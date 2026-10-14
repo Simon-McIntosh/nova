@@ -14,6 +14,7 @@ import jax.numpy as jnp
 import matplotlib
 
 matplotlib.use("Agg")
+matplotlib.rcParams["svg.hashsalt"] = "fixed-shape"
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
@@ -56,10 +57,13 @@ def _trace(rows, output, metric, threshold, ylabel):
         x = np.asarray([row["realised_cells"] for row in values])
         y = np.asarray([row[metric] for row in values])
         axes.plot(x, y, color=colour, linewidth=3, marker="o", markersize=8)
+        offset = 0
+        if metric == "map_wall_ms":
+            offset = 13 if kind == "limited" else -13
         axes.annotate(
             kind,
             (x[-1], y[-1]),
-            xytext=(9, 0),
+            xytext=(9, offset),
             textcoords="offset points",
             color=colour,
             va="center",

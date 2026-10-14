@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
+from time import perf_counter
 
 import imas
 import numpy as np
@@ -19,7 +21,12 @@ from nova.circuit.linkage import (
     guard_positive_definite,
     preserve_series_terminal_linkage,
 )
-from nova.circuit.passive import terminal_impedance_spectrum
+from nova.circuit.passive import (
+    PassiveCircuitSystem,
+    load_circuit_system,
+    save_circuit_system,
+    terminal_impedance_spectrum,
+)
 from nova.imas.pulsedesign import ITER
 
 
@@ -157,6 +164,9 @@ def calculate(
     max_thickness: float,
     section_n_max: int,
     *,
+    surface_layer_m: float | None = None,
+    workers: int = 1,
+    cache_root: Path | None = None,
     terminal_reference: np.ndarray | None = None,
     raw_linkage: bool = False,
 ) -> dict:
@@ -166,12 +176,41 @@ def calculate(
     n_section = len(owner)
     source_passive = np.arange(n_section, n_section + len(thickness))
     refined = subdivide_passive_thickness(
-        conductors, source_passive, thickness, max_thickness
+        conductors,
+        source_passive,
+        thickness,
+        max_thickness,
+        surface_layer_m=surface_layer_m,
     )
     circuits = [*range(n_section), *refined.circuits]
-    matrix = circuit_linkage_matrix(
-        refined.conductors, circuits, section_n_max=section_n_max
+    digest = hashlib.sha256()
+    for name in conductors._columns:
+        digest.update(np.asarray(getattr(conductors, name)).tobytes())
+    for section in conductors.polygon_sections:
+        digest.update(np.asarray(section.vertices).tobytes())
+    digest.update(
+        np.asarray([max_thickness, surface_layer_m or 0, section_n_max]).tobytes()
     )
+    cache_dir = cache_root / digest.hexdigest()[:20] if cache_root else None
+    matrix_path = cache_dir / "linkage.npy" if cache_dir else None
+    cache_hit = bool(matrix_path and matrix_path.exists())
+    started = perf_counter()
+    if cache_hit:
+        matrix = np.load(matrix_path)
+        if matrix.shape != (len(circuits), len(circuits)):
+            raise ValueError("cached linkage shape disagrees with conductor set")
+        print(f"CACHE-HIT {matrix_path}", flush=True)
+    else:
+        matrix = circuit_linkage_matrix(
+            refined.conductors,
+            circuits,
+            section_n_max=section_n_max,
+            workers=workers,
+        )
+        if cache_dir:
+            cache_dir.mkdir(parents=True, exist_ok=True)
+            np.save(matrix_path, matrix)
+    build_seconds = perf_counter() - started
     series = np.zeros((n_section, len(coil_names)))
     series[np.arange(n_section), owner] = 1.0
     raw_coil_matrix = series.T @ matrix[:n_section, :n_section] @ series
@@ -199,10 +238,36 @@ def calculate(
             matrix[:n_section, :n_section], series, reference
         )
     coil_matrix = series.T @ matrix[:n_section, :n_section] @ series
-    passive_matrix = guard_positive_definite(matrix[n_section:, n_section:])
-    resistance = (
-        source_resistance[refined.parent - n_section] * refined.resistance_factor
-    )
+    system_path = cache_dir / "system.npz" if cache_dir else None
+    if system_path and system_path.exists():
+        stored_system = load_circuit_system(system_path)
+        passive_matrix = stored_system.lmat
+        resistance = stored_system.r_diag
+    else:
+        passive_matrix = guard_positive_definite(matrix[n_section:, n_section:])
+        resistance = (
+            source_resistance[refined.parent - n_section] * refined.resistance_factor
+        )
+    if system_path and not system_path.exists():
+        centroid_r, centroid_z = refined.conductors.centroids(refined.circuits)
+        save_circuit_system(
+            system_path,
+            PassiveCircuitSystem(
+                circuits=refined.circuits,
+                centroid_r=centroid_r,
+                centroid_z=centroid_z,
+                lmat=passive_matrix,
+                r_diag=resistance,
+                a_circuit=np.empty((0, len(refined.circuits))),
+                g_grid=np.empty((0, len(refined.circuits))),
+                m_channel=matrix[n_section:, :n_section] @ series,
+                channels=coil_names,
+                measured_channel_row={},
+                resistivity=7.2e-7,
+                section_scale=refined.conductors.section_scale(refined.circuits),
+            ),
+        )
+    spectrum_started = perf_counter()
     screened = terminal_impedance_spectrum(
         matrix[:n_section, :n_section],
         matrix[:n_section, n_section:],
@@ -228,6 +293,7 @@ def calculate(
     bare_error = float(
         np.max(np.abs(np.diagonal(bare, axis1=1, axis2=2) / expected_bare - 1))
     )
+    spectrum_seconds = perf_counter() - spectrum_started
     if bare_error > 1e-12:
         raise AssertionError(f"passive removal differs from bare by {bare_error}")
     return {
@@ -237,6 +303,11 @@ def calculate(
         "source_passive_count": len(thickness),
         "max_source_thickness_m": float(thickness.max()),
         "max_layer_thickness_m": max_thickness,
+        "surface_layer_m": surface_layer_m,
+        "linkage_build_seconds": build_seconds,
+        "spectrum_seconds": spectrum_seconds,
+        "cache_hit": cache_hit,
+        "cache_dir": str(cache_dir) if cache_dir else None,
         "source_resistance_ohm": [
             float(source_resistance.min()),
             float(source_resistance.max()),
@@ -259,6 +330,9 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--max-thickness", type=float, required=True)
     parser.add_argument("--section-n-max", type=int, default=3)
+    parser.add_argument("--surface-layer", type=float)
+    parser.add_argument("--workers", type=int, default=1)
+    parser.add_argument("--cache-root", type=Path)
     parser.add_argument("--terminal-reference", type=Path)
     parser.add_argument("--raw-linkage", action="store_true")
     parser.add_argument("--output", type=Path, required=True)
@@ -271,13 +345,19 @@ def main() -> None:
     result = calculate(
         args.max_thickness,
         args.section_n_max,
+        surface_layer_m=args.surface_layer,
+        workers=args.workers,
+        cache_root=args.cache_root,
         terminal_reference=reference,
         raw_linkage=args.raw_linkage,
     )
     args.output.write_text(json.dumps(result, indent=2))
     print(
         f"SUMMARY sections={result['section_count']} passive={result['passive_count']} "
-        f"max_layer_m={args.max_thickness} bare_error={result['bare_error']:.3g}"
+        f"max_layer_m={args.max_thickness} surface_layer_m={args.surface_layer} "
+        f"build_seconds={result['linkage_build_seconds']:.3f} "
+        f"spectrum_seconds={result['spectrum_seconds']:.3f} "
+        f"cache_hit={result['cache_hit']} bare_error={result['bare_error']:.3g}"
     )
 
 

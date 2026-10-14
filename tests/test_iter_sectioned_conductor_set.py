@@ -102,6 +102,41 @@ def test_passive_wall_layers_preserve_area_and_source_resistance():
     ) == pytest.approx(0.05)
 
 
+def test_surface_graded_wall_preserves_parallel_conductance():
+    source = ConductorSet(
+        r=[2.0],
+        z=[0.0],
+        dr=[0.08],
+        dz=[0.2],
+        current_share=[1.0],
+        circuit=[0],
+    )
+    refined = subdivide_passive_thickness(
+        source,
+        [0],
+        np.array([0.08]),
+        0.04,
+        surface_layer_m=0.006,
+        surface_growth=2.0,
+    )
+    widths = refined.conductors.dr
+    assert widths[0] == pytest.approx(0.006)
+    assert widths[-1] == pytest.approx(0.006)
+    assert widths.max() <= 0.04
+    assert widths.sum() == pytest.approx(0.08)
+    assert np.sum(1 / refined.resistance_factor) == pytest.approx(1.0)
+
+
+def test_parallel_linkage_columns_equal_serial_result():
+    conductors = ConductorSet(
+        r=[1.0, 1.5], z=[0.0, 0.2], dr=[0.04, 0.03], dz=[0.04, 0.03],
+        current_share=[2.0, 3.0], circuit=[0, 1],
+    )
+    serial = circuit_linkage_matrix(conductors, [0, 1], workers=1)
+    parallel = circuit_linkage_matrix(conductors, [0, 1], workers=2)
+    np.testing.assert_allclose(parallel, serial, rtol=0, atol=0)
+
+
 def test_passive_screening_changes_terminal_impedance_and_removal_is_bare():
     frequency = np.geomspace(0.1, 5000.0, 20)
     coil = np.array([[0.7, 0.3], [0.3, 0.5]])

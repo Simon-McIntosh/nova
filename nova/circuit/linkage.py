@@ -24,6 +24,9 @@ the physical inductance matrix is symmetric by reciprocity.
 
 from __future__ import annotations
 
+from concurrent.futures import ProcessPoolExecutor
+from multiprocessing import get_context
+
 import numpy as np
 
 from nova.biot.greens import hybrid_greens
@@ -164,12 +167,48 @@ def polygon_flux_columns(
     )
 
 
+_COLUMN_CONTEXT = None
+
+
+def _set_column_context(
+    conductors, groups, circuits, polygon, point_r, point_z, weight, owner
+):
+    global _COLUMN_CONTEXT
+    _COLUMN_CONTEXT = (
+        conductors,
+        groups,
+        circuits,
+        polygon,
+        point_r,
+        point_z,
+        weight,
+        owner,
+    )
+
+
+def _linkage_column(index):
+    conductors, groups, circuits, polygon, point_r, point_z, weight, owner = (
+        _COLUMN_CONTEXT
+    )
+    section = polygon.get(int(circuits[index]))
+    if section is not None:
+        column = polygon_flux_columns(
+            section, point_r, point_z, weight, owner, len(groups)
+        )
+    else:
+        column = linked_flux_columns(
+            conductors, groups[index], point_r, point_z, weight, owner, len(groups)
+        )
+    return index, column
+
+
 def circuit_linkage_matrix(
     conductors: ConductorSet,
     circuits,
     *,
     section_scale_frac: float = 1.0,
     section_n_max: int = 6,
+    workers: int = 1,
 ) -> np.ndarray:
     """Symmetric two-section flux linkage matrix of a circuit set [Wb/A].
 
@@ -186,17 +225,24 @@ def circuit_linkage_matrix(
         conductors, groups, delta, section_n_max
     )
     polygon = conductors.polygon_by_circuit()
+    if workers < 1:
+        raise ValueError("workers must be positive")
     lmat = np.zeros((n_circuits, n_circuits))
-    for index, (circuit, rows) in enumerate(zip(circuits, groups, strict=True)):
-        section = polygon.get(int(circuit))
-        if section is not None:
-            lmat[:, index] = polygon_flux_columns(
-                section, point_r, point_z, weight, owner, n_circuits
-            )
-        else:
-            lmat[:, index] = linked_flux_columns(
-                conductors, rows, point_r, point_z, weight, owner, n_circuits
-            )
+    context = (conductors, groups, circuits, polygon, point_r, point_z, weight, owner)
+    if workers == 1:
+        _set_column_context(*context)
+        columns = map(_linkage_column, range(n_circuits))
+        for index, column in columns:
+            lmat[:, index] = column
+    else:
+        with ProcessPoolExecutor(
+            max_workers=workers,
+            mp_context=get_context("forkserver"),
+            initializer=_set_column_context,
+            initargs=context,
+        ) as pool:
+            for index, column in pool.map(_linkage_column, range(n_circuits)):
+                lmat[:, index] = column
     return 0.5 * (lmat + lmat.T)
 
 

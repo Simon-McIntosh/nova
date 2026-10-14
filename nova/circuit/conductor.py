@@ -129,16 +129,25 @@ def subdivide_passive_thickness(
     passive_circuits,
     thickness_m: np.ndarray,
     max_layer_thickness_m: float,
+    *,
+    surface_layer_m: float | None = None,
+    surface_growth: float = 2.0,
 ) -> ThicknessSubdivision:
     """Split each passive element normal to its wall into toroidal rings.
 
-    Each strip is an independent current path.  For equal strips its resistance
-    is the source ring resistance times the strip count; its parent mapping
-    lets the caller carry source measured resistances without replacing them
-    with a nominal material value.  Polygon walls retain their true shape.
+    Each strip is an independent current path.  An optional surface layer
+    grows geometrically towards the midplane, bounded by the maximum interior
+    width. Its resistance is the parent resistance divided by its fraction of
+    the parent thickness. Polygon walls retain their true shape.
     """
     if not np.isfinite(max_layer_thickness_m) or max_layer_thickness_m <= 0:
         raise ValueError("maximum layer thickness must be positive")
+    if surface_layer_m is not None and (
+        not np.isfinite(surface_layer_m) or surface_layer_m <= 0
+    ):
+        raise ValueError("surface layer thickness must be positive")
+    if not np.isfinite(surface_growth) or surface_growth < 1:
+        raise ValueError("surface growth must be at least one")
     passive = np.asarray(list(passive_circuits), dtype=np.int64)
     thickness = np.asarray(thickness_m, dtype=np.float64)
     if (
@@ -167,9 +176,26 @@ def subdivide_passive_thickness(
     circuits, parents, factors = [], [], []
     for parent, source_rows, wall in zip(passive, rows, thickness, strict=True):
         row = int(source_rows[0])
-        count = int(np.ceil(wall / max_layer_thickness_m))
+        if surface_layer_m is None or surface_layer_m >= max_layer_thickness_m:
+            edges = np.linspace(
+                0.0, 1.0, int(np.ceil(wall / max_layer_thickness_m)) + 1
+            )
+        else:
+            left = [0.0]
+            width = surface_layer_m
+            while 2 * (left[-1] + width) < wall:
+                left.append(left[-1] + width)
+                width = min(width * surface_growth, max_layer_thickness_m)
+            middle = wall - 2 * left[-1]
+            n_middle = max(1, int(np.ceil(middle / max_layer_thickness_m)))
+            left_edge = np.asarray(left)
+            center = np.linspace(left[-1], wall - left[-1], n_middle + 1)
+            edges = (
+                np.concatenate((left_edge[:-1], center, wall - left_edge[-2::-1]))
+                / wall
+            )
         source_polygon = polygon.get(int(parent))
-        for layer in range(count):
+        for low, high in zip(edges[:-1], edges[1:], strict=True):
             circuit = next_circuit
             next_circuit += 1
             values = {name: getattr(conductors, name)[row] for name in columns}
@@ -179,7 +205,6 @@ def subdivide_passive_thickness(
                 vertices = source_polygon.vertices
                 if vertices.shape != (4, 2):
                     raise ValueError("passive wall polygon must have four corners")
-                low, high = layer / count, (layer + 1) / count
                 first = vertices[0] * (1 - low) + vertices[3] * low
                 second = vertices[1] * (1 - low) + vertices[2] * low
                 third = vertices[1] * (1 - high) + vertices[2] * high
@@ -194,20 +219,20 @@ def subdivide_passive_thickness(
                 )
                 polygons.append(PolygonSection(circuit, stripe))
             elif abs(float(values["dr"])) <= abs(float(values["dz"])):
-                values["dr"] = float(values["dr"]) / count
-                values["r"] = (
-                    float(values["r"]) + (layer + 0.5 - count / 2) * values["dr"]
+                values["dr"] = float(values["dr"]) * (high - low)
+                values["r"] = float(values["r"]) + ((low + high) / 2 - 0.5) * float(
+                    conductors.dr[row]
                 )
             else:
-                values["dz"] = float(values["dz"]) / count
-                values["z"] = (
-                    float(values["z"]) + (layer + 0.5 - count / 2) * values["dz"]
+                values["dz"] = float(values["dz"]) * (high - low)
+                values["z"] = float(values["z"]) + ((low + high) / 2 - 0.5) * float(
+                    conductors.dz[row]
                 )
             for name in columns:
                 columns[name].append(values[name])
             circuits.append(circuit)
             parents.append(parent)
-            factors.append(count)
+            factors.append(1.0 / (high - low))
     return ThicknessSubdivision(
         conductors=ConductorSet(**columns, polygon_sections=tuple(polygons)),
         circuits=np.asarray(circuits, dtype=np.int64),

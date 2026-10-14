@@ -93,7 +93,7 @@ def main():
                             env=env,
                             stdout=output,
                             stderr=subprocess.STDOUT,
-                            timeout=600,
+                            timeout=1800,
                         ).returncode
                     except subprocess.TimeoutExpired:
                         result = 124

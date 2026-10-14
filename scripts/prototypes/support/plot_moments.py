@@ -14,15 +14,21 @@ from nova.media.ink import DEFAULT_INK, poloidal_axes, trace_axes
 from nova.media.poloidal import draw_nulls, draw_wall
 
 
-def render(row, directory, destination):
+def render(row, directory, destination, *, trace_row=None):
     """Render one recorded diverted row using a common physical level array."""
     routes = row["routes"]
+    traces = row if trace_row is None else trace_row
     if row["kind"] != "diverted" or not all(
-        route in routes and routes[route].get("status") == "completed"
+        route in traces["routes"]
+        and traces["routes"][route].get("status") == "completed"
         for route in ("dense", "krylov")
     ):
         return None
-    converged = [name for name in ("dense", "krylov") if routes[name]["qualified"]]
+    converged = [
+        name
+        for name in ("dense", "krylov")
+        if routes.get(name, {}).get("qualified", False)
+    ]
     if not converged:
         return None
     selected = min(
@@ -54,7 +60,7 @@ def render(row, directory, destination):
             axes[0].spines[side].set_linewidth(1.2)
         poloidal_axes(axes[1])
         for name in ("krylov", "dense"):
-            values = routes[name]
+            values = traces["routes"][name]
             history = np.asarray(values["history"])[: values["iterations"] + 1]
             axes[0].semilogy(
                 np.arange(len(history)),
@@ -130,6 +136,9 @@ def render(row, directory, destination):
         plt.close(figure)
     return dict(
         path=str(destination),
+        trace_kind=traces["kind"],
+        trace_cells=traces["cells"],
+        poloidal_cells=row["cells"],
         selected=selected,
         levels=levels.tolist(),
         residual=routes[selected]["residual"],

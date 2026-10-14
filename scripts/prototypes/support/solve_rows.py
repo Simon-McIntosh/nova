@@ -55,7 +55,11 @@ def linear_timings(equation, operator, initial, arguments, result, method):
     if method == "dense":
         import jax.scipy.linalg as dense
 
-        jacobian = jax.jit(jax.jacfwd(scaled, argnums=1))
+        jacobian = jax.jit(
+            lambda operator, state, scale, arguments: gs.dense_jacobian(
+                lambda value: scaled(operator, value, scale, arguments), state
+            )
+        )
         factor = jax.jit(dense.lu_factor)
         state = (initial / scale).reshape(-1)
         start = perf_counter()
@@ -181,6 +185,17 @@ def main():
     parser.add_argument("--cache", type=Path, required=True)
     parser.add_argument("--prepare-only", action="store_true")
     parser.add_argument("--require-cache", action="store_true")
+    parser.add_argument(
+        "--methods", nargs="+", choices=("dense", "krylov"), default=("krylov", "dense")
+    )
+    parser.add_argument(
+        "--seeds",
+        nargs="+",
+        choices=("analytic", "production"),
+        default=("analytic", "production"),
+    )
+    parser.add_argument("--diagnostics-only", action="store_true")
+    parser.add_argument("--jet-cache", type=Path)
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
@@ -233,7 +248,9 @@ def main():
     roots = jnp.asarray([axis] if saddle is None else [axis, saddle])
     print("BUILD_JETS", flush=True)
     before = perf_counter()
-    identity = bind_analytic_exterior(operator, field, physical, roots)
+    identity = bind_analytic_exterior(
+        operator, field, physical, roots, row_cache=args.jet_cache
+    )
     identity["build_seconds"] = perf_counter() - before
     row = dict(
         kind=args.kind,
@@ -259,9 +276,7 @@ def main():
     )
     convention = topology.TopologyConvention.from_cocos(17, target)
     policy = TopologyPolicy()
-    quadrature = current.Quadrature(
-        sigma=convention.sigma, target_current=target, segments=64
-    )
+    quadrature = current.Quadrature(sigma=convention.sigma, target_current=target)
     operands, cache = operator.moment_operands()
 
     def residual(
@@ -321,7 +336,22 @@ def main():
         state = state - value
     span = abs(float(fixture._analytic_axis_flux(exact)))
     row["production_routes"] = {}
-    for seed_name in ("analytic", "production"):
+    if args.diagnostics_only:
+        seed, _, seed_receipt = certificate._production_seed(
+            profile, name, target, centroid, current_receipt
+        )
+        row["production_seed"] = seed_receipt
+        row["analytic_stationary_candidates"] = stationary_seed_probe(
+            operands, cache, initial, roots, -convention.sigma
+        )
+        row["production_stationary_candidates"] = stationary_seed_probe(
+            operands, cache, operator.seed_moments(seed), roots, -convention.sigma
+        )
+        row["diagnostics_completed"] = True
+        write(destination, row)
+        print("DIAGNOSTICS " + json.dumps(row), flush=True)
+        return
+    for seed_name in args.seeds:
         if seed_name == "analytic":
             seed = initial
         else:
@@ -337,7 +367,7 @@ def main():
                 operands, cache, operator.seed_moments(seed), roots, -convention.sigma
             )
             write(destination, row)
-        for method in ("krylov", "dense"):
+        for method in args.methods:
             collection = (
                 row["routes"] if seed_name == "analytic" else row["production_routes"]
             )

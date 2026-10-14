@@ -52,6 +52,8 @@ def validate(source, cache):
         assert len(result["iteration_wall_ms"]) == len(history)
         methods[label] = dict(
             iterations=len(history),
+            residual_history=history,
+            iteration_wall_ms=result["iteration_wall_ms"],
             initial_residual=history[0],
             terminal_residual=history[-1],
             converged=result["converged"],

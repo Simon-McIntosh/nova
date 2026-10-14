@@ -42,7 +42,7 @@ def _write(output, result):
     print("CHECKPOINT " + json.dumps(result, default=str), flush=True)
 
 
-def run(kind, cells, cache, output, batch=False):
+def run(kind, cells, cache, output, batch=False, terminal_only=False):
     assert jax.config.jax_enable_x64 is True and jax.default_backend() == "gpu"
     print(
         f"nova={nova.__file__} probe={__file__} cwd={Path.cwd().resolve()}", flush=True
@@ -271,7 +271,7 @@ def run(kind, cells, cache, output, batch=False):
             scale_vector,
         )
 
-    if batch:
+    if batch or terminal_only:
         terminal_path = output.with_name(f"forward-{kind}-{cells}-terminal-moments.npy")
         solution_moments = jnp.asarray(np.load(terminal_path))
         supplied_residual = jax.jit(
@@ -445,8 +445,9 @@ def main():
     parser.add_argument("--cache", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--batch", action="store_true")
+    parser.add_argument("--terminal-only", action="store_true")
     args = parser.parse_args()
-    run(args.kind, args.cells, args.cache, args.output, args.batch)
+    run(args.kind, args.cells, args.cache, args.output, args.batch, args.terminal_only)
 
 
 if __name__ == "__main__":

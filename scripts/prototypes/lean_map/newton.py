@@ -81,21 +81,48 @@ def factor_at(residual, moments):
     return lu_factor(matrix)
 
 
-def cached_factor_corrections(residual, start, factor, scale, *, steps=3):
-    """Apply a predecessor's factor with live residual checks each correction."""
+def cached_factor_corrections(residual, start, factor, scale, *, steps=5):
+    """Use a cached factor with checked trial steps and stop at convergence."""
+    alphas = jnp.asarray((1.0, 0.5, 0.25, 0.125))
+    initial = _scaled_norm(residual(start), scale)
 
-    def correct(moments, _):
-        value = residual(moments)
-        correction = lu_solve(factor, -value.reshape(-1)).reshape(moments.shape)
-        updated = moments + correction
-        return updated, _scaled_norm(residual(updated), scale)
+    def correct(state, _):
+        moments, norm, accepted, done = state
 
-    moments, history = jax.lax.scan(correct, start, None, length=steps)
-    terminal = _scaled_norm(residual(moments), scale)
+        def advance(_):
+            value = residual(moments)
+            correction = lu_solve(factor, -value.reshape(-1)).reshape(moments.shape)
+            candidates = moments[None] + alphas[:, None, None] * correction
+            norms = jax.lax.map(
+                lambda candidate: _scaled_norm(residual(candidate), scale),
+                candidates,
+            )
+            eligible = jnp.isfinite(norms) & (norms < norm)
+            chosen = jnp.argmin(jnp.where(eligible, norms, jnp.inf))
+            improved = jnp.any(eligible)
+            updated = jnp.where(improved, candidates[chosen], moments)
+            terminal = _scaled_norm(residual(updated), scale)
+            finished = (terminal <= 1e-12) | ~improved | ~jnp.isfinite(terminal)
+            return updated, terminal, accepted + improved.astype(jnp.int32), finished
+
+        next_state = jax.lax.cond(
+            done | (norm <= 1e-12),
+            lambda _: state,
+            advance,
+            operand=None,
+        )
+        return next_state, next_state[1]
+
+    (moments, terminal, accepted, _), history = jax.lax.scan(
+        correct,
+        (start, initial, jnp.asarray(0, jnp.int32), jnp.asarray(False)),
+        None,
+        length=steps,
+    )
     return NewtonResult(
         moments,
         terminal,
         terminal <= 1e-12,
-        jnp.asarray(steps, jnp.int32),
+        accepted,
         history,
     )

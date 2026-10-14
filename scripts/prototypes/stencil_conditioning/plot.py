@@ -83,15 +83,16 @@ def _accuracy(rows: dict, output: Path) -> None:
     for axis, (field, label) in zip(
         axes,
         (
-            ("gradient_error", "gradient error [Wb/m]"),
-            ("operator_error", "elliptic error [Wb/m²]"),
+            ("gradient_error", "relative gradient error"),
+            ("operator_error", "relative elliptic error"),
         ),
     ):
         for kind in KINDS:
             for cells in CELLS:
-                _record, array = rows[(kind, cells)]
+                record, array = rows[(kind, cells)]
                 condition = array["condition"]
-                error = array[field]
+                scale = record["accuracy"][field.replace("error", "scale")]
+                error = array[field] / scale
                 sample = np.linspace(
                     0, len(condition) - 1, min(80, len(condition)), dtype=int
                 )

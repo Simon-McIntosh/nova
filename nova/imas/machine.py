@@ -407,6 +407,7 @@ class MachineSection:
 
     name: str
     section: GeomData
+    turns: float = 0.0
 
     @property
     def outline(self) -> tuple[tuple[float, float], ...]:
@@ -456,6 +457,7 @@ class MachineSection:
         return cls(
             name=str(record["name"]),
             section=TabularGeometryReader(record).section(geometry),
+            turns=float(record.get("turns_with_sign", record.get("turns", 0.0))),
         )
 
 
@@ -466,6 +468,42 @@ class MachineCoil:
     name: str
     identifier: str
     elements: tuple[MachineSection, ...]
+
+    def winding_sections(self, count: int) -> tuple[MachineSection, ...]:
+        """Divide a rectangular winding pack into ordered series sections.
+
+        The section geometry occupies the original pack without overlap.  The
+        final turn count takes the floating-point remainder, so the signed
+        turns of the series sections sum exactly to the source winding.
+        """
+        if count < 1:
+            raise ValueError("winding section count must be positive")
+        if len(self.elements) == count:
+            return self.elements
+        if len(self.elements) != 1:
+            raise ValueError("winding layout does not match source elements")
+        source = self.elements[0]
+        if source.section.name != "rectangle" or source.turns == 0:
+            raise ValueError("a winding pack needs a rectangle and signed turns")
+        geometry = source.section.data
+        height = float(geometry["height"]) / count
+        centre = float(geometry["z"])
+        turns = source.turns / count
+        sections = []
+        for index in range(count):
+            record = {
+                "name": f"{self.name} pancake {index + 1}",
+                "geometry_type": 2,
+                "r": float(geometry["r"]),
+                "z": centre + (index + 0.5 - count / 2) * height,
+                "width": float(geometry["width"]),
+                "height": height,
+                "turns_with_sign": (
+                    turns if index + 1 < count else source.turns - turns * (count - 1)
+                ),
+            }
+            sections.append(MachineSection.from_record(record))
+        return tuple(sections)
 
     @classmethod
     def from_record(cls, record: dict) -> MachineCoil:

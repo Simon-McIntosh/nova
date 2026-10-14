@@ -15,7 +15,7 @@ import jax.numpy as jnp
 import jax.scipy.linalg as dense
 import numpy as np
 import nova
-from nova.equilibrium import current, gs, support_read, topology
+from nova.equilibrium import current, fixed_points, gs, support_read, topology
 from nova.equilibrium.solve_request import TopologyPolicy
 from scripts.prototypes.support.geometry import certificate_field
 from tests.equilibrium.test_topology_read import _analytic_inputs
@@ -116,11 +116,35 @@ def run(kind, cells, cache, bias_row, newton_row, local_row, out):
         )
         return jnp.stack((support.reading.axis_flux, support.reading.boundary_flux))
 
-    global_program = jax.jit(jax.jacrev(global_levels, argnums=0))
-    global_executable, global_compile, global_wall = _time(
-        global_program, initial, operands, window
+    support = support_read.read(
+        operands,
+        window,
+        tuple(initial[:, component] for component in range(3)),
+        roots,
+        roots,
+        convention,
+        policy,
+        axis_sign=-convention.sigma,
     )
-    global_rows = global_executable(initial, operands, window).reshape(2, -1)
+    if not bool(support.valid):
+        raise ValueError("analytic global read invalid")
+    positions = jnp.stack((support.reading.axis, support.reading.boundary))
+
+    def fixed_position_levels(moments, ops, positions):
+        jets = support_read.nodal_jets(
+            ops, tuple(moments[:, component] for component in range(3))
+        )
+        bell = fixed_points.field_from_jets(jets, ops.sample_index, ops.mesh)
+        return jax.vmap(bell.value)(positions)
+
+    fixed_values = fixed_position_levels(initial, operands, positions)
+    live_values = global_levels(initial, operands, window)
+    level_value_error = float(jnp.max(jnp.abs(fixed_values - live_values))) / span
+    global_program = jax.jit(jax.jacrev(fixed_position_levels, argnums=0))
+    global_executable, global_compile, global_wall = _time(
+        global_program, initial, operands, positions
+    )
+    global_rows = global_executable(initial, operands, positions).reshape(2, -1)
     if not bool(jnp.all(jnp.isfinite(global_rows))):
         raise ValueError("global level rows are nonfinite")
 
@@ -152,6 +176,26 @@ def run(kind, cells, cache, bias_row, newton_row, local_row, out):
     direction = jnp.asarray(np.random.default_rng(731).normal(size=initial.shape))
     direction *= jnp.maximum(jnp.max(jnp.abs(initial[:, 0])), 1e-30) * jnp.stack(
         (jnp.ones_like(geometry.pitch),) + (geometry.pitch,) * 2, axis=-1
+    )
+    live_level_tangent = jax.jit(
+        lambda moments, vector, ops, cache_window: jax.jvp(
+            lambda state: global_levels(state, ops, cache_window),
+            (moments,),
+            (vector,),
+        )[1]
+    )
+    level_tangent_executable, level_tangent_compile, level_tangent_wall = _time(
+        live_level_tangent, initial, direction, operands, window
+    )
+    actual_level_tangent = level_tangent_executable(
+        initial, direction, operands, window
+    )
+    level_response = float(jnp.max(jnp.abs(actual_level_tangent)))
+    if not np.isfinite(level_response) or level_response <= 1e-12:
+        raise ValueError("live global level tangent is empty")
+    level_tangent_error = (
+        float(jnp.max(jnp.abs(actual_level_tangent - global_rows @ direction.ravel())))
+        / level_response
     )
 
     def full_residual(moments, ops, cache_window):
@@ -200,6 +244,11 @@ def run(kind, cells, cache, bias_row, newton_row, local_row, out):
         local_matrix_wall_ms=local_wall,
         global_rows_compile_seconds=global_compile,
         global_rows_wall_ms=global_wall,
+        global_level_value_relative_error=level_value_error,
+        global_level_jvp_compile_seconds=level_tangent_compile,
+        global_level_jvp_wall_ms=level_tangent_wall,
+        global_level_jvp_response_max=level_response,
+        global_level_jvp_relative_error=level_tangent_error,
         booking_sensitivity_compile_seconds=sensitivity_compile,
         booking_sensitivity_wall_ms=sensitivity_wall,
         rank_two_update_compile_seconds=matrix_compile,
@@ -213,7 +262,7 @@ def run(kind, cells, cache, bias_row, newton_row, local_row, out):
         zero_direction_response_max=zero_response,
         partial_booking_relative_error=partial_error,
         structured_booking_relative_error=error,
-        full_jvp_agrees=bool(error <= 1e-8),
+        full_jvp_agrees=bool(error <= 1e-8 and level_tangent_error <= 1e-8),
         gpu_memory=jax.devices()[0].memory_stats(),
         host_peak_rss_kib=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
     )

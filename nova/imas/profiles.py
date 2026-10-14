@@ -10,8 +10,8 @@ import numpy as np
 import scipy.interpolate
 import scipy.spatial
 import contourpy
-from matplotlib.path import Path
 from scipy.constants import mu_0
+from shapely import contains_xy
 from shapely.geometry import Point, Polygon
 
 from nova.biot.plasma import Flux
@@ -122,11 +122,7 @@ def prescribe_current_density(
         radius, height, psi, outline, axis, psi_axis, psi_boundary
     )
     grid_r, grid_z = np.meshgrid(radius, height, indexing="ij")
-    mask = (
-        Path(boundary)
-        .contains_points(np.c_[grid_r.ravel(), grid_z.ravel()])
-        .reshape(psi.shape)
-    )
+    mask = contains_xy(Polygon(boundary), grid_r, grid_z)
     psi_samples = np.asarray(psi_samples, float)
     coordinate = (psi_samples - psi_samples[0]) / (psi_samples[-1] - psi_samples[0])
     if not np.all(np.diff(coordinate) > 0):

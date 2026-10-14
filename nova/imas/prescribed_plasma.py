@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import numpy as np
-from matplotlib.path import Path
+from shapely import contains_xy
+from shapely.geometry import Polygon
 
 from nova.biot.greens import greens_psi, hybrid_greens
 from nova.circuit.conductor import ConductorSet
@@ -83,7 +84,7 @@ def plasma_linked_flux(
                 section_spacing,
                 section_n_max,
             )
-            inside = Path(vertices).contains_points(np.c_[point_r, point_z])
+            inside = contains_xy(Polygon(vertices), point_r, point_z)
             if not np.any(inside):
                 raise ValueError(f"polygon circuit {circuit} has no quadrature points")
             weight = weight[inside] / weight[inside].sum()

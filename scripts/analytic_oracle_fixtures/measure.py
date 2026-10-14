@@ -797,9 +797,10 @@ def cached_machine(
         wall=wall,
         builder=builder,
     )
+    dirname = os.environ.get("NOVA_ANALYTIC_ORACLE_CACHE", ".nova")
     store = ZarrStore(
         filename=f"{CACHE_FILENAME}_{abs(requested_cells)}",
-        dirname=Path(os.environ.get("NOVA_ANALYTIC_ORACLE_CACHE", ".nova")),
+        dirname=Path(dirname) if os.path.isabs(dirname) else dirname,
     )
     store.group = store.hash_attrs(identity)
     with _cache_lock(store) as lock_wait:

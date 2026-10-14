@@ -276,15 +276,20 @@ def draw_figures(rows, representatives, linkage, pulse):
     plt.close(fig)
 
     fig, axis = plt.subplots(figsize=(14, 5))
-    for category, colour in (("coil", "#315f78"), ("loop", "#a06635")):
-        selected = [row for row in linkage if row["category"] == category]
+    for source, label, colour, marker in (
+        ("psi_map_minus_nova_conductors", "map coils", "#315f78", "o"),
+        ("dina_jtor_nova_kernel", "jtor coils", "#6492a4", "x"),
+        ("magnetics_minus_nova_conductors", "flux loops", "#a06635", "o"),
+    ):
+        selected = [row for row in linkage if row["reference_source"] == source]
         if selected:
             axis.scatter(
                 [row["time"] for row in selected],
                 [row["relative_residual"] for row in selected],
                 s=18,
                 color=colour,
-                label=category,
+                marker=marker,
+                label=label,
             )
     axis.axhline(0, color="#777777", lw=1.2)
     axis.set_ylabel("plasma flux residual / tolerance scale")
@@ -305,7 +310,7 @@ def main():
     parser.add_argument("--jtor-relative-tolerance", type=float, default=0.01)
     parser.add_argument("--jtor-absolute-tolerance-wb", type=float, default=0.1)
     limits = parser.parse_args()
-    defaults = {105014: (0.1, 1.0), 105052: (1.0, 100.0)}
+    defaults = {105014: (0.1, 1.0), 105052: (0.05, 3.0)}
     relative_default, absolute_default = defaults[limits.pulse]
     if limits.flux_relative_tolerance is None:
         limits.flux_relative_tolerance = relative_default

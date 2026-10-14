@@ -51,8 +51,11 @@ def run(kind, cells, cache, bias_row, newton_row, local_row, out):
     local_receipt = json.loads(local_row.read_text())
     assert local_receipt["machine_key"] == provenance["machine_key"]
     assert local_receipt["sampled_nodes"] == len(operands.nodes)
-    blocks = jnp.asarray(
-        np.load(local_receipt["local_blocks_path"], allow_pickle=False)
+    span = json.loads(bias_row.read_text())["flux_span"]
+    seed_amplitude = span * 1e-5
+    blocks = (
+        jnp.asarray(np.load(local_receipt["local_blocks_path"], allow_pickle=False))
+        / seed_amplitude
     )
     index = operands.sample_index
     assert blocks.shape == (*index.shape, 3)
@@ -68,7 +71,6 @@ def run(kind, cells, cache, bias_row, newton_row, local_row, out):
     source = support_read.nodal_jets(
         operands, tuple(initial[:, component] for component in range(3))
     )[:, 0]
-    span = json.loads(bias_row.read_text())["flux_span"]
     source_error = float(jnp.max(jnp.abs(source - nodal))) / span
     if source_error > 1e-10:
         raise ValueError(f"analytic nodal source mismatch: {source_error}")
@@ -240,6 +242,7 @@ def run(kind, cells, cache, bias_row, newton_row, local_row, out):
         provenance=provenance,
         source_value_relative_error=source_error,
         local_color_assembly_ms=local_receipt["assembly_wall_ms"],
+        local_color_seed_amplitude=seed_amplitude,
         local_matrix_compile_seconds=local_compile,
         local_matrix_wall_ms=local_wall,
         global_rows_compile_seconds=global_compile,

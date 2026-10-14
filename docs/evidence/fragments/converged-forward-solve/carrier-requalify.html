@@ -10,10 +10,10 @@
 <meta name="plan-summary" content="The carrier cache identity now hashes the packed polygon moment kernel and the coupling-assembly source instead of the fixture's own bytes, so a carrier assembled by the pre-repair kernel is refused rather than warm-loaded; the 5,000-cell certificate map rows are re-run on the repaired kernel">
 <meta name="plan-evidence-for" content="converged-forward-solve">
 <meta name="plan-verifies" content="converged-forward-solve#s4">
-<meta name="plan-commits" content="5f7456b62,b83358808,5ecafc760,327a3c074,f0659cbcd,3084de30a,60e976977,d36c7a1f7">
+<meta name="plan-commits" content="5f7456b62,b83358808,5ecafc760,327a3c074,f0659cbcd,3084de30a,60e976977,d36c7a1f7,6a6a05810">
 <meta name="plan-recorded-at" content="2026-10-13">
 <meta name="plan-verdict" content="pass-with-follow-on">
-<meta name="plan-environment" content="Identity and refuse check on CPU x64 binary64 (JAX_PLATFORMS=cpu). The 5,000-cell certificate rows ran on the H200 lane (98dci4-gpu-0003, reservation gpu_0003_grpA) as job 1284720; the 10,000-cell rung on the device builder ran as job 1284803; the diverted 550-cell legacy attribution rows ran as jobs 1284795, 1284807 and 1284826. The fleet allocation (98dci4-clu-2002) carries no GPU, so every GPU-shaped row ran on the H200 lane.">
+<meta name="plan-environment" content="Identity and refuse check on CPU x64 binary64 (JAX_PLATFORMS=cpu). The 5,000-cell certificate rows ran on the H200 lane (98dci4-gpu-0003, reservation gpu_0003_grpA) as job 1284720; the 10,000-cell rung on the device builder ran as job 1284803; the diverted 550-cell legacy attribution rows ran as jobs 1284795, 1284807 and 1284826; the host-against-device block agreement ran as job 1284903. The fleet allocation (98dci4-clu-2002) carries no GPU, so every GPU-shaped row ran on the H200 lane.">
 <title>Requalify the fine certificate carriers on the repaired kernel | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
@@ -229,26 +229,76 @@ and
 device temporary bytes reached 22.6 GB. Neither changed a measured value; both
 size the rung for a later run.</p>
 
+<h2 id="carrier-requalify-agreement">Host-against-device block agreement at 5,000 cells</h2>
+
+<p>The 5,000-cell limited carrier was assembled twice on the repaired kernel,
+once on the host path and once on the device path, in H200 job 1284903. Both
+were fresh assemblies &mdash; neither path was a cache hit &mdash; so the
+comparison is between two independent builds of the same semantic carrier and
+not between a build and its own re-read. The two builds differ only in the
+platform on which the coupling blocks are assembled.</p>
+
+<p>Both build walls and the persisted bytes:</p>
+
+<table>
+  <thead><tr><th>path</th><th>build wall [s]</th><th>store bytes</th><th>realised cells</th></tr></thead>
+  <tbody>
+    <tr><td>host (<code>JAX_PLATFORMS=cpu</code>)</td><td>2081.2850875165313</td><td>927,577,847</td><td>5,167</td></tr>
+    <tr><td>device (<code>JAX_PLATFORMS=cuda,cpu</code>)</td><td>919.758650071919</td><td>1,850,592,079</td><td>5,167</td></tr>
+  </tbody>
+</table>
+
+<p>Norm-relative difference per coupling block, host against device, against the
+1e-12 floor:</p>
+
+<table>
+  <thead><tr><th>block</th><th>relative difference</th><th>within 1e-12</th></tr></thead>
+  <tbody>
+    <tr><td><code>plasma_to_grid</code></td><td>1.4688528176048765e-14</td><td>yes</td></tr>
+    <tr><td><code>plasma_to_grid_r</code></td><td>5.18645164736026e-13</td><td>yes</td></tr>
+    <tr><td><code>plasma_to_grid_z</code></td><td>6.021348604610557e-13</td><td>yes</td></tr>
+    <tr><td><code>plasma_to_wall</code></td><td>5.482651131372806e-15</td><td>yes</td></tr>
+    <tr><td><code>plasma_to_wall_r</code></td><td>1.4672124559786036e-13</td><td>yes</td></tr>
+    <tr><td><code>plasma_to_wall_z</code></td><td>1.409929948052452e-13</td><td>yes</td></tr>
+    <tr><td><code>plasma_to_sample</code></td><td>4.3710966923858874e-14</td><td>yes</td></tr>
+    <tr><td><code>plasma_to_sample_r</code></td><td>1.2186816095922636e-12</td><td><strong>no</strong></td></tr>
+    <tr><td><code>plasma_to_sample_z</code></td><td>7.102738896879781e-13</td><td>yes</td></tr>
+  </tbody>
+</table>
+
+<p><strong>Eight of the nine blocks agree to better than 1e-12; one does not.</strong>
+<code>plasma_to_sample_r</code> reads 1.2186816095922636e-12, about 22&nbsp;%
+above the floor, so the receipt's own <code>within_tolerance</code> is
+<code>false</code> and the agreement is <em>not</em> reported as met. The
+margin is small and every other block sits at or below 6.0e-13, but a floor
+stated as 1e-12 is not met by a block at 1.22e-12 and this record does not
+round it down. The value is the worst of nine and is the one the row's
+<code>worst_block</code> field names.</p>
+
+<p>Both stores are far above the size at which a receipt belongs in git, so
+they stay on the H200 lane's own scratch and only their byte counts are
+recorded here; the host path is the cheaper carrier at 927,577,847 bytes
+against the device path's 1,850,592,079, and the device path is the faster
+build at 919.76 s against the host's 2,081.29 s, a factor of about 2.26.</p>
+
 <h2 id="carrier-requalify-outstanding">Not completed in this run</h2>
 
-<p>One item of the followup's done-when is not measured in this record and is
-carried as a follow-on rather than reported as met:</p>
+<p>Two items of the followup's done-when are not measured in this record and
+are carried as follow-ons rather than reported as met:</p>
 
 <ul>
-  <li><strong>The host-against-device block agreement at 5,000 cells.</strong>
-  The 5,000-cell host carrier exists on the repaired kernel, but no device build
-  was produced alongside it in this run, so the 1e-12 block agreement is not
-  reported. The rebuild submitted for that purpose found the host carrier a
-  cache miss when the device platform was enabled, because the platform is part
-  of the carrier cache identity: the host blocks were re-assembled under the
-  device platform. That is now fixed &mdash; the platform is set per carrier path,
-  with the host path built on <code>cpu</code> and only the device path on
-  <code>cuda,cpu</code> &mdash; and the check is resubmitted as one H200 job at
-  <code>--time 01:15:00</code>, sized from the measured host assembly of about
-  2,077 s plus margin. Its evidence is recorded in the manifest's follow-ons
-  once it lands. The host carrier the row driver persisted was built with the
-  CPU platform alone, and the two carrier cache groups are not interchangeable,
-  which is what the per-path platform setting resolves.</li>
+  <li><strong>The 1e-12 block agreement is not met on every block.</strong> The
+  limited 5,000-cell carrier agrees on eight of nine blocks and reads
+  1.2186816095922636e-12 on <code>plasma_to_sample_r</code>, so the stated
+  floor is missed on one block. Whether that block should be repaired or whether
+  the floor is met in spirit at this rung is not decided here.</li>
+  <li><strong>The diverted 5,000-cell rung did not complete.</strong> Job
+  1284903 carried premises <code>limited:5000</code> and
+  <code>diverted:5000</code>; the limited rung completed and was written, and
+  the job reached its <code>--time 01:15:00</code> limit while assembling the
+  diverted carrier, so no diverted row was written. The diverted rung therefore
+  still has no host-against-device agreement, and its carrier assembly is the
+  same path the 10,000-cell diverted carrier is refused on.</li>
 </ul>
 
 </main>

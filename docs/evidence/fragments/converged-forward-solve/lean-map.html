@@ -41,4 +41,14 @@
 </tbody></table>
 <p id="lean-map-solve-verdict">Job 1285598 recorded these independently recomputed terminal residuals. Cold Newton compiled in 80.19 s limited and 79.09 s diverted, exceeding the 60 s clause. Full-column <code>jacfwd</code> had requested 132.73 GiB and failed in job 1285579; the completed route linearises once and scans eight-column tangent batches. The first rung is the smallest tested map-accuracy-qualified count, but no tested count is certified against all §6 clauses. The <a href="/nova/research/fixed-shape-lean-map.html">research record</a> shows the terminal poloidal panels and remaining measurements.</p>
 <p id="lean-map-stage-measure">At 282 diverted cells, H200 job 1285602 measured 10.176 ms for the full live map, 6.120 ms for the isolated connected-support read and 4.322 ms for exact cut booking. The values and gathered-jet matvecs took 0.488 and 0.255 ms against peak-HBM byte floors of 0.00716 and 0.01005 ms. Stage calls overlap in the fused program; their walls are diagnostic, not additive.</p></section>
+<section id="lean-map-batch"><h2>Fixed-shape batch throughput</h2>
+<table id="lean-map-batch-table"><thead><tr><th>Topology; cells</th><th>Width</th><th>Wall per slice</th><th>Residual-qualified slices</th></tr></thead><tbody>
+<tr><td>Limited; 289</td><td>1</td><td>239.9 ms</td><td>0/1</td></tr>
+<tr><td>Limited; 289</td><td>16</td><td>54.0 ms</td><td>4/16</td></tr>
+<tr><td>Limited; 289</td><td>128</td><td>51.1 ms</td><td>35/128</td></tr>
+<tr><td>Diverted; 282</td><td>1</td><td>228.1 ms</td><td>0/1</td></tr>
+<tr><td>Diverted; 282</td><td>16</td><td>60.0 ms</td><td>1/16</td></tr>
+<tr><td>Diverted; 282</td><td>128</td><td>55.0 ms</td><td>22/128</td></tr>
+</tbody></table>
+<p id="lean-map-batch-caveat">Job 1285606 ran distinct nearby exterior slices under <code>jax.vmap</code> with identical shapes within each width. Each count requires residual ≤ 10<sup>−12</sup>; the walls are raw execution throughput, not qualified converged throughput. The saved diverted terminal rechecked at 2.21 × 10<sup>−11</sup> after rebuilding the map. A limited warm history reached 6.83 × 10<sup>−15</sup> after correction two and then regressed to 1.85 × 10<sup>−12</sup> after an unconditional third correction; a checked early stop is being measured separately.</p></section>
 </main></body></html>

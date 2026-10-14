@@ -23,6 +23,9 @@ def reconcile(raw: dict, reference: dict) -> dict:
     if names != source_names:
         raise ValueError("active source resistance ordering differs from sectioned set")
     resistance = np.asarray([float(coil.resistance) for coil in source.coil])
+    existing_resistance = np.asarray(
+        raw.get("coil_resistance_ohm", np.zeros_like(resistance))
+    )
     original = np.asarray(raw["coil_inductance_h"])
     target = np.asarray(reference["coil_inductance_h"])
     frequency = np.asarray(raw["frequency_hz"])
@@ -37,7 +40,8 @@ def reconcile(raw: dict, reference: dict) -> dict:
     ).tolist()
     revised["bare_imag_ohm"] = (np.asarray(raw["bare_imag_ohm"]) + shift).tolist()
     revised["screened_real_ohm"] = (
-        np.asarray(raw["screened_real_ohm"]) + resistance[None, :]
+        np.asarray(raw["screened_real_ohm"])
+        + (resistance - existing_resistance)[None, :]
     ).tolist()
     revised["bare_real_ohm"] = np.broadcast_to(
         resistance[None, :], np.asarray(raw["bare_imag_ohm"]).shape

@@ -44,14 +44,14 @@ def dense_newton(residual, start, scale, *, steps=8, tolerance=1e-12):
                 moments.shape
             )
             candidates = moments[None] + alphas[:, None, None] * correction
-            candidate_values = jax.vmap(residual)(candidates)
+            candidate_values = jax.lax.map(residual, candidates)
             norms = jax.vmap(lambda row: _scaled_norm(row, scale))(candidate_values)
             admissible = jnp.isfinite(norms) & (norms < norm)
             scores = jnp.where(admissible, norms, jnp.inf)
             chosen = jnp.argmin(scores)
             improved = jnp.any(admissible)
             updated = jnp.where(improved, candidates[chosen], moments)
-            terminal = jnp.where(improved, norms[chosen], norm)
+            terminal = _scaled_norm(residual(updated), scale)
             return updated, accepted + improved.astype(jnp.int32), terminal
 
         updated, count, terminal = jax.lax.cond(

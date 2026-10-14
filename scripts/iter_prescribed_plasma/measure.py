@@ -292,6 +292,7 @@ def main():
     representatives = set(np.linspace(eligible[0], eligible[-1], 3, dtype=int))
     rows = []
     linkage = []
+    grid_columns = []
     subtraction = []
     selected = []
     failures = []
@@ -364,6 +365,21 @@ def main():
         grid_current = (density * cell_area).ravel()
         loop_reference = grid_to_loops @ grid_current
         coil_reference = grid_to_coils.T @ grid_current
+        prescribed_grid_flux = grid_to_coils.T @ current.cell_current.ravel()
+        for column, (value, reference) in enumerate(
+            zip(prescribed_grid_flux, coil_reference)
+        ):
+            grid_columns.append(
+                {
+                    "index": index,
+                    "column": column,
+                    "reference": float(reference),
+                    "predicted": float(value),
+                    "relative_residual": float(
+                        (value - reference) / max(abs(reference), 1.0)
+                    ),
+                }
+            )
         # DINA's central-solenoid circuit joins two stored sections in one column.
         predicted_coils = np.r_[
             predicted[len(loop_points) : len(loop_points) + 2],
@@ -443,6 +459,16 @@ def main():
         "fallback_slices": sum(row["boundary_source"] != "separatrix" for row in rows),
         "grid_spacing_m": 0.09375,
         "linked_flux_relative_error": residuals,
+        "all_active_grid_mutual_relative_error": metric(
+            [abs(row["relative_residual"]) for row in grid_columns]
+        ),
+        "remaining_active_grid_columns_relative_error": metric(
+            [
+                abs(row["relative_residual"])
+                for row in grid_columns
+                if row["column"] >= 11
+            ]
+        ),
         "geometric_map_subtraction_relative_error": {
             category: metric(
                 [
@@ -466,6 +492,7 @@ def main():
                 "summary": summary,
                 "slices": rows,
                 "linkage": linkage,
+                "active_grid_columns": grid_columns,
                 "geometric_map_subtraction": subtraction,
             },
             indent=2,

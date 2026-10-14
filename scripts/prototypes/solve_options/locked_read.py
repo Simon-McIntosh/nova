@@ -19,6 +19,8 @@ import nova
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium import fixed_points, topology
 from nova.equilibrium.solve_request import TopologyPolicy
+from nova.equilibrium.stencil_mesh import CellCurrentMoments
+from scripts.analytic_oracle_fixtures import measure as fixture
 from scripts.prototypes.solve_options.profile import _machine, _time
 from scripts.prototypes.support.geometry import certificate_field
 from tests.equilibrium.test_topology_read import _analytic_inputs
@@ -28,7 +30,7 @@ def run(kind, cells, cache, out):
     name = (
         "weak-rotation-reactor-static" if kind == "limited" else "diverted-single-null"
     )
-    carrier, _, _ = certificate._case(name, clip_mode="exact")
+    carrier, source, _ = certificate._case(name, clip_mode="exact")
     machine, key = _machine(cache, carrier, cells)
     geometry = topology.TopologyGeometry.from_cells(
         machine.cell_polygons, machine.sampling_vertices, (machine.wall_node,)
@@ -71,6 +73,23 @@ def run(kind, cells, cache, out):
     )
     assert bool(reading.valid) and bool(reading.qualified)
     assert int(jnp.sum(reading.membership > 0)) > 0
+    started = perf_counter()
+    operator = fixture.forward_operator(source, machine)
+    operator_build_seconds = perf_counter() - started
+    physical = CellCurrentMoments(
+        jnp.asarray(machine.area),
+        jnp.zeros(len(machine.area)),
+        jnp.zeros(len(machine.area)),
+    )
+    image, image_ms, image_min_ms = _time(
+        lambda op, moments: op.current_moment_image(
+            op.coupling_current_moments(moments)
+        ),
+        operator,
+        physical,
+    )
+    assert bool(jnp.all(jnp.isfinite(image)))
+    assert float(jnp.max(jnp.abs(image))) > 0
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     print(f"revision={revision} tree={Path.cwd().resolve()}", flush=True)
     print(f"NOVA_MODULE={nova.__file__} MODULE={fixed_points.__file__}", flush=True)
@@ -88,6 +107,9 @@ def run(kind, cells, cache, out):
         bell_assembly_ms=bell_ms * 1000,
         membership_ms=membership_ms * 1000,
         membership_min_ms=membership_min_ms * 1000,
+        operator_build_seconds=operator_build_seconds,
+        image_ms=image_ms * 1000,
+        image_min_ms=image_min_ms * 1000,
         selected_cells=int(jnp.sum(reading.membership > 0)),
         cut_cells=int(jnp.sum((reading.membership > 0) & (reading.membership < 1))),
         device_memory=jax.devices()[0].memory_stats(),

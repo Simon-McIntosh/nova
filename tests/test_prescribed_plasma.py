@@ -64,8 +64,58 @@ def test_open_outline_uses_last_closed_flux_surface(current):
         (5, 0),
     )
     assert replacement.boundary_source == "last_closed_flux"
+    assert replacement.boundary_fraction is not None
     assert replacement.endpoint_gap > 0.01
     assert np.sum(replacement.cell_current) == pytest.approx(1e6)
+
+
+def test_divertor_legs_are_cut_at_x_point_before_stored_boundary(current):
+    theta = np.linspace(-np.pi / 2, 3 * np.pi / 2, 121)
+    x_point = (5.0, -0.8)
+    diverted = np.vstack(
+        ([4.6, -1.4], np.c_[5 + 0.8 * np.cos(theta), 0.8 * np.sin(theta)], [5.4, -1.4])
+    )
+    rr, zz = np.meshgrid(current.radius, current.height, indexing="ij")
+    replacement = prescribe_current_density(
+        current.radius,
+        current.height,
+        1 - (rr - 5) ** 2 - zz**2,
+        np.linspace(1, 0.36, 50),
+        np.ones(50),
+        np.zeros(50),
+        1,
+        0.36,
+        1e6,
+        diverted,
+        (5, 0),
+        x_points=[x_point],
+        boundary_outline=current.boundary,
+    )
+    assert replacement.boundary_source == "separatrix_x_point"
+    assert replacement.boundary_fraction is None
+    assert replacement.endpoint_gap > 0.5
+    assert replacement.boundary[0] == pytest.approx(x_point)
+
+
+def test_stored_boundary_precedes_flux_contour(current):
+    rr, zz = np.meshgrid(current.radius, current.height, indexing="ij")
+    replacement = prescribe_current_density(
+        current.radius,
+        current.height,
+        1 - (rr - 5) ** 2 - zz**2,
+        np.linspace(1, 0.36, 50),
+        np.ones(50),
+        np.zeros(50),
+        1,
+        0.36,
+        1e6,
+        current.boundary[:-1],
+        (5, 0),
+        boundary_outline=current.boundary,
+    )
+    assert replacement.boundary_source == "boundary_outline"
+    assert replacement.boundary_fraction is None
+    np.testing.assert_array_equal(replacement.boundary, current.boundary)
 
 
 def test_missing_edge_gradient_extrapolates_from_finite_samples(current):

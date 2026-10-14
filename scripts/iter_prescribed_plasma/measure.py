@@ -84,6 +84,7 @@ def prescribe_slice(slice_):
     profile = slice_.profiles_1d
     map_ = slice_.profiles_2d[0]
     outline = slice_.boundary_separatrix.outline
+    stored_boundary = slice_.boundary.outline
     return prescribe_current_density(
         np.asarray(map_.grid.dim1),
         np.asarray(map_.grid.dim2),
@@ -96,6 +97,13 @@ def prescribe_slice(slice_):
         float(global_.ip),
         np.c_[np.asarray(outline.r), np.asarray(outline.z)],
         (float(global_.magnetic_axis.r), float(global_.magnetic_axis.z)),
+        x_points=[
+            (float(point.r), float(point.z))
+            for point in slice_.boundary_separatrix.x_point
+        ],
+        boundary_outline=np.c_[
+            np.asarray(stored_boundary.r), np.asarray(stored_boundary.z)
+        ],
     )
 
 
@@ -339,6 +347,7 @@ def main():
                 "ip": current.plasma_current,
                 "scale_factor": current.scale_factor,
                 "boundary_source": current.boundary_source,
+                "boundary_fraction": current.boundary_fraction,
                 "endpoint_gap": current.endpoint_gap,
                 "grid_spacing_m": float(
                     min(
@@ -486,7 +495,25 @@ def main():
         "failures": failures,
         "scale_factor": scale,
         "centroid_max_coordinate_error_m": centroid,
-        "fallback_slices": sum(row["boundary_source"] != "separatrix" for row in rows),
+        "fallback_slices": sum(
+            row["boundary_source"] == "last_closed_flux" for row in rows
+        ),
+        "boundary_sources": {
+            source: sum(row["boundary_source"] == source for row in rows)
+            for source in (
+                "separatrix",
+                "separatrix_x_point",
+                "boundary_outline",
+                "last_closed_flux",
+            )
+        },
+        "fallback_flux_fractions": sorted(
+            {
+                row["boundary_fraction"]
+                for row in rows
+                if row["boundary_fraction"] is not None
+            }
+        ),
         "grid_spacing_m": min(row["grid_spacing_m"] for row in rows),
         "linked_flux_relative_error": residuals,
         "all_active_grid_mutual_relative_error": metric(

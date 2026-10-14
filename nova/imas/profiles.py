@@ -34,6 +34,7 @@ class PrescribedCurrent:
     cell_current: np.ndarray
     boundary: np.ndarray
     boundary_source: str
+    boundary_fraction: float | None
     endpoint_gap: float
     scale_factor: float
     centroid: tuple[float, float]
@@ -52,8 +53,19 @@ def finite_flux_interpolant(coordinate, values):
     )
 
 
-def closed_plasma_boundary(radius, height, psi, outline, axis, psi_axis, psi_boundary):
-    """Select a simple axis-enclosing outline or its last closed flux surface."""
+def closed_plasma_boundary(
+    radius,
+    height,
+    psi,
+    outline,
+    axis,
+    psi_axis,
+    psi_boundary,
+    *,
+    x_points=None,
+    boundary_outline=None,
+):
+    """Prefer DINA's closed outlines before reconstructing a flux contour."""
     radius = np.asarray(radius, float)
     height = np.asarray(height, float)
     outline = np.asarray(outline, float).reshape(-1, 2)
@@ -71,7 +83,46 @@ def closed_plasma_boundary(radius, height, psi, outline, axis, psi_axis, psi_bou
         return polygon.is_valid and polygon.area > 0 and polygon.contains(Point(axis))
 
     if np.isfinite(gap) and gap <= 0.1 * spacing and valid(outline):
-        return outline, "separatrix", gap
+        return outline, "separatrix", None, gap
+
+    # A diverted outline can traverse both legs after circling the core. Two
+    # nearby passages through the X-point delimit its axis-enclosing loop.
+    for x_point in np.asarray(x_points if x_points is not None else [], float).reshape(
+        -1, 2
+    ):
+        if not len(outline) or not np.all(np.isfinite(x_point)):
+            continue
+        distance = np.linalg.norm(outline - x_point, axis=1)
+        near = np.flatnonzero(distance <= 2 * spacing)
+        groups = np.split(near, np.flatnonzero(np.diff(near) > 1) + 1)
+        passages = [
+            int(group[np.argmin(distance[group])]) for group in groups if len(group)
+        ]
+        candidates = []
+        for first_index, first in enumerate(passages):
+            for last in passages[first_index + 1 :]:
+                if last - first < 3:
+                    continue
+                loop = np.vstack((x_point, outline[first : last + 1], x_point))
+                if valid(loop):
+                    candidates.append((last - first, loop))
+        if candidates:
+            return (
+                min(candidates, key=lambda candidate: candidate[0])[1],
+                "separatrix_x_point",
+                None,
+                gap,
+            )
+
+    if boundary_outline is not None:
+        stored = np.asarray(boundary_outline, float).reshape(-1, 2)
+        stored_gap = (
+            float(np.linalg.norm(stored[0] - stored[-1]))
+            if len(stored)
+            else float("nan")
+        )
+        if np.isfinite(stored_gap) and stored_gap <= 0.1 * spacing and valid(stored):
+            return stored, "boundary_outline", None, gap
 
     generator = contourpy.contour_generator(radius, height, np.asarray(psi).T)
     for fraction in (0.999, 0.995, 0.99, 0.98, 0.95, 0.9, 0.8):
@@ -86,6 +137,7 @@ def closed_plasma_boundary(radius, height, psi, outline, axis, psi_axis, psi_bou
             return (
                 max(loops, key=lambda points: Polygon(points).area),
                 "last_closed_flux",
+                fraction,
                 gap,
             )
     raise ValueError("no simple closed plasma surface encloses the magnetic axis")
@@ -104,6 +156,9 @@ def prescribe_current_density(
     outline,
     axis,
     flux_derivative_scale=2 * np.pi,
+    *,
+    x_points=None,
+    boundary_outline=None,
 ):
     """Evaluate stored flux functions inside the boundary and match current.
 
@@ -118,8 +173,16 @@ def prescribe_current_density(
         raise ValueError("psi must be an (R,Z) map with positive radius")
     if np.isclose(psi_boundary, psi_axis):
         raise ValueError("axis and boundary flux do not define a profile")
-    boundary, source, gap = closed_plasma_boundary(
-        radius, height, psi, outline, axis, psi_axis, psi_boundary
+    boundary, source, fraction, gap = closed_plasma_boundary(
+        radius,
+        height,
+        psi,
+        outline,
+        axis,
+        psi_axis,
+        psi_boundary,
+        x_points=x_points,
+        boundary_outline=boundary_outline,
     )
     grid_r, grid_z = np.meshgrid(radius, height, indexing="ij")
     mask = contains_xy(Polygon(boundary), grid_r, grid_z)
@@ -152,6 +215,7 @@ def prescribe_current_density(
         cell_current,
         boundary,
         source,
+        fraction,
         gap,
         scale,
         centroid,

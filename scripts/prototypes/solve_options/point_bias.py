@@ -78,6 +78,7 @@ def _tangent_check(function, psi, direction):
 
 
 def run(kind, cells, cache, out):
+    out.mkdir(parents=True, exist_ok=True)
     name = (
         "weak-rotation-reactor-static" if kind == "limited" else "diverted-single-null"
     )
@@ -217,11 +218,35 @@ def run(kind, cells, cache, out):
     exterior, exterior_key = _exterior(cache, machine_key)
     analytic = None
     exact_flux_error = None
+    exterior_source = "provided" if exterior is not None else "built-in-run"
     if exterior is not None:
         coordinates = np.vstack(
             (machine.node, machine.wall_node, machine.sample_coordinates)
         )
         analytic = jnp.asarray(certificate._exact_state(name, exact, coordinates))
+        assert analytic.shape == exact_image.shape == exterior.shape
+        exact_flux_error = (
+            float(jnp.max(jnp.abs(exterior + exact_image - analytic))) / span
+        )
+    else:
+        coordinates = np.vstack(
+            (machine.node, machine.wall_node, machine.sample_coordinates)
+        )
+        analytic = jnp.asarray(certificate._exact_state(name, exact, coordinates))
+        run_cache = out / "cache"
+        run_cache.mkdir(parents=True, exist_ok=True)
+        previous_store = fixture.ZarrStore
+        fixture.ZarrStore = lambda *, filename, dirname, group=None: ZarrStore(
+            filename=filename, dirname=run_cache, group=group
+        )
+        try:
+            _, built_exterior, receipt = fixture.cached_fixture_exterior(
+                source, exact, machine, operator, np.asarray(analytic)
+            )
+        finally:
+            fixture.ZarrStore = previous_store
+        exterior = jnp.asarray(built_exterior)
+        exterior_key = receipt["semantic_key"]
         assert analytic.shape == exact_image.shape == exterior.shape
         exact_flux_error = (
             float(jnp.max(jnp.abs(exterior + exact_image - analytic))) / span
@@ -258,6 +283,7 @@ def run(kind, cells, cache, out):
         machine_key=machine_key,
         machine_builder=builder,
         exterior_key=exterior_key,
+        exterior_source=exterior_source,
         exact_flux_error=exact_flux_error,
         zero_current_flux_difference=zero_current_difference,
         target_current=float(target),

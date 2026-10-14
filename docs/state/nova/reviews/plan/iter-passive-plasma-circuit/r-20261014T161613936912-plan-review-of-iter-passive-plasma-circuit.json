@@ -64,7 +64,24 @@
   "plan_slug": "iter-passive-plasma-circuit",
   "plan_version": 0,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reuse_search-1",
+      "reason": "",
+      "when": "2026-10-14T16:27:53.539153+00:00"
+    }
+  ],
+  "responses": {
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-14T16:27:53.539153+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/iter-passive-plasma-circuit/r-20261014T161613936912-plan-review-of-iter-passive-plasma-circuit.json",
   "review_run_id": "r-20261014T161613936912-plan-review-of-iter-passive-plasma-circuit",
   "reviewed_blob_sha": "1ff06ec76c5f1695d3b55b823f17b96340698842",
   "rubric": "design",

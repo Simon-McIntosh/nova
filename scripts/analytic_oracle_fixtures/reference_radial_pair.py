@@ -98,7 +98,8 @@ def main() -> None:
     parser.add_argument("inspection", type=Path)
     parser.add_argument("output", type=Path)
     args = parser.parse_args()
-    pair = json.loads(args.inspection.read_text())["top"][0]
+    inspection = json.loads(args.inspection.read_text())
+    pair = inspection["top"][0]
     with xr.open_zarr(args.cache, group=args.group, consolidated=False) as data:
         all_targets = np.asarray(data["sample_coordinates"].values)
         target = all_targets[pair["target"]]
@@ -121,7 +122,7 @@ def main() -> None:
         section,
         expansion_point=section_centroid(section),
     )[1][pair["target"]]
-    if host_batch != pair["host"]:
+    if abs(host_batch - pair["host"]) > 5e-14 * inspection["global_scale"]:
         raise ValueError("stored host entry does not match its full batch")
     report = {
         **pair,

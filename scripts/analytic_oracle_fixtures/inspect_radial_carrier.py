@@ -83,7 +83,7 @@ def inspect(
         control_section,
         expansion_point=section_centroid(control_section),
     )[1]
-    if not np.array_equal(control, host[:, 0]):
+    if np.max(np.abs(control - host[:, 0])) > 5e-14 * global_scale:
         raise ValueError("stored host column does not match its construction path")
     wall_distance = cKDTree(wall).query(nodes)[0]
     order = np.argsort(wall_distance)

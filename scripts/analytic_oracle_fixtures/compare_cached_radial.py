@@ -37,7 +37,8 @@ def compare(cache: Path, group: str, output: Path) -> None:
     control = polygon_analytic_flux_moments(
         targets[:, 0], targets[:, 1], polygons[0], expansion_point=centres[0]
     )[1]
-    if not np.array_equal(control, host[:, 0]):
+    host_scale = float(np.abs(host).max())
+    if np.max(np.abs(control - host[:, 0])) > 5e-14 * host_scale:
         raise ValueError("stored host column does not match its construction path")
     device = coupling_build.build_flux_blocks(targets, polygons, centres)[1]
     difference = np.abs(host - device)

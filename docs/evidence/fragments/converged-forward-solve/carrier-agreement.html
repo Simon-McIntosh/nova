@@ -7,10 +7,10 @@
 <meta name="reckon-type" content="evidence">
 <meta name="plan-slug" content="carrier-agreement">
 <meta name="plan-title" content="Carrier agreement and identity">
-<meta name="plan-summary" content="Identity coverage passes mutation controls. The full radial maximum is near the wall and the host batch departs from fifty-digit quadrature; the diverted rerun is in progress.">
+<meta name="plan-summary" content="Identity coverage passes mutation controls. Three near-wall radial entries put the host batch farther from fifty-digit quadrature. The diverted nine-block rerun also exceeds the radial floor.">
 <meta name="plan-evidence-for" content="converged-forward-solve">
 <meta name="plan-verifies" content="converged-forward-solve#s4">
-<meta name="plan-commits" content="c7b1b5dc4,618a735a6,cb38cd9c3,e4a0efa8f,58e6679eb,c7aa7e57c,ffb73fc17,bc237c5e1,4a35ccd6e,43d0ca2b7,166918859,55b338a82,7b99006ed,aee36c170,c05786857,399806fec,d89a39bf3,293554dcf,9d9e9562d,7e7ab108d,137b03ee0,d8930e97f">
+<meta name="plan-commits" content="c7b1b5dc4,618a735a6,cb38cd9c3,e4a0efa8f,58e6679eb,c7aa7e57c,ffb73fc17,bc237c5e1,4a35ccd6e,43d0ca2b7,166918859,55b338a82,7b99006ed,aee36c170,c05786857,399806fec,d89a39bf3,293554dcf,9d9e9562d,7e7ab108d,137b03ee0,d8930e97f,862b1adc4">
 <meta name="plan-recorded-at" content="2026-10-14">
 <meta name="plan-verdict" content="partial">
 <title>Carrier agreement and identity | nova</title>
@@ -99,14 +99,32 @@ target-batch widths, replacing its unconditioned
 This candidate still needs validation against the reference and all nine
 blocks; it was not applied here.</p>
 
-<p>The diverted 5,000-cell all-nine-block job 1284938 reached its 75-minute
-time limit after persisting the host carrier but before writing a comparison
-receipt. The cache-path parser had interpreted the dot in the run-directory
-name as a FilePath suffix; passing a Path now preserves the requested
-location. The completed 962 MB host carrier was copied into that directory.
-H200 job 1284958 is running the same nine-block comparison from this cached
-host. No diverted agreement is claimed until its JSON receipt, terminal
-state and exit marker have been read.</p>
+<p>The first diverted 5,000-cell all-nine-block job, 1284938, reached its
+75-minute limit after persisting the host carrier but before writing a
+comparison receipt. The cache-path parser had interpreted the dot in the
+run-directory name as a FilePath suffix; an absolute override now passes as
+a Path while the relative default keeps its existing resolution. The
+completed 962 MB host carrier was copied into the intended run directory.
+Job 1284958 reused that host group, built the device group afresh and
+completed in 16:21 with <code>EXIT=0</code>. Its receipt names both group keys,
+records 5,158 realised cells and reports all nine blocks. The radial sample
+block is again the maximum, 1.0249978687933993e-12, which exceeds the
+1e-12 floor by 2.4998%. The other eight blocks are 4.51e-15 to 6.43e-13.</p>
+
+<table>
+<thead><tr><th>Diverted block</th><th>Host/device norm-relative gap</th></tr></thead>
+<tbody>
+<tr><td><code>plasma_to_grid</code></td><td>1.3546266193536203e-14</td></tr>
+<tr><td><code>plasma_to_grid_r</code></td><td>4.667520789499299e-13</td></tr>
+<tr><td><code>plasma_to_grid_z</code></td><td>6.431887689986539e-13</td></tr>
+<tr><td><code>plasma_to_wall</code></td><td>4.5098457392606785e-15</td></tr>
+<tr><td><code>plasma_to_wall_r</code></td><td>1.4791333403258007e-13</td></tr>
+<tr><td><code>plasma_to_wall_z</code></td><td>2.0865241423368282e-13</td></tr>
+<tr><td><code>plasma_to_sample</code></td><td>3.6814334678144844e-14</td></tr>
+<tr><td><code>plasma_to_sample_r</code></td><td>1.0249978687933993e-12</td></tr>
+<tr><td><code>plasma_to_sample_z</code></td><td>4.4213644305740566e-13</td></tr>
+</tbody>
+</table>
 
 <p>An earlier controlled CPU sample covered 98,304 target-cell entries across
 256 wall-adjacent cells. Its worst gap was 2.305072123406433e-13 at target

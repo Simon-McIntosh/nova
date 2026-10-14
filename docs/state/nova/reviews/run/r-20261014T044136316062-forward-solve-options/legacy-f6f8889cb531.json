@@ -104,6 +104,13 @@
     "measurement controls are genuine: local_booking_jacobian.py compares colour-block reconstruction against an independent jax.jvp random direction (:110-113) and central finite differences (:116-120) and raises on failure (:120-123); point_bias.py zero-current control 3.88 limited / 23.72 diverted sits far from analytic (bias-rows/*.log).",
     "no evidence fragment committed for the node, though sibling converged-forward-solve fragments exist under docs/evidence/fragments/converged-forward-solve/."
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "Research prototype styling and fragment anchoring; the research record itself is the section 5 evidence until the lead picks a representation",
+      "recorded_at": "2026-10-14T15:28:57.036728+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/solve_options/render.py",

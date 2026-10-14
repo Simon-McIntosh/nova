@@ -10,7 +10,7 @@
 <meta name="plan-summary" content="The carrier identity now covers mesh, ring and coupling construction. The radial and diverted full-block measurements remain in progress.">
 <meta name="plan-evidence-for" content="converged-forward-solve">
 <meta name="plan-verifies" content="converged-forward-solve#s4">
-<meta name="plan-commits" content="c7b1b5dc4,618a735a6,cb38cd9c3,e4a0efa8f,58e6679eb,c7aa7e57c">
+<meta name="plan-commits" content="c7b1b5dc4,618a735a6,cb38cd9c3,e4a0efa8f,58e6679eb,c7aa7e57c,bc237c5e1,43d0ca2b7,55b338a82,aee36c170">
 <meta name="plan-recorded-at" content="2026-10-14">
 <meta name="plan-verdict" content="partial">
 <title>Carrier agreement and identity | nova</title>
@@ -70,10 +70,20 @@ reduction by 2.5623e-20. The sample pair's norm-relative host-device gap is
 2.3051e-13, below the block's reported maximum. This is an entry check, not
 a bound on the remaining 61.7 million entries.</p>
 
+<p>The controlled CPU sample covered 98,304 target-cell entries across 256
+wall-adjacent source cells. Its worst gap was 2.305072123406433e-13
+norm-relative, at the pair above. The receipt records
+<code>sampled_cell_count=256</code> and <code>completed=false</code>: the planned
+middle and interior sample batches were stopped so the entire radial block can
+be measured by the queued H200 job. These 256 cells do not establish the
+1.2186816095922636e-12 full-block maximum's location. Earlier 550- and
+2,000-cell parity rows used a different certificate case, so their values
+cannot by themselves justify a new 5,000-cell floor.</p>
+
 <figure id="carrier-agreement-radial-panel">
   <img src="/nova/figures/converged-forward-solve/carrier-agreement/radial-sample.svg" alt="Limiter overview and close view locating the largest sampled radial disagreements">
   <figcaption>The limited carrier's poloidal limiter and the eight largest
-  checked radial target-cell gaps. Black circles mark source cells; blue crosses
+  checked radial target-cell gaps among 256 wall-adjacent cells. Black circles mark source cells; blue crosses
   mark sample points; grey segments join each pair. The close view locates the
   largest sampled pair at the wall. These are sampled entries; the full-block
   maximum awaits the device receipt.</figcaption>

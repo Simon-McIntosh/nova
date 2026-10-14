@@ -21,34 +21,39 @@ from scripts.analytic_oracle_fixtures import coupling_build
 
 def render_figure(result: dict, wall: np.ndarray, figure: Path) -> None:
     """Locate the strongest measured target-cell pairs inside the limiter."""
-    fig, ax = plt.subplots(figsize=(14, 7), dpi=100, layout="constrained")
-    poloidal_axes(ax)
-    draw_wall(ax, wall[:, 0], wall[:, 1])
-    for pair in result["top"][:8]:
-        source = pair["cell_coordinate"]
-        target = pair["target_coordinate"]
-        ax.plot(
-            [source[0], target[0]],
-            [source[1], target[1]],
-            color=DEFAULT_INK.probe_color,
-            linewidth=1.2,
-        )
-        ax.plot(*source, marker="o", color=DEFAULT_INK.wall_color, markersize=5)
-        ax.plot(*target, marker="x", color=DEFAULT_INK.flux_color, markersize=8)
+    fig, axes = plt.subplots(1, 2, figsize=(14, 7), dpi=100, layout="constrained")
+    for ax in axes:
+        poloidal_axes(ax)
+        draw_wall(ax, wall[:, 0], wall[:, 1])
+    for ax, pairs in ((axes[0], result["top"][:8]), (axes[1], result["top"][:1])):
+        for pair in pairs:
+            source = pair["cell_coordinate"]
+            target = pair["target_coordinate"]
+            ax.plot(
+                [source[0], target[0]],
+                [source[1], target[1]],
+                color=DEFAULT_INK.probe_color,
+                linewidth=1.2,
+            )
+            ax.plot(*source, marker="o", color=DEFAULT_INK.wall_color, markersize=5)
+            ax.plot(*target, marker="x", color=DEFAULT_INK.flux_color, markersize=8)
     if result["top"]:
         pair = result["top"][0]
-        ax.annotate(
+        axes[1].annotate(
             "source cell",
             pair["cell_coordinate"],
-            xytext=(8, -12),
+            xytext=(-65, -14),
             textcoords="offset points",
         )
-        ax.annotate(
+        axes[1].annotate(
             "sample point",
             pair["target_coordinate"],
             xytext=(8, 8),
             textcoords="offset points",
         )
+        centre = np.mean([pair["cell_coordinate"], pair["target_coordinate"]], axis=0)
+        axes[1].set_xlim(centre[0] - 0.22, centre[0] + 0.22)
+        axes[1].set_ylim(centre[1] - 0.22, centre[1] + 0.22)
     figure.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(figure)
     plt.close(fig)

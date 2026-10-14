@@ -9,6 +9,7 @@ from pathlib import Path
 import matplotlib
 
 matplotlib.use("Agg")
+matplotlib.rcParams["svg.hashsalt"] = "equilibrium-comparison"
 import matplotlib.pyplot as plt
 import nova
 from nova.media.ink import DEFAULT_INK
@@ -77,7 +78,7 @@ def _save_wall(rows, output):
         _style(axis)
     axes[0].set_ylabel("warm booking wall [ms]", fontsize=22)
     figure.subplots_adjust(left=0.08, right=0.96, bottom=0.19, top=0.88, wspace=0.08)
-    figure.savefig(output, format="svg", facecolor="white")
+    figure.savefig(output, format="svg", facecolor="white", metadata={"Date": None})
     plt.close(figure)
 
 
@@ -121,18 +122,19 @@ def _save_flux(rows, output):
             axis.annotate(
                 label,
                 (x[-1], y[-1]),
-                xytext=(5, 4),
+                xytext=(5, -14 if kind == "diverted" and key == "hard" else 7),
                 textcoords="offset points",
                 fontsize=20,
                 color=color,
             )
         axis.set_yscale("log")
         axis.set_xlim(1700, 15000)
+        axis.set_xticks((2000, 5000, 10000))
         axis.set_title(kind, fontsize=20)
         _style(axis)
     axes[0].set_ylabel("analytic flux error [relative sup]", fontsize=22)
     figure.subplots_adjust(left=0.10, right=0.96, bottom=0.16, top=0.88, wspace=0.08)
-    figure.savefig(output, format="svg", facecolor="white")
+    figure.savefig(output, format="svg", facecolor="white", metadata={"Date": None})
     plt.close(figure)
 
 

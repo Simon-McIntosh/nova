@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 
@@ -270,6 +271,20 @@ def draw_figures(rows, representatives, linkage, names):
 
 def main():
     """Run the current census and independent linked-flux comparisons."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--coil-flux-tolerance", type=float, default=0.025)
+    parser.add_argument("--loop-flux-tolerance", type=float, default=0.005)
+    parser.add_argument("--active-grid-tolerance", type=float, default=0.005)
+    limits = parser.parse_args()
+    if (
+        min(
+            limits.coil_flux_tolerance,
+            limits.loop_flux_tolerance,
+            limits.active_grid_tolerance,
+        )
+        <= 0
+    ):
+        parser.error("flux tolerances must be positive")
     OUTPUT.mkdir(parents=True, exist_ok=True)
     with imas.DBEntry(URI, "r", dd_version=DD_VERSION) as entry:
         equilibrium = entry.get("equilibrium", lazy=False, autoconvert=False)
@@ -325,6 +340,11 @@ def main():
                 "scale_factor": current.scale_factor,
                 "boundary_source": current.boundary_source,
                 "endpoint_gap": current.endpoint_gap,
+                "grid_spacing_m": float(
+                    min(
+                        np.min(np.diff(current.radius)), np.min(np.diff(current.height))
+                    )
+                ),
                 "centroid_error_r": current.centroid[0] - centre[0],
                 "centroid_error_z": current.centroid[1] - centre[1],
             }
@@ -467,7 +487,7 @@ def main():
         "scale_factor": scale,
         "centroid_max_coordinate_error_m": centroid,
         "fallback_slices": sum(row["boundary_source"] != "separatrix" for row in rows),
-        "grid_spacing_m": 0.09375,
+        "grid_spacing_m": min(row["grid_spacing_m"] for row in rows),
         "linked_flux_relative_error": residuals,
         "all_active_grid_mutual_relative_error": metric(
             [abs(row["relative_residual"]) for row in grid_columns]
@@ -495,6 +515,12 @@ def main():
         ],
         "geometry_unmapped_coil_family": "VS3: 4 coupling columns, 2 stored elements",
         "vertical_shift_control": vertical_control,
+        "tolerances": {
+            "centroid_grid_cells": 1.0,
+            "coil_flux_relative": limits.coil_flux_tolerance,
+            "loop_flux_relative": limits.loop_flux_tolerance,
+            "active_grid_relative": limits.active_grid_tolerance,
+        },
     }
     (OUTPUT / "summary.json").write_text(
         json.dumps(
@@ -509,6 +535,30 @@ def main():
         )
     )
     print("SUMMARY " + json.dumps(summary, sort_keys=True))
+    if failures or len(rows) != len(eligible):
+        raise AssertionError(f"prescription failed on {len(failures)} eligible slices")
+    if vertical_control is None:
+        raise AssertionError("vertical-shift control was not sampled")
+    if centroid["count"] != len(rows):
+        raise AssertionError("centroid measurement did not cover every slice")
+    if centroid["maximum"] > summary["grid_spacing_m"]:
+        raise AssertionError(
+            f"centroid error {centroid['maximum']:.6g} m exceeds one grid cell"
+        )
+    for label, observed, tolerance in (
+        ("coil flux", residuals["coil"], limits.coil_flux_tolerance),
+        ("flux-loop flux", residuals["loop"], limits.loop_flux_tolerance),
+        (
+            "active-grid flux",
+            summary["all_active_grid_mutual_relative_error"],
+            limits.active_grid_tolerance,
+        ),
+    ):
+        if observed["maximum"] > tolerance:
+            raise AssertionError(
+                f"{label} residual {observed['maximum']:.6g} exceeds {tolerance:.6g}"
+            )
+    print("GATE_PASS centroid, coil flux, flux-loop flux, active-grid flux")
     draw_figures(rows, selected, linkage, coil_names)
 
 

@@ -14,7 +14,44 @@ from scipy.spatial import cKDTree
 from nova.biot.greens import section_centroid
 from nova.biot.polygonanalytic import polygon_analytic_flux_moments
 from nova.jax.config import configure_dtypes
+from nova.media.ink import DEFAULT_INK, poloidal_axes
+from nova.media.poloidal import draw_wall
 from scripts.analytic_oracle_fixtures import coupling_build
+
+
+def render_figure(result: dict, wall: np.ndarray, figure: Path) -> None:
+    """Locate the strongest measured target-cell pairs inside the limiter."""
+    fig, ax = plt.subplots(figsize=(14, 7), dpi=100, layout="constrained")
+    poloidal_axes(ax)
+    draw_wall(ax, wall[:, 0], wall[:, 1])
+    for pair in result["top"][:8]:
+        source = pair["cell_coordinate"]
+        target = pair["target_coordinate"]
+        ax.plot(
+            [source[0], target[0]],
+            [source[1], target[1]],
+            color=DEFAULT_INK.probe_color,
+            linewidth=1.2,
+        )
+        ax.plot(*source, marker="o", color=DEFAULT_INK.wall_color, markersize=5)
+        ax.plot(*target, marker="x", color=DEFAULT_INK.flux_color, markersize=8)
+    if result["top"]:
+        pair = result["top"][0]
+        ax.annotate(
+            "source cell",
+            pair["cell_coordinate"],
+            xytext=(8, -12),
+            textcoords="offset points",
+        )
+        ax.annotate(
+            "sample point",
+            pair["target_coordinate"],
+            xytext=(8, 8),
+            textcoords="offset points",
+        )
+    figure.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(figure)
+    plt.close(fig)
 
 
 def inspect(
@@ -120,28 +157,7 @@ def inspect(
             f"pairs={sampled_pair_count} worst={top[0]['norm_relative']:.6e}",
             flush=True,
         )
-    fig, ax = plt.subplots(figsize=(14, 7), layout="constrained")
-    ax.plot(*wall.T, color="0.35", linewidth=2.4)
-    ax.plot(
-        [wall[-1, 0], wall[0, 0]],
-        [wall[-1, 1], wall[0, 1]],
-        color="0.35",
-        linewidth=2.4,
-    )
-    for pair in top[:8]:
-        ax.plot(
-            [pair["cell_coordinate"][0], pair["target_coordinate"][0]],
-            [pair["cell_coordinate"][1], pair["target_coordinate"][1]],
-            color="0.7",
-            linewidth=1.2,
-        )
-        ax.plot(*pair["cell_coordinate"], marker="o", color="0.15", markersize=5)
-        ax.plot(*pair["target_coordinate"], marker="x", color="#b22424", markersize=8)
-    ax.set_aspect("equal")
-    ax.set_axis_off()
-    figure.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(figure)
-    plt.close(fig)
+    render_figure(result, wall, figure)
     print(json.dumps({key: value for key, value in result.items() if key != "top"}))
     print(json.dumps(top[0]))
 
@@ -153,7 +169,15 @@ def main() -> None:
     parser.add_argument("output", type=Path)
     parser.add_argument("figure", type=Path)
     parser.add_argument("--all-cells", action="store_true")
+    parser.add_argument("--render-only", action="store_true")
     arguments = parser.parse_args()
+    if arguments.render_only:
+        with xr.open_zarr(
+            arguments.cache, group=arguments.group, consolidated=False
+        ) as data:
+            wall = np.asarray(data["wall_node"].values)
+        render_figure(json.loads(arguments.output.read_text()), wall, arguments.figure)
+        return
     inspect(
         arguments.cache,
         arguments.group,

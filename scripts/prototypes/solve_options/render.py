@@ -41,7 +41,7 @@ def _style(axis):
     axis.set_xlabel("realised cells", fontsize=22)
 
 
-def _save_wall(booking, frozen, local, factor, output):
+def _save_wall(booking, frozen, local, warm, output):
     measures = (
         ("exact cut-cell booking", lambda key: booking[key]["exact_booking_ms"]),
         ("hard centroid booking", lambda key: booking[key]["hard_ms"]),
@@ -53,23 +53,45 @@ def _save_wall(booking, frozen, local, factor, output):
             ][-1],
         ),
         ("local derivative", lambda key: local[key]["assembly_wall_ms"]),
-        ("dense factor refresh", lambda key: factor[key]["factor_median_ms"]),
+        ("cached-factor warm slice", None),
     )
     figure, axes = plt.subplots(2, 3, figsize=(14, 10.5), sharex=True, sharey=True)
     for axis, (name, measure) in zip(axes.flat, measures, strict=True):
         for kind in CASES:
-            points = [(kind, cells) for cells in REQUESTS]
-            receipts = [booking[key] for key in points]
-            x = [row["realised_cells"] for row in receipts]
-            y = [measure(key) for key in points]
-            axis.plot(x, y, linewidth=3.0, marker="o", markersize=8, **CASE_STYLE[kind])
+            if measure is None:
+                row = warm[kind]
+                slice_row = row["slices"][0]
+                x = [row["realised_cells"]]
+                y = [slice_row["warm_wall_ms"]]
+                axis.plot(
+                    x,
+                    y,
+                    linewidth=3.0,
+                    marker="o" if slice_row["converged"] else "x",
+                    markersize=11,
+                    **CASE_STYLE[kind],
+                )
+            else:
+                points = [(kind, cells) for cells in REQUESTS]
+                receipts = [booking[key] for key in points]
+                x = [row["realised_cells"] for row in receipts]
+                y = [measure(key) for key in points]
+                axis.plot(
+                    x, y, linewidth=3.0, marker="o", markersize=8, **CASE_STYLE[kind]
+                )
             offsets = {"limited": (5, 6), "diverted": (5, -16)}
             if name == "one-pitch smooth booking":
                 offsets = {"limited": (5, -16), "diverted": (5, 6)}
-            elif name == "dense factor refresh":
-                offsets = {"limited": (5, -16), "diverted": (5, 6)}
+            elif name == "cached-factor warm slice":
+                offsets = {"limited": (10, 0), "diverted": (10, 0)}
+            label = kind
+            if measure is None:
+                outcome = (
+                    "qualified" if warm[kind]["slices"][0]["converged"] else "failed"
+                )
+                label = f"{kind} {outcome}"
             axis.annotate(
-                kind,
+                label,
                 (x[-1], y[-1]),
                 xytext=offsets[kind],
                 textcoords="offset points",
@@ -80,7 +102,15 @@ def _save_wall(booking, frozen, local, factor, output):
         axis.set_yscale("log")
         axis.set_ylim(0.05, 10000)
         axis.set_xlim(1700, 15000)
-        axis.text(0.04, 0.94, name, transform=axis.transAxes, fontsize=20, va="top")
+        title_height = 0.08 if measure is None else 0.94
+        axis.text(
+            0.04,
+            title_height,
+            name,
+            transform=axis.transAxes,
+            fontsize=20,
+            va="bottom" if measure is None else "top",
+        )
         _style(axis)
         axis.set_xticks((2000, 5000, 10000), labels=("2k", "5k", "10k"))
     axes[0, 0].annotate(
@@ -162,7 +192,7 @@ def main():
     parser.add_argument("--bias", type=Path)
     parser.add_argument("--frozen", type=Path, action="append", required=True)
     parser.add_argument("--local", type=Path, required=True)
-    parser.add_argument("--factor", type=Path, required=True)
+    parser.add_argument("--warm", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     print(f"NOVA_MODULE={nova.__file__} CWD={Path.cwd().resolve()}", flush=True)
@@ -182,12 +212,8 @@ def main():
         for kind in CASES
         for cells in REQUESTS
     }
-    factor = {
-        (kind, cells): _receipt((args.factor,), kind, cells)
-        for kind in CASES
-        for cells in REQUESTS
-    }
-    _save_wall(wall, frozen, local, factor, args.out / "wall-by-cells.svg")
+    warm = {kind: _receipt((args.warm,), kind, 2000) for kind in CASES}
+    _save_wall(wall, frozen, local, warm, args.out / "wall-by-cells.svg")
     if args.bias is not None:
         bias = {
             (kind, cells): _receipt((args.bias,), kind, cells)

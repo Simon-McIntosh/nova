@@ -266,12 +266,19 @@ def main():
         active = entry.get("pf_active", lazy=False, autoconvert=False)
         passive = entry.get("pf_passive", lazy=False, autoconvert=False)
         magnetics = entry.get("magnetics", lazy=False, autoconvert=False)
+        coupling = entry.get("em_coupling", lazy=False, autoconvert=False)
     loop_points = loop_locations(magnetics)
     coil_points, coil_names = coil_locations(active)
     locations = np.vstack((loop_points, coil_points))
     kernel, owners = conductor_sources(
         active, passive, locations[:, 0], locations[:, 1]
     )
+    grid_to_loops = np.asarray(coupling.mutual_loops_grid)
+    grid_to_coils = np.asarray(coupling.mutual_grid_active)
+    if grid_to_loops.shape != (len(loop_points), 8385):
+        raise ValueError("DINA loop-grid mutual shape does not match this grid")
+    if grid_to_coils.shape != (8385, 15):
+        raise ValueError("DINA active-grid mutual shape does not match this grid")
     print(
         f"REFERENCE_CONTROL loops={len(loop_points)} coils={len(coil_points)} "
         f"sources={len(owners)} kernel_nonzero={np.count_nonzero(kernel)}"
@@ -285,6 +292,7 @@ def main():
     representatives = set(np.linspace(eligible[0], eligible[-1], 3, dtype=int))
     rows = []
     linkage = []
+    subtraction = []
     selected = []
     failures = []
     map_control = []
@@ -317,27 +325,61 @@ def main():
         source = kernel @ current_vector(active, passive, owners, index)
         inferred = stored - source
         predicted = plasma_flux_at_points(current, locations[:, 0], locations[:, 1])
-        for point_index, name in enumerate(
-            [str(loop.name).strip() for loop in magnetics.flux_loop] + coil_names
+        density = np.asarray(slice_.profiles_2d[0].j_tor)
+        cell_area = float(
+            np.mean(np.diff(current.radius)) * np.mean(np.diff(current.height))
+        )
+        grid_current = (density * cell_area).ravel()
+        loop_reference = grid_to_loops @ grid_current
+        coil_reference = grid_to_coils.T @ grid_current
+        # DINA's central-solenoid circuit joins two stored sections in one column.
+        predicted_coils = np.r_[
+            predicted[len(loop_points) : len(loop_points) + 2],
+            predicted[len(loop_points) + 2 : len(loop_points) + 4].sum(),
+            predicted[len(loop_points) + 4 : len(loop_points) + 12],
+        ]
+        for category, names, model, reference_values in (
+            (
+                "loop",
+                [str(loop.name).strip() for loop in magnetics.flux_loop],
+                predicted[: len(loop_points)],
+                loop_reference,
+            ),
+            (
+                "coil",
+                [str(coil.name).strip() for coil in list(active.coil)[:11]],
+                predicted_coils,
+                coil_reference[:11],
+            ),
         ):
+            for name, value, reference in zip(names, model, reference_values):
+                residual = float(value - reference)
+                linkage.append(
+                    {
+                        "index": index,
+                        "time": float(slice_.time),
+                        "category": category,
+                        "name": name,
+                        "reference": float(reference),
+                        "predicted": float(value),
+                        "residual": residual,
+                        "relative_residual": residual / max(abs(reference), 1.0),
+                    }
+                )
+        for point_index in range(len(locations)):
             if not np.isfinite(inferred[point_index]):
                 continue
-            category = "loop" if point_index < len(loop_points) else "coil"
             reference = float(inferred[point_index])
-            residual = float(predicted[point_index] - reference)
-            linkage.append(
+            subtraction.append(
                 {
                     "index": index,
-                    "time": float(slice_.time),
-                    "category": category,
-                    "name": name,
-                    "reference": reference,
-                    "predicted": float(predicted[point_index]),
-                    "residual": residual,
-                    "relative_residual": residual / max(abs(reference), 1.0),
+                    "category": "loop" if point_index < len(loop_points) else "coil",
+                    "relative_residual": float(
+                        (predicted[point_index] - reference) / max(abs(reference), 1.0)
+                    ),
                 }
             )
-            if category == "loop":
+            if point_index < len(loop_points):
                 loop = magnetics.flux_loop[point_index]
                 measured = float(np.asarray(loop.flux.data)[index])
                 map_control.append(stored[point_index] - measured)
@@ -369,10 +411,21 @@ def main():
         "fallback_slices": sum(row["boundary_source"] != "separatrix" for row in rows),
         "grid_spacing_m": 0.09375,
         "linked_flux_relative_error": residuals,
+        "geometric_map_subtraction_relative_error": {
+            category: metric(
+                [
+                    abs(row["relative_residual"])
+                    for row in subtraction
+                    if row["category"] == category
+                ]
+            )
+            for category in ("coil", "loop")
+        },
         "map_minus_magnetics_flux_loop_wb": metric(map_control),
-        "coil_positions_inside_map": len(
-            set(row["name"] for row in linkage if row["category"] == "coil")
-        ),
+        "independent_coil_families": [
+            str(coil.name).strip() for coil in list(active.coil)[:11]
+        ],
+        "excluded_coil_family": "VS3: four coupling columns for two stored elements",
     }
     (OUTPUT / "summary.json").write_text(
         json.dumps(
@@ -380,6 +433,7 @@ def main():
                 "summary": summary,
                 "slices": rows,
                 "linkage": linkage,
+                "geometric_map_subtraction": subtraction,
             },
             indent=2,
         )

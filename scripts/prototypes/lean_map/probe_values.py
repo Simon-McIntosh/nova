@@ -106,7 +106,7 @@ def run(kind, cells, cache, output):
     rule = triangle_rule(geometry)
     values, matrix_receipt = build_values(machine, rule, field, exact_moments)
     gauss_flux = values.apply(exact_moments).reshape(rule.points.shape[:-1])
-    full = reading.membership >= 1 - 1e-14
+    full = (reading.membership >= 1 - 1e-14) & (geometry.vertex_count == 6)
     cut = (reading.membership > 0) & ~full
     count = int(jnp.sum(cut))
     capacity = int(np.ceil(1.2 * count)) + 16

@@ -78,7 +78,7 @@ def run(kind, cells, cache, output):
     gauss_flux = jax.vmap(field.value)(rule.points.reshape(-1, 2)).reshape(
         rule.points.shape[:-1]
     )
-    full = reading.membership >= 1 - 1e-14
+    full = (reading.membership >= 1 - 1e-14) & (geometry.vertex_count == 6)
     cut = (reading.membership > 0) & ~full
     cut_count = int(jnp.sum(cut))
     capacity = int(np.ceil(1.2 * cut_count)) + 16

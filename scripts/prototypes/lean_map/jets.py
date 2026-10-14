@@ -53,7 +53,9 @@ def gather_window(jet_map, geometry, membership, roots, *, margin_pitches=4.0):
     points = np.asarray(roots)
     distance = np.min(np.linalg.norm(centre[:, None] - points[None], axis=-1), axis=1)
     fraction = np.asarray(membership)
-    boundary_band = (fraction > 0) & (fraction < 1 - 1e-14)
+    boundary_band = (fraction > 0) & (
+        (fraction < 1 - 1e-14) | (np.asarray(geometry.vertex_count) != 6)
+    )
     live_edges = (
         np.arange(geometry.neighbour.shape[1])[None]
         < np.asarray(geometry.vertex_count)[:, None]

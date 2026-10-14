@@ -84,7 +84,7 @@ def apply(
     reading = topology.read_at_stationary_points(
         field, geometry, convention, policy, roots
     )
-    full = reading.membership >= 1 - 1e-14
+    full = (reading.membership >= 1 - 1e-14) & (geometry.vertex_count == 6)
     interior = interior_moments(
         rule, gauss_flux, profile, reading.axis_flux, reading.boundary_flux, full
     )
@@ -98,7 +98,7 @@ def apply(
     )
     unscaled = interior + cut.moments
     raw_current = jnp.sum(unscaled[:, 0])
-    cut_cells = (reading.membership > 0) & (reading.membership < 1 - 1e-14)
+    cut_cells = (reading.membership > 0) & ~full
     missing_band = jnp.any(cut_cells & ~complete)
     valid = (
         jnp.all(roots.valid)

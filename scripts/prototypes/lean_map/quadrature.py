@@ -32,18 +32,19 @@ class LeanBooking(NamedTuple):
 
 
 def triangle_rule(geometry) -> InteriorRule:
-    """Three-point Gaussian triangle fan of every polygon, padded to one shape."""
+    """Three-point fan over six edges; irregular cells use exact booking."""
     centre = np.asarray(geometry.centre)
-    vertices = np.asarray(geometry.vertices)
-    count = np.asarray(geometry.vertex_count)
+    vertices = np.asarray(geometry.vertices)[:, :6]
+    count = np.minimum(np.asarray(geometry.vertex_count), 6)
     slots = np.arange(vertices.shape[1])
     following = np.where(slots[None] + 1 < count[:, None], slots[None] + 1, 0)
     ends = np.take_along_axis(vertices, following[..., None], axis=1)
     first = vertices - centre[:, None]
     second = ends - centre[:, None]
     area = 0.5 * (first[..., 0] * second[..., 1] - first[..., 1] * second[..., 0])
-    area = np.where(slots[None] < count[:, None], area, 0.0)
-    if np.any(area < -1e-13):
+    regular = np.asarray(geometry.vertex_count) == 6
+    area = np.where((slots[None] < count[:, None]) & regular[:, None], area, 0.0)
+    if np.any(area[regular] < -1e-13):
         raise ValueError("polygon fan must be counterclockwise")
     barycentric = np.asarray(((2 / 3, 1 / 6), (1 / 6, 2 / 3), (1 / 6, 1 / 6)))
     points = (
@@ -54,10 +55,13 @@ def triangle_rule(geometry) -> InteriorRule:
     weights = np.repeat(area / 3, 3, axis=1)
     points = np.where(weights[..., None] > 0, points, centre[:, None])
     np.testing.assert_allclose(
-        weights.sum(axis=1), np.asarray(geometry.full_area), rtol=1e-10, atol=1e-13
+        weights.sum(axis=1)[regular],
+        np.asarray(geometry.full_area)[regular],
+        rtol=1e-10,
+        atol=1e-13,
     )
     np.testing.assert_allclose(
-        np.einsum("nq,nqd->nd", weights, points - centre[:, None]),
+        np.einsum("nq,nqd->nd", weights, points - centre[:, None])[regular],
         0,
         rtol=0,
         atol=1e-11,
@@ -99,7 +103,7 @@ def quadratic_fit(rule, geometry):
 
 def cut_moments(psi, reading, geometry, profile, sigma, capacity):
     """Gather one fixed cut batch and refuse any state exceeding its capacity."""
-    full = reading.membership >= 1 - 1e-14
+    full = (reading.membership >= 1 - 1e-14) & (geometry.vertex_count == 6)
     cut = (reading.membership > 0) & ~full
     count = jnp.sum(cut, dtype=jnp.int32)
     indices = jnp.nonzero(cut, size=capacity, fill_value=0)[0]

@@ -102,9 +102,8 @@ def run(kind, cells, cache, output):
     window, window_receipt = gather_window(jets, geometry, reading.membership, roots)
     result.update(stage="window-built", window=window_receipt)
     _write(output, result)
-    cut_count = int(
-        jnp.sum((reading.membership > 0) & (reading.membership < 1 - 1e-14))
-    )
+    full = (reading.membership >= 1 - 1e-14) & (geometry.vertex_count == 6)
+    cut_count = int(jnp.sum((reading.membership > 0) & ~full))
     capacity = int(np.ceil(1.2 * cut_count)) + 16
     axis_jet = field.evaluate(jnp.asarray(roots[0]))
     axis_sign = float(jnp.sign(axis_jet.hessian[0, 0]))

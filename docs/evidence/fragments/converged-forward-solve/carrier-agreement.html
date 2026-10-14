@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="carrier-agreement">
+<meta name="plan-title" content="Carrier agreement and identity">
+<meta name="plan-summary" content="The carrier identity now covers mesh, ring and coupling construction. The radial and diverted full-block measurements remain in progress.">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s4">
+<meta name="plan-commits" content="c7b1b5dc4,618a735a6,cb38cd9c3,e4a0efa8f,58e6679eb,c7aa7e57c">
+<meta name="plan-recorded-at" content="2026-10-14">
+<meta name="plan-verdict" content="partial">
+<title>Carrier agreement and identity | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<h1 id="carrier-agreement">Carrier agreement and identity</h1>
+
+<p>The stored carrier includes node, area, polygon, stencil, interior-ring and
+nine coupling arrays. Its revision previously hashed the packed polygon kernel
+and coupling assembly only. A mesh or ring construction change could therefore
+replay arrays built by different source. The revision now fingerprints the
+mesh and ring modules, the coupling dependencies and the fixture functions
+that build the carrier. An edit to measurement-only fixture code leaves the
+revision unchanged.</p>
+
+<h2 id="carrier-agreement-identity">Identity guard</h2>
+<p>At the orientation base, the new test reproduced eight failures: edits to
+the mesh, ring and related construction sources, and to the fixture builder
+function, left <code>builder_revision</code> unchanged. The head arm passes all
+11 identities. Replacing <code>builder_revision</code> in a scratch tree with
+the former fixture-plus-coupling digest fails nine IDs, including the packed
+polygon kernel. The head arm fails none. The mutation log ends with
+<code>EXIT=1</code> and names each failing ID.</p>
+<table>
+<thead><tr><th>Fresh per-file process</th><th>Orientation base</th><th>Head</th></tr></thead>
+<tbody>
+<tr><td><code>tests/test_coupling_build.py</code></td><td>7 passed</td><td>7 passed</td></tr>
+<tr><td><code>tests/test_carrier_identity.py</code></td><td>8 failed, 3 passed</td><td>11 passed</td></tr>
+<tr><td><code>tests/test_analytic_oracle_fixture_exterior.py</code></td><td>2 passed</td><td>2 passed</td></tr>
+</tbody>
+</table>
+
+<h2 id="carrier-agreement-measurement">Numerical agreement</h2>
+<p>The prior 5,167-cell limited receipt reported
+<code>plasma_to_sample_r</code> at 1.2186816095922636e-12 norm-relative;
+the other eight blocks measured 1.5e-14 to 7.1e-13. The stored cache now
+exposes its host group but no device group, so that scalar alone cannot locate
+the differing entries. A fresh device comparison of the stored host radial
+block is queued as H200 job 1284944. Its receipt will name the worst target and
+cell, their coordinates and wall proximity. A separate H200 job, 1284938,
+measures all nine diverted 5,000-cell blocks in one allocation. Neither job's
+absence of an error is treated as a result: their receipts and terminal job
+states must be read before a numerical verdict or floor is stated.</p>
+</main>
+</body>
+</html>

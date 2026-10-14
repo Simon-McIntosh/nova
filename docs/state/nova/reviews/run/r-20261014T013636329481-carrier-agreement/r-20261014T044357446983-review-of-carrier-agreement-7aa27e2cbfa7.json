@@ -1,0 +1,103 @@
+{
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed baseline_suite (revision 298a2d498aa208351ceef4422487ed022c57a7a7, exit_status 1, completed true, 8 failure ids, all tests/test_carrier_identity.py ids) and after_suite (revision 137b03ee0b2e0308c874291765874100d0563740, exit_status 0, completed true, 0 failure ids) are both readable and completed in the reviewed run's manifest, so added_failure_ids is the after-suite failure set minus the baseline's and is empty, added_failure_count 0. Read from the manifest fields and the two named logs (base-suite.log ends FILE_EXIT=1/EXIT=1 with '8 failed, 3 passed'; head-suite-final.log ends SUITE_SUMMARY=20 passed / EXIT=0), not from a missing file.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "docs/evidence/fragments/converged-forward-solve/carrier-agreement.html -- plan-verdict partial, plan-evidence-for converged-forward-solve, verdict partial; localises the radial block to target 11226/cell 4860 (device 1.29164e-21 from the 50-digit reference vs host 1.27457e-19, 98.7x farther); manipulates device 1.0249978687933993e-12 vs host 1.2186816095922636e-12 for the limited case.",
+    "docs/figures/converged-forward-solve/carrier-agreement/radial-sample.svg -- 20,089 bytes, one poloidal panel, 0 axis/grid tokens.",
+    "scripts/analytic_oracle_fixtures/measure.py:406-455 -- builder_revision now hashes CARRIER_SOURCE_PATHS (8 sources including stencil_mesh.py, plasmagrid.py) plus coupling_build.__file__ bytes plus the AST of CARRIER_BUILDER_FUNCTIONS, replacing the fixture-plus-coupling digest.",
+    "tests/test_carrier_identity.py -- 72 lines, 11 collected, three assertions; at head 11 passed, at base 8 failed/3 passed.",
+    "diverted-carriers.json -- completed true, 5158 cells, nine blocks, worst plasma_to_sample_r 1.0249978687933993e-12 (H200 job 1284958, EXIT=0).",
+    "radial-full.json -- completed true, 61,652,644 pairs, worst 1.2186816095922636e-12 (H200 job 1284944)."
+  ],
+  "blocking_finding_count": 0,
+  "call_site_count": 3,
+  "call_sites": [
+    "scripts/analytic_oracle_fixtures/measure.py:503",
+    "scripts/analytic_oracle_fixtures/requalify_carriers.py:124",
+    "scripts/analytic_oracle_fixtures/requalify_carriers.py:131"
+  ],
+  "commits_read": [
+    "7aa27e2cbfa78755ca73f8beb32bd2ace2944309",
+    "862b1adc4047c680d72bf1bce2457ca50f072687",
+    "d8930e97fcc9ac54e2a8e7cb651caff199bd0d74",
+    "137b03ee0b2e0308c874291765874100d0563740",
+    "7e7ab108d2cf226c9486e8dd4738aa64889cca79",
+    "9d9e9562d62595a74d6937a768e293a5e32909b6",
+    "293554dcf93eaefdaeda48bb36e26ed0d5a5909f",
+    "d89a39bf3cdecf4e456ed2e0700d2d77ba1c77e5",
+    "399806fec54726716c7028f1270b8175c7f4f131",
+    "c0578685727536086d965c7bdd3db34e10943bdb",
+    "aee36c170faa70f215a6ee61e8c011d7ef599ae1",
+    "7b99006ed31e7c90b6a39c0b22c6c44cd6dcde9c",
+    "55b338a82e17e7cf137c1b0ce9a5b6d645bce8e3",
+    "166918859a7d67a3705fc1490e5fe7fae4f4ed85",
+    "43d0ca2b7cb5f3eac21f970a0a1e2a1f282bcf1c",
+    "4a35ccd6eabbdc41ead407938e69dbfe74e9483f",
+    "bc237c5e1f1f091f8fc437aeea1dd2d32023d869",
+    "ffb73fc177306cd85b87834940a26f6194dd4052",
+    "c7aa7e57ca99593650d21f8b335df53bb88f89f0",
+    "58e6679eb7037e62f19256b3d9868fdb797e7762",
+    "e4a0efa8f7f46dd4df1e3d9c5a4015c8e88462d5",
+    "cb38cd9c37d22ab57943abd399fd454ca53a0992",
+    "c7b1b5dc4638efe10db672ca864c1a039c2204ee"
+  ],
+  "completed_at": "2026-10-14T04:55:45.619Z",
+  "dispatched_at": "2026-10-14T04:44:14Z",
+  "evidence_inputs": [
+    "Identity guard delivered and mutation-controlled: negative-control.log (header line names MUTATION reverting the builder_revision rescope) ends '9 failed, 2 passed' and EXIT=1, with the nine ids being all eight test_carrier_revision_tracks_construction_sources parametrisations plus test_carrier_revision_tracks_builder_function; the head arm fails none of them. So the guard fires on the regrowth it was written to catch.",
+    "The added assertions are differential and independent: tests/test_carrier_identity.py captures 'before = measure.builder_revision()', mutates the input (a source file's bytes or the fixture text), then asserts builder_revision() differs; no assertion compares against a value the test handed the code, so none is the moves-together shape.",
+    "Agreement is not closed and is honestly reported: the limited 5,000-cell plasma_to_sample_r is 1.2186816095922636e-12 (>1e-12) and the diverted 5,000 is 1.0249978687933993e-12; the host path departs the independent 50-digit reference by 98.7x more than the device path, so done-when(2)'s floor branch is correctly declined and the kernel repair is filed under follow_ons (nova/biot/polygonanalytic.py, outside the grant).",
+    "The recorded after_suite ran at revision 137b03ee0, three commits before the head; the intervening code change is confined to scripts/analytic_oracle_fixtures/reference_radial_pair.py, a standalone script not imported by tests/test_coupling_build.py, tests/test_carrier_identity.py or tests/test_analytic_oracle_fixture_exterior.py, so the three-file test result is not invalidated by it."
+  ],
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T013636329481-carrier-agreement/manifest.md",
+      "line": 22,
+      "severity": "follow-on",
+      "text": "after_suite records revision 137b03ee0b2e0308c874291765874100d0563740, three commits before the reviewed head 7aa27e2cbfa78755ca73f8beb32bd2ace2944309; a code commit lands after it (d8930e97fcc9ac54e2a8e7cb651caff199bd0d74 adds --top-index to scripts/analytic_oracle_fixtures/reference_radial_pair.py). The changed module is a standalone script outside the import graph of the three tested files, so the delta the arm reports still holds at head, but the arm as recorded does not execute at the head it is presented as covering."
+    }
+  ],
+  "gate_arms_note": "the reviewed node declares readable, completed baseline_suite and after_suite arms (base at 298a2d49, after at 137b03ee0); this review re-ran no gate and read the delta from manifest.md plus base-suite.log and head-suite-final.log in the reviewed run directory.",
+  "item_verdicts": {
+    "diff": "read commit by commit against 298a2d498aa208351ceef4422487ed022c57a7a7: 618a735a6 rescopes builder_revision, c7b1b5dc4/cb38cd9c3/e4a0efa8f/58e6679eb/c7aa7e57c add the radial drivers, 43d0ca2b7/293554dcf/d89a39bf3/137b03ee0 fix cache and control bounds, bc237c5e1 aligns expansion and reduction, d8930e97f adds --top-index, and 4a35ccd6e..7aa27e2cb write the panel and fragment; 9 files, +1422/-11.",
+    "done_when": "clause (1) localisation and independent 50-digit reference delivered (carrier-agreement.html: target 11226/cell 4860, device 1.29164e-21 vs host 1.27457e-19 from the reference, 98.7x farther); (2) neither branch runs since the host path departs reference, so no floor is proposed and the reason is stated; (3) diverted nine-block H200 job 1284958 (worst 1.0249978687933993e-12); (4) identity test with a negative control turning 9 ids red; (5) mesh and ring sources added to CARRIER_SOURCE_PATHS; (6) three-file per-process gate recorded; (7) fragment and figure written.",
+    "goal": "the node goal is to close the host-against-device carrier agreement and guard the carrier identity; the identity guard is delivered and mutation-controlled in tests/test_carrier_identity.py, but the radial agreement is not closed -- the limited 5,000-cell plasma_to_sample_r reads 1.2186816095922636e-12 against the 1e-12 floor and the repair requires nova/biot/polygonanalytic.py, outside the grant, so the node correctly defers it to follow_ons.",
+    "manifest": "read; status complete, 24 commits, baseline_suite and after_suite present with completed true, negative_control_log = negative-control.log, landing and follow_ons present; after_suite revision 137b03ee0 is three commits short of the reviewed head.",
+    "write_paths": "met: the 298a2d49..7aa27e2cb diff touches only the fragment, the figure, six files under scripts/analytic_oracle_fixtures and tests/test_carrier_identity.py, every one inside the declared fence; tests/test_coupling_build.py was in scope and untouched."
+  },
+  "justifications": {
+    "durability": "tests/test_carrier_identity.py:21-51 asserts builder_revision changes when each construction source's bytes change and tests/test_carrier_identity.py:54-72 that a builder-function edit changes it, differential against a captured baseline rather than a value the test supplies, and the negative control reddens 9 of them.",
+    "evidence": "the manifest after_suite and baseline_suite carry the literal three-file per-process command, EXIT and failure ids, and negative-control.log:9 records the 9 ids that redden when the rescope is reverted, but after_suite ran at revision 137b03ee0 rather than the reviewed head.",
+    "fit": "measure.py:425-455 follows the fixtures idiom (module-level source tuples, AST extraction) and no added name, comment or docstring carries a plan, sprint or ticket identifier.",
+    "goal_fidelity": "measure.py:425 fully guards the identity and carrier-agreement.html localises the radial departure, but the agreement itself is not closed -- the radial block stays 1.2186816095922636e-12 against the 1e-12 floor.",
+    "reuse": "the identity extension stays inside its existing owner at scripts/analytic_oracle_fixtures/measure.py:425 and the added definitions are reused through it.",
+    "scope_discipline": "every path in the 298a2d49..7aa27e2cb diff lies inside the declared fence (scripts/analytic_oracle_fixtures, tests/test_carrier_identity.py, the figure directory and the fragment), and no concurrently-fenced nova/equilibrium or nova/biot file is touched."
+  },
+  "plan": "nova:converged-forward-solve",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to close the host-against-device carrier agreement and guard the carrier identity; the identity guard is delivered and mutation-controlled in tests/test_carrier_identity.py, but the radial agreement is not closed -- the limited 5,000-cell plasma_to_sample_r reads 1.2186816095922636e-12 against the 1e-12 floor and the repair requires nova/biot/polygonanalytic.py, outside the grant, so the node correctly defers it to follow_ons.\nVERDICT done_when: clause (1) localisation and independent 50-digit reference delivered (docs/evidence/fragments/converged-forward-solve/carrier-agreement.html: the worst entry is target 11226/cell 4860, device 1.29164e-21 from reference vs host 1.27457e-19, 98.7x farther); (2) neither branch of the either/or is run since the host path departs reference, so no floor is proposed with the reason stated; (3) diverted nine-block H200 job 1284958 recorded in diverted-carriers.json (worst 1.0249978687933993e-12); (4) identity test with a negative control that turns 9 ids red; (5) mesh and ring sources (stencil_mesh.py, plasmagrid.py) added to CARRIER_SOURCE_PATHS; (6) three-file per-process gate recorded; (7) fragment and figure written.\nVERDICT write_paths: met: the 298a2d49..7aa27e2cb diff touches only docs/evidence/fragments/converged-forward-solve/carrier-agreement.html, docs/figures/converged-forward-solve/carrier-agreement/radial-sample.svg, six files under scripts/analytic_oracle_fixtures and tests/test_carrier_identity.py, every one inside the declared fence; tests/test_coupling_build.py was in scope and left untouched.\nVERDICT manifest: read; status complete, 24 commits, baseline_suite (revision 298a2d49, EXIT=1, 8 failure ids) and after_suite (revision 137b03ee0, EXIT=0, 0 failure ids) both present with completed true, negative_control_log = negative-control.log, and landing and follow_ons present; the after_suite revision is 137b03ee0, three commits short of the reviewed head.\nVERDICT diff: read commit by commit against 298a2d498aa208351ceef4422487ed022c57a7a7: 618a735a6 rescopes builder_revision in measure.py, c7b1b5dc4/cb38cd9c3/e4a0efa8f/58e6679eb/c7aa7e57c add the radial inspection and comparison drivers, 43d0ca2b7/293554dcf/d89a39bf3/137b03ee0 fix cache and control bounds, bc237c5e1 aligns expansion and reduction, d8930e97f adds a --top-index selector, and 4a35ccd6e..7aa27e2cb write the panel and fragment; 9 files, +1422/-11.\nCALL_SITES: scripts/analytic_oracle_fixtures/measure.py:503, scripts/analytic_oracle_fixtures/requalify_carriers.py:124, scripts/analytic_oracle_fixtures/requalify_carriers.py:131\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/converged-forward-solve/carrier-agreement.html localises the radial departure to the vectorised host near-field path and scripts/analytic_oracle_fixtures/measure.py:425 fully guards the identity, but the agreement itself is not closed -- the radial block stays 1.2186816095922636e-12 against the 1e-12 floor.\nSCORE evidence: 17\nJUSTIFICATION evidence: the manifest after_suite and baseline_suite carry the literal three-file per-process command, EXIT and failure ids, and negative-control.log:9 records the 9 ids that redden when the rescope is reverted, but after_suite ran at revision 137b03ee0 rather than the reviewed head.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the 298a2d49..7aa27e2cb diff lies inside the declared fence (scripts/analytic_oracle_fixtures, tests/test_carrier_identity.py, the figure directory and the fragment), and no concurrently-fenced nova/equilibrium or nova/biot file is touched.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_carrier_identity.py:21-51 asserts builder_revision changes when each construction source's bytes change and tests/test_carrier_identity.py:54-72 that a builder-function edit changes it, differential against a captured baseline rather than a value the test supplies, and the negative control reddens 9 of them.\nSCORE fit: 16\nJUSTIFICATION fit: measure.py:425-455 follows the fixtures idiom (module-level source tuples, AST extraction) and no added name, comment or docstring carries a plan, sprint or ticket identifier.\nSCORE reuse: 18\nJUSTIFICATION reuse: the identity extension stays inside its existing owner at scripts/analytic_oracle_fixtures/measure.py:425 and the added definitions are reused through it.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T013636329481-carrier-agreement/manifest.md:22 follow-on: after_suite records revision 137b03ee0, three commits before the reviewed head 7aa27e2cb, and a code commit (d8930e97f, a --top-index argument on scripts/analytic_oracle_fixtures/reference_radial_pair.py) lands after it; the changed module is a standalone script outside the three tested files' import graph so the recorded delta still holds, but the arm as recorded does not run at the head it is presented as covering.",
+  "review_kind": "independent review",
+  "review_run_id": "r-20261014T044357446983-review-of-carrier-agreement-7aa27e2cbfa7",
+  "reviewed_base_sha": "298a2d498aa208351ceef4422487ed022c57a7a7",
+  "reviewed_head_sha": "7aa27e2cbfa78755ca73f8beb32bd2ace2944309",
+  "reviewed_revision": "7aa27e2cbfa78755ca73f8beb32bd2ace2944309",
+  "reviewed_run_id": "r-20261014T013636329481-carrier-agreement",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/carrier-agreement",
+  "reviewer_node": "review-of-carrier-agreement-7aa27e2cbfa7",
+  "reviewer_run_id": "r-20261014T044357446983-review-of-carrier-agreement-7aa27e2cbfa7",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 16,
+    "goal_fidelity": 15,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "section": "\u00a74",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T05:05:00Z",
+  "total": 103,
+  "verdict": "pass-with-follow-ons"
+}

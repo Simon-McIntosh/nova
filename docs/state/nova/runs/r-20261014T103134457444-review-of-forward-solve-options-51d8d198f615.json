@@ -589,16 +589,11 @@
     "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
     "process_signalled": false,
     "process_withheld": "process is not alive",
-    "scratch_bytes": 5040,
+    "scratch_bytes": null,
     "scratch_path": "/tmp/reckon-crew-scratch/r-20261014T103134457444-review-of-forward-solve-options-51d8d198f615",
-    "scratch_removed": true,
-    "scratch_removed_paths": [
-      {
-        "bytes": 5040,
-        "path": "/tmp/reckon-crew-scratch/r-20261014T103134457444-review-of-forward-solve-options-51d8d198f615"
-      }
-    ],
-    "scratch_withheld": "",
+    "scratch_removed": false,
+    "scratch_removed_paths": [],
+    "scratch_withheld": "scratch directory is no longer present",
     "worktree_audit": {
       "counts": {
         "dirty": 0,
@@ -617,7 +612,8 @@
         }
       ]
     },
-    "worktree_released": true
+    "worktree_released": false,
+    "worktree_withheld": "tree is no longer available"
   },
   "resume_waiver": null,
   "review": {

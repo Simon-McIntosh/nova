@@ -1,5 +1,6 @@
 """Fixed-shape candidate forward map with dense interior and bounded cut rows."""
 
+from dataclasses import dataclass
 from typing import NamedTuple
 
 import jax
@@ -19,8 +20,24 @@ class LeanState(NamedTuple):
     root_status: jax.Array
     cut_count: jax.Array
     booking_status: jax.Array
+    band_status: jax.Array
     topology_valid: jax.Array
     topology_qualified: jax.Array
+
+
+@jax.tree_util.register_dataclass
+@dataclass(frozen=True)
+class MixedField:
+    """Bell jets only in the gathered window, plus cellwise Gauss coefficients."""
+
+    cached: fixed_points._CachedField
+    coefficient: jax.Array
+
+    def evaluate(self, point):
+        return self.cached.evaluate(point)
+
+    def sampled_coefficient(self, geometry):
+        return self.coefficient
 
 
 def apply(
@@ -29,6 +46,8 @@ def apply(
     jets,
     window,
     rule,
+    fit_inverse,
+    sample_design,
     geometry,
     profile,
     seeds,
@@ -40,8 +59,9 @@ def apply(
     axis_sign,
 ):
     """Return one live connected-support map evaluation at fixed carrier shape."""
-    nodal = jets.gather(moments)
-    field = fixed_points.field_from_jets(nodal, jets.sample_index, jets.mesh)
+    cached = fixed_points._CachedField(
+        window.mesh, window.lookup, window.rows, moments, window.exterior
+    )
     roots = fixed_points.solve(
         window,
         moments,
@@ -50,29 +70,42 @@ def apply(
         jnp.median(geometry.pitch),
         axis_sign,
     )
+    gauss_flux = values.apply(moments).reshape(rule.points.shape[:-1])
+    gauss_coefficient = jnp.einsum("nkq,nq->nk", fit_inverse, gauss_flux)
+    slots = window.lookup[jets.sample_index]
+    complete = jnp.all(slots >= 0, axis=1)
+    safe_slots = jnp.maximum(slots, 0)
+    band_values = window.exterior[safe_slots, 0] + jnp.einsum(
+        "nscm,cm->ns", window.rows[safe_slots, ..., 0], moments
+    )
+    band_coefficient = jnp.einsum("nks,ns->nk", geometry.fit_inverse, band_values)
+    coefficient = jnp.where(complete[:, None], band_coefficient, gauss_coefficient)
+    field = MixedField(cached, coefficient)
     reading = topology.read_at_stationary_points(
         field, geometry, convention, policy, roots
     )
-    gauss_flux = values.apply(moments).reshape(rule.points.shape[:-1])
     full = reading.membership >= 1 - 1e-14
     interior = interior_moments(
         rule, gauss_flux, profile, reading.axis_flux, reading.boundary_flux, full
     )
-    samples = nodal[jets.sample_index, 0]
-    centre = jax.vmap(field.cell_value)(
-        jnp.arange(len(geometry.centre)), geometry.centre
+    samples = jnp.where(
+        complete[:, None],
+        band_values,
+        jnp.einsum("nsk,nk->ns", sample_design, coefficient),
     )
-    samples = samples.at[:, 0].set(centre)
     cut = cut_moments(
         samples, reading, geometry, profile, convention.sigma, cut_capacity
     )
     unscaled = interior + cut.moments
     raw_current = jnp.sum(unscaled[:, 0])
+    cut_cells = (reading.membership > 0) & (reading.membership < 1 - 1e-14)
+    missing_band = jnp.any(cut_cells & ~complete)
     valid = (
         jnp.all(roots.valid)
         & reading.valid
         & reading.qualified
         & (cut.status == int(BookingStatus.VALID))
+        & ~missing_band
         & jnp.isfinite(raw_current)
         & (raw_current != 0)
     )
@@ -86,6 +119,7 @@ def apply(
         roots.status,
         cut.cut_count,
         cut.status,
+        jnp.where(missing_band, 1, 0),
         reading.valid,
         reading.qualified,
     )

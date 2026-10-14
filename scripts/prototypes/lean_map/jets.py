@@ -54,7 +54,12 @@ def gather_window(jet_map, geometry, membership, roots, *, margin_pitches=4.0):
     distance = np.min(np.linalg.norm(centre[:, None] - points[None], axis=-1), axis=1)
     fraction = np.asarray(membership)
     boundary_band = (fraction > 0) & (fraction < 1 - 1e-14)
-    window_cells = boundary_band | (distance <= margin_pitches * pitch)
+    live_edges = (
+        np.arange(geometry.neighbour.shape[1])[None]
+        < np.asarray(geometry.vertex_count)[:, None]
+    )
+    wall_band = np.any((np.asarray(geometry.neighbour) < 0) & live_edges, axis=1)
+    window_cells = boundary_band | wall_band | (distance <= margin_pitches * pitch)
     selected = np.unique(np.asarray(jet_map.sample_index)[window_cells])
     needed = len(selected)
     capacity = int(np.ceil(1.25 * needed)) + 16
@@ -73,6 +78,7 @@ def gather_window(jet_map, geometry, membership, roots, *, margin_pitches=4.0):
     )
     return cache, {
         "boundary_cells": int(np.sum(boundary_band)),
+        "wall_cells": int(np.sum(wall_band)),
         "root_margin_pitches": margin_pitches,
         "required_rows": needed,
         "capacity": capacity,

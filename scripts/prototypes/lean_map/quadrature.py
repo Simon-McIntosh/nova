@@ -82,6 +82,21 @@ def interior_moments(rule, flux, profile, axis_flux, boundary_flux, full):
     )
 
 
+def quadratic_fit(rule, geometry):
+    """Return fixed least-squares and sample design matrices in pitch units."""
+    centre = np.asarray(geometry.centre)
+    pitch = np.asarray(geometry.pitch)
+
+    def design(points):
+        local = (np.asarray(points) - centre[:, None]) / pitch[:, None, None]
+        x, y = local[..., 0], local[..., 1]
+        return np.stack((np.ones_like(x), x, y, x * x, x * y, y * y), axis=-1)
+
+    gauss = design(rule.points)
+    samples = design(geometry.sample_points)
+    return jnp.asarray(np.linalg.pinv(gauss)), jnp.asarray(samples)
+
+
 def cut_moments(psi, reading, geometry, profile, sigma, capacity):
     """Gather one fixed cut batch and refuse any state exceeding its capacity."""
     full = reading.membership >= 1 - 1e-14

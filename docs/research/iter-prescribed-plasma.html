@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="iter-prescribed-plasma">
+  <meta name="plan-title" content="ITER plasma prescribed from DINA">
+  <meta name="plan-summary" content="Closed-boundary current prescription and independent plasma-flux linkage measurements on ITER 105014/1">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-evidence-for" content="iter-passive-plasma-circuit">
+  <meta name="plan-verifies" content="iter-passive-plasma-circuit#s2">
+  <meta name="plan-source" content="DINA-IMAS ITER 105014/1, DD 3.38.1">
+  <meta name="plan-source-quality" content="primary">
+  <meta name="plan-tags" content="iter,machine-description,equilibrium">
+  <title>ITER plasma prescribed from DINA | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p class="eyebrow">Execution evidence</p>
+      <h1>ITER plasma prescribed from DINA</h1>
+      <p class="lead">The current prescription follows DINA's centre to 4.14 mm and its plasma flux to 2.17% at the mapped CS/PF coils and 0.41% at flux loops; VS3 still needs a section mapping.</p>
+    </header>
+
+    <section id="source-and-method">
+      <h2>Source and method</h2>
+      <p>Read ITER 105014/1 through imas-python with its native Data Dictionary 3.38.1. The equilibrium has 2,027 slices; 867 carry at least 0.1 MA of absolute plasma current, from 1.22 to 66.63 s. Each active slice supplies a 65 by 129 poloidal-flux map, 50 samples of the two flux-function derivatives, a declared plasma current, magnetic axis, current centre, and a separatrix outline. The last pressure-gradient sample is nonfinite in otherwise usable profiles. The profile interpolant uses the finite samples and extrapolates to the edge.</p>
+      <p>The prescription evaluates the stored pressure and field-function gradients at each grid point. DINA's derivatives are against total flux; multiplying them by 2π puts them in the flux-per-radian coordinate of the toroidal-current formula. A simple closed separatrix enclosing the magnetic axis defines the current mask. An open or invalid outline is replaced by the outermost axis-enclosing closed contour of DINA's flux map, searched inward from 99.9% of the declared axis-to-boundary span. The endpoint gap and boundary source are retained per slice. Cell currents are integrated over the 93.75 mm square grid and multiplied by the ratio of declared to integrated current. The same cell currents feed axisymmetric ring Green functions at point filaments or averaged over finite conductor sections.</p>
+      <figure>
+        <img src="/nova/figures/iter-prescribed-plasma/current-boundary.svg" alt="Three ITER plasma current contour panels with the selected closed boundary, stored separatrix outline, and current centroids">
+        <figcaption>At 1.22, 35.33 and 66.63 s, blue contours mark 20%, 40%, 60% and 80% of each slice's maximum absolute toroidal current density. The ochre line is the selected closed boundary; the dashed grey line is DINA's supplied outline. Blue dots are prescribed current centroids and black crosses are DINA's. The first and last panels use a reconstructed closed flux surface because their supplied separatrices are open. The panels share the machine's poloidal geometry and omit plot axes.</figcaption>
+      </figure>
+    </section>
+
+    <section id="current-check">
+      <h2>Current and boundary check</h2>
+      <table>
+        <thead><tr><th>Measure</th><th>Result over 867 active slices</th><th>Criterion</th></tr></thead>
+        <tbody>
+          <tr><td>Prescribed slices</td><td>867 of 867; no failed prescriptions</td><td>Every active slice</td></tr>
+          <tr><td>Boundary fallback</td><td>335 reconstructed closed surfaces; 532 valid stored separatrices</td><td>Flag every replacement</td></tr>
+          <tr><td>Current scale</td><td>Median 1.0426; 5th–95th percentile 1.0046–1.0497; range 0.9824–1.0605</td><td>Report distribution</td></tr>
+          <tr><td>Largest centroid coordinate error</td><td>4.14 mm; 95th percentile 3.27 mm</td><td>Less than one 93.75 mm grid cell</td></tr>
+        </tbody>
+      </table>
+      <p>The scale reflects the stored profile derivatives, boundary discretisation and DINA's declared current on this grid. It is recorded as a measurement rather than silently folded into the source functions.</p>
+      <figure>
+        <img src="/nova/figures/iter-prescribed-plasma/scale-centroid.svg" alt="Current scale factor and radial and vertical centroid residuals against scenario time">
+        <figcaption>The upper trace is the scale applied to the raw cell currents. The lower traces are prescribed minus DINA current-centre coordinates; dotted grey bounds show one grid cell in either direction. Both coordinate errors remain far inside that bound.</figcaption>
+      </figure>
+    </section>
+
+    <section id="linked-flux-check">
+      <h2>Independent linked-flux check</h2>
+      <p>At 24 indices spanning the active interval, DINA's own <code>profiles_2d.j_tor</code> multiplied by grid-cell area supplies an independent current vector. Its C-order flattening is confirmed by the 24 by 8,385 <code>em_coupling.mutual_loops_grid</code> matrix: the alternate flattening gives multi-weber errors, whereas the chosen order tracks the direct ring calculation. DINA's 8,385 by 15 <code>mutual_grid_active</code> matrix gives plasma-only flux at active conductors. The first 11 columns map to CS3U, CS2U, CS1, CS2L, CS3L and PF1–PF6; CS1's column links both of its stored sections, so their predicted fluxes are summed. This supplies a coil reference even where the 2-D map stops at R = 3 m.</p>
+      <table>
+        <thead><tr><th>Independent DINA reference</th><th>Comparisons</th><th>Median absolute relative residual</th><th>Maximum</th><th>Stated tolerance</th></tr></thead>
+        <tbody>
+          <tr><td>Eleven CS/PF coil families</td><td>264</td><td>0.382%</td><td>2.168%</td><td>2.5%</td></tr>
+          <tr><td>Twenty-four magnetics flux loops</td><td>576</td><td>0.0915%</td><td>0.406%</td><td>0.5%</td></tr>
+        </tbody>
+      </table>
+      <p>Residuals divide by the larger of one weber and the magnitude of DINA's plasma-only flux, so the small-current tail cannot create an unbounded percentage from a near-zero denominator. The flux-loop control also checks that the interpolation instrument sees known total flux: the stored map and magnetics readings differ by a median −0.00152 Wb across these comparisons, although their largest difference is 0.487 Wb at 1.22 s.</p>
+      <figure>
+        <img src="/nova/figures/iter-prescribed-plasma/linked-flux-residual.svg" alt="Relative plasma linked-flux residuals at coil families and magnetics loops against scenario time">
+        <figcaption>Every point is a predicted plasma flux minus DINA's grid-mutual plasma flux, normalised by the larger of one weber and the reference magnitude. Blue denotes the mapped CS/PF coil families and ochre the magnetics flux loops. Twenty-four scenario indices were sampled for the independent comparison.</figcaption>
+      </figure>
+    </section>
+
+    <section id="diagnostic-and-limits">
+      <h2>Map subtraction and remaining mapping</h2>
+      <p>A separate diagnostic subtracts finite-section coil and passive contributions reconstructed from the scenario's <code>pf_active</code> and <code>pf_passive</code> geometry and currents from its total ψ map. That route gives a median 1.87% loop residual and a 72.65% maximum, while the VS3 positions inside the map give a 5.40% median and 90.71% maximum. These larger residuals are not ascribed to the plasma prescription: the independent grid mutuals above bound that prescription much more tightly. The geometric subtraction and DINA's stored conductor coupling therefore remain distinct instruments, especially in the low-current tail.</p>
+      <p>VS3 has two elements in this scenario's <code>pf_active</code> IDS, while DINA's active-grid coupling carries four additional columns after the mapped CS/PF columns. Their section-level correspondence is unresolved. The current API can evaluate a sectioned VS3 conductor set when its geometry is supplied; the independent DINA comparison for those four columns needs the conductor-set mapping.</p>
+    </section>
+
+    <section id="negative-control">
+      <h2>Vertical-shift negative control</h2>
+      <p>At 5.93 s and the magnetics loop at (R, Z) = (5.7547544, 5.0640967) m, moving the prescribed distribution upward by 1 cm changes its linked flux by −0.0183351 Wb. The local vertical-gradient prediction is −0.0183045 Wb, a 0.167% difference. The focused mutation run removed the displacement from the source coordinates: the same test then measured zero change against a predicted 0.0067701 Wb and failed. The mutation was removed after its failing log was retained.</p>
+    </section>
+
+    <section id="reproduction">
+      <h2>Reproduction and artifacts</h2>
+      <p><code>scripts/iter_prescribed_plasma/measure.py</code> reads the native IDSs and writes the slice census, individual linked-flux comparisons and summary to <code>/home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit/gate-logs/iter-prescribed-plasma/summary.json</code>. The complete run log is <code>scenario-final.log</code> in that directory, headed by revision <code>44dc368946730f6803d14ca8d408df242db6eec0</code> and ending in <code>EXIT=0</code>. The one-centimetre mutation's red log is <code>vertical-shift-mutation.log</code>, ending in <code>EXIT=1</code> with <code>test_vertical_shift_follows_flux_gradient</code> as the failing test. The five focused tests of the prescription and generic linkage passed.</p>
+    </section>
+  </main>
+</body>
+</html>

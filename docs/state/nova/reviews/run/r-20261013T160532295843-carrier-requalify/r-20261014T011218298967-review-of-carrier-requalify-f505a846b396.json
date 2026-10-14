@@ -1,0 +1,111 @@
+{
+  "added_failure_count": 0,
+  "added_failure_derivation": "Reviewed baseline_suite and after_suite are both null in the reviewed run's manifest (classification.json manifest.data has baseline_suite=null, after_suite=null), because the node's write paths reach no test path: scripts/analytic_oracle_fixtures, the evidence fragment and docs/figures carry no test-role arm, so no head-minus-base test-id set exists and the derived added_failure_count is 0 with added_failure_ids []. The gates the run did produce are measurement gates, not test-suite arms: gate-rows-5000.log closes EXIT=0 (ROW_EXIT kind=limited cells=5000 code=0, kind=diverted code=0) and gate-attribution.log closes EXIT=0 (five ATTRIB_ROW lines, no test id). The absence is read from the manifest fields being present-and-null, not from a missing file.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "scripts/analytic_oracle_fixtures/measure.py:420 -- builder_revision now hashes _polygonanalytic_source() (nova/biot/polygonanalytic.py) and coupling_build.__file__, dropping the fixture's own bytes; the digest feeds cache_identity, consumed by cached_machine at measure.py:765",
+    "identity-refusal.log -- REVISION=5ecafc760, kernel_source .../nova/biot/polygonanalytic.py, builder_revision_head ae1403eb01611aaf vs builder_revision_pre_repair_kernel 26844a3699fae418, REFUSED True, EXIT=0",
+    "requalify-carriers.json -- builder_revision ae1403eb01611aaf, tolerance 1e-12, one rung limited:5000 realised 5167, worst_block plasma_to_sample_r 1.2186816095922636e-12, within_tolerance false, host wall 2081.2850875165313 s / 927577847 bytes vs device 919.758650071919 s / 1850592079 bytes",
+    "gate-attribution.log -- diverted 550-cell legacy map_relative_sup 0.1973269787169759 at 63411377f, 67e6da3cf and acaea2c9c, EXIT=0; the value moves to 0.19464650241785292 at f68870f99 per the fragment",
+    "docs/evidence/fragments/converged-forward-solve/carrier-requalify.html -- plan-verdict pass-with-follow-on, plan-verifies converged-forward-solve#s4, four outstanding items stated"
+  ],
+  "blocking_finding_count": 0,
+  "call_site_count": 10,
+  "call_sites": [
+    "scripts/analytic_oracle_fixtures/measure.py:465",
+    "scripts/accuracy_cost_ladder/measure.py:176",
+    "scripts/accuracy_cost_ladder/measure.py:226",
+    "scripts/device_kernel_port/measure.py:461",
+    "scripts/device_kernel_port/measure.py:488",
+    "scripts/device_kernel_port/localize_far_contour.py:490",
+    "scripts/dual_basin_fixtures/measure.py:179",
+    "scripts/dual_basin_fixtures/build_diverted_fixture.py:246",
+    "scripts/density_moment_projection/measure.py:431",
+    "scripts/moment_route_adjudication/measure.py:371"
+  ],
+  "commits_read": [
+    "3dfef79b1472bbc0da9e1b8a8031c921b97fdb63",
+    "5f7456b62",
+    "b83358808",
+    "5ecafc760",
+    "b80eb6bc6",
+    "327a3c074",
+    "f0659cbcd",
+    "3084de30a",
+    "60e976977",
+    "d36c7a1f7",
+    "6a6a05810",
+    "f505a846b396b8dde65fffbb0ab008da25d6e9af"
+  ],
+  "completed_at": "2026-10-14T01:21:12.442Z",
+  "dispatched_at": "2026-10-14T01:12:39Z",
+  "evidence_inputs": [
+    "The identity rescope is correct on its own terms: measure.py:408 _polygonanalytic_source resolves Path(__file__).resolve().parents[2] / POLYGONANALYTIC_SOURCE to the repository's nova/biot/polygonanalytic.py, and measure.py:420 hashes it with coupling_build.__file__; identity-refusal.log shows the pre-repair kernel (digest 14573967e239d850) and HEAD (0425598d0de19a99) produce distinct builder_revisions, so an old-kernel carrier is a different carrier.",
+    "The 1e-12 floor is met on eight of nine coupling blocks and missed on one: requalify-carriers.json limited:5000 worst_block plasma_to_sample_r 1.2186816095922636e-12, within_tolerance false; the block carries the rung's headline, so done-when(2)'s 'within 1e-12 norm-relative on every block' is unmet and the fragment states this plainly rather than rounding it.",
+    "Coverage of done-when(2)/(3) is partial and honestly recorded: only limited:5000 has a host-against-device agreement (diverted:5000 hit job 1284903's 01:15:00 limit while assembling the diverted carrier); the 10,000-cell rung was built on the device builder only (job 1284803, wall 3,209.5846427511424 s, store 3,526,603,966 bytes) and its diverted case is refused at stencil conditioning ring 475/cell 535 condition 1.758e+03, so no 10,000 agreement and no diverted 10,000 row exist.",
+    "The attribution (done-when 4) is delivered by measurement, not bisect: all three named revisions read 0.1973269787169759, and two further revisions (8fe66e390, c3c95a467) and a bracketing pair (1b68b8099, f68870f99) locate the mover at f68870f99, the exterior exact-support merge -- an intended accuracy change, value stable to 1.2e-16 after it.",
+    "scripts/analytic_oracle_fixtures/requalify_carriers.py:52 _relative is a symmetric norm-relative (max|a-b| / max(max|a|, max|b|, tiny)), which is the measure done-when(2) names; it is not the pointwise relative_sup at scripts/ring_attribution/localize_support_limit.py:112."
+  ],
+  "findings": [
+    {
+      "file": "scripts/analytic_oracle_fixtures/requalify_carriers.py",
+      "line": 170,
+      "severity": "follow-on",
+      "text": "the 5,000-cell limited rung's plasma_to_sample_r block reads 1.2186816095922636e-12, about 22 percent above the done-when's 1e-12 floor, so within_tolerance is false and done-when(2)'s 'within 1e-12 norm-relative on every block' is unmet; the node records it under follow_ons (a) and does not round it down."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T160532295843-carrier-requalify/manifest.md",
+      "line": 9,
+      "severity": "follow-on",
+      "text": "changed_paths lists three files but the landed diff is four -- scripts/analytic_oracle_fixtures/attribute_diverted_map.py (a landed +83-line harness) is omitted -- and the commits list omits b80eb6bc6 (fix(oracle): build the certificate carrier and measure a revision without a worktree), so the manifest understates the landed change."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T160532295843-carrier-requalify/manifest.md",
+      "line": 2,
+      "severity": "follow-on",
+      "text": "orientation_base_sha is transcribed as 3dfef79b1472bbc0da9e1b8f8031c921b97fdb63, which resolves to no object in the repository; the actual base commit is 3dfef79b1472bbc0da9e1b8a8031c921b97fdb63 (differing at the ...b8f80 vs ...b8a80 digit), so the recorded base cannot be checked as written."
+    }
+  ],
+  "gate_arms_note": "the reviewed node's write paths reach no test path, so it declares no baseline_suite/after_suite test arm; this review did not re-run any gate; the identity, agreement, row and attribution figures were read from identity-refusal.log, requalify-carriers.json and gate-attribution.log in the reviewed run directory.",
+  "item_verdicts": {
+    "diff": "read commit by commit against 3dfef79b1472bbc0da9e1b8a8031c921b97fdb63: 5f7456b62 rescopes the identity in measure.py, b83358808/327a3c074/b80eb6bc6/60e976977 add and fix the carrier and attribution drivers, 3084de30a/f0659cbcd/5ecafc760/6a6a05810/d36c7a1f7/f505a846b write the fragment; four files changed (measure.py +15/-6, requalify_carriers.py +185, attribute_diverted_map.py +83, fragment +306), matching the manifest changed_paths minus the omitted driver.",
+    "done_when": "clause (1) identity rescope delivered (identity-refusal.log: builder_revision_head ae1403eb01611aaf vs pre-repair 26844a3699fae418, REFUSED True); (2) agreement delivered at limited:5000 only, plasma_to_sample_r 1.2186816095922636e-12 misses the 1e-12 floor and the 10,000 host build was waived by a coordinator ruling; (3) rows at 5,000 both cases, 10,000 limited only (diverted refused at stencil conditioning); (4) attribution delivered, mover f68870f99; (5) fragment written, audit-doc reported OK.",
+    "goal": "the node goal is to requalify the 5,000 and 10,000-cell certificate carriers on the repaired kernel; scripts/analytic_oracle_fixtures/measure.py:420 makes the carrier identity hash the packed polygon kernel and the coupling source so an old-kernel carrier is refused, and the 5,000-cell limited carrier is rebuilt on both paths, but the 10,000-cell host build was waived and the 5,000 agreement misses the floor on one block.",
+    "manifest": "read: status complete, ten commits, tests and test_logs recorded, negative_control_log = identity-refusal.log, landing and follow_ons present, but changed_paths omits attribute_diverted_map.py and the commits list omits b80eb6bc6, and baseline_suite/after_suite are both null.",
+    "write_paths": "met: the 3dfef79b..f505a846b diff touches only scripts/analytic_oracle_fixtures/measure.py, scripts/analytic_oracle_fixtures/requalify_carriers.py, scripts/analytic_oracle_fixtures/attribute_diverted_map.py and docs/evidence/fragments/converged-forward-solve/carrier-requalify.html, all inside the declared fence; docs/figures/converged-forward-solve/carrier-requalify was in scope and untouched."
+  },
+  "justifications": {
+    "durability": "no test was added (the fence reaches no test path), and the existing tests/test_coupling_build.py:151 only asserts host_identity[\"builder_revision\"] == device_identity[\"builder_revision\"], which holds under either scoping, so nothing fails if the rescope in measure.py:420 regresses; the negative control is a one-off identity_check.py script, not a durable guard.",
+    "evidence": "identity-refusal.log records the refusal, requalify-carriers.json records the limited:5000 rung (worst plasma_to_sample_r 1.2186816095922636e-12, within False) and gate-attribution.log records the three attribution rows, all honest to the digit, but the diverted:5000 and 10,000-cell agreement rows are absent and the reviewed manifest declares baseline_suite/after_suite null so no test-arm delta is produced.",
+    "fit": "scripts/analytic_oracle_fixtures/requalify_carriers.py and attribute_diverted_map.py follow the fixtures package idiom (module docstring, configure_dtypes before arrays, assert jax_enable_x64, per-path JAX_PLATFORMS) and no added name, comment or docstring carries a plan, sprint or ticket identifier.",
+    "goal_fidelity": "scripts/analytic_oracle_fixtures/measure.py:420 rescopes builder_revision to the packed polygon kernel and the coupling source (REFUSED ae1403eb01611aaf vs 26844a3699fae418, identity-refusal.log), and the 5,000-cell carrier is rebuilt both paths, but the 10,000-cell host agreement was waived and the 5,000 agreement misses the 1e-12 floor, so the goal is delivered only in part.",
+    "reuse": "the added definitions extend existing owners -- measure.py:408 _polygonanalytic_source consolidates the POLYGONANALYTIC_SOURCE path already used at measure.py:1172, and requalify_carriers reuses cached_machine, certificate._case and BUILDER_HOST/DEVICE; a search for a norm-relative or host-vs-device block-agreement owner across scripts/ and nova/ found none, and the near neighbour relative_sup (scripts/ring_attribution/localize_support_limit.py:112) is pointwise-relative-to-reference, a different measure from the symmetric _relative at requalify_carriers.py:52.",
+    "scope_discipline": "every path in the 3dfef79b..f505a846b diff is inside the declared fence (scripts/analytic_oracle_fixtures, the fragment), no file in the concurrent wire-current-book scope (tests/, nova/equilibrium, scripts/prototypes) is touched, and docs/figures was in scope and untouched."
+  },
+  "plan": "nova:converged-forward-solve",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to requalify the 5,000 and 10,000-cell certificate carriers on the repaired kernel; scripts/analytic_oracle_fixtures/measure.py:420 makes the carrier identity hash the packed polygon kernel and the coupling source so an old-kernel carrier is refused, and the 5,000-cell limited carrier is rebuilt on both paths, but the 10,000-cell host build was waived and the 5,000 agreement misses the floor on one block.\nVERDICT done_when: clause (1) identity rescope delivered (identity-refusal.log: builder_revision_head ae1403eb01611aaf vs pre-repair 26844a3699fae418, REFUSED True); (2) agreement delivered at limited:5000 only, plasma_to_sample_r 1.2186816095922636e-12 misses the 1e-12 floor and the 10,000 host build was waived by a coordinator ruling; (3) rows at 5,000 both cases, 10,000 limited only (diverted refused at stencil conditioning); (4) attribution delivered, mover f68870f99; (5) fragment written, audit-doc reported OK.\nVERDICT write_paths: met: the 3dfef79b..f505a846b diff touches only scripts/analytic_oracle_fixtures/measure.py, scripts/analytic_oracle_fixtures/requalify_carriers.py, scripts/analytic_oracle_fixtures/attribute_diverted_map.py and docs/evidence/fragments/converged-forward-solve/carrier-requalify.html, all inside the declared fence; docs/figures was in scope and untouched.\nVERDICT manifest: read: status complete, ten commits, tests and test_logs recorded, negative_control_log = identity-refusal.log, landing and follow_ons present, but changed_paths omits attribute_diverted_map.py and the commits list omits b80eb6bc6, and baseline_suite/after_suite are both null.\nVERDICT diff: read commit by commit against 3dfef79b1472bbc0da9e1b8a8031c921b97fdb63: 5f7456b62 rescopes the identity in measure.py, b83358808/327a3c074/b80eb6bc6/60e976977 add and fix the carrier and attribution drivers, 3084de30a/f0659cbcd/5ecafc760/6a6a05810/d36c7a1f7/f505a846b write the fragment; four files changed (measure.py +15/-6, requalify_carriers.py +185, attribute_diverted_map.py +83, fragment +306).\nCALL_SITES: scripts/analytic_oracle_fixtures/measure.py:465, scripts/accuracy_cost_ladder/measure.py:176, scripts/accuracy_cost_ladder/measure.py:226, scripts/device_kernel_port/measure.py:461, scripts/device_kernel_port/measure.py:488, scripts/device_kernel_port/localize_far_contour.py:490, scripts/dual_basin_fixtures/measure.py:179, scripts/dual_basin_fixtures/build_diverted_fixture.py:246, scripts/density_moment_projection/measure.py:431, scripts/moment_route_adjudication/measure.py:371\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: scripts/analytic_oracle_fixtures/measure.py:420 rescopes builder_revision to the packed polygon kernel and the coupling source (REFUSED ae1403eb01611aaf vs 26844a3699fae418, identity-refusal.log), and the 5,000-cell carrier is rebuilt both paths, but the 10,000-cell host agreement was waived and the 5,000 agreement misses the 1e-12 floor, so the goal is delivered only in part.\nSCORE evidence: 16\nJUSTIFICATION evidence: identity-refusal.log records the refusal, requalify-carriers.json records the limited:5000 rung (worst plasma_to_sample_r 1.2186816095922636e-12, within False) and gate-attribution.log records the three attribution rows, all honest to the digit, but the diverted:5000 and 10,000-cell agreement rows are absent and the reviewed manifest declares baseline_suite/after_suite null so no test-arm delta is produced.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the 3dfef79b..f505a846b diff is inside the declared fence (scripts/analytic_oracle_fixtures, the fragment), no file in the concurrent wire-current-book scope (tests/, nova/equilibrium, scripts/prototypes) is touched, and docs/figures was in scope and untouched.\nSCORE durability: 8\nJUSTIFICATION durability: no test was added (the fence reaches no test path), and the existing tests/test_coupling_build.py:151 only asserts host_identity[\"builder_revision\"] == device_identity[\"builder_revision\"], which holds under either scoping, so nothing fails if the rescope in measure.py:420 regresses; the negative control is a one-off identity_check.py script, not a durable guard.\nSCORE fit: 18\nJUSTIFICATION fit: scripts/analytic_oracle_fixtures/requalify_carriers.py and attribute_diverted_map.py follow the fixtures package idiom (module docstring, configure_dtypes before arrays, assert jax_enable_x64, per-path JAX_PLATFORMS) and no added name, comment or docstring carries a plan, sprint or ticket identifier.\nSCORE reuse: 18\nJUSTIFICATION reuse: the added definitions extend existing owners -- measure.py:408 _polygonanalytic_source consolidates the POLYGONANALYTIC_SOURCE path already used at measure.py:1172, and requalify_carriers reuses cached_machine, certificate._case and BUILDER_HOST/DEVICE; a search for a norm-relative or host-vs-device block-agreement owner across scripts/ and nova/ found none, and the near neighbour relative_sup (scripts/ring_attribution/localize_support_limit.py:112) is pointwise-relative-to-reference, a different measure from the symmetric _relative at requalify_carriers.py:52.\nFINDING scripts/analytic_oracle_fixtures/requalify_carriers.py:170 follow-on: the 5,000-cell limited rung's plasma_to_sample_r block reads 1.2186816095922636e-12, about 22 percent above the done-when's 1e-12 floor, so within_tolerance is false and done-when(2)'s 'within 1e-12 norm-relative on every block' is unmet; the node records it under follow_ons (a) and does not round it down.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T160532295843-carrier-requalify/manifest.md:9 follow-on: changed_paths lists three files but the landed diff is four -- scripts/analytic_oracle_fixtures/attribute_diverted_map.py (a landed +83-line harness) is omitted -- and the commits list omits b80eb6bc6 (fix(oracle): build the certificate carrier and measure a revision without a worktree), so the manifest understates the landed change.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T160532295843-carrier-requalify/manifest.md:2 follow-on: orientation_base_sha is transcribed as 3dfef79b1472bbc0da9e1b8f8031c921b97fdb63, which resolves to no object in the repository; the actual base commit is 3dfef79b1472bbc0da9e1b8a8031c921b97fdb63 (differing at the ...b8f80 vs ...b8a80 digit), so the recorded base cannot be checked as written.\n",
+  "review_kind": "independent review",
+  "review_run_id": "r-20261014T011218298967-review-of-carrier-requalify-f505a846b396",
+  "reviewed_base_sha": "3dfef79b1472bbc0da9e1b8a8031c921b97fdb63",
+  "reviewed_head_sha": "f505a846b396b8dde65fffbb0ab008da25d6e9af",
+  "reviewed_revision": "f505a846b396b8dde65fffbb0ab008da25d6e9af",
+  "reviewed_run_id": "r-20261013T160532295843-carrier-requalify",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/carrier-requalify",
+  "reviewer_node": "review-of-carrier-requalify-f505a846b396",
+  "reviewer_run_id": "r-20261014T011218298967-review-of-carrier-requalify-f505a846b396",
+  "scores": {
+    "durability": 8,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 14,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "section": "\u00a74",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T01:30:00Z",
+  "total": 93,
+  "verdict": "pass-with-follow-ons"
+}

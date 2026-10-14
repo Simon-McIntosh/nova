@@ -252,12 +252,15 @@ def run(kind, cells, cache, out):
             float(jnp.max(jnp.abs(exterior + exact_image - analytic))) / span
         )
     rows = {}
+    moment_scale = jnp.stack(
+        (jnp.ones_like(geometry.pitch), geometry.pitch, geometry.pitch), axis=-1
+    )
     for label, moments in candidates.items():
         mapped = image(operator, moments)
         jax.block_until_ready(mapped)
         rows[label] = dict(
             moment_relative_sup=float(
-                jnp.max(jnp.abs(moments - exact_array))
+                jnp.max(jnp.abs((moments - exact_array) / moment_scale))
                 / jnp.max(jnp.abs(exact_array[:, 0]))
             ),
             flux_difference_from_exact_booking=float(

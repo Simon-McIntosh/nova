@@ -310,7 +310,18 @@ def main():
             lambda state: equation(operator, state, *arguments), (state,), (direction,)
         )
         errors = []
-        difference_steps = (1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8)
+        difference_steps = (
+            1e-3,
+            1e-4,
+            1e-5,
+            1e-6,
+            1e-7,
+            1e-8,
+            1e-9,
+            1e-10,
+            1e-11,
+            1e-12,
+        )
         for epsilon in difference_steps:
             central = (
                 equation(operator, state + epsilon * direction, *arguments)

@@ -52,7 +52,7 @@ def _save_wall(booking, frozen, local, factor, output):
                 "iteration_wall_ms"
             ][-1],
         ),
-        ("coloured local derivative", lambda key: local[key]["assembly_wall_ms"]),
+        ("local derivative", lambda key: local[key]["assembly_wall_ms"]),
         ("dense factor refresh", lambda key: factor[key]["factor_median_ms"]),
     )
     figure, axes = plt.subplots(2, 3, figsize=(14, 10.5), sharex=True, sharey=True)
@@ -63,10 +63,15 @@ def _save_wall(booking, frozen, local, factor, output):
             x = [row["realised_cells"] for row in receipts]
             y = [measure(key) for key in points]
             axis.plot(x, y, linewidth=3.0, marker="o", markersize=8, **CASE_STYLE[kind])
+            offsets = {"limited": (5, 6), "diverted": (5, -16)}
+            if name == "one-pitch smooth booking":
+                offsets = {"limited": (5, -16), "diverted": (5, 6)}
+            elif name == "dense factor refresh":
+                offsets = {"limited": (5, -16), "diverted": (5, 6)}
             axis.annotate(
                 kind,
                 (x[-1], y[-1]),
-                xytext=(5, 6 if kind == "limited" else -16),
+                xytext=offsets[kind],
                 textcoords="offset points",
                 fontsize=20,
                 color=CASE_STYLE[kind]["color"],

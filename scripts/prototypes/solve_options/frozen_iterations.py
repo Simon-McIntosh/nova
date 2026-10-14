@@ -15,6 +15,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 import nova
+from scipy.spatial import cKDTree
 
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium import current, topology
@@ -75,8 +76,14 @@ def run(kind, cells, cache, fallback, out):
     if exterior is None:
         raise FileNotFoundError("exact exterior absent from both read-only locations")
     sample_shape = points.shape[:-1]
-    sample_count = int(np.prod(sample_shape))
-    exterior_samples = exterior[-sample_count:].reshape(sample_shape)
+    coordinates = np.vstack(
+        (machine.node, machine.wall_node, machine.sample_coordinates)
+    )
+    distance, indices = cKDTree(coordinates).query(np.asarray(points).reshape(-1, 2))
+    if float(np.max(distance)) > 2e-11:
+        raise ValueError("sample stencil has no matching exterior target")
+    sample_index = jnp.asarray(indices).reshape(sample_shape)
+    exterior_samples = exterior[sample_index]
     scale = jnp.maximum(jnp.max(jnp.abs(initial[:, 0])), 1e-30) * jnp.stack(
         (jnp.ones_like(geometry.pitch), geometry.pitch, geometry.pitch), axis=-1
     )
@@ -113,7 +120,7 @@ def run(kind, cells, cache, fallback, out):
     for method in ("exact", "hard", "smooth"):
         mapped = jax.jit(
             lambda moments: booking(
-                exterior_samples + image(moments)[-sample_count:].reshape(sample_shape),
+                exterior_samples + image(moments)[sample_index],
                 method,
             )
         )
@@ -137,9 +144,6 @@ def run(kind, cells, cache, fallback, out):
                     break
             total = perf_counter() - started
             terminal_image = jax.jit(image)(state)
-            coordinates = np.vstack(
-                (machine.node, machine.wall_node, machine.sample_coordinates)
-            )
             analytic = jnp.asarray(certificate._exact_state(name, exact, coordinates))
             flux_error = (
                 float(jnp.max(jnp.abs(exterior + terminal_image - analytic))) / span

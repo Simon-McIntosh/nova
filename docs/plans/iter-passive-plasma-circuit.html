@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="iter-passive-plasma-circuit">
+  <meta name="plan-title" content="ITER Passive and Prescribed-Plasma Circuit">
+  <meta name="plan-summary" content="Evolve ITER vessel currents driven by sectioned coils and a plasma prescribed from DINA, and export the coupled plant to the converter model">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="20.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-context" content="extended">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-sprint" content="S24">
+  <meta name="plan-tags" content="iter,machine-description,equilibrium">
+  <meta name="plan-blocks" content="power_convertor:iter-switched-terminal-transients">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
+  <title>ITER Passive and Prescribed-Plasma Circuit | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <p>power_convertor is building an integrated, switched time-domain model of every ITER coil power supply
+    (<a href="/power_convertor/plans/iter-switched-terminal-transients">iter-switched-terminal-transients</a>).
+    Its converters drive the coils, and what the coils present to the converters depends on everything they
+    couple to: each other, the vessel and the other passive conductors, and the plasma. That coupled plant
+    belongs in nova, which owns the conductor geometry, the Green's-function kernels and the L/R circuit
+    solvers (<code>nova/circuit/passive.py</code>, <code>propagate.py</code>, <code>linkage.py</code>,
+    <code>screening.py</code>).</p>
+    <p>This plan builds the ITER plant, evolves the vessel currents through a scenario, and exports the
+    coupled system for the converter model. Two choices come from the lead (14 October 2026). The plasma is
+    not solved: its position and current distribution are prescribed from DINA's separatrix and flux
+    functions, with the net current adjusted to DINA's. And the passive structure carries a full current
+    model, so its currents evolve with the coils and the plasma.</p>
+    <p>The power_convertor work so far built a first ITER passive set through nova
+    (<code>power_convertor/scripts/nova_passive_export.py</code>: 458 rings, slowest decay 1.3 s). It found
+    the coil self-inductances (PF1 0.703 H, CS 0.760 H, PF2 0.475, PF3 1.855, PF4 1.560, PF5 1.555, PF6
+    2.390 H), and it found the ring model's validity ends at the skin depth: 1.8 Hz in the cryostat and 29
+    to 35 Hz in the vessel. The converters put their lines at 600 Hz and above, so that limit is the first
+    thing this plan removes.</p>
+
+    <h2 id="s1">§1 — The ITER conductor set, sectioned and valid across the converter band</h2>
+<section data-reckon="section" data-id="s1" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <p>The conductors come from the machine description, ITER_MACHINE_DESCRIPTION/3/111001: run 204 for
+    the Stage 1 + Stage 2 coil set (the six CS modules, PF1 to PF6 and the VS3 in-vessel coils), and the
+    <code>pf_passive</code> loops for the passive structure. A switching edge does not divide evenly along a
+    winding, so each coil is split into winding sections: double pancakes for the PF coils and the pancake
+    structure of each CS module. Each section is placed from the element geometry, its turns and the
+    published winding layout.</p>
+    <p>The passive structure is subdivided wherever a single ring cannot carry the skin effect at the
+    highest frequency the converter model needs. The double-walled vessel, the triangular supports and the
+    cryostat are subdivided through their thickness, and the subdivision is refined until it converges
+    across the converter band, with the upper limit stated. The linkage uses
+    <code>circuit/linkage.py</code>'s two-section integration, and the reduction uses
+    <code>PassiveCircuit</code>.</p>
+    <p>Done when four checks pass:
+    </p>
+    <ul>
+      <li>Each coil's self-inductance and mutuals match power_convertor's values above to 0.5 %, and DINA's
+      <code>em_coupling</code> matrices in the DINA-IMAS cases (105013/1, 105014/1) within a stated
+      tolerance.</li>
+      <li>Refining the through-thickness subdivision changes each coil's terminal impedance, with the
+      passive structure coupled, by less than 1 % from 0.1 Hz to the stated upper limit.</li>
+      <li>The resistances are cited or marked nominal.</li>
+      <li>Negative control: removing the passive structure gives the bare coil impedance at every
+      frequency.</li>
+    </ul>
+    <p>Figures go in <code>docs/figures/iter-passive-plasma-circuit/</code>: the sectioned coils and the
+    subdivided passive set in the poloidal plane, and each coil's impedance with and without the passive
+    structure.</p>
+
+    <h2 id="s2">§2 — The plasma, prescribed from DINA</h2>
+<section data-reckon="section" data-id="s2" data-effort-hours="5.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>The plasma is not solved. Its current distribution at each DINA equilibrium slice is built in four
+    steps:
+    </p>
+    <ol>
+      <li>Check that DINA's separatrix outline is a closed loop. Where it is not (early ramp-up and limited
+      phases), use the last closed flux surface instead and flag the slice.</li>
+      <li>Evaluate j<sub>φ</sub>(R, Z) = R p′(ψ) + FF′(ψ)/(μ<sub>0</sub>R) inside that boundary on nova's
+      plasma grid, from DINA's 1-D flux functions and its 2-D ψ map.</li>
+      <li>Scale the result to DINA's plasma current, recording the scale factor for each slice as a measure
+      of DINA's own consistency.</li>
+      <li>From that distribution, compute the flux the plasma links at every coil section and passive
+      element, against time.</li>
+    </ol>
+    <p>The DINA-IMAS cases hold what this needs: separatrix outline, 1-D profiles and a 65 × 129 ψ map,
+    DD 3.38.1, read with imas-python in that version. power_convertor's scenario inventory (§1 of its plan)
+    names any further cases. The reading reuses <code>nova/imas/equilibrium.py</code> and
+    <code>nova/imas/extrapolate.py</code>.</p>
+    <p>Done when three checks pass:
+    </p>
+    <ul>
+      <li>The prescribed current centroid follows DINA's within one grid cell.</li>
+      <li>The distribution of scale factors is reported.</li>
+      <li>The flux the prescribed plasma links at the coils matches DINA's own plasma flux, its ψ map less
+      the coil and passive contributions, within a stated tolerance.</li>
+    </ul>
+    <p>Negative control: moving the distribution 1 cm vertically changes the linked flux by the predicted
+    ∂ψ/∂Z.</p>
+
+    <h2 id="s3">§3 — The vessel currents, evolved through a scenario</h2>
+<section data-reckon="section" data-id="s3" data-effort-hours="5.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>The passive structure is driven by DINA's coil currents and the prescribed plasma, and integrated
+    with nova's exact zero-order-hold eigenmode propagation (<code>circuit/propagate.py</code>). Its currents
+    are compared group by group with DINA's own <code>pf_passive</code> currents in the DINA-IMAS cases.</p>
+    <p>The coil voltages then follow from the whole coupled flux: R I + dΨ/dt, with Ψ carrying the coils,
+    the passive currents and the plasma. They are compared with DINA's coil voltages. power_convertor found
+    that bare coil L·dI/dt misses DINA's PF2 to PF5 voltages by about 1 kV rms
+    (iter-power-supply-model §8), and this check measures how much of that miss the passive and plasma
+    coupling accounts for.</p>
+    <p>Done when the passive currents agree with DINA's by group within a stated tolerance, and each coil's
+    voltage residual is reported as rms and peak. Negative control: removing the plasma drive brings back
+    the bare-coil residual.</p>
+
+    <h2 id="s4">§4 — The coupled plant, exported to the converter model</h2>
+<section data-reckon="section" data-id="s4" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>The export is one versioned file per machine description and DINA case, written to
+    <code>/home/ITER/mcintos/Code/power_convertor/data/iter/coupled_plant/</code>. It carries:
+    </p>
+    <ul>
+      <li>the section-level coil inductance matrix and resistances;</li>
+      <li>the reduced passive system: the eigenmodes kept, their decay times and their coupling to every
+      coil section;</li>
+      <li>the plasma's flux drive at every coil section and passive mode, against time, at a stated
+      cadence;</li>
+      <li>provenance: the machine-description run, the DINA case and the nova revision;</li>
+      <li>the reduction error against frequency.</li>
+    </ul>
+    <p>The contract is written down in the record, so power_convertor's switched-circuit solver can take
+    the plant as a state-space multiport.</p>
+    <p>Done when two checks pass:
+    </p>
+    <ul>
+      <li>A round-trip test of the loader passes in nova.</li>
+      <li>The reduced plant's terminal impedance for every coil matches the full model's to 1 % from 0.1 Hz
+      to §1's upper limit.</li>
+    </ul>
+    <p>This section is the evidence power_convertor's gate g-istt-1 waits on.</p>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-ippc-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-14" data-recommends-skill="/reckon-build iter-passive-plasma-circuit §1">
+    <h4 class="r-fu-title">Build the sectioned ITER conductor set</h4>
+    <div class="r-fu-body"><p>§1 and §2 have no prerequisite and run in parallel. §3 needs both, and §4 needs §1 and §3. power_convertor's iter-switched-terminal-transients §6 waits on §4. The design review must be composed and answered before the first dispatch.</p></div>
+    <pre class="r-fu-prompt">/reckon-build iter-passive-plasma-circuit §1</pre>
+    </article>
+</section>
+<section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="d-ippc-plasma" data-choice="prescribe the plasma from DINA's closed separatrix and flux functions, net current adjusted; do not solve it" data-by="Simon McIntosh" data-when="2026-10-14T16:20:00+00:00">
+    <p class="r-dec-q">Is the plasma solved or prescribed?</p>
+    <p class="r-dec-rat">The converter model needs the plasma's flux at the conductors, not a new equilibrium. Prescribing it from DINA keeps the plant consistent with the scenario the coil currents come from, and the scale factor to DINA's current measures that consistency directly.</p>
+    </div>
+<div class="r-dec" data-key="d-ippc-passive" data-choice="a full passive current model evolved in nova, valid across the converter band" data-by="Simon McIntosh" data-when="2026-10-14T16:20:00+00:00">
+    <p class="r-dec-q">Where does the passive current model live?</p>
+    <p class="r-dec-rat">nova owns the conductor geometry, the kernels and the L/R solvers, so the vessel currents are evolved here and exported to power_convertor, rather than rebuilt there.</p>
+    </div>
+</section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "base_log_revision": null,
+  "call_site_count": 2,
+  "call_sites": [
+    "nova/imas/profiles.py:fluxfunctions",
+    "scripts/iter_prescribed_plasma/measure.py"
+  ],
+  "completed_at": "2026-10-14T17:30:57.640Z",
+  "dispatched_at": "2026-10-14T17:21:20Z",
+  "findings": [
+    {
+      "file": "scripts/iter_prescribed_plasma/measure.py",
+      "line": "461",
+      "severity": "follow-on",
+      "text": "follow-on: the scenario gate computes and records the centroid and residual tolerances but never asserts them, so a centroid past one grid cell or a residual past the stated tolerance still exits 0 and the done-when cannot fail."
+    },
+    {
+      "file": "nova/imas/prescribed_plasma.py",
+      "line": "95",
+      "severity": "follow-on",
+      "text": "follow-on: the filament branch re-implements the per-section sub-gridding and current_share weighting that nova/circuit/linkage.py:81 section_grid already owns (it duplicates that owner rather than extending it), so a change to the linkage sub-grid rule leaves the two out of step."
+    },
+    {
+      "file": "tests/test_prescribed_plasma.py",
+      "line": "106",
+      "severity": "follow-on",
+      "text": "follow-on: assert_array_equal(history[0], history[1]) compares two invocations given identical inputs, so it fails only on nondeterminism and is not a guard for any behaviour."
+    },
+    {
+      "file": "nova/imas/profiles.py",
+      "line": "234",
+      "severity": "follow-on",
+      "text": "follow-on: Profile.prescribed_current (profiles.py:234) has no caller; the tests and scripts/iter_prescribed_plasma/measure.py:86 call the free function, so the added public method is unreached."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read the ten commits 8f294d56..ab99b4850 commit by commit; the code change is nova/imas/profiles.py (+163/-3) and the new nova/imas/prescribed_plasma.py, plus tests, the measure.py driver and docs.",
+    "done_when": "nova/imas/profiles.py and scripts/iter_prescribed_plasma/measure.py:461 measure centroid vs DINA, the scale distribution, the linked-flux residual and the 1 cm vertical control, all recorded in scenario-verified.log.",
+    "goal": "nova/imas/profiles.py:94 prescribe_current_density and nova/imas/prescribed_plasma.py:14 plasma_flux_at_points build the closed-boundary DINA prescription and the generic conductor linkage the brief names.",
+    "manifest": "read manifest.md and landing.md; they report 867/867 prescribed slices, 4.14 mm maximum centroid error, 2.168%/0.427%/0.406% residuals, and name the gate logs.",
+    "write_paths": "the manifest declares nova/imas/, tests/test_prescribed_plasma.py, scripts/iter_prescribed_plasma, docs/research, docs/figures and the evidence fragment; every path in the diff (git diff --stat = 9 files) is inside them."
+  },
+  "justifications": {
+    "durability": "tests/test_prescribed_plasma.py:122 fails when the vertical offset is dropped (vertical-shift-mutation.log, EXIT=1), but no test guards the DINA-path thresholds and the focused arm ran at 6ea7fa6, not the reviewed head.",
+    "evidence": "scripts/iter_prescribed_plasma/measure.py:461 records the done-when measures in summary.json and scenario-verified.log, but the gate asserts only the vertical control (measure.py:353), not the centroid or residual thresholds.",
+    "fit": "names in nova/imas/prescribed_plasma.py and nova/imas/profiles.py:28 are capability-named with no plan or version labels and follow the surrounding module style.",
+    "goal_fidelity": "nova/imas/prescribed_plasma.py:14 and nova/imas/profiles.py:94 implement the boundary mask, current scaling and filament/section linkage the brief requires.",
+    "reuse": "nova/imas/prescribed_plasma.py:95 reuses section_points and greens_psi but re-derives the section sub-gridding and current_share weighting owned by nova/circuit/linkage.py:section_grid.",
+    "scope_discipline": "the diff touches only the declared write paths, and no file outside the brief's scope (nova/imas/, tests, scripts, docs) is changed."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: nova/imas/profiles.py:94 prescribe_current_density and nova/imas/prescribed_plasma.py:14 plasma_flux_at_points build the closed-boundary DINA prescription and the generic conductor linkage the brief names.\nVERDICT done_when: nova/imas/profiles.py and scripts/iter_prescribed_plasma/measure.py:461 measure centroid vs DINA, the scale distribution, the linked-flux residual and the 1 cm vertical control, all recorded in scenario-verified.log.\nVERDICT write_paths: the manifest declares nova/imas/, tests/test_prescribed_plasma.py, scripts/iter_prescribed_plasma, docs/research, docs/figures and the evidence fragment; every path in the diff (git diff --stat = 9 files) is inside them.\nVERDICT manifest: read manifest.md and landing.md; they report 867/867 prescribed slices, 4.14 mm maximum centroid error, 2.168%/0.427%/0.406% residuals, and name the gate logs.\nVERDICT diff: read the ten commits 8f294d56..ab99b4850 commit by commit; the code change is nova/imas/profiles.py (+163/-3) and the new nova/imas/prescribed_plasma.py, plus tests, the measure.py driver and docs.\nCALL_SITES: nova/imas/profiles.py:fluxfunctions, scripts/iter_prescribed_plasma/measure.py\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/imas/prescribed_plasma.py:14 and nova/imas/profiles.py:94 implement the boundary mask, current scaling and filament/section linkage the brief requires.\nSCORE evidence: 15\nJUSTIFICATION evidence: scripts/iter_prescribed_plasma/measure.py:461 records the done-when measures in summary.json and scenario-verified.log, but the gate asserts only the vertical control (measure.py:353), not the centroid or residual thresholds.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the diff touches only the declared write paths, and no file outside the brief's scope (nova/imas/, tests, scripts, docs) is changed.\nSCORE durability: 14\nJUSTIFICATION durability: tests/test_prescribed_plasma.py:122 fails when the vertical offset is dropped (vertical-shift-mutation.log, EXIT=1), but no test guards the DINA-path thresholds and the focused arm ran at 6ea7fa6, not the reviewed head.\nSCORE fit: 16\nJUSTIFICATION fit: names in nova/imas/prescribed_plasma.py and nova/imas/profiles.py:28 are capability-named with no plan or version labels and follow the surrounding module style.\nSCORE reuse: 14\nJUSTIFICATION reuse: nova/imas/prescribed_plasma.py:95 reuses section_points and greens_psi but re-derives the section sub-gridding and current_share weighting owned by nova/circuit/linkage.py:section_grid.\nFINDING scripts/iter_prescribed_plasma/measure.py:461 follow-on: the scenario gate computes and records the centroid and residual tolerances but never asserts them, so a centroid past one grid cell or a residual past the stated tolerance still exits 0 and the done-when cannot fail.\nFINDING nova/imas/prescribed_plasma.py:95 follow-on: the filament branch re-implements the per-section sub-gridding and current_share weighting that nova/circuit/linkage.py:81 section_grid already owns (it duplicates that owner rather than extending it), so a change to the linkage sub-grid rule leaves the two out of step.\nFINDING tests/test_prescribed_plasma.py:106 follow-on: assert_array_equal(history[0], history[1]) compares two invocations given identical inputs, so it fails only on nondeterminism and is not a guard for any behaviour.\nFINDING nova/imas/profiles.py:234 follow-on: Profile.prescribed_current (profiles.py:234) has no caller; the tests and scripts/iter_prescribed_plasma/measure.py:86 call the free function, so the added public method is unreached.",
+  "review_run_id": "r-20261014T172059598501-review-of-iter-prescribed-plasma-ab99b4850589",
+  "reviewed_base_sha": "8f294d56d85f00f5c65796431164082dcf294956",
+  "reviewed_head_sha": "ab99b4850589271cc427df16d1b3c5248efd8f2a",
+  "reviewed_run_id": "r-20261014T163316797402-iter-prescribed-plasma",
+  "scores": {
+    "durability": 14,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 14,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T17:33:56.080674+00:00",
+  "total": 96
+}

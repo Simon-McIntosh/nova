@@ -159,9 +159,13 @@ def polygon_flux_columns(
     The exact polygon-section kernel replaces the rectangular bounding box: same
     area, shaped mutual and self linkage.  The observer sub-grid stays the
     axis-aligned box -- the flux another circuit links across these small
-    sections varies negligibly over the shear.
+    sections varies negligibly over the shear.  The eight-panel, 24-node
+    source rule is resolved against the full polygon rule for thin wall strips;
+    the cheaper rule matters when thousands of independent layers are coupled.
     """
-    psi, _b_r, _b_z = polygon_greens(point_r, point_z, section.vertices)
+    psi, _b_r, _b_z = polygon_greens(
+        point_r, point_z, section.vertices, n_panels=8, n_nodes=24
+    )
     return section.current_share * np.bincount(
         owner, weights=weight * psi, minlength=n_groups
     )

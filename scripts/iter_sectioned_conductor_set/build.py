@@ -188,6 +188,7 @@ def calculate(
         digest.update(np.asarray(getattr(conductors, name)).tobytes())
     for section in conductors.polygon_sections:
         digest.update(np.asarray(section.vertices).tobytes())
+    digest.update(b"polygon:8x24")
     digest.update(
         np.asarray([max_thickness, surface_layer_m or 0, section_n_max]).tobytes()
     )

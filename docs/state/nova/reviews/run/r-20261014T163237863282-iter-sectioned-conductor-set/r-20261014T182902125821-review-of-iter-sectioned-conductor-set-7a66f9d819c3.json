@@ -1,0 +1,78 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed manifest records an after_suite arm at c43e39932 (completed true, failure_count 0, failure_ids []) and no baseline_suite, so the added count is taken from the readable head arm as 0",
+  "base_log_revision": null,
+  "call_site_count": 3,
+  "call_sites": [
+    "nova/imas/pulsedesign.py:111",
+    "scripts/iter_sectioned_conductor_set/build.py",
+    "scripts/iter_sectioned_conductor_set/figures.py"
+  ],
+  "completed_at": "2026-10-14T18:39:31.219Z",
+  "dispatched_at": "2026-10-14T18:29:22Z",
+  "findings": [
+    {
+      "file": "scripts/iter_sectioned_conductor_set/validate.py",
+      "line": "51",
+      "severity": "blocking",
+      "text": "blocking: the done-when requires comparing against DINA's em_coupling matrices in 105013/1 (DD 3.38.1, read with imas-python in that version); no code, gate log or record paragraph names that IDS, so half of the node's own checked deliverable is unperformed and unreported."
+    },
+    {
+      "file": "scripts/iter_sectioned_conductor_set/compare_refinement.py",
+      "line": "27",
+      "severity": "follow-on",
+      "text": "follow-on: the thickness-refinement gate computes upper_sampled_limit_hz and prints it but never asserts the 1% criterion, so a mesh regression that changed every coil impedance by 5% would still exit 0 and the convergence done-when could not fail."
+    },
+    {
+      "file": "scripts/iter_sectioned_conductor_set/validate.py",
+      "line": "57",
+      "severity": "follow-on",
+      "text": "follow-on: power_self_max_fraction compares receipt coil_inductance_h against the same power_convertor reference the reconciliation forced it to (build.py:242), so it is an input-consistency identity reading 4.44e-16 that cannot detect a sectioned-linkage regression; the raw 1.820%-disagreeing matrix is disclosed but ungated."
+    },
+    {
+      "file": "nova/circuit/passive.py",
+      "line": "283",
+      "severity": "follow-on",
+      "text": "follow-on: terminal_impedance_spectrum solves eigh(diag(resistance), passive) inline, duplicating the passive eigenbasis owned by nova/circuit/passive.py:97 mode_system rather than extending it, so a change to the eigenbasis rule leaves the two out of step."
+    }
+  ],
+  "head_log_revision": "c43e39932",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read the 22 commits 8f294d56..7a66f9d81 commit by commit; the code is nova/circuit/{conductor,linkage,passive}.py and nova/imas/{machine,pulsedesign}.py (+398/-14), plus the test module, five scripts and the docs/figures.",
+    "done_when": "the coil-matrix and analytic tolerances are asserted in scripts/iter_sectioned_conductor_set/validate.py:68 and the mesh convergence is measured in compare_refinement.py:27, but no code reads DINA 105013/1 em_coupling, which the done_when names.",
+    "goal": "the goal is the sectioned ITER conductor set; nova/imas/machine.py:472 MachineCoil.winding_sections and nova/circuit/conductor.py:120 subdivide_passive_thickness build the series sections and through-thickness layers the brief requires.",
+    "manifest": "read manifest.md and landing.md; they report 295 winding sections across 14 coils, 1312/2163 passive circuits, 0.29295% 12-to-6mm convergence through 5 kHz on 101 samples, a 1.28e-16 passive-removal control, and name the gate logs.",
+    "write_paths": "the manifest declares nova/imas/machine.py, nova/imas/pulsedesign.py, nova/circuit, three test files, scripts/iter_sectioned_conductor_set, docs/research, docs/figures and the fragment; all 15 paths in git diff --stat 8f294d56..7a66f9d81 fall inside them."
+  },
+  "justifications": {
+    "durability": "tests/test_iter_sectioned_conductor_set.py:35 guards turn conservation and :147 the negative-control target, but the 1% convergence criterion (compare_refinement.py:27) and the 0.5% coil reference (validate.py:57) have no assertion that can fail.",
+    "evidence": "scripts/iter_sectioned_conductor_set/validate.py:68 asserts the analytic tolerances and the convergence is recorded at compare_refinement.py:27, but the 0.5% coil check is measured against the reconciled matrix (validate.py:57) and the DINA em_coupling comparison is absent.",
+    "fit": "added names (subdivide_passive_thickness, terminal_impedance_spectrum, preserve_series_terminal_linkage, winding_sections) are capability-named with no plan or version labels and follow the dataclass style of nova/circuit/conductor.py:117.",
+    "goal_fidelity": "nova/imas/machine.py:472 winding_sections and nova/circuit/conductor.py:120 subdivide_passive_thickness produce the sectioned coils and subdivided passive set the goal names, all 14 coils and 458 source loops covered.",
+    "reuse": "nova/circuit/passive.py:283 re-derivates the passive generalized eigenbasis inline that nova/circuit/passive.py:97 PassiveCircuitSystem.mode_system already owns, though the surrounding terminal-Z capability is new.",
+    "scope_discipline": "all 15 changed paths in git diff --stat 8f294d56..7a66f9d81 are inside the declared write paths and nothing outside them is touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is the sectioned ITER conductor set; nova/imas/machine.py:472 MachineCoil.winding_sections and nova/circuit/conductor.py:120 subdivide_passive_thickness build the series sections and through-thickness layers the brief requires.\nVERDICT done_when: the coil-matrix and analytic tolerances are asserted in scripts/iter_sectioned_conductor_set/validate.py:68 and the mesh convergence is measured in compare_refinement.py:27, but no code reads DINA 105013/1 em_coupling, which the done_when names.\nVERDICT write_paths: the manifest declares nova/imas/machine.py, nova/imas/pulsedesign.py, nova/circuit, three test files, scripts/iter_sectioned_conductor_set, docs/research, docs/figures and the fragment; all 15 paths in git diff --stat 8f294d56..7a66f9d81 fall inside them.\nVERDICT manifest: read manifest.md and landing.md; they report 295 winding sections across 14 coils, 1312/2163 passive circuits, 0.29295% 12-to-6mm convergence through 5 kHz on 101 samples, a 1.28e-16 passive-removal control, and name the gate logs.\nVERDICT diff: read the 22 commits 8f294d56..7a66f9d81 commit by commit; the code is nova/circuit/{conductor,linkage,passive}.py and nova/imas/{machine,pulsedesign}.py (+398/-14), plus the test module, five scripts and the docs/figures.\nCALL_SITES: nova/imas/pulsedesign.py:111, scripts/iter_sectioned_conductor_set/build.py, scripts/iter_sectioned_conductor_set/figures.py\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: nova/imas/machine.py:472 winding_sections and nova/circuit/conductor.py:120 subdivide_passive_thickness produce the sectioned coils and subdivided passive set the goal names, all 14 coils and 458 source loops covered.\nSCORE evidence: 12\nJUSTIFICATION evidence: scripts/iter_sectioned_conductor_set/validate.py:68 asserts the analytic tolerances and the convergence is recorded at compare_refinement.py:27, but the 0.5% coil check is measured against the reconciled matrix (validate.py:57) and the DINA em_coupling comparison is absent.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: all 15 changed paths in git diff --stat 8f294d56..7a66f9d81 are inside the declared write paths and nothing outside them is touched.\nSCORE durability: 13\nJUSTIFICATION durability: tests/test_iter_sectioned_conductor_set.py:35 guards turn conservation and :147 the negative-control target, but the 1% convergence criterion (compare_refinement.py:27) and the 0.5% coil reference (validate.py:57) have no assertion that can fail.\nSCORE fit: 17\nJUSTIFICATION fit: added names (subdivide_passive_thickness, terminal_impedance_spectrum, preserve_series_terminal_linkage, winding_sections) are capability-named with no plan or version labels and follow the dataclass style of nova/circuit/conductor.py:117.\nSCORE reuse: 13\nJUSTIFICATION reuse: nova/circuit/passive.py:283 re-derives the passive generalized eigenbasis inline that nova/circuit/passive.py:97 PassiveCircuitSystem.mode_system already owns, though the surrounding terminal-Z capability is new.\nFINDING scripts/iter_sectioned_conductor_set/validate.py:51 blocking: the done-when requires comparing against DINA's em_coupling matrices in 105013/1 (DD 3.38.1); no code, gate log or record paragraph reads that IDS, so half of the node's own checked deliverable is unperformed and unreported.\nFINDING scripts/iter_sectioned_conductor_set/compare_refinement.py:27 follow-on: the thickness-refinement gate computes upper_sampled_limit_hz and prints it but never asserts the 1% criterion, so a mesh regression that changed every coil impedance by 5% would still exit 0 and the convergence done-when could not fail.\nFINDING scripts/iter_sectioned_conductor_set/validate.py:57 follow-on: power_self_max_fraction compares receipt coil_inductance_h against the same power_convertor reference the reconciliation forced it to (build.py:242), so the check is an input-consistency identity that reports 4.44e-16 and cannot detect a sectioned-linkage regression; the raw 1.820% disagreeing matrix is disclosed but ungated.\nFINDING nova/circuit/passive.py:283 follow-on: terminal_impedance_spectrum solves eigh(diag(resistance), passive) inline, duplicating the passive eigenbasis owned by nova/circuit/passive.py:97 mode_system rather than extending it, so a change to the eigenbasis rule leaves the two out of step.",
+  "review_run_id": "r-20261014T182902125821-review-of-iter-sectioned-conductor-set-7a66f9d819c3",
+  "reviewed_base_sha": "8f294d56d85f00f5c65796431164082dcf294956",
+  "reviewed_head_sha": "7a66f9d819c39c559f36a45f881eb618e7e082b7",
+  "reviewed_run_id": "r-20261014T163237863282-iter-sectioned-conductor-set",
+  "scores": {
+    "durability": 13,
+    "evidence": 12,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "reuse": 13,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T18:37:28.369831+00:00",
+  "total": 90
+}

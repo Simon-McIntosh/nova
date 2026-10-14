@@ -150,6 +150,14 @@ def run(kind, cells, cache, bias_row, newton_row, local_row, out):
     if not np.isfinite(amplitude) or amplitude < 1e-12:
         raise ValueError("fixed-support residual tangent is empty")
     fixed_error = float(jnp.max(jnp.abs(actual_fixed - predicted))) / amplitude
+    booked_predicted = random.ravel() - predicted
+    booked_fixed = random.ravel() - actual_fixed
+    booked_amplitude = float(jnp.max(jnp.abs(booked_fixed)))
+    if not np.isfinite(booked_amplitude) or booked_amplitude < 1e-12:
+        raise ValueError("fixed-support booking tangent is empty")
+    booked_error = (
+        float(jnp.max(jnp.abs(booked_fixed - booked_predicted))) / booked_amplitude
+    )
     zero = fixed_executable(initial, jnp.zeros_like(random), operands, index)
     zero_response = float(jnp.max(jnp.abs(zero)))
     if zero_response > 1e-12:
@@ -179,6 +187,10 @@ def run(kind, cells, cache, bias_row, newton_row, local_row, out):
     missing_global_relative = float(jnp.max(jnp.abs(actual_full - predicted))) / max(
         full_amplitude, 1e-30
     )
+    booked_full = random.ravel() - actual_full
+    missing_global_booking = float(
+        jnp.max(jnp.abs(booked_full - booked_predicted))
+    ) / max(float(jnp.max(jnp.abs(booked_full))), 1e-30)
     result = dict(
         kind=kind,
         requested_cells=cells,
@@ -198,10 +210,14 @@ def run(kind, cells, cache, bias_row, newton_row, local_row, out):
         fixed_jvp_response_max=amplitude,
         fixed_jvp_zero_response_max=zero_response,
         fixed_jvp_relative_error=fixed_error,
+        fixed_booking_jvp_response_max=booked_amplitude,
+        fixed_booking_jvp_relative_error=booked_error,
+        fixed_booking_jvp_agrees=bool(booked_error <= 1e-8),
         full_jvp_compile_seconds=full_compile,
         full_jvp_wall_ms=full_wall,
         full_jvp_response_max=full_amplitude,
         omitted_global_relative_response=missing_global_relative,
+        omitted_global_booking_relative_response=missing_global_booking,
         actual_full_structured_jacobian=False,
         gpu_memory=jax.devices()[0].memory_stats(),
         host_peak_rss_kib=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,

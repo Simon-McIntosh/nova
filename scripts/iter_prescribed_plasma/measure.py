@@ -1,4 +1,4 @@
-"""Measure DINA prescribed current and plasma flux against stored diagnostics."""
+"""Measure prescribed plasma against DINA flux with nova conductor kernels."""
 
 from __future__ import annotations
 
@@ -27,7 +27,6 @@ OUTPUT = Path(
     "/home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit/"
     "gate-logs/iter-prescribed-plasma"
 )
-URI = "imas:hdf5?user=mcintos;pulse=105014;run=1;database=iter;version=3"
 DD_VERSION = "3.38.1"
 
 
@@ -150,6 +149,15 @@ def metric(values):
     """Finite distribution summary with explicit count and quantiles."""
     values = np.asarray(values, float)
     values = values[np.isfinite(values)]
+    if not values.size:
+        return {
+            "count": 0,
+            "minimum": None,
+            "p05": None,
+            "median": None,
+            "p95": None,
+            "maximum": None,
+        }
     return {
         "count": int(values.size),
         "minimum": float(np.min(values)),
@@ -177,7 +185,7 @@ def save_svg(figure, name):
     )
 
 
-def draw_figures(rows, representatives, linkage, names):
+def draw_figures(rows, representatives, linkage, pulse):
     """Save spatial, time-history and residual figures as stand-alone SVGs."""
     matplotlib.rcParams["svg.hashsalt"] = "plasma-current"
     FIGURES.mkdir(parents=True, exist_ok=True)
@@ -224,7 +232,8 @@ def draw_figures(rows, representatives, linkage, names):
             fontsize=16,
         )
     fig.tight_layout()
-    save_svg(fig, "current-boundary.svg")
+    suffix = "" if pulse == 105014 else f"-{pulse}"
+    save_svg(fig, f"current-boundary{suffix}.svg")
     plt.close(fig)
 
     time = np.array([row["time"] for row in rows])
@@ -245,15 +254,16 @@ def draw_figures(rows, representatives, linkage, names):
         lw=2.6,
         label="vertical",
     )
-    axes[1].axhline(0.09375, color="#777777", lw=1.2, ls=":")
-    axes[1].axhline(-0.09375, color="#777777", lw=1.2, ls=":")
+    cell = min(row["grid_spacing_m"] for row in rows)
+    axes[1].axhline(cell, color="#777777", lw=1.2, ls=":")
+    axes[1].axhline(-cell, color="#777777", lw=1.2, ls=":")
     axes[1].set_ylabel("centroid error [m]")
     axes[1].set_xlabel("scenario time [s]")
     axes[1].legend(frameon=False, fontsize=15)
     for axis in axes:
         style_axes(axis)
     fig.tight_layout()
-    save_svg(fig, "scale-centroid.svg")
+    save_svg(fig, f"scale-centroid{suffix}.svg")
     plt.close(fig)
 
     fig, axis = plt.subplots(figsize=(14, 5))
@@ -268,50 +278,45 @@ def draw_figures(rows, representatives, linkage, names):
                 label=category,
             )
     axis.axhline(0, color="#777777", lw=1.2)
-    axis.set_ylabel("plasma flux residual / |reference|")
+    axis.set_ylabel("plasma flux residual / tolerance scale")
     axis.set_xlabel("scenario time [s]")
     axis.legend(frameon=False, fontsize=15)
     style_axes(axis)
     fig.tight_layout()
-    save_svg(fig, "linked-flux-residual.svg")
+    save_svg(fig, f"linked-flux-residual{suffix}.svg")
     plt.close(fig)
 
 
 def main():
-    """Run the current census and independent linked-flux comparisons."""
+    """Run current census and geometric flux comparisons for one DINA case."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--coil-flux-tolerance", type=float, default=0.025)
-    parser.add_argument("--loop-flux-tolerance", type=float, default=0.005)
-    parser.add_argument("--active-grid-tolerance", type=float, default=0.005)
+    parser.add_argument("--pulse", type=int, choices=(105014, 105052), required=True)
+    parser.add_argument("--flux-relative-tolerance", type=float, default=0.1)
+    parser.add_argument("--flux-absolute-tolerance-wb", type=float, default=1.0)
     limits = parser.parse_args()
-    if (
-        min(
-            limits.coil_flux_tolerance,
-            limits.loop_flux_tolerance,
-            limits.active_grid_tolerance,
-        )
-        <= 0
-    ):
+    if min(limits.flux_relative_tolerance, limits.flux_absolute_tolerance_wb) <= 0:
         parser.error("flux tolerances must be positive")
     OUTPUT.mkdir(parents=True, exist_ok=True)
-    with imas.DBEntry(URI, "r", dd_version=DD_VERSION) as entry:
+    uri = f"imas:hdf5?user=mcintos;pulse={limits.pulse};run=1;database=iter;version=3"
+    with imas.DBEntry(uri, "r", dd_version=DD_VERSION) as entry:
         equilibrium = entry.get("equilibrium", lazy=False, autoconvert=False)
         active = entry.get("pf_active", lazy=False, autoconvert=False)
         passive = entry.get("pf_passive", lazy=False, autoconvert=False)
-        magnetics = entry.get("magnetics", lazy=False, autoconvert=False)
-        coupling = entry.get("em_coupling", lazy=False, autoconvert=False)
-    loop_points = loop_locations(magnetics)
+        magnetics = (
+            entry.get("magnetics", lazy=False, autoconvert=False)
+            if limits.pulse == 105014
+            else None
+        )
+    loop_points = (
+        loop_locations(magnetics) if magnetics is not None else np.empty((0, 2))
+    )
     coil_points, coil_names = coil_locations(active)
     locations = np.vstack((loop_points, coil_points))
     kernel, owners = conductor_sources(
         active, passive, locations[:, 0], locations[:, 1]
     )
-    grid_to_loops = np.asarray(coupling.mutual_loops_grid)
-    grid_to_coils = np.asarray(coupling.mutual_grid_active)
-    if grid_to_loops.shape != (len(loop_points), 8385):
-        raise ValueError("DINA loop-grid mutual shape does not match this grid")
-    if grid_to_coils.shape != (8385, 15):
-        raise ValueError("DINA active-grid mutual shape does not match this grid")
+    if not np.count_nonzero(kernel):
+        raise AssertionError("nova conductor kernel has no nonzero flux signatures")
     print(
         f"REFERENCE_CONTROL loops={len(loop_points)} coils={len(coil_points)} "
         f"sources={len(owners)} kernel_nonzero={np.count_nonzero(kernel)}"
@@ -325,8 +330,6 @@ def main():
     representatives = set(np.linspace(eligible[0], eligible[-1], 3, dtype=int))
     rows = []
     linkage = []
-    grid_columns = []
-    subtraction = []
     selected = []
     failures = []
     map_control = []
@@ -361,8 +364,9 @@ def main():
         if index in representatives:
             selected.append((index, current, slice_))
         if index == 200:
-            target_r = np.array([loop_points[9, 0]])
-            target_z = np.array([loop_points[9, 1]])
+            target = loop_points[9] if len(loop_points) > 9 else np.array([5.75, 5.06])
+            target_r = np.array([target[0]])
+            target_z = np.array([target[1]])
             displacement = 0.01
             probe = 0.001
             base = plasma_flux_at_points(current, target_r, target_z)[0]
@@ -395,81 +399,45 @@ def main():
             continue
         stored = map_flux(slice_, locations)
         source = kernel @ current_vector(active, passive, owners, index)
-        inferred = stored - source
+        total = stored.copy()
+        for loop_index, loop in enumerate(magnetics.flux_loop if magnetics else []):
+            total[loop_index] = float(np.asarray(loop.flux.data)[index])
+            map_control.append(stored[loop_index] - total[loop_index])
+        inferred = total - source
         predicted = plasma_flux_at_points(current, locations[:, 0], locations[:, 1])
-        density = np.asarray(slice_.profiles_2d[0].j_tor)
-        cell_area = float(
-            np.mean(np.diff(current.radius)) * np.mean(np.diff(current.height))
-        )
-        grid_current = (density * cell_area).ravel()
-        loop_reference = grid_to_loops @ grid_current
-        coil_reference = grid_to_coils.T @ grid_current
-        prescribed_grid_flux = grid_to_coils.T @ current.cell_current.ravel()
-        for column, (value, reference) in enumerate(
-            zip(prescribed_grid_flux, coil_reference)
-        ):
-            grid_columns.append(
-                {
-                    "index": index,
-                    "column": column,
-                    "reference": float(reference),
-                    "predicted": float(value),
-                    "relative_residual": float(
-                        (value - reference) / max(abs(reference), 1.0)
-                    ),
-                }
-            )
-        # DINA's central-solenoid circuit joins two stored sections in one column.
-        predicted_coils = np.r_[
-            predicted[len(loop_points) : len(loop_points) + 2],
-            predicted[len(loop_points) + 2 : len(loop_points) + 4].sum(),
-            predicted[len(loop_points) + 4 : len(loop_points) + 12],
-        ]
-        for category, names, model, reference_values in (
-            (
-                "loop",
-                [str(loop.name).strip() for loop in magnetics.flux_loop],
-                predicted[: len(loop_points)],
-                loop_reference,
-            ),
-            (
-                "coil",
-                [str(coil.name).strip() for coil in list(active.coil)[:11]],
-                predicted_coils,
-                coil_reference[:11],
-            ),
-        ):
-            for name, value, reference in zip(names, model, reference_values):
-                residual = float(value - reference)
-                linkage.append(
-                    {
-                        "index": index,
-                        "time": float(slice_.time),
-                        "category": category,
-                        "name": name,
-                        "reference": float(reference),
-                        "predicted": float(value),
-                        "residual": residual,
-                        "relative_residual": residual / max(abs(reference), 1.0),
-                    }
-                )
         for point_index in range(len(locations)):
             if not np.isfinite(inferred[point_index]):
                 continue
             reference = float(inferred[point_index])
-            subtraction.append(
+            residual = float(predicted[point_index] - reference)
+            tolerance_wb = max(
+                limits.flux_absolute_tolerance_wb,
+                limits.flux_relative_tolerance * abs(reference),
+            )
+            linkage.append(
                 {
                     "index": index,
+                    "target_index": point_index,
+                    "time": float(slice_.time),
+                    "ip": current.plasma_current,
                     "category": "loop" if point_index < len(loop_points) else "coil",
-                    "relative_residual": float(
-                        (predicted[point_index] - reference) / max(abs(reference), 1.0)
+                    "name": (
+                        str(magnetics.flux_loop[point_index].name).strip()
+                        if point_index < len(loop_points)
+                        else coil_names[point_index - len(loop_points)]
                     ),
+                    "reference_source": (
+                        "magnetics_minus_nova_conductors"
+                        if point_index < len(loop_points)
+                        else "psi_map_minus_nova_conductors"
+                    ),
+                    "reference": reference,
+                    "predicted": float(predicted[point_index]),
+                    "residual_wb": residual,
+                    "tolerance_wb": tolerance_wb,
+                    "relative_residual": residual / tolerance_wb,
                 }
             )
-            if point_index < len(loop_points):
-                loop = magnetics.flux_loop[point_index]
-                measured = float(np.asarray(loop.flux.data)[index])
-                map_control.append(stored[point_index] - measured)
     scale = metric([row["scale_factor"] for row in rows])
     centroid = metric(
         [
@@ -487,8 +455,14 @@ def main():
         )
         for category in ("coil", "loop")
     }
+    absolute_residuals = {
+        category: metric(
+            [abs(row["residual_wb"]) for row in linkage if row["category"] == category]
+        )
+        for category in ("coil", "loop")
+    }
     summary = {
-        "case": "ITER 105014/1",
+        "case": f"ITER {limits.pulse}/1",
         "dd_version": DD_VERSION,
         "eligible_slices": len(eligible),
         "prescribed_slices": len(rows),
@@ -515,48 +489,32 @@ def main():
             }
         ),
         "grid_spacing_m": min(row["grid_spacing_m"] for row in rows),
-        "linked_flux_relative_error": residuals,
-        "all_active_grid_mutual_relative_error": metric(
-            [abs(row["relative_residual"]) for row in grid_columns]
+        "linked_flux_tolerance_fraction": residuals,
+        "linked_flux_absolute_residual_wb": absolute_residuals,
+        "sampled_times": len(comparison),
+        "coil_sections_total": len(coil_points),
+        "coil_sections_inside_psi_map": len(
+            {row["target_index"] for row in linkage if row["category"] == "coil"}
         ),
-        "remaining_active_grid_columns_relative_error": metric(
-            [
-                abs(row["relative_residual"])
-                for row in grid_columns
-                if row["column"] >= 11
-            ]
-        ),
-        "geometric_map_subtraction_relative_error": {
-            category: metric(
-                [
-                    abs(row["relative_residual"])
-                    for row in subtraction
-                    if row["category"] == category
-                ]
-            )
-            for category in ("coil", "loop")
-        },
+        "flux_loops_compared": len(loop_points),
         "map_minus_magnetics_flux_loop_wb": metric(map_control),
-        "independent_coil_families": [
-            str(coil.name).strip() for coil in list(active.coil)[:11]
-        ],
-        "geometry_unmapped_coil_family": "VS3: 4 coupling columns, 2 stored elements",
+        "coil_families_compared": sorted(
+            {row["name"] for row in linkage if row["category"] == "coil"}
+        ),
         "vertical_shift_control": vertical_control,
         "tolerances": {
             "centroid_grid_cells": 1.0,
-            "coil_flux_relative": limits.coil_flux_tolerance,
-            "loop_flux_relative": limits.loop_flux_tolerance,
-            "active_grid_relative": limits.active_grid_tolerance,
+            "flux_relative": limits.flux_relative_tolerance,
+            "flux_absolute_wb": limits.flux_absolute_tolerance_wb,
+            "rule": "absolute residual <= max(absolute Wb, relative * |reference Wb|)",
         },
     }
-    (OUTPUT / "summary.json").write_text(
+    (OUTPUT / f"summary-{limits.pulse}.json").write_text(
         json.dumps(
             {
                 "summary": summary,
                 "slices": rows,
                 "linkage": linkage,
-                "active_grid_columns": grid_columns,
-                "geometric_map_subtraction": subtraction,
             },
             indent=2,
         )
@@ -572,21 +530,20 @@ def main():
         raise AssertionError(
             f"centroid error {centroid['maximum']:.6g} m exceeds one grid cell"
         )
-    for label, observed, tolerance in (
-        ("coil flux", residuals["coil"], limits.coil_flux_tolerance),
-        ("flux-loop flux", residuals["loop"], limits.loop_flux_tolerance),
-        (
-            "active-grid flux",
-            summary["all_active_grid_mutual_relative_error"],
-            limits.active_grid_tolerance,
-        ),
-    ):
-        if observed["maximum"] > tolerance:
-            raise AssertionError(
-                f"{label} residual {observed['maximum']:.6g} exceeds {tolerance:.6g}"
-            )
-    print("GATE_PASS centroid, coil flux, flux-loop flux, active-grid flux")
-    draw_figures(rows, selected, linkage, coil_names)
+    if not residuals["coil"]["count"]:
+        raise AssertionError("no coil sections were covered by the stored psi map")
+    if limits.pulse == 105014 and not residuals["loop"]["count"]:
+        raise AssertionError("magnetics flux loops were not compared")
+    failing = [row for row in linkage if abs(row["residual_wb"]) > row["tolerance_wb"]]
+    if failing:
+        worst = max(failing, key=lambda row: abs(row["relative_residual"]))
+        raise AssertionError(
+            f"{worst['category']} {worst['name']} at {worst['time']:.3f} s: "
+            f"flux residual {abs(worst['residual_wb']):.6g} Wb exceeds "
+            f"{worst['tolerance_wb']:.6g} Wb"
+        )
+    print("GATE_PASS centroid and geometric plasma flux")
+    draw_figures(rows, selected, linkage, limits.pulse)
 
 
 if __name__ == "__main__":

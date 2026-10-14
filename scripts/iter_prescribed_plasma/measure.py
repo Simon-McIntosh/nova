@@ -159,6 +159,15 @@ def style_axes(axis):
     axis.yaxis.label.set_size(18)
 
 
+def save_svg(figure, name):
+    """Write stable SVG text without renderer-added trailing spaces."""
+    path = FIGURES / name
+    figure.savefig(path, metadata={"Date": None})
+    path.write_text(
+        "\n".join(line.rstrip() for line in path.read_text().splitlines()) + "\n"
+    )
+
+
 def draw_figures(rows, representatives, linkage, names):
     """Save spatial, time-history and residual figures as stand-alone SVGs."""
     matplotlib.rcParams["svg.hashsalt"] = "plasma-current"
@@ -206,7 +215,7 @@ def draw_figures(rows, representatives, linkage, names):
             fontsize=16,
         )
     fig.tight_layout()
-    fig.savefig(FIGURES / "current-boundary.svg", metadata={"Date": None})
+    save_svg(fig, "current-boundary.svg")
     plt.close(fig)
 
     time = np.array([row["time"] for row in rows])
@@ -235,7 +244,7 @@ def draw_figures(rows, representatives, linkage, names):
     for axis in axes:
         style_axes(axis)
     fig.tight_layout()
-    fig.savefig(FIGURES / "scale-centroid.svg", metadata={"Date": None})
+    save_svg(fig, "scale-centroid.svg")
     plt.close(fig)
 
     fig, axis = plt.subplots(figsize=(14, 5))
@@ -255,7 +264,7 @@ def draw_figures(rows, representatives, linkage, names):
     axis.legend(frameon=False, fontsize=15)
     style_axes(axis)
     fig.tight_layout()
-    fig.savefig(FIGURES / "linked-flux-residual.svg", metadata={"Date": None})
+    save_svg(fig, "linked-flux-residual.svg")
     plt.close(fig)
 
 
@@ -484,7 +493,7 @@ def main():
         "independent_coil_families": [
             str(coil.name).strip() for coil in list(active.coil)[:11]
         ],
-        "geometry_unmapped_coil_family": "VS3: four coupling columns for two stored elements",
+        "geometry_unmapped_coil_family": "VS3: 4 coupling columns, 2 stored elements",
         "vertical_shift_control": vertical_control,
     }
     (OUTPUT / "summary.json").write_text(

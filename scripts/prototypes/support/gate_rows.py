@@ -13,6 +13,15 @@ import tarfile
 import tempfile
 
 
+def failure_ids(text: str) -> list[str]:
+    """Read test identities from summaries, excluding split progress lines."""
+    return re.findall(
+        r"^(?:FAILED|ERROR) (tests/\S+\.py::\S+)(?: - .*|\s*)$",
+        text,
+        re.MULTILINE,
+    )
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--base", required=True)
@@ -99,11 +108,7 @@ def main():
                         result = 124
                     output.write(f"\nEXIT={result}\n")
                 text = log.read_text()
-                failed = [
-                    line.removeprefix("FAILED ").removeprefix("ERROR ").split(" - ")[0]
-                    for line in text.splitlines()
-                    if line.startswith(("FAILED ", "ERROR "))
-                ]
+                failed = failure_ids(text)
                 completed = (
                     bool(
                         re.search(

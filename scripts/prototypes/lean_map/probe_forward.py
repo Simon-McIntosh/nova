@@ -6,6 +6,7 @@ from nova.jax.config import configure_dtypes
 configure_dtypes()
 
 import argparse
+from dataclasses import replace
 import json
 from pathlib import Path
 from time import perf_counter
@@ -21,6 +22,11 @@ from nova.equilibrium.solve_request import TopologyPolicy
 from scripts.analytic_oracle_fixtures import measure as fixture
 from scripts.prototypes.lean_map.forward import apply
 from scripts.prototypes.lean_map.jets import build_jets, gather_window
+from scripts.prototypes.lean_map.newton import (
+    cached_factor_corrections,
+    dense_newton,
+    factor_at,
+)
 from scripts.prototypes.lean_map.probe_bias import _image
 from scripts.prototypes.lean_map.quadrature import quadratic_fit, triangle_rule
 from scripts.prototypes.lean_map.values import build_values
@@ -36,7 +42,7 @@ def _write(output, result):
     print("CHECKPOINT " + json.dumps(result, default=str), flush=True)
 
 
-def run(kind, cells, cache, output):
+def run(kind, cells, cache, output, batch=False):
     assert jax.config.jax_enable_x64 is True and jax.default_backend() == "gpu"
     print(
         f"nova={nova.__file__} probe={__file__} cwd={Path.cwd().resolve()}", flush=True
@@ -251,6 +257,139 @@ def run(kind, cells, cache, output):
         / max(signal, 1e-30),
     )
     _write(output, result)
+    scale_vector = jnp.asarray(
+        (float(booked.raw_current) / len(reference)) * np.asarray((1.0, pitch, pitch))
+    )
+
+    def equation(moments, *operands):
+        return mapped(moments, *operands).moments - moments
+
+    def solve(moments, *operands):
+        return dense_newton(
+            lambda varied: equation(varied, *operands),
+            moments,
+            scale_vector,
+        )
+
+    started = perf_counter()
+    solve_program = jax.jit(solve).lower(reference, *rest).compile()
+    solve_compile = perf_counter() - started
+    started = perf_counter()
+    solution = solve_program(reference, *rest)
+    jax.block_until_ready(solution)
+    solve_wall = perf_counter() - started
+    result.update(
+        stage="cold-solved",
+        newton_compile_seconds=solve_compile,
+        cold_solve_seconds=solve_wall,
+        cold_residual=float(solution.residual),
+        cold_converged=bool(solution.converged),
+        cold_accepted_steps=int(solution.accepted_steps),
+        cold_history=np.asarray(solution.history).tolist(),
+    )
+    _write(output, result)
+    if not bool(solution.converged):
+        print("RESULT " + json.dumps(result, default=str), flush=True)
+        return
+    terminal = compiled(*(solution.moments, *rest))
+    terminal_flux = exterior + _image(operator, terminal.moments)
+    result.update(
+        terminal_flux_error=float(jnp.max(jnp.abs(terminal_flux - analytic))) / span,
+        terminal_root_shift_pitches=(
+            np.linalg.norm(np.asarray(terminal.roots) - roots, axis=1) / pitch
+        ).tolist(),
+    )
+    _write(output, result)
+
+    def factorised(varied, *operands):
+        return factor_at(lambda state: equation(state, *operands), varied)
+
+    started = perf_counter()
+    factor_program = jax.jit(factorised).lower(solution.moments, *rest).compile()
+    factor_compile = perf_counter() - started
+    started = perf_counter()
+    factor = factor_program(solution.moments, *rest)
+    jax.block_until_ready(factor)
+    factor_wall = perf_counter() - started
+    amplitude = span * 1e-8 / pitch
+    shifted_values = replace(
+        values,
+        exterior=values.exterior
+        + amplitude * (rule.points.reshape(-1, 2)[:, 1] - roots[0, 1]),
+    )
+    lookup = np.asarray(window.lookup)
+    selected = np.flatnonzero(lookup >= 0)
+    perturbation = np.zeros_like(np.asarray(window.exterior))
+    positions = np.asarray(window.nodes)[selected]
+    perturbation[lookup[selected], 0] = amplitude * (positions[:, 1] - roots[0, 1])
+    perturbation[lookup[selected], 2] = amplitude
+    shifted_window = replace(
+        window, exterior=window.exterior + jnp.asarray(perturbation)
+    )
+    warm_rest = (
+        shifted_values,
+        jets,
+        shifted_window,
+        rule,
+        fit_inverse,
+        sample_design,
+        geometry,
+        seeds,
+        convention,
+        booked.raw_current,
+    )
+
+    def warm_correct(varied, factor, *operands):
+        return cached_factor_corrections(
+            lambda state: equation(state, *operands),
+            varied,
+            factor,
+            scale_vector,
+        )
+
+    warm_program = (
+        jax.jit(warm_correct).lower(solution.moments, factor, *warm_rest).compile()
+    )
+    started = perf_counter()
+    warm = warm_program(solution.moments, factor, *warm_rest)
+    jax.block_until_ready(warm)
+    warm_wall = perf_counter() - started
+    result.update(
+        stage="warm-solved",
+        factor_compile_seconds=factor_compile,
+        factor_wall_ms=1000 * factor_wall,
+        warm_wall_ms=1000 * warm_wall,
+        warm_residual=float(warm.residual),
+        warm_converged=bool(warm.converged),
+        warm_history=np.asarray(warm.history).tolist(),
+        exterior_perturbation=1e-8,
+    )
+    _write(output, result)
+    if not batch:
+        print("RESULT " + json.dumps(result, default=str), flush=True)
+        return
+    for width in (1, 16, 128):
+        starts = jnp.broadcast_to(reference, (width,) + reference.shape)
+        started = perf_counter()
+        batch_program = (
+            jax.jit(jax.vmap(solve, in_axes=(0,) + (None,) * len(rest)))
+            .lower(starts, *rest)
+            .compile()
+        )
+        batch_compile = perf_counter() - started
+        jax.block_until_ready(batch_program(starts, *rest))
+        started = perf_counter()
+        outcomes = batch_program(starts, *rest)
+        jax.block_until_ready(outcomes)
+        elapsed = perf_counter() - started
+        result[f"batch_{width}"] = {
+            "compile_seconds": batch_compile,
+            "wall_seconds": elapsed,
+            "per_slice_ms": 1000 * elapsed / width,
+            "converged": int(jnp.sum(outcomes.converged)),
+        }
+        result["stage"] = f"batch-{width}"
+        _write(output, result)
     print("RESULT " + json.dumps(result, default=str), flush=True)
 
 
@@ -260,8 +399,9 @@ def main():
     parser.add_argument("--cells", type=int, required=True)
     parser.add_argument("--cache", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--batch", action="store_true")
     args = parser.parse_args()
-    run(args.kind, args.cells, args.cache, args.output)
+    run(args.kind, args.cells, args.cache, args.output, args.batch)
 
 
 if __name__ == "__main__":

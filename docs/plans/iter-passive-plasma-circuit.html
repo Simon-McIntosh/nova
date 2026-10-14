@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="iter-passive-plasma-circuit">
   <meta name="plan-title" content="ITER Passive and Prescribed-Plasma Circuit">
-  <meta name="plan-summary" content="Evolve ITER vessel currents driven by sectioned coils and a plasma prescribed from DINA, and export the coupled plant to the converter model">
+  <meta name="plan-summary" content="Evolve ITER vessel currents driven by sectioned coils and a DINA-prescribed plasma, all couplings from nova, given to the converter model by one imported call">
   <meta name="plan-status" content="draft">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="20.0">
@@ -25,6 +25,8 @@
   <title>ITER Passive and Prescribed-Plasma Circuit | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="2">
+<meta name="plan-modified" content="2026-10-14">
 </head>
 <body>
   <main class="plan-doc">
@@ -35,8 +37,10 @@
     belongs in nova, which owns the conductor geometry, the Green's-function kernels and the L/R circuit
     solvers (<code>nova/circuit/passive.py</code>, <code>propagate.py</code>, <code>linkage.py</code>,
     <code>screening.py</code>).</p>
-    <p>This plan builds the ITER plant, evolves the vessel currents through a scenario, and exports the
-    coupled system for the converter model. Two choices come from the lead (14 October 2026). The plasma is
+    <p>This plan builds the ITER plant, evolves the vessel currents through a scenario, and gives the
+    converter model the coupled system through one narrow call it imports. Every coupling is computed here
+    from the conductor geometry with nova's existing kernels; DINA's coupling matrices are not used, not
+    even as a check (lead decision, 14 October 2026). Two choices come from the lead (14 October 2026). The plasma is
     not solved: its position and current distribution are prescribed from DINA's separatrix and flux
     functions, with the net current adjusted to DINA's. And the passive structure carries a full current
     model, so its currents evolve with the coils and the plasma.</p>
@@ -74,9 +78,9 @@
     <p>Done when four checks pass:
     </p>
     <ul>
-      <li>Each coil's self-inductance and mutuals match power_convertor's values above to 0.5 %, and DINA's
-      <code>em_coupling</code> matrices in the DINA-IMAS cases (105013/1, 105014/1) within a stated
-      tolerance.</li>
+      <li>Each coil's self-inductance and mutuals match power_convertor's values above to 0.5 %, and a
+      single thin ring and a rectangular-section coil match their analytic inductances to a stated
+      tolerance. DINA's coupling matrices are not used.</li>
       <li>Refining the through-thickness subdivision changes each coil's terminal impedance, with the
       passive structure coupled, by less than 1 % from 0.1 Hz to the stated upper limit.</li>
       <li>The resistances are cited or marked nominal.</li>
@@ -114,8 +118,10 @@
     <ul>
       <li>The prescribed current centroid follows DINA's within one grid cell.</li>
       <li>The distribution of scale factors is reported.</li>
-      <li>The flux the prescribed plasma links at the coils matches DINA's own plasma flux, its ψ map less
-      the coil and passive contributions, within a stated tolerance.</li>
+      <li>The flux the prescribed plasma links, computed by nova, matches DINA's own plasma flux within a
+      stated tolerance, where DINA's is its ψ map less the coil and passive contributions that nova
+      computes from DINA's currents. On 105014/1 the same holds at the <code>magnetics</code> flux loops.
+      DINA's coupling matrices are not used.</li>
     </ul>
     <p>Negative control: moving the distribution 1 cm vertically changes the linked flux by the predicted
     ∂ψ/∂Z.</p>
@@ -137,16 +143,18 @@
     voltage residual is reported as rms and peak. Negative control: removing the plasma drive brings back
     the bare-coil residual.</p>
 
-    <h2 id="s4">§4 — The coupled plant, exported to the converter model</h2>
+    <h2 id="s4">§4 — The coupled plant, through one narrow imported call</h2>
 <section data-reckon="section" data-id="s4" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
-    <p>The export is one versioned file per machine description and DINA case. It is written by extending
-    the serialisers <code>nova/circuit/passive.py</code> already ships (<code>save_circuit_system</code>,
-    <code>save_eigenbasis</code> and their loaders) to the coupled plant with its plasma drive, rather than
-    adding a parallel loader. The location resolves through <code>FilePath</code> in
-    <code>nova/database/filepath.py</code>, not a literal path into another repository, and the record states
-    the resolved location power_convertor reads. The arrays are stored so power_convertor can read them
-    without importing nova. The export retires nothing in nova. In power_convertor it replaces the ring
-    model for the switched simulation, which reads only this export. The file carries:
+    <p>power_convertor imports nova and makes one call: given a machine description and a DINA case, it
+    returns the coupled plant. The call is a thin composition of what nova already has: the machine binding,
+    the sectioned conductor set of §1, the linkage and passive reduction in <code>nova/circuit/</code>, and
+    the prescribed plasma of §2. The surface is that one function and the one result type it returns; nothing
+    else becomes public for this. Because the build is minutes of kernel sums, the call caches through the
+    serialisers <code>nova/circuit/passive.py</code> already ships (<code>save_circuit_system</code>,
+    <code>save_eigenbasis</code> and their loaders), extended to the coupled plant, with the cache location
+    resolved through <code>FilePath</code> in <code>nova/database/filepath.py</code>. There is no file
+    contract between the repositories. The call retires nothing in nova. In power_convertor it replaces the
+    ring model for the switched simulation. The result carries:
     </p>
     <ul>
       <li>the section-level coil inductance matrix and resistances;</li>
@@ -157,12 +165,13 @@
       <li>provenance: the machine-description run, the DINA case and the nova revision;</li>
       <li>the reduction error against frequency.</li>
     </ul>
-    <p>The contract is written down in the record, so power_convertor's switched-circuit solver can take
-    the plant as a state-space multiport.</p>
+    <p>The record documents the call and its result, so power_convertor's switched-circuit solver can take
+    the plant as a state-space multiport. nova requires Python 3.14, and power_convertor moves to it before
+    importing.</p>
     <p>Done when two checks pass:
     </p>
     <ul>
-      <li>A round-trip test of the extended serialiser passes in nova.</li>
+      <li>The call returns the same plant cold and from its cache, tested in nova.</li>
       <li>The reduced plant's terminal impedance for every coil matches the full model's to 1 % from 0.1 Hz
       to §1's upper limit.</li>
     </ul>
@@ -170,7 +179,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-ippc-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-14" data-recommends-skill="/reckon-build iter-passive-plasma-circuit §1">
+<article class="r-fu" data-id="f-ippc-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-14" data-recommends-skill="/reckon-build iter-passive-plasma-circuit §1" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Build the sectioned ITER conductor set</h4>
     <div class="r-fu-body"><p>§1 and §2 have no prerequisite and run in parallel. §3 needs both, and §4 needs §1 and §3. power_convertor's iter-switched-terminal-transients §6 waits on §4. The design review must be composed and answered before the first dispatch.</p></div>
     <pre class="r-fu-prompt">/reckon-build iter-passive-plasma-circuit §1</pre>
@@ -178,13 +187,17 @@
 </section>
 <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="d-ippc-plasma" data-choice="prescribe the plasma from DINA's closed separatrix and flux functions, net current adjusted; do not solve it" data-by="Simon McIntosh" data-when="2026-10-14T16:20:00+00:00">
+<div class="r-dec" data-key="d-ippc-plasma" data-choice="prescribe the plasma from DINA&#x27;s closed separatrix and flux functions, net current adjusted; do not solve it" data-by="Simon McIntosh" data-when="2026-10-14T16:20:00+00:00">
     <p class="r-dec-q">Is the plasma solved or prescribed?</p>
-    <p class="r-dec-rat">The converter model needs the plasma's flux at the conductors, not a new equilibrium. Prescribing it from DINA keeps the plant consistent with the scenario the coil currents come from, and the scale factor to DINA's current measures that consistency directly.</p>
+    <p class="r-dec-rat">The converter model needs the plasma&#x27;s flux at the conductors, not a new equilibrium. Prescribing it from DINA keeps the plant consistent with the scenario the coil currents come from, and the scale factor to DINA&#x27;s current measures that consistency directly.</p>
     </div>
 <div class="r-dec" data-key="d-ippc-passive" data-choice="a full passive current model evolved in nova, valid across the converter band" data-by="Simon McIntosh" data-when="2026-10-14T16:20:00+00:00">
     <p class="r-dec-q">Where does the passive current model live?</p>
     <p class="r-dec-rat">nova owns the conductor geometry, the kernels and the L/R solvers, so the vessel currents are evolved here and exported to power_convertor, rather than rebuilt there.</p>
+    </div>
+<div class="r-dec" data-key="d-ippc-interface" data-choice="every coupling computed by nova; DINA&#x27;s coupling matrices not used; power_convertor imports one narrow call built on nova&#x27;s existing capabilities" data-by="Simon McIntosh" data-when="2026-10-14T17:37:21+00:00">
+    <p class="r-dec-q">d-ippc-interface</p>
+    <p class="r-dec-rat">The lead directed on 14 October 2026 that DINA&#x27;s coupling matrices are neither needed nor used, that the couplings are calculated directly with nova, and that nova is an imported capability with a narrow interface, using as much of its existing machinery as possible and integrated with power_convertor&#x27;s existing ITER converter models. power_convertor moves to Python 3.14 to import it.</p>
     </div>
 </section>
   </main>

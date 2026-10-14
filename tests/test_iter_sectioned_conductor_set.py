@@ -17,6 +17,7 @@ from nova.circuit.linkage import (
 from nova.circuit.passive import terminal_impedance_spectrum
 from nova.imas.machine import MachineCoil, MachineSection
 from nova.imas.pulsedesign import ITER
+from scripts.iter_sectioned_conductor_set.build import calculate
 
 
 def _rectangle(name: str, turns: float) -> MachineSection:
@@ -129,12 +130,21 @@ def test_surface_graded_wall_preserves_parallel_conductance():
 
 def test_parallel_linkage_columns_equal_serial_result():
     conductors = ConductorSet(
-        r=[1.0, 1.5], z=[0.0, 0.2], dr=[0.04, 0.03], dz=[0.04, 0.03],
-        current_share=[2.0, 3.0], circuit=[0, 1],
+        r=[1.0, 1.5],
+        z=[0.0, 0.2],
+        dr=[0.04, 0.03],
+        dz=[0.04, 0.03],
+        current_share=[2.0, 3.0],
+        circuit=[0, 1],
     )
     serial = circuit_linkage_matrix(conductors, [0, 1], workers=1)
     parallel = circuit_linkage_matrix(conductors, [0, 1], workers=2)
     np.testing.assert_allclose(parallel, serial, rtol=0, atol=0)
+
+
+def test_frequency_grid_rejects_single_sample():
+    with pytest.raises(ValueError, match="two frequency samples"):
+        calculate(0.04, 3, frequency_samples=1)
 
 
 def test_passive_screening_changes_terminal_impedance_and_removal_is_bare():

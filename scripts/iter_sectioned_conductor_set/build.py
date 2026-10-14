@@ -164,12 +164,16 @@ def calculate(
     max_thickness: float,
     section_n_max: int,
     *,
+    frequency_samples: int = 21,
     surface_layer_m: float | None = None,
     workers: int = 1,
     cache_root: Path | None = None,
     terminal_reference: np.ndarray | None = None,
     raw_linkage: bool = False,
 ) -> dict:
+    if frequency_samples < 2:
+        raise ValueError("at least two frequency samples are required")
+    frequency = np.geomspace(FREQUENCY[0], FREQUENCY[-1], frequency_samples)
     conductors, coil_names, owner, thickness, source_resistance, passive_name = (
         source_conductors()
     )
@@ -275,7 +279,7 @@ def calculate(
         passive_matrix,
         resistance,
         series,
-        FREQUENCY,
+        frequency,
         terminal_resistance=coil_resistance,
     )
     bare = terminal_impedance_spectrum(
@@ -284,12 +288,12 @@ def calculate(
         np.empty((0, 0)),
         np.empty(0),
         series,
-        FREQUENCY,
+        frequency,
         terminal_resistance=coil_resistance,
     )
     expected_bare = (
         coil_resistance[None, :]
-        + 2j * np.pi * FREQUENCY[:, None] * np.diag(coil_matrix)[None, :]
+        + 2j * np.pi * frequency[:, None] * np.diag(coil_matrix)[None, :]
     )
     bare_error = float(
         np.max(np.abs(np.diagonal(bare, axis1=1, axis2=2) / expected_bare - 1))
@@ -317,7 +321,7 @@ def calculate(
         "raw_coil_inductance_h": raw_coil_matrix.tolist(),
         "coil_resistance_ohm": coil_resistance.tolist(),
         "terminal_reference_applied": not raw_linkage,
-        "frequency_hz": FREQUENCY.tolist(),
+        "frequency_hz": frequency.tolist(),
         "screened_real_ohm": np.diagonal(screened.real, axis1=1, axis2=2).tolist(),
         "screened_imag_ohm": np.diagonal(screened.imag, axis1=1, axis2=2).tolist(),
         "bare_imag_ohm": np.diagonal(bare.imag, axis1=1, axis2=2).tolist(),
@@ -331,6 +335,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--max-thickness", type=float, required=True)
     parser.add_argument("--section-n-max", type=int, default=3)
+    parser.add_argument("--frequency-samples", type=int, default=21)
     parser.add_argument("--surface-layer", type=float)
     parser.add_argument("--workers", type=int, default=1)
     parser.add_argument("--cache-root", type=Path)
@@ -346,6 +351,7 @@ def main() -> None:
     result = calculate(
         args.max_thickness,
         args.section_n_max,
+        frequency_samples=args.frequency_samples,
         surface_layer_m=args.surface_layer,
         workers=args.workers,
         cache_root=args.cache_root,

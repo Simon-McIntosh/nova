@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="iter-passive-plasma-circuit-landed">
+  <meta name="plan-title" content="ITER Passive and Prescribed-Plasma Circuit — landed record">
+  <meta name="plan-summary" content="Closure synthesis for ITER Passive and Prescribed-Plasma Circuit: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).">
+  <meta name="plan-evidence-for" content="iter-passive-plasma-circuit">
+  <meta name="plan-verdict" content="qualified">
+  <title>ITER Passive and Prescribed-Plasma Circuit — landed record | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+ <main class="plan-doc">
+  <h1>ITER Passive and Prescribed-Plasma Circuit — landed record</h1>
+  <p>Closure synthesis for ITER Passive and Prescribed-Plasma Circuit: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).</p>
+
+
+   <section id="iter-prescribed-plasma">
+    <h2>§2 — the plasma prescribed from DINA landed</h2>
+    <p><code>nova/imas/profiles.py</code> is extended and <code>nova/imas/prescribed_plasma.py</code> added (merged at <code>c39d9aba9</code> from <code>fa74d76</code>). Each DINA equilibrium slice's plasma current is prescribed inside a closed boundary: the separatrix cut at its X-point, or DINA's own closed boundary outline, with no ψ-contour fallback needed. The current comes from the 1-D flux functions and the 2-D ψ map, scaled to DINA's plasma current. The flux it links at any conductor geometry is computed with nova's own kernels.</p><p>On 105014/1 (2 MA) all 867 active slices are prescribed and on 105052/1 (15 MA) all 2,036; the centroids follow DINA's within 4.3 mm and 27.8 mm, under one grid cell. The reference is nova's reconstruction of DINA's plasma flux: DINA's ψ map less the coil and passive contributions nova computes from DINA's currents. The prescribed plasma's linked flux matches it to at most 1.08 Wb and 2.52 Wb within the case bounds the record states. The 105014/1 magnetics loops agree to at most 0.87 Wb. DINA's coupling matrices are not used. A 1 cm vertical shift changes the linked flux by the predicted ∂ψ/∂Z, and a tightened gate fails as it should.</p><p>DINA's ψ map covers only 2 of the 14 coil sections, so the other 12 are checked against DINA's current density through nova's kernels, which is a weaker reference. The independent geometric VS3 comparison moves to §3, which has §1's sections. The review scored 18 to 20 after three rounds. Record: <a href="/nova/research/iter-prescribed-plasma">iter-prescribed-plasma</a>.</p>
+  </section>
+
+</main>
+</body>
+</html>

@@ -21,11 +21,11 @@
   <meta name="plan-sprint" content="S24">
   <meta name="plan-tags" content="iter,machine-description,equilibrium">
   <meta name="plan-blocks" content="power_convertor:iter-switched-terminal-transients">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
   <title>ITER Passive and Prescribed-Plasma Circuit | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 <meta name="plan-modified" content="2026-10-14">
 </head>
 <body>
@@ -92,7 +92,7 @@
     structure.</p>
 
     <h2 id="s2">§2 — The plasma, prescribed from DINA</h2>
-<section data-reckon="section" data-id="s2" data-effort-hours="5.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s2" data-effort-hours="5.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
     <p>The plasma is not solved. Its current distribution at each DINA equilibrium slice is built in four
     steps:
     </p>
@@ -211,6 +211,11 @@
     <p class="r-dec-rat">The lead decided on 14 October 2026 that the coupled plant must accept a reconstructed plasma as well as a DINA simulation, so the switched model can replay real discharges, starting with JT-60SA, where the stray capacitances and inductances can be observed on a smaller machine of similar construction.</p>
     </div>
 </section>
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s2" data-id="c-close-s2" data-who="reckon-build" data-when="2026-10-14T18:42:00Z">
+    <div class="r-comment-body"><p>§2 landed (merged <code>c39d9aba9</code>): DINA plasma prescribed on 105014/1 and 105052/1, every active slice, centroids within 4.3 and 27.8 mm, linked flux checked with nova's own kernels and no DINA coupling matrices. The VS3 geometric check moves to §3. <a href="/nova/evidence/archive/iter-passive-plasma-circuit-landed.html#iter-prescribed-plasma">evidence</a></p></div>
+</div>
+</section>
+</main>
 </body>
 </html>

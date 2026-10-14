@@ -5,12 +5,14 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import re
 
 import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.patches import Polygon, Rectangle
+from matplotlib.path import Path as MplPath
+from matplotlib.patches import PathPatch
 import numpy as np
 
 from nova.circuit.conductor import subdivide_passive_thickness
@@ -38,29 +40,42 @@ def geometry_figure(
     )
     fig, ax = plt.subplots(figsize=(14, 17), dpi=100)
     poloidal_axes(ax)
-    for stripe in refined.conductors.polygon_sections:
+
+    def outlines(shapes, color, linewidth):
+        vertices = []
+        codes = []
+        for corners in shapes:
+            vertices.extend([*corners, corners[0]])
+            codes.extend([MplPath.MOVETO, *([MplPath.LINETO] * 3), MplPath.CLOSEPOLY])
         ax.add_patch(
-            Polygon(
-                stripe.vertices,
-                closed=True,
+            PathPatch(
+                MplPath(np.asarray(vertices), codes),
                 fill=False,
-                edgecolor=PASSIVE,
-                linewidth=0.25,
+                edgecolor=color,
+                linewidth=linewidth,
             )
         )
+
+    outlines(
+        (section.vertices for section in refined.conductors.polygon_sections),
+        PASSIVE,
+        0.25,
+    )
+    coils = []
     for index in range(n_section):
         r, z = refined.conductors.r[index], refined.conductors.z[index]
         width, height = refined.conductors.dr[index], refined.conductors.dz[index]
-        ax.add_patch(
-            Rectangle(
-                (r - width / 2, z - height / 2),
-                width,
-                height,
-                fill=False,
-                edgecolor=ACTIVE,
-                linewidth=0.65,
+        coils.append(
+            np.array(
+                [
+                    [r - width / 2, z - height / 2],
+                    [r + width / 2, z - height / 2],
+                    [r + width / 2, z + height / 2],
+                    [r - width / 2, z + height / 2],
+                ]
             )
         )
+    outlines(coils, ACTIVE, 0.65)
     for index, name in enumerate(coil_names):
         if name.startswith("CS") and name != "CS3U":
             continue
@@ -78,6 +93,21 @@ def geometry_figure(
     ax.set_ylim(-14, 17)
     fig.tight_layout()
     fig.savefig(path)
+    svg = path.read_text()
+    svg = re.sub(
+        r'\sd="([^"]+)"',
+        lambda match: (
+            ' d="'
+            + re.sub(
+                r"-?\d+\.\d{4,}",
+                lambda number: f"{float(number.group()):.3f}".rstrip("0").rstrip("."),
+                match.group(1),
+            )
+            + '"'
+        ),
+        svg,
+    )
+    path.write_text("\n".join(line.rstrip() for line in svg.splitlines()) + "\n")
     plt.close(fig)
 
 

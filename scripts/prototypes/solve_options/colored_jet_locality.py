@@ -2,6 +2,7 @@
 
 # ruff: noqa: E402
 import argparse
+from dataclasses import replace
 import json
 from pathlib import Path
 import resource
@@ -34,7 +35,7 @@ def _colors(index, count):
     return colors
 
 
-def run(kind, cells, cache, bias_row, newton_row, out):
+def run(kind, cells, cache, bias_row, newton_row, out, mode):
     if jax.default_backend() != "gpu" or jax.config.jax_enable_x64 is not True:
         raise RuntimeError("coloured jet measurement requires H200 double precision")
     (
@@ -67,14 +68,27 @@ def run(kind, cells, cache, bias_row, newton_row, out):
     colors = _colors(index, len(operands.nodes))
     color_count = int(np.max(colors)) + 1
     geometry = operands.geometry
+    local_quadrature = replace(quadrature, target_current=None)
 
     def booking(jets):
         bell = fixed_points.field_from_jets(jets, operands.sample_index, operands.mesh)
         reading = topology.read_at_stationary_points(
             bell, geometry, convention, policy, support.stationary
         )
+        if mode == "fixed-global":
+            reading = reading._replace(
+                axis_flux=jax.lax.stop_gradient(support.reading.axis_flux),
+                boundary_flux=jax.lax.stop_gradient(support.reading.boundary_flux),
+                saddle_form=jax.tree.map(
+                    jax.lax.stop_gradient, support.reading.saddle_form
+                ),
+            )
         booked = current.book(
-            jets[operands.sample_index, 0], reading, geometry, profile, quadrature
+            jets[operands.sample_index, 0],
+            reading,
+            geometry,
+            profile,
+            local_quadrature if mode == "fixed-global" else quadrature,
         )
         return jnp.stack(booked[:3], axis=-1)
 
@@ -114,6 +128,7 @@ def run(kind, cells, cache, bias_row, newton_row, out):
         raise ValueError("coloured jet tangent controls failed")
     reconstruction = float(np.max(np.abs(actual - predicted))) / response_max
     result = dict(
+        mode=mode,
         kind=kind,
         requested_cells=cells,
         realised_cells=len(initial),
@@ -133,7 +148,9 @@ def run(kind, cells, cache, bias_row, newton_row, out):
         host_peak_rss_kib=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
     )
     out.mkdir(parents=True, exist_ok=True)
-    (out / f"{kind}-{cells}.json").write_text(json.dumps(result, indent=2) + "\n")
+    (out / f"{kind}-{cells}-{mode}.json").write_text(
+        json.dumps(result, indent=2) + "\n"
+    )
     print("RESULT " + json.dumps(result), flush=True)
 
 
@@ -145,12 +162,21 @@ def main():
     parser.add_argument("--bias-row", type=Path, required=True)
     parser.add_argument("--newton-row", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--mode", choices=("direct", "fixed-global"), default="direct")
     args = parser.parse_args()
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     print(f"revision={revision} tree={Path.cwd().resolve()}", flush=True)
     print(f"NOVA_MODULE={nova.__file__}", flush=True)
     print(f"CWD={Path.cwd().resolve()} DEVICE={jax.devices()}", flush=True)
-    run(args.kind, args.cells, args.cache, args.bias_row, args.newton_row, args.out)
+    run(
+        args.kind,
+        args.cells,
+        args.cache,
+        args.bias_row,
+        args.newton_row,
+        args.out,
+        args.mode,
+    )
 
 
 if __name__ == "__main__":

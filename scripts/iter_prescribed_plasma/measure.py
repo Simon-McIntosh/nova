@@ -484,7 +484,7 @@ def main():
         "independent_coil_families": [
             str(coil.name).strip() for coil in list(active.coil)[:11]
         ],
-        "excluded_coil_family": "VS3: four coupling columns for two stored elements",
+        "geometry_unmapped_coil_family": "VS3: four coupling columns for two stored elements",
         "vertical_shift_control": vertical_control,
     }
     (OUTPUT / "summary.json").write_text(

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="research">
+<meta name="plan-slug" content="forward-solve-options">
+<meta name="plan-title" content="Options for a sub-millisecond converged forward solve">
+<meta name="plan-summary" content="Measured solver and booking costs, alternative formulations, and their accuracy tradeoffs on fine analytic certificates">
+<meta name="plan-status" content="reference">
+<meta name="plan-informs" content="converged-forward-solve">
+<meta name="plan-tags" content="equilibrium,grad-shafranov,fixed-point,topology,jax,convergence">
+<title>Forward solve options | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<header><h1>Options for a sub-millisecond converged forward solve</h1>
+<p>The target is a warm-started, converged forward equilibrium in less than 1 ms on an H200 at about 2,000–10,000 cells. This record distinguishes measured solve walls from component timings and estimates. An algebraic residual below 1e-12 does not by itself qualify the flux, root selection, constraint rows or map fidelity.</p></header>
+
+<section id="budget"><h2>Budget and existing solver</h2>
+<p>The solve is a fixed point in cell moments, <code>m = book(read(ψext + Gm))</code>. A two-step solve has less than 0.5 ms per step for the read, membership, booking, image, Jacobian update and convergence check combined; a three-step solve has less than 0.333 ms. Cold compilation and carrier preparation are reported separately. A predecessor's warm factorisation can be excluded from an individual slice only when the receipt identifies which preceding slice produced it and includes the cost of refreshing it over the sequence.</p>
+<p>The exact-booking prototype already measured 26.0 ms at 2,098 cells and 85.4 ms at 5,158 cells on the H200. It is thus at least 26–85 times the total target before the fixed-point read or linear solve. This is a component lower bound, not an end-to-end solve timing. The <a href="/nova/plans/converged-forward-solve.html#s5">live acceptance section</a> remains the authority for the joint accuracy clauses.</p>
+<table><caption>Held moment-space Newton receipts, analytic seed, exact booking at 512 segments. Replay timings are separate experiments and are not added to solve wall.</caption><thead><tr><th>Certificate</th><th>Cells</th><th>Steps; residual</th><th>Kernel solve</th><th>Receipt wall; cold compile</th><th>Jacobian replay; LU replay</th><th>Flux error</th><th>GPU peak</th></tr></thead><tbody>
+<tr><td>Limited</td><td>2,105</td><td>3; 8.03e-15</td><td>775.92 s</td><td>874.74 s; 70.55 s</td><td>697.20 s; 0.0889 s</td><td>1.080e-5</td><td>10.56 GB</td></tr>
+<tr><td>Diverted</td><td>2,098</td><td>3; 9.97e-13</td><td>412.48 s</td><td>510.92 s; 76.86 s</td><td>447.98 s; 0.0889 s</td><td>1.640e-4</td><td>10.55 GB</td></tr>
+<tr><td>Limited</td><td>5,167</td><td>2; 1.06e-13</td><td>2,530.36 s</td><td>2,639.92 s; 87.66 s</td><td>unmeasured</td><td>1.976e-6</td><td>43.28 GB</td></tr>
+</tbody></table>
+<p>Sources: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T185617649894-moment-space-newton/validated-booking-20261014T005433Z/newton/{limited-2000,diverted-2000,limited-5000}.json</code>. The 5,167-cell row completed only its analytic solve before the enclosing allocation timed out. The limited 2,105 and diverted 2,098 production seeds both produced nonfinite initial residuals and accepted zero steps because the axis or saddle read returned <code>WRONG_ROOT</code>. No warm-neighbouring-slice sequence was measured in those receipts.</p>
+</section>
+
+<section id="candidates"><h2>Formulations to compare</h2>
+<table><thead><tr><th>Option</th><th>Work changed</th><th>Accuracy and robustness question</th><th>Latency question</th></tr></thead><tbody>
+<tr><td>Exact booking, structured Jacobian</td><td>Keep connected fragments and exact integration. Assemble the local derivative by stencil-coloured JVPs, add implicit axis/saddle/normalisation tangents as low-rank terms, then factor <code>I − (dB/dψ)G</code>.</td><td>The full derivative must match finite differences on both topologies, including moving cut geometry; the diverted 2,098-cell dense JVP currently disagrees by 0.256 at its finest resolved step.</td><td>Measure assembly and factor walls separately. Existing dense replay spends 137–167 s per Jacobian and about 0.03 s per LU at 2,098 cells.</td></tr>
+<tr><td>Hard fixed-node quadrature</td><td>Integrate current at cell centroids or a fixed small Gauss set with a binary membership test; delete polygon clipping if this becomes the one accepted booking.</td><td>A cell crossing the boundary changes discontinuously. Compare booked moments and mapped flux to the exact support on every certificate rung, and perturb across boundary changes before trusting a JVP.</td><td>Point evaluation can be cheap; topology and the magnetic image still have to fit the per-step budget.</td></tr>
+<tr><td>One-pitch smoothed membership</td><td>Replace the binary test by a transition of width about one local pitch; eliminate clipping if the biased map qualifies.</td><td>The transition carries current outside the exact connected support and changes the equation. Measure flux bias and its order; a smooth tangent of the biased equation is not a tangent of the exact one.</td><td>Measure sigmoid booking and any iteration savings against the extra bias.</td></tr>
+<tr><td>Frozen-support chord or relaxed Picard</td><td>Hold cut geometry through inner iterations and refresh when membership changes.</td><td>The terminal state must be checked again with the live exact read and booking. A frozen-map residual cannot certify the exact map or a saddle transition.</td><td>Count every refresh and compare warm and cold iteration counts, including refusals.</td></tr>
+<tr><td>One or two warm Newton steps with cached factor</td><td>Reuse the preceding slice's factor and update the nonlinear state once or twice; maintain a cache keyed by geometry, source and root branch.</td><td>Convergence and a valid branch are conditional on neighbouring-slice distance. Production seeds currently fail at step zero; they cannot be reported as warm tracking.</td><td>Measure solve, cache validation and amortised refactor walls across a declared slice sequence.</td></tr>
+<tr><td>Published real-time reconstructions</td><td>Use a different numerical representation and often a different problem: infer an equilibrium from diagnostics on a fixed rectangular grid.</td><td>Published real-time accuracy is judged against experiment or another reconstruction. It does not establish Nova's closed-form flux, exact current support, 1e-12 residual or production-seed clauses.</td><td>Use published timing as a design clue, with grid size and per-iteration versus whole-cycle timing stated.</td></tr>
+</tbody></table>
+</section>
+
+<section id="literature"><h2>Published speed and its scope</h2>
+<p><a href="https://www.sciencedirect.com/science/article/pii/S0920379614005973">LIUQE's real-time implementation</a> reports a cycle shorter than 200 μs for a 28 × 65 grid and 133 measurements. It uses an iterative Poisson solve with a linear parameterisation of current density for equilibrium reconstruction. This is evidence that a smaller fixed-grid reconstruction can meet a sub-millisecond control cycle, not evidence that exact cut-cell booking and a converged forward map can do so.</p>
+<p>The <a href="https://www.nifs.ac.jp/report/nifs_proc_97.pdf">P-EFIT GPU report</a> gives roughly 250 μs per iteration on a 65 × 65 grid. A later <a href="https://www.sciencedirect.com/science/article/abs/pii/S0920379616301302">EAST implementation report</a> describes eight to nine converged iterations in about 2.5 ms. Per-iteration and full-solve claims must remain separate. <a href="https://docs.freegsnke.com/api/freegsnke.gsstaticsolver">FreeGSNKE's solver documentation</a> identifies a Newton–Krylov method with finite-difference Jacobian approximations; it does not provide a sub-millisecond H200 measurement or Nova-certificate error.</p>
+</section>
+
+<section id="measurement"><h2>Certificate measurement</h2>
+<p>The prototype in <code>scripts/prototypes/solve_options</code> reads device-built machine groups from the prior certified caches and runs all six certificate/grid rows inside one H200 allocation. Per-stage walls are synchronized medians of five warm calls; compilation, machine load and Bell-mesh preparation are separate. Point-booking moment error is a comparison to exact booked moments at the same analytic field, not yet the mapped flux error or a converged-solve error. The logged module path and carrier key identify the code and data actually measured.</p>
+<p>The initial device profile is in flight. Its first 2,105-cell limited row measured exact booking at 47.39 ms, hard-centroid booking at 0.0837 ms and one-pitch sigmoid booking at 0.0889 ms. Their relative-sup moment differences from exact are 0.407 and 0.343. The 2,098-cell diverted row measured 26.15, 0.0826 and 0.0929 ms respectively, with moment differences 0.645 and 0.528. These are distinct physical cases; the point methods use one centroid per cell. The initial script also times <code>topology.read</code>, the older full census, at 8.06 and 7.52 seconds. That is deliberately excluded from the locked read budget; a separate Bell-membership and <code>Gm</code> profile is being prepared.</p>
+<p>The required next measurements are the remaining four rung/case component rows, full moving-support structured Jacobian and factor, finite-difference tangent controls, mapped flux bias and convergence order, warm and cold solve totals, and production-seed outcome for each option. Until those receipts exist, no alternative is certified to meet 1 ms. A credible recommendation must account for the cheapest method's physical bias as well as its launch latency.</p>
+</section>
+</main></body>
+</html>

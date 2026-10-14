@@ -582,6 +582,43 @@
   "plan_link": null,
   "promoted_by": "review-self",
   "promoted_revision": "eca0114a561aa951e2bd9d7cc6bfb3fdc18cf589",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 15258,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261014T042302860717-review-of-stencil-ten-thousand-5c7874b0c9ef",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 15258,
+        "path": "/tmp/reckon-crew-scratch/r-20261014T042302860717-review-of-stencil-ten-thousand-5c7874b0c9ef"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-stencil-ten-thousand-5c7874b0c9ef",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

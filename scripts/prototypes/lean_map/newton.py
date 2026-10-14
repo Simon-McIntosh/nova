@@ -19,9 +19,18 @@ def _scaled_norm(residual, scale):
     return jnp.max(jnp.abs(residual / scale))
 
 
+def _jacobian(residual, moments):
+    """Differentiate columns in bounded batches to cap live tangent storage."""
+    _, push = jax.linearize(residual, moments)
+    basis = jnp.eye(moments.size, dtype=moments.dtype).reshape(
+        (moments.size,) + moments.shape
+    )
+    columns = jax.lax.map(push, basis, batch_size=8)
+    return columns.reshape((moments.size, moments.size)).T
+
+
 def dense_newton(residual, start, scale, *, steps=8, tolerance=1e-12):
     """Scan one compiled Newton site with a fixed four-trial line search."""
-    size = start.size
     alphas = jnp.asarray((1.0, 0.5, 0.25, 0.125))
 
     def one_step(state, _):
@@ -30,7 +39,7 @@ def dense_newton(residual, start, scale, *, steps=8, tolerance=1e-12):
         norm = _scaled_norm(value, scale)
 
         def advance(_):
-            matrix = jax.jacfwd(residual)(moments).reshape((size, size))
+            matrix = _jacobian(residual, moments)
             correction = jnp.linalg.solve(matrix, -value.reshape(-1)).reshape(
                 moments.shape
             )
@@ -68,7 +77,7 @@ def dense_newton(residual, start, scale, *, steps=8, tolerance=1e-12):
 
 def factor_at(residual, moments):
     """Factor the full dense derivative once for a neighbouring slice."""
-    matrix = jax.jacfwd(residual)(moments).reshape((moments.size, moments.size))
+    matrix = _jacobian(residual, moments)
     return lu_factor(matrix)
 
 

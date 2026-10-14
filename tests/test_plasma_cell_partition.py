@@ -5,6 +5,7 @@ import numpy as np
 from scipy.spatial import Delaunay
 
 from nova.biot.plasmagrid import PlasmaGrid, hex_ring_slots
+from nova.equilibrium.stencil_mesh import RING_CONDITION_LIMIT, ring_condition
 from nova.equilibrium.cell_partition import (
     cell_partition_geometry,
     missing_link_mask,
@@ -65,6 +66,38 @@ def test_distorted_complete_ring_uses_distinct_cyclic_slots():
     slots = hex_ring_slots(centre, neighbours)
 
     _assert_distinct_cyclic_slots(centre, neighbours, slots)
+
+
+def test_wall_distorted_ring_is_excluded():
+    """A sliver-shifted neighbour strip cannot support quadratic derivatives."""
+    points = np.array(
+        [
+            [1.3646725307163263, -1.1438652674354455],
+            [1.3368487781551448, -1.109433751965528],
+            [1.4087248240478032, -1.1823217617300184],
+            [1.3766692143848032, -1.1533525974088261],
+            [1.3746890268159402, -1.1389157480804086],
+            [1.3603879495036149, -1.1300050754226518],
+            [1.3478710047771272, -1.1195692277868838],
+        ]
+    )
+    adjacency = (np.array([0, 6, 6, 6, 6, 6, 6, 6]), np.arange(1, 7))
+    assert ring_condition(points, np.arange(7)[None, :])[0] > RING_CONDITION_LIMIT
+    stencil, centre = PlasmaGrid.loop_neighbour_vertices(
+        points, adjacency, np.empty(0, dtype=int)
+    )
+    assert stencil.shape == (0, 7)
+    assert centre.size == 0
+
+    angles = np.arange(6) * np.pi / 3.0
+    regular = np.vstack(
+        ([2.0, 0.0], [2.0, 0.0] + np.c_[np.cos(angles), np.sin(angles)])
+    )
+    stencil, centre = PlasmaGrid.loop_neighbour_vertices(
+        regular, adjacency, np.empty(0, dtype=int)
+    )
+    assert stencil.shape == (1, 7)
+    np.testing.assert_array_equal(centre, [0])
 
 
 def test_randomly_distorted_complete_rings_preserve_cyclic_order():

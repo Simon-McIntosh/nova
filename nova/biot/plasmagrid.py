@@ -359,7 +359,7 @@ class PlasmaGrid(BaseGrid, PlasmaLoc):
 
     @staticmethod
     def loop_neighbour_vertices(points, neighbor_vertices, boundary_vertices):
-        """Calculate 6-point ordered loop vertex indices."""
+        """Calculate ordered neighbour rings that support a quadratic fit."""
         point_number = len(points)
         neighbours = np.full((point_number, 6), -1)
         for i in range(len(points)):
@@ -377,6 +377,17 @@ class PlasmaGrid(BaseGrid, PlasmaLoc):
         stencil = np.append(
             np.arange(point_number)[mask].reshape(-1, 1), neighbours[mask], axis=1
         )
+        if len(stencil):
+            from nova.equilibrium.stencil_mesh import (  # noqa: PLC0415
+                RING_CONDITION_LIMIT,
+                ring_condition,
+            )
+
+            # Wall-clipped slivers can pull otherwise adjacent centroids into a
+            # nearly collinear ring, which cannot carry reliable derivatives.
+            supported = ring_condition(points, stencil) <= RING_CONDITION_LIMIT
+            stencil = stencil[supported]
+            stencil_index = stencil_index[supported]
         return stencil, stencil_index
 
     def tessellate(self, target: Target, wall: LineString):

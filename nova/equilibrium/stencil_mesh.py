@@ -25,8 +25,9 @@ linear functional of the ring values. The coordinates are centred on the ring
 centre and scaled by the ring half-width before the fit, the normalisation
 :class:`~nova.biot.null.Null2D` already applies, which is what keeps the design
 matrix conditioned at a metre-scale major radius: on a regular hexagonal ring
-its condition number is 5.5, and a quarter-pitch centroid displacement — far
-more than first-wall clipping produces — leaves it under twenty.
+its condition number is 5.5, and a quarter-pitch centroid displacement leaves
+it under twenty. A near-collinear ring caused by wall-clipped slivers is omitted
+at selection instead of being fitted.
 
 A hexagonal ring determines the full quadratic rather than the Laplacian alone.
 Restricted to the six ring points the quadratic basis spans the angular modes
@@ -79,9 +80,8 @@ __all__ = [
 ]
 
 #: Largest normalised design-matrix condition number a ring may carry. A
-#: regular hexagonal ring sits at 5.5 and irregular ones climb slowly, so the
-#: limit is far above any tiling and still catches the failure it exists for: a
-#: cluster whose points are collinear, coincident or otherwise unable to
+#: regular hexagonal ring sits at 5.5 and ordinary irregular ones climb slowly.
+#: The limit catches clusters whose points are collinear, coincident or unable to
 #: determine a quadratic, which pinv would answer with a plausible-looking
 #: least-norm fit rather than an error.
 RING_CONDITION_LIMIT = 1.0e3

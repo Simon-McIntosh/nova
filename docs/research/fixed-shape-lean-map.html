@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="research">
+<meta name="plan-slug" content="fixed-shape-lean-map">
+<meta name="plan-title" content="Fixed-shape lean forward map">
+<meta name="plan-summary" content="Certificate measurements of connected current quadrature, a dense interior map, and a bounded jet read">
+<meta name="plan-status" content="draft">
+<meta name="plan-informs" content="converged-forward-solve">
+<meta name="plan-source" content="analytic limited and diverted certificates on the H200">
+<meta name="plan-source-quality" content="primary">
+<meta name="plan-tags" content="equilibrium,grad-shafranov,fixed-point,topology,jax,convergence">
+<title>Fixed-shape lean forward map | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<header>
+  <p class="eyebrow">Research input</p>
+  <h1>Fixed-shape lean forward map</h1>
+  <p class="lead">The hard-centroid bias comes from booking support as a binary point decision. Restricting the bulk to connected full cells and retaining exact cut-cell moments restores refinement. A fixed-shape values and jet map is being measured against the joint acceptance.</p>
+</header>
+
+<section id="point-bias"><h2>Point-booking bias and correction</h2>
+<p>The earlier <a href="/nova/research/forward-solve-options.html">forward-solve options</a> measurement reported a diverted hard-centroid map error near 0.42 from about 2,000 to 10,000 cells and a limited plateau near 0.0036. The independent replay here reproduced 0.418807 at 2,098 diverted cells and 0.409206 at 5,158 cells, using the same analytic field and exact-support exterior. Its exact booked control was 1.77 × 10<sup>−5</sup> and 4.36 × 10<sup>−6</sup>, respectively, so the comparison resolves a current-image signal rather than a uniform or zero field.</p>
+<p>The point mask counts a selected cut cell as a whole source and can select detached private-flux cells below the saddle. At 2,098 diverted cells it selected 419 partial cells and 21 cells with zero connected membership; the latter held 1.22% of its unnormalised point current. The correction books only connected full cells at their centroid and reuses exact first moments for every partial cell, then normalises once to the same current. It reduces diverted error by factors of 226 and 716 at the two measured sizes. This is a diagnosis of the combined area, component and first-moment error. A separate control is queued to isolate the private-cell contribution from the cut-cell contribution.</p>
+<table><caption>Analytic-state map error, maximum flux difference divided by axis-to-boundary span. Rows use read-only certificate carriers and the exact-support exterior.</caption>
+<thead><tr><th>Topology</th><th>Realised cells</th><th>Hard centroid</th><th>Connected full plus exact cuts</th><th>Exact booked control</th></tr></thead><tbody>
+<tr><td>Limited</td><td>2,105</td><td>0.007114</td><td>0.00008812</td><td>0.000004693</td></tr>
+<tr><td>Limited</td><td>5,167</td><td>0.003626</td><td>0.00003258</td><td>0.0000006501</td></tr>
+<tr><td>Diverted</td><td>2,098</td><td>0.418807</td><td>0.001850</td><td>0.00001766</td></tr>
+<tr><td>Diverted</td><td>5,158</td><td>0.409206</td><td>0.0005712</td><td>0.000004364</td></tr>
+</tbody></table>
+<p>The corrected errors decrease with refinement on both topologies. The 5,158-cell diverted control uses the previously certified host-built carrier because that was the read-only carrier available at that size; the coarse ladder below builds its own carriers with the device builder. Reproduction and correction are in H200 job 1285574, with one JSON receipt per row under this run.</p>
+</section>
+
+<section id="map"><h2>Fixed-shape representation and early map rows</h2>
+<p>Each regular interior cell has a fixed 18-point triangle-fan Gauss rule. Irregular wall cells and connected partial cells go through one fixed-capacity exact booking batch. A cell source contributes its current and two first moments to a dense precomputed values map at every interior Gauss point. The full six-component nodal jet map is stored, while a machine-sized row gather supplies the active boundary band, wall events and fixed-point windows. A newly cut cell without its nodal rows or a cut count above capacity returns a typed refusal. The 2,105-cell limited quadrature probe reserved 1,075 cut slots for 882 selected cells and returned the refusal code when capacity was deliberately set to one; the compact batch agreed cellwise with the full exact booking.</p>
+<table><caption>First two H200 dense-values rows. The wall is one map evaluation, not a converged solve. The read floor is the matrix byte count divided by a local device-read bandwidth sample.</caption>
+<thead><tr><th>Topology</th><th>Cells</th><th>Map error</th><th>Map wall</th><th>Matrix</th><th>Read floor</th></tr></thead><tbody>
+<tr><td>Limited</td><td>289</td><td>1.4323 × 10<sup>−4</sup></td><td>0.266 ms</td><td>36.1 MB</td><td>0.0358 ms</td></tr>
+<tr><td>Diverted</td><td>282</td><td>6.1896 × 10<sup>−4</sup></td><td>0.144 ms</td><td>34.4 MB</td><td>0.0454 ms</td></tr>
+</tbody></table>
+<p>Both first-rung analytic-state errors clear the requested 10<sup>−3</sup> margin. That fact does not yet select the smallest accepted cell count: the converged residual, root positions, production seeds, full ladder and batched solve walls remain under measurement. The complete receipt will compare every rung and state its joint verdict, including the cold and warm solve wall against 1 ms.</p>
+</section>
+
+<section id="method"><h2>Method and provenance</h2>
+<p>The prototype lives under <code>scripts/prototypes/lean_map</code> and changes no product module. It configures double precision before constructing JAX arrays, records <code>nova.__file__</code> and its worktree in each job log, and runs rows in fresh processes on one reserved H200 per measurement. Coarse certificate carriers and exteriors are built with <code>NOVA_ANALYTIC_ORACLE_BUILDER=device</code> inside this run's cache, leaving the certified caches untouched. The bias replay compares a known nonuniform analytic field to an exact booked control before interpreting a small error as fidelity. Map-only walls are synchronised warm calls and are never added to separately measured solve walls.</p>
+<p>The analytic carriers, point-bias controls, quadrature rows and dense-map ladder are written under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T174345284407-lean-map</code>. The limited and diverted 250-cell carriers are device-built and realised as 289 and 282 cells. This draft will be completed after the remaining ladder, live-map derivative and convergence receipts finish.</p>
+</section>
+</main></body></html>

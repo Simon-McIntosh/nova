@@ -53,6 +53,13 @@
     "The attribution (done-when 4) is delivered by measurement, not bisect: all three named revisions read 0.1973269787169759, and two further revisions (8fe66e390, c3c95a467) and a bracketing pair (1b68b8099, f68870f99) locate the mover at f68870f99, the exterior exact-support merge -- an intended accuracy change, value stable to 1.2e-16 after it.",
     "scripts/analytic_oracle_fixtures/requalify_carriers.py:52 _relative is a symmetric norm-relative (max|a-b| / max(max|a|, max|b|, tiny)), which is the measure done-when(2) names; it is not the pointwise relative_sup at scripts/ring_attribution/localize_support_limit.py:112."
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "carrier-agreement",
+      "recorded_at": "2026-10-14T01:37:56.870820+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/analytic_oracle_fixtures/requalify_carriers.py",

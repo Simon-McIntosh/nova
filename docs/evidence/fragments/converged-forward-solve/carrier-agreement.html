@@ -57,6 +57,18 @@ cell, their coordinates and wall proximity. A separate H200 job, 1284938,
 measures all nine diverted 5,000-cell blocks in one allocation. Neither job's
 absence of an error is treated as a result: their receipts and terminal job
 states must be read before a numerical verdict or floor is stated.</p>
+
+<p>One checked near-field pair already shows why entry provenance matters.
+Target 2735 and cell 1177 are 0.042865&nbsp;m apart; the source centre is
+0.018536&nbsp;m from a limiter vertex. The stored host radial entry is
+1.7621838929108605e-9, while the sampled device entry is
+1.7621838929352127e-9. Fifty-digit evaluation of the same graded area rule
+gives 1.762183892933187e-9: the stored host is 2.2326e-20 away and the
+device is 2.0258e-21 away. Replaying the host on the complete target batch
+returns the stored value exactly; evaluating that target alone changes the
+reduction by 2.5623e-20. The sample pair's norm-relative host-device gap is
+2.3051e-13, below the block's reported maximum. This is an entry check, not
+a bound on the remaining 61.7 million entries.</p>
 </main>
 </body>
 </html>

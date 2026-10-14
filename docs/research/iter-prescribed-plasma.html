@@ -23,7 +23,7 @@
     <header>
       <p class="eyebrow">Execution evidence</p>
       <h1>ITER plasma prescribed from DINA</h1>
-      <p class="lead">The current prescription follows DINA's centre to 4.14 mm and its plasma flux to 2.17% at the mapped CS/PF coils and 0.41% at flux loops; VS3 still needs a section mapping.</p>
+      <p class="lead">The current prescription follows DINA's centre to 4.14 mm and its plasma flux to 2.17% at mapped CS/PF coils, 0.43% across all active-grid coupling columns, and 0.41% at flux loops.</p>
     </header>
 
     <section id="source-and-method">
@@ -57,10 +57,13 @@
     <section id="linked-flux-check">
       <h2>Independent linked-flux check</h2>
       <p>At 24 indices spanning the active interval, DINA's own <code>profiles_2d.j_tor</code> multiplied by grid-cell area supplies an independent current vector. Its C-order flattening is confirmed by the 24 by 8,385 <code>em_coupling.mutual_loops_grid</code> matrix: the alternate flattening gives multi-weber errors, whereas the chosen order tracks the direct ring calculation. DINA's 8,385 by 15 <code>mutual_grid_active</code> matrix gives plasma-only flux at active conductors. The first 11 columns map to CS3U, CS2U, CS1, CS2L, CS3L and PF1–PF6; CS1's column links both of its stored sections, so their predicted fluxes are summed. This supplies a coil reference even where the 2-D map stops at R = 3 m.</p>
+      <p>The prescribed cell-current vector is also projected through all 15 stored active-grid mutual columns and compared with the projection of DINA's <code>j_tor</code>. This checks source-distribution consistency for the four remaining active channels without inventing their physical section mapping. It shares DINA's target coupling matrix, so it is a distinct check from the independent geometric Green-function comparison for the first 11 coil families.</p>
       <table>
         <thead><tr><th>Independent DINA reference</th><th>Comparisons</th><th>Median absolute relative residual</th><th>Maximum</th><th>Stated tolerance</th></tr></thead>
         <tbody>
           <tr><td>Eleven CS/PF coil families</td><td>264</td><td>0.382%</td><td>2.168%</td><td>2.5%</td></tr>
+          <tr><td>All fifteen active-grid mutual columns</td><td>360</td><td>0.0911%</td><td>0.427%</td><td>0.5%</td></tr>
+          <tr><td>Four active-grid columns awaiting section mapping</td><td>96</td><td>0.1146%</td><td>0.427%</td><td>0.5%</td></tr>
           <tr><td>Twenty-four magnetics flux loops</td><td>576</td><td>0.0915%</td><td>0.406%</td><td>0.5%</td></tr>
         </tbody>
       </table>
@@ -74,7 +77,7 @@
     <section id="diagnostic-and-limits">
       <h2>Map subtraction and remaining mapping</h2>
       <p>A separate diagnostic subtracts finite-section coil and passive contributions reconstructed from the scenario's <code>pf_active</code> and <code>pf_passive</code> geometry and currents from its total ψ map. That route gives a median 1.87% loop residual and a 72.65% maximum, while the VS3 positions inside the map give a 5.40% median and 90.71% maximum. These larger residuals are not ascribed to the plasma prescription: the independent grid mutuals above bound that prescription much more tightly. The geometric subtraction and DINA's stored conductor coupling therefore remain distinct instruments, especially in the low-current tail.</p>
-      <p>VS3 has two elements in this scenario's <code>pf_active</code> IDS, while DINA's active-grid coupling carries four additional columns after the mapped CS/PF columns. Their section-level correspondence is unresolved. The current API can evaluate a sectioned VS3 conductor set when its geometry is supplied; the independent DINA comparison for those four columns needs the conductor-set mapping.</p>
+      <p>VS3 has two elements in this scenario's <code>pf_active</code> IDS, while DINA's active-grid coupling carries four additional columns after the mapped CS/PF columns. Their section-level correspondence is unresolved. The matrix-projected check above includes the four columns and shows at most 0.427% source-distribution error. The current API can evaluate a sectioned VS3 conductor set when its geometry is supplied; an independent geometric comparison for those four columns needs the conductor-set mapping.</p>
     </section>
 
     <section id="negative-control">
@@ -84,7 +87,7 @@
 
     <section id="reproduction">
       <h2>Reproduction and artifacts</h2>
-      <p><code>scripts/iter_prescribed_plasma/measure.py</code> reads the native IDSs and writes the slice census, individual linked-flux comparisons and summary to <code>/home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit/gate-logs/iter-prescribed-plasma/summary.json</code>. The complete run log is <code>scenario-final.log</code> in that directory, headed by revision <code>44dc368946730f6803d14ca8d408df242db6eec0</code> and ending in <code>EXIT=0</code>. The one-centimetre mutation's red log is <code>vertical-shift-mutation.log</code>, ending in <code>EXIT=1</code> with <code>test_vertical_shift_follows_flux_gradient</code> as the failing test. The five focused tests of the prescription and generic linkage passed.</p>
+      <p><code>scripts/iter_prescribed_plasma/measure.py</code> reads the native IDSs and writes the slice census, individual linked-flux comparisons and summary to <code>/home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit/gate-logs/iter-prescribed-plasma/summary.json</code>. The complete run log is <code>scenario-delivery.log</code> in that directory, headed by revision <code>7de250d3e7e9bc68bc4ac8dce23862183becec8f</code> and ending in <code>EXIT=0</code>. The one-centimetre mutation's red log is <code>vertical-shift-mutation.log</code>, ending in <code>EXIT=1</code> with <code>test_vertical_shift_follows_flux_gradient</code> as the failing test. The five focused tests of the prescription and generic linkage passed.</p>
     </section>
   </main>
 </body>

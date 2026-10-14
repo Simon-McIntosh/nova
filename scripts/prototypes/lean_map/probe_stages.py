@@ -153,7 +153,7 @@ def run(kind, cells, cache, output):
             axis_sign,
         )
 
-    positions = root_stage(reference).position
+    positions = root_stage(reference)
     gauss_flux = values_stage(reference)
     band_values = band_stage(reference)
     support = read_stage(reference, gauss_flux, band_values, positions)

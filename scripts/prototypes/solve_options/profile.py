@@ -47,14 +47,14 @@ def _machine(directory, carrier, cells):
         lambda item: (
             item["analytic_case"] == carrier.name
             and item["discretisation"]["requested_cells"] == -cells
-            and item["builder"] == "device"
+            and item.get("builder") in ("device", "host")
         ),
     )
     store = ZarrStore(filename=filename, dirname=directory, group=key)
     store.load()
     machine = fixture._from_dataset(store.data, identity, key)
     machine.cache.update(semantic_key=key, hit=True, readonly=True)
-    return machine, key
+    return machine, key, identity["builder"]
 
 
 def _time(function, *args, repeats=5):
@@ -91,7 +91,7 @@ def run(kind, cells, cache, out):
         "weak-rotation-reactor-static" if kind == "limited" else "diverted-single-null"
     )
     carrier, source, exact = certificate._case(name, clip_mode="exact")
-    machine, key = _machine(cache, carrier, cells)
+    machine, key, builder = _machine(cache, carrier, cells)
     geometry = topology.TopologyGeometry.from_cells(
         machine.cell_polygons, machine.sampling_vertices, (machine.wall_node,)
     )
@@ -158,6 +158,7 @@ def run(kind, cells, cache, out):
         requested_cells=cells,
         realised_cells=len(machine.node),
         machine_key=key,
+        machine_builder=builder,
         axis=axis.tolist(),
         saddle=None if saddle is None else saddle.tolist(),
         device=str(jax.devices()[0]),

@@ -31,7 +31,7 @@ def run(kind, cells, cache, out):
         "weak-rotation-reactor-static" if kind == "limited" else "diverted-single-null"
     )
     carrier, source, _ = certificate._case(name, clip_mode="exact")
-    machine, key = _machine(cache, carrier, cells)
+    machine, key, builder = _machine(cache, carrier, cells)
     geometry = topology.TopologyGeometry.from_cells(
         machine.cell_polygons, machine.sampling_vertices, (machine.wall_node,)
     )
@@ -101,6 +101,7 @@ def run(kind, cells, cache, out):
         requested_cells=cells,
         realised_cells=len(machine.node),
         machine_key=key,
+        machine_builder=builder,
         bell_nodes=len(nodes),
         mesh_build_seconds=mesh_build_seconds,
         analytic_jets_ms=jets_ms * 1000,

@@ -16,7 +16,9 @@ from nova.jax.config import configure_dtypes
 from scripts.analytic_oracle_fixtures import coupling_build
 
 
-def inspect(cache: Path, group: str, output: Path, figure: Path) -> None:
+def inspect(
+    cache: Path, group: str, output: Path, figure: Path, *, all_cells: bool
+) -> None:
     configure_dtypes()
     import jax
 
@@ -36,10 +38,23 @@ def inspect(cache: Path, group: str, output: Path, figure: Path) -> None:
     if float(distance.max()) > 1e-9:
         raise ValueError("stored sampling vertices do not map to sample coordinates")
     sample_index = sample_index.reshape(sampling.shape[:2])
+    wall_distance = cKDTree(wall).query(nodes)[0]
+    order = np.argsort(wall_distance)
+    selected = (
+        np.arange(len(nodes))
+        if all_cells
+        else np.concatenate(
+            (
+                order[:256],
+                order[len(order) // 2 - 64 : len(order) // 2 + 64],
+                order[-128:],
+            )
+        )
+    )
     top: list[dict[str, object]] = []
     sampled_pair_count = 0
-    for start in range(0, len(nodes), 64):
-        cells = np.arange(start, min(start + 64, len(nodes)))
+    for start in range(0, len(selected), 64):
+        cells = selected[start : start + 64]
         targets = np.unique(sample_index[cells].ravel())
         padded = np.resize(targets, ((len(targets) + 63) // 64) * 64)
         polygons = tuple(vertices[offsets[i] : offsets[i + 1]] for i in cells)
@@ -63,27 +78,38 @@ def inspect(cache: Path, group: str, output: Path, figure: Path) -> None:
                 "device": float(device[row, column]),
                 "absolute_difference": float(disagreement[row, column]),
                 "norm_relative": float(disagreement[row, column] / global_scale),
+                "source_wall_distance": float(wall_distance[cells[column]]),
+                "target_source_distance": float(
+                    np.linalg.norm(coordinates[targets[row]] - nodes[cells[column]])
+                ),
             }
             for row, column in zip(rows, columns, strict=True)
         )
         top.sort(key=lambda item: item["absolute_difference"], reverse=True)
         del top[20:]
+        result = {
+            "cache": str(cache),
+            "group": group,
+            "shape": list(host.shape),
+            "global_scale": global_scale,
+            "candidate_rule": (
+                "every cell"
+                if all_cells
+                else "256 closest to wall vertices, 128 middle, 128 farthest"
+            ),
+            "selected_cell_count": int(len(selected)),
+            "sampled_cell_count": int(start + len(cells)),
+            "sampled_pair_count": sampled_pair_count,
+            "sampled_worst_relative": top[0]["norm_relative"],
+            "completed": bool(start + len(cells) == len(selected)),
+            "top": top,
+        }
+        output.write_text(json.dumps(result, indent=2) + "\n")
         print(
-            f"SCAN cells={int(cells[-1]) + 1}/{len(nodes)} "
+            f"SCAN cells={start + len(cells)}/{len(selected)} "
             f"pairs={sampled_pair_count} worst={top[0]['norm_relative']:.6e}",
             flush=True,
         )
-    result = {
-        "cache": str(cache),
-        "group": group,
-        "shape": list(host.shape),
-        "global_scale": global_scale,
-        "candidate_rule": "each cell against the sample vertices of its 64-cell batch",
-        "sampled_pair_count": sampled_pair_count,
-        "sampled_worst_relative": top[0]["norm_relative"],
-        "top": top,
-    }
-    output.write_text(json.dumps(result, indent=2) + "\n")
     fig, ax = plt.subplots(figsize=(14, 7), layout="constrained")
     ax.plot(*wall.T, color="0.35", linewidth=2.4)
     ax.plot(
@@ -116,8 +142,15 @@ def main() -> None:
     parser.add_argument("group")
     parser.add_argument("output", type=Path)
     parser.add_argument("figure", type=Path)
+    parser.add_argument("--all-cells", action="store_true")
     arguments = parser.parse_args()
-    inspect(arguments.cache, arguments.group, arguments.output, arguments.figure)
+    inspect(
+        arguments.cache,
+        arguments.group,
+        arguments.output,
+        arguments.figure,
+        all_cells=arguments.all_cells,
+    )
 
 
 if __name__ == "__main__":

@@ -55,6 +55,16 @@
     winding, so each coil is split into winding sections: double pancakes for the PF coils and the pancake
     structure of each CS module. Each section is placed from the element geometry, its turns and the
     published winding layout.</p>
+    <p>The machine-description reading already has an owner, which this section extends rather than
+    rebuilds. <code>nova/imas/pulsedesign.py</code> binds <code>ITER(Machine)</code> to the ITER machine
+    description, and <code>nova/imas/machine.py</code> owns the conductor classes
+    (<code>PoloidalFieldActive</code>, <code>PoloidalFieldPassive</code>, <code>Wall</code>, the coil and
+    shell data) and the section seam (<code>MachineSection</code>, <code>CrossSection</code>). A winding
+    section is a series sub-coil carrying part of a coil's turns. If <code>MachineSection</code> can carry
+    one, it is extended; if it cannot, the record states why before any new section type is added. This
+    conductor set supersedes, for the converter work, the 458-ring set power_convertor holds in
+    <code>PassiveStructure</code> (<code>data/iter/passive_structure/matrices.json</code>). That set stays
+    only as the recorded input of the frozen frequency-domain prediction, which cites it.</p>
     <p>The passive structure is subdivided wherever a single ring cannot carry the skin effect at the
     highest frequency the converter model needs. The double-walled vessel, the triangular supports and the
     cryostat are subdivided through their thickness, and the subdivision is refined until it converges
@@ -95,7 +105,10 @@
     <p>The DINA-IMAS cases hold what this needs: separatrix outline, 1-D profiles and a 65 × 129 ψ map,
     DD 3.38.1, read with imas-python in that version. power_convertor's scenario inventory (§1 of its plan)
     names any further cases. The reading reuses <code>nova/imas/equilibrium.py</code> and
-    <code>nova/imas/extrapolate.py</code>.</p>
+    <code>nova/imas/extrapolate.py</code>. The current density in step 2 already has an owner:
+    <code>nova/imas/profiles.py</code> evaluates it from the flux functions (<code>Profile.fluxfunctions</code>,
+    <code>Profile.j_tor_rbs</code>). This section extends that owner with the closed-boundary mask and the
+    scaling to DINA's current, rather than deriving j<sub>φ</sub> again.</p>
     <p>Done when three checks pass:
     </p>
     <ul>
@@ -111,7 +124,10 @@
 <section data-reckon="section" data-id="s3" data-effort-hours="5.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>The passive structure is driven by DINA's coil currents and the prescribed plasma, and integrated
     with nova's exact zero-order-hold eigenmode propagation (<code>circuit/propagate.py</code>). Its currents
-    are compared group by group with DINA's own <code>pf_passive</code> currents in the DINA-IMAS cases.</p>
+    are compared group by group with DINA's own <code>pf_passive</code> currents in the DINA-IMAS cases. They
+    are read through the existing reader, <code>PF_Passive</code> in <code>nova/imas/pf_passive.py</code>, and
+    mapped onto §1's conductors through <code>PoloidalFieldPassive</code>, so the grouping has one
+    owner.</p>
     <p>The coil voltages then follow from the whole coupled flux: R I + dΨ/dt, with Ψ carrying the coils,
     the passive currents and the plasma. They are compared with DINA's coil voltages. power_convertor found
     that bare coil L·dI/dt misses DINA's PF2 to PF5 voltages by about 1 kV rms
@@ -123,8 +139,14 @@
 
     <h2 id="s4">§4 — The coupled plant, exported to the converter model</h2>
 <section data-reckon="section" data-id="s4" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
-    <p>The export is one versioned file per machine description and DINA case, written to
-    <code>/home/ITER/mcintos/Code/power_convertor/data/iter/coupled_plant/</code>. It carries:
+    <p>The export is one versioned file per machine description and DINA case. It is written by extending
+    the serialisers <code>nova/circuit/passive.py</code> already ships (<code>save_circuit_system</code>,
+    <code>save_eigenbasis</code> and their loaders) to the coupled plant with its plasma drive, rather than
+    adding a parallel loader. The location resolves through <code>FilePath</code> in
+    <code>nova/database/filepath.py</code>, not a literal path into another repository, and the record states
+    the resolved location power_convertor reads. The arrays are stored so power_convertor can read them
+    without importing nova. The export retires nothing in nova. In power_convertor it replaces the ring
+    model for the switched simulation, which reads only this export. The file carries:
     </p>
     <ul>
       <li>the section-level coil inductance matrix and resistances;</li>
@@ -140,7 +162,7 @@
     <p>Done when two checks pass:
     </p>
     <ul>
-      <li>A round-trip test of the loader passes in nova.</li>
+      <li>A round-trip test of the extended serialiser passes in nova.</li>
       <li>The reduced plant's terminal impedance for every coil matches the full model's to 1 % from 0.1 Hz
       to §1's upper limit.</li>
     </ul>

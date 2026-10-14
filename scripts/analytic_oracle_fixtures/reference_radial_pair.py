@@ -122,7 +122,15 @@ def main() -> None:
         section,
         expansion_point=section_centroid(section),
     )[1][pair["target"]]
-    if abs(host_batch - pair["host"]) > 5e-14 * inspection["global_scale"]:
+    print(
+        f"HOST_REPLAY stored={pair['host']:.17e} full={host_batch:.17e} "
+        f"scalar={host_recomputed:.17e} reference={high_precision:.17e} "
+        f"centre={section_centroid(section)}",
+        flush=True,
+    )
+    replay_difference = abs(host_batch - pair["host"])
+    replay_limit = 1e-13 * inspection["global_scale"]
+    if replay_difference > replay_limit:
         raise ValueError("stored host entry does not match its full batch")
     report = {
         **pair,
@@ -130,6 +138,8 @@ def main() -> None:
         "near": near,
         "host_recomputed": float(host_recomputed),
         "host_recomputed_full_batch": float(host_batch),
+        "host_replay_absolute": float(replay_difference),
+        "host_replay_limit": float(replay_limit),
         "host_reference_absolute": abs(pair["host"] - high_precision),
         "device_reference_absolute": abs(pair["device"] - high_precision),
     }

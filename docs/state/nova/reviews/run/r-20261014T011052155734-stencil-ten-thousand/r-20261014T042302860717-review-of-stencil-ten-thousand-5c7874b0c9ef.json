@@ -1,0 +1,95 @@
+{
+  "added_failure_count": 0,
+  "added_failure_derivation": "annotate_review_of_run read the reviewed run's manifest.md baseline_suite (log base-suite.log) and after_suite (log head-suite.log); both completed with exit_status 0 and failure_ids [], so added_failures_from_gate_logs returns count 0 and no ids (zero failing test ids added head over base).",
+  "added_failure_ids": [],
+  "artifacts": [
+    "nova/biot/plasmagrid.py:379 -- ring_condition filter omits rings above RING_CONDITION_LIMIT at selection, leaving StencilMesh's refusal for directly handed rings",
+    "tests/test_plasma_cell_partition.py:71 -- test_wall_distorted_ring_is_excluded, the durable guard (fails on base), negative-control.log EXIT=1",
+    "census-post.log -- eight-rung census, diverted 10000 retained max 8.3703, removed [535]",
+    "docs/evidence/fragments/converged-forward-solve/stencil-ten-thousand.html -- evidence record, plan-verdict pass, requalification noted as adjacent work"
+  ],
+  "base_log_revision": "4da7553e429a1bd3c912a0338e2551453f489ac1",
+  "blocking_finding_count": 0,
+  "call_site_count": 2,
+  "call_sites": [
+    "nova/biot/plasmagrid.py:399 (PlasmaGrid.tessellate)",
+    "scripts/analytic_oracle_fixtures/measure.py:622 (carrier build_machine)"
+  ],
+  "commits_read": [
+    "ff249994e8b8bd874297caeff3b35e923e18ef27",
+    "b646af53e1d04c8b9ec6de6be8ad7819a3fb91f7",
+    "cf489067289c3cb3aeec4a5e657d7505b0ec85b1",
+    "19c3231ba12f5ad4406de6f0f73a12043d7769de",
+    "2cf83f7a85907002dbf42b232b8bd7dc0c26e6fa",
+    "ed56b55b5025f53570949f64320ff5acce78674d",
+    "5c7874b0c9efd1d4b03d956b093f585771a4c489"
+  ],
+  "completed_at": "2026-10-14T04:34:14.853Z",
+  "dispatched_at": "2026-10-14T04:23:29Z",
+  "evidence_inputs": [
+    "pre-repair diverted 10,000-cell refusal reproduced: ring 475 centred on cell 535, condition 1.758e3 (diverted-10000-classification.json), ring_count 9772 over 10229 realised cells",
+    "refused ring: six of seven cells clipped, smallest neighbour area 0.011383 of a full hexagon, three neighbours touch the sampled wall; the centre cell 535 is area-clipped but does not touch the wall, so the old wall-contact boundary selector did not exclude it",
+    "refused ring analytic error 0.00288503 gradient against field max 0.0464333 (6.21%) and 0.599193 elliptic against 0.120811 (496%), so the ring is genuinely unfit rather than accurate-but-over-threshold",
+    "census-post.log: diverted 10,000-cell mesh now refusal None, ring_count 9771, retained maximum condition 8.3703, removed [535]; all seven other case-rung ring sets kept_identical True",
+    "H200 job 1284946: carrier-resubmitted/build.json status complete, 10229 cells, 9771 rings, build_wall_seconds 3203.441, store_bytes 3625780927; log h200-carrier-resubmitted.log EXIT=0 at revision ed56b55b5",
+    "negative control: negative-control.log restores the base selector in memory and fails test_wall_distorted_ring_is_excluded (1 failed, EXIT=1)"
+  ],
+  "findings": [
+    {
+      "file": "nova/biot/plasmagrid.py",
+      "line": "379",
+      "severity": "follow-on",
+      "text": "follow-on: the condition filter applies to every consumer of loop_neighbour_vertices (scripts/accuracy_cost_ladder/measure.py:106, scripts/coverage_scaling/measure_coverage.py:103, benchmarks/global_default_gpu_rebuild.py:108, benchmarks/solovev_solver_discriminator.py:158), not only the diverted 10,000-cell carrier, so it silently drops rings for those paths too; the eight-rung census in census-post.log shows only ring 535 affected, but no test pins those other consumers."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/stencil-ten-thousand.html",
+      "line": "56",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment states requalification \"belongs to the adjacent requalification work\", so \u00a74's \"builds and qualifies\" clause is only half met by this node; the build receipt records a constructed carrier but no qualification is run."
+    }
+  ],
+  "gate_arms_note": "the reviewed node declares baseline_suite and after_suite in its manifest; both completed with exit_status 0 and failure_ids [], so the derived added_failure_count is 0 with no ids; this review re-ran no gate, reading census-base.log, census-post.log, diverted-10000-classification.json, negative-control.log, carrier-resubmitted/build.json and h200-carrier-resubmitted.log in the reviewed run directory.",
+  "head_log_revision": "cf489067289c3cb3aeec4a5e657d7505b0ec85b1",
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read commit by commit against base 4da7553e429a1bd3c912a0338e2551453f489ac1; cf4890672 carries the only production change (a ring-condition filter added in nova/biot/plasmagrid.py:379 plus comment-only edits in nova/equilibrium/stencil_mesh.py), the added test lands in tests/test_plasma_cell_partition.py:71, and the three later commits touch only the prototype scripts and the fragment.",
+    "done_when": "\u00a74's done-when requires the cause named, the stencil repaired or the threshold re-set from a measured error bound, and the carrier to build and qualify; diverted-10000-classification.json names a wall-clip ring-selection defect, census-post.log shows the diverted 10,000-cell carrier constructs with retained maximum condition 8.3703 and the repaired H200 job completed (build.json status complete), but requalification is deferred to the adjacent node, so \"builds\" is met and \"qualifies\" is measured by no gate here.",
+    "goal": "the plan's \u00a74 goal is to clear the stencil conditioning refusal at nova/equilibrium/stencil_mesh.py:651 on the diverted 10,000-cell carrier (condition 1.758e3 at ring 475, cell 535); the landed change omits that ring at selection in nova/biot/plasmagrid.py and the diverted carrier now constructs, so the refusal is cleared.",
+    "manifest": "read; status complete, seven commits, tests and test_logs recorded, negative_control_log = negative-control.log, baseline_suite and after_suite both completed with exit_status 0 and failure_ids [], artifacts and evidence_inputs present.",
+    "write_paths": "read the manifest's orientation_write_paths; the base..head diff touches only nova/biot/plasmagrid.py, nova/equilibrium/stencil_mesh.py, tests/test_equilibrium_stencil_mesh.py, tests/test_plasma_cell_partition.py, the four scripts under scripts/prototypes/stencil_conditioning, the three figures under docs/figures/converged-forward-solve/stencil-ten-thousand and the fragment, all inside the declared fence."
+  },
+  "justifications": {
+    "durability": "tests/test_plasma_cell_partition.py:71 test_wall_distorted_ring_is_excluded fails on the base implementation per negative-control.log (EXIT=1, the test id named) and passes at head, so it reddens when the filter regresses.",
+    "evidence": "the done-when's build is recorded (carrier-resubmitted/build.json status complete, 10229 cells and 9771 rings, h200-carrier-resubmitted.log EXIT=0) with base and head gate logs both complete at exit 0 and zero added failure ids, but the \"qualifies\" clause is measured by no gate here.",
+    "fit": "the filter in nova/biot/plasmagrid.py:379 reuses the existing RING_CONDITION_LIMIT and ring_condition vocabulary and carries no plan, sprint or ticket identifier in names or comments.",
+    "goal_fidelity": "nova/biot/plasmagrid.py:379 omits rings whose ring_condition exceeds RING_CONDITION_LIMIT at selection, and census-post.log reports the diverted 10,000-cell mesh with refusal None and removed [535], so the \u00a74 refusal is cleared.",
+    "reuse": "the filter reuses the ring_condition measure and RING_CONDITION_LIMIT owned by nova/equilibrium/stencil_mesh.py:87 rather than forking a second conditioning measure.",
+    "scope_discipline": "every path in the 4da7553e429a1bd3c912a0338e2551453f489ac1..5c7874b0c9efd1d4b03d956b093f585771a4c489 diff is inside the declared write paths listed in the manifest."
+  },
+  "plan": "nova:converged-forward-solve",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the plan's \u00a74 goal is to clear the stencil conditioning refusal at nova/equilibrium/stencil_mesh.py:651 on the diverted 10,000-cell carrier (condition 1.758e3 at ring 475, cell 535); the landed change omits that ring at selection in nova/biot/plasmagrid.py and the diverted carrier now constructs, so the refusal is cleared.\nVERDICT done_when: \u00a74's done-when requires the cause named, the stencil repaired or the threshold re-set from a measured error bound, and the carrier to build and qualify; diverted-10000-classification.json names a wall-clip ring-selection defect, census-post.log shows the diverted 10,000-cell carrier constructs with retained maximum condition 8.3703 and the repaired H200 job completed (build.json status complete), but requalification is deferred to the adjacent node, so \"builds\" is met and \"qualifies\" is measured by no gate here.\nVERDICT write_paths: read the manifest's orientation_write_paths; the base..head diff touches only nova/biot/plasmagrid.py, nova/equilibrium/stencil_mesh.py, tests/test_equilibrium_stencil_mesh.py, tests/test_plasma_cell_partition.py, the four scripts under scripts/prototypes/stencil_conditioning, the three figures under docs/figures/converged-forward-solve/stencil-ten-thousand and the fragment, all inside the declared fence.\nVERDICT manifest: read; status complete, seven commits, tests and test_logs recorded, negative_control_log = negative-control.log, baseline_suite and after_suite both completed with exit_status 0 and failure_ids [], artifacts and evidence_inputs present.\nVERDICT diff: read commit by commit against base 4da7553e429a1bd3c912a0338e2551453f489ac1; cf4890672 carries the only production change (a ring-condition filter added in nova/biot/plasmagrid.py:379 plus comment-only edits in nova/equilibrium/stencil_mesh.py), the added test lands in tests/test_plasma_cell_partition.py:71, and the three later commits touch only the prototype scripts and the fragment.\nCALL_SITES: nova/biot/plasmagrid.py:399 (PlasmaGrid.tessellate), scripts/analytic_oracle_fixtures/measure.py:622 (carrier build_machine)\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: nova/biot/plasmagrid.py:379 omits rings whose ring_condition exceeds RING_CONDITION_LIMIT at selection, and census-post.log reports the diverted 10,000-cell mesh with refusal None and removed [535], so the \u00a74 refusal is cleared.\nSCORE evidence: 17\nJUSTIFICATION evidence: the done-when's build is recorded (carrier-resubmitted/build.json status complete, 10229 cells and 9771 rings, h200-carrier-resubmitted.log EXIT=0) with base and head gate logs both complete at exit 0 and zero added failure ids, but the \"qualifies\" clause is measured by no gate here.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the 4da7553e429a1bd3c912a0338e2551453f489ac1..5c7874b0c9efd1d4b03d956b093f585771a4c489 diff is inside the declared write paths listed in the manifest.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_plasma_cell_partition.py:71 test_wall_distorted_ring_is_excluded fails on the base implementation per negative-control.log (EXIT=1, the test id named) and passes at head, so it reddens when the filter regresses.\nSCORE fit: 18\nJUSTIFICATION fit: the filter in nova/biot/plasmagrid.py:379 reuses the existing RING_CONDITION_LIMIT and ring_condition vocabulary and carries no plan, sprint or ticket identifier in names or comments.\nSCORE reuse: 20\nJUSTIFICATION reuse: the filter reuses the ring_condition measure and RING_CONDITION_LIMIT owned by nova/equilibrium/stencil_mesh.py:87 rather than forking a second conditioning measure.\nFINDING nova/biot/plasmagrid.py:379 follow-on: the condition filter applies to every consumer of loop_neighbour_vertices (scripts/accuracy_cost_ladder/measure.py:106, scripts/coverage_scaling/measure_coverage.py:103, benchmarks/global_default_gpu_rebuild.py:108, benchmarks/solovev_solver_discriminator.py:158), not only the diverted 10,000-cell carrier, so it silently drops rings for those paths too; the eight-rung census in census-post.log shows only ring 535 affected, but no test pins those other consumers.\nFINDING docs/evidence/fragments/converged-forward-solve/stencil-ten-thousand.html:56 follow-on: the fragment states requalification \"belongs to the adjacent requalification work\", so \u00a74's \"builds and qualifies\" clause is only half met by this node; the build receipt records a constructed carrier but no qualification is run.",
+  "review_kind": "independent review",
+  "review_run_id": "r-20261014T042302860717-review-of-stencil-ten-thousand-5c7874b0c9ef",
+  "reviewed_base_sha": "4da7553e429a1bd3c912a0338e2551453f489ac1",
+  "reviewed_head_sha": "5c7874b0c9efd1d4b03d956b093f585771a4c489",
+  "reviewed_revision": "5c7874b0c9efd1d4b03d956b093f585771a4c489",
+  "reviewed_run_id": "r-20261014T011052155734-stencil-ten-thousand",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/stencil-ten-thousand",
+  "reviewer_node": "review-of-stencil-ten-thousand-5c7874b0c9ef",
+  "reviewer_run_id": "r-20261014T042302860717-review-of-stencil-ten-thousand-5c7874b0c9ef",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "section": "\u00a74",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T04:32:00Z",
+  "total": 109,
+  "verdict": "pass-with-follow-ons"
+}

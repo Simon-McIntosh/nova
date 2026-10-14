@@ -92,6 +92,13 @@
       "finding": "duplicate_owner-3",
       "reason": "",
       "when": "2026-10-14T16:28:19.777417+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "thin_wrapper-1",
+      "reason": "",
+      "when": "2026-10-14T16:28:28.288717+00:00"
     }
   ],
   "responses": {
@@ -118,6 +125,12 @@
       "by": "",
       "reason": "",
       "when": "2026-10-14T16:27:53.539153+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-14T16:28:28.288717+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/iter-passive-plasma-circuit/r-20261014T161613936912-plan-review-of-iter-passive-plasma-circuit.json",

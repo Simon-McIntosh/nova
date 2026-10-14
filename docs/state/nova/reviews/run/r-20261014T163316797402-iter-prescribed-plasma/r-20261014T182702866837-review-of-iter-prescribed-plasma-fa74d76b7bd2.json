@@ -1,0 +1,58 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed manifest records an after_suite arm at fa74d76b (completed true, failure_count 0) and no baseline_suite, so the added count is taken from the readable head arm as 0",
+  "base_log_revision": null,
+  "call_site_count": 1,
+  "call_sites": [
+    "scripts/iter_prescribed_plasma/measure.py"
+  ],
+  "completed_at": "2026-10-14T18:37:48.277Z",
+  "dispatched_at": "2026-10-14T18:27:23Z",
+  "findings": [
+    {
+      "file": "tests/test_prescribed_plasma.py",
+      "line": "179",
+      "severity": "follow-on",
+      "text": "follow-on: the negative-control mutation the manifest designates (vertical-shift-mutation.log) was produced at revision 3558388a, an earlier pre-review commit rather than the reviewed head fa74d76b; the guarded test body is unchanged in the gained range and the head arm passed, so the firing is demonstrated on an older revision."
+    }
+  ],
+  "head_log_revision": "fa74d76b7bd2f34c69dbbeb9a1bdb9bf72a7c962",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "scripts/iter_prescribed_plasma/measure.py is the only production caller of the changed module; no nova runtime module imports nova/imas/prescribed_plasma (the prescribed_current methods in nova/equilibrium/forward.py are a distinct mechanism).",
+    "diff": "read the 14 commits ab99b4850..fa74d76b7 commit by commit; the code is nova/imas/profiles.py (closed_plasma_boundary signature and the shapely mask), nova/imas/prescribed_plasma.py (section_grid reuse, X-point and stored-outline branches), scripts/iter_prescribed_plasma/measure.py (time interpolation, flux sign and gauge, tolerance gate), tests/test_prescribed_plasma.py and the docs/figures.",
+    "done_when": "the done_when names centroid within one grid cell, reported scale factors, a stated linked-flux tolerance at coils and flux loops, the 1 cm control and audit-doc; scripts/iter_prescribed_plasma/measure.py:663 now asserts the centroid bound, measure.py:675 the per-target tolerance and measure.py:659 the control, with results in delivery-geometric-105014.log and delivery-geometric-105052.log.",
+    "goal": "the goal is to prescribe the ITER plasma current distribution from DINA's closed separatrix and flux functions scaled to DINA's current and compute its linked flux; the gained commits extend nova/imas/profiles.py:closed_plasma_boundary with an X-point cut and a stored-boundary preference and rebuild nova/imas/prescribed_plasma.py:plasma_linked_flux on the shared section_grid quadrature.",
+    "manifest": "read manifest.md and landing.md; they report 867/867 and 2036/2036 prescribed slices, centroid maxima 4.303 and 27.817 mm against a 93.75 mm cell, geometric VS3 residual maxima 1.081 and 2.523 Wb against case bounds, the 105014/1 magnetics-loop maximum 0.872 Wb, and name the per-case gate logs.",
+    "write_paths": "the declared write paths are nova/imas/{profiles,equilibrium,prescribed_plasma}.py, the three test files, scripts/iter_prescribed_plasma, docs/research/iter-prescribed-plasma.html, docs/figures/iter-prescribed-plasma and the evidence fragment; every one of the 12 changed paths in the 14-commit diff is inside them."
+  },
+  "justifications": {
+    "durability": "tests/test_prescribed_plasma.py:176 guards the linkage against current-share regression by comparing history[:,0] to 3*plasma_flux_at_points at a known point, and the gate's refusals are shown by vertical-share and tightened logs.",
+    "evidence": "scripts/iter_prescribed_plasma/measure.py:663 and measure.py:675 assert the centroid and residual bounds the done_when states and delivery-geometric-105014.log records GATE_PASS with the tolerance table.",
+    "fit": "the added names (native_flux_sign, boundary_source values separatrix_x_point/boundary_outline) are capability-named with no plan or version labels and follow nova/imas/profiles.py style.",
+    "goal_fidelity": "nova/imas/profiles.py:closed_plasma_boundary and nova/imas/prescribed_plasma.py:plasma_linked_flux implement the boundary selection and the generic conductor linkage the goal names, now covering both DINA cases.",
+    "reuse": "nova/imas/prescribed_plasma.py:78 now calls nova/circuit/linkage.py:section_grid for filament circuits and the mask uses the shapely contains_xy the module already imports, so the earlier duplicate sub-gridding is gone.",
+    "scope_discipline": "every path in git diff --stat ab99b4850..fa74d76b7 is inside the declared write paths and no file outside the goal's scope is touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to prescribe the ITER plasma current distribution from DINA's closed separatrix and flux functions scaled to DINA's current and compute its linked flux; the gained commits extend nova/imas/profiles.py:closed_plasma_boundary with an X-point cut and a stored-boundary preference and rebuild nova/imas/prescribed_plasma.py:plasma_linked_flux on the shared section_grid quadrature.\nVERDICT done_when: the done_when names centroid within one grid cell, reported scale factors, a stated linked-flux tolerance at coils and flux loops, the 1 cm control and audit-doc; scripts/iter_prescribed_plasma/measure.py:663 now asserts the centroid bound, measure.py:675 the per-target tolerance and measure.py:659 the control, with results in delivery-geometric-105014.log and delivery-geometric-105052.log.\nVERDICT write_paths: the declared write paths are nova/imas/{profiles,equilibrium,prescribed_plasma}.py, the three test files, scripts/iter_prescribed_plasma, docs/research/iter-prescribed-plasma.html, docs/figures/iter-prescribed-plasma and the evidence fragment; every one of the 12 changed paths in the 14-commit diff is inside them.\nVERDICT manifest: read manifest.md and landing.md; they report 867/867 and 2036/2036 prescribed slices, centroid maxima 4.303 and 27.817 mm against a 93.75 mm cell, geometric VS3 residual maxima 1.081 and 2.523 Wb against case bounds, the 105014/1 magnetics-loop maximum 0.872 Wb, and name the per-case gate logs.\nVERDICT diff: read the 14 commits ab99b4850..fa74d76b7 commit by commit; the code is nova/imas/profiles.py (closed_plasma_boundary signature and the shapely mask), nova/imas/prescribed_plasma.py (section_grid reuse, X-point and stored-outline branches), scripts/iter_prescribed_plasma/measure.py (time interpolation, flux sign and gauge, tolerance gate), tests/test_prescribed_plasma.py and the docs/figures.\nCALL_SITES: scripts/iter_prescribed_plasma/measure.py\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/imas/profiles.py:closed_plasma_boundary and nova/imas/prescribed_plasma.py:plasma_linked_flux implement the boundary selection and the generic conductor linkage the goal names, now covering both DINA cases.\nSCORE evidence: 19\nJUSTIFICATION evidence: scripts/iter_prescribed_plasma/measure.py:663 and measure.py:675 assert the centroid and residual bounds the done_when states and delivery-geometric-105014.log records GATE_PASS with the tolerance table.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in git diff --stat ab99b4850..fa74d76b7 is inside the declared write paths and no file outside the goal's scope is touched.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_prescribed_plasma.py:176 guards the linkage against current-share regression by comparing history[:,0] to 3*plasma_flux_at_points at a known point, and the gate's refusals are shown by vertical-share and tightened logs.\nSCORE fit: 18\nJUSTIFICATION fit: the added names (native_flux_sign, boundary_source values separatrix_x_point/boundary_outline) are capability-named with no plan or version labels and follow nova/imas/profiles.py style.\nSCORE reuse: 19\nJUSTIFICATION reuse: nova/imas/prescribed_plasma.py:78 now calls nova/circuit/linkage.py:section_grid for filament circuits and the mask uses the shapely contains_xy the module already imports, so the earlier duplicate sub-gridding is gone.\nFINDING tests/test_prescribed_plasma.py:179 follow-on: the negative-control mutation the manifest designates (vertical-shift-mutation.log) was produced at revision 3558388a, an earlier pre-review commit rather than the reviewed head fa74d76b; the guarded test body is unchanged in the gained range and the head arm passed, so the firing is demonstrated on an older revision.",
+  "review_run_id": "r-20261014T182702866837-review-of-iter-prescribed-plasma-fa74d76b7bd2",
+  "reviewed_base_sha": "ab99b4850589271cc427df16d1b3c5248efd8f2a",
+  "reviewed_head_sha": "fa74d76b7bd2f34c69dbbeb9a1bdb9bf72a7c962",
+  "reviewed_run_id": "r-20261014T163316797402-iter-prescribed-plasma",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T18:35:38.686021+00:00",
+  "total": 113
+}

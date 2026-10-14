@@ -161,6 +161,7 @@ def style_axes(axis):
 
 def draw_figures(rows, representatives, linkage, names):
     """Save spatial, time-history and residual figures as stand-alone SVGs."""
+    matplotlib.rcParams["svg.hashsalt"] = "plasma-current"
     FIGURES.mkdir(parents=True, exist_ok=True)
     fig, axes = plt.subplots(1, len(representatives), figsize=(14, 5))
     for axis, (index, current, slice_) in zip(axes, representatives):
@@ -205,7 +206,7 @@ def draw_figures(rows, representatives, linkage, names):
             fontsize=16,
         )
     fig.tight_layout()
-    fig.savefig(FIGURES / "current-boundary.svg")
+    fig.savefig(FIGURES / "current-boundary.svg", metadata={"Date": None})
     plt.close(fig)
 
     time = np.array([row["time"] for row in rows])
@@ -234,7 +235,7 @@ def draw_figures(rows, representatives, linkage, names):
     for axis in axes:
         style_axes(axis)
     fig.tight_layout()
-    fig.savefig(FIGURES / "scale-centroid.svg")
+    fig.savefig(FIGURES / "scale-centroid.svg", metadata={"Date": None})
     plt.close(fig)
 
     fig, axis = plt.subplots(figsize=(14, 5))
@@ -254,7 +255,7 @@ def draw_figures(rows, representatives, linkage, names):
     axis.legend(frameon=False, fontsize=15)
     style_axes(axis)
     fig.tight_layout()
-    fig.savefig(FIGURES / "linked-flux-residual.svg")
+    fig.savefig(FIGURES / "linked-flux-residual.svg", metadata={"Date": None})
     plt.close(fig)
 
 

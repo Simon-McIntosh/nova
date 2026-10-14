@@ -299,6 +299,14 @@ def run(kind, cells, cache, output, batch=False):
             np.linalg.norm(np.asarray(terminal.roots) - roots, axis=1) / pitch
         ).tolist(),
     )
+    np.save(
+        output.with_name(output.stem + "-terminal-moments.npy"),
+        np.asarray(solution.moments),
+    )
+    np.save(
+        output.with_name(output.stem + "-terminal-roots.npy"),
+        np.asarray(terminal.roots),
+    )
     _write(output, result)
 
     def factorised(varied, *operands):

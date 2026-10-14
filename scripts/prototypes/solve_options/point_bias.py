@@ -9,6 +9,7 @@ import argparse
 import json
 from pathlib import Path
 import subprocess
+from time import perf_counter
 
 import jax
 import jax.numpy as jnp
@@ -51,6 +52,29 @@ def _exterior(cache, machine_key):
 
 def _moments(array):
     return CellCurrentMoments(array[:, 0], array[:, 1], array[:, 2])
+
+
+def _tangent_check(function, psi, direction):
+    derivative = jax.jit(
+        lambda sample, vector: jax.jvp(function, (sample,), (vector,))[1]
+    )
+    jax.block_until_ready(derivative(psi, direction))
+    walls = []
+    for _ in range(3):
+        started = perf_counter()
+        jax.block_until_ready(derivative(psi, direction))
+        walls.append(perf_counter() - started)
+    tangent = derivative(psi, direction)
+    errors = {}
+    scale = float(jnp.max(jnp.abs(tangent)))
+    for epsilon in (1e-2, 1e-3, 1e-4):
+        central = (
+            function(psi + epsilon * direction) - function(psi - epsilon * direction)
+        ) / (2 * epsilon)
+        errors[str(epsilon)] = float(jnp.max(jnp.abs(central - tangent))) / max(
+            scale, 1e-30
+        )
+    return dict(jvp_wall_ms=float(np.median(walls)) * 1000, fd_relative_errors=errors)
 
 
 def run(kind, cells, cache, out):
@@ -113,6 +137,72 @@ def run(kind, cells, cache, out):
             True,
         ),
     }
+    span = float(jnp.abs(reading.boundary_flux - reading.axis_flux))
+    assert span > 0
+    tangent_direction = jnp.asarray(
+        np.random.default_rng(731).normal(size=psi.shape)
+    ) * (span * 1e-4)
+    booking_functions = {
+        "exact_frozen_read": jax.jit(
+            lambda sample: jnp.stack(
+                tuple(
+                    current.book(
+                        sample,
+                        reading,
+                        geometry,
+                        profile,
+                        current.Quadrature(sigma=convention.sigma),
+                    )[:3]
+                ),
+                axis=-1,
+            )
+        ),
+        "hard": jax.jit(
+            lambda sample: _point_booking(
+                sample,
+                geometry,
+                profile,
+                reading.boundary_flux,
+                reading.axis_flux,
+                convention.sigma,
+                target,
+                False,
+            )
+        ),
+        "smooth": jax.jit(
+            lambda sample: _point_booking(
+                sample,
+                geometry,
+                profile,
+                reading.boundary_flux,
+                reading.axis_flux,
+                convention.sigma,
+                target,
+                True,
+            )
+        ),
+    }
+    tangents = {
+        label: _tangent_check(function, psi, tangent_direction)
+        for label, function in booking_functions.items()
+    }
+    centre_flux = jnp.einsum("nij,nj->ni", geometry.fit_inverse, psi)[:, 0]
+    distance = jnp.abs(centre_flux - reading.boundary_flux)
+    nearest = int(jnp.argmin(jnp.where(distance > span * 1e-14, distance, jnp.inf)))
+    crossing = (
+        jnp.zeros_like(psi)
+        .at[nearest, 0]
+        .set(2 * (reading.boundary_flux - centre_flux[nearest]))
+    )
+    hard_function = booking_functions["hard"]
+    crossing_tangent = jax.jvp(hard_function, (psi,), (crossing,))[1]
+    crossing_central = (
+        hard_function(psi + crossing) - hard_function(psi - crossing)
+    ) / 2
+    crossing_error = float(
+        jnp.max(jnp.abs(crossing_central - crossing_tangent))
+        / jnp.maximum(jnp.max(jnp.abs(crossing_central)), 1e-30)
+    )
     operator = fixture.forward_operator(source, machine)
 
     @jax.jit
@@ -121,8 +211,6 @@ def run(kind, cells, cache, out):
 
     exact_image = image(operator, exact_array)
     jax.block_until_ready(exact_image)
-    span = float(jnp.abs(reading.boundary_flux - reading.axis_flux))
-    assert span > 0
     zero_image = image(operator, jnp.zeros_like(exact_array))
     zero_current_difference = float(jnp.max(jnp.abs(zero_image - exact_image))) / span
     assert zero_current_difference > 1e-2
@@ -175,6 +263,9 @@ def run(kind, cells, cache, out):
         target_current=float(target),
         flux_span=span,
         candidates=rows,
+        tangents=tangents,
+        hard_crossing_cell=nearest,
+        hard_crossing_fd_relative_error=crossing_error,
         device_memory=jax.devices()[0].memory_stats(),
     )
     out.mkdir(parents=True, exist_ok=True)

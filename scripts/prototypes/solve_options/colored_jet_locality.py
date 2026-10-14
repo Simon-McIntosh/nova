@@ -35,6 +35,21 @@ def _colors(index, count):
     return colors
 
 
+class _CellVaryingField:
+    def __init__(self, varied, fixed):
+        self.varied = varied
+        self.fixed = fixed
+
+    def value(self, point):
+        return self.fixed.value(point)
+
+    def evaluate(self, point):
+        return self.fixed.evaluate(point)
+
+    def sampled_coefficient(self, geometry):
+        return self.varied.sampled_coefficient(geometry)
+
+
 def run(kind, cells, cache, bias_row, newton_row, out, mode):
     if jax.default_backend() != "gpu" or jax.config.jax_enable_x64 is not True:
         raise RuntimeError("coloured jet measurement requires H200 double precision")
@@ -64,6 +79,9 @@ def run(kind, cells, cache, bias_row, newton_row, out, mode):
     base = support_read.nodal_jets(
         operands, tuple(initial[:, component] for component in range(3))
     )
+    fixed_field = fixed_points.field_from_jets(
+        base, operands.sample_index, operands.mesh
+    )
     index = np.asarray(operands.sample_index)
     colors = _colors(index, len(operands.nodes))
     color_count = int(np.max(colors)) + 1
@@ -72,8 +90,13 @@ def run(kind, cells, cache, bias_row, newton_row, out, mode):
 
     def booking(jets):
         bell = fixed_points.field_from_jets(jets, operands.sample_index, operands.mesh)
+        field = (
+            _CellVaryingField(bell, fixed_field)
+            if mode == "fixed-point-evaluation"
+            else bell
+        )
         reading = topology.read_at_stationary_points(
-            bell, geometry, convention, policy, support.stationary
+            field, geometry, convention, policy, support.stationary
         )
         if mode == "fixed-global":
             reading = reading._replace(
@@ -88,7 +111,7 @@ def run(kind, cells, cache, bias_row, newton_row, out, mode):
             reading,
             geometry,
             profile,
-            local_quadrature if mode == "fixed-global" else quadrature,
+            local_quadrature if mode != "direct" else quadrature,
         )
         return jnp.stack(booked[:3], axis=-1)
 
@@ -162,7 +185,11 @@ def main():
     parser.add_argument("--bias-row", type=Path, required=True)
     parser.add_argument("--newton-row", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
-    parser.add_argument("--mode", choices=("direct", "fixed-global"), default="direct")
+    parser.add_argument(
+        "--mode",
+        choices=("direct", "fixed-global", "fixed-point-evaluation"),
+        default="direct",
+    )
     args = parser.parse_args()
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     print(f"revision={revision} tree={Path.cwd().resolve()}", flush=True)

@@ -12,7 +12,8 @@ import xarray as xr
 from scipy.spatial import cKDTree
 
 import nova
-from nova.biot.polygonanalytic import _section_centroid
+from nova.biot.greens import section_centroid
+from nova.biot.polygonanalytic import polygon_analytic_flux_moments
 from nova.jax.config import configure_dtypes
 from scripts.analytic_oracle_fixtures import coupling_build
 
@@ -32,7 +33,12 @@ def compare(cache: Path, group: str, output: Path) -> None:
         vertices = np.asarray(data["cell_polygon_vertices"].values)
         identity = json.loads(data.attrs["semantic_identity"])
     polygons = tuple(vertices[offsets[i] : offsets[i + 1]] for i in range(len(nodes)))
-    centres = np.asarray([_section_centroid(section) for section in polygons])
+    centres = np.asarray([section_centroid(section) for section in polygons])
+    control = polygon_analytic_flux_moments(
+        targets[:, 0], targets[:, 1], polygons[0], expansion_point=centres[0]
+    )[1]
+    if not np.array_equal(control, host[:, 0]):
+        raise ValueError("stored host column does not match its construction path")
     device = coupling_build.build_flux_blocks(targets, polygons, centres)[1]
     difference = np.abs(host - device)
     global_scale = float(max(np.abs(host).max(), np.abs(device).max()))

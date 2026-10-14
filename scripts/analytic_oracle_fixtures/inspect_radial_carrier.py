@@ -11,7 +11,8 @@ import numpy as np
 import xarray as xr
 from scipy.spatial import cKDTree
 
-from nova.biot.polygonanalytic import _section_centroid
+from nova.biot.greens import section_centroid
+from nova.biot.polygonanalytic import polygon_analytic_flux_moments
 from nova.jax.config import configure_dtypes
 from scripts.analytic_oracle_fixtures import coupling_build
 
@@ -38,6 +39,15 @@ def inspect(
     if float(distance.max()) > 1e-9:
         raise ValueError("stored sampling vertices do not map to sample coordinates")
     sample_index = sample_index.reshape(sampling.shape[:2])
+    control_section = vertices[offsets[0] : offsets[1]]
+    control = polygon_analytic_flux_moments(
+        coordinates[:, 0],
+        coordinates[:, 1],
+        control_section,
+        expansion_point=section_centroid(control_section),
+    )[1]
+    if not np.array_equal(control, host[:, 0]):
+        raise ValueError("stored host column does not match its construction path")
     wall_distance = cKDTree(wall).query(nodes)[0]
     order = np.argsort(wall_distance)
     selected = (
@@ -58,7 +68,7 @@ def inspect(
         targets = np.unique(sample_index[cells].ravel())
         padded = np.resize(targets, ((len(targets) + 63) // 64) * 64)
         polygons = tuple(vertices[offsets[i] : offsets[i + 1]] for i in cells)
-        centres = np.asarray([_section_centroid(section) for section in polygons])
+        centres = np.asarray([section_centroid(section) for section in polygons])
         device = coupling_build.build_flux_blocks(
             coordinates[padded], polygons, centres, tile_side=64
         )[1][: len(targets)]

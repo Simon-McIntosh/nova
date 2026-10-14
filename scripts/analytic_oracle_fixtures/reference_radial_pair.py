@@ -10,6 +10,7 @@ import mpmath as mp
 import numpy as np
 import xarray as xr
 
+from nova.biot.greens import section_centroid
 from nova.biot.polygonanalytic import (
     _flux_area_rule,
     _section_centroid,
@@ -26,7 +27,7 @@ def reference(target: np.ndarray, section: np.ndarray) -> tuple[float, bool]:
     mp.mp.dps = 50
     radius, height = map(_number, target)
     centre = np.asarray(_section_centroid(section))
-    expansion = tuple(map(_number, centre))
+    expansion = tuple(map(_number, section_centroid(section)))
     edge, weight, norm = pack_section(section)
     present = ~np.signbit(weight)
     extent = max(
@@ -34,31 +35,16 @@ def reference(target: np.ndarray, section: np.ndarray) -> tuple[float, bool]:
         for point in section
     )
     near = float(np.sum((target - centre) ** 2)) < 16.0 * extent
+    origin = (radius, height) if near else tuple(map(_number, centre))
     u, wu, v, wv = _flux_area_rule(near)
     result = mp.mpf("0")
     for index in range(len(edge)):
         if not present[index]:
             continue
-        ar = (
-            _number(edge[index, 0]) - radius
-            if near
-            else _number(edge[index, 0]) - expansion[0]
-        )
-        az = (
-            _number(edge[index, 1]) - height
-            if near
-            else _number(edge[index, 1]) - expansion[1]
-        )
-        br = (
-            _number(edge[index, 2]) - radius
-            if near
-            else _number(edge[index, 2]) - expansion[0]
-        )
-        bz = (
-            _number(edge[index, 3]) - height
-            if near
-            else _number(edge[index, 3]) - expansion[1]
-        )
+        ar = _number(edge[index, 0]) - origin[0]
+        az = _number(edge[index, 1]) - origin[1]
+        br = _number(edge[index, 2]) - origin[0]
+        bz = _number(edge[index, 3]) - origin[1]
         determinant = ar * bz - az * br
         if determinant == 0:
             continue
@@ -83,8 +69,8 @@ def reference(target: np.ndarray, section: np.ndarray) -> tuple[float, bool]:
                     edge_coordinate = angular_node
                 dr = radial_node * ((1 - edge_coordinate) * ar + edge_coordinate * br)
                 dz = radial_node * ((1 - edge_coordinate) * az + edge_coordinate * bz)
-                source_r = (radius if near else expansion[0]) + dr
-                source_z = (height if near else expansion[1]) + dz
+                source_r = origin[0] + dr
+                source_z = origin[1] + dz
                 gap = (radius - source_r) ** 2 + (height - source_z) ** 2
                 span = (radius + source_r) ** 2 + (height - source_z) ** 2
                 complement = gap / span
@@ -114,7 +100,8 @@ def main() -> None:
     args = parser.parse_args()
     pair = json.loads(args.inspection.read_text())["top"][0]
     with xr.open_zarr(args.cache, group=args.group, consolidated=False) as data:
-        target = np.asarray(data["sample_coordinates"][pair["target"]].values)
+        all_targets = np.asarray(data["sample_coordinates"].values)
+        target = all_targets[pair["target"]]
         offsets = np.asarray(data["cell_polygon_offsets"].values)
         section = np.asarray(
             data["cell_polygon_vertices"][
@@ -126,13 +113,22 @@ def main() -> None:
         np.asarray([target[0]]),
         np.asarray([target[1]]),
         section,
-        expansion_point=_section_centroid(section),
+        expansion_point=section_centroid(section),
     )[1][0]
+    host_batch = polygon_analytic_flux_moments(
+        all_targets[:, 0],
+        all_targets[:, 1],
+        section,
+        expansion_point=section_centroid(section),
+    )[1][pair["target"]]
+    if host_batch != pair["host"]:
+        raise ValueError("stored host entry does not match its full batch")
     report = {
         **pair,
         "high_precision": high_precision,
         "near": near,
         "host_recomputed": float(host_recomputed),
+        "host_recomputed_full_batch": float(host_batch),
         "host_reference_absolute": abs(pair["host"] - high_precision),
         "device_reference_absolute": abs(pair["device"] - high_precision),
     }

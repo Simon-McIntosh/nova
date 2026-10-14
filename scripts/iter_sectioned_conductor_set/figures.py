@@ -25,6 +25,25 @@ PASSIVE = "#777777"
 BARE = "#555555"
 
 
+def _compact_svg(path: Path) -> None:
+    """Keep vector geometry below the repository artifact ceiling."""
+    svg = path.read_text()
+    svg = re.sub(
+        r'\sd="([^"]+)"',
+        lambda match: (
+            ' d="'
+            + re.sub(
+                r"-?\d+\.\d{4,}",
+                lambda number: f"{float(number.group()):.3f}".rstrip("0").rstrip("."),
+                match.group(1),
+            )
+            + '"'
+        ),
+        svg,
+    )
+    path.write_text("\n".join(line.rstrip() for line in svg.splitlines()) + "\n")
+
+
 def geometry_figure(
     path: Path, max_layer_thickness: float, surface_layer: float
 ) -> None:
@@ -93,21 +112,7 @@ def geometry_figure(
     ax.set_ylim(-14, 17)
     fig.tight_layout()
     fig.savefig(path)
-    svg = path.read_text()
-    svg = re.sub(
-        r'\sd="([^"]+)"',
-        lambda match: (
-            ' d="'
-            + re.sub(
-                r"-?\d+\.\d{4,}",
-                lambda number: f"{float(number.group()):.3f}".rstrip("0").rstrip("."),
-                match.group(1),
-            )
-            + '"'
-        ),
-        svg,
-    )
-    path.write_text("\n".join(line.rstrip() for line in svg.splitlines()) + "\n")
+    _compact_svg(path)
     plt.close(fig)
 
 
@@ -138,6 +143,7 @@ def impedance_figure(path: Path, receipt: dict) -> None:
         ax.tick_params(labelsize=16)
     fig.tight_layout()
     fig.savefig(path)
+    _compact_svg(path)
     plt.close(fig)
 
 

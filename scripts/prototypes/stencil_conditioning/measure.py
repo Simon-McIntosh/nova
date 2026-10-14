@@ -47,11 +47,13 @@ def inspect(kind: str, cells: int, output: Path) -> dict:
         np.asarray(coilset.subframe.loc[plasma, "z"], dtype=np.float64),
     ]
     area = np.asarray([item.poly.area for item in material])
+    full_area = float(np.max(area))
     boundary = LineString(wall)
-    clipped = np.asarray([item.poly.intersects(boundary) for item in material])
+    touches_wall = np.asarray([item.poly.intersects(boundary) for item in material])
+    clipped = area / full_area < 1.0 - 1.0e-9
     tri = Delaunay(centre)
     stencil, _ = PlasmaGrid.loop_neighbour_vertices(
-        centre, tri.vertex_neighbor_vertices, np.flatnonzero(clipped)
+        centre, tri.vertex_neighbor_vertices, np.flatnonzero(touches_wall)
     )
     condition = ring_condition(centre, stencil)
     clusters = centre[stencil]
@@ -98,7 +100,6 @@ def inspect(kind: str, cells: int, output: Path) -> dict:
         StencilMesh(centre, stencil, area)
     except ValueError as exc:
         refused = str(exc)
-    full_area = float(np.max(area))
     x_point = np.asarray(exact.x_point, dtype=float) if kind == "diverted" else None
     detail = []
     for index in np.flatnonzero(condition > 100):
@@ -116,6 +117,7 @@ def inspect(kind: str, cells: int, output: Path) -> dict:
                 "centroids": cluster.tolist(),
                 "area_fraction": (area[ids] / full_area).tolist(),
                 "clipped": clipped[ids].tolist(),
+                "touches_wall": touches_wall[ids].tolist(),
                 "distance_xpoint": (
                     np.linalg.norm(cluster - x_point, axis=1).tolist()
                     if x_point is not None
@@ -131,6 +133,7 @@ def inspect(kind: str, cells: int, output: Path) -> dict:
         "kind": kind,
         "requested_cells": cells,
         "realised_cells": len(centre),
+        "full_hex_area": full_area,
         "ring_count": len(stencil),
         "refusal": refused,
         "condition": {

@@ -26,6 +26,7 @@ def compare(coarse: dict, refined: dict) -> dict:
     worst = np.max(error, axis=1)
     passed = np.cumprod((worst < 0.01).astype(int)).astype(bool)
     limit = float(frequency[np.flatnonzero(passed)[-1]]) if np.any(passed) else 0.0
+    near_converter = int(np.argmin(abs(frequency - 600)))
     return {
         "coarse_passive_count": coarse["passive_count"],
         "refined_passive_count": refined["passive_count"],
@@ -33,9 +34,8 @@ def compare(coarse: dict, refined: dict) -> dict:
         "refined_max_layer_m": refined["max_layer_thickness_m"],
         "sample_count": len(frequency),
         "upper_sampled_limit_hz": limit,
-        "max_relative_difference_at_600_hz": float(
-            worst[np.argmin(abs(frequency - 600))]
-        ),
+        "nearest_600_sample_hz": float(frequency[near_converter]),
+        "max_relative_difference_near_600_hz": float(worst[near_converter]),
         "max_relative_difference_at_5000_hz": float(worst[-1]),
         "max_relative_difference": float(np.max(worst)),
         "coil_max_relative_difference": {
@@ -60,7 +60,8 @@ def main() -> None:
     print(
         "SUMMARY upper_sampled_limit_hz={upper_sampled_limit_hz:.6g} "
         "max_relative_difference={max_relative_difference:.6g} "
-        "at_600_hz={max_relative_difference_at_600_hz:.6g} "
+        "near_600_hz={max_relative_difference_near_600_hz:.6g} "
+        "sample_hz={nearest_600_sample_hz:.6g} "
         "at_5000_hz={max_relative_difference_at_5000_hz:.6g}".format(**result)
     )
 

@@ -80,8 +80,13 @@ def run(kind, cells, cache, fallback, out):
         (machine.node, machine.wall_node, machine.sample_coordinates)
     )
     distance, indices = cKDTree(coordinates).query(np.asarray(points).reshape(-1, 2))
-    if float(np.max(distance)) > 2e-11:
+    maximum_distance = float(np.max(distance))
+    if maximum_distance > 2e-11:
         raise ValueError("sample stencil has no matching exterior target")
+    pitch = float(np.median(np.asarray(geometry.pitch)))
+    remote = np.min(coordinates, axis=0) - 10 * pitch
+    remote_distance = float(cKDTree(coordinates).query(remote)[0])
+    assert remote_distance > pitch
     sample_index = jnp.asarray(indices).reshape(sample_shape)
     exterior_samples = exterior[sample_index]
     scale = jnp.maximum(jnp.max(jnp.abs(initial[:, 0])), 1e-30) * jnp.stack(
@@ -166,6 +171,10 @@ def run(kind, cells, cache, fallback, out):
         machine_key=machine_key,
         machine_builder=builder,
         exterior_key=exterior_key,
+        matched_sample_points=int(np.prod(sample_shape)),
+        maximum_exterior_target_distance_m=maximum_distance,
+        mismatch_control_distance_m=remote_distance,
+        median_pitch_m=pitch,
         seed_basis=(
             "analytic moments scaled by 1.001 or zero current; "
             "not a neighbouring time slice"

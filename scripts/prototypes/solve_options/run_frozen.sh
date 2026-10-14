@@ -15,7 +15,8 @@ export XLA_PYTHON_CLIENT_PREALLOCATE=false
 export PYTHONPATH=$NOVA_OPTIONS_ROOT
 mkdir -p "$NOVA_OPTIONS_OUT"
 
-for cells in 2000 5000 10000; do
+read -r -a requested_cells <<< "${NOVA_OPTIONS_CELLS:-2000 5000 10000}"
+for cells in "${requested_cells[@]}"; do
     for kind in limited diverted; do
         cache=$NOVA_OPTIONS_COMMON
         if [ "$cells" = 5000 ] && [ "$kind" = diverted ]; then

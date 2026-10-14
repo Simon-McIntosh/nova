@@ -93,6 +93,18 @@ def run(kind, cells, cache, output):
         (whole, jnp.zeros_like(whole), jnp.zeros_like(whole)), axis=-1
     ) + jnp.where(cut[:, None], exact_moments, 0.0)
     corrected = corrected_raw * target / jnp.sum(corrected_raw[:, 0])
+    point_connected_raw = jnp.where(
+        old_inside & (reading.membership > 0), geometry.full_area * density, 0.0
+    )
+    point_connected = jnp.stack(
+        (point_connected_raw, jnp.zeros_like(whole), jnp.zeros_like(whole)), axis=-1
+    )
+    point_connected *= target / jnp.sum(point_connected_raw)
+    private_raw = jnp.where(
+        old_inside & (reading.membership == 0), geometry.full_area * density, 0.0
+    )
+    retained_private = corrected_raw.at[:, 0].add(private_raw)
+    retained_private *= target / jnp.sum(retained_private[:, 0])
     operator = fixture.forward_operator(source, machine)
     exterior, exterior_key = _exterior(cache, key)
     if exterior is None:
@@ -106,6 +118,8 @@ def run(kind, cells, cache, output):
     baseline = exterior + _image(operator, exact_moments)
     old_mapped = exterior + _image(operator, old)
     corrected_mapped = exterior + _image(operator, corrected)
+    point_connected_mapped = exterior + _image(operator, point_connected)
+    retained_private_mapped = exterior + _image(operator, retained_private)
     result = {
         "kind": kind,
         "cells": int(len(machine.node)),
@@ -114,6 +128,14 @@ def run(kind, cells, cache, output):
         "exterior_key": exterior_key,
         "exact_error": float(jnp.max(jnp.abs(baseline - analytic))) / span,
         "old_error": float(jnp.max(jnp.abs(old_mapped - analytic))) / span,
+        "point_connected_error": float(
+            jnp.max(jnp.abs(point_connected_mapped - analytic))
+        )
+        / span,
+        "retained_private_error": float(
+            jnp.max(jnp.abs(retained_private_mapped - analytic))
+        )
+        / span,
         "corrected_error": float(jnp.max(jnp.abs(corrected_mapped - analytic))) / span,
         "old_selected": int(jnp.sum(old_inside)),
         "outside_selected": int(jnp.sum(old_inside & (reading.membership == 0))),

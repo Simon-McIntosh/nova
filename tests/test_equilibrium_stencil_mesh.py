@@ -596,8 +596,8 @@ def test_the_ring_fit_holds_its_conditioning_at_machine_scale():
 
     The ring is centred and scaled before the design matrix is formed, so the
     conditioning follows the SHAPE of the neighbourhood and not the major
-    radius it sits at. A quarter-pitch displacement is far more than first-wall
-    clipping produces and still leaves a wide margin.
+    radius it sits at. A quarter-pitch displacement still leaves a wide margin;
+    near-collinear rings from wall-clipped slivers are handled at selection.
     """
     configure_dtypes()
     mesh = hex_mesh(0.16)

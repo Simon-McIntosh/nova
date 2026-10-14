@@ -5,6 +5,12 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 
+from nova.circuit.conductor import (
+    ConductorSet,
+    PolygonSection,
+    subdivide_passive_thickness,
+)
+from nova.circuit.passive import terminal_impedance_spectrum
 from nova.imas.machine import MachineCoil, MachineSection
 from nova.imas.pulsedesign import ITER
 
@@ -67,3 +73,44 @@ def test_iter_layout_uses_pancakes_and_retains_in_vessel_turns():
     assert (len(cs.elements), len(pf.elements)) == (40, 6)
     assert sum(section.turns for section in cs.elements) == pytest.approx(554.0)
     assert sum(section.turns for section in pf.elements) == pytest.approx(115.2)
+
+
+def test_passive_wall_layers_preserve_area_and_source_resistance():
+    wall = np.array([[2.0, -0.05], [2.5, -0.05], [2.5, 0.05], [2.0, 0.05]])
+    original = ConductorSet(
+        r=[1.0, 2.25],
+        z=[0.0, 0.0],
+        dr=[0.1, 0.5],
+        dz=[0.1, 0.1],
+        current_share=[8.0, 1.0],
+        circuit=[0, 1],
+        polygon_sections=(PolygonSection(1, wall),),
+    )
+    refined = subdivide_passive_thickness(original, [1], np.array([0.1]), 0.025)
+    assert refined.conductors.n_filaments == 5
+    assert refined.conductors.current_share[0] == 8.0
+    assert len(refined.circuits) == 4
+    assert np.all(refined.parent == 1)
+    assert np.all(refined.resistance_factor == 4)
+    assert sum(
+        abs(np.linalg.det(np.diff(section.vertices[:3], axis=0)))
+        for section in refined.conductors.polygon_sections
+    ) == pytest.approx(0.05)
+
+
+def test_passive_screening_changes_terminal_impedance_and_removal_is_bare():
+    frequency = np.geomspace(0.1, 5000.0, 20)
+    coil = np.array([[0.7, 0.3], [0.3, 0.5]])
+    series = np.ones((2, 1))
+    coupling = np.array([[0.1], [0.05]])
+    passive = np.array([[0.04]])
+    resistance = np.array([0.001])
+    screened = terminal_impedance_spectrum(
+        coil, coupling, passive, resistance, series, frequency
+    )[:, 0, 0]
+    bare = 2j * np.pi * frequency * float(series[:, 0] @ coil @ series[:, 0])
+    assert np.max(np.abs(screened / bare - 1)) > 0.01
+    removed = terminal_impedance_spectrum(
+        coil, np.empty((2, 0)), np.empty((0, 0)), np.empty(0), series, frequency
+    )[:, 0, 0]
+    np.testing.assert_allclose(removed, bare, rtol=1e-14)

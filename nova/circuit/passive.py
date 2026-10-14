@@ -229,6 +229,63 @@ def build_passive_circuit_system(
     )
 
 
+def terminal_impedance_spectrum(
+    coil_inductance: np.ndarray,
+    mutual: np.ndarray,
+    passive_inductance: np.ndarray,
+    passive_resistance: np.ndarray,
+    series: np.ndarray,
+    frequency_hz: np.ndarray,
+) -> np.ndarray:
+    """Series-coil terminal impedance with independent passive rings shorted.
+
+    ``series`` maps section currents to each terminal current.  The passive
+    generalized eigenbasis is solved once; its L-orthonormal modes make a
+    frequency sweep a small weighted sum rather than repeated dense solves.
+    With zero passive circuits the result is exactly the bare winding matrix.
+    """
+    from scipy.linalg import eigh
+
+    coil = np.asarray(coil_inductance, dtype=np.float64)
+    coupling = np.asarray(mutual, dtype=np.float64)
+    passive = np.asarray(passive_inductance, dtype=np.float64)
+    resistance = np.asarray(passive_resistance, dtype=np.float64)
+    wiring = np.asarray(series, dtype=np.float64)
+    frequency = np.atleast_1d(np.asarray(frequency_hz, dtype=np.float64))
+    if coil.ndim != 2 or coil.shape[0] != coil.shape[1]:
+        raise ValueError("coil inductance must be square")
+    if wiring.ndim != 2 or wiring.shape[0] != coil.shape[0]:
+        raise ValueError("series mapping has the wrong number of sections")
+    n_passive = passive.shape[0]
+    if (
+        passive.shape != (n_passive, n_passive)
+        or coupling.shape != (coil.shape[0], n_passive)
+        or resistance.shape != (n_passive,)
+    ):
+        raise ValueError("passive inductance, coupling and resistance shapes disagree")
+    if np.any(~np.isfinite(frequency)) or np.any(frequency <= 0):
+        raise ValueError("frequencies must be finite and positive")
+    if np.any(~np.isfinite(resistance)) or np.any(resistance <= 0):
+        raise ValueError("passive resistances must be finite and positive")
+    omega = 2 * np.pi * frequency
+    bare = wiring.T @ coil @ wiring
+    result = 1j * omega[:, None, None] * bare
+    if n_passive:
+        rate, vectors = eigh(np.diag(resistance), passive)
+        if np.any(rate <= 0):
+            raise ValueError("passive inductance must store positive magnetic energy")
+        mode_coupling = wiring.T @ coupling @ vectors
+        screened = np.einsum(
+            "im,jm,fm->fij",
+            mode_coupling,
+            mode_coupling,
+            1.0 / (rate[None, :] + 1j * omega[:, None]),
+            optimize=True,
+        )
+        result = result + omega[:, None, None] ** 2 * screened
+    return result
+
+
 def mode_relevance(
     tau: np.ndarray, a_modes: np.ndarray, sensor_scale: np.ndarray
 ) -> np.ndarray:

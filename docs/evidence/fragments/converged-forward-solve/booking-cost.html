@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="booking-cost">
+<meta name="plan-title" content="Current booking cost on fine grids">
+<meta name="plan-summary" content="Compact whole-cell and live-fragment booking with bounded device memory">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s3">
+<meta name="plan-commits" content="637a14ac52386717b2990a668f66f00c285b2467,d4ab8cefc23b5cf2a118d57c6791e51de9204e0a">
+<meta name="plan-recorded-at" content="2026-10-14">
+<meta name="plan-verdict" content="partial">
+<meta name="plan-environment" content="One reserved H200, binary64, fresh device-built diverted certificate machines, base and head booking on the same machine at each rung">
+<title>Current booking cost on fine grids | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<h1 id="booking-cost-title">Current booking cost on fine grids</h1>
+<p id="booking-cost-summary">The inherited vmapped booking keeps every cell in the largest fragment-ring shape. Each full or empty cell therefore reserves the clipped-ring representation. The committed implementation books full cells on their original small polygons, packs cut cells in batches of 32, and integrates only live rings within each cut cell. It preserves the signed ring order and the existing eight-by-eight Duffy quadrature and 512 chord segments.</p>
+<section id="booking-cost-profile">
+<h2>H200 profile and scaling</h2>
+<p id="booking-cost-profile-body">A one-booking H200 profile at 64 chord segments separates conic-ring construction from the full booking. The book's warm wall includes clipped integration; the independent ring measurement isolates construction and its padded output. The read has 499 cut, 774 full and 825 empty cells at the 2,098-cell rung, and 1,659 cut, 1,447 full and 2,052 empty cells at 5,158. Ring construction takes milliseconds while clipped integration dominates wall. The padded ring bank dominates the materialised geometry and contributes substantially to the booking peak; quadrature raises the full temporary allocation further.</p>
+<table id="booking-cost-profile-table">
+<thead><tr><th>Realised cells</th><th>Maximum ring slots per cell</th><th>64-segment booking [ms]</th><th>Ring construction [ms]</th><th>Ring output [GB]</th><th>Booking temporary [GB]</th></tr></thead>
+<tbody>
+<tr><td>2,098</td><td>84</td><td>174.8</td><td>1.78</td><td>0.368</td><td>1.012</td></tr>
+<tr><td>5,158</td><td>93</td><td>449.8</td><td>4.34</td><td>1.002</td><td>2.960</td></tr>
+</tbody>
+</table>
+<p id="booking-cost-scaling">The inherited bank scales with cell count times the maximum fragment count per cell times sampled ring width, which grows with chord segments. Each ring also generates 64 Duffy samples per triangle. The new whole-cell path uses original cell vertices; the cut path allocates at most 32 cells' sampled rings at a time and loops over each cell's live rings. Its cut integration scales with the actual cut-cell and live-fragment counts instead of every cell multiplied by the worst fragment count.</p>
+</section>
+<section id="booking-cost-measure">
+<h2>Fresh-machine booking cost and identity</h2>
+<p id="booking-cost-measure-body">H200 job 1284893 built both diverted certificate machines fresh with <code>NOVA_ANALYTIC_ORACLE_BUILDER=device</code> (cache hits false: 255 s and 1,019 s), then booked each machine from the orientation base and the committed head in separate processes. Each arm used its own tree as working directory and printed its imported <code>nova.__file__</code> and <code>current.__file__</code> in <code>fresh.log</code>. The base and head use the same 512-segment rule and same machine at each rung. At 2,098 cells the base defect reproduces at 1.045 s and 7.91 GB; the head runs in 26.0 ms and 0.279 GB, a 40.2-fold wall reduction. Its HLO bytes accessed fall from 38.7 to 1.03 GB, and the largest relative moment difference is 5.42e-16, below the 6.9e-16 identity threshold. The target set from the profile was a sub-250 ms warm step at 5,000 cells and a sub-500 ms step at 10,000 cells, conditional on a qualified 10,000-cell carrier. The measured 5,158-cell head clears its target at 85.4 ms; the 10,000-cell target remains unmeasured.</p>
+<table id="booking-cost-measure-table">
+<thead><tr><th>Realised cells</th><th>Base wall [ms]</th><th>Head wall [ms]</th><th>Base peak [GB]</th><th>Head peak [GB]</th><th>Maximum moment difference</th></tr></thead>
+<tbody>
+<tr><td>2,098</td><td>1,045</td><td>26.0</td><td>7.91</td><td>0.279</td><td>5.42e-16 relative</td></tr>
+<tr><td>5,158</td><td>3,066</td><td>85.4</td><td>23.13</td><td>0.728</td><td>4.45e-16 relative</td></tr>
+<tr><td>about 10,000</td><td colspan="5">Pending a qualified carrier store from the carrier requalification work.</td></tr>
+</tbody>
+</table>
+<p id="booking-cost-cost-body">The 5,158-cell base defect reproduces at 3.066 s and 23.13 GB, beside the prior 3.4 s and 23.7 GB; the head is 35.9 times faster with 31.8 times less peak memory. At 2,098 cells it is 40.2 times faster with 28.4 times less memory. The HLO cost analysis in the row receipts reports bytes accessed of 38.7 to 1.03 GB at 2,098 cells and 121.6 to 1.27 GB at 5,158; estimated floating-point operations fall from 28.9 to 0.519 billion and 65.3 to 0.724 billion. Both moment comparisons pass the 6.9e-16 relative identity tolerance, and both validity receipts agree. The read-only carrier store listed for this node contains no 10,000-cell machine, so that rung is pending carrier requalification rather than inferred from these measurements.</p>
+</section>
+<section id="booking-cost-gates">
+<h2>Tests and refusal control</h2>
+<p id="booking-cost-gates-body">The focused CPU base arm passed 11 tests and the head passed 12 tests, including the added traced guard against a sequential scan over cells. The four smooth, axis, boundary and moving-support JVP stages in <code>test_current_book_fragments.py</code> agree with central differences. Their finest-step relative errors are 5.13e-12, 9.22e-12, 8.05e-9 and 1.97e-11, respectively, below the declared 1e-10 smooth and 1e-8 other-stage bounds (<code>jvp-cpu.log</code>). A scratch-tree mutation replaced whole-cell <code>vmap</code> with a sequential <code>lax.scan</code>. The guard then failed by test id with scan length 17 and <code>EXIT=1</code>; the committed head passed the same guard. The refusal is recorded in <code>negative-control.log</code> in the node's run directory.</p>
+<p id="booking-cost-certificate-gate">A further H200 job, 1284915, ran all six analytic certificate parametrizations in separate orientation-base and head processes on the same card, including the 2,000- and 5,000-cell diverted rows. Both logs name their own source tree and imported module, assert binary64, and set the required results directory. Each arm collected six tests and ended with the same six failures in the fixture helper's cache semantic-key assertion, before <code>current.book</code> ran. The added-failure count is zero; these logs give no analytic certificate moment verdict. A read-only preflight loaded the existing 2,000- and 5,000-cell stores by their recorded groups, then showed that recomputed groups differ: <code>e1181cd028835f12</code> versus <code>56c89ac4cf893668</code> and <code>cdccd053cb900cee</code> versus <code>4c818bdbed936090</code>. The stored identities lack the builder keys and carry a different wall hash, so a merged carrier and booking test must supply matching receipts. The arm logs and <code>certificate-cache-preflight-retry.log</code> are in the run directory.</p>
+</section>
+</main>
+</body>
+</html>

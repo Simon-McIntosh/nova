@@ -196,80 +196,115 @@ def book(psi, read, geometry, profile, quadrature=Quadrature()):
     signed = quadrature.sigma * read.field_coefficients
     signed = signed.at[:, 0].add(-quadrature.sigma * read.boundary_flux)
 
-    def cell(index):
+    def cell_field(index):
         centre = geometry.centre[index]
-        vertices, count = geometry.vertices[index], geometry.vertex_count[index]
         field = FluxFieldPolynomial(
             normalized[index][None],
             centre[None],
             jnp.full((1, 2), geometry.pitch[index]),
             jnp.ones(1, dtype=bool),
         )
+        return centre, field
 
-        def integrate(rings, counts):
-            support = FragmentSupport(
-                rings[None],
-                counts[None],
-                centre[None],
-                jnp.ones(1, dtype=bool),
-                jnp.ones(1, dtype=bool),
-            )
-            return clipped_support_current_moments(
-                support,
-                support.included,
-                field,
-                profile,
-                cut_cell_capacity=1,
-                boundary_reduction=False,
-            )
-
-        def occupied(_):
-            def partial(_):
-                def conic(_):
-                    rings, counts, valid = _conic_rings(
-                        vertices,
-                        count,
-                        centre,
-                        geometry.pitch[index],
-                        signed[index],
-                        read.fragment_selected[index],
-                        quadrature.segments,
-                    )
-                    moments = integrate(rings, counts)
-                    return jax.tree.map(
-                        lambda value: jnp.where(valid, value, jnp.nan), moments
-                    )
-
-                def normal(_):
-                    rings, counts = _normal_rings(
-                        vertices,
-                        count,
-                        centre,
-                        read.saddle_form,
-                        read.fragment_selected[index],
-                        read.edge_interval[index],
-                        quadrature.segments,
-                    )
-                    return integrate(rings, counts)
-
-                return jax.lax.cond(read.normal_form_cells[index], normal, conic, None)
-
-            return jax.lax.cond(
-                read.membership[index] >= 1 - 1e-14,
-                lambda _: integrate(vertices[None], count[None]),
-                partial,
-                None,
-            )
-
-        moments = jax.lax.cond(
-            read.membership[index] > 0,
-            occupied,
-            lambda _: ClippedCurrentMoments(*(jnp.zeros(1) for _ in range(3))),
-            None,
+    def integrate(index, rings, counts):
+        centre, field = cell_field(index)
+        support = FragmentSupport(
+            rings[None],
+            counts[None],
+            centre[None],
+            jnp.ones(1, dtype=bool),
+            jnp.ones(1, dtype=bool),
+        )
+        moments = clipped_support_current_moments(
+            support,
+            support.included,
+            field,
+            profile,
+            cut_cell_capacity=1,
+            boundary_reduction=False,
         )
         return jax.tree.map(lambda value: value[0], moments)
 
-    moments = jax.vmap(cell)(jnp.arange(len(geometry.centre)))
+    def whole_cell(index):
+        rings = geometry.vertices[index][None]
+        counts = geometry.vertex_count[index][None]
+        return integrate(index, rings, counts)
+
+    def integrate_live_rings(index, rings, counts):
+        live = counts >= 3
+        live_count = jnp.sum(live, dtype=jnp.int32)
+        ring_index = jnp.nonzero(live, size=len(counts), fill_value=0)[0]
+        zero = ClippedCurrentMoments(*(jnp.zeros((), rings.dtype) for _ in range(3)))
+
+        def add_ring(slot, total):
+            ring = ring_index[slot]
+            value = integrate(index, rings[ring][None], counts[ring][None])
+            return jax.tree.map(lambda prior, addition: prior + addition, total, value)
+
+        return jax.lax.fori_loop(0, live_count, add_ring, zero)
+
+    def cut_cell(index):
+        centre = geometry.centre[index]
+        vertices, count = geometry.vertices[index], geometry.vertex_count[index]
+
+        def conic(_):
+            rings, counts, valid = _conic_rings(
+                vertices,
+                count,
+                centre,
+                geometry.pitch[index],
+                signed[index],
+                read.fragment_selected[index],
+                quadrature.segments,
+            )
+            moments = integrate_live_rings(index, rings, counts)
+            return jax.tree.map(lambda value: jnp.where(valid, value, jnp.nan), moments)
+
+        def normal(_):
+            rings, counts = _normal_rings(
+                vertices,
+                count,
+                centre,
+                read.saddle_form,
+                read.fragment_selected[index],
+                read.edge_interval[index],
+                quadrature.segments,
+            )
+            return integrate_live_rings(index, rings, counts)
+
+        return jax.lax.cond(read.normal_form_cells[index], normal, conic, None)
+
+    cells = len(geometry.centre)
+    full = read.membership >= 1 - 1e-14
+    cut = (read.membership > 0) & ~full
+    whole = jax.vmap(whole_cell)(jnp.arange(cells))
+    whole = jax.tree.map(lambda value: jnp.where(full, value, 0.0), whole)
+
+    # Only the compact cut batch carries sampled rings. The number of batches
+    # varies with the read, while the compiled batch width bounds device memory.
+    batch_width = 32
+    cut_count = jnp.sum(cut, dtype=jnp.int32)
+    cut_index = jnp.nonzero(cut, size=cells, fill_value=0)[0]
+    cut_index = jnp.pad(cut_index, (0, (-cells) % batch_width))
+
+    def add_batch(batch, carried):
+        start = batch * batch_width
+        indices = jax.lax.dynamic_slice(cut_index, (start,), (batch_width,))
+        active = start + jnp.arange(batch_width) < cut_count
+        values = jax.vmap(cut_cell)(indices)
+
+        def scatter(total, value):
+            return total.at[indices].add(jnp.where(active, value, 0.0))
+
+        return jax.tree.map(scatter, carried, values)
+
+    cuts = jax.tree.map(jnp.zeros_like, whole)
+    cuts = jax.lax.fori_loop(
+        0, (cut_count + batch_width - 1) // batch_width, add_batch, cuts
+    )
+    moments = jax.tree.map(
+        lambda full_value, cut_value: full_value + cut_value, whole, cuts
+    )
     raw = jnp.sum(moments.cell_current)
     valid = read.valid & read.qualified & (span != 0) & jnp.isfinite(raw)
     if quadrature.target_current is None:

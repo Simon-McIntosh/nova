@@ -7,10 +7,10 @@
 <meta name="reckon-type" content="evidence">
 <meta name="plan-slug" content="carrier-agreement">
 <meta name="plan-title" content="Carrier agreement and identity">
-<meta name="plan-summary" content="The carrier identity now covers mesh, ring and coupling construction. The radial and diverted full-block measurements remain in progress.">
+<meta name="plan-summary" content="Identity coverage passes mutation controls. The full radial maximum is near the wall and the host batch departs from fifty-digit quadrature; the diverted rerun is in progress.">
 <meta name="plan-evidence-for" content="converged-forward-solve">
 <meta name="plan-verifies" content="converged-forward-solve#s4">
-<meta name="plan-commits" content="c7b1b5dc4,618a735a6,cb38cd9c3,e4a0efa8f,58e6679eb,c7aa7e57c,ffb73fc17,bc237c5e1,4a35ccd6e,43d0ca2b7,166918859,55b338a82,7b99006ed,aee36c170,c05786857">
+<meta name="plan-commits" content="c7b1b5dc4,618a735a6,cb38cd9c3,e4a0efa8f,58e6679eb,c7aa7e57c,ffb73fc17,bc237c5e1,4a35ccd6e,43d0ca2b7,166918859,55b338a82,7b99006ed,aee36c170,c05786857,399806fec,d89a39bf3,293554dcf,9d9e9562d">
 <meta name="plan-recorded-at" content="2026-10-14">
 <meta name="plan-verdict" content="partial">
 <title>Carrier agreement and identity | nova</title>
@@ -49,44 +49,72 @@ polygon kernel. The head arm fails none. The mutation log ends with
 <h2 id="carrier-agreement-measurement">Numerical agreement</h2>
 <p>The prior 5,167-cell limited receipt reported
 <code>plasma_to_sample_r</code> at 1.2186816095922636e-12 norm-relative;
-the other eight blocks measured 1.5e-14 to 7.1e-13. The stored cache now
-exposes its host group but no device group, so that scalar alone cannot locate
-the differing entries. A fresh device comparison of the stored host radial
-block is queued as H200 job 1284944. Its receipt will name the worst target and
-cell, their coordinates and wall proximity. A separate H200 job, 1284938,
-measures all nine diverted 5,000-cell blocks in one allocation. Neither job's
-absence of an error is treated as a result: their receipts and terminal job
-states must be read before a numerical verdict or floor is stated.</p>
+the other eight blocks measured 1.5e-14 to 7.1e-13. H200 job 1284944
+completed with <code>EXIT=0</code> and compared all 61,652,644 entries of
+the stored host radial block against a fresh device assembly. Its completed
+JSON receipt reproduces that maximum. The largest gaps sit on near-wall
+cells 4860, 1177 and 4766. Their source centres lie 0.0185–0.0381 m from a
+wall vertex; the leading target-source distances are 0.0618–0.0814 m.
+These are near-field couplings, not coincident or singular pairs.</p>
 
-<p>One checked near-field pair already shows why entry provenance matters.
-Target 2735 and cell 1177 are 0.042865&nbsp;m apart; the source centre is
-0.018536&nbsp;m from a limiter vertex. The stored host radial entry is
-1.7621838929108605e-9, while the sampled device entry is
-1.7621838929352127e-9. Fifty-digit evaluation of the same graded area rule
-gives 1.762183892933187e-9: the stored host is 2.2326e-20 away and the
-device is 2.0258e-21 away. Replaying the host on the complete target batch
-returns the stored value exactly; evaluating that target alone changes the
-reduction by 2.5623e-20. The sample pair's norm-relative host-device gap is
-2.3051e-13, below the block's reported maximum. This is an entry check, not
-a bound on the remaining 61.7 million entries.</p>
+<table>
+<thead><tr><th>Target</th><th>Cell</th><th>Absolute radial gap [m Wb/A]</th><th>Gap / block scale</th><th>Wall vertex distance [m]</th></tr></thead>
+<tbody>
+<tr><td>11226</td><td>4860</td><td>1.2874900798265365e-19</td><td>1.2186816095922636e-12</td><td>0.038138</td></tr>
+<tr><td>2705</td><td>1177</td><td>1.173140631947206e-19</td><td>1.1104434403192664e-12</td><td>0.018536</td></tr>
+<tr><td>2700</td><td>1177</td><td>8.385626177817573e-20</td><td>7.937465746686454e-13</td><td>0.018536</td></tr>
+<tr><td>10921</td><td>4766</td><td>8.123575359760774e-20</td><td>7.689419942102502e-13</td><td>0.028901</td></tr>
+<tr><td>11096</td><td>4860</td><td>7.284483346386983e-20</td><td>6.895172264798334e-13</td><td>0.038138</td></tr>
+</tbody>
+</table>
 
-<p>The controlled CPU sample covered 98,304 target-cell entries across 256
-wall-adjacent source cells. Its worst gap was 2.305072123406433e-13
-norm-relative, at the pair above. The receipt records
-<code>sampled_cell_count=256</code> and <code>completed=false</code>: the planned
-middle and interior sample batches were stopped so the entire radial block can
-be measured by the queued H200 job. These 256 cells do not establish the
-1.2186816095922636e-12 full-block maximum's location. Earlier 550- and
-2,000-cell parity rows used a different certificate case, so their values
-cannot by themselves justify a new 5,000-cell floor.</p>
+<p>The maximum is target (7.01271761983729, 3.136819170404031) against
+cell (7.09342091294632, 3.1475371319701004), separated by 0.0814119 m.
+An independent 50-digit mpmath evaluation uses the same 64-by-128 graded
+near-field quadrature nodes and authored three-edge section. It gives
+-1.777657987617869e-9 m Wb/A. The device entry is 1.29164e-21 from that
+value; the stored host entry is 1.27457e-19 away, 98.7 times farther. A host
+replay over all 11,932 targets differs from storage by only 6.77626e-21,
+below the declared 1.05646e-20 replay bound. Computing the target alone gives
+-1.777657987625937e-9, only 8.06790e-21 from the reference. The different
+batch widths localise the departure to the vectorised host near-field path.</p>
+
+<p>These values do not support a new agreement floor: the two paths are not
+equally close to the independent reference. A correction belongs in
+<code>nova/biot/polygonanalytic.py</code>, outside this worker's write grant.
+The concrete candidate edit is in <code>_flux_area_integral</code>'s NumPy
+branch: accumulate signed radial terms
+<code>weighted * (displacement_r + dr)</code> with a reduction stable across
+target-batch widths, replacing its unconditioned
+<code>xp.sum(..., axis=(0, 1))</code>. The graded rule must remain the same.
+This candidate still needs validation against the reference and all nine
+blocks; it was not applied here.</p>
+
+<p>The diverted 5,000-cell all-nine-block job 1284938 reached its 75-minute
+time limit after persisting the host carrier but before writing a comparison
+receipt. The cache-path parser had interpreted the dot in the run-directory
+name as a FilePath suffix; passing a Path now preserves the requested
+location. The completed 962 MB host carrier was copied into that directory.
+H200 job 1284958 is running the same nine-block comparison from this cached
+host. No diverted agreement is claimed until its JSON receipt, terminal
+state and exit marker have been read.</p>
+
+<p>An earlier controlled CPU sample covered 98,304 target-cell entries across
+256 wall-adjacent cells. Its worst gap was 2.305072123406433e-13 at target
+2735, cell 1177. The receipt records <code>sampled_cell_count=256</code> and
+<code>completed=false</code>. The sample missed the full-block maximum, which
+is why the H200 receipt is the localisation authority. Earlier 550- and
+2,000-cell parity rows used a different certificate case and cannot justify
+a new 5,000-cell floor.</p>
 
 <figure id="carrier-agreement-radial-panel">
-  <img src="/nova/figures/converged-forward-solve/carrier-agreement/radial-sample.svg" alt="Limiter overview and close view locating the largest sampled radial disagreements">
+  <img src="/nova/figures/converged-forward-solve/carrier-agreement/radial-sample.svg" alt="Limiter overview and close view locating the largest full-block radial disagreements">
   <figcaption>The limited carrier's poloidal limiter and the eight largest
-  checked radial target-cell gaps among 256 wall-adjacent cells. Black circles mark source cells; blue crosses
-  mark sample points; grey segments join each pair. The close view locates the
-  largest sampled pair at the wall. These are sampled entries; the full-block
-  maximum awaits the device receipt.</figcaption>
+  target-cell gaps in the complete 61,652,644-entry comparison. Black circles
+  mark source cells, blue crosses sample points, and grey segments join each
+  pair. The close view locates the full-block maximum at target 11226 and cell
+  4860 near the wall. The axes are hidden; limiter geometry gives spatial
+  context.</figcaption>
 </figure>
 </main>
 </body>

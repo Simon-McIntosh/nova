@@ -33,7 +33,7 @@ from scripts.prototypes.support.geometry import certificate_field
 from tests.equilibrium.test_topology_read import _analytic_inputs
 
 
-def run(cells, cache, output, terminal_path):
+def run(cells, cache, output, terminal_path, perturbation):
     assert jax.config.jax_enable_x64 is True and jax.default_backend() == "gpu"
     print(
         f"nova={nova.__file__} probe={__file__} cwd={Path.cwd().resolve()}",
@@ -94,14 +94,63 @@ def run(cells, cache, output, terminal_path):
     )
     pitch = float(jnp.median(geometry.pitch))
     span = float(jnp.abs(reading.boundary_flux - reading.axis_flux))
-    scale = span / pitch
+    scale = span / pitch if perturbation == "vertical" else span
     z0 = float(seeds[0, 1])
-    value_slope = rule.points.reshape(-1, 2)[:, 1] - z0
+    wall_centre = None
+    wall_candidate_selection = None
+    if perturbation == "vertical":
+        value_slope = rule.points.reshape(-1, 2)[:, 1] - z0
+    else:
+        wall_points, wall_flux = topology._wall_events(
+            analytic_field, geometry, policy, convention.sigma
+        )
+        wall_cell = jax.vmap(
+            lambda point: jnp.argmax(topology._inside_cells(geometry, point))
+        )(wall_points)
+        on_core = jnp.any(reading.fragment_selected[wall_cell], axis=1)
+        score = jnp.where(on_core, convention.sigma * wall_flux, -jnp.inf)
+        if bool(jnp.any(jnp.isfinite(score))):
+            wall_index = int(jnp.argmax(score))
+            wall_candidate_selection = "connected"
+        else:
+            x_level = jnp.sum(
+                jnp.where(reading.x_point_valid, reading.x_point_flux, 0.0)
+            ) / jnp.sum(reading.x_point_valid)
+            wall_index = int(jnp.argmin(jnp.abs(wall_flux - x_level)))
+            wall_candidate_selection = "nearest-x-flux"
+        wall_centre = np.asarray(wall_points[wall_index])
+        width = 1.5 * pitch
+
+        def bump(points):
+            displacement = np.asarray(points) - wall_centre
+            value = np.exp(-np.sum(displacement**2, axis=-1) / (2 * width**2))
+            gradient = -displacement * value[..., None] / width**2
+            hessian = (
+                displacement[..., :, None] * displacement[..., None, :] / width**4
+                - np.eye(2) / width**2
+            ) * value[..., None, None]
+            jets = np.stack(
+                (
+                    value,
+                    gradient[..., 0],
+                    gradient[..., 1],
+                    hessian[..., 0, 0],
+                    hessian[..., 0, 1],
+                    hessian[..., 1, 1],
+                ),
+                axis=-1,
+            )
+            return value, jets
+
+        value_slope = bump(rule.points.reshape(-1, 2))[0]
     lookup = np.asarray(window.lookup)
     selected = np.flatnonzero(lookup >= 0)
     jet_slope = np.zeros_like(np.asarray(window.exterior))
-    jet_slope[lookup[selected], 0] = np.asarray(window.nodes)[selected, 1] - z0
-    jet_slope[lookup[selected], 2] = 1.0
+    if perturbation == "vertical":
+        jet_slope[lookup[selected], 0] = np.asarray(window.nodes)[selected, 1] - z0
+        jet_slope[lookup[selected], 2] = 1.0
+    else:
+        jet_slope[lookup[selected]] = bump(np.asarray(window.nodes)[selected])[1]
     jet_slope = jnp.asarray(jet_slope)
     slots = window.lookup[jets.sample_index]
     safe_slots = jnp.maximum(slots, 0)
@@ -317,6 +366,9 @@ def run(cells, cache, output, terminal_path):
         crossing["full_map_finite_differences"] = derivatives
     result = {
         "cells": len(machine.node),
+        "perturbation": perturbation,
+        "wall_bump_centre": None if wall_centre is None else wall_centre.tolist(),
+        "wall_candidate_selection": wall_candidate_selection,
         "span": span,
         "pitch": pitch,
         "slope_scale": scale,
@@ -347,8 +399,10 @@ def run(cells, cache, output, terminal_path):
     component_scale = jnp.asarray(
         (float(booked.raw_current) / len(reference)) * np.asarray((1.0, pitch, pitch))
     )
+
     def scaled(residual):
         return float(jnp.max(jnp.abs(residual / component_scale)))
+
     result["terminal_booking_floor"] = {
         "split_residual": scaled(terminal_read[7] - terminal),
         "full_exact_residual": scaled(exact_moments - terminal),
@@ -370,8 +424,11 @@ def main():
     parser.add_argument("--cache", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--terminal", type=Path, required=True)
+    parser.add_argument(
+        "--perturbation", choices=("vertical", "wall-bump"), default="vertical"
+    )
     args = parser.parse_args()
-    run(args.cells, args.cache, args.output, args.terminal)
+    run(args.cells, args.cache, args.output, args.terminal, args.perturbation)
 
 
 if __name__ == "__main__":

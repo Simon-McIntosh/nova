@@ -18,6 +18,10 @@ from nova.circuit.passive import terminal_impedance_spectrum
 from nova.imas.machine import MachineCoil, MachineSection
 from nova.imas.pulsedesign import ITER
 from scripts.iter_sectioned_conductor_set.build import calculate
+from scripts.iter_sectioned_conductor_set.compare_refinement import (
+    compare as compare_refinement,
+    require_convergence,
+)
 
 
 def _rectangle(name: str, turns: float) -> MachineSection:
@@ -145,6 +149,28 @@ def test_parallel_linkage_columns_equal_serial_result():
 def test_frequency_grid_rejects_single_sample():
     with pytest.raises(ValueError, match="two frequency samples"):
         calculate(0.04, 3, frequency_samples=1)
+
+
+def test_refinement_gate_rejects_a_converter_band_excursion():
+    refined = {
+        "coil_names": ["PF1"],
+        "frequency_hz": [0.1, 600.0, 5000.0],
+        "screened_real_ohm": [[1.0], [1.0], [1.0]],
+        "screened_imag_ohm": [[0.0], [0.0], [0.0]],
+        "passive_count": 2,
+        "max_layer_thickness_m": 0.006,
+    }
+    coarse = dict(refined, passive_count=1, max_layer_thickness_m=0.012)
+    coarse["screened_real_ohm"] = [[1.0], [1.02], [1.0]]
+    failed = compare_refinement(coarse, refined)
+    assert failed["max_relative_difference"] == pytest.approx(0.02)
+    with pytest.raises(AssertionError, match="before 5000 Hz"):
+        require_convergence(failed, tolerance=0.01, upper_limit_hz=5000.0)
+    coarse["screened_real_ohm"] = [[1.002], [1.002], [1.002]]
+    passed = compare_refinement(coarse, refined)
+    require_convergence(passed, tolerance=0.01, upper_limit_hz=5000.0)
+    with pytest.raises(AssertionError, match="limit"):
+        require_convergence(passed, tolerance=0.001, upper_limit_hz=5000.0)
 
 
 def test_passive_screening_changes_terminal_impedance_and_removal_is_bare():

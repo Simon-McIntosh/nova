@@ -51,11 +51,34 @@ def compare(coarse: dict, refined: dict) -> dict:
     }
 
 
+def require_convergence(
+    result: dict, *, tolerance: float, upper_limit_hz: float
+) -> None:
+    """Refuse a mesh pair that does not converge through the requested band."""
+    if not 0 < tolerance <= 0.01 or upper_limit_hz <= 0:
+        raise ValueError("tolerance must be at most 1% and upper limit positive")
+    if result["upper_sampled_limit_hz"] < upper_limit_hz:
+        raise AssertionError(
+            "passive thickness refinement exceeds the terminal impedance "
+            f"limit before {upper_limit_hz:g} Hz: "
+            f"max={result['max_relative_difference']:.6g}, "
+            f"limit={tolerance:.6g}"
+        )
+    if result["max_relative_difference"] >= tolerance:
+        raise AssertionError(
+            "passive thickness refinement exceeds the terminal impedance "
+            f"limit: max={result['max_relative_difference']:.6g}, "
+            f"limit={tolerance:.6g}"
+        )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--coarse", type=Path, required=True)
     parser.add_argument("--refined", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--tolerance", type=float, default=0.01)
+    parser.add_argument("--upper-limit", type=float, default=5000.0)
     args = parser.parse_args()
     result = compare(
         json.loads(args.coarse.read_text()), json.loads(args.refined.read_text())
@@ -67,6 +90,9 @@ def main() -> None:
         "near_600_hz={max_relative_difference_near_600_hz:.6g} "
         "sample_hz={nearest_600_sample_hz:.6g} "
         "at_5000_hz={max_relative_difference_at_5000_hz:.6g}".format(**result)
+    )
+    require_convergence(
+        result, tolerance=args.tolerance, upper_limit_hz=args.upper_limit
     )
 
 

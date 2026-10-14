@@ -296,6 +296,7 @@ def main():
     selected = []
     failures = []
     map_control = []
+    vertical_control = None
     for index in eligible:
         slice_ = equilibrium.time_slice[index]
         try:
@@ -319,6 +320,37 @@ def main():
         )
         if index in representatives:
             selected.append((index, current, slice_))
+        if index == 200:
+            target_r = np.array([loop_points[9, 0]])
+            target_z = np.array([loop_points[9, 1]])
+            displacement = 0.01
+            probe = 0.001
+            base = plasma_flux_at_points(current, target_r, target_z)[0]
+            moved = plasma_flux_at_points(
+                current, target_r, target_z, vertical_offset=displacement
+            )[0]
+            gradient = (
+                plasma_flux_at_points(current, target_r, target_z + probe)[0]
+                - plasma_flux_at_points(current, target_r, target_z - probe)[0]
+            ) / (2 * probe)
+            predicted_change = -displacement * gradient
+            observed_change = moved - base
+            relative_error = abs(observed_change - predicted_change) / abs(
+                predicted_change
+            )
+            if abs(predicted_change) < 1e-4 or relative_error > 0.03:
+                raise AssertionError(
+                    "vertical-shift flux response differs from gradient"
+                )
+            vertical_control = {
+                "index": index,
+                "target": [float(target_r[0]), float(target_z[0])],
+                "displacement_m": displacement,
+                "predicted_change_wb": float(predicted_change),
+                "observed_change_wb": float(observed_change),
+                "relative_error": float(relative_error),
+            }
+            print("NEGATIVE_CONTROL " + json.dumps(vertical_control, sort_keys=True))
         if index not in comparison:
             continue
         stored = map_flux(slice_, locations)
@@ -426,6 +458,7 @@ def main():
             str(coil.name).strip() for coil in list(active.coil)[:11]
         ],
         "excluded_coil_family": "VS3: four coupling columns for two stored elements",
+        "vertical_shift_control": vertical_control,
     }
     (OUTPUT / "summary.json").write_text(
         json.dumps(

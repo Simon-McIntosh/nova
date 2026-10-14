@@ -101,7 +101,7 @@ def run(kind, cells, cache, out):
     psi = jax.vmap(field.value)(points.reshape(-1, 2)).reshape(points.shape[:-1])
     convention = topology.TopologyConvention.from_cocos(17, 1.0)
     policy = TopologyPolicy()
-    profile = source.core
+    profile = fixture.analytic_profile(source)
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     print(f"revision={revision} tree={Path.cwd().resolve()}", flush=True)
     print(f"command=profile {kind} {cells}", flush=True)

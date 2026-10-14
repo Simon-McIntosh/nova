@@ -271,27 +271,41 @@ def run(kind, cells, cache, output, batch=False):
             scale_vector,
         )
 
-    started = perf_counter()
-    solve_program = jax.jit(solve).lower(reference, *rest).compile()
-    solve_compile = perf_counter() - started
-    started = perf_counter()
-    solution = solve_program(reference, *rest)
-    jax.block_until_ready(solution)
-    solve_wall = perf_counter() - started
-    result.update(
-        stage="cold-solved",
-        newton_compile_seconds=solve_compile,
-        cold_solve_seconds=solve_wall,
-        cold_residual=float(solution.residual),
-        cold_converged=bool(solution.converged),
-        cold_accepted_steps=int(solution.accepted_steps),
-        cold_history=np.asarray(solution.history).tolist(),
-    )
+    if batch:
+        terminal_path = output.with_name(f"forward-{kind}-{cells}-terminal-moments.npy")
+        solution_moments = jnp.asarray(np.load(terminal_path))
+        supplied_residual = jax.jit(
+            lambda varied: jnp.max(jnp.abs(equation(varied, *rest) / scale_vector))
+        )(solution_moments)
+        result.update(
+            stage="supplied-terminal",
+            supplied_terminal_residual=float(supplied_residual),
+            supplied_terminal_converged=bool(supplied_residual <= 1e-12),
+        )
+    else:
+        started = perf_counter()
+        solve_program = jax.jit(solve).lower(reference, *rest).compile()
+        solve_compile = perf_counter() - started
+        started = perf_counter()
+        solution = solve_program(reference, *rest)
+        jax.block_until_ready(solution)
+        solve_wall = perf_counter() - started
+        result.update(
+            stage="cold-solved",
+            newton_compile_seconds=solve_compile,
+            cold_solve_seconds=solve_wall,
+            cold_residual=float(solution.residual),
+            cold_converged=bool(solution.converged),
+            cold_accepted_steps=int(solution.accepted_steps),
+            cold_history=np.asarray(solution.history).tolist(),
+        )
+        if not bool(solution.converged):
+            _write(output, result)
+            print("RESULT " + json.dumps(result, default=str), flush=True)
+            return
+        solution_moments = solution.moments
     _write(output, result)
-    if not bool(solution.converged):
-        print("RESULT " + json.dumps(result, default=str), flush=True)
-        return
-    terminal = compiled(*(solution.moments, *rest))
+    terminal = compiled(*(solution_moments, *rest))
     terminal_flux = exterior + _image(operator, terminal.moments)
     result.update(
         terminal_flux_error=float(jnp.max(jnp.abs(terminal_flux - analytic))) / span,
@@ -301,7 +315,7 @@ def run(kind, cells, cache, output, batch=False):
     )
     np.save(
         output.with_name(output.stem + "-terminal-moments.npy"),
-        np.asarray(solution.moments),
+        np.asarray(solution_moments),
     )
     np.save(
         output.with_name(output.stem + "-terminal-roots.npy"),
@@ -313,10 +327,10 @@ def run(kind, cells, cache, output, batch=False):
         return factor_at(lambda state: equation(state, *operands), varied)
 
     started = perf_counter()
-    factor_program = jax.jit(factorised).lower(solution.moments, *rest).compile()
+    factor_program = jax.jit(factorised).lower(solution_moments, *rest).compile()
     factor_compile = perf_counter() - started
     started = perf_counter()
-    factor = factor_program(solution.moments, *rest)
+    factor = factor_program(solution_moments, *rest)
     jax.block_until_ready(factor)
     factor_wall = perf_counter() - started
     amplitude = span * 1e-8 / pitch
@@ -356,10 +370,10 @@ def run(kind, cells, cache, output, batch=False):
         )
 
     warm_program = (
-        jax.jit(warm_correct).lower(solution.moments, factor, *warm_rest).compile()
+        jax.jit(warm_correct).lower(solution_moments, factor, *warm_rest).compile()
     )
     started = perf_counter()
-    warm = warm_program(solution.moments, factor, *warm_rest)
+    warm = warm_program(solution_moments, factor, *warm_rest)
     jax.block_until_ready(warm)
     warm_wall = perf_counter() - started
     result.update(
@@ -387,7 +401,7 @@ def run(kind, cells, cache, output, batch=False):
             window, exterior=window.exterior + offset * window_delta
         )
         return warm_correct(
-            solution.moments,
+            solution_moments,
             factor,
             varied_values,
             jets,

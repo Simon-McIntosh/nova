@@ -97,9 +97,10 @@ def main() -> None:
     parser.add_argument("group")
     parser.add_argument("inspection", type=Path)
     parser.add_argument("output", type=Path)
+    parser.add_argument("--top-index", type=int, default=0)
     args = parser.parse_args()
     inspection = json.loads(args.inspection.read_text())
-    pair = inspection["top"][0]
+    pair = inspection["top"][args.top_index]
     with xr.open_zarr(args.cache, group=args.group, consolidated=False) as data:
         all_targets = np.asarray(data["sample_coordinates"].values)
         target = all_targets[pair["target"]]
@@ -134,6 +135,7 @@ def main() -> None:
         raise ValueError("stored host entry does not match its full batch")
     report = {
         **pair,
+        "top_index": args.top_index,
         "high_precision": high_precision,
         "near": near,
         "host_recomputed": float(host_recomputed),

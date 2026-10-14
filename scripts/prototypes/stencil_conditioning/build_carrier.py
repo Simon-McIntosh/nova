@@ -38,10 +38,45 @@ def main() -> None:
     print(f"nova.__file__={nova.__file__}", flush=True)
     print(f"device={jax.devices('gpu')[0]}", flush=True)
 
+    stage_walls: dict[str, float] = {}
+    geometry_started = None
+    build_machine = fixture.build_machine
+    assemble_families = fixture._assemble_families
+
+    def timed_build_machine(*args, **kwargs):
+        nonlocal geometry_started
+        geometry_started = perf_counter()
+        print("STAGE_START geometry", flush=True)
+        return build_machine(*args, **kwargs)
+
+    def timed_assemble_families(*args, **kwargs):
+        assert geometry_started is not None
+        stage_walls["geometry"] = perf_counter() - geometry_started
+        print(f"STAGE_DONE geometry seconds={stage_walls['geometry']:.3f}", flush=True)
+        print("STAGE_START coupling_assembly", flush=True)
+        started = perf_counter()
+        result = assemble_families(*args, **kwargs)
+        duration = perf_counter() - started
+        stage_walls["coupling_assembly"] = duration
+        print(f"STAGE_DONE coupling_assembly seconds={duration:.3f}", flush=True)
+        return result
+
+    class TimedStore(ZarrStore):
+        def store(self, mode=None):
+            print("STAGE_START store_publication", flush=True)
+            started = perf_counter()
+            result = super().store(mode=mode)
+            duration = perf_counter() - started
+            stage_walls["store_publication"] = duration
+            print(f"STAGE_DONE store_publication seconds={duration:.3f}", flush=True)
+            return result
+
     def scoped_store(*, filename, dirname, group=None):
-        return ZarrStore(filename=filename, dirname=output / "cache", group=group)
+        return TimedStore(filename=filename, dirname=output / "cache", group=group)
 
     fixture.ZarrStore = scoped_store
+    fixture.build_machine = timed_build_machine
+    fixture._assemble_families = timed_assemble_families
     carrier, _source, exact = certificate._case(
         "diverted-single-null", clip_mode="exact"
     )
@@ -58,6 +93,7 @@ def main() -> None:
         "realised_cells": int(len(machine.node)),
         "ring_count": int(len(machine.stencil)),
         "build_wall_seconds": wall,
+        "stage_wall_seconds": stage_walls,
         "store_bytes": store_bytes,
         "builder": fixture.resolve_builder(None),
         "device": str(jax.devices("gpu")[0]),

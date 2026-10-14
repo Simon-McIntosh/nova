@@ -19,7 +19,6 @@ from nova.circuit.conductor import (
 from nova.circuit.linkage import (
     circuit_linkage_matrix,
     guard_positive_definite,
-    preserve_series_terminal_linkage,
 )
 from nova.circuit.passive import (
     PassiveCircuitSystem,
@@ -168,8 +167,6 @@ def calculate(
     surface_layer_m: float | None = None,
     workers: int = 1,
     cache_root: Path | None = None,
-    terminal_reference: np.ndarray | None = None,
-    raw_linkage: bool = False,
 ) -> dict:
     if frequency_samples < 2:
         raise ValueError("at least two frequency samples are required")
@@ -218,7 +215,6 @@ def calculate(
     build_seconds = perf_counter() - started
     series = np.zeros((n_section, len(coil_names)))
     series[np.arange(n_section), owner] = 1.0
-    raw_coil_matrix = series.T @ matrix[:n_section, :n_section] @ series
     active = read_ids(*SOURCE[0])
     source_coil_names = [
         str(coil.name).rsplit("(", 1)[-1].removesuffix(")") for coil in active.coil
@@ -233,15 +229,6 @@ def calculate(
     )
     if np.any(~np.isfinite(coil_resistance)):
         raise ValueError("active source resistance is missing")
-    if not raw_linkage:
-        reference = (
-            canonical_coil_reference(active)
-            if terminal_reference is None
-            else np.asarray(terminal_reference, dtype=np.float64)
-        )
-        matrix[:n_section, :n_section] = preserve_series_terminal_linkage(
-            matrix[:n_section, :n_section], series, reference
-        )
     coil_matrix = series.T @ matrix[:n_section, :n_section] @ series
     system_path = cache_dir / "system.npz" if cache_dir else None
     if system_path and system_path.exists():
@@ -318,9 +305,7 @@ def calculate(
             float(source_resistance.max()),
         ],
         "coil_inductance_h": coil_matrix.tolist(),
-        "raw_coil_inductance_h": raw_coil_matrix.tolist(),
         "coil_resistance_ohm": coil_resistance.tolist(),
-        "terminal_reference_applied": not raw_linkage,
         "frequency_hz": frequency.tolist(),
         "screened_real_ohm": np.diagonal(screened.real, axis1=1, axis2=2).tolist(),
         "screened_imag_ohm": np.diagonal(screened.imag, axis1=1, axis2=2).tolist(),
@@ -339,15 +324,8 @@ def main() -> None:
     parser.add_argument("--surface-layer", type=float)
     parser.add_argument("--workers", type=int, default=1)
     parser.add_argument("--cache-root", type=Path)
-    parser.add_argument("--terminal-reference", type=Path)
-    parser.add_argument("--raw-linkage", action="store_true")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    reference = None
-    if args.terminal_reference is not None:
-        reference = np.asarray(
-            json.loads(args.terminal_reference.read_text())["coil_inductance_h"]
-        )
     result = calculate(
         args.max_thickness,
         args.section_n_max,
@@ -355,8 +333,6 @@ def main() -> None:
         surface_layer_m=args.surface_layer,
         workers=args.workers,
         cache_root=args.cache_root,
-        terminal_reference=reference,
-        raw_linkage=args.raw_linkage,
     )
     args.output.write_text(json.dumps(result, indent=2))
     print(

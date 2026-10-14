@@ -10,10 +10,7 @@ from nova.circuit.conductor import (
     PolygonSection,
     subdivide_passive_thickness,
 )
-from nova.circuit.linkage import (
-    circuit_linkage_matrix,
-    preserve_series_terminal_linkage,
-)
+from nova.circuit.linkage import circuit_linkage_matrix
 from nova.circuit.passive import terminal_impedance_spectrum
 from nova.imas.machine import MachineCoil, MachineSection
 from nova.imas.pulsedesign import ITER
@@ -199,20 +196,6 @@ def test_passive_screening_changes_terminal_impedance_and_removal_is_bare():
         terminal_resistance=np.array([0.0057]),
     )[:, 0, 0]
     np.testing.assert_allclose(resistive, bare + 0.0057, rtol=1e-14)
-
-
-def test_terminal_reconciliation_preserves_differential_section_energy():
-    linkage = np.array([[1.0, 0.4, 0.1], [0.4, 1.2, 0.2], [0.1, 0.2, 0.7]])
-    series = np.array([[1.0, 0.0], [1.0, 0.0], [0.0, 1.0]])
-    reference = np.array([[3.3, 0.33], [0.33, 0.71]])
-    corrected = preserve_series_terminal_linkage(linkage, series, reference)
-    np.testing.assert_allclose(series.T @ corrected @ series, reference, rtol=1e-14)
-    differential = np.array([1.0, -1.0, 0.0])
-    np.testing.assert_allclose(
-        differential @ corrected @ differential,
-        differential @ linkage @ differential,
-        rtol=1e-14,
-    )
 
 
 @pytest.mark.parametrize(

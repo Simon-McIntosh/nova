@@ -72,20 +72,18 @@ def conductor_sources(active, passive, target_r, target_z):
     return np.stack(columns, axis=1), owners
 
 
-def current_vector(active, passive, owners, index):
-    """Scenario current of each finite source section at an equilibrium index."""
-    return np.array(
-        [
-            float(
-                np.asarray(
-                    (active.coil if category == "coil" else passive.loop)[
-                        group
-                    ].current.data
-                )[index]
-            )
-            for category, group in owners
-        ]
-    )
+def current_vector(active, passive, owners, time):
+    """Interpolate each conductor current onto an equilibrium slice time."""
+    values = []
+    for category, group in owners:
+        ids = active if category == "coil" else passive
+        signal = (ids.coil if category == "coil" else ids.loop)[group].current
+        times = np.asarray(ids.time)
+        data = np.asarray(signal.data)
+        if len(times) != len(data) or time < times[0] or time > times[-1]:
+            raise ValueError(f"{category} current does not cover equilibrium time")
+        values.append(float(np.interp(time, times, data)))
+    return np.asarray(values)
 
 
 def prescribe_slice(slice_):
@@ -334,6 +332,11 @@ def main():
             if limits.pulse == 105014
             else None
         )
+    for ids in (equilibrium, active, passive):
+        if int(ids.ids_properties.homogeneous_time) != 1:
+            raise ValueError("scenario IDS requires its own signal time bases")
+        if not np.all(np.diff(np.asarray(ids.time)) > 0):
+            raise ValueError("scenario IDS time must increase strictly")
     loop_points = (
         loop_locations(magnetics) if magnetics is not None else np.empty((0, 2))
     )
@@ -346,7 +349,9 @@ def main():
         raise AssertionError("nova conductor kernel has no nonzero flux signatures")
     print(
         f"REFERENCE_CONTROL loops={len(loop_points)} coils={len(coil_points)} "
-        f"sources={len(owners)} kernel_nonzero={np.count_nonzero(kernel)}"
+        f"sources={len(owners)} kernel_nonzero={np.count_nonzero(kernel)} "
+        f"equilibrium_times={len(equilibrium.time)} "
+        f"active_times={len(active.time)} passive_times={len(passive.time)}"
     )
     eligible = [
         index
@@ -441,7 +446,7 @@ def main():
             dina_current, locations[:, 0], locations[:, 1]
         )
         stored = map_flux(slice_, locations)
-        source_currents = current_vector(active, passive, owners, index)
+        source_currents = current_vector(active, passive, owners, float(slice_.time))
         source = kernel @ source_currents
         total = stored.copy()
         for loop_index, loop in enumerate(magnetics.flux_loop if magnetics else []):
@@ -604,6 +609,11 @@ def main():
         "native_flux_sign_counts": sign_counts,
         "axis_gauge_wb": metric(gauges),
         "sampled_times": len(comparison),
+        "current_time_samples": {
+            "equilibrium": len(equilibrium.time),
+            "pf_active": len(active.time),
+            "pf_passive": len(passive.time),
+        },
         "coil_sections_total": len(coil_points),
         "coil_sections_inside_psi_map": len(
             {

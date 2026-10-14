@@ -1,6 +1,7 @@
 """Closed-boundary current prescription and conductor flux linkage."""
 
 from dataclasses import replace
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -12,6 +13,7 @@ from nova.imas.prescribed_plasma import (
     plasma_linked_flux_history,
 )
 from nova.imas.profiles import prescribe_current_density
+from scripts.iter_prescribed_plasma.measure import current_vector
 
 
 @pytest.fixture
@@ -188,3 +190,18 @@ def test_vertical_shift_follows_flux_gradient(current):
     predicted_change = -step * derivative
     assert abs(predicted_change) > 1e-4
     assert moved - base == pytest.approx(predicted_change, rel=0.03)
+
+
+def test_conductor_currents_follow_the_equilibrium_time():
+    active = SimpleNamespace(
+        time=np.array([0.0, 1.0, 2.0]),
+        coil=[
+            SimpleNamespace(current=SimpleNamespace(data=np.array([0.0, 10.0, 20.0])))
+        ],
+    )
+    passive = SimpleNamespace(
+        time=np.array([0.0, 2.0]),
+        loop=[SimpleNamespace(current=SimpleNamespace(data=np.array([4.0, 8.0])))],
+    )
+    values = current_vector(active, passive, [("coil", 0), ("passive", 0)], 1.5)
+    assert values == pytest.approx([15.0, 7.0])

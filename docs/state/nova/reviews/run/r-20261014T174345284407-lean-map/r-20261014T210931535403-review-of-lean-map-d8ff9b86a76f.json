@@ -1,0 +1,66 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "6e65c31d9fb1581de741c51cff6a77a593004989",
+    "d8ff9b86a76fdc16397e9a50d8cb2af903755872"
+  ],
+  "completed_at": "2026-10-14T21:24:58.112Z",
+  "dispatched_at": "2026-10-14T21:09:51Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/lean_map/probe_values.py",
+      "line": "33",
+      "severity": "follow-on",
+      "text": "follow-on: seven prototype modules import the private helper `_analytic_inputs` from the pytest file tests/equilibrium/test_topology_read.py, so the prototype tooling breaks if that test module is renamed or refactored and reaches into test internals rather than a supported seam."
+    },
+    {
+      "file": "docs/research/fixed-shape-lean-map.html",
+      "line": "24",
+      "severity": "follow-on",
+      "text": "follow-on: the headline map errors and walls in the lead paragraph are transcribed by hand from the job receipts with no assertion tying document text to receipt JSON, so a re-run or an edit can desync the document from its evidence without any gate turning red."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read the range commit by commit; 29 files, all prototype scripts under scripts/prototypes/lean_map plus the research doc, the evidence fragment and four figures, with no nova/ product module or tests/ path touched.",
+    "done_when": "the done-when asks for the research document at docs/research/fixed-shape-lean-map.html plus wall/error plots and one poloidal panel per topology and a clean audit-doc; the document is 115 lines with four committed SVGs under docs/figures/converged-forward-solve/lean-map, and I re-ran the named gate, `reckon audit-doc`, on both the research doc and the evidence fragment (both OK, exit 0).",
+    "goal": "the goal asks for a fixed-shape lean forward map prototype and the smallest cell count passing section 6; docs/research/fixed-shape-lean-map.html carries the values map, the bounded jet gather with a typed over-capacity refusal, exact cut booking and the solved ladder, and reports that no tested count passes joint 6 while naming 282/289 as the smallest map-accuracy-qualified rung.",
+    "manifest": "read manifest.md; it states status complete (as delivered it read blocked at manifest.md.asdelivered:5, a recognised value the coordinator repaired to complete per status-repair.json), names its measurement jobs and their EXIT lines, and leaves baseline_suite and after_suite empty because the done-when named no suite.",
+    "write_paths": "the four declared scopes are docs/research/fixed-shape-lean-map.html, scripts/prototypes/lean_map, docs/figures/converged-forward-solve/lean-map and docs/evidence/fragments/converged-forward-solve/lean-map.html; git diff --name-only 6e65c31d..d8ff9b86a lists exactly 29 files and every one lies inside them."
+  },
+  "justifications": {
+    "durability": "the delivered artifact is a research document with no runtime change, so no test regresses it; the probe asserts in scripts/prototypes/lean_map/probe_quadrature.py:109 guard a typed refusal but nothing pins the quoted headline numbers to their receipts.",
+    "evidence": "values-1285577.log:10 records the 289-cell limited map error 1.4323e-4 and batch-checked-limited-250.json:47 the width-128 232.9 ms wall and 107/128 pass, both matching docs/research/fixed-shape-lean-map.html:52 and :96.",
+    "fit": "scripts/prototypes/lean_map/render.py:25-30 draws through the committed nova.media.ink and nova.media.poloidal painters, the modules use mechanism names (LeanState, DenseValues, BookingStatus) with no plan label, and the range commits carry no attribution trailer.",
+    "goal_fidelity": "the goal sentence is answered at docs/research/fixed-shape-lean-map.html:64, which names the 282/289 first rung as smallest map-qualified and states no tested count passes joint section 6.",
+    "reuse": "scripts/prototypes/lean_map/forward.py:9 and probe_bias.py:25 extend nova.equilibrium.fixed_points, nova.equilibrium.current and nova.equilibrium.topology rather than forking them, and no production owner duplicates the prototype's bounded-refusal mechanism.",
+    "scope_discipline": "every path of git diff --name-only 6e65c31d9fb1581de741c51cff6a77a593004989 d8ff9b86a76fdc16397e9a50d8cb2af903755872 is inside the four declared write paths and no product or test source changed."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal asks for a fixed-shape lean forward map prototype and the smallest cell count passing section 6; docs/research/fixed-shape-lean-map.html carries the values map, the bounded jet gather with a typed over-capacity refusal, exact cut booking and the solved ladder, and reports that no tested count passes joint 6 while naming 282/289 as the smallest map-accuracy-qualified rung.\nVERDICT done_when: the done-when asks for the research document at docs/research/fixed-shape-lean-map.html plus wall/error plots and one poloidal panel per topology and a clean audit-doc; the document is 115 lines with four committed SVGs under docs/figures/converged-forward-solve/lean-map, and I re-ran the named gate, `reckon audit-doc`, on both the research doc and the evidence fragment (both OK, exit 0).\nVERDICT write_paths: the four declared scopes are docs/research/fixed-shape-lean-map.html, scripts/prototypes/lean_map, docs/figures/converged-forward-solve/lean-map and docs/evidence/fragments/converged-forward-solve/lean-map.html; git diff --name-only 6e65c31d..d8ff9b86a lists exactly 29 files and every one lies inside them.\nVERDICT manifest: read manifest.md; it states status complete (as delivered it read blocked at manifest.md.asdelivered:5, a recognised value the coordinator repaired to complete per status-repair.json), names its measurement jobs and their EXIT lines, and leaves baseline_suite and after_suite empty because the done-when named no suite.\nVERDICT diff: read the range commit by commit; 29 files, all prototype scripts under scripts/prototypes/lean_map plus the research doc, the evidence fragment and four figures, with no nova/ product module or tests/ path touched.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: the goal sentence is answered at docs/research/fixed-shape-lean-map.html:64, which names the 282/289 first rung as smallest map-qualified and states no tested count passes joint section 6.\nSCORE evidence: 18\nJUSTIFICATION evidence: values-1285577.log:10 records the 289-cell limited map error 1.4323e-4 and batch-checked-limited-250.json:47 the width-128 232.9 ms wall and 107/128 pass, both matching docs/research/fixed-shape-lean-map.html:52 and :96.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path of git diff --name-only 6e65c31d9fb1581de741c51cff6a77a593004989 d8ff9b86a76fdc16397e9a50d8cb2af903755872 is inside the four declared write paths and no product or test source changed.\nSCORE durability: 14\nJUSTIFICATION durability: the delivered artifact is a research document with no runtime change, so no test regresses it; the probe asserts in scripts/prototypes/lean_map/probe_quadrature.py:109 guard a typed refusal but nothing pins the quoted headline numbers to their receipts.\nSCORE fit: 18\nJUSTIFICATION fit: scripts/prototypes/lean_map/render.py:25-30 draws through the committed nova.media.ink and nova.media.poloidal painters, the modules use mechanism names (LeanState, DenseValues, BookingStatus) with no plan label, and the range commits carry no attribution trailer.\nSCORE reuse: 19\nJUSTIFICATION reuse: scripts/prototypes/lean_map/forward.py:9 and probe_bias.py:25 extend nova.equilibrium.fixed_points, nova.equilibrium.current and nova.equilibrium.topology rather than forking them, and no production owner duplicates the prototype's bounded-refusal mechanism.\nFINDING scripts/prototypes/lean_map/probe_values.py:33 follow-on: seven prototype modules import the private helper `_analytic_inputs` from the pytest file tests/equilibrium/test_topology_read.py, so the prototype tooling breaks if that test module is renamed or refactored and reaches into test internals rather than a supported seam.\nFINDING docs/research/fixed-shape-lean-map.html:24 follow-on: the headline map errors and walls in the lead paragraph are transcribed by hand from the job receipts with no assertion tying document text to receipt JSON, so a re-run or an edit can desync the document from its evidence without any gate turning red.",
+  "review_run_id": "r-20261014T210931535403-review-of-lean-map-d8ff9b86a76f",
+  "reviewed_base_sha": "6e65c31d9fb1581de741c51cff6a77a593004989",
+  "reviewed_head_sha": "d8ff9b86a76fdc16397e9a50d8cb2af903755872",
+  "reviewed_revision": "d8ff9b86a76fdc16397e9a50d8cb2af903755872",
+  "reviewed_run_id": "r-20261014T174345284407-lean-map",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/lean-map",
+  "reviewer_run_id": "r-20261014T210931535403-review-of-lean-map-d8ff9b86a76f",
+  "scores": {
+    "durability": 14,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T21:24:04.189043+00:00",
+  "total": 105
+}

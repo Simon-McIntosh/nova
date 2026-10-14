@@ -21,11 +21,6 @@ CASE_STYLE = {
     "limited": dict(color=DEFAULT_INK.flux_color, linestyle="-"),
     "diverted": dict(color="#353535", linestyle="--"),
 }
-ARMS = (
-    ("exact_booking_ms", "exact booking"),
-    ("hard_ms", "hard centroid"),
-    ("smooth_ms", "smoothed centroid"),
-)
 
 
 def _receipt(roots, kind, cells):
@@ -46,38 +41,56 @@ def _style(axis):
     axis.set_xlabel("realised cells", fontsize=22)
 
 
-def _save_wall(rows, output):
-    figure, axes = plt.subplots(1, len(ARMS), figsize=(14, 5.5), sharey=True)
-    for axis, (key, name) in zip(axes, ARMS, strict=True):
+def _save_wall(booking, frozen, local, factor, output):
+    measures = (
+        ("exact cut-cell booking", lambda key: booking[key]["exact_booking_ms"]),
+        ("hard centroid booking", lambda key: booking[key]["hard_ms"]),
+        ("one-pitch smooth booking", lambda key: booking[key]["smooth_ms"]),
+        (
+            "held-support exact step",
+            lambda key: frozen[key]["rows"]["exact_analytic_perturbed"][
+                "iteration_wall_ms"
+            ][-1],
+        ),
+        ("coloured local derivative", lambda key: local[key]["assembly_wall_ms"]),
+        ("dense factor refresh", lambda key: factor[key]["factor_median_ms"]),
+    )
+    figure, axes = plt.subplots(2, 3, figsize=(14, 10.5), sharex=True, sharey=True)
+    for axis, (name, measure) in zip(axes.flat, measures, strict=True):
         for kind in CASES:
-            points = [rows[(kind, cells)] for cells in REQUESTS]
-            x = [row["realised_cells"] for row in points]
-            y = [row[key] for row in points]
+            points = [(kind, cells) for cells in REQUESTS]
+            receipts = [booking[key] for key in points]
+            x = [row["realised_cells"] for row in receipts]
+            y = [measure(key) for key in points]
             axis.plot(x, y, linewidth=3.0, marker="o", markersize=8, **CASE_STYLE[kind])
             axis.annotate(
                 kind,
                 (x[-1], y[-1]),
-                xytext=(5, 5 if kind == "limited" else -12),
+                xytext=(5, 6 if kind == "limited" else -16),
                 textcoords="offset points",
                 fontsize=20,
                 color=CASE_STYLE[kind]["color"],
             )
         axis.axhline(1.0, color="#777777", linewidth=1.2, linestyle=":")
-        axis.annotate(
-            "1 ms",
-            (2100, 1.0),
-            xytext=(0, 4),
-            textcoords="offset points",
-            fontsize=18,
-            color="#666666",
-        )
         axis.set_yscale("log")
-        axis.set_ylim(0.05, 500)
+        axis.set_ylim(0.05, 10000)
         axis.set_xlim(1700, 15000)
-        axis.set_title(name, fontsize=20)
+        axis.text(0.04, 0.94, name, transform=axis.transAxes, fontsize=20, va="top")
         _style(axis)
-    axes[0].set_ylabel("warm booking wall [ms]", fontsize=22)
-    figure.subplots_adjust(left=0.08, right=0.96, bottom=0.19, top=0.88, wspace=0.08)
+        axis.set_xticks((2000, 5000, 10000), labels=("2k", "5k", "10k"))
+    axes[0, 0].annotate(
+        "1 ms",
+        (2200, 1.0),
+        xytext=(0, 5),
+        textcoords="offset points",
+        fontsize=18,
+        color="#666666",
+    )
+    axes[0, 0].set_ylabel("H200 wall [ms]", fontsize=22)
+    axes[1, 0].set_ylabel("H200 wall [ms]", fontsize=22)
+    figure.subplots_adjust(
+        left=0.09, right=0.96, bottom=0.10, top=0.98, wspace=0.10, hspace=0.22
+    )
     figure.savefig(output, format="svg", facecolor="white", metadata={"Date": None})
     plt.close(figure)
 
@@ -142,6 +155,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--profile", type=Path, action="append", required=True)
     parser.add_argument("--bias", type=Path)
+    parser.add_argument("--frozen", type=Path, action="append", required=True)
+    parser.add_argument("--local", type=Path, required=True)
+    parser.add_argument("--factor", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     print(f"NOVA_MODULE={nova.__file__} CWD={Path.cwd().resolve()}", flush=True)
@@ -151,7 +167,22 @@ def main():
         for kind in CASES
         for cells in REQUESTS
     }
-    _save_wall(wall, args.out / "wall-by-cells.svg")
+    frozen = {
+        (kind, cells): _receipt(args.frozen, kind, cells)
+        for kind in CASES
+        for cells in REQUESTS
+    }
+    local = {
+        (kind, cells): _receipt((args.local,), kind, cells)
+        for kind in CASES
+        for cells in REQUESTS
+    }
+    factor = {
+        (kind, cells): _receipt((args.factor,), kind, cells)
+        for kind in CASES
+        for cells in REQUESTS
+    }
+    _save_wall(wall, frozen, local, factor, args.out / "wall-by-cells.svg")
     if args.bias is not None:
         bias = {
             (kind, cells): _receipt((args.bias,), kind, cells)

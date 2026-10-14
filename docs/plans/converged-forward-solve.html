@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="231">
+<meta name="plan-version" content="232">
 <meta name="plan-modified" content="2026-10-14">
 </head>
 <body>
@@ -1025,6 +1025,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261014T103134457444-review-of-forward-solve-options-51d8d198f615" data-who="reckon-build" data-when="2026-10-14T10:52:52.594Z">
     <div class="r-comment-body"><p>review record for r-20261014T044136316062-forward-solve-options stored at both granted paths, byte-identical, status parsed, all six dimensions scored in 0..20, revision pair 348bd89a4..51d8d198f carried, verdict pass-with-follow-ons (total 81, no blocking findings).</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261014T044136316062-forward-solve-options" data-who="reckon-build" data-when="2026-10-14T10:30:49Z">
+    <div class="r-comment-body"><p>Measured six analytic certificate rungs and compared solve formulations: fastest qualified warm exact solve 2,302.68 ms at diverted 2,098 cells, fastest qualified cold analytic solve 409.70 s, and no qualified solve below 1 ms; hard centroid booking costs 0.082-0.636 ms but diverted 10,229-cell analytic-state flux error is 0.4343007 versus exact 2.473e-6, while Bell membership plus Gm alone costs 17.9-73.3 ms. Full structured-factor and reduced-map accuracy remain unmeasured; recommend exact booking as oracle and a reduced magnetic-image/Bell representation with warm continuation.</p></div>
 </div>
 </section>
 </main>

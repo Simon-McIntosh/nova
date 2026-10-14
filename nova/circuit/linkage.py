@@ -200,6 +200,36 @@ def circuit_linkage_matrix(
     return 0.5 * (lmat + lmat.T)
 
 
+def preserve_series_terminal_linkage(
+    section_linkage: np.ndarray,
+    series: np.ndarray,
+    terminal_reference: np.ndarray,
+) -> np.ndarray:
+    """Reconcile section quadrature with a canonical whole-coil linkage.
+
+    The low-rank update is constant over each section pair.  It changes the
+    integrated terminal matrix to the whole-coil reference while leaving every
+    within-coil differential-current mode unchanged.  The uncorrected section
+    matrix must still be reported so this numerical reconciliation is visible.
+    """
+    linkage = np.asarray(section_linkage, dtype=np.float64)
+    wiring = np.asarray(series, dtype=np.float64)
+    reference = np.asarray(terminal_reference, dtype=np.float64)
+    if linkage.ndim != 2 or linkage.shape[0] != linkage.shape[1]:
+        raise ValueError("section linkage must be square")
+    if wiring.ndim != 2 or wiring.shape[0] != linkage.shape[0]:
+        raise ValueError("series mapping has the wrong number of sections")
+    if reference.shape != (wiring.shape[1], wiring.shape[1]):
+        raise ValueError("terminal reference has the wrong shape")
+    gram = wiring.T @ wiring
+    if np.linalg.matrix_rank(gram) != gram.shape[0]:
+        raise ValueError("series mapping must have independent terminals")
+    right_inverse = wiring @ np.linalg.inv(gram)
+    difference = reference - wiring.T @ linkage @ wiring
+    corrected = linkage + right_inverse @ difference @ right_inverse.T
+    return 0.5 * (corrected + corrected.T)
+
+
 def guard_positive_definite(lmat: np.ndarray, floor_frac: float = 1e-4) -> np.ndarray:
     """Clip a linkage matrix's spectrum to keep it positive definite.
 

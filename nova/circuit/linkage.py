@@ -178,7 +178,14 @@ _COLUMN_CONTEXT = None
 
 
 def _set_column_context(
-    conductors, groups, circuits, polygon, point_r, point_z, weight, owner,
+    conductors,
+    groups,
+    circuits,
+    polygon,
+    point_r,
+    point_z,
+    weight,
+    owner,
     finite_source,
 ):
     global _COLUMN_CONTEXT
@@ -197,8 +204,15 @@ def _set_column_context(
 
 def _linkage_column(index):
     (
-        conductors, groups, circuits, polygon, point_r, point_z,
-        weight, owner, finite_source,
+        conductors,
+        groups,
+        circuits,
+        polygon,
+        point_r,
+        point_z,
+        weight,
+        owner,
+        finite_source,
     ) = _COLUMN_CONTEXT
     section = polygon.get(int(circuits[index]))
     if section is not None:
@@ -207,7 +221,13 @@ def _linkage_column(index):
         )
     else:
         column = linked_flux_columns(
-            conductors, groups[index], point_r, point_z, weight, owner, len(groups),
+            conductors,
+            groups[index],
+            point_r,
+            point_z,
+            weight,
+            owner,
+            len(groups),
             finite_source=finite_source,
         )
     return index, column
@@ -241,7 +261,14 @@ def circuit_linkage_matrix(
         raise ValueError("workers must be positive")
     lmat = np.zeros((n_circuits, n_circuits))
     context = (
-        conductors, groups, circuits, polygon, point_r, point_z, weight, owner,
+        conductors,
+        groups,
+        circuits,
+        polygon,
+        point_r,
+        point_z,
+        weight,
+        owner,
         finite_source,
     )
     if workers == 1:

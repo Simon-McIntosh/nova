@@ -152,14 +152,15 @@ def unsectioned_coil_conductors(active) -> ConductorSet:
             if kind == 2:
                 rect = geometry.rectangle
                 data = (
-                    float(rect.r), float(rect.z),
-                    float(rect.width), float(rect.height),
+                    float(rect.r),
+                    float(rect.z),
+                    float(rect.width),
+                    float(rect.height),
                 )
             elif kind == 5:
                 annulus = geometry.annulus
                 area = np.pi * (
-                    float(annulus.radius_outer) ** 2
-                    - float(annulus.radius_inner) ** 2
+                    float(annulus.radius_outer) ** 2 - float(annulus.radius_inner) ** 2
                 )
                 side = np.sqrt(area)
                 data = (float(annulus.r), float(annulus.z), side, side)
@@ -235,8 +236,7 @@ def calculate(
         coil_digest.update(np.asarray(getattr(conductors, name))[:n_section].tobytes())
     coil_digest.update(b"finite-source:6")
     coil_path = (
-        cache_root / f"coil-{coil_digest.hexdigest()[:20]}.npy"
-        if cache_root else None
+        cache_root / f"coil-{coil_digest.hexdigest()[:20]}.npy" if cache_root else None
     )
     coil_cache_hit = bool(coil_path and coil_path.exists())
     coil_started = perf_counter()

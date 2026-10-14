@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from dataclasses import replace
 from pathlib import Path
 
 import imas
@@ -28,6 +29,16 @@ OUTPUT = Path(
     "gate-logs/iter-prescribed-plasma"
 )
 DD_VERSION = "3.38.1"
+
+
+def native_flux_sign(slice_):
+    """Map native poloidal flux into the Green kernel's current orientation."""
+    global_ = slice_.global_quantities
+    current = float(global_.ip)
+    span = float(global_.psi_boundary) - float(global_.psi_axis)
+    if abs(current) < 1e-12 or abs(span) < 1e-12:
+        raise ValueError("current and axis-to-boundary flux span must be nonzero")
+    return float(np.sign(-current / span))
 
 
 def geometry_flux(target_r, target_z, element):
@@ -291,10 +302,26 @@ def main():
     """Run current census and geometric flux comparisons for one DINA case."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--pulse", type=int, choices=(105014, 105052), required=True)
-    parser.add_argument("--flux-relative-tolerance", type=float, default=0.1)
-    parser.add_argument("--flux-absolute-tolerance-wb", type=float, default=1.0)
+    parser.add_argument("--flux-relative-tolerance", type=float)
+    parser.add_argument("--flux-absolute-tolerance-wb", type=float)
+    parser.add_argument("--jtor-relative-tolerance", type=float, default=0.01)
+    parser.add_argument("--jtor-absolute-tolerance-wb", type=float, default=0.1)
     limits = parser.parse_args()
-    if min(limits.flux_relative_tolerance, limits.flux_absolute_tolerance_wb) <= 0:
+    defaults = {105014: (0.1, 1.0), 105052: (1.0, 100.0)}
+    relative_default, absolute_default = defaults[limits.pulse]
+    if limits.flux_relative_tolerance is None:
+        limits.flux_relative_tolerance = relative_default
+    if limits.flux_absolute_tolerance_wb is None:
+        limits.flux_absolute_tolerance_wb = absolute_default
+    if (
+        min(
+            limits.flux_relative_tolerance,
+            limits.flux_absolute_tolerance_wb,
+            limits.jtor_relative_tolerance,
+            limits.jtor_absolute_tolerance_wb,
+        )
+        <= 0
+    ):
         parser.error("flux tolerances must be positive")
     OUTPUT.mkdir(parents=True, exist_ok=True)
     uri = f"imas:hdf5?user=mcintos;pulse={limits.pulse};run=1;database=iter;version=3"
@@ -333,6 +360,8 @@ def main():
     selected = []
     failures = []
     map_control = []
+    gauges = []
+    sign_counts = {"positive": 0, "negative": 0}
     vertical_control = None
     for index in eligible:
         slice_ = equilibrium.time_slice[index]
@@ -397,22 +426,61 @@ def main():
             print("NEGATIVE_CONTROL " + json.dumps(vertical_control, sort_keys=True))
         if index not in comparison:
             continue
+        flux_sign = native_flux_sign(slice_)
+        sign_counts["positive" if flux_sign > 0 else "negative"] += 1
+        cell_area = float(
+            np.mean(np.diff(current.radius)) * np.mean(np.diff(current.height))
+        )
+        stored_current = np.asarray(slice_.profiles_2d[0].j_tor) * cell_area
+        if abs(stored_current.sum() - current.plasma_current) > 0.02 * abs(
+            current.plasma_current
+        ):
+            raise AssertionError("stored j_tor does not integrate to declared Ip")
+        dina_current = replace(current, cell_current=stored_current)
+        dina_flux = plasma_flux_at_points(
+            dina_current, locations[:, 0], locations[:, 1]
+        )
         stored = map_flux(slice_, locations)
-        source = kernel @ current_vector(active, passive, owners, index)
+        source_currents = current_vector(active, passive, owners, index)
+        source = kernel @ source_currents
         total = stored.copy()
         for loop_index, loop in enumerate(magnetics.flux_loop if magnetics else []):
             total[loop_index] = float(np.asarray(loop.flux.data)[index])
             map_control.append(stored[loop_index] - total[loop_index])
-        inferred = total - source
+        axis = np.array(
+            [[float(global_.magnetic_axis.r), float(global_.magnetic_axis.z)]]
+        )
+        axis_kernel, _ = conductor_sources(active, passive, axis[:, 0], axis[:, 1])
+        axis_source = float((axis_kernel @ source_currents)[0])
+        axis_plasma = float(
+            plasma_flux_at_points(dina_current, axis[:, 0], axis[:, 1])[0]
+        )
+        axis_map = float(map_flux(slice_, axis)[0])
+        if not np.isfinite(axis_map):
+            raise AssertionError("stored psi map does not cover the magnetic axis")
+        gauge = flux_sign * axis_map - axis_source - axis_plasma
+        gauges.append(gauge)
+        inferred = flux_sign * total - source - gauge
         predicted = plasma_flux_at_points(current, locations[:, 0], locations[:, 1])
         for point_index in range(len(locations)):
-            if not np.isfinite(inferred[point_index]):
-                continue
-            reference = float(inferred[point_index])
+            mapped = np.isfinite(inferred[point_index])
+            reference = float(
+                inferred[point_index] if mapped else dina_flux[point_index]
+            )
             residual = float(predicted[point_index] - reference)
+            relative_limit = (
+                limits.flux_relative_tolerance
+                if mapped
+                else limits.jtor_relative_tolerance
+            )
+            absolute_limit = (
+                limits.flux_absolute_tolerance_wb
+                if mapped
+                else limits.jtor_absolute_tolerance_wb
+            )
             tolerance_wb = max(
-                limits.flux_absolute_tolerance_wb,
-                limits.flux_relative_tolerance * abs(reference),
+                absolute_limit,
+                relative_limit * abs(reference),
             )
             linkage.append(
                 {
@@ -429,8 +497,14 @@ def main():
                     "reference_source": (
                         "magnetics_minus_nova_conductors"
                         if point_index < len(loop_points)
-                        else "psi_map_minus_nova_conductors"
+                        else (
+                            "psi_map_minus_nova_conductors"
+                            if mapped
+                            else "dina_jtor_nova_kernel"
+                        )
                     ),
+                    "flux_sign": flux_sign,
+                    "gauge_wb": gauge if mapped else None,
                     "reference": reference,
                     "predicted": float(predicted[point_index]),
                     "residual_wb": residual,
@@ -491,10 +565,52 @@ def main():
         "grid_spacing_m": min(row["grid_spacing_m"] for row in rows),
         "linked_flux_tolerance_fraction": residuals,
         "linked_flux_absolute_residual_wb": absolute_residuals,
+        "reference_source_counts": {
+            source: sum(row["reference_source"] == source for row in linkage)
+            for source in (
+                "psi_map_minus_nova_conductors",
+                "magnetics_minus_nova_conductors",
+                "dina_jtor_nova_kernel",
+            )
+        },
+        "reference_source_tolerance_fraction": {
+            source: metric(
+                [
+                    abs(row["relative_residual"])
+                    for row in linkage
+                    if row["reference_source"] == source
+                ]
+            )
+            for source in (
+                "psi_map_minus_nova_conductors",
+                "magnetics_minus_nova_conductors",
+                "dina_jtor_nova_kernel",
+            )
+        },
+        "reference_source_absolute_residual_wb": {
+            source: metric(
+                [
+                    abs(row["residual_wb"])
+                    for row in linkage
+                    if row["reference_source"] == source
+                ]
+            )
+            for source in (
+                "psi_map_minus_nova_conductors",
+                "magnetics_minus_nova_conductors",
+                "dina_jtor_nova_kernel",
+            )
+        },
+        "native_flux_sign_counts": sign_counts,
+        "axis_gauge_wb": metric(gauges),
         "sampled_times": len(comparison),
         "coil_sections_total": len(coil_points),
         "coil_sections_inside_psi_map": len(
-            {row["target_index"] for row in linkage if row["category"] == "coil"}
+            {
+                row["target_index"]
+                for row in linkage
+                if row["reference_source"] == "psi_map_minus_nova_conductors"
+            }
         ),
         "flux_loops_compared": len(loop_points),
         "map_minus_magnetics_flux_loop_wb": metric(map_control),
@@ -506,6 +622,8 @@ def main():
             "centroid_grid_cells": 1.0,
             "flux_relative": limits.flux_relative_tolerance,
             "flux_absolute_wb": limits.flux_absolute_tolerance_wb,
+            "jtor_relative": limits.jtor_relative_tolerance,
+            "jtor_absolute_wb": limits.jtor_absolute_tolerance_wb,
             "rule": "absolute residual <= max(absolute Wb, relative * |reference Wb|)",
         },
     }
@@ -532,6 +650,8 @@ def main():
         )
     if not residuals["coil"]["count"]:
         raise AssertionError("no coil sections were covered by the stored psi map")
+    if not summary["coil_sections_inside_psi_map"]:
+        raise AssertionError("stored psi map covers no coil section")
     if limits.pulse == 105014 and not residuals["loop"]["count"]:
         raise AssertionError("magnetics flux loops were not compared")
     failing = [row for row in linkage if abs(row["residual_wb"]) > row["tolerance_wb"]]

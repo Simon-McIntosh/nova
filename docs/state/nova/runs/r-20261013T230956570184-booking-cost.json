@@ -1,0 +1,843 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 3,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "a0b86e5d913cf01ba7619f6a102c9db5040bbdf1",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 55976320,
+      "cached_input_tokens_cumulative": 55976320,
+      "input_tokens": 56330759,
+      "input_tokens_cumulative": 56330759,
+      "output_tokens": 126717,
+      "output_tokens_cumulative": 126717,
+      "reasoning_output_tokens": 59550,
+      "reasoning_output_tokens_cumulative": 59550
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 185,
+    "files": 3,
+    "removed": 61
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 215,
+        "name": "_reference_book",
+        "path": "tests/test_current_book_vectorised.py"
+      },
+      "run_function": {
+        "line": 179,
+        "name": "book",
+        "path": "nova/equilibrium/current.py"
+      },
+      "window_line": 187
+    },
+    {
+      "existing_function": {
+        "line": 235,
+        "name": "cell",
+        "path": "tests/test_current_book_vectorised.py"
+      },
+      "run_function": {
+        "line": 199,
+        "name": "cell_field",
+        "path": "nova/equilibrium/current.py"
+      },
+      "window_line": 201
+    },
+    {
+      "existing_function": {
+        "line": 245,
+        "name": "integrate",
+        "path": "tests/test_current_book_vectorised.py"
+      },
+      "run_function": {
+        "line": 209,
+        "name": "integrate",
+        "path": "nova/equilibrium/current.py"
+      },
+      "window_line": 211
+    },
+    {
+      "existing_function": {
+        "line": 264,
+        "name": "conic",
+        "path": "tests/test_current_book_vectorised.py"
+      },
+      "run_function": {
+        "line": 250,
+        "name": "conic",
+        "path": "nova/equilibrium/current.py"
+      },
+      "window_line": 252
+    },
+    {
+      "existing_function": {
+        "line": 279,
+        "name": "normal",
+        "path": "tests/test_current_book_vectorised.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "normal",
+        "path": "nova/equilibrium/current.py"
+      },
+      "window_line": 265
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "637a14ac52386717b2990a668f66f00c285b2467",
+    "d4ab8cefc23b5cf2a118d57c6791e51de9204e0a",
+    "bb248a9313ef67616b19b4383191f27d7b51d56e",
+    "8779ebe313772d3414991328656277f72d8bc13c"
+  ],
+  "completed_at": "2026-10-14T00:49:01Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-13T23:10:15Z",
+  "disposition": "handed-off",
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": "pre-existing-failure",
+  "follow_on_paths": [
+    "carrier/booking",
+    "scripts/prototypes/support/book.py",
+    "scripts/analytic_oracle_fixtures"
+  ],
+  "gate": "failed",
+  "gate_check": {
+    "command": "env TMPDIR=/tmp XLA_PYTHON_CLIENT_PREALLOCATE=false JAX_PLATFORMS=cuda,cpu NOVA_ANALYTIC_ORACLE_BUILDER=device NOVA_BOOK_CACHE=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T181553786165-proto-support/ordered/rows/cache NOVA_BOOK_RESULTS=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T230956570184-booking-cost/certificate-head PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/booking-cost /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider --timeout=900 --basetemp=/tmp/head-certificate-temp -q -s /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/booking-cost/tests/test_current_book_fragments.py::test_analytic_certificate_moments\\[550-limited\\] /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/booking-cost/tests/test_current_book_fragments.py::test_analytic_certificate_moments\\[550-diverted\\] /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/booking-cost/tests/test_current_book_fragments.py::test_analytic_certificate_moments\\[2000-limited\\] /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/booking-cost/tests/test_current_book_fragments.py::test_analytic_certificate_moments\\[2000-diverted\\] /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/booking-cost/tests/test_current_book_fragments.py::test_analytic_certificate_moments\\[5000-limited\\] /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/booking-cost/tests/test_current_book_fragments.py::test_analytic_certificate_moments\\[5000-diverted\\]",
+    "exit_status": 1,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T230956570184-booking-cost/certificate-head-betelgeuse.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.2857142857142857,
+    "plan": "converged-forward-solve",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-14T00:09:56.870109+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-13T23:09:56Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 15,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 8,
+    "headroom": 3,
+    "mean_context": 130000,
+    "observed_at": "2026-10-13T23:09:43Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 15,
+      "aggregate_tokens_per_second": 348.919,
+      "detail": "",
+      "mean_tokens_per_second": 43.615,
+      "observed_at": "2026-10-13T23:09:43Z",
+      "runs": 8.0,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-14T00:49:01Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": {
+    "attempt": 2,
+    "kind": "lane-change",
+    "lanes": [
+      {
+        "changed_at": "2026-10-13T23:10:37Z",
+        "detail": "starting fresh because the session cannot follow the move from harness 'claude' to 'codex'",
+        "from_backend": "clive",
+        "from_harness": "claude",
+        "reason": "profile-led performance restructure of the hot-path booking with identity and autograd gates; deep critical work goes to codex",
+        "session": "fresh",
+        "session_id": "d2b3bea7-d7ff-47ef-aa6c-059a2cdb4eb5",
+        "session_source": "stream",
+        "to_backend": "codex",
+        "to_harness": "codex"
+      }
+    ],
+    "root_run_id": "r-20261013T230956570184-booking-cost"
+  },
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T230956570184-booking-cost/manifest.md",
+  "member": "disposable-r-20261013T230956570184-booking-cost",
+  "model_key": "sol",
+  "negative_control": {
+    "reason": "gate-not-passing",
+    "test_paths": [
+      "tests/test_current_book_fragments.py",
+      "tests/test_current_book_vectorised.py"
+    ],
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "booking-cost",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 463,
+          "cached_input_tokens": 941592,
+          "input_tokens": 942057,
+          "output_tokens": 1957,
+          "reasoning_output_tokens": 153,
+          "total_tokens": 944014,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Carry out followup f-cfs-booking-cost on converged-forward-solve. current.book, now vmapped over cells at merge e1ce330f9, costs 1.2 to 3.4 s per solve step at 2,000 to 5,000 cells on the H200, and peaks at 23.7 GB at 5,000 cells (7 to 11 times the sequential version). Every forward-solve iteration books once, so this is the hot path. The lead wants the method fast on fine grids, without unnecessary complexity.\n\nDone when:\n(1) Profile. Profile one booking at 2,000 and 5,000 cells on the H200 (jax.profiler trace or HLO cost analysis). Name the stage that dominates the wall and the stage that dominates memory, with numbers: fragment construction, the ring quadrature (segments=64), the per-cell padding to the worst cell, or the conditional branches. Say how the work scales with cells and with fragment count.\n(2) Restructure the dominant stage for speed and bounded memory. Choices that typically pay: quadrature order matched to the polynomial degree of the integrand rather than a fixed 64 segments; cells whose fragment is the whole cell (fully inside) booked in closed form, so only cut cells take the clipped integral; cut cells gathered into a compact batch instead of padding every cell to the worst case. State what you chose and why.\n(3) Identity. The booked moments agree with the current booking within its identity tolerance (6.9e-16 relative), or with the closed-form certificate moments within the section 3 bound, at 2,000, 5,000 and 10,000 cells. Use 10,000 cells only if the carrier-requalify device store is available; otherwise record it as pending. Autograd (jax.jvp) still matches finite differences.\n(4) Cost. Give the per-step booking wall and peak memory at each rung, before and after, on the H200, using machines built fresh with NOVA_ANALYTIC_ORACLE_BUILDER=device in one job, and the base and head booking on the same machine. Set the target from the profile and state it; aim for milliseconds per step at 10,000 cells.\n(5) tests/test_current_book_vectorised.py and test_current_book_fragments.py pass by delta. Add the review follow-on: a guard test that fails if the sequential scan over cells is reinstated.\n(6) Write the evidence fragment docs/evidence/fragments/converged-forward-solve/booking-cost.html with plan-evidence-for converged-forward-solve; reckon audit-doc must report 0 errors.\nWrite only nova/equilibrium/current.py, its tests and the fragment. The moment-space Newton node owns forward.py, forward_operator.py, gs.py, support_read.py, topology.py and fixed_points.py.\n\nRun conditions: H200 rows run as one job through RECKON_ALLOW_NESTED_LAUNCH=1 scripts/h200_test_lane/run.sh --log (an absolute path in the run directory) --wait -- (targets), or one sbatch job on --partition=betelgeuse --reservation=gpu_0003_grpA --gres=gpu:1 with rungs as rows inside the allocation (never an array), --time sized to finish, XLA_PYTHON_CLIENT_PREALLOCATE=false and TMPDIR=/tmp in the submit environment and in every child; submit for real and read squeue a minute later rather than trusting sbatch --test-only. On a compute node run /home/ITER/mcintos/Code/nova/.venv/bin/python directly with PYTHONPATH set to the run worktree and never invoke uv; every login-node uv command carries --no-sync and nothing runs uv sync. configure_dtypes() before any array and jax_enable_x64 asserted True. Gates pass by delta against orientation_base_sha in per-module fresh processes, both arms running the same test files with the repository root conftest, baseline_suite and after_suite as single-line JSON whose log_path names one log file and whose command is literally runnable. Any wait is declared on the job that finishes last as wait_probe [\"sacct\",\"-n\",\"-X\",\"-P\",\"-j\",\"(job id)\",\"-o\",\"State\"] and wait_terminal [\"COMPLETED\",\"FAILED\",\"CANCELLED\",\"TIMEOUT\",\"OUT_OF_MEMORY\",\"NODE_FAIL\"] as JSON lists, and names every job it depends on in wait_condition. The certified 550, 2,000 and 5,000-cell machines and exteriors are cached under /home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T181553786165-proto-support/ordered/rows/cache and may be read in place, never written. Run filepath relativize over any evidence fragment before committing. Commit with conventional subjects and bodies at every step and write the manifest and commit before every job wait; the manifest commits line lists every commit; status is complete, blocked or failed, which the worker sets itself. No plan labels in source names or comments.\n\nImport provenance: run each arm from its own tree as the working directory and print nova.__file__ in each log header (the review found a base arm that imported the head worktree). On the fleet allocation (SLURM_JOB_ID set), run CPU gates in place.",
+    "estimated_hours": 5.0,
+    "goal": "Bring the per-step current booking from seconds to milliseconds on fine grids",
+    "id": "booking-cost",
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-13T23:09:56Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 15,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 8,
+      "headroom": 3,
+      "mean_context": 130000,
+      "observed_at": "2026-10-13T23:09:43Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 15,
+        "aggregate_tokens_per_second": 348.919,
+        "detail": "",
+        "mean_tokens_per_second": 43.615,
+        "observed_at": "2026-10-13T23:09:43Z",
+        "runs": 8.0,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T230956570184-booking-cost/manifest.md",
+    "negative_control": "reinstating the sequential lax.scan over cells turns the new guard test red by test id",
+    "plan": "converged-forward-solve",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/equilibrium/current.py",
+      "tests/test_current_book_vectorised.py",
+      "tests/test_current_book_fragments.py",
+      "docs/evidence/fragments/converged-forward-solve/booking-cost.html",
+      "docs/figures/converged-forward-solve/booking-cost"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "booking-cost",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-13T23:10:02.299408+00:00",
+    "score": 0.64375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "Profile-led performance restructure of a JAX quadrature booking on the H200 with identity and autograd gates; deep reasoning, critical risk",
+    "confidence": 0.76,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 360.3,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 1704.128,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 24689.760005,
+        "budget_reason": null,
+        "burn_multiple": 0.9796645592778386,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 59924,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 16.6,
+          "peak_utilisation_p90_pct": 19.7,
+          "peak_utilisation_runs": 6,
+          "window_tokens": null
+        },
+        "days_to_reset": 4.284782071701389,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.03754066265934768,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-18T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 38.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 24689.760005,
+        "budget_reason": null,
+        "burn_multiple": 0.9796645592778386,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 59924,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 16.6,
+          "peak_utilisation_p90_pct": 19.7,
+          "peak_utilisation_runs": 6,
+          "window_tokens": null
+        },
+        "days_to_reset": 4.284782071701389,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.03754066265934768,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-18T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 38.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 24689.760005,
+        "budget_reason": null,
+        "burn_multiple": 0.9796645592778386,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 59924,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 16.6,
+          "peak_utilisation_p90_pct": 19.7,
+          "peak_utilisation_runs": 6,
+          "window_tokens": null
+        },
+        "days_to_reset": 4.284782071701389,
+        "effort": "medium",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": 0.03754066265934768,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-18T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 38.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 8,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": {
+          "estimated_tokens": 59924,
+          "headroom_pct": 74.0,
+          "peak_utilisation_p50_pct": 58.3,
+          "peak_utilisation_p90_pct": 84.5,
+          "peak_utilisation_runs": 112,
+          "window_tokens": 230144
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 3,
+          "not-run": 14,
+          "passed": 77,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": 5
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 1303.617005,
+        "budget_reason": null,
+        "burn_multiple": 4.709231557833088,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 59924,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.241911701331019,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.11912771608498678,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-20T04:58:16+00:00",
+        "stale": true,
+        "utilisation_pct": 51.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 1303.617005,
+        "budget_reason": null,
+        "burn_multiple": 4.709231557833088,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 59924,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.241911701331019,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.11912771608498678,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-20T04:58:16+00:00",
+        "stale": true,
+        "utilisation_pct": 51.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 1303.617005,
+        "budget_reason": null,
+        "burn_multiple": 4.709231557833088,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 59924,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.241911701331019,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 6,
+          "not-run": 2,
+          "passed": 8,
+          "unknown": 0
+        },
+        "pace_allowance": 0.11912771608498678,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-20T04:58:16+00:00",
+        "stale": true,
+        "utilisation_pct": 51.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude:claude-haiku-4-5-20251001:claude": 0,
+      "claude:claude-opus-5-5:claude": 0.02,
+      "claude:claude-sonnet-5-5:claude": 0.05,
+      "codex:gpt-6-astra:codex": 0,
+      "codex:gpt-6-luna:codex": 0,
+      "codex:gpt-6-sol:codex": 0.1,
+      "hold": 0.04,
+      "local:deepseek-v4.1-flash:clive": 0.79
+    },
+    "questions": {
+      "route": {
+        "criteria": {
+          "claude:claude-haiku-4-5-20251001:claude": {
+            "backend": "claude",
+            "effort": "high",
+            "lane": "claude",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "claude-haiku-4-5-20251001"
+          },
+          "claude:claude-opus-5-5:claude": {
+            "backend": "claude",
+            "effort": "high",
+            "lane": "claude",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "claude-opus-5-5"
+          },
+          "claude:claude-sonnet-5-5:claude": {
+            "backend": "claude",
+            "effort": "medium",
+            "lane": "claude",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "claude-sonnet-5-5"
+          },
+          "codex:gpt-6-astra:codex": {
+            "backend": "codex",
+            "effort": "xhigh",
+            "lane": "codex",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "gpt-6-astra"
+          },
+          "codex:gpt-6-luna:codex": {
+            "backend": "codex",
+            "effort": "xhigh",
+            "lane": "codex",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "gpt-6-luna"
+          },
+          "codex:gpt-6-sol:codex": {
+            "backend": "codex",
+            "effort": "high",
+            "lane": "codex",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "gpt-6-sol"
+          },
+          "hold": "Do not dispatch now; wait for pressure to ease. When the local lane is not admitting (full, paused or unavailable), well-defined, routine or deferrable work should usually hold for it rather than spend a pressed metered lane. On a sliding scale, hard, high-risk or urgent work may still take the metered lane; weigh expected wait against urgency without a numeric threshold. When exactly one lane can serve the node, a hold waits for that lane alone, as hold_waits_for states.",
+          "local:deepseek-v4.1-flash:clive": {
+            "backend": "clive",
+            "effort": "high",
+            "lane": "local",
+            "local": true,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "deepseek-v4.1-flash"
+          }
+        },
+        "glossary": {
+          "budget_age_s": "Seconds since the budget reading was observed; null when unknown.",
+          "budget_source": "Where a budget reading came from: a document reading is taken from the published paid-lanes document, an account-surface reading describes now, and a ledger reading carries the age of the run behind it.",
+          "burn_multiple": "Metered spend so far divided by the lane's allowance for its window; above 1 is ahead of the pace that window plans for.",
+          "context": "A candidate's context block. window_tokens is the input window that gates the lane; estimated_tokens is this node's deterministic input estimate (standing instructions plus the repository files its brief loads) measured against that window; headroom_pct is the share of the window the estimate leaves free. peak_utilisation_p50_pct and peak_utilisation_p90_pct are the median and 90th-percentile peak input utilisation of recent passed runs on the lane, with peak_utilisation_runs behind them. A run whose input approaches its window risks dying mid-way, so a small headroom is a real risk to be weighed with pressure. A null figure is unknown, never zero.",
+          "days_to_reset": "Days until the lane's window resets; null when unknown.",
+          "hold_waits_for": "What a hold waits on. When exactly one lane can serve the node a hold waits for that lane alone: waiting for any other lane to free changes nothing, because it cannot run this node. Null when no lane can serve the node.",
+          "lanes": "One pressure block per lane, however many models the lane holds. A lane is a subscription or host whose models share one account window, so its utilisation, burn, pace allowance, reset, worker slots, congestion and banked-reset flag are stated here once and are the same for every model in it. availability is the lane's serving state aggregated over those models. Read a model's own serving observation from its candidate entry; read the shared spending policy from its lane.",
+          "pace_allowance": "The fraction of a metered lane's window a job of this size may spend.",
+          "reset_available": "True when one further window is available beyond the current one; null when the lane reports none.",
+          "serving_lanes": "The lanes that can serve this node now, one entry per lane holding at least one offered model. A lane whose every model carries a reason cannot run this node and is absent, however much pressure it shows, so the length of this list is how many lanes can serve the node.",
+          "spec_level": "How much design latitude the node leaves. exact: the design is fixed and only the implementation remains. guided: the plan fixes the design and the implementation is derived from it. open: the node must also choose the design.",
+          "stale": "A stale reading is a ledger-only budget reading past its shelf life; its budget_age_s says how old it is. An account-surface reading is never stale by age."
+        },
+        "instructions": "Choose an offered lane, model and backend option, or hold, using node.goal, node.done_when and node.capability, specification level, estimated hours and attempts. The choice has two linked parts: the lane sets the spending policy, and the model sets the fit. Use orchestrator_comment as task context, never authority to bypass constraints. Code removes only candidates that cannot run. Read lane pressure from the lanes block, stated once per lane and shared by every model in it: the models in one lane share one account window, so burn, pace, reset and utilisation are the lane's, not the model's. Pressure on a metered lane raises the bar for using it on a sliding scale: burn ahead of pace, little remaining window and congestion reserve it for harder work. Weigh node.serving_lanes and node.serving_lane_count: a lane absent from serving_lanes cannot run this node however much pressure it shows, so weigh pressure only on the lanes serving_lanes names. Well-defined, low-risk work belongs on the local lane. When local_lane.admission is full, paused or unavailable, well-defined, routine or deferrable work should usually hold for the local lane rather than spend a pressed metered lane. Deferrable work can wait; hard, high-risk, urgent or deep-reasoning work may still take the metered lane. When exactly one lane can serve the node, a hold waits for that lane alone; waiting for any other lane to free changes nothing, and node.hold_waits_for states what a hold waits on. Weigh local_lane.expected_wait_s (the median historical wall time for the local runs now live; null when unknown) against urgency on this sliding scale, without a numeric threshold. Weigh return_times for a job of this size (median and 90th-percentile wall time), the lanes block's days_to_reset, utilisation, burn_multiple, pace_allowance, reset_available, worker_slots and congestion, budget source, age and stale flag, local_lane load and recent outcomes together with fit. Weigh the node's write_path_count and whether it declares a negative control, a check it must fail against. Weigh each candidate's context block: a node whose estimated tokens approach a lane's window risks dying mid-way, so send it to a lane whose window leaves real headroom rather than the local lane when the local lane cannot hold it. Confidence is your confidence in the joint pick of lane and model. Unknown facts are null, not zero. Outcomes are gate counts, not calibrated model rankings. Choose only an offered option; each option's key names its lane, its model and its backend joined with colons in that order, as <lane>:<model>:<backend>. The glossary defines spec_level, burn_multiple, pace_allowance, budget_source, budget_age_s, stale, reset_available, days_to_reset, lanes, serving_lanes, hold_waits_for and context",
+        "type": "choice"
+      }
+    },
+    "rendered_state": "{\"node\":{\"role\":\"implement\",\"spec_level\":\"exact\",\"capability\":{\"version\":\"1.0\",\"class\":\"orchestrator\",\"requirements\":{\"reasoning\":\"deep\",\"verification\":\"strict\",\"risk\":\"critical\"}},\"goal\":\"Bring the per-step current booking from seconds to milliseconds on fine grids\",\"done_when\":\"Carry out followup f-cfs-booking-cost on converged-forward-solve. current.book, now vmapped over cells at merge e1ce330f9, costs 1.2 to 3.4 s per solve step at 2,000 to 5,000 cells on the H200, and peaks at 23.7 GB at 5,000 cells (7 to 11 times the sequential version). Every forward-solve iteration books once, so this is the hot path. The lead wants the method fast on fine grids, without unnecessary complexity.\\n\\nDone when:\\n(1) Profile. Profile one booking at 2,000 and 5,000 cells on the H200 (jax.profiler trace or HLO cost analysis). Name the stage that dominates the wall and the stage that dominates memory, with numbers: fragment construction, the ring quadrature (segments=64), the per-cell padding to the worst cell, or the conditional branches. Say how the work scales with cells and with fragment count.\\n(2) Restructure the dominant stage for speed and bounded memory. Choices that typically pay: quadrature order matched to the polynomial degree of the integrand rather than a fixed 64 segments; cells whose fragment is the whole cell (fully inside) booked in closed form, so only cut cells take the clipped integral; cut cells gathered into a compact batch instead of padding every cell to the worst case. State what you chose and why.\\n(3) Identity. The booked moments agree with the current booking within its identity tolerance (6.9e-16 relative), or with the closed-form certificate moments within the section 3 bound, at 2,000, 5,000 and 10,000 cells. Use 10,000 cells only if the carrier-requalify device store is available; otherwise record it as pending. Autograd (jax.jvp) still matches finite differences.\\n(4) Cost. Give the per-step booking wall and peak memory at each rung, before and after, on the H200, using machines built fresh with NOVA_ANALYTIC_ORACLE_BUILDER=device in one job, and the base and head booking on the same machine. Set the target from the profile and state it; aim for milliseconds per step at 10,000 cells.\\n(5) tests/test_current_book_vectorised.py and test_current_book_fragments.py pass by delta. Add the review follow-on: a guard test that fails if the sequential scan over cells is reinstated.\\n(6) Write the evidence fragment docs/evidence/fragments/converged-forward-solve/booking-cost.html with plan-evidence-for converged-forward-solve; reckon audit-doc must report 0 errors.\\nWrite only nova/equilibrium/current.py, its tests and the fragment. The moment-space Newton node owns forward.py, forward_operator.py, gs.py, support_read.py, topology.py and fixed_points.py.\\n\\nRun conditions: H200 rows run as one job through RECKON_ALLOW_NESTED_LAUNCH=1 scripts/h200_test_lane/run.sh --log (an absolute path in the run directory) --wait -- (targets), or one sbatch job on --partition=betelgeuse --reservation=gpu_0003_grpA --gres=gpu:1 with rungs as rows inside the allocation (never an array), --time sized to finish, XLA_PYTHON_CLIENT_PREALLOCATE=false and TMPDIR=/tmp in the submit environment and in every child; submit for real and read squeue a minute later rather than trusting sbatch --test-only. On a compute node run /home/ITER/mcintos/Code/nova/.venv/bin/python directly with PYTHONPATH set to the run worktree and never invoke uv; every login-node uv command carries --no-sync and nothing runs uv sync. configure_dtypes() before any array and jax_enable_x64 asserted True. Gates pass by delta against orientation_base_sha in per-module fresh processes, both arms running the same test files with the repository root conftest, baseline_suite and after_suite as single-line JSON whose log_path names one log file and whose command is literally runnable. Any wait is declared on the job that finishes last as wait_probe [\\\"sacct\\\",\\\"-n\\\",\\\"-X\\\",\\\"-P\\\",\\\"-j\\\",\\\"(job id)\\\",\\\"-o\\\",\\\"State\\\"] and wait_terminal [\\\"COMPLETED\\\",\\\"FAILED\\\",\\\"CANCELLED\\\",\\\"TIMEOUT\\\",\\\"OUT_OF_MEMORY\\\",\\\"NODE_FAIL\\\"] as JSON lists, and names every job it depends on in wait_condition. The certified 550, 2,000 and 5,000-cell machines and exteriors are cached under /home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T181553786165-proto-support/ordered/rows/cache and may be read in place, never written. Run filepath relativize over any evidence fragment before committing. Commit with conventional subjects and bodies at every step and write the manifest and commit before every job wait; the manifest commits line lists every commit; status is complete, blocked or failed, which the worker sets itself. No plan labels in source names or comments.\\n\\nImport provenance: run each arm from its own tree as the working directory and print nova.__file__ in each log header (the review found a base arm that imported the head worktree). On the fleet allocation (SLURM_JOB_ID set), run CPU gates in place.\",\"estimated_context\":59924,\"estimated_hours\":5.0,\"estimated_hours_source\":\"node\",\"attempts\":0,\"write_path_count\":4,\"negative_control_declared\":true,\"serving_lanes\":[\"claude\",\"local\",\"codex\"],\"serving_lane_count\":3,\"hold_waits_for\":\"any one of 3 lanes that can serve this node to have room\"},\"orchestrator_comment\":\"Profile-led performance restructure of a JAX quadrature booking on the H200 with identity and autograd gates; deep reasoning, critical risk\",\"candidates\":{\"claude\":{\"backend\":\"claude\",\"lane\":\"claude\",\"model\":\"claude-sonnet-5-5\",\"availability\":\"unknown\",\"utilisation_pct\":38.0,\"burn_multiple\":0.9796645592778386,\"pace_allowance\":0.03754066265934768,\"days_to_reset\":4.284782071701389,\"resets_at\":\"2026-10-18T06:00:00+00:00\",\"worker_slots\":null,\"congestion\":null,\"outcomes\":{\"passed\":1,\"failed\":1,\"not-run\":0,\"unknown\":0},\"context\":{\"window_tokens\":null,\"estimated_tokens\":59924,\"headroom_pct\":null,\"peak_utilisation_p50_pct\":16.6,\"peak_utilisation_p90_pct\":19.7,\"peak_utilisation_runs\":6},\"budget_source\":null,\"budget_age_s\":24689.760005,\"stale\":true,\"reset_available\":null},\"clive\":{\"backend\":\"clive\",\"lane\":\"local\",\"model\":\"deepseek-v4.1-flash\",\"availability\":\"served\",\"utilisation_pct\":null,\"burn_multiple\":null,\"pace_allowance\":null,\"days_to_reset\":null,\"resets_at\":null,\"worker_slots\":5,\"congestion\":{\"running\":8,\"waiting\":0,\"admission_verdict\":\"open\",\"stale\":false,\"slots_state\":\"measured\"},\"outcomes\":{\"passed\":77,\"failed\":3,\"not-run\":14,\"unknown\":0},\"context\":{\"window_tokens\":230144,\"estimated_tokens\":59924,\"headroom_pct\":74.0,\"peak_utilisation_p50_pct\":58.3,\"peak_utilisation_p90_pct\":84.5,\"peak_utilisation_runs\":112},\"budget_source\":null,\"budget_age_s\":null,\"stale\":null,\"reset_available\":null},\"codex\":{\"backend\":\"codex\",\"lane\":\"codex\",\"model\":\"gpt-6-sol\",\"availability\":\"unknown\",\"utilisation_pct\":51.0,\"burn_multiple\":4.709231557833088,\"pace_allowance\":0.11912771608498678,\"days_to_reset\":6.241911701331019,\"resets_at\":\"2026-10-20T04:58:16+00:00\",\"worker_slots\":null,\"congestion\":null,\"outcomes\":{\"passed\":8,\"failed\":6,\"not-run\":2,\"unknown\":0},\"context\":{\"window_tokens\":null,\"estimated_tokens\":59924,\"headroom_pct\":null,\"peak_utilisation_p50_pct\":null,\"peak_utilisation_p90_pct\":null,\"peak_utilisation_runs\":null},\"budget_source\":null,\"budget_age_s\":1303.617005,\"stale\":true,\"reset_available\":null}},\"return_times\":{\"claude\":{\"p50_s\":6257.5,\"p90_s\":12314,\"runs\":2,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"ledger\",\"budget_age_s\":24691.03686,\"stale\":true},\"clive\":{\"p50_s\":2484,\"p90_s\":7650,\"runs\":81,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"ledger\",\"budget_age_s\":1960568.12786,\"stale\":true},\"codex\":{\"p50_s\":5509.0,\"p90_s\":94200,\"runs\":18,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"document\",\"budget_age_s\":1304.89386,\"stale\":false}},\"lanes\":{\"claude\":{\"availability\":\"unknown\",\"utilisation_pct\":38.0,\"burn_multiple\":0.9796645592778386,\"pace_allowance\":0.03754066265934768,\"resets_at\":\"2026-10-18T06:00:00+00:00\",\"days_to_reset\":4.284767293287037,\"worker_slots\":null,\"congestion\":null,\"reset_available\":false},\"local\":{\"availability\":\"served\",\"utilisation_pct\":null,\"burn_multiple\":null,\"pace_allowance\":null,\"resets_at\":null,\"days_to_reset\":null,\"worker_slots\":5,\"congestion\":{\"running\":8,\"waiting\":0,\"admission_verdict\":\"open\",\"stale\":false,\"slots_state\":\"measured\"},\"reset_available\":null},\"codex\":{\"availability\":\"unknown\",\"utilisation_pct\":51.0,\"burn_multiple\":4.709231557833088,\"pace_allowance\":0.11912771608498678,\"resets_at\":\"2026-10-20T04:58:16+00:00\",\"days_to_reset\":6.241896922916666,\"worker_slots\":null,\"congestion\":null,\"reset_available\":false}},\"local_lane\":{\"admission\":\"admitting\",\"expected_wait_s\":714.0,\"running\":8,\"waiting\":0,\"headroom\":3,\"worker_slots\":9,\"tokens_per_second\":43.615,\"read_at\":\"2026-10-13T23:09:56.115569+00:00\"}}",
+    "rendered_token_estimate": 2223,
+    "stage_ms": {
+      "budget-snapshot": 221.965,
+      "context-estimate": 15.99,
+      "jev": 1705.859,
+      "records": 187.125,
+      "verdict-inputs": 182.963
+    },
+    "template_digest": "bf398dab17ed4a1f716fe26e88b498badb311b83b4b219bc1dfbeaad8ffd187d",
+    "usage": {
+      "cost": 0.00021252,
+      "input_tokens": 5060,
+      "output_tokens": 174
+    }
+  },
+  "plan": "converged-forward-solve",
+  "plan_impl_at_dispatch": 0.2857142857142857,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "8779ebe313772d3414991328656277f72d8bc13c",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "a0b86e5d913cf01ba7619f6a102c9db5040bbdf1",
+    "reviewed_head_sha": "8779ebe313772d3414991328656277f72d8bc13c",
+    "scores": {
+      "durability": 18,
+      "evidence": 17,
+      "fit": 19,
+      "goal_fidelity": 18,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 112
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "picker",
+  "run_id": "r-20261013T230956570184-booking-cost",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a13788-4b1b-7ae0-84ab-b0f16c67ca23",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 55976320,
+    "cumulative_input_tokens": 112307079,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 186267
+  },
+  "time_budget": "60m",
+  "tool_steps": 0.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 5926,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 3,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-14T00:49:04Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-14T00:11:56Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261013T230956570184-booking-cost",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 1709,
+    "worker_pid": 2178689
+  },
+  "worker_seconds": 5926,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": {
+    "classification": "retained-for-resume",
+    "retained_at": "2026-10-14T00:49:01Z",
+    "session_id": "01a13788-4b1b-7ae0-84ab-b0f16c67ca23",
+    "session_source": "stream",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/booking-cost"
+  }
+}

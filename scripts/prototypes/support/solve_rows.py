@@ -184,6 +184,24 @@ def stationary_seed_probe(operands, cache, moments, roots, axis_sign):
     )
 
 
+def qualified_axis_seed(candidates, sigma):
+    """Return the extreme signed-flux axis from an already qualified census."""
+    valid = np.asarray(candidates["valid"], dtype=bool)
+    values = np.asarray(candidates["values"])
+    positions = np.asarray(candidates["positions"])
+    eligible = valid & np.isfinite(values) & np.all(np.isfinite(positions), axis=1)
+    if not np.any(eligible):
+        raise ValueError("the stationary census contains no qualified axis")
+    index = int(np.argmax(np.where(eligible, float(sigma) * values, -np.inf)))
+    return positions[index], dict(
+        rule="extreme signed flux among qualified nearby stationary roots",
+        candidate_index=index,
+        position=positions[index].tolist(),
+        value=float(values[index]),
+        qualified=True,
+    )
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--kind", choices=("limited", "diverted"), required=True)
@@ -200,6 +218,9 @@ def main():
         nargs="+",
         choices=("analytic", "production"),
         default=("analytic", "production"),
+    )
+    parser.add_argument(
+        "--axis-seed", choices=("declared", "census"), default="declared"
     )
     parser.add_argument("--diagnostics-only", action="store_true")
     parser.add_argument("--jet-cache", type=Path)
@@ -369,7 +390,9 @@ def main():
         write(destination, row)
         print("DIAGNOSTICS " + json.dumps(row), flush=True)
         return
+    declared_roots = roots
     for seed_name in args.seeds:
+        roots = declared_roots
         if seed_name == "analytic":
             seed = initial
         else:
@@ -384,7 +407,15 @@ def main():
             row["production_stationary_candidates"] = stationary_seed_probe(
                 operands, cache, operator.seed_moments(seed), roots, -convention.sigma
             )
+            if args.axis_seed == "census":
+                selected, selection = qualified_axis_seed(
+                    row["production_stationary_candidates"], convention.sigma
+                )
+                roots = roots.at[0].set(jnp.asarray(selected))
+                row["production_axis_selection"] = selection
             write(destination, row)
+        operator.moment_roots = roots
+        arguments = (operands, cache, roots, convention, policy, quadrature)
         for method in args.methods:
             collection = (
                 row["routes"] if seed_name == "analytic" else row["production_routes"]

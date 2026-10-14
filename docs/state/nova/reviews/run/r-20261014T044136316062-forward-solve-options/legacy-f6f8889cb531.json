@@ -83,6 +83,11 @@
   ],
   "completed_at": "",
   "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "Research node by design: it changes no product code, so there is nothing for a test to guard; its numbers are recorded as receipts and in docs/research/forward-solve-options.html",
+      "recorded_at": "2026-10-14T15:28:48.628372+00:00"
+    },
     "reuse": {
       "kind": "exempted",
       "reason": "Measurement-only research prototypes under scripts/prototypes/solve_options; the styling duplication in render.py is in a throwaway figure script, not product code, and the lead decision on the solve representation decides whether any of it survives",

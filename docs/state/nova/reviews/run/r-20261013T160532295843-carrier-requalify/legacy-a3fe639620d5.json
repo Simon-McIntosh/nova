@@ -38,6 +38,13 @@
     "f505a846b396b8dde65fffbb0ab008da25d6e9af"
   ],
   "completed_at": "",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "carrier-agreement",
+      "recorded_at": "2026-10-14T01:37:45.758228+00:00"
+    }
+  },
   "dispatched_at": "2026-10-13T16:05:52Z",
   "evidence_inputs": [
     "The identity rescope is correct on its own terms: measure.py:408 _polygonanalytic_source resolves Path(__file__).resolve().parents[2] / POLYGONANALYTIC_SOURCE to the repository's nova/biot/polygonanalytic.py, and measure.py:420 hashes it with coupling_build.__file__; identity-refusal.log shows the pre-repair kernel (digest 14573967e239d850) and HEAD (0425598d0de19a99) produce distinct builder_revisions, so an old-kernel carrier is a different carrier.",

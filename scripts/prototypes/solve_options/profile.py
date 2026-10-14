@@ -109,8 +109,8 @@ def run(kind, cells, cache, out):
     print(f"CWD={Path.cwd().resolve()} DEVICE={jax.devices()}", flush=True)
     assert jax.config.jax_enable_x64 is True
     assert jax.default_backend() == "gpu"
-    reading, read_median, read_min = _time(
-        lambda: topology.read(field, geometry, convention, policy)
+    reading, legacy_read_wall, _ = _time(
+        lambda: topology.read(field, geometry, convention, policy), repeats=1
     )
     assert bool(reading.valid) and bool(reading.qualified)
     target = jnp.asarray(1.0)
@@ -162,8 +162,7 @@ def run(kind, cells, cache, out):
         axis=axis.tolist(),
         saddle=None if saddle is None else saddle.tolist(),
         device=str(jax.devices()[0]),
-        read_ms=read_median * 1000,
-        read_min_ms=read_min * 1000,
+        legacy_read_once_ms=legacy_read_wall * 1000,
         exact_booking_ms=exact_median * 1000,
         exact_booking_min_ms=exact_min * 1000,
         hard_ms=hard_median * 1000,

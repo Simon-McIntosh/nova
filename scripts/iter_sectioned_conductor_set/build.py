@@ -142,21 +142,36 @@ def source_conductors() -> tuple[
     )
 
 
-def canonical_coil_reference(active) -> np.ndarray:
-    """Compute the whole-coil matrix through Nova's active-coil owner."""
-    from nova.imas.machine import PoloidalFieldActive
-
-    converted = imas.convert_ids(
-        active, str(active.ids_properties.version_put.data_dictionary)
-    )
-    for source, target in zip(active.coil, converted.coil, strict=True):
-        target.identifier = str(source.name)
-        target.name = str(source.name)
-    converted.circuit.resize(0)
-    converted.supply.resize(0)
-    model = PoloidalFieldActive(ids=converted, run=204)
-    model.inductance.solve(0)
-    return np.asarray(model.inductance.Psi, dtype=np.float64)
+def unsectioned_coil_conductors(active) -> ConductorSet:
+    """Keep each original IDS element as one filament of its whole coil."""
+    columns = {key: [] for key in ConductorSet._columns}
+    for coil_index, coil in enumerate(active.coil):
+        for element in coil.element:
+            geometry = element.geometry
+            kind = int(geometry.geometry_type)
+            if kind == 2:
+                rect = geometry.rectangle
+                data = (
+                    float(rect.r), float(rect.z),
+                    float(rect.width), float(rect.height),
+                )
+            elif kind == 5:
+                annulus = geometry.annulus
+                area = np.pi * (
+                    float(annulus.radius_outer) ** 2
+                    - float(annulus.radius_inner) ** 2
+                )
+                side = np.sqrt(area)
+                data = (float(annulus.r), float(annulus.z), side, side)
+            else:
+                raise ValueError(f"unsupported active geometry {kind}")
+            for key, value in zip(
+                columns,
+                (*data, float(element.turns_with_sign), coil_index),
+                strict=True,
+            ):
+                columns[key].append(value)
+    return ConductorSet(**columns)
 
 
 def calculate(
@@ -215,6 +230,33 @@ def calculate(
     build_seconds = perf_counter() - started
     series = np.zeros((n_section, len(coil_names)))
     series[np.arange(n_section), owner] = 1.0
+    coil_digest = hashlib.sha256()
+    for name in conductors._columns:
+        coil_digest.update(np.asarray(getattr(conductors, name))[:n_section].tobytes())
+    coil_digest.update(b"finite-source:6")
+    coil_path = (
+        cache_root / f"coil-{coil_digest.hexdigest()[:20]}.npy"
+        if cache_root else None
+    )
+    coil_cache_hit = bool(coil_path and coil_path.exists())
+    coil_started = perf_counter()
+    if coil_cache_hit:
+        coil_linkage = np.load(coil_path)
+        if coil_linkage.shape != (n_section, n_section):
+            raise ValueError("cached coil linkage shape disagrees with sections")
+    else:
+        coil_linkage = circuit_linkage_matrix(
+            conductors,
+            range(n_section),
+            section_n_max=6,
+            workers=workers,
+            finite_source=True,
+        )
+        if coil_path:
+            coil_path.parent.mkdir(parents=True, exist_ok=True)
+            np.save(coil_path, coil_linkage)
+    coil_build_seconds = perf_counter() - coil_started
+    matrix[:n_section, :n_section] = coil_linkage
     active = read_ids(*SOURCE[0])
     source_coil_names = [
         str(coil.name).rsplit("(", 1)[-1].removesuffix(")") for coil in active.coil
@@ -297,8 +339,10 @@ def calculate(
         "max_layer_thickness_m": max_thickness,
         "surface_layer_m": surface_layer_m,
         "linkage_build_seconds": build_seconds,
+        "coil_build_seconds": coil_build_seconds,
         "spectrum_seconds": spectrum_seconds,
         "cache_hit": cache_hit,
+        "coil_cache_hit": coil_cache_hit,
         "cache_dir": str(cache_dir) if cache_dir else None,
         "source_resistance_ohm": [
             float(source_resistance.min()),

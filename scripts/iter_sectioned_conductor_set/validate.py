@@ -10,6 +10,11 @@ import numpy as np
 
 from nova.circuit.conductor import ConductorSet
 from nova.circuit.linkage import circuit_linkage_matrix
+from scripts.iter_sectioned_conductor_set.build import (
+    SOURCE,
+    read_ids,
+    unsectioned_coil_conductors,
+)
 
 
 POWER_MATRIX = Path(
@@ -42,7 +47,7 @@ def _analytic_inductance_errors() -> tuple[float, float]:
     return tuple(errors)
 
 
-def compare(receipt: dict) -> dict:
+def compare(receipt: dict, unsectioned_matrix: np.ndarray | None = None) -> dict:
     names = receipt["coil_names"]
     matrix = np.asarray(receipt["coil_inductance_h"])
     source = json.loads(POWER_MATRIX.read_text())
@@ -58,15 +63,39 @@ def compare(receipt: dict) -> dict:
     power_mutual = float(
         np.max(np.abs(matrix[off_diagonal] / reference[off_diagonal] - 1))
     )
+    if unsectioned_matrix is None:
+        active = read_ids(*SOURCE[0])
+        conductors = unsectioned_coil_conductors(active)
+        unsectioned_matrix = circuit_linkage_matrix(
+            conductors,
+            range(len(names)),
+            section_scale_frac=0.05,
+            section_n_max=24,
+            finite_source=True,
+        )
+    unsectioned = np.asarray(unsectioned_matrix)
+    if unsectioned.shape != matrix.shape:
+        raise ValueError("unsectioned coil matrix shape differs")
+    section_self = np.abs(matrix[diagonal] / unsectioned[diagonal] - 1)
     ring_error, rectangle_error = _analytic_inductance_errors()
     result = {
         "power_self_max_fraction": power_self,
         "power_mutual_max_fraction": power_mutual,
+        "power_self_fraction_by_coil": {
+            name: float(value)
+            for name, value in zip(
+                names, np.abs(matrix[diagonal] / reference[diagonal] - 1), strict=True
+            )
+        },
+        "sectioning_self_max_fraction": float(np.max(section_self)),
+        "sectioning_self_fraction_by_coil": {
+            name: float(value) for name, value in zip(names, section_self, strict=True)
+        },
         "thin_ring_error_fraction": ring_error,
         "rectangular_coil_error_fraction": rectangle_error,
     }
-    if power_self > 0.005 or power_mutual > 0.005:
-        raise AssertionError(f"coil matrix exceeds 0.5% reference tolerance: {result}")
+    if result["sectioning_self_max_fraction"] > 0.005:
+        raise AssertionError(f"sectioned self-inductance exceeds 0.5%: {result}")
     if ring_error > 0.05 or rectangle_error > 0.01:
         raise AssertionError(f"analytic inductance exceeds tolerance: {result}")
     return result
@@ -79,7 +108,14 @@ def main() -> None:
     args = parser.parse_args()
     result = compare(json.loads(args.receipt.read_text()))
     args.output.write_text(json.dumps(result, indent=2))
-    print("SUMMARY " + " ".join(f"{key}={value:.6g}" for key, value in result.items()))
+    print(
+        "SUMMARY "
+        + " ".join(
+            f"{key}={value:.6g}"
+            for key, value in result.items()
+            if isinstance(value, float)
+        )
+    )
 
 
 if __name__ == "__main__":

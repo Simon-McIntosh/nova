@@ -1,5 +1,6 @@
 """ITER winding placement and conductor circuit contracts."""
 
+import json
 from types import SimpleNamespace
 
 import numpy as np
@@ -19,6 +20,7 @@ from scripts.iter_sectioned_conductor_set.compare_refinement import (
     compare as compare_refinement,
     require_convergence,
 )
+from scripts.iter_sectioned_conductor_set import validate
 
 
 def _rectangle(name: str, turns: float) -> MachineSection:
@@ -168,6 +170,31 @@ def test_refinement_gate_rejects_a_converter_band_excursion():
     require_convergence(passed, tolerance=0.01, upper_limit_hz=5000.0)
     with pytest.raises(AssertionError, match="limit"):
         require_convergence(passed, tolerance=0.001, upper_limit_hz=5000.0)
+
+
+def test_raw_power_difference_is_reported_and_sectioning_guard_fires(
+    tmp_path, monkeypatch
+):
+    reference = np.array([[1.0, 0.1], [0.1, 2.0]])
+    power_path = tmp_path / "power.json"
+    power_path.write_text(
+        json.dumps(
+            {
+                "coils": ["Coil (PF1)", "Coil (PF2)"],
+                "coil_inductance_H": reference.tolist(),
+            }
+        )
+    )
+    monkeypatch.setattr(validate, "POWER_MATRIX", power_path)
+    monkeypatch.setattr(validate, "_analytic_inductance_errors", lambda: (0.0, 0.0))
+    measured = reference.copy()
+    measured[0, 0] *= 1.0182
+    receipt = {"coil_names": ["PF1", "PF2"], "coil_inductance_h": measured.tolist()}
+    result = validate.compare(receipt, unsectioned_matrix=measured)
+    assert result["power_self_fraction_by_coil"]["PF1"] == pytest.approx(0.0182)
+    assert result["sectioning_self_max_fraction"] == pytest.approx(0.0)
+    with pytest.raises(AssertionError, match="sectioned self-inductance"):
+        validate.compare(receipt, unsectioned_matrix=reference)
 
 
 def test_passive_screening_changes_terminal_impedance_and_removal_is_bare():

@@ -29,7 +29,7 @@ from multiprocessing import get_context
 
 import numpy as np
 
-from nova.biot.greens import hybrid_greens
+from nova.biot.greens import cylinder_greens, hybrid_greens
 from nova.biot.polygon import polygon_greens
 from nova.circuit.conductor import ConductorSet
 
@@ -129,6 +129,8 @@ def linked_flux_columns(
     weight: np.ndarray,
     owner: np.ndarray,
     n_groups: int,
+    *,
+    finite_source: bool = False,
 ) -> np.ndarray:
     """Flux linkage [Wb/A] of one source group into every observer group.
 
@@ -137,7 +139,8 @@ def linked_flux_columns(
     """
     column = np.zeros(n_groups)
     for row in source_rows:
-        psi, _b_r, _b_z = hybrid_greens(
+        kernel = cylinder_greens if finite_source else hybrid_greens
+        psi, _b_r, _b_z = kernel(
             point_r,
             point_z,
             float(conductors.r[row]),
@@ -175,7 +178,8 @@ _COLUMN_CONTEXT = None
 
 
 def _set_column_context(
-    conductors, groups, circuits, polygon, point_r, point_z, weight, owner
+    conductors, groups, circuits, polygon, point_r, point_z, weight, owner,
+    finite_source,
 ):
     global _COLUMN_CONTEXT
     _COLUMN_CONTEXT = (
@@ -187,13 +191,15 @@ def _set_column_context(
         point_z,
         weight,
         owner,
+        finite_source,
     )
 
 
 def _linkage_column(index):
-    conductors, groups, circuits, polygon, point_r, point_z, weight, owner = (
-        _COLUMN_CONTEXT
-    )
+    (
+        conductors, groups, circuits, polygon, point_r, point_z,
+        weight, owner, finite_source,
+    ) = _COLUMN_CONTEXT
     section = polygon.get(int(circuits[index]))
     if section is not None:
         column = polygon_flux_columns(
@@ -201,7 +207,8 @@ def _linkage_column(index):
         )
     else:
         column = linked_flux_columns(
-            conductors, groups[index], point_r, point_z, weight, owner, len(groups)
+            conductors, groups[index], point_r, point_z, weight, owner, len(groups),
+            finite_source=finite_source,
         )
     return index, column
 
@@ -213,6 +220,7 @@ def circuit_linkage_matrix(
     section_scale_frac: float = 1.0,
     section_n_max: int = 6,
     workers: int = 1,
+    finite_source: bool = False,
 ) -> np.ndarray:
     """Symmetric two-section flux linkage matrix of a circuit set [Wb/A].
 
@@ -232,7 +240,10 @@ def circuit_linkage_matrix(
     if workers < 1:
         raise ValueError("workers must be positive")
     lmat = np.zeros((n_circuits, n_circuits))
-    context = (conductors, groups, circuits, polygon, point_r, point_z, weight, owner)
+    context = (
+        conductors, groups, circuits, polygon, point_r, point_z, weight, owner,
+        finite_source,
+    )
     if workers == 1:
         _set_column_context(*context)
         columns = map(_linkage_column, range(n_circuits))

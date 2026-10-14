@@ -52,6 +52,13 @@ def linear_timings(equation, operator, initial, arguments, result, method):
         return (equation(operator, moments, *arguments) / scale).reshape(-1)
 
     rows = []
+    if not np.isfinite(float(result.residual)):
+        return dict(
+            basis="nonfinite initial read; no accepted linearization to replay",
+            rows=rows,
+            jacobian_seconds=None,
+            factor_seconds=None,
+        )
     if method == "dense":
         import jax.scipy.linalg as dense
 

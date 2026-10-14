@@ -1,5 +1,7 @@
 """Closed-boundary current prescription and conductor flux linkage."""
 
+from dataclasses import replace
+
 import numpy as np
 import pytest
 
@@ -102,8 +104,24 @@ def test_finite_section_and_filament_linkage(current):
     assert circuits.tolist() == [0, 1]
     assert linked.shape == (2,)
     assert linked[0] > 0 and linked[1] > 0
-    _, history = plasma_linked_flux_history([current, current], conductors)
-    np.testing.assert_array_equal(history[0], history[1])
+    shared = ConductorSet(
+        r=np.array([7.0, 7.0]),
+        z=np.array([0.4, 0.4]),
+        dr=np.zeros(2),
+        dz=np.zeros(2),
+        current_share=np.array([1.0, 2.0]),
+        circuit=np.zeros(2, dtype=int),
+    )
+    doubled = replace(
+        current,
+        current_density=2 * current.current_density,
+        cell_current=2 * current.cell_current,
+        plasma_current=2 * current.plasma_current,
+    )
+    ids, history = plasma_linked_flux_history([current, doubled], shared)
+    expected = 3 * plasma_flux_at_points(current, np.array([7.0]), np.array([0.4]))[0]
+    assert ids.tolist() == [0]
+    assert history[:, 0] == pytest.approx([expected, 2 * expected])
 
 
 def test_vertical_shift_follows_flux_gradient(current):

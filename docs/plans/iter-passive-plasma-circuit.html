@@ -21,11 +21,11 @@
   <meta name="plan-sprint" content="S24">
   <meta name="plan-tags" content="iter,machine-description,equilibrium">
   <meta name="plan-blocks" content="power_convertor:iter-switched-terminal-transients">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
   <title>ITER Passive and Prescribed-Plasma Circuit | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="4">
 <meta name="plan-modified" content="2026-10-14">
 </head>
 <body>
@@ -145,8 +145,11 @@
 
     <h2 id="s4">§4 — The coupled plant, through one narrow imported call</h2>
 <section data-reckon="section" data-id="s4" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
-    <p>power_convertor imports nova and makes one call: given a machine description and a DINA case, it
-    returns the coupled plant. The call is a thin composition of what nova already has: the machine binding,
+    <p>power_convertor imports nova and makes one call: given a machine description and a plasma source, it
+    returns the coupled plant. The plasma source is either a DINA case or a reconstructed equilibrium of a
+    measured pulse, each with the coil currents that go with it (DINA's, or the measured ones); the call does
+    not care which, because both reach it as an IMAS equilibrium and a coil-current series (§5 adds the
+    reconstruction). The call is a thin composition of what nova already has: the machine binding,
     the sectioned conductor set of §1, the linkage and passive reduction in <code>nova/circuit/</code>, and
     the prescribed plasma of §2. The surface is that one function and the one result type it returns; nothing
     else becomes public for this. Because the build is minutes of kernel sums, the call caches through the
@@ -177,6 +180,10 @@
     </ul>
     <p>This section is the evidence power_convertor's gate g-istt-1 waits on.</p>
 
+    <h2 id="s5">§5 — A reconstructed plasma as the source</h2>
+<section data-reckon="section" data-id="s5" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<p>The same coupled plant serves a measured pulse as well as a DINA simulation. The lead decided (14 October 2026) that the plasma source must accept a reconstructed equilibrium too, so the switched model can replay real discharges: JT-60SA first, where a smaller machine of similar construction lets the stray capacitances and inductances be observed against measured coil voltages and currents.</p><p>The prescription of §2 already works from an IMAS equilibrium: a closed boundary, the 1-D flux functions, the 2-D ψ map and the plasma current. This section makes the source explicit and generic. A plasma source is an equilibrium (simulated or reconstructed) plus the coil-current series that goes with it. The narrow call of §4 takes either. A reconstruction carries its own conventions, so the reading states them, through nova's existing readers and COCOS handling rather than a new one:</p><ul><li>EFIT-style p′ and FF′ on its own ψ normalisation;</li><li>a boundary that may be the last closed flux surface rather than a separatrix;</li><li>coil currents that may come from a different source and cadence than the equilibrium.</li></ul><p>Done when three checks pass. First, a reconstruction nova already reads (one of its DIII-D or MAST reconstructions, or a JT-60SA reconstruction if one is found) is prescribed through the same path, and its linked flux at the coils and flux loops matches the reconstruction's own ψ within a stated tolerance. Second, the same call returns a coupled plant for that machine and pulse. Third, a DINA case run through the generic source gives the plant §4 returns for it, unchanged. Negative control: handing the call a reconstruction with its ψ sign convention flipped is refused or detected, not silently prescribed.</p>
+
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
 <article class="r-fu" data-id="f-ippc-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-14" data-recommends-skill="/reckon-build iter-passive-plasma-circuit §1" data-resolved-at="" data-resolved-by="">
@@ -198,6 +205,10 @@
 <div class="r-dec" data-key="d-ippc-interface" data-choice="every coupling computed by nova; DINA&#x27;s coupling matrices not used; power_convertor imports one narrow call built on nova&#x27;s existing capabilities" data-by="Simon McIntosh" data-when="2026-10-14T17:37:21+00:00">
     <p class="r-dec-q">d-ippc-interface</p>
     <p class="r-dec-rat">The lead directed on 14 October 2026 that DINA&#x27;s coupling matrices are neither needed nor used, that the couplings are calculated directly with nova, and that nova is an imported capability with a narrow interface, using as much of its existing machinery as possible and integrated with power_convertor&#x27;s existing ITER converter models. power_convertor moves to Python 3.14 to import it.</p>
+    </div>
+<div class="r-dec" data-key="d-ippc-plasma-source" data-choice="the plasma source is generic: a DINA case or a reconstructed equilibrium of a measured pulse, each with its coil currents" data-by="Simon McIntosh" data-when="2026-10-14T18:32:56+00:00">
+    <p class="r-dec-q">d-ippc-plasma-source</p>
+    <p class="r-dec-rat">The lead decided on 14 October 2026 that the coupled plant must accept a reconstructed plasma as well as a DINA simulation, so the switched model can replay real discharges, starting with JT-60SA, where the stray capacitances and inductances can be observed on a smaller machine of similar construction.</p>
     </div>
 </section>
   </main>

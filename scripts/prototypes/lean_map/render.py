@@ -210,7 +210,8 @@ def _support_panel(kind, cells, run, output):
         handles=handles,
         frameon=False,
         fontsize=16,
-        loc="lower right",
+        loc="center left",
+        bbox_to_anchor=(1.02, 0.5),
     )
     axes.autoscale_view()
     figure.savefig(output, format="svg", bbox_inches="tight")

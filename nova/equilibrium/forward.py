@@ -2756,7 +2756,7 @@ class ForwardProfile:
         )
         convention = topology.TopologyConvention.from_cocos(17, signed_current)
         quadrature = booking.Quadrature(
-            sigma=convention.sigma, target_current=request.target_current, segments=64
+            sigma=convention.sigma, target_current=request.target_current
         )
         method = "dense" if request.route == "moment_dense" else "krylov"
 

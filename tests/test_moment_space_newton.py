@@ -268,3 +268,67 @@ def test_augmented_default_retains_the_constrained_route():
     )
     assert not request.uses_moments
     assert request.clip_mode == "chord"
+
+
+@pytest.mark.parametrize("width", [1, 4, 32])
+def test_dense_jacobian_matches_coupled_equation_with_partial_block(width):
+    state = jnp.linspace(-0.7, 1.1, 11)
+    response = jnp.sin(jnp.arange(121, dtype=jnp.float64).reshape(11, 11) / 31)
+
+    def equation(value):
+        mapped = response @ value
+        return value + jnp.sin(mapped) + jnp.sum(value**2) * mapped
+
+    expected = jax.jacfwd(equation)(state)
+    actual = jax.jit(lambda x: gs.dense_jacobian(equation, x, column_block=width))(
+        state
+    )
+    assert np.all(np.linalg.norm(np.asarray(expected), axis=0) > 1)
+    np.testing.assert_allclose(actual, expected, rtol=1e-13, atol=1e-13)
+    direction = jnp.cos(state)
+    np.testing.assert_allclose(
+        actual @ direction,
+        jax.jvp(equation, (state,), (direction,))[1],
+        rtol=1e-13,
+        atol=1e-13,
+    )
+
+
+def test_forward_moment_uses_declared_booking_resolution(monkeypatch):
+    from types import SimpleNamespace
+    from nova.equilibrium.forward import ForwardProfile
+    from nova.equilibrium.solve_request import (
+        ExplicitSolveSeed,
+        declared_forward_solve_policy,
+    )
+
+    class Inspected(Exception):
+        pass
+
+    declared = current.Quadrature
+
+    def inspect_quadrature(**kwargs):
+        actual = declared(**kwargs)
+        assert actual.segments == declared().segments
+        raise Inspected
+
+    monkeypatch.setattr(current, "Quadrature", inspect_quadrature)
+    profile = object.__new__(ForwardProfile)
+    profile.operator = SimpleNamespace(
+        moment_operands=lambda current: (
+            SimpleNamespace(geometry=SimpleNamespace(centre=jnp.zeros((2, 2)))),
+            None,
+        ),
+        moment_roots=jnp.asarray([[2.0, 0.0]]),
+        seed_moments=lambda state, **kwargs: state,
+    )
+    request = SimpleNamespace(
+        constraint_pairs=(),
+        prescribed_current=None,
+        policy=declared_forward_solve_policy(),
+        current=None,
+        seed_policy=ExplicitSolveSeed(jnp.ones((2, 3))),
+        target_current=2.0,
+    )
+    with pytest.raises(Inspected):
+        profile._solve_moment_request(request)

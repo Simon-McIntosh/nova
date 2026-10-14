@@ -55,6 +55,30 @@ class MomentSolution(NamedTuple):
     termination_reason: jax.Array
 
 
+def dense_jacobian(equation, state, *, column_block=128):
+    """Assemble a dense jacfwd matrix with bounded tangent intermediates.
+
+    Each device-loop trip differentiates a coordinate block, retaining the
+    complete Jacobian for LU while bounding membership and booking tangents
+    by the block width. Out-of-range coordinates in the last block are dropped.
+    """
+    if state.ndim != 1 or column_block < 1:
+        raise ValueError("dense Jacobian needs a vector and positive column block")
+    width = min(column_block, state.size)
+    groups = (state.size + width - 1) // width
+
+    def columns(group):
+        indices = group * width + jnp.arange(width)
+
+        def displaced(displacement):
+            return equation(state.at[indices].add(displacement, mode="drop"))
+
+        return jax.jacfwd(displaced)(jnp.zeros(width, dtype=state.dtype))
+
+    blocks = jax.lax.map(columns, jnp.arange(groups))
+    return jnp.transpose(blocks, (1, 0, 2)).reshape((state.size, -1))[:, : state.size]
+
+
 def newton_moments(
     initial,
     operands,
@@ -141,7 +165,7 @@ def _newton_moments(
     def advance(carry):
         state, residual, norm, count = carry
         if method == "dense":
-            jacobian = jax.jacfwd(equation)(state)
+            jacobian = dense_jacobian(equation, state)
             delta = dense.lu_solve(dense.lu_factor(jacobian), -residual)
             linear_error = jnp.max(jnp.abs(jacobian @ delta + residual))
         else:

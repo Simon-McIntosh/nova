@@ -392,11 +392,15 @@ def run(
     ]
     if switches:
         left, right = switches[0]
-        for _ in range(24):
+        bisections = 0
+        for _ in range(56):
             middle_value = (left["offset"] + right["offset"]) / 2
+            if middle_value in (left["offset"], right["offset"]):
+                break
             roots, reading, raw_current, booking, *_ = program(
                 jnp.asarray(middle_value * scale), previous
             )
+            bisections += 1
             middle = {
                 "offset": middle_value,
                 "boundary_class": int(reading.boundary_class),
@@ -411,6 +415,7 @@ def run(
         result["transition"] = {
             "left": left,
             "right": right,
+            "bisections": bisections,
             "boundary_jump_per_span": abs(
                 right["boundary_flux"] - left["boundary_flux"]
             )

@@ -137,7 +137,7 @@ def run(kind, cache, output, trace_dir):
         )
         + 2 * np.max(geometry.pitch)
     )
-    window, maintenance = fixed_points.maintain_rows(
+    maintained, maintenance = fixed_points.maintain_rows(
         geometry,
         coupling,
         CachedExterior(jets.nodes, jets.exterior),
@@ -146,9 +146,11 @@ def run(kind, cache, output, trace_dir):
         cache=cached_rows,
         capacity=len(jets.nodes),
     )
+    window = cached_rows
     result["window"] = {
         "rows": int(jnp.sum(window.lookup >= 0)),
         "capacity": len(window.rows),
+        "owner_rows": int(jnp.sum(maintained.lookup >= 0)),
         "maintenance": str(maintenance),
     }
     save(output, result)

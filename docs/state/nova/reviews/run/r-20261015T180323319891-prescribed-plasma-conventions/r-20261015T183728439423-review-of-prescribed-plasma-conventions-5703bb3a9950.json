@@ -1,0 +1,70 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "base_log_revision": null,
+  "call_site_count": 2,
+  "call_sites": [
+    "nova/imas/plasma_source.py:79",
+    "scripts/iter_prescribed_plasma/measure.py:96"
+  ],
+  "completed_at": "2026-10-15T18:47:37Z",
+  "dispatched_at": "2026-10-15T18:38:37Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T180323319891-prescribed-plasma-conventions/manifest.md",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "follow-on: baseline_suite and after_suite are empty, so a base-to-head added-test-failure count cannot be measured from paired gate logs; the stored count must remain null rather than claim zero."
+    },
+    {
+      "file": "tests/test_profiles.py",
+      "line": "14",
+      "severity": "follow-on",
+      "text": "follow-on: the regression test samples only one 105052 slice, so the reported 105014 convention and full-pulse li comparisons remain supported by measurement receipts rather than an automated regression assertion."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "Four commits from 8a4c5875 to 5703bb3a add tests/test_profiles.py:1-37, two li SVGs, docs/research/iter-prescribed-plasma.html:90-146 and the evidence fragment, with no production source change.",
+    "done_when": "The source brief requires native-DD signs, all-slice li and alternatives, coil flux, and a p-prime sign-flip control; self-105014.log and self-105052.log summarize 867 and 2036 active slices, coil-flux.log names all twelve groups, and negative-control-combined.log records 0.06109 worsening above the 0.001 declared bound.",
+    "goal": "The source brief asks whether the DINA derivative convention changes the prescribed plasma profile; docs/research/iter-prescribed-plasma.html:90-146 reports both cases, alternatives, li, current maps, and coil flux, and retains the existing convention.",
+    "manifest": "The source manifest.md:11-25 names four commits and a passing one-test gate with a failing sign-flip control, but its baseline_suite and after_suite fields at lines 21-22 are empty.",
+    "write_paths": "The source manifest.md:3 permits the profile source, test, research, figures, evidence fragment and gate logs; git diff --name-only from 8a4c5875 to 5703bb3a shows only the test, two figures, research page and evidence fragment within that scope."
+  },
+  "justifications": {
+    "durability": "In tests/test_profiles.py:18-35 the assertions fail respectively if the mask has too few cells, selects only weak stored current, changes the prescribed map relative to independent DINA j_tor, shifts scale away from fixed -1, or moves the centroid beyond one grid cell; the recorded p-prime mutation reddens the map assertion, though only one 105052 slice is tested.",
+    "evidence": "self-105014.log and self-105052.log report all active-slice summaries, field-reference.log establishes a positive li instrument control, and negative-control-combined.log records the predicted red result, but source manifest.md:21-22 supplies no paired suite arms.",
+    "fit": "tests/test_profiles.py:11-35 uses the existing native-DD prescription helper and pytest/numpy idioms, and the added names contain no forbidden release, plan or ticket labels.",
+    "goal_fidelity": "docs/research/iter-prescribed-plasma.html:90-146 answers the convention, li, current-map, centre and coil-flux questions, while explicitly leaving the 105014 poloidal-angle COCOS digit unresolved because its q is nonfinite.",
+    "reuse": "The capability search found synthetic current and boundary tests in tests/test_prescribed_plasma.py:29-43 and a self-identity check in tests/test_plasma_source.py:79-100, while tests/test_profiles.py:16-24 uniquely compares against DINA's independently stored j_tor without duplicating a production mechanism.",
+    "scope_discipline": "The diff from 8a4c5875 to 5703bb3a changes exactly tests/test_profiles.py, two declared figures, docs/research/iter-prescribed-plasma.html and the declared evidence fragment listed in source manifest.md:3."
+  },
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: 8a4c5875e95f218908e6960788267990d755d163\nreviewed_head_sha: 5703bb3a9950ed1e6042940d5e7721f3984003f3\nVERDICT goal: The source brief asks whether the DINA derivative convention changes the prescribed plasma profile; docs/research/iter-prescribed-plasma.html:90-146 reports both cases, alternatives, li, current maps, and coil flux, and retains the existing convention.\nVERDICT done_when: The source brief requires native-DD signs, all-slice li and alternatives, coil flux, and a p-prime sign-flip control; self-105014.log and self-105052.log summarize 867 and 2036 active slices, coil-flux.log names all twelve groups, and negative-control-combined.log records 0.06109 worsening above the 0.001 declared bound.\nVERDICT write_paths: The source manifest.md:3 permits the profile source, test, research, figures, evidence fragment and gate logs; git diff --name-only from 8a4c5875 to 5703bb3a shows only the test, two figures, research page and evidence fragment within that scope.\nVERDICT manifest: The source manifest.md:11-25 names four commits and a passing one-test gate with a failing sign-flip control, but its baseline_suite and after_suite fields at lines 21-22 are empty.\nVERDICT diff: Four commits from 8a4c5875 to 5703bb3a add tests/test_profiles.py:1-37, two li SVGs, docs/research/iter-prescribed-plasma.html:90-146 and the evidence fragment, with no production source change.\nCALL_SITES: nova/imas/plasma_source.py:79, scripts/iter_prescribed_plasma/measure.py:96\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/research/iter-prescribed-plasma.html:90-146 answers the convention, li, current-map, centre and coil-flux questions, while explicitly leaving the 105014 poloidal-angle COCOS digit unresolved because its q is nonfinite.\nSCORE evidence: 16\nJUSTIFICATION evidence: self-105014.log and self-105052.log report all active-slice summaries, field-reference.log establishes a positive li instrument control, and negative-control-combined.log records the predicted red result, but source manifest.md:21-22 supplies no paired suite arms.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The diff from 8a4c5875 to 5703bb3a changes exactly tests/test_profiles.py, two declared figures, docs/research/iter-prescribed-plasma.html and the declared evidence fragment listed in source manifest.md:3.\nSCORE durability: 16\nJUSTIFICATION durability: In tests/test_profiles.py:18-35 the assertions fail respectively if the mask has too few cells, selects only weak stored current, changes the prescribed map relative to independent DINA j_tor, shifts scale away from fixed -1, or moves the centroid beyond one grid cell; the recorded p-prime mutation reddens the map assertion, though only one 105052 slice is tested.\nSCORE fit: 19\nJUSTIFICATION fit: tests/test_profiles.py:11-35 uses the existing native-DD prescription helper and pytest/numpy idioms, and the added names contain no forbidden release, plan or ticket labels.\nSCORE reuse: 20\nJUSTIFICATION reuse: The capability search found synthetic current and boundary tests in tests/test_prescribed_plasma.py:29-43 and a self-identity check in tests/test_plasma_source.py:79-100, while tests/test_profiles.py:16-24 uniquely compares against DINA's independently stored j_tor without duplicating a production mechanism.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T180323319891-prescribed-plasma-conventions/manifest.md:21 follow-on: baseline_suite and after_suite are empty, so a base-to-head added-test-failure count cannot be measured from paired gate logs; the stored count must remain null rather than claim zero.\nFINDING tests/test_profiles.py:14 follow-on: the regression test samples only one 105052 slice, so the reported 105014 convention and full-pulse li comparisons remain supported by measurement receipts rather than an automated regression assertion.\n",
+  "review_run_id": "r-20261015T183728439423-review-of-prescribed-plasma-conventions-5703bb3a9950",
+  "reviewed_base_sha": "8a4c5875e95f218908e6960788267990d755d163",
+  "reviewed_head_sha": "5703bb3a9950ed1e6042940d5e7721f3984003f3",
+  "reviewed_revision": "5703bb3a9950ed1e6042940d5e7721f3984003f3",
+  "reviewed_run_id": "r-20261015T180323319891-prescribed-plasma-conventions",
+  "reviewed_scope_note": "Read four commits from source base 8a4c5875e95f218908e6960788267990d755d163 to source head 5703bb3a9950ed1e6042940d5e7721f3984003f3, including both rendered SVGs.",
+  "reviewer_node": "review-of-prescribed-plasma-conventions-5703bb3a9950",
+  "reviewer_run_id": "r-20261015T183728439423-review-of-prescribed-plasma-conventions-5703bb3a9950",
+  "scores": {
+    "durability": 16,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T18:43:02.695560+00:00",
+  "total": 109,
+  "verdict": "pass-with-follow-ons"
+}

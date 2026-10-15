@@ -35,6 +35,16 @@
     <p>H200 job 1286400 reevaluated the accepted stalled state at scaled infinity residual 0.00268458155. Its relative Gauss–Newton gradient is 0.354173795, so the state is not a residual minimum. Along the fresh dense Newton direction, the sampled step scale increases from 7.49894209 × 10<sup>−5</sup> to 8.91250938 × 10<sup>−5</sup>. The wall candidate changes from negative infinity to 0.000355327763 Wb; the residual jumps from 0.00268438024 to 1.092245824; axis-connected support falls from 179 to 166 cells; and cell 71 membership falls from 0.356472679 to zero. The unchanged map therefore still exhibits the recorded boolean-eligibility defect.</p>
     <figure><img src="/nova/figures/converged-forward-solve/fast-map-production/step-scale-scan.svg" alt="Fresh residual, membership, and booked moment scan along the Newton direction"><figcaption>Fresh unchanged-map H200 scan at the 282-cell stalled diverted iterate. The dotted line marks the first sampled step where a wall cell becomes eligible. The wall candidate and support jump together, followed by the residual. Cell 71 carries normal-form membership but ordinary booked moments on this route.</figcaption></figure>
   </section>
+  <section id="ownership">
+    <h2>The coarse-cell fidelity loss</h2>
+    <p>The first coherent-booking candidate selected the ordinary cut whenever that cut reported valid. At 282 cells, the four-crossing cell containing the X-point is cell 7. The unchanged map selected its normal-form fragment, while the candidate selected its ordinary polygon. The ordinary polygon reports valid but gives a different first moment and 13.18 A more normalized current. This single change adds 0.0999974 to the scaled cell-current residual. The full candidate map image error rose to 0.0149396 from the unchanged 0.00108654. At 550 and 2,098 cells this candidate's map image and seed residual were identical to the unchanged map, so the coarse-cell regression has a local owner rather than a global normalization cause.</p>
+    <table><thead><tr><th>282-cell X-point cell 7</th><th>Current [A]</th><th>Membership</th></tr></thead><tbody>
+      <tr><th>Analytic reference</th><td>90.5240</td><td>—</td></tr>
+      <tr><th>Unchanged saddle fragment</th><td>90.5678</td><td>0.408749</td></tr>
+      <tr><th>First candidate ordinary cut</th><td>103.750</td><td>0.469310</td></tr>
+    </tbody></table>
+    <p>The read now assigns four-crossing cells to the saddle fragment even if the ordinary polygon reports valid. Membership and the three booked moments therefore use that same representation. Fresh H200 map-only measurement restores the 282-cell analytic image error to 0.001086535 and its seed residual to 0.004696462, equal to the unchanged route to the precision shown. The 550 and 2,098-cell rows are still being measured.</p>
+  </section>
   <section id="candidate">
     <h2>Candidate measurement</h2>
     <p>The H200 map-image measurement is running for the diverted 282, 550, and 2,098-cell carriers. Cold solves, limited controls, transition brackets, and terminal contour panels remain to be measured before this route can be qualified.</p>

@@ -32,7 +32,7 @@ class Correction(NamedTuple):
     moments: jax.Array
     residual: jax.Array
     converged: jax.Array
-    linear_status: jax.Array
+    linear_residual: jax.Array
 
 
 @jax.tree_util.register_dataclass
@@ -214,22 +214,52 @@ def map_moments(
 
 
 def warm_slice(start, scale, *map_operands):
-    """Run one device JVP-GMRES correction with a checked output map."""
+    """Run four device JVP Krylov products and check the corrected map."""
 
-    def equation(varied):
-        return map_moments(varied, *map_operands).moments - varied
+    def equation(scaled):
+        varied = scaled * scale
+        return ((map_moments(varied, *map_operands).moments - varied) / scale).reshape(
+            -1
+        )
 
-    value, linear = jax.linearize(equation, start)
-    rhs = -value.reshape(-1)
-
-    def flat(tangent):
-        return linear(tangent.reshape(start.shape)).reshape(-1)
-
-    correction, status = jax.scipy.sparse.linalg.gmres(
-        flat, rhs, tol=1e-10, restart=4, maxiter=1
+    scaled = start / scale
+    residual = equation(scaled)
+    rhs = -residual
+    length = jnp.linalg.norm(rhs)
+    basis = (
+        jnp.zeros((5, rhs.size), dtype=rhs.dtype)
+        .at[0]
+        .set(rhs / jnp.where(length > 0, length, 1))
     )
-    candidate = start + correction.reshape(start.shape)
-    residual = jnp.max(jnp.abs(equation(candidate) / scale))
+    hessenberg = jnp.zeros((5, 4), dtype=rhs.dtype)
+    for column in range(4):
+        vector = jax.jvp(equation, (scaled,), (basis[column].reshape(start.shape),))[1]
+        projections = jnp.einsum("ij,j->i", basis, vector)
+        occupied = jnp.arange(5) <= column
+        projection = jnp.where(occupied, projections, 0)
+        vector = vector - jnp.einsum("i,ij->j", projection, basis)
+        next_length = jnp.linalg.norm(vector)
+        basis = basis.at[column + 1].set(
+            vector / jnp.where(next_length > 0, next_length, 1)
+        )
+        hessenberg = hessenberg.at[:, column].set(
+            projection.at[column + 1].set(next_length)
+        )
+    target = jnp.zeros((5,), dtype=rhs.dtype).at[0].set(length)
+    coefficients = jnp.linalg.lstsq(hessenberg, target, rcond=None)[0]
+    step = jnp.einsum("i,ij->j", coefficients, basis[:4]).reshape(start.shape)
+    candidate = (scaled + step) * scale
+    candidate_residual = jnp.max(jnp.abs(equation(candidate / scale)))
+    initial_residual = jnp.max(jnp.abs(residual))
+    accepted = jnp.isfinite(candidate_residual) & (
+        candidate_residual < initial_residual
+    )
+    state = jnp.where(accepted, candidate, start)
+    final_residual = jnp.where(accepted, candidate_residual, initial_residual)
+    linear_residual = jnp.linalg.norm(hessenberg @ coefficients - target)
     return Correction(
-        candidate, residual, jnp.isfinite(residual) & (residual <= 1e-12), status
+        state,
+        final_residual,
+        jnp.isfinite(final_residual) & (final_residual <= 1e-12),
+        linear_residual,
     )

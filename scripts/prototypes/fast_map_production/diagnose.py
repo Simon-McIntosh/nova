@@ -99,8 +99,15 @@ def run(cells, cache, output):
         booked.raw_current,
         axis_sign,
     )
-    original = jax.jit(original_program.map_moments)(reference, *operands)
-    candidate = jax.jit(program.map_moments)(reference, *operands)
+
+    def unchanged(moments):
+        return original_program.map_moments(moments, *operands)
+
+    def aligned(moments):
+        return program.map_moments(moments, *operands)
+
+    original = jax.jit(unchanged)(reference)
+    candidate = jax.jit(aligned)(reference)
     jax.block_until_ready((original, candidate))
     cached = fixed_points._CachedField(
         window.mesh, window.lookup, window.rows, reference, window.exterior
@@ -119,10 +126,12 @@ def run(cells, cache, output):
     band_coefficient = jnp.einsum("nks,ns->nk", geometry.fit_inverse, band_values)
     coefficient = jnp.where(complete[:, None], band_coefficient, gauss_coefficient)
     fused = original_program.FusedField(cached, coefficient)
-    original_read = jax.jit(original_kernel.read)(
-        fused, found, geometry, convention, policy
-    )
-    candidate_read = jax.jit(kernel.read)(fused, found, geometry, convention, policy)
+    original_read = jax.jit(
+        lambda: original_kernel.read(fused, found, geometry, convention, policy)
+    )()
+    candidate_read = jax.jit(
+        lambda: kernel.read(fused, found, geometry, convention, policy)
+    )()
     ordinary_fraction, ordinary_valid = bell_fraction(
         geometry, candidate_read, convention.sigma
     )

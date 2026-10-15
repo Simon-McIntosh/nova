@@ -806,10 +806,6 @@ def test_reconstruction_route_into_the_plant_meets_the_stated_tolerance(tmp_path
 
     coarse = reconstruction.coil_currents()
     full = generic.coil_currents()
-    sampled = np.arange(0, full.shape[0], 4)
-    resampling_error = float(
-        np.max(np.abs(coarse - full[sampled])) / max(float(np.max(np.abs(full))), 1e-30)
-    )
     difference = np.abs(plant.section_plasma_flux - baseline.section_plasma_flux)
     flux_error = float(np.max(difference))
     flux_relative = float(np.max(difference / np.abs(baseline.section_plasma_flux)))
@@ -817,8 +813,7 @@ def test_reconstruction_route_into_the_plant_meets_the_stated_tolerance(tmp_path
         "RECONSTRUCTION_ROUTE "
         f"max_abs_flux_diff_wb={flux_error:.9f} "
         f"max_rel_flux_diff={flux_relative:.3e} tolerance=1e-03 "
-        f"coil_resampling_max_rel_error={resampling_error:.9f} "
-        f"coil_rows={coarse.shape[0]}"
+        f"coil_rows={coarse.shape[0]}/{full.shape[0]}"
     )
 
 

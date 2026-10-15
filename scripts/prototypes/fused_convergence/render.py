@@ -47,7 +47,14 @@ def residual_history(results, destination):
             axis.axhline(1e-12, color="#666666", linestyle=":", linewidth=1.2)
         else:
             axis.set_ylim(2e-3, 5e-3)
-        axis.text(0.03, 0.97, carrier, transform=axis.transAxes, va="top")
+        axis.text(
+            0.03 if carrier == "limited" else 0.97,
+            0.05 if carrier == "limited" else 0.97,
+            carrier,
+            transform=axis.transAxes,
+            ha="left" if carrier == "limited" else "right",
+            va="bottom" if carrier == "limited" else "top",
+        )
         axis.set_xlabel("accepted correction")
         axis.legend(
             frameon=False, loc="upper right" if carrier == "limited" else "lower left"

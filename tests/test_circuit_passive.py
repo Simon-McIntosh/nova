@@ -22,11 +22,13 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+from scipy.special import iv, kv
 
 from nova.circuit.conductor import ConductorSet, SensorSet
 from nova.circuit.passive import (
     PassiveCircuit,
     PassiveEigenbasis,
+    PassiveCircuitSystem,
     build_passive_circuit_system,
     eddy_history,
     load_circuit_system,
@@ -35,6 +37,7 @@ from nova.circuit.passive import (
     predict_circuit_currents,
     raw_eddy_trajectory,
     reduce_passive_system,
+    resolve_passive_thickness,
     save_circuit_system,
     save_eigenbasis,
     select_modes_to_tolerance,
@@ -134,6 +137,104 @@ def _shell_system(**kwargs):
         **kwargs,
     )
     return conductors, sensors, system
+
+
+def test_cylindrical_shell_skin_transfer_matches_closed_form():
+    """Coaxial drive and pickup see the cylindrical diffusion solution."""
+    permeability = 4e-7 * np.pi
+    resistivity = 7.2e-7
+    inner, outer, pickup = 1.0, 1.06, 0.9
+    frequency = np.array([300.0, 600.0, 1200.0, 1600.0, 5000.0])
+
+    def spectrum(n_layers):
+        width = (outer - inner) / n_layers
+        radius = inner + (np.arange(n_layers) + 0.5) * width
+        inductance = permeability * np.pi * np.minimum.outer(radius, radius) ** 2
+        resistance = 2 * np.pi * radius * resistivity / width
+        mutual = (
+            permeability
+            * np.pi
+            * np.column_stack((radius**2, np.full(n_layers, pickup**2)))
+        )
+        winding = (
+            permeability
+            * np.pi
+            * np.array([[outer**2, pickup**2], [pickup**2, pickup**2]])
+        )
+        return terminal_impedance_spectrum(
+            winding,
+            mutual.T,
+            inductance,
+            resistance,
+            frequency_hz=frequency,
+        )[:, 0, 1]
+
+    expected = []
+    for point in frequency:
+        rate = np.sqrt(1j * 2 * np.pi * point * permeability / resistivity)
+        inner_conditions = np.array(
+            [
+                [iv(0, rate * inner), kv(0, rate * inner)],
+                [rate * iv(1, rate * inner), -rate * kv(1, rate * inner)],
+            ]
+        )
+        coefficients = np.linalg.solve(
+            inner_conditions, np.array([1, rate**2 * inner / 2])
+        )
+        outer_field = coefficients @ np.array(
+            [iv(0, rate * outer), kv(0, rate * outer)]
+        )
+        expected.append(
+            1j * 2 * np.pi * point * permeability * np.pi * pickup**2 / outer_field
+        )
+    expected = np.asarray(expected)
+    np.testing.assert_array_less(np.abs(spectrum(160) / expected - 1), 0.01)
+    assert np.max(np.abs(spectrum(1) / expected - 1)) > 1.0
+    low_frequency = terminal_impedance_spectrum(
+        permeability
+        * np.pi
+        * np.array([[outer**2, pickup**2], [pickup**2, pickup**2]]),
+        frequency_hz=np.array([1e-8]),
+    )[0, 0, 1]
+    assert low_frequency == pytest.approx(
+        1j * 2 * np.pi * 1e-8 * permeability * np.pi * pickup**2
+    )
+
+
+def test_resolved_wall_has_independent_skin_strips_and_dc_resistance():
+    conductors = ConductorSet(
+        r=np.array([1.3, 1.0]),
+        z=np.zeros(2),
+        dr=np.array([0.02, 0.02]),
+        dz=np.array([0.4, 0.4]),
+        current_share=np.ones(2),
+        circuit=np.array([0, 1]),
+    )
+    resistance = 2 * np.pi * 1.0 * 7.2e-7 / (0.02 * 0.4)
+    source = PassiveCircuitSystem(
+        circuits=np.array([1]),
+        centroid_r=np.array([1.0]),
+        centroid_z=np.array([0.0]),
+        lmat=np.array([[1e-6]]),
+        r_diag=np.array([resistance]),
+        a_circuit=np.empty((0, 1)),
+        g_grid=np.empty((0, 1)),
+        m_channel=np.zeros((1, 1)),
+        channels=["drive"],
+        measured_channel_row={},
+        resistivity=7.2e-7,
+        section_scale=np.array([np.sqrt(0.008)]),
+    )
+    resolved, circuits, system, mutual = resolve_passive_thickness(
+        conductors, source, np.array([0.02]), np.ones((1, 1)), 4
+    )
+    assert circuits.size >= 4
+    assert mutual.shape == (circuits.size, 1)
+    assert len(resolved.polygon_sections) == circuits.size
+    widths = resolved.dr[np.concatenate(resolved.rows(circuits))]
+    assert np.min(widths) < np.sqrt(7.2e-7 / (np.pi * 5000 * 4e-7 * np.pi)) / 3
+    assert np.sum(widths) == pytest.approx(0.02)
+    assert 1 / np.sum(1 / system.r_diag) == pytest.approx(resistance)
 
 
 # --- propagation ------------------------------------------------------------

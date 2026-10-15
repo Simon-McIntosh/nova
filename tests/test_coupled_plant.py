@@ -40,6 +40,8 @@ class _Machine:
     section_resistance: np.ndarray = None
     section_passive_mutual: np.ndarray = None
     passive_system: PassiveCircuitSystem = None
+    passive_thickness_m: np.ndarray = None
+    passive_layer_count: int = 1
     label: str = "reduced-two-coil"
 
 
@@ -363,6 +365,47 @@ def test_negative_control_perturbed_cache_fails(tmp_path):
         perturbed.terminal_impedance(frequencies),
         reference.terminal_impedance(frequencies),
     )
+
+
+def test_machine_passive_layers_change_screening_and_preserve_one_layer(tmp_path):
+    machine = _reduced_machine()
+    frequency = np.array([300.0, 600.0, 1200.0, 1600.0, 5000.0])
+    original = coupled_plant(
+        machine, None, frequencies=frequency, cache_dir=tmp_path / "original"
+    )
+    one_layer = coupled_plant(
+        machine,
+        None,
+        passive_layers=1,
+        frequencies=frequency,
+        cache_dir=tmp_path / "one-layer",
+    )
+    for field in (
+        "coil_inductance",
+        "coil_resistance",
+        "mode_tau",
+        "mode_coil_coupling",
+        "section_inductance",
+        "section_resistance",
+        "reduction_error",
+    ):
+        np.testing.assert_array_equal(
+            getattr(one_layer, field), getattr(original, field)
+        )
+    np.testing.assert_array_equal(
+        one_layer.terminal_impedance(frequency), original.terminal_impedance(frequency)
+    )
+
+    machine.passive_thickness_m = np.full(machine.passive_circuits.size, 0.2)
+    machine.passive_layer_count = 2
+    layered = coupled_plant(
+        machine, None, frequencies=frequency, cache_dir=tmp_path / "layered"
+    )
+    assert layered.n_modes > original.n_modes
+    assert not np.array_equal(
+        layered.terminal_impedance(frequency), original.terminal_impedance(frequency)
+    )
+    assert np.max(layered.reduction_error) < 0.01
 
 
 def test_real_sectioned_set_reduction_is_within_one_percent():

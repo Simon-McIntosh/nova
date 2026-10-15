@@ -46,7 +46,12 @@ from pathlib import Path
 import numpy as np
 
 from nova.biot.greens import greens_psi
-from nova.circuit.conductor import ConductorSet, SensorSet
+from nova.circuit.conductor import (
+    ConductorSet,
+    PolygonSection,
+    SensorSet,
+    subdivide_passive_thickness,
+)
 from nova.circuit.linkage import (
     channel_flux_linkage,
     circuit_linkage_matrix,
@@ -115,6 +120,153 @@ class PassiveCircuitSystem:
             r_diag = r_diag * multiplier
         rate, vectors = _passive_modes(self.lmat, r_diag)
         return 1.0 / np.clip(rate, 1e-12, None), vectors
+
+
+def resolve_passive_thickness(
+    conductors: ConductorSet,
+    source_system: PassiveCircuitSystem,
+    thickness_m: np.ndarray,
+    series: np.ndarray,
+    layer_count: int,
+    *,
+    highest_frequency_hz: float = 5000.0,
+    workers: int = 1,
+) -> tuple[ConductorSet, np.ndarray, PassiveCircuitSystem, np.ndarray]:
+    """Resolve wall current through thickness for a sectioned machine.
+
+    ``layer_count`` sets the minimum uniform resolution of the thickest wall;
+    narrower walls use fewer interior strips. Both faces receive a strip thinner
+    than one third of the skin depth at ``highest_frequency_hz``. The source
+    system's resistance is the measured or nominal whole-wall resistance, and
+    each independent strip receives its inverse area fraction.
+    """
+    from nova.circuit.linkage import circuit_linkage_matrix, guard_positive_definite
+
+    if (
+        isinstance(layer_count, bool)
+        or int(layer_count) != layer_count
+        or layer_count < 2
+    ):
+        raise ValueError("layer_count must be an integer of at least two")
+    thickness = np.asarray(thickness_m, dtype=np.float64)
+    source = np.asarray(source_system.circuits, dtype=np.int64)
+    if (
+        thickness.shape != source.shape
+        or np.any(~np.isfinite(thickness))
+        or np.any(thickness <= 0)
+    ):
+        raise ValueError(
+            "one positive thickness is required per source passive circuit"
+        )
+    if not np.isfinite(highest_frequency_hz) or highest_frequency_hz <= 0:
+        raise ValueError("highest_frequency_hz must be finite and positive")
+    if isinstance(workers, bool) or not 1 <= workers <= 6:
+        raise ValueError("workers must be between one and six")
+    # Rectangular strips use polygon linkage so the source-side 10 mm section
+    # floor does not smear a skin layer that is only a few millimetres wide.
+    polygons = list(conductors.polygon_sections)
+    shaped = {int(section.circuit) for section in polygons}
+    for circuit, rows in zip(source, conductors.rows(source), strict=True):
+        if len(rows) != 1:
+            raise ValueError("each source passive circuit must have one element")
+        if int(circuit) in shaped:
+            continue
+        row = int(rows[0])
+        r, z = float(conductors.r[row]), float(conductors.z[row])
+        dr, dz = abs(float(conductors.dr[row])), abs(float(conductors.dz[row]))
+        if dr <= dz:
+            vertices = np.array(
+                [
+                    [r - dr / 2, z - dz / 2],
+                    [r - dr / 2, z + dz / 2],
+                    [r + dr / 2, z + dz / 2],
+                    [r + dr / 2, z - dz / 2],
+                ]
+            )
+        else:
+            vertices = np.array(
+                [
+                    [r - dr / 2, z - dz / 2],
+                    [r + dr / 2, z - dz / 2],
+                    [r + dr / 2, z + dz / 2],
+                    [r - dr / 2, z + dz / 2],
+                ]
+            )
+        polygons.append(PolygonSection(int(circuit), vertices))
+    shaped_conductors = ConductorSet(
+        **{name: getattr(conductors, name) for name in conductors._columns},
+        polygon_sections=tuple(polygons),
+    )
+    resistivities = [float(source_system.resistivity)]
+    polygon_by_circuit = conductors.polygon_by_circuit()
+    for circuit, row, resistance in zip(
+        source, conductors.rows(source), source_system.r_diag, strict=True
+    ):
+        index = int(row[0])
+        radius = float(conductors.r[index])
+        section = polygon_by_circuit.get(int(circuit))
+        if section is None:
+            area = abs(float(conductors.dr[index] * conductors.dz[index]))
+        else:
+            vertices = section.vertices
+            area = (
+                abs(
+                    float(
+                        np.sum(
+                            vertices[:, 0] * np.roll(vertices[:, 1], -1)
+                            - vertices[:, 1] * np.roll(vertices[:, 0], -1)
+                        )
+                    )
+                )
+                / 2
+            )
+        if radius > 0 and area > 0 and resistance > 0:
+            resistivities.append(float(resistance) * area / (2 * np.pi * radius))
+    resistivity = min(resistivities)
+    if not np.isfinite(resistivity) or resistivity <= 0:
+        raise ValueError("source resistivity must be positive")
+    skin_depth = np.sqrt(resistivity / (np.pi * highest_frequency_hz * 4e-7 * np.pi))
+    max_layer = float(np.max(thickness)) / layer_count
+    refined = subdivide_passive_thickness(
+        shaped_conductors,
+        source,
+        thickness,
+        max_layer,
+        surface_layer_m=min(max_layer / 3, skin_depth / 7),
+    )
+    section_ids = np.setdiff1d(conductors.circuits, source)
+    if section_ids.size != series.shape[0]:
+        raise ValueError("series rows must match the non-passive section circuits")
+    circuits = np.concatenate((section_ids, refined.circuits))
+    matrix = circuit_linkage_matrix(refined.conductors, circuits, workers=workers)
+    n_section = section_ids.size
+    passive_matrix = guard_positive_definite(matrix[n_section:, n_section:])
+    resistance_of = dict(zip(source, source_system.r_diag, strict=True))
+    resistance = np.array(
+        [
+            resistance_of[int(parent)] * factor
+            for parent, factor in zip(
+                refined.parent, refined.resistance_factor, strict=True
+            )
+        ]
+    )
+    centroid_r, centroid_z = refined.conductors.centroids(refined.circuits)
+    mutual = matrix[n_section:, :n_section]
+    system = PassiveCircuitSystem(
+        circuits=refined.circuits,
+        centroid_r=centroid_r,
+        centroid_z=centroid_z,
+        lmat=passive_matrix,
+        r_diag=resistance,
+        a_circuit=np.empty((0, refined.circuits.size)),
+        g_grid=np.empty((0, refined.circuits.size)),
+        m_channel=mutual @ series,
+        channels=source_system.channels,
+        measured_channel_row={},
+        resistivity=source_system.resistivity,
+        section_scale=refined.conductors.section_scale(refined.circuits),
+    )
+    return refined.conductors, refined.circuits, system, mutual
 
 
 def _passive_modes(lmat: np.ndarray, r_diag: np.ndarray):

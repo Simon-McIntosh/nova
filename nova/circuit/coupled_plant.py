@@ -36,6 +36,7 @@ from nova.circuit.passive import (
     PassiveCircuitSystem,
     load_coupled_plant,
     mode_relevance,
+    resolve_passive_thickness,
     save_coupled_plant,
     select_modes_to_tolerance,
     terminal_impedance_spectrum,
@@ -128,6 +129,7 @@ def coupled_plant(
     cache_dir: Path | str | None = None,
     provenance: dict | None = None,
     refresh: bool = False,
+    passive_layers: int | None = None,
 ) -> CoupledPlant:
     """Return the coupled plant for ``machine`` driven by ``source``.
 
@@ -163,6 +165,12 @@ def coupled_plant(
     The reduced passive modes are the most coil-relevant, grown until the
     terminal impedance matches the full model to ``error_tolerance`` over
     ``frequencies`` (0.1 Hz to 5 kHz by default) or capped at ``n_modes``.
+
+    ``passive_layers`` overrides ``machine.passive_layer_count``. A value of one
+    uses the supplied passive system exactly. More layers rebuild the passive
+    linkage from ``machine.conductors`` and ``machine.passive_thickness_m``;
+    the latter must give one physical wall thickness per source passive circuit.
+    ``machine.passive_linkage_workers`` may request up to six geometry workers.
     """
     conductors: ConductorSet = machine.conductors
     series = np.asarray(machine.series, dtype=np.float64)
@@ -184,6 +192,17 @@ def coupled_plant(
     section_passive_mutual = np.asarray(
         getattr(machine, "section_passive_mutual", np.empty((0, 0))), dtype=np.float64
     )
+    layer_count = (
+        getattr(machine, "passive_layer_count", 1)
+        if passive_layers is None
+        else passive_layers
+    )
+    if (
+        isinstance(layer_count, bool)
+        or int(layer_count) != layer_count
+        or layer_count < 1
+    ):
+        raise ValueError("passive_layers must be a positive integer")
 
     # The terminal fields are the series reduction of the section fields.  When
     # the machine supplies only the section level, the call performs the
@@ -218,13 +237,32 @@ def coupled_plant(
 
     directory = Path(cache_dir) if cache_dir is not None else _default_cache_dir()
     digest = _cache_digest(
-        machine, source, n_modes, frequencies, error_tolerance, provenance
+        machine,
+        source,
+        n_modes,
+        frequencies,
+        error_tolerance,
+        provenance,
+        layer_count=layer_count,
     )
     directory = directory / digest
     plant_path = directory / "plant.npz"
 
     if plant_path.exists() and not refresh:
         return load_coupled_plant(plant_path)
+
+    if layer_count > 1:
+        conductors, passive_circuits, system, section_passive_mutual = (
+            resolve_passive_thickness(
+                conductors,
+                system,
+                np.asarray(machine.passive_thickness_m, dtype=np.float64),
+                series,
+                layer_count,
+                highest_frequency_hz=float(np.max(frequencies)),
+                workers=getattr(machine, "passive_linkage_workers", 1),
+            )
+        )
 
     tau, vectors = system.mode_system()
     coupling = system.m_channel.T @ vectors  # (n_coil, n_modes_all)
@@ -424,7 +462,7 @@ def _default_cache_dir() -> Path:
 
 
 def _cache_digest(
-    machine, source, n_modes, frequencies, error_tolerance, provenance
+    machine, source, n_modes, frequencies, error_tolerance, provenance, *, layer_count=1
 ) -> str:
     """A stable digest of everything the cached plant depends on.
 
@@ -435,6 +473,12 @@ def _cache_digest(
     time base and currents, the reduction settings and the provenance.
     """
     digest = hashlib.sha256()
+    if layer_count > 1:
+        _update_optional(digest, layer_count)
+        _update_optional(digest, getattr(machine, "passive_thickness_m", None))
+        for section in machine.conductors.polygon_sections:
+            _update_optional(digest, section.circuit)
+            _update_optional(digest, section.vertices)
     for name in ConductorSet._columns:
         digest.update(np.asarray(getattr(machine.conductors, name)).tobytes())
     _update_names(digest, getattr(machine, "coil_names", ()))

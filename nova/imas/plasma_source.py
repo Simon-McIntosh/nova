@@ -111,8 +111,36 @@ class PlasmaSource:
     def prescribe(self, index: int) -> PrescribedCurrent:
         return self.slices[index].prescribe()
 
-    def coil_currents(self, index: int) -> np.ndarray:
+    def prescribed_currents(self) -> tuple[PrescribedCurrent, ...]:
+        """One prescribed flux-function current per slice, in time order."""
+        return tuple(self.prescribe(index) for index in range(len(self.slices)))
+
+    def coil_currents(self, index: int | None = None) -> np.ndarray:
+        """Coil currents at one slice time, or the whole ``(n_t, n_coil)`` series.
+
+        With no index this is the coil-current series itself, which is the
+        interface a consumer reads to key or provenance a product on the
+        discharge; with an index it is the row interpolated onto that slice's
+        own time from the independent coil clock.
+        """
+        if index is None:
+            return self.coils.current
         return self.coils.at(self.slices[index].time)
+
+    @property
+    def plasma_times(self) -> np.ndarray:
+        """The equilibrium time of every slice, in order [s]."""
+        return np.array([slice_.time for slice_ in self.slices], dtype=float)
+
+    @property
+    def coil_current_times(self) -> np.ndarray:
+        """The coil-current clock, independent of the equilibrium time base [s]."""
+        return self.coils.time
+
+    @property
+    def label(self) -> str:
+        """The provenance string naming the reconstruction or simulation."""
+        return self.provenance
 
     @classmethod
     def from_mast(

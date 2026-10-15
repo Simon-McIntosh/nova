@@ -144,9 +144,18 @@ def coupled_plant(
     -- whose series reduction is the terminal fields above.  Omit them and the
     section fields come back empty.
 
-    ``source`` is the plasma source: ``coil_current_times``, ``coil_currents``
-    ``(n_t, n_coil)`` and ``prescribed_currents()`` (one flux-function current
-    distribution per ``plasma_times``).  Pass ``source=None`` for the plant
+    The sectioned winding's own linkage is self-consistent: when the machine
+    supplies both the terminal fields and the section block, the series
+    reduction of the section block is computed and compared, and a machine
+    whose supplied terminals disagree is refused.  When it supplies only the
+    section level, the call performs the reduction.
+
+    ``source`` is the plasma source: ``plasma_times``, ``coil_current_times``,
+    ``coil_currents`` ``(n_t, n_coil)`` (an array, or a no-argument accessor)
+    and ``prescribed_currents()`` (one flux-function current distribution per
+    ``plasma_times``).  A DINA case and a reconstructed measured pulse reach
+    the call the same way: :class:`~nova.imas.plasma_source.PlasmaSource`
+    presents this interface directly.  Pass ``source=None`` for the plant
     without a plasma drive; the plasma flux fields are then empty and the
     terminal impedance is unaffected, so a machine's reduction can be measured
     without a plasma source in hand.
@@ -177,12 +186,23 @@ def coupled_plant(
     )
 
     # The terminal fields are the series reduction of the section fields.  When
-    # the machine supplies them they are kept as given; when it supplies only
-    # the section level, the call performs the reduction.
-    if section_inductance.size and not coil_inductance.size:
-        coil_inductance = series.T @ section_inductance @ series
-    if section_resistance.size and not coil_resistance.size:
-        coil_resistance = series.T @ section_resistance
+    # the machine supplies only the section level, the call performs the
+    # reduction.  When it supplies both, the reduction is still computed and
+    # compared: a machine whose supplied terminals disagree with its own
+    # sections is refused rather than served with two mutually inconsistent
+    # descriptions of the same winding.
+    if section_inductance.size:
+        reduced = series.T @ section_inductance @ series
+        if coil_inductance.size:
+            _require_series_reduction("coil_inductance", coil_inductance, reduced)
+        else:
+            coil_inductance = reduced
+    if section_resistance.size:
+        reduced = series.T @ section_resistance
+        if coil_resistance.size:
+            _require_series_reduction("coil_resistance", coil_resistance, reduced)
+        else:
+            coil_resistance = reduced
 
     if frequencies is None:
         frequencies = np.geomspace(0.1, 5000.0, 21)
@@ -276,6 +296,29 @@ def _section_columns(circuits, conductors, series) -> list[int]:
         }
     )
     return [row_of[circuit] for circuit in sections]
+
+
+def _require_series_reduction(
+    name: str, supplied: np.ndarray, reduced: np.ndarray, rtol: float = 1e-6
+) -> None:
+    """Refuse a supplied terminal field its section block does not reproduce.
+
+    The wiring matrix is 0/1 with one row per section, so the series reduction
+    is a plain sum over each coil's own sections: it carries no cancellation
+    and no ill-conditioning, and agreement is limited only by the accumulation
+    of a handful of additions.  ``rtol`` is therefore far below the smallest
+    disagreement a real wiring defect would produce.
+    """
+    scale = max(
+        float(np.max(np.abs(reduced))) if reduced.size else 0.0,
+        float(np.max(np.abs(supplied))) if np.asarray(supplied).size else 0.0,
+        1e-30,
+    )
+    if float(np.max(np.abs(np.asarray(supplied) - reduced))) > rtol * scale:
+        raise ValueError(
+            f"supplied {name} disagrees with the series reduction of the section "
+            "fields; a machine must describe one winding once"
+        )
 
 
 def _terminal_impedance(
@@ -412,9 +455,13 @@ def _cache_digest(
         _update_optional(digest, getattr(system, name, None))
     _update_names(digest, getattr(system, "channels", ()))
     for name in ("plasma_times", "coil_current_times", "coil_currents"):
-        _update_optional(
-            digest, None if source is None else getattr(source, name, None)
-        )
+        value = None if source is None else getattr(source, name, None)
+        # A source may expose its coil series as an array or as a no-argument
+        # accessor; resolve the accessor so the key folds the values rather
+        # than the address of a bound method, which differs per process.
+        if callable(value):
+            value = value()
+        _update_optional(digest, value)
     if source is not None:
         for current in getattr(source, "prescribed_currents", list)():
             for name in ("cell_current", "radius", "height"):

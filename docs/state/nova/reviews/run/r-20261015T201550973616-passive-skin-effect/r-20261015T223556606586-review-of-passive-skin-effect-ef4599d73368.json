@@ -1,0 +1,89 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_derivation": "The reviewed source manifest's baseline_suite and after_suite fields are empty; neither declares a completed suite arm or log, so the added-failure count is unmeasured rather than zero.",
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: no completed baseline_suite or after_suite gate log is recorded by the source run",
+  "artifacts": [
+    "/home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit/gate-logs/passive-skin-effect/production-analytic-committed.log",
+    "/home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit/gate-logs/passive-skin-effect/analytic-production-mutant-committed.log",
+    "/home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit/gate-logs/passive-skin-effect/review-block-audit.log"
+  ],
+  "assertion_audit": {
+    "absolute_transfer": "tests/test_circuit_passive.py:298 fails if the transfer including coil linkage differs over 1 percent from the independently calculated cylindrical diffusion impedance.",
+    "dc_limit": "tests/test_circuit_passive.py:286-289 fail if passive coupling remains in the transfer at near-zero frequency; the expected bare inductance is the same coil_inductance passed to terminal_impedance_spectrum, so this line does not independently validate the coil geometry.",
+    "extracted_analytic_oracle": "tests/test_circuit_passive.py:143-162 factors the same closed-form Bessel solution used by the prior hand-built test; lines 205-211 keep their existing checks and fail if that independent ring calculation departs from the analytic solution or its DC limit.",
+    "face_resolution": "tests/test_circuit_passive.py:254 fails if the returned surface strip is too thick for the analytically computed 5 kHz skin depth.",
+    "shielding": "tests/test_circuit_passive.py:297 fails if the production resolver, linkage or strip resistance changes the shell shielding beyond 1 percent; the recorded 10 percent resistance mutation makes this assertion fail at 17.610471 percent.",
+    "width_conservation": "tests/test_circuit_passive.py:252 fails if the resolver returns widths whose sum differs from the declared shell thickness; the input thickness is the correct conservation reference, so changing the declared thickness alone is not the regression this line guards."
+  },
+  "base_log_revision": null,
+  "call_site_count": 4,
+  "call_sites": [
+    "nova/circuit/coupled_plant.py:260",
+    "nova/circuit/passive.py:393",
+    "nova/circuit/passive.py:415",
+    "nova/circuit/coupled_plant.py:382"
+  ],
+  "commits_read": [
+    "90f47442d5474e86aabc09053daf54058f266cfc",
+    "8f3572f9d29b465dffb58aa6e06cc4e18aab6048",
+    "ef4599d733683ded910aa15601b22c5df711dde7"
+  ],
+  "completed_at": "2026-10-15T22:41:07Z",
+  "dispatched_at": "2026-10-15T22:36:29Z",
+  "findings": [
+    {
+      "file": "docs/research/iter-coupled-plant-call.html",
+      "line": "81",
+      "severity": "blocking",
+      "text": "blocking: The full 105052/1 plant, doubled-layer terminal convergence, resolved full-versus-reduced error, mode count, build time and requested transfer matrices still have no completed receipt, so the source done_when remains unmet."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified four production sites reached by the tested resolver and impedance path",
+    "diff": "I read commits 90f47442d, 8f3572f9d and ef4599d73 against b4281bb5; tests/test_circuit_passive.py:143-298 adds a production-path oracle and docs/research/iter-coupled-plant-call.html:80-81 plus the evidence fragment record its measured result and handoff snapshot.",
+    "done_when": "The done_when at prompt.txt:149-150 requires analytic accuracy, doubled-layer ITER convergence, reduced-plant accuracy, and four-frequency matrices; production-analytic-committed.log proves the analytic check only, and docs/research/iter-coupled-plant-call.html:81 records the rest as open.",
+    "goal": "The source goal at prompt.txt:30 asks for frequency-correct passive screening; tests/test_circuit_passive.py:215-298 now checks the production shell, while docs/research/iter-coupled-plant-call.html:81 keeps the ITER plant measurement open.",
+    "manifest": "The source manifest.md records the two passing shell tests, the red resistance mutant, and the incomplete ITER linkage build; its baseline_suite and after_suite fields are empty, so no suite failure delta can be measured.",
+    "write_paths": "The source prompt.txt:124-132 grants tests/test_circuit_passive.py and both cumulative HTML paths, exactly the three paths in the b4281bb5..ef4599d7 diff."
+  },
+  "justifications": {
+    "durability": "tests/test_circuit_passive.py:297-298 fail under a 10% production strip-resistance mutation in analytic-production-mutant-committed.log, while no added assertion can fail on an unfinished ITER plant.",
+    "evidence": "production-analytic-committed.log records two passes and 0.1414867% shielding error, but docs/research/iter-coupled-plant-call.html:81 has no completed ITER matrix or reduction receipt.",
+    "fit": "tests/test_circuit_passive.py:143 factors the existing closed-form oracle within its owner and docs/research/iter-coupled-plant-call.html:80-81 appends evidence to the cumulative page.",
+    "goal_fidelity": "tests/test_circuit_passive.py:215-298 proves production shell screening, while docs/research/iter-coupled-plant-call.html:81 correctly leaves the required ITER plant unfinished.",
+    "reuse": "The capability search found the cylindrical diffusion oracle already inside tests/test_circuit_passive.py:165-203, and the added helper at line 143 extracts and reuses that owner rather than adding a competing production mechanism.",
+    "scope_discipline": "The three b4281bb5..ef4599d7 changed paths are all granted at prompt.txt:124-132 and contain the test and its requested evidence."
+  },
+  "plan": "nova:iter-passive-plasma-circuit",
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source goal at prompt.txt:30 asks for frequency-correct passive screening; tests/test_circuit_passive.py:215-298 now checks the production shell, while docs/research/iter-coupled-plant-call.html:81 keeps the ITER plant measurement open.\nVERDICT done_when: The done_when at prompt.txt:149-150 requires analytic accuracy, doubled-layer ITER convergence, reduced-plant accuracy, and four-frequency matrices; production-analytic-committed.log proves the analytic check only, and docs/research/iter-coupled-plant-call.html:81 records the rest as open.\nVERDICT write_paths: The source prompt.txt:124-132 grants tests/test_circuit_passive.py and both cumulative HTML paths, exactly the three paths in the b4281bb5..ef4599d7 diff.\nVERDICT manifest: The source manifest.md records the two passing shell tests, the red resistance mutant, and the incomplete ITER linkage build; its baseline_suite and after_suite fields are empty, so no suite failure delta can be measured.\nVERDICT diff: I read commits 90f47442d, 8f3572f9d and ef4599d73 against b4281bb5; tests/test_circuit_passive.py:143-298 adds a production-path oracle and docs/research/iter-coupled-plant-call.html:80-81 plus the evidence fragment record its measured result and handoff snapshot.\nCALL_SITES: nova/circuit/coupled_plant.py:260, nova/circuit/passive.py:393, nova/circuit/passive.py:415, nova/circuit/coupled_plant.py:382\nSCORE goal_fidelity: 12\nJUSTIFICATION goal_fidelity: tests/test_circuit_passive.py:215-298 proves production shell screening, while docs/research/iter-coupled-plant-call.html:81 correctly leaves the required ITER plant unfinished.\nSCORE evidence: 10\nJUSTIFICATION evidence: production-analytic-committed.log records two passes and 0.1414867% shielding error, but docs/research/iter-coupled-plant-call.html:81 has no completed ITER matrix or reduction receipt.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The three b4281bb5..ef4599d7 changed paths are all granted at prompt.txt:124-132 and contain the test and its requested evidence.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_circuit_passive.py:297-298 fail under a 10% production strip-resistance mutation in analytic-production-mutant-committed.log, while no added assertion can fail on an unfinished ITER plant.\nSCORE fit: 19\nJUSTIFICATION fit: tests/test_circuit_passive.py:143 factors the existing closed-form oracle within its owner and docs/research/iter-coupled-plant-call.html:80-81 appends evidence to the cumulative page.\nSCORE reuse: 20\nJUSTIFICATION reuse: The capability search found the cylindrical diffusion oracle already inside tests/test_circuit_passive.py:165-203, and the added helper at line 143 extracts and reuses that owner rather than adding a competing production mechanism.\nFINDING docs/research/iter-coupled-plant-call.html:81 blocking: The full 105052/1 plant, doubled-layer terminal convergence, resolved full-versus-reduced error, mode count, build time and requested transfer matrices still have no completed receipt, so the source done_when remains unmet.\nREVIEWED_BASE_SHA: b4281bb55c14f27771a2d8d58a28827f9d4b6f7c\nREVIEWED_HEAD_SHA: ef4599d733683ded910aa15601b22c5df711dde7\n",
+  "review_limitations": [
+    "This delta review reads only the three commits after b4281bb5; earlier follow-on findings remain in the previous review.",
+    "No full suite was rerun; the reviewed manifest records no completed baseline or after suite arm."
+  ],
+  "review_run_id": "r-20261015T223556606586-review-of-passive-skin-effect-ef4599d73368",
+  "reviewed_base_sha": "b4281bb55c14f27771a2d8d58a28827f9d4b6f7c",
+  "reviewed_head_sha": "ef4599d733683ded910aa15601b22c5df711dde7",
+  "reviewed_run_id": "r-20261015T201550973616-passive-skin-effect",
+  "reviewer_node": "review-of-passive-skin-effect-ef4599d73368",
+  "reviewer_run_id": "r-20261015T223556606586-review-of-passive-skin-effect-ef4599d73368",
+  "reviewing_run_id": "r-20261015T223556606586-review-of-passive-skin-effect-ef4599d73368",
+  "scores": {
+    "durability": 17,
+    "evidence": 10,
+    "fit": 19,
+    "goal_fidelity": 12,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T22:39:02.906961+00:00",
+  "total": 98,
+  "verdict": "fail"
+}

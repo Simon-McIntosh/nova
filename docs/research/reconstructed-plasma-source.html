@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="reconstructed-plasma-source">
+  <meta name="plan-title" content="Reconstructed plasma source">
+  <meta name="plan-summary" content="MAST linked-flux and DINA identity checks for a generic prescribed plasma source">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-evidence-for" content="iter-passive-plasma-circuit">
+  <meta name="plan-verifies" content="iter-passive-plasma-circuit#s5">
+  <meta name="plan-commits" content="ba5547aca61b8bfde21048b1eb192304fd0d2270,20fb4a947eaa9588c08a79fb9dbaaf87965b4a55">
+  <meta name="plan-recorded-at" content="2026-10-15">
+  <meta name="plan-source" content="MAST level-1 shot 21978 EFIT and DINA-IMAS ITER 105014/1">
+  <meta name="plan-source-quality" content="primary">
+  <meta name="plan-tags" content="iter,equilibrium">
+  <title>Reconstructed plasma source | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p class="eyebrow">Execution evidence</p>
+      <h1>Reconstructed plasma source</h1>
+      <p class="lead">A measured MAST equilibrium reaches the same current-prescription path as DINA, with a separately clocked coil-current series and an explicit flux-sign check.</p>
+    </header>
+    <section id="method">
+      <h2>Method</h2>
+      <p>The MAST example is EFIT shot 21978 at 0.200000 s, read by nova's existing <code>mast_efit</code> reader. Its source COCOS is 3. That reader converts flux from Wb/rad to total Wb under nova's COCOS 17 convention; the EFIT p′ and FF′ remain derivatives on the reconstruction's own Wb/rad coordinate, so the prescription uses a derivative scale of one. EFIT's closed last-closed-flux-surface outline is selected as a stored boundary outline, without calling it a separatrix. That boundary and the 65 by 65 flux map prescribe 840,505.375 A with a current scale of 1.000039891. Thirteen measured coil-current channels have 7,500 samples on a clock independent of the equilibrium slice.</p>
+      <p>The comparison evaluates plasma flux using nova's Green kernel. EFIT's fitted conductor currents and filament geometry supply the conductor contribution to EFIT's own total ψ map, and the common arbitrary flux offset is fixed at the magnetic axis. These fitted currents serve only to separate the stored reference map; the generic source carries the separate measured coil series. A nonempty-reference control found 118 held points with nonzero plasma and conductor responses and a 0.398628031 Wb axis-to-boundary flux span.</p>
+    </section>
+    <section id="result">
+      <h2>Linked flux</h2>
+      <p>The tolerance was fixed before comparison at 2% of the reconstruction's axis-to-boundary ψ span: 0.007972561 Wb. Of 101 EFIT coil centres, 71 lie inside the stored map; all 46 flux-loop positions lie inside it. The maxima below are gauge-corrected absolute differences between prescribed plasma plus EFIT conductor flux and the stored reconstruction ψ.</p>
+      <table>
+        <thead><tr><th>Target</th><th>Held positions</th><th>Median absolute residual [Wb]</th><th>Maximum absolute residual [Wb]</th><th>Limit [Wb]</th></tr></thead>
+        <tbody>
+          <tr><td>Coil centres</td><td>71</td><td>0.000963118</td><td>0.003817129</td><td>0.007972561</td></tr>
+          <tr><td>Flux loops</td><td>46</td><td>0.001358474</td><td>0.005235869</td><td>0.007972561</td></tr>
+        </tbody>
+      </table>
+      <figure>
+        <img src="/nova/figures/reconstructed-plasma-source/mast-linked-flux.svg" alt="MAST poloidal flux contours and held coil and loop locations beside their absolute linked-flux residuals">
+        <figcaption>MAST 21978 at 0.200000 s. Left: the stored ψ contours, wall, plasma boundary, magnetic nulls and held conductor and loop positions. Right: absolute residual at each target after the magnetic-axis gauge is fixed; the dotted line is the declared 2% span limit.</figcaption>
+      </figure>
+    </section>
+    <section id="controls">
+      <h2>Identity and negative control</h2>
+      <p>On ITER DINA 105014/1 at 5.927598 s, the generic source gives the same prescribed cell-current array, boundary, plasma current and scale factor as the existing native-IDS path. The source interpolates twelve coil-current channels at the equilibrium time from their own 2,027-row IDS clock. The focused gate also runs the original prescription tests.</p>
+      <p>The prior current-density function accepted a MAST reconstruction whose ψ map, profile coordinate, axis ψ and boundary ψ were all sign-flipped while the plasma current was held fixed; it still prescribed 840,505.375 A. The generic source checks the plasma-current sign against the axis-to-boundary ψ ordering before prescription and refuses that mutation. The retained red mutation log and the passing head-arm test make this a fired guard rather than a suite-only claim.</p>
+    </section>
+    <section id="limits">
+      <h2>Scope</h2>
+      <p>This record measures one MAST reconstruction slice and one DINA slice. Positions outside the stored MAST ψ grid are not compared. The plant-return check awaits the narrow coupled-plant call; this record asserts only this source and its prescription/linkage checks. No JT-60SA data or figure is used.</p>
+    </section>
+  </main>
+</body>
+</html>

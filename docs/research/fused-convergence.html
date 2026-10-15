@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="fused-convergence">
+  <meta name="plan-title" content="Fused moment correction convergence">
+  <meta name="plan-summary" content="H200 comparison of short Krylov, GMRES and dense moment corrections on limited and diverted certificate carriers">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-informs" content="converged-forward-solve">
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-verifies" content="converged-forward-solve#s5">
+  <meta name="plan-source" content="H200 certificate-carrier correction receipts and live Taylor remainder probes">
+  <meta name="plan-source-quality" content="primary">
+  <meta name="plan-tags" content="equilibrium,grad-shafranov,jax,convergence,topology">
+  <title>Fused moment correction convergence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+  <header>
+    <p class="eyebrow">Research input</p>
+    <h1>Fused moment correction convergence</h1>
+    <p class="lead">On the 289-cell limited carrier, a dense moment Jacobian reaches a scaled residual of 2.98 × 10<sup>−15</sup> in three corrections; four-vector Krylov needs fourteen. The 282-cell diverted carrier retains a saddle-region stall: a damped dense step lowers the residual from 0.004696 to 0.002685, then finds no decreasing trial. This is an accepted-iterate result, not a converged forward state.</p>
+  </header>
+  <section id="method">
+    <h2>Method and provenance</h2>
+    <p>The prototype in <code>scripts/prototypes/fused_convergence</code> imports the committed fixed-shape read and moment map. It does not change the product solver. Both carriers use the stored 250-rung certificate machines, binary64 enabled before array construction, and their original analytic field and current profile. The limited carrier has 289 cells and the diverted carrier 282. The one-step probes form the residual and <code>jax.linearize</code> factor once at a starting state; short Krylov, GMRES and dense LU apply that same linearized map. The dense matrix consists of the factor applied to identity columns in batches, so its linear residual can check the complete Jacobian rather than only a Krylov subspace.</p>
+    <p>All numerical rows ran on the reserved H200 with <code>XLA_PYTHON_CLIENT_PREALLOCATE=false</code>. Each log prints the imported <code>nova</code> and measurement-module paths, the worktree, revision and command. The run directory is <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T115843362666-fused-convergence</code>; its JSON receipts hold every accepted residual, factor wall and terminal moments. The root derivative experiment changes the prototype's imported cubic-ray tangent during that run only; it does not modify <code>nova/</code>.</p>
+  </section>
+  <section id="linear">
+    <h2>Linear correction and cold histories</h2>
+    <p>The prior four-vector outcome was reproduced by running the map again. Its limited predecessor reaches 6.715 × 10<sup>−13</sup> in fourteen corrections and the diverted cold state stops at 0.00342278 after the first accepted correction. The dense limited step reaches 6.673 × 10<sup>−6</sup>, 5.704 × 10<sup>−12</sup> and 2.981 × 10<sup>−15</sup> on its three accepted corrections. Dense linear residuals are between 9.55 × 10<sup>−16</sup> and 2.23 × 10<sup>−15</sup>; the Krylov linear residual stays near 0.03 to 0.32, identifying the limited cold iteration count as an incomplete linear solve.</p>
+    <p>At the first dense limited correction, Python-side linearization and factor construction took 84.47 s, batched factor compilation 10.52 s, matrix construction and LU 10.75 s, and LU application 0.679 ms. These are separate host-observed components, not the wall of one compiled correction. Subsequent dense factor builds took about 7.1 s each. The compiled map was 1,343,052 B; its 1.73 s compile here reused a persistent cache and is not a cold-compile claim.</p>
+  </section>
+  <section id="saddle">
+    <h2>Diverted derivative and residual carrier</h2>
+    <p>The diverted centre has scaled residual 0.004696. The one-sided current-block Taylor remainder falls from 2.553 × 10<sup>−5</sup> at perturbation 10<sup>−3</sup> to 2.566 × 10<sup>−7</sup> at 10<sup>−4</sup> and 2.341 × 10<sup>−9</sup> at 10<sup>−5</sup>, approximately the quadratic slope expected of a valid tangent. Below that, binary64 cancellation contaminates the finite difference. Replacing the cubic-ray closed-form tangent with the simple-root implicit derivative changes the central-difference current-block discrepancy by less than 0.1% at 10<sup>−4</sup> and 10<sup>−5</sup>; those discrepancies are about 1.27 × 10<sup>−5</sup>. This experiment does not identify the ray-root tangent as the cause of the diverted stall.</p>
+    <figure><img src="/nova/figures/converged-forward-solve/fused-convergence/taylor-remainder.svg" alt="Diverted moment-block one-sided Taylor remainder versus perturbation with a quadratic guide"><figcaption>Diverted 282-cell centre, three moment blocks. The positive perturbation has a quadratic remainder over 10<sup>−3</sup> to 10<sup>−5</sup>; the negative 10<sup>−3</sup> perturbation changes geometry, so its central difference is not a local derivative. The left edge reaches the binary64 floor. This plot uses fresh map evaluations and the live JVP, not a frozen derivative receipt.</figcaption></figure>
+    <p>Damped dense corrections reduce the diverted residual to 0.002685 after nine accepted steps, with line-search scales falling from 0.25 to 0.000488. The dominant entry remains cell 71's current block, with a radial contribution about 0.000776 and a vertical contribution about 0.000241 at that stage. It is one of the selected normal-form saddle cells, together with cells 7, 8 and 9. The first nine accepted states retain the same 179 support-cell identities, the same saddle-cell identities and diverted boundary class; successive maximum membership changes decrease with the accepted step size. The tenth dense step finds no decreasing trial within twelve halvings. A rejected trial changes class and support, so the terminal state must remain the ninth accepted state.</p>
+  </section>
+</main></body>
+</html>

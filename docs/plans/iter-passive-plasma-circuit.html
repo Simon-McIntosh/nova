@@ -25,7 +25,7 @@
   <title>ITER Passive and Prescribed-Plasma Circuit | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="9">
+<meta name="plan-version" content="10">
 <meta name="plan-modified" content="2026-10-15">
 </head>
 <body>
@@ -226,6 +226,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-close-s4" data-who="reckon-build" data-when="2026-10-15T09:40:00Z">
     <div class="r-comment-body"><p>§4 landed (merged <code>c4c7abd78</code>): one public call and result type; cold equals cached; the reduced plant is within 1 % of the full model for all 14 coils to 5 kHz. This is the evidence for power_convertor's gates g-istt-1 and g-jspr-1. The serialiser and screening duplication is being repaired without changing the surface. <a href="/nova/evidence/archive/iter-passive-plasma-circuit-landed.html#iter-coupled-plant-call">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-s4-sections-landed" data-who="reckon-build" data-when="2026-10-15T12:58:00Z">
+    <div class="r-comment-body"><p>Section-level matrices landed (merged <code>837c96fa2</code>): <code>CoupledPlant</code> now carries section inductance, resistance and mode coupling beside the terminal fields. The cache key covers every stored output's inputs, and the terminals are formed in the call as the series reduction of the section block (29 tests pass; perturbing one section's self inductance breaks the reduction check). Review 107/120, passed with follow-ons. Open follow-on: a machine that supplies its own terminal values skips the derivation (<code>nova/circuit/coupled_plant.py</code>, near line 179), so terminals that disagree with the section block are served unchecked. The call should assert terminal equals series reduction whenever both are present. The gate logs are headed at the parent revision <code>56d246c1c</code>, while the tests they ran are in <code>ad81f87bc</code>.</p></div>
 </div>
 </section>
 </main>

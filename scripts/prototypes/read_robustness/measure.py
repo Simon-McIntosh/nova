@@ -1,0 +1,304 @@
+"""Measure full-jet and mobile-window reads on analytic carriers."""
+
+# ruff: noqa: E402
+from nova.jax.config import configure_dtypes
+
+configure_dtypes()
+
+import argparse
+from dataclasses import replace
+import json
+from pathlib import Path
+from time import perf_counter
+
+import jax
+import jax.numpy as jnp
+import numpy as np
+import nova
+
+from benchmarks import solovev_certificate as certificate
+from nova.equilibrium import current, topology
+from nova.equilibrium.solve_request import TopologyPolicy
+from scripts.analytic_oracle_fixtures import measure as fixture
+from scripts.prototypes.lean_map.forward import apply as reference_apply
+from scripts.prototypes.lean_map.jets import build_jets, gather_window
+from scripts.prototypes.lean_map.quadrature import quadratic_fit, triangle_rule
+from scripts.prototypes.lean_map.values import build_values
+from scripts.prototypes.read_robustness.census import axis_identity
+from scripts.prototypes.read_robustness.read import read
+from scripts.prototypes.read_robustness.window import full_window, mobile_window
+from scripts.prototypes.solve_options.profile import _machine
+from scripts.prototypes.support.geometry import certificate_field
+from tests.equilibrium.test_topology_read import _analytic_inputs
+
+
+def save(path, result):
+    path.write_text(json.dumps(result, indent=2, allow_nan=True) + "\n")
+    print("CHECKPOINT " + json.dumps(result, allow_nan=True), flush=True)
+
+
+def wall(program, *args):
+    durations = []
+    for _ in range(7):
+        start = perf_counter()
+        jax.block_until_ready(program(*args))
+        durations.append(1000 * (perf_counter() - start))
+    return float(np.median(durations))
+
+
+def run(kind, cache, output):
+    assert jax.config.jax_enable_x64 is True and jax.default_backend() == "gpu"
+    print(
+        f"nova={nova.__file__} module={__file__} cwd={Path.cwd().resolve()}",
+        flush=True,
+    )
+    name = (
+        "weak-rotation-reactor-static" if kind == "limited" else "diverted-single-null"
+    )
+    carrier, source, _ = certificate._case(name, clip_mode="exact")
+    machine, _, _ = _machine(cache, carrier, 250)
+    geometry = topology.TopologyGeometry.from_cells(
+        machine.cell_polygons, machine.sampling_vertices, (machine.wall_node,)
+    )
+    _, analytic_field, _, _, _ = _analytic_inputs(kind)
+    field = certificate_field(analytic_field, kind)
+    convention = topology.TopologyConvention.from_cocos(17, 1.0)
+    policy = TopologyPolicy()
+    reading = jax.jit(lambda: topology.read(field, geometry, convention, policy))()
+    assert bool(reading.valid) and bool(reading.qualified)
+    sample_flux = jax.vmap(field.value)(geometry.sample_points.reshape(-1, 2)).reshape(
+        geometry.sample_points.shape[:-1]
+    )
+    profile = fixture.analytic_profile(source)
+    booked = jax.jit(
+        lambda samples: current.book(
+            samples,
+            reading,
+            geometry,
+            profile,
+            current.Quadrature(sigma=convention.sigma),
+        )
+    )(sample_flux)
+    assert bool(booked.valid)
+    reference = jnp.stack(
+        (booked.cell_current, booked.radial_moment, booked.vertical_moment), axis=-1
+    )
+    rule = triangle_rule(geometry)
+    fit, design = quadratic_fit(rule, geometry)
+    values, _ = build_values(machine, rule, field, reference)
+    coupling = topology.BiotMomentCoupling.from_polygons(machine.cell_polygons)
+    jets, jet_receipt = build_jets(coupling, geometry, field, reference)
+    roots = np.vstack(
+        (
+            np.asarray(reading.axis)[None],
+            np.asarray(reading.x_points)[np.asarray(reading.x_point_valid)],
+        )
+    )
+    previous = jnp.asarray(roots)
+    expected_axis = previous[0]
+    window, window_receipt = gather_window(jets, geometry, reading.membership, roots)
+    axis_sign = float(jnp.sign(field.evaluate(expected_axis).hessian[0, 0]))
+    full = (reading.membership >= 1 - 1e-14) & (geometry.vertex_count == 6)
+    cut_capacity = (
+        int(np.ceil(1.2 * int(jnp.sum((reading.membership > 0) & ~full)))) + 16
+    )
+    pitch = float(jnp.median(geometry.pitch))
+    span = float(jnp.abs(reading.boundary_flux - reading.axis_flux))
+    scale = span / pitch
+    value_slope = np.asarray(rule.points.reshape(-1, 2)[:, 1] - float(expected_axis[1]))
+    jet_slope_host = np.zeros((len(jets.nodes), 6))
+    jet_slope_host[:, 0] = np.asarray(jets.nodes[:, 1]) - float(expected_axis[1])
+    jet_slope_host[:, 2] = 1.0
+    jet_slope = jnp.asarray(jet_slope_host)
+    slot = np.asarray(window.lookup)
+    old_slope = np.zeros_like(np.asarray(window.exterior))
+    selected = np.flatnonzero(slot >= 0)
+    old_slope[slot[selected]] = np.asarray(jet_slope)[selected]
+    old_slope = jnp.asarray(old_slope)
+    result = {
+        "kind": kind,
+        "cells": len(machine.node),
+        "jet_rows": jet_receipt["nodes"],
+        "jet_bytes": jet_receipt["matrix_bytes"],
+        "reference_window": window_receipt,
+        "span": span,
+        "pitch": pitch,
+        "baseline": [],
+        "full": [],
+    }
+    save(output, result)
+
+    def baseline(offset, moments):
+        varied_values = replace(values, exterior=values.exterior + offset * value_slope)
+        varied_window = replace(window, exterior=window.exterior + offset * old_slope)
+        return reference_apply(
+            moments,
+            varied_values,
+            jets,
+            varied_window,
+            rule,
+            fit,
+            design,
+            geometry,
+            profile,
+            previous,
+            previous,
+            convention,
+            policy,
+            booked.raw_current,
+            cut_capacity,
+            axis_sign,
+        )
+
+    def robust(offset, moments, prior):
+        varied_values = replace(values, exterior=values.exterior + offset * value_slope)
+        varied_jets = replace(jets, exterior=jets.exterior + offset * jet_slope)
+        return read(
+            moments,
+            varied_values,
+            varied_jets,
+            rule,
+            geometry,
+            profile,
+            prior,
+            expected_axis,
+            convention,
+            policy,
+            booked.raw_current,
+        )
+
+    baseline_program = jax.jit(baseline)
+    robust_program = jax.jit(robust)
+    for value in np.linspace(-0.2, 0.2, 41):
+        baseline_state = baseline_program(jnp.asarray(value * scale), reference)
+        jax.block_until_ready(baseline_state)
+        result["baseline"].append(
+            {
+                "offset": float(value),
+                "root_status": np.asarray(baseline_state.root_status).tolist(),
+                "booking_status": int(baseline_state.booking_status),
+                "band_status": int(baseline_state.band_status),
+                "topology_valid": bool(baseline_state.topology_valid),
+                "topology_qualified": bool(baseline_state.topology_qualified),
+                "valid": bool(
+                    jnp.all(baseline_state.root_status == 0)
+                    & baseline_state.topology_valid
+                    & baseline_state.topology_qualified
+                    & (baseline_state.booking_status == 0)
+                    & (baseline_state.band_status == 0)
+                    & jnp.all(jnp.isfinite(baseline_state.moments))
+                ),
+            }
+        )
+    save(output, result)
+    for value in np.linspace(-0.2, 0.2, 41):
+        state = robust_program(jnp.asarray(value * scale), reference, previous)
+        jax.block_until_ready(state)
+        result["full"].append(
+            {
+                "offset": float(value),
+                "valid": bool(state.valid),
+                "axis_identity": bool(state.axis_identity),
+                "axis": np.asarray(state.roots[0]).tolist(),
+                "axis_distance_pitches": float(state.axis_distance),
+                "candidate_count": int(state.candidate_count),
+                "axis_count": int(state.axis_count),
+                "saddle_count": int(state.saddle_count),
+                "overflow": bool(state.census_overflow),
+                "booking_status": int(state.booking_status),
+                "topology_reason": int(state.topology_reason),
+                "topology_valid": bool(state.topology_valid),
+                "topology_qualified": bool(state.topology_qualified),
+                "boundary_flux": float(state.boundary_flux),
+                "boundary_class": int(state.boundary_class),
+                "wall_candidate": float(state.wall_candidate),
+                "saddle_candidates": np.asarray(state.saddle_candidates).tolist(),
+                "current": float(jnp.nansum(state.moments[:, 0])),
+            }
+        )
+        if len(result["full"]) % 10 == 0:
+            save(output, result)
+    save(output, result)
+    areas = np.asarray(geometry.full_area)
+    centres = np.asarray(geometry.centre)
+    total = float(booked.raw_current)
+    uniform = total * areas / areas.sum()
+    centroid = np.average(centres, axis=0, weights=np.asarray(reference[:, 0]))
+    radius = np.sqrt(float(np.sum(areas * np.asarray(reading.membership))) / np.pi)
+    disc = (np.linalg.norm(centres - centroid, axis=1) <= radius).astype(float)
+    circle = total * areas * disc / np.sum(areas * disc)
+
+    def distributed(current_values):
+        return jnp.stack(
+            (jnp.asarray(current_values), jnp.zeros(len(areas)), jnp.zeros(len(areas))),
+            axis=-1,
+        )
+
+    result["seeds"] = {}
+    for label, moments in (
+        ("zero", jnp.zeros_like(reference)),
+        ("uniform", distributed(uniform)),
+        ("centroid_circle", distributed(circle)),
+    ):
+        old = baseline_program(jnp.asarray(0.0), moments)
+        new = robust_program(jnp.asarray(0.0), moments, previous)
+        jax.block_until_ready((old, new))
+        result["seeds"][label] = {
+            "baseline_root_status": np.asarray(old.root_status).tolist(),
+            "baseline_booking_status": int(old.booking_status),
+            "baseline_band_status": int(old.band_status),
+            "valid": bool(new.valid),
+            "axis_identity": bool(new.axis_identity),
+            "axis": np.asarray(new.roots[0]).tolist(),
+            "booking_status": int(new.booking_status),
+            "topology_reason": int(new.topology_reason),
+            "saddle_count": int(new.saddle_count),
+        }
+    save(output, result)
+    wrong_axis = expected_axis + jnp.asarray((0.0, 3 * pitch))
+    result["negative_control"] = {
+        "convergence_only": True,
+        "axis_identity": bool(axis_identity(wrong_axis, expected_axis, pitch)),
+    }
+    assert not result["negative_control"]["axis_identity"]
+    full_cache = full_window(jets)
+    assert bool(jnp.all(full_cache.lookup >= 0))
+    contract = jax.jit(lambda m: jets.gather(m))
+    result["full_contraction_ms"] = wall(contract, reference)
+    mobile_program = jax.jit(
+        lambda membership, points: mobile_window(
+            jets, geometry, membership, points, window_receipt["capacity"]
+        )
+    )
+    mobile = mobile_program(reading.membership, previous)
+    jax.block_until_ready(mobile)
+    result["mobile_required_rows"] = int(mobile.required)
+    result["mobile_overflow"] = bool(mobile.overflow)
+    result["mobile_gather_ms"] = wall(mobile_program, reading.membership, previous)
+    result["baseline_valid_count"] = sum(row["valid"] for row in result["baseline"])
+    result["full_valid_count"] = sum(row["valid"] for row in result["full"])
+    print(
+        "RESULT "
+        + json.dumps(
+            {
+                key: value
+                for key, value in result.items()
+                if key not in ("baseline", "full")
+            }
+        ),
+        flush=True,
+    )
+    save(output, result)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--kind", choices=("limited", "diverted"), required=True)
+    parser.add_argument("--cache", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    arguments = parser.parse_args()
+    run(arguments.kind, arguments.cache, arguments.output)
+
+
+if __name__ == "__main__":
+    main()

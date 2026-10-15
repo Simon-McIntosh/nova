@@ -23,6 +23,11 @@
       "kind": "folded",
       "node": "batched-factor-size",
       "recorded_at": "2026-10-15T14:44:21.240470+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "prototype measurement research with receipts; regression tests for convergence belong to the production fixed-point solve, which replaces these scripts",
+      "recorded_at": "2026-10-15T14:44:28.210556+00:00"
     }
   },
   "findings": [

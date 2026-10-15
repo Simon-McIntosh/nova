@@ -7,7 +7,11 @@ import jax.numpy as jnp
 
 from nova.equilibrium import topology
 from scripts.prototypes.sub_millisecond.measure_saddle_frame import connected_cells
-from scripts.prototypes.fast_read.ordinary_cut import bell_fraction
+from scripts.prototypes.fast_read.ordinary_cut import _split_polygons
+from scripts.prototypes.sub_millisecond.measure_bell_cut import (
+    bell_polygon as single_polygon,
+)
+from scripts.prototypes.sub_millisecond.measure_wall_march import polygon_area
 
 
 class FastRead(NamedTuple):
@@ -28,6 +32,19 @@ class FastRead(NamedTuple):
     edge_interval: jax.Array
     qualified: jax.Array
     valid: jax.Array
+
+
+def bell_fraction_with_crossings(geometry, reading, sigma):
+    """Return the ordinary area and the crossings that select saddle booking."""
+    polygon, count, valid = single_polygon(geometry, reading, sigma, 4)
+    default = polygon_area(polygon, count)
+    split, split_count, split_valid, four = _split_polygons(geometry, reading, sigma)
+    split_area = jnp.sum(
+        jax.vmap(polygon_area, in_axes=(1, 1), out_axes=1)(split, split_count), axis=1
+    )
+    area = jnp.where(four, split_area, default)
+    fraction = jnp.clip(area / geometry.full_area, 0.0, 1.0)
+    return fraction, jnp.where(four, split_valid, valid), four
 
 
 def _wall_path_ceiling(
@@ -192,8 +209,10 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
         wall_candidate=sigma * wall_score,
         normal_form_cells=normal,
     )
-    fraction, ordinary_valid = bell_fraction(geometry, approximate, sigma)
-    booking = normal & ~ordinary_valid
+    fraction, ordinary_valid, four_crossings = bell_fraction_with_crossings(
+        geometry, approximate, sigma
+    )
+    booking = normal & (four_crossings | ~ordinary_valid)
     capacity = min(16, len(geometry.centre))
     chosen = jnp.nonzero(booking, size=capacity, fill_value=0)[0]
     fragments = jax.vmap(

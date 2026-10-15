@@ -18,16 +18,22 @@ from benchmarks import solovev_certificate as certificate
 from nova.equilibrium import current, fixed_points, topology
 from nova.equilibrium.solve_request import TopologyPolicy
 from scripts.analytic_oracle_fixtures import measure as fixture
+from scripts.prototypes.lean_map import forward as lean_forward
 from scripts.prototypes.lean_map.jets import build_jets, gather_window
-from scripts.prototypes.lean_map.quadrature import interior_moments, triangle_rule
+from scripts.prototypes.lean_map.quadrature import (
+    interior_moments,
+    quadratic_fit,
+    triangle_rule,
+)
 from scripts.prototypes.lean_map.values import build_values
 from scripts.prototypes.solve_options.profile import _machine
 from scripts.prototypes.sub_millisecond.measure_vmap import measure
+from scripts.prototypes.sub_millisecond.measure_slice import arc_cut_moments
 from scripts.prototypes.support.geometry import certificate_field
 from tests.equilibrium.test_topology_read import _analytic_inputs
 
 
-def run(cache: Path, output: Path):
+def run(cache: Path, output: Path, full_only: bool = False):
     assert jax.config.jax_enable_x64 is True and jax.default_backend() == "gpu"
     print(
         f"nova={nova.__file__} module={__file__} cwd={Path.cwd().resolve()}", flush=True
@@ -58,6 +64,7 @@ def run(cache: Path, output: Path):
         (booked.cell_current, booked.radial_moment, booked.vertical_moment), axis=-1
     )
     rule = triangle_rule(geometry)
+    fit, design = quadratic_fit(rule, geometry)
     values, _ = build_values(machine, rule, field, reference)
     coupling = topology.BiotMomentCoupling.from_polygons(machine.cell_polygons)
     jets, _ = build_jets(coupling, geometry, field, reference)
@@ -108,13 +115,48 @@ def run(cache: Path, output: Path):
             full,
         )
 
+    cut_count = int(
+        jnp.sum(
+            (reading.membership > 0)
+            & ~((reading.membership >= 1 - 1e-14) & (geometry.vertex_count == 6))
+        )
+    )
+    capacity = int(np.ceil(1.2 * cut_count)) + 16
+    lean_forward.cut_moments = arc_cut_moments
+
+    def live_map(shift):
+        state = lean_forward.apply(
+            moments(shift),
+            values,
+            jets,
+            window,
+            rule,
+            fit,
+            design,
+            geometry,
+            profile,
+            seeds,
+            seeds,
+            convention,
+            TopologyPolicy(),
+            booked.raw_current,
+            capacity,
+            axis_sign,
+        )
+        return state.moments
+
     rows = []
-    for name, function in (
-        ("values_map", values_stage),
-        ("bell_jet_band", band_stage),
-        ("fixed_points", root_stage),
-        ("interior_gauss", interior_stage),
-    ):
+    stages = (
+        (("live_bell_map", live_map),)
+        if full_only
+        else (
+            ("values_map", values_stage),
+            ("bell_jet_band", band_stage),
+            ("fixed_points", root_stage),
+            ("interior_gauss", interior_stage),
+        )
+    )
+    for name, function in stages:
         rows = measure(name, function, output, rows)
     print("RESULT " + json.dumps(rows), flush=True)
 
@@ -123,8 +165,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--cache", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--full-only", action="store_true")
     args = parser.parse_args()
-    run(args.cache, args.output)
+    run(args.cache, args.output, args.full_only)
 
 
 if __name__ == "__main__":

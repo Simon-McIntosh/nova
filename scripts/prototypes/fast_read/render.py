@@ -1,5 +1,7 @@
 """Render measured moving-axis validity and read cost."""
 
+# ruff: noqa: E402
+
 import argparse
 import json
 from pathlib import Path
@@ -7,6 +9,7 @@ from pathlib import Path
 import matplotlib
 
 matplotlib.use("Agg")
+matplotlib.rcParams["svg.hashsalt"] = "fixed-shape-read"
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -57,7 +60,7 @@ def validity(rows, output):
         fontsize=20,
     )
     figure.subplots_adjust(hspace=0.15, right=0.82)
-    figure.savefig(output, format="svg")
+    figure.savefig(output, format="svg", metadata={"Date": None})
     plt.close(figure)
 
 
@@ -87,7 +90,7 @@ def cost(reads, output):
         axis.set_xlim(-0.15, 1.8)
         axes_style(axis)
     figure.subplots_adjust(wspace=0.45, right=0.82)
-    figure.savefig(output, format="svg")
+    figure.savefig(output, format="svg", metadata={"Date": None})
     plt.close(figure)
 
 
@@ -113,7 +116,7 @@ def stages(reads, fused, output):
         axis.set_xlim(-0.2, 2.7)
         axes_style(axis)
     figure.subplots_adjust(wspace=0.45, right=0.82)
-    figure.savefig(output, format="svg")
+    figure.savefig(output, format="svg", metadata={"Date": None})
     plt.close(figure)
 
 

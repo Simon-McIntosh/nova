@@ -213,6 +213,8 @@ def bell_moments(geometry, reading, profile, sigma):
         ),
         axis=1,
     )
-    return jnp.where(four[:, None], split_moments, ordinary), jnp.where(
-        four, split_valid, ordinary_valid
+    return (
+        jnp.where(four[:, None], split_moments, ordinary),
+        jnp.where(four, split_valid, ordinary_valid),
+        four,
     )

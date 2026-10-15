@@ -123,13 +123,18 @@ def run(
         interior = interior_moments(
             rule, gauss, profile, reading.axis_flux, reading.boundary_flux, full
         )
-        ordinary, ordinary_valid = bell_moments(
+        ordinary, ordinary_valid, four_crossings = bell_moments(
             geometry, reading, profile, convention.sigma
         )
         cut = (reading.membership > 0) & ~full
-        saddle_cut = cut & reading.normal_form_cells & ~ordinary_valid
+        saddle_cut = (
+            cut & reading.normal_form_cells & (four_crossings | ~ordinary_valid)
+        )
         saddle, saddle_valid = _saddle_moments(
-            geometry, reading, profile, ordinary_valid=ordinary_valid
+            geometry,
+            reading,
+            profile,
+            ordinary_valid=ordinary_valid & ~four_crossings,
         )
         raw = interior + jnp.where((cut & ~saddle_cut)[:, None], ordinary, 0.0) + saddle
         valid_booking = (

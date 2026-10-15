@@ -165,14 +165,14 @@ def map_moments(
     interior = interior_moments(
         rule, gauss_flux, profile, reading.axis_flux, reading.boundary_flux, full
     )
-    ordinary, ordinary_valid = bell_moments(
+    ordinary, ordinary_valid, four_crossings = bell_moments(
         geometry, reading, profile, convention.sigma
     )
     cut = (reading.membership > 0) & ~full
-    saddle_cut = cut & reading.normal_form_cells & ~ordinary_valid
+    saddle_cut = cut & reading.normal_form_cells & (four_crossings | ~ordinary_valid)
     ordinary_cut = cut & ~saddle_cut
     saddle, saddle_valid = _saddle_moments(
-        geometry, reading, profile, ordinary_valid=ordinary_valid
+        geometry, reading, profile, ordinary_valid=ordinary_valid & ~four_crossings
     )
     raw = interior + jnp.where(ordinary_cut[:, None], ordinary, 0.0) + saddle
     total = jnp.sum(raw[:, 0])

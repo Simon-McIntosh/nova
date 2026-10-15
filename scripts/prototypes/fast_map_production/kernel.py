@@ -48,8 +48,19 @@ def bell_fraction_with_crossings(geometry, reading, sigma):
     return fraction, jnp.where(four, split_valid, valid), four
 
 
+def _local_axis_sector(geometry, axis, form):
+    """Select the axis-facing branch inside the saddle form's local domain."""
+    direction = axis - form.position
+    distance = jnp.linalg.norm(direction)
+    reach = 0.5 * jnp.median(geometry.pitch)
+    nearby = form.position + direction * jnp.minimum(
+        1.0, reach / jnp.maximum(distance, 1e-30)
+    )
+    return jnp.argmax(topology._normal_form_sectors(nearby[None], form)[0])
+
+
 def _wall_path_ceiling(
-    geometry, coefficients, form, normal, saddle_score, seed, sigma, frame_gate
+    geometry, coefficients, form, axis, normal, saddle_score, seed, sigma, frame_gate
 ):
     """Find the highest level that can reach each cell from the axis."""
     vertices = geometry.vertices
@@ -83,9 +94,7 @@ def _wall_path_ceiling(
     peer_edge = jnp.maximum(geometry.neighbour_edge, 0)
     ceiling = jnp.minimum(peak, peak[peer, peer_edge])
     if frame_gate:
-        axis_sector = jnp.argmax(
-            topology._normal_form_sectors(geometry.centre[seed][None], form)[0]
-        )
+        axis_sector = _local_axis_sector(geometry, axis, form)
         sector = topology._normal_form_sectors(midpoint, form)[..., axis_sector]
         barred = (normal[:, None] & ~sector) | (normal[peer] & ~sector[peer, peer_edge])
         ceiling = jnp.where(barred, jnp.minimum(ceiling, saddle_score), ceiling)
@@ -138,7 +147,7 @@ def _continuous_path_weight(
     flux_width = jnp.asarray(1e-8, dtype=passage.dtype)
     flux_weight = jnp.clip(0.5 + (passage - level) / flux_width, 0, 1)
 
-    axis_sector = jnp.argmax(topology._normal_form_sectors(axis[None], form)[0])
+    axis_sector = _local_axis_sector(geometry, axis, form)
     offset = midpoint - form.position
     parameter = jnp.einsum("...i,ai->...a", offset, form.direction)
     residual = (
@@ -228,7 +237,7 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
         policy.hessian_tolerance,
         sigma * fourth,
     )
-    axis_sector = jnp.argmax(topology._normal_form_sectors(axis[None], form)[0])
+    axis_sector = _local_axis_sector(geometry, axis, form)
     radius = jnp.maximum(
         policy.normal_form_radius,
         policy.normal_form_pitch_floor * jnp.median(geometry.pitch),
@@ -268,6 +277,7 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
         geometry,
         approximate.field_coefficients,
         form,
+        axis,
         saddle_live & near_saddle,
         saddle_score,
         seed,

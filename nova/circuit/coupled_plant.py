@@ -92,7 +92,7 @@ class CoupledPlant:
 
 def coupled_plant(
     machine,
-    source,
+    source=None,
     *,
     n_modes: int | None = None,
     frequencies: np.ndarray | None = None,
@@ -111,7 +111,10 @@ def coupled_plant(
 
     ``source`` is the plasma source: ``coil_current_times``, ``coil_currents``
     ``(n_t, n_coil)`` and ``prescribed_currents()`` (one flux-function current
-    distribution per ``plasma_times``).
+    distribution per ``plasma_times``).  Pass ``source=None`` for the plant
+    without a plasma drive; the plasma flux fields are then empty and the
+    terminal impedance is unaffected, so a machine's reduction can be measured
+    without a plasma source in hand.
 
     The reduced passive modes are the most coil-relevant, grown until the
     terminal impedance matches the full model to ``error_tolerance`` over
@@ -132,7 +135,10 @@ def coupled_plant(
     provenance = dict(provenance or {})
     provenance.setdefault("nova_version", _nova_revision())
     provenance.setdefault("machine", getattr(machine, "label", "unspecified"))
-    provenance.setdefault("plasma_source", getattr(source, "label", "unspecified"))
+    provenance.setdefault(
+        "plasma_source",
+        "none" if source is None else getattr(source, "label", "unspecified"),
+    )
 
     directory = Path(cache_dir) if cache_dir is not None else _default_cache_dir()
     digest = _cache_digest(
@@ -158,13 +164,20 @@ def coupled_plant(
     mode_tau = tau[keep]
     mode_coil_coupling = coupling[:, keep].T  # (n_modes, n_coil)
 
-    plasma_times = np.asarray(source.plasma_times, dtype=np.float64)
-    currents = source.prescribed_currents()
-    circuits, plasma_flux = plasma_linked_flux_history(currents, conductors)
-    row_of = {int(circuit): index for index, circuit in enumerate(circuits)}
-    section_plasma_flux = plasma_flux[:, _section_columns(circuits, conductors, series)]
-    passive_columns = [row_of[int(c)] for c in passive_circuits]
-    mode_plasma_flux = plasma_flux[:, passive_columns] @ vectors[:, keep]
+    if source is None:
+        plasma_times = np.empty(0, dtype=np.float64)
+        section_plasma_flux = np.empty((0, series.shape[0]))
+        mode_plasma_flux = np.empty((0, mode_tau.size))
+    else:
+        plasma_times = np.asarray(source.plasma_times, dtype=np.float64)
+        currents = source.prescribed_currents()
+        circuits, plasma_flux = plasma_linked_flux_history(currents, conductors)
+        row_of = {int(circuit): index for index, circuit in enumerate(circuits)}
+        section_plasma_flux = plasma_flux[
+            :, _section_columns(circuits, conductors, series)
+        ]
+        passive_columns = [row_of[int(c)] for c in passive_circuits]
+        mode_plasma_flux = plasma_flux[:, passive_columns] @ vectors[:, keep]
 
     plant = CoupledPlant(
         coil_names=coil_names,

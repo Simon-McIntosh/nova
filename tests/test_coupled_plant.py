@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import importlib.util
+import sys
 from dataclasses import dataclass
+from pathlib import Path
 
 import numpy as np
 
@@ -176,3 +179,75 @@ def test_negative_control_perturbed_cache_fails(tmp_path):
         perturbed.terminal_impedance(frequencies),
         reference.terminal_impedance(frequencies),
     )
+
+
+def test_real_sectioned_set_reduction_is_within_one_percent():
+    """The real ITER sectioned plant holds 1% per coil from 0.1 Hz to 5 kHz.
+
+    Loads the cached sectioned system and the machine-description wiring rather
+    than rebuilding the passive mesh, so the check is seconds rather than the
+    minutes the refinement takes.
+    """
+    import pytest
+
+    root = Path(__file__).resolve().parents[1]
+    cache = Path(
+        "/home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit"
+        "/sectioned-conductor-set/68df15665ab2ea45f427"
+    )
+    if not (cache / "linkage.npy").exists():
+        pytest.skip("the sectioned conductor cache is not present on this host")
+
+    spec = importlib.util.spec_from_file_location(
+        "iter_sectioned_build", root / "scripts" / "iter_sectioned_conductor_set/build.py"
+    )
+    build = importlib.util.module_from_spec(spec)
+    sys.modules["iter_sectioned_build"] = build
+    try:
+        spec.loader.exec_module(build)
+    except Exception:  # pragma: no cover - the machine description is not local: skip
+        pytest.skip("the ITER machine description is not reachable from this host")
+
+    from nova.circuit.coupled_plant import _terminal_impedance, coupled_plant
+    from nova.circuit.passive import load_circuit_system
+
+    matrix = np.load(cache / "linkage.npy")
+    system = load_circuit_system(cache / "system.npz")
+    conductors, coil_names, owner, *_unused = build.source_conductors()
+    owner = np.asarray(owner, dtype=np.int64)
+    series = np.zeros((owner.size, len(coil_names)))
+    series[np.arange(owner.size), owner] = 1.0
+
+    n_section = owner.size
+    machine = _Machine(
+        conductors=conductors,
+        series=series,
+        coil_names=list(coil_names),
+        passive_circuits=np.asarray(system.circuits, dtype=np.int64),
+        coil_inductance=series.T @ matrix[:n_section, :n_section] @ series,
+        coil_resistance=np.zeros(series.shape[1]),
+        passive_system=system,
+        label="iter-sectioned-12mm",
+    )
+
+    frequencies = np.geomspace(0.1, 5000.0, 101)
+    plant = coupled_plant(machine, None, frequencies=frequencies)
+
+    tau, vectors = system.mode_system()
+    coupling = system.m_channel.T @ vectors
+    full = _terminal_impedance(
+        plant.coil_inductance,
+        plant.coil_resistance,
+        coupling,
+        tau,
+        frequencies,
+    )
+    diag = np.arange(machine.coil_inductance.shape[0])
+    error = np.abs(
+        plant.terminal_impedance(frequencies)[:, diag, diag] - full[:, diag, diag]
+    ) / np.abs(full[:, diag, diag])
+
+    assert error.max() < 1e-2, dict(
+        zip(machine.coil_names, np.round(error.max(axis=0), 12))
+    )
+    assert plant.n_coil == len(machine.coil_names)

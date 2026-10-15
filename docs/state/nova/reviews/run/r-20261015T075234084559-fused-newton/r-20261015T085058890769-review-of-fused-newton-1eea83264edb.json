@@ -8,6 +8,13 @@
   "call_sites": [],
   "completed_at": "",
   "dispatched_at": "2026-10-15T07:52:52Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "fast-read",
+      "recorded_at": "2026-10-15T09:17:37.094931+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/fused_newton/negative_control.py",

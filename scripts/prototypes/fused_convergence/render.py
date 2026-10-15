@@ -77,7 +77,9 @@ def main():
     results = {}
     for carrier in ("limited", "diverted"):
         for method in ("krylov", "gmres", "dense"):
-            path = args.receipts / f"{carrier}-{method}.json"
+            path = args.receipts / f"{carrier}-{method}-accepted.json"
+            if not path.exists():
+                path = args.receipts / f"{carrier}-{method}.json"
             if path.exists():
                 results[(carrier, method)] = json.loads(path.read_text())
     residual_history(results, args.output / "residual-history.svg")

@@ -126,18 +126,31 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
+
+    def receipt(kind, *candidates):
+        for candidate in candidates:
+            path = args.run / f"{kind}-{candidate}.json"
+            if path.is_file():
+                return path
+        raise FileNotFoundError(f"No receipt for {kind}: {candidates}")
+
     sweeps = {
-        kind: json.loads((args.run / f"{kind}-sweep.json").read_text())
+        kind: json.loads(
+            receipt(
+                kind, "saddle-booking-sweep", "four-crossing-sweep", "sweep"
+            ).read_text()
+        )
         for kind in ("limited", "diverted")
     }
     reads = {
-        kind: json.loads((args.run / f"{kind}-edge.json").read_text())
+        kind: json.loads(receipt(kind, "read-final", "edge").read_text())
         for kind in ("limited", "diverted")
     }
     validity(sweeps, args.output / "axis-sweep.svg")
     cost(reads, args.output / "read-cost.svg")
     fused_paths = {
-        kind: args.run / f"{kind}-fused-all.json" for kind in ("limited", "diverted")
+        kind: receipt(kind, "saddle-booking-fused", "terminal", "fused-all")
+        for kind in ("limited", "diverted")
     }
     if all(path.is_file() for path in fused_paths.values()):
         fused = {

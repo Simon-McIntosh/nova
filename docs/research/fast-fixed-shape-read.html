@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="fast-fixed-shape-read">
+  <meta name="plan-title" content="Fixed-shape topology read and fused correction">
+  <meta name="plan-summary" content="H200 measurement of a vectorized coarse topology read, moving-state validity, and a fused moment correction">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-informs" content="converged-forward-solve">
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-verifies" content="converged-forward-solve#s2">
+  <meta name="plan-source" content="Analytic certificate carriers, full-row root census, H200 profiler traces, and fused prototype receipts">
+  <meta name="plan-source-quality" content="primary">
+  <meta name="plan-tags" content="equilibrium,grad-shafranov,jax,convergence,topology">
+  <title>Fixed-shape topology read and fused correction | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+  <header>
+    <p class="eyebrow">Research input</p>
+    <h1>Fixed-shape topology read and fused correction</h1>
+    <p class="lead">On the 289-cell limited and 282-cell diverted analytic carriers, a single fixed-shape program restores the reference boundary and selects the same 254 and 179 support cells. Its measured read costs 0.775 and 1.112 ms, above the 0.12 ms target. The complete fused correction and moving-state sweeps are being measured separately.</p>
+  </header>
+  <section id="method">
+    <h2>Method and authority</h2>
+    <p>The prototype lives in <code>scripts/prototypes/fast_read</code> and does not change the production topology module. It solves stationary points through the existing fixed-point machinery, evaluates both saddle and wall boundary candidates, and chooses the binding signed flux with array operations. Wall events include a quadratic peak candidate per edge: the limited certificate's actual contact is at the midpoint of a wall edge, while either adjacent wall node misses its flux by 0.049155. A preliminary saddle-frame-gated graph restricts wall events to axis-reachable cells. Bell polygons provide smooth-cell fractions and four-arc cut moments; the normal-form sectors supply saddle-neighbourhood fractions and selected-sector intervals. Fixed-capacity arrays hold saddle cells; dense boolean reachability uses a static nine squaring steps. No cell, strip, or fragment-label loop is data dependent.</p>
+    <p>The H200 runs used binary64, printed the imported <code>nova</code> and measurement-module paths, and kept the analytic carriers read-only. A profiler trace had to contain the named compiled module, GPU kernel-detail events, and a host graph launch before its count was accepted. Both the existing read and candidate ran as compiled calls on the same carrier. The full logs and JSON receipts are in <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T091903690374-fast-read</code>.</p>
+  </section>
+  <section id="read">
+    <h2>Centre-state read and cost</h2>
+    <table>
+      <caption>H200 job 1285946. Walls are medians of seven synchronized calls; kernel counts come from the named GPU process in the JAX profiler trace.</caption>
+      <thead><tr><th>Carrier</th><th>Cells</th><th>Existing read [ms]</th><th>Fixed-shape read [ms]</th><th>GPU kernels</th><th>Selected cells; reference</th><th>Boundary flux difference</th><th>Maximum fraction difference</th></tr></thead>
+      <tbody>
+        <tr><td>Limited</td><td>289</td><td>4.158</td><td>0.775</td><td>95</td><td>254; 254</td><td>0</td><td>0.002026</td></tr>
+        <tr><td>Diverted</td><td>282</td><td>5.874</td><td>1.112</td><td>186</td><td>179; 179</td><td>1.77 × 10<sup>−17</sup></td><td>0.001658</td></tr>
+      </tbody>
+    </table>
+    <p>The magnetic axis equals the analytic reference on both centre states. The diverted state stays diverted and the limited state stays limited. The read is faster than the previously measured algorithm but misses the 0.12 ms ceiling by 6.5× limited and 9.3× diverted; the diverted profiler count also exceeds a tens-of-kernels target. The maximum cell-fraction differences are measurements against the reference read, not an analytic membership-error certificate.</p>
+  </section>
+  <section id="moving">
+    <h2>Moving-state validity and transition</h2>
+    <p>The full-row root census and continuation are run on 41 vertical-field offsets per topology. The gate records the analytic oracle's position and residual, root validity, axis identity, connected support, raw booked current, and both boundary candidates on each state. The limited-to-diverted class change is bisected on live program calls, and raw-current continuity is judged before total-current normalization. The resulting counts and bracket are reported after the H200 sweep completes.</p>
+  </section>
+  <section id="fused">
+    <h2>Fused correction and retained limits</h2>
+    <p>The fused prototype uses <code>jax.linearize</code> to reuse the primal map and its linearized factor across four Krylov products. Its row window is maintained by <code>fixed_points.maintain_rows</code>; at this coarse resolution the full prebuilt jet set is retained. The H200 fused run measures the map, cold correction, warm neighbour, three distinct-state batch widths, generated code, and profiler launches. Those results remain unqualified until the run reaches its terminal receipts. The row-maintenance measurement helper first passed a wrong moment operand shape and then attempted to recompute all cached exterior jets in one batch, exhausting 296.63 GiB before map compilation. It now serves stored exterior jets to the row owner. These were helper failures, not a measured rejection by the new read.</p>
+  </section>
+  <section id="controls">
+    <h2>Controls and interpretation</h2>
+    <p>The centre-state comparison is a positive control for topology identity: both reference reads are valid, the candidate axis position matches, and the profiler sees nonzero GPU work. A global wall maximum is a negative mechanism control: on the diverted carrier it selects a private wall level of 0.000995 and only 144 cells; restricting the candidate to the axis side restores the near-zero saddle boundary and 179 cells. On the limited carrier, node-only wall sampling selects a contact at Z = 0.112943 m with flux −0.049155 rather than the true midpoint contact at Z = 0; vectorized wall-edge extrema restore the reference level. A full re-run of the ungated-private-edge and wrong-axis controls remains part of the moving-state and fused qualification.</p>
+  </section>
+</main></body>
+</html>

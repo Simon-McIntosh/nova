@@ -1,0 +1,820 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 12,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "f2a74fb7bec81c4894e156adc47e22afc2fa83b7",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 79355392,
+      "cached_input_tokens_cumulative": 79355392,
+      "input_tokens": 79712502,
+      "input_tokens_cumulative": 79712502,
+      "output_tokens": 125417,
+      "output_tokens_cumulative": 125417,
+      "reasoning_output_tokens": 41997,
+      "reasoning_output_tokens_cumulative": 41997
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 16497,
+    "files": 15,
+    "removed": 0
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "8dcb3c3dd1dc7f7fd99364f0718d6db227b467f3",
+    "a4686aca81d7f97a702432bda8c889c278c45c90",
+    "ec85b87deaacf3354be5ba5e5f229b84611ae45e",
+    "ad1cf9f9e811f29e0acc24ef521209245aa4c452",
+    "342dccabe08aae8da637f51297c859a1e78fa900",
+    "ee679659ad00608e6f3907c886d629cf5255a31a",
+    "abbb1e16fbaaa7c4b36226c58caf5a577acdc24a",
+    "95a69af761264299c2f67178c157d7b1fbe92d95",
+    "58c1b990371e3600d110eec8f845924f46e7c151",
+    "fed1da9e575053afd9fd0dcb807d5ae89ad5543b",
+    "7cf61b01b6eb39de70eb99b4265319f9ba86af0c",
+    "040cccfa875e644ca22a124b73a5b2e9d5af7cdc",
+    "656058dc9fadc0e5fdaad57927d12fc69c80b257",
+    "34f659d5880047b6b7668b60cf89430bd341a7a7",
+    "32b2757c816da50b4ef16a9a3c689078a6e4a169",
+    "28b2524ba8540e5f4f45ab73583689908e9663aa",
+    "9b6be46fd0136b92be4a7984312b7facb6a6a053",
+    "9e2bb2f834a9d0da7886038659d6e5ddcc9aa52e",
+    "9426c689c359ce2f8da37d59ee2af6bcc2eb8fda",
+    "af1f8f2847c58a532fbe5efb86ccfeee8b98ddcc",
+    "a16e6cf67d8b36db9aeabf783de7df5f3527d6e4",
+    "0318fd1252201ed4bce5bfd877cca7f8d55d5226",
+    "10efbbd342bf2d7831e9ba508b03e4962073aae4",
+    "4f33a8e6cf6c5a18b5518d80602acdf71a82dc8f",
+    "676181a5acce323b311bb3024560b6ad6e3153fb",
+    "9d2dbd18dbeea8ba281e131fcb0f02b59f678ab1",
+    "ff47bbece75ff1eb0a5d148f136ddb457f45647c",
+    "948dfb16cc95233609cd8b41e9f06056a4aa7098"
+  ],
+  "completed_at": "2026-10-15T14:41:28Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-15T11:59:03Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "factor/batch",
+    "0.90"
+  ],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.2857142857142857,
+    "plan": "converged-forward-solve",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-15T12:58:43.694643+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-15T11:58:43Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 26,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 5,
+    "headroom": 7,
+    "mean_context": 130000,
+    "observed_at": "2026-10-15T11:58:17Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 26,
+      "aggregate_tokens_per_second": 489.467,
+      "detail": "",
+      "mean_tokens_per_second": 66.144,
+      "observed_at": "2026-10-15T11:58:17Z",
+      "runs": 7.4,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-15T14:41:28Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": {
+    "attempt": 2,
+    "kind": "lane-change",
+    "lanes": [
+      {
+        "changed_at": "2026-10-15T11:59:34Z",
+        "detail": "starting fresh because the session cannot follow the move from harness 'claude' to 'codex'",
+        "from_backend": "clive",
+        "from_harness": "claude",
+        "reason": "Deep numerical analysis on GPU with critical risk: Newton-Krylov convergence, dense Jacobian factorisation, exact saddle-booking derivative. Standing coordinator rule moves deep critical nodes to codex.",
+        "session": "fresh",
+        "session_id": "cb7e8365-528a-4135-9026-2a30fc96742e",
+        "session_source": "stream",
+        "to_backend": "codex",
+        "to_harness": "codex"
+      }
+    ],
+    "root_run_id": "r-20261015T115843362666-fused-convergence"
+  },
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T115843362666-fused-convergence/manifest.md",
+  "member": "disposable-r-20261015T115843362666-fused-convergence",
+  "model_key": "sol",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "fused-convergence",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1617,
+          "cached_input_tokens": 257509,
+          "input_tokens": 259128,
+          "output_tokens": 1141,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 260269,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Make the fused moment-space correction converge to 1e-12 on both carriers, and say why it does not today. The fixed-shape read is now valid and continuous; convergence is the gate that keeps every warm-slice and batch wall unqualified.\n\nWhere it stands (on main, docs/research/fast-fixed-shape-read.html, prototype scripts/prototypes/fast_read, merged at 38cb9f76e):\n- Read 0.759/1.487 ms limited/diverted at 289/282 cells. It is valid on every converged-oracle state of both 41-state sweeps. The limited-to-diverted switch is continuous to roundoff (1.96e-16 of target current).\n- The fused correction (jax.linearize once, four Krylov products) takes 4.13/5.98 ms.\n  - Limited: a cold solve reaches 6.73e-13 after 14 corrections, but the warm neighbour stops at 3.92e-9 after one correction.\n  - Diverted: a cold solve stalls at 0.003423 through 20 corrections.\n  - Width 128: 0/128 members reach 1e-12 on either carrier.\n- JVP against central differences:\n  - Limited, all three moment blocks: about 1e-9. The limited Jacobian is not the defect, which points at the four-vector Krylov step.\n  - Diverted current and radial blocks: 8.8e-6 and 5.3e-6. This is isolated to the selected saddle normal-form booking (cubic-ray intersections). The step scan (1e-4 to 1e-6) could not tell a wrong JVP from finite-difference cancellation.\n- The lead rules the limited-to-diverted transition continuous: both boundary candidates are computed every step, and no discrete verdict feeds the iteration.\n\nDone when docs/research/fused-convergence.html (reckon-type research, plan-informs converged-forward-solve) reports these H200 measurements on the 289-cell limited and 282-cell diverted carriers:\n\n(1) The linear step. Compare three steps, each from the same cached linearization, on the limited cold predecessor, the limited warm neighbour and the diverted centre state:\n- the existing four-vector Krylov step;\n- GMRES to relative tolerance 1e-10, with its iteration count;\n- a dense Jacobian formed by vmapping the linearized map over identity columns, then LU-factored.\nReport the residual history per correction to 1e-12, or to the stall, for each, plus the wall to build and to apply each step.\n\n(2) The diverted saddle derivative. Run a Taylor remainder test of the moment-block central differences over steps 1e-2 to 1e-8, where slope 2 is expected, to decide whether the JVP is wrong or the finite difference cancels.\n- If the JVP is wrong, give the saddle normal-form booking an exact derivative (for example, the implicit-function rule for the ray roots). Re-run the comparison.\n\n(3) The diverted stall. With the exact dense step, report whether the diverted cold solve reaches 1e-12. If it does not, characterise it:\n- the residual history;\n- which cells and moment blocks carry the residual;\n- whether support, saddle selection or class changes between iterates (the support must move smoothly);\n- whether a damped or line-searched step changes the outcome.\n\n(4) The warm slice and the batch, once (1) to (3) give a converging step:\n- one-correction and two-correction warm neighbours from a converged predecessor, including chord iteration that reuses the predecessor's factor;\n- the wall of each component (map evaluation, factor build, factor apply);\n- jax.vmap over distinct states at widths 1, 16 and 128, with the count that reaches 1e-12, and per-state wall set against the 0.90 ms warm-slice condition.\n\n(5) Cold compile and executable size against 60 s and 50 MB for every program measured.\n\n(6) Figures under docs/figures/converged-forward-solve/fused-convergence, following AGENTS.md plotting rules:\n- residual history per step type and carrier;\n- the Taylor remainder slopes;\n- one poloidal line-contour panel per terminal forward state, showing solved and analytic flux on shared levels, both null sets and the wall, with no axes, and the terminal residual and converged flag in the caption.\n\nNegative controls must re-run the program rather than read a frozen receipt:\n- a Jacobian with the saddle booking term removed lowers the converged count, so its row turns red;\n- the four-vector Krylov step reproduces the limited warm stall above 1e-12.\n\nWrite only scripts/prototypes/fused_convergence, docs/research/fused-convergence.html, docs/figures/converged-forward-solve/fused-convergence and docs/evidence/fragments/converged-forward-solve/fused-convergence.html, with plan-evidence-for converged-forward-solve. Import, but do not edit, scripts/prototypes/{fast_read,fused_newton,read_robustness,sub_millisecond,lean_map} and nova/. Do not change nova/ product code, and do not touch the held moment-space Newton worktree. reckon audit-doc must report 0 errors.\n\nRun conditions: H200 rows run as one job through RECKON_ALLOW_NESTED_LAUNCH=1 scripts/h200_test_lane/run.sh --log (an absolute path in the run directory) --wait -- (targets), or one sbatch job on --partition=betelgeuse --reservation=gpu_0003_grpA --gres=gpu:1 with rungs as rows inside the allocation (never an array), --time sized to finish, XLA_PYTHON_CLIENT_PREALLOCATE=false and TMPDIR=/tmp in the submit environment and in every child; submit for real and read squeue a minute later rather than trusting sbatch --test-only. On a compute node run /home/ITER/mcintos/Code/nova/.venv/bin/python directly with PYTHONPATH set to the run worktree and never invoke uv; every login-node uv command carries --no-sync and nothing runs uv sync. configure_dtypes() before any array and jax_enable_x64 asserted True. Gates pass by delta against orientation_base_sha in per-module fresh processes, both arms running the same test files with the repository root conftest, baseline_suite and after_suite as single-line JSON whose log_path names one log file and whose command is literally runnable. Any wait is declared on the job that finishes last as wait_probe [\"sacct\",\"-n\",\"-X\",\"-P\",\"-j\",\"(job id)\",\"-o\",\"State\"] and wait_terminal [\"COMPLETED\",\"FAILED\",\"CANCELLED\",\"TIMEOUT\",\"OUT_OF_MEMORY\",\"NODE_FAIL\"] as JSON lists, and names every job it depends on in wait_condition. The certified 550, 2,000 and 5,000-cell machines and exteriors are cached under /home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T181553786165-proto-support/ordered/rows/cache and may be read in place, never written. Run filepath relativize over any evidence fragment before committing. Commit with conventional subjects and bodies at every step and write the manifest and commit before every job wait; the manifest commits line lists every commit; status is complete, blocked or failed, which the worker sets itself. No plan labels in source names or comments. Inside every job payload, make one directory with mktemp -d /tmp/$USER-$SLURM_JOB_ID-XXXX, point TMPDIR at it, and remove it on exit with trap 'rm -rf' (keep TMPDIR=/tmp in the submit environment so slurmstepd can start). Never leave extracted base trees or caches in /tmp after a node ends; anything a later reader needs goes under the run directory on GPFS.\n\nImport provenance: print nova.__file__ in every log header. On the fleet allocation (SLURM_JOB_ID set), run CPU work in place. The time budget is per working turn, not a deadline: park on H200 jobs with declared waits and continue across turns; this node is sized at about 8 worker-hours, and an unmeasured item in your own scope is remaining work, not a blocker. Never edit a script a submitted job will run; submit a per-job copy. Size every job memory from a measured row. The manifest commits line lists every commit (git rev-list), orientation_base_sha is copied from git rev-parse output, and status is complete when the record is delivered even if the target is not met (then give the nearest measured figure and what dominates it).",
+    "estimated_hours": 8.0,
+    "goal": "Make the fused moment correction converge to 1e-12 on both carriers and explain the diverted stall",
+    "id": "fused-convergence",
+    "images": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-15T11:58:43Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 26,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 5,
+      "headroom": 7,
+      "mean_context": 130000,
+      "observed_at": "2026-10-15T11:58:17Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 26,
+        "aggregate_tokens_per_second": 489.467,
+        "detail": "",
+        "mean_tokens_per_second": 66.144,
+        "observed_at": "2026-10-15T11:58:17Z",
+        "runs": 7.4,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T115843362666-fused-convergence/manifest.md",
+    "negative_control": "re-running with the saddle booking term removed from the Jacobian turns the converged-count row red, and the four-vector Krylov step reproduces the limited warm stall above 1e-12",
+    "plan": "converged-forward-solve",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§5",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "scripts/prototypes/fused_convergence",
+      "docs/research/fused-convergence.html",
+      "docs/figures/converged-forward-solve/fused-convergence",
+      "docs/evidence/fragments/converged-forward-solve/fused-convergence.html"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "fused-convergence",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-15T11:58:49.593548+00:00",
+    "score": 0.56875,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "Deep numerical analysis on GPU: Newton-Krylov convergence, dense Jacobian factorisation, exact derivative of a saddle normal-form booking; critical risk, deepest reasoning",
+    "confidence": 0.5,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 404.667,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 1933.746,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 157216.302945,
+        "budget_reason": null,
+        "burn_multiple": 0.626016806508888,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 16.6,
+          "peak_utilisation_p90_pct": 19.7,
+          "peak_utilisation_runs": 6,
+          "window_tokens": null
+        },
+        "days_to_reset": 2.7509100469328707,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.0631225400564393,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-18T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 38.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 157216.302945,
+        "budget_reason": null,
+        "burn_multiple": 0.626016806508888,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 16.6,
+          "peak_utilisation_p90_pct": 19.7,
+          "peak_utilisation_runs": 6,
+          "window_tokens": null
+        },
+        "days_to_reset": 2.7509100469328707,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.0631225400564393,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-18T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 38.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 157216.302945,
+        "budget_reason": null,
+        "burn_multiple": 0.626016806508888,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 16.6,
+          "peak_utilisation_p90_pct": 19.7,
+          "peak_utilisation_runs": 6,
+          "window_tokens": null
+        },
+        "days_to_reset": 2.7509100469328707,
+        "effort": "medium",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": 0.0631225400564393,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-18T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 38.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 5,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": 78.1,
+          "peak_utilisation_p50_pct": 59.4,
+          "peak_utilisation_p90_pct": 84.9,
+          "peak_utilisation_runs": 116,
+          "window_tokens": 230144
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 4,
+          "not-run": 14,
+          "passed": 78,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": 30
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 345.823945,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "lift": {
+            "ends_at": "2026-10-20T04:58:00+00:00",
+            "ends_on": "time",
+            "form": "uncapped",
+            "group": "codex-sub",
+            "id": "codex-sub-1792002586-64d825",
+            "pace_multiple": null,
+            "remaining_seconds": 406758.865854,
+            "scope": "global"
+          }
+        },
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.7600767135995365,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-22T06:13:12+00:00",
+        "stale": true,
+        "utilisation_pct": 13.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 345.823945,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "lift": {
+            "ends_at": "2026-10-20T04:58:00+00:00",
+            "ends_on": "time",
+            "form": "uncapped",
+            "group": "codex-sub",
+            "id": "codex-sub-1792002586-64d825",
+            "pace_multiple": null,
+            "remaining_seconds": 406758.865854,
+            "scope": "global"
+          }
+        },
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.7600767135995365,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-22T06:13:12+00:00",
+        "stale": true,
+        "utilisation_pct": 13.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 345.823945,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "lift": {
+            "ends_at": "2026-10-20T04:58:00+00:00",
+            "ends_on": "time",
+            "form": "uncapped",
+            "group": "codex-sub",
+            "id": "codex-sub-1792002586-64d825",
+            "pace_multiple": null,
+            "remaining_seconds": 406758.865854,
+            "scope": "global"
+          }
+        },
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.7600767135995365,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 7,
+          "not-run": 7,
+          "passed": 10,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-22T06:13:12+00:00",
+        "stale": true,
+        "utilisation_pct": 13.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude:claude-haiku-4-5-20251001:claude": 0.01,
+      "claude:claude-opus-5-5:claude": 0.03,
+      "claude:claude-sonnet-5-5:claude": 0.08,
+      "codex:gpt-6-astra:codex": 0.01,
+      "codex:gpt-6-luna:codex": 0,
+      "codex:gpt-6-sol:codex": 0.29,
+      "hold": 0.02,
+      "local:deepseek-v4.1-flash:clive": 0.56
+    },
+    "questions": {
+      "route": {
+        "criteria": {
+          "claude:claude-haiku-4-5-20251001:claude": {
+            "backend": "claude",
+            "effort": "high",
+            "lane": "claude",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "claude-haiku-4-5-20251001"
+          },
+          "claude:claude-opus-5-5:claude": {
+            "backend": "claude",
+            "effort": "high",
+            "lane": "claude",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "claude-opus-5-5"
+          },
+          "claude:claude-sonnet-5-5:claude": {
+            "backend": "claude",
+            "effort": "medium",
+            "lane": "claude",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "claude-sonnet-5-5"
+          },
+          "codex:gpt-6-astra:codex": {
+            "backend": "codex",
+            "effort": "xhigh",
+            "lane": "codex",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "gpt-6-astra"
+          },
+          "codex:gpt-6-luna:codex": {
+            "backend": "codex",
+            "effort": "xhigh",
+            "lane": "codex",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "gpt-6-luna"
+          },
+          "codex:gpt-6-sol:codex": {
+            "backend": "codex",
+            "effort": "high",
+            "lane": "codex",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "gpt-6-sol"
+          },
+          "hold": "Do not dispatch now; wait for pressure to ease. When the local lane is not admitting (full, paused or unavailable), well-defined, routine or deferrable work should usually hold for it rather than spend a pressed metered lane. On a sliding scale, hard, high-risk or urgent work may still take the metered lane; weigh expected wait against urgency without a numeric threshold. When exactly one lane can serve the node, a hold waits for that lane alone, as hold_waits_for states.",
+          "local:deepseek-v4.1-flash:clive": {
+            "backend": "clive",
+            "effort": "high",
+            "lane": "local",
+            "local": true,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "deepseek-v4.1-flash"
+          }
+        },
+        "glossary": {
+          "budget_age_s": "Seconds since the budget reading was observed; null when unknown.",
+          "budget_source": "Where a budget reading came from: a document reading is taken from the published paid-lanes document, an account-surface reading describes now, and a ledger reading carries the age of the run behind it.",
+          "burn_multiple": "Metered spend so far divided by the lane's allowance for its window; above 1 is ahead of the pace that window plans for.",
+          "context": "A candidate's context block. window_tokens is the input window that gates the lane; estimated_tokens is this node's deterministic input estimate (standing instructions plus the repository files its brief loads) measured against that window; headroom_pct is the share of the window the estimate leaves free. peak_utilisation_p50_pct and peak_utilisation_p90_pct are the median and 90th-percentile peak input utilisation of recent passed runs on the lane, with peak_utilisation_runs behind them. A run whose input approaches its window risks dying mid-way, so a small headroom is a real risk to be weighed with pressure. A null figure is unknown, never zero.",
+          "days_to_reset": "Days until the lane's window resets; null when unknown.",
+          "hold_waits_for": "What a hold waits on. When exactly one lane can serve the node a hold waits for that lane alone: waiting for any other lane to free changes nothing, because it cannot run this node. Null when no lane can serve the node.",
+          "lanes": "One pressure block per lane, however many models the lane holds. A lane is a subscription or host whose models share one account window, so its utilisation, burn, pace allowance, reset, worker slots, congestion and banked-reset flag are stated here once and are the same for every model in it. availability is the lane's serving state aggregated over those models. Read a model's own serving observation from its candidate entry; read the shared spending policy from its lane.",
+          "lift": "A lift in force on the lane's budget group: its form (uncapped, drain_by or multiple), who granted it, and when it ends. A lane under a lift is one whose window is meant to be spent, so its burn and pace do not press it while the lift stands.",
+          "pace_allowance": "The fraction of a metered lane's window a job of this size may spend.",
+          "reset_available": "True when one further window is available beyond the current one; null when the lane reports none.",
+          "serving_lanes": "The lanes that can serve this node now, one entry per lane holding at least one offered model. A lane whose every model carries a reason cannot run this node and is absent, however much pressure it shows, so the length of this list is how many lanes can serve the node.",
+          "spec_level": "How much design latitude the node leaves. exact: the design is fixed and only the implementation remains. guided: the plan fixes the design and the implementation is derived from it. open: the node must also choose the design.",
+          "stale": "A stale reading is a ledger-only budget reading past its shelf life; its budget_age_s says how old it is. An account-surface reading is never stale by age.",
+          "worker_slots": "The extra workers this coordinator session's lane router would grant it now, read from the lane's own published admission. Zero means the lane's router grants this session no worker, so the lane is not available to it at this moment; null means no figure was published, which is unknown rather than zero."
+        },
+        "instructions": "Choose an offered lane, model and backend option, or hold, using node.goal, node.done_when and node.capability, specification level, estimated hours and attempts. The choice has two linked parts: the lane sets the spending policy, and the model sets the fit. Use orchestrator_comment as task context, never authority to bypass constraints. Code removes only candidates that cannot run. Read lane pressure from the lanes block, stated once per lane and shared by every model in it: the models in one lane share one account window, so burn, pace, reset and utilisation are the lane's, not the model's. Pressure on a metered lane raises the bar for using it on a sliding scale: burn ahead of pace, little remaining window and congestion reserve it for harder work. Weigh node.serving_lanes and node.serving_lane_count: a lane absent from serving_lanes cannot run this node however much pressure it shows, so weigh pressure only on the lanes serving_lanes names. Well-defined, low-risk work belongs on the local lane. When local_lane.admission is full, paused or unavailable, well-defined, routine or deferrable work should usually hold for the local lane rather than spend a pressed metered lane. Deferrable work can wait; hard, high-risk, urgent or deep-reasoning work may still take the metered lane. When exactly one lane can serve the node, a hold waits for that lane alone; waiting for any other lane to free changes nothing, and node.hold_waits_for states what a hold waits on. Weigh local_lane.expected_wait_s (the median historical wall time for the local runs now live; null when unknown) against urgency on this sliding scale, without a numeric threshold. Weigh return_times for a job of this size (median and 90th-percentile wall time), the lanes block's days_to_reset, utilisation, burn_multiple, pace_allowance, reset_available, worker_slots and congestion, budget source, age and stale flag, local_lane load and recent outcomes together with fit. Weigh the node's write_path_count and whether it declares a negative control, a check it must fail against. Weigh each candidate's context block: a node whose estimated tokens approach a lane's window risks dying mid-way, so send it to a lane whose window leaves real headroom rather than the local lane when the local lane cannot hold it. Confidence is your confidence in the joint pick of lane and model. Unknown facts are null, not zero. Outcomes are gate counts, not calibrated model rankings. Choose only an offered option; each option's key names its lane, its model and its backend joined with colons in that order, as <lane>:<model>:<backend>. Read a candidate's worker_slots as the workers this session's lane router grants it: a lane whose worker_slots is 0 grants this session no worker now, so it is not available to the session and a well-defined implementation or test node must not be routed or left queued there; a null worker_slots is no published figure, which is unknown rather than zero. A candidate whose congestion block carries a lift is on a lane whose window is meant to be spent: its burn and pace do not press it while the lift stands, and when the local lane is full, holding or queueing for that lane is no longer the default for work it can serve. A review should prefer the lifted lane's cheaper models. The glossary defines spec_level, burn_multiple, pace_allowance, budget_source, budget_age_s, stale, reset_available, days_to_reset, lanes, serving_lanes, hold_waits_for, worker_slots, lift and context",
+        "type": "choice"
+      }
+    },
+    "rendered_state": "{\"node\":{\"role\":\"implement\",\"spec_level\":\"exact\",\"capability\":{\"version\":\"1.0\",\"class\":\"orchestrator\",\"requirements\":{\"reasoning\":\"deep\",\"verification\":\"strict\",\"risk\":\"critical\"}},\"goal\":\"Make the fused moment correction converge to 1e-12 on both carriers and explain the diverted stall\",\"done_when\":\"Make the fused moment-space correction converge to 1e-12 on both carriers, and say why it does not today. The fixed-shape read is now valid and continuous; convergence is the gate that keeps every warm-slice and batch wall unqualified.\\n\\nWhere it stands (on main, docs/research/fast-fixed-shape-read.html, prototype scripts/prototypes/fast_read, merged at 38cb9f76e):\\n- Read 0.759/1.487 ms limited/diverted at 289/282 cells. It is valid on every converged-oracle state of both 41-state sweeps. The limited-to-diverted switch is continuous to roundoff (1.96e-16 of target current).\\n- The fused correction (jax.linearize once, four Krylov products) takes 4.13/5.98 ms.\\n  - Limited: a cold solve reaches 6.73e-13 after 14 corrections, but the warm neighbour stops at 3.92e-9 after one correction.\\n  - Diverted: a cold solve stalls at 0.003423 through 20 corrections.\\n  - Width 128: 0/128 members reach 1e-12 on either carrier.\\n- JVP against central differences:\\n  - Limited, all three moment blocks: about 1e-9. The limited Jacobian is not the defect, which points at the four-vector Krylov step.\\n  - Diverted current and radial blocks: 8.8e-6 and 5.3e-6. This is isolated to the selected saddle normal-form booking (cubic-ray intersections). The step scan (1e-4 to 1e-6) could not tell a wrong JVP from finite-difference cancellation.\\n- The lead rules the limited-to-diverted transition continuous: both boundary candidates are computed every step, and no discrete verdict feeds the iteration.\\n\\nDone when docs/research/fused-convergence.html (reckon-type research, plan-informs converged-forward-solve) reports these H200 measurements on the 289-cell limited and 282-cell diverted carriers:\\n\\n(1) The linear step. Compare three steps, each from the same cached linearization, on the limited cold predecessor, the limited warm neighbour and the diverted centre state:\\n- the existing four-vector Krylov step;\\n- GMRES to relative tolerance 1e-10, with its iteration count;\\n- a dense Jacobian formed by vmapping the linearized map over identity columns, then LU-factored.\\nReport the residual history per correction to 1e-12, or to the stall, for each, plus the wall to build and to apply each step.\\n\\n(2) The diverted saddle derivative. Run a Taylor remainder test of the moment-block central differences over steps 1e-2 to 1e-8, where slope 2 is expected, to decide whether the JVP is wrong or the finite difference cancels.\\n- If the JVP is wrong, give the saddle normal-form booking an exact derivative (for example, the implicit-function rule for the ray roots). Re-run the comparison.\\n\\n(3) The diverted stall. With the exact dense step, report whether the diverted cold solve reaches 1e-12. If it does not, characterise it:\\n- the residual history;\\n- which cells and moment blocks carry the residual;\\n- whether support, saddle selection or class changes between iterates (the support must move smoothly);\\n- whether a damped or line-searched step changes the outcome.\\n\\n(4) The warm slice and the batch, once (1) to (3) give a converging step:\\n- one-correction and two-correction warm neighbours from a converged predecessor, including chord iteration that reuses the predecessor's factor;\\n- the wall of each component (map evaluation, factor build, factor apply);\\n- jax.vmap over distinct states at widths 1, 16 and 128, with the count that reaches 1e-12, and per-state wall set against the 0.90 ms warm-slice condition.\\n\\n(5) Cold compile and executable size against 60 s and 50 MB for every program measured.\\n\\n(6) Figures under docs/figures/converged-forward-solve/fused-convergence, following AGENTS.md plotting rules:\\n- residual history per step type and carrier;\\n- the Taylor remainder slopes;\\n- one poloidal line-contour panel per terminal forward state, showing solved and analytic flux on shared levels, both null sets and the wall, with no axes, and the terminal residual and converged flag in the caption.\\n\\nNegative controls must re-run the program rather than read a frozen receipt:\\n- a Jacobian with the saddle booking term removed lowers the converged count, so its row turns red;\\n- the four-vector Krylov step reproduces the limited warm stall above 1e-12.\\n\\nWrite only scripts/prototypes/fused_convergence, docs/research/fused-convergence.html, docs/figures/converged-forward-solve/fused-convergence and docs/evidence/fragments/converged-forward-solve/fused-convergence.html, with plan-evidence-for converged-forward-solve. Import, but do not edit, scripts/prototypes/{fast_read,fused_newton,read_robustness,sub_millisecond,lean_map} and nova/. Do not change nova/ product code, and do not touch the held moment-space Newton worktree. reckon audit-doc must report 0 errors.\\n\\nRun conditions: H200 rows run as one job through RECKON_ALLOW_NESTED_LAUNCH=1 scripts/h200_test_lane/run.sh --log (an absolute path in the run directory) --wait -- (targets), or one sbatch job on --partition=betelgeuse --reservation=gpu_0003_grpA --gres=gpu:1 with rungs as rows inside the allocation (never an array), --time sized to finish, XLA_PYTHON_CLIENT_PREALLOCATE=false and TMPDIR=/tmp in the submit environment and in every child; submit for real and read squeue a minute later rather than trusting sbatch --test-only. On a compute node run /home/ITER/mcintos/Code/nova/.venv/bin/python directly with PYTHONPATH set to the run worktree and never invoke uv; every login-node uv command carries --no-sync and nothing runs uv sync. configure_dtypes() before any array and jax_enable_x64 asserted True. Gates pass by delta against orientation_base_sha in per-module fresh processes, both arms running the same test files with the repository root conftest, baseline_suite and after_suite as single-line JSON whose log_path names one log file and whose command is literally runnable. Any wait is declared on the job that finishes last as wait_probe [\\\"sacct\\\",\\\"-n\\\",\\\"-X\\\",\\\"-P\\\",\\\"-j\\\",\\\"(job id)\\\",\\\"-o\\\",\\\"State\\\"] and wait_terminal [\\\"COMPLETED\\\",\\\"FAILED\\\",\\\"CANCELLED\\\",\\\"TIMEOUT\\\",\\\"OUT_OF_MEMORY\\\",\\\"NODE_FAIL\\\"] as JSON lists, and names every job it depends on in wait_condition. The certified 550, 2,000 and 5,000-cell machines and exteriors are cached under /home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T181553786165-proto-support/ordered/rows/cache and may be read in place, never written. Run filepath relativize over any evidence fragment before committing. Commit with conventional subjects and bodies at every step and write the manifest and commit before every job wait; the manifest commits line lists every commit; status is complete, blocked or failed, which the worker sets itself. No plan labels in source names or comments. Inside every job payload, make one directory with mktemp -d /tmp/$USER-$SLURM_JOB_ID-XXXX, point TMPDIR at it, and remove it on exit with trap 'rm -rf' (keep TMPDIR=/tmp in the submit environment so slurmstepd can start). Never leave extracted base trees or caches in /tmp after a node ends; anything a later reader needs goes under the run directory on GPFS.\\n\\nImport provenance: print nova.__file__ in every log header. On the fleet allocation (SLURM_JOB_ID set), run CPU work in place. The time budget is per working turn, not a deadline: park on H200 jobs with declared waits and continue across turns; this node is sized at about 8 worker-hours, and an unmeasured item in your own scope is remaining work, not a blocker. Never edit a script a submitted job will run; submit a per-job copy. Size every job memory from a measured row. The manifest commits line lists every commit (git rev-list), orientation_base_sha is copied from git rev-parse output, and status is complete when the record is delivered even if the target is not met (then give the nearest measured figure and what dominates it).\",\"estimated_context\":50392,\"estimated_hours\":8.0,\"estimated_hours_source\":\"node\",\"attempts\":0,\"write_path_count\":4,\"negative_control_declared\":true,\"serving_lanes\":[\"claude\",\"local\",\"codex\"],\"serving_lane_count\":3,\"hold_waits_for\":\"any one of 3 lanes that can serve this node to have room\"},\"orchestrator_comment\":\"Deep numerical analysis on GPU: Newton-Krylov convergence, dense Jacobian factorisation, exact derivative of a saddle normal-form booking; critical risk, deepest reasoning\",\"candidates\":{\"claude\":{\"backend\":\"claude\",\"lane\":\"claude\",\"model\":\"claude-sonnet-5-5\",\"availability\":\"unknown\",\"utilisation_pct\":38.0,\"burn_multiple\":0.626016806508888,\"pace_allowance\":0.0631225400564393,\"days_to_reset\":2.7509100469328707,\"resets_at\":\"2026-10-18T06:00:00+00:00\",\"worker_slots\":null,\"congestion\":null,\"outcomes\":{\"passed\":1,\"failed\":1,\"not-run\":0,\"unknown\":0},\"context\":{\"window_tokens\":null,\"estimated_tokens\":50392,\"headroom_pct\":null,\"peak_utilisation_p50_pct\":16.6,\"peak_utilisation_p90_pct\":19.7,\"peak_utilisation_runs\":6},\"budget_source\":null,\"budget_age_s\":157216.302945,\"stale\":true,\"reset_available\":null},\"clive\":{\"backend\":\"clive\",\"lane\":\"local\",\"model\":\"deepseek-v4.1-flash\",\"availability\":\"served\",\"utilisation_pct\":null,\"burn_multiple\":null,\"pace_allowance\":null,\"days_to_reset\":null,\"resets_at\":null,\"worker_slots\":30,\"congestion\":{\"running\":5,\"waiting\":0,\"admission_verdict\":\"open\",\"stale\":false,\"slots_state\":\"measured\"},\"outcomes\":{\"passed\":78,\"failed\":4,\"not-run\":14,\"unknown\":0},\"context\":{\"window_tokens\":230144,\"estimated_tokens\":50392,\"headroom_pct\":78.1,\"peak_utilisation_p50_pct\":59.4,\"peak_utilisation_p90_pct\":84.9,\"peak_utilisation_runs\":116},\"budget_source\":null,\"budget_age_s\":null,\"stale\":null,\"reset_available\":null},\"codex\":{\"backend\":\"codex\",\"lane\":\"codex\",\"model\":\"gpt-6-sol\",\"availability\":\"unknown\",\"utilisation_pct\":13.0,\"burn_multiple\":null,\"pace_allowance\":null,\"days_to_reset\":6.7600767135995365,\"resets_at\":\"2026-10-22T06:13:12+00:00\",\"worker_slots\":null,\"congestion\":{\"lift\":{\"id\":\"codex-sub-1792002586-64d825\",\"group\":\"codex-sub\",\"form\":\"uncapped\",\"scope\":\"global\",\"pace_multiple\":null,\"ends_at\":\"2026-10-20T04:58:00+00:00\",\"ends_on\":\"time\",\"remaining_seconds\":406758.865854}},\"outcomes\":{\"passed\":10,\"failed\":7,\"not-run\":7,\"unknown\":0},\"context\":{\"window_tokens\":null,\"estimated_tokens\":50392,\"headroom_pct\":null,\"peak_utilisation_p50_pct\":null,\"peak_utilisation_p90_pct\":null,\"peak_utilisation_runs\":null},\"budget_source\":null,\"budget_age_s\":345.823945,\"stale\":true,\"reset_available\":null}},\"return_times\":{\"claude\":{\"p50_s\":6257.5,\"p90_s\":12314,\"runs\":2,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"ledger\",\"budget_age_s\":157217.766499,\"stale\":true},\"clive\":{\"p50_s\":2517,\"p90_s\":8439,\"runs\":83,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"ledger\",\"budget_age_s\":2093094.857499,\"stale\":true},\"codex\":{\"p50_s\":7640.0,\"p90_s\":48831,\"runs\":26,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"document\",\"budget_age_s\":347.287499,\"stale\":false}},\"lanes\":{\"claude\":{\"availability\":\"unknown\",\"utilisation_pct\":38.0,\"burn_multiple\":0.626016806508888,\"pace_allowance\":0.0631225400564393,\"resets_at\":\"2026-10-18T06:00:00+00:00\",\"days_to_reset\":2.750893107650463,\"worker_slots\":null,\"congestion\":null,\"reset_available\":false},\"local\":{\"availability\":\"served\",\"utilisation_pct\":null,\"burn_multiple\":null,\"pace_allowance\":null,\"resets_at\":null,\"days_to_reset\":null,\"worker_slots\":30,\"congestion\":{\"running\":5,\"waiting\":0,\"admission_verdict\":\"open\",\"stale\":false,\"slots_state\":\"measured\"},\"reset_available\":null},\"codex\":{\"availability\":\"unknown\",\"utilisation_pct\":13.0,\"burn_multiple\":null,\"pace_allowance\":null,\"resets_at\":\"2026-10-22T06:13:12+00:00\",\"days_to_reset\":6.76005977431713,\"worker_slots\":null,\"congestion\":null,\"reset_available\":false}},\"local_lane\":{\"admission\":\"admitting\",\"expected_wait_s\":633.5,\"running\":5,\"waiting\":0,\"headroom\":7,\"worker_slots\":42,\"tokens_per_second\":66.144,\"read_at\":\"2026-10-15T11:58:42.846980+00:00\"}}",
+    "rendered_token_estimate": 3036,
+    "stage_ms": {
+      "budget-snapshot": 198.184,
+      "context-estimate": 19.246,
+      "records": 203.327,
+      "verdict-inputs": 52.06
+    },
+    "template_digest": "c3fe6f493155a9b428ea865abba751e7ff2b809fbe359a520deacbfa7bfb2aaa",
+    "usage": {
+      "cost": 0.000254772,
+      "input_tokens": 6066,
+      "output_tokens": 174
+    }
+  },
+  "plan": "converged-forward-solve",
+  "plan_impl_at_dispatch": 0.2857142857142857,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "948dfb16cc95233609cd8b41e9f06056a4aa7098",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "f2a74fb7bec81c4894e156adc47e22afc2fa83b7",
+    "reviewed_head_sha": "948dfb16cc95233609cd8b41e9f06056a4aa7098",
+    "scores": {
+      "durability": 5,
+      "evidence": 14,
+      "fit": 18,
+      "goal_fidelity": 9,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 86
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "picker",
+  "run_id": "r-20261015T115843362666-fused-convergence",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§5",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a13f6e-accb-74a2-a514-3da89bebcb4f",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 79355392,
+    "cumulative_input_tokens": 159067894,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 167414
+  },
+  "time_budget": "60m",
+  "tool_steps": 0.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 9745,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 12,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": null,
+    "exited_at": "2026-10-15T14:41:35Z",
+    "last_record_type": "item.completed",
+    "launched_at": "2026-10-15T14:41:13Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261015T115843362666-fused-convergence",
+    "signal": 15,
+    "signal_name": "SIGTERM",
+    "stream_records_seen": 2266,
+    "worker_pid": 1738778
+  },
+  "worker_seconds": null,
+  "worker_seconds_source": "stalled",
+  "worktree_retention": null
+}

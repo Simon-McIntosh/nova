@@ -15,6 +15,13 @@
     }
   },
   "dispatched_at": "2026-10-15T08:45:09Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "fast-read",
+      "recorded_at": "2026-10-15T09:17:17.128601+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/read_robustness/check_window.py",

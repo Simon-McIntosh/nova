@@ -21,7 +21,8 @@ from benchmarks import solovev_certificate as certificate
 from nova.equilibrium import current, fixed_points, topology
 from nova.equilibrium.solve_request import TopologyPolicy
 from scripts.analytic_oracle_fixtures import measure as fixture
-from scripts.prototypes.fast_read.kernel import read as fixed_shape_read
+from scripts.prototypes.diverted_stall.kernel import read as fixed_shape_read
+from scripts.prototypes.fast_read import program as mapped_program
 from scripts.prototypes.fast_read.program import FusedField, map_moments
 from scripts.prototypes.fused_convergence import roots as ray_roots
 from scripts.prototypes.lean_map.jets import build_jets
@@ -90,11 +91,10 @@ class CachedExterior:
 
 def run(args):
     kind, cache, output = args.kind, args.cache, args.output
+    mapped_program.read = fixed_shape_read
     if args.exact_roots:
         ray_roots.install()
     if args.omit_saddle_derivative:
-        from scripts.prototypes.fast_read import program as mapped_program
-
         original_saddle = mapped_program._saddle_moments
 
         def detached_saddle(*arguments, **keywords):

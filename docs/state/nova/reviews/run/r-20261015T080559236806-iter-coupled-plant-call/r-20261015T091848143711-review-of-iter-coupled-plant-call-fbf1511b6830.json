@@ -1,0 +1,106 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "7ae63932c4b2a38ca40b3fb91cf1fc1afd696ea9",
+    "d12adc9a84f207a39140ab5f8ef45e29c636c947",
+    "25f32be9806bd34b6516f397d40b5b11ffdfbe64",
+    "fbf1511b683066bde331f4c2c0b547bef06dc8b5"
+  ],
+  "completed_at": "2026-10-15T09:30:51.569Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "coupled-plant-reuse",
+      "recorded_at": "2026-10-15T09:31:30.786791+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-15T09:19:08Z",
+  "findings": [
+    {
+      "file": "nova/circuit/coupled_plant.py",
+      "line": "352",
+      "severity": "blocking",
+      "text": "blocking (goal fidelity, reuse): save_coupled_plant/load_coupled_plant implement a private npz serialiser pair in the new module rather than extending the serialisers the brief named -- nova/circuit/passive.py:639 save_circuit_system and :684 save_eigenbasis, and their loaders -- and docs/research/iter-coupled-plant-call.html:18 states the plant 'is cached through the serialisers nova.circuit.passive ships, extended to the coupled plant', a claim the diff contradicts because nova/circuit/passive.py does not appear in the changed paths. A reader of the record would conclude the named owner was extended; it was not."
+    },
+    {
+      "file": "nova/circuit/coupled_plant.py",
+      "line": "213",
+      "severity": "follow-on",
+      "text": "follow-on (reuse): _terminal_impedance re-implements the terminal-impedance-with-rings-shorted capability owned by nova/circuit/passive.py:237 terminal_impedance_spectrum -- the same bare winding plus i*w*L plus R and the w^2 einsum screening gamma*gamma/(rate + i*w), differing only in that it takes already-reduced modes where the owner solves the eigenbasis from the dense passive matrices -- so a second screening algebra now exists and can drift from the owner."
+    },
+    {
+      "file": "nova/circuit/coupled_plant.py",
+      "line": "265",
+      "severity": "follow-on",
+      "text": "follow-on (reuse): select_terminal_modes re-implements a mode-reduction search the repository already owns at nova/circuit/passive.py:322 reduce_passive_system (with select_modes at :314 and mode_relevance at :301) without extending it; the retained criterion differs (coupling-strength norm grown to an impedance tolerance versus history relevance), but the mechanism -- rank modes and retain a subset -- is the owner's."
+    },
+    {
+      "file": "nova/circuit/coupled_plant.py",
+      "line": "242",
+      "severity": "follow-on",
+      "text": "follow-on (fit): _relative_error is defined and never called; _reduction_error at :248 recomputes the same scale inline, so the helper is dead code."
+    },
+    {
+      "file": "docs/research/iter-coupled-plant-call.html",
+      "line": "52",
+      "severity": "follow-on",
+      "text": "follow-on (evidence): the committed record states the gate is 'ten tests, all passing, against the committed revision', but the reviewed head fbf1511b carries eleven tests (tests/test_coupled_plant.py 4 plus tests/test_iter_vessel_evolution.py 7); a correction to eleven is staged but uncommitted in the reviewed worktree, so at the reviewed revision the record understates its own gate by one."
+    },
+    {
+      "file": "/home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit/gate-logs/iter-coupled-plant-call/gate.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on (evidence provenance): the gate log's header stamps revision 25f32be9806bd34b6516f397d40b5b11ffdfbe64 yet reports '11 passed', and that revision carries only ten tests, so the log's revision and its passing count cannot both be right and the pytest gate cannot be tied to the reviewed head; the head's additional test (the real-set 1% test) is evidenced only by the standalone script log."
+    },
+    {
+      "file": "docs/research/iter-coupled-plant-call.html",
+      "line": "47",
+      "severity": "follow-on",
+      "text": "follow-on (evidence): the record asserts the section 3 VS3 peaks are unchanged (8.40230532 to 8.40042344 Wb and 10.0803061 to 10.09798884 Wb) but no recomputation log for those two numbers exists under the node's declared gate-logs directory, so a done-when item that asked to 'show the VS3 numbers are unchanged' rests on stated numbers rather than a receipt."
+    }
+  ],
+  "gate_arms_note": "the reviewed run's manifest and live record carry baseline_suite and after_suite both null, so it declares no readable suite arm and added_failure_count is 0 by absence of arms rather than a measured zero. The arms it did leave were read: gate.log (EXIT=0, 11 passed, header stamped 25f32be), negative-control-head.log (EXIT=0, 1 passed, header fbf1511b) and negative-control-mutant.log (EXIT=1, the cold/cached comparison failing on mode_tau) at /home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit/gate-logs/iter-coupled-plant-call/, plus real-set-reduced-vs-full.log (EXIT=0, within 1% True both meshes). No failure id is added by the reviewed run's own records.",
+  "item_verdicts": {
+    "call_sites": "no production call site: coupled_plant and CoupledPlant are named only in nova/circuit/coupled_plant.py and tests/test_coupled_plant.py, and a grep over nova/, scripts/ and apps/ finds no other importer, so the call is a new surface with no runtime consumer yet.",
+    "diff": "read commit by commit from 11e57396879bb4a53949ab68540c796ff3431cd0 to fbf1511b683066bde331f4c2c0b547bef06dc8b5: 7ae63932c adds the call and result type, d12adc9a8 routes measure.py's passive_flux_at_points through the linkage owner and adds the driver test, 25f32be98 adds the record and figure, fbf1511b adds the real-set 1% test; 8 files, 2934 insertions, all inside the declared scope.",
+    "done_when": "done is a cold-equals-cached comparison, a 1% reduced-vs-full terminal impedance from 0.1 Hz to 5 kHz for every coil, a logged negative control, the folded reuse and driver-test items with VS3 numbers unchanged, and committed documents; tests/test_coupled_plant.py:127 pins cold against cached by value on every array field and the recorded mutant reddens it, real-set-reduced-vs-full.log records within 1% True on both cached meshes over 101 log points, the driver test is at tests/test_iter_vessel_evolution.py:120, but the VS3-unchanged item is stated in the record without a backing log.",
+    "goal": "the node's goal is to return the coupled ITER plant (sectioned coils, reduced passive modes, plasma flux drive) through one public call and one result type cached through nova's serialisers; nova/circuit/coupled_plant.py:93 coupled_plant and :41 CoupledPlant carry every field the goal names, but the caching half is a private npz pair (coupled_plant.py:352 save_coupled_plant, :372 load_coupled_plant) and nova/circuit/passive.py, whose serialisers the goal names, is absent from the diff.",
+    "manifest": "read; its status is complete, its commits list runs through fbf1511b, its checkpoint claims gate green (11 passed) with a red mutant arm, and its tests and test_logs name the gate and the real-set log, but baseline_suite and after_suite are absent and its gate.log is stamped at 25f32be rather than the reviewed head.",
+    "write_paths": "the declared scope is nova/circuit/coupled_plant.py, nova/circuit/passive.py, tests/test_coupled_plant.py, scripts/iter_vessel_evolution/measure.py, tests/test_iter_vessel_evolution.py, docs/research/iter-coupled-plant-call.html, docs/figures/iter-coupled-plant-call and docs/evidence/fragments/iter-passive-plasma-circuit/iter-coupled-plant-call.html; all 8 changed paths are inside it and nova/circuit/passive.py, though declared, is untouched."
+  },
+  "justifications": {
+    "durability": "tests/test_coupled_plant.py:127 is a genuine guard (cold compute against npz round-trip) that the recorded mutant reddens, but tests/test_coupled_plant.py:153 and :161 build both sides from the same _terminal_impedance, so a systematic impedance regression moves both together, and tests/test_coupled_plant.py:184 skips when the sectioned cache is absent.",
+    "evidence": "the 1% done-when is recorded at the head in real-set-reduced-vs-full.log (within 1% True on both meshes, 14 coils, 101 log points 0.1 Hz-5 kHz, worst per-coil 1.3e-13 and 4.3e-12), but the VS3-unchanged item has no log under the declared gate-logs and the head's record states ten tests where the head carries eleven (docs/research/iter-coupled-plant-call.html:52).",
+    "fit": "nova/circuit/coupled_plant.py follows the surrounding circuit idiom (module docstring, dataclass, explicit __all__) and carries no plan or ticket label, but nova/circuit/coupled_plant.py:242 _relative_error is dead code.",
+    "goal_fidelity": "nova/circuit/coupled_plant.py:93 returns the plant and :41 the result type with every field the goal names, but the 'cached through nova's serialisers' half is unmet -- coupled_plant.py:352 save_coupled_plant and :372 load_coupled_plant are a private npz pair while nova/circuit/passive.py is untouched.",
+    "reuse": "nova/circuit/coupled_plant.py:213 _terminal_impedance duplicates nova/circuit/passive.py:237 terminal_impedance_spectrum, :265 select_terminal_modes duplicates nova/circuit/passive.py:322 reduce_passive_system, and :352 save_coupled_plant duplicates nova/circuit/passive.py:639 save_circuit_system, none of them extending its owner.",
+    "scope_discipline": "every changed path is inside the eight declared write paths -- coupled_plant.py, tests/test_coupled_plant.py, measure.py, tests/test_iter_vessel_evolution.py, the record, its figure and the fragment -- and nothing outside them is touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to return the coupled ITER plant through one public call and one result type cached through nova's serialisers; nova/circuit/coupled_plant.py:93 coupled_plant and :41 CoupledPlant carry every field the goal names, but the caching half is a private npz pair (coupled_plant.py:352/372) and nova/circuit/passive.py, whose serialisers the goal names, is absent from the diff.\nVERDICT done_when: the cold-equals-cached test (tests/test_coupled_plant.py:127) is falsified by the run's own recorded mutant arm, and the 1% reduced-vs-full measure is recorded at the head in real-set-reduced-vs-full.log (within 1% True on both meshes, 14 coils, 101 log points 0.1 Hz-5 kHz, worst per-coil 1.3e-13 and 4.3e-12); the folded driver test is present at tests/test_iter_vessel_evolution.py:120, but the VS3-unchanged item rests on the record's stated numbers alone.\nVERDICT write_paths: the declared scope is nova/circuit/coupled_plant.py, nova/circuit/passive.py, tests/test_coupled_plant.py, scripts/iter_vessel_evolution/measure.py, tests/test_iter_vessel_evolution.py, docs/research/iter-coupled-plant-call.html, docs/figures/iter-coupled-plant-call, docs/evidence/fragments/iter-passive-plasma-circuit/iter-coupled-plant-call.html; every one of the 8 paths in the diff is inside it.\nVERDICT manifest: read; status complete with commits through fbf1511b and a checkpoint claiming gate green (11 passed) and a red mutant arm, but it records no baseline_suite/after_suite and its gate.log is stamped at revision 25f32be, not the reviewed head.\nVERDICT diff: read commit by commit from 11e57396879bb4a53949ab68540c796ff3431cd0 to fbf1511b683066bde331f4c2c0b547bef06dc8b5: 7ae63932c (the call and result type), d12adc9a8 (measure.py routed through the linkage owner plus the driver test), 25f32be98 (the record and figure), fbf1511b (the real-set 1% test); 8 files, 2934 insertions, all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: nova/circuit/coupled_plant.py:93 returns the plant and :41 the result type with every field the goal names, but the 'cached through nova's serialisers' half is unmet -- coupled_plant.py:352 save_coupled_plant and :372 load_coupled_plant are a private npz pair while nova/circuit/passive.py is untouched.\nSCORE evidence: 13\nJUSTIFICATION evidence: the 1% done-when is recorded at the head in real-set-reduced-vs-full.log (within 1% True on both meshes), but the VS3-unchanged item has no log under the declared gate-logs and the head's record states ten tests where the head carries eleven (docs/research/iter-coupled-plant-call.html:52).\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every changed path (coupled_plant.py, tests/test_coupled_plant.py, measure.py, tests/test_iter_vessel_evolution.py, the record, its figure and the fragment) is inside the eight declared write paths and nothing outside them is touched.\nSCORE durability: 14\nJUSTIFICATION durability: tests/test_coupled_plant.py:127 is a genuine guard (cold compute against npz round-trip) that the recorded mutant reddens, but tests/test_coupled_plant.py:153 and :161 build both sides from the same _terminal_impedance and tests/test_coupled_plant.py:184 skips when the sectioned cache is absent.\nSCORE fit: 17\nJUSTIFICATION fit: nova/circuit/coupled_plant.py follows the surrounding circuit idiom (module docstring, dataclass, explicit __all__) and carries no plan or ticket label, but nova/circuit/coupled_plant.py:242 _relative_error is dead code.\nSCORE reuse: 4\nJUSTIFICATION reuse: nova/circuit/coupled_plant.py:213 _terminal_impedance duplicates nova/circuit/passive.py:237 terminal_impedance_spectrum, :265 select_terminal_modes duplicates nova/circuit/passive.py:322 reduce_passive_system, and :352 save_coupled_plant duplicates nova/circuit/passive.py:639 save_circuit_system, none of them extending its owner.\nFINDING nova/circuit/coupled_plant.py:352 blocking: save_coupled_plant/load_coupled_plant implement a private npz serialiser pair rather than extending the serialisers the brief named (nova/circuit/passive.py:639 save_circuit_system, :684 save_eigenbasis), and docs/research/iter-coupled-plant-call.html:18 states the plant 'is cached through the serialisers nova.circuit.passive ships, extended to the coupled plant' -- a claim the diff contradicts, since nova/circuit/passive.py does not appear in the changed paths.\nFINDING nova/circuit/coupled_plant.py:213 follow-on: _terminal_impedance re-implements the terminal-impedance-with-rings-shorted capability owned by nova/circuit/passive.py:237 terminal_impedance_spectrum (the same bare winding plus i*w*L plus R and the w^2 einsum screening term), taking already-reduced modes where the owner solves the eigenbasis itself, so a second screening algebra now exists.\nFINDING nova/circuit/coupled_plant.py:265 follow-on: select_terminal_modes re-implements a mode-reduction search the repository owns at nova/circuit/passive.py:322 reduce_passive_system (with select_modes:314 and mode_relevance:301), ranking by coupling-strength norm where the owner ranks by history relevance, without extending the owner.\nFINDING nova/circuit/coupled_plant.py:242 follow-on: _relative_error is defined and never called -- _reduction_error at :248 recomputes the same scale inline -- so the helper is dead code.\nFINDING docs/research/iter-coupled-plant-call.html:52 follow-on: the committed record states the gate is 'ten tests, all passing, against the committed revision', but the reviewed head fbf1511b carries eleven (test_coupled_plant 4 plus test_iter_vessel_evolution 7); a correction to eleven sits staged but uncommitted in the worktree, so at the reviewed revision the record is off by one.\nFINDING /home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit/gate-logs/iter-coupled-plant-call/gate.log:1 follow-on: the gate log's header stamps revision 25f32be9806bd34b6516f397d40b5b11ffdfbe64 yet reports 11 passed, and that revision carries only ten tests, so the log's revision and its count cannot both be right and the pytest gate cannot be tied to the reviewed head.\nFINDING docs/research/iter-coupled-plant-call.html:47 follow-on: the record asserts the section 3 VS3 peaks are unchanged (8.40230532 to 8.40042344 Wb, 10.0803061 to 10.09798884 Wb) but no recomputation log exists under the node's declared gate-logs directory, so an otherwise-quantitative done_when item rests on a stated number rather than a receipt.\n",
+  "review_run_id": "r-20261015T091848143711-review-of-iter-coupled-plant-call-fbf1511b6830",
+  "reviewed_base_sha": "11e57396879bb4a53949ab68540c796ff3431cd0",
+  "reviewed_head_sha": "fbf1511b683066bde331f4c2c0b547bef06dc8b5",
+  "reviewed_revision": "fbf1511b683066bde331f4c2c0b547bef06dc8b5",
+  "reviewed_run_id": "r-20261015T080559236806-iter-coupled-plant-call",
+  "reviewer_node": "review-of-iter-coupled-plant-call-fbf1511b6830",
+  "reviewer_run_id": "r-20261015T091848143711-review-of-iter-coupled-plant-call-fbf1511b6830",
+  "scores": {
+    "durability": 14,
+    "evidence": 13,
+    "fit": 17,
+    "goal_fidelity": 13,
+    "reuse": 4,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T09:28:49.205637+00:00",
+  "total": 80,
+  "verdict": "blocked"
+}

@@ -27,8 +27,8 @@ from scripts.prototypes.support.geometry import certificate_field
 from tests.equilibrium.test_topology_read import _analytic_inputs
 
 
-def measure(name, function, output: Path):
-    rows = []
+def measure(name, function, output: Path, previous):
+    rows = list(previous)
     for width in (1, 16, 128):
         offset = jnp.linspace(-1.0, 1.0, width)
         started = perf_counter()
@@ -129,7 +129,7 @@ def run(cache: Path, output: Path):
         ("four_arc_bell", bell),
         ("exact_cut_booking", exact_cut),
     ):
-        rows.extend(measure(name, function, output))
+        rows = measure(name, function, output, rows)
     print("RESULT " + json.dumps(rows), flush=True)
 
 

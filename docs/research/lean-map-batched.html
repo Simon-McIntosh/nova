@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="lean-map-batched">
+  <meta name="plan-title" content="Lean-map batched chord measurements">
+  <meta name="plan-summary" content="H200 analytic accuracy, cold Newton, and per-state batched lean-map throughput">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-informs" content="converged-forward-solve">
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-verifies" content="converged-forward-solve#s5">
+  <meta name="plan-source" content="analytic limited and diverted certificate carriers on the H200">
+  <meta name="plan-source-quality" content="primary">
+  <meta name="plan-tags" content="equilibrium,grad-shafranov,fixed-point,topology,jax,convergence">
+  <title>Lean-map batched chord measurements | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<header>
+  <p class="eyebrow">Research input and execution evidence</p>
+  <h1>Lean-map batched chord measurements</h1>
+  <p class="lead">The first fresh replay preserves the lean map's analytic fidelity at 289 limited cells, but its cold Newton residual stops at 1.83 × 10<sup>−12</sup> and its cache-disabled compile takes 115 s. The batched per-state wall at the production sizes remains under measurement; no sub-millisecond qualification follows from this first row.</p>
+</header>
+
+<section id="lean-map-batched-method">
+  <h2>Method and acceptance</h2>
+  <p>The candidate is the fixed-shape lean map: connected full cells use an 18-point interior Gauss rule, while connected partial cells and irregular wall cells use exact cuts in a fixed-capacity batch. A dense values map serves interior Gauss points and a gathered six-jet map serves the boundary and fixed-point windows. The analytic certificate supplies the exact-support exterior. The same scaled moment equation is used for cold Newton, a fresh dense Jacobian factor, and two cached-factor chord corrections. All program calls take state, geometry, map operands and factor as runtime arguments. Double precision is enabled before any JAX arrays are constructed.</p>
+  <p>Each requested resolution has both limited and diverted carriers, and each carrier is built twice with the device builder in separate caches. A row reports the independently checked analytic-state map error; cold residual history, terminal gradient ratio and repeatability; and synchronised width-1, width-16 and width-128 walls divided by distinct states. Map-only, factor-build and chord-correction walls are separate measurements. Compilation runs with the persistent compilation cache disabled. The strict pass requires each scaled moment residual to be at most 10<sup>−12</sup>, a per-state chord wall below 0.90 ms, executable code below 50 MB and cold compilation below 60 s.</p>
+  <p>The hard-centroid control recomputes point booking on the same analytic field and exact-support exterior; the expected diverted error is about 0.42 at 2,098 cells. A perturbed LU factor is compared with the unperturbed factor on the same chord state, so a refusal counts as a negative control only when the unperturbed state passes. The 550-cell continuity sweep bisects a limited-to-diverted bracket and records boundary flux, booked current and refusal flags. The 2,098-cell stage profile times the support read, exact cut booking, fixed-point roots, interior Gauss booking and matrix reads separately.</p>
+</section>
+
+<section id="lean-map-batched-first-row">
+  <h2>First measured row</h2>
+  <table><caption>H200 pilot job 1286399, device-built 289-cell limited carrier. The receipt is under the worker run directory and records the imported Nova path and working tree before the measurement.</caption>
+    <thead><tr><th>Analytic map error</th><th>Map wall</th><th>Cold compile</th><th>Cold solve wall</th><th>Terminal scaled residual</th><th>Accepted Newton steps</th></tr></thead>
+    <tbody><tr><td>1.4323371455 × 10<sup>−4</sup></td><td>11.399 ms</td><td>115.391 s</td><td>46.401 s</td><td>1.8306504944 × 10<sup>−12</sup></td><td>1</td></tr></tbody>
+  </table>
+  <p>The Gauss-point calibration signal spans 59.576 flux units and reconstructs the nonuniform analytic field to 2.31 × 10<sup>−13</sup> absolute sup, so the low map error is not an empty or uniform-read result. The first residual history reaches 1.8306504944 × 10<sup>−12</sup> after one accepted correction and then repeats that value for the remaining seven scan slots. This reproduces the previously observed near-threshold fresh-build sensitivity; the strict cold-converged flag is false. The map executable is 23,924 bytes and the cold Newton executable is 90,606 bytes; both code-size observations are below 50 MB, while the cold Newton compile exceeds 60 s.</p>
+  <p>One map call at this size is already 12.7 times the 0.90 ms per-state target. The batched wall, not this width-one observation, decides throughput. The next H200 replay keeps the nonconverged terminal state and times the map, fresh factor and two-correction chord batches with explicit converged counts. Its result will be reported separately from the cold residual.</p>
+</section>
+
+<section id="lean-map-batched-pending">
+  <h2>Measurements in progress</h2>
+  <p>The two-topology 550- and 2,098-cell rows, the second fresh builds, the width-1/16/128 throughput rows, the gradient ratios, the 2,098-cell stage profile, the 550-cell topology transition, the two live negative controls and terminal poloidal panels are not yet measured in this record. Their absence is an open measurement, not a passing gate. The committed suite runs those rows inside one reserved H200 allocation and writes a receipt after every stage, so completed rows survive a later row failing.</p>
+</section>
+</main></body></html>

@@ -21,10 +21,10 @@ export XLA_PYTHON_CLIENT_PREALLOCATE=false JAX_PLATFORMS=cuda,cpu
 printf 'revision=%s tree=%s command=%s %s %s %s %s %s\n' \
   "$revision" "$worktree" "$snapshot/scripts/prototypes/fused_newton/run.sh" \
   "$revision" "$worktree" "$run_directory" "$snapshot" "$cache"
-"$python" -c 'import nova; print("nova=" + nova.__file__)'
+"$python" -P -c 'import nova; print("nova=" + nova.__file__)'
 for kind in limited diverted; do
   printf 'ROW kind=%s\n' "$kind"
-  "$python" -m scripts.prototypes.fused_newton.measure \
+  "$python" -P -m scripts.prototypes.fused_newton.measure \
     --kind "$kind" --cache "$cache" \
     --output "$run_directory/$kind.json" \
     --trace-dir "$run_directory/traces"

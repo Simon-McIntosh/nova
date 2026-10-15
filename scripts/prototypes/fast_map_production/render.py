@@ -56,7 +56,7 @@ def step_scan(baseline, candidate, output):
     _save(figure, axes, output)
 
 
-def resolution(receipts, output):
+def resolution(receipts, output, unchanged=None, lean=None):
     _style()
     cells = np.asarray([row["cells"] for row in receipts])
     error = np.asarray([row["centre_map_flux_error"] for row in receipts])
@@ -64,10 +64,16 @@ def resolution(receipts, output):
     figure, axis = plt.subplots(figsize=(14, 7), dpi=100)
     axis.loglog(cells, error, "o-", color=BLUE, linewidth=3, markersize=9)
     axis.loglog(cells, residual, "o--", color=RUST, linewidth=2.6, markersize=9)
+    if unchanged:
+        axis.loglog(cells, unchanged, "o:", color=GREY, linewidth=2.6, markersize=9)
+        axis.text(cells[-1], unchanged[-1], "unchanged map", color=GREY, ha="right")
+    if lean:
+        axis.loglog(cells, lean, "o-.", color="#355f4d", linewidth=2.6, markersize=9)
+        axis.text(cells[-1], lean[-1], "lean map", color="#355f4d", ha="right")
     axis.set_xlabel("carrier cells")
     axis.set_ylabel("relative error")
     axis.set_xticks(cells, labels=[str(cell) for cell in cells])
-    axis.text(cells[-1], error[-1], "map image", color=BLUE, ha="right")
+    axis.text(cells[-1], error[-1], "profile map", color=BLUE, ha="right")
     axis.text(cells[-1], residual[-1], "seed residual", color=RUST, ha="right")
     _save(figure, (axis,), output)
 
@@ -77,6 +83,8 @@ def main():
     parser.add_argument("--baseline-probe", type=Path)
     parser.add_argument("--candidate-probe", type=Path)
     parser.add_argument("--map", type=Path, action="append", default=[])
+    parser.add_argument("--unchanged-error", type=float, action="append", default=[])
+    parser.add_argument("--lean-error", type=float, action="append", default=[])
     parser.add_argument("--terminal", type=Path, action="append", default=[])
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
@@ -91,6 +99,8 @@ def main():
         resolution(
             [json.loads(path.read_text()) for path in args.map],
             args.output / "resolution.svg",
+            args.unchanged_error,
+            args.lean_error,
         )
     for receipt in args.terminal:
         data = json.loads(receipt.read_text())

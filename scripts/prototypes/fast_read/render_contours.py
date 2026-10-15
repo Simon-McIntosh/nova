@@ -31,26 +31,36 @@ def panel(data, output):
         axis,
         points[:, 0],
         points[:, 1],
-        analytic,
-        levels,
-        wall,
-        color="#444444",
-        linewidth=2.6,
-    )
-    draw_scattered_contours(
-        axis,
-        points[:, 0],
-        points[:, 1],
         solved,
         levels,
         wall,
         color=DEFAULT_INK.flux_color,
         linewidth=3.0,
     )
+    reference_lines = draw_scattered_contours(
+        axis,
+        points[:, 0],
+        points[:, 1],
+        analytic,
+        levels,
+        wall,
+        color="#444444",
+        linewidth=2.0,
+    )
+    reference_lines.set_linestyles("dashed")
     draw_wall(axis, wall[:, 0], wall[:, 1])
     solved_roots = np.asarray(data["solved_roots"])
     analytic_roots = np.asarray(data["analytic_roots"])
-    reference_style = DEFAULT_INK.variant(axis_color="#444444", xpoint_color="#444444")
+    reference_style = DEFAULT_INK.variant(
+        axis_color="#444444",
+        xpoint_color="#444444",
+        axis_markersize=10,
+        xpoint_markersize=11,
+    )
+    solved_style = DEFAULT_INK.variant(
+        axis_color=DEFAULT_INK.flux_color,
+        xpoint_color=DEFAULT_INK.flux_color,
+    )
     draw_nulls(
         axis,
         analytic_roots[0],
@@ -62,22 +72,20 @@ def panel(data, output):
         axis,
         solved_roots[0],
         solved_roots[1:],
-        style=DEFAULT_INK,
+        style=solved_style,
         contain=wall,
     )
-    axis.text(
-        0.02,
-        0.06,
+    figure.text(
+        0.03,
+        0.95,
         "solved flux and nulls",
-        transform=axis.transAxes,
         color=DEFAULT_INK.flux_color,
         fontsize=20,
     )
-    axis.text(
-        0.02,
-        0.01,
+    figure.text(
+        0.03,
+        0.90,
         "analytic flux and nulls",
-        transform=axis.transAxes,
         color="#444444",
         fontsize=20,
     )

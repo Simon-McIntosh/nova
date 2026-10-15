@@ -21,11 +21,11 @@
   <meta name="plan-sprint" content="S24">
   <meta name="plan-tags" content="iter,machine-description,equilibrium">
   <meta name="plan-blocks" content="power_convertor:iter-switched-terminal-transients">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
   <title>ITER Passive and Prescribed-Plasma Circuit | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="7">
 <meta name="plan-modified" content="2026-10-15">
 </head>
 <body>
@@ -127,7 +127,7 @@
     ∂ψ/∂Z.</p>
 
     <h2 id="s3">§3 — The vessel currents, evolved through a scenario</h2>
-<section data-reckon="section" data-id="s3" data-effort-hours="5.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s3" data-effort-hours="5.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
     <p>The passive structure is driven by DINA's coil currents and the prescribed plasma, and integrated
     with nova's exact zero-order-hold eigenmode propagation (<code>circuit/propagate.py</code>). Its currents
     are compared group by group with DINA's own <code>pf_passive</code> currents in the DINA-IMAS cases. They
@@ -217,6 +217,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-close-s1" data-who="reckon-build" data-when="2026-10-15T04:05:00Z">
     <div class="r-comment-body"><p>§1 landed (merged <code>c20fda519</code>): 295 winding sections and 1,312 or 2,163 passive circuits, all couplings from nova; sectioning within 0.46 %, analytic checks within 0.45 % and 0.03 %, meshes agree within 0.30 % to 5 kHz; the power_convertor export differs by up to −1.1 % (VSU), reported as measured. <a href="/nova/evidence/archive/iter-passive-plasma-circuit-landed.html#iter-sectioned-conductor-set">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-close-s3" data-who="reckon-build" data-when="2026-10-15T08:15:00Z">
+    <div class="r-comment-body"><p>§3 landed (merged <code>8e3676bcb</code>): vessel currents evolved through 105014/1 and 105052/1 (91/103 and 33/103 DINA loops within tolerance). PF2–PF5 coil voltages are consistent with DINA's within 93–235 V rms, which is cross-code consistency only. The CS, PF1 and PF6 residual is switching-network discharge. The VS3 residual is not closed. <a href="/nova/evidence/archive/iter-passive-plasma-circuit-landed.html#iter-vessel-evolution">evidence</a></p></div>
 </div>
 </section>
 </main>

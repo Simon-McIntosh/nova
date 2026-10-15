@@ -129,6 +129,12 @@ def run(kind, cache, output, traces):
         "axis_distance_pitches": float(
             jnp.linalg.norm(state.axis - reference.axis) / jnp.median(geometry.pitch)
         ),
+        "reference_boundary_flux": float(reference.boundary_flux),
+        "boundary_flux": float(state.boundary_flux),
+        "boundary_class": int(state.boundary_class),
+        "wall_candidate": float(state.wall_candidate),
+        "saddle_candidate": float(state.saddle_candidate),
+        "normal_cells": int(jnp.sum(state.normal_form_cells)),
         "boundary_delta": float(state.boundary_flux - reference.boundary_flux),
         "membership_max_delta": float(
             jnp.max(jnp.abs(state.membership - baseline_state.membership))

@@ -1,0 +1,400 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "read-only"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex",
+  "base_sha": "c58f9f2b9ea0e9c76323e7831b2f83a39f082d21",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T160233813944-review-of-diverted-stall-759b6b105788/brief.md",
+    "sha256": "75d11ba4faacd97c6f0e006786a7d902fd2b694d5846c8a02a9463b26b193e97"
+  },
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 4089088,
+      "cached_input_tokens_cumulative": 4089088,
+      "input_tokens": 4209175,
+      "input_tokens_cumulative": 4209175,
+      "output_tokens": 14523,
+      "output_tokens_cumulative": 14523,
+      "reasoning_output_tokens": 4757,
+      "reasoning_output_tokens_cumulative": 4757
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-10-15T16:09:51Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-15T16:02:58Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": false,
+    "matched_measure": null,
+    "override": false,
+    "role": "review",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.2857142857142857,
+    "plan": "converged-forward-solve",
+    "reason": "role-not-enforced:review",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 3.762576704465119,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-10-17T10:04:56Z, which is after this node's 3600s horizon ending 2026-10-15T17:02:35.923975+00:00",
+    "horizon_ends_at": "2026-10-15T17:02:35.923975+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-15T16:02:34Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-17T10:04:56Z",
+    "resets_at": "2026-10-22T06:13:12Z",
+    "seconds_until_reset": 569437,
+    "state": "quiet",
+    "utilisation_pct": 22.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-15T16:02:34Z",
+    "read_at": "2026-10-15T16:02:35Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 22.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-15T16:09:51Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T160233813944-review-of-diverted-stall-759b6b105788/manifest.md",
+  "member": "disposable-r-20261015T160233813944-review-of-diverted-stall-759b6b105788",
+  "model_key": "sol",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "review-of-diverted-stall-759b6b105788",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T143844399420-diverted-stall/review-brief.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T160233813944-review-of-diverted-stall-759b6b105788/brief.md",
+    "brief_sha256": "75d11ba4faacd97c6f0e006786a7d902fd2b694d5846c8a02a9463b26b193e97",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 2353,
+          "cached_input_tokens": 365246,
+          "input_tokens": 367601,
+          "output_tokens": 1807,
+          "reasoning_output_tokens": 1014,
+          "total_tokens": 369408,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "the review for r-20261015T143844399420-diverted-stall stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run's own baseline_suite and after_suite gate logs; the turn ends once that record is stored and the manifest reads complete",
+    "estimated_hours": null,
+    "goal": "attach an independent review to run r-20261015T143844399420-diverted-stall",
+    "id": "review-of-diverted-stall-759b6b105788",
+    "images": [],
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-15T16:02:34Z",
+      "read_at": "2026-10-15T16:02:35Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 22.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T160233813944-review-of-diverted-stall-759b6b105788/manifest.md",
+    "negative_control": "",
+    "plan": "converged-forward-solve",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "review",
+    "section": "§5",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261015T143844399420-diverted-stall.json",
+      "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261015T143844399420-diverted-stall.at-759b6b10578813d476d5de430ed3ccc70353dd04.json"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 3.76185714426426,
+      "derived": 0.06432992820287707,
+      "drain_hours": 168.0,
+      "effective_limit": 0.06432992820287707,
+      "elapsed_fraction": 0.058481752911706424,
+      "elapsed_hours": 9.82493448916668,
+      "group": "codex-sub",
+      "lift": {
+        "ends_at": "2026-10-20T04:58:00+00:00",
+        "ends_on": "time",
+        "form": "uncapped",
+        "group": "codex-sub",
+        "id": "codex-sub-1792002586-64d825",
+        "pace_multiple": null,
+        "remaining_seconds": 392118.235839,
+        "scope": "global"
+      },
+      "lift_hold": {
+        "held": false,
+        "kind": "uncapped"
+      },
+      "limited_by": "allowance",
+      "observed_at": "2026-10-15T16:02:41+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.78,
+      "remaining_windows": null,
+      "resets_at": "2026-10-22T06:13:12Z",
+      "state": "observed",
+      "utilisation": 0.22,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.123904,
+      "decided_by": "window",
+      "margin": 0.501096,
+      "name": "review-of-diverted-stall-759b6b105788",
+      "score": 0.625,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.22
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.764161,
+        "observed_at": "2026-10-15T16:02:41+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-22T06:13:12Z",
+        "state": "observed",
+        "utilisation": 0.22,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": "codex-sub-1792002586-64d825",
+    "member": "codex",
+    "node": "review-of-diverted-stall-759b6b105788",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-15T16:02:41.764161+00:00",
+    "score": 0.625,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.543,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {}
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.2857142857142857,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "c58f9f2b9ea0e9c76323e7831b2f83a39f082d21",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "id": "r-20261015T160233813944-review-of-diverted-stall-759b6b105788",
+    "reviewed_base_sha": "b5d3f094ebf408de23bad6c5422f8cf1e40ff30c",
+    "reviewed_head_sha": "759b6b10578813d476d5de430ed3ccc70353dd04",
+    "scores": {
+      "durability": 4,
+      "evidence": 11,
+      "fit": 17,
+      "goal_fidelity": 8,
+      "reuse": 4,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 64
+  },
+  "review_tier": "full",
+  "role": "review",
+  "route_mode": "explicit",
+  "run_id": "r-20261015T160233813944-review-of-diverted-stall-759b6b105788",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§5",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a1404d-9209-7b22-84c1-3c468d35afd8",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 4089088,
+    "cumulative_input_tokens": 8298263,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 19280
+  },
+  "time_budget": "60m",
+  "tool_steps": 69.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 413,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-15T16:09:54Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-15T16:03:05Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261015T160233813944-review-of-diverted-stall-759b6b105788",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 186,
+    "worker_pid": 2237079
+  },
+  "worker_seconds": 413,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

@@ -1,0 +1,68 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed manifest has no baseline_suite or after_suite arm, and no suite gate log is named. The H200 receipts are numerical probes, not comparable test summaries. Zero means no attributable suite failure IDs could be derived, not that a suite passed.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-15T16:09:51Z",
+  "dispatched_at": "2026-10-15T16:02:58Z",
+  "findings": [
+    {
+      "file": "docs/research/diverted-stall.html",
+      "line": "50",
+      "severity": "blocking",
+      "text": "blocking: the proposed 282-cell booking repair stops at residual 0.428655 with converged false, so the 1e-12 deliverable and its warm, batch, limited and sweep checks remain unmet."
+    },
+    {
+      "file": "scripts/prototypes/diverted_stall/measure.py",
+      "line": "107",
+      "severity": "blocking",
+      "text": "blocking: the added assertions check backend and valid setup only; both cold and rollback probes exit 0 while reporting nonconvergence, so no added gate turns red on the required 1e-12 or rollback clause."
+    },
+    {
+      "file": "scripts/prototypes/diverted_stall/kernel.py",
+      "line": "87",
+      "severity": "follow-on",
+      "text": "follow-on: this read duplicates the capability owned by scripts/prototypes/fast_read/kernel.py:29, while program.py:122 similarly copies fast_read/program.py:123; the brief permits isolated copies for diagnosis, but they leave parallel owners to reconcile."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "git grep at reviewed head found no production import of scripts.prototypes.diverted_stall outside its own prototype directory; docs/research/diverted-stall.html:30 is a research reference rather than a runtime call site.",
+    "diff": "The 16 commits from b5d3f094ebf408de23bad6c5422f8cf1e40ff30c to 759b6b10578813d476d5de430ed3ccc70353dd04 add diagnostic scripts, two isolated read and booking variants, four SVG figures and two HTML records; docs/research/diverted-stall.html:50 identifies both variants as failed.",
+    "done_when": "prompt.txt:115-122 requires a 1e-12 cold, warm and batched solve, unchanged limited and sweep controls, and a live red rollback; booking-cold.json records 0.428655 and converged false, and the omitted controls are acknowledged at docs/research/diverted-stall.html:50.",
+    "goal": "prompt.txt:30 asks for the cause of the 2.7e-3 stall and a 1e-12 diverted solve; docs/research/diverted-stall.html:50 records two failed repairs and no converged carrier.",
+    "manifest": "manifest.md:5-18 reports status complete, 16 commits and H200 logs but explicitly records the failed 0.428655 repair, omitted controls, and no baseline_suite or after_suite arm.",
+    "write_paths": "prompt.txt:68-72 grants the diverted_stall prototype, its research page, figure directory and evidence fragment; all 11 paths in the base-to-head diff lie within those grants."
+  },
+  "justifications": {
+    "durability": "measure.py:107,126,140,272 and sweep.py:51 fail on wrong backend or invalid reads and bookings, but no added assertion fails when the cold solve remains above 1e-12 or the rollback also remains stalled.",
+    "evidence": "booking.log and candidate.log end EXIT=0 and their receipts report nonconvergence, so docs/research/diverted-stall.html:50 records the failure without a gate that asserts the done_when.",
+    "fit": "measure.py:3-32 follows the prototype's binary64 and imported-operand style, while kernel.py:87 and program.py:122 use descriptive names without plan labels.",
+    "goal_fidelity": "docs/research/diverted-stall.html:34-50 diagnoses a wall-path jump and mixed saddle booking, but the latest 282-cell terminal residual is 0.428655 against the goal's 1e-12.",
+    "reuse": "kernel.py:87 duplicates the existing topology read owned by scripts/prototypes/fast_read/kernel.py:29, and program.py:122 duplicates its moment map in scripts/prototypes/fast_read/program.py:123 instead of extending either owner.",
+    "scope_discipline": "git diff --name-only for the reviewed pair lists only the four grants at prompt.txt:68-72, with no product or test file."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: prompt.txt:30 asks for the cause of the 2.7e-3 stall and a 1e-12 diverted solve; docs/research/diverted-stall.html:50 records two failed repairs and no converged carrier.\nVERDICT done_when: prompt.txt:115-122 requires a 1e-12 cold, warm and batched solve, unchanged limited and sweep controls, and a live red rollback; booking-cold.json records 0.428655 and converged false, and the omitted controls are acknowledged at docs/research/diverted-stall.html:50.\nVERDICT write_paths: prompt.txt:68-72 grants the diverted_stall prototype, its research page, figure directory and evidence fragment; all 11 paths in the base-to-head diff lie within those grants.\nVERDICT manifest: manifest.md:5-18 reports status complete, 16 commits and H200 logs but explicitly records the failed 0.428655 repair, omitted controls, and no baseline_suite or after_suite arm.\nVERDICT diff: The 16 commits from b5d3f094ebf408de23bad6c5422f8cf1e40ff30c to 759b6b10578813d476d5de430ed3ccc70353dd04 add diagnostic scripts, two isolated read and booking variants, four SVG figures and two HTML records; docs/research/diverted-stall.html:50 identifies both variants as failed.\nCALL_SITES: none\nSCORE goal_fidelity: 8\nJUSTIFICATION goal_fidelity: docs/research/diverted-stall.html:34-50 diagnoses a wall-path jump and mixed saddle booking, but the latest 282-cell terminal residual is 0.428655 against the goal's 1e-12.\nSCORE evidence: 11\nJUSTIFICATION evidence: booking.log and candidate.log end EXIT=0 and their receipts report nonconvergence, so docs/research/diverted-stall.html:50 records the failure without a gate that asserts the done_when.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only for the reviewed pair lists only the four grants at prompt.txt:68-72, with no product or test file.\nSCORE durability: 4\nJUSTIFICATION durability: measure.py:107,126,140,272 and sweep.py:51 fail on wrong backend or invalid reads and bookings, but no added assertion fails when the cold solve remains above 1e-12 or the rollback also remains stalled.\nSCORE fit: 17\nJUSTIFICATION fit: measure.py:3-32 follows the prototype's binary64 and imported-operand style, while kernel.py:87 and program.py:122 use descriptive names without plan labels.\nSCORE reuse: 4\nJUSTIFICATION reuse: kernel.py:87 duplicates the existing topology read owned by scripts/prototypes/fast_read/kernel.py:29, and program.py:122 duplicates its moment map in scripts/prototypes/fast_read/program.py:123 instead of extending either owner.\nFINDING docs/research/diverted-stall.html:50 blocking: the proposed 282-cell booking repair stops at residual 0.428655 with converged false, so the 1e-12 deliverable and its warm, batch, limited and sweep checks remain unmet.\nFINDING scripts/prototypes/diverted_stall/measure.py:107 blocking: the added assertions check backend and valid setup only; both cold and rollback probes exit 0 while reporting nonconvergence, so no added gate turns red on the required 1e-12 or rollback clause.\nFINDING scripts/prototypes/diverted_stall/kernel.py:87 follow-on: this read duplicates the capability owned by scripts/prototypes/fast_read/kernel.py:29, while program.py:122 similarly copies fast_read/program.py:123; the brief permits isolated copies for diagnosis, but they leave parallel owners to reconcile.",
+  "review_run_id": "r-20261015T160233813944-review-of-diverted-stall-759b6b105788",
+  "reviewed_base_sha": "b5d3f094ebf408de23bad6c5422f8cf1e40ff30c",
+  "reviewed_head_sha": "759b6b10578813d476d5de430ed3ccc70353dd04",
+  "reviewed_run_id": "r-20261015T143844399420-diverted-stall",
+  "rubric": "code",
+  "scores": {
+    "durability": 4,
+    "evidence": 11,
+    "fit": 17,
+    "goal_fidelity": 8,
+    "reuse": 4,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T16:06:50Z",
+  "total": 64,
+  "unmatched_base": true
+}

@@ -16,7 +16,10 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
+plt.style.use("data-ink")
+
 from benchmarks import solovev_certificate as certificate
+from nova.media.ink import DEFAULT_INK
 from scripts.prototypes.fast_read.render_contours import panel
 from scripts.prototypes.lean_map.probe_bias import _image
 from scripts.prototypes.solve_options.point_bias import _exterior
@@ -24,7 +27,10 @@ from scripts.prototypes.solve_options.profile import _machine
 from scripts.analytic_oracle_fixtures import measure as fixture
 
 
-COLORS = {"limited": "#356c86", "diverted": "#a05d49"}
+COLORS = {
+    "limited": DEFAULT_INK.flux_color,
+    "diverted": DEFAULT_INK.thomson_secondary_color,
+}
 
 
 def style(axis, xlabel, ylabel, *, log=False):
@@ -139,7 +145,10 @@ def stages(receipts, output):
         ((label, receipts["walls_ms"][key]) for key, label in labels.items()),
         key=lambda row: row[1],
     )
-    axis.barh([row[0] for row in ranked], [row[1] for row in ranked], color="#356c86")
+    for index, (_, wall) in enumerate(ranked):
+        axis.hlines(index, 0, wall, color=DEFAULT_INK.flux_color, linewidth=3)
+        axis.plot(wall, index, "o", color=DEFAULT_INK.flux_color, markersize=8)
+    axis.set_yticks(range(len(ranked)), labels=[row[0] for row in ranked])
     axis.tick_params(axis="y", labelsize=20)
     for index, (_, wall) in enumerate(ranked):
         axis.text(wall, index, f" {wall:.3g}", va="center", fontsize=20)

@@ -63,7 +63,7 @@ def run(cache, output):
         )
     )
     saddle, valid = jax.jit(lambda: _saddle_moments(geometry, reading, profile))()
-    ordinary, _ = jax.jit(
+    ordinary, ordinary_valid = jax.jit(
         lambda: bell_moments(geometry, reading, profile, convention.sigma, 4)
     )()
     selected = np.flatnonzero(
@@ -81,6 +81,7 @@ def run(cache, output):
                 "selected_fragments": np.asarray(
                     reading.fragment_selected[index]
                 ).tolist(),
+                "ordinary_valid": bool(ordinary_valid[index]),
             }
         )
     result = {

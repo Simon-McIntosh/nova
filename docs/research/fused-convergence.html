@@ -65,17 +65,17 @@
   </section>
   <section id="programs">
     <h2>Compilation and executable size</h2>
-    <p>A second H200 allocation disables the JAX compilation cache before each fresh process and confirms binary64 before any array is built. The cache-disabled <code>lower().compile()</code> timings are listed below; the limited batch cold row is still pending in that allocation. The factor programs compile below the 60 s condition but exceed the 50 MB executable ceiling. The compiled chord apply is small enough; the width 1, 16 and 128 batch programs are not.</p>
-    <table><caption>Cache-disabled compile and generated-code size, with the earlier batch row pending cache-disabled confirmation. MB uses decimal bytes. Values for the scalar and batched factor are the three same-linearization probes; exact-root and ablated factors are separate diverted runs.</caption><thead><tr><th>Program</th><th>Limited cold</th><th>Limited warm</th><th>Diverted</th><th>50 MB size</th></tr></thead><tbody>
+    <p>Cache-disabled H200 processes confirm binary64 before any array is built. The first allocation timed out after writing five complete same-linearization comparison receipts; a separate completed H200 retry measured the limited warm chord and all three batch widths. Each row below is a cache-disabled <code>lower().compile()</code> measurement from those receipts. The factor programs compile below 60 s but exceed 50 MB. The compiled chord apply fits; all three batch executables exceed the size ceiling.</p>
+    <table><caption>Cache-disabled compile and generated-code size. MB uses decimal bytes. Scalar and batched Jacobian columns are the same-linearization probes; exact-root and ablated factors are separate diverted runs. The chord and batch rows come from the completed retry.</caption><thead><tr><th>Program</th><th>Limited cold</th><th>Limited warm</th><th>Diverted</th><th>50 MB size</th></tr></thead><tbody>
       <tr><td>Moment map</td><td>10.30 s / 1.343 MB</td><td>9.98 s / 1.343 MB</td><td>13.55 s / 1.788 MB</td><td>Pass</td></tr>
       <tr><td>Scalar linearized product</td><td>4.35 s / 165.316 MB</td><td>4.28 s / 165.316 MB</td><td>6.17 s / 150.621 MB</td><td>Fail</td></tr>
       <tr><td>Batched Jacobian columns</td><td>8.12 s / 165.080 MB</td><td>8.25 s / 165.080 MB</td><td>12.15 s / 150.274 MB</td><td>Fail</td></tr>
       <tr><td>Implicit-root diverted map / scalar / columns</td><td>—</td><td>—</td><td>13.34 s / 1.788 MB; 5.90 s / 150.251 MB; 11.69 s / 149.829 MB</td><td>Factor fails</td></tr>
       <tr><td>Saddle-ablated diverted map / scalar / columns</td><td>—</td><td>—</td><td>13.07 s / 1.788 MB; 4.09 s / 132.072 MB; 7.57 s / 131.718 MB</td><td>Factor fails</td></tr>
-      <tr><td>Predecessor chord apply</td><td>—</td><td>10.82 s / 7.362 MB</td><td>—</td><td>Pass</td></tr>
-      <tr><td>Two-correction batch, widths 1 / 16 / 128</td><td>—</td><td>24.56 / 23.17 / 23.01 s; 492.963 / 289.805 / 289.812 MB</td><td>—</td><td>Fail</td></tr>
+      <tr><td>Predecessor chord apply</td><td>—</td><td>10.36 s / 7.362 MB</td><td>—</td><td>Pass</td></tr>
+      <tr><td>Two-correction batch, widths 1 / 16 / 128</td><td>—</td><td>19.70 / 24.00 / 25.53 s; 492.963 / 289.805 / 289.812 MB</td><td>—</td><td>Fail</td></tr>
     </tbody></table>
-    <p>All measured compile times are below 60 s. The 80–85 s first factor-linearization wall is a separate operation and already exceeds 60 s if the gate is interpreted as complete correction setup rather than XLA compilation alone. Matrix/LU build and factor application are reported in the shared-factor table; the warm chord's factor build and application are reported above.</p>
+    <p>All measured XLA compile times are below 60 s. The retry independently reproduces 1/1, 16/16 and 128/128 two-correction limited batch convergence, with 0.233 ms per state and maximum residual 5.01 × 10<sup>−14</sup> at width 128. The cache-disabled first factor-linearization wall is 94.7–95.8 s, a separate setup operation that exceeds 60 s if the condition covers complete correction setup. Matrix/LU build and factor application are reported in the shared-factor table; the warm chord's factor build and application are reported above.</p>
   </section>
   <section id="geometry">
     <h2>Terminal poloidal geometry</h2>

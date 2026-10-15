@@ -447,6 +447,127 @@ def run(args):
             row["read"] = inspect_read(candidate.reshape(reference.shape) * scale)
         return candidate.reshape(reference.shape), row
 
+    def compare_methods(point, active_operands):
+        started = perf_counter()
+        residual, factor = jax.linearize(
+            lambda x: equation(x, active_operands), point.reshape(-1)
+        )
+        jax.block_until_ready(residual)
+        linearize_ms = 1000 * (perf_counter() - started)
+        rhs = -residual
+        started = perf_counter()
+        product = jax.jit(factor).lower(rhs).compile()
+        scalar_compile_ms = 1000 * (perf_counter() - started)
+        started = perf_counter()
+        short_step, _ = krylov_step(product, rhs)
+        jax.block_until_ready(short_step)
+        short_ms = 1000 * (perf_counter() - started)
+        counter = [0]
+
+        def multiply(x):
+            return np.asarray(product(jnp.asarray(x, dtype=rhs.dtype)))
+
+        def count(_):
+            counter[0] += 1
+
+        operator = LinearOperator(
+            (rhs.size, rhs.size), matvec=multiply, dtype=np.float64
+        )
+        started = perf_counter()
+        gmres_step, gmres_info = gmres(
+            operator,
+            np.asarray(rhs),
+            rtol=1e-10,
+            atol=0.0,
+            restart=50,
+            maxiter=20,
+            callback=count,
+            callback_type="pr_norm",
+        )
+        gmres_ms = 1000 * (perf_counter() - started)
+        columns = jnp.eye(rhs.size, dtype=rhs.dtype)
+        started = perf_counter()
+        products = jax.jit(jax.vmap(factor)).lower(columns[: args.block]).compile()
+        batch_compile_ms = 1000 * (perf_counter() - started)
+        started = perf_counter()
+        blocks = []
+        for first in range(0, rhs.size, args.block):
+            last = min(first + args.block, rhs.size)
+            batch = columns[first:last]
+            if last - first < args.block:
+                batch = jnp.pad(batch, ((0, args.block - last + first), (0, 0)))
+            blocks.append(np.asarray(products(batch))[: last - first])
+        matrix = np.concatenate(blocks, axis=0).T
+        decomposition = lu_factor(matrix)
+        dense_build_ms = 1000 * (perf_counter() - started)
+        started = perf_counter()
+        dense_step = lu_solve(decomposition, np.asarray(rhs))
+        dense_apply_ms = 1000 * (perf_counter() - started)
+        methods = {}
+        for name, step, apply_ms in (
+            ("krylov", short_step, short_ms),
+            ("gmres", gmres_step, gmres_ms),
+            ("dense", dense_step, dense_apply_ms),
+        ):
+            step = jnp.asarray(step)
+            candidate = point.reshape(-1) + step
+            methods[name] = {
+                "candidate_residual": float(
+                    jnp.max(jnp.abs(equation(candidate, active_operands)))
+                ),
+                "linear_residual": float(
+                    jnp.linalg.norm(factor(step) - rhs)
+                    / jnp.maximum(jnp.linalg.norm(rhs), 1e-30)
+                ),
+                "apply_ms": apply_ms,
+                "build_ms": dense_build_ms if name == "dense" else 0.0,
+                "iterations": counter[0]
+                if name == "gmres"
+                else (4 if name == "krylov" else 1),
+            }
+        result["comparison"] = {
+            "input_residual": float(jnp.max(jnp.abs(residual))),
+            "linearize_ms": linearize_ms,
+            "scalar_compile_ms": scalar_compile_ms,
+            "batched_compile_ms": batch_compile_ms,
+            "scalar_executable_bytes": generated_bytes(product),
+            "batched_executable_bytes": generated_bytes(products),
+            "gmres_info": int(gmres_info),
+            "methods": methods,
+        }
+        save(output, result)
+
+    if args.compare:
+        point = reference / scale
+        active_operands = operands
+        if args.start_json:
+            point = (
+                jnp.asarray(
+                    json.loads(args.start_json.read_text())["terminal_state"]["moments"]
+                )
+                / scale
+            )
+        if args.compare_warm:
+            span = float(jnp.abs(reading.boundary_flux - reading.axis_flux))
+            amplitude = span * 1e-8 / pitch
+            shifted_values = replace(
+                values,
+                exterior=values.exterior
+                + amplitude * (rule.points.reshape(-1, 2)[:, 1] - roots[0, 1]),
+            )
+            selected = np.flatnonzero(np.asarray(window.lookup) >= 0)
+            delta = np.zeros_like(np.asarray(window.exterior))
+            positions = np.asarray(window.nodes)[selected]
+            lookup = np.asarray(window.lookup)[selected]
+            delta[lookup, 0] = amplitude * (positions[:, 1] - roots[0, 1])
+            delta[lookup, 2] = amplitude
+            shifted_window = replace(
+                window, exterior=window.exterior + jnp.asarray(delta)
+            )
+            active_operands = (shifted_values, jets, shifted_window, *operands[3:])
+        compare_methods(point, active_operands)
+        return
+
     def measure_warm(predecessor):
         span = float(jnp.abs(reading.boundary_flux - reading.axis_flux))
         amplitude = span * 1e-8 / pitch
@@ -471,6 +592,8 @@ def run(args):
             "input_residual": float(jnp.max(jnp.abs(equation(predecessor, operands)))),
         }
         save(output, result)
+        if args.warm_only:
+            return
 
         started = perf_counter()
         residual, factor = jax.linearize(
@@ -621,6 +744,9 @@ def main():
     parser.add_argument("--inspect-support", action="store_true")
     parser.add_argument("--start-json", type=Path)
     parser.add_argument("--warm", action="store_true")
+    parser.add_argument("--warm-only", action="store_true")
+    parser.add_argument("--compare", action="store_true")
+    parser.add_argument("--compare-warm", action="store_true")
     args = parser.parse_args()
     run(args)
 

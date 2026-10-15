@@ -23,7 +23,7 @@
   <header>
     <p class="eyebrow">Research input</p>
     <h1>Continuous fixed-shape forward map</h1>
-    <p class="lead">The unchanged 282-cell map still has a state discontinuity at the stalled diverted iterate. A separate candidate gives each cell one membership and moment representation and evaluates the wall candidate through a continuous path bottleneck; its H200 fidelity measurements are in progress.</p>
+    <p class="lead">The unchanged 282-cell map still has a state discontinuity at the stalled diverted iterate. A separate candidate makes the wall candidate continuous and books each cell with one representation. Its 282- and 550-cell H200 map errors improve or hold steady, while the 2,098-cell X-point owner still overbooks current.</p>
   </header>
   <section id="method">
     <h2>Method and provenance</h2>
@@ -43,7 +43,7 @@
       <tr><th>Unchanged saddle fragment</th><td>90.5678</td><td>0.408749</td></tr>
       <tr><th>First candidate ordinary cut</th><td>103.750</td><td>0.469310</td></tr>
     </tbody></table>
-    <p>The read now assigns four-crossing cells to the saddle fragment even if the ordinary polygon reports valid. Membership and the three booked moments therefore use that same representation. Fresh H200 map-only measurement restores the 282-cell analytic image error to 0.001086535 and its seed residual to 0.004696462, equal to the unchanged route to the precision shown. At 550 and 2,098 cells this repair alone left image errors of 0.000997180 and 0.0161172; the separate containing-cell repair below is being measured.</p>
+    <p>The read now assigns four-crossing cells to the saddle fragment even if the ordinary polygon reports valid. Membership and the three booked moments therefore use that same representation. Fresh H200 map-only measurement restores the 282-cell analytic image error to 0.001086535 and its seed residual to 0.004696462, equal to the unchanged route to the precision shown. At 550 and 2,098 cells this repair alone left image errors of 0.000997180 and 0.0161172; the separate containing-cell repair below changes both.</p>
   </section>
   <section id="production-owner">
     <h2>Why the production X-point cell was not booked</h2>
@@ -52,12 +52,13 @@
       <tr><th>Analytic reference</th><td>0.784511</td><td>—</td></tr>
       <tr><th>Existing ordinary booking</th><td>12.638078</td><td>0.460443 ordinary fraction</td></tr>
       <tr><th>Normal-form read</th><td>not booked</td><td>0.028514</td></tr>
+      <tr><th>Containing-cell saddle booking</th><td>3.463054</td><td>0.028514</td></tr>
     </tbody></table>
-    <p>The 11.8536 A excess at cell 47 accounts for the scaled current residual of −0.668971 there. The read now assigns every cell containing the X-point to the normal-form owner even when the ordinary cut is valid; the same owner supplies membership and all three booked moments. A fresh H200 map-image run at 282, 550, and 2,098 cells is in progress to test this repair. No cold solve has been submitted from this state.</p>
+    <p>The 11.8536 A ordinary-booking excess at cell 47 accounts for the scaled current residual of −0.668971 there. The read now assigns every cell containing the X-point to the normal-form owner even when the ordinary cut is valid; the same owner supplies membership and all three booked moments. That books one saddle cut at 2,098 cells and reduces the seed residual to 0.151167, but the saddle moment is still 2.67854 A above the analytic reference. A geometry probe compares its integrated ring area with the read's fragment area. No cold solve has been submitted from this state.</p>
   </section>
   <section id="candidate">
     <h2>Candidate measurement</h2>
-    <p>The H200 map-image measurement is running for the diverted 282, 550, and 2,098-cell carriers. Cold solves, limited controls, transition brackets, and terminal contour panels remain to be measured before this route can be qualified.</p>
+    <p>The completed H200 map-image rows give relative flux error 0.001086535, 0.000487282, and 0.003639982 at 282, 550, and 2,098 cells. The corresponding seed residuals are 0.004696462, 0.003685984, and 0.151166995. The 550-cell result improves on the unchanged error 0.000997180, but the finest error rises with resolution and remains above the lean-map result 0.0000176641. The fine-cell geometry must be repaired and fidelity remeasured before cold solves. Limited controls, transition brackets, and terminal contour panels remain to be measured before this route can be qualified.</p>
   </section>
 </main></body>
 </html>

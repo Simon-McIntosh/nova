@@ -1,4 +1,4 @@
-"""Trace map and warm-correction launches in the complete prototype route."""
+"""Trace one complete map call in the warm correction's prototype route."""
 
 # ruff: noqa: E402
 from nova.jax.config import configure_dtypes
@@ -36,8 +36,7 @@ def main():
 
         def __call__(self, *operands):
             self.calls += 1
-            target = 2 if self.name == "mapped" else 1
-            if self.calls == target:
+            if self.name == "mapped" and self.calls == 2:
                 directory = profile_dir / self.name
                 directory.mkdir(parents=True, exist_ok=True)
                 with jax.profiler.trace(str(directory)):
@@ -66,7 +65,7 @@ def main():
     def traced_jit(function, *arguments, **options):
         jitted = original_jit(function, *arguments, **options)
         name = getattr(function, "__name__", "")
-        if name in ("mapped", "warm_correct"):
+        if name == "mapped":
             return Jitted(jitted, name)
         return jitted
 

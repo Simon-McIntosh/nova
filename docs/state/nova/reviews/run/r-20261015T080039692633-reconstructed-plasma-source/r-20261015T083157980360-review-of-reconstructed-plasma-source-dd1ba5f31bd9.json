@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "base_log_revision": null,
+  "call_site_count": 2,
+  "call_sites": [
+    "scripts/reconstructed_plasma_source/measure.py",
+    "scripts/reconstructed_plasma_source/baseline_sign.py"
+  ],
+  "completed_at": "2026-10-15T08:30:46Z",
+  "dispatched_at": "2026-10-15T08:01:17Z",
+  "findings": [
+    {
+      "file": "nova/imas/plasma_source.py",
+      "line": "153",
+      "severity": "follow-on",
+      "text": "from_imas duplicates the native-IMAS slice extraction (grid dim1/dim2, psi, profile.psi, dpressure_dpsi, f_df_dpsi, psi_axis, psi_boundary, ip, separatrix outline, magnetic axis, x_points, boundary outline) that scripts/iter_prescribed_plasma/measure.py:89 prescribe_slice already owns; it should extend that owner rather than fork a second extraction, and the DINA identity test only passes because both paths happen to agree today."
+    },
+    {
+      "file": "tests/test_plasma_source.py",
+      "line": "44",
+      "severity": "follow-on",
+      "text": "assert result[\"limit_fraction\"] == FLUX_FRACTION_LIMIT compares the measurement's own echoed constant against the constant, and measure_linkage sets that key from the same constant, so the assertion is true for any measurement and guards nothing."
+    },
+    {
+      "file": "tests/test_plasma_source.py",
+      "line": "33",
+      "severity": "follow-on",
+      "text": "the linkage and sign-flip guards are @pytest.mark.slow and skip at :37 when the MAST /work mirror is absent, so on any machine without the mirror the guard is silently inactive and a regression reads as a pass."
+    }
+  ],
+  "head_log_revision": "20fb4a947eaa9588c08a79fb9dbaaf87965b4a55",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read commit by commit against 1b6855b9; the module, scripts and tests, the record and fragment, and the LCFS boundary reclassification, all inside scope.",
+    "done_when": "the done_when names a MAST linkage tolerance, the 105014/1 identity, a logged sign-flip refusal and the record/figure/fragment; tests/test_plasma_source.py:33/:60/:80 assert those and the after_suite log records 12 passed.",
+    "goal": "read the node goal against nova/imas/plasma_source.py:97 PlasmaSource with from_mast (:118) and from_imas (:153); both prescribe through nova/imas/profiles.py:146 prescribe_current_density.",
+    "manifest": "read; it records the commits, changed paths, the exact gate command and result, the negative-control log with EXIT=1, and leaves the coupled-plant follow-on open.",
+    "write_paths": "the manifest's eight declared paths are reached by the diff's seven files with nothing outside them."
+  },
+  "justifications": {
+    "durability": "tests/test_plasma_source.py:60 fails if the COCOS guard at nova/imas/plasma_source.py:70-78 is removed, and the sign-flip-mutation-final.log shows that guard firing; tests/test_plasma_source.py:44 asserts a tautology.",
+    "evidence": "the MAST linkage at scripts/reconstructed_plasma_source/measure.py:118 compares prescribed plasma plus EFIT conductor flux to the stored psi against a predeclared limit, and the after_suite log (headed revision 20fb4a94) records 12 passed; the base arm is absent so the added-failure delta is unmeasured.",
+    "fit": "nova/imas/plasma_source.py:20-42 follows the frozen-dataclass/type-hint style of the neighbouring nova/imas modules and introduces no name the repo naming rules forbid.",
+    "goal_fidelity": "nova/imas/plasma_source.py:97 delivers a generic PlasmaSource over reconstructed (from_mast:118) and simulated (from_imas:153) equilibria, but states each convention with hardcoded flux_derivative_scale (1.0 and 2*pi at :145/:200) rather than nova_cocos as the brief names.",
+    "reuse": "from_imas (nova/imas/plasma_source.py:153) re-extracts the native-IDS slice fields already owned by scripts/iter_prescribed_plasma/measure.py:89 prescribe_slice, which the node's own test imports and compares against rather than extending.",
+    "scope_discipline": "the seven files in git diff 1b6855b9..dd1ba5f3 all fall inside the manifest's declared write paths, with no edits to the read-only nova/imas/prescribed_plasma.py or profiles.py."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: read the node goal (\"Build a generic plasma source that prescribes a reconstructed equilibrium as well as a DINA simulation, checked on a MAST reconstruction\") against nova/imas/plasma_source.py:97 PlasmaSource with from_mast (nova/imas/plasma_source.py:118) and from_imas (:153); both prescribe through nova/imas/profiles.py:146 prescribe_current_density, and the MAST source is checked in scripts/reconstructed_plasma_source/measure.py:34 mast_source.\nVERDICT done_when: the done_when names a MAST linkage tolerance, the 105014/1 identity, a logged sign-flip refusal and the record/figure/fragment; tests/test_plasma_source.py:33 asserts the linkage within FLUX_FRACTION_LIMIT (measure.py:22 = 0.02), :80 asserts the DINA cell-for-cell identity, :60 asserts the sign-flip refusal, and the after_suite log records \"12 passed in 37.17s\".\nVERDICT write_paths: read the manifest's eight declared paths; the diff touches exactly seven files, every one inside them (nova/imas/plasma_source.py, tests/test_plasma_source.py, scripts/reconstructed_plasma_source/, docs/research/reconstructed-plasma-source.html, docs/figures/reconstructed-plasma-source/mast-linked-flux.svg, docs/evidence/fragments/iter-passive-plasma-circuit/reconstructed-plasma-source.html).\nVERDICT manifest: read; it records the four commits, changed paths, the exact gate command with its result, base/after arms (base absent, after 12 passed / exit 0), the negative-control log with EXIT=1, and leaves the coupled-plant follow-on open.\nVERDICT diff: read commit by commit against 1b6855b9; ba5547ac adds the module, scripts, figure and tests, 16238509 adds the record and fragment, 20fb4a94 reclassifies the EFIT LCFS to the stored-boundary path (nova/imas/plasma_source.py:143 outline=np.empty) and tightens the assertion, dd1ba5f3 only extends the record's plan-commits meta.\nCALL_SITES: scripts/reconstructed_plasma_source/measure.py, scripts/reconstructed_plasma_source/baseline_sign.py\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: nova/imas/plasma_source.py:97 delivers a generic PlasmaSource over reconstructed (from_mast:118) and simulated (from_imas:153) equilibria, but states each convention with hardcoded flux_derivative_scale (1.0 and 2*pi at :145/:200) rather than nova_cocos as the brief names.\nSCORE evidence: 17\nJUSTIFICATION evidence: the MAST linkage at scripts/reconstructed_plasma_source/measure.py:118 compares prescribed plasma plus EFIT conductor flux to the stored psi against a predeclared limit, and the after_suite log (headed revision 20fb4a94) records 12 passed; the base arm is absent so the added-failure delta is unmeasured.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the seven files in git diff 1b6855b9..dd1ba5f3 all fall inside the manifest's declared write paths, with no edits to the read-only nova/imas/prescribed_plasma.py or profiles.py.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_plasma_source.py:60 fails if the COCOS guard at nova/imas/plasma_source.py:70-78 is removed, and the sign-flip-mutation-final.log shows that guard firing; tests/test_plasma_source.py:44 asserts a tautology.\nSCORE fit: 17\nJUSTIFICATION fit: nova/imas/plasma_source.py:20-42 follows the frozen-dataclass/type-hint style of the neighbouring nova/imas modules and introduces no name the repo naming rules forbid.\nSCORE reuse: 13\nJUSTIFICATION reuse: from_imas (nova/imas/plasma_source.py:153) re-extracts the native-IDS slice fields already owned by scripts/iter_prescribed_plasma/measure.py:89 prescribe_slice, which the node's own test imports and compares against rather than extending.\nFINDING nova/imas/plasma_source.py:153 follow-on: from_imas duplicates the native-IMAS slice extraction (grid dim1/dim2, psi, profile.psi, dpressure_dpsi, f_df_dpsi, psi_axis, psi_boundary, ip, separatrix outline, magnetic axis, x_points, boundary outline) that scripts/iter_prescribed_plasma/measure.py:89 prescribe_slice already owns; it should extend that owner rather than fork a second extraction, and the DINA identity test only passes because both paths happen to agree today.\nFINDING tests/test_plasma_source.py:44 follow-on: assert result[\"limit_fraction\"] == FLUX_FRACTION_LIMIT compares the measurement's own echoed constant against the constant, and measure_linkage sets that key from the same constant, so the assertion is true for any measurement and guards nothing.\nFINDING tests/test_plasma_source.py:33 follow-on: the linkage and sign-flip guards are @pytest.mark.slow and skip at :37 when the MAST /work mirror is absent, so on any machine without the mirror the guard is silently inactive and a regression reads as a pass.\n",
+  "review_run_id": "r-20261015T083157980360-review-of-reconstructed-plasma-source-dd1ba5f31bd9",
+  "reviewed_base_sha": "1b6855b9bb9a547c04803d626d562804f36b2a82",
+  "reviewed_head_sha": "dd1ba5f31bd9da21917671bf399c8f0d12244dcd",
+  "reviewed_run_id": "r-20261015T080039692633-reconstructed-plasma-source",
+  "reviewer": "review-of-reconstructed-plasma-source-dd1ba5f31bd9",
+  "scores": {
+    "durability": 16,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 13,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T08:54:34.930446+00:00",
+  "total": 99
+}

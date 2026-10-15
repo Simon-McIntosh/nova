@@ -1,0 +1,66 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run's manifest records baseline_suite and after_suite as empty (an unarmed node whose declared write paths reach no test file, so it declared no suite pair), so no gate log exists to difference and the added-failure count is defined as zero over an unmatched base rather than measured; the node's executed checks (three H200 jobs 1285863/1285868/1285872, the reproduced negative control EXIT=1, and reckon audit-doc 0 errors) are recorded in manifest.md and the run directory.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-15T07:52:52Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/fused_newton/negative_control.py",
+      "line": "12",
+      "severity": "follow-on",
+      "text": "follow-on: the private-cell guard reads a frozen receipt (the committed negative-control-input.json) instead of re-evaluating the program, so it documents that the red control was observed at job 1285872 but cannot detect a later regression in the saddle-cut rule it is meant to protect."
+    },
+    {
+      "file": "docs/research/fused-moment-newton.html",
+      "line": "37",
+      "severity": "follow-on",
+      "text": "follow-on: the record's central accuracy claim is a flux-map error against the analytic certificate, computed and compared as a scalar, yet the declared write path docs/figures/converged-forward-solve/fused-newton is left empty; the repository's plotting rule asks that a certificate-rung forward state be shown as a line-contour poloidal panel beside its reference on shared levels, which would make the passing 0.001087 and red 0.158676 maps readable directly."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 0 production call site(s); a whole-tree search for imports of scripts/prototypes/fused_newton found nothing outside that directory, and the diff adds only standalone prototype modules and two HTML records, so no runtime code reaches the change.",
+    "diff": "read all ten commits 1b6855b9..1eea83264 against the run's base; 895 insertions and zero deletions across seven newly added files, with no test file in the diff and no production module under nova/ modified.",
+    "done_when": "the done_when requires each of six measures reported on the H200 at 289/282 cells; docs/research/fused-moment-newton.html:37 (map error 0.000180/0.001087, roots 2.22e-5 pitch within one pitch), :52 (per-call walls and kernels 1,532/2,217 map, :56 10,016/14,170 correction, compile 81.77/79.02 s against 60 s, executable 0.855/1.083 MB against 50 MB), :58-66 (vmap widths 1/16/128 with 0/1, 0/16, 0/128 converged), and the residual clause is reported unmet (limited warm slice 3.92e-9, diverted predecessor unconverged); the manifest tests line records job 1285872 COMPLETED and reckon audit-doc 0 errors, and I reconciled every headline figure against the run receipts.",
+    "goal": "the node's goal is to prototype one fused moment-Newton executable per machine against the 0.90 ms warm-slice budget; docs/research/fused-moment-newton.html:22 and :52 report one compiled device program per shape on 289 limited and 282 diverted analytic-certificate cells with map walls 4.623/6.366 ms and correction walls 25.647/35.516 ms against the budget, honestly rejecting the 0.90 ms hypothesis rather than claiming it.",
+    "manifest": "read; status complete, ten commits, changed_paths matching the diff (five prototype modules, the research record and the evidence fragment), job 1285872 with EXIT=0, one attributed retry failure, and a reproduced red negative control (EXIT=1); its baseline_suite and after_suite are empty because the node's write paths reach no test file, so the added-failure delta is unmatched rather than measured.",
+    "write_paths": "the declared scope is scripts/prototypes/fused_newton, docs/research/fused-moment-newton.html, docs/figures/converged-forward-solve/fused-newton and docs/evidence/fragments/converged-forward-solve/fused-newton.html; git diff --stat 1b6855b9..1eea83264 lists 7 files, every one inside those paths, and no nova/ production source is touched."
+  },
+  "justifications": {
+    "durability": "scripts/prototypes/fused_newton/negative_control.py:22-24 genuinely refuses a gate that does not redden and its result (EXIT=1, FAILED test_private_support_gate) is reproduced, but it reads a frozen receipt (negative_control.py:12) rather than re-running the program and no suite test binds the prototype, so nothing fails automatically if the fused map regresses (FINDING).",
+    "evidence": "the done_when's figures reconcile with the run receipts limited-1285872.json and diverted-1285872.json (map_flux_error 0.000180/0.001087, slice_wall_ms 25.647/35.516, gpu_kernel_events 10,016/14,170) and the negative control fires red with EXIT=1 at negative-control-check.log.",
+    "fit": "the modules follow the surrounding scripts/prototypes idiom (standalone module, configure_dtypes(), ruff noqa E402, jax_enable_x64 assert, JSON receipts) as scripts/prototypes/sub_millisecond does; no plan label or forbidden name appears in the added paths or contents.",
+    "goal_fidelity": "docs/research/fused-moment-newton.html:22 reports the fused per-machine program measured at 25.65/35.52 ms against the 0.90 ms target and :28 discloses it still reads only the binding boundary level (not both qualified candidates) and uses the exact fragment read for the saddle frame, so the fused prototype is delivered but clause (1)'s dual-candidate read is partial.",
+    "reuse": "the change composes owners rather than reimplementing them - interior_moments, bell_moments, connected_cells and nova.equilibrium.current._normal_rings / nova.equilibrium.separatrix_clip.padded_polynomial_current_moments are imported at scripts/prototypes/fused_newton/program.py:13-21, and _saddle_moments is a new composition over those owners with no existing owner for the fused map.",
+    "scope_discipline": "git diff --stat 1b6855b9..1eea83264 lists seven paths, all inside the four declared write paths, with no product module under nova/ touched and no test file added, matching the brief's instruction not to change nova/ product code."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to prototype one fused moment-Newton executable per machine against the 0.90 ms warm-slice budget; docs/research/fused-moment-newton.html:22 and :52 report one compiled device program per shape on 289 limited and 282 diverted analytic-certificate cells with map walls 4.623/6.366 ms and correction walls 25.647/35.516 ms against the budget, honestly rejecting the 0.90 ms hypothesis rather than claiming it.\nVERDICT done_when: the done_when requires each of six measures reported on the H200 at 289/282 cells; docs/research/fused-moment-newton.html:37 (map error 0.000180/0.001087, roots 2.22e-5 pitch within one pitch), :52 (per-call walls and kernels 1,532/2,217 map, :56 10,016/14,170 correction, compile 81.77/79.02 s against 60 s, executable 0.855/1.083 MB against 50 MB), :58-66 (vmap widths 1/16/128 with 0/1, 0/16, 0/128 converged), and the residual clause is reported unmet (limited warm slice 3.92e-9, diverted predecessor unconverged); the manifest tests line records job 1285872 COMPLETED and reckon audit-doc 0 errors, and I reconciled every headline figure against the run receipts.\nVERDICT write_paths: the declared scope is scripts/prototypes/fused_newton, docs/research/fused-moment-newton.html, docs/figures/converged-forward-solve/fused-newton and docs/evidence/fragments/converged-forward-solve/fused-newton.html; git diff --stat 1b6855b9..1eea83264 lists 7 files, every one inside those paths, and no nova/ production source is touched.\nVERDICT manifest: read; status complete, ten commits, changed_paths matching the diff (five prototype modules, the research record and the evidence fragment), job 1285872 with EXIT=0, one attributed retry failure, and a reproduced red negative control (EXIT=1); its baseline_suite and after_suite are empty because the node's write paths reach no test file, so the added-failure delta is unmatched rather than measured.\nVERDICT diff: read all ten commits 1b6855b9..1eea83264 against the run's base; 895 insertions and zero deletions across seven newly added files, with no test file in the diff and no production module under nova/ modified.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/research/fused-moment-newton.html:22 reports the fused per-machine program measured at 25.65/35.52 ms against the 0.90 ms target and :28 discloses it still reads only the binding boundary level (not both qualified candidates) and uses the exact fragment read for the saddle frame, so the fused prototype is delivered but clause (1)'s dual-candidate read is partial.\nSCORE evidence: 18\nJUSTIFICATION evidence: the done_when's figures reconcile with the run receipts limited-1285872.json and diverted-1285872.json (map_flux_error 0.000180/0.001087, slice_wall_ms 25.647/35.516, gpu_kernel_events 10,016/14,170) and the negative control fires red with EXIT=1 at negative-control-check.log.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 1b6855b9..1eea83264 lists seven paths, all inside the four declared write paths, with no product module under nova/ touched and no test file added, matching the brief's instruction not to change nova/ product code.\nSCORE durability: 12\nJUSTIFICATION durability: scripts/prototypes/fused_newton/negative_control.py:22-24 genuinely refuses a gate that does not redden and its result (EXIT=1, FAILED test_private_support_gate) is reproduced, but it reads a frozen receipt (negative_control.py:12) rather than re-running the program and no suite test binds the prototype, so nothing fails automatically if the fused map regresses (FINDING).\nSCORE fit: 16\nJUSTIFICATION fit: the modules follow the surrounding scripts/prototypes idiom (standalone module, configure_dtypes(), ruff noqa E402, jax_enable_x64 assert, JSON receipts) as scripts/prototypes/sub_millisecond does; no plan label or forbidden name appears in the added paths or contents.\nSCORE reuse: 18\nJUSTIFICATION reuse: the change composes owners rather than reimplementing them - interior_moments, bell_moments, connected_cells and nova.equilibrium.current._normal_rings / nova.equilibrium.separatrix_clip.padded_polynomial_current_moments are imported at scripts/prototypes/fused_newton/program.py:13-21, and _saddle_moments is a new composition over those owners with no existing owner for the fused map.\nFINDING scripts/prototypes/fused_newton/negative_control.py:12 follow-on: the private-cell guard reads a frozen receipt (the committed negative-control-input.json) instead of re-evaluating the program, so it documents that the red control was observed at job 1285872 but cannot detect a later regression in the saddle-cut rule it is meant to protect.\nFINDING docs/research/fused-moment-newton.html:37 follow-on: the record's central accuracy claim is a flux-map error against the analytic certificate, computed and compared as a scalar, yet the declared write path docs/figures/converged-forward-solve/fused-newton is left empty; the repository's plotting rule asks that a certificate-rung forward state be shown as a line-contour poloidal panel beside its reference on shared levels, which would make the passing 0.001087 and red 0.158676 maps readable directly.",
+  "review_run_id": "r-20261015T085058890769-review-of-fused-newton-1eea83264edb",
+  "reviewed_base_sha": "1b6855b9bb9a547c04803d626d562804f36b2a82",
+  "reviewed_head_sha": "1eea83264edb5f1de1dc82509c20ba4b671b13ca",
+  "reviewed_run_id": "r-20261015T075234084559-fused-newton",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 12,
+    "evidence": 18,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T09:01:49.625106+00:00",
+  "total": 101,
+  "unmatched_base": true
+}

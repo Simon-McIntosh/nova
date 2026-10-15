@@ -14,7 +14,7 @@ from scripts.prototypes.fast_read.render_contours import panel
 
 
 def render_costs(before, after, output):
-    plt.style.use("data-ink")
+    plt.style.use(Path.home() / ".config/matplotlib/stylelib/data-ink.mplstyle")
     widths = np.array((1, 16, 128))
     figure, axes = plt.subplots(1, 2, figsize=(14, 6), dpi=100)
     for axis, key, divisor, limit, ylabel in (

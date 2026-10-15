@@ -196,6 +196,8 @@ def run(kind, cache, output, trace_dir, jvp_only=False):
     result["map_executable_bytes"] = generated_bytes(map_program)
     state = map_program(reference, *operands)
     jax.block_until_ready(state)
+    np.save(output.parent / f"{kind}-centre-moments.npy", np.asarray(state.moments))
+    np.save(output.parent / f"{kind}-centre-roots.npy", np.asarray(state.roots))
     result["map_wall_ms"] = wall(map_program, (reference, *operands))
     result.update(
         topology_valid=bool(state.topology_valid),
@@ -222,6 +224,28 @@ def run(kind, cache, output, trace_dir, jvp_only=False):
     analytic = jnp.asarray(certificate._exact_state(name, exact, coordinates))
     flux = exterior + _image(operator, state.moments)
     result["map_flux_error"] = float(jnp.max(jnp.abs(flux - analytic))) / span
+    analytic_root_residuals = jnp.linalg.norm(
+        jax.vmap(field.evaluate)(jnp.asarray(roots)).gradient, axis=1
+    )
+
+    def panel_payload(solved_flux, solved_roots, terminal_residual, converged):
+        return {
+            "coordinates": np.asarray(machine.node).tolist(),
+            "wall": np.asarray(machine.wall_node).tolist(),
+            "solved_flux": np.asarray(solved_flux)[: len(machine.node)].tolist(),
+            "analytic_flux": np.asarray(analytic)[: len(machine.node)].tolist(),
+            "solved_roots": np.asarray(solved_roots).tolist(),
+            "analytic_roots": roots.tolist(),
+            "analytic_root_residuals": np.asarray(analytic_root_residuals).tolist(),
+            "terminal_residual": float(terminal_residual),
+            "converged": bool(converged),
+        }
+
+    result["panels"] = {
+        "centre": panel_payload(
+            flux, state.roots, jnp.max(jnp.abs(state.moment_residual)), False
+        )
+    }
     result["root_shift_pitches"] = (
         np.linalg.norm(np.asarray(state.roots) - roots, axis=1)
         / float(np.median(np.asarray(geometry.pitch)))
@@ -282,6 +306,9 @@ def run(kind, cache, output, trace_dir, jvp_only=False):
     pitch = float(np.median(np.asarray(geometry.pitch)))
     scale = jnp.asarray(
         (float(booked.raw_current) / len(reference)) * np.asarray((1.0, pitch, pitch))
+    )
+    result["panels"]["centre"]["terminal_residual"] = float(
+        jnp.max(jnp.abs(state.moment_residual / scale))
     )
 
     def correction(moments, scale, *args):
@@ -400,8 +427,18 @@ def run(kind, cache, output, trace_dir, jvp_only=False):
     result["cold_wall_ms"] = 1000 * (perf_counter() - start)
     result["cold_history"] = history
     result["cold_converged"] = bool(outcome.converged)
+    cold_state = map_program(moments, *operands)
+    jax.block_until_ready(cold_state)
+    np.save(output.parent / f"{kind}-cold-moments.npy", np.asarray(moments))
+    np.save(output.parent / f"{kind}-cold-roots.npy", np.asarray(cold_state.roots))
     result["cold_flux_error"] = (
         float(jnp.max(jnp.abs(exterior + _image(operator, moments) - analytic))) / span
+    )
+    result["panels"]["cold"] = panel_payload(
+        exterior + _image(operator, moments),
+        cold_state.roots,
+        outcome.residual,
+        outcome.converged,
     )
     save(output, result)
     result["warm_input_converged"] = bool(outcome.converged)

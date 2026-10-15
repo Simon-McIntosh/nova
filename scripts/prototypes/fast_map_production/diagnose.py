@@ -1,0 +1,179 @@
+"""Locate cells changed by coherent fixed-shape booking on a carrier."""
+
+# ruff: noqa: E402
+from nova.jax.config import configure_dtypes
+
+configure_dtypes()
+
+import argparse
+import json
+from pathlib import Path
+
+import jax
+import jax.numpy as jnp
+import numpy as np
+import nova
+
+from benchmarks import solovev_certificate as certificate
+from nova.equilibrium import current, fixed_points, topology
+from nova.equilibrium.solve_request import TopologyPolicy
+from scripts.analytic_oracle_fixtures import measure as fixture
+from scripts.prototypes.fast_map_production import kernel, program
+from scripts.prototypes.fast_read import kernel as original_kernel
+from scripts.prototypes.fast_read import program as original_program
+from scripts.prototypes.fast_read.ordinary_cut import bell_fraction
+from scripts.prototypes.lean_map.jets import build_jets
+from scripts.prototypes.lean_map.quadrature import quadratic_fit, triangle_rule
+from scripts.prototypes.lean_map.values import build_values
+from scripts.prototypes.solve_options.profile import _machine
+from scripts.prototypes.support.geometry import certificate_field
+from tests.equilibrium.test_topology_read import _analytic_inputs
+
+
+def run(cells, cache, output):
+    assert jax.config.jax_enable_x64 is True and jax.default_backend() == "gpu"
+    print(
+        f"nova={nova.__file__} module={__file__} cwd={Path.cwd().resolve()}",
+        flush=True,
+    )
+    carrier, source, _ = certificate._case("diverted-single-null", clip_mode="exact")
+    machine, _, _ = _machine(cache, carrier, cells)
+    geometry = topology.TopologyGeometry.from_cells(
+        machine.cell_polygons, machine.sampling_vertices, (machine.wall_node,)
+    )
+    _, analytic_field, _, _, _ = _analytic_inputs("diverted")
+    field = certificate_field(analytic_field, "diverted")
+    convention = topology.TopologyConvention.from_cocos(17, 1.0)
+    policy = TopologyPolicy()
+    analytic_read = jax.jit(
+        lambda: topology.read(field, geometry, convention, policy)
+    )()
+    samples = jax.vmap(field.value)(geometry.sample_points.reshape(-1, 2)).reshape(
+        geometry.sample_points.shape[:-1]
+    )
+    profile = fixture.analytic_profile(source)
+    booked = jax.jit(
+        lambda psi: current.book(
+            psi,
+            analytic_read,
+            geometry,
+            profile,
+            current.Quadrature(sigma=convention.sigma),
+        )
+    )(samples)
+    reference = jnp.stack(
+        (booked.cell_current, booked.radial_moment, booked.vertical_moment), axis=-1
+    )
+    rule = triangle_rule(geometry)
+    fit, design = quadratic_fit(rule, geometry)
+    values, _ = build_values(machine, rule, field, reference)
+    coupling = topology.BiotMomentCoupling.from_polygons(machine.cell_polygons)
+    jets, _ = build_jets(coupling, geometry, field, reference)
+    roots = np.vstack(
+        (
+            np.asarray(analytic_read.axis)[None],
+            np.asarray(analytic_read.x_points)[np.asarray(analytic_read.x_point_valid)],
+        )
+    )
+    window = fixed_points.RowCache(
+        jets.mesh,
+        jets.nodes,
+        jnp.arange(len(jets.nodes), dtype=jnp.int32),
+        jets.rows,
+        jets.exterior,
+    )
+    seeds = jnp.asarray(roots)
+    axis_sign = float(jnp.sign(field.evaluate(seeds[0]).hessian[0, 0]))
+    operands = (
+        values,
+        jets,
+        window,
+        rule,
+        fit,
+        design,
+        geometry,
+        profile,
+        seeds,
+        convention,
+        policy,
+        booked.raw_current,
+        axis_sign,
+    )
+    original = jax.jit(original_program.map_moments)(reference, *operands)
+    candidate = jax.jit(program.map_moments)(reference, *operands)
+    jax.block_until_ready((original, candidate))
+    cached = fixed_points._CachedField(
+        window.mesh, window.lookup, window.rows, reference, window.exterior
+    )
+    found = fixed_points.solve(
+        window, reference, seeds, seeds, jnp.median(geometry.pitch), axis_sign
+    )
+    gauss_flux = values.apply(reference).reshape(rule.points.shape[:-1])
+    gauss_coefficient = jnp.einsum("nkq,nq->nk", fit, gauss_flux)
+    slots = window.lookup[jets.sample_index]
+    complete = jnp.all(slots >= 0, axis=1)
+    safe_slots = jnp.maximum(slots, 0)
+    band_values = window.exterior[safe_slots, 0] + jnp.einsum(
+        "nscm,cm->ns", window.rows[safe_slots, ..., 0], reference
+    )
+    band_coefficient = jnp.einsum("nks,ns->nk", geometry.fit_inverse, band_values)
+    coefficient = jnp.where(complete[:, None], band_coefficient, gauss_coefficient)
+    fused = original_program.FusedField(cached, coefficient)
+    original_read = jax.jit(original_kernel.read)(
+        fused, found, geometry, convention, policy
+    )
+    candidate_read = jax.jit(kernel.read)(fused, found, geometry, convention, policy)
+    ordinary_fraction, ordinary_valid = bell_fraction(
+        geometry, candidate_read, convention.sigma
+    )
+    difference = np.asarray(candidate.moments - original.moments)
+    scale = float(booked.raw_current) / len(reference)
+    rank = np.argsort(np.max(np.abs(difference), axis=1))[-12:][::-1]
+    saddle_owner = topology._inside_cells(geometry, candidate_read.saddle_form.position)
+    rows = []
+    for index in rank:
+        rows.append(
+            {
+                "cell": int(index),
+                "centre": np.asarray(geometry.centre[index]).tolist(),
+                "reference": np.asarray(reference[index]).tolist(),
+                "original": np.asarray(original.moments[index]).tolist(),
+                "candidate": np.asarray(candidate.moments[index]).tolist(),
+                "scaled_difference": (difference[index] / scale).tolist(),
+                "original_membership": float(original_read.membership[index]),
+                "candidate_membership": float(candidate_read.membership[index]),
+                "ordinary_fraction": float(ordinary_fraction[index]),
+                "ordinary_valid": bool(ordinary_valid[index]),
+                "frame_cell": bool(candidate_read.normal_form_cells[index]),
+                "booking_cell": bool(candidate_read.booking_cells[index]),
+                "saddle_owner": bool(saddle_owner[index]),
+            }
+        )
+    result = {
+        "cells": len(reference),
+        "original_residual": float(jnp.max(jnp.abs(original.moment_residual / scale))),
+        "candidate_residual": float(
+            jnp.max(jnp.abs(candidate.moment_residual / scale))
+        ),
+        "original_saddle_booked": int(original.saddle_cells),
+        "candidate_saddle_booked": int(candidate.saddle_cells),
+        "normal_region": int(jnp.sum(candidate_read.normal_form_cells)),
+        "booking_region": int(jnp.sum(candidate_read.booking_cells)),
+        "saddle_position": np.asarray(candidate_read.saddle_form.position).tolist(),
+        "hot_cells": rows,
+    }
+    output.write_text(json.dumps(result, indent=2) + "\n")
+    print("DIAGNOSIS " + json.dumps(result), flush=True)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--cells", type=int, required=True)
+    parser.add_argument("--cache", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    arguments = parser.parse_args()
+    run(arguments.cells, arguments.cache, arguments.output)
+
+
+if __name__ == "__main__":
+    main()

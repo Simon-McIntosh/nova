@@ -44,8 +44,22 @@
   <p>One map call at this size is already 12.7 times the 0.90 ms per-state target. The batched wall, not this width-one observation, decides throughput. The ongoing H200 replay retains its converged terminal state and times the map, fresh factor and two-correction chord batches with explicit converged counts. Its result will be reported separately from the first cold residual.</p>
 </section>
 
+<section id="lean-map-batched-pilot-throughput">
+  <h2>Diagnostic batch pilot</h2>
+  <p>H200 job 1286433 rebuilt the 289-cell limited map and reached 2.2871 × 10<sup>−13</sup> in two accepted cold corrections. It used the original unconditional two-correction chord while the checked early-stop version was being prepared. The width-one offset is 0.5 of a distinct vertical exterior perturbation; the width-16 map uses 16 distinct offsets. These are synchronised warm execution walls divided by state count, with fresh factor setup measured separately.</p>
+  <table><caption>Completed rows from the diagnostic pilot. The factor batch at width 16 had not produced a receipt when this superseded pilot was stopped; no width-16 chord or width-128 result is inferred.</caption>
+    <thead><tr><th>Width</th><th>Map per state</th><th>Fresh factor per state</th><th>Two chord corrections per state</th><th>Strict passes</th><th>Largest terminal residual</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>34.320 ms</td><td>5,288.062 ms</td><td>102.331 ms</td><td>1/1</td><td>2.3200 × 10<sup>−15</sup></td></tr>
+      <tr><td>16</td><td>7.820 ms</td><td>not measured</td><td>not measured</td><td>not measured</td><td>not measured</td></tr>
+    </tbody>
+  </table>
+  <p>Width-one executable code occupied 2.11 MB for the map, 3.06 MB for the factor build and 3.50 MB for the chord. Their cache-disabled compilations took 23.17 s, 67.11 s and 43.79 s. The width-16 map executable occupied 1.37 MB and compiled in 25.49 s. The vmapped width-16 fresh-factor build then spent more than eight minutes compiling without a receipt. Job 1286433 was cancelled after 22 minutes to release its H200 card for the production suite; Slurm recorded <code>CANCELLED</code> even though the shell exit trap printed <code>EXIT=0</code>, so the scheduler state governs the outcome. The production suite bounds factor memory by evaluating factors sequentially inside one device program while the map and chord remain vmapped.</p>
+  <p>At a separate offset of 1.0, the unguarded two-correction comparator ended at 1.8487 × 10<sup>−12</sup>; a 1% LU perturbation ended at 1.3112 × 10<sup>−9</sup>. The mutation increased the residual, but the comparator itself missed 10<sup>−12</sup>, so this is not yet a qualifying factor negative control. The production replay requires a passing comparator before it calls the mutation a refusal.</p>
+</section>
+
 <section id="lean-map-batched-pending">
   <h2>Measurements in progress</h2>
-  <p>The two-topology 550- and 2,098-cell rows, the second fresh builds, the width-1/16/128 throughput rows, the gradient ratios, the 2,098-cell stage profile, the 550-cell topology transition, the two live negative controls and terminal poloidal panels are not yet measured in this record. Their absence is an open measurement, not a passing gate. The committed suite runs those rows inside one reserved H200 allocation and writes a receipt after every stage, so completed rows survive a later row failing.</p>
+  <p>The two-topology 550- and 2,098-cell rows, the second fresh builds, the checked width-1/16/128 chord throughput rows, the gradient ratios, the 2,098-cell stage profile, the 550-cell topology transition, the production-resolution hard-centroid control, a passing-comparator factor control and the remaining terminal poloidal panels are not yet measured in this record. Their absence is an open measurement, not a passing gate. The committed suite runs those rows inside one reserved H200 allocation and writes a receipt after every stage, so completed rows survive a later row failing.</p>
 </section>
 </main></body></html>

@@ -23,6 +23,7 @@ from nova.equilibrium.solve_request import TopologyPolicy
 from scripts.analytic_oracle_fixtures import measure as fixture
 from scripts.prototypes.diverted_stall.kernel import read as fixed_shape_read
 from scripts.prototypes.fast_read import program as mapped_program
+from scripts.prototypes.fast_read.kernel import read as original_read
 from scripts.prototypes.fast_read.program import FusedField, map_moments
 from scripts.prototypes.fused_convergence import roots as ray_roots
 from scripts.prototypes.lean_map.jets import build_jets
@@ -91,7 +92,8 @@ class CachedExterior:
 
 def run(args):
     kind, cache, output = args.kind, args.cache, args.output
-    mapped_program.read = fixed_shape_read
+    selected_read = original_read if args.original_read else fixed_shape_read
+    mapped_program.read = selected_read
     if args.exact_roots:
         ray_roots.install()
     if args.omit_saddle_derivative:
@@ -247,7 +249,7 @@ def run(args):
         )
         band_coefficient = jnp.einsum("nks,ns->nk", geometry.fit_inverse, band_values)
         coefficient = jnp.where(complete[:, None], band_coefficient, gauss_coefficient)
-        reading = fixed_shape_read(
+        reading = selected_read(
             FusedField(cached, coefficient), found, geometry, convention, policy
         )
         jax.block_until_ready(reading)
@@ -352,7 +354,7 @@ def run(args):
             coefficient = jnp.where(
                 complete[:, None], band_coefficient, gauss_coefficient
             )
-            reading = fixed_shape_read(
+            reading = selected_read(
                 FusedField(cached, coefficient), found, geometry, convention, policy
             )
             ordinary, ordinary_valid, four = bell_moments(
@@ -445,6 +447,26 @@ def run(args):
                 ),
             }
             for h in np.logspace(-2, -7, 11)
+        ]
+        random_direction = np.sin(np.arange(residual.size) + 1) / np.sqrt(residual.size)
+        random_tangent = matrix @ random_direction
+        result["stalled_random_taylor"] = [
+            {
+                "step": float(h),
+                "remainder_two": float(
+                    np.linalg.norm(
+                        np.asarray(
+                            equation(
+                                point.reshape(-1) + h * jnp.asarray(random_direction),
+                                operands,
+                            )
+                        )
+                        - base
+                        - h * random_tangent
+                    )
+                ),
+            }
+            for h in np.logspace(-3, -7, 9)
         ]
         save(output, result)
         return
@@ -935,6 +957,7 @@ def main():
     parser.add_argument("--panel-only", action="store_true")
     parser.add_argument("--probe", action="store_true")
     parser.add_argument("--map-only", action="store_true")
+    parser.add_argument("--original-read", action="store_true")
     args = parser.parse_args()
     run(args)
 

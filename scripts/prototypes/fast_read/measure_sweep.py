@@ -30,7 +30,10 @@ from scripts.prototypes.lean_map.values import build_values
 from scripts.prototypes.read_robustness.census import axis_identity, census
 from scripts.prototypes.read_robustness.oracle import shifted_axis
 from scripts.prototypes.solve_options.profile import _machine
-from scripts.prototypes.sub_millisecond.measure_bell_cut import bell_moments
+from scripts.prototypes.sub_millisecond.measure_bell_cut import (
+    bell_moments,
+    bell_polygon,
+)
 from scripts.prototypes.support.geometry import certificate_field
 from tests.equilibrium.test_topology_read import _analytic_inputs
 
@@ -43,7 +46,7 @@ def save(path, data):
     )
 
 
-def run(kind, cache, output):
+def run(kind, cache, output, diagnose_offset=None):
     assert jax.config.jax_enable_x64 is True and jax.default_backend() == "gpu"
     print(
         f"nova={nova.__file__} module={__file__} cwd={Path.cwd().resolve()}",
@@ -139,6 +142,77 @@ def run(kind, cache, output):
 
     program = jax.jit(sampled)
     oracle = jax.jit(lambda offset: shifted_axis(field, previous[0], offset, pitch))
+    if diagnose_offset is not None:
+        offset = jnp.asarray(diagnose_offset * scale)
+        expected, oracle_residual = oracle(offset)
+        roots, reading, raw_current, booking, *_ = program(offset, previous)
+        polygon, polygon_count, ordinary_valid = bell_polygon(
+            geometry, reading, convention.sigma, 4
+        )
+        centre = np.asarray(geometry.centre)
+        size = np.asarray(geometry.pitch)
+        vertices = np.asarray(geometry.vertices)
+        counts = np.asarray(geometry.vertex_count)
+        coefficients = np.asarray(reading.field_coefficients)
+        boundary = float(reading.boundary_flux)
+        memberships = np.asarray(reading.membership)
+        ordinary_valid = np.asarray(ordinary_valid)
+        invalid = np.flatnonzero((memberships > 0) & ~ordinary_valid)
+        rows = []
+        for index in invalid:
+            points = vertices[index, : counts[index]]
+            local = (points - centre[index]) / size[index]
+            x, y = local.T
+            coefficient = coefficients[index]
+            signed = float(convention.sigma) * (
+                coefficient[0]
+                + coefficient[1] * x
+                + coefficient[2] * y
+                + coefficient[3] * x * x
+                + coefficient[4] * x * y
+                + coefficient[5] * y * y
+                - boundary
+            )
+            rows.append(
+                {
+                    "cell": int(index),
+                    "centre": centre[index].tolist(),
+                    "pitch": float(size[index]),
+                    "vertices": points.tolist(),
+                    "signed_vertices": signed.tolist(),
+                    "edge_crossings": int(
+                        np.count_nonzero(signed * np.roll(signed, -1) < 0)
+                    ),
+                    "coefficients": coefficient.tolist(),
+                    "distance_to_saddle": float(
+                        np.linalg.norm(
+                            centre[index] - np.asarray(reading.saddle_form.position)
+                        )
+                    ),
+                    "normal_form_cell": bool(reading.normal_form_cells[index]),
+                    "selected_cell": bool(reading.selected_cells[index]),
+                    "membership": float(memberships[index]),
+                    "polygon_count": int(polygon_count[index]),
+                    "polygon": np.asarray(
+                        polygon[index, : polygon_count[index]]
+                    ).tolist(),
+                }
+            )
+        result["diagnosis"] = {
+            "offset": diagnose_offset,
+            "oracle_residual": float(oracle_residual),
+            "oracle_axis": np.asarray(expected).tolist(),
+            "axis": np.asarray(reading.axis).tolist(),
+            "root_valid": bool(roots.roots.valid[0]),
+            "read_valid": bool(reading.valid),
+            "booking_valid": bool(booking),
+            "raw_current": float(raw_current),
+            "saddle": np.asarray(reading.saddle_form.position).tolist(),
+            "invalid_cells": rows,
+        }
+        save(output, result)
+        print("RESULT " + json.dumps(result), flush=True)
+        return
     offsets = np.linspace(-0.2, 0.2, 41)
     rows = [None] * len(offsets)
 
@@ -253,8 +327,9 @@ def main():
     parser.add_argument("--kind", choices=("limited", "diverted"), required=True)
     parser.add_argument("--cache", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--diagnose-offset", type=float)
     args = parser.parse_args()
-    run(args.kind, args.cache, args.output)
+    run(args.kind, args.cache, args.output, args.diagnose_offset)
 
 
 if __name__ == "__main__":

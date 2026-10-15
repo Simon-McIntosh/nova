@@ -55,10 +55,10 @@ def taylor_remainder(data, destination):
     for block, (color, name) in enumerate(zip(colors, names, strict=True)):
         remainder = np.asarray([row["remainder"][block] for row in rows])
         axis.loglog(h, remainder, color=color, linewidth=3)
-        axis.text(h[-1] * 0.8, remainder[-1], name, color=color, ha="right")
-    guide = rows[0]["remainder"][0] * (h / h[0]) ** 2
-    axis.loglog(h, guide, color="#666666", linestyle=":", linewidth=1.2)
-    axis.text(h[2], guide[2], "slope 2", color="#666666")
+        axis.text(h[4] * 0.8, remainder[4], name, color=color, ha="right")
+    guide = 3 * rows[2]["remainder"][0] * (h / h[2]) ** 2
+    axis.loglog(h[1:4], guide[1:4], color="#666666", linestyle=":", linewidth=1.2)
+    axis.text(h[2], guide[2], "slope 2", color="#666666", va="bottom")
     axis.set_xlabel("relative perturbation")
     axis.set_ylabel("Taylor remainder")
     axis.spines["top"].set_visible(False)

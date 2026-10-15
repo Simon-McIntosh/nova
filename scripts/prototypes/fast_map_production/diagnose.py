@@ -21,7 +21,6 @@ from scripts.analytic_oracle_fixtures import measure as fixture
 from scripts.prototypes.fast_map_production import kernel, program
 from scripts.prototypes.fast_read import kernel as original_kernel
 from scripts.prototypes.fast_read import program as original_program
-from scripts.prototypes.fast_read.ordinary_cut import bell_fraction
 from scripts.prototypes.lean_map.jets import build_jets
 from scripts.prototypes.lean_map.quadrature import quadratic_fit, triangle_rule
 from scripts.prototypes.lean_map.values import build_values
@@ -132,13 +131,26 @@ def run(cells, cache, output):
     candidate_read = jax.jit(
         lambda: kernel.read(fused, found, geometry, convention, policy)
     )()
-    ordinary_fraction, ordinary_valid = bell_fraction(
-        geometry, candidate_read, convention.sigma
+    ordinary_fraction, ordinary_valid, four_crossings = (
+        kernel.bell_fraction_with_crossings(geometry, candidate_read, convention.sigma)
     )
     difference = np.asarray(candidate.moments - original.moments)
     scale = float(booked.raw_current) / len(reference)
-    rank = np.argsort(np.max(np.abs(difference), axis=1))[-12:][::-1]
     saddle_owner = topology._inside_cells(geometry, candidate_read.saddle_form.position)
+    original_residual = np.asarray(original.moment_residual / scale)
+    candidate_residual = np.asarray(candidate.moment_residual / scale)
+    score = np.maximum.reduce(
+        (
+            np.max(np.abs(difference / scale), axis=1),
+            np.max(np.abs(original_residual), axis=1),
+            np.max(np.abs(candidate_residual), axis=1),
+        )
+    )
+    leading = np.argsort(score)[-12:]
+    frame = np.flatnonzero(np.asarray(candidate_read.normal_form_cells | saddle_owner))
+    rank = sorted(
+        set(leading.tolist()) | set(frame.tolist()), key=lambda row: -score[row]
+    )
     rows = []
     for index in rank:
         rows.append(
@@ -149,10 +161,13 @@ def run(cells, cache, output):
                 "original": np.asarray(original.moments[index]).tolist(),
                 "candidate": np.asarray(candidate.moments[index]).tolist(),
                 "scaled_difference": (difference[index] / scale).tolist(),
+                "original_scaled_residual": original_residual[index].tolist(),
+                "candidate_scaled_residual": candidate_residual[index].tolist(),
                 "original_membership": float(original_read.membership[index]),
                 "candidate_membership": float(candidate_read.membership[index]),
                 "ordinary_fraction": float(ordinary_fraction[index]),
                 "ordinary_valid": bool(ordinary_valid[index]),
+                "four_crossings": bool(four_crossings[index]),
                 "frame_cell": bool(candidate_read.normal_form_cells[index]),
                 "booking_cell": bool(candidate_read.booking_cells[index]),
                 "saddle_owner": bool(saddle_owner[index]),

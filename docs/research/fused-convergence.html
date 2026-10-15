@@ -65,13 +65,13 @@
   </section>
   <section id="programs">
     <h2>Compilation and executable size</h2>
-    <p>The first <code>lower().compile()</code> timings in fresh H200 processes are listed below. The launcher exported a compilation-cache root, but this prototype did not call the opt-in cache configurator; a cache-disabled rerun is being measured to make the cold-compile claim explicit. The factor programs compile below the 60 s condition but exceed the 50 MB executable ceiling. The compiled chord apply is small enough; the width 1, 16 and 128 batch programs are not.</p>
-    <table><caption>Observed first compile and generated-code size. MB uses decimal bytes. Values for the scalar and batched factor are the three same-linearization probes; exact-root and ablated factors are separate diverted runs.</caption><thead><tr><th>Program</th><th>Limited cold</th><th>Limited warm</th><th>Diverted</th><th>50 MB size</th></tr></thead><tbody>
-      <tr><td>Moment map</td><td>1.77 s / 1.343 MB</td><td>1.85 s / 1.343 MB</td><td>1.95 s / 1.788 MB</td><td>Pass</td></tr>
-      <tr><td>Scalar linearized product</td><td>5.52 s / 165.316 MB</td><td>5.33 s / 165.316 MB</td><td>6.93 s / 150.621 MB</td><td>Fail</td></tr>
-      <tr><td>Batched Jacobian columns</td><td>6.77 s / 165.080 MB</td><td>6.72 s / 165.080 MB</td><td>8.81 s / 150.273 MB</td><td>Fail</td></tr>
-      <tr><td>Implicit-root diverted factor</td><td>—</td><td>—</td><td>8.98 s / 149.829 MB</td><td>Fail</td></tr>
-      <tr><td>Saddle-ablated diverted factor</td><td>—</td><td>—</td><td>7.03 s / 131.718 MB</td><td>Fail</td></tr>
+    <p>A second H200 allocation disables the JAX compilation cache before each fresh process and confirms binary64 before any array is built. The cache-disabled <code>lower().compile()</code> timings are listed below; the limited batch cold row is still pending in that allocation. The factor programs compile below the 60 s condition but exceed the 50 MB executable ceiling. The compiled chord apply is small enough; the width 1, 16 and 128 batch programs are not.</p>
+    <table><caption>Cache-disabled compile and generated-code size, with the earlier batch row pending cache-disabled confirmation. MB uses decimal bytes. Values for the scalar and batched factor are the three same-linearization probes; exact-root and ablated factors are separate diverted runs.</caption><thead><tr><th>Program</th><th>Limited cold</th><th>Limited warm</th><th>Diverted</th><th>50 MB size</th></tr></thead><tbody>
+      <tr><td>Moment map</td><td>10.30 s / 1.343 MB</td><td>9.98 s / 1.343 MB</td><td>13.55 s / 1.788 MB</td><td>Pass</td></tr>
+      <tr><td>Scalar linearized product</td><td>4.35 s / 165.316 MB</td><td>4.28 s / 165.316 MB</td><td>6.17 s / 150.621 MB</td><td>Fail</td></tr>
+      <tr><td>Batched Jacobian columns</td><td>8.12 s / 165.080 MB</td><td>8.25 s / 165.080 MB</td><td>12.15 s / 150.274 MB</td><td>Fail</td></tr>
+      <tr><td>Implicit-root diverted map / scalar / columns</td><td>—</td><td>—</td><td>13.34 s / 1.788 MB; 5.90 s / 150.251 MB; 11.69 s / 149.829 MB</td><td>Factor fails</td></tr>
+      <tr><td>Saddle-ablated diverted map / scalar / columns</td><td>—</td><td>—</td><td>13.07 s / 1.788 MB; 4.09 s / 132.072 MB; 7.57 s / 131.718 MB</td><td>Factor fails</td></tr>
       <tr><td>Predecessor chord apply</td><td>—</td><td>10.82 s / 7.362 MB</td><td>—</td><td>Pass</td></tr>
       <tr><td>Two-correction batch, widths 1 / 16 / 128</td><td>—</td><td>24.56 / 23.17 / 23.01 s; 492.963 / 289.805 / 289.812 MB</td><td>—</td><td>Fail</td></tr>
     </tbody></table>

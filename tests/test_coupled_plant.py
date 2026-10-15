@@ -12,6 +12,7 @@ import pytest
 
 from nova.circuit.conductor import ConductorSet
 from nova.circuit.coupled_plant import (
+    _cache_digest,
     _terminal_impedance,
     coupled_plant,
     load_coupled_plant,
@@ -406,6 +407,16 @@ def test_machine_passive_layers_change_screening_and_preserve_one_layer(tmp_path
         layered.terminal_impedance(frequency), original.terminal_impedance(frequency)
     )
     assert np.max(layered.reduction_error) < 0.01
+
+
+def test_layered_cache_key_tracks_skin_resistivity():
+    machine = _reduced_machine()
+    machine.passive_thickness_m = np.full(machine.passive_circuits.size, 0.2)
+    frequencies = np.array([300.0, 5000.0])
+    first = _cache_digest(machine, None, None, frequencies, 0.01, {}, layer_count=2)
+    machine.passive_system.resistivity *= 0.1
+    second = _cache_digest(machine, None, None, frequencies, 0.01, {}, layer_count=2)
+    assert first != second
 
 
 def test_real_sectioned_set_reduction_is_within_one_percent(tmp_path):

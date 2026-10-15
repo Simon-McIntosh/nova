@@ -476,6 +476,7 @@ def _cache_digest(
     if layer_count > 1:
         _update_optional(digest, layer_count)
         _update_optional(digest, getattr(machine, "passive_thickness_m", None))
+        _update_optional(digest, machine.passive_system.resistivity)
         for section in machine.conductors.polygon_sections:
             _update_optional(digest, section.circuit)
             _update_optional(digest, section.vertices)

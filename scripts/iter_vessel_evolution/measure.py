@@ -194,7 +194,7 @@ def passive_flux_at_points(conductors, circuits, i_passive, times, points):
 
 def vs3_residual(
     times: np.ndarray,
-    section2_residual: np.ndarray,
+    psimap_residual: np.ndarray,
     evolved_flux: np.ndarray,
     dina_flux: np.ndarray,
     *,
@@ -202,24 +202,24 @@ def vs3_residual(
 ) -> dict:
     """Whether the evolved passive flux at the VS3 sections closes the psi-map residual.
 
-    ``section2_residual``, ``evolved_flux`` and ``dina_flux`` are all
+    ``psimap_residual``, ``evolved_flux`` and ``dina_flux`` are all
     ``(n_times, n_points)`` at the VS3 element centroids.  The psi-map check left
     its conductor source driven by DINA's stored ``pf_passive`` currents; the
     evolved passive currents replace them, so the residual it left open moves by
-    the flux change ``evolved - dina`` at each point.  The section-2 residual is
+    the flux change ``evolved - dina`` at each point.  The psi-map residual is
     ``predicted - inferred`` with ``inferred = psi_map - source - gauge``, so a
     rise of that flux amount *reduces* the residual.
     """
     delta = evolved_flux - dina_flux
-    after = section2_residual - delta
+    after = psimap_residual - delta
     per_point = []
-    for index in range(section2_residual.shape[1]):
-        before = float(np.max(np.abs(section2_residual[:, index])))
+    for index in range(psimap_residual.shape[1]):
+        before = float(np.max(np.abs(psimap_residual[:, index])))
         after_peak = float(np.max(np.abs(after[:, index])))
         per_point.append(
             {
                 "point": index,
-                "section2_peak_wb": before,
+                "psimap_residual_peak_wb": before,
                 "evolved_passive_flux_peak_wb": float(
                     np.max(np.abs(evolved_flux[:, index]))
                 ),
@@ -231,11 +231,11 @@ def vs3_residual(
                 "within_tolerance": bool(after_peak <= tolerance_wb),
             }
         )
-    before_peak = max(row["section2_peak_wb"] for row in per_point)
+    before_peak = max(row["psimap_residual_peak_wb"] for row in per_point)
     after_peak = max(row["residual_after_peak_wb"] for row in per_point)
     return {
         "points": per_point,
-        "section2_peak_wb": before_peak,
+        "psimap_residual_peak_wb": before_peak,
         "residual_after_peak_wb": after_peak,
         "tolerance_wb": tolerance_wb,
         "residual_removed_fraction": (

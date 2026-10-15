@@ -108,7 +108,7 @@ def vs3_arm(receipt: dict, output: Path) -> None:
     positions = np.arange(len(points))
     width = 0.2
     series = [
-        ("psi-map residual", [row["section2_peak_wb"] for row in points], BARE),
+        ("psi-map residual", [row["psimap_residual_peak_wb"] for row in points], BARE),
         (
             "DINA passive flux",
             [row["dina_passive_flux_peak_wb"] for row in points],

@@ -30,13 +30,32 @@ def test_positive_control_recovers_analytic_decay():
     assert result["relative_error"] < 1e-6
 
 
-def test_resistance_sets_decay_time():
-    """The analytic peak scales inversely with the ring resistance."""
-    measure = _module("measure")
-    slow = measure.positive_control(inductance=2.0, resistance=1.0)
-    fast = measure.positive_control(inductance=2.0, resistance=4.0)
-    assert abs(fast["tau_s"] - 0.25 * slow["tau_s"]) < 1e-12
-    assert abs(fast["peak_current_a"]) < abs(slow["peak_current_a"])
+def test_integration_matches_analytic_lr_decay():
+    """The integrated ring current follows the analytic L/R decay.
+
+    Asserts the *propagated* state against the closed-form L/R response, so a
+    change to the recurrence -- a scaled interval, a dropped decay factor --
+    reddens here.
+    """
+    from nova.circuit.propagate import integrate_eddy_ode
+
+    tau = 1.0
+    linkage, rate, ramp, duration = 0.5, 1.0, 0.1, 1.0
+    times = np.linspace(0.0, duration, 4001)
+    psi = linkage * np.clip(rate * times, 0.0, rate * ramp)
+    numeric, _ = integrate_eddy_ode(np.array([tau]), times, psi[:, None])
+
+    peak = -linkage * rate * tau * (1.0 - np.exp(-ramp / tau))
+    analytic = np.where(
+        times <= ramp,
+        -linkage * rate * tau * (1.0 - np.exp(-times / tau)),
+        peak * np.exp(-(times - ramp) / tau),
+    )
+    error = np.max(np.abs(numeric[:, 0] - analytic)) / abs(peak)
+    assert error < 1e-6
+
+    fast, _ = integrate_eddy_ode(np.array([0.25 * tau]), times, psi[:, None])
+    assert np.abs(fast[:, 0]).max() < np.abs(numeric[:, 0]).max()
 
 
 def test_assignment_uses_containment():

@@ -378,28 +378,28 @@ def main():
         relative=0.25,
     )
     vs3_centroids = vs3_points(active)
-    section2_residual, section2_tolerance = prescribed_vs3_history(
+    psimap_residual, psimap_tolerance = prescribed_vs3_history(
         args.pulse, vs3_centroids.shape[0], times
     )
     vs3 = analysis.vs3_residual(
         times,
-        section2_residual,
+        psimap_residual,
         analysis.passive_flux_at_points(
             refined.conductors, system.circuits, chosen["i_passive"], times,
             vs3_centroids,
         ),
         dina_passive_flux(active, passive, measure, vs3_centroids, times),
-        tolerance_wb=section2_tolerance,
+        tolerance_wb=psimap_tolerance,
     )
     vs3_noplasma = analysis.vs3_residual(
         times,
-        section2_residual,
+        psimap_residual,
         analysis.passive_flux_at_points(
             refined.conductors, system.circuits, chosen["i_noplasma"], times,
             vs3_centroids,
         ),
         dina_passive_flux(active, passive, measure, vs3_centroids, times),
-        tolerance_wb=section2_tolerance,
+        tolerance_wb=psimap_tolerance,
     )
 
     result.update(

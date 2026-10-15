@@ -360,6 +360,13 @@ def run(kind, cells, cache, output, widths, cold_only=False):
     def one_factor(offset, point, *base):
         return factor_build(point, *varying(offset, base[0], base[1]))
 
+    def factor_batch(offsets, point, base_values, base_window):
+        def one(offset):
+            matrix, _ = one_factor(offset, point, base_values, base_window)
+            return jnp.linalg.norm(matrix)
+
+        return jax.lax.map(one, offsets)
+
     def one_chord(offset, point, factor, *base):
         args = varying(offset, base[0], base[1])
 
@@ -422,7 +429,7 @@ def run(kind, cells, cache, output, widths, cold_only=False):
             ),
             (
                 "factor",
-                jax.vmap(one_factor, in_axes=(0, None, None, None)),
+                factor_batch,
                 (offsets, terminal, *batch_base),
             ),
             (
@@ -437,8 +444,14 @@ def run(kind, cells, cache, output, widths, cold_only=False):
             rows[label] = {
                 "compile_seconds": seconds,
                 "executable_bytes": size,
-                "per_state_ms": timed(executable, *args) / width,
+                "per_state_ms": timed(
+                    executable, *args, repeats=1 if label == "factor" else 5
+                )
+                / width,
+                "route": "bounded-lax-map" if label == "factor" else "vmap",
             }
+            if label == "factor":
+                rows[label]["factor_signal_min"] = float(jnp.min(output_value))
             if label == "chord":
                 residuals = np.asarray(output_value[0])
                 rows[label]["converged"] = int(np.sum(residuals <= 1e-12))

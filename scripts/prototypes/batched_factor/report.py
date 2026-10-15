@@ -52,6 +52,8 @@ def batch_rows(before, after):
         old, new = before[f"batch_{width}"], after[f"batch_{width}"]
         rows.append(
             f"<tr><th>{width}</th><td>{mb(old['executable_bytes'])}</td>"
+            f"<td><strong>FAIL</strong></td>"
+            f"<td>{old['compile_seconds']:.2f}</td>"
             f"<td>{mb(new['executable_bytes'])}</td>"
             f"<td>{new['compile_seconds']:.2f}</td>"
             f"<td>{old['per_state_ms']:.3f}</td>"
@@ -83,10 +85,7 @@ def diverted_rows(data):
         entry = data[f"batch_{width}"]
         rows.append(
             f"<tr><th>{width}</th><td>{mb(entry['executable_bytes'])}</td>"
-            f"<td>{entry['compile_seconds']:.2f}</td>"
-            f"<td>{entry['per_state_ms']:.3f}</td>"
-            f"<td>{entry['two_converged']}/{width}</td>"
-            f"<td>{number(entry['two_max_residual'])}</td></tr>"
+            f"<td>{entry['compile_seconds']:.2f}</td></tr>"
         )
     return "\n".join(rows)
 
@@ -143,7 +142,7 @@ def write(args):
 {constant_rows("diverted", diverted_constants)}
 </tbody></table></section>
 <section id="limited"><h2>Limited two-correction batches</h2>
-<table><caption>One predecessor factor is reused across distinct vertical-field offsets. Cold compile uses the disabled persistent cache; one compiled program also serves a second state with the same shape.</caption><thead><tr><th>Width</th><th>Closure MB</th><th>Runtime MB</th><th>Cold compile [s]</th><th>Closure [ms/state]</th><th>Runtime [ms/state]</th><th>Converged</th><th>Max residual</th><th>Second state residual</th></tr></thead><tbody>
+<table><caption>One predecessor factor is reused across distinct vertical-field offsets. Cold compile uses the disabled persistent cache; one compiled program also serves a second state with the same shape. The closure size verdict is against 50 MB.</caption><thead><tr><th>Width</th><th>Closure MB</th><th>Size verdict</th><th>Closure compile [s]</th><th>Runtime MB</th><th>Runtime compile [s]</th><th>Closure [ms/state]</th><th>Runtime [ms/state]</th><th>Converged</th><th>Max residual</th><th>Second state residual</th></tr></thead><tbody>
 {batch_rows(before, limited)}
 </tbody></table>
 <p>The maximum runtime batch cold compile is {max_compile:.2f} s, against 60 s. Width one is reported as a latency control and does not meet 0.90 ms per state; the lead's acceptance target applies to batched per-state wall. A 2% perturbation of the predecessor LU produces width-16 maximum residual {number(limited["batch_16"]["perturbed_factor_max_residual"])}, above 10<sup>−12</sup>; this rerun makes the factor-dependence check red. The closure control likewise reruns the oversized program rather than reading a frozen receipt.</p>
@@ -156,7 +155,8 @@ def write(args):
 {factor_rows(diverted, "diverted")}
 </tbody></table></section>
 <section id="diverted"><h2>Diverted program costs</h2>
-<table><caption>The 282-cell diverted carrier is included for executable size and compile; convergence belongs to the separate diverted-state investigation.</caption><thead><tr><th>Width</th><th>Runtime MB</th><th>Cold compile [s]</th><th>Wall [ms/state]</th><th>Converged</th><th>Max residual</th></tr></thead><tbody>
+<p>The diverted batch returns NaN terminal residuals from its non-converged predecessor. Its wall and convergence counts are unqualified; the executable size and cold compile still measure the compiled program. The separate diverted-state investigation owns that residual.</p>
+<table><caption>The 282-cell diverted carrier is included for executable size and compile.</caption><thead><tr><th>Width</th><th>Runtime MB</th><th>Cold compile [s]</th></tr></thead><tbody>
 {diverted_rows(diverted)}
 </tbody></table></section>
 <section id="geometry"><h2>Limited terminal geometry</h2>

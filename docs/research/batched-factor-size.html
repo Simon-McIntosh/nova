@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova"><meta name="reckon-type" content="research">
+<meta name="plan-slug" content="batched-factor-size"><meta name="plan-title" content="Batched factor executable size">
+<meta name="plan-summary" content="H200 executable size, compile and wall for runtime-argument moment factors and chord batches">
+<meta name="plan-status" content="reference"><meta name="plan-informs" content="converged-forward-solve">
+<meta name="plan-evidence-for" content="converged-forward-solve"><meta name="plan-verifies" content="converged-forward-solve#s5">
+<meta name="plan-source" content="Cache-disabled H200 carrier programs and lowered HLO constant operations">
+<meta name="plan-source-quality" content="primary"><meta name="plan-tags" content="equilibrium,grad-shafranov,jax,convergence,topology">
+<title>Batched factor executable size | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css"><link rel="stylesheet" href="/_shared/dashboard.css">
+</head><body><main class="plan-doc">
+<header><p class="eyebrow">Research input</p><h1>Batched factor executable size</h1>
+<p class="lead">On the 289-cell limited carrier, passing the state, carrier arrays and predecessor LU as traced operands reduces the largest two-correction batch executable to 1.362 MB. The width-128 synchronized wall is 0.279 ms per distinct state, with 128/128 reaching a scaled residual at or below 10<sup>−12</sup>. The diverted carrier is measured for program size and compile; its separate convergence defect remains open.</p></header>
+<section id="method"><h2>Method and provenance</h2>
+<p>The prototype <code>scripts/prototypes/batched_factor/measure.py</code> imports the fixed-shape moment map without changing product code. It uses the cached 289-cell limited and 282-cell diverted certificate carriers, binary64 before array construction, and a cache-disabled H200 process for each carrier. The residual is evaluated from the scaled moment map. A vmapped JVP of identity directions forms every dense Jacobian column inside one jitted factor program; <code>jax.scipy.linalg.lu_factor</code> and <code>lu_solve</code> build and apply the device factor. The factor, state, scale and carrier arrays are runtime arguments to the two-correction chord program. A separate program builds fresh factors over state groups of four within one compiled scan to bound the temporary Jacobian memory.</p>
+<p>The fresh closure-constant reproduction and the runtime and HLO jobs write complete logs and JSON receipts under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T143916649094-batched-factor-size</code>. Each log begins with revision, tree, command, imported <code>nova</code> and measurement-module paths. All walls are synchronized medians of five calls, or three for the factor build. MB uses decimal bytes. The width-128 wall is a batch throughput measure, not a single-state latency.</p></section>
+<section id="constants"><h2>Captured constants</h2>
+<p>The fresh closure form reproduces 492.963, 289.805 and 289.812 MB at widths 1, 16 and 128. The table lists the five largest HLO <code>constant</code> operations in each oversized scalar-product, Jacobian-column and chord-batch lowering. The 50.65 MB row coupling and 36.08 MB quadrature matrix are carrier operands in the new program; the repeated 15.11 MB rows in the linearized products are captured primal intermediates of <code>jax.linearize</code>. A shape match identifies the source; the HLO operation name and byte count come directly from the lowered module with large literal values elided.</p>
+<table><caption>Largest lowered HLO literals, by program and carrier. Shapes are element counts; size is decimal MB.</caption><thead><tr><th>Carrier</th><th>Program</th><th>Shape</th><th>Dtype</th><th>MB</th><th>Source</th><th>Producing operation</th></tr></thead><tbody>
+<tr><td>limited</td><td>scalar_product</td><td>1217×289×3×6</td><td>f64</td><td>50.647</td><td>cached row coupling</td><td>constant.988: HLO constant</td></tr>
+<tr><td>limited</td><td>scalar_product</td><td>5202×289×3</td><td>f64</td><td>36.081</td><td>quadrature flux matrix</td><td>constant.1017: HLO constant</td></tr>
+<tr><td>limited</td><td>scalar_product</td><td>121×3×289×3×6</td><td>f64</td><td>15.107</td><td>linearized row-gather intermediate</td><td>constant.1022: HLO constant</td></tr>
+<tr><td>limited</td><td>scalar_product</td><td>121×3×289×3×6</td><td>f64</td><td>15.107</td><td>linearized row-gather intermediate</td><td>constant.1032: HLO constant</td></tr>
+<tr><td>limited</td><td>scalar_product</td><td>121×3×289×3×6</td><td>f64</td><td>15.107</td><td>linearized row-gather intermediate</td><td>constant.1047: HLO constant</td></tr>
+<tr><td>limited</td><td>jacobian_columns</td><td>1217×289×3×6</td><td>f64</td><td>50.647</td><td>cached row coupling</td><td>constant.1357: HLO constant</td></tr>
+<tr><td>limited</td><td>jacobian_columns</td><td>5202×289×3</td><td>f64</td><td>36.081</td><td>quadrature flux matrix</td><td>constant.1386: HLO constant</td></tr>
+<tr><td>limited</td><td>jacobian_columns</td><td>121×3×289×3×6</td><td>f64</td><td>15.107</td><td>linearized row-gather intermediate</td><td>constant.1391: HLO constant</td></tr>
+<tr><td>limited</td><td>jacobian_columns</td><td>121×3×289×3×6</td><td>f64</td><td>15.107</td><td>linearized row-gather intermediate</td><td>constant.1396: HLO constant</td></tr>
+<tr><td>limited</td><td>jacobian_columns</td><td>121×3×289×3×6</td><td>f64</td><td>15.107</td><td>linearized row-gather intermediate</td><td>constant.1404: HLO constant</td></tr>
+<tr><td>limited</td><td>batch_1</td><td>1217×289×3×6</td><td>f64</td><td>50.647</td><td>cached row coupling</td><td>constant.1495: HLO constant</td></tr>
+<tr><td>limited</td><td>batch_1</td><td>5202×289×3</td><td>f64</td><td>36.081</td><td>quadrature flux matrix</td><td>constant.1497: HLO constant</td></tr>
+<tr><td>limited</td><td>batch_1</td><td>867×867</td><td>f64</td><td>6.014</td><td>predecessor LU factor</td><td>constant.1507: HLO constant</td></tr>
+<tr><td>limited</td><td>batch_1</td><td>289×4×21×18</td><td>f64</td><td>3.496</td><td>captured carrier or linearization intermediate</td><td>constant.1490: HLO constant</td></tr>
+<tr><td>limited</td><td>batch_1</td><td>289×6×18</td><td>f64</td><td>0.250</td><td>captured carrier or linearization intermediate</td><td>constant.1498: HLO constant</td></tr>
+<tr><td>limited</td><td>batch_16</td><td>1217×289×3×6</td><td>f64</td><td>50.647</td><td>cached row coupling</td><td>constant.1529: HLO constant</td></tr>
+<tr><td>limited</td><td>batch_16</td><td>5202×289×3</td><td>f64</td><td>36.081</td><td>quadrature flux matrix</td><td>constant.1531: HLO constant</td></tr>
+<tr><td>limited</td><td>batch_16</td><td>867×867</td><td>f64</td><td>6.014</td><td>predecessor LU factor</td><td>constant.1541: HLO constant</td></tr>
+<tr><td>limited</td><td>batch_16</td><td>289×4×21×18</td><td>f64</td><td>3.496</td><td>captured carrier or linearization intermediate</td><td>constant.1524: HLO constant</td></tr>
+<tr><td>limited</td><td>batch_16</td><td>289×6×18</td><td>f64</td><td>0.250</td><td>captured carrier or linearization intermediate</td><td>constant.1532: HLO constant</td></tr>
+<tr><td>limited</td><td>batch_128</td><td>1217×289×3×6</td><td>f64</td><td>50.647</td><td>cached row coupling</td><td>constant.1529: HLO constant</td></tr>
+<tr><td>limited</td><td>batch_128</td><td>5202×289×3</td><td>f64</td><td>36.081</td><td>quadrature flux matrix</td><td>constant.1531: HLO constant</td></tr>
+<tr><td>limited</td><td>batch_128</td><td>867×867</td><td>f64</td><td>6.014</td><td>predecessor LU factor</td><td>constant.1541: HLO constant</td></tr>
+<tr><td>limited</td><td>batch_128</td><td>289×4×21×18</td><td>f64</td><td>3.496</td><td>captured carrier or linearization intermediate</td><td>constant.1524: HLO constant</td></tr>
+<tr><td>limited</td><td>batch_128</td><td>289×6×18</td><td>f64</td><td>0.250</td><td>captured carrier or linearization intermediate</td><td>constant.1532: HLO constant</td></tr>
+<tr><td>diverted</td><td>scalar_product</td><td>1164×282×3×6</td><td>f64</td><td>47.268</td><td>cached row coupling</td><td>constant.1077: HLO constant</td></tr>
+<tr><td>diverted</td><td>scalar_product</td><td>5076×282×3</td><td>f64</td><td>34.354</td><td>quadrature flux matrix</td><td>constant.1109: HLO constant</td></tr>
+<tr><td>diverted</td><td>scalar_product</td><td>121×3×282×3×6</td><td>f64</td><td>14.741</td><td>linearized row-gather intermediate</td><td>constant.1114: HLO constant</td></tr>
+<tr><td>diverted</td><td>scalar_product</td><td>121×3×282×3×6</td><td>f64</td><td>14.741</td><td>linearized row-gather intermediate</td><td>constant.1123: HLO constant</td></tr>
+<tr><td>diverted</td><td>scalar_product</td><td>121×3×282×3×6</td><td>f64</td><td>14.741</td><td>linearized row-gather intermediate</td><td>constant.1139: HLO constant</td></tr>
+<tr><td>diverted</td><td>jacobian_columns</td><td>1164×282×3×6</td><td>f64</td><td>47.268</td><td>cached row coupling</td><td>constant.1503: HLO constant</td></tr>
+<tr><td>diverted</td><td>jacobian_columns</td><td>5076×282×3</td><td>f64</td><td>34.354</td><td>quadrature flux matrix</td><td>constant.1535: HLO constant</td></tr>
+<tr><td>diverted</td><td>jacobian_columns</td><td>121×3×282×3×6</td><td>f64</td><td>14.741</td><td>linearized row-gather intermediate</td><td>constant.1540: HLO constant</td></tr>
+<tr><td>diverted</td><td>jacobian_columns</td><td>121×3×282×3×6</td><td>f64</td><td>14.741</td><td>linearized row-gather intermediate</td><td>constant.1545: HLO constant</td></tr>
+<tr><td>diverted</td><td>jacobian_columns</td><td>121×3×282×3×6</td><td>f64</td><td>14.741</td><td>linearized row-gather intermediate</td><td>constant.1553: HLO constant</td></tr>
+<tr><td>diverted</td><td>batch_1</td><td>1164×282×3×6</td><td>f64</td><td>47.268</td><td>cached row coupling</td><td>constant.1525: HLO constant</td></tr>
+<tr><td>diverted</td><td>batch_1</td><td>5076×282×3</td><td>f64</td><td>34.354</td><td>quadrature flux matrix</td><td>constant.1527: HLO constant</td></tr>
+<tr><td>diverted</td><td>batch_1</td><td>846×846</td><td>f64</td><td>5.726</td><td>predecessor LU factor</td><td>constant.1537: HLO constant</td></tr>
+<tr><td>diverted</td><td>batch_1</td><td>282×4×21×18</td><td>f64</td><td>3.411</td><td>captured carrier or linearization intermediate</td><td>constant.1520: HLO constant</td></tr>
+<tr><td>diverted</td><td>batch_1</td><td>282×6×18</td><td>f64</td><td>0.244</td><td>captured carrier or linearization intermediate</td><td>constant.1528: HLO constant</td></tr>
+<tr><td>diverted</td><td>batch_16</td><td>1164×282×3×6</td><td>f64</td><td>47.268</td><td>cached row coupling</td><td>constant.1529: HLO constant</td></tr>
+<tr><td>diverted</td><td>batch_16</td><td>5076×282×3</td><td>f64</td><td>34.354</td><td>quadrature flux matrix</td><td>constant.1531: HLO constant</td></tr>
+<tr><td>diverted</td><td>batch_16</td><td>846×846</td><td>f64</td><td>5.726</td><td>predecessor LU factor</td><td>constant.1541: HLO constant</td></tr>
+<tr><td>diverted</td><td>batch_16</td><td>282×4×21×18</td><td>f64</td><td>3.411</td><td>captured carrier or linearization intermediate</td><td>constant.1524: HLO constant</td></tr>
+<tr><td>diverted</td><td>batch_16</td><td>282×6×18</td><td>f64</td><td>0.244</td><td>captured carrier or linearization intermediate</td><td>constant.1532: HLO constant</td></tr>
+<tr><td>diverted</td><td>batch_128</td><td>1164×282×3×6</td><td>f64</td><td>47.268</td><td>cached row coupling</td><td>constant.1531: HLO constant</td></tr>
+<tr><td>diverted</td><td>batch_128</td><td>5076×282×3</td><td>f64</td><td>34.354</td><td>quadrature flux matrix</td><td>constant.1533: HLO constant</td></tr>
+<tr><td>diverted</td><td>batch_128</td><td>846×846</td><td>f64</td><td>5.726</td><td>predecessor LU factor</td><td>constant.1543: HLO constant</td></tr>
+<tr><td>diverted</td><td>batch_128</td><td>282×4×21×18</td><td>f64</td><td>3.411</td><td>captured carrier or linearization intermediate</td><td>constant.1526: HLO constant</td></tr>
+<tr><td>diverted</td><td>batch_128</td><td>282×6×18</td><td>f64</td><td>0.244</td><td>captured carrier or linearization intermediate</td><td>constant.1534: HLO constant</td></tr>
+</tbody></table></section>
+<section id="limited"><h2>Limited two-correction batches</h2>
+<table><caption>One predecessor factor is reused across distinct vertical-field offsets. Cold compile uses the disabled persistent cache; one compiled program also serves a second state with the same shape. The closure size verdict is against 50 MB.</caption><thead><tr><th>Width</th><th>Closure MB</th><th>Size verdict</th><th>Closure compile [s]</th><th>Runtime MB</th><th>Runtime compile [s]</th><th>Closure [ms/state]</th><th>Runtime [ms/state]</th><th>Converged</th><th>Max residual</th><th>Second state residual</th></tr></thead><tbody>
+<tr><th>1</th><td>492.963</td><td><strong>FAIL</strong></td><td>20.12</td><td>1.362</td><td>24.01</td><td>8.956</td><td>7.633</td><td>1/1</td><td>5.15557e-15</td><td>3.99557e-15</td></tr>
+<tr><th>16</th><td>289.805</td><td><strong>FAIL</strong></td><td>24.81</td><td>1.352</td><td>31.48</td><td>0.655</td><td>0.716</td><td>16/16</td><td>3.80223e-14</td><td>2.92579e-14</td></tr>
+<tr><th>128</th><td>289.812</td><td><strong>FAIL</strong></td><td>25.70</td><td>1.359</td><td>32.96</td><td>0.233</td><td>0.279</td><td>128/128</td><td>5.16201e-14</td><td>4.69157e-14</td></tr>
+</tbody></table>
+<p>The maximum runtime batch cold compile is 32.96 s, against 60 s. Width one is reported as a latency control and does not meet 0.90 ms per state; the lead's acceptance target applies to batched per-state wall. A 2% perturbation of the predecessor LU produces width-16 maximum residual 7.48579e-09, above 10<sup>−12</sup>; this rerun makes the factor-dependence check red. The closure control likewise reruns the oversized program rather than reading a frozen receipt.</p>
+<figure><img src="/nova/figures/converged-forward-solve/batched-factor-size/program-costs.svg" alt="Before and after executable size and per-state wall against batch width"><figcaption>Closure capture (dashed grey) and runtime operands (blue) at widths 1, 16 and 128 on the same limited H200 carrier. Dotted limits mark 50 MB and 0.90 ms per state.</figcaption></figure>
+</section>
+<section id="factors"><h2>Fresh factor build</h2>
+<p>The predecessor factor program itself is 1.353 MB and cold-compiles in 26.40 s on the limited carrier; it is 1.796 MB and cold-compiles in 39.80 s on the diverted carrier. The separate rows below include Jacobian columns and LU for fresh per-state factors. Their synchronized walls are not included in the reused-factor chord batch wall.</p>
+<table><caption>Fresh factors compiled as one program per width, with groups of four states inside the program.</caption><thead><tr><th>Carrier / width</th><th>Executable [MB]</th><th>Cold compile [s]</th><th>Batch wall [ms]</th><th>Per state [ms]</th></tr></thead><tbody>
+<tr><th>limited 1</th><td>1.351</td><td>25.07</td><td>29.620</td><td>29.620</td></tr>
+<tr><th>limited 16</th><td>1.349</td><td>38.17</td><td>412.060</td><td>25.754</td></tr>
+<tr><th>limited 128</th><td>1.349</td><td>26.84</td><td>3302.688</td><td>25.802</td></tr>
+<tr><th>diverted 1</th><td>1.795</td><td>36.77</td><td>45.935</td><td>45.935</td></tr>
+<tr><th>diverted 16</th><td>1.794</td><td>49.94</td><td>654.061</td><td>40.879</td></tr>
+<tr><th>diverted 128</th><td>1.794</td><td>31.62</td><td>5214.438</td><td>40.738</td></tr>
+</tbody></table></section>
+<section id="diverted"><h2>Diverted program costs</h2>
+<p>The diverted batch returns NaN terminal residuals from its non-converged predecessor. Its wall and convergence counts are unqualified; the executable size and cold compile still measure the compiled program. The separate diverted-state investigation owns that residual.</p>
+<table><caption>The 282-cell diverted carrier is included for executable size and compile.</caption><thead><tr><th>Width</th><th>Runtime MB</th><th>Cold compile [s]</th></tr></thead><tbody>
+<tr><th>1</th><td>1.809</td><td>33.41</td></tr>
+<tr><th>16</th><td>1.794</td><td>35.08</td></tr>
+<tr><th>128</th><td>1.794</td><td>36.14</td></tr>
+</tbody></table></section>
+<section id="geometry"><h2>Limited terminal geometry</h2>
+<p>Each panel shows the first terminal state from its batch, using shared levels for solved and analytic poloidal flux, both null sets, and the vessel wall. The field offset is 0.5 of the measured warm perturbation for the first state; the panels draw the base analytic exterior, whose omitted field change is order 10<sup>−8</sup> of the boundary span.</p>
+<figure><img src="/nova/figures/converged-forward-solve/batched-factor-size/limited-1-terminal.svg" alt="Limited terminal solved and analytic flux at width 1, both null sets and wall"><figcaption>Width 1, first distinct terminal state: scaled residual 5.15557e-15; converged true. Solved and analytic line contours use shared levels; both null sets and the vessel wall are drawn.</figcaption></figure>
+<figure><img src="/nova/figures/converged-forward-solve/batched-factor-size/limited-16-terminal.svg" alt="Limited terminal solved and analytic flux at width 16, both null sets and wall"><figcaption>Width 16, first distinct terminal state: scaled residual 1.63689e-14; converged true. Solved and analytic line contours use shared levels; both null sets and the vessel wall are drawn.</figcaption></figure>
+<figure><img src="/nova/figures/converged-forward-solve/batched-factor-size/limited-128-terminal.svg" alt="Limited terminal solved and analytic flux at width 128, both null sets and wall"><figcaption>Width 128, first distinct terminal state: scaled residual 2.13956e-14; converged true. Solved and analytic line contours use shared levels; both null sets and the vessel wall are drawn.</figcaption></figure>
+</section></main></body></html>

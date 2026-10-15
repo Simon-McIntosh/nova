@@ -62,7 +62,23 @@ def step_scan(data, output):
     axes[2].set_ylabel("cell 71 current moment [A]")
     axes[2].set_xlabel("Newton step scale")
     _label(axes[2], step, saddle, "saddle", RUST)
-    _label(axes[2], step, ordinary, "ordinary candidate", GREY)
+    present = np.flatnonzero(np.isfinite(ordinary) & (np.abs(ordinary) > 1e-12))
+    if len(present):
+        index = present[-1]
+        axes[2].text(
+            step[index], ordinary[index], "ordinary candidate", color=GREY, ha="right"
+        )
+    initial_class = data["scan"][0]["boundary_class"]
+    switched = [row["step"] for row in rows if row["boundary_class"] != initial_class]
+    if switched:
+        for axis in axes:
+            axis.axvline(switched[0], color=GREY, linestyle=":", linewidth=1.2)
+        axes[0].text(
+            switched[0] * 1.1,
+            axes[0].get_ylim()[1] * 0.8,
+            "wall path opens",
+            color=GREY,
+        )
     for axis in axes:
         axis.set_xlim(step[0], step[-1])
     _finish(figure, axes, output)

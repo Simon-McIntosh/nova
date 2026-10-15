@@ -39,14 +39,25 @@ L-orthonormal eigencoordinates everywhere.
 
 from __future__ import annotations
 
+import hashlib
 import json
+import os
+from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
+from multiprocessing import get_context
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 
 import numpy as np
 
 from nova.biot.greens import greens_psi
-from nova.circuit.conductor import ConductorSet, SensorSet
+from nova.circuit.conductor import (
+    ConductorSet,
+    PolygonSection,
+    SensorSet,
+    ThicknessSubdivision,
+    subdivide_passive_thickness,
+)
 from nova.circuit.linkage import (
     channel_flux_linkage,
     circuit_linkage_matrix,
@@ -55,6 +66,147 @@ from nova.circuit.linkage import (
     sensor_grid_couplings,
 )
 from nova.circuit.propagate import integrate_eddy_ode
+
+
+def resumable_linkage_matrix(
+    conductors: ConductorSet,
+    circuits: np.ndarray,
+    cache_dir: Path,
+    *,
+    block_size: int = 32,
+    workers: int = 1,
+    max_new_blocks: int | None = None,
+) -> np.ndarray:
+    """Build linkage in durable source-row blocks, reusing every finished block.
+
+    A block contains the unsymmetrized source rows. The final matrix applies
+    the same reciprocity average as ``circuit_linkage_matrix``.
+    """
+    from nova.circuit import linkage
+
+    circuits = np.asarray(circuits, dtype=np.int64)
+    if circuits.ndim != 1 or not len(circuits) or len(set(circuits)) != len(circuits):
+        raise ValueError("circuits must be a nonempty unique vector")
+    if isinstance(block_size, bool) or int(block_size) != block_size or block_size < 1:
+        raise ValueError("block_size must be a positive integer")
+    if isinstance(workers, bool) or not 1 <= workers <= 6:
+        raise ValueError("workers must be between one and six")
+    if max_new_blocks is not None and (
+        isinstance(max_new_blocks, bool)
+        or int(max_new_blocks) != max_new_blocks
+        or max_new_blocks < 1
+    ):
+        raise ValueError("max_new_blocks must be positive")
+    digest = hashlib.sha256(b"linkage-row-blocks-1")
+    digest.update(Path(linkage.__file__).read_bytes())
+    for array in (
+        circuits,
+        *(getattr(conductors, name) for name in conductors._columns),
+    ):
+        data = np.ascontiguousarray(array)
+        digest.update(str(data.dtype).encode())
+        digest.update(str(data.shape).encode())
+        digest.update(data.tobytes())
+    for section in conductors.polygon_sections:
+        digest.update(
+            np.asarray(
+                [section.circuit, section.current_share], dtype=np.float64
+            ).tobytes()
+        )
+        digest.update(
+            np.ascontiguousarray(section.vertices, dtype=np.float64).tobytes()
+        )
+    directory = Path(cache_dir) / digest.hexdigest()[:24]
+    directory.mkdir(parents=True, exist_ok=True)
+    print(f"LINKAGE_CACHE {directory}", flush=True)
+    groups = conductors.rows(circuits)
+    delta = linkage.median_section_scale(conductors.dr, conductors.dz)
+    point_r, point_z, weight, owner = linkage.section_grid(conductors, groups, delta, 6)
+    context = (
+        conductors,
+        groups,
+        circuits.tolist(),
+        conductors.polygon_by_circuit(),
+        point_r,
+        point_z,
+        weight,
+        owner,
+        False,
+    )
+    spans = [
+        (start, min(start + block_size, len(circuits)))
+        for start in range(0, len(circuits), block_size)
+    ]
+    expected_names = {f"rows-{start:06d}-{stop:06d}.npy" for start, stop in spans}
+    unexpected = [
+        path for path in directory.glob("rows-*.npy") if path.name not in expected_names
+    ]
+    if unexpected:
+        raise ValueError(f"linkage cache uses a different block size: {unexpected[0]}")
+
+    def pending():
+        for start, stop in spans:
+            path = directory / f"rows-{start:06d}-{stop:06d}.npy"
+            if path.exists():
+                block = np.load(path, mmap_mode="r", allow_pickle=False)
+                if block.shape != (stop - start, len(circuits)) or not np.all(
+                    np.isfinite(block)
+                ):
+                    raise ValueError(f"invalid completed linkage block: {path}")
+                print(f"LINKAGE_BLOCK_REUSED {start}:{stop} {path}", flush=True)
+                continue
+            yield start, stop, path
+
+    missing = list(pending())
+    print(f"LINKAGE_BLOCKS total={len(spans)} pending={len(missing)}", flush=True)
+    if missing:
+        if workers == 1:
+            linkage._set_column_context(*context)
+            column_map = map
+            pool = None
+        else:
+            pool = ProcessPoolExecutor(
+                max_workers=workers,
+                mp_context=get_context("forkserver"),
+                initializer=linkage._set_column_context,
+                initargs=context,
+            )
+            column_map = pool.map
+        try:
+            for start, stop, path in missing[:max_new_blocks]:
+                block = np.empty((stop - start, len(circuits)), dtype=np.float64)
+                for index, column in column_map(
+                    linkage._linkage_column, range(start, stop)
+                ):
+                    block[index - start] = column
+                with NamedTemporaryFile(
+                    dir=directory, suffix=".npy", delete=False
+                ) as temporary:
+                    np.save(temporary, block)
+                    temporary.flush()
+                    os.fsync(temporary.fileno())
+                    temporary_path = Path(temporary.name)
+                temporary_path.replace(path)
+                print(f"LINKAGE_BLOCK_DONE {start}:{stop} {path}", flush=True)
+        finally:
+            if pool is not None:
+                pool.shutdown()
+    remaining = [
+        (start, stop)
+        for start, stop in spans
+        if not (directory / f"rows-{start:06d}-{stop:06d}.npy").exists()
+    ]
+    if remaining:
+        raise RuntimeError(
+            f"linkage blocks incomplete: {len(spans) - len(remaining)}/{len(spans)} "
+            f"in {directory}"
+        )
+    matrix = np.empty((len(circuits), len(circuits)), dtype=np.float64)
+    for start, stop in spans:
+        path = directory / f"rows-{start:06d}-{stop:06d}.npy"
+        matrix[start:stop] = np.load(path, allow_pickle=False)
+    return 0.5 * (matrix + matrix.T)
+
 
 #: nominal stainless-steel resistivity [Ohm m] -- the SCALE at which the ring
 #: resistances start; a bounded cross-shot multiplier is the calibrated unknown
@@ -115,6 +267,190 @@ class PassiveCircuitSystem:
             r_diag = r_diag * multiplier
         rate, vectors = _passive_modes(self.lmat, r_diag)
         return 1.0 / np.clip(rate, 1e-12, None), vectors
+
+
+def resolve_passive_thickness(
+    conductors: ConductorSet,
+    source_system: PassiveCircuitSystem,
+    thickness_m: np.ndarray,
+    series: np.ndarray,
+    layer_count: int,
+    *,
+    highest_frequency_hz: float = 5000.0,
+    workers: int = 1,
+    linkage_cache_dir: Path | None = None,
+    linkage_block_size: int = 32,
+    linkage_block_limit: int | None = None,
+) -> tuple[ConductorSet, np.ndarray, PassiveCircuitSystem, np.ndarray]:
+    """Resolve wall current through thickness for a sectioned machine.
+
+    ``layer_count`` sets the minimum uniform resolution of the thickest wall;
+    narrower walls use fewer interior strips. Both faces receive a strip thinner
+    than one third of the skin depth at ``highest_frequency_hz``. The source
+    system's resistance is the measured or nominal whole-wall resistance, and
+    each independent strip receives its inverse area fraction.
+    """
+    from nova.circuit.linkage import circuit_linkage_matrix, guard_positive_definite
+
+    if (
+        isinstance(layer_count, bool)
+        or int(layer_count) != layer_count
+        or layer_count < 2
+    ):
+        raise ValueError("layer_count must be an integer of at least two")
+    thickness = np.asarray(thickness_m, dtype=np.float64)
+    source = np.asarray(source_system.circuits, dtype=np.int64)
+    if (
+        source.size == 0
+        or thickness.shape != source.shape
+        or np.any(~np.isfinite(thickness))
+        or np.any(thickness <= 0)
+    ):
+        raise ValueError(
+            "one positive thickness is required per source passive circuit"
+        )
+    if not np.isfinite(highest_frequency_hz) or highest_frequency_hz <= 0:
+        raise ValueError("highest_frequency_hz must be finite and positive")
+    if isinstance(workers, bool) or not 1 <= workers <= 6:
+        raise ValueError("workers must be between one and six")
+    if np.any(~np.isfinite(source_system.r_diag)) or np.any(source_system.r_diag <= 0):
+        raise ValueError("source passive resistances must be finite and positive")
+    # Rectangular strips use polygon linkage so the source-side 10 mm section
+    # floor does not smear a skin layer that is only a few millimetres wide.
+    polygons = list(conductors.polygon_sections)
+    shaped = {int(section.circuit) for section in polygons}
+    for circuit, rows in zip(source, conductors.rows(source), strict=True):
+        if len(rows) != 1:
+            raise ValueError("each source passive circuit must have one element")
+        if int(circuit) in shaped:
+            continue
+        row = int(rows[0])
+        r, z = float(conductors.r[row]), float(conductors.z[row])
+        dr, dz = abs(float(conductors.dr[row])), abs(float(conductors.dz[row]))
+        if dr <= dz:
+            vertices = np.array(
+                [
+                    [r - dr / 2, z - dz / 2],
+                    [r - dr / 2, z + dz / 2],
+                    [r + dr / 2, z + dz / 2],
+                    [r + dr / 2, z - dz / 2],
+                ]
+            )
+        else:
+            vertices = np.array(
+                [
+                    [r - dr / 2, z - dz / 2],
+                    [r + dr / 2, z - dz / 2],
+                    [r + dr / 2, z + dz / 2],
+                    [r - dr / 2, z + dz / 2],
+                ]
+            )
+        polygons.append(PolygonSection(int(circuit), vertices))
+    shaped_conductors = ConductorSet(
+        **{name: getattr(conductors, name) for name in conductors._columns},
+        polygon_sections=tuple(polygons),
+    )
+    resistivities = np.full(source.size, float(source_system.resistivity))
+    polygon_by_circuit = conductors.polygon_by_circuit()
+    for position, (circuit, row, resistance) in enumerate(
+        zip(source, conductors.rows(source), source_system.r_diag, strict=True)
+    ):
+        index = int(row[0])
+        radius = float(conductors.r[index])
+        section = polygon_by_circuit.get(int(circuit))
+        if section is None:
+            area = abs(float(conductors.dr[index] * conductors.dz[index]))
+        else:
+            vertices = section.vertices
+            area = (
+                abs(
+                    float(
+                        np.sum(
+                            vertices[:, 0] * np.roll(vertices[:, 1], -1)
+                            - vertices[:, 1] * np.roll(vertices[:, 0], -1)
+                        )
+                    )
+                )
+                / 2
+            )
+        if radius > 0 and area > 0 and resistance > 0:
+            resistivities[position] = min(
+                resistivities[position], float(resistance) * area / (2 * np.pi * radius)
+            )
+    if np.any(~np.isfinite(resistivities)) or np.any(resistivities <= 0):
+        raise ValueError("source resistivity must be positive")
+    skin_depth = np.sqrt(resistivities / (np.pi * highest_frequency_hz * 4e-7 * np.pi))
+    max_layer = float(np.max(thickness)) / layer_count
+    face_target = np.minimum(max_layer / 3, skin_depth / 7)
+    # Bucket similar skin depths so walls with a low-resistivity path do not
+    # force every steel wall onto the same very fine mesh.
+    face_min = float(np.min(face_target))
+    bucket = np.floor(2 * np.log2(face_target / face_min) + 1e-12).astype(int)
+    refined_conductors = shaped_conductors
+    layer_circuits, layer_parent, layer_factors = [], [], []
+    for index in np.unique(bucket):
+        select = bucket == index
+        split = subdivide_passive_thickness(
+            refined_conductors,
+            source[select],
+            thickness[select],
+            max_layer,
+            surface_layer_m=face_min * 2 ** (float(index) / 2),
+        )
+        refined_conductors = split.conductors
+        layer_circuits.append(split.circuits)
+        layer_parent.append(split.parent)
+        layer_factors.append(split.resistance_factor)
+    refined = ThicknessSubdivision(
+        refined_conductors,
+        np.concatenate(layer_circuits),
+        np.concatenate(layer_parent),
+        np.concatenate(layer_factors),
+    )
+    section_ids = np.setdiff1d(conductors.circuits, source)
+    if section_ids.size != series.shape[0]:
+        raise ValueError("series rows must match the non-passive section circuits")
+    circuits = np.concatenate((section_ids, refined.circuits))
+    matrix = (
+        circuit_linkage_matrix(refined.conductors, circuits, workers=workers)
+        if linkage_cache_dir is None
+        else resumable_linkage_matrix(
+            refined.conductors,
+            circuits,
+            linkage_cache_dir,
+            block_size=linkage_block_size,
+            workers=workers,
+            max_new_blocks=linkage_block_limit,
+        )
+    )
+    n_section = section_ids.size
+    passive_matrix = guard_positive_definite(matrix[n_section:, n_section:])
+    resistance_of = dict(zip(source, source_system.r_diag, strict=True))
+    resistance = np.array(
+        [
+            resistance_of[int(parent)] * factor
+            for parent, factor in zip(
+                refined.parent, refined.resistance_factor, strict=True
+            )
+        ]
+    )
+    centroid_r, centroid_z = refined.conductors.centroids(refined.circuits)
+    mutual = matrix[n_section:, :n_section]
+    system = PassiveCircuitSystem(
+        circuits=refined.circuits,
+        centroid_r=centroid_r,
+        centroid_z=centroid_z,
+        lmat=passive_matrix,
+        r_diag=resistance,
+        a_circuit=np.empty((0, refined.circuits.size)),
+        g_grid=np.empty((0, refined.circuits.size)),
+        m_channel=mutual @ series,
+        channels=source_system.channels,
+        measured_channel_row={},
+        resistivity=source_system.resistivity,
+        section_scale=refined.conductors.section_scale(refined.circuits),
+    )
+    return refined.conductors, refined.circuits, system, mutual
 
 
 def _passive_modes(lmat: np.ndarray, r_diag: np.ndarray):

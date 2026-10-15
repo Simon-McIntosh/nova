@@ -28,7 +28,7 @@ from scripts.prototypes.lean_map.probe_bias import _image
 from scripts.prototypes.lean_map.quadrature import quadratic_fit, triangle_rule
 from scripts.prototypes.lean_map.values import build_values
 from scripts.prototypes.solve_options.point_bias import _exterior
-from scripts.prototypes.solve_options.profile import _machine
+from scripts.prototypes.solve_options.profile import _machine, _point_booking
 from scripts.prototypes.support.geometry import certificate_field
 from tests.equilibrium.test_topology_read import _analytic_inputs
 
@@ -57,6 +57,47 @@ def compile_program(program, operands):
     started = perf_counter()
     compiled = jax.jit(program).lower(*operands).compile()
     return compiled, perf_counter() - started, bytes_generated(compiled)
+
+
+def gradient_ratio(equation, point, scale, operands, block=8):
+    shape = point.shape
+    coordinates = (point / scale).reshape(-1)
+
+    def residual_at(flat, *args):
+        return (equation(flat.reshape(shape) * scale, *args) / scale).reshape(-1)
+
+    def energy(flat, *args):
+        residual = residual_at(flat, *args)
+        return 0.5 * jnp.vdot(residual, residual)
+
+    residual = np.asarray(jax.jit(residual_at)(coordinates, *operands))
+    gradient = np.asarray(jax.jit(jax.grad(energy))(coordinates, *operands))
+
+    def products(flat, basis, *args):
+        _, push = jax.linearize(lambda varied: residual_at(varied, *args), flat)
+        return jax.vmap(push)(basis)
+
+    product_program = jax.jit(products)
+    size = coordinates.size
+    squares = 0.0
+    for start in range(0, size, block):
+        basis = np.zeros((block, size))
+        for row, column in enumerate(range(start, min(start + block, size))):
+            basis[row, column] = 1.0
+        columns = np.asarray(
+            product_program(coordinates, jnp.asarray(basis), *operands)
+        )
+        squares += float(np.sum(columns**2))
+    residual_two = float(np.linalg.norm(residual))
+    gradient_two = float(np.linalg.norm(gradient))
+    jacobian_frobenius = float(np.sqrt(squares))
+    return {
+        "residual_two": residual_two,
+        "gradient_two": gradient_two,
+        "jacobian_frobenius": jacobian_frobenius,
+        "gradient_relative": gradient_two
+        / max(jacobian_frobenius * residual_two, 1e-30),
+    }
 
 
 def run(kind, cells, cache, output, widths, cold_only=False):
@@ -211,6 +252,23 @@ def run(kind, cells, cache, output, widths, cold_only=False):
         )
         / span
     )
+    hard_centroid = _point_booking(
+        sample_flux,
+        geometry,
+        profile,
+        reading.boundary_flux,
+        reading.axis_flux,
+        convention.sigma,
+        booked.raw_current,
+        False,
+    )
+    result["hard_centroid_map_error"] = (
+        float(
+            jnp.max(jnp.abs(exterior + _image(operator, hard_centroid) - analytic_flux))
+        )
+        / span
+    )
+    result["hard_centroid_refused"] = result["hard_centroid_map_error"] > 1e-2
     record(output, result)
 
     def solve(start, *args):
@@ -233,7 +291,7 @@ def run(kind, cells, cache, output, widths, cold_only=False):
         cold_accepted_steps=int(solution.accepted_steps),
     )
     record(output, result)
-    if not bool(solution.converged) or cold_only:
+    if not bool(solution.converged):
         return
     terminal = solution.moments
     np.save(output.with_suffix(".npy"), np.asarray(terminal))
@@ -249,7 +307,10 @@ def run(kind, cells, cache, output, widths, cold_only=False):
         / span
     )
     result["terminal_roots"] = np.asarray(terminal_map.roots).tolist()
+    result["gauss_newton"] = gradient_ratio(equation, terminal, scale, operands)
     record(output, result)
+    if cold_only:
+        return
 
     def factor_build(point, *args):
         return factor_at(lambda varied: equation(varied, *args), point)
@@ -318,6 +379,13 @@ def run(kind, cells, cache, output, widths, cold_only=False):
         return residual, first, second
 
     batch_base = (values, window)
+    perturbed_factor = (factor[0] * 1.01, factor[1])
+    perturbed_residual = one_chord(
+        jnp.asarray(1.0), terminal, perturbed_factor, *batch_base
+    )[0]
+    result["perturbed_factor_residual"] = float(perturbed_residual)
+    result["perturbed_factor_refused"] = result["perturbed_factor_residual"] > 1e-12
+    record(output, result)
     for width in widths:
         offsets = jnp.linspace(0.5, 1.5, width)
         rows = {"width": width}

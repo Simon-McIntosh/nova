@@ -224,10 +224,12 @@ def main():
             row.get("cold_converged")
             and row["_receipt_path"].with_suffix(".npy").is_file()
         ):
+            build = row["_receipt_path"].stem.split("-")[0]
+            cache = args.receipts / f"cache-{build}"
             terminal_panel(
                 row,
-                args.cache,
-                args.output / f"{row['kind']}-{row['cells']}-terminal.svg",
+                cache if cache.is_dir() else args.cache,
+                args.output / f"{row['_receipt_path'].stem}-terminal.svg",
             )
     for path in args.receipts.glob("stages-*.json"):
         stages(json.loads(path.read_text()), args.output / f"{path.stem}.svg")

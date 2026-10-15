@@ -159,8 +159,8 @@ def coupled_plant(
     series = np.asarray(machine.series, dtype=np.float64)
     coil_names = list(machine.coil_names)
     passive_circuits = np.asarray(machine.passive_circuits, dtype=np.int64)
-    coil_inductance = np.asarray(machine.coil_inductance, dtype=np.float64)
-    coil_resistance = np.asarray(machine.coil_resistance, dtype=np.float64)
+    coil_inductance = _optional_array(machine, "coil_inductance", (0, 0))
+    coil_resistance = _optional_array(machine, "coil_resistance", (0,))
     system: PassiveCircuitSystem = machine.passive_system
     section_names = [str(name) for name in getattr(machine, "section_names", [])]
     section_coil = np.asarray(
@@ -175,6 +175,14 @@ def coupled_plant(
     section_passive_mutual = np.asarray(
         getattr(machine, "section_passive_mutual", np.empty((0, 0))), dtype=np.float64
     )
+
+    # The terminal fields are the series reduction of the section fields.  When
+    # the machine supplies them they are kept as given; when it supplies only
+    # the section level, the call performs the reduction.
+    if section_inductance.size and not coil_inductance.size:
+        coil_inductance = series.T @ section_inductance @ series
+    if section_resistance.size and not coil_resistance.size:
+        coil_resistance = series.T @ section_resistance
 
     if frequencies is None:
         frequencies = np.geomspace(0.1, 5000.0, 21)
@@ -345,6 +353,14 @@ def select_terminal_modes(
     )
 
 
+def _optional_array(machine, name, shape) -> np.ndarray:
+    """Return ``machine.<name>`` as a float array, or an empty array when absent."""
+    value = getattr(machine, name, None)
+    if value is None:
+        return np.empty(shape, dtype=np.float64)
+    return np.asarray(value, dtype=np.float64)
+
+
 def _nova_revision() -> str:
     """The nova revision the plant was built at."""
     try:
@@ -367,23 +383,61 @@ def _default_cache_dir() -> Path:
 def _cache_digest(
     machine, source, n_modes, frequencies, error_tolerance, provenance
 ) -> str:
-    """A stable digest of everything the cached plant depends on."""
+    """A stable digest of everything the cached plant depends on.
+
+    Every input that feeds a stored output is folded in, so two machines that
+    differ in any of them cannot collide on one cached plant: the coil and
+    section wiring and linkage, the section names, the passive--section mutual
+    that forms ``mode_section_coupling``, the passive system, the source's
+    time base and currents, the reduction settings and the provenance.
+    """
     digest = hashlib.sha256()
     for name in ConductorSet._columns:
         digest.update(np.asarray(getattr(machine.conductors, name)).tobytes())
-    digest.update(np.asarray(machine.series).tobytes())
-    digest.update(np.asarray(machine.passive_circuits).tobytes())
-    digest.update(np.asarray(machine.coil_inductance).tobytes())
-    digest.update(np.asarray(machine.coil_resistance).tobytes())
-    for name in ("section_coil", "section_inductance", "section_resistance"):
-        section = getattr(machine, name, None)
-        if section is not None:
-            digest.update(np.asarray(section).tobytes())
-    digest.update(np.asarray(machine.passive_system.lmat).tobytes())
-    digest.update(np.asarray(machine.passive_system.r_diag).tobytes())
+    _update_names(digest, getattr(machine, "coil_names", ()))
+    _update_names(digest, getattr(machine, "section_names", ()))
+    for name in (
+        "series",
+        "passive_circuits",
+        "coil_inductance",
+        "coil_resistance",
+        "section_coil",
+        "section_inductance",
+        "section_resistance",
+        "section_passive_mutual",
+    ):
+        _update_optional(digest, getattr(machine, name, None))
+    system = machine.passive_system
+    for name in ("lmat", "r_diag", "m_channel", "circuits"):
+        _update_optional(digest, getattr(system, name, None))
+    _update_names(digest, getattr(system, "channels", ()))
+    for name in ("plasma_times", "coil_current_times", "coil_currents"):
+        _update_optional(
+            digest, None if source is None else getattr(source, name, None)
+        )
+    if source is not None:
+        for current in getattr(source, "prescribed_currents", list)():
+            for name in ("cell_current", "radius", "height"):
+                _update_optional(digest, getattr(current, name, None))
     digest.update(np.asarray(frequencies).tobytes())
     digest.update(
         np.asarray([n_modes if n_modes is not None else -1, error_tolerance]).tobytes()
     )
     digest.update(json.dumps(provenance, sort_keys=True, default=str).encode())
     return digest.hexdigest()[:20]
+
+
+def _update_optional(digest, value) -> None:
+    """Fold an optional array into ``digest`` when it is present."""
+    if value is None:
+        return
+    array = np.asarray(value)
+    if array.size:
+        digest.update(array.tobytes())
+
+
+def _update_names(digest, names) -> None:
+    """Fold an ordered name sequence into ``digest``, separators included."""
+    for name in names or ():
+        digest.update(str(name).encode())
+        digest.update(b"\x00")

@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import importlib.util
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 from nova.circuit.conductor import ConductorSet
 from nova.circuit.coupled_plant import (
@@ -53,7 +54,14 @@ class _Source:
         return list(self._currents)
 
 
-def _reduced_machine() -> _Machine:
+def _reduced_machine(*, perturb_section_self: float | None = None) -> _Machine:
+    """A reduced machine whose terminal fields the call must derive.
+
+    The machine carries only section-level linkage, so ``coupled_plant``
+    computes the terminal L and R itself.  ``perturb_section_self`` scales one
+    section self term after the terminal derivation has been fixed, which is
+    what a control needs: the section input moves, the terminal does not.
+    """
     n_section, n_coil, n_passive = 4, 2, 6
     r = np.array([3.0, 3.6, 6.0, 6.6, 8.0, 8.4, 8.8, 9.2, 9.6, 10.0])
     z = np.array([4.0, 3.2, 4.0, 3.2, 3.0, 2.0, 1.0, -1.0, -2.0, -3.0])
@@ -83,16 +91,24 @@ def _reduced_machine() -> _Machine:
         resistivity=NOMINAL_STEEL_RESISTIVITY,
         section_scale=conductors.section_scale(passive),
     )
+    section_inductance = matrix[:n_section, :n_section].copy()
+    if perturb_section_self is not None:
+        section_inductance[0, 0] *= perturb_section_self
+    # A supplied terminal comes from the unperturbed linkage, so it disagrees
+    # with a perturbed section block; without one the call derives the terminal.
+    supplied = perturb_section_self is not None
     return _Machine(
         conductors=conductors,
         series=series,
         coil_names=coil_names,
         passive_circuits=passive,
-        coil_inductance=series.T @ matrix[:n_section, :n_section] @ series,
-        coil_resistance=np.array([1e-4, 1e-4]),
+        coil_inductance=(
+            series.T @ matrix[:n_section, :n_section] @ series if supplied else None
+        ),
+        coil_resistance=np.array([1e-4, 1e-4]) if supplied else None,
         section_names=["PFa-1", "PFa-2", "PFb-1", "PFb-2"],
         section_coil=np.array([0, 0, 1, 1]),
-        section_inductance=matrix[:n_section, :n_section],
+        section_inductance=section_inductance,
         section_resistance=np.array([5e-5, 5e-5, 5e-5, 5e-5]),
         section_passive_mutual=matrix[n_section:, :n_section],
         passive_system=system,
@@ -185,10 +201,18 @@ def _series_of(plant) -> np.ndarray:
 
 
 def test_terminal_fields_are_the_series_reduction_of_the_section_fields(tmp_path):
+    """The call derives the terminal fields; the test rebuilds the wiring itself.
+
+    The machine carries no terminal fields, so coupled_plant performs the
+    reduction.  The expectation is rebuilt here from the plant's own section
+    map rather than from the machine's series, so a wiring bug in the call
+    shows as a failure instead of cancelling out.
+    """
     machine, source = _reduced_machine(), _source()
-    series = machine.series
+    assert machine.coil_inductance is None
     plant = coupled_plant(machine, source, cache_dir=tmp_path)
-    np.testing.assert_array_equal(_series_of(plant), series)
+    series = _series_of(plant)
+    np.testing.assert_array_equal(series, machine.series)
     np.testing.assert_allclose(
         plant.coil_inductance,
         series.T @ plant.section_inductance @ series,
@@ -206,18 +230,55 @@ def test_terminal_fields_are_the_series_reduction_of_the_section_fields(tmp_path
     )
 
 
-def test_perturbed_section_self_breaks_the_series_reduction(tmp_path):
-    """The negative control: move one section self term and the reduction fails."""
-    machine, source = _reduced_machine(), _source()
+def test_series_reduction_check_fails_on_a_perturbed_section_self(tmp_path):
+    """The negative control: the call keeps the terminal the machine gave it.
+
+    The machine supplies a terminal linkage and a section block whose first
+    self term is scaled by 1.5, and the call stores both.  The series
+    reduction of the stored section block then no longer reproduces the stored
+    terminal, so the equality the positive test asserts fails here.
+    """
+    machine, source = _reduced_machine(perturb_section_self=1.5), _source()
     plant = coupled_plant(machine, source, cache_dir=tmp_path)
     series = _series_of(plant)
     reduced = series.T @ plant.section_inductance @ series
-    np.testing.assert_allclose(plant.coil_inductance, reduced, rtol=1e-10, atol=0.0)
+    with pytest.raises(AssertionError):
+        np.testing.assert_allclose(plant.coil_inductance, reduced, rtol=1e-10, atol=0.0)
 
-    perturbed = plant.section_inductance.copy()
-    perturbed[0, 0] *= 1.5  # one section's self inductance moved
-    broken = series.T @ perturbed @ series
-    assert not np.allclose(plant.coil_inductance, broken, rtol=1e-10, atol=0.0)
+
+def test_machines_differing_only_in_section_inputs_do_not_collide(tmp_path):
+    """Two machines that differ only in section inputs get different plants.
+
+    section_names and section_passive_mutual both feed stored outputs -- the
+    section names and mode_section_coupling -- so a cache key that ignores
+    them would hand the second machine the first one's plant.
+    """
+    machine, source = _reduced_machine(), _source()
+    # identical arrays, different section labels: only the names differ
+    other_names = replace(
+        machine,
+        section_names=["PFa-a", "PFa-b", "PFb-a", "PFb-b"],
+    )
+    # identical labels, different passive-section mutual: only that differs
+    other_mutual = replace(
+        machine,
+        section_passive_mutual=machine.section_passive_mutual * 1.5,
+    )
+
+    first = coupled_plant(machine, source, cache_dir=tmp_path)
+    names_plant = coupled_plant(other_names, source, cache_dir=tmp_path)
+    mutual_plant = coupled_plant(other_mutual, source, cache_dir=tmp_path)
+
+    # three machines, three cache entries: no two collided
+    assert len(list(tmp_path.glob("*/plant.npz"))) == 3
+    assert names_plant.section_names == other_names.section_names
+    assert names_plant.section_names != first.section_names
+    assert not np.allclose(
+        mutual_plant.mode_section_coupling, first.mode_section_coupling
+    )
+    # a re-run of the first machine still resolves to its own cached plant
+    again = coupled_plant(machine, source, cache_dir=tmp_path)
+    assert again.section_names == first.section_names
 
 
 def test_the_cache_is_written_by_the_circuit_tier_serialisers(tmp_path):
@@ -270,8 +331,6 @@ def test_real_sectioned_set_reduction_is_within_one_percent():
     than rebuilding the passive mesh, so the check is seconds rather than the
     minutes the refinement takes.
     """
-    import pytest
-
     root = Path(__file__).resolve().parents[1]
     cache = Path(
         "/home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit"
@@ -313,8 +372,6 @@ def test_real_sectioned_set_reduction_is_within_one_percent():
         series=series,
         coil_names=list(coil_names),
         passive_circuits=np.asarray(system.circuits, dtype=np.int64),
-        coil_inductance=series.T @ matrix[:n_section, :n_section] @ series,
-        coil_resistance=np.zeros(series.shape[1]),
         section_names=section_names,
         section_coil=owner,
         section_inductance=matrix[:n_section, :n_section],
@@ -335,6 +392,7 @@ def test_real_sectioned_set_reduction_is_within_one_percent():
     assert plant.n_section == n_section
     assert list(plant.section_names) == section_names
 
+    assert machine.coil_inductance is None
     tau, vectors = system.mode_system()
     coupling = system.m_channel.T @ vectors
     full = _terminal_impedance(
@@ -344,7 +402,7 @@ def test_real_sectioned_set_reduction_is_within_one_percent():
         tau,
         frequencies,
     )
-    diag = np.arange(machine.coil_inductance.shape[0])
+    diag = np.arange(plant.n_coil)
     error = np.abs(
         plant.terminal_impedance(frequencies)[:, diag, diag] - full[:, diag, diag]
     ) / np.abs(full[:, diag, diag])
@@ -371,8 +429,6 @@ def test_real_sectioned_self_holds_the_unsectioned_box_check():
     both sides share a quadrature, and the difference measures sectioning
     rather than quadrature.
     """
-    import pytest
-
     root = Path(__file__).resolve().parents[1]
     spec = importlib.util.spec_from_file_location(
         "iter_sectioned_build",

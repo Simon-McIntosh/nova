@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="250">
+<meta name="plan-version" content="251">
 <meta name="plan-modified" content="2026-10-15">
 </head>
 <body>
@@ -775,6 +775,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261015T115457776708-review-of-fast-read-d8ee8ad8b3d4" data-who="reckon-build" data-when="2026-10-15T12:02:48Z">
     <div class="r-comment-body"><p>Stored parsed independent review of source base 6c82b47f85d0676cadd449c766cba9585daab624 through head d8ee8ad8b3d41bef60e737209259c1535e85c42c; six scores total 74/120, six checklist items, one blocking and three follow-on findings, added failure count unmeasured because both source suite arms are blank.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261015T091903690374-fast-read" data-who="reckon-build" data-when="2026-10-15T12:14:56Z">
+    <div class="r-comment-body"><p>Fixed-shape read delivered with a focused four-crossing Bell-cut gate; same-target orientation-base/head suite moved from 2 failures to 2 passes, with 0 added failures; H200 reads remain 0.759/1.487 ms.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

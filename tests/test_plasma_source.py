@@ -40,12 +40,7 @@ def test_mast_reconstruction_linkage_matches_own_psi():
     assert len(source.coils.time) > len(source.slices)
     assert len(source.coils.names) == 13
     assert np.all(np.isfinite(source.coil_currents(0)))
-    assert source.prescribe(0).boundary_source in {
-        "separatrix",
-        "boundary_outline",
-        "last_closed_flux",
-        "separatrix_x_point",
-    }
+    assert source.prescribe(0).boundary_source == "boundary_outline"
     assert result["limit_fraction"] == FLUX_FRACTION_LIMIT
     assert result["targets"]["coil"]["count"] > 0
     assert result["targets"]["loop"]["count"] > 0

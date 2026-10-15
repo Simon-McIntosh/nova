@@ -140,7 +140,7 @@ class PlasmaSource:
                     psi_axis=frame.flux_axis,
                     psi_boundary=frame.flux_boundary,
                     plasma_current=frame.plasma_current,
-                    outline=frame.boundary,
+                    outline=np.empty((0, 2)),
                     axis=tuple(frame.magnetic_axis),
                     flux_derivative_scale=1.0,
                     x_points=tuple(map(tuple, finite_x)),

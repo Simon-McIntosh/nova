@@ -508,9 +508,7 @@ def test_select_modes_to_tolerance_grows_the_ranked_prefix():
         trials.append(int(keep.size))
         return np.array([{1: 0.4, 2: 0.05, 3: 0.01, 4: 1e-6}[int(keep.size)]])
 
-    keep, error = select_modes_to_tolerance(
-        relevance, error_of_keep, tolerance=1e-1
-    )
+    keep, error = select_modes_to_tolerance(relevance, error_of_keep, tolerance=1e-1)
     assert list(keep) == [0, 1]
     assert trials == [4, 1, 2]
     np.testing.assert_allclose(error, [0.05])
@@ -526,3 +524,33 @@ def test_select_modes_to_tolerance_grows_the_ranked_prefix():
     )
     assert empty.size == 0
     np.testing.assert_allclose(empty_error, [0.3])
+
+
+def test_reduced_mode_branch_reproduces_a_single_ring_analytic_screening():
+    """The already-reduced mode form reproduces one ring's analytic impedance.
+
+    Pins the reduced-mode algebra against an independent reference rather than
+    against the dense solve: a single passive ring of self inductance ``lp`` and
+    resistance ``rp``, mutually coupled to a coil of inductance ``lc`` through
+    ``mutual``, reflects ``w**2 mutual**2 / (rp + i w lp)``.  Its L-orthonormal
+    mode is ``1/sqrt(lp)`` with ``tau = lp/rp``, so the mode coupling is
+    ``mutual/sqrt(lp)`` and the reduced terminal impedance must equal the
+    analytic screened impedance to round-off.
+    """
+    lp, rp, lc, mutual = 1.2e-3, 3.5e-4, 4.0e-4, 1.7e-3
+    frequency = np.geomspace(0.5, 4000.0, 17)
+    omega = 2.0 * np.pi * frequency
+    tau = lp / rp
+    mode_coupling = np.array([[mutual / np.sqrt(lp)]])
+
+    reduced = terminal_impedance_spectrum(
+        np.array([[lc]]),
+        frequency_hz=frequency,
+        mode_coupling=mode_coupling,
+        mode_rate=np.array([1.0 / tau]),
+    )
+    analytic = (
+        1j * omega[:, None, None] * lc
+        + (omega**2 * mutual**2)[:, None, None] / (rp + 1j * omega * lp)[:, None, None]
+    )
+    np.testing.assert_allclose(reduced, analytic, rtol=1e-12, atol=0.0)

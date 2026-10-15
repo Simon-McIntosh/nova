@@ -57,6 +57,16 @@ class CoupledPlant:
     the mode amplitude ``a_m`` with ``da_m/dt = (Psi_m - a_m) / tau_m`` and
     ``Psi_m = mode_coil_coupling[m] . i_coil + mode_plasma_flux[m](t)``.
 
+    ``section_names`` names the ``n_section`` winding sections, and
+    ``section_coil`` ``(n_section,)`` is the coil each section belongs to in its
+    series order.  ``section_inductance`` ``(n_section, n_section)``,
+    ``section_resistance`` ``(n_section,)`` and ``mode_section_coupling``
+    ``(n_modes, n_section)`` are the section-level L, R and mode couplings; the
+    terminal fields are their series reduction over ``section_coil``
+    (``coil_inductance == series.T . section_inductance . series`` and so on).
+    The section level is what a switched-converter model reads to predict the
+    internal section voltages of a sectioned winding.
+
     ``section_plasma_flux`` ``(n_times, n_section)`` is the plasma flux linked at
     every coil section against ``plasma_times``, and ``mode_plasma_flux``
     ``(n_times, n_modes)`` its projection onto the reduced modes -- the plasma's
@@ -68,8 +78,13 @@ class CoupledPlant:
     coil_names: list[str]
     coil_inductance: np.ndarray
     coil_resistance: np.ndarray
+    section_names: list[str]
+    section_coil: np.ndarray
+    section_inductance: np.ndarray
+    section_resistance: np.ndarray
     mode_tau: np.ndarray
     mode_coil_coupling: np.ndarray
+    mode_section_coupling: np.ndarray
     section_plasma_flux: np.ndarray
     mode_plasma_flux: np.ndarray
     plasma_times: np.ndarray
@@ -81,6 +96,11 @@ class CoupledPlant:
     def n_coil(self) -> int:
         """Return the number of coil terminals."""
         return len(self.coil_names)
+
+    @property
+    def n_section(self) -> int:
+        """Return the number of coil winding sections."""
+        return int(self.section_inductance.shape[0])
 
     @property
     def n_modes(self) -> int:
@@ -117,6 +137,13 @@ def coupled_plant(
     ``coil_inductance`` ``(n_coil, n_coil)``, ``coil_resistance`` ``(n_coil,)``
     and ``passive_system`` (:class:`~nova.circuit.passive.PassiveCircuitSystem`).
 
+    The machine also carries the sectioned winding's own linkage --
+    ``section_names``, ``section_coil`` ``(n_section,)``, ``section_inductance``
+    ``(n_section, n_section)``, ``section_resistance`` ``(n_section,)`` and the
+    passive-section mutual ``section_passive_mutual`` ``(n_passive, n_section)``
+    -- whose series reduction is the terminal fields above.  Omit them and the
+    section fields come back empty.
+
     ``source`` is the plasma source: ``coil_current_times``, ``coil_currents``
     ``(n_t, n_coil)`` and ``prescribed_currents()`` (one flux-function current
     distribution per ``plasma_times``).  Pass ``source=None`` for the plant
@@ -135,6 +162,19 @@ def coupled_plant(
     coil_inductance = np.asarray(machine.coil_inductance, dtype=np.float64)
     coil_resistance = np.asarray(machine.coil_resistance, dtype=np.float64)
     system: PassiveCircuitSystem = machine.passive_system
+    section_names = [str(name) for name in getattr(machine, "section_names", [])]
+    section_coil = np.asarray(
+        getattr(machine, "section_coil", np.empty(0, dtype=np.int64)), dtype=np.int64
+    )
+    section_inductance = np.asarray(
+        getattr(machine, "section_inductance", np.empty((0, 0))), dtype=np.float64
+    )
+    section_resistance = np.asarray(
+        getattr(machine, "section_resistance", np.empty(0)), dtype=np.float64
+    )
+    section_passive_mutual = np.asarray(
+        getattr(machine, "section_passive_mutual", np.empty((0, 0))), dtype=np.float64
+    )
 
     if frequencies is None:
         frequencies = np.geomspace(0.1, 5000.0, 21)
@@ -171,6 +211,13 @@ def coupled_plant(
     )
     mode_tau = tau[keep]
     mode_coil_coupling = coupling[:, keep].T  # (n_modes, n_coil)
+    if (
+        section_passive_mutual.shape[0] == vectors.shape[0]
+        and section_passive_mutual.size
+    ):
+        mode_section_coupling = (vectors.T @ section_passive_mutual)[keep]
+    else:
+        mode_section_coupling = np.empty((mode_tau.size, section_inductance.shape[0]))
 
     if source is None:
         plasma_times = np.empty(0, dtype=np.float64)
@@ -191,8 +238,13 @@ def coupled_plant(
         coil_names=coil_names,
         coil_inductance=coil_inductance,
         coil_resistance=coil_resistance,
+        section_names=section_names,
+        section_coil=section_coil,
+        section_inductance=section_inductance,
+        section_resistance=section_resistance,
         mode_tau=mode_tau,
         mode_coil_coupling=mode_coil_coupling,
+        mode_section_coupling=mode_section_coupling,
         section_plasma_flux=section_plasma_flux,
         mode_plasma_flux=mode_plasma_flux,
         plasma_times=plasma_times,
@@ -323,6 +375,10 @@ def _cache_digest(
     digest.update(np.asarray(machine.passive_circuits).tobytes())
     digest.update(np.asarray(machine.coil_inductance).tobytes())
     digest.update(np.asarray(machine.coil_resistance).tobytes())
+    for name in ("section_coil", "section_inductance", "section_resistance"):
+        section = getattr(machine, name, None)
+        if section is not None:
+            digest.update(np.asarray(section).tobytes())
     digest.update(np.asarray(machine.passive_system.lmat).tobytes())
     digest.update(np.asarray(machine.passive_system.r_diag).tobytes())
     digest.update(np.asarray(frequencies).tobytes())

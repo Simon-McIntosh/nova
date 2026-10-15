@@ -43,7 +43,17 @@
       <tr><th>Unchanged saddle fragment</th><td>90.5678</td><td>0.408749</td></tr>
       <tr><th>First candidate ordinary cut</th><td>103.750</td><td>0.469310</td></tr>
     </tbody></table>
-    <p>The read now assigns four-crossing cells to the saddle fragment even if the ordinary polygon reports valid. Membership and the three booked moments therefore use that same representation. Fresh H200 map-only measurement restores the 282-cell analytic image error to 0.001086535 and its seed residual to 0.004696462, equal to the unchanged route to the precision shown. The 550 and 2,098-cell rows are still being measured.</p>
+    <p>The read now assigns four-crossing cells to the saddle fragment even if the ordinary polygon reports valid. Membership and the three booked moments therefore use that same representation. Fresh H200 map-only measurement restores the 282-cell analytic image error to 0.001086535 and its seed residual to 0.004696462, equal to the unchanged route to the precision shown. At 550 and 2,098 cells this repair alone left image errors of 0.000997180 and 0.0161172; the separate containing-cell repair below is being measured.</p>
+  </section>
+  <section id="production-owner">
+    <h2>Why the production X-point cell was not booked</h2>
+    <p>The fresh 2,098-cell comparison reproduces the unchanged 0.0161172 analytic image error and 0.668971 seed residual. Its seven-cell saddle frame contains the X-point in cell 47. That cell has positive membership after the connected read, so the graph did not omit it. The ordinary polygon reports valid and has only two crossings, so the map sends the cell to ordinary booking and records zero saddle-booked cells. One other cell is marked for normal-form booking but carries zero selected membership. The X-point is therefore missed by the booking choice, not by saddle detection or absence from the connected support.</p>
+    <table><thead><tr><th>2,098-cell X-point cell 47</th><th>Current [A]</th><th>Membership</th></tr></thead><tbody>
+      <tr><th>Analytic reference</th><td>0.784511</td><td>—</td></tr>
+      <tr><th>Existing ordinary booking</th><td>12.638078</td><td>0.460443 ordinary fraction</td></tr>
+      <tr><th>Normal-form read</th><td>not booked</td><td>0.028514</td></tr>
+    </tbody></table>
+    <p>The 11.8536 A excess at cell 47 accounts for the scaled current residual of −0.668971 there. The read now assigns every cell containing the X-point to the normal-form owner even when the ordinary cut is valid; the same owner supplies membership and all three booked moments. A fresh H200 map-image run at 282, 550, and 2,098 cells is in progress to test this repair. No cold solve has been submitted from this state.</p>
   </section>
   <section id="candidate">
     <h2>Candidate measurement</h2>

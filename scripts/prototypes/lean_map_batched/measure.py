@@ -364,18 +364,40 @@ def run(kind, cells, cache, output, widths, cold_only=False):
         args = varying(offset, base[0], base[1])
 
         def correction(state):
-            residual = equation(state, *args)
-            delta = jsp_linalg.lu_solve(factor, -residual.reshape(-1)).reshape(
-                state.shape
-            )
-            return state + delta
+            moments, residual = state
+            norm = jnp.max(jnp.abs(residual / scale))
 
-        first = correction(point)
-        second = correction(first)
-        residual = jnp.max(jnp.abs(equation(second, *args) / scale))
-        return residual, first, second
+            def advance(_):
+                delta = jsp_linalg.lu_solve(factor, -residual.reshape(-1)).reshape(
+                    moments.shape
+                )
+                candidate = moments + delta
+                candidate_residual = equation(candidate, *args)
+                candidate_norm = jnp.max(jnp.abs(candidate_residual / scale))
+                improved = jnp.isfinite(candidate_norm) & (candidate_norm < norm)
+                return (
+                    jnp.where(improved, candidate, moments),
+                    jnp.where(improved, candidate_residual, residual),
+                )
+
+            return jax.lax.cond(
+                norm <= 1e-12,
+                lambda _: state,
+                advance,
+                operand=None,
+            )
+
+        initial = equation(point, *args)
+        first, first_residual = correction((point, initial))
+        second, second_residual = correction((first, first_residual))
+        terminal_norm = jnp.max(jnp.abs(second_residual / scale))
+        return terminal_norm, first, second
 
     batch_base = (values, window)
+    control_input = equation(terminal, *varying(jnp.asarray(1.0), values, window))
+    result["control_factor_input_residual"] = float(
+        jnp.max(jnp.abs(control_input / scale))
+    )
     control_residual = one_chord(jnp.asarray(1.0), terminal, factor, *batch_base)[0]
     perturbed_factor = (factor[0] * 1.01, factor[1])
     perturbed_residual = one_chord(
@@ -384,7 +406,8 @@ def run(kind, cells, cache, output, widths, cold_only=False):
     result["control_factor_residual"] = float(control_residual)
     result["perturbed_factor_residual"] = float(perturbed_residual)
     result["perturbed_factor_refused"] = (
-        result["control_factor_residual"] <= 1e-12
+        result["control_factor_input_residual"] > 1e-12
+        and result["control_factor_residual"] <= 1e-12
         and result["perturbed_factor_residual"] > 1e-12
     )
     record(output, result)

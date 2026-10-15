@@ -19,6 +19,8 @@ from scripts.prototypes.sub_millisecond.measure_wall_march import polygon_area
 
 class MapState(NamedTuple):
     moments: jax.Array
+    moment_residual: jax.Array
+    constraint_rows: jax.Array
     roots: jax.Array
     boundary_class: jax.Array
     boundary_flux: jax.Array
@@ -85,9 +87,11 @@ def _density_coefficients(geometry, reading, profile):
     )
 
 
-def _saddle_moments(geometry, reading, profile, capacity=8):
+def _saddle_moments(geometry, reading, profile, capacity=8, ordinary_valid=None):
     """Book selected saddle sectors with four chords per cubic ray."""
     active = reading.normal_form_cells & (reading.membership > 0)
+    if ordinary_valid is not None:
+        active = active & ~ordinary_valid
     count = jnp.sum(active, dtype=jnp.int32)
     indices = jnp.nonzero(active, size=capacity, fill_value=0)[0]
     coefficients = _density_coefficients(geometry, reading, profile)
@@ -185,8 +189,11 @@ def map_moments(
         geometry, reading, profile, convention.sigma, 4
     )
     cut = (reading.membership > 0) & ~full
-    ordinary_cut = cut & ~reading.normal_form_cells
-    saddle, saddle_valid = _saddle_moments(geometry, reading, profile)
+    saddle_cut = cut & reading.normal_form_cells & ~ordinary_valid
+    ordinary_cut = cut & ~saddle_cut
+    saddle, saddle_valid = _saddle_moments(
+        geometry, reading, profile, ordinary_valid=ordinary_valid
+    )
     raw = interior + jnp.where(ordinary_cut[:, None], ordinary, 0.0) + saddle
     total = jnp.sum(raw[:, 0])
     missing = jnp.any(cut & ~complete)
@@ -201,15 +208,20 @@ def map_moments(
         & (total != 0)
     )
     normalized = raw * (target_current / jnp.where(total != 0, total, 1))
+    normalized = jnp.where(valid, normalized, jnp.nan)
+    constraint_scale = jnp.maximum(jnp.abs(target_current), 1.0)
+    current_row = (jnp.sum(normalized[:, 0]) - target_current) / constraint_scale
     return MapState(
-        jnp.where(valid, normalized, jnp.nan),
+        normalized,
+        moments - normalized,
+        jnp.atleast_1d(current_row),
         roots.position,
         reading.boundary_class,
         reading.boundary_flux,
         reading.valid & reading.qualified,
         valid,
         jnp.sum(selected),
-        jnp.sum(cut & reading.normal_form_cells),
+        jnp.sum(saddle_cut),
     )
 
 
@@ -218,9 +230,7 @@ def warm_slice(start, scale, *map_operands):
 
     def equation(scaled):
         varied = scaled * scale
-        return ((map_moments(varied, *map_operands).moments - varied) / scale).reshape(
-            -1
-        )
+        return (map_moments(varied, *map_operands).moment_residual / scale).reshape(-1)
 
     scaled = start / scale
     residual = equation(scaled)

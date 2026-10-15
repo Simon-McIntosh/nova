@@ -158,6 +158,7 @@ def run(kind, cache, output, trace_dir):
         saddle_cells=int(state.saddle_cells),
         boundary_class=int(state.boundary_class),
         boundary_flux=float(state.boundary_flux),
+        current_constraint_row=float(state.constraint_rows[0]),
     )
     trace_path = trace_dir / kind / "map"
     trace_path.mkdir(parents=True, exist_ok=True)
@@ -273,7 +274,7 @@ def run(kind, cache, output, trace_dir):
     start = perf_counter()
     moments = reference
     history = []
-    for _ in range(8):
+    for _ in range(20):
         outcome = program(moments, scale, *operands)
         jax.block_until_ready(outcome)
         history.append(float(outcome.residual))
@@ -287,9 +288,7 @@ def run(kind, cache, output, trace_dir):
         float(jnp.max(jnp.abs(exterior + _image(operator, moments) - analytic))) / span
     )
     save(output, result)
-    if not bool(outcome.converged):
-        print("RESULT " + json.dumps(result), flush=True)
-        return
+    result["warm_input_converged"] = bool(outcome.converged)
     amplitude = span * 1e-8 / pitch
     shifted_values = replace(
         values,
@@ -334,6 +333,7 @@ def run(kind, cache, output, trace_dir):
         outcomes = batched(offsets)
         jax.block_until_ready(outcomes)
         result[f"batch_{width}"] = {
+            "input_converged": bool(outcome.converged),
             "compile_seconds": compile_s,
             "wall_ms": wall(batched, (offsets,)),
             "converged": int(jnp.sum(outcomes.converged)),

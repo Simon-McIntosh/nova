@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="lean-map">
+<meta name="plan-title" content="Fixed-shape lean forward map prototype">
+<meta name="plan-summary" content="Eight map rows, booking-bias controls and strict cold solves at the first cell rung">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s5">
+<meta name="plan-recorded-at" content="2026-10-14">
+<meta name="plan-verdict" content="partial">
+<meta name="plan-environment" content="One reserved H200, binary64, device-built coarse carriers, fixed-shape Gauss values and bounded jet and cut rows">
+<title>Fixed-shape lean forward map prototype | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<header><h1 id="lean-map-title">Fixed-shape lean forward map prototype</h1>
+<p id="lean-map-summary">At the first device-built rung, analytic-state map error is 1.4323 × 10<sup>−4</sup> for 289 limited cells and 6.1896 × 10<sup>−4</sup> for 282 diverted cells. Both cold Newton solves reach residual below 10<sup>−12</sup> and nulls within one pitch. The warm cached-factor slices and cold compile walls miss the joint acceptance.</p></header>
+<section id="lean-map-bias"><h2>Reproduced point-booking bias</h2>
+<p id="lean-map-bias-measure">The hard-centroid diverted error reproduced at 0.418807 with 2,098 cells and 0.409206 with 5,158. Restricting bulk booking to connected full cells and retaining exact cut moments reduced these to 0.001850 and 0.0005712. At 2,098 cells the hard mask selected 21 zero-membership private cells and 419 partial cells. Keeping private cells while correcting cuts leaves 0.41436 error, so detached private flux explains the plateau. The corrected error decreases under refinement. H200 jobs 1285574 and 1285581 and their row JSON receipts carry the controls.</p></section>
+<section id="lean-map-values"><h2>Values-map ladder</h2>
+<table id="lean-map-values-table"><thead><tr><th>Topology</th><th>Cells</th><th>Relative sup error</th><th>Warm values wall</th><th>Peak-HBM byte floor</th></tr></thead><tbody>
+<tr><td>Limited</td><td>289</td><td>1.4323 × 10<sup>−4</sup></td><td>0.266 ms</td><td>0.00752 ms</td></tr>
+<tr><td>Diverted</td><td>282</td><td>6.1896 × 10<sup>−4</sup></td><td>0.144 ms</td><td>0.00716 ms</td></tr>
+<tr><td>Limited</td><td>553</td><td>4.6633 × 10<sup>−5</sup></td><td>0.284 ms</td><td>0.02752 ms</td></tr>
+<tr><td>Diverted</td><td>550</td><td>1.8214 × 10<sup>−4</sup></td><td>0.240 ms</td><td>0.02723 ms</td></tr>
+<tr><td>Limited</td><td>1,071</td><td>1.5567 × 10<sup>−5</sup></td><td>0.615 ms</td><td>0.10323 ms</td></tr>
+<tr><td>Diverted</td><td>1,074</td><td>1.1591 × 10<sup>−4</sup></td><td>0.634 ms</td><td>0.10381 ms</td></tr>
+<tr><td>Limited</td><td>2,105</td><td>4.6928 × 10<sup>−6</sup></td><td>0.915 ms</td><td>0.39879 ms</td></tr>
+<tr><td>Diverted</td><td>2,098</td><td>1.7664 × 10<sup>−5</sup></td><td>0.892 ms</td><td>0.39614 ms</td></tr>
+</tbody></table>
+<p id="lean-map-values-caveat">All eight H200 values rows completed in job 1285577. The byte floors use the <a href="https://www.nvidia.com/en-us/data-center/h200/">H200 NVL 4.8 TB/s peak specification</a>. A reduction-throughput control was slower than the observed 2,000-cell matvec and was rejected as a floor. These walls exclude booking, support read and Newton. The <a href="/nova/research/fixed-shape-lean-map.html">research document</a> holds the method, plots and provenance.</p>
+<p id="lean-map-first-moments">At the 289-cell limited rung, one current per interior cell gave 0.00104895 relative sup error versus 0.000143234 with first moments. At the 282-cell diverted rung, it gave 0.0170329 versus 0.000618964. Thus first moments are required at the chosen rung. Exact cut booking took 7.159/4.854 ms warm for limited/diverted, and both deliberate over-capacity trials returned typed status 1 (H200 job 1285611).</p></section>
+<section id="lean-map-solve"><h2>Converged cold and refused warm rows</h2>
+<table id="lean-map-solve-table"><thead><tr><th>Topology; cells</th><th>Cold residual; wall</th><th>Terminal flux error; farthest null</th><th>Live-map wall</th><th>Cached-factor warm residual; wall</th></tr></thead><tbody>
+<tr><td>Limited; 289</td><td>9.2419 × 10<sup>−13</sup>; 11.71 s</td><td>1.4324 × 10<sup>−4</sup>; 5.48 × 10<sup>−8</sup> pitches</td><td>11.04 ms</td><td>1.8307 × 10<sup>−12</sup>; 307.5 ms</td></tr>
+<tr><td>Diverted; 282</td><td>7.5623 × 10<sup>−13</sup>; 23.86 s</td><td>6.2183 × 10<sup>−4</sup>; 1.56 × 10<sup>−5</sup> pitches</td><td>9.99 ms</td><td>2.2061 × 10<sup>−11</sup>; 156.2 ms</td></tr>
+</tbody></table>
+<p id="lean-map-solve-verdict">Job 1285598 recorded these independently recomputed terminal residuals. Cold Newton compiled in 80.19 s limited and 79.09 s diverted, exceeding the 60 s clause. Full-column <code>jacfwd</code> had requested 132.73 GiB and failed in job 1285579; the completed route linearises once and scans eight-column tangent batches. The first rung is the smallest tested map-accuracy-qualified count, but no tested count is certified against all §6 clauses. The <a href="/nova/research/fixed-shape-lean-map.html">research record</a> shows the terminal poloidal panels and remaining measurements.</p>
+<p id="lean-map-checked-warm">A checked cached-factor correction (job 1285620) stopped at 4.3822 × 10<sup>−15</sup> on limited after two corrections, with a 291.7 ms warm wall and 5.878 s factor setup. Diverted reached 1.0561 × 10<sup>−12</sup> after five corrections, narrowly refusing the strict tolerance, in 725.6 ms warm wall with 3.611 s factor setup. Its saved terminal rechecked at 2.2063 × 10<sup>−11</sup> after rebuilding the map. A fresh build in batch job 1285631 reached 8.391 × 10<sup>−13</sup> for the diverted scalar correction, showing residual variability; both warm walls remain far above 1 ms.</p>
+<p id="lean-map-stage-measure">At 282 diverted cells, H200 job 1285602 measured 10.176 ms for the full live map, 6.120 ms for the isolated connected-support read and 4.322 ms for exact cut booking. The values and gathered-jet matvecs took 0.488 and 0.255 ms against peak-HBM byte floors of 0.00716 and 0.01005 ms. Stage calls overlap in the fused program; their walls are diagnostic, not additive.</p></section>
+<section id="lean-map-batch"><h2>Fixed-shape batch throughput</h2>
+<table id="lean-map-batch-table"><thead><tr><th>Topology; cells</th><th>Width</th><th>Wall per slice</th><th>Residual-qualified slices</th></tr></thead><tbody>
+<tr><td>Limited; 289</td><td>1</td><td>1,072.6 ms</td><td>0/1</td></tr>
+<tr><td>Limited; 289</td><td>16</td><td>238.5 ms</td><td>16/16</td></tr>
+<tr><td>Limited; 289</td><td>128</td><td>232.9 ms</td><td>107/128</td></tr>
+<tr><td>Diverted; 282</td><td>1</td><td>1,032.3 ms</td><td>1/1</td></tr>
+<tr><td>Diverted; 282</td><td>16</td><td>260.2 ms</td><td>6/16</td></tr>
+<tr><td>Diverted; 282</td><td>128</td><td>243.5 ms</td><td>43/128</td></tr>
+</tbody></table>
+<p id="lean-map-batch-caveat">Job 1285631 ran distinct nearby exterior slices under <code>jax.vmap</code> with identical shapes within each width and checked early stopping. Each count requires residual ≤ 10<sup>−12</sup>; the walls are raw execution throughput, not qualified converged throughput for refused slices. The saved diverted predecessor rechecked at 2.21 × 10<sup>−11</sup> after rebuilding the map, so its batch starts were not qualified even where a later slice converged. Width-128 wall is 232.9/243.5 ms per limited/diverted slice, with 107/128 and 43/128 strict passes. The original unconditional route (job 1285606) was faster at 51.1/55.0 ms per slice but passed only 35/128 and 22/128; it also regressed an already passing limited scalar correction.</p></section>
+<section id="lean-map-continuity"><h2>Fixed-shape transition controls</h2>
+<p id="lean-map-transition-result">Two 41-state sweeps retained one fixed 282-cell carrier and computed both X-point and limiter-contact flux candidates on every step. Each had only one fully valid state. In the wall-local sweep (job 1285610), the bisected class switch changed boundary flux by 7.34 × 10<sup>−10</sup> of the flux span, while booked current jumped by 1.285 of reference current and one side refused with cut status 2. At an interior-to-band crossing, roots and cut booking passed on both sides but jet-band rows were missing. Its diagnostic route current jump was 7.587 × 10<sup>−12</sup> of total current, versus 8.41 × 10<sup>−17</sup> for exact booking. Full-map finite differences at normalized steps 10<sup>−3</sup>, 10<sup>−4</sup> and 10<sup>−5</sup> remained near 88.1 relative sup. The fixed lookup margin does not admit moving band rows, and these receipts do not demonstrate a continuous, refusal-free limited-to-diverted transition.</p></section>
+</main></body></html>

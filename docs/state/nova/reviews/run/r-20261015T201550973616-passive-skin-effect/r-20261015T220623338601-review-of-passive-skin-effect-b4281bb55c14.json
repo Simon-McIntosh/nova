@@ -1,0 +1,117 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_derivation": "Both baseline_suite and after_suite are empty in the reviewed run manifest; the focused head gate passed 3 tests but cannot supply a base-versus-head suite delta, so null is not a measured zero.",
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "artifacts": [
+    "/home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit/gate-logs/passive-skin-effect/postcommit-focused.log",
+    "/home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit/gate-logs/passive-skin-effect/negative-head.log",
+    "/home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit/gate-logs/passive-skin-effect/negative-mutant.log",
+    "/home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit/gate-logs/passive-skin-effect/iter-blocks-2-last.log"
+  ],
+  "assertion_audit": {
+    "analytic": "tests/test_circuit_passive.py:192 fails if the manually constructed 160-ring transfer departs over 1 percent from the Bessel solution; lines 193 and 197 fail if the one-ring positive control becomes accurate or the low-frequency limit changes. None calls the new resolver.",
+    "cache_key": "tests/test_coupled_plant.py:418-421 fails if a tenfold source resistivity change leaves the layered cache digest unchanged.",
+    "iter_control": "tests/test_coupled_plant.py:498-515 fail if the one-layer path differs from an independently stored ITER plant; negative-mutant.log:117-119 confirms a 1 percent passive-resistance perturbation reddens the test when the cache exists.",
+    "machine_route": "tests/test_coupled_plant.py:393-411 fail if explicit one-layer differs from default, layering produces no modes or no spectrum change, toy reduction exceeds 1 percent, or the row-block cache is empty; the equality comparison shares the same machine and implementation on both sides.",
+    "resumable": "tests/test_circuit_passive.py:258-285 fail if interruption does not preserve the first block, resume recomputes rows 0 and 1, assembly differs from direct linkage, a block-size change is accepted, or a bounded call claims completion; direct and resumed paths share the same linkage column kernel.",
+    "subdivision": "tests/test_circuit_passive.py:229-235 fail for too few strips, wrong mutual or polygon shape, insufficient face resolution, lost total width or wrong resistance distribution; the resistance baseline is the same variable passed as input at line 217.",
+    "wall_material": "tests/test_circuit_passive.py:324-326 fail if the more conductive wall does not get more strips or output parallel resistance differs from the supplied wall resistance; the latter baseline is the input at line 304."
+  },
+  "base_log_revision": null,
+  "call_site_count": 3,
+  "call_sites": [
+    "nova/circuit/coupled_plant.py:260",
+    "nova/circuit/passive.py:393",
+    "nova/circuit/passive.py:417"
+  ],
+  "commits_read": [
+    "c4754771e1610fbd8179f45e41c9e122ec862ddf",
+    "3e60a21ec9be1184e8f8558873418703aa70a24a",
+    "c9eb5880cbb114ca6f732e53df20e19b575c0454",
+    "72224a55df2377a3a8ad630f6abc6beacb0071f6",
+    "2f785359125af3cc495015eff281a9c92b7b972f",
+    "7d663b0e82db902fcd6e2565108692ea2c60f8c2",
+    "61e4f2d87c358245925c949cbdc339d0ed60b695",
+    "9ae7149726e8167227c1f6fb8b62f4c2173ae4c9",
+    "53459ffe3aed653e11724e96499c5491ef52d2d3",
+    "83c79752860cdff736b60f21d5c8c3acbf6b66fb",
+    "16e6f6790a4aa1c1309e684dca272333b88e6720",
+    "b4281bb55c14f27771a2d8d58a28827f9d4b6f7c"
+  ],
+  "completed_at": "2026-10-15T22:13:19Z",
+  "dispatched_at": "2026-10-15T22:06:54Z",
+  "findings": [
+    {
+      "file": "docs/research/iter-coupled-plant-call.html",
+      "line": "78",
+      "severity": "blocking",
+      "text": "blocking: The source done_when remains unmet: the new 4912-circuit mesh has only 31/163 linkage blocks and no rebuilt 105052/1 plant, doubled-layer terminal comparison, resolved full-versus-reduced error, mode count, measured build time or requested new-plant transfer matrices; cached 12 mm versus 6 mm data do not establish those results."
+    },
+    {
+      "file": "tests/test_circuit_passive.py",
+      "line": "150",
+      "severity": "blocking",
+      "text": "blocking: The analytic shell test constructs its own ring inductances and resistances and calls terminal_impedance_spectrum directly, so it stays green if resolve_passive_thickness produces incorrect wall geometry or linkage; the required 1 percent analytic check is not demonstrated for the new production path."
+    },
+    {
+      "file": "tests/test_circuit_passive.py",
+      "line": "235",
+      "severity": "follow-on",
+      "text": "follow-on: This DC resistance assertion compares the output with resistance, the same value supplied as source.r_diag at line 217; line 326 repeats the pattern for each wall, so both can stay green if the supplied baseline resistance changes, and neither independently verifies the real plant's DC limit."
+    },
+    {
+      "file": "nova/circuit/passive.py",
+      "line": "122",
+      "severity": "follow-on",
+      "text": "follow-on: resumable_linkage_matrix duplicates circuit_linkage_matrix's quadrature setup and symmetric matrix assembly in nova/circuit/linkage.py:236-285 rather than extending that owner; the two paths can diverge when kernel defaults or parameters change."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "I read the twelve commits from e01a4f7a63e576d91b48a29fcb2d8d508447b90e to b4281bb55c14f27771a2d8d58a28827f9d4b6f7c commit by commit; the eight changed paths add wall resolution, machine routing, resumable linkage, tests, documentation and two rendered figures.",
+    "done_when": "The source done_when at prompt.txt:149-150 requires analytic accuracy, doubled-layer convergence, a reduced 105052/1 plant and four-frequency matrices; postcommit-focused.log records 3 passed while iter-blocks-2-last.log records only 31/163 blocks, so the gate does not assert the whole measure.",
+    "goal": "The source goal in prompt.txt:30 asks for frequency-correct passive screening; nova/circuit/coupled_plant.py:258-274 exposes the layered path, but docs/research/iter-coupled-plant-call.html:78 says its resolved ITER plant is unfinished.",
+    "manifest": "The reviewed manifest.md reports twelve commits, 3 passed in the final focused gate, a red resistance mutant, and 132 linkage blocks still missing; baseline_suite and after_suite are empty, so the suite failure delta is unmeasured.",
+    "write_paths": "The declared paths at prompt.txt:124-132 cover all eight paths in git diff --name-only e01a4f7a..b4281bb5, including the two SVGs and cumulative research page."
+  },
+  "justifications": {
+    "durability": "tests/test_coupled_plant.py:503-515 has an independent cached-plant comparison whose resistance mutant failed, but tests/test_circuit_passive.py:150-192 never calls resolve_passive_thickness and no test asserts the full new ITER plant.",
+    "evidence": "tests/test_circuit_passive.py:192 and postcommit-focused.log support the separate 0.523 percent cylindrical calculation and three focused passes, while iter-blocks-2-last.log:42 proves only 31 of 163 new linkage blocks are complete.",
+    "fit": "nova/circuit/passive.py:393 reuses the existing conductor subdivision, and the rendered figures in docs/figures/iter-passive-skin-effect are legible with unclipped labels; the source and comments carry no forbidden transient names.",
+    "goal_fidelity": "nova/circuit/coupled_plant.py:258-274 implements a callable layered route, but docs/research/iter-coupled-plant-call.html:78 expressly leaves the required resolved 105052/1 plant and convergence unmeasured.",
+    "reuse": "nova/circuit/passive.py:122-135 and 163-208 duplicate the quadrature, worker and symmetric assembly owned by nova/circuit/linkage.py:236-285 to add row-block durability, rather than extending that owner.",
+    "scope_discipline": "The eight paths in the e01a4f7a..b4281bb5 diff are all within the source prompt.txt:124-132 grant and the figures and fragment directly report the requested physics."
+  },
+  "plan": "nova:iter-passive-plasma-circuit",
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source goal in prompt.txt:30 asks for frequency-correct passive screening; nova/circuit/coupled_plant.py:258-274 exposes the layered path, but docs/research/iter-coupled-plant-call.html:78 says its resolved ITER plant is unfinished.\nVERDICT done_when: The source done_when at prompt.txt:149-150 requires analytic accuracy, doubled-layer convergence, a reduced 105052/1 plant and four-frequency matrices; postcommit-focused.log records 3 passed while iter-blocks-2-last.log records only 31/163 blocks, so the gate does not assert the whole measure.\nVERDICT write_paths: The declared paths at prompt.txt:124-132 cover all eight paths in git diff --name-only e01a4f7a..b4281bb5, including the two SVGs and cumulative research page.\nVERDICT manifest: The reviewed manifest.md reports twelve commits, 3 passed in the final focused gate, a red resistance mutant, and 132 linkage blocks still missing; baseline_suite and after_suite are empty, so the suite failure delta is unmeasured.\nVERDICT diff: I read the twelve commits from e01a4f7a63e576d91b48a29fcb2d8d508447b90e to b4281bb55c14f27771a2d8d58a28827f9d4b6f7c commit by commit; the eight changed paths add wall resolution, machine routing, resumable linkage, tests, documentation and two rendered figures.\nCALL_SITES: nova/circuit/coupled_plant.py:260, nova/circuit/passive.py:393, nova/circuit/passive.py:417\nSCORE goal_fidelity: 10\nJUSTIFICATION goal_fidelity: nova/circuit/coupled_plant.py:258-274 implements a callable layered route, but docs/research/iter-coupled-plant-call.html:78 expressly leaves the required resolved 105052/1 plant and convergence unmeasured.\nSCORE evidence: 7\nJUSTIFICATION evidence: tests/test_circuit_passive.py:192 and postcommit-focused.log support the separate 0.523 percent cylindrical calculation and three focused passes, while iter-blocks-2-last.log:42 proves only 31 of 163 new linkage blocks are complete.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The eight paths in the e01a4f7a..b4281bb5 diff are all within the source prompt.txt:124-132 grant and the figures and fragment directly report the requested physics.\nSCORE durability: 12\nJUSTIFICATION durability: tests/test_coupled_plant.py:503-515 has an independent cached-plant comparison whose resistance mutant failed, but tests/test_circuit_passive.py:150-192 never calls resolve_passive_thickness and no test asserts the full new ITER plant.\nSCORE fit: 17\nJUSTIFICATION fit: nova/circuit/passive.py:393 reuses the existing conductor subdivision, and the rendered figures in docs/figures/iter-passive-skin-effect are legible with unclipped labels; the source and comments carry no forbidden transient names.\nSCORE reuse: 5\nJUSTIFICATION reuse: nova/circuit/passive.py:122-135 and 163-208 duplicate the quadrature, worker and symmetric assembly owned by nova/circuit/linkage.py:236-285 to add row-block durability, rather than extending that owner.\nFINDING docs/research/iter-coupled-plant-call.html:78 blocking: The source done_when remains unmet: the new 4912-circuit mesh has only 31/163 linkage blocks and no rebuilt 105052/1 plant, doubled-layer terminal comparison, resolved full-versus-reduced error, mode count, measured build time or requested new-plant transfer matrices; cached 12 mm versus 6 mm data do not establish those results.\nFINDING tests/test_circuit_passive.py:150 blocking: The analytic shell test constructs its own ring inductances and resistances and calls terminal_impedance_spectrum directly, so it stays green if resolve_passive_thickness produces incorrect wall geometry or linkage; the required 1 percent analytic check is not demonstrated for the new production path.\nFINDING tests/test_circuit_passive.py:235 follow-on: This DC resistance assertion compares the output with resistance, the same value supplied as source.r_diag at line 217; line 326 repeats the pattern for each wall, so both can stay green if the supplied baseline resistance changes, and neither independently verifies the real plant's DC limit.\nFINDING nova/circuit/passive.py:122 follow-on: resumable_linkage_matrix duplicates circuit_linkage_matrix's quadrature setup and symmetric matrix assembly in nova/circuit/linkage.py:236-285 rather than extending that owner; the two paths can diverge when kernel defaults or parameters change.\nREVIEWED_BASE_SHA: e01a4f7a63e576d91b48a29fcb2d8d508447b90e\nREVIEWED_HEAD_SHA: b4281bb55c14f27771a2d8d58a28827f9d4b6f7c\n",
+  "review_limitations": [
+    "The assigned review worktree is at e01a4f7a; the reviewed head was read by git show and git diff against b4281bb5, and both added SVGs were rendered from that commit and inspected.",
+    "No full suite was rerun; the reviewed manifest has no baseline_suite or after_suite arm, so added failures cannot be counted."
+  ],
+  "review_run_id": "r-20261015T220623338601-review-of-passive-skin-effect-b4281bb55c14",
+  "reviewed_base_sha": "e01a4f7a63e576d91b48a29fcb2d8d508447b90e",
+  "reviewed_head_sha": "b4281bb55c14f27771a2d8d58a28827f9d4b6f7c",
+  "reviewed_run_id": "r-20261015T201550973616-passive-skin-effect",
+  "reviewer_node": "review-of-passive-skin-effect-b4281bb55c14",
+  "reviewer_run_id": "r-20261015T220623338601-review-of-passive-skin-effect-b4281bb55c14",
+  "reviewing_run_id": "r-20261015T220623338601-review-of-passive-skin-effect-b4281bb55c14",
+  "scores": {
+    "durability": 12,
+    "evidence": 7,
+    "fit": 17,
+    "goal_fidelity": 10,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T22:11:15.235090+00:00",
+  "total": 71,
+  "verdict": "fail"
+}

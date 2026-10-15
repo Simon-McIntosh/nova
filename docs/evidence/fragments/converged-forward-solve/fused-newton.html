@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="fused-newton">
+<meta name="plan-title" content="Fused moment correction measurement">
+<meta name="plan-summary" content="H200 analytic-certificate measurement of one fixed-shape moment correction">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s5">
+<meta name="plan-recorded-at" content="2026-10-15">
+<meta name="plan-verdict" content="partial">
+<meta name="plan-environment" content="H200 binary64, 282 diverted and 289 limited analytic-certificate cells, JAX profiler">
+<title>Fused moment correction measurement | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<h1 id="fused-newton-landing">Fused moment correction measurement</h1>
+<p id="fused-newton-result">The <a href="/nova/research/fused-moment-newton.html">measurement record</a> reports a fixed-shape device correction on 289-cell limited and 282-cell diverted analytic machines. The map passes the 0.01 flux ceiling at 0.000180/0.001087; ungating the diverted graph admits five private cells and raises error to 0.158676. One correction takes 25.647/35.516 ms and 10,016/14,170 GPU kernels, above the conditional 0.90 ms warm budget. Limited cold solving reaches 6.72 × 10<sup>−13</sup> residual in 0.391 s, but its neighboring one-correction slice stops at 3.92 × 10<sup>−9</sup>; diverted cold solving stalls at 0.003423.</p>
+</main></body></html>

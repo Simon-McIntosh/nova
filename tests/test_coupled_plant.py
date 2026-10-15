@@ -467,6 +467,29 @@ def test_real_sectioned_set_reduction_is_within_one_percent():
 
     frequencies = np.geomspace(0.1, 5000.0, 101)
     plant = coupled_plant(machine, None, frequencies=frequencies)
+    reference_path = Path(
+        "/home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit"
+        "/coupled-plant/28148563521d92a2198b/plant.npz"
+    )
+    if reference_path.exists():
+        reference = load_coupled_plant(reference_path)
+        one_layer = coupled_plant(
+            machine, None, passive_layers=1, frequencies=frequencies
+        )
+        for field in (
+            "coil_inductance",
+            "coil_resistance",
+            "mode_tau",
+            "mode_coil_coupling",
+            "reduction_error",
+        ):
+            np.testing.assert_array_equal(
+                getattr(one_layer, field), getattr(reference, field)
+            )
+        np.testing.assert_array_equal(
+            one_layer.terminal_impedance(frequencies),
+            reference.terminal_impedance(frequencies),
+        )
 
     series_of = _series_of(plant)
     reduced = series_of.T @ plant.section_inductance @ series_of

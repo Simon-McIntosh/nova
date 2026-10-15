@@ -146,7 +146,7 @@ def test_cylindrical_shell_skin_transfer_matches_closed_form():
     inner, outer, pickup = 1.0, 1.06, 0.9
     frequency = np.array([300.0, 600.0, 1200.0, 1600.0, 5000.0])
 
-    def spectrum(n_layers):
+    def spectrum(n_layers, points=frequency):
         width = (outer - inner) / n_layers
         radius = inner + (np.arange(n_layers) + 0.5) * width
         inductance = permeability * np.pi * np.minimum.outer(radius, radius) ** 2
@@ -166,7 +166,7 @@ def test_cylindrical_shell_skin_transfer_matches_closed_form():
             mutual.T,
             inductance,
             resistance,
-            frequency_hz=frequency,
+            frequency_hz=points,
         )[:, 0, 1]
 
     expected = []
@@ -190,15 +190,12 @@ def test_cylindrical_shell_skin_transfer_matches_closed_form():
     expected = np.asarray(expected)
     np.testing.assert_array_less(np.abs(spectrum(160) / expected - 1), 0.01)
     assert np.max(np.abs(spectrum(1) / expected - 1)) > 1.0
-    low_frequency = terminal_impedance_spectrum(
-        permeability
-        * np.pi
-        * np.array([[outer**2, pickup**2], [pickup**2, pickup**2]]),
-        frequency_hz=np.array([1e-8]),
-    )[0, 0, 1]
-    assert low_frequency == pytest.approx(
-        1j * 2 * np.pi * 1e-8 * permeability * np.pi * pickup**2
-    )
+    low_frequency = np.array([1e-8])
+    bare_transfer = 1j * 2 * np.pi * low_frequency[0] * permeability * np.pi * pickup**2
+    for layers in (1, 160):
+        np.testing.assert_allclose(
+            spectrum(layers, low_frequency)[0], bare_transfer, rtol=1e-6
+        )
 
 
 def test_resolved_wall_has_independent_skin_strips_and_dc_resistance():
@@ -235,6 +232,47 @@ def test_resolved_wall_has_independent_skin_strips_and_dc_resistance():
     assert np.min(widths) < np.sqrt(7.2e-7 / (np.pi * 5000 * 4e-7 * np.pi)) / 3
     assert np.sum(widths) == pytest.approx(0.02)
     assert 1 / np.sum(1 / system.r_diag) == pytest.approx(resistance)
+
+
+def test_skin_layers_follow_each_walls_own_resistivity(monkeypatch):
+    conductors = ConductorSet(
+        r=np.array([2.0, 1.0, 1.6]),
+        z=np.zeros(3),
+        dr=np.full(3, 0.02),
+        dz=np.full(3, 0.4),
+        current_share=np.ones(3),
+        circuit=np.arange(3),
+    )
+    resistance = 2 * np.pi * conductors.r[1:] * 7.2e-7 / (0.02 * 0.4)
+    resistance[1] *= 0.01
+    source = PassiveCircuitSystem(
+        circuits=np.array([1, 2]),
+        centroid_r=conductors.r[1:],
+        centroid_z=np.zeros(2),
+        lmat=np.eye(2),
+        r_diag=resistance,
+        a_circuit=np.empty((0, 2)),
+        g_grid=np.empty((0, 2)),
+        m_channel=np.zeros((2, 1)),
+        channels=["drive"],
+        measured_channel_row={},
+        resistivity=7.2e-7,
+        section_scale=np.ones(2),
+    )
+
+    monkeypatch.setattr(
+        "nova.circuit.linkage.circuit_linkage_matrix",
+        lambda _conductors, circuits, **_kwargs: np.eye(len(circuits)),
+    )
+    refined, circuits, system, _mutual = resolve_passive_thickness(
+        conductors, source, np.full(2, 0.02), np.ones((1, 1)), 2
+    )
+    radius = refined.centroids(circuits)[0]
+    steel = np.abs(radius - 1.0) < 0.02
+    conductive = np.abs(radius - 1.6) < 0.02
+    assert conductive.sum() > steel.sum()
+    for selected, expected in ((steel, resistance[0]), (conductive, resistance[1])):
+        assert 1 / np.sum(1 / system.r_diag[selected]) == pytest.approx(expected)
 
 
 # --- propagation ------------------------------------------------------------

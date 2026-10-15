@@ -50,6 +50,7 @@ from nova.circuit.conductor import (
     ConductorSet,
     PolygonSection,
     SensorSet,
+    ThicknessSubdivision,
     subdivide_passive_thickness,
 )
 from nova.circuit.linkage import (
@@ -151,7 +152,8 @@ def resolve_passive_thickness(
     thickness = np.asarray(thickness_m, dtype=np.float64)
     source = np.asarray(source_system.circuits, dtype=np.int64)
     if (
-        thickness.shape != source.shape
+        source.size == 0
+        or thickness.shape != source.shape
         or np.any(~np.isfinite(thickness))
         or np.any(thickness <= 0)
     ):
@@ -162,6 +164,8 @@ def resolve_passive_thickness(
         raise ValueError("highest_frequency_hz must be finite and positive")
     if isinstance(workers, bool) or not 1 <= workers <= 6:
         raise ValueError("workers must be between one and six")
+    if np.any(~np.isfinite(source_system.r_diag)) or np.any(source_system.r_diag <= 0):
+        raise ValueError("source passive resistances must be finite and positive")
     # Rectangular strips use polygon linkage so the source-side 10 mm section
     # floor does not smear a skin layer that is only a few millimetres wide.
     polygons = list(conductors.polygon_sections)
@@ -197,10 +201,10 @@ def resolve_passive_thickness(
         **{name: getattr(conductors, name) for name in conductors._columns},
         polygon_sections=tuple(polygons),
     )
-    resistivities = [float(source_system.resistivity)]
+    resistivities = np.full(source.size, float(source_system.resistivity))
     polygon_by_circuit = conductors.polygon_by_circuit()
-    for circuit, row, resistance in zip(
-        source, conductors.rows(source), source_system.r_diag, strict=True
+    for position, (circuit, row, resistance) in enumerate(
+        zip(source, conductors.rows(source), source_system.r_diag, strict=True)
     ):
         index = int(row[0])
         radius = float(conductors.r[index])
@@ -221,18 +225,38 @@ def resolve_passive_thickness(
                 / 2
             )
         if radius > 0 and area > 0 and resistance > 0:
-            resistivities.append(float(resistance) * area / (2 * np.pi * radius))
-    resistivity = min(resistivities)
-    if not np.isfinite(resistivity) or resistivity <= 0:
+            resistivities[position] = min(
+                resistivities[position], float(resistance) * area / (2 * np.pi * radius)
+            )
+    if np.any(~np.isfinite(resistivities)) or np.any(resistivities <= 0):
         raise ValueError("source resistivity must be positive")
-    skin_depth = np.sqrt(resistivity / (np.pi * highest_frequency_hz * 4e-7 * np.pi))
+    skin_depth = np.sqrt(resistivities / (np.pi * highest_frequency_hz * 4e-7 * np.pi))
     max_layer = float(np.max(thickness)) / layer_count
-    refined = subdivide_passive_thickness(
-        shaped_conductors,
-        source,
-        thickness,
-        max_layer,
-        surface_layer_m=min(max_layer / 3, skin_depth / 7),
+    face_target = np.minimum(max_layer / 3, skin_depth / 7)
+    # Bucket similar skin depths so walls with a low-resistivity path do not
+    # force every steel wall onto the same very fine mesh.
+    face_min = float(np.min(face_target))
+    bucket = np.floor(2 * np.log2(face_target / face_min) + 1e-12).astype(int)
+    refined_conductors = shaped_conductors
+    layer_circuits, layer_parent, layer_factors = [], [], []
+    for index in np.unique(bucket):
+        select = bucket == index
+        split = subdivide_passive_thickness(
+            refined_conductors,
+            source[select],
+            thickness[select],
+            max_layer,
+            surface_layer_m=face_min * 2 ** (float(index) / 2),
+        )
+        refined_conductors = split.conductors
+        layer_circuits.append(split.circuits)
+        layer_parent.append(split.parent)
+        layer_factors.append(split.resistance_factor)
+    refined = ThicknessSubdivision(
+        refined_conductors,
+        np.concatenate(layer_circuits),
+        np.concatenate(layer_parent),
+        np.concatenate(layer_factors),
     )
     section_ids = np.setdiff1d(conductors.circuits, source)
     if section_ids.size != series.shape[0]:

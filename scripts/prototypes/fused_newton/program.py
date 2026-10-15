@@ -1,0 +1,235 @@
+"""Fixed-shape connected moment map and device Newton correction."""
+
+from dataclasses import dataclass
+from typing import NamedTuple
+
+import jax
+import jax.numpy as jnp
+
+from nova.equilibrium import current, fixed_points, topology
+from nova.equilibrium.separatrix_clip import padded_polynomial_current_moments
+from scripts.prototypes.lean_map.quadrature import interior_moments
+from scripts.prototypes.sub_millisecond.measure_bell_cut import (
+    bell_moments,
+    bell_polygon,
+)
+from scripts.prototypes.sub_millisecond.measure_saddle_frame import connected_cells
+from scripts.prototypes.sub_millisecond.measure_wall_march import polygon_area
+
+
+class MapState(NamedTuple):
+    moments: jax.Array
+    roots: jax.Array
+    boundary_class: jax.Array
+    boundary_flux: jax.Array
+    topology_valid: jax.Array
+    booking_valid: jax.Array
+    graph_cells: jax.Array
+    saddle_cells: jax.Array
+
+
+class Correction(NamedTuple):
+    moments: jax.Array
+    residual: jax.Array
+    converged: jax.Array
+    linear_status: jax.Array
+
+
+@jax.tree_util.register_dataclass
+@dataclass(frozen=True)
+class FusedField:
+    cached: fixed_points._CachedField
+    coefficient: jax.Array
+
+    def evaluate(self, point):
+        return self.cached.evaluate(point)
+
+    def sampled_coefficient(self, geometry):
+        return self.coefficient
+
+
+def _density_coefficients(geometry, reading, profile):
+    """Fit the same quadratic density used by ordinary Bell polygons."""
+    centre, pitch = geometry.centre, geometry.pitch
+    polynomial = reading.field_coefficients
+    span = reading.boundary_flux - reading.axis_flux
+
+    def value(x, y):
+        flux = (
+            polynomial[:, 0]
+            + polynomial[:, 1] * x
+            + polynomial[:, 2] * y
+            + polynomial[:, 3] * x * x
+            + polynomial[:, 4] * x * y
+            + polynomial[:, 5] * y * y
+        )
+        return profile.current_density(
+            centre[:, 0] + pitch * x, (flux - reading.axis_flux) / span
+        )
+
+    origin = value(0, 0)
+    radial_positive, radial_negative = value(1, 0), value(-1, 0)
+    vertical_positive, vertical_negative = value(0, 1), value(0, -1)
+    radial = (radial_positive - radial_negative) / 2
+    vertical = (vertical_positive - vertical_negative) / 2
+    return jnp.stack(
+        (
+            origin,
+            radial,
+            vertical,
+            (radial_positive + radial_negative) / 2 - origin,
+            value(1, 1) - radial_positive - vertical_positive + origin,
+            (vertical_positive + vertical_negative) / 2 - origin,
+        ),
+        axis=1,
+    )
+
+
+def _saddle_moments(geometry, reading, profile, capacity=8):
+    """Book selected saddle sectors with four chords per cubic ray."""
+    active = reading.normal_form_cells & (reading.membership > 0)
+    count = jnp.sum(active, dtype=jnp.int32)
+    indices = jnp.nonzero(active, size=capacity, fill_value=0)[0]
+    coefficients = _density_coefficients(geometry, reading, profile)
+
+    def one(index):
+        rings, sizes = current._normal_rings(
+            geometry.vertices[index],
+            geometry.vertex_count[index],
+            geometry.centre[index],
+            reading.saddle_form,
+            reading.fragment_selected[index],
+            reading.edge_interval[index],
+            4,
+        )
+        origin = geometry.centre[index]
+        pitch = jnp.broadcast_to(geometry.pitch[index], (2,))
+        values, first = padded_polynomial_current_moments(
+            rings,
+            sizes,
+            jnp.broadcast_to(origin, (len(rings), 2)),
+            jnp.broadcast_to(pitch, (len(rings), 2)),
+            jnp.broadcast_to(coefficients[index], (len(rings), 6)),
+        )
+        return jnp.stack((jnp.sum(values), *jnp.sum(first, axis=0)), axis=0)
+
+    packed = jax.vmap(one)(indices)
+    live = jnp.arange(capacity) < count
+    scattered = (
+        jnp.zeros((len(geometry.centre), 3), dtype=packed.dtype)
+        .at[indices]
+        .add(jnp.where(live[:, None], packed, 0.0))
+    )
+    return scattered, count <= capacity
+
+
+def map_moments(
+    moments,
+    values,
+    jets,
+    window,
+    rule,
+    fit_inverse,
+    sample_design,
+    geometry,
+    profile,
+    seeds,
+    convention,
+    policy,
+    target_current,
+    axis_sign,
+    *,
+    frame_gate=True,
+):
+    """Return the connected three-moment image and read qualifications."""
+    cached = fixed_points._CachedField(
+        window.mesh, window.lookup, window.rows, moments, window.exterior
+    )
+    roots = fixed_points.solve(
+        window, moments, seeds, seeds, jnp.median(geometry.pitch), axis_sign
+    )
+    gauss_flux = values.apply(moments).reshape(rule.points.shape[:-1])
+    gauss_coefficient = jnp.einsum("nkq,nq->nk", fit_inverse, gauss_flux)
+    slots = window.lookup[jets.sample_index]
+    complete = jnp.all(slots >= 0, axis=1)
+    safe_slots = jnp.maximum(slots, 0)
+    band_values = window.exterior[safe_slots, 0] + jnp.einsum(
+        "nscm,cm->ns", window.rows[safe_slots, ..., 0], moments
+    )
+    band_coefficient = jnp.einsum("nks,ns->nk", geometry.fit_inverse, band_values)
+    coefficient = jnp.where(complete[:, None], band_coefficient, gauss_coefficient)
+    field = FusedField(cached, coefficient)
+    reading = topology.read_at_stationary_points(
+        field, geometry, convention, policy, roots
+    )
+    seed_cell = jnp.argmin(jnp.sum((geometry.centre - reading.axis) ** 2, axis=1))
+    if frame_gate:
+        selected = connected_cells(geometry, reading, convention.sigma, seed_cell)
+    else:
+        from scripts.prototypes.sub_millisecond.measure_wall_march import (
+            connected_cells as ungated,
+        )
+
+        selected = ungated(geometry, reading, convention.sigma, seed_cell)
+    polygon, polygon_count, _ = bell_polygon(geometry, reading, convention.sigma, 4)
+    fraction = jnp.clip(
+        polygon_area(polygon, polygon_count) / geometry.full_area, 0.0, 1.0
+    )
+    membership = jnp.where(reading.normal_form_cells, reading.membership, fraction)
+    reading = reading._replace(membership=jnp.where(selected, membership, 0.0))
+    full = (reading.membership >= 1 - 1e-14) & (geometry.vertex_count == 6)
+    interior = interior_moments(
+        rule, gauss_flux, profile, reading.axis_flux, reading.boundary_flux, full
+    )
+    ordinary, ordinary_valid = bell_moments(
+        geometry, reading, profile, convention.sigma, 4
+    )
+    cut = (reading.membership > 0) & ~full
+    ordinary_cut = cut & ~reading.normal_form_cells
+    saddle, saddle_valid = _saddle_moments(geometry, reading, profile)
+    raw = interior + jnp.where(ordinary_cut[:, None], ordinary, 0.0) + saddle
+    total = jnp.sum(raw[:, 0])
+    missing = jnp.any(cut & ~complete)
+    valid = (
+        jnp.all(roots.valid)
+        & reading.valid
+        & reading.qualified
+        & jnp.all(~ordinary_cut | ordinary_valid)
+        & saddle_valid
+        & ~missing
+        & jnp.isfinite(total)
+        & (total != 0)
+    )
+    normalized = raw * (target_current / jnp.where(total != 0, total, 1))
+    return MapState(
+        jnp.where(valid, normalized, jnp.nan),
+        roots.position,
+        reading.boundary_class,
+        reading.boundary_flux,
+        reading.valid & reading.qualified,
+        valid,
+        jnp.sum(selected),
+        jnp.sum(cut & reading.normal_form_cells),
+    )
+
+
+def warm_slice(start, scale, *map_operands):
+    """Run one device JVP-GMRES correction with a checked output map."""
+
+    def equation(varied):
+        return map_moments(varied, *map_operands).moments - varied
+
+    value, linear = jax.linearize(equation, start)
+    rhs = -value.reshape(-1)
+
+    def flat(tangent):
+        return linear(tangent.reshape(start.shape)).reshape(-1)
+
+    correction, status = jax.scipy.sparse.linalg.gmres(
+        flat, rhs, tol=1e-10, restart=4, maxiter=1
+    )
+    candidate = start + correction.reshape(start.shape)
+    residual = jnp.max(jnp.abs(equation(candidate) / scale))
+    return Correction(
+        candidate, residual, jnp.isfinite(residual) & (residual <= 1e-12), status
+    )

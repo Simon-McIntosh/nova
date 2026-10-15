@@ -44,7 +44,7 @@ def save(path, data):
     )
 
 
-def run(kind, cache, output, diagnose_offset=None):
+def run(kind, cache, output, diagnose_offset=None, wrong_axis_only=False):
     assert jax.config.jax_enable_x64 is True and jax.default_backend() == "gpu"
     print(
         f"nova={nova.__file__} module={__file__} cwd={Path.cwd().resolve()}",
@@ -102,11 +102,18 @@ def run(kind, cache, output, diagnose_offset=None):
     result = {"kind": kind, "cells": len(geometry.centre), "rows": []}
     save(output, result)
 
-    def sampled(offset, prior):
+    def sampled(offset, prior, wrong_axis=False):
         varied_jets = replace(jets, exterior=jets.exterior + offset * jet_slope)
         varied_values = replace(values, exterior=values.exterior + offset * value_slope)
         moving = varied_jets.field(reference)
         roots = census(moving, geometry, convention, policy, prior)
+        if wrong_axis:
+            order = jnp.concatenate(
+                (jnp.asarray((1, 0)), jnp.arange(2, len(roots.roots.position)))
+            )
+            roots = roots._replace(
+                roots=jax.tree.map(lambda values: values[order], roots.roots)
+            )
         reading = read(moving, roots.roots, geometry, convention, policy)
         gauss = varied_values.apply(reference).reshape(rule.points.shape[:-1])
         full = (reading.membership >= 1 - 1e-14) & (geometry.vertex_count == 6)
@@ -140,6 +147,27 @@ def run(kind, cache, output, diagnose_offset=None):
 
     program = jax.jit(sampled)
     oracle = jax.jit(lambda offset: shifted_axis(field, previous[0], offset, pitch))
+    if wrong_axis_only:
+        normal = program(jnp.asarray(0.0), previous)
+        altered = jax.jit(lambda: sampled(jnp.asarray(0.0), previous, True))()
+        expected = previous[0]
+        result["wrong_axis_control"] = {
+            "normal_root_valid": bool(normal[0].roots.valid[0]),
+            "normal_axis_identity": bool(
+                axis_identity(normal[1].axis, expected, pitch)
+            ),
+            "altered_root_valid": bool(altered[0].roots.valid[0]),
+            "altered_axis_identity": bool(
+                axis_identity(altered[1].axis, expected, pitch)
+            ),
+            "control_red": bool(
+                altered[0].roots.valid[0]
+                and not axis_identity(altered[1].axis, expected, pitch)
+            ),
+        }
+        save(output, result)
+        print("RESULT " + json.dumps(result), flush=True)
+        return
     if diagnose_offset is not None:
         offset = jnp.asarray(diagnose_offset * scale)
         expected, oracle_residual = oracle(offset)
@@ -326,8 +354,9 @@ def main():
     parser.add_argument("--cache", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--diagnose-offset", type=float)
+    parser.add_argument("--wrong-axis-only", action="store_true")
     args = parser.parse_args()
-    run(args.kind, args.cache, args.output, args.diagnose_offset)
+    run(args.kind, args.cache, args.output, args.diagnose_offset, args.wrong_axis_only)
 
 
 if __name__ == "__main__":

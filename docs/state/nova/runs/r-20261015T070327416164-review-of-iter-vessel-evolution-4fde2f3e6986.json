@@ -75,6 +75,32 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "11e57396879bb4a53949ab68540c796ff3431cd0",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": null,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261015T070327416164-review-of-iter-vessel-evolution-4fde2f3e6986",
+    "scratch_removed": false,
+    "scratch_removed_paths": [],
+    "scratch_withheld": "scratch directory is no longer present",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": []
+    },
+    "worktree_released": false,
+    "worktree_withheld": "uncommitted changes in the worktree; commit or discard them, and nothing reclaims a worktree holding work that exists nowhere else"
+  },
   "resume_waiver": null,
   "review": null,
   "review_tier": "none",

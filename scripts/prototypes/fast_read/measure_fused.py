@@ -325,16 +325,21 @@ def run(kind, cache, output, trace_dir, jvp_only=False):
         direction = direction / jnp.sqrt(point.shape[0])
 
         def image(moments):
-            return mapped(moments, *operands).moments
+            mapped_state = mapped(moments, *operands)
+            return mapped_state.moments, mapped_state.roots, mapped_state.boundary_flux
 
         tangent_program = jax.jit(lambda p, d: jax.jvp(image, (p,), (d,))[1])
         tangent = tangent_program(point, direction)
         jax.block_until_ready(tangent)
         rows = []
-        for step in (1e-3, 1e-4, 1e-5):
-            positive = map_program(point + step * direction, *operands).moments
-            negative = map_program(point - step * direction, *operands).moments
-            difference = (positive - negative) / (2 * step)
+        for step in (1e-3, 1e-4, 1e-5, 3e-6, 1e-6):
+            upper = map_program(point + step * direction, *operands)
+            lower = map_program(point - step * direction, *operands)
+            positive = (upper.moments, upper.roots, upper.boundary_flux)
+            negative = (lower.moments, lower.roots, lower.boundary_flux)
+            difference = jax.tree.map(
+                lambda hi, lo: (hi - lo) / (2 * step), positive, negative
+            )
             jax.block_until_ready(difference)
             rows.append(
                 {
@@ -343,19 +348,27 @@ def run(kind, cache, output, trace_dir, jvp_only=False):
                         {
                             "relative_error": float(
                                 jnp.linalg.norm(
-                                    tangent[:, block] - difference[:, block]
+                                    tangent[0][:, block] - difference[0][:, block]
                                 )
                                 / jnp.maximum(
-                                    jnp.linalg.norm(difference[:, block]), 1e-30
+                                    jnp.linalg.norm(difference[0][:, block]), 1e-30
                                 )
                             ),
                             "finite_difference_norm": float(
-                                jnp.linalg.norm(difference[:, block])
+                                jnp.linalg.norm(difference[0][:, block])
                             ),
-                            "jvp_norm": float(jnp.linalg.norm(tangent[:, block])),
+                            "jvp_norm": float(jnp.linalg.norm(tangent[0][:, block])),
                         }
                         for block in range(3)
                     ],
+                    "roots_relative_error": float(
+                        jnp.linalg.norm(tangent[1] - difference[1])
+                        / jnp.maximum(jnp.linalg.norm(difference[1]), 1e-30)
+                    ),
+                    "boundary_absolute_error": float(
+                        jnp.abs(tangent[2] - difference[2])
+                    ),
+                    "boundary_fd": float(difference[2]),
                 }
             )
         result["jvp"] = rows

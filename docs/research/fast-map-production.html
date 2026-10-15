@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="fast-map-production">
+  <meta name="plan-title" content="Continuous fixed-shape forward map">
+  <meta name="plan-summary" content="Fresh H200 reproduction and evaluation of continuous wall candidates and coherent cut-cell booking">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-informs" content="converged-forward-solve">
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-verifies" content="converged-forward-solve#s5">
+  <meta name="plan-source" content="H200 executions on certified analytic carriers">
+  <meta name="plan-source-quality" content="primary">
+  <meta name="plan-tags" content="equilibrium,grad-shafranov,jax,continuity,topology">
+  <title>Continuous fixed-shape forward map | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+  <header>
+    <p class="eyebrow">Research input</p>
+    <h1>Continuous fixed-shape forward map</h1>
+    <p class="lead">The unchanged 282-cell map still has a state discontinuity at the stalled diverted iterate. A separate candidate gives each cell one membership and moment representation and evaluates the wall candidate through a continuous path bottleneck; its H200 fidelity measurements are in progress.</p>
+  </header>
+  <section id="method">
+    <h2>Method and provenance</h2>
+    <p>The baseline probe executes the unchanged <code>scripts/prototypes/fast_read</code> read and map in a fresh H200 process. It uses the certified 282-cell analytic carrier and the accepted stalled moment state. The complete command, imported <code>nova</code> and module paths, worktree, revision, and raw scan are recorded in <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T160647356198-fast-map-production/baseline-probe-retry.log</code> and <code>baseline-probe.json</code> beside it. Binary64 is enabled before array construction and the probe asserts the GPU backend.</p>
+    <p>The candidate lives only in <code>scripts/prototypes/fast_map_production</code>. Its read replaces <code>scripts/prototypes/fast_read/kernel.py::read</code> with a path-bottleneck wall candidate. Its map replaces <code>scripts/prototypes/fast_read/program.py::map_moments</code>. The saddle frame still gates graph edges, while <code>booking_cells</code> names the cells whose membership and current moments both come from normal-form fragments. Ordinary-valid cells take both from the ordinary cut. Full-cell Gauss booking excludes normal-form-owned cells.</p>
+  </section>
+  <section id="reproduction">
+    <h2>Fresh defect reproduction</h2>
+    <p>H200 job 1286400 reevaluated the accepted stalled state at scaled infinity residual 0.00268458155. Its relative Gauss–Newton gradient is 0.354173795, so the state is not a residual minimum. Along the fresh dense Newton direction, the sampled step scale increases from 7.49894209 × 10<sup>−5</sup> to 8.91250938 × 10<sup>−5</sup>. The wall candidate changes from negative infinity to 0.000355327763 Wb; the residual jumps from 0.00268438024 to 1.092245824; axis-connected support falls from 179 to 166 cells; and cell 71 membership falls from 0.356472679 to zero. The unchanged map therefore still exhibits the recorded boolean-eligibility defect.</p>
+    <figure><img src="/nova/figures/converged-forward-solve/fast-map-production/step-scale-scan.svg" alt="Fresh residual, membership, and booked moment scan along the Newton direction"><figcaption>Fresh unchanged-map H200 scan at the 282-cell stalled diverted iterate. The dotted line marks the first sampled step where a wall cell becomes eligible. The wall candidate and support jump together, followed by the residual. Cell 71 carries normal-form membership but ordinary booked moments on this route.</figcaption></figure>
+  </section>
+  <section id="candidate">
+    <h2>Candidate measurement</h2>
+    <p>The H200 map-image measurement is running for the diverted 282, 550, and 2,098-cell carriers. Cold solves, limited controls, transition brackets, and terminal contour panels remain to be measured before this route can be qualified.</p>
+  </section>
+</main></body>
+</html>

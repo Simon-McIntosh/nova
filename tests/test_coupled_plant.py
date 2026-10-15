@@ -18,7 +18,10 @@ from nova.circuit.coupled_plant import (
 )
 from nova.circuit.linkage import circuit_linkage_matrix, ring_resistance
 from nova.circuit.passive import NOMINAL_STEEL_RESISTIVITY, PassiveCircuitSystem
+from nova.imas.plasma_source import CoilCurrentSeries, PlasmaSource
+from nova.imas.prescribed_plasma import plasma_linked_flux_history
 from nova.imas.profiles import PrescribedCurrent
+from nova.media.sources.frame import EquilibriumFrame
 
 
 @dataclass
@@ -54,13 +57,19 @@ class _Source:
         return list(self._currents)
 
 
-def _reduced_machine(*, perturb_section_self: float | None = None) -> _Machine:
+def _reduced_machine(
+    *,
+    perturb_section_self: float | None = None,
+    terminal_scale: float | None = None,
+) -> _Machine:
     """A reduced machine whose terminal fields the call must derive.
 
     The machine carries only section-level linkage, so ``coupled_plant``
     computes the terminal L and R itself.  ``perturb_section_self`` scales one
-    section self term after the terminal derivation has been fixed, which is
-    what a control needs: the section input moves, the terminal does not.
+    section self term and ``terminal_scale`` scales the supplied terminal
+    linkage, each moving one side of the terminal/section equality while the
+    other is held to the unperturbed wiring -- which is what a control needs:
+    the two descriptions of one winding disagree.
     """
     n_section, n_coil, n_passive = 4, 2, 6
     r = np.array([3.0, 3.6, 6.0, 6.6, 8.0, 8.4, 8.8, 9.2, 9.6, 10.0])
@@ -96,15 +105,16 @@ def _reduced_machine(*, perturb_section_self: float | None = None) -> _Machine:
         section_inductance[0, 0] *= perturb_section_self
     # A supplied terminal comes from the unperturbed linkage, so it disagrees
     # with a perturbed section block; without one the call derives the terminal.
-    supplied = perturb_section_self is not None
+    supplied = perturb_section_self is not None or terminal_scale is not None
+    reduced_inductance = series.T @ matrix[:n_section, :n_section] @ series
+    if terminal_scale is not None:
+        reduced_inductance = reduced_inductance * terminal_scale
     return _Machine(
         conductors=conductors,
         series=series,
         coil_names=coil_names,
         passive_circuits=passive,
-        coil_inductance=(
-            series.T @ matrix[:n_section, :n_section] @ series if supplied else None
-        ),
+        coil_inductance=(reduced_inductance if supplied else None),
         coil_resistance=np.array([1e-4, 1e-4]) if supplied else None,
         section_names=["PFa-1", "PFa-2", "PFb-1", "PFb-2"],
         section_coil=np.array([0, 0, 1, 1]),
@@ -230,20 +240,51 @@ def test_terminal_fields_are_the_series_reduction_of_the_section_fields(tmp_path
     )
 
 
-def test_series_reduction_check_fails_on_a_perturbed_section_self(tmp_path):
-    """The negative control: the call keeps the terminal the machine gave it.
+def test_terminal_equals_series_reduction_when_both_are_present(tmp_path):
+    """A machine that supplies consistent terminals and sections is served.
 
-    The machine supplies a terminal linkage and a section block whose first
-    self term is scaled by 1.5, and the call stores both.  The series
-    reduction of the stored section block then no longer reproduces the stored
-    terminal, so the equality the positive test asserts fails here.
+    The positive arm of the agreement check: the supplied terminal is the
+    series reduction of the supplied section block, so the call accepts it and
+    the stored terminal still equals the reduction.
     """
-    machine, source = _reduced_machine(perturb_section_self=1.5), _source()
+    machine, source = _reduced_machine(terminal_scale=1.0), _source()
     plant = coupled_plant(machine, source, cache_dir=tmp_path)
     series = _series_of(plant)
-    reduced = series.T @ plant.section_inductance @ series
-    with pytest.raises(AssertionError):
-        np.testing.assert_allclose(plant.coil_inductance, reduced, rtol=1e-10, atol=0.0)
+    np.testing.assert_allclose(
+        plant.coil_inductance,
+        series.T @ plant.section_inductance @ series,
+        rtol=1e-10,
+        atol=0.0,
+    )
+    np.testing.assert_allclose(
+        plant.coil_resistance,
+        series.T @ plant.section_resistance,
+        rtol=1e-10,
+        atol=0.0,
+    )
+
+
+def test_supplied_terminal_disagreeing_with_the_section_block_is_refused(tmp_path):
+    """The negative control: a machine describing one winding two ways is refused.
+
+    The machine supplies a terminal inductance moved by one percent from its
+    section reduction.  The call computes the reduction and refuses the
+    disagreement rather than serving terminals the section block contradicts.
+    """
+    machine, source = _reduced_machine(terminal_scale=1.01), _source()
+    with pytest.raises(ValueError, match="disagrees with the series reduction"):
+        coupled_plant(machine, source, cache_dir=tmp_path)
+
+
+def test_perturbed_section_self_is_refused_against_a_stale_terminal(tmp_path):
+    """A section self term scaled by 1.5 no longer reproduces the terminal.
+
+    The supplied terminal comes from the unperturbed linkage while the section
+    block's first self term is scaled, so the two disagree and the call refuses.
+    """
+    machine, source = _reduced_machine(perturb_section_self=1.5), _source()
+    with pytest.raises(ValueError, match="disagrees with the series reduction"):
+        coupled_plant(machine, source, cache_dir=tmp_path)
 
 
 def test_machines_differing_only_in_section_inputs_do_not_collide(tmp_path):
@@ -466,3 +507,77 @@ def test_real_sectioned_self_holds_the_unsectioned_box_check():
     self_fraction = np.abs(sectioned[diagonal] / unsectioned[diagonal] - 1)
     print("sectioning self max fraction =", float(self_fraction.max()))
     assert float(np.max(self_fraction)) < 0.005
+
+
+def _generic_source(n_slices: int = 3, *, provenance: str = "synthetic reconstruction"):
+    """A `PlasmaSource` built from synthetic EFIT-shaped frames, no data needed.
+
+    The frames carry a Gaussian flux map in the sign convention the prescription
+    checks (an increasing axis-to-boundary span against a negative plasma
+    current), so the source prescribes through the same path a reconstruction
+    uses without reaching for a stored pulse.
+    """
+    radius = np.linspace(5.0, 7.0, 9)
+    height = np.linspace(-2.0, 2.0, 7)
+    grid_r, grid_z = np.meshgrid(radius, height, indexing="ij")
+    shape = np.exp(-(((grid_r - 6.0) / 1.2) ** 2 + (grid_z / 1.5) ** 2))
+    psi_axis, psi_boundary = 0.0, 1.0
+    levels = np.linspace(0.0, 1.0, 11)
+    boundary = np.c_[
+        6.0 + 1.0 * np.cos(np.linspace(0.0, 2 * np.pi, 33)),
+        1.0 * np.sin(np.linspace(0.0, 2 * np.pi, 33)),
+    ]
+    frames = [
+        EquilibriumFrame(
+            time=1.0 + index,
+            radius=radius,
+            height=height,
+            flux=(psi_axis + shape * (psi_boundary - psi_axis)).T,
+            flux_axis=psi_axis,
+            flux_boundary=psi_boundary,
+            psi_norm=levels,
+            p_prime=np.linspace(5e4, 1e5, levels.size),
+            ff_prime=np.linspace(1e-2, 2e-2, levels.size),
+            boundary=boundary,
+            magnetic_axis=np.array([6.0, 0.0]),
+            x_points=np.empty((0, 2)),
+            plasma_current=-3e5,
+        )
+        for index in range(n_slices)
+    ]
+    coil_times = np.linspace(0.5, 5.0, 11)
+    coils = CoilCurrentSeries(
+        coil_times,
+        ("upper", "lower"),
+        np.column_stack([1e5 * np.sin(coil_times), 1e5 * np.cos(coil_times)]),
+    )
+    return PlasmaSource.from_mast(frames, coils, provenance=provenance)
+
+
+def test_generic_source_drives_the_plant(tmp_path):
+    """A `PlasmaSource` reaches `coupled_plant` through its own interface.
+
+    The source exposes `plasma_times`, `prescribed_currents()` and `label`
+    directly, so no adapter stands between it and the call.  The plant's
+    section plasma flux is rebuilt independently here from the source's own
+    prescribed currents and nova's linkage owner, so a wrong plasma drive shows
+    as a mismatch rather than cancelling against the call's own derivation.
+    """
+    machine, source = _reduced_machine(), _generic_source()
+    plant = coupled_plant(machine, source, cache_dir=tmp_path)
+
+    np.testing.assert_array_equal(plant.plasma_times, source.plasma_times)
+    assert plant.provenance["plasma_source"] == source.label
+    assert plant.section_plasma_flux.shape == (
+        source.plasma_times.size,
+        machine.section_coil.size,
+    )
+
+    circuits, linked = plasma_linked_flux_history(
+        list(source.prescribed_currents()), machine.conductors
+    )
+    row_of = {int(circuit): index for index, circuit in enumerate(circuits)}
+    columns = [row_of[int(circuit)] for circuit in range(machine.section_coil.size)]
+    np.testing.assert_allclose(
+        plant.section_plasma_flux, linked[:, columns], rtol=0.0, atol=0.0
+    )

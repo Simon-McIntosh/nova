@@ -1,0 +1,400 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "read-only"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex",
+  "base_sha": "da8618fbb68efb8d31ca7190ce5c27e3144964a3",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T115457776708-review-of-fast-read-d8ee8ad8b3d4/brief.md",
+    "sha256": "a66b9f1cd2f42d52026ca7b81cb0c5b63f4222ccd085e024ad27e0ddc628d05b"
+  },
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 3079296,
+      "cached_input_tokens_cumulative": 3079296,
+      "input_tokens": 3227518,
+      "input_tokens_cumulative": 3227518,
+      "output_tokens": 13691,
+      "output_tokens_cumulative": 13691,
+      "reasoning_output_tokens": 4776,
+      "reasoning_output_tokens_cumulative": 4776
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-10-15T12:02:48Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-15T11:56:25Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": false,
+    "matched_measure": null,
+    "override": false,
+    "role": "review",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.2857142857142857,
+    "plan": "converged-forward-solve",
+    "reason": "role-not-enforced:review",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-15T12:55:06.108273+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-15T11:55:03Z",
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": "2026-10-22T06:13:12Z",
+    "seconds_until_reset": 584288,
+    "state": "quiet",
+    "utilisation_pct": 13.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-15T11:55:03Z",
+    "read_at": "2026-10-15T11:55:06Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 13.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-15T12:02:48Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T115457776708-review-of-fast-read-d8ee8ad8b3d4/manifest.md",
+  "member": "disposable-r-20261015T115457776708-review-of-fast-read-d8ee8ad8b3d4",
+  "model_key": "sol",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "review-of-fast-read-d8ee8ad8b3d4",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T091903690374-fast-read/review-brief.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T115457776708-review-of-fast-read-d8ee8ad8b3d4/brief.md",
+    "brief_sha256": "a66b9f1cd2f42d52026ca7b81cb0c5b63f4222ccd085e024ad27e0ddc628d05b",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 624,
+          "cached_input_tokens": 240783,
+          "input_tokens": 241409,
+          "output_tokens": 309,
+          "reasoning_output_tokens": 61,
+          "total_tokens": 241718,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "the review for r-20261015T091903690374-fast-read stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run's own baseline_suite and after_suite gate logs; the turn ends once that record is stored and the manifest reads complete",
+    "estimated_hours": null,
+    "goal": "attach an independent review to run r-20261015T091903690374-fast-read",
+    "id": "review-of-fast-read-d8ee8ad8b3d4",
+    "images": [],
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-15T11:55:03Z",
+      "read_at": "2026-10-15T11:55:06Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 13.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T115457776708-review-of-fast-read-d8ee8ad8b3d4/manifest.md",
+    "negative_control": "",
+    "plan": "converged-forward-solve",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "review",
+    "section": "§2",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261015T091903690374-fast-read.json",
+      "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261015T091903690374-fast-read.at-d8ee8ad8b3d41bef60e737209259c1535e85c42c.json"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": null,
+      "derived": null,
+      "drain_hours": 168.0,
+      "effective_limit": null,
+      "elapsed_fraction": 0.0340200124305554,
+      "elapsed_hours": 5.715362088333308,
+      "group": "codex-sub",
+      "lift": {
+        "ends_at": "2026-10-20T04:58:00+00:00",
+        "ends_on": "time",
+        "form": "uncapped",
+        "group": "codex-sub",
+        "id": "codex-sub-1792002586-64d825",
+        "pace_multiple": null,
+        "remaining_seconds": 406912.696482,
+        "scope": "global"
+      },
+      "lift_hold": {
+        "held": false,
+        "kind": "uncapped"
+      },
+      "limited_by": null,
+      "observed_at": "2026-10-15T11:56:07+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": "window too young to project: burn evidence is quantised too coarsely: 3.40% elapsed is below the 5% floor",
+      "remaining_budget": 0.87,
+      "remaining_windows": null,
+      "resets_at": "2026-10-22T06:13:12Z",
+      "state": "observed",
+      "utilisation": 0.13,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.04630600000000001,
+      "decided_by": "window",
+      "margin": 0.578694,
+      "name": "review-of-fast-read-d8ee8ad8b3d4",
+      "score": 0.625,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.13
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.303518,
+        "observed_at": "2026-10-15T11:56:07+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-22T06:13:12Z",
+        "state": "observed",
+        "utilisation": 0.13,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": "codex-sub-1792002586-64d825",
+    "member": "codex",
+    "node": "review-of-fast-read-d8ee8ad8b3d4",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-15T11:56:07.303518+00:00",
+    "score": 0.625,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.67,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {}
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.2857142857142857,
+  "plan_link": null,
+  "promoted_by": "review-self",
+  "promoted_revision": "da8618fbb68efb8d31ca7190ce5c27e3144964a3",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "id": "r-20261015T115457776708-review-of-fast-read-d8ee8ad8b3d4",
+    "reviewed_base_sha": "6c82b47f85d0676cadd449c766cba9585daab624",
+    "reviewed_head_sha": "d8ee8ad8b3d41bef60e737209259c1535e85c42c",
+    "scores": {
+      "durability": 3,
+      "evidence": 12,
+      "fit": 18,
+      "goal_fidelity": 16,
+      "reuse": 5,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 74
+  },
+  "review_tier": "full",
+  "role": "review",
+  "route_mode": "explicit",
+  "run_id": "r-20261015T115457776708-review-of-fast-read-d8ee8ad8b3d4",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a13f6b-e88e-7eb3-a30e-41d7e9a144ec",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 3079296,
+    "cumulative_input_tokens": 6306814,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 18467
+  },
+  "time_budget": "60m",
+  "tool_steps": 68.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 383,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-15T12:02:58Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-15T11:56:36Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261015T115457776708-review-of-fast-read-d8ee8ad8b3d4",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 175,
+    "worker_pid": 722358
+  },
+  "worker_seconds": 383,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

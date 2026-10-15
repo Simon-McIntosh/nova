@@ -1,0 +1,74 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-15T12:02:48Z",
+  "dispatched_at": "2026-10-15T11:56:25Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/fast_read/measure.py",
+      "line": "139",
+      "severity": "follow-on",
+      "text": "follow-on: The centre axis-distance metric compares state.axis with reference.axis after reference.axis was supplied as roots.position at lines 71-83, so both sides move together and the zero cannot detect a wrong stationary-point solve; use the independent moving-state axis-identity rows for that claim."
+    },
+    {
+      "file": "scripts/prototypes/fast_read/measure_fused.py",
+      "line": "298",
+      "severity": "follow-on",
+      "text": "follow-on: The ungated map-error control and measure_sweep.py:171 wrong-axis control write red booleans but never assert them, so either control can regress to false while its command still exits zero."
+    },
+    {
+      "file": "scripts/prototypes/fast_read/program.py",
+      "line": "49",
+      "severity": "follow-on",
+      "text": "follow-on: _density_coefficients duplicates the current-density quadratic fit in scripts/prototypes/sub_millisecond/measure_bell_cut.py:125 and a second copy in ordinary_cut.py:161, leaving one physical mapping in three implementations that can drift."
+    },
+    {
+      "file": "scripts/prototypes/fast_read/measure.py",
+      "line": "50",
+      "severity": "blocking",
+      "text": "blocking: The source manifest leaves baseline_suite and after_suite blank and the diff adds no paired test gate, despite the source done_when requiring same-target base/head runs; the review cannot measure added failures or establish a regression check before landing."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "I read the 33 commits from 6c82b47f85d0676cadd449c766cba9585daab624 through d8ee8ad8b3d41bef60e737209259c1535e85c42c commit by commit; they add eight prototype Python modules, one research document and eleven SVG figures within the declared scope.",
+    "done_when": "The live pointer's seven-clause done_when names 289/282-cell H200 measurements and paired suite arms; h200-read-final.log:5-10 and h200-saddle-booking.log:43 record quantitative receipts, but the manifest leaves both suite arms empty and the measurement scripts do not enforce the numeric targets.",
+    "goal": "The dispatched goal in the live run pointer is a vectorised fixed-shape read plus fused warm-slice measurement; scripts/prototypes/fast_read/kernel.py:32 and program.py:208 implement those prototype paths, while docs/research/fast-fixed-shape-read.html:28 records the missed read target.",
+    "manifest": "The source run's manifest.md reports complete with 33 commits and H200 logs, and explicitly leaves baseline_suite and after_suite empty, so its added test-failure delta is unmeasured.",
+    "write_paths": "The source manifest and live pointer declare scripts/prototypes/fast_read, docs/research/fast-fixed-shape-read.html, docs/figures/converged-forward-solve/fast-read, and one evidence fragment; git diff 6c82b47f85d0676cadd449c766cba9585daab624..d8ee8ad8b3d41bef60e737209259c1535e85c42c changes only the first three declared groups."
+  },
+  "justifications": {
+    "durability": "No test file changed, and scripts/prototypes/fast_read/measure.py:50 plus measure_fused.py:74,93,107 assert GPU mode and reference validity rather than rejecting a regression of the new read; the red controls at measure_sweep.py:171 and measure_fused.py:298 are recorded booleans, not failing assertions.",
+    "evidence": "h200-saddle-booking.log:43 and h200-read-final.log:10 end EXIT=0 with measurements, but scripts/prototypes/fast_read/measure_fused.py:298 only stores its negative-control result and the source manifest's baseline_suite and after_suite are empty.",
+    "fit": "scripts/prototypes/fast_read/kernel.py:13 uses the surrounding JAX NamedTuple idiom and imports fixed_points and the existing topology policy through program.py:9 and measure.py:20, with no forbidden plan-labelled source names in the added modules.",
+    "goal_fidelity": "scripts/prototypes/fast_read/kernel.py:32 has a fixed-shape read and program.py:208 reuses a linearized map for the fused correction, while docs/research/fast-fixed-shape-read.html:28 states the 0.12 ms and qualified warm-slice targets remain unmet.",
+    "reuse": "scripts/prototypes/fast_read/program.py:49 duplicates the current-density quadratic coefficient mechanism already owned by scripts/prototypes/sub_millisecond/measure_bell_cut.py:125 and also repeated in ordinary_cut.py:161, rather than extending its owner; the read otherwise reuses fixed_points.maintain_rows and connected_cells.",
+    "scope_discipline": "The source-base-to-head diff changes only scripts/prototypes/fast_read, docs/research/fast-fixed-shape-read.html, and docs/figures/converged-forward-solve/fast-read, all inside the source manifest's write_paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The dispatched goal in the live run pointer is a vectorised fixed-shape read plus fused warm-slice measurement; scripts/prototypes/fast_read/kernel.py:32 and program.py:208 implement those prototype paths, while docs/research/fast-fixed-shape-read.html:28 records the missed read target.\nVERDICT done_when: The live pointer's seven-clause done_when names 289/282-cell H200 measurements and paired suite arms; h200-read-final.log:5-10 and h200-saddle-booking.log:43 record quantitative receipts, but the manifest leaves both suite arms empty and the measurement scripts do not enforce the numeric targets.\nVERDICT write_paths: The source manifest and live pointer declare scripts/prototypes/fast_read, docs/research/fast-fixed-shape-read.html, docs/figures/converged-forward-solve/fast-read, and one evidence fragment; git diff 6c82b47f85d0676cadd449c766cba9585daab624..d8ee8ad8b3d41bef60e737209259c1535e85c42c changes only the first three declared groups.\nVERDICT manifest: The source run's manifest.md reports complete with 33 commits and H200 logs, and explicitly leaves baseline_suite and after_suite empty, so its added test-failure delta is unmeasured.\nVERDICT diff: I read the 33 commits from 6c82b47f85d0676cadd449c766cba9585daab624 through d8ee8ad8b3d41bef60e737209259c1535e85c42c commit by commit; they add eight prototype Python modules, one research document and eleven SVG figures within the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: scripts/prototypes/fast_read/kernel.py:32 has a fixed-shape read and program.py:208 reuses a linearized map for the fused correction, while docs/research/fast-fixed-shape-read.html:28 states the 0.12 ms and qualified warm-slice targets remain unmet.\nSCORE evidence: 12\nJUSTIFICATION evidence: h200-saddle-booking.log:43 and h200-read-final.log:10 end EXIT=0 with measurements, but scripts/prototypes/fast_read/measure_fused.py:298 only stores its negative-control result and the source manifest's baseline_suite and after_suite are empty.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The source-base-to-head diff changes only scripts/prototypes/fast_read, docs/research/fast-fixed-shape-read.html, and docs/figures/converged-forward-solve/fast-read, all inside the source manifest's write_paths.\nSCORE durability: 3\nJUSTIFICATION durability: No test file changed, and scripts/prototypes/fast_read/measure.py:50 plus measure_fused.py:74,93,107 assert GPU mode and reference validity rather than rejecting a regression of the new read; the red controls at measure_sweep.py:171 and measure_fused.py:298 are recorded booleans, not failing assertions.\nSCORE fit: 18\nJUSTIFICATION fit: scripts/prototypes/fast_read/kernel.py:13 uses the surrounding JAX NamedTuple idiom and imports fixed_points and the existing topology policy through program.py:9 and measure.py:20, with no forbidden plan-labelled source names in the added modules.\nSCORE reuse: 5\nJUSTIFICATION reuse: scripts/prototypes/fast_read/program.py:49 duplicates the current-density quadratic coefficient mechanism already owned by scripts/prototypes/sub_millisecond/measure_bell_cut.py:125 and also repeated in ordinary_cut.py:161, rather than extending its owner; the read otherwise reuses fixed_points.maintain_rows and connected_cells.\nFINDING scripts/prototypes/fast_read/measure.py:139 follow-on: The centre axis-distance metric compares state.axis with reference.axis after reference.axis was supplied as roots.position at lines 71-83, so both sides move together and the zero cannot detect a wrong stationary-point solve; use the independent moving-state axis-identity rows for that claim.\nFINDING scripts/prototypes/fast_read/measure_fused.py:298 follow-on: The ungated map-error control and measure_sweep.py:171 wrong-axis control write red booleans but never assert them, so either control can regress to false while its command still exits zero.\nFINDING scripts/prototypes/fast_read/program.py:49 follow-on: _density_coefficients duplicates the current-density quadratic fit in scripts/prototypes/sub_millisecond/measure_bell_cut.py:125 and a second copy in ordinary_cut.py:161, leaving one physical mapping in three implementations that can drift.\nFINDING scripts/prototypes/fast_read/measure.py:50 blocking: The source manifest leaves baseline_suite and after_suite blank and the diff adds no paired test gate, despite the source done_when requiring same-target base/head runs; the review cannot measure added failures or establish a regression check before landing.\nreviewed_base_sha: 6c82b47f85d0676cadd449c766cba9585daab624\nreviewed_head_sha: d8ee8ad8b3d41bef60e737209259c1535e85c42c\n",
+  "review_run_id": "r-20261015T115457776708-review-of-fast-read-d8ee8ad8b3d4",
+  "reviewed_base_sha": "6c82b47f85d0676cadd449c766cba9585daab624",
+  "reviewed_head_sha": "d8ee8ad8b3d41bef60e737209259c1535e85c42c",
+  "reviewed_run_id": "r-20261015T091903690374-fast-read",
+  "scores": {
+    "durability": 3,
+    "evidence": 12,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T12:04:55.909763+00:00",
+  "total": 74
+}

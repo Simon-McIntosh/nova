@@ -243,6 +243,7 @@ def run(kind, cache, output):
                 "wall_candidate": float(state.wall_candidate),
                 "saddle_candidates": np.asarray(state.saddle_candidates).tolist(),
                 "raw_current": float(state.raw_current),
+                "split_raw_current": float(state.split_raw_current),
             }
             if bool(state.root_valid[0]) and bool(state.axis_identity):
                 updated = np.asarray(prior).copy()
@@ -289,6 +290,7 @@ def run(kind, cache, output):
                 "wall_candidate": float(state.wall_candidate),
                 "saddle_candidates": finite_saddles.tolist(),
                 "raw_current": float(state.raw_current),
+                "split_raw_current": float(state.split_raw_current),
                 "axis": np.asarray(state.roots[0]).tolist(),
                 "axis_identity": bool(state.axis_identity),
                 "oracle_residual": float(residual),
@@ -311,6 +313,10 @@ def run(kind, cache, output):
             / span,
             "raw_current_jump_per_target": abs(
                 right["raw_current"] - left["raw_current"]
+            )
+            / abs(float(booked.raw_current)),
+            "split_raw_current_jump_per_target": abs(
+                right["split_raw_current"] - left["split_raw_current"]
             )
             / abs(float(booked.raw_current)),
         }

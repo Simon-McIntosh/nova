@@ -5,7 +5,7 @@ from typing import NamedTuple
 import jax
 import jax.numpy as jnp
 
-from nova.equilibrium import topology
+from nova.equilibrium import current, topology
 from scripts.prototypes.lean_map.quadrature import (
     cut_moments,
     interior_moments,
@@ -16,6 +16,7 @@ from scripts.prototypes.read_robustness.census import axis_identity, census
 class RobustState(NamedTuple):
     moments: jax.Array
     raw_current: jax.Array
+    split_raw_current: jax.Array
     roots: jax.Array
     root_valid: jax.Array
     axis_identity: jax.Array
@@ -77,18 +78,31 @@ def read(
         len(geometry.centre),
     )
     raw = interior + cut.moments
-    current = jnp.sum(raw[:, 0])
+    split_current = jnp.sum(raw[:, 0])
+    exact = current.book(
+        samples,
+        topology_state,
+        geometry,
+        profile,
+        current.Quadrature(sigma=convention.sigma),
+    )
+    exact_moments = jnp.stack(
+        (exact.cell_current, exact.radial_moment, exact.vertical_moment), axis=-1
+    )
+    raw_current = exact.raw_current
     valid = (
         topology_state.valid
         & topology_state.qualified
         & identity
         & jnp.any(roots.roots.valid)
         & ~roots.overflow
-        & (cut.status == 0)
-        & jnp.isfinite(current)
-        & (current != 0)
+        & exact.valid
+        & jnp.isfinite(raw_current)
+        & (raw_current != 0)
     )
-    normalized = raw * target_current / jnp.where(current != 0, current, 1)
+    normalized = (
+        exact_moments * target_current / jnp.where(raw_current != 0, raw_current, 1)
+    )
     normalized = jnp.where(valid, normalized, jnp.nan)
     _, wall_flux = topology._wall_events(field, geometry, policy, convention.sigma)
     candidate_wall = jnp.max(convention.sigma * wall_flux) * convention.sigma
@@ -97,7 +111,8 @@ def read(
     )
     return RobustState(
         normalized,
-        current,
+        raw_current,
+        split_current,
         roots.roots.position,
         roots.roots.valid,
         identity,
@@ -111,7 +126,7 @@ def read(
         topology_state.axis_flux,
         candidate_wall,
         candidate_saddles,
-        cut.status,
+        jnp.where(exact.valid, 0, 2),
         topology_state.reason,
         topology_state.valid,
         topology_state.qualified,

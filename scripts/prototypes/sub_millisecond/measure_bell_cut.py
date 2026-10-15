@@ -26,7 +26,7 @@ from scripts.prototypes.sub_millisecond.measure_cuts import image, time_call
 from tests.equilibrium.test_topology_read import _analytic_inputs
 
 
-def bell_polygon(geometry, reading, sigma):
+def bell_polygon(geometry, reading, sigma, arc_segments=0):
     vertices = geometry.vertices
     count = geometry.vertex_count
     centre = geometry.centre
@@ -73,24 +73,57 @@ def bell_polygon(geometry, reading, sigma):
     inside = (start >= 0) & live
     crossing = (start * end < 0) & live
     intersection = vertices + root[..., None] * (following - vertices)
-    pair = jnp.stack((vertices, intersection), axis=2).reshape(
-        len(vertices), 2 * capacity, 2
-    )
-    keep = jnp.stack((inside, crossing), axis=2).reshape(len(vertices), 2 * capacity)
-    order = jnp.argsort(jnp.where(keep, jnp.arange(2 * capacity), 2 * capacity), axis=1)
+    pair = jnp.stack((vertices, intersection), axis=2)
+    keep = jnp.stack((inside, crossing), axis=2)
+    valid_arc = jnp.ones(len(vertices), bool)
+    if arc_segments:
+        leaving = crossing & inside
+        entering = crossing & ~inside
+        row = jnp.arange(len(vertices))
+        exit_point = intersection[row, jnp.argmax(leaving, axis=1)]
+        entry_point = intersection[row, jnp.argmax(entering, axis=1)]
+        chord_vector = entry_point - exit_point
+        normal = jnp.stack((-chord_vector[:, 1], chord_vector[:, 0]), axis=1)
+        fraction = jnp.linspace(0, 1, arc_segments + 2)[1:-1]
+        chord = exit_point[:, None] + fraction[None, :, None] * chord_vector[:, None]
+        zero = signed_value(chord)
+        positive = signed_value(chord + normal[:, None])
+        negative = signed_value(chord - normal[:, None])
+        curvature = (positive + negative - 2 * zero) / 2
+        slope = (positive - negative) / 2
+        discriminant = slope * slope - 4 * curvature * zero
+        safe_curvature = jnp.where(jnp.abs(curvature) > 1e-12, curvature, 1)
+        radical = jnp.sqrt(jnp.maximum(discriminant, 0))
+        first = (-slope - radical) / (2 * safe_curvature)
+        second = (-slope + radical) / (2 * safe_curvature)
+        root = jnp.where(jnp.abs(first) < jnp.abs(second), first, second)
+        linear_root = -zero / jnp.where(jnp.abs(slope) > 1e-12, slope, 1)
+        root = jnp.where(jnp.abs(curvature) > 1e-12, root, linear_root)
+        valid_arc = jnp.all(discriminant >= -1e-9, axis=1)
+        arc = chord + root[..., None] * normal[:, None]
+        arc = jnp.broadcast_to(arc[:, None], (len(vertices), capacity, arc_segments, 2))
+        arc_live = jnp.broadcast_to(
+            leaving[..., None], (len(vertices), capacity, arc_segments)
+        )
+        pair = jnp.concatenate((pair, arc), axis=2)
+        keep = jnp.concatenate((keep, arc_live), axis=2)
+    width = capacity * (arc_segments + 2)
+    pair = pair.reshape(len(vertices), width, 2)
+    keep = keep.reshape(len(vertices), width)
+    order = jnp.argsort(jnp.where(keep, jnp.arange(width), width), axis=1)
     polygon = jnp.take_along_axis(pair, order[..., None], axis=1)
     number = jnp.sum(keep, axis=1, dtype=jnp.int32)
     polygon = jnp.where(
-        jnp.arange(2 * capacity)[None, :, None] < number[:, None, None],
+        jnp.arange(width)[None, :, None] < number[:, None, None],
         polygon,
         centre[:, None],
     )
-    valid = (jnp.sum(crossing, axis=1) <= 2) & (number >= 3)
+    valid = (jnp.sum(crossing, axis=1) <= 2) & (number >= 3) & valid_arc
     return polygon, number, valid
 
 
-def bell_moments(geometry, reading, profile, sigma):
-    polygon, count, valid = bell_polygon(geometry, reading, sigma)
+def bell_moments(geometry, reading, profile, sigma, arc_segments=0):
+    polygon, count, valid = bell_polygon(geometry, reading, sigma, arc_segments)
     centre = geometry.centre
     pitch = geometry.pitch
     coefficient = reading.field_coefficients
@@ -109,9 +142,20 @@ def bell_moments(geometry, reading, profile, sigma):
         return profile.current_density(centre[:, 0] + pitch * dx, normalized)
 
     origin = density(0, 0)
-    radial = (density(1, 0) - density(-1, 0)) / 2
-    vertical = (density(0, 1) - density(0, -1)) / 2
-    coefficients = jnp.stack((origin, radial, vertical), axis=1)
+    radial_positive = density(1, 0)
+    radial_negative = density(-1, 0)
+    vertical_positive = density(0, 1)
+    vertical_negative = density(0, -1)
+    radial = (radial_positive - radial_negative) / 2
+    vertical = (vertical_positive - vertical_negative) / 2
+    radial_squared = (radial_positive + radial_negative) / 2 - origin
+    vertical_squared = (vertical_positive + vertical_negative) / 2 - origin
+    cross = (
+        density(1, 1) - origin - radial - vertical - radial_squared - vertical_squared
+    )
+    coefficients = jnp.stack(
+        (origin, radial, vertical, radial_squared, cross, vertical_squared), axis=1
+    )
     current_value, first = padded_polynomial_current_moments(
         polygon, count, centre, jnp.stack((pitch, pitch), axis=1), coefficients
     )
@@ -166,33 +210,42 @@ def run(kind, cache, output):
         / span
     )
 
-    def candidate():
-        raw, valid = bell_moments(geometry, reading, profile, convention.sigma)
-        use = cut & valid & ~reading.normal_form_cells
-        mixed = jnp.where(use[:, None], raw, exact_moments)
-        mixed = mixed * booked.raw_current / jnp.sum(mixed[:, 0])
-        return mixed, use, valid
-
-    (moments, used, valid), wall_ms, compile_s = time_call(candidate)
-    candidate_map = exterior + image(operator, moments)
-    map_error = float(jnp.max(jnp.abs(candidate_map - analytic))) / span
-    difference = jnp.abs((moments - exact_moments)[used])
     result = {
         "kind": kind,
         "cells": len(machine.node),
         "cut_cells": int(jnp.sum(cut)),
-        "bell_eligible_cut_cells": int(jnp.sum(used)),
-        "bell_invalid_cut_cells": int(jnp.sum(cut & ~valid)),
         "normal_form_cut_cells": int(jnp.sum(cut & reading.normal_form_cells)),
-        "wall_ms": wall_ms,
-        "wall_us_per_eligible_cut": wall_ms * 1000 / max(int(jnp.sum(used)), 1),
-        "compile_s": compile_s,
         "exact_map_error": exact_error,
-        "map_error": map_error,
-        "cut_moment_max_difference": float(jnp.max(difference))
-        if difference.size
-        else 0.0,
+        "rows": {},
     }
+    for segments in (0, 4, 8):
+
+        def candidate():
+            raw, valid = bell_moments(
+                geometry, reading, profile, convention.sigma, segments
+            )
+            use = cut & valid & ~reading.normal_form_cells
+            mixed = jnp.where(use[:, None], raw, exact_moments)
+            mixed = mixed * booked.raw_current / jnp.sum(mixed[:, 0])
+            return mixed, use, valid
+
+        (moments, used, valid), wall_ms, compile_s = time_call(candidate)
+        candidate_map = exterior + image(operator, moments)
+        map_error = float(jnp.max(jnp.abs(candidate_map - analytic))) / span
+        difference = jnp.abs((moments - exact_moments)[used])
+        row = {
+            "bell_eligible_cut_cells": int(jnp.sum(used)),
+            "bell_invalid_cut_cells": int(jnp.sum(cut & ~valid)),
+            "wall_ms": wall_ms,
+            "wall_us_per_eligible_cut": wall_ms * 1000 / max(int(jnp.sum(used)), 1),
+            "compile_s": compile_s,
+            "map_error": map_error,
+            "cut_moment_max_difference": float(jnp.max(difference))
+            if difference.size
+            else 0.0,
+        }
+        result["rows"][str(segments)] = row
+        print("ARM " + str(segments) + " " + json.dumps(row), flush=True)
     output.write_text(json.dumps(result, indent=2) + "\n")
     print("RESULT " + json.dumps(result), flush=True)
 

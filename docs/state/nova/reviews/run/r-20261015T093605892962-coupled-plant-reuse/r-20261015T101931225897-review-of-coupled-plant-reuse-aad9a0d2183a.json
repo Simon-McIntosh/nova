@@ -1,0 +1,70 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "base_log_revision": null,
+  "call_site_count": 3,
+  "call_sites": [
+    "nova/circuit/resistance.py:839",
+    "nova/circuit/screening.py:697",
+    "scripts/iter_sectioned_conductor_set/build.py:305"
+  ],
+  "completed_at": "2026-10-15T10:45:01.300Z",
+  "dispatched_at": "2026-10-15T10:19:52Z",
+  "findings": [
+    {
+      "file": "tests/test_circuit_passive.py",
+      "line": "499",
+      "severity": "follow-on",
+      "text": "follow-on: assert_allclose(reduced, dense) compares two calls to terminal_impedance_spectrum itself (the provided-mode form against the module's own dense eigen-solve), so the two operands move together and a defect common to both branches, such as a dropped or mis-scaled screening term, leaves the assertion true; the reduced branch is pinned only against the dense branch, not against an independent reference."
+    },
+    {
+      "file": "docs/evidence/fragments/iter-passive-plasma-circuit/coupled-plant-reuse.html",
+      "line": "2",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment claims the refactored plant is bit-identical to the pre-refactor plant on every array field on the real 12 mm ITER sectioned set, but that arm passed source=None, so equivalence/compare.log records real.mode_plasma_flux shape (0,1312) and real.section_plasma_flux shape (0,295); the plasma-drive path was compared on the reduced fixture only and a reader of the fragment would take the real set as covering it."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read commit by commit from 43eb5606e to aad9a0d2 -- 66ec89fb9 folds save/load_coupled_plant, the reduced-mode screening and select_modes_to_tolerance onto nova/circuit/passive.py, delegating _terminal_impedance and select_terminal_modes and removing the dead _relative_error, and adds three tests; aad9a0d2 corrects docs/research/iter-coupled-plant-call.html and adds the fragment; six files, 304 insertions and 130 deletions, all inside the declared scope.",
+    "done_when": "every item of the done-when is recorded at the reviewed head -- the refactor is committed 66ec89fb9 with the record at aad9a0d2, gate.log records 31 passed EXIT=0 over the three named files, equivalence/compare.log records the base-vs-head plant array-for-array identical at worst max_relative 0.000e+00 against 1e-12, the perturbed-cache control reddens only on the mutant arm (EXIT=1, two named test ids) while the head arm is green (EXIT=0), and vs3-recompute-105014-12mm.json re-derives the section 3 peaks at 8.40042344 and 10.09798884 Wb agreeing with the record's stated after-values.",
+    "goal": "the node's goal is to make the coupled-plant call cache, screen and reduce through nova's existing owners in passive.py without changing its public surface; nova/circuit/coupled_plant.py:101 coupled_plant and :49 CoupledPlant keep every field and terminal_impedance, and the call now reaches nova.circuit.passive.save_coupled_plant/load_coupled_plant (:803,:828), the extended terminal_impedance_spectrum (passive.py:237) and select_modes_to_tolerance (passive.py:367) in the tier it names.",
+    "manifest": "read; status complete, commits through aad9a0d2, a shared checkpoint claiming gate green (31 passed) with a red mutant arm, and test_logs naming gate.log, the equivalence arms and the control logs; it carries no baseline_suite and no after_suite key, so its added-failure count is unmeasured rather than zero.",
+    "write_paths": "the declared scope is the seven paths nova/circuit/coupled_plant.py, nova/circuit/passive.py, tests/test_coupled_plant.py, tests/test_circuit_passive.py, docs/research/iter-coupled-plant-call.html, docs/evidence/fragments/iter-passive-plasma-circuit/coupled-plant-reuse.html and the gate-log directory, and every one of the six paths in the diff is inside it."
+  },
+  "justifications": {
+    "durability": "tests/test_coupled_plant.py:170 holds the call's serialisers identical to the tier's and tests/test_circuit_passive.py:467 exercises the doubling search against an independent error table, but tests/test_circuit_passive.py:499 builds both operands from terminal_impedance_spectrum itself so a defect common to both branches leaves it green.",
+    "evidence": "the done-when's controls are each recorded at the head (gate.log 31 passed EXIT=0; equivalence/compare.log identical at 1e-12; negative-control mutant EXIT=1 against a green head arm; vs3-recompute-105014-12mm.json matching the record), though the flagship array-equality is kept as a log rather than pinned by a test.",
+    "fit": "nova/circuit/passive.py:803 and :354 follow the module's bespoke npz serialiser and helper idiom with no plan or ticket label, and the docstrings state the mechanism rather than the task.",
+    "goal_fidelity": "nova/circuit/coupled_plant.py:101 and :49 keep the public surface unchanged while :159 and :204 cache through nova/circuit/passive.py:803/:828 and coupled_plant.py:288 reduces through passive.py:237.",
+    "reuse": "every added definition extends a passive.py owner -- passive.py:803/:828 sit beside save_circuit_system/save_eigenbasis, passive.py:354/:367 extend mode_relevance/select_modes, and passive.py:237 gains the reduced-mode form -- and coupled_plant.py:221 delegates rather than re-implementing.",
+    "scope_discipline": "all six paths in git diff 43eb5606e..aad9a0d2 (coupled_plant.py, passive.py, the two test files, the record and the fragment) are inside the seven declared write paths."
+  },
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: 43eb5606eb06317ecc65b0542193946d0e9488eb\nreviewed_head_sha: aad9a0d2183abbc3c6b50cd1e4776387f846ca4f\nVERDICT goal: the node's goal is to make the coupled-plant call cache, screen and reduce through nova's existing owners in passive.py without changing its public surface; nova/circuit/coupled_plant.py:101 coupled_plant and :49 CoupledPlant keep every field and terminal_impedance, and the call now reaches nova.circuit.passive.save_coupled_plant/load_coupled_plant (:803,:828), the extended terminal_impedance_spectrum (passive.py:237) and select_modes_to_tolerance (passive.py:367) in the tier it names.\nVERDICT done_when: every item of the done-when is recorded at the reviewed head -- the refactor is committed 66ec89fb9 with the record at aad9a0d2, gate.log records 31 passed EXIT=0 over the three named files, equivalence/compare.log records the base-vs-head plant array-for-array identical at worst max_relative 0.000e+00 against 1e-12, the perturbed-cache control reddens only on the mutant arm (EXIT=1, two named test ids) while the head arm is green (EXIT=0), and vs3-recompute-105014-12mm.json re-derives the section 3 peaks at 8.40042344 and 10.09798884 Wb agreeing with the record's stated after-values.\nVERDICT write_paths: the declared scope is the seven paths nova/circuit/coupled_plant.py, nova/circuit/passive.py, tests/test_coupled_plant.py, tests/test_circuit_passive.py, docs/research/iter-coupled-plant-call.html, docs/evidence/fragments/iter-passive-plasma-circuit/coupled-plant-reuse.html and the gate-log directory, and every one of the six paths in the diff is inside it.\nVERDICT manifest: read; status complete, commits through aad9a0d2, a shared checkpoint claiming gate green (31 passed) with a red mutant arm, and test_logs naming gate.log, the equivalence arms and the control logs; it carries no baseline_suite and no after_suite key, so its added-failure count is unmeasured rather than zero.\nVERDICT diff: read commit by commit from 43eb5606e to aad9a0d2 -- 66ec89fb9 folds save/load_coupled_plant, the reduced-mode screening and select_modes_to_tolerance onto nova/circuit/passive.py, delegating _terminal_impedance and select_terminal_modes and removing the dead _relative_error, and adds three tests; aad9a0d2 corrects docs/research/iter-coupled-plant-call.html and adds the fragment; six files, 304 insertions and 130 deletions, all inside the declared scope.\nCALL_SITES: nova/circuit/resistance.py:839, nova/circuit/screening.py:697, scripts/iter_sectioned_conductor_set/build.py:305\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/circuit/coupled_plant.py:101 and :49 keep the public surface unchanged while :159 and :204 cache through nova/circuit/passive.py:803/:828 and coupled_plant.py:288 reduces through passive.py:237.\nSCORE evidence: 19\nJUSTIFICATION evidence: the done-when's controls are each recorded at the head (gate.log 31 passed EXIT=0; equivalence/compare.log identical at 1e-12; negative-control mutant EXIT=1 against a green head arm; vs3-recompute-105014-12mm.json matching the record), though the flagship array-equality is kept as a log rather than pinned by a test.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: all six paths in git diff 43eb5606e..aad9a0d2 (coupled_plant.py, passive.py, the two test files, the record and the fragment) are inside the seven declared write paths.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_coupled_plant.py:170 holds the call's serialisers identical to the tier's and tests/test_circuit_passive.py:467 exercises the doubling search against an independent error table, but tests/test_circuit_passive.py:499 builds both operands from terminal_impedance_spectrum itself so a defect common to both branches leaves it green.\nSCORE fit: 19\nJUSTIFICATION fit: nova/circuit/passive.py:803 and :354 follow the module's bespoke npz serialiser and helper idiom with no plan or ticket label, and the docstrings state the mechanism rather than the task.\nSCORE reuse: 20\nJUSTIFICATION reuse: every added definition extends a passive.py owner -- passive.py:803/:828 sit beside save_circuit_system/save_eigenbasis, passive.py:354/:367 extend mode_relevance/select_modes, and passive.py:237 gains the reduced-mode form -- and coupled_plant.py:221 delegates rather than re-implementing.\nFINDING tests/test_circuit_passive.py:499 follow-on: assert_allclose(reduced, dense) compares two calls to terminal_impedance_spectrum itself (the provided-mode form against the module's own dense eigen-solve), so the two operands move together and a defect common to both branches, such as a dropped or mis-scaled screening term, leaves the assertion true; the reduced branch is pinned only against the dense branch, not against an independent reference.\nFINDING docs/evidence/fragments/iter-passive-plasma-circuit/coupled-plant-reuse.html:2 follow-on: the fragment claims the refactored plant is bit-identical to the pre-refactor plant on every array field on the real 12 mm ITER sectioned set, but that arm passed source=None, so equivalence/compare.log records real.mode_plasma_flux shape (0,1312) and real.section_plasma_flux shape (0,295); the plasma-drive path was compared on the reduced fixture only and a reader of the fragment would take the real set as covering it.\n",
+  "review_run_id": "r-20261015T101931225897-review-of-coupled-plant-reuse-aad9a0d2183a",
+  "reviewed_base_sha": "43eb5606eb06317ecc65b0542193946d0e9488eb",
+  "reviewed_head_sha": "aad9a0d2183abbc3c6b50cd1e4776387f846ca4f",
+  "reviewed_revision": "aad9a0d2183abbc3c6b50cd1e4776387f846ca4f",
+  "reviewed_run_id": "r-20261015T093605892962-coupled-plant-reuse",
+  "reviewer_node": "review-of-coupled-plant-reuse-aad9a0d2183a",
+  "reviewer_run_id": "r-20261015T101931225897-review-of-coupled-plant-reuse-aad9a0d2183a",
+  "scores": {
+    "durability": 16,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T10:41:04.829469+00:00",
+  "total": 113,
+  "verdict": "pass-with-follow-ons"
+}

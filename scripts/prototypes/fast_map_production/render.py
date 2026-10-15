@@ -35,24 +35,30 @@ def _save(figure, axes, output):
 
 def step_scan(baseline, candidate, output):
     _style()
-    figure, axes = plt.subplots(3, 1, figsize=(14, 12), dpi=100, sharex=True)
+    figure, axes = plt.subplots(5, 1, figsize=(14, 18), dpi=100, sharex=True)
     for data, name, color, dash in (
         (baseline, "unchanged", GREY, "--"),
-        (candidate, "coherent booking", BLUE, "-"),
+        (candidate, "continuous wall", RUST, "-"),
     ):
         rows = data["scan"][1:]
         step = np.asarray([row["step"] for row in rows])
         residual = np.asarray([row["residual"] for row in rows])
         wall = np.asarray([row["wall_candidate"] for row in rows])
         support = np.asarray([len(row["support_ids"]) for row in rows])
+        membership = np.asarray([row["membership_71"] for row in rows])
+        current = np.asarray([row["cell_current_residual"] for row in rows])
         axes[0].semilogx(step, residual, color=color, linestyle=dash, linewidth=3)
         axes[1].semilogx(step, wall, color=color, linestyle=dash, linewidth=3)
         axes[2].semilogx(step, support, color=color, linestyle=dash, linewidth=3)
+        axes[3].semilogx(step, membership, color=color, linestyle=dash, linewidth=3)
+        axes[4].semilogx(step, current, color=color, linestyle=dash, linewidth=3)
         axes[0].text(step[-1], residual[-1], name, color=color, ha="right")
     axes[0].set_ylabel("scaled residual")
     axes[1].set_ylabel("wall candidate [Wb]")
     axes[2].set_ylabel("support cells")
-    axes[2].set_xlabel("Newton step scale")
+    axes[3].set_ylabel("cell 71 membership")
+    axes[4].set_ylabel("cell 71 scaled current residual")
+    axes[4].set_xlabel("Newton step scale")
     _save(figure, axes, output)
 
 

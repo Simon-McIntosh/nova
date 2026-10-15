@@ -74,9 +74,7 @@ def dina_loop_polygons(passive) -> list:
 
     polygons = []
     for loop in passive.loop:
-        parts = [
-            CrossSection(element.geometry).data.poly for element in loop.element
-        ]
+        parts = [CrossSection(element.geometry).data.poly for element in loop.element]
         polygons.append(unary_union(parts) if parts else None)
     return polygons
 
@@ -169,27 +167,27 @@ def group_comparison(
 
 
 def passive_flux_at_points(conductors, circuits, i_passive, times, points):
-    """Flux [Wb] at ``points`` from the evolved passive circuit currents."""
-    from nova.biot.greens import greens_psi
+    """Flux [Wb] at ``points`` from the evolved passive circuit currents.
 
-    rows = conductors.rows(circuits)
-    owner = np.concatenate(
-        [
-            np.full(group.size, index, dtype=np.int64)
-            for index, group in enumerate(rows)
-        ]
+    The per-ampere coupling is the grid column of
+    :func:`~nova.circuit.linkage.sensor_grid_couplings` -- the same finite-area
+    kernels the rest of the circuit tier uses, so a point kernel is not derived a
+    second time here.
+    """
+    from nova.circuit.conductor import SensorSet
+    from nova.circuit.linkage import sensor_grid_couplings
+
+    points = np.asarray(points, dtype=np.float64)
+    sensors = SensorSet(
+        points[:, 0],
+        points[:, 1],
+        np.zeros(points.shape[0]),
+        np.ones(points.shape[0], dtype=bool),
     )
-    filament = np.concatenate(rows)
-    source_r = conductors.r[filament]
-    source_z = conductors.z[filament]
-    share = conductors.current_share[filament]
-    membership = np.zeros((len(circuits), share.size))
-    np.add.at(membership, (owner, np.arange(share.size)), share)
-    kernel = greens_psi(
-        points[:, 0], points[:, 1], source_r[:, None], source_z[:, None]
+    _, coupling = sensor_grid_couplings(
+        conductors, circuits, sensors, points[:, 0], points[:, 1]
     )
-    coupling = membership @ kernel
-    return i_passive @ coupling
+    return np.asarray(i_passive, dtype=np.float64) @ coupling.T
 
 
 def vs3_residual(
@@ -223,9 +221,7 @@ def vs3_residual(
                 "evolved_passive_flux_peak_wb": float(
                     np.max(np.abs(evolved_flux[:, index]))
                 ),
-                "dina_passive_flux_peak_wb": float(
-                    np.max(np.abs(dina_flux[:, index]))
-                ),
+                "dina_passive_flux_peak_wb": float(np.max(np.abs(dina_flux[:, index]))),
                 "delta_peak_wb": float(np.max(np.abs(delta[:, index]))),
                 "residual_after_peak_wb": after_peak,
                 "within_tolerance": bool(after_peak <= tolerance_wb),

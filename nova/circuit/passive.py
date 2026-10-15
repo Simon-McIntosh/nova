@@ -812,8 +812,13 @@ def save_coupled_plant(path: Path | str, plant) -> None:
         coil_names=np.array(plant.coil_names),
         coil_inductance=plant.coil_inductance,
         coil_resistance=plant.coil_resistance,
+        section_names=np.array(plant.section_names),
+        section_coil=plant.section_coil,
+        section_inductance=plant.section_inductance,
+        section_resistance=plant.section_resistance,
         mode_tau=plant.mode_tau,
         mode_coil_coupling=plant.mode_coil_coupling,
+        mode_section_coupling=plant.mode_section_coupling,
         section_plasma_flux=plant.section_plasma_flux,
         mode_plasma_flux=plant.mode_plasma_flux,
         plasma_times=plant.plasma_times,
@@ -830,12 +835,27 @@ def load_coupled_plant(path: Path | str):
     from nova.circuit.coupled_plant import CoupledPlant
 
     with np.load(path) as stored:
+
+        def section(key, shape, dtype):
+            return stored[key] if key in stored else np.empty(shape, dtype=dtype)
+
         return CoupledPlant(
             coil_names=[str(name) for name in stored["coil_names"]],
             coil_inductance=stored["coil_inductance"],
             coil_resistance=stored["coil_resistance"],
+            section_names=[str(name) for name in stored["section_names"]]
+            if "section_names" in stored
+            else [],
+            section_coil=section("section_coil", 0, np.int64),
+            section_inductance=section("section_inductance", (0, 0), np.float64),
+            section_resistance=section("section_resistance", 0, np.float64),
             mode_tau=stored["mode_tau"],
             mode_coil_coupling=stored["mode_coil_coupling"],
+            mode_section_coupling=section(
+                "mode_section_coupling",
+                (stored["mode_tau"].size, 0),
+                np.float64,
+            ),
             section_plasma_flux=stored["section_plasma_flux"],
             mode_plasma_flux=stored["mode_plasma_flux"],
             plasma_times=stored["plasma_times"],

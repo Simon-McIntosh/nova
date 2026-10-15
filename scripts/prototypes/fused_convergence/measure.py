@@ -6,13 +6,14 @@ from nova.jax.config import configure_dtypes
 configure_dtypes()
 
 import argparse
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import json
 from pathlib import Path
 from time import perf_counter
 
 import jax
 import jax.numpy as jnp
+import jax.scipy.linalg as jsp_linalg
 import numpy as np
 import nova
 
@@ -335,10 +336,10 @@ def run(args):
     from scipy.linalg import lu_factor, lu_solve
     from scipy.sparse.linalg import LinearOperator, gmres
 
-    def linear_step(point):
+    def linear_step(point, active_operands=operands):
         started = perf_counter()
         residual, factor = jax.linearize(
-            lambda x: equation(x, operands), point.reshape(-1)
+            lambda x: equation(x, active_operands), point.reshape(-1)
         )
         jax.block_until_ready(residual)
         linearize_ms = 1000 * (perf_counter() - started)
@@ -406,7 +407,7 @@ def run(args):
         new_residual = original
         for _ in range(12 if args.line_search else 1):
             trial = point.reshape(-1) + factor_scale * jnp.asarray(step)
-            trial_residual = float(jnp.max(jnp.abs(equation(trial, operands))))
+            trial_residual = float(jnp.max(jnp.abs(equation(trial, active_operands))))
             if np.isfinite(trial_residual) and trial_residual < original:
                 candidate = trial
                 new_residual = trial_residual
@@ -428,7 +429,7 @@ def run(args):
                 / jnp.maximum(jnp.linalg.norm(rhs), 1e-30)
             ),
         }
-        state = mapped(candidate.reshape(reference.shape) * scale, *operands)
+        state = mapped(candidate.reshape(reference.shape) * scale, *active_operands)
         jax.block_until_ready(state)
         block = np.asarray(state.moment_residual / scale)
         hot = np.argsort(np.max(np.abs(block), axis=1))[-5:][::-1]
@@ -443,6 +444,129 @@ def run(args):
         if args.inspect_support:
             row["read"] = inspect_read(candidate.reshape(reference.shape) * scale)
         return candidate.reshape(reference.shape), row
+
+    def measure_warm(predecessor):
+        span = float(jnp.abs(reading.boundary_flux - reading.axis_flux))
+        amplitude = span * 1e-8 / pitch
+        shifted_values = replace(
+            values,
+            exterior=values.exterior
+            + amplitude * (rule.points.reshape(-1, 2)[:, 1] - roots[0, 1]),
+        )
+        selected = np.flatnonzero(np.asarray(window.lookup) >= 0)
+        delta = np.zeros_like(np.asarray(window.exterior))
+        positions = np.asarray(window.nodes)[selected]
+        lookup = np.asarray(window.lookup)[selected]
+        delta[lookup, 0] = amplitude * (positions[:, 1] - roots[0, 1])
+        delta[lookup, 2] = amplitude
+        shifted_window = replace(window, exterior=window.exterior + jnp.asarray(delta))
+        warm_operands = (shifted_values, jets, shifted_window, *operands[3:])
+        first, first_row = linear_step(predecessor, warm_operands)
+        second, second_row = linear_step(first, warm_operands)
+        result["warm"] = {
+            "one": first_row,
+            "two": second_row,
+            "input_residual": float(jnp.max(jnp.abs(equation(predecessor, operands)))),
+        }
+        save(output, result)
+
+        started = perf_counter()
+        residual, factor = jax.linearize(
+            lambda x: equation(x, operands), predecessor.reshape(-1)
+        )
+        columns = jnp.eye(residual.size, dtype=residual.dtype)
+        products = jax.jit(jax.vmap(factor)).lower(columns[: args.block]).compile()
+        blocks = []
+        for start in range(0, residual.size, args.block):
+            stop = min(start + args.block, residual.size)
+            batch = columns[start:stop]
+            if stop - start < args.block:
+                batch = jnp.pad(batch, ((0, args.block - stop + start), (0, 0)))
+            blocks.append(np.asarray(products(batch))[: stop - start])
+        matrix = np.concatenate(blocks, axis=0).T
+        decomposition = lu_factor(matrix)
+        build_ms = 1000 * (perf_counter() - started)
+        lu = jnp.asarray(decomposition[0])
+        pivots = jnp.asarray(decomposition[1])
+
+        def chord(point, active_operands):
+            rhs = -equation(point.reshape(-1), active_operands)
+            step = jsp_linalg.lu_solve((lu, pivots), rhs)
+            candidate = point.reshape(-1) + step
+            new_residual = jnp.max(jnp.abs(equation(candidate, active_operands)))
+            return candidate.reshape(reference.shape), new_residual
+
+        chord_program = jax.jit(chord)
+        started = perf_counter()
+        compiled_chord = chord_program.lower(predecessor, warm_operands).compile()
+        chord_compile_s = perf_counter() - started
+        started = perf_counter()
+        chord_first, chord_first_residual = compiled_chord(predecessor, warm_operands)
+        jax.block_until_ready(chord_first_residual)
+        first_apply_ms = 1000 * (perf_counter() - started)
+        started = perf_counter()
+        _, chord_second_residual = compiled_chord(chord_first, warm_operands)
+        jax.block_until_ready(chord_second_residual)
+        second_apply_ms = 1000 * (perf_counter() - started)
+        result["chord"] = {
+            "factor_build_ms": build_ms,
+            "factor_apply_ms": [first_apply_ms, second_apply_ms],
+            "residual": [
+                float(chord_first_residual),
+                float(chord_second_residual),
+            ],
+            "compile_seconds": chord_compile_s,
+            "executable_bytes": generated_bytes(compiled_chord),
+        }
+        save(output, result)
+
+        for width in (1, 16, 128):
+            offsets = jnp.linspace(0.5, 1.5, width)
+
+            def one_offset(offset):
+                varied_values = replace(
+                    values,
+                    exterior=values.exterior
+                    + offset * (shifted_values.exterior - values.exterior),
+                )
+                varied_window = replace(
+                    window,
+                    exterior=window.exterior
+                    + offset * (shifted_window.exterior - window.exterior),
+                )
+                varied = (varied_values, jets, varied_window, *operands[3:])
+                first, first_residual = chord(predecessor, varied)
+                _, second_residual = chord(first, varied)
+                return first_residual, second_residual
+
+            started = perf_counter()
+            batch_program = jax.jit(jax.vmap(one_offset)).lower(offsets).compile()
+            compile_s = perf_counter() - started
+            first_residual, second_residual = batch_program(offsets)
+            jax.block_until_ready(second_residual)
+            batch_wall_ms = wall(batch_program, (offsets,))
+            result[f"batch_{width}"] = {
+                "compile_seconds": compile_s,
+                "executable_bytes": generated_bytes(batch_program),
+                "wall_ms": batch_wall_ms,
+                "per_state_ms": batch_wall_ms / width,
+                "one_converged": int(jnp.sum(first_residual <= 1e-12)),
+                "two_converged": int(jnp.sum(second_residual <= 1e-12)),
+                "one_max_residual": float(jnp.max(first_residual)),
+                "two_max_residual": float(jnp.max(second_residual)),
+            }
+            save(output, result)
+
+    if args.start_json:
+        predecessor = (
+            jnp.asarray(
+                json.loads(args.start_json.read_text())["terminal_state"]["moments"]
+            )
+            / scale
+        )
+        if args.warm:
+            measure_warm(predecessor)
+        return
 
     point = reference / scale
     history = []
@@ -493,6 +617,8 @@ def main():
     parser.add_argument("--exact-roots", action="store_true")
     parser.add_argument("--omit-saddle-derivative", action="store_true")
     parser.add_argument("--inspect-support", action="store_true")
+    parser.add_argument("--start-json", type=Path)
+    parser.add_argument("--warm", action="store_true")
     args = parser.parse_args()
     run(args)
 

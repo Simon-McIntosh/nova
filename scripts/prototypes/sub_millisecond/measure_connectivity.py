@@ -187,13 +187,19 @@ def run(kind, cache, output):
     assert np.array_equal(graph_component, exact), (
         "graph extraction must reproduce the exact fragment labels"
     )
-    _, label_ms, label_compile = time_call(
+    (labels, _wall), label_ms, label_compile = time_call(
         lambda area, intervals: topology._connected_fragment_labels(
             area, intervals, geometry, policy.edge_tolerance
         ),
         reading.fragment_area,
         reading.edge_interval,
     )
+    flat_labels = np.asarray(labels).reshape(-1)[active]
+    label_component = flat_labels == flat_labels[np.flatnonzero(exact)[0]]
+    assert np.array_equal(label_component, exact)
+    negative_mismatch = int(np.sum(np.ones_like(exact, bool) != exact))
+    if kind == "diverted":
+        assert negative_mismatch > 0, "the private-fragment control must be present"
     centre = np.asarray(geometry.centre)
     axis = np.asarray(reading.axis)
     wall = np.asarray(machine.wall_node)
@@ -228,7 +234,7 @@ def run(kind, cache, output):
     cell_neighbour = np.asarray(geometry.neighbour)
     wall_cell = np.any(cell_neighbour < 0, axis=1)
     axis_cell = int(np.argmin(np.sum((centre - axis) ** 2, axis=1)))
-    outward = jnp.asarray(convention.sigma * (scalar - float(reading.axis_flux)))
+    outward = jnp.asarray(-convention.sigma * (scalar - float(reading.axis_flux)))
     (limited, diverted), merge_ms, merge_compile = time_call(
         lambda row: merge_levels(
             row, jnp.asarray(cell_neighbour), jnp.asarray(wall_cell), axis_cell
@@ -241,6 +247,7 @@ def run(kind, cache, output):
         "fragments": len(active),
         "exact_selected_cells": int(exact_cells.sum()),
         "exact_selected_fragments": int(exact.sum()),
+        "all_fragments_negative_control_mismatch": negative_mismatch,
         "candidate": {
             "fragment_labels": {
                 "wall_ms": label_ms,

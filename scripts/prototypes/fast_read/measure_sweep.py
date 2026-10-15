@@ -126,7 +126,16 @@ def run(kind, cache, output):
             & saddle_valid
             & jnp.all(jnp.isfinite(raw))
         )
-        return roots, reading, jnp.sum(raw[:, 0]), valid_booking
+        return (
+            roots,
+            reading,
+            jnp.sum(raw[:, 0]),
+            valid_booking,
+            jnp.sum(reading.normal_form_cells),
+            jnp.sum(saddle_cut),
+            jnp.sum(cut & ~ordinary_valid),
+            saddle_valid,
+        )
 
     program = jax.jit(sampled)
     oracle = jax.jit(lambda offset: shifted_axis(field, previous[0], offset, pitch))
@@ -139,7 +148,16 @@ def run(kind, cache, output):
             value = float(offsets[index])
             offset = jnp.asarray(value * scale)
             expected, oracle_residual = oracle(offset)
-            roots, reading, raw_current, booking = program(offset, prior)
+            (
+                roots,
+                reading,
+                raw_current,
+                booking,
+                normal_count,
+                saddle_count,
+                invalid_cut_count,
+                saddle_valid,
+            ) = program(offset, prior)
             jax.block_until_ready((roots, reading, raw_current))
             inside = bool(jnp.any(topology._inside_cells(geometry, expected)))
             identity = bool(axis_identity(reading.axis, expected, pitch))
@@ -159,6 +177,10 @@ def run(kind, cache, output):
                 "boundary_class": int(reading.boundary_class),
                 "raw_current": float(raw_current),
                 "selected_cells": int(jnp.sum(reading.selected_cells)),
+                "normal_cells": int(normal_count),
+                "saddle_cut_cells": int(saddle_count),
+                "invalid_cut_cells": int(invalid_cut_count),
+                "saddle_booking_valid": bool(saddle_valid),
             }
             row["valid"] = (
                 row["root_valid"]
@@ -196,7 +218,7 @@ def run(kind, cache, output):
         left, right = switches[0]
         for _ in range(24):
             middle_value = (left["offset"] + right["offset"]) / 2
-            roots, reading, raw_current, booking = program(
+            roots, reading, raw_current, booking, *_ = program(
                 jnp.asarray(middle_value * scale), previous
             )
             middle = {

@@ -15,6 +15,7 @@ from scripts.prototypes.read_robustness.census import axis_identity, census
 
 class RobustState(NamedTuple):
     moments: jax.Array
+    raw_current: jax.Array
     roots: jax.Array
     root_valid: jax.Array
     axis_identity: jax.Array
@@ -96,6 +97,7 @@ def read(
     )
     return RobustState(
         normalized,
+        current,
         roots.roots.position,
         roots.roots.valid,
         identity,

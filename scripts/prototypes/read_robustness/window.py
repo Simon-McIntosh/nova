@@ -54,7 +54,9 @@ def mobile_window(jets, geometry, membership, roots, capacity, margin_pitches=4.
     indices = jnp.nonzero(required_mask, size=capacity, fill_value=0)[0]
     live = jnp.arange(capacity) < required
     lookup = jnp.full(node_count, -1, dtype=jnp.int32)
-    lookup = lookup.at[indices].set(jnp.where(live, jnp.arange(capacity), -1))
+    lookup = lookup.at[indices].max(
+        jnp.where(live, jnp.arange(capacity, dtype=jnp.int32), -1)
+    )
     cache = fixed_points.RowCache(
         jets.mesh,
         jets.nodes,

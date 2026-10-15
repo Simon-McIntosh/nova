@@ -14,6 +14,13 @@
     "4fde2f3e6986dadd385f9220f71f685351587fa9"
   ],
   "completed_at": "",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "iter-coupled-plant-call",
+      "recorded_at": "2026-10-15T08:02:56.703094+00:00"
+    }
+  },
   "dispatched_at": "2026-10-15T04:03:02Z",
   "findings": [
     {

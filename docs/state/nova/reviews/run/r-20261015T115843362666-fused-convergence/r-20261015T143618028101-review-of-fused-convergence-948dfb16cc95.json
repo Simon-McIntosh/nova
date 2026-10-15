@@ -1,0 +1,78 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run's manifest and parsed classification contain no baseline_suite or after_suite gate arm, and its declared paths include no test file. No suite delta can be measured; zero denotes no attributable added suite failure ids on this unmatched base, not a passing suite.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-15T14:43:19Z",
+  "dispatched_at": "2026-10-15T14:36:43Z",
+  "findings": [
+    {
+      "file": "docs/research/fused-convergence.html",
+      "line": "95",
+      "severity": "blocking",
+      "text": "blocking: the diverted cold solve ends at 0.00268458, about 2.7e9 times the 1e-12 goal, so the stated two-carrier convergence deliverable has not been achieved."
+    },
+    {
+      "file": "docs/research/fused-convergence.html",
+      "line": "57",
+      "severity": "blocking",
+      "text": "blocking: the live saddle-derivative ablation leaves the converged count at 0/1 in both arms, so the required negative control does not produce a red count and cannot validate that clause."
+    },
+    {
+      "file": "scripts/prototypes/fused_convergence/measure.py",
+      "line": "398",
+      "severity": "follow-on",
+      "text": "follow-on: build_ms starts before compilation and non-dense apply_ms uses the same precompile start at line 404; the warm receipt's 7.630 s build includes 7.382 s compilation, so the named component timings are not isolated."
+    },
+    {
+      "file": "scripts/prototypes/fused_convergence/measure.py",
+      "line": "729",
+      "severity": "follow-on",
+      "text": "follow-on: convergence is only written as a receipt field and no test was added; the existing assertions reject invalid setup but cannot fail when the residual or the saddle negative-control verdict regresses."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified no production call site: rg over nova and scripts found no import of scripts.prototypes.fused_convergence outside its own prototype directory.",
+    "diff": "read the 28 commits from f2a74fb7..948dfb16c commit by commit; they add three prototype modules, two HTML records and ten SVGs, with no product or test file.",
+    "done_when": "prompt.txt:104-147 requires three shared-factor steps, Taylor and stall probes, warm and batched walls, compile sizes, figures and two live negative controls; docs/research/fused-convergence.html:35-95 and the cited receipts provide the measurements, but the diverted convergence and saddle-ablation count control fail.",
+    "goal": "prompt.txt:30 asks for 1e-12 convergence on both carriers and an explanation of the diverted stall; docs/research/fused-convergence.html:95 reports only the explanation and a diverted residual of 0.00268458.",
+    "manifest": "manifest.md records status complete, 28 commits, the 15 changed paths, H200 jobs and audit-doc 0 errors; baseline_suite and after_suite are absent, and the negative_control_note admits the saddle-ablation count did not redden.",
+    "write_paths": "prompt.txt:70-74 grants only scripts/prototypes/fused_convergence, the fused-convergence research page, its figure directory and its evidence fragment; the 15 paths in git diff f2a74fb7..948dfb16c all lie there."
+  },
+  "justifications": {
+    "durability": "measure.py:105,124,138,270 independently refuse wrong precision or invalid seed/read, but measure.py:729 only records convergence as data and no added test fails if the solver stalls or the saddle ablation stays at 0/1.",
+    "evidence": "docs/research/fused-convergence.html:47-78 reconciles with limited-gmres-accepted.json, diverted-dense-accepted.json and limited-batch-cacheoff-retry.json, while :57 and measure.py:398-404 leave the required red control and warm component timing unsatisfied.",
+    "fit": "measure.py:3-26 follows the standalone prototype import and binary64 configuration idiom, render.py:12 reuses the existing contour owner, and the added source names contain no plan or stage labels.",
+    "goal_fidelity": "docs/research/fused-convergence.html:95 openly records diverted 0.00268458 against 1e-12, so the diagnostic half of the goal landed but two-carrier convergence did not.",
+    "reuse": "measure.py:25,27 and render.py:12 reuse fast_read.map_moments, topology._cubic_parameters through roots.py:9-14, and fast_read.render_contours.panel; a capability search found no existing shared-factor three-method comparison owner.",
+    "scope_discipline": "git diff --name-only f2a74fb7..948dfb16c contains only the four prompt.txt:70-74 grants and no nova/ or tests path."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: prompt.txt:30 asks for 1e-12 convergence on both carriers and an explanation of the diverted stall; docs/research/fused-convergence.html:95 reports only the explanation and a diverted residual of 0.00268458.\nVERDICT done_when: prompt.txt:104-147 requires three shared-factor steps, Taylor and stall probes, warm and batched walls, compile sizes, figures and two live negative controls; docs/research/fused-convergence.html:35-95 and the cited receipts provide the measurements, but the diverted convergence and saddle-ablation count control fail.\nVERDICT write_paths: prompt.txt:70-74 grants only scripts/prototypes/fused_convergence, the fused-convergence research page, its figure directory and its evidence fragment; the 15 paths in git diff f2a74fb7..948dfb16c all lie there.\nVERDICT manifest: manifest.md records status complete, 28 commits, the 15 changed paths, H200 jobs and audit-doc 0 errors; baseline_suite and after_suite are absent, and the negative_control_note admits the saddle-ablation count did not redden.\nVERDICT diff: read the 28 commits from f2a74fb7..948dfb16c commit by commit; they add three prototype modules, two HTML records and ten SVGs, with no product or test file.\nCALL_SITES: none\nSCORE goal_fidelity: 9\nJUSTIFICATION goal_fidelity: docs/research/fused-convergence.html:95 openly records diverted 0.00268458 against 1e-12, so the diagnostic half of the goal landed but two-carrier convergence did not.\nSCORE evidence: 14\nJUSTIFICATION evidence: docs/research/fused-convergence.html:47-78 reconciles with limited-gmres-accepted.json, diverted-dense-accepted.json and limited-batch-cacheoff-retry.json, while :57 and measure.py:398-404 leave the required red control and warm component timing unsatisfied.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only f2a74fb7..948dfb16c contains only the four prompt.txt:70-74 grants and no nova/ or tests path.\nSCORE durability: 5\nJUSTIFICATION durability: measure.py:105,124,138,270 independently refuse wrong precision or invalid seed/read, but measure.py:729 only records convergence as data and no added test fails if the solver stalls or the saddle ablation stays at 0/1.\nSCORE fit: 18\nJUSTIFICATION fit: measure.py:3-26 follows the standalone prototype import and binary64 configuration idiom, render.py:12 reuses the existing contour owner, and the added source names contain no plan or stage labels.\nSCORE reuse: 20\nJUSTIFICATION reuse: measure.py:25,27 and render.py:12 reuse fast_read.map_moments, topology._cubic_parameters through roots.py:9-14, and fast_read.render_contours.panel; a capability search found no existing shared-factor three-method comparison owner.\nFINDING docs/research/fused-convergence.html:95 blocking: the diverted cold solve ends at 0.00268458, about 2.7e9 times the 1e-12 goal, so the stated two-carrier convergence deliverable has not been achieved.\nFINDING docs/research/fused-convergence.html:57 blocking: the live saddle-derivative ablation leaves the converged count at 0/1 in both arms, so the required negative control does not produce a red count and cannot validate that clause.\nFINDING scripts/prototypes/fused_convergence/measure.py:398 follow-on: build_ms starts before compilation and non-dense apply_ms uses the same precompile start at line 404; the warm receipt's 7.630 s build includes 7.382 s compilation, so the named component timings are not isolated.\nFINDING scripts/prototypes/fused_convergence/measure.py:729 follow-on: convergence is only written as a receipt field and no test was added; the existing assertions reject invalid setup but cannot fail when the residual or the saddle negative-control verdict regresses.",
+  "review_run_id": "r-20261015T143618028101-review-of-fused-convergence-948dfb16cc95",
+  "reviewed_base_sha": "f2a74fb7bec81c4894e156adc47e22afc2fa83b7",
+  "reviewed_head_sha": "948dfb16cc95233609cd8b41e9f06056a4aa7098",
+  "reviewed_run_id": "r-20261015T115843362666-fused-convergence",
+  "reviewer": {
+    "backend": "codex",
+    "model": "gpt-6"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 5,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 9,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T14:40:59.970Z",
+  "total": 86,
+  "unmatched_base": true
+}

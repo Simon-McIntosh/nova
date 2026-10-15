@@ -11,7 +11,7 @@
   <meta name="plan-status" content="reference">
   <meta name="plan-evidence-for" content="iter-passive-plasma-circuit">
   <meta name="plan-verifies" content="iter-passive-plasma-circuit#s5">
-  <meta name="plan-commits" content="ba5547aca61b8bfde21048b1eb192304fd0d2270,20fb4a947eaa9588c08a79fb9dbaaf87965b4a55">
+  <meta name="plan-commits" content="4f9a5c76b0defd8b6c56425099632956d725f2be,42dc8ef43,a7d7483e5">
   <meta name="plan-recorded-at" content="2026-10-15">
   <meta name="plan-source" content="MAST level-1 shot 21978 EFIT and DINA-IMAS ITER 105014/1">
   <meta name="plan-source-quality" content="primary">
@@ -51,6 +51,11 @@
       <h2>Identity and negative control</h2>
       <p>On ITER DINA 105014/1 at 5.927598 s, the generic source gives the same prescribed cell-current array, boundary, plasma current and scale factor as the existing native-IDS path. The source interpolates twelve coil-current channels at the equilibrium time from their own 2,027-row IDS clock. The focused gate also runs the original prescription tests.</p>
       <p>The prior current-density function accepted a MAST reconstruction whose ψ map, profile coordinate, axis ψ and boundary ψ were all sign-flipped while the plasma current was held fixed; it still prescribed 840,505.375 A. The generic source checks the plasma-current sign against the axis-to-boundary ψ ordering before prescription and refuses that mutation. The retained red mutation log and the passing head-arm test make this a fired guard rather than a suite-only claim.</p>
+    </section>
+    <section id="plant">
+      <h2>Reconstruction route into the coupled plant</h2>
+      <p>The narrow <code>coupled_plant</code> call now takes a generic plasma source wherever it took a DINA case, so a reconstruction or a simulation reaches the plant through the same interface the native path uses. Measured at 42dc8ef43 on DINA 105014/1: through the generic source the call returns <strong>today's plant exactly</strong> &mdash; coil inductance and resistance, section and modal plasma flux, plasma times, the section block and the modal coil coupling are bit-for-bit equal to the plant built from a minimal source carrying DINA's own prescription (maximum absolute flux difference <code>0.000000000</code> Wb).</p>
+      <p>The same slice was then presented the way a <em>reconstruction</em> arrives rather than the way an IDS export does: EFIT-style p&prime; and FF&prime; on DINA's own &psi; normalisation, the stored last closed flux surface named as the boundary outline, and the coil currents resampled to every fourth row of their own clock. The tolerance was fixed before the comparison, at a relative <code>1e-3</code> against the DINA-path plant. What bounds it is where the two presentations draw the boundary: the native route hands over the stored separatrix outline, which closes within the polygon tolerance and is therefore the polygon <code>prescribe_current_density</code> resolves first, while the reconstruction route hands over the stored boundary outline with no separatrix to prefer. Both enclose the same plasma; their discretisation differs, and that difference propagates into the flux the plant links at each winding. The coarser coil cadence does not enter the prescription at all &mdash; at the slice time both cadences interpolate the same currents &mdash; so it changes the series the plant keys on and nothing the plant derives from the plasma. Measured: <code>1.163e-05</code> relative on the section flux and <code>1.163e-04</code> on the modal projection, both inside the declared tolerance, with the plant's provenance naming the reconstruction-style source.</p>
     </section>
     <section id="limits">
       <h2>Scope</h2>

@@ -8,6 +8,13 @@
   "call_sites": [],
   "completed_at": "2026-10-15T16:09:51Z",
   "dispatched_at": "2026-10-15T16:02:58Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "fast-map-production",
+      "recorded_at": "2026-10-15T16:11:04.539123+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/research/diverted-stall.html",

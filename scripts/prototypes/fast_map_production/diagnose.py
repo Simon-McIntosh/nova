@@ -137,6 +137,37 @@ def run(cells, cache, output):
     difference = np.asarray(candidate.moments - original.moments)
     scale = float(booked.raw_current) / len(reference)
     saddle_owner = topology._inside_cells(geometry, candidate_read.saddle_form.position)
+    owner_index = int(jnp.argmax(saddle_owner))
+
+    def owner_geometry():
+        rings, counts = current._normal_rings(
+            geometry.vertices[owner_index],
+            geometry.vertex_count[owner_index],
+            geometry.centre[owner_index],
+            candidate_read.saddle_form,
+            candidate_read.fragment_selected[owner_index],
+            candidate_read.edge_interval[owner_index],
+            4,
+        )
+        slot = jnp.arange(rings.shape[1])
+        following = jnp.where(slot[None] + 1 < counts[:, None], slot[None] + 1, 0)
+        end = jnp.take_along_axis(rings, following[..., None], axis=1)
+        cross = rings[..., 0] * end[..., 1] - rings[..., 1] * end[..., 0]
+        ring_area = 0.5 * jnp.sum(jnp.where(slot[None] < counts[:, None], cross, 0))
+        fragments = topology._normal_form_cell_fragments(
+            geometry.vertices[owner_index],
+            geometry.vertex_count[owner_index],
+            candidate_read.saddle_form,
+            policy.edge_tolerance,
+        )
+        selected = candidate_read.fragment_selected[owner_index]
+        positive = jnp.nonzero(
+            candidate_read.saddle_form.positive, size=2, fill_value=0
+        )[0]
+        fragment_area = jnp.sum(jnp.where(selected, fragments.area[positive], 0))
+        return ring_area, fragment_area, geometry.full_area[owner_index]
+
+    ring_area, fragment_area, full_area = jax.jit(owner_geometry)()
     original_residual = np.asarray(original.moment_residual / scale)
     candidate_residual = np.asarray(candidate.moment_residual / scale)
     score = np.maximum.reduce(
@@ -184,6 +215,12 @@ def run(cells, cache, output):
         "normal_region": int(jnp.sum(candidate_read.normal_form_cells)),
         "booking_region": int(jnp.sum(candidate_read.booking_cells)),
         "saddle_position": np.asarray(candidate_read.saddle_form.position).tolist(),
+        "owner_geometry": {
+            "cell": owner_index,
+            "ring_area": float(ring_area),
+            "fragment_area": float(fragment_area),
+            "full_area": float(full_area),
+        },
         "hot_cells": rows,
     }
     output.write_text(json.dumps(result, indent=2) + "\n")

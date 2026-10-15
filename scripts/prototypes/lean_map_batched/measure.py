@@ -66,12 +66,7 @@ def gradient_ratio(equation, point, scale, operands, block=8):
     def residual_at(flat, *args):
         return (equation(flat.reshape(shape) * scale, *args) / scale).reshape(-1)
 
-    def energy(flat, *args):
-        residual = residual_at(flat, *args)
-        return 0.5 * jnp.vdot(residual, residual)
-
     residual = np.asarray(jax.jit(residual_at)(coordinates, *operands))
-    gradient = np.asarray(jax.jit(jax.grad(energy))(coordinates, *operands))
 
     def products(flat, basis, *args):
         _, push = jax.linearize(lambda varied: residual_at(varied, *args), flat)
@@ -79,15 +74,18 @@ def gradient_ratio(equation, point, scale, operands, block=8):
 
     product_program = jax.jit(products)
     size = coordinates.size
+    gradient = np.zeros(size)
     squares = 0.0
     for start in range(0, size, block):
         basis = np.zeros((block, size))
-        for row, column in enumerate(range(start, min(start + block, size))):
+        active = min(block, size - start)
+        for row, column in enumerate(range(start, start + active)):
             basis[row, column] = 1.0
         columns = np.asarray(
             product_program(coordinates, jnp.asarray(basis), *operands)
         )
         squares += float(np.sum(columns**2))
+        gradient[start : start + active] = columns[:active] @ residual
     residual_two = float(np.linalg.norm(residual))
     gradient_two = float(np.linalg.norm(gradient))
     jacobian_frobenius = float(np.sqrt(squares))

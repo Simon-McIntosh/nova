@@ -1,0 +1,87 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "0fd48907c589578d70ea5042ef48561cd52f641c",
+    "dc2c365888f4d68b20c2066627dac0e20707ce12",
+    "66ab3b2f162ae5f4a88c04dfc81e0c402d600103"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-10-15T04:03:02Z",
+  "findings": [
+    {
+      "file": "docs/research/iter-vessel-evolution.html",
+      "line": "29",
+      "severity": "follow-on",
+      "text": "follow-on (accuracy of the deliverable): the record states \"Only 58% of the sectioned circuits fall inside a DINA loop cross-section\", but its own table in the same section gives 537 of 1312 = 41% of circuits inside; the 58% is the current share (1 - 0.4207), and the unassigned_current_fraction 0.4207 in result-105014-12mm.json is the only 58/42 that is measured. The circuit fraction and the current fraction have been conflated, so a reader takes the geometric coverage as 58% when it is 41%. The same sentence is copied into the fragment docs/evidence/fragments/iter-passive-plasma-circuit/iter-vessel-evolution.html."
+    },
+    {
+      "file": "tests/test_iter_vessel_evolution.py",
+      "line": "38",
+      "severity": "follow-on",
+      "text": "follow-on (durability): `assert abs(fast[\"tau_s\"] - 0.25 * slow[\"tau_s\"]) < 1e-12` compares two values that are both pure L/R arithmetic from the inductance and resistance this test itself passes in, so it holds whatever integrate_eddy_ode does and cannot fail on a regression in the propagation it is meant to stand beside. It is the assertion the recorded negative control reddens, so the control falsifies the tau formula on measure.py's line 42 and not the integrator."
+    },
+    {
+      "file": "/home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit/gate-logs/iter-vessel-evolution/gate-head-fde500947.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on (evidence record): the head gate log's first line names `revision fde500947` -- the run's BASE commit, not its head -- and its summary reads `4 passed in 6.94s`, while the manifest's tests field claims a 5-passed run at the landed head and the landed test file holds 5 tests. The recorded arm therefore does not cover the landed change. Re-run here at 66ab3b2f1: 5 passed, EXIT=0, so the change is green and only the record is wrong; the three heavy run-*.log receipts likewise carry no revision line at all, so no measurement is pinned to the commit it measured."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T040209168729-iter-vessel-evolution/manifest.md",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "follow-on (evidence inference): the negative_control_note claims the mutation shows \"the positive control's 1.36e-13 agreement is carried by the real propagation\". It does not: the red test is test_resistance_sets_decay_time, and the mutated line `tau = inductance` does not enter integrate_eddy_ode, so test_positive_control_recovers_analytic_decay stayed green in the same run (the `.F..` order). The mutation that would falsify the propagation test was not applied, so the control does not support the claim it is cited for."
+    },
+    {
+      "file": "scripts/iter_vessel_evolution/measure.py",
+      "line": "197",
+      "severity": "follow-on",
+      "text": "follow-on (naming): `section2_residual` and the `section2_peak_wb` key name the flux quantity by the plan section that left it open. The repository's naming rule keeps plan-section identity out of symbols and comments, so the residual should be named by its mechanism (the psi-map residual at the VS3 sections), which is what the same docstring already says in words."
+    }
+  ],
+  "gate_arms_note": "the reviewed run's manifest carries no baseline_suite and no after_suite (both blank), so no gate arm exists and no failure id can be added from them; the 0 is by absence of arms rather than a measured zero. The run's own gates are tests/test_iter_vessel_evolution.py (re-run here at the landed head: 5 passed, EXIT=0) and the three evolve.py receipts result-{105014,105052}-{12mm,6mm}.json, whose headline numbers I re-read and reconciled against the manifest and the record.",
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit from fde500947 to 66ab3b2f1: 0fd48907c (first driver, grouped by nearest centroid), dc2c36588 (regrouped by cross-section containment, VS3 arm, shared time base) and 66ab3b2f1 (record, six figures, fragment); 9006 insertions over 66ab3b2f1 vs the base across 12 files, all inside the declared scope.",
+    "done_when": "done is a stated tolerance, the per-coil rms and peak residual, and the plan's negative control; measure.py:180 states the tolerance before the comparison and result-105014-12mm.json holds 91/103 loops, rms 857/793/790/780 V and vs3 closes False -- but the control the brief names (removing the plasma drive brings back the bare-coil residual) is contradicted: 780 V stands against 857 V bare, and the node reports that rather than the plan's expectation.",
+    "goal": "the goal is to evolve the sectioned passive set through a DINA scenario and measure it against DINA's pf_passive loops, the whole coupled-flux coil voltages and section 2's VS3 psi-map residual; scripts/iter_vessel_evolution/evolve.py:346 builds all three arms and docs/research/iter-vessel-evolution.html:24 reports them.",
+    "manifest": "read; it records the arms on both pulses and both meshes with their receipts, but its commits field at line 14 lists two of the node's three landed commits (0fd48907c is omitted) and its tests field at line 18 claims a 5-passed run that its own named head gate log does not show.",
+    "write_paths": "every path in the diff is inside the brief's scope: scripts/iter_vessel_evolution/{evolve,measure,figures}.py, tests/test_iter_vessel_evolution.py, docs/research/iter-vessel-evolution.html, six SVGs under docs/figures/iter-vessel-evolution/ and the evidence fragment; nothing outside them, and no nova/ production module is touched."
+  },
+  "justifications": {
+    "durability": "tests/test_iter_vessel_evolution.py holds three assertions that can name the condition under which they fail (test_positive_control_recovers_analytic_decay pins an independent analytic L/R form, test_assignment_uses_containment pins the owner index, test_group_comparison_flags_an_out_of_tolerance_loop pins a residual above a mission tolerance), but one is self-referential at line 38 and evolve.py -- the 448-line driver that produces the whole deliverable -- carries no test at all.",
+    "evidence": "the receipts reproduce: I re-read result-105014-12mm.json, result-105052-12mm.json and result-105014-6mm.json and every headline the manifest and record quote (91/103, 33/103, 90/102, the four voltage arms, the VS3 before/after) matches the receipts. Reduced because the recorded head gate log names the base revision and 4 passed against a claimed 5, the heavy run logs name no revision, and the negative control does not exercise the propagation it is cited to validate.",
+    "fit": "the added modules follow the surrounding scripts idiom (module docstring, explicit imports at the top, argparse main) and `ruff check` over the three new modules plus the test file with nova's pyproject is clean; two points off for `section2_residual` at measure.py:197, which encodes a plan-section identity into a symbol.",
+    "goal_fidelity": "all three measurements the brief names are present and reconciled: measure.py:180 states the tolerance before the comparison, result-105014-12mm.json gives 91/103 loops within tolerance and rms 857/793/790/780 V, and the VS3 arm reads closes False at 1.08 -> 3.66 Wb. Two points off because the plan's stated negative control expectation is contradicted by the voltage arm and the node reports the contradiction rather than resolving it.",
+    "reuse": "the change extends owners rather than forking them: integrate_eddy_ode (nova/circuit/propagate.py:46), plasma_flux_at_points (nova/imas/prescribed_plasma.py:15), CrossSection (nova/imas/machine.py) and greens_psi (nova/biot/greens.py:324) are all called, and section 2's conductor_sources/current_vector are imported rather than recopied. Reduced because the brief's reuse map names PoloidalFieldPassive (nova/imas/machine.py:1003) as the one owner of the pf_passive-to-conductor mapping and the landed grouping instead builds its own containment assignment (measure.py:104 assign_by_containment); I searched nova/ for an existing containment-assignment owner and found none, so this is a departure from the named owner rather than a duplication of an existing one.",
+    "scope_discipline": "every added path is inside the brief's declared scope -- scripts/iter_vessel_evolution/, tests/test_iter_vessel_evolution.py, docs/research/iter-vessel-evolution.html, docs/figures/iter-vessel-evolution/ and the fragment -- with no edit to nova/ production code and no touch of a peer plan's files; two points off because the grouping departs from the brief's named owner (see reuse)."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to evolve the sectioned passive set through a DINA scenario and measure it against DINA's pf_passive loops, the whole coupled-flux coil voltages and section 2's VS3 psi-map residual; scripts/iter_vessel_evolution/evolve.py:346 builds all three arms and docs/research/iter-vessel-evolution.html:24 reports them.\nVERDICT done_when: done is a stated tolerance, the per-coil rms and peak residual, and the plan's negative control; measure.py:180 states the tolerance before the comparison and result-105014-12mm.json holds 91/103 loops, rms 857/793/790/780 V and vs3 closes False -- but the control the brief names (removing the plasma drive brings back the bare-coil residual) is contradicted: 780 V stands against 857 V bare, and the node reports that rather than the plan's expectation.\nVERDICT write_paths: every path in the diff is inside the brief's scope: scripts/iter_vessel_evolution/{evolve,measure,figures}.py, tests/test_iter_vessel_evolution.py, docs/research/iter-vessel-evolution.html, six SVGs under docs/figures/iter-vessel-evolution/ and the evidence fragment; nothing outside them, and no nova/ production module is touched.\nVERDICT manifest: read; it records the arms on both pulses and both meshes with their receipts, but its commits field at line 14 lists two of the node's three landed commits (0fd48907c is omitted) and its tests field at line 18 claims a 5-passed run that its own named head gate log does not show.\nVERDICT diff: read commit by commit from fde500947 to 66ab3b2f1: 0fd48907c (first driver, grouped by nearest centroid), dc2c36588 (regrouped by cross-section containment, VS3 arm, shared time base) and 66ab3b2f1 (record, six figures, fragment); 9006 insertions over 66ab3b2f1 vs the base across 12 files, all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: all three measurements the brief names are present and reconciled: measure.py:180 states the tolerance before the comparison, result-105014-12mm.json gives 91/103 loops within tolerance and rms 857/793/790/780 V, and the VS3 arm reads closes False at 1.08 -> 3.66 Wb.\nSCORE evidence: 13\nJUSTIFICATION evidence: the receipts reproduce (re-read result-105014-12mm.json, result-105052-12mm.json, result-105014-6mm.json; every headline quoted matches), but the recorded head gate log names the base revision and 4 passed against a claimed 5 and the run logs name no revision.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every added path is inside the declared scope with no edit to nova/ production code and no touch of a peer plan's files; two points off because the grouping departs from the brief's named owner.\nSCORE durability: 13\nJUSTIFICATION durability: tests/test_iter_vessel_evolution.py holds three assertions that can name a failing condition, but line 38 is self-referential and evolve.py, the driver that produces the deliverable, carries no test.\nSCORE fit: 16\nJUSTIFICATION fit: the new modules follow the scripts idiom and ruff check is clean over them, less two points for section2_residual at measure.py:197 encoding a plan-section identity into a symbol.\nSCORE reuse: 15\nJUSTIFICATION reuse: integrate_eddy_ode, plasma_flux_at_points, CrossSection and greens_psi are extended, not forked; reduced because the brief's named owner PoloidalFieldPassive (nova/imas/machine.py:1003) is bypassed for a new containment assignment at measure.py:104.\nFINDING docs/research/iter-vessel-evolution.html:29 follow-on: the record says 58% of the sectioned circuits fall inside a DINA loop cross-section, but its own table gives 537/1312 = 41%; 58% is the current share, and the two are conflated.\nFINDING tests/test_iter_vessel_evolution.py:38 follow-on: the assertion compares fast tau_s against 0.25 * slow tau_s, both pure L/R from the test's own arguments, so it cannot fail on a propagation regression; it is the test the recorded negative control reddens.\nFINDING /home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit/gate-logs/iter-vessel-evolution/gate-head-fde500947.log:1 follow-on: the head gate log names the BASE revision fde500947 and 4 passed while the manifest claims 5 at head; the landed change is green (re-run here 5 passed EXIT=0) but the recorded arm does not cover it.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T040209168729-iter-vessel-evolution/manifest.md:21 follow-on: the negative control mutates tau (L/R -> L), which does not enter integrate_eddy_ode, so it does not support the claim that the positive control's 1.36e-13 agreement rests on the real propagation.\nFINDING scripts/iter_vessel_evolution/measure.py:197 follow-on: section2_residual and the section2_peak_wb key name the quantity by the plan section that left it, contrary to the rule keeping plan-section identity out of symbols.",
+  "review_run_id": "legacy-f738d8dbf1aa",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "fde500947c3d89a7fe6023f05159cf93f4c87016",
+  "reviewed_head_sha": "66ab3b2f162ae5f4a88c04dfc81e0c402d600103",
+  "reviewed_revision": "66ab3b2f162ae5f4a88c04dfc81e0c402d600103",
+  "reviewed_run_id": "r-20261015T040209168729-iter-vessel-evolution",
+  "reviewer_node": "review-of-iter-vessel-evolution-66ab3b2f162a",
+  "reviewer_run_id": "r-20261015T061958052912-review-of-iter-vessel-evolution-66ab3b2f162a",
+  "scores": {
+    "durability": 13,
+    "evidence": 13,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 15,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T06:55:00+00:00",
+  "total": 93,
+  "verdict": "pass"
+}

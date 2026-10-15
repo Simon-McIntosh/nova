@@ -1,0 +1,78 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own two suite arms for the same two test files: baseline fast.log '16 passed in 209.04s' at 4f9a5c76b, after-suite.log '20 passed in 154.14s' EXIT=0 at a7d7483e5; 20-16=4 added, no test that passed at the base fails at the head, so the failure delta is zero.",
+  "base_log_revision": "4f9a5c76b0defd8b6c56425099632956d725f2be",
+  "call_site_count": 3,
+  "call_sites": [
+    "scripts/reconstructed_plasma_source/measure.py:133",
+    "nova/circuit/passive.py:803",
+    "nova/circuit/passive.py:824"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-10-15T12:58:26Z",
+  "findings": [
+    {
+      "file": "tests/test_coupled_plant.py",
+      "line": "254",
+      "severity": "follow-on",
+      "text": "follow-on: the positive arm asserts plant.coil_inductance equals series.T @ plant.section_inductance @ series, but both sides are read back from the same plant and the machine at :255 is built with terminal_scale=1.0, so the supplied terminal already equals the reduction by construction; reinstating the removed guard (keep the terminal as given) leaves the assertion true, so it guards nothing the refusal tests at :267 and :279 do not already guard better."
+    },
+    {
+      "file": "tests/test_coupled_plant.py",
+      "line": "762",
+      "severity": "follow-on",
+      "text": "follow-on: the reconstruction-route arm drives _reduced_machine() (a 2-coil, 4-section fixture) rather than the real ITER sectioned set, so the plan's 'a reconstructed pulse gets a plant for that machine and pulse' is demonstrated only on a reduced winding; the substitution is disclosed in the manifest follow_ons and authorised by the coordinator comment c-s5-plant-vehicle, but the ITER-scale plant driven by a reconstruction remains unbuilt."
+    },
+    {
+      "file": "/home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit/gate-logs/reconstructed-plasma-plant/fast.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the baseline suite log carries no header naming a revision, a tree or the command, unlike after-suite.log:1 which names all three, so the '16 passed' baseline cannot be tied to 4f9a5c76b from the log itself; a reader checking the base arm must trust the manifest's assertion rather than the artefact."
+    }
+  ],
+  "head_log_revision": "a7d7483e5",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call sites",
+    "diff": "read commit by commit from a6480d72 to a0c3b9f44 -- four commits over five files (71 lines in nova/circuit/coupled_plant.py, 30 in nova/imas/plasma_source.py, 438 in tests/test_coupled_plant.py, and the two doc edits): the generic-source interface, the terminal/section refusal guard and its callable-resolving cache digest, the four arms of tests, and the record splice.",
+    "done_when": "the source done_when's three checks are covered -- DINA-unchanged at after-suite.log 'DINA_UNCHANGED max_abs_flux_diff_wb=0.000000000', the reconstruction route at 'RECONSTRUCTION_ROUTE max_rel_flux_diff=1.163e-05 tolerance=1e-03', and the terminal/section guard by tests/test_coupled_plant.py:267/:279 raising 'disagrees with the series reduction' -- but the reconstruction arm drives _reduced_machine(), not the real ITER sectioned plant.",
+    "goal": "the source node's goal is to let coupled_plant take a generic plasma source through the source's own interface and to refuse a machine whose supplied terminals disagree with its section block; nova/imas/plasma_source.py:117-145 gives PlasmaSource plasma_times/prescribed_currents/coil_current_times/label and nova/circuit/coupled_plant.py:193-205 refuses the disagreement, so the build lands against the goal.",
+    "manifest": "read; status complete, commits a0c3b9f44/a7d7483e5/42dc8ef43/4f9a5c76b, tests '20 passed in 154.14s' at a7d7483e5, test_logs naming after-suite.log, a negative_control_log at negative-control-flipped-sign-guard-removed.log, a baseline_suite of '16 passed' and an after_suite of '20 passed' so the failure delta is derivable and zero.",
+    "write_paths": "the source node's declared scope is the seven paths in its manifest (nova/circuit/coupled_plant.py, tests/test_coupled_plant.py, nova/imas/plasma_source.py, tests/test_plasma_source.py, docs/research/reconstructed-plasma-source.html, docs/evidence/fragments/iter-passive-plasma-circuit/reconstructed-plasma-plant.html and the gate-log directory); the delta touches five of them (tests/test_plasma_source.py unchanged) and nothing outside."
+  },
+  "justifications": {
+    "durability": "tests/test_coupled_plant.py:267 and :279 both refuse a machine whose supplied terminal disagrees with its own section reduction and would redden if _require_series_reduction were dropped, but the positive arm at :254 compares plant.coil_inductance against a reduction rebuilt from plant.section_inductance, two sides that move together under the consistent machine :255 feeds in.",
+    "evidence": "after-suite.log:1-2 records '20 passed in 154.14s' EXIT=0 with a header naming revision a7d7483e5, tree and command, and the run measures DINA_UNCHANGED 0.000000000 Wb and RECONSTRUCTION_ROUTE 1.163e-05 relative against a predeclared 1e-3, but the baseline arm fast.log carries no header naming a revision or command, so only the manifest ties it to 4f9a5c76b.",
+    "fit": "nova/circuit/coupled_plant.py:301 _require_series_reduction follows the module's numpy helper idiom (typed args, np.asarray coercion, a scale-safeguarded compare) and no plan, phase, ticket or version label appears in any added symbol or comment.",
+    "goal_fidelity": "nova/imas/plasma_source.py:117 adds prescribed_currents/plasma_times/coil_current_times/label so coupled_plant consumes the source through its own interface, and nova/circuit/coupled_plant.py:193 adds the terminal-equals-series-reduction guard, but check 1 (a reconstructed pulse gets a plant) is exercised only on tests/test_coupled_plant.py:762's _reduced_machine(), not the real ITER sectioned set the plan's coordinator comment names.",
+    "reuse": "searched nova/ and scripts/ for an existing terminal/section agreement owner (only nova/circuit/resistance.py:415 series_reduction, which builds a wiring matrix, and coupled_plant.py:344 _reduction_error, which measures modal impedance error, neither of which compares a supplied terminal to its reduction), so the guard is new and PlasmaSource's five new members extend the owner rather than forking it.",
+    "scope_discipline": "git diff a6480d72..a0c3b9f44 touches exactly the five files the source brief lists (nova/circuit/coupled_plant.py, nova/imas/plasma_source.py, tests/test_coupled_plant.py and the two docs), all inside the declared write paths and with no edit to the not-yours set."
+  },
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: a6480d7246ff42ff66ce946cc39d060d562191a8\nreviewed_head_sha: a0c3b9f44a9e883e10f17ac590416e2159c42dc2\nVERDICT goal: the source node's goal is to let coupled_plant take a generic plasma source through the source's own interface and to refuse a machine whose supplied terminals disagree with its section block; nova/imas/plasma_source.py:117-145 gives PlasmaSource plasma_times/prescribed_currents/coil_current_times/label and nova/circuit/coupled_plant.py:193-205 refuses the disagreement, so the build lands against the goal.\nVERDICT done_when: the source done_when's three checks are covered -- DINA-unchanged at after-suite.log 'DINA_UNCHANGED max_abs_flux_diff_wb=0.000000000', the reconstruction route at 'RECONSTRUCTION_ROUTE max_rel_flux_diff=1.163e-05 tolerance=1e-03', and the terminal/section guard by tests/test_coupled_plant.py:267/:279 raising 'disagrees with the series reduction' -- but the reconstruction arm drives _reduced_machine(), not the real ITER sectioned plant.\nVERDICT write_paths: the source node's declared scope is the seven paths in its manifest; the delta touches five of them (tests/test_plasma_source.py unchanged) and nothing outside.\nVERDICT manifest: read; status complete, commits a0c3b9f44/a7d7483e5/42dc8ef43/4f9a5c76b, tests '20 passed in 154.14s' at a7d7483e5, a baseline_suite of '16 passed' and an after_suite of '20 passed' so the failure delta is derivable and zero.\nVERDICT diff: read commit by commit from a6480d72 to a0c3b9f44 -- four commits over five files: the generic-source interface, the terminal/section refusal guard and its callable-resolving cache digest, the four arms of tests, and the record splice.\nCALL_SITES: scripts/reconstructed_plasma_source/measure.py:133, nova/circuit/passive.py:803, nova/circuit/passive.py:824\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: nova/imas/plasma_source.py:117 adds prescribed_currents/plasma_times/coil_current_times/label so coupled_plant consumes the source through its own interface, and nova/circuit/coupled_plant.py:193 adds the terminal-equals-series-reduction guard, but check 1 is exercised only on tests/test_coupled_plant.py:762's _reduced_machine().\nSCORE evidence: 15\nJUSTIFICATION evidence: after-suite.log:1-2 records '20 passed in 154.14s' EXIT=0 with a header naming revision a7d7483e5, and the run measures DINA_UNCHANGED 0.000000000 Wb and RECONSTRUCTION_ROUTE 1.163e-05 relative, but the baseline arm fast.log:1 carries no header naming a revision or command.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff a6480d72..a0c3b9f44 touches exactly the five files the source brief lists, all inside the declared write paths and with no edit to the not-yours set.\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_coupled_plant.py:267 and :279 both refuse a machine whose supplied terminal disagrees with its section reduction, but the positive arm at :254 compares plant.coil_inductance against a reduction rebuilt from plant.section_inductance, two sides that move together under the consistent machine :255 feeds in.\nSCORE fit: 19\nJUSTIFICATION fit: nova/circuit/coupled_plant.py:301 _require_series_reduction follows the module's numpy helper idiom and no plan, phase, ticket or version label appears in any added symbol or comment.\nSCORE reuse: 19\nJUSTIFICATION reuse: searched nova/ and scripts/ for a terminal/section agreement owner (only resistance.py:415 series_reduction, which builds a wiring matrix, and coupled_plant.py:344 _reduction_error, which measures modal impedance error), so the guard is new and PlasmaSource's five new members extend the owner rather than forking it.\nFINDING tests/test_coupled_plant.py:254 follow-on: the positive arm compares plant.coil_inductance against a reduction rebuilt from plant.section_inductance while the machine is built with terminal_scale=1.0, so the two sides move together and reinstating the removed guard leaves the assertion true.\nFINDING tests/test_coupled_plant.py:762 follow-on: the reconstruction-route arm drives _reduced_machine() rather than the real ITER sectioned set, so the plan's reconstructed-pulse-gets-a-plant check is demonstrated only on a reduced winding.\nFINDING /home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit/gate-logs/reconstructed-plasma-plant/fast.log:1 follow-on: the baseline suite log carries no header naming a revision, a tree or the command, so the '16 passed' baseline cannot be tied to 4f9a5c76b from the log itself.\n",
+  "review_run_id": "legacy-f0cb5b9e7458",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "a6480d7246ff42ff66ce946cc39d060d562191a8",
+  "reviewed_head_sha": "a0c3b9f44a9e883e10f17ac590416e2159c42dc2",
+  "reviewed_revision": "a0c3b9f44a9e883e10f17ac590416e2159c42dc2",
+  "reviewed_run_id": "r-20261015T125758050541-reconstructed-plasma-plant",
+  "reviewed_scope_note": "the diff read is a6480d72..a0c3b9f44 (4 commits over 5 files); the recorded base is the run's declared orientation_base_sha, the commit the four landed commits sit on.",
+  "reviewer_node": "review-of-reconstructed-plasma-plant-a0c3b9f44a9e",
+  "reviewer_run_id": "r-20261015T141506558250-review-of-reconstructed-plasma-plant-a0c3b9f44a9e",
+  "scores": {
+    "durability": 15,
+    "evidence": 15,
+    "fit": 19,
+    "goal_fidelity": 17,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T14:25:00+00:00",
+  "total": 105,
+  "verdict": "pass-with-follow-ons"
+}

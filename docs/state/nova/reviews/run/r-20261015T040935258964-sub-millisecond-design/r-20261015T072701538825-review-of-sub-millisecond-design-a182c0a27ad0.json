@@ -8,18 +8,6 @@
   "call_sites": [],
   "completed_at": "2026-10-15T07:43:55.459Z",
   "dispatched_at": "2026-10-15T07:27:27Z",
-  "finding_dispositions": {
-    "0": {
-      "kind": "exempted",
-      "reason": "Throwaway measurement probes under scripts/prototypes/sub_millisecond; the implementation node that follows the lead decision will time through the owned primitive in benchmarks/forward_solve_throughput.py rather than these probes",
-      "recorded_at": "2026-10-15T07:46:54.709458+00:00"
-    },
-    "1": {
-      "kind": "exempted",
-      "reason": "The device join sweep was rejected on parity and continuity in the same record, so its probe does not carry forward; the assertion weakness changes no conclusion",
-      "recorded_at": "2026-10-15T07:47:02.131100+00:00"
-    }
-  },
   "findings": [
     {
       "file": "scripts/prototypes/sub_millisecond/measure_connectivity.py",

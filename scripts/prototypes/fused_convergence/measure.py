@@ -402,7 +402,7 @@ def run(args):
             iterations = 1
         if args.method != "dense":
             apply_ms = 1000 * (perf_counter() - build_start)
-        candidate = point.reshape(-1) + jnp.asarray(step)
+        candidate = point.reshape(-1)
         original = float(jnp.max(jnp.abs(residual)))
         accepted = False
         factor_scale = 1.0

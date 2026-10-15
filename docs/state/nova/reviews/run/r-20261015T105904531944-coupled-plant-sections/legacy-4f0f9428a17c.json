@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest (r-20261015T105904531944-coupled-plant-sections/manifest.md) carries empty baseline_suite and after_suite keys, and its gate logs (full-gate.log 29 passed; real-set.log 2 passed) are single-arm, so no base-vs-head failure count exists to derive for the delta",
+  "base_log_revision": null,
+  "call_site_count": 2,
+  "call_sites": [
+    "nova/circuit/passive.py:803",
+    "nova/circuit/passive.py:828"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-10-15T10:59:30Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit/gate-logs/coupled-plant-sections/full-gate.log",
+      "line": "2",
+      "severity": "follow-on",
+      "text": "follow-on: all three gate logs (full-gate.log, real-set.log, negative-control.log) carry REVISION=56d246c1cc1dc9f890ac00545d772e2453806e7a, the parent of the reviewed head, while the tests they exercised (perturb_section_self, test_machines_differing_only_in_section_inputs_do_not_collide) exist only in ad81f87bc; the header therefore names a revision that does not contain the code it measured, and a reader who checks out the named revision collects 28 tests, not the 29 the log reports. The content reconciles -- 29 passed matches the repaired tree after the resume, and ad81f87bc committed four minutes after the logs were written -- so the evidence is sound but mislabelled."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T105904531944-coupled-plant-sections/manifest.md",
+      "line": "19",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest leaves baseline_suite and after_suite empty, so the delta has no base-vs-head arm and this review's added_failure_count and added_failure_ids are unmeasurable rather than zero; a delta that repairs four findings is exactly the change a reader would want a failure-count delta for."
+    },
+    {
+      "file": "nova/circuit/coupled_plant.py",
+      "line": "179",
+      "severity": "follow-on",
+      "text": "follow-on: the derivation is skipped whenever the machine supplies a terminal (the comment at :179-181 and the not-coil_inductance.size guards at :182-185), so a machine whose supplied terminals disagree with its own section block is cached and served without the terminal==series-reduction invariant ever being checked; the goal states the terminals must equal the reduction, and only the test argues it, never the call."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call sites",
+    "diff": "read commit by commit from 56d246c1c to ad81f87bc -- a single commit, four files, 153 insertions and 39 deletions: the terminal derivation and the widened _cache_digest in nova/circuit/coupled_plant.py, the reworked reduction, control and cache-collision tests in tests/test_coupled_plant.py, and the two doc edits.",
+    "done_when": "the source done_when's three controls are re-recorded after the repair -- real-set.log (2 passed, EXIT=0, series-reduction max relative error = 0.000e+00, sectioning self fraction 0.004621797304724451), full-gate.log (29 passed, EXIT=0) and negative-control.log (EXIT=1, FAILED test_negative_control.py::test_series_reduction_check_fails_on_a_perturbed_section_self) -- and the gate asserts each measure, though the reduction figure remains an exact algebraic identity.",
+    "goal": "the source node's goal is to give CoupledPlant its section-level matrices with the terminal fields equal to their series reduction; the delta repairs the four follow-on findings against that goal, and nova/circuit/coupled_plant.py:183 now forms the reduction in the call rather than in the fixture.",
+    "manifest": "read; status complete, commits 56d246c1c and ad81f87bc, tests 29 passed with the real-set subset 2 passed, test_logs naming full-gate.log and real-set.log, a negative_control_log at negative-control.log, and empty baseline_suite and after_suite keys so its added-failure count is unmeasured rather than zero.",
+    "write_paths": "the source node's declared scope is the seven paths in its manifest (nova/circuit/coupled_plant.py, nova/circuit/passive.py, tests/test_coupled_plant.py, tests/test_circuit_passive.py, docs/research/iter-coupled-plant-call.html and the two fragments, plus the gate-log directory); the delta touches four of them and nothing outside."
+  },
+  "justifications": {
+    "durability": "tests/test_coupled_plant.py:273 asserts three distinct cache entries and reddens if _cache_digest drops section_names or section_passive_mutual, and the control at :233 passes only if the perturbed reduction really fails, but the reduction equality at :214 rebuilds the same algebraic formula the call applies, so it catches a wiring defect in the call and not a wrong formula.",
+    "evidence": "coupled-plant-sections/real-set.log:2 and full-gate.log:2 record the reduction (0.000e+00), the 0.5% self fraction (0.004621797304724451) and 29 passed EXIT=0, but every log header names REVISION=56d246c1c while the tests it ran exist only in ad81f87bc, and the manifest's baseline_suite/after_suite keys are empty so added_failure_count cannot be derived.",
+    "fit": "nova/circuit/coupled_plant.py:356 _optional_array and the _update_optional/_update_names pair follow the module's numpy-typed helper idiom, and no plan, phase or ticket label appears anywhere in the delta.",
+    "goal_fidelity": "nova/circuit/coupled_plant.py:183 forms coil_inductance = series.T @ section_inductance @ series in the call itself, so the goal's reduction invariant is now produced by production code rather than the fixture, while the five section fields are unchanged.",
+    "reuse": "no repository owner exists for a section-to-terminal reduction (searched nova/ and scripts/ for series.T @ and @ series; only the inline idiom scripts/iter_sectioned_conductor_set/build.py:274), so nova/circuit/coupled_plant.py:183 extends CoupledPlant's own call and the digest helpers at :412 are new rather than a fork.",
+    "scope_discipline": "git diff 56d246c1c..ad81f87bc touches only the four files the goal names, all inside the source node's declared write paths, though nova/circuit/coupled_plant.py:162-185 extends the call's runtime behaviour beyond the test-only change the prior findings implied."
+  },
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: 56d246c1cc1dc9f890ac00545d772e2453806e7a\nreviewed_head_sha: ad81f87bc21e890d04a4c4866a087e85da4e686c\nVERDICT goal: the source node's goal is to give CoupledPlant its section-level matrices with the terminal fields equal to their series reduction; the delta 56d246c1c..ad81f87bc repairs the four follow-on findings against that goal, and nova/circuit/coupled_plant.py:183 now forms the reduction in the call rather than in the fixture.\nVERDICT done_when: the source done_when's three controls are re-recorded after the repair -- real-set.log (2 passed, EXIT=0, series-reduction max relative error = 0.000e+00, sectioning self fraction 0.004621797304724451), full-gate.log (29 passed, EXIT=0) and negative-control.log (EXIT=1, FAILED test_negative_control.py::test_series_reduction_check_fails_on_a_perturbed_section_self) -- and the gate asserts each measure, though the reduction figure remains an exact algebraic identity.\nVERDICT write_paths: the source node's declared scope is the seven paths named in its manifest (nova/circuit/coupled_plant.py, nova/circuit/passive.py, tests/test_coupled_plant.py, tests/test_circuit_passive.py, docs/research/iter-coupled-plant-call.html and the two fragments, plus the gate-log directory); the delta touches four of them and nothing outside.\nVERDICT manifest: read; status complete, commits 56d246c1c and ad81f87bc, tests 29 passed with the real-set subset 2 passed, test_logs naming full-gate.log and real-set.log, a negative_control_log at negative-control.log, and empty baseline_suite and after_suite keys so its added-failure count is unmeasured rather than zero.\nVERDICT diff: read commit by commit from 56d246c1c to ad81f87bc -- a single commit, four files, 153 insertions and 39 deletions: the terminal derivation and the widened _cache_digest in nova/circuit/coupled_plant.py, the reworked reduction, control and cache-collision tests in tests/test_coupled_plant.py, and the two doc edits.\nCALL_SITES: nova/circuit/passive.py:803, nova/circuit/passive.py:828\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/circuit/coupled_plant.py:183 forms coil_inductance = series.T @ section_inductance @ series in the call itself, so the goal's reduction invariant is now produced by production code rather than the fixture, while the five section fields are unchanged.\nSCORE evidence: 14\nJUSTIFICATION evidence: coupled-plant-sections/real-set.log:2 and full-gate.log:2 record the reduction (0.000e+00), the 0.5% self fraction (0.004621797304724451) and 29 passed EXIT=0, but every log header names REVISION=56d246c1c while the tests it ran exist only in ad81f87bc, and the manifest's baseline_suite/after_suite keys are empty so added_failure_count cannot be derived.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff 56d246c1c..ad81f87bc touches only the four files the goal names, all inside the source node's declared write paths, though nova/circuit/coupled_plant.py:162-185 extends the call's runtime behaviour beyond the test-only change the prior findings implied.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_coupled_plant.py:273 asserts three distinct cache entries and reddens if _cache_digest drops section_names or section_passive_mutual, and the control at :233 passes only if the perturbed reduction really fails, but the reduction equality at :214 rebuilds the same algebraic formula the call applies, so it catches a wiring defect in the call and not a wrong formula.\nSCORE fit: 19\nJUSTIFICATION fit: nova/circuit/coupled_plant.py:356 _optional_array and the _update_optional/_update_names pair follow the module's numpy-typed helper idiom, and no plan, phase or ticket label appears anywhere in the delta.\nSCORE reuse: 19\nJUSTIFICATION reuse: no repository owner exists for a section-to-terminal reduction (searched nova/ and scripts/ for series.T @ and @ series; only the inline idiom scripts/iter_sectioned_conductor_set/build.py:274), so nova/circuit/coupled_plant.py:183 extends CoupledPlant's own call and the digest helpers at :412 are new rather than a fork.\nFINDING /home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit/gate-logs/coupled-plant-sections/full-gate.log:2 follow-on: all three gate logs carry REVISION=56d246c1cc1dc9f890ac00545d772e2453806e7a, the parent of the reviewed head, while the tests they exercised exist only in ad81f87bc, so the header names a revision that does not contain the code it measured and a reader checking it out collects 28 tests, not the 29 reported.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T105904531944-coupled-plant-sections/manifest.md:19 follow-on: the reviewed manifest leaves baseline_suite and after_suite empty, so the delta has no base-vs-head arm and added_failure_count/added_failure_ids are unmeasurable rather than zero.\nFINDING nova/circuit/coupled_plant.py:179 follow-on: the derivation is skipped whenever the machine supplies a terminal, so a machine whose supplied terminals disagree with its own section block is cached and served without the terminal==series-reduction invariant ever being checked; only the test argues the invariant, never the call.\n",
+  "review_run_id": "legacy-4f0f9428a17c",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "56d246c1cc1dc9f890ac00545d772e2453806e7a",
+  "reviewed_head_sha": "ad81f87bc21e890d04a4c4866a087e85da4e686c",
+  "reviewed_revision": "ad81f87bc21e890d04a4c4866a087e85da4e686c",
+  "reviewed_run_id": "r-20261015T105904531944-coupled-plant-sections",
+  "reviewed_scope_note": "the goal scopes this review to the commits the run gained since the prior review at 56d246c1c, so the diff read is 56d246c1c..ad81f87bc (a single commit over four files) and the recorded base is that prior reviewed head, not the run's original base da8618fbb",
+  "reviewer_node": "review-of-coupled-plant-sections-ad81f87bc21e",
+  "reviewer_run_id": "r-20261015T123441269626-review-of-coupled-plant-sections-ad81f87bc21e",
+  "scores": {
+    "durability": 17,
+    "evidence": 14,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T12:48:00+00:00",
+  "total": 107,
+  "verdict": "pass-with-follow-ons"
+}

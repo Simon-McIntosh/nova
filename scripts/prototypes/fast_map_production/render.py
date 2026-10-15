@@ -62,6 +62,26 @@ def step_scan(baseline, candidate, output):
     _save(figure, axes, output)
 
 
+def step_window(candidate, output):
+    """Show the local support exchange without compressing its step axis."""
+    _style()
+    rows = candidate["scan"][1:]
+    step = np.asarray([row["step"] for row in rows]) * 1e5
+    quantities = (
+        ("residual", "scaled residual", 1),
+        ("wall_candidate", "wall candidate [µWb]", 1e6),
+        ("membership_71", "cell 71 membership", 1),
+        ("cell_current_residual", "cell 71 scaled current residual", 1),
+    )
+    figure, axes = plt.subplots(4, 1, figsize=(14, 14), dpi=100, sharex=True)
+    for axis, (key, label, scale) in zip(axes, quantities, strict=True):
+        value = np.asarray([row[key] for row in rows]) * scale
+        axis.plot(step, value, color=RUST, linewidth=3)
+        axis.set_ylabel(label)
+    axes[-1].set_xlabel("Newton step scale [10⁻⁵]")
+    _save(figure, axes, output)
+
+
 def resolution(receipts, output, unchanged=None, lean=None):
     _style()
     cells = np.asarray([row["cells"] for row in receipts])
@@ -88,6 +108,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--baseline-probe", type=Path)
     parser.add_argument("--candidate-probe", type=Path)
+    parser.add_argument("--window-probe", type=Path)
     parser.add_argument("--map", type=Path, action="append", default=[])
     parser.add_argument("--unchanged-error", type=float, action="append", default=[])
     parser.add_argument("--lean-error", type=float, action="append", default=[])
@@ -100,6 +121,10 @@ def main():
             json.loads(args.baseline_probe.read_text()),
             json.loads(args.candidate_probe.read_text()),
             args.output / "step-scale-scan.svg",
+        )
+    if args.window_probe:
+        step_window(
+            json.loads(args.window_probe.read_text()), args.output / "step-window.svg"
         )
     if args.map:
         resolution(

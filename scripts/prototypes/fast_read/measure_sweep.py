@@ -44,7 +44,9 @@ def save(path, data):
     )
 
 
-def run(kind, cache, output, diagnose_offset=None, wrong_axis_only=False):
+def run(
+    kind, cache, output, diagnose_offset=None, wrong_axis_only=False, panel_receipt=None
+):
     assert jax.config.jax_enable_x64 is True and jax.default_backend() == "gpu"
     print(
         f"nova={nova.__file__} module={__file__} cwd={Path.cwd().resolve()}",
@@ -165,6 +167,48 @@ def run(kind, cache, output, diagnose_offset=None, wrong_axis_only=False):
                 and not axis_identity(altered[1].axis, expected, pitch)
             ),
         }
+    if panel_receipt is not None:
+        sweep = json.loads(panel_receipt.read_text())
+        transition = sweep["transition"]
+        panel_offsets = {
+            "centre": 0.0,
+            "refused-cut": -0.14,
+            "transition-left": transition["left"]["offset"],
+            "transition-right": transition["right"]["offset"],
+        }
+        nodes = jnp.asarray(machine.node)
+        base_flux = jax.vmap(field.value)(nodes)
+        panels = {}
+        for label, value in panel_offsets.items():
+            offset = jnp.asarray(value * scale)
+            varied_jets = replace(jets, exterior=jets.exterior + offset * jet_slope)
+            moving = varied_jets.field(reference)
+            roots, reading, _, booking, *_ = program(offset, previous)
+            solved_flux = jax.vmap(lambda node: moving.evaluate(node).value)(nodes)
+            analytic_roots, analytic_residuals = jax.vmap(
+                lambda seed: shifted_axis(field, seed, offset, pitch)
+            )(previous)
+            panels[label] = {
+                "offset": value,
+                "coordinates": np.asarray(nodes).tolist(),
+                "wall": np.asarray(machine.wall_node).tolist(),
+                "solved_flux": np.asarray(solved_flux).tolist(),
+                "analytic_flux": np.asarray(
+                    base_flux + offset * (nodes[:, 1] - previous[0, 1])
+                ).tolist(),
+                "solved_roots": np.asarray(roots.roots.position)[
+                    np.asarray(roots.roots.valid)
+                ].tolist(),
+                "analytic_roots": np.asarray(analytic_roots).tolist(),
+                "analytic_root_residuals": np.asarray(analytic_residuals).tolist(),
+                "read_valid": bool(reading.valid and reading.qualified),
+                "booking_valid": bool(booking),
+                "axis_identity": bool(
+                    axis_identity(reading.axis, analytic_roots[0], pitch)
+                ),
+            }
+        result["panels"] = panels
+    if wrong_axis_only or panel_receipt is not None:
         save(output, result)
         print("RESULT " + json.dumps(result), flush=True)
         return
@@ -355,8 +399,16 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--diagnose-offset", type=float)
     parser.add_argument("--wrong-axis-only", action="store_true")
+    parser.add_argument("--panel-receipt", type=Path)
     args = parser.parse_args()
-    run(args.kind, args.cache, args.output, args.diagnose_offset, args.wrong_axis_only)
+    run(
+        args.kind,
+        args.cache,
+        args.output,
+        args.diagnose_offset,
+        args.wrong_axis_only,
+        args.panel_receipt,
+    )
 
 
 if __name__ == "__main__":

@@ -1,0 +1,239 @@
+"""Measure moving-axis validity and raw-current continuity across both carriers."""
+
+# ruff: noqa: E402
+from nova.jax.config import configure_dtypes
+
+configure_dtypes()
+
+import argparse
+from dataclasses import replace
+import json
+from pathlib import Path
+
+import jax
+import jax.numpy as jnp
+import numpy as np
+import nova
+
+from benchmarks import solovev_certificate as certificate
+from nova.equilibrium import current, topology
+from nova.equilibrium.solve_request import TopologyPolicy
+from scripts.analytic_oracle_fixtures import measure as fixture
+from scripts.prototypes.fast_read.kernel import read
+from scripts.prototypes.fast_read.program import _saddle_moments
+from scripts.prototypes.lean_map.jets import build_jets
+from scripts.prototypes.lean_map.quadrature import (
+    interior_moments,
+    triangle_rule,
+)
+from scripts.prototypes.lean_map.values import build_values
+from scripts.prototypes.read_robustness.census import axis_identity, census
+from scripts.prototypes.read_robustness.oracle import shifted_axis
+from scripts.prototypes.solve_options.profile import _machine
+from scripts.prototypes.sub_millisecond.measure_bell_cut import bell_moments
+from scripts.prototypes.support.geometry import certificate_field
+from tests.equilibrium.test_topology_read import _analytic_inputs
+
+
+def save(path, data):
+    path.write_text(json.dumps(data, indent=2, allow_nan=True) + "\n")
+    print(
+        "CHECKPOINT " + json.dumps({"kind": data["kind"], "rows": len(data["rows"])}),
+        flush=True,
+    )
+
+
+def run(kind, cache, output):
+    assert jax.config.jax_enable_x64 is True and jax.default_backend() == "gpu"
+    print(
+        f"nova={nova.__file__} module={__file__} cwd={Path.cwd().resolve()}",
+        flush=True,
+    )
+    name = (
+        "weak-rotation-reactor-static" if kind == "limited" else "diverted-single-null"
+    )
+    carrier, source, _ = certificate._case(name, clip_mode="exact")
+    machine, _, _ = _machine(cache, carrier, 250)
+    geometry = topology.TopologyGeometry.from_cells(
+        machine.cell_polygons, machine.sampling_vertices, (machine.wall_node,)
+    )
+    _, analytic, _, _, _ = _analytic_inputs(kind)
+    field = certificate_field(analytic, kind)
+    convention = topology.TopologyConvention.from_cocos(17, 1.0)
+    policy = TopologyPolicy()
+    initial = jax.jit(lambda: topology.read(field, geometry, convention, policy))()
+    sample_flux = jax.vmap(field.value)(geometry.sample_points.reshape(-1, 2)).reshape(
+        geometry.sample_points.shape[:-1]
+    )
+    profile = fixture.analytic_profile(source)
+    booked = jax.jit(
+        lambda flux: current.book(
+            flux,
+            initial,
+            geometry,
+            profile,
+            current.Quadrature(sigma=convention.sigma),
+        )
+    )(sample_flux)
+    reference = jnp.stack(
+        (booked.cell_current, booked.radial_moment, booked.vertical_moment), axis=-1
+    )
+    rule = triangle_rule(geometry)
+    values, _ = build_values(machine, rule, field, reference)
+    coupling = topology.BiotMomentCoupling.from_polygons(machine.cell_polygons)
+    jets, _ = build_jets(coupling, geometry, field, reference)
+    previous = jnp.asarray(
+        np.vstack(
+            (
+                np.asarray(initial.axis)[None],
+                np.asarray(initial.x_points)[np.asarray(initial.x_point_valid)],
+            )
+        )
+    )
+    pitch = float(jnp.median(geometry.pitch))
+    span = float(jnp.abs(initial.boundary_flux - initial.axis_flux))
+    scale = span / pitch
+    jet_slope = np.zeros_like(np.asarray(jets.exterior))
+    jet_slope[:, 0] = np.asarray(jets.nodes[:, 1]) - float(previous[0, 1])
+    jet_slope[:, 2] = 1.0
+    jet_slope = jnp.asarray(jet_slope)
+    value_slope = rule.points.reshape(-1, 2)[:, 1] - previous[0, 1]
+    result = {"kind": kind, "cells": len(geometry.centre), "rows": []}
+    save(output, result)
+
+    def sampled(offset, prior):
+        varied_jets = replace(jets, exterior=jets.exterior + offset * jet_slope)
+        varied_values = replace(values, exterior=values.exterior + offset * value_slope)
+        moving = varied_jets.field(reference)
+        roots = census(moving, geometry, convention, policy, prior)
+        reading = read(moving, roots.roots, geometry, convention, policy)
+        gauss = varied_values.apply(reference).reshape(rule.points.shape[:-1])
+        full = (reading.membership >= 1 - 1e-14) & (geometry.vertex_count == 6)
+        interior = interior_moments(
+            rule, gauss, profile, reading.axis_flux, reading.boundary_flux, full
+        )
+        ordinary, ordinary_valid = bell_moments(
+            geometry, reading, profile, convention.sigma, 4
+        )
+        cut = (reading.membership > 0) & ~full
+        saddle_cut = cut & reading.normal_form_cells & ~ordinary_valid
+        saddle, saddle_valid = _saddle_moments(
+            geometry, reading, profile, ordinary_valid=ordinary_valid
+        )
+        raw = interior + jnp.where((cut & ~saddle_cut)[:, None], ordinary, 0.0) + saddle
+        valid_booking = (
+            jnp.all(~(cut & ~saddle_cut) | ordinary_valid)
+            & saddle_valid
+            & jnp.all(jnp.isfinite(raw))
+        )
+        return roots, reading, jnp.sum(raw[:, 0]), valid_booking
+
+    program = jax.jit(sampled)
+    oracle = jax.jit(lambda offset: shifted_axis(field, previous[0], offset, pitch))
+    offsets = np.linspace(-0.2, 0.2, 41)
+    rows = [None] * len(offsets)
+
+    def follow(indices, start):
+        prior = start
+        for index in indices:
+            value = float(offsets[index])
+            offset = jnp.asarray(value * scale)
+            expected, oracle_residual = oracle(offset)
+            roots, reading, raw_current, booking = program(offset, prior)
+            jax.block_until_ready((roots, reading, raw_current))
+            inside = bool(jnp.any(topology._inside_cells(geometry, expected)))
+            identity = bool(axis_identity(reading.axis, expected, pitch))
+            row = {
+                "offset": value,
+                "oracle_residual": float(oracle_residual),
+                "oracle_inside_wall": inside,
+                "axis": np.asarray(reading.axis).tolist(),
+                "oracle_axis": np.asarray(expected).tolist(),
+                "axis_identity": identity,
+                "root_valid": bool(roots.roots.valid[0]),
+                "read_valid": bool(reading.valid and reading.qualified),
+                "booking_valid": bool(booking),
+                "boundary_flux": float(reading.boundary_flux),
+                "wall_candidate": float(reading.wall_candidate),
+                "saddle_candidate": float(reading.saddle_candidate),
+                "boundary_class": int(reading.boundary_class),
+                "raw_current": float(raw_current),
+                "selected_cells": int(jnp.sum(reading.selected_cells)),
+            }
+            row["valid"] = (
+                row["root_valid"]
+                and row["read_valid"]
+                and row["booking_valid"]
+                and identity
+                and inside
+            )
+            rows[index] = row
+            if row["root_valid"] and identity:
+                updated = np.asarray(prior).copy()
+                for slot, live in enumerate(np.asarray(roots.roots.valid)):
+                    if live and slot < len(updated):
+                        updated[slot] = np.asarray(roots.roots.position[slot])
+                prior = jnp.asarray(updated)
+            if sum(item is not None for item in rows) % 10 == 0:
+                result["rows"] = [item for item in rows if item is not None]
+                save(output, result)
+        return prior
+
+    centre = follow((20,), previous)
+    follow(range(21, 41), centre)
+    follow(range(19, -1, -1), centre)
+    result["rows"] = rows
+    result["valid_count"] = sum(row["valid"] for row in rows)
+    result["axis_identity_count"] = sum(row["axis_identity"] for row in rows)
+    switches = [
+        (left, right)
+        for left, right in zip(rows, rows[1:])
+        if left["valid"]
+        and right["valid"]
+        and left["boundary_class"] != right["boundary_class"]
+    ]
+    if switches:
+        left, right = switches[0]
+        for _ in range(24):
+            middle_value = (left["offset"] + right["offset"]) / 2
+            roots, reading, raw_current, booking = program(
+                jnp.asarray(middle_value * scale), previous
+            )
+            middle = {
+                "offset": middle_value,
+                "boundary_class": int(reading.boundary_class),
+                "boundary_flux": float(reading.boundary_flux),
+                "raw_current": float(raw_current),
+                "valid": bool(reading.valid and reading.qualified and booking),
+            }
+            if middle["boundary_class"] == left["boundary_class"]:
+                left = middle
+            else:
+                right = middle
+        result["transition"] = {
+            "left": left,
+            "right": right,
+            "boundary_jump_per_span": abs(
+                right["boundary_flux"] - left["boundary_flux"]
+            )
+            / span,
+            "raw_current_jump_per_target": abs(
+                right["raw_current"] - left["raw_current"]
+            )
+            / abs(float(booked.raw_current)),
+        }
+    save(output, result)
+    print("RESULT " + json.dumps(result), flush=True)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--kind", choices=("limited", "diverted"), required=True)
+    parser.add_argument("--cache", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+    run(args.kind, args.cache, args.output)
+
+
+if __name__ == "__main__":
+    main()

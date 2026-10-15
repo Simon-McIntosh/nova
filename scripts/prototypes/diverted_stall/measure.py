@@ -273,6 +273,24 @@ def run(args):
     result["centre_support"] = int(centre.graph_cells)
     save(output, result)
 
+    if args.map_only:
+        coordinates = np.vstack(
+            (machine.node, machine.wall_node, machine.sample_coordinates)
+        )
+        analytic = jnp.asarray(certificate._exact_state(name, exact, coordinates))
+        exterior, _ = _exterior(cache, key)
+        operator = fixture.forward_operator(source, machine)
+        flux = exterior + _image(operator, centre.moments)
+        span = float(jnp.abs(reading.boundary_flux - reading.axis_flux))
+        result["centre_map_flux_error"] = (
+            float(jnp.max(jnp.abs(flux - analytic))) / span
+        )
+        result["centre_map_moment_error"] = float(
+            jnp.max(jnp.abs(centre.moments - reference)) / jnp.max(jnp.abs(reference))
+        )
+        save(output, result)
+        return
+
     if args.probe:
         from scipy.linalg import lu_factor, lu_solve
 
@@ -916,6 +934,7 @@ def main():
     parser.add_argument("--compare-warm", action="store_true")
     parser.add_argument("--panel-only", action="store_true")
     parser.add_argument("--probe", action="store_true")
+    parser.add_argument("--map-only", action="store_true")
     args = parser.parse_args()
     run(args)
 

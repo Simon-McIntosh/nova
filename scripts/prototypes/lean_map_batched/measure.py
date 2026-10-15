@@ -377,12 +377,17 @@ def run(kind, cells, cache, output, widths, cold_only=False):
         return residual, first, second
 
     batch_base = (values, window)
+    control_residual = one_chord(jnp.asarray(1.0), terminal, factor, *batch_base)[0]
     perturbed_factor = (factor[0] * 1.01, factor[1])
     perturbed_residual = one_chord(
         jnp.asarray(1.0), terminal, perturbed_factor, *batch_base
     )[0]
+    result["control_factor_residual"] = float(control_residual)
     result["perturbed_factor_residual"] = float(perturbed_residual)
-    result["perturbed_factor_refused"] = result["perturbed_factor_residual"] > 1e-12
+    result["perturbed_factor_refused"] = (
+        result["control_factor_residual"] <= 1e-12
+        and result["perturbed_factor_residual"] > 1e-12
+    )
     record(output, result)
     for width in widths:
         offsets = jnp.linspace(0.5, 1.5, width)

@@ -19,7 +19,7 @@ printf 'revision=%s tree=%s command=%s %s %s %s\n' \
   "$run" "$measure" "$worktree"
 "$python" -c 'import nova; print("nova=" + nova.__file__)'
 failures=0
-for cells in 250 500 2000; do
+for cells in 500 2000 250; do
   for kind in limited diverted; do
     for build in first second; do
       cache="$run/cache-$build"

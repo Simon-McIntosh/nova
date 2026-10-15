@@ -1352,6 +1352,63 @@
   "plan_link": "iter-passive-plasma-circuit",
   "promoted_by": null,
   "promoted_revision": "fbf1511b683066bde331f4c2c0b547bef06dc8b5",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 0,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261015T080559236806-iter-coupled-plant-call",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 0,
+        "path": "/tmp/reckon-crew-scratch/r-20261015T080559236806-iter-coupled-plant-call"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 1,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "dirty",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [
+            "M  docs/research/iter-coupled-plant-call.html"
+          ],
+          "head": "fbf1511b683066bde331f4c2c0b547bef06dc8b5",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/c952ceac-4c68-4aa1-9f63-5db2a6152f10/iter-coupled-plant-call",
+          "reclaimable": false,
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:69b6341c2f74430763a0ee2ae2abbf242dd898565f8a6e847d9b3c34b931e4bc",
+          "status_entries": [
+            {
+              "code": "M ",
+              "path": "docs/research/iter-coupled-plant-call.html"
+            }
+          ],
+          "withheld": "uncommitted changes in the worktree; commit or discard them, and nothing reclaims a worktree holding work that exists nowhere else"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_withheld": "uncommitted changes in the worktree; commit or discard them, and nothing reclaims a worktree holding work that exists nowhere else"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

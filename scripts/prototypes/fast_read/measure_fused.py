@@ -54,18 +54,19 @@ def generated_bytes(program):
 
 @jax.tree_util.register_dataclass
 @dataclass(frozen=True)
-class SubtractedField:
-    """Reference total field minus its fixed plasma image at moving points."""
+class CachedExterior:
+    """Return stored exterior jets at the same nodes retained by row maintenance."""
 
-    total: object
-    coupling: topology.BiotMomentCoupling
-    reference: tuple[jax.Array, jax.Array, jax.Array]
+    nodes: jax.Array
+    jets: jax.Array
 
     def evaluate(self, point):
-        return jax.tree.map(
-            jnp.subtract,
-            self.total.evaluate(point),
-            self.coupling.evaluate(point, self.reference),
+        distance = jnp.sum((self.nodes - point) ** 2, axis=1)
+        row = self.jets[jnp.argmin(distance)]
+        return topology.FieldJet(
+            row[0],
+            row[1:3],
+            jnp.stack((jnp.stack((row[3], row[4])), jnp.stack((row[4], row[5])))),
         )
 
 
@@ -136,7 +137,7 @@ def run(kind, cache, output, trace_dir):
     window, maintenance = fixed_points.maintain_rows(
         geometry,
         coupling,
-        SubtractedField(field, coupling, tuple(reference[:, i] for i in range(3))),
+        CachedExterior(jets.nodes, jets.exterior),
         jnp.asarray(roots),
         margin,
         cache=cached_rows,

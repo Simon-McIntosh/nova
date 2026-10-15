@@ -86,14 +86,14 @@ def dense_reach(links, seed):
 def merge_levels(values, neighbour, wall, seed):
     """Sorted cell-graph union with a fixed device scan and both first events."""
     count = values.size
-    order = jnp.argsort(values)
+    order = jnp.argsort(values).astype(jnp.int32)
     index = jnp.arange(count, dtype=jnp.int32)
 
     def root(parent, start):
         return jax.lax.while_loop(
             lambda position: parent[position] != position,
             lambda position: parent[position],
-            start,
+            jnp.asarray(start, dtype=jnp.int32),
         )
 
     def visit(carry, current):

@@ -270,6 +270,8 @@ def test_linkage_resume_reuses_completed_rows(tmp_path, monkeypatch):
     np.testing.assert_array_equal(actual, expected)
     assert evaluated == [2, 3]
     assert len(list(tmp_path.glob("*/rows-*.npy"))) == 2
+    with pytest.raises(ValueError, match="different block size"):
+        resumable_linkage_matrix(conductors, np.arange(4), tmp_path, block_size=1)
 
     bounded = tmp_path / "bounded"
     monkeypatch.setattr(linkage, "_linkage_column", original)

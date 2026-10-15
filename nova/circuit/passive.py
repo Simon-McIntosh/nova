@@ -87,12 +87,14 @@ def resumable_linkage_matrix(
     circuits = np.asarray(circuits, dtype=np.int64)
     if circuits.ndim != 1 or not len(circuits) or len(set(circuits)) != len(circuits):
         raise ValueError("circuits must be a nonempty unique vector")
-    if isinstance(block_size, bool) or block_size < 1:
-        raise ValueError("block_size must be positive")
+    if isinstance(block_size, bool) or int(block_size) != block_size or block_size < 1:
+        raise ValueError("block_size must be a positive integer")
     if isinstance(workers, bool) or not 1 <= workers <= 6:
         raise ValueError("workers must be between one and six")
     if max_new_blocks is not None and (
-        isinstance(max_new_blocks, bool) or max_new_blocks < 1
+        isinstance(max_new_blocks, bool)
+        or int(max_new_blocks) != max_new_blocks
+        or max_new_blocks < 1
     ):
         raise ValueError("max_new_blocks must be positive")
     digest = hashlib.sha256(b"linkage-row-blocks-1")
@@ -135,6 +137,12 @@ def resumable_linkage_matrix(
         (start, min(start + block_size, len(circuits)))
         for start in range(0, len(circuits), block_size)
     ]
+    expected_names = {f"rows-{start:06d}-{stop:06d}.npy" for start, stop in spans}
+    unexpected = [
+        path for path in directory.glob("rows-*.npy") if path.name not in expected_names
+    ]
+    if unexpected:
+        raise ValueError(f"linkage cache uses a different block size: {unexpected[0]}")
 
     def pending():
         for start, stop in spans:

@@ -1,0 +1,1095 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 5,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "b5d3f094ebf408de23bad6c5422f8cf1e40ff30c",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 23283200,
+      "cached_input_tokens_cumulative": 23283200,
+      "input_tokens": 23489738,
+      "input_tokens_cumulative": 23489738,
+      "output_tokens": 55337,
+      "output_tokens_cumulative": 55337,
+      "reasoning_output_tokens": 19861,
+      "reasoning_output_tokens_cumulative": 19861
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 7590,
+    "files": 9,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 324,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_cold_and_cached_plants_are_identical",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 325,
+        "name": "test_the_cache_is_written_by_the_circuit_tier_serialisers",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 735,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 623,
+        "name": "_slice_process",
+        "path": "tests/test_forward_profile_corsica.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "_assert_same_topology",
+        "path": "tests/test_fused_same_state_read.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_receipt_keeps_every_fitted_shot_unknown_without_can_evidence",
+        "path": "tests/test_mast_coil_case_temperature.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "_numeric_receipt",
+        "path": "tests/test_transport_ensemble.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "main",
+        "path": "scripts/prototypes/batched_factor/report.py"
+      },
+      "window_line": 175
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "33514ed30f0fc93f8bade06bc86e0a3f9379199d",
+    "81f82d72cd26623545e7862adcfba94a3a46c29b",
+    "13f2f63653a30a2e8d2b0a770c680c89b5494a0a",
+    "681ed29fe55b3ded97fd571d6b5eb02ebcd039c3",
+    "3be4e4fb4f75a0cfc2cf2cb7c6626c411b23bb0b",
+    "23c31a1a1721d9fa1b863b4c35c89fcaaad1bbf2",
+    "0eca169046e79a7aeaccdc044a431608b5b499d3",
+    "49f7b4071a5c7eff70980d9795ebcc5887843332"
+  ],
+  "completed_at": "2026-10-15T16:14:32Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-15T14:39:35Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "7.633",
+    "ms/state"
+  ],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.2857142857142857,
+    "plan": "converged-forward-solve",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-15T15:39:17.906585+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-15T14:39:17Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 23,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 2,
+    "headroom": 9,
+    "mean_context": 120000,
+    "observed_at": "2026-10-15T14:38:54Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 23,
+      "aggregate_tokens_per_second": 230.026,
+      "detail": "",
+      "mean_tokens_per_second": 95.844,
+      "observed_at": "2026-10-15T14:38:54Z",
+      "runs": 2.4,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-15T16:14:32Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": {
+    "attempt": 2,
+    "kind": "lane-change",
+    "lanes": [
+      {
+        "changed_at": "2026-10-15T14:40:18Z",
+        "detail": "starting fresh because the session cannot follow the move from harness 'claude' to 'codex'",
+        "from_backend": "clive",
+        "from_harness": "claude",
+        "reason": "Deep critical numerical node on GPU; standing coordinator rule moves deep critical nodes to codex.",
+        "session": "fresh",
+        "session_id": "c6db6986-6b41-448e-bdf5-472b1c268d58",
+        "session_source": "stream",
+        "to_backend": "codex",
+        "to_harness": "codex"
+      }
+    ],
+    "root_run_id": "r-20261015T143916649094-batched-factor-size"
+  },
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T143916649094-batched-factor-size/manifest.md",
+  "member": "disposable-r-20261015T143916649094-batched-factor-size",
+  "model_key": "sol",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "batched-factor-size",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 465,
+          "cached_input_tokens": 337213,
+          "input_tokens": 337680,
+          "output_tokens": 1210,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 338890,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Bring the batched fixed-point correction under the 50 MB executable ceiling without losing its convergence or its per-state wall. The lead rules the sub-millisecond target as the per-state wall of a batched H200 program.\n\nWhere it stands (on main, docs/research/fused-convergence.html, prototype scripts/prototypes/fused_convergence, merged at 2ceb154a3; the read is scripts/prototypes/fast_read):\n- On the 289-cell limited carrier, a two-correction chord batch reusing one predecessor dense LU factor converges 1/1, 16/16 and 128/128 distinct states to 1e-12. It takes 6.55, 0.640 and 0.234 ms per state, with compiles of 20 to 26 s.\n- The executables are 493.0, 289.8 and 289.8 MB.\n- The moment map alone is 1.34 MB (limited) and 1.79 MB (diverted).\n- The scalar linearized product is 165 MB, and the batched Jacobian columns 150 to 165 MB.\n- The predecessor chord-apply program is 7.36 MB.\n- The first factor linearization takes 80 to 96 s of host time, which is not a compiled wall.\n- The likely cause: jax.linearize closes over the primal intermediates as program constants. A program that takes the state and operands as traced arguments, and forms the Jacobian columns with jax.jvp inside one jitted function, carries none of them. Measure this; do not assume it.\n\nDone when docs/research/batched-factor-size.html (reckon-type research, plan-informs converged-forward-solve) reports these H200 measurements on the 289-cell limited carrier, and on the 282-cell diverted carrier for size and compile:\n\n(1) What the 150 to 493 MB is. List the largest constants in each oversize executable by shape, dtype and producing operation, from the lowered HLO or the compiled module's constant table.\n\n(2) A restructured program in which the state, the carrier operands and the predecessor factor are runtime arguments, so no state-dependent array is a constant. It includes:\n- the residual;\n- the dense Jacobian built by a vmapped jvp over identity columns inside one jitted function;\n- the LU factor and solve (jax.scipy.linalg lu_factor and lu_solve);\n- the two-correction chord batch.\n\n(3) For each program at widths 1, 16 and 128:\n- executable size and cold compile, against 50 MB and 60 s, cache-disabled;\n- the synchronized per-state wall for the two-correction chord batch, against 0.90 ms;\n- the count of distinct states reaching 1e-12;\n- the wall to build a fresh factor batched over states (Jacobian columns plus LU), as its own row.\n- One compiled program must serve two different states of the same shape.\n\n(4) Executable size and compile time for the diverted factor and batch programs, whether or not the diverted carrier converges. Its convergence belongs to a separate node.\n\n(5) Figures under docs/figures/converged-forward-solve/batched-factor-size, following AGENTS.md plotting rules: executable size and per-state wall against batch width, before and after. Add one poloidal line-contour panel per terminal limited forward state measured, showing solved and analytic flux on shared levels, both null sets and the wall, with no axes, and the terminal residual and converged flag in the caption.\n\nNegative controls must re-run the program rather than read a frozen receipt:\n- the closure-constant form reproduces an executable above 50 MB, so its row turns red;\n- the restructured batch with its factor perturbed misses 1e-12.\n\nWrite only scripts/prototypes/batched_factor, docs/research/batched-factor-size.html, docs/figures/converged-forward-solve/batched-factor-size and docs/evidence/fragments/converged-forward-solve/batched-factor-size.html, with plan-evidence-for converged-forward-solve. Import, but do not edit, scripts/prototypes/{fast_read,fused_convergence,fused_newton,read_robustness,sub_millisecond,lean_map} and nova/. Do not change nova/ product code, and do not touch the held moment-space Newton worktree. reckon audit-doc must report 0 errors.\n\nRun conditions: H200 rows run as one job through RECKON_ALLOW_NESTED_LAUNCH=1 scripts/h200_test_lane/run.sh --log (an absolute path in the run directory) --wait -- (targets), or one sbatch job on --partition=betelgeuse --reservation=gpu_0003_grpA --gres=gpu:1 with rungs as rows inside the allocation (never an array), --time sized to finish, XLA_PYTHON_CLIENT_PREALLOCATE=false and TMPDIR=/tmp in the submit environment and in every child; submit for real and read squeue a minute later rather than trusting sbatch --test-only. On a compute node run /home/ITER/mcintos/Code/nova/.venv/bin/python directly with PYTHONPATH set to the run worktree and never invoke uv; every login-node uv command carries --no-sync and nothing runs uv sync. configure_dtypes() before any array and jax_enable_x64 asserted True. Gates pass by delta against orientation_base_sha in per-module fresh processes, both arms running the same test files with the repository root conftest, baseline_suite and after_suite as single-line JSON whose log_path names one log file and whose command is literally runnable. Any wait is declared on the job that finishes last as wait_probe [\"sacct\",\"-n\",\"-X\",\"-P\",\"-j\",\"(job id)\",\"-o\",\"State\"] and wait_terminal [\"COMPLETED\",\"FAILED\",\"CANCELLED\",\"TIMEOUT\",\"OUT_OF_MEMORY\",\"NODE_FAIL\"] as JSON lists, and names every job it depends on in wait_condition. The certified 550, 2,000 and 5,000-cell machines and exteriors are cached under /home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T181553786165-proto-support/ordered/rows/cache and may be read in place, never written. Run filepath relativize over any evidence fragment before committing. Commit with conventional subjects and bodies at every step and write the manifest and commit before every job wait; the manifest commits line lists every commit; status is complete, blocked or failed, which the worker sets itself. No plan labels in source names or comments. Inside every job payload, make one directory with mktemp -d /tmp/$USER-$SLURM_JOB_ID-XXXX, point TMPDIR at it, and remove it on exit with trap 'rm -rf' (keep TMPDIR=/tmp in the submit environment so slurmstepd can start). Never leave extracted base trees or caches in /tmp after a node ends; anything a later reader needs goes under the run directory on GPFS.\n\nImport provenance: print nova.__file__ in every log header. On the fleet allocation (SLURM_JOB_ID set), run CPU work in place. The time budget is per working turn, not a deadline: park on H200 jobs with declared waits and continue across turns; this node is sized at about 8 worker-hours, and an unmeasured item in your own scope is remaining work, not a blocker. Never edit a script a submitted job will run; submit a per-job copy. Size every job memory from a measured row. The manifest commits line lists every commit (git rev-list), orientation_base_sha is copied from git rev-parse output, and status is complete when the record is delivered even if the target is not met (then give the nearest measured figure and what dominates it).",
+    "estimated_hours": 6.0,
+    "goal": "Bring the batched factor and chord programs under 50 MB while keeping convergence and per-state wall",
+    "id": "batched-factor-size",
+    "images": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-15T14:39:17Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 23,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 2,
+      "headroom": 9,
+      "mean_context": 120000,
+      "observed_at": "2026-10-15T14:38:54Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 23,
+        "aggregate_tokens_per_second": 230.026,
+        "detail": "",
+        "mean_tokens_per_second": 95.844,
+        "observed_at": "2026-10-15T14:38:54Z",
+        "runs": 2.4,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T143916649094-batched-factor-size/manifest.md",
+    "negative_control": "the closure-constant form reproduces an executable above 50 MB and turns its row red",
+    "plan": "converged-forward-solve",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§5",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "scripts/prototypes/batched_factor",
+      "docs/research/batched-factor-size.html",
+      "docs/figures/converged-forward-solve/batched-factor-size",
+      "docs/evidence/fragments/converged-forward-solve/batched-factor-size.html"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "batched-factor-size",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-15T14:39:22.898347+00:00",
+    "score": 0.56875,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "XLA program structure on GPU: executable constants from jax.linearize closures, runtime-operand restructuring, batched dense LU; high verification, critical risk",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:state-render",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5095.302,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 176.442,
+      "context-estimate": 18.916,
+      "records": 194.889,
+      "verdict-inputs": 61.341
+    }
+  },
+  "plan": "converged-forward-solve",
+  "plan_impl_at_dispatch": 0.2857142857142857,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "49f7b4071a5c7eff70980d9795ebcc5887843332",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "b5d3f094ebf408de23bad6c5422f8cf1e40ff30c",
+    "reviewed_head_sha": "49f7b4071a5c7eff70980d9795ebcc5887843332",
+    "scores": {
+      "durability": 4,
+      "evidence": 17,
+      "fit": 16,
+      "goal_fidelity": 18,
+      "reuse": 4,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 79
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261015T143916649094-batched-factor-size",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§5",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a14001-cee5-7e42-bdb8-bb9153e61563",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 23283200,
+    "cumulative_input_tokens": 46772938,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 75198
+  },
+  "time_budget": "60m",
+  "tool_steps": 0.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 5697,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 4,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-15T16:14:36Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-15T16:03:55Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261015T143916649094-batched-factor-size",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 821,
+    "worker_pid": 2249913
+  },
+  "worker_seconds": 5697,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

@@ -305,9 +305,10 @@ def run(kind, cells, cache, output, widths, cold_only=False):
         / span
     )
     result["terminal_roots"] = np.asarray(terminal_map.roots).tolist()
-    result["gauss_newton"] = gradient_ratio(equation, terminal, scale, operands)
     record(output, result)
     if cold_only:
+        result["gauss_newton"] = gradient_ratio(equation, terminal, scale, operands)
+        record(output, result)
         return
 
     def factor_build(point, *args):
@@ -424,6 +425,8 @@ def run(kind, cells, cache, output, widths, cold_only=False):
                 rows[label]["residuals"] = residuals.tolist()
             result[f"batch_{width}"] = rows
             record(output, result)
+    result["gauss_newton"] = gradient_ratio(equation, terminal, scale, operands)
+    record(output, result)
 
 
 def main():

@@ -25,7 +25,7 @@
   <title>ITER Passive and Prescribed-Plasma Circuit | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="12">
+<meta name="plan-version" content="13">
 <meta name="plan-modified" content="2026-10-15">
 </head>
 <body>
@@ -214,6 +214,9 @@
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s2" data-id="c-close-s2" data-who="reckon-build" data-when="2026-10-14T18:42:00Z">
     <div class="r-comment-body"><p>§2 landed (merged <code>c39d9aba9</code>): DINA plasma prescribed on 105014/1 and 105052/1, every active slice, centroids within 4.3 and 27.8 mm, linked flux checked with nova's own kernels and no DINA coupling matrices. The VS3 geometric check moves to §3. <a href="/nova/evidence/archive/iter-passive-plasma-circuit-landed.html#iter-prescribed-plasma">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-s2-conventions-checked" data-who="reckon-build" data-when="2026-10-15T19:00:00Z">
+    <div class="r-comment-body"><p>The lead asked whether the prescription could carry a COCOS or p′/FF′ convention error. It does not (merged <code>dabd37cb5</code>; review goal 18).</p><ul><li>p′ and FF′ share sign and total-weber normalisation, and 105052/1's negative scale (median −0.99979) reverses both together.</li><li>li(3) against DINA's: median +0.044 (105052/1) and +0.034 (105014/1). Flipping p′ relative to FF′ worsens this to +0.105 and +0.110, and moves 2,033 of 2,036 slices further from DINA.</li><li>The current map matches DINA's own to 0.30 % rms (105052/1) and 3.7 % (105014/1).</li><li>The best convention changes no coil's flux.</li></ul><p>105014/1's final COCOS digit (13 or 17) is not determinable from the IDS, because q is nonfinite in every active slice; it does not affect the current. The downstream power_convertor flux balance agrees: substituting DINA's plasma moves no coil by more than 15 V·s per phase.</p></div>
 </div>
 <div class="r-comment" data-section="s1" data-id="c-close-s1" data-who="reckon-build" data-when="2026-10-15T04:05:00Z">
     <div class="r-comment-body"><p>§1 landed (merged <code>c20fda519</code>): 295 winding sections and 1,312 or 2,163 passive circuits, all couplings from nova; sectioning within 0.46 %, analytic checks within 0.45 % and 0.03 %, meshes agree within 0.30 % to 5 kHz; the power_convertor export differs by up to −1.1 % (VSU), reported as measured. <a href="/nova/evidence/archive/iter-passive-plasma-circuit-landed.html#iter-sectioned-conductor-set">evidence</a></p></div>

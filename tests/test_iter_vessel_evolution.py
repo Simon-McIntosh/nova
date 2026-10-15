@@ -39,24 +39,45 @@ def test_resistance_sets_decay_time():
     assert abs(fast["peak_current_a"]) < abs(slow["peak_current_a"])
 
 
-def test_assignment_uses_nearest_loop():
-    """A circuit is assigned to the nearest loop centroid."""
+def test_assignment_uses_containment():
+    """A circuit is assigned to the loop whose cross-section contains it."""
+    from shapely.geometry import box
+
     measure = _module("measure")
-    circuits = np.array([[1.0, 0.0], [9.0, 0.0], [5.1, 0.0]])
-    loops = np.array([[1.0, 0.0], [9.0, 0.0], [5.0, 0.0]])
-    owner = measure.assign_to_loops(circuits, loops)
-    assert list(owner) == [0, 1, 2]
+    circuits = np.array([[1.0, 0.0], [9.0, 0.0], [1.0, 40.0]])
+    loops = [
+        box(-1.0, -1.0, 3.0, 1.0),
+        box(7.0, -1.0, 11.0, 1.0),
+    ]
+    owner, unassigned, ambiguous = measure.assign_by_containment(circuits, loops)
+    assert list(owner) == [0, 1, -1]
+    assert unassigned == 1
+    assert ambiguous == 0
+
+
+def test_assignment_flags_a_circuit_inside_two_loops():
+    """A circuit inside more than one DINA loop is ambiguous, not forced onto one."""
+    from shapely.geometry import box
+
+    measure = _module("measure")
+    circuits = np.array([[1.0, 0.0]])
+    loops = [box(-1.0, -1.0, 3.0, 1.0), box(0.0, -1.0, 5.0, 1.0)]
+    owner, _unassigned, ambiguous = measure.assign_by_containment(circuits, loops)
+    assert list(owner) == [-2]
+    assert ambiguous == 1
 
 
 def test_group_comparison_flags_an_out_of_tolerance_loop():
     """A loop whose residual exceeds the stated tolerance is not counted within it."""
+    from shapely.geometry import box
+
     measure = _module("measure")
     times = np.linspace(0.0, 1.0, 11)
     i_passive = np.zeros((11, 2))
     i_passive[:, 0] = 100.0
     i_passive[:, 1] = 100.0
-    circuit_centroids = np.array([[0.0, 0.0], [10.0, 0.0]])
-    loop_centroids = np.array([[0.0, 0.0], [10.0, 0.0]])
+    circuit_centroids = np.array([[1.0, 0.0], [9.0, 0.0]])
+    loop_polygons = [box(0.0, -1.0, 2.0, 1.0), box(8.0, -1.0, 10.0, 1.0)]
     dina_times = times
     dina_currents = np.zeros((11, 2))
     dina_currents[:, 0] = 100.0
@@ -65,7 +86,7 @@ def test_group_comparison_flags_an_out_of_tolerance_loop():
         times,
         i_passive,
         circuit_centroids,
-        loop_centroids,
+        loop_polygons,
         ["good", "bad"],
         dina_times,
         dina_currents,

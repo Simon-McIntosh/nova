@@ -162,6 +162,25 @@ def test_reduced_terminal_impedance_matches_full(tmp_path):
     assert np.max(plant.reduction_error) < 0.01
 
 
+def test_the_cache_is_written_by_the_circuit_tier_serialisers(tmp_path):
+    """The call caches through the serialisers nova.circuit.passive ships."""
+    from nova.circuit import coupled_plant as plant_module
+    from nova.circuit import passive
+
+    assert plant_module.save_coupled_plant is passive.save_coupled_plant
+    assert plant_module.load_coupled_plant is passive.load_coupled_plant
+
+    machine, source = _reduced_machine(), _source()
+    cold = coupled_plant(machine, source, cache_dir=tmp_path)
+    path = next(tmp_path.glob("*/plant.npz"))
+    restored = passive.load_coupled_plant(path)
+    for field in ("mode_tau", "mode_coil_coupling", "section_plasma_flux"):
+        np.testing.assert_array_equal(
+            getattr(restored, field), getattr(cold, field)
+        )
+    assert restored.provenance == cold.provenance
+
+
 def test_negative_control_perturbed_cache_fails(tmp_path):
     machine, source = _reduced_machine(), _source()
     coupled_plant(machine, source, cache_dir=tmp_path)

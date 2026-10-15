@@ -15,8 +15,9 @@ measured pulse reach the call the same way: it exposes ``coil_current_times``,
 distributions at ``plasma_times``).  The plasma is never solved here; it is
 prescribed from the source's flux functions against the source's own current.
 
-The build is minutes of kernel sums, so the result is cached through nova's
-serialisers.  The cache location resolves through
+The build is minutes of kernel sums, so the result is cached through the circuit
+tier's serialisers, :func:`nova.circuit.passive.save_coupled_plant` and its
+loader, re-exported here.  The cache location resolves through
 :class:`nova.database.filepath.FilePath`; the call returns the same plant cold
 and from its cache.
 """
@@ -31,7 +32,14 @@ from pathlib import Path
 import numpy as np
 
 from nova.circuit.conductor import ConductorSet
-from nova.circuit.passive import PassiveCircuitSystem
+from nova.circuit.passive import (
+    PassiveCircuitSystem,
+    load_coupled_plant,
+    mode_relevance,
+    save_coupled_plant,
+    select_modes_to_tolerance,
+    terminal_impedance_spectrum,
+)
 from nova.imas.prescribed_plasma import plasma_linked_flux_history
 
 __all__ = ["CoupledPlant", "coupled_plant"]
@@ -216,33 +224,18 @@ def _terminal_impedance(
     """Terminal impedance with the retained passive modes shorted.
 
     ``mode_coupling`` is ``(n_coil, n_modes)``.  The bare winding plus the
-    frequency-dependent screening the retained modes add.  With no modes the
-    result is exactly the bare winding.
+    frequency-dependent screening the retained modes add, screened through the
+    owner :func:`~nova.circuit.passive.terminal_impedance_spectrum` in its
+    already-reduced-mode form.  With no modes the result is exactly the bare
+    winding.
     """
-    omega = 2 * np.pi * np.asarray(frequency_hz, dtype=np.float64)
-    coil = np.asarray(coil_inductance, dtype=np.float64)
-    result = (
-        1j * omega[:, None, None] * coil
-        + np.diag(np.asarray(coil_resistance, dtype=np.float64))[None, :, :]
+    return terminal_impedance_spectrum(
+        coil_inductance,
+        frequency_hz=frequency_hz,
+        terminal_resistance=coil_resistance,
+        mode_coupling=mode_coupling,
+        mode_rate=1.0 / np.asarray(mode_tau, dtype=np.float64),
     )
-    coupling = np.asarray(mode_coupling, dtype=np.float64)
-    if coupling.shape[0]:
-        rate = 1.0 / np.asarray(mode_tau, dtype=np.float64)
-        screened = np.einsum(
-            "im,jm,fm->fij",
-            coupling,
-            coupling,
-            1.0 / (rate[None, :] + 1j * omega[:, None]),
-            optimize=True,
-        )
-        result = result + omega[:, None, None] ** 2 * screened
-    return result
-
-
-def _relative_error(reduced, full) -> float:
-    scale = np.abs(full)
-    scale = np.where(scale > 0, scale, 1.0)
-    return float(np.max(np.abs(reduced - full) / scale))
 
 
 def _reduction_error(
@@ -274,39 +267,30 @@ def select_terminal_modes(
 ) -> tuple[np.ndarray, np.ndarray]:
     """Modes whose retention holds the terminal impedance to ``tolerance``.
 
-    Modes are ranked by the strength of their coupling to the coils, so the
-    ranking ignores passive detail the terminals cannot see.  Returns
-    ``(keep, error)`` -- the retained indices and the per-frequency relative
-    error they achieve.  ``keep`` is grown from the strongest coupling until the
-    error is within ``tolerance`` over every frequency, or capped at ``n_modes``
-    or the full set.  The full set reproduces the model exactly.
+    Modes are ranked by the strength of their coupling to the coils through the
+    passive tier's relevance owner, so the ranking ignores passive detail the
+    terminals cannot see, and the retained set is grown by
+    :func:`~nova.circuit.passive.select_modes_to_tolerance` until the terminal
+    impedance it leaves is within ``tolerance`` over every frequency, or capped
+    at ``n_modes`` or the full set.  Returns ``(keep, error)`` -- the retained
+    indices and the per-frequency relative error they achieve.  The full set
+    reproduces the model exactly.
     """
-    n_all = tau.size
-    if n_all == 0:
-        return np.argsort(tau)[::-1], np.zeros(frequencies.size)
-    if n_modes is None:
-        n_modes = n_all
-    n_modes = int(np.clip(n_modes, 1, n_all))
-    strength = np.linalg.norm(np.asarray(coupling, dtype=np.float64), axis=0)
-    order = np.argsort(strength)[::-1]
-    best_keep = order[:n_modes]
-    best_error = _reduction_error(
-        coil_inductance, coil_resistance, coupling, tau, frequencies, best_keep
-    )
-    # Doubling the retained count on each trial keeps the search logarithmic in
-    # the mode count, so a full set of wall circuits is still tractable.
-    count = 1
-    while True:
-        keep = order[:count]
-        error = _reduction_error(
+    coupling = np.asarray(coupling, dtype=np.float64)
+    tau = np.asarray(tau, dtype=np.float64)
+    frequencies = np.asarray(frequencies, dtype=np.float64)
+
+    def error_of_keep(keep):
+        return _reduction_error(
             coil_inductance, coil_resistance, coupling, tau, frequencies, keep
         )
-        if float(np.max(error)) <= tolerance:
-            return keep, error
-        if count == n_modes:
-            break
-        count = min(count * 2, n_modes)
-    return best_keep, best_error
+
+    return select_modes_to_tolerance(
+        mode_relevance(np.ones(tau.size), coupling),
+        error_of_keep,
+        n_modes=n_modes,
+        tolerance=tolerance,
+    )
 
 
 def _nova_revision() -> str:
@@ -347,41 +331,3 @@ def _cache_digest(
     )
     digest.update(json.dumps(provenance, sort_keys=True, default=str).encode())
     return digest.hexdigest()[:20]
-
-
-def save_coupled_plant(path: Path | str, plant: CoupledPlant) -> None:
-    """Persist a coupled plant -- the build is minutes of kernel sums."""
-    np.savez_compressed(
-        path,
-        coil_names=np.array(plant.coil_names),
-        coil_inductance=plant.coil_inductance,
-        coil_resistance=plant.coil_resistance,
-        mode_tau=plant.mode_tau,
-        mode_coil_coupling=plant.mode_coil_coupling,
-        section_plasma_flux=plant.section_plasma_flux,
-        mode_plasma_flux=plant.mode_plasma_flux,
-        plasma_times=plant.plasma_times,
-        frequencies=plant.frequencies,
-        reduction_error=plant.reduction_error,
-        provenance=np.frombuffer(
-            json.dumps(plant.provenance, default=str).encode(), dtype=np.uint8
-        ),
-    )
-
-
-def load_coupled_plant(path: Path | str) -> CoupledPlant:
-    """Read back a persisted coupled plant."""
-    with np.load(path) as stored:
-        return CoupledPlant(
-            coil_names=[str(name) for name in stored["coil_names"]],
-            coil_inductance=stored["coil_inductance"],
-            coil_resistance=stored["coil_resistance"],
-            mode_tau=stored["mode_tau"],
-            mode_coil_coupling=stored["mode_coil_coupling"],
-            section_plasma_flux=stored["section_plasma_flux"],
-            mode_plasma_flux=stored["mode_plasma_flux"],
-            plasma_times=stored["plasma_times"],
-            frequencies=stored["frequencies"],
-            reduction_error=stored["reduction_error"],
-            provenance=json.loads(stored["provenance"].tobytes()),
-        )

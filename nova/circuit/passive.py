@@ -236,42 +236,43 @@ def build_passive_circuit_system(
 
 def terminal_impedance_spectrum(
     coil_inductance: np.ndarray,
-    mutual: np.ndarray,
-    passive_inductance: np.ndarray,
-    passive_resistance: np.ndarray,
-    series: np.ndarray,
-    frequency_hz: np.ndarray,
+    mutual: np.ndarray | None = None,
+    passive_inductance: np.ndarray | None = None,
+    passive_resistance: np.ndarray | None = None,
+    series: np.ndarray | None = None,
+    frequency_hz: np.ndarray | None = None,
     *,
     terminal_resistance: np.ndarray | None = None,
+    mode_coupling: np.ndarray | None = None,
+    mode_rate: np.ndarray | None = None,
 ) -> np.ndarray:
     """Series-coil terminal impedance with independent passive rings shorted.
 
-    ``series`` maps section currents to each terminal current.  The passive
-    generalized eigenbasis is solved once; its L-orthonormal modes make a
-    frequency sweep a small weighted sum rather than repeated dense solves.
-    With zero passive circuits the result is exactly the bare winding matrix.
+    ``series`` maps section currents to each terminal current and defaults to the
+    identity, so a caller holding its terminals directly passes only the terminal
+    inductance.  The screening the passive rings add is either solved here from
+    the dense passive matrices (``mutual``, ``passive_inductance``,
+    ``passive_resistance``) or taken already reduced as ``mode_coupling``
+    ``(n_section, n_modes)`` and ``mode_rate`` ``1/tau`` [1/s] -- the form a
+    reduced plant carries, so a plant screens through this owner rather than a
+    second algebra.  The passive generalized eigenbasis is solved once; its
+    L-orthonormal modes make a frequency sweep a small weighted sum rather than
+    repeated dense solves.  With zero passive circuits the result is exactly the
+    bare winding matrix.
     """
     coil = np.asarray(coil_inductance, dtype=np.float64)
-    coupling = np.asarray(mutual, dtype=np.float64)
-    passive = np.asarray(passive_inductance, dtype=np.float64)
-    resistance = np.asarray(passive_resistance, dtype=np.float64)
-    wiring = np.asarray(series, dtype=np.float64)
     frequency = np.atleast_1d(np.asarray(frequency_hz, dtype=np.float64))
     if coil.ndim != 2 or coil.shape[0] != coil.shape[1]:
         raise ValueError("coil inductance must be square")
+    wiring = (
+        np.eye(coil.shape[0])
+        if series is None
+        else np.asarray(series, dtype=np.float64)
+    )
     if wiring.ndim != 2 or wiring.shape[0] != coil.shape[0]:
         raise ValueError("series mapping has the wrong number of sections")
-    n_passive = passive.shape[0]
-    if (
-        passive.shape != (n_passive, n_passive)
-        or coupling.shape != (coil.shape[0], n_passive)
-        or resistance.shape != (n_passive,)
-    ):
-        raise ValueError("passive inductance, coupling and resistance shapes disagree")
     if np.any(~np.isfinite(frequency)) or np.any(frequency <= 0):
         raise ValueError("frequencies must be finite and positive")
-    if np.any(~np.isfinite(resistance)) or np.any(resistance <= 0):
-        raise ValueError("passive resistances must be finite and positive")
     omega = 2 * np.pi * frequency
     bare = wiring.T @ coil @ wiring
     result = 1j * omega[:, None, None] * bare
@@ -282,11 +283,43 @@ def terminal_impedance_spectrum(
         if np.any(~np.isfinite(coil_resistance)) or np.any(coil_resistance < 0):
             raise ValueError("terminal resistance must be finite and non-negative")
         result = result + np.diag(coil_resistance)[None, :, :]
-    if n_passive:
-        rate, vectors = _passive_modes(passive, resistance)
-        if np.any(rate <= 0):
-            raise ValueError("passive inductance must store positive magnetic energy")
-        mode_coupling = wiring.T @ coupling @ vectors
+    if mode_coupling is not None:
+        reduced = np.asarray(mode_coupling, dtype=np.float64)
+        if reduced.ndim != 2 or reduced.shape[0] != coil.shape[0]:
+            raise ValueError("reduced mode coupling is one row per section")
+        rate = np.asarray(mode_rate, dtype=np.float64)
+        if rate.shape != (reduced.shape[1],):
+            raise ValueError("one rate is required per retained mode")
+        mode_coupling = wiring.T @ reduced
+    elif passive_inductance is not None:
+        coupling = np.asarray(mutual, dtype=np.float64)
+        passive = np.asarray(passive_inductance, dtype=np.float64)
+        resistance = np.asarray(passive_resistance, dtype=np.float64)
+        n_passive = passive.shape[0]
+        if (
+            passive.shape != (n_passive, n_passive)
+            or coupling.shape != (coil.shape[0], n_passive)
+            or resistance.shape != (n_passive,)
+        ):
+            raise ValueError(
+                "passive inductance, coupling and resistance shapes disagree"
+            )
+        if np.any(~np.isfinite(resistance)) or np.any(resistance <= 0):
+            raise ValueError("passive resistances must be finite and positive")
+        if n_passive:
+            rate, vectors = _passive_modes(passive, resistance)
+            if np.any(rate <= 0):
+                raise ValueError(
+                    "passive inductance must store positive magnetic energy"
+                )
+            mode_coupling = wiring.T @ coupling @ vectors
+        else:
+            rate = np.empty(0)
+            mode_coupling = np.empty((coil.shape[0], 0))
+    else:
+        rate = np.empty(0)
+        mode_coupling = np.empty((coil.shape[0], 0))
+    if mode_coupling.shape[1]:
         screened = np.einsum(
             "im,jm,fm->fij",
             mode_coupling,
@@ -299,24 +332,75 @@ def terminal_impedance_spectrum(
 
 
 def mode_relevance(
-    tau: np.ndarray, a_modes: np.ndarray, sensor_scale: np.ndarray
+    tau: np.ndarray,
+    a_modes: np.ndarray,
+    sensor_scale: np.ndarray | None = None,
 ) -> np.ndarray:
     """History relevance ``tau * ||a_sensor / scale||`` of each mode.
 
     How long a mode lives times how strongly it shows up in whitened sensor
     units.  A slow mode the sensors can see is exactly a mode whose history a
     per-slice fit cannot absorb, which is what makes this the reduction ranking.
+    Omit ``sensor_scale`` to rank by the amplitudes alone, as a caller does when
+    its channels carry no measurement scale to whiten by.
     """
-    scale = np.clip(np.asarray(sensor_scale, dtype=np.float64), 1e-12, None)
-    return tau * np.linalg.norm(a_modes / scale[:, np.newaxis], axis=0)
+    amplitudes = np.asarray(a_modes, dtype=np.float64)
+    if sensor_scale is not None:
+        scale = np.clip(np.asarray(sensor_scale, dtype=np.float64), 1e-12, None)
+        amplitudes = amplitudes / scale[:, np.newaxis]
+    return np.asarray(tau, dtype=np.float64) * np.linalg.norm(amplitudes, axis=0)
+
+
+def mode_ranking(relevance: np.ndarray) -> np.ndarray:
+    """Mode indices, most relevant first."""
+    return np.argsort(np.asarray(relevance, dtype=np.float64))[::-1]
 
 
 def select_modes(
     tau: np.ndarray, a_modes: np.ndarray, sensor_scale: np.ndarray, n_modes: int
 ) -> np.ndarray:
     """Indices of the ``n_modes`` most history-relevant modes, slowest first."""
-    keep = np.argsort(mode_relevance(tau, a_modes, sensor_scale))[::-1][: int(n_modes)]
+    keep = mode_ranking(mode_relevance(tau, a_modes, sensor_scale))[: int(n_modes)]
     return keep[np.argsort(tau[keep])[::-1]]
+
+
+def select_modes_to_tolerance(
+    relevance: np.ndarray,
+    error_of_keep,
+    *,
+    n_modes: int | None = None,
+    tolerance: float = 1e-2,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Modes retained by growing the ranked set until an error meets ``tolerance``.
+
+    ``relevance`` ranks the modes (see :func:`mode_relevance`) and
+    ``error_of_keep`` maps a retained index array to the error that retaining it
+    leaves -- the quantity the caller measures.  The ranked prefix is doubled on
+    each trial, so the search is logarithmic in the mode count rather than linear
+    in it, and ``n_modes`` caps the retained set.  Where no prefix meets
+    ``tolerance`` the capped prefix is returned with the error it achieves.
+    Returns ``(keep, error)``.
+    """
+    n_all = int(np.size(relevance))
+    if n_all == 0:
+        empty = np.empty(0, dtype=np.int64)
+        return empty, np.asarray(error_of_keep(empty), dtype=np.float64)
+    if n_modes is None:
+        n_modes = n_all
+    n_modes = int(np.clip(n_modes, 1, n_all))
+    order = mode_ranking(relevance)
+    best_keep = order[:n_modes]
+    best_error = np.asarray(error_of_keep(best_keep), dtype=np.float64)
+    count = 1
+    while True:
+        keep = order[:count]
+        error = np.asarray(error_of_keep(keep), dtype=np.float64)
+        if float(np.max(error)) <= tolerance:
+            return keep, error
+        if count == n_modes:
+            break
+        count = min(count * 2, n_modes)
+    return best_keep, best_error
 
 
 def reduce_passive_system(
@@ -716,6 +800,51 @@ def load_eigenbasis(path: Path | str) -> PassiveEigenbasis:
         )
 
 
+def save_coupled_plant(path: Path | str, plant) -> None:
+    """Persist a coupled plant -- the build is minutes of kernel sums.
+
+    The plant is duck-typed: any object carrying the fields is written, so the
+    circuit tier owns one serialiser for it rather than the plant module keeping
+    a private npz pair of its own.
+    """
+    np.savez_compressed(
+        path,
+        coil_names=np.array(plant.coil_names),
+        coil_inductance=plant.coil_inductance,
+        coil_resistance=plant.coil_resistance,
+        mode_tau=plant.mode_tau,
+        mode_coil_coupling=plant.mode_coil_coupling,
+        section_plasma_flux=plant.section_plasma_flux,
+        mode_plasma_flux=plant.mode_plasma_flux,
+        plasma_times=plant.plasma_times,
+        frequencies=plant.frequencies,
+        reduction_error=plant.reduction_error,
+        provenance=np.frombuffer(
+            json.dumps(plant.provenance, default=str).encode(), dtype=np.uint8
+        ),
+    )
+
+
+def load_coupled_plant(path: Path | str):
+    """Read back a coupled plant persisted by :func:`save_coupled_plant`."""
+    from nova.circuit.coupled_plant import CoupledPlant
+
+    with np.load(path) as stored:
+        return CoupledPlant(
+            coil_names=[str(name) for name in stored["coil_names"]],
+            coil_inductance=stored["coil_inductance"],
+            coil_resistance=stored["coil_resistance"],
+            mode_tau=stored["mode_tau"],
+            mode_coil_coupling=stored["mode_coil_coupling"],
+            section_plasma_flux=stored["section_plasma_flux"],
+            mode_plasma_flux=stored["mode_plasma_flux"],
+            plasma_times=stored["plasma_times"],
+            frequencies=stored["frequencies"],
+            reduction_error=stored["reduction_error"],
+            provenance=json.loads(stored["provenance"].tobytes()),
+        )
+
+
 __all__ = [
     "NOMINAL_STEEL_RESISTIVITY",
     "PassiveCircuit",
@@ -725,12 +854,17 @@ __all__ = [
     "build_passive_eigenbasis",
     "eddy_history",
     "load_circuit_system",
+    "load_coupled_plant",
     "load_eigenbasis",
+    "mode_ranking",
     "mode_relevance",
     "predict_circuit_currents",
     "raw_eddy_trajectory",
     "reduce_passive_system",
     "save_circuit_system",
+    "save_coupled_plant",
     "save_eigenbasis",
     "select_modes",
+    "select_modes_to_tolerance",
+    "terminal_impedance_spectrum",
 ]

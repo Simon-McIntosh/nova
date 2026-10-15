@@ -30,13 +30,23 @@ def residual_history(results, destination):
             data = results.get((carrier, method))
             if not data or not data.get("history"):
                 continue
-            residual = [entry["residual"] for entry in data["history"]]
-            x = np.arange(1, len(residual) + 1)
-            axis.semilogy(x, residual, color=COLORS[method], linewidth=3)
-            axis.text(x[-1] + 0.2, residual[-1], method, color=COLORS[method])
+            accepted = [
+                entry["residual"] for entry in data["history"] if entry["accepted"]
+            ]
+            residual = [data["history"][0]["original"], *accepted]
+            x = np.arange(len(residual))
+            axis.semilogy(
+                x,
+                residual,
+                color=COLORS[method],
+                linewidth=3,
+                linestyle="--" if method == "dense" else "-",
+                label=method,
+            )
         axis.axhline(1e-12, color="#666666", linestyle=":", linewidth=1.2)
         axis.text(0.03, 0.97, carrier, transform=axis.transAxes, va="top")
         axis.set_xlabel("accepted correction")
+        axis.legend(frameon=False, loc="center right")
         axis.spines["top"].set_visible(False)
         axis.spines["right"].set_visible(False)
     axes[0].set_ylabel("scaled moment residual")
@@ -100,6 +110,13 @@ def main():
                     result["panel"],
                     args.output / f"{carrier}-{method}-terminal.svg",
                 )
+    for variant in ("exact", "ablated"):
+        path = args.receipts / f"diverted-dense-{variant}.json"
+        if path.exists():
+            result = json.loads(path.read_text())
+            panel(
+                result["panel"], args.output / f"diverted-dense-{variant}-terminal.svg"
+            )
 
 
 if __name__ == "__main__":

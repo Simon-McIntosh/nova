@@ -84,9 +84,9 @@ def curves(rows, output, key, ylabel, target=None):
     save(figure, output)
 
 
-def batch_walls(rows, output):
+def batch_walls(rows, output, stage):
     figure, axis = plt.subplots(figsize=(14, 6), dpi=100)
-    style(axis, "states in batch", "per-state wall [ms]", log=True)
+    style(axis, "states in batch", f"{stage} per-state wall [ms]", log=True)
     for kind, color in COLORS.items():
         for cells, marker in ((289, "o"), (550, "s"), (2098, "^")):
             selected = [
@@ -101,11 +101,11 @@ def batch_walls(rows, output):
             widths = [
                 width
                 for width in (1, 16, 128)
-                if f"batch_{width}" in row and "chord" in row[f"batch_{width}"]
+                if f"batch_{width}" in row and stage in row[f"batch_{width}"]
             ]
             if not widths:
                 continue
-            walls = [row[f"batch_{width}"]["chord"]["per_state_ms"] for width in widths]
+            walls = [row[f"batch_{width}"][stage]["per_state_ms"] for width in widths]
             axis.plot(widths, walls, color=color, linewidth=3, marker=marker)
             axis.annotate(
                 f"{kind} {row['cells']}",
@@ -227,7 +227,8 @@ def main():
         1e-2,
     )
     curves(rows, args.output / "map-wall.svg", "map_wall_ms", "map wall [ms]")
-    batch_walls(rows, args.output / "batch-wall.svg")
+    batch_walls(rows, args.output / "batch-chord-wall.svg", "chord")
+    batch_walls(rows, args.output / "batch-map-wall.svg", "map")
     for row in rows:
         if (
             "terminal_roots" in row

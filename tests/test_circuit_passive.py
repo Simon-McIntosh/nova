@@ -37,6 +37,8 @@ from nova.circuit.passive import (
     reduce_passive_system,
     save_circuit_system,
     save_eigenbasis,
+    select_modes_to_tolerance,
+    terminal_impedance_spectrum,
 )
 from nova.circuit.propagate import (
     integrate_eddy_ode,
@@ -460,3 +462,67 @@ def test_circuit_system_and_eigenbasis_round_trip(tmp_path):
     np.testing.assert_array_equal(restored.tau, basis.tau)
     np.testing.assert_array_equal(restored.m_cell, basis.m_cell)
     assert restored.volt_channel is None
+
+
+def test_terminal_impedance_reduced_modes_are_the_dense_solve():
+    """A reduced mode set screens through the same terminal-impedance owner."""
+    _conductors, _sensors, system = _shell_system()
+    rng = np.random.default_rng(5)
+    n_section, n_terminal = 5, 2
+    block = rng.normal(size=(n_section, n_section))
+    coil = block.T @ block + 5.0 * np.eye(n_section)
+    series = np.zeros((n_section, n_terminal))
+    series[:3, 0] = 1.0
+    series[3:, 1] = 1.0
+    mutual = 1e-2 * rng.normal(size=(n_section, system.n_circuits))
+    frequencies = np.geomspace(0.5, 2000.0, 9)
+    terminal_resistance = np.array([2e-4, 3e-4])
+
+    dense = terminal_impedance_spectrum(
+        coil,
+        mutual,
+        system.lmat,
+        system.r_diag,
+        series,
+        frequencies,
+        terminal_resistance=terminal_resistance,
+    )
+    tau, vectors = system.mode_system()
+    reduced = terminal_impedance_spectrum(
+        coil,
+        series=series,
+        frequency_hz=frequencies,
+        terminal_resistance=terminal_resistance,
+        mode_coupling=mutual @ vectors,
+        mode_rate=1.0 / tau,
+    )
+    np.testing.assert_allclose(reduced, dense, rtol=1e-12, atol=0.0)
+
+
+def test_select_modes_to_tolerance_grows_the_ranked_prefix():
+    """The retained set grows by doubling until its error meets the tolerance."""
+    relevance = np.array([10.0, 5.0, 1.0, 0.5])
+    trials = []
+
+    def error_of_keep(keep):
+        trials.append(int(keep.size))
+        return np.array([{1: 0.4, 2: 0.05, 3: 0.01, 4: 1e-6}[int(keep.size)]])
+
+    keep, error = select_modes_to_tolerance(
+        relevance, error_of_keep, tolerance=1e-1
+    )
+    assert list(keep) == [0, 1]
+    assert trials == [4, 1, 2]
+    np.testing.assert_allclose(error, [0.05])
+
+    capped, capped_error = select_modes_to_tolerance(
+        relevance, lambda keep: np.array([0.4]), n_modes=3, tolerance=1e-1
+    )
+    assert list(capped) == [0, 1, 2]
+    np.testing.assert_allclose(capped_error, [0.4])
+
+    empty, empty_error = select_modes_to_tolerance(
+        np.empty(0), lambda keep: np.array([0.3]), tolerance=1e-1
+    )
+    assert empty.size == 0
+    np.testing.assert_allclose(empty_error, [0.3])

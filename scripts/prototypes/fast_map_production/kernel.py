@@ -212,7 +212,8 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
     fraction, ordinary_valid, four_crossings = bell_fraction_with_crossings(
         geometry, approximate, sigma
     )
-    booking = normal & (four_crossings | ~ordinary_valid)
+    saddle_owner = topology._inside_cells(geometry, form.position)
+    booking = normal & (saddle_owner | four_crossings | ~ordinary_valid)
     capacity = min(16, len(geometry.centre))
     chosen = jnp.nonzero(booking, size=capacity, fill_value=0)[0]
     fragments = jax.vmap(

@@ -62,41 +62,66 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
         sigma * fourth,
     )
     axis_sector = jnp.argmax(topology._normal_form_sectors(axis[None], form)[0])
-    wall_sector = topology._normal_form_sectors(geometry.wall_points, form)
-    wall_eligible = ~saddle_live | wall_sector[:, axis_sector]
-    wall_score_rows = jnp.where(wall_eligible, sigma * wall_flux, -jnp.inf)
-    wall_index = jnp.argmax(wall_score_rows)
-    wall_score = wall_score_rows[wall_index]
-    diverted = saddle_live & (saddle_score >= wall_score)
-    level = sigma * jnp.maximum(wall_score, saddle_score)
-    boundary = jnp.where(
-        diverted, roots.position[saddle_index], geometry.wall_points[wall_index]
-    )
     radius = jnp.maximum(
         policy.normal_form_radius,
         policy.normal_form_pitch_floor * jnp.median(geometry.pitch),
     )
-    normal = diverted & (
-        topology._inside_cells(geometry, form.position)
-        | (jnp.linalg.norm(geometry.centre - form.position, axis=1) < radius)
+    near_saddle = topology._inside_cells(geometry, form.position) | (
+        jnp.linalg.norm(geometry.centre - form.position, axis=1) < radius
     )
+    raw_wall_index = jnp.argmax(sigma * wall_flux)
+    raw_wall_score = sigma * wall_flux[raw_wall_index]
+    initial_score = jnp.where(saddle_live, saddle_score, raw_wall_score)
     approximate = FastRead(
         axis,
         axis_flux,
-        boundary,
-        level,
-        diverted.astype(jnp.int32),
-        sigma * wall_score,
+        roots.position[saddle_index],
+        sigma * initial_score,
+        jnp.asarray(0, jnp.int32),
+        sigma * raw_wall_score,
         sigma * saddle_score,
         jnp.zeros(len(geometry.centre)),
         jnp.zeros(len(geometry.centre), bool),
         field.sampled_coefficient(geometry),
         form,
-        normal,
+        saddle_live & near_saddle,
         jnp.zeros((len(geometry.centre), 2), bool),
         jnp.zeros((len(geometry.centre), 2, geometry.vertices.shape[1], 13, 2)),
         jnp.asarray(True),
         jnp.asarray(True),
+    )
+    seed = jnp.argmin(jnp.sum((geometry.centre - axis) ** 2, axis=1))
+    if frame_gate:
+        provisional_core = connected_cells(geometry, approximate, sigma, seed)
+    else:
+        from scripts.prototypes.sub_millisecond.measure_wall_march import (
+            connected_cells as ungated,
+        )
+
+        provisional_core = ungated(geometry, approximate, sigma, seed)
+    wall_cell = jax.vmap(
+        lambda point: jnp.argmax(topology._inside_cells(geometry, point))
+    )(geometry.wall_points)
+    wall_eligible = provisional_core[wall_cell]
+    wall_scores = jnp.where(wall_eligible, sigma * wall_flux, -jnp.inf)
+    wall_index = jnp.argmax(wall_scores)
+    wall_score = jnp.where(
+        jnp.any(wall_eligible),
+        wall_scores[wall_index],
+        jnp.where(saddle_live, -jnp.inf, raw_wall_score),
+    )
+    diverted = saddle_live & (saddle_score >= wall_score)
+    level = sigma * jnp.maximum(wall_score, saddle_score)
+    boundary = jnp.where(
+        diverted, roots.position[saddle_index], geometry.wall_points[wall_index]
+    )
+    normal = diverted & near_saddle
+    approximate = approximate._replace(
+        boundary=boundary,
+        boundary_flux=level,
+        boundary_class=diverted.astype(jnp.int32),
+        wall_candidate=sigma * wall_score,
+        normal_form_cells=normal,
     )
     polygon, number, ordinary_valid = bell_polygon(geometry, approximate, sigma, 4)
     fraction = jnp.clip(polygon_area(polygon, number) / geometry.full_area, 0.0, 1.0)
@@ -137,7 +162,6 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
         fragment_selected=selected_sector,
         edge_interval=intervals,
     )
-    seed = jnp.argmin(jnp.sum((geometry.centre - axis) ** 2, axis=1))
     if frame_gate:
         connected = connected_cells(geometry, provisional, sigma, seed)
     else:

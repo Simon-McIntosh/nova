@@ -24,7 +24,7 @@ from scripts.prototypes.lean_map.forward import apply as reference_apply
 from scripts.prototypes.lean_map.jets import build_jets, gather_window
 from scripts.prototypes.lean_map.quadrature import quadratic_fit, triangle_rule
 from scripts.prototypes.lean_map.values import build_values
-from scripts.prototypes.read_robustness.census import axis_identity
+from scripts.prototypes.read_robustness.census import axis_identity, census
 from scripts.prototypes.read_robustness.oracle import shifted_axis
 from scripts.prototypes.read_robustness.read import read
 from scripts.prototypes.read_robustness.window import full_window, mobile_window
@@ -262,6 +262,61 @@ def run(kind, cache, output):
     follow(range(19, -1, -1), centre_prior)
     result["full"] = full_rows
     save(output, result)
+    switches = [
+        (left, right)
+        for left, right in zip(full_rows, full_rows[1:])
+        if left["valid"]
+        and right["valid"]
+        and left["boundary_class"] != right["boundary_class"]
+    ]
+    if switches:
+        left, right = min(
+            switches, key=lambda pair: abs(pair[0]["offset"] + pair[1]["offset"])
+        )
+
+        def transition_row(value):
+            offset = jnp.asarray(value * scale)
+            oracle_axis, residual = oracle_program(offset)
+            state = robust_program(offset, reference, previous, oracle_axis)
+            jax.block_until_ready((state, residual))
+            finite_saddles = np.asarray(state.saddle_candidates)
+            finite_saddles = finite_saddles[np.isfinite(finite_saddles)]
+            return {
+                "offset": float(value),
+                "valid": bool(state.valid),
+                "boundary_class": int(state.boundary_class),
+                "boundary_flux": float(state.boundary_flux),
+                "wall_candidate": float(state.wall_candidate),
+                "saddle_candidates": finite_saddles.tolist(),
+                "raw_current": float(state.raw_current),
+                "axis": np.asarray(state.roots[0]).tolist(),
+                "axis_identity": bool(state.axis_identity),
+                "oracle_residual": float(residual),
+            }
+
+        left = transition_row(left["offset"])
+        right = transition_row(right["offset"])
+        for _ in range(24):
+            middle = transition_row(0.5 * (left["offset"] + right["offset"]))
+            if middle["boundary_class"] == left["boundary_class"]:
+                left = middle
+            else:
+                right = middle
+        result["transition"] = {
+            "left": left,
+            "right": right,
+            "boundary_jump_per_span": abs(
+                right["boundary_flux"] - left["boundary_flux"]
+            )
+            / span,
+            "raw_current_jump_per_target": abs(
+                right["raw_current"] - left["raw_current"]
+            )
+            / abs(float(booked.raw_current)),
+        }
+    else:
+        result["transition"] = None
+    save(output, result)
     areas = np.asarray(geometry.full_area)
     centres = np.asarray(geometry.centre)
     total = float(booked.raw_current)
@@ -277,13 +332,31 @@ def run(kind, cache, output):
             axis=-1,
         )
 
+    seeds = {
+        "analytic_moments": reference,
+        "zero": jnp.zeros_like(reference),
+        "uniform": distributed(uniform),
+        "centroid_circle": distributed(circle),
+        "profile_weighted": distributed(np.asarray(reference[:, 0])),
+    }
+    for fraction in (0.5, 0.75, 1.25, 1.5):
+        mask = (np.linalg.norm(centres - centroid, axis=1) <= fraction * radius).astype(
+            float
+        )
+        values_at_cells = total * areas * mask / np.sum(areas * mask)
+        seeds[f"circle_radius_{fraction:g}"] = distributed(values_at_cells)
+    for width in (0.5, 1.0, 1.5):
+        weight = areas * np.exp(
+            -0.5 * (np.linalg.norm(centres - centroid, axis=1) / (width * radius)) ** 2
+        )
+        seeds[f"gaussian_width_{width:g}"] = distributed(total * weight / weight.sum())
+    for fraction in (0.25, 0.5, 0.75):
+        seeds[f"circle_reference_blend_{fraction:g}"] = fraction * reference + (
+            1 - fraction
+        ) * distributed(circle)
+        seeds[f"scaled_reference_{fraction:g}"] = fraction * reference
     result["seeds"] = {}
-    for label, moments in (
-        ("zero", jnp.zeros_like(reference)),
-        ("uniform", distributed(uniform)),
-        ("centroid_circle", distributed(circle)),
-        ("profile_weighted", distributed(np.asarray(reference[:, 0]))),
-    ):
+    for label, moments in seeds.items():
         old = baseline_program(jnp.asarray(0.0), moments)
         new = robust_program(jnp.asarray(0.0), moments, previous, expected_axis)
         jax.block_until_ready((old, new))
@@ -324,6 +397,15 @@ def run(kind, cache, output):
         }
     full_cache = full_window(jets)
     assert bool(jnp.all(full_cache.lookup >= 0))
+    census_program = jax.jit(
+        lambda moments: census(
+            jets.field(moments), geometry, convention, policy, previous
+        )
+    )
+    result["census_ms"] = wall(census_program, reference)
+    result["read_ms"] = wall(
+        robust_program, jnp.asarray(0.0), reference, previous, expected_axis
+    )
     contract = jax.jit(lambda m: jets.gather(m))
     result["full_contraction_ms"] = wall(contract, reference)
     mobile_program = jax.jit(

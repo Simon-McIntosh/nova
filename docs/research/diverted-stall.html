@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="diverted-stall">
+  <meta name="plan-title" content="Diverted fixed-point stall">
+  <meta name="plan-summary" content="H200 diagnosis of the diverted carrier's wall-path discontinuity and resolution response">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-informs" content="converged-forward-solve">
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-verifies" content="converged-forward-solve#s5">
+  <meta name="plan-source" content="H200 live moment-map probes and certified certificate carriers">
+  <meta name="plan-source-quality" content="primary">
+  <meta name="plan-tags" content="equilibrium,grad-shafranov,jax,convergence,topology">
+  <title>Diverted fixed-point stall | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+  <header>
+    <p class="eyebrow">Research input</p>
+    <h1>Diverted fixed-point stall</h1>
+    <p class="lead">At the last accepted 282-cell iterate, the residual is 0.00268458 and the relative Gauss–Newton gradient is 0.354. A binary wall-path eligibility change turns a decreasing Newton trial into a residual of 1.092; the iterate is not a local residual minimum.</p>
+  </header>
+  <section id="method">
+    <h2>Method and provenance</h2>
+    <p>The prototype in <code>scripts/prototypes/diverted_stall</code> reuses the certificate field, current profile, fixed-shape map and cached carrier from the <a href="/nova/research/fused-convergence.html">preceding convergence study</a>. It enables binary64 before constructing arrays and asserts the CUDA backend on the reserved H200. The numerical log prints the imported <code>nova</code> path, module path, worktree, revision and command. Inputs and complete receipts are in <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T143844399420-diverted-stall</code>; the cached 282-cell carrier was read from the lean-map run without modification.</p>
+    <p>The first fresh probe used a predecessor receipt whose terminal moment array belonged to a rejected trial. That array evaluates to residual 1.112, even though its attached accepted history says 0.00268458. Its gradient and scan are excluded. Job 1286353 used the separate accepted-state receipt, re-evaluated its residual from the live map, formed the complete dense Jacobian from a cached JVP, and scanned its Newton direction at 81 positive scales from 10<sup>−6</sup> to 1 plus the zero point. The dense linear solve leaves relative linear residual 1.57 × 10<sup>−14</sup>.</p>
+  </section>
+  <section id="stalled-point">
+    <h2>The last accepted point</h2>
+    <p>The recomputed scaled infinity residual is 0.00268458155 and its two-norm is 0.00455412. The Gauss–Newton gradient norm is 0.0948430. Dividing by the Jacobian Frobenius norm 58.8009 times the residual two-norm gives 0.354174. This large ratio rules out an approximately stationary least-squares point; the correction direction and the map's geometry need examination.</p>
+    <p>Scales through 7.49894 × 10<sup>−5</sup> retain the diverted class, all 179 support cells and the same four selected saddle-region cells, while reducing the residual to 0.00268438024. At 8.91251 × 10<sup>−5</sup>, the wall candidate appears at signed flux 0.000355328 where it was previously ineligible; the saddle candidate remains near −4.87186 × 10<sup>−6</sup>. The chosen boundary switches to limited, support falls to 166 cells, cell 71's booked fraction falls from 0.356473 to zero, and the residual jumps to 1.09224582. Cell 71 has no four-crossing change. The wall eligibility and boundary-class change, rather than the local cubic-ray derivative, is the located event.</p>
+    <p>Along this same Newton direction, the Taylor remainder is near binary64 precision at scale 3.16228 × 10<sup>−5</sup> (7.03 × 10<sup>−13</sup> in two-norm); at 10<sup>−4</sup> it is 3.32248 after crossing the wall event. The small-scale probe validates that local direction but does not resolve a quadratic slope above roundoff. A second perturbation at the same stalled state gives remainder 3.32248 even at scale 10<sup>−7</sup>, while the Newton direction gives 6.96 × 10<sup>−14</sup> there. The directional control shows a jump for the second direction, not a measurable smooth Taylor slope.</p>
+    <figure><img src="/nova/figures/converged-forward-solve/diverted-stall/step-scale-scan.svg" alt="Residual, cell 71 membership and current moment along the Newton step, with the wall-path event marked"><figcaption>Fresh H200 scan from the accepted 282-cell stalled state. The dotted line marks the first sampled scale whose wall path becomes eligible. Before it, the residual falls smoothly and cell 71 remains booked; afterward, the class and support change and the residual jumps by about 407 times. The ordinary moment is the candidate used by the existing route for cell 71; its saddle booking is zero on that route despite the cell's normal-form membership.</figcaption></figure>
+    <figure><img src="/nova/figures/converged-forward-solve/diverted-stall/diverted-dense-accepted-terminal.svg" alt="Accepted stalled diverted flux contours with analytic contours, both null sets and the vessel wall"><figcaption>Unchanged 282-cell diverted terminal state from the accepted-state predecessor receipt, re-evaluated by job 1286353 at scaled residual 0.00268458; converged false. Solved blue and analytic dashed contours use one physical level array, with both null sets and the vessel wall shown.</figcaption></figure>
+  </section>
+  <section id="resolution">
+    <h2>Resolution check</h2>
+    <p>The unchanged 282-cell map stalls at 0.00268458. A fresh 550-cell cold solve from the certified device carrier accepts six corrections and stalls at 0.0134218. The 2,098-cell carrier starts at 0.668971 and accepts no correction: GMRES reaches relative linear residual 8.73 × 10<sup>−11</sup> in 51 iterations, but twelve nonlinear trial scales fail to decrease the residual. Cell 47 carries −0.668971 in the scaled current block; the booked saddle-cut count is zero despite the diverted class. The separate lean-map analytic flux-image error falls from 0.000618964 at 282 cells to 0.000182144 at 550 and 0.0000176641 at 2,098. Fresh full fused-image comparisons instead give 0.001086535, 0.000997180 and 0.0161172 at those sizes. Neither full-map error nor stalled residual decreases consistently with resolution, so the data do not support a simple discretisation-error explanation.</p>
+    <figure><img src="/nova/figures/converged-forward-solve/diverted-stall/resolution-550-terminal.svg" alt="550-cell diverted terminal solved and analytic flux contours, both null sets and vessel wall"><figcaption>Fresh H200 550-cell diverted cold terminal from job 1286352: six accepted corrections, scaled residual 0.0134218, converged false. Solved and analytic line contours use shared physical levels, with both null sets and the vessel wall shown.</figcaption></figure>
+    <figure><img src="/nova/figures/converged-forward-solve/diverted-stall/resolution-2098-terminal.svg" alt="2098-cell diverted terminal solved and analytic flux contours, both null sets and vessel wall"><figcaption>Fresh H200 2,098-cell diverted cold terminal from job 1286352: zero accepted corrections, scaled residual 0.668971, converged false. Solved and analytic line contours use shared physical levels, with both null sets and the vessel wall shown.</figcaption></figure>
+  </section>
+  <section id="repair">
+    <h2>Two failed isolated repairs</h2>
+    <p>The imported read formed a wall candidate only for wall cells in a boolean provisional connected set, setting it to negative infinity otherwise. One graph-edge eligibility change injected a finite wall candidate above the saddle flux and changed the support discontinuously. The isolated read computes a continuous path bottleneck and keeps saddle-region geometry on both sides of the boundary verdict; it replaces <code>scripts/prototypes/fast_read/kernel.py::read</code> only inside this measurement. That change alone reran the cold solve and still stalled at 0.00268458 after nine accepted corrections. A live rollback to the unchanged read again stalled at 0.00268458, confirming the negative control by executing the program.</p>
+    <p>Cell 71 exposes a mixed representation: the read assigns it normal-form membership 0.35646 while the map books its ordinary moment because that cut is valid. The second isolated copy, <code>scripts/prototypes/diverted_stall/program.py</code>, makes selected saddle-region cut cells use normal-form moments and excludes full cells from duplicate booking. Its 282-cell H200 cold solve starts at residual 0.434635, accepts two corrections at scales 0.0078125 and 0.00390625, and rejects the third at residual 0.428655. The accurate third linear solve has residual 2.24 × 10<sup>−13</sup>; cells 71 and 8 dominate the current block at −0.428655 and −0.416115. The analytic flux-image map error grows to 0.0868876 from 0.00108654 for the unchanged map. This booking replacement does not preserve map fidelity or converge. It is the second counted fix failure, so further repair trials, limited and 41-state controls, and final contour panels were not run. The diverted 10<sup>−12</sup> gate remains unmet; product code and imported prototypes are unchanged.</p>
+  </section>
+</main></body>
+</html>

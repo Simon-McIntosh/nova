@@ -280,13 +280,19 @@ def select_terminal_modes(
     best_error = _reduction_error(
         coil_inductance, coil_resistance, coupling, tau, frequencies, best_keep
     )
-    for count in range(1, n_modes + 1):
+    # Doubling the retained count on each trial keeps the search logarithmic in
+    # the mode count, so a full set of wall circuits is still tractable.
+    count = 1
+    while True:
         keep = order[:count]
         error = _reduction_error(
             coil_inductance, coil_resistance, coupling, tau, frequencies, keep
         )
         if float(np.max(error)) <= tolerance:
             return keep, error
+        if count == n_modes:
+            break
+        count = min(count * 2, n_modes)
     return best_keep, best_error
 
 

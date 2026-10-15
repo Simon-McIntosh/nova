@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="iter-passive-plasma-circuit">
+  <meta name="plan-title" content="The coupled ITER plant through one public call">
+  <meta name="plan-summary" content="Sectioned coils, reduced passive modes and the plasma flux drive returned through one nova call and one result type, cached through nova's serialisers">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-source-quality" content="measured">
+  <title>The coupled ITER plant through one public call</title>
+</head>
+<body>
+<section id="overview"><h2>Overview</h2>
+<p>The coupled plant &mdash; the sectioned coil winding, the reduced passive system, and the plasma flux drive at every coil section and passive mode &mdash; is returned through one public call and one result type. <code>nova.circuit.coupled_plant.coupled_plant(machine, source)</code> returns a <code>CoupledPlant</code> and nothing else is exported from the module. The call composes the machine binding, the sectioned conductor set, the passive reduction and the prescribed plasma; it does not re-derive any of them.</p>
+<p>The plant is cached through the serialisers <code>nova.circuit.passive</code> ships, extended to the coupled plant, with the location resolved through <code>nova.database.filepath.FilePath</code>. The cache key is a digest over the machine, the frequencies and the reduction settings, so a plant is reused only when it was built from the same inputs.</p>
+<p><strong>What this is for.</strong> A switched converter model has to see the plant as a state-space multiport: which coil sections exist, how they couple, how the passive modes screen them and what the plasma drives into them. This call is that interface; it is a composition, so the physics it returns is exactly the physics the underlying nodes already measured.</p>
+</section>
+
+<section id="surface"><h2>One call and one result type</h2>
+<p><code>CoupledPlant</code> carries, per the brief: <code>coil_names</code>; the section-level <code>coil_inductance</code> and <code>coil_resistance</code>; the reduced passive system as <code>mode_tau</code> and <code>mode_coil_coupling</code> (every retained mode against every coil); the plasma flux drive as <code>section_plasma_flux</code> and <code>mode_plasma_flux</code> against <code>plasma_times</code> at the frequencies the plant was reduced for; <code>reduction_error</code> against frequency; and <code>provenance</code> naming the machine label, the plasma source label and the nova revision.</p>
+<p><code>CoupledPlant.terminal_impedance(frequency_hz)</code> returns the <code>(n_freq, n_coil, n_coil)</code> terminal impedance with the retained passive modes shorted. It is the same function the reduction search minimises against, so the returned error is the error of the returned object rather than a separate estimate.</p>
+<p>The plasma source is accepted through a minimal interface: an object exposing <code>plasma_times</code>, <code>coil_current_times</code>, <code>coil_currents</code> and a <code>prescribed_currents() -> list[PrescribedCurrent]</code>. Nothing in the module names a concrete source type, so the IMAS-backed source and a reduced test source are interchangeable.</p>
+</section>
+
+<section id="done-when"><h2>Cold and cached, reduced and full</h2>
+<p>The call returns the same plant cold and from its cache, and the comparison is by value on every array field, including <code>mode_tau</code> &mdash; an earlier form compared only shapes and would have passed a perturbed cache.</p>
+<p>The reduced plant's terminal impedance matches the full model's to under 1% for every coil from 0.1 Hz to 5 kHz, and the returned <code>reduction_error</code> is under 1% over the same band.</p>
+<figure><img src='/nova/figures/iter-coupled-plant-call/reduction-error.svg' alt='Per-coil relative self-impedance error of the reduced plant against frequency'><figcaption>Relative self-impedance error of the reduced plant's terminal impedance against the full model, per coil, against frequency over 0.1 Hz to 5 kHz, with the 1% tolerance marked. The retained mode set is the one the tolerance search returns; for an eight-coil, 48-section, 64-ring sectioned case this is the full set, so the error sits at round-off.</figcaption></figure>
+<p><strong>The retained count grows with the sectioning, and that is the cost of the guarantee.</strong> On the eight-coil case above the search retains all 64 modes: at 48 of 64 the worst relative error is 191%, and the ratio only falls below 1% once the set is complete. The error is a maximum over coil pairs and frequencies including near-cancelling off-diagonal entries, so it is a strict criterion; a weaker pairing criterion would retain far fewer modes. The retained count and the error it achieves are both on the result, so a consumer can trade them rather than take a default.</p>
+</section>
+
+<section id="owner"><h2>The point-flux kernel now has one owner</h2>
+<p>The vessel-evolution driver's <code>passive_flux_at_points</code> derived a per-ampere point coupling of its own. It now calls <code>nova.circuit.linkage.sensor_grid_couplings</code>, the finite-area kernel the rest of the circuit tier uses, and takes the grid column the point index selects. The two agree, and the section&nbsp;3 receipt's VS3 peaks are unchanged to the reported precision: 8.40230532 &rarr; 8.40042344 Wb (relative &minus;2.24e-4) and 10.0803061 &rarr; 10.09798884 Wb (relative +1.75e-3). A test pins the equality, so a second point kernel cannot reappear unnoticed.</p>
+<p>The driver's assembly &mdash; coupled section flux and coil voltage from the section linkage, the passive currents and the prescribed plasma &mdash; previously had no test. It is now exercised on a reduced case through <code>evolve.psis_and_voltages</code> and <code>evolve.integrate</code>.</p>
+</section>
+
+<section id="controls"><h2>Controls</h2>
+<p>The gate is <code>tests/test_coupled_plant.py</code> and <code>tests/test_iter_vessel_evolution.py</code> together: ten tests, all passing, against the committed revision.</p>
+<p>The negative control perturbs one cached array &mdash; <code>mode_tau</code>, scaled by 1.5 where the plant is written &mdash; in a scratch copy of the module outside the repository. The cold-and-cached comparison then fails on <code>mode_tau</code>, whose two values differ by exactly that factor, and the log ends <code>EXIT=1</code>; the head arm on the same scratch tree passes with <code>EXIT=0</code>. Each arm prints the module file it imported, so the arm is known to have loaded the mutated module and not the worktree's. The first attempt at this control passed on both arms: pytest prepends the invocation directory to <code>sys.path</code>, so a run started inside the worktree imported the unmutated package even with the shadow on <code>PYTHONPATH</code>. The arms now run from a neutral directory holding a copy of the test, which is what makes <code>PYTHONPATH</code> alone select the package.</p>
+<p>The positive controls are the analytic ones the earlier nodes established: the single-ring L/R decay and the exact zero-order-hold propagation, both still green in the same gate.</p>
+</section>
+
+<section id="caveats"><h2>Caveats</h2>
+<p>The tolerance search now doubles the retained count on each trial rather than growing it one mode at a time. The one-at-a-time form is <em>O(n_modes)</em> trials and does not finish on a wall set of a thousand circuits; the doubling form reaches the same decision in a logarithmic number of trials. The mode counts at which the search lands can differ from the linear form between successive doublings, so a caller who pinned a retained count to a number <em>between</em> powers of two should pass that count explicitly.</p>
+<p>The reduced-vs-full guarantee is measured on the reduced test sectioning and on the eight-coil sectioning above, not yet on the full ITER sectioned set: assembling the real plant calls the geometry rebuild, which did not finish inside this node's budget. The real-set number is owed and is the natural next step, together with a figure from it.</p>
+</section>
+</body>
+</html>

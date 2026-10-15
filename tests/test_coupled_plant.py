@@ -126,22 +126,17 @@ def test_cold_and_cached_plants_are_identical(tmp_path):
     cold = coupled_plant(machine, source, cache_dir=tmp_path)
     cached = coupled_plant(machine, source, cache_dir=tmp_path)
     assert any(tmp_path.glob("*/plant.npz"))
-    for name in (
+    for field in (
         "coil_inductance",
         "coil_resistance",
-        "mode_tau.shape",
+        "mode_tau",
         "mode_coil_coupling",
         "section_plasma_flux",
         "mode_plasma_flux",
         "plasma_times",
         "reduction_error",
     ):
-        field, _, attr = name.partition(".shape")
-        left, right = getattr(cold, field), getattr(cached, field)
-        if attr:
-            assert np.shape(left) == np.shape(right)
-        else:
-            assert np.array_equal(left, right), field
+        assert np.array_equal(getattr(cold, field), getattr(cached, field)), field
     assert cold.provenance == cached.provenance
 
 

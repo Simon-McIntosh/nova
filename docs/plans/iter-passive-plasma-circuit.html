@@ -21,11 +21,11 @@
   <meta name="plan-sprint" content="S24">
   <meta name="plan-tags" content="iter,machine-description,equilibrium">
   <meta name="plan-blocks" content="power_convertor:iter-switched-terminal-transients">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
   <title>ITER Passive and Prescribed-Plasma Circuit | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="8">
+<meta name="plan-version" content="9">
 <meta name="plan-modified" content="2026-10-15">
 </head>
 <body>
@@ -144,7 +144,7 @@
     the bare-coil residual.</p>
 
     <h2 id="s4">§4 — The coupled plant, through one narrow imported call</h2>
-<section data-reckon="section" data-id="s4" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s4" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
     <p>power_convertor imports nova and makes one call: given a machine description and a plasma source, it
     returns the coupled plant. The plasma source is either a DINA case or a reconstructed equilibrium of a
     measured pulse, each with the coil currents that go with it (DINA's, or the measured ones); the call does
@@ -223,6 +223,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-s5-source-landed" data-who="reckon-build" data-when="2026-10-15T09:00:00Z">
     <div class="r-comment-body"><p>First check landed (merged <code>6c0f4db5d</code>): a MAST reconstruction through the generic source matches its own ψ below 8 mWb at 71 coils and 46 loops; the DINA case is unchanged; a sign flip is refused. The plant checks wait for §4. <a href="/nova/evidence/archive/iter-passive-plasma-circuit-landed.html#reconstructed-plasma-source">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-close-s4" data-who="reckon-build" data-when="2026-10-15T09:40:00Z">
+    <div class="r-comment-body"><p>§4 landed (merged <code>c4c7abd78</code>): one public call and result type; cold equals cached; the reduced plant is within 1 % of the full model for all 14 coils to 5 kHz. This is the evidence for power_convertor's gates g-istt-1 and g-jspr-1. The serialiser and screening duplication is being repaired without changing the surface. <a href="/nova/evidence/archive/iter-passive-plasma-circuit-landed.html#iter-coupled-plant-call">evidence</a></p></div>
 </div>
 </section>
 </main>

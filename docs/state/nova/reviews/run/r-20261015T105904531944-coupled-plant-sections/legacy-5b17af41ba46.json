@@ -1,0 +1,82 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest (r-20261015T105904531944-coupled-plant-sections/manifest.md) carries empty baseline_suite and after_suite keys, and its gate logs (full-gate.log 28 passed; real-set.log 2 passed) are single-arm, so no base-vs-head failure count exists to derive",
+  "base_log_revision": null,
+  "call_site_count": 2,
+  "call_sites": [
+    "nova/circuit/passive.py:803",
+    "nova/circuit/passive.py:833"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-10-15T10:59:30Z",
+  "findings": [
+    {
+      "file": "tests/test_coupled_plant.py",
+      "line": "192",
+      "severity": "follow-on",
+      "text": "follow-on: the terminal-series-reduction assertion compares the fixture's own construction -- tests/test_coupled_plant.py:91 builds coil_inductance as series.T @ matrix[:n_section,:n_section] @ series and :95 sets section_inductance=matrix[:n_section,:n_section], and coupled_plant copies both through unchanged -- so both sides of the allclose derive from the same test matrix and the assertion moves with the fixture rather than the change; only a dropped or reordered section pass-through can fail it, and docs/evidence/fragments/iter-passive-plasma-circuit/coupled-plant-sections.html:3 concedes the 0.000e+00 is 'exact, since the terminals are formed by that same reduction'."
+    },
+    {
+      "file": "tests/test_coupled_plant.py",
+      "line": "334",
+      "severity": "follow-on",
+      "text": "follow-on: the real-set reduction assertion has the same constructed-equality shape -- :316 builds coil_inductance as series.T @ matrix[:n_section,:n_section] @ series and :320 sets section_inductance=matrix[:n_section,:n_section] from the same matrix -- so the logged 'series-reduction max relative error = 0.000e+00' in real-set.log measures the fixture's invariant, not the plant, and cannot redden while the two pass-through fields stay consistent."
+    },
+    {
+      "file": "tests/test_coupled_plant.py",
+      "line": "220",
+      "severity": "follow-on",
+      "text": "follow-on: the negative control perturbs a copy inside the test (:218 perturbed[0,0] *= 1.5) and asserts only that two arrays it builds itself differ (:220), never calling coupled_plant with the perturbed section_inductance, so the assertion is true for any plant; the out-of-suite control at negative-control.log carries EXIT=1 but its only failing artifact is a bare traceback with no test id, so it demonstrates the invariant's sensitivity rather than the change's reddening."
+    },
+    {
+      "file": "nova/circuit/coupled_plant.py",
+      "line": "378",
+      "severity": "follow-on",
+      "text": "follow-on: _cache_digest updates on section_coil, section_inductance and section_resistance but not on section_passive_mutual or section_names, which are inputs to stored outputs -- mode_section_coupling is computed from section_passive_mutual at :218 and section_names is stored at :241 -- so two machines differing only in those fields collide on the same digest and the cached plant returns mode_section_coupling/section_names belonging to the other machine."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call sites",
+    "diff": "read commit by commit from da8618fbb to 56d246c1c -- a single commit, seven files, 266 insertions and 9 deletions, adding the five fields and n_section to nova/circuit/coupled_plant.py, extending nova/circuit/passive.py:803/:833, extending both test files, and adding the section_reduction tests and the fragment.",
+    "done_when": "all three controls are recorded at the reviewed head -- real-set.log logs the 1e-10 real-set reduction, real-set.log logs the 0.5% unsectioned self fraction 0.004621797304724451, and negative-control.log ends EXIT=1 with an AssertionError -- though two of the three measure the test fixture's own construction.",
+    "goal": "the node's goal is to add the section-level inductance, resistance and mode couplings to CoupledPlant with the terminal fields as their series reduction; nova/circuit/coupled_plant.py:81-87 add section_names/section_coil/section_inductance/section_resistance/mode_section_coupling and keep coil_inductance/coil_resistance/mode_coil_coupling as the terminal fields.",
+    "manifest": "read; status complete, commits 56d246c1c, tests 28 passed on the two named files with real-set 2 passed, test_logs naming full-gate.log/real-set.log, and a negative_control_log at negative-control.log; it carries empty baseline_suite and after_suite keys, so its added-failure count is unmeasured rather than zero.",
+    "write_paths": "the declared scope is the seven paths named in the reviewed manifest (nova/circuit/coupled_plant.py, nova/circuit/passive.py, tests/test_coupled_plant.py, tests/test_circuit_passive.py, docs/research/iter-coupled-plant-call.html and the two fragments, plus the gate-log directory)."
+  },
+  "justifications": {
+    "durability": "tests/test_coupled_plant.py:358 (unsectioned self at section_n_max=24) and tests/test_circuit_passive.py:524 (single-ring analytic screening) are independent and would redden on a regression, but tests/test_coupled_plant.py:192 and :334 compare values the fixture itself constructs and :220 never calls coupled_plant with its perturbation.",
+    "evidence": "the gate log records the real-set reduction (real-set.log 'series-reduction max relative error = 0.000e+00'), the independent unsectioned self check ('sectioning self max fraction = 0.004621797304724451' against 0.005) and full-gate.log 28 passed EXIT=0, but the flagship reduction figure is the fixture's own construction and the negative control is a script with no failing test id.",
+    "fit": "nova/circuit/coupled_plant.py:81 follows the dataclass field block and numpy-typed idiom of the surrounding fields, and nova/circuit/passive.py:839 keeps the loader's npz idiom with no plan or ticket label anywhere in the diff.",
+    "goal_fidelity": "nova/circuit/coupled_plant.py:81 adds section_names/section_coil/section_inductance/section_resistance and :87 mode_section_coupling to CoupledPlant with n_section at :103 while :241 keeps every prior field as the same pass-through, and nova/circuit/passive.py:803/:833 carry them through the serialisers.",
+    "reuse": "no repository owner exists for a section-to-coil wiring matrix (searched nova/**/*.py and scripts for def wiring/series/owner and arange(n_section); only the inline idiom scripts/iter_sectioned_conductor_set/build.py:233), and the added fields extend CoupledPlant at nova/circuit/coupled_plant.py:81 while save/load extend nova/circuit/passive.py:803/:833 rather than forking a serialiser.",
+    "scope_discipline": "git diff da8618fbb..56d246c1c touches only the seven declared paths (nova/circuit/coupled_plant.py, nova/circuit/passive.py, tests/test_coupled_plant.py, tests/test_circuit_passive.py, docs/research/iter-coupled-plant-call.html, the two fragments) and carries nothing the goal does not imply."
+  },
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: da8618fbb68efb8d31ca7190ce5c27e3144964a3\nreviewed_head_sha: 56d246c1cc1dc9f890ac00545d772e2453806e7a\nVERDICT goal: the node's goal is to add the section-level inductance, resistance and mode couplings to CoupledPlant with the terminal fields as their series reduction; nova/circuit/coupled_plant.py:81-87 add section_names/section_coil/section_inductance/section_resistance/mode_section_coupling and keep coil_inductance/coil_resistance/mode_coil_coupling as the terminal fields.\nVERDICT done_when: all three controls are recorded at the reviewed head -- real-set.log logs the 1e-10 real-set reduction (series-reduction max relative error = 0.000e+00), real-set.log logs the 0.5% unsectioned self fraction 0.004621797304724451, and negative-control.log ends EXIT=1 with an AssertionError -- though two of the three measure the fixture's own construction rather than the change.\nVERDICT write_paths: the declared scope is the seven paths named in the reviewed manifest (nova/circuit/coupled_plant.py, nova/circuit/passive.py, tests/test_coupled_plant.py, tests/test_circuit_passive.py, docs/research/iter-coupled-plant-call.html and the two fragments, plus the gate-log directory), and every path in the diff is inside it.\nVERDICT manifest: read; status complete, commits 56d246c1c, tests 28 passed on the two named files with real-set 2 passed, test_logs naming full-gate.log and real-set.log, and a negative_control_log at negative-control.log; it carries empty baseline_suite and after_suite keys, so its added-failure count is unmeasured rather than zero.\nVERDICT diff: read commit by commit from da8618fbb to 56d246c1c -- a single commit, seven files, 266 insertions and 9 deletions, adding the five fields and n_section to nova/circuit/coupled_plant.py, extending the save/load_coupled_plant serialisers at nova/circuit/passive.py:803/:833, extending both test files, and adding the section_reduction tests, the fragment and the docs splice.\nCALL_SITES: nova/circuit/passive.py:803, nova/circuit/passive.py:833\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/circuit/coupled_plant.py:81 adds section_names/section_coil/section_inductance/section_resistance and :87 mode_section_coupling to CoupledPlant with n_section at :103 while :241 keeps every prior field as the same pass-through, and nova/circuit/passive.py:803/:833 carry them through the serialisers.\nSCORE evidence: 17\nJUSTIFICATION evidence: the gate log records the real-set reduction (real-set.log series-reduction max relative error = 0.000e+00), the independent unsectioned self check (sectioning self max fraction = 0.004621797304724451 against 0.005) and full-gate.log 28 passed EXIT=0, but the flagship reduction figure is the fixture's own construction and the negative control is a script with no failing test id.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff da8618fbb..56d246c1c touches only the seven declared paths and carries nothing the goal does not imply.\nSCORE durability: 13\nJUSTIFICATION durability: tests/test_coupled_plant.py:358 (unsectioned self at section_n_max=24) and tests/test_circuit_passive.py:524 (single-ring analytic screening) are independent and would redden on a regression, but tests/test_coupled_plant.py:192 and :334 compare values the fixture itself constructs and :220 never calls coupled_plant with its perturbation.\nSCORE fit: 19\nJUSTIFICATION fit: nova/circuit/coupled_plant.py:81 follows the dataclass field block and numpy-typed idiom of the surrounding fields, and nova/circuit/passive.py:839 keeps the loader's npz idiom with no plan or ticket label anywhere in the diff.\nSCORE reuse: 19\nJUSTIFICATION reuse: no repository owner exists for a section-to-coil wiring matrix (searched nova/**/*.py and scripts for def wiring/series/owner and arange(n_section); only the inline idiom scripts/iter_sectioned_conductor_set/build.py:233), and the added fields extend CoupledPlant at nova/circuit/coupled_plant.py:81 while save/load extend nova/circuit/passive.py:803/:833 rather than forking a serialiser.\nFINDING tests/test_coupled_plant.py:192 follow-on: the terminal-series-reduction assertion compares the fixture's own construction -- tests/test_coupled_plant.py:91 builds coil_inductance as series.T @ matrix[:n_section,:n_section] @ series and :95 sets section_inductance=matrix[:n_section,:n_section], and coupled_plant copies both through unchanged -- so both sides of the allclose derive from the added test matrix and the assertion moves with the fixture rather than the change; only a dropped or reordered section pass-through can fail it.\nFINDING tests/test_coupled_plant.py:334 follow-on: the real-set reduction assertion has the same constructed-equality shape -- :316 builds coil_inductance as series.T @ matrix[:n_section,:n_section] @ series and :320 sets section_inductance=matrix[:n_section,:n_section] from the same matrix -- so the logged series-reduction max relative error = 0.000e+00 measures the fixture's invariant, not the plant, and cannot redden while the two pass-through fields stay consistent.\nFINDING tests/test_coupled_plant.py:220 follow-on: the negative control perturbs a copy inside the test (:218 perturbed[0,0] *= 1.5) and asserts only that two arrays it builds itself differ (:220), never calling coupled_plant with the perturbed section_inductance, so the assertion is true for any plant; the out-of-suite control at negative-control.log carries EXIT=1 but its only failing artifact is a bare traceback with no test id.\nFINDING nova/circuit/coupled_plant.py:378 follow-on: _cache_digest updates on section_coil, section_inductance and section_resistance but not on section_passive_mutual or section_names, which are inputs to stored outputs -- mode_section_coupling is computed from section_passive_mutual at :218 and section_names is stored at :241 -- so two machines differing only in those fields collide on the same digest and the cached plant returns mode_section_coupling/section_names belonging to the other machine.\n",
+  "review_run_id": "legacy-5b17af41ba46",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "da8618fbb68efb8d31ca7190ce5c27e3144964a3",
+  "reviewed_head_sha": "56d246c1cc1dc9f890ac00545d772e2453806e7a",
+  "reviewed_revision": "56d246c1cc1dc9f890ac00545d772e2453806e7a",
+  "reviewed_run_id": "r-20261015T105904531944-coupled-plant-sections",
+  "reviewer_node": "review-of-coupled-plant-sections-56d246c1cc1d",
+  "reviewer_run_id": "r-20261015T115121634246-review-of-coupled-plant-sections-56d246c1cc1d",
+  "scores": {
+    "durability": 13,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T12:20:00+00:00",
+  "total": 107,
+  "verdict": "pass-with-follow-ons"
+}

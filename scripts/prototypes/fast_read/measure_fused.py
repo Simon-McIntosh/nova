@@ -130,10 +130,13 @@ def run(kind, cache, output, trace_dir):
         jets.rows,
         jets.exterior,
     )
-    distance = np.linalg.norm(
-        np.asarray(geometry.centre)[:, None] - roots[None], axis=-1
+    generators = np.asarray(jets.mesh.generators)
+    margin = float(
+        np.max(
+            np.min(np.linalg.norm(generators[:, None] - roots[None], axis=-1), axis=1)
+        )
+        + 2 * np.max(geometry.pitch)
     )
-    margin = float(np.max(np.min(distance, axis=1)) + np.max(geometry.pitch))
     window, maintenance = fixed_points.maintain_rows(
         geometry,
         coupling,

@@ -38,6 +38,7 @@ from nova.circuit.passive import (
     raw_eddy_trajectory,
     reduce_passive_system,
     resolve_passive_thickness,
+    resumable_linkage_matrix,
     save_circuit_system,
     save_eigenbasis,
     select_modes_to_tolerance,
@@ -232,6 +233,54 @@ def test_resolved_wall_has_independent_skin_strips_and_dc_resistance():
     assert np.min(widths) < np.sqrt(7.2e-7 / (np.pi * 5000 * 4e-7 * np.pi)) / 3
     assert np.sum(widths) == pytest.approx(0.02)
     assert 1 / np.sum(1 / system.r_diag) == pytest.approx(resistance)
+
+
+def test_linkage_resume_reuses_completed_rows(tmp_path, monkeypatch):
+    from nova.circuit import linkage
+
+    conductors = ConductorSet(
+        r=np.array([1.1, 1.4, 1.8, 2.1]),
+        z=np.array([0.0, 0.2, -0.3, 0.4]),
+        dr=np.full(4, 0.03),
+        dz=np.full(4, 0.05),
+        current_share=np.ones(4),
+        circuit=np.arange(4),
+    )
+    expected = linkage.circuit_linkage_matrix(conductors, np.arange(4))
+    original = linkage._linkage_column
+
+    def interrupted(index):
+        if index >= 2:
+            raise RuntimeError("interrupted after the first block")
+        return original(index)
+
+    monkeypatch.setattr(linkage, "_linkage_column", interrupted)
+    with pytest.raises(RuntimeError, match="interrupted"):
+        resumable_linkage_matrix(conductors, np.arange(4), tmp_path, block_size=2)
+    assert len(list(tmp_path.glob("*/rows-*.npy"))) == 1
+
+    evaluated = []
+
+    def remaining(index):
+        evaluated.append(index)
+        return original(index)
+
+    monkeypatch.setattr(linkage, "_linkage_column", remaining)
+    actual = resumable_linkage_matrix(conductors, np.arange(4), tmp_path, block_size=2)
+    np.testing.assert_array_equal(actual, expected)
+    assert evaluated == [2, 3]
+    assert len(list(tmp_path.glob("*/rows-*.npy"))) == 2
+
+    bounded = tmp_path / "bounded"
+    monkeypatch.setattr(linkage, "_linkage_column", original)
+    with pytest.raises(RuntimeError, match="1/2"):
+        resumable_linkage_matrix(
+            conductors, np.arange(4), bounded, block_size=2, max_new_blocks=1
+        )
+    np.testing.assert_array_equal(
+        resumable_linkage_matrix(conductors, np.arange(4), bounded, block_size=2),
+        expected,
+    )
 
 
 def test_skin_layers_follow_each_walls_own_resistivity(monkeypatch):

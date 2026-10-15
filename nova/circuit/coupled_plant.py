@@ -171,6 +171,10 @@ def coupled_plant(
     linkage from ``machine.conductors`` and ``machine.passive_thickness_m``;
     the latter must give one physical wall thickness per source passive circuit.
     ``machine.passive_linkage_workers`` may request up to six geometry workers.
+    ``machine.passive_linkage_cache_dir`` enables durable linkage row blocks;
+    ``machine.passive_linkage_block_size`` controls their size (default 32).
+    ``machine.passive_linkage_block_limit`` bounds the number of new blocks
+    completed by one call; an incomplete call raises with its durable count.
     """
     conductors: ConductorSet = machine.conductors
     series = np.asarray(machine.series, dtype=np.float64)
@@ -261,6 +265,11 @@ def coupled_plant(
                 layer_count,
                 highest_frequency_hz=float(np.max(frequencies)),
                 workers=getattr(machine, "passive_linkage_workers", 1),
+                linkage_cache_dir=getattr(machine, "passive_linkage_cache_dir", None),
+                linkage_block_size=getattr(machine, "passive_linkage_block_size", 32),
+                linkage_block_limit=getattr(
+                    machine, "passive_linkage_block_limit", None
+                ),
             )
         )
 

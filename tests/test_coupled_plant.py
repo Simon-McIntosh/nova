@@ -399,6 +399,7 @@ def test_machine_passive_layers_change_screening_and_preserve_one_layer(tmp_path
 
     machine.passive_thickness_m = np.full(machine.passive_circuits.size, 0.2)
     machine.passive_layer_count = 2
+    machine.passive_linkage_cache_dir = tmp_path / "linkage"
     layered = coupled_plant(
         machine, None, frequencies=frequency, cache_dir=tmp_path / "layered"
     )
@@ -407,6 +408,7 @@ def test_machine_passive_layers_change_screening_and_preserve_one_layer(tmp_path
         layered.terminal_impedance(frequency), original.terminal_impedance(frequency)
     )
     assert np.max(layered.reduction_error) < 0.01
+    assert list((tmp_path / "linkage").glob("*/rows-*.npy"))
 
 
 def test_layered_cache_key_tracks_skin_resistivity():

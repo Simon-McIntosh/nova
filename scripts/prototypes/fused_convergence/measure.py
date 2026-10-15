@@ -360,7 +360,7 @@ def run(args):
             counter = [0]
 
             def multiply(x):
-                return np.asarray(product(jnp.asarray(x)))
+                return np.asarray(product(jnp.asarray(x))).copy()
 
             def count(_):
                 counter[0] += 1
@@ -465,7 +465,7 @@ def run(args):
         counter = [0]
 
         def multiply(x):
-            return np.asarray(product(jnp.asarray(x, dtype=rhs.dtype)))
+            return np.asarray(product(jnp.asarray(x, dtype=rhs.dtype))).copy()
 
         def count(_):
             counter[0] += 1

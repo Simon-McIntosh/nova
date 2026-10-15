@@ -35,9 +35,29 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
     sigma = convention.sigma
     axis = roots.position[0]
     axis_flux = roots.jet.value[0]
-    wall_flux = jax.vmap(lambda point: field.evaluate(point).value)(
-        geometry.wall_points
+    wall_start = geometry.wall_points
+    wall_end = wall_start[geometry.wall_following]
+    wall_midpoint = (wall_start + wall_end) / 2
+    node_flux = jax.vmap(lambda point: field.evaluate(point).value)(wall_start)
+    middle_flux = jax.vmap(lambda point: field.evaluate(point).value)(wall_midpoint)
+    signed_start = sigma * node_flux
+    signed_end = signed_start[geometry.wall_following]
+    signed_middle = sigma * middle_flux
+    curvature = 2 * (signed_start + signed_end - 2 * signed_middle)
+    slope = signed_end - signed_start - curvature
+    peak_fraction = jnp.clip(
+        -slope / jnp.where(curvature < 0, 2 * curvature, 1), 0.0, 1.0
     )
+    peak = wall_start + peak_fraction[:, None] * (wall_end - wall_start)
+    peak_flux = jax.vmap(lambda point: field.evaluate(point).value)(peak)
+    candidate_points = jnp.stack((wall_start, wall_end, peak), axis=1)
+    candidate_values = jnp.stack(
+        (node_flux, node_flux[geometry.wall_following], peak_flux), axis=1
+    )
+    best_on_edge = jnp.argmax(sigma * candidate_values, axis=1)
+    edge_row = jnp.arange(len(wall_start))
+    wall_points = candidate_points[edge_row, best_on_edge]
+    wall_flux = candidate_values[edge_row, best_on_edge]
     count = roots.position.shape[0]
     if count == 1:
         roots = jax.tree.map(
@@ -101,7 +121,7 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
         provisional_core = ungated(geometry, approximate, sigma, seed)
     wall_cell = jax.vmap(
         lambda point: jnp.argmax(topology._inside_cells(geometry, point))
-    )(geometry.wall_points)
+    )(wall_points)
     wall_eligible = provisional_core[wall_cell]
     wall_scores = jnp.where(wall_eligible, sigma * wall_flux, -jnp.inf)
     wall_index = jnp.argmax(wall_scores)
@@ -113,7 +133,7 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
     diverted = saddle_live & (saddle_score >= wall_score)
     level = sigma * jnp.maximum(wall_score, saddle_score)
     boundary = jnp.where(
-        diverted, roots.position[saddle_index], geometry.wall_points[wall_index]
+        diverted, roots.position[saddle_index], wall_points[wall_index]
     )
     normal = diverted & near_saddle
     approximate = approximate._replace(

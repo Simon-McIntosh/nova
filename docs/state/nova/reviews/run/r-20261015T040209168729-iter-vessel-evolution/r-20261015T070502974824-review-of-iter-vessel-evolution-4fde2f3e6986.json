@@ -1,0 +1,71 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "0fd48907c589578d70ea5042ef48561cd52f641c",
+    "dc2c365888f4d68b20c2066627dac0e20707ce12",
+    "66ab3b2f162ae5f4a88c04dfc81e0c402d600103",
+    "0d34085d5c579b67908c1b10f189426a35674afc",
+    "16b5d7ea3aa177cb833b1bee1a3b6863da729b5e",
+    "4fde2f3e6986dadd385f9220f71f685351587fa9"
+  ],
+  "completed_at": "2026-10-15T07:32:46.558Z",
+  "dispatched_at": "2026-10-15T07:05:21Z",
+  "findings": [
+    {
+      "file": "scripts/iter_vessel_evolution/measure.py",
+      "line": "171",
+      "severity": "follow-on",
+      "text": "follow-on (reuse, capability duplicated): passive_flux_at_points rebuilds the grid-flux-columns capability that nova/circuit/linkage.py:450 `sensor_grid_couplings` already owns -- the docstring of that owner is literally \"what flux each grid point sees per ampere of circuit current\" and it is documented \"build once per machine description and reuse across slices\", which is exactly this use. The addition does not extend that owner; it reassembles the current_share x kernel membership by hand (measure.py:191 `coupling = membership @ kernel`) and substitutes a thin `greens_psi` point kernel (measure.py:188) for the finite-area kernel the owner applies. It matters rather than being cosmetic: the evolved flux at VS3 is compared against DINA's passive flux from section 2's `conductor_sources`, which uses a finite-area element kernel, so the two halves of the VS3 arm at evolve.py:384 are computed with different kernels and any part of the 2.0-3.5 Wb delta that is kernel rather than current is not separable from the receipt."
+    },
+    {
+      "file": "scripts/iter_vessel_evolution/evolve.py",
+      "line": "292",
+      "severity": "follow-on",
+      "text": "follow-on (durability): the driver that produces every number in the deliverable has no test. evolve.py:292 main() assembles the coverage clamp, the vsl-sign selection, the grouping and the three voltage arms, and measure.py:171 passive_flux_at_points and measure.py:195 vs3_residual are likewise unexercised, so the file is green while the change to the mechanism is unguarded; what the gate does cover is the small helpers (positive_control, assign_by_containment, group_comparison) and the pre-existing integrator."
+    }
+  ],
+  "gate_arms_note": "the reviewed run's manifest carries baseline_suite and after_suite both blank, so it declares no readable suite arm and added_failure_count is 0 by absence of arms rather than a measured zero. The run's own arms are elsewhere and were read: gate-head-fde500947.log (PASS, 4 passed, EXIT=0) and gate-head-4fde2f3e6.log (PASS, 5 passed, EXIT=0) are the base and head arms of tests/test_iter_vessel_evolution.py, so no failure id is added). The three scenario receipts result-{105014,105052}-{12mm,6mm}.json were re-read and every headline the manifest and record quote reconciles.",
+  "item_verdicts": {
+    "call_sites": "no production call site: the change adds only a CLI script family, its test and its documents, and a grep over nova/ finds nothing importing scripts/iter_vessel_evolution.",
+    "diff": "read commit by commit from fde500947 to 4fde2f3e6: 0fd48907c and dc2c36588 (the driver and the DINA comparison), 66ab3b2f1 and 16b5d7ea3 (the record), 0d34085d5 (the propagation test) and 4fde2f3e6 (the 105052 figures redrawn); 12 files, 9035 insertions, all inside the declared scope.",
+    "done_when": "done is a stated tolerance, per-coil rms and peak residual, and the plan's negative control; measure.py:106 applies peak residual <= max(10 kA, 25% of the loop's DINA peak) and result-105014-12mm.json records 91/103 loops within tolerance, rms 857/793/790/780 V and vs3 closes False -- but the plan's stated negative-control expectation (removing the plasma drive brings back the bare-coil residual) is contradicted, since 780 V stands against 857 V bare, and docs/research/iter-vessel-evolution.html:40 reports the contradiction rather than resolving it.",
+    "goal": "the node's goal is to evolve the sectioned passive set through a DINA scenario and measure it group by group against DINA's pf_passive currents, the whole coupled-flux coil voltages and section 2's VS3 psi-map residual; scripts/iter_vessel_evolution/evolve.py:292 builds all three arms and docs/research/iter-vessel-evolution.html:24 reports them.",
+    "manifest": "read; its checkpoint, landing, tests and negative_control_note describe the landed head 4fde2f3e6, its commits field lists the circuit commits through 4fde2f3e6 and it names gate-head-4fde2f3e6.log and gate-negative-propagation-4fde2f3e6.log, but baseline_suite and after_suite are blank so the manifest records no suite arm of its own.",
+    "write_paths": "every path in the diff is inside the brief's declared scope: scripts/iter_vessel_evolution/{evolve,measure,figures}.py, tests/test_iter_vessel_evolution.py, docs/research/iter-vessel-evolution.html, the six SVGs under docs/figures/iter-vessel-evolution/ and docs/evidence/fragments/iter-passive-plasma-circuit/iter-vessel-evolution.html; nothing outside them, and no nova/ production module is edited."
+  },
+  "justifications": {
+    "durability": "the previously self-referential assertion the earlier review flagged at tests/test_iter_vessel_evolution.py:38 is gone, and its replacement at tests/test_iter_vessel_evolution.py:33 pins the propagated state against an independent closed-form L/R solution, which the recorded propagation mutation (analytic agreement 1.4e-13 -> 6.0e-3) reddens; five points off because scripts/iter_vessel_evolution/evolve.py:292, the driver that produces the whole deliverable, and measure.py:171 and measure.py:195 carry no test at all.",
+    "evidence": "the receipts reproduce -- I re-read result-105014-12mm.json, result-105052-12mm.json and result-105014-6mm.json and every headline the manifest and record quote (91/103, 33/103, 90/102, the four voltage arms, the VS3 before/after 1.081->3.662 and 2.523->16.316, the positive control 1.36e-13) matches -- and gate-head-4fde2f3e6.log names the head revision and 5 passed while gate-negative-propagation-4fde2f3e6.log records the propagation mutation reddening the new test, but the reviewed manifest's own baseline_suite and after_suite are blank, so it records no suite arm and the receipts were generated at 0d34085d5 rather than at the head.",
+    "fit": "the three added modules follow the surrounding scripts idiom (module docstring, explicit imports at the top, argparse main) and a naming scan over the new source finds no plan section, version or ticket label; two points off for the two constants that share one value at scripts/iter_vessel_evolution/figures.py:20, where DINA and FULL are both #315f78.",
+    "goal_fidelity": "all three measurements the brief names are present and reconciled in the receipts: measure.py:106 applies a tolerance stated before the comparison, result-105014-12mm.json gives 91/103 loops within tolerance and rms 857/793/790/780 V, and the VS3 arm reads closes False at 1.081 -> 3.662 Wb; two points off because the plan's stated negative-control expectation is not met and is reported rather than resolved.",
+    "reuse": "most added definitions extend owners (integrate_eddy_ode nova/circuit/propagate.py:46, plasma_flux_at_points nova/imas/prescribed_plasma.py:15, CrossSection nova/imas/machine.py, greens_psi nova/biot/greens.py:324, and section 2's conductor_sources/current_vector imported rather than recopied), but measure.py:171 passive_flux_at_points re-implements the grid-flux-columns capability owned by nova/circuit/linkage.py:sensor_grid_couplings without extending it, so the dimension is scored at the duplicated-capability floor.",
+    "scope_discipline": "every added path is inside the brief's declared scope with no edit to nova/ production code and no touch of a peer plan's files; two points off because the grouping bypasses the brief's named pf_passive owner (see reuse)."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to evolve the sectioned passive set through a DINA scenario and measure it group by group against DINA's pf_passive currents, the whole coupled-flux coil voltages and section 2's VS3 psi-map residual; scripts/iter_vessel_evolution/evolve.py:292 builds all three arms and docs/research/iter-vessel-evolution.html:24 reports them.\nVERDICT done_when: done is a stated tolerance, per-coil rms and peak residual, and the plan's negative control; measure.py:106 applies peak residual <= max(10 kA, 25% of the loop's DINA peak) and result-105014-12mm.json records 91/103 loops within tolerance, rms 857/793/790/780 V and vs3 closes False -- but the plan's stated negative-control expectation (removing the plasma drive brings back the bare-coil residual) is contradicted, since 780 V stands against 857 V bare, and docs/research/iter-vessel-evolution.html:40 reports the contradiction rather than resolving it.\nVERDICT write_paths: every path in the diff is inside the brief's declared scope: scripts/iter_vessel_evolution/{evolve,measure,figures}.py, tests/test_iter_vessel_evolution.py, docs/research/iter-vessel-evolution.html, the six SVGs under docs/figures/iter-vessel-evolution/ and docs/evidence/fragments/iter-passive-plasma-circuit/iter-vessel-evolution.html; nothing outside them, and no nova/ production module is edited.\nVERDICT manifest: read; its checkpoint, landing, tests and negative_control_note describe the landed head 4fde2f3e6, its commits field lists the circuit commits through 4fde2f3e6 and it names gate-head-4fde2f3e6.log and gate-negative-propagation-4fde2f3e6.log, but baseline_suite and after_suite are blank so the manifest records no suite arm of its own.\nVERDICT diff: read commit by commit from fde500947 to 4fde2f3e6: 0fd48907c and dc2c36588 (the driver and the DINA comparison), 66ab3b2f1 and 16b5d7ea3 (the record), 0d34085d5 (the propagation test) and 4fde2f3e6 (the 105052 figures redrawn); 12 files, 9035 insertions, all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: all three measurements the brief names are present and reconciled in the receipts: measure.py:106 applies a stated tolerance, result-105014-12mm.json gives 91/103 loops and rms 857/793/790/780 V, and the VS3 arm reads closes False; two points off because the plan's stated negative-control expectation is not met and is reported rather than resolved.\nSCORE evidence: 16\nJUSTIFICATION evidence: the receipts reproduce (re-read result-105014-12mm.json, result-105052-12mm.json and result-105014-6mm.json; every headline quoted matches) and gate-head-4fde2f3e6.log names the head revision and 5 passed, but the manifest's baseline_suite and after_suite are blank and the receipts were generated at 0d34085d5, two commits before the head.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every added path is inside the declared scope with no edit to nova/ production code and no touch of a peer plan's files; two points off because the grouping bypasses the brief's named pf_passive owner.\nSCORE durability: 15\nJUSTIFICATION durability: the self-referential assertion the earlier review flagged at tests/test_iter_vessel_evolution.py:38 is gone and its replacement at tests/test_iter_vessel_evolution.py:33 pins the propagated state against an independent analytic L/R form, which the recorded mutation reddens; five points off because evolve.py:292, the driver producing the deliverable, carries no test.\nSCORE fit: 18\nJUSTIFICATION fit: the new modules follow the scripts idiom and a naming scan over the new source finds no plan section, version or ticket label; two points off for DINA and FULL sharing one value at scripts/iter_vessel_evolution/figures.py:20.\nSCORE reuse: 5\nJUSTIFICATION reuse: most definitions extend owners (integrate_eddy_ode, plasma_flux_at_points, CrossSection, greens_psi, section 2's conductor_sources), but measure.py:171 passive_flux_at_points re-implements the grid-flux-columns capability owned by nova/circuit/linkage.py:450 sensor_grid_couplings without extending it, with a thin kernel where the owner uses the finite-area one.\nFINDING scripts/iter_vessel_evolution/measure.py:171 follow-on: passive_flux_at_points re-implements the grid-flux-columns capability nova/circuit/linkage.py:450 sensor_grid_couplings already owns, reassembling the current_share x kernel membership by hand instead of extending the owner, and substitutes a thin greens_psi kernel for the finite-area kernel the owner and section 2's conductor_sources use, so the two halves of the VS3 arm at evolve.py:384 are computed with different kernels.\nFINDING scripts/iter_vessel_evolution/evolve.py:292 follow-on: the driver main() that produces every reported number, and measure.py:171 and measure.py:195 with it, has no test, so a regression in the coverage clamp, the vsl-sign selection, the grouping or the voltage assembly is not caught by the gate that reads 5 passed.\n",
+  "review_run_id": "r-20261015T070502974824-review-of-iter-vessel-evolution-4fde2f3e6986",
+  "reviewed_base_sha": "fde500947c3d89a7fe6023f05159cf93f4c87016",
+  "reviewed_head_sha": "4fde2f3e6986dadd385f9220f71f685351587fa9",
+  "reviewed_revision": "4fde2f3e6986dadd385f9220f71f685351587fa9",
+  "reviewed_run_id": "r-20261015T040209168729-iter-vessel-evolution",
+  "reviewer_node": "review-of-iter-vessel-evolution-4fde2f3e6986",
+  "reviewer_run_id": "r-20261015T070502974824-review-of-iter-vessel-evolution-4fde2f3e6986",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T07:22:00+00:00",
+  "total": 90,
+  "verdict": "pass"
+}

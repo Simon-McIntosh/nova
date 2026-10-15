@@ -32,6 +32,7 @@ from scripts.prototypes.read_robustness.census import axis_identity, census
 from scripts.prototypes.read_robustness.oracle import shifted_axis
 from scripts.prototypes.solve_options.profile import _machine
 from scripts.prototypes.sub_millisecond.measure_bell_cut import bell_polygon
+from scripts.prototypes.sub_millisecond.measure_wall_march import polygon_area
 from scripts.prototypes.support.geometry import certificate_field
 from tests.equilibrium.test_topology_read import _analytic_inputs
 
@@ -227,9 +228,32 @@ def run(
         boundary = float(reading.boundary_flux)
         memberships = np.asarray(reading.membership)
         ordinary_valid = np.asarray(ordinary_valid)
+        old_fraction = np.asarray(
+            polygon_area(polygon, polygon_count) / geometry.full_area
+        )
         invalid = np.flatnonzero((memberships > 0) & ~ordinary_valid)
+        crossing_count = np.zeros(len(centre), dtype=int)
+        for index in range(len(centre)):
+            points = vertices[index, : counts[index]]
+            local = (points - centre[index]) / size[index]
+            x, y = local.T
+            coefficient = coefficients[index]
+            signed = float(convention.sigma) * (
+                coefficient[0]
+                + coefficient[1] * x
+                + coefficient[2] * y
+                + coefficient[3] * x * x
+                + coefficient[4] * x * y
+                + coefficient[5] * y * y
+                - boundary
+            )
+            crossing_count[index] = np.count_nonzero(signed * np.roll(signed, -1) < 0)
+        interesting = np.union1d(
+            invalid,
+            np.flatnonzero((crossing_count == 4) & np.asarray(reading.selected_cells)),
+        )
         rows = []
-        for index in invalid:
+        for index in interesting:
             points = vertices[index, : counts[index]]
             local = (points - centre[index]) / size[index]
             x, y = local.T
@@ -262,6 +286,9 @@ def run(
                     "normal_form_cell": bool(reading.normal_form_cells[index]),
                     "selected_cell": bool(reading.selected_cells[index]),
                     "membership": float(memberships[index]),
+                    "reference_membership": float(initial.membership[index]),
+                    "old_fraction": float(old_fraction[index]),
+                    "ordinary_valid": bool(ordinary_valid[index]),
                     "polygon_count": int(polygon_count[index]),
                     "polygon": np.asarray(
                         polygon[index, : polygon_count[index]]

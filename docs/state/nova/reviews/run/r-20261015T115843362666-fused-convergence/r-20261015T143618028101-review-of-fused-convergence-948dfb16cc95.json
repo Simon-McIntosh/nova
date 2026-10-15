@@ -8,6 +8,13 @@
   "call_sites": [],
   "completed_at": "2026-10-15T14:43:19Z",
   "dispatched_at": "2026-10-15T14:36:43Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diverted-stall",
+      "recorded_at": "2026-10-15T14:44:07.202088+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/research/fused-convergence.html",

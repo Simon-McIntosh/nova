@@ -682,13 +682,36 @@ def run(args):
             }
             save(output, result)
 
-    if args.start_json:
-        predecessor = (
-            jnp.asarray(
-                json.loads(args.start_json.read_text())["terminal_state"]["moments"]
-            )
-            / scale
+    def terminal_panel(point, residual, converged):
+        coordinates = np.vstack(
+            (machine.node, machine.wall_node, machine.sample_coordinates)
         )
+        analytic = jnp.asarray(certificate._exact_state(name, exact, coordinates))
+        exterior, _ = _exterior(cache, key)
+        operator = fixture.forward_operator(source, machine)
+        terminal = mapped(point * scale, *operands)
+        solved_flux = exterior + _image(operator, point * scale)
+        return {
+            "coordinates": np.asarray(machine.node).tolist(),
+            "wall": np.asarray(machine.wall_node).tolist(),
+            "solved_flux": np.asarray(solved_flux)[: len(machine.node)].tolist(),
+            "analytic_flux": np.asarray(analytic)[: len(machine.node)].tolist(),
+            "solved_roots": np.asarray(terminal.roots).tolist(),
+            "analytic_roots": roots.tolist(),
+            "terminal_residual": residual,
+            "converged": converged,
+        }
+
+    if args.start_json:
+        start_receipt = json.loads(args.start_json.read_text())
+        predecessor = jnp.asarray(start_receipt["terminal_state"]["moments"]) / scale
+        if args.panel_only:
+            result["panel"] = terminal_panel(
+                predecessor,
+                start_receipt["history"][-1]["residual"],
+                start_receipt["converged"],
+            )
+            save(output, result)
         if args.warm:
             measure_warm(predecessor)
         return
@@ -708,24 +731,9 @@ def run(args):
         "moments": np.asarray(point * scale).tolist(),
         "roots": np.asarray(mapped(point * scale, *operands).roots).tolist(),
     }
-    coordinates = np.vstack(
-        (machine.node, machine.wall_node, machine.sample_coordinates)
+    result["panel"] = terminal_panel(
+        point, history[-1]["residual"], result["converged"]
     )
-    analytic = jnp.asarray(certificate._exact_state(name, exact, coordinates))
-    exterior, _ = _exterior(cache, key)
-    operator = fixture.forward_operator(source, machine)
-    terminal = mapped(point * scale, *operands)
-    solved_flux = exterior + _image(operator, point * scale)
-    result["panel"] = {
-        "coordinates": np.asarray(machine.node).tolist(),
-        "wall": np.asarray(machine.wall_node).tolist(),
-        "solved_flux": np.asarray(solved_flux)[: len(machine.node)].tolist(),
-        "analytic_flux": np.asarray(analytic)[: len(machine.node)].tolist(),
-        "solved_roots": np.asarray(terminal.roots).tolist(),
-        "analytic_roots": roots.tolist(),
-        "terminal_residual": history[-1]["residual"],
-        "converged": result["converged"],
-    }
     save(output, result)
 
 
@@ -747,6 +755,7 @@ def main():
     parser.add_argument("--warm-only", action="store_true")
     parser.add_argument("--compare", action="store_true")
     parser.add_argument("--compare-warm", action="store_true")
+    parser.add_argument("--panel-only", action="store_true")
     args = parser.parse_args()
     run(args)
 

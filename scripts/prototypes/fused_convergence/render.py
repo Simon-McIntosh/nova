@@ -89,9 +89,15 @@ def main():
     for carrier in ("limited", "diverted"):
         for method in ("dense", "gmres", "krylov"):
             result = results.get((carrier, method), {})
+            if "panel" not in result:
+                panel_receipt = args.receipts / f"{carrier}-{method}-panel.json"
+                if panel_receipt.exists():
+                    result = json.loads(panel_receipt.read_text())
             if "panel" in result:
-                panel(result["panel"], args.output / f"{carrier}-terminal.svg")
-                break
+                panel(
+                    result["panel"],
+                    args.output / f"{carrier}-{method}-terminal.svg",
+                )
 
 
 if __name__ == "__main__":

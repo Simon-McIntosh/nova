@@ -186,7 +186,7 @@ def map_moments(
     reading = read(field, roots, geometry, convention, policy, frame_gate=frame_gate)
     selected = reading.selected_cells
     full = (
-        (reading.membership >= 1 - 1e-14)
+        (reading.geometric_membership >= 1 - 1e-14)
         & (geometry.vertex_count == 6)
         & ~reading.booking_cells
     )
@@ -200,7 +200,9 @@ def map_moments(
     saddle_cut = cut & reading.booking_cells
     ordinary_cut = cut & ~saddle_cut
     saddle, saddle_valid = _saddle_moments(geometry, reading, profile)
-    raw = interior + jnp.where(ordinary_cut[:, None], ordinary, 0.0) + saddle
+    raw = (
+        interior + jnp.where(ordinary_cut[:, None], ordinary, 0.0) + saddle
+    ) * reading.path_weight[:, None]
     total = jnp.sum(raw[:, 0])
     missing = jnp.any(cut & ~complete)
     valid = (

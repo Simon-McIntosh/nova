@@ -6,7 +6,6 @@ import jax
 import jax.numpy as jnp
 
 from nova.equilibrium import topology
-from scripts.prototypes.sub_millisecond.measure_saddle_frame import connected_cells
 from scripts.prototypes.fast_read.ordinary_cut import _split_polygons
 from scripts.prototypes.sub_millisecond.measure_bell_cut import (
     bell_polygon as single_polygon,
@@ -23,6 +22,8 @@ class FastRead(NamedTuple):
     wall_candidate: jax.Array
     saddle_candidate: jax.Array
     membership: jax.Array
+    geometric_membership: jax.Array
+    path_weight: jax.Array
     selected_cells: jax.Array
     field_coefficients: jax.Array
     saddle_form: topology.SaddleNormalForm
@@ -98,6 +99,84 @@ def _wall_path_ceiling(
     return jax.lax.fori_loop(0, len(geometry.centre), relax, best)
 
 
+def _continuous_path_weight(
+    geometry, coefficients, form, axis, seed, sigma, level, radius, saddle_live
+):
+    """Propagate the strongest smooth edge passage from the magnetic axis."""
+    vertices = geometry.vertices
+    count = geometry.vertex_count
+    slot = jnp.arange(vertices.shape[1])
+    following = jnp.where(slot[None] + 1 < count[:, None], slot[None] + 1, 0)
+    end = jnp.take_along_axis(vertices, following[..., None], axis=1)
+    midpoint = (vertices + end) / 2
+    local = (vertices - geometry.centre[:, None]) / geometry.pitch[:, None, None]
+    local_middle = (midpoint - geometry.centre[:, None]) / geometry.pitch[:, None, None]
+    local_end = (end - geometry.centre[:, None]) / geometry.pitch[:, None, None]
+
+    def signed(position):
+        x, y = position[..., 0], position[..., 1]
+        return sigma * (
+            coefficients[:, 0, None]
+            + coefficients[:, 1, None] * x
+            + coefficients[:, 2, None] * y
+            + coefficients[:, 3, None] * x * x
+            + coefficients[:, 4, None] * x * y
+            + coefficients[:, 5, None] * y * y
+        )
+
+    first, middle, last = signed(local), signed(local_middle), signed(local_end)
+    curvature = 2 * (first + last - 2 * middle)
+    slope = last - first - curvature
+    fraction = jnp.clip(-slope / jnp.where(curvature < 0, 2 * curvature, 1), 0, 1)
+    peak = jnp.maximum(
+        jnp.maximum(first, last),
+        signed(local + fraction[..., None] * (local_end - local)),
+    )
+    peer = jnp.maximum(geometry.neighbour, 0)
+    peer_edge = jnp.maximum(geometry.neighbour_edge, 0)
+    passage = jnp.minimum(peak, peak[peer, peer_edge])
+    flux_width = jnp.asarray(1e-8, dtype=passage.dtype)
+    flux_weight = jnp.clip(0.5 + (passage - level) / flux_width, 0, 1)
+
+    axis_sector = jnp.argmax(topology._normal_form_sectors(axis[None], form)[0])
+    offset = midpoint - form.position
+    parameter = jnp.einsum("...i,ai->...a", offset, form.direction)
+    residual = (
+        offset[..., None, :]
+        - parameter[..., None] ** 2 * form.curvature
+        - parameter[..., None] ** 3 * form.cubic
+    )
+    side = (
+        form.direction[:, 0] * residual[..., 1]
+        - form.direction[:, 1] * residual[..., 0]
+    )
+    next_side = jnp.roll(side, -1, axis=-1)
+    sector_margin = jnp.minimum(side[..., axis_sector], -next_side[..., axis_sector])
+    length_width = jnp.maximum(1e-7, 1e-4 * jnp.median(geometry.pitch))
+    sector_weight = jnp.clip(0.5 + sector_margin / length_width, 0, 1)
+    distance = jnp.linalg.norm(geometry.centre - form.position, axis=1)
+    near_weight = jnp.clip(0.5 + (radius - distance) / length_width, 0, 1)
+    near_weight = jnp.maximum(
+        near_weight,
+        topology._inside_cells(geometry, form.position).astype(near_weight.dtype),
+    )
+    near_weight = jnp.where(saddle_live, near_weight, 0)
+    frame_weight = 1 - near_weight[:, None] * (1 - sector_weight)
+    frame_weight = jnp.minimum(frame_weight, frame_weight[peer, peer_edge])
+    edge_weight = jnp.where(
+        geometry.neighbour >= 0, jnp.minimum(flux_weight, frame_weight), 0
+    )
+    strength = (
+        jnp.zeros((len(geometry.centre),), dtype=edge_weight.dtype).at[seed].set(1)
+    )
+
+    def relax(_, current):
+        incoming = jnp.minimum(current[peer], edge_weight)
+        return jnp.maximum(current, jnp.max(incoming, axis=1))
+
+    return jax.lax.fori_loop(0, len(geometry.centre), relax, strength)
+
+
 def read(field, roots, geometry, convention, policy, *, frame_gate=True):
     """Read both boundary candidates and axis-connected Bell support at fixed shape."""
     sigma = convention.sigma
@@ -169,6 +248,8 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
         sigma * raw_wall_score,
         sigma * saddle_score,
         jnp.zeros(len(geometry.centre)),
+        jnp.zeros(len(geometry.centre)),
+        jnp.ones(len(geometry.centre)),
         jnp.zeros(len(geometry.centre), bool),
         field.sampled_coefficient(geometry),
         form,
@@ -253,14 +334,26 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
         edge_interval=intervals,
     )
     if frame_gate:
-        connected = connected_cells(geometry, provisional, sigma, seed)
+        path_weight = _continuous_path_weight(
+            geometry,
+            provisional.field_coefficients,
+            form,
+            axis,
+            seed,
+            sigma,
+            sigma * level,
+            radius,
+            saddle_live,
+        )
+        connected = path_weight > 0
     else:
         from scripts.prototypes.sub_millisecond.measure_wall_march import (
             connected_cells as ungated,
         )
 
         connected = ungated(geometry, provisional, sigma, seed)
-    membership = jnp.where(connected, provisional.membership, 0.0)
+        path_weight = connected.astype(fraction.dtype)
+    membership = provisional.membership * path_weight
     valid = (
         roots.valid[0]
         & jnp.all(jnp.isfinite(approximate.field_coefficients))
@@ -273,6 +366,8 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
     )
     return provisional._replace(
         membership=membership,
+        geometric_membership=provisional.membership,
+        path_weight=path_weight,
         selected_cells=connected,
         fragment_selected=selected_sector & connected[:, None],
         qualified=valid & (~diverted | form.valid),

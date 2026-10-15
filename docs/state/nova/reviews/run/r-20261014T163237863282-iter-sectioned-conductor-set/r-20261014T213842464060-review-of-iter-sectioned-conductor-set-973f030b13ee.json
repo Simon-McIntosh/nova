@@ -1,0 +1,66 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed manifest records an after_suite arm at 973f030b1 (completed true, failure_count 0, failure_ids []) and no baseline_suite, so the added count is taken from the readable head arm as 0",
+  "base_log_revision": null,
+  "call_site_count": 3,
+  "call_sites": [
+    "nova/circuit/passive.py:193",
+    "scripts/iter_sectioned_conductor_set/build.py",
+    "scripts/iter_sectioned_conductor_set/validate.py"
+  ],
+  "completed_at": "2026-10-14T21:50:56.028Z",
+  "dispatched_at": "2026-10-14T21:38:59Z",
+  "findings": [
+    {
+      "file": "scripts/iter_sectioned_conductor_set/validate.py",
+      "line": "97",
+      "severity": "follow-on",
+      "text": "follow-on: the done_when's 0.5% match of every coil self term and mutual against the quoted prior export is computed (power_self_max_fraction=0.0110402 in final-raw-head-gate.log) but no longer asserted after the reconciliation was removed, so a regression that moved a CS/PF self term past 0.5% of the quoted value would still exit 0; the raw VSU term already reads 1.104% ungated."
+    },
+    {
+      "file": "scripts/iter_sectioned_conductor_set/build.py",
+      "line": "151",
+      "severity": "follow-on",
+      "text": "follow-on: unsectioned_coil_conductors hard-codes the geometry_type 2/5 dispatch that nova/imas/machine.py:451 CrossSection.transform already owns, so a geometry-type change updates one copy and not the other; it is defensible as an independent-validation adapter but does not extend its owner."
+    }
+  ],
+  "head_log_revision": "973f030b1",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read the 7 commits 7a66f9d819c3..973f030b13ee commit by commit; linkage.py threads finite_source and drops preserve_series_terminal_linkage, passive.py extracts _passive_modes, build.py/validate.py/compare_refinement.py and the two documents change.",
+    "done_when": "the refinement criterion is asserted at compare_refinement.py:63 (EXIT=0 in final-raw-head-gate.log), the 0.5% self-inductance check at validate.py:97, and the passive-removal control in negative-control.log (EXIT=1); the DINA em_coupling check is declined under the lead decision.",
+    "goal": "the run's goal is the sectioned ITER conductor set on nova's linkage and passive owners; the gained commits remove the terminal-reference reconciliation so the landed matrix is the raw finite-source section sum (build.py:145, linkage.py:288) and add the refinement gate (compare_refinement.py:63).",
+    "manifest": "read manifest.md and landing.md; they report 37 tests passing at 973f030b1, 0.302164% 12-to-6 mm refinement through 5 kHz, the 0.1% refusal at EXIT=1, and name the gate logs.",
+    "write_paths": "the ten declared paths; all paths in git diff --stat 7a66f9d819c3..973f030b13ee fall inside them."
+  },
+  "justifications": {
+    "durability": "tests/test_iter_sectioned_conductor_set.py:153 exercises both branches of require_convergence and :175 fires the validate.py:97 guard, but the raw finite-source coil block has no focused unit test.",
+    "evidence": "final-raw-head-gate.log records EXIT=0 with the 1% assert live and final-raw-tightened.log refuses at EXIT=1, but the 0.5% match to the quoted export values is computed at validate.py:62 and never asserted.",
+    "fit": "the added names (_passive_modes, require_convergence, unsectioned_coil_conductors, finite_source) are capability-named with no plan or version labels and follow nova/circuit/linkage.py:167's idiom.",
+    "goal_fidelity": "the gained change keeps the sectioned set and coupled L/R system the goal names and removes the reconcile_receipt.py correction (build.py:145, linkage.py:288), so the landed matrix is the raw section sum.",
+    "reuse": "nova/circuit/passive.py:120 _passive_modes consolidates the eigensolve formerly inline at mode_system and terminal_impedance_spectrum, but build.py:151 re-implements machine.py:451's geometry-type dispatch.",
+    "scope_discipline": "every path in git diff --stat 7a66f9d819c3..973f030b13ee is inside the ten declared write paths, the reconcile_receipt.py deletion included."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the run's goal is the sectioned ITER conductor set built on nova's linkage and passive owners; the commits gained since the prior review (7a66f9d81..973f030b13ee) remove the terminal-reference reconciliation so the landed matrix is the raw finite-source section sum, add the passive-refinement gate assertion at scripts/iter_sectioned_conductor_set/compare_refinement.py:63 and share the passive eigensolve at nova/circuit/passive.py:120, leaving all 14 coils and 295 sections in place.\nVERDICT done_when: the three checks are the coupled terminal-impedance refinement (asserted by require_convergence at compare_refinement.py:63, recorded EXIT=0 in final-raw-head-gate.log), the 0.5% self-inductance check (asserted at validate.py:97 against the independently discretized unsplit IDS elements) and the passive-removal negative control (test_passive_screening_changes_terminal_impedance_and_removal_is_bare in negative-control.log, EXIT=1); the DINA em_coupling half is declined under the lead's 14 October 2026 decision.\nVERDICT write_paths: the node's declared paths are the ten listed in the aim; git diff --stat 7a66f9d819c3..973f030b13ee touches exactly those ten (reconcile_receipt.py as a deletion), and nothing outside them.\nVERDICT manifest: read manifest.md and landing.md; at 973f030b1 they record 37 focused tests passing, both coil validations, the 101-point 12-to-6 mm refinement of 0.302164% through 5 kHz, the tightened 0.1% refusal (EXIT=1), and name final-raw-head-gate.log, final-raw-tightened.log, final-raw-audit.log and negative-control.log.\nVERDICT diff: read the 7 commits 7a66f9d819c3..973f030b13ee commit by commit; nova/circuit/linkage.py drops preserve_series_terminal_linkage and threads a finite_source flag to cylinder_greens, nova/circuit/passive.py extracts _passive_modes, build.py swaps the whole-coil reference for an unsectioned IDS conductor set, validate.py re-keys the 0.5% assertion onto sectioning, compare_refinement.py adds require_convergence, and the two documents and the impedance SVG are re-rendered raw.\nCALL_SITES: nova/circuit/passive.py:193, scripts/iter_sectioned_conductor_set/build.py, scripts/iter_sectioned_conductor_set/validate.py\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: the gained change leaves the sectioned set and coupled L/R system the goal names and removes the reconcile_receipt.py terminal correction (build.py:145 unsectioned_coil_conductors, linkage.py:288 assignment), so the landed matrix is the raw section sum the goal describes.\nSCORE evidence: 16\nJUSTIFICATION evidence: final-raw-head-gate.log records EXIT=0 with the 1% refinement assert live and the tightened 0.1% run refusing (final-raw-tightened.log EXIT=1), but the done_when's 0.5% match to the quoted export values is computed at validate.py:62 and never asserted.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff --stat 7a66f9d819c3..973f030b13ee is inside the ten declared write paths, the reconcile_receipt.py deletion included, with no stray edits elsewhere.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_iter_sectioned_conductor_set.py:153 exercises both branches of require_convergence and :175 fires the validate.py:97 sectioning guard, so each new assertion fails if its guard is removed, but the raw finite-source coil block that is the head change has no focused unit test.\nSCORE fit: 18\nJUSTIFICATION fit: the added names (_passive_modes, require_convergence, unsectioned_coil_conductors, finite_source) are capability-named with no plan, version or ticket labels and follow the numpy and dataclass idiom of nova/circuit/linkage.py:167.\nSCORE reuse: 15\nJUSTIFICATION reuse: nova/circuit/passive.py:120 _passive_modes consolidates the generalized eigensolve that was inline at mode_system and terminal_impedance_spectrum, but scripts/iter_sectioned_conductor_set/build.py:151 re-implements the geometry-type dispatch owned by nova/imas/machine.py:451.\nFINDING scripts/iter_sectioned_conductor_set/validate.py:97 follow-on: the done_when's 0.5% match of every coil self term and mutual against the quoted prior export is computed (power_self_max_fraction=0.0110402 in final-raw-head-gate.log) but no longer asserted after the reconciliation was removed, so a regression that moved a CS/PF self term past 0.5% of the quoted value would still exit 0; the raw VSU term already reads 1.104% ungated.\nFINDING scripts/iter_sectioned_conductor_set/build.py:151 follow-on: unsectioned_coil_conductors hard-codes the geometry_type 2/5 dispatch that nova/imas/machine.py:451 CrossSection.transform already owns, so a geometry-type change updates one copy and not the other; it is defensible as an independent-validation adapter but does not extend its owner.",
+  "review_run_id": "r-20261014T213842464060-review-of-iter-sectioned-conductor-set-973f030b13ee",
+  "reviewed_base_sha": "7a66f9d819c39c559f36a45f881eb618e7e082b7",
+  "reviewed_head_sha": "973f030b13ee847da695c20fb44e0db474a62bbc",
+  "reviewed_run_id": "r-20261014T163237863282-iter-sectioned-conductor-set",
+  "scores": {
+    "durability": 16,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 15,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T21:48:26.000000+00:00",
+  "total": 101
+}

@@ -38,8 +38,6 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
     wall_flux = jax.vmap(lambda point: field.evaluate(point).value)(
         geometry.wall_points
     )
-    wall_index = jnp.argmax(sigma * wall_flux)
-    wall_score = sigma * wall_flux[wall_index]
     count = roots.position.shape[0]
     if count == 1:
         roots = jax.tree.map(
@@ -52,11 +50,7 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
     saddle_score_rows = jnp.where(saddles, sigma * roots.jet.value[1:], -jnp.inf)
     saddle_index = 1 + jnp.argmax(saddle_score_rows)
     saddle_score = jnp.max(saddle_score_rows)
-    diverted = jnp.any(saddles) & (saddle_score >= wall_score)
-    level = sigma * jnp.maximum(wall_score, saddle_score)
-    boundary = jnp.where(
-        diverted, roots.position[saddle_index], geometry.wall_points[wall_index]
-    )
+    saddle_live = jnp.any(saddles)
     third, fourth = topology._curvature_derivatives(
         field, roots.position[saddle_index], jnp.median(geometry.pitch)
     )
@@ -66,6 +60,17 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
         sigma * third,
         policy.hessian_tolerance,
         sigma * fourth,
+    )
+    axis_sector = jnp.argmax(topology._normal_form_sectors(axis[None], form)[0])
+    wall_sector = topology._normal_form_sectors(geometry.wall_points, form)
+    wall_eligible = ~saddle_live | wall_sector[:, axis_sector]
+    wall_score_rows = jnp.where(wall_eligible, sigma * wall_flux, -jnp.inf)
+    wall_index = jnp.argmax(wall_score_rows)
+    wall_score = wall_score_rows[wall_index]
+    diverted = saddle_live & (saddle_score >= wall_score)
+    level = sigma * jnp.maximum(wall_score, saddle_score)
+    boundary = jnp.where(
+        diverted, roots.position[saddle_index], geometry.wall_points[wall_index]
     )
     radius = jnp.maximum(
         policy.normal_form_radius,
@@ -106,7 +111,6 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
         policy.edge_tolerance,
     )
     positive = jnp.nonzero(form.positive, size=2, fill_value=0)[0]
-    axis_sector = jnp.argmax(topology._normal_form_sectors(axis[None], form)[0])
     core = positive == axis_sector
     sector_area = fragments.area[:, positive]
     core_area = jnp.sum(jnp.where(core[None], sector_area, 0.0), axis=1)

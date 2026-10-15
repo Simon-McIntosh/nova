@@ -70,7 +70,7 @@ class CachedExterior:
         )
 
 
-def run(kind, cache, output, trace_dir):
+def run(kind, cache, output, trace_dir, jvp_only=False):
     assert jax.config.jax_enable_x64 is True and jax.default_backend() == "gpu"
     print(
         f"nova={nova.__file__} module={__file__} cwd={Path.cwd().resolve()}", flush=True
@@ -306,6 +306,63 @@ def run(kind, cache, output, trace_dir):
             axis_sign,
         )
 
+    if jvp_only:
+        point = reference
+        if kind == "limited":
+            correction_program = (
+                jax.jit(correction).lower(reference, scale, *operands).compile()
+            )
+            for _ in range(14):
+                corrected = correction_program(point, scale, *operands)
+                jax.block_until_ready(corrected)
+                point = corrected.moments
+            result["jvp_point_residual"] = float(corrected.residual)
+        else:
+            result["jvp_point_residual"] = float(
+                jnp.max(jnp.abs(state.moment_residual / scale))
+            )
+        direction = jnp.sin(jnp.arange(point.size).reshape(point.shape) + 1.0) * scale
+        direction = direction / jnp.sqrt(point.shape[0])
+
+        def image(moments):
+            return mapped(moments, *operands).moments
+
+        tangent_program = jax.jit(lambda p, d: jax.jvp(image, (p,), (d,))[1])
+        tangent = tangent_program(point, direction)
+        jax.block_until_ready(tangent)
+        rows = []
+        for step in (1e-3, 1e-4, 1e-5):
+            positive = map_program(point + step * direction, *operands).moments
+            negative = map_program(point - step * direction, *operands).moments
+            difference = (positive - negative) / (2 * step)
+            jax.block_until_ready(difference)
+            rows.append(
+                {
+                    "step": step,
+                    "blocks": [
+                        {
+                            "relative_error": float(
+                                jnp.linalg.norm(
+                                    tangent[:, block] - difference[:, block]
+                                )
+                                / jnp.maximum(
+                                    jnp.linalg.norm(difference[:, block]), 1e-30
+                                )
+                            ),
+                            "finite_difference_norm": float(
+                                jnp.linalg.norm(difference[:, block])
+                            ),
+                            "jvp_norm": float(jnp.linalg.norm(tangent[:, block])),
+                        }
+                        for block in range(3)
+                    ],
+                }
+            )
+        result["jvp"] = rows
+        save(output, result)
+        print("RESULT " + json.dumps(result), flush=True)
+        return
+
     started = perf_counter()
     program = jax.jit(correction).lower(reference, scale, *operands).compile()
     result["slice_compile_seconds"] = perf_counter() - started
@@ -395,8 +452,9 @@ def main():
     parser.add_argument("--cache", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--trace-dir", type=Path, required=True)
+    parser.add_argument("--jvp-only", action="store_true")
     args = parser.parse_args()
-    run(args.kind, args.cache, args.output, args.trace_dir)
+    run(args.kind, args.cache, args.output, args.trace_dir, args.jvp_only)
 
 
 if __name__ == "__main__":

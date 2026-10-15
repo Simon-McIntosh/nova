@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="iter-passive-plasma-circuit">
+  <meta name="plan-title" content="Evolving the ITER vessel currents through the DINA scenarios">
+  <meta name="plan-summary" content="The sectioned passive set driven by DINA's coil currents and the prescribed plasma, measured against DINA's pf_passive currents, the whole coupled-flux coil voltages and section 2's VS3 psi-map residual">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-source-quality" content="measured">
+  <title>Evolving the ITER vessel currents through the DINA scenarios</title>
+</head>
+<body>
+<section id="overview"><h2>Overview</h2>
+<p>The sectioned passive conductor set is driven through 105014/1 and 105052/1 by DINA's <code>pf_active</code> coil currents and the prescribed plasma, integrated with the exact zero-order-hold eigenmode propagation of <code>nova.circuit.propagate</code> on the 12 mm mesh and a 6 mm interval. Three measurements follow: the evolved currents against DINA's own <code>pf_passive</code> loops, the coil voltages of the whole coupled flux against DINA's, and section 2's VS3 psi-map residual with the evolved passive flux added at that point.</p>
+<p>The ITER windings are superconducting, so their winding resistance is zero and each coil voltage is <code>dPsi/dt</code> alone; DINA's stored zero coil resistance is the physical value, not a gap in the data. The passive flux at VS3 is compared against exactly the source term the psi-map check subtracted, restricted to that kernel's passive columns, so a flux-model difference cannot hide inside the coil contribution.</p>
+</section>
+
+<section id="passive-currents"><h2>DINA's <code>pf_passive</code> loops, grouped by cross-section containment</h2>
+<p>Each sectioned circuit is assigned to the DINA loop whose element cross-section contains its centroid, read through <code>nova.imas.machine.CrossSection</code>. A circuit inside no DINA loop is reported unassigned rather than forced onto a nearest loop, and so is a circuit inside more than one.</p>
+<table><thead><tr><th>case</th><th>mesh</th><th>passive circuits</th><th>inside a DINA loop</th><th>loops within tolerance</th><th>current share outside</th><th>worst loop</th></tr></thead><tbody>
+<tr><td>105014/1</td><td>12 mm</td><td>1312</td><td>537</td><td>91/103</td><td>42%</td><td>VES_1, 18.6 kA peak</td></tr>
+<tr><td>105014/1</td><td>6 mm</td><td>2163</td><td>893</td><td>90/102</td><td>41%</td><td>VES_1, 18.6 kA peak</td></tr>
+<tr><td>105052/1</td><td>12 mm</td><td>1312</td><td>537</td><td>33/103</td><td>47%</td><td>TRI_SUPP, 68.5 kA peak</td></tr>
+</tbody></table>
+<p>Tolerance is stated before comparison as peak residual &le; max(10 kA, 25% of that loop's peak DINA current), reported per loop because the loops range over three decades in current. The 6 mm interval reproduces the 12 mm result: the same 90-91 loops, the same worst loop, and the same voltage and VS3 numbers to the reported digits, so the passive current is resolved on the 12 mm mesh.</p>
+<p>Only 58% of the sectioned circuits fall inside a DINA loop cross-section, and they carry 58% of the evolved current magnitude. DINA's passive cover totals 3.4 m<sup>2</sup> in r[3.24, 9.72] z[-5.66, 5.68] while the sectioned set spans r[0.2, 14.4] z[-13.1, 16.0]. The comparison therefore covers the DINA-represented subset; 42% of the evolved current sits in structures DINA's <code>pf_passive</code> does not model and is unmatched by construction.</p>
+<figure><img src='/nova/figures/iter-vessel-evolution/vessel-loop-residual-105014.svg' alt='Peak residual per DINA pf_passive loop against each loop tolerance'><figcaption>Per-loop peak residual for 105014/1 on the 12 mm mesh, sorted, against each loop's own tolerance. Twelve loops exceed it; the worst is VES_1.</figcaption></figure>
+</section>
+
+<section id="coil-voltages"><h2>Coil voltages from the whole coupled flux</h2>
+<p>Each voltage is the gradient of the coupled flux &Psi; = L<sub>cc</sub>I<sub>c</sub> + M<sub>cp</sub>I<sub>p</sub> + &Psi;<sub>plasma</sub> at the section level, summed into DINA's coil channels (CS1U and CS1L into CS1, VSU and VSL into VS3).</p>
+<table><thead><tr><th>arm</th><th>rms mean [V]</th><th>PF2</th><th>PF3</th><th>PF4</th><th>PF5</th></tr></thead><tbody>
+<tr><td>bare coils</td><td>857</td><td>168</td><td>309</td><td>278</td><td>242</td></tr>
+<tr><td>coils + passive</td><td>793</td><td>96</td><td>239</td><td>227</td><td>180</td></tr>
+<tr><td>coils + passive + plasma</td><td>790</td><td>93</td><td>235</td><td>222</td><td>178</td></tr>
+<tr><td>no plasma drive (negative control)</td><td>780</td><td>85</td><td>219</td><td>211</td><td>171</td></tr>
+</tbody></table>
+<p>On 105014/1 the passive coupling removes 64 V of the 857 V rms the bare coils miss, and 72-77 V of it lands on PF2-PF5 (PF2 168 &rarr; 93 V, PF5 242 &rarr; 178 V). The plasma term adds back 10 V of rms, contributing its own <code>dPsi/dt</code> on the evolved passive currents. Dropping the plasma drive entirely leaves 780 V, so it is the passive coupling, not the plasma term, that carries the reduction. On 105052/1 the same arms read 783, 593 and 591 V, so the PF2-PF5 miss there is roughly twice as large and the coupling removes roughly half of it (PF2 388 &rarr; 177 V, PF4 780 &rarr; 301 V).</p>
+<figure><img src='/nova/figures/iter-vessel-evolution/vessel-voltage-residual-105014.svg' alt='Per-coil voltage residual rms across the coupling arms'><figcaption>Per-coil voltage residual rms for 105014/1: coils alone, with the evolved passive coupling, and with the prescribed plasma added.</figcaption></figure>
+<p>The anti-series sign of the VSU/VSL winding was taken from the machine description and then tested explicitly. The residual does not resolve it: on 105014/1 the two signs differ by 0.11 V rms (789.60 against 789.72), and although 105052/1 separates them further (591.21 against 593.73 V), that pulse's minimum falls on the opposite sign to 105014/1's. The sign is therefore inherited from the machine description's circuit connections, not measured; the disagreement between the two pulses' minima shows the residual is too small a lever to settle it.</p>
+</section>
+
+<section id="vs3"><h2>The VS3 residual does not close</h2>
+<p>Section 2 left a psi-map residual at the two VS3 sections of 0.88 and 1.08 Wb on 105014/1, and up to 2.52 Wb on 105052/1. Substituting the evolved passive flux for DINA's stored passive flux there does not close it; it grows. On 105014/1 the evolved passive flux peaks at 8.40 and 10.08 Wb against DINA's 7.37 and 8.46 Wb, a difference of 2.0 and 3.5 Wb, larger than the residual itself. The residual is therefore not a passive-current modelling gap: DINA's own stored passive currents already reproduce the psi-map at VS3 to about 1 Wb. On 105052/1 the substitution moves 2.52 Wb to 8.47 Wb at the first section and 2.35 Wb to 16.32 Wb at the second, where the evolved flux (11.13 Wb) falls 2.3 Wb *below* DINA's (13.42 Wb). Removing the plasma drive leaves the substitution essentially unchanged (the residuals move from 2.37 and 3.66 Wb to 3.22 and 6.19 Wb on 105014/1), because the passive flux at VS3 is coil-driven.</p>
+<figure><img src='/nova/figures/iter-vessel-evolution/vessel-vs3-residual-105014.svg' alt='VS3 psi-map residual against the passive flux at the two VS3 sections'><figcaption>At both VS3 sections of 105014/1: the psi-map residual section 2 left open, DINA's stored passive flux there, the evolved passive flux, and the residual that remains once the substitution is made.</figcaption></figure>
+<p>Caveat: the receipt compares the peak of the residual against the peak of the flux difference, and those peaks fall at different times. A common-time-base restatement is owed before the numbers are read as a per-instant closure.</p>
+</section>
+
+<section id="controls"><h2>Controls</h2>
+<p>The positive control is a single passive ring under a coil-current ramp, integrated with the same zero-order-hold scheme and compared with the analytic L/R solution; it recovers the analytic peak to a relative error of 1.4e-13, so the propagation is exact for a piecewise-linear drive and the ring's decay time is set by its resistance. The negative control mutates the ring resistance handling in a scratch copy, where that analytic decay test fails while it passes on the head arm.</p>
+</section>
+</body>
+</html>

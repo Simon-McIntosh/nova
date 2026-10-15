@@ -59,7 +59,7 @@ class SubtractedField:
 
     total: object
     coupling: topology.BiotMomentCoupling
-    reference: jax.Array
+    reference: tuple[jax.Array, jax.Array, jax.Array]
 
     def evaluate(self, point):
         return jax.tree.map(
@@ -136,7 +136,7 @@ def run(kind, cache, output, trace_dir):
     window, maintenance = fixed_points.maintain_rows(
         geometry,
         coupling,
-        SubtractedField(field, coupling, reference),
+        SubtractedField(field, coupling, tuple(reference[:, i] for i in range(3))),
         jnp.asarray(roots),
         margin,
         cache=cached_rows,

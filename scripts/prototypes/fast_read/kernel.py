@@ -6,9 +6,8 @@ import jax
 import jax.numpy as jnp
 
 from nova.equilibrium import topology
-from scripts.prototypes.sub_millisecond.measure_bell_cut import bell_polygon
 from scripts.prototypes.sub_millisecond.measure_saddle_frame import connected_cells
-from scripts.prototypes.sub_millisecond.measure_wall_march import polygon_area
+from scripts.prototypes.fast_read.ordinary_cut import bell_fraction
 
 
 class FastRead(NamedTuple):
@@ -143,8 +142,7 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
         wall_candidate=sigma * wall_score,
         normal_form_cells=normal,
     )
-    polygon, number, ordinary_valid = bell_polygon(geometry, approximate, sigma, 4)
-    fraction = jnp.clip(polygon_area(polygon, number) / geometry.full_area, 0.0, 1.0)
+    fraction, ordinary_valid = bell_fraction(geometry, approximate, sigma)
     capacity = min(16, len(geometry.centre))
     chosen = jnp.nonzero(normal, size=capacity, fill_value=0)[0]
     fragments = jax.vmap(

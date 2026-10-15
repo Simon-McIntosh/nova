@@ -20,6 +20,7 @@ from nova.equilibrium import current, topology
 from nova.equilibrium.solve_request import TopologyPolicy
 from scripts.analytic_oracle_fixtures import measure as fixture
 from scripts.prototypes.fast_read.kernel import read
+from scripts.prototypes.fast_read.ordinary_cut import bell_moments
 from scripts.prototypes.fast_read.program import _saddle_moments
 from scripts.prototypes.lean_map.jets import build_jets
 from scripts.prototypes.lean_map.quadrature import (
@@ -30,10 +31,7 @@ from scripts.prototypes.lean_map.values import build_values
 from scripts.prototypes.read_robustness.census import axis_identity, census
 from scripts.prototypes.read_robustness.oracle import shifted_axis
 from scripts.prototypes.solve_options.profile import _machine
-from scripts.prototypes.sub_millisecond.measure_bell_cut import (
-    bell_moments,
-    bell_polygon,
-)
+from scripts.prototypes.sub_millisecond.measure_bell_cut import bell_polygon
 from scripts.prototypes.support.geometry import certificate_field
 from tests.equilibrium.test_topology_read import _analytic_inputs
 
@@ -116,7 +114,7 @@ def run(kind, cache, output, diagnose_offset=None):
             rule, gauss, profile, reading.axis_flux, reading.boundary_flux, full
         )
         ordinary, ordinary_valid = bell_moments(
-            geometry, reading, profile, convention.sigma, 4
+            geometry, reading, profile, convention.sigma
         )
         cut = (reading.membership > 0) & ~full
         saddle_cut = cut & reading.normal_form_cells & ~ordinary_valid

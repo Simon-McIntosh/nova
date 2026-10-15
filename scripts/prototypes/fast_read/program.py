@@ -9,11 +9,7 @@ import jax.numpy as jnp
 from nova.equilibrium import current, fixed_points
 from nova.equilibrium.separatrix_clip import padded_polynomial_current_moments
 from scripts.prototypes.lean_map.quadrature import interior_moments
-from scripts.prototypes.sub_millisecond.measure_bell_cut import (
-    bell_moments,
-    bell_polygon,
-)
-from scripts.prototypes.sub_millisecond.measure_wall_march import polygon_area
+from scripts.prototypes.fast_read.ordinary_cut import bell_moments
 from scripts.prototypes.fast_read.kernel import read
 
 
@@ -165,18 +161,12 @@ def map_moments(
     field = FusedField(cached, coefficient)
     reading = read(field, roots, geometry, convention, policy, frame_gate=frame_gate)
     selected = reading.selected_cells
-    polygon, polygon_count, _ = bell_polygon(geometry, reading, convention.sigma, 4)
-    fraction = jnp.clip(
-        polygon_area(polygon, polygon_count) / geometry.full_area, 0.0, 1.0
-    )
-    membership = jnp.where(reading.normal_form_cells, reading.membership, fraction)
-    reading = reading._replace(membership=jnp.where(selected, membership, 0.0))
     full = (reading.membership >= 1 - 1e-14) & (geometry.vertex_count == 6)
     interior = interior_moments(
         rule, gauss_flux, profile, reading.axis_flux, reading.boundary_flux, full
     )
     ordinary, ordinary_valid = bell_moments(
-        geometry, reading, profile, convention.sigma, 4
+        geometry, reading, profile, convention.sigma
     )
     cut = (reading.membership > 0) & ~full
     saddle_cut = cut & reading.normal_form_cells & ~ordinary_valid

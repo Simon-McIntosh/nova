@@ -24,7 +24,7 @@ def _style():
 
 def residual_history(results, destination):
     _style()
-    figure, axes = plt.subplots(1, 2, figsize=(14, 5), dpi=100, sharey=True)
+    figure, axes = plt.subplots(1, 2, figsize=(14, 5), dpi=100)
     for axis, carrier in zip(axes, ("limited", "diverted"), strict=True):
         for method in ("krylov", "gmres", "dense"):
             data = results.get((carrier, method))
@@ -40,13 +40,18 @@ def residual_history(results, destination):
                 residual,
                 color=COLORS[method],
                 linewidth=3,
-                linestyle="--" if method == "dense" else "-",
+                linestyle="--" if method == "gmres" else "-",
                 label=method,
             )
-        axis.axhline(1e-12, color="#666666", linestyle=":", linewidth=1.2)
+        if carrier == "limited":
+            axis.axhline(1e-12, color="#666666", linestyle=":", linewidth=1.2)
+        else:
+            axis.set_ylim(2e-3, 5e-3)
         axis.text(0.03, 0.97, carrier, transform=axis.transAxes, va="top")
         axis.set_xlabel("accepted correction")
-        axis.legend(frameon=False, loc="center right")
+        axis.legend(
+            frameon=False, loc="upper right" if carrier == "limited" else "lower left"
+        )
         axis.spines["top"].set_visible(False)
         axis.spines["right"].set_visible(False)
     axes[0].set_ylabel("scaled moment residual")

@@ -115,6 +115,133 @@ class ConductorSet:
 
 
 @dataclass(frozen=True)
+class ThicknessSubdivision:
+    """Independent skin-current layers and their unsplit parent circuits."""
+
+    conductors: ConductorSet
+    circuits: np.ndarray
+    parent: np.ndarray
+    resistance_factor: np.ndarray
+
+
+def subdivide_passive_thickness(
+    conductors: ConductorSet,
+    passive_circuits,
+    thickness_m: np.ndarray,
+    max_layer_thickness_m: float,
+    *,
+    surface_layer_m: float | None = None,
+    surface_growth: float = 2.0,
+) -> ThicknessSubdivision:
+    """Split each passive element normal to its wall into toroidal rings.
+
+    Each strip is an independent current path.  An optional surface layer
+    grows geometrically towards the midplane, bounded by the maximum interior
+    width. Its resistance is the parent resistance divided by its fraction of
+    the parent thickness. Polygon walls retain their true shape.
+    """
+    if not np.isfinite(max_layer_thickness_m) or max_layer_thickness_m <= 0:
+        raise ValueError("maximum layer thickness must be positive")
+    if surface_layer_m is not None and (
+        not np.isfinite(surface_layer_m) or surface_layer_m <= 0
+    ):
+        raise ValueError("surface layer thickness must be positive")
+    if not np.isfinite(surface_growth) or surface_growth < 1:
+        raise ValueError("surface growth must be at least one")
+    passive = np.asarray(list(passive_circuits), dtype=np.int64)
+    thickness = np.asarray(thickness_m, dtype=np.float64)
+    if (
+        thickness.shape != passive.shape
+        or np.any(~np.isfinite(thickness))
+        or np.any(thickness <= 0)
+    ):
+        raise ValueError("one positive thickness is required per passive circuit")
+    if len(set(passive)) != len(passive):
+        raise ValueError("passive circuits must be unique")
+    rows = conductors.rows(passive)
+    if any(len(group) != 1 for group in rows):
+        raise ValueError("each passive circuit must have one source element")
+    polygon = conductors.polygon_by_circuit()
+    columns = {name: [] for name in conductors._columns}
+    polygons = [
+        section
+        for section in conductors.polygon_sections
+        if section.circuit not in passive
+    ]
+    for row in range(conductors.n_filaments):
+        if int(conductors.circuit[row]) not in passive:
+            for name in columns:
+                columns[name].append(getattr(conductors, name)[row])
+    next_circuit = int(np.max(conductors.circuit)) + 1
+    circuits, parents, factors = [], [], []
+    for parent, source_rows, wall in zip(passive, rows, thickness, strict=True):
+        row = int(source_rows[0])
+        if surface_layer_m is None or surface_layer_m >= max_layer_thickness_m:
+            edges = np.linspace(
+                0.0, 1.0, int(np.ceil(wall / max_layer_thickness_m)) + 1
+            )
+        else:
+            left = [0.0]
+            width = surface_layer_m
+            while 2 * (left[-1] + width) < wall:
+                left.append(left[-1] + width)
+                width = min(width * surface_growth, max_layer_thickness_m)
+            middle = wall - 2 * left[-1]
+            n_middle = max(1, int(np.ceil(middle / max_layer_thickness_m)))
+            left_edge = np.asarray(left)
+            center = np.linspace(left[-1], wall - left[-1], n_middle + 1)
+            edges = (
+                np.concatenate((left_edge[:-1], center, wall - left_edge[-2::-1]))
+                / wall
+            )
+        source_polygon = polygon.get(int(parent))
+        for low, high in zip(edges[:-1], edges[1:], strict=True):
+            circuit = next_circuit
+            next_circuit += 1
+            values = {name: getattr(conductors, name)[row] for name in columns}
+            values["circuit"] = circuit
+            values["current_share"] = 1.0
+            if source_polygon is not None:
+                vertices = source_polygon.vertices
+                if vertices.shape != (4, 2):
+                    raise ValueError("passive wall polygon must have four corners")
+                first = vertices[0] * (1 - low) + vertices[3] * low
+                second = vertices[1] * (1 - low) + vertices[2] * low
+                third = vertices[1] * (1 - high) + vertices[2] * high
+                fourth = vertices[0] * (1 - high) + vertices[3] * high
+                stripe = np.array([first, second, third, fourth])
+                extent = np.ptp(stripe, axis=0)
+                values.update(
+                    r=float(np.mean(stripe[:, 0])),
+                    z=float(np.mean(stripe[:, 1])),
+                    dr=float(extent[0]),
+                    dz=float(extent[1]),
+                )
+                polygons.append(PolygonSection(circuit, stripe))
+            elif abs(float(values["dr"])) <= abs(float(values["dz"])):
+                values["dr"] = float(values["dr"]) * (high - low)
+                values["r"] = float(values["r"]) + ((low + high) / 2 - 0.5) * float(
+                    conductors.dr[row]
+                )
+            else:
+                values["dz"] = float(values["dz"]) * (high - low)
+                values["z"] = float(values["z"]) + ((low + high) / 2 - 0.5) * float(
+                    conductors.dz[row]
+                )
+            for name in columns:
+                columns[name].append(values[name])
+            circuits.append(circuit)
+            parents.append(parent)
+            factors.append(1.0 / (high - low))
+    return ThicknessSubdivision(
+        conductors=ConductorSet(**columns, polygon_sections=tuple(polygons)),
+        circuits=np.asarray(circuits, dtype=np.int64),
+        parent=np.asarray(parents, dtype=np.int64),
+        resistance_factor=np.asarray(factors, dtype=np.float64),
+    )
+
+
+@dataclass(frozen=True)
 class SensorSet:
     """Magnetic sensor positions and orientations for per-ampere signatures.
 
@@ -155,4 +282,8 @@ class SensorSet:
         )
 
 
-__all__ = ["ConductorSet", "PolygonSection", "SensorSet"]
+__all__ = [
+    "ConductorSet",
+    "PolygonSection",
+    "SensorSet",
+]

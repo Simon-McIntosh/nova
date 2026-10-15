@@ -16,9 +16,12 @@ from nova.imas.database import Database
 from nova.imas.dataset import IdsBase, Ids
 from nova.imas.equilibrium import EquilibriumData
 from nova.imas.ids_entry import IdsEntry
-from nova.imas.machine import Machine
+from nova.imas.machine import Machine, MachineCoil, MachineSection
 from nova.imas.metadata import Metadata
 from nova.imas.pf_active import PF_Active
+
+
+PF_DOUBLE_PANCAKES = {"PF1": 8, "PF2": 6, "PF3": 8, "PF4": 8, "PF5": 8, "PF6": 9}
 
 
 @dataclass
@@ -57,6 +60,58 @@ class ITER(Machine):
     wall: Ids | bool | str = field(default="iter_md", repr=False)
     tplasma: str = "hex"
     dplasma: int | float = -3000
+
+    @staticmethod
+    def winding_sections(active_ids) -> tuple[MachineCoil, ...]:
+        """Place series pancakes in the source winding packs and retain VS turns."""
+        coils = []
+        for source in active_ids.coil:
+            name = str(source.name)
+            short_name = name.rsplit("(", 1)[-1].removesuffix(")")
+            elements = []
+            for index, element in enumerate(source.element):
+                geometry = element.geometry
+                kind = int(geometry.geometry_type)
+                record = {
+                    "name": f"{short_name} element {index + 1}",
+                    "geometry_type": kind,
+                    "turns_with_sign": float(element.turns_with_sign),
+                }
+                if kind == 2:
+                    rect = geometry.rectangle
+                    record.update(
+                        r=float(rect.r),
+                        z=float(rect.z),
+                        width=float(rect.width),
+                        height=float(rect.height),
+                    )
+                elif kind == 5:
+                    annulus = geometry.annulus
+                    record.update(
+                        r=float(annulus.r),
+                        z=float(annulus.z),
+                        radius_inner=float(annulus.radius_inner),
+                        radius_outer=float(annulus.radius_outer),
+                    )
+                else:
+                    raise ValueError(f"unsupported active geometry {kind} in {name}")
+                elements.append(MachineSection.from_record(record))
+            coil = MachineCoil(
+                name=short_name, identifier=name, elements=tuple(elements)
+            )
+            count = (
+                40
+                if short_name.startswith("CS")
+                else PF_DOUBLE_PANCAKES.get(short_name, len(elements))
+            )
+            coils.append(
+                MachineCoil(
+                    name=short_name,
+                    identifier=name,
+                    elements=coil.winding_sections(count),
+                )
+            )
+        return tuple(coils)
 
     def __post_init__(self):
         """Disable vs3 current updates."""

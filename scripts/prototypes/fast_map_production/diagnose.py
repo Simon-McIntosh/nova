@@ -29,7 +29,7 @@ from scripts.prototypes.support.geometry import certificate_field
 from tests.equilibrium.test_topology_read import _analytic_inputs
 
 
-def run(cells, cache, output):
+def run(cells, cache, output, density_only=False):
     assert jax.config.jax_enable_x64 is True and jax.default_backend() == "gpu"
     print(
         f"nova={nova.__file__} module={__file__} cwd={Path.cwd().resolve()}",
@@ -98,6 +98,63 @@ def run(cells, cache, output):
         booked.raw_current,
         axis_sign,
     )
+
+    if density_only:
+        cached = fixed_points._CachedField(
+            window.mesh, window.lookup, window.rows, reference, window.exterior
+        )
+        found = fixed_points.solve(
+            window, reference, seeds, seeds, jnp.median(geometry.pitch), axis_sign
+        )
+        slots = window.lookup[jets.sample_index]
+        complete = jnp.all(slots >= 0, axis=1)
+        safe_slots = jnp.maximum(slots, 0)
+        band_values = window.exterior[safe_slots, 0] + jnp.einsum(
+            "nscm,cm->ns", window.rows[safe_slots, ..., 0], reference
+        )
+        gauss_flux = values.apply(reference).reshape(rule.points.shape[:-1])
+        gauss_coefficient = jnp.einsum("nkq,nq->nk", fit, gauss_flux)
+        band_coefficient = jnp.einsum("nks,ns->nk", geometry.fit_inverse, band_values)
+        coefficient = jnp.where(complete[:, None], band_coefficient, gauss_coefficient)
+        fused = original_program.FusedField(cached, coefficient)
+        reading = jax.jit(
+            lambda: kernel.read(fused, found, geometry, convention, policy)
+        )()
+        owner = int(
+            jnp.argmax(topology._inside_cells(geometry, reading.saddle_form.position))
+        )
+        candidate_flux = float(reading.field_coefficients[owner, 0])
+        analytic_flux = float(field.value(geometry.centre[owner]))
+        candidate_norm = float(
+            (candidate_flux - reading.axis_flux)
+            / (reading.boundary_flux - reading.axis_flux)
+        )
+        analytic_norm = float(
+            (analytic_flux - analytic_read.axis_flux)
+            / (analytic_read.boundary_flux - analytic_read.axis_flux)
+        )
+        candidate_density = float(
+            program._density_coefficients(geometry, reading, profile)[owner, 0]
+        )
+        analytic_density = float(
+            profile.current_density(geometry.centre[owner, 0], analytic_norm)
+        )
+        result = {
+            "cells": len(reference),
+            "owner": owner,
+            "candidate_flux": candidate_flux,
+            "analytic_flux": analytic_flux,
+            "candidate_norm": candidate_norm,
+            "analytic_norm": analytic_norm,
+            "candidate_density": candidate_density,
+            "analytic_density": analytic_density,
+            "reference_current": float(reference[owner, 0]),
+            "membership": float(reading.membership[owner]),
+            "full_area": float(geometry.full_area[owner]),
+        }
+        output.write_text(json.dumps(result, indent=2) + "\n")
+        print("DENSITY " + json.dumps(result), flush=True)
+        return
 
     def unchanged(moments):
         return original_program.map_moments(moments, *operands)
@@ -232,8 +289,9 @@ def main():
     parser.add_argument("--cells", type=int, required=True)
     parser.add_argument("--cache", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--density-only", action="store_true")
     arguments = parser.parse_args()
-    run(arguments.cells, arguments.cache, arguments.output)
+    run(arguments.cells, arguments.cache, arguments.output, arguments.density_only)
 
 
 if __name__ == "__main__":

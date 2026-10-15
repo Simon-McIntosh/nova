@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="245">
+<meta name="plan-version" content="246">
 <meta name="plan-modified" content="2026-10-15">
 </head>
 <body>
@@ -1086,6 +1086,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261015T085132689557-review-of-fused-newton-1eea83264edb" data-who="reckon-build" data-when="2026-10-15T09:05:27.932Z">
     <div class="r-comment-body"><p>Independent review of fused-newton at 1eea83264 stored parsed: scores goal_fidelity 17, evidence 18, scope_discipline 20, durability 12, fit 16, reuse 18 (total 101), two follow-on findings (negative control reads a frozen receipt; no flux-contour panel figure); the fused map passes the 0.01 flux ceiling at 0.000180/0.001087 and the private-cell guard fires red, but one correction costs 25.647/35.516 ms against the 0.90 ms warm budget.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261015T075234084559-fused-newton" data-who="reckon-build" data-when="2026-10-15T08:50:00Z">
+    <div class="r-comment-body"><p>At 289/282 cells the fused map passes flux error 0.000180/0.001087, but one correction costs 25.647/35.516 ms against 0.90 ms and no width-128 member converges; the red ungated control reaches 0.158676 map error.</p></div>
 </div>
 </section>
 </main>

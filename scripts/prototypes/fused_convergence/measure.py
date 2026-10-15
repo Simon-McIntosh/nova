@@ -20,10 +20,14 @@ from benchmarks import solovev_certificate as certificate
 from nova.equilibrium import current, fixed_points, topology
 from nova.equilibrium.solve_request import TopologyPolicy
 from scripts.analytic_oracle_fixtures import measure as fixture
-from scripts.prototypes.fast_read.program import map_moments
+from scripts.prototypes.fast_read.kernel import read as fixed_shape_read
+from scripts.prototypes.fast_read.program import FusedField, map_moments
+from scripts.prototypes.fused_convergence import roots as ray_roots
 from scripts.prototypes.lean_map.jets import build_jets
+from scripts.prototypes.lean_map.probe_bias import _image
 from scripts.prototypes.lean_map.quadrature import quadratic_fit, triangle_rule
 from scripts.prototypes.lean_map.values import build_values
+from scripts.prototypes.solve_options.point_bias import _exterior
 from scripts.prototypes.solve_options.profile import _machine
 from scripts.prototypes.support.geometry import certificate_field
 from tests.equilibrium.test_topology_read import _analytic_inputs
@@ -31,7 +35,22 @@ from tests.equilibrium.test_topology_read import _analytic_inputs
 
 def save(path, result):
     path.write_text(json.dumps(result, indent=2, default=str) + "\n")
-    print("CHECKPOINT " + json.dumps(result, default=str), flush=True)
+    history = result.get("history", [])
+    print(
+        "CHECKPOINT "
+        + json.dumps(
+            {
+                "kind": result["kind"],
+                "cells": result["cells"],
+                "centre_residual": result.get("centre_residual"),
+                "corrections": len(history),
+                "residual": history[-1]["residual"] if history else None,
+                "converged": result.get("converged"),
+                "taylor_rows": len(result.get("taylor", [])),
+            }
+        ),
+        flush=True,
+    )
 
 
 def wall(program, arguments, repetitions=5):
@@ -70,6 +89,18 @@ class CachedExterior:
 
 def run(args):
     kind, cache, output = args.kind, args.cache, args.output
+    if args.exact_roots:
+        ray_roots.install()
+    if args.omit_saddle_derivative:
+        from scripts.prototypes.fast_read import program as mapped_program
+
+        original_saddle = mapped_program._saddle_moments
+
+        def detached_saddle(*arguments, **keywords):
+            moments, valid = original_saddle(*arguments, **keywords)
+            return jax.lax.stop_gradient(moments), valid
+
+        mapped_program._saddle_moments = detached_saddle
     assert jax.config.jax_enable_x64 is True and jax.default_backend() == "gpu"
     print(
         f"nova={nova.__file__} module={__file__} cwd={Path.cwd().resolve()}", flush=True
@@ -198,9 +229,43 @@ def run(args):
         state = mapped(scaled.reshape(reference.shape) * scale, *args)
         return (state.moment_residual / scale).reshape(-1)
 
-    map_program = jax.jit(mapped)
+    def inspect_read(moments):
+        cached = fixed_points._CachedField(
+            window.mesh, window.lookup, window.rows, moments, window.exterior
+        )
+        found = fixed_points.solve(
+            window, moments, seeds, seeds, jnp.median(geometry.pitch), axis_sign
+        )
+        gauss_flux = values.apply(moments).reshape(rule.points.shape[:-1])
+        gauss_coefficient = jnp.einsum("nkq,nq->nk", fit, gauss_flux)
+        slots = window.lookup[jets.sample_index]
+        complete = jnp.all(slots >= 0, axis=1)
+        safe_slots = jnp.maximum(slots, 0)
+        band_values = window.exterior[safe_slots, 0] + jnp.einsum(
+            "nscm,cm->ns", window.rows[safe_slots, ..., 0], moments
+        )
+        band_coefficient = jnp.einsum("nks,ns->nk", geometry.fit_inverse, band_values)
+        coefficient = jnp.where(complete[:, None], band_coefficient, gauss_coefficient)
+        reading = fixed_shape_read(
+            FusedField(cached, coefficient), found, geometry, convention, policy
+        )
+        jax.block_until_ready(reading)
+        return {
+            "support_ids": np.flatnonzero(np.asarray(reading.selected_cells)).tolist(),
+            "saddle_ids": np.flatnonzero(
+                np.asarray(reading.normal_form_cells & (reading.membership > 0))
+            ).tolist(),
+            "membership": np.asarray(reading.membership).tolist(),
+            "roots": np.asarray(found.position).tolist(),
+        }
+
+    started = perf_counter()
+    map_program = jax.jit(mapped).lower(reference, *operands).compile()
+    result["map_compile_seconds"] = perf_counter() - started
+    result["map_executable_bytes"] = generated_bytes(map_program)
     centre = map_program(reference, *operands)
     jax.block_until_ready(centre)
+    result["map_wall_ms"] = wall(map_program, (reference, *operands))
     assert bool(centre.booking_valid)
     result["centre_residual"] = float(jnp.max(jnp.abs(centre.moment_residual / scale)))
     result["centre_class"] = int(centre.boundary_class)
@@ -218,13 +283,18 @@ def run(args):
             upper = equation(base + h * direction, operands)
             lower = equation(base - h * direction, operands)
             symmetric = (upper + lower) / 2 - value
+            remainder = upper - value - h * tangent
             derivative_error = (upper - lower) / (2 * h) - tangent
-            jax.block_until_ready((symmetric, derivative_error))
+            jax.block_until_ready((symmetric, remainder, derivative_error))
             block = np.asarray(symmetric).reshape(reference.shape)
+            one_sided = np.asarray(remainder).reshape(reference.shape)
             error = np.asarray(derivative_error).reshape(reference.shape)
             rows.append(
                 {
                     "step": float(h),
+                    "remainder": [
+                        float(np.linalg.norm(one_sided[:, k])) for k in range(3)
+                    ],
                     "symmetric_remainder": [
                         float(np.linalg.norm(block[:, k])) for k in range(3)
                     ],
@@ -265,7 +335,7 @@ def run(args):
     from scipy.linalg import lu_factor, lu_solve
     from scipy.sparse.linalg import LinearOperator, gmres
 
-    def linear_step(point, measure=True):
+    def linear_step(point):
         started = perf_counter()
         residual, factor = jax.linearize(
             lambda x: equation(x, operands), point.reshape(-1)
@@ -274,12 +344,18 @@ def run(args):
         linearize_ms = 1000 * (perf_counter() - started)
         rhs = -residual
         build_start = perf_counter()
+        compile_start = perf_counter()
         if args.method == "krylov":
-            step, iterations = krylov_step(factor, rhs)
+            product = jax.jit(factor).lower(rhs).compile()
+            compile_ms = 1000 * (perf_counter() - compile_start)
+            result.setdefault("factor_executable_bytes", generated_bytes(product))
+            step, iterations = krylov_step(product, rhs)
             jax.block_until_ready(step)
             build_ms = 0.0
         elif args.method == "gmres":
-            product = jax.jit(factor)
+            product = jax.jit(factor).lower(rhs).compile()
+            compile_ms = 1000 * (perf_counter() - compile_start)
+            result.setdefault("factor_executable_bytes", generated_bytes(product))
             counter = [0]
 
             def multiply(x):
@@ -304,11 +380,16 @@ def run(args):
             build_ms = 0.0
         else:
             columns = jnp.eye(rhs.size, dtype=rhs.dtype)
-            products = jax.jit(jax.vmap(factor))
+            products = jax.jit(jax.vmap(factor)).lower(columns[: args.block]).compile()
+            compile_ms = 1000 * (perf_counter() - compile_start)
+            result.setdefault("factor_executable_bytes", generated_bytes(products))
             blocks = []
             for start in range(0, rhs.size, args.block):
                 stop = min(start + args.block, rhs.size)
-                blocks.append(np.asarray(products(columns[start:stop])))
+                batch = columns[start:stop]
+                if stop - start < args.block:
+                    batch = jnp.pad(batch, ((0, args.block - stop + start), (0, 0)))
+                blocks.append(np.asarray(products(batch))[: stop - start])
             matrix = np.concatenate(blocks, axis=0).T
             decomposition = lu_factor(matrix)
             build_ms = 1000 * (perf_counter() - build_start)
@@ -338,6 +419,7 @@ def run(args):
             "accepted": accepted,
             "factor_scale": factor_scale if accepted else 0.0,
             "linearize_ms": linearize_ms,
+            "compile_ms": compile_ms,
             "build_ms": build_ms,
             "apply_ms": apply_ms,
             "iterations": iterations,
@@ -346,6 +428,20 @@ def run(args):
                 / jnp.maximum(jnp.linalg.norm(rhs), 1e-30)
             ),
         }
+        state = mapped(candidate.reshape(reference.shape) * scale, *operands)
+        jax.block_until_ready(state)
+        block = np.asarray(state.moment_residual / scale)
+        hot = np.argsort(np.max(np.abs(block), axis=1))[-5:][::-1]
+        row["block_max"] = np.max(np.abs(block), axis=0).tolist()
+        row["hot_cells"] = [
+            {"cell": int(cell), "blocks": block[cell].tolist()} for cell in hot
+        ]
+        row["support_cells"] = int(state.graph_cells)
+        row["saddle_cells"] = int(state.saddle_cells)
+        row["boundary_class"] = int(state.boundary_class)
+        row["booking_valid"] = bool(state.booking_valid)
+        if args.inspect_support:
+            row["read"] = inspect_read(candidate.reshape(reference.shape) * scale)
         return candidate.reshape(reference.shape), row
 
     point = reference / scale
@@ -363,6 +459,24 @@ def run(args):
         "moments": np.asarray(point * scale).tolist(),
         "roots": np.asarray(mapped(point * scale, *operands).roots).tolist(),
     }
+    coordinates = np.vstack(
+        (machine.node, machine.wall_node, machine.sample_coordinates)
+    )
+    analytic = jnp.asarray(certificate._exact_state(name, exact, coordinates))
+    exterior, _ = _exterior(cache, key)
+    operator = fixture.forward_operator(source, machine)
+    terminal = mapped(point * scale, *operands)
+    solved_flux = exterior + _image(operator, point * scale)
+    result["panel"] = {
+        "coordinates": np.asarray(machine.node).tolist(),
+        "wall": np.asarray(machine.wall_node).tolist(),
+        "solved_flux": np.asarray(solved_flux)[: len(machine.node)].tolist(),
+        "analytic_flux": np.asarray(analytic)[: len(machine.node)].tolist(),
+        "solved_roots": np.asarray(terminal.roots).tolist(),
+        "analytic_roots": roots.tolist(),
+        "terminal_residual": history[-1]["residual"],
+        "converged": result["converged"],
+    }
     save(output, result)
 
 
@@ -376,6 +490,9 @@ def main():
     parser.add_argument("--block", type=int, default=16)
     parser.add_argument("--line-search", action="store_true")
     parser.add_argument("--taylor", action="store_true")
+    parser.add_argument("--exact-roots", action="store_true")
+    parser.add_argument("--omit-saddle-derivative", action="store_true")
+    parser.add_argument("--inspect-support", action="store_true")
     args = parser.parse_args()
     run(args)
 

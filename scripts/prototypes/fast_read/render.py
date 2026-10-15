@@ -91,6 +91,32 @@ def cost(reads, output):
     plt.close(figure)
 
 
+def stages(reads, fused, output):
+    figure, axes = plt.subplots(1, 2, figsize=(14, 6), dpi=100)
+    labels = ("read", "map", "correction")
+    x = np.arange(3)
+    for kind in ("limited", "diverted"):
+        data = fused[kind]
+        walls = (reads[kind]["wall_ms"], data["map_wall_ms"], data["slice_wall_ms"])
+        kernels = (
+            reads[kind]["trace"]["gpu_kernel_events"],
+            data["map_trace"]["gpu_kernel_events"],
+            data["slice_trace"]["gpu_kernel_events"],
+        )
+        for axis, values in zip(axes, (walls, kernels), strict=True):
+            axis.plot(x, values, color=COLOURS[kind], linewidth=3, marker="o")
+            axis.text(2.08, values[-1], kind, color=COLOURS[kind], fontsize=20)
+    axes[0].set_ylabel("wall per call [ms]", fontsize=22)
+    axes[1].set_ylabel("GPU kernels per call", fontsize=22)
+    for axis in axes:
+        axis.set_xticks(x, labels, fontsize=20)
+        axis.set_xlim(-0.2, 2.7)
+        axes_style(axis)
+    figure.subplots_adjust(wspace=0.45, right=0.82)
+    figure.savefig(output, format="svg")
+    plt.close(figure)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--run", type=Path, required=True)
@@ -107,6 +133,15 @@ def main():
     }
     validity(sweeps, args.output / "axis-sweep.svg")
     cost(reads, args.output / "read-cost.svg")
+    fused_paths = {
+        kind: args.run / f"{kind}-fused-all.json" for kind in ("limited", "diverted")
+    }
+    if all(path.is_file() for path in fused_paths.values()):
+        fused = {
+            kind: json.loads(path.read_text()) for kind, path in fused_paths.items()
+        }
+        if all("slice_trace" in row for row in fused.values()):
+            stages(reads, fused, args.output / "stage-cost.svg")
 
 
 if __name__ == "__main__":

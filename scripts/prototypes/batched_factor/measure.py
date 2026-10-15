@@ -8,6 +8,7 @@ configure_dtypes()
 import argparse
 from dataclasses import dataclass, replace
 import json
+import re
 from pathlib import Path
 from time import perf_counter
 
@@ -68,6 +69,35 @@ def generated_bytes(program):
     executable = program.runtime_executable()
     method = getattr(executable, "size_of_generated_code_in_bytes", None)
     return method() if callable(method) else None
+
+
+def hlo_constants(lowered):
+    """Summarize literal-producing HLO operations without materializing their text."""
+    source = lowered.compiler_ir("hlo").as_hlo_text(print_large_constants=False)
+    expression = re.compile(
+        r"^\s*([^\s=]+)\s*=\s*([a-z0-9]+)\[([0-9,]*)\].*\bconstant\("
+    )
+    items = []
+    for line in source.splitlines():
+        found = expression.match(line)
+        if found is None:
+            continue
+        name, dtype, dimensions = found.groups()
+        shape = tuple(int(value) for value in dimensions.split(",") if value)
+        itemsize = {
+            "f64": 8, "s64": 8, "u64": 8,
+            "f32": 4, "s32": 4, "u32": 4,
+            "f16": 2, "bf16": 2, "s16": 2, "u16": 2,
+            "pred": 1, "s8": 1, "u8": 1,
+        }.get(dtype, 0)
+        items.append({
+            "operation": name,
+            "producer": "HLO constant",
+            "shape": shape,
+            "dtype": dtype,
+            "bytes": int(np.prod(shape)) * itemsize,
+        })
+    return sorted(items, key=lambda item: item["bytes"], reverse=True)[:20]
 
 
 @jax.tree_util.register_dataclass
@@ -651,6 +681,57 @@ def run(args):
                 )
             )(offsets)
 
+        if args.inspect_constants:
+            from scipy.linalg import lu_factor
+
+            _, product = jax.linearize(
+                lambda point: equation(point, operands), predecessor.reshape(-1)
+            )
+            dimension = predecessor.size
+            directions = jnp.eye(dimension, dtype=predecessor.dtype)
+            columns = jax.jit(jax.vmap(product)).lower(directions[: args.block])
+            result["closure_constants"] = {
+                "scalar_product": hlo_constants(
+                    jax.jit(product).lower(directions[0])
+                ),
+                "jacobian_columns": hlo_constants(columns),
+            }
+            compiled_columns = columns.compile()
+            blocks = []
+            for start in range(0, dimension, args.block):
+                stop = min(start + args.block, dimension)
+                block = directions[start:stop]
+                if stop - start < args.block:
+                    block = jnp.pad(
+                        block, ((0, args.block - stop + start), (0, 0))
+                    )
+                blocks.append(np.asarray(compiled_columns(block))[: stop - start])
+            matrix = np.concatenate(blocks, axis=0).T
+            factor, pivots = lu_factor(matrix)
+            closed_lu = jnp.asarray(factor)
+            closed_pivots = jnp.asarray(pivots)
+
+            def closed_offset(offset):
+                active = varied_operands(offset, operands, warm_operands)
+
+                def correct(point):
+                    rhs = -equation(point, active)
+                    step = jsp_linalg.lu_solve((closed_lu, closed_pivots), rhs)
+                    return point.reshape(-1) + step
+
+                first = correct(predecessor)
+                second = correct(first)
+                return jnp.max(jnp.abs(equation(second, active)))
+
+            for width in (1, 16, 128):
+                offsets = jnp.linspace(0.5, 1.5, width)
+                lowered = jax.jit(jax.vmap(closed_offset)).lower(offsets)
+                result["closure_constants"][f"batch_{width}"] = hlo_constants(
+                    lowered
+                )
+                save(output, result)
+            return
+
         started = perf_counter()
         compiled_factor = (
             jax.jit(fresh_factor).lower(predecessor, operands, scale).compile()
@@ -804,6 +885,7 @@ def main():
     parser.add_argument("--warm-only", action="store_true")
     parser.add_argument("--compare", action="store_true")
     parser.add_argument("--compare-warm", action="store_true")
+    parser.add_argument("--inspect-constants", action="store_true")
     parser.add_argument("--panel-only", action="store_true")
     args = parser.parse_args()
     run(args)

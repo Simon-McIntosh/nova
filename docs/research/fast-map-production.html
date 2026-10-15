@@ -23,7 +23,7 @@
   <header>
     <p class="eyebrow">Research input</p>
     <h1>Continuous fixed-shape forward map</h1>
-    <p class="lead">The unchanged 282-cell map still has a state discontinuity at the stalled diverted iterate. A separate candidate makes the wall candidate continuous and books each cell with one representation. Its 282- and 550-cell H200 map errors improve or hold steady, while the 2,098-cell X-point owner still overbooks current.</p>
+    <p class="lead">The repaired map books the X-point cell with one representation and its analytic image error falls with resolution. Fresh H200 cold solves still fail: a separate hard connected-support decision switches cell 71 off across a tiny state step, even though the wall candidate remains continuous.</p>
   </header>
   <section id="method">
     <h2>Method and provenance</h2>
@@ -67,7 +67,20 @@
       <tr><th>2,098</th><td>0.0161172</td><td>0.0000176641</td><td>0.0000866659</td><td>0.004564258</td></tr>
     </tbody></table>
     <figure><img src="/nova/figures/converged-forward-solve/fast-map-production/resolution.svg" alt="Unchanged, lean, and profile map image errors and profile map seed residual across three diverted carrier resolutions"><figcaption>Fresh H200 profile-map rows against the unchanged fused map and lean-map booking at the same diverted resolutions. The profile-map error decreases with resolution. The coordinator accepts the 282-cell difference of 4.42 × 10<sup>−8</sup> absolute (about 4 × 10<sup>−5</sup> relative) as meeting the no-worse fidelity criterion.</figcaption></figure>
-    <p>H200 job 1286598 completed fresh 282- and 2,098-cell saddle-booking diagnoses with exit 0; each log row matches its full JSON receipt. At 2,098 cells the unchanged map books zero saddle cuts and the corrected map books one. Limited controls, transition brackets, and terminal contour panels remain to be measured before this route can be qualified.</p>
+    <p>H200 job 1286598 completed fresh 282- and 2,098-cell saddle-booking diagnoses with exit 0; each log row matches its full JSON receipt. At 2,098 cells the unchanged map books zero saddle cuts and the corrected map books one.</p>
+  </section>
+  <section id="cold-solve">
+    <h2>Cold solve and remaining discontinuity</h2>
+    <p>H200 jobs 1286602 and 1286603 both completed with scheduler exit 0, and both logs end with <code>EXIT=0</code>. Their receipts instead show a failed numerical gate. At the 282-cell accepted stalled state, the wall candidate changes only from −4.871787363 × 10<sup>−6</sup> to −4.871856985 × 10<sup>−6</sup> Wb between Newton step scales 7.498942093 × 10<sup>−5</sup> and 8.912509381 × 10<sup>−5</sup>. The boundary remains diverted and the connected support count stays 179. Yet support exchanges cells 9 and 71 for cells 4 and 6; cell 71 membership drops from 0.233989 to zero, its scaled current residual changes from −0.00268438 to 0.415085, and the total residual jumps from 0.00268438 to 1.683654. The wall fix therefore removes boolean wall eligibility but does not make the full map continuous: the separate boolean graph connectivity still switches finite cell content.</p>
+    <table><thead><tr><th>Diverted cells</th><th>Initial scaled residual</th><th>Accepted residual history</th><th>Terminal residual</th><th>Converged</th></tr></thead><tbody>
+      <tr><th>282</th><td>0.00469646</td><td>0.00348286, 0.00304372, 0.00285281, 0.00276352, 0.00272031, 0.00269905, 0.00268850, 0.00268719</td><td>0.00268719</td><td>No</td></tr>
+      <tr><th>550</th><td>0.00368598</td><td>0.00174950, 0.00162516, 0.00157639, 0.00155692, 0.00155123, 0.00155037</td><td>0.00155037</td><td>No</td></tr>
+      <tr><th>2,098</th><td>0.00456426</td><td>none; first correction refused</td><td>0.00456426</td><td>No</td></tr>
+    </tbody></table>
+    <p>The final attempted correction was refused at every size. The largest terminal residual block is cell 71 at 282, cell 8 at 550, and cell 40 at 2,098. All three terminal states are shown below even though none is a solution. The profile probe and full cold receipts are under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T160647356198-fast-map-production</code>.</p>
+    <figure><img src="/nova/figures/converged-forward-solve/fast-map-production/cold-250-terminal.svg" alt="Solved and analytic line flux contours, both null sets and wall at the 282-cell terminal state"><figcaption>282-cell diverted terminal state: scaled residual 0.00268719; converged: false. Solid blue contours and nulls are solved; dashed dark contours and nulls are analytic, on shared flux levels. The wall is outlined.</figcaption></figure>
+    <figure><img src="/nova/figures/converged-forward-solve/fast-map-production/cold-500-terminal.svg" alt="Solved and analytic line flux contours, both null sets and wall at the 550-cell terminal state"><figcaption>550-cell diverted terminal state: scaled residual 0.00155037; converged: false. Solid blue contours and nulls are solved; dashed dark contours and nulls are analytic, on shared flux levels. The wall is outlined.</figcaption></figure>
+    <figure><img src="/nova/figures/converged-forward-solve/fast-map-production/cold-2000-terminal.svg" alt="Solved and analytic line flux contours, both null sets and wall at the 2098-cell terminal state"><figcaption>2,098-cell diverted terminal state: scaled residual 0.00456426; converged: false. Solid blue contours and nulls are solved; dashed dark contours and nulls are analytic, on shared flux levels. The wall is outlined.</figcaption></figure>
   </section>
 </main></body>
 </html>

@@ -116,6 +116,10 @@ def run(kind, cache, output, traces):
     trace_dir.mkdir(parents=True, exist_ok=True)
     with jax.profiler.trace(str(trace_dir)):
         jax.block_until_ready(candidate_program())
+    fractions = jnp.linspace(0.05, 0.95, 19)
+    axis = reference.axis
+    ray_points = axis[None] + fractions[:, None] * (state.boundary - axis)[None]
+    ray_flux = jax.vmap(source.evaluate)(ray_points).value
     result = {
         "kind": kind,
         "cells": len(geometry.centre),
@@ -128,6 +132,12 @@ def run(kind, cache, output, traces):
         "compile_seconds": compile_seconds,
         "axis_distance_pitches": float(
             jnp.linalg.norm(state.axis - reference.axis) / jnp.median(geometry.pitch)
+        ),
+        "axis_flux": float(state.axis_flux),
+        "reference_boundary": np.asarray(reference.boundary).tolist(),
+        "boundary": np.asarray(state.boundary).tolist(),
+        "selected_ray_min_signed": float(
+            jnp.min(convention.sigma * (ray_flux - state.boundary_flux))
         ),
         "reference_boundary_flux": float(reference.boundary_flux),
         "boundary_flux": float(state.boundary_flux),

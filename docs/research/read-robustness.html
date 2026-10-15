@@ -1,0 +1,175 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="research">
+<meta name="plan-slug" content="read-robustness">
+<meta name="plan-title" content="Robust topology read on moving fields">
+<meta name="plan-summary" content="Full-jet and mobile-window read, stationary census, perturbed-axis and cold-start measurements">
+<meta name="plan-status" content="reference">
+<meta name="plan-informs" content="converged-forward-solve">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s2">
+<meta name="plan-source" content="Analytic certificate carriers and H200 jobs 1285859, 1285870, 1285871, 1285881, 1285884">
+<meta name="plan-source-quality" content="primary">
+<meta name="plan-tags" content="equilibrium,grad-shafranov,jax,convergence,topology">
+<title>Robust topology read on moving fields | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css"></head>
+<body><main class="plan-doc"><header><p class="eyebrow">Research input</p>
+<h1>Robust topology read on moving fields</h1>
+<p class="lead">The frozen reference lookup reproduces one valid read in 41 states on each topology. Reading all stored jets and censusing roots raises the valid share to 36/41 limited and 32/41 diverted with the moving analytic-axis check. The bisected class change has both sides valid and a raw-current jump of 7.781e-06 of target current. The measured read remains above its 0.12 ms target.</p></header>
+<section id="method"><h2>Method and positive controls</h2>
+<p>Each 41-state test uses the same 289-cell limited or 282-cell diverted analytic certificate carrier and a prescribed vertical-field slope from −0.2 to +0.2 reference flux span per pitch. The baseline is the retained Bell-row lookup and its original fixed seeds. The candidate contracts every stored six-component nodal jet, proposes extrema and saddles from each cell’s quadratic on a fixed lattice, polishes them on the Bell field, removes duplicate roots, continues accepted roots between neighbouring states, and sends every distinct saddle to the connected-support read. It has no saddle-size floor. A separate Newton solve on the closed-form analytic field gives the moving axis used for identity; its residual is recorded on every row. The final diverted arm books all selected support exactly while retaining split interior/cut current as a control. The analytic-moments arm and an actual newly cut node known missing from the frozen lookup are positive controls.</p>
+<p>The complete coarse jet maps hold 1217 limited rows (50.65 MB) and 1164 diverted rows (47.27 MB). The frozen references populate only 916/1161 and 937/1188 row slots. Storage slack is therefore not lookup coverage. Every H200 payload used binary64, reported the imported nova path in its log header, and cleaned a per-job local temporary directory.</p></section>
+<section id="refusals"><h2>Refusal census</h2>
+<p>Root codes are 0 CONVERGED, 1 NEEDS_ROWS, 2 WRONG_ROOT and 3 NOT_CONVERGED. Booking status 2 is INVALID; band status 1 means a newly cut cell is absent from the fixed lookup. A status 2 booking after a root refusal is downstream, so the columns below retain both causes instead of collapsing them into one label. The per-state table records every refusal and every axis position.</p>
+<table><thead><tr><th>Carrier</th><th>Baseline valid</th><th>NEEDS_ROWS rows</th><th>WRONG_ROOT rows</th><th>NOT_CONVERGED rows</th><th>Booking 2</th><th>Band 1</th><th>Full-row valid</th><th>Axis identity on valid rows</th></tr></thead><tbody>
+<tr><td>limited; 289</td><td>1/41</td><td>24</td><td>0</td><td>0</td><td>24</td><td>16</td><td>36/41</td><td>36/36</td></tr>
+<tr><td>diverted; 282</td><td>1/41</td><td>15</td><td>0</td><td>0</td><td>15</td><td>25</td><td>32/41</td><td>32/32</td></tr>
+</tbody></table>
+<p>The limited oracle remains stationary to numerical precision on all 41 sampled fields. Four of its roots lie outside the wall; the remaining in-wall refusal is UNRESOLVED_COMPONENT. The diverted analytic oracle converges on 32/41 rows; every one of those rows reads valid. The nine other oracle probes retain nonzero stationarity residuals and do not establish a confined axis. The farthest valid-axis error is 0.0002921 diverted pitches and 1.087e-13 limited pitches.</p>
+<table><thead><tr><th>Carrier</th><th>Field offset [span/pitch]</th><th>Baseline roots</th><th>Booking / band</th><th>Read axis [R,Z m]</th><th>Analytic axis [R,Z m]</th><th>Axis identity</th><th>Polished saddles</th><th>Read verdict</th></tr></thead><tbody>
+<tr><td>limited</td><td>-0.2</td><td>NEEDS_ROWS</td><td>2 / 0</td><td>6.2, -4.19431012</td><td>6.2, -4.19431012</td><td>yes</td><td>0</td><td>NO_QUALIFIED_AXIS</td></tr>
+<tr><td>limited</td><td>-0.19</td><td>NEEDS_ROWS</td><td>2 / 0</td><td>6.2, -3.98459462</td><td>6.2, -3.98459462</td><td>yes</td><td>0</td><td>NO_QUALIFIED_AXIS</td></tr>
+<tr><td>limited</td><td>-0.18</td><td>NEEDS_ROWS</td><td>2 / 0</td><td>6.2, -3.77487911</td><td>6.2, -3.77487911</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>-0.17</td><td>NEEDS_ROWS</td><td>2 / 0</td><td>6.2, -3.56516361</td><td>6.2, -3.56516361</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>-0.16</td><td>NEEDS_ROWS</td><td>2 / 0</td><td>6.2, -3.3554481</td><td>6.2, -3.3554481</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>-0.15</td><td>NEEDS_ROWS</td><td>2 / 0</td><td>6.2, -3.14573259</td><td>6.2, -3.14573259</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>-0.14</td><td>NEEDS_ROWS</td><td>2 / 0</td><td>6.2, -2.93601709</td><td>6.2, -2.93601709</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>-0.13</td><td>NEEDS_ROWS</td><td>2 / 0</td><td>6.2, -2.72630158</td><td>6.2, -2.72630158</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>-0.12</td><td>NEEDS_ROWS</td><td>2 / 0</td><td>6.2, -2.51658607</td><td>6.2, -2.51658607</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>-0.11</td><td>NEEDS_ROWS</td><td>2 / 0</td><td>6.2, -2.30687057</td><td>6.2, -2.30687057</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>-0.1</td><td>NEEDS_ROWS</td><td>2 / 0</td><td>6.2, -2.09715506</td><td>6.2, -2.09715506</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>-0.09</td><td>CONVERGED</td><td>0 / 1</td><td>6.2, -1.88743956</td><td>6.2, -1.88743956</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>-0.08</td><td>CONVERGED</td><td>0 / 1</td><td>6.2, -1.67772405</td><td>6.2, -1.67772405</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>-0.07</td><td>NEEDS_ROWS</td><td>2 / 0</td><td>6.2, -1.46800854</td><td>6.2, -1.46800854</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>-0.06</td><td>CONVERGED</td><td>0 / 1</td><td>6.2, -1.25829304</td><td>6.2, -1.25829304</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>-0.05</td><td>CONVERGED</td><td>0 / 1</td><td>6.2, -1.04857753</td><td>6.2, -1.04857753</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>-0.04</td><td>CONVERGED</td><td>0 / 1</td><td>6.2, -0.838862025</td><td>6.2, -0.838862025</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>-0.03</td><td>CONVERGED</td><td>0 / 1</td><td>6.2, -0.629146519</td><td>6.2, -0.629146519</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>-0.02</td><td>CONVERGED</td><td>0 / 1</td><td>6.2, -0.419431012</td><td>6.2, -0.419431012</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>-0.01</td><td>CONVERGED</td><td>0 / 1</td><td>6.2, -0.209715506</td><td>6.2, -0.209715506</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>0</td><td>CONVERGED</td><td>0 / 0</td><td>6.2, 1.73664974e-14</td><td>6.2, 0</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>0.01</td><td>CONVERGED</td><td>0 / 1</td><td>6.2, 0.209715506</td><td>6.2, 0.209715506</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>0.02</td><td>CONVERGED</td><td>0 / 1</td><td>6.2, 0.419431012</td><td>6.2, 0.419431012</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>0.03</td><td>CONVERGED</td><td>0 / 1</td><td>6.2, 0.629146519</td><td>6.2, 0.629146519</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>0.04</td><td>CONVERGED</td><td>0 / 1</td><td>6.2, 0.838862025</td><td>6.2, 0.838862025</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>0.05</td><td>CONVERGED</td><td>0 / 1</td><td>6.2, 1.04857753</td><td>6.2, 1.04857753</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>0.06</td><td>CONVERGED</td><td>0 / 1</td><td>6.2, 1.25829304</td><td>6.2, 1.25829304</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>0.07</td><td>CONVERGED</td><td>0 / 1</td><td>6.2, 1.46800854</td><td>6.2, 1.46800854</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>0.08</td><td>CONVERGED</td><td>0 / 1</td><td>6.2, 1.67772405</td><td>6.2, 1.67772405</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>0.09</td><td>NEEDS_ROWS</td><td>2 / 0</td><td>6.2, 1.88743956</td><td>6.2, 1.88743956</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>0.1</td><td>NEEDS_ROWS</td><td>2 / 0</td><td>6.2, 2.09715506</td><td>6.2, 2.09715506</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>0.11</td><td>NEEDS_ROWS</td><td>2 / 0</td><td>6.2, 2.30687057</td><td>6.2, 2.30687057</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>0.12</td><td>NEEDS_ROWS</td><td>2 / 0</td><td>6.2, 2.51658607</td><td>6.2, 2.51658607</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>0.13</td><td>NEEDS_ROWS</td><td>2 / 0</td><td>6.2, 2.72630158</td><td>6.2, 2.72630158</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>0.14</td><td>NEEDS_ROWS</td><td>2 / 0</td><td>6.2, 2.93601709</td><td>6.2, 2.93601709</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>0.15</td><td>NEEDS_ROWS</td><td>2 / 0</td><td>6.2, 3.14573259</td><td>6.2, 3.14573259</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>0.16</td><td>NEEDS_ROWS</td><td>2 / 0</td><td>6.2, 3.3554481</td><td>6.2, 3.3554481</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>0.17</td><td>NEEDS_ROWS</td><td>2 / 0</td><td>6.2, 3.56516361</td><td>6.2, 3.56516361</td><td>yes</td><td>0</td><td>VALID</td></tr>
+<tr><td>limited</td><td>0.18</td><td>NEEDS_ROWS</td><td>2 / 0</td><td>6.2, 3.77487911</td><td>6.2, 3.77487911</td><td>yes</td><td>0</td><td>UNRESOLVED_COMPONENT</td></tr>
+<tr><td>limited</td><td>0.19</td><td>NEEDS_ROWS</td><td>2 / 0</td><td>6.2, 3.98459462</td><td>6.2, 3.98459462</td><td>yes</td><td>0</td><td>NO_QUALIFIED_AXIS</td></tr>
+<tr><td>limited</td><td>0.2</td><td>NEEDS_ROWS</td><td>2 / 0</td><td>6.2, 4.19431012</td><td>6.2, 4.19431012</td><td>yes</td><td>0</td><td>NO_QUALIFIED_AXIS</td></tr>
+<tr><td>diverted</td><td>-0.2</td><td>NEEDS_ROWS, NEEDS_ROWS</td><td>2 / 0</td><td>1.60696215, -0.638002464</td><td>1.65441324, -0.531997522</td><td>no</td><td>0</td><td>NO_QUALIFIED_AXIS</td></tr>
+<tr><td>diverted</td><td>-0.19</td><td>NEEDS_ROWS, NEEDS_ROWS</td><td>2 / 0</td><td>1.6071088, -0.638064979</td><td>1.65424947, -0.532041567</td><td>no</td><td>0</td><td>NO_QUALIFIED_AXIS</td></tr>
+<tr><td>diverted</td><td>-0.18</td><td>NEEDS_ROWS, NEEDS_ROWS</td><td>2 / 0</td><td>1.60732445, -0.638157145</td><td>1.65428679, -0.532189125</td><td>no</td><td>0</td><td>NO_QUALIFIED_AXIS</td></tr>
+<tr><td>diverted</td><td>-0.17</td><td>NEEDS_ROWS, NEEDS_ROWS</td><td>2 / 0</td><td>1.60766684, -0.638304026</td><td>1.65456364, -0.532459893</td><td>no</td><td>0</td><td>NO_QUALIFIED_AXIS</td></tr>
+<tr><td>diverted</td><td>-0.16</td><td>NEEDS_ROWS, NEEDS_ROWS</td><td>2 / 0</td><td>1.60826171, -0.638560793</td><td>1.6550192, -0.53282885</td><td>no</td><td>0</td><td>NO_QUALIFIED_AXIS</td></tr>
+<tr><td>diverted</td><td>-0.15</td><td>NEEDS_ROWS, NEEDS_ROWS</td><td>2 / 0</td><td>1.61023212, -0.641222282</td><td>1.6462222, -0.554043414</td><td>yes</td><td>0</td><td>NO_QUALIFIED_AXIS</td></tr>
+<tr><td>diverted</td><td>-0.14</td><td>NEEDS_ROWS, NEEDS_ROWS</td><td>2 / 0</td><td>1.68929534, -0.454712001</td><td>1.68928452, -0.45473928</td><td>yes</td><td>1</td><td>VALID</td></tr>
+<tr><td>diverted</td><td>-0.13</td><td>CONVERGED, CONVERGED</td><td>0 / 1</td><td>1.71516208, -0.387348782</td><td>1.71516147, -0.387351005</td><td>yes</td><td>1</td><td>VALID</td></tr>
+<tr><td>diverted</td><td>-0.12</td><td>CONVERGED, CONVERGED</td><td>0 / 1</td><td>1.73170418, -0.338641986</td><td>1.73170378, -0.338644957</td><td>yes</td><td>1</td><td>VALID</td></tr>
+<tr><td>diverted</td><td>-0.11</td><td>CONVERGED, CONVERGED</td><td>0 / 1</td><td>1.74403875, -0.297487403</td><td>1.74403946, -0.297486688</td><td>yes</td><td>1</td><td>VALID</td></tr>
+<tr><td>diverted</td><td>-0.1</td><td>CONVERGED, CONVERGED</td><td>0 / 1</td><td>1.75376224, -0.260508671</td><td>1.75376193, -0.260508251</td><td>yes</td><td>1</td><td>VALID</td></tr>
+<tr><td>diverted</td><td>-0.09</td><td>CONVERGED, CONVERGED</td><td>0 / 1</td><td>1.76162106, -0.226149287</td><td>1.76162129, -0.226148902</td><td>yes</td><td>1</td><td>VALID</td></tr>
+<tr><td>diverted</td><td>-0.08</td><td>CONVERGED, CONVERGED</td><td>0 / 1</td><td>1.76804041, -0.19353173</td><td>1.76804117, -0.193531909</td><td>yes</td><td>1</td><td>VALID</td></tr>
+<tr><td>diverted</td><td>-0.07</td><td>CONVERGED, CONVERGED</td><td>0 / 1</td><td>1.77328743, -0.162105724</td><td>1.77328706, -0.162104558</td><td>yes</td><td>1</td><td>VALID</td></tr>
+<tr><td>diverted</td><td>-0.06</td><td>CONVERGED, CONVERGED</td><td>0 / 1</td><td>1.77753649, -0.131489748</td><td>1.77753654, -0.131489878</td><td>yes</td><td>1</td><td>VALID</td></tr>
+<tr><td>diverted</td><td>-0.05</td><td>CONVERGED, CONVERGED</td><td>0 / 1</td><td>1.78091316, -0.101417457</td><td>1.78091347, -0.101415379</td><td>yes</td><td>1</td><td>VALID</td></tr>
+<tr><td>diverted</td><td>-0.04</td><td>CONVERGED, CONVERGED</td><td>0 / 1</td><td>1.78350682, -0.0716693076</td><td>1.78350637, -0.0716749439</td><td>yes</td><td>1</td><td>VALID</td></tr>
+<tr><td>diverted</td><td>-0.03</td><td>CONVERGED, CONVERGED</td><td>0 / 1</td><td>1.78537889, -0.0421082467</td><td>1.78537909, -0.0421067581</td><td>yes</td><td>1</td><td>VALID</td></tr>
+<tr><td>diverted</td><td>-0.02</td><td>CONVERGED, CONVERGED</td><td>0 / 1</td><td>1.7865774, -0.0125791847</td><td>1.7865773, -0.0125796598</td><td>yes</td><td>1</td><td>VALID</td></tr>
+<tr><td>diverted</td><td>-0.01</td><td>CONVERGED, CONVERGED</td><td>0 / 1</td><td>1.78713246, 0.0170153431</td><td>1.78713251, 0.0170158068</td><td>yes</td><td>1</td><td>VALID</td></tr>
+<tr><td>diverted</td><td>0</td><td>CONVERGED, CONVERGED</td><td>0 / 0</td><td>1.78706473, 0.0467735516</td><td>1.7870647, 0.0467736266</td><td>yes</td><td>1</td><td>VALID</td></tr>
+<tr><td>diverted</td><td>0.01</td><td>CONVERGED, CONVERGED</td><td>0 / 1</td><td>1.78638376, 0.0767767469</td><td>1.78638381, 0.0767769804</td><td>yes</td><td>1</td><td>VALID</td></tr>
+<tr><td>diverted</td><td>0.02</td><td>CONVERGED, CONVERGED</td><td>0 / 1</td><td>1.78509085, 0.107100676</td><td>1.78509057, 0.107102065</td><td>yes</td><td>1</td><td>VALID</td></tr>
+<tr><td>diverted</td><td>0.03</td><td>CONVERGED, CONVERGED</td><td>0 / 1</td><td>1.78317649, 0.137823322</td><td>1.78317669, 0.13782157</td><td>yes</td><td>1</td><td>VALID</td></tr>
+<tr><td>diverted</td><td>0.04</td><td>CONVERGED, CONVERGED</td><td>0 / 1</td><td>1.7806245, 0.169007923</td><td>1.78062448, 0.169008222</td><td>yes</td><td>1</td><td>VALID</td></tr>
+<tr><td>diverted</td><td>0.05</td><td>CONVERGED, CONVERGED</td><td>0 / 1</td><td>1.77740586, 0.200738933</td><td>1.77740585, 0.200738794</td><td>yes</td><td>1</td><td>VALID</td></tr>
+<tr><td>diverted</td><td>0.06</td><td>CONVERGED, CONVERGED</td><td>0 / 1</td><td>1.7734804, 0.233099265</td><td>1.77348052, 0.233099034</td><td>yes</td><td>1</td><td>VALID</td></tr>
+<tr><td>diverted</td><td>0.07</td><td>CONVERGED, CONVERGED</td><td>0 / 1</td><td>1.76879312, 0.266189966</td><td>1.76879321, 0.266190134</td><td>yes</td><td>1</td><td>VALID</td></tr>
+<tr><td>diverted</td><td>0.08</td><td>CONVERGED, CONVERGED</td><td>0 / 1</td><td>1.76326917, 0.300137747</td><td>1.76326919, 0.300137692</td><td>yes</td><td>1</td><td>VALID</td></tr>
+<tr><td>diverted</td><td>0.09</td><td>CONVERGED, CONVERGED</td><td>0 / 1</td><td>1.75680757, 0.335104896</td><td>1.75680756, 0.335104736</td><td>yes</td><td>1</td><td>VALID</td></tr>
+<tr><td>diverted</td><td>0.1</td><td>CONVERGED, CONVERGED</td><td>0 / 1</td><td>1.74926995, 0.371311946</td><td>1.74927024, 0.371311679</td><td>yes</td><td>1</td><td>VALID</td></tr>
+<tr><td>diverted</td><td>0.11</td><td>CONVERGED, CONVERGED</td><td>0 / 1</td><td>1.74046394, 0.409068289</td><td>1.74046391, 0.409068707</td><td>yes</td><td>1</td><td>VALID</td></tr>
+<tr><td>diverted</td><td>0.12</td><td>CONVERGED, CONVERGED</td><td>0 / 1</td><td>1.73010785, 0.448831787</td><td>1.73010793, 0.448832268</td><td>yes</td><td>1</td><td>VALID</td></tr>
+<tr><td>diverted</td><td>0.13</td><td>NEEDS_ROWS, CONVERGED</td><td>2 / 0</td><td>1.71777228, 0.491314249</td><td>1.71777295, 0.491312788</td><td>yes</td><td>1</td><td>VALID</td></tr>
+<tr><td>diverted</td><td>0.14</td><td>NEEDS_ROWS, CONVERGED</td><td>2 / 0</td><td>1.70274895, 0.537707576</td><td>1.70274915, 0.537706203</td><td>yes</td><td>1</td><td>VALID</td></tr>
+<tr><td>diverted</td><td>0.15</td><td>NEEDS_ROWS, CONVERGED</td><td>2 / 0</td><td>1.68371014, 0.590288501</td><td>1.6837111, 0.590286045</td><td>yes</td><td>1</td><td>VALID</td></tr>
+<tr><td>diverted</td><td>0.16</td><td>NEEDS_ROWS, CONVERGED</td><td>2 / 0</td><td>1.65758122, 0.654428664</td><td>1.65758221, 0.654427091</td><td>yes</td><td>1</td><td>VALID</td></tr>
+<tr><td>diverted</td><td>0.17</td><td>NEEDS_ROWS, CONVERGED</td><td>2 / 0</td><td>1.61187549, 0.752438841</td><td>1.6118795, 0.752431759</td><td>yes</td><td>2</td><td>VALID</td></tr>
+<tr><td>diverted</td><td>0.18</td><td>NEEDS_ROWS, CONVERGED</td><td>2 / 0</td><td>1.51828541, 0.930194562</td><td>1.58278026, 0.813145725</td><td>no</td><td>1</td><td>NO_QUALIFIED_AXIS</td></tr>
+<tr><td>diverted</td><td>0.19</td><td>NEEDS_ROWS, CONVERGED</td><td>2 / 0</td><td>1.51900403, 0.930578079</td><td>1.58538301, 0.814194871</td><td>no</td><td>1</td><td>NO_QUALIFIED_AXIS</td></tr>
+<tr><td>diverted</td><td>0.2</td><td>NEEDS_ROWS, CONVERGED</td><td>2 / 0</td><td>1.5194472, 0.930815605</td><td>1.58796842, 0.81529897</td><td>no</td><td>1</td><td>NO_QUALIFIED_AXIS</td></tr>
+</tbody></table></section>
+<section id="windows"><h2>Mobile rows and cost</h2>
+<p>At the coarse count the full stored map is read directly, so no band identity can be missing. For larger carriers the fixed-capacity gather forms its desired nodes afresh from current cut cells, wall cells and moving root neighbourhoods. Its overflow is typed. The positive control below marks one cell cut whose nodal row was −1 in the frozen lookup; the mobile lookup gives that same node a live slot. The full map remains stored as the source for the gather.</p>
+<table><thead><tr><th>Carrier</th><th>Cells</th><th>Full jet bytes [MB]</th><th>New node</th><th>Fixed → mobile slot</th><th>Full contraction [ms]</th><th>Mobile gather [ms]</th><th>Census [ms]</th><th>Whole read [ms]</th></tr></thead><tbody>
+<tr><td>limited</td><td>289</td><td>50.65</td><td>—</td><td>—</td><td>0.1387</td><td>0.4135</td><td>1.336</td><td>12.2</td></tr>
+<tr><td>limited</td><td>553</td><td>170</td><td>561</td><td>-1 → 435</td><td>0.4098</td><td>0.9903</td><td>—</td><td>—</td></tr>
+<tr><td>diverted</td><td>282</td><td>47.27</td><td>—</td><td>—</td><td>0.08323</td><td>0.3983</td><td>1.652</td><td>14.61</td></tr>
+<tr><td>diverted</td><td>550</td><td>166.7</td><td>331</td><td>-1 → 226</td><td>0.2543</td><td>0.4065</td><td>—</td><td>—</td></tr>
+</tbody></table>
+<p>The proposed connected-read allowance is 0.12 ms per step. These synchronised H200 dispatch-and-wait walls exceed it even for the isolated contraction and gather; separately timed stages overlap in a fused read and must not be summed as a slice wall. The whole-read row is the direct comparison for the current prototype. The 550-cell window test forces a new cut; it is not a full physical 550-cell sweep.</p></section>
+<section id="cold"><h2>Cold and distributed current starts</h2>
+<p>Each distributed arm supplies nonzero current at the same requested total as the analytic certificate; the zero arm supplies exactly zero. Circle and Gaussian arms use the analytic state only to set centroid, radius and total. The profile-weighted and blended controls use varying amounts of analytic current information and must not be mistaken for a production seed. An analytic-moments arm proves that the instrument can admit a known present read.</p>
+<table><thead><tr><th>Carrier</th><th>Input</th><th>Frozen root status</th><th>Frozen booking / band</th><th>Full-row axis [R,Z m]</th><th>Correct axis</th><th>Full-row valid</th></tr></thead><tbody>
+<tr><td>limited</td><td>analytic moments</td><td>CONVERGED</td><td>0 / 0</td><td>6.2, 1.73664974e-14</td><td>yes</td><td>yes</td></tr>
+<tr><td>limited</td><td>zero</td><td>NEEDS_ROWS</td><td>2 / 0</td><td>3.65038427, -0.423408171</td><td>no</td><td>no</td></tr>
+<tr><td>limited</td><td>uniform</td><td>NOT_CONVERGED</td><td>2 / 0</td><td>5.98313883, 0.0657889409</td><td>yes</td><td>yes</td></tr>
+<tr><td>limited</td><td>centroid circle</td><td>CONVERGED</td><td>0 / 1</td><td>6.02739503, 0.0596621276</td><td>yes</td><td>yes</td></tr>
+<tr><td>limited</td><td>profile weighted</td><td>CONVERGED</td><td>0 / 0</td><td>6.2046339, -0.00290351159</td><td>yes</td><td>yes</td></tr>
+<tr><td>limited</td><td>circle radius 0.5</td><td>CONVERGED</td><td>0 / 1</td><td>6.20839683, 0.0412936788</td><td>yes</td><td>yes</td></tr>
+<tr><td>limited</td><td>circle radius 0.75</td><td>CONVERGED</td><td>0 / 1</td><td>6.22637887, 0.0440049003</td><td>yes</td><td>yes</td></tr>
+<tr><td>limited</td><td>circle radius 1.25</td><td>CONVERGED</td><td>0 / 1</td><td>5.994517, 0.0630039537</td><td>yes</td><td>yes</td></tr>
+<tr><td>limited</td><td>circle radius 1.5</td><td>NOT_CONVERGED</td><td>2 / 0</td><td>5.98313883, 0.0657889409</td><td>yes</td><td>yes</td></tr>
+<tr><td>limited</td><td>gaussian width 0.5</td><td>NOT_CONVERGED</td><td>2 / 0</td><td>6.11506364, 0.0524496657</td><td>yes</td><td>yes</td></tr>
+<tr><td>limited</td><td>gaussian width 1</td><td>CONVERGED</td><td>0 / 1</td><td>6.0268678, 0.0642534771</td><td>yes</td><td>yes</td></tr>
+<tr><td>limited</td><td>gaussian width 1.5</td><td>CONVERGED</td><td>0 / 1</td><td>6.00357587, 0.0651879689</td><td>yes</td><td>yes</td></tr>
+<tr><td>limited</td><td>circle reference blend 0.25</td><td>WRONG_ROOT</td><td>2 / 0</td><td>6.07376937, -0.00350139143</td><td>yes</td><td>no</td></tr>
+<tr><td>limited</td><td>scaled reference 0.25</td><td>NEEDS_ROWS</td><td>2 / 0</td><td>3.88047097, 0.00957974025</td><td>no</td><td>no</td></tr>
+<tr><td>limited</td><td>circle reference blend 0.5</td><td>WRONG_ROOT</td><td>2 / 0</td><td>6.11211386, 0.0099416499</td><td>yes</td><td>no</td></tr>
+<tr><td>limited</td><td>scaled reference 0.5</td><td>CONVERGED</td><td>0 / 1</td><td>5.35892547, 0.00178130878</td><td>no</td><td>no</td></tr>
+<tr><td>limited</td><td>circle reference blend 0.75</td><td>CONVERGED</td><td>0 / 1</td><td>6.15685598, -0.00297279018</td><td>yes</td><td>yes</td></tr>
+<tr><td>limited</td><td>scaled reference 0.75</td><td>CONVERGED</td><td>0 / 1</td><td>5.93219979, 0.0392195524</td><td>yes</td><td>yes</td></tr>
+<tr><td>diverted</td><td>analytic moments</td><td>CONVERGED, CONVERGED</td><td>0 / 0</td><td>1.78706473, 0.0467735516</td><td>yes</td><td>yes</td></tr>
+<tr><td>diverted</td><td>zero</td><td>WRONG_ROOT, CONVERGED</td><td>2 / 0</td><td>2.06078196, 0.0331391131</td><td>no</td><td>no</td></tr>
+<tr><td>diverted</td><td>uniform</td><td>WRONG_ROOT, NOT_CONVERGED</td><td>2 / 0</td><td>2.00696521, 0.100459594</td><td>no</td><td>no</td></tr>
+<tr><td>diverted</td><td>centroid circle</td><td>WRONG_ROOT, CONVERGED</td><td>2 / 0</td><td>1.3819997, 0.0239738047</td><td>no</td><td>no</td></tr>
+<tr><td>diverted</td><td>profile weighted</td><td>WRONG_ROOT, WRONG_ROOT</td><td>2 / 0</td><td>1.50811369, -1.02296949</td><td>no</td><td>no</td></tr>
+<tr><td>diverted</td><td>circle radius 0.5</td><td>CONVERGED, CONVERGED</td><td>0 / 1</td><td>1.72711884, 0.0344160774</td><td>yes</td><td>yes</td></tr>
+<tr><td>diverted</td><td>circle radius 0.75</td><td>NOT_CONVERGED, WRONG_ROOT</td><td>2 / 0</td><td>1.72392903, 0.0351816235</td><td>yes</td><td>no</td></tr>
+<tr><td>diverted</td><td>circle radius 1.25</td><td>WRONG_ROOT, CONVERGED</td><td>2 / 0</td><td>2.30492478, 0.086422119</td><td>no</td><td>no</td></tr>
+<tr><td>diverted</td><td>circle radius 1.5</td><td>WRONG_ROOT, CONVERGED</td><td>2 / 0</td><td>2.34587137, 0.0788371922</td><td>no</td><td>no</td></tr>
+<tr><td>diverted</td><td>gaussian width 0.5</td><td>NOT_CONVERGED, CONVERGED</td><td>2 / 0</td><td>1.68379162, 0.0302390674</td><td>no</td><td>no</td></tr>
+<tr><td>diverted</td><td>gaussian width 1</td><td>WRONG_ROOT, NOT_CONVERGED</td><td>2 / 0</td><td>2.29469716, 0.085308499</td><td>no</td><td>no</td></tr>
+<tr><td>diverted</td><td>gaussian width 1.5</td><td>WRONG_ROOT, NOT_CONVERGED</td><td>2 / 0</td><td>2.29093838, 0.198164413</td><td>no</td><td>no</td></tr>
+<tr><td>diverted</td><td>circle reference blend 0.25</td><td>NOT_CONVERGED, NOT_CONVERGED</td><td>2 / 0</td><td>2.26935472, 0.0768572776</td><td>no</td><td>no</td></tr>
+<tr><td>diverted</td><td>scaled reference 0.25</td><td>WRONG_ROOT, NOT_CONVERGED</td><td>2 / 0</td><td>2.0772729, 0.0260389773</td><td>no</td><td>no</td></tr>
+<tr><td>diverted</td><td>circle reference blend 0.5</td><td>CONVERGED, CONVERGED</td><td>0 / 1</td><td>1.58632294, 0.0264563433</td><td>no</td><td>no</td></tr>
+<tr><td>diverted</td><td>scaled reference 0.5</td><td>WRONG_ROOT, NOT_CONVERGED</td><td>2 / 0</td><td>2.35639902, 0.0728252889</td><td>no</td><td>no</td></tr>
+<tr><td>diverted</td><td>circle reference blend 0.75</td><td>CONVERGED, NOT_CONVERGED</td><td>0 / 1</td><td>1.71629442, 0.038090981</td><td>yes</td><td>yes</td></tr>
+<tr><td>diverted</td><td>scaled reference 0.75</td><td>NEEDS_ROWS, CONVERGED</td><td>2 / 0</td><td>2.24054271, -0.0468131872</td><td>no</td><td>no</td></tr>
+</tbody></table>
+<p>The negative control is the diverted centroid-circle arm: its candidate root is converged and its topology read says valid, so a convergence-only gate accepts it; the axis-identity check rejects 1.3819997, 0.0239738047 m against the intended 1.7870647, 0.0467736266 m. This is a real alternate stationary root, not a fabricated shifted coordinate.</p></section>
+<section id="transition"><h2>Limited-to-diverted transition</h2>
+<p>Both wall and saddle candidate fluxes are evaluated on every sampled state. An accepted adjacent class change was bisected 24 times with the same reference moments and complete jet map. The table keeps both candidate levels, the chosen boundary and the unnormalised booked current on each side. A normalised target-current sum would conceal a support jump.</p>
+<table><thead><tr><th>Side</th><th>Offset [span/pitch]</th><th>Class</th><th>Wall candidate</th><th>Saddle candidates</th><th>Boundary flux</th><th>Exact raw current [A]</th><th>Split raw current [A]</th><th>Valid</th></tr></thead><tbody>
+<tr><td>left</td><td>0.0135817724466</td><td>1</td><td>2.741600321e-05</td><td>-0.0008280591109</td><td>-0.0008280591109</td><td>43179.08408</td><td>43179.08411</td><td>True</td></tr>
+<tr><td>right</td><td>0.0135817730427</td><td>0</td><td>2.741596072e-05</td><td>-0.0008280591475</td><td>-0.0008280590938</td><td>43178.79481</td><td>43178.79484</td><td>True</td></tr>
+</tbody></table>
+<p>The bracket width is 5.96e-10 normalised slope units. The chosen boundary changes by 2.99063e-09 reference flux spans, exact raw current by 7.78131e-06 requested currents, and split-route raw current by 7.78131e-06 requested currents. Both endpoint reads are valid. This fails the requested continuity.</p>
+</section><section id="limits"><h2>Limits and next implementation step</h2>
+<p>This is a prototype in scripts; it changes no product read or production seed. The per-cell quadratic proposes stationary candidates, while the full Bell field polishes them; a carrier with more candidates than the fixed slots returns overflow. The fixed-capacity gather follows tested new cuts but is not itself a fast connected-support read. Whole-cell exact booking is an accuracy control and adds cost; it does not establish the intended fused fast booking path. The measured full contraction, gather, census and complete read determine whether the 0.12 ms allowance is credible. Any remaining cold-seed or transition failure requires a separate mechanism repair before this route can replace the production read.</p>
+<p>Receipts and complete logs are under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T075344363557-read-robustness</code>. The source revision and imported nova path appear in each H200 log header. The prior design input is <a href="/nova/research/sub-millisecond-forward-design.html">the sub-millisecond design review</a>; the earlier carrier measurement is <a href="/nova/research/fixed-shape-lean-map.html">the fixed-shape lean-map study</a>.</p>
+</section></main></body></html>

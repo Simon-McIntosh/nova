@@ -291,8 +291,6 @@ def run(kind, cells, cache, output, widths, cold_only=False):
         cold_accepted_steps=int(solution.accepted_steps),
     )
     record(output, result)
-    if not bool(solution.converged):
-        return
     terminal = solution.moments
     np.save(output.with_suffix(".npy"), np.asarray(terminal))
     terminal_map = map_program(terminal, *operands)

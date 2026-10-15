@@ -221,7 +221,7 @@ def main():
     batch_walls(rows, args.output / "batch-wall.svg")
     for row in rows:
         if (
-            row.get("cold_converged")
+            "terminal_roots" in row
             and row["_receipt_path"].with_suffix(".npy").is_file()
         ):
             build = row["_receipt_path"].stem.split("-")[0]

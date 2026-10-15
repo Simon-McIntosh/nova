@@ -675,11 +675,18 @@ def run(args):
             return jax.vmap(correct)(offsets)
 
         def factor_batch(point, baseline, shifted, active_scale, offsets):
-            return jax.vmap(
-                lambda offset: fresh_factor(
-                    point, varied_operands(offset, baseline, shifted), active_scale
-                )
-            )(offsets)
+            group_size = min(4, offsets.shape[0])
+            groups = offsets.reshape((-1, group_size))
+            return jax.lax.map(
+                lambda group: jax.vmap(
+                    lambda offset: fresh_factor(
+                        point,
+                        varied_operands(offset, baseline, shifted),
+                        active_scale,
+                    )
+                )(group),
+                groups,
+            )
 
         if args.inspect_constants:
             from scipy.linalg import lu_factor

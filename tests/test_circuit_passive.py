@@ -140,6 +140,28 @@ def _shell_system(**kwargs):
     return conductors, sensors, system
 
 
+def _cylindrical_shell_shielding(frequency, inner, outer, resistivity):
+    """Field-transfer ratio of a long conducting cylindrical shell."""
+    permeability = 4e-7 * np.pi
+    shielding = []
+    for point in frequency:
+        rate = np.sqrt(1j * 2 * np.pi * point * permeability / resistivity)
+        inner_conditions = np.array(
+            [
+                [iv(0, rate * inner), kv(0, rate * inner)],
+                [rate * iv(1, rate * inner), -rate * kv(1, rate * inner)],
+            ]
+        )
+        coefficients = np.linalg.solve(
+            inner_conditions, np.array([1, rate**2 * inner / 2])
+        )
+        outer_field = coefficients @ np.array(
+            [iv(0, rate * outer), kv(0, rate * outer)]
+        )
+        shielding.append(1 / outer_field)
+    return np.asarray(shielding)
+
+
 def test_cylindrical_shell_skin_transfer_matches_closed_form():
     """Coaxial drive and pickup see the cylindrical diffusion solution."""
     permeability = 4e-7 * np.pi
@@ -170,25 +192,16 @@ def test_cylindrical_shell_skin_transfer_matches_closed_form():
             frequency_hz=points,
         )[:, 0, 1]
 
-    expected = []
-    for point in frequency:
-        rate = np.sqrt(1j * 2 * np.pi * point * permeability / resistivity)
-        inner_conditions = np.array(
-            [
-                [iv(0, rate * inner), kv(0, rate * inner)],
-                [rate * iv(1, rate * inner), -rate * kv(1, rate * inner)],
-            ]
-        )
-        coefficients = np.linalg.solve(
-            inner_conditions, np.array([1, rate**2 * inner / 2])
-        )
-        outer_field = coefficients @ np.array(
-            [iv(0, rate * outer), kv(0, rate * outer)]
-        )
-        expected.append(
-            1j * 2 * np.pi * point * permeability * np.pi * pickup**2 / outer_field
-        )
-    expected = np.asarray(expected)
+    expected = (
+        1j
+        * 2
+        * np.pi
+        * frequency
+        * permeability
+        * np.pi
+        * pickup**2
+        * _cylindrical_shell_shielding(frequency, inner, outer, resistivity)
+    )
     np.testing.assert_array_less(np.abs(spectrum(160) / expected - 1), 0.01)
     assert np.max(np.abs(spectrum(1) / expected - 1)) > 1.0
     low_frequency = np.array([1e-8])
@@ -197,6 +210,92 @@ def test_cylindrical_shell_skin_transfer_matches_closed_form():
         np.testing.assert_allclose(
             spectrum(layers, low_frequency)[0], bare_transfer, rtol=1e-6
         )
+
+
+def test_resolved_cylindrical_shell_matches_closed_form():
+    """Production wall geometry, linkage and resistance carry skin screening."""
+    from nova.circuit.linkage import circuit_linkage_matrix
+
+    permeability = 4e-7 * np.pi
+    resistivity = 7.2e-7
+    inner, outer, pickup, length = 1.0, 1.012, 0.9, 100.0
+    frequency = np.geomspace(10.0, 5000.0, 21)
+    conductors = ConductorSet(
+        r=np.array([outer + 0.005, pickup, (inner + outer) / 2]),
+        z=np.zeros(3),
+        dr=np.array([0.01, 0.01, outer - inner]),
+        dz=np.full(3, length),
+        current_share=np.ones(3),
+        circuit=np.arange(3),
+    )
+    wall_resistance = (
+        2 * np.pi * (inner + outer) / 2 * resistivity / ((outer - inner) * length)
+    )
+    source = PassiveCircuitSystem(
+        circuits=np.array([2]),
+        centroid_r=np.array([(inner + outer) / 2]),
+        centroid_z=np.zeros(1),
+        lmat=np.ones((1, 1)),
+        r_diag=np.array([wall_resistance]),
+        a_circuit=np.empty((0, 1)),
+        g_grid=np.empty((0, 1)),
+        m_channel=np.empty((1, 2)),
+        channels=["drive", "pickup"],
+        measured_channel_row={},
+        resistivity=resistivity,
+        section_scale=np.ones(1),
+    )
+    resolved, circuits, system, mutual = resolve_passive_thickness(
+        conductors, source, np.array([outer - inner]), np.eye(2), 79, workers=4
+    )
+    widths = resolved.dr[np.concatenate(resolved.rows(circuits))]
+    np.testing.assert_allclose(widths.sum(), outer - inner, rtol=1e-12)
+    skin_depth = np.sqrt(resistivity / (np.pi * frequency[-1] * permeability))
+    assert widths.min() < skin_depth / 3
+    coil_inductance = circuit_linkage_matrix(resolved, [0, 1])
+    transfer = terminal_impedance_spectrum(
+        coil_inductance,
+        mutual.T,
+        system.lmat,
+        system.r_diag,
+        frequency_hz=frequency,
+    )[:, 0, 1]
+    bare = 1j * 2 * np.pi * frequency * coil_inductance[0, 1]
+    shielding = _cylindrical_shell_shielding(frequency, inner, outer, resistivity)
+    analytic_transfer = (
+        1j
+        * 2
+        * np.pi
+        * frequency
+        * permeability
+        * np.pi
+        * pickup**2
+        / length
+        * shielding
+    )
+    shielding_error = np.abs(transfer / bare / shielding - 1)
+    transfer_error = np.abs(transfer / analytic_transfer - 1)
+    low_frequency = np.array([1e-8])
+    low_transfer = terminal_impedance_spectrum(
+        coil_inductance,
+        mutual.T,
+        system.lmat,
+        system.r_diag,
+        frequency_hz=low_frequency,
+    )[0, 0, 1]
+    np.testing.assert_allclose(
+        low_transfer,
+        1j * 2 * np.pi * low_frequency[0] * coil_inductance[0, 1],
+        rtol=1e-6,
+    )
+    print(
+        "SUMMARY production_shell_shielding_max_relative_error="
+        f"{shielding_error.max():.8g} "
+        f"transfer_max_relative_error={transfer_error.max():.8g} "
+        f"layers={circuits.size}"
+    )
+    assert shielding_error.max() < 0.01
+    assert transfer_error.max() < 0.01
 
 
 def test_resolved_wall_has_independent_skin_strips_and_dc_resistance():

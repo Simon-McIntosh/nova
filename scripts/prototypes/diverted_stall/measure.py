@@ -22,9 +22,9 @@ from nova.equilibrium import current, fixed_points, topology
 from nova.equilibrium.solve_request import TopologyPolicy
 from scripts.analytic_oracle_fixtures import measure as fixture
 from scripts.prototypes.diverted_stall.kernel import read as fixed_shape_read
-from scripts.prototypes.fast_read import program as mapped_program
+from scripts.prototypes.diverted_stall import program as mapped_program
 from scripts.prototypes.fast_read.kernel import read as original_read
-from scripts.prototypes.fast_read.program import FusedField, map_moments
+from scripts.prototypes.diverted_stall.program import FusedField, map_moments
 from scripts.prototypes.fused_convergence import roots as ray_roots
 from scripts.prototypes.lean_map.jets import build_jets
 from scripts.prototypes.lean_map.probe_bias import _image
@@ -297,7 +297,7 @@ def run(args):
         from scipy.linalg import lu_factor, lu_solve
 
         from scripts.prototypes.fast_read.ordinary_cut import bell_moments
-        from scripts.prototypes.fast_read.program import _saddle_moments
+        from scripts.prototypes.diverted_stall.program import _saddle_moments
 
         saved = json.loads(args.start_json.read_text())
         point = jnp.asarray(saved["terminal_state"]["moments"]) / scale
@@ -361,7 +361,10 @@ def run(args):
                 geometry, reading, profile, convention.sigma
             )
             saddle, saddle_valid = _saddle_moments(
-                geometry, reading, profile, ordinary_valid=ordinary_valid & ~four
+                geometry,
+                reading,
+                profile,
+                selected=reading.normal_form_cells & (reading.membership > 0),
             )
             return (
                 reading.membership[71],

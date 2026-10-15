@@ -25,7 +25,7 @@
   <title>ITER Passive and Prescribed-Plasma Circuit | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="11">
+<meta name="plan-version" content="12">
 <meta name="plan-modified" content="2026-10-15">
 </head>
 <body>
@@ -226,6 +226,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-s5-plant-vehicle" data-who="reckon-build" data-when="2026-10-15T13:33:00Z">
     <div class="r-comment-body"><p>Coordinator decision on §5's second check. The plant node found that the coupled-plant call needs a machine (coil-to-terminal wiring, a passive linkage) that nova does not hold for MAST, and building one is outside this plan. The reconstruction path into the plant is therefore proven on ITER, where the answer is known. DINA 105014/1 is presented the way a reconstruction arrives: EFIT-style p′ and FF′ on its own ψ normalisation, the last closed flux surface as boundary, and coil currents at a coarser cadence. The plant it returns must equal the DINA-path plant within a tolerance stated beforehand. The MAST check of ψ at coils and loops (first check, landed) stands. The JT-60SA machine for reconstructed pulses lives in power_convertor, which already builds it for the coupled-plant call. The same node adds the guard that refuses a machine whose supplied terminals disagree with its section reduction.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-s5-plant-landed" data-who="reckon-build" data-when="2026-10-15T14:32:00Z">
+    <div class="r-comment-body"><p>The plant checks landed (merged <code>838789ec2</code>). <code>coupled_plant</code> takes a generic plasma source. 105014/1 through it returns the earlier plant bit for bit. The same slice presented the way a reconstruction arrives (EFIT-style p′ and FF′, last closed surface, coarser coil cadence) agrees within a predeclared relative 1e-3. The call refuses a flipped-sign source, and a machine whose supplied terminals disagree with their section reduction by 1 %; each refusal has a red log with the guard removed. 20 tests pass, review passed. §5 stays open on one point. The reconstruction arm runs on a reduced sectioned machine, because the cached ITER sectioned set keeps its linkage and system but not the refined conductor geometry it was built from. A plasma source therefore cannot re-drive it, since the call reads the source's flux at every passive circuit. Follow-on: the cache keeps the conductor geometry, or its subdivision parameters, so any plasma source can drive the full ITER plant without a rebuild.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-close-s4" data-who="reckon-build" data-when="2026-10-15T09:40:00Z">
     <div class="r-comment-body"><p>§4 landed (merged <code>c4c7abd78</code>): one public call and result type; cold equals cached; the reduced plant is within 1 % of the full model for all 14 coils to 5 kHz. This is the evidence for power_convertor's gates g-istt-1 and g-jspr-1. The serialiser and screening duplication is being repaired without changing the surface. <a href="/nova/evidence/archive/iter-passive-plasma-circuit-landed.html#iter-coupled-plant-call">evidence</a></p></div>

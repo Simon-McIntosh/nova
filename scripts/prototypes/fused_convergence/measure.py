@@ -365,7 +365,9 @@ def run(args):
             def count(_):
                 counter[0] += 1
 
-            operator = LinearOperator((rhs.size, rhs.size), matvec=multiply)
+            operator = LinearOperator(
+                (rhs.size, rhs.size), matvec=multiply, dtype=np.float64
+            )
             step, info = gmres(
                 operator,
                 np.asarray(rhs),

@@ -6,6 +6,7 @@ from nova.jax.config import configure_dtypes
 configure_dtypes()
 
 from dataclasses import dataclass
+import json
 import os
 from types import SimpleNamespace
 
@@ -13,6 +14,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 import pytest
+import xarray
 
 from nova.equilibrium.clip_quadrature import clipped_support_current_moments
 from nova.equilibrium.current import FragmentSupport, Quadrature, book
@@ -184,9 +186,7 @@ def test_fragment_capacity_is_refused():
 def test_analytic_certificate_moments(kind, cells):
     from scripts.prototypes.support.book import measure
 
-    row = measure(
-        kind, cells, os.environ["NOVA_BOOK_RESULTS"], os.environ["NOVA_BOOK_CACHE"]
-    )
+    row = measure(kind, cells, os.environ["NOVA_BOOK_RESULTS"])
     assert row["net_current_relative_error"] <= 1e-12, row
     assert row["private_cell_count"] > 0, row
     assert row["private_current"] == 0, row
@@ -203,3 +203,43 @@ def test_analytic_certificate_moments(kind, cells):
     ), row
     if kind == "limited":
         assert row["read_image_error"] <= 1e-4, row
+
+
+def test_certificate_fixture_is_addressed_by_the_carrier_identity(
+    tmp_path, monkeypatch
+):
+    """A moved identity addresses a different fixture rather than a stale one.
+
+    The shared fixture key is the carrier identity the fixture sources define,
+    so perturbing one identity input must miss the object published under the
+    original identity. A key that ignores an input would serve the stale
+    fixture, which is what this refuses.
+    """
+    from benchmarks import solovev_certificate as certificate
+    from scripts.analytic_oracle_fixtures import measure as fixture
+    from scripts.prototypes.support import certificate_fixtures
+
+    monkeypatch.setenv("NOVA_BOOK_FIXTURE_ROOT", str(tmp_path))
+    carrier, _source, _exact = certificate._case(
+        "weak-rotation-reactor-static", clip_mode="exact"
+    )
+    identity = fixture.cache_identity(
+        carrier, requested_cells=-550, wall_nodes=fixture.WALL_POINT_COUNT
+    )
+    moved = json.loads(json.dumps(identity, sort_keys=True))
+    moved["discretisation"]["requested_cells"] = -552
+    kind = certificate_fixtures.CARRIER_KIND
+    payload = xarray.Dataset({"cell_current": (("cell",), np.arange(3.0))})
+    published = certificate_fixtures.publish_fixture(
+        kind, certificate_fixtures.fixture_digest(identity), payload
+    )
+    entry = certificate_fixtures.fixture_entry(
+        kind, certificate_fixtures.fixture_digest(identity)
+    )
+    assert entry == published
+    assert (
+        certificate_fixtures.fixture_entry(
+            kind, certificate_fixtures.fixture_digest(moved)
+        )
+        is None
+    ), "a moved identity loaded the fixture published under the original"

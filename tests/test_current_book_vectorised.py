@@ -26,6 +26,7 @@ from nova.equilibrium.current import (
     book,
 )
 from nova.equilibrium.stencil_mesh import FluxFieldPolynomial
+from tests.jaxpr_scans import scan_axes
 
 assert jax.config.jax_enable_x64
 
@@ -379,31 +380,6 @@ def test_vectorised_booking_matches_sequential_scan_on_a_large_lattice():
     _compare(2000)
 
 
-def _scan_axes(traced):
-    """Yield the leading axis length of every scan's mapped operand."""
-    visited = set()
-
-    def walk(value):
-        if id(value) in visited:
-            return
-        visited.add(id(value))
-        if hasattr(value, "eqns"):
-            for equation in value.eqns:
-                if equation.primitive.name == "scan":
-                    yield equation.params["length"]
-                yield from walk(equation.params)
-        elif hasattr(value, "jaxpr"):
-            yield from walk(value.jaxpr)
-        elif isinstance(value, dict):
-            for item in value.values():
-                yield from walk(item)
-        elif isinstance(value, list | tuple):
-            for item in value:
-                yield from walk(item)
-
-    return tuple(walk(traced))
-
-
 def _cell_axis(traced):
     """Return the cell axis length of a lowered booking program.
 
@@ -435,10 +411,10 @@ def _cell_scan_faults(programs):
     """
     faults = {}
     for cells, traced in programs.items():
-        lengths = _scan_axes(traced)
+        lengths = scan_axes(traced)
         if _cell_axis(traced) in lengths:
             faults[cells] = lengths
-    counts = sorted(_scan_axes(traced) for traced in programs.values())
+    counts = sorted(scan_axes(traced) for traced in programs.values())
     if len({lengths for lengths in counts}) != 1:
         faults["follows-cell-count"] = tuple(counts)
     return faults

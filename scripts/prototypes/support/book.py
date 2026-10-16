@@ -9,7 +9,6 @@ from copy import copy
 import json
 import os
 from pathlib import Path
-import tempfile
 from time import perf_counter
 from types import MethodType
 
@@ -18,11 +17,11 @@ import jax.numpy as jnp
 import numpy as np
 
 from benchmarks import solovev_certificate as certificate
-from nova.database.zarrstore import ZarrStore
 from nova.equilibrium import current, topology
 from nova.equilibrium.solve_request import TopologyPolicy
 from nova.equilibrium.stencil_mesh import CellCurrentMoments
 from scripts.analytic_oracle_fixtures import measure as fixture
+from scripts.prototypes.support import certificate_fixtures
 from scripts.prototypes.support.geometry import (
     analytic_moments,
     analytic_polygons,
@@ -40,72 +39,35 @@ from tests.equilibrium.test_topology_read import _analytic_inputs
 assert jax.config.jax_enable_x64
 
 
-def _fixture_root():
-    """Return the writable root that holds the fixtures this run rebuilds."""
-    root = os.environ.get("NOVA_BOOK_FIXTURE_ROOT")
-    if root is None:
-        root = tempfile.mkdtemp(prefix="nova-book-fixture-")
-        os.environ["NOVA_BOOK_FIXTURE_ROOT"] = root
-    return Path(root)
-
-
 def _cached_machine(carrier, requested, wall):
-    """Build the carrier machine on the identity the current sources define.
+    """Load or publish the carrier machine on the identity the sources define.
 
-    A published carrier record is keyed on the identity schema in force when it
-    was written, so it cannot be reused once those sources move. The carrier is
-    rebuilt on the current schema instead, and every build lands under this
-    run's own writable root rather than the read-only certified directory.
+    The carrier is addressed by its semantic identity and published, whole,
+    through the shared content store, so a run that follows a first one loads
+    the machine rather than rebuilding it.
     """
-    root = _fixture_root()
-    previous = os.environ.get("NOVA_ANALYTIC_ORACLE_CACHE")
-    os.environ["NOVA_ANALYTIC_ORACLE_CACHE"] = str(root)
-    try:
-        machine = fixture.cached_machine(
-            carrier, requested, wall_nodes=fixture.WALL_POINT_COUNT, wall=wall
-        )
-    finally:
-        if previous is None:
-            os.environ.pop("NOVA_ANALYTIC_ORACLE_CACHE", None)
-        else:
-            os.environ["NOVA_ANALYTIC_ORACLE_CACHE"] = previous
-    assert machine.cache["store"].startswith(str(root)), machine.cache["store"]
+    machine, _ = certificate_fixtures.cached_carrier(carrier, requested, wall)
+    assert machine.cache["store"].startswith(
+        str(certificate_fixtures.kind_root(certificate_fixtures.CARRIER_KIND))
+    ), machine.cache["store"]
     return machine
 
 
 def _cached_exterior(source, exact, machine, empty, analytic):
-    """Build the exterior on the current identity, under this run's root.
-
-    The exterior builder places its store beside its caller, so the store is
-    redirected to the run's own root for the duration of the call instead of
-    the read-only certified directory.
-    """
-    root = _fixture_root()
-    factory = fixture.ZarrStore
-    fixture.ZarrStore = lambda *, filename, dirname, group=None: ZarrStore(
-        filename=filename, dirname=root, group=group
-    )
-    try:
-        moments, exterior, receipt = fixture.cached_fixture_exterior(
-            source, exact, machine, empty, analytic
-        )
-    finally:
-        fixture.ZarrStore = factory
-    assert str(receipt["store"]).startswith(str(root)), receipt["store"]
-    return moments, exterior
+    """Load or publish the clipped exterior fixture on the sources' identity."""
+    return certificate_fixtures.cached_exterior(source, exact, machine, empty, analytic)
 
 
-def measure(kind, cells, directory, cache):
+def measure(kind, cells, directory):
     """Keep the map immutable and replace its private booking on a copy."""
     if jax.default_backend() != "gpu":
         raise RuntimeError("certificate rows require the GPU measurement lane")
     directory = Path(directory)
-    # The certified cache named by ``cache`` is read-only and keyed on a
+    # The certified cache named by the caller is read-only and keyed on a
     # superseded identity schema, so its stored groups cannot be reused. The
-    # carrier and exterior are rebuilt on the current identity under this run's
-    # own writable root instead, and nothing is written back into the certified
-    # directory.
-    del cache
+    # carrier and exterior are addressed on the current identity and published
+    # through the shared content store instead, so a later run loads what this
+    # one built.
     directory.mkdir(parents=True, exist_ok=True)
     name = (
         "diverted-single-null" if kind == "diverted" else "weak-rotation-reactor-static"
@@ -116,12 +78,15 @@ def measure(kind, cells, directory, cache):
     machine, _ = stage(
         "cached-machine", lambda: _cached_machine(carrier, requested, wall)
     )
+    carrier_cache = machine.cache
     coordinates = np.vstack(
         (machine.node, machine.wall_node, machine.sample_coordinates)
     )
     analytic = jnp.asarray(certificate._exact_state(name, exact, coordinates))
     empty = fixture.forward_operator(source, machine)
-    physical, exterior = _cached_exterior(source, exact, machine, empty, analytic)
+    physical, exterior, exterior_cache = _cached_exterior(
+        source, exact, machine, empty, analytic
+    )
     operator = fixture.forward_operator(source, machine, exterior).with_clip_mode(
         "exact"
     )
@@ -346,6 +311,14 @@ def measure(kind, cells, directory, cache):
         saddle_moment_budget_ratio=float(np.max(errors[1:, region] / budget[region]))
         if region.any()
         else 0.0,
+        carrier_cache_hit=bool(carrier_cache["hit"]),
+        carrier_build_seconds=float(carrier_cache["build_seconds"]),
+        carrier_load_seconds=float(carrier_cache["load_seconds"]),
+        carrier_digest=carrier_cache["semantic_key"],
+        exterior_cache_hit=bool(exterior_cache["hit"]),
+        exterior_build_seconds=float(exterior_cache["build_seconds"]),
+        exterior_load_seconds=float(exterior_cache["load_seconds"]),
+        exterior_digest=exterior_cache["digest"],
         completed=True,
     )
     path = directory / f"{kind}-{cells}.json"

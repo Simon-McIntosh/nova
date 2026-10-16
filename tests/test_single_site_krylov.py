@@ -16,6 +16,7 @@ import numpy as np
 
 from nova.equilibrium import fixed_point
 from nova.jax.config import configure_dtypes
+from tests.jaxpr_scans import subjaxprs
 
 configure_dtypes()
 
@@ -128,18 +129,10 @@ def test_the_vmapped_stream_stops_when_every_member_is_done():
         )
 
 
-def _subjaxprs(equation):
-    for parameter in equation.params.values():
-        for value in parameter if isinstance(parameter, tuple | list) else (parameter,):
-            inner = getattr(value, "jaxpr", value)
-            if hasattr(inner, "eqns"):
-                yield inner
-
-
 def _uses(jaxpr, primitive) -> bool:
     return any(
         equation.primitive.name == primitive
-        or any(_uses(inner, primitive) for inner in _subjaxprs(equation))
+        or any(_uses(inner, primitive) for inner in subjaxprs(equation))
         for equation in jaxpr.eqns
     )
 
@@ -147,7 +140,7 @@ def _uses(jaxpr, primitive) -> bool:
 def _operator_loops(jaxpr, enclosing=()):
     """Every while body that applies the operator, innermost last, per path."""
     for equation in jaxpr.eqns:
-        for inner in _subjaxprs(equation):
+        for inner in subjaxprs(equation):
             path = enclosing + ((inner,) if equation.primitive.name == "while" else ())
             if equation.primitive.name == "while" and _operator_sites(inner):
                 yield path

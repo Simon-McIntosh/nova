@@ -129,6 +129,25 @@ def integrate_cell(
     bounds.extend(
         float(point[0]) for point in polygon if bounds[0] < point[0] < bounds[1]
     )
+    constant = field_at(0, 0)
+    positive_side = field_at(1, 0)
+    negative_side = field_at(-1, 0)
+    upper_side = field_at(0, 1)
+    lower_side = field_at(0, -1)
+    diagonal = field_at(1, 1)
+    linear_u = (positive_side - negative_side) / 2
+    linear_v = (upper_side - lower_side) / 2
+    squared_u = (positive_side + negative_side) / 2 - constant
+    squared_v = (upper_side + lower_side) / 2 - constant
+    mixed = diagonal - positive_side - upper_side + constant
+    discriminant = (
+        mixed * mixed - 4 * squared_v * squared_u,
+        2 * linear_v * mixed - 4 * squared_v * linear_u,
+        linear_v * linear_v - 4 * squared_v * constant,
+    )
+    for root in np.roots(discriminant):
+        if abs(root.imag) < 1e-12 and bounds[0] < root.real < bounds[1]:
+            bounds.append(float(root.real))
     for first, last in zip(polygon, np.roll(polygon, -1, axis=0), strict=True):
         for fraction in _edge_roots(first, last, field_at):
             crossing = first + fraction * (last - first)

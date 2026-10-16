@@ -10,6 +10,7 @@ from dataclasses import dataclass
 
 import numpy as np
 from numpy.polynomial import Polynomial
+from numpy.polynomial.legendre import leggauss
 from scipy.integrate import quad_vec
 
 
@@ -52,6 +53,9 @@ def integrate_cell(
     saddle,
     axis,
     density_coefficients,
+    *,
+    outer_rule="adaptive",
+    branch_shift=0.0,
 ):
     """Integrate the positive Bell region on the axis-facing saddle branch.
 
@@ -108,6 +112,7 @@ def integrate_cell(
         lower, upper = min(intersections), max(intersections)
         q, polynomials = slice_polynomial(u)
         roots = np.roots(q.coef[::-1])
+        roots = [root + branch_shift for root in roots]
         cuts = [lower, upper]
         cuts.extend(
             float(root.real)
@@ -157,9 +162,23 @@ def integrate_cell(
     total = np.zeros(4)
     error = 0.0
     for left, right in zip(bounds[:-1], bounds[1:], strict=True):
-        value, estimated = quad_vec(
-            slice_integral, left, right, epsabs=1e-14, epsrel=1e-13
-        )
+        if outer_rule == "adaptive":
+            value, estimated = quad_vec(
+                slice_integral, left, right, epsabs=1e-14, epsrel=1e-13
+            )
+        elif outer_rule == "dense":
+            nodes, weights = leggauss(256)
+            theta = (nodes + 1) * (np.pi / 4)
+            locations = left + (right - left) * np.sin(theta) ** 2
+            jacobian = (right - left) * np.sin(2 * theta) * (np.pi / 4)
+            value = np.einsum(
+                "n,ni->i",
+                weights * jacobian,
+                np.stack([slice_integral(u) for u in locations]),
+            )
+            estimated = np.nan
+        else:
+            raise ValueError(f"unknown outer quadrature rule: {outer_rule}")
         total += value
         error += estimated
     total *= pitch * pitch

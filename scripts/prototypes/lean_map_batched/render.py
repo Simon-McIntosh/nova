@@ -88,6 +88,7 @@ def curves(rows, output, key, ylabel, target=None):
 
 def batch_walls(rows, output, stage):
     figure, axis = plt.subplots(figsize=(14, 6), dpi=100)
+    figure.subplots_adjust(right=0.70)
     style(axis, "states in batch", f"{stage} per-state wall [ms]", log=True)
     for kind, color in COLORS.items():
         for cells, marker in ((289, "o"), (550, "s"), (2098, "^")):
@@ -108,14 +109,13 @@ def batch_walls(rows, output, stage):
             if not widths:
                 continue
             walls = [row[f"batch_{width}"][stage]["per_state_ms"] for width in widths]
-            axis.plot(widths, walls, color=color, linewidth=3, marker=marker)
-            axis.annotate(
-                f"{kind} {row['cells']}",
-                (widths[-1], walls[-1]),
-                xytext=(8, -16 if kind == "limited" and cells == 289 else 0),
-                textcoords="offset points",
+            axis.plot(
+                widths,
+                walls,
                 color=color,
-                fontsize=20,
+                linewidth=3,
+                marker=marker,
+                label=f"{kind} {row['cells']}",
             )
     axis.axhline(0.90, color="#666666", linestyle=":", linewidth=1.2)
     axis.annotate(
@@ -129,6 +129,14 @@ def batch_walls(rows, output, stage):
     axis.set_xscale("log", base=2)
     axis.set_xticks((1, 16, 128), labels=("1", "16", "128"))
     axis.margins(x=0.15, y=0.15)
+    axis.legend(
+        loc="upper left",
+        bbox_to_anchor=(1.03, 1),
+        frameon=False,
+        fontsize=20,
+        handlelength=2.5,
+        borderaxespad=0,
+    )
     save(figure, output)
 
 

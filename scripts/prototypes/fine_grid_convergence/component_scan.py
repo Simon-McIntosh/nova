@@ -117,7 +117,8 @@ def main():
         neighbouring = np.asarray(geometry.neighbour)
         touched = np.argwhere((neighbouring >= 0) & (original_edge < 0.999))
         local = []
-        for cell in (47, 48, 50):
+        local_cells = (8, 80, 82) if args.cells == 500 else (47, 48, 50)
+        for cell in local_cells:
             for slot, peer in enumerate(neighbouring[cell]):
                 if peer >= 0:
                     local.append(
@@ -136,13 +137,20 @@ def main():
                             "near_weight": float(near[cell]),
                         }
                     )
-        cell_ids = (47, 50)
+        cell_ids = (8, 82) if args.cells == 500 else (47, 50)
+        scaled_residual = np.asarray(state.moment_residual / context.scale)
+        peak_cell, peak_block = np.unravel_index(
+            np.argmax(np.abs(scaled_residual)), scaled_residual.shape
+        )
         row = {
             "step": amount,
             "residual": float(jnp.max(jnp.abs(state.moment_residual / context.scale))),
             "boundary_class": int(reading.boundary_class),
             "booking_ids": np.flatnonzero(np.asarray(reading.booking_cells)).tolist(),
             "supported_cells": int(jnp.sum(reading.selected_cells)),
+            "peak_residual_cell": int(peak_cell),
+            "peak_residual_block": int(peak_block),
+            "peak_residual_value": float(scaled_residual[peak_cell, peak_block]),
             "saddle": np.asarray(reading.saddle_form.position).tolist(),
             "cells": [
                 {
@@ -177,8 +185,8 @@ def main():
         neighbour = row["cells"][1]
         print(
             f"STEP h={amount:.8g} residual={row['residual']:.12g} "
-            f"booking={row['booking_ids']} weight50={neighbour['path_weight']:.6g} "
-            f"cell50={neighbour['current_residual']:.12g}",
+            f"booking={row['booking_ids']} weight={neighbour['path_weight']:.6g} "
+            f"cell={cell_ids[1]} current={neighbour['current_residual']:.12g}",
             flush=True,
         )
 

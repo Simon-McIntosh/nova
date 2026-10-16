@@ -974,6 +974,64 @@
   "predecessor_run": "r-20261016T035628355879-fine-grid-convergence",
   "promoted_by": null,
   "promoted_revision": "952bfcfa44508a45b58ff05d6cf2d8fbb6d84532",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'failed' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 10026,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261016T145650209779-xpoint-cell-owner",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 10026,
+        "path": "/tmp/reckon-crew-scratch/r-20261016T145650209779-xpoint-cell-owner"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "integrated",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [],
+          "head": "952bfcfa44508a45b58ff05d6cf2d8fbb6d84532",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/xpoint-cell-owner",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-10-16T16:47:31Z",
+            "session_id": "01a14538-0155-7cf3-8faa-1e07364ea424",
+            "session_source": "stream",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/xpoint-cell-owner"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "this worktree is the working directory of recoverable session 01a14538-0155-7cf3-8faa-1e07364ea424"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_withheld": "gate verdict 'failed' is not passing; worktree retained for recovery"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

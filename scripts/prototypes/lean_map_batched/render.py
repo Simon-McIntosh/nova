@@ -214,23 +214,26 @@ def main():
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     rows = []
-    for path in sorted(args.receipts.glob("first-*.json")):
+    for path in sorted(args.receipts.glob("*-*.json")):
+        if path.stem.split("-")[0] not in {"first", "second"}:
+            continue
         row = json.loads(path.read_text())
         if isinstance(row, dict) and "analytic_map_error" in row:
             row["_receipt_path"] = path
             rows.append(row)
     if not rows:
         raise RuntimeError("no completed analytic-map receipt found")
+    first_rows = [row for row in rows if row["_receipt_path"].stem.startswith("first-")]
     curves(
-        rows,
+        first_rows,
         args.output / "map-error.svg",
         "analytic_map_error",
         "relative sup map error",
         1e-2,
     )
-    curves(rows, args.output / "map-wall.svg", "map_wall_ms", "map wall [ms]")
-    batch_walls(rows, args.output / "batch-chord-wall.svg", "chord")
-    batch_walls(rows, args.output / "batch-map-wall.svg", "map")
+    curves(first_rows, args.output / "map-wall.svg", "map_wall_ms", "map wall [ms]")
+    batch_walls(first_rows, args.output / "batch-chord-wall.svg", "chord")
+    batch_walls(first_rows, args.output / "batch-map-wall.svg", "map")
     for row in rows:
         if (
             "terminal_roots" in row

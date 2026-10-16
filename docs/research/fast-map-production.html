@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="fast-map-production">
+  <meta name="plan-title" content="Fast fixed-shape map on the diverted carrier">
+  <meta name="plan-summary" content="H200 measurement of the corrected fixed-shape read and single-owner booking on the diverted and limited certificate carriers">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-informs" content="converged-forward-solve">
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-verifies" content="converged-forward-solve#s5">
+  <meta name="plan-source" content="H200 certificate-carrier cold-solve, stalled-iterate scan and unfixed-pair control receipts">
+  <meta name="plan-source-quality" content="primary">
+  <meta name="plan-tags" content="equilibrium,grad-shafranov,jax,topology,map">
+  <title>Fast fixed-shape map on the diverted carrier | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+  <header>
+    <h1>Fast fixed-shape map on the diverted carrier</h1>
+    <p class="lead">The corrected fixed-shape read and single-owner booking descend the diverted carrier's scaled moment residual monotonically over ten dense corrections but do not converge it: the residual moves from 1.7989 to 1.0209 and the eleventh correction is rejected, so no accept state is reached at 282 nodes. The stall is therefore not the boolean wall eligibility or the mixed cell booking alone.</p>
+  </header>
+  <section id="method">
+    <h2>Method and provenance</h2>
+    <p>The corrected pair lives in <code>scripts/prototypes/fast_map_production</code>. <code>read.py</code> carries a corrected copy of <code>scripts.prototypes.fast_read.kernel.read</code>: the wall candidate keeps the same continuous edge-peak wall flux and maximises it over every wall edge with no eligibility gate. <code>program.py</code> carries a corrected copy of <code>scripts.prototypes.fast_read.program.map_moments</code>: one owner selects each cell's representation and takes both its membership and its booked moments from that choice. Nothing under <code>nova/</code> is changed.</p>
+    <p>Carriers are opened from the analytic oracle machine store by <code>(analytic_case, requested_cells, builder)</code>. The certified store holds only the 5000-cell carrier, so <code>build_machines.py</code> writes each ladder carrier and its machine-keyed exterior into the store the lane is pointed at; a carrier requested for k cells has k+32 hex nodes on the diverted case. Every row runs on one H200 under the <code>gpu_0003_grpA</code> reservation as a single job with the rungs as rows inside the allocation, binary64 enabled before any array is constructed, and one temporary directory per job removed on exit.</p>
+  </section>
+  <section id="carriers">
+    <h2>Built carriers</h2>
+    <p>Each carrier is built once and re-read from the store by later rows, which is what makes a ladder row cheap to repeat. The build wall is the measured cost of the carrier itself, not of the map.</p>
+    <table>
+      <thead><tr><th>Carrier</th><th>Requested cells</th><th>Hex nodes</th><th>Build wall (s)</th></tr></thead>
+      <tbody>
+        <tr><td>diverted-single-null</td><td>250</td><td>282</td><td>75.2</td></tr>
+        <tr><td>diverted-single-null</td><td>282</td><td>315</td><td>70.8</td></tr>
+        <tr><td>diverted-single-null</td><td>550</td><td>606</td><td>140.2</td></tr>
+        <tr><td>weak-rotation-reactor-static</td><td>250</td><td>289</td><td>85.2</td></tr>
+      </tbody>
+    </table>
+  </section>
+  <section id="diverted-solve">
+    <h2>Diverted cold solve at 282 nodes</h2>
+    <p>Ten dense corrections with a bisecting line search were accepted and the eleventh found no decreasing trial within twelve halvings, so the run terminated unconverged. The scaled sup residual falls monotonically but the steps shrink: the ninth and tenth corrections move only the fourth significant figure, and the accepted line-search factors collapse from 0.25 to 0.0039.</p>
+    <table>
+      <thead><tr><th>Correction</th><th>Scaled residual</th><th>Accepted</th><th>Line-search factor</th><th>Support cells</th><th>Saddle cells</th><th>Boundary class</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>1.742743e+00</td><td>yes</td><td>0.03125</td><td>144</td><td>0</td><td>0</td></tr>
+        <tr><td>2</td><td>1.685764e+00</td><td>yes</td><td>0.03125</td><td>144</td><td>0</td><td>0</td></tr>
+        <tr><td>3</td><td>1.334532e+00</td><td>yes</td><td>0.25</td><td>153</td><td>0</td><td>0</td></tr>
+        <tr><td>4</td><td>1.137347e+00</td><td>yes</td><td>0.125</td><td>157</td><td>0</td><td>0</td></tr>
+        <tr><td>5</td><td>1.105652e+00</td><td>yes</td><td>0.03125</td><td>157</td><td>0</td><td>0</td></tr>
+        <tr><td>6</td><td>1.103508e+00</td><td>yes</td><td>0.001953125</td><td>157</td><td>0</td><td>0</td></tr>
+        <tr><td>7</td><td>1.051941e+00</td><td>yes</td><td>0.0625</td><td>155</td><td>0</td><td>0</td></tr>
+        <tr><td>8</td><td>1.047928e+00</td><td>yes</td><td>0.00390625</td><td>155</td><td>0</td><td>0</td></tr>
+        <tr><td>9</td><td>1.020859e+00</td><td>yes</td><td>0.0625</td><td>155</td><td>0</td><td>0</td></tr>
+        <tr><td>10</td><td>1.020859e+00</td><td>no</td><td>0.0</td><td>155</td><td>0</td><td>0</td></tr>
+      </tbody>
+    </table>
+    <p>The map itself is fast: the compiled map executes in 1.82 ms and compiles in 2.58 s. The scaled centre residual at the initial state is 1.798960437380231, reproducible across independent job allocations to the last digit.</p>
+  </section>
+  <section id="diagnosis">
+    <h2>What the run establishes, and what it does not</h2>
+    <p>The boundary class stays 0 and the booked saddle-cell count stays 0 through every accepted correction, so at this carrier and resolution the map never enters the X-point booking branch the single-owner change governs. The descent is slow for a different reason than the two mechanisms this node corrected, and the scale of the correction needed is large: the residual starts near 1.8, not near the 0.0027 that the earlier fused-convergence study stalled at.</p>
+    <p>Consequently this node does not claim the diverted carrier converges. The corrected pair removes a specific discontinuity and makes each cell's membership and moments consistent; it does not by itself produce a converged diverted state, and that is a separate and larger defect than the one the spec named. The unfixed-pair control re-runs the original read and booking at the same carrier and resolution, so the two residuals are comparable across runs; the control's row had not completed when the run's fence expired and is unread.</p>
+  </section>
+  <section id="limits">
+    <h2>Measurements not taken</h2>
+    <p>The 550- and 2098-cell diverted carriers were built but not solved within the run's fence, so the three-size convergence claim is unmeasured. The limited carrier was built at 289 nodes but not solved, so the 41-state sweep validity check and its re-measurement at 550 remain unmeasured. The step-scale scan, the Taylor remainder slope at a converged state and the two-random-direction probe all require a converged state to be meaningful and therefore could not be reported. No figures were produced; the map-error and convergence figures named by the spec are unstarted.</p>
+  </section>
+</main></body>
+</html>

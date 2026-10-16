@@ -1,29 +1,57 @@
 from __future__ import annotations
 
 import hashlib
+import os
+import secrets
+import shutil
+from collections.abc import Iterator
 from pathlib import Path
 
 import imas
 import pytest
 
+import nova.database.content_store as content_store
 import nova.imas.machine_artifact as machine_artifact_module
 from nova.imas.machine_artifact import (
+    MANIFEST_FILENAME,
     ArtifactShotRange,
     MachineArtifactError,
     create_machine_artifact_manifest,
     latest_publication_dd_version,
     machine_name,
     manifest_schema,
+    materialize_machine_artifact,
     oci_artifact_reference,
     oci_artifact_tag,
     oci_artifact_type,
     oci_file_media_type,
     publication_dd_version,
+    resolve_machine_artifact,
 )
 
 DD_VERSION = latest_publication_dd_version()
 REGISTRY_DIGEST = "a" * 64
 PHYSICAL_DIGEST = "b" * 16
+
+# RENAME_NOREPLACE is what the atomic content-store publication needs, and GPFS
+# rejects it with EINVAL, so a cache root here forces the plain-rename fallback.
+_GPFS_ROOT = Path(
+    os.environ.get(
+        "NOVA_MACHINE_ARTIFACT_GPFS_ROOT",
+        str(Path.home() / ".cache" / "nova" / "machine-artifact-gpfs-tests"),
+    )
+)
+
+
+@pytest.fixture
+def gpfs_cache() -> Iterator[Path]:
+    _GPFS_ROOT.mkdir(parents=True, exist_ok=True)
+    cache = _GPFS_ROOT / f"{os.getpid()}-{secrets.token_hex(6)}"
+    cache.mkdir()
+    try:
+        yield cache
+    finally:
+        shutil.rmtree(cache, ignore_errors=True)
 
 
 def _write_netcdf_wall(path: Path) -> None:
@@ -193,3 +221,32 @@ def test_imas_netcdf_inventory_has_repeatable_content_identity(
 def test_machine_name_rejects_noncanonical_registry_names(machine: str) -> None:
     with pytest.raises(MachineArtifactError, match="machine name"):
         machine_name(machine)
+
+
+def test_gpfs_machine_artifact_publishes_and_resolves(
+    tmp_path: Path,
+    gpfs_cache: Path,
+) -> None:
+    source = tmp_path / "source"
+    source.mkdir()
+    (source / "wall.nc").write_bytes(b"wall")
+    manifest = _manifest(source, "MAST")
+
+    object_root = content_store.verified_object_root(gpfs_cache, create=True)
+    if content_store._rename_no_replace_supported(object_root):
+        pytest.skip("this cache root admits no-clobber rename")
+
+    stored = materialize_machine_artifact(source, gpfs_cache, manifest)
+    resolved = resolve_machine_artifact(
+        gpfs_cache,
+        manifest.digest,
+        allow_incomplete=True,
+    )
+
+    assert stored.digest == manifest.digest
+    assert resolved.digest == manifest.digest
+    assert (stored.directory / MANIFEST_FILENAME).is_file()
+    entries = [
+        entry.name for entry in object_root.iterdir() if not entry.name.startswith(".")
+    ]
+    assert entries == [manifest.digest.removeprefix("sha256:")]

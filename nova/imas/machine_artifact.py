@@ -32,7 +32,7 @@ from nova.database.content_store import (
     file_content_identity as _file_identity,
     hdf5_consistency_field as _hdf5_consistency_field,
     inventory_files as _inventory_files,
-    _linux_rename_no_replace as _linux_rename_no_replace,
+    _publication_rename_factory as _publication_rename_factory,
     publish_files as _publish_files,
     read_regular_bytes as _read_regular_bytes,
     require_contained as _require_contained,
@@ -755,7 +755,13 @@ def materialize_machine_artifact(
         {item.name: source / item.name for item in manifest.files},
         manifest.canonical_bytes(),
         private_directory_factory=_create_private_directory,
-        rename_factory=_linux_rename_no_replace,
+        # Select the rename the cache root admits up front: probing inside the
+        # store would run after the pending directory exists, so a root swapped
+        # mid-publication would be refused by the probe's own pin instead of the
+        # pinned-root guard the swap must trip.
+        rename_factory=_publication_rename_factory(
+            _verified_object_root(cache_directory, create=True)
+        ),
     )
     return resolve_machine_artifact(
         cache_directory,

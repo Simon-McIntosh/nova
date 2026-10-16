@@ -21,6 +21,23 @@ import nova
 from nova.definitions import root_dir
 
 
+OPERAND_CACHE_ROOT = Path("/work/projects/imas_gpu/sophelio/evidence/operands")
+"""Default GPFS root for cached Biot-Savart value and jet operands.
+
+The matrices are gigabytes at production resolution and identical across
+processes, so they are written once under this shared root and loaded by
+every later forward-solve measurement instead of being reassembled.
+``NOVA_OPERAND_CACHE`` overrides the location, which lets a workstation
+without the shared filesystem - or a unit test - point at a local store.
+"""
+
+
+def operand_cache_root() -> Path:
+    """Return the root directory holding cached forward-solve operands."""
+    override = os.environ.get("NOVA_OPERAND_CACHE")
+    return Path(override) if override else OPERAND_CACHE_ROOT
+
+
 WORKTREE_ROOT = "reckon-worktrees"
 """Directory name at the head of every reckon worktree layout.
 

@@ -28,22 +28,36 @@ class JetMap:
         )
 
 
-def build_jets(coupling, geometry, total_field, reference_moments):
-    """Store the six value and derivative responses at every unique node."""
+def build_jets(coupling, geometry, total_field, reference_moments, persist=True):
+    """Store the six value and derivative responses at every unique node.
+
+    With ``persist`` set the jet matrix is written to the shared operand
+    cache on first build and loaded by every later process for the same
+    coupling, node set and hashed source.
+    """
     columns = tuple(reference_moments[:, index] for index in range(3))
+    receipt = {}
     rows, exterior, nodes, sample_index, seconds = build_jet_matrix(
-        coupling, geometry, total_field, columns, batch=4, persist=False
+        coupling,
+        geometry,
+        total_field,
+        columns,
+        batch=4,
+        persist=persist,
+        receipt=receipt,
     )
     mesh = fixed_points.build_mesh(
         np.asarray(nodes), np.asarray(sample_index), geometry
     )
     jet_map = JetMap(rows, exterior, nodes, sample_index, mesh)
-    return jet_map, {
-        "nodes": len(nodes),
-        "source_cells": rows.shape[1],
-        "matrix_bytes": rows.size * rows.dtype.itemsize,
-        "assembly_seconds": seconds,
-    }
+    receipt.update(
+        nodes=len(nodes),
+        source_cells=rows.shape[1],
+        matrix_bytes=rows.size * rows.dtype.itemsize,
+        assembly_seconds=(receipt.get("load_seconds") or 0.0)
+        + (receipt.get("build_seconds") or 0.0),
+    )
+    return jet_map, receipt
 
 
 def gather_window(jet_map, geometry, membership, roots, *, margin_pitches=4.0):

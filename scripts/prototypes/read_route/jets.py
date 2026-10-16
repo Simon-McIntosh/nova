@@ -3,9 +3,11 @@
 from dataclasses import dataclass
 import hashlib
 import json
+import os
 from pathlib import Path
 from time import perf_counter
 from types import FunctionType
+from typing import Any
 
 import jax
 import jax.numpy as jnp
@@ -13,7 +15,69 @@ import numpy as np
 
 from nova.biot.polygonanalytic import packed_analytic_moments
 from nova.equilibrium import topology
-from nova.database.filepath import FilePath
+from nova.database.filepath import operand_cache_root
+
+JETS_KIND = "jets"
+VALUES_KIND = "values"
+COMPLETE_NAME = "complete.json"
+MATRIX_NAME = "matrix.npy"
+
+
+def source_bytes() -> tuple[bytes, ...]:
+    """Return the bytes of every source file a jet key is computed over."""
+    from nova.biot import polygonanalytic
+
+    return (Path(__file__).read_bytes(), Path(polygonanalytic.__file__).read_bytes())
+
+
+def operand_digest(*chunks: bytes) -> str:
+    """Return the hex digest of every chunk, in order."""
+    digest = hashlib.sha256()
+    for chunk in chunks:
+        digest.update(chunk)
+    return digest.hexdigest()
+
+
+def operand_cache_directory(kind: str, digest: str) -> Path:
+    """Return (creating if absent) the cache directory for one operand key."""
+    directory = operand_cache_root() / kind / digest
+    directory.mkdir(parents=True, exist_ok=True)
+    return directory
+
+
+def load_operand(directory: Path, shape: tuple[int, ...]):
+    """Return ``(matrix, build_seconds)`` for a completed entry, else ``None``.
+
+    A directory without its completion marker is a build in flight, not a
+    cache entry: the reader returns ``None`` and lets the caller rebuild
+    rather than serve a partial matrix.
+    """
+    complete = directory / COMPLETE_NAME
+    if not complete.is_file():
+        return None
+    matrix = np.load(directory / MATRIX_NAME, mmap_mode="r")
+    if tuple(matrix.shape) != tuple(shape):
+        return None
+    return matrix, json.loads(complete.read_text())["build_seconds"]
+
+
+def store_operand(directory: Path, matrix: np.ndarray, build_seconds: float):
+    """Write a completed matrix and marker, each through an atomic rename.
+
+    The matrix and its marker land under process-unique names and are moved
+    into place with :func:`os.replace`, so a concurrent builder of the same
+    key replaces whole files rather than interleaving writes into one, and a
+    reader never observes a partial matrix.
+    """
+    pid = os.getpid()
+    pending_matrix = directory / f"{MATRIX_NAME}.{pid}.pending.npy"
+    np.save(pending_matrix, np.asarray(matrix))
+    os.replace(pending_matrix, directory / MATRIX_NAME)
+    pending_marker = directory / f"{COMPLETE_NAME}.{pid}.pending"
+    pending_marker.write_text(
+        json.dumps({"build_seconds": build_seconds, "bytes": int(matrix.nbytes)})
+    )
+    os.replace(pending_marker, directory / COMPLETE_NAME)
 
 
 def _source_jets(point, coupling):
@@ -76,9 +140,21 @@ def _source_jets(point, coupling):
 
 
 def build_jet_matrix(
-    coupling, geometry, total, reference_moments, batch=4, persist=False
+    coupling,
+    geometry,
+    total,
+    reference_moments,
+    batch=4,
+    persist=True,
+    receipt: dict[str, Any] | None = None,
 ):
-    """Build the three (nodes, cells, six-jet) source matrices in batches."""
+    """Build the three (nodes, cells, six-jet) source matrices in batches.
+
+    With ``persist`` set the matrix is loaded from the shared operand cache
+    when a completed entry for the same key exists, and otherwise built and
+    stored there for the next process.  The key covers the unique node
+    coordinates, the coupling operands and the hashed source files.
+    """
     started = perf_counter()
     samples = np.asarray(geometry.sample_points)
     nodes, inverse = np.unique(
@@ -86,72 +162,55 @@ def build_jet_matrix(
     )
     sample_index = inverse.reshape(samples.shape[:-1])
     shape = (len(nodes), len(coupling.centre), 3, 6)
-    checkpoint = None
-    first_unbuilt = 0
-    previous_wall = 0.0
+    directory = None
+    load_seconds = None
+    build_seconds = None
+    cached = None
     if persist:
-        digest = hashlib.sha256(nodes.tobytes())
-        for operand in jax.tree_util.tree_leaves(coupling):
-            digest.update(np.asarray(operand).tobytes())
-        digest.update(Path(__file__).read_bytes())
-        from nova.biot import polygonanalytic
-
-        digest.update(Path(polygonanalytic.__file__).read_bytes())
-        store = FilePath(
-            dirname=Path("/work/projects/imas_gpu/sophelio/evidence/conforming-jets")
-            / digest.hexdigest()
+        operands = (
+            np.asarray(leaf).tobytes() for leaf in jax.tree_util.tree_leaves(coupling)
         )
-        store.makepath()
-        checkpoint = store.path / "progress.json"
-        matrix_path = store.path / "matrix.npy"
-        if checkpoint.exists():
-            progress = json.loads(checkpoint.read_text())
-            first_unbuilt = progress["nodes_complete"]
-            previous_wall = progress["build_seconds"]
-            rows = np.lib.format.open_memmap(matrix_path, mode="r+")
-            assert rows.shape == shape
-        else:
-            rows = np.lib.format.open_memmap(
-                matrix_path, mode="w+", dtype=np.float64, shape=shape
-            )
+        digest = operand_digest(nodes.tobytes(), *operands, *source_bytes())
+        directory = operand_cache_directory(JETS_KIND, digest)
+        if receipt is not None:
+            receipt["digest"] = digest
+            receipt["cache_path"] = str(directory / MATRIX_NAME)
+            receipt["cache_root"] = str(operand_cache_root())
+        load_started = perf_counter()
+        cached = load_operand(directory, shape)
+        if cached is not None:
+            load_seconds = perf_counter() - load_started
+    if cached is not None:
+        rows, build_seconds = cached
+        rows = np.asarray(rows)
         print(
-            f"JET_STORE path={matrix_path} start={first_unbuilt} bytes={rows.nbytes}",
+            f"JET_CACHE path={directory / MATRIX_NAME} bytes={rows.nbytes} "
+            f"build_seconds={build_seconds:.6f} load_seconds={load_seconds:.6f}",
             flush=True,
         )
     else:
         rows = np.empty(shape, dtype=np.float64)
-    point_batch = jax.jit(jax.vmap(_source_jets, in_axes=(0, None)))
-    for first in range(first_unbuilt, len(nodes), batch):
-        last = min(first + batch, len(nodes))
-        points = nodes[first:last]
-        if len(points) < batch:
-            points = np.concatenate(
-                (points, np.repeat(points[-1:], batch - len(points), axis=0))
-            )
-        rows[first:last] = np.asarray(point_batch(jnp.asarray(points), coupling))[
-            : last - first
-        ]
-        if checkpoint is not None and (
-            last == len(nodes) or first % (batch * 100) == 0
-        ):
-            rows.flush()
-            pending = checkpoint.with_suffix(".pending")
-            pending.write_text(
-                json.dumps(
-                    dict(
-                        nodes_complete=last,
-                        build_seconds=previous_wall + perf_counter() - started,
-                        bytes=rows.nbytes,
-                    )
+        build_started = perf_counter()
+        point_batch = jax.jit(jax.vmap(_source_jets, in_axes=(0, None)))
+        for first in range(0, len(nodes), batch):
+            last = min(first + batch, len(nodes))
+            points = nodes[first:last]
+            if len(points) < batch:
+                points = np.concatenate(
+                    (points, np.repeat(points[-1:], batch - len(points), axis=0))
                 )
-            )
-            pending.replace(checkpoint)
-        if first % (batch * 500) == 0:
-            elapsed = perf_counter() - started
-            print(
-                f"JET_BUILD nodes={last}/{len(nodes)} seconds={elapsed:.3f}",
-                flush=True,
-            )
+            rows[first:last] = np.asarray(point_batch(jnp.asarray(points), coupling))[
+                : last - first
+            ]
+            if first % (batch * 500) == 0:
+                elapsed = perf_counter() - started
+                print(
+                    f"JET_BUILD nodes={last}/{len(nodes)} seconds={elapsed:.3f}",
+                    flush=True,
+                )
+        build_seconds = perf_counter() - build_started
+        if directory is not None:
+            store_operand(directory, rows, build_seconds)
     matrix = jnp.asarray(rows)
     jax.block_until_ready(matrix)
     reference = np.stack(
@@ -170,7 +229,13 @@ def build_jet_matrix(
         axis=-1,
     ) - jnp.einsum("ncmq,cm->nq", matrix, jnp.asarray(reference))
     jax.block_until_ready(exterior)
-    elapsed = previous_wall + perf_counter() - started
+    elapsed = perf_counter() - started
+    if receipt is not None:
+        receipt.update(
+            cache_hit=cached is not None,
+            build_seconds=build_seconds,
+            load_seconds=load_seconds,
+        )
     print(
         f"JET_READY nodes={len(nodes)} cells={len(coupling.centre)} "
         f"bytes={rows.nbytes} seconds={elapsed:.6f}",

@@ -69,8 +69,27 @@ def _near_saddle(geometry, form, policy, radius_cells):
     return inside | (distance < radius) | nearest
 
 
-def read(field, roots, geometry, convention, policy, *, frame_gate=True, radius_cells=3):
-    """Read a branchless boundary and separated Bell and normal-form fractions."""
+def read(
+    field,
+    roots,
+    geometry,
+    convention,
+    policy,
+    *,
+    frame_gate=True,
+    radius_cells=3,
+    wall_gate=False,
+    saddle_gate=False,
+):
+    """Read a branchless boundary and separated Bell and normal-form fractions.
+
+    ``wall_gate`` restores the original read's boolean eligibility of the wall
+    candidate, so the two wall selections can be measured against each other
+    without also changing the booking. ``saddle_gate`` restores the original's
+    condition that a cell is booked by its normal form only when the state reads
+    as diverted, rather than whenever a saddle is live. Both default off, which
+    is the branchless selection.
+    """
     sigma = convention.sigma
     axis = roots.position[0]
     axis_flux = roots.jet.value[0]
@@ -148,13 +167,33 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True, radius_
     seed = jnp.argmin(jnp.sum((geometry.centre - axis) ** 2, axis=1))
     wall_index = raw_wall_index
     wall_score = raw_wall_score
+    if wall_gate:
+        if frame_gate:
+            provisional_core = connected_cells(geometry, approximate, sigma, seed)
+        else:
+            from scripts.prototypes.sub_millisecond.measure_wall_march import (
+                connected_cells as ungated,
+            )
+
+            provisional_core = ungated(geometry, approximate, sigma, seed)
+        wall_cell = jax.vmap(
+            lambda point: jnp.argmax(topology._inside_cells(geometry, point))
+        )(wall_points)
+        eligible = provisional_core[wall_cell]
+        gated_scores = jnp.where(eligible, sigma * wall_flux, -jnp.inf)
+        wall_index = jnp.argmax(gated_scores)
+        wall_score = jnp.where(
+            jnp.any(eligible),
+            gated_scores[wall_index],
+            jnp.where(saddle_live, -jnp.inf, raw_wall_score),
+        )
     diverted = saddle_live & (saddle_score >= wall_score)
     live_saddle = jnp.where(saddle_live, saddle_score, wall_score)
     level = sigma * jnp.maximum(wall_score, live_saddle)
     boundary = jnp.where(
         diverted, roots.position[saddle_index], wall_points[wall_index]
     )
-    normal = saddle_live & near_saddle
+    normal = (diverted if saddle_gate else saddle_live) & near_saddle
     approximate = approximate._replace(
         boundary=boundary,
         boundary_flux=level,

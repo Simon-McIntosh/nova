@@ -93,6 +93,20 @@ class CachedExterior:
 def run(args):
     kind, cache, output = args.kind, args.cache, args.output
     selected_read = original_read if args.original_read else fixed_shape_read
+    if (args.wall_gate or args.saddle_gate) and not args.original_read:
+
+        def selected_read(field, roots, geometry, convention, policy, *, frame_gate=True):
+            return fixed_shape_read(
+                field,
+                roots,
+                geometry,
+                convention,
+                policy,
+                frame_gate=frame_gate,
+                wall_gate=args.wall_gate,
+                saddle_gate=args.saddle_gate,
+            )
+
     mapped_program.read = selected_read
     if args.original_read:
         from scripts.prototypes.fast_read import program as original_program
@@ -966,6 +980,8 @@ def main():
     parser.add_argument("--probe", action="store_true")
     parser.add_argument("--map-only", action="store_true")
     parser.add_argument("--original-read", action="store_true")
+    parser.add_argument("--wall-gate", action="store_true")
+    parser.add_argument("--saddle-gate", action="store_true")
     args = parser.parse_args()
     run(args)
 

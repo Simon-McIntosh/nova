@@ -49,6 +49,28 @@
     <figure><img src="/nova/figures/converged-forward-solve/fine-grid-convergence/terminal-550.svg" alt="Paired solved and analytic flux contours, nulls and wall at the 550-cell terminal state"><figcaption>550-cell terminal state: scaled residual 1.55037 × 10<sup>−3</sup>; converged: false. Blue solid contours and blue nulls are solved; dark dashed contours and dark nulls are analytic. Both fields use one set of flux levels; the black outline is the wall.</figcaption></figure>
     <figure><img src="/nova/figures/converged-forward-solve/fine-grid-convergence/terminal-2098.svg" alt="Paired solved and analytic flux contours, nulls and wall at the 2,098-cell terminal state"><figcaption>2,098-cell terminal state: scaled residual 3.62803 × 10<sup>−3</sup>; converged: false. Blue solid contours and blue nulls are solved; dark dashed contours and dark nulls are analytic. Both fields use one set of flux levels; the black outline is the wall.</figcaption></figure>
   </section>
+
+  <section id="derivatives">
+    <h2>Fresh stalled-state derivatives</h2>
+    <p>H200 job 1286864 completed both rows with scheduler state COMPLETED and a final <code>EXIT=0</code> line. Its fresh map evaluations reproduce the 550-cell residual 0.00155037339354 and the 2,098-cell residual 0.00362802802167. GMRES returns code zero for both Newton directions, with relative linear residuals 6.94 × 10<sup>−11</sup> and 8.92 × 10<sup>−11</sup>. The machine data, source revision, imported module path, command, and full step series are recorded in <code>reproduce-taylor.log</code>, <code>stalled-500.json</code>, and <code>stalled-2000.json</code> under this node's run directory.</p>
+    <p>At 550 cells, reducing the moment step from 10<sup>−4</sup> to 10<sup>−5</sup> reduces the Newton-direction remainder by approximately 100 in all three moment blocks: slopes 2.000, 2.000, and 2.000. The three seeded random directions give block slopes between 1.998 and 2.006 over the same decade. The local JVP therefore matches the map in these measured directions. At 2,098 cells, all three seeded random directions give slopes 2.001–2.011. The Newton direction has a small-step current-block remainder of 1.46 × 10<sup>−10</sup> at 10<sup>−4</sup>, close to the approximately 10<sup>−11</sup> evaluation floor at smaller steps; its slope over that decade alone is not evidence of a first-order derivative. At step 10<sup>−3</sup>, however, the current-block remainder is 1.30945 and its largest term is cell 50, while the remainder at 10<sup>−4</sup> is 1.46 × 10<sup>−10</sup>. This finite-step change is the bracket for the next live booking scan.</p>
+    <figure><img src="/nova/figures/converged-forward-solve/fine-grid-convergence/taylor-slopes.svg" alt="Taylor remainder slopes by moment block at 550 and 2,098 cells"><figcaption>Fresh H200 Newton-direction Taylor slopes, with current, radial and vertical blocks separated by line pattern and resolution by colour. The dotted slope-two reference marks quadratic agreement. The 2,098-cell spike between 10<sup>−3</sup> and 10<sup>−4</sup> comes from the cell-50 finite-step change; slopes at the smallest steps approach the binary64 evaluation floor and cannot alone diagnose a kink.</figcaption></figure>
+  </section>
+
+  <section id="handoff">
+    <h2>Saddle handoff cells</h2>
+    <p>The same job reports the normal-form area fraction, ordinary-cut area fraction and their one-sided derivatives for cells in and next to each X-point neighbourhood. It also reports the ordinary-cut moments for every row and the normal-form moments for cells actually selected by the current booking mask. Representative rows show that the two representations can differ strongly even though each representation's own left and right finite differences agree at the stalled iterate.</p>
+    <table>
+      <thead><tr><th>Carrier and cell</th><th>Current booking</th><th>Normal fraction</th><th>Ordinary fraction</th><th>Normal derivative, left / right</th><th>Ordinary derivative, left / right</th></tr></thead>
+      <tbody>
+        <tr><th>550, cell 8</th><td>normal</td><td>0.380798</td><td>0.368358</td><td>−0.053809 / −0.053803</td><td>0.408686 / 0.408675</td></tr>
+        <tr><th>550, cell 82</th><td>ordinary</td><td>0.626815</td><td>0.029429</td><td>27.194971 / 27.192820</td><td>0.003184 / 0.003183</td></tr>
+        <tr><th>2,098, cell 47</th><td>normal</td><td>0.027780</td><td>0.453996</td><td>−0.0034 / −0.0034</td><td>−0.0225 / −0.0225</td></tr>
+        <tr><th>2,098, cell 50</th><td>ordinary</td><td>0.497632</td><td>0.842276</td><td>−1.2267 / −1.2267</td><td>−0.0094 / −0.0094</td></tr>
+      </tbody>
+    </table>
+    <p>At 2,098 cells, selected cell 47 books 0.7617 A from its normal-form fragment; its ordinary cut would book 12.4648 A. At 550 cells, selected cell 8 books 41.9265 A from its normal-form fragment versus 40.5797 A from its ordinary cut. The probe's zero normal-moment entries for unselected cells, including cells 82 and 50, are mask outputs, not measurements of what those fragments would book. A direct live scan across the cell-50 step bracket is running in H200 job 1286870; until it resolves booking and path weights there, the finite-step change is localized to cell 50 but its changing term is not yet established.</p>
+  </section>
 </main>
 </body>
 </html>

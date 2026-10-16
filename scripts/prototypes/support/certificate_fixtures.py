@@ -254,16 +254,22 @@ def cached_exterior(case, analytic, machine, operator, state):
     The exterior build and the analytic state it is posed against are taken from
     the fixture module, so the published object is the same moments and target
     vector the in-place builder produced. Its identity keys on the carrier's own
-    semantic key, the analytic state digest and the support arm.
+    semantic key, the analytic state digest and the support arm. The arm is
+    named explicitly on both the identity and the build: the two arms drive
+    different clips and different quadratures, so an object built on one arm
+    must never be addressed by the other.
     """
     from scripts.analytic_oracle_fixtures import measure as fixture
 
-    identity = fixture._exterior_cache_identity(case, analytic, machine, state)
+    support_arm = fixture.EXTERIOR_SUPPORT_ARM
+    identity = fixture._exterior_cache_identity(
+        case, analytic, machine, state, support_arm
+    )
     key = fixture_digest(identity)
 
     def build() -> xarray.Dataset:
         moments = fixture.exact_current_moments(
-            case, operator, state, analytic=analytic
+            case, operator, state, analytic=analytic, support_arm=support_arm
         )
         coefficients = operator.coupling_current_moments(moments)
         exterior = np.asarray(state) - fixture._internal_flux_image(

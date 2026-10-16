@@ -16,10 +16,6 @@ export PYTHONPATH="$repo"
 revision=$(git -C "$repo" rev-parse HEAD)
 for size in 500 2000; do
   source="$run/handoff-cold-$size.json"
-  if ! "$python" -c 'import json,sys; raise SystemExit(0 if "terminal_state" in json.load(open(sys.argv[1])) else 1)' "$source"; then
-    printf 'INSPECT size=%s SKIP=no-terminal-state\n' "$size"
-    continue
-  fi
   command="$python -m scripts.prototypes.fine_grid_convergence.inspect_terminal --cells $size --cache $cache --start-json $source --output $run/handoff-inspect-$size.json"
   printf 'revision=%s tree=%s command=%s\n' "$revision" "$repo" "$command"
   printf 'cwd=%s\n' "$repo"

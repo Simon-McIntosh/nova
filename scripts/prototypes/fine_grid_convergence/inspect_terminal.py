@@ -39,7 +39,12 @@ def main():
     )
     context = build(args.cells, args.cache)
     receipt = json.loads(args.start_json.read_text())
-    moments = jnp.asarray(receipt["terminal_state"]["moments"])
+    source = "terminal" if "terminal_state" in receipt else "reference"
+    moments = jnp.asarray(
+        receipt["terminal_state"]["moments"]
+        if source == "terminal"
+        else context.reference
+    )
     operands = without_profile(context.operands)
     profile = context.profile
     state = jax.jit(
@@ -79,20 +84,22 @@ def main():
                 "ordinary_valid": bool(ordinary_valid[index] & fraction_valid[index]),
             }
         )
-    flat = (moments / context.scale).reshape(-1)
-    value, gradient = jax.jit(
-        lambda point, carrier, unit: gauss_newton_gradient(
-            point, carrier, unit, profile
-        )
-    )(flat, operands, context.scale)
     result = {
         "cells": len(context.reference),
-        "residual": float(jnp.max(jnp.abs(value))),
-        "gauss_newton_gradient_two": float(jnp.linalg.norm(gradient)),
+        "state_source": source,
+        "residual": float(jnp.max(jnp.abs(scaled))),
         "support_cells": int(jnp.sum(reading.selected_cells)),
         "booking_ids": np.flatnonzero(np.asarray(reading.booking_cells)).tolist(),
         "rows": rows,
     }
+    args.output.write_text(json.dumps(result, indent=2) + "\n")
+    flat = (moments / context.scale).reshape(-1)
+    _, gradient = jax.jit(
+        lambda point, carrier, unit: gauss_newton_gradient(
+            point, carrier, unit, profile
+        )
+    )(flat, operands, context.scale)
+    result["gauss_newton_gradient_two"] = float(jnp.linalg.norm(gradient))
     args.output.write_text(json.dumps(result, indent=2) + "\n")
     print(
         f"SUMMARY cells={result['cells']} residual={result['residual']:.12g} "

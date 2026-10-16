@@ -75,11 +75,31 @@ def chord_two(states, operands, scale, lu, pivots, profile):
 
 
 def gauss_newton_gradient(state, operands, scale, profile):
-    """Apply the transposed map Jacobian without capturing carrier arrays."""
-    value, pullback = jax.vjp(
-        lambda probe: residual(probe, operands, scale, profile), state
-    )
-    return value, pullback(value)[0]
+    """Form the transposed map Jacobian by forward products through the null solve."""
+    value = residual(state, operands, scale, profile)
+    count = state.size
+    width = 16
+    blocks = (count + width - 1) // width
+    columns = jnp.zeros((blocks * width, count), state.dtype)
+
+    def body(block, packed):
+        first = block * width
+        indices = first + jnp.arange(width)
+        directions = (indices[:, None] == jnp.arange(count)[None]).astype(state.dtype)
+
+        def column(direction):
+            return jax.jvp(
+                lambda point: residual(point, operands, scale, profile),
+                (state,),
+                (direction,),
+            )[1]
+
+        return jax.lax.dynamic_update_slice(
+            packed, jax.vmap(column)(directions), (first, 0)
+        )
+
+    columns = jax.lax.fori_loop(0, blocks, body, columns)
+    return value, columns[:count] @ value
 
 
 def main():

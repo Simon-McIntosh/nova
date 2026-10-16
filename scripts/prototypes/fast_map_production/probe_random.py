@@ -27,7 +27,10 @@ def main():
     def random_direction(factorization, rhs, *args, **kwargs):
         newton = original_solve(factorization, rhs, *args, **kwargs)
         direction = np.random.default_rng(seed).standard_normal(newton.shape)
-        direction *= np.linalg.norm(newton) / np.linalg.norm(direction)
+        target_norm = float(
+            os.environ.get("MOMENT_DIRECTION_NORM", np.linalg.norm(newton))
+        )
+        direction *= target_norm / np.linalg.norm(direction)
         print(
             f"RANDOM_DIRECTION seed={seed} size={direction.size} "
             f"newton_norm={np.linalg.norm(newton):.12g} "

@@ -12,10 +12,10 @@ cache=${CARRIER_CACHE:?}
 python=/home/ITER/mcintos/Code/nova/.venv/bin/python
 export PYTHONPATH="$repo"
 revision=$(git -C "$repo" rev-parse HEAD)
-printf 'revision=%s tree=%s command=%s\n' "$revision" "$repo" "$python -m scripts.prototypes.fine_grid_convergence.probe --cells 500,2000 --start-json $prior/local-cold-{500,2000}.json"
-printf 'cwd=%s\n' "$repo"
 failed=0
 for size in 500 2000; do
+  printf 'revision=%s tree=%s command=%s\n' "$revision" "$repo" "$python -m scripts.prototypes.fine_grid_convergence.probe --cells $size --cache $cache --start-json $prior/local-cold-$size.json --output $run/stalled-$size.json"
+  printf 'cwd=%s\n' "$repo"
   printf 'ROW size=%s\n' "$size"
   if ! "$python" -m scripts.prototypes.fine_grid_convergence.probe \
     --cells "$size" \

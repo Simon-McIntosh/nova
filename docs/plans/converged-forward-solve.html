@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="292">
+<meta name="plan-version" content="293">
 <meta name="plan-modified" content="2026-10-16">
 </head>
 <body>
@@ -501,6 +501,11 @@
     <h4 class="r-fu-title">Cache the certificate fixtures by identity and remove the booking-test leftovers (§3)</h4>
     <div class="r-fu-body"><p>From <code>c-s21-fast-build-ruling</code> and the book-fixture-cache review. The certificate booking gate rebuilds six carrier and exterior fixtures, up to 5,167 cells, on the H200 every run: 58 min. Done when:</p><ul><li>the fixtures persist under the operand-cache root, keyed through <code>nova.database.content_store</code> by carrier identity, so a second run loads them;</li><li><code>scripts/prototypes/support/book.py:measure</code> drops its vestigial cache parameter, and <code>tests/test_current_book_fragments.py</code> stops supplying <code>NOVA_BOOK_CACHE</code>;</li><li>the three jaxpr scan-length traversals (<code>tests/test_current_book_vectorised.py:382</code>, <code>tests/test_solve_trips_are_a_scan.py:305</code>, <code>tests/test_single_site_krylov.py:147</code>) share one helper;</li><li>the certificate gate's second run is reported against its first.</li></ul></div>
     <pre class="r-fu-prompt">/reckon-build converged-forward-solve §3</pre>
+    </article>
+<article class="r-fu" data-id="f-cfs-content-store-gpfs" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="reckon-build" data-written-at="2026-10-16" data-recommends-skill="/reckon-build converged-forward-solve §4" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Let content_store publish on GPFS so the default operand cache works on shared filesystems (§4)</h4>
+    <div class="r-fu-body"><p>From the operand-cache repair round. Its review (89, reuse 5) required the operand cache to use <code>nova.database.content_store</code> instead of a private copy. But <code>publish_files</code> needs an atomic no-clobber directory rename, which GPFS, both shared filesystems here, rejects. The 2,098-cell H200 job built its matrix and failed at publish.</p><p>Done when <code>content_store</code> publishes on GPFS inside the existing owner, through its <code>rename_factory</code> hook selected by a capability probe:</p><ul><li>there are no partial reads;</li><li>concurrent same-key publishers are safe;</li><li>existing callers are unchanged where rename is supported;</li><li>the GPFS tests pass;</li><li>the operand cache re-measures at 282, 550 and 2,098 cells with honest load-to-device walls.</li></ul><p>Dispatched as run r-20261016T123856231263-content-store-gpfs, chained on the operand-cache head b70052ffb. The two land together.</p></div>
+    <pre class="r-fu-prompt">/reckon-build converged-forward-solve §4</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">

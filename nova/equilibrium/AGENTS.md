@@ -190,6 +190,26 @@ before an absent solve count can be believed.
   code from 0.44 GiB at 300 cells to 3.5 GiB at 1000 and 19 GiB at 2500 while
   the pre-optimization instruction count stayed constant.  A cache key may
   describe array shape and policy, but it must not close over the array values.
+- **Every Newton update takes its state, operands and factor as runtime
+  variables, never as compiled constants.** Use `nova.equilibrium.solve`:
+  `factor(residual_fn, state, operands)` builds the dense Jacobian by a
+  vmapped `jax.jvp` and LU-factors it, and `fixed_point(residual_fn, state,
+  operands, factor=...)` runs cold or chord corrections. One jitted program
+  then serves every correction and every state of a size, and it is compiled
+  once.
+  - Never wrap `jax.linearize`, or a closure over the current state, inside a
+    per-correction `jit`. That bakes the linearisation point into the program,
+    so every correction compiles a new executable.
+  - Measured 2026-10-16 on the 2,098-cell diverted carrier: a 7.4 GB
+    executable, about 60 s of compile and 60 to 95 s of apply per correction.
+  - Programs above 2 GB also fail to serialise into the persistent compilation
+    cache (`RESOURCE_EXHAUSTED` in the job log), so they recompile on every
+    run.
+  - The runtime-argument form of the same chord batch is 1.36 MB, compiles in
+    about 33 s once, and costs 0.28 ms per state at width 128.
+  - The guard is `tests/test_equilibrium_solve.py`, which lowers the program
+    and asserts that no HLO constant scales with the state. Copy that check
+    into any new solver program.
 - Flux-function coefficients and normalization scalars enter as traced,
   fixed-shape arrays.  The profile evaluation rule may remain static; binding
   the profile object or its coefficient values into the callable makes a new
@@ -211,6 +231,34 @@ before an absent solve count can be believed.
   topology-read path.  Repeated dynamic evaluations return to those shared
   loop bodies; a second source copy in optimized HLO is a failed size gate even
   when the terminal state and temporary-memory gate pass.
+
+## Build the Biot-Savart operands once per carrier
+
+The dense value and jet matrices that map cell moments to flux are the dominant
+setup cost of a forward-solve measurement.
+- At 2,098 cells they take 803 s and 286 s to assemble on the H200, and occupy
+  1.9 GB and 2.2 GB.
+- At 550 cells they take 146 s and 137 s.
+
+Treat them as cached artefacts, not per-process work:
+
+- **Load, do not rebuild.** The shared builders in
+  `scripts/prototypes/lean_map` and `scripts/prototypes/read_route/jets.py`
+  persist their matrices on GPFS under a content-addressed key: the sample
+  nodes or Gauss points, the cell geometry, and the source of the coupling and
+  polygon-kernel modules. A changed input or source is a new key, so a stale
+  matrix is never served. A caller that builds jets directly passes
+  `persist=True` to `build_jet_matrix`.
+- **One process per carrier size.** Run every row that needs a size's
+  operands, the map check, the cold solve, the warm and batch rows, in one
+  process. Separate processes each reassemble or reload the matrices.
+- **Never write a partial matrix where a reader can see it.** Build into a
+  pending file and rename atomically, so concurrent jobs on one key cannot
+  corrupt it.
+
+The production forward route inherits the same rule. Its coupling operands
+are explicit program arguments, under the closure-constant rule above, and
+come from a persistent store keyed by carrier identity.
 
 ## Debug-lane handling for cache-sensitive reduced-state tests
 

@@ -279,6 +279,10 @@ def verified_destination(object_root: Path, digest_hex: str) -> Path | None:
         raise ContentStoreError(
             f"cache digest destination is not canonical: {destination}"
         )
+    marker = destination / MANIFEST_FILENAME
+    marker_metadata = entry_metadata(marker)
+    if marker_metadata is None or not S_ISREG(marker_metadata.st_mode):
+        return None
     return destination
 
 
@@ -387,6 +391,47 @@ def _linux_rename_no_replace() -> Any:
     rename_no_replace.argtypes = (c_int, c_char_p, c_int, c_char_p, c_int)
     rename_no_replace.restype = c_int
     return rename_no_replace
+
+
+def _linux_rename_replace() -> Any:
+    """Return a directory rename that follows POSIX replacement rules.
+
+    Plain ``renameat`` is the operation every parallel filesystem implements,
+    and it names the race loser itself: renaming a directory onto an existing
+    non-empty directory fails with ``EEXIST`` while a fresh target succeeds.  A
+    committed entry always holds at least its completion marker, so it is never
+    empty and is never replaced.  The returned callable keeps the
+    ``rename_factory`` signature so the publication path is identical whichever
+    primitive the cache root admits.
+    """
+
+    required_dir_fd = (os.mkdir, os.open, os.stat)
+    if any(function not in os.supports_dir_fd for function in required_dir_fd):
+        raise ContentStoreError(
+            "descriptor-relative artifact publication is unavailable"
+        )
+    library = CDLL(None, use_errno=True)
+    try:
+        rename_replace = library.renameat
+    except AttributeError as error:
+        raise ContentStoreError(
+            "directory publication is unavailable on this platform"
+        ) from error
+    rename_replace.argtypes = (c_int, c_char_p, c_int, c_char_p)
+    rename_replace.restype = c_int
+
+    def rename(
+        source_directory: int,
+        source_name: bytes,
+        destination_directory: int,
+        destination_name: bytes,
+        flags: int,
+    ) -> int:
+        return rename_replace(
+            source_directory, source_name, destination_directory, destination_name
+        )
+
+    return rename
 
 
 def _open_pinned_object_root(object_root: Path) -> int:
@@ -501,6 +546,8 @@ def _copy_file_at(source: Path, directory_descriptor: int, name: str) -> None:
             os.fdopen(target_descriptor, "wb") as target_stream,
         ):
             shutil.copyfileobj(source_stream, target_stream)
+            target_stream.flush()
+            os.fsync(target_stream.fileno())
     except OSError as error:
         raise ContentStoreError(f"cannot copy artifact file {name!r}") from error
     finally:
@@ -515,6 +562,8 @@ def _write_bytes_at(directory_descriptor: int, name: str, data: bytes) -> None:
         raise ContentStoreError(f"cannot write artifact file {name!r}") from error
     with os.fdopen(descriptor, "wb") as stream:
         stream.write(data)
+        stream.flush()
+        os.fsync(stream.fileno())
 
 
 def _publish_directory_no_replace(
@@ -548,6 +597,56 @@ def _publish_directory_no_replace(
     raise ContentStoreError(
         f"cannot publish cache object {destination_name}"
     ) from error
+
+
+def _rename_no_replace_supported(object_root: Path) -> bool:
+    """Report whether the cache root admits atomic no-clobber directory rename.
+
+    The probe is the operation itself: a private directory is renamed onto a
+    name it alone owns, so success proves the primitive works and an
+    unsupported-flag error proves it does not.  The private directory is
+    removed either way.
+    """
+
+    try:
+        rename_no_replace = _linux_rename_no_replace()
+    except ContentStoreError:
+        return False
+    descriptor = _open_pinned_object_root(object_root)
+    source_name: str | None = None
+    target_name: str | None = None
+    try:
+        source_name, source_descriptor = _create_private_directory(descriptor, "probe")
+        os.close(source_descriptor)
+        target_name = f"{source_name}.probe"
+        result = rename_no_replace(
+            descriptor,
+            os.fsencode(source_name),
+            descriptor,
+            os.fsencode(target_name),
+            _RENAME_NO_REPLACE,
+        )
+        if result == 0:
+            return True
+        if get_errno() in _RENAME_UNSUPPORTED_ERRORS:
+            return False
+        raise ContentStoreError(f"cannot probe directory publication on {object_root}")
+    finally:
+        for name in (source_name, target_name):
+            if name is not None:
+                shutil.rmtree(
+                    Path("/proc/self/fd") / str(descriptor) / name,
+                    ignore_errors=True,
+                )
+        os.close(descriptor)
+
+
+def _publication_rename_factory(object_root: Path) -> Callable[[], Any]:
+    """Select the directory rename the cache root actually supports."""
+
+    if _rename_no_replace_supported(object_root):
+        return _linux_rename_no_replace
+    return _linux_rename_replace
 
 
 def publish_files(
@@ -600,14 +699,18 @@ def publish_files(
                     _copy_file_at(Path(source), temporary_descriptor, name)
             _write_bytes_at(temporary_descriptor, MANIFEST_FILENAME, manifest_bytes)
             verify_directory_files(temporary_path, declarations, allow_manifest=True)
+            os.fsync(temporary_descriptor)
             os.close(temporary_descriptor)
             temporary_descriptor = None
             rename_factory = (
-                _linux_rename_no_replace if rename_factory is None else rename_factory
+                _publication_rename_factory(object_root)
+                if rename_factory is None
+                else rename_factory
             )
             _publish_directory_no_replace(
                 rename_factory(), object_descriptor, temporary_name, digest_name
             )
+            os.fsync(object_descriptor)
         _pinned_root_path(object_descriptor, object_root.parent)
         if not _visible_root_matches_descriptor(object_root, object_descriptor):
             raise ContentStoreError("cache object root changed during publication")

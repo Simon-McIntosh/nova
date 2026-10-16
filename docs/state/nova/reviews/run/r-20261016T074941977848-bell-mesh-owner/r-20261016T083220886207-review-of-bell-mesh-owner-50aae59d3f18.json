@@ -1,0 +1,88 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run declares no baseline_suite and no after_suite (manifest.md:21-22 are empty) because its write paths reach no test file, so there is no base arm and no head arm to diff; its two gate logs are bell_equality_check.log (EXIT=0) and importer_imports.log (EXIT=0), neither of which carries a test failure id. No failure id is added and none is withheld.",
+  "base_log_revision": "33576cbbc7ef6a11c15541f9c9f1f158b495d127",
+  "call_site_count": 11,
+  "call_sites": [
+    "scripts/prototypes/fixed_points/solve.py:13",
+    "scripts/prototypes/fixed_points/measure.py:35",
+    "scripts/prototypes/fixed_points/check_solve.py:17",
+    "scripts/prototypes/fixed_points/capture_replay.py:26",
+    "scripts/prototypes/read_route/check_element.py:14",
+    "scripts/prototypes/read_route/check_adapter.py:14",
+    "scripts/prototypes/read_route/conforming.py:23",
+    "scripts/prototypes/membership/measure.py:37",
+    "scripts/prototypes/membership/booking.py:36",
+    "scripts/prototypes/membership/hybrid.py:8",
+    "scripts/prototypes/membership/compose.py:24"
+  ],
+  "completed_at": "2026-10-16T08:50:58.931Z",
+  "dispatched_at": "2026-10-16T08:32:49Z",
+  "finding_dispositions": {
+    "2": {
+      "kind": "exempted",
+      "reason": "prototype re-export; the live importer lean_map.jets is exercised by every fast-map and fine-grid measurement, and the prototypes retire with the production read",
+      "recorded_at": "2026-10-16T08:53:58.139632+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T074941977848-bell-mesh-owner/bell_equality_check.py",
+      "line": 81,
+      "severity": "follow-on",
+      "text": "the equality gate builds its jets by stacking the analytic certificate field's value, gradient and Hessian at the sample nodes, not by lean_map.jets.build_jets on the carrier as done_when clause (2) specifies; the 282-cell carrier, its geometry and its 1164 sample nodes are real, so a genuine 0.0 comparison is made, but the production jet-assembly path the done-when names is never exercised and a divergence entering through it would not be seen. The worker reports this under follow_ons as a time-budget fallback (the read/booking/jet stage timed out at 540 s), so it is a disclosed deviation rather than a silent one."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T074941977848-bell-mesh-owner/bell_equality_check.py",
+      "line": 102,
+      "severity": "follow-on",
+      "text": "max_transforms_vs_production compares fixed_points.build_mesh against bell.build_mesh, but bell.build_mesh IS the imported fixed_points.build_mesh, so the two sides are one function applied to identical arguments and the reported 0.0 is identically zero for any implementation; the manifest quotes it at manifest.md:15 as corroboration, where it carries no information."
+    },
+    {
+      "file": "scripts/prototypes/read_route/bell.py",
+      "line": 15,
+      "severity": "follow-on",
+      "text": "the re-export is guarded by no committed test: grep over tests/ for read_route finds only tests/test_fused_same_state_read.py, which uses 'read route' as a concept and imports nothing from this module, so a regression that reinstates the deleted copies or drops a re-exported name is caught by nothing in the suite \u2014 only by the run-directory script importer_imports.py, which is not committed."
+    }
+  ],
+  "head_log_revision": "50aae59d3f189f18622955047848cb900a295333",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 11 importer call sites in scripts/, all import-clean per importer_imports.log; none in nova/, so the change reaches no installed-package code.",
+    "diff": "read commit by commit against 33576cbbc; one commit 50aae59d3f18 changes exactly two files, bell.py (23 insertions, 168 deletions) and the new evidence fragment.",
+    "done_when": "prompt.txt:97-101 has four clauses; clauses (1), (3) and (4) are met and recorded (bell.py:10-24, importer_imports.log 16 OK / 0 FAILED, manifest.md:26), while clause (2)'s named source lean_map.jets.build_jets is not used \u2014 bell_equality_check.py:81 substitutes the analytic jet.",
+    "goal": "prompt.txt:29-30 asks for the prototype Bell-mesh copy to be deleted so read_route imports the production fixed_points owner; scripts/prototypes/read_route/bell.py:10-15 imports the four names and defines none of the deleted functions.",
+    "manifest": "read; manifest.md records status complete, commit 50aae59d3f18, both gate commands with their logs, and states the jet-source deviation under follow_ons.",
+    "write_paths": "read from prompt.txt:68-71 and manifest.md:3; the diff touches only scripts/prototypes/read_route/bell.py and the declared evidence fragment, both inside them."
+  },
+  "justifications": {
+    "durability": "no test reaches scripts/prototypes/read_route/bell.py:15 \u2014 grep over tests/ finds only tests/test_fused_same_state_read.py, which uses 'read route' as a concept and imports nothing from the module \u2014 so nothing reddens if the deleted copies are reinstated or the re-export breaks.",
+    "evidence": "bell_equality_check.log reports max_mesh_diff 0.0 across triangles/origins/transforms/inverse_edges/generators/local_vertices, max_coefficient_diff 0.0 and value/gradient diffs 0.0 on the real 282-cell carrier with a working negative control (3.392e-4), but the jets are not a production input: bell_equality_check.py:81 stacks the analytic certificate's value/gradient/Hessian instead of lean_map.jets.build_jets, so clause (2) of the done_when is measured on a substituted data path.",
+    "fit": "scripts/prototypes/read_route/bell.py:17-24 follows the surrounding prototype idiom of an explicit __all__ over a bare re-export, and the added docstring and names carry no plan, ticket or version identifier.",
+    "goal_fidelity": "scripts/prototypes/read_route/bell.py:10-15 imports BellField, BellMesh, build_mesh and field_from_jets from nova.equilibrium.fixed_points and the 187 deleted lines are exactly the copies, so the prototype no longer owns the Bell mesh.",
+    "reuse": "the change is the reuse remedy itself: bell.py:10-15 extends nova/equilibrium/fixed_points.py:96,127,174 as the sole owner, and the bodies I diffed against 33576cbbc differ only by the leading underscores on _polynomial_row and _triangle_transform.",
+    "scope_discipline": "the single commit 50aae59d3f18 changes exactly scripts/prototypes/read_route/bell.py and docs/evidence/fragments/converged-forward-solve/bell-mesh-owner.html, both inside the three declared write paths at prompt.txt:68-71."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: prompt.txt:29-30 asks for the prototype Bell-mesh copy to be deleted so read_route imports the production owner; scripts/prototypes/read_route/bell.py:10-15 imports BellField, BellMesh, build_mesh and field_from_jets from nova.equilibrium.fixed_points and defines none of them.\nVERDICT done_when: prompt.txt:97-101 has four clauses; clauses (1), (3) and (4) are met and recorded (bell.py:10-24, importer_imports.log 16 OK / 0 FAILED, manifest.md:26), while clause (2) is measured on a substituted jet source at bell_equality_check.py:81 rather than lean_map.jets.build_jets.\nVERDICT write_paths: read from prompt.txt:68-71; the diff touches only scripts/prototypes/read_route/bell.py and docs/evidence/fragments/converged-forward-solve/bell-mesh-owner.html, both inside them.\nVERDICT manifest: read; manifest.md states status complete, commit 50aae59d3f18, both gate commands with their logs, and the jet-source deviation under follow_ons.\nVERDICT diff: read commit by commit against 33576cbbc; one commit 50aae59d3f18 changes exactly two files, 23 insertions and 168 deletions, both in scope.\nCALL_SITES: scripts/prototypes/fixed_points/solve.py:13, scripts/prototypes/fixed_points/measure.py:35, scripts/prototypes/fixed_points/check_solve.py:17, scripts/prototypes/fixed_points/capture_replay.py:26, scripts/prototypes/read_route/check_element.py:14, scripts/prototypes/read_route/check_adapter.py:14, scripts/prototypes/read_route/conforming.py:23, scripts/prototypes/membership/measure.py:37, scripts/prototypes/membership/booking.py:36, scripts/prototypes/membership/hybrid.py:8, scripts/prototypes/membership/compose.py:24\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: scripts/prototypes/read_route/bell.py:10-15 imports the four names from nova.equilibrium.fixed_points and the 187 deleted lines are exactly the copies.\nSCORE evidence: 14\nJUSTIFICATION evidence: bell_equality_check.log records 0.0 across mesh, coefficient and evaluated fields with a working negative control (3.392e-4), but bell_equality_check.py:81 substitutes analytic jets for the build_jets source clause (2) names.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the single commit changes only scripts/prototypes/read_route/bell.py and the declared evidence fragment.\nSCORE durability: 5\nJUSTIFICATION durability: no test reaches scripts/prototypes/read_route/bell.py:15; nothing reddens if the deleted copies are reinstated.\nSCORE fit: 18\nJUSTIFICATION fit: scripts/prototypes/read_route/bell.py:17-24 re-exports through an explicit __all__ in the idiom of its sibling prototype modules.\nSCORE reuse: 20\nJUSTIFICATION reuse: bell.py:10-15 extends nova/equilibrium/fixed_points.py:96,127,174 as the sole owner instead of forking it, which is the reuse remedy itself.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T074941977848-bell-mesh-owner/bell_equality_check.py:81 follow-on: the equality gate stacks the analytic certificate's value/gradient/Hessian instead of lean_map.jets.build_jets, so the production jet path named by done_when clause (2) is never exercised (disclosed under follow_ons).\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T074941977848-bell-mesh-owner/bell_equality_check.py:102 follow-on: max_transforms_vs_production compares fixed_points.build_mesh against the same imported function, so its 0.0 is tautological and carries no information.\nFINDING scripts/prototypes/read_route/bell.py:15 follow-on: no committed test imports read_route.bell, so reinstating the deleted copies or dropping a re-exported name reddens nothing.",
+  "review_run_id": "r-20261016T083220886207-review-of-bell-mesh-owner-50aae59d3f18",
+  "reviewed_base_sha": "33576cbbc7ef6a11c15541f9c9f1f158b495d127",
+  "reviewed_head_sha": "50aae59d3f189f18622955047848cb900a295333",
+  "reviewed_run_id": "r-20261016T074941977848-bell-mesh-owner",
+  "rubric": "code",
+  "scores": {
+    "durability": 5,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T08:48:20+00:00",
+  "total": 97
+}

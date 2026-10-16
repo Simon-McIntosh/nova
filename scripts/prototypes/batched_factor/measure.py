@@ -19,7 +19,7 @@ import numpy as np
 import nova
 
 from benchmarks import solovev_certificate as certificate
-from nova.equilibrium import current, fixed_points, topology
+from nova.equilibrium import current, fixed_points, solve, topology
 from nova.equilibrium.solve_request import TopologyPolicy
 from scripts.analytic_oracle_fixtures import measure as fixture
 from scripts.prototypes.fast_read.kernel import read as fixed_shape_read
@@ -85,18 +85,29 @@ def hlo_constants(lowered):
         name, dtype, dimensions = found.groups()
         shape = tuple(int(value) for value in dimensions.split(",") if value)
         itemsize = {
-            "f64": 8, "s64": 8, "u64": 8,
-            "f32": 4, "s32": 4, "u32": 4,
-            "f16": 2, "bf16": 2, "s16": 2, "u16": 2,
-            "pred": 1, "s8": 1, "u8": 1,
+            "f64": 8,
+            "s64": 8,
+            "u64": 8,
+            "f32": 4,
+            "s32": 4,
+            "u32": 4,
+            "f16": 2,
+            "bf16": 2,
+            "s16": 2,
+            "u16": 2,
+            "pred": 1,
+            "s8": 1,
+            "u8": 1,
         }.get(dtype, 0)
-        items.append({
-            "operation": name,
-            "producer": "HLO constant",
-            "shape": shape,
-            "dtype": dtype,
-            "bytes": int(np.prod(shape)) * itemsize,
-        })
+        items.append(
+            {
+                "operation": name,
+                "producer": "HLO constant",
+                "shape": shape,
+                "dtype": dtype,
+                "bytes": int(np.prod(shape)) * itemsize,
+            }
+        )
     return sorted(items, key=lambda item: item["bytes"], reverse=True)[:20]
 
 
@@ -623,19 +634,13 @@ def run(args):
 
         def fresh_factor(point, active_operands, active_scale):
             flattened = point.reshape(-1)
+
+            def residual_fn(probe, operands):
+                return runtime_equation(probe, operands, active_scale)
+
+            factored = solve.factor(residual_fn, flattened, active_operands)
             residual = runtime_equation(flattened, active_operands, active_scale)
-            directions = jnp.eye(flattened.size, dtype=flattened.dtype)
-            columns = jax.vmap(
-                lambda direction: jax.jvp(
-                    lambda trial: runtime_equation(
-                        trial, active_operands, active_scale
-                    ),
-                    (flattened,),
-                    (direction,),
-                )[1]
-            )(directions)
-            lu, pivots = jsp_linalg.lu_factor(columns.T)
-            return lu, pivots, jnp.max(jnp.abs(residual))
+            return factored.lu, factored.pivots, jnp.max(jnp.abs(residual))
 
         def varied_operands(offset, baseline, shifted):
             varied_values = replace(
@@ -651,13 +656,17 @@ def run(args):
             return (varied_values, baseline[1], varied_window, *baseline[3:])
 
         def chord(point, active_operands, lu, pivots, active_scale):
-            rhs = -runtime_equation(point, active_operands, active_scale)
-            step = jsp_linalg.lu_solve((lu, pivots), rhs)
-            candidate = point.reshape(-1) + step
-            residual = jnp.max(
-                jnp.abs(runtime_equation(candidate, active_operands, active_scale))
+            def residual_fn(probe, operands):
+                return runtime_equation(probe, operands, active_scale)
+
+            result = solve.fixed_point(
+                residual_fn,
+                point.reshape(-1),
+                active_operands,
+                factor=solve.Factor(lu=lu, pivots=pivots),
+                max_corrections=1,
             )
-            return candidate.reshape(reference.shape), residual
+            return result.state.reshape(reference.shape), result.residual
 
         def correction_batch(
             point, baseline, shifted, lu, pivots, active_scale, offsets
@@ -698,9 +707,7 @@ def run(args):
             directions = jnp.eye(dimension, dtype=predecessor.dtype)
             columns = jax.jit(jax.vmap(product)).lower(directions[: args.block])
             result["closure_constants"] = {
-                "scalar_product": hlo_constants(
-                    jax.jit(product).lower(directions[0])
-                ),
+                "scalar_product": hlo_constants(jax.jit(product).lower(directions[0])),
                 "jacobian_columns": hlo_constants(columns),
             }
             compiled_columns = columns.compile()
@@ -709,9 +716,7 @@ def run(args):
                 stop = min(start + args.block, dimension)
                 block = directions[start:stop]
                 if stop - start < args.block:
-                    block = jnp.pad(
-                        block, ((0, args.block - stop + start), (0, 0))
-                    )
+                    block = jnp.pad(block, ((0, args.block - stop + start), (0, 0)))
                 blocks.append(np.asarray(compiled_columns(block))[: stop - start])
             matrix = np.concatenate(blocks, axis=0).T
             factor, pivots = lu_factor(matrix)
@@ -733,9 +738,7 @@ def run(args):
             for width in (1, 16, 128):
                 offsets = jnp.linspace(0.5, 1.5, width)
                 lowered = jax.jit(jax.vmap(closed_offset)).lower(offsets)
-                result["closure_constants"][f"batch_{width}"] = hlo_constants(
-                    lowered
-                )
+                result["closure_constants"][f"batch_{width}"] = hlo_constants(lowered)
                 save(output, result)
             return
 

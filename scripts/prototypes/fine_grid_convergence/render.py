@@ -89,11 +89,13 @@ def taylor(receipts, output):
 def residual_histories(receipts, output):
     _style()
     figure, axis = plt.subplots(figsize=(14, 8), dpi=100)
+    all_values = []
     for receipt, color in zip(receipts, (GREY, BLUE, RUST), strict=True):
         rows = receipt["history"]
         values = [receipt["centre_residual"]] + [
             row["residual"] for row in rows if row["accepted"]
         ]
+        all_values.extend(values)
         axis.semilogy(
             np.arange(len(values)),
             values,
@@ -109,6 +111,13 @@ def residual_histories(receipts, output):
     axis.set_xlim(-0.1, largest + 0.1)
     axis.set_xticks(np.arange(largest + 1))
     axis.axhline(1e-12, color=GREY, linestyle=":", linewidth=1.2)
+    lower = min(min(all_values), 1e-12) / 2
+    upper = max(all_values) * 2
+    axis.set_ylim(lower, upper)
+    powers = np.arange(
+        int(np.ceil(np.log10(lower))), int(np.floor(np.log10(upper))) + 1, 2
+    )
+    axis.set_yticks(10.0**powers)
     axis.set_xlabel("accepted correction")
     axis.set_ylabel("scaled residual")
     axis.legend(

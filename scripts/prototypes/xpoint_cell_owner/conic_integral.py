@@ -56,12 +56,14 @@ def integrate_cell(
     *,
     outer_rule="adaptive",
     branch_shift=0.0,
+    axis_component="halfplane",
 ):
-    """Integrate the positive Bell region on the axis-facing saddle branch.
+    """Integrate the positive Bell region on its selected axis component.
 
-    Coordinates are scaled by the cell pitch. The branch is the half-plane
-    through the saddle normal to the positive Hessian eigenvector; this is
-    exact when the Bell conic has the same stationary point and level there.
+    Coordinates are scaled by the cell pitch. The half-plane mode selects
+    the side of the physical saddle facing the axis. The Bell mode uses the
+    quadratic's own stationary point and includes both sides when its
+    positive region is connected through that point.
     """
     vertices = np.asarray(vertices, dtype=float)
     centre = np.asarray(centre, dtype=float)
@@ -75,22 +77,32 @@ def integrate_cell(
     values, vectors = np.linalg.eigh(hessian)
     if not (values[0] < 0 < values[1]):
         raise ValueError("quadratic cell does not have a saddle Hessian")
+    if axis_component == "bell":
+        stationary_local = -np.linalg.solve(hessian, field[1:3])
+        origin = centre + pitch * stationary_local
+        critical_level = _quadratic(field, *stationary_local)
+        restrict_branch = critical_level <= 0
+    elif axis_component == "halfplane":
+        origin = saddle
+        restrict_branch = True
+    else:
+        raise ValueError(f"unknown component rule: {axis_component}")
     positive = vectors[:, 1]
-    if np.dot(axis - saddle, positive) < 0:
+    if np.dot(axis - origin, positive) < 0:
         positive = -positive
     negative = vectors[:, 0]
     basis = np.column_stack((positive, negative))
-    polygon = ((vertices - saddle) / pitch) @ basis
+    polygon = ((vertices - origin) / pitch) @ basis
 
     def field_at(u, v):
-        point = saddle + pitch * (u * positive + v * negative)
+        point = origin + pitch * (u * positive + v * negative)
         local = (point - centre) / pitch
         return _quadratic(field, *local)
 
     def slice_polynomial(u):
-        origin = (saddle - centre) / pitch + u * positive
-        x = Polynomial((origin[0], negative[0]))
-        y = Polynomial((origin[1], negative[1]))
+        local_origin = (origin - centre) / pitch + u * positive
+        x = Polynomial((local_origin[0], negative[0]))
+        y = Polynomial((local_origin[1], negative[1]))
         q = field[0] + field[1] * x + field[2] * y
         q += field[3] * x * x + field[4] * x * y + field[5] * y * y
         rho = density[0] + density[1] * x + density[2] * y
@@ -128,7 +140,10 @@ def integrate_cell(
                 )
         return total
 
-    bounds = [max(0.0, float(np.min(polygon[:, 0]))), float(np.max(polygon[:, 0]))]
+    lower_bound = float(np.min(polygon[:, 0]))
+    if restrict_branch:
+        lower_bound = max(0.0, lower_bound)
+    bounds = [lower_bound, float(np.max(polygon[:, 0]))]
     if bounds[0] >= bounds[1]:
         return CellIntegral(0.0, 0.0, 0.0, 0.0, 0.0)
     bounds.extend(

@@ -14,6 +14,7 @@ def main():
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--branch-shift", type=float, default=0.0)
+    parser.add_argument("--bell-component", action="store_true")
     args = parser.parse_args()
     source = json.loads(args.input.read_text())
     rows = []
@@ -31,8 +32,11 @@ def main():
             source["axis"],
             cell["density_coefficients"],
         )
-        adaptive = integrate_cell(*operands, branch_shift=args.branch_shift)
-        dense = integrate_cell(*operands, outer_rule="dense")
+        component = "bell" if args.bell_component else "halfplane"
+        adaptive = integrate_cell(
+            *operands, branch_shift=args.branch_shift, axis_component=component
+        )
+        dense = integrate_cell(*operands, outer_rule="dense", axis_component=component)
         observed = np.array(
             (
                 adaptive.area,

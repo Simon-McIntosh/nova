@@ -1,0 +1,109 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "63caf693143b26d2a689939bb9073b5f969d2b75",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-16T11:55:15.538Z",
+  "dispatched_at": "2026-10-16T11:26:20Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "log and manifest provenance mismatch on a docs-only revision difference; the gate outcome is recorded by counts in the fragment",
+      "recorded_at": "2026-10-16T11:47:37.868814+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "log and manifest provenance mismatch on a docs-only revision difference; the gate outcome is recorded by counts in the fragment",
+      "recorded_at": "2026-10-16T11:47:38.885959+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "the uncovered clause is redundant with the tested follows-cell-count clause, as the review notes",
+      "recorded_at": "2026-10-16T11:47:40.078302+00:00"
+    },
+    "3": {
+      "kind": "folded",
+      "node": "certificate-fixture-cache",
+      "recorded_at": "2026-10-16T11:47:41.349342+00:00"
+    },
+    "4": {
+      "kind": "folded",
+      "node": "certificate-fixture-cache",
+      "recorded_at": "2026-10-16T11:47:42.627068+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T085122852839-book-fixture-cache/logs/baseline-vectorised.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the cited base-arm log holds only a header line and PROBE_DIR and no pytest summary, so baseline_suite's completed:true / failure_count:0 is asserted but not recorded; the manifest's baseline_suite command also names basetemp ...-vectorised-base-q6dt while the log header names ...-vectorised-base-264k."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T085122852839-book-fixture-cache/logs/after-vectorised.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the log's own header records rev=2189d7267497 and basetemp ...-vectorised-head-jMm9, while the manifest's after_suite records revision a54bde312b25 and basetemp ...-vectorised-head-1vCW, so the record does not reconcile with the log it cites even though the two revisions differ only by a docs commit."
+    },
+    {
+      "file": "tests/test_current_book_vectorised.py",
+      "line": "439",
+      "severity": "follow-on",
+      "text": "follow-on: the `_cell_axis(traced) in lengths` clause is exercised by no test - the committed control reports only the follows-cell-count fault, as does my reproduction - so a regression that reverted this clause would go uncaught; it is nevertheless redundant with the follows-cell-count clause for a scan whose length equals the cell count."
+    },
+    {
+      "file": "tests/test_current_book_vectorised.py",
+      "line": "382",
+      "severity": "follow-on",
+      "text": "follow-on: _scan_axes re-implements jaxpr scan-length traversal the repository already carries at tests/test_solve_trips_are_a_scan.py:305 and tests/test_single_site_krylov.py:147; there is no shared owner module to extend, so this is a third ad-hoc copy."
+    },
+    {
+      "file": "scripts/prototypes/support/book.py",
+      "line": "107",
+      "severity": "follow-on",
+      "text": "follow-on: measure() still declares a cache parameter and immediately `del cache`s it, so tests/test_current_book_fragments.py:188 still supplies NOVA_BOOK_CACHE to a silently-ignored argument; the node records this in its own follow_ons."
+    }
+  ],
+  "head_log_revision": "a32d0eb388ca65715e7af0e26af0ba0a8b1f9484",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call site reaches the change; the sole consumer of book.measure is the test tests/test_current_book_fragments.py:185",
+    "diff": "read commit by commit against 63caf6931; 3c8b25084a43 tightens the guard, 7f3d64b35adb rebuilds the fixtures, a54bde312b25/2189d7267497/a32d0eb388ca are the evidence fragment, three files changed +216/-56, all inside the declared scope.",
+    "done_when": "the measure is the six certificate parametrizations failing at base and passing at head plus a guard that rejects a sequential cell scan at any bound; the six rows are recorded at logs/certificate-base-h200.log (6 failed at book.py:55) and logs/certificate-head-h200.log (6 passed, EXIT=0) under one H200 job 1287207, and the guard's negative control is logs/negative-control.log (1 failed, EXIT=1), but the CPU arm's baseline_suite cites logs/baseline-vectorised.log, which carries no test result at all.",
+    "goal": "the goal is to make the six certificate parametrizations book and to reject any sequential cell axis; scripts/prototypes/support/book.py:44-97 rebuilds the carrier and exterior fixtures on the identity the current sources define under a run-owned root, and tests/test_current_book_vectorised.py:427-444 tightens the scan guard to the program's own cell axis, so both halves of the goal landed.",
+    "manifest": "read in full at runs/r-20261016T084257466033-book-fixture-cache/manifest.md; status complete, Gate A base 6 failed / head 6 passed and Gate B base 5 passed / head 6 passed stated with logs, the negative-control path and note given, but the commits line lists four of the five commits (the head a32d0eb388ca is absent) and both suite records name a scratch directory their cited log does not.",
+    "write_paths": "the manifest declares scripts/prototypes/support, tests/test_current_book_vectorised.py and the evidence fragment; git diff 63caf6931..a32d0eb38 touches exactly those three paths and nothing else."
+  },
+  "justifications": {
+    "durability": "I reproduced the head guard green and then disabled its follows-cell-count clause, which made tests/test_current_book_vectorised.py:454 fail with an empty fault dict, so that clause is genuinely guarded, while the cell-axis-in-lengths clause at :439 is exercised by no test and the fixture rebuild is guarded only by the slow H200 gate.",
+    "evidence": "the substantive certificate delta is fully recorded at logs/certificate-base-h200.log and logs/certificate-head-h200.log, but the CPU base arm's logs/baseline-vectorised.log holds only a header, so baseline_suite's completed:true and failure_count:0 rest on no recorded result.",
+    "fit": "the added helpers follow the surrounding private-helper idiom with no plan or ticket label, though scripts/prototypes/support/book.py:78 rebinds the fixture owner's module-level ZarrStore for the duration of a call rather than through a parameter.",
+    "goal_fidelity": "scripts/prototypes/support/book.py:73 rebuilds the carrier on the current identity under a run-owned root and tests/test_current_book_vectorised.py:427 refuses a cell scan whatever its bound, so both clauses of the goal are met by the landed code.",
+    "reuse": "the fixture redirect extends the owner at scripts/analytic_oracle_fixtures/measure.py:800, but tests/test_current_book_vectorised.py:382 re-implements jaxpr scan-length traversal the repository already carries at tests/test_solve_trips_are_a_scan.py:305 and tests/test_single_site_krylov.py:147, with no shared owner to extend.",
+    "scope_discipline": "git diff 63caf6931..a32d0eb38 touches only scripts/prototypes/support/book.py, tests/test_current_book_vectorised.py and the evidence fragment, every one inside the manifest's declared write paths."
+  },
+  "node": "review-of-book-fixture-cache-a32d0eb388ca",
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: 63caf693143b26d2a689939bb9073b5f969d2b75\nreviewed_head_sha: a32d0eb388ca65715e7af0e26af0ba0a8b1f9484\nVERDICT goal: the goal is to make the six certificate parametrizations book and to reject any sequential cell axis; scripts/prototypes/support/book.py:44-97 rebuilds the carrier and exterior fixtures on the identity the current sources define under a run-owned root, and tests/test_current_book_vectorised.py:427-444 tightens the scan guard to the program's own cell axis, so both halves of the goal landed.\nVERDICT done_when: the measure is the six certificate parametrizations failing at base and passing at head plus a guard that rejects a sequential cell scan at any bound; the six rows are recorded at logs/certificate-base-h200.log (6 failed at book.py:55) and logs/certificate-head-h200.log (6 passed, EXIT=0) under one H200 job 1287207, and the guard's negative control is logs/negative-control.log (1 failed, EXIT=1), but the CPU arm's baseline_suite cites logs/baseline-vectorised.log, which carries no test result at all.\nVERDICT write_paths: the manifest declares scripts/prototypes/support, tests/test_current_book_vectorised.py and the evidence fragment; git diff 63caf6931..a32d0eb38 touches exactly those three paths and nothing else.\nVERDICT manifest: read in full at runs/r-20261016T084257466033-book-fixture-cache/manifest.md; status complete, Gate A base 6 failed / head 6 passed and Gate B base 5 passed / head 6 passed stated with logs, the negative-control path and note given, but the commits line lists four of the five commits (the head a32d0eb388ca is absent) and both suite records name a scratch directory their cited log does not.\nVERDICT diff: read commit by commit against 63caf6931; 3c8b25084a43 tightens the guard, 7f3d64b35adb rebuilds the fixtures, a54bde312b25/2189d7267497/a32d0eb388ca are the evidence fragment, three files changed +216/-56, all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: scripts/prototypes/support/book.py:73 rebuilds the carrier on the current identity under a run-owned root and tests/test_current_book_vectorised.py:427 refuses a cell scan whatever its bound, so both clauses of the goal are met by the landed code.\nSCORE evidence: 13\nJUSTIFICATION evidence: the substantive certificate delta is fully recorded at logs/certificate-base-h200.log and logs/certificate-head-h200.log, but the CPU base arm's logs/baseline-vectorised.log holds only a header, so baseline_suite's completed:true and failure_count:0 rest on no recorded result.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 63caf6931..a32d0eb38 touches only scripts/prototypes/support/book.py, tests/test_current_book_vectorised.py and the evidence fragment, every one inside the manifest's declared write paths.\nSCORE durability: 15\nJUSTIFICATION durability: I reproduced the head guard green and then disabled its follows-cell-count clause, which made tests/test_current_book_vectorised.py:454 fail with an empty fault dict, so that clause is genuinely guarded, while the cell-axis-in-lengths clause at :439 is exercised by no test and the fixture rebuild is guarded only by the slow H200 gate.\nSCORE fit: 16\nJUSTIFICATION fit: the added helpers follow the surrounding private-helper idiom with no plan or ticket label, though scripts/prototypes/support/book.py:78 rebinds the fixture owner's module-level ZarrStore for the duration of a call rather than through a parameter.\nSCORE reuse: 14\nJUSTIFICATION reuse: the fixture redirect extends the owner at scripts/analytic_oracle_fixtures/measure.py:800, but tests/test_current_book_vectorised.py:382 re-implements jaxpr scan-length traversal the repository already carries at tests/test_solve_trips_are_a_scan.py:305 and tests/test_single_site_krylov.py:147, with no shared owner to extend.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T085122852839-book-fixture-cache/logs/baseline-vectorised.log:1 follow-on: the cited base-arm log holds only a header line and PROBE_DIR and no pytest summary, so baseline_suite's completed:true / failure_count:0 is asserted but not recorded; the manifest's baseline_suite command also names basetemp ...-vectorised-base-q6dt while the log header names ...-vectorised-base-264k.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T085122852839-book-fixture-cache/logs/after-vectorised.log:1 follow-on: the log's own header records rev=2189d7267497 and basetemp ...-vectorised-head-jMm9, while the manifest's after_suite records revision a54bde312b25 and basetemp ...-vectorised-head-1vCW, so the record does not reconcile with the log it cites even though the two revisions differ only by a docs commit.\nFINDING tests/test_current_book_vectorised.py:439 follow-on: the `_cell_axis(traced) in lengths` clause is exercised by no test - the committed control reports only the follows-cell-count fault, as does my reproduction - so a regression that reverted this clause would go uncaught; it is nevertheless redundant with the follows-cell-count clause for a scan whose length equals the cell count.\nFINDING tests/test_current_book_vectorised.py:382 follow-on: _scan_axes re-implements jaxpr scan-length traversal the repository already carries at tests/test_solve_trips_are_a_scan.py:305 and tests/test_single_site_krylov.py:147; there is no shared owner module to extend, so this is a third ad-hoc copy.\nFINDING scripts/prototypes/support/book.py:107 follow-on: measure() still declares a cache parameter and immediately `del cache`s it, so tests/test_current_book_fragments.py:188 still supplies NOVA_BOOK_CACHE to a silently-ignored argument; the node records this in its own follow_ons.\n",
+  "review_run_id": "r-20261016T112559840958-review-of-book-fixture-cache-a32d0eb388ca",
+  "reviewed_base_sha": "63caf693143b26d2a689939bb9073b5f969d2b75",
+  "reviewed_commit": "a32d0eb388ca65715e7af0e26af0ba0a8b1f9484",
+  "reviewed_head_sha": "a32d0eb388ca65715e7af0e26af0ba0a8b1f9484",
+  "reviewed_run_id": "r-20261016T085122852839-book-fixture-cache",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/book-fixture-cache",
+  "scores": {
+    "durability": 15,
+    "evidence": 13,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 14,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T11:45:00.000000+00:00",
+  "total": 96
+}

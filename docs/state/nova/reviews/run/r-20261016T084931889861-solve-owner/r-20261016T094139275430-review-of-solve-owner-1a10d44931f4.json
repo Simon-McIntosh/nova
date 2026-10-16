@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-16T09:49:54.120Z",
+  "dispatched_at": "2026-10-16T09:41:59Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "legacy-read-migration",
+      "recorded_at": "2026-10-16T09:52:25.294480+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "solve-owner",
+      "recorded_at": "2026-10-16T09:52:28.908037+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/test_equilibrium_solve.py",
+      "line": "78",
+      "severity": "follow-on",
+      "text": "follow-on: assert int(result.corrections) == 2 compares result.corrections against the same max_corrections value the test supplied, and nova/equilibrium/solve.py:152 sets corrections to jnp.int32(max_corrections) unconditionally in the chord path, so the assertion cannot fail whatever the solver does between the two corrections."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/solve-owner.html",
+      "line": "104",
+      "severity": "follow-on",
+      "text": "follow-on: the width-128 row's one-/two-correction maximum residuals are quoted as 2.17e-12 and 3.96e-15, which are the width-1 row's values in chord-limited.json (batch_1 one_max_residual=2.166e-12, two_max_residual=3.963e-15); the width-128 receipt carries one_max_residual=1.949e-11 and two_max_residual=5.207e-14."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read all four commits (63caf6931..1a10d4493) file by file; solve.py and its test are new, measure.py routes its factor and chord through solve and drops the local copies, the fragment and receipt record the H200 row.",
+    "done_when": "the done_when's four CPU clauses are asserted in tests/test_equilibrium_solve.py and its H200 row is recorded in the after arm; the after-solve.log records 6 passed at cdc1452e2 and chord-limited.json records batch_128 two_converged=128 at 0.28286 ms per state against the prototype 0.279 ms.",
+    "goal": "the node's goal is the production chord-Newton owner; nova/equilibrium/solve.py:63-173 lands exactly the narrow interface the done_when names (Factor, SolveResult, factor, fixed_point cold/chord).",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T084130940452-solve-owner/manifest.md; it states tests/test_equilibrium_solve.py 6 passed at cdc1452e2, names its logs, and its baseline_suite/after_suite JSON omit a failure_count key (only failure_ids are carried).",
+    "write_paths": "read the manifest declaration (nova/equilibrium/solve.py, tests/test_equilibrium_solve.py, scripts/prototypes/batched_factor, docs/evidence/fragments/converged-forward-solve/solve-owner.html, docs/evidence/converged-forward-solve/solve-owner); the four changed paths all lie inside it."
+  },
+  "justifications": {
+    "durability": "tests/test_equilibrium_solve.py:79-80 reddens if the chord stops converging, but :78's corrections==2 assertion is not independent of the max_corrections the test passed in.",
+    "evidence": "after-solve.log records 6 passed and chord-limited.json batch_128 records 128/128 at 0.28286 ms, but docs/evidence/fragments/converged-forward-solve/solve-owner.html:104 quotes the width-1 residuals as the width-128 row's.",
+    "fit": "nova/equilibrium/solve.py:24-26 names BACKTRACKING_STEPS/DEFAULT_MAX_CORRECTIONS with no plan label, matching the surrounding module idiom.",
+    "goal_fidelity": "nova/equilibrium/solve.py:63 factor and :155 fixed_point expose only the frozen Factor/SolveResult and the two entry points the done_when specifies, cold and chord.",
+    "reuse": "a search of nova/ for chord/lu_factor/jvp found no production batched-chord owner (only the prototype, whose local copy measure.py:634-660 now deletes in favour of solve), while nova/equilibrium/fixed_point.py remains the general fixed-point owner the plan retires at the section-6 cutover.",
+    "scope_discipline": "all four changed paths are inside the declared write paths, but scripts/prototypes/batched_factor/measure.py carries unrelated ruff reformatting at lines 85-101 and 698-740 beside the capability change."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is the production chord-Newton owner; nova/equilibrium/solve.py:63-173 lands exactly the narrow interface the done_when names (Factor, SolveResult, factor, fixed_point cold/chord).\nVERDICT done_when: the done_when's four CPU clauses are asserted in tests/test_equilibrium_solve.py and its H200 row is recorded in the after arm; the after-solve.log records 6 passed at cdc1452e2 and chord-limited.json records batch_128 two_converged=128 at 0.28286 ms per state against the prototype 0.279 ms.\nVERDICT write_paths: read the manifest declaration (nova/equilibrium/solve.py, tests/test_equilibrium_solve.py, scripts/prototypes/batched_factor, docs/evidence/fragments/converged-forward-solve/solve-owner.html, docs/evidence/converged-forward-solve/solve-owner); the four changed paths all lie inside it.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T084130940452-solve-owner/manifest.md; it states tests/test_equilibrium_solve.py 6 passed at cdc1452e2, names its logs, and its baseline_suite/after_suite JSON omit a failure_count key (only failure_ids are carried).\nVERDICT diff: read all four commits (63caf6931..1a10d4493) file by file; solve.py and its test are new, measure.py routes its factor and chord through solve and drops the local copies, the fragment and receipt record the H200 row.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/equilibrium/solve.py:63 factor and :155 fixed_point expose only the frozen Factor/SolveResult and the two entry points the done_when specifies, cold and chord.\nSCORE evidence: 14\nJUSTIFICATION evidence: after-solve.log records 6 passed and chord-limited.json batch_128 records 128/128 at 0.28286 ms, but docs/evidence/fragments/converged-forward-solve/solve-owner.html:104 quotes the width-1 residuals as the width-128 row's.\nSCORE scope_discipline: 15\nJUSTIFICATION scope_discipline: all four changed paths are inside the declared write paths, but scripts/prototypes/batched_factor/measure.py carries unrelated ruff reformatting at lines 85-101 and 698-740 beside the capability change.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_equilibrium_solve.py:79-80 reddens if the chord stops converging, but :78's corrections==2 assertion is not independent of the max_corrections the test passed in.\nSCORE fit: 16\nJUSTIFICATION fit: nova/equilibrium/solve.py:24-26 names BACKTRACKING_STEPS/DEFAULT_MAX_CORRECTIONS with no plan label, matching the surrounding module idiom.\nSCORE reuse: 15\nJUSTIFICATION reuse: a search of nova/ for chord/lu_factor/jvp found no production batched-chord owner (only the prototype, whose local copy measure.py:634-660 now deletes in favour of solve), while nova/equilibrium/fixed_point.py remains the general fixed-point owner the plan retires at the section-6 cutover.\nFINDING tests/test_equilibrium_solve.py:78 follow-on: assert int(result.corrections) == 2 compares result.corrections against the same max_corrections value the test supplied, and nova/equilibrium/solve.py:152 sets corrections to jnp.int32(max_corrections) unconditionally in the chord path, so the assertion cannot fail whatever the solver does between the two corrections.\nFINDING docs/evidence/fragments/converged-forward-solve/solve-owner.html:104 follow-on: the width-128 row's one-/two-correction maximum residuals are quoted as 2.17e-12 and 3.96e-15, which are the width-1 row's values in chord-limited.json (batch_1 one_max_residual=2.166e-12, two_max_residual=3.963e-15); the width-128 receipt carries one_max_residual=1.949e-11 and two_max_residual=5.207e-14.\n",
+  "review_run_id": "r-20261016T094139275430-review-of-solve-owner-1a10d44931f4",
+  "reviewed_base_sha": "63caf693143b26d2a689939bb9073b5f969d2b75",
+  "reviewed_head_sha": "1a10d44931f40240dbfce017453abc69fc5fd7b6",
+  "reviewed_run_id": "r-20261016T084931889861-solve-owner",
+  "rubric": "landed_node",
+  "scores": {
+    "durability": 17,
+    "evidence": 14,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 15,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T09:46:58.190747+00:00",
+  "total": 95
+}

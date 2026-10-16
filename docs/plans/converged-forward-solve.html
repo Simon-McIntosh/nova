@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="279">
+<meta name="plan-version" content="281">
 <meta name="plan-modified" content="2026-10-16">
 </head>
 <body>
@@ -1234,6 +1234,12 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261013T185617649894-moment-space-newton" data-who="reckon-build" data-when="2026-10-14T03:44:19Z">
     <div class="r-comment-body"><p>Typed/raw unconstrained default solve uses cell moments; legacy consumers inventoried. H200 dense analytic residuals &lt;=1e-12 at2098/2105/5167 cells, flux errors1.63981e-4/1.07974e-5/1.97608e-6; both2000 production seeds refused. Full forward arms completed21 base versus12 head failing/error IDs with qualification caveats. Required SVG committed; accuracy, production and512-segment route comparison unmet; no final default selected.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261016T094139275430-review-of-solve-owner-1a10d44931f4" data-who="reckon-build" data-when="2026-10-16T09:49:54.120Z">
+    <div class="r-comment-body"><p>Independent review of run r-20261016T084931889861-solve-owner at head 1a10d44931f40240dbfce017453abc69fc5fd7b6 from base 63caf693143b26d2a689939bb9073b5f969d2b75; scores goal_fidelity 18, evidence 14, scope_discipline 15, durability 17, fit 16, reuse 15 (total 95), added_failure_count 0, two follow-on findings.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261016T084931889861-solve-owner" data-who="reckon-build" data-when="2026-10-16T09:41:11.258Z">
+    <div class="r-comment-body"><p>The production chord-Newton fixed-point owner is nova/equilibrium/solve.py: a frozen Factor and SolveResult, factor() building the dense Jacobian by vmapped jvp and LU-factoring it, and fixed_point() solving cold from a fresh factor with damped backtracking or reusing a supplied factor as a chord; scripts/prototypes/batched_factor/measure.py now drives both through it with its local copies deleted, and the H200 width-128 limited row converges 128 of 128 states at 0.2829 ms per state against the prototype&#x27;s 0.279 ms. Call sites that move to solve.fixed_point at the cutover are listed in docs/evidence/fragments/converged-forward-solve/solve-owner.html#solve-owner-cutover.</p></div>
 </div>
 </section>
 </main>

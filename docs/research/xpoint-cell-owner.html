@@ -34,42 +34,44 @@
   </section>
   <section id="cell-agreement">
     <h2>Every X-point-neighbourhood cell</h2>
-    <p>The unmodified handoff still reproduces its defect: at 550 cells the residual is 0.00175892253683 with cell 8 as the peak; at 2,098 cells its converged residual is 8.45541 × 10<sup>−13</sup>, while cell 47's normal and ordinary area fractions are 0.0281766 and 0.465726. The selected conic half-plane gives 0.375577 at cell 8 and 0.0332371 at cell 47. These rows are fresh program evaluations, not values copied from the predecessor's document.</p>
+    <p>The unmodified handoff still reproduces its defect: at 550 cells the residual is 0.00175892253683 with cell 8 as the peak; at 2,098 cells its converged residual is 8.45541 × 10<sup>−13</sup>, while cell 47's normal and ordinary area fractions are 0.0281766 and 0.465726. The axis-facing half-plane gives 0.375577 at cell 8 and 0.0332371 at cell 47; the full connected Bell component is reported in the table below. These rows are fresh program evaluations, not values copied from the predecessor's document.</p>
     <table>
-      <caption>Area fraction and adaptive-versus-dense agreement for every extracted neighbourhood cell. The scaled relative column is the maximum across area, current and both first moments; inactive cells retain their measured zero path weight.</caption>
+      <caption>Connected Bell area fraction and adaptive-versus-dense agreement for every extracted neighbourhood cell. The scaled relative column is the maximum across area, current and both first moments; inactive cells retain their measured zero path weight.</caption>
       <thead><tr><th>Carrier cells</th><th>Cell</th><th>Conic area fraction</th><th>Normal-form fraction</th><th>Ordinary-cut fraction</th><th>Largest scaled relative difference</th><th>Path weight</th></tr></thead>
       <tbody>
         <tr><td>282</td><th>4</th><td>0</td><td>0.694166872</td><td>0.694166872</td><td>0</td><td>0</td></tr>
-        <tr><td>282</td><th>5</th><td>0</td><td>0.842371306</td><td>0.842371306</td><td>0</td><td>0</td></tr>
+        <tr><td>282</td><th>5</th><td>0.841794769</td><td>0.842371306</td><td>0.842371306</td><td>3.06e-16</td><td>0</td></tr>
         <tr><td>282</td><th>6</th><td>0</td><td>0.0483187519</td><td>0.0483187519</td><td>0</td><td>0</td></tr>
-        <tr><td>282</td><th>7</th><td>0.409566608</td><td>0.408749005</td><td>0.469310328</td><td>1.72e-16</td><td>1</td></tr>
-        <tr><td>282</td><th>8</th><td>0.179087975</td><td>0.179355857</td><td>0.179355857</td><td>4.7e-16</td><td>1</td></tr>
-        <tr><td>282</td><th>9</th><td>1</td><td>1</td><td>1</td><td>2.56e-16</td><td>1</td></tr>
+        <tr><td>282</td><th>7</th><td>0.462611786</td><td>0.408749005</td><td>0.469310328</td><td>2.78e-16</td><td>1</td></tr>
+        <tr><td>282</td><th>8</th><td>0.179087975</td><td>0.179355857</td><td>0.179355857</td><td>3.52e-16</td><td>1</td></tr>
+        <tr><td>282</td><th>9</th><td>1</td><td>1</td><td>1</td><td>1.72e-16</td><td>1</td></tr>
         <tr><td>282</td><th>66</th><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
         <tr><td>282</td><th>71</th><td>0.245255432</td><td>0.245586353</td><td>0.245586353</td><td>4.92e-16</td><td>1</td></tr>
-        <tr><td>550</td><th>5</th><td>0</td><td>0</td><td>1</td><td>0</td><td>0.2229</td></tr>
+        <tr><td>550</td><th>5</th><td>0.920822731</td><td>0</td><td>1</td><td>5.63e-16</td><td>0.2229</td></tr>
         <tr><td>550</td><th>7</th><td>0</td><td>0.00776574423</td><td>0.00776574423</td><td>0</td><td>0</td></tr>
-        <tr><td>550</td><th>8</th><td>0.375577403</td><td>0.381894929</td><td>0.369979196</td><td>1.51e-16</td><td>1</td></tr>
-        <tr><td>550</td><th>18</th><td>0.0842332749</td><td>0.0844148085</td><td>0.0844148085</td><td>7.95e-16</td><td>1</td></tr>
-        <tr><td>550</td><th>20</th><td>1</td><td>1</td><td>1</td><td>1.72e-16</td><td>1</td></tr>
+        <tr><td>550</td><th>8</th><td>0.375577403</td><td>0.381894929</td><td>0.369979196</td><td>3.44e-16</td><td>1</td></tr>
+        <tr><td>550</td><th>18</th><td>0.0842332749</td><td>0.0844148085</td><td>0.0844148085</td><td>3.98e-16</td><td>1</td></tr>
+        <tr><td>550</td><th>20</th><td>1</td><td>1</td><td>1</td><td>2.02e-16</td><td>1</td></tr>
         <tr><td>550</td><th>68</th><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-        <tr><td>550</td><th>80</th><td>0.300785414</td><td>0.301053815</td><td>0.301053815</td><td>2.06e-16</td><td>1</td></tr>
+        <tr><td>550</td><th>80</th><td>0.300785414</td><td>0.301053815</td><td>0.301053815</td><td>1.81e-16</td><td>1</td></tr>
         <tr><td>2,098</td><th>37</th><td>0</td><td>0.153706983</td><td>0.153706983</td><td>0</td><td>0</td></tr>
-        <tr><td>2,098</td><th>40</th><td>0.00245667353</td><td>0.0024566975</td><td>0.0024566975</td><td>1.81e-15</td><td>0.9062</td></tr>
-        <tr><td>2,098</td><th>45</th><td>0</td><td>1</td><td>1</td><td>0</td><td>0.002731</td></tr>
+        <tr><td>2,098</td><th>40</th><td>0.00245667353</td><td>0.0024566975</td><td>0.0024566975</td><td>8.06e-16</td><td>0.9062</td></tr>
+        <tr><td>2,098</td><th>45</th><td>1</td><td>1</td><td>1</td><td>1.72e-16</td><td>0.002731</td></tr>
         <tr><td>2,098</td><th>46</th><td>0</td><td>0.302227459</td><td>0.302227459</td><td>0</td><td>0</td></tr>
-        <tr><td>2,098</td><th>47</th><td>0.0332370916</td><td>0.0281765634</td><td>0.465725576</td><td>1.6e-16</td><td>1</td></tr>
+        <tr><td>2,098</td><th>47</th><td>0.511789965</td><td>0.0281765634</td><td>0.465725576</td><td>1.26e-16</td><td>1</td></tr>
         <tr><td>2,098</td><th>48</th><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-        <tr><td>2,098</td><th>50</th><td>0.842694499</td><td>0.841915935</td><td>0.841915935</td><td>6.13e-16</td><td>1</td></tr>
+        <tr><td>2,098</td><th>50</th><td>0.842694499</td><td>0.841915935</td><td>0.841915935</td><td>1.72e-16</td><td>1</td></tr>
       </tbody>
     </table>
-    <figure><img src="/nova/figures/converged-forward-solve/xpoint-cell-owner/per-cell-agreement.svg" alt="Per-cell integral differences across the three diverted carriers"><figcaption>Adaptive conic slices against independent dense outer quadrature on every X-point-neighbourhood cell, including cells 8 and 47. The plotted floor at 10<sup>−18</sup> represents numerical zero, and blue highlights the largest difference in each carrier. All measured differences are below the 10<sup>−12</sup> limit. The receipt maxima are 4.92 × 10<sup>−16</sup>, 7.95 × 10<sup>−16</sup> and 1.81 × 10<sup>−15</sup> at 282, 550 and 2,098 cells.</figcaption></figure>
+    <figure><img src="/nova/figures/converged-forward-solve/xpoint-cell-owner/per-cell-agreement.svg" alt="Per-cell integral differences across the three diverted carriers"><figcaption>The full connected Bell component by adaptive conic slices against independent dense outer quadrature on every X-point-neighbourhood cell, including cells 8 and 47. The plotted floor at 10<sup>−18</sup> represents numerical zero, and blue highlights the largest difference in each carrier. All measured differences are below the 10<sup>−12</sup> limit. The receipt maxima are 4.92 × 10<sup>−16</sup>, 5.63 × 10<sup>−16</sup> and 8.06 × 10<sup>−16</sup> at 282, 550 and 2,098 cells; the traced device integrals agree with the dense rule to 6.89 × 10<sup>−15</sup>, 8.35 × 10<sup>−15</sup> and 2.04 × 10<sup>−14</sup>.</figcaption></figure>
     <p>A live negative control moved the conic branch root by 10<sup>−4</sup> in the adaptive program while leaving the dense reference unchanged. The same comparison refused with a largest scaled difference of 4.31818 × 10<sup>−4</sup> and <code>EXIT=1</code>. The unmodified row completed with <code>EXIT=0</code>.</p>
   </section>
   <section id="connectivity">
     <h2>The fitted field and the physical saddle</h2>
     <p>The Bell quadratic sampled from the live field has a stationary value 2.52 × 10<sup>−7</sup> above the boundary at the active 282-cell owner and 5.80 × 10<sup>−8</sup> above it at cell 47 on the 2,098-cell carrier. Its positive region is therefore connected through its own stationary point. Integrating that entire Bell component gives area fractions 0.462612 and 0.511790, respectively, rather than the submitted half-plane's 0.409567 and 0.0332371. Both ways of selecting the region agree internally between adaptive and dense quadrature. The distinction is geometric and cannot be resolved by tightening integration tolerances.</p>
     <p>A separate arm constrains the fitted quadratic to have the physical saddle's value and zero gradient while retaining its Hessian. Constraining every nearby cell fails the 282-cell analytic map guard at 0.0315696, driven by large changes in neighbouring cells. The narrower arm that constrains only the containing cell also fails the analytic map guard at 282 and 550 cells, at 0.00144692 and 0.000681188. Both projection jobs were stopped after those rows so the H200 could serve the owner controls. The half-plane solve remains a numerical candidate, not an exact owner of the requested axis-connected Bell region.</p>
+    <p>Integrating the Bell quadratic's full connected component with one read-and-book integral resolves the numerical agreement question: adaptive and dense rules differ by at most 4.92 × 10<sup>−16</sup>, 5.63 × 10<sup>−16</sup> and 8.06 × 10<sup>−16</sup>, while the traced device differs from dense by at most 6.89 × 10<sup>−15</sup>, 8.35 × 10<sup>−15</sup> and 2.04 × 10<sup>−14</sup> across the three carriers. Yet the fitted Bell saddle is not held at the physical boundary level. A signed level scan through its own saddle contact, at offsets ±10<sup>−11</sup> Wb, changes the exact connected area by 0.04967, 0.06212 and 0.47262 of the owner cell at 282, 550 and 2,098 cells. The difference persists as the level approaches contact: selecting the second lobe by binary connectivity creates a finite area jump. The continuous handoff therefore cannot use this fitted Bell component without changing how the field is represented at the saddle.</p>
+    <figure><img src="/nova/figures/converged-forward-solve/xpoint-cell-owner/bell-contact.svg" alt="Connected Bell cell area from both sides of its saddle contact at three carrier sizes"><figcaption>The full positive Bell region joins through its fitted saddle when its signed critical level is above the boundary (blue); below contact, only the axis-facing lobe is connected (grey). Each series is evaluated anew at offsets 10<sup>−9</sup>, 10<sup>−10</sup> and 10<sup>−11</sup> Wb from contact, with the two sides shown separately so a line cannot imply continuity. At the smallest offset their area-fraction gaps are 0.04967, 0.06212 and 0.47262 for 282, 550 and 2,098 cells.</figcaption></figure>
   </section>
   <section id="cold-solves">
     <h2>Diverted cold solves and remaining checks</h2>

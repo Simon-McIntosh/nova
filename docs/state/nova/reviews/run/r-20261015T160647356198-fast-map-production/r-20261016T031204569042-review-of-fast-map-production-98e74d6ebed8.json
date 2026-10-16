@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "d4dd9374ab678c51a7cbab01cf7b1d2d4e03c71e",
+  "call_site_count": 4,
+  "call_sites": [
+    "scripts/prototypes/fast_map_production/solver.py:299",
+    "scripts/prototypes/fast_map_production/solver.py:965",
+    "scripts/prototypes/fast_map_production/two_merit_job.sh:17",
+    "scripts/prototypes/fast_map_production/render.py:204"
+  ],
+  "completed_at": "2026-10-16T03:21:03Z",
+  "dispatched_at": "2026-10-16T03:12:40Z",
+  "findings": [
+    {
+      "file": "docs/research/fast-map-production.html",
+      "line": "140",
+      "severity": "blocking",
+      "text": "blocking: the added two-norm trial ends at 0.001550318061 with converged false, and the previously recorded 2,098-cell result remains 0.003627426010, so the source node's required production-resolution convergence is still unmet."
+    },
+    {
+      "file": "scripts/prototypes/fast_map_production/test_qualification.py",
+      "line": "18",
+      "severity": "follow-on",
+      "text": "follow-on: every committed test invokes the standalone checker, so removing either new solver call at solver.py:299 or :965 would leave those tests green and silently restore a success exit on a failed receipt."
+    },
+    {
+      "file": "scripts/prototypes/fast_map_production/qualification.py",
+      "line": "76",
+      "severity": "follow-on",
+      "text": "follow-on: the continuity check is reachable only through its standalone command and tests, while no solver call site invokes it on a generated scan, so continuity refusal still depends on a separate manual gate."
+    }
+  ],
+  "head_log_revision": "88afcf1786a83e9ae2e0ca8efac3a62328bbcc82",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "the six commits from d206bf4d through 98e74d6e add qualification.py and three tests, wire two solver refusals, adjust render.py and resolution.svg, try two-norm merit through two_merit_job.sh, and record the failed trial in docs/research/fast-map-production.html and its terminal SVG.",
+    "done_when": "the source done_when in r-20261015T160647356198-fast-map-production/prompt.txt:90 requires continuous booking and production-resolution convergence; docs/research/fast-map-production.html:136 records map and scan checks while :140 and the two-merit receipt give a 550-cell residual of 0.001550318061 against 1e-12, with no new 2,098-cell solve.",
+    "goal": "the source goal in r-20261015T160647356198-fast-map-production/prompt.txt:30 requires continuous one-owner booking and diverted convergence at 550 and 2,098 cells; docs/research/fast-map-production.html:140 records that the added two-norm trial still fails at 550 cells.",
+    "manifest": "r-20261015T160647356198-fast-map-production/manifest.md reports complete, names the six later commits and eight touched paths, and points to completed baseline, after, mutant, and two-merit gate logs.",
+    "write_paths": "the source prompt's declared paths at r-20261015T160647356198-fast-map-production/prompt.txt:64 include all eight paths in the 986bcc7a..98e74d6e diff, as confirmed by the commit-by-commit name-status list."
+  },
+  "justifications": {
+    "durability": "test_qualification.py:34,53,64 go red if valid receipts are rejected, :37,58,67 go red if bad receipts are accepted, and :38,59,68 go red if refusal has the wrong cause; none is self-referential, but all call only the checker CLI at :18, so deleting solver.py:299 or :965 leaves the committed tests green.",
+    "evidence": "scripts/prototypes/fast_map_production/qualification.py:14-62 checks quantitative map, scan, and solve receipts; the source run's complete after and mutant logs show three passing tests and one targeted red refusal, and two-merit.log records the failed 550-cell gate with EXIT=1.",
+    "fit": "solver.py:297-300 and :964-965 save receipts before raising on failed qualification, and render.py:155-164 now yields readable measured ticks and labels without introducing a forbidden name.",
+    "goal_fidelity": "docs/research/fast-map-production.html:140 correctly exposes the failed 550-cell two-norm trial and preserves the partial result, while neither the 550- nor 2,098-cell diverted carrier reaches the goal's 1e-12 convergence.",
+    "reuse": "qualification.py:14-62 is the first receipt-qualification owner found by a capability search; scripts/prototypes/diverted_stall/measure.py:287 only computes map error, while solver.py and render.py extend their existing owners.",
+    "scope_discipline": "the six-commit diff changes only the eight declared files under scripts/prototypes/fast_map_production, docs/research/fast-map-production.html, and docs/figures/converged-forward-solve/fast-map-production."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source goal in r-20261015T160647356198-fast-map-production/prompt.txt:30 requires continuous one-owner booking and diverted convergence at 550 and 2,098 cells; docs/research/fast-map-production.html:140 records that the added two-norm trial still fails at 550 cells.\nVERDICT done_when: the source done_when in r-20261015T160647356198-fast-map-production/prompt.txt:90 requires continuous booking and production-resolution convergence; docs/research/fast-map-production.html:136 records map and scan checks while :140 and the two-merit receipt give a 550-cell residual of 0.001550318061 against 1e-12, with no new 2,098-cell solve.\nVERDICT write_paths: the source prompt's declared paths at r-20261015T160647356198-fast-map-production/prompt.txt:64 include all eight paths in the 986bcc7a..98e74d6e diff, as confirmed by the commit-by-commit name-status list.\nVERDICT manifest: r-20261015T160647356198-fast-map-production/manifest.md reports complete, names the six later commits and eight touched paths, and points to completed baseline, after, mutant, and two-merit gate logs.\nVERDICT diff: the six commits from d206bf4d through 98e74d6e add qualification.py and three tests, wire two solver refusals, adjust render.py and resolution.svg, try two-norm merit through two_merit_job.sh, and record the failed trial in docs/research/fast-map-production.html and its terminal SVG.\nCALL_SITES: scripts/prototypes/fast_map_production/solver.py:299, scripts/prototypes/fast_map_production/solver.py:965, scripts/prototypes/fast_map_production/two_merit_job.sh:17, scripts/prototypes/fast_map_production/render.py:204\nSCORE goal_fidelity: 9\nJUSTIFICATION goal_fidelity: docs/research/fast-map-production.html:140 correctly exposes the failed 550-cell two-norm trial and preserves the partial result, while neither the 550- nor 2,098-cell diverted carrier reaches the goal's 1e-12 convergence.\nSCORE evidence: 17\nJUSTIFICATION evidence: scripts/prototypes/fast_map_production/qualification.py:14-62 checks quantitative map, scan, and solve receipts; the source run's complete after and mutant logs show three passing tests and one targeted red refusal, and two-merit.log records the failed 550-cell gate with EXIT=1.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the six-commit diff changes only the eight declared files under scripts/prototypes/fast_map_production, docs/research/fast-map-production.html, and docs/figures/converged-forward-solve/fast-map-production.\nSCORE durability: 12\nJUSTIFICATION durability: test_qualification.py:34,53,64 go red if valid receipts are rejected, :37,58,67 go red if bad receipts are accepted, and :38,59,68 go red if refusal has the wrong cause; none is self-referential, but all call only the checker CLI at :18, so deleting solver.py:299 or :965 leaves the committed tests green.\nSCORE fit: 18\nJUSTIFICATION fit: solver.py:297-300 and :964-965 save receipts before raising on failed qualification, and render.py:155-164 now yields readable measured ticks and labels without introducing a forbidden name.\nSCORE reuse: 20\nJUSTIFICATION reuse: qualification.py:14-62 is the first receipt-qualification owner found by a capability search; scripts/prototypes/diverted_stall/measure.py:287 only computes map error, while solver.py and render.py extend their existing owners.\nFINDING docs/research/fast-map-production.html:140 blocking: the added two-norm trial ends at 0.001550318061 with converged false, and the previously recorded 2,098-cell result remains 0.003627426010, so the source node's required production-resolution convergence is still unmet.\nFINDING scripts/prototypes/fast_map_production/test_qualification.py:18 follow-on: every committed test invokes the standalone checker, so removing either new solver call at solver.py:299 or :965 would leave those tests green and silently restore a success exit on a failed receipt.\nFINDING scripts/prototypes/fast_map_production/qualification.py:76 follow-on: the continuity check is reachable only through its standalone command and tests, while no solver call site invokes it on a generated scan, so continuity refusal still depends on a separate manual gate.\n",
+  "review_run_id": "r-20261016T031204569042-review-of-fast-map-production-98e74d6ebed8",
+  "reviewed_base_sha": "986bcc7ad9debc372784f5ef0bea6e08b342369e",
+  "reviewed_head_sha": "98e74d6ebed845cbf4d883a23d6e67950bab906b",
+  "reviewed_run_id": "r-20261015T160647356198-fast-map-production",
+  "reviewer": {
+    "backend": "codex",
+    "model": "gpt-6"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 12,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 9,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T03:17:23.631032+00:00",
+  "total": 96
+}

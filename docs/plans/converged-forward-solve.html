@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="284">
+<meta name="plan-version" content="285">
 <meta name="plan-modified" content="2026-10-16">
 </head>
 <body>
@@ -1170,6 +1170,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261016T092836081129-review-of-equilibrium-hygiene-20bdab4be699" data-who="reckon-build" data-when="2026-10-16T09:41:14.849Z">
     <div class="r-comment-body"><p>Independent review of r-20261016T084145210091-equilibrium-hygiene at head 20bdab4be: scores goal_fidelity 19, evidence 19, scope_discipline 18, durability 18, fit 17, reuse 20 (total 111), added_failure_count 0 of 36 baseline and 34 edited failure ids, and one blocking finding — the diff deletes benchmarks/carrier_step_attribution.py, which tests/test_production_solver_receipt_trip_alignment.py:12 still imports.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261016T094809656284-review-of-equilibrium-hygiene-273e4dc6b916" data-who="reckon-build" data-when="2026-10-16T09:57:33.646Z">
+    <div class="r-comment-body"><p>Independently reviewed run r-20261016T084145210091-equilibrium-hygiene at base 63caf693143b26d2a689939bb9073b5f969d2b75 and head 273e4dc6b91651903ee2da871df2a674dbc842f8: the record scores all six dimensions (goal_fidelity 18, evidence 16, scope_discipline 19, durability 15, fit 18, reuse 20; total 106) and carries two follow-on findings with zero added failures.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-s21-moment-space-ruling" data-who="reckon-build" data-when="2026-10-13T18:40:00Z">
     <div class="r-comment-body"><p>Lead ruling 2026-10-13: the forward solve's unknown is the cell current moments.</p><p>The locked read builds its field from booked moments: the Bell jets at the nodes are the jet coupling rows times m, plus the exterior's jets. So it cannot evaluate an arbitrary trial flux vector, but it can always evaluate a trial m. The solve therefore iterates m = book(read(psi_ext + G m)), and the flux is G m wherever output needs it.</p><ul><li>Newton runs on the device with autograd.</li><li>A dense <code>jax.jacfwd</code> Jacobian with a device LU is measured against a device-side Jacobian-free Krylov, replacing SciPy's host <code>newton_krylov</code>.</li><li>Autograd must be shown to pass through the read and the booking.</li><li><code>current.book</code> is vectorised. Its sequential cell scan costs 0.9 to 8 s per step at 2,000 to 10,000 cells.</li><li>The legacy support partition, the spline-clip read and the chord default are deleted.</li></ul></div>

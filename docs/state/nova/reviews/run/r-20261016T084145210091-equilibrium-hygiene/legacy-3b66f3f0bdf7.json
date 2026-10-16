@@ -1,0 +1,71 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "63caf693143b26d2a689939bb9073b5f969d2b75",
+  "call_site_count": 5,
+  "call_sites": [
+    "nova/equilibrium/wall_mask.py:391",
+    "nova/equilibrium/connectivity_boundary.py:646",
+    "nova/equilibrium/flux_surface_connectivity.py:72",
+    "nova/equilibrium/stencil_nulls.py:948",
+    "nova/imas/mast_chain_factory.py:191"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-10-16T08:42:14Z",
+  "findings": [
+    {
+      "file": "tests/test_equilibrium_forward_solve.py",
+      "line": "147",
+      "severity": "follow-on",
+      "text": "follow-on: the new border test compares _dilate4 against an independent reference and reddens on a wrapping mutation, but restoring the deleted wall_mask._dilate4_np duplicate leaves it green because both implementations agree in bounds, so nothing asserts the deduplication the node's goal names."
+    },
+    {
+      "file": "manifest.md",
+      "line": "19",
+      "severity": "follow-on",
+      "text": "follow-on: after_suite records revision e7bd253326fbc986dc1fdd8cfac4d894ef5e92b0 while the reviewed head is 273e4dc6b91651903ee2da871df2a674dbc842f8; the intervening commit touches only the restored carrier closure and the evidence fragment and none of the five measured test files, so the 36-to-34 delta stands but the arm is one commit behind the head."
+    }
+  ],
+  "head_log_revision": "e7bd253326fbc986dc1fdd8cfac4d894ef5e92b0",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "read commit by commit against 63caf693; 6d00aabf6 consolidates the dilation and the helpers, e7bd25332 deletes the carrier tooling, 20bdab4be records the evidence fragment, and 273e4dc6b restores the carrier dependency closure a tracked test imports, all inside scope.",
+    "done_when": "item (1) is met (dilation-base.log records 100 random-mask equalities at the base revision and the new border test at tests/test_equilibrium_forward_solve.py:147 passes); item (2)'s specified docs census found zero names for each benchmark, yet a live tracked test importer overrode deletion and is recorded in the evidence; item (3) is met (helpers centralized, source-text assertions about fixed_point.py deleted with the reason stated); the five-file gate records 36 base to 34 edited failure IDs with zero added.",
+    "goal": "the goal removes a duplicated dilation, dead carrier benchmarks and copied test helpers; nova/equilibrium/morphology.py:7 is now the single dilation owner called by nova/equilibrium/wall_mask.py:391, benchmarks/carrier_advance_diagnosis.py and benchmarks/h200_matrix_benchmark.py are deleted, and tests/conftest.py:19 holds the one _green_block and _solovev definition each, so the goal is met while two benchmarks a live test imports are deliberately kept.",
+    "manifest": "read; it records status complete, four commits, the negative-control log path, baseline_suite 36 failure IDs and after_suite 34, and the receipt and carrier head results 15/15 and 5/5.",
+    "write_paths": "read the manifest's sixteen declared paths; git diff 63caf693143b26d2a689939bb9073b5f969d2b75..273e4dc6b91651903ee2da871df2a674dbc842f8 touches only those paths, including the four carrier files the repair commit restores byte-identical to the base blobs."
+  },
+  "justifications": {
+    "durability": "tests/test_equilibrium_forward_solve.py:147 asserts against an independent in-bounds reference loop and reddens on the edge-propagating mutation at dilation-negative-control.log, but it would not redden if the deleted NumPy duplicate were restored, so it guards border semantics rather than the consolidation.",
+    "evidence": "the delta is recorded and verified at baseline-suite.log 36 and after-suite.log 34 with the two absent IDs a strict subset of the base set, but after_suite names revision e7bd25332 while the reviewed head is 273e4dc6b, and the \"identical results\" claim rests on a probe log rather than the committed assertion.",
+    "fit": "nova/equilibrium/morphology.py:7 follows the module's one-expression idiom and every added or moved name (morphology._dilate4, tests/conftest.py:_green_block, tests/conftest.py:_solovev) is descriptive with no plan, version or ticket label.",
+    "goal_fidelity": "nova/equilibrium/morphology.py:7 owns the one dilation, the two genuinely dead benchmark drivers are deleted, and tests/conftest.py:19 owns the shared helpers, though the coefficient carrier module survives as a live test's dependency rather than being removed.",
+    "reuse": "the change merges two dilation definitions into one owner at nova/equilibrium/morphology.py:7 and five copied test helpers into two definitions at tests/conftest.py:19, forking nothing; a repository search found no other owned dilation in source.",
+    "scope_discipline": "every path in git diff 63caf693143b26d2a689939bb9073b5f969d2b75..273e4dc6b91651903ee2da871df2a674dbc842f8 is inside the manifest's declared write paths, and no nova/equilibrium source is edited outside morphology.py and wall_mask.py."
+  },
+  "node": "review-of-equilibrium-hygiene-273e4dc6b916",
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: 63caf693143b26d2a689939bb9073b5f969d2b75\nreviewed_head_sha: 273e4dc6b91651903ee2da871df2a674dbc842f8\nVERDICT goal: the goal removes a duplicated dilation, dead carrier benchmarks and copied test helpers; nova/equilibrium/morphology.py:7 is now the single dilation owner called by nova/equilibrium/wall_mask.py:391, benchmarks/carrier_advance_diagnosis.py and benchmarks/h200_matrix_benchmark.py are deleted, and tests/conftest.py:19 holds the one _green_block and _solovev definition each, so the goal is met while two benchmarks a live test imports are deliberately kept.\nVERDICT done_when: item (1) is met (dilation-base.log records 100 random-mask equalities at the base revision and the new border test at tests/test_equilibrium_forward_solve.py:147 passes); item (2)'s specified docs census found zero names for each benchmark, yet a live tracked test importer overrode deletion and is recorded in the evidence; item (3) is met (helpers centralized, source-text assertions about fixed_point.py deleted with the reason stated); the five-file gate records 36 base to 34 edited failure IDs with zero added.\nVERDICT write_paths: read the manifest's sixteen declared paths; git diff 63caf693143b26d2a689939bb9073b5f969d2b75..273e4dc6b91651903ee2da871df2a674dbc842f8 touches only those paths, including the four carrier files the repair commit restores byte-identical to the base blobs.\nVERDICT manifest: read; it records status complete, four commits, the negative-control log path, baseline_suite 36 failure IDs and after_suite 34, and the receipt and carrier head results 15/15 and 5/5.\nVERDICT diff: read commit by commit against 63caf693; 6d00aabf6 consolidates the dilation and the helpers, e7bd25332 deletes the carrier tooling, 20bdab4be records the evidence fragment, and 273e4dc6b restores the carrier dependency closure a tracked test imports, all inside scope.\nCALL_SITES: nova/equilibrium/wall_mask.py:391, nova/equilibrium/connectivity_boundary.py:646, nova/equilibrium/flux_surface_connectivity.py:72, nova/equilibrium/stencil_nulls.py:948, nova/imas/mast_chain_factory.py:191\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/equilibrium/morphology.py:7 owns the one dilation, the two genuinely dead benchmark drivers are deleted, and tests/conftest.py:19 owns the shared helpers, though the coefficient carrier module survives as a live test's dependency rather than being removed.\nSCORE evidence: 16\nJUSTIFICATION evidence: the delta is recorded and verified at baseline-suite.log 36 and after-suite.log 34 with the two absent IDs a strict subset of the base set, but after_suite names revision e7bd25332 while the reviewed head is 273e4dc6b, and the \"identical results\" claim rests on a probe log rather than the committed assertion.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff 63caf693143b26d2a689939bb9073b5f969d2b75..273e4dc6b91651903ee2da871df2a674dbc842f8 is inside the manifest's declared write paths, and no nova/equilibrium source is edited outside morphology.py and wall_mask.py.\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_equilibrium_forward_solve.py:147 asserts against an independent in-bounds reference loop and reddens on the edge-propagating mutation at dilation-negative-control.log, but it would not redden if the deleted NumPy duplicate were restored, so it guards border semantics rather than the consolidation.\nSCORE fit: 18\nJUSTIFICATION fit: nova/equilibrium/morphology.py:7 follows the module's one-expression idiom and every added or moved name (morphology._dilate4, tests/conftest.py:_green_block, tests/conftest.py:_solovev) is descriptive with no plan, version or ticket label.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change merges two dilation definitions into one owner at nova/equilibrium/morphology.py:7 and five copied test helpers into two definitions at tests/conftest.py:19, forking nothing; a repository search found no other owned dilation in source.\nFINDING tests/test_equilibrium_forward_solve.py:147 follow-on: the new border test compares _dilate4 against an independent reference and reddens on a wrapping mutation, but restoring the deleted wall_mask._dilate4_np duplicate leaves it green because both implementations agree in bounds, so nothing asserts the deduplication the node's goal names.\nFINDING manifest.md:19 follow-on: after_suite records revision e7bd253326fbc986dc1fdd8cfac4d894ef5e92b0 while the reviewed head is 273e4dc6b91651903ee2da871df2a674dbc842f8; the intervening commit touches only the restored carrier closure and the evidence fragment and none of the five measured test files, so the 36-to-34 delta stands but the arm is one commit behind the head.\n",
+  "review_run_id": "legacy-3b66f3f0bdf7",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "63caf693143b26d2a689939bb9073b5f969d2b75",
+  "reviewed_commit": "273e4dc6b91651903ee2da871df2a674dbc842f8",
+  "reviewed_head_sha": "273e4dc6b91651903ee2da871df2a674dbc842f8",
+  "reviewed_run_id": "r-20261016T084145210091-equilibrium-hygiene",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/equilibrium-hygiene",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T09:56:41.147997+00:00",
+  "total": 106
+}

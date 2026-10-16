@@ -52,19 +52,28 @@ def edge_components(
     flux_weight = jnp.clip((passage - level) / jnp.maximum(flux_excursion, 1e-14), 0, 1)
 
     axis_sector = _local_axis_sector(geometry, axis, form)
-    offset = midpoint - form.position
-    parameter = jnp.einsum("...i,ai->...a", offset, form.direction)
-    residual = (
-        offset[..., None, :]
-        - parameter[..., None] ** 2 * form.curvature
-        - parameter[..., None] ** 3 * form.cubic
-    )
-    side = (
-        form.direction[:, 0] * residual[..., 1]
-        - form.direction[:, 1] * residual[..., 0]
-    )
+
+    def signed_sides(points):
+        offset = points - form.position
+        parameter = jnp.einsum("...i,ai->...a", offset, form.direction)
+        residual = (
+            offset[..., None, :]
+            - parameter[..., None] ** 2 * form.curvature
+            - parameter[..., None] ** 3 * form.cubic
+        )
+        return (
+            form.direction[:, 0] * residual[..., 1]
+            - form.direction[:, 1] * residual[..., 0]
+        )
+
+    side = signed_sides(midpoint)
+    side_span = jnp.abs(signed_sides(vertices) - signed_sides(end))
     next_side = jnp.roll(side, -1, axis=-1)
     sector_margin = jnp.minimum(side[..., axis_sector], -next_side[..., axis_sector])
+    sector_span = jnp.maximum(
+        side_span[..., axis_sector],
+        jnp.roll(side_span, -1, axis=-1)[..., axis_sector],
+    )
     length_width = jnp.maximum(1e-7, 1e-4 * jnp.median(geometry.pitch))
     sector_weight = jnp.clip(0.5 + sector_margin / length_width, 0, 1)
     distance = jnp.linalg.norm(geometry.centre - form.position, axis=1)
@@ -86,4 +95,7 @@ def edge_components(
         passage - level,
         sector_weight,
         near_weight,
+        sector_margin,
+        sector_span,
+        length_width,
     )

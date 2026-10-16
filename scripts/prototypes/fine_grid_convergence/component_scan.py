@@ -101,7 +101,17 @@ def main():
         state = mapped(moments)
         reading, components = inspect(moments)
         jax.block_until_ready((state, reading, components))
-        flux, frame, edge, margin, sector, near = map(np.asarray, components)
+        (
+            flux,
+            frame,
+            edge,
+            margin,
+            sector,
+            near,
+            sector_margin,
+            sector_span,
+            length_width,
+        ) = map(np.asarray, components)
         original_flux = np.clip(0.5 + margin / 1e-8, 0, 1)
         original_edge = np.minimum(original_flux, frame)
         neighbouring = np.asarray(geometry.neighbour)
@@ -120,6 +130,9 @@ def main():
                             "flux_weight_geometric": float(flux[cell, slot]),
                             "frame_weight": float(frame[cell, slot]),
                             "sector_weight": float(sector[cell, slot]),
+                            "sector_margin": float(sector_margin[cell, slot]),
+                            "sector_span": float(sector_span[cell, slot]),
+                            "original_sector_width": float(length_width),
                             "near_weight": float(near[cell]),
                         }
                     )

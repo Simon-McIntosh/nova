@@ -98,6 +98,10 @@ def main():
         size - np.isfinite(np.asarray(device_step)).sum()
     )
     if result["matrix_nonfinite"] or result["residual_nonfinite"]:
+        try:
+            scipy_solve(host_matrix, -host_vector, assume_a="gen")
+        except ValueError as error:
+            result["host_solve_refusal"] = f"{type(error).__name__}: {error}"
         args.output.write_text(json.dumps(result, indent=2) + "\n")
         print(f"SUMMARY {json.dumps(result)}", flush=True)
         return

@@ -8,6 +8,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FixedLocator, NullLocator
 import numpy as np
 
 from scripts.prototypes.fast_read.render_contours import panel
@@ -147,15 +148,20 @@ def resolution(receipts, output, unchanged=None, lean=None):
     axis.loglog(cells, residual, "o--", color=RUST, linewidth=2.6, markersize=9)
     if unchanged:
         axis.loglog(cells, unchanged, "o:", color=GREY, linewidth=2.6, markersize=9)
-        axis.text(cells[-1], unchanged[-1], "unchanged map", color=GREY, ha="right")
+        axis.text(
+            cells[-1] * 1.04, unchanged[-1], "unchanged map", color=GREY, va="center"
+        )
     if lean:
         axis.loglog(cells, lean, "o-.", color="#355f4d", linewidth=2.6, markersize=9)
-        axis.text(cells[-1], lean[-1], "lean map", color="#355f4d", ha="right")
+        axis.text(cells[-1] * 1.04, lean[-1], "lean map", color="#355f4d", va="center")
     axis.set_xlabel("carrier cells")
     axis.set_ylabel("relative error")
-    axis.set_xticks(cells, labels=[str(cell) for cell in cells])
-    axis.text(cells[-1], error[-1], "profile map", color=BLUE, ha="right")
-    axis.text(cells[-1], residual[-1], "seed residual", color=RUST, ha="right")
+    axis.xaxis.set_major_locator(FixedLocator(cells))
+    axis.xaxis.set_minor_locator(NullLocator())
+    axis.set_xticklabels([str(cell) for cell in cells])
+    axis.set_xlim(cells[0] * 0.8, cells[-1] * 1.7)
+    axis.text(cells[-1] * 1.04, error[-1], "profile map", color=BLUE, va="center")
+    axis.text(cells[-1] * 1.04, residual[-1], "seed residual", color=RUST, va="center")
     _save(figure, (axis,), output)
 
 

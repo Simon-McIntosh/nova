@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="303">
+<meta name="plan-version" content="304">
 <meta name="plan-modified" content="2026-10-16">
 </head>
 <body>
@@ -512,10 +512,11 @@
     <pre class="r-fu-prompt">/reckon-build converged-forward-solve §4</pre>
     <p class="r-fu-outcome"><p>Landed at merge 08eb46636 (run r-20261016T123856231263-content-store-gpfs, review 113). <code>publish_files</code> probes its cache root and falls back to a plain directory rename where GPFS rejects no-clobber rename. That is safe because a rename onto a non-empty entry fails, and every committed entry carries its manifest marker. Existing callers are unchanged where rename is supported. One gap remains: <code>machine_artifact</code> passes its own rename factory and still bypasses the probe on GPFS; it goes to <code>f-cfs-machine-artifact-gpfs</code>.</p></p>
     </article>
-<article class="r-fu" data-id="f-cfs-machine-artifact-gpfs" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-written-by="reckon-build" data-written-at="2026-10-16" data-recommends-skill="/reckon-build converged-forward-solve §4" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-cfs-machine-artifact-gpfs" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-written-by="reckon-build" data-written-at="2026-10-16" data-recommends-skill="/reckon-build converged-forward-solve §4" data-resolved-at="2026-10-16T16:12:02+00:00" data-resolved-by="reckon-build">
     <h4 class="r-fu-title">Let machine-artifact publication use the content-store GPFS probe</h4>
     <div class="r-fu-body"><p>From the content-store-gpfs review. <code>nova/imas/machine_artifact.py:758</code> passes <code>rename_factory=_linux_rename_no_replace</code> explicitly, so it bypasses the new capability probe and still fails on GPFS. Done when it uses the store's probing default, and a GPFS publish test covers it.</p></div>
     <pre class="r-fu-prompt">/reckon-build converged-forward-solve §4</pre>
+    <p class="r-fu-outcome"><p>Landed at merge e4b80cb24 (run r-20261016T152837349228-machine-artifact-gpfs, review 115 of 120, no added failures). <code>materialize_machine_artifact</code> now takes the content store's probed rename instead of forcing the no-clobber primitive, and the unused re-export is gone. A GPFS publish-and-resolve test and a forced-fallback concurrency test cover the change. Restoring the explicit primitive reproduces the GPFS failure.</p><p>The review's three follow-ons were digest assertions that echo the requested digest. They are redundant rather than wrong, and were exempted. The worker also noted that the store probes the root by path, after the pending directory exists. A root swapped mid-publish is still refused by the visible-root check that follows, so the worst case is a loud failure; it is not acted on.</p></p>
     </article>
 <article class="r-fu" data-id="f-cfs-xpoint-cell-owner" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-written-by="reckon-build" data-written-at="2026-10-16" data-recommends-skill="/reckon-build converged-forward-solve §5" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">One exact owner for the X-point cell&#x27;s area and moments; converge diverted at 282, 550 and 2,098 (§5)</h4>

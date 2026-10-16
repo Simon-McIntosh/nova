@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="saddle-anchored-expansion">
+<meta name="plan-title" content="Saddle-anchored X-point expansion">
+<meta name="plan-summary" content="H200 speed gate for the exact-jet saddle-anchored expansion, measured against the axis-facing map in one allocation">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s5">
+<meta name="plan-commits" content="b737789f8">
+<meta name="plan-recorded-at" content="2026-10-16">
+<meta name="plan-verdict" content="partial">
+<meta name="plan-environment" content="H200 NVL, binary64; job 1287634 on 98dci4-gpu-0003, reservation gpu_0003_grpA">
+<title>Saddle-anchored expansion evidence | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<h1 id="saddle-anchored-expansion-landing">Saddle-anchored expansion evidence</h1>
+<p id="saddle-anchored-expansion-record">The expanded record, with the cost decomposition and the fitting change, is the <a href="/nova/research/saddle-anchored-expansion.html">saddle-anchored expansion research note</a>.</p>
+
+<section id="saddle-anchored-expansion-gate">
+<h2 id="saddle-anchored-expansion-gate-heading">Speed gate</h2>
+<p id="saddle-anchored-expansion-gate-verdict">Measured first, as the brief requires, on the 282 realised cell diverted carrier (requested 250). The saddle arm costs <b>6.7185 ms per state</b> at width 128 against the axis-facing map's <b>0.22446 ms</b>, a ratio of <b>29.9319</b> against a 1.25 ceiling. Generated code is <b>152913270 bytes</b> against a 50 MB ceiling, 3.06&times; over. Compile is 1.61 s against a 60 s ceiling. The gate <b>fails</b>, on the wall condition by 23.9&times; and on the size condition by 3.06&times;.</p>
+<table>
+<thead>
+<tr><th>Arm</th><th>Width</th><th>Per-state wall [ms]</th><th>Compile [s]</th><th>Executable [bytes]</th><th>Finite states</th></tr>
+</thead>
+<tbody>
+<tr><td>axis-facing</td><td>1</td><td>5.6324</td><td>0.0580</td><td>203261230</td><td>1 / 1</td></tr>
+<tr><td>axis-facing</td><td>16</td><td>0.53047</td><td>0.0372</td><td>152045334</td><td>16 / 16</td></tr>
+<tr><td>axis-facing</td><td>128</td><td>0.22446</td><td>0.1705</td><td>152045334</td><td>128 / 128</td></tr>
+<tr><td>saddle-anchored</td><td>1</td><td>17.11938</td><td>0.2380</td><td>204366512</td><td>1 / 1</td></tr>
+<tr><td>saddle-anchored</td><td>16</td><td>6.92149</td><td>0.3957</td><td>152913270</td><td>16 / 16</td></tr>
+<tr><td>saddle-anchored</td><td>128</td><td>6.71851</td><td>1.6053</td><td>152913270</td><td>128 / 128</td></tr>
+</tbody>
+</table>
+<p id="saddle-anchored-expansion-gate-accounting">Both arms run in one process on one carrier in one allocation, so the ratio is a same-job, same-machine comparison and not a cross-run estimate. Per-state wall is the median of five evaluations after the first, so compilation is excluded from it. The axis arm falls 25&times; from width 1 to width 128 and the saddle arm 2.5&times;, so the axis arm's width-1 figure is launch overhead while the saddle arm's marginal cost is real work: about 6.7 ms per state against the axis arm's 0.22 ms.</p>
+</section>
+
+<section id="saddle-anchored-expansion-correctness">
+<h2 id="saddle-anchored-expansion-correctness-heading">What the rows do establish</h2>
+<p id="saddle-anchored-expansion-correctness-finite">Every state in every row returns a finite moment residual: 1/1, 16/16 and 128/128 across both arms. The map builds, the batch vectorises, the owned disk cut returns a fraction and a booked moment for each state, and nothing in the representation is degenerate at 282 cells. The failure is a cost failure and not a numerical one, which is what makes the cost decomposition in the research note the whole of the result: the representation is not implicated, the integration rule that consumes it is.</p>
+</section>
+
+<section id="saddle-anchored-expansion-cache">
+<h2 id="saddle-anchored-expansion-cache-heading">Carrier cache</h2>
+<p id="saddle-anchored-expansion-cache-accounting">The read-only cache named in the node brief, <code>r-20261009T181553786165-proto-support/ordered/rows/cache</code>, holds one 5,000-cell machine for the moderate-rotation and weak-rotation analytic cases and no diverted carrier; a request against it raised <code>FileNotFoundError</code> in <code>_machine</code> during input loading and produced no numerical evidence. The diverted carrier is cached under <code>r-20261014T174345284407-lean-map/cache</code>, the cache the accepted fast-map run uses, which is the one this gate reads. Its realised cell count runs ahead of the requested count: 250&rarr;282, 500&rarr;550, 2000&rarr;2098.</p>
+</section>
+
+<section id="saddle-anchored-expansion-negative-control">
+<h2 id="saddle-anchored-expansion-negative-control-heading">Declared negative control</h2>
+<p id="saddle-anchored-expansion-negative-control-status"><b>Not run.</b> The control is that replacing the Newton-located saddle with the fitted Bell stationary point reproduces the connected-lobe map error. It belongs to the map-error clause, which compares against the analytic flux sample; with the speed gate failed first the map was never exercised against the analytic flux, so the control has no host measurement. It is recorded as owed, not as passed.</p>
+</section>
+
+<section id="saddle-anchored-expansion-clauses">
+<h2 id="saddle-anchored-expansion-clauses-heading">Done-when clauses</h2>
+<table>
+<thead><tr><th>Clause</th><th>Status</th><th>Evidence</th></tr></thead>
+<tbody>
+<tr><td>1. Speed gate measured first</td><td><b>measured, failed</b></td><td>Table above; job 1287634; <code>speed-282.json</code> <code>gate_pass: false</code></td></tr>
+<tr><td>2. Newton saddle, exact jets, order, truncation</td><td>not attempted</td><td>gate stop condition</td></tr>
+<tr><td>3. Owned disk, exact cell split, shared integral</td><td>implemented, uncharacterised</td><td><code>expansion.py</code> <code>owned_disk_cut</code>; radius 4 median pitches</td></tr>
+<tr><td>4. Owner-cell area vs independent sample; level-scan continuity</td><td>not attempted</td><td>gate stop condition</td></tr>
+<tr><td>5. Map error under the three guards</td><td>not attempted</td><td>gate stop condition; host of the negative control</td></tr>
+<tr><td>6. Diverted cold solve to 1e-12 at three sizes</td><td>not attempted</td><td>gate stop condition</td></tr>
+<tr><td>7. Limited carriers, 41-state sweep, 550 bracket, converged walls</td><td>not attempted</td><td>gate stop condition</td></tr>
+<tr><td>8. Line-contour poloidal panels</td><td>not attempted</td><td>no terminal state produced</td></tr>
+<tr><td>9. Evidence fragment</td><td>delivered</td><td>this document</td></tr>
+</tbody>
+</table>
+</section>
+
+<section id="saddle-anchored-expansion-receipts">
+<h2 id="saddle-anchored-expansion-receipts-heading">Receipts</h2>
+<table>
+<thead><tr><th>Artefact</th><th>Path</th></tr></thead>
+<tbody>
+<tr><td>Gate JSON (282)</td><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T183044774061-saddle-anchored-expansion/speed-282.json</code></td></tr>
+<tr><td>H200 log</td><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T183044774061-saddle-anchored-expansion/slurm-speed-gate-1287634.log</code></td></tr>
+<tr><td>Job script</td><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T183044774061-saddle-anchored-expansion/speed-gate-h200.sh</code></td></tr>
+<tr><td>Implementation</td><td><code>scripts/prototypes/saddle_expansion/expansion.py</code>, <code>scripts/prototypes/saddle_expansion/speed_gate.py</code></td></tr>
+</tbody>
+</table>
+</section>
+</main>
+</body>
+</html>

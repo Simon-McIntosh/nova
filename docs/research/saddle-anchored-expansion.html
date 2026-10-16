@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="saddle-anchored-expansion">
+  <meta name="plan-title" content="Saddle-anchored X-point expansion">
+  <meta name="plan-summary" content="H200 speed gate for an exact-jet expansion anchored at the located saddle">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-informs" content="converged-forward-solve">
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-verifies" content="converged-forward-solve#s5">
+  <meta name="plan-source" content="H200 speed-gate rows against the axis-facing map in one allocation">
+  <meta name="plan-source-quality" content="primary">
+  <meta name="plan-tags" content="equilibrium,grad-shafranov,jax,topology,performance">
+  <title>Saddle-anchored X-point expansion | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <header>
+    <p class="eyebrow">Research input</p>
+    <h1>Saddle-anchored X-point expansion</h1>
+    <p class="lead">The X-point cell is booked from one conic anchored at the physical saddle, whose value, gradient and Hessian are the exact Biot&ndash;Savart jets evaluated at the saddle the read locates. The map runs: every batched state returns a finite residual at every width. It fails the speed gate measured first, at 282 realised cells by a factor of 24: the saddle arm costs 6.72 ms per state at width 128 against the axis-facing map's 0.224 ms, a ratio of 29.93 against a 1.25 ceiling, with a 152.9 MB executable against a 50 MB ceiling. The gate is the node's declared stop condition, so the expansion order, truncation study, area continuity, map error, cold solve and terminal panels were not attempted.</p>
+  </header>
+
+  <section id="method">
+    <h2>Method and provenance</h2>
+    <p>The saddle-anchored map is <code>scripts/prototypes/saddle_expansion/expansion.py</code>, measured by <code>scripts/prototypes/saddle_expansion/speed_gate.py</code>. It imports the certified carrier from <code>scripts/prototypes/fine_grid_convergence/context.py</code>, the exact source jets from <code>scripts/prototypes/read_route/jets.py</code> and the axis-facing baseline from <code>scripts/prototypes/xpoint_cell_owner/owner_map.py</code>, editing none of them. Both arms are lowered and compiled in the same process, on the same carrier, and timed in the same allocation; the axis-facing rows are the control the gate is defined against and are measured in that same job, as the brief requires.</p>
+    <p>The read-only carrier cache is <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T174345284407-lean-map/cache</code>, the one the accepted fast-map run uses. The cache named in the node brief holds a 5,000-cell machine for two other analytic cases and no diverted carrier at all, so a request against it raised <code>FileNotFoundError</code> during input loading and supplied no evidence. The diverted carrier is the analytic closed-form member under its own offset wall, so its realised cell count runs ahead of the requested count: 250 requested realises 282, 500 realises 550 and 2,000 realises 2,098. The gate was therefore measured at the realised 282 with requested 250; the 2,098 row is the second rung of the same allocation.</p>
+    <p>Binary64 is configured before any JAX array is constructed, the runner asserts <code>jax_enable_x64</code> and a GPU backend, and the H200 log prints the imported module path, worktree, working directory, backend and device. The job is SLURM <code>1287634</code> on <code>98dci4-gpu-0003</code> (NVIDIA H200 NVL) under <code>betelgeuse</code> and reservation <code>gpu_0003_grpA</code>, one job with the size rungs as rows, never an array. Per-state wall is the median of five timed evaluations after the first call, so compilation is not charged to it.</p>
+  </section>
+
+  <section id="gate">
+    <h2>Speed gate</h2>
+    <p>The gate is the brief's first condition: the saddle map must cost at most 1.25&times; the axis-facing map per state at width 128, compile within 60 s and stay under 50 MB of generated code. A batch of 128 states is built from the carrier reference moments plus an independent seed-offset perturbation, so both arms see identical inputs.</p>
+    <table>
+      <thead><tr><th>Arm</th><th>Width</th><th>Per-state wall [ms]</th><th>Compile [s]</th><th>Executable [bytes]</th><th>Finite states</th></tr></thead>
+      <tbody>
+        <tr><td>axis-facing</td><td>1</td><td>5.6324</td><td>0.0580</td><td>203261230</td><td>1 / 1</td></tr>
+        <tr><td>axis-facing</td><td>16</td><td>0.5305</td><td>0.0372</td><td>152045334</td><td>16 / 16</td></tr>
+        <tr><td>axis-facing</td><td>128</td><td>0.2245</td><td>0.1705</td><td>152045334</td><td>128 / 128</td></tr>
+        <tr><td>saddle-anchored</td><td>1</td><td>17.1194</td><td>0.2380</td><td>204366512</td><td>1 / 1</td></tr>
+        <tr><td>saddle-anchored</td><td>16</td><td>6.9215</td><td>0.3957</td><td>152913270</td><td>16 / 16</td></tr>
+        <tr><td>saddle-anchored</td><td>128</td><td>6.7185</td><td>1.6053</td><td>152913270</td><td>128 / 128</td></tr>
+      </tbody>
+    </table>
+    <p>Ratio at width 128 is 29.9319 against a 1.25 ceiling. The compile condition passes by a wide margin and the size condition fails by 3.06&times;; the wall condition alone fails by 23.9&times;. Every state in every row is finite, so the failure is cost and not correctness: the expansion books, the batch vectorises, and the residual is well formed at widths 1, 16 and 128.</p>
+  </section>
+
+  <section id="dominates">
+    <h2>What dominates the cost</h2>
+    <p>The growth structure, not the absolute time, identifies the term. The axis-facing arm falls 25&times; from width 1 to width 128 (5.6324 to 0.2245 ms per state), which is the signature of a fixed launch cost being amortised over the batch; its marginal per-state cost is about 0.22 ms. The saddle arm falls only 2.5&times; (17.1194 to 6.7185), so its cost is not launch overhead either before or after batching: about 6.7 ms of marginal work per state, roughly thirty times the axis arm's marginal work.</p>
+    <p>Three terms account for it, and they are structural rather than incidental.</p>
+    <ul>
+      <li><b>Fixed-shape slice integration over a capacity of cells, not over the cells that are cut.</b> The owned disk has a fixed physical radius of 4 median pitches, so it spans about eight cells across at every resolution and is provisioned for 16 members by <code>_CAPACITY</code>, regardless of how many the disk actually cuts. Each provisioned member runs the full slice decomposition: every candidate bound (the two slice caps, each polygon vertex, two roots per polygon edge and both discriminant tangent roots) becomes a slice, and each slice carries a 128-node Gauss&ndash;Legendre outer rule with two inner nodes, so one state evaluates on the order of 5,000 field-probe-equivalent points per provisioned cell. Fifteen extra provisioned members is fifteen times that work, which is the same order as the 30&times; ratio once the axis arm's own one-cell booking is subtracted.</li>
+      <li><b>A per-state distance scan over every cell in the machine.</b> Membership of the owned set is decided by <code>_polygon_distance</code> over the whole geometry, with a masked reduction over all cells, before any integration. That scan runs per state and grows with the machine, while the axis-facing arm needs no such scan because it books the single cell the read already qualified.</li>
+      <li><b>The radius is in pitch units, so the disk does not shrink as the grid refines.</b> A radius of four pitches keeps the owned set near 16 cells at 282 and at 2,098 alike. The cost is therefore expected to persist across the resolution ladder rather than washing out at the fine end, which is why a 282-cell failure is decisive for the 2,098-cell condition and not merely an artefact of the coarse rung.</li>
+    </ul>
+  </section>
+
+  <section id="fits">
+    <h2>What would fit</h2>
+    <p>The expansion itself is not the expensive part: evaluating one conic and its density is a handful of flops. The cost is in the integration rule that consumes it, and three changes attack it in increasing order of benefit.</p>
+    <ul>
+      <li><b>Size the capacity to the realised cut count.</b> At 282 cells the disk holds a small number of members; 16 is a ceiling chosen for safety, and every unused member is charged the full slice rule. Measuring the realised count and setting capacity at the observed maximum (with an asserted guard) removes most of the factor directly, and removes it at every resolution.</li>
+      <li><b>Drop the 128-node outer rule.</b> The outer 128-node Gauss&ndash;Legendre rule is inherited from the conic cell integral it was copied from, where the integrand is the square root of a slice discriminant. Here the integrand is piecewise quadratic in the slice coordinate with analytically located breakpoints, so accuracy comes from the breakpoints, not from node count; a low-order rule over the same partition should hold the moment accuracy at a fraction of the probes. This is a measurement, not an assumption: the truncation study owed by the brief's second clause is what would settle it.</li>
+      <li><b>Reuse the read's own geometry masks for the distance test.</b> The scan is a second pass over the machine that the topology read has already done in kind; sharing it, or replacing the polygon distance by the signed level candidate set the read already carries, removes a whole per-state traversal.</li>
+    </ul>
+    <p>Together these are a re-parameterisation of the same mathematics, not a retreat from the exact anchored expansion: the conic, its exact Biot&ndash;Savart jets and the shared membership/booking integral are unchanged. What the gate rules out is the present <em>cost model</em> of the disk, not the representation.</p>
+  </section>
+
+  <section id="negative-control">
+    <h2>Negative control</h2>
+    <p>The declared negative control is that replacing the Newton-located saddle with the fitted Bell stationary point reproduces the connected-lobe map error. It was not run. Its natural host is the map-error clause of the brief, which is measured against the analytic sample and cannot be read off a speed row; with the gate failed first, the map was not exercised against the analytic flux at all.</p>
+  </section>
+
+  <section id="remaining">
+    <h2>Done-when status</h2>
+    <table>
+      <thead><tr><th>Clause</th><th>Status</th><th>Reason</th></tr></thead>
+      <tbody>
+        <tr><td>1. Speed gate measured first</td><td>measured, failed</td><td>Ratio 29.9319 against 1.25 at width 128, 282 cells; compile passes, size fails at 3.06&times;</td></tr>
+        <tr><td>2. Newton-located saddle, exact jets, expansion order, truncation error</td><td>not attempted</td><td>The brief's stop condition on gate failure</td></tr>
+        <tr><td>3. Owned disk radius, exact split of cut cells, shared read/booking integral</td><td>implemented, not characterised</td><td>The radius is 4 median pitches and the integral is shared; the continuity characterisation was not reached</td></tr>
+        <tr><td>4. Owner-cell area against an independent sample; level-scan continuity</td><td>not attempted</td><td>Stop condition</td></tr>
+        <tr><td>5. Map error under the three guards</td><td>not attempted</td><td>Stop condition</td></tr>
+        <tr><td>6. Diverted cold solve to 1e-12 at three sizes</td><td>not attempted</td><td>Stop condition</td></tr>
+        <tr><td>7. Limited carriers, 41-state sweep, 550 transition bracket, converged-state walls</td><td>not attempted</td><td>Stop condition</td></tr>
+        <tr><td>8. Poloidal line-contour panels of terminal states</td><td>not attempted</td><td>No terminal state was produced</td></tr>
+        <tr><td>9. Evidence fragment</td><td>delivered</td><td><a href="/nova/evidence/fragments/converged-forward-solve/saddle-anchored-expansion.html">Saddle-anchored expansion evidence</a></td></tr>
+      </tbody>
+    </table>
+    <p>The gate is the brief's first clause and its stated stop: a failure there is a delivered result, with the dominant cost named and the fitting change named, not an incomplete one. The remaining clauses are ordered behind a gate that did not open.</p>
+  </section>
+
+  <section id="receipts">
+    <h2>Receipts</h2>
+    <p>Gate JSON: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T183044774061-saddle-anchored-expansion/speed-282.json</code>. H200 log: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T183044774061-saddle-anchored-expansion/slurm-speed-gate-1287634.log</code>. Job script: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T183044774061-saddle-anchored-expansion/speed-gate-h200.sh</code>. Implementation: <code>scripts/prototypes/saddle_expansion/expansion.py</code> and <code>scripts/prototypes/saddle_expansion/speed_gate.py</code>.</p>
+  </section>
+</main>
+</body>
+</html>

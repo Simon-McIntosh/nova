@@ -73,6 +73,8 @@ def taylor(receipts, output):
                 label=f"{receipt['cells']:,} {name}",
             )
     axis.axhline(2, color=GREY, linestyle=":", linewidth=1.2)
+    axis.set_xlim(2e-8, 5e-3)
+    axis.set_xticks(np.logspace(-7, -3, 5))
     axis.set_xlabel("moment step")
     axis.set_ylabel("Taylor remainder slope")
     axis.legend(

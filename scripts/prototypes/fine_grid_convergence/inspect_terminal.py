@@ -18,7 +18,7 @@ from scripts.prototypes.fast_map_production import program
 from scripts.prototypes.fast_map_production.kernel import bell_fraction_with_crossings
 from scripts.prototypes.fast_read.ordinary_cut import bell_moments
 from scripts.prototypes.fine_grid_convergence.context import build
-from scripts.prototypes.fine_grid_convergence.handoff import map_moments
+from scripts.prototypes.fine_grid_convergence.handoff import booked_blend, map_moments
 from scripts.prototypes.fine_grid_convergence.runtime_solve import without_profile
 from scripts.prototypes.fine_grid_convergence.solution_controls import (
     gauss_newton_gradient,
@@ -62,7 +62,7 @@ def main():
         context.geometry, reading, context.convention.sigma
     )
     area_gap = reading.geometric_membership - ordinary_fraction
-    blend = -jnp.expm1(-jnp.square(area_gap / 0.043))
+    blend = booked_blend(area_gap)
     selected = np.union1d(
         hot,
         np.flatnonzero(np.asarray(reading.booking_cells & (reading.membership > 0))),

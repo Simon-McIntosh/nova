@@ -60,16 +60,10 @@ def main():
 
     positive = measure()
 
-    class DetachedExponential:
-        def __getattr__(self, name):
-            return getattr(jnp, name)
-
-        def expm1(self, value):
-            return jax.lax.stop_gradient(jnp.expm1(value))
-
-    handoff.jnp = DetachedExponential()
+    real_weight = handoff.booked_blend
+    handoff.booked_blend = lambda gap: jax.lax.stop_gradient(real_weight(gap))
     negative = measure()
-    handoff.jnp = jnp
+    handoff.booked_blend = real_weight
     positive_pass = all(
         1.7 < slope < 2.3 for row in positive["slopes"] for slope in row
     )

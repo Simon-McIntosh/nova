@@ -12,6 +12,12 @@ from scripts.prototypes.fast_read.ordinary_cut import bell_moments
 from scripts.prototypes.lean_map.quadrature import interior_moments
 
 
+def booked_blend(area_gap):
+    """Damp the ordinary-cut correction outside a narrow agreement region."""
+    disagreement = jnp.square(area_gap / 0.043)
+    return disagreement * jnp.exp(-disagreement) / 3.0
+
+
 def map_moments(
     moments,
     values,
@@ -70,7 +76,7 @@ def map_moments(
         geometry, reading, convention.sigma
     )
     area_gap = reading.geometric_membership - ordinary_fraction
-    blend = -jnp.expm1(-jnp.square(area_gap / 0.043))
+    blend = booked_blend(area_gap)
     blended_saddle = saddle + jnp.where(
         saddle_cut[:, None], blend[:, None] * (ordinary - saddle), 0.0
     )

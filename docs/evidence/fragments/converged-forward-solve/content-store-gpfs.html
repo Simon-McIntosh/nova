@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="content-store-gpfs">
+  <meta name="plan-title" content="Content-store publication on parallel filesystems">
+  <meta name="plan-summary" content="The content store published by renaming a private directory onto its digest with renameat2 RENAME_NOREPLACE, which GPFS rejects with EINVAL, so the default-on operand cache could not publish on either shared mount. The publication path now probes the cache root and, where no-clobber rename is unsupported, publishes with plain renameat whose POSIX semantics name the race loser. Publications, concurrent fresh-process publishers, a crash before completion, a corrupted file and a marker-less directory are all exercised on a GPFS cache root.">
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-verifies" content="converged-forward-solve#s4">
+  <meta name="plan-recorded-at" content="2026-10-16">
+  <meta name="plan-verdict" content="complete">
+  <meta name="plan-environment" content="Fleet allocation 98dci4-clu-2002 job 1281970 for CPU tests; operand rows on the H200 reservation gpu_0003_grpA job 1287330; base revision b70052ffb">
+  <meta name="plan-tags" content="content-store,gpfs,publication,operand-cache">
+  <title>content-store-gpfs — publication on parallel filesystems | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+  <h1>content-store-gpfs — content-store publication on parallel filesystems</h1>
+
+  <p id="content-store-gpfs-status">
+    <strong>The operand cache now publishes on GPFS.</strong>
+    <code>nova/database/content_store.py:publish_files</code> probes the cache root and
+    selects a directory-rename primitive the filesystem admits: the existing
+    <code>renameat2</code> <code>RENAME_NOREPLACE</code> where it is supported, and plain
+    <code>renameat</code> where it is not. The default-on operand cache in
+    <code>scripts/prototypes/lean_map/values.py</code>,
+    <code>scripts/prototypes/lean_map/jets.py</code> and
+    <code>scripts/prototypes/read_route/jets.py</code> is unchanged; it calls the same
+    <code>publish_files</code> seam and gains GPFS support from the owner.
+  </p>
+
+  <h2 id="content-store-gpfs-strategy">Strategy</h2>
+  <p id="content-store-gpfs-strategy-probe">
+    The probe runs the operation itself. A private directory is renamed onto a name it
+    alone owns with <code>RENAME_NOREPLACE</code>; success selects the no-clobber
+    primitive, an unsupported-flag error (<code>EINVAL</code>, <code>ENOSYS</code>,
+    <code>EOPNOTSUPP</code>, <code>EPERM</code>) selects plain <code>renameat</code>.
+    The private directory is removed either way. The probe is the primitive the
+    publication path then uses, so a root that rejects the flag is never published to
+    with it.
+  </p>
+  <p id="content-store-gpfs-strategy-rename">
+    Where no-clobber rename is unsupported, publication relies on the POSIX
+    <code>rename(2)</code> rules that every parallel filesystem implements: a
+    <strong>plain <code>renameat</code></strong> moves the completed pending directory
+    into place atomically, and a rename of a directory onto an existing
+    <strong>non-empty</strong> directory fails with <code>EEXIST</code>. A committed
+    entry always holds at least its completion marker, so a loser is never able to
+    replace a winner and is told it lost by the error itself.
+  </p>
+  <p id="content-store-gpfs-strategy-visible">
+    A reader never sees a partial entry: files are written under a private pending name
+    (<code>.&lt;digest&gt;.&lt;token&gt;</code>), each file is fsynced, the pending
+    directory is fsynced, the whole directory is renamed into place atomically, and
+    <code>manifest.json</code> — the completion marker naming every file and its digest —
+    is written last inside it. The object root descriptor is fsynced after the rename. A
+    crash before the rename leaves only a hidden pending directory.
+  </p>
+  <p id="content-store-gpfs-strategy-refuse">
+    Two concurrent publishers of one content-addressed key both succeed and leave one
+    valid entry: both build their own pending directory, the first rename wins, the
+    second receives <code>EEXIST</code> and returns the winner after verifying it. A
+    publisher of different content under the same key is impossible by construction — the
+    key is the digest of the manifest, which names each file's digest and size — and a
+    contradictory publisher is refused: its source files fail the declaration check
+    before the pending directory is written, and a destination already carrying a
+    different manifest fails <code>verify_directory_files</code>.
+  </p>
+
+  <h2 id="content-store-gpfs-probe">FS operations the strategy relies on</h2>
+  <table id="content-store-gpfs-probe-table">
+    <thead><tr><th>operation</th><th>/work (GPFS)</th><th>home (GPFS)</th><th>why</th></tr></thead>
+    <tbody>
+      <tr><td><code>renameat2 RENAME_NOREPLACE</code></td><td><code>EINVAL</code></td><td><code>EINVAL</code></td><td>not supported; the probe routes away from it</td></tr>
+      <tr><td><code>renameat</code> over a non-empty dir</td><td><code>EEXIST</code></td><td><code>EEXIST</code></td><td>names the race loser; a winner is never replaced</td></tr>
+      <tr><td><code>renameat</code> to a fresh name</td><td><code>OK</code></td><td><code>OK</code></td><td>atomic publication of a completed entry</td></tr>
+      <tr><td><code>fsync</code> on a directory descriptor</td><td><code>OK</code></td><td><code>OK</code></td><td>persists the rename and the file data</td></tr>
+    </tbody>
+  </table>
+  <p id="content-store-gpfs-probe-note">
+    The GPFS mounts are POSIX, so plain <code>renameat</code> is atomic and the
+    non-empty-destination <code>EEXIST</code> rule holds; the repository notes GPFS
+    lacks atomic no-clobber <em>create</em>, and the strategy relies on no cross-node
+    <code>O_EXCL</code>. The publication path does not depend on the unsupported
+    no-clobber rename on these mounts.
+  </p>
+
+  <h2 id="content-store-gpfs-tests">Checks</h2>
+  <p id="content-store-gpfs-tests-note">
+    <code>tests/test_content_store.py</code> runs in fresh processes with
+    <code>JAX_PLATFORMS=cpu</code> on the fleet allocation in place, over a GPFS cache
+    root (<code>NOVA_CONTENT_STORE_GPFS_ROOT</code>, defaulting to the GPFS home). The
+    four base tests and the concurrent-thread test are unchanged.
+  </p>
+  <ul id="content-store-gpfs-tests-list">
+    <li id="content-store-gpfs-test-publish">publish then verified read returns the files;</li>
+    <li id="content-store-gpfs-test-concurrent">two concurrent fresh-process publishers of one key leave one verified entry and both return it;</li>
+    <li id="content-store-gpfs-test-crash">a crash before publication completes leaves no visible entry;</li>
+    <li id="content-store-gpfs-test-corrupt">a corrupted file is refused on read;</li>
+    <li id="content-store-gpfs-test-marker">a destination without its completion marker is not served.</li>
+  </ul>
+  <p id="content-store-gpfs-tests-result">
+    Head arm: 10 passed. Base arm (base <code>content_store.py</code>, same test file):
+    4 failed, 6 passed — the four failures are exactly the newly added GPFS
+    publication checks, which the base module cannot satisfy on a GPFS root.
+  </p>
+  <p id="content-store-gpfs-negative">
+    The declared negative control mutates <code>_create_private_directory</code> so the
+    pending directory is named the digest, publishing files directly at the destination.
+    The crash check then fails: 9 failed, 1 passed, with
+    <code>test_gpfs_crash_mid_publish_leaves_no_visible_entry</code> among them. This is
+    the mutation the check exists to catch; the mutation was reverted and the tree is
+    clean.
+  </p>
+
+  <h2 id="content-store-gpfs-measure">Operand cache end to end</h2>
+  <p id="content-store-gpfs-measure-note">
+    The diverted value and jet operands build on a miss and load on a hit through the
+    extended owner, on the H200 reservation with one GPU as one job with its rows inside
+    the allocation (never an array), against a fresh GPFS operand root so the first call
+    is a miss. <code>build_seconds</code> is the miss assembly, <code>load_seconds</code>
+    the wall from opening the entry to a device-resident matrix, and the loaded matrix is
+    compared bitwise with the built matrix. Status:
+    <span id="content-store-gpfs-measure-status">pending — job 1287330 submitted</span>.
+  </p>
+  <div id="content-store-gpfs-measure-rows"></div>
+
+  <h2 id="content-store-gpfs-scope">Scope</h2>
+  <p id="content-store-gpfs-scope-note">
+    Only <code>nova/database/content_store.py</code> and
+    <code>tests/test_content_store.py</code> were edited. The operand-cache node's files
+    (<code>nova/database/filepath.py</code>, <code>scripts/prototypes/lean_map/values.py</code>,
+    <code>scripts/prototypes/lean_map/jets.py</code>,
+    <code>scripts/prototypes/read_route/jets.py</code>,
+    <code>tests/test_operand_cache.py</code>) were <strong>not edited</strong>; they
+    already call the owner.
+  </p>
+</main></body></html>

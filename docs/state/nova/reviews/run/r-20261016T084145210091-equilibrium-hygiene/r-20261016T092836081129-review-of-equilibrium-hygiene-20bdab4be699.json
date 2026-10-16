@@ -1,0 +1,78 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "clive",
+  "base_log_revision": "63caf693143b26d2a689939bb9073b5f969d2b75",
+  "call_site_count": 7,
+  "call_sites": [
+    "nova/equilibrium/wall_mask.py:391",
+    "nova/equilibrium/stencil_nulls.py:948",
+    "nova/equilibrium/connectivity_boundary.py:646",
+    "nova/equilibrium/connectivity_boundary.py:1526",
+    "nova/equilibrium/connectivity_boundary.py:1546",
+    "nova/equilibrium/connectivity_boundary.py:1676",
+    "nova/equilibrium/connectivity_boundary.py:1679"
+  ],
+  "completed_at": "2026-10-16T09:41:14.849Z",
+  "dispatched_at": "2026-10-16T09:28:57Z",
+  "findings": [
+    {
+      "file": "tests/test_production_solver_receipt_trip_alignment.py",
+      "line": "12",
+      "severity": "blocking",
+      "text": "blocking: deleting benchmarks/carrier_step_attribution.py in e7bd2533 leaves this tracked test importing a module that no longer exists, so the file fails at collection on the edited tree \u2014 reproduced for this run in out-of-scope-import.log as an ImportError with EXIT=1 while the same file passed at the base revision; the deletion was justified by a census of benchmark names in docs only, and the live test importer is what makes the module not dead."
+    },
+    {
+      "file": "docs/plans/coefficient-space-newton.html",
+      "line": "30",
+      "severity": "follow-on",
+      "text": "follow-on: the shipped plan's plan-artifacts meta still names nova/equilibrium/coefficient_carrier.py, which e7bd2533 deleted, so that plan's declared artifact list now points at a file that does not exist and its owning scope should drop the entry."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T084145210091-equilibrium-hygiene/dilation-negative-control.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the log's header records revision=63caf693, the base commit, while the test it exercises exists only in the uncommitted working tree of that moment, so a reader comparing the header revision against the head sha sees a mismatch that the header's absence of a dirty-tree marker cannot explain."
+    }
+  ],
+  "head_log_revision": "e7bd253326fbc986dc1fdd8cfac4d894ef5e92b0",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 7 production call site(s)",
+    "diff": "read commit by commit \u2014 6d00aabf consolidates the dilation and the analytic helpers, e7bd2533 deletes coefficient_carrier.py and its test with the four carrier benchmarks, 20bdab4be adds the evidence fragment; the three commits touch only paths inside the declared scope.",
+    "done_when": "the done_when asks for the touched test files measured by delta against the base with no added failures; baseline-suite.log and after-suite.log are the per-file arms it names, and my own parse of those two logs gives 36 baseline and 34 edited failure ids with zero added and the edited set a strict subset of the base set.",
+    "goal": "the goal is to remove the duplicated four-neighbour dilation, the dead coefficient-carrier tooling and the copied test helpers; the diff at 63caf693..20bdab4be does all three \u2014 nova/equilibrium/morphology.py:8 now owns the one dilation that nova/equilibrium/wall_mask.py:391 calls, the coefficient-carrier module, its test and four benchmarks are deleted, and tests/conftest.py:21 and tests/conftest.py:33 hold the single copy of each helper.",
+    "manifest": "read; it states the three local commits, the five-file CPU gate at 36 baseline and 34 edited failure ids with zero added, names every per-file log with its own revision header, and records a negative_control_log whose last line reads EXIT=1.",
+    "write_paths": "read the manifest's 15 declared write paths; every path in the diff against the base is one of them and no path outside the list appears in any of the three commits."
+  },
+  "justifications": {
+    "durability": "tests/test_equilibrium_forward_solve.py:147 derives its expected dilation from an argwhere loop and fails when the false padding is replaced by periodic propagation, which dilation-negative-control.log shows at EXIT=1.",
+    "evidence": "baseline-suite.log and after-suite.log carry a revision, a runnable command and per-file summaries, and my own parse of them reproduces 36 to 34 failure ids with zero added.",
+    "fit": "tests/conftest.py:21 adds pure helper functions beside the module's fixtures, and three test modules import them, though the neighbouring tests/rotating_equilibrium_references.py shows the repository's shared-module idiom rather than import-from-conftest.",
+    "goal_fidelity": "nova/equilibrium/morphology.py:8 holds one host-and-device dilation that nova/equilibrium/wall_mask.py:391 now calls, which is the consolidation the goal names.",
+    "reuse": "nova/equilibrium/morphology.py already owned _dilate4 for nova/equilibrium/stencil_nulls.py:948 and nova/equilibrium/connectivity_boundary.py:646, and the change extends that owner instead of adding a third dilation.",
+    "scope_discipline": "every path in git diff --name-only 63caf693 20bdab4be is one of the 15 declared write paths, with no figure or file outside that grant."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to remove the duplicated four-neighbour dilation, the dead coefficient-carrier tooling and the copied test helpers; the diff at 63caf693..20bdab4be does all three \u2014 nova/equilibrium/morphology.py:8 now owns the one dilation that nova/equilibrium/wall_mask.py:391 calls, the coefficient-carrier module, its test and four benchmarks are deleted, and tests/conftest.py:21 and tests/conftest.py:33 hold the single copy of each helper.\nVERDICT done_when: the done_when asks for the touched test files measured by delta against the base with no added failures; baseline-suite.log and after-suite.log are the per-file arms it names, and my own parse of those two logs gives 36 baseline and 34 edited failure ids with zero added and the edited set a strict subset of the base set.\nVERDICT write_paths: read the manifest's 15 declared write paths; every path in the diff against the base is one of them and no path outside the list appears in any of the three commits.\nVERDICT manifest: read; it states the three local commits, the five-file CPU gate at 36 baseline and 34 edited failure ids with zero added, names every per-file log with its own revision header, and records a negative_control_log whose last line reads EXIT=1.\nVERDICT diff: read commit by commit \u2014 6d00aabf consolidates the dilation and the analytic helpers, e7bd2533 deletes coefficient_carrier.py and its test with the four carrier benchmarks, 20bdab4be adds the evidence fragment; the three commits touch only paths inside the declared scope.\nCALL_SITES: nova/equilibrium/wall_mask.py:391, nova/equilibrium/stencil_nulls.py:948, nova/equilibrium/connectivity_boundary.py:646, nova/equilibrium/connectivity_boundary.py:1526, nova/equilibrium/connectivity_boundary.py:1546, nova/equilibrium/connectivity_boundary.py:1676, nova/equilibrium/connectivity_boundary.py:1679\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/equilibrium/morphology.py:8 holds one host-and-device dilation that nova/equilibrium/wall_mask.py:391 now calls, which is the consolidation the goal names.\nSCORE evidence: 19\nJUSTIFICATION evidence: baseline-suite.log and after-suite.log carry a revision, a runnable command and per-file summaries, and my own parse of them reproduces 36 to 34 failure ids with zero added.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in git diff --name-only 63caf693 20bdab4be is one of the 15 declared write paths, with no figure or file outside that grant.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_equilibrium_forward_solve.py:147 derives its expected dilation from an argwhere loop and fails when the false padding is replaced by periodic propagation, which dilation-negative-control.log shows at EXIT=1.\nSCORE fit: 17\nJUSTIFICATION fit: tests/conftest.py:21 adds pure helper functions beside the module's fixtures, and three test modules import them, though the neighbouring tests/rotating_equilibrium_references.py shows the repository's shared-module idiom rather than import-from-conftest.\nSCORE reuse: 20\nJUSTIFICATION reuse: nova/equilibrium/morphology.py already owned _dilate4 for nova/equilibrium/stencil_nulls.py:948 and nova/equilibrium/connectivity_boundary.py:646, and the change extends that owner instead of adding a third dilation.\nFINDING tests/test_production_solver_receipt_trip_alignment.py:12 blocking: deleting benchmarks/carrier_step_attribution.py in e7bd2533 leaves this tracked test importing a module that no longer exists, so the file fails at collection on the edited tree \u2014 reproduced for this run in out-of-scope-import.log as an ImportError with EXIT=1 while the same file passed at the base revision; the deletion was justified by a census of benchmark names in docs only, and the live test importer is what makes the module not dead.\nFINDING docs/plans/coefficient-space-newton.html:30 follow-on: the shipped plan's plan-artifacts meta still names nova/equilibrium/coefficient_carrier.py, which e7bd2533 deleted, so that plan's declared artifact list now points at a file that does not exist and its owning scope should drop the entry.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T084145210091-equilibrium-hygiene/dilation-negative-control.log:1 follow-on: the log's header records revision=63caf693, the base commit, while the test it exercises exists only in the uncommitted working tree of that moment, so a reader comparing the header revision against the head sha sees a mismatch that the header's absence of a dirty-tree marker cannot explain.\nreviewed_base_sha: 63caf693143b26d2a689939bb9073b5f969d2b75\nreviewed_head_sha: 20bdab4be6997c97fe894646b65da2e1388191de\n",
+  "review_run_id": "r-20261016T092836081129-review-of-equilibrium-hygiene-20bdab4be699",
+  "reviewed_base_sha": "63caf693143b26d2a689939bb9073b5f969d2b75",
+  "reviewed_head_sha": "20bdab4be6997c97fe894646b65da2e1388191de",
+  "reviewed_run_id": "r-20261016T084145210091-equilibrium-hygiene",
+  "reviewer_run_id": "r-20261016T092836081129-review-of-equilibrium-hygiene-20bdab4be699",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T09:40:20.488154+00:00",
+  "total": 111
+}

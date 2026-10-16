@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="xpoint-cell-owner">
+  <meta name="plan-title" content="X-point cell area and moments">
+  <meta name="plan-summary" content="Closed-form slice-discriminant moments and the ownership impasse across three carriers">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-informs" content="converged-forward-solve">
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-verifies" content="converged-forward-solve#s5">
+  <meta name="plan-source" content="CPU closed-form moment verification and the inherited H200 carrier record">
+  <meta name="plan-source-quality" content="primary">
+  <meta name="plan-tags" content="equilibrium,grad-shafranov,jax,continuity,topology">
+  <meta name="plan-version" content="1">
+  <meta name="plan-modified" content="2026-10-16">
+  <title>X-point cell area and moments | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <header>
+    <p class="eyebrow">Research record</p>
+    <h1>X-point cell area and moments</h1>
+    <p class="lede">An exact owner of the X-point cell needs the area and first moments of the region above the boundary level inside the containing cell. On each slice abscissa that bound is either a polygon edge or a branch of the level-set hyperbola, and the hyperbola branch contributes the square root of the slice discriminant. This record delivers that square root's moments in closed form and measures the remaining impasse.</p>
+  </header>
+
+  <section id="xpoint-cell-owner-summary">
+    <h2>Summary</h2>
+    <p>The exact primitive the closed-form conic route needs is implemented and verified on CPU. The moments of the square root of a quadratic in the slice abscissa are elementary; the implementation covers both leading-coefficient signs and the linear branch, and its definite integrals against an arbitrary polynomial agree with 400-node Gauss-Legendre to better than 1e-12 relative. A closed-form check against the semicircle area reproduces the analytic value to roundoff.</p>
+    <p>The remaining assembly — expanding the density antiderivative on a hyperbola branch into a polynomial part and a polynomial part times the root, so that the primitive replaces the outer quadrature — is <strong>not</strong> delivered here, and no diverted cold solve was re-measured on this run. The node's earlier attempt delivered a complete negative result, and that result stands: the Bell field representation displaces the fitted stationary level from the physical boundary, so neither the axis-facing cut nor the connected Bell region is simultaneously exact and continuous at the saddles of all three carriers.</p>
+  </section>
+
+  <section id="xpoint-cell-owner-method">
+    <h2>The primitive</h2>
+    <p>Fix a slice abscissa <code>u</code>. The Bell level set solves a quadratic in the transverse coordinate <code>v</code>,</p>
+    <p><code>q(u, v) = A v<sup>2</sup> + B(u) v + C(u) = 0</code>,</p>
+    <p>with <code>A</code> constant and <code>B</code>, <code>C</code> polynomial in <code>u</code>, so the branch is <code>v(u) = (-B(u) + s&middot;&radic;D(u)) / (2A)</code> with <code>D = B<sup>2</sup> - 4AC</code> quadratic in <code>u</code>. The density antiderivative is a polynomial of degree four in <code>v</code> whose coefficients are polynomial in <code>u</code>; expanding a power of <code>v(u)</code> separates the even powers of <code>&radic;D</code>, which are polynomial, from the odd powers, which are polynomial times <code>&radic;D</code>. Every term therefore integrates through the moments</p>
+    <p><code>J<sub>m</sub>(u) = &int; u<sup>m</sup> &radic;D(u) du</code>,</p>
+    <p>which the Euler reduction expresses through <code>J<sub>0</sub></code>. The closed <code>J<sub>0</sub></code> takes a different form for each sign of the leading coefficient, because <code>&radic;D</code> is real over a different set in each case; a linear discriminant has its own substitution.</p>
+    <p>Nothing in the evaluation samples the region. The inherited numerical integrator achieves the same agreement to 4.9-8.1 &times; 10<sup>-16</sup> on the connected component and below 2.0 &times; 10<sup>-14</sup> on the device, so <em>exactness of the integral is not the binding constraint</em>: it was already at roundoff. The closed form removes a methodological objection — a quadrature rule inside a step that is required to be exact — rather than changing any measured error.</p>
+  </section>
+
+  <section id="xpoint-cell-owner-measurements">
+    <h2>Measurements</h2>
+    <table>
+      <thead><tr><th>Check</th><th>Measure</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>Primitive derivative, downward discriminant</td><td>difference quotient vs <code>u<sup>m</sup>&radic;D</code></td><td>matches, scaled gap &lt; 1e-7</td></tr>
+        <tr><td>Primitive derivative, upward discriminant</td><td>difference quotient vs <code>u<sup>m</sup>&radic;D</code></td><td>matches, scaled gap &lt; 1e-7</td></tr>
+        <tr><td>Primitive derivative, linear discriminant</td><td>difference quotient vs <code>u<sup>m</sup>&radic;D</code></td><td>matches, scaled gap &lt; 1e-7</td></tr>
+        <tr><td>Definite integral</td><td>closed form vs 400-node Gauss-Legendre</td><td>relative gap &lt; 1e-12 on all three branches</td></tr>
+        <tr><td>Analytic area</td><td><code>D = 4 - u<sup>2</sup></code> over <code>[-2, 2]</code></td><td>semicircle area to 1e-12</td></tr>
+        <tr><td>Focused suite</td><td>7 tests (3 new, 4 inherited)</td><td>7 passed, CPU, 23.3 s</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="xpoint-cell-owner-impasse">
+    <h2>The ownership impasse that remains</h2>
+    <p>The node's earlier attempt measured, across the 282, 550 and 2,098-cell carriers, that the fitted Bell quadratic's own stationary level sits above the boundary in the active owner cells, so its exact connected positive region occupies 0.462612 and 0.511790 of two cells where the submitted axis-facing half-plane occupies 0.333 and 0.033. Crossing the fitted saddle contact by &plusmn;10<sup>-11</sup> Wb jumps the exact axis-connected area by 0.04967, 0.06212 and 0.47262 cell fractions, so binary connectedness and a continuous handoff cannot both hold for that fit: the jump is intrinsic to admitting the newly joined lobe.</p>
+    <p>An independent direct analytic flux grid resolves which representation is physical at the worst cell. At fine cell 47 the analytic grid selects 0.0285123 of the cell, close to the normal-form 0.0281766, while the connected Bell interpolation gives 0.511790 — the interpolation joins a second lobe that the physical local region does not contain. The 16-fold disagreement between the two representations is therefore a defect of the connected interpolation at the saddle, not of the normal form.</p>
+    <p>The independent review of the earlier attempt scored it 60/120 with three blocking findings: the owner is not simultaneously exact and continuous at every saddle; the integrator's outer rule is adaptive quadrature rather than a closed-form conic-arc Green integral; and the solve carrier refuses each candidate map before correction, leaving the 2,098-cell cold root and all its controls unmeasured. This run closes the middle finding's building block — the closed-form primitive — and confirms the other two stand.</p>
+  </section>
+
+  <section id="xpoint-cell-owner-remaining">
+    <h2>What remains</h2>
+    <ul>
+      <li>Expand the density antiderivative on each hyperbola branch into its polynomial and square-root parts and wire the primitive into the cell integral, then verify against the dense quadrature on every X-point-neighbourhood cell of all three carriers, including cell 47 at 2,098 and cell 8 at 550.</li>
+      <li>Delete the normal-form/ordinary blend from the booking path and confirm the single owner is used by both the read and the map.</li>
+      <li>Re-measure the analytic map error and the three cold solves on the H200 once the map passes its guards. The earlier attempt measured analytic errors 0.0134080, 0.0358585 and 0.0179194 against guards 0.0010866, 0.0005 and 0.0001, so this step is gated on the field representation, not on the integrator.</li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>

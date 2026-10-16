@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="xpoint-cell-owner">
+  <meta name="plan-title" content="X-point cell area and moments">
+  <meta name="plan-summary" content="Closed-form slice-discriminant moments and the remaining ownership impasse">
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-verifies" content="converged-forward-solve#s5">
+  <meta name="plan-recorded-at" content="2026-10-16">
+  <meta name="plan-verdict" content="partial">
+  <title>X-point cell area and moments | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+  <h1 id="xpoint-cell-owner-landing">X-point cell area and moments</h1>
+  <p>The <a href="/nova/research/xpoint-cell-owner.html">measured research record</a> and the earlier carrier record hold the full picture. This run delivers the exact primitive the closed-form conic route names as its preferred form: the moments <code>J_m(u) = integral of u**m sqrt(D(u)) du</code> of the square root of the slice discriminant, in closed form.</p>
+  <p id="xpoint-cell-owner-primitive">The primitive is exact and covers both signs of the discriminant's leading coefficient plus the linear branch. In <code>conic_arc.py</code> the difference quotient of every moment reproduces its integrand to a scaled gap below 1e-7 over all three branches; its definite integral against an arbitrary cubic agrees with 400-node Gauss-Legendre to better than 1e-12 relative; and the <code>D = 4 - u**2</code> zeroth moment over <code>[-2, 2]</code> reproduces the semicircle area to 1e-12. The focused suite is 7 tests (3 new, 4 inherited), all passing on CPU in 23.3 s.</p>
+  <p id="xpoint-cell-owner-method-role">The inherited numerical integrator already reaches 4.92-8.06 × 10<sup>−16</sup> on the connected component and below 2.04 × 10<sup>−14</sup> on the device, so the closed form removes a methodological objection rather than moving a measured error: exactness of the integral was never the binding constraint.</p>
+  <p id="xpoint-cell-owner-impasse">The earlier attempt's three blocking findings stand. The owner is not simultaneously exact and continuous at every saddle; the outer rule inside the cell integral remains a quadrature rule; and the solve carrier refuses each candidate map before correction, leaving the 2,098-cell cold root and all its controls unmeasured. The dominant cause is the Bell field representation around the saddle: its analytic-flux errors 0.0134080, 0.0358585 and 0.0179194 exceed the guards 0.0010866, 0.0005 and 0.0001 at 282, 550 and 2,098 cells. At fine cell 47 the physical analytic grid selects 0.0285123 of the cell, close to the normal-form 0.0281766 against the connected Bell interpolation's 0.511790, so the interpolation joins a lobe the local physical region does not contain.</p>
+  <p id="xpoint-cell-owner-remaining">Wiring the primitive into the cell integral, deleting the normal-form/ordinary blend from the booking path, and re-measuring the analytic map and the three cold solves on the H200 remain. The map is gated on the field representation, not on the integrator.</p>
+</main></body>
+</html>

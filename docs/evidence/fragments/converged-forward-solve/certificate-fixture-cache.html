@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="certificate-fixture-cache">
+<meta name="plan-title" content="Certificate fixtures published by identity into shared storage">
+<meta name="plan-summary" content="Address the carrier and exterior fixtures by the identity the fixture sources already define and publish them whole through the shared content store, so the booking gate builds them once and a later run in a fresh process loads them">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s3">
+<meta name="plan-commits" content="957e1b1e8a3c803e793697107f47b3f08e4d2719,bdddc614b4b5067031126167290924de3892e4d4,5e7383f665438d33c7d221aa67611574cb29b669">
+<meta name="plan-recorded-at" content="2026-10-16">
+<meta name="plan-verdict" content="verified">
+<meta name="plan-environment" content="One reserved H200 (job 1287655 on 98dci4-gpu-0003, CudaDevice(id=0)), binary64, with the six certificate rows run twice in one allocation as sequential fresh processes, the first cold and the second warm; the CPU arm on the fleet allocation in place">
+<title>Certificate fixtures published by identity into shared storage | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<h1 id="certificate-fixture-cache-title">Certificate fixtures published by identity into shared storage</h1>
+<p id="certificate-fixture-cache-summary">The certificate booking gate composes a carrier machine and a clipped exterior for every analytic case and resolution, and rebuilt both from scratch on every run. The six parametrizations spend nearly all of their wall on those two builds, and the fixtures are identical between runs, so the repeated work bought nothing. Both are now addressed by the identity the fixture sources already define and published whole through the shared content store under the shared operand root, so a run that follows a first one loads the objects the first one published. A source change that moves any one identity input addresses a different object rather than reloading a stale fixture.</p>
+
+<figure>
+<img src="/nova/figures/converged-forward-solve/certificate-fixture-cache/certificate-fixture-build-vs-load.svg" alt="Per-row carrier and exterior fixture wall in the first and second runs of the certificate gate: the first run builds each fixture and the second loads it" width="1400">
+<figcaption>Carrier (left) and exterior (right) fixture wall for each of the six certificate booking rows, on a logarithmic axis. The grey mark is the wall the first run spent building the fixture and publishing it; the blue mark is the wall the second run spent loading the object the first run published. Both marks come from one gate - job 1287655 on the H200 reservation, the six rows run twice in one allocation as sequential fresh processes. Every carrier mark moves from 114 s to 3,756 s down to 0.08 s to 0.82 s, and every exterior mark from 1.0 s to 6.0 s down to 0.01 s to 0.02 s. The marks are drawn from the receipts in <code>rows/h200-run1</code> and <code>rows/h200-run2</code>.</figcaption>
+</figure>
+
+<section id="certificate-fixture-cache-layout">
+<h2>The cache layout and the identity key</h2>
+<p id="certificate-fixture-cache-layout-body">The key is the identity, and it is not a new identity. The fixture module already computed one for its own in-run cache, and the misuse of it is what the earlier node in this plan repaired: <code>fixture.cache_identity</code> names the carrier's closed-form constants, the requested cell count, the wall node count and the wall, and <code>fixture._exterior_cache_identity</code> keys the exterior on the carrier's own semantic key, the analytic state digest and the support arm. The store digest is the SHA-256 of that identity's canonical JSON, taken over <code>json.dumps(identity, sort_keys=True, separators=(",", ":"))</code>, and it is rendered as <code>"sha256:" + hexdigest</code>. Because every input a fixture depends on is inside the hashed object, a source change that moves any one of them computes a different digest and addresses nothing, rather than finding the object built by the previous revision.</p>
+<p id="certificate-fixture-cache-layout-store">The layout is one directory per kind, then the content store's own digest tree: <code>&lt;root&gt;/&lt;kind&gt;/sha256/&lt;digest&gt;/</code> holding <code>fixture.nc</code> and the store's <code>manifest.json</code>. The root is <code>certificate_fixtures.fixture_root()</code>, which is <code>nova.database.filepath.operand_cache_root()</code> suffixed with <code>certificate-fixtures</code> - the shared operand root on the GPFS evidence mount - unless <code>NOVA_BOOK_FIXTURE_ROOT</code> names a private one, which is how a unit test or a scratch probe keeps its objects out of the shared tree. This is the point of the node: the two fixture kinds were previously written under a temporary root that the run removed on exit, so the next run began cold however recently a peer had built the same object. The kind roots are disjoint, and the booking helper asserts that the store the carrier resolved under lies beneath the carrier's kind root, so a build that landed anywhere else fails loudly rather than quietly publishing over a certified record.</p>
+</section>
+
+<section id="certificate-fixture-cache-owner">
+<h2>Who publishes, and why that is safe on GPFS</h2>
+<p id="certificate-fixture-cache-owner-body">One owner per fixture. <code>cached_carrier</code> owns the carrier object and <code>cached_exterior</code> owns the exterior object, and each is the only writer of its own key: no caller composes one and publishes it, and neither helper stages an object the other could name. Each reads before it builds - a hit returns the loaded dataset and a receipt recording <code>hit: true</code> with the load wall, a miss builds, publishes, and returns a receipt recording <code>hit: false</code> with the build wall - so one row's receipt says on its face which of the two happened without consulting the store.</p>
+<p id="certificate-fixture-cache-owner-gpfs">Publication is delegated to <code>nova.database.content_store.publish_files</code>, which is the existing primitive for this and not a second mechanism invented here. The dataset is serialised to a private staging directory inside the kind root, then the store renames it onto its digest, without replacement where the filesystem admits that and with a plain rename where it does not. Two concurrent publishers of one key therefore resolve to one visible object instead of interleaving writes into it, and a reader sees the whole object or none of it. That is the property an in-place group write on the same root does not have, and it is the reason the fixtures are published through the store rather than written where the in-run cache wrote them. The store also verifies each declared file's content digest before the object becomes visible, so a returned dataset is the one that was published under that key, and a directory left without a manifest reads as a miss rather than a partial fixture.</p>
+<p id="certificate-fixture-cache-owner-staging">A publisher killed between the payload write and the rename leaves its <code>.pending-</code> staging directory behind. The store never sees such a directory as an object, so it cannot be read as one, but nothing reaps it either; one was observed on the shared root after a cancelled run and was removed by hand. It is a leak of dead bytes, not a correctness fault, and it is recorded here rather than repaired.</p>
+</section>
+
+<section id="certificate-fixture-cache-control">
+<h2>The negative control: a moved identity misses</h2>
+<p id="certificate-fixture-cache-control-body">A cache that is only ever read on a hit proves nothing; the question is whether a moved input misses. <code>tests/test_current_book_fragments.py::test_certificate_fixture_is_addressed_by_the_carrier_identity</code> publishes the carrier fixture under the identity the current sources compute, points the fixture root at a private temporary directory, and then perturbs exactly one identity input - the discretisation's requested cell count - and asks for the perturbed identity. It asserts two things and not one: that the published identity resolves to the object just written, and that the moved identity resolves to no entry at all. Both hold. A cache keyed on anything coarser than the full identity - the case name, the discretisation without the wall, a revision stamp - would return the original object for the perturbed request, and this control would be the test that failed.</p>
+</section>
+
+<section id="certificate-fixture-cache-gate">
+<h2>Two runs of the gate: the first builds, the second loads</h2>
+<p id="certificate-fixture-cache-gate-body">Job 1287655 ran the six analytic certificate parametrizations twice in one allocation, as two sequential runs in fresh processes and never as an array, on the queue's H200 reservation (<code>98dci4-gpu-0003</code>, one card reported as <code>CudaDevice(id=0)</code>, four cores, 100 GB). The first run is cold: it builds each carrier and exterior fixture and publishes it. The second is warm: every fixture is already under the shared root, so it loads. Both runs ran the same six node ids from <code>tests/test_current_book_fragments.py</code>, on the same card, in binary64, each printing its resolved tree, its imported fixture module, its device list and its fixture root in the log header. Neither was sharded, and the fixture root is the shared operand root, so the objects the first run published outlived the process that wrote them and were read by a different process in the same allocation.</p>
+<p id="certificate-fixture-cache-gate-verdicts">Both runs reached the same verdict: <strong>six passed, none failed</strong>, exit status zero. Run 1 took 10,750.76 s of pytest wall (2:59:10; 2:59:23 by <code>/usr/bin/time</code>) and run 2 took 891.00 s (0:14:51; 15:22.33 by wall clock), so the whole gate is 12.1 times faster the second time and the job completed in 3:15:39 with <code>GATE_EXIT=0</code>. No row changed status between the runs and no row was added: the six ids are the same six in the same order, and the two logs differ only in the walls.</p>
+<table id="certificate-fixture-cache-gate-table">
+<thead><tr><th>Row</th><th>Realised cells</th><th>Carrier build [s]</th><th>Carrier load [s]</th><th>Exterior build [s]</th><th>Exterior load [s]</th><th>Book run 1 [s]</th><th>Book run 2 [s]</th></tr></thead>
+<tbody>
+<tr><td><code>[550-limited]</code></td><td>553</td><td>128.07</td><td>0.23</td><td>1.05</td><td>0.02</td><td>1.189</td><td>1.153</td></tr>
+<tr><td><code>[550-diverted]</code></td><td>550</td><td>114.43</td><td>0.08</td><td>2.93</td><td>0.01</td><td>1.101</td><td>1.077</td></tr>
+<tr><td><code>[2000-limited]</code></td><td>2105</td><td>798.22</td><td>0.21</td><td>1.03</td><td>0.02</td><td>18.301</td><td>1.191</td></tr>
+<tr><td><code>[2000-diverted]</code></td><td>2098</td><td>795.58</td><td>0.21</td><td>3.79</td><td>0.02</td><td>1.105</td><td>1.073</td></tr>
+<tr><td><code>[5000-limited]</code></td><td>5167</td><td>3755.84</td><td>0.82</td><td>2.91</td><td>0.02</td><td>4.432</td><td>1.491</td></tr>
+<tr><td><code>[5000-diverted]</code></td><td>5158</td><td>3675.88</td><td>0.80</td><td>5.98</td><td>0.02</td><td>3.680</td><td>1.637</td></tr>
+</tbody>
+</table>
+<p id="certificate-fixture-cache-gate-walls">Each column is read from that row's own receipt, which records whether the fixture was built or loaded and what that cost. Every row flips state between the runs: <code>carrier_cache_hit</code> and <code>exterior_cache_hit</code> are false in run 1 and true in run 2 for all six rows, with the build wall zero and the load wall nonzero in the second. The carrier digests and the exterior digests the two runs recorded are identical row for row, so the second run loaded the objects the first had published rather than rebuilding an equivalent set under a different key. An all-load worst case for this job is 0.82 s against a single carrier build of 3,755.84 s.</p>
+<p id="certificate-fixture-cache-gate-residual">The second run is not free, and the 891 s it still spends is the honest measure of what this node did <em>not</em> cache. The carrier build is 9,268.02 s of run 1's 10,750.76 s and the exterior build another 17.69 s, and both drop to 2.35 s and 0.12 s respectively - but the oracle refinement, the topology read, the traced booking and the per-row JSON all still run, and they account for the rest. Caching the carrier and the exterior removes 86 % of the gate's wall, not all of it.</p>
+<p id="certificate-fixture-cache-gate-superseded">An earlier gate, job 1287565, is superseded rather than reported: it reached its 02:30:00 wall after run 1 alone, with four rows passed and two cut, because the cold 5,000-cell carrier build alone exceeds an hour on a node holding seven of its eight cards against other work. Its run 1 had also published the 550- and 2000-cell objects into the shared root, which a following gate would then have loaded - so the root was listed, emptied, and job 1287655 dispatched onto the empty root, which is what makes run 1 above a genuine cold arm rather than a partially warm one.</p>
+</section>
+
+<section id="certificate-fixture-cache-suite">
+<h2>CPU suite delta</h2>
+<p id="certificate-fixture-cache-suite-body">The three scan tests and the vectorised booking test ran CPU-only, one fresh process per module per arm, on the fleet allocation in place, with <code>JAX_PLATFORMS=cpu</code>, <code>configure_dtypes()</code> called before any array and <code>jax_enable_x64</code> asserted true. The delta is measured against the orientation base and never against absolute green: both arms ran the same three modules in the same allocation, so the number that matters is the failures the head adds, and it adds none. <code>tests/test_current_book_vectorised.py</code> passes 6 in both arms (97.71 s at base, 74.05 s at head); <code>tests/test_single_site_krylov.py</code> passes 5 in both (29.03 s and 11.91 s); <code>tests/test_solve_trips_are_a_scan.py</code> reports 4 failed and 12 passed in both arms, with the same four ids in each - <code>test_active_trip_body_is_lowered_once[2]</code>, <code>[5]</code>, <code>test_newton_step_body_is_lowered_once[2]</code>, <code>[5]</code> - so the four are pre-existing at the base revision and are not attributable to this node. The scan tests now import the leading-axis helper from <code>tests/jaxpr_scans.py</code> in place of three local copies, and each keeps the assertion it made before.</p>
+</section>
+</main>
+</body>
+</html>

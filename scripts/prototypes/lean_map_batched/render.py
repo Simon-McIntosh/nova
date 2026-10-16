@@ -9,6 +9,7 @@ import argparse
 import json
 from pathlib import Path
 
+import jax
 import jax.numpy as jnp
 import matplotlib
 
@@ -17,6 +18,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 plt.style.use("data-ink")
+assert jax.config.jax_enable_x64 is True
 
 from benchmarks import solovev_certificate as certificate
 from nova.media.ink import DEFAULT_INK
@@ -212,7 +214,7 @@ def main():
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     rows = []
-    for path in sorted(args.receipts.glob("*-*.json")):
+    for path in sorted(args.receipts.glob("first-*.json")):
         row = json.loads(path.read_text())
         if isinstance(row, dict) and "analytic_map_error" in row:
             row["_receipt_path"] = path

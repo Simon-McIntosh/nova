@@ -101,7 +101,7 @@ def residual_histories(receipts, output):
     for receipt, color in zip(receipts, (GREY, BLUE, RUST), strict=True):
         rows = receipt["history"]
         values = [receipt["centre_residual"]] + [
-            row["residual"] for row in rows if row["accepted"]
+            row["residual"] for row in rows if row.get("accepted", True)
         ]
         all_values.extend(values)
         axis.semilogy(
@@ -114,7 +114,8 @@ def residual_histories(receipts, output):
             label=f"{receipt['cells']:,} cells",
         )
     largest = max(
-        sum(row["accepted"] for row in receipt["history"]) for receipt in receipts
+        sum(row.get("accepted", True) for row in receipt["history"])
+        for receipt in receipts
     )
     axis.set_xlim(-0.1, largest + 0.1)
     axis.set_xticks(np.arange(largest + 1))

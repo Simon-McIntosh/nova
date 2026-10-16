@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="polygon-moments-retire">
+<meta name="plan-title" content="Retire the parallel polygon-moment module
+after proving equivalence">
+<meta name="plan-summary" content="The unreached polygon-density moment module
+is deleted once its output is shown to be one contraction of the live owner's
+monomial table">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s3">
+<meta name="plan-recorded-at" content="2026-10-16">
+<meta name="plan-verdict" content="passed">
+<meta name="plan-environment" content="CPU, binary64, fleet allocation in place">
+<title>Retire the parallel polygon-moment module | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<h1 id="polygon-moments-retire-equivalence">Retire the parallel polygon-moment module</h1>
+<table>
+<thead>
+<tr>
+<th>Comparison</th>
+<th>Subject</th>
+<th>Max absolute difference</th>
+<th>Max relative difference</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>retired route against the owner table contraction</td><td>convex and concave test polygons</td><td>1.33e-15</td><td>&mdash;</td></tr>
+<tr><td>retired route against an independent dense Duffy fan quadrature</td><td>convex and concave test polygons</td><td>&mdash;</td></tr>
+<tr><td>retired route against the owner table contraction</td><td>stored carrier cut cell 131</td><td>1.78e-15</td><td>&mdash;</td></tr>
+<tr><td>retired route against an independent dense Duffy fan quadrature</td><td>stored carrier cut cell 131</td><td>&mdash;</td><td>2.50e-14</td></tr>
+<tr><td>surviving polynomial layer against the retired route, area</td><td>stored carrier cut cell 131</td><td>&mdash;</td><td>1.24e-16</td></tr>
+<tr><td>surviving polynomial layer against the retired route, first moments</td><td>stored carrier cut cell 131</td><td>&mdash;</td><td>0.0</td></tr>
+</tbody>
+</table>
+<p>The retired route adds no numerics of its own: every channel it published,
+including both first moments and all three second moments, is a contraction of
+<code>clip_quadrature._straight_edge_monomial_moments</code>, which it already
+called. The surviving polynomial layer
+(<code>separatrix_clip.padded_polynomial_current_moments</code>) reproduces the
+area and both first moments exactly on a stored carrier cut cell, and the owner
+table against exact rationals together with the centred degree-two construction
+is held by <code>tests/test_polygon_moment_owner.py</code>.</p>
+<h2 id="polygon-moments-retire-negative-control">Negative control</h2>
+<p>Perturbing one monomial coefficient inside the equivalence check
+(<code>_owner_quadratic_moments</code>, <code>coefficient[:, 1] *= 1.0 + 1e-6</code>)
+turns the check red: three test ids fail with a relative difference of 1.58e-7
+against a 1e-13 tolerance, while the positive control that perturbs the
+integrand keeps passing.</p>
+</main>
+</body>
+</html>

@@ -1,0 +1,70 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "b70052ffbaedd51b6e0c25313c0bd16408bb7963",
+  "call_site_count": 6,
+  "call_sites": [
+    "scripts/prototypes/read_route/jets.py:143",
+    "scripts/prototypes/read_route/jets.py:73",
+    "nova/database/layer_fetch.py:148",
+    "nova/database/layer_fetch.py:119",
+    "nova/imas/machine_artifact.py:751",
+    "nova/imas/machine_artifact.py:783"
+  ],
+  "completed_at": "2026-10-16T14:30:57.623Z",
+  "dispatched_at": "2026-10-16T14:19:31Z",
+  "findings": [
+    {
+      "file": "nova/imas/machine_artifact.py",
+      "line": "758",
+      "severity": "follow-on",
+      "text": "follow-on: materialize_machine_artifact passes rename_factory=_linux_rename_no_replace explicitly, so it bypasses the new _publication_rename_factory probe and still raises the unsupported-no-clobber error on GPFS; the probe's reach is one in-tree caller short, leaving machine-artifact publication unsupported on the shared filesystems."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T123856231263-content-store-gpfs/baseline-content-store.log",
+      "line": "2",
+      "severity": "follow-on",
+      "text": "follow-on: the base-arm header's module= line names the worktree's content_store.py while its tree= line names the scratch base tree, so the header alone does not identify the revision exercised; the traceback line content_store.py:542 (base numbering, against 590 in the head module) is what proves the base source ran."
+    }
+  ],
+  "head_log_revision": "93b1c2a49564fe98d19a9f58a7f14b5030234fb4",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 6 production call site(s)",
+    "diff": "read commit by commit against b70052ffb; 382cee25b carries the whole code and test change (content_store.py +105, tests +227), and 93b1c2a49/7291442af/7d990dd57/27ce7001b touch only the evidence fragment, so the after_suite revision 93b1c2a49 is the reviewed code.",
+    "done_when": "the done_when names tests/test_content_store.py plus an H200 end-to-end row set; tests/test_content_store.py is recorded green (after_suite 10 passed, EXIT=0) against a 4-failure base arm, and h200-cs-1287385.out records the 282/550/2098-cell value and jet rows exit 0 with bitwise-equal loaded matrices.",
+    "goal": "the goal is for the default operand cache to publish on GPFS through content_store's rename hook; nova/database/content_store.py:396-649 adds a capability probe and a plain-renameat fallback selected behind the existing rename_factory hook, and scripts/prototypes/read_route/jets.py:143 (publish_operand -> publish_files, no factory) publishes through it unchanged.",
+    "manifest": "read in full; it records status complete, five commits, the negative-control log path and note (9 failed, 1 passed with the crash check among the failures), baseline_suite 4 failed/6 passed, after_suite 0 failed/10 passed, measurement_module and measurement_cwd, and the H200 job 1287385 figures.",
+    "write_paths": "the manifest declares nova/database/content_store.py, tests/test_content_store.py and docs/evidence/fragments/converged-forward-solve/content-store-gpfs.html; git diff --stat b70052ffb..27ce7001b touches exactly those three paths and nothing else."
+  },
+  "justifications": {
+    "durability": "reverting the marker check at nova/database/content_store.py:282-285 reddens tests/test_content_store.py:test_entry_without_completion_marker_is_not_served, and the base arm reddens the four GPFS publication checks, so the added guards fail on the regressions they cover.",
+    "evidence": "the after suite and the H200 job are recorded with exit status and per-row figures, but baseline-content-store.log:2 names the worktree module in its module= line rather than the base scratch tree its tree= line names, so the header alone does not fix the revision the base arm measured.",
+    "fit": "the added helpers (_linux_rename_replace, _rename_no_replace_supported, _publication_rename_factory) follow the private-helper idiom of nova/database/content_store.py:369 and carry no plan or ticket label.",
+    "goal_fidelity": "nova/database/content_store.py:644-649 selects plain renameat on a GPFS root and scripts/prototypes/read_route/jets.py:143 publishes through it unedited, so the default operand cache publishes on GPFS; nova/imas/machine_artifact.py:758 still pins the no-clobber primitive and is the one in-tree caller the probe does not reach.",
+    "reuse": "a search over nova for renameat/RENAME_NOREPLACE/os.replace found the rename owners only in nova/database/content_store.py:369-434 and the single-file atomic checkpoint at nova/equilibrium/fixed_point.py:190-216, a different capability, so the additions extend the owner rather than fork it."
+  },
+  "node": "review-of-content-store-gpfs-27ce7001b450",
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: b70052ffbaedd51b6e0c25313c0bd16408bb7963\nreviewed_head_sha: 27ce7001b4505e06a365a61afda175ee33ef8f72\nVERDICT goal: the goal is for the default operand cache to publish on GPFS through content_store's rename hook; nova/database/content_store.py:396-649 adds a capability probe and a plain-renameat fallback selected behind the existing rename_factory hook, and scripts/prototypes/read_route/jets.py:143 (publish_operand -> publish_files, no factory) publishes through it unchanged.\nVERDICT done_when: the done_when names tests/test_content_store.py plus an H200 end-to-end row set; tests/test_content_store.py is recorded green (after_suite 10 passed, EXIT=0) against a 4-failure base arm, and h200-cs-1287385.out records the 282/550/2098-cell value and jet rows exit 0 with bitwise-equal loaded matrices.\nVERDICT write_paths: the manifest declares nova/database/content_store.py, tests/test_content_store.py and docs/evidence/fragments/converged-forward-solve/content-store-gpfs.html; git diff --stat b70052ffb..27ce7001b touches exactly those three paths and nothing else.\nVERDICT manifest: read in full; it records status complete, five commits, the negative-control log path and note (9 failed, 1 passed with the crash check among the failures), baseline_suite 4 failed/6 passed, after_suite 0 failed/10 passed, measurement_module and measurement_cwd, and the H200 job 1287385 figures.\nVERDICT diff: read commit by commit against b70052ffb; 382cee25b carries the whole code and test change (content_store.py +105, tests +227), and 93b1c2a49/7291442af/7d990dd57/27ce7001b touch only the evidence fragment, so the after_suite revision 93b1c2a49 is the reviewed code.\nCALL_SITES: scripts/prototypes/read_route/jets.py:143, scripts/prototypes/read_route/jets.py:73, nova/database/layer_fetch.py:148, nova/database/layer_fetch.py:119, nova/imas/machine_artifact.py:751, nova/imas/machine_artifact.py:783\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/database/content_store.py:644-649 selects plain renameat on a GPFS root and scripts/prototypes/read_route/jets.py:143 publishes through it unedited, so the default operand cache publishes on GPFS; nova/imas/machine_artifact.py:758 still pins the no-clobber primitive and is the one in-tree caller the probe does not reach.\nSCORE evidence: 17\nJUSTIFICATION evidence: the after suite and the H200 job are recorded with exit status and per-row figures, but baseline-content-store.log:2 names the worktree module in its module= line rather than the base scratch tree its tree= line names, so the header alone does not fix the revision the base arm measured.\nSCORE scope_discipline: 20\nJUSTIFICATION_PLACEHOLDER: x\nSCORE durability: 18\nJUSTIFICATION durability: reverting the marker check at nova/database/content_store.py:282-285 reddens tests/test_content_store.py:test_entry_without_completion_marker_is_not_served, and the base arm reddens the four GPFS publication checks, so the added guards fail on the regressions they cover.\nSCORE fit: 19\nJUSTIFICATION fit: the added helpers (_linux_rename_replace, _rename_no_replace_supported, _publication_rename_factory) follow the private-helper idiom of nova/database/content_store.py:369 and carry no plan or ticket label.\nSCORE reuse: 20\nJUSTIFICATION reuse: a search over nova for renameat/RENAME_NOREPLACE/os.replace found the rename owners only in nova/database/content_store.py:369-434 and the single-file atomic checkpoint at nova/equilibrium/fixed_point.py:190-216, a different capability, so the additions extend the owner rather than fork it.\nFINDING nova/imas/machine_artifact.py:758 follow-on: materialize_machine_artifact passes rename_factory=_linux_rename_no_replace explicitly, so it bypasses the new _publication_rename_factory probe and still raises the unsupported-no-clobber error on GPFS; the probe's reach is one in-tree caller short, leaving machine-artifact publication unsupported on the shared filesystems.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T123856231263-content-store-gpfs/baseline-content-store.log:2 follow-on: the base-arm header's module= line names the worktree's content_store.py while its tree= line names the scratch base tree, so the header alone does not identify the revision exercised; the traceback line content_store.py:542 (base numbering, against 590 in the head module) is what proves the base source ran.\n",
+  "review_run_id": "r-20261016T141907668899-review-of-content-store-gpfs-27ce7001b450",
+  "reviewed_base_sha": "b70052ffbaedd51b6e0c25313c0bd16408bb7963",
+  "reviewed_commit": "27ce7001b4505e06a365a61afda175ee33ef8f72",
+  "reviewed_head_sha": "27ce7001b4505e06a365a61afda175ee33ef8f72",
+  "reviewed_run_id": "r-20261016T123856231263-content-store-gpfs",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/content-store-gpfs",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T14:28:01.751276+00:00",
+  "total": 113
+}

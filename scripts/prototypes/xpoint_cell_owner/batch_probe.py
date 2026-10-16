@@ -39,15 +39,20 @@ def main():
         f"nova={nova.__file__} module={__file__} cwd={Path.cwd().resolve()}", flush=True
     )
     saved = json.loads(args.start_json.read_text())
-    if not saved.get("converged") or "terminal_state" not in saved:
-        raise ValueError("batch probe requires a converged fine cold state")
+    if "terminal_state" not in saved:
+        raise ValueError("batch probe requires a delivered fine state")
     context = build(2000, args.cache)
     state = jnp.asarray(saved["terminal_state"]["moments"]).reshape(-1)
     state = state / jnp.tile(context.scale, len(context.reference))
     operands = without_profile(context.operands)
     profile = context.profile
     scale = context.scale
-    result = {"cells": len(context.reference), "rows": []}
+    result = {
+        "cells": len(context.reference),
+        "source_converged_on_its_map": bool(saved.get("converged")),
+        "source": str(args.start_json),
+        "rows": [],
+    }
     save(args.output, result)
     started = perf_counter()
     compiled_factor = (

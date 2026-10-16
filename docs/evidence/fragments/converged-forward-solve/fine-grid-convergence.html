@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="fine-grid-convergence">
+  <meta name="plan-title" content="Fine-grid diverted convergence">
+  <meta name="plan-summary" content="Continuous fast-map diverted solve measurements">
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-verifies" content="converged-forward-solve#s5">
+  <meta name="plan-recorded-at" content="2026-10-16">
+  <meta name="plan-verdict" content="partial">
+  <title>Fine-grid diverted convergence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+  <h1 id="fine-grid-convergence-landing">Fine-grid diverted convergence</h1>
+  <p><a href="/nova/research/fine-grid-convergence.html">Measured research record</a>. The 2,098-cell agreement map reaches 8.47435 × 10<sup>−13</sup>; the 282-cell runtime correction produces NaN at correction 2 and the 550-cell solve stops at 0.001758923. The three-size 10<sup>−12</sup> target is unmet.</p>
+  <table id="fine-grid-convergence-variants"><caption>Normalized analytic flux error / diverted cold residual; “guard” means the live map check refused before the solve, and “partial” means timeout.</caption>
+    <thead><tr><th>Variant</th><th>282</th><th>550</th><th>2,098</th></tr></thead><tbody>
+    <tr><th>Original</th><td>0.001086579 / 1.25 × 10<sup>−13</sup></td><td>0.000487272 / 0.001550316</td><td>0.0000866659 / 0.003627426</td></tr>
+    <tr><th>Centered sector ramp</th><td>unmeasured / 0.002227863</td><td>unmeasured / 0.005909102</td><td>unmeasured / 0.008875627</td></tr>
+    <tr><th>One-sided sector ramp</th><td>0.104551 / guard</td><td>0.000487272 / 0.001550316</td><td>0.0000947423 / 6.13650 × 10<sup>−13</sup></td></tr>
+    <tr><th>Flux taper</th><td>0.001086579 / 2.65299 × 10<sup>−13</sup></td><td>0.000487272 / 0.001550316</td><td>0.0000913261 / 0.001081631 partial</td></tr>
+    <tr><th>Booked-moment blend</th><td>unmeasured</td><td>0.000472383 / 0.000763632</td><td>0.016178604 / guard</td></tr>
+    <tr><th>Localized taper</th><td>0.002073437 / guard</td><td>0.000482422 / 0.001468689</td><td>0.0000913261 / 0.001081614</td></tr>
+    <tr><th>Agreement blend</th><td>0.001086579 / NaN</td><td>0.000459514 / 0.001758923</td><td>0.0000947423 / 8.47435 × 10<sup>−13</sup></td></tr>
+    </tbody></table>
+  <p id="fine-grid-convergence-owner">At 2,098 cells, X-point cell 47 has normal-form area fraction 0.028514 and ordinary-cut fraction 0.460443, a 16.15-fold disagreement; its corresponding current moments are 0.784530 and 12.641941 A. At 550 cells, booked cell 8 holds the original scaled current residual −0.001550316; a smooth blend moves it to +0.000763632 but the solve still stalls. The next node should use one exact owner for the containing cell's area and all three moments, removing the two-representation blend. The separate 282-cell on-device LU NaN remains unattributed.</p>
+  <p id="fine-grid-convergence-build">The 2,098-cell root has Gauss–Newton gradient two-norm 8.04170 × 10<sup>−9</sup> and Taylor slopes 1.98238–2.00589 across all three moment blocks over steps 10<sup>−5</sup> to 10<sup>−7</sup>. Runtime-argument correction compiles in 33.714/32.964/32.796 s and occupies 5.017/8.167/22.997 MB at 282/550/2,098 cells; the fine factor uses 7.666 MB. Persistent jet-store headers show complete cached matrices at all three sizes, though the 2.186 GB fine load takes 178 s. Width-128 fine chord allocation requests 272.97 GiB and fails; width 1 and 16 converge 0/1 and 0/16. The reverted 550 solve reruns and fails at 0.001550316; detaching the booked-weight derivative makes the Taylor control first order.</p>
+  <figure id="fine-grid-convergence-contour"><img src="/nova/figures/converged-forward-solve/fine-grid-convergence/terminal-agreement-2098.svg" alt="Solved and analytic shared-level diverted flux contours with both null sets and wall"><figcaption>2,098-cell agreement terminal state: scaled residual 8.47434784 × 10<sup>−13</sup>; converged: true. Blue solid contours and nulls are solved; dark dashed contours and nulls are analytic; the black outline is the wall.</figcaption></figure>
+</main></body>
+</html>

@@ -23,6 +23,10 @@ from nova.equilibrium.solve_request import TopologyPolicy
 from scripts.analytic_oracle_fixtures import measure as fixture
 from scripts.prototypes.fast_map_production.kernel import read as fixed_shape_read
 from scripts.prototypes.fast_map_production import program as mapped_program
+from scripts.prototypes.fast_map_production.qualification import (
+    require_map,
+    require_solve,
+)
 from scripts.prototypes.fast_read.kernel import read as original_read
 from scripts.prototypes.fast_map_production.program import FusedField, map_moments
 from scripts.prototypes.fused_convergence import roots as ray_roots
@@ -291,6 +295,8 @@ def run(args):
             jnp.max(jnp.abs(centre.moments - reference)) / jnp.max(jnp.abs(reference))
         )
         save(output, result)
+        if kind == "diverted":
+            require_map([result])
         return
 
     if args.probe:
@@ -943,6 +949,7 @@ def run(args):
         point, history[-1]["residual"], result["converged"]
     )
     save(output, result)
+    require_solve(result)
 
 
 def main():

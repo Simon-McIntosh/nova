@@ -51,7 +51,9 @@ def main():
                 abs(reference[1]) * cell["pitch"],
             )
         )
-        relative = np.abs(observed - reference) / np.maximum(np.abs(reference), scale)
+        relative = np.abs(observed - reference) / np.maximum.reduce(
+            (np.abs(reference), scale, np.full(4, 1e-14))
+        )
         row = {
             "cell": cell["cell"],
             "area_fraction": adaptive.area / cell["full_area"],

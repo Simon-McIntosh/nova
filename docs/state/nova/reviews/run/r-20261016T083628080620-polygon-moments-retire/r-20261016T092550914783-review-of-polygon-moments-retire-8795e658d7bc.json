@@ -9,6 +9,13 @@
   "call_sites": [],
   "completed_at": "2026-10-16T09:42:47.918Z",
   "dispatched_at": "2026-10-16T09:27:01Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "documentation or provenance detail in a landed deletion; the equivalence is proven and the moved assertions run in tests/test_clipped_support_quadrature.py",
+      "recorded_at": "2026-10-16T09:56:02.591249+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/converged-forward-solve/polygon-moments-retire.html",

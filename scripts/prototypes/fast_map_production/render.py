@@ -82,6 +82,41 @@ def step_window(candidate, output):
     _save(figure, axes, output)
 
 
+def direction_scans(receipts, output):
+    """Compare three fine scans against a common Newton-step scale."""
+    _style()
+    figure, axes = plt.subplots(5, 1, figsize=(14, 18), dpi=100, sharex=True)
+    quantities = (
+        ("residual", "scaled residual", 1),
+        ("wall_candidate", "wall candidate [µWb]", 1e6),
+        ("support_ids", "support cells", 1),
+        ("membership_71", "cell 71 membership", 1),
+        ("cell_current_residual", "cell 71 scaled current residual", 1),
+    )
+    for data, name, linestyle in zip(
+        receipts, ("Newton", "seed 17", "seed 29"), ("-", "--", ":"), strict=True
+    ):
+        rows = data["scan"][1:]
+        step = np.asarray([row["step"] for row in rows]) * 1e5
+        for axis, (key, label, scale) in zip(axes, quantities, strict=True):
+            value = (
+                np.asarray(
+                    [
+                        len(row[key]) if key == "support_ids" else row[key]
+                        for row in rows
+                    ]
+                )
+                * scale
+            )
+            axis.plot(
+                step, value, color=RUST, linestyle=linestyle, linewidth=3, label=name
+            )
+            axis.set_ylabel(label)
+    axes[0].legend(frameon=False, ncol=3)
+    axes[-1].set_xlabel("Newton step scale [10⁻⁵]")
+    _save(figure, axes, output)
+
+
 def resolution(receipts, output, unchanged=None, lean=None):
     _style()
     cells = np.asarray([row["cells"] for row in receipts])
@@ -109,6 +144,7 @@ def main():
     parser.add_argument("--baseline-probe", type=Path)
     parser.add_argument("--candidate-probe", type=Path)
     parser.add_argument("--window-probe", type=Path)
+    parser.add_argument("--direction-probe", type=Path, action="append", default=[])
     parser.add_argument("--map", type=Path, action="append", default=[])
     parser.add_argument("--unchanged-error", type=float, action="append", default=[])
     parser.add_argument("--lean-error", type=float, action="append", default=[])
@@ -125,6 +161,13 @@ def main():
     if args.window_probe:
         step_window(
             json.loads(args.window_probe.read_text()), args.output / "step-window.svg"
+        )
+    if args.direction_probe:
+        if len(args.direction_probe) != 3:
+            parser.error("--direction-probe requires exactly three receipts")
+        direction_scans(
+            [json.loads(path.read_text()) for path in args.direction_probe],
+            args.output / "direction-scans.svg",
         )
     if args.map:
         resolution(

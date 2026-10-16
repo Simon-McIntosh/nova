@@ -284,15 +284,21 @@ def _leggauss(degree):
     return jnp.asarray(nodes), jnp.asarray(weights)
 
 
-def disk_candidates(geometry, saddle, radius, margin=1.0):
+def disk_candidates(geometry, saddle, radius, margin=None):
     """Cells a disk of this radius can cut about a located saddle.
 
     The owned set depends on the state only through the located saddle, which
     moves by well under a cell pitch between neighbouring states, so the list
-    is built once per carrier about a reference saddle and grown by one radius
-    of margin. It replaces the per-state scan over every cell in the machine
-    with a fixed-shape scan over the local patch.
+    is built once per carrier about a reference saddle and grown by one median
+    pitch to cover that motion. The margin is taken in pitches rather than in
+    absolute length: a fixed length would admit a larger and larger share of
+    the machine as the grid refines, while a pitch-sized margin keeps the
+    candidate count fixed along the resolution ladder. It replaces the
+    per-state scan over every cell in the machine with a fixed-shape scan over
+    the local patch.
     """
+    if margin is None:
+        margin = jnp.median(geometry.pitch)
     distance = jnp.asarray(
         jax.vmap(_polygon_distance, in_axes=(0, 0, None))(
             geometry.vertices, geometry.vertex_count, saddle

@@ -17,12 +17,15 @@ from nova.equilibrium.solve_request import TopologyPolicy
 from scripts.analytic_oracle_fixtures import measure as fixture
 from scripts.prototypes.fast_map_production import program
 from scripts.prototypes.fast_map_production.kernel import read
+from scripts.prototypes.fine_grid_convergence.path_weight import install
 from scripts.prototypes.lean_map.jets import build_jets
 from scripts.prototypes.lean_map.quadrature import quadratic_fit, triangle_rule
 from scripts.prototypes.lean_map.values import build_values
 from scripts.prototypes.solve_options.profile import _machine
 from scripts.prototypes.support.geometry import certificate_field
 from tests.equilibrium.test_topology_read import _analytic_inputs
+
+install()
 
 
 @dataclass(frozen=True)

@@ -77,14 +77,19 @@
           <td><code>e1afb81b137e…dfc147</code></td></tr>
       <tr><td>282</td><td>jets</td><td>47,267,712</td><td>110.346</td><td>0.0040</td><td>27,345×</td>
           <td><code>51721ac3060c…f2593e</code></td></tr>
+      <tr><td>551</td><td>values</td><td>131,155,632</td><td>78.766</td><td>0.0037</td><td>21,364×</td>
+          <td><code>a0fcc45780a0…d0d689e</code></td></tr>
+      <tr><td>551</td><td>jets</td><td>169,161,408</td><td>108.352</td><td>0.0036</td><td>30,403×</td>
+          <td><code>6526174bc311…bd0b16d6</code></td></tr>
     </tbody>
   </table>
   <p id="operand-cache-measure-rows">
-    The 282-cell rows are the first row of the diverted sweep at 282, 550 and 2,098 cells,
-    run as one job (job 1287218) on the H200 reservation <code>gpu_0003_grpA</code> with one
-    GPU; both operands report <code>cache_hit</code> false on the first call and true on the
-    second, and the load is the second call reading the entry the first one wrote. The
-    550 and 2,098 rows are still building in the same allocation, so they are not claimed
+    The 282 and 551-cell rows are the first two entries of the diverted sweep at 282, 550
+    and 2,098 cells, run as one job (job 1287218) on the H200 reservation
+    <code>gpu_0003_grpA</code> with one GPU. Every operand reports <code>cache_hit</code>
+    false on the first call and true on the second, so the load reported is a second call
+    reading the entry the first call wrote, and the build reported is the same call's build.
+    The 2,098-cell row was still building when this node's fence closed and is not claimed
     here.
   </p>
 

@@ -15,6 +15,9 @@ import numpy as np
 
 import nova
 from scripts.prototypes.xpoint_cell_owner.device_owner import integrate_cell
+from scripts.prototypes.xpoint_cell_owner.device_projection import (
+    saddle_constrained_coefficients,
+)
 
 
 def main():
@@ -22,6 +25,7 @@ def main():
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--reference", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--projected", action="store_true")
     args = parser.parse_args()
     assert jax.config.jax_enable_x64 is True
     print(
@@ -37,12 +41,21 @@ def main():
     for row in source["rows"]:
         vertices = np.asarray(row["vertices"])
         padded = np.pad(vertices, ((0, capacity - len(vertices)), (0, 0)))
+        coefficients = jnp.asarray(row["field_coefficients"])
+        if args.projected:
+            coefficients = saddle_constrained_coefficients(
+                coefficients[None],
+                jnp.asarray(row["centre"])[None],
+                jnp.asarray([row["pitch"]]),
+                jnp.asarray(source["saddle"]),
+                jnp.asarray(source["boundary_level"]),
+            )[0]
         output, valid = evaluate(
             jnp.asarray(padded),
             jnp.asarray(len(vertices), dtype=jnp.int32),
             jnp.asarray(row["centre"]),
             jnp.asarray(row["pitch"]),
-            jnp.asarray(row["field_coefficients"]),
+            coefficients,
             jnp.asarray(source["boundary_level"]),
             jnp.asarray(source["sigma"]),
             jnp.asarray(source["saddle"]),
@@ -50,7 +63,18 @@ def main():
             jnp.asarray(row["density_coefficients"]),
         )
         actual = np.asarray(output)
-        expected = np.asarray(by_cell[row["cell"]]["dense"])
+        if args.projected:
+            projection = by_cell[row["cell"]]
+            expected = np.asarray(
+                (
+                    projection["projected_fraction"] * row["full_area"],
+                    projection["current"],
+                    projection["radial_moment"],
+                    projection["vertical_moment"],
+                )
+            )
+        else:
+            expected = np.asarray(by_cell[row["cell"]]["dense"])
         scale = np.maximum.reduce(
             (
                 np.abs(expected),

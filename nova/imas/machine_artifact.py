@@ -28,7 +28,6 @@ from nova.database.content_store import (
     ContentStoreError,
     _create_private_directory as _create_private_directory,
     digest_hex as _digest_hex,
-    entry_metadata as _entry_metadata,
     file_content_identity as _file_identity,
     hdf5_consistency_field as _hdf5_consistency_field,
     inventory_files as _inventory_files,
@@ -792,13 +791,6 @@ def resolve_machine_artifact(
             f"cache object {digest} is missing under {object_root}"
         )
     manifest_path = directory / MANIFEST_FILENAME
-    metadata = _entry_metadata(manifest_path)
-    if metadata is None:
-        raise MachineArtifactError(f"artifact manifest is missing at {manifest_path}")
-    if manifest_path.is_symlink():
-        raise MachineArtifactError(
-            f"artifact manifest must not be a symlink: {manifest_path}"
-        )
     _require_contained(manifest_path, object_root.parent, "artifact manifest")
     manifest_bytes = _read_regular_bytes(manifest_path)
     if _sha256_bytes(manifest_bytes) != digest_hex:

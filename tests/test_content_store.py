@@ -376,7 +376,9 @@ def test_gpfs_corrupted_file_is_refused_on_read(
         _verified_read(gpfs_cache, _payload_digest(payload), entries)
 
 
-def test_entry_without_completion_marker_is_not_served(gpfs_cache: Path) -> None:
+def test_entry_without_completion_marker_is_refused_by_name(
+    gpfs_cache: Path,
+) -> None:
     payload = b"gpfs-marker-less" * 512
     digest, entries = _publish(gpfs_cache, {"matrix.npy": payload})
     directory = _verified_read(gpfs_cache, digest, entries)
@@ -384,4 +386,30 @@ def test_entry_without_completion_marker_is_not_served(gpfs_cache: Path) -> None
     (directory / MANIFEST_FILENAME).unlink()
 
     object_root = verified_object_root(gpfs_cache, create=False)
-    assert verified_destination(object_root, digest_hex(digest)) is None
+    with pytest.raises(ContentStoreError, match="manifest is missing"):
+        verified_destination(object_root, digest_hex(digest))
+    assert directory.is_dir()
+
+
+def test_entry_with_symlinked_completion_marker_is_refused_by_name(
+    gpfs_cache: Path,
+) -> None:
+    payload = b"gpfs-marker-symlink" * 512
+    digest, entries = _publish(gpfs_cache, {"matrix.npy": payload})
+    directory = _verified_read(gpfs_cache, digest, entries)
+
+    manifest_path = directory / MANIFEST_FILENAME
+    outside = directory.parent / "outside-manifest.json"
+    outside.write_bytes(manifest_path.read_bytes())
+    manifest_path.unlink()
+    manifest_path.symlink_to(outside)
+
+    object_root = verified_object_root(gpfs_cache, create=False)
+    with pytest.raises(ContentStoreError, match="manifest.*symlink"):
+        verified_destination(object_root, digest_hex(digest))
+    assert directory.is_dir()
+
+
+def test_absent_entry_reads_as_absent(gpfs_cache: Path) -> None:
+    object_root = verified_object_root(gpfs_cache, create=True)
+    assert verified_destination(object_root, digest_hex("sha256:" + "0" * 64)) is None

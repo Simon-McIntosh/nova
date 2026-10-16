@@ -262,6 +262,15 @@ def verified_object_root(cache_directory: Path | str, *, create: bool) -> Path:
 
 
 def verified_destination(object_root: Path, digest_hex: str) -> Path | None:
+    """Return a completed entry's directory, or ``None`` when it is absent.
+
+    ``None`` means one thing only: no entry is stored under this address, which
+    a caller may treat as a miss to rebuild.  An entry that is present but
+    incomplete is not a miss — its directory exists and holds either nothing or
+    something other than a regular completion marker — so it is refused with the
+    cause named, here, on the one path every caller shares.
+    """
+
     destination = object_root / digest_hex
     metadata = entry_metadata(destination)
     if metadata is None:
@@ -281,8 +290,16 @@ def verified_destination(object_root: Path, digest_hex: str) -> Path | None:
         )
     marker = destination / MANIFEST_FILENAME
     marker_metadata = entry_metadata(marker)
-    if marker_metadata is None or not S_ISREG(marker_metadata.st_mode):
-        return None
+    if marker_metadata is None:
+        raise ContentStoreError(f"cache object manifest is missing at {marker}")
+    if S_ISLNK(marker_metadata.st_mode):
+        raise ContentStoreError(
+            f"cache object manifest must not be a symlink: {marker}"
+        )
+    if not S_ISREG(marker_metadata.st_mode):
+        raise ContentStoreError(
+            f"cache object manifest is not a regular file: {marker}"
+        )
     return destination
 
 
@@ -720,8 +737,6 @@ def publish_files(
                 f"cache object {digest} is missing after publication"
             )
         manifest_path = destination / MANIFEST_FILENAME
-        if entry_metadata(manifest_path) is None:
-            raise ContentStoreError(f"artifact manifest is missing at {manifest_path}")
         verify_directory_files(destination, declarations, allow_manifest=True)
         if read_regular_bytes(manifest_path) != manifest_bytes:
             raise ContentStoreError(f"cache object {digest} has a different manifest")

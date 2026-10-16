@@ -1,0 +1,137 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "4e852a31ea5544825f5dc968d2683d3e63e25422",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-16T16:48:51Z",
+  "dimension_dispositions": {
+    "evidence": {
+      "kind": "exempted",
+      "reason": "negative result, recorded: exact integration of the fitted Bell conic works, but the fitted saddle sits off the physical one, so no in-scope owner can pass; the remedy changes the field representation at the saddle, which goes to the lead as a ruling, and the next node is dispatched from that ruling",
+      "recorded_at": "2026-10-16T16:48:11.641641+00:00"
+    },
+    "goal_fidelity": {
+      "kind": "exempted",
+      "reason": "negative result, recorded: exact integration of the fitted Bell conic works, but the fitted saddle sits off the physical one, so no in-scope owner can pass; the remedy changes the field representation at the saddle, which goes to the lead as a ruling, and the next node is dispatched from that ruling",
+      "recorded_at": "2026-10-16T16:48:08.049966+00:00"
+    },
+    "reuse": {
+      "kind": "exempted",
+      "reason": "deferred to f-cfs-prototype-owner-consolidation, which now also covers owner_map, containing_owner_map and projected_owner_map; consolidating before the representation ruling would delete the arms the ruling compares",
+      "recorded_at": "2026-10-16T16:48:17.150453+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-16T16:41:47Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "negative result, recorded: exact integration of the fitted Bell conic works, but the fitted saddle sits off the physical one, so no in-scope owner can pass; the remedy changes the field representation at the saddle, which goes to the lead as a ruling, and the next node is dispatched from that ruling",
+      "recorded_at": "2026-10-16T16:47:59.568707+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "negative result, recorded: exact integration of the fitted Bell conic works, but the fitted saddle sits off the physical one, so no in-scope owner can pass; the remedy changes the field representation at the saddle, which goes to the lead as a ruling, and the next node is dispatched from that ruling",
+      "recorded_at": "2026-10-16T16:48:02.211904+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "negative result, recorded: exact integration of the fitted Bell conic works, but the fitted saddle sits off the physical one, so no in-scope owner can pass; the remedy changes the field representation at the saddle, which goes to the lead as a ruling, and the next node is dispatched from that ruling",
+      "recorded_at": "2026-10-16T16:48:04.707186+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "deferred to f-cfs-prototype-owner-consolidation, which now also covers owner_map, containing_owner_map and projected_owner_map; consolidating before the representation ruling would delete the arms the ruling compares",
+      "recorded_at": "2026-10-16T16:48:14.741695+00:00"
+    },
+    "4": {
+      "kind": "exempted",
+      "reason": "the independent physical check is the 1024x1024 analytic flux grid in the record, not these unit tests; the next node brief requires a test against a sample not produced by the integrator under test",
+      "recorded_at": "2026-10-16T16:48:20.623545+00:00"
+    },
+    "5": {
+      "kind": "exempted",
+      "reason": "the independent physical check is the 1024x1024 analytic flux grid in the record, not these unit tests; the next node brief requires a test against a sample not produced by the integrator under test",
+      "recorded_at": "2026-10-16T16:48:23.312570+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/xpoint_cell_owner/owner_map.py",
+      "line": "16",
+      "severity": "blocking",
+      "text": "blocking: the default axis-facing cut is only half of the fitted Bell region when its stationary level connects both lobes, while the connected mode jumps at contact and fails all three map guards, so neither mode supplies the requested exact, continuous owner and three converged cold solves."
+    },
+    {
+      "file": "scripts/prototypes/xpoint_cell_owner/conic_integral.py",
+      "line": "180",
+      "severity": "blocking",
+      "text": "blocking: the outer conic coordinate is evaluated by adaptive or 256-node numerical quadrature, so the delivered algorithm does not implement the closed-form conic-arc Green integral required by the plan."
+    },
+    {
+      "file": "scripts/prototypes/xpoint_cell_owner/solve_carrier.py",
+      "line": "109",
+      "severity": "blocking",
+      "text": "blocking: require_map refuses the fine axis-facing map and every connected Bell map before correction, leaving the 2,098-cell cold root and its continuity, limited, sweep, transition and converged-batch controls unmeasured."
+    },
+    {
+      "file": "scripts/prototypes/xpoint_cell_owner/owner_map.py",
+      "line": "52",
+      "severity": "follow-on",
+      "text": "follow-on: this map duplicates fast_map_production/program.py:150 rather than extending it, and containing_owner_map.py:63 and projected_owner_map.py:59 copy the same capability again, leaving competing map owners to reconcile."
+    },
+    {
+      "file": "scripts/prototypes/xpoint_cell_owner/test_conic_integral.py",
+      "line": "39",
+      "severity": "follow-on",
+      "text": "follow-on: both sides come from the same integrator with different component flags, so a shared zero or scale regression can preserve the two-to-one relation without verifying the positive-level physical region."
+    },
+    {
+      "file": "scripts/prototypes/xpoint_cell_owner/test_conic_integral.py",
+      "line": "47",
+      "severity": "follow-on",
+      "text": "follow-on: the adaptive and dense modes share slice_integral and the fitted conic selector, so their agreement checks outer quadrature but cannot detect a shared wrong physical region or restored half-plane handoff."
+    }
+  ],
+  "head_log_revision": "b7fb4c47e7c9ed03c390c710793e92a6bd5b14cb",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "the 37 commits from 72b7f489d through 952bfcfa4 add numerical host and traced conic integrals, four competing map implementations, four focused tests, six figures and a partial research record, with no nova production module changed.",
+    "done_when": "prompt.txt:87-88 and converged-forward-solve.html:521-523 require three cold roots, a closed-form conic owner and controls; bell-map.log:6-64 records three map refusals, while pytest-after.log:1-18 measures only four focused conic tests.",
+    "goal": "prompt.txt:30 requires one exact X-point cell owner and diverted convergence at 282, 550 and 2,098 cells; owner_map.py:16-49 supplies a prototype cut but solve_carrier.py:109 refuses the connected Bell map before every cold solve.",
+    "manifest": "manifest.md:1-22 records 37 commits, completed baseline and head suites, and explicitly states that the three-size goal and several controls remain unmet; reproduce.log reproduces the inherited 550-cell residual 0.00175892253683.",
+    "write_paths": "prompt.txt:68-72 grants the prototype directory, research page, figures directory and evidence fragment; git diff 4e852a31e..952bfcfa4 changes 45 files inside those four paths."
+  },
+  "justifications": {
+    "durability": "test_conic_integral.py:28-81 catches analytic and device integral regressions, but its line 47 comparison shares the same slice geometry and no added assertion tests the three-size cold solve or physical saddle ownership.",
+    "evidence": "bell-compare-550.log:10-11 proves a 5.63e-16 numerical agreement and bell-map.log:6-64 proves three map refusals, while pytest-after.log:1-18 does not measure the full done_when and predates the reviewed head.",
+    "fit": "owner_map.py:8-13 reuses the existing reading and booking components and introduces no forbidden source label, while conic_integral.py:1-5 accurately describes its numerical outer rule.",
+    "goal_fidelity": "conic_integral.py:180-200 uses adaptive outer quadrature rather than closed-form arc integration, and solve_carrier.py:109 refuses all connected Bell maps before the requested three cold roots.",
+    "reuse": "capability search found the existing map owner at fast_map_production/program.py:150, yet owner_map.py:52, containing_owner_map.py:63 and projected_owner_map.py:59 duplicate its full map instead of extending that owner.",
+    "scope_discipline": "git diff 4e852a31e..952bfcfa4 confines all 45 changed files to the four paths in prompt.txt:68-72, including the prototype variants that informed the research result."
+  },
+  "node": "review-of-xpoint-cell-owner-952bfcfa4450",
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: 4e852a31ea5544825f5dc968d2683d3e63e25422\nreviewed_head_sha: 952bfcfa44508a45b58ff05d6cf2d8fbb6d84532\nVERDICT goal: prompt.txt:30 requires one exact X-point cell owner and diverted convergence at 282, 550 and 2,098 cells; owner_map.py:16-49 supplies a prototype cut but solve_carrier.py:109 refuses the connected Bell map before every cold solve.\nVERDICT done_when: prompt.txt:87-88 and converged-forward-solve.html:521-523 require three cold roots, a closed-form conic owner and controls; bell-map.log:6-64 records three map refusals, while pytest-after.log:1-18 measures only four focused conic tests.\nVERDICT write_paths: prompt.txt:68-72 grants the prototype directory, research page, figures directory and evidence fragment; git diff 4e852a31e..952bfcfa4 changes 45 files inside those four paths.\nVERDICT manifest: manifest.md:1-22 records 37 commits, completed baseline and head suites, and explicitly states that the three-size goal and several controls remain unmet; reproduce.log reproduces the inherited 550-cell residual 0.00175892253683.\nVERDICT diff: the 37 commits from 72b7f489d through 952bfcfa4 add numerical host and traced conic integrals, four competing map implementations, four focused tests, six figures and a partial research record, with no nova production module changed.\nCALL_SITES: none\nSCORE goal_fidelity: 3\nJUSTIFICATION goal_fidelity: conic_integral.py:180-200 uses adaptive outer quadrature rather than closed-form arc integration, and solve_carrier.py:109 refuses all connected Bell maps before the requested three cold roots.\nSCORE evidence: 9\nJUSTIFICATION evidence: bell-compare-550.log:10-11 proves a 5.63e-16 numerical agreement and bell-map.log:6-64 proves three map refusals, while pytest-after.log:1-18 does not measure the full done_when and predates the reviewed head.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff 4e852a31e..952bfcfa4 confines all 45 changed files to the four paths in prompt.txt:68-72, including the prototype variants that informed the research result.\nSCORE durability: 10\nJUSTIFICATION durability: test_conic_integral.py:28-81 catches analytic and device integral regressions, but its line 47 comparison shares the same slice geometry and no added assertion tests the three-size cold solve or physical saddle ownership.\nSCORE fit: 16\nJUSTIFICATION fit: owner_map.py:8-13 reuses the existing reading and booking components and introduces no forbidden source label, while conic_integral.py:1-5 accurately describes its numerical outer rule.\nSCORE reuse: 3\nJUSTIFICATION reuse: capability search found the existing map owner at fast_map_production/program.py:150, yet owner_map.py:52, containing_owner_map.py:63 and projected_owner_map.py:59 duplicate its full map instead of extending that owner.\nFINDING scripts/prototypes/xpoint_cell_owner/owner_map.py:16 blocking: the default axis-facing cut is only half of the fitted Bell region when its stationary level connects both lobes, while the connected mode jumps at contact and fails all three map guards, so neither mode supplies the requested exact, continuous owner and three converged cold solves.\nFINDING scripts/prototypes/xpoint_cell_owner/conic_integral.py:180 blocking: the outer conic coordinate is evaluated by adaptive or 256-node numerical quadrature, so the delivered algorithm does not implement the closed-form conic-arc Green integral required by the plan.\nFINDING scripts/prototypes/xpoint_cell_owner/solve_carrier.py:109 blocking: require_map refuses the fine axis-facing map and every connected Bell map before correction, leaving the 2,098-cell cold root and its continuity, limited, sweep, transition and converged-batch controls unmeasured.\nFINDING scripts/prototypes/xpoint_cell_owner/owner_map.py:52 follow-on: this map duplicates fast_map_production/program.py:150 rather than extending it, and containing_owner_map.py:63 and projected_owner_map.py:59 copy the same capability again, leaving competing map owners to reconcile.\nFINDING scripts/prototypes/xpoint_cell_owner/test_conic_integral.py:39 follow-on: both sides come from the same integrator with different component flags, so a shared zero or scale regression can preserve the two-to-one relation without verifying the positive-level physical region.\nFINDING scripts/prototypes/xpoint_cell_owner/test_conic_integral.py:47 follow-on: the adaptive and dense modes share slice_integral and the fitted conic selector, so their agreement checks outer quadrature but cannot detect a shared wrong physical region or restored half-plane handoff.\nASSERTION scripts/prototypes/xpoint_cell_owner/test_conic_integral.py:30-33: the fixed analytic values fail if the axis-facing quadratic area, constant-density current, radial first moment or zero vertical first moment changes.\nASSERTION scripts/prototypes/xpoint_cell_owner/test_conic_integral.py:39-40: the relation fails if connected-mode area ceases to be twice half-mode area or connected radial symmetry is broken, but common zero or scale errors survive.\nASSERTION scripts/prototypes/xpoint_cell_owner/test_conic_integral.py:47-48: the first comparison fails if adaptive and dense outer rules disagree; the second fails if the explicit root perturbation no longer moves the vertical first moment by more than 1e-6.\nASSERTION scripts/prototypes/xpoint_cell_owner/test_conic_integral.py:78-81: these fail if the device integral becomes invalid or its first three outputs depart from the host integral, but a geometric error common to both implementations survives.\n",
+  "review_run_id": "r-20261016T164120708343-review-of-xpoint-cell-owner-952bfcfa4450",
+  "reviewed_base_sha": "4e852a31ea5544825f5dc968d2683d3e63e25422",
+  "reviewed_commit": "952bfcfa44508a45b58ff05d6cf2d8fbb6d84532",
+  "reviewed_head_sha": "952bfcfa44508a45b58ff05d6cf2d8fbb6d84532",
+  "reviewed_run_id": "r-20261016T145650209779-xpoint-cell-owner",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/xpoint-cell-owner",
+  "scores": {
+    "durability": 10,
+    "evidence": 9,
+    "fit": 16,
+    "goal_fidelity": 3,
+    "reuse": 3,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T16:46:04.083246+00:00",
+  "total": 60
+}

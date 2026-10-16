@@ -1,0 +1,78 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Source baseline-gate-corrected.log and after-gate-paired.log both completed the artifact-path test with EXIT=0, 1 passed and no failure ids; this pair spans the source run, while the reviewed diff is f1182237..6106235e.",
+  "base_log_revision": "d4dd9374ab678c51a7cbab01cf7b1d2d4e03c71e",
+  "call_site_count": 2,
+  "call_sites": [
+    "scripts/prototypes/lean_map_batched/render.py:235",
+    "scripts/prototypes/lean_map_batched/render.py:236"
+  ],
+  "completed_at": "2026-10-16T04:42:33Z",
+  "dispatched_at": "2026-10-16T04:33:08Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the binding data-ink style sets legend and direct labels at 20 pt, not 14 pt; the 20-point labels follow it",
+      "recorded_at": "2026-10-16T04:43:34.687095+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "prototype figure; a checked-in label-clearance test belongs to nova.media's shared painters, not a research script",
+      "recorded_at": "2026-10-16T04:43:39.707950+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/lean_map_batched/render.py",
+      "line": "132",
+      "severity": "follow-on",
+      "text": "follow-on: the new 20-point legend exceeds the mandated 14-point legend size; both figures remain readable, but the labels dominate their axes at page size."
+    },
+    {
+      "file": "scripts/prototypes/lean_map_batched/render.py",
+      "line": "140",
+      "severity": "follow-on",
+      "text": "follow-on: the saved figure has no checked-in label-clearance assertion, so the source run's red and green probe will not catch a later label regression in the repository gate."
+    }
+  ],
+  "head_log_revision": "6106235e38edc8ceea2a9403876ee4451c9b75d5",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "commit 6106235e38ed against f1182237b5ab changes exactly render.py and two SVGs; render.py:91 reserves legend space and render.py:112-139 moves five series labels into a frameless legend, with no added assertions or tests.",
+    "done_when": "prompt.txt:103-130 requires H200 accuracy, convergence, width and continuity rows plus readable figures; the source manifest.md:12 and label-after-610.log verify this figure repair, while after-gate-paired.log asserts only artifact-path sanitation and the broader quantitative rows remain incomplete.",
+    "goal": "prompt.txt:30 asks for lean-map batch walls at 550 and 2,098 cells; this incremental commit clears labels in the two wall figures, while docs/research/lean-map-batched.html:104-105 still reports that the 2,098-cell run was stopped and the 0.90 ms target missed.",
+    "manifest": "source manifest.md:5-20 records commit 6106235e38ed, both rendered figures, a red parent-source label control with 19 collisions, a green repaired check with zero collisions, and completed baseline_suite and after_suite gates with no failures.",
+    "write_paths": "prompt.txt:68-72 grants the prototype directory and figure directory; git diff-tree for 6106235e38ed changes only render.py and its two batch-wall SVGs inside those grants."
+  },
+  "justifications": {
+    "durability": "render.py:112-139 adds no assertion and the collision checker lives only in the source run directory, so the checked-in artifact-path gate would stay green if labels moved back over plotted lines.",
+    "evidence": "label-revert-610.log shows 19 restored collisions and label-after-610.log shows zero with a known-overlap positive control, while after-gate-paired.log covers only artifact paths rather than the full quantitative done_when.",
+    "fit": "render.py:132-139 uses the existing Matplotlib legend idiom and keeps every carrier identified, but its new 20-point legend exceeds the repository's 14-point plot legend rule.",
+    "goal_fidelity": "the committed batch-chord-wall.svg and batch-map-wall.svg now display all five carrier names clear of the plotted data, but docs/research/lean-map-batched.html:104-105 still shows the original 2,098-cell and 0.90 ms goals unmet.",
+    "reuse": "render.py:132-139 uses Matplotlib's existing legend directly, matching the exterior-legend owner at scripts/prototypes/lean_map/render.py:213-222 without adding a competing helper.",
+    "scope_discipline": "git diff-tree for 6106235e38ed names only scripts/prototypes/lean_map_batched/render.py and the two SVGs under docs/figures/converged-forward-solve/lean-map-batched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: prompt.txt:30 asks for lean-map batch walls at 550 and 2,098 cells; this incremental commit clears labels in the two wall figures, while docs/research/lean-map-batched.html:104-105 still reports that the 2,098-cell run was stopped and the 0.90 ms target missed.\nVERDICT done_when: prompt.txt:103-130 requires H200 accuracy, convergence, width and continuity rows plus readable figures; the source manifest.md:12 and label-after-610.log verify this figure repair, while after-gate-paired.log asserts only artifact-path sanitation and the broader quantitative rows remain incomplete.\nVERDICT write_paths: prompt.txt:68-72 grants the prototype directory and figure directory; git diff-tree for 6106235e38ed changes only render.py and its two batch-wall SVGs inside those grants.\nVERDICT manifest: source manifest.md:5-20 records commit 6106235e38ed, both rendered figures, a red parent-source label control with 19 collisions, a green repaired check with zero collisions, and completed baseline_suite and after_suite gates with no failures.\nVERDICT diff: commit 6106235e38ed against f1182237b5ab changes exactly render.py and two SVGs; render.py:91 reserves legend space and render.py:112-139 moves five series labels into a frameless legend, with no added assertions or tests.\nCALL_SITES: scripts/prototypes/lean_map_batched/render.py:235, scripts/prototypes/lean_map_batched/render.py:236\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: the committed batch-chord-wall.svg and batch-map-wall.svg now display all five carrier names clear of the plotted data, but docs/research/lean-map-batched.html:104-105 still shows the original 2,098-cell and 0.90 ms goals unmet.\nSCORE evidence: 15\nJUSTIFICATION evidence: label-revert-610.log shows 19 restored collisions and label-after-610.log shows zero with a known-overlap positive control, while after-gate-paired.log covers only artifact paths rather than the full quantitative done_when.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff-tree for 6106235e38ed names only scripts/prototypes/lean_map_batched/render.py and the two SVGs under docs/figures/converged-forward-solve/lean-map-batched.\nSCORE durability: 7\nJUSTIFICATION durability: render.py:112-139 adds no assertion and the collision checker lives only in the source run directory, so the checked-in artifact-path gate would stay green if labels moved back over plotted lines.\nSCORE fit: 16\nJUSTIFICATION fit: render.py:132-139 uses the existing Matplotlib legend idiom and keeps every carrier identified, but its new 20-point legend exceeds the repository's 14-point plot legend rule.\nSCORE reuse: 20\nJUSTIFICATION reuse: render.py:132-139 uses Matplotlib's existing legend directly, matching the exterior-legend owner at scripts/prototypes/lean_map/render.py:213-222 without adding a competing helper.\nFINDING scripts/prototypes/lean_map_batched/render.py:132 follow-on: the new 20-point legend exceeds the mandated 14-point legend size; both figures remain readable, but the labels dominate their axes at page size.\nFINDING scripts/prototypes/lean_map_batched/render.py:140 follow-on: the saved figure has no checked-in label-clearance assertion, so the source run's red and green probe will not catch a later label regression in the repository gate.\n",
+  "review_run_id": "r-20261016T043231079942-review-of-lean-map-batched-6106235e38ed",
+  "reviewed_base_sha": "f1182237b5ab97a4880a4d2bdca0f301f15ae132",
+  "reviewed_head_sha": "6106235e38edc8ceea2a9403876ee4451c9b75d5",
+  "reviewed_run_id": "r-20261015T160718563144-lean-map-batched",
+  "rubric": "code",
+  "scores": {
+    "durability": 7,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 13,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T04:39:26.142539+00:00",
+  "total": 91
+}

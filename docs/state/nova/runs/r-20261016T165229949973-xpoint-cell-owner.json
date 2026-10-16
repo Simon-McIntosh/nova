@@ -887,6 +887,64 @@
   "plan_link": null,
   "predecessor_run": "r-20261016T035628355879-fine-grid-convergence",
   "promoted_by": null,
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'failed' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "manifest is blocked; process kept for resume",
+    "scratch_bytes": 5013,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261016T165229949973-xpoint-cell-owner",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 5013,
+        "path": "/tmp/reckon-crew-scratch/r-20261016T165229949973-xpoint-cell-owner"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "unintegrated",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [],
+          "head": "6482dbad4585c947ce9c010ccb2edfc1331a5815",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/shadow-r-20261016T145650209779-xpoint-cell-owner-clive-24f3d0a83ad1/xpoint-cell-owner",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-10-16T17:36:22.679Z",
+            "session_id": "dbc23055-d157-40e0-b75e-69d088e6a671",
+            "session_source": "stream",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/shadow-r-20261016T145650209779-xpoint-cell-owner-clive-24f3d0a83ad1/xpoint-cell-owner"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "r-20261016T165229949973-xpoint-cell-owner",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "this worktree is the working directory of recoverable session dbc23055-d157-40e0-b75e-69d088e6a671"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_withheld": "gate verdict 'failed' is not passing; worktree retained for recovery"
+  },
   "resume_waiver": {
     "reason": "the decision it asked for is ruled and a fresh node carries it; a confounded comparison arm is not resumed",
     "session_id": "dbc23055-d157-40e0-b75e-69d088e6a671",

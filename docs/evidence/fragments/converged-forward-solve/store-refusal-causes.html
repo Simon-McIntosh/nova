@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="store-refusal-causes">
+  <meta name="plan-title" content="The content store names the cause when it refuses an invalid cache entry">
+  <meta name="plan-summary" content="verified_destination returned None for three different states: an absent entry, an entry whose completion marker is missing, and an entry whose marker is not a regular file such as a symlink. Every caller read all three as a cache miss, so a refusal on a present-but-invalid entry reported the entry as missing. Absent now reads as absent; a present entry is refused where the check lives, naming the manifest as missing, symlinked or not a regular file. The artifact resolver passes that error through instead of restating it.">
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-verifies" content="converged-forward-solve#s4">
+  <meta name="plan-recorded-at" content="2026-10-16">
+  <meta name="plan-verdict" content="complete">
+  <meta name="plan-environment" content="Fleet allocation 98dci4-clu-2002 job 1281970, CPU tests run in place">
+  <meta name="plan-tags" content="content-store,machine-artifact,refusal,cache">
+  <title>store-refusal-causes — a present invalid entry is refused by name | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+  <h1>store-refusal-causes — a present invalid entry is refused by name</h1>
+
+  <p id="store-refusal-causes-status">
+    <strong>The store now separates "absent" from "present but invalid".</strong>
+    <code>nova/database/content_store.py:verified_destination</code> returned a single
+    <code>None</code> for three states, so a caller could not tell a cold cache from a broken entry.
+    It now returns <code>None</code> only for an entry that is absent, and refuses a present entry
+    whose completion marker is missing, is a symlink, or is otherwise not a regular file, naming that
+    cause. Both <code>tests/test_mast_artifact.py</code> failures on main
+    (<code>test_existing_empty_destination_is_not_overwritten</code> and
+    <code>test_resolver_rejects_symlinked_manifest</code>) now pass.
+  </p>
+
+  <h2 id="store-refusal-causes-states">The three states, before and after</h2>
+  <p id="store-refusal-causes-states-note">
+    The refusal behaviour was already correct — both cases refused and neither overwrote the empty
+    destination. Only the message was wrong, because the state was collapsed before any caller saw it.
+    The reproduction, quoted from the base arm:
+    <code>Actual message: 'cache object sha256:5ffc1dc… is missing under …/cache/sha256'</code> for the
+    symlinked manifest against the expected <code>manifest.*symlink</code>, and
+    <code>cache object sha256:… is missing after publication</code> for the empty destination against
+    the expected <code>manifest is missing</code>.
+  </p>
+  <table id="store-refusal-causes-states-table">
+    <thead><tr><th>state of <code>object_root/&lt;digest&gt;</code></th><th>before</th><th>after</th></tr></thead>
+    <tbody>
+      <tr id="store-refusal-causes-states-absent"><td>name absent</td><td><code>None</code></td><td><code>None</code> — a miss to rebuild</td></tr>
+      <tr id="store-refusal-causes-states-missing"><td>directory present, <code>manifest.json</code> absent</td><td><code>None</code> — read as absent</td><td><code>ContentStoreError</code>: <code>cache object manifest is missing at &lt;marker&gt;</code></td></tr>
+      <tr id="store-refusal-causes-states-symlink"><td>directory present, <code>manifest.json</code> is a symlink</td><td><code>None</code> — read as absent</td><td><code>ContentStoreError</code>: <code>cache object manifest must not be a symlink: &lt;marker&gt;</code></td></tr>
+      <tr id="store-refusal-causes-states-notregular"><td>directory present, <code>manifest.json</code> is neither regular nor a symlink</td><td><code>None</code> — read as absent</td><td><code>ContentStoreError</code>: <code>cache object manifest is not a regular file: &lt;marker&gt;</code></td></tr>
+    </tbody>
+  </table>
+  <p id="store-refusal-causes-states-place">
+    One place decides this: <code>verified_destination</code>, on the path every caller shares. The
+    duplicate marker check inside <code>publish_files</code> is removed, and
+    <code>resolve_machine_artifact</code> drops its own restatement of the missing-marker and
+    symlinked-marker refusals, so the artifact caller now surfaces the store's error rather than
+    composing a second wording for the same fact. <code>_lifted</code> still re-raises it as
+    <code>MachineArtifactError</code>, so artifact callers keep catching one vocabulary.
+  </p>
+
+  <h2 id="store-refusal-causes-callers">Callers and the state each relies on</h2>
+  <table id="store-refusal-causes-callers-table">
+    <thead><tr><th>caller</th><th>invalid-entry behaviour</th><th>kept?</th></tr></thead>
+    <tbody>
+      <tr id="store-refusal-causes-callers-mastatta"><td><code>nova/imas/machine_artifact.py:resolve_machine_artifact</code></td><td><code>None</code> means absent and is reported as <code>cache object … is missing under …</code>; a present invalid entry is now refused by name</td><td>yes — the absent arm is unchanged; the invalid arm gains a precise cause instead of a misleading one</td></tr>
+      <tr id="store-refusal-causes-callers-publish"><td><code>nova/database/content_store.py:publish_files</code></td><td><code>None</code> after a just-completed publication means absent; a present empty destination is now refused with the manifest named</td><td>yes — the empty destination is still not overwritten (asserted by the mast test)</td></tr>
+      <tr id="store-refusal-causes-callers-layerfetch"><td><code>nova/database/layer_fetch.py:fetch_layer</code></td><td>an absent entry is a miss and the layer is fetched and published</td><td>absent arm kept. The invalid arm already failed before this change: publishing over the existing directory skipped the private-directory write and refused with the same generic message, so it never rebuilt; it now names the cause earlier</td></tr>
+      <tr id="store-refusal-causes-callers-operand"><td><code>scripts/prototypes/read_route/jets.py:operand_entry</code> (used by <code>lean_map/values.py</code> and <code>lean_map/jets.py</code>)</td><td>a cold cache is a miss: <code>verified_object_root</code> is caught and mapped to <code>None</code>. A destination-level fault is raised rather than read, which its own docstring already states</td><td>yes — the absent arm kept; the invalid case no longer returns <code>None</code>, which makes the destination arm behave as the docstring says. Not edited: outside this node's write scope</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="store-refusal-causes-tests">Checks and suite delta</h2>
+  <p id="store-refusal-causes-tests-note">
+    Five modules, each in a fresh process, CPU-only, run in place on the fleet allocation, with the
+    worktree's own package first on <code>PYTHONPATH</code> so each log header could print
+    <code>nova.__file__</code> under the worktree root. The base arm runs the same five files at
+    <code>dac8403834e7dcc697fd9604c0baef0b6bfea26c</code>; the after arm runs them at
+    <code>5921a2b81d14902dd4f2879d5e9b93d0d11f92a2</code>.
+  </p>
+  <table id="store-refusal-causes-tests-table">
+    <thead><tr><th>module</th><th>base arm</th><th>after arm</th><th>added failures</th></tr></thead>
+    <tbody>
+      <tr id="store-refusal-causes-tests-mast"><td><code>tests/test_mast_artifact.py</code></td><td>2 failed, 59 passed</td><td>61 passed</td><td>0 — the two named failures clear</td></tr>
+      <tr id="store-refusal-causes-tests-machine"><td><code>tests/test_machine_artifact.py</code></td><td>9 passed</td><td>9 passed</td><td>0</td></tr>
+      <tr id="store-refusal-causes-tests-concurrency"><td><code>tests/test_machine_artifact_concurrency.py</code></td><td>3 passed, 2 skipped</td><td>3 passed, 2 skipped</td><td>0</td></tr>
+      <tr id="store-refusal-causes-tests-store"><td><code>tests/test_content_store.py</code></td><td>10 passed</td><td>12 passed</td><td>0</td></tr>
+      <tr id="store-refusal-causes-tests-layer"><td><code>tests/test_layer_fetch.py</code></td><td>1 failed, 22 passed</td><td>1 failed, 22 passed</td><td>0</td></tr>
+    </tbody>
+  </table>
+  <p id="store-refusal-causes-tests-delta">
+    Net: the two named failures pass and nothing else changes. The one remaining failure,
+    <code>tests/test_layer_fetch.py::test_every_pinned_layer_is_fetched_and_verified</code>, fails
+    identically in both arms with
+    <code>LayerRegistryCredentialError: registry credentials rejected for ghcr.io/…: unauthorized</code>
+    — a registry credential on this host, not code under test, and outside this node's scope. The store
+    test that asserted the old collapse, <code>test_entry_without_completion_marker_is_not_served</code>,
+    is rewritten as <code>…_is_refused_by_name</code> and asserts the named refusal and that the entry's
+    directory survives; two new tests cover the symlinked marker and the absent case, so the checks
+    record both arms of the contract the node exists to draw. The two mast tests' expectations were not
+    weakened: their <code>manifest is missing</code> and <code>manifest.*symlink</code> patterns are
+    matched exactly, and the store's new wording is what satisfies them.
+  </p>
+
+  <h2 id="store-refusal-causes-negative">Negative control</h2>
+  <p id="store-refusal-causes-negative-note">
+    The declared mutation is the pre-change behaviour restored: replacing the
+    <code>marker_metadata is None</code> refusal in <code>verified_destination</code> with
+    <code>return None</code>. Applied to the delivered tree and run against
+    <code>tests/test_mast_artifact.py::test_existing_empty_destination_is_not_overwritten</code>, it
+    reproduces the collapsed state and the generic message —
+    <code>Actual message: 'cache object sha256:5ffc1dc… is missing after publication'</code> against
+    the expected <code>manifest is missing</code> — giving
+    <code>1 failed in 6.28s</code> with <code>EXIT=1</code> on the failing id
+    <code>test_existing_empty_destination_is_not_overwritten</code>, which the after arm does not fail.
+    The mutation was reverted and the delivered tree carries the refusal.
+  </p>
+
+  <h2 id="store-refusal-causes-scope">Scope</h2>
+  <p id="store-refusal-causes-scope-note">
+    Edited: <code>nova/database/content_store.py</code>,
+    <code>nova/imas/machine_artifact.py</code>, <code>tests/test_content_store.py</code>. The two
+    named <code>tests/test_mast_artifact.py</code> tests were <strong>not edited</strong>; they pass
+    unmodified against the store's new wording. <code>scripts/prototypes</code>-adjacent callers and
+    <code>nova/database/layer_fetch.py</code> were read, not edited.
+  </p>
+</main></body></html>

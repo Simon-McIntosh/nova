@@ -1,4 +1,4 @@
-"""Compare the map JVP with a detached edge-strength control."""
+"""Compare the map JVP with a detached booked-moment handoff."""
 
 # ruff: noqa: E402
 from nova.jax.config import configure_dtypes
@@ -14,12 +14,8 @@ import jax.numpy as jnp
 import numpy as np
 
 import nova
-from scripts.prototypes.fast_map_production import kernel
 from scripts.prototypes.fine_grid_convergence.context import build
-from scripts.prototypes.fine_grid_convergence.path_weight import (
-    _continuous_path_weight,
-    install,
-)
+from scripts.prototypes.fine_grid_convergence import handoff
 
 
 def main():
@@ -62,14 +58,18 @@ def main():
         ]
         return {"remainders": rows, "slopes": slopes}
 
-    install()
     positive = measure()
 
-    def detached(*arguments):
-        return jax.lax.stop_gradient(_continuous_path_weight(*arguments))
+    class DetachedExponential:
+        def __getattr__(self, name):
+            return getattr(jnp, name)
 
-    kernel._continuous_path_weight = detached
+        def expm1(self, value):
+            return jax.lax.stop_gradient(jnp.expm1(value))
+
+    handoff.jnp = DetachedExponential()
     negative = measure()
+    handoff.jnp = jnp
     positive_pass = all(
         1.7 < slope < 2.3 for row in positive["slopes"] for slope in row
     )
@@ -79,7 +79,7 @@ def main():
     result = {
         "cells": len(context.reference),
         "positive": positive,
-        "detached_path_strength": negative,
+        "detached_handoff_weight": negative,
         "positive_pass": positive_pass,
         "negative_pass": negative_pass,
     }

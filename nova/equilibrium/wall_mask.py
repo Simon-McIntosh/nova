@@ -46,6 +46,8 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
+from nova.equilibrium.morphology import _dilate4
+
 logger = logging.getLogger("nova.equilibrium.wall_mask")
 
 __all__ = [
@@ -295,16 +297,6 @@ def supercover_raster(rg, zg, unit: WallUnit) -> np.ndarray:
 # ---------------------------------------------------------------------------
 
 
-def _dilate4_np(mask: np.ndarray) -> np.ndarray:
-    """4-neighbour boolean dilation (host; no scipy dependency)."""
-    out = mask.copy()
-    out[1:, :] |= mask[:-1, :]
-    out[:-1, :] |= mask[1:, :]
-    out[:, 1:] |= mask[:, :-1]
-    out[:, :-1] |= mask[:, 1:]
-    return out
-
-
 def polygon_area(r, z) -> float:
     """Absolute shoelace area of the polygon (closed implicitly)."""
     r = np.asarray(r, dtype=np.float64)
@@ -396,7 +388,7 @@ def build_wall_mask(
         for b in range(a + 1, len(keys)):
             ka, kb = keys[a], keys[b]
             ma, mb = unit_rasters[ka], unit_rasters[kb]
-            if not (_dilate4_np(ma) & mb).any():
+            if not (_dilate4(ma) & mb).any():
                 continue
             gap = _min_polygon_gap(units[ka], units[kb])
             if gap > 0.5 * delta:  # genuinely separate, yet the rasters fused

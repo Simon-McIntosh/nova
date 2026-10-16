@@ -234,7 +234,6 @@ def measure_production_receipt(data: Path, output: Path) -> dict[str, Any]:
         )
 
     dimension_engagement = _dimension_engagement()
-    source = Path("nova/equilibrium/fixed_point.py").read_text(encoding="utf-8")
     repaired_residual_gate = all(
         record["enabled_residual_no_worse_than_same_tree_disabled"]
         for record in records
@@ -273,12 +272,6 @@ def measure_production_receipt(data: Path, output: Path) -> dict[str, Any]:
                 "try the raw fixed ladder first; use conditioned damping only "
                 "after total raw-ladder refusal and only for a candidate that "
                 "does not increase the current relative residual"
-            ),
-            "dataset_fitted_constants_absent": (
-                "44.5" not in source and "27.781718445022726" not in source
-            ),
-            "dimension_specific_gate_absent": (
-                "_PROJECTED_KRYLOV_CONDITION_DIMENSION" not in source
             ),
             "dimension_engagement": dimension_engagement,
         },

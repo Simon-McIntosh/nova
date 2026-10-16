@@ -49,6 +49,7 @@ import math
 import matplotlib.path
 import numpy as np
 import pytest
+from tests.conftest import _green_block
 
 from nova.utilities.importmanager import skip_import
 from tests.rotating_equilibrium_references import (
@@ -63,7 +64,6 @@ with skip_import("jax"):
     import jax
     import jax.numpy as jnp
 
-    from nova.biot.greens import hybrid_greens
     from nova.equilibrium.conservation import FluxLattice
     from nova.equilibrium.convention import delta_star_from_current_density
     from nova.equilibrium.domain import DomainMasks, PlasmaDomain
@@ -733,17 +733,6 @@ def solve_member(mach: float) -> RotatingEquilibrium:
         boundary_temperature=5.0e1 * 1.602176634e-19,
     )
     return base.with_rotation_parameter(mach**2 / base.major_radius**2)
-
-
-def _green_block(target, source, section):
-    """Return the total-flux coupling [Wb/A] of one source set on one target."""
-    return np.stack(
-        [
-            hybrid_greens(target[:, 0], target[:, 1], a, z, section, section)[0]
-            for a, z in source
-        ],
-        axis=1,
-    )
 
 
 def _limiter_loop(case: RotatingEquilibrium, points=61, clearance=0.06):

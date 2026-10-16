@@ -46,6 +46,7 @@ from typing import get_type_hints
 import numpy as np
 import pytest
 from scipy.constants import mu_0
+from tests.conftest import _green_block, _solovev
 
 from nova.utilities.importmanager import skip_import
 
@@ -53,7 +54,6 @@ with skip_import("jax"):
     import jax
     import jax.numpy as jnp
 
-    from nova.biot.greens import hybrid_greens
     from nova.biot.null import Null1D
     from nova.biot.target import FluxTarget
     from nova.equilibrium.conservation import FluxLattice
@@ -61,6 +61,7 @@ with skip_import("jax"):
     from nova.equilibrium import PrescribedCurrentField
     from nova.equilibrium.forward import ForwardEquilibrium, ForwardProfile
     from nova.equilibrium.forward_operator import ForwardTopologyState
+    from nova.equilibrium.morphology import _dilate4
     from nova.equilibrium.observation import MomentEnforcementError, MomentTargets
     from nova.equilibrium.source import (
         DomainProfile,
@@ -143,39 +144,42 @@ ROOT_FIND_RESOLUTION_STEPS = 8
 IMPLEMENTATION_PARITY = 1.0e-9
 
 
+def test_four_neighbour_dilation_stops_at_every_border():
+    """Host and device masks agree with an in-bounds cell reference."""
+    rng = np.random.default_rng(281)
+    corner = np.zeros((5, 7), dtype=bool)
+    corner[0, 0] = True
+    masks = [corner]
+    for shape in ((1, 7), (7, 1), (6, 9), (12, 13)):
+        masks.extend(rng.random(shape) < 0.3 for _ in range(12))
+
+    for mask in masks:
+        expected = np.zeros_like(mask)
+        for row, col in np.argwhere(mask):
+            for dr, dc in ((0, 0), (-1, 0), (1, 0), (0, -1), (0, 1)):
+                nr, nc = row + dr, col + dc
+                if 0 <= nr < mask.shape[0] and 0 <= nc < mask.shape[1]:
+                    expected[nr, nc] = True
+        np.testing.assert_array_equal(_dilate4(mask), expected)
+        np.testing.assert_array_equal(np.asarray(_dilate4(jnp.asarray(mask))), expected)
+
+
 def _terms():
     """Return the Solov'ev quartic, offset and vertical coefficients."""
     alpha = np.pi**2 * mu_0 * P_PRIME / 2.0
     return alpha, -2.0 * alpha * AXIS_RADIUS**2, 2.0 * np.pi**2 * FF_PRIME
 
 
-def _solovev(radius, height):
-    """Return the analytic seed flux [Wb] the conductors are fitted to."""
-    alpha, offset, beta = _terms()
-    return alpha * radius**4 + offset * radius**2 + beta * height**2
-
-
 def _wall_loop(points=61):
     """Return a material boundary lying on one seed flux surface."""
     alpha, offset, beta = _terms()
-    wall_flux = _solovev(AXIS_RADIUS, 0.0) - SEED_SPAN
+    wall_flux = _solovev(AXIS_RADIUS, 0.0, _terms()) - SEED_SPAN
     inner, outer = np.sqrt(np.sort(np.roots([alpha, offset, -wall_flux])))
     centre, half = 0.5 * (inner + outer), 0.5 * (outer - inner)
     angle = 2 * np.pi * np.arange(points) / points
     radius = centre + half * np.cos(angle)
-    argument = np.clip((wall_flux - _solovev(radius, 0.0)) / beta, 0.0, None)
+    argument = np.clip((wall_flux - _solovev(radius, 0.0, _terms())) / beta, 0.0, None)
     return np.c_[radius, np.sign(np.sin(angle)) * np.sqrt(argument)], wall_flux
-
-
-def _green_block(target, source, section=0.05):
-    """Return the total-flux coupling [Wb/A] of one source set on one target."""
-    return np.stack(
-        [
-            hybrid_greens(target[:, 0], target[:, 1], a, z, section, section)[0]
-            for a, z in source
-        ],
-        axis=1,
-    )
 
 
 def _flat_profile(amplitude):
@@ -211,8 +215,8 @@ def machine():
     lattice = FluxLattice(np.linspace(0.6, 1.42, 25), np.linspace(-0.42, 0.42, 25))
     coordinate = lattice.coordinate
     wall, wall_flux = _wall_loop()
-    seed_flux = _solovev(coordinate[:, 0], coordinate[:, 1])
-    wall_seed = _solovev(wall[:, 0], wall[:, 1])
+    seed_flux = _solovev(coordinate[:, 0], coordinate[:, 1], _terms())
+    wall_seed = _solovev(wall[:, 0], wall[:, 1], _terms())
     inside = seed_flux >= wall_flux
 
     angle = 2 * np.pi * np.arange(CONDUCTORS) / CONDUCTORS
@@ -301,7 +305,7 @@ def _with_direct_samples(profile, seed):
         plasma_target=jnp.zeros((len(coordinate), operator.grid.node_number)),
         null=Null1D(jnp.asarray(coordinate)),
     )
-    sampled_seed = _solovev(coordinate[:, 0], coordinate[:, 1])
+    sampled_seed = _solovev(coordinate[:, 0], coordinate[:, 1], _terms())
     return (
         replace(operator, sample=sample, use_linear_moments=True),
         jnp.r_[seed, sampled_seed],

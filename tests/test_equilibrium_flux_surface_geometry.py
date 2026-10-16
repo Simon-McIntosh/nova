@@ -51,6 +51,7 @@ import numpy as np
 import pytest
 from scipy.constants import mu_0
 from scipy.interpolate import CubicSpline
+from tests.conftest import _green_block, _solovev
 
 from nova.utilities.importmanager import skip_import
 from tests.rotating_equilibrium_references import reference_cases
@@ -58,7 +59,6 @@ from tests.rotating_equilibrium_references import reference_cases
 with skip_import("jax"):
     import jax.numpy as jnp
 
-    from nova.biot.greens import hybrid_greens
     from nova.equilibrium.conservation import FluxLattice
     from nova.equilibrium.domain import PlasmaDomain
     from nova.equilibrium.flux_surface_geometry import (
@@ -673,33 +673,18 @@ def _solovev_terms():
     return alpha, -2.0 * alpha * AXIS_RADIUS**2, 2.0 * np.pi**2 * FF_PRIME
 
 
-def _solovev(radius, height):
-    """Return the analytic seed flux [Wb] the conductors are fitted to."""
-    alpha, offset, beta = _solovev_terms()
-    return alpha * radius**4 + offset * radius**2 + beta * height**2
-
-
 def _wall_loop(points=41):
     """Return a material boundary lying on one seed flux surface."""
     alpha, offset, beta = _solovev_terms()
-    wall_flux = _solovev(AXIS_RADIUS, 0.0) - SEED_SPAN
+    wall_flux = _solovev(AXIS_RADIUS, 0.0, _solovev_terms()) - SEED_SPAN
     inner, outer = np.sqrt(np.sort(np.roots([alpha, offset, -wall_flux])))
     centre, half = 0.5 * (inner + outer), 0.5 * (outer - inner)
     angle = 2 * np.pi * np.arange(points) / points
     radius = centre + half * np.cos(angle)
-    argument = np.clip((wall_flux - _solovev(radius, 0.0)) / beta, 0.0, None)
-    return np.c_[radius, np.sign(np.sin(angle)) * np.sqrt(argument)], wall_flux
-
-
-def _green_block(target, source, section=0.05):
-    """Return the total-flux coupling [Wb/A] of one source set on one target."""
-    return np.stack(
-        [
-            hybrid_greens(target[:, 0], target[:, 1], a, z, section, section)[0]
-            for a, z in source
-        ],
-        axis=1,
+    argument = np.clip(
+        (wall_flux - _solovev(radius, 0.0, _solovev_terms())) / beta, 0.0, None
     )
+    return np.c_[radius, np.sign(np.sin(angle)) * np.sqrt(argument)], wall_flux
 
 
 def _edge_vanishing_profile(amplitude):
@@ -730,8 +715,8 @@ def _bootstrap_solve():
     )
     coordinate = lattice.coordinate
     wall, wall_flux = _wall_loop()
-    seed_flux = _solovev(coordinate[:, 0], coordinate[:, 1])
-    wall_seed = _solovev(wall[:, 0], wall[:, 1])
+    seed_flux = _solovev(coordinate[:, 0], coordinate[:, 1], _solovev_terms())
+    wall_seed = _solovev(wall[:, 0], wall[:, 1], _solovev_terms())
     inside = seed_flux >= wall_flux
 
     angle = 2 * np.pi * np.arange(CONDUCTORS) / CONDUCTORS

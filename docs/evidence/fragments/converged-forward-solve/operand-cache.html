@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="converged-forward-solve-operand-cache">
+<meta name="plan-title" content="GPFS-cached Biot-Savart value and jet operands by default">
+<meta name="plan-summary" content="The dense Biot-Savart value and jet matrices are identical across processes and cost minutes to reassemble at production resolution, so a process that reassembles them repeats work a peer already did. Both builders now persist through one shared GPFS operand cache, resolved by a single helper and keyed on the geometry and the hashed source files, and persist by default. Each entry lands through a process-unique pending file and an atomic rename, so a completed marker is the only thing a reader trusts. A perturbed node coordinate or a flipped source byte moves the key and rebuilds, and a loaded matrix is bitwise the matrix that was built.">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-commits" content="8bdb995f1">
+<meta name="plan-recorded-at" content="2026-10-16">
+<meta name="plan-rows" content="converged-forward-solve-operand-cache">
+<title>operand-cache — cached Biot-Savart operands by default | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head><body><main class="plan-doc">
+  <h1>operand-cache — cached Biot-Savart operands by default</h1>
+
+  <p id="operand-cache-status">
+    <strong>Persistence is the default on both builders.</strong>
+    <code>scripts/prototypes/lean_map/values.py:build_values</code> caches its flux-block
+    matrix and <code>scripts/prototypes/lean_map/jets.py:build_jets</code> persists through
+    <code>scripts/prototypes/read_route/jets.py:build_jet_matrix</code>, both reaching one
+    GPFS cache root resolved by the single helper
+    <code>nova.database.filepath.operand_cache_root</code>. The exterior stays runtime-only:
+    it depends on the field and the reference moments and is cheap to pose once the matrix is
+    in hand. Each entry is written under a process-unique pending name and moved into place
+    with <code>os.replace</code>, and a reader serves an entry only when its completion marker
+    is present, so a partial matrix is never visible and two concurrent builders of one key
+    cannot interleave writes into one file.
+  </p>
+
+  <h2 id="operand-cache-what">What changed</h2>
+  <ul>
+    <li id="operand-cache-root">
+      <code>nova/database/filepath.py</code> gains <code>operand_cache_root()</code>,
+      returning <code>OPERAND_CACHE_ROOT =
+      /work/projects/imas_gpu/sophelio/evidence/operands</code> unless
+      <code>NOVA_OPERAND_CACHE</code> overrides it. Both caches resolve their directory
+      through it, which removes the literal conforming-jets path from the jet builder.
+    </li>
+    <li id="operand-cache-values">
+      <code>build_value_matrix</code> builds the <code>(target, cell, moment)</code> flux
+      blocks only on a miss and stores the completed matrix on a hit. Its key is a SHA-256
+      over the Gauss point coordinates, the cell centres, each cell polygon's vertices and
+      vertex count, the bytes of
+      <code>scripts/analytic_oracle_fixtures/coupling_build.py</code> and the bytes of
+      <code>nova/biot/polygonanalytic.py</code>.
+    </li>
+    <li id="operand-cache-jets">
+      <code>build_jet_matrix</code> takes <code>persist=True</code> by default and keys on the
+      unique node coordinates, the traced coupling operand leaves, the jets module source and
+      the polygon-kernel source, matching the key the existing conforming-jets entries carry.
+    </li>
+    <li id="operand-cache-atomic">
+      <code>store_operand</code> writes <code>matrix.npy.&lt;pid&gt;.pending.npy</code> and
+      <code>complete.json.&lt;pid&gt;.pending</code>, then renames each into place;
+      <code>load_operand</code> returns nothing unless <code>complete.json</code> is present
+      and the stored shape matches, so a build in flight reads as absent rather than partial.
+    </li>
+  </ul>
+
+  <h2 id="operand-cache-measure">Measured load against build</h2>
+  <p id="operand-cache-measure-note">
+    Each row builds the matrix once and then reloads it, on one process, with the cache empty
+    before the first call. The four-cell hex carrier the unit test uses, on CPU
+    (<code>JAX_PLATFORMS=cpu</code>, a login node under heavy fleet load, so the build wall is
+    an upper bound rather than a clean number):
+  </p>
+  <table id="operand-cache-measure-small">
+    <thead><tr><th>cells</th><th>matrix bytes</th><th>build [s]</th><th>load [s]</th><th>digest</th></tr></thead>
+    <tbody>
+      <tr><td>4</td><td>6,912</td><td>54.376</td><td>0.0135</td>
+          <td><code>3659c832de62…8793b4</code></td></tr>
+    </tbody>
+  </table>
+  <p id="operand-cache-measure-rows">
+    The diverted rows at 282, 550 and 2,098 cells build and reload through
+    <code>scripts/prototypes/.../measure_operands.py</code> in one submission. That job is
+    queued on the H200 reservation, so the three rows are not yet measured and this fragment
+    does not claim them.
+  </p>
+
+  <h2 id="operand-cache-checks">Checks</h2>
+  <ul>
+    <li id="operand-cache-tests">
+      <code>tests/test_operand_cache.py</code> on CPU over a four-cell hex carrier: default-on
+      persistence, a hit with the stored build time preserved, a miss on a perturbed polygon
+      vertex, a miss on a flipped source byte, and bitwise equality between the loaded matrix
+      and the built <code>DenseValues.matrix</code>. Two further arms are marked
+      <code>slow</code>: two concurrent processes building one key, and the default arm of
+      <code>build_jet_matrix</code>.
+    </li>
+    <li id="operand-cache-concurrent">
+      The two-process arm passed alone on CPU (<code>1 passed in 60.03s</code>): two spawned
+      children build one key concurrently, both exit zero, the matrices they built are equal
+      byte for byte, the stored matrices are equal byte for byte, and the stored matrix equals
+      the built one. A reader therefore never sees a half-written matrix — the completion
+      marker is absent until the rename lands.
+    </li>
+    <li id="operand-cache-negative">
+      The declared mutation drops the geometry and source chunks from
+      <code>values_digest</code>, so a perturbed coordinate or source byte can no longer move
+      the key; the run turned <code>2 failed, 2 passed, 2 deselected</code>, failing exactly
+      <code>test_values_miss_on_a_perturbed_node_coordinate</code> and
+      <code>test_values_miss_on_a_perturbed_source_byte</code>, with the digest assertion
+      printing the same key on both sides of the perturbed coordinate. The mutation was
+      reverted and the gate rerun green.
+    </li>
+  </ul>
+</main></body></html>

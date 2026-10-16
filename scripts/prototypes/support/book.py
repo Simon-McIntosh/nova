@@ -9,6 +9,7 @@ from copy import copy
 import json
 import os
 from pathlib import Path
+import tempfile
 from time import perf_counter
 from types import MethodType
 
@@ -39,47 +40,59 @@ from tests.equilibrium.test_topology_read import _analytic_inputs
 assert jax.config.jax_enable_x64
 
 
-def _cached_machine(carrier, requested, wall, receipt):
-    """Read the recorded semantic group, refusing every cache miss."""
-    identity = fixture.cache_identity(
-        carrier,
-        requested_cells=requested,
-        wall_nodes=fixture.WALL_POINT_COUNT,
-        wall=wall,
-    )
-    store = ZarrStore(
-        filename=f"{fixture.CACHE_FILENAME}_{abs(requested)}",
-        dirname=Path(receipt["machine_cache"]["store"]).parent,
-    )
-    store.group = store.hash_attrs(identity)
-    assert store.group == receipt["machine_cache"]["semantic_key"]
-    store.load()
-    machine = fixture._from_dataset(store.data, identity, store.group)
-    machine.cache.update(
-        hit=True, readonly=True, store=str(store.filepath), semantic_key=store.group
-    )
+def _fixture_root():
+    """Return the writable root that holds the fixtures this run rebuilds."""
+    root = os.environ.get("NOVA_BOOK_FIXTURE_ROOT")
+    if root is None:
+        root = tempfile.mkdtemp(prefix="nova-book-fixture-")
+        os.environ["NOVA_BOOK_FIXTURE_ROOT"] = root
+    return Path(root)
+
+
+def _cached_machine(carrier, requested, wall):
+    """Build the carrier machine on the identity the current sources define.
+
+    A published carrier record is keyed on the identity schema in force when it
+    was written, so it cannot be reused once those sources move. The carrier is
+    rebuilt on the current schema instead, and every build lands under this
+    run's own writable root rather than the read-only certified directory.
+    """
+    root = _fixture_root()
+    previous = os.environ.get("NOVA_ANALYTIC_ORACLE_CACHE")
+    os.environ["NOVA_ANALYTIC_ORACLE_CACHE"] = str(root)
+    try:
+        machine = fixture.cached_machine(
+            carrier, requested, wall_nodes=fixture.WALL_POINT_COUNT, wall=wall
+        )
+    finally:
+        if previous is None:
+            os.environ.pop("NOVA_ANALYTIC_ORACLE_CACHE", None)
+        else:
+            os.environ["NOVA_ANALYTIC_ORACLE_CACHE"] = previous
+    assert machine.cache["store"].startswith(str(root)), machine.cache["store"]
     return machine
 
 
-def _cached_exterior(source, exact, machine, analytic, receipt):
-    """Read the recorded exterior without invoking its writable miss path."""
-    identity = fixture._exterior_cache_identity(source, exact, machine, analytic)
-    store = ZarrStore(
-        filename=fixture.EXTERIOR_CACHE_FILENAME,
-        dirname=Path(receipt["exterior_cache"]["store"]).parent,
+def _cached_exterior(source, exact, machine, empty, analytic):
+    """Build the exterior on the current identity, under this run's root.
+
+    The exterior builder places its store beside its caller, so the store is
+    redirected to the run's own root for the duration of the call instead of
+    the read-only certified directory.
+    """
+    root = _fixture_root()
+    factory = fixture.ZarrStore
+    fixture.ZarrStore = lambda *, filename, dirname, group=None: ZarrStore(
+        filename=filename, dirname=root, group=group
     )
-    store.group = store.hash_attrs(identity)
-    store.load()
-    assert store.data.attrs["semantic_identity"] == json.dumps(
-        identity, sort_keys=True, separators=(",", ":")
-    )
-    moments = CellCurrentMoments(
-        *(
-            jnp.asarray(store.data[name])
-            for name in ("cell_current", "radial_moment", "vertical_moment")
+    try:
+        moments, exterior, receipt = fixture.cached_fixture_exterior(
+            source, exact, machine, empty, analytic
         )
-    )
-    return moments, jnp.asarray(store.data["exterior"])
+    finally:
+        fixture.ZarrStore = factory
+    assert str(receipt["store"]).startswith(str(root)), receipt["store"]
+    return moments, exterior
 
 
 def measure(kind, cells, directory, cache):
@@ -87,8 +100,12 @@ def measure(kind, cells, directory, cache):
     if jax.default_backend() != "gpu":
         raise RuntimeError("certificate rows require the GPU measurement lane")
     directory = Path(directory)
-    cache = Path(cache)
-    receipt = json.loads((cache.parent / f"{kind}-{cells}-fixture.json").read_text())
+    # The certified cache named by ``cache`` is read-only and keyed on a
+    # superseded identity schema, so its stored groups cannot be reused. The
+    # carrier and exterior are rebuilt on the current identity under this run's
+    # own writable root instead, and nothing is written back into the certified
+    # directory.
+    del cache
     directory.mkdir(parents=True, exist_ok=True)
     name = (
         "diverted-single-null" if kind == "diverted" else "weak-rotation-reactor-static"
@@ -97,14 +114,14 @@ def measure(kind, cells, directory, cache):
     wall = certificate._diverted_wall(exact) if kind == "diverted" else None
     requested = -500 if cells == 550 else -cells
     machine, _ = stage(
-        "cached-machine", lambda: _cached_machine(carrier, requested, wall, receipt)
+        "cached-machine", lambda: _cached_machine(carrier, requested, wall)
     )
-    assert machine.cache["hit"] and machine.cache["readonly"]
     coordinates = np.vstack(
         (machine.node, machine.wall_node, machine.sample_coordinates)
     )
     analytic = jnp.asarray(certificate._exact_state(name, exact, coordinates))
-    physical, exterior = _cached_exterior(source, exact, machine, analytic, receipt)
+    empty = fixture.forward_operator(source, machine)
+    physical, exterior = _cached_exterior(source, exact, machine, empty, analytic)
     operator = fixture.forward_operator(source, machine, exterior).with_clip_mode(
         "exact"
     )

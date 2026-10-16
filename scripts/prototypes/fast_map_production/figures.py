@@ -111,6 +111,77 @@ def scans(directory, out):
     plt.close(figure)
 
 
+def taylor(directory, out):
+    """Taylor remainders at the converged limited state and the stalled diverted one.
+
+    A smooth map's remainder falls as the square of the step, so a log-log slope
+    of two is the differentiability a Taylor remainder tests for. Both states
+    reach that slope over the decade above each series' roundoff floor. They
+    differ in extent rather than in slope: the converged limited state's two
+    directions are defined through the largest step, while three of the
+    diverted iterate's eleven rows are undefined at the largest steps, which is
+    the interval the descent cannot cross.
+    """
+    limited = _load(directory, "limited-250-probe.json")
+    diverted = _load(directory, "diverted-250-probe.json")
+    figure, axis = plt.subplots(figsize=(14, 5.5))
+    series = (
+        (limited["stalled_taylor"], LEFT, "limited converged, Newton direction"),
+        (
+            limited["stalled_random_taylor"],
+            "#7a5c1e",
+            "limited converged, random direction",
+        ),
+        (diverted["stalled_taylor"], RIGHT, "diverted stalled, Newton direction"),
+    )
+    axis.set_xscale("log")
+    axis.set_yscale("log")
+    axis.set_xlabel("step")
+    axis.set_ylabel("two-norm Taylor remainder")
+    largest = 0.0
+    for rows, colour, label in series:
+        step = [row["step"] for row in rows]
+        remainder = [row["remainder_two"] for row in rows]
+        runs, current = [], []
+        for point, value in zip(step, remainder):
+            if value == value:
+                current.append((point, value))
+            elif current:
+                runs.append(current)
+                current = []
+        if current:
+            runs.append(current)
+        run = max(runs, key=len)
+        axis.plot(
+            [point for point, _ in run],
+            [value for _, value in run],
+            color=colour,
+            linewidth=2.6,
+            zorder=3,
+        )
+        end = max(run, key=lambda item: item[0])
+        largest = max(largest, end[0])
+        axis.annotate(
+            label,
+            end,
+            textcoords="offset points",
+            xytext=(8, 0),
+            color=colour,
+            fontsize=13,
+            va="center",
+        )
+    axis.set_xlim(left=1e-8, right=largest * 9)
+    axis.set_xscale("log")
+    axis.set_yscale("log")
+    axis.set_xlabel("step")
+    axis.set_ylabel("two-norm Taylor remainder")
+    for side in ("top", "right"):
+        axis.spines[side].set_visible(False)
+    figure.tight_layout()
+    figure.savefig(out / "taylor-remainder-slopes.svg")
+    plt.close(figure)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--receipts", type=Path, required=True)
@@ -122,7 +193,12 @@ def main():
     arguments.inspection.mkdir(parents=True, exist_ok=True)
     convergence(arguments.receipts, arguments.output)
     scans(arguments.receipts, arguments.output)
-    for name in ("diverted-convergence-traces", "stalled-scan-residuals"):
+    taylor(arguments.receipts, arguments.output)
+    for name in (
+        "diverted-convergence-traces",
+        "stalled-scan-residuals",
+        "taylor-remainder-slopes",
+    ):
         source = arguments.output / f"{name}.svg"
         print(f"wrote {source}", flush=True)
 

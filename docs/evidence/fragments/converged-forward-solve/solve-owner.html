@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="solve-owner">
+<meta name="plan-title" content="Production chord-Newton fixed-point solve owner">
+<meta name="plan-summary" content="The settled batched chord solver moved into nova.equilibrium.solve with its CPU gate and the H200 width-128 row">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s5">
+<meta name="plan-commits" content="849a03289,cdc1452e2">
+<meta name="plan-recorded-at" content="2026-10-16">
+<meta name="plan-verdict" content="passed">
+<meta name="plan-environment" content="CPU x64 for the gate; H200 for the batched chord row">
+<title>Production chord-Newton fixed-point solve owner | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<h1 id="solve-owner">Production chord-Newton fixed-point solve owner</h1>
+
+<section id="solve-owner-module">
+<h2>The module and its interface</h2>
+<p><code>nova/equilibrium/solve.py</code> carries the settled method out of the
+prototypes. It exposes one frozen result type and two entry points, and nothing
+else public:</p>
+<ul>
+<li><code>Factor</code> — the dense LU factorisation of the map's Jacobian at a
+state;</li>
+<li><code>SolveResult</code> — <code>state</code>, <code>residual</code> (the
+scaled infinity norm), <code>converged</code>, <code>corrections</code> and
+<code>factor</code>;</li>
+<li><code>factor(residual_fn, state, operands)</code> — builds the dense
+Jacobian by a vmapped <code>jax.jvp</code> over identity directions and
+LU-factors it;</li>
+<li><code>fixed_point(residual_fn, state, operands, *, factor=None,
+tolerance=1e-12, max_corrections=…)</code> — cold from a fresh factor per
+correction with a damped backtracking line search, or a chord reusing a supplied
+factor.</li>
+</ul>
+<p>The map is pure and takes <code>(state, operands)</code>; the state is flat.
+There are no policy objects, receipts or host loops: the correction loop and the
+line search are <code>lax.while_loop</code> constructs and the chord corrections
+unroll at trace time, so both paths trace under <code>jax.jit</code> and
+<code>jax.vmap</code>.</p>
+</section>
+
+<section id="solve-owner-cpu-gate">
+<h2>CPU gate — after arm versus the orientation base</h2>
+<p>Both arms run <code>tests/test_equilibrium_solve.py</code> in a fresh process
+with the repository root conftest, at <code>JAX_PLATFORMS=cpu</code>.</p>
+<table>
+<thead><tr><th>Arm</th><th>Revision</th><th>Result</th><th>Log</th></tr></thead>
+<tbody>
+<tr><td>after</td><td><code>cdc1452e2</code></td><td>6 passed</td><td><code>after-solve.log</code></td></tr>
+<tr><td>base</td><td><code>63caf6931</code></td><td>2 collection errors: the base package carries no <code>nova.equilibrium.solve</code></td><td><code>base-solve.log</code></td></tr>
+</tbody>
+</table>
+<p>The base arm is the honest before-state of a new module: the test file cannot
+import its subject at the orientation base, so the whole delta is this node's
+new module and tests. The after arm records the four clauses the design names:
+cold convergence to 1e-12 in four corrections with a quadratic residual
+reduction (<code>r&lt;sub&gt;k+1&lt;/sub&gt; ≤ 10·r&lt;sub&gt;k&lt;/sub&gt;²</code>),
+a chord reuse from a neighbouring factor converging in exactly two corrections,
+<code>jax.vmap</code> over sixteen distinct states all converging, and a
+compiled chord program taking state, operands and factor as arguments whose
+lowered HLO constants are all scalar and identical across state sizes 2 and 6 —
+no constant scales with the state.</p>
+</section>
+
+<section id="solve-owner-negative-control">
+<h2>Negative control — a perturbed factor must fail the chord clause</h2>
+<p>Declared mutation: <em>a factor perturbed by 2 percent fails the
+two-correction chord convergence test</em>. Applied by wrapping
+<code>solve.fixed_point</code> so a supplied chord factor is scaled by 1.02,
+leaving cold solves (no factor) untouched. The head arm passes the chord test;
+under the mutation exactly that test fails and the other five pass
+(<code>EXIT=1</code>), so the chord clause is a real measurement rather than an
+identity that cannot fail. Log:
+<code>negative-control.log</code>.</p>
+</section>
+
+<section id="solve-owner-h200-row">
+<h2>H200 width-128 limited chord row</h2>
+<p><code>scripts/prototypes/batched_factor/measure.py</code> now drives its
+dense factor through <code>solve.factor</code> and each chord correction through
+one single-correction <code>solve.fixed_point</code> reusing a supplied
+<code>Factor</code>; the local runtime copies of both are deleted. The width-128
+limited row runs as one sbatch job on <code>betelgeuse</code> under
+<code>gpu_0003_grpA</code>, reusing the cached 289-cell limited carrier and the
+converged predecessor receipt.</p>
+<table>
+<thead><tr><th>Figure</th><th>Recorded prototype</th><th>Through solve.fixed_point</th><th>Job</th></tr></thead>
+<tbody>
+<tr><td>converged of 128</td><td>128</td><td>pending</td><td>1287154</td></tr>
+<tr><td>per-state wall [ms]</td><td>0.279</td><td>pending</td><td>1287154</td></tr>
+<tr><td>executable [MB]</td><td>1.359</td><td>pending</td><td>1287154</td></tr>
+</tbody>
+</table>
+</section>
+
+<section id="solve-owner-cutover">
+<h2>Call sites that move to <code>solve.fixed_point</code> at the §6 cutover</h2>
+<p>Listed only; none is edited by this node.</p>
+<ul>
+<li><code>nova/equilibrium/fixed_point.py</code>: the routes <code>picard</code>
+(2874), <code>anderson</code> (3050), <code>newton_krylov</code> (5003) and
+<code>kink_aware_newton_krylov</code> (5222), and the request body
+<code>operator_request</code> (954), <code>operator_request_body</code> (972)
+and <code>run_operator_requests</code> (1026).</li>
+<li><code>nova/equilibrium/forward.py</code>: <code>fixed_point.newton_krylov</code>
+(2092, 2102, 2257); the route selection <code>scheme =
+fixed_point.picard if route == "picard" else fixed_point.anderson</code> (2114);
+the route dispatch on <code>route == "newton_krylov"</code> (1977, 2079, 2670,
+2898, 3058); and the eager scalar counterpart at 1817–1908.</li>
+<li><code>nova/equilibrium/reduced_newton.py</code>: the
+<code>operator_request_body</code> import (111) and call (974), and
+<code>_linearized_fixed_point_response</code> (2427) as it is called at
+2536.</li>
+</ul>
+</section>
+
+</main>
+</body>
+</html>

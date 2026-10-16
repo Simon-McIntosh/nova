@@ -94,6 +94,11 @@ def run(args):
     kind, cache, output = args.kind, args.cache, args.output
     selected_read = original_read if args.original_read else fixed_shape_read
     mapped_program.read = selected_read
+    if args.original_read:
+        from scripts.prototypes.fast_read import program as original_program
+
+        global map_moments
+        map_moments = original_program.map_moments
     if args.exact_roots:
         ray_roots.install()
     if args.omit_saddle_derivative:

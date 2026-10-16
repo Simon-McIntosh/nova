@@ -88,11 +88,24 @@
     <p>The same corrected pair converges the limited carrier in three dense corrections to a scaled sup residual of 3.996e-15, from a starting residual of 2.315e-03, with the boundary class at 0 and 254 support cells at the terminal state. The map executes in 1.18 ms there. This reproduces the earlier fused-convergence measurement on the same rung in both count and order (three cold corrections, below 4e-15), so the corrected read and booking do not disturb the limited carrier's convergence.</p>
     <p>A step-scale scan from the converged limited state (scaled sup residual 3.996e-15, relative gradient 0.032) walks 82 steps along the Newton direction from step 0 to step 1 without leaving roundoff: the residual spans 3.996e-15 to 4.898e-15, the largest excursion is 9.0e-16, and the X-point cell's membership stays at 1 across every step. This is the continuity the divergence at the diverted carrier lacks, and it is measured at a converged state as the spec requires. Only the Newton direction was scanned; the two random directions the spec names are unmeasured.</p>
   </section>
+  <section id="isolation">
+    <h2>Which mechanism causes the regression</h2>
+    <p>The corrected read carries three deviations from the original, not the two the spec names: the wall candidate taken over every wall edge with no eligibility gate, the separated ordinary and normal-form fractions, and a normal-form cell set conditioned on a live saddle rather than on a diverted state. <code>--wall-gate</code> restores the boolean eligibility of the wall candidate and leaves the booking corrected; it recovers the uncorrected pair's trajectory almost exactly.</p>
+    <table>
+      <thead><tr><th>Read and booking</th><th>Reference residual</th><th>Stalled residual</th><th>Boundary class</th><th>Booked saddle cells</th></tr></thead>
+      <tbody>
+        <tr><td>branchless wall, single-owner booking</td><td>1.7989604373802375</td><td>1.0208587667876892</td><td>0</td><td>0</td></tr>
+        <tr><td>wall eligibility restored, single-owner booking</td><td>4.696461790766224e-03</td><td>2.6898417865827873e-03</td><td>1</td><td>1</td></tr>
+        <tr><td>original read and booking</td><td>4.696461790759203e-03</td><td>2.684581554642e-03</td><td>1</td><td>1</td></tr>
+      </tbody>
+    </table>
+    <p>Restoring the wall eligibility alone moves the reference residual from 1.7989604 to 4.696461790766224e-03, agreeing with the uncorrected pair to ten significant figures, and moves the stall from 1.0209 to 2.6898e-03 in the same boundary class with the same booked saddle cell. The single-owner booking is then worth the remaining 0.2 per cent of the stall, 2.6898e-03 against 2.6846e-03. So the regression is the wall candidate: maximising the edge-peak wall flux over every wall edge admits a wall level the eligibility gate excluded, and that level reads the diverted carrier as limiter-limited from the reference state onward. The two changes the spec asked for are not equally implicated, and the eligibility is load-bearing on this carrier rather than the defect it was taken for.</p>
+  </section>
   <section id="figures">
     <h2>Figures</h2>
     <figure>
       <img src="/nova/figures/converged-forward-solve/fast-map-production/diverted-convergence-traces.svg" alt="Scaled sup residual against correction for the corrected pair and the unfixed-pair control on the diverted carrier at 282 nodes">
-      <figcaption>Scaled sup residual against correction on the diverted carrier at 282 nodes, for the corrected read and booking and for the unfixed-pair control. Both stall after ten corrections, the control 380 times lower.</figcaption>
+      <figcaption>Scaled sup residual against correction on the diverted carrier at 282 nodes. The branchless wall candidate stalls at 1.021e+00; restoring the boolean wall eligibility stalls at 2.690e-03, on top of the uncorrected pair's 2.685e-03. The gate is the whole difference.</figcaption>
     </figure>
     <figure>
       <img src="/nova/figures/converged-forward-solve/fast-map-production/stalled-scan-residuals.svg" alt="Scaled residual against scan step at the diverted stalled iterate and at the converged limited state">

@@ -35,30 +35,30 @@ def _load(directory, name):
 def convergence(directory, out):
     corrected = _load(directory, "diverted-250-solve.json")
     control = _load(directory, "control-original-250-solve.json")
+    gated = _load(directory, "diverted-250-wallgate.json")
     figure, axis = plt.subplots(figsize=(14, 5))
     for receipt, colour, label in (
-        (corrected, RIGHT, "corrected read and booking"),
         (control, ORIGINAL, "original read and booking (control)"),
+        (gated, LEFT, "wall eligibility restored"),
+        (corrected, RIGHT, "branchless wall candidate"),
     ):
         rows = receipt["history"]
         residual = [row["residual"] for row in rows]
         steps = np.arange(1, len(rows) + 1)
-        axis.plot(steps, residual, color=colour, linewidth=3.0, zorder=3)
-        axis.annotate(
-            f"{label}\n{residual[-1]:.3e}",
-            (steps[-1], residual[-1]),
-            textcoords="offset points",
-            xytext=(6, 0),
+        axis.plot(
+            steps,
+            residual,
             color=colour,
-            fontsize=14,
-            va="center",
-        )
+            linewidth=3.0,
+            zorder=3,
+            label=f"{label}: {residual[-1]:.3e}")
     axis.set_yscale("log")
-    axis.set_xlim(0.5, 15)
+    axis.set_xlim(0.5, len(corrected["history"]) + 0.5)
     axis.set_xlabel("correction")
     axis.set_ylabel("scaled sup residual")
     for side in ("top", "right"):
         axis.spines[side].set_visible(False)
+    axis.legend(frameon=False, fontsize=14, loc="center right")
     figure.tight_layout()
     figure.savefig(out / "diverted-convergence-traces.svg")
     plt.close(figure)

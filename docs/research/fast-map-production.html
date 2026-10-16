@@ -22,7 +22,7 @@
 <body><main class="plan-doc">
   <header>
     <h1>Fast fixed-shape map on the diverted carrier</h1>
-    <p class="lead">The corrected fixed-shape read and single-owner booking descend the diverted carrier's scaled moment residual monotonically over ten dense corrections but do not converge it: the residual moves from 1.7989 to 1.0209 and the eleventh correction is rejected, so no accept state is reached at 282 nodes. The stall is therefore not the boolean wall eligibility or the mixed cell booking alone, and the unfixed-pair control shows the reverse: the uncorrected pair stalls 380 times lower, at 2.6846e-03, and books the X-point cell the corrected pair does not.</p>
+    <p class="lead">The corrected fixed-shape read and single-owner booking descend the diverted carrier's scaled moment residual monotonically over ten dense corrections but do not converge it: the residual moves from 1.7989 to 1.0209 and the eleventh correction is rejected, so no accept state is reached at 282 nodes. The next ladder rung, 606 nodes, behaves the same way, stalling at 1.2308e+00 after twelve corrections. The stall is therefore not the boolean wall eligibility or the mixed cell booking alone, and the unfixed-pair control shows the reverse: the uncorrected pair stalls 380 times lower, at 2.6846e-03, and books the X-point cell the corrected pair does not.</p>
   </header>
   <section id="method">
     <h2>Method and provenance</h2>
@@ -61,6 +61,22 @@
       </tbody>
     </table>
     <p>The map itself is fast: the compiled map executes in 1.82 ms and compiles in 2.58 s. The scaled centre residual at the initial state is 1.798960437380231, reproducible across independent job allocations to the last digit.</p>
+  </section>
+  <section id="ladder">
+    <h2>Diverted ladder rung at 606 nodes</h2>
+    <p>The corrected pair was re-run on the next ladder rung, the diverted carrier at 550 requested cells carried by 606 hex nodes, with the same dense bisecting line search. It fails to converge there for the same reason and in the same shape as at 282 nodes, which is what makes it a rung rather than a coincidence: the residual falls monotonically and the step keeps shrinking, and the loop terminates on the twelfth correction when no decreasing trial is found.</p>
+    <table>
+      <thead><tr><th>Correction</th><th>Scaled residual</th><th>Accepted</th><th>Boundary class</th><th>Saddle cells</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>1.564262e+00</td><td>yes</td><td>0</td><td>0</td></tr>
+        <tr><td>4</td><td>1.328495e+00</td><td>yes</td><td>0</td><td>0</td></tr>
+        <tr><td>8</td><td>1.234947e+00</td><td>yes</td><td>0</td><td>0</td></tr>
+        <tr><td>10</td><td>1.231416e+00</td><td>yes</td><td>0</td><td>0</td></tr>
+        <tr><td>11</td><td>1.230818e+00</td><td>yes</td><td>0</td><td>0</td></tr>
+        <tr><td>12</td><td>1.230818e+00</td><td>no</td><td>0</td><td>0</td></tr>
+      </tbody>
+    </table>
+    <p>The reference residual at this rung is 1.8974674535249814 with 297 support cells, against 1.798960437380231 at 282 nodes, so the corrected pair starts and stalls at a similar scaled height on both sizes. The compiled map executes in 2.10 ms at 606 cells and compiles in 9.85 s, against 1.82 ms and 2.58 s at 282 nodes. The boundary class stays 0 and no saddle cell is ever booked, exactly as at 282 nodes, so refining the map does not by itself carry the diverted carrier into the X-point booking branch. The 2098-cell rung remains unbuilt and unmeasured.</p>
   </section>
   <section id="diagnosis">
     <h2>What the run establishes, and what it does not</h2>
@@ -116,7 +132,7 @@
   </section>
   <section id="limits">
     <h2>Measurements not taken</h2>
-    <p>The 550- and 2098-cell diverted carriers were built but not solved within the run's fence, so the three-size convergence claim is unmeasured. The limited carrier solved at 289 nodes but its 41-state sweep validity check and its re-measurement at 550 remain unmeasured. The Newton-direction step-scale scan at the converged limited state is reported above; the two random directions and the Taylor remainder slope at that state are not. The unfixed-pair control completed its correction loop and stalls at 2.684581554642e-03 against the corrected pair's 1.0208587667876892. No figures were produced, so the map-error and convergence figures named by the spec are unstarted, and the two mechanisms the spec corrected have no negative-control figure showing the residual jump the boolean eligibility produces.</p>
+    <p>The 2098-cell diverted carrier was neither built nor solved within the run's fence, so the three-size convergence claim is measured at two of its three sizes and not at the largest. The limited carrier solved at 289 nodes but its 41-state sweep validity check and its re-measurement at 550 remain unmeasured; the 550 limited row was in flight when the allocation's wall clock ran out. The Newton-direction step-scale scan at the converged limited state is reported above; the two random directions at that state are not, so the spec's three-direction scan is one third measured. The warm one- and two-correction neighbours, the two-correction chord batch at widths 1, 16 and 128 against the 0.90 ms budget, and the bisected limited-to-diverted bracket are all unmeasured. The isolated Taylor remainder slopes at the converged limited state are shown in the figures and were computed against the roundoff floor; the diverted slopes are undefined over the decade the descent cannot cross. The unfixed-pair control completed its correction loop and stalls at 2.684581554642e-03 against the corrected pair's 1.0208587667876892, and the convergence figure carries all four isolation series so the wall candidate's effect is visible rather than tabulated alone.</p>
   </section>
 </main></body>
 </html>

@@ -24,7 +24,7 @@
   <header>
     <p class="eyebrow">Research input</p>
     <h1>Fine-grid diverted convergence</h1>
-    <p class="lead">The accepted continuous map converges the 282-cell diverted carrier to 1.25 × 10<sup>−13</sup>, while its 550- and 2,098-cell cold solves stop at 1.55 × 10<sup>−3</sup> and 3.63 × 10<sup>−3</sup>. A live scan traced the 2,098-cell finite-step change to the cell 50–52 saddle-sector frame. A one-sided geometric frame ramp preserves analytic-map fidelity at both fine sizes but fails it badly at 282 cells; its fine cold solves are running.</p>
+    <p class="lead">The accepted continuous map converges the 282-cell diverted carrier to 1.25 × 10<sup>−13</sup>, while its 550- and 2,098-cell cold solves stop at 1.55 × 10<sup>−3</sup> and 3.63 × 10<sup>−3</sup>. A live scan traced the 2,098-cell finite-step change to the cell 50–52 saddle-sector frame. A one-sided geometric ramp then converged the 2,098-cell cold solve to 6.14 × 10<sup>−13</sup>, but left the 550-cell solve stalled and failed the 282-cell analytic-map guard.</p>
   </header>
 
   <section id="method">
@@ -100,6 +100,22 @@
     <figure><img src="/nova/figures/converged-forward-solve/fine-grid-convergence/terminal-geometric-282.svg" alt="Paired solved and analytic flux contours, both null sets and wall at the centered-frame 282-cell terminal state"><figcaption>Centered geometric frame-ramp trial, 282-cell terminal state: scaled residual 0.00222786275396; converged: false. Blue solid contours and blue nulls are solved; dark dashed contours and dark nulls are analytic. Both fields share one physical level array; the black outline is the wall.</figcaption></figure>
     <figure><img src="/nova/figures/converged-forward-solve/fine-grid-convergence/terminal-corrected-550.svg" alt="Paired solved and analytic flux contours, both null sets and wall at the corrected 550-cell terminal state"><figcaption>Geometric frame-ramp trial, 550-cell terminal state: scaled residual 0.00590910167353; converged: false. Blue solid contours and blue nulls are solved; dark dashed contours and dark nulls are analytic. Both fields share one physical level array; the black outline is the wall.</figcaption></figure>
     <figure><img src="/nova/figures/converged-forward-solve/fine-grid-convergence/terminal-geometric-2098.svg" alt="Paired solved and analytic flux contours, both null sets and wall at the centered-frame 2,098-cell terminal state"><figcaption>Centered geometric frame-ramp trial, 2,098-cell terminal state: scaled residual 0.00887562739958; converged: false. Blue solid contours and blue nulls are solved; dark dashed contours and dark nulls are analytic. Both fields share one physical level array; the black outline is the wall.</figcaption></figure>
+  </section>
+  <section id="one-sided">
+    <h2>One-sided sector-ramp test</h2>
+    <p>H200 jobs 1286926 and 1286927 both completed with final <code>EXIT=0</code> lines, while each numerical row retained its own guard exit. The face-span ramp converges at 2,098 cells in eight accepted corrections, finishing at 6.13650 × 10<sup>−13</sup>. At 550 cells it returns to the original 1.55031584 × 10<sup>−3</sup> stall after nine accepted corrections and one rejected correction. At the analytic reference state, its 550-cell support grows from 337 to 338 cells, yet every reported membership remains unchanged; the one-sided frame does not alter the terms of the stalled 550-cell map. The live 550-cell Newton-direction sector scan is therefore directed at the separate obstruction.</p>
+    <table>
+      <thead><tr><th>Carrier</th><th>Analytic flux error at reference</th><th>Cold terminal residual</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr style="color:#9d3b31"><th>282 cells</th><td>0.104551</td><td>Not run after map refusal</td><td>Map guard exit 1</td></tr>
+        <tr style="color:#9d3b31"><th>550 cells</th><td>0.000487272</td><td>0.00155031583773</td><td>Solve guard exit 1</td></tr>
+        <tr><th>2,098 cells</th><td>0.0000947423</td><td>6.13649516713 × 10<sup>−13</sup></td><td>Converged; solve guard exit 0</td></tr>
+      </tbody>
+    </table>
+    <p>The coarse reference-state scan found 62 faces whose sector factor increased by more than 0.01; two cells changed from unsupported to supported. Cell 5 gained membership 0.436355 and cell 6 gained 0.022157. A face at cell 8–10 has signed margin −0.002357 and span 0.053419, so the one-sided rule raises its sector factor from zero to 0.955885 while its flux factor is 0.386964. This opening is far from the fine cell-50 crossing, whose relevant margin is about 10<sup>−5</sup>. A uniform full-face scale admits coarse material that the accepted map excludes. The full face rows are in <code>centre-sector-250.json</code> and <code>centre-sector-500.json</code>.</p>
+    <figure><img src="/nova/figures/converged-forward-solve/fine-grid-convergence/residual-histories-one-sided.svg" alt="Original 282-cell and one-sided fine-grid diverted cold residual histories"><figcaption>The gray 282-cell series is the accepted original-map control; blue 550 and rust 2,098 are the one-sided face-span trial. The dotted line is the 10<sup>−12</sup> target. H200 job 1286926 reaches it only at 2,098 cells.</figcaption></figure>
+    <figure><img src="/nova/figures/converged-forward-solve/fine-grid-convergence/terminal-one-sided-550.svg" alt="Shared-level solved and analytic contours, both null sets and wall for the one-sided 550-cell terminal state"><figcaption>One-sided frame trial, 550-cell terminal state: scaled residual 0.00155031583773; converged: false. Blue solid contours and blue nulls are solved; dark dashed contours and dark nulls are analytic. Both fields share physical flux levels; the black outline is the wall.</figcaption></figure>
+    <figure><img src="/nova/figures/converged-forward-solve/fine-grid-convergence/terminal-one-sided-2098.svg" alt="Shared-level solved and analytic contours, both null sets and wall for the one-sided 2,098-cell terminal state"><figcaption>One-sided frame trial, 2,098-cell terminal state: scaled residual 6.13649516713 × 10<sup>−13</sup>; converged: true. Blue solid contours and blue nulls are solved; dark dashed contours and dark nulls are analytic. Both fields share physical flux levels; the black outline is the wall.</figcaption></figure>
   </section>
 </main>
 </body>

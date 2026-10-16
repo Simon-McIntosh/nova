@@ -1,0 +1,76 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "clive",
+  "base_log_revision": "a193577bce22054280bb601e4c8ca0d6488674db",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-16T09:42:47.918Z",
+  "dispatched_at": "2026-10-16T09:27:01Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/polygon-moments-retire.html",
+      "line": "37",
+      "severity": "follow-on",
+      "text": "follow-on: the dense-comparison row for the test polygons carries three cells against a four-column header, so the relative difference the receipt records (7.42e-15 in equivalence.log) is silently dropped from the delivered table and a reader cannot reconcile the two."
+    },
+    {
+      "file": "benchmarks/exact_clip_closed_form_floor.py",
+      "line": "303",
+      "severity": "follow-on",
+      "text": "follow-on: table_terms_per_live_edge = 15 * 6 * 5 describes the retired route's fifteen-column table while the program now lowers the padded layer over a degree-three owner table of ten columns, so the receipt's stated contraction layout is stale; it has no consumer."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T083628080620-polygon-moments-retire/equivalence.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the log's header names scratch script /tmp/pmeq/equivalence.py, which was not carried into the run directory, so the padded-versus-retired comparison that motivates the benchmark re-point cannot be re-run; the durable substitute is tests/test_clipped_support_quadrature.py:506."
+    },
+    {
+      "file": "tests/test_clipped_support_quadrature.py",
+      "line": "404",
+      "severity": "follow-on",
+      "text": "follow-on: the rationale for what moved out of the deleted test does not mention its reversed-winding assertion (test_padding_and_winding_leave_the_moments_alone), so the omission of a property the done_when asks to account for is unrecorded; it is covered only indirectly, by the clockwise sliver ring in tests/test_polygon_moment_owner.py:75 exercising the orientation branch at nova/equilibrium/clip_quadrature.py:185."
+    }
+  ],
+  "head_log_revision": "8795e658d7bca7ef3a861ade95d04e9c3df3aaf4",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none - the only product-source change is a deletion of a module no production code imports (grep over nova tests benchmarks scripts apps found no import), and the touched benchmark is reached at runtime only by tests/test_exact_clip_closed_form_budget.py:18, which is not a production call site",
+    "diff": "read commit by commit against a193577b - one commit, 8795e658d, touches exactly five paths (+222/-283); the deletions are complete at head (both files absent), the benchmark's numeric change is algebraically the retired computation (local = (vertices - centre) / scale inside separatrix_clip.py:504 with area_scale re-applied at :505-531), and the source worktree is clean, so the declared mutation of _owner_quadratic_moments was restored.",
+    "done_when": "all five clauses are evidenced. (1) equivalence.log, run at base a193577b, records the owner table reproducing the retired route at 1.33e-15 absolute on the retired test's convex and concave polygons and 1.78e-15 on stored carrier cut cell 131, with an independent dense Duffy fan quadrature agreeing to 7.42e-15 and 2.50e-14 relative. (2) both files are deleted, and the one property the clip suite did not hold moves to tests/test_clipped_support_quadrature.py:478 with its reason in the block at :397-405. (3) the benchmark is re-pointed rather than deleted, with the reason stated in evidence_inputs; the literal clause \"imports the clip_quadrature owner instead\" is met through the owner's surviving general layer separatrix_clip.padded_polynomial_current_moments:473-507, which contracts against clip_quadrature._straight_edge_monomial_moments, rather than by importing the raw owner table and re-implementing the contraction inside a benchmark, which would recreate the duplication the node removes - a justified reading of the clause, disclosed in the manifest. (4) my own grep over nova tests benchmarks scripts apps returns no import of polygon_moments, only unrelated identifiers (benchmarks/xpoint_cell_wedge_oracle.py:473, benchmarks/empty_exact_polygon_probe.py:284, scripts/clip_audit/audit_hex_clip.py:62). (5) the three per-file CPU arms in the run directory are complete with EXIT=0 and read 2/5/4 passed before against 2/5/8 passed after, zero added failures.",
+    "goal": "the goal is to delete the unreached polygon_moments module after proving equivalence; the diff at a193577b..8795e658d deletes nova/equilibrium/polygon_moments.py and tests/test_polygon_moments.py and re-points benchmarks/exact_clip_closed_form_floor.py:190 to separatrix_clip.padded_polynomial_current_moments, so the parallel contraction the goal names is gone from the tree.",
+    "manifest": "read in full; it states the three per-file gate arms with their before and after counts, names the negative-control log, derives baseline_suite and after_suite from completed logs at a193577b and 8795e658d with zero failures, and lists two follow-ons with blockers none.",
+    "write_paths": "the declared paths are the two deletions, benchmarks/exact_clip_closed_form_floor.py, tests/test_clipped_support_quadrature.py and the evidence fragment; every one of the five paths in the diff a193577b..8795e658d is inside that list and no granted figure directory was written."
+  },
+  "justifications": {
+    "durability": "tests/test_clipped_support_quadrature.py:478 reddens if the owner contraction or its orientation sign changes, and negative-control.log shows tests/test_clipped_support_quadrature.py:506 failing on the perturbed coefficient while the positive control at :494 passes, but the six-channel contraction is held only by the test-local helper at :457 and the benchmark re-point by nothing re-runnable.",
+    "evidence": "equivalence.log is a complete receipt at the base revision and the three gate arms are recorded by delta, but the re-pointed benchmark body at benchmarks/exact_clip_closed_form_floor.py:187 is reached by no test - tests/test_exact_clip_closed_form_budget.py:18 imports the module for constants only - and the equivalence script at /tmp/pmeq/equivalence.py was not preserved.",
+    "fit": "the added block at tests/test_clipped_support_quadrature.py:393-407 follows the file's existing dense-reference idiom and carries no plan label, version suffix or author attribution.",
+    "goal_fidelity": "nova/equilibrium/polygon_moments.py is deleted and benchmarks/exact_clip_closed_form_floor.py:190 now books through separatrix_clip.padded_polynomial_current_moments, which is the goal's whole content.",
+    "reuse": "separatrix_clip.padded_polynomial_current_moments:533 returns only (current, first), so no production owner exposes the second moments the added helper at tests/test_clipped_support_quadrature.py:457 re-contracts - it extends the owner family rather than forking it, though it does re-create the deleted module's contraction in test code.",
+    "scope_discipline": "all five paths in the diff are inside the declared write paths and the granted docs/figures/converged-forward-solve/polygon-moments-retire directory was correctly left unused."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to delete the unreached polygon_moments module after proving equivalence; the diff at a193577b..8795e658d deletes nova/equilibrium/polygon_moments.py and tests/test_polygon_moments.py and re-points benchmarks/exact_clip_closed_form_floor.py:190 to separatrix_clip.padded_polynomial_current_moments, so the parallel contraction the goal names is gone from the tree.\nVERDICT done_when: all five clauses are evidenced. (1) equivalence.log, run at base a193577b, records the owner table reproducing the retired route at 1.33e-15 absolute on the retired test's convex and concave polygons and 1.78e-15 on stored carrier cut cell 131, with an independent dense Duffy fan quadrature agreeing to 7.42e-15 and 2.50e-14 relative. (2) both files are deleted, and the one property the clip suite did not hold moves to tests/test_clipped_support_quadrature.py:478 with its reason in the block at :397-405. (3) the benchmark is re-pointed rather than deleted, with the reason stated in evidence_inputs; the literal clause \"imports the clip_quadrature owner instead\" is met through the owner's surviving general layer separatrix_clip.padded_polynomial_current_moments:473-507, which contracts against clip_quadrature._straight_edge_monomial_moments, rather than by importing the raw owner table and re-implementing the contraction inside a benchmark, which would recreate the duplication the node removes - a justified reading of the clause, disclosed in the manifest. (4) my own grep over nova tests benchmarks scripts apps returns no import of polygon_moments, only unrelated identifiers (benchmarks/xpoint_cell_wedge_oracle.py:473, benchmarks/empty_exact_polygon_probe.py:284, scripts/clip_audit/audit_hex_clip.py:62). (5) the three per-file CPU arms in the run directory are complete with EXIT=0 and read 2/5/4 passed before against 2/5/8 passed after, zero added failures.\nVERDICT write_paths: the declared paths are the two deletions, benchmarks/exact_clip_closed_form_floor.py, tests/test_clipped_support_quadrature.py and the evidence fragment; every one of the five paths in the diff a193577b..8795e658d is inside that list and no granted figure directory was written.\nVERDICT manifest: read in full; it states the three per-file gate arms with their before and after counts, names the negative-control log, derives baseline_suite and after_suite from completed logs at a193577b and 8795e658d with zero failures, and lists two follow-ons with blockers none.\nVERDICT diff: read commit by commit against a193577b - one commit, 8795e658d, touches exactly five paths (+222/-283); the deletions are complete at head (both files absent), the benchmark's numeric change is algebraically the retired computation (local = (vertices - centre) / scale inside separatrix_clip.py:504 with area_scale re-applied at :505-531), and the source worktree is clean, so the declared mutation of _owner_quadratic_moments was restored.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/equilibrium/polygon_moments.py is deleted and benchmarks/exact_clip_closed_form_floor.py:190 now books through separatrix_clip.padded_polynomial_current_moments, which is the goal's whole content.\nSCORE evidence: 16\nJUSTIFICATION evidence: equivalence.log is a complete receipt at the base revision and the three gate arms are recorded by delta, but the re-pointed benchmark body at benchmarks/exact_clip_closed_form_floor.py:187 is reached by no test - tests/test_exact_clip_closed_form_budget.py:18 imports the module for constants only - and the equivalence script at /tmp/pmeq/equivalence.py was not preserved.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: all five paths in the diff are inside the declared write paths and the granted docs/figures/converged-forward-solve/polygon-moments-retire directory was correctly left unused.\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_clipped_support_quadrature.py:478 reddens if the owner contraction or its orientation sign changes, and negative-control.log shows tests/test_clipped_support_quadrature.py:506 failing on the perturbed coefficient while the positive control at :494 passes, but the six-channel contraction is held only by the test-local helper at :457 and the benchmark re-point by nothing re-runnable.\nSCORE fit: 18\nJUSTIFICATION fit: the added block at tests/test_clipped_support_quadrature.py:393-407 follows the file's existing dense-reference idiom and carries no plan label, version suffix or author attribution.\nSCORE reuse: 16\nJUSTIFICATION reuse: separatrix_clip.padded_polynomial_current_moments:533 returns only (current, first), so no production owner exposes the second moments the added helper at tests/test_clipped_support_quadrature.py:457 re-contracts - it extends the owner family rather than forking it, though it does re-create the deleted module's contraction in test code.\nFINDING docs/evidence/fragments/converged-forward-solve/polygon-moments-retire.html:37 follow-on: the dense-comparison row for the test polygons carries three cells against a four-column header, so the relative difference the receipt records (7.42e-15 in equivalence.log) is silently dropped from the delivered table and a reader cannot reconcile the two.\nFINDING benchmarks/exact_clip_closed_form_floor.py:303 follow-on: table_terms_per_live_edge = 15 * 6 * 5 describes the retired route's fifteen-column table while the program now lowers the padded layer over a degree-three owner table of ten columns, so the receipt's stated contraction layout is stale; it has no consumer.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T083628080620-polygon-moments-retire/equivalence.log:1 follow-on: the log's header names scratch script /tmp/pmeq/equivalence.py, which was not carried into the run directory, so the padded-versus-retired comparison that motivates the benchmark re-point cannot be re-run; the durable substitute is tests/test_clipped_support_quadrature.py:506.\nFINDING tests/test_clipped_support_quadrature.py:404 follow-on: the rationale for what moved out of the deleted test does not mention its reversed-winding assertion (test_padding_and_winding_leave_the_moments_alone), so the omission of a property the done_when asks to account for is unrecorded; it is covered only indirectly, by the clockwise sliver ring in tests/test_polygon_moment_owner.py:75 exercising the orientation branch at nova/equilibrium/clip_quadrature.py:185.",
+  "review_run_id": "r-20261016T092550914783-review-of-polygon-moments-retire-8795e658d7bc",
+  "reviewed_base_sha": "a193577bce22054280bb601e4c8ca0d6488674db",
+  "reviewed_head_sha": "8795e658d7bca7ef3a861ade95d04e9c3df3aaf4",
+  "reviewed_run_id": "r-20261016T083628080620-polygon-moments-retire",
+  "reviewer_run_id": "r-20261016T092550914783-review-of-polygon-moments-retire-8795e658d7bc",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T09:39:55.353482+00:00",
+  "total": 104
+}

@@ -100,6 +100,11 @@ def residual_histories(receipts, output):
             markersize=5,
             label=f"{receipt['cells']:,} cells",
         )
+    largest = max(
+        sum(row["accepted"] for row in receipt["history"]) for receipt in receipts
+    )
+    axis.set_xlim(-0.1, largest + 0.1)
+    axis.set_xticks(np.arange(largest + 1))
     axis.axhline(1e-12, color=GREY, linestyle=":", linewidth=1.2)
     axis.set_xlabel("accepted correction")
     axis.set_ylabel("scaled residual")

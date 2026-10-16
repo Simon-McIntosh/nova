@@ -16,16 +16,48 @@ import jax.scipy.linalg as jsp_linalg
 import numpy as np
 
 import nova
+from benchmarks import solovev_certificate as certificate
+from scripts.analytic_oracle_fixtures import measure as fixture
 from scripts.prototypes.fine_grid_convergence.context import build
+from scripts.prototypes.fine_grid_convergence.handoff import map_moments
 from scripts.prototypes.fine_grid_convergence.runtime_solve import (
     factor,
     residual,
     without_profile,
 )
+from scripts.prototypes.lean_map.probe_bias import _image
+from scripts.prototypes.solve_options.point_bias import _exterior
 
 
 def save(path, data):
     path.write_text(json.dumps(data, indent=2) + "\n")
+
+
+def panel_data(context, moments, operands, profile, residual_value, converged):
+    """Build a shared-level contour receipt for the terminal forward state."""
+    machine = context.machine
+    coordinates = np.vstack(
+        (machine.node, machine.wall_node, machine.sample_coordinates)
+    )
+    analytic = jnp.asarray(
+        certificate._exact_state("diverted-single-null", context.exact, coordinates)
+    )
+    exterior, _ = _exterior(context.cache, context.carrier_key)
+    operator = fixture.forward_operator(context.source, machine)
+    terminal = jax.jit(
+        lambda point, carrier: map_moments(point, *carrier[:7], profile, *carrier[7:])
+    )(moments, operands)
+    solved_flux = exterior + _image(operator, moments)
+    return {
+        "coordinates": np.asarray(machine.node).tolist(),
+        "wall": np.asarray(machine.wall_node).tolist(),
+        "solved_flux": np.asarray(solved_flux)[: len(machine.node)].tolist(),
+        "analytic_flux": np.asarray(analytic)[: len(machine.node)].tolist(),
+        "solved_roots": np.asarray(terminal.roots).tolist(),
+        "analytic_roots": np.asarray(context.seeds).tolist(),
+        "terminal_residual": residual_value,
+        "converged": converged,
+    }
 
 
 def chord_two(states, operands, scale, lu, pivots, profile):
@@ -56,6 +88,7 @@ def main():
     parser.add_argument("--cache", type=Path, required=True)
     parser.add_argument("--start-json", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--panel-only", action="store_true")
     args = parser.parse_args()
     assert jax.config.jax_enable_x64 is True and jax.default_backend() == "gpu"
     print(
@@ -63,8 +96,8 @@ def main():
         flush=True,
     )
     saved = json.loads(args.start_json.read_text())
-    if not saved.get("converged"):
-        raise ValueError("control requires a converged cold receipt")
+    if "terminal_state" not in saved or not saved.get("history"):
+        raise ValueError("control requires a cold receipt with a terminal state")
     context = build(args.cells, args.cache)
     state = jnp.asarray(saved["terminal_state"]["moments"]).reshape(-1)
     state = state / jnp.tile(context.scale, len(context.reference))
@@ -72,7 +105,23 @@ def main():
     scale = context.scale
     profile = context.profile
     result = {"cells": len(context.reference), "taylor": [], "batches": []}
+    result["panel"] = panel_data(
+        context,
+        state.reshape((-1, 3)) * scale,
+        operands,
+        profile,
+        saved["history"][-1]["residual"],
+        bool(saved.get("converged")),
+    )
     save(args.output, result)
+    print(
+        f"PANEL cells={result['cells']} converged={result['panel']['converged']}",
+        flush=True,
+    )
+    if args.panel_only:
+        return
+    if not saved.get("converged"):
+        raise ValueError("control requires a converged cold receipt")
 
     mapped = jax.jit(
         lambda point, carrier, unit: residual(point, carrier, unit, profile)

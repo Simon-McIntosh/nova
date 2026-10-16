@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 scratch=$(mktemp -d /tmp/$USER-$SLURM_JOB_ID-XXXX)
-trap 'rm -rf "$scratch"' EXIT
+finish() {
+  code=$?
+  printf 'EXIT=%s\n' "$code"
+  rm -rf "$scratch"
+}
+trap finish EXIT
 export TMPDIR="$scratch"
 export XLA_PYTHON_CLIENT_PREALLOCATE=false
 export JAX_PLATFORMS=cuda,cpu
@@ -12,17 +17,12 @@ cache=${CARRIER_CACHE:?}
 python=/home/ITER/mcintos/Code/nova/.venv/bin/python
 export PYTHONPATH="$repo"
 revision=$(git -C "$repo" rev-parse HEAD)
-failed=0
 for size in 500 2000; do
   printf 'revision=%s tree=%s command=%s\n' "$revision" "$repo" "$python -m scripts.prototypes.fine_grid_convergence.probe --cells $size --cache $cache --start-json $prior/local-cold-$size.json --output $run/stalled-$size.json"
   printf 'cwd=%s\n' "$repo"
   printf 'ROW size=%s\n' "$size"
-  if ! "$python" -m scripts.prototypes.fine_grid_convergence.probe \
+  "$python" -m scripts.prototypes.fine_grid_convergence.probe \
     --cells "$size" \
     --cache "$cache" --start-json "$prior/local-cold-$size.json" \
-    --output "$run/stalled-$size.json"; then
-    failed=1
-  fi
+    --output "$run/stalled-$size.json"
 done
-printf 'EXIT=%s\n' "$failed"
-exit "$failed"

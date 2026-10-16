@@ -64,10 +64,17 @@ def main():
     residual, factor = jax.linearize(equation, base.reshape(-1))
     residual = np.asarray(residual)
     length = residual.size
+    cell_count = len(context.reference)
+    residual_inf = np.max(np.abs(residual))
+    print(
+        f"BASE cells={cell_count} residual_inf={residual_inf:.12g} "
+        f"residual_two={np.linalg.norm(residual):.12g}",
+        flush=True,
+    )
     product = jax.jit(factor)
     operator = LinearOperator(
         (length, length),
-        matvec=lambda vector: np.asarray(product(jnp.asarray(vector))),
+        matvec=lambda vector: np.array(product(jnp.asarray(vector)), copy=True),
         dtype=np.float64,
     )
     direction, code = gmres(

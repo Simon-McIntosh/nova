@@ -44,31 +44,39 @@ def _continuous_path_weight(
     peer = jnp.maximum(geometry.neighbour, 0)
     peer_edge = jnp.maximum(geometry.neighbour_edge, 0)
     passage = jnp.minimum(peak, peak[peer, peer_edge])
-    # The share of an edge above the boundary level vanishes as its passage
-    # closes. Its measured flux excursion supplies the local scale.
-    edge_low = jnp.minimum(
-        jnp.minimum(first, last),
-        jnp.minimum(first[peer, peer_edge], last[peer, peer_edge]),
-    )
-    flux_excursion = passage - edge_low
-    flux_weight = jnp.clip((passage - level) / jnp.maximum(flux_excursion, 1e-14), 0, 1)
+    flux_width = jnp.asarray(1e-8, dtype=passage.dtype)
+    flux_weight = jnp.clip(0.5 + (passage - level) / flux_width, 0, 1)
 
     axis_sector = _local_axis_sector(geometry, axis, form)
-    offset = midpoint - form.position
-    parameter = jnp.einsum("...i,ai->...a", offset, form.direction)
-    residual = (
-        offset[..., None, :]
-        - parameter[..., None] ** 2 * form.curvature
-        - parameter[..., None] ** 3 * form.cubic
+    def signed_sides(points):
+        offset = points - form.position
+        parameter = jnp.einsum("...i,ai->...a", offset, form.direction)
+        residual = (
+            offset[..., None, :]
+            - parameter[..., None] ** 2 * form.curvature
+            - parameter[..., None] ** 3 * form.cubic
+        )
+        return (
+            form.direction[:, 0] * residual[..., 1]
+            - form.direction[:, 1] * residual[..., 0]
+        )
+
+    side = signed_sides(midpoint)
+    first_side = signed_sides(vertices)
+    last_side = signed_sides(end)
+    sector_margin = jnp.minimum(
+        side[..., axis_sector], -jnp.roll(side, -1, axis=-1)[..., axis_sector]
     )
-    side = (
-        form.direction[:, 0] * residual[..., 1]
-        - form.direction[:, 1] * residual[..., 0]
+    side_span = jnp.abs(first_side - last_side)
+    sector_width = jnp.maximum(
+        jnp.maximum(
+            side_span[..., axis_sector],
+            jnp.roll(side_span, -1, axis=-1)[..., axis_sector],
+        ),
+        1e-12,
     )
-    next_side = jnp.roll(side, -1, axis=-1)
-    sector_margin = jnp.minimum(side[..., axis_sector], -next_side[..., axis_sector])
     length_width = jnp.maximum(1e-7, 1e-4 * jnp.median(geometry.pitch))
-    sector_weight = jnp.clip(0.5 + sector_margin / length_width, 0, 1)
+    sector_weight = jnp.clip(0.5 + sector_margin / sector_width, 0, 1)
     distance = jnp.linalg.norm(geometry.centre - form.position, axis=1)
     near_weight = jnp.clip(0.5 + (radius - distance) / length_width, 0, 1)
     near_weight = jnp.maximum(

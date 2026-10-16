@@ -753,6 +753,71 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "b70052ffbaedd51b6e0c25313c0bd16408bb7963",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "manifest is blocked; process kept for resume",
+    "scratch_bytes": 15973,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261016T101339510832-operand-cache",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 15973,
+        "path": "/tmp/reckon-crew-scratch/r-20261016T101339510832-operand-cache"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "integrated",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [],
+          "head": "b70052ffbaedd51b6e0c25313c0bd16408bb7963",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/operand-cache",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-10-16T12:37:41Z",
+            "session_id": "51b453ff-d396-4c1b-a814-ea4e4fc4cb6f",
+            "session_source": "stream",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/operand-cache"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "this worktree is the working directory of recoverable session 51b453ff-d396-4c1b-a814-ea4e4fc4cb6f"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_retention": {
+      "classification": "retained-for-resume",
+      "retained_at": "2026-10-16T12:37:41Z",
+      "session_id": "51b453ff-d396-4c1b-a814-ea4e4fc4cb6f",
+      "session_source": "stream",
+      "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/operand-cache"
+    },
+    "worktree_withheld": "retained as the working directory of recoverable session 51b453ff-d396-4c1b-a814-ea4e4fc4cb6f"
+  },
   "resume_waiver": {
     "reason": "its repair landed through the chained content-store-gpfs follow-on, merged at 08eb46636; the run will not be resumed",
     "session_id": "51b453ff-d396-4c1b-a814-ea4e4fc4cb6f",

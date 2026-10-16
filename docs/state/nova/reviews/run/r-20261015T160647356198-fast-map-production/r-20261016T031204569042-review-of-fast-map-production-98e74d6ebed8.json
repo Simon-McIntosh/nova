@@ -18,6 +18,11 @@
       "kind": "folded",
       "node": "fine-grid-convergence",
       "recorded_at": "2026-10-16T03:50:24.566384+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "prototype qualification tests call a standalone checker; solver-wired refusal tests belong to the production fixed-point solve that replaces these scripts",
+      "recorded_at": "2026-10-16T03:50:40.312959+00:00"
     }
   },
   "findings": [

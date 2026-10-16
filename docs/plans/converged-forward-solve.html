@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="272">
+<meta name="plan-version" content="273">
 <meta name="plan-modified" content="2026-10-16">
 </head>
 <body>
@@ -471,6 +471,21 @@
     <h4 class="r-fu-title">Converge the continuous fast map&#x27;s diverted solve at 550 and 2,098 cells (§5)</h4>
     <div class="r-fu-body"><p>From <code>c-s21-fast-route-kept</code>. Done when <code>docs/research/fine-grid-convergence.html</code> reports, on the H200:</p><ul><li>Taylor remainder tests at the stalled 550 and 2,098-cell iterates, per moment block, with the X-point handoff cells' one-sided derivatives;</li><li>the cause, named at a cell and a term;</li><li>a fix that keeps the map continuous and its error falling;</li><li>the diverted cold solve to 1e-12 at 282, 550 and 2,098, with Taylor slopes of 2 at each solution;</li><li>warm neighbours, and the runtime-argument chord batch at widths 1, 16 and 128 against 0.90 ms, 60 s and 50 MB;</li><li>limited, sweep and transition controls unchanged;</li><li>poloidal contour panels.</li></ul></div>
     <pre class="r-fu-prompt">/reckon-build converged-forward-solve §5</pre>
+    </article>
+<article class="r-fu" data-id="f-cfs-solve-owner" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-written-by="reckon-build" data-written-at="2026-10-16" data-recommends-skill="/reckon-build converged-forward-solve §5" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Create the production solve.fixed_point owner from the settled batched chord solver (§5)</h4>
+    <div class="r-fu-body"><p>From <code>c-s21-widen-ruling</code>. Done when <code>nova/equilibrium/solve.py</code> exposes one narrow chord-Newton solver over a pure map: a result type, <code>factor</code> and <code>fixed_point</code>. It needs CPU tests for cold quadratic convergence, two-correction chord reuse, vmap over 16 states, and no state-dependent constants. The batched-factor prototype must use it, reproducing the width-128 limited row on the H200 within 10% of 0.279 ms per state. The legacy call sites moving at the §6 cutover are listed but not edited.</p></div>
+    <pre class="r-fu-prompt">/reckon-build converged-forward-solve §5</pre>
+    </article>
+<article class="r-fu" data-id="f-cfs-equilibrium-hygiene" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-written-by="reckon-build" data-written-at="2026-10-16" data-recommends-skill="/reckon-build converged-forward-solve §6" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Remove the duplicated dilation, dead carrier benchmarks and copied test helpers (§6)</h4>
+    <div class="r-fu-body"><p>From the code review r-20261016T074713917162. Done when:</p><ul><li><code>morphology</code> owns the only four-neighbour dilation;</li><li><code>coefficient_carrier</code> and its four benchmarks are deleted, or kept with the plan or doc that keeps them live;</li><li><code>_green_block</code> and <code>_solovev</code> live once, in <code>tests/conftest.py</code>;</li><li>the two source-text assertions are replaced by behaviour assertions or deleted;</li><li>the touched tests pass by delta.</li></ul></div>
+    <pre class="r-fu-prompt">/reckon-build converged-forward-solve §6</pre>
+    </article>
+<article class="r-fu" data-id="f-cfs-polygon-moments-retire" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-written-by="reckon-build" data-written-at="2026-10-16" data-recommends-skill="/reckon-build converged-forward-solve §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Delete the unreached polygon_moments duplicate after proving clip_quadrature equivalent (§3)</h4>
+    <div class="r-fu-body"><p>From the code review r-20261016T074713917162, treatment. Done when a CPU equivalence check shows <code>clip_quadrature</code>'s polynomial current moments reproduce <code>polygon_density_moments</code> to roundoff. <code>polygon_moments.py</code> and its test must be deleted, the one benchmark moved to the owner or deleted, and no import left. The node is dispatched as run r-20261016T083628080620.</p></div>
+    <pre class="r-fu-prompt">/reckon-build converged-forward-solve §3</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -986,6 +1001,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-s21-moment-space-superseded" data-who="reckon-build" data-when="2026-10-16T08:35:00Z">
     <div class="r-comment-body"><p>Lead ruling 2026-10-16: supersede the held moment-space Newton. It is recorded as a negative result, its commits are archived under tag <code>archive/moment-space-newton</code>, and its claims on <code>fixed_points</code>, <code>forward</code>, <code>forward_operator</code>, <code>gs</code>, <code>topology</code>, <code>support_read</code>, <code>solve_request</code> and their tests are released. That clears the way for production nodes on the settled parts and for deleting the legacy read.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-s21-widen-ruling" data-who="reckon-build" data-when="2026-10-16T08:45:00Z">
+    <div class="r-comment-body"><p>Lead ruling 2026-10-16: widen beyond the single critical-path node. Run the paired shadow now (fast-map-production on clive, run r-20261016T074530605259). Move settled parts into production. Clear the plan hygiene items. Run a background code review that removes dead parallel implementations and keeps the interface narrow.</p><p>The code review (r-20261016T074713917162) found ten findings. Its one treatment deletes the unreached <code>polygon_moments</code> duplicate of <code>clip_quadrature</code>'s booking, which four reviews have raised (<code>f-cfs-polygon-moments-retire</code>). The dilation duplicate, the dead carrier benchmarks and the copied test helpers go to <code>f-cfs-equilibrium-hygiene</code>. The legacy-solver width and interface-growth findings go to <code>f-cfs-legacy-read-migration</code>. The Bell-mesh prototype copy is being removed by <code>f-cfs-fixed-point-owner</code> (run r-20261016T074941977848). The first production node moves the settled batched chord solver into <code>nova/equilibrium/solve.py</code> (<code>f-cfs-solve-owner</code>).</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261010T184522536142-cfs-current-book-fragments" data-who="reckon-build" data-when="2026-10-10T18:46:29.609Z">
     <div class="r-comment-body"><p>Implemented traced current.book over connected multi-polygon membership using the widened signed-ring exact clip. Six certificate rows pass: diverted read image errors 1.15131582e-4, 2.49842782e-5, 3.95031905e-6 at 550/2098/5158 cells; limited errors 1.77777866e-5, 2.66948705e-6, 5.45231060e-7 at 553/2105/5167. Maximum net-current error 2.22e-16, excluded current zero, legacy control 0.197326978718; evidence docs/evidence/fragments/converged-forward-solve/cfs-current-book.html#cfs-current-book-fragments-booking and one three-rung SVG; audit-doc 0 errors.</p></div>

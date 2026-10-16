@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="281">
+<meta name="plan-version" content="282">
 <meta name="plan-modified" content="2026-10-16">
 </head>
 <body>
@@ -484,10 +484,11 @@
     <div class="r-fu-body"><p>From the code review r-20261016T074713917162. Done when:</p><ul><li><code>morphology</code> owns the only four-neighbour dilation;</li><li><code>coefficient_carrier</code> and its four benchmarks are deleted, or kept with the plan or doc that keeps them live;</li><li><code>_green_block</code> and <code>_solovev</code> live once, in <code>tests/conftest.py</code>;</li><li>the two source-text assertions are replaced by behaviour assertions or deleted;</li><li>the touched tests pass by delta.</li></ul></div>
     <pre class="r-fu-prompt">/reckon-build converged-forward-solve §6</pre>
     </article>
-<article class="r-fu" data-id="f-cfs-polygon-moments-retire" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-written-by="reckon-build" data-written-at="2026-10-16" data-recommends-skill="/reckon-build converged-forward-solve §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-cfs-polygon-moments-retire" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-written-by="reckon-build" data-written-at="2026-10-16" data-recommends-skill="/reckon-build converged-forward-solve §3" data-resolved-at="2026-10-16T09:55:47+00:00" data-resolved-by="reckon-build">
     <h4 class="r-fu-title">Delete the unreached polygon_moments duplicate after proving clip_quadrature equivalent (§3)</h4>
     <div class="r-fu-body"><p>From the code review r-20261016T074713917162, treatment. Done when a CPU equivalence check shows <code>clip_quadrature</code>'s polynomial current moments reproduce <code>polygon_density_moments</code> to roundoff. <code>polygon_moments.py</code> and its test must be deleted, the one benchmark moved to the owner or deleted, and no import left. The node is dispatched as run r-20261016T083628080620.</p></div>
     <pre class="r-fu-prompt">/reckon-build converged-forward-solve §3</pre>
+    <p class="r-fu-outcome"><p>Landed at merge f7f46b5d9 (run r-20261016T083628080620-polygon-moments-retire, review 104). It deleted <code>nova/equilibrium/polygon_moments.py</code> (108 lines) and its 157-line test, after a CPU equivalence check showed the <code>clip_quadrature</code> owner reproduces every channel the module published to 1.8e-15 on a stored carrier cut cell. The closed-form floor benchmark now uses <code>separatrix_clip.padded_polynomial_current_moments</code>, and the properties the deleted test held moved into <code>tests/test_clipped_support_quadrature.py</code>. The owner, budget and quadrature test files show no added failures. This closes a duplicate-owner finding four reviews raised. The review's four follow-ons are documentation and provenance details, exempted.</p></p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -1239,7 +1240,7 @@
     <div class="r-comment-body"><p>Independent review of run r-20261016T084931889861-solve-owner at head 1a10d44931f40240dbfce017453abc69fc5fd7b6 from base 63caf693143b26d2a689939bb9073b5f969d2b75; scores goal_fidelity 18, evidence 14, scope_discipline 15, durability 17, fit 16, reuse 15 (total 95), added_failure_count 0, two follow-on findings.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261016T084931889861-solve-owner" data-who="reckon-build" data-when="2026-10-16T09:41:11.258Z">
-    <div class="r-comment-body"><p>The production chord-Newton fixed-point owner is nova/equilibrium/solve.py: a frozen Factor and SolveResult, factor() building the dense Jacobian by vmapped jvp and LU-factoring it, and fixed_point() solving cold from a fresh factor with damped backtracking or reusing a supplied factor as a chord; scripts/prototypes/batched_factor/measure.py now drives both through it with its local copies deleted, and the H200 width-128 limited row converges 128 of 128 states at 0.2829 ms per state against the prototype&#x27;s 0.279 ms. Call sites that move to solve.fixed_point at the cutover are listed in docs/evidence/fragments/converged-forward-solve/solve-owner.html#solve-owner-cutover.</p></div>
+    <div class="r-comment-body"><p>The production chord-Newton fixed-point owner is nova/equilibrium/solve.py: a frozen Factor and SolveResult, factor() building the dense Jacobian by vmapped jvp and LU-factoring it, and fixed_point() solving cold from a fresh factor with damped backtracking or reusing a supplied factor as a chord; scripts/prototypes/batched_factor/measure.py now drives both through it with its local copies deleted, and the H200 width-128 limited row converges 128 of 128 states at 0.2829 ms per state against the prototype's 0.279 ms. Call sites that move to solve.fixed_point at the cutover are listed in docs/evidence/fragments/converged-forward-solve/solve-owner.html#solve-owner-cutover.</p></div>
 </div>
 </section>
 </main>

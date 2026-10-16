@@ -88,6 +88,17 @@
     <p>The same corrected pair converges the limited carrier in three dense corrections to a scaled sup residual of 3.996e-15, from a starting residual of 2.315e-03, with the boundary class at 0 and 254 support cells at the terminal state. The map executes in 1.18 ms there. This reproduces the earlier fused-convergence measurement on the same rung in both count and order (three cold corrections, below 4e-15), so the corrected read and booking do not disturb the limited carrier's convergence.</p>
     <p>A step-scale scan from the converged limited state (scaled sup residual 3.996e-15, relative gradient 0.032) walks 82 steps along the Newton direction from step 0 to step 1 without leaving roundoff: the residual spans 3.996e-15 to 4.898e-15, the largest excursion is 9.0e-16, and the X-point cell's membership stays at 1 across every step. This is the continuity the divergence at the diverted carrier lacks, and it is measured at a converged state as the spec requires. Only the Newton direction was scanned; the two random directions the spec names are unmeasured.</p>
   </section>
+  <section id="figures">
+    <h2>Figures</h2>
+    <figure>
+      <img src="/nova/figures/converged-forward-solve/fast-map-production/diverted-convergence-traces.svg" alt="Scaled sup residual against correction for the corrected pair and the unfixed-pair control on the diverted carrier at 282 nodes">
+      <figcaption>Scaled sup residual against correction on the diverted carrier at 282 nodes, for the corrected read and booking and for the unfixed-pair control. Both stall after ten corrections, the control 380 times lower.</figcaption>
+    </figure>
+    <figure>
+      <img src="/nova/figures/converged-forward-solve/fast-map-production/stalled-scan-residuals.svg" alt="Scaled residual against scan step at the diverted stalled iterate and at the converged limited state">
+      <figcaption>Scaled sup residual along the Newton direction at the diverted stalled iterate, where a step of 0.178 takes it to 2.789e+01, and at the converged limited state, where every one of the 82 steps stays inside 1.0e-15 of roundoff. The scan step index increases with the step scale.</figcaption>
+    </figure>
+  </section>
   <section id="limits">
     <h2>Measurements not taken</h2>
     <p>The 550- and 2098-cell diverted carriers were built but not solved within the run's fence, so the three-size convergence claim is unmeasured. The limited carrier solved at 289 nodes but its 41-state sweep validity check and its re-measurement at 550 remain unmeasured. The Newton-direction step-scale scan at the converged limited state is reported above; the two random directions and the Taylor remainder slope at that state are not. The unfixed-pair control completed its correction loop and stalls at 2.684581554642e-03 against the corrected pair's 1.0208587667876892. No figures were produced, so the map-error and convergence figures named by the spec are unstarted, and the two mechanisms the spec corrected have no negative-control figure showing the residual jump the boolean eligibility produces.</p>

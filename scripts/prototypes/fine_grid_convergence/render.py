@@ -10,7 +10,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-from scripts.prototypes.fast_read.render_contours import panel
+from nova.media.ink import DEFAULT_INK, poloidal_axes
+from nova.media.poloidal import draw_nulls, draw_scattered_contours, draw_wall
 
 
 BLUE = "#326c88"
@@ -117,6 +118,70 @@ def residual_histories(receipts, output):
     _save(figure, axis, output)
 
 
+def terminal_panel(data, output):
+    """Replace fast_read.render_contours.panel without figure-local prose."""
+    points = np.asarray(data["coordinates"])
+    wall = np.asarray(data["wall"])
+    solved = np.asarray(data["solved_flux"])
+    analytic = np.asarray(data["analytic_flux"])
+    lower = max(np.min(solved), np.min(analytic))
+    upper = min(np.max(solved), np.max(analytic))
+    levels = np.linspace(lower, upper, 9)[1:-1]
+    figure, axis = plt.subplots(figsize=(14, 8), dpi=100)
+    poloidal_axes(axis)
+    draw_scattered_contours(
+        axis,
+        points[:, 0],
+        points[:, 1],
+        solved,
+        levels,
+        wall,
+        color=DEFAULT_INK.flux_color,
+        linewidth=3.0,
+    )
+    reference_lines = draw_scattered_contours(
+        axis,
+        points[:, 0],
+        points[:, 1],
+        analytic,
+        levels,
+        wall,
+        color="#444444",
+        linewidth=2.6,
+    )
+    reference_lines.set_linestyles("dashed")
+    draw_wall(axis, wall[:, 0], wall[:, 1])
+    solved_roots = np.asarray(data["solved_roots"])
+    analytic_roots = np.asarray(data["analytic_roots"])
+    reference_style = DEFAULT_INK.variant(
+        axis_color="#444444",
+        xpoint_color="#444444",
+        axis_markersize=10,
+        xpoint_markersize=11,
+    )
+    solved_style = DEFAULT_INK.variant(
+        axis_color=DEFAULT_INK.flux_color,
+        xpoint_color=DEFAULT_INK.flux_color,
+    )
+    draw_nulls(
+        axis,
+        analytic_roots[0],
+        analytic_roots[1:],
+        style=reference_style,
+        contain=wall,
+    )
+    draw_nulls(
+        axis,
+        solved_roots[0],
+        solved_roots[1:],
+        style=solved_style,
+        contain=wall,
+    )
+    axis.autoscale_view()
+    figure.savefig(output, format="svg", metadata={"Date": None})
+    plt.close(figure)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--probe", type=Path, action="append", default=[])
@@ -137,7 +202,7 @@ def main():
         receipts = [json.loads(path.read_text()) for path in args.solve]
         residual_histories(receipts, args.output / "residual-histories.svg")
         for receipt in receipts:
-            panel(
+            terminal_panel(
                 receipt["panel"],
                 args.output / f"terminal-{receipt['cells']}.svg",
             )

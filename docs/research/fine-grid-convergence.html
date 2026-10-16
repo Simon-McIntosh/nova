@@ -69,7 +69,17 @@
         <tr><th>2,098, cell 50</th><td>ordinary</td><td>0.497632</td><td>0.842276</td><td>−1.2267 / −1.2267</td><td>−0.0094 / −0.0094</td></tr>
       </tbody>
     </table>
-    <p>At 2,098 cells, selected cell 47 books 0.7617 A from its normal-form fragment; its ordinary cut would book 12.4648 A. At 550 cells, selected cell 8 books 41.9265 A from its normal-form fragment versus 40.5797 A from its ordinary cut. The probe's zero normal-moment entries for unselected cells, including cells 82 and 50, are mask outputs, not measurements of what those fragments would book. A direct live scan across the cell-50 step bracket is running in H200 job 1286870; until it resolves booking and path weights there, the finite-step change is localized to cell 50 but its changing term is not yet established.</p>
+    <p>At 2,098 cells, selected cell 47 books 0.7617 A from its normal-form fragment; its ordinary cut would book 12.4648 A. At 550 cells, selected cell 8 books 41.9265 A from its normal-form fragment versus 40.5797 A from its ordinary cut. The probe's zero normal-moment entries for unselected cells, including cells 82 and 50, are mask outputs, not measurements of what those fragments would book.</p>
+    <p>H200 job 1286870 completed the live Newton bracket scan with <code>EXIT=0</code>. The booking IDs remain [47, 48], the boundary class remains diverted, and cell 50 stays on the ordinary cut. Its geometric membership changes by less than 0.000002, but its axis-connected path weight drops from 1 to 0 between steps 10<sup>−4</sup> and 2 × 10<sup>−4</sup>. The scaled current residual of that cell jumps from −0.00137408 to 1.30678340. The full rows are in <code>handoff-scan.json</code>; <code>handoff-scan.log</code> records the imported revision and successful exit. A separate live edge-factor probe distinguishes whether the flux passage or the saddle-sector frame causes the drop.</p>
+    <table>
+      <thead><tr><th>Newton step</th><th>Cell 50 path weight</th><th>Cell 50 geometric membership</th><th>Cell 50 scaled current residual</th><th>Supported cells</th></tr></thead>
+      <tbody>
+        <tr><th>0</th><td>1</td><td>0.842276</td><td>−0.00137422</td><td>1,272</td></tr>
+        <tr><th>10<sup>−4</sup></th><td>1</td><td>0.842275</td><td>−0.00137408</td><td>1,272</td></tr>
+        <tr><th>2 × 10<sup>−4</sup></th><td>0</td><td>0.842274</td><td>1.30678340</td><td>1,270</td></tr>
+        <tr><th>10<sup>−3</sup></th><td>0</td><td>0.842267</td><td>1.30677298</td><td>1,270</td></tr>
+      </tbody>
+    </table>
   </section>
 </main>
 </body>

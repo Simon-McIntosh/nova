@@ -1,13 +1,14 @@
 """Measure the saddle-anchored map against the axis-facing map on one device.
 
-Both arms are lowered with the carrier, operands and states as runtime
-arguments, so no carrier-scaled array is captured as an HLO constant. The
-saddle arm is checked against a reference configuration that reproduces the
-first build's integration (every cell a candidate, 128-node outer rule, the
-realised cut set within the first build's ceiling): the owned-cell area and
-moments must agree to 1e-12, so the cost change alters nothing but cost. The
-runner exits nonzero when that agreement fails, so the gate carries a
-correctness guard as well as a cost one.
+Both arms are lowered with the carrier, the batched state and every operands
+array as runtime arguments, so no carrier- or state-scaled array is captured
+as an HLO constant. The density profile and the topology policy are closed
+over: they carry callables and scalars, no array that scales with the carrier,
+and the profile is not one of the operands. The saddle arm is checked against
+a reference configuration that reproduces the first build's integration (every
+cell a candidate, 128-node outer rule): the owned map must agree to 1e-12, so
+the cost change alters nothing but cost. The runner exits nonzero when that
+agreement fails, so the gate carries a correctness guard as well as a cost one.
 """
 
 # ruff: noqa: E402
@@ -47,7 +48,7 @@ def generated_size(program):
     """Generated code size, or -1 where the backend does not report it."""
     try:
         return program.runtime_executable().size_of_generated_code_in_bytes()
-    except Exception:  # noqa: BLE001 - CPU backend has no runtime executable
+    except Exception:  # noqa: BLE001 - the CPU backend has no runtime executable
         return -1
 
 
@@ -62,8 +63,8 @@ def dense_constant_elements(text):
     return largest
 
 
-def arm_signature(map_fn, *, saddle):
-    """One-function signature with every carrier array a runtime argument."""
+def arm_signature(map_fn, profile, policy, *, saddle):
+    """One function with every carrier and state array a runtime argument."""
 
     def one(
         moments,
@@ -74,7 +75,6 @@ def arm_signature(map_fn, *, saddle):
         fit,
         design,
         geometry,
-        profile,
         seeds,
         convention,
         target,
@@ -86,7 +86,6 @@ def arm_signature(map_fn, *, saddle):
         candidates,
         outer_nodes,
         outer_weights,
-        policy,
     ):
         extras = (
             {
@@ -159,11 +158,10 @@ def main():
         profile,
         seeds,
         convention,
-        _,
+        policy,
         target,
         axis_sign,
     ) = context.operands
-    policy = context.policy
     gate_nodes, gate_weights = _leggauss(GATE_OUTER_DEGREE)
     reference_nodes, reference_weights = _leggauss(REFERENCE_OUTER_DEGREE)
 
@@ -188,6 +186,7 @@ def main():
         "radius_cells": args.radius_cells,
         "gate_capacity": gate_capacity,
         "gate_outer_degree": GATE_OUTER_DEGREE,
+        "reference_outer_degree": REFERENCE_OUTER_DEGREE,
         "arms": {},
     }
     save(args.output, result)
@@ -201,7 +200,6 @@ def main():
             fit,
             design,
             geometry,
-            profile,
             seeds,
             convention,
             target,
@@ -213,18 +211,17 @@ def main():
             active_candidates,
             nodes,
             weights,
-            policy,
         )
 
     def run_arm(map_fn, saddle, active_candidates, nodes, weights, widths):
-        one = arm_signature(map_fn, saddle=saddle)
+        one = arm_signature(map_fn, profile, policy, saddle=saddle)
         rows = {}
         for width in widths:
             batch = neighbours[:width]
             arguments = arguments_for(active_candidates, nodes, weights)
-            lowered = jax.jit(
-                jax.vmap(one, in_axes=(0,) + (None,) * 20), static_argnums=(20,)
-            ).lower(batch, *arguments)
+            lowered = jax.jit(jax.vmap(one, in_axes=(0,) + (None,) * 18)).lower(
+                batch, *arguments
+            )
             executable = lowered.compile()
             started = perf_counter()
             state = executable(batch, *arguments)
@@ -247,7 +244,7 @@ def main():
                 "finite": int(np.sum(np.all(np.isfinite(residual), axis=reduce_axes))),
                 "owner_cells": int(np.sum(np.asarray(state.graph_cells) > 0)),
             }
-            result["arms"][map_fn.__module__ + "." + map_fn.__name__] = rows
+            result["arms"][("saddle" if saddle else "axis")] = rows
             save(args.output, result)
             print(
                 f"SPEED arm={'saddle' if saddle else 'axis'} "
@@ -265,8 +262,9 @@ def main():
     result["arms"] = {"axis": axis_rows, "saddle": saddle_rows}
 
     agreement = agreement_check(
-        context,
         saddle_map,
+        profile,
+        policy,
         neighbours[:4],
         candidates,
         gate_nodes,
@@ -296,8 +294,9 @@ def main():
 
 
 def agreement_check(
-    context,
     map_fn,
+    profile,
+    policy,
     batch,
     gate_candidates,
     gate_nodes,
@@ -308,12 +307,12 @@ def agreement_check(
     arguments_for,
 ):
     """Owned map must agree between the sized disk and the first-build rule."""
-    one = arm_signature(map_fn, saddle=True)
+    one = arm_signature(map_fn, profile, policy, saddle=True)
 
     def evaluate(active_candidates, nodes, weights):
         arguments = arguments_for(active_candidates, nodes, weights)
         program = (
-            jax.jit(jax.vmap(one, in_axes=(0,) + (None,) * 20), static_argnums=(20,))
+            jax.jit(jax.vmap(one, in_axes=(0,) + (None,) * 18))
             .lower(batch, *arguments)
             .compile()
         )

@@ -68,18 +68,24 @@
     (<code>JAX_PLATFORMS=cpu</code>, a login node under heavy fleet load, so the build wall is
     an upper bound rather than a clean number):
   </p>
-  <table id="operand-cache-measure-small">
-    <thead><tr><th>cells</th><th>matrix bytes</th><th>build [s]</th><th>load [s]</th><th>digest</th></tr></thead>
+  <table id="operand-cache-measure-table">
+    <thead><tr><th>cells</th><th>operand</th><th>matrix bytes</th><th>build [s]</th><th>load [s]</th><th>ratio</th><th>digest</th></tr></thead>
     <tbody>
-      <tr><td>4</td><td>6,912</td><td>54.376</td><td>0.0135</td>
-          <td><code>3659c832de62…8793b4</code></td></tr>
+      <tr><td>4</td><td>values</td><td>6,912</td><td>54.376</td><td>0.0135</td><td>4,028×</td>
+          <td><code>3659c832de62…8793b4</code></td>
+      <tr><td>282</td><td>values</td><td>34,354,368</td><td>80.547</td><td>0.0055</td><td>14,677×</td>
+          <td><code>e1afb81b137e…dfc147</code></td></tr>
+      <tr><td>282</td><td>jets</td><td>47,267,712</td><td>110.346</td><td>0.0040</td><td>27,345×</td>
+          <td><code>51721ac3060c…f2593e</code></td></tr>
     </tbody>
   </table>
   <p id="operand-cache-measure-rows">
-    The diverted rows at 282, 550 and 2,098 cells build and reload through
-    <code>scripts/prototypes/.../measure_operands.py</code> in one submission. That job is
-    queued on the H200 reservation, so the three rows are not yet measured and this fragment
-    does not claim them.
+    The 282-cell rows are the first row of the diverted sweep at 282, 550 and 2,098 cells,
+    run as one job (job 1287218) on the H200 reservation <code>gpu_0003_grpA</code> with one
+    GPU; both operands report <code>cache_hit</code> false on the first call and true on the
+    second, and the load is the second call reading the entry the first one wrote. The
+    550 and 2,098 rows are still building in the same allocation, so they are not claimed
+    here.
   </p>
 
   <h2 id="operand-cache-checks">Checks</h2>

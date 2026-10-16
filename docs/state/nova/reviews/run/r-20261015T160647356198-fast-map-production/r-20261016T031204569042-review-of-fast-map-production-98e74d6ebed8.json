@@ -13,6 +13,13 @@
   ],
   "completed_at": "2026-10-16T03:21:03Z",
   "dispatched_at": "2026-10-16T03:12:40Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "fine-grid-convergence",
+      "recorded_at": "2026-10-16T03:50:24.566384+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/research/fast-map-production.html",

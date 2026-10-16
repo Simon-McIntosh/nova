@@ -95,11 +95,17 @@ converged predecessor receipt.</p>
 <table>
 <thead><tr><th>Figure</th><th>Recorded prototype</th><th>Through solve.fixed_point</th><th>Job</th></tr></thead>
 <tbody>
-<tr><td>converged of 128</td><td>128</td><td>pending</td><td>1287154</td></tr>
-<tr><td>per-state wall [ms]</td><td>0.279</td><td>pending</td><td>1287154</td></tr>
-<tr><td>executable [MB]</td><td>1.359</td><td>pending</td><td>1287154</td></tr>
+<tr><td>converged of 128</td><td>128</td><td>128</td><td>1287154</td></tr>
+<tr><td>per-state wall [ms]</td><td>0.279</td><td>0.2829</td><td>1287154</td></tr>
+<tr><td>executable [MB]</td><td>1.359</td><td>1.359</td><td>1287154</td></tr>
 </tbody>
 </table>
+<p>The width-128 row converges all 128 states in two corrections (one-correction
+maximum residual 2.17e-12, two-correction 3.96e-15) at 0.2829 ms per state, 1.4
+percent above the prototype's 0.279 ms and inside the ten-percent bound; the
+compiled program is 1,358,968 bytes against the prototype's 1.359 MB. The
+widths 1 and 16 rows measured on the same card are 7.42 ms and 0.755 ms per
+state, so the batch scaling is intact.</p>
 </section>
 
 <section id="solve-owner-cutover">

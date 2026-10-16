@@ -22,6 +22,11 @@
       "kind": "exempted",
       "reason": "redundant, not wrong: the digest echo assertions cannot fail independently, but the marker, single-entry and GPFS negative-control checks carry the regression; deleting three lines is not worth a node",
       "recorded_at": "2026-10-16T16:11:13.531043+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "redundant, not wrong: the digest echo assertions cannot fail independently, but the marker, single-entry and GPFS negative-control checks carry the regression; deleting three lines is not worth a node",
+      "recorded_at": "2026-10-16T16:11:21.700843+00:00"
     }
   },
   "findings": [

@@ -23,6 +23,11 @@
       "kind": "exempted",
       "reason": "prototype qualification tests call a standalone checker; solver-wired refusal tests belong to the production fixed-point solve that replaces these scripts",
       "recorded_at": "2026-10-16T03:50:40.312959+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "the continuity refusal is a prototype measurement gate; the production read owns a solver-invoked continuity check",
+      "recorded_at": "2026-10-16T03:50:54.921862+00:00"
     }
   },
   "findings": [

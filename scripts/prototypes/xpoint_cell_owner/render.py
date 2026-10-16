@@ -79,7 +79,7 @@ def agreement(receipts, output):
     _save(figure, output)
 
 
-def map_error(receipts, output):
+def map_error(receipts, output, connected=None):
     plt.style.use("data-ink")
     figure, axis = plt.subplots(figsize=(14, 5.5), dpi=100)
     cells = np.asarray([receipt["cells"] for receipt in receipts])
@@ -100,14 +100,27 @@ def map_error(receipts, output):
         color=BLUE,
         linewidth=3.0,
         marker="o",
-        label="conic owner",
+        label="axis-facing Bell",
     )
+    if connected:
+        connected_error = np.asarray(
+            [receipt["centre_map_flux_error"] for receipt in connected]
+        )
+        axis.loglog(
+            cells,
+            connected_error,
+            color=BLUE,
+            linestyle=":",
+            linewidth=2.6,
+            marker="s",
+            label="connected Bell",
+        )
     axis.set_xticks(cells, labels=[f"{number:,}" for number in cells])
     axis.xaxis.set_minor_locator(NullLocator())
     axis.xaxis.set_minor_formatter(NullFormatter())
     axis.set_xlim(cells[0] * 0.85, cells[-1] * 1.15)
-    axis.set_ylim(5e-5, 2e-3)
-    axis.set_yticks((1e-4, 1e-3))
+    axis.set_ylim(5e-5, 0.12 if connected else 2e-3)
+    axis.set_yticks((1e-4, 1e-3, 1e-2) if connected else (1e-4, 1e-3))
     axis.yaxis.set_minor_locator(NullLocator())
     axis.yaxis.set_minor_formatter(NullFormatter())
     axis.set_xlabel("carrier cells")
@@ -249,6 +262,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--agreement", type=Path, action="append", default=[])
     parser.add_argument("--solve", type=Path, action="append", default=[])
+    parser.add_argument("--bell-map", type=Path, action="append", default=[])
     parser.add_argument("--panel", type=Path, action="append", default=[])
     parser.add_argument("--contact", type=Path, action="append", default=[])
     parser.add_argument("--output", type=Path, required=True)
@@ -264,9 +278,14 @@ def main():
     if args.solve:
         if len(args.solve) != 3:
             parser.error("three carrier solve receipts are required")
+        if args.bell_map and len(args.bell_map) != 3:
+            parser.error("three connected Bell map receipts are required")
         receipts = [json.loads(path.read_text()) for path in args.solve]
-        map_error(receipts, args.output / "map-error.svg")
+        connected = [json.loads(path.read_text()) for path in args.bell_map]
+        map_error(receipts, args.output / "map-error.svg", connected)
         residual_histories(receipts, args.output / "residual-histories.svg")
+    elif args.bell_map:
+        parser.error("connected Bell maps require the solve receipts")
     for path in args.panel:
         receipt = json.loads(path.read_text())
         terminal_panel(

@@ -1,9 +1,15 @@
 """Render measured Taylor slopes, solve histories, and terminal flux contours."""
 
+# ruff: noqa: E402
+from nova.jax.config import configure_dtypes
+
+configure_dtypes()
+
 import argparse
 import json
 from pathlib import Path
 
+import jax
 import matplotlib
 
 matplotlib.use("Agg")
@@ -12,6 +18,8 @@ import numpy as np
 
 from nova.media.ink import DEFAULT_INK, poloidal_axes
 from nova.media.poloidal import draw_nulls, draw_scattered_contours, draw_wall
+
+assert jax.config.jax_enable_x64 is True
 
 
 BLUE = "#326c88"

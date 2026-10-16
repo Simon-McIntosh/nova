@@ -117,6 +117,26 @@ def direction_scans(receipts, output):
     _save(figure, axes, output)
 
 
+def stalled_correction(receipt, output):
+    """Show the smooth minimum below the line search's trial-scale floor."""
+    _style()
+    rows = receipt["scan"]
+    step = np.asarray([row["step"] for row in rows])
+    residual = np.asarray([row["residual"] for row in rows])
+    near = step <= 0.002
+    step, residual = step[near], residual[near]
+    minimum = np.argmin(residual)
+    figure, axis = plt.subplots(figsize=(14, 7), dpi=100)
+    axis.plot(step, residual, color=RUST, linewidth=3)
+    axis.plot(step[minimum], residual[minimum], "o", color=RUST, markersize=10)
+    axis.axvline(1 / 2048, color=GREY, linestyle=":", linewidth=1.2)
+    label_height = residual.max() - 0.1 * (residual.max() - residual.min())
+    axis.text(1 / 2048, label_height, "smallest trial", color=GREY)
+    axis.set_xlabel("Newton step scale")
+    axis.set_ylabel("scaled residual")
+    _save(figure, (axis,), output)
+
+
 def resolution(receipts, output, unchanged=None, lean=None):
     _style()
     cells = np.asarray([row["cells"] for row in receipts])
@@ -145,6 +165,7 @@ def main():
     parser.add_argument("--candidate-probe", type=Path)
     parser.add_argument("--window-probe", type=Path)
     parser.add_argument("--direction-probe", type=Path, action="append", default=[])
+    parser.add_argument("--stall-probe", type=Path)
     parser.add_argument("--map", type=Path, action="append", default=[])
     parser.add_argument("--unchanged-error", type=float, action="append", default=[])
     parser.add_argument("--lean-error", type=float, action="append", default=[])
@@ -168,6 +189,10 @@ def main():
         direction_scans(
             [json.loads(path.read_text()) for path in args.direction_probe],
             args.output / "direction-scans.svg",
+        )
+    if args.stall_probe:
+        stalled_correction(
+            json.loads(args.stall_probe.read_text()), args.output / "stall-scan.svg"
         )
     if args.map:
         resolution(

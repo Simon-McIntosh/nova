@@ -76,3 +76,16 @@ def test_downward_discriminant_matches_a_hand_integral():
     moments, _ = moments_of_root(DOWNWARD)
     area = moments[0](2.0) - moments[0](-2.0)
     assert abs(area - 0.5 * np.pi * 4.0) < 1e-12
+
+
+def test_perturbed_discriminant_breaks_the_dense_agreement():
+    # Negative control: shift one term of the discriminant used by the CLOSED
+    # FORM only, leaving the quadrature on the unperturbed one. The agreed
+    # integral must separate, so the agreement above is a property of this
+    # primitive rather than of the quadrature it is compared against.
+    coefficients = (1.0, -0.5, 2.0, 0.75)
+    lower, upper = -1.9, 1.9
+    dense = _dense(DOWNWARD, coefficients, lower, upper)
+    perturbed = (DOWNWARD[0] + 1e-3, DOWNWARD[1], DOWNWARD[2])
+    shifted = integrate_root_polynomial(perturbed, coefficients, lower, upper)
+    assert abs(shifted - dense) / abs(dense) > 1e-4

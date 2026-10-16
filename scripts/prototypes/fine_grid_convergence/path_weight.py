@@ -46,6 +46,13 @@ def _continuous_path_weight(
     passage = jnp.minimum(peak, peak[peer, peer_edge])
     flux_width = jnp.asarray(1e-8, dtype=passage.dtype)
     flux_weight = jnp.clip(0.5 + (passage - level) / flux_width, 0, 1)
+    edge_low = jnp.minimum(
+        jnp.minimum(first, last),
+        jnp.minimum(first[peer, peer_edge], last[peer, peer_edge]),
+    )
+    passage_fraction = jnp.clip(
+        (passage - level) / jnp.maximum(passage - edge_low, 1e-14), 0, 1
+    )
 
     axis_sector = _local_axis_sector(geometry, axis, form)
 
@@ -69,7 +76,7 @@ def _continuous_path_weight(
         side[..., axis_sector], -jnp.roll(side, -1, axis=-1)[..., axis_sector]
     )
     side_span = jnp.abs(first_side - last_side)
-    sector_width = jnp.maximum(
+    face_span = jnp.maximum(
         jnp.maximum(
             side_span[..., axis_sector],
             jnp.roll(side_span, -1, axis=-1)[..., axis_sector],
@@ -77,6 +84,8 @@ def _continuous_path_weight(
         1e-12,
     )
     length_width = jnp.maximum(1e-7, 1e-4 * jnp.median(geometry.pitch))
+    # A weak flux passage gives less room to extend the axis-facing sector.
+    sector_width = jnp.hypot(length_width, face_span * passage_fraction**2)
     # A face whose midpoint is inside the axis sector stays fully open.
     # Outside it, the passage closes over that face's resolved sector span.
     sector_weight = jnp.clip(1 + sector_margin / sector_width, 0, 1)

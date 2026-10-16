@@ -83,9 +83,13 @@ def _continuous_path_weight(
         ),
         1e-12,
     )
-    length_width = jnp.maximum(1e-7, 1e-4 * jnp.median(geometry.pitch))
-    # A weak flux passage gives less room to extend the axis-facing sector.
-    sector_width = jnp.hypot(length_width, face_span * passage_fraction**2)
+    pitch = jnp.median(geometry.pitch)
+    length_width = jnp.maximum(1e-7, 1e-4 * pitch)
+    resolved = jnp.clip((0.100 - pitch) / (0.100 - 0.036), 0, 1)
+    resolved = resolved * resolved * (3 - 2 * resolved)
+    # Coarse faces need a flux taper; resolved faces carry their full sector span.
+    sector_fraction = resolved + (1 - resolved) * passage_fraction**2
+    sector_width = jnp.hypot(length_width, face_span * sector_fraction)
     # A face whose midpoint is inside the axis sector stays fully open.
     # Outside it, the passage closes over that face's resolved sector span.
     sector_weight = jnp.clip(1 + sector_margin / sector_width, 0, 1)

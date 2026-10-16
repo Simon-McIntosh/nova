@@ -15,12 +15,12 @@ python=/home/ITER/mcintos/Code/nova/.venv/bin/python
 export PYTHONPATH="$repo"
 revision=$(git -C "$repo" rev-parse HEAD)
 for size in 250 500 2000; do
-  command="$python -m scripts.prototypes.fine_grid_convergence.solve_carrier --cells $size --cache $cache --output $run/localized-cold-$size.json --max-steps 18"
+  command="$python -m scripts.prototypes.fine_grid_convergence.solve_carrier --cells $size --cache $cache --output $run/agreement-cold-$size.json --max-steps 18"
   printf 'revision=%s tree=%s command=%s\n' "$revision" "$repo" "$command"
   printf 'cwd=%s\n' "$repo"
   code=0
   "$python" -m scripts.prototypes.fine_grid_convergence.solve_carrier \
-    --cells "$size" --cache "$cache" --output "$run/localized-cold-$size.json" \
+    --cells "$size" --cache "$cache" --output "$run/agreement-cold-$size.json" \
     --max-steps 18 || code=$?
   printf 'ROW size=%s EXIT=%s\n' "$size" "$code"
 done

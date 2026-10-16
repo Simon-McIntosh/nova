@@ -15,7 +15,7 @@ from scripts.prototypes.lean_map.quadrature import interior_moments
 def booked_blend(area_gap):
     """Damp the ordinary-cut correction outside a narrow agreement region."""
     disagreement = jnp.square(area_gap / 0.043)
-    return disagreement * jnp.exp(-disagreement) / 3.0
+    return 0.085 * jnp.exp(-8.0 * jnp.square(disagreement))
 
 
 def map_moments(

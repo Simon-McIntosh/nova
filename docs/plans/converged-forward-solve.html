@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="305">
+<meta name="plan-version" content="306">
 <meta name="plan-modified" content="2026-10-16">
 </head>
 <body>
@@ -527,6 +527,11 @@
     <h4 class="r-fu-title">Delete the fine-grid copies of the fixed-shape map and path weight in favour of their owners (§5)</h4>
     <div class="r-fu-body"><p>From the fine-grid-convergence review's reuse findings, scored 4 of 20. <code>scripts/prototypes/fine_grid_convergence/handoff.py</code> repeats <code>map_moments</code> from <code>fast_map_production/program.py</code>. <code>path_weight.py</code> copies the edge-passage map from <code>fast_map_production/kernel.py</code> and installs it globally, so two implementations of one mechanism exist.</p><p>Dispatch only after <code>f-cfs-xpoint-cell-owner</code> lands, because that node is based on the fine-grid head and may import these modules. Done when one owner remains for each mechanism, every caller imports it, the deleted copies have no references left, and the agreement and limited gates read the same at the merged head.</p></div>
     <pre class="r-fu-prompt">/reckon-build converged-forward-solve §5</pre>
+    </article>
+<article class="r-fu" data-id="f-cfs-store-refusal-causes" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="reckon-build" data-written-at="2026-10-16" data-recommends-skill="/reckon-build converged-forward-solve §4" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Name the cause when the content store refuses an existing but invalid entry (§4)</h4>
+    <div class="r-fu-body"><p>Found while landing machine-artifact-gpfs. Two tests in <code>tests/test_mast_artifact.py</code> fail on main: <code>test_existing_empty_destination_is_not_overwritten</code> and <code>test_resolver_rejects_symlinked_manifest</code>. The store refuses correctly but says the entry is missing, because <code>verified_destination</code> returns <code>None</code> for three states: an absent entry, an entry with no manifest, and an entry whose manifest is not a regular file.</p><p>Done when the store names the cause in one place, every caller keeps its intended rebuild-on-miss behaviour, and the two tests pass with no other change by delta. Run r-20261016T161552219287-store-refusal-causes.</p></div>
+    <pre class="r-fu-prompt">/reckon-build converged-forward-solve §4</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -1191,7 +1196,7 @@
     <div class="r-comment-body"><p>Stored parsed independent review for source run at base 0ebe45a55a36fe1f8ea6fad5b082ca08e772585c and head 7554f1214c354c9371dd592e4ad7b098245e261b; six scores total 115/120, six checklist items present, three follow-on findings, no blocking finding, zero added failures.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261016T152837349228-machine-artifact-gpfs" data-who="reckon-build" data-when="2026-10-16T15:59:59.925Z">
-    <div class="r-comment-body"><p>materialize_machine_artifact now passes the content store&#x27;s cache-root rename selection instead of the explicit no-clobber primitive, so a machine bundle publishes and resolves on GPFS; the GPFS publish test is green (module 9 passed vs 8 at base), the four-module suite adds no failure, and the negative control restores the explicit no-clobber rename on a GPFS root and reproduces the publish failure (1 failed, EXIT=1).</p></div>
+    <div class="r-comment-body"><p>materialize_machine_artifact now passes the content store's cache-root rename selection instead of the explicit no-clobber primitive, so a machine bundle publishes and resolves on GPFS; the GPFS publish test is green (module 9 passed vs 8 at base), the four-module suite adds no failure, and the negative control restores the explicit no-clobber rename on a GPFS root and reproduces the publish failure (1 failed, EXIT=1).</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-s21-accuracy-floor-review" data-who="reckon-build" data-when="2026-10-11T21:20:00Z">
     <div class="r-comment-body"><p>Accuracy-floor review, 2026-10-11, at the lead's request. A health review of ten accuracy-path modules and a census of ten capabilities ranked six floors on the production path; each is owned by a followup or section. In rank order: the packed moment kernel (f-cfs-moment-path-reconcile); legacy spline support on the map (f-cfs-wire-current-book); the certificate exterior (f-cfs-exterior-on-exact-support); the production-seed Newton defect (f-cfs-newton-production-seed); the read on solved states (f-cfs-read-compile-route); the dense literals, fixed by gs.apply. The health review found polygon moment integration implemented in four modules (clip_quadrature, separatrix_clip, polygon_moments, stencil_mesh). The census found no accuracy floor among them, and their consolidation is a deletion-led treatment. The production chord default is an unmeasured arm (f-cfs-chord-default-arm). Reports: accuracy-floor-census.md under the crew reports directory resolution-pivot/, and code-review/98773e8b1367/report.md.</p></div>

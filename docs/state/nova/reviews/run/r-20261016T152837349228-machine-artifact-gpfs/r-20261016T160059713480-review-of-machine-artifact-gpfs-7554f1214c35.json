@@ -1,0 +1,74 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": null,
+  "call_site_count": 3,
+  "call_sites": [
+    "nova/imas/mast_geometry.py:580",
+    "nova/imas/mast_geometry.py:632",
+    "nova/scripts/diiid_machine_artifact.py:389"
+  ],
+  "completed_at": "2026-10-16T16:07:48Z",
+  "dispatched_at": "2026-10-16T16:01:32Z",
+  "findings": [
+    {
+      "file": "tests/test_machine_artifact.py",
+      "line": "246",
+      "severity": "follow-on",
+      "text": "follow-on: stored.digest and resolved.digest are compared with manifest.digest, the value supplied to materialize and resolve, so those two assertions cannot independently expose a wrong publication path; the GPFS failure control and marker and entry checks still protect the target regression."
+    },
+    {
+      "file": "tests/test_mast_artifact.py",
+      "line": "753",
+      "severity": "follow-on",
+      "text": "follow-on: the stored and resolved digest comparisons reuse the manifest.digest supplied to both calls, so they can pass when the return objects simply echo the request; the resolver's own verification and entry-count check provide the substantive coverage."
+    },
+    {
+      "file": "tests/test_machine_artifact_concurrency.py",
+      "line": "282",
+      "severity": "follow-on",
+      "text": "follow-on: resolved.digest is checked against digest just passed to resolve, while resolve_machine_artifact returns that argument at nova/imas/machine_artifact.py:828, so this assertion is not an independent concurrency check; the preceding result, exit, and single-entry assertions carry that test."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "7f3a308ee changes nova/imas/machine_artifact.py and three test files, 0e44c8ff8 adds the evidence fragment, and 7554f1214 corrects its recorded negative-control timing; all three were read against base 0ebe45a55.",
+    "done_when": "prompt.txt:94-99 requires GPFS publish and resolve, forced unsupported-rename concurrency, and four CPU modules by delta; after_suite.log:11-70 records 9/3/59/10 passes with the same two MAST failures as base_suite.log:12-52, while negative_control.log:104-106 fails the GPFS test after restoring the old rename.",
+    "goal": "the goal in the reviewed run's prompt.txt:30 is GPFS machine-bundle publication through the content-store probe; nova/imas/machine_artifact.py:762-764 now selects that owner's factory before publishing.",
+    "manifest": "the reviewed manifest.md:1-22 reports three commits, completed base and head gate records, the negative-control log, and the same two failure IDs in both arms.",
+    "write_paths": "manifest.md:3 declares the machine-artifact source, three tests, and one evidence fragment; the diff from 0ebe45a55 to 7554f1214 touches exactly those five permitted files."
+  },
+  "justifications": {
+    "durability": "tests/test_machine_artifact.py:239-252 fails when the explicit no-clobber rename is restored, as negative_control.log:104-106 proves, while its digest comparisons at lines 246-247 and similar assertions in the other tests echo caller-supplied values.",
+    "evidence": "after_suite.log:11-70 and base_suite.log:12-52 support zero added failures, and negative_control.log:104-106 shows the old no-clobber path fails the new GPFS test.",
+    "fit": "nova/imas/machine_artifact.py:26-42 imports the content-store helper beside its existing private helper aliases and its new comments at lines 758-761 explain probe ordering without forbidden source labels.",
+    "goal_fidelity": "nova/imas/machine_artifact.py:762-764 uses content_store._publication_rename_factory on the verified cache root, and tests/test_machine_artifact.py:239-252 verifies a GPFS publication and resolution.",
+    "reuse": "a capability search for rename selection and publication found nova/database/content_store.py:602-649 as the existing owner, and nova/imas/machine_artifact.py:762 calls it without adding a competing probe.",
+    "scope_discipline": "the five files in git diff 0ebe45a55..7554f1214 are exactly the five written paths recorded in manifest.md:3-8."
+  },
+  "node": "review-of-machine-artifact-gpfs-7554f1214c35",
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: 0ebe45a55a36fe1f8ea6fad5b082ca08e772585c\nreviewed_head_sha: 7554f1214c354c9371dd592e4ad7b098245e261b\nVERDICT goal: the goal in the reviewed run's prompt.txt:30 is GPFS machine-bundle publication through the content-store probe; nova/imas/machine_artifact.py:762-764 now selects that owner's factory before publishing.\nVERDICT done_when: prompt.txt:94-99 requires GPFS publish and resolve, forced unsupported-rename concurrency, and four CPU modules by delta; after_suite.log:11-70 records 9/3/59/10 passes with the same two MAST failures as base_suite.log:12-52, while negative_control.log:104-106 fails the GPFS test after restoring the old rename.\nVERDICT write_paths: manifest.md:3 declares the machine-artifact source, three tests, and one evidence fragment; the diff from 0ebe45a55 to 7554f1214 touches exactly those five permitted files.\nVERDICT manifest: the reviewed manifest.md:1-22 reports three commits, completed base and head gate records, the negative-control log, and the same two failure IDs in both arms.\nVERDICT diff: 7f3a308ee changes nova/imas/machine_artifact.py and three test files, 0e44c8ff8 adds the evidence fragment, and 7554f1214 corrects its recorded negative-control timing; all three were read against base 0ebe45a55.\nCALL_SITES: nova/imas/mast_geometry.py:580, nova/imas/mast_geometry.py:632, nova/scripts/diiid_machine_artifact.py:389\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: nova/imas/machine_artifact.py:762-764 uses content_store._publication_rename_factory on the verified cache root, and tests/test_machine_artifact.py:239-252 verifies a GPFS publication and resolution.\nSCORE evidence: 19\nJUSTIFICATION evidence: after_suite.log:11-70 and base_suite.log:12-52 support zero added failures, and negative_control.log:104-106 shows the old no-clobber path fails the new GPFS test.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the five files in git diff 0ebe45a55..7554f1214 are exactly the five written paths recorded in manifest.md:3-8.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_machine_artifact.py:239-252 fails when the explicit no-clobber rename is restored, as negative_control.log:104-106 proves, while its digest comparisons at lines 246-247 and similar assertions in the other tests echo caller-supplied values.\nSCORE fit: 19\nJUSTIFICATION fit: nova/imas/machine_artifact.py:26-42 imports the content-store helper beside its existing private helper aliases and its new comments at lines 758-761 explain probe ordering without forbidden source labels.\nSCORE reuse: 20\nJUSTIFICATION reuse: a capability search for rename selection and publication found nova/database/content_store.py:602-649 as the existing owner, and nova/imas/machine_artifact.py:762 calls it without adding a competing probe.\nFINDING tests/test_machine_artifact.py:246 follow-on: stored.digest and resolved.digest are compared with manifest.digest, the value supplied to materialize and resolve, so those two assertions cannot independently expose a wrong publication path; the GPFS failure control and marker and entry checks still protect the target regression.\nFINDING tests/test_mast_artifact.py:753 follow-on: the stored and resolved digest comparisons reuse the manifest.digest supplied to both calls, so they can pass when the return objects simply echo the request; the resolver's own verification and entry-count check provide the substantive coverage.\nFINDING tests/test_machine_artifact_concurrency.py:282 follow-on: resolved.digest is checked against digest just passed to resolve, while resolve_machine_artifact returns that argument at nova/imas/machine_artifact.py:828, so this assertion is not an independent concurrency check; the preceding result, exit, and single-entry assertions carry that test.\nASSERTION tests/test_machine_artifact.py:246-247: these fail only if the returned digest differs from the caller's manifest.digest; reverting the rename selection raises before either assertion.\nASSERTION tests/test_machine_artifact.py:248: this fails if the stored directory lacks its manifest marker.\nASSERTION tests/test_machine_artifact.py:252: this fails if publication leaves no digest entry, a wrong entry, or an extra visible entry.\nASSERTION tests/test_machine_artifact_concurrency.py:270: this fails if the four workers construct different manifest digests from the same source.\nASSERTION tests/test_machine_artifact_concurrency.py:271: this fails if any worker reports a publication exception instead of stored.\nASSERTION tests/test_machine_artifact_concurrency.py:272: this fails if the workers report different destination directories.\nASSERTION tests/test_machine_artifact_concurrency.py:273: this fails if any publisher exits abnormally.\nASSERTION tests/test_machine_artifact_concurrency.py:280: this fails if the shared object root has no digest entry, another name, or an extra visible entry.\nASSERTION tests/test_machine_artifact_concurrency.py:282: this fails only if resolve returns a digest different from the caller-supplied digest; it does not fail merely from reverting the rename input.\nASSERTION tests/test_mast_artifact.py:753-761: these fail only if materialize or resolve returns a digest different from the supplied manifest.digest; reverting to unsupported no-clobber rename raises before them.\nASSERTION tests/test_mast_artifact.py:762: this fails if the forced fallback leaves zero or multiple hex-named object entries.\n",
+  "review_run_id": "r-20261016T160059713480-review-of-machine-artifact-gpfs-7554f1214c35",
+  "reviewed_base_sha": "0ebe45a55a36fe1f8ea6fad5b082ca08e772585c",
+  "reviewed_commit": "7554f1214c354c9371dd592e4ad7b098245e261b",
+  "reviewed_head_sha": "7554f1214c354c9371dd592e4ad7b098245e261b",
+  "reviewed_run_id": "r-20261016T152837349228-machine-artifact-gpfs",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/machine-artifact-gpfs",
+  "scores": {
+    "durability": 17,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T16:04:55.382626+00:00",
+  "total": 115
+}

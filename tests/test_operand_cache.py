@@ -129,12 +129,16 @@ def test_values_persist_by_default_and_hit_on_the_second_build():
     assert first["build_seconds"] > 0.0
     stored = Path(first["cache_path"])
     assert stored.is_file()
-    assert (stored.parent / "complete.json").is_file()
+    assert stored.parent.parent.name == "sha256"
+    assert stored.parent.name == first["digest"].removeprefix("sha256:")
+    assert (stored.parent / "manifest.json").is_file()
 
     _, second = build_values(block.machine, rule, block.field, block.reference)
     assert second["cache_hit"] is True
-    assert second["build_seconds"] == first["build_seconds"]
+    assert second["build_seconds"] is None
+    assert second["stored_build_seconds"] == first["build_seconds"]
     assert second["load_seconds"] is not None
+    assert second["matrix_ready_seconds"] == second["load_seconds"]
     assert second["digest"] == first["digest"]
 
     loaded = np.asarray(np.load(stored, mmap_mode="r"))
@@ -226,9 +230,9 @@ def test_two_concurrent_processes_never_see_a_partial_matrix(tmp_path):
 
 @pytest.mark.slow
 def test_jet_matrix_persists_by_default():
-    """``build_jet_matrix`` writes a complete entry on its default arm."""
+    """``build_jet_matrix`` writes a published entry on its default arm."""
     configure_dtypes()
-    from scripts.prototypes.read_route.jets import build_jet_matrix, load_operand
+    from scripts.prototypes.read_route.jets import build_jet_matrix, read_operand
 
     block = carrier()
     coupling = topology.BiotMomentCoupling.from_polygons(block.polygons)
@@ -239,14 +243,16 @@ def test_jet_matrix_persists_by_default():
     )
     assert receipt["cache_hit"] is False
     directory = Path(receipt["cache_path"]).parent
-    assert (directory / "complete.json").is_file()
-    cached = load_operand(directory, tuple(np.asarray(matrix).shape))
-    assert cached is not None
-    assert np.asarray(cached[0]).tobytes() == np.asarray(matrix).tobytes()
+    assert (directory / "manifest.json").is_file()
+    entry = read_operand("jets", receipt["digest"], tuple(np.asarray(matrix).shape))
+    assert entry is not None
+    assert np.asarray(entry.matrix).tobytes() == np.asarray(matrix).tobytes()
+    assert entry.build_seconds == receipt["build_seconds"]
 
     hit = {}
     build_jet_matrix(coupling, block.geometry, block.field, columns, receipt=hit)
     assert hit["cache_hit"] is True
+    assert hit["build_seconds"] is None
     assert hit["load_seconds"] is not None
+    assert hit["stored_build_seconds"] == receipt["build_seconds"]
     assert hit["digest"] == receipt["digest"]
-    assert hit["build_seconds"] == receipt["build_seconds"]

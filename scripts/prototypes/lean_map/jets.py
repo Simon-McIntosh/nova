@@ -50,13 +50,7 @@ def build_jets(coupling, geometry, total_field, reference_moments, persist=True)
         np.asarray(nodes), np.asarray(sample_index), geometry
     )
     jet_map = JetMap(rows, exterior, nodes, sample_index, mesh)
-    receipt.update(
-        nodes=len(nodes),
-        source_cells=rows.shape[1],
-        matrix_bytes=rows.size * rows.dtype.itemsize,
-        assembly_seconds=(receipt.get("load_seconds") or 0.0)
-        + (receipt.get("build_seconds") or 0.0),
-    )
+    receipt.update(nodes=len(nodes), source_cells=rows.shape[1])
     return jet_map, receipt
 
 

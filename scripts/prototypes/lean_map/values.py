@@ -2,7 +2,6 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from time import perf_counter
 from typing import Any
 
 import jax
@@ -12,10 +11,8 @@ import numpy as np
 from scripts.analytic_oracle_fixtures.coupling_build import build_flux_blocks
 from scripts.prototypes.read_route.jets import (
     VALUES_KIND,
-    load_operand,
-    operand_cache_directory,
-    operand_digest,
-    store_operand,
+    operand_key,
+    operand_matrix,
 )
 
 
@@ -48,7 +45,7 @@ def values_digest(points, polygons, centres) -> str:
     polygon kernel, moves the key and forces a rebuild.
     """
     lengths = np.array([len(polygon) for polygon in polygons], dtype=np.int64)
-    return operand_digest(
+    return operand_key(
         np.asarray(points, dtype=np.float64).tobytes(),
         np.asarray(centres, dtype=np.float64).tobytes(),
         lengths.tobytes(),
@@ -64,38 +61,19 @@ def build_value_matrix(points, polygons, centres, persist=True, receipt=None):
     moments and is cheap to pose once the matrix is in hand.
     """
     shape = (len(points), len(centres), 3)
-    directory = None
-    cached = None
-    load_seconds = None
-    if persist:
-        digest = values_digest(points, polygons, centres)
-        directory = operand_cache_directory(VALUES_KIND, digest)
-        if receipt is not None:
-            receipt["digest"] = digest
-            receipt["cache_path"] = str(directory / "matrix.npy")
-        load_started = perf_counter()
-        cached = load_operand(directory, shape)
-        if cached is not None:
-            load_seconds = perf_counter() - load_started
-    matrix_bytes = int(np.prod(shape) * 8)
-    if cached is not None:
-        matrix, build_seconds = cached
-        matrix = np.asarray(matrix)
-    else:
-        build_started = perf_counter()
-        blocks = build_flux_blocks(points, polygons, centres)
-        matrix = np.stack(blocks, axis=-1)
-        matrix_bytes = matrix.nbytes
-        build_seconds = perf_counter() - build_started
-        if directory is not None:
-            store_operand(directory, matrix, build_seconds)
-    if receipt is not None:
-        receipt.update(
-            cache_hit=cached is not None,
-            build_seconds=build_seconds,
-            load_seconds=load_seconds,
-            matrix_bytes=matrix_bytes,
-        )
+    digest = values_digest(points, polygons, centres)
+
+    def assemble():
+        return np.stack(build_flux_blocks(points, polygons, centres), axis=-1)
+
+    def transfer(matrix):
+        device = jnp.asarray(matrix)
+        jax.block_until_ready(device)
+        return device
+
+    matrix, _ = operand_matrix(
+        VALUES_KIND, digest, shape, assemble, transfer, persist=persist, receipt=receipt
+    )
     return matrix
 
 
@@ -112,16 +90,14 @@ def build_values(machine, rule, total_field, reference_moments, persist=True):
     analytic = np.asarray(jax.jit(jax.vmap(total_field.value))(jnp.asarray(points)))
     if np.ptp(analytic) <= 0:
         raise AssertionError("the analytic Gauss field is uniform")
-    exterior = analytic - np.einsum("tcm,cm->t", matrix, reference)
-    values = DenseValues(jnp.asarray(matrix), jnp.asarray(exterior))
+    exterior = jnp.asarray(analytic) - jnp.einsum("tcm,cm->t", matrix, reference)
+    values = DenseValues(matrix, exterior)
     jax.block_until_ready(values)
     reconstruction = np.asarray(values.apply(jnp.asarray(reference)))
     calibration_error = float(np.max(np.abs(reconstruction - analytic)))
     receipt.update(
         target_points=len(points),
         source_cells=len(centres),
-        assembly_seconds=(receipt.get("load_seconds") or 0.0)
-        + (receipt.get("build_seconds") or 0.0),
         calibration_sup_absolute=calibration_error,
         analytic_flux_range=float(np.ptp(analytic)),
     )

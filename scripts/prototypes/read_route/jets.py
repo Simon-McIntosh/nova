@@ -1,26 +1,44 @@
 """Precompute polygon point jets and read a cellwise Hermite field."""
 
 from dataclasses import dataclass
-import hashlib
 import json
 import os
 from pathlib import Path
 from time import perf_counter
 from types import FunctionType
-from typing import Any
+from typing import Any, Callable
 
 import jax
 import jax.numpy as jnp
 import numpy as np
 
 from nova.biot.polygonanalytic import packed_analytic_moments
-from nova.equilibrium import topology
+from nova.database.content_store import (
+    ContentStoreError,
+    MANIFEST_FILENAME,
+    entry_metadata,
+    file_content_identity,
+    publish_files,
+    read_regular_bytes,
+    sha256_bytes,
+    verified_destination,
+    verified_object_root,
+)
 from nova.database.filepath import operand_cache_root
+from nova.equilibrium import topology
 
 JETS_KIND = "jets"
 VALUES_KIND = "values"
-COMPLETE_NAME = "complete.json"
 MATRIX_NAME = "matrix.npy"
+
+
+@dataclass(frozen=True)
+class OperandFile:
+    """One declared operand file, in the form the content store verifies."""
+
+    name: str
+    sha256: str
+    size: int
 
 
 def source_bytes() -> tuple[bytes, ...]:
@@ -30,54 +48,182 @@ def source_bytes() -> tuple[bytes, ...]:
     return (Path(__file__).read_bytes(), Path(polygonanalytic.__file__).read_bytes())
 
 
-def operand_digest(*chunks: bytes) -> str:
-    """Return the hex digest of every chunk, in order."""
-    digest = hashlib.sha256()
-    for chunk in chunks:
-        digest.update(chunk)
-    return digest.hexdigest()
+def operand_key(*chunks: bytes) -> str:
+    """Return the content-store digest naming one operand from its key chunks."""
+    return "sha256:" + sha256_bytes(b"".join(chunks))
 
 
-def operand_cache_directory(kind: str, digest: str) -> Path:
-    """Return (creating if absent) the cache directory for one operand key."""
-    directory = operand_cache_root() / kind / digest
-    directory.mkdir(parents=True, exist_ok=True)
-    return directory
+def kind_root(kind: str) -> Path:
+    """Return the cache directory one operand kind is published under."""
+    return operand_cache_root() / kind
 
 
-def load_operand(directory: Path, shape: tuple[int, ...]):
-    """Return ``(matrix, build_seconds)`` for a completed entry, else ``None``.
+def operand_entry(kind: str, digest: str) -> Path | None:
+    """Return the store's verified directory for one operand key, else ``None``.
 
-    A directory without its completion marker is a build in flight, not a
-    cache entry: the reader returns ``None`` and lets the caller rebuild
-    rather than serve a partial matrix.
+    A cold cache is a miss, not an error: the object root does not exist until
+    the first operand of that kind is published. Everything else the store
+    reports about the root and the destination, such as an object root that is a
+    symlink or a destination that escaped it, is raised rather than read.
     """
-    complete = directory / COMPLETE_NAME
-    if not complete.is_file():
+    try:
+        object_root = verified_object_root(kind_root(kind), create=False)
+    except ContentStoreError:
         return None
-    matrix = np.load(directory / MATRIX_NAME, mmap_mode="r")
-    if tuple(matrix.shape) != tuple(shape):
-        return None
-    return matrix, json.loads(complete.read_text())["build_seconds"]
+    return verified_destination(object_root, digest.removeprefix("sha256:"))
 
 
-def store_operand(directory: Path, matrix: np.ndarray, build_seconds: float):
-    """Write a completed matrix and marker, each through an atomic rename.
+@dataclass(frozen=True)
+class OperandEntry:
+    """A published operand: its mapped matrix, recorded build wall and directory."""
 
-    The matrix and its marker land under process-unique names and are moved
-    into place with :func:`os.replace`, so a concurrent builder of the same
-    key replaces whole files rather than interleaving writes into one, and a
-    reader never observes a partial matrix.
+    matrix: np.ndarray
+    build_seconds: float
+    directory: Path
+
+
+def read_operand(kind: str, digest: str, shape: tuple[int, ...]) -> OperandEntry | None:
+    """Return the published operand for one key, else ``None``.
+
+    The matrix is memory-mapped rather than read, so a 1.9 GB entry costs a few
+    milliseconds to open and streams from GPFS as it is consumed. For the same
+    reason the read does not re-hash the matrix: a full verification would read
+    more from disk than the assembly the entry exists to save. What it checks is
+    that the store's own root and destination are canonical, that the manifest
+    names this kind and shape, and that the matrix is the declared size. The
+    content digest of every published file is verified by the store before the
+    entry becomes visible, which is where that guarantee belongs.
     """
-    pid = os.getpid()
-    pending_matrix = directory / f"{MATRIX_NAME}.{pid}.pending.npy"
-    np.save(pending_matrix, np.asarray(matrix))
-    os.replace(pending_matrix, directory / MATRIX_NAME)
-    pending_marker = directory / f"{COMPLETE_NAME}.{pid}.pending"
-    pending_marker.write_text(
-        json.dumps({"build_seconds": build_seconds, "bytes": int(matrix.nbytes)})
-    )
-    os.replace(pending_marker, directory / COMPLETE_NAME)
+    directory = operand_entry(kind, digest)
+    if directory is None:
+        return None
+    manifest_path = directory / MANIFEST_FILENAME
+    if entry_metadata(manifest_path) is None:
+        return None
+    payload = json.loads(read_regular_bytes(manifest_path))
+    if payload.get("kind") != kind or tuple(payload.get("shape", ())) != tuple(shape):
+        return None
+    declared = {item["name"]: item for item in payload.get("files", [])}
+    if MATRIX_NAME not in declared:
+        return None
+    matrix_path = directory / MATRIX_NAME
+    metadata = entry_metadata(matrix_path)
+    if metadata is None:
+        return None
+    if metadata.st_size != declared[MATRIX_NAME]["size"]:
+        raise ContentStoreError(f"operand is not the declared size: {matrix_path}")
+    matrix = np.load(matrix_path, mmap_mode="r")
+    return OperandEntry(matrix, float(payload["build_seconds"]), directory)
+
+
+def publish_operand(
+    kind: str, digest: str, matrix: np.ndarray, build_seconds: float
+) -> Path:
+    """Publish one operand through the content store and return its directory.
+
+    The matrix lands in a private directory that is renamed into place without
+    replacement, so a reader sees the whole entry or none of it and two
+    concurrent builders of one key cannot interleave writes into one file.
+    """
+    root = kind_root(kind)
+    root.mkdir(parents=True, exist_ok=True)
+    pending = root / f".pending-{os.getpid()}.npy"
+    try:
+        np.save(pending, np.asarray(matrix))
+        identity, size = file_content_identity(pending)
+        manifest = json.dumps(
+            {
+                "kind": kind,
+                "shape": [int(length) for length in np.shape(matrix)],
+                "build_seconds": float(build_seconds),
+                "files": [{"name": MATRIX_NAME, "sha256": identity, "size": size}],
+            },
+            sort_keys=True,
+        ).encode()
+        return publish_files(
+            root,
+            digest,
+            [OperandFile(MATRIX_NAME, identity, size)],
+            {MATRIX_NAME: pending},
+            manifest,
+        )
+    finally:
+        pending.unlink(missing_ok=True)
+
+
+def operand_matrix(
+    kind: str,
+    digest: str,
+    shape: tuple[int, ...],
+    assemble: Callable[[], np.ndarray],
+    transfer: Callable[[np.ndarray], Any],
+    persist: bool = True,
+    receipt: dict[str, Any] | None = None,
+):
+    """Return ``(device matrix, entry directory)`` for one operand of ``kind``.
+
+    On a hit the mapped matrix is transferred to the device; on a miss
+    ``assemble`` builds it, ``transfer`` moves it, and the store publishes it
+    under ``digest``. The receipt prices only what this process paid:
+    ``load_seconds`` is the hit wall from opening the entry to a device-resident
+    matrix, ``build_seconds`` the miss assembly, and ``matrix_ready_seconds``
+    the wall that got the matrix ready either way. ``stored_build_seconds`` is
+    the wall the entry's own builder recorded, which is not this process's cost.
+    """
+    entry = read_operand(kind, digest, shape) if persist else None
+    if entry is not None:
+        load_started = perf_counter()
+        matrix = transfer(entry.matrix)
+        load_seconds = perf_counter() - load_started
+        if receipt is not None:
+            receipt.update(
+                kind=kind,
+                digest=digest,
+                cache_hit=True,
+                cache_path=str(entry.directory / MATRIX_NAME),
+                build_seconds=None,
+                load_seconds=load_seconds,
+                publish_seconds=None,
+                stored_build_seconds=entry.build_seconds,
+                matrix_ready_seconds=load_seconds,
+                matrix_bytes=int(entry.matrix.nbytes),
+            )
+        return matrix, entry.directory
+
+    build_started = perf_counter()
+    host = assemble()
+    build_seconds = perf_counter() - build_started
+    transfer_started = perf_counter()
+    matrix = transfer(host)
+    ready_seconds = build_seconds + perf_counter() - transfer_started
+    directory = None
+    publish_seconds = None
+    stored_build_seconds = None
+    if persist:
+        publish_started = perf_counter()
+        try:
+            directory = publish_operand(kind, digest, host, build_seconds)
+        except ContentStoreError:
+            published = read_operand(kind, digest, shape)
+            if published is None:
+                raise
+            directory = published.directory
+            stored_build_seconds = published.build_seconds
+        publish_seconds = perf_counter() - publish_started
+    if receipt is not None:
+        receipt.update(
+            kind=kind,
+            digest=digest,
+            cache_hit=False,
+            cache_path=None if directory is None else str(directory / MATRIX_NAME),
+            build_seconds=build_seconds,
+            load_seconds=None,
+            stored_build_seconds=stored_build_seconds,
+            publish_seconds=publish_seconds,
+            matrix_ready_seconds=ready_seconds,
+            matrix_bytes=int(host.nbytes),
+        )
+    return matrix, directory
 
 
 def _source_jets(point, coupling):
@@ -151,8 +297,8 @@ def build_jet_matrix(
     """Build the three (nodes, cells, six-jet) source matrices in batches.
 
     With ``persist`` set the matrix is loaded from the shared operand cache
-    when a completed entry for the same key exists, and otherwise built and
-    stored there for the next process.  The key covers the unique node
+    when an entry for the same key is published, and otherwise built and
+    published there for the next process.  The key covers the unique node
     coordinates, the coupling operands and the hashed source files.
     """
     started = perf_counter()
@@ -162,35 +308,16 @@ def build_jet_matrix(
     )
     sample_index = inverse.reshape(samples.shape[:-1])
     shape = (len(nodes), len(coupling.centre), 3, 6)
-    directory = None
-    load_seconds = None
-    build_seconds = None
-    cached = None
-    if persist:
-        operands = (
-            np.asarray(leaf).tobytes() for leaf in jax.tree_util.tree_leaves(coupling)
-        )
-        digest = operand_digest(nodes.tobytes(), *operands, *source_bytes())
-        directory = operand_cache_directory(JETS_KIND, digest)
-        if receipt is not None:
-            receipt["digest"] = digest
-            receipt["cache_path"] = str(directory / MATRIX_NAME)
-            receipt["cache_root"] = str(operand_cache_root())
-        load_started = perf_counter()
-        cached = load_operand(directory, shape)
-        if cached is not None:
-            load_seconds = perf_counter() - load_started
-    if cached is not None:
-        rows, build_seconds = cached
-        rows = np.asarray(rows)
-        print(
-            f"JET_CACHE path={directory / MATRIX_NAME} bytes={rows.nbytes} "
-            f"build_seconds={build_seconds:.6f} load_seconds={load_seconds:.6f}",
-            flush=True,
-        )
-    else:
+    operands = (
+        np.asarray(leaf).tobytes() for leaf in jax.tree_util.tree_leaves(coupling)
+    )
+    digest = operand_key(nodes.tobytes(), *operands, *source_bytes())
+    if receipt is not None:
+        receipt["digest"] = digest
+        receipt["cache_root"] = str(operand_cache_root())
+
+    def assemble():
         rows = np.empty(shape, dtype=np.float64)
-        build_started = perf_counter()
         point_batch = jax.jit(jax.vmap(_source_jets, in_axes=(0, None)))
         for first in range(0, len(nodes), batch):
             last = min(first + batch, len(nodes))
@@ -208,11 +335,24 @@ def build_jet_matrix(
                     f"JET_BUILD nodes={last}/{len(nodes)} seconds={elapsed:.3f}",
                     flush=True,
                 )
-        build_seconds = perf_counter() - build_started
-        if directory is not None:
-            store_operand(directory, rows, build_seconds)
-    matrix = jnp.asarray(rows)
-    jax.block_until_ready(matrix)
+        return rows
+
+    def transfer(rows):
+        matrix = jnp.asarray(rows)
+        jax.block_until_ready(matrix)
+        return matrix
+
+    matrix, directory = operand_matrix(
+        JETS_KIND, digest, shape, assemble, transfer, persist=persist, receipt=receipt
+    )
+    if receipt is not None and receipt["cache_hit"]:
+        print(
+            f"JET_CACHE path={directory / MATRIX_NAME} "
+            f"bytes={receipt['matrix_bytes']} "
+            f"stored_build_seconds={receipt['stored_build_seconds']:.6f} "
+            f"load_seconds={receipt['load_seconds']:.6f}",
+            flush=True,
+        )
     reference = np.stack(
         tuple(np.asarray(value) for value in reference_moments), axis=-1
     )
@@ -230,15 +370,10 @@ def build_jet_matrix(
     ) - jnp.einsum("ncmq,cm->nq", matrix, jnp.asarray(reference))
     jax.block_until_ready(exterior)
     elapsed = perf_counter() - started
-    if receipt is not None:
-        receipt.update(
-            cache_hit=cached is not None,
-            build_seconds=build_seconds,
-            load_seconds=load_seconds,
-        )
     print(
         f"JET_READY nodes={len(nodes)} cells={len(coupling.centre)} "
-        f"bytes={rows.nbytes} seconds={elapsed:.6f}",
+        f"bytes={int(matrix.size) * matrix.dtype.itemsize} "
+        f"seconds={elapsed:.6f}",
         flush=True,
     )
     return matrix, exterior, jnp.asarray(nodes), jnp.asarray(sample_index), elapsed

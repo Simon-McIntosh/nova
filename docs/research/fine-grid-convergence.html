@@ -24,7 +24,7 @@
   <header>
     <p class="eyebrow">Research input</p>
     <h1>Fine-grid diverted convergence</h1>
-    <p class="lead">The accepted continuous map converges the 282-cell diverted carrier to 1.25 × 10<sup>−13</sup>, while its 550- and 2,098-cell cold solves stop at 1.55 × 10<sup>−3</sup> and 3.63 × 10<sup>−3</sup>. Fresh blockwise derivative and saddle-handoff measurements are in progress; the figures below retain the accepted terminal states as the comparison base.</p>
+    <p class="lead">The accepted continuous map converges the 282-cell diverted carrier to 1.25 × 10<sup>−13</sup>, while its 550- and 2,098-cell cold solves stop at 1.55 × 10<sup>−3</sup> and 3.63 × 10<sup>−3</sup>. A live scan traced the 2,098-cell finite-step change to the cell 50–52 saddle-sector frame. The first geometric-width correction failed at all three sizes; a one-sided frame ramp is under analytic-map screening.</p>
   </header>
 
   <section id="method">
@@ -85,8 +85,21 @@
   </section>
   <section id="correction">
     <h2>Geometric frame-ramp trial</h2>
-    <p>The first runtime-argument H200 cold trial of the corrected prototype, job 1286885, has finished its 550-cell row. Its map compiles in 7.0899 s to a 2,720,560-byte executable, under the 60 s and 50 MB ceilings. The reference-state scaled residual rises to 0.0394335. Twenty accepted Newton corrections reduce the residual to 0.00590910167353, then the configured correction limit ends the row with <code>converged=false</code>; the solver's 10<sup>−12</sup> guard raises and the row exits nonzero. The geometric frame-ramp change therefore does not resolve the 550-cell convergence target. The 2,098-cell and original-map control rows continue in the same job; their terminal results are not inferred from this row.</p>
+    <p>H200 job 1286885 completed all four live rows and ended with <code>EXIT=0</code>; every row's own solver guard exited 1. The centered geometric frame ramp compiled under the 60 s and 50 MB ceilings at all three sizes, but it degraded even the previously converged 282-cell carrier. At 550 cells, 20 accepted corrections end at 0.00590910167353. At 2,098 cells, the line search stops after 15 corrections at 0.00887562739958; at 282 it stops after 12 at 0.00222786275396. Each is far above 10<sup>−12</sup>, and <code>require_solve</code> raised on each row. The geometry-scale midpoint ramp is therefore insufficient as a fix.</p>
+    <table>
+      <thead><tr><th>Live arm</th><th>Cells</th><th>Corrections</th><th>Terminal scaled residual</th><th>Compile</th><th>Executable</th><th>Converged</th></tr></thead>
+      <tbody>
+        <tr><th>Centered geometric frame</th><td>282</td><td>12</td><td>0.00222786275396</td><td>8.2672 s</td><td>1.67 MB</td><td>false; row exit 1</td></tr>
+        <tr><th>Centered geometric frame</th><td>550</td><td>20</td><td>0.00590910167353</td><td>7.0899 s</td><td>2.72 MB</td><td>false; row exit 1</td></tr>
+        <tr><th>Centered geometric frame</th><td>2,098</td><td>15</td><td>0.00887562739958</td><td>8.4646 s</td><td>7.66 MB</td><td>false; row exit 1</td></tr>
+        <tr style="color:#9d3b31"><th>Fresh original-map control</th><td>550</td><td>10</td><td>0.00155031583851</td><td>8.2059 s</td><td>2.72 MB</td><td>false; row exit 1</td></tr>
+      </tbody>
+    </table>
+    <p>The last row reruns the original program in a fresh process after the prototype correction. Its 550-cell residual reproduces the earlier approximately 1.55 × 10<sup>−3</sup> stall, and its own <code>require_solve</code> guard turns the row red. This control is a live solve, not a copied predecessor receipt. The one-sided follow-up keeps an edge fully open while its midpoint remains in the axis-facing sector and scales closure only once that margin becomes negative; H200 job 1286912 is screening its analytic map error before another cold run.</p>
+    <figure><img src="/nova/figures/converged-forward-solve/fine-grid-convergence/residual-histories-geometric.svg" alt="Three centered-frame cold residual histories all stopping above the target"><figcaption>Centered geometric frame-ramp trial, H200 job 1286885: all three diverted carriers stay above the dotted 10<sup>−12</sup> requirement. The row receipts record 20 accepted corrections at 550, 14 accepted plus one refused at 2,098, and 11 accepted plus one refused at 282.</figcaption></figure>
+    <figure><img src="/nova/figures/converged-forward-solve/fine-grid-convergence/terminal-geometric-282.svg" alt="Paired solved and analytic flux contours, both null sets and wall at the centered-frame 282-cell terminal state"><figcaption>Centered geometric frame-ramp trial, 282-cell terminal state: scaled residual 0.00222786275396; converged: false. Blue solid contours and blue nulls are solved; dark dashed contours and dark nulls are analytic. Both fields share one physical level array; the black outline is the wall.</figcaption></figure>
     <figure><img src="/nova/figures/converged-forward-solve/fine-grid-convergence/terminal-corrected-550.svg" alt="Paired solved and analytic flux contours, both null sets and wall at the corrected 550-cell terminal state"><figcaption>Geometric frame-ramp trial, 550-cell terminal state: scaled residual 0.00590910167353; converged: false. Blue solid contours and blue nulls are solved; dark dashed contours and dark nulls are analytic. Both fields share one physical level array; the black outline is the wall.</figcaption></figure>
+    <figure><img src="/nova/figures/converged-forward-solve/fine-grid-convergence/terminal-geometric-2098.svg" alt="Paired solved and analytic flux contours, both null sets and wall at the centered-frame 2,098-cell terminal state"><figcaption>Centered geometric frame-ramp trial, 2,098-cell terminal state: scaled residual 0.00887562739958; converged: false. Blue solid contours and blue nulls are solved; dark dashed contours and dark nulls are analytic. Both fields share one physical level array; the black outline is the wall.</figcaption></figure>
   </section>
 </main>
 </body>

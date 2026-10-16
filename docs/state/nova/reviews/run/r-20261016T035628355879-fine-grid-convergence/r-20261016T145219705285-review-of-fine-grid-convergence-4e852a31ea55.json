@@ -1,0 +1,120 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed run's baseline_suite and after_suite fields are blank, so no completed paired gate logs exist from which to derive a failure delta; zero would be invented.",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-16T15:02:12Z",
+  "dimension_dispositions": {
+    "goal_fidelity": {
+      "kind": "folded",
+      "node": "xpoint-cell-owner",
+      "recorded_at": "2026-10-16T15:01:50.571954+00:00"
+    },
+    "reuse": {
+      "kind": "exempted",
+      "reason": "deferred, not dropped: the duplicate map_moments and path weight are deleted in favour of their owners by a consolidation node dispatched after xpoint-cell-owner lands (plan followup f-cfs-prototype-owner-consolidation); deleting them now would break that in-flight node, which is based on this head",
+      "recorded_at": "2026-10-16T15:02:12.947286+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-16T14:53:05Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "xpoint-cell-owner",
+      "recorded_at": "2026-10-16T15:01:30.435513+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "xpoint-cell-owner",
+      "recorded_at": "2026-10-16T15:01:36.956169+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "xpoint-cell-owner",
+      "recorded_at": "2026-10-16T15:01:43.055307+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "deferred, not dropped: the duplicate map_moments and path weight are deleted in favour of their owners by a consolidation node dispatched after xpoint-cell-owner lands (plan followup f-cfs-prototype-owner-consolidation); deleting them now would break that in-flight node, which is based on this head",
+      "recorded_at": "2026-10-16T15:01:59.834627+00:00"
+    },
+    "4": {
+      "kind": "exempted",
+      "reason": "deferred, not dropped: the duplicate map_moments and path weight are deleted in favour of their owners by a consolidation node dispatched after xpoint-cell-owner lands (plan followup f-cfs-prototype-owner-consolidation); deleting them now would break that in-flight node, which is based on this head",
+      "recorded_at": "2026-10-16T15:02:04.980810+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/research/fine-grid-convergence.html",
+      "line": "127",
+      "severity": "blocking",
+      "text": "blocking: the final agreement map produces NaN at 282 cells and stops at 0.00175892254 at 550 cells, so the cold-convergence goal remains unmet."
+    },
+    {
+      "file": "scripts/prototypes/fine_grid_convergence/solve_carrier.py",
+      "line": "144",
+      "severity": "blocking",
+      "text": "blocking: converged is computed from the same residual returned by the correction, and the fresh evaluation in agreement-controls-2000.log measures 1.41378933843e-12 for the recorded 2,098-cell terminal state, above the 1e-12 acceptance limit."
+    },
+    {
+      "file": "scripts/prototypes/fine_grid_convergence/solution_controls.py",
+      "line": "220",
+      "severity": "blocking",
+      "text": "blocking: warm neighbours converge 0/1 and 0/16 at 83.52 and 9.15 ms per state, while width 128 requests 272.97 GiB and cannot run, leaving the required batch gate unmet."
+    },
+    {
+      "file": "scripts/prototypes/fine_grid_convergence/handoff.py",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "follow-on: map_moments repeats the fixed-shape map owned by scripts/prototypes/fast_map_production/program.py:150 instead of extending that owner, allowing the two booking routes to drift."
+    },
+    {
+      "file": "scripts/prototypes/fine_grid_convergence/path_weight.py",
+      "line": "11",
+      "severity": "follow-on",
+      "text": "follow-on: _continuous_path_weight copies the edge-passage map owned by scripts/prototypes/fast_map_production/kernel.py:111 and install at line 119 replaces it globally, leaving two implementations of one mechanism."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified no production call site; only prototype scripts import the added modules",
+    "diff": "the 70 commits from cfbe20ed94de0624e5ca67023b9485310392db13 to 4e852a31ea5544825f5dc968d2683d3e63e25422 add 53 prototype and evidence paths, including separate moment-map and path-weight implementations, without changing a nova production module or adding a test file.",
+    "done_when": "source prompt.txt:88-89 and plan \u00a75 require all cold, warm, continuity and runtime rows; agreement-map-cold.log has 282/550 row EXIT=1 and agreement-controls-2000.log has width 1/16 failures and width 128 out of memory.",
+    "goal": "source prompt.txt:30 asks for 550- and 2,098-cell diverted convergence to 1e-12; docs/research/fine-grid-convergence.html:127-130 records a 550-cell stall and only a near-threshold 2,098-cell result.",
+    "manifest": "source manifest.md records 70 commits and the failed cold and chord rows, but leaves baseline_suite and after_suite empty so a paired added-failure count cannot be derived.",
+    "write_paths": "source prompt.txt:68-72 grants the prototype, research, figure and evidence directories; all 53 paths in the cfbe20ed94de0624e5ca67023b9485310392db13..4e852a31ea5544825f5dc968d2683d3e63e25422 diff fall inside those grants."
+  },
+  "justifications": {
+    "durability": "scripts/prototypes/fine_grid_convergence/jacobian_control.py:66-86 fails if the booked-weight derivative is detached and solve_carrier.py:153 refuses a reported residual above 1e-12, but no added test rechecks the returned terminal state or the limited and transition controls.",
+    "evidence": "agreement-map-cold.log and agreement-controls-2000.log record real row refusals and the derivative negative control is in handoff-jacobian.log, but source manifest.md has no completed baseline_suite or after_suite pair.",
+    "fit": "scripts/prototypes/fine_grid_convergence/context.py:17-27 reuses certificate and map fixtures and all 16 added SVGs render readably, while path_weight.py:119 installs a process-global prototype patch.",
+    "goal_fidelity": "docs/research/fine-grid-convergence.html:127-130 records 282 NaN, a 550 residual of 0.00175892254, and only a 2,098 reported cold residual below 1e-12.",
+    "reuse": "scripts/prototypes/fine_grid_convergence/handoff.py:21 duplicates the moment map in scripts/prototypes/fast_map_production/program.py:150 and path_weight.py:11 duplicates the path propagation owner in scripts/prototypes/fast_map_production/kernel.py:111.",
+    "scope_discipline": "every path in the source diff lies under a prompt.txt:68-72 grant, and the committed docs/research/fine-grid-convergence.html:149-167 presents the failed trials as partial evidence."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: source prompt.txt:30 asks for 550- and 2,098-cell diverted convergence to 1e-12; docs/research/fine-grid-convergence.html:127-130 records a 550-cell stall and only a near-threshold 2,098-cell result.\nVERDICT done_when: source prompt.txt:88-89 and plan \u00a75 require all cold, warm, continuity and runtime rows; agreement-map-cold.log has 282/550 row EXIT=1 and agreement-controls-2000.log has width 1/16 failures and width 128 out of memory.\nVERDICT write_paths: source prompt.txt:68-72 grants the prototype, research, figure and evidence directories; all 53 paths in the cfbe20ed94de0624e5ca67023b9485310392db13..4e852a31ea5544825f5dc968d2683d3e63e25422 diff fall inside those grants.\nVERDICT manifest: source manifest.md records 70 commits and the failed cold and chord rows, but leaves baseline_suite and after_suite empty so a paired added-failure count cannot be derived.\nVERDICT diff: the 70 commits from cfbe20ed94de0624e5ca67023b9485310392db13 to 4e852a31ea5544825f5dc968d2683d3e63e25422 add 53 prototype and evidence paths, including separate moment-map and path-weight implementations, without changing a nova production module or adding a test file.\nCALL_SITES: none\nSCORE goal_fidelity: 6\nJUSTIFICATION goal_fidelity: docs/research/fine-grid-convergence.html:127-130 records 282 NaN, a 550 residual of 0.00175892254, and only a 2,098 reported cold residual below 1e-12.\nSCORE evidence: 14\nJUSTIFICATION evidence: agreement-map-cold.log and agreement-controls-2000.log record real row refusals and the derivative negative control is in handoff-jacobian.log, but source manifest.md has no completed baseline_suite or after_suite pair.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the source diff lies under a prompt.txt:68-72 grant, and the committed docs/research/fine-grid-convergence.html:149-167 presents the failed trials as partial evidence.\nSCORE durability: 10\nJUSTIFICATION durability: scripts/prototypes/fine_grid_convergence/jacobian_control.py:66-86 fails if the booked-weight derivative is detached and solve_carrier.py:153 refuses a reported residual above 1e-12, but no added test rechecks the returned terminal state or the limited and transition controls.\nSCORE fit: 16\nJUSTIFICATION fit: scripts/prototypes/fine_grid_convergence/context.py:17-27 reuses certificate and map fixtures and all 16 added SVGs render readably, while path_weight.py:119 installs a process-global prototype patch.\nSCORE reuse: 4\nJUSTIFICATION reuse: scripts/prototypes/fine_grid_convergence/handoff.py:21 duplicates the moment map in scripts/prototypes/fast_map_production/program.py:150 and path_weight.py:11 duplicates the path propagation owner in scripts/prototypes/fast_map_production/kernel.py:111.\nFINDING docs/research/fine-grid-convergence.html:127 blocking: the final agreement map produces NaN at 282 cells and stops at 0.00175892254 at 550 cells, so the cold-convergence goal remains unmet.\nFINDING scripts/prototypes/fine_grid_convergence/solve_carrier.py:144 blocking: converged is computed from the same residual returned by the correction, and the fresh evaluation in agreement-controls-2000.log measures 1.41378933843e-12 for the recorded 2,098-cell terminal state, above the 1e-12 acceptance limit.\nFINDING scripts/prototypes/fine_grid_convergence/solution_controls.py:220 blocking: warm neighbours converge 0/1 and 0/16 at 83.52 and 9.15 ms per state, while width 128 requests 272.97 GiB and cannot run, leaving the required batch gate unmet.\nFINDING scripts/prototypes/fine_grid_convergence/handoff.py:21 follow-on: map_moments repeats the fixed-shape map owned by scripts/prototypes/fast_map_production/program.py:150 instead of extending that owner, allowing the two booking routes to drift.\nFINDING scripts/prototypes/fine_grid_convergence/path_weight.py:11 follow-on: _continuous_path_weight copies the edge-passage map owned by scripts/prototypes/fast_map_production/kernel.py:111 and install at line 119 replaces it globally, leaving two implementations of one mechanism.\n",
+  "review_run_id": "r-20261016T145219705285-review-of-fine-grid-convergence-4e852a31ea55",
+  "reviewed_base_sha": "cfbe20ed94de0624e5ca67023b9485310392db13",
+  "reviewed_head_sha": "4e852a31ea5544825f5dc968d2683d3e63e25422",
+  "reviewed_run_id": "r-20261016T035628355879-fine-grid-convergence",
+  "rubric": "code",
+  "scores": {
+    "durability": 10,
+    "evidence": 14,
+    "fit": 16,
+    "goal_fidelity": 6,
+    "reuse": 4,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T15:00:56.201414+00:00",
+  "total": 69
+}

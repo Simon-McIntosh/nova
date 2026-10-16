@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="298">
+<meta name="plan-version" content="299">
 <meta name="plan-modified" content="2026-10-16">
 </head>
 <body>
@@ -1306,6 +1306,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261016T084931889861-solve-owner" data-who="reckon-build" data-when="2026-10-16T09:41:11.258Z">
     <div class="r-comment-body"><p>The production chord-Newton fixed-point owner is nova/equilibrium/solve.py: a frozen Factor and SolveResult, factor() building the dense Jacobian by vmapped jvp and LU-factoring it, and fixed_point() solving cold from a fresh factor with damped backtracking or reusing a supplied factor as a chord; scripts/prototypes/batched_factor/measure.py now drives both through it with its local copies deleted, and the H200 width-128 limited row converges 128 of 128 states at 0.2829 ms per state against the prototype's 0.279 ms. Call sites that move to solve.fixed_point at the cutover are listed in docs/evidence/fragments/converged-forward-solve/solve-owner.html#solve-owner-cutover.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261016T145219705285-review-of-fine-grid-convergence-4e852a31ea55" data-who="reckon-build" data-when="2026-10-16T15:02:12Z">
+    <div class="r-comment-body"><p>Parsed revision-specific review stored at both granted review paths; scores 6/14/19/10/16/4 total 69 of 120, five findings (three blocking, two follow-on), source paired-suite failure delta unmeasured.</p></div>
 </div>
 </section>
 </main>

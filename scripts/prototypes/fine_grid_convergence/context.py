@@ -16,9 +16,10 @@ from nova.equilibrium import current, fixed_points, topology
 from nova.equilibrium.solve_request import TopologyPolicy
 from scripts.analytic_oracle_fixtures import measure as fixture
 from scripts.prototypes.fast_map_production import program
+from scripts.prototypes.fine_grid_convergence.handoff import map_moments
 from scripts.prototypes.fast_map_production.kernel import read
 from scripts.prototypes.fine_grid_convergence.path_weight import install
-from scripts.prototypes.lean_map.jets import build_jets
+from scripts.prototypes.fine_grid_convergence.jets import build_jets
 from scripts.prototypes.lean_map.quadrature import quadratic_fit, triangle_rule
 from scripts.prototypes.lean_map.values import build_values
 from scripts.prototypes.solve_options.profile import _machine
@@ -44,9 +45,14 @@ class Context:
     convention: topology.TopologyConvention
     policy: TopologyPolicy
     axis_sign: float
+    machine: object
+    source: object
+    exact: object
+    carrier_key: object
+    cache: object
 
     def map(self, moments):
-        return program.map_moments(moments, *self.operands)
+        return map_moments(moments, *self.operands)
 
     def reading(self, moments):
         cached = fixed_points._CachedField(
@@ -82,8 +88,10 @@ class Context:
 
 def build(cells, cache):
     assert jax.config.jax_enable_x64 is True
-    carrier, source, _ = certificate._case("diverted-single-null", clip_mode="exact")
-    machine, _, _ = _machine(cache, carrier, cells)
+    carrier, source, exact = certificate._case(
+        "diverted-single-null", clip_mode="exact"
+    )
+    machine, key, _ = _machine(cache, carrier, cells)
     geometry = topology.TopologyGeometry.from_cells(
         machine.cell_polygons, machine.sampling_vertices, (machine.wall_node,)
     )
@@ -163,4 +171,9 @@ def build(cells, cache):
         convention,
         policy,
         axis_sign,
+        machine,
+        source,
+        exact,
+        key,
+        cache,
     )

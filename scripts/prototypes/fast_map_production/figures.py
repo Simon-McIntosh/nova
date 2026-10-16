@@ -36,10 +36,12 @@ def convergence(directory, out):
     corrected = _load(directory, "diverted-250-solve.json")
     control = _load(directory, "control-original-250-solve.json")
     gated = _load(directory, "diverted-250-wallgate.json")
+    saddle = _load(directory, "diverted-250-saddlegate.json")
     figure, axis = plt.subplots(figsize=(14, 5))
     for receipt, colour, label in (
         (control, ORIGINAL, "original read and booking (control)"),
         (gated, LEFT, "wall eligibility restored"),
+        (saddle, "#7a5c1e", "normal-form set restored (saddle condition)"),
         (corrected, RIGHT, "branchless wall candidate"),
     ):
         rows = receipt["history"]

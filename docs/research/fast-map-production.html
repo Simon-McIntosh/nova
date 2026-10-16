@@ -90,22 +90,24 @@
   </section>
   <section id="isolation">
     <h2>Which mechanism causes the regression</h2>
-    <p>The corrected read carries three deviations from the original, not the two the spec names: the wall candidate taken over every wall edge with no eligibility gate, the separated ordinary and normal-form fractions, and a normal-form cell set conditioned on a live saddle rather than on a diverted state. <code>--wall-gate</code> restores the boolean eligibility of the wall candidate and leaves the booking corrected; it recovers the uncorrected pair's trajectory almost exactly.</p>
+    <p>The corrected read carries three deviations from the original, not the two the spec names: the wall candidate taken over every wall edge with no eligibility gate, the separated ordinary and normal-form fractions, and a normal-form cell set conditioned on a live saddle rather than on a diverted state. Two independent switches measure each separately: <code>--wall-gate</code> restores the boolean eligibility of the wall candidate and leaves the booking corrected; <code>--saddle-gate</code> restores the diverted-state condition on the normal-form cell set and leaves the wall candidate branchless.</p>
     <table>
       <thead><tr><th>Read and booking</th><th>Reference residual</th><th>Stalled residual</th><th>Boundary class</th><th>Booked saddle cells</th></tr></thead>
       <tbody>
         <tr><td>branchless wall, single-owner booking</td><td>1.7989604373802375</td><td>1.0208587667876892</td><td>0</td><td>0</td></tr>
         <tr><td>wall eligibility restored, single-owner booking</td><td>4.696461790766224e-03</td><td>2.6898417865827873e-03</td><td>1</td><td>1</td></tr>
+        <tr><td>branchless wall, normal-form set restored to the diverted condition</td><td>1.798960437380231</td><td>9.350137856046135e-01</td><td>0</td><td>0</td></tr>
         <tr><td>original read and booking</td><td>4.696461790759203e-03</td><td>2.684581554642e-03</td><td>1</td><td>1</td></tr>
       </tbody>
     </table>
-    <p>Restoring the wall eligibility alone moves the reference residual from 1.7989604 to 4.696461790766224e-03, agreeing with the uncorrected pair to ten significant figures, and moves the stall from 1.0209 to 2.6898e-03 in the same boundary class with the same booked saddle cell. The single-owner booking is then worth the remaining 0.2 per cent of the stall, 2.6898e-03 against 2.6846e-03. So the regression is the wall candidate: maximising the edge-peak wall flux over every wall edge admits a wall level the eligibility gate excluded, and that level reads the diverted carrier as limiter-limited from the reference state onward. The two changes the spec asked for are not equally implicated, and the eligibility is load-bearing on this carrier rather than the defect it was taken for.</p>
+    <p>Restoring the wall eligibility alone moves the reference residual from 1.7989604 to 4.696461790766224e-03, agreeing with the uncorrected pair to ten significant figures, and moves the stall from 1.0209 to 2.6898e-03 in the same boundary class with the same booked saddle cell. The single-owner booking is then worth the remaining 0.2 per cent of the stall, 2.6898e-03 against 2.6846e-03.</p>
+    <p>The saddle condition is measured the same way and is not the mechanism. With the wall candidate left branchless and only the normal-form cell set restored to the diverted condition, the reference residual is unchanged at 1.798960437380231 and the stall moves from 1.0209 to 9.3501e-01 — 8.4 per cent, two orders of magnitude short of the wall gate's effect — and the trajectory never leaves boundary class 0 and never books a saddle cell. So the normal-form set condition is a second-order term here; it cannot re-enter the X-point booking branch while the wall level is wrong. The wall candidate is the regression: maximising the edge-peak wall flux over every wall edge admits a wall level the eligibility gate excluded, and that level reads the diverted carrier as limiter-limited from the reference state onward. The two changes the spec asked for are not equally implicated, and the eligibility is load-bearing on this carrier rather than the defect it was taken for.</p>
   </section>
   <section id="figures">
     <h2>Figures</h2>
     <figure>
       <img src="/nova/figures/converged-forward-solve/fast-map-production/diverted-convergence-traces.svg" alt="Scaled sup residual against correction for the corrected pair and the unfixed-pair control on the diverted carrier at 282 nodes">
-      <figcaption>Scaled sup residual against correction on the diverted carrier at 282 nodes. The branchless wall candidate stalls at 1.021e+00; restoring the boolean wall eligibility stalls at 2.690e-03, on top of the uncorrected pair's 2.685e-03. The gate is the whole difference.</figcaption>
+      <figcaption>Scaled sup residual against correction on the diverted carrier at 282 nodes. The branchless wall candidate stalls at 1.021e+00 and restoring only the normal-form set condition barely moves it, to 9.350e-01; restoring the boolean wall eligibility stalls at 2.690e-03, on top of the uncorrected pair's 2.685e-03. The wall eligibility is the whole difference; the normal-form condition is a second-order term.</figcaption>
     </figure>
     <figure>
       <img src="/nova/figures/converged-forward-solve/fast-map-production/stalled-scan-residuals.svg" alt="Scaled residual against scan step at the diverted stalled iterate and at the converged limited state">

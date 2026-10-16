@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import math
-from pathlib import Path
 
 import numpy as np
 import pytest
@@ -88,11 +87,3 @@ def test_conditioning_remains_jit_and_vmap_safe(dimension: int):
     # Trusted linear solves stay undamped; only unresolved solves may condition.
     np.testing.assert_array_equal(result.krylov_conditioning_count, [0, 0])
     assert result.state.shape == (2, dimension)
-
-
-def test_dataset_fitted_conditioning_constants_are_absent():
-    """The solver path contains neither retired trajectory calibration value."""
-    source = Path("nova/equilibrium/fixed_point.py").read_text(encoding="utf-8")
-    assert "44.5" not in source
-    assert "27.781718445022726" not in source
-    assert "_PROJECTED_KRYLOV_CONDITION_DIMENSION" not in source

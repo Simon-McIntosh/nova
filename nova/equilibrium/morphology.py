@@ -1,12 +1,17 @@
-"""Fixed-shape morphology shared by accelerator equilibrium kernels."""
+"""Fixed-shape morphology shared by host geometry and device kernels."""
 
 import jax.numpy as jnp
+import numpy as np
 
 
-def _dilate4(mask: jnp.ndarray) -> jnp.ndarray:
-    """Return one false-bordered four-neighbour dilation."""
-    up = jnp.zeros_like(mask).at[1:, :].set(mask[:-1, :])
-    down = jnp.zeros_like(mask).at[:-1, :].set(mask[1:, :])
-    left = jnp.zeros_like(mask).at[:, 1:].set(mask[:, :-1])
-    right = jnp.zeros_like(mask).at[:, :-1].set(mask[:, 1:])
-    return mask | up | down | left | right
+def _dilate4(mask: np.ndarray | jnp.ndarray) -> np.ndarray | jnp.ndarray:
+    """Dilate a host or device mask within its bounds by four neighbours."""
+    array = np if isinstance(mask, np.ndarray) else jnp
+    padded = array.pad(mask, ((1, 1), (1, 1)), constant_values=False)
+    return (
+        padded[1:-1, 1:-1]
+        | padded[:-2, 1:-1]
+        | padded[2:, 1:-1]
+        | padded[1:-1, :-2]
+        | padded[1:-1, 2:]
+    )

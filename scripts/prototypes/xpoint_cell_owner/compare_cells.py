@@ -13,6 +13,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--branch-shift", type=float, default=0.0)
     args = parser.parse_args()
     source = json.loads(args.input.read_text())
     rows = []
@@ -30,7 +31,7 @@ def main():
             source["axis"],
             cell["density_coefficients"],
         )
-        adaptive = integrate_cell(*operands)
+        adaptive = integrate_cell(*operands, branch_shift=args.branch_shift)
         dense = integrate_cell(*operands, outer_rule="dense")
         observed = np.array(
             (

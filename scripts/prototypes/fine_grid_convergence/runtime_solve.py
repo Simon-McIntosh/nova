@@ -11,14 +11,19 @@ DIRECTION_BLOCK = 16
 BACKTRACKING_STEPS = 20
 
 
-def residual(state, operands, scale):
-    """Scaled moment residual with every carrier value passed at runtime."""
+def without_profile(operands):
+    """Keep the callable profile outside the runtime array pytree."""
+    return (*operands[:7], *operands[8:])
+
+
+def residual(state, operands, scale, profile):
+    """Scaled moment residual with carrier arrays passed at runtime."""
     moments = state.reshape((-1, 3)) * scale
-    mapped = map_moments(moments, *operands)
+    mapped = map_moments(moments, *operands[:7], profile, *operands[7:])
     return (mapped.moment_residual / scale).reshape(-1)
 
 
-def factor(state, operands, scale):
+def factor(state, operands, scale, profile):
     """Build dense Jacobian columns by vmapped JVP and factor them on device."""
     count = state.size
     blocks = (count + DIRECTION_BLOCK - 1) // DIRECTION_BLOCK
@@ -31,7 +36,7 @@ def factor(state, operands, scale):
 
         def column(direction):
             _, tangent = jax.jvp(
-                lambda probe: residual(probe, operands, scale),
+                lambda probe: residual(probe, operands, scale, profile),
                 (state,),
                 (direction,),
             )
@@ -45,13 +50,13 @@ def factor(state, operands, scale):
     return jsp_linalg.lu_factor(matrix)
 
 
-def advance(state, operands, scale, lu, pivots, refactor):
+def advance(state, operands, scale, lu, pivots, refactor, profile):
     """Replace the state-capturing linearize correction with one jitted step."""
-    current = residual(state, operands, scale)
+    current = residual(state, operands, scale, profile)
     magnitude = jnp.max(jnp.abs(current))
     lu, pivots = jax.lax.cond(
         refactor,
-        lambda _: factor(state, operands, scale),
+        lambda _: factor(state, operands, scale, profile),
         lambda _: (lu, pivots),
         operand=None,
     )
@@ -63,7 +68,7 @@ def advance(state, operands, scale, lu, pivots, refactor):
 
     def body(carry):
         trial, accepted, attempts, chosen = carry
-        proposed = residual(state + trial * step, operands, scale)
+        proposed = residual(state + trial * step, operands, scale, profile)
         take = jnp.max(jnp.abs(proposed)) < magnitude
         return (
             trial / 2,
@@ -83,5 +88,5 @@ def advance(state, operands, scale, lu, pivots, refactor):
         ),
     )
     updated = state + chosen * step
-    end = residual(updated, operands, scale)
+    end = residual(updated, operands, scale, profile)
     return updated, jnp.max(jnp.abs(end)), lu, pivots, chosen

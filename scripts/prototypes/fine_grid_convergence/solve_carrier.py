@@ -20,7 +20,10 @@ from scripts.analytic_oracle_fixtures import measure as fixture
 from scripts.prototypes.fast_map_production.qualification import require_map
 from scripts.prototypes.fine_grid_convergence.context import build
 from scripts.prototypes.fine_grid_convergence.handoff import map_moments
-from scripts.prototypes.fine_grid_convergence.runtime_solve import advance
+from scripts.prototypes.fine_grid_convergence.runtime_solve import (
+    advance,
+    without_profile,
+)
 from scripts.prototypes.lean_map.probe_bias import _image
 from scripts.prototypes.solve_options.point_bias import _exterior
 
@@ -44,15 +47,21 @@ def main():
     count = len(context.reference)
     result = {"kind": "diverted", "cells": count, "history": []}
     save(args.output, result)
+    operands = without_profile(context.operands)
+    profile = context.profile
 
-    mapped = jax.jit(lambda moments, operands: map_moments(moments, *operands))
+    mapped = jax.jit(
+        lambda moments, carrier: map_moments(
+            moments, *carrier[:7], profile, *carrier[7:]
+        )
+    )
     started = perf_counter()
-    program = mapped.lower(context.reference, context.operands).compile()
+    program = mapped.lower(context.reference, operands).compile()
     result["map_compile_seconds"] = perf_counter() - started
     result["map_executable_bytes"] = (
         program.runtime_executable().size_of_generated_code_in_bytes()
     )
-    centre = program(context.reference, context.operands)
+    centre = program(context.reference, operands)
     jax.block_until_ready(centre)
     result["centre_residual"] = float(
         jnp.max(jnp.abs(centre.moment_residual / context.scale))
@@ -94,10 +103,14 @@ def main():
     size = state.size
     lu = jnp.eye(size, dtype=state.dtype)
     pivots = jnp.arange(size, dtype=jnp.int32)
-    compiled_step = jax.jit(advance)
+    compiled_step = jax.jit(
+        lambda point, carrier, unit, matrix, piv, rebuild: advance(
+            point, carrier, unit, matrix, piv, rebuild, profile
+        )
+    )
     started = perf_counter()
     correction = compiled_step.lower(
-        state, context.operands, context.scale, lu, pivots, True
+        state, operands, context.scale, lu, pivots, True
     ).compile()
     result["correction_compile_seconds"] = perf_counter() - started
     result["correction_executable_bytes"] = (
@@ -113,7 +126,7 @@ def main():
     for index in range(args.max_steps):
         started = perf_counter()
         state, residual, lu, pivots, factor_scale = correction(
-            state, context.operands, context.scale, lu, pivots, True
+            state, operands, context.scale, lu, pivots, True
         )
         jax.block_until_ready(residual)
         row = {

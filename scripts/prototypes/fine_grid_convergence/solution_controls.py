@@ -17,30 +17,36 @@ import numpy as np
 
 import nova
 from scripts.prototypes.fine_grid_convergence.context import build
-from scripts.prototypes.fine_grid_convergence.runtime_solve import factor, residual
+from scripts.prototypes.fine_grid_convergence.runtime_solve import (
+    factor,
+    residual,
+    without_profile,
+)
 
 
 def save(path, data):
     path.write_text(json.dumps(data, indent=2) + "\n")
 
 
-def chord_two(states, operands, scale, lu, pivots):
+def chord_two(states, operands, scale, lu, pivots, profile):
     """Two fixed-factor corrections with every large operand passed at runtime."""
 
     def one(state):
         for _ in range(2):
             direction = jsp_linalg.lu_solve(
-                (lu, pivots), -residual(state, operands, scale)
+                (lu, pivots), -residual(state, operands, scale, profile)
             )
             state = state + direction
-        return jnp.max(jnp.abs(residual(state, operands, scale)))
+        return jnp.max(jnp.abs(residual(state, operands, scale, profile)))
 
     return jax.vmap(one)(states)
 
 
-def gauss_newton_gradient(state, operands, scale):
+def gauss_newton_gradient(state, operands, scale, profile):
     """Apply the transposed map Jacobian without capturing carrier arrays."""
-    value, pullback = jax.vjp(lambda probe: residual(probe, operands, scale), state)
+    value, pullback = jax.vjp(
+        lambda probe: residual(probe, operands, scale, profile), state
+    )
     return value, pullback(value)[0]
 
 
@@ -62,13 +68,20 @@ def main():
     context = build(args.cells, args.cache)
     state = jnp.asarray(saved["terminal_state"]["moments"]).reshape(-1)
     state = state / jnp.tile(context.scale, len(context.reference))
-    operands = context.operands
+    operands = without_profile(context.operands)
     scale = context.scale
+    profile = context.profile
     result = {"cells": len(context.reference), "taylor": [], "batches": []}
     save(args.output, result)
 
-    mapped = jax.jit(residual)
-    centre, gradient = jax.jit(gauss_newton_gradient)(state, operands, scale)
+    mapped = jax.jit(
+        lambda point, carrier, unit: residual(point, carrier, unit, profile)
+    )
+    centre, gradient = jax.jit(
+        lambda point, carrier, unit: gauss_newton_gradient(
+            point, carrier, unit, profile
+        )
+    )(state, operands, scale)
     centre_np = np.asarray(centre)
     result["residual"] = float(np.max(np.abs(centre_np)))
     result["gauss_newton_gradient_two"] = float(jnp.linalg.norm(gradient))
@@ -87,7 +100,7 @@ def main():
     steps = (1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8)
     tangent_program = jax.jit(
         lambda point, direction, ops, unit: jax.jvp(
-            lambda probe: residual(probe, ops, unit),
+            lambda probe: residual(probe, ops, unit, profile),
             (point,),
             (direction,),
         )
@@ -118,7 +131,11 @@ def main():
         print(f"TAYLOR direction={index} slopes={slopes}", flush=True)
 
     started = perf_counter()
-    compiled_factor = jax.jit(factor).lower(state, operands, scale).compile()
+    compiled_factor = (
+        jax.jit(lambda point, carrier, unit: factor(point, carrier, unit, profile))
+        .lower(state, operands, scale)
+        .compile()
+    )
     result["factor_compile_seconds"] = perf_counter() - started
     result["factor_executable_bytes"] = (
         compiled_factor.runtime_executable().size_of_generated_code_in_bytes()
@@ -134,7 +151,15 @@ def main():
     for width in (1, 16, 128):
         batch = neighbours[:width]
         started = perf_counter()
-        program = jax.jit(chord_two).lower(batch, operands, scale, lu, pivots).compile()
+        program = (
+            jax.jit(
+                lambda states, carrier, unit, matrix, piv: chord_two(
+                    states, carrier, unit, matrix, piv, profile
+                )
+            )
+            .lower(batch, operands, scale, lu, pivots)
+            .compile()
+        )
         compile_seconds = perf_counter() - started
         size_bytes = program.runtime_executable().size_of_generated_code_in_bytes()
         values = np.asarray(program(batch, operands, scale, lu, pivots))

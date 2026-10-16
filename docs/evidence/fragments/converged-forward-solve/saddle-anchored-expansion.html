@@ -40,6 +40,10 @@
 </tbody>
 </table>
 <p id="saddle-anchored-expansion-gate-accounting">Both arms run in one process on one carrier in one allocation, so the ratio is a same-job, same-machine comparison and not a cross-run estimate. Per-state wall is the median of five evaluations after the first, so compilation is excluded from it. The axis arm falls 25&times; from width 1 to width 128 and the saddle arm 2.5&times;, so the axis arm's width-1 figure is launch overhead while the saddle arm's marginal cost is real work: about 6.7 ms per state against the axis arm's 0.22 ms.</p>
+<figure>
+<img src="/nova/figures/converged-forward-solve/saddle-anchored-expansion/speed-gate-282.svg" alt="Per-state wall and generated executable size against batch width for both arms at 282 realised cells">
+<figcaption>Per-state wall and generated executable size against batch width, both arms measured in the same H200 allocation. The two arms generate nearly the same code size, so the wall gap is a run-time cost of the integration rule rather than of the compiled program.</figcaption>
+</figure>
 </section>
 
 <section id="saddle-anchored-expansion-correctness">

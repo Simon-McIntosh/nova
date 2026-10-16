@@ -49,6 +49,10 @@
       </tbody>
     </table>
     <p>Ratio at width 128 is 29.9319 against a 1.25 ceiling. The compile condition passes by a wide margin and the size condition fails by 3.06&times;; the wall condition alone fails by 23.9&times;. Every state in every row is finite, so the failure is cost and not correctness: the expansion books, the batch vectorises, and the residual is well formed at widths 1, 16 and 128.</p>
+    <figure>
+      <img src="/nova/figures/converged-forward-solve/saddle-anchored-expansion/speed-gate-282.svg" alt="Per-state wall and generated executable size against batch width for the saddle-anchored and axis-facing maps at 282 realised cells">
+      <figcaption>Per-state wall and generated executable size against batch width, both arms in one H200 allocation on the 282 realised cell diverted carrier. The axis-facing arm's width-1 point is launch overhead and its curve flattens to about 0.22 ms per state; the saddle-anchored arm flattens to about 6.7 ms, so its excess is marginal work and not batching. The size panel shows both arms above the 50 MB bound, the saddle arm by 3.06&times;, and their generated code is nearly indistinguishable in size, so the wall gap is a run-time cost and not a code-size one.</figcaption>
+    </figure>
   </section>
 
   <section id="dominates">

@@ -10,11 +10,13 @@ from benchmarks import solovev_certificate as certificate
 from nova.equilibrium.clip_quadrature import (
     _QuadratureSupport,
     _flux_selected_current_moments,
+    _straight_edge_monomial_moments,
     clipped_support_current_moments,
     clipped_support_field_integrals,
     clipped_support_quadrature,
     cut_cell_bank_capacity,
 )
+from nova.equilibrium.separatrix_clip import padded_polynomial_current_moments
 from nova.equilibrium.source import _FluxSelectedProfile
 from nova.equilibrium.stencil_mesh import (
     FluxFieldPolynomial,
@@ -388,3 +390,143 @@ def test_compact_reduction_work_arrays_stay_below_one_gibibyte():
         _shape_bytes((*cut_shape.shape[:2], design_columns), cut_shape.dtype),
     )
     assert largest_intermediate_bytes < GIB
+
+
+# ---------------------------------------------------------------------------
+# Exact moments of a quadratic density over a clipped polygon.
+#
+# The closed-form floor books a cut cell by contracting its fitted quadratic
+# density against the owner's monomial table. The dense reference below is
+# independent of that route: the polygon is fanned into signed triangles from
+# its first vertex and each triangle carries a forty-node product rule, which
+# resolves a degree-four integrand exactly. This is the property the parallel
+# quadratic-density module's test held and this file did not, so it moves here.
+# That module's other assertions are already held elsewhere: the owner table
+# against exact rationals and the centred degree-two construction against those
+# same moments in ``test_polygon_moment_owner.py``, and the refusal of a
+# malformed vertex buffer in ``test_equilibrium_separatrix_clip.py``.
+_QUADRATIC_POWERS = ((0, 0), (1, 0), (0, 1), (2, 0), (1, 1), (0, 2))
+_OWNER_POWERS = tuple(
+    (radial, total - radial) for total in range(5) for radial in range(total + 1)
+)
+_OWNER_SLOT = {power: index for index, power in enumerate(_OWNER_POWERS)}
+#: A convex hexagon and a concave five-vertex arrow, both carrying vertices in
+#: every quadrant, and a quadratic with every coefficient live.
+_DENSITY_POLYGONS = (
+    np.array(
+        [[0.1, -0.2], [1.3, -0.35], [1.9, 0.6], [1.1, 1.4], [-0.2, 0.9], [-0.35, 0.15]]
+    ),
+    np.array([[0.0, 0.0], [2.0, 0.0], [2.0, 2.0], [1.0, 0.6], [0.0, 2.0]]),
+)
+_QUADRATIC_DENSITY = np.array([1.5, -0.75, 0.4, 0.6, -0.35, 0.25])
+
+
+def _dense_quadratic_moments(polygon: np.ndarray, coefficient: np.ndarray):
+    """Integrate a quadratic density with a dense Duffy fan quadrature."""
+    node, weight = np.polynomial.legendre.leggauss(40)
+    node = 0.5 * (node + 1.0)
+    weight = 0.5 * weight
+    radial = np.repeat(node, 40)[:, None]
+    vertical = np.tile(node, 40)[:, None]
+    rule = (np.repeat(weight, 40) * np.tile(weight, 40))[:, None]
+    total = np.zeros(6, dtype=np.float64)
+    first = polygon[0]
+    for index in range(1, len(polygon) - 1):
+        second, third = polygon[index], polygon[index + 1]
+        point = (
+            first
+            + radial * (second - first)
+            + (1.0 - radial) * vertical * (third - first)
+        )
+        # Signed, not absolute: a concave polygon's fan has mixed orientation.
+        third_from_first = third - first
+        affine = float(
+            (second[0] - first[0]) * third_from_first[1]
+            - (second - first)[1] * third_from_first[0]
+        )
+        jacobian = (affine * (1.0 - radial) * rule).ravel()
+        design = np.stack(
+            [point[:, 0] ** p * point[:, 1] ** q for p, q in _QUADRATIC_POWERS], axis=1
+        )
+        weighted = (design @ coefficient) * jacobian
+        for slot, (p, q) in enumerate(_QUADRATIC_POWERS):
+            total[slot] += np.sum(weighted * point[:, 0] ** p * point[:, 1] ** q)
+    return total
+
+
+def _owner_quadratic_moments(vertices, count, coefficient):
+    """Contract a quadratic against the owner's monomial table, six channels."""
+    table = np.asarray(
+        _straight_edge_monomial_moments(
+            jnp.asarray(vertices), jnp.asarray(count), max_degree=4
+        )
+    )
+    shifts = ((0, 0), (1, 0), (0, 1), (2, 0), (1, 1), (0, 2))
+    channels = []
+    for radial_shift, vertical_shift in shifts:
+        slots = np.asarray(
+            [
+                _OWNER_SLOT[(radial + radial_shift, vertical + vertical_shift)]
+                for radial, vertical in _QUADRATIC_POWERS
+            ]
+        )
+        channels.append(np.einsum("nm,nm->n", coefficient, table[:, slots]))
+    return np.stack(channels, axis=1)
+
+
+@pytest.mark.parametrize("polygon", _DENSITY_POLYGONS, ids=["convex", "concave"])
+def test_quadratic_density_moments_match_the_dense_reference(polygon: np.ndarray):
+    """The owner's quadratic contraction reproduces an independent quadrature."""
+    capacity = len(polygon) + 8
+    vertices = np.zeros((1, capacity, 2), dtype=np.float64)
+    vertices[0, : len(polygon)] = polygon
+    count = np.asarray([len(polygon)])
+    coefficient = _QUADRATIC_DENSITY[None, :]
+    reference = _dense_quadratic_moments(polygon, _QUADRATIC_DENSITY)
+    assert np.all(reference != 0.0)
+    observed = _owner_quadratic_moments(vertices, count, coefficient)[0]
+    # Padding adds exact-zero edges but lengthens the reduction axis, so the
+    # comparison is relative rather than bitwise.
+    relative = np.abs(observed - reference) / np.abs(reference)
+    np.testing.assert_array_less(relative, 1e-13)
+
+
+def test_quadratic_density_moments_move_with_a_perturbed_coefficient():
+    """Positive control: the dense comparison bites on a wrong integrand."""
+    polygon = _DENSITY_POLYGONS[0]
+    reference = _dense_quadratic_moments(polygon, _QUADRATIC_DENSITY)
+    perturbed_coefficient = _QUADRATIC_DENSITY + np.array(
+        [0.0, 0.3, 0.0, 0.0, 0.0, 0.0]
+    )
+    perturbed = _dense_quadratic_moments(polygon, perturbed_coefficient)
+    relative = np.abs(perturbed - reference) / np.abs(reference)
+    assert np.max(relative) > 2e-3
+
+
+def test_polynomial_layer_books_the_quadratic_density_over_a_carrier_cell():
+    """The surviving polynomial layer reproduces the quadratic moments exactly.
+
+    One cut cell of a stored carrier is posed with a quadratic density in its
+    own local frame; the layer the closed-form floor books through must give the same
+    area and first moments as the direct owner contraction, whose second
+    moments the dense reference checks above.
+    """
+    _operator, support, _field, _span, _bank, _centroid, _sample = _analytic_support(
+        "weak-rotation-reactor-static", -110
+    )
+    cut = np.flatnonzero(np.asarray(support.included) & np.asarray(support.boundary))
+    assert cut.size > 0
+    cell = int(cut[0])
+    vertices = np.asarray(support.support_vertices, dtype=np.float64)[cell : cell + 1]
+    count = np.asarray(support.vertex_count, dtype=np.intp)[cell : cell + 1]
+    coefficient = _QUADRATIC_DENSITY[None, :]
+    direct = _owner_quadratic_moments(vertices, count, coefficient)
+    current, first = padded_polynomial_current_moments(
+        jnp.asarray(vertices),
+        jnp.asarray(count),
+        jnp.zeros((1, 2)),
+        jnp.ones((1, 2)),
+        jnp.asarray(coefficient),
+    )
+    np.testing.assert_allclose(np.asarray(current), direct[:, 0], rtol=1e-13, atol=0.0)
+    np.testing.assert_allclose(np.asarray(first), direct[:, 1:3], rtol=1e-13, atol=0.0)

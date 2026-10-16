@@ -38,7 +38,7 @@ from nova.equilibrium.clip_quadrature import (
     _quadratic_coefficients,
     _quadratic_sample_field,
 )
-from nova.equilibrium.polygon_moments import polygon_density_moments
+from nova.equilibrium.separatrix_clip import padded_polynomial_current_moments
 from nova.jax.config import configure_dtypes
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -84,7 +84,7 @@ def probe(case_name: str, requested_cells: int) -> None:
     count = np.asarray(support.vertex_count, dtype=np.intp)
     included = np.asarray(support.included)
     boundary = np.asarray(support.boundary)
-    print("polygon_moments_probe_start")
+    print("polynomial_moments_probe_start")
     print("vertices", vertices.shape, "flux_span", flux_span)
     print("count_min", int(count.min()), "count_max", int(count.max()))
     print("boundary_cells", int(np.count_nonzero(included & boundary)))
@@ -93,7 +93,7 @@ def probe(case_name: str, requested_cells: int) -> None:
         print("cell", int(cell), "count", int(count[cell]))
         print(vertices[cell, : count[cell]])
     print("support_fields", sorted(support._fields))
-    print("polygon_moments_probe_end")
+    print("polynomial_moments_probe_end")
 
 
 def run(
@@ -187,19 +187,18 @@ def _closed_form_moments(
     fitted = np.asarray(_quadratic_coefficients(sampled), dtype=np.float64)
     centre = np.asarray(centre, dtype=np.float64)
     scale = np.asarray(scale, dtype=np.float64)
-    local = (polygon - centre[:, None, :]) / scale[:, None, :]
-    moments = polygon_density_moments(
-        jnp.asarray(local), jnp.asarray(live), jnp.asarray(fitted)
+    current, first = padded_polynomial_current_moments(
+        jnp.asarray(polygon),
+        jnp.asarray(live),
+        jnp.asarray(centre),
+        jnp.asarray(scale),
+        jnp.asarray(fitted),
     )
-    area_scale = scale[:, 0] * scale[:, 1]
-    current = area_scale * np.asarray(moments.area)
+    current = np.asarray(current, dtype=np.float64)
+    first = np.asarray(first, dtype=np.float64)
     offset = centre - np.asarray(support.centroids, dtype=np.float64)
-    radial = (
-        area_scale * scale[:, 0] * np.asarray(moments.radial) + current * offset[:, 0]
-    )
-    vertical = (
-        area_scale * scale[:, 1] * np.asarray(moments.vertical) + current * offset[:, 1]
-    )
+    radial = first[:, 0] + current * offset[:, 0]
+    vertical = first[:, 1] + current * offset[:, 1]
     return np.stack((current, radial, vertical), axis=0)
 
 
@@ -287,15 +286,18 @@ def cost_study(
     sample, psi_norm, _r, _v, centre, scale = _quadratic_sample_field(field, cell_index)
     sampled = operator.source.core.current_density(sample[..., 0], psi_norm)
     fitted = np.asarray(_quadratic_coefficients(sampled), dtype=np.float64)
-    local = (polygon - np.asarray(centre)[:, None, :]) / np.asarray(scale)[:, None, :]
-    lowered = jax.jit(polygon_density_moments).lower(
-        jnp.asarray(local), jnp.asarray(live), jnp.asarray(fitted)
+    lowered = jax.jit(padded_polynomial_current_moments).lower(
+        jnp.asarray(polygon),
+        jnp.asarray(live),
+        jnp.asarray(centre),
+        jnp.asarray(scale),
+        jnp.asarray(fitted),
     )
     compiled = lowered.compile()
     memory = compiled.memory_analysis()
     cost = compiled.cost_analysis()
     return {
-        "buffer_capacity": int(local.shape[1]),
+        "buffer_capacity": int(polygon.shape[1]),
         "live_edges_per_cut_cell": float(np.mean(live)),
         "quadrature_nodes_per_cut_cell": 0,
         "table_terms_per_live_edge": 15 * 6 * 5,

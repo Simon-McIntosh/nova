@@ -1,0 +1,68 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "scripts/prototypes/support/book.py:49",
+    "scripts/prototypes/support/book.py:58"
+  ],
+  "completed_at": "2026-10-16T23:09:54.961Z",
+  "dispatched_at": "2026-10-16T23:01:33Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/support/certificate_fixtures.py",
+      "line": "251",
+      "severity": "follow-on",
+      "text": "follow-on: cached_exterior duplicates the load-or-build orchestration and the exterior build body owned by scripts/analytic_oracle_fixtures/measure.py:1343 cached_fixture_exterior, and cached_carrier at :210 forks measure.py:783 cached_machine, so a fix to the build or the flow must now land in two places; the fixture owners could instead have taken a store argument."
+    },
+    {
+      "file": "tests/test_current_book_fragments.py",
+      "line": "239",
+      "severity": "follow-on",
+      "text": "follow-on: `assert entry == published` compares fixture_entry(kind, fixture_digest(identity)) against publish_fixture(kind, fixture_digest(identity), ...), so both sides are derived from the same test-supplied digest and the assertion holds whatever fixture_digest does; the independent guard is the following is-None assertion at :243."
+    },
+    {
+      "file": "scripts/prototypes/support/certificate_fixtures.py",
+      "line": "166",
+      "severity": "follow-on",
+      "text": "follow-on: no assertion covers the hit path, so a regression in _load_or_build that always rebuilt would leave the certificate gate green (six passed) and show only in the walls; the added negative control exercises the key, not the load-on-hit."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read commit by commit 0ebe45a..4d813488a; 957e1b1e8 adds certificate_fixtures.py and rewires book.py, bdddc614b names the exterior support arm, 5e7383f66/d632f6249/4d813488a carry the figure and the fragment, all inside the declared scope.",
+    "done_when": "the done_when's quantitative measure is a two-run H200 gate with per-row build/load walls, matching verdicts, a negative control and a suite delta; h200/slurm-1287655.out records RUN1 6 passed (10750.76s) then RUN2 6 passed (891.00s), GATE_EXIT=0, and the negative-control log records a failing arm, so the gate the worker ran asserts the named measure.",
+    "goal": "node goal is to load the certificate booking gate's carrier and exterior fixtures from an identity-keyed shared cache; scripts/prototypes/support/book.py:48-58 now calls certificate_fixtures.cached_carrier and cached_exterior, so both are addressed by the fixture sources' own identity and published under operand_cache_root()/certificate-fixtures.",
+    "manifest": "read manifest.md; status complete, it names the five commits, the gate command tests/test_current_book_fragments.py::test_analytic_certificate_moments, both suite arms, and the H200 and CPU log paths.",
+    "write_paths": "the node's declared paths are scripts/prototypes/support, scripts/analytic_oracle_fixtures/measure.py, four tests, tests/jaxpr_scans.py and the fragment/figures dirs; every path in the diff resolves inside them."
+  },
+  "justifications": {
+    "durability": "tests/test_current_book_fragments.py:243 fails when fixture_digest is coarsened to drop discretisation.requested_cells, as cpu/negative_control.log shows, but nothing asserts that a second run loads rather than rebuilds.",
+    "evidence": "h200/slurm-1287655.out:81 shows RUN1 6 passed and :143 shows RUN2 6 passed with GATE_EXIT=0, and cpu/negative_control.log:1 records the failing arm, though the CPU head arm in cpu/after_suite.json was run at 957e1b1e8 rather than the reviewed head.",
+    "fit": "certificate_fixtures.py:125 publishes through nova.database.content_store and book.py:50 keeps the \"store under the kind root\" assertion the surrounding module style uses, though the _DeclaredFile shim at certificate_fixtures.py:157 is not a dataclass.",
+    "goal_fidelity": "book.py:49 and book.py:58 replace the per-run tempfile root and the ZarrStore redirect with certificate_fixtures.cached_carrier/cached_exterior, which read the identity-keyed object before building, so the gate loads what a prior run published.",
+    "reuse": "certificate_fixtures.py:251 cached_exterior re-implements the load-or-build flow and copies the exterior build body of scripts/analytic_oracle_fixtures/measure.py:1343 cached_fixture_exterior, and certificate_fixtures.py:210 cached_carrier forks measure.py:783 cached_machine rather than extending either owner.",
+    "scope_discipline": "every path in git diff 0ebe45a..4d813488a is inside the manifest's declared write paths, including the two doc commits, and measure.py was left untouched as the brief permits."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: node goal is to load the certificate booking gate's carrier and exterior fixtures from an identity-keyed shared cache; scripts/prototypes/support/book.py:48-58 now calls certificate_fixtures.cached_carrier and cached_exterior, so both are addressed by the fixture sources' own identity and published under operand_cache_root()/certificate-fixtures.\nVERDICT done_when: the done_when's quantitative measure is a two-run H200 gate with per-row build/load walls, matching verdicts, a negative control and a suite delta; h200/slurm-1287655.out records RUN1 6 passed (10750.76s) then RUN2 6 passed (891.00s), GATE_EXIT=0, and the negative-control log records a failing arm, so the gate the worker ran asserts the named measure.\nVERDICT write_paths: the node's declared paths are scripts/prototypes/support, scripts/analytic_oracle_fixtures/measure.py, four tests, tests/jaxpr_scans.py and the fragment/figures dirs; every path in the diff resolves inside them.\nVERDICT manifest: read manifest.md; status complete, it names the five commits, the gate command tests/test_current_book_fragments.py::test_analytic_certificate_moments, both suite arms, and the H200 and CPU log paths.\nVERDICT diff: read commit by commit 0ebe45a..4d813488a; 957e1b1e8 adds certificate_fixtures.py and rewires book.py, bdddc614b names the exterior support arm, 5e7383f66/d632f6249/4d813488a carry the figure and the fragment, all inside the declared scope.\nCALL_SITES: scripts/prototypes/support/book.py:49, scripts/prototypes/support/book.py:58\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: book.py:49 and book.py:58 replace the per-run tempfile root and the ZarrStore redirect with certificate_fixtures.cached_carrier/cached_exterior, which read the identity-keyed object before building, so the gate loads what a prior run published.\nSCORE evidence: 16\nJUSTIFICATION evidence: h200/slurm-1287655.out:81 shows RUN1 6 passed and :143 shows RUN2 6 passed with GATE_EXIT=0, and cpu/negative_control.log:1 records the failing arm, though the CPU head arm in cpu/after_suite.json was run at 957e1b1e8 rather than the reviewed head.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff 0ebe45a..4d813488a is inside the manifest's declared write paths, including the two doc commits, and measure.py was left untouched as the brief permits.\nSCORE durability: 12\nJUSTIFICATION durability: tests/test_current_book_fragments.py:243 fails when fixture_digest is coarsened to drop discretisation.requested_cells, as cpu/negative_control.log shows, but nothing asserts that a second run loads rather than rebuilds.\nSCORE fit: 16\nJUSTIFICATION fit: certificate_fixtures.py:125 publishes through nova.database.content_store and book.py:50 keeps the \"store under the kind root\" assertion the surrounding module style uses, though the _DeclaredFile shim at certificate_fixtures.py:157 is not a dataclass.\nSCORE reuse: 5\nJUSTIFICATION reuse: certificate_fixtures.py:251 cached_exterior re-implements the load-or-build flow and copies the exterior build body of scripts/analytic_oracle_fixtures/measure.py:1343 cached_fixture_exterior, and certificate_fixtures.py:210 cached_carrier forks measure.py:783 cached_machine rather than extending either owner.\nFINDING scripts/prototypes/support/certificate_fixtures.py:251 follow-on: cached_exterior duplicates the load-or-build orchestration and the exterior build body owned by scripts/analytic_oracle_fixtures/measure.py:1343 cached_fixture_exterior, and cached_carrier at :210 forks measure.py:783 cached_machine, so a fix to the build or the flow must now land in two places; the fixture owners could instead have taken a store argument.\nFINDING tests/test_current_book_fragments.py:239 follow-on: `assert entry == published` compares fixture_entry(kind, fixture_digest(identity)) against publish_fixture(kind, fixture_digest(identity), ...), so both sides are derived from the same test-supplied digest and the assertion holds whatever fixture_digest does; the independent guard is the following is-None assertion at :243.\nFINDING scripts/prototypes/support/certificate_fixtures.py:166 follow-on: no assertion covers the hit path, so a regression in _load_or_build that always rebuilt would leave the certificate gate green (six passed) and show only in the walls; the added negative control exercises the key, not the load-on-hit.\n",
+  "review_run_id": "r-20261016T230114694604-review-of-certificate-fixture-cache-4d813488a294",
+  "reviewed_base_sha": "0ebe45a55a36fe1f8ea6fad5b082ca08e772585c",
+  "reviewed_head_sha": "4d813488a294b09d640c20a7c7cfef26f041147b",
+  "reviewed_run_id": "r-20261016T152946554093-certificate-fixture-cache",
+  "scores": {
+    "durability": 12,
+    "evidence": 16,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T23:07:42.737189+00:00",
+  "total": 87
+}

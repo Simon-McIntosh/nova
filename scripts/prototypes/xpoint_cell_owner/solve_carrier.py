@@ -38,6 +38,10 @@ def main():
     parser.add_argument("--cache", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--max-steps", type=int, default=15)
+    parser.add_argument(
+        "--component", choices=("halfplane", "bell"), default="halfplane"
+    )
+    parser.add_argument("--map-only", action="store_true")
     args = parser.parse_args()
     assert jax.config.jax_enable_x64 is True and jax.default_backend() == "gpu"
     print(
@@ -45,14 +49,19 @@ def main():
     )
     context = build(args.cells, args.cache)
     count = len(context.reference)
-    result = {"kind": "diverted", "cells": count, "history": []}
+    result = {
+        "kind": "diverted",
+        "component": args.component,
+        "cells": count,
+        "history": [],
+    }
     save(args.output, result)
     operands = without_profile(context.operands)
     profile = context.profile
 
     mapped = jax.jit(
         lambda moments, carrier: map_moments(
-            moments, *carrier[:7], profile, *carrier[7:]
+            moments, *carrier[:7], profile, *carrier[7:], component=args.component
         )
     )
     started = perf_counter()
@@ -98,6 +107,8 @@ def main():
         flush=True,
     )
     require_map([result])
+    if args.map_only:
+        return
 
     state = (context.reference / context.scale).reshape(-1)
     size = state.size

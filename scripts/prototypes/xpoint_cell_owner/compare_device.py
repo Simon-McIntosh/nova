@@ -7,6 +7,7 @@ configure_dtypes()
 
 import argparse
 import json
+from functools import partial
 from pathlib import Path
 
 import jax
@@ -26,6 +27,7 @@ def main():
     parser.add_argument("--reference", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--projected", action="store_true")
+    parser.add_argument("--bell-component", action="store_true")
     args = parser.parse_args()
     assert jax.config.jax_enable_x64 is True
     print(
@@ -34,7 +36,12 @@ def main():
     source = json.loads(args.input.read_text())
     reference = json.loads(args.reference.read_text())
     by_cell = {row["cell"]: row for row in reference["rows"]}
-    evaluate = jax.jit(integrate_cell)
+    evaluate = jax.jit(
+        partial(
+            integrate_cell,
+            axis_component="bell" if args.bell_component else "halfplane",
+        )
+    )
     capacity = max(len(row["vertices"]) for row in source["rows"])
     result = {"cells": source["cells"], "device": jax.default_backend(), "rows": []}
     args.output.write_text(json.dumps(result, indent=2) + "\n")

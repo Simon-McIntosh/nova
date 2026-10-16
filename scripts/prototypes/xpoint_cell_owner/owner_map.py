@@ -1,5 +1,7 @@
 """Book a single Bell-conic cut for saddle-neighbourhood area and moments."""
 
+from functools import partial
+
 import jax
 import jax.numpy as jnp
 
@@ -11,14 +13,15 @@ from scripts.prototypes.lean_map.quadrature import interior_moments
 from scripts.prototypes.xpoint_cell_owner.device_owner import integrate_cell
 
 
-def owned_cut(reading, geometry, profile, sigma, capacity=16):
+def owned_cut(reading, geometry, profile, sigma, capacity=16, component="halfplane"):
     """Replace the sampled saddle-sector area and moment booking together."""
     active = reading.normal_form_cells
     count = jnp.sum(active, dtype=jnp.int32)
     indices = jnp.nonzero(active, size=capacity, fill_value=0)[0]
     density = program._density_coefficients(geometry, reading, profile)
     selected = jax.vmap(
-        integrate_cell, in_axes=(0, 0, 0, 0, 0, None, None, None, None, 0)
+        partial(integrate_cell, axis_component=component),
+        in_axes=(0, 0, 0, 0, 0, None, None, None, None, 0),
     )(
         geometry.vertices[indices],
         geometry.vertex_count[indices],
@@ -63,6 +66,7 @@ def map_moments(
     axis_sign,
     *,
     frame_gate=True,
+    component="halfplane",
 ):
     """Replace fast_map_production.program.map_moments at the booked handoff."""
     cached = fixed_points._CachedField(
@@ -84,7 +88,7 @@ def map_moments(
     field = program.FusedField(cached, coefficient)
     reading = read(field, roots, geometry, convention, policy, frame_gate=frame_gate)
     reading, owned, owner_valid = owned_cut(
-        reading, geometry, profile, convention.sigma
+        reading, geometry, profile, convention.sigma, component=component
     )
     selected = reading.selected_cells
     full = (

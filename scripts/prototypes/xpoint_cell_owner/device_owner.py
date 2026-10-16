@@ -5,7 +5,7 @@ import jax.numpy as jnp
 from numpy.polynomial.legendre import leggauss
 
 
-_OUTER_NODES, _OUTER_WEIGHTS = (jnp.asarray(row) for row in leggauss(64))
+_OUTER_NODES, _OUTER_WEIGHTS = (jnp.asarray(row) for row in leggauss(128))
 _INNER_NODES = jnp.asarray((-1 / jnp.sqrt(3.0), 1 / jnp.sqrt(3.0)))
 
 
@@ -42,15 +42,27 @@ def integrate_cell(
     saddle,
     axis,
     density_coefficients,
+    *,
+    axis_component="halfplane",
 ):
     """Replace the sampled saddle-sector booking for one containing cell."""
     field = field_coefficients.at[0].add(-boundary_level) * sigma
     hessian = jnp.array(((2 * field[3], field[4]), (field[4], 2 * field[5])))
     eigenvalues, eigenvectors = jnp.linalg.eigh(hessian)
+    if axis_component == "bell":
+        stationary_local = -jnp.linalg.solve(hessian, field[1:3])
+        origin = centre + pitch * stationary_local
+        critical_level = _quadratic(field, *stationary_local)
+        restrict_branch = critical_level <= 0
+    elif axis_component == "halfplane":
+        origin = saddle
+        restrict_branch = True
+    else:
+        raise ValueError(f"unknown component rule: {axis_component}")
     plus = eigenvectors[:, 1]
-    plus *= jnp.where(jnp.dot(axis - saddle, plus) < 0, -1.0, 1.0)
+    plus *= jnp.where(jnp.dot(axis - origin, plus) < 0, -1.0, 1.0)
     minus = eigenvectors[:, 0]
-    polygon = (vertices - saddle) / pitch
+    polygon = (vertices - origin) / pitch
     polygon = jnp.stack((polygon @ plus, polygon @ minus), axis=1)
     slot = jnp.arange(vertices.shape[0])
     following = jnp.where(slot + 1 < count, slot + 1, 0)
@@ -59,7 +71,7 @@ def integrate_cell(
 
     def value(u, v):
         u, v = jnp.asarray(u), jnp.asarray(v)
-        local = (saddle - centre) / pitch + u[..., None] * plus + v[..., None] * minus
+        local = (origin - centre) / pitch + u[..., None] * plus + v[..., None] * minus
         return _quadratic(field, local[..., 0], local[..., 1])
 
     constant = value(0.0, 0.0)
@@ -71,7 +83,9 @@ def integrate_cell(
     squared_v = (upper + lower) / 2 - constant
     mixed = value(1.0, 1.0) - plus_value - upper + constant
     vertex_u = jnp.where(live, polygon[:, 0], jnp.inf)
-    lower_u = jnp.maximum(0.0, jnp.min(vertex_u))
+    lower_u = jnp.where(
+        restrict_branch, jnp.maximum(0.0, jnp.min(vertex_u)), jnp.min(vertex_u)
+    )
     upper_u = jnp.max(jnp.where(live, polygon[:, 0], -jnp.inf))
     upper_u = jnp.maximum(lower_u, upper_u)
 
@@ -137,7 +151,7 @@ def integrate_cell(
         middle_v = (v_left + v_right) / 2
         positive = value(u_value, middle_v) > 0
         v_nodes = middle_v[:, None] + (v_right - v_left)[:, None] * _INNER_NODES / 2
-        local = (saddle - centre) / pitch + u_value * plus + v_nodes[..., None] * minus
+        local = (origin - centre) / pitch + u_value * plus + v_nodes[..., None] * minus
         x, y = local[..., 0], local[..., 1]
         density = _quadratic(density_coefficients, x, y)
         terms = jnp.stack(

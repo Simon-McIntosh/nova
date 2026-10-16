@@ -611,21 +611,34 @@ def run(args):
             apply_ms = 1000 * (perf_counter() - build_start)
         candidate = point.reshape(-1)
         original = float(jnp.max(jnp.abs(residual)))
+        original_merit = (
+            float(jnp.linalg.norm(residual)) if args.merit == "two" else original
+        )
         accepted = False
         factor_scale = 1.0
         new_residual = original
+        new_merit = original_merit
         for _ in range(args.line_search_depth if args.line_search else 1):
             trial = point.reshape(-1) + factor_scale * jnp.asarray(step)
-            trial_residual = float(jnp.max(jnp.abs(equation(trial, active_operands))))
-            if np.isfinite(trial_residual) and trial_residual < original:
+            trial_vector = equation(trial, active_operands)
+            trial_residual = float(jnp.max(jnp.abs(trial_vector)))
+            trial_merit = (
+                float(jnp.linalg.norm(trial_vector))
+                if args.merit == "two"
+                else trial_residual
+            )
+            if np.isfinite(trial_merit) and trial_merit < original_merit:
                 candidate = trial
                 new_residual = trial_residual
+                new_merit = trial_merit
                 accepted = True
                 break
             factor_scale *= 0.5
         row = {
             "residual": new_residual,
             "original": original,
+            "merit": new_merit,
+            "original_merit": original_merit,
             "accepted": accepted,
             "factor_scale": factor_scale if accepted else 0.0,
             "linearize_ms": linearize_ms,
@@ -963,6 +976,7 @@ def main():
     parser.add_argument("--block", type=int, default=16)
     parser.add_argument("--line-search", action="store_true")
     parser.add_argument("--line-search-depth", type=int, default=20)
+    parser.add_argument("--merit", choices=("sup", "two"), default="sup")
     parser.add_argument("--taylor", action="store_true")
     parser.add_argument("--exact-roots", action="store_true")
     parser.add_argument("--omit-saddle-derivative", action="store_true")

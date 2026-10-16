@@ -67,6 +67,20 @@
     <p>The boundary class stays 0 and the booked saddle-cell count stays 0 through every accepted correction, so at this carrier and resolution the map never enters the X-point booking branch the single-owner change governs. The descent is slow for a different reason than the two mechanisms this node corrected, and the scale of the correction needed is large: the residual starts near 1.8, not near the 0.0027 that the earlier fused-convergence study stalled at.</p>
     <p>Consequently this node does not claim the diverted carrier converges. The corrected pair removes a specific discontinuity and makes each cell's membership and moments consistent; it does not by itself produce a converged diverted state, and that is a separate and larger defect than the one the spec named. The unfixed-pair control re-runs the original read and booking at the same carrier and resolution, so the two residuals are comparable across runs; the control's row had not completed when the run's fence expired and is unread.</p>
   </section>
+  <section id="stalled-scan">
+    <h2>Step-scale scan at the stalled iterate</h2>
+    <p>The probe re-runs the program at the last accepted iterate with a dense Jacobian. The linear solve is exact — its relative residual is 8.9e-14 — and <code>J<sup>T</sup>r</code> is not small: the gradient-to-<code>(&#8214;J&#8214;&#8214;r&#8214;)</code> ratio is 0.407, so the iterate is not a stationary point of the map. A finite step along the Newton direction nevertheless raises the scaled residual from 1.020859 to 27.8865, and the largest residual of the whole scan sits at step 0.178 with the X-point cell's membership at 1.</p>
+    <table>
+      <thead><tr><th>Step</th><th>Scaled residual</th><th>Support cells</th><th>Saddle cells</th><th>Wall candidate</th><th>Saddle candidate</th><th>X-point cell membership</th></tr></thead>
+      <tbody>
+        <tr><td>0.0</td><td>1.020859e+00</td><td>155</td><td>0</td><td>8.0e-04</td><td>-4.0e-04</td><td>0.0</td></tr>
+        <tr><td>1.0e-06</td><td>1.020858e+00</td><td>155</td><td>0</td><td>8.0e-04</td><td>-4.0e-04</td><td>0.0</td></tr>
+        <tr><td>1.78e-01</td><td>2.788650e+01</td><td>154</td><td>0</td><td>—</td><td>—</td><td>1.0</td></tr>
+      </tbody>
+    </table>
+    <p>Seven of the 82 scanned steps book 1, 2, 3 or 5 saddle cells and the rest book none, so the scan crosses the X-point booking branch without the boundary class ever changing from 0. Both candidate magnitudes order far below the residual jump, which places the jump in the booked current rather than in the boundary level.</p>
+    <p>The Taylor rows at this iterate are not a clean power law: the two-norm remainder is <code>nan</code> at step 1e-2 on the Newton direction and at step 1e-3 on the random direction, and only reaches 2.96e-10 and 6.34e-14 at step 1e-7. A remainder that is undefined at 1e-2 and finite at 1e-7 is a further sign that the map is not differentiable over that interval, which is why the spec's Taylor requirement is stated at a converged state.</p>
+  </section>
   <section id="limits">
     <h2>Measurements not taken</h2>
     <p>The 550- and 2098-cell diverted carriers were built but not solved within the run's fence, so the three-size convergence claim is unmeasured. The limited carrier was built at 289 nodes but not solved, so the 41-state sweep validity check and its re-measurement at 550 remain unmeasured. The step-scale scan, the Taylor remainder slope at a converged state and the two-random-direction probe all require a converged state to be meaningful and therefore could not be reported. No figures were produced; the map-error and convergence figures named by the spec are unstarted.</p>

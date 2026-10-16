@@ -8,6 +8,7 @@ slice integral returns both the area membership and the booked moments.
 
 import jax
 import jax.numpy as jnp
+import numpy as np
 
 from nova.equilibrium import fixed_points
 from scripts.prototypes.fast_map_production import program
@@ -15,6 +16,10 @@ from scripts.prototypes.fast_map_production.kernel import read
 from scripts.prototypes.fast_read.ordinary_cut import bell_moments
 from scripts.prototypes.lean_map.quadrature import interior_moments
 from scripts.prototypes.read_route.jets import _source_jets
+from scripts.prototypes.xpoint_cell_owner.conic_integral import (
+    _quadratic,
+    integrate_cell,
+)
 
 
 def _pack(jet):
@@ -50,9 +55,34 @@ def _saddle_frame(jet6, boundary, sigma):
     return value, gradient, eigenvalue, plus, minus
 
 
-def _quadratic(coefficients, x, y):
-    a, b, c, d, e, f = coefficients
-    return a + b * x + c * y + d * x * x + e * x * y + f * y * y
+def reference_cell_integral(
+    vertices,
+    centre,
+    pitch,
+    field_coefficients,
+    boundary_level,
+    sigma,
+    saddle,
+    axis,
+    density_coefficients,
+    *,
+    outer_rule="dense",
+    axis_component="halfplane",
+):
+    """Wrap the numpy cell integral so the characterisation shares one route."""
+    return integrate_cell(
+        vertices,
+        centre,
+        pitch,
+        field_coefficients,
+        boundary_level,
+        sigma,
+        saddle,
+        axis,
+        density_coefficients,
+        outer_rule=outer_rule,
+        axis_component=axis_component,
+    )
 
 
 def _roots(a, b, c):
@@ -214,7 +244,9 @@ def _polygon_distance(vertices, count, point):
     )
 
 
-def _disk_view(reading, geometry, coupling, reference, total, moments, sigma, radius):
+def _disk_view(
+    reading, geometry, coupling, reference, total, moments, sigma, radius, candidates
+):
     """Saddle frame and per-cell expansion conics for the cells the disk cuts."""
     saddle = reading.saddle_form.position
     jet6 = exact_jets(total, coupling, reference, saddle, moments)
@@ -222,19 +254,19 @@ def _disk_view(reading, geometry, coupling, reference, total, moments, sigma, ra
         jet6, reading.boundary_flux, sigma
     )
     distance = jax.vmap(_polygon_distance, in_axes=(0, 0, None))(
-        geometry.vertices, geometry.vertex_count, saddle
+        geometry.vertices[candidates], geometry.vertex_count[candidates], saddle
     )
-    active = distance <= radius
-    index = jnp.nonzero(active, size=_CAPACITY, fill_value=0)[0]
-    live = jnp.arange(_CAPACITY) < jnp.sum(active, dtype=jnp.int32)
+    live = distance <= radius
+    capacity = candidates.shape[0]
+    index = candidates
     pitch = geometry.pitch[index]
     sigma_expansion = jnp.stack(
         (
-            jnp.full(_CAPACITY, value),
+            jnp.full(capacity, value),
             pitch * (gradient @ plus),
             pitch * (gradient @ minus),
             0.5 * eigenvalue[1] * pitch * pitch,
-            jnp.zeros(_CAPACITY),
+            jnp.zeros(capacity),
             0.5 * eigenvalue[0] * pitch * pitch,
         ),
         axis=-1,
@@ -242,7 +274,6 @@ def _disk_view(reading, geometry, coupling, reference, total, moments, sigma, ra
     return saddle, plus, minus, radius / pitch, index, live, sigma_expansion
 
 
-_CAPACITY = 16
 _INNER_NODES = jnp.asarray((-1 / jnp.sqrt(3.0), 1 / jnp.sqrt(3.0)))
 
 
@@ -253,7 +284,22 @@ def _leggauss(degree):
     return jnp.asarray(nodes), jnp.asarray(weights)
 
 
-_OUTER_NODES, _OUTER_WEIGHTS = _leggauss(128)
+def disk_candidates(geometry, saddle, radius, margin=1.0):
+    """Cells a disk of this radius can cut about a located saddle.
+
+    The owned set depends on the state only through the located saddle, which
+    moves by well under a cell pitch between neighbouring states, so the list
+    is built once per carrier about a reference saddle and grown by one radius
+    of margin. It replaces the per-state scan over every cell in the machine
+    with a fixed-shape scan over the local patch.
+    """
+    distance = jnp.asarray(
+        jax.vmap(_polygon_distance, in_axes=(0, 0, None))(
+            geometry.vertices, geometry.vertex_count, saddle
+        )
+    )
+    inside = np.asarray(jax.device_get(distance <= radius + margin))
+    return jnp.nonzero(jnp.asarray(inside), size=int(inside.sum()))[0]
 
 
 def owned_disk_cut(
@@ -266,11 +312,22 @@ def owned_disk_cut(
     moments,
     sigma,
     radius,
-    capacity=_CAPACITY,
+    candidates,
+    outer_nodes,
+    outer_weights,
+    inner_nodes=_INNER_NODES,
 ):
     """Replace the ordinary saddle-sector booking with the disk expansion."""
     saddle, plus, minus, radius_hat, index, live, expansion = _disk_view(
-        reading, geometry, coupling, reference, total, moments, sigma, radius
+        reading,
+        geometry,
+        coupling,
+        reference,
+        total,
+        moments,
+        sigma,
+        radius,
+        candidates,
     )
     density = program._density_coefficients(geometry, reading, profile)
     active = jnp.zeros(len(geometry.centre), dtype=bool).at[index].set(live)
@@ -289,9 +346,9 @@ def owned_disk_cut(
             minus,
             radius_row,
             density_row,
-            inner_nodes=_INNER_NODES,
-            outer_nodes=_OUTER_NODES,
-            outer_weights=_OUTER_WEIGHTS,
+            inner_nodes=inner_nodes,
+            outer_nodes=outer_nodes,
+            outer_weights=outer_weights,
         )
 
     integrals, valid = jax.vmap(integrate)(
@@ -313,7 +370,11 @@ def owned_disk_cut(
         ),
         booking_cells=active,
     )
-    return reading, packed[:, 1:], (jnp.sum(live) <= capacity) & jnp.all(~live | valid)
+    return (
+        reading,
+        packed[:, 1:],
+        (jnp.sum(live) <= candidates.shape[0]) & jnp.all(~live | valid),
+    )
 
 
 def map_moments(
@@ -336,6 +397,10 @@ def map_moments(
     reference,
     total,
     radius,
+    candidates,
+    outer_nodes,
+    outer_weights,
+    inner_nodes=_INNER_NODES,
     frame_gate=True,
 ):
     """Replace fast_map_production.program.map_moments at the booked handoff."""
@@ -367,6 +432,10 @@ def map_moments(
         moments,
         convention.sigma,
         radius,
+        candidates,
+        outer_nodes,
+        outer_weights,
+        inner_nodes,
     )
     selected = reading.selected_cells
     full = (

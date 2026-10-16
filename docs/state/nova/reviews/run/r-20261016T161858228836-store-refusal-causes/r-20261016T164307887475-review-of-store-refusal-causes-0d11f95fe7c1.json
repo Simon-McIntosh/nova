@@ -1,0 +1,49 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "dac8403834e7dcc697fd9604c0baef0b6bfea26c",
+  "call_site_count": 4,
+  "call_sites": [
+    "nova/imas/machine_artifact.py:788 resolve_machine_artifact",
+    "nova/database/content_store.py:734 publish_files",
+    "nova/database/layer_fetch.py:119 fetch_layer",
+    "scripts/prototypes/read_route/jets.py:73 operand_entry"
+  ],
+  "completed_at": "2026-10-16T17:01:23.870Z",
+  "dispatched_at": "2026-10-16T16:43:26Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "harmless dead branch: read_operand cannot reach the missing-manifest soft miss now that the store refuses by name, and no recovery is lost because publish refuses over an existing entry; it goes with f-cfs-prototype-owner-consolidation, which already rewrites these prototype cache readers",
+      "recorded_at": "2026-10-16T18:18:28.167915+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/read_route/jets.py",
+      "line": "101",
+      "severity": "follow-on",
+      "text": "follow-on: the missing-manifest soft-miss branch `if entry_metadata(manifest_path) is None: return None` is now unreachable, because verified_destination raises ContentStoreError before operand_entry can return a directory; read_operand previously returned None (a rebuild) for a present entry whose manifest was missing and now raises. The caller's rebuild could not have succeeded anyway (publish_files refuses over an existing destination), so no recovery path is lost, but the branch is dead and its intent is now contradicted by the store's hard refusal."
+    }
+  ],
+  "head_log_revision": "5921a2b81d14902dd4f2879d5e9b93d0d11f92a2",
+  "node": "review-of-store-refusal-causes-0d11f95fe7c1",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to make the content store name the cause when it refuses a present-but-invalid cache entry; nova/database/content_store.py:264-303 now returns None only for an absent entry and raises ContentStoreError naming manifest-is-missing, manifest-must-not-be-a-symlink, or manifest-is-not-a-regular-file.\nVERDICT done_when: the done_when names tests/test_mast_artifact.py, tests/test_machine_artifact.py, tests/test_machine_artifact_concurrency.py, tests/test_content_store.py and tests/test_layer_fetch.py; the manifest records the per-module base/after arms and the logs at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T161858228836-store-refusal-causes/logs/base-arm.log and after-arm.log.\nVERDICT write_paths: every path in the diff (nova/database/content_store.py, nova/imas/machine_artifact.py, tests/test_content_store.py, docs/evidence/fragments/converged-forward-solve/store-refusal-causes.html) is inside the declared write paths; tests/test_mast_artifact.py was declared and left unedited.\nVERDICT manifest: read; status complete; commits 5921a2b81 (fix) and 0d11f95fe (fragment); it states tests/test_mast_artifact.py moved from 2 failed/59 passed to 61 passed and names the log paths.\nVERDICT diff: read commit by commit against base dac8403834e7dcc697fd9604c0baef0b6bfea26c; 5921a2b81 changes content_store.py, machine_artifact.py and test_content_store.py, 0d11f95fe adds only the 128-line fragment; all inside the declared scope.\nCALL_SITES: nova/imas/machine_artifact.py:788 resolve_machine_artifact, nova/database/content_store.py:734 publish_files, nova/database/layer_fetch.py:119 fetch_layer, scripts/prototypes/read_route/jets.py:73 operand_entry\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/database/content_store.py:293-302 refuses a present-but-invalid marker with a named cause, so the three collapsed states are separated at the single decision point.\nSCORE evidence: 18\nJUSTIFICATION evidence: the gate logs' summary lines (base-arm '2 failed, 59 passed' for tests/test_mast_artifact.py; after-arm '61 passed') are the delta the fragment and manifest cite.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff touches only content_store.py, machine_artifact.py, test_content_store.py and the fragment, all inside the declared write paths.\nSCORE durability: 19\nJUSTIFICATION durability: reverting nova/database/content_store.py:293 to 'return None' reddens tests/test_mast_artifact.py::test_existing_empty_destination_is_not_overwritten, as logs/negative-control.log records, and the added tests in tests/test_content_store.py discriminate by message.\nSCORE fit: 19\nJUSTIFICATION fit: the raises in nova/database/content_store.py:294-301 follow the module's existing ContentStoreError wording; ruff passes and no plan labels are introduced.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change extends the existing owner verified_destination in place and removes the duplicate restatement in nova/imas/machine_artifact.py rather than forking a second classifier.\nFINDING scripts/prototypes/read_route/jets.py:101 follow-on: the missing-manifest soft-miss branch is now unreachable because verified_destination raises before operand_entry returns, so read_operand raises where it used to return None for a rebuild; the rebuild could not have succeeded anyway, so no recovery path is lost.\n",
+  "review_run_id": "r-20261016T164307887475-review-of-store-refusal-causes-0d11f95fe7c1",
+  "reviewed_base_sha": "dac8403834e7dcc697fd9604c0baef0b6bfea26c",
+  "reviewed_head_sha": "0d11f95fe7c16741c81008386f83079bc1a63fe5",
+  "reviewed_run_id": "r-20261016T161858228836-store-refusal-causes",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/store-refusal-causes",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T16:52:00+00:00"
+}

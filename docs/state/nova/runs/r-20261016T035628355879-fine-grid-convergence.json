@@ -831,6 +831,64 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "4e852a31ea5544825f5dc968d2683d3e63e25422",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'failed' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 25085,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261016T035628355879-fine-grid-convergence",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 25085,
+        "path": "/tmp/reckon-crew-scratch/r-20261016T035628355879-fine-grid-convergence"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "integrated",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [],
+          "head": "4e852a31ea5544825f5dc968d2683d3e63e25422",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fine-grid-convergence",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-10-16T15:02:22Z",
+            "session_id": "01a142db-95fb-7ba0-8463-501befa1b1ca",
+            "session_source": "stream",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fine-grid-convergence"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "this worktree is the working directory of recoverable session 01a142db-95fb-7ba0-8463-501befa1b1ca"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_withheld": "gate verdict 'failed' is not passing; worktree retained for recovery"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

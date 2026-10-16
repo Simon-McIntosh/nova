@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="converged-forward-solve-operand-cache">
+<meta name="plan-title" content="GPFS-cached Biot-Savart value and jet operands by default">
+<meta name="plan-summary" content="The dense Biot-Savart value and jet matrices are identical across processes and cost minutes to reassemble at production resolution, so a process that reassembles them repeats work a peer already did. Both builders now persist through one shared GPFS operand cache, resolved by a single helper and keyed on the geometry and the hashed source files, and persist by default. Each entry lands through a process-unique pending file and an atomic rename, so a completed marker is the only thing a reader trusts. A perturbed node coordinate or a flipped source byte moves the key and rebuilds, and a loaded matrix is bitwise the matrix that was built.">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-commits" content="8bdb995f1 07d03d9d6">
+<meta name="plan-recorded-at" content="2026-10-16">
+<meta name="plan-rows" content="converged-forward-solve-operand-cache">
+<title>operand-cache — cached Biot-Savart operands by default | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head><body><main class="plan-doc">
+  <h1>operand-cache — cached Biot-Savart operands by default</h1>
+
+  <p id="operand-cache-status">
+    <strong>Persistence is the default on both builders, and both now publish through the
+    repository's content store rather than a private one.</strong>
+    <code>scripts/prototypes/lean_map/values.py:build_values</code> caches its flux-block
+    matrix and <code>scripts/prototypes/lean_map/jets.py:build_jets</code> persists through
+    <code>scripts/prototypes/read_route/jets.py:build_jet_matrix</code>, both keying with
+    <code>nova.database.content_store.sha256_bytes</code>, publishing with
+    <code>publish_files</code> and reading through <code>verified_object_root</code>. One key
+    is one directory <code>&lt;root&gt;/&lt;kind&gt;/sha256/&lt;digest&gt;/</code> holding
+    <code>matrix.npy</code> and a <code>manifest.json</code> naming the kind, the shape, the
+    wall the entry's builder recorded, and the sha256 and size of the published file. The
+    exterior stays runtime-only: it depends on the field and the reference moments and is
+    cheap to pose once the matrix is in hand. <strong>Publishing to the shared operand root is
+    blocked:</strong> the store refuses to risk a half-visible object and neither GPFS mount on
+    this machine supports the no-clobber directory rename it requires, so a build on the
+    production root aborts at publication after the assembly it has already paid for. Two checks
+    the repair round owed are also outstanding and are recorded below rather than papered over:
+    the 2,098-cell load wall has no corrected number, and the jet default-on guard has not run
+    at the head revision.
+  </p>
+
+  <h2 id="operand-cache-what">What changed</h2>
+  <ul>
+    <li id="operand-cache-root">
+      <code>nova/database/filepath.py</code> gains <code>operand_cache_root()</code>,
+      returning <code>OPERAND_CACHE_ROOT =
+      /work/projects/imas_gpu/sophelio/evidence/operands</code> unless
+      <code>NOVA_OPERAND_CACHE</code> overrides it. Both caches resolve their directory
+      through it, which removes the literal conforming-jets path from the jet builder.
+    </li>
+    <li id="operand-cache-values">
+      <code>build_value_matrix</code> builds the <code>(target, cell, moment)</code> flux
+      blocks only on a miss and stores the completed matrix on a hit. Its key is a SHA-256
+      over the Gauss point coordinates, the cell centres, each cell polygon's vertices and
+      vertex count, the bytes of
+      <code>scripts/analytic_oracle_fixtures/coupling_build.py</code> and the bytes of
+      <code>nova/biot/polygonanalytic.py</code>.
+    </li>
+    <li id="operand-cache-jets">
+      <code>build_jet_matrix</code> takes <code>persist=True</code> by default and keys on the
+      unique node coordinates, the traced coupling operand leaves, the jets module source and
+      the polygon-kernel source, matching the key the existing conforming-jets entries carry.
+    </li>
+    <li id="operand-cache-atomic">
+      The node's own store is gone. <code>store_operand</code>, <code>load_operand</code>,
+      <code>operand_digest</code> and <code>operand_cache_directory</code> re-implemented a
+      content-addressed publication that <code>nova.database.content_store</code> already
+      owns, so they are deleted and the builders call the store instead: the key is
+      <code>sha256_bytes</code> over the joined chunks, the entry is published by
+      <code>publish_files</code>, which verifies a private directory's declared files and
+      renames it into place with <code>RENAME_NOREPLACE</code>, and a reader resolves
+      <code>verified_object_root</code> and <code>verified_destination</code> and treats an
+      absent entry as a miss rather than an error. Two builders of one key cannot interleave,
+      and a partial entry is never visible. The same seam is what
+      <code>nova/imas/machine_artifact.py</code> and <code>nova/database/layer_fetch.py</code>
+      already use.
+    </li>
+    <li id="operand-cache-receipt">
+      The receipt prices only what the calling process paid. <code>build_seconds</code> is the
+      miss assembly, <code>publish_seconds</code> the publication, <code>load_seconds</code> a
+      hit's wall from opening the entry to a device-resident matrix, and
+      <code>matrix_ready_seconds</code> the wall that got the matrix ready either way.
+      <code>stored_build_seconds</code> carries the wall the entry's own builder recorded as a
+      separately named field, so a hit no longer reports a peer's assembly cost as its own;
+      <code>assembly_seconds</code>, which did exactly that, is removed.
+    </li>
+  </ul>
+
+  <h2 id="operand-cache-measure">Measured load against build</h2>
+  <p id="operand-cache-measure-note">
+    Each row builds the matrix once and then reloads it, on one process, with the cache empty
+    before the first call. The build column stands as measured.
+    <strong>The load column was priced by the superseded protocol</strong>, which timed opening
+    an entry rather than getting a matrix onto the device, and it is retained only as the record
+    of what was run before the receipts were corrected; the ratio in the last column inherits
+    that and is not a claim about the current <code>load_seconds</code>. The four-cell hex
+    carrier the unit test uses, on CPU
+    (<code>JAX_PLATFORMS=cpu</code>, a login node under heavy fleet load, so the build wall is
+    an upper bound rather than a clean number):
+  </p>
+  <table id="operand-cache-measure-table">
+    <thead><tr><th>cells</th><th>operand</th><th>matrix bytes</th><th>build [s]</th><th>load [s] (superseded)</th><th>ratio</th><th>digest</th></tr></thead>
+    <tbody>
+      <tr><td>4</td><td>values</td><td>6,912</td><td>54.376</td><td>0.0135</td><td>4,028×</td>
+          <td><code>3659c832de62…8793b4</code></td></tr>
+      <tr><td>282</td><td>values</td><td>34,354,368</td><td>80.547</td><td>0.0055</td><td>14,677×</td>
+          <td><code>e1afb81b137e…9bdfc147</code></td></tr>
+      <tr><td>282</td><td>jets</td><td>47,267,712</td><td>110.346</td><td>0.0040</td><td>27,343×</td>
+          <td><code>51721ac3060c…54f2593e</code></td></tr>
+      <tr><td>551</td><td>values</td><td>131,155,632</td><td>78.766</td><td>0.0037</td><td>21,358×</td>
+          <td><code>a0fcc45780a0…9d0d689e</code></td></tr>
+      <tr><td>551</td><td>jets</td><td>169,161,408</td><td>108.352</td><td>0.0036</td><td>30,411×</td>
+          <td><code>6526174bc311…bd0b16d6</code></td></tr>
+      <tr><td>2,098</td><td>values</td><td>1,901,492,928</td><td>796.654</td><td>0.0037</td><td>215,084×</td>
+          <td><code>ea97d1c279ff…d2d73811</code></td></tr>
+      <tr><td>2,098</td><td>jets</td><td>2,185,780,320</td><td>267.198</td><td>0.0035</td><td>76,276×</td>
+          <td><code>59042af2b459…0b7016bb</code></td></tr>
+    </tbody>
+  </table>
+  <p id="operand-cache-measure-rows">
+    All four rows of the diverted sweep at 282, 551 and 2,098 cells ran as one job (job
+    1287218) on the H200 reservation <code>gpu_0003_grpA</code> with one GPU, which
+    completed in 24 m 53 s. Every operand reports <code>cache_hit</code> false on the first
+    call and true on the second, so the load reported is a second call reading the entry the
+    first call wrote, and the build reported is that same call's build. The 2,098-cell row is
+    the one that makes the case: the value matrix takes 13.3 minutes to reassemble and 3.7 ms
+    to load, and the jet matrix 4.5 minutes against 3.5 ms.
+  </p>
+  <p id="operand-cache-measure-caveat">
+    The load figure was priced by the superseded protocol, which timed opening the entry and not
+    reading it: the matrix is memory-mapped and streamed from GPFS as it is consumed, so the old
+    number prices the open alone. Under the corrected receipt the load figure runs to a device-resident matrix, so it carries
+    the transfer the old figure omitted. What it still skips is the kernel compile that dominates
+    a jet build, which is the saving that matters to a reader that only needs the matrix. The
+    2,098-cell row was the one scheduled for re-measurement under the corrected definition, and
+    it has no corrected number: that job built the value matrix and died at the publish step.
+  </p>
+
+  <h2 id="operand-cache-checks">Checks</h2>
+  <ul>
+    <li id="operand-cache-tests">
+      <code>tests/test_operand_cache.py</code> on CPU over a four-cell hex carrier: default-on
+      persistence, a hit with the stored build time preserved, a miss on a perturbed polygon
+      vertex, a miss on a flipped source byte, and bitwise equality between the loaded matrix
+      and the built <code>DenseValues.matrix</code>. Two further arms are marked
+      <code>slow</code>: two concurrent processes building one key, and the default arm of
+      <code>build_jet_matrix</code>.
+    </li>
+    <li id="operand-cache-concurrent">
+      The two-process arm passed alone on CPU (<code>1 passed in 60.03s</code>): two spawned
+      children build one key concurrently, both exit zero, the matrices they built are equal
+      byte for byte, the stored matrices are equal byte for byte, and the stored matrix equals
+      the built one. A reader therefore never sees a half-written matrix — the completion
+      marker is absent until the rename lands.
+    </li>
+    <li id="operand-cache-gate">
+      The fast gate at the head revision <code>07d03d9d6</code> reads
+      <code>4 passed, 2 deselected in 19.14s</code>, exit 0
+      (<code>pytest tests/test_operand_cache.py -m 'not slow'</code>). Its cache root is pytest's
+      <code>tmp_path</code>, which is node-local, so this green is evidence about the store's
+      publication path on a filesystem that supports the no-clobber rename and says nothing
+      about the shared GPFS root where the store refuses to publish.
+    </li>
+    <li id="operand-cache-jet-guard-gap">
+      <strong>The jet default-on guard has not run at the head revision.</strong> The arm is
+      marked <code>slow</code> because its build is a kernel compile, so it is outside the
+      recorded gate, and the job that was to run it explicitly was submitted while the worktree
+      still stood at <code>7eb4234f3</code>, before the content-store migration landed at
+      <code>07d03d9d6</code>; its log records that earlier revision and could not be cited for
+      head, and the job was cancelled rather than reported. What the arm covers — that
+      <code>build_jet_matrix</code> publishes on its default arm and that a second call loads
+      the entry bitwise equal — is therefore covered at head by inspection of shared code paths
+      only, not by a run.
+    </li>
+    <li id="operand-cache-negative">
+      The declared mutation drops the geometry and source chunks from
+      <code>values_digest</code>, so a perturbed coordinate or source byte can no longer move
+      the key; the run turned <code>2 failed, 2 passed, 2 deselected</code>, failing exactly
+      <code>test_values_miss_on_a_perturbed_node_coordinate</code> and
+      <code>test_values_miss_on_a_perturbed_source_byte</code>, with the digest assertion
+      printing the same key on both sides of the perturbed coordinate. The mutation was
+      reverted and the gate rerun green.
+    </li>
+  </ul>
+
+  <h2 id="operand-cache-blocker">Publication is blocked on the shared root</h2>
+  <p id="operand-cache-blocker-evidence">
+    <code>publish_files</code> lands an entry by renaming a verified private directory into
+    place with <code>RENAME_NOREPLACE</code>, and refuses to publish at all where the
+    filesystem rejects that operation, because the alternative is an object that is briefly
+    half-visible. Measured on this machine with a direct probe of the store's own entry point:
+    <code>/work/projects/imas_gpu/sophelio/evidence/rename-probe</code> and
+    <code>~/.cache/nova/rename-probe</code> both raise
+    <code>ContentStoreError: the cache filesystem does not support atomic no-clobber directory
+    rename</code>, while a directory under <code>/tmp</code> publishes. Both shared mounts are
+    GPFS (<code>HPC_T2</code>); only the node-local <code>xfs</code> root beside them supports
+    the rename. So the operand cache, whose whole purpose is a share between processes on
+    different nodes, has no root available to it that the content store will publish to.
+  </p>
+  <p id="operand-cache-blocker-job">
+    The 2,098-cell re-measurement under the new receipt definition was the first victim: job
+    1287269 (one GPU on the H200 reservation <code>gpu_0003_grpA</code>, one job with its rows
+    inside the allocation) ran 12 m 53 s, built the value matrix at 2,098 cells and then died
+    at the publish step with that refusal, exiting 1 and writing no row. The probe that produced that three-way output is kept in the run
+    directory as <code>rename-probe.py</code> with its output beside it as
+    <code>rename-probe.out</code>, so the refusal can be reproduced without touching this tree.
+  </p>
+  <p id="operand-cache-blocker-decision">
+    The block is not a defect in this node's code, and it is not repairable here: the two
+    available options both belong to the coordinator. Either the operand root moves to a
+    filesystem that supports the no-clobber rename, which no shared mount on this machine
+    currently does, or <code>content_store</code> gains a publication path the refusal
+    deliberately withholds. Until one of those is chosen, a value or jet build on the shared
+    root assembles its matrix and then raises, so persistence must be turned off there
+    (<code>persist=False</code>) rather than left on its default.
+  </p>
+
+</main></body></html>

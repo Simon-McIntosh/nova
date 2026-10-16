@@ -43,7 +43,15 @@ def main():
         reference = np.array(
             (dense.area, dense.current, dense.radial_moment, dense.vertical_moment)
         )
-        relative = np.abs(observed - reference) / np.maximum(np.abs(reference), 1e-14)
+        scale = np.array(
+            (
+                cell["full_area"],
+                abs(reference[1]),
+                abs(reference[1]) * cell["pitch"],
+                abs(reference[1]) * cell["pitch"],
+            )
+        )
+        relative = np.abs(observed - reference) / np.maximum(np.abs(reference), scale)
         row = {
             "cell": cell["cell"],
             "area_fraction": adaptive.area / cell["full_area"],

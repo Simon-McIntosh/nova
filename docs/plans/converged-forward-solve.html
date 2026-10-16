@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="287">
+<meta name="plan-version" content="288">
 <meta name="plan-modified" content="2026-10-16">
 </head>
 <body>
@@ -1022,6 +1022,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-s21-fast-build-ruling" data-who="reckon-build" data-when="2026-10-16T10:20:00Z">
     <div class="r-comment-body"><p>Lead ruling 2026-10-16: faster builds, made the default.</p><p>The fine-grid diagnostic jobs at 2,098 cells were rebuilding the Biot-Savart value and jet operands in every process: 803 s and 286 s, 4.1 GB. They also recompiled a 7.4 GB <code>jax.linearize</code> program on every Newton correction, at about 60 s compile plus 60 to 95 s apply. That program is too large for the persistent compilation cache.</p><p>Two rules now hold:</p><ul><li>Every Newton update takes its state, operands and factor as runtime variables, through <code>nova.equilibrium.solve</code>, never as compiled constants.</li><li>Biot-Savart operands are built once per carrier, persisted under a content-addressed key, and shared by every row of one size in one process.</li></ul><p>Both rules are in <code>nova/equilibrium/AGENTS.md</code>. fine-grid-convergence applies them from its next job, and <code>f-cfs-operand-cache</code> makes operand caching the default in the shared builders.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-s21-paired-arm-result" data-who="reckon-build" data-when="2026-10-16T11:05:00Z">
+    <div class="r-comment-body"><p>First controlled lane comparison, under <code>c-s21-routing-ruling</code>. The same brief and base ran on two lanes:</p><ul><li>The codex primary of fast-map-production made the map continuous. It converged the 282-cell diverted carrier to 1.25e-13, with a 128-state batch at 0.309 ms per state (review 96).</li><li>The clive shadow (r-20261016T074530605259) also converged the limited carrier to 4e-15. But it read the diverted state as limited with no saddle cell, and stalled at 1.02 with 282 nodes and 1.23 with 606. It twice stopped on its turn budget, the second time after neutral per-turn advice.</li></ul><p>That is one pair, not a verdict. It argues against routing this deepest node family to clive, and it has been sent to reckon-b9 as outcome evidence for Jev. The shadow's commits are archived as tag <code>archive/shadow-fast-map-production-clive</code>; nothing was merged.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261010T184522536142-cfs-current-book-fragments" data-who="reckon-build" data-when="2026-10-10T18:46:29.609Z">
     <div class="r-comment-body"><p>Implemented traced current.book over connected multi-polygon membership using the widened signed-ring exact clip. Six certificate rows pass: diverted read image errors 1.15131582e-4, 2.49842782e-5, 3.95031905e-6 at 550/2098/5158 cells; limited errors 1.77777866e-5, 2.66948705e-6, 5.45231060e-7 at 553/2105/5167. Maximum net-current error 2.22e-16, excluded current zero, legacy control 0.197326978718; evidence docs/evidence/fragments/converged-forward-solve/cfs-current-book.html#cfs-current-book-fragments-booking and one three-rung SVG; audit-doc 0 errors.</p></div>

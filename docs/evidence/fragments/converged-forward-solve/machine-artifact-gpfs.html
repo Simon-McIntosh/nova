@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="machine-artifact-gpfs">
+  <meta name="plan-title" content="Machine-artifact publication on the content store's GPFS probe">
+  <meta name="plan-summary" content="materialize_machine_artifact passed the no-clobber directory rename explicitly, so it bypassed the cache-root probe content_store gained for GPFS and could not publish a machine bundle on either shared filesystem, where renameat2 RENAME_NOREPLACE returns EINVAL. It now passes the selection that probe makes, so a bundle publishes and resolves on GPFS; a GPFS publish test, an unsupported-rename fallback test and a concurrent same-digest publish under the fallback cover it.">
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-verifies" content="converged-forward-solve#s4">
+  <meta name="plan-recorded-at" content="2026-10-16">
+  <meta name="plan-verdict" content="complete">
+  <meta name="plan-environment" content="Fleet allocation 98dci4-clu-2002 job 1281970, CPU tests run in place; GPFS cache roots /work/projects/imas_gpu and the GPFS home">
+  <meta name="plan-tags" content="machine-artifact,content-store,gpfs,publication">
+  <title>machine-artifact-gpfs — machine bundles publish on GPFS | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+  <h1>machine-artifact-gpfs — machine bundles publish on GPFS</h1>
+
+  <p id="machine-artifact-gpfs-status">
+    <strong>Machine-artifact publication now uses the content store's probing default.</strong>
+    <code>nova/imas/machine_artifact.py:materialize_machine_artifact</code> no longer passes
+    <code>rename_factory=_linux_rename_no_replace</code>. It passes the factory the store's probe
+    selects for the cache root (<code>_publication_rename_factory</code>): <code>renameat2</code>
+    <code>RENAME_NOREPLACE</code> where the filesystem admits it, plain <code>renameat</code> where it
+    does not. The re-export of the no-clobber primitive at the old line 35 is removed. A machine
+    bundle now publishes into a directory on GPFS and resolves there.
+  </p>
+
+  <h2 id="machine-artifact-gpfs-change">Change</h2>
+  <p id="machine-artifact-gpfs-change-detail">
+    The publication path inside the store is unchanged and was not edited: <code>publish_files</code>
+    still writes the pending directory, fsyncs it, renames it into place and verifies the destination.
+    Only the caller changed, and it changed to the store's own selection, so no second probe or
+    rename strategy exists outside <code>nova/database/content_store.py</code>. The factory is
+    computed at the call site rather than left to the store's internal default, and that ordering is
+    load bearing: the store probes the cache root <em>after</em> the pending directory exists, so a
+    root swapped during publication would be refused by the probe's own pin rather than by the
+    pinned-root guard that swap must trip. Selecting up front probes the real root and leaves
+    <code>test_object_root_path_swap_cannot_redirect_materialization</code> exercising the guard it
+    names.
+  </p>
+
+  <h2 id="machine-artifact-gpfs-gpfs">The GPFS publish</h2>
+  <p id="machine-artifact-gpfs-gpfs-probe">
+    A standalone probe of the operation itself on this host reads the same result the store's
+    capability probe reads: <code>renameat2</code> <code>RENAME_NOREPLACE</code> on a private
+    directory inside each root.
+  </p>
+  <table id="machine-artifact-gpfs-gpfs-table">
+    <thead><tr><th>cache root</th><th>renameat2 RENAME_NOREPLACE</th><th>selected primitive</th></tr></thead>
+    <tbody>
+      <tr id="machine-artifact-gpfs-gpfs-row-work"><td><code>/work/projects/imas_gpu</code></td><td><code>EINVAL</code></td><td>plain <code>renameat</code></td></tr>
+      <tr id="machine-artifact-gpfs-gpfs-row-home"><td>GPFS home <code>/home/ITER/mcintos</code></td><td><code>EINVAL</code></td><td>plain <code>renameat</code></td></tr>
+      <tr id="machine-artifact-gpfs-gpfs-row-tmp"><td>node-local <code>/tmp</code></td><td><code>OK</code></td><td><code>RENAME_NOREPLACE</code></td></tr>
+    </tbody>
+  </table>
+  <p id="machine-artifact-gpfs-gpfs-result">
+    <code>test_gpfs_machine_artifact_publishes_and_resolves</code> materializes a manifest into a
+    fresh cache directory on the GPFS home and resolves it back: the stored and resolved digests both
+    match the manifest digest, the manifest marker is present, and the object root holds exactly one
+    entry, the digest. The test asserts the root does not admit no-clobber rename and skips otherwise,
+    so it cannot pass by exercising the supported branch; on this host it ran (9 passed in the module
+    against 8 at base, so it was collected and green, not skipped).
+  </p>
+
+  <h2 id="machine-artifact-gpfs-tests">Checks and suite delta</h2>
+  <p id="machine-artifact-gpfs-tests-note">
+    Four modules, each in a fresh process, CPU-only (<code>JAX_PLATFORMS=cpu</code>), on the fleet
+    allocation in place, with the worktree's own package first on <code>PYTHONPATH</code> (each log
+    header prints <code>nova.imas.machine_artifact.__file__</code>). The base arm is the same three
+    test files at <code>HEAD</code> against the base <code>machine_artifact.py</code> in a scratch
+    tree; the after arm is the edited tree against the edited module.
+  </p>
+  <table id="machine-artifact-gpfs-tests-table">
+    <thead><tr><th>module</th><th>base arm</th><th>after arm</th><th>added failures</th></tr></thead>
+    <tbody>
+      <tr id="machine-artifact-gpfs-tests-machine"><td><code>tests/test_machine_artifact.py</code></td><td>8 passed</td><td>9 passed</td><td>0</td></tr>
+      <tr id="machine-artifact-gpfs-tests-concurrency"><td><code>tests/test_machine_artifact_concurrency.py</code></td><td>2 passed, 2 skipped</td><td>3 passed, 2 skipped</td><td>0</td></tr>
+      <tr id="machine-artifact-gpfs-tests-mast"><td><code>tests/test_mast_artifact.py</code></td><td>2 failed, 59 passed</td><td>2 failed, 59 passed</td><td>0</td></tr>
+      <tr id="machine-artifact-gpfs-tests-store"><td><code>tests/test_content_store.py</code></td><td>10 passed</td><td>10 passed</td><td>0</td></tr>
+    </tbody>
+  </table>
+  <p id="machine-artifact-gpfs-tests-preexisting">
+    The two <code>test_mast_artifact.py</code> failures are pre-existing and are not this node's:
+    <code>test_existing_empty_destination_is_not_overwritten</code> and
+    <code>test_resolver_rejects_symlinked_manifest</code> fail identically in the base arm, against
+    base source and base tests, so they come from the store's publication error vocabulary rather
+    than from the rename selection. The after arm adds no failure and clears none.
+  </p>
+
+  <h2 id="machine-artifact-gpfs-negative">Negative control</h2>
+  <p id="machine-artifact-gpfs-negative-note">
+    The declared mutation is the pre-change behaviour restored: forcing the explicit no-clobber
+    rename (<code>rename_factory=_linux_rename_no_replace</code>) in
+    <code>materialize_machine_artifact</code>. Applied in a scratch tree and run against the GPFS
+    test, it reproduces the publish failure at the probe-free path —
+    <code>ContentStoreError: the cache filesystem does not support atomic no-clobber directory
+    rename</code>, re-raised as <code>MachineArtifactError</code> — giving
+    <code>1 failed in 9.32s</code>, <code>EXIT=1</code>, with the failing id
+    <code>test_gpfs_machine_artifact_publishes_and_resolves</code>, which the after arm does not
+    fail. The mutation was reverted and the delivered tree carries the probing selection.
+  </p>
+
+  <h2 id="machine-artifact-gpfs-scope">Scope</h2>
+  <p id="machine-artifact-gpfs-scope-note">
+    Edited: <code>nova/imas/machine_artifact.py</code>,
+    <code>tests/test_machine_artifact.py</code>,
+    <code>tests/test_machine_artifact_concurrency.py</code>,
+    <code>tests/test_mast_artifact.py</code>. <code>nova/database/content_store.py</code> was
+    <strong>not edited</strong> and needs no change; the probe, the storage and the fallback are the
+    owner's.
+  </p>
+</main></body></html>

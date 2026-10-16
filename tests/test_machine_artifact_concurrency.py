@@ -191,6 +191,97 @@ def test_verified_artifact_survives_repeated_concurrent_opens() -> None:
     assert raw_mismatches == 20
 
 
+def _forced_plain_rename_publisher(
+    cache_directory: str,
+    source_directory: str,
+    start_event: Any,
+    result_queue: Any,
+) -> None:
+    """Publish a machine artifact with the no-clobber probe forced to fail."""
+
+    import nova.database.content_store as content_store
+    from nova.imas.machine_artifact import (
+        ArtifactShotRange,
+        create_machine_artifact_manifest,
+    )
+
+    content_store._rename_no_replace_supported = lambda _object_root: False
+    source = Path(source_directory)
+    manifest = create_machine_artifact_manifest(
+        source,
+        machine="mast",
+        dd_version="4.1.1",
+        registry_digest="a" * 64,
+        physical_digest="b" * 16,
+        shot_ranges=(
+            ArtifactShotRange(
+                first_shot=11766,
+                last_shot=30471,
+                physical_digest="b" * 16,
+                evidence="observed",
+            ),
+        ),
+        complete=False,
+        unresolved_gaps=("test fixture is not operator-ready",),
+    )
+    start_event.wait(30)
+    try:
+        stored = materialize_machine_artifact(source, cache_directory, manifest)
+    except Exception as error:  # noqa: BLE001
+        result_queue.put((manifest.digest, type(error).__name__, str(error)))
+    else:
+        result_queue.put((manifest.digest, "stored", str(stored.directory)))
+
+
+def test_concurrent_publish_on_unsupported_rename_leaves_one_entry(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "source"
+    source.mkdir()
+    (source / "master.h5").write_bytes(_hdf5_image())
+    cache = tmp_path / "cache"
+    context = get_context("spawn")
+    start_event = context.Event()
+    result_queue = context.Queue()
+    workers = [
+        context.Process(
+            target=_forced_plain_rename_publisher,
+            args=(str(cache), str(source), start_event, result_queue),
+        )
+        for _ in range(4)
+    ]
+    for worker in workers:
+        worker.start()
+    start_event.set()
+    results = []
+    try:
+        for _ in workers:
+            results.append(result_queue.get(timeout=60))
+    except Empty as error:
+        raise AssertionError("a publisher did not complete") from error
+    finally:
+        for worker in workers:
+            worker.join(30)
+            if worker.is_alive():
+                worker.kill()
+                worker.join()
+
+    digests = {result[0] for result in results}
+    assert len(digests) == 1
+    assert all(result[1] == "stored" for result in results)
+    assert len({result[2] for result in results}) == 1
+    assert [worker.exitcode for worker in workers] == [0, 0, 0, 0]
+
+    digest = next(iter(digests))
+    object_root = cache / "sha256"
+    entries = [
+        entry.name for entry in object_root.iterdir() if not entry.name.startswith(".")
+    ]
+    assert entries == [digest.removeprefix("sha256:")]
+    resolved = resolve_machine_artifact(cache, digest, allow_incomplete=True)
+    assert resolved.digest == digest
+
+
 def _score_partition_worker(
     slice_start: int,
     artifact_path: Path,

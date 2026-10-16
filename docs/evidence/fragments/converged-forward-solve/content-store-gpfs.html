@@ -12,7 +12,7 @@
   <meta name="plan-verifies" content="converged-forward-solve#s4">
   <meta name="plan-recorded-at" content="2026-10-16">
   <meta name="plan-verdict" content="complete">
-  <meta name="plan-environment" content="Fleet allocation 98dci4-clu-2002 job 1281970 for CPU tests; operand rows on the H200 reservation gpu_0003_grpA job 1287330; base revision b70052ffb">
+  <meta name="plan-environment" content="Fleet allocation 98dci4-clu-2002 job 1281970 for CPU tests; operand rows on the H200 reservation gpu_0003_grpA job 1287385; base revision b70052ffb">
   <meta name="plan-tags" content="content-store,gpfs,publication,operand-cache">
   <title>content-store-gpfs — publication on parallel filesystems | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
@@ -125,9 +125,31 @@
     is a miss. <code>build_seconds</code> is the miss assembly, <code>load_seconds</code>
     the wall from opening the entry to a device-resident matrix, and the loaded matrix is
     compared bitwise with the built matrix. Status:
-    <span id="content-store-gpfs-measure-status">pending — job 1287339 running</span>.
+    <span id="content-store-gpfs-measure-status">partial — job 1287385 running; the 282 and 550-cell rows are recorded below, the 2,098-cell row follows</span>.
   </p>
-  <div id="content-store-gpfs-measure-rows"></div>
+  <div id="content-store-gpfs-measure-rows">
+    <table id="content-store-gpfs-measure-table">
+      <thead>
+        <tr><th>cells</th><th>nodes</th><th>operand</th><th>first call</th><th>build [s]</th><th>publish [s]</th><th>load [s]</th><th>matrix [MB]</th><th>bitwise</th></tr>
+      </thead>
+      <tbody>
+        <tr id="content-store-gpfs-measure-282-values"><td>282</td><td>315</td><td>values</td><td>miss</td><td>30.97</td><td>0.163</td><td>0.037</td><td>42.9</td><td>equal</td></tr>
+        <tr id="content-store-gpfs-measure-282-jets"><td>282</td><td>315</td><td>jets</td><td>miss</td><td>15.05</td><td>0.198</td><td>0.051</td><td>58.0</td><td>equal</td></tr>
+        <tr id="content-store-gpfs-measure-550-values"><td>550</td><td>606</td><td>values</td><td>miss</td><td>90.51</td><td>0.481</td><td>0.123</td><td>158.6</td><td>equal</td></tr>
+        <tr id="content-store-gpfs-measure-550-jets"><td>550</td><td>606</td><td>jets</td><td>miss</td><td>28.93</td><td>0.607</td><td>0.156</td><td>204.9</td><td>equal</td></tr>
+      </tbody>
+    </table>
+    <p id="content-store-gpfs-measure-caption">
+      Job 1287385, one sbatch on <code>betelgeuse</code> under reservation
+      <code>gpu_0003_grpA</code> with one H200 card, rows looped inside the single
+      allocation. Every row is on a fresh GPFS operand root, so the first call is a miss
+      (<code>cache_hit_first: false</code>) and the second a hit
+      (<code>cache_hit_second: true</code>); <code>load_seconds</code> is the wall from
+      opening the entry to a device-resident matrix. The loaded matrix is compared with
+      the built matrix by <code>jax.numpy.array_equal</code> and is bit-identical in every
+      row.
+    </p>
+  </div>
 
   <h2 id="content-store-gpfs-scope">Scope</h2>
   <p id="content-store-gpfs-scope-note">

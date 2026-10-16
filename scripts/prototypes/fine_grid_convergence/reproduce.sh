@@ -5,7 +5,7 @@ trap 'rm -rf "$scratch"' EXIT
 export TMPDIR="$scratch"
 export XLA_PYTHON_CLIENT_PREALLOCATE=false
 export JAX_PLATFORMS=cuda,cpu
-repo=$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)
+repo=$(git -C "${SLURM_SUBMIT_DIR:?}" rev-parse --show-toplevel)
 run=${RECKON_RUN_DIR:?}
 prior=${FAST_MAP_RUN_DIR:?}
 cache=${CARRIER_CACHE:?}

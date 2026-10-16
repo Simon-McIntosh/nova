@@ -14,8 +14,8 @@ prior=${FAST_MAP_RUN_DIR:?}
 cache=${CARRIER_CACHE:?}
 python=/home/ITER/mcintos/Code/nova/.venv/bin/python
 export PYTHONPATH="$repo"
-printf 'revision=%s tree=%s command=%s\n' "$(git -C "$repo" rev-parse HEAD)" "$repo" "$python -m scripts.prototypes.fine_grid_convergence.component_scan --cells 2000 --cache $cache --start-json $prior/local-cold-2000.json --output $run/component-scan.json"
+printf 'revision=%s tree=%s command=%s\n' "$(git -C "$repo" rev-parse HEAD)" "$repo" "$python -m scripts.prototypes.fine_grid_convergence.component_scan --cells 2000 --cache $cache --start-json $prior/local-cold-2000.json --output $run/sector-component-scan.json"
 printf 'cwd=%s\n' "$repo"
 "$python" -m scripts.prototypes.fine_grid_convergence.component_scan \
   --cells 2000 --cache "$cache" --start-json "$prior/local-cold-2000.json" \
-  --output "$run/component-scan.json"
+  --output "$run/sector-component-scan.json"

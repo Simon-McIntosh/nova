@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="xpoint-cell-owner">
+  <meta name="plan-title" content="X-point cell area and moments">
+  <meta name="plan-summary" content="Measured conic-cell ownership and diverted cold-solve behaviour across three carriers">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-informs" content="converged-forward-solve">
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-verifies" content="converged-forward-solve#s5">
+  <meta name="plan-source" content="Live H200 carrier jobs and independent conic quadrature">
+  <meta name="plan-source-quality" content="primary">
+  <meta name="plan-tags" content="equilibrium,grad-shafranov,jax,continuity,topology">
+  <title>X-point cell area and moments | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <header>
+    <p class="eyebrow">Research input and execution evidence</p>
+    <h1>X-point cell area and moments</h1>
+    <p class="lead">An axis-facing conic integral shared by membership and booking converges the diverted cold solve at 282 and 550 cells to 7.76 × 10<sup>−14</sup> and 2.52 × 10<sup>−13</sup>, but the fine map refuses at error 0.000249294. Selecting the fitted Bell quadratic's full connected component agrees with dense quadrature to 2.04 × 10<sup>−14</sup> on device, yet its analytic map errors are 0.013408, 0.035859 and 0.017919 at 282, 550 and 2,098 cells. The Bell fit puts its stationary level away from the physical saddle boundary and joins a lobe absent from the independent analytic flux sample.</p>
+  </header>
+  <section id="method">
+    <h2>One geometric integral</h2>
+    <p>The prototype keeps the continuous wall and saddle candidates and the inherited path-strength gate. For cells near the X-point it rotates the fitted Bell quadratic into its Hessian eigen-directions, selects the axis-facing side, and integrates the positive level set inside the cell polygon. Each vertical slice integrates the quadratic profile density, current and first moments analytically; the outer conic coordinate uses adaptive quadrature for the independent reference and fixed-shape Gauss–Legendre nodes for the traced map. The same four-component integral gives area membership and all three booked moments. No normal-form/ordinary-cut blend is applied on this booking path. The traced correction takes its state, carrier operands, LU factor and pivots as runtime arrays.</p>
+    <p>This is numerical conic integration, rather than the preferred closed-form Green-theorem arc formula. The independent check uses a second outer rule with 256 nodes and a sine-squared coordinate change at interval ends. A zero first moment is scaled by its cell current times pitch for comparison; a mathematically undefined relative error against zero is never reported as a large disagreement. Both rules integrate the same fitted conic, so their agreement checks quadrature accuracy, not whether that conic is the physical separatrix.</p>
+    <p>All three carriers use the certified cached machine and Biot operands. The 2,098-cell jet matrix contains 7,235 nodes and 2.186 GB; the live reproduction loaded that cache in 178 seconds. Binary64 was enabled before arrays, and each H200 log names the revision, resolved worktree, imported nova path and runnable command. The run directory holds the full JSON cell receipts and logs.</p>
+  </section>
+  <section id="cell-agreement">
+    <h2>Every X-point-neighbourhood cell</h2>
+    <p>The unmodified handoff still reproduces its defect: at 550 cells the residual is 0.00175892253683 with cell 8 as the peak; at 2,098 cells its converged residual is 8.45541 × 10<sup>−13</sup>, while cell 47's normal and ordinary area fractions are 0.0281766 and 0.465726. The axis-facing half-plane gives 0.375577 at cell 8 and 0.0332371 at cell 47; the full connected Bell component is reported in the table below. These rows are fresh program evaluations, not values copied from the predecessor's document.</p>
+    <table>
+      <caption>Connected Bell area fraction and adaptive-versus-dense agreement for every extracted neighbourhood cell. The scaled relative column is the maximum across area, current and both first moments; inactive cells retain their measured zero path weight.</caption>
+      <thead><tr><th>Carrier cells</th><th>Cell</th><th>Conic area fraction</th><th>Normal-form fraction</th><th>Ordinary-cut fraction</th><th>Largest scaled relative difference</th><th>Path weight</th></tr></thead>
+      <tbody>
+        <tr><td>282</td><th>4</th><td>0</td><td>0.694166872</td><td>0.694166872</td><td>0</td><td>0</td></tr>
+        <tr><td>282</td><th>5</th><td>0.841794769</td><td>0.842371306</td><td>0.842371306</td><td>3.06e-16</td><td>0</td></tr>
+        <tr><td>282</td><th>6</th><td>0</td><td>0.0483187519</td><td>0.0483187519</td><td>0</td><td>0</td></tr>
+        <tr><td>282</td><th>7</th><td>0.462611786</td><td>0.408749005</td><td>0.469310328</td><td>2.78e-16</td><td>1</td></tr>
+        <tr><td>282</td><th>8</th><td>0.179087975</td><td>0.179355857</td><td>0.179355857</td><td>3.52e-16</td><td>1</td></tr>
+        <tr><td>282</td><th>9</th><td>1</td><td>1</td><td>1</td><td>1.72e-16</td><td>1</td></tr>
+        <tr><td>282</td><th>66</th><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><td>282</td><th>71</th><td>0.245255432</td><td>0.245586353</td><td>0.245586353</td><td>4.92e-16</td><td>1</td></tr>
+        <tr><td>550</td><th>5</th><td>0.920822731</td><td>0</td><td>1</td><td>5.63e-16</td><td>0.2229</td></tr>
+        <tr><td>550</td><th>7</th><td>0</td><td>0.00776574423</td><td>0.00776574423</td><td>0</td><td>0</td></tr>
+        <tr><td>550</td><th>8</th><td>0.375577403</td><td>0.381894929</td><td>0.369979196</td><td>3.44e-16</td><td>1</td></tr>
+        <tr><td>550</td><th>18</th><td>0.0842332749</td><td>0.0844148085</td><td>0.0844148085</td><td>3.98e-16</td><td>1</td></tr>
+        <tr><td>550</td><th>20</th><td>1</td><td>1</td><td>1</td><td>2.02e-16</td><td>1</td></tr>
+        <tr><td>550</td><th>68</th><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><td>550</td><th>80</th><td>0.300785414</td><td>0.301053815</td><td>0.301053815</td><td>1.81e-16</td><td>1</td></tr>
+        <tr><td>2,098</td><th>37</th><td>0</td><td>0.153706983</td><td>0.153706983</td><td>0</td><td>0</td></tr>
+        <tr><td>2,098</td><th>40</th><td>0.00245667353</td><td>0.0024566975</td><td>0.0024566975</td><td>8.06e-16</td><td>0.9062</td></tr>
+        <tr><td>2,098</td><th>45</th><td>1</td><td>1</td><td>1</td><td>1.72e-16</td><td>0.002731</td></tr>
+        <tr><td>2,098</td><th>46</th><td>0</td><td>0.302227459</td><td>0.302227459</td><td>0</td><td>0</td></tr>
+        <tr><td>2,098</td><th>47</th><td>0.511789965</td><td>0.0281765634</td><td>0.465725576</td><td>1.26e-16</td><td>1</td></tr>
+        <tr><td>2,098</td><th>48</th><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><td>2,098</td><th>50</th><td>0.842694499</td><td>0.841915935</td><td>0.841915935</td><td>1.72e-16</td><td>1</td></tr>
+      </tbody>
+    </table>
+    <figure><img src="/nova/figures/converged-forward-solve/xpoint-cell-owner/per-cell-agreement.svg" alt="Per-cell integral differences across the three diverted carriers"><figcaption>The full connected Bell component by adaptive conic slices against independent dense outer quadrature on every X-point-neighbourhood cell, including cells 8 and 47. The plotted floor at 10<sup>−18</sup> represents numerical zero, and blue highlights the largest difference in each carrier. All measured differences are below the 10<sup>−12</sup> limit. The receipt maxima are 4.92 × 10<sup>−16</sup>, 5.63 × 10<sup>−16</sup> and 8.06 × 10<sup>−16</sup> at 282, 550 and 2,098 cells; the traced device integrals agree with the dense rule to 6.89 × 10<sup>−15</sup>, 8.35 × 10<sup>−15</sup> and 2.04 × 10<sup>−14</sup>.</figcaption></figure>
+    <p>A live negative control moved the conic branch root by 10<sup>−4</sup> in the adaptive program while leaving the dense reference unchanged. The same comparison refused with a largest scaled difference of 4.31818 × 10<sup>−4</sup> and <code>EXIT=1</code>. The unmodified row completed with <code>EXIT=0</code>.</p>
+  </section>
+  <section id="connectivity">
+    <h2>The fitted field and the physical saddle</h2>
+    <p>The Bell quadratic sampled from the live field has a stationary value 2.52 × 10<sup>−7</sup> above the boundary at the active 282-cell owner and 5.80 × 10<sup>−8</sup> above it at cell 47 on the 2,098-cell carrier. Its positive region is therefore connected through its own stationary point. Integrating that entire Bell component gives area fractions 0.462612 and 0.511790, respectively, rather than the submitted half-plane's 0.409567 and 0.0332371. Both ways of selecting the region agree internally between adaptive and dense quadrature. The distinction is geometric and cannot be resolved by tightening integration tolerances.</p>
+    <p>A separate arm constrains the fitted quadratic to have the physical saddle's value and zero gradient while retaining its Hessian. Constraining every nearby cell fails the 282-cell analytic map guard at 0.0315696, driven by large changes in neighbouring cells. The narrower arm that constrains only the containing cell also fails the analytic map guard at 282 and 550 cells, at 0.00144692 and 0.000681188. Both projection jobs were stopped after those rows so the H200 could serve the owner controls. The half-plane solve remains a numerical candidate, not an exact owner of the requested axis-connected Bell region.</p>
+    <p>Integrating the Bell quadratic's full connected component with one read-and-book integral resolves the numerical agreement question: adaptive and dense rules differ by at most 4.92 × 10<sup>−16</sup>, 5.63 × 10<sup>−16</sup> and 8.06 × 10<sup>−16</sup>, while the traced device differs from dense by at most 6.89 × 10<sup>−15</sup>, 8.35 × 10<sup>−15</sup> and 2.04 × 10<sup>−14</sup> across the three carriers. Yet the fitted Bell saddle is not held at the physical boundary level. A signed level scan through its own saddle contact, at offsets ±10<sup>−11</sup> Wb, changes the exact connected area by 0.04967, 0.06212 and 0.47262 of the owner cell at 282, 550 and 2,098 cells. The difference persists as the level approaches contact: selecting the second lobe by binary connectivity creates a finite area jump. The continuous handoff therefore cannot use this fitted Bell component without changing how the field is represented at the saddle.</p>
+    <table>
+      <caption>Owner-cell area fraction against a separate direct sample of the analytic flux. The 1024 × 1024 grid selects positive points on the axis-facing side of the physical saddle; the difference from a 512 × 512 grid is at most 7.63 × 10<sup>−6</sup>. It is a physical diagnostic rather than the 10<sup>−12</sup> conic quadrature check.</caption>
+      <thead><tr><th>Carrier cells</th><th>Owner cell</th><th>Analytic flux grid</th><th>Normal form</th><th>Axis-facing Bell</th><th>Connected Bell</th></tr></thead>
+      <tbody>
+        <tr><td>282</td><th>7</th><td>0.408703</td><td>0.408749</td><td>0.409567</td><td>0.462612</td></tr>
+        <tr><td>550</td><th>8</th><td>0.378283</td><td>0.381895</td><td>0.375577</td><td>0.375577</td></tr>
+        <tr><td>2,098</td><th>47</th><td>0.0285123</td><td>0.0281766</td><td>0.0332371</td><td>0.511790</td></tr>
+      </tbody>
+    </table>
+    <p>The analytic grid counts 321,417, 297,494 and 22,423 selected samples inside the three owner cells, so the fine comparison sees a known present region. The full Bell component's extra 0.48328 cell fraction at cell 47 comes from its fitted topology, not from the analytic positive region. The local axis-facing classification is diagnostic, not a proof of global path connection.</p>
+    <figure><img src="/nova/figures/converged-forward-solve/xpoint-cell-owner/bell-contact.svg" alt="Connected Bell cell area from both sides of its saddle contact at three carrier sizes"><figcaption>The full positive Bell region joins through its fitted saddle when its signed critical level is above the boundary (blue); below contact, only the axis-facing lobe is connected (grey). Each series is evaluated anew at offsets 10<sup>−9</sup>, 10<sup>−10</sup> and 10<sup>−11</sup> Wb from contact, with the two sides shown separately so a line cannot imply continuity. At the smallest offset their area-fraction gaps are 0.04967, 0.06212 and 0.47262 for 282, 550 and 2,098 cells.</figcaption></figure>
+  </section>
+  <section id="cold-solves">
+    <h2>Diverted cold solves and remaining checks</h2>
+    <p>The submitted half-plane owner has normalized analytic map flux errors 0.001080246, 0.000409613 and 0.000249294 at 282, 550 and 2,098 cells. Its error falls with resolution, and the first two values improve on the inherited 0.001086579 and 0.000487272. The fine value is worse than the inherited 0.0000866659 and exceeds the 0.0001 map guard, so the fine row refuses before any cold correction. Map compiles take 7.250, 7.268 and 7.392 seconds and produce 1.672, 2.722 and 7.665 MB executables. The fine row has no terminal solve or terminal poloidal panel.</p>
+    <table>
+      <caption>Normalized analytic flux map error at the reference state. The guard is the maximum allowed for each realized carrier. The connected Bell arm fails every guard and is nonmonotone.</caption>
+      <thead><tr><th>Carrier cells</th><th>Inherited</th><th>Axis-facing Bell</th><th>Connected Bell</th><th>Guard</th></tr></thead>
+      <tbody>
+        <tr><td>282</td><td>0.001086579</td><td>0.001080246</td><td>0.013408027</td><td>0.0010866</td></tr>
+        <tr><td>550</td><td>0.000487272</td><td>0.000409613</td><td>0.035858548</td><td>0.0005</td></tr>
+        <tr><td>2,098</td><td>0.0000866659</td><td>0.000249294</td><td>0.017919404</td><td>0.0001</td></tr>
+      </tbody>
+    </table>
+    <p>The full connected Bell maps report valid booking, compile in 8.033, 8.150 and 8.172 seconds, and produce 1.674, 2.724 and 7.667 MB executables. Their initial scaled moment residuals are 0.0892, 0.4671 and 0.7416. All three map errors exceed their guards before a Newton correction, so no full-Bell cold root or terminal poloidal panel exists. The small executable and short compile show that capacity is not the reason for this refusal.</p>
+    <p>The 282-cell cold residual falls through 0.00199197, 1.10071 × 10<sup>−5</sup> and 3.31518 × 10<sup>−9</sup> to 7.76168 × 10<sup>−14</sup> in four corrections. The 550-cell row reaches 2.51986 × 10<sup>−13</sup> in four corrections. Their correction compiles take 34.052 and 33.668 seconds and produce 5,022,533- and 8,172,485-byte executables, within the 60-second and 50 MB limits. At 282 cells, an independent root evaluation gives Gauss–Newton gradient two-norm 1.21848 × 10<sup>−12</sup>; three random directions have selected Taylor slopes 1.981–2.002, and fine Newton and random-direction scans show finite, quadratic local remainders. At 550 cells, independent residual and gradient are 5.07336 × 10<sup>−13</sup> and 3.13189 × 10<sup>−11</sup>. The step interval 10<sup>−5</sup> to 3 × 10<sup>−6</sup> has slopes near two in three directions, but the full predeclared Taylor check refuses because larger steps cross a change in local behavior and the smallest steps reach roundoff. Fine step-scale continuity scans are finite. Limited-carrier, 41-state sweep and bisected-transition controls have not been measured for this owner.</p>
+    <figure><img src="/nova/figures/converged-forward-solve/xpoint-cell-owner/map-error.svg" alt="Analytic map error of the inherited, axis-facing and connected Bell maps over three carrier resolutions"><figcaption>All three maps use the same analytic state and realized carrier sizes. The axis-facing Bell map improves on the inherited error at 282 and 550 cells but refuses the fine guard. The full connected Bell map refuses at all three sizes and its error does not fall consistently with resolution. Every connected Bell point is a map result, not a cold solve.</figcaption></figure>
+    <figure><img src="/nova/figures/converged-forward-solve/xpoint-cell-owner/residual-histories.svg" alt="Diverted cold Newton residual histories at three carrier sizes"><figcaption>The 282- and 550-cell cold solves converge after four corrections. The 2,098-cell carrier has only its initial moment residual because its analytic map guard refused before a correction. The dotted line is the 10<sup>−12</sup> cold target.</figcaption></figure>
+    <figure><img src="/nova/figures/converged-forward-solve/xpoint-cell-owner/terminal-282.svg" alt="Solved and analytic diverted flux contours, null sets and wall at 282 cells"><figcaption>282-cell terminal state: scaled residual 7.76168 × 10<sup>−14</sup>; converged: true. Blue solid contours and nulls are solved; dark dashed contours and nulls are analytic. Both use shared physical flux levels, and the black outline is the wall.</figcaption></figure>
+    <figure><img src="/nova/figures/converged-forward-solve/xpoint-cell-owner/terminal-550.svg" alt="Solved and analytic diverted flux contours, null sets and wall at 550 cells"><figcaption>550-cell terminal state: scaled residual 2.51986 × 10<sup>−13</sup>; converged: true. Blue solid contours and nulls are solved; dark dashed contours and nulls are analytic. Both use shared physical flux levels, and the black outline is the wall.</figcaption></figure>
+    <p>The inherited agreement map's 282-cell NaN was reproduced at the state after its first correction. The scaled residual is finite at 0.001991972; all 715,716 entries of the 846-by-846 Jacobian are nonfinite, and the on-device step is nonfinite. SciPy refuses the same transferred matrix with “array must not contain infs or NaNs,” so the failure precedes an LU-versus-SciPy numerical disagreement.</p>
+    <p>Restoring the original blended handoff in a fresh 550-cell run stalls at residual 0.00175892253691 after 11 corrections, including a zero accepted step, and exits with a refusal. Three focused analytic conic tests pass. The 2,098-cell batch uses a labelled terminal state from the inherited agreement map, because this owner has no converged fine state. With one shared factor, widths 1, 16 and 128 compile in 17.33, 17.43 and 17.59 seconds into 7.679, 7.671 and 7.671 MB executables; the 128-state batch runs as eight sequential chunks of 16. The measured per-state walls are 84.57, 9.32 and 9.30 ms. Every resulting residual is NaN and zero states converge. The source is a solution of another map, so these timings show that the bounded batch fits and runs, but they do not establish this owner's fine throughput or convergence.</p>
+  </section>
+</main>
+</body>
+</html>

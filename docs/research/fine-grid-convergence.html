@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="fine-grid-convergence">
+  <meta name="plan-title" content="Fine-grid diverted convergence">
+  <meta name="plan-summary" content="H200 derivative and handoff measurements for the continuous diverted moment map">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-informs" content="converged-forward-solve">
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-verifies" content="converged-forward-solve#s5">
+  <meta name="plan-source" content="H200 certificate carrier runs and fixed-shape map probes">
+  <meta name="plan-source-quality" content="primary">
+  <meta name="plan-tags" content="equilibrium,grad-shafranov,jax,continuity,topology">
+  <title>Fine-grid diverted convergence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <header>
+    <p class="eyebrow">Research input</p>
+    <h1>Fine-grid diverted convergence</h1>
+    <p class="lead">The accepted continuous map converges the 282-cell diverted carrier to 1.25 × 10<sup>−13</sup>, while its 550- and 2,098-cell cold solves stop at 1.55 × 10<sup>−3</sup> and 3.63 × 10<sup>−3</sup>. Fresh blockwise derivative and saddle-handoff measurements are in progress; the figures below retain the accepted terminal states as the comparison base.</p>
+  </header>
+
+  <section id="method">
+    <h2>Method and provenance</h2>
+    <p>The fixed-shape continuous map is imported from <code>scripts/prototypes/fast_map_production</code> without editing it. The derivative instrument in <code>scripts/prototypes/fine_grid_convergence</code> builds the same certified diverted carrier, reference moments, coupling rows and moment scales as that route. It reads the prior accepted terminal moments, evaluates the current map again, linearizes that map, solves for a Newton direction, and measures Taylor remainders in the current, radial-moment and vertical-moment blocks along the Newton direction and three independently seeded random directions. The saddle probe compares the normal-form and ordinary-cut area fractions and moments at and next to the X-point, with one-sided finite differences. Binary64 is configured before any JAX array is constructed, the probe asserts the GPU backend, and each H200 log prints the imported module path, worktree, revision, command and resolved working directory.</p>
+    <p>The read-only 550- and 2,098-cell machine cache used by the accepted fast-map run is <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T174345284407-lean-map/cache</code>. The earlier support cache named in the node brief contains a 5,000-cell machine but no 550- or 2,098-cell machine; a fresh attempt against it failed during input loading and supplies no numerical evidence. The predecessor terminal receipts and their full H200 logs are under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T160647356198-fast-map-production</code>. This node's live probe logs and JSON receipts are under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T035628355879-fine-grid-convergence</code>. A derivative verdict is admitted only after a log reaches its <code>EXIT=0</code> line and its JSON receipt can be read.</p>
+  </section>
+
+  <section id="baseline">
+    <h2>Accepted continuous-map baseline</h2>
+    <p>The predecessor's H200 receipts establish the defect to reproduce: the coarse solve reaches the required residual, and both fine solves accept diminishing steps before refusing a further correction. Its 550-cell dense Jacobian has relative Gauss–Newton gradient 0.585922 at the stopped iterate and relative linear residual 3.88 × 10<sup>−13</sup>. The 401-point Newton-direction scan retains 337 supported cells while the best sampled residual remains 1.55026 × 10<sup>−3</sup>. These facts show an accurately solved local linear equation and a nonstationary stalled state; they do not by themselves identify the map term that prevents convergence.</p>
+    <table>
+      <thead><tr><th>Diverted carrier</th><th>Realized cells</th><th>Accepted terminal residual</th><th>Outcome</th></tr></thead>
+      <tbody>
+        <tr><th>Coarse</th><td>282</td><td>1.24834 × 10<sup>−13</sup></td><td>Converged</td></tr>
+        <tr><th>Middle</th><td>550</td><td>1.55037 × 10<sup>−3</sup></td><td>Stopped</td></tr>
+        <tr><th>Fine</th><td>2,098</td><td>3.62803 × 10<sup>−3</sup></td><td>Stopped</td></tr>
+      </tbody>
+    </table>
+    <figure><img src="/nova/figures/converged-forward-solve/fine-grid-convergence/residual-histories.svg" alt="Accepted correction histories for the three diverted carriers"><figcaption>Accepted predecessor H200 cold solves, before a fine-grid repair. Only accepted corrections appear. The dotted reference is the 10<sup>−12</sup> residual requirement; the 550- and 2,098-cell histories stop above it.</figcaption></figure>
+    <figure><img src="/nova/figures/converged-forward-solve/fine-grid-convergence/terminal-282.svg" alt="Paired solved and analytic flux contours, nulls and wall at the 282-cell terminal state"><figcaption>282-cell terminal state: scaled residual 1.24834 × 10<sup>−13</sup>; converged: true. Blue solid contours and blue nulls are solved; dark dashed contours and dark nulls are analytic. Both fields use one set of flux levels; the black outline is the wall.</figcaption></figure>
+    <figure><img src="/nova/figures/converged-forward-solve/fine-grid-convergence/terminal-550.svg" alt="Paired solved and analytic flux contours, nulls and wall at the 550-cell terminal state"><figcaption>550-cell terminal state: scaled residual 1.55037 × 10<sup>−3</sup>; converged: false. Blue solid contours and blue nulls are solved; dark dashed contours and dark nulls are analytic. Both fields use one set of flux levels; the black outline is the wall.</figcaption></figure>
+    <figure><img src="/nova/figures/converged-forward-solve/fine-grid-convergence/terminal-2098.svg" alt="Paired solved and analytic flux contours, nulls and wall at the 2,098-cell terminal state"><figcaption>2,098-cell terminal state: scaled residual 3.62803 × 10<sup>−3</sup>; converged: false. Blue solid contours and blue nulls are solved; dark dashed contours and dark nulls are analytic. Both fields use one set of flux levels; the black outline is the wall.</figcaption></figure>
+  </section>
+</main>
+</body>
+</html>

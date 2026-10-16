@@ -112,7 +112,7 @@ def batch_walls(rows, output, stage):
             axis.annotate(
                 f"{kind} {row['cells']}",
                 (widths[-1], walls[-1]),
-                xytext=(8, 0),
+                xytext=(8, -16 if kind == "limited" and cells == 289 else 0),
                 textcoords="offset points",
                 color=color,
                 fontsize=20,

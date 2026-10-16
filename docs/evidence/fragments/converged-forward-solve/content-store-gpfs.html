@@ -125,7 +125,7 @@
     is a miss. <code>build_seconds</code> is the miss assembly, <code>load_seconds</code>
     the wall from opening the entry to a device-resident matrix, and the loaded matrix is
     compared bitwise with the built matrix. Status:
-    <span id="content-store-gpfs-measure-status">partial — job 1287385 running; the 282 and 550-cell rows are recorded below, the 2,098-cell row follows</span>.
+    <span id="content-store-gpfs-measure-status">complete — job 1287385 finished on the H200 (exit 0, 27 min) with all three carrier sizes and bit-identical loaded matrices</span>.
   </p>
   <div id="content-store-gpfs-measure-rows">
     <table id="content-store-gpfs-measure-table">
@@ -137,17 +137,34 @@
         <tr id="content-store-gpfs-measure-282-jets"><td>282</td><td>315</td><td>jets</td><td>miss</td><td>15.05</td><td>0.198</td><td>0.051</td><td>58.0</td><td>equal</td></tr>
         <tr id="content-store-gpfs-measure-550-values"><td>550</td><td>606</td><td>values</td><td>miss</td><td>90.51</td><td>0.481</td><td>0.123</td><td>158.6</td><td>equal</td></tr>
         <tr id="content-store-gpfs-measure-550-jets"><td>550</td><td>606</td><td>jets</td><td>miss</td><td>28.93</td><td>0.607</td><td>0.156</td><td>204.9</td><td>equal</td></tr>
+        <tr id="content-store-gpfs-measure-2098-values"><td>2098</td><td>2202</td><td>values</td><td>miss</td><td>994.45</td><td>101.07</td><td>1.580</td><td>2094.7</td><td>equal</td></tr>
+        <tr id="content-store-gpfs-measure-2098-jets"><td>2098</td><td>2202</td><td>jets</td><td>miss</td><td>234.67</td><td>88.24</td><td>1.772</td><td>2409.6</td><td>equal</td></tr>
       </tbody>
     </table>
     <p id="content-store-gpfs-measure-caption">
       Job 1287385, one sbatch on <code>betelgeuse</code> under reservation
       <code>gpu_0003_grpA</code> with one H200 card, rows looped inside the single
-      allocation. Every row is on a fresh GPFS operand root, so the first call is a miss
-      (<code>cache_hit_first: false</code>) and the second a hit
-      (<code>cache_hit_second: true</code>); <code>load_seconds</code> is the wall from
+      allocation, at revision <code>7291442af</code>, exit 0 after 27 minutes. Every row
+      is on a fresh GPFS operand root
+      (<code>/work/projects/imas_gpu/sophelio/evidence/operands-content-store-gpfs-c</code>),
+      so the first call is a miss (<code>cache_hit_first: false</code>) and the second a
+      hit (<code>cache_hit_second: true</code>); <code>load_seconds</code> is the wall from
       opening the entry to a device-resident matrix. The loaded matrix is compared with
       the built matrix by <code>jax.numpy.array_equal</code> and is bit-identical in every
       row.
+    </p>
+    <p id="content-store-gpfs-measure-caveats">
+      Two readings are not to be generalised from. <strong>The build wall is noisy on a
+      shared device</strong>: the 550-cell jet row built in 28.9 s in this job and in
+      114.8 s in an earlier run of the same shape on the same reservation, because the
+      card is shared with the serving jobs. The <code>load_seconds</code> figure is the
+      stable one — it is bounded by reading a 2 GB matrix and moving it to the device, and
+      it stayed under two seconds at every carrier size. <strong>The publish wall grows
+      with the matrix, not with the entry count</strong>: sub-second at 550 cells against
+      101.1 s for a 2.09 GB matrix and 88.2 s for a 2.41 GB one at 2,098 cells, which is
+      the cost of writing and fsyncing the data file into the pending directory before the
+      directory rename. That is the price of the guarantee that a reader never sees a
+      partial entry, and it is paid once per key.
     </p>
   </div>
 

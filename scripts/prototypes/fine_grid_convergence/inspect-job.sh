@@ -14,14 +14,14 @@ cache=${CARRIER_CACHE:?}
 python=/home/ITER/mcintos/Code/nova/.venv/bin/python
 export PYTHONPATH="$repo"
 revision=$(git -C "$repo" rev-parse HEAD)
-for size in 500 2000; do
-  source="$run/handoff-cold-$size.json"
-  command="$python -m scripts.prototypes.fine_grid_convergence.inspect_terminal --cells $size --cache $cache --start-json $source --output $run/handoff-inspect-$size.json"
+for size in 250 500 2000; do
+  source="$run/localized-cold-$size.json"
+  command="$python -m scripts.prototypes.fine_grid_convergence.inspect_terminal --cells $size --cache $cache --start-json $source --output $run/localized-inspect-$size.json --cell-only"
   printf 'revision=%s tree=%s command=%s\n' "$revision" "$repo" "$command"
   printf 'cwd=%s\n' "$repo"
   code=0
   "$python" -m scripts.prototypes.fine_grid_convergence.inspect_terminal \
     --cells "$size" --cache "$cache" --start-json "$source" \
-    --output "$run/handoff-inspect-$size.json" || code=$?
+    --output "$run/localized-inspect-$size.json" --cell-only || code=$?
   printf 'INSPECT size=%s EXIT=%s\n' "$size" "$code"
 done

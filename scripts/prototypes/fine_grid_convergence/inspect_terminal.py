@@ -31,6 +31,7 @@ def main():
     parser.add_argument("--cache", type=Path, required=True)
     parser.add_argument("--start-json", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--cell-only", action="store_true")
     args = parser.parse_args()
     assert jax.config.jax_enable_x64 is True and jax.default_backend() == "gpu"
     print(
@@ -93,6 +94,13 @@ def main():
         "rows": rows,
     }
     args.output.write_text(json.dumps(result, indent=2) + "\n")
+    if args.cell_only:
+        print(
+            f"SUMMARY cells={result['cells']} residual={result['residual']:.12g} "
+            f"peak_cell={int(hot[0])}",
+            flush=True,
+        )
+        return
     flat = (moments / context.scale).reshape(-1)
     _, gradient = jax.jit(
         lambda point, carrier, unit: gauss_newton_gradient(

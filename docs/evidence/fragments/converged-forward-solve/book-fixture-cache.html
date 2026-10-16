@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="book-fixture-cache">
+<meta name="plan-title" content="Certificate booking on fixtures rebuilt in the run's own root">
+<meta name="plan-summary" content="Rebuild the carrier and exterior fixtures on the identity the current sources define, so all six analytic certificate parametrizations reach booking, and tighten the sequential-cell-scan guard to the scanned operand's leading axis">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s3">
+<meta name="plan-commits" content="3c8b25084a4383c3c4acb52360d6dd3b299f10ad,7f3d64b35adbcc92840fbd420ec9d0c127028d64">
+<meta name="plan-recorded-at" content="2026-10-16">
+<meta name="plan-verdict" content="verified">
+<meta name="plan-environment" content="One reserved H200 (job 1287207 on 98dci4-gpu-0003), binary64, device-built certificate machines rebuilt on the current identity under the job's own temporary root; CPU arm on the fleet allocation in place">
+<title>Certificate booking on fixtures rebuilt in the run's own root | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<h1 id="book-fixture-cache-title">Certificate booking on fixtures rebuilt in the run's own root</h1>
+<p id="book-fixture-cache-summary">The booking helper read the certified carrier and exterior records by the semantic key recorded in their receipts, and refused them: the stored groups were keyed on a superseded identity schema and carry a wall hash the current sources no longer produce. Every one of the six analytic certificate parametrizations therefore failed before booking, so the closed-form booking identity was unverified on the certificate carriers. Both fixtures are now built on the identity the current sources define, under a writable root the run owns, and the certified directory is read and never written. In the same node the scanned-operand guard against a sequential cell axis is tightened from a length comparison against one cell count to the traced program's own leading axis, with a negative control that lowers a sequential scan of a different length.</p>
+
+<section id="book-fixture-cache-fixtures">
+<h2>Fixture rebuild on the current identity</h2>
+<p id="book-fixture-cache-fixtures-body">A published carrier record is keyed on the identity schema in force when it was written, so it cannot be reused once those sources move. Reading it by the recorded key raised before booking: the base arm of H200 job 1287207 fails all six rows with <code>AssertionError</code> raised at <code>scripts/prototypes/support/book.py:55</code>, inside the cache-key assertion, with no receipt written. The repair does not attempt to reuse the stored groups. Both helpers build instead on the current identity. The carrier build is redirected by pointing <code>NOVA_ANALYTIC_ORACLE_CACHE</code> at the run's root for the duration of the call; the exterior build places its store beside its caller, so its store factory is substituted for the same span. Each helper asserts the resulting store path lies under that root, so a build that landed anywhere else fails loudly rather than quietly publishing over a certified record. The root is <code>NOVA_BOOK_FIXTURE_ROOT</code> when the caller sets one, and otherwise a directory the process creates under its own temporary root. Nothing is written back into the certified caches.</p>
+<p id="book-fixture-cache-fixtures-why">The fixture helpers hold a lock file beside their store, so a read that fell back to the certified directory would open a lock file for writing there. Rebuilding is therefore not only the simpler path but the one that keeps the read-only promise: the certified caches are opened for reading only, and every lock, group and machine this node builds lands under the job's own temporary root.</p>
+<p id="book-fixture-cache-fixtures-cost">Rebuilding costs the machine build, which dominates the gate. The six rows were cold on this job: the head arm ran 3521 s wall for the six rows, of which the 2,000- and 5,000-cell carrier builds are the larger part, against 10.2 s for the base arm, which fails before any build. A run that needs the same rows twice pays that cost twice, because the fixtures live under a temporary root that is removed when the job ends.</p>
+</section>
+
+<section id="book-fixture-cache-guard">
+<h2>The scanned-operand guard</h2>
+<p id="book-fixture-cache-guard-body">The guard against a sequential scan over the cell dimension compared every scan length in the lowered program against one number, the cell count of a single 17-cell fixture. A scan that iterated the cells at any other bound passed: only a scan of exactly 17 was refused, and 17 was also the length of scans that are legitimate ring reductions, so the check was keyed on an incidental collision rather than on the axis. The guard now traces the booking program at two cell counts and identifies the cell axis from the program's own input — the leading axis of the traced flux samples, which every per-cell operand carries — and refuses the program in two cases: a scan length equal to that axis, and a scan-axis set that changes with the cell count. The second case is what makes the guard a statement about the dimension rather than about a length, because a scan over the cells moves with the count whether it runs to the count, short of it, or past it.</p>
+<p id="book-fixture-cache-guard-control">The negative control replaces <code>nova.equilibrium.current.book</code> with a program whose body does a <code>lax.scan</code> over <code>jnp.arange(cells - 2)</code>, a bound two short of the cell count, loaded as a pytest plugin so the guard test's own import binds the mutated callable. The tightened guard refuses it in one test: the traced scan axes are <code>{15}</code> and <code>{17}</code> at 17 and 19 cells, reported as <code>follows-cell-count</code>, and the run ends <code>EXIT=1</code> with <code>test_booking_does_not_scan_over_cells</code> failing. The committed head passes that same test. The bound is not 17, so the length comparison the guard replaces would have accepted this program; the control is a measurement of the tightening and not of the guard's continued presence.</p>
+<p id="book-fixture-cache-guard-delta">The guard test is not new — it existed at the orientation base and passed there, which is the finding: it passed because its single 17-cell fixture could not distinguish a cell scan at another bound from a ring reduction. Naming more cell counts is not enough on its own; what closes it is asking the program which axis it scanned.</p>
+</section>
+
+<section id="book-fixture-cache-gate">
+<h2>Six certificate parametrizations, base against head</h2>
+<p id="book-fixture-cache-gate-body">One sbatch job, 1287207, on the queue's H200 reservation (<code>98dci4-gpu-0003</code>, one H200 NVL, 143,771 MiB), ran the six rows in one allocation as two arms in sequence, never an array. Each arm ran from its own tree with its own <code>PYTHONPATH</code> and printed the resolved working directory, the imported <code>nova.__file__</code> and the imported booking module in its log header; the base arm's tree was extracted from the head worktree's object store, so no branch was created and no checkout was switched. Both arms ran the same six node ids from <code>tests/test_current_book_fragments.py</code>, on the same card, in binary64, with <code>assert jax.config.jax_enable_x64 is True</code> reached in the printed probe and the device list reading <code>[CudaDevice(id=0)]</code>. The base arm used the certified caches read-only and had no receipts written; the head arm built its fixtures on the current identity under the job's temporary root, and the whole job directory was removed on exit.</p>
+<table id="book-fixture-cache-gate-table">
+<thead><tr><th>Row</th><th>Realised cells</th><th>Base</th><th>Head</th></tr></thead>
+<tbody>
+<tr><td><code>[550-limited]</code></td><td>553</td><td>AssertionError at <code>book.py:55</code></td><td>passed</td></tr>
+<tr><td><code>[2000-limited]</code></td><td>2105</td><td>AssertionError at <code>book.py:55</code></td><td>passed</td></tr>
+<tr><td><code>[5000-limited]</code></td><td>5167</td><td>AssertionError at <code>book.py:55</code></td><td>passed</td></tr>
+<tr><td><code>[550-diverted]</code></td><td>550</td><td>AssertionError at <code>book.py:55</code></td><td>passed</td></tr>
+<tr><td><code>[2000-diverted]</code></td><td>2098</td><td>AssertionError at <code>book.py:55</code></td><td>passed</td></tr>
+<tr><td><code>[5000-diverted]</code></td><td>5158</td><td>AssertionError at <code>book.py:55</code></td><td>passed</td></tr>
+</tbody>
+</table>
+<p id="book-fixture-cache-gate-suite"><code>certificate-base-h200.log</code> ends <code>6 failed, 6 warnings in 10.20s</code> with <code>EXIT=1</code>; <code>certificate-head-h200.log</code> ends <code>6 passed in 3521.05s (0:58:41)</code> with <code>EXIT=0</code>. The delta is the six rows and nothing else: same node ids, same card, same session, same command apart from the tree. No row that passed at base failed at head and no row changed status for any reason other than the fixture rebuild.</p>
+</section>
+
+<section id="book-fixture-cache-rows">
+<h2>Booked rows at head</h2>
+<p id="book-fixture-cache-rows-body">Each row writes a receipt under <code>certificate-head/</code> as it lands, and each reports <code>completed=true</code>. The booked current reproduces the closed-form analytic current at machine precision on five rows and at 2.2e-16 on the diverted 550- and 2,000-cell rows. Every smooth-region budget ratio is below one, the largest being 0.832 on the 5,000-cell limited row. The clipped-current error is finite on every row, largest at 2.0e-8 on the 5,000-cell diverted row, against an error that is nonfinite when the clip fails.</p>
+<table id="book-fixture-cache-rows-table">
+<thead><tr><th>Row</th><th>Book [s]</th><th>Net current relative error</th><th>Smooth current ratio</th><th>Smooth moment ratio</th><th>Saddle current ratio</th><th>Clipped current error</th></tr></thead>
+<tbody>
+<tr><td><code>limited-550</code></td><td>6.444</td><td>1.11e-16</td><td>0.7750</td><td>0.1473</td><td>0.0000</td><td>2.39e-11</td></tr>
+<tr><td><code>limited-2000</code></td><td>4.633</td><td>0</td><td>0.7608</td><td>0.1320</td><td>0.0000</td><td>5.09e-11</td></tr>
+<tr><td><code>limited-5000</code></td><td>4.292</td><td>0</td><td>0.8321</td><td>0.1332</td><td>0.0000</td><td>1.07e-10</td></tr>
+<tr><td><code>diverted-550</code></td><td>6.472</td><td>2.22e-16</td><td>0.0840</td><td>0.0328</td><td>0.0176</td><td>1.36e-08</td></tr>
+<tr><td><code>diverted-2000</code></td><td>4.655</td><td>2.22e-16</td><td>0.2780</td><td>0.0659</td><td>0.0006</td><td>3.10e-09</td></tr>
+<tr><td><code>diverted-5000</code></td><td>3.551</td><td>0</td><td>0.4921</td><td>0.1444</td><td>0.0076</td><td>2.01e-08</td></tr>
+</tbody>
+</table>
+<p id="book-fixture-cache-rows-pin">The diverted 550-cell row carries a pinned legacy booking error, <code>abs(legacy_map / 0.1946465024178517 - 1) &lt; 5e-6</code>, recorded from an earlier measurement on the ground that the row raised before booking rather than printing a number. This node makes that assertion reachable for the first time, and the row passes it: the measured value is <code>0.194646502418</code>, a relative deviation of 6.2e-15, eleven orders inside the declared tolerance. The pin is therefore confirmed by measurement rather than merely retained.</p>
+</section>
+
+<section id="book-fixture-cache-cpu">
+<h2>CPU delta on the vectorised suite</h2>
+<p id="book-fixture-cache-cpu-body">The vectorised booking suite ran CPU-only, one fresh process per arm, on the fleet allocation in place, with <code>JAX_PLATFORMS=cpu</code>, <code>configure_dtypes()</code> called before any array and <code>jax_enable_x64</code> asserted true, each arm running from its own tree with that tree's module resolving under its own root. The base revision is <code>63caf693143b26d2a689939bb9073b5f969d2b75</code> and the head is <code>7f3d64b35adbcc92840fbd420ec9d0c127028d64</code>. Base passed 5 tests in 67.98 s; head passed 6 in 64.79 s. The added test is the negative control; no test that passed at base failed at head, so the added-failure count is zero. Both arms report <code>platforms=[CpuDevice(id=0)]</code> and <code>x64=True</code>, and both report zero absolute and relative difference between the batched and sequential bookings at 1, 64, 200 and 2,000 cells.</p>
+</section>
+</main>
+</body>
+</html>

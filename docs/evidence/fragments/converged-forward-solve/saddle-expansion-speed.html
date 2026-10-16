@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="saddle-expansion-speed">
+<meta name="plan-title" content="Saddle-anchored expansion speed rebuild">
+<meta name="plan-summary" content="Runtime arguments and a sized disk patch for the saddle-anchored map, re-measured on the H200 speed gate">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s5">
+<meta name="plan-commits" content="67d0e3fe1, eb35b8349, e3353b26c">
+<meta name="plan-recorded-at" content="2026-10-16">
+<meta name="plan-verdict" content="partial">
+<meta name="plan-environment" content="H200 NVL, binary64; job 1287671 on 98dci4-gpu-0003, reservation gpu_0003_grpA">
+<title>Saddle-anchored expansion speed | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<h1 id="saddle-expansion-speed-landing">Saddle-anchored expansion speed</h1>
+<p id="saddle-expansion-speed-record">The cost decomposition and the fitting change are in the <a href="/nova/research/saddle-anchored-expansion.html">saddle-anchored expansion research note</a>; the gate rows are carried by the <a href="/nova/evidence/fragments/converged-forward-solve/saddle-anchored-expansion.html">saddle-anchored expansion evidence</a> fragment.</p>
+
+<section id="saddle-expansion-speed-result">
+<h2 id="saddle-expansion-speed-result-heading">Result</h2>
+<p id="saddle-expansion-speed-verdict">The structural cost the node was dispatched to remove is gone and the gate still does not open, and the rebuild measures why instead of arguing it. Generated code at width 128 on the 282 realised cell carrier falls from <b>152913270</b> bytes to <b>1684704</b>, and the largest dense HLO constant in the lowered module is <b>one element</b> at every width and every rung, so no constant scales with the carrier or the state. The ratio is <b>30.3036</b> against the 1.25 ceiling, essentially unchanged from the first build's 29.9319, because the cost was never the constants.</p>
+<p id="saddle-expansion-speed-decomposition">The ratio decomposes into two measured factors: the gate arm provisions <b>194</b> of the carrier's 282 cells against the control's fixed <b>16</b>, a factor of <b>12.1&times;</b>, and costs <b>34.8 &micro;s</b> per member against the control's <b>13.9 &micro;s</b>, a factor of <b>2.5&times;</b>. The product is the measured ratio. The per-member factor is the outer quadrature; the guard that checks agreement with the first build's integration reports <b>0.6593670573</b> against a 1e-12 tolerance, so the low-order outer rule is wrong by five hundred billion times the tolerance and the closed-form branch the brief asks for is the outstanding work.</p>
+</section>
+
+<section id="saddle-expansion-speed-clauses">
+<h2 id="saddle-expansion-speed-clauses-heading">Done-when clauses</h2>
+<table>
+<thead><tr><th>Clause</th><th>Status</th><th>Evidence</th></tr></thead>
+<tbody>
+<tr><td>1. Runtime arguments, no carrier- or state-scaled HLO constant</td><td><b>achieved</b></td><td>152.9 MB &rarr; 1.68 MB; largest constant 1 element, <code>constant_elements</code> in <code>speed-282/550/2098.json</code></td></tr>
+<tr><td>2. Closed-form slice-discriminant outer integral</td><td><b>not implemented</b></td><td>low-order branch only; guard measures 0.6593670573</td></tr>
+<tr><td>3. Disk capacity from carrier geometry and radius; static candidate list</td><td>partial, then corrected</td><td>static list replaces the per-state scan; margin was a fixed metre, corrected to one median pitch in <code>e3353b26c</code>, not re-measured</td></tr>
+<tr><td>4. Agreement with the first build to 1e-12</td><td><b>not met</b></td><td>0.6593670573; runner exits 3 by design</td></tr>
+<tr><td>5. Gate at 2,098 cells</td><td><b>failed; unmeasurable at 2,098</b></td><td>30.3036 at 282; the axis control is refused 263.80 GiB at 2,098 &mdash; obstruction is in the control</td></tr>
+<tr><td>6. Reuse <code>_quadratic</code> and <code>integrate_cell</code>; nonzero exit on clause 4</td><td>achieved</td><td>both imported from <code>conic_integral.py</code> and wrapped</td></tr>
+<tr><td>7. Evidence fragment after rows</td><td>delivered</td><td>this document and the saddle-anchored expansion fragment</td></tr>
+</tbody>
+</table>
+</section>
+
+<section id="saddle-expansion-speed-receipts">
+<h2 id="saddle-expansion-speed-receipts-heading">Receipts</h2>
+<table>
+<thead><tr><th>Artefact</th><th>Path</th></tr></thead>
+<tbody>
+<tr><td>Gate JSON</td><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T192804852944-saddle-expansion-speed/speed-282.json</code>, <code>speed-550.json</code>, <code>speed-2098.json</code></td></tr>
+<tr><td>H200 log</td><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T192804852944-saddle-expansion-speed/slurm-speed-gate-1287671.log</code></td></tr>
+<tr><td>Job script</td><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T192804852944-saddle-expansion-speed/speed-gate-h200.sh</code></td></tr>
+<tr><td>Implementation</td><td><code>scripts/prototypes/saddle_expansion/expansion.py</code>, <code>scripts/prototypes/saddle_expansion/speed_gate.py</code>, <code>scripts/prototypes/saddle_expansion/render_gate.py</code></td></tr>
+</tbody>
+</table>
+</section>
+</main>
+</body>
+</html>

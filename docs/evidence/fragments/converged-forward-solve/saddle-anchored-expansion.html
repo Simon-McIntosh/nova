@@ -10,10 +10,10 @@
 <meta name="plan-summary" content="H200 speed gate for the exact-jet saddle-anchored expansion, measured against the axis-facing map in one allocation">
 <meta name="plan-evidence-for" content="converged-forward-solve">
 <meta name="plan-verifies" content="converged-forward-solve#s5">
-<meta name="plan-commits" content="b737789f8">
+<meta name="plan-commits" content="b737789f8, 67d0e3fe1, eb35b8349, e3353b26c">
 <meta name="plan-recorded-at" content="2026-10-16">
 <meta name="plan-verdict" content="partial">
-<meta name="plan-environment" content="H200 NVL, binary64; job 1287634 on 98dci4-gpu-0003, reservation gpu_0003_grpA">
+<meta name="plan-environment" content="H200 NVL, binary64; jobs 1287634 and 1287671 on 98dci4-gpu-0003, reservation gpu_0003_grpA">
 <title>Saddle-anchored expansion evidence | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
@@ -41,9 +41,31 @@
 </table>
 <p id="saddle-anchored-expansion-gate-accounting">Both arms run in one process on one carrier in one allocation, so the ratio is a same-job, same-machine comparison and not a cross-run estimate. Per-state wall is the median of five evaluations after the first, so compilation is excluded from it. The axis arm falls 25&times; from width 1 to width 128 and the saddle arm 2.5&times;, so the axis arm's width-1 figure is launch overhead while the saddle arm's marginal cost is real work: about 6.7 ms per state against the axis arm's 0.22 ms.</p>
 <figure>
-<img src="/nova/figures/converged-forward-solve/saddle-anchored-expansion/speed-gate-282.svg" alt="Per-state wall and generated executable size against batch width for both arms at 282 realised cells">
-<figcaption>Per-state wall and generated executable size against batch width, both arms measured in the same H200 allocation. The two arms generate nearly the same code size, so the wall gap is a run-time cost of the integration rule rather than of the compiled program.</figcaption>
+<img src="/nova/figures/converged-forward-solve/saddle-anchored-expansion/speed-gate-282.svg" alt="Per-state wall and generated executable size against batch width for both arms at 282 realised cells, rebuild">
+<figcaption>Per-state wall and generated executable size against batch width at 282 realised cells, drawn from the rebuild's receipt. The size panel is the headline of the rebuild: both arms now sit at about 1.7 MB against a 50 MB ceiling, where the first build's rows put them at 152.9 MB. The wall panel is unchanged in shape, which is the point &mdash; the executable no longer carries the carrier, and the ratio did not move with it.</figcaption>
 </figure>
+</section>
+
+<section id="saddle-anchored-expansion-rebuild">
+<h2 id="saddle-anchored-expansion-rebuild-heading">Rebuild: runtime arguments and the measured decomposition</h2>
+<p id="saddle-anchored-expansion-rebuild-structure">The rows above are the first build, which lowered each arm through a closure over the carrier, the operands and the batched state so XLA hoisted them into the compiled program. The rebuild gives every one of those arrays to the lowered function as a runtime argument. Generated code falls from <b>152913270</b> to <b>1684704 bytes</b> at width 128 on the same carrier, a factor of 90.7, and the largest dense HLO constant in the lowered module is <b>one element</b> at widths 1, 16 and 128 and at 282, 550 and 2,098 cells alike, so no constant scales with the carrier or the state. The size condition now passes with the ceiling at 50 MB; the compile condition passes at 1.46 s.</p>
+<p id="saddle-anchored-expansion-rebuild-verdict">The ratio does not move: <b>30.3036</b> against the first build's 29.9319. The constants were never the cost. The rebuild's ratio decomposes into two measured factors read off its own two width-128 rows. The axis-facing arm provisions a fixed <b>16</b> members and spends 0.223044 ms, 13.9 &micro;s per member; the saddle arm provisions <b>194</b> of the carrier's 282 cells and spends 6.759026 ms, 34.8 &micro;s per member. The member factor is <b>12.1&times;</b> and the per-member factor is <b>2.5&times;</b>, and 12.1 &times; 2.5 = 30.3 is the measured ratio.</p>
+<table>
+<thead>
+<tr><th>Arm</th><th>Width</th><th>Per-state wall [ms]</th><th>Compile [s]</th><th>Executable [bytes]</th><th>Largest constant [elements]</th><th>Finite states</th></tr>
+</thead>
+<tbody>
+<tr><td>axis-facing</td><td>1</td><td>5.771903</td><td>0.083257</td><td>1674912</td><td>1</td><td>1 / 1</td></tr>
+<tr><td>axis-facing</td><td>16</td><td>0.509470</td><td>0.038361</td><td>1673544</td><td>1</td><td>16 / 16</td></tr>
+<tr><td>axis-facing</td><td>128</td><td>0.223044</td><td>0.088245</td><td>1673544</td><td>1</td><td>128 / 128</td></tr>
+<tr><td>saddle-anchored</td><td>1</td><td>14.821980</td><td>0.355188</td><td>1686168</td><td>1</td><td>1 / 1</td></tr>
+<tr><td>saddle-anchored</td><td>16</td><td>7.029561</td><td>0.324337</td><td>1684704</td><td>1</td><td>16 / 16</td></tr>
+<tr><td>saddle-anchored</td><td>128</td><td>6.759026</td><td>1.458507</td><td>1684704</td><td>1</td><td>128 / 128</td></tr>
+</tbody>
+</table>
+<p id="saddle-anchored-expansion-rebuild-agreement">The rebuild carries its own correctness guard, and it fails. The gate configuration is required to reproduce the first build's integration to 1e-12; the measured maximum absolute difference in <code>moment_residual</code> over four states is <b>0.6593670573</b> against a tolerance of 1e-12, and the runner exits nonzero on it. The two configurations differ only in outer degree (8 against 128) and in the candidate list, and the candidate list cannot explain the gap: it holds every cell within 1.40 m of the saddle while the disk radius is 0.40 m, so the live set is identical in both and the difference is the outer rule alone. The disk cap contributes a half-width <code>sqrt(radius&sup2; &minus; u&sup2;)</code> with unbounded slope at the cap, so the integrand is only H&ouml;lder-continuous at that endpoint and an 8-node rule converges to it slowly. The closed-form slice-discriminant branch the brief requires is <b>not implemented</b>; only the low-order branch was built.</p>
+<p id="saddle-anchored-expansion-rebuild-rungs">Two rungs have no ratio. At 550 cells the saddle arm's width-128 lowering is refused for 81.95 GiB, and at 2,098 cells the <b>axis-facing control arm's</b> width-128 lowering is refused for 263.80 GiB, so the gate's own 2,098-cell condition is unmeasured and the obstruction is in the control, not the expansion.</p>
+<p id="saddle-anchored-expansion-rebuild-sizing">The candidate list was grown by a literal one metre of margin while the radius is given in pitches; on this carrier the pitch is 0.1005 m, so the 0.40 m radius was smaller than the margin and 194 of 282 cells were admitted, 332 of 550, and 1062 of 2,098. The margin is now one median pitch (commit <code>e3353b26c</code>), which is resolution-independent. The rows above were measured before that correction, so the 12.1&times; member factor is an upper bound and the corrected measurement is outstanding.</p>
 </section>
 
 <section id="saddle-anchored-expansion-correctness">

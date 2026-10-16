@@ -1,0 +1,127 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "b713929c86bf05821e06936b30e959c3a0ee6317",
+  "call_site_count": 10,
+  "call_sites": [
+    "scripts/prototypes/fast_map_production/solver.py:150",
+    "scripts/prototypes/fast_map_production/solver.py:154",
+    "scripts/prototypes/diverted_stall/measure.py:146",
+    "scripts/prototypes/diverted_stall/measure.py:150",
+    "scripts/prototypes/lean_map/probe_forward.py:97",
+    "scripts/prototypes/lean_map/probe_forward.py:101",
+    "scripts/prototypes/read_route/conforming.py:118",
+    "scripts/prototypes/read_route/measure.py:441",
+    "scripts/prototypes/read_route/diagnose.py:117",
+    "scripts/prototypes/fused_convergence/measure.py:144"
+  ],
+  "completed_at": "2026-10-16T11:42:55.266Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "operand-cache",
+      "recorded_at": "2026-10-16T11:44:44.336287+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-16T11:26:48Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "operand-cache",
+      "recorded_at": "2026-10-16T11:44:45.703675+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "operand-cache",
+      "recorded_at": "2026-10-16T11:44:47.193908+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "operand-cache",
+      "recorded_at": "2026-10-16T11:44:48.440479+00:00"
+    },
+    "3": {
+      "kind": "folded",
+      "node": "operand-cache",
+      "recorded_at": "2026-10-16T11:44:50.055150+00:00"
+    },
+    "4": {
+      "kind": "folded",
+      "node": "operand-cache",
+      "recorded_at": "2026-10-16T11:44:51.876878+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/read_route/jets.py",
+      "line": "64",
+      "severity": "follow-on",
+      "text": "follow-on: store_operand, load_operand, operand_digest and operand_cache_directory (lines 33-81) re-implement content-addressed atomic publication the repository already owns at nova/database/content_store.py (sha256_bytes, publish_files, verified_object_root) and which nova/imas/machine_artifact.py:751 and nova/database/layer_fetch.py:148 already use; the addition neither extends nor wraps that owner, and the source-file digest idiom it also introduces already exists at nova/circuit/coupled_plant.py:473 and nova/circuit/passive.py:101."
+    },
+    {
+      "file": "scripts/prototypes/lean_map/values.py",
+      "line": "123",
+      "severity": "follow-on",
+      "text": "follow-on: assembly_seconds is now the stored build wall plus this call's load on a cache hit, so a receipt consumer reads an assembly cost the process never paid, and scripts/prototypes/lean_map/jets.py:57 applies the same substitution in the jet receipt."
+    },
+    {
+      "file": "scripts/prototypes/lean_map/values.py",
+      "line": "83",
+      "severity": "follow-on",
+      "text": "follow-on: load_seconds is timed around load_operand alone while the memmap is materialised here and copied again by jnp.asarray at values.py:116 outside the timed window, so the 3.7 ms load figure in the evidence fragment prices the mmap open rather than getting the 1.9 GB matrix in hand."
+    },
+    {
+      "file": "tests/test_operand_cache.py",
+      "line": "228",
+      "severity": "follow-on",
+      "text": "follow-on: the only guard for the jet default-on path is marked slow and the recorded gate deselected it (gate-values.log, 2 deselected), so build_jet_matrix's persist default and build_jets' default have no guard in the recorded evidence."
+    },
+    {
+      "file": "manifest.md",
+      "line": "19",
+      "severity": "follow-on",
+      "text": "follow-on: no baseline_suite line is recorded, so added_failure_count 0 and added_failure_ids [] are derived from after_suite alone and the delta cannot be checked against a base arm; defensible for a newly added test file, but the record does not say so."
+    }
+  ],
+  "head_log_revision": "8bdb995f11758c0cd19cd0afa0043372a6fb10e6",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 10 production call site(s)",
+    "diff": "read commit by commit against b713929c8; 8bdb995f1 adds the cache and both defaults, 296f137f6 records the fragment, 48c35ddf7/98c5627f2/7eb4234f3 add the measured H200 rows, all six changed paths inside the declared write paths.",
+    "done_when": "the named gate tests/test_operand_cache.py is recorded green at gate-values.log (4 passed, 2 deselected, EXIT=0), but the two deselected arms (the jet default-on arm and the two-process arm at concurrency.log 1 passed) are outside the recorded run and the manifest carries no baseline_suite arm.",
+    "goal": "the goal makes cached Biot-Savart value and jet operands the default; scripts/prototypes/lean_map/values.py:60 persists the flux-block matrix by default and scripts/prototypes/read_route/jets.py:148 takes persist=True, both resolving one root at nova/database/filepath.py:35, and os.replace publication makes a partial matrix invisible.",
+    "manifest": "read in full; it records status complete, five commits, the negative-control log path and note, after_suite at 8bdb995f1 with failure_count 0, the artifacts and four follow-ons, and no baseline_suite line.",
+    "write_paths": "the manifest declares seven paths plus a figures directory; git diff b713929c86bf05821e06936b30e959c3a0ee6317..7eb4234f3304e5db28102850a42d6d1b1c0d6e00 touches only the six declared non-figure paths."
+  },
+  "justifications": {
+    "durability": "tests/test_operand_cache.py:156 and :182 redden on the declared mutation (negative-control.log, 2 failed with the same digest on both sides), so the miss guards are real, but the jet default-on guard at tests/test_operand_cache.py:228 is slow and was deselected by the recorded gate.",
+    "evidence": "gate-values.log records the run with its revision, tree and command and EXIT=0, yet the load wall it reports times only the mmap open and the jets default arm is not in the recorded evidence.",
+    "fit": "the added names (operand_digest, operand_cache_root, values_digest) are descriptive with no plan or ticket label, but scripts/prototypes/lean_map/values.py has no trailing newline and defines a second source_bytes shadowing scripts/prototypes/read_route/jets.py:26 with different contents.",
+    "goal_fidelity": "scripts/prototypes/lean_map/values.py:60 and scripts/prototypes/read_route/jets.py:148 make persistence the default on both builders and nova/database/filepath.py:35 is the one root, meeting the goal without changing the matrices' numerical content.",
+    "reuse": "scripts/prototypes/read_route/jets.py:33-81 defines a content-addressed store with atomic publication that nova/database/content_store.py already owns and that the node does not extend or wrap.",
+    "scope_discipline": "every path in git diff b713929c86bf05821e06936b30e959c3a0ee6317..7eb4234f3304e5db28102850a42d6d1b1c0d6e00 is inside the manifest's declared write paths."
+  },
+  "node": "review-of-operand-cache-7eb4234f3304",
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: b713929c86bf05821e06936b30e959c3a0ee6317\nreviewed_head_sha: 7eb4234f3304e5db28102850a42d6d1b1c0d6e00\nVERDICT goal: the goal makes cached Biot-Savart value and jet operands the default; scripts/prototypes/lean_map/values.py:60 persists the flux-block matrix by default and scripts/prototypes/read_route/jets.py:148 takes persist=True, both resolving one root at nova/database/filepath.py:35, and os.replace publication makes a partial matrix invisible.\nVERDICT done_when: the named gate tests/test_operand_cache.py is recorded green at gate-values.log (4 passed, 2 deselected, EXIT=0), but the two deselected arms (the jet default-on arm and the two-process arm at concurrency.log 1 passed) are outside the recorded run and the manifest carries no baseline_suite arm.\nVERDICT write_paths: the manifest declares seven paths plus a figures directory; git diff b713929c86bf05821e06936b30e959c3a0ee6317..7eb4234f3304e5db28102850a42d6d1b1c0d6e00 touches only the six declared non-figure paths.\nVERDICT manifest: read in full; it records status complete, five commits, the negative-control log path and note, after_suite at 8bdb995f1 with failure_count 0, the artifacts and four follow-ons, and no baseline_suite line.\nVERDICT diff: read commit by commit against b713929c8; 8bdb995f1 adds the cache and both defaults, 296f137f6 records the fragment, 48c35ddf7/98c5627f2/7eb4234f3 add the measured H200 rows, all six changed paths inside the declared write paths.\nCALL_SITES: scripts/prototypes/fast_map_production/solver.py:150, scripts/prototypes/fast_map_production/solver.py:154, scripts/prototypes/diverted_stall/measure.py:146, scripts/prototypes/diverted_stall/measure.py:150, scripts/prototypes/lean_map/probe_forward.py:97, scripts/prototypes/lean_map/probe_forward.py:101, scripts/prototypes/read_route/conforming.py:118, scripts/prototypes/read_route/measure.py:441, scripts/prototypes/read_route/diagnose.py:117, scripts/prototypes/fused_convergence/measure.py:144\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: scripts/prototypes/lean_map/values.py:60 and scripts/prototypes/read_route/jets.py:148 make persistence the default on both builders and nova/database/filepath.py:35 is the one root, meeting the goal without changing the matrices' numerical content.\nSCORE evidence: 14\nJUSTIFICATION evidence: gate-values.log records the run with its revision, tree and command and EXIT=0, yet the load wall it reports times only the mmap open and the jets default arm is not in the recorded evidence.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff b713929c86bf05821e06936b30e959c3a0ee6317..7eb4234f3304e5db28102850a42d6d1b1c0d6e00 is inside the manifest's declared write paths.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_operand_cache.py:156 and :182 redden on the declared mutation (negative-control.log, 2 failed with the same digest on both sides), so the miss guards are real, but the jet default-on guard at tests/test_operand_cache.py:228 is slow and was deselected by the recorded gate.\nSCORE fit: 16\nJUSTIFICATION fit: the added names (operand_digest, operand_cache_root, values_digest) are descriptive with no plan or ticket label, but scripts/prototypes/lean_map/values.py has no trailing newline and defines a second source_bytes shadowing scripts/prototypes/read_route/jets.py:26 with different contents.\nSCORE reuse: 5\nJUSTIFICATION reuse: scripts/prototypes/read_route/jets.py:33-81 defines a content-addressed store with atomic publication that nova/database/content_store.py already owns and that the node does not extend or wrap.\nFINDING scripts/prototypes/read_route/jets.py:64 follow-on: store_operand, load_operand, operand_digest and operand_cache_directory (lines 33-81) re-implement content-addressed atomic publication the repository already owns at nova/database/content_store.py (sha256_bytes, publish_files, verified_object_root) and which nova/imas/machine_artifact.py:751 and nova/database/layer_fetch.py:148 already use; the addition neither extends nor wraps that owner, and the source-file digest idiom it also introduces already exists at nova/circuit/coupled_plant.py:473 and nova/circuit/passive.py:101.\nFINDING scripts/prototypes/lean_map/values.py:123 follow-on: assembly_seconds is now the stored build wall plus this call's load on a cache hit, so a receipt consumer reads an assembly cost the process never paid, and scripts/prototypes/lean_map/jets.py:57 applies the same substitution in the jet receipt.\nFINDING scripts/prototypes/lean_map/values.py:83 follow-on: load_seconds is timed around load_operand alone while the memmap is materialised here and copied again by jnp.asarray at values.py:116 outside the timed window, so the 3.7 ms load figure in the evidence fragment prices the mmap open rather than getting the 1.9 GB matrix in hand.\nFINDING tests/test_operand_cache.py:228 follow-on: the only guard for the jet default-on path is marked slow and the recorded gate deselected it (gate-values.log, 2 deselected), so build_jet_matrix's persist default and build_jets' default have no guard in the recorded evidence.\nFINDING tests/test_operand_cache.py:228 follow-on: the only guard for the jet default-on path is marked slow and the recorded gate deselected it (gate-values.log, 2 deselected), so build_jet_matrix's persist default and build_jets' default have no guard in the recorded evidence.\n",
+  "review_run_id": "r-20261016T112627735501-review-of-operand-cache-7eb4234f3304",
+  "reviewed_base_sha": "b713929c86bf05821e06936b30e959c3a0ee6317",
+  "reviewed_commit": "7eb4234f3304e5db28102850a42d6d1b1c0d6e00",
+  "reviewed_head_sha": "7eb4234f3304e5db28102850a42d6d1b1c0d6e00",
+  "reviewed_run_id": "r-20261016T101339510832-operand-cache",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/operand-cache",
+  "scores": {
+    "durability": 17,
+    "evidence": 14,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T11:48:00.000000+00:00",
+  "total": 89
+}

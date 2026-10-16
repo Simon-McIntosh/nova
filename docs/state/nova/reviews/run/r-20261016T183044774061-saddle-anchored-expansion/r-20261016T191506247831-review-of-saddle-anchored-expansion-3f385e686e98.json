@@ -1,0 +1,83 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "90067f20de2d8adb9cb56b1d5af3f21fd956e4a8",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-16T19:24:52.663Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "saddle-expansion-speed",
+      "recorded_at": "2026-10-16T19:22:37.807798+00:00"
+    },
+    "evidence": {
+      "kind": "folded",
+      "node": "saddle-expansion-speed",
+      "recorded_at": "2026-10-16T19:22:31.003344+00:00"
+    },
+    "reuse": {
+      "kind": "folded",
+      "node": "saddle-expansion-speed",
+      "recorded_at": "2026-10-16T19:22:45.476336+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-16T19:15:25Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "saddle-expansion-speed",
+      "recorded_at": "2026-10-16T19:22:06.075025+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "saddle-expansion-speed",
+      "recorded_at": "2026-10-16T19:22:15.474800+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "saddle-expansion-speed",
+      "recorded_at": "2026-10-16T19:22:22.948600+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/saddle-anchored-expansion.html",
+      "line": "28",
+      "severity": "follow-on",
+      "text": "follow-on: the gate verdict is recorded at 282 realised cells while done_when clause 1 names 2,098 cells; the 2,098 rung (slurm-speed-gate-1287634.log row 2) was left unread, so the headline ratio 29.9319 rests on the coarse rung and the research note's claim that a 282 failure is decisive for 2,098 remains an argument rather than a measurement."
+    },
+    {
+      "file": "scripts/prototypes/saddle_expansion/expansion.py",
+      "line": "53",
+      "severity": "follow-on",
+      "text": "follow-on: _quadratic is copied verbatim from scripts/prototypes/xpoint_cell_owner/conic_integral.py:26 and integrate_disk_cell re-implements the conic positive-region integral owned by conic_integral.py:46 integrate_cell without extending it; the node fence forbade editing the owner, so the fork is by constraint rather than an avoidable duplicate."
+    },
+    {
+      "file": "scripts/prototypes/saddle_expansion/speed_gate.py",
+      "line": "42",
+      "severity": "follow-on",
+      "text": "follow-on: no assertion fails if the anchored map regresses; the only new assertions are environment guards (jax_enable_x64, gpu backend), so the gate is a cost measurement with no correctness guard."
+    }
+  ],
+  "head_log_revision": "3f385e686e98162b3b813b7887182727528d520f",
+  "node": "review-of-saddle-anchored-expansion-3f385e686e98",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to represent the X-point flux by an expansion anchored at the physical saddle and converge the diverted solve at 282, 550 and 2,098 cells gated on speed; scripts/prototypes/saddle_expansion/expansion.py:259 owned_disk_cut and :319 map_moments deliver the representation and scripts/prototypes/saddle_expansion/speed_gate.py:122 measures the gate, while the convergence half is lawfully gated off by the done_when's stop condition.\nVERDICT done_when: clause 1 requires the speed gate measured at 2,098 cells, but the recorded receipt is speed-282.json (282 realised cells) and slurm-speed-gate-1287634.log shows row 2 (cells 2000 -> 2098) started and never printed a result, so the recorded measure is not the cell count the done_when names.\nVERDICT write_paths: every one of the six changed files (expansion.py, speed_gate.py, render_gate.py, the research note, the evidence fragment, the one SVG) lies inside the four declared write paths; nothing outside them was touched.\nVERDICT manifest: read; status complete; gate line reports cells=282, ratio 29.9319 against a 1.25 ceiling, executable 152913270 B against 50 MB, gate_pass=false, and it carries no baseline_suite or after_suite arm.\nVERDICT diff: read commit by commit against base 90067f20d (b737789f8 the expansion map and runner, 0db7ece75 the gate record, 3f385e686 the figure); 6 files, 2218 insertions, 0 deletions, no test file and no nova edit.\nCALL_SITES: none\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: scripts/prototypes/saddle_expansion/expansion.py:34 exact_jets anchors the conic on the Newton-located saddle the read supplies, so the representation half of the goal is delivered, but the convergence half at 282/550/2098 cells is not attempted and the goal is only half met.\nSCORE evidence: 8\nJUSTIFICATION evidence: docs/evidence/fragments/converged-forward-solve/saddle-anchored-expansion.html:28 records the gate at 282 realised cells (requested 250) while the done_when names 2,098, and slurm-speed-gate-1287634.log row 2 never completes, so the gate does not measure the asserted cell count.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: all six paths in the diff are inside the four declared write paths and no nova module, prototype outside the scope, or test was edited.\nSCORE durability: 3\nJUSTIFICATION durability: no test file was added and the only new assertions (scripts/prototypes/saddle_expansion/speed_gate.py:42 jax_enable_x64, :45 gpu backend) are environment guards that cannot redden on an algorithmic regression of the expansion.\nSCORE fit: 14\nJUSTIFICATION fit: the module follows the jax/vmap prototype idiom of its siblings and carries no forbidden name, but it imports underscore-private helpers across module boundaries (scripts/prototypes/saddle_expansion/expansion.py:17 from read_route.jets import _source_jets; :275 program._density_coefficients).\nSCORE reuse: 5\nJUSTIFICATION reuse: scripts/prototypes/saddle_expansion/expansion.py:72 integrate_disk_cell re-implements the conic positive-region-over-cell integral owned by scripts/prototypes/xpoint_cell_owner/conic_integral.py:46 integrate_cell and duplicates _quadratic verbatim (expansion.py:53 vs conic_integral.py:26), extending that owner in neither case.\nFINDING docs/evidence/fragments/converged-forward-solve/saddle-anchored-expansion.html:28 follow-on: the gate verdict is recorded at 282 realised cells while done_when clause 1 names 2,098 cells; the 2,098 rung (slurm-speed-gate-1287634.log row 2) was left unread, so the node's headline ratio 29.9319 rests on the coarse rung and the research note's claim that a 282 failure is decisive for 2,098 remains an argument rather than a measurement.\nFINDING scripts/prototypes/saddle_expansion/expansion.py:53 follow-on: _quadratic is copied verbatim from scripts/prototypes/xpoint_cell_owner/conic_integral.py:26 and the surrounding positive-region integral is re-implemented rather than extended from conic_integral.py:46 integrate_cell (which already takes a saddle and axis), so the repository now carries two implementations of the conic cell integral; the node fence forbade editing the owner, so this is a fork by constraint, not a duplicate the worker could have merged.\nFINDING scripts/prototypes/saddle_expansion/speed_gate.py:42 follow-on: neither the expansion nor the runner adds an assertion that fails if the anchored map regresses; the gate is a cost measurement with no correctness guard, so nothing reddens if owned_disk_cut later returns a wrong fraction or moment.",
+  "review_run_id": "r-20261016T191506247831-review-of-saddle-anchored-expansion-3f385e686e98",
+  "reviewed_base_sha": "90067f20de2d8adb9cb56b1d5af3f21fd956e4a8",
+  "reviewed_head_sha": "3f385e686e98162b3b813b7887182727528d520f",
+  "reviewed_run_id": "r-20261016T183044774061-saddle-anchored-expansion",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/saddle-anchored-expansion",
+  "scores": {
+    "durability": 3,
+    "evidence": 8,
+    "fit": 14,
+    "goal_fidelity": 13,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T19:34:00+00:00"
+}

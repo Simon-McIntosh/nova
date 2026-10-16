@@ -1,0 +1,90 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Reviewed run baseline-gate-corrected.log at d4dd9374 and after-gate-paired.log at fcb9146d0 both completed the same artifact-path test with EXIT=0, 1 passed, and no failure ids.",
+  "base_log_revision": "d4dd9374ab678c51a7cbab01cf7b1d2d4e03c71e",
+  "call_site_count": 2,
+  "call_sites": [
+    "scripts/prototypes/lean_map_batched/run.sh:24",
+    "scripts/prototypes/lean_map_batched/suite.sh:39"
+  ],
+  "completed_at": "2026-10-16T04:15:18Z",
+  "dispatched_at": "2026-10-16T04:07:07Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/lean_map_batched/render.py",
+      "line": "112",
+      "severity": "blocking",
+      "text": "blocking: the direct labels produced here collide with plotted lines in batch-chord-wall.svg and batch-map-wall.svg; all 15 SVGs were rendered and the two batch-wall figures need clear labels before landing."
+    },
+    {
+      "file": "docs/research/lean-map-batched.html",
+      "line": "120",
+      "severity": "follow-on",
+      "text": "follow-on: the lead-stopped 2,098-cell diverted batch, valid 550-cell continuity bracket and 2,098-cell stage profile remain unmeasured, so the originally declared quantitative done_when is only partially supported."
+    },
+    {
+      "file": "scripts/prototypes/lean_map_batched/measure.py",
+      "line": "415",
+      "severity": "follow-on",
+      "text": "follow-on: the factor mutation cannot demonstrate the requested refusal because the unperturbed comparator also misses 1e-12; the report correctly declines to count it."
+    },
+    {
+      "file": "scripts/prototypes/lean_map_batched/measure.py",
+      "line": "370",
+      "severity": "follow-on",
+      "text": "follow-on: one_chord duplicates the cached correction capability in scripts/prototypes/lean_map/newton.py:84-115 instead of extending that owner; local timing helpers likewise repeat scripts/prototypes/fused_convergence/measure.py:37-67."
+    },
+    {
+      "file": "scripts/prototypes/lean_map_batched/render.py",
+      "line": "168",
+      "severity": "follow-on",
+      "text": "follow-on: the assertion compares a rebuilt machine count with row[\"cells\"], which measure.py:115 filled from the same builder; a cell-count regression moves both sides and leaves this assertion green."
+    },
+    {
+      "file": "scripts/prototypes/lean_map_batched/measure.py",
+      "line": "102",
+      "severity": "follow-on",
+      "text": "follow-on: the added assertions reject setup failures but no checked-in test fails when the measured accuracy, wall or convergence regresses; the paired pytest gate exercises only artifact path sanitation."
+    }
+  ],
+  "head_log_revision": "fcb9146d0d1081474ee2a12ad0bf4a65e457cc86",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "scripts/prototypes/lean_map_batched/run.sh:24, scripts/prototypes/lean_map_batched/suite.sh:39",
+    "diff": "the 25 commits from d4dd9374ab678c51a7cbab01cf7b1d2d4e03c71e to f1182237b5ab97a4880a4d2bdca0f301f15ae132 add measure.py, render.py, two launchers, 15 SVGs and two HTML records; measure.py:421-460 records batched walls and convergence but no regression assertion.",
+    "done_when": "prompt.txt:103-130 requires both resolutions, repeat cold solves, width 1/16/128 walls, a 2,098-cell stage profile, continuity and live negative controls; docs/research/lean-map-batched.html:97-120 and the H200 receipts support the smaller rows while naming the missing rows and controls.",
+    "goal": "prompt.txt:30 asks for lean-map batch walls at about 550 and 2,098 cells; docs/research/lean-map-batched.html:119-120 measures the 550-cell miss and explicitly says the 2,098-cell diverted batch was stopped.",
+    "manifest": "the reviewed manifest.md:5-20 lists 25 commits, 21 changed paths, measured 550-cell walls and the lead stop; its baseline_suite and after_suite point to completed 1/1 artifact-path gates with zero failures each.",
+    "write_paths": "prompt.txt:68-72 grants the prototype directory, research page, figures directory and evidence fragment; git diff d4dd9374..f1182237 changes 21 paths and every one is within those grants."
+  },
+  "justifications": {
+    "durability": "measure.py:102-141 can fail for wrong backend or invalid input and render.py:168 can fail for a mismatched receipt, but no added test reruns the batch and reddens if the 0.90 ms, 1e-12, or map-error result regresses; render.py:168 compares counts derived from the same carrier builder.",
+    "evidence": "measure.py:421-460 emits quantitative batch receipts corroborated by inventory-final.json, but after-gate-paired.log checks only artifact paths and docs/research/lean-map-batched.html:120 records unmeasured production rows and nonqualifying controls.",
+    "fit": "measure.py:101-103 follows the x64 GPU prototype idiom and names no forbidden identifier, while render.py:112-118 places 20-point labels over the plotted lines in both batch-wall figures.",
+    "goal_fidelity": "docs/research/lean-map-batched.html:88-120 reports 44.04 and 34.39 ms per state at 553/550 cells, while its requested 2,098-cell diverted result remains absent under the recorded lead stop.",
+    "reuse": "measure.py:36-59 repeats the receipt, wall and executable-size helpers owned by scripts/prototypes/fused_convergence/measure.py:37-67, and measure.py:370-401 duplicates cached corrections already owned by scripts/prototypes/lean_map/newton.py:84-115.",
+    "scope_discipline": "all 21 paths in the d4dd9374..f1182237 diff are under the four grants at prompt.txt:68-72, with no product source or test changed."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: prompt.txt:30 asks for lean-map batch walls at about 550 and 2,098 cells; docs/research/lean-map-batched.html:119-120 measures the 550-cell miss and explicitly says the 2,098-cell diverted batch was stopped.\nVERDICT done_when: prompt.txt:103-130 requires both resolutions, repeat cold solves, width 1/16/128 walls, a 2,098-cell stage profile, continuity and live negative controls; docs/research/lean-map-batched.html:97-120 and the H200 receipts support the smaller rows while naming the missing rows and controls.\nVERDICT write_paths: prompt.txt:68-72 grants the prototype directory, research page, figures directory and evidence fragment; git diff d4dd9374..f1182237 changes 21 paths and every one is within those grants.\nVERDICT manifest: the reviewed manifest.md:5-20 lists 25 commits, 21 changed paths, measured 550-cell walls and the lead stop; its baseline_suite and after_suite point to completed 1/1 artifact-path gates with zero failures each.\nVERDICT diff: the 25 commits from d4dd9374ab678c51a7cbab01cf7b1d2d4e03c71e to f1182237b5ab97a4880a4d2bdca0f301f15ae132 add measure.py, render.py, two launchers, 15 SVGs and two HTML records; measure.py:421-460 records batched walls and convergence but no regression assertion.\nCALL_SITES: scripts/prototypes/lean_map_batched/run.sh:24, scripts/prototypes/lean_map_batched/suite.sh:39\nSCORE goal_fidelity: 12\nJUSTIFICATION goal_fidelity: docs/research/lean-map-batched.html:88-120 reports 44.04 and 34.39 ms per state at 553/550 cells, while its requested 2,098-cell diverted result remains absent under the recorded lead stop.\nSCORE evidence: 12\nJUSTIFICATION evidence: measure.py:421-460 emits quantitative batch receipts corroborated by inventory-final.json, but after-gate-paired.log checks only artifact paths and docs/research/lean-map-batched.html:120 records unmeasured production rows and nonqualifying controls.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: all 21 paths in the d4dd9374..f1182237 diff are under the four grants at prompt.txt:68-72, with no product source or test changed.\nSCORE durability: 3\nJUSTIFICATION durability: measure.py:102-141 can fail for wrong backend or invalid input and render.py:168 can fail for a mismatched receipt, but no added test reruns the batch and reddens if the 0.90 ms, 1e-12, or map-error result regresses; render.py:168 compares counts derived from the same carrier builder.\nSCORE fit: 13\nJUSTIFICATION fit: measure.py:101-103 follows the x64 GPU prototype idiom and names no forbidden identifier, while render.py:112-118 places 20-point labels over the plotted lines in both batch-wall figures.\nSCORE reuse: 4\nJUSTIFICATION reuse: measure.py:36-59 repeats the receipt, wall and executable-size helpers owned by scripts/prototypes/fused_convergence/measure.py:37-67, and measure.py:370-401 duplicates cached corrections already owned by scripts/prototypes/lean_map/newton.py:84-115.\nFINDING scripts/prototypes/lean_map_batched/render.py:112 blocking: the direct labels produced here collide with plotted lines in batch-chord-wall.svg and batch-map-wall.svg; all 15 SVGs were rendered and the two batch-wall figures need clear labels before landing.\nFINDING docs/research/lean-map-batched.html:120 follow-on: the lead-stopped 2,098-cell diverted batch, valid 550-cell continuity bracket and 2,098-cell stage profile remain unmeasured, so the originally declared quantitative done_when is only partially supported.\nFINDING scripts/prototypes/lean_map_batched/measure.py:415 follow-on: the factor mutation cannot demonstrate the requested refusal because the unperturbed comparator also misses 1e-12; the report correctly declines to count it.\nFINDING scripts/prototypes/lean_map_batched/measure.py:370 follow-on: one_chord duplicates the cached correction capability in scripts/prototypes/lean_map/newton.py:84-115 instead of extending that owner; local timing helpers likewise repeat scripts/prototypes/fused_convergence/measure.py:37-67.\nFINDING scripts/prototypes/lean_map_batched/render.py:168 follow-on: the assertion compares a rebuilt machine count with row[\"cells\"], which measure.py:115 filled from the same builder; a cell-count regression moves both sides and leaves this assertion green.\nFINDING scripts/prototypes/lean_map_batched/measure.py:102 follow-on: the added assertions reject setup failures but no checked-in test fails when the measured accuracy, wall or convergence regresses; the paired pytest gate exercises only artifact path sanitation.\n",
+  "review_run_id": "r-20261016T040630428919-review-of-lean-map-batched-f1182237b5ab",
+  "reviewed_base_sha": "d4dd9374ab678c51a7cbab01cf7b1d2d4e03c71e",
+  "reviewed_head_sha": "f1182237b5ab97a4880a4d2bdca0f301f15ae132",
+  "reviewed_run_id": "r-20261015T160718563144-lean-map-batched",
+  "rubric": "code",
+  "scores": {
+    "durability": 3,
+    "evidence": 12,
+    "fit": 13,
+    "goal_fidelity": 12,
+    "reuse": 4,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T04:11:29.487074+00:00",
+  "total": 64
+}

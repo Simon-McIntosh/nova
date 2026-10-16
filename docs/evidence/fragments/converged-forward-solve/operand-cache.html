@@ -72,25 +72,36 @@
     <thead><tr><th>cells</th><th>operand</th><th>matrix bytes</th><th>build [s]</th><th>load [s]</th><th>ratio</th><th>digest</th></tr></thead>
     <tbody>
       <tr><td>4</td><td>values</td><td>6,912</td><td>54.376</td><td>0.0135</td><td>4,028×</td>
-          <td><code>3659c832de62…8793b4</code></td>
+          <td><code>3659c832de62…8793b4</code></td></tr>
       <tr><td>282</td><td>values</td><td>34,354,368</td><td>80.547</td><td>0.0055</td><td>14,677×</td>
-          <td><code>e1afb81b137e…dfc147</code></td></tr>
-      <tr><td>282</td><td>jets</td><td>47,267,712</td><td>110.346</td><td>0.0040</td><td>27,345×</td>
-          <td><code>51721ac3060c…f2593e</code></td></tr>
-      <tr><td>551</td><td>values</td><td>131,155,632</td><td>78.766</td><td>0.0037</td><td>21,364×</td>
-          <td><code>a0fcc45780a0…d0d689e</code></td></tr>
-      <tr><td>551</td><td>jets</td><td>169,161,408</td><td>108.352</td><td>0.0036</td><td>30,403×</td>
+          <td><code>e1afb81b137e…9bdfc147</code></td></tr>
+      <tr><td>282</td><td>jets</td><td>47,267,712</td><td>110.346</td><td>0.0040</td><td>27,343×</td>
+          <td><code>51721ac3060c…54f2593e</code></td></tr>
+      <tr><td>551</td><td>values</td><td>131,155,632</td><td>78.766</td><td>0.0037</td><td>21,358×</td>
+          <td><code>a0fcc45780a0…9d0d689e</code></td></tr>
+      <tr><td>551</td><td>jets</td><td>169,161,408</td><td>108.352</td><td>0.0036</td><td>30,411×</td>
           <td><code>6526174bc311…bd0b16d6</code></td></tr>
+      <tr><td>2,098</td><td>values</td><td>1,901,492,928</td><td>796.654</td><td>0.0037</td><td>215,084×</td>
+          <td><code>ea97d1c279ff…d2d73811</code></td></tr>
+      <tr><td>2,098</td><td>jets</td><td>2,185,780,320</td><td>267.198</td><td>0.0035</td><td>76,276×</td>
+          <td><code>59042af2b459…0b7016bb</code></td></tr>
     </tbody>
   </table>
   <p id="operand-cache-measure-rows">
-    The 282 and 551-cell rows are the first two entries of the diverted sweep at 282, 550
-    and 2,098 cells, run as one job (job 1287218) on the H200 reservation
-    <code>gpu_0003_grpA</code> with one GPU. Every operand reports <code>cache_hit</code>
-    false on the first call and true on the second, so the load reported is a second call
-    reading the entry the first call wrote, and the build reported is the same call's build.
-    The 2,098-cell row was still building when this node's fence closed and is not claimed
-    here.
+    All four rows of the diverted sweep at 282, 551 and 2,098 cells ran as one job (job
+    1287218) on the H200 reservation <code>gpu_0003_grpA</code> with one GPU, which
+    completed in 24 m 53 s. Every operand reports <code>cache_hit</code> false on the first
+    call and true on the second, so the load reported is a second call reading the entry the
+    first call wrote, and the build reported is that same call's build. The 2,098-cell row is
+    the one that makes the case: the value matrix takes 13.3 minutes to reassemble and 3.7 ms
+    to load, and the jet matrix 4.5 minutes against 3.5 ms.
+  </p>
+  <p id="operand-cache-measure-caveat">
+    The load figure prices opening the entry, not reading it: <code>load_operand</code> maps
+    the file and the matrix streams from GPFS as it is consumed, so a 1.9 GB entry costs 3.7 ms
+    to open and pays for itself afterwards. The jet row's load likewise skips the kernel
+    compile that dominates its build, which is the saving that matters to a reader that only
+    needs the matrix.
   </p>
 
   <h2 id="operand-cache-checks">Checks</h2>

@@ -68,6 +68,43 @@ def main():
     opened = np.clip(1 + sector_margin / np.maximum(sector_span, 1e-12), 0, 1)
     old = np.clip(0.5 + sector_margin / width, 0, 1)
     neighbours = np.asarray(geometry.neighbour)
+    neighbour_edges = np.asarray(geometry.neighbour_edge)
+    peer = np.maximum(neighbours, 0)
+    peer_edge = np.maximum(neighbour_edges, 0)
+    original_flux = np.clip(0.5 + margin / 1e-8, 0, 1)
+
+    def paths(sector_weight):
+        frame_weight = 1 - near[:, None] * (1 - sector_weight)
+        frame_weight = np.minimum(frame_weight, frame_weight[peer, peer_edge])
+        edge_weight = np.where(
+            neighbours >= 0, np.minimum(original_flux, frame_weight), 0
+        )
+        strength = np.zeros(len(context.reference))
+        strength[int(seed)] = 1
+        for _ in range(len(strength)):
+            incoming = np.minimum(strength[peer], edge_weight)
+            strength = np.maximum(strength, np.max(incoming, axis=1))
+        return strength
+
+    baseline_path = paths(old)
+    full_span_path = paths(opened)
+    scale_screen = []
+    for exponent in (2, 3, 4, 5, 6):
+        scaled_span = sector_span * flux**exponent
+        tapered = np.clip(1 + sector_margin / np.maximum(scaled_span, 1e-12), 0, 1)
+        strength = paths(tapered)
+        area = np.asarray(original.geometric_membership) * strength
+        scale_screen.append(
+            {
+                "exponent": exponent,
+                "support": int(np.sum(strength > 0)),
+                "cell_5_path": float(strength[5]),
+                "cell_6_path": float(strength[6]),
+                "maximum_membership_change": float(
+                    np.max(np.abs(area - np.asarray(original.membership)))
+                ),
+            }
+        )
     candidates = np.argwhere((neighbours >= 0) & (opened - old > 0.01))
     rows = []
     for cell, slot in candidates:
@@ -81,6 +118,7 @@ def main():
                 "old": float(old[cell, slot]),
                 "opened": float(opened[cell, slot]),
                 "flux": float(flux[cell, slot]),
+                "flux_weight_original": float(original_flux[cell, slot]),
                 "near": float(near[cell]),
             }
         )
@@ -91,6 +129,13 @@ def main():
     result = {
         "cells": len(context.reference),
         "old_width": float(width),
+        "baseline_path_error": float(
+            np.max(np.abs(baseline_path - np.asarray(original.path_weight)))
+        ),
+        "full_span_path_error": float(
+            np.max(np.abs(full_span_path - np.asarray(corrected.path_weight)))
+        ),
+        "scale_screen": scale_screen,
         "opened_edge_count": len(rows),
         "largest_openings": rows[:30],
         "support_original": int(np.sum(np.asarray(original.selected_cells))),

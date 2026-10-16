@@ -48,6 +48,7 @@ def _continuous_path_weight(
     flux_weight = jnp.clip(0.5 + (passage - level) / flux_width, 0, 1)
 
     axis_sector = _local_axis_sector(geometry, axis, form)
+
     def signed_sides(points):
         offset = points - form.position
         parameter = jnp.einsum("...i,ai->...a", offset, form.direction)
@@ -76,7 +77,9 @@ def _continuous_path_weight(
         1e-12,
     )
     length_width = jnp.maximum(1e-7, 1e-4 * jnp.median(geometry.pitch))
-    sector_weight = jnp.clip(0.5 + sector_margin / sector_width, 0, 1)
+    # A face whose midpoint is inside the axis sector stays fully open.
+    # Outside it, the passage closes over that face's resolved sector span.
+    sector_weight = jnp.clip(1 + sector_margin / sector_width, 0, 1)
     distance = jnp.linalg.norm(geometry.centre - form.position, axis=1)
     near_weight = jnp.clip(0.5 + (radius - distance) / length_width, 0, 1)
     near_weight = jnp.maximum(

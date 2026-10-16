@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="297">
+<meta name="plan-version" content="298">
 <meta name="plan-modified" content="2026-10-16">
 </head>
 <body>
@@ -513,6 +513,11 @@
     <h4 class="r-fu-title">Let machine-artifact publication use the content-store GPFS probe</h4>
     <div class="r-fu-body"><p>From the content-store-gpfs review. <code>nova/imas/machine_artifact.py:758</code> passes <code>rename_factory=_linux_rename_no_replace</code> explicitly, so it bypasses the new capability probe and still fails on GPFS. Done when it uses the store's probing default, and a GPFS publish test covers it.</p></div>
     <pre class="r-fu-prompt">/reckon-build converged-forward-solve §4</pre>
+    </article>
+<article class="r-fu" data-id="f-cfs-xpoint-cell-owner" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-written-by="reckon-build" data-written-at="2026-10-16" data-recommends-skill="/reckon-build converged-forward-solve §5" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">One exact owner for the X-point cell&#x27;s area and moments; converge diverted at 282, 550 and 2,098 (§5)</h4>
+    <div class="r-fu-body"><p>From <code>c-s21-xpoint-owner-ruling</code>. Done when <code>docs/research/xpoint-cell-owner.html</code> reports, on the H200:</p><ul><li>one exact representation of the X-point-neighbourhood cells (conic-arc Green integration), with the blend deleted;</li><li>per-cell agreement with dense quadrature to 1e-12, at cell 47 at 2,098 and cell 8 at 550;</li><li>map error falling with resolution;</li><li>the diverted cold solve to 1e-12 at 282, 550 and 2,098, with Taylor slopes of 2 and the 282 NaN explained;</li><li>continuity, limited, sweep and transition unchanged;</li><li>a batch width that fits the H200 at 2,098, against 0.90 ms per state;</li><li>contour panels.</li></ul></div>
+    <pre class="r-fu-prompt">/reckon-build converged-forward-solve §5</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -1043,6 +1048,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-s21-paired-arm-result" data-who="reckon-build" data-when="2026-10-16T11:05:00Z">
     <div class="r-comment-body"><p>First controlled lane comparison, under <code>c-s21-routing-ruling</code>. The same brief and base ran on two lanes:</p><ul><li>The codex primary of fast-map-production made the map continuous. It converged the 282-cell diverted carrier to 1.25e-13, with a 128-state batch at 0.309 ms per state (review 96).</li><li>The clive shadow (r-20261016T074530605259) also converged the limited carrier to 4e-15. But it read the diverted state as limited with no saddle cell, and stalled at 1.02 with 282 nodes and 1.23 with 606. It twice stopped on its turn budget, the second time after neutral per-turn advice.</li></ul><p>That is one pair, not a verdict. It argues against routing this deepest node family to clive, and it has been sent to reckon-b9 as outcome evidence for Jev. The shadow's commits are archived as tag <code>archive/shadow-fast-map-production-clive</code>; nothing was merged.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-s21-xpoint-owner-ruling" data-who="reckon-build" data-when="2026-10-16T14:55:00Z">
+    <div class="r-comment-body"><p>Lead ruling 2026-10-16: replace the two-representation X-point handoff with one exact owner of the X-point cell's area and moments.</p><p>fine-grid-convergence (run r-20261016T035628355879, head 4e852a31e) tried seven variants: sector ramp, flux taper, booked-moment blend, localized taper, zero blend and agreement blend. Each moved the failure between resolutions rather than removing it. The agreement variant converges the 2,098-cell diverted solve to 8.5e-13, but 550 stalls at 1.76e-3 and 282 returns NaN. At 2,098 cells the X-point owner cell's normal-form and ordinary-cut area fractions disagree sixteenfold, 0.0285 against 0.460.</p><p>The next node computes that cell's region exactly in one representation, using closed-form conic integration over the cell polygon. Its gates: per-cell agreement with dense quadrature to 1e-12; map error falling with resolution; the diverted solve to 1e-12 at all three sizes; continuity and limited controls unchanged; a batch sized to the H200, where 128 wide requested 273 GiB at 2,098 cells.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261010T184522536142-cfs-current-book-fragments" data-who="reckon-build" data-when="2026-10-10T18:46:29.609Z">
     <div class="r-comment-body"><p>Implemented traced current.book over connected multi-polygon membership using the widened signed-ring exact clip. Six certificate rows pass: diverted read image errors 1.15131582e-4, 2.49842782e-5, 3.95031905e-6 at 550/2098/5158 cells; limited errors 1.77777866e-5, 2.66948705e-6, 5.45231060e-7 at 553/2105/5167. Maximum net-current error 2.22e-16, excluded current zero, legacy control 0.197326978718; evidence docs/evidence/fragments/converged-forward-solve/cfs-current-book.html#cfs-current-book-fragments-booking and one three-rung SVG; audit-doc 0 errors.</p></div>

@@ -10,6 +10,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.lines import Line2D
+from matplotlib.ticker import NullFormatter, NullLocator
 
 from nova.media.ink import DEFAULT_INK, poloidal_axes
 from nova.media.poloidal import draw_nulls, draw_scattered_contours, draw_wall
@@ -102,7 +103,13 @@ def map_error(receipts, output):
         label="conic owner",
     )
     axis.set_xticks(cells, labels=[f"{number:,}" for number in cells])
+    axis.xaxis.set_minor_locator(NullLocator())
+    axis.xaxis.set_minor_formatter(NullFormatter())
     axis.set_xlim(cells[0] * 0.85, cells[-1] * 1.15)
+    axis.set_ylim(5e-5, 2e-3)
+    axis.set_yticks((1e-4, 1e-3))
+    axis.yaxis.set_minor_locator(NullLocator())
+    axis.yaxis.set_minor_formatter(NullFormatter())
     axis.set_xlabel("carrier cells")
     axis.set_ylabel("normalized analytic map flux error")
     axis.spines["top"].set_visible(False)
@@ -134,7 +141,10 @@ def residual_histories(receipts, output):
     axis.set_xticks(np.arange(max(len(receipt["history"]) for receipt in receipts) + 1))
     finite = np.asarray(values)
     finite = finite[np.isfinite(finite) & (finite > 0)]
-    axis.set_ylim(min(np.min(finite), 1e-12) / 3, np.max(finite) * 3)
+    axis.set_ylim(1e-14, max(1e-1, np.max(finite) * 3))
+    axis.set_yticks((1e-12, 1e-9, 1e-6, 1e-3))
+    axis.yaxis.set_minor_locator(NullLocator())
+    axis.yaxis.set_minor_formatter(NullFormatter())
     axis.set_xlabel("Newton correction")
     axis.set_ylabel("scaled moment residual")
     axis.spines["top"].set_visible(False)

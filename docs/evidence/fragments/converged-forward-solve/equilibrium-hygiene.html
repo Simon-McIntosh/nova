@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="evidence">
   <meta name="plan-slug" content="equilibrium-hygiene">
   <meta name="plan-title" content="Equilibrium morphology and test hygiene">
-  <meta name="plan-summary" content="One host and device dilation replaces two copies; historical coefficient-carrier tooling and copied test helpers are removed.">
+  <meta name="plan-summary" content="One host and device dilation replaces two copies; two unreferenced benchmarks are removed while the carrier tooling required by a live receipt test remains; copied test helpers are centralized.">
   <meta name="plan-evidence-for" content="converged-forward-solve">
   <meta name="plan-verifies" content="converged-forward-solve#s6">
   <meta name="plan-recorded-at" content="2026-10-16">
@@ -24,7 +24,7 @@
     <h2>Change</h2>
     <p>Base <code>63caf693143b26d2a689939bb9073b5f969d2b75</code> had two in-bounds four-neighbour dilation functions: JAX in <code>morphology.py</code> and NumPy in <code>wall_mask.py</code>. Both returned identical arrays for 100 random masks with populated border rows and columns. <code>morphology._dilate4</code> now dispatches on the host NumPy mask or device JAX mask and evaluates one false-padded expression; <code>wall_mask</code> calls it. The reported unreachable second return in <code>morphology</code> was already absent at the base revision.</p>
     <p>The new border test covers 49 masks, including a corner-only case and random one-row, one-column and rectangular masks. It passed on the edited tree. Replacing false padding with periodic edge propagation failed that test at the opposite edges with <code>EXIT=1</code>, after which false padding was restored. Eight masks also matched between host evaluation and <code>jax.jit(jax.vmap(...))</code>; the existing wall-mask test file passed 10 of 10 tests.</p>
-    <p>The <code>grep -rn</code> census over <code>docs/plans</code> and <code>docs/research</code> found zero matches for each of the four benchmark names. As a positive control, the same census found four mentions of <code>coefficient_carrier</code>; the shipped coefficient-space document lists that module as a historical artifact but names none of the drivers as current tools. The coefficient-carrier module, its five-test file and four benchmark drivers were removed, deleting 2,930 lines. The deleted test file passed 5 of 5 tests before deletion.</p>
+    <p>The <code>grep -rn</code> census over <code>docs/plans</code> and <code>docs/research</code> found zero matches for each of the four benchmark names. As a positive control, the same census found four mentions of <code>coefficient_carrier</code>. That document-only census missed a live test: <code>test_production_solver_receipt_trip_alignment.py</code> imports <code>carrier_step_attribution</code> and calls its receipt builder. Removing that driver caused collection to fail with <code>ImportError</code>. The carrier module, its five-test file, <code>carrier_arms</code> and <code>carrier_step_attribution</code> are retained as the test's dependency closure; the unreferenced advance-diagnosis and matrix benchmark drivers remain deleted, removing 1,195 lines.</p>
     <p>The three <code>_green_block</code> copies and two <code>_solovev</code> copies now resolve to one definition each in <code>tests/conftest.py</code>. A source-text assertion and two source-text receipt fields about the retiring <code>fixed_point.py</code> path were removed; the dimension and conditioning behaviour tests remain.</p>
   </section>
   <section id="equilibrium-hygiene-gates">
@@ -40,11 +40,11 @@
         <tr><td><code>test_equilibrium_forward_solve.py</code></td><td>10 passed, 3 failed, 16 errors; solve timeouts and a JAX tangent-tree error</td><td>12 passed, 2 failed, 16 errors; no new failing IDs, one base failure absent</td></tr>
       </tbody>
     </table>
-    <p>The five-file base suite completed with 36 failing or erroring test IDs; the edited suite completed with 34. The edited failure-ID set is a subset of the base set, with zero added failures. The two IDs absent from the edited set are <code>test_the_topology_portfolio_matches_per_branch_solves_under_jit_and_vmap</code> and <code>test_the_host_and_traced_routes_agree_on_the_rotating_map</code>. Both suite arms used the same files, one fresh process per file, <code>JAX_PLATFORMS=cpu</code> and the worktree's root <code>tests/conftest.py</code>; every file log prints the revision, command and <code>nova.__file__</code>. The prior solve timeouts and JAX tangent-tree errors remain visible in the logs.</p>
+    <p>The five-file base suite completed with 36 failing or erroring test IDs; the edited suite before the carrier repair completed with 34. The edited failure-ID set is a subset of the base set, with zero added failures. The two IDs absent from the edited set are <code>test_the_topology_portfolio_matches_per_branch_solves_under_jit_and_vmap</code> and <code>test_the_host_and_traced_routes_agree_on_the_rotating_map</code>. Both suite arms used the same files, one fresh process per file, <code>JAX_PLATFORMS=cpu</code> and the worktree's root <code>tests/conftest.py</code>; every file log prints the revision, command and <code>nova.__file__</code>. The prior solve timeouts and JAX tangent-tree errors remain visible in the logs.</p>
   </section>
   <section id="equilibrium-hygiene-follow-on">
-    <h2>Scope follow-on</h2>
-    <p><code>tests/test_production_solver_receipt_trip_alignment.py</code> is outside this node's write grant. It still imports the deleted <code>benchmarks.carrier_step_attribution</code> and calls its receipt builder. The base file passed, while an edited-tree import fails with <code>ImportError</code>. Its owning scope must retire or replace that legacy receipt assertion.</p>
+    <h2>Collection repair</h2>
+    <p>The receipt test was outside the first write grant, so the missing importer was recorded as a follow-on. A later repair grant widened the scope. The collection failure reproduced at the committed cleanup head with <code>EXIT=2</code>. With the carrier dependency closure restored, the receipt-test file passed 15 of 15 tests and the carrier unit file passed 5 of 5 in fresh CPU processes. The committed-head gate and its reversal control are recorded in the run manifest.</p>
   </section>
 </main>
 </body>

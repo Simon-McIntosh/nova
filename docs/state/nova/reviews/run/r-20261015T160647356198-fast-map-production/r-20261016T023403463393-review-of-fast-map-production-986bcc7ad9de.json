@@ -1,0 +1,83 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed run's manifest leaves baseline_suite and after_suite empty, so no completed paired gate logs exist from which to derive an added-failure count; zero would be an invented measurement.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-16T02:46:00Z",
+  "dispatched_at": "2026-10-16T02:34:38Z",
+  "findings": [
+    {
+      "file": "docs/research/fast-map-production.html",
+      "line": "126",
+      "severity": "blocking",
+      "text": "blocking: the required 550- and 2,098-cell diverted solves stop at 0.001550315837 and 0.003627426010, many orders above 1e-12, so the node's convergence goal is unmet."
+    },
+    {
+      "file": "scripts/prototypes/fast_map_production/solver.py",
+      "line": "272",
+      "severity": "blocking",
+      "text": "blocking: the added assertions check environment and validity but never require the map-error, continuity, or convergence limits; reinstating the measured failure leaves the scripts exiting zero and no regression test reddens."
+    },
+    {
+      "file": "scripts/prototypes/fast_map_production/render.py",
+      "line": "156",
+      "severity": "blocking",
+      "text": "blocking: the rendered resolution.svg has overlapping x-axis tick labels and direct labels crossing plotted lines, so this delivered figure fails the required artifact readability check."
+    },
+    {
+      "file": "scripts/prototypes/fast_map_production/kernel.py",
+      "line": "189",
+      "severity": "follow-on",
+      "text": "follow-on: the new read duplicates the fixed-shape topology capability already owned by scripts/prototypes/fast_read/kernel.py:32 rather than extending that owner, leaving two implementations to maintain."
+    },
+    {
+      "file": "scripts/prototypes/fast_map_production/program.py",
+      "line": "150",
+      "severity": "follow-on",
+      "text": "follow-on: the new moment map duplicates scripts/prototypes/fast_read/program.py:126 and separately integrates saddle moments beside nova/equilibrium/current.py:179, so booking behaviour can drift across three owners."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 0 production call sites; the change is reached only by its own prototype probe scripts and no nova production module imports it.",
+    "diff": "read the 49 commit subjects and code/document changes from d4dd9374 to 986bcc7a; the diff adds a prototype read, moment map, solve probes, research page, evidence fragment, and 14 SVG figures without changing nova production modules or adding a test file.",
+    "done_when": "the plan's \u00a75 followup and source prompt require continuity, one booking owner, and production-resolution convergence; deep-cold-500.json and deep-cold-2000.json record final residuals 0.001550315837 and 0.003627426010 with converged false, while solver.py:272 asserts only booking validity.",
+    "goal": "the source goal in its prompt requires a continuous fast map with one X-point booking owner and diverted convergence at 550 and 2,098 cells; docs/research/fast-map-production.html:125-134 reports one-owner booking and a continuous sampled 282-cell route, but both required fine solves fail.",
+    "manifest": "the source manifest records complete, 49 commits, 39 changed paths, H200 receipt logs, and the failed 550/2,098 residuals; its baseline_suite and after_suite are empty, so no added-failure delta can be measured from a completed paired suite.",
+    "write_paths": "the source prompt declares scripts/prototypes/fast_map_production, docs/research/fast-map-production.html, docs/figures/converged-forward-solve/fast-map-production, and docs/evidence/fragments/converged-forward-solve/fast-map-production.html; all 39 files in the d4dd9374..986bcc7a diff fall inside those paths."
+  },
+  "justifications": {
+    "durability": "scripts/prototypes/fast_map_production/solver.py:107,126,140,272 asserts GPU/x64 and receipt validity only; restoring the boolean wall jump, mixed saddle booking, or a stalled 550-cell solve would leave those assertions green, and the diff adds no test file.",
+    "evidence": "the completed H200 receipts in deep-cold-500.json and deep-cold-2000.json expose the failed quantitative gate, but scripts/prototypes/fast_map_production/solver.py:272 never asserts that gate, and the source manifest has no completed baseline_suite or after_suite pair.",
+    "fit": "scripts/prototypes/fast_map_production/program.py:9-12 reuses the existing current, quadrature, and ordinary-cut modules and the source introduces no forbidden name, but render.py:156-158 saves overlapping ticks and direct labels in the delivered resolution figure.",
+    "goal_fidelity": "docs/research/fast-map-production.html:126-134 records one-owner booking and a 282-cell residual of 1.24834e-13, but the 550- and 2,098-cell terminal residuals remain 0.001550315837 and 0.003627426010 against 1e-12.",
+    "reuse": "a capability search found the existing fixed-shape read at scripts/prototypes/fast_read/kernel.py:32 and moment map at scripts/prototypes/fast_read/program.py:126, while scripts/prototypes/fast_map_production/kernel.py:189 and program.py:150 duplicate those owners in a separate module family instead of extending them.",
+    "scope_discipline": "the d4dd9374..986bcc7a diff changes only the four paths declared in the source prompt, with its 39 files matching the source manifest's changed_paths list."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source goal in its prompt requires a continuous fast map with one X-point booking owner and diverted convergence at 550 and 2,098 cells; docs/research/fast-map-production.html:125-134 reports one-owner booking and a continuous sampled 282-cell route, but both required fine solves fail.\nVERDICT done_when: the plan's \u00a75 followup and source prompt require continuity, one booking owner, and production-resolution convergence; deep-cold-500.json and deep-cold-2000.json record final residuals 0.001550315837 and 0.003627426010 with converged false, while solver.py:272 asserts only booking validity.\nVERDICT write_paths: the source prompt declares scripts/prototypes/fast_map_production, docs/research/fast-map-production.html, docs/figures/converged-forward-solve/fast-map-production, and docs/evidence/fragments/converged-forward-solve/fast-map-production.html; all 39 files in the d4dd9374..986bcc7a diff fall inside those paths.\nVERDICT manifest: the source manifest records complete, 49 commits, 39 changed paths, H200 receipt logs, and the failed 550/2,098 residuals; its baseline_suite and after_suite are empty, so no added-failure delta can be measured from a completed paired suite.\nVERDICT diff: read the 49 commit subjects and code/document changes from d4dd9374 to 986bcc7a; the diff adds a prototype read, moment map, solve probes, research page, evidence fragment, and 14 SVG figures without changing nova production modules or adding a test file.\nCALL_SITES: none\nSCORE goal_fidelity: 8\nJUSTIFICATION goal_fidelity: docs/research/fast-map-production.html:126-134 records one-owner booking and a 282-cell residual of 1.24834e-13, but the 550- and 2,098-cell terminal residuals remain 0.001550315837 and 0.003627426010 against 1e-12.\nSCORE evidence: 13\nJUSTIFICATION evidence: the completed H200 receipts in deep-cold-500.json and deep-cold-2000.json expose the failed quantitative gate, but scripts/prototypes/fast_map_production/solver.py:272 never asserts that gate, and the source manifest has no completed baseline_suite or after_suite pair.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the d4dd9374..986bcc7a diff changes only the four paths declared in the source prompt, with its 39 files matching the source manifest's changed_paths list.\nSCORE durability: 3\nJUSTIFICATION durability: scripts/prototypes/fast_map_production/solver.py:107,126,140,272 asserts GPU/x64 and receipt validity only; restoring the boolean wall jump, mixed saddle booking, or a stalled 550-cell solve would leave those assertions green, and the diff adds no test file.\nSCORE fit: 15\nJUSTIFICATION fit: scripts/prototypes/fast_map_production/program.py:9-12 reuses the existing current, quadrature, and ordinary-cut modules and the source introduces no forbidden name, but render.py:156-158 saves overlapping ticks and direct labels in the delivered resolution figure.\nSCORE reuse: 4\nJUSTIFICATION reuse: a capability search found the existing fixed-shape read at scripts/prototypes/fast_read/kernel.py:32 and moment map at scripts/prototypes/fast_read/program.py:126, while scripts/prototypes/fast_map_production/kernel.py:189 and program.py:150 duplicate those owners in a separate module family instead of extending them.\nFINDING docs/research/fast-map-production.html:126 blocking: the required 550- and 2,098-cell diverted solves stop at 0.001550315837 and 0.003627426010, many orders above 1e-12, so the node's convergence goal is unmet.\nFINDING scripts/prototypes/fast_map_production/solver.py:272 blocking: the added assertions check environment and validity but never require the map-error, continuity, or convergence limits; reinstating the measured failure leaves the scripts exiting zero and no regression test reddens.\nFINDING scripts/prototypes/fast_map_production/render.py:156 blocking: the rendered resolution.svg has overlapping x-axis tick labels and direct labels crossing plotted lines, so this delivered figure fails the required artifact readability check.\nFINDING scripts/prototypes/fast_map_production/kernel.py:189 follow-on: the new read duplicates the fixed-shape topology capability already owned by scripts/prototypes/fast_read/kernel.py:32 rather than extending that owner, leaving two implementations to maintain.\nFINDING scripts/prototypes/fast_map_production/program.py:150 follow-on: the new moment map duplicates scripts/prototypes/fast_read/program.py:126 and separately integrates saddle moments beside nova/equilibrium/current.py:179, so booking behaviour can drift across three owners.",
+  "review_run_id": "r-20261016T023403463393-review-of-fast-map-production-986bcc7ad9de",
+  "reviewed_base_sha": "d4dd9374ab678c51a7cbab01cf7b1d2d4e03c71e",
+  "reviewed_head_sha": "986bcc7ad9debc372784f5ef0bea6e08b342369e",
+  "reviewed_run_id": "r-20261015T160647356198-fast-map-production",
+  "reviewer": {
+    "backend": "codex",
+    "model": "gpt-6"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 3,
+    "evidence": 13,
+    "fit": 15,
+    "goal_fidelity": 8,
+    "reuse": 4,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T02:40:32.584900+00:00",
+  "total": 63
+}

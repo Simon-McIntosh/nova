@@ -153,6 +153,33 @@ def residual_histories(receipts, output):
     _save(figure, output)
 
 
+def bell_contact(receipts, output):
+    plt.style.use("data-ink")
+    figure, axes = plt.subplots(1, 3, figsize=(14, 5.5), dpi=100, sharey=True)
+    for axis, receipt in zip(axes, receipts, strict=True):
+        rows = receipt["rows"]
+        above = [row for row in rows if row["signed_critical_offset"] > 0]
+        below = [row for row in rows if row["signed_critical_offset"] < 0]
+        for series, color, label, width in (
+            (above, BLUE, "connected through saddle", 3.0),
+            (below, GREY, "axis branch only", 2.6),
+        ):
+            x = -np.log10([abs(row["signed_critical_offset"]) for row in series])
+            y = [row["area_fraction"] for row in series]
+            axis.plot(x, y, marker="o", color=color, linewidth=width, label=label)
+        axis.set_xlim(8.8, 11.2)
+        axis.set_xticks((9, 10, 11), labels=("10⁻⁹", "10⁻¹⁰", "10⁻¹¹"))
+        axis.set_ylim(-0.025, 0.575)
+        axis.set_yticks((0, 0.2, 0.4))
+        axis.set_xlabel(f"|saddle offset| [Wb] ({receipt['cells']:,} cells)")
+        axis.spines["top"].set_visible(False)
+        axis.spines["right"].set_visible(False)
+    axes[0].set_ylabel("connected area / cell area")
+    handles, labels = axes[0].get_legend_handles_labels()
+    figure.legend(handles, labels, loc="upper center", ncol=2, frameon=False)
+    _save(figure, output)
+
+
 def terminal_panel(receipt, output):
     data = receipt["panel"]
     points = np.asarray(data["coordinates"])
@@ -223,6 +250,7 @@ def main():
     parser.add_argument("--agreement", type=Path, action="append", default=[])
     parser.add_argument("--solve", type=Path, action="append", default=[])
     parser.add_argument("--panel", type=Path, action="append", default=[])
+    parser.add_argument("--contact", type=Path, action="append", default=[])
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
@@ -244,6 +272,13 @@ def main():
         terminal_panel(
             receipt,
             args.output / f"terminal-{receipt['cells']}.svg",
+        )
+    if args.contact:
+        if len(args.contact) != 3:
+            parser.error("three carrier contact receipts are required")
+        bell_contact(
+            [json.loads(path.read_text()) for path in args.contact],
+            args.output / "bell-contact.svg",
         )
 
 

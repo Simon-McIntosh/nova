@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="310">
+<meta name="plan-version" content="311">
 <meta name="plan-modified" content="2026-10-16">
 </head>
 <body>
@@ -1210,6 +1210,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261016T152837349228-machine-artifact-gpfs" data-who="reckon-build" data-when="2026-10-16T15:59:59.925Z">
     <div class="r-comment-body"><p>materialize_machine_artifact now passes the content store's cache-root rename selection instead of the explicit no-clobber primitive, so a machine bundle publishes and resolves on GPFS; the GPFS publish test is green (module 9 passed vs 8 at base), the four-module suite adds no failure, and the negative control restores the explicit no-clobber rename on a GPFS root and reproduces the publish failure (1 failed, EXIT=1).</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261016T161858228836-store-refusal-causes" data-who="reckon-build" data-when="2026-10-16T16:42:19.134Z">
+    <div class="r-comment-body"><p>store-refusal-causes: verified_destination returns None now only for an absent entry and refuses a present-but-invalid entry by name, so both named tests/test_mast_artifact.py failures pass (mast 2 failed/59 passed -&gt; 61 passed) and the five-module delta adds none.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-s21-accuracy-floor-review" data-who="reckon-build" data-when="2026-10-11T21:20:00Z">
     <div class="r-comment-body"><p>Accuracy-floor review, 2026-10-11, at the lead's request. A health review of ten accuracy-path modules and a census of ten capabilities ranked six floors on the production path; each is owned by a followup or section. In rank order: the packed moment kernel (f-cfs-moment-path-reconcile); legacy spline support on the map (f-cfs-wire-current-book); the certificate exterior (f-cfs-exterior-on-exact-support); the production-seed Newton defect (f-cfs-newton-production-seed); the read on solved states (f-cfs-read-compile-route); the dense literals, fixed by gs.apply. The health review found polygon moment integration implemented in four modules (clip_quadrature, separatrix_clip, polygon_moments, stencil_mesh). The census found no accuracy floor among them, and their consolidation is a deletion-led treatment. The production chord default is an unmeasured arm (f-cfs-chord-default-arm). Reports: accuracy-floor-census.md under the crew reports directory resolution-pivot/, and code-review/98773e8b1367/report.md.</p></div>

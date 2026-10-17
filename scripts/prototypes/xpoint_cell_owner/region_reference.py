@@ -77,6 +77,23 @@ def region_moments(
         local = offset + u * plus + v * minus
         return _quadratic(field, local[..., 0], local[..., 1])
 
+    tensor = np.array(((field[3], field[4] / 2), (field[4] / 2, field[5])))
+    gradient = np.array((field[1], field[2]))
+
+    def slice_quadratic(u):
+        """v-quadratic coefficients of the field along the line ``u``.
+
+        The line is stated in the rotated (u, v) basis, so the coefficients
+        follow from the field's own gradient and curvature tensor with the
+        rotation applied, not from the unrotated polynomial coefficients.
+        """
+        foot = offset + u * plus
+        return (
+            minus @ tensor @ minus,
+            2 * minus @ tensor @ foot + gradient @ minus,
+            field[0] + gradient @ foot + foot @ tensor @ foot,
+        )
+
     def density_at(u, v):
         local = (
             offset + np.asarray(u)[..., None] * plus + np.asarray(v)[..., None] * minus
@@ -105,13 +122,7 @@ def region_moments(
             / spans[keep]
         )
         low, high = float(np.min(crossings)), float(np.max(crossings))
-        roots = np.roots(
-            (
-                field[5],
-                field[2] + field[4] * u,
-                field[0] + field[1] * u + field[3] * u * u,
-            )
-        )
+        roots = np.roots(slice_quadratic(u))
         cuts = [low, high]
         cuts.extend(
             float(root.real)

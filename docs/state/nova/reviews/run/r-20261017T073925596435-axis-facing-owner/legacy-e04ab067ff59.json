@@ -21,6 +21,11 @@
       "kind": "exempted",
       "reason": "a duplicated save of an unchanged result; harmless, and it goes with f-cfs-prototype-owner-consolidation, which rewrites these prototype runners",
       "recorded_at": "2026-10-17T10:23:27.879473+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "manifest-only omission; the coordinator audited the diff, and extract_cells.py is inside the declared write path",
+      "recorded_at": "2026-10-17T10:23:35.571147+00:00"
     }
   },
   "findings": [

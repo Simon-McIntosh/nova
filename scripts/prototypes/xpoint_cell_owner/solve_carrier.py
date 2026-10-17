@@ -49,6 +49,7 @@ def main():
             "shifted",
             "ordinary",
             "oriented",
+            "inherited",
         ),
         default="halfplane",
     )

@@ -5,7 +5,7 @@ from functools import partial
 import jax
 import jax.numpy as jnp
 
-from nova.equilibrium import fixed_points
+from nova.equilibrium import current, fixed_points
 from scripts.prototypes.fast_map_production import program
 from scripts.prototypes.fast_map_production.kernel import read
 from scripts.prototypes.fast_read.ordinary_cut import bell_moments
@@ -63,6 +63,76 @@ def fitted_value(coefficients, local):
     )
 
 
+def reference_saddle_moments(geometry, reading, profile, capacity=16):
+    """Book owner sectors on the inherited signed ring fans.
+
+    Reproduces the accessor's own saddle booking, so a carrier built through
+    this path is what the read books rather than an approximation of it. It
+    exists to re-measure the error the diverted map guards were set from.
+    """
+    active = reading.booking_cells & (reading.membership > 0)
+    count = jnp.sum(active, dtype=jnp.int32)
+    indices = jnp.nonzero(active, size=capacity, fill_value=0)[0]
+
+    def one(index):
+        rings, sizes = current._normal_rings(
+            geometry.vertices[index],
+            geometry.vertex_count[index],
+            geometry.centre[index],
+            reading.saddle_form,
+            reading.fragment_selected[index],
+            reading.edge_interval[index],
+            4,
+        )
+        origin = geometry.centre[index]
+        slot = jnp.arange(rings.shape[1])
+        following = jnp.where(slot[None] + 1 < sizes[:, None], slot[None] + 1, 0)
+        end = jnp.take_along_axis(rings, following[..., None], axis=1)
+        first = rings - origin
+        second = end - origin
+        area = 0.5 * (first[..., 0] * second[..., 1] - first[..., 1] * second[..., 0])
+        area = jnp.where(slot[None] < sizes[:, None], area, 0.0)
+        barycentric = jnp.asarray(((2 / 3, 1 / 6), (1 / 6, 2 / 3), (1 / 6, 1 / 6)))
+        points = (
+            origin
+            + barycentric[:, 0, None] * first[..., None, :]
+            + barycentric[:, 1, None] * second[..., None, :]
+        )
+        local = (points - origin) / geometry.pitch[index]
+        x, y = local[..., 0], local[..., 1]
+        coefficient = reading.field_coefficients[index]
+        flux = (
+            coefficient[0]
+            + coefficient[1] * x
+            + coefficient[2] * y
+            + coefficient[3] * x * x
+            + coefficient[4] * x * y
+            + coefficient[5] * y * y
+        )
+        normalized = (flux - reading.axis_flux) / (
+            reading.boundary_flux - reading.axis_flux
+        )
+        density = profile.current_density(points[..., 0], normalized)
+        weighted = area[..., None] * density / 3
+        displacement = points - origin
+        return jnp.stack(
+            (
+                jnp.sum(weighted),
+                jnp.sum(weighted * displacement[..., 0]),
+                jnp.sum(weighted * displacement[..., 1]),
+            )
+        )
+
+    packed = jax.vmap(one)(indices)
+    live = jnp.arange(capacity) < count
+    scattered = (
+        jnp.zeros((len(geometry.centre), 3), dtype=packed.dtype)
+        .at[indices]
+        .add(jnp.where(live[:, None], packed, 0.0))
+    )
+    return scattered, count <= capacity
+
+
 def owned_cut(
     reading,
     geometry,
@@ -73,6 +143,9 @@ def owned_cut(
     saddle_hessian=None,
 ):
     """Replace the sampled saddle-sector area and moment booking together."""
+    if component == "inherited":
+        moments, valid = reference_saddle_moments(geometry, reading, profile, capacity)
+        return reading, moments, valid
     active = reading.normal_form_cells
     if component == "ordinary":
         active = jnp.zeros_like(active)

@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "Unmeasured: the reviewed manifest explicitly records baseline_suite and after_suite as not run, with no completed paired suite gate logs; the focused head test passed three cases but cannot establish a failure delta.",
+  "call_sites": [
+    "scripts/prototypes/fast_map_production/kernel.py:299",
+    "scripts/prototypes/fast_map_production/program.py:12",
+    "scripts/prototypes/fast_map_production/sweep.py:25",
+    "scripts/prototypes/fast_map_production/solver.py:24",
+    "scripts/prototypes/xpoint_cell_owner/owner_map.py:10"
+  ],
+  "completed_at": "2026-10-17T18:04:43Z",
+  "dispatched_at": "2026-10-17T17:59:01Z",
+  "findings": [
+    {
+      "file": "docs/research/bottleneck-path-level.html",
+      "line": 87,
+      "severity": "blocking",
+      "text": "The page says every verdict change was bisected to adjacent binary64 values, yet the 282 and 550 sweep receipts each contain only one transition bracket while their rows have two additional tie-island class changes; those boundaries and their competing levels were not resolved to the required adjacent doubles, so the three-way classification gate is incomplete."
+    },
+    {
+      "file": "scripts/prototypes/fast_map_production/test_bottleneck_level.py",
+      "line": 129,
+      "severity": "follow-on",
+      "text": "All three tests call _wall_effective_level directly, so changing kernel.py:299 to use raw tangency or a maximum would leave the focused test green even though the production wall candidate regressed; add a read-level assertion on the synthetic carrier."
+    },
+    {
+      "file": "scripts/prototypes/fast_map_production/test_bottleneck_level.py",
+      "line": 139,
+      "severity": "follow-on",
+      "text": "The directly reachable control compares the returned value with control_tangency, which the test supplied to the helper, so a helper that always returns tangency passes this assertion; the separate private-contact assertion is the independent bottleneck guard."
+    },
+    {
+      "file": "docs/research/bottleneck-path-level.html",
+      "line": 71,
+      "severity": "follow-on",
+      "text": "The original prompt.txt:99 demands paired 2,098-cell fidelity and prompt.txt:101 demands cold solves, but the table has no 2,098 head row and manifest.md says the solves were not run; the plan correction narrows the repair to the 282/550 restoration and bracket, so these original measures remain explicitly unverified."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "The fifteen commits from e4c8b98157fa0b4086c9febefdd66a40b3875984 to e36e252f80a56ead0cf7981a05c480657a2a8380 net to the helper and three tests in kernel.py:111-120 and test_bottleneck_level.py:109-195, plus two documents and two SVG figures.",
+    "done_when": "The quantitative clauses in prompt.txt:93-104 have a head-stamped three-test log and matching 282/550 fidelity receipts, but restore-sweep-diverted-500-head.json stores only one adjacent-double transition while docs/research/bottleneck-path-level.html:87 claims every verdict change was bisected.",
+    "goal": "The prompt.txt:30 goal is narrowed by docs/plans/converged-forward-solve.html:1133 to preserve cell membership and apply the bottleneck to the wall candidate, and kernel.py:111-120,299 names the wall rule that was already inline at base.",
+    "manifest": "manifest.md records the final head, six changed paths, three passed tests in logs/unit-test.log, two rendered figures and the P100 capacity limit, while baseline_suite and after_suite are explicitly unrun at manifest.md:14-15.",
+    "write_paths": "The four grants in prompt.txt:68-72 contain all six paths in the diff from e4c8b98157fa0b4086c9febefdd66a40b3875984 to e36e252f80a56ead0cf7981a05c480657a2a8380."
+  },
+  "justifications": {
+    "durability": "test_bottleneck_level.py:124,130,139,151,180,185 can fail on a wrong bottleneck, wrong minimum or level jump, but :129-139 exercises the helper directly and would miss a regression at kernel.py:299 that bypasses it; :128 is setup and :194-195 checks only the deliberately broken helper.",
+    "evidence": "docs/research/bottleneck-path-level.html:87 claims every switch was bisected, but each restore-sweep-diverted-500-head.json transition covers only the first wall-saddle change, and manifest.md:14-15 supplies no completed paired suite logs.",
+    "fit": "kernel.py:111 adds a private helper beside its path-ceiling owner with a mechanism-based name, and test_bottleneck_level.py:19 configures JAX precision before array construction as surrounding tests do.",
+    "goal_fidelity": "scripts/prototypes/fast_map_production/kernel.py:111-120,299 applies the plan-corrected wall-only minimum and leaves the cell membership code untouched in the net diff.",
+    "reuse": "A capability search of scripts/prototypes and nova/equilibrium found the same inline wall minimum at scripts/prototypes/diverted_stall/kernel.py:177, while kernel.py:111-120 extends the fast map's own existing owner and test_bottleneck_level.py:33-105 adds only local test fixtures.",
+    "scope_discipline": "The six diff paths are all within prompt.txt:68-72, and the two docs/figures/converged-forward-solve/bottleneck-path-level SVGs present the measured fidelity and bracket named by the goal."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The prompt.txt:30 goal is narrowed by docs/plans/converged-forward-solve.html:1133 to preserve cell membership and apply the bottleneck to the wall candidate, and kernel.py:111-120,299 names the wall rule that was already inline at base.\nVERDICT done_when: The quantitative clauses in prompt.txt:93-104 have a head-stamped three-test log and matching 282/550 fidelity receipts, but restore-sweep-diverted-500-head.json stores only one adjacent-double transition while docs/research/bottleneck-path-level.html:87 claims every verdict change was bisected.\nVERDICT write_paths: The four grants in prompt.txt:68-72 contain all six paths in the diff from e4c8b98157fa0b4086c9febefdd66a40b3875984 to e36e252f80a56ead0cf7981a05c480657a2a8380.\nVERDICT manifest: manifest.md records the final head, six changed paths, three passed tests in logs/unit-test.log, two rendered figures and the P100 capacity limit, while baseline_suite and after_suite are explicitly unrun at manifest.md:14-15.\nVERDICT diff: The fifteen commits from e4c8b98157fa0b4086c9febefdd66a40b3875984 to e36e252f80a56ead0cf7981a05c480657a2a8380 net to the helper and three tests in kernel.py:111-120 and test_bottleneck_level.py:109-195, plus two documents and two SVG figures.\nCALL_SITES: scripts/prototypes/fast_map_production/kernel.py:299, scripts/prototypes/fast_map_production/program.py:12, scripts/prototypes/fast_map_production/sweep.py:25, scripts/prototypes/fast_map_production/solver.py:24, scripts/prototypes/xpoint_cell_owner/owner_map.py:10\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: scripts/prototypes/fast_map_production/kernel.py:111-120,299 applies the plan-corrected wall-only minimum and leaves the cell membership code untouched in the net diff.\nSCORE evidence: 10\nJUSTIFICATION evidence: docs/research/bottleneck-path-level.html:87 claims every switch was bisected, but each restore-sweep-diverted-500-head.json transition covers only the first wall-saddle change, and manifest.md:14-15 supplies no completed paired suite logs.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The six diff paths are all within prompt.txt:68-72, and the two docs/figures/converged-forward-solve/bottleneck-path-level SVGs present the measured fidelity and bracket named by the goal.\nSCORE durability: 14\nJUSTIFICATION durability: test_bottleneck_level.py:124,130,139,151,180,185 can fail on a wrong bottleneck, wrong minimum or level jump, but :129-139 exercises the helper directly and would miss a regression at kernel.py:299 that bypasses it; :128 is setup and :194-195 checks only the deliberately broken helper.\nSCORE fit: 19\nJUSTIFICATION fit: kernel.py:111 adds a private helper beside its path-ceiling owner with a mechanism-based name, and test_bottleneck_level.py:19 configures JAX precision before array construction as surrounding tests do.\nSCORE reuse: 20\nJUSTIFICATION reuse: A capability search of scripts/prototypes and nova/equilibrium found the same inline wall minimum at scripts/prototypes/diverted_stall/kernel.py:177, while kernel.py:111-120 extends the fast map's own existing owner and test_bottleneck_level.py:33-105 adds only local test fixtures.\nFINDING docs/research/bottleneck-path-level.html:87 blocking: The page says every verdict change was bisected to adjacent binary64 values, yet the 282 and 550 sweep receipts each contain only one transition bracket while their rows have two additional tie-island class changes; those boundaries and their competing levels were not resolved to the required adjacent doubles, so the three-way classification gate is incomplete.\nFINDING scripts/prototypes/fast_map_production/test_bottleneck_level.py:129 follow-on: All three tests call _wall_effective_level directly, so changing kernel.py:299 to use raw tangency or a maximum would leave the focused test green even though the production wall candidate regressed; add a read-level assertion on the synthetic carrier.\nFINDING scripts/prototypes/fast_map_production/test_bottleneck_level.py:139 follow-on: The directly reachable control compares the returned value with control_tangency, which the test supplied to the helper, so a helper that always returns tangency passes this assertion; the separate private-contact assertion is the independent bottleneck guard.\nFINDING docs/research/bottleneck-path-level.html:71 follow-on: The original prompt.txt:99 demands paired 2,098-cell fidelity and prompt.txt:101 demands cold solves, but the table has no 2,098 head row and manifest.md says the solves were not run; the plan correction narrows the repair to the 282/550 restoration and bracket, so these original measures remain explicitly unverified.\n",
+  "review_run_id": "r-20261017T175833248844-review-of-bottleneck-path-level-e36e252f80a5",
+  "reviewed_base_sha": "e4c8b98157fa0b4086c9febefdd66a40b3875984",
+  "reviewed_commit": "e36e252f80a56ead0cf7981a05c480657a2a8380",
+  "reviewed_head_sha": "e36e252f80a56ead0cf7981a05c480657a2a8380",
+  "reviewed_run_id": "r-20261017T101935652190-bottleneck-path-level",
+  "scores": {
+    "durability": 14,
+    "evidence": 10,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T18:03:05.630733+00:00",
+  "total": 101
+}

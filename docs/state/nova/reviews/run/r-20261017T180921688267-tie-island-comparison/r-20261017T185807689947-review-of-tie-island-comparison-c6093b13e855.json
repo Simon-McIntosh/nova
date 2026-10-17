@@ -1,0 +1,71 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [
+    "none"
+  ],
+  "completed_at": "2026-10-17T19:14:09.990Z",
+  "dispatched_at": "2026-10-17T18:58:27Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/fast_map_production/test_bottleneck_level.py",
+      "line": "144",
+      "severity": "follow-on",
+      "text": "follow-on: float(control[0]) == CONTROL_TANGENCY, and :236 float(effective[0]) == float(bottleneck[0]), compare the function's output against the same value the test passed in rather than an independent source; the equality is a round-trip and is discriminating only because of the adjacent != at :238 and the numeric guards elsewhere."
+    },
+    {
+      "file": "scripts/prototypes/fast_map_production/test_bottleneck_level.py",
+      "line": "204",
+      "severity": "follow-on",
+      "text": "follow-on: _selected_wall_candidate re-composes the read's wall-candidate selection (min then argmax) inside the test, so the read-level assertion never invokes read(...); a regression of the read's own selection at kernel.py:296 would not be caught, and the mutation log rebinds the test module's _wall_effective_level rather than the kernel's."
+    },
+    {
+      "file": "docs/research/bottleneck-path-level.html",
+      "line": "116",
+      "severity": "follow-on",
+      "text": "follow-on: clause (1) asked to list every consumer of boundary_class in fast_map_production and in every importer with number-vs-label, but the table enumerates only the three in-kernel consumers of diverted and asserts the rest in one line, while consumers exist at sweep.py:361/399/419, program.py:227, solver.py:278/386/411/434/664, qualification.py:41 and in importers; all are receipt/print/diagnostic, so the conclusion holds but the enumeration is incomplete."
+    }
+  ],
+  "gate_sources": {
+    "after_suite": null,
+    "baseline_suite": null
+  },
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified no production call site; the landed scripts/prototypes files are probe and figure tooling, and kernel.py is unmodified",
+    "diff": "Read commit by commit: e4dcfff5f adds tie_probe.py, 5764188f2 pins the wall level in the test and follows the sweep root prior, c6093b13e adds the research section, the bisection figure and the evidence fragment; six files, all inside scope.",
+    "done_when": "The done_when's five clauses are reported in docs/research/bottleneck-path-level.html:110-140 and docs/evidence/fragments/converged-forward-solve/tie-island-comparison.html; clauses (2),(3),(5) carry probe and row receipts and clause (4)'s measure is asserted by test_bottleneck_level.py with the mutation log negative-control.log, but clause (1)'s per-consumer enumeration is only partly met.",
+    "goal": "The source node goal is to settle whether the exact-tie boundary-class switch changes any number and make it continuous if it does; docs/research/bottleneck-path-level.html:108-140 concludes the comparison at scripts/prototypes/fast_map_production/kernel.py:302 is label-only, kernel.py is left unmodified, and the number-changing step is recorded against the saddle selection at kernel.py:239.",
+    "manifest": "The source manifest records status complete, three commits, test_bottleneck_level.py (4 passed) with the mutation negative control in negative-control.log, and one follow-on naming kernel.py:239 for the saddle selection.",
+    "write_paths": "Every path in git diff dbc59142391b86dcb32e80383d47d8b143fba999..c6093b13e855e143036c1cad08ae13e3c2d52553 lies inside the six declared fence paths, and no product source module was modified."
+  },
+  "justifications": {
+    "durability": "test_bottleneck_level.py:216-250 reddens under the raw-tangency and maximum mutants (negative-control.log), but :144 and :236 compare the function's output against the values the test itself handed in and :204 re-combines the read locally rather than calling read(...).",
+    "evidence": "the four rows of the bisection table in docs/research/bottleneck-path-level.html match probe-warm-250.json and probe-warm-500.json field for field, and tie-map-*-head.json matches map-*-base.json in every non-timing field, but the reviewed run recorded no baseline_suite/after_suite so added_failure_count is 0 on a measured absence.",
+    "fit": "scripts/prototypes/fast_map_production/tie_probe.py:1-14 follows the prototype docstring idiom and the rendered figure obeys the data-ink rules with no spines, one figure legend and direct labels; no plan labels or version suffixes in names.",
+    "goal_fidelity": "docs/research/bottleneck-path-level.html:113-116 concludes the comparison at scripts/prototypes/fast_map_production/kernel.py:302 changes no number and leaves the kernel unmodified, which settles the goal's question.",
+    "reuse": "scripts/prototypes/fast_map_production/test_bottleneck_level.py:204 duplicates the read's wall-candidate selection owned at kernel.py:296-297, and tie_probe.py:265-283 re-implements the boundary-class bisection already inline at sweep.py:399-419.",
+    "scope_discipline": "git diff --stat dbc591423..c6093b13e855 touches only test_bottleneck_level.py, tie_island_figure.py, tie_probe.py, docs/research/bottleneck-path-level.html, docs/figures/converged-forward-solve/tie-island-comparison/ and docs/evidence/fragments/converged-forward-solve/tie-island-comparison.html, all inside the declared fence."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source node goal is to settle whether the exact-tie boundary-class switch changes any number and make it continuous if it does; docs/research/bottleneck-path-level.html:108-140 concludes the comparison at scripts/prototypes/fast_map_production/kernel.py:302 is label-only, kernel.py is left unmodified, and the number-changing step is recorded against the saddle selection at kernel.py:239.\nVERDICT done_when: The done_when's five clauses are reported in docs/research/bottleneck-path-level.html:110-140 and docs/evidence/fast_map_production/tie-island-comparison.html; clauses (2),(3),(5) carry probe and row receipts and clause (4)'s measure is asserted by test_bottleneck_level.py with the mutation log negative-control.log, but clause (1)'s per-consumer enumeration is only partly met.\nVERDICT write_paths: Every path in git diff dbc59142391b86dcb32e80383d47d8b143fba999..c6093b13e855e143036c1cad08ae13e3c2d52553 lies inside the six declared fence paths, and no product source module was modified.\nVERDICT manifest: The source manifest records status complete, three commits, test_bottleneck_level.py (4 passed) with the mutation negative control in negative-control.log, and one follow-on naming kernel.py:239 for the saddle selection.\nVERDICT diff: Read commit by commit \u2014 e4dcfff5f adds tie_probe.py, 5764188f2 pins the wall level in the test and follows the sweep root prior, c6093b13e adds the research section, the bisection figure and the evidence fragment; six files, all inside scope.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/research/bottleneck-path-level.html:113-116 concludes the comparison at scripts/prototypes/fast_map_production/kernel.py:302 changes no number and leaves the kernel unmodified, which settles the goal's question.\nSCORE evidence: 17\nJUSTIFICATION evidence: the four rows of the bisection table in docs/research/bottleneck-path-level.html match probe-warm-250.json and probe-warm-500.json field for field, and tie-map-*-head.json matches map-*-base.json in every non-timing field, but the reviewed run recorded no baseline_suite/after_suite so added_failure_count is 0 on a measured absence.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat dbc591423..c6093b13e855 touches only test_bottleneck_level.py, tie_island_figure.py, tie_probe.py, docs/research/bottleneck-path-level.html, docs/figures/converged-forward-solve/tie-island-comparison/ and docs/evidence/fragments/converged-forward-solve/tie-island-comparison.html, all inside the declared fence.\nSCORE durability: 14\nJUSTIFICATION durability: test_bottleneck_level.py:216-250 reddens under the raw-tangency and maximum mutants (negative-control.log), but :144 and :236 compare the function's output against the values the test itself handed in and :204 re-composes the read locally rather than calling read(...).\nSCORE fit: 18\nJUSTIFICATION fit: scripts/prototypes/fast_map_production/tie_probe.py:1-14 follows the prototype docstring idiom and the rendered figure docs/figures/converged-forward-solve/tie-island-comparison/tie-island-bisection.svg obeys the data-ink rules with no spines, one figure legend and direct labels; names carry no plan labels or version suffixes.\nSCORE reuse: 13\nJUSTIFICATION reuse: scripts/prototypes/fast_map_production/test_bottleneck_level.py:204 duplicates the read's wall-candidate selection owned at kernel.py:296-297, and scripts/prototypes/fast_map_production/tie_probe.py:265-283 re-implements the boundary-class bisection already inline at scripts/prototypes/fast_map_production/sweep.py:399-419.\nFINDING scripts/prototypes/fast_map_production/test_bottleneck_level.py:144 follow-on: float(control[0]) == CONTROL_TANGENCY, and :236 float(effective[0]) == float(bottleneck[0]), compare the function's output against the same value the test passed in rather than an independent source; the equality is a round-trip and is discriminating only because of the adjacent != at :238 and the numeric guards elsewhere.\nFINDING scripts/prototypes/fast_map_production/test_bottleneck_level.py:204 follow-on: _selected_wall_candidate re-composes the read's wall-candidate selection (min then argmax) inside the test, so the \"read-level\" assertion never invokes read(...); a regression of the read's own selection at kernel.py:296 would not be caught, and the mutation log rebinds the test module's _wall_effective_level rather than the kernel's.\nFINDING docs/research/bottleneck-path-level.html:116 follow-on: clause (1) asked to list every consumer of boundary_class in fast_map_production and in every importer with number-vs-label, but the table enumerates only the three in-kernel consumers of diverted and asserts the rest in one line, while consumers exist at sweep.py:361/399/419, program.py:227, solver.py:278/386/411/434/664, qualification.py:41 and in importers (xpoint_cell_owner/owner_map.py:319, fine_grid_convergence/handoff.py:108, saddle_expansion/expansion.py:456); all are receipt/print/diagnostic, so the conclusion holds but the enumeration is incomplete.",
+  "review_run_id": "r-20261017T185807689947-review-of-tie-island-comparison-c6093b13e855",
+  "reviewed_base_sha": "dbc59142391b86dcb32e80383d47d8b143fba999",
+  "reviewed_head_sha": "c6093b13e855e143036c1cad08ae13e3c2d52553",
+  "reviewed_run_id": "r-20261017T180921688267-tie-island-comparison",
+  "scores": {
+    "durability": 14,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 13,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T19:11:26.594138+00:00",
+  "total": 101
+}

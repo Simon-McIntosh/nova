@@ -129,11 +129,13 @@ def make_sampler(state):
     value_slope = state["value_slope"]
     sigma = convention.sigma
 
-    def sampled(offset):
+    def sampled(offset, prior=None):
+        if prior is None:
+            prior = previous
         varied_jets = replace(jets, exterior=jets.exterior + offset * jet_slope)
         varied_values = replace(values, exterior=values.exterior + offset * value_slope)
         moving = varied_jets.field(reference)
-        roots = census(moving, geometry, convention, policy, previous)
+        roots = census(moving, geometry, convention, policy, prior)
         reading = read(moving, roots.roots, geometry, convention, policy)
         gauss = varied_values.apply(reference).reshape(rule.points.shape[:-1])
         full = (
@@ -160,9 +162,23 @@ def make_sampler(state):
     return jax.jit(sampled)
 
 
-def row(offset, state, sampled):
+def warm(state, sampled, start, stop, step):
+    """Follow the root prior forward, as the sweep does, to reach a bracket."""
+    prior = state["previous"]
+    values = np.arange(start, stop + step / 2, step)
+    for value in values:
+        roots, *_ = sampled(jnp.asarray(value * state["scale"]), prior)
+        updated = np.asarray(prior).copy()
+        for slot, live in enumerate(np.asarray(roots.valid)):
+            if live and slot < len(updated):
+                updated[slot] = np.asarray(roots.position[slot])
+        prior = jnp.asarray(updated)
+    return prior, len(values)
+
+
+def row(offset, state, sampled, prior=None):
     roots, reading, raw, eigenvalues, live, chosen = sampled(
-        jnp.asarray(offset * state["scale"])
+        jnp.asarray(offset * state["scale"]), prior
     )
     jax.block_until_ready(raw)
     eigen = np.asarray(eigenvalues)
@@ -225,6 +241,12 @@ def main():
         default=[],
         help="class bracket 'lo,hi' to bisect to adjacent doubles; repeatable",
     )
+    parser.add_argument(
+        "--warm",
+        type=float,
+        default=None,
+        help="follow the root prior from -0.2 to this offset before measuring",
+    )
     args = parser.parse_args()
 
     assert jax.config.jax_enable_x64 is True
@@ -235,30 +257,35 @@ def main():
     )
     state = build(args.kind, args.cells, args.cache)
     sampled = make_sampler(state)
+    prior = None
+    warm_count = 0
+    if args.warm is not None:
+        prior, warm_count = warm(state, sampled, -0.2, args.warm, 0.01)
     result = {
         "kind": args.kind,
         "cells": len(state["geometry"].centre),
         "pitch": state["pitch"],
         "span": state["span"],
+        "warm_states": warm_count,
         "scan": [],
         "bisections": [],
     }
     if args.scan:
         lo, hi, count = (float(part) for part in args.scan.split(","))
         for value in np.linspace(lo, hi, int(count)):
-            result["scan"].append(row(value, state, sampled))
+            result["scan"].append(row(value, state, sampled, prior))
         save(Path(args.output), result)
     for bracket in args.bisect:
         left = float(bracket.split(",")[0])
         right = float(bracket.split(",")[1])
-        left_row = row(left, state, sampled)
-        right_row = row(right, state, sampled)
+        left_row = row(left, state, sampled, prior)
+        right_row = row(right, state, sampled, prior)
         steps = 0
         while right != np.nextafter(left, right) and steps < 200:
             middle = (left + right) / 2
             if middle in (left, right):
                 break
-            middle_row = row(middle, state, sampled)
+            middle_row = row(middle, state, sampled, prior)
             steps += 1
             if middle_row["boundary_class"] == left_row["boundary_class"]:
                 left, left_row = middle, middle_row

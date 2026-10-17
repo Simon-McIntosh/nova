@@ -51,11 +51,10 @@ def sampler_with_enclosure(state):
     convention = state["convention"]
     policy = state["policy"]
 
-    def sampled(offset, prior=None):
-        shifted = jnp.asarray(offset * state["scale"])
+    def sampled(shifted, prior=None):
         roots, reading, raw, eigenvalues, live, chosen = base(shifted, prior)
         moving = replace(
-            state["jets"], exterior=state["jets"].exterior + offset * state["jet_slope"]
+            state["jets"], exterior=state["jets"].exterior + shifted * state["jet_slope"]
         ).field(state["reference"])
         enclosure = psi_enclosure(moving.sampled_coefficient(geometry))
         return roots, reading, raw, eigenvalues, live, chosen, enclosure

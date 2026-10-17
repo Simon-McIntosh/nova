@@ -34,6 +34,10 @@ dependencies = [
   "h5py>=3.15",
   "imas-python>=2.2",
   "netcdf4>=1.7",
+  # CoilSet circuit topology (Circuit.edge_loops) is evaluated on the 2D
+  # coilset path, so the graph library is a runtime dependency, not a
+  # visualisation or test-only one.
+  "networkx>=3",
   "nova-cocos",
   "numpy>=2",
   "packaging>=23.2",
@@ -83,7 +87,6 @@ test = [
   "nova-stella[jax,transport]",
   "matplotlib>=3.10",
   "meshio>=5.3.4",
-  "networkx",
   "pyvista>=0.44",
   "pytest",
   "pytest-cov>=4.1.0",

@@ -1,0 +1,89 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": null,
+  "call_site_count": 3,
+  "call_sites": [
+    "nova/frame/framespace.py:36 (FrameSpace.__init__ calls frame_attrs(VtkGeo, VtkPlot), constructing the VtkGeo whose additional/features fields call _trishell_features at vtkgeo.py:60,67)",
+    "nova/frame/dataframe.py:420 (DataFrame.frame_attrs constructs the metamethod subclass, the path by which VtkGeo is built)",
+    "nova/control/circuit.py:113 (Circuit.edge_loops builds networkx.Graph/cycle_basis, reached from CoilSet via nova/control/control.py)"
+  ],
+  "completed_at": "2026-10-17T20:51:43.509Z",
+  "dispatched_at": "2026-10-17T20:42:25Z",
+  "findings": [
+    {
+      "file": "nova/frame/vtkgeo.py",
+      "line": "36",
+      "severity": "follow-on",
+      "text": "follow-on: the file is changed outside the node's declared write paths; the brief body cites vtkgeo.py:29 and the eager reach cannot otherwise be removed, but check-manifest reports it as an out-of-scope write for coordinator adjudication."
+    },
+    {
+      "file": "tests/test_base_install_imports.py",
+      "line": "104",
+      "severity": "follow-on",
+      "text": "follow-on: assert not loaded cannot fail, because the _Block3D finder at line 45 raises on any request for a blocked root, so a blocked module can never reach sys.modules; the load-bearing guard is the returncode==0 assertion at line 129."
+    },
+    {
+      "file": "pyproject.toml",
+      "line": "37",
+      "severity": "follow-on",
+      "text": "follow-on: the networkx base-dependency declaration has no regression guard -- the subprocess runs in an environment that already carries networkx, so reverting this line leaves tests/test_base_install_imports.py green."
+    },
+    {
+      "file": "nova/frame/vtkgeo.py",
+      "line": "36",
+      "severity": "follow-on",
+      "text": "follow-on: TRISHELL_FEATURES duplicates the column list owned by TriShell.features at nova/geometry/volume.py:33; a stack-free owner both import would remove the drift the guarded test at tests/test_base_install_imports.py:142 exists to catch."
+    },
+    {
+      "file": "manifest.md",
+      "line": "11",
+      "severity": "follow-on",
+      "text": "follow-on: the tests: field carries an unsubstituted <worktree> placeholder the manifest contract forbids, so the recorded gate command cannot be re-run as written."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s): nova/frame/framespace.py:36, nova/frame/dataframe.py:420, nova/control/circuit.py:113",
+    "diff": "commit-by-commit against base dbc59142391b86dcb32e80383d47d8b143fba999: f51fcd57e replaces the lazy TriShell.features lookup in vtkgeo with a declared TRISHELL_FEATURES tuple, and d9f340e5d moves networkx into [project].dependencies (relocking uv.lock) and extends tests/test_base_install_imports.py with a series-circuit edge_loops exercise.",
+    "done_when": "the done_when asks for a subprocess blocking the five 3D modules that imports the named modules and builds a two-coil coilset failing at base; tests/test_base_install_imports.py does exactly that and its head run (2 passed, EXIT=0 at d9f340e5d) and red base arm are recorded in /home/ITER/mcintos/Code/nova/.cache/coilset-without-3d-stack/head_gate2.log and negative_control_base.log.",
+    "goal": "the node goal is to make the 2D coilset path import under nova's base dependencies alone; nova/frame/vtkgeo.py:36 and pyproject.toml:37 land that, and the blocked subprocess builds a two-coil CoilSet and its linkage matrix stack-free, though the brief's listed winding.py:8 and volume.py:8 imports were left untouched.",
+    "manifest": "read; it reports status complete, commits f51fcd57e and d9f340e5d, the head gate at d9f340e5d (2 passed EXIT=0), the red base arm, and an explicit SCOPE DISCREPANCY for nova/frame/vtkgeo.py.",
+    "write_paths": "the manifest declares ten write paths and three of the four changed paths sit inside them; nova/frame/vtkgeo.py is outside the declared scope even though the brief body cites vtkgeo.py:29 and the fix cannot be made without editing it."
+  },
+  "justifications": {
+    "durability": "restoring base vtkgeo.py reddens tests/test_base_install_imports.py:129 in negative_control_base.log, but the networkx declaration at pyproject.toml:37 has no assertion under which it fails.",
+    "evidence": "the gate is tests/test_base_install_imports.py and its head result (2 passed, EXIT=0 at d9f340e5d) is recorded in /home/ITER/mcintos/Code/nova/.cache/coilset-without-3d-stack/head_gate2.log with a matching red base arm.",
+    "fit": "nova/frame/vtkgeo.py:29 already used the deferred import_module idiom and the new module-level tuple at vtkgeo.py:36 follows it with no forbidden identifier.",
+    "goal_fidelity": "nova/frame/vtkgeo.py:36 declares the feature columns stack-free and pyproject.toml:37 promotes networkx, and the coilset path imports and builds without the 3D stack, meeting the goal.",
+    "reuse": "TRISHELL_FEATURES at nova/frame/vtkgeo.py:36 duplicates the list owned at nova/geometry/volume.py:33 rather than extending a single stack-free owner.",
+    "scope_discipline": "nova/frame/vtkgeo.py is the only changed file absent from the declared write paths at manifest.md:5."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to make the 2D coilset path import under nova's base dependencies alone; the landed change gives nova/frame/vtkgeo.py its own TRISHELL_FEATURES tuple (vtkgeo.py:36) and declares networkx in the base dependency set (pyproject.toml:37), and the blocked subprocess builds a two-coil CoilSet and its 2x2 linkage matrix with none of the 3D stack loaded, so the coilset path now imports stack-free; the brief's listed eager sites in nova/frame/winding.py:8 and nova/geometry/volume.py:8 were left untouched and the worker's measurement shows they are not on the 2D path.\nVERDICT done_when: the done_when names a subprocess blocking meshio/vedo/pyvista/trimesh/vtk that imports nova.frame.coilset, nova.imas.machine, nova.circuit.conductor, nova.circuit.linkage and nova.biot.greens and builds a two-coil coilset with its linkage matrix, failing at base; tests/test_base_install_imports.py implements exactly that and the manifest records the head run at tests/test_base_install_imports.py (2 passed, EXIT=0) in /home/ITER/mcintos/Code/nova/.cache/coilset-without-3d-stack/head_gate2.log, with the base arm red in negative_control_base.log (2 failed, EXIT=1).\nVERDICT write_paths: the manifest declares nova/frame/winding.py, nova/geometry/volume.py, nova/geometry/polyline.py, nova/control/circuit.py, tests/test_base_install_imports.py, pyproject.toml, uv.lock and the cache dir; the diff's tests/test_base_install_imports.py, pyproject.toml and uv.lock sit inside them, but nova/frame/vtkgeo.py is outside the declared scope even though the brief body cites vtkgeo.py:29 and the fix cannot be made without editing it.\nVERDICT manifest: read; it reports status complete, commits f51fcd57e and d9f340e5d, the head gate at d9f340e5d (2 passed EXIT=0), the base arm red, and an explicit SCOPE DISCREPANCY for nova/frame/vtkgeo.py.\nVERDICT diff: read commit by commit against base dbc59142391b86dcb32e80383d47d8b143fba999; f51fcd57e replaces vtkgeo._trishell_features()'s lazy _volume().TriShell.features with a declared TRISHELL_FEATURES tuple, and d9f340e5d moves networkx from the test extra into [project].dependencies relocking uv.lock and extends tests/test_base_install_imports.py with a series-circuit edge_loops exercise.\nCALL_SITES: nova/frame/framespace.py:36 (frame_attrs(VtkGeo, VtkPlot) constructs VtkGeo whose additional/features fields call _trishell_features at vtkgeo.py:60,67), nova/frame/dataframe.py:420 (_frame_attrs method that constructs the metamethod), nova/control/circuit.py:113 (Circuit.edge_loops builds networkx.Graph, reached from nova/control/control.py via CoilSet)\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: nova/frame/vtkgeo.py:36 declares the feature columns stack-free and pyproject.toml:37 promotes networkx, and the head gate builds a two-coil CoilSet with none of the blocked modules loaded, so the coilset import goal is met.\nSCORE evidence: 18\nJUSTIFICATION evidence: the gate is tests/test_base_install_imports.py and its head result (2 passed, EXIT=0 at d9f340e5d) is recorded in /home/ITER/mcintos/Code/nova/.cache/coilset-without-3d-stack/head_gate2.log with a matching red base arm, though the manifest's tests: field carries an unsubstituted <worktree> placeholder and line 104's not-loaded assertion is tautological.\nSCORE scope_discipline: 12\nJUSTIFICATION scope_discipline: nova/frame/vtkgeo.py is the only file the diff changes that is absent from the node's declared write paths at manifest.md:5, so the landed change leaves the fenced scope.\nSCORE durability: 14\nJUSTIFICATION durability: the vtkgeo deferral is genuinely guarded -- restoring base vtkgeo.py reddens tests/test_base_install_imports.py:129 with ModuleNotFoundError meshio in negative_control_base.log -- but the networkx declaration at pyproject.toml:37 has no assertion under which it fails, since the subprocess runs in an environment that already carries networkx.\nSCORE fit: 19\nJUSTIFICATION fit: nova/frame/vtkgeo.py:29 already used the deferred import_module idiom and the new module-level TRISHELL_FEATURES tuple at vtkgeo.py:36 follows it, with no plan, version or ticket identifier in any added name or comment.\nSCORE reuse: 12\nJUSTIFICATION reuse: TRISHELL_FEATURES at nova/frame/vtkgeo.py:36 duplicates the feature list the repository already owns at nova/geometry/volume.py:33 rather than extending a single stack-free owner both could import, held equal only by the guarded test at tests/test_base_install_imports.py:142.\nFINDING nova/frame/vtkgeo.py:36 follow-on: the file is changed outside the node's declared write paths, and while the brief body cites vtkgeo.py:29 and the eager reach cannot otherwise be removed, check-manifest reports it as an out-of-scope write for coordinator adjudication.\nFINDING tests/test_base_install_imports.py:104 follow-on: assert not loaded cannot fail, because the _Block3D finder at line 45 raises ModuleNotFoundError on any request for a blocked root, so a blocked module can never reach sys.modules; the load-bearing guard is the returncode==0 assertion at line 129, and this line overstates what the test checks.\nFINDING pyproject.toml:37 follow-on: the networkx base-dependency declaration has no regression guard -- the blocked subprocess runs in the shared environment that already carries networkx, so reverting this line leaves tests/test_base_install_imports.py green; a guard would parse [project].dependencies for networkx.\nFINDING nova/frame/vtkgeo.py:36 follow-on: TRISHELL_FEATURES duplicates the column list owned by TriShell.features at nova/geometry/volume.py:33; a stack-free owner module importing neither vtk nor vedo would let both resolve one list, removing the drift the guarded test at tests/test_base_install_imports.py:142 exists to catch.\nFINDING manifest.md:11 follow-on: the tests: field records the gate command with an unsubstituted \"<worktree>\" placeholder the manifest contract forbids, so a reader copying the recorded command cannot re-run the gate; the literal path survives only in the gate log header.",
+  "review_run_id": "r-20261017T204203320137-review-of-coilset-without-3d-stack-d9f340e5d23a",
+  "reviewed_base_sha": "dbc59142391b86dcb32e80383d47d8b143fba999",
+  "reviewed_head_sha": "d9f340e5d23a9bfecb846f2c5dc74e9a7f18c523",
+  "reviewed_run_id": "r-20261017T185754754946-coilset-without-3d-stack",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 14,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 17,
+    "reuse": 12,
+    "scope_discipline": 12
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T20:54:15.618663+00:00",
+  "total": 92
+}

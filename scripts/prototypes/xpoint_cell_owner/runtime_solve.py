@@ -113,5 +113,5 @@ def advance(
         ),
     )
     updated = state + chosen * step
-    end = residual(updated, operands, scale, profile, density_mode)
+    end = residual(updated, operands, scale, profile, component, density_mode)
     return updated, jnp.max(jnp.abs(end)), lu, pivots, chosen

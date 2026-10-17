@@ -13,6 +13,7 @@ import pytest
 from nova.equilibrium import fixed_point, reduced_newton
 from nova.equilibrium.forward_operator import CellCurrentMoments, ForwardFluxOperator
 from nova.jax.config import Precision, configure_dtypes
+from tests.jaxpr_scans import scan_sites
 
 configure_dtypes()
 assert jax.config.jax_enable_x64 is True
@@ -308,21 +309,11 @@ def test_reduced_trip_body_and_newton_budget_are_scans(trips, steps):
     assert _barrier_count(solve, *arguments) == 1
     program = jax.make_jaxpr(solve)(*arguments)
 
-    def scan_lengths(value):
-        if hasattr(value, "eqns"):
-            for equation in value.eqns:
-                if equation.primitive.name == "scan":
-                    assert equation.params["unroll"] == 1
-                    yield equation.params["length"]
-                for parameter in equation.params.values():
-                    yield from scan_lengths(parameter)
-        elif hasattr(value, "jaxpr"):
-            yield from scan_lengths(value.jaxpr)
-        elif isinstance(value, tuple | list):
-            for item in value:
-                yield from scan_lengths(item)
-
-    lengths = list(scan_lengths(program))
+    scan_lengths = []
+    for length, unroll in scan_sites(program):
+        assert unroll == 1
+        scan_lengths.append(length)
+    lengths = scan_lengths
     assert trips in lengths
     assert steps in lengths
     result = jax.jit(solve)(*arguments)

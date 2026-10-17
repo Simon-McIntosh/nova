@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="trip-guard-counts-its-marker">
+  <meta name="plan-title" content="Trip-body guards count their own marker">
+  <meta name="plan-summary" content="The four trip-body guards were a false positive: they counted the two optimization barriers _fenced places around each stream operator application alongside their own marker. The guards now difference a marked lowering against the same program unmarked, so they count trip-body copies alone. The fence is kept and nova/equilibrium/fixed_point.py is unedited. All four guards pass; the three compared modules and the guard module add no failure over the base.">
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-verifies" content="converged-forward-solve#s6">
+  <meta name="plan-recorded-at" content="2026-10-17">
+  <meta name="plan-verdict" content="pass">
+  <meta name="plan-environment" content="Fleet CPU allocation (job 1281970, node 98dci4-clu-2002), JAX_PLATFORMS=cpu">
+  <meta name="plan-tags" content="equilibrium,krylov,tests,guards">
+  <title>Trip-body guards count their own marker | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>Trip-body guards count their own marker</h1>
+  <section id="trip-guard-counts-its-marker-verdict">
+    <h2>False positive confirmed, counter repaired, fence kept</h2>
+    <p>Four guards failed on the base revision <code>cf92f9ae347caf402c4e1f03d925fbc9961f9947</code>: <code>test_active_trip_body_is_lowered_once[2]</code>, <code>[5]</code> and <code>test_newton_step_body_is_lowered_once[2]</code>, <code>[5]</code>. Each read <code>assert 3 == 1</code>. The reproduction is <code>logs/repro-base.log</code> of run <code>r-20261017T084815859798</code>.</p>
+    <p>The three barriers are not three copies of a trip body. A whole solve carries two <code>stablehlo.optimization_barrier</code> operations from <code>_fenced</code> in <code>nova/equilibrium/fixed_point.py</code>, which wraps each stream operator application in a barrier on its input and one on its result. The fence landed in <code>e84cbcaee</code> on 2026-09-23, after these guards were written, so each operator application still rounds as a standalone evaluation for the single-site Krylov identity comparison. The third barrier is the guard's own marker. The guards were measuring the fence, not the number of lowered trip bodies.</p>
+    <p><code>nova/equilibrium/fixed_point.py</code> is not edited by this node. The fence stays; the counter is what changed.</p>
+  </section>
+  <section id="trip-guard-counts-its-marker-counter">
+    <h2>How the counter now attributes a barrier to its marker</h2>
+    <p><code>_marker_barrier_count(marked_function, unmarked_count, *arguments)</code> lowers the program twice and returns the difference. The unmarked arm is lowered with the guard's marker not installed, and its barrier count is passed in; the marked arm is lowered with the marker installed. Only barriers the marker adds survive the subtraction, so the fence contributes to both arms and cancels.</p>
+    <p>The two arms must be lowered through distinct callables. <code>jax.jit</code> caches a lowering on the callable it traces, so re-lowering the same function object after a monkeypatch returns the first program and the difference reads zero. Measured on this allocation: the plain solve lowers to 2 barriers; the same function object lowered after the marker is installed still reads 2, while the same body passed as a <code>lambda</code> or a <code>partial</code> reads 3. Both guards therefore lower each arm through its own <code>functools.partial</code>, and the Newton guard's solve is lifted to the module-level <code>_newton_solve</code> so both of its arms are partials of the same helper.</p>
+    <p>The assertion intent is unchanged. A count of one still means the trip body is lowered exactly once; a doubled body now counts two, which the negative control shows.</p>
+  </section>
+  <section id="trip-guard-counts-its-marker-negative-control">
+    <h2>Negative control: the marked step applied twice counts two</h2>
+    <p>A copy of the guard module was mutated so its test-only solve <code>_newton_solve</code> applies the marked Krylov step twice and returns the sum of the two states, then run unchanged otherwise. Both guard instances fail on the count: <code>AssertionError: the lowered solve contains 2 copies of its step body</code>, with <code>2 failed, 14 passed</code> and a final line of <code>EXIT=1</code>. The two failing ids are <code>test_newton_step_body_is_lowered_once[2]</code> and <code>[5]</code>, which the head arm passes. The log is <code>logs/negative-control.log</code>; the mutation that produced the module is <code>logs/negctl_mutate.py</code>.</p>
+  </section>
+  <section id="trip-guard-counts-its-marker-gates">
+    <h2>Gate results by delta against the base revision</h2>
+    <p>Every arm ran one module in its own fresh CPU process with the repository root conftest. The base arm ran in a revision tree extracted from <code>cf92f9ae347caf402c4e1f03d925fbc9961f9947</code>; the head arm ran in the worktree at <code>d0245d0085fcf6a7d4a6aea41b1db5303cabde76</code>. Each log names its tree, its command, the imported <code>nova.__file__</code> and its exit status.</p>
+    <table>
+      <thead><tr><th>Module</th><th>Base arm</th><th>Head arm</th><th>Added failures</th></tr></thead>
+      <tbody>
+        <tr><td><code>tests/test_solve_trips_are_a_scan.py</code></td><td>4 failed, 12 passed (35.80 s), <code>EXIT=1</code></td><td>16 passed (37.06 s), <code>EXIT=0</code></td><td>0; the four guards are repaired</td></tr>
+        <tr><td><code>tests/test_single_site_krylov.py</code></td><td>5 passed (7.90 s), <code>EXIT=0</code></td><td>5 passed (7.86 s), <code>EXIT=0</code></td><td>0</td></tr>
+        <tr><td><code>tests/test_fixed_point.py</code></td><td>45 passed (260.97 s), <code>EXIT=0</code></td><td>45 passed (265.90 s), <code>EXIT=0</code></td><td>0</td></tr>
+        <tr><td><code>tests/test_fixed_points.py</code></td><td>15 passed (42.30 s), <code>EXIT=0</code></td><td>15 passed (42.54 s), <code>EXIT=0</code></td><td>0</td></tr>
+      </tbody>
+    </table>
+    <p>The four failing base ids are exactly the four named guards; the head arm fails none of them and no other test in the module. No GPU job was submitted and no running job was cancelled.</p>
+  </section>
+  <section id="trip-guard-counts-its-marker-evidence">
+    <h2>Logs and change</h2>
+    <ul>
+      <li><code>logs/repro-base.log</code> — the four guards failing on the base revision, <code>assert 3 == 1</code>.</li>
+      <li><code>logs/negative-control.log</code> — the doubled-body control, <code>2 failed, 14 passed</code>, <code>EXIT=1</code>.</li>
+      <li><code>logs/negctl_mutate.py</code> — the mutation applied to the guard module to build the control.</li>
+      <li><code>logs/base_guards.log</code>, <code>logs/head_guards.log</code>, <code>logs/base_single_site_krylov.log</code>, <code>logs/head_single_site_krylov.log</code>, <code>logs/base_fixed_point.log</code>, <code>logs/head_fixed_point.log</code>, <code>logs/base_fixed_points.log</code>, <code>logs/head_fixed_points.log</code> — the gate arms.</li>
+      <li>Changed path: <code>tests/test_solve_trips_are_a_scan.py</code>, 36 insertions and 15 deletions.</li>
+    </ul>
+    <p>The base revision's own failing ids are recorded so a later reader can reproduce the delta without re-deriving the base arm.</p>
+  </section>
+</main>
+</body>
+</html>

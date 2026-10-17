@@ -59,48 +59,10 @@ def _local_axis_sector(geometry, axis, form):
     return jnp.argmax(topology._normal_form_sectors(nearby[None], form)[0])
 
 
-def _sector_sidedness(midpoint, form, axis_sector):
-    """Continuous signed distance from an edge midpoint to the axis-facing sector.
-
-    The positive branches of the saddle normal form divide the local domain by
-    curved rays. A boolean side test snaps that partition onto the mesh; this
-    returns the margin to the nearest curved ray so the frame treatment can vary
-    smoothly across the boundary instead of switching between cells.
-    """
-    offset = midpoint - form.position
-    parameter = jnp.einsum("...i,ai->...a", offset, form.direction)
-    residual = (
-        offset[..., None, :]
-        - parameter[..., None] ** 2 * form.curvature
-        - parameter[..., None] ** 3 * form.cubic
-    )
-    side = (
-        form.direction[:, 0] * residual[..., 1]
-        - form.direction[:, 1] * residual[..., 0]
-    )
-    next_side = jnp.roll(side, -1, axis=-1)
-    return jnp.minimum(side[..., axis_sector], -next_side[..., axis_sector])
-
-
 def _wall_path_ceiling(
-    geometry,
-    coefficients,
-    form,
-    axis,
-    radius,
-    saddle_live,
-    saddle_score,
-    seed,
-    sigma,
-    frame_gate,
+    geometry, coefficients, form, axis, normal, saddle_score, seed, sigma, frame_gate
 ):
-    """Highest signed level at which each cell is reachable from the axis.
-
-    The maximin bottleneck of the edge passages, capped near the saddle by a
-    continuous frame attenuation so a path that crosses the saddle along a
-    non-positive branch is limited toward the saddle level without any boolean
-    sector test.
-    """
+    """Find the highest level that can reach each cell from the axis."""
     vertices = geometry.vertices
     count = geometry.vertex_count
     slot = jnp.arange(vertices.shape[1])
@@ -133,41 +95,9 @@ def _wall_path_ceiling(
     ceiling = jnp.minimum(peak, peak[peer, peer_edge])
     if frame_gate:
         axis_sector = _local_axis_sector(geometry, axis, form)
-        length_width = jnp.maximum(1e-7, 1e-4 * jnp.median(geometry.pitch))
-        sector_weight = jnp.clip(
-            0.5 + _sector_sidedness(midpoint, form, axis_sector) / length_width, 0, 1
-        )
-        distance = jnp.linalg.norm(geometry.centre - form.position, axis=1)
-        near_weight = jnp.clip(0.5 + (radius - distance) / length_width, 0, 1)
-        near_weight = jnp.maximum(
-            near_weight,
-            topology._inside_cells(geometry, form.position).astype(near_weight.dtype),
-        )
-        near_weight = jnp.where(saddle_live, near_weight, 0)
-        leak = near_weight[:, None] * (1 - sector_weight)
-        leak = jnp.maximum(leak, leak[peer, peer_edge])
-        over = jnp.where(saddle_live, jnp.maximum(ceiling - saddle_score, 0.0), 0.0)
-        # Written as a min against the interpolated level, not as a subtraction:
-        # subtracting the excess computes ceiling - (ceiling - saddle_score),
-        # which in binary64 returns the saddle level to within a few ulp rather
-        # than exactly, and a wall contact that ties the saddle level to the last
-        # bit then wins the boundary on the tie. Where the attenuation saturates
-        # this is exactly min(ceiling, saddle_score).
-        ceiling = jnp.where(
-            over > 0,
-            jnp.minimum(ceiling, saddle_score + (1.0 - leak) * over),
-            ceiling,
-        )
-    # The cell quadratic is a fitted surrogate for the field, so an edge peak
-    # inside the cell that owns the X-point can land on the wrong side of the
-    # true saddle level. The read already locates that level, so the passage
-    # through the owner cell is bounded by it before any path can carry it into
-    # the private-flux region. A plain min of two located levels, so nothing
-    # boolean returns and the bound is continuous in every fitted quantity.
-    if form is not None:
-        owner = topology._inside_cells(geometry, form.position)
-        seat = jnp.where(saddle_live, owner, False)
-        ceiling = jnp.where(seat[:, None], jnp.minimum(ceiling, saddle_score), ceiling)
+        sector = topology._normal_form_sectors(midpoint, form)[..., axis_sector]
+        barred = (normal[:, None] & ~sector) | (normal[peer] & ~sector[peer, peer_edge])
+        ceiling = jnp.where(barred, jnp.minimum(ceiling, saddle_score), ceiling)
     ceiling = jnp.where(geometry.neighbour >= 0, ceiling, -jnp.inf)
     best = jnp.full((len(geometry.centre),), -jnp.inf).at[seed].set(jnp.inf)
 
@@ -179,10 +109,93 @@ def _wall_path_ceiling(
 
 
 def _wall_effective_level(tangency, bottleneck):
-    """Effective level of a wall contact: the more scrape-off-side of its own
-    tangency level and the best axis path's bottleneck. Continuous in both
-    operands and free of any boolean reachability gate."""
+    """Effective level of a wall contact.
+
+    The more scrape-off-side of the contact's own tangency level and the
+    bottleneck of the best axis path that reaches it. A private-flux contact
+    whose tangency is more axis-ward than the X-point, but which the axis
+    reaches only through the X-point, therefore takes the saddle's level rather
+    than its own. Continuous in both operands and free of any reachability gate.
+    """
     return jnp.minimum(tangency, bottleneck)
+
+
+def _continuous_path_weight(
+    geometry, coefficients, form, axis, seed, sigma, level, radius, saddle_live
+):
+    """Propagate the strongest smooth edge passage from the magnetic axis."""
+    vertices = geometry.vertices
+    count = geometry.vertex_count
+    slot = jnp.arange(vertices.shape[1])
+    following = jnp.where(slot[None] + 1 < count[:, None], slot[None] + 1, 0)
+    end = jnp.take_along_axis(vertices, following[..., None], axis=1)
+    midpoint = (vertices + end) / 2
+    local = (vertices - geometry.centre[:, None]) / geometry.pitch[:, None, None]
+    local_middle = (midpoint - geometry.centre[:, None]) / geometry.pitch[:, None, None]
+    local_end = (end - geometry.centre[:, None]) / geometry.pitch[:, None, None]
+
+    def signed(position):
+        x, y = position[..., 0], position[..., 1]
+        return sigma * (
+            coefficients[:, 0, None]
+            + coefficients[:, 1, None] * x
+            + coefficients[:, 2, None] * y
+            + coefficients[:, 3, None] * x * x
+            + coefficients[:, 4, None] * x * y
+            + coefficients[:, 5, None] * y * y
+        )
+
+    first, middle, last = signed(local), signed(local_middle), signed(local_end)
+    curvature = 2 * (first + last - 2 * middle)
+    slope = last - first - curvature
+    fraction = jnp.clip(-slope / jnp.where(curvature < 0, 2 * curvature, 1), 0, 1)
+    peak = jnp.maximum(
+        jnp.maximum(first, last),
+        signed(local + fraction[..., None] * (local_end - local)),
+    )
+    peer = jnp.maximum(geometry.neighbour, 0)
+    peer_edge = jnp.maximum(geometry.neighbour_edge, 0)
+    passage = jnp.minimum(peak, peak[peer, peer_edge])
+    flux_width = jnp.asarray(1e-8, dtype=passage.dtype)
+    flux_weight = jnp.clip(0.5 + (passage - level) / flux_width, 0, 1)
+
+    axis_sector = _local_axis_sector(geometry, axis, form)
+    offset = midpoint - form.position
+    parameter = jnp.einsum("...i,ai->...a", offset, form.direction)
+    residual = (
+        offset[..., None, :]
+        - parameter[..., None] ** 2 * form.curvature
+        - parameter[..., None] ** 3 * form.cubic
+    )
+    side = (
+        form.direction[:, 0] * residual[..., 1]
+        - form.direction[:, 1] * residual[..., 0]
+    )
+    next_side = jnp.roll(side, -1, axis=-1)
+    sector_margin = jnp.minimum(side[..., axis_sector], -next_side[..., axis_sector])
+    length_width = jnp.maximum(1e-7, 1e-4 * jnp.median(geometry.pitch))
+    sector_weight = jnp.clip(0.5 + sector_margin / length_width, 0, 1)
+    distance = jnp.linalg.norm(geometry.centre - form.position, axis=1)
+    near_weight = jnp.clip(0.5 + (radius - distance) / length_width, 0, 1)
+    near_weight = jnp.maximum(
+        near_weight,
+        topology._inside_cells(geometry, form.position).astype(near_weight.dtype),
+    )
+    near_weight = jnp.where(saddle_live, near_weight, 0)
+    frame_weight = 1 - near_weight[:, None] * (1 - sector_weight)
+    frame_weight = jnp.minimum(frame_weight, frame_weight[peer, peer_edge])
+    edge_weight = jnp.where(
+        geometry.neighbour >= 0, jnp.minimum(flux_weight, frame_weight), 0
+    )
+    strength = (
+        jnp.zeros((len(geometry.centre),), dtype=edge_weight.dtype).at[seed].set(1)
+    )
+
+    def relax(_, current):
+        incoming = jnp.minimum(current[peer], edge_weight)
+        return jnp.maximum(current, jnp.max(incoming, axis=1))
+
+    return jax.lax.fori_loop(0, len(geometry.centre), relax, strength)
 
 
 def read(field, roots, geometry, convention, policy, *, frame_gate=True):
@@ -277,8 +290,7 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
         approximate.field_coefficients,
         form,
         axis,
-        radius,
-        saddle_live,
+        saddle_live & near_saddle,
         saddle_score,
         seed,
         sigma,
@@ -288,8 +300,7 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
     wall_index = jnp.argmax(wall_scores)
     wall_score = wall_scores[wall_index]
     diverted = saddle_live & (saddle_score >= wall_score)
-    level_signed = jnp.maximum(wall_score, saddle_score)
-    level = sigma * level_signed
+    level = sigma * jnp.maximum(wall_score, saddle_score)
     boundary = jnp.where(
         diverted, roots.position[saddle_index], wall_points[wall_index]
     )
@@ -345,8 +356,18 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
         edge_interval=intervals,
     )
     if frame_gate:
-        connected = ceiling >= level_signed
-        path_weight = connected.astype(fraction.dtype)
+        path_weight = _continuous_path_weight(
+            geometry,
+            provisional.field_coefficients,
+            form,
+            axis,
+            seed,
+            sigma,
+            sigma * level,
+            radius,
+            saddle_live,
+        )
+        connected = path_weight > 0
     else:
         from scripts.prototypes.sub_millisecond.measure_wall_march import (
             connected_cells as ungated,

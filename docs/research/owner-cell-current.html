@@ -241,6 +241,39 @@ asks for is not implemented. Neither is the independent dense reference at
 1e-12 (the agreement above is against the accessor's own construction, not an
 independent one), nor the cold solve, the transition bracket, or the panels.</p>
 
+<h2 id="s21-owner-current-cold">The diverted cold solve under the lobe</h2>
+
+<p>Run on titan (P100, 16 GB, one card, no reservation) because the H200 was
+draining; every wall here is a titan number and the persistent compilation cache
+keys on the backend, so these programs cold-compiled on this device. The solve
+is double precision — <code>solve_carrier</code> calls
+<code>configure_dtypes()</code> before any array is built — so the residual floor
+below is a numerical claim and not a single-precision artefact.</p>
+
+<table id="s21-owner-current-cold-table">
+<tr><th>cells</th><th>corrections</th><th>residual history</th><th>converged (residual &le; 1e-12)</th></tr>
+<tr><td>2,098</td><td>6</td><td>1.3144847464656726e-3, 1.3078152814932939e-3, 1.3061922780456478e-3, 1.1716316194908564e-3, 7.145042375987129e-7, <strong>1.4236135421233083e-11</strong></td><td><strong>false</strong> — 14x the criterion</td></tr>
+</table>
+
+<p>The solve is doing real work and stops one factor short: the first three
+corrections crawl (the line search collapses to 1/64, 1/128 and then 1/1024)
+before correction four restores a full step and five and six drop the residual
+by eleven orders in two steps. It ends at 1.4236e-11 against a criterion of
+1e-12, so the flag is false while the solve has effectively converged. The same
+solver under the retired half-plane region stalled at 7.3477e-6 at 282 cells and
+2.6072e-6 at 550 — five orders worse — so the region repair moves the solve
+residual as well as the map error. Map-level context for this row: the map error
+the solve was built on is 9.47422658888e-5 and the map's own centre residual is
+1.3279236560632087e-3, which bounds what any solver can reach while the map
+carries that error.</p>
+
+<p><strong>Not taken:</strong> the Gauss-Newton gradient measurement and the
+Taylor slopes in three random directions at each root; the 550 and 282 cold rows
+were cut off by the job's 20-minute wall after the 2,098 row spent nine minutes
+of the allocation. The 41-state limited-carrier sweeps and their transition
+bracket, the share partition and the independent dense reference at 1e-12 are
+also outstanding.</p>
+
 <h2 id="s21-owner-current-clauses">Done-when status</h2>
 
 <table>
@@ -275,17 +308,14 @@ share partition the ruling asks for is specified and not implemented (see
 <tr>
 <td>3. Diverted cold solve to 1e-12 at all three sizes with residual
 histories, Gauss-Newton gradient and Taylor slopes</td>
-<td><strong>not met</strong> — the coarse solves ran and stalled</td>
-<td>The 282 and 550 solves ran from cold under the profile representation, six
-corrections each, and did not converge: final residual 7.3477e-6 at 282 cells
-and 2.6072e-6 at 550, with <code>converged</code> false and the correction
-history (<code>history</code>) recorded in
-<code>owner-current/cold-profile-250.json</code> and <code>-500.json</code>.
-Neither reaches the 1e-12 floor the clause asks for, and the stall sits at the
-same order as the map error those carriers fail on, so the residual floor is
-the un-repaired booking rather than a property of the Newton step. The Gauss-Newton
-gradient and the Taylor slope measurement were not taken. The 2,098 solve
-cannot start: <code>require_map</code> refuses a map this node cannot repair.</td>
+<td><strong>not met</strong> — the finest solve reaches 1.4e-11 against a 1e-12 criterion</td>
+<td>Under the lobe the 2,098-cell solve now runs and drives its residual to
+1.4236135421233083e-11 in six corrections on titan, 14x the 1e-12 criterion, so
+<code>converged</code> is false while the same solver under the retired region
+stalled at 7.3477e-6 (282 cells) and 2.6072e-6 (550). The Gauss-Newton gradient
+and the Taylor slopes were not taken, and the 550 and 282 rows were cut off by
+the titan job wall (<code>owner-current/coldlobe-2000.json</code> holds the full
+history).</td>
 </tr>
 <tr>
 <td>4. Limited-carrier sweep; 550 transition bracket classified by adjacent

@@ -108,6 +108,18 @@ def _wall_path_ceiling(
     return jax.lax.fori_loop(0, len(geometry.centre), relax, best)
 
 
+def _wall_effective_level(tangency, bottleneck):
+    """Effective level of a wall contact.
+
+    The more scrape-off-side of the contact's own tangency level and the
+    bottleneck of the best axis path that reaches it. A private-flux contact
+    whose tangency is more axis-ward than the X-point, but which the axis
+    reaches only through the X-point, therefore takes the saddle's level rather
+    than its own. Continuous in both operands and free of any reachability gate.
+    """
+    return jnp.minimum(tangency, bottleneck)
+
+
 def _continuous_path_weight(
     geometry, coefficients, form, axis, seed, sigma, level, radius, saddle_live
 ):
@@ -284,7 +296,7 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
         sigma,
         frame_gate,
     )
-    wall_scores = jnp.minimum(sigma * wall_flux, ceiling[wall_cell])
+    wall_scores = _wall_effective_level(sigma * wall_flux, ceiling[wall_cell])
     wall_index = jnp.argmax(wall_scores)
     wall_score = wall_scores[wall_index]
     diverted = saddle_live & (saddle_score >= wall_score)

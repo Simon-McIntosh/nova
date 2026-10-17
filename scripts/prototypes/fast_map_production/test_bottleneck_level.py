@@ -139,14 +139,57 @@ def test_private_flux_contact_takes_the_saddle_level():
     assert float(control[0]) == control_tangency
 
 
-def test_effective_level_is_continuous_in_both_operands():
-    tangency = jnp.asarray([-0.05, 0.2, -1.0])
-    bottleneck = jnp.asarray([-0.5, 0.5, -0.5])
-    effective = _wall_effective_level(tangency, bottleneck)
-    assert np.allclose(np.asarray(effective), [-0.5, 0.2, -1.0])
-    # Varying the tangency through the bottleneck crossing moves the level
-    # continuously: no step.
-    swept = _wall_effective_level(
-        0.5 + jnp.linspace(-1e-6, 1e-6, 5), jnp.full((5,), 0.5)
+def test_effective_level_is_the_minimum_of_the_two_operands():
+    tangency = jnp.asarray([-0.05, 0.2, -1.0, 0.5, 0.7])
+    bottleneck = jnp.asarray([-0.5, 0.5, -0.5, 0.5, 0.3])
+    effective = np.asarray(_wall_effective_level(tangency, bottleneck))
+    expected = np.minimum(np.asarray(tangency), np.asarray(bottleneck))
+    # The effective level IS the more scrape-off-side operand, exactly. A
+    # minimum of two operands is exact in binary64, so the comparison is
+    # bitwise here, not a tolerance test.
+    assert np.allclose(effective, expected, atol=0.0, rtol=1e-15)
+    assert np.array_equal(effective, expected)
+
+
+def _max_adjacent_step(values):
+    """Largest difference between neighbouring samples of a swept series."""
+    values = np.asarray(values, dtype=np.float64)
+    return float(np.max(np.abs(np.diff(values))))
+
+
+def _step_at_the_tie(tangency, bottleneck):
+    """A deliberately non-continuous variant: a 0.1 step where the operands meet.
+
+    Selection is on ``>=`` at the tie, and the branch not taken is offset, so
+    the series jumps at the crossing instead of following the minimum.
+    """
+    return jnp.where(tangency >= bottleneck, bottleneck, tangency + 0.1)
+
+
+def test_effective_level_is_continuous_through_the_tie():
+    bottleneck = 0.5
+    tangency = bottleneck + np.linspace(-1e-6, 1e-6, 41)
+    operand_step = _max_adjacent_step(tangency)
+    effective = np.asarray(
+        _wall_effective_level(
+            jnp.asarray(tangency), jnp.full((tangency.size,), bottleneck)
+        )
     )
-    assert np.allclose(np.asarray(swept), 0.5 + np.linspace(-1e-6, 1e-6, 5))
+    expected = np.minimum(tangency, bottleneck)
+    # Exactness first: the sweep follows the minimum to rtol 1e-15, atol 0.
+    assert np.allclose(effective, expected, atol=0.0, rtol=1e-15)
+    # Continuity second: the largest adjacent-sample difference cannot exceed
+    # the operand step, because the level is one of the two operands and each
+    # of those moves by at most the step.
+    largest = _max_adjacent_step(effective)
+    assert largest <= operand_step, (
+        f"level steps by {largest} over an operand step of {operand_step}"
+    )
+
+    # The variant carries a step at the tie, so both checks must reject it:
+    # this is what shows the checks can fail rather than passing on anything.
+    broken = np.asarray(
+        _step_at_the_tie(jnp.asarray(tangency), jnp.full((tangency.size,), bottleneck))
+    )
+    assert not np.allclose(broken, expected, atol=0.0, rtol=1e-15)
+    assert _max_adjacent_step(broken) > operand_step

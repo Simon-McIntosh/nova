@@ -80,7 +80,7 @@ def owned_cut(
     indices = jnp.nonzero(active, size=capacity, fill_value=0)[0]
     density = program._density_coefficients(geometry, reading, profile)
     coefficients = reading.field_coefficients[indices]
-    branch = "halfplane" if component == "ordinary" else component
+    branch = "bell" if component == "bell" else "halfplane"
     orientation = None
     if component == "oriented":
         orientation = jnp.broadcast_to(sigma * saddle_hessian, (indices.shape[0], 2, 2))

@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="327">
+<meta name="plan-version" content="328">
 <meta name="plan-modified" content="2026-10-17">
 </head>
 <body>
@@ -1105,6 +1105,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-s21-saddle-stop" data-who="reckon-build" data-when="2026-10-17T08:45:00Z">
     <div class="r-comment-body"><p>Lead ruling 2026-10-17, applied: one more pass on the saddle-anchored map against an absolute 0.90 ms per-state bar, and if it misses, stop and adopt the axis-facing half-plane. It missed at every size, by 7.4, 10.3 and 27.8 times. Node <code>axis-facing-owner</code> (run r-20261017T073925596435) now makes the half-plane pass the 2,098-cell map guard and converge at all three sizes, with one representation throughout.</p><p>It was not paired: codex stood at 89% of its week with exhaustion projected for 2026-10-18, and reckon routed the codex arm to clive. A separate gap stands: even the half-plane costs 2.71 ms per state at 2,098 cells, and a width-128 batch asks for 263.8 GiB. That belongs to <code>f-cfs-gpu-batch-profile</code>.</p><p>The H200 node 98dci4-gpu-0003 drained at 09:39 after a worker cancelled a running job and SLURM's kill step failed. New betelgeuse jobs pend until an administrator resumes the node, so GPU gates fall back to titan.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-s21-trip-guard-landed" data-who="reckon-build" data-when="2026-10-17T09:25:00Z">
+    <div class="r-comment-body"><p>The trip-body guards are repaired at merge b4f90a428 (run r-20261017T084815859798-trip-guard-counts-its-marker, review 118 of 120, no findings). They now difference a marked lowering against the same program unmarked, so the count attributes to the guard's marker alone. <code>tests/test_solve_trips_are_a_scan.py</code> goes from 4 failed and 12 passed at base to 16 passed. A test-only solve that applies the marked step twice fails both guard instances, and the stream operator fence in <code>fixed_point.py</code> is unchanged.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261010T184522536142-cfs-current-book-fragments" data-who="reckon-build" data-when="2026-10-10T18:46:29.609Z">
     <div class="r-comment-body"><p>Implemented traced current.book over connected multi-polygon membership using the widened signed-ring exact clip. Six certificate rows pass: diverted read image errors 1.15131582e-4, 2.49842782e-5, 3.95031905e-6 at 550/2098/5158 cells; limited errors 1.77777866e-5, 2.66948705e-6, 5.45231060e-7 at 553/2105/5167. Maximum net-current error 2.22e-16, excluded current zero, legacy control 0.197326978718; evidence docs/evidence/fragments/converged-forward-solve/cfs-current-book.html#cfs-current-book-fragments-booking and one three-rung SVG; audit-doc 0 errors.</p></div>

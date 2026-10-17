@@ -136,17 +136,18 @@ descriptions of the same flux apart rather than together.</p>
 <tr><td>282</td><td>4</td><td>3.14409717612e-13</td><td>2.39498329587e-11</td><td>20.7 s</td><td>pass</td><td>finite</td></tr>
 <tr><td>550</td><td>4</td><td>4.84764428524e-13</td><td>1.91211948969e-11</td><td>63.3 s</td><td>fail (one direction)</td><td>finite</td></tr>
 <tr><td>2,098</td><td colspan="6">refused by <code>require_map</code>: the delivered map's 2.49303535497e-4 exceeds the 1e-4 guard before the first correction</td></tr>
-<tr><td>2,098, labelled diagnostic</td><td>1</td><td>3.71832259764e-3</td><td>not reached</td><td>1254.7 s</td><td>not reached</td><td>not reached</td></tr>
+<tr><td>2,098, labelled diagnostic</td><td>2</td><td>1.41370336889e-4</td><td>not reached</td><td>1254.7 s / 1259.7 s</td><td>not reached</td><td>not reached</td></tr>
 </tbody>
 </table>
 <p id="axis-facing-owner-solve-finding">The 282 residual history is 7.59023e-4 → 1.09971e-5 →
 3.31601e-9 → 3.14410e-13 and the 550 history is 7.36288e-4 → 1.91098e-5 → 1.44992e-8 →
 4.84764e-13; both are quadratic throughout. The 2,098 diagnostic was run past the guard with the
-run labelled as such: one correction completed in 1254.7 s, reaching 3.71832259764e-3 with the line
-search damping the step to 0.5, and the 59-minute allocation expired before a second. Four
-corrections is what each smaller carrier needs, so a converged 2,098 root is out of reach on one CPU
-debug node, and the damping engaging there where it does not at 282 and 550 says the booked map is
-further from its own root on this carrier. The 282 root passes the Taylor check in all three
+run labelled as such and timed out mid-descent: two corrections completed, 3.71832259764e-3 after
+1254.7 s with the line search damping the step to 0.5, then 1.41370336889e-4 after a further 1259.7 s
+with the damping off. The 59-minute allocation expired during the third, which needed another 21
+minutes, and four corrections is what each smaller carrier needs. The iteration was still descending
+when the wall arrived, so this is a CPU budget limit rather than a convergence failure, and a root
+past the guard is a root of the map as booked - self-consistency rather than flux accuracy. The 282 root passes the Taylor check in all three
 directions, with middle-step slopes between 1.983 and 2.041. The 550 root reaches the same residual
 quality and fails the check in one direction, where the remainder falls faster than
 step<sup>2</sup> at the three middle step pairs (slopes 3.36 and 3.84 against the 1.8–2.2 window)

@@ -266,14 +266,16 @@
     clause 3: the 2,098-cell root cannot be qualified until the owner map is repaired, and a residual
     measured past the guard would be a root of the map as booked — self-consistency, not flux
     accuracy. A run that does so is therefore labelled as a diagnostic in its own receipt.</p>
-    <p>That diagnostic was run, and the largest carrier is beyond this node's budget at roughly
-    21 minutes per correction: one correction completed in 1,254.7 s, taking the residual from the
-    booked map to 3.71832259764 × 10<sup>−3</sup> with the line search damping the step to 0.5, and
-    the 59-minute allocation expired before a second. Four corrections is what 282 and 550 each need,
-    so a converged 2,098 root is out of reach on one CPU debug node — and on this carrier the damping
-    engages where it does not at the two smaller sizes, which is itself a signal that the booked map
-    is further from its own root. The wall is reported because it is the honest state of clause 3 at
-    2,098, not because the run failed: the iteration was still descending when the allocation ended.</p>
+    <p>That diagnostic was run and timed out mid-descent, and the largest carrier is beyond this node's
+    budget at roughly 21 minutes per correction. Two corrections completed: 3.71832259764 × 10<sup>−3</sup>
+    after 1,254.7 s with the line search damping the step to 0.5, then 1.41370336889 × 10<sup>−4</sup>
+    after a further 1,259.7 s with the damping off, a factor of 26 in one step. The 59-minute
+    allocation expired during the third, which would have needed another 21 minutes, and four
+    corrections is what each smaller carrier needs. So the iteration was still descending quadratically
+    when the wall arrived — this is a budget limit, not a convergence failure, and it is not the same
+    thing as the guard refusal above. It is also not evidence about the analytic target: past the
+    guard the iteration converges to a root of the map as booked, which is self-consistency, and the
+    run is labelled as that in its own receipt.</p>
     <table>
       <thead>
         <tr><th>carrier</th><th>corrections</th><th>terminal residual</th><th>Gauss-Newton gradient</th><th>per-correction wall</th><th>Taylor slopes 2, three directions</th></tr>
@@ -281,7 +283,7 @@
       <tbody>
         <tr><td>282</td><td>4</td><td>3.14409717612e-13</td><td>2.39498329587e-11</td><td>20.7 s</td><td>pass</td></tr>
         <tr><td>550</td><td>4</td><td>4.84764428524e-13</td><td>1.91211948969e-11</td><td>63.3 s</td><td><b>fail (direction 1)</b></td></tr>
-        <tr><td>2,098 (labelled diagnostic)</td><td>1</td><td>3.71832259764e-3</td><td>—</td><td>1,254.7 s</td><td>not reached</td></tr>
+        <tr><td>2,098 (labelled diagnostic)</td><td>2</td><td>1.41370336889e-4</td><td>—</td><td>1,254.7 s / 1,259.7 s</td><td>not reached</td></tr>
       </tbody>
     </table>
     <p id="axis-facing-owner-solve">The 282-cell root passes the Taylor check cleanly: in all three

@@ -32,20 +32,35 @@
 
 <section id="fixture-owner-store-argument-callers">
 <h2>Every caller of the two owners, and what changed for each</h2>
-<p id="fixture-owner-store-argument-callers-body">The fence asks for the enumeration rather than an assurance, so it is here. Across <code>scripts/</code>, <code>tests/</code> and <code>benchmarks/</code>, <code>cached_machine</code> has <strong>58</strong> call sites and <code>cached_fixture_exterior</code> has <strong>33</strong>. Exactly four name a store: the two backend helpers in <code>certificate_fixtures.py</code> (<code>carrier_store()</code> at line 246 and <code>exterior_store()</code> at line 260) and the two calls inside the new hit-path test at <code>tests/test_current_book_fragments.py:312-313</code>. Every other call site takes the default. The default path, the identity, the key, the encode and decode, the builder and its revision, and the receipt's field names are all unchanged, so those 87 call sites are unchanged in behaviour by construction rather than by inspection - but they were also inspected, and the representative ones are listed.</p>
+<p id="fixture-owner-store-argument-callers-body">The fence asks for the enumeration rather than an assurance, so it is here, counted rather than estimated. Across <code>scripts/</code>, <code>tests/</code> and <code>benchmarks/</code>, <code>cached_machine</code> has <strong>69</strong> call sites and <code>cached_fixture_exterior</code> has <strong>34</strong>: 103 in all. The count walks the three trees with <code>ast</code> and counts <code>ast.Call</code> nodes whose callee is one of the two names, in the worktree at <code>f629e1dc3</code> - so a definition is not a call site and a mention in prose, a docstring or a comment is not either, which a line-oriented count cannot separate (the same trees match 86 and 35 such lines).</p>
 <table id="fixture-owner-store-argument-callers-table">
-<thead><tr><th>Caller</th><th>Owner</th><th>Store passed</th><th>Behaviour</th></tr></thead>
+<thead><tr><th>Tree</th><th>Owner</th><th>Call sites</th><th>Files</th><th>Store passed</th><th>Behaviour</th></tr></thead>
 <tbody>
-<tr><td><code>scripts/prototypes/support/certificate_fixtures.py:241,259</code></td><td>both</td><td>the shared content store</td><td>the booking gate's fixtures; the new path</td></tr>
-<tr><td><code>tests/test_current_book_fragments.py:312-313</code></td><td>carrier</td><td>a store that refuses a second publish</td><td>new; the hit-path test</td></tr>
-<tr><td><code>scripts/prototypes/support/measure.py:76,107</code></td><td>both</td><td>default</td><td>inherited-cache read; delegates to the owner on a miss, unchanged</td></tr>
-<tr><td><code>benchmarks/solovev_certificate.py:420,1247,431,1114,2284,3323,3763</code></td><td>both</td><td>default</td><td>unchanged</td></tr>
-<tr><td><code>tests/test_equilibrium_forward_operator.py:55</code>, <code>test_forward_census.py:365,470</code>, <code>test_forward_support_clip_mode.py:47</code>, <code>test_forward_receipt_raster.py:20</code>, <code>test_analytic_oracle_tangent.py:29</code>, <code>test_analytic_oracle_fixture_exterior.py:73</code>, <code>test_certificate_exterior_support.py:88,92</code>, <code>test_certificate_gate_live.py:87</code>, <code>test_solve_path_census_inputs.py:177</code>, <code>test_two_class_recovery.py:88,114</code></td><td>both</td><td>default</td><td>unchanged</td></tr>
-<tr><td>40 further <code>scripts/*</code> call sites (accuracy_cost_ladder, device_kernel_port, dual_basin_fixtures, moment_route_adjudication, oracle_rebaseline, requalify_carriers, lean_map, solve_options, ladder, &hellip;)</td><td>both</td><td>default</td><td>unchanged</td></tr>
-<tr><td>18 further <code>benchmarks/*</code> call sites (carrier_arms, support_order_arms, plasma_cell_*, diverted_map_error_decomposition, &hellip;)</td><td>both</td><td>default</td><td>unchanged</td></tr>
+<tr><td><code>scripts/</code></td><td><code>cached_machine</code></td><td>32</td><td>26</td><td>1, at <code>certificate_fixtures.py:241</code></td><td>the booking gate; 31 callers take the default and are unchanged</td></tr>
+<tr><td><code>scripts/</code></td><td><code>cached_fixture_exterior</code></td><td>6</td><td>6</td><td>1, at <code>certificate_fixtures.py:259</code></td><td>the booking gate; 5 callers take the default and are unchanged</td></tr>
+<tr><td><code>tests/</code></td><td><code>cached_machine</code></td><td>11</td><td>7</td><td>2, at <code>test_current_book_fragments.py:312-313</code></td><td>the new hit-path test; 9 callers take the default and are unchanged</td></tr>
+<tr><td><code>tests/</code></td><td><code>cached_fixture_exterior</code></td><td>4</td><td>3</td><td>none</td><td>unchanged</td></tr>
+<tr><td><code>benchmarks/</code></td><td><code>cached_machine</code></td><td>26</td><td>22</td><td>none</td><td>unchanged</td></tr>
+<tr><td><code>benchmarks/</code></td><td><code>cached_fixture_exterior</code></td><td>24</td><td>17</td><td>none</td><td>unchanged</td></tr>
 </tbody>
 </table>
-<p id="fixture-owner-store-argument-callers-note">One inherited-cache reader is worth naming because it is adjacent and was deliberately left alone. <code>scripts/prototypes/support/measure.py::machine_from_cache</code> and <code>exterior_from_cache</code> read a certified cache the caller names and, on a miss, delegate to the owners' default path. They pass no store and are outside this node's write fence, so they are reported rather than touched; the node does not claim them.</p>
+<p id="fixture-owner-store-argument-callers-store-sites">The four sites that name a store are the whole of the change's reach. Two are the backend helpers - <code>cached_carrier</code> and <code>cached_exterior</code> in <code>certificate_fixtures.py</code>, whose <code>store=</code> keywords are on lines 246 and 260 - and two are the hit-path test. On the scripts and benchmarks side the sites are spread thin (26 and 22 files carry the carrier's 32 and 26, and 6 and 17 carry the exterior's 6 and 24), which is the shape the node was meant to leave alone: many independent callers, one default path.</p>
+<table id="fixture-owner-store-argument-callers-tests-table">
+<thead><tr><th>Test file</th><th>Owner</th><th>Line</th></tr></thead>
+<tbody>
+<tr><td><code>tests/test_analytic_oracle_fixture_exterior.py</code></td><td><code>cached_machine</code></td><td>73</td></tr>
+<tr><td><code>tests/test_analytic_oracle_tangent.py</code></td><td><code>cached_machine</code></td><td>29</td></tr>
+<tr><td><code>tests/test_current_book_fragments.py</code></td><td><code>cached_machine</code></td><td>312, 313 (store passed)</td></tr>
+<tr><td><code>tests/test_equilibrium_forward_reference.py</code></td><td><code>cached_machine</code></td><td>1724, 1725</td></tr>
+<tr><td><code>tests/test_forward_census.py</code></td><td><code>cached_machine</code></td><td>365, 470</td></tr>
+<tr><td><code>tests/test_forward_receipt_raster.py</code></td><td><code>cached_machine</code></td><td>20</td></tr>
+<tr><td><code>tests/test_two_class_recovery.py</code></td><td><code>cached_machine</code></td><td>88, 114</td></tr>
+<tr><td><code>tests/test_certificate_exterior_support.py</code></td><td><code>cached_fixture_exterior</code></td><td>88, 92</td></tr>
+<tr><td><code>tests/test_certificate_gate_live.py</code></td><td><code>cached_fixture_exterior</code></td><td>87</td></tr>
+<tr><td><code>tests/test_solve_path_census_inputs.py</code></td><td><code>cached_fixture_exterior</code></td><td>177</td></tr>
+</tbody>
+</table>
+<p id="fixture-owner-store-argument-callers-note">Two adjacent readers were deliberately left alone and are reported rather than claimed. <code>scripts/prototypes/support/measure.py</code> holds the same two calls as every other scripts caller - one of each owner, both taking the default - and <code>machine_from_cache</code> and <code>exterior_from_cache</code> in the same module read a certified cache the caller names and delegate to the owners only on a miss. Neither passes a store, and the module is outside this node's write fence, so the node does not count it as changed.</p>
 </section>
 
 <section id="fixture-owner-store-argument-hit">

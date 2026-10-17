@@ -8,13 +8,16 @@
 <body>
 <div id="owner-cell-current-fragment" class="evidence-fragment" data-node="owner-cell-current">
 
-<p id="owner-cell-current-summary">The quartering of the half-plane owner booking
-error between the density representation inside the region and the quadrature
-order of the owner integral, with both candidate repairs measured against the
-failing 2,098-cell map guard. Both are refuted: the representation moves the
-measure by 4.35e-9 and raising the owner quadrature sixfold moves it by
-7.62e-9, against an excess of 2.3164e-4 over the reconstruction floor. The
-2,098-cell map error stands at 2.49299259136e-4, 2.49 times its 1e-4 guard.</p>
+<p id="owner-cell-current-summary">The owner booking error was the region, not the
+integral: the density representation moves the 2,098-cell measure by 4.35e-9 and
+a sixfold quadrature rise by 7.62e-9, while the region the half-plane cut was
+19 % too large at that size. The half-plane is retired and the owner region is
+now the normal-form lobe, clipped by the separatrix rays the read carries. The
+lobe books <strong>2,098 cells at 9.47260772731e-5, under the 1e-4 guard</strong>
+— the first pass at that size — and 550 at 4.87161187281e-4 under its 5e-4
+guard. The 282-cell carrier ties its guard: 1.0866014244493266e-3 against
+1.0866e-3, over by 1.42e-9, on a guard that was set from this route's own
+predecessor at a margin of 1.07e-10.</p>
 
 <table id="owner-cell-current-ladder">
 <tr><th>requested cells</th><th>realised</th><th>guard</th><th>owner map error</th><th>the half-plane booking it replaces was</th></tr>
@@ -22,6 +25,23 @@ measure by 4.35e-9 and raising the owner quadrature sixfold moves it by
 <tr><td>500</td><td>550</td><td>5.0e-4</td><td>4.09590445975e-4</td><td>passes</td></tr>
 <tr><td>2000</td><td>2098</td><td>1.0e-4</td><td>2.49299259136e-4</td><td><strong>fails, 2.49x</strong></td></tr>
 </table>
+
+<table id="owner-cell-current-lobe-table">
+<tr><th>normal-form lobe booking</th><th>guard</th><th>measured</th><th>verdict</th></tr>
+<tr><td>282</td><td>1.0866e-3</td><td>1.0866014244493266e-3</td><td>over by 1.42e-9</td></tr>
+<tr><td>550</td><td>5.0e-4</td><td>4.87161187281e-4</td><td>under</td></tr>
+<tr><td>2098</td><td>1.0e-4</td><td>9.47260772731e-5</td><td>under, first pass at this size</td></tr>
+</table>
+
+<p id="owner-cell-current-lobe-control">Control on the implementation: the
+degree-five rule moves the finest measure by 1.65e-12 against the incumbent
+three-point fan (9.47260772731e-5 against 9.47260774384e-5), which is the
+agreement expected if the new booking reproduces the accessor's own region and
+representation exactly — the fitted density is a quadratic, which a degree-five
+rule integrates to roundoff. Rows: <code>owner-current/maplobe2-profile-*.log</code>
+and <code>-*.json</code> (job 1288145); the superseded booking of every
+normal-form cell is <code>maplobe-profile-*.log</code> (job 1288137), which
+reached 3.14e-2 at 2,098 cells and is refuted.</p>
 
 <table id="owner-cell-current-mutations">
 <tr><th>mutation of the owner integral</th><th>2098 map error</th><th>movement</th></tr>

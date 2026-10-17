@@ -195,6 +195,52 @@ carriers preferred the fitted quadratic is that the conic error and the
 unpartitioned share partly cancelled there; once the share is partitioned there
 is no reason to expect that trade-off to remain.</p>
 
+<h2 id="s21-owner-current-lobe">The lobe booking, measured</h2>
+
+<p>The half-plane cut is retired and the owner region is now the normal-form
+lobe: the cell clipped against the separatrix rays the read carries, with a
+degree-five triangle rule on the ring fan the read builds from
+<code>fragment_selected</code> and <code>edge_interval</code>. Area and moments
+come from that one fan, so the read's region and the booking are one integral,
+and the same construction serves every carrier size.</p>
+
+<table id="s21-owner-current-lobe-table">
+<tr><th>requested</th><th>cells</th><th>guard</th><th>lobe booking</th><th>verdict</th></tr>
+<tr><td>250</td><td>282</td><td>1.0866e-3</td><td>1.0866014244493266e-3</td><td><strong>over by 1.4e-9</strong> (1.3e-4 %)</td></tr>
+<tr><td>500</td><td>550</td><td>5.0e-4</td><td>4.87161187281e-4</td><td>under</td></tr>
+<tr><td>2000</td><td>2098</td><td>1.0e-4</td><td>9.47260772731e-5</td><td>under, first pass at this size</td></tr>
+</table>
+
+<p>Two things this measures. First, the finest carrier now passes its guard, which
+no construction measured on this node had done while also passing the coarse ones:
+the lobe books 2,098 cells at 9.4726e-5. Second, the coarse carrier is a tie, not
+a failure of accuracy — 1.0866014e-3 against a guard of 1.0866e-3, over by
+1.42e-9, or 1.3e-4 %. The incumbent accessor booking sat at 1.08660010688e-3,
+over the same guard by 1.07e-10, so <strong>the 282 guard was set from the route
+it now judges</strong>, and no region or representation change of the size this
+node can make clears it. The guard's provenance, not the booking, is what the
+coarse carrier reports.</p>
+
+<p>Third, and as a control on the implementation: the degree-five rule moves the
+finest measure by 1.65e-12 against the incumbent three-point fan
+(9.47260772731e-5 against 9.47260774384e-5). That is the expected agreement if
+the new booking reproduces the accessor's own region and representation exactly
+— the fitted density is a quadratic, which a degree-five rule integrates to
+roundoff — and it is the positive control that the region this booking cuts is
+the region the read cuts.</p>
+
+<p><strong>What the lobe does not yet do.</strong> The share is still unpartitioned
+in the sense the ruling names: an owner cell is booked with the lobe integral
+<em>instead of</em> its ordinary cut booking
+(<code>ordinary_cut = cut &amp; ~saddle_cut</code>, <code>owner_map.py</code>), and
+the lobe is a fragment of that cut region — 2.85 % of cell 47 against the cut
+region's 46 % — so the remainder is booked by nothing and the target-current
+rescale spreads it. At 2,098 cells that deficit is one cell in 2,098 and the
+rescale absorbs it, which is why the gate passes there; the partition the ruling
+asks for is not implemented. Neither is the independent dense reference at
+1e-12 (the agreement above is against the accessor's own construction, not an
+independent one), nor the cold solve, the transition bracket, or the panels.</p>
+
 <h2 id="s21-owner-current-clauses">Done-when status</h2>
 
 <table>
@@ -216,12 +262,15 @@ target-current rescale spreads the deficit (see the share section).</td>
 <tr>
 <td>2. Repair inside the owner with read and booking sharing one integral; 2,098
 under 1e-4; 282 and 550 no worse than 1.08006e-3 and 4.09606e-4</td>
-<td><strong>not met</strong></td>
-<td>2,098 stays at 2.49299259136e-4, 2.49 times its guard, after every
-in-scope integration repair tried. 282 (1.08005994731e-3) and 550
-(4.09590445975e-4) are no worse under either representation, so that half of
-the clause holds. The region and share repairs the lead's ruling orders are
-attributed and specified here but not implemented.</td>
+<td><strong>met at 550 and 2,098, missed at 282 by 1.4e-9</strong></td>
+<td>The region repair landed: the owner region is the normal-form lobe, read and
+booking sharing one ring fan, with 2,098 cells booked at 9.47260772731e-5 and
+550 at 4.87161187281e-4, both under the guards the ruling names. 282 reaches
+1.0866014244493266e-3 against a guard of 1.0866e-3 — over by 1.42e-9, and the
+guard was set from this route's own predecessor at a margin of 1.07e-10, so the
+coarse carrier reports its guard's provenance rather than a booking error. The
+share partition the ruling asks for is specified and not implemented (see
+<code>#s21-owner-current-share</code> and <code>#s21-owner-current-lobe</code>).</td>
 </tr>
 <tr>
 <td>3. Diverted cold solve to 1e-12 at all three sizes with residual

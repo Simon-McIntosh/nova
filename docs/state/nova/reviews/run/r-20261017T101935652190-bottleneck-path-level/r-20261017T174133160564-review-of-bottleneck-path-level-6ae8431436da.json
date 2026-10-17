@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "Unmeasured, not zero: reviewed manifest.md:14-15 says baseline_suite and after_suite were not run and provides no completed gate logs, so no set difference of failure ids can be derived.",
+  "call_sites": [
+    "scripts/prototypes/fast_map_production/kernel.py:299",
+    "scripts/prototypes/fast_map_production/program.py:12",
+    "scripts/prototypes/fast_map_production/sweep.py:25",
+    "scripts/prototypes/fast_map_production/solver.py:24",
+    "scripts/prototypes/xpoint_cell_owner/owner_map.py:10",
+    "scripts/prototypes/xpoint_cell_owner/projected_owner_map.py:8"
+  ],
+  "completed_at": "2026-10-17T17:47:39Z",
+  "dispatched_at": "2026-10-17T17:41:59Z",
+  "findings": [
+    {
+      "file": "docs/research/bottleneck-path-level.html",
+      "line": 92,
+      "severity": "blocking",
+      "text": "The row calls the verdict change a fold because two candidate levels cross, which is the dispatched crossing criterion; neither this row nor the cited transition receipt reports a saddle Hessian determinant or persistence near roundoff, so the fold classification is unsupported and the quantitative transition gate is not met."
+    },
+    {
+      "file": "manifest.md",
+      "line": 10,
+      "severity": "follow-on",
+      "text": "It states the three-test result was run at 6ae843143, but logs/unit-test.log names 45e3b821c; the reviewer reran the focused file at 6ae843143 with NUMBA_CACHE_DIR set and recorded 3 passed in review-test-cache.log, so the source run should cite the correct gate revision."
+    },
+    {
+      "file": "manifest.md",
+      "line": 9,
+      "severity": "follow-on",
+      "text": "changed_paths omits docs/figures/converged-forward-solve/bottleneck-path-level/bottleneck-level-bracket.svg, added by fc8cfd1f7, leaving the delivered figure absent from the run inventory."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "Read the fourteen commits from e4c8b9815 through 6ae843143 and their net six-file diff; kernel.py:111-120 extracts the inline minimum, the new test adds three cases, and the two pages plus two SVGs report the measurements.",
+    "done_when": "The six clauses at prompt.txt:94-104 were narrowed by the plan correction; the 282/550 fidelity and unit test are evidenced, but docs/research/bottleneck-path-level.html:92 calls a level crossing a fold without the required Hessian and persistence proof.",
+    "goal": "The dispatched goal in prompt.txt:30 asks to replace 0/1 membership; the plan correction at docs/plans/converged-forward-solve.html:1129-1130 retains it, and kernel.py:111-120 names the already-inline wall minimum.",
+    "manifest": "manifest.md:10 claims three tests at 6ae843143, while logs/unit-test.log:2 names 45e3b821c; an independent review-test-cache.log run at 6ae843143 passes all three, and manifest.md:14-15 records no baseline or after suite.",
+    "write_paths": "The four grants at prompt.txt:68-72 contain all six paths in git diff e4c8b9815..6ae843143, including both SVGs."
+  },
+  "justifications": {
+    "durability": "test_bottleneck_level.py:130 fails if the wall minimum becomes a maximum or ignores the path bottleneck, :150-151 compare against independent NumPy minimum, and :180-195 reject a stepped tie variant; all three pass at the reviewed head.",
+    "evidence": "docs/research/bottleneck-path-level.html:92 labels a candidate crossing a fold without the determinant and persistence evidence required by prompt.txt:99, and logs/unit-test.log:2 predates the reviewed head even though the independent head test passes.",
+    "fit": "kernel.py:111 adds a private helper beside the existing path ceiling and its name describes the effective level without a plan or release label.",
+    "goal_fidelity": "scripts/prototypes/fast_map_production/kernel.py:111-120 and :299 give the corrected wall-contact rule one owner, while the original replacement of cell membership was withdrawn by the plan correction.",
+    "reuse": "kernel.py:111-120 extracts the inline wall-score minimum owned by that same module at the base revision; a capability search through scripts/prototypes and nova/equilibrium found only an inline sibling prototype at scripts/prototypes/diverted_stall/kernel.py:177, and the new test helpers have no owner there.",
+    "scope_discipline": "All six changed files fall under prompt.txt:68-72, but manifest.md:9 omits the added bottleneck-level-bracket.svg from changed_paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The dispatched goal in prompt.txt:30 asks to replace 0/1 membership; the plan correction at docs/plans/converged-forward-solve.html:1129-1130 retains it, and kernel.py:111-120 names the already-inline wall minimum.\nVERDICT done_when: The six clauses at prompt.txt:94-104 were narrowed by the plan correction; the 282/550 fidelity and unit test are evidenced, but docs/research/bottleneck-path-level.html:92 calls a level crossing a fold without the required Hessian and persistence proof.\nVERDICT write_paths: The four grants at prompt.txt:68-72 contain all six paths in git diff e4c8b9815..6ae843143, including both SVGs.\nVERDICT manifest: manifest.md:10 claims three tests at 6ae843143, while logs/unit-test.log:2 names 45e3b821c; an independent review-test-cache.log run at 6ae843143 passes all three, and manifest.md:14-15 records no baseline or after suite.\nVERDICT diff: Read the fourteen commits from e4c8b9815 through 6ae843143 and their net six-file diff; kernel.py:111-120 extracts the inline minimum, the new test adds three cases, and the two pages plus two SVGs report the measurements.\nCALL_SITES: scripts/prototypes/fast_map_production/kernel.py:299, scripts/prototypes/fast_map_production/program.py:12, scripts/prototypes/fast_map_production/sweep.py:25, scripts/prototypes/fast_map_production/solver.py:24, scripts/prototypes/xpoint_cell_owner/owner_map.py:10, scripts/prototypes/xpoint_cell_owner/projected_owner_map.py:8\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: scripts/prototypes/fast_map_production/kernel.py:111-120 and :299 give the corrected wall-contact rule one owner, while the original replacement of cell membership was withdrawn by the plan correction.\nSCORE evidence: 12\nJUSTIFICATION evidence: docs/research/bottleneck-path-level.html:92 labels a candidate crossing a fold without the determinant and persistence evidence required by prompt.txt:99, and logs/unit-test.log:2 predates the reviewed head even though the independent head test passes.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: All six changed files fall under prompt.txt:68-72, but manifest.md:9 omits the added bottleneck-level-bracket.svg from changed_paths.\nSCORE durability: 18\nJUSTIFICATION durability: test_bottleneck_level.py:130 fails if the wall minimum becomes a maximum or ignores the path bottleneck, :150-151 compare against independent NumPy minimum, and :180-195 reject a stepped tie variant; all three pass at the reviewed head.\nSCORE fit: 19\nJUSTIFICATION fit: kernel.py:111 adds a private helper beside the existing path ceiling and its name describes the effective level without a plan or release label.\nSCORE reuse: 20\nJUSTIFICATION reuse: kernel.py:111-120 extracts the inline wall-score minimum owned by that same module at the base revision; a capability search through scripts/prototypes and nova/equilibrium found only an inline sibling prototype at scripts/prototypes/diverted_stall/kernel.py:177, and the new test helpers have no owner there.\nFINDING docs/research/bottleneck-path-level.html:92 blocking: The row calls the verdict change a fold because two candidate levels cross, which is the dispatched crossing criterion; neither this row nor the cited transition receipt reports a saddle Hessian determinant or persistence near roundoff, so the fold classification is unsupported and the quantitative transition gate is not met.\nFINDING manifest.md:10 follow-on: It states the three-test result was run at 6ae843143, but logs/unit-test.log names 45e3b821c; the reviewer reran the focused file at 6ae843143 with NUMBA_CACHE_DIR set and recorded 3 passed in review-test-cache.log, so the source run should cite the correct gate revision.\nFINDING manifest.md:9 follow-on: changed_paths omits docs/figures/converged-forward-solve/bottleneck-path-level/bottleneck-level-bracket.svg, added by fc8cfd1f7, leaving the delivered figure absent from the run inventory.\n",
+  "review_run_id": "r-20261017T174133160564-review-of-bottleneck-path-level-6ae8431436da",
+  "reviewed_base_sha": "e4c8b98157fa0b4086c9febefdd66a40b3875984",
+  "reviewed_commit": "6ae8431436dacb22d5f59eeca5c61cb9c099852d",
+  "reviewed_head_sha": "6ae8431436dacb22d5f59eeca5c61cb9c099852d",
+  "reviewed_run_id": "r-20261017T101935652190-bottleneck-path-level",
+  "scores": {
+    "durability": 18,
+    "evidence": 12,
+    "fit": 19,
+    "goal_fidelity": 16,
+    "reuse": 20,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T17:45:56.435162+00:00",
+  "total": 103
+}

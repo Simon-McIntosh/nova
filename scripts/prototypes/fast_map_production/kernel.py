@@ -198,6 +198,44 @@ def _continuous_path_weight(
     return jax.lax.fori_loop(0, len(geometry.centre), relax, strength)
 
 
+def psi_rounding_enclosure(coefficients):
+    """Binary64 enclosure of the fitted psi at a cell centre.
+
+    The Bell coefficients are one linear fit, so the psi they carry is uncertain
+    by the machine epsilon times the fit's absolute row sum. Two stationary
+    levels closer than this are one number rather than two features.
+    """
+    row_sum = jnp.abs(coefficients).sum(axis=1)
+    return 2.0 * jnp.finfo(coefficients.dtype).eps * jnp.max(row_sum)
+
+
+def _merge_path_saddle(geometry, roots, saddles, sigma, axis_ceiling):
+    """Admit the saddle that bounds the axis merge path, before the wall contest.
+
+    The merge path runs from the magnetic axis out to the boundary. The saddle
+    that bounds it is the one the axis reaches at a level at least its own: the
+    maximin passage from the axis to the saddle's own cell meets or exceeds the
+    saddle's level. A root sitting on a wall contact the axis reaches only below
+    its own level is off the merge path, even though an extremum there ties the
+    boundary level by construction. Candidates are therefore ranked by the
+    passage margin ``axis_ceiling - level``, so a tie between the wall contact
+    and the saddle can move only the classification label and never the admitted
+    saddle.
+
+    Fixed shape and traced: the index is resolved by ``argmax`` over a masked
+    margin, with no host-side branch, and the wall-versus-saddle contest is left
+    downstream of the decision.
+    """
+    levels = sigma * roots.jet.value[1:]
+    inside = jax.vmap(lambda point: topology._inside_cells(geometry, point))(
+        roots.position[1:]
+    )
+    cells = jnp.argmax(inside, axis=1)
+    margin = jnp.where(saddles, axis_ceiling[cells] - levels, -jnp.inf)
+    index = jnp.argmax(margin)
+    return index, levels[index]
+
+
 def read(field, roots, geometry, convention, policy, *, frame_gate=True):
     """Read both boundary candidates and axis-connected Bell support at fixed shape."""
     sigma = convention.sigma
@@ -235,9 +273,15 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
     saddles = roots.valid[1:] & (eigenvalues[:, 0] < 0) & (eigenvalues[:, 1] > 0)
     if count == 1:
         saddles = jnp.zeros_like(saddles)
-    saddle_score_rows = jnp.where(saddles, sigma * roots.jet.value[1:], -jnp.inf)
-    saddle_index = 1 + jnp.argmax(saddle_score_rows)
-    saddle_score = jnp.max(saddle_score_rows)
+    coefficients = field.sampled_coefficient(geometry)
+    seed = jnp.argmin(jnp.sum((geometry.centre - axis) ** 2, axis=1))
+    axis_ceiling = _wall_path_ceiling(
+        geometry, coefficients, None, axis, None, -jnp.inf, seed, sigma, False
+    )
+    saddle_index, saddle_score = _merge_path_saddle(
+        geometry, roots, saddles, sigma, axis_ceiling
+    )
+    saddle_index = 1 + saddle_index
     saddle_live = jnp.any(saddles)
     third, fourth = topology._curvature_derivatives(
         field, roots.position[saddle_index], jnp.median(geometry.pitch)

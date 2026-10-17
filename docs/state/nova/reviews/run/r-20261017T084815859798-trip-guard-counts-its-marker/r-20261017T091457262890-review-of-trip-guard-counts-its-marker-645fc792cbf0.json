@@ -1,0 +1,47 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "after_failure_ids ([]) minus baseline_failure_ids (the four test_solve_trips_are_a_scan.py guard ids) is empty: the base arm fails 4 guards and the head arm fails none, so 0 added failures across the reviewed gate.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-17T09:22:04.790Z",
+  "dispatched_at": "2026-10-17T09:15:15Z",
+  "findings": [],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites: the landed change is confined to a test module and an evidence fragment, so no runtime code reaches it.",
+    "diff": "read commit by commit against cf92f9ae3; d0245d008 adds _marker_barrier_count and lifts _newton_solve to module scope, re-pointing both guards at the differential, and 645fc792c adds the evidence fragment; nothing else changed.",
+    "done_when": "the five clauses are recorded: (1) differential attribution at tests/test_solve_trips_are_a_scan.py:117; (2) the negative control logs/negative-control.log (2 failed, EXIT=1); (3) logs/head_guards.log 16 passed against logs/base_guards.log 4 failed, plus the three compared modules each 0 added failures in logs/base_*_/head_*.log; (4) nova/equilibrium/fixed_point.py is absent from git diff --stat; (5) the fragment docs/evidence/fragments/converged-forward-solve/trip-body-lowered-once.html states the false positive, the attribution and that the fence is kept.",
+    "goal": "the node goal is \"Make the trip-body guards count only their own marker so the deliberate operator fence is not mistaken for extra trip copies\"; the landed tests/test_solve_trips_are_a_scan.py:106 _marker_barrier_count differences a marked lowering against the same program unmarked, and both trip-body guards (:251, :320) route through it so the _fenced barriers at nova/equilibrium/fixed_point.py:2389 cancel.",
+    "manifest": "read; status complete, commits d0245d008 and 645fc792c, and it records baseline_suite (cf92f9ae3, 4 failed, the four guard ids) and after_suite (d0245d008, 0 failed) with their gate logs, matching the logs I opened.",
+    "write_paths": "read the manifest's declared paths; git diff --name-only cf92f9ae3 645fc792c lists two files, tests/test_solve_trips_are_a_scan.py and docs/evidence/fragments/converged-forward-solve/trip-body-lowered-once.html, both inside them."
+  },
+  "justifications": {
+    "durability": "tests/test_solve_trips_are_a_scan.py:254 and :323 assert count == 1 against an independent literal, and the negative control shows a doubled body reads 2; a caching defeat that served the unmarked program to the marked arm would read 0 and also redden, so the guard fails closed.",
+    "evidence": "the done_when's four clauses are each recorded: the differential counter (tests/test_solve_trips_are_a_scan.py:117), the negative control logs/negative-control.log reading 2 failed EXIT=1, the module gates (logs/head_guards.log 16 passed, base_guards.log 4 failed) plus the three compared modules, and nova/equilibrium/fixed_point.py unedited.",
+    "fit": "the added names _marker_barrier_count and _newton_solve are descriptive with no plan labels, matching the module idiom of the one-line _optimized_read_body_count docstring at tests/test_solve_trips_are_a_scan.py:120, though the new docstring runs several lines.",
+    "goal_fidelity": "tests/test_solve_trips_are_a_scan.py:106 _marker_barrier_count subtracts the unmarked lowering from the marked one, so the two _fenced barriers in nova/equilibrium/fixed_point.py:2389 cancel and each guard counts only its own marker, exactly as the goal states.",
+    "reuse": "_marker_barrier_count wraps the existing tests/test_solve_trips_are_a_scan.py:99 _barrier_count rather than forking it, and a search of tests/ and nova/ for optimization_barrier and barrier_count found no pre-existing differential-lowering owner.",
+    "scope_discipline": "git diff --stat cf92f9ae3..645fc792c lists only tests/test_solve_trips_are_a_scan.py and docs/evidence/fragments/converged-forward-solve/trip-body-lowered-once.html, both inside the declared write paths, and no concurrent node's path is touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is \"Make the trip-body guards count only their own marker so the deliberate operator fence is not mistaken for extra trip copies\"; the landed tests/test_solve_trips_are_a_scan.py:106 _marker_barrier_count differences a marked lowering against the same program unmarked, and both trip-body guards (:251, :320) route through it so the _fenced barriers at nova/equilibrium/fixed_point.py:2389 cancel.\nVERDICT done_when: the five clauses are recorded: (1) differential attribution at tests/test_solve_trips_are_a_scan.py:117; (2) the negative control logs/negative-control.log (2 failed, EXIT=1); (3) logs/head_guards.log 16 passed against logs/base_guards.log 4 failed, plus the three compared modules each 0 added failures in logs/base_*_/head_*.log; (4) nova/equilibrium/fixed_point.py is absent from git diff --stat; (5) the fragment docs/evidence/fragments/converged-forward-solve/trip-body-lowered-once.html states the false positive, the attribution and that the fence is kept.\nVERDICT write_paths: read the manifest's declared paths; git diff --name-only cf92f9ae3 645fc792c lists two files, tests/test_solve_trips_are_a_scan.py and docs/evidence/fragments/converged-forward-solve/trip-body-lowered-once.html, both inside them.\nVERDICT manifest: read; status complete, commits d0245d008 and 645fc792c, and it records baseline_suite (cf92f9ae3, 4 failed, the four guard ids) and after_suite (d0245d008, 0 failed) with their gate logs, matching the logs I opened.\nVERDICT diff: read commit by commit against cf92f9ae3; d0245d008 adds _marker_barrier_count and lifts _newton_solve to module scope, re-pointing both guards at the differential, and 645fc792c adds the evidence fragment; nothing else changed.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: tests/test_solve_trips_are_a_scan.py:106 _marker_barrier_count subtracts the unmarked lowering from the marked one, so the two _fenced barriers in nova/equilibrium/fixed_point.py:2389 cancel and each guard counts only its own marker, exactly as the goal states.\nSCORE evidence: 19\nSCORE evidence: 19\nJUSTIFICATION evidence: the done_when's four clauses are each recorded: the differential counter (tests/test_solve_trips_are_a_scan.py:117), the negative control logs/negative-control.log reading 2 failed EXIT=1, the module gates (logs/head_guards.log 16 passed, base_guards.log 4 failed) plus the three compared modules, and nova/equilibrium/fixed_point.py unedited.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat cf92f9ae3..645fc792c lists only tests/test_solve_trips_are_a_scan.py and docs/evidence/fragments/converged-forward-solve/trip-body-lowered-once.html, both inside the declared write paths, and no concurrent node's path is touched.\nSCORE durability: 20\nJUSTIFICATION durability: tests/test_solve_trips_are_a_scan.py:254 and :323 assert count == 1 against an independent literal, and the negative control shows a doubled body reads 2; a caching defeat that served the unmarked program to the marked arm would read 0 and also redden, so the guard fails closed.\nSCORE fit: 19\nJUSTIFICATION fit: the added names _marker_barrier_count and _newton_solve are descriptive with no plan labels, matching the module idiom of the one-line _optimized_read_body_count docstring at tests/test_solve_trips_are_a_scan.py:120, though the new docstring runs several lines.\nSCORE reuse: 20\nJUSTIFICATION reuse: _marker_barrier_count wraps the existing tests/test_solve_trips_are_a_scan.py:99 _barrier_count rather than forking it, and a search of tests/ and nova/ for optimization_barrier and barrier_count found no pre-existing differential-lowering owner.\n",
+  "review_run_id": "r-20261017T091457262890-review-of-trip-guard-counts-its-marker-645fc792cbf0",
+  "reviewed_base_sha": "cf92f9ae347caf402c4e1f03d925fbc9961f9947",
+  "reviewed_head_sha": "645fc792cbf030285d1cee5e865caea7ebd40873",
+  "reviewed_run_id": "r-20261017T084815859798-trip-guard-counts-its-marker",
+  "scores": {
+    "durability": 20,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T09:22:00+00:00",
+  "total": 118
+}

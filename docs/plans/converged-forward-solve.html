@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="329">
+<meta name="plan-version" content="330">
 <meta name="plan-modified" content="2026-10-17">
 </head>
 <body>
@@ -1314,7 +1314,10 @@
     <div class="r-comment-body"><p>The four compile-cost guards count three optimization barriers in the lowered Newton-Krylov solve where one trip body exists; two of the three were the fence around the stream operator application and the third was the guard's own marker. The fence is removed, the operator application is one shared lowered body, all four guards pass, the reduced Newton delta adds no failure, and every compared solver output is bit-identical base to head.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261017T084815859798-trip-guard-counts-its-marker" data-who="reckon-build" data-when="2026-10-17T09:14:31.174Z">
-    <div class="r-comment-body"><p>The four trip-body guards counted the two optimization barriers _fenced places around each stream operator application as extra trip copies; they now difference a marked lowering against the same program unmarked, so the count attributes to the guard&#x27;s marker alone and the fence is kept, with tests/test_solve_trips_are_a_scan.py at 16 passed against a base of 4 failed and 12 passed.</p></div>
+    <div class="r-comment-body"><p>The four trip-body guards counted the two optimization barriers _fenced places around each stream operator application as extra trip copies; they now difference a marked lowering against the same program unmarked, so the count attributes to the guard's marker alone and the fence is kept, with tests/test_solve_trips_are_a_scan.py at 16 passed against a base of 4 failed and 12 passed.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261017T091457262890-review-of-trip-guard-counts-its-marker-645fc792cbf0" data-who="reckon-build" data-when="2026-10-17T09:22:04.790Z">
+    <div class="r-comment-body"><p>Review of r-20261017T084815859798-trip-guard-counts-its-marker (head 645fc792cbf030285d1cee5e865caea7ebd40873) scores goal_fidelity 20, evidence 19, scope_discipline 20, durability 20, fit 19, reuse 20 against base cf92f9ae347caf402c4e1f03d925fbc9961f9947, 0 added failures, no blocking or follow-on findings.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-s21-moment-space-ruling" data-who="reckon-build" data-when="2026-10-13T18:40:00Z">
     <div class="r-comment-body"><p>Lead ruling 2026-10-13: the forward solve's unknown is the cell current moments.</p><p>The locked read builds its field from booked moments: the Bell jets at the nodes are the jet coupling rows times m, plus the exterior's jets. So it cannot evaluate an arbitrary trial flux vector, but it can always evaluate a trial m. The solve therefore iterates m = book(read(psi_ext + G m)), and the flux is G m wherever output needs it.</p><ul><li>Newton runs on the device with autograd.</li><li>A dense <code>jax.jacfwd</code> Jacobian with a device LU is measured against a device-side Jacobian-free Krylov, replacing SciPy's host <code>newton_krylov</code>.</li><li>Autograd must be shown to pass through the read and the booking.</li><li><code>current.book</code> is vectorised. Its sequential cell scan costs 0.9 to 8 s per step at 2,000 to 10,000 cells.</li><li>The legacy support partition, the spline-clip read and the chord default are deleted.</li></ul></div>

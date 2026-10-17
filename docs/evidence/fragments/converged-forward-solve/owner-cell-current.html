@@ -105,6 +105,33 @@ the ordinary cut integration over the same cell with the lobe removed, so the
 two parts tile the cell's cut region exactly once and sum to the cell the
 ordinary route books alone.</p>
 
+<p id="owner-cell-current-constructions">Three ways to bound the owner
+region, each measured at the carriers it was run on. No one satisfies all three
+guards, and the two that pass at opposite ends pass for opposite reasons: the
+fitted cell quadratic is a whole-cell fit (best where the cell is large, 19 %
+too large at 2,098), while the exact-Hessian conic is a tangent cone at the
+saddle (exact only where the cell is tiny, 9.3x over guard at 282).
+The intended region is the separatrix-bounded lobe, which the saddle normal form
+supplies and which matches the analytic sample at all three sizes.</p>
+
+<table id="owner-cell-current-constructions-table">
+<tr><th>construction</th><th>282 (1.0866e-3)</th><th>550 (5.0e-4)</th><th>2098 (1.0e-4)</th></tr>
+<tr><td>fitted quadratic, boundary-shifted — submitted</td><td>1.08005994731e-3 pass</td><td>4.09590445975e-4 pass</td><td>2.49299259136e-4 <strong>fail 2.49x</strong></td></tr>
+<tr><td>Hessian conic through the saddle (<code>--component saddle</code>)</td><td>1.00982361078e-2 <strong>fail 9.3x</strong></td><td>not run</td><td>9.408724611e-5 pass</td></tr>
+<tr><td>Hessian conic pinned at the saddle (<code>--component anchored</code>)</td><td>2.04442839399e-2 <strong>fail 18.8x</strong></td><td>8.7111270364e-3 <strong>fail 17.4x</strong></td><td>7.97500919891e-4 <strong>fail 7.98x</strong></td></tr>
+</table>
+
+<p id="owner-cell-current-constructions-note">Repair path from these
+measurements: bound the region by the normal-form rays the read already carries
+(<code>fragment_selected</code>, <code>edge_interval</code>) instead of a conic
+zero level, then require a dense reference over that region to agree with the
+traced integral to 1e-12 on area, current and first moments at all three sizes;
+partition the share as the region the owner integral books plus the ordinary cut
+over the same cell with the lobe removed. Both are inside the owner. Row outputs:
+<code>owner-current/mapy-saddle-250.log</code>,
+<code>owner-current/mapy-saddle-2000.json</code>,
+<code>owner-current/mapz-anchored-250/500/2000.log</code>.</p>
+
 <p id="owner-cell-current-unmet">Unmet done-when clauses: the repair (2,098 stays
 2.49x its guard), the cold solves to 1e-12 (they ran once, stalled at the
 residual floor, with no gradient or Taylor-slope measurement), the 550

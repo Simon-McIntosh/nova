@@ -158,6 +158,43 @@ share can be repaired by a rescaling fraction: a fraction that reconciles two
 overlapping regions double-counts wherever they overlap, which is what the
 blend arms measured on this carrier already showed.</p>
 
+<h2 id="s21-owner-current-constructions">Each region construction against all three guards</h2>
+
+<p>The owner region can be bounded three ways from data the read already carries.
+Each is a conic through the saddle neighbourhood; they differ in what fixes its
+curvature and its level, and the table measures each at every carrier.</p>
+
+<table id="s21-owner-current-constructions-table">
+<tr><th>owner region construction</th><th>282 (guard 1.0866e-3)</th><th>550 (guard 5.0e-4)</th><th>2098 (guard 1.0e-4)</th></tr>
+<tr><td>fitted cell quadratic, constant moved to the boundary — submitted</td><td>1.08005994731e-3 <strong>pass</strong></td><td>4.09590445975e-4 <strong>pass</strong></td><td>2.49299259136e-4 <strong>fail</strong>, 2.49x</td></tr>
+<tr><td>exact-Hessian conic through the physical saddle (<code>--component saddle</code>)</td><td>1.00982361078e-2 <strong>fail</strong>, 9.3x</td><td>not run</td><td>9.408724611e-5 <strong>pass</strong></td></tr>
+<tr><td>exact-Hessian conic with the constant pinned at the saddle (<code>--component anchored</code>)</td><td>2.04442839399e-2 <strong>fail</strong>, 18.8x</td><td>8.7111270364e-3 <strong>fail</strong>, 17.4x</td><td>7.97500919891e-4 <strong>fail</strong>, 7.98x</td></tr>
+</table>
+
+<p>No construction satisfies all three guards, and the two that pass at one end
+pass for opposite reasons. The submitted fitted quadratic is a whole-cell fit, so
+it tracks the flux best where the cell is large and its region is set by the
+cell's own shape; it is 19 % too large at 2,098 cells, where the cell is small
+and the fit's stationary value sits 5.80e-8 above the boundary. The exact-Hessian
+conic is a tangent cone at the saddle, so it is exact where the cell is tiny and
+progressively wrong as the cell grows — 9.3x and 18.8x over guard at 282 cells.
+That trade-off is the signature of a local tangent model against a global cell
+fit, and neither is the separatrix. The intended region is the separatrix-bounded
+lobe, whose curvature and cubic corrections the saddle normal form supplies:
+it matches the independent analytic sample at <em>all three</em> sizes
+(4.2e-4 / 2.3e-4 / 1.1e-4), which no conic above does.</p>
+
+<p><strong>So the repair is a region substitution, not a coefficient choice:</strong>
+bound the owner region by the normal-form rays the read already carries
+(<code>fragment_selected</code>, <code>edge_interval</code>) rather than by any
+conic's zero level, then book the density over that region with a rule accurate
+enough that a dense reference over the same region agrees to 1e-12 on area,
+current and first moments. The rays are already in the read, so this is
+bookkeeping inside the owner, not new geometry. The likely reason the coarse
+carriers preferred the fitted quadratic is that the conic error and the
+unpartitioned share partly cancelled there; once the share is partitioned there
+is no reason to expect that trade-off to remain.</p>
+
 <h2 id="s21-owner-current-clauses">Done-when status</h2>
 
 <table>

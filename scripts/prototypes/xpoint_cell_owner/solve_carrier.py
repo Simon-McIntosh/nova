@@ -43,6 +43,7 @@ def main():
         choices=(
             "halfplane",
             "bell",
+            "lobe",
             "saddle",
             "pinned",
             "anchored",

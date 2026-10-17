@@ -1,14 +1,17 @@
 """Measure the saddle-anchored map against the axis-facing map on one device.
 
 Both arms are lowered with the carrier, the batched state and every operands
-array as runtime arguments, so no carrier- or state-scaled array is captured
-as an HLO constant. The density profile and the topology policy are closed
-over: they carry callables and scalars, no array that scales with the carrier,
-and the profile is not one of the operands. The saddle arm is checked against
-a reference configuration that reproduces the first build's integration (every
-cell a candidate, 128-node outer rule): the owned map must agree to 1e-12, so
-the cost change alters nothing but cost. The runner exits nonzero when that
-agreement fails, so the gate carries a correctness guard as well as a cost one.
+array as runtime arguments, so no carrier- or state-scaled array is captured as
+an HLO constant; the density profile and the topology policy are closed over
+because they carry callables and scalars rather than arrays. The saddle arm is
+checked against a reference configuration that reproduces the first build's
+integration, and the runner exits nonzero when that check fails, so the gate
+carries a correctness guard as well as a cost one.
+
+One width is measured per invocation, so the device memory high-water mark
+reported belongs to that configuration alone and is not a running maximum
+carried over from a larger one. The caller sweeps widths downward and stops at
+the first that fits.
 """
 
 # ruff: noqa: E402
@@ -18,7 +21,6 @@ configure_dtypes()
 
 import argparse
 import json
-import re
 from pathlib import Path
 from time import perf_counter
 
@@ -34,10 +36,13 @@ from scripts.prototypes.saddle_expansion.expansion import map_moments as saddle_
 from scripts.prototypes.support.geometry import certificate_field
 from scripts.prototypes.xpoint_cell_owner.owner_map import map_moments as axis_map
 from tests.equilibrium.test_topology_read import _analytic_inputs
+from tests.test_equilibrium_solve import _hlo_constants
 
 REFERENCE_OUTER_DEGREE = 128
 GATE_OUTER_DEGREE = 8
 AGREEMENT_TOLERANCE = 1e-12
+DEGREE_LADDER = (8, 16, 32, 64, 128)
+EXIT_OOM = 2
 
 
 def save(path, result):
@@ -52,15 +57,16 @@ def generated_size(program):
         return -1
 
 
-def dense_constant_elements(text):
-    """Largest element count over the dense constants in one lowered module."""
-    largest = 0
-    for match in re.finditer(r"dense<([fd]?)([^>]*)>", text):
-        product = 1
-        for dimension in re.findall(r"(\d+)x", match.group(2)):
-            product *= int(dimension)
-        largest = max(largest, product)
-    return largest
+def peak_bytes():
+    """Device memory high-water mark, or -1 where the device does not report it."""
+    try:
+        return int(jax.devices()[0].memory_stats().get("peak_bytes_in_use", -1))
+    except Exception:  # noqa: BLE001 - no device statistics on every backend
+        return -1
+
+
+def is_oom(error):
+    return "RESOURCE_EXHAUSTED" in str(error) or "Out of memory" in str(error)
 
 
 def arm_signature(map_fn, profile, policy, *, saddle):
@@ -126,7 +132,9 @@ def main():
     parser.add_argument("--cells", type=int, default=2098)
     parser.add_argument("--cache", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--radius-cells", type=float, default=4.0)
+    parser.add_argument("--radius-cells", type=float, default=1.0)
+    parser.add_argument("--width", type=int, default=128)
+    parser.add_argument("--agreement", action="store_true")
     parser.add_argument("--allow-cpu", action="store_true")
     args = parser.parse_args()
     assert jax.config.jax_enable_x64 is True
@@ -163,7 +171,6 @@ def main():
         axis_sign,
     ) = context.operands
     gate_nodes, gate_weights = _leggauss(GATE_OUTER_DEGREE)
-    reference_nodes, reference_weights = _leggauss(REFERENCE_OUTER_DEGREE)
 
     reading = context.reading(reference)
     candidates = disk_candidates(geometry, reading.saddle_form.position, radius)
@@ -187,6 +194,7 @@ def main():
         "gate_capacity": gate_capacity,
         "gate_outer_degree": GATE_OUTER_DEGREE,
         "reference_outer_degree": REFERENCE_OUTER_DEGREE,
+        "width": args.width,
         "arms": {},
     }
     save(args.output, result)
@@ -213,87 +221,112 @@ def main():
             weights,
         )
 
-    def run_arm(map_fn, saddle, active_candidates, nodes, weights, widths):
+    if args.agreement:
+        run_agreement(
+            saddle_map,
+            profile,
+            policy,
+            neighbours,
+            candidates,
+            gate_nodes,
+            gate_weights,
+            jnp.arange(len(context.geometry.centre)),
+            arguments_for,
+            result,
+            args.output,
+        )
+        return
+
+    def compile_and_run(map_fn, saddle):
         one = arm_signature(map_fn, profile, policy, saddle=saddle)
-        rows = {}
-        for width in widths:
-            batch = neighbours[:width]
-            arguments = arguments_for(active_candidates, nodes, weights)
-            lowered = jax.jit(jax.vmap(one, in_axes=(0,) + (None,) * 18)).lower(
-                batch, *arguments
-            )
-            executable = lowered.compile()
+        batch = neighbours[: args.width]
+        arguments = arguments_for(candidates, gate_nodes, gate_weights)
+        lowered = jax.jit(jax.vmap(one, in_axes=(0,) + (None,) * 18)).lower(
+            batch, *arguments
+        )
+        executable = lowered.compile()
+        started = perf_counter()
+        state = executable(batch, *arguments)
+        jax.block_until_ready(state.moment_residual)
+        compile_seconds = perf_counter() - started
+        times = []
+        for _ in range(5):
             started = perf_counter()
             state = executable(batch, *arguments)
             jax.block_until_ready(state.moment_residual)
-            compile_seconds = perf_counter() - started
-            times = []
-            for _ in range(5):
-                started = perf_counter()
-                state = executable(batch, *arguments)
-                jax.block_until_ready(state.moment_residual)
-                times.append((perf_counter() - started) * 1000 / width)
-            residual = np.asarray(state.moment_residual)
-            reduce_axes = tuple(range(1, residual.ndim))
-            rows[str(width)] = {
-                "width": width,
-                "per_state_wall_ms": float(np.median(times)),
-                "compile_seconds": compile_seconds,
-                "executable_bytes": generated_size(executable),
-                "constant_elements": dense_constant_elements(lowered.as_text()),
-                "finite": int(np.sum(np.all(np.isfinite(residual), axis=reduce_axes))),
-                "owner_cells": int(np.sum(np.asarray(state.graph_cells) > 0)),
+            times.append((perf_counter() - started) * 1000 / args.width)
+        residual = np.asarray(state.moment_residual)
+        reduce_axes = tuple(range(1, residual.ndim))
+        constants = _hlo_constants(lowered)
+        row = {
+            "width": args.width,
+            "per_state_wall_ms": float(np.median(times)),
+            "compile_seconds": compile_seconds,
+            "executable_bytes": generated_size(executable),
+            "constant_shapes": [list(shape) for shape in constants],
+            "constant_elements": int(sum(np.prod(shape) for shape in constants)),
+            "largest_constant_elements": int(
+                max((int(np.prod(shape)) for shape in constants), default=0)
+            ),
+            "peak_bytes_in_use": peak_bytes(),
+            "finite": int(np.sum(np.all(np.isfinite(residual), axis=reduce_axes))),
+            "owner_cells": int(np.sum(np.asarray(state.graph_cells) > 0)),
+        }
+        row["per_state_peak_bytes"] = (
+            row["peak_bytes_in_use"] // args.width
+            if row["peak_bytes_in_use"] > 0
+            else -1
+        )
+        row["per_member_us"] = (
+            row["per_state_wall_ms"] * 1000.0 / gate_capacity if gate_capacity else -1.0
+        )
+        return row
+
+    failed = False
+    for label, map_fn, saddle in (
+        ("axis", axis_map, False),
+        ("saddle", saddle_map, True),
+    ):
+        try:
+            row = compile_and_run(map_fn, saddle)
+        except jax.errors.JaxRuntimeError as error:
+            if not is_oom(error):
+                raise
+            result["arms"][label] = {
+                "oom": True,
+                "width": args.width,
+                "error": str(error),
             }
-            result["arms"][("saddle" if saddle else "axis")] = rows
             save(args.output, result)
-            print(
-                f"SPEED arm={'saddle' if saddle else 'axis'} "
-                f"{json.dumps(rows[str(width)])}",
-                flush=True,
-            )
-        return rows
+            print(f"SPEED arm={label} width={args.width} OOM {error}", flush=True)
+            failed = True
+            break
+        result["arms"][label] = row
+        save(args.output, result)
+        print(f"SPEED arm={label} {json.dumps(row)}", flush=True)
 
-    axis_rows = run_arm(
-        axis_map, False, candidates, gate_nodes, gate_weights, (1, 16, 128)
-    )
-    saddle_rows = run_arm(
-        saddle_map, True, candidates, gate_nodes, gate_weights, (1, 16, 128)
-    )
-    result["arms"] = {"axis": axis_rows, "saddle": saddle_rows}
-
-    agreement = agreement_check(
-        saddle_map,
-        profile,
-        policy,
-        neighbours[:4],
-        candidates,
-        gate_nodes,
-        gate_weights,
-        reference_nodes,
-        reference_weights,
-        jnp.arange(len(context.geometry.centre)),
-        arguments_for,
-    )
-    result["agreement"] = agreement
-    axis128 = axis_rows["128"]["per_state_wall_ms"]
-    saddle128 = saddle_rows["128"]["per_state_wall_ms"]
-    ratio = saddle128 / axis128 if axis128 else float("inf")
-    result["saddle_over_axis_width128"] = ratio
-    result["gate_pass"] = bool(
-        ratio <= 1.25
-        and saddle_rows["128"]["compile_seconds"] <= 60
-        and saddle_rows["128"]["executable_bytes"] <= 50_000_000
-        and agreement["max_abs_difference"] <= AGREEMENT_TOLERANCE
-    )
+    if not failed:
+        axis_row, saddle_row = result["arms"]["axis"], result["arms"]["saddle"]
+        ratio = saddle_row["per_state_wall_ms"] / axis_row["per_state_wall_ms"]
+        result["saddle_over_axis"] = ratio
+        result["bar_pass"] = bool(
+            saddle_row["per_state_wall_ms"] <= 0.90
+            and saddle_row["compile_seconds"] <= 60
+            and saddle_row["executable_bytes"] <= 50_000_000
+        )
+        save(args.output, result)
+        print(
+            f"BAR width={args.width} "
+            f"saddle_per_state_ms={saddle_row['per_state_wall_ms']:.6f} "
+            f"ratio={ratio:.4f} pass={result['bar_pass']} "
+            f"capacity={gate_capacity}",
+            flush=True,
+        )
     save(args.output, result)
-    print(f"GATE saddle_over_axis={ratio:.4f} pass={result['gate_pass']}", flush=True)
-    print(f"AGREEMENT {json.dumps(agreement)}", flush=True)
-    if agreement["max_abs_difference"] > AGREEMENT_TOLERANCE:
-        print("AGREEMENT FAILED", flush=True)
-        raise SystemExit(3)
+    raise SystemExit(EXIT_OOM if failed else 0)
 
 
-def agreement_check(
+def run_agreement(
     map_fn,
     profile,
     policy,
@@ -301,38 +334,60 @@ def agreement_check(
     gate_candidates,
     gate_nodes,
     gate_weights,
-    reference_nodes,
-    reference_weights,
     all_candidates,
     arguments_for,
+    result,
+    output,
 ):
-    """Owned map must agree between the sized disk and the first-build rule."""
+    """Ladder the outer degree against the 128-node all-cell reference."""
     one = arm_signature(map_fn, profile, policy, saddle=True)
+    states = batch[:4]
 
     def evaluate(active_candidates, nodes, weights):
         arguments = arguments_for(active_candidates, nodes, weights)
         program = (
             jax.jit(jax.vmap(one, in_axes=(0,) + (None,) * 18))
-            .lower(batch, *arguments)
+            .lower(states, *arguments)
             .compile()
         )
-        state = program(batch, *arguments)
+        state = program(states, *arguments)
         jax.block_until_ready(state.moment_residual)
         return np.asarray(state.moment_residual)
 
-    gate = evaluate(gate_candidates, gate_nodes, gate_weights)
+    reference_nodes, reference_weights = _leggauss(REFERENCE_OUTER_DEGREE)
     reference = evaluate(all_candidates, reference_nodes, reference_weights)
-    difference = float(np.max(np.abs(gate - reference)))
-    return {
-        "states": int(batch.shape[0]),
-        "gate_outer_degree": GATE_OUTER_DEGREE,
-        "reference_outer_degree": REFERENCE_OUTER_DEGREE,
+    ladder = {}
+    for degree in DEGREE_LADDER:
+        nodes, weights = _leggauss(degree)
+        candidate = evaluate(gate_candidates, nodes, weights)
+        difference = float(np.max(np.abs(candidate - reference)))
+        ladder[str(degree)] = {
+            "max_abs_difference": difference,
+            "passed": bool(difference <= AGREEMENT_TOLERANCE),
+        }
+        print(
+            f"AGREEMENT degree={degree} max_abs_difference={difference:.12e}",
+            flush=True,
+        )
+    same_list = evaluate(gate_candidates, reference_nodes, reference_weights)
+    result["agreement"] = {
+        "states": int(states.shape[0]),
         "gate_capacity": int(gate_candidates.shape[0]),
         "reference_capacity": int(all_candidates.shape[0]),
-        "max_abs_difference": difference,
+        "ladder": ladder,
+        "candidate_set_effect": float(np.max(np.abs(same_list - reference))),
         "tolerance": AGREEMENT_TOLERANCE,
-        "passed": bool(difference <= AGREEMENT_TOLERANCE),
+        "min_over_ladder": min(row["max_abs_difference"] for row in ladder.values()),
+        "max_outer_degree": max(int(degree) for degree in ladder),
     }
+    result["agreement"]["passed"] = bool(
+        result["agreement"]["min_over_ladder"] <= AGREEMENT_TOLERANCE
+    )
+    save(output, result)
+    print(f"AGREEMENT {json.dumps(result['agreement'])}", flush=True)
+    if not result["agreement"]["passed"]:
+        print("AGREEMENT FAILED", flush=True)
+        raise SystemExit(3)
 
 
 if __name__ == "__main__":

@@ -16,10 +16,7 @@ from scripts.prototypes.fast_map_production.kernel import read
 from scripts.prototypes.fast_read.ordinary_cut import bell_moments
 from scripts.prototypes.lean_map.quadrature import interior_moments
 from scripts.prototypes.read_route.jets import _source_jets
-from scripts.prototypes.xpoint_cell_owner.conic_integral import (
-    _quadratic,
-    integrate_cell,
-)
+from scripts.prototypes.xpoint_cell_owner.conic_integral import _quadratic
 
 
 def _pack(jet):
@@ -53,36 +50,6 @@ def _saddle_frame(jet6, boundary, sigma):
     plus = eigenvector[:, 1]
     minus = eigenvector[:, 0]
     return value, gradient, eigenvalue, plus, minus
-
-
-def reference_cell_integral(
-    vertices,
-    centre,
-    pitch,
-    field_coefficients,
-    boundary_level,
-    sigma,
-    saddle,
-    axis,
-    density_coefficients,
-    *,
-    outer_rule="dense",
-    axis_component="halfplane",
-):
-    """Wrap the numpy cell integral so the characterisation shares one route."""
-    return integrate_cell(
-        vertices,
-        centre,
-        pitch,
-        field_coefficients,
-        boundary_level,
-        sigma,
-        saddle,
-        axis,
-        density_coefficients,
-        outer_rule=outer_rule,
-        axis_component=axis_component,
-    )
 
 
 def _roots(a, b, c):

@@ -1,4 +1,4 @@
-"""Identity-keyed shared cache for the analytic-certificate booking fixtures.
+"""Shared content-store backend for the analytic-certificate booking fixtures.
 
 The certificate booking gate composes a carrier machine and a clipped exterior
 for every analytic case and resolution. Both are expensive to build, identical
@@ -6,7 +6,16 @@ across runs, and addressed by the semantic identity the fixture sources define,
 so they are published whole through the shared content store and a later run in
 a fresh process loads them instead of rebuilding them.
 
-The contract this module keeps:
+This module is only the store. Which fixture exists, what its identity is, how
+its dataset is encoded and decoded, and whether a read is a hit or a build are
+all owned by the fixture owners in
+:mod:`scripts.analytic_oracle_fixtures.measure` - ``cached_machine`` and
+``cached_fixture_exterior`` - which take a store for the one thing they cannot
+express themselves: where the object lives and how it is made visible to a
+concurrent reader. :class:`ContentStoreFixtureStore` supplies that, and the two
+helpers below name it as the store the booking gate uses.
+
+The contract this store keeps:
 
 * **The key is the identity.** ``fixture.cache_identity`` (carrier) and
   ``fixture._exterior_cache_identity`` (exterior) name every input a fixture
@@ -14,26 +23,23 @@ The contract this module keeps:
   its revision, the analytic state digest. The store digest is the SHA-256 of
   that identity's canonical JSON, so a source change that moves any one input
   addresses a different object rather than reloading a stale fixture.
-* **One owner per fixture.** :func:`cached_carrier` owns the carrier and
-  :func:`cached_exterior` owns the exterior; each is the only writer of its
-  object. Publication goes through ``nova.database.content_store``, which lands
-  the payload in a private directory and renames it onto its digest, so a
-  reader sees the whole object or none of it and two concurrent publishers of
-  one key cannot interleave. That primitive is the reason this module publishes
-  through the content store rather than writing a group in place: it is safe on
-  the GPFS operand root, where an in-place group write is not.
+* **Publication is the store's rename-onto-digest.** :func:`publish_fixture`
+  hands the payload to ``nova.database.content_store.publish_files``, which
+  lands it in a private directory and renames it onto its digest, so a reader
+  sees the whole object or none of it and two concurrent publishers of one key
+  cannot interleave. That primitive is the reason this store publishes through
+  the content store rather than writing a group in place: it is safe on the GPFS
+  operand root, where an in-place group write is not.
 """
 
 from __future__ import annotations
 
+from contextlib import AbstractContextManager, contextmanager
 import json
 import os
 from pathlib import Path
 import tempfile
-from time import perf_counter
-from typing import Callable
 
-import numpy as np
 import xarray
 
 from nova.database.content_store import (
@@ -53,7 +59,6 @@ CARRIER_KIND = "carrier"
 EXTERIOR_KIND = "exterior"
 FIXTURE_KIND_ROOT = "certificate-fixtures"
 PAYLOAD_NAME = "fixture.nc"
-IDENTITY_NAME = "identity.json"
 NETCDF_ENGINE = "h5netcdf"
 
 
@@ -61,7 +66,7 @@ def fixture_root() -> Path:
     """Return the shared root the certificate fixtures are published under.
 
     The default is a subdirectory of the shared operand root, on the GPFS
-    evidence mount, so a fixture built by one run is visible to the next. A
+    evidence mount, so a fixture built by one run is visible to all of them. A
     caller that needs a private root - a unit test, a scratch probe - sets
     ``NOVA_BOOK_FIXTURE_ROOT``.
     """
@@ -163,144 +168,94 @@ class _DeclaredFile:
         self.size = size
 
 
-def _load_or_build(
-    kind: str,
-    identity: dict[str, object],
-    build: Callable[[], xarray.Dataset],
-) -> tuple[xarray.Dataset, dict[str, object]]:
-    """Return the fixture dataset for one identity, loading or publishing it.
+class _ContentSession:
+    """One fixture kind's session, moving a dataset through the content store.
 
-    On a hit the load wall is what this process paid; on a miss the build wall
-    is the assembly and the payload is published under the identity's digest.
-    The receipt records which of the two happened, so a run can be read for
-    whether it built or loaded without consulting the store.
+    The session is opened on a digest and reads or publishes under it. Its
+    location is the verified object directory on a hit, and the directory the
+    store renamed the object onto on a miss; both lie beneath the kind root, so
+    a caller can assert that a fixture landed where it meant to publish.
     """
-    digest = fixture_digest(identity)
-    started = perf_counter()
-    data = read_fixture(kind, digest)
-    if data is not None:
-        receipt = {
-            "kind": kind,
-            "digest": digest,
-            "store": str(fixture_entry(kind, digest)),
-            "hit": True,
-            "load_seconds": perf_counter() - started,
-            "build_seconds": 0.0,
-        }
-        return data, receipt
-    build_started = perf_counter()
-    data = build()
-    build_seconds = perf_counter() - build_started
-    destination = publish_fixture(kind, digest, data)
-    receipt = {
-        "kind": kind,
-        "digest": digest,
-        "store": str(destination),
-        "hit": False,
-        "load_seconds": 0.0,
-        "build_seconds": build_seconds,
-    }
-    return data, receipt
+
+    def __init__(self, kind: str, digest: str, location: str):
+        self.kind = kind
+        self.digest = digest
+        self.location = location
+        self.lock_wait = 0.0
+
+    @property
+    def key(self) -> str:
+        return self.digest
+
+    def load(self) -> xarray.Dataset | None:
+        return read_fixture(self.kind, self.digest)
+
+    def publish(self, data: xarray.Dataset) -> None:
+        self.location = str(publish_fixture(self.kind, self.digest, data))
 
 
-def _encoded(identity: dict[str, object]) -> str:
-    return json.dumps(identity, sort_keys=True, separators=(",", ":"))
+class ContentStoreFixtureStore:
+    """Publish one fixture kind through the shared content store.
+
+    No lock is taken: publication is the store's rename-onto-digest, so two
+    processes racing one identity resolve to one visible object without either
+    waiting on the other, which is what lets this backend sit on the shared
+    GPFS operand root.
+    """
+
+    def __init__(self, kind: str):
+        self.kind = kind
+
+    @contextmanager
+    def session(
+        self, identity: dict[str, object]
+    ) -> AbstractContextManager[_ContentSession]:
+        digest = fixture_digest(identity)
+        entry = fixture_entry(self.kind, digest)
+        yield _ContentSession(
+            self.kind,
+            digest,
+            str(entry) if entry is not None else "",
+        )
 
 
-def cached_carrier(case, requested_cells: int, wall: np.ndarray | None):
+def carrier_store() -> ContentStoreFixtureStore:
+    """Return the shared root's store for the carrier fixture kind."""
+    return ContentStoreFixtureStore(CARRIER_KIND)
+
+
+def exterior_store() -> ContentStoreFixtureStore:
+    """Return the shared root's store for the clipped exterior fixture kind."""
+    return ContentStoreFixtureStore(EXTERIOR_KIND)
+
+
+def cached_carrier(case, requested_cells: int, wall):
     """Return the carrier machine for one identity, loading or publishing it.
 
-    The carrier build is the host assembly the fixture sources define; its
-    identity and its dataset codec are taken from the fixture module, so the
-    object stored here is bit-identical to one the in-place builder would have
-    produced and carries the same schema and identity attributes.
+    The build, the identity and the receipt belong to
+    :func:`measure.cached_machine`; this names the shared content store as the
+    backend, so the booking gate builds a carrier once and a later run loads it.
     """
     from scripts.analytic_oracle_fixtures import measure as fixture
 
-    identity = fixture.cache_identity(
+    return fixture.cached_machine(
         case,
-        requested_cells=requested_cells,
+        requested_cells,
         wall_nodes=fixture.WALL_POINT_COUNT,
         wall=wall,
+        store=carrier_store(),
     )
-    key = fixture_digest(identity)
-
-    def build() -> xarray.Dataset:
-        machine = fixture.build_machine(
-            case,
-            requested_cells,
-            wall_nodes=fixture.WALL_POINT_COUNT,
-            wall=wall,
-        )
-        return fixture._dataset(machine, identity, key)
-
-    data, receipt = _load_or_build(CARRIER_KIND, identity, build)
-    machine = fixture._from_dataset(data, identity, key)
-    machine.cache.update(
-        {
-            "store": receipt["store"],
-            "semantic_key": key,
-            "hit": receipt["hit"],
-            "load_seconds": receipt["load_seconds"],
-            "build_seconds": receipt["build_seconds"],
-        }
-    )
-    return machine, receipt
 
 
 def cached_exterior(case, analytic, machine, operator, state):
-    """Return the clipped exterior fixture for one identity, loading or publishing.
+    """Return the clipped exterior for one identity, loading or publishing it.
 
-    The exterior build and the analytic state it is posed against are taken from
-    the fixture module, so the published object is the same moments and target
-    vector the in-place builder produced. Its identity keys on the carrier's own
-    semantic key, the analytic state digest and the support arm. The arm is
-    named explicitly on both the identity and the build: the two arms drive
-    different clips and different quadratures, so an object built on one arm
-    must never be addressed by the other.
+    The build, the identity and the receipt belong to
+    :func:`measure.cached_fixture_exterior`; this names the shared content store
+    as the backend.
     """
     from scripts.analytic_oracle_fixtures import measure as fixture
 
-    support_arm = fixture.EXTERIOR_SUPPORT_ARM
-    identity = fixture._exterior_cache_identity(
-        case, analytic, machine, state, support_arm
+    return fixture.cached_fixture_exterior(
+        case, analytic, machine, operator, state, store=exterior_store()
     )
-    key = fixture_digest(identity)
-
-    def build() -> xarray.Dataset:
-        moments = fixture.exact_current_moments(
-            case, operator, state, analytic=analytic, support_arm=support_arm
-        )
-        coefficients = operator.coupling_current_moments(moments)
-        exterior = np.asarray(state) - fixture._internal_flux_image(
-            operator, coefficients
-        )
-        return xarray.Dataset(
-            {
-                "cell_current": (("cell",), np.asarray(moments.cell_current)),
-                "radial_moment": (("cell",), np.asarray(moments.radial_moment)),
-                "vertical_moment": (("cell",), np.asarray(moments.vertical_moment)),
-                "exterior": (("target",), exterior),
-            },
-            attrs={
-                "cache_schema": fixture.EXTERIOR_CACHE_SCHEMA,
-                "cache_key": key,
-                "semantic_identity": _encoded(identity),
-            },
-        )
-
-    data, receipt = _load_or_build(EXTERIOR_KIND, identity, build)
-    if data.attrs.get("cache_schema") != fixture.EXTERIOR_CACHE_SCHEMA:
-        raise ValueError("fixture exterior cache schema mismatch")
-    if data.attrs.get("semantic_identity") != _encoded(identity):
-        raise ValueError("fixture exterior cache identity mismatch")
-    from nova.equilibrium.stencil_mesh import CellCurrentMoments
-
-    moments = CellCurrentMoments(
-        *(
-            np.asarray(data[name].values, dtype=np.float64)
-            for name in ("cell_current", "radial_moment", "vertical_moment")
-        )
-    )
-    exterior = np.asarray(data["exterior"].values, dtype=np.float64)
-    return moments, exterior, receipt

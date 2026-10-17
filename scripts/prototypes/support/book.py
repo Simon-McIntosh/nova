@@ -44,9 +44,10 @@ def _cached_machine(carrier, requested, wall):
 
     The carrier is addressed by its semantic identity and published, whole,
     through the shared content store, so a run that follows a first one loads
-    the machine rather than rebuilding it.
+    the machine rather than rebuilding it. The fixture owner returns the machine
+    and records the receipt on it.
     """
-    machine, _ = certificate_fixtures.cached_carrier(carrier, requested, wall)
+    machine = certificate_fixtures.cached_carrier(carrier, requested, wall)
     assert machine.cache["store"].startswith(
         str(certificate_fixtures.kind_root(certificate_fixtures.CARRIER_KIND))
     ), machine.cache["store"]
@@ -318,7 +319,7 @@ def measure(kind, cells, directory):
         exterior_cache_hit=bool(exterior_cache["hit"]),
         exterior_build_seconds=float(exterior_cache["build_seconds"]),
         exterior_load_seconds=float(exterior_cache["load_seconds"]),
-        exterior_digest=exterior_cache["digest"],
+        exterior_digest=exterior_cache["semantic_key"],
         completed=True,
     )
     path = directory / f"{kind}-{cells}.json"

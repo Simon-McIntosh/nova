@@ -1,0 +1,1073 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 7,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "e4c8b98157fa0b4086c9febefdd66a40b3875984",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 6816343,
+      "input_tokens_cumulative": 6816343,
+      "output_tokens": 26270,
+      "output_tokens_cumulative": 26270,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 2871,
+    "files": 6,
+    "removed": 1
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "7f1235c43026b8289431638a0b65c125415dd30a",
+    "be657434d03bb7ed63d3525aa802b0b322373d7e",
+    "6ca791d6fba0ff7a00ae234e20d8ea1c81939810",
+    "0b02badfda4d255cc8710bf431d273287b21caa4",
+    "a6d1bd8dabc49ae371479717a759ed4c87081b9a",
+    "573e9bbf631e039388633e86f31dc71942129057",
+    "d4b6fd016921122cec488fc67bf0a78119103910",
+    "449dc80f12730d1b60268f0d5501063aca20cce8",
+    "08ce5266c63236ac35c00d90ca288ee89f3d98f9",
+    "ff3e9e4a5acb3c08d9e4ed76cbd0b0f953f2a494",
+    "4d015018b2f16328c5abee5718e52d9fd70cd6ce",
+    "fc8cfd1f70af868c6df8cfb2ca672627d26126b0",
+    "45e3b821c4c5c4d451f434d211a9ff79912e2328",
+    "6ae8431436dacb22d5f59eeca5c61cb9c099852d",
+    "e36e252f80a56ead0cf7981a05c480657a2a8380"
+  ],
+  "completed_at": "2026-10-17T17:57:19Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-17T10:19:57Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv uv run --no-sync pytest -p no:cacheprovider -q scripts/prototypes/fast_map_production/test_bottleneck_level.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T101935652190-bottleneck-path-level/logs/unit-test.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.2857142857142857,
+    "plan": "converged-forward-solve",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-17T11:19:36.405827+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-17T10:19:36Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 29,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 3,
+    "headroom": 8,
+    "mean_context": 144000,
+    "observed_at": "2026-10-17T10:19:07Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 29,
+      "aggregate_tokens_per_second": 353.09,
+      "detail": "",
+      "mean_tokens_per_second": 76.759,
+      "observed_at": "2026-10-17T10:19:07Z",
+      "runs": 4.6,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-17T17:57:19Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T101935652190-bottleneck-path-level/manifest.md",
+  "member": "disposable-r-20261017T101935652190-bottleneck-path-level",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "bottleneck-path-level",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "critical",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1775,
+          "cached_input_tokens": 658490,
+          "input_tokens": 660267,
+          "output_tokens": 861,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 661128,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Replace the fast map's 0/1 axis-path membership with the continuous bottleneck level, so the wall contact's effective level is the more scrape-off-side of its tangency level and the best axis path's bottleneck, with no boolean or step in between. Standing rules: the limited-to-diverted transition is continuous, with both boundary candidates every step and no discrete verdict; every Newton update takes state, operands and factor as runtime variables (nova.equilibrium.solve); Biot-Savart operands come from the default GPFS cache.\n\nWhere it stands. In scripts/prototypes/fast_map_production/kernel.py, `_wall_path_ceiling` (:62, called at :276) already computes the maximin of edge-passage peaks from the axis seed: the highest level that can reach each cell from the axis, which is the continuous bottleneck. Two switches follow it.\n- `_continuous_path_weight` (:111, called at :347) thresholds the passage against the level through a 1e-8-wide ramp (`flux_weight = clip(0.5 + (passage - level) / 1e-8, 0, 1)`). It is a step in effect, and the fast-map record measured the path weight switching exactly 0 or 1 in fine scans.\n- `frame_gate` (:96) bars edges with a boolean normal-form sector test (`barred = normal & ~sector`).\nimas-efit measured the same structure, on WEST NICE 62751, TCV and HL-3. A private-flux wall contact whose tangency level is more axis-ward than the X-point, but which the axis reaches only through the X-point, must not win by its own tangency level. Taking the effective wall level as the more scrape-off-side of tangency and bottleneck cleared their regressions. The plan item is f-cfs-bottleneck-path-level.\n\nDone when all of the following hold, reported in docs/research/bottleneck-path-level.html:\n(1) The wall candidate's effective level is the more scrape-off-side of its tangency level and its bottleneck from `_wall_path_ceiling`, built as one owned function. The 1e-8 ramp membership and the boolean sector bar are deleted, not left as dead options. State what replaces the sector bar's job, if anything still needs it, and why that replacement is continuous.\n(2) A unit test on a small synthetic carrier, CPU-only: a private-flux wall contact whose tangency level is more axis-ward than the saddle, but reachable from the axis only through the saddle, gets the saddle's level as its effective level. A control where the contact is directly reachable keeps its tangency level.\n(3) Map fidelity on the certified limited and diverted carriers at 282, 550 and 2,098 cells is no worse than at base, by the analytic map error against each carrier's guard. Report base beside head.\n(4) Continuity. Run the 41-state sweeps and the 550 transition bracket, and bisect every verdict change to adjacent binary64 values. Classify each: a crossing (competing levels equal to roundoff relative to the axis-to-boundary flux), a fold (one saddle's Hessian determinant and persistence to roundoff), or an implementation switch named by file and line. No implementation switch may remain from the path weight or the sector bar. Report the counts at base and at head.\n(5) The diverted and limited cold solves at 282 and 550 converge to 1e-12 at head as at base, with residual histories.\n(6) The evidence fragment docs/evidence/fragments/converged-forward-solve/bottleneck-path-level.html, with a figure of the effective wall level through the bracket at base and head. Render it to PNG and look at it before committing, so no label clips or overlaps.\n\nGPU rung: the H200 98dci4-gpu-0003 is draining until an administrator resumes it. Use titan (--partition=titan --gres=gpu:1, a P100 with 16 GB, no reservation), and label every wall as a titan number. Put every script a job runs on GPFS in the run directory, never under /tmp: a titan job cannot see the fleet node's /tmp, and that failed one job today. Never scancel a running GPU job.\n\nWrite only scripts/prototypes/fast_map_production, docs/research/bottleneck-path-level.html, docs/figures/converged-forward-solve/bottleneck-path-level and docs/evidence/fragments/converged-forward-solve/bottleneck-path-level.html. Other prototypes import from fast_map_production; keep their imports working, or list the callers whose behaviour changes.\n\nRun conditions: H200 rows run as one job through RECKON_ALLOW_NESTED_LAUNCH=1 scripts/h200_test_lane/run.sh --log (an absolute path in the run directory) --wait -- (targets), or one sbatch job on --partition=betelgeuse --reservation=gpu_0003_grpA --gres=gpu:1 with rungs as rows inside the allocation (never an array), --time sized to finish, XLA_PYTHON_CLIENT_PREALLOCATE=false and TMPDIR=/tmp in the submit environment and in every child; submit for real and read squeue a minute later rather than trusting sbatch --test-only. On a compute node run /home/ITER/mcintos/Code/nova/.venv/bin/python directly with PYTHONPATH set to the run worktree and never invoke uv; every login-node uv command carries --no-sync and nothing runs uv sync. configure_dtypes() before any array and jax_enable_x64 asserted True. Gates pass by delta against orientation_base_sha in per-module fresh processes, both arms running the same test files with the repository root conftest, baseline_suite and after_suite as single-line JSON whose log_path names one log file and whose command is literally runnable. Any wait is declared on the job that finishes last as wait_probe [\"sacct\",\"-n\",\"-X\",\"-P\",\"-j\",\"(job id)\",\"-o\",\"State\"] and wait_terminal [\"COMPLETED\",\"FAILED\",\"CANCELLED\",\"TIMEOUT\",\"OUT_OF_MEMORY\",\"NODE_FAIL\"] as JSON lists, and names every job it depends on in wait_condition. The certified 550, 2,000 and 5,000-cell machines and exteriors are cached under /home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T181553786165-proto-support/ordered/rows/cache and may be read in place, never written. Run filepath relativize over any evidence fragment before committing. Commit with conventional subjects and bodies at every step and write the manifest and commit before every job wait; the manifest commits line lists every commit; status is complete, blocked or failed, which the worker sets itself. No plan labels in source names or comments. Inside every job payload, make one directory with mktemp -d /tmp/$USER-$SLURM_JOB_ID-XXXX, point TMPDIR at it, and remove it on exit with trap 'rm -rf' (keep TMPDIR=/tmp in the submit environment so slurmstepd can start). Never leave extracted base trees or caches in /tmp after a node ends; anything a later reader needs goes under the run directory on GPFS.\n\nImport provenance: print nova.__file__ in every log header. On the fleet allocation (SLURM_JOB_ID set), run CPU work in place. The time budget is per working turn, not a deadline: park on H200 jobs with declared waits and continue across turns; this node is sized at about 8 worker-hours, and an unmeasured item in your own scope is remaining work, not a blocker. Never edit a script a submitted job will run; submit a per-job copy. Size every job memory from a measured row. The manifest commits line lists every commit (git rev-list), orientation_base_sha is copied from git rev-parse output, and status is complete when the record is delivered even if the target is not met (then give the nearest measured figure and what dominates it).",
+    "estimated_hours": 8.0,
+    "goal": "Replace the fast map 0/1 axis-path membership with the continuous bottleneck level for the wall contact",
+    "id": "bottleneck-path-level",
+    "images": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-17T10:19:36Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 29,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 3,
+      "headroom": 8,
+      "mean_context": 144000,
+      "observed_at": "2026-10-17T10:19:07Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 29,
+        "aggregate_tokens_per_second": 353.09,
+        "detail": "",
+        "mean_tokens_per_second": 76.759,
+        "observed_at": "2026-10-17T10:19:07Z",
+        "runs": 4.6,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T101935652190-bottleneck-path-level/manifest.md",
+    "negative_control": "restoring the 1e-8 ramp membership brings back an implementation switch on the transition bracket",
+    "orchestrator_assessment": {
+      "reasoning": "deep",
+      "risk": "elevated",
+      "verification": "strict"
+    },
+    "plan": "converged-forward-solve",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "scripts/prototypes/fast_map_production",
+      "docs/research/bottleneck-path-level.html",
+      "docs/figures/converged-forward-solve/bottleneck-path-level",
+      "docs/evidence/fragments/converged-forward-solve/bottleneck-path-level.html"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 2667589.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "bottleneck-path-level",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-17T10:19:42.351118+00:00",
+    "score": 0.64375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "Deep but well located: the bottleneck already exists in _wall_path_ceiling; the work is removing two switches and proving continuity with the three-way classifier on titan; unpaired because codex is near its weekly exhaustion",
+    "confidence": 0.77,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "budget_source": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "review_total_median": null,
+          "unknown": 0,
+          "unrecorded": 0,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 399.237,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 1133.74,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 324069.996491,
+        "budget_reason": null,
+        "budget_source": "ledger",
+        "burn_multiple": 0.43040284939175294,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 19.2,
+          "peak_utilisation_p90_pct": 19.7,
+          "peak_utilisation_runs": 2,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.8197330382986111,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "review_total_median": null,
+          "unknown": 0,
+          "unrecorded": 0,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": 0.44436657982343025,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-18T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 38.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 324069.996491,
+        "budget_reason": null,
+        "budget_source": "ledger",
+        "burn_multiple": 0.43040284939175294,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 19.2,
+          "peak_utilisation_p90_pct": 19.7,
+          "peak_utilisation_runs": 2,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.8197330382986111,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "review_total_median": null,
+          "unknown": 0,
+          "unrecorded": 0,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": 0.44436657982343025,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-18T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 38.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 324069.996491,
+        "budget_reason": null,
+        "budget_source": "ledger",
+        "burn_multiple": 0.43040284939175294,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 19.2,
+          "peak_utilisation_p90_pct": 19.7,
+          "peak_utilisation_runs": 2,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.8197330382986111,
+        "effort": "medium",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "review_total_median": null,
+          "unknown": 0,
+          "unrecorded": 1,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": 0.44436657982343025,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-18T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 38.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "budget_source": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 3,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": 78.1,
+          "peak_utilisation_p50_pct": 77.8,
+          "peak_utilisation_p90_pct": 85.2,
+          "peak_utilisation_runs": 73,
+          "window_tokens": 230144
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "outcomes": {
+          "failed": 9,
+          "not-run": 10,
+          "passed": 59,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "review_total_median": null,
+          "unknown": 0,
+          "unrecorded": 78,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": 11
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 82.181491,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn_multiple": 2.9017684825031256,
+        "congestion": {
+          "lift": {
+            "ends_at": "2026-10-20T04:58:00+00:00",
+            "ends_on": "time",
+            "form": "uncapped",
+            "group": "codex-sub",
+            "id": "codex-sub-1792002586-64d825",
+            "pace_multiple": null,
+            "remaining_seconds": 239905.83992,
+            "scope": "global"
+          }
+        },
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 4.828899704965278,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "review_total_median": null,
+          "unknown": 0,
+          "unrecorded": 0,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": 0.3411712567592593,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-22T06:13:12+00:00",
+        "stale": false,
+        "utilisation_pct": 90.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 82.181491,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn_multiple": 2.9017684825031256,
+        "congestion": {
+          "lift": {
+            "ends_at": "2026-10-20T04:58:00+00:00",
+            "ends_on": "time",
+            "form": "uncapped",
+            "group": "codex-sub",
+            "id": "codex-sub-1792002586-64d825",
+            "pace_multiple": null,
+            "remaining_seconds": 239905.83992,
+            "scope": "global"
+          }
+        },
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 4.828899704965278,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "review_total_median": null,
+          "unknown": 0,
+          "unrecorded": 0,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": 0.3411712567592593,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-22T06:13:12+00:00",
+        "stale": false,
+        "utilisation_pct": 90.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 82.181491,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn_multiple": 2.9017684825031256,
+        "congestion": {
+          "lift": {
+            "ends_at": "2026-10-20T04:58:00+00:00",
+            "ends_on": "time",
+            "form": "uncapped",
+            "group": "codex-sub",
+            "id": "codex-sub-1792002586-64d825",
+            "pace_multiple": null,
+            "remaining_seconds": 239905.83992,
+            "scope": "global"
+          }
+        },
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 4.828899704965278,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "outcomes": {
+          "failed": 9,
+          "not-run": 14,
+          "passed": 10,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "review_total_median": null,
+          "unknown": 0,
+          "unrecorded": 33,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": 0.3411712567592593,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-22T06:13:12+00:00",
+        "stale": false,
+        "utilisation_pct": 90.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude:claude-haiku-4-5-20251001:claude": 0,
+      "claude:claude-opus-5-5:claude": 0.01,
+      "claude:claude-sonnet-5-5:claude": 0.06,
+      "codex:gpt-6-astra:codex": 0,
+      "codex:gpt-6-luna:codex": 0,
+      "codex:gpt-6-sol:codex": 0.11,
+      "hold": 0.02,
+      "local:deepseek-v4.1-flash:clive": 0.8
+    },
+    "questions": {
+      "route": {
+        "criteria": {
+          "claude:claude-haiku-4-5-20251001:claude": {
+            "backend": "claude",
+            "effort": "high",
+            "lane": "claude",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "claude-haiku-4-5-20251001"
+          },
+          "claude:claude-opus-5-5:claude": {
+            "backend": "claude",
+            "effort": "high",
+            "lane": "claude",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "claude-opus-5-5"
+          },
+          "claude:claude-sonnet-5-5:claude": {
+            "backend": "claude",
+            "effort": "medium",
+            "lane": "claude",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "claude-sonnet-5-5"
+          },
+          "codex:gpt-6-astra:codex": {
+            "backend": "codex",
+            "effort": "xhigh",
+            "lane": "codex",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "gpt-6-astra"
+          },
+          "codex:gpt-6-luna:codex": {
+            "backend": "codex",
+            "effort": "xhigh",
+            "lane": "codex",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "gpt-6-luna"
+          },
+          "codex:gpt-6-sol:codex": {
+            "backend": "codex",
+            "effort": "high",
+            "lane": "codex",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "gpt-6-sol"
+          },
+          "hold": "Do not dispatch now; wait for pressure to ease. When the local lane is not admitting (full, paused or unavailable), well-defined, routine or deferrable work should usually hold for it rather than spend a pressed metered lane. On a sliding scale, hard, high-risk or urgent work may still take the metered lane; weigh expected wait against urgency without a numeric threshold. When exactly one lane can serve the node, a hold waits for that lane alone, as hold_waits_for states.",
+          "local:deepseek-v4.1-flash:clive": {
+            "backend": "clive",
+            "effort": "high",
+            "lane": "local",
+            "local": true,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "deepseek-v4.1-flash"
+          }
+        },
+        "glossary": {
+          "budget_age_s": "Seconds since the budget reading was observed; null when unknown.",
+          "budget_source": "Where a budget reading came from: a document reading is taken from the published paid-lanes document, an account-surface reading describes now, and a ledger reading carries the age of the run behind it.",
+          "burn_multiple": "Metered spend so far divided by the lane's allowance for its window; above 1 is ahead of the pace that window plans for.",
+          "context": "A candidate's context block. window_tokens is the input window that gates the lane; estimated_tokens is this node's deterministic input estimate (standing instructions plus the repository files its brief loads) measured against that window; headroom_pct is the share of the window the estimate leaves free. peak_utilisation_p50_pct and peak_utilisation_p90_pct are the median and 90th-percentile peak input utilisation of recent passed runs on the lane, with peak_utilisation_runs behind them. A run whose input approaches its window risks dying mid-way, so a small headroom is a real risk to be weighed with pressure. A null figure is unknown, never zero.",
+          "days_to_reset": "Days until the lane's window resets; null when unknown.",
+          "expected_wait_profile_age_s": "The age in seconds of the oldest foreign project's run-time profile that contributed to expected_wait_s, counted from the instant its promotion published it; null when no foreign profile contributed. A pick reads a published profile rather than rebuilding one, so this names how stale the reading behind the wait is.",
+          "hold_waits_for": "What a hold waits on. When exactly one lane can serve the node a hold waits for that lane alone: waiting for any other lane to free changes nothing, because it cannot run this node. Null when no lane can serve the node.",
+          "lanes": "One pressure block per lane, however many models the lane holds. A lane is a subscription or host whose models share one account window, so its utilisation, burn, pace allowance, reset, worker slots, congestion and banked-reset flag are stated here once and are the same for every model in it. availability is the lane's serving state aggregated over those models. Read a model's own serving observation from its candidate entry; read the shared spending policy from its lane.",
+          "lift": "A lift in force on the lane's budget group: its form (uncapped, drain_by or multiple), who granted it, and when it ends. A lane under a lift is one whose window is meant to be spent, so its burn and pace do not press it while the lift stands.",
+          "moved_in": "A candidate's gate history over the runs a coordinator moved onto it from another lane: a run Jev routed elsewhere, whose lineage records a lane change onto this candidate. It uses the same passed, failed, not-run and unknown counts as outcomes, but those runs are kept out of outcomes and outcomes_at_requirement, because their outcome is the outcome of the pick they were chosen for, not of this lane's own picks. Read at the request's requirement when it names one, and over every move when it names none. Present only when at least one such move exists; an absent key means no coordinator moved a run onto this candidate in the window.",
+          "moved_off": "How many of this candidate's own picks a coordinator moved away to another lane. Read at the request's requirement when it names one, and over every move when it names none. A high moved_off means coordinators overrode the choice this candidate was picked for, so the lane never ran the nodes it was chosen for. Present only when it is greater than zero; an absent key means no coordinator moved this candidate's pick away in the window.",
+          "outcomes_at_requirement": "A candidate's gate history at this node's requirement: the same passed, failed, not-run and unknown counts as outcomes, but over only the rows whose recorded requirement (reasoning and risk) equals this node's. review_total_median and wall_seconds_median are the median review score and wall time over those rows, null when none was recorded. Rows that recorded no requirement count under unrecorded and are never matched, so history written before a requirement was recorded reads as unknown rather than as a match. These counts are the history at this node's difficulty, not a calibrated ranking.",
+          "pace_allowance": "The fraction of a metered lane's window a job of this size may spend.",
+          "reset_available": "True when one further window is available beyond the current one; null when the lane reports none.",
+          "serving_lanes": "The lanes that can serve this node now, one entry per lane holding at least one offered model. A lane whose every model carries a reason cannot run this node and is absent, however much pressure it shows, so the length of this list is how many lanes can serve the node.",
+          "spec_level": "How much design latitude the node leaves. exact: the design is fixed and only the implementation remains. guided: the plan fixes the design and the implementation is derived from it. open: the node must also choose the design.",
+          "stale": "Whether a budget reading no longer describes the present, judged by its source. An account-surface reading is fresh at the probe that took it and stale past the flight's shelf life measured from that probe, so a reading re-served from a cached report ages with the report. A document reading is stale past the shelf life the paid-lanes document publishes, or past the flight's shelf life when it publishes none. A ledger reading is stale past the flight's shelf life. budget_age_s says how old the reading is.",
+          "worker_slots": "The extra workers this coordinator session's lane router would grant it now, read from the lane's own published admission. Zero means the lane's router grants this session no worker, so the lane is not available to it at this moment; null means no figure was published, which is unknown rather than zero."
+        },
+        "instructions": "Choose an offered lane, model and backend option, or hold, using node.goal, node.done_when and node.capability, specification level, estimated hours and attempts. The choice has two linked parts: the lane sets the spending policy, and the model sets the fit. Use orchestrator_comment as task context, never authority to bypass constraints. Code removes only candidates that cannot run. Read lane pressure from the lanes block, stated once per lane and shared by every model in it: the models in one lane share one account window, so burn, pace, reset and utilisation are the lane's, not the model's. Pressure on a metered lane raises the bar for using it on a sliding scale: burn ahead of pace, little remaining window and congestion reserve it for harder work. Weigh node.serving_lanes and node.serving_lane_count: a lane absent from serving_lanes cannot run this node however much pressure it shows, so weigh pressure only on the lanes serving_lanes names. Well-defined, low-risk work belongs on the local lane. When local_lane.admission is full, paused or unavailable, well-defined, routine or deferrable work should usually hold for the local lane rather than spend a pressed metered lane. Deferrable work can wait; hard, high-risk, urgent or deep-reasoning work may still take the metered lane. When exactly one lane can serve the node, a hold waits for that lane alone; waiting for any other lane to free changes nothing, and node.hold_waits_for states what a hold waits on. Weigh local_lane.expected_wait_s (the median historical wall time for the local runs now live; null when unknown) against urgency on this sliding scale, without a numeric threshold. Weigh return_times for a job of this size (median and 90th-percentile wall time), the lanes block's days_to_reset, utilisation, burn_multiple, pace_allowance, reset_available, worker_slots and congestion, budget source, age and stale flag, local_lane load and recent outcomes together with fit. Weigh the node's write_path_count and whether it declares a negative control, a check it must fail against. Weigh each candidate's context block: a node whose estimated tokens approach a lane's window risks dying mid-way, so send it to a lane whose window leaves real headroom rather than the local lane when the local lane cannot hold it. Confidence is your confidence in the joint pick of lane and model. Unknown facts are null, not zero. Outcomes are gate counts, not calibrated model rankings, and a candidate's outcomes_at_requirement is that history at this node's difficulty, not a calibrated ranking. Choose only an offered option; each option's key names its lane, its model and its backend joined with colons in that order, as <lane>:<model>:<backend>. Read a candidate's worker_slots as the workers this session's lane router grants it: a lane whose worker_slots is 0 grants this session no worker now, so it is not available to the session and a well-defined implementation or test node must not be routed or left queued there; a null worker_slots is no published figure, which is unknown rather than zero. A candidate whose congestion block carries a lift is on a lane whose window is meant to be spent: its burn and pace do not press it while the lift stands, and when the local lane is full, holding or queueing for that lane is no longer the default for work it can serve. A review should prefer the lifted lane's cheaper models. The glossary defines spec_level, burn_multiple, pace_allowance, budget_source, budget_age_s, stale, reset_available, days_to_reset, lanes, serving_lanes, hold_waits_for, worker_slots, lift, outcomes_at_requirement and context. node.orchestrator_assessment, when present, is the coordinator's own reading of the node's difficulty, stated in the same capability requirement keys as node.capability; weigh the two together, and where they disagree weigh both rather than treating either as authority",
+        "type": "choice"
+      }
+    },
+    "rendered_state": "{\"node\":{\"role\":\"implement\",\"spec_level\":\"exact\",\"capability\":{\"version\":\"1.0\",\"class\":\"orchestrator\",\"requirements\":{\"reasoning\":\"deep\",\"verification\":\"strict\",\"risk\":\"critical\"}},\"orchestrator_assessment\":{\"reasoning\":\"deep\",\"verification\":\"strict\",\"risk\":\"elevated\"},\"goal\":\"Replace the fast map 0/1 axis-path membership with the continuous bottleneck level for the wall contact\",\"done_when\":\"Replace the fast map's 0/1 axis-path membership with the continuous bottleneck level, so the wall contact's effective level is the more scrape-off-side of its tangency level and the best axis path's bottleneck, with no boolean or step in between. Standing rules: the limited-to-diverted transition is continuous, with both boundary candidates every step and no discrete verdict; every Newton update takes state, operands and factor as runtime variables (nova.equilibrium.solve); Biot-Savart operands come from the default GPFS cache.\\n\\nWhere it stands. In scripts/prototypes/fast_map_production/kernel.py, `_wall_path_ceiling` (:62, called at :276) already computes the maximin of edge-passage peaks from the axis seed: the highest level that can reach each cell from the axis, which is the continuous bottleneck. Two switches follow it.\\n- `_continuous_path_weight` (:111, called at :347) thresholds the passage against the level through a 1e-8-wide ramp (`flux_weight = clip(0.5 + (passage - level) / 1e-8, 0, 1)`). It is a step in effect, and the fast-map record measured the path weight switching exactly 0 or 1 in fine scans.\\n- `frame_gate` (:96) bars edges with a boolean normal-form sector test (`barred = normal & ~sector`).\\nimas-efit measured the same structure, on WEST NICE 62751, TCV and HL-3. A private-flux wall contact whose tangency level is more axis-ward than the X-point, but which the axis reaches only through the X-point, must not win by its own tangency level. Taking the effective wall level as the more scrape-off-side of tangency and bottleneck cleared their regressions. The plan item is f-cfs-bottleneck-path-level.\\n\\nDone when all of the following hold, reported in docs/research/bottleneck-path-level.html:\\n(1) The wall candidate's effective level is the more scrape-off-side of its tangency level and its bottleneck from `_wall_path_ceiling`, built as one owned function. The 1e-8 ramp membership and the boolean sector bar are deleted, not left as dead options. State what replaces the sector bar's job, if anything still needs it, and why that replacement is continuous.\\n(2) A unit test on a small synthetic carrier, CPU-only: a private-flux wall contact whose tangency level is more axis-ward than the saddle, but reachable from the axis only through the saddle, gets the saddle's level as its effective level. A control where the contact is directly reachable keeps its tangency level.\\n(3) Map fidelity on the certified limited and diverted carriers at 282, 550 and 2,098 cells is no worse than at base, by the analytic map error against each carrier's guard. Report base beside head.\\n(4) Continuity. Run the 41-state sweeps and the 550 transition bracket, and bisect every verdict change to adjacent binary64 values. Classify each: a crossing (competing levels equal to roundoff relative to the axis-to-boundary flux), a fold (one saddle's Hessian determinant and persistence to roundoff), or an implementation switch named by file and line. No implementation switch may remain from the path weight or the sector bar. Report the counts at base and at head.\\n(5) The diverted and limited cold solves at 282 and 550 converge to 1e-12 at head as at base, with residual histories.\\n(6) The evidence fragment docs/evidence/fragments/converged-forward-solve/bottleneck-path-level.html, with a figure of the effective wall level through the bracket at base and head. Render it to PNG and look at it before committing, so no label clips or overlaps.\\n\\nGPU rung: the H200 98dci4-gpu-0003 is draining until an administrator resumes it. Use titan (--partition=titan --gres=gpu:1, a P100 with 16 GB, no reservation), and label every wall as a titan number. Put every script a job runs on GPFS in the run directory, never under /tmp: a titan job cannot see the fleet node's /tmp, and that failed one job today. Never scancel a running GPU job.\\n\\nWrite only scripts/prototypes/fast_map_production, docs/research/bottleneck-path-level.html, docs/figures/converged-forward-solve/bottleneck-path-level and docs/evidence/fragments/converged-forward-solve/bottleneck-path-level.html. Other prototypes import from fast_map_production; keep their imports working, or list the callers whose behaviour changes.\\n\\nRun conditions: H200 rows run as one job through RECKON_ALLOW_NESTED_LAUNCH=1 scripts/h200_test_lane/run.sh --log (an absolute path in the run directory) --wait -- (targets), or one sbatch job on --partition=betelgeuse --reservation=gpu_0003_grpA --gres=gpu:1 with rungs as rows inside the allocation (never an array), --time sized to finish, XLA_PYTHON_CLIENT_PREALLOCATE=false and TMPDIR=/tmp in the submit environment and in every child; submit for real and read squeue a minute later rather than trusting sbatch --test-only. On a compute node run /home/ITER/mcintos/Code/nova/.venv/bin/python directly with PYTHONPATH set to the run worktree and never invoke uv; every login-node uv command carries --no-sync and nothing runs uv sync. configure_dtypes() before any array and jax_enable_x64 asserted True. Gates pass by delta against orientation_base_sha in per-module fresh processes, both arms running the same test files with the repository root conftest, baseline_suite and after_suite as single-line JSON whose log_path names one log file and whose command is literally runnable. Any wait is declared on the job that finishes last as wait_probe [\\\"sacct\\\",\\\"-n\\\",\\\"-X\\\",\\\"-P\\\",\\\"-j\\\",\\\"(job id)\\\",\\\"-o\\\",\\\"State\\\"] and wait_terminal [\\\"COMPLETED\\\",\\\"FAILED\\\",\\\"CANCELLED\\\",\\\"TIMEOUT\\\",\\\"OUT_OF_MEMORY\\\",\\\"NODE_FAIL\\\"] as JSON lists, and names every job it depends on in wait_condition. The certified 550, 2,000 and 5,000-cell machines and exteriors are cached under /home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T181553786165-proto-support/ordered/rows/cache and may be read in place, never written. Run filepath relativize over any evidence fragment before committing. Commit with conventional subjects and bodies at every step and write the manifest and commit before every job wait; the manifest commits line lists every commit; status is complete, blocked or failed, which the worker sets itself. No plan labels in source names or comments. Inside every job payload, make one directory with mktemp -d /tmp/$USER-$SLURM_JOB_ID-XXXX, point TMPDIR at it, and remove it on exit with trap 'rm -rf' (keep TMPDIR=/tmp in the submit environment so slurmstepd can start). Never leave extracted base trees or caches in /tmp after a node ends; anything a later reader needs goes under the run directory on GPFS.\\n\\nImport provenance: print nova.__file__ in every log header. On the fleet allocation (SLURM_JOB_ID set), run CPU work in place. The time budget is per working turn, not a deadline: park on H200 jobs with declared waits and continue across turns; this node is sized at about 8 worker-hours, and an unmeasured item in your own scope is remaining work, not a blocker. Never edit a script a submitted job will run; submit a per-job copy. Size every job memory from a measured row. The manifest commits line lists every commit (git rev-list), orientation_base_sha is copied from git rev-parse output, and status is complete when the record is delivered even if the target is not met (then give the nearest measured figure and what dominates it).\",\"estimated_context\":50392,\"estimated_hours\":8.0,\"estimated_hours_source\":\"node\",\"attempts\":0,\"write_path_count\":4,\"negative_control_declared\":true,\"serving_lanes\":[\"claude\",\"local\",\"codex\"],\"serving_lane_count\":3,\"hold_waits_for\":\"any one of 3 lanes that can serve this node to have room\"},\"orchestrator_comment\":\"Deep but well located: the bottleneck already exists in _wall_path_ceiling; the work is removing two switches and proving continuity with the three-way classifier on titan; unpaired because codex is near its weekly exhaustion\",\"candidates\":{\"claude\":{\"backend\":\"claude\",\"lane\":\"claude\",\"model\":\"claude-sonnet-5-5\",\"availability\":\"unknown\",\"utilisation_pct\":38.0,\"burn_multiple\":0.43040284939175294,\"pace_allowance\":0.44436657982343025,\"days_to_reset\":0.8197330382986111,\"resets_at\":\"2026-10-18T06:00:00+00:00\",\"worker_slots\":null,\"congestion\":null,\"outcomes\":{\"passed\":0,\"failed\":1,\"not-run\":0,\"unknown\":0},\"outcomes_at_requirement\":{\"passed\":0,\"failed\":0,\"not-run\":0,\"unknown\":0,\"unrecorded\":1,\"review_total_median\":null,\"wall_seconds_median\":null},\"context\":{\"window_tokens\":null,\"estimated_tokens\":50392,\"headroom_pct\":null,\"peak_utilisation_p50_pct\":19.2,\"peak_utilisation_p90_pct\":19.7,\"peak_utilisation_runs\":2},\"budget_source\":\"ledger\",\"budget_age_s\":324069.996491,\"stale\":true,\"reset_available\":null},\"clive\":{\"backend\":\"clive\",\"lane\":\"local\",\"model\":\"deepseek-v4.1-flash\",\"availability\":\"served\",\"utilisation_pct\":null,\"burn_multiple\":null,\"pace_allowance\":null,\"days_to_reset\":null,\"resets_at\":null,\"worker_slots\":11,\"congestion\":{\"running\":3,\"waiting\":0,\"admission_verdict\":\"open\",\"stale\":false,\"slots_state\":\"measured\"},\"outcomes\":{\"passed\":59,\"failed\":9,\"not-run\":10,\"unknown\":0},\"outcomes_at_requirement\":{\"passed\":0,\"failed\":0,\"not-run\":0,\"unknown\":0,\"unrecorded\":78,\"review_total_median\":null,\"wall_seconds_median\":null},\"context\":{\"window_tokens\":230144,\"estimated_tokens\":50392,\"headroom_pct\":78.1,\"peak_utilisation_p50_pct\":77.8,\"peak_utilisation_p90_pct\":85.2,\"peak_utilisation_runs\":73},\"budget_source\":null,\"budget_age_s\":null,\"stale\":null,\"reset_available\":null},\"codex\":{\"backend\":\"codex\",\"lane\":\"codex\",\"model\":\"gpt-6-sol\",\"availability\":\"unknown\",\"utilisation_pct\":90.0,\"burn_multiple\":2.9017684825031256,\"pace_allowance\":0.3411712567592593,\"days_to_reset\":4.828899704965278,\"resets_at\":\"2026-10-22T06:13:12+00:00\",\"worker_slots\":null,\"congestion\":{\"lift\":{\"id\":\"codex-sub-1792002586-64d825\",\"group\":\"codex-sub\",\"form\":\"uncapped\",\"scope\":\"global\",\"pace_multiple\":null,\"ends_at\":\"2026-10-20T04:58:00+00:00\",\"ends_on\":\"time\",\"remaining_seconds\":239905.83992}},\"outcomes\":{\"passed\":10,\"failed\":9,\"not-run\":14,\"unknown\":0},\"outcomes_at_requirement\":{\"passed\":0,\"failed\":0,\"not-run\":0,\"unknown\":0,\"unrecorded\":33,\"review_total_median\":null,\"wall_seconds_median\":null},\"context\":{\"window_tokens\":null,\"estimated_tokens\":50392,\"headroom_pct\":null,\"peak_utilisation_p50_pct\":null,\"peak_utilisation_p90_pct\":null,\"peak_utilisation_runs\":null},\"budget_source\":\"document\",\"budget_age_s\":82.181491,\"stale\":false,\"reset_available\":null}},\"return_times\":{\"claude\":{\"p50_s\":12314,\"p90_s\":12314,\"runs\":1,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"ledger\",\"budget_age_s\":324070.040258,\"stale\":true},\"clive\":{\"p50_s\":2470.0,\"p90_s\":11756,\"runs\":72,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"ledger\",\"budget_age_s\":2259947.131258,\"stale\":true},\"codex\":{\"p50_s\":7656,\"p90_s\":44553,\"runs\":33,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"document\",\"budget_age_s\":82.225258,\"stale\":false}},\"lanes\":{\"claude\":{\"availability\":\"unknown\",\"utilisation_pct\":38.0,\"burn_multiple\":0.43040284939175294,\"pace_allowance\":0.44436657982343025,\"resets_at\":\"2026-10-18T06:00:00+00:00\",\"days_to_reset\":0.8197325317361112,\"worker_slots\":null,\"congestion\":null,\"reset_available\":false},\"local\":{\"availability\":\"served\",\"utilisation_pct\":null,\"burn_multiple\":null,\"pace_allowance\":null,\"resets_at\":null,\"days_to_reset\":null,\"worker_slots\":11,\"congestion\":{\"running\":3,\"waiting\":0,\"admission_verdict\":\"open\",\"stale\":false,\"slots_state\":\"measured\"},\"reset_available\":null},\"codex\":{\"availability\":\"unknown\",\"utilisation_pct\":90.0,\"burn_multiple\":2.9017684825031256,\"pace_allowance\":0.3411712567592593,\"resets_at\":\"2026-10-22T06:13:12+00:00\",\"days_to_reset\":4.828899198402778,\"worker_slots\":null,\"congestion\":null,\"reset_available\":false}},\"local_lane\":{\"admission\":\"admitting\",\"expected_wait_s\":608.0,\"expected_wait_profile_age_s\":305.477499,\"running\":3,\"waiting\":0,\"headroom\":8,\"worker_slots\":15,\"tokens_per_second\":76.759,\"read_at\":\"2026-10-17T10:19:35.118584+00:00\"}}",
+    "rendered_token_estimate": 3085,
+    "stage_ms": {
+      "budget-snapshot": 244.821,
+      "context-estimate": 19.852,
+      "records": 240.999,
+      "verdict-inputs": 124.527
+    },
+    "template_digest": "bb3cfa0704db4f502a8d020a0514d769f011525818f08be189cc92dc58d215b9",
+    "usage": {
+      "cost": 0.000264894,
+      "input_tokens": 6307,
+      "output_tokens": 174
+    }
+  },
+  "plan": "converged-forward-solve",
+  "plan_impl_at_dispatch": 0.2857142857142857,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "e36e252f80a56ead0cf7981a05c480657a2a8380",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "e4c8b98157fa0b4086c9febefdd66a40b3875984",
+    "reviewed_head_sha": "e36e252f80a56ead0cf7981a05c480657a2a8380",
+    "scores": {
+      "durability": 14,
+      "evidence": 10,
+      "fit": 19,
+      "goal_fidelity": 18,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 101
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "picker",
+  "run_id": "r-20261017T101935652190-bottleneck-path-level",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "eaba4da5-32ff-46df-85d1-1e58241d7d09",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 64438282,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 499.429,
+    "generated_tokens": 311154,
+    "generation_seconds": 371.303,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 77.6,
+    "machine_seconds": 128.126,
+    "peak_input_tokens": 178623,
+    "tokens_per_second": 838.01,
+    "wall_tokens_per_second": 623.02
+  },
+  "time_budget": "60m",
+  "tool_steps": 123.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 5866,
+        "budget_seconds": 3600,
+        "classification": "scoring",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 9466,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [
+            694060,
+            694322,
+            694342,
+            694346,
+            1051024,
+            1051029,
+            1051028,
+            1052827,
+            694541,
+            694629
+          ],
+          "exit_code": 0,
+          "exited_at": "2026-10-17T10:03:41Z",
+          "last_record_type": "system",
+          "launched_at": "2026-10-17T07:42:29Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261017T073925596435-axis-facing-owner",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 60160,
+          "worker_pid": 694322
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-17T10:03:41Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 976,
+        "log_fresh": false,
+        "manifest_commits": [
+          "a3a6eb331",
+          "154a639cd",
+          "57f02833b",
+          "ddec16c7b",
+          "106046268",
+          "970a02d89",
+          "316ac77ef",
+          "0bb2e4085",
+          "15c5677d7",
+          "f092f6a64",
+          "d4fba98bc",
+          "726a61709",
+          "583820d0b"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "471717a20e5920af131c8d8a5cf510861947e162292adbb5997501a27280b0ea",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T073925596435-axis-facing-owner/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project nova --brief /home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T073925596435-axis-facing-owner/review-brief.md --plan converged-forward-solve --section '§5' --role review --spec-level exact --node review-of-axis-facing-owner-583820d0bf3f --goal 'attach an independent review to run r-20261017T073925596435-axis-facing-owner' --done-when 'the review for r-20261017T073925596435-axis-facing-owner stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the record is written at one of this run'\"'\"'s declared write paths, under review-records/ inside the directory of run r-20261017T073925596435-axis-facing-owner, and never in the worktree; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T073925596435-axis-facing-owner/review-records/r-20261017T073925596435-axis-facing-owner.json --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T073925596435-axis-facing-owner/review-records/r-20261017T073925596435-axis-facing-owner.at-583820d0bf3ff1c50e9565704cd2e1a6e43e90a0.json --time-budget 60m --session s21-nova --allow-unreconciled-runs --local",
+        "node": "axis-facing-owner",
+        "phase": "complete",
+        "plan": "converged-forward-solve",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261017T073925596435-axis-facing-owner",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 1262,
+        "terminal_at": "2026-10-17T09:58:37Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/axis-facing-owner"
+      }
+    ]
+  },
+  "wall_seconds": 27442,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 7,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-17T17:57:23Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-17T17:48:55Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261017T101935652190-bottleneck-path-level",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 47892,
+    "worker_pid": 3000473
+  },
+  "worker_seconds": 9236,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

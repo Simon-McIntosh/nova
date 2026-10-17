@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="axis-facing-owner">
+<meta name="plan-title" content="Axis-facing X-point owner">
+<meta name="plan-summary" content="Per-cell attribution of the diverted map error and a six-representation owner ladder on the exact clipped carrier">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s5">
+<meta name="plan-commits" content="a3a6eb331,154a639cd,57f02833b,ddec16c7b,106046268,970a02d89,316ac77ef">
+<meta name="plan-recorded-at" content="2026-10-17">
+<meta name="plan-verdict" content="partial">
+<meta name="plan-environment" content="all_debug CPU rows, binary64 asserted at entry, JAX_PLATFORMS=cpu, share of the exact clipped single-null diverted certificate realising 282, 550 and 2,098 cells">
+<title>Axis-facing X-point owner | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<h1 id="axis-facing-owner-title">Axis-facing X-point owner</h1>
+<p id="axis-facing-owner-summary">At 2,098 cells one booked owner cell carries 59 % of the diverted
+map's flux error, and its area fraction matches the analytic one to 1.5e-6 while its booked current
+is off by 3.3e-3 relative. Six owner representations spanning the natural design space are measured
+on all three carriers and none passes all three guards, so the axis-facing owner remains the
+continuous bottleneck. The candidate the plan names — taking the owner conic from the saddle the
+read already locates — passes 2,098 at 9.41e-5 and fails 282 and 550 by 9.3x and 9.2x. The diverted
+cold solve converges to 1e-12 at 282 and 550 under the delivered owner; at 2,098 the map
+qualification gate refuses the run before its first correction.</p>
+
+<section id="axis-facing-owner-attribution">
+<h2>Which cells carry the 2,098-cell error</h2>
+<p id="axis-facing-owner-attribution-body">Attribution books the map from the reference moments,
+forms <code>residual = booked − reference</code>, and patches one cell at a time back to its
+reference moments, re-measuring the flux error after each patch. A cell is a genuine driver only
+when patching it lowers the error.</p>
+<table id="axis-facing-owner-attribution-table">
+<thead><tr><th>carrier</th><th>delivered</th><th>floor</th><th>rank</th><th>cell</th><th>relative moment residual</th><th>booked membership</th><th>owner cell</th><th>error without that cell</th></tr></thead>
+<tbody>
+<tr><td>2,098</td><td>2.49303535497e-4</td><td>1.76641360086e-5</td><td>0</td><td>47</td><td>3.335e-3</td><td>0.028514</td><td>yes</td><td><b>1.47404865990e-4</b></td></tr>
+<tr><td>2,098</td><td>2.49303535497e-4</td><td>1.76641360086e-5</td><td>1</td><td>1750</td><td>3.578e-4</td><td>0.303423</td><td>no</td><td>2.50643290680e-4</td></tr>
+<tr><td>2,098</td><td>2.49303535497e-4</td><td>1.76641360086e-5</td><td>2</td><td>1644</td><td>3.328e-4</td><td>0.616579</td><td>no</td><td>2.50692782596e-4</td></tr>
+<tr><td>550</td><td>4.09606071189e-4</td><td>1.82141864746e-4</td><td>0</td><td>8</td><td>2.589e-3</td><td>0.378309</td><td>yes</td><td>4.17339318840e-4</td></tr>
+<tr><td>282</td><td>1.08006018256e-3</td><td>6.18989257731e-4</td><td>0</td><td>71</td><td>1.540e-3</td><td>0.245586</td><td>no</td><td>1.14302456020e-3</td></tr>
+</tbody>
+</table>
+<p id="axis-facing-owner-attribution-finding">Cell 47 is the only top-ranked cell that is also an
+owner cell, and patching it takes the map from 2.49303535497e-4 to 1.47404865990e-4. Its residual
+is <code>[0.1487554, 4.697e-05, 0.00222181]</code>: almost entirely cell current, with the radial
+moment smaller by four orders of magnitude. Its booked area fraction, 0.02851379310, matches the
+analytic 0.02851231893 to 1.5e-6, so the conic gets the size of the owned region right and the
+weighting of that region wrong. Cumulative error after patching the top six cells is
+1.30437e-4 against the 1.0e-4 guard and the 1.7664e-5 floor, so one cell carries the concentration
+and the remainder is spread thin. At 282 and 550 the top-ranked cells are not drivers: removing cell
+71 at 282 raises the error to 1.14302456020e-3 and removing cell 8 at 550 raises it to
+4.17339318840e-4.</p>
+</section>
+
+<section id="axis-facing-owner-anchor">
+<h2>Whether the located saddle anchors the owner conic</h2>
+<table id="axis-facing-owner-anchor-table">
+<thead><tr><th>carrier</th><th>owner cells</th><th>cells the read books</th><th>|quadratic(saddle)| / span</th><th>|grad quadratic(saddle)| / span per length</th><th>stationary point offset</th><th>grid pitch</th><th>owner share of moment mass</th></tr></thead>
+<tbody>
+<tr><td>282</td><td>8</td><td>2</td><td>9.811e-3</td><td>1.7995</td><td>0.11238</td><td>0.10046</td><td>10.9 %</td></tr>
+<tr><td>550</td><td>7</td><td>3</td><td>3.649e-3</td><td>1.0898</td><td>0.07430</td><td>0.07104</td><td>17.9 %</td></tr>
+<tr><td>2,098</td><td>7</td><td>2</td><td>7.301e-4</td><td>0.5961</td><td>0.03602</td><td>0.03552</td><td>18.2 %</td></tr>
+</tbody>
+</table>
+<p id="axis-facing-owner-anchor-finding">The fitted cell quadratic's slope at the located saddle is
+not small — up to 1.80 in span units per unit length at 282, still 0.60 at 2,098 — so the fitted
+quadratic is a cell fit and has deliberately not been anchored. Its own stationary point sits 1.87,
+1.63 and 1.29 cells away from the located saddle, so the anchor mismatch shrinks with the cell but
+never vanishes.</p>
+</section>
+
+<section id="axis-facing-owner-ladder">
+<h2>The owner representation ladder</h2>
+<table id="axis-facing-owner-ladder-table">
+<thead><tr><th>representation</th><th>282 (guard 1.0866e-3)</th><th>550 (guard 5e-4)</th><th>2,098 (guard 1e-4)</th></tr></thead>
+<tbody>
+<tr><td>half-plane, fitted quadratic at the saddle origin (delivered)</td><td>1.08006018256e-3 <b>pass</b></td><td>4.09606071189e-4 <b>pass</b></td><td>2.49303535497e-4 <b>fail</b></td></tr>
+<tr><td>saddle-anchored conic, exact Hessian, exact level</td><td>1.0098236108e-2 fail</td><td>3.78175700635e-3 fail</td><td>9.40872462985e-5 <b>pass</b></td></tr>
+<tr><td>fitted field, cut direction from the exact saddle Hessian</td><td>1.08102643329e-3 <b>pass</b></td><td>4.09606071189e-4 <b>pass</b></td><td>2.49325729609e-4 <b>fail</b></td></tr>
+<tr><td>fitted curvature, exact value and zero gradient at the saddle</td><td>3.15696528417e-2 fail</td><td>1.14594590178e-2 fail</td><td>2.84133180532e-4 fail</td></tr>
+<tr><td>fitted shape, exact level at the saddle</td><td>2.04442839398e-2 fail</td><td>8.71112703623e-3 fail</td><td>7.97500920012e-4 fail</td></tr>
+<tr><td>exact curvature, fitted level at the saddle</td><td>1.05795087211e-2 fail</td><td>5.00095294654e-3 fail</td><td>6.81674659183e-4 fail</td></tr>
+<tr><td>no owner at all</td><td>1.49396091282e-2 fail</td><td>9.97172971635e-4 fail</td><td>1.6193239834e-2 fail</td></tr>
+</tbody>
+</table>
+<figure id="axis-facing-owner-ladder-figure">
+<img src="/nova/figures/converged-forward-solve/axis-facing-owner/owner-representation-ladder.svg"
+     alt="Map flux error against carrier size for each owner representation, with the guard and the reconstruction floor">
+<figcaption id="axis-facing-owner-ladder-caption">Map flux error against carrier size. The delivered
+half-plane owner and the saddle-anchored conic cross between 550 and 2,098 cells: the fitted
+quadratic is the better model of a large cell and the saddle expansion the better model of a small
+one, so neither is a single representation that holds at every size. Each carrier is one
+<code>all_debug</code> row of the same allocation on the exact clipped single-null diverted
+certificate.</figcaption>
+</figure>
+<p id="axis-facing-owner-ladder-finding">The plan's named candidate is refuted as a whole-carrier
+repair. It does what it promises at 2,098 — 2.49303535497e-4 falls to 9.40872462985e-5, under the
+guard — and fails by 9.3x at 282 and 9.2x at 550, where it is worse than the representation it was
+meant to replace. Orienting the cut from the exact saddle Hessian while keeping the fitted field
+leaves 2,098 at 2.49325729609e-4 and 550 bit-identical to the delivered value, so the cut direction
+is not the limiting term. The four intermediate anchors land between 1.06e-2 and 3.16e-2 at 282,
+worse than either extreme: pairing an exact constraint with a fitted free parameter drives the two
+descriptions of the same flux apart rather than together.</p>
+</section>
+
+<section id="axis-facing-owner-solve">
+<h2>Cold solves</h2>
+<table id="axis-facing-owner-solve-table">
+<thead><tr><th>carrier</th><th>corrections</th><th>terminal residual</th><th>Gauss-Newton gradient</th><th>per-correction wall</th><th>Taylor slopes of 2</th><th>continuity</th></tr></thead>
+<tbody>
+<tr><td>282</td><td>4</td><td>3.14409717612e-13</td><td>2.39498329587e-11</td><td>20.7 s</td><td>pass</td><td>finite</td></tr>
+<tr><td>550</td><td>4</td><td>4.84764428524e-13</td><td>1.91211948969e-11</td><td>63.3 s</td><td>fail (one direction)</td><td>finite</td></tr>
+<tr><td>2,098</td><td colspan="6">refused by <code>require_map</code>: the delivered map's 2.49303535497e-4 exceeds the 1e-4 guard before the first correction</td></tr>
+</tbody>
+</table>
+<p id="axis-facing-owner-solve-finding">The 282 residual history is 7.59023e-4 → 1.09971e-5 →
+3.31601e-9 → 3.14410e-13 and the 550 history is 7.36288e-4 → 1.91098e-5 → 1.44992e-8 →
+4.84764e-13; both are quadratic throughout. The 282 root passes the Taylor check in all three
+directions, with middle-step slopes between 1.983 and 2.041. The 550 root reaches the same residual
+quality and fails the check in one direction, where the remainder falls faster than
+step<sup>2</sup> at the three middle step pairs (slopes 3.36 and 3.84 against the 1.8–2.2 window)
+before relaxing to 2.10 and 1.96 at the smallest steps: a cubic term dominates there and is
+overtaken by the quadratic as the step shrinks. It is not a kink. The continuity probe walks
+±1e-5 in four directions including the Newton direction, and in every one the difference is linear
+in the step and symmetric about zero (2.2007e-6 at −1e-5, 2.2001e-6 at +1e-5, exactly 0 at 0), so no
+discrete switch fires at that scale. The verdict is reported unwidened.</p>
+</section>
+
+<section id="axis-facing-owner-regression">
+<h2>Limited carriers, the sweeps and the 550 bracket</h2>
+<p id="axis-facing-owner-regression-body">The change is confined to
+<code>scripts/prototypes/xpoint_cell_owner</code>. No module outside that directory imports it
+except one sibling prototype's speed gate, which calls the unchanged public signature of
+<code>map_moments</code>. There is therefore no path from the read or the production map to this
+owner, and no code branches on which owner is in use: no implementation switch remains.</p>
+<table id="axis-facing-owner-regression-table">
+<thead><tr><th>sweep</th><th>carrier</th><th>valid states</th><th>axis identity</th><th>bracket offsets (binary64)</th><th>class step</th><th>bisections</th><th>Δflux / span</th><th>Δcurrent / target</th><th>verdict</th></tr></thead>
+<tbody>
+<tr><td>limited</td><td>289</td><td>37 / 41</td><td>41 / 41</td><td colspan="5">no valid-to-valid class switch</td><td>unchanged</td></tr>
+<tr><td>limited</td><td>553</td><td>25 / 41</td><td>41 / 41</td><td colspan="5">no valid-to-valid class switch</td><td>unchanged</td></tr>
+<tr><td>diverted</td><td>282</td><td>32 / 41</td><td>33 / 41</td><td>0.013581788350157312 ..</td><td>1 → 0</td><td>52</td><td>9.50e-17</td><td>7.83e-15</td><td><b>crossing</b></td></tr>
+<tr><td>diverted</td><td>550</td><td>23 / 41</td><td>31 / 41</td><td>0.009603774000452345 ..</td><td>1 → 0</td><td>52</td><td>2.66e-16</td><td>3.91e-16</td><td><b>crossing</b></td></tr>
+</tbody>
+</table>
+<p id="axis-facing-owner-regression-finding">The 550 bracket the plan names is unambiguous. Its two
+endpoints are adjacent binary64 values 1.73e-18 apart, one unit in the last place; the bisection is
+exhausted at 52 steps without finding a third verdict; both endpoints are valid; and the boundary
+flux moves by 2.66e-16 of the span while the raw current moves by 3.91e-16 of the target. Both are
+at the roundoff floor of the quantity being differenced, so the verdict change is a
+<b>crossing</b> — a continuous passage through the topology boundary that the grid resolves
+exactly. It is not a fold, which would carry an order-unity jump in the boundary flux at an interior
+bracket point, and not an implementation switch. The limited carriers have no valid-to-valid class
+switch at all.</p>
+</section>
+
+<section id="axis-facing-owner-panels">
+<h2>Terminal-state panels</h2>
+<figure id="axis-facing-owner-panel-282-figure">
+<img src="/nova/figures/converged-forward-solve/axis-facing-owner/terminal-282.svg"
+     alt="Solved and analytic poloidal flux contours at the 282-cell terminal state">
+<figcaption id="axis-facing-owner-panel-282-caption">282-cell terminal state. Solved flux in solid
+blue, analytic flux dashed dark grey on the same physical level array, both null sets, the first
+wall, and no axes or gridlines. Terminal residual 3.144097176116057e-13, converged.</figcaption>
+</figure>
+<figure id="axis-facing-owner-panel-550-figure">
+<img src="/nova/figures/converged-forward-solve/axis-facing-owner/terminal-550.svg"
+     alt="Solved and analytic poloidal flux contours at the 550-cell terminal state">
+<figcaption id="axis-facing-owner-panel-550-caption">550-cell terminal state. Same representation as
+the 282 panel, on its own shared level array. Terminal residual 4.847644285236704e-13,
+converged.</figcaption>
+</figure>
+</section>
+
+<section id="axis-facing-owner-blocked">
+<h2>Blocked measures</h2>
+<p id="axis-facing-owner-blocked-body">Clause 5 is blocked by hardware. The batched 2,098-cell
+measurement needs a card. betelgeuse carries eight H200s with two free and drains every job
+(<code>State=MIXED+DRAIN+RESERVED</code>, <code>Reason=Kill task failed
+[root@2026-10-17T09:40:32]</code>, set before this session started). titan carries eight P100s and
+all are held by the <code>codex-embed</code> service in job 1282615. Every number on this page was
+measured on CPU, and a CPU batch wall is not an H200 batch wall: it is reported as a CPU
+measurement and never as the 0.90 ms comparison. The 2,098-cell cold solve is blocked on clause 2
+rather than on hardware — the map qualification gate refuses it — and the 41-state sweeps cannot be
+re-measured because their driver asserts a GPU backend.</p>
+</section>
+
+<section id="axis-facing-owner-verdict">
+<h2>Verdict</h2>
+<p id="axis-facing-owner-verdict-body">Clause 1 is answered: cell 47 at 2,098 carries 59 % of the
+error over the floor, in the cell current, with its area right to 1.5e-6. Clause 2 is not met and
+the evidence says why it is structural: the delivered owner sits 2.316e-4 over the floor at 2,098
+against 4.61e-4 at 282 and 2.275e-4 at 550, a nearly resolution-independent excess that a better
+conic does not remove. What the numbers point at is the region rather than the field — the
+reference booking builds exact normal-form fragment rings from the saddle's own cubic and the edge
+intervals the read has already computed, while the owner approximates that region with a conic, and
+a conic cannot represent a cubic separatrix. Clause 3 passes at 282 and 550 and is refused at 2,098
+by clause 2's gate. Clause 4 holds by construction and its recorded brackets classify as crossings.
+The declared negative control holds: restoring the fitted Bell stationary point as the owner conic
+anchor brings the 2,098 map error back to 2.49e-4.</p>
+</section>
+</main>
+</body>
+</html>

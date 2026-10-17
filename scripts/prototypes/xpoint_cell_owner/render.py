@@ -253,6 +253,41 @@ def terminal_panel(receipt, output):
         contain=wall,
     )
     axis.autoscale_view()
+    figure.legend(
+        loc="upper center",
+        ncol=4,
+        frameon=False,
+        handles=(
+            Line2D(
+                [],
+                [],
+                linestyle="-",
+                linewidth=3.0,
+                color=DEFAULT_INK.flux_color,
+                label="solved",
+            ),
+            Line2D(
+                [], [], linestyle="--", linewidth=2.6, color="#444444", label="analytic"
+            ),
+            Line2D(
+                [],
+                [],
+                linestyle="-",
+                linewidth=2.0,
+                color=DEFAULT_INK.wall_color,
+                label="first wall",
+            ),
+            Line2D(
+                [],
+                [],
+                linestyle="",
+                marker="^",
+                markersize=8,
+                color=DEFAULT_INK.flux_color,
+                label="axis / X-point",
+            ),
+        ),
+    )
     figure.canvas.draw()
     figure.savefig(output, format="svg", metadata={"Date": None})
     plt.close(figure)

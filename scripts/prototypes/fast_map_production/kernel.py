@@ -163,7 +163,7 @@ def _wall_path_ceiling(
     if form is not None:
         owner = topology._inside_cells(geometry, form.position)
         seat = jnp.where(saddle_live, owner, False)
-        ceiling = jnp.where(seat, jnp.minimum(ceiling, saddle_score), ceiling)
+        ceiling = jnp.where(seat[:, None], jnp.minimum(ceiling, saddle_score), ceiling)
     ceiling = jnp.where(geometry.neighbour >= 0, ceiling, -jnp.inf)
     best = jnp.full((len(geometry.centre),), -jnp.inf).at[seed].set(jnp.inf)
 

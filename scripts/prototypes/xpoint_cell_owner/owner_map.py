@@ -119,9 +119,11 @@ def owned_cut(
             reading.boundary_flux,
         )
         branch = "halfplane"
+    cut_axes = (0, 0, 0, 0, 0, None, None, None, None, 0)
+    orientation_axes = None if orientation is None else 0
     selected = jax.vmap(
         partial(integrate_cell, axis_component=branch),
-        in_axes=(0, 0, 0, 0, 0, None, None, None, None, 0, None),
+        in_axes=cut_axes + (orientation_axes,),
     )(
         geometry.vertices[indices],
         geometry.vertex_count[indices],

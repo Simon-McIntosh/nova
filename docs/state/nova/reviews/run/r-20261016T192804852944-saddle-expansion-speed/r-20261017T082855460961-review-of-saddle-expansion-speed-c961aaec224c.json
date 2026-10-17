@@ -1,0 +1,60 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-17T08:39:09.751Z",
+  "dispatched_at": "2026-10-17T08:29:17Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T192804852944-saddle-expansion-speed/bar-agreement.json",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the receipt still records passed true with min_over_ladder 0.0 from a degree-128 row the repaired code no longer admits, and no re-run regenerated it, so the record's claim that the guard now fails is unverified by any device run."
+    },
+    {
+      "file": "scripts/prototypes/saddle_expansion/test_speed_gate_guard.py",
+      "line": "65",
+      "severity": "follow-on",
+      "text": "follow-on: passed_on_minimum is computed from a dict the test itself builds against the old reduction, so that assertion cannot fail on any production regression; only the agreement_passed(broken) assertion at line 69 is a guard."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit against 45bc217e2; the repair commit c961aaec2 sets DEGREE_LADDER=(8,16,32,64) at scripts/prototypes/saddle_expansion/speed_gate.py:46, adds agreement_failures/agreement_passed and a ValueError guard at speed_gate.py:375, adds test_speed_gate_guard.py, and corrects the record's one-element HLO claim that bar-282/550/2098.json falsify (846/1650/6294).",
+    "done_when": "the seven clauses are recorded in docs/research/saddle-anchored-expansion.html:136-146; the bar is measured (bar-282.json/bar-550.json/bar-2098.json at widths 128/64/32) and clause 5 is marked superseded by the 0.90 ms absolute bar, while clauses 1 and 6 are now marked partly met rather than achieved, matching the receipts.",
+    "goal": "the node goal is \"Remove the structural costs of the saddle-anchored X-point map and re-measure its speed gate at 2,098 cells\"; the landed tree takes the carrier, operands and state as runtime arguments (scripts/prototypes/saddle_expansion/expansion.py:285) and replaces the per-state whole-machine scan with a static per-carrier candidate list (scripts/prototypes/saddle_expansion/expansion.py:254), and the gate is re-measured at 282, 550 and 2,098 cells in slurm-bar-gate-1287882.log and reported as an absolute-bar miss at all three.",
+    "manifest": "read; status complete, commits c961aaec2 listing all eight range commits, and it reports the guard repair with the falsified bar-agreement pass called out; it still carries no baseline_suite or after_suite arm.",
+    "write_paths": "read the manifest's declared paths; git diff --name-only 45bc217e2 c961aaec2 lists seven files, every one inside them (scripts/prototypes/saddle_expansion, docs/research/saddle-anchored-expansion.html, the two converged-forward-solve evidence fragments and the saddle-anchored-expansion figure directory)."
+  },
+  "justifications": {
+    "durability": "scripts/prototypes/saddle_expansion/test_speed_gate_guard.py:34 fails if DEGREE_LADDER regains the reference degree, but line 65 re-derives the old guard inline and no assertion guards the runtime-argument conversion.",
+    "evidence": "bar-282.json, bar-550.json and bar-2098.json record per-state wall, width, compile and executable behind slurm-bar-gate-1287882.log, but bar-agreement.json still reads passed true and no device run re-exercises the repaired guard.",
+    "fit": "the added names disk_candidates, agreement_failures and agreement_passed are descriptive with no plan labels, following the prototype idiom at scripts/prototypes/saddle_expansion/expansion.py:254.",
+    "goal_fidelity": "scripts/prototypes/saddle_expansion/expansion.py:254 disk_candidates removes the per-state whole-machine scan and expansion.py:285 takes outer_nodes/outer_weights as arguments, but docs/research/saddle-anchored-expansion.html:138 records clause 2 (the closed-form outer integral) as not implemented and one carrier-scaled literal remains.",
+    "reuse": "scripts/prototypes/saddle_expansion/expansion.py:19 imports _quadratic from the owner scripts/prototypes/xpoint_cell_owner/conic_integral.py rather than duplicating it and speed_gate.py:39 reuses tests/test_equilibrium_solve.py:30 _hlo_constants, and a search of scripts, tests and nova found no existing agreement-ladder owner.",
+    "scope_discipline": "every path in git diff --name-only 45bc217e2 c961aaec2 is inside the declared write paths and no concurrent node's path is touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is \"Remove the structural costs of the saddle-anchored X-point map and re-measure its speed gate at 2,098 cells\"; the landed tree takes the carrier, operands and state as runtime arguments (scripts/prototypes/saddle_expansion/expansion.py:285) and replaces the per-state whole-machine scan with a static per-carrier candidate list (scripts/prototypes/saddle_expansion/expansion.py:254), and the gate is re-measured at 282, 550 and 2,098 cells in slurm-bar-gate-1287882.log and reported as an absolute-bar miss at all three.\nVERDICT done_when: the seven clauses are recorded in docs/research/saddle-anchored-expansion.html:136-146; the bar is measured (bar-282.json/bar-550.json/bar-2098.json at widths 128/64/32) and clause 5 is marked superseded by the 0.90 ms absolute bar, while clauses 1 and 6 are now marked partly met rather than achieved, matching the receipts.\nVERDICT write_paths: read the manifest's declared paths; git diff --name-only 45bc217e2 c961aaec2 lists seven files, every one inside them (scripts/prototypes/saddle_expansion, docs/research/saddle-anchored-expansion.html, the two converged-forward-solve evidence fragments and the saddle-anchored-expansion figure directory).\nVERDICT manifest: read; status complete, commits c961aaec2 listing all eight range commits, and it reports the guard repair with the falsified bar-agreement pass called out; it still carries no baseline_suite or after_suite arm.\nVERDICT diff: read commit by commit against 45bc217e2; the repair commit c961aaec2 sets DEGREE_LADDER=(8,16,32,64) at scripts/prototypes/saddle_expansion/speed_gate.py:46, adds agreement_failures/agreement_passed and a ValueError guard at speed_gate.py:375, adds test_speed_gate_guard.py, and corrects the record's one-element HLO claim that bar-282/550/2098.json falsify (846/1650/6294).\nCALL_SITES: none\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: scripts/prototypes/saddle_expansion/expansion.py:254 disk_candidates removes the per-state whole-machine scan and expansion.py:285 takes outer_nodes/outer_weights as arguments, but docs/research/saddle-anchored-expansion.html:138 records clause 2 (the closed-form outer integral) as not implemented and one carrier-scaled literal remains.\nSCORE evidence: 13\nJUSTIFICATION evidence: bar-282.json, bar-550.json and bar-2098.json record per-state wall, width, compile and executable behind slurm-bar-gate-1287882.log, but bar-agreement.json still reads passed true and no device run re-exercises the repaired guard.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff --name-only 45bc217e2 c961aaec2 is inside the declared write paths and no concurrent node's path is touched.\nSCORE durability: 13\nJUSTIFICATION durability: scripts/prototypes/saddle_expansion/test_speed_gate_guard.py:34 fails if DEGREE_LADDER regains the reference degree, but line 65 re-derives the old guard inline and no assertion guards the runtime-argument conversion.\nSCORE fit: 16\nJUSTIFICATION fit: the added names disk_candidates, agreement_failures and agreement_passed are descriptive with no plan labels, following the prototype idiom at scripts/prototypes/saddle_expansion/expansion.py:254.\nSCORE reuse: 18\nJUSTIFICATION reuse: scripts/prototypes/saddle_expansion/expansion.py:19 imports _quadratic from the owner scripts/prototypes/xpoint_cell_owner/conic_integral.py rather than duplicating it and speed_gate.py:39 reuses tests/test_equilibrium_solve.py:30 _hlo_constants, and a search of scripts, tests and nova found no existing agreement-ladder owner.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T192804852944-saddle-expansion-speed/bar-agreement.json:1 follow-on: the receipt still records passed true with min_over_ladder 0.0 from a degree-128 row the repaired code no longer admits, and no re-run regenerated it, so the record's claim that the guard now fails is unverified by any device run.\nFINDING scripts/prototypes/saddle_expansion/test_speed_gate_guard.py:65 follow-on: passed_on_minimum is computed from a dict the test itself builds against the old reduction, so that assertion cannot fail on any production regression; only the agreement_passed(broken) assertion at line 69 is a guard.",
+  "review_run_id": "r-20261017T082855460961-review-of-saddle-expansion-speed-c961aaec224c",
+  "reviewed_base_sha": "45bc217e2843c3119e25701b16fa52b02d7039b3",
+  "reviewed_head_sha": "c961aaec224cda2b2414d05d514fad977ac2d09c",
+  "reviewed_run_id": "r-20261016T192804852944-saddle-expansion-speed",
+  "scores": {
+    "durability": 13,
+    "evidence": 13,
+    "fit": 16,
+    "goal_fidelity": 15,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T08:55:00+00:00",
+  "total": 94
+}

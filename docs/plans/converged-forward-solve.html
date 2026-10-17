@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="323">
+<meta name="plan-version" content="324">
 <meta name="plan-modified" content="2026-10-17">
 </head>
 <body>
@@ -1404,6 +1404,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261016T192804852944-saddle-expansion-speed" data-who="reckon-build" data-when="2026-10-17T08:27:41Z">
     <div class="r-comment-body"><p>MISS. Per-state wall against the 0.90 ms bar, at the largest width up to 128 that fits on one H200: 282 cells width 128 saddle 6.681955 ms (7.42x over), 550 cells width 64 saddle 9.276844 ms (10.31x over), 2098 cells width 32 saddle 25.008424 ms (27.79x over). Compile 0.86-1.30 s and executable 1.68-7.72 MB, both within the 60 s and 50 MB conditions, so the failure is wall alone. The control is measured beside it in the same job for reference: 0.223786 / 0.417197 / 2.707774 ms. The walls and the miss verdict are unchanged by the record repair; the axis-facing half-plane is adopted.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261017T082855460961-review-of-saddle-expansion-speed-c961aaec224c" data-who="reckon-build" data-when="2026-10-17T08:39:09.751Z">
+    <div class="r-comment-body"><p>independent review of r-20261016T192804852944-saddle-expansion-speed at base 45bc217e2843c3119e25701b16fa52b02d7039b3 and head c961aaec224cda2b2414d05d514fad977ac2d09c stored at both granted paths, byte-identical, status parsed; six dimensions scored in 0..20 (goal_fidelity 15, evidence 13, scope_discipline 19, durability 13, fit 16, reuse 18; total 94 of 120), six item verdicts, CALL_SITES none, two follow-on findings and no blocking finding; the two blocking findings of the prior review at b5b6fdfa7 (the degree ladder carrying the reference degree, and the withdrawn one-element HLO constant claim) are both repaired in c961aaec2, and the new CPU guard test passes 5 of 5; added_failure_count unmeasured (the reviewed manifest names no suite arm).</p></div>
 </div>
 </section>
 </main>

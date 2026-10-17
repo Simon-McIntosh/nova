@@ -41,8 +41,26 @@ from tests.test_equilibrium_solve import _hlo_constants
 REFERENCE_OUTER_DEGREE = 128
 GATE_OUTER_DEGREE = 8
 AGREEMENT_TOLERANCE = 1e-12
-DEGREE_LADDER = (8, 16, 32, 64, 128)
+# The ladder must exclude REFERENCE_OUTER_DEGREE. At that degree the gate
+# configuration is the reference, so its row is a comparison of the reference
+# with itself: it reads exactly zero however wrong the cheaper degrees are, and
+# a guard that reduces over the ladder would pass on that row alone.
+DEGREE_LADDER = (8, 16, 32, 64)
 EXIT_OOM = 2
+
+
+def agreement_failures(ladder, tolerance=AGREEMENT_TOLERANCE):
+    """Ladder degrees whose disagreement with the reference exceeds tolerance."""
+    return [
+        (int(degree), float(row["max_abs_difference"]))
+        for degree, row in sorted(ladder.items(), key=lambda item: int(item[0]))
+        if float(row["max_abs_difference"]) > tolerance
+    ]
+
+
+def agreement_passed(ladder, tolerance=AGREEMENT_TOLERANCE):
+    """True only when every ladder degree is within tolerance of the reference."""
+    return not agreement_failures(ladder, tolerance)
 
 
 def save(path, result):
@@ -354,6 +372,12 @@ def run_agreement(
         jax.block_until_ready(state.moment_residual)
         return np.asarray(state.moment_residual)
 
+    if REFERENCE_OUTER_DEGREE in DEGREE_LADDER:
+        raise ValueError(
+            "DEGREE_LADDER must exclude the reference degree "
+            f"{REFERENCE_OUTER_DEGREE}: that row compares the reference with "
+            "itself and reads zero whatever the cheaper degrees do"
+        )
     reference_nodes, reference_weights = _leggauss(REFERENCE_OUTER_DEGREE)
     reference = evaluate(all_candidates, reference_nodes, reference_weights)
     ladder = {}
@@ -377,12 +401,11 @@ def run_agreement(
         "ladder": ladder,
         "candidate_set_effect": float(np.max(np.abs(same_list - reference))),
         "tolerance": AGREEMENT_TOLERANCE,
+        "failures": agreement_failures(ladder),
         "min_over_ladder": min(row["max_abs_difference"] for row in ladder.values()),
         "max_outer_degree": max(int(degree) for degree in ladder),
     }
-    result["agreement"]["passed"] = bool(
-        result["agreement"]["min_over_ladder"] <= AGREEMENT_TOLERANCE
-    )
+    result["agreement"]["passed"] = agreement_passed(ladder)
     save(output, result)
     print(f"AGREEMENT {json.dumps(result['agreement'])}", flush=True)
     if not result["agreement"]["passed"]:

@@ -54,12 +54,16 @@
     <figure>
       <img src="/nova/figures/converged-forward-solve/axis-facing-owner/owner-representation-ladder.svg"
            alt="Map flux error against carrier size for each owner representation, with the guard and the reconstruction floor">
-      <figcaption>Map flux error against carrier size for the axis-facing half-plane owner, the
-      saddle-anchored exact-Hessian conic, and the remaining owner anchors including no owner at all.
-      Each carrier is one <code>all_debug</code> row of the same allocation on the exact clipped
-      single-null diverted certificate. The two subject series cross between 550 and 2,098 cells: the
-      fitted quadratic is the better model of a large cell and the saddle expansion the better model
-      of a small one, so neither is the same-representation repair the plan asks for.</figcaption>
+      <figcaption>Map flux error against carrier size on the exact clipped single-null diverted
+      certificate, one <code>all_debug</code> row per point; the thin dotted grey line is the guard
+      at each size. The delivered axis-facing half-plane cut (blue) and the saddle-anchored
+      exact-Hessian conic (terracotta) cross between 550 and 2,098 cells: the fitted quadratic is the
+      better model of a large cell and the saddle expansion the better model of a small one, so
+      neither is the same-representation repair the plan asks for. The dashed grey series is the
+      sampling booking the owner replaces, re-measured through the same read and handoff: the
+      delivered cut sits below it at 282 and 550 and crosses above it before 2,098, where the
+      inherited booking is under the guard and the owner is not. The guard at 282 passes through that
+      inherited series, because it is that booking's own error.</figcaption>
     </figure>
   </section>
 
@@ -140,12 +144,13 @@
 
   <section id="ladder">
     <h2>The representation ladder</h2>
-    <p>Six representations, each one rule applied at every size.</p>
+    <p>Nine representations, each one rule applied at every size.</p>
     <table>
       <thead>
         <tr><th>representation</th><th>282 (guard 1.0866e-3)</th><th>550 (guard 5e-4)</th><th>2,098 (guard 1e-4)</th></tr>
       </thead>
       <tbody>
+        <tr><td>the sampling bookings the owner replaces (inherited ring fans)</td><td>1.08660010688e-3 fail</td><td>4.87161211918e-4 <b>pass</b></td><td>9.47260774384e-5 <b>pass</b></td></tr>
         <tr><td>half-plane, fitted quadratic at the saddle origin<b> (delivered)</b></td><td>1.08006018256e-3 <b>pass</b></td><td>4.09606071189e-4 <b>pass</b></td><td>2.49303535497e-4 <b>fail</b></td></tr>
         <tr><td>saddle-anchored conic, exact Hessian, exact level</td><td>1.0098236108e-2 fail</td><td>3.78175700635e-3 fail</td><td>9.40872462985e-5 <b>pass</b></td></tr>
         <tr><td>fitted field, cut direction from the exact saddle Hessian</td><td>1.08102643329e-3 <b>pass</b></td><td>4.09606071189e-4 <b>pass</b></td><td>2.49325729609e-4 <b>fail</b></td></tr>
@@ -156,6 +161,25 @@
         <tr><td>no owner at all</td><td>1.49396091282e-2 fail</td><td>9.97172971635e-4 fail</td><td>1.6193239834e-2 fail</td></tr>
       </tbody>
     </table>
+    <p><b>The booking the owner replaces passes the guard the owner fails, and the 282 guard is
+    that booking's own error.</b> Re-measuring the inherited saddle booking through the identical read
+    and handoff — the owner map with its cut set to reproduce the accessor's own signed normal-form
+    ring fans rather than approximate them — gives 1.08660010688 × 10<sup>−3</sup> at 282,
+    4.87161211918 × 10<sup>−4</sup> at 550 and 9.47260774384 × 10<sup>−5</sup> at 2,098. The 282 guard
+    is 1.0866 × 10<sup>−3</sup>, which is that number to eight significant figures: the guard was
+    calibrated to the sampling booking the owner exists to replace, and that booking sits
+    1.07 × 10<sup>−10</sup> over it. At 550 and 2,098 the inherited booking passes outright. So the
+    2,098 failure is not an unmet target the owner inherited — the delivered half-plane cut
+    <i>introduces</i> it, at 2.63 × the error of the booking it replaces, while improving 282 (1.0801
+    against 1.0866 × 10<sup>−3</sup>) and 550 (4.096 against 4.872 × 10<sup>−4</sup>). The replacement
+    is a net gain at two sizes and a regression at the third, and the guard at 2,098 is the only one
+    the replaced booking was already under.</p>
+    <p>Two consequences follow. A repair that returns the 2,098 owner cells to the inherited region
+    would close the guard and reopen the discrete behaviour the owner was built to remove, so the
+    exchange is not free. And the figure's inherited series, taken from a parent node's record
+    (1.08657917135 × 10<sup>−3</sup> / 4.87271823 × 10<sup>−4</sup> / 8.66659 × 10<sup>−5</sup>), does
+    not agree with the booking measured here at 2,098 — 8.67 against 9.47 × 10<sup>−5</sup>, 9 % apart
+    — so that series is from a different revision and is not this comparison.</p>
     <p><b>The plan's named candidate is refuted as a whole-carrier repair.</b> Taking the owner
     conic from the saddle the read already locates, as the normal form does, does exactly what it
     promises at 2,098 — 2.493 × 10<sup>−4</sup> falls to 9.409 × 10<sup>−5</sup>, under the guard —
@@ -192,6 +216,12 @@
     282, 550 and 2,098. A systematic term that does not fall with resolution is not something a
     better conic removes; it is a property of integrating a quadratic over a region the conic only
     approximates.</p>
+    <p>Against the booking it replaces the fleet reads more sharply than that. The inherited ring
+    booking passes 550 and 2,098 and fails 282 by 1.07 × 10<sup>−10</sup>; the delivered half-plane
+    cut passes 282 and 550 with room and fails 2,098 by 2.5 ×. The 282 guard is the earlier booking's
+    own error to eight figures, so the guard is not a target the owner fell short of but the
+    calibration of the thing it replaced. At the two sizes where the owner wins it wins clearly; at
+    2,098 it is 2.63 × worse than no replacement at all.</p>
     <p>The plan's named candidate is measured and refuted. The four derived anchors are measured and
     refuted. The declared negative control is measured and does <b>not</b> reproduce: the fitted Bell
     stationary-point anchor gives 1.79194122881 × 10<sup>−2</sup> at 2,098, not the 2.49 × 10<sup>−4</sup>
@@ -200,17 +230,24 @@
     anchor carries the defect is wrong. The measurement is of the Bell rule as the code implements it,
     which moves the branch restriction along with the origin; a pure origin swap is named as a
     follow-on.</p>
-    <p><b>The repair the evidence points at is the region, not the field.</b> The reference booking
-    that the map is judged against does not integrate a conic over the owner cells at all: it builds
-    exact normal-form fragment rings from the saddle's own cubic and the straight edge intervals the
-    read has already computed, and integrates the cell's fitted quadratic over those rings. Cell 47's
-    numbers are the tell — the conic gets its area right to 1.5 × 10<sup>−6</sup> and its current
-    wrong by 3.3 × 10<sup>−3</sup>, which is a boundary displaced along one principal direction, not a
-    level or a curvature in error. A conic cannot represent a cubic separatrix; the read's own
-    fragment geometry can, and it is already in the reading. The next node should book the owner cells
-    on the read's normal-form rings rather than on the conic, which is the same representation at every
-    size and should take the owner-cell moments to the reference values outright. The performance cost
-    of that is clause 5's question, and clause 5 is explicitly not this node's gate.</p>
+    <p><b>The repair the evidence points at is the region, not the field.</b> The booking the map is
+    judged against does not integrate a conic over the owner cells at all: it builds exact normal-form
+    fragment rings from the saddle's own cubic and the straight edge intervals the read has already
+    computed, and integrates the cell's fitted quadratic over those rings. That booking is now
+    measured, not inferred, and it passes 2,098 at 9.47260774384 × 10<sup>−5</sup> where the conic
+    owner sits at 2.49303535497 × 10<sup>−4</sup> — so the target the ring region reaches is a
+    measured value on this carrier, not a hope. Cell 47's numbers say why: the conic gets its area
+    right to 1.5 × 10<sup>−6</sup> and its current wrong by 3.3 × 10<sup>−3</sup>, which is a
+    boundary displaced along one principal direction, not a level or a curvature in error. A conic
+    cannot represent a cubic separatrix; the read's own fragment geometry can, and it is already in
+    the reading. So the next node should book the owner cells on the read's normal-form rings rather
+    than on the conic — the same representation at every size — and the measurement says that takes
+    the 2,098 map under the guard. What it costs at 282 and 550, where the inherited booking is
+    <i>worse</i> than the conic (1.08660010688 against 1.08006018256 × 10<sup>−3</sup>, and
+    4.87161211918 against 4.09606071189 × 10<sup>−4</sup>), is the part that measurement does not
+    answer: a plain revert to the rings gives up the gains the owner won at the two smaller carriers.
+    The node's open problem is therefore a region that is exact where the cell is large and continuous
+    where it is small, not a better conic.</p>
   </section>
 
   <section id="solve">
@@ -229,6 +266,14 @@
     clause 3: the 2,098-cell root cannot be qualified until the owner map is repaired, and a residual
     measured past the guard would be a root of the map as booked — self-consistency, not flux
     accuracy. A run that does so is therefore labelled as a diagnostic in its own receipt.</p>
+    <p>That diagnostic was run, and the largest carrier is beyond this node's budget at roughly
+    21 minutes per correction: one correction completed in 1,254.7 s, taking the residual from the
+    booked map to 3.71832259764 × 10<sup>−3</sup> with the line search damping the step to 0.5, and
+    the 59-minute allocation expired before a second. Four corrections is what 282 and 550 each need,
+    so a converged 2,098 root is out of reach on one CPU debug node — and on this carrier the damping
+    engages where it does not at the two smaller sizes, which is itself a signal that the booked map
+    is further from its own root. The wall is reported because it is the honest state of clause 3 at
+    2,098, not because the run failed: the iteration was still descending when the allocation ended.</p>
     <table>
       <thead>
         <tr><th>carrier</th><th>corrections</th><th>terminal residual</th><th>Gauss-Newton gradient</th><th>per-correction wall</th><th>Taylor slopes 2, three directions</th></tr>
@@ -236,6 +281,7 @@
       <tbody>
         <tr><td>282</td><td>4</td><td>3.14409717612e-13</td><td>2.39498329587e-11</td><td>20.7 s</td><td>pass</td></tr>
         <tr><td>550</td><td>4</td><td>4.84764428524e-13</td><td>1.91211948969e-11</td><td>63.3 s</td><td><b>fail (direction 1)</b></td></tr>
+        <tr><td>2,098 (labelled diagnostic)</td><td>1</td><td>3.71832259764e-3</td><td>—</td><td>1,254.7 s</td><td>not reached</td></tr>
       </tbody>
     </table>
     <p id="axis-facing-owner-solve">The 282-cell root passes the Taylor check cleanly: in all three

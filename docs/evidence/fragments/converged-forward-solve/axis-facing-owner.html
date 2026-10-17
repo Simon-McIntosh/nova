@@ -7,10 +7,10 @@
 <meta name="reckon-type" content="evidence">
 <meta name="plan-slug" content="axis-facing-owner">
 <meta name="plan-title" content="Axis-facing X-point owner">
-<meta name="plan-summary" content="Per-cell attribution of the diverted map error and a six-representation owner ladder on the exact clipped carrier">
+<meta name="plan-summary" content="Per-cell attribution of the diverted map error and a nine-representation owner ladder on the exact clipped carrier">
 <meta name="plan-evidence-for" content="converged-forward-solve">
 <meta name="plan-verifies" content="converged-forward-solve#s5">
-<meta name="plan-commits" content="a3a6eb331,154a639cd,57f02833b,ddec16c7b,106046268,970a02d89,316ac77ef">
+<meta name="plan-commits" content="a3a6eb331,154a639cd,57f02833b,ddec16c7b,106046268,970a02d89,316ac77ef,0bb2e4085,15c5677d7,f092f6a64">
 <meta name="plan-recorded-at" content="2026-10-17">
 <meta name="plan-verdict" content="partial">
 <meta name="plan-environment" content="all_debug CPU rows, binary64 asserted at entry, JAX_PLATFORMS=cpu, share of the exact clipped single-null diverted certificate realising 282, 550 and 2,098 cells">
@@ -23,7 +23,7 @@
 <h1 id="axis-facing-owner-title">Axis-facing X-point owner</h1>
 <p id="axis-facing-owner-summary">At 2,098 cells one booked owner cell carries 59 % of the diverted
 map's flux error, and its area fraction matches the analytic one to 1.5e-6 while its booked current
-is off by 3.3e-3 relative. Six owner representations spanning the natural design space are measured
+is off by 3.3e-3 relative. Nine owner representations spanning the natural design space are measured
 on all three carriers and none passes all three guards, so the axis-facing owner remains the
 continuous bottleneck. The candidate the plan names — taking the owner conic from the saddle the
 read already locates — passes 2,098 at 9.41e-5 and fails 282 and 550 by 9.3x and 9.2x. The diverted
@@ -80,6 +80,7 @@ never vanishes.</p>
 <table id="axis-facing-owner-ladder-table">
 <thead><tr><th>representation</th><th>282 (guard 1.0866e-3)</th><th>550 (guard 5e-4)</th><th>2,098 (guard 1e-4)</th></tr></thead>
 <tbody>
+<tr id="axis-facing-owner-ladder-inherited"><td>the sampling booking the owner replaces (inherited ring fans)</td><td>1.08660010688e-3 fail</td><td>4.87161211918e-4 <b>pass</b></td><td>9.47260774384e-5 <b>pass</b></td></tr>
 <tr><td>half-plane, fitted quadratic at the saddle origin (delivered)</td><td>1.08006018256e-3 <b>pass</b></td><td>4.09606071189e-4 <b>pass</b></td><td>2.49303535497e-4 <b>fail</b></td></tr>
 <tr><td>saddle-anchored conic, exact Hessian, exact level</td><td>1.0098236108e-2 fail</td><td>3.78175700635e-3 fail</td><td>9.40872462985e-5 <b>pass</b></td></tr>
 <tr><td>fitted field, cut direction from the exact saddle Hessian</td><td>1.08102643329e-3 <b>pass</b></td><td>4.09606071189e-4 <b>pass</b></td><td>2.49325729609e-4 <b>fail</b></td></tr>
@@ -93,13 +94,30 @@ never vanishes.</p>
 <figure id="axis-facing-owner-ladder-figure">
 <img src="/nova/figures/converged-forward-solve/axis-facing-owner/owner-representation-ladder.svg"
      alt="Map flux error against carrier size for each owner representation, with the guard and the reconstruction floor">
-<figcaption id="axis-facing-owner-ladder-caption">Map flux error against carrier size. The delivered
-half-plane owner and the saddle-anchored conic cross between 550 and 2,098 cells: the fitted
-quadratic is the better model of a large cell and the saddle expansion the better model of a small
-one, so neither is a single representation that holds at every size. Each carrier is one
-<code>all_debug</code> row of the same allocation on the exact clipped single-null diverted
+<figcaption id="axis-facing-owner-ladder-caption">Map flux error against carrier size; the thin dotted
+grey line is the guard at each size. The delivered half-plane owner (blue) and the saddle-anchored
+conic (terracotta) cross between 550 and 2,098 cells: the fitted quadratic is the better model of a
+large cell and the saddle expansion the better model of a small one, so neither is a single
+representation that holds at every size. The dashed grey series is the sampling booking the owner
+replaces, re-measured through the same read and handoff: the delivered cut is below it at 282 and 550
+and above it at 2,098, where the inherited booking is under the guard and the owner is not. The 282
+guard passes through that inherited series, because it is that booking's own error. Each carrier is
+one <code>all_debug</code> row of the same allocation on the exact clipped single-null diverted
 certificate.</figcaption>
 </figure>
+<p id="axis-facing-owner-ladder-inherited-note">The booking the owner replaces, re-measured through the
+identical read and handoff with its cut set to reproduce the accessor's own signed normal-form ring
+fans, passes 550 and 2,098 and fails 282 by 1.07e-10. The 282 guard 1.0866e-3 is that booking's own
+error to eight significant figures, so the guard is the calibration of the replaced booking rather
+than an independent target. The delivered half-plane cut is better at 282 (1.08006018256e-3 against
+1.08660010688e-3) and at 550 (4.09606071189e-4 against 4.87161211918e-4), so the replacement is a
+net gain at two sizes; at 2,098 it is 2.63x worse than no replacement at all, which is where the
+guard fails. The repair is therefore the region, not a better conic: the rings reach
+9.47260774384e-5 on this carrier, and cell 47 shows the conic gets its area right to 1.5e-6 while
+placing the boundary wrongly along one principal direction. The open problem is a region exact where
+the cell is large and continuous where it is small. The figure's inherited series
+(1.08657917135e-3 / 4.87271823e-4 / 8.66659e-5) is a parent node's record and does not agree with this
+measurement at 2,098, 9 % apart.</p>
 <p id="axis-facing-owner-ladder-finding">The plan's named candidate is refuted as a whole-carrier
 repair. It does what it promises at 2,098 — 2.49303535497e-4 falls to 9.40872462985e-5, under the
 guard — and fails by 9.3x at 282 and 9.2x at 550, where it is worse than the representation it was
@@ -118,11 +136,17 @@ descriptions of the same flux apart rather than together.</p>
 <tr><td>282</td><td>4</td><td>3.14409717612e-13</td><td>2.39498329587e-11</td><td>20.7 s</td><td>pass</td><td>finite</td></tr>
 <tr><td>550</td><td>4</td><td>4.84764428524e-13</td><td>1.91211948969e-11</td><td>63.3 s</td><td>fail (one direction)</td><td>finite</td></tr>
 <tr><td>2,098</td><td colspan="6">refused by <code>require_map</code>: the delivered map's 2.49303535497e-4 exceeds the 1e-4 guard before the first correction</td></tr>
+<tr><td>2,098, labelled diagnostic</td><td>1</td><td>3.71832259764e-3</td><td>not reached</td><td>1254.7 s</td><td>not reached</td><td>not reached</td></tr>
 </tbody>
 </table>
 <p id="axis-facing-owner-solve-finding">The 282 residual history is 7.59023e-4 → 1.09971e-5 →
 3.31601e-9 → 3.14410e-13 and the 550 history is 7.36288e-4 → 1.91098e-5 → 1.44992e-8 →
-4.84764e-13; both are quadratic throughout. The 282 root passes the Taylor check in all three
+4.84764e-13; both are quadratic throughout. The 2,098 diagnostic was run past the guard with the
+run labelled as such: one correction completed in 1254.7 s, reaching 3.71832259764e-3 with the line
+search damping the step to 0.5, and the 59-minute allocation expired before a second. Four
+corrections is what each smaller carrier needs, so a converged 2,098 root is out of reach on one CPU
+debug node, and the damping engaging there where it does not at 282 and 550 says the booked map is
+further from its own root on this carrier. The 282 root passes the Taylor check in all three
 directions, with middle-step slopes between 1.983 and 2.041. The 550 root reaches the same residual
 quality and fails the check in one direction, where the remainder falls faster than
 step<sup>2</sup> at the three middle step pairs (slopes 3.36 and 3.84 against the 1.8–2.2 window)
@@ -209,7 +233,10 @@ all are held by the <code>codex-embed</code> service in job 1282615. Every numbe
 measured on CPU, and a CPU batch wall is not an H200 batch wall: it is reported as a CPU
 measurement and never as the 0.90 ms comparison. The 2,098-cell cold solve is blocked on clause 2
 rather than on hardware — the map qualification gate refuses it — and the 41-state sweeps cannot be
-re-measured because their driver asserts a GPU backend.</p>
+re-measured because their driver asserts a GPU backend. Run past that gate as a labelled diagnostic,
+the 2,098 solve reaches one correction in 1254.7 s, so clause 3's largest carrier is out of reach on
+one CPU debug node: four corrections is what each smaller carrier needs, and the 59-minute
+allocation expired mid-descent with the line search damping to 0.5.</p>
 </section>
 
 <section id="axis-facing-owner-verdict">
@@ -218,11 +245,14 @@ re-measured because their driver asserts a GPU backend.</p>
 error over the floor, in the cell current, with its area right to 1.5e-6. Clause 2 is not met and
 the evidence says why it is structural: the delivered owner sits 2.316e-4 over the floor at 2,098
 against 4.61e-4 at 282 and 2.275e-4 at 550, a nearly resolution-independent excess that a better
-conic does not remove. What the numbers point at is the region rather than the field — the
-reference booking builds exact normal-form fragment rings from the saddle's own cubic and the edge
-intervals the read has already computed, while the owner approximates that region with a conic, and
-a conic cannot represent a cubic separatrix. Clause 3 passes at 282 and 550 and is refused at 2,098
-by clause 2's gate. Clause 4 holds by construction and its recorded brackets classify as crossings. The declared
+conic does not remove. Re-measuring the booking the owner replaces settles which way the defect runs:
+that booking passes 550 and 2,098 (4.87161211918e-4 and 9.47260774384e-5) and fails 282 by 1.07e-10,
+and the 282 guard 1.0866e-3 is its own error to eight figures, so the owner's replacement is a net
+gain at two sizes and a 2.63x regression at the third. What the numbers point at is the region
+rather than the field — the reference booking builds exact normal-form fragment rings from the
+saddle's own cubic and the edge intervals the read has already computed, while the owner
+approximates that region with a conic, and a conic cannot represent a cubic separatrix. Clause 3
+passes at 282 and 550 and is refused at 2,098 by clause 2's gate. Clause 4 holds by construction and its recorded brackets classify as crossings. The declared
 negative control does not reproduce: the mutation it names gives 1.79194122881e-2 at 2,098, not
 2.49e-4, because the base already anchored the owner at the located saddle and 2.49e-4 is the
 delivered representation's own value.</p>

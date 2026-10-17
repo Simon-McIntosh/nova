@@ -40,7 +40,15 @@ def main():
     parser.add_argument("--max-steps", type=int, default=15)
     parser.add_argument(
         "--component",
-        choices=("halfplane", "bell", "saddle", "pinned", "anchored", "shifted"),
+        choices=(
+            "halfplane",
+            "bell",
+            "saddle",
+            "pinned",
+            "anchored",
+            "shifted",
+            "ordinary",
+        ),
         default="halfplane",
     )
     parser.add_argument("--map-only", action="store_true")

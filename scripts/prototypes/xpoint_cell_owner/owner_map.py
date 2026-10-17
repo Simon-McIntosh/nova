@@ -74,11 +74,13 @@ def owned_cut(
 ):
     """Replace the sampled saddle-sector area and moment booking together."""
     active = reading.normal_form_cells
+    if component == "ordinary":
+        active = jnp.zeros_like(active)
     count = jnp.sum(active, dtype=jnp.int32)
     indices = jnp.nonzero(active, size=capacity, fill_value=0)[0]
     density = program._density_coefficients(geometry, reading, profile)
     coefficients = reading.field_coefficients[indices]
-    branch = component
+    branch = "halfplane" if component == "ordinary" else component
     if component == "anchored":
         local = (
             reading.saddle_form.position - geometry.centre[indices]
@@ -87,6 +89,7 @@ def owned_cut(
             reading.field_coefficients[indices], local
         )
         coefficients = reading.field_coefficients[indices].at[:, 0].add(offset)
+        branch = "halfplane"
     elif component == "shifted":
         local = (
             reading.saddle_form.position - geometry.centre[indices]

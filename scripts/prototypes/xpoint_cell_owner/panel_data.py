@@ -31,7 +31,15 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument(
         "--component",
-        choices=("halfplane", "bell", "saddle", "pinned", "anchored", "shifted"),
+        choices=(
+            "halfplane",
+            "bell",
+            "saddle",
+            "pinned",
+            "anchored",
+            "shifted",
+            "ordinary",
+        ),
         default="halfplane",
     )
     args = parser.parse_args()

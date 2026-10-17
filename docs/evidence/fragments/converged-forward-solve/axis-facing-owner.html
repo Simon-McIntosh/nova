@@ -86,6 +86,7 @@ never vanishes.</p>
 <tr><td>fitted curvature, exact value and zero gradient at the saddle</td><td>3.15696528417e-2 fail</td><td>1.14594590178e-2 fail</td><td>2.84133180532e-4 fail</td></tr>
 <tr><td>fitted shape, exact level at the saddle</td><td>2.04442839398e-2 fail</td><td>8.71112703623e-3 fail</td><td>7.97500920012e-4 fail</td></tr>
 <tr><td>exact curvature, fitted level at the saddle</td><td>1.05795087211e-2 fail</td><td>5.00095294654e-3 fail</td><td>6.81674659183e-4 fail</td></tr>
+<tr><td>fitted field at the fitted Bell stationary point (the declared control)</td><td>1.34080430954e-2 fail</td><td>3.58585602656e-2 fail</td><td>1.79194122881e-2 fail</td></tr>
 <tr><td>no owner at all</td><td>1.49396091282e-2 fail</td><td>9.97172971635e-4 fail</td><td>1.6193239834e-2 fail</td></tr>
 </tbody>
 </table>
@@ -159,6 +160,27 @@ bracket point, and not an implementation switch. The limited carriers have no va
 switch at all.</p>
 </section>
 
+<section id="axis-facing-owner-control">
+<h2>The declared negative control does not reproduce</h2>
+<p id="axis-facing-owner-control-body">The control declared for this node reads: restoring the
+fitted Bell stationary point as the owner conic anchor brings the 2,098 map error back to 2.49e-4.
+It was run at all three sizes and it does not. The fitted stationary-point anchor gives
+1.34080430954e-2 at 282, 3.58585602656e-2 at 550 and <b>1.79194122881e-2 at 2,098</b> — 72 times
+the value the control names.</p>
+<p id="axis-facing-owner-control-finding">The reason is that 2.49e-4 is not a pre-repair value at
+all: it is what the saddle-anchored half-plane owner produces, and the base revision already
+anchored there. The base <code>integrate_cell</code> sets <code>origin = saddle</code> for its
+half-plane branch and <code>origin = centre + pitch * stationary_local</code> only for its Bell
+branch, and the owner's default component was already the half-plane. So the defect the node
+inherited came from the saddle anchor, and the anchor is not what the repair changes. One caveat is
+carried with the number rather than hidden: the fitted stationary-point anchor moves the branch
+restriction as well as the origin (the restriction follows the sign of the critical level at the
+stationary point rather than being unconditional), so the measurement is of the Bell rule as the
+code implements it, not of a pure origin swap. A pure swap — the fitted field, the fitted
+stationary origin, the unconditional half-plane restriction — is named as a follow-on rather than
+built here.</p>
+</section>
+
 <section id="axis-facing-owner-panels">
 <h2>Terminal-state panels</h2>
 <figure id="axis-facing-owner-panel-282-figure">
@@ -200,9 +222,10 @@ conic does not remove. What the numbers point at is the region rather than the f
 reference booking builds exact normal-form fragment rings from the saddle's own cubic and the edge
 intervals the read has already computed, while the owner approximates that region with a conic, and
 a conic cannot represent a cubic separatrix. Clause 3 passes at 282 and 550 and is refused at 2,098
-by clause 2's gate. Clause 4 holds by construction and its recorded brackets classify as crossings.
-The declared negative control holds: restoring the fitted Bell stationary point as the owner conic
-anchor brings the 2,098 map error back to 2.49e-4.</p>
+by clause 2's gate. Clause 4 holds by construction and its recorded brackets classify as crossings. The declared
+negative control does not reproduce: the mutation it names gives 1.79194122881e-2 at 2,098, not
+2.49e-4, because the base already anchored the owner at the located saddle and 2.49e-4 is the
+delivered representation's own value.</p>
 </section>
 </main>
 </body>

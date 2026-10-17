@@ -10,6 +10,13 @@
   ],
   "completed_at": "2026-10-16T23:09:54.961Z",
   "dispatched_at": "2026-10-16T23:01:33Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "fixture-owner-store-argument",
+      "recorded_at": "2026-10-17T06:53:01.915173+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/support/certificate_fixtures.py",

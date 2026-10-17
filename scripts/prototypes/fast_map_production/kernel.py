@@ -147,7 +147,23 @@ def _wall_path_ceiling(
         leak = near_weight[:, None] * (1 - sector_weight)
         leak = jnp.maximum(leak, leak[peer, peer_edge])
         over = jnp.where(saddle_live, jnp.maximum(ceiling - saddle_score, 0.0), 0.0)
-        ceiling = ceiling - leak * over
+        # Written as a min against the interpolated level, not as a subtraction:
+        # subtracting the excess computes ceiling - (ceiling - saddle_score),
+        # which in binary64 returns the saddle level to within a few ulp rather
+        # than exactly, and a wall contact that ties the saddle level to the last
+        # bit then wins the boundary on the tie. Where the attenuation saturates
+        # this is exactly min(ceiling, saddle_score).
+        ceiling = jnp.minimum(ceiling, saddle_score + (1.0 - leak) * over)
+    # The cell quadratic is a fitted surrogate for the field, so an edge peak
+    # inside the cell that owns the X-point can land on the wrong side of the
+    # true saddle level. The read already locates that level, so the passage
+    # through the owner cell is bounded by it before any path can carry it into
+    # the private-flux region. A plain min of two located levels, so nothing
+    # boolean returns and the bound is continuous in every fitted quantity.
+    if form is not None:
+        owner = topology._inside_cells(geometry, form.position)
+        seat = jnp.where(saddle_live, owner, False)
+        ceiling = jnp.where(seat, jnp.minimum(ceiling, saddle_score), ceiling)
     ceiling = jnp.where(geometry.neighbour >= 0, ceiling, -jnp.inf)
     best = jnp.full((len(geometry.centre),), -jnp.inf).at[seed].set(jnp.inf)
 

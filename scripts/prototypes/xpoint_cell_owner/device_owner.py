@@ -45,6 +45,9 @@ def integrate_cell(
     orientation_hessian=None,
     *,
     axis_component="halfplane",
+    density_mode="fitted",
+    profile=None,
+    span=None,
 ):
     """Replace the sampled saddle-sector booking for one containing cell.
 
@@ -52,6 +55,14 @@ def integrate_cell(
     branch cut. The cut follows the fitted cell quadratic's own principal axes
     by default; supplying the exact flux Hessian at the saddle instead keeps
     the cut direction independent of how well the fit resolves the curvature.
+
+    ``density_mode`` selects how the current density is represented inside the
+    owned region. ``"fitted"`` evaluates the quadratic fit of the composed
+    density in local pitch coordinates, so the flux enters the weighting only
+    through its own quadratic fit. ``"profile"`` evaluates the profile at the
+    quadrature nodes from the region-selecting flux itself, so the two share
+    one representation and no intermediate density fit is made. The region —
+    and therefore the area — is identical under both modes.
     """
     field = field_coefficients.at[0].add(-boundary_level) * sigma
     hessian = jnp.array(((2 * field[3], field[4]), (field[4], 2 * field[5])))
@@ -161,7 +172,11 @@ def integrate_cell(
         v_nodes = middle_v[:, None] + (v_right - v_left)[:, None] * _INNER_NODES / 2
         local = (origin - centre) / pitch + u_value * plus + v_nodes[..., None] * minus
         x, y = local[..., 0], local[..., 1]
-        density = _quadratic(density_coefficients, x, y)
+        if density_mode == "profile":
+            normalized = 1.0 + _quadratic(field, x, y) / (sigma * span)
+            density = profile.current_density(centre[0] + pitch * x, normalized)
+        else:
+            density = _quadratic(density_coefficients, x, y)
         terms = jnp.stack(
             (jnp.ones_like(density), density, pitch * density * x, pitch * density * y),
             axis=-1,

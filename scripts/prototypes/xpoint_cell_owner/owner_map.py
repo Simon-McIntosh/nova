@@ -141,6 +141,7 @@ def owned_cut(
     capacity=16,
     component="halfplane",
     saddle_hessian=None,
+    density_mode="fitted",
 ):
     """Replace the sampled saddle-sector area and moment booking together."""
     if component == "inherited":
@@ -194,10 +195,15 @@ def owned_cut(
         branch = "halfplane"
     cut_axes = (0, 0, 0, 0, 0, None, None, None, None, 0)
     orientation_axes = None if orientation is None else 0
-    selected = jax.vmap(
-        partial(integrate_cell, axis_component=branch),
-        in_axes=cut_axes + (orientation_axes,),
-    )(
+    span = reading.boundary_flux - reading.axis_flux
+    rule = partial(
+        integrate_cell,
+        axis_component=branch,
+        density_mode=density_mode,
+        profile=profile,
+        span=span,
+    )
+    selected = jax.vmap(rule, in_axes=cut_axes + (orientation_axes,))(
         geometry.vertices[indices],
         geometry.vertex_count[indices],
         geometry.centre[indices],
@@ -243,6 +249,7 @@ def map_moments(
     *,
     frame_gate=True,
     component="halfplane",
+    density_mode="fitted",
 ):
     """Replace fast_map_production.program.map_moments at the booked handoff."""
     cached = fixed_points._CachedField(
@@ -274,6 +281,7 @@ def map_moments(
         convention.sigma,
         component=component,
         saddle_hessian=roots.jet.hessian[saddle_root],
+        density_mode=density_mode,
     )
     selected = reading.selected_cells
     full = (

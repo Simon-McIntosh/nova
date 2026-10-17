@@ -43,6 +43,11 @@ def main():
         ),
         default="halfplane",
     )
+    parser.add_argument(
+        "--density-mode",
+        choices=("fitted", "profile"),
+        default="fitted",
+    )
     args = parser.parse_args()
     assert jax.config.jax_enable_x64 is True
     assert jax.default_backend() in ("gpu", "cpu")
@@ -67,7 +72,12 @@ def main():
     operator = fixture.forward_operator(context.source, machine)
     terminal = jax.jit(
         lambda point, carrier: map_moments(
-            point, *carrier[:7], profile, *carrier[7:], component=args.component
+            point,
+            *carrier[:7],
+            profile,
+            *carrier[7:],
+            component=args.component,
+            density_mode=args.density_mode,
         )
     )(moments, operands)
     solved_flux = exterior + _image(operator, moments)

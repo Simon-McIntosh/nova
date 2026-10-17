@@ -16,16 +16,25 @@ def without_profile(operands):
     return (*operands[:7], *operands[8:])
 
 
-def residual(state, operands, scale, profile, component="halfplane"):
+def residual(
+    state, operands, scale, profile, component="halfplane", density_mode="fitted"
+):
     """Scaled moment residual with carrier arrays passed at runtime."""
     moments = state.reshape((-1, 3)) * scale
     mapped = map_moments(
-        moments, *operands[:7], profile, *operands[7:], component=component
+        moments,
+        *operands[:7],
+        profile,
+        *operands[7:],
+        component=component,
+        density_mode=density_mode,
     )
     return (mapped.moment_residual / scale).reshape(-1)
 
 
-def factor(state, operands, scale, profile, component="halfplane"):
+def factor(
+    state, operands, scale, profile, component="halfplane", density_mode="fitted"
+):
     """Build dense Jacobian columns by vmapped JVP and factor them on device."""
     count = state.size
     blocks = (count + DIRECTION_BLOCK - 1) // DIRECTION_BLOCK
@@ -38,7 +47,9 @@ def factor(state, operands, scale, profile, component="halfplane"):
 
         def column(direction):
             _, tangent = jax.jvp(
-                lambda probe: residual(probe, operands, scale, profile, component),
+                lambda probe: residual(
+                    probe, operands, scale, profile, component, density_mode
+                ),
                 (state,),
                 (direction,),
             )
@@ -53,14 +64,22 @@ def factor(state, operands, scale, profile, component="halfplane"):
 
 
 def advance(
-    state, operands, scale, lu, pivots, refactor, profile, component="halfplane"
+    state,
+    operands,
+    scale,
+    lu,
+    pivots,
+    refactor,
+    profile,
+    component="halfplane",
+    density_mode="fitted",
 ):
     """Replace the state-capturing linearize correction with one jitted step."""
-    current = residual(state, operands, scale, profile, component)
+    current = residual(state, operands, scale, profile, component, density_mode)
     magnitude = jnp.max(jnp.abs(current))
     lu, pivots = jax.lax.cond(
         refactor,
-        lambda _: factor(state, operands, scale, profile, component),
+        lambda _: factor(state, operands, scale, profile, component, density_mode),
         lambda _: (lu, pivots),
         operand=None,
     )
@@ -72,7 +91,9 @@ def advance(
 
     def body(carry):
         trial, accepted, attempts, chosen = carry
-        proposed = residual(state + trial * step, operands, scale, profile, component)
+        proposed = residual(
+            state + trial * step, operands, scale, profile, component, density_mode
+        )
         take = jnp.max(jnp.abs(proposed)) < magnitude
         return (
             trial / 2,
@@ -92,5 +113,5 @@ def advance(
         ),
     )
     updated = state + chosen * step
-    end = residual(updated, operands, scale, profile, component)
+    end = residual(updated, operands, scale, profile, density_mode)
     return updated, jnp.max(jnp.abs(end)), lu, pivots, chosen

@@ -29,9 +29,25 @@ def _volume():
     return import_module("nova.geometry.volume")
 
 
+# The vtk geometry column names, declared here so the frame schema resolves
+# without importing the 3D stack.  TriShell.geom yields its values in this
+# order; the two lists are held equal by a test that imports both, so a coilset
+# built without vedo/vtk/meshio carries the same columns as one built with them.
+TRISHELL_FEATURES: tuple[str, ...] = (
+    *"xyz",
+    "dx",
+    "dy",
+    "dz",
+    "dl",
+    "dt",
+    "area",
+    "volume",
+)
+
+
 def _trishell_features() -> list[str]:
-    """Return the TriShell feature column names (lazy, avoids eager vedo)."""
-    return list(_volume().TriShell.features)
+    """Return the TriShell feature column names (no eager vedo/vtk)."""
+    return list(TRISHELL_FEATURES)
 
 
 @dataclass

@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="evidence">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="tie-island-comparison">
+  <meta name="plan-title" content="The exact-tie boundary-class switch">
+  <meta name="plan-summary" content="Both tie islands bisect to adjacent doubles and are an implementation switch at the boundary-class comparison; the comparison changes labels only, and the booked-current step belongs to the saddle selection"></meta>
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-verifies" content="converged-forward-solve#s2">
+  <meta name="plan-recorded-at" content="2026-10-17">
+  <meta name="plan-verdict" content="met">
+  <title>The exact-tie boundary-class switch | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+  <h1 id="tie-island-comparison-landing">The exact-tie boundary-class switch</h1>
+  <p><a href="/nova/research/bottleneck-path-level.html#tie-island">Measured research record</a></p>
+
+  <p><strong>The switch is a label, and the number that moves is not its.</strong> The comparison at <code>scripts/prototypes/fast_map_production/kernel.py:302</code>, <code>diverted = saddle_live &amp; (saddle_score &gt;= wall_score)</code>, is consumed at three places and none of them changes a number at the tie. The booked current does step, by up to 125, but it steps because the <em>saddle selection</em> at <code>kernel.py:239</code>, <code>saddle_index = 1 + jnp.argmax(saddle_score_rows)</code>, changes which root is chosen — the same root that creates the tie. The kernel is therefore left unmodified, and the defect is recorded against the selection.</p>
+
+  <h2 id="tie-island-comparison-consumers">Consumers of the comparison</h2>
+
+  <table>
+    <thead><tr><th>Line</th><th>Consumer</th><th>Changes a number?</th></tr></thead>
+    <tbody>
+      <tr><td>305</td><td><code>boundary</code> position, saddle against wall point</td><td>No. No importer of this read consumes <code>boundary</code> numerically: <code>ordinary_cut.py</code> and <code>measure_bell_cut.py</code> read <code>boundary_flux</code>, and <code>solve_options/global_structured_factor.py</code> uses a different read (<code>nova.equilibrium.support_read</code>).</td></tr>
+      <tr><td>311</td><td><code>boundary_class</code> label</td><td>No. Asserted and printed only.</td></tr>
+      <tr><td>395</td><td><code>qualified = valid &amp; (~diverted | form.valid)</code></td><td>No at every measured tie state: <code>form.valid</code> reads True on both sides of all four bisections, so <code>qualified</code> is True either way.</td></tr>
+    </tbody>
+  </table>
+
+  <p><code>boundary_flux</code> is <code>sigma * maximum(wall_score, saddle_score)</code>, which does not read the label, and <code>membership</code>, <code>booking_cells</code> and <code>path_weight</code> are all built from <code>saddle_live</code> rather than <code>diverted</code>.</p>
+
+  <h2 id="tie-island-comparison-bisections">Both islands bisected to adjacent binary64</h2>
+
+  <p>Each bracket was bisected with the sweep&rsquo;s own root prior, followed forward from offset &minus;0.2 in 0.01 steps before the bracket was entered, so the state measured is the state the sweep reaches. Both brackets closed to adjacent doubles at both resolutions.</p>
+
+  <table>
+    <thead><tr><th>Cells</th><th>Bracket</th><th>Adjacent doubles</th><th>Left class / saddles</th><th>Right class / saddles</th><th>Boundary flux left &rarr; right</th><th>Booked current left &rarr; right</th></tr></thead>
+    <tbody>
+      <tr><th>282</th><td>0.16&ndash;0.17</td><td>0.1609503646795457<br>0.16095036467954574</td><td>0 / 1</td><td>1 / 2</td><td>0.007967410709779124 &rarr; 0.007967410111760857<br>(&minus;5.98 &times; 10<sup>&minus;10</sup>)</td><td>2,215.3501307072502 &rarr; 2,206.110579145786<br>(&minus;9.24)</td></tr>
+      <tr><th>282</th><td>0.17&ndash;0.18</td><td>0.17323108126295622<br>0.17323108126295625</td><td>1 / 2</td><td>0 / 1</td><td>0.00864313336060203 &rarr; 0.008642528074090649<br>(&minus;6.05 &times; 10<sup>&minus;7</sup>)</td><td>14.480609756127421 &rarr; 129.23415705055402<br>(+114.75)</td></tr>
+      <tr><th>550</th><td>0.11&ndash;0.12</td><td>0.11387676068777415<br>0.11387676068777416</td><td>0 / 2</td><td>1 / 2</td><td>0.007973171836422467 &rarr; 0.007973164696008964<br>(&minus;7.14 &times; 10<sup>&minus;9</sup>)</td><td>2,189.9778600957816 &rarr; 2,190.0736507161205<br>(+0.096)</td></tr>
+      <tr><th>550</th><td>0.12&ndash;0.13</td><td>0.12253776651721095<br>0.12253776651721096</td><td>1 / 2</td><td>0 / 1</td><td>0.008646133616273382 &rarr; 0.00864588582314691<br>(&minus;2.48 &times; 10<sup>&minus;7</sup>)</td><td>4.451324501366652 &rarr; 129.50028674825086<br>(+125.05)</td></tr>
+    </tbody>
+  </table>
+
+  <p>Booked current is the unnormalised first component of the assembled moment, the same quantity the sweep reports, on the same carrier and the same 41-state jet construction.</p>
+
+  <figure><img src="/nova/figures/converged-forward-solve/tie-island-comparison/tie-island-bisection.svg" alt="Wall contact level, saddle level, boundary flux and unnormalised booked current against the exterior jet offset through the 282-cell 0.17-0.18 tie and the 550-cell 0.12-0.13 tie, with every class switch dotted"><figcaption>Both tie islands on the offset scale of the state that produces them, 61 probe states per panel with the sweep's own root prior. Wall contact level (grey), saddle level (near-black dashed) and boundary flux (blue) above; booked current (amber) below; dotted lines mark every class switch in the window. The grey is hidden under the blue wherever the wall candidate wins, because the boundary flux is the maximum of the two levels and the wall contact level is what a tied wall candidate is. The booked current steps at the same state that flips the class, which is the point: the step is the saddle selection moving, not the label.</figcaption></figure>
+
+  <h2 id="tie-island-comparison-classification">Classification</h2>
+
+  <p><strong>An implementation switch at <code>kernel.py:302</code></strong>, not a crossing and not a fold.</p>
+
+  <ul>
+    <li>On the two rising edges (282 at 0.16&ndash;0.17, 550 at 0.11&ndash;0.12) the second saddle&rsquo;s level arrives <em>bit-identical</em> to the wall candidate, 0.007967410111760857 at 282 and 0.007973164696008964 at 550, so the non-strict <code>&gt;=</code> takes the diverted branch on an exact tie. The tie is not a coincidence: the wall candidate is <code>min(tangency, bottleneck)</code> and the bottleneck is the saddle level, so the two operands meet by construction at the wall contact the census has just returned.</li>
+    <li>On the two falling edges the second root leaves the census entirely (two saddles &rarr; one, root count three &rarr; two) between adjacent doubles, and the class falls with it. This is not a fold: the departing root&rsquo;s <code>|det H|</code> is 2.74 &times; 10<sup>&minus;5</sup> at 282 and 2.22 &times; 10<sup>&minus;5</sup> at 550 on the last state that carries it, orders of magnitude off roundoff, so the root does not degenerate to zero curvature — the root finder stops returning it.</li>
+    <li>The saddle position at the tie, (1.4317, 1.1054) at 282 and (1.4321, 1.1042) at 550, sits on the wall, and its level equals the wall candidate exactly. Across the 49-state fine scan at 282 cells, all 25 rows carrying two live saddles show that second saddle tied to the wall candidate, so the island is systematic rather than a single unlucky sample.</li>
+  </ul>
+
+  <p><strong>The step that does move a number is the saddle selection.</strong> At 282, the 0.17&ndash;0.18 bracket steps the booked current by +114.75 while the boundary flux moves by 6 &times; 10<sup>&minus;7</sup>; the label is class 1 on the left and class 0 on the right, but so is <code>saddle_index</code>, which moves off the wall-contact root and onto the primary X-point. That change re-derives <code>form</code> and with it <code>normal</code>, <code>booking</code>, the booked-cell set and the path weight, all of which the booked current is built from. The sweep&rsquo;s booked current does not read <code>diverted</code> at all. Since the comparison&rsquo;s own consumers are label-only, the kernel is left as it stands and the number-changing defect is recorded as a follow-on against <code>kernel.py:239</code>.</p>
+
+  <h2 id="tie-island-comparison-test">The wall level is now pinned at the read, and the control is not its own input</h2>
+
+  <p>The bottleneck-level test previously asserted the wall level only through its helper, which a swap of the read&rsquo;s composition could not have failed. It now composes the wall candidate per contact the way the read does — effective level, then the most axis-ward contact wins — and asserts both that the gated contact takes the bottleneck and that the directly reachable control keeps its tangency. Both forbidden compositions move the selected candidate, so the assertion rejects each: raw tangency hands the wall candidate to the gated cell, and a maximum hands it to the control&rsquo;s bottleneck. The control&rsquo;s expectation is a declared module constant rather than the value handed in, and it is asserted to differ from the bottleneck it was given.</p>
+
+  <table>
+    <thead><tr><th>Mutant</th><th>private-flux contact</th><th>minimum exactness</th><th>continuity at the tie</th><th>read wall candidate</th></tr></thead>
+    <tbody>
+      <tr><td>raw tangency</td><td>fail</td><td>fail</td><td>fail</td><td>fail</td></tr>
+      <tr><td>maximum</td><td>fail</td><td>fail</td><td>fail</td><td>fail</td></tr>
+      <tr><td>bottleneck only</td><td>fail</td><td>fail</td><td>fail</td><td>fail</td></tr>
+      <tr><td>restored</td><td>pass</td><td>pass</td><td>pass</td><td>pass</td></tr>
+    </tbody>
+  </table>
+
+  <p>Gate log: <code>negative-control.log</code> in the run directory, ending <code>mutants rejected=True restored_green=True</code> and <code>EXIT=0</code>.</p>
+
+  <h2 id="tie-island-comparison-rows">The certified map rows are unchanged</h2>
+
+  <p>All four certified rows at head match the stored base rows in every non-timing field: <code>centre_residual</code>, <code>centre_class</code>, <code>centre_support</code>, the window row and owner counts, the <code>values</code> and <code>jets</code> digests and <code>map_executable_bytes</code>. The only differing fields are wall clocks — <code>load_seconds</code>, <code>matrix_ready_seconds</code>, <code>map_compile_seconds</code>, <code>map_wall_ms</code> and the maintenance interval — as the clause allows, since the label is the only field the tie reaches and the kernel is unchanged.</p>
+
+  <p>Receipts and per-row logs: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T180921688267-tie-island-comparison</code>. Every wall in this record is a titan P100 number, not an H200 number.</p>
+
+</main></body>
+</html>

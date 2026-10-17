@@ -26,6 +26,10 @@ from scripts.prototypes.fast_map_production.kernel import (
 
 assert jax.config.jax_enable_x64 is True
 
+# The control branch's tangency, declared here and compared against the
+# function's output rather than handed in as the expectation itself.
+CONTROL_TANGENCY = -0.3
+
 
 class Carrier(NamedTuple):
     """Minimal cell mesh: vertices, edge neighbours and cell geometry."""
@@ -132,11 +136,13 @@ def test_private_flux_contact_takes_the_saddle_level():
     assert float(effective[0]) < private_tangency
 
     # Control: cell 1 is directly reachable, its bottleneck sits above its
-    # tangency, so the tangency is kept.
-    control_tangency = -0.3
-    control = _wall_effective_level(jnp.asarray([control_tangency]), ceiling[1:2])
+    # tangency, so the tangency is kept. The expectation is the declared
+    # constant, not the value handed in, and it is asserted to differ from the
+    # bottleneck so a maximum composition is rejected here too.
+    control = _wall_effective_level(jnp.asarray([CONTROL_TANGENCY]), ceiling[1:2])
     assert float(ceiling[1]) == 0.5
-    assert float(control[0]) == control_tangency
+    assert float(control[0]) == CONTROL_TANGENCY
+    assert float(control[0]) != float(ceiling[1])
 
 
 def test_effective_level_is_the_minimum_of_the_two_operands():
@@ -193,3 +199,52 @@ def test_effective_level_is_continuous_through_the_tie():
     )
     assert not np.allclose(broken, expected, atol=0.0, rtol=1e-15)
     assert _max_adjacent_step(broken) > operand_step
+
+
+def _selected_wall_candidate(tangency, bottleneck):
+    """The read's wall selection over contacts, as the read composes it.
+
+    Per-contact effective level, then the most axis-ward contact wins. This is
+    the composition the read performs between its bottleneck field and its wall
+    candidate, so an assertion here is an assertion about the read's own
+    ``wall_candidate``, not about the level function in isolation.
+    """
+    level = _wall_effective_level(jnp.asarray(tangency), jnp.asarray(bottleneck))
+    return float(level[jnp.argmax(level)]), jnp.asarray(level)
+
+
+def test_read_wall_candidate_takes_the_bottleneck_limited_level():
+    geometry = _carrier(
+        [
+            _square(1.0, 0.0),  # 0 axis
+            _square(0.0, 0.0),  # 1 control branch
+            _square(2.0, 0.0),  # 2 saddle gate
+            _square(3.0, 0.0),  # 3 private-flux contact
+            _square(0.0, 1.0),  # 4 spacer
+        ]
+    )
+    levels = np.array([1.0, 0.5, -0.5, -0.05, -2.0])
+    ceiling = _bottleneck(geometry, levels)
+    tangency = jnp.asarray([levels[3], CONTROL_TANGENCY])
+    bottleneck = jnp.asarray([ceiling[3], ceiling[1]])
+    assert float(bottleneck[0]) == -0.5
+    assert float(bottleneck[1]) == 0.5
+
+    selected, effective = _selected_wall_candidate(tangency, bottleneck)
+    # The gated contact carries the saddle level, not its own more axis-ward
+    # tangency; the directly reachable control keeps its tangency.
+    assert float(effective[0]) == float(bottleneck[0])
+    assert float(effective[1]) == CONTROL_TANGENCY
+    assert selected == CONTROL_TANGENCY
+
+    # Falsification. Both compositions the read must not use move the selected
+    # candidate, so this assertion rejects each: raw tangency hands the contact
+    # to the gated cell, and a maximum hands it to the control's bottleneck.
+    operand = np.asarray(tangency)
+    raw_selected = float(operand[jnp.argmax(operand)])
+    raised = np.maximum(operand, np.asarray(bottleneck))
+    raised_selected = float(raised[jnp.argmax(raised)])
+    assert raw_selected == float(levels[3])
+    assert raw_selected != selected
+    assert raised_selected == float(bottleneck[1])
+    assert raised_selected != selected

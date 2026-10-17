@@ -153,7 +153,11 @@ def _wall_path_ceiling(
         # than exactly, and a wall contact that ties the saddle level to the last
         # bit then wins the boundary on the tie. Where the attenuation saturates
         # this is exactly min(ceiling, saddle_score).
-        ceiling = jnp.minimum(ceiling, saddle_score + (1.0 - leak) * over)
+        ceiling = jnp.where(
+            over > 0,
+            jnp.minimum(ceiling, saddle_score + (1.0 - leak) * over),
+            ceiling,
+        )
     # The cell quadratic is a fitted surrogate for the field, so an edge peak
     # inside the cell that owns the X-point can land on the wrong side of the
     # true saddle level. The read already locates that level, so the passage

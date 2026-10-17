@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="research">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="saddle-merge-path-admission">
+  <meta name="plan-title" content="Merge-path saddle admission on the axis merge path">
+  <meta name="plan-summary" content="The fixed-shape topology read selected its saddle by argmax over levels, so a wall-contact root tied to the boundary level by construction won and then left the census; replacing the argmax with a merge-path admission admits the bounding saddle of the axis merge path and removes the boundary-class switch at 282 and 550 cells"></meta>
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-verifies" content="converged-forward-solve#s2">
+  <meta name="plan-recorded-at" content="2026-10-17">
+  <meta name="plan-verdict" content="partial">
+  <title>Merge-path saddle admission on the axis merge path | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+  <h1 id="saddle-merge-path-admission-research">Merge-path saddle admission on the axis merge path</h1>
+
+  <p><a href="/nova/evidence/fragments/converged-forward-solve/saddle-merge-path-admission.html">Measured evidence fragment</a></p>
+
+  <h2 id="saddle-merge-path-admission-defect">The defect</h2>
+
+  <p>In <code>scripts/prototypes/fast_map_production/kernel.py</code> the read classified every valid root as a saddle by Hessian signature and took <code>saddle_index = 1 + jnp.argmax(saddle_score_rows)</code> over <code>sigma * value</code>. The roots come from <code>nova.equilibrium.fixed_points.solve</code> (or, in the prototype family, <code>read_robustness.census</code>), called at <code>program.py:172</code>. On the 41-state sweeps a second root enters the census at the wall contact. That root ties the wall level by construction: the wall candidate is <code>_wall_effective_level(tangency, bottleneck) = minimum(tangency, bottleneck)</code>, the bottleneck of the private-flux contact is the just-admitted saddle's own level through <code>_wall_path_ceiling</code>, and the wall contact the census returns carries that level, so <code>min</code> and the saddle agree — at the tie, to the last bit. The root wins the argmax, then leaves the census between adjacent doubles.</p>
+
+  <p>Bisected at 282 and 550 cells, the booked current steps by +114.75 and +125.05 across the island's two edges against a boundary-flux move of at most 6 &times; 10<sup>&minus;7</sup>; the prior tie-island record bisected both islands to adjacent binary64 and attributed the step to this selection rather than to the class comparison, which is label-only.</p>
+
+  <h2 id="saddle-merge-path-admission-repair">The repair</h2>
+
+  <p>One owned function, <code>_merge_path_saddle</code>, replaces the argmax and the decision is taken before the wall-versus-saddle contest. The merge path runs from the magnetic axis out to the boundary, and the saddle that bounds it is the one the axis reaches at a level at least its own: the maximin passage from the axis to the saddle's own cell, taken from the ungated <code>_wall_path_ceiling</code>, meets or exceeds the saddle's level. A wall-contact root the axis reaches only below its own level is off that path even though its paired extremum ties the boundary level. Candidates are ranked by the passage margin <code>axis_ceiling - level</code>, so a tie between wall contact and saddle can move only the classification label and never the admitted saddle. The function is fixed-shape and traced, resolving its index by <code>argmax</code> over a masked margin with no host-side branch. <code>psi_rounding_enclosure</code> states the binary64 enclosure of the fitted psi — the machine epsilon times the fit's absolute row sum — so a saddle/extremum pair closer than it can be cancelled as one number before admission.</p>
+
+  <h2 id="saddle-merge-path-admission-census">The census is not at fault at the observed tie</h2>
+
+  <p>The departing wall-contact root's <code>|det H|</code> is 1.6 &times; 10<sup>&minus;4</sup> at 282 (offset 0.16133) shrinking to 5.4 &times; 10<sup>&minus;5</sup> before it leaves, four to two orders of magnitude off roundoff, so its exit is <strong>not a fold</strong> and <code>nova/equilibrium/fixed_points.py</code> is left unmodified. The root finder stops returning a genuine saddle with large curvature; the merge-path admission removes the step without touching the census. A census repair certifying Newton convergence against a computed rounding bound would be owed only if the departure coincided with the rounding floor, which it does not.</p>
+
+  <h2 id="saddle-merge-path-admission-result">Result</h2>
+
+  <p>At 282 cells the boundary class no longer switches anywhere in the window (base: two switches; head: zero) and the admitted saddle level is the primary X-point's continuous trace (&minus;0.01040 &rarr; &minus;0.01133) where base jumps onto the wall contact (+0.00799 &hellip; +0.00862) and back. At 550 cells the same: base carries six class switches, head carries none, and the admitted saddle is held on the primary X-point. The boundary flux is unchanged between adjacent samples at both arms. The gate — <code>tests/test_fixed_points.py</code>, <code>tests/test_fixed_point.py</code> and <code>test_bottleneck_level.py</code>, CPU, fresh process — reports 66 passed. The negative control (restoring the argmax inside <code>_merge_path_saddle</code>) turns <code>test_path_admission_rejects_the_wall_contact_root</code> red at <code>EXIT=1</code>.</p>
+
+  <h2 id="saddle-merge-path-admission-unmeasured">Unmeasured</h2>
+
+  <p>Not measured this run: the 550 transition-bracket bisection to adjacent doubles; diverted and limited cold solves to 1e-12 at 282 and 550; map-fidelity base-beside-head; and tests that drive <code>read(...)</code> itself rather than the admission directly. No GPU row was run.</p>
+
+</main></body>
+</html>

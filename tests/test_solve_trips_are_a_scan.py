@@ -103,6 +103,20 @@ def _barrier_count(function, *arguments):
     )
 
 
+def _marker_barrier_count(marked_function, unmarked_count, *arguments):
+    """Barriers ``marked_function`` adds over that same program left unmarked.
+
+    A whole solve carries the barriers of ``fixed_point._fenced``, which keeps
+    each stream operator application out of its consumers' fusions, alongside
+    the guard's own marker. Differencing the two lowerings attributes the
+    count to the marker alone, so the guard measures trip-body copies rather
+    than the fence. ``jax.jit`` caches a lowering on the callable it traces, so
+    each arm is lowered through its own callable and the marked arm is never
+    served the unmarked program.
+    """
+    return _barrier_count(marked_function, *arguments) - unmarked_count
+
+
 def _optimized_read_body_count(function, *arguments):
     """Count the distinctive read operation after the compiler has inlined calls."""
     compiled = jax.jit(function).lower(*arguments).compile()
@@ -230,10 +244,13 @@ def test_active_trip_body_is_lowered_once(monkeypatch, trips):
             state=jax.lax.optimization_barrier(result.state)
         ), globalization
 
-    monkeypatch.setattr(fixed_point, "_newton_krylov_inner", marked_inner)
     initial = jnp.zeros(1, dtype=jnp.float64)
     assert _barrier_count(jax.lax.optimization_barrier, initial) == 1
-    count = _barrier_count(partial(_active_solve, trips=trips), initial)
+    unmarked = _barrier_count(partial(_active_solve, trips=trips), initial)
+    monkeypatch.setattr(fixed_point, "_newton_krylov_inner", marked_inner)
+    count = _marker_barrier_count(
+        partial(_active_solve, trips=trips), unmarked, initial
+    )
     assert count == 1, f"the lowered solve contains {count} copies of its trip body"
 
 
@@ -277,6 +294,17 @@ def _reduced_solver(*, trips, steps):
     )
 
 
+def _newton_solve(initial, *, steps):
+    return fixed_point.newton_krylov(
+        lambda state: 0.5 * state + 1.0,
+        initial,
+        newton_steps=steps,
+        warmup=0,
+        gmres_iterations=1,
+        precision=Precision.DOUBLE,
+    )
+
+
 @pytest.mark.parametrize("steps", [2, 5])
 def test_newton_step_body_is_lowered_once(monkeypatch, steps):
     original = fixed_point._qualified_krylov_step
@@ -285,21 +313,14 @@ def test_newton_step_body_is_lowered_once(monkeypatch, steps):
         result = original(*args, **kwargs)
         return result._replace(step=jax.lax.optimization_barrier(result.step))
 
-    monkeypatch.setattr(fixed_point, "_qualified_krylov_step", marked_step)
-
-    def solve(initial):
-        return fixed_point.newton_krylov(
-            lambda state: 0.5 * state + 1.0,
-            initial,
-            newton_steps=steps,
-            warmup=0,
-            gmres_iterations=1,
-            precision=Precision.DOUBLE,
-        )
-
     initial = jnp.zeros(1, dtype=jnp.float64)
     assert _barrier_count(jax.lax.optimization_barrier, initial) == 1
-    assert _barrier_count(solve, initial) == 1
+    unmarked = _barrier_count(partial(_newton_solve, steps=steps), initial)
+    monkeypatch.setattr(fixed_point, "_qualified_krylov_step", marked_step)
+    count = _marker_barrier_count(
+        partial(_newton_solve, steps=steps), unmarked, initial
+    )
+    assert count == 1, f"the lowered solve contains {count} copies of its step body"
 
 
 @pytest.mark.parametrize("trips,steps", [(3, 5), (6, 9)])

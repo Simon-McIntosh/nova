@@ -1,0 +1,66 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-17T07:56:56.900Z",
+  "dispatched_at": "2026-10-17T07:37:18Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/saddle_expansion/speed_gate.py",
+      "line": "44",
+      "severity": "blocking",
+      "text": "blocking: DEGREE_LADDER includes 128, which equals REFERENCE_OUTER_DEGREE, so the degree-128 rung is the reference compared against itself; min_over_ladder at speed_gate.py:380 is therefore always 0.0 and the passed flag at :383 is always True, so the SystemExit(3) at :390 never fires and bar-agreement.json records passed true with RC_AGREEMENT 0 while degrees 8, 16, 32 and 64 measure 0.211, 0.048, 0.004 and 0.0066, four orders above the 1e-12 tolerance the done_when requires the runner to fail on."
+    },
+    {
+      "file": "docs/research/saddle-anchored-expansion.html",
+      "line": "40",
+      "severity": "blocking",
+      "text": "blocking: the record still states the largest dense HLO constant \"is one element at 282, 550 and 2,098 cells alike\" and marks clause 1 achieved at :137, but the run's own receipts bar-282.json, bar-550.json and bar-2098.json report largest_constant_elements 846, 1650 and 6294 (three integer arrays of the cell count, carrier-scaled), and the node's own fragment withdraws the claim at docs/evidence/fragments/converged-forward-solve/saddle-anchored-expansion.html:131, so the primary record asserts a result its own receipts contradict."
+    },
+    {
+      "file": "docs/research/saddle-anchored-expansion.html",
+      "line": "142",
+      "severity": "follow-on",
+      "text": "follow-on: the done-when status row for clause 6 reports reuse as \"Both imported from conic_integral.py and wrapped; the guard exits 3 on the measured disagreement\", but at head expansion.py:19 imports _quadratic alone (the wrapper was deleted) and the agreement runner exits 0, so the row describes the pre-correction state rather than what landed."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit against 45bc217e2; seven commits touching scripts/prototypes/saddle_expansion/expansion.py, speed_gate.py, docs/research/saddle-anchored-expansion.html, two evidence fragments and one figure, all inside the declared scope.",
+    "done_when": "the done_when names one H200 job on betelgeuse at the realised 282, 550 and 2,098 cells with compile 60 s or less and size under 50 MB; job 1287882 is recorded in slurm-bar-gate-1287882.log with receipts bar-282.json, bar-550.json and bar-2098.json, but the runner's pass criterion is an absolute 0.90 ms bar (authorized by the 2026-10-17 ruling) rather than the written 1.25x ratio, and item 6's agreement guard cannot fail.",
+    "goal": "the node's goal is \"Remove the structural costs of the saddle-anchored X-point map and re-measure its speed gate at 2,098 cells\"; the landed tree removes the constant capture (executable 152.9 MB -> 1.68 MB) and the per-state whole-machine scan (scripts/prototypes/saddle_expansion/expansion.py:257 disk_candidates), but docs/research/saddle-anchored-expansion.html:138 records clause 2 (the closed-form slice-discriminant outer integral) as not implemented, and the 2,098-cell gate was measured only at width 32 (bar-2098.json), not the width 128 the decision names.",
+    "manifest": "read; status complete, it records the gate as the validating run and the bar miss at all three rungs with its log paths, but it carries no baseline_suite or after_suite arm.",
+    "write_paths": "read the manifest's declared paths; all six files in git diff --name-only 45bc217e2843c3119e25701b16fa52b02d7039b3 b5b6fdfa7ec7fe9ac41f2294ccc60dfa210e2df4 are inside them."
+  },
+  "justifications": {
+    "durability": "the only guard, the agreement ladder, includes the 128-node reference in its own DEGREE_LADDER, so speed_gate.py:383 never stores a failing verdict and the runner cannot exit 3.",
+    "evidence": "bar-282.json, bar-550.json and bar-2098.json record per-state wall, fitted width, compile seconds and executable size behind slurm-bar-gate-1287882.log, but the clause-4 agreement guard at speed_gate.py:383 is vacuous and no assertion reddens on a carrier-scaled constant.",
+    "fit": "the added disk_candidates and owned_disk_cut names are descriptive with no plan labels, following the surrounding prototype idiom at expansion.py:257.",
+    "goal_fidelity": "expansion.py:257 disk_candidates replaces the per-state whole-machine scan and the executable falls 90x, but docs/research/saddle-anchored-expansion.html:138 records the required closed-form outer rule as not implemented and bar-2098.json measures only width 32.",
+    "reuse": "expansion.py:19 imports _quadratic from the named owner scripts/prototypes/xpoint_cell_owner/conic_integral.py, the local duplicate and the dead reference_cell_integral wrapper were deleted, and no owner was found for disk_candidates' static candidate list.",
+    "scope_discipline": "every path in the diff is inside the declared write paths listed in the manifest, with no edit to a concurrent node's paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is \"Remove the structural costs of the saddle-anchored X-point map and re-measure its speed gate at 2,098 cells\"; the landed tree removes the constant capture (executable 152.9 MB -> 1.68 MB) and the per-state whole-machine scan (scripts/prototypes/saddle_expansion/expansion.py:257 disk_candidates), but docs/research/saddle-anchored-expansion.html:138 records clause 2 (the closed-form slice-discriminant outer integral) as not implemented, and the 2,098-cell gate was measured only at width 32 (bar-2098.json), not the width 128 the decision names.\nVERDICT done_when: the done_when names one H200 job on betelgeuse at the realised 282, 550 and 2,098 cells with compile 60 s or less and size under 50 MB; job 1287882 is recorded in slurm-bar-gate-1287882.log with receipts bar-282.json, bar-550.json and bar-2098.json, but the runner's pass criterion is an absolute 0.90 ms bar (authorized by the 2026-10-17 ruling) rather than the written 1.25x ratio, and item 6's agreement guard cannot fail.\nVERDICT write_paths: read the manifest's declared paths; all six files in git diff --name-only 45bc217e2843c3119e25701b16fa52b02d7039b3 b5b6fdfa7ec7fe9ac41f2294ccc60dfa210e2df4 are inside them.\nVERDICT manifest: read; status complete, it records the gate as the validating run and the bar miss at all three rungs with its log paths, but it carries no baseline_suite or after_suite arm.\nVERDICT diff: read commit by commit against 45bc217e2; seven commits touching scripts/prototypes/saddle_expansion/expansion.py, speed_gate.py, docs/research/saddle-anchored-expansion.html, two evidence fragments and one figure, all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 11\nJUSTIFICATION goal_fidelity: expansion.py:257 disk_candidates replaces the per-state whole-machine scan and the executable falls 90x, but docs/research/saddle-anchored-expansion.html:138 records the required closed-form outer rule as not implemented and bar-2098.json measures only width 32.\nSCORE evidence: 10\nJUSTIFICATION evidence: bar-282.json, bar-550.json and bar-2098.json record per-state wall, fitted width, compile seconds and executable size behind slurm-bar-gate-1287882.log, but the clause-4 agreement guard at speed_gate.py:383 is vacuous and no assertion reddens on a carrier-scaled constant.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in the diff is inside the declared write paths listed in the manifest, with no edit to a concurrent node's paths.\nSCORE durability: 3\nJUSTIFICATION durability: the only guard, the agreement ladder, includes the 128-node reference in its own DEGREE_LADDER, so speed_gate.py:383 never stores a failing verdict and the runner cannot exit 3.\nSCORE fit: 16\nJUSTIFICATION fit: the added disk_candidates and owned_disk_cut names are descriptive with no plan labels, following the surrounding prototype idiom at expansion.py:257.\nSCORE reuse: 17\nJUSTIFICATION reuse: expansion.py:19 imports _quadratic from the named owner scripts/prototypes/xpoint_cell_owner/conic_integral.py, the local duplicate and the dead reference_cell_integral wrapper were deleted, and no owner was found for disk_candidates' static candidate list.\nFINDING scripts/prototypes/saddle_expansion/speed_gate.py:44 blocking: DEGREE_LADDER includes 128, which equals REFERENCE_OUTER_DEGREE, so the degree-128 rung is the reference compared against itself; min_over_ladder at speed_gate.py:380 is therefore always 0.0 and the passed flag at :383 is always True, so the SystemExit(3) at :390 never fires and bar-agreement.json records passed true with RC_AGREEMENT 0 while degrees 8, 16, 32 and 64 measure 0.211, 0.048, 0.004 and 0.0066, four orders above the 1e-12 tolerance the done_when requires the runner to fail on.\nFINDING docs/research/saddle-anchored-expansion.html:40 blocking: the record still states the largest dense HLO constant \"is one element at 282, 550 and 2,098 cells alike\" and marks clause 1 achieved at :137, but the run's own receipts bar-282.json, bar-550.json and bar-2098.json report largest_constant_elements 846, 1650 and 6294 (three integer arrays of the cell count, carrier-scaled), and the node's own fragment withdraws the claim at docs/evidence/fragments/converged-forward-solve/saddle-anchored-expansion.html:131, so the primary record asserts a result its own receipts contradict.\nFINDING docs/research/saddle-anchored-expansion.html:142 follow-on: the done-when status row for clause 6 reports reuse as \"Both imported from conic_integral.py and wrapped; the guard exits 3 on the measured disagreement\", but at head expansion.py:19 imports _quadratic alone (the wrapper was deleted) and the agreement runner exits 0, so the row describes the pre-correction state rather than what landed.",
+  "review_run_id": "r-20261017T073659073849-review-of-saddle-expansion-speed-b5b6fdfa7ec7",
+  "reviewed_base_sha": "45bc217e2843c3119e25701b16fa52b02d7039b3",
+  "reviewed_head_sha": "b5b6fdfa7ec7fe9ac41f2294ccc60dfa210e2df4",
+  "reviewed_run_id": "r-20261016T192804852944-saddle-expansion-speed",
+  "scores": {
+    "durability": 3,
+    "evidence": 10,
+    "fit": 16,
+    "goal_fidelity": 11,
+    "reuse": 17,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T07:58:28.132121+00:00",
+  "total": 75
+}

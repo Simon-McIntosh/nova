@@ -1494,8 +1494,10 @@ def cached_fixture_exterior(
             )
             exterior = np.asarray(data["exterior"].values, dtype=np.float64)
             hit = True
+            load_seconds = perf_counter() - started
             build_seconds = 0.0
         except FileNotFoundError, KeyError, OSError, ValueError:
+            load_seconds = perf_counter() - started
             moments = exact_current_moments(
                 case, operator, state, analytic=analytic, support_arm=support_arm
             )
@@ -1529,6 +1531,7 @@ def cached_fixture_exterior(
             "semantic_key": session.key,
             "hit": hit,
             "lock_wait_seconds": session.lock_wait,
+            "load_seconds": load_seconds,
             "build_seconds": build_seconds,
         },
     )

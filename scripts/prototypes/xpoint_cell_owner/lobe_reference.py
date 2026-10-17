@@ -54,7 +54,7 @@ def _triangle_monomial(vertices, power_x, power_y):
     ax, ay = float(vertices[0][0]), float(vertices[0][1])
     bx, by = float(vertices[1][0]), float(vertices[1][1])
     cx, cy = float(vertices[2][0]), float(vertices[2][1])
-    twice_area = (bx - ax) * (cy - ay) / 2.0 - (by - ay) * (cx - ax) / 2.0
+    twice_area = (bx - ax) * (cy - ay) - (by - ay) * (cx - ax)
     x_poly = _power_polynomial(bx - ax, cx - ax, power_x, ax)
     y_poly = _power_polynomial(by - ay, cy - ay, power_y, ay)
     total = 0.0
@@ -102,7 +102,12 @@ def triangle_integral(vertices, coefficients, origin, pitch):
         + c[4] * moment(1, 2)
         + c[5] * moment(0, 3)
     )
-    return area * pitch * pitch, charge, first_x * pitch, first_y * pitch
+    return (
+        area * pitch * pitch,
+        charge * pitch * pitch,
+        first_x * pitch * pitch * pitch,
+        first_y * pitch * pitch * pitch,
+    )
 
 
 def _fan_integral(triangles, coefficients, origin, pitch):
@@ -136,13 +141,23 @@ def lobe_reference(geometry, reading, index, density, segments=4):
     return _fan_integral(triangles, density[index], origin, pitch), rings, sizes
 
 
-def polygon_reference(geometry, index, density):
-    """Exact integral over the cell's own polygon, from a fan about its centre."""
+def polygon_reference(geometry, index, density, segments=1):
+    """Exact integral over the cell's own polygon, from a fan about its centre.
+
+    Each edge is subdivided into ``segments`` chords, so a dense reference uses
+    the same polygon with a finer fan and the closed form still integrates it
+    exactly.
+    """
     origin = np.asarray(geometry.centre[index], dtype=float)
     pitch = float(geometry.pitch[index])
     vertices = np.asarray(geometry.vertices[index], dtype=float)
     count = int(np.asarray(geometry.vertex_count[index]))
-    triangles = [
-        (origin, vertices[slot], vertices[(slot + 1) % count]) for slot in range(count)
-    ]
+    triangles = []
+    for slot in range(count):
+        start = vertices[slot]
+        end = vertices[(slot + 1) % count]
+        for fraction in range(segments):
+            left = start + (end - start) * (fraction / segments)
+            right = start + (end - start) * ((fraction + 1) / segments)
+            triangles.append((origin, left, right))
     return _fan_integral(triangles, density[index], origin, pitch)

@@ -1,12 +1,18 @@
 """The 2D coilset path imports under nova's base dependencies alone.
 
 A downstream project that installs only nova's base dependencies must import
-``nova.frame.coilset``, ``nova.imas.machine``, ``nova.circuit.conductor``,
-``nova.circuit.linkage`` and ``nova.circuit.linkage`` and build a two-coil
-coilset with its linkage matrix, without the 3D visualisation stack (``vedo``,
-``pyvista``, ``meshio``, ``trimesh``, ``vtk``) being importable.  The check runs
-in a subprocess whose import machinery refuses those names, so a stray eager
-import anywhere on the path surfaces as a failure rather than a warning.
+``nova.frame.coilset``, ``nova.imas.machine``, ``nova.circuit.conductor`` and
+``nova.circuit.linkage``, build a two-coil coilset with its linkage matrix, and
+evaluate the circuit loop of a two-coil series circuit, without the 3D
+visualisation stack (``vedo``, ``pyvista``, ``meshio``, ``trimesh``, ``vtk``)
+being importable.  The check runs in a subprocess whose import machinery refuses
+those names, so a stray eager import anywhere on the path surfaces as a failure
+rather than a warning.
+
+The series-circuit loop is found by ``Circuit.edge_loops``, which builds a
+``networkx`` graph, so an environment carrying only nova's declared
+dependencies needs ``networkx`` too -- it is declared in the base dependency
+set for that reason, and this test exercises the call that uses it.
 
 ``test_vtkgeo_features_match_trishell`` is the reverse guard: with the stack
 present, the frame-declared vtk column names must equal the ones ``TriShell``
@@ -77,10 +83,33 @@ _SUBPROCESS = textwrap.dedent(
     )
     lmat = np.asarray(circuit_linkage_matrix(conductors, list(range(len(radius)))))
 
+    # One series circuit threading both coils through a single supply: the loop
+    # search in Circuit.edge_loops walks a networkx graph over the three edges.
+    circuit = coilset.circuit
+    circuit.initialize(["PFS"], 3)
+    connection = np.zeros((3, 6), dtype=np.int64)
+    connection[0, 0] = 1
+    connection[1, 1] = 1  # PFS: node 0 -> node 1
+    connection[1, 2] = 1
+    connection[2, 3] = 1  # PF0: node 1 -> node 2
+    connection[2, 4] = 1
+    connection[0, 5] = 1  # PF1: node 2 -> node 0
+    circuit.insert("PFCS", connection)
+    loops = circuit.edge_loops("PFCS")
+
     loaded = sorted(name for name in BLOCKED if name in sys.modules)
     assert lmat.shape == (2, 2), lmat.shape
+    assert len(loops) == 1, loops
+    assert sorted(loops[0]["edge"]) == ["PF0", "PF1", "PFS"], loops[0]["edge"]
     assert not loaded, f"3D modules loaded on the base path: {{loaded}}"
-    print("base-install coilset OK", lmat.shape, "requested", sorted(set(requested)))
+    print(
+        "base-install coilset OK",
+        lmat.shape,
+        "loops",
+        len(loops),
+        "requested",
+        sorted(set(requested)),
+    )
     """.format(blocked=BLOCKED_MODULES)
 )
 

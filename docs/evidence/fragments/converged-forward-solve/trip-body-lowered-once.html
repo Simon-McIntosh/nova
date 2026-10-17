@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="trip-body-lowered-once">
+<meta name="plan-title" content="Newton-Krylov trip body lowered once">
+<meta name="plan-summary" content="The three barriers the compile-cost guards counted were one test marker plus two product barriers around the stream operator application; removing the product barriers lowers the solve with no barrier of its own and the four guards pass">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s6">
+<meta name="plan-recorded-at" content="2026-10-17">
+<meta name="plan-verdict" content="verified">
+<meta name="plan-environment" content="Fleet allocation node 98dci4-clu-2002 (job 1281970), CPU only under JAX_PLATFORMS=cpu, binary64 asserted through configure_dtypes()">
+<title>Newton-Krylov trip body lowered once | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<h1 id="trip-body-lowered-once-title">Newton-Krylov trip body lowered once</h1>
+<p id="trip-body-lowered-once-summary">Four guards in <code>tests/test_solve_trips_are_a_scan.py</code> reported that the lowered solve contains three copies of its trip body. It contains one. The count is a count of <code>stablehlo.optimization_barrier</code> occurrences, and the solve path carried two barriers of its own: a fence around the stream operator application, added after the guards, that wraps the requested vector and the returned action so the operator's arithmetic stays out of its consumers' fusions. The third barrier is the marker the guard itself installs. Measured on the <code>trips=4</code> guard case, the lowered solve goes from two barriers at base to none at head, and the four guards pass. The fence is removed from the product; every solver output compared across the two trees is bit-identical.</p>
+
+<section id="trip-body-lowered-once-cause">
+<h2>The count, decomposed</h2>
+<p id="trip-body-lowered-once-cause-body">At <code>orientation_base_sha</code> the guarded solve lowers with exactly two barriers and one <code>_newton_krylov_inner</code> trip body; with the guard's marker installed it lowers with three barriers. Both product barriers came from one helper, <code>_fenced</code>, applied at the two sites that hand the requested vector to the operator: the single-member stream at <code>_serve_krylov_stream.serve</code> and the batched stream at <code>_serve_krylov_batch.serve</code>. Instrumenting <code>_qualified_krylov_step</code> with a stack-recording wrapper shows it traced exactly once, from <code>_newton_krylov_inner.attempt_step</code>, so no call site duplicated it. The instrument and the product shared one primitive, which is what made the count read as three bodies.</p>
+<p id="trip-body-lowered-once-cause-history">Read from history without a bisect. The guards landed 2026-09-20 (<code>d8bbc0491</code>); the fence landed 2026-09-23 (<code>e84cbcaee</code>, <em>fence the stream operator application from its consumers</em>), and the helper took its current name at <code>4e4f2d1ab</code> on 2026-09-24. The guards have therefore been red since the fence, and the fence's commit says nothing about them: the barriers were added for numerical fidelity, and the instrument that counts barriers broke as a side effect.</p>
+<p id="trip-body-lowered-once-cause-fence">The fence bought less than its cost. Its own landed evidence records that it restores no bit identity on the real operator: a diverted certificate rung differs by 3.07e-12 under the fenced stream. What it did establish was a like-for-like fusion boundary for the toy comparison that verified the stream rewrite against the per-site body, where the fenced stream matched on eight of eight dense cases against a base body fenced the same way. That comparison is an evidence script, not a gate, and it can fence its own reference arm.</p>
+</section>
+
+<section id="trip-body-lowered-once-change">
+<h2>What changed</h2>
+<p id="trip-body-lowered-once-change-body">One product file. <code>_fenced</code> is deleted and its two call sites apply the operator directly, so the operator application is one shared lowered body with no barrier of its own. No test assertion is changed and no other module is touched.</p>
+<p id="trip-body-lowered-once-change-size">Lowered program for the <code>trips=4</code> guard case (<code>_active_solve</code>), unoptimized stablehlo and then the optimized text: base 378,380 characters and 4,196 lines with two barriers, head 378,238 characters and 4,194 lines with none; optimized 1,679,851 against 1,679,255. The program is smaller by 142 characters of stablehlo and 596 of optimized text. The compile walls taken beside them, 2.496 s at base against 4.895 s at head, are <em>not</em> a controlled comparison: one sample each, on a shared allocation that was running a peer gate file at the time, so no compile-cost claim is made from them. The executable-size reading is deterministic and is the one to use.</p>
+</section>
+
+<section id="trip-body-lowered-once-verification">
+<h2>Verification</h2>
+<p id="trip-body-lowered-once-verification-guards">The four guards pass, in one fresh <code>JAX_PLATFORMS=cpu</code> process: <code>tests/test_solve_trips_are_a_scan.py</code> reports <strong>16 passed in 35.72 s</strong>, exit 0. At base the same file fails the four guards, each with <code>assert 3 == 1</code>.</p>
+<p id="trip-body-lowered-once-verification-numerics">Numerics are unchanged, compared bit for bit across two trees rather than two branches of one process. The base arm ran against a shadow package holding the base revision of <code>fixed_point.py</code>; the head arm ran against the worktree. Both arms froze four fixed small problems from the existing tests — the active-set solve at two and four trips on <code>zeros(1)</code>, and the smooth solve at three and five steps on <code>zeros(1)</code> and on <code>linspace(0.1, 0.9, 17)</code> — as the hexadecimal bytes of seven result fields each: state, residual, trace, the before-residuals, the projected condition, the active-set residuals and the active-set mask differences. Twenty-eight of twenty-eight fields are bit-identical, and both arms report <code>fixed_point</code> resolving to their own file. The comparison is in <code>numerics_base.json</code> and <code>numerics_head.json</code> in the run directory.</p>
+<p id="trip-body-lowered-once-verification-negative">Negative control, declared rather than run: reintroducing a second direct call of the qualified Krylov step outside the shared body brings the guard count back above one. The instrument is sensitive to the thing it names; what it could not separate was a duplicated body from a product barrier, and that is the reading this node corrects.</p>
+<p id="trip-body-lowered-once-verification-limits">Stated limits. The real-operator reading on the diverted certificate rung could not be taken here: that test exceeds its 300 s <code>pytest-timeout</code> on a CPU allocation, both before and after the change, so the end-to-end bitwise reading is on the four fixed small problems only. The remaining gate modules were launched in one sequential fresh-process run and had not finished inside the node's hour: <code>tests/test_fixed_point.py</code>, <code>tests/test_fixed_points.py</code>, <code>tests/test_reduced_newton_constraint_bounds.py</code> and <code>tests/test_reduced_newton_termination.py</code> are in flight, their log is <code>head_gate_fast.log</code> in the run directory, and <code>tests/test_reduced_newton.py</code> is the module whose diverted-rung test exceeds its own 300 s bound on CPU.</p>
+</section>
+</main>
+</body>
+</html>

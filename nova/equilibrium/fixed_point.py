@@ -2380,17 +2380,6 @@ def _krylov_outputs(stream: _KrylovStream):
     )
 
 
-def _fenced(linear_action: Callable, vector: jax.Array) -> jax.Array:
-    """Apply the operator between optimisation barriers.
-
-    The barriers keep the operator's arithmetic out of its consumers'
-    fusions, so each application rounds as a standalone evaluation.
-    """
-    return jax.lax.optimization_barrier(
-        linear_action(jax.lax.optimization_barrier(vector))
-    )
-
-
 def _serve_krylov_stream(
     linear_action: Callable[[jax.Array], jax.Array], machine: _KrylovMachine
 ) -> _KrylovStream:
@@ -2401,7 +2390,7 @@ def _serve_krylov_stream(
 
     def serve(stream):
         vector = jax.lax.switch(stream.phase, machine.requests, stream)
-        action = _fenced(linear_action, vector)
+        action = linear_action(vector)
         return jax.lax.switch(stream.phase, machine.consumers, stream, action)
 
     return jax.lax.while_loop(pending, serve, machine.initial)
@@ -2599,7 +2588,7 @@ def _serve_krylov_batch(
     def serve(carry):
         stream, _ = carry
         vectors = jax.vmap(request)(stream, *inputs)
-        return fold(stream, _fenced(batched_action, vectors))
+        return fold(stream, batched_action(vectors))
 
     def cycle(carry):
         stream, owed = jax.lax.while_loop(serving, serve, carry)

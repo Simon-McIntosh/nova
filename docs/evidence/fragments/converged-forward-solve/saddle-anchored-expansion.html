@@ -10,7 +10,7 @@
 <meta name="plan-summary" content="H200 speed gate for the exact-jet saddle-anchored expansion, measured against the axis-facing map in one allocation">
 <meta name="plan-evidence-for" content="converged-forward-solve">
 <meta name="plan-verifies" content="converged-forward-solve#s5">
-<meta name="plan-commits" content="b737789f8, 67d0e3fe1, eb35b8349, e3353b26c">
+<meta name="plan-commits" content="b737789f8, 67d0e3fe1, eb35b8349, e3353b26c, 0a43f10b1, 1b29a3638, 810b2e1a0">
 <meta name="plan-recorded-at" content="2026-10-16">
 <meta name="plan-verdict" content="partial">
 <meta name="plan-environment" content="H200 NVL, binary64; jobs 1287634 and 1287671 on 98dci4-gpu-0003, reservation gpu_0003_grpA">
@@ -112,6 +112,23 @@
 <tr><td>Implementation</td><td><code>scripts/prototypes/saddle_expansion/expansion.py</code>, <code>scripts/prototypes/saddle_expansion/speed_gate.py</code></td></tr>
 </tbody>
 </table>
+</section>
+
+<section id="saddle-anchored-expansion-bar">
+<h2 id="saddle-anchored-expansion-bar-heading">The absolute bar: missed at every realised size</h2>
+<p id="saddle-anchored-expansion-bar-verdict">The 1.25&times; ratio above was retired for an absolute bar: at each of the realised 282, 550 and 2,098 cells, the saddle map's per-state wall at most <b>0.90 ms</b> at the largest width up to 128 that fits on one H200, with compile still under 60 s and the executable under 50 MB. Job <code>1287882</code> measured all three rungs as rows in one allocation, one width per process, and completed <code>2026-10-17T07:29:56Z</code> per <code>sacct</code>. <b>The bar is missed at all three.</b></p>
+<table>
+<thead><tr><th>Cells</th><th>Fitted width</th><th>Saddle [ms]</th><th>Over 0.90 ms</th><th>Axis control [ms]</th><th>Ratio</th><th>Members</th></tr></thead>
+<tbody>
+<tr><td>282</td><td>128</td><td>6.681955</td><td>7.42&times;</td><td>0.223786</td><td>29.8586</td><td>19</td></tr>
+<tr><td>550</td><td>64</td><td>9.276844</td><td>10.31&times;</td><td>0.417197</td><td>22.2361</td><td>19</td></tr>
+<tr><td>2,098</td><td>32</td><td>25.008424</td><td>27.79&times;</td><td>2.707774</td><td>9.2358</td><td>22</td></tr>
+</tbody>
+</table>
+<p id="saddle-anchored-expansion-bar-widths">The fitting width falls as the carrier refines because the device binds first. At 550 cells the saddle arm's width-128 lowering is refused for 81.93 GiB while the control at that width succeeds; at 2,098 cells the control itself is refused at width 128 (263.80 GiB) and at 64 (131.90 GiB). Compile is 0.86&ndash;1.30 s and the executable 1.68&ndash;7.72 MB at every rung, so the size and compile conditions pass and the failure is wall alone. Under the lead's ruling the line stops and the axis-facing half-plane is adopted.</p>
+<p id="saddle-anchored-expansion-bar-disk">The disk was narrowed to one median pitch, provisioning <b>19</b> members where the rows above provisioned 194. The 282-cell wall moved from 6.759026 to <b>6.681955 ms</b>: ninety per cent of the members removed, 1.1% of the wall. The member factor was therefore not the cost, and the cost is carrier-wide &mdash; the wall rises 6.68 &rarr; 9.28 &rarr; 25.01 ms with the cell count while the member count stays near twenty.</p>
+<p id="saddle-anchored-expansion-bar-cause">The 0.659 agreement failure is located, not inferred. A degree ladder against the 128-node reference over the same states gives <b>0.2110304721853531</b> at degree 8, <b>0.04833218463634381</b> at 16, <b>0.004051944956813713</b> at 32, <b>0.006582352677924064</b> at 64 and 0 at 128, that rung being the reference. <code>candidate_set_effect</code> is <b>0.0</b>, so the candidate list contributes nothing and the disagreement is the outer rule alone. The rule does not converge: the error <i>rises</i> from degree 32 to 64 and plateaus near 1e-3, four orders above the guard, which is the disk cap's H&ouml;lder endpoint and not a tolerance that a larger degree would buy past. <b>Clause 2 is still not implemented</b>, and with the member factor shown not to be the cost, replacing the outer rule attacks the 351.68 &micro;s per member and not the bulk of the gap.</p>
+<p id="saddle-anchored-expansion-bar-correction">Correction to the rebuild section above: its claim that the largest dense HLO constant is <b>one element</b> is <b>withdrawn</b>. No receipt carried it, the pre-rebuild <code>speed-*.json</code> files have no <code>constant_elements</code> field, and the measurement gives three integer arrays of the cell count &mdash; <b>846</b>, <b>1650</b> and <b>6294</b> elements at 282, 550 and 2,098 cells, byte-trivial but genuinely carrier-scaled. The executable-size result stands. Job 1287676 was also described as complete while still running; it completed 2026-10-16T23:04:04Z per <code>sacct</code>.</p>
 </section>
 </main>
 </body>

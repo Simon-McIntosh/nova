@@ -1,0 +1,71 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 5,
+  "call_sites": [
+    "nova/equilibrium/fixed_point.py:_serve_krylov_stream",
+    "nova/equilibrium/fixed_point.py:_serve_krylov_batch",
+    "nova/equilibrium/forward.py:2092",
+    "nova/equilibrium/forward.py:2257",
+    "nova/imas/mast_parity_chain.py:338"
+  ],
+  "completed_at": "2026-10-17T08:44:25.797Z",
+  "dispatched_at": "2026-10-17T08:37:30Z",
+  "findings": [
+    {
+      "file": "numerics_base.json",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the two numerics arms land only as byte-identical JSON of result hex with no revision or module-path stamp and no retained log, so a base arm that read the head tree and compared it against itself is indistinguishable from a genuine bit-identical result - the exact hazard the reviewed manifest records under retry_failures."
+    },
+    {
+      "file": "manifest.md",
+      "line": "25",
+      "severity": "follow-on",
+      "text": "follow-on: tests.guards_base claims four guards fail at base, but repro-base.log ran with -x and stops after the first failure, so the log evidences one failing guard and not four."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "read commit by commit at ad3c3f77e..32366a63d; fe11cabfd deletes `_fenced` and its two call sites in fixed_point.py, and the three later commits are docs adding the fragment.",
+    "done_when": "the done-when's measures are recorded \u2014 the four guards (head_guards.log, 16 passed), the base failure (repro-base.log, assert 3 == 1), numerics_base.json == numerics_head.json (28/28 fields), the reduced-Newton delta logs, and the fragment docs/evidence/fragments/converged-forward-solve/trip-body-lowered-once.html.",
+    "goal": "the node restores a single lowered operator application in nova/equilibrium/fixed_point.py by deleting the `_fenced` barrier wrapper and applying the operator directly at its two stream sites; head_guards.log records 16 passed.",
+    "manifest": "read; it reports status complete with the guard, numerics, fixed-point and reduced-Newton results and names each log, and names the two reduced-Newton modules it did not run.",
+    "write_paths": "three paths declared; the diff touches only nova/equilibrium/fixed_point.py and the fragment, both inside them, and no figure."
+  },
+  "justifications": {
+    "durability": "no test is added, but tests/test_solve_trips_are_a_scan.py:237 fails if the fence returns, as repro-base.log shows at base with assert 3 == 1.",
+    "evidence": "head_guards.log records 16 passed and the delta logs are recorded, but the numerics arms land only as numerics_base.json/numerics_head.json with no revision stamp or run log.",
+    "fit": "the deletion leaves the direct application already used at nova/equilibrium/fixed_point.py:2651 and introduces no plan label.",
+    "goal_fidelity": "nova/equilibrium/fixed_point.py:2383 no longer wraps the operator in `_fenced`, so the lowered solve carries no product barrier and the four guards at tests/test_solve_trips_are_a_scan.py:237,302 pass.",
+    "reuse": "no definition is added; the change removes a wrapper in favour of the direct operator application the module already uses at nova/equilibrium/fixed_point.py:2651.",
+    "scope_discipline": "the diff at nova/equilibrium/fixed_point.py and docs/evidence/fragments/converged-forward-solve/trip-body-lowered-once.html stays inside the three declared write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node restores a single lowered operator application in nova/equilibrium/fixed_point.py by deleting the `_fenced` barrier wrapper and applying the operator directly at its two stream sites; head_guards.log records 16 passed.\nVERDICT done_when: the done-when's measures are recorded \u2014 the four guards (head_guards.log, 16 passed), the base failure (repro-base.log, assert 3 == 1), numerics_base.json == numerics_head.json (28/28 fields), the reduced-Newton delta logs, and the fragment docs/evidence/fragments/converged-forward-solve/trip-body-lowered-once.html.\nVERDICT write_paths: three paths declared; the diff touches only nova/equilibrium/fixed_point.py and the fragment, both inside them, and no figure.\nVERDICT manifest: read; it reports status complete with the guard, numerics, fixed-point and reduced-Newton results and names each log, and names the two reduced-Newton modules it did not run.\nVERDICT diff: read commit by commit at ad3c3f77e..32366a63d; fe11cabfd deletes `_fenced` and its two call sites in fixed_point.py, and the three later commits are docs adding the fragment.\nCALL_SITES: nova/equilibrium/fixed_point.py:_serve_krylov_stream, nova/equilibrium/fixed_point.py:_serve_krylov_batch, nova/equilibrium/forward.py:2092, nova/equilibrium/forward.py:2257, nova/imas/mast_parity_chain.py:338\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/equilibrium/fixed_point.py:2383 no longer wraps the operator in `_fenced`, so the lowered solve carries no product barrier and the four guards at tests/test_solve_trips_are_a_scan.py:237,302 pass.\nSCORE evidence: 16\nJUSTIFICATION evidence: head_guards.log records 16 passed and the delta logs are recorded, but the numerics arms land only as numerics_base.json/numerics_head.json with no revision stamp or run log.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the diff at nova/equilibrium/fixed_point.py and docs/evidence/fragments/converged-forward-solve/trip-body-lowered-once.html stays inside the three declared write paths.\nSCORE durability: 18\nJUSTIFICATION durability: no test is added, but tests/test_solve_trips_are_a_scan.py:237 fails if the fence returns, as repro-base.log shows at base with assert 3 == 1.\nSCORE fit: 19\nJUSTIFICATION fit: the deletion leaves the direct application already used at nova/equilibrium/fixed_point.py:2651 and introduces no plan label.\nSCORE reuse: 19\nJUSTIFICATION reuse: no definition is added; the change removes a wrapper in favour of the direct operator application the module already uses at nova/equilibrium/fixed_point.py:2651.\nFINDING numerics_base.json:1 follow-on: the two numerics arms land only as byte-identical JSON of result hex with no revision or module-path stamp and no retained log, so a base arm that read the head tree and compared it against itself is indistinguishable from a genuine bit-identical result - the exact hazard the reviewed manifest records under retry_failures.\nFINDING manifest.md:25 follow-on: tests.guards_base claims four guards fail at base, but repro-base.log ran with -x and stops after the first failure, so the log evidences one failing guard and not four.\n",
+  "review_run_id": "r-20261017T083708083807-review-of-trip-body-lowered-once-32366a63d1f2",
+  "reviewed_base_sha": "ad3c3f77ea9c9f17f1d0a47a9195ecf68f33c3d5",
+  "reviewed_head_sha": "32366a63d1f2a39bc93c5beb17c45c35e7d2a6fa",
+  "reviewed_run_id": "r-20261017T065713898685-trip-body-lowered-once",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 18,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T08:42:07.023340+00:00",
+  "total": 110
+}

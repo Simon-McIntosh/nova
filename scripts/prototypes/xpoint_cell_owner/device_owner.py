@@ -147,11 +147,14 @@ def integrate_cell(
     )
 
     def one_slice(u_value):
-        span = end[:, 0] - polygon[:, 0]
-        safe_span = jnp.where(jnp.abs(span) > 1e-14, span, 1.0)
-        edge_fraction = (u_value - polygon[:, 0]) / safe_span
+        u_extent = end[:, 0] - polygon[:, 0]
+        safe_extent = jnp.where(jnp.abs(u_extent) > 1e-14, u_extent, 1.0)
+        edge_fraction = (u_value - polygon[:, 0]) / safe_extent
         cross = (
-            live & (jnp.abs(span) > 1e-14) & (edge_fraction >= 0) & (edge_fraction < 1)
+            live
+            & (jnp.abs(u_extent) > 1e-14)
+            & (edge_fraction >= 0)
+            & (edge_fraction < 1)
         )
         crossing_v = polygon[:, 1] + edge_fraction * (end[:, 1] - polygon[:, 1])
         low = jnp.min(jnp.where(cross, crossing_v, jnp.inf))

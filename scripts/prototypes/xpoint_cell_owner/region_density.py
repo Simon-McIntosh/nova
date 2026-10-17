@@ -29,17 +29,15 @@ from scripts.prototypes.xpoint_cell_owner.region_reference import region_moments
 MODES = ("fitted", "profile")
 
 
-def relative(observed, reference, full_area, pitch):
+def relative(observed, reference, pitch):
+    """Scale a current and first-moment residual by the moment that carries it.
+
+    The owner integral emits current, radial moment and vertical moment; the
+    area is membership and is reported separately.
+    """
+    current = max(abs(reference[0]), 1e-14)
     scale = np.maximum(
-        np.abs(reference),
-        np.array(
-            (
-                full_area,
-                max(abs(reference[1]), 1e-14),
-                max(abs(reference[1]), 1e-14) * pitch,
-                max(abs(reference[1]), 1e-14) * pitch,
-            )
-        ),
+        np.abs(reference), np.array((current, current * pitch, current * pitch))
     )
     return np.abs(observed - reference) / np.maximum(scale, 1e-14)
 
@@ -122,29 +120,29 @@ def main():
             row[f"dense_valid_{mode}"] = dense_valid
         area = row["dense"]["fitted"][0]
         row["area_fraction"] = area / row["full_area"]
+        row["dense_area_fraction_profile"] = (
+            row["dense"]["profile"][0] / row["full_area"]
+        )
         row["quadrature_order"] = relative(
             np.asarray(row["traced"]["fitted"]),
-            np.asarray(row["dense"]["fitted"]),
-            row["full_area"],
+            np.asarray(row["dense"]["fitted"])[1:],
             pitch,
         ).tolist()
         row["representation"] = relative(
-            np.asarray(row["dense"]["fitted"]),
-            np.asarray(row["dense"]["profile"]),
-            row["full_area"],
+            np.asarray(row["dense"]["fitted"])[1:],
+            np.asarray(row["dense"]["profile"])[1:],
             pitch,
         ).tolist()
         row["traced_gap"] = relative(
             np.asarray(row["traced"]["fitted"]),
             np.asarray(row["traced"]["profile"]),
-            row["full_area"],
             pitch,
         ).tolist()
         result["rows"].append(row)
         path.write_text(json.dumps(result, indent=2) + "\n")
         print(f"CELL {json.dumps(row)}", flush=True)
-    quadrature = max(max(row["quadrature_order"][1:]) for row in result["rows"])
-    representation = max(max(row["representation"][1:]) for row in result["rows"])
+    quadrature = max(max(row["quadrature_order"]) for row in result["rows"])
+    representation = max(max(row["representation"]) for row in result["rows"])
     result["max_quadrature_order"] = quadrature
     result["max_representation"] = representation
     path.write_text(json.dumps(result, indent=2) + "\n")

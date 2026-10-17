@@ -78,7 +78,9 @@ def region_moments(
         return _quadratic(field, local[..., 0], local[..., 1])
 
     def density_at(u, v):
-        local = offset + u * plus + v * minus
+        local = (
+            offset + np.asarray(u)[..., None] * plus + np.asarray(v)[..., None] * minus
+        )
         x, y = local[..., 0], local[..., 1]
         if density_mode == "profile":
             normalized = 1.0 + _quadratic(field, x, y) / (sigma * span)

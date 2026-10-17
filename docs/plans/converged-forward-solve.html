@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="332">
+<meta name="plan-version" content="333">
 <meta name="plan-modified" content="2026-10-17">
 </head>
 <body>
@@ -1434,6 +1434,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261017T100459076471-review-of-axis-facing-owner-583820d0bf3f" data-who="reckon-build" data-when="2026-10-17T10:20:44.575Z">
     <div class="r-comment-body"><p>stored a parsed six-dimension review of r-20261017T073925596435-axis-facing-owner at both granted paths, byte-identical, revision pair c75e617f80f120668563daa8ff6b62b120658a49..583820d0bf3ff1c50e9565704cd2e1a6e43e90a0, total 75/120 (goal_fidelity 6, evidence 14, scope_discipline 19, durability 3, fit 17, reuse 16), two follow-on findings and no blocking finding; the goal is unmet (2,098 map error 2.49303535497e-4 against the 1e-4 guard) and no test reaches the changed modules.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261017T073925596435-axis-facing-owner" data-who="reckon-build" data-when="2026-10-17T10:03:20.564Z">
+    <div class="r-comment-body"><p>§5&#x27;s diverted map measurement is landed as docs/research/axis-facing-owner.html with its evidence fragment at docs/evidence/fragments/converged-forward-solve/axis-facing-owner.html — the 2098 guard failure is a REGRESSION introduced by the owner&#x27;s replacement, not a target it inherited: re-measuring the sampling booking the owner replaces, through the identical read and handoff, gives 1.08660010688e-3 / 4.87161211918e-4 / 9.47260774384e-5 at 282 / 550 / 2098, which passes 550 and 2098 and fails 282 by 1.07e-10, and the 282 guard 1.0866e-3 is that booking&#x27;s own error to eight significant figures; the delivered half-plane cut is better at 282 and 550 (1.08006018256e-3 and 4.09606071189e-4) and 2.63x worse at 2098 (2.49303535497e-4), where a single booked owner cell (cell 47) carries 59 % of the excess over the 1.76641360086e-5 floor with its area right to 1.5e-6 and its current off by 3.3e-3. Nine representations measured on all three carriers leave no conic under all three guards, and the measured target the region repair reaches is the inherited booking&#x27;s own 9.47260774384e-5; the diverted cold solve converges to 1e-12 at 282 (3.14409717612e-13) and 550 (4.84764428524e-13), and at 2098 reaches one correction in 1254.7 s before the allocation expired, so clause 3&#x27;s largest carrier is a CPU-budget limit rather than a convergence failure.</p></div>
 </div>
 </section>
 </main>

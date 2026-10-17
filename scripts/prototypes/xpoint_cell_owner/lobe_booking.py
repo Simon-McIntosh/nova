@@ -104,16 +104,25 @@ def _density_of(geometry, reading, profile, index, density, span, sigma, density
 
 
 def _cell_rings(geometry, index, segments):
-    """The cell's own polygon as a centre fan, one row per subdivided edge."""
-    count = int(geometry.vertex_count[index])
-    vertices = geometry.vertices[index, :count]
-    following = jnp.concatenate((vertices[1:], vertices[:1]))
+    """The cell's own polygon as a centre fan, one row per subdivided edge.
+
+    The vertex count is read as a traced value and turned into a per-row size
+    rather than a slice, so the fan builds under ``vmap`` where no element of
+    the index array is concrete.
+    """
+    count = geometry.vertex_count[index]
+    centre = geometry.centre[index]
+    vertices = geometry.vertices[index]
+    following = jnp.concatenate((vertices[1:], vertices[:1]), axis=0)
     fractions = jnp.linspace(0.0, 1.0, segments + 1)
     edge = (
-        vertices[None, :, :]
-        + fractions[:, None, None] * (following - vertices)[None, :, :]
+        vertices[:, None, :]
+        + fractions[None, :, None] * (following - vertices)[:, None, :]
     )
-    return jnp.transpose(edge, (1, 0, 2)), jnp.full((count,), segments + 1)
+    origin = jnp.broadcast_to(centre, (vertices.shape[0], 1, 2))
+    rings = jnp.concatenate((origin, edge), axis=1)
+    live = jnp.arange(vertices.shape[0]) < count
+    return rings, jnp.where(live, segments + 2, 0)
 
 
 def lobe_moments(

@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="322">
+<meta name="plan-version" content="323">
 <meta name="plan-modified" content="2026-10-17">
 </head>
 <body>
@@ -1401,6 +1401,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261017T073659073849-review-of-saddle-expansion-speed-b5b6fdfa7ec7" data-who="reckon-build" data-when="2026-10-17T07:56:56.900Z">
     <div class="r-comment-body"><p>saddle-expansion-speed review at b5b6fdfa7: 75/120; two blocking findings — the agreement runner cannot fail (its DEGREE_LADDER includes the 128-node reference, so speed_gate.py:383 records passed on a self-comparison) and docs/research/saddle-anchored-expansion.html:40/:137 keep the withdrawn one-element HLO constant claim that bar-282.json/550/2098 falsify (846/1650/6294).</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261016T192804852944-saddle-expansion-speed" data-who="reckon-build" data-when="2026-10-17T08:27:41Z">
+    <div class="r-comment-body"><p>MISS. Per-state wall against the 0.90 ms bar, at the largest width up to 128 that fits on one H200: 282 cells width 128 saddle 6.681955 ms (7.42x over), 550 cells width 64 saddle 9.276844 ms (10.31x over), 2098 cells width 32 saddle 25.008424 ms (27.79x over). Compile 0.86-1.30 s and executable 1.68-7.72 MB, both within the 60 s and 50 MB conditions, so the failure is wall alone. The control is measured beside it in the same job for reference: 0.223786 / 0.417197 / 2.707774 ms. The walls and the miss verdict are unchanged by the record repair; the axis-facing half-plane is adopted.</p></div>
 </div>
 </section>
 </main>

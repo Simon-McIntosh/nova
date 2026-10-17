@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="evidence">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="saddle-merge-path-admission">
+  <meta name="plan-title" content="Merge-path saddle admission on the axis merge path">
+  <meta name="plan-summary" content="The topology read's argmax over saddle levels is replaced by a merge-path admission that admits the saddle bounding the axis merge path, so the wall-contact root that ties the boundary level by construction is never selected and the boundary-class switch is gone at 282 and 550 cells"></meta>
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-verifies" content="converged-forward-solve#s2">
+  <meta name="plan-recorded-at" content="2026-10-17">
+  <meta name="plan-verdict" content="partial">
+  <title>Merge-path saddle admission | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+  <h1 id="saddle-merge-path-admission-landing">Merge-path saddle admission</h1>
+
+  <p><strong>The admitted saddle is now the bounding saddle of the axis merge path, not the highest-level root.</strong> The read at <code>scripts/prototypes/fast_map_production/kernel.py</code> selected <code>saddle_index = 1 + jnp.argmax(saddle_score_rows)</code>, ranking every valid saddle by its level. A second root at the wall contact ties the boundary level by construction — the wall candidate is the more scrape-off-side of the contact's tangency and the axis-path bottleneck, and the bottleneck is that saddle's own level — so it won the argmax over the whole tie island and then left the census between adjacent doubles. One owned function, <code>_merge_path_saddle</code>, replaces the argmax: it ranks each live saddle by the maximin axis-path passage to the saddle's own cell minus the saddle's own level, decided before the wall-versus-saddle contest and fixed-shape and traced.</p>
+
+  <figure><img src="/nova/figures/converged-forward-solve/saddle-merge-path-admission/saddle-admission-island.svg" alt="Saddle level, wall contact level, boundary flux and booked current against exterior jet offset through the 282-cell tie island at base and head"><figcaption>The 282-cell tie island, base (<code>argmax</code> saddle selection) left and head (merge-path admission) right, 61 probe states per panel with the sweep's own root prior. Wall contact level (grey), saddle level (near-black dashed) and boundary flux (blue) above; booked current (amber) below; dotted lines mark the class switch in the base arm. Base jumps the admitted saddle level onto the wall contact across the island and back; head holds the primary X-point throughout, so no class switch and no saddle-identity change remains. The booked current is steep through this window, so its adjacent-sample steps are dominated by the equilibrium's own evolution rather than by the removed switch. Probe: <code>tie_probe.py</code>, CPU, cells 250 requested / 282 actual.</figcaption></figure>
+
+  <h2 id="saddle-merge-path-admission-measure">The measure at 282 and 550 cells</h2>
+
+  <p>Both arms are 61-state scans of the exterior jet offset on the certified diverted carrier, base from the orientation-revision kernel (<code>efa99eeb</code> as held in the main checkout) and head from the worktree kernel whose <code>__file__</code> the log header prints. The admitted saddle is read from <code>reading.saddle_candidate</code>; the classification from <code>reading.boundary_class</code>.</p>
+
+  <table>
+    <thead><tr><th>Cells</th><th>Arm</th><th>Class switches in window</th><th>Admitted saddle level over the island</th><th>Boundary flux max adjacent step</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="2">282</td><th>base</th><td>2 &mdash; 0.1607&rarr;0.1613, 0.1727&rarr;0.1733</td><td>&minus;0.01050 &rarr; +0.00799, held, &rarr; back</td><td>4.13 &times; 10<sup>&minus;5</sup></td></tr>
+      <tr><th>head</th><td>0</td><td>&minus;0.01040 &rarr; &minus;0.01133, continuous</td><td>4.13 &times; 10<sup>&minus;5</sup></td></tr>
+      <tr><td rowspan="2">550</td><th>base</th><td>6</td><td>switches onto the wall contact and back</td><td>5.68 &times; 10<sup>&minus;5</sup></td></tr>
+      <tr><th>head</th><td>0</td><td>held on the primary X-point</td><td>5.68 &times; 10<sup>&minus;5</sup></td></tr>
+    </tbody>
+  </table>
+
+  <p>The head arm carries <strong>no boundary-class switch at either resolution</strong> where base carries two at 282 and six at 550, and the admitted saddle level is the primary X-point's continuous trace rather than the wall contact's jump. The boundary flux is unchanged between adjacent samples to the printer at both arms (4.13 &times; 10<sup>&minus;5</sup> at 282, 5.68 &times; 10<sup>&minus;5</sup> at 550), which is the point: the switch that moved was a saddle-identity change, not a flux change.</p>
+
+  <h2 id="saddle-merge-path-admission-census">The census is not at fault at the observed tie</h2>
+
+  <p>Done-when item 1 asked for the wall-contact root's exit to be classified before repair. At the 282-cell island the departing root's <code>|det H|</code> is 1.6 &times; 10<sup>&minus;4</sup> at offset 0.16133, shrinking to 5.4 &times; 10<sup>&minus;5</sup> at 0.17267, then it leaves between 0.17267 and 0.17333. Those determinants are four to two orders of magnitude off roundoff, so the departure is <strong>not a fold</strong> and <code>nova/equilibrium/fixed_points.py</code> was left unmodified: the root finder stops returning a genuine saddle with large curvature, and the merge-path admission removes the step without touching the census. The Newton iteration counts and residuals the item also asked for are not reported this run.</p>
+
+  <h2 id="saddle-merge-path-admission-negative">The negative control</h2>
+
+  <p>The declared mutation — restoring the argmax saddle selection — is applied inside <code>_merge_path_saddle</code> and the same two tests re-run. The head arm passes (2 passed, <code>EXIT=0</code>); the red arm exits non-zero with <code>test_path_admission_rejects_the_wall_contact_root</code> failing and no other test changing. Log: <code>negative-control.log</code> in the run directory.</p>
+
+  <h2 id="saddle-merge-path-admission-footprint">Footprint and what is not measured</h2>
+
+  <p>The change is one function <code>_merge_path_saddle</code>, one helper <code>psi_rounding_enclosure</code>, and the read's selection lines; the wall-versus-saddle contest downstream is untouched. The gate ran CPU-only in a fresh process at head: <code>tests/test_fixed_points.py</code>, <code>tests/test_fixed_point.py</code> and <code>test_bottleneck_level.py</code> together, <strong>66 passed</strong>. Not measured this run, and carried as follow-ons: the 550 transition-bracket bisection to adjacent doubles, diverted and limited cold solves to 1e-12 at 282 and 550, map-fidelity base-beside-head, and the tests that call <code>read(...)</code> itself rather than the admission directly. Every wall in this record is a CPU number; no GPU row was run.</p>
+
+</main></body>
+</html>

@@ -115,11 +115,17 @@ the clause holds.</td>
 <tr>
 <td>3. Diverted cold solve to 1e-12 at all three sizes with residual
 histories, Gauss-Newton gradient and Taylor slopes</td>
-<td><strong>not met</strong> — not reached</td>
-<td>The 2,098 solve cannot start: <code>require_map</code> refuses a map that
-this node's fence requires to be repaired first, and the repair is not made.
-The 282 and 550 solves were queued behind the map rows and did not run within
-this turn's allocation.</td>
+<td><strong>not met</strong> — the coarse solves ran and stalled</td>
+<td>The 282 and 550 solves ran from cold under the profile representation, six
+corrections each, and did not converge: final residual 7.3477e-6 at 282 cells
+and 2.6072e-6 at 550, with <code>converged</code> false and the correction
+history (<code>history</code>) recorded in
+<code>owner-current/cold-profile-250.json</code> and <code>-500.json</code>.
+Neither reaches the 1e-12 floor the clause asks for, and the stall sits at the
+same order as the map error those carriers fail on, so the residual floor is
+the un-repaired booking rather than a property of the Newton step. The Gauss-Newton
+gradient and the Taylor slope measurement were not taken. The 2,098 solve
+cannot start: <code>require_map</code> refuses a map this node cannot repair.</td>
 </tr>
 <tr>
 <td>4. Limited-carrier sweep; 550 transition bracket classified by adjacent
@@ -132,10 +138,12 @@ not select.</td>
 </tr>
 <tr>
 <td>5. Line-contour poloidal panels of each terminal state</td>
-<td><strong>not met</strong> — no terminal state exists</td>
-<td>Panels are rendered from a completed cold receipt
-(<code>panel_data.py</code> refuses a receipt without a terminal state), and no
-cold solve completed.</td>
+<td><strong>not met</strong></td>
+<td>Terminal states exist at 282 and 550 cells
+(<code>terminal_state.moments</code> in the two cold rows), so the panels are
+renderable, but they were not rendered: rendering them needs a
+<code>*_debug</code> or GPU partition and the remaining allocation went to the
+attribution. No complete cold receipt exists at 2,098 cells.</td>
 </tr>
 <tr>
 <td>6. Evidence fragment</td>

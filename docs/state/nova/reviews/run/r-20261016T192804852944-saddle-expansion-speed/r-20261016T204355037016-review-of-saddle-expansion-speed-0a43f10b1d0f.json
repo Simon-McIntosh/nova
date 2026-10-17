@@ -1,0 +1,69 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "45bc217e2843c3119e25701b16fa52b02d7039b3",
+  "call_site_count": 1,
+  "call_sites": [
+    "scripts/prototypes/saddle_expansion/speed_gate.py"
+  ],
+  "completed_at": "2026-10-16T20:56:25.707Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "saddle-expansion-speed",
+      "recorded_at": "2026-10-17T06:49:48.785459+00:00"
+    },
+    "evidence": {
+      "kind": "folded",
+      "node": "saddle-expansion-speed",
+      "recorded_at": "2026-10-17T06:49:47.833935+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-16T20:44:14Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T192804852944-saddle-expansion-speed/manifest.md",
+      "line": "15",
+      "severity": "blocking",
+      "text": "blocking: the delivered record asserts a measurement that does not exist. manifest.md:15 states the validating measurement is \"H200 job 1287671 (complete) plus job 1287676 (complete)\" and manifest.md:6 states \"both H200 jobs are terminal\", but sacct -X -j 1287676 and squeue -j 1287676 both report 1287676 RUNNING (14 min elapsed at review time, still running), and its cited log slurm-speed-gate-fixed-1287676.log ends after the 550-cell saddle width-128 attempt, having printed only the width-1 and width-16 rows with no EXIT_550 line. The run's own exit record shows it ended at 2026-10-16T20:42:21Z against a 21:05 deadline, so the worker's turn ended while 1287676 was mid-run and no wait block was declared, leaving the 550 corrected rung unrecoverable by resume. Repair: correct manifest.md:6 and :15 to the state sacct reports and declare the job as a wait so a resume sweep can read the corrected rung when it lands."
+    },
+    {
+      "file": "scripts/prototypes/saddle_expansion/expansion.py",
+      "line": "58",
+      "severity": "follow-on",
+      "text": "follow-on: reference_cell_integral is dead code. Nothing in the repository calls it (grep over scripts/, tests/ and nova/ returns only its own definition), so the reuse clause it was added to satisfy is nominal: the disk split still runs through the hand-rolled integrate_disk_cell at expansion.py:102, while docs/evidence/fragments/converged-forward-solve/saddle-expansion-speed.html:42 records clause 6 as \"achieved ... both imported from conic_integral.py and wrapped\". The import of _quadratic at expansion.py:21 is a real reuse repair and is used on the hot path; the integrate_cell wrap is reached by nothing."
+    },
+    {
+      "file": "scripts/prototypes/saddle_expansion/speed_gate.py",
+      "line": "55",
+      "severity": "follow-on",
+      "text": "follow-on: dense_constant_elements restates the lowered-program constant enumeration the repository already owns at tests/test_equilibrium_solve.py:30 _hlo_constants (with test_compiled_chord_carries_no_state_scaled_constant at :114), which speed_gate.py could have imported the way it already imports _analytic_inputs from tests/equilibrium/test_topology_read.py. The two read different IR (StableHLO as_text versus compiler_ir(\"hlo\")), so this is a partial rather than a full duplicate, and the done_when asked for a check \"in the style of\" that test; recorded for the next node rather than as a repair owed here."
+    },
+    {
+      "file": "docs/research/saddle-anchored-expansion.html",
+      "line": "87",
+      "severity": "follow-on",
+      "text": "follow-on: the cost decomposition is presented as two independently measured factors (\"12.1 x 2.5 = 30.3 ... not a hypothesis about which term dominates\"), but the product is an algebraic identity that returns the ratio by construction: (194/16) x ((6.7590/194)/(0.2230/16)) = 6.7590/0.2230 whatever the member counts are. It carries information only to the extent that 16 and 194 are the two arms' real work units, and the note asserts the control's 16 rather than showing it read from the axis arm. What survives as measurement is the ratio and the two per-member costs."
+    }
+  ],
+  "head_log_revision": "0a43f10b1d0f5319d6a4b28a009eb47ade62f1a2",
+  "node": "review-of-saddle-expansion-speed-0a43f10b1d0f",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to remove the structural costs of the saddle-anchored X-point map and re-measured its speed gate at 2,098 cells; the runtime-argument refactor landed at scripts/prototypes/saddle_expansion/speed_gate.py:66 and the sized candidate list at scripts/prototypes/saddle_expansion/expansion.py:287, both verified in the diff, while the 2,098-cell re-measurement the goal names is absent.\nVERDICT done_when: the done_when's clause (5) decides the gate at 2,098 cells; speed-282.json is the only receipt carrying a ratio (30.3036) and speed-2098.json reaches only the axis arm at width 16, so the recorded measure is the 282 rung and not the cell count the done_when names.\nVERDICT write_paths: manifest.md:3 declares four paths (scripts/prototypes/saddle_expansion and three documentation paths); all six files in git diff 45bc217e2..0a43f10b1 --stat lie inside them.\nVERDICT manifest: read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T192804852944-saddle-expansion-speed/manifest.md; it reports status complete with the 30.3036 failure, the 12.1x/2.5x split and the 0.659 agreement failure, but manifest.md:15 states job 1287676 is complete and manifest.md:6 states both H200 jobs are terminal while sacct and squeue both report 1287676 RUNNING, and baseline_suite and after_suite are both null.\nVERDICT diff: read commit by commit against base 45bc217e2843c3119e25701b16fa52b02d7039b3; 67d0e3fe1 takes the carrier and states as runtime arguments and replaces the per-state whole-machine scan with disk_candidates, eb35b8349 closes over the profile and policy instead of the carrier, e3353b26c sizes the candidate margin in pitches, and 0a43f10b1 records the rebuild rows and the cost split in the research note, the two evidence fragments and the regenerated SVG.\nCALL_SITES: scripts/prototypes/saddle_expansion/speed_gate.py (the only importer of expansion.py; no module under nova/ reaches the prototype)\nSCORE goal_fidelity: 12\nJUSTIFICATION goal_fidelity: expansion.py:287 disk_candidates and the runtime-argument signature at speed_gate.py:66 remove the structural costs the goal names, but the 2,098-cell gate clause is unmeasured (speed-2098.json carries no width-128 saddle row).\nSCORE evidence: 7\nJUSTIFICATION evidence: manifest.md:15 asserts job 1287676 complete against sacct's RUNNING, baseline_suite and after_suite are both null, and the gate's own 2,098-cell condition has no ratio.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff 45bc217e2..0a43f10b1 lies inside the four write paths declared at manifest.md:3.\nSCORE durability: 7\nJUSTIFICATION durability: the only added assertion is speed_gate.py:296 agreement_check, which compares two configurations of the same function under test and is currently red at 0.6593670573, and no test path is in the write scope.\nSCORE fit: 15\nJUSTIFICATION fit: the new definitions follow the surrounding prototype idiom and introduce no forbidden name, but expansion.py:58 reference_cell_integral is dead code nothing calls.\nSCORE reuse: 12\nJUSTIFICATION reuse: expansion.py:21 imports _quadratic from conic_integral.py, repairing the fork the predecessor review found, but the integrate_cell wrap at expansion.py:58 is unreachable and speed_gate.py:55 dense_constant_elements restates the enumeration owned by tests/test_equilibrium_solve.py:30.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T192804852944-saddle-expansion-speed/manifest.md:15 blocking: the record asserts job 1287676 complete and terminal while sacct and squeue report it RUNNING and its cited log has no 550-cell saddle width-128 row.\nFINDING scripts/prototypes/saddle_expansion/expansion.py:58 follow-on: reference_cell_integral is dead code, so the reuse clause it was added to satisfy is nominal.\nFINDING scripts/prototypes/saddle_expansion/speed_gate.py:55 follow-on: dense_constant_elements restates the lowered-program constant enumeration owned by tests/test_equilibrium_solve.py:30 instead of importing it.\nFINDING docs/research/saddle-anchored-expansion.html:87 follow-on: the 12.1x times 2.5x decomposition is an algebraic identity that returns the ratio by construction, so it is not two independent measurements.\n",
+  "review_run_id": "r-20261016T204355037016-review-of-saddle-expansion-speed-0a43f10b1d0f",
+  "reviewed_base_sha": "45bc217e2843c3119e25701b16fa52b02d7039b3",
+  "reviewed_head_sha": "0a43f10b1d0f5319d6a4b28a009eb47ade62f1a2",
+  "reviewed_run_id": "r-20261016T192804852944-saddle-expansion-speed",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/saddle-expansion-speed",
+  "scores": {
+    "durability": 7,
+    "evidence": 7,
+    "fit": 15,
+    "goal_fidelity": 12,
+    "reuse": 12,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T20:58:00+00:00"
+}

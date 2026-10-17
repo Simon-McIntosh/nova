@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="bottleneck-path-level">
+  <meta name="plan-title" content="Continuous bottleneck level for the wall contact">
+  <meta name="plan-summary" content="Base and head read measured in one titan allocation: unit test passes, continuity sweeps pass, diverted map fidelity regresses">
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-verifies" content="converged-forward-solve#s2">
+  <meta name="plan-recorded-at" content="2026-10-17">
+  <meta name="plan-verdict" content="partial">
+  <title>Continuous bottleneck level for the wall contact | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+  <h1 id="bottleneck-path-level-landing">Continuous bottleneck level for the wall contact</h1>
+  <p><a href="/nova/research/bottleneck-path-level.html">Measured research record</a></p>
+
+  <p>The 1e-8 ramp membership and the boolean saddle sector bar are deleted from <code>scripts/prototypes/fast_map_production/kernel.py</code> and replaced by one owned effective level function and a continuous frame attenuation. The CPU unit test on a synthetic private-flux carrier passes, and the 41-state continuity sweeps at 282 diverted and 289 limited cells pass at both arms. <strong>The diverted map-fidelity gate fails at head:</strong> 0.4116 against a base of 0.0010866 at 282 cells, flat in resolution, with <code>centre_class</code> flipping from diverted to limited and support rising from 179 to 184. The head is a no-op on the limited carrier.</p>
+
+  <table>
+    <thead><tr><th>Row</th><th>Base</th><th>Head</th></tr></thead>
+    <tbody>
+      <tr><th>Diverted 282 map error</th><td>0.001086579452150808</td><td>0.411603569216409</td></tr>
+      <tr><th>Diverted 282 centre class</th><td>1 (diverted)</td><td>0 (limited)</td></tr>
+      <tr><th>Diverted 282 centre support</th><td>179</td><td>184</td></tr>
+      <tr><th>Diverted 282 sweep valid</th><td>32/41</td><td>32/41</td></tr>
+      <tr><th>Diverted 282 boundary jump / span</th><td>7.216 &times; 10<sup>&minus;16</sup></td><td>3.509 &times; 10<sup>&minus;16</sup></td></tr>
+      <tr><th>Limited 289 map error</th><td>0.0001803919036243785</td><td>0.0001803919036243785</td></tr>
+    </tbody>
+  </table>
+
+  <figure><img src="/nova/figures/converged-forward-solve/bottleneck-path-level/bottleneck-level-fidelity.svg" alt="Analytic map flux error against carrier resolution for the base and head read on the diverted and limited carriers, with the diverted guard limit staircase"><figcaption>Analytic map flux error against resolution, base against head, on the certified diverted and limited carriers. Titan jobs 1288024 (maps) and 1288113 (sweeps). Base and head coincide on the limited panel. The head's diverted error is 380 times the 282-cell guard and does not fall with resolution.</figcaption></figure>
+
+  <p>Receipts, per-row logs and both arms' kernels: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T101935652190-bottleneck-path-level</code>. Base arm is the kernel at orientation revision e4c8b9815 loaded into <code>sys.modules</code> before any downstream import, and it reproduces the previously recorded unchanged-map numbers to the last printed digit.</p>
+</main></body>
+</html>

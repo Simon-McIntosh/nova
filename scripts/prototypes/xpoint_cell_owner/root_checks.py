@@ -28,9 +28,9 @@ def save(path, result):
     path.write_text(json.dumps(result, indent=2) + "\n")
 
 
-def gauss_newton_gradient(point, operands, scale, profile):
+def gauss_newton_gradient(point, operands, scale, profile, component="halfplane"):
     """Accumulate the transposed Jacobian product from forward columns."""
-    value = residual(point, operands, scale, profile)
+    value = residual(point, operands, scale, profile, component)
     count = point.size
     blocks = (count + DIRECTION_BLOCK - 1) // DIRECTION_BLOCK
     columns = jnp.zeros((blocks * DIRECTION_BLOCK, count), point.dtype)
@@ -41,7 +41,7 @@ def gauss_newton_gradient(point, operands, scale, profile):
 
         def column(direction):
             return jax.jvp(
-                lambda trial: residual(trial, operands, scale, profile),
+                lambda trial: residual(trial, operands, scale, profile, component),
                 (point,),
                 (direction,),
             )[1]
@@ -61,8 +61,14 @@ def main():
     parser.add_argument("--cache", type=Path, required=True)
     parser.add_argument("--start-json", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--component",
+        choices=("halfplane", "bell", "saddle", "pinned", "anchored", "shifted"),
+        default="halfplane",
+    )
     args = parser.parse_args()
-    assert jax.config.jax_enable_x64 is True and jax.default_backend() == "gpu"
+    assert jax.config.jax_enable_x64 is True
+    assert jax.default_backend() in ("gpu", "cpu")
     print(
         f"nova={nova.__file__} module={__file__} cwd={Path.cwd().resolve()}", flush=True
     )
@@ -76,11 +82,13 @@ def main():
     profile = context.profile
     scale = context.scale
     mapped = jax.jit(
-        lambda point, carrier, unit: residual(point, carrier, unit, profile)
+        lambda point, carrier, unit: residual(
+            point, carrier, unit, profile, args.component
+        )
     )
     value, gradient = jax.jit(
         lambda point, carrier, unit: gauss_newton_gradient(
-            point, carrier, unit, profile
+            point, carrier, unit, profile, args.component
         )
     )(state, operands, scale)
     value = np.asarray(value)
@@ -94,7 +102,8 @@ def main():
     }
     save(args.output, result)
     print(
-        f"ROOT cells={result['cells']} residual={result['residual']:.12g} "
+        f"ROOT cells={result['cells']} component={args.component} "
+        f"residual={result['residual']:.12g} "
         f"gradient={result['gauss_newton_gradient_two']:.12g}",
         flush=True,
     )
@@ -107,7 +116,7 @@ def main():
     steps = (1e-4, 3e-5, 1e-5, 3e-6, 1e-6, 3e-7, 1e-7)
     tangent_program = jax.jit(
         lambda point, direction, carrier, unit: jax.jvp(
-            lambda trial: residual(trial, carrier, unit, profile),
+            lambda trial: residual(trial, carrier, unit, profile, args.component),
             (point,),
             (direction,),
         )
@@ -143,7 +152,9 @@ def main():
         print(f"TAYLOR {json.dumps(row)}", flush=True)
 
     lu, pivots = jax.jit(
-        lambda point, carrier, unit: factor(point, carrier, unit, profile)
+        lambda point, carrier, unit: factor(
+            point, carrier, unit, profile, args.component
+        )
     )(state, operands, scale)
     newton = jsp_linalg.lu_solve((lu, pivots), -jnp.asarray(value))
     newton = newton / jnp.linalg.norm(newton)

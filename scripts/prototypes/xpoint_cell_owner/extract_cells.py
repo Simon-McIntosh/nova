@@ -27,7 +27,8 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--reference", action="store_true")
     args = parser.parse_args()
-    assert jax.config.jax_enable_x64 is True and jax.default_backend() == "gpu"
+    assert jax.config.jax_enable_x64 is True
+    assert jax.default_backend() in ("gpu", "cpu")
     print(
         f"nova={nova.__file__} module={__file__} cwd={Path.cwd().resolve()}", flush=True
     )

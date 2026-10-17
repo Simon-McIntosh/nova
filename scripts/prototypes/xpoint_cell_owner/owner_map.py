@@ -39,6 +39,30 @@ def saddle_conic_coefficients(centres, pitches, saddle, hessian, level):
     )
 
 
+def fitted_hessian(coefficients):
+    """Hessian of the cell's fitted quadratic, in the fitted coefficient units."""
+    return jnp.stack(
+        (
+            jnp.stack((2 * coefficients[:, 3], coefficients[:, 4]), axis=1),
+            jnp.stack((coefficients[:, 4], 2 * coefficients[:, 5]), axis=1),
+        ),
+        axis=1,
+    )
+
+
+def fitted_value(coefficients, local):
+    """Evaluate a fitted cell quadratic at local pitch-unit coordinates."""
+    x, y = local[..., 0], local[..., 1]
+    return (
+        coefficients[..., 0]
+        + coefficients[..., 1] * x
+        + coefficients[..., 2] * y
+        + coefficients[..., 3] * x * x
+        + coefficients[..., 4] * x * y
+        + coefficients[..., 5] * y * y
+    )
+
+
 def owned_cut(
     reading,
     geometry,
@@ -55,12 +79,37 @@ def owned_cut(
     density = program._density_coefficients(geometry, reading, profile)
     coefficients = reading.field_coefficients[indices]
     branch = component
-    if component == "saddle":
+    if component == "anchored":
+        local = (
+            reading.saddle_form.position - geometry.centre[indices]
+        ) / geometry.pitch[indices, None]
+        offset = reading.boundary_flux - fitted_value(
+            reading.field_coefficients[indices], local
+        )
+        coefficients = reading.field_coefficients[indices].at[:, 0].add(offset)
+    elif component == "shifted":
+        local = (
+            reading.saddle_form.position - geometry.centre[indices]
+        ) / geometry.pitch[indices, None]
         coefficients = saddle_conic_coefficients(
             geometry.centre[indices],
             geometry.pitch[indices],
             reading.saddle_form.position,
             saddle_hessian,
+            fitted_value(reading.field_coefficients[indices], local),
+        )
+        branch = "halfplane"
+    elif component in ("saddle", "pinned"):
+        curvature = (
+            saddle_hessian
+            if component == "saddle"
+            else fitted_hessian(reading.field_coefficients[indices])
+        )
+        coefficients = saddle_conic_coefficients(
+            geometry.centre[indices],
+            geometry.pitch[indices],
+            reading.saddle_form.position,
+            curvature,
             reading.boundary_flux,
         )
         branch = "halfplane"

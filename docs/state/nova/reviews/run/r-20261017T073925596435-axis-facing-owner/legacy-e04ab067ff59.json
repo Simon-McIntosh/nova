@@ -1,0 +1,70 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "base_log_revision": null,
+  "call_site_count": 6,
+  "call_sites": [
+    "scripts/prototypes/saddle_expansion/speed_gate.py:22",
+    "scripts/prototypes/xpoint_cell_owner/solve_carrier.py:88",
+    "scripts/prototypes/xpoint_cell_owner/root_checks.py:95",
+    "scripts/prototypes/xpoint_cell_owner/panel_data.py:69",
+    "scripts/prototypes/xpoint_cell_owner/owner_attribution.py:59",
+    "scripts/prototypes/xpoint_cell_owner/saddle_probe.py:62"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-10-17T07:41:57Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/xpoint_cell_owner/solve_carrier.py",
+      "line": "139",
+      "severity": "follow-on",
+      "text": "follow-on: a second save(args.output, result) writes the unchanged result dict immediately after the save at line 127, so the non-diagnostic path now writes the whole result file twice for no change."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T073925596435-axis-facing-owner/manifest.md",
+      "line": "9",
+      "severity": "follow-on",
+      "text": "follow-on: changed_paths omits scripts/prototypes/xpoint_cell_owner/extract_cells.py, which git diff --name-only c75e617f80 583820d0b lists among the changed files."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 6 production call site(s)",
+    "diff": "read commit by commit from c75e617f80 to 583820d0b; owner_map.py and device_owner.py add the saddle-conic, orientation-override and component machinery (halfplane/bell/saddle/pinned/anchored/shifted/ordinary/oriented/inherited), solve_carrier.py adds --past-map-guard and a diagnostic label, root_checks.py/panel_data.py/runtime_solve.py thread a component argument, extract_cells.py relaxes its backend assert to allow cpu, and four docs/figures are added.",
+    "done_when": "the done_when's seven clauses are read against the manifest; clause 1 (per-cell attribution) and clause 7 (fragment) are delivered, clause 2 is recorded NOT MET (2.49303535497e-4 > 1e-4 at 2,098), clause 3 is met at 282/550 (3.14409717612e-13, 4.84764428524e-13) but the 2,098 solve is refused by the same map guard, clause 5 is blocked on betelgeuse/titan, and clause 6 is complete only at 282/550, so the gate measures the done_when and records the shortfall rather than asserting it met.",
+    "goal": "the node goal is to make the axis-facing X-point owner pass the 2,098-cell map guard and converge the diverted solve at 282/550/2,098 with one representation; owner_map.py:96 leaves the default component \"halfplane\" so the delivered default owner is unchanged and the manifest records the 2,098 map error at 2.49303535497e-4 against the 1e-4 guard, so the goal is unmet.",
+    "manifest": "read manifest.md; status complete, 13 commits a3a6eb331..583820d0b, and it records the map guard miss, the two converged residuals, the 2,098 diagnostic wall, and a declared negative control it reports as not reproducing; tests and test_logs are empty and no baseline_suite/after_suite arm is named.",
+    "write_paths": "the four declared paths are scripts/prototypes/xpoint_cell_owner, docs/research/axis-facing-owner.html, docs/figures/converged-forward-solve/axis-facing-owner and docs/evidence/fragments/converged-forward-solve/axis-facing-owner.html; git diff --name-only c75e617f80 583820d0b lists 15 files, all inside them."
+  },
+  "justifications": {
+    "durability": "no test imports owner_map.py or device_owner.py, so nothing reddens if the added saddle-conic or orientation-override behaviour regresses, and the manifest names no suite arm.",
+    "evidence": "the map and cold-solve measurements are recorded in logs with terminal EXIT lines (cpu-map-job.log, cpu-cold-250.log, cold-halfplane-2000-pastguard.log) and quoted in the manifest, but the clean measurement is the runner's own print rather than a test that could fail.",
+    "fit": "the added definitions (owner_map.py:16 saddle_conic_coefficients, owner_map.py:103 reference_saddle_moments) follow the surrounding jnp/argparse prototype idiom and carry mechanism names with no plan or ticket labels.",
+    "goal_fidelity": "the goal's target is unmet: owner_map.py:96 still routes the default component to branch \"halfplane\" and the manifest records 2.49303535497e-4 at 2,098 against the 1e-4 guard, so the owner does not pass the guard it was dispatched to pass.",
+    "reuse": "owner_map.py:110 reuses the accessor's own current._normal_rings to reproduce the inherited booking rather than rebuilding ring geometry, and the new conic helpers have no existing owner, so nothing is forked.",
+    "scope_discipline": "every path in the manifest's 15-file changed set lies inside the four declared write paths, with no edit outside scripts/prototypes/xpoint_cell_owner and docs, and no nova/equilibrium or nova/biot change."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to make the axis-facing X-point owner pass the 2,098-cell map guard and converge the diverted solve at 282/550/2,098 with one representation; owner_map.py:96 leaves the default component \"halfplane\" so the delivered default owner is unchanged and the manifest records the 2,098 map error at 2.49303535497e-4 against the 1e-4 guard, so the goal is unmet.\nVERDICT done_when: the done_when's seven clauses are read against the manifest; clause 1 (per-cell attribution) and clause 7 (fragment) are delivered, clause 2 is recorded NOT MET (2.49303535497e-4 > 1e-4 at 2,098), clause 3 is met at 282/550 (3.14409717612e-13, 4.84764428524e-13) but the 2,098 solve is refused by the same map guard, clause 5 is blocked on betelgeuse/titan, and clause 6 is complete only at 282/550, so the gate measures the done_when and records the shortfall rather than asserting it met.\nVERDICT write_paths: the four declared paths are scripts/prototypes/xpoint_cell_owner, docs/research/axis-facing-owner.html, docs/figures/converged-forward-solve/axis-facing-owner and docs/evidence/fragments/converged-forward-solve/axis-facing-owner.html; git diff --name-only c75e617f80 583820d0b lists 15 files, all inside them.\nVERDICT manifest: read manifest.md; status complete, 13 commits a3a6eb331..583820d0b, and it records the map guard miss, the two converged residuals, the 2,098 diagnostic wall, and a declared negative control it reports as not reproducing; tests and test_logs are empty and no baseline_suite/after_suite arm is named.\nVERDICT diff: read commit by commit from c75e617f80 to 583820d0b; owner_map.py and device_owner.py add the saddle-conic, orientation-override and component machinery (halfplane/bell/saddle/pinned/anchored/shifted/ordinary/oriented/inherited), solve_carrier.py adds --past-map-guard and a diagnostic label, root_checks.py/panel_data.py/runtime_solve.py thread a component argument, extract_cells.py relaxes its backend assert to allow cpu, and four docs/figures are added.\nCALL_SITES: scripts/prototypes/saddle_expansion/speed_gate.py:22, scripts/prototypes/xpoint_cell_owner/solve_carrier.py:88, scripts/prototypes/xpoint_cell_owner/root_checks.py:95, scripts/prototypes/xpoint_cell_owner/panel_data.py:69, scripts/prototypes/xpoint_cell_owner/owner_attribution.py:59, scripts/prototypes/xpoint_cell_owner/saddle_probe.py:62\nSCORE goal_fidelity: 6\nJUSTIFICATION goal_fidelity: the goal's target is unmet: owner_map.py:96 still routes the default component to branch \"halfplane\" and the manifest records 2.49303535497e-4 at 2,098 against the 1e-4 guard, so the owner does not pass the guard it was dispatched to pass.\nSCORE evidence: 14\nJUSTIFICATION evidence: the map and cold-solve measurements are recorded in logs with terminal EXIT lines (cpu-map-job.log, cpu-cold-250.log, cold-halfplane-2000-pastguard.log) and quoted in the manifest, but the clean measurement is the runner's own print rather than a test that could fail.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the manifest's 15-file changed set lies inside the four declared write paths, with no edit outside scripts/prototypes/xpoint_cell_owner and docs, and no nova/equilibrium or nova/biot change.\nSCORE durability: 3\nJUSTIFICATION durability: no test imports owner_map.py or device_owner.py, so nothing reddens if the added saddle-conic or orientation-override behaviour regresses, and the manifest names no suite arm.\nSCORE fit: 17\nJUSTIFICATION fit: the added definitions (owner_map.py:16 saddle_conic_coefficients, owner_map.py:103 reference_saddle_moments) follow the surrounding jnp/argparse prototype idiom and carry mechanism names with no plan or ticket labels.\nSCORE reuse: 16\nJUSTIFICATION reuse: owner_map.py:110 reuses the accessor's own current._normal_rings to reproduce the inherited booking rather than rebuilding ring geometry, and the new conic helpers have no existing owner, so nothing is forked.\nFINDING scripts/prototypes/xpoint_cell_owner/solve_carrier.py:139 follow-on: a second save(args.output, result) writes the unchanged result dict immediately after the save at line 127, so the non-diagnostic path now writes the whole result file twice for no change.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T073925596435-axis-facing-owner/manifest.md:9 follow-on: changed_paths omits scripts/prototypes/xpoint_cell_owner/extract_cells.py, which git diff --name-only c75e617f80 583820d0b lists among the changed files.\n",
+  "review_run_id": "legacy-e04ab067ff59",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "c75e617f80f120668563daa8ff6b62b120658a49",
+  "reviewed_head_sha": "583820d0bf3ff1c50e9565704cd2e1a6e43e90a0",
+  "reviewed_run_id": "r-20261017T073925596435-axis-facing-owner",
+  "scores": {
+    "durability": 3,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 6,
+    "reuse": 16,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T10:20:58.067458+00:00",
+  "total": 75
+}

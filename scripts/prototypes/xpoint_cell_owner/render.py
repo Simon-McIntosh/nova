@@ -14,6 +14,7 @@ from matplotlib.ticker import NullFormatter, NullLocator
 
 from nova.media.ink import DEFAULT_INK, poloidal_axes
 from nova.media.poloidal import draw_nulls, draw_scattered_contours, draw_wall
+from scripts.prototypes.fast_map_production.qualification import MAP_LIMITS
 
 
 GREY = "#929292"
@@ -253,9 +254,110 @@ def terminal_panel(receipt, output):
         contain=wall,
     )
     axis.autoscale_view()
+    figure.legend(
+        loc="upper center",
+        ncol=4,
+        frameon=False,
+        handles=(
+            Line2D(
+                [],
+                [],
+                linestyle="-",
+                linewidth=3.0,
+                color=DEFAULT_INK.flux_color,
+                label="solved",
+            ),
+            Line2D(
+                [], [], linestyle="--", linewidth=2.6, color="#444444", label="analytic"
+            ),
+            Line2D(
+                [],
+                [],
+                linestyle="-",
+                linewidth=2.0,
+                color=DEFAULT_INK.wall_color,
+                label="first wall",
+            ),
+            Line2D(
+                [],
+                [],
+                linestyle="",
+                marker="^",
+                markersize=8,
+                color=DEFAULT_INK.flux_color,
+                label="axis / X-point",
+            ),
+        ),
+    )
     figure.canvas.draw()
     figure.savefig(output, format="svg", metadata={"Date": None})
     plt.close(figure)
+
+
+LADDER = (
+    ("inherited", "inherited ring booking", REFERENCE, "--", 2.6),
+    ("saddle", "saddle-anchored conic", "#9a5f47", "-", 2.6),
+    ("halfplane", "axis-facing (delivered)", BLUE, "-", 3.0),
+)
+
+
+def ladder(receipts, output):
+    """Map flux error against carrier size for each owner representation."""
+    plt.style.use("data-ink")
+    figure, axis = plt.subplots(figsize=(14, 5.5), dpi=100)
+    by_component = {}
+    for receipt in receipts:
+        by_component.setdefault(receipt["component"], []).append(receipt)
+    shared = sorted({receipt["cells"] for receipt in receipts})
+    guards = np.asarray([MAP_LIMITS[cells] for cells in shared])
+    axis.loglog(
+        shared,
+        guards,
+        color=GREY,
+        linestyle=":",
+        linewidth=1.2,
+        zorder=1,
+    )
+    for name, label, color, style, width in LADDER:
+        rows = sorted(by_component.get(name, []), key=lambda row: row["cells"])
+        if not rows:
+            continue
+        cells = np.asarray([row["cells"] for row in rows])
+        errors = np.asarray([row["centre_map_flux_error"] for row in rows])
+        axis.loglog(
+            cells,
+            errors,
+            color=color,
+            linestyle=style,
+            linewidth=width,
+            marker="o",
+            markersize=5,
+            label=label,
+            zorder=3 if name == "halfplane" else 2,
+        )
+    axis.set_xticks(shared, labels=[f"{number:,}" for number in shared])
+    axis.xaxis.set_minor_locator(NullLocator())
+    axis.xaxis.set_minor_formatter(NullFormatter())
+    axis.set_xlim(shared[0] * 0.85, shared[-1] * 1.15)
+    axis.set_yticks((1e-4, 1e-3, 1e-2))
+    axis.yaxis.set_minor_locator(NullLocator())
+    axis.yaxis.set_minor_formatter(NullFormatter())
+    axis.set_ylim(7e-5, 4e-2)
+    axis.set_xlabel("carrier cells")
+    axis.set_ylabel("normalized analytic map flux error")
+    axis.spines["top"].set_visible(False)
+    axis.spines["right"].set_visible(False)
+    axis.annotate(
+        "map guard",
+        xy=(shared[1], guards[1]),
+        xytext=(7, 7),
+        textcoords="offset points",
+        color=GREY,
+        fontsize=14,
+        ha="left",
+    )
+    figure.legend(loc="upper center", ncol=3, frameon=False)
+    _save(figure, output)
 
 
 def main():
@@ -265,9 +367,15 @@ def main():
     parser.add_argument("--bell-map", type=Path, action="append", default=[])
     parser.add_argument("--panel", type=Path, action="append", default=[])
     parser.add_argument("--contact", type=Path, action="append", default=[])
+    parser.add_argument("--ladder", type=Path, action="append", default=[])
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
+    if args.ladder:
+        ladder(
+            [json.loads(path.read_text()) for path in args.ladder],
+            args.output / "owner-representation-ladder.svg",
+        )
     if args.agreement:
         if len(args.agreement) != 3:
             parser.error("three carrier receipts are required")

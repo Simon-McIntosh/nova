@@ -5,7 +5,7 @@ from functools import partial
 import jax
 import jax.numpy as jnp
 
-from nova.equilibrium import fixed_points
+from nova.equilibrium import current, fixed_points
 from scripts.prototypes.fast_map_production import program
 from scripts.prototypes.fast_map_production.kernel import read
 from scripts.prototypes.fast_read.ordinary_cut import bell_moments
@@ -13,26 +13,202 @@ from scripts.prototypes.lean_map.quadrature import interior_moments
 from scripts.prototypes.xpoint_cell_owner.device_owner import integrate_cell
 
 
-def owned_cut(reading, geometry, profile, sigma, capacity=16, component="halfplane"):
+def saddle_conic_coefficients(centres, pitches, saddle, hessian, level):
+    """Express the quadratic held at the located saddle in the cell convention.
+
+    The conic is ``0.5 * (x - saddle)^T H (x - saddle)`` with ``H`` the exact
+    flux Hessian at the saddle, so its value is the boundary level and its
+    gradient vanishes there. The result is returned in the same per-pitch
+    coefficient form the fitted Bell quadratic uses, so one integral consumes
+    both representations.
+    """
+    local = (saddle - centres) / pitches[:, None]
+    scaled = hessian * pitches[:, None, None] ** 2
+    linear = jnp.einsum("nij,nj->ni", scaled, local)
+    quadratic = 0.5 * jnp.einsum("ni,nij,nj->n", local, scaled, local)
+    return jnp.stack(
+        (
+            level + quadratic,
+            -linear[:, 0],
+            -linear[:, 1],
+            0.5 * scaled[:, 0, 0],
+            scaled[:, 0, 1],
+            0.5 * scaled[:, 1, 1],
+        ),
+        axis=1,
+    )
+
+
+def fitted_hessian(coefficients):
+    """Hessian of the cell's fitted quadratic, in the fitted coefficient units."""
+    return jnp.stack(
+        (
+            jnp.stack((2 * coefficients[:, 3], coefficients[:, 4]), axis=1),
+            jnp.stack((coefficients[:, 4], 2 * coefficients[:, 5]), axis=1),
+        ),
+        axis=1,
+    )
+
+
+def fitted_value(coefficients, local):
+    """Evaluate a fitted cell quadratic at local pitch-unit coordinates."""
+    x, y = local[..., 0], local[..., 1]
+    return (
+        coefficients[..., 0]
+        + coefficients[..., 1] * x
+        + coefficients[..., 2] * y
+        + coefficients[..., 3] * x * x
+        + coefficients[..., 4] * x * y
+        + coefficients[..., 5] * y * y
+    )
+
+
+def reference_saddle_moments(geometry, reading, profile, capacity=16):
+    """Book owner sectors on the inherited signed ring fans.
+
+    Reproduces the accessor's own saddle booking, so a carrier built through
+    this path is what the read books rather than an approximation of it. It
+    exists to re-measure the error the diverted map guards were set from.
+    """
+    active = reading.booking_cells & (reading.membership > 0)
+    count = jnp.sum(active, dtype=jnp.int32)
+    indices = jnp.nonzero(active, size=capacity, fill_value=0)[0]
+
+    def one(index):
+        rings, sizes = current._normal_rings(
+            geometry.vertices[index],
+            geometry.vertex_count[index],
+            geometry.centre[index],
+            reading.saddle_form,
+            reading.fragment_selected[index],
+            reading.edge_interval[index],
+            4,
+        )
+        origin = geometry.centre[index]
+        slot = jnp.arange(rings.shape[1])
+        following = jnp.where(slot[None] + 1 < sizes[:, None], slot[None] + 1, 0)
+        end = jnp.take_along_axis(rings, following[..., None], axis=1)
+        first = rings - origin
+        second = end - origin
+        area = 0.5 * (first[..., 0] * second[..., 1] - first[..., 1] * second[..., 0])
+        area = jnp.where(slot[None] < sizes[:, None], area, 0.0)
+        barycentric = jnp.asarray(((2 / 3, 1 / 6), (1 / 6, 2 / 3), (1 / 6, 1 / 6)))
+        points = (
+            origin
+            + barycentric[:, 0, None] * first[..., None, :]
+            + barycentric[:, 1, None] * second[..., None, :]
+        )
+        local = (points - origin) / geometry.pitch[index]
+        x, y = local[..., 0], local[..., 1]
+        coefficient = reading.field_coefficients[index]
+        flux = (
+            coefficient[0]
+            + coefficient[1] * x
+            + coefficient[2] * y
+            + coefficient[3] * x * x
+            + coefficient[4] * x * y
+            + coefficient[5] * y * y
+        )
+        normalized = (flux - reading.axis_flux) / (
+            reading.boundary_flux - reading.axis_flux
+        )
+        density = profile.current_density(points[..., 0], normalized)
+        weighted = area[..., None] * density / 3
+        displacement = points - origin
+        return jnp.stack(
+            (
+                jnp.sum(weighted),
+                jnp.sum(weighted * displacement[..., 0]),
+                jnp.sum(weighted * displacement[..., 1]),
+            )
+        )
+
+    packed = jax.vmap(one)(indices)
+    live = jnp.arange(capacity) < count
+    scattered = (
+        jnp.zeros((len(geometry.centre), 3), dtype=packed.dtype)
+        .at[indices]
+        .add(jnp.where(live[:, None], packed, 0.0))
+    )
+    return scattered, count <= capacity
+
+
+def owned_cut(
+    reading,
+    geometry,
+    profile,
+    sigma,
+    capacity=16,
+    component="halfplane",
+    saddle_hessian=None,
+):
     """Replace the sampled saddle-sector area and moment booking together."""
+    if component == "inherited":
+        moments, valid = reference_saddle_moments(geometry, reading, profile, capacity)
+        return reading, moments, valid
     active = reading.normal_form_cells
+    if component == "ordinary":
+        active = jnp.zeros_like(active)
     count = jnp.sum(active, dtype=jnp.int32)
     indices = jnp.nonzero(active, size=capacity, fill_value=0)[0]
     density = program._density_coefficients(geometry, reading, profile)
+    coefficients = reading.field_coefficients[indices]
+    branch = "bell" if component == "bell" else "halfplane"
+    orientation = None
+    if component == "oriented":
+        orientation = jnp.broadcast_to(sigma * saddle_hessian, (indices.shape[0], 2, 2))
+    if component == "anchored":
+        local = (
+            reading.saddle_form.position - geometry.centre[indices]
+        ) / geometry.pitch[indices, None]
+        offset = reading.boundary_flux - fitted_value(
+            reading.field_coefficients[indices], local
+        )
+        coefficients = reading.field_coefficients[indices].at[:, 0].add(offset)
+        branch = "halfplane"
+    elif component == "shifted":
+        local = (
+            reading.saddle_form.position - geometry.centre[indices]
+        ) / geometry.pitch[indices, None]
+        coefficients = saddle_conic_coefficients(
+            geometry.centre[indices],
+            geometry.pitch[indices],
+            reading.saddle_form.position,
+            saddle_hessian,
+            fitted_value(reading.field_coefficients[indices], local),
+        )
+        branch = "halfplane"
+    elif component in ("saddle", "pinned"):
+        curvature = (
+            saddle_hessian
+            if component == "saddle"
+            else fitted_hessian(reading.field_coefficients[indices])
+        )
+        coefficients = saddle_conic_coefficients(
+            geometry.centre[indices],
+            geometry.pitch[indices],
+            reading.saddle_form.position,
+            curvature,
+            reading.boundary_flux,
+        )
+        branch = "halfplane"
+    cut_axes = (0, 0, 0, 0, 0, None, None, None, None, 0)
+    orientation_axes = None if orientation is None else 0
     selected = jax.vmap(
-        partial(integrate_cell, axis_component=component),
-        in_axes=(0, 0, 0, 0, 0, None, None, None, None, 0),
+        partial(integrate_cell, axis_component=branch),
+        in_axes=cut_axes + (orientation_axes,),
     )(
         geometry.vertices[indices],
         geometry.vertex_count[indices],
         geometry.centre[indices],
         geometry.pitch[indices],
-        reading.field_coefficients[indices],
+        coefficients,
         reading.boundary_flux,
         sigma,
         reading.saddle_form.position,
         reading.axis,
         density[indices],
+        orientation,
     )
     integrals, valid = selected
     live = jnp.arange(capacity) < count
@@ -87,8 +263,17 @@ def map_moments(
     coefficient = jnp.where(complete[:, None], band_coefficient, gauss_coefficient)
     field = program.FusedField(cached, coefficient)
     reading = read(field, roots, geometry, convention, policy, frame_gate=frame_gate)
+    saddle_gap = jnp.linalg.norm(
+        roots.position - reading.saddle_form.position[None], axis=-1
+    )
+    saddle_root = jnp.argmin(jnp.where(roots.valid, saddle_gap, jnp.inf))
     reading, owned, owner_valid = owned_cut(
-        reading, geometry, profile, convention.sigma, component=component
+        reading,
+        geometry,
+        profile,
+        convention.sigma,
+        component=component,
+        saddle_hessian=roots.jet.hessian[saddle_root],
     )
     selected = reading.selected_cells
     full = (

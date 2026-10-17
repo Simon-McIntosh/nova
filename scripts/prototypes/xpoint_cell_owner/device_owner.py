@@ -42,13 +42,21 @@ def integrate_cell(
     saddle,
     axis,
     density_coefficients,
+    orientation_hessian=None,
     *,
     axis_component="halfplane",
 ):
-    """Replace the sampled saddle-sector booking for one containing cell."""
+    """Replace the sampled saddle-sector booking for one containing cell.
+
+    ``orientation_hessian`` overrides the matrix whose eigenvectors orient the
+    branch cut. The cut follows the fitted cell quadratic's own principal axes
+    by default; supplying the exact flux Hessian at the saddle instead keeps
+    the cut direction independent of how well the fit resolves the curvature.
+    """
     field = field_coefficients.at[0].add(-boundary_level) * sigma
     hessian = jnp.array(((2 * field[3], field[4]), (field[4], 2 * field[5])))
-    eigenvalues, eigenvectors = jnp.linalg.eigh(hessian)
+    cut_matrix = hessian if orientation_hessian is None else orientation_hessian
+    eigenvalues, eigenvectors = jnp.linalg.eigh(cut_matrix)
     if axis_component == "bell":
         stationary_local = -jnp.linalg.solve(hessian, field[1:3])
         origin = centre + pitch * stationary_local

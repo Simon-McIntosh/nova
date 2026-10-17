@@ -29,8 +29,23 @@ def main():
     parser.add_argument("--cache", type=Path, required=True)
     parser.add_argument("--start-json", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--component",
+        choices=(
+            "halfplane",
+            "bell",
+            "saddle",
+            "pinned",
+            "anchored",
+            "shifted",
+            "ordinary",
+            "oriented",
+        ),
+        default="halfplane",
+    )
     args = parser.parse_args()
-    assert jax.config.jax_enable_x64 is True and jax.default_backend() == "gpu"
+    assert jax.config.jax_enable_x64 is True
+    assert jax.default_backend() in ("gpu", "cpu")
     print(
         f"nova={nova.__file__} module={__file__} cwd={Path.cwd().resolve()}", flush=True
     )
@@ -51,7 +66,9 @@ def main():
     exterior, _ = _exterior(context.cache, context.carrier_key)
     operator = fixture.forward_operator(context.source, machine)
     terminal = jax.jit(
-        lambda point, carrier: map_moments(point, *carrier[:7], profile, *carrier[7:])
+        lambda point, carrier: map_moments(
+            point, *carrier[:7], profile, *carrier[7:], component=args.component
+        )
     )(moments, operands)
     solved_flux = exterior + _image(operator, moments)
     result = {

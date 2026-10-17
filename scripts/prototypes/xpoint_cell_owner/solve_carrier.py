@@ -39,13 +39,38 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--max-steps", type=int, default=15)
     parser.add_argument(
-        "--component", choices=("halfplane", "bell"), default="halfplane"
+        "--component",
+        choices=(
+            "halfplane",
+            "bell",
+            "saddle",
+            "pinned",
+            "anchored",
+            "shifted",
+            "ordinary",
+            "oriented",
+            "inherited",
+        ),
+        default="halfplane",
     )
     parser.add_argument("--map-only", action="store_true")
+    parser.add_argument(
+        "--past-map-guard",
+        action="store_true",
+        help=(
+            "Solve from a map that exceeds its flux guard and record the "
+            "excess. Diagnostic only: the iteration then converges to a root "
+            "of the map as booked, which is self-consistency and not flux "
+            "accuracy, and the run is labelled as such in its receipt."
+        ),
+    )
     args = parser.parse_args()
-    assert jax.config.jax_enable_x64 is True and jax.default_backend() == "gpu"
+    assert jax.config.jax_enable_x64 is True
+    assert jax.default_backend() in ("gpu", "cpu")
     print(
-        f"nova={nova.__file__} module={__file__} cwd={Path.cwd().resolve()}", flush=True
+        f"nova={nova.__file__} module={__file__} cwd={Path.cwd().resolve()} "
+        f"backend={jax.default_backend()}",
+        flush=True,
     )
     context = build(args.cells, args.cache)
     count = len(context.reference)
@@ -106,7 +131,12 @@ def main():
         f"compile={result['map_compile_seconds']:.3f}",
         flush=True,
     )
-    require_map([result])
+    if args.past_map_guard:
+        result["map_guard_exceeded"] = True
+        result["diagnostic"] = "solved past the flux guard"
+    else:
+        require_map([result])
+    save(args.output, result)
     if args.map_only:
         return
 
@@ -116,7 +146,7 @@ def main():
     pivots = jnp.arange(size, dtype=jnp.int32)
     compiled_step = jax.jit(
         lambda point, carrier, unit, matrix, piv, rebuild: advance(
-            point, carrier, unit, matrix, piv, rebuild, profile
+            point, carrier, unit, matrix, piv, rebuild, profile, args.component
         )
     )
     started = perf_counter()
@@ -157,7 +187,8 @@ def main():
             break
     print(
         f"COLD cells={count} residual={result['history'][-1]['residual']:.12g} "
-        f"converged={result['converged']}",
+        f"converged={result['converged']} "
+        f"guard_exceeded={bool(args.past_map_guard)}",
         flush=True,
     )
     if not result["converged"]:

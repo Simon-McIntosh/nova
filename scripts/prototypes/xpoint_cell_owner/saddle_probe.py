@@ -85,13 +85,16 @@ def main():
     coefficients = reading.field_coefficients[owner]
     level = fitted_value(coefficients, local)
     slope = coefficients[:, 1:3]
-    stationary = -slope / jnp.stack(
-        (
-            jnp.stack((2 * coefficients[:, 3], coefficients[:, 4]), axis=1),
-            jnp.stack((coefficients[:, 4], 2 * coefficients[:, 5]), axis=1),
+    stationary = -jnp.linalg.solve(
+        jnp.stack(
+            (
+                jnp.stack((2 * coefficients[:, 3], coefficients[:, 4]), axis=1),
+                jnp.stack((coefficients[:, 4], 2 * coefficients[:, 5]), axis=1),
+            ),
+            axis=1,
         ),
-        axis=1,
-    )
+        slope[:, :, None],
+    )[:, :, 0]
     offset = jnp.linalg.norm(stationary, axis=1) * jnp.linalg.norm(pitch[owner], axis=1)
     value_gap = np.asarray(jnp.abs(level) / span)
     slope_span = np.asarray(

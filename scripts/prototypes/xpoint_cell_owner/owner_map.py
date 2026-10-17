@@ -81,6 +81,9 @@ def owned_cut(
     density = program._density_coefficients(geometry, reading, profile)
     coefficients = reading.field_coefficients[indices]
     branch = "halfplane" if component == "ordinary" else component
+    orientation = None
+    if component == "oriented":
+        orientation = jnp.broadcast_to(sigma * saddle_hessian, (indices.shape[0], 2, 2))
     if component == "anchored":
         local = (
             reading.saddle_form.position - geometry.centre[indices]
@@ -118,7 +121,7 @@ def owned_cut(
         branch = "halfplane"
     selected = jax.vmap(
         partial(integrate_cell, axis_component=branch),
-        in_axes=(0, 0, 0, 0, 0, None, None, None, None, 0),
+        in_axes=(0, 0, 0, 0, 0, None, None, None, None, 0, None),
     )(
         geometry.vertices[indices],
         geometry.vertex_count[indices],
@@ -130,6 +133,7 @@ def owned_cut(
         reading.saddle_form.position,
         reading.axis,
         density[indices],
+        orientation,
     )
     integrals, valid = selected
     live = jnp.arange(capacity) < count

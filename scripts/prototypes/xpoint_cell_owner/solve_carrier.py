@@ -48,6 +48,7 @@ def main():
             "anchored",
             "shifted",
             "ordinary",
+            "oriented",
         ),
         default="halfplane",
     )

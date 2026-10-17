@@ -158,6 +158,18 @@ share can be repaired by a rescaling fraction: a fraction that reconciles two
 overlapping regions double-counts wherever they overlap, which is what the
 blend arms measured on this carrier already showed.</p>
 
+<p><strong>The ordinary route cannot supply the remainder.</strong> The partition's
+limiting case — hand the owner cells back to the ordinary whole-cell booking,
+which integrates the cell's own polygon with a fitted quadratic density — was
+measured on the profile representation (job 1288163, CPU): 2,098 reaches
+1.61932398342e-2, 550 reaches 9.97172971635e-4 and 282 reaches 1.49396091282e-2,
+against 9.47260772731e-5, 4.87161187281e-4 and 1.0866014244493266e-3 on the lobe
+route. Every guard fails, by 162x, 2.0x and 13.7x. The ordinary fit
+mis-books these cells rather than merely overlapping the lobe, so
+<code>ordinary = lobe + (ordinary − lobe)</code> is not the partition: the
+remainder must be integrated by the owner machinery over the same ring fan with
+the lobe removed, then checked against a dense whole-cell reference.</p>
+
 <h2 id="s21-owner-current-constructions">Each region construction against all three guards</h2>
 
 <p>The owner region can be bounded three ways from data the read already carries.

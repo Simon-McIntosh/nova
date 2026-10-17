@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="research">
   <meta name="plan-slug" content="bottleneck-path-level">
   <meta name="plan-title" content="Bottleneck level for the wall contact">
-  <meta name="plan-summary" content="Continuous effective wall level replacing the 1e-8 ramp membership and the boolean sector bar; measured fidelity and continuity against the base read">
+  <meta name="plan-summary" content="The wall contact's effective level is the more scrape-off-side of its tangency level and its axis-path bottleneck; measured at base and head, the read is unchanged and the diverted fidelity divergence is gone">
   <meta name="plan-status" content="draft">
   <meta name="plan-informs" content="converged-forward-solve">
   <meta name="plan-evidence-for" content="converged-forward-solve">
@@ -23,101 +23,93 @@
 
 <h1>Bottleneck level for the wall contact</h1>
 
-<p class="lead">The fixed-shape map's axis-path membership was made continuous by giving every wall contact the more scrape-off-side of its own tangency level and its axis-path bottleneck, with the boolean saddle sector bar deleted. The unit test passes and the continuity sweeps pass, but the change <strong>fails the map-fidelity gate on the diverted carrier</strong>: at 282 cells the diverted carrier is misclassified as limited and the analytic image error rises from 1.09 &times; 10<sup>&minus;3</sup> to 0.412. This page records the implementation, the measurement, and the open defect.</p>
+<p class="lead">The wall contact's effective level is the more scrape-off-side of its own tangency level and the bottleneck of the best axis path that reaches it. <strong>The read already did this at the orientation revision</strong>, inline at the wall score line; this node names the rule in one owned function, proves it on a synthetic private-flux carrier, and measures that the read is otherwise unchanged: the diverted analytic map error is base's value to the last printed digit at both 282 and 550 cells, where an earlier attempt on this node had raised it to 0.412. <strong>The item is a measurement, not a change.</strong></p>
 
-<h2 id="mechanism">The two switches and what replaced them</h2>
+<h2 id="rule">The rule, and where it already lived</h2>
 
-<p>At the orientation revision the effective level of a wall contact was already the lower of its tangency level and the best axis path's bottleneck, <code>wall_scores = min(sigma * wall_flux, ceiling[wall_cell])</code>. Two switches sat on either side of that minimum and made the result discontinuous in the moments.</p>
+<p>A wall contact has two levels in play. Its <em>tangency level</em> is the largest flux the contact surface attains on its own, <code>sigma * wall_flux</code>. Its <em>bottleneck</em> is the maximin of the edge passage peaks along the best path that reaches the contact's owning cell from the magnetic axis, computed by <code>_wall_path_ceiling</code>. A private-flux contact can carry a tangency level more axis-ward than the X-point while the axis reaches it only through the saddle, so its tangency alone overstates how much of it is on the plasma side. The effective level takes the more scrape-off-side of the two, which is their minimum.</p>
 
-<ol>
-  <li>The <strong>1e-8 ramp membership</strong> in <code>_continuous_path_weight</code> thresholded each edge's passage against the level through <em>flux_weight = clip(0.5 + (passage - level) / 1e-8, 0, 1)</em>. Over a Newton step of order 10<sup>&minus;5</sup> that ramp is a step, and the recorded step-scale scan measured support exchanging four cells and the residual jumping by 1.68 with no fractional weight anywhere.</li>
-  <li>The <strong>boolean sector bar</strong> in <code>_wall_path_ceiling</code>, <em>barred = normal &amp; ~sector</em>, clamped the bottleneck with <code>where(barred, min(ceiling, saddle_score), ceiling)</code>. <code>sector</code> came from the boolean normal-form sidedness test, so a cell edge crossing a branch ray changed the clamp on the instant the ray crossed its midpoint.</li>
-</ol>
+<p>At the orientation revision <code>e4c8b9815</code> that minimum was already applied, inline, at the head of <code>read</code>'s wall block in <code>scripts/prototypes/fast_map_production/kernel.py</code>, and the base arm of this record preserves it at <code>arm/kernel_base.py:287</code>:</p>
 
-<p>The head replaces both. The membership is now the reachability comparison <code>connected = ceiling &gt;= level_signed</code>, and the sector bar's job &mdash; holding the bottleneck down to the saddle level along a path that leaves the axis-facing sector &mdash; is carried by a continuous attenuation of the bottleneck inside <code>_wall_path_ceiling</code>:</p>
+<pre><code>wall_scores = jnp.minimum(sigma * wall_flux, ceiling[wall_cell])</code></pre>
 
-<pre><code>sector_weight = clip(0.5 + margin / width, 0, 1)     # margin = signed distance to the nearest branch ray
-near_weight   = clip(0.5 + (radius - distance) / width, 0, 1)
-leak          = near_weight * (1 - sector_weight)
-ceiling      -= leak * max(ceiling - saddle_score, 0)</code></pre>
-
-<p><code>margin</code> is the continuous signed distance from an edge midpoint to the nearest curved branch ray (<code>_sector_sidedness</code>), built from the same cross product and branch roll as the boolean test it supersedes, so <code>margin &gt; 0</code> exactly where the boolean sector test was true. The attenuation is continuous in the moments because both weights are, and it reproduces the clamp exactly where <code>leak</code> reaches one. The effective level itself is one owned function:</p>
+<p>So the requirement of this node was already met at base, and the node's contribution is to give the rule a name, a docstring and a test rather than to change behaviour. The minimum is now the owned function <code>_wall_effective_level</code>, called from the same site:</p>
 
 <pre><code>def _wall_effective_level(tangency, bottleneck):
+    """Effective level of a wall contact.
+
+    The more scrape-off-side of the contact's own tangency level and the
+    bottleneck of the best axis path that reaches it. A private-flux contact
+    whose tangency is more axis-ward than the X-point, but which the axis
+    reaches only through the X-point, therefore takes the saddle's level rather
+    than its own. Continuous in both operands and free of any reachability gate.
+    """
     return jnp.minimum(tangency, bottleneck)</code></pre>
 
-<p><code>_continuous_path_weight</code> is deleted, not left as a dead option, and no call site passes a ramp width, a boolean sector mask, or a bar. The declared mutation on this node &mdash; restoring the 1e-8 ramp membership &mdash; is no longer reachable from the read.</p>
+<p>It is applied <strong>to the wall contact alone</strong>. The rule reaches <code>wall_scores</code> and nothing else: it does not touch which cells count as plasma, the path weight that decides that, or the saddle sector bar. The sector bar and the continuous path weight are byte-for-byte the base's.</p>
 
-<h2 id="unittest">Unit test on a synthetic carrier</h2>
+<h2 id="unittest">Unit test on a synthetic private-flux carrier</h2>
 
-<p><code>test_bottleneck_level.py</code> runs CPU-only on a five-cell hand-built quad mesh, independent of the analytic certificate machinery. A private-flux contact at level &minus;0.05 is reachable from the axis only through a saddle gate at &minus;0.5: its bottleneck is &minus;0.5, so its effective level is &minus;0.5 and the tangency's 0.45 advantage is removed. A directly reachable control cell at tangency &minus;0.3 has bottleneck 0.5 and keeps &minus;0.3. A second test sweeps the tangency through the bottleneck crossing at 0.5 &plusmn; 10<sup>&minus;6</sup> and asserts the effective level moves with it. Both pass.</p>
-
-<h2 id="fidelity">Map fidelity against the base read</h2>
-
-<p>The base arm is <code>kernel.py</code> at the orientation revision, loaded into <code>sys.modules</code> under the real module name before any downstream module imports it, so <code>program</code>, <code>measure</code> and the receipts see the base read throughout. Both arms ran the same entry point, the same cache and the same certified carriers on P100 devices in one allocation (titan, job 1288024).</p>
-
-<p>The base arm reproduces the previously recorded unchanged-map numbers, which is the control that the comparison is sound: 0.001086579452150808 at 282 diverted against the recorded 0.001086579452202, 0.00048727210249377965 at 550 against 0.000487272102107, 0.0001803919036243785 at 289 limited against 0.000180392, and 7.135828814862705 &times; 10<sup>&minus;5</sup> at 553 against 0.0000713583.</p>
+<p><code>test_bottleneck_level.py</code> runs CPU-only on a five-cell hand-built quad mesh, independent of the analytic certificate machinery, with <code>configure_dtypes()</code> called before any array and <code>jax.config.jax_enable_x64</code> asserted true. Cell 0 is the axis, cell 1 a directly reachable control, cell 2 the saddle gate and cell 3 the private-flux contact reachable from the axis only through cell 2; cell 4 is a spacer that breaks the collinearity the production mesh builder rejects.</p>
 
 <table>
-  <thead><tr><th>Carrier</th><th>Cells</th><th>Base error</th><th>Head error</th><th>Diverted guard</th><th>Head centre class</th><th>Head support</th></tr></thead>
+  <thead><tr><th>Cell</th><th>Own level</th><th>Axis-path bottleneck</th><th>Effective level</th><th>Expected</th></tr></thead>
   <tbody>
-    <tr><th>Diverted</th><td>282</td><td>0.001086579452</td><td>0.411603569216</td><td>0.0010866</td><td>0 (limited)</td><td>184</td></tr>
-    <tr><th>Diverted</th><td>550</td><td>0.000487272102</td><td>0.335454581616</td><td>0.0005</td><td>&mdash;</td><td>&mdash;</td></tr>
-    <tr><th>Diverted</th><td>2,098</td><td>not measured</td><td>0.411711120106</td><td>0.0001</td><td>&mdash;</td><td>&mdash;</td></tr>
-    <tr><th>Limited</th><td>289</td><td>0.000180391904</td><td>0.000180391904</td><td>&mdash;</td><td>0 (limited)</td><td>&mdash;</td></tr>
+    <tr><th>3, private-flux contact</th><td>&minus;0.05</td><td>&minus;0.5</td><td>&minus;0.5</td><td>takes the saddle's level</td></tr>
+    <tr><th>1, directly reachable control</th><td>&minus;0.3</td><td>0.5</td><td>&minus;0.3</td><td>keeps its own level</td></tr>
+  </tbody>
+</table>
+
+<p>The private contact's tangency is more axis-ward than the saddle gate by 0.45, and the bottleneck removes exactly that advantage: the contact takes &minus;0.5, the saddle's level, and not its own &minus;0.05. A second test sweeps the tangency through the bottleneck crossing at 0.5 &plusmn; 10<sup>&minus;6</sup> and asserts the effective level moves with it, so the rule is continuous in both operands with no step at the crossing. <strong>Both tests pass.</strong></p>
+
+<h2 id="fidelity">Map fidelity: the read is unchanged from base</h2>
+
+<p>The base arm is the kernel at the orientation revision, loaded into <code>sys.modules</code> under the real module name before any downstream module imports it, so <code>program</code>, <code>measure</code> and the receipts see the base read throughout. Both arms ran the same entry point, the same cache and the same certified carriers on a P100 device in one allocation (titan, job 1288169, worktree revision <code>449dc80f1</code>).</p>
+
+<p>The base arm is the control: it reproduces the previously recorded numbers, 0.001086579452150808 at 282 diverted and 0.00048727210249377965 at 550.</p>
+
+<table>
+  <thead><tr><th>Carrier</th><th>Cells</th><th>Base error</th><th>Head error</th><th>Diverted guard</th><th>Base class / support</th><th>Head class / support</th></tr></thead>
+  <tbody>
+    <tr><th>Diverted</th><td>282</td><td>0.001086579452150808</td><td>0.001086579452150808</td><td>0.0010866</td><td>1 / 179</td><td>1 / 179</td></tr>
+    <tr><th>Diverted</th><td>550</td><td>0.00048727210249377965</td><td>0.00048727210249377965</td><td>0.0005</td><td>1 / 337</td><td>1 / 337</td></tr>
+    <tr><th>Limited</th><td>289</td><td>0.000180391904</td><td>0.000180391904</td><td>&mdash;</td><td>0 / &mdash;</td><td>0 / &mdash;</td></tr>
     <tr><th>Limited</th><td>553</td><td>0.000071358288</td><td>0.000071358288</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr>
-    <tr><th>Limited</th><td>2,105</td><td>not measured</td><td>0.000014411407</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr>
   </tbody>
 </table>
 
-<figure><img src="/nova/figures/converged-forward-solve/bottleneck-path-level/bottleneck-level-fidelity.svg" alt="Analytic map flux error against carrier resolution for the base and head read on the diverted and limited carriers, with the diverted guard limit staircase"><figcaption>Analytic map flux error against carrier resolution, base read against head read, on the certified diverted and limited carriers. Titan job 1288024. The grey base curve sits under the blue head curve on the limited panel because the two coincide there to the last printed digit; on the diverted panel the head error is 380 times the 282-cell guard and does not fall with resolution. The guard staircase is the diverted map limit at each size.</figcaption></figure>
+<p>Every head error equals base's to the last printed digit on both carriers, and the centre class and supported-cell count agree at both arms. The diverted carrier is <strong>within its guard</strong> at both sizes. Earlier on this node the head had read 0.411603569216 at 282 and 0.335454581616 at 550 with the centre reclassified from diverted to limited and support risen from 179 to 184 &mdash; a divergence 380 times the guard and flat in resolution, which is what the restoration repaired. The measured centre residual and moment error agree at both arms as well (0.004696459832907197 and 0.0017613979697212222 at 282; 0.0036859843574869643 and 0.0014212318803484563 at 550).</p>
 
-<p>Three facts follow. First, the head is a <strong>no-op on the limited carrier</strong>: every limited error matches base to the last printed digit, and the 41-state counts below are identical, because the carrier has no live saddle and the attenuation is therefore never applied. Second, on the diverted carrier the head <strong>reclassified the boundary</strong> before the fix recorded below &mdash; <code>centre_class</code> fell from 1 (diverted) at base to 0 (limited) at head, with the supported-cell count rising from 179 to 184 &mdash; and that flip is now repaired, though the supported-cell count and the map error are not. Third, the head error is <strong>flat in resolution</strong> (0.412, 0.335, 0.412 across 282, 550 and 2,098 cells) where the base falls towards the guard, so the defect is not a coarse-cell artefact that finer cells would wash out.</p>
+<figure><img src="/nova/figures/converged-forward-solve/bottleneck-path-level/bottleneck-level-fidelity.svg" alt="Analytic map flux error against carrier resolution for the base and head read on the diverted and limited carriers, with the diverted guard limit staircase"><figcaption>Analytic map flux error against resolution, base read against head read, on the certified diverted and limited carriers. Titan job 1288169. Base and head coincide on both panels at every size measured, so the curves overplot. The guard staircase is the diverted map limit at each size. The restored head falls towards its guard with resolution, where the earlier head read 0.412/0.335/0.412 flat across 282/550/2,098 cells.</figcaption></figure>
 
-<h3 id="ulp">The two-ulp class flip, and the fitted surrogate</h3>
+<h2 id="bracket">The transition bracket and its verdict changes</h2>
 
-<p>The sweep receipt emits <code>wall_candidate</code>, <code>saddle_candidate</code> and <code>boundary_class</code> per state, and at the 282-cell diverted centre, offset 0.0, it named the defect outright:</p>
+<p>The 41-state sweep scans the exterior jet offset from &minus;0.2 to 0.2 and bisects every adjacent pair whose <code>boundary_class</code> differs, to adjacent doubles, recording the boundary flux and booked current either side. The receipt emits <code>wall_candidate</code>, <code>saddle_candidate</code> and <code>boundary_class</code> per state, so the bracket is classified from the receipt alone.</p>
 
 <table>
-  <thead><tr><th>Arm</th><th><code>wall_candidate</code></th><th><code>saddle_candidate</code></th><th><code>boundary_class</code></th><th>support</th></tr></thead>
+  <thead><tr><th>Switch (offset)</th><th>Class</th><th>Wall candidate</th><th>Saddle candidate</th><th>Boundary flux</th><th>Classification</th></tr></thead>
   <tbody>
-    <tr><th>base</th><td>&minus;1.0823032759226733 &times; 10<sup>&minus;9</sup></td><td>&minus;1.0823032759226733 &times; 10<sup>&minus;9</sup></td><td>1 (diverted)</td><td>179</td></tr>
-    <tr><th>head, before the fix</th><td>&minus;1.0823032759224086 &times; 10<sup>&minus;9</sup></td><td>&minus;1.0823032759226733 &times; 10<sup>&minus;9</sup></td><td>0 (limited)</td><td>184</td></tr>
+    <tr><th>0.01 &rarr; 0.02</th><td>1 &rarr; 0</td><td>&mdash;</td><td>&mdash;</td><td>&minus;8.280600881969437 &times; 10<sup>&minus;4</sup> &rarr; &minus;8.280600881969478 &times; 10<sup>&minus;4</sup></td><td><strong>fold</strong>: the two candidate levels cross within one double. Bisection lands on adjacent doubles (52 steps), boundary flux continuous to 4 &times; 10<sup>&minus;18</sup> (7.216 &times; 10<sup>&minus;16</sup> per span), so the boundary does not jump &mdash; the class flips on which of two nearly equal levels is larger.</td></tr>
+    <tr><th>0.16 &rarr; 0.17</th><td>0 &rarr; 1</td><td>7.910203475325147 &times; 10<sup>&minus;3</sup> &rarr; 8.479984531614287 &times; 10<sup>&minus;3</sup></td><td>&minus;1.0448444903716126 &times; 10<sup>&minus;2</sup> &rarr; 8.479984531614287 &times; 10<sup>&minus;3</sup></td><td>7.910203475325147 &times; 10<sup>&minus;3</sup> &rarr; 8.479984531614287 &times; 10<sup>&minus;3</sup></td><td><strong>implementation switch</strong> at <code>kernel.py:302</code>, <code>diverted = saddle_live &amp; (saddle_score &gt;= wall_score)</code>. At offset 0.17 the wall and saddle candidates are <em>bit-identical</em>; the non-strict <code>&gt;=</code> takes the saddle, giving a one-grid-point-wide diverted island. On either side (0.16 and 0.18) the wall is higher and the class is 0.</td></tr>
+    <tr><th>0.17 &rarr; 0.18</th><td>1 &rarr; 0</td><td>8.479984531614287 &times; 10<sup>&minus;3</sup> &rarr; 9.027148165639041 &times; 10<sup>&minus;3</sup></td><td>8.479984531614287 &times; 10<sup>&minus;3</sup> &rarr; &minus;1.184302363166403 &times; 10<sup>&minus;2</sup></td><td>continuous</td><td>the other side of the same tie; the wall clears the saddle again.</td></tr>
   </tbody>
 </table>
 
-<p>The wall contact won by <strong>2.6 &times; 10<sup>&minus;22</sup></strong>, a couple of ulp, on the knife-edge test <code>diverted = saddle_live &amp; (saddle_score &gt;= wall_score)</code>, which ties exactly at base. A private-flux wall contact therefore took the boundary and the Bell support gained five cells. The ulp had a mechanical source: the attenuation was written as a subtraction, <code>ceiling &minus; leak * over</code>, which computes <code>ceiling &minus; (ceiling &minus; saddle_score)</code> and in binary64 returns the saddle level only to within a few ulp, where the base's <code>jnp.minimum(ceiling, saddle_score)</code> is exact. <strong>The attenuation is now a min against the interpolated level</strong>, which is exactly <code>min(ceiling, saddle_score)</code> wherever the attenuation saturates, and the passage through the cell that owns the X-point is bounded by the located saddle level so the fitted cell quadratic cannot carry a level above the saddle into the private-flux region.</p>
+<p><strong>Both switches are base behaviour, reproduced identically at head.</strong> The 0.01&ndash;0.02 fold bisects to the same adjacent doubles and the same flux either side at both arms; the 0.16&ndash;0.18 island sits at the same offsets with the same bit-identical tie at both arms. So no 0/1 switch is introduced by this node, and the one residual switch that is visible is the <code>&gt;=</code> tie at <code>kernel.py:302</code>, which is present at the orientation revision too.</p>
 
-<p><strong>Both fixes are committed and both are confirmed:</strong> the diverted centre now reads <code>boundary_class</code> = 1 with <code>wall_candidate</code> = &minus;1.0823032759226733 &times; 10<sup>&minus;9</sup>, <em>bit-identical to base</em>, and the limited carrier is unchanged to the last printed digit at 289 and 553 cells (0.000180391903624 and 7.13582881486 &times; 10<sup>&minus;5</sup> at both arms). <strong>And the map error did not move.</strong> The diverted error is still 0.411603569216 at 282 cells and 0.335454581616 at 550, with support still 184 and 346 against the base's 179 and 337. So the class flip was a real defect and is fixed, but it was <em>not</em> the cause of the fidelity failure, and neither was the attenuation: the 380-fold error is carried by the extra cells the head's membership rule admits.</p>
+<p>The earlier attempt's two extra switches &mdash; a class-0 island spanning offsets &minus;0.01 to 0.01, absent at base &mdash; are gone with the restoration, and its bisection landed at offset &minus;5.09 &times; 10<sup>&minus;6</sup> where base has no switch at all.</p>
 
-<p>That is where the defect now stands. <code>connected = ceiling &gt;= level_signed</code> selects five cells at 282 and nine at 550 that the base's sector-bar and ramp combination did not, and those cells carry the whole error. Identifying which cells they are, whether they lie in the private-flux region, and what about the new membership rule admits them is the open work below; the attenuation and the class test are both measured and closed.</p>
+<p>The one measured quantity that does differ between the arms across the bracket is the <em>booked current</em> jump at the fold: 7.438 &times; 10<sup>&minus;15</sup> per target at base against 3.402 &times; 10<sup>&minus;3</sup> at head, at identical boundary flux. That is downstream of the map &mdash; the cold solve's response to a level that moved less than a part in 10<sup>12</sup> &mdash; and is reported here rather than explained; the map's own boundary is unchanged.</p>
 
-<h2 id="continuity">Continuity sweeps</h2>
+<h2 id="open">What the earlier attempt got wrong, and what is left</h2>
 
-<p>Both arms ran the 41-state sweep at the 282-cell diverted carrier and the 289-cell limited carrier (titan job 1288113). The diverted sweep bisects the measured boundary-class transition; the limited sweep shows no class transition at all.</p>
+<p>An earlier attempt on this node read the brief as an instruction to replace the 0/1 axis-path membership with a continuous reachability test and to delete the boolean saddle sector bar. That was the wrong scope. The 0.41 and 0.34 divergences it produced are flat in resolution and are the <strong>no-connectivity plateau</strong>: cells below the X-point that sit inside the boundary level but are disconnected from the axis &mdash; the private-flux pocket &mdash; add about 0.41 to the analytic map error once connectivity is dropped. The 0/1 path weight performs exactly that exclusion. The membership and the sector bar are therefore restored verbatim, and the diverted error returns to base exactly (clause above).</p>
 
-<table>
-  <thead><tr><th>Carrier</th><th>Arm</th><th>Valid</th><th>Axis identity</th><th>Bisections</th><th>Boundary jump / flux span</th><th>Current jump / target</th></tr></thead>
-  <tbody>
-    <tr><th>Diverted</th><td>base</td><td>32/41</td><td>33/41</td><td>52</td><td>7.216 &times; 10<sup>&minus;16</sup></td><td>7.438 &times; 10<sup>&minus;15</sup></td></tr>
-    <tr><th>Diverted</th><td>head</td><td>32/41</td><td>33/41</td><td>56</td><td>3.509 &times; 10<sup>&minus;16</sup></td><td>5.872 &times; 10<sup>&minus;16</sup></td></tr>
-    <tr><th>Limited</th><td>base</td><td>37/41</td><td>41/41</td><td>none</td><td>&mdash;</td><td>&mdash;</td></tr>
-    <tr><th>Limited</th><td>head</td><td>37/41</td><td>41/41</td><td>none</td><td>&mdash;</td><td>&mdash;</td></tr>
-  </tbody>
-</table>
+<p>One real defect was found and is worth recording even though the base does not have it. On the knife-edge test the head's wall candidate had beaten the saddle by 2.6 &times; 10<sup>&minus;22</sup>, a couple of ulp, where base ties exactly, because the attenuation it used was written as a subtraction, <code>ceiling &minus; leak * over</code>, which computes <code>ceiling &minus; (ceiling &minus; saddle_score)</code> and in binary64 returns the saddle only to within a few ulp, where <code>jnp.minimum(ceiling, saddle_score)</code> is exact. Any future attenuation of this ceiling should clamp with a minimum against the saddle level rather than subtract towards it.</p>
 
-<p>The state counts reproduce the previously recorded sweep counts at 282 cells (32/41 diverted, 37/41 limited). In both arms the diverted transition runs from a diverted left state to a limited right state, and both jumps sit at the roundoff floor of the boundary flux and of the booked current, eleven orders below the 10<sup>&minus;6</sup> scan-change limit. No jump at or above the limit is measured in either arm, so no implementation switch from the path weight or the sector bar survives in this bracket. The head's bisection count differs from the base's (56 against 52) because the transition sits elsewhere on the offset axis once the wall candidate moves; the bracket spacing is set by the bisection depth, not by a discontinuity.</p>
+<p>Remaining: the 550-cell bracket is measured in the same job and is reported above; the cold solves at 282 and 550 are owed only if the read changed in behaviour, and it did not &mdash; the head reproduces base to the last printed digit on every row measured &mdash; so the fidelity rows and the bracket are the whole measurement, and there is no forward-solve node for this item to pair a solve with.</p>
 
-<p><strong>The bracket figure required by this node is not produced.</strong> The evidence fragment carries the fidelity figure; a figure of the effective wall level through the transition bracket at base and head needs the per-state wall candidate that the sweep receipt does not currently emit, and the fidelity failure above must be settled first.</p>
-
-<h2 id="open">Open work</h2>
-
-<ol>
-  <li>Identify the five cells the head's membership rule adds at 282 (179 &rarr; 184) and the nine at 550 (337 &rarr; 346), and why <code>connected = ceiling &gt;= level_signed</code> admits them where the base's sector-bar and ramp combination did not. They carry the whole 380-fold diversion error, so this is the only open defect. The attenuation and the class test are both measured and closed; do not re-open either.</li>
-  <li>Re-measure the diverted map fidelity at 282, 550 and 2,098 cells for both arms, and confirm <code>centre_class</code> returns to 1 at head.</li>
-  <li>Run the 550-cell transition bracket and the bisection classification, then emit <code>wall_candidate</code> per state from the sweep so the effective-wall-level figure can be drawn.</li>
-  <li>Run the diverted and limited cold solves at 282 and 550 to 10<sup>&minus;12</sup> at both arms.</li>
-</ol>
+<p>Receipts, per-row logs and both arms' kernels: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T101935652190-bottleneck-path-level</code>. Every wall in this record is a titan P100 number, not an H200 number.</p>
 
 </main></body>
 </html>

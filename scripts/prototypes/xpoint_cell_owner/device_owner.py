@@ -7,6 +7,7 @@ from numpy.polynomial.legendre import leggauss
 
 _OUTER_NODES, _OUTER_WEIGHTS = (jnp.asarray(row) for row in leggauss(128))
 _INNER_NODES = jnp.asarray((-1 / jnp.sqrt(3.0), 1 / jnp.sqrt(3.0)))
+_INNER_WEIGHTS = jnp.asarray((1.0, 1.0))
 
 
 def _quadratic(coefficients, x, y):
@@ -15,19 +16,24 @@ def _quadratic(coefficients, x, y):
 
 
 def _roots(a, b, c):
-    radical = jnp.sqrt(jnp.maximum(b * b - 4 * a * c, 0.0))
-    safe_a = jnp.where(jnp.abs(a) > 1e-14, a, 1.0)
-    safe_b = jnp.where(jnp.abs(b) > 1e-14, b, 1.0)
-    quadratic = jnp.stack(
-        ((-b - radical) / (2 * safe_a), (-b + radical) / (2 * safe_a))
-    )
-    linear = -c / safe_b
-    roots = jnp.where(jnp.abs(a) > 1e-14, quadratic, linear)
-    valid = jnp.where(
-        jnp.abs(a) > 1e-14,
-        b * b - 4 * a * c >= 0,
-        jnp.abs(b) > 1e-14,
-    )
+    """Roots of a v-quadratic in the cancellation-free symmetric form.
+
+    The symmetric form (-b +/- sqrt(b^2 - 4ac)) / 2a destroys the root nearer
+    zero whenever b^2 dominates 4ac, which is the regime of the fine-mesh cells
+    the owner region cuts through: the small root is then the one inside the
+    slice, and losing it moves the region boundary past a whole subinterval, so
+    that subinterval is dropped or counted entire.
+    """
+    squared = b * b - 4 * a * c
+    radical = jnp.sqrt(jnp.maximum(squared, 0.0))
+    quadratic = jnp.abs(a) > 1e-14
+    safe_a = jnp.where(quadratic, a, 1.0)
+    pivot = -0.5 * (b + jnp.where(b >= 0.0, radical, -radical))
+    pivot = jnp.where(jnp.abs(pivot) > 1e-300, pivot, 1.0)
+    paired = jnp.stack((pivot / safe_a, c / pivot))
+    linear = -c / jnp.where(jnp.abs(b) > 1e-14, b, 1.0)
+    roots = jnp.where(quadratic, paired, linear)
+    valid = jnp.where(quadratic, squared >= 0, jnp.abs(b) > 1e-14)
     return roots, valid
 
 
@@ -184,8 +190,10 @@ def integrate_cell(
             (jnp.ones_like(density), density, pitch * density * x, pitch * density * y),
             axis=-1,
         )
-        weights = jnp.where(positive, (v_right - v_left) / 2, 0.0)
-        return jnp.sum(terms * weights[:, None, None], axis=(0, 1))
+        weights = (
+            jnp.where(positive, (v_right - v_left) / 2, 0.0)[:, None] * _INNER_WEIGHTS
+        )
+        return jnp.sum(terms * weights[..., None], axis=(0, 1))
 
     values = jax.vmap(one_slice)(u.reshape(-1)).reshape(*u.shape, 4)
     moments = pitch * pitch * jnp.sum(values * outer_weights[..., None], axis=(0, 1))

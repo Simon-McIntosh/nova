@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Owner-cell current evidence fragment</title>
+<meta name="plan" content="converged-forward-solve">
+</head>
+<body>
+<div id="owner-cell-current-fragment" class="evidence-fragment" data-node="owner-cell-current">
+
+<p id="owner-cell-current-summary">The quartering of the half-plane owner booking
+error between the density representation inside the region and the quadrature
+order of the owner integral, with both candidate repairs measured against the
+failing 2,098-cell map guard. Both are refuted: the representation moves the
+measure by 4.35e-9 and raising the owner quadrature sixfold moves it by
+7.62e-9, against an excess of 2.3164e-4 over the reconstruction floor. The
+2,098-cell map error stands at 2.49299259136e-4, 2.49 times its 1e-4 guard.</p>
+
+<table id="owner-cell-current-ladder">
+<tr><th>requested cells</th><th>realised</th><th>guard</th><th>owner map error</th><th>the half-plane booking it replaces was</th></tr>
+<tr><td>250</td><td>282</td><td>1.0866e-3</td><td>1.08005994731e-3</td><td>passes</td></tr>
+<tr><td>500</td><td>550</td><td>5.0e-4</td><td>4.09590445975e-4</td><td>passes</td></tr>
+<tr><td>2000</td><td>2098</td><td>1.0e-4</td><td>2.49299259136e-4</td><td><strong>fails, 2.49x</strong></td></tr>
+</table>
+
+<table id="owner-cell-current-mutations">
+<tr><th>mutation of the owner integral</th><th>2098 map error</th><th>movement</th></tr>
+<tr><td>fitted Bell quadratic inside the region (reference)</td><td>2.49303535497e-4</td><td>—</td></tr>
+<tr><td>profile at the quadrature nodes from the region-selecting flux</td><td>2.49299183493e-4</td><td>4.35e-9</td></tr>
+<tr><td>v-quadratic roots, cancellation-free symmetric form</td><td>2.49303535497e-4</td><td>0</td></tr>
+<tr><td>outer rule 128 to 256 nodes, inner rule 2 to 6 nodes</td><td>2.49299259136e-4</td><td>7.62e-9</td></tr>
+</table>
+
+<p id="owner-cell-current-attribution">The half-plane owner region accounts for
+1.5457e-4 of the 2.3164e-4 excess over the reconstruction floor at 2,098 cells:
+the booking it replaces reaches 9.4726e-5, which is inside the 1e-4 guard, while
+the half-plane owner reaches 2.4930e-4. The owner books 11.76 % of cell 47's
+area, and removing that one cell's residual takes the map error to 1.4740e-4.
+Neither the integral's quadrature order nor its density weighting is a term at
+this size, so the failing term is the region share and its reconciliation with
+the cell's remaining booking.</p>
+
+<p id="owner-cell-current-control">Declared negative control — "restoring the
+fitted Bell flux inside the owner region brings the 2,098 map error back above
+1e-4" — <strong>fails</strong>: restoring the fitted representation moves the
+measure to 2.49303535497e-4, a change of 2.5e-7 in relative terms, so the guard
+is exceeded under both representations and no mutation of the representation can
+move the measure across it. Recorded as the measurement's refutation of the
+representation repair.</p>
+
+<p id="owner-cell-current-inputs">Evidence inputs: carrier cache
+<code>analytic_oracle_hex_machine_250/500/2000.zarr</code> under the lean-map
+crew run; row outputs <code>owner-current/map-fitted-*.json</code>,
+<code>owner-current/map-profile-*.json</code>,
+<code>owner-current/mapq-profile-*.json</code> and
+<code>owner-current/region-density-*.json</code>; per-job payload copies
+<code>owner-current/rows*.sh</code>. Revision at measurement
+<code>b4d125d550ec</code> for the map rows, working tree at 12:02 for the
+raised-order row. Full account: <code>docs/research/owner-cell-current.html</code>.</p>
+
+<p id="owner-cell-current-unmet">Unmet done-when clauses: the repair (2,098 stays
+2.49x its guard), the cold solves to 1e-12, the 550 transition-bracket bisection
+and the poloidal panels, the last because no cold solve produced a terminal
+state.</p>
+
+</div>
+</body>
+</html>

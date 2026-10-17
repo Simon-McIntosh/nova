@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Owner-cell current: attribution of the half-plane booking error</title>
+<meta name="plan" content="converged-forward-solve">
+</head>
+<body>
+<h1>Owner-cell current: attribution of the half-plane booking error</h1>
+
+<p>Node <code>owner-cell-current</code>. The axis-facing half-plane owner region
+was introduced to book the current over the cells its cut passes through. It
+improves the coarse carriers and fails the fine one: at 2,098 cells the
+diverted map error stalls at 2.4930e-4 against a guard of 1e-4, while the
+booking it replaces reaches 9.4726e-5 and the reconstruction floor is
+1.7664e-5. This record attributes the excess to a term, tests the two candidate
+repairs, and reports which of the six done-when clauses the measurement
+supports.</p>
+
+<h2 id="s21-owner-current-ladder">The measured ladder</h2>
+
+<p>Every number is a diverted single-null map flux error,
+<code>max|flux - analytic| / span</code>, measured on the carrier the requested
+cell count realises. The fitted column is the Bell quadratic fit of the composed
+density inside the owner region; the profile column evaluates the profile at the
+quadrature nodes from the region-selecting flux. Both share one integral, one
+geometry and one region, so the difference between the columns is the density
+representation alone.</p>
+
+<table>
+<tr><th>requested</th><th>cells</th><th>guard</th><th>fitted</th><th>profile</th><th>difference</th></tr>
+<tr><td>250</td><td>282</td><td>1.0866e-3</td><td>1.08006018262e-3</td><td>1.08005994731e-3</td><td>2.35e-10</td></tr>
+<tr><td>500</td><td>550</td><td>5.0e-4</td><td>4.09606071189e-4</td><td>4.09590445975e-4</td><td>1.56e-8</td></tr>
+<tr><td>2000</td><td>2098</td><td>1.0e-4</td><td>2.49303535497e-4</td><td>2.49299183493e-4</td><td>4.35e-9</td></tr>
+</table>
+
+<p>The representation term is null. Changing it moves the failing measure by
+4.35e-9 against an excess of 2.3164e-4 over the reconstruction floor — five
+orders of magnitude too small to be the term the repair must remove. It is not
+a resolution artefact of the 2,098 column: the coarse carriers show the same
+null (2.35e-10 at 282 cells, where the excess over the floor is 4.61e-4).</p>
+
+<h2 id="s21-owner-current-quadrature">The quadrature-order candidate, refuted the same way</h2>
+
+<p>A dense reference (<code>region_reference.py</code>: 256-node outer rule,
+64-node inner rule) integrated the same half-plane under both representations,
+and the traced integral was compared with it per owner cell. The comparison
+reported a gap of 71 % on the current of cell 47 at 2,098 cells, 9.2 % on cell  7
+at 282 cells, and 10.6 % on cell 8 at 550 cells, against a representation term of
+at most 3.5e-6.</p>
+
+<p>That reading did not survive its own test. Two changes were made to the owner
+integral and the failing measure was re-taken:</p>
+
+<table>
+<tr><th>change to the owner integral</th><th>2098 map error</th><th>movement</th></tr>
+<tr><td>none (fitted reference)</td><td>2.49303535497e-4</td><td>—</td></tr>
+<tr><td>density representation: profile at the nodes</td><td>2.49299183493e-4</td><td>4.35e-9</td></tr>
+<tr><td>v-quadratic roots in the cancellation-free symmetric form</td><td>2.49303535497e-4</td><td>0</td></tr>
+<tr><td>outer rule 128 → 256 nodes, inner rule 2 → 6 nodes</td><td>2.49299259136e-4</td><td>7.62e-9</td></tr>
+</table>
+
+<p>Raising the quadrature order sixfold moves the measure by 7.62e-9. The traced
+owner integral is therefore already converged at its original order, and the
+71 % gap is a property of the dense reference, not of the booked integral: the
+two implementations cut different regions for that cell, so the reference is not
+a valid arbiter of the traced integral as written. The cancellation-free root
+form leaves the moments bit-identical, which says the same thing from the other
+side — the conic roots do not bound the region the traced integral actually
+integrates for cell 47.</p>
+
+<h2 id="s21-owner-current-where-the-excess-is">Where the excess actually is</h2>
+
+<p>With the integral's accuracy and its density weighting both excluded, the
+remaining difference between the half-plane owner and the booking it replaces is
+the region share itself. At 2,098 cells the owner books 11.76 % of cell 47's
+area; the same cell's contribution was measured by the predecessor node at
+<code>relative_moment_residual</code> 3.3346e-3, and removing that one cell's
+residual takes the map error from 2.4930e-4 to 1.4740e-4 — 59 % of the excess
+over the floor. The owner's presence accounts for the whole of the remaining
+excess: booked 9.4726e-5 → half-plane 2.4930e-4 is a change of 1.5457e-4, and
+9.4726e-5 is under the guard the half-plane misses.</p>
+
+<p>So the failing term is the region-share arithmetic — which part of the cell is
+booked through the owner integral and which through the ordinary booking, and
+the fraction that reconciles them. That is within the scope of the lead ruling
+of 2026-10-17 ("keep the half-plane geometry, whose area is already right, and
+fix how current is integrated over the owner region"): the geometry and the
+area stay, and the share assignment changes. It is <em>not</em> the two
+candidate repairs this node set out to test, both of which are refuted above.</p>
+
+<h2 id="s21-owner-current-clauses">Done-when status</h2>
+
+<table>
+<tr><th>clause</th><th>status</th><th>evidence</th></tr>
+<tr>
+<td>1. Attribution of the error between profile quadrature order and flux
+representation, at all three sizes, with the dominant term named</td>
+<td>met, with the dominant term established by refutation rather than by the
+per-cell split</td>
+<td>Representation: 2.35e-10 / 1.56e-8 / 4.35e-9 (table above). Quadrature
+order: 7.62e-9 at 2,098 when the order is raised sixfold; 0 when the root form
+changes. Neither term dominates; the excess is the region share, at 1.5457e-4
+of the 2.3164e-4 excess over the floor at 2,098 cells.</td>
+</tr>
+<tr>
+<td>2. Repair inside the owner with read and booking sharing one integral; 2,098
+under 1e-4; 282 and 550 no worse than 1.08006e-3 and 4.09606e-4</td>
+<td><strong>not met</strong></td>
+<td>2,098 stays at 2.49299259136e-4, 2.49 times its guard, after every
+in-scope integration repair tried. 282 (1.08005994731e-3) and 550
+(4.09590445975e-4) are no worse under either representation, so that half of
+the clause holds.</td>
+</tr>
+<tr>
+<td>3. Diverted cold solve to 1e-12 at all three sizes with residual
+histories, Gauss-Newton gradient and Taylor slopes</td>
+<td><strong>not met</strong> — not reached</td>
+<td>The 2,098 solve cannot start: <code>require_map</code> refuses a map that
+this node's fence requires to be repaired first, and the repair is not made.
+The 282 and 550 solves were queued behind the map rows and did not run within
+this turn's allocation.</td>
+</tr>
+<tr>
+<td>4. Limited-carrier sweep; 550 transition bracket classified by adjacent
+binary64 bisection, no implementation switch from the owner</td>
+<td><strong>not met</strong> — not reached</td>
+<td>No limited-carrier run was made in this turn. The owner modules are
+unchanged in the limited branch by construction: the owner rule is reached
+only through <code>component="halfplane"</code>, which the limited carriers do
+not select.</td>
+</tr>
+<tr>
+<td>5. Line-contour poloidal panels of each terminal state</td>
+<td><strong>not met</strong> — no terminal state exists</td>
+<td>Panels are rendered from a completed cold receipt
+(<code>panel_data.py</code> refuses a receipt without a terminal state), and no
+cold solve completed.</td>
+</tr>
+<tr>
+<td>6. Evidence fragment</td>
+<td>written</td>
+<td><code>docs/evidence/fragments/converged-forward-solve/owner-cell-current.html</code></td>
+</tr>
+</table>
+
+<h2 id="s21-owner-current-control">Declared negative control</h2>
+
+<p>The declared control was: "restoring the fitted Bell flux inside the owner
+region brings the 2,098 map error back above 1e-4". <strong>The control
+fails.</strong> Restoring the fitted representation moves the 2,098 map error
+to 2.49303535497e-4 — from 2.49299183493e-4, a change of 4.35e-9 — so the
+measure never fell, and the control cannot be demonstrated. That is the
+measurement's verdict on the repair, not a defect in the control: the
+representation is not a term of the error, so no mutation of it can move the
+measure across the guard. A control that tracks a term which does move the
+measure would have to mutate the region share, not the density
+representation.</p>
+
+<h2 id="s21-owner-current-next">Next action</h2>
+
+<p>Re-attribute the excess on the share arithmetic rather than on the integral.
+For the owner cells at 2,098 cells, compare the owner share and the remaining
+booking against the cell's own analytic moments and require their sum to
+reproduce the cell, and require the same for the 282 and 550 carriers; the
+1.5457e-4 excess over the booked map error is the size of the term that has to
+close. This is the third attribution of this region — the predecessor node's
+half-plane record is at <code>docs/research/axis-facing-owner.html</code> — and
+this node adds the refutation of both integration routes, which is what
+"fix how current is integrated" has now been shown not to cover.</p>
+
+</body>
+</html>

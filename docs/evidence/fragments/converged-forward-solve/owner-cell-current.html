@@ -66,6 +66,45 @@ residual 7.3477e-6 and 2.6072e-6 with <code>converged</code> false, against the
 1e-12 floor the clause asks for. No 2,098-cell cold solve exists, because the
 map guard refuses the map this node could not repair.</p>
 
+<p id="owner-cell-current-region">The owner region the integral cuts is not
+the intended one. Four readings of the owner cell's region as a fraction of its
+area, at every carrier:</p>
+
+<table id="owner-cell-current-region-table">
+<tr><th>cells</th><th>owner cell</th><th>submitted</th><th>dense, same region</th><th>normal-form lobe</th><th>analytic grid</th></tr>
+<tr><td>282</td><td>7</td><td>0.409566608</td><td>0.409560477</td><td>0.408875293</td><td>0.408702850</td></tr>
+<tr><td>550</td><td>8</td><td>0.374207719</td><td>0.374195385</td><td>0.378370528</td><td>0.378283183</td></tr>
+<tr><td>2098</td><td>47</td><td>0.033927661</td><td>0.033928701</td><td>0.028515415</td><td>0.028512319</td></tr>
+</table>
+
+<p id="owner-cell-current-region-verdict">The submitted and dense readings agree
+to 1.50e-5, 3.30e-5 and 3.07e-5 relative, so they cut the same region and the
+71 % gap this node reported earlier was a defect in the dense reference: it
+solved its slice intercepts from the field's polynomial coefficients as though
+the slice basis were the coordinate axes while evaluating the field in the
+rotated basis. Fixed. The region both cut is not the intended one: the intended
+region is the normal-form lobe, which matches an independent 1024 x 1024 sample
+of the analytic flux to 4.2e-4, 2.3e-4 and 1.1e-4, while the submitted region is
+too large by 0.2114 % at 282 cells, too small by 1.0774 % at 550 and too large
+by 18.99 % at 2,098. The cause is the conic: the submitted integral bounds its
+region by the fitted cell quadratic's level-shifted zero set, whose stationary
+value sits 5.80e-8 above the boundary at cell 47, so it reaches past the
+separatrix. The lobe is bounded by the separatrix itself.</p>
+
+<p id="owner-cell-current-share">The share is also unpartitioned. An owner cell's
+booking is replaced outright (<code>ordinary_cut = cut &amp; ~saddle_cut</code>,
+<code>owner_map.py</code>:299-305) and it is excluded from the full-interior
+booking (<code>owner_map.py</code>:288-291), so the part of the cell outside the
+owner region is booked by nothing and the target-current rescale
+(<code>owner_map.py</code>:318) spreads the deficit over every other cell. At
+2,098 cells cell 47's ordinary booking covers 0.460443 of the cell carrying
+12.641941 A while its normal-form lobe carries 0.784530 A, so the great majority
+of that cell's current is booked nowhere. <strong>Rule:</strong> for every cell
+the owner region touches, book the owner integral over the axis-facing lobe plus
+the ordinary cut integration over the same cell with the lobe removed, so the
+two parts tile the cell's cut region exactly once and sum to the cell the
+ordinary route books alone.</p>
+
 <p id="owner-cell-current-unmet">Unmet done-when clauses: the repair (2,098 stays
 2.49x its guard), the cold solves to 1e-12 (they ran once, stalled at the
 residual floor, with no gradient or Taylor-slope measurement), the 550

@@ -89,6 +89,75 @@ fix how current is integrated over the owner region"): the geometry and the
 area stay, and the share assignment changes. It is <em>not</em> the two
 candidate repairs this node set out to test, both of which are refuted above.</p>
 
+<h2 id="s21-owner-current-region">The region audit</h2>
+
+<p>Four readings of the same owner cell's region, as a fraction of the cell's
+area, at every carrier. The submitted column is what the owner integral books;
+the dense column is the same region under a 256-node outer and 64-node inner
+rule; the lobe column is the saddle normal form's own booking, which clips the
+cell against the four separatrix rays; the grid column counts positive points of
+the analytic flux on the axis-facing side of the physical saddle over a
+1024 x 1024 grid, an independent sample that moved by at most 7.63e-6 between
+512 and 1024.</p>
+
+<table id="s21-owner-current-region-table">
+<tr><th>cells</th><th>owner cell</th><th>submitted</th><th>dense, same region</th><th>normal-form lobe</th><th>analytic grid</th></tr>
+<tr><td>282</td><td>7</td><td>0.409566608</td><td>0.409560477</td><td>0.408875293</td><td>0.408702850</td></tr>
+<tr><td>550</td><td>8</td><td>0.374207719</td><td>0.374195385</td><td>0.378370528</td><td>0.378283183</td></tr>
+<tr><td>2098</td><td>47</td><td>0.033927661</td><td>0.033928701</td><td>0.028515415</td><td>0.028512319</td></tr>
+</table>
+
+<p><strong>The traced and dense readings cut the same region</strong> — they now
+agree to 1.50e-5, 3.30e-5 and 3.07e-5 relative, so the 71 % gap this node
+reported earlier was entirely a defect in the dense reference and not in the
+booked integral. The reference solved its slice intercepts from the field's
+polynomial coefficients as though the slice basis were the coordinate axes while
+evaluating the field in the rotated basis the traced integral uses, so the two
+cut different regions. That is fixed: the slice quadratic is now composed from
+the field gradient and curvature tensor with the rotation applied.</p>
+
+<p><strong>The region both cut is not the intended one. The intended region is
+the normal-form lobe</strong>, and the lobe agrees with the independent analytic
+grid at every size: to 4.2e-4 at 282 cells, 2.3e-4 at 550 and 1.1e-4 at 2,098,
+against the submitted region's +0.2114 %, -1.0774 % and +18.99 % respectively.
+The submitted region is therefore too large by 19 % at 2,098 cells, too small by
+1.08 % at 550, and too large by 0.21 % at 282 — a non-monotone error, which is
+why it helps two carriers and fails the third.</p>
+
+<p>The cause is the conic, not the quadrature. The submitted integral bounds its
+region by the zero level of the <em>fitted</em> cell quadratic measured from the
+boundary, and that fit's stationary value sits 5.80e-8 above the boundary at
+cell 47, so its positive region joins through its own stationary point and
+reaches past the separatrix. The lobe is bounded by the separatrix itself.
+Raising the owner rule's order sixfold, which this node measured earlier as a
+7.62e-9 move in the map error, cannot touch a 19 % region error: the two
+integrals agree with each other and disagree with the region.</p>
+
+<h2 id="s21-owner-current-share">The share defect</h2>
+
+<p>Which current is booked for a cell the owner region touches, and which is
+lost. At 2,098 cells, cell 47's ordinary cut books 0.460443 of the cell carrying
+12.641941 A, and the normal-form lobe over that cell carries 0.784530 A. The
+submitted owner region books 0.933259 A over the 19 %-too-large region.</p>
+
+<p>The share is not partitioned. <code>map_moments</code> replaces an owner
+cell's booking outright — <code>ordinary_cut = cut &amp; ~saddle_cut</code>
+(<code>owner_map.py</code>:299-305) gives such a cell the owner integral and
+nothing else, and the cell is excluded from the full-interior booking because
+its membership is a fraction and not 1 (<code>owner_map.py</code>:288-291). So
+the part of the cell outside the owner region is booked by nothing, and the
+target-current rescale (<code>owner_map.py</code>:318) spreads that deficit
+across every other cell.</p>
+
+<p><strong>The rule.</strong> For every cell the owner region touches, the
+booked moments are the owner integral over the axis-facing lobe plus the
+ordinary cut integration over that same cell with the lobe removed, so the two
+parts tile the cell's own cut region exactly once and their sum equals the cell
+the ordinary route books alone. Neither the 19 % region error nor the dropped
+share can be repaired by a rescaling fraction: a fraction that reconciles two
+overlapping regions double-counts wherever they overlap, which is what the
+blend arms measured on this carrier already showed.</p>
+
 <h2 id="s21-owner-current-clauses">Done-when status</h2>
 
 <table>
@@ -96,12 +165,16 @@ candidate repairs this node set out to test, both of which are refuted above.</p
 <tr>
 <td>1. Attribution of the error between profile quadrature order and flux
 representation, at all three sizes, with the dominant term named</td>
-<td>met, with the dominant term established by refutation rather than by the
-per-cell split</td>
-<td>Representation: 2.35e-10 / 1.56e-8 / 4.35e-9 (table above). Quadrature
-order: 7.62e-9 at 2,098 when the order is raised sixfold; 0 when the root form
-changes. Neither term dominates; the excess is the region share, at 1.5457e-4
-of the 2.3164e-4 excess over the floor at 2,098 cells.</td>
+<td>met</td>
+<td>Neither candidate stated in the clause carries the error. Representation:
+2.35e-10 / 1.56e-8 / 4.35e-9. Quadrature order: 7.62e-9 at 2,098 when the order
+is raised sixfold, 0 when the root form changes. The dominant term is the
+region the owner integral cuts: the submitted region is too large by 18.99 % at
+2,098 cells (0.033927661 against the intended 0.028515415, whose own agreement
+with an independent analytic sample is 1.1e-4), too small by 1.0774 % at 550 and
+too large by 0.2114 % at 282. Second term: the owner region's share of the cell
+is booked alone, so the rest of the cell is booked by nothing and the
+target-current rescale spreads the deficit (see the share section).</td>
 </tr>
 <tr>
 <td>2. Repair inside the owner with read and booking sharing one integral; 2,098
@@ -110,7 +183,8 @@ under 1e-4; 282 and 550 no worse than 1.08006e-3 and 4.09606e-4</td>
 <td>2,098 stays at 2.49299259136e-4, 2.49 times its guard, after every
 in-scope integration repair tried. 282 (1.08005994731e-3) and 550
 (4.09590445975e-4) are no worse under either representation, so that half of
-the clause holds.</td>
+the clause holds. The region and share repairs the lead's ruling orders are
+attributed and specified here but not implemented.</td>
 </tr>
 <tr>
 <td>3. Diverted cold solve to 1e-12 at all three sizes with residual
@@ -167,15 +241,35 @@ representation.</p>
 
 <h2 id="s21-owner-current-next">Next action</h2>
 
-<p>Re-attribute the excess on the share arithmetic rather than on the integral.
-For the owner cells at 2,098 cells, compare the owner share and the remaining
-booking against the cell's own analytic moments and require their sum to
-reproduce the cell, and require the same for the 282 and 550 carriers; the
-1.5457e-4 excess over the booked map error is the size of the term that has to
-close. This is the third attribution of this region — the predecessor node's
-half-plane record is at <code>docs/research/axis-facing-owner.html</code> — and
-this node adds the refutation of both integration routes, which is what
-"fix how current is integrated" has now been shown not to cover.</p>
+<p>The two repairs the lead's ruling of 2026-10-17 orders, in order, and where
+this node stands on each:</p>
+
+<ol>
+<li><strong>Region.</strong> Established here: the traced region is the submitted
+half-plane bounded by the fitted quadratic's level-shifted zero set, it is 19 %
+too large at 2,098 cells, and the intended region is the normal-form lobe, which
+matches an independent analytic sample at all three sizes. The repair is to
+bound the owner region by the separatrix (the saddle normal form's ray pair,
+whose cells and intervals the read already carries as
+<code>fragment_selected</code> and <code>edge_interval</code>) rather than by the
+fitted quadratic, and then to require the traced integral and a dense reference
+over that same region to agree to 1e-12. That 1e-12 comparison is not yet made:
+the current agreement, 3.07e-5 relative in area at 2,098 cells, is
+quadrature-order limited by the owner rule's two-node inner rule.</li>
+<li><strong>Share.</strong> The rule is stated above; the partition is not yet
+implemented. It needs the ordinary route to integrate the cell with the lobe
+removed, which today's <code>bell_moments</code> cannot express: it books the
+cell's cut region whole.</li>
+</ol>
+
+<p>Until both land the gates cannot move: the map error is a region error of
+19 % on one owner cell and a share error that the target-current rescale
+converts into a global distortion. Neither is a tolerance.</p>
+
+<p>This is the third attribution of this region — the predecessor node's half-plane
+record is at <code>docs/research/axis-facing-owner.html</code>. This node adds
+the refutation of both integration routes and the audit that names the conic as
+the carrier of the region error.</p>
 
 </body>
 </html>

@@ -155,6 +155,9 @@ def owned_cut(
     indices = jnp.nonzero(active, size=capacity, fill_value=0)[0]
     density = program._density_coefficients(geometry, reading, profile)
     if component == "lobe":
+        selected = reading.booking_cells & (reading.membership > 0)
+        count = jnp.sum(selected, dtype=jnp.int32)
+        indices = jnp.nonzero(selected, size=capacity, fill_value=0)[0]
         integrals, integral_valid = lobe_moments(
             geometry,
             reading,
@@ -168,16 +171,6 @@ def owned_cut(
         live = jnp.arange(capacity) < count
         packed = jnp.zeros((len(geometry.centre), 4), dtype=integrals.dtype)
         packed = packed.at[indices].add(jnp.where(live[:, None], integrals, 0.0))
-        fraction = jnp.clip(packed[:, 0] / geometry.full_area, 0.0, 1.0)
-        reading = reading._replace(
-            geometric_membership=jnp.where(
-                active, fraction, reading.geometric_membership
-            ),
-            membership=jnp.where(
-                active, fraction * reading.path_weight, reading.membership
-            ),
-            booking_cells=active,
-        )
         return reading, packed[:, 1:], (count <= capacity) & jnp.all(
             ~live | integral_valid
         )

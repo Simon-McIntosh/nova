@@ -84,7 +84,7 @@
 
 <h2 id="bracket">The transition bracket and its verdict changes</h2>
 
-<p>The 41-state sweep scans the exterior jet offset from &minus;0.2 to 0.2 and bisects every adjacent pair whose <code>boundary_class</code> differs, to adjacent doubles, recording the boundary flux and booked current either side. The receipt emits <code>wall_candidate</code>, <code>saddle_candidate</code> and <code>boundary_class</code> per state, so the bracket is classified from the receipt alone.</p>
+<p>The 41-state sweep scans the exterior jet offset from &minus;0.2 to 0.2 and bisects every adjacent pair whose <code>boundary_class</code> differs, to adjacent doubles, recording the boundary flux and booked current either side. The 41-state counts are 32/41 valid with 33/41 axis identity at 282 cells and 23/41 valid with 31/41 axis identity at 550, identical at both arms. The receipt emits <code>wall_candidate</code>, <code>saddle_candidate</code> and <code>boundary_class</code> per state, so the bracket is classified from the receipt alone. The table below is the 282-cell bracket; the 550-cell bracket behaves identically and its numbers follow.</p>
 
 <table>
   <thead><tr><th>Switch (offset)</th><th>Class</th><th>Wall candidate</th><th>Saddle candidate</th><th>Boundary flux</th><th>Classification</th></tr></thead>
@@ -94,6 +94,8 @@
     <tr><th>0.17 &rarr; 0.18</th><td>1 &rarr; 0</td><td>8.479984531614287 &times; 10<sup>&minus;3</sup> &rarr; 9.027148165639041 &times; 10<sup>&minus;3</sup></td><td>8.479984531614287 &times; 10<sup>&minus;3</sup> &rarr; &minus;1.184302363166403 &times; 10<sup>&minus;2</sup></td><td>continuous</td><td>the other side of the same tie; the wall clears the saddle again.</td></tr>
   </tbody>
 </table>
+
+<p>At 550 cells the same two switch types appear at shifted offsets and are again identical at both arms: a fold at 0.00 &rarr; 0.01, bisecting to the adjacent doubles 0.009603774000452515 and 0.009603774000452517 with a boundary flux of &minus;8.280600151255801 &times; 10<sup>&minus;4</sup> either side (2.279 &times; 10<sup>&minus;16</sup> per span), and the tie island at 0.11 &rarr; 0.12, where the wall and saddle candidates are bit-identical at 8.46444836527098 &times; 10<sup>&minus;3</sup> and the class is 1 only at that grid point. Both arms bisect in 52 steps to the same doubles and report the same plateau. So the 282 and 550 brackets agree in both the switches present and their classification.</p>
 
 <p><strong>Both switches are base behaviour, reproduced identically at head.</strong> The 0.01&ndash;0.02 fold bisects to the same adjacent doubles and the same flux either side at both arms; the 0.16&ndash;0.18 island sits at the same offsets with the same bit-identical tie at both arms. So no 0/1 switch is introduced by this node, and the one residual switch that is visible is the <code>&gt;=</code> tie at <code>kernel.py:302</code>, which is present at the orientation revision too.</p>
 
@@ -107,7 +109,7 @@
 
 <p>One real defect was found and is worth recording even though the base does not have it. On the knife-edge test the head's wall candidate had beaten the saddle by 2.6 &times; 10<sup>&minus;22</sup>, a couple of ulp, where base ties exactly, because the attenuation it used was written as a subtraction, <code>ceiling &minus; leak * over</code>, which computes <code>ceiling &minus; (ceiling &minus; saddle_score)</code> and in binary64 returns the saddle only to within a few ulp, where <code>jnp.minimum(ceiling, saddle_score)</code> is exact. Any future attenuation of this ceiling should clamp with a minimum against the saddle level rather than subtract towards it.</p>
 
-<p>Remaining: the 550-cell bracket is measured in the same job and is reported above; the cold solves at 282 and 550 are owed only if the read changed in behaviour, and it did not &mdash; the head reproduces base to the last printed digit on every row measured &mdash; so the fidelity rows and the bracket are the whole measurement, and there is no forward-solve node for this item to pair a solve with.</p>
+<p><strong>Cold solves are not owed.</strong> They were required only if the read changed in behaviour, and it did not: the head reproduces base to the last printed digit on every map row and every sweep row measured, at both 282 and 550 cells, because the restored kernel differs from base only by the renamed function. The fidelity rows and the two brackets are therefore the whole measurement.</p>
 
 <p>Receipts, per-row logs and both arms' kernels: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T101935652190-bottleneck-path-level</code>. Every wall in this record is a titan P100 number, not an H200 number.</p>
 

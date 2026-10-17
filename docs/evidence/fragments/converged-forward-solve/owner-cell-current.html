@@ -187,15 +187,110 @@ lobe must be integrated by the owner machinery itself, over the same ring fan
 with the lobe removed, and checked against a dense whole-cell reference. Row
 outputs: <code>owner-current/mapord-profile-250/500/2000.log</code> (job 1288163).</p>
 
+<p id="owner-cell-current-cold-lobe-small">The 282 and 550 cold solves run under the lobe region and the
+<code>profile</code> density representation, one process per card on titan (P100,
+two cards, job 1288292). The <strong>282 row meets the 1e-12 criterion</strong>:
+five corrections take the Newton residual 1.624467000376721e-3 →
+1.380877322080389e-4 → 1.5709015093404146e-6 → 7.700733985540787e-10 →
+<strong>2.0697822884320557e-14</strong>, with <code>factor_scale</code> 1.0 at
+every correction and <code>converged</code> true. The <strong>550 row stalls at
+1.550343395001591e-3</strong> over eight corrections, and the stall is in the
+line search rather than the arithmetic: <code>factor_scale</code> collapses
+0.5 → 0.25 → 0.062 → 0.031 → 0.008 → 0.004 → 0.000 → 0.000, so every trial step
+is rejected outright and the solver cannot move. A line search that rejects a
+Newton step at every damping is the signature of a map whose Jacobian does not
+predict its own neighbourhood — a discontinuous map — rather than of a hard
+fixed point, and it is the shape the tie-island node reports for the
+saddle-selection change at <code>fast_map_production/kernel.py:239</code>, where
+the booked current moves by up to 125 for a 1e-7 move in boundary flux. That
+selection is named here and not repaired: a separate node owns it. Receipts:
+<code>owner-current/coldlobe2-250.json</code>,
+<code>owner-current/coldlobe2-500.json</code>.</p>
+
+<p id="owner-cell-current-root-checks">Derivative and continuity checks at both
+delivered states (job 1288306, one row per carrier, CPU). In three smooth random
+directions the Taylor remainder falls with slope 2 through four decades of step
+(1e-4 to 3e-6) at both carriers: at 550 the slopes read 1.99–2.2 in all three
+components up to the step where the remainder reaches the roundoff floor, and
+<code>taylor_pass</code> is true. At 282 the same four decades give slopes
+1.988–2.025 in all three directions with one component at the third decade
+reading 2.2252 against a band top of 2.2 — the remainder there is 1.0e-12
+against a residual of 6.8e-6, so that single miss is the roundoff floor and not
+a derivative defect. The Newton-direction continuity scan is finite at both
+carriers and the centred difference is odd to five digits about the state. The
+550 Newton gradient is 0.29142101859338304 at a residual of
+1.5503452519873596e-3: a non-gradient this large at a state the line search will
+not leave is the same inconsistency the stall above records. Receipts:
+<code>owner-current/root-lobe-250.json</code>,
+<code>owner-current/root-lobe-500.json</code>.</p>
+
+<p id="owner-cell-current-residual-disagreement">One measurement does not
+reconcile and is recorded as open. The 282 cold row's own last correction
+reports residual 2.0697822884320557e-14, and the root check reads the delivered
+state under the same component and the same density mode as
+<strong>6.81516728434e-06</strong> — a factor 3.3e8. At 550 the same pair agrees
+to six digits (1.550343395001591e-3 from the cold row, 1.5503452519873596e-3
+from the root check), which localises the disagreement to the 282 carrier — the
+same carrier that ties its map guard and is the near-degenerate one of the
+three. Both numbers are reported as measured; neither is used to certify the
+other, and the 282 agreement to 1e-12 should not be read as established until
+the two residuals are shown to be one quantity.</p>
+
+<p id="owner-cell-current-partition">The share partition has its machinery and does not yet have its
+number. The remainder is now booked by the owner machinery itself: the cell's
+own polygon enters the signed fan positive, the lobe enters it negative, and one
+call to the same degree-five rule integrates both, so the two sides are
+evaluated on the same points rather than by two rules. What the
+independent closed-form reference establishes is the quadrature: booked and
+closed-form lobes agree on area, current and both first moments at
+<strong>4.776e-10</strong> (2,098), <strong>4.791e-10</strong> (550) and
+<strong>4.774e-10</strong> (282). That floor is the rule rather than the fan —
+the degree-five abcissae and weights are carried truncated to ten digits, so the
+rule is exact for the fitted quadratic only to about 5e-10, and no arrangement
+of the arithmetic brings the two routes to 1e-12 while those constants are
+short. Extending them to double precision is the first step of any 1e-12 claim
+from two rules.
+What the partition measure shows is that the cell fan is wrong, and the
+<strong>partition is not established</strong>. At 2,098 cell 47 carries 27.47 A
+in the dense whole-cell reference and 0.7845 A in the booked lobe, but the
+remainder comes back negative: lobe plus remainder is <strong>-1.154 A</strong>,
+against 27.47 A. The same shape at 550 (lobe 41.69 A, lobe plus remainder 30.51 A
+against 109.88 A) and 282 (90.56 A, 45.95 A against 222.11 A): the cell fan is
+short of the cell by a factor of two to five and changes sign at the finest
+carrier. So the remainder booking is defective while the booking it is built
+against is sound, and the defect is in the cell's own ring rather than in the
+rule. Two causes were found and one is fixed: the rows were built from
+subdivided edge points alone, and because a fan row is closed on its own first
+point, a collinear row's closing triangle exactly negates its subdivision
+triangles and every cell row contributed zero (fixed, so the remainder now
+differs from the negated lobe); the remaining shortfall is that the cell ring is
+being reconstructed from <code>geometry.vertices</code> and
+<code>geometry.vertex_count</code> instead of being taken from
+<code>_normal_rings</code>, whose rows are <code>[centre, first, third]</code>
+straight fans per live sector edge and whose live-edge set is not the bare
+vertex list. The next step is to build the cell fan from the same call that
+builds the lobe, with every sector selected and the intervals taken full, so
+that the part and its complement are two selections of one construction rather
+than a construction and a reconstruction. Row outputs:
+<code>owner-current/lobe-partition-250/500/2000.json</code> (job 1288332);
+the superseded revision is <code>owner-current/lobe-ref-*.json</code> (job
+1288307) and <code>owner-current/lobe-part-*.json</code> (job 1288330).</p>
+
 <p id="owner-cell-current-unmet">Met: the 2,098 map under its guard
 (9.47260772731e-5) and 550 under 5e-4 (4.87161187281e-4) with read and booking
-sharing one ring-fan integral. Unmet: the 282 carrier, over its guard by 1.42e-9
-on a guard set from this route's predecessor; the share partition; the
-independent dense reference over the lobe at 1e-12; the cold solve's 1e-12
-criterion (6.84582327205636e-12 at 2,098 after eight corrections, with no
-Gauss-Newton gradient or Taylor-slope measurement and the 550/282 rows cut off by
-the job wall); the 550 transition-bracket bisection; and the poloidal panels of
-the terminal states.</p>
+sharing one ring-fan integral; the 282 cold solve's 1e-12 criterion
+(2.0697822884320557e-14 in five corrections, <code>converged</code> true); the
+Taylor slopes of 2 in three smooth directions at both 550 and 282, with one
+component at 282 out of the 1.8-to-2.2 band at the roundoff floor; and the
+independent closed-form reference over the lobe, agreeing with the booking to
+4.8e-10 at all three carriers. Unmet: the 1e-12 the reference was set the task
+of showing, blocked by the degree-five constants' ten-digit truncation rather
+than by the fan; the share partition, whose remainder booking is defective and
+whose measure is above; the 282 carrier's map guard, over by 1.42e-9 on a guard
+set from this route's predecessor; the 550 cold solve, stalled at
+1.550343395001591e-3 on a line search that collapses to zero; the 282 residual
+disagreement recorded above; the 550 transition-bracket bisection; and the
+poloidal panels of the terminal states.</p>
 
 </div>
 </body>

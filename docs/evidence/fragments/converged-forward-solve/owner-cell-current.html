@@ -152,11 +152,26 @@ over the same cell with the lobe removed. Both are inside the owner. Row outputs
 <code>owner-current/mapy-saddle-2000.json</code>,
 <code>owner-current/mapz-anchored-250/500/2000.log</code>.</p>
 
-<p id="owner-cell-current-unmet">Unmet done-when clauses: the repair (2,098 stays
-2.49x its guard), the cold solves to 1e-12 (they ran once, stalled at the
-residual floor, with no gradient or Taylor-slope measurement), the 550
-transition-bracket bisection, and the poloidal panels — renderable from the two
-terminal states but not rendered.</p>
+<p id="owner-cell-current-cold-lobe">The diverted cold solve now runs at
+2,098 cells on titan (P100, one card) and drives its Newton residual to
+<strong>1.4236135421233083e-11</strong> in six corrections, 14x the 1e-12
+criterion, so <code>converged</code> is false while the same solver under the
+retired region stalled at 7.3477e-6 at 282 and 2.6072e-6 at 550. The line search
+collapses for three corrections (1/64, 1/128, 1/1024, all at 87 s), then a full
+step restores it and corrections five and six drop the residual eleven orders in
+two steps. The map the solve was built on carries 9.47422658888e-5 flux error
+and a 1.3279236560632087e-3 centre residual, which bounds what any solver can
+reach on it. Walls are titan numbers; the 550 and 282 rows were cut off by the
+job wall. Receipt: <code>owner-current/coldlobe-2000.json</code>.</p>
+
+<p id="owner-cell-current-unmet">Met: the 2,098 map under its guard
+(9.47260772731e-5) and 550 under 5e-4 (4.87161187281e-4) with read and booking
+sharing one ring-fan integral. Unmet: the 282 carrier, over its guard by 1.42e-9
+on a guard set from this route's predecessor; the share partition; the
+independent dense reference over the lobe at 1e-12; the cold solve's 1e-12
+criterion (1.4236135421233083e-11 at 2,098, with no Gauss-Newton gradient or
+Taylor-slope measurement and the 550/282 rows cut off by the job wall); the 550
+transition-bracket bisection; and the poloidal panels of the terminal states.</p>
 
 </div>
 </body>

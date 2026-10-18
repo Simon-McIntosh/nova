@@ -14,7 +14,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-from nova.equilibrium import fixed_points
+from nova.equilibrium import fixed_points, topology
 from scripts.prototypes.fast_map_production import tie_probe
 
 
@@ -54,6 +54,61 @@ def main():
         else:
             right = middle
     offsets = (left, right)
+
+    def candidate_evidence(field, target):
+        geometry = state["geometry"]
+        policy = state["policy"]
+        coefficients = field.sampled_coefficient(geometry)
+        hessian = jnp.stack(
+            (
+                jnp.stack((2 * coefficients[:, 3], coefficients[:, 4]), axis=-1),
+                jnp.stack((coefficients[:, 4], 2 * coefficients[:, 5]), axis=-1),
+            ),
+            axis=1,
+        )
+        conditioned, safe = jax.vmap(topology._conditioned_hessian, in_axes=(0, None))(
+            hessian, policy.hessian_tolerance
+        )
+        displacement = -jnp.linalg.solve(safe, coefficients[:, 1:3, None])[..., 0]
+        seeds = geometry.centre + geometry.pitch[:, None] * displacement
+        slot = jnp.arange(geometry.vertices.shape[1])
+        following = jnp.where(
+            slot[None] + 1 < geometry.vertex_count[:, None], slot[None] + 1, 0
+        )
+        end = jnp.take_along_axis(geometry.vertices, following[..., None], axis=1)
+        cross = topology._cross_plane(
+            end - geometry.vertices, seeds[:, None] - geometry.vertices
+        )
+        inside = jnp.all(
+            jnp.where(slot[None] < geometry.vertex_count[:, None], cross >= 0, True),
+            axis=1,
+        )
+        candidate = conditioned & inside & jnp.all(jnp.isfinite(seeds), axis=1)
+        seed_np = np.asarray(seeds)
+        centre_np = np.asarray(geometry.centre)
+        candidate_np = np.asarray(candidate)
+        order = np.argsort(np.linalg.norm(seed_np - target, axis=1))[:6]
+        owner = np.flatnonzero(np.asarray(topology._inside_cells(geometry, target)))
+        indices = np.unique(np.concatenate((order, owner)))
+        rank = np.cumsum(candidate_np) - 1
+        return {
+            "candidate_count": int(candidate_np.sum()),
+            "owner_cells": owner.tolist(),
+            "near_target": [
+                {
+                    "cell": int(index),
+                    "centre": centre_np[index].tolist(),
+                    "seed": seed_np[index].tolist(),
+                    "distance": float(np.linalg.norm(seed_np[index] - target)),
+                    "conditioned": bool(conditioned[index]),
+                    "inside": bool(inside[index]),
+                    "candidate": bool(candidate_np[index]),
+                    "rank": int(rank[index]) if candidate_np[index] else None,
+                }
+                for index in indices
+            ],
+        }
+
     rows = []
     for offset in offsets:
         shifted = jnp.asarray(offset * state["scale"])
@@ -88,6 +143,9 @@ def main():
             window.mesh, window.lookup, window.rows, state["reference"], window.exterior
         )
         contained = jax.vmap(cached.contains)(solved.position)
+        target = np.asarray(
+            roots.position[2] if not rows else rows[0]["census_positions"][2]
+        )
         rows.append(
             {
                 "offset": offset,
@@ -109,6 +167,9 @@ def main():
                 "solved_determinants": np.linalg.det(hessian).tolist(),
                 "solved_contained": np.asarray(contained).tolist(),
                 "reading_class": int(reading.boundary_class),
+                "candidate_evidence": candidate_evidence(
+                    jets.field(state["reference"]), target
+                ),
             }
         )
     rows[0]["seeds"] = rows[0]["seeds"].tolist()

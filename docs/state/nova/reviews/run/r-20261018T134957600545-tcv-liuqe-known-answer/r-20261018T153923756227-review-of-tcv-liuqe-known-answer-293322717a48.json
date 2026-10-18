@@ -13,6 +13,13 @@
   ],
   "completed_at": "2026-10-18T15:54:55.194Z",
   "dispatched_at": "2026-10-18T15:41:07Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "tcv-liuqe-known-answer",
+      "recorded_at": "2026-10-18T15:58:08.179474+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/research/tcv-liuqe-known-answer.html",

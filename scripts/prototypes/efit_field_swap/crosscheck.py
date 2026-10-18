@@ -104,6 +104,7 @@ class Decision:
     nova_span: float
     efit_span: float
     field_grad_at_efit_axis: float
+    field_grad_at_nova_axis: float
     note: str = ""
 
 
@@ -142,6 +143,7 @@ def _unqualified(
         nova_span=float("nan"),
         efit_span=abs(record.fed_back_psi - record.axis_psi),
         field_grad_at_efit_axis=field_grad_at_efit_axis,
+        field_grad_at_nova_axis=float("nan"),
         note=(
             f"lattice {resolution}: candidates {int(roots.candidates)}, "
             "admitted saddles 0; nova's read's axis fallback is not reported"
@@ -213,6 +215,20 @@ def _field_gradient_at_efit_axis(field, record):
     return float(np.linalg.norm(np.asarray(jax.jacfwd(field.value)(axis))))
 
 
+def _field_gradient_at_nova_axis(field, reading):
+    """|grad psi| at the axis nova's own read placed on this field.
+
+    The paired test of the one above. If nova's axis is a true stationary point
+    of the same field, the axis disagreement between the two codes is a
+    difference in how they select an axis, which is a statement about nova's
+    rule. If it is not stationary, nova's axis here is an artefact of the
+    square-lattice cell geometry this adapter substitutes, and no claim about
+    nova's axis rule can be made from this table.
+    """
+    axis = jnp.asarray(reading.axis)
+    return float(np.linalg.norm(np.asarray(jax.jacfwd(field.value)(axis))))
+
+
 def _decision(case, source, record, resolution):
     field = TraceSplineField.from_record(record)
     field_grad = _field_gradient_at_efit_axis(field, record)
@@ -244,6 +260,7 @@ def _decision(case, source, record, resolution):
     )
     wall_level = float(np.max(sigma * wall_values))
     label = np.asarray(reading.boundary_class)
+    nova_axis_grad = _field_gradient_at_nova_axis(field, reading)
     return Decision(
         case=case,
         record=record.slice,
@@ -269,6 +286,7 @@ def _decision(case, source, record, resolution):
         nova_span=abs(float(np.asarray(reading.boundary_flux)) - axis_psi),
         efit_span=abs(record.fed_back_psi - record.axis_psi),
         field_grad_at_efit_axis=field_grad,
+        field_grad_at_nova_axis=nova_axis_grad,
     )
 
 
@@ -336,6 +354,7 @@ def main(resolution=16, out=None):
                         else float("nan")
                     ),
                     field_grad_at_efit_axis=float("nan"),
+                    field_grad_at_nova_axis=float("nan"),
                     note=f"{type(error).__name__}: {error}",
                 )
             results.append(asdict(case))

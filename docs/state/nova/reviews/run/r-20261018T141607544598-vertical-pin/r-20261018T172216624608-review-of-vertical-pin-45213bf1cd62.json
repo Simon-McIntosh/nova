@@ -1,0 +1,172 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite": {
+    "command": "bash /home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T141607544598-vertical-pin/after-suite.sh",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 12,
+    "failure_ids": [
+      "tests/equilibrium/test_topology_read.py::test_biot_moment_point_derivatives",
+      "tests/equilibrium/test_topology_read.py::test_kernel_backed_carrier_read[1074-diverted]",
+      "tests/equilibrium/test_topology_read.py::test_kernel_backed_carrier_read[1074-limited]",
+      "tests/equilibrium/test_topology_read.py::test_kernel_backed_carrier_read[2616-diverted]",
+      "tests/equilibrium/test_topology_read.py::test_kernel_backed_carrier_read[2616-limited]",
+      "tests/equilibrium/test_topology_read.py::test_kernel_compile_growth[132]",
+      "tests/equilibrium/test_topology_read.py::test_kernel_compile_growth[300]",
+      "tests/equilibrium/test_topology_read.py::test_kernel_compile_growth[550]",
+      "tests/equilibrium/test_topology_read.py::test_null_position_implicit_tangent[diverted]",
+      "tests/equilibrium/test_topology_read.py::test_null_position_implicit_tangent[limited]",
+      "tests/equilibrium/test_topology_read.py::test_saddle_support_order[diverted]",
+      "tests/equilibrium/test_topology_read.py::test_topology_class_and_membership[diverted]"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T141607544598-vertical-pin/head-suite-batch.log",
+    "revision": "d7fa249aed09cffe1aa9355002ee4c0ea2bc9e38"
+  },
+  "assertion_audit": [
+    {
+      "fails_if": "the chosen source is the wrong unknown type, radial flux basis differs from -2\u03c0RZ, or the declared coil direction is not retained",
+      "path": "tests/equilibrium/test_solve_vertical_pin.py:76-85"
+    },
+    {
+      "fails_if": "the inactive row is not zero or the active centroid row does not return 0.5 - 0.7 = -0.2",
+      "path": "tests/equilibrium/test_solve_vertical_pin.py:100-109"
+    },
+    {
+      "fails_if": "the typed request does not pass one CurrentCentroidConstraint pair to active.solve; it cannot fail on an error inside that mocked call",
+      "path": "tests/equilibrium/test_solve_vertical_pin.py:158-163"
+    },
+    {
+      "fails_if": "the test constant is below 1.6, even if carrier_map no longer makes an elongated state",
+      "path": "tests/equilibrium/test_solve_vertical_pin.py:169"
+    },
+    {
+      "fails_if": "the synthetic free solver stalls, misses literal 0.5 m, approaches either target, or leaves a nonzero compensator",
+      "path": "tests/equilibrium/test_solve_vertical_pin.py:173-177"
+    },
+    {
+      "fails_if": "the synthetic solve stalls, misses residual 1e-12, returns a different value of its supplied observation function, or gives identical field unknowns; a shared error in the supplied observation and assertion survives",
+      "path": "tests/equilibrium/test_solve_vertical_pin.py:188-193"
+    },
+    {
+      "fails_if": "the explicitly compiled synthetic program cannot execute all three bindings, stalls, or returns an observation differing from the same supplied target or FREE_HEIGHT",
+      "path": "tests/equilibrium/test_solve_vertical_pin.py:204-210"
+    }
+  ],
+  "base_log_revision": "8e0ccc13a1d72fa47a4e48f37ca5d6131ad89fca",
+  "baseline_suite": {
+    "command": "bash /home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T141607544598-vertical-pin/base-suite.sh",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 15,
+    "failure_ids": [
+      "tests/equilibrium/test_topology_read.py::test_closed_form_resolution_probe[diverted]",
+      "tests/equilibrium/test_topology_read.py::test_topology_class_and_membership[limited]",
+      "tests/equilibrium/test_topology_read.py::test_topology_class_and_membership[diverted]",
+      "tests/equilibrium/test_topology_read.py::test_saddle_support_order[limited]",
+      "tests/equilibrium/test_topology_read.py::test_saddle_support_order[diverted]",
+      "tests/equilibrium/test_topology_read.py::test_kernel_compile_growth[132]",
+      "tests/equilibrium/test_topology_read.py::test_kernel_compile_growth[300]",
+      "tests/equilibrium/test_topology_read.py::test_kernel_compile_growth[550]",
+      "tests/equilibrium/test_topology_read.py::test_biot_moment_point_derivatives",
+      "tests/equilibrium/test_topology_read.py::test_kernel_backed_carrier_read[1074-limited]",
+      "tests/equilibrium/test_topology_read.py::test_kernel_backed_carrier_read[1074-diverted]",
+      "tests/equilibrium/test_topology_read.py::test_kernel_backed_carrier_read[2616-limited]",
+      "tests/equilibrium/test_topology_read.py::test_kernel_backed_carrier_read[2616-diverted]",
+      "tests/equilibrium/test_topology_read.py::test_null_position_implicit_tangent[limited]",
+      "tests/equilibrium/test_topology_read.py::test_null_position_implicit_tangent[diverted]"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T141607544598-vertical-pin/base-suite-current.log",
+    "revision": "8e0ccc13a1d72fa47a4e48f37ca5d6131ad89fca"
+  },
+  "call_site_count": 3,
+  "call_sites": [
+    "nova/equilibrium/forward.py:_solve_imposed_request:2613",
+    "nova/equilibrium/forward.py:ForwardProfile.solve:2860",
+    "nova/equilibrium/forward.py:_solve_augmented_constraints:2252"
+  ],
+  "completed_at": "2026-10-18T17:33:20Z",
+  "dispatched_at": "2026-10-18T17:23:19Z",
+  "findings": [
+    {
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": "158",
+      "severity": "blocking",
+      "text": "the public-route test raises from a mock before assemble_augmented_system and Newton-Krylov execute, so a broken physical pin on a real ForwardSolveRequest would leave all five focused tests green."
+    },
+    {
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": "191",
+      "severity": "blocking",
+      "text": "the asserted height is computed by the same centroid_height function supplied to pinned_fixed_point; replacing that function with an unrelated state coordinate can move both sides together and keep the target assertion green."
+    },
+    {
+      "file": "docs/research/vertical-pin.html",
+      "line": "46",
+      "severity": "blocking",
+      "text": "the one-program claim is measured for the synthetic core and a public cache key, while the document admits no production augmented Newton-Krylov executable count; the done_when's production compilation measure remains unverified."
+    },
+    {
+      "file": "nova/equilibrium/solve.py",
+      "line": "186",
+      "severity": "follow-on",
+      "text": "pin_residual and pinned_fixed_point duplicate the augmented constraint capability owned by constraint.py's AugmentedConstraintSystem and have no production caller, leaving two paths to maintain."
+    },
+    {
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": "169",
+      "severity": "follow-on",
+      "text": "ELONGATION >= 1.6 checks only the test constant; removing elongation from carrier_map would leave this assertion green, so it does not independently guard the solved carrier shape."
+    },
+    {
+      "file": "manifest.md",
+      "line": "22",
+      "severity": "follow-on",
+      "text": "the head topology module reached its summary with seven setup errors after an out-of-memory compiler child; zero added failure IDs is a valid set difference but those seven kernel behaviours remain unmeasured."
+    }
+  ],
+  "head_log_revision": "d7fa249aed09cffe1aa9355002ee4c0ea2bc9e38",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "git diff 8e0ccc13..45213bf1 and each intervening commit add the public binding, prototype comparison, carrier tests and evidence; solve.py:186 also adds a separate pin wrapper without a production caller.",
+    "done_when": "brief.txt:9-15 requires an elongated carrier, two targets, one production program and a 550-cell comparison; compare-550-titan.log:15-28 measures the stall clearing, while docs/research/vertical-pin.html:46 says the production Newton-Krylov executable count is unmeasured.",
+    "goal": "brief.txt:1 and the plan's f-cfs-vertical-pin clause require a current-centroid height pin on elongated forward solves; forward.py:2613 and :2860 expose the pin, but no real public constrained solve is exercised.",
+    "manifest": "manifest.md:10-26 names eight commits, the two suite logs, the 550-cell comparison and a completed status; its after_suite is at d7fa249 and the later changes to reviewed head are documentation only.",
+    "write_paths": "manifest.md:3 grants the four equilibrium modules, prototype directory, pin test and evidence assets; all 11 net diff paths and each of eight commits fall within those paths."
+  },
+  "justifications": {
+    "durability": "tests/equilibrium/test_solve_vertical_pin.py:185-210 fails when field leverage is removed, but :190-191 compares the same centroid_height function passed to the solver and :158 stops before the public solve.",
+    "evidence": "compare-550-titan.log:15-28 records a free residual of 1.54987034415e-3 and pinned residual of 2.09179996955e-13; docs/research/vertical-pin.html:46 limits the program count to an analytic core.",
+    "fit": "nova/equilibrium/constraint.py:441 extends ConstraintPair and CurrentCentroidConstraint using existing idioms, and the changed code introduces no prohibited plan-labelled source names.",
+    "goal_fidelity": "nova/equilibrium/forward.py:2613 routes a pin into the production constraint system, but tests/equilibrium/test_solve_vertical_pin.py:158 raises from a mock before that system runs.",
+    "reuse": "nova/equilibrium/solve.py:186-241 introduces a second augmented pin row and state wrapper beside constraint.py:1975's AugmentedConstraintSystem, with no production caller of pinned_fixed_point.",
+    "scope_discipline": "all paths in git diff 8e0ccc13..45213bf1 fit the grants in manifest.md:3, including scripts/prototypes/xpoint_cell_owner/panel_data.py and the evidence SVG."
+  },
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: 8e0ccc13a1d72fa47a4e48f37ca5d6131ad89fca\nreviewed_head_sha: 45213bf1cd6216df72a450af58038e088407d39e\nVERDICT goal: brief.txt:1 and the plan's f-cfs-vertical-pin clause require a current-centroid height pin on elongated forward solves; forward.py:2613 and :2860 expose the pin, but no real public constrained solve is exercised.\nVERDICT done_when: brief.txt:9-15 requires an elongated carrier, two targets, one production program and a 550-cell comparison; compare-550-titan.log:15-28 measures the stall clearing, while docs/research/vertical-pin.html:46 says the production Newton-Krylov executable count is unmeasured.\nVERDICT write_paths: manifest.md:3 grants the four equilibrium modules, prototype directory, pin test and evidence assets; all 11 net diff paths and each of eight commits fall within those paths.\nVERDICT manifest: manifest.md:10-26 names eight commits, the two suite logs, the 550-cell comparison and a completed status; its after_suite is at d7fa249 and the later changes to reviewed head are documentation only.\nVERDICT diff: git diff 8e0ccc13..45213bf1 and each intervening commit add the public binding, prototype comparison, carrier tests and evidence; solve.py:186 also adds a separate pin wrapper without a production caller.\nCALL_SITES: nova/equilibrium/forward.py:_solve_imposed_request:2613, nova/equilibrium/forward.py:ForwardProfile.solve:2860, nova/equilibrium/forward.py:_solve_augmented_constraints:2252\nSCORE goal_fidelity: 12\nJUSTIFICATION goal_fidelity: nova/equilibrium/forward.py:2613 routes a pin into the production constraint system, but tests/equilibrium/test_solve_vertical_pin.py:158 raises from a mock before that system runs.\nSCORE evidence: 13\nJUSTIFICATION evidence: compare-550-titan.log:15-28 records a free residual of 1.54987034415e-3 and pinned residual of 2.09179996955e-13; docs/research/vertical-pin.html:46 limits the program count to an analytic core.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: all paths in git diff 8e0ccc13..45213bf1 fit the grants in manifest.md:3, including scripts/prototypes/xpoint_cell_owner/panel_data.py and the evidence SVG.\nSCORE durability: 10\nJUSTIFICATION durability: tests/equilibrium/test_solve_vertical_pin.py:185-210 fails when field leverage is removed, but :190-191 compares the same centroid_height function passed to the solver and :158 stops before the public solve.\nSCORE fit: 17\nJUSTIFICATION fit: nova/equilibrium/constraint.py:441 extends ConstraintPair and CurrentCentroidConstraint using existing idioms, and the changed code introduces no prohibited plan-labelled source names.\nSCORE reuse: 5\nJUSTIFICATION reuse: nova/equilibrium/solve.py:186-241 introduces a second augmented pin row and state wrapper beside constraint.py:1975's AugmentedConstraintSystem, with no production caller of pinned_fixed_point.\nFINDING tests/equilibrium/test_solve_vertical_pin.py:158 blocking: the public-route test raises from a mock before assemble_augmented_system and Newton-Krylov execute, so a broken physical pin on a real ForwardSolveRequest would leave all five focused tests green.\nFINDING tests/equilibrium/test_solve_vertical_pin.py:191 blocking: the asserted height is computed by the same centroid_height function supplied to pinned_fixed_point; replacing that function with an unrelated state coordinate can move both sides together and keep the target assertion green.\nFINDING docs/research/vertical-pin.html:46 blocking: the one-program claim is measured for the synthetic core and a public cache key, while the document admits no production augmented Newton-Krylov executable count; the done_when's production compilation measure remains unverified.\nFINDING nova/equilibrium/solve.py:186 follow-on: pin_residual and pinned_fixed_point duplicate the augmented constraint capability owned by constraint.py's AugmentedConstraintSystem and have no production caller, leaving two paths to maintain.\nFINDING tests/equilibrium/test_solve_vertical_pin.py:169 follow-on: ELONGATION >= 1.6 checks only the test constant; removing elongation from carrier_map would leave this assertion green, so it does not independently guard the solved carrier shape.\nFINDING manifest.md:22 follow-on: the head topology module reached its summary with seven setup errors after an out-of-memory compiler child; zero added failure IDs is a valid set difference but those seven kernel behaviours remain unmeasured.\n",
+  "review_run_id": "r-20261018T172216624608-review-of-vertical-pin-45213bf1cd62",
+  "reviewed_base_sha": "8e0ccc13a1d72fa47a4e48f37ca5d6131ad89fca",
+  "reviewed_head_sha": "45213bf1cd6216df72a450af58038e088407d39e",
+  "reviewed_run_id": "r-20261018T141607544598-vertical-pin",
+  "scores": {
+    "durability": 10,
+    "evidence": 13,
+    "fit": 17,
+    "goal_fidelity": 12,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "suite_delta_basis": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T141607544598-vertical-pin/head-suite-batch.log",
+    "after_summary": "5 failed, 26 passed, 2 skipped, 7 errors; pin module 5 passed, solver module 6 passed",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T141607544598-vertical-pin/base-suite-current.log",
+    "baseline_summary": "8 failed, 23 passed, 2 skipped, 7 errors; solver module 6 passed",
+    "limit": "seven setup errors did not exercise topology kernel behaviour; reviewed head changes after the head arm are documentation only"
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T17:28:07.168392+00:00",
+  "total": 77
+}

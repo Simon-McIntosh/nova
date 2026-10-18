@@ -137,7 +137,7 @@ def _efit_columns(case, source, record):
         source=source,
         efit_verdict=int(record.verdict) if record is not None else -1,
         efit_label=(
-            ("diverted" if record.diverted else "unread")
+            "unread"
             if record is None
             else ("diverted" if record.diverted else "limited")
         ),

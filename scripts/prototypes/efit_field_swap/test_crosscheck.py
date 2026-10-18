@@ -8,10 +8,10 @@ truncates nova's own contour-mesh capacity is read rather than dropped.
 
 from __future__ import annotations
 
-import numpy as np
 
 from scripts.prototypes.efit_field_swap.crosscheck import (
     _decision,
+    _row,
     cases,
     fitted_geometry,
     lattice,
@@ -58,3 +58,11 @@ def test_a_wide_wall_record_reads_a_decision():
     )
     assert row.capacity_fit is True
     assert row.nova_label in ("limited", "diverted")
+
+
+def test_missing_record_remains_an_explicit_unread_row(tmp_path):
+    row = _row("missing", "missing.txt", str(tmp_path / "missing.txt"))
+    assert row.case == "missing"
+    assert row.efit_label == "unread"
+    assert row.nova_label == "unread"
+    assert "FileNotFoundError" in row.note

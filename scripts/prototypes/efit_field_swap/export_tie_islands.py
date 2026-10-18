@@ -1,19 +1,18 @@
 """Export nova's bisected tie-island states as imas-efit version-2 trace records.
 
 The tie-island states are the ones the merge-path admission probe bisects: the
-carrier is built at a requested cell count, and the state exported is the moving
-field evaluated at the bisected offset, where the read's boundary class or
+carrier is built at a requested cell count, and the moving field is exported at
+both ends of every adjacent-double bracket where the read's boundary class or
 saddle identity changes. Building the carrier is done exactly as
 ``saddle_admission_probe`` does it -- ``tie_probe.build(kind, requested, cache)``
 -- against the same read-only cache, so the machine, field and bisected offset
 are the probe's rather than a reconstruction of them.
 
-The offset is **read out of a bisection receipt** produced by
-``bisect_tie_island.py`` rather than passed on the command line, so a state
-cannot be exported at an offset nobody bisected. A receipt whose bracket is not
-adjacent binary64, or whose two ends agree, is refused: it names an interval
-rather than a state. The provenance travels with the record as a sidecar JSON
-carrying the bracket, the step count and the decision keys on either side.
+The offsets are read out of a bisection receipt produced by
+``bisect_tie_island.py`` rather than passed on the command line. Every bracket
+must have adjacent binary64 endpoints and different decision keys; the live
+probe read must reproduce each endpoint key before its record is written.
+Provenance travels with each record as a sidecar JSON.
 
 What is written is a plain ``BOUNDARY_LEVEL_TRACE 2`` record: a rectilinear grid
 over the machine, the moving field evaluated on it, the machine's wall as
@@ -172,12 +171,11 @@ def centre_count(geometry):
 
 
 def bisected_brackets(receipt, path):
-    """The bisected offset a receipt records, refusing anything but a state.
+    """Yield every numerically adjacent decision transition in a receipt.
 
-    The offset comes from the receipt rather than from a command-line argument,
-    and the bracket must be adjacent binary64 and must change the decision key.
-    A receipt failing either test names an interval or a non-transition, and
-    neither is a tie-island state.
+    The endpoints come from the receipt rather than command-line arguments.
+    Boolean flags are checked for consistency, never used as proof of adjacency
+    or a changed decision key.
     """
     entries = receipt.get("bisected", [])
     if not entries:
@@ -228,18 +226,17 @@ def validate_carrier(receipt, requested, achieved):
 
 
 def main(cache, out_dir, jobs):
-    """jobs: one (receipt-path, requested-cells) pair per exported state."""
+    """Export both sides of every transition for each receipt and carrier."""
     Path(out_dir).mkdir(parents=True, exist_ok=True)
     for receipt_path, requested in jobs:
         receipt = json.loads(Path(receipt_path).read_text())
+        brackets = list(bisected_brackets(receipt, receipt_path))
         state = tie_probe.build(receipt["kind"], requested, cache)
         achieved = len(centre_count(state["geometry"]))
         validate_carrier(receipt, requested, achieved)
         tag = f"{receipt['kind']}-{achieved}cells"
         sampled = sampler_with_enclosure(state)
-        for index, (left, right, entry) in enumerate(
-            bisected_brackets(receipt, receipt_path), start=1
-        ):
+        for index, (left, right, entry) in enumerate(brackets, start=1):
             for side, offset, row in (
                 ("left", left, entry["left"]),
                 ("right", right, entry["right"]),

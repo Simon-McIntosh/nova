@@ -276,3 +276,79 @@ def test_newton_trajectory_leaves_rows_without_building(monkeypatch):
     assert result.position[0, 0] > 0.75
     assert not result.valid[0]
     assert result.status[0] == fixed.FixedPointStatus.NEEDS_ROWS
+
+
+def _path_carrier():
+    """Five cells: axis, control branch, saddle gate, wall contact, spacer."""
+    from scripts.prototypes.fast_map_production.test_bottleneck_level import (
+        _carrier,
+        _square,
+    )
+
+    return _carrier(
+        [
+            _square(1.0, 0.0),  # 0 axis
+            _square(0.0, 0.0),  # 1 control branch
+            _square(2.0, 0.0),  # 2 saddle gate (the merge-path saddle)
+            _square(3.0, 0.0),  # 3 wall contact
+            _square(0.0, 1.0),  # 4 spacer
+        ]
+    )
+
+
+def _path_roots(geometry, levels):
+    """Three roots: axis, the merge-path saddle, and a higher wall-contact root."""
+    position = jnp.asarray(
+        np.stack(
+            (
+                np.asarray(geometry.centre[0]),
+                np.asarray(geometry.centre[2]),
+                np.asarray(geometry.centre[3]),
+            )
+        )
+    )
+    jet = SimpleNamespace(value=jnp.asarray(levels), hessian=jnp.zeros((3, 2, 2)))
+    return SimpleNamespace(
+        position=position, jet=jet, valid=jnp.asarray([True, True, True])
+    )
+
+
+def test_path_admission_rejects_the_wall_contact_root():
+    """The bounding saddle of the axis path is admitted, not the higher root.
+
+    The wall-contact root carries a level above the gate by construction: its
+    extremum ties the boundary level, so ranking saddles by level would admit it
+    and step the booked current. Admission ranks each saddle by the axis-path
+    passage to its own cell minus its own level, so the wall root, whose cell the
+    axis reaches only at the gate level (-0.5) and not at its own (+0.3), loses.
+    """
+    from scripts.prototypes.fast_map_production.kernel import _merge_path_saddle
+
+    geometry = _path_carrier()
+    ceiling = jnp.asarray([1.0, 0.5, -0.5, -0.5, -2.0])
+    levels = np.array([1.0, -0.5, 0.3])
+    roots = _path_roots(geometry, levels)
+    saddles = jnp.asarray([True, True])
+    sigma = jnp.asarray(1.0)
+
+    index, score = _merge_path_saddle(geometry, roots, saddles, sigma, ceiling)
+    # Root 1 (the gate) is admitted; root 2 (the wall contact) is not.
+    assert int(index) == 0, f"admitted saddle index {int(index)}"
+    assert float(score) == levels[1], f"admitted level {float(score)}"
+
+    # Falsification: an argmax over saddle levels, the behaviour the admission
+    # replaced, admits the wall-contact root and so the assertion would fail.
+    wall_level = sigma * roots.jet.value
+    argmax_index = int(jnp.argmax(jnp.where(saddles, wall_level[1:], -jnp.inf)))
+    assert argmax_index != int(index)
+    assert argmax_index == 1
+
+
+def test_psi_rounding_enclosure_bounds_the_fit():
+    """The enclosure is the binary64 bound of the fitted psi, positive and small."""
+    from scripts.prototypes.fast_map_production.kernel import psi_rounding_enclosure
+
+    coefficients = jnp.asarray(np.linspace(-2.0, 3.0, 12).reshape(2, 6))
+    bound = float(psi_rounding_enclosure(coefficients))
+    assert bound > 0.0
+    assert bound < 1e-1

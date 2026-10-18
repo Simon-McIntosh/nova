@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="evidence">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="saddle-merge-path-admission">
+  <meta name="plan-title" content="Merge-path saddle admission on the axis merge path">
+  <meta name="plan-summary" content="The topology read's argmax over saddle levels is replaced by a merge-path admission that admits the saddle bounding the axis merge path, so the wall-contact root that ties the boundary level by construction is never selected and the boundary-class switch is gone at 282 and 550 cells"></meta>
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-verifies" content="converged-forward-solve#s2">
+  <meta name="plan-recorded-at" content="2026-10-17">
+  <meta name="plan-verdict" content="partial">
+  <title>Merge-path saddle admission | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+  <h1 id="saddle-merge-path-admission-landing">Merge-path saddle admission</h1>
+
+  <p><strong>The admitted saddle is now the bounding saddle of the axis merge path, not the highest-level root.</strong> The read at <code>scripts/prototypes/fast_map_production/kernel.py</code> selected <code>saddle_index = 1 + jnp.argmax(saddle_score_rows)</code>, ranking every valid saddle by its level. A second root at the wall contact ties the boundary level by construction — the wall candidate is the more scrape-off-side of the contact's tangency and the axis-path bottleneck, and the bottleneck is that saddle's own level — so it won the argmax over the whole tie island and then left the census between adjacent doubles. One owned function, <code>_merge_path_saddle</code>, replaces the argmax: it ranks each live saddle by the maximin axis-path passage to the saddle's own cell minus the saddle's own level, decided before the wall-versus-saddle contest and fixed-shape and traced.</p>
+
+  <figure><img src="/nova/figures/converged-forward-solve/saddle-merge-path-admission/saddle-admission-island.svg" alt="Saddle level, wall contact level, boundary flux and booked current against exterior jet offset through the 282-cell tie island at base and head"><figcaption>The 282-cell tie island, base (<code>argmax</code> saddle selection) left and head (merge-path admission) right, 61 probe states per panel with the sweep's own root prior. Wall contact level (grey), saddle level (near-black dashed) and boundary flux (blue) above; booked current (amber) below; dotted lines mark the class switch in the base arm. Base jumps the admitted saddle level onto the wall contact across the island and back; head holds the primary X-point throughout, so no class switch and no saddle-identity change remains. The booked current is steep through this window, so its adjacent-sample steps are dominated by the equilibrium's own evolution rather than by the removed switch. Probe: <code>tie_probe.py</code>, CPU, cells 250 requested / 282 actual.</figcaption></figure>
+
+  <h2 id="saddle-merge-path-admission-measure">The measure at 282 and 550 cells</h2>
+
+  <p>Both arms are 61-state scans of the exterior jet offset on the certified diverted carrier, base from the orientation-revision kernel (<code>efa99eeb</code> as held in the main checkout) and head from the worktree kernel whose <code>__file__</code> the log header prints. The admitted saddle is read from <code>reading.saddle_candidate</code>; the classification from <code>reading.boundary_class</code>.</p>
+
+  <table>
+    <thead><tr><th>Cells</th><th>Arm</th><th>Class switches in window</th><th>Admitted saddle level over the island</th><th>Boundary flux max adjacent step</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="2">282</td><th>base</th><td>2 &mdash; 0.1607&rarr;0.1613, 0.1727&rarr;0.1733</td><td>&minus;0.01050 &rarr; +0.00799, held, &rarr; back</td><td>4.13 &times; 10<sup>&minus;5</sup></td></tr>
+      <tr><th>head</th><td>0</td><td>&minus;0.01040 &rarr; &minus;0.01133, continuous</td><td>4.13 &times; 10<sup>&minus;5</sup></td></tr>
+      <tr><td rowspan="2">550</td><th>base</th><td>6</td><td>switches onto the wall contact and back</td><td>5.68 &times; 10<sup>&minus;5</sup></td></tr>
+      <tr><th>head</th><td>0</td><td>held on the primary X-point</td><td>5.68 &times; 10<sup>&minus;5</sup></td></tr>
+    </tbody>
+  </table>
+
+  <p>The head arm carries <strong>no boundary-class switch at either resolution</strong> where base carries two at 282 and six at 550, and the admitted saddle level is the primary X-point's continuous trace rather than the wall contact's jump. The boundary flux is unchanged between adjacent samples to the printer at both arms (4.13 &times; 10<sup>&minus;5</sup> at 282, 5.68 &times; 10<sup>&minus;5</sup> at 550), which is the point: the switch that moved was a saddle-identity change, not a flux change.</p>
+
+  <h2 id="saddle-merge-path-admission-census">Every remaining change, bisected and classified</h2>
+
+  <p>Each change is bisected to adjacent binary64 values by <code>saddle_admission_probe.py</code>, which measures the same carrier the sweep does and reports, on both sides, the boundary flux, the unnormalised booked current, the live saddle roots with their levels and determinants, and the computed psi rounding enclosure <code>psi_rounding_enclosure</code> states for the moving field. Classification follows imas-efit's ruling of 2026-10-17: a change caused by a max/saddle pair whose persistence crosses the computed enclosure is a <strong>fold</strong>, whatever <code>det H</code> says.</p>
+
+  <table>
+    <thead><tr><th>Tie</th><th>Adjacent pair (offset)</th><th>Persistence <code>|level &minus; wall|</code></th><th>Enclosure</th><th><code>det H</code> of the root entering or leaving</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>282-A</td><td><code>0.16095036467954554</code> &rarr; <code>&hellip;557</code></td><td><strong>0.0</strong> (bit-identical to the wall level)</td><td>9.05 &times; 10<sup>&minus;18</sup></td><td>&minus;1.6194 &times; 10<sup>&minus;4</sup></td><td><strong>implementation switch at base</strong></td></tr>
+      <tr><td>282-B</td><td><code>0.17323108126295567</code> &rarr; <code>&hellip;570</code></td><td>6.05 &times; 10<sup>&minus;7</sup></td><td>9.32 &times; 10<sup>&minus;18</sup></td><td>&minus;2.7385 &times; 10<sup>&minus;5</sup></td><td>census departure</td></tr>
+      <tr><td>550-1</td><td><code>0.11377439384256692</code> &rarr; <code>&hellip;693</code></td><td>2.81 &times; 10<sup>&minus;10</sup></td><td>7.93 &times; 10<sup>&minus;18</sup></td><td>&minus;1.6218 &times; 10<sup>&minus;4</sup></td><td>crossing</td></tr>
+      <tr><td>550-2</td><td><code>0.1161745036841524</code> &rarr; <code>&hellip;241</code></td><td>5.46 &times; 10<sup>&minus;7</sup></td><td>8.00 &times; 10<sup>&minus;18</sup></td><td>&minus;1.4401 &times; 10<sup>&minus;4</sup></td><td>census departure</td></tr>
+      <tr><td>550-3</td><td><code>0.11669761150742126</code> &rarr; <code>&hellip;128</code></td><td>3.93 &times; 10<sup>&minus;7</sup></td><td>8.01 &times; 10<sup>&minus;18</sup></td><td>&minus;1.3984 &times; 10<sup>&minus;4</sup></td><td>crossing</td></tr>
+      <tr><td>550-4</td><td><code>0.121278920399938</code> &rarr; <code>&hellip;801</code></td><td>3.72 &times; 10<sup>&minus;7</sup></td><td>8.14 &times; 10<sup>&minus;18</sup></td><td>&minus;8.1224 &times; 10<sup>&minus;5</sup></td><td>census departure</td></tr>
+      <tr><td>550-5</td><td><code>0.12133441656962647</code> &rarr; <code>&hellip;649</code></td><td>3.46 &times; 10<sup>&minus;7</sup></td><td>8.15 &times; 10<sup>&minus;18</sup></td><td>&minus;7.9790 &times; 10<sup>&minus;5</sup></td><td>crossing</td></tr>
+      <tr><td>550-6</td><td><code>0.12227181690819959</code> &rarr; <code>&hellip;960</code></td><td>3.79 &times; 10<sup>&minus;7</sup></td><td>8.17 &times; 10<sup>&minus;18</sup></td><td>&minus;4.4522 &times; 10<sup>&minus;5</sup></td><td>census departure</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>282-A is the tie island's mechanism, and at base it is an implementation switch.</strong> (Coordinator correction at merge: this record first called it a fold under an imas-efit ruling that pairs crossing the rounding enclosure count as folds. imas-efit's lead reversed that ruling on 2026-10-18, after review showed such events are real steps at nondegenerate pairs. By the original test, where a fold needs |det H| and persistence both at roundoff, this is a switch: an arithmetic tie with a step. Merge-path admission removes it at head.) A saddle root enters the census at offset <code>0.16095036467954557</code> with its level <em>bit-identical</em> to the wall level (<code>wall_candidate == saddle_candidate == boundary_flux == 0.007967410111760847</code>), so the persistence of the pair is exactly zero and crosses the enclosure of 9.05 &times; 10<sup>&minus;18</sup>. Its <code>det H</code> is &minus;1.6194 &times; 10<sup>&minus;4</sup>, thirteen orders of magnitude <em>above</em> the enclosure — so by the determinant it is not a fold: the pair has no persistence to speak of, and the root arrives already hyperbolic. Base admits it and switches class 0 &rarr; 1, stepping the booked current 2215.3501 &rarr; 2206.1106.</p>
+
+  <p><strong>282-B is a census departure, not a fold.</strong> The same wall-contact root leaves the census between <code>0.17323108126295567</code> and <code>&hellip;570</code> while still hyperbolic (<code>det H</code> = &minus;2.7385 &times; 10<sup>&minus;5</sup>) at a persistence of 6.05 &times; 10<sup>&minus;7</sup>, eleven orders above the enclosure of 9.32 &times; 10<sup>&minus;18</sup>. Base's argmax then falls back to the primary X-point, switching class 1 &rarr; 0 and stepping the booked current 14.4806 &rarr; 129.2342 — <strong>the +114.75 step this node exists to remove</strong>. Head holds class 0 and the primary X-point's identity on both sides of both ties: at 282 the head arm carries <em>no</em> change over the 61-state window, at 550 none over its own island window, so the 115-to-125 step is present at base and gone at head.</p>
+
+  <p><strong>At 550 the same two mechanisms appear six times, and none is a fold.</strong> Base carries six changes in the 0.10&ndash;0.14 island window, each bisected to adjacent binary64 in 45 or 46 steps. The three entries (550-1, -3, -5) are <strong>crossings</strong>: the admitted saddle's level passes the wall candidate's level with a resolvable difference of 2.81 &times; 10<sup>&minus;10</sup> to 3.93 &times; 10<sup>&minus;7</sup>, eight to ten orders above the enclosure. The three exits (550-2, -4, -6) are <strong>census departures</strong>: the root leaves while still hyperbolic, <code>det H</code> between &minus;4.45 &times; 10<sup>&minus;5</sup> and &minus;1.44 &times; 10<sup>&minus;4</sup>, at a persistence of 3.72 &times; 10<sup>&minus;7</sup> to 5.46 &times; 10<sup>&minus;7</sup>. Head carries <em>zero</em> changes over the same window and each of the six brackets reports class 0 on both sides. Booked-current steps at the exits reach 112.20 &rarr; 184.74 and 15.91 &rarr; 114.07 &mdash; the 115-to-125 class of step, gone at head.</p>
+
+  <p>A correction to the previous entry in this fragment: the earlier probe read the same carrier through a sampler that applied the state's <code>scale</code> a second time, so its window was not the intended one and its <code>live_saddle_count</code> read 1 everywhere. The numbers above come from the corrected probe, which reproduces both islands at the offsets the coarse sweep straddles.</p>
+
+  <h2 id="saddle-merge-path-admission-negative">The negative control</h2>
+
+  <p>The declared mutation — restoring the argmax saddle selection — is applied inside <code>_merge_path_saddle</code> and the same two tests re-run. The head arm passes (2 passed, <code>EXIT=0</code>); the red arm exits non-zero with <code>test_path_admission_rejects_the_wall_contact_root</code> failing and no other test changing. Log: <code>negative-control.log</code> in the run directory.</p>
+
+  <h2 id="saddle-merge-path-admission-footprint">Footprint and what is not measured</h2>
+
+  <p>The change is one function <code>_merge_path_saddle</code>, one helper <code>psi_rounding_enclosure</code>, and the read's selection lines; the wall-versus-saddle contest downstream is untouched. The gate ran CPU-only in a fresh process at head: <code>tests/test_fixed_points.py</code>, <code>tests/test_fixed_point.py</code> and <code>test_bottleneck_level.py</code> together, <strong>66 passed</strong>.</p>
+
+  <p><strong>Map fidelity is unchanged, which is the gate the selection change had to pass.</strong> The booked-current map error at base beside head, measured on titan (job 1288352, one device, <code>--map-only</code>, script on GPFS) at the same 250/500-cell machines the probe uses, is bit-identical between the arms at every row: diverted 250 flux 1.086579 &times; 10<sup>&minus;3</sup> / moment 1.761398 &times; 10<sup>&minus;3</sup>, diverted 500 4.872721 &times; 10<sup>&minus;4</sup> / 1.421232 &times; 10<sup>&minus;3</sup>, limited 250 1.803919 &times; 10<sup>&minus;4</sup> / 1.547435 &times; 10<sup>&minus;3</sup>, limited 500 7.135829 &times; 10<sup>&minus;5</sup> / 8.522775 &times; 10<sup>&minus;4</sup>, with the boundary class matching at every row. Head is no worse than base at any resolution or kind &mdash; it is the same number.</p>
+
+  <p>Not measured this run, and carried as follow-ons: diverted and limited cold solves to 1e-12 at 282 and 550, the <code>fixed_points.solve</code> iteration counts and residuals for the wall-contact root at its base exit, and the tests that call <code>read(...)</code> itself rather than the admission directly (including the two tie-island review follow-ons). Every wall in this record that is not the titan row is a CPU number.</p>
+
+</main></body>
+</html>

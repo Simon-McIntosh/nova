@@ -161,14 +161,31 @@ def census(field, geometry, convention, policy, previous):
     distance = jnp.linalg.norm(polished.position - previous[0], axis=-1)
     axis_index = jnp.argmin(jnp.where(axes, distance, jnp.inf))
     saddle_count = jnp.sum(saddles, dtype=jnp.int32)
-    saddle_slots = jnp.nonzero(saddles, size=policy.null_capacity - 1, fill_value=0)[0]
-    gather = jnp.concatenate((axis_index[None], saddle_slots))
-    valid = jnp.concatenate(
-        (
-            jnp.any(axes)[None],
-            jnp.arange(policy.null_capacity - 1) < saddle_count,
+    slots = policy.null_capacity - 1
+    if slots:
+        saddle_slots = jnp.nonzero(saddles, size=slots, fill_value=0)[0]
+        other_axes = axes & (jnp.arange(len(axes)) != axis_index)
+        axis_slots = jnp.nonzero(other_axes, size=slots, fill_value=0)[0]
+        remainder = jnp.arange(slots)
+        gather = jnp.concatenate(
+            (
+                axis_index[None],
+                jnp.where(
+                    remainder < saddle_count,
+                    saddle_slots,
+                    axis_slots[jnp.clip(remainder - saddle_count, 0, slots - 1)],
+                ),
+            )
         )
-    )
+        valid = jnp.concatenate(
+            (
+                jnp.any(axes)[None],
+                remainder < saddle_count + jnp.maximum(jnp.sum(axes) - 1, 0),
+            )
+        )
+    else:
+        gather = axis_index[None]
+        valid = jnp.any(axes)[None]
     roots = fixed_points.FixedPointResult(
         polished.position[gather],
         jax.tree.map(lambda leaf: leaf[gather], polished.jet),
@@ -184,6 +201,6 @@ def census(field, geometry, convention, policy, previous):
         saddle_count,
         saddle_count,
         (jnp.sum(candidate) > seed_capacity)
-        | (saddle_count > policy.null_capacity - 1),
+        | (saddle_count + jnp.sum(axes) > policy.null_capacity),
         distance[axis_index],
     )

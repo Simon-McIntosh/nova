@@ -148,8 +148,9 @@
 
   <section id="lobe-share-partition-maps">
     <h2>The map errors</h2>
-    <p>The diverted and limited map errors are re-measured with the lobe as the owner component, at
-    the same three sizes and against the same guards, beside the half-plane cut's errors.</p>
+    <p>The diverted map errors are measured with the lobe as the owner component at all three sizes,
+    beside the half-plane cut and against the stated diverted guards. The limited control follows
+    below.</p>
     <table id="lobe-share-partition-maps-table">
       <thead><tr><th>carrier</th><th>guard</th><th>half-plane delivered</th><th>half-plane floor</th><th>lobe delivered</th><th>lobe floor</th></tr></thead>
       <tbody>
@@ -158,7 +159,7 @@
         <tr><td>2,098</td><td>1 × 10<sup>−4</sup></td><td>2.49303535497 × 10<sup>−4</sup> fail</td><td>1.76641360086 × 10<sup>−5</sup></td><td>9.47260994768 × 10<sup>−5</sup> pass</td><td>1.76641360086 × 10<sup>−5</sup></td></tr>
       </tbody>
     </table>
-    <p id="lobe-share-partition-maps-finding">At 282 the lobe cut lands 6.5 × 10<sup>−4</sup> below
+    <p id="lobe-share-partition-maps-finding">At 282 the lobe cut lands 4.409905 × 10<sup>−8</sup> below
     the guard, within 0.6 % of the half-plane cut's error and of the same order as its own
     reconstruction floor, so at this size the two representations of the owned region are not
     distinguishable by the map. The reconstruction floor is the smallest error any booking on this
@@ -171,10 +172,25 @@ passes where the half-plane cut fails &mdash; 9.47260994768 × 10<sup>&minus;5</
 1 × 10<sup>&minus;4</sup> guard, where the half-plane cut delivers 2.49303535497 × 10<sup>&minus;4</sup> and
 misses it by 2.5× &mdash; and that is the one size at which the two representations of the owned region
 separate, in favour of the lobe. At 550 the lobe cut is 19 % above the half-plane cut while still
-clearing its guard by 2.6 %, and at 282 the two are 0.6 % apart, both inside the carrier's own
-reconstruction floor of 6.18989257731 × 10<sup>&minus;4</sup>, so most of what remains there is the
+clearing its guard by 2.6 %, and at 282 the two are 0.6 % apart, both of the same order as the
+carrier's 6.18989257731 × 10<sup>&minus;4</sup> reconstruction floor, so much of what remains there is the
 carrier rather than the region. The 282 error clears its 1.0866 × 10<sup>&minus;3</sup>
 guard by 4.409905 × 10<sup>&minus;8</sup>.</p>
+    <h3>Limited control</h3>
+    <table id="lobe-share-partition-limited-table">
+      <thead><tr><th>carrier</th><th>booked owner cells</th><th>half-plane map error</th><th>lobe map error</th><th>independent reference error</th></tr></thead>
+      <tbody>
+        <tr><td>289</td><td>0</td><td>1.80391903624 × 10<sup>−4</sup></td><td>1.80391903624 × 10<sup>−4</sup></td><td>1.43236766265 × 10<sup>−4</sup></td></tr>
+        <tr><td>553</td><td>0</td><td>7.13582881486 × 10<sup>−5</sup></td><td>7.13582881486 × 10<sup>−5</sup></td><td>4.66332420692 × 10<sup>−5</sup></td></tr>
+        <tr><td>2,105</td><td>unmeasured</td><td>unmeasured</td><td>unmeasured</td><td>unmeasured</td></tr>
+      </tbody>
+    </table>
+    <p id="lobe-share-partition-limited-result">On the measured limited carriers the two maps have
+    exactly the same moments and errors, with no X-point owner cell. The nonzero independent reference
+    errors show that the equality is not an empty measurement. The 2,105-cell carrier was built on
+    titan, but CUDA ran out of device memory loading the compiled map after JAX reported 4.15 GB of
+    captured constants; no 2,105 map error is claimed. The limited comparison therefore covers two
+    of the three requested sizes.</p>
   </section>
 
   <section id="lobe-share-partition-solves">
@@ -215,14 +231,15 @@ partition is a root at 282. The stall is reported and left as the next item.</p>
 
   <section id="lobe-share-partition-verdict">
     <h2>Verdict</h2>
-    <p id="lobe-share-partition-verdict-body">Clauses 1 to 5 hold by construction and by
+    <p id="lobe-share-partition-verdict-body">Clauses 1 to 4 and the diverted part of clause 5 hold by construction and by
 measurement: the remainder takes its fan from the same builder that builds the lobe, the vertex-list
 reconstruction and the local signed-fan reduction are deleted, the reduction is the imported
 clip-quadrature rule, and the truncated rule that set the booked lobe's floor is gone with it. The
 independent lobe reference agrees to at most 7.10542735760 × 10<sup>&minus;13</sup>, and the whole-cell
 partition to at most 1.13686837722 × 10<sup>&minus;13</sup>. The 550 carrier books cell 8, so all three
 sizes exercise the intended owner partition. The lobe partition passes all
-three map guards and at 2,098 passes where the half-plane cut fails. Clause 6 holds at 282 and is
+three diverted map guards and at 2,098 passes where the half-plane cut fails. Limited controls are
+measured at 289 and 553 cells; the 2,105-cell map could not load on the P100. Clause 6 holds at 282 and is
 reported, not met, at 550: the solve stalls on a collapsing line search at a fixed point near
 1.55 × 10<sup>&minus;3</sup>, which is the item clause 6 named in advance and is left as the next item.
 No number on this page is an estimate.</p>

@@ -13,7 +13,7 @@
 <meta name="plan-commits" content="698ce55c4,49f04d62a,de3efb343,c67cce123,e50548d80,7e2026485,cfce8e4b0,c3eb7e017,c8c326194">
 <meta name="plan-recorded-at" content="2026-10-18">
 <meta name="plan-verdict" content="pass">
-<meta name="plan-environment" content="all_debug and in-place rows on the fleet node, binary64 asserted at entry, JAX_PLATFORMS=cpu, exact clipped single-null diverted certificate realising 282, 550 and 2,098 cells">
+<meta name="plan-environment" content="all_debug CPU partition rows and titan P100 limited controls, binary64 asserted at entry, exact clipped certificates">
 <title>Lobe share and cell partition | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
@@ -140,6 +140,20 @@ measured. They resolved when the measurement ran against a cache root that carri
 for those carriers: the root used first holds none, so <code>_exterior</code> returned a null and the run
 died on the addition rather than raising. That was a per-carrier fixture gap, and no pre-warm was built
 and no module outside this node's write scope was touched to close it.</p>
+<h3 id="lobe-share-partition-limited-title">Limited control</h3>
+<table id="lobe-share-partition-limited-table">
+<thead><tr><th>carrier</th><th>booked owner cells</th><th>half-plane error</th><th>lobe error</th><th>independent reference error</th></tr></thead>
+<tbody>
+<tr id="lobe-share-partition-limited-row-289"><td>289</td><td>0</td><td>1.80391903624e-4</td><td>1.80391903624e-4</td><td>1.43236766265e-4</td></tr>
+<tr id="lobe-share-partition-limited-row-553"><td>553</td><td>0</td><td>7.13582881486e-5</td><td>7.13582881486e-5</td><td>4.66332420692e-5</td></tr>
+<tr id="lobe-share-partition-limited-row-2105"><td>2,105</td><td>unmeasured</td><td>unmeasured</td><td>unmeasured</td><td>unmeasured</td></tr>
+</tbody>
+</table>
+<p id="lobe-share-partition-limited-finding">At the two measured limited sizes, neither selection
+books an X-point owner, and the maps have exactly equal moments and errors. The independent reference
+errors are nonzero, a positive control for the measurement. The 2,105-cell titan run built its carrier,
+then failed to load the compiled map with <code>CUDA_ERROR_OUT_OF_MEMORY</code> after JAX reported
+4.15 GB of captured constants. No 2,105-cell map error is inferred from the two smaller rows.</p>
 </section>
 
 <section id="lobe-share-partition-solves">
@@ -169,15 +183,16 @@ wall, and no axes or gridlines. Terminal residual 3.002262329835039e-14, converg
 
 <section id="lobe-share-partition-verdict">
 <h2>Verdict</h2>
-<p id="lobe-share-partition-verdict-body">Clauses 1 to 5 hold. The remainder takes its fan from the
+<p id="lobe-share-partition-verdict-body">Clauses 1 to 4 and the diverted part of clause 5 hold. The remainder takes its fan from the
 same builder that builds the lobe, the vertex-list reconstruction and the local signed-fan reduction
 are deleted, the reduction is the imported clip-quadrature rule, and the truncated rule that set the
 booked lobe's floor is gone with it. Clause 4 holds at 282, 550 and 2,098: the independent lobe
 reference agrees to at most 7.10542735760 &times; 10<sup>&minus;13</sup>, and the whole-cell partition
 to at most 1.13686837722 &times; 10<sup>&minus;13</sup>. The 550 carrier books cell 8, so the lobe and
-remainder are both exercised. Clause 5 holds at all three sizes: the lobe partition passes the guards
+remainder are both exercised. The diverted lobe partition passes the guards
 1.0866 &times; 10<sup>&minus;3</sup>, 5 &times; 10<sup>&minus;4</sup> and 1 &times; 10<sup>&minus;4</sup>, and at
-2,098 it passes where the half-plane cut fails. Clause 6 holds at 282 and is reported, not met, at 550:
+2,098 it passes where the half-plane cut fails. Limited controls agree at 289 and 553 cells; the
+2,105-cell map was not measured because the P100 ran out of device memory. Clause 6 holds at 282 and is reported, not met, at 550:
 the solve stalls on a collapsing line search at a fixed point near
 1.55 &times; 10<sup>&minus;3</sup>, which is the item clause 6 named in advance and is left as the next
 item. Clause 7 is this fragment. No number above is an estimate.</p>

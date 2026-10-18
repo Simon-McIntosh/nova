@@ -221,7 +221,7 @@ def write_trace_record(path: str | Path, record: TraceRecord) -> None:
                     record.axis_psi,
                     record.axis_r,
                     record.axis_z,
-                    1.0 if record.saddle_contested else 0.0,
+                    record.saddle_contested,
                     record.saddle_refined,
                     record.wall_level,
                     record.fed_back_psi,

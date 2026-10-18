@@ -1,0 +1,114 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "base_log_revision": null,
+  "call_site_count": 3,
+  "call_sites": [
+    "scripts/prototypes/xpoint_cell_owner/owner_map.py:161",
+    "scripts/prototypes/xpoint_cell_owner/owner_attribution.py:64",
+    "scripts/prototypes/xpoint_cell_owner/panel_data.py:74"
+  ],
+  "completed_at": "2026-10-18T10:46:59Z",
+  "dispatched_at": "2026-10-18T10:38:10Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/xpoint_cell_owner/lobe_booking.py",
+      "line": "183",
+      "severity": "blocking",
+      "text": "blocking: _whole_cell_rings makes a separate _normal_rings call before the lobe call at :184, so the remainder does not take its fan from the same call as the lobe as the exact done-when requires."
+    },
+    {
+      "file": "scripts/prototypes/xpoint_cell_owner/lobe_partition_gate.py",
+      "line": "124",
+      "severity": "blocking",
+      "text": "blocking: lobe_reference calls current._normal_rings at lobe_reference.py:124 with the booking's selection fields, so the dense lobe reference shares the region builder with the booking and cannot expose a common fan-geometry error despite the explicit independent-reference clause."
+    },
+    {
+      "file": "docs/research/lobe-share-partition.html",
+      "line": "124",
+      "severity": "blocking",
+      "text": "blocking: the partition table labels a 551-cell, zero-booked receipt as the 550-cell row, while maps2-lobe-500.json and cold2-lobe-500.json measure 550 cells from another cache; the required 550 carrier's owner partition has not been measured."
+    },
+    {
+      "file": "scripts/prototypes/xpoint_cell_owner/test_lobe_partition.py",
+      "line": "86",
+      "severity": "blocking",
+      "text": "blocking: all added tests construct a private _cell_fan and call _ring_moments directly, never _whole_cell_rings or remaining_moments, so reinstating the vertex-list remainder defect leaves their three green assertions unchanged."
+    },
+    {
+      "file": "docs/research/lobe-share-partition.html",
+      "line": "175",
+      "severity": "blocking",
+      "text": "blocking: the prose says the 2,098 lobe error is 9.47260994768e-4 and passes a 1e-4 guard, but the measured value in the table and maps2-lobe-2000.json is 9.47260994768e-5; the published verdict is numerically self-contradictory."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T063028156714-lobe-share-partition/manifest.md",
+      "line": "98",
+      "severity": "blocking",
+      "text": "blocking: the dispatch required baseline_suite and after_suite logs for a delta gate, but neither arm is recorded, so added_failure_count cannot be measured from the reviewed run."
+    },
+    {
+      "file": "scripts/prototypes/xpoint_cell_owner/lobe_partition_gate.py",
+      "line": "25",
+      "severity": "follow-on",
+      "text": "follow-on: the new runner duplicates the existing lobe-plus-remainder versus closed-reference capability in scripts/prototypes/xpoint_cell_owner/lobe_reference_probe.py rather than extending that owner, creating two measurement paths that can drift."
+    },
+    {
+      "file": "scripts/prototypes/xpoint_cell_owner/test_lobe_partition.py",
+      "line": "128",
+      "severity": "follow-on",
+      "text": "follow-on: signed and whole-minus-part are all computed by _ring_moments from the test's own rings, so their agreement moves together under a common quadrature error; the independent uniform-density comparison at :130 is the assertion that checks the value."
+    },
+    {
+      "file": "docs/research/lobe-share-partition.html",
+      "line": "166",
+      "severity": "follow-on",
+      "text": "follow-on: the 282 lobe error of 1.08655590095e-3 is only 4.409905e-8 below the 1.0866e-3 guard, whereas the prose says 6.5e-4 below it and materially overstates the margin."
+    },
+    {
+      "file": "scripts/prototypes/xpoint_cell_owner/fan_probe.py",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the committed file calls itself a scratch probe outside the node deliverable, adding a maintenance path with no role in the shipped booking or recorded gate."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "the thirteen ordered commits from 698ce55c4 to b49c5a4bb change booking, add a partition runner and tests, expose the lobe CLI arm, and add research, evidence and a figure; test_lobe_partition.py:22 fails if binary64 is disabled, :82 if its private fan has the wrong live-row count, :100 if its reduction differs from a closed polygon integral, :128 if signed combination differs from separate reductions, and :130 if that signed result differs from an independent uniform-density polygon integral, while lobe_partition_gate.py:175 fails if binary64 is disabled.",
+    "done_when": "prompt.txt:98-106 requires independent 282, 550 and 2,098 partition checks plus map and cold rows; rows-inplace-250.json and rows-inplace-2000.json pass at 1.42108547152e-13 and 1.77635683940e-14, rows-inplace-500m.json instead measures 551 cells with empty lobes, maps2-1288883.out records three map guards passing, and cold2-1288884.out records the permitted 550 stall at 1.54987034401e-3.",
+    "goal": "prompt.txt:30 asks for each owner cell's lobe and remainder from one ring fan through the clip-quadrature owner, and lobe_booking.py:51 imports that owner and the 282 and 2,098 receipts agree within 1e-12, but lobe_booking.py:183-192 builds the cell and lobe with separate ring calls.",
+    "manifest": "manifest.md:96-109 records status complete, thirteen commits, nine paths and a three-pass test, but omits the required baseline_suite and after_suite arms, and test-lobe-partition.log reports 19.48s rather than the manifest's 17.31s.",
+    "write_paths": "prompt.txt:70-74 grants scripts/prototypes/xpoint_cell_owner and the three named doc and figure paths, and git diff --name-status 80ee84b289d41d5a1bfbda8c3a5b94a7b2d7f1cd b49c5a4bb88ea94bbc4640bfbbecaffa5f3bcd3b lists nine files all inside them."
+  },
+  "justifications": {
+    "durability": "test_lobe_partition.py:100 and :130 have independent closed-form expectations for the reduction, but :86 builds its own fan and no added test calls the changed remaining_moments or _whole_cell_rings, so restoring the vertex-list remainder would leave all three tests green.",
+    "evidence": "lobe_partition_gate.py:124 uses a lobe reference built by the same ring routine as booking, its recorded 550 row uses 551 cells, and manifest.md:98-99 has no base and head suite arms, although the other numeric receipts are readable.",
+    "fit": "lobe_booking.py:40-64 follows the surrounding JAX and private-helper idiom and introduces no forbidden source name, while docs/research/lobe-share-partition.html:175 contradicts its own measured map table by a factor of ten.",
+    "goal_fidelity": "lobe_booking.py:183-192 calls current._normal_rings twice for the remainder, while the source goal requires the remainder to use the same call that builds the lobe, although the measured 282 and 2,098 partitions agree.",
+    "reuse": "lobe_booking.py:51 wraps the existing clip_quadrature.py:378 owner and :104 calls current.py:82, but the added lobe_partition_gate.py:25 duplicates the lobe-plus-remainder reference comparison already owned by lobe_reference_probe.py:1-20 instead of extending that runner.",
+    "scope_discipline": "all nine paths in the base-to-head diff are granted by prompt.txt:70-74, but fan_probe.py:1 is a committed scratch probe expressly described as outside the deliverable."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: prompt.txt:30 asks for each owner cell's lobe and remainder from one ring fan through the clip-quadrature owner, and lobe_booking.py:51 imports that owner and the 282 and 2,098 receipts agree within 1e-12, but lobe_booking.py:183-192 builds the cell and lobe with separate ring calls.\nVERDICT done_when: prompt.txt:98-106 requires independent 282, 550 and 2,098 partition checks plus map and cold rows; rows-inplace-250.json and rows-inplace-2000.json pass at 1.42108547152e-13 and 1.77635683940e-14, rows-inplace-500m.json instead measures 551 cells with empty lobes, maps2-1288883.out records three map guards passing, and cold2-1288884.out records the permitted 550 stall at 1.54987034401e-3.\nVERDICT write_paths: prompt.txt:70-74 grants scripts/prototypes/xpoint_cell_owner and the three named doc and figure paths, and git diff --name-status 80ee84b289d41d5a1bfbda8c3a5b94a7b2d7f1cd b49c5a4bb88ea94bbc4640bfbbecaffa5f3bcd3b lists nine files all inside them.\nVERDICT manifest: manifest.md:96-109 records status complete, thirteen commits, nine paths and a three-pass test, but omits the required baseline_suite and after_suite arms, and test-lobe-partition.log reports 19.48s rather than the manifest's 17.31s.\nVERDICT diff: the thirteen ordered commits from 698ce55c4 to b49c5a4bb change booking, add a partition runner and tests, expose the lobe CLI arm, and add research, evidence and a figure; test_lobe_partition.py:22 fails if binary64 is disabled, :82 if its private fan has the wrong live-row count, :100 if its reduction differs from a closed polygon integral, :128 if signed combination differs from separate reductions, and :130 if that signed result differs from an independent uniform-density polygon integral, while lobe_partition_gate.py:175 fails if binary64 is disabled.\nCALL_SITES: scripts/prototypes/xpoint_cell_owner/owner_map.py:161, scripts/prototypes/xpoint_cell_owner/owner_attribution.py:64, scripts/prototypes/xpoint_cell_owner/panel_data.py:74\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: lobe_booking.py:183-192 calls current._normal_rings twice for the remainder, while the source goal requires the remainder to use the same call that builds the lobe, although the measured 282 and 2,098 partitions agree.\nSCORE evidence: 9\nJUSTIFICATION evidence: lobe_partition_gate.py:124 uses a lobe reference built by the same ring routine as booking, its recorded 550 row uses 551 cells, and manifest.md:98-99 has no base and head suite arms, although the other numeric receipts are readable.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: all nine paths in the base-to-head diff are granted by prompt.txt:70-74, but fan_probe.py:1 is a committed scratch probe expressly described as outside the deliverable.\nSCORE durability: 7\nJUSTIFICATION durability: test_lobe_partition.py:100 and :130 have independent closed-form expectations for the reduction, but :86 builds its own fan and no added test calls the changed remaining_moments or _whole_cell_rings, so restoring the vertex-list remainder would leave all three tests green.\nSCORE fit: 17\nJUSTIFICATION fit: lobe_booking.py:40-64 follows the surrounding JAX and private-helper idiom and introduces no forbidden source name, while docs/research/lobe-share-partition.html:175 contradicts its own measured map table by a factor of ten.\nSCORE reuse: 5\nJUSTIFICATION reuse: lobe_booking.py:51 wraps the existing clip_quadrature.py:378 owner and :104 calls current.py:82, but the added lobe_partition_gate.py:25 duplicates the lobe-plus-remainder reference comparison already owned by lobe_reference_probe.py:1-20 instead of extending that runner.\nFINDING scripts/prototypes/xpoint_cell_owner/lobe_booking.py:183 blocking: _whole_cell_rings makes a separate _normal_rings call before the lobe call at :184, so the remainder does not take its fan from the same call as the lobe as the exact done-when requires.\nFINDING scripts/prototypes/xpoint_cell_owner/lobe_partition_gate.py:124 blocking: lobe_reference calls current._normal_rings at lobe_reference.py:124 with the booking's selection fields, so the dense lobe reference shares the region builder with the booking and cannot expose a common fan-geometry error despite the explicit independent-reference clause.\nFINDING docs/research/lobe-share-partition.html:124 blocking: the partition table labels a 551-cell, zero-booked receipt as the 550-cell row, while maps2-lobe-500.json and cold2-lobe-500.json measure 550 cells from another cache; the required 550 carrier's owner partition has not been measured.\nFINDING scripts/prototypes/xpoint_cell_owner/test_lobe_partition.py:86 blocking: all added tests construct a private _cell_fan and call _ring_moments directly, never _whole_cell_rings or remaining_moments, so reinstating the vertex-list remainder defect leaves their three green assertions unchanged.\nFINDING docs/research/lobe-share-partition.html:175 blocking: the prose says the 2,098 lobe error is 9.47260994768e-4 and passes a 1e-4 guard, but the measured value in the table and maps2-lobe-2000.json is 9.47260994768e-5; the published verdict is numerically self-contradictory.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T063028156714-lobe-share-partition/manifest.md:98 blocking: the dispatch required baseline_suite and after_suite logs for a delta gate, but neither arm is recorded, so added_failure_count cannot be measured from the reviewed run.\nFINDING scripts/prototypes/xpoint_cell_owner/lobe_partition_gate.py:25 follow-on: the new runner duplicates the existing lobe-plus-remainder versus closed-reference capability in scripts/prototypes/xpoint_cell_owner/lobe_reference_probe.py rather than extending that owner, creating two measurement paths that can drift.\nFINDING scripts/prototypes/xpoint_cell_owner/test_lobe_partition.py:128 follow-on: signed and whole-minus-part are all computed by _ring_moments from the test's own rings, so their agreement moves together under a common quadrature error; the independent uniform-density comparison at :130 is the assertion that checks the value.\nFINDING docs/research/lobe-share-partition.html:166 follow-on: the 282 lobe error of 1.08655590095e-3 is only 4.409905e-8 below the 1.0866e-3 guard, whereas the prose says 6.5e-4 below it and materially overstates the margin.\nFINDING scripts/prototypes/xpoint_cell_owner/fan_probe.py:1 follow-on: the committed file calls itself a scratch probe outside the node deliverable, adding a maintenance path with no role in the shipped booking or recorded gate.\n",
+  "review_run_id": "r-20261018T103739748495-review-of-r-20261018T063028156714-lobe-share-partition-b49c5a4bb88e",
+  "reviewed_base_sha": "80ee84b289d41d5a1bfbda8c3a5b94a7b2d7f1cd",
+  "reviewed_head_sha": "b49c5a4bb88ea94bbc4640bfbbecaffa5f3bcd3b",
+  "reviewed_run_id": "r-20261018T063028156714-lobe-share-partition",
+  "scores": {
+    "durability": 7,
+    "evidence": 9,
+    "fit": 17,
+    "goal_fidelity": 13,
+    "reuse": 5,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T10:44:33.971083+00:00",
+  "total": 68
+}

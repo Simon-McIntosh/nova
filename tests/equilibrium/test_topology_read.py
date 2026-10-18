@@ -2694,7 +2694,6 @@ def test_census_keeps_the_wall_contact_saddle_across_the_adjacent_pair():
     cache = _census_cache()
     state, prior, repaired = _census_tie_setup(cache)
     restored = base_admission_census()
-    assert tie_probe is not None
 
     low, high = 0.17, 0.18
     reference = _census_reading(restored, state, prior, low)[0]

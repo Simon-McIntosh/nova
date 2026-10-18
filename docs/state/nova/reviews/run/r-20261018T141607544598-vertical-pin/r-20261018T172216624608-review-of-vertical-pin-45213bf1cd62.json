@@ -89,6 +89,13 @@
   ],
   "completed_at": "2026-10-18T17:33:20Z",
   "dispatched_at": "2026-10-18T17:23:19Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "vertical-pin",
+      "recorded_at": "2026-10-18T18:20:34.475869+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/equilibrium/test_solve_vertical_pin.py",

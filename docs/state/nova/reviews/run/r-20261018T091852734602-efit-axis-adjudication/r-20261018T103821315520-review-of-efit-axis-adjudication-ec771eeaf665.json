@@ -1,0 +1,93 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "base_log_revision": null,
+  "call_site_count": 3,
+  "call_sites": [
+    "scripts/prototypes/efit_axis_adjudication/analyse.py:294",
+    "scripts/prototypes/efit_axis_adjudication/plot.py:185",
+    "scripts/prototypes/efit_axis_adjudication/page.py:313"
+  ],
+  "completed_at": "2026-10-18T10:44:12Z",
+  "dispatched_at": "2026-10-18T10:38:52Z",
+  "findings": [
+    {
+      "file": "docs/research/efit-axis-adjudication.html",
+      "line": "75",
+      "severity": "blocking",
+      "text": "blocking: The synthetic A and B axis gradients are 2.433e-4 and 2.638e-4, not rounding level, so done-when clause 1 and the manifest's all-record rebuild claim fail."
+    },
+    {
+      "file": "scripts/prototypes/efit_axis_adjudication/page.py",
+      "line": "67",
+      "severity": "blocking",
+      "text": "blocking: Capping out-of-wall rows at 200 omits 2,120 and 2,116 stationary points from the two synthetic per-record tables, contrary to the requirement to table every census point in the research page."
+    },
+    {
+      "file": "scripts/prototypes/efit_axis_adjudication/page.py",
+      "line": "149",
+      "severity": "blocking",
+      "text": "blocking: The disagreement summary compares only imas-efit with adapter A, skips records with absent A geometry and never compares adapter B; the receipt includes A-to-B saddle separations above 1 m that the required any-two-of-three summary cannot show."
+    },
+    {
+      "file": "scripts/prototypes/efit_axis_adjudication/page.py",
+      "line": "192",
+      "severity": "blocking",
+      "text": "blocking: Each machine-level caption only explains styles and omits each record's identity, both codes' axis and boundary psi, and both labels, which the source brief requires for every panel."
+    },
+    {
+      "file": "scripts/prototypes/efit_axis_adjudication/plot.py",
+      "line": "190",
+      "severity": "blocking",
+      "text": "blocking: The five-column legend clips its final entries in the rendered AUG and synthetic panels, and the two-panel figures use a 7-inch canvas, so those delivered figures fail the figure visibility and size rules."
+    },
+    {
+      "file": "scripts/prototypes/efit_axis_adjudication/analyse.py",
+      "line": "227",
+      "severity": "follow-on",
+      "text": "follow-on: The rebuild result is only stored, with no test or assertion that can fail on an excessive gradient, allowing the already failing synthetic rows to be reported as a completed gate."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "Read dd5bdc5e9, da9daffa5, 69aeab270 and ec771eeaf commit by commit; they add the independent scipy analysis scripts, five SVGs and two pages, with no added test assertions or threshold refusal.",
+    "done_when": "The source brief's five clauses are only partly measured by out/analyse2.log and out/results.json; docs/research/efit-axis-adjudication.html:75-76 records two gradients above rounding level, while page.py:67 and page.py:149 omit required rows and pairwise comparisons.",
+    "goal": "The source brief requests adjudication plots and tables without a code verdict; docs/research/efit-axis-adjudication.html:49-86 supplies the plots and rebuild table, but omits required census rows and record-specific captions.",
+    "manifest": "The source manifest reports four commits, 26 analysed records and rendered panels, but its claim that every axis gradient is at rounding level conflicts with docs/research/efit-axis-adjudication.html:75-76, and it names no baseline_suite or after_suite.",
+    "write_paths": "The source brief grants scripts/prototypes/efit_axis_adjudication, the five-figure directory, the research page and the evidence fragment; git diff 1b25eedd7574fda2220c02fc33fffd39db9433bd..ec771eeaf6658b49073aa810ea581ebe3d7605a0 changes only those paths."
+  },
+  "justifications": {
+    "durability": "scripts/prototypes/efit_axis_adjudication/analyse.py:227-231 writes rebuild values without asserting their bounds, so changing FastField to report a wrong gradient can still leave analyse.py:294 and the page generation green; the diff adds no test assertions, self-referential or otherwise.",
+    "evidence": "docs/research/efit-axis-adjudication.html:75-76 displays gradient norms 0.000243 and 0.000264 despite the brief's rounding-level clause, and the source manifest records no paired suite arms.",
+    "fit": "scripts/prototypes/efit_axis_adjudication/plot.py:104 uses nova.media.poloidal.draw_nulls and the source adds no forbidden symbol names, but plot.py:183 makes the two-panel figures half the required 14-inch width and their rendered legend clips.",
+    "goal_fidelity": "scripts/prototypes/efit_axis_adjudication/page.py:67 drops 4,236 synthetic census rows from the requested per-record tables, and page.py:149 excludes adapter B from the disagreement summary.",
+    "reuse": "A capability search found scripts/prototypes/read_robustness/census.py:26 for Bell-field roots, while scripts/prototypes/efit_axis_adjudication/field.py:17 and census.py:84 implement the independently required scipy record-spline census; plot.py:104 reuses nova.media.poloidal.draw_nulls.",
+    "scope_discipline": "The base-to-head diff changes only the four path families granted by the source brief, including scripts/prototypes/efit_axis_adjudication/analyse.py and docs/research/efit-axis-adjudication.html."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source brief requests adjudication plots and tables without a code verdict; docs/research/efit-axis-adjudication.html:49-86 supplies the plots and rebuild table, but omits required census rows and record-specific captions.\nVERDICT done_when: The source brief's five clauses are only partly measured by out/analyse2.log and out/results.json; docs/research/efit-axis-adjudication.html:75-76 records two gradients above rounding level, while page.py:67 and page.py:149 omit required rows and pairwise comparisons.\nVERDICT write_paths: The source brief grants scripts/prototypes/efit_axis_adjudication, the five-figure directory, the research page and the evidence fragment; git diff 1b25eedd7574fda2220c02fc33fffd39db9433bd..ec771eeaf6658b49073aa810ea581ebe3d7605a0 changes only those paths.\nVERDICT manifest: The source manifest reports four commits, 26 analysed records and rendered panels, but its claim that every axis gradient is at rounding level conflicts with docs/research/efit-axis-adjudication.html:75-76, and it names no baseline_suite or after_suite.\nVERDICT diff: Read dd5bdc5e9, da9daffa5, 69aeab270 and ec771eeaf commit by commit; they add the independent scipy analysis scripts, five SVGs and two pages, with no added test assertions or threshold refusal.\nCALL_SITES: scripts/prototypes/efit_axis_adjudication/analyse.py:294, scripts/prototypes/efit_axis_adjudication/plot.py:185, scripts/prototypes/efit_axis_adjudication/page.py:313\nSCORE goal_fidelity: 9\nJUSTIFICATION goal_fidelity: scripts/prototypes/efit_axis_adjudication/page.py:67 drops 4,236 synthetic census rows from the requested per-record tables, and page.py:149 excludes adapter B from the disagreement summary.\nSCORE evidence: 5\nJUSTIFICATION evidence: docs/research/efit-axis-adjudication.html:75-76 displays gradient norms 0.000243 and 0.000264 despite the brief's rounding-level clause, and the source manifest records no paired suite arms.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The base-to-head diff changes only the four path families granted by the source brief, including scripts/prototypes/efit_axis_adjudication/analyse.py and docs/research/efit-axis-adjudication.html.\nSCORE durability: 0\nJUSTIFICATION durability: scripts/prototypes/efit_axis_adjudication/analyse.py:227-231 writes rebuild values without asserting their bounds, so changing FastField to report a wrong gradient can still leave analyse.py:294 and the page generation green; the diff adds no test assertions, self-referential or otherwise.\nSCORE fit: 13\nJUSTIFICATION fit: scripts/prototypes/efit_axis_adjudication/plot.py:104 uses nova.media.poloidal.draw_nulls and the source adds no forbidden symbol names, but plot.py:183 makes the two-panel figures half the required 14-inch width and their rendered legend clips.\nSCORE reuse: 19\nJUSTIFICATION reuse: A capability search found scripts/prototypes/read_robustness/census.py:26 for Bell-field roots, while scripts/prototypes/efit_axis_adjudication/field.py:17 and census.py:84 implement the independently required scipy record-spline census; plot.py:104 reuses nova.media.poloidal.draw_nulls.\nFINDING docs/research/efit-axis-adjudication.html:75 blocking: The synthetic A and B axis gradients are 2.433e-4 and 2.638e-4, not rounding level, so done-when clause 1 and the manifest's all-record rebuild claim fail.\nFINDING scripts/prototypes/efit_axis_adjudication/page.py:67 blocking: Capping out-of-wall rows at 200 omits 2,120 and 2,116 stationary points from the two synthetic per-record tables, contrary to the requirement to table every census point in the research page.\nFINDING scripts/prototypes/efit_axis_adjudication/page.py:149 blocking: The disagreement summary compares only imas-efit with adapter A, skips records with absent A geometry and never compares adapter B; the receipt includes A-to-B saddle separations above 1 m that the required any-two-of-three summary cannot show.\nFINDING scripts/prototypes/efit_axis_adjudication/page.py:192 blocking: Each machine-level caption only explains styles and omits each record's identity, both codes' axis and boundary psi, and both labels, which the source brief requires for every panel.\nFINDING scripts/prototypes/efit_axis_adjudication/plot.py:190 blocking: The five-column legend clips its final entries in the rendered AUG and synthetic panels, and the two-panel figures use a 7-inch canvas, so those delivered figures fail the figure visibility and size rules.\nFINDING scripts/prototypes/efit_axis_adjudication/analyse.py:227 follow-on: The rebuild result is only stored, with no test or assertion that can fail on an excessive gradient, allowing the already failing synthetic rows to be reported as a completed gate.\nreviewed_base_sha: 1b25eedd7574fda2220c02fc33fffd39db9433bd\nreviewed_head_sha: ec771eeaf6658b49073aa810ea581ebe3d7605a0\n",
+  "review_run_id": "r-20261018T103821315520-review-of-efit-axis-adjudication-ec771eeaf665",
+  "reviewed_base_sha": "1b25eedd7574fda2220c02fc33fffd39db9433bd",
+  "reviewed_head_sha": "ec771eeaf6658b49073aa810ea581ebe3d7605a0",
+  "reviewed_run_id": "r-20261018T091852734602-efit-axis-adjudication",
+  "reviewer": {
+    "reviewer_run_id": "r-20261018T103821315520-review-of-efit-axis-adjudication-ec771eeaf665"
+  },
+  "scores": {
+    "durability": 0,
+    "evidence": 5,
+    "fit": 13,
+    "goal_fidelity": 9,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T10:43:20.860122+00:00",
+  "total": 66
+}

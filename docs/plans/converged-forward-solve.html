@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="362">
+<meta name="plan-version" content="363">
 <meta name="plan-modified" content="2026-10-18">
 </head>
 <body>
@@ -998,6 +998,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261018T063236394668-efit-field-swap" data-who="reckon-build" data-when="2026-10-18T09:57:54Z">
     <div class="r-comment-body"><p>Parked by lead decision 2026-10-18 after three rounds (review 62 then 59, six blocking: incomplete case table, 9 of 28 inputs without a nova decision, one side only of each tie-island pair, weak receipt checks, a 550 export whose read disagrees with its receipt). Nothing merged. The cross-check is redone when imas-efit sends its escape-level rule; the efit-axis-adjudication node covers the axis question meanwhile. Found a real nova defect, filed as f-cfs-contour-mesh-capacity.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261018T103821315520-review-of-efit-axis-adjudication-ec771eeaf665" data-who="reckon-build" data-when="2026-10-18T10:44:12Z">
+    <div class="r-comment-body"><p>independent review of efit-axis-adjudication at base 1b25eedd7574fda2220c02fc33fffd39db9433bd and head ec771eeaf6658b49073aa810ea581ebe3d7605a0 stored at both granted review-records paths; 5 blocking and 1 follow-on finding; no code verdict was changed.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

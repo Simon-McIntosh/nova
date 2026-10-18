@@ -22,7 +22,16 @@ import jax
 import jax.numpy as jnp
 import jax.scipy.linalg as jsp_linalg
 
-__all__ = ["Factor", "SolveResult", "factor", "fixed_point"]
+__all__ = [
+    "Factor",
+    "SolveResult",
+    "VerticalPin",
+    "factor",
+    "fixed_point",
+    "pin_residual",
+    "pin_state",
+    "pinned_fixed_point",
+]
 
 BACKTRACKING_STEPS = 12
 DEFAULT_MAX_CORRECTIONS = 25
@@ -36,6 +45,24 @@ class Factor:
 
     lu: jax.Array
     pivots: jax.Array
+
+
+@jax.tree_util.register_dataclass
+@dataclass(frozen=True)
+class VerticalPin:
+    """One compensating unknown that holds a vertical position at a target.
+
+    The compensating unknown is the last element of the state: the current in
+    its spatial sign enters the resolved map through the runtime operands, so
+    the field shape is not captured in the traced program.  ``target`` is the
+    held current-centroid height in metres and ``pin_scale`` the row's declared
+    scale; ``initial`` seeds the unknown.  Target, scale and seed are runtime
+    leaves, so one compiled program serves any target and any pin.
+    """
+
+    target: jax.Array
+    pin_scale: jax.Array
+    initial: jax.Array
 
 
 @jax.tree_util.register_dataclass
@@ -171,3 +198,62 @@ def fixed_point(
     if factor is None:
         return _cold(residual_fn, flat, operands, tolerance, max_corrections)
     return _chord(residual_fn, flat, operands, factor, tolerance, max_corrections)
+
+
+def pin_residual(residual_fn, observation, pin):
+    """Augment a map with one pin row held by one compensating unknown.
+
+    The augmented state is the base state with the compensating unknown
+    appended.  ``residual_fn(extended, operands)`` is the base map, which reads
+    the unknown off the state's last element and adds its declared field
+    through the runtime operands; ``observation(extended, operands)`` returns
+    the scalar the pin holds.  ``pin.target`` and ``pin.pin_scale`` are read
+    from the ``pin`` argument at runtime, so the traced program is the same for
+    any pin target.
+    """
+    target = jnp.asarray(pin.target)
+    scale = jnp.asarray(pin.pin_scale)
+
+    def augmented(extended, operands):
+        base = jnp.reshape(residual_fn(extended, operands), (-1,))
+        row = jnp.reshape((observation(extended, operands) - target) / scale, (1,))
+        return jnp.concatenate((base, row))
+
+    return augmented
+
+
+def pin_state(state, pin):
+    """Return the base state extended by the pin's initial compensating unknown."""
+    flat = jnp.reshape(jnp.asarray(state), (-1,))
+    seed = jnp.reshape(jnp.asarray(pin.initial), (1,))
+    return jnp.concatenate((flat, seed))
+
+
+def pinned_fixed_point(
+    residual_fn,
+    observation,
+    state,
+    operands,
+    pin,
+    *,
+    factor=None,
+    tolerance=DEFAULT_TOLERANCE,
+    max_corrections=DEFAULT_MAX_CORRECTIONS,
+):
+    """Drive a map augmented by one vertical pin to ``tolerance``.
+
+    The pin's basis, target and scale ride in ``pin`` as runtime leaves, so a
+    single compiled program pins at any target value and degenerates to the
+    free map when the basis carries no leverage.  The terminal state's last
+    element is the compensating unknown; ``pin_residual``'s last row is the
+    pin's own residual.
+    """
+    augmented = pin_residual(residual_fn, observation, pin)
+    return fixed_point(
+        augmented,
+        pin_state(state, pin),
+        operands,
+        factor=factor,
+        tolerance=tolerance,
+        max_corrections=max_corrections,
+    )

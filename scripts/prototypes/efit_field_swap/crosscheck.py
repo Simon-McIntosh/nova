@@ -287,7 +287,7 @@ def gradient_floor(field, ring):
     return GRADIENT_FLOOR_RELATIVE * float(np.ptp(values)) / spacing
 
 
-def admitted_index_sum(roots):
+def admitted_index_sum(roots, axis_admitted):
     """Index sum of the admitted critical points: extrema +1, saddles -1.
 
     Counted from the sign of the Hessian determinant at each admitted root, so
@@ -298,8 +298,43 @@ def admitted_index_sum(roots):
     """
     hessian = np.asarray(roots.jet.hessian)
     valid = np.asarray(roots.valid).copy()
+    if valid.size:
+        valid[0] = axis_admitted
     determinant = hessian[:, 0, 0] * hessian[:, 1, 1] - hessian[:, 0, 1] ** 2
     return int(np.sum(np.where(determinant[valid] > 0.0, 1, -1)))
+
+
+def stationary_axis_admitted(field, roots, outer_ring, obstacle_rings, policy):
+    """Admit a geometrically interior extremum despite the census sign frame.
+
+    The census' axis predicate selects only negative-definite roots, while a
+    stored psi grid may put the axis at a minimum. Re-evaluate the spline at
+    slot zero and require a stationary extremum in the domain; a slot with no
+    independently checked root cannot make an unknown read limited.
+    """
+    position = np.asarray(roots.position[0], dtype=float)
+    if not np.all(np.isfinite(position)):
+        return False
+    point = Point(*position)
+    if not ShapelyPolygon(outer_ring).contains(point) or any(
+        ShapelyPolygon(ring).covers(point) for ring in obstacle_rings
+    ):
+        return False
+    jet = field.evaluate(jnp.asarray(position))
+    gradient = np.asarray(jet.gradient, dtype=float)
+    hessian = np.asarray(jet.hessian, dtype=float)
+    if not np.all(np.isfinite(gradient)) or not np.all(np.isfinite(hessian)):
+        return False
+    if np.linalg.det(hessian) <= 0.0:
+        return False
+    spline = field.spline
+    spacing = min(
+        float(np.min(np.diff(np.asarray(spline.radial)))),
+        float(np.min(np.diff(np.asarray(spline.vertical)))),
+    )
+    gradient_scale = float(np.ptp(np.asarray(spline.coefficients))) / spacing
+    tolerance = max(policy.position_tolerance, np.sqrt(np.finfo(float).eps))
+    return bool(np.linalg.norm(gradient) <= tolerance * gradient_scale)
 
 
 def coverage_certificate(field, outer_ring, obstacle_rings, index_sum):
@@ -711,7 +746,10 @@ def read_state(
         roots = census(field, geometry, convention, policy, previous)
         candidates = int(roots.candidates)
         admitted = int(roots.saddles)
-        index_sum = admitted_index_sum(roots.roots)
+        axis_admitted = stationary_axis_admitted(
+            field, roots.roots, outer, walls, policy
+        )
+        index_sum = admitted_index_sum(roots.roots, axis_admitted)
         try:
             coverage = coverage_certificate(field, outer, walls, index_sum)
         except Exception as error:  # noqa: BLE001 - refusal, never a false decision
@@ -722,7 +760,8 @@ def read_state(
             uncertified = True
             continue
         root_valid = np.asarray(roots.roots.valid).copy()
-        axis_admitted = bool(root_valid.size and root_valid[0])
+        if root_valid.size:
+            root_valid[0] = axis_admitted
         admitted_points = np.asarray(roots.roots.position)[root_valid]
         try:
             cleared, unresolved, occupied = certify_empty_cells(
@@ -764,7 +803,8 @@ def read_state(
             uncertified = True
             continue
         try:
-            reading = nova_read(field, roots.roots, geometry, convention, policy)
+            admitted_roots = roots.roots._replace(valid=jnp.asarray(root_valid))
+            reading = nova_read(field, admitted_roots, geometry, convention, policy)
         except Exception as error:  # noqa: BLE001 - one lattice must not stop the sweep
             attempts[-1] += f"; read failed {type(error).__name__}: {error}"
             continue

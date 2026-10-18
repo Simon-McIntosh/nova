@@ -170,7 +170,7 @@ def test_invalid_axis_slot_cannot_be_read_as_limited(monkeypatch):
             hessian=jnp.asarray([[[-2.0, 0.0], [0.0, -2.0]]]),
         )
         roots = fixed_points.FixedPointResult(
-            position=jnp.zeros((1, 2)),
+            position=jnp.asarray([[0.2, 0.2]]),
             jet=jet,
             valid=jnp.asarray([False]),
             status=jnp.ones(1, jnp.int32),

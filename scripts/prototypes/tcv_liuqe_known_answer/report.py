@@ -126,27 +126,29 @@ def build(rows, field_swap_rows, receipt_path):
         for gap in gaps
     ):
         raise ValueError("a measured axis gap lacks its relative value")
-    finite_axis = [gap["axis_gap"] for gap in gaps if math.isfinite(gap["axis_gap"])]
-    finite_psi = [
-        gap["boundary_gap"] for gap in gaps if math.isfinite(gap["boundary_gap"])
-    ]
-    max_axis = max(finite_axis, default=float("nan"))
-    max_boundary = max(finite_psi, default=float("nan"))
 
     def largest(name):
         return max(
-            (gap[name] for gap in gaps if math.isfinite(gap[name])),
-            default=float("nan"),
+            (
+                (row["index"], gap[name])
+                for row, gap in zip(rows, gaps)
+                if math.isfinite(gap[name])
+            ),
+            key=lambda pair: pair[1],
+            default=(None, float("nan")),
         )
 
-    max_x = largest("x_gap")
-    max_axis_psi = largest("axis_psi_gap")
-    max_axis_relative = largest("axis_relative")
-    max_x_relative = largest("x_relative")
-    max_axis_psi_relative = largest("axis_psi_relative")
-    max_boundary_relative = largest("boundary_relative")
+    axis_slice, max_axis = largest("axis_gap")
+    axis_relative_slice, max_axis_relative = largest("axis_relative")
+    x_slice, max_x = largest("x_gap")
+    x_relative_slice, max_x_relative = largest("x_relative")
+    axis_psi_slice, max_axis_psi = largest("axis_psi_gap")
+    axis_psi_relative_slice, max_axis_psi_relative = largest("axis_psi_relative")
+    boundary_slice, max_boundary = largest("boundary_gap")
+    boundary_relative_slice, max_boundary_relative = largest("boundary_relative")
     x_phrase = (
-        f"X-point {_number(max_x)} m ({_number(max_x_relative, 3)} spatial spans)"
+        f"X-point absolute {_number(max_x)} m at slice {x_slice}; relative "
+        f"{_number(max_x_relative, 3)} spans at slice {x_relative_slice}"
         if math.isfinite(max_x)
         else "no paired X-point distance is measurable"
     )
@@ -167,12 +169,14 @@ def build(rows, field_swap_rows, receipt_path):
         f"{agreements} of 12 labels agree; {refusals} reads are coverage uncertified. "
         f"Of the five diverted slices previously read as limited, {misses} are now "
         "coverage misses. "
-        f"Largest measured gaps: axis position {_number(max_axis)} m "
-        f"({_number(max_axis_relative, 3)} spatial spans), {x_phrase}, "
-        f"axis psi {_number(max_axis_psi)} "
-        f"({_number(max_axis_psi_relative, 3)} flux spans), and boundary psi "
-        f"{_number(max_boundary)} "
-        f"({_number(max_boundary_relative, 3)} flux spans)."
+        f"Largest measured gaps: axis position absolute {_number(max_axis)} m at "
+        f"slice {axis_slice}; relative {_number(max_axis_relative, 3)} spans at "
+        f"slice {axis_relative_slice}; {x_phrase}; axis psi absolute "
+        f"{_number(max_axis_psi)} at slice {axis_psi_slice}; relative "
+        f"{_number(max_axis_psi_relative, 3)} flux spans at slice "
+        f"{axis_psi_relative_slice}; boundary psi absolute {_number(max_boundary)} "
+        f"at slice {boundary_slice}; relative {_number(max_boundary_relative, 3)} "
+        f"flux spans at slice {boundary_relative_slice}."
     )
     table = "\n".join(_row_html(row) for row in rows)
     field_swap_table = "\n".join(

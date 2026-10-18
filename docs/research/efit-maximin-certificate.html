@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Escape-level maximin certificates | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_data/dashboard.css">
+</head><body><main class="plan-doc">
+<h1 id="efit-maximin-certificate-title">Escape-level maximin certificates</h1>
+<p id="efit-maximin-certificate-summary">These three same-axis comparisons test the
+boundary rule on each trace record's own field. The strict full-precision claims
+are different from their rounded display values. Nova's MAST-U contact is
+blocked at its claimed level. On both synthetic rows nova understates the reach
+to the specified wall point, but that point's scipy-spline value is slightly
+below imas-efit's full-precision claim. A path cannot attain a level higher than
+its own endpoint. The delivered imas-efit paths also stop at different wall
+points and each dips below its claimed level. These facts settle which exact
+claims fail without selecting a winner by visual judgement.</p>
+
+<h2 id="efit-maximin-certificate-method">Independent spline and bounds</h2>
+<p>The <code>BOUNDARY_LEVEL_TRACE 2</code> grid is rebuilt with scipy
+<code>RectBivariateSpline(kx=ky=3,s=0)</code>, as in the axis-adjudication rebuild.
+Every reported path and cut value is <code>polarity*psi</code> on that spline.
+A sampled 800-by-800 four-neighbour graph inside the recorded wall ring proposes
+paths; its Kruskal merge level is only a sampled estimate. Exact axes and exact
+targets are joined to the proposed cell sequence by evaluated straight segments.
+Every path segment is split at spline knots. A bicubic restricted to one such
+segment is degree at most six; seven evaluations yield Bernstein coefficients
+whose minimum and maximum enclose the segment. The numerical enclosure includes
+an absolute <code>1e-12</code> arithmetic pad. Independent midpoint residuals
+were at most <code>1.4e-15</code>. Text exports preserve 17-digit coordinates and
+every cell-path vertex, with intermediate samples at no more than half the
+graph diagonal step. The 800-grid step is about 5.5 mm on MAST-U and 2.6 mm
+on the synthetic records; it is not an error bound on the continuous maximin.</p>
+<p>A sublevel cut is verified continuously by the same Bernstein upper bound.
+On MAST-U, downhill branches from the spline saddle reach the vessel wall on
+both sides. Splitting the recorded wall polygon by that wall-to-wall curve puts
+the axis and nova's contact in different pieces. On each synthetic row the exact
+wall endpoint is below imas-efit's full-precision level; a certified closed
+square around it separates the endpoint from the axis. Those squares are only
+about <code>4.7e-12 m</code> in radius, so they expose a full-precision endpoint
+mismatch rather than a macroscopic change of boundary topology.</p>
+
+<h2 id="efit-maximin-certificate-results">Strict levels and exact targets</h2>
+<table><thead><tr><th>row and target</th><th>claimed level</th><th>path / endpoint check</th><th>certified cut</th></tr></thead><tbody>
+<tr><td>MAST-U B, nova contact (0.3327971398830414, 1.3030896186828613)</td>
+<td>nova 0.020530973894263525</td><td>sampled path to the exact contact has a
+continuous minimum below 0.019653; no path at nova's level can cross the saddle cut</td>
+<td>wall-to-wall cut maximum &le; 0.019652442526100, strictly below nova's level;
+axis and target in different polygon pieces</td></tr>
+<tr><td>MAST-U B, same contact</td><td>imas-efit 0.019652442525099203</td>
+<td>the spline saddle is 0.019652442525099196, equal within 7e-18; the delivered
+path has minimum in [0.0196524250845, 0.0196524251116]</td>
+<td>no strict below-level cut certified at this marginal level: the saddle lies
+inside the 1e-12 numerical enclosure</td></tr>
+<tr><td>synthetic A, exact wall point (0.85, 0.2)</td>
+<td>imas-efit 0.014214735553450476</td><td>endpoint spline value
+0.014214735537876434, 1.56e-11 lower; the sampled nova path to this point
+has a continuous minimum near 0.014214693, well above nova's 0.011338328562728484</td>
+<td>closed endpoint cut maximum &le; 0.014214735539850</td></tr>
+<tr><td>synthetic B, exact wall point (0.85, 0.2)</td>
+<td>imas-efit 0.012577168748814730</td><td>endpoint spline value
+0.012577168735034847, 1.38e-11 lower; the sampled nova path to this point
+has a continuous minimum near 0.012577131, well above nova's 0.011404085542709722</td>
+<td>closed endpoint cut maximum &le; 0.012577168736897</td></tr>
+</tbody></table>
+<p id="efit-maximin-certificate-rounding">The short labels 0.01965, 0.0142 and
+0.0126 are display roundings, not interchangeable thresholds: 0.0142 is below
+the synthetic A endpoint, while 0.0126 is above the synthetic B endpoint.
+The full-precision levels carried by the records are used for the strict tests.</p>
+
+<h2 id="efit-maximin-certificate-read">Nova's merged read and the admission step</h2>
+<p>The field-swap adapter presents the same trace grid through
+<code>TraceSplineField</code>; the merged <code>fast_map_production.kernel.read</code>
+is called with roots polished from that field. The MAST-U result reproduces the
+recorded limited decision and exact contact: boundary flux
+<code>0.020530973894263525</code> at
+<code>(0.3327971398830414,1.3030896186828613)</code>; its saddle candidate is
+<code>0.019652442525099224</code>. The read's cell-membership step is
+<code>kernel.read</code>'s <code>wall_cell = argmax(_inside_cells(...))</code>,
+followed by <code>_wall_path_ceiling</code> and
+<code>_wall_effective_level</code>. The graph treats an admitted cell as
+connected through its edge peaks. The exact contact maps to cell 0, whose
+computed path ceiling is <code>0.02192981135271742</code> and whose path weight
+is <code>1.0</code>; the wall score therefore remains its tangency
+<code>0.020530973894263525</code>. That cell-level passage does not establish a
+continuous path through the bicubic field inside a saddle-bearing cell; the
+independent wall-to-wall cut shows the contact is disconnected at the chosen
+level. The adapter uses a local compatibility wrapper for the census's sampled
+jet interface; the imported field-swap and merged read implementations are not
+modified.</p>
+<p>Both synthetic records are sampled from the same grid used by the adapter.
+At 963 common points per row, including the exact axis and target, nova's
+imported tensor spline and the independent scipy rebuild differ by at most
+<code>2.45e-15</code>; at the two exact synthetic targets the differences are
+below <code>2.5e-17</code>. At all 22,001 delivered imas-efit path samples per
+synthetic row, the path file values and independently rebuilt scipy values
+differ by at most <code>8.9e-16</code>.
+The axis-adjudication gradient warning at the recorded synthetic axes is an
+axis metadata issue, not evidence that the two readers used different input
+grids. The remaining endpoint gaps are stated as measured gaps; no cause is
+assigned from their size alone.</p>
+
+<h2 id="efit-maximin-certificate-external">Delivered imas-efit paths</h2>
+<p>All three path files were present under
+<code>continuous-boundary-level/cbl-maximin-certificates/</code>. Their provided
+samples agree with the scipy spline to at most <code>8.9e-16</code>, a positive
+control that the evaluator sees the recorded field. The MAST-U path ends at
+<code>(0.3327971398830414,1.271840162621331)</code>, 31.25 mm below nova's
+specified contact; the synthetic paths end at <code>(0.85,0.203125)</code>,
+3.125 mm from the specified target. Exact endpoint connectors were included in
+the segment bounds. The minimum intervals are:</p>
+<table><thead><tr><th>file</th><th>minimum interval on scipy spline</th><th>deficit from full-precision claim</th></tr></thead><tbody>
+<tr><td>path-mastu-fullPulse-s1-4-5-B.txt</td><td>[0.0196524250845, 0.0196524251116]</td><td>at least 1.74e-8</td></tr>
+<tr><td>path-synthetic_crossing-A.txt</td><td>[0.0142129951046, 0.0142129951056]</td><td>at least 1.74e-6</td></tr>
+<tr><td>path-synthetic_crossing-B.txt</td><td>[0.0125756288031, 0.0125756288042]</td><td>at least 1.54e-6</td></tr>
+</tbody></table>
+<p>The exported JSON gives exact source paths, point counts, original endpoints,
+field disagreement, Bernstein bounds and arithmetic pad. The read cannot use
+these delivered paths as exact-level attaining certificates.</p>
+
+<h2 id="efit-maximin-certificate-artifacts">Exports and tests</h2>
+<p>Plain-text paths, continuous cuts, the original sampled graph cut cells,
+<code>certificates.json</code>, <code>cuts.json</code>,
+<code>external-path-bounds.json</code>, and a format README are under this run's
+<code>exports/</code>. The continuous cut files carry R, Z and spline value at
+17 digits, their level and a Bernstein maximum upper bound. Focused tests fix
+each exact target, each full-precision level, the MAST-U cut at nova's level,
+the saddle's marginal equality at imas-efit's level, and the two synthetic
+endpoint cuts. Both suite arms are recorded in the run manifest.</p>
+</main></body></html>

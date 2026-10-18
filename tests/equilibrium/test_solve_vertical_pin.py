@@ -15,7 +15,9 @@ from nova.equilibrium.constraint import (
     CurrentCentroidConstraint,
     UniformRadialFieldUnknown,
     VerticalPositionPin,
+    assemble_augmented_system,
 )
+from nova.equilibrium import fixed_point
 from nova.equilibrium.forward import ForwardProfile
 from nova.equilibrium.observation import CurrentMomentObservation, MomentIntegralSupport
 from nova.equilibrium.solve_request import ExplicitSolveSeed, ForwardSolveRequest
@@ -191,3 +193,58 @@ def test_public_pinned_request_converges_to_booked_height(target):
     assert abs(_booked_terminal_height(flux) - target) <= 1e-10
     assert len(receipt.constraints) == 1
     assert bool(receipt.constraints[0].qualified[0])
+
+
+@pytest.mark.slow
+def test_one_augmented_newton_program_serves_free_and_pinned_requests():
+    configure_dtypes()
+    assert jax.config.jax_enable_x64 is True
+    profile = _profile()
+    operator = profile.operator
+
+    def production(seed, pair):
+        system = assemble_augmented_system(
+            profile,
+            seed,
+            (pair,),
+            base_map=profile.flux_map(),
+            base_shadow_mask=lambda flux: operator.residual_shadow_mask(flux),
+            base_promoted_shadow_mask=lambda flux, previous: (
+                operator.residual_shadow_mask(flux, previous_shadow=previous)
+            ),
+            base_shadowed_map=operator.flux_map_with_shadow(),
+            requested_class=None,
+            target_current=None,
+        )
+        history = fixed_point.newton_krylov(
+            system.map_fn,
+            system.initial,
+            newton_steps=8,
+            gmres_iterations=7,
+            warmup=0,
+            active_set_steps=2,
+            convergence_tolerance=1e-12,
+            shadow_mask_fn=system.shadow_mask_fn,
+            promoted_shadow_mask_fn=system.promoted_shadow_mask_fn,
+            shadowed_map_fn=system.shadowed_map_fn,
+            row_jvp_observers=system.row_jvp_observers,
+        )
+        flux, unknown = system.split(history.state)
+        return flux, unknown, history.residual, history.converged
+
+    seed = jnp.asarray(SEED)
+    free = _request(profile, TARGETS[0], active=False).vertical_pin.pair(operator)
+    program = jax.jit(production)
+    compiled = program.lower(seed, free).compile()
+    for target, active, expected in [
+        (TARGETS[0], False, FREE_HEIGHT),
+        *[(height, True, height) for height in TARGETS],
+    ]:
+        pair = _request(profile, target, active=active).vertical_pin.pair(operator)
+        flux, unknown, residual, converged = compiled(seed, pair)
+        assert bool(converged)
+        assert float(residual) <= 1e-12
+        assert _terminal_elongation(flux) >= 1.6
+        assert abs(_booked_terminal_height(flux) - expected) <= 1e-10
+        if not active:
+            np.testing.assert_array_equal(unknown, [0.0])

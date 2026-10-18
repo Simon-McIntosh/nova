@@ -284,6 +284,8 @@ class ConstraintPair:
 
 def _require_positive_if_concrete(value: object, name: str) -> None:
     """Validate host values without forcing a traced value back to the host."""
+    if isinstance(value, jax.stages.ArgInfo):
+        return
     try:
         concrete = np.asarray(value)
     except TypeError, jax.errors.TracerArrayConversionError:
@@ -1973,7 +1975,11 @@ class ConstraintRecord(NamedTuple):
 
 @dataclass(frozen=True)
 class AugmentedConstraintSystem:
-    """Private fixed-shape map and callbacks assembled for one constraint tuple."""
+    """Fixed-shape map and callbacks for compensating rows, including pins.
+
+    An inactive centroid pin retains its row and unknown, so the same traced
+    system can serve free and pinned states through runtime pair leaves.
+    """
 
     initial: jax.Array
     map_fn: Callable[[jax.Array], jax.Array]

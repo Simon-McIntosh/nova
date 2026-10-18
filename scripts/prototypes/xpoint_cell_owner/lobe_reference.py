@@ -7,26 +7,19 @@ neither quadrature points nor weights. A quadratic density is degree two, so the
 closed form is exact and the two agree to roundoff; any larger difference means
 the fan the two consume is not the same region.
 
-The fan is built by ``nova.equilibrium.current._normal_rings`` from the read's
-own selection fields, so the check covers the slicing the booking consumes. The
-whole-cell reference of the same rule integrates the cell polygon's own centre
-fan, which is the fan the read uses for a cell it does not cut.
+The lobe reference constructs its straight intervals and cubic-ray chords in
+NumPy from the read's geometry and selection. It never calls the booking's ring
+builder or quadrature. The whole-cell reference uses the polygon's centre fan.
 """
 
 from math import factorial
 
 import numpy as np
 
-from nova.equilibrium import current
-
 
 def _simplex_moment(power_u, power_v):
     """Integral of ``u**power_u v**power_v`` over the reference simplex."""
-    return (
-        factorial(power_u)
-        * factorial(power_v)
-        / factorial(power_u + power_v + 2)
-    )
+    return factorial(power_u) * factorial(power_v) / factorial(power_u + power_v + 2)
 
 
 def _power_polynomial(base_u, base_v, exponent, constant):
@@ -117,28 +110,102 @@ def _fan_integral(triangles, coefficients, origin, pitch):
     return total
 
 
+def _cross(left, right):
+    return left[..., 0] * right[..., 1] - left[..., 1] * right[..., 0]
+
+
+def _lobe_triangles(geometry, reading, index, segments):
+    """Construct the selected edge and ray chords independently in NumPy."""
+    origin = np.asarray(geometry.centre[index], dtype=float)
+    vertices = np.asarray(geometry.vertices[index], dtype=float)
+    count = int(np.asarray(geometry.vertex_count[index]))
+    vertices = vertices[:count]
+    edges = np.roll(vertices, -1, axis=0) - vertices
+    selected = np.asarray(reading.fragment_selected[index], dtype=bool)
+    intervals = np.asarray(reading.edge_interval[index], dtype=float)
+    form = reading.saddle_form
+    position = np.asarray(form.position, dtype=float)
+    direction = np.asarray(form.direction, dtype=float)
+    curvature = np.asarray(form.curvature, dtype=float)
+    cubic = np.asarray(form.cubic, dtype=float)
+    positive = np.asarray(form.positive, dtype=bool)
+    triangles = []
+
+    for fragment, live in enumerate(selected):
+        if not live:
+            continue
+        for edge_index in range(count):
+            for lower, upper in intervals[fragment, edge_index]:
+                if upper > lower:
+                    start = vertices[edge_index] + lower * edges[edge_index]
+                    end = vertices[edge_index] + upper * edges[edge_index]
+                    triangles.append((origin, start, end))
+
+    sector_live = np.zeros(4, dtype=bool)
+    sector_live[np.flatnonzero(positive)[:2]] = selected[:2]
+    signs = sector_live.astype(int) - np.roll(sector_live, 1).astype(int)
+    relative = vertices - position
+    bound = 2 * np.max(np.linalg.norm(relative, axis=1))
+    for sector, sign in enumerate(signs):
+        if not sign:
+            continue
+        hits = [0.0, bound]
+        for edge_index, edge in enumerate(edges):
+            coefficients = [
+                _cross(cubic[sector], edge),
+                _cross(curvature[sector], edge),
+                _cross(direction[sector], edge),
+                -_cross(relative[edge_index], edge),
+            ]
+            roots = np.roots(np.trim_zeros(coefficients, trim="f"))
+            for root in roots:
+                if abs(root.imag) > 1e-10:
+                    continue
+                parameter = float(root.real)
+                point = (
+                    parameter * direction[sector]
+                    + parameter**2 * curvature[sector]
+                    + parameter**3 * cubic[sector]
+                )
+                length_squared = np.dot(edge, edge)
+                fraction = np.dot(point - relative[edge_index], edge) / length_squared
+                if parameter >= -1e-12 and -1e-12 <= fraction <= 1 + 1e-12:
+                    hits.append(float(np.clip(parameter, 0, bound)))
+        hits.sort()
+        for begin, end in zip(hits[:-1], hits[1:], strict=True):
+            middle = (begin + end) / 2
+            point = (
+                middle * direction[sector]
+                + middle**2 * curvature[sector]
+                + middle**3 * cubic[sector]
+            )
+            if end <= begin or np.any(_cross(edges, point - relative) < -1e-12):
+                continue
+            parameters = np.linspace(begin, end, segments + 1)
+            arc = (
+                position
+                + parameters[:, None] * direction[sector]
+                + parameters[:, None] ** 2 * curvature[sector]
+                + parameters[:, None] ** 3 * cubic[sector]
+            )
+            if sign < 0:
+                arc = arc[::-1]
+            triangles.extend(
+                (origin, arc[slot], arc[slot + 1]) for slot in range(segments)
+            )
+    return triangles
+
+
 def lobe_reference(geometry, reading, index, density, segments=4):
-    """Exact fan integral over the lobe the booking cuts for one owner cell."""
+    """Exact triangle integral over an independently constructed lobe."""
     origin = np.asarray(geometry.centre[index], dtype=float)
     pitch = float(geometry.pitch[index])
-    rings, sizes = current._normal_rings(
-        geometry.vertices[index],
-        geometry.vertex_count[index],
-        geometry.centre[index],
-        reading.saddle_form,
-        reading.fragment_selected[index],
-        reading.edge_interval[index],
-        segments,
+    triangles = _lobe_triangles(geometry, reading, index, segments)
+    return (
+        _fan_integral(triangles, density[index], origin, pitch),
+        triangles,
+        len(triangles),
     )
-    rings = np.asarray(rings, dtype=float)
-    sizes = np.asarray(sizes)
-    triangles = []
-    for row in range(rings.shape[0]):
-        count = int(sizes[row])
-        for slot in range(count):
-            following = slot + 1 if slot + 1 < count else 0
-            triangles.append((origin, rings[row, slot], rings[row, following]))
-    return _fan_integral(triangles, density[index], origin, pitch), rings, sizes
 
 
 def polygon_reference(geometry, index, density, segments=1):

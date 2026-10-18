@@ -11,6 +11,7 @@ booking's clip rule.
 import jax
 import jax.numpy as jnp
 import numpy as np
+from types import SimpleNamespace
 
 from nova.jax.config import configure_dtypes
 
@@ -19,7 +20,11 @@ assert jax.config.jax_enable_x64 is True
 
 from nova.equilibrium import current
 from nova.equilibrium.topology import SaddleNormalForm
-from scripts.prototypes.xpoint_cell_owner.lobe_booking import _ring_moments
+from scripts.prototypes.xpoint_cell_owner.lobe_booking import (
+    _ring_moments,
+    _whole_cell_rings,
+    remaining_moments,
+)
 from scripts.prototypes.xpoint_cell_owner.lobe_reference import triangle_integral
 
 SQUARE = ((0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0))
@@ -128,3 +133,38 @@ def test_a_negative_slot_subtracts_its_region():
     assert np.all(np.abs(signed - (whole - part)) < 1e-13)
     expected = _closed_form(SQUARE, CENTRE, UNIT) - _closed_form(inner, CENTRE, UNIT)
     assert np.all(np.abs(signed - expected) < 1e-12)
+
+
+def test_remainder_uses_the_ring_builders_counted_polygon():
+    """A padded fourth vertex must never replace the triangle's closing edge."""
+    vertices = ((0.0, 0.0), (1.0, 0.0), (0.0, 1.0), (9.0, 9.0))
+    geometry = SimpleNamespace(
+        vertices=jnp.asarray([vertices]),
+        vertex_count=jnp.asarray([3]),
+        centre=jnp.asarray([[0.0, 0.0]]),
+        pitch=jnp.asarray([1.0]),
+    )
+    reading = SimpleNamespace(
+        saddle_form=_dead_form(CENTRE),
+        fragment_selected=jnp.zeros((1, 2), dtype=bool),
+        edge_interval=jnp.zeros((1, 2, 4, STRIPS, 2)),
+    )
+    rings, sizes = _whole_cell_rings(geometry, reading, 0, SEGMENTS)
+    ones = lambda points: jnp.ones(points.shape[:-1])  # noqa: E731
+    whole = np.asarray(
+        _ring_moments(rings, sizes, jnp.ones(len(sizes)), geometry.centre[0], ones)
+    )
+    remainder, valid = remaining_moments(
+        geometry,
+        reading,
+        None,
+        jnp.asarray([0]),
+        jnp.asarray([UNIT]),
+        1.0,
+        1.0,
+        segments=SEGMENTS,
+    )
+    expected = _closed_form(vertices[:3], CENTRE, UNIT)
+    assert bool(valid[0])
+    np.testing.assert_allclose(whole, expected, rtol=0, atol=1e-13)
+    np.testing.assert_allclose(np.asarray(remainder[0]), expected, rtol=0, atol=1e-13)

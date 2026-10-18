@@ -30,8 +30,9 @@
     owner's own rule, imported rather than restated, and the vertex-list reconstruction of an
     earlier booking is gone. This page records the construction, why one call of the builder cannot
     carry both selections, and the agreement of the booking with closed-form references that share
-    no quadrature with it. The partition holds to 1.4 × 10<sup>&minus;13</sup> at 282 and
-    1.8 × 10<sup>&minus;14</sup> at 2,098 against a 1 × 10<sup>&minus;12</sup> contract, the lobe partition
+    neither its ring builder nor its quadrature. The largest lobe-reference deviation is
+    7.10542735760 × 10<sup>&minus;13</sup> and the largest whole-cell partition deviation is
+    1.13686837722 × 10<sup>&minus;13</sup>, both under the 1 × 10<sup>&minus;12</sup> contract. The lobe partition
     passes all three map guards, and the 282 cold solve converges to 3.0 × 10<sup>&minus;14</sup>; the 550
     cold solve stalls on a collapsing line search and is left as the next item.</p>
   </header>
@@ -43,12 +44,12 @@
     <code>fine_grid_convergence.context.build</code>, so the geometry, the reference moments and the
     fitted density coefficients are the ones every other node in this plan measures against, and the
     booking is compared against the same reference the map is measured on.</p>
-    <p>Two references bound the booking. The <b>lobe reference</b> walks each lobe ring row as a
-    polygon with apex at the cell centre and integrates the quadratic density over its triangles in
-    closed form; the <b>whole-cell reference</b> does the same over the cell polygon's own edges. Both
-    use the ring builder to obtain the same region the booking integrates, and neither uses the clip
-    quadrature, so a disagreement larger than roundoff is a disagreement about the region rather than
-    about the rule that integrates it. Agreement is required to 1 × 10<sup>−12</sup> on area, current
+    <p>Two references bound the booking. The <b>lobe reference</b> constructs selected straight-edge
+    intervals and cubic-ray chords independently in NumPy, then integrates the quadratic density
+    over their triangles in closed form. The <b>whole-cell reference</b> integrates the cell polygon's
+    own edges in closed form. Neither calls the booking's ring builder or clip quadrature, so a
+    disagreement can expose either a region-construction or integration error. Agreement is required
+    to 1 × 10<sup>−12</sup> on area, current
     and both first moments.</p>
   </section>
 
@@ -106,9 +107,13 @@
     booked reduction against the closed form over the polygon's triangles. It asserts that exactly
     one live slot carries the polygon once, that the reduction of that fan matches the closed form
     on a quadratic density, and that a negative fan subtracts: the signed booking of a square less
-    an inner quadrilateral equals the closed form over each. All three pass to
-    1 × 10<sup>−13</sup>. The check shares the ring builder with the booking and shares no quadrature
-    with it, and it is the instrument that holds the single-slot contract in place.</p>
+    an inner quadrilateral equals the closed form over each. Two further tests call
+    <code>_whole_cell_rings</code> and <code>remaining_moments</code> on a padded triangle, and forbid
+    the booking builder while the independent lobe reference runs. All five pass. Restoring the
+    vertex-list remainder makes the padded-triangle test fail; restoring the builder-based lobe
+    reference makes the forbidden-builder test fail. The fresh-process base arm reaches pytest's
+    summary with two collection errors because the new test imports <code>_ring_moments</code>, which
+    the base does not define; the head arm collects and passes all five tests.</p>
   </section>
 
   <section id="lobe-share-partition-partition">
@@ -120,35 +125,25 @@
     <table id="lobe-share-partition-partition-table">
       <thead><tr><th>carrier</th><th>owner cells booked</th><th>lobe vs dense lobe, max |Δ|</th><th>lobe + remainder vs dense whole cell, max |Δ|</th></tr></thead>
       <tbody>
-        <tr><td>282</td><td>1 (cell 7)</td><td>1.42108547152 × 10<sup>−14</sup></td><td>1.42108547152 × 10<sup>−13</sup></td></tr>
-        <tr><td>550</td><td>0 booked by the read; the 16 largest-membership cells sampled</td><td>0 (the lobe is empty on all 16)</td><td>1.13686837722 × 10<sup>−13</sup></td></tr>
-        <tr><td>2,098</td><td>1 (cell 47)</td><td>4.44089209850 × 10<sup>−16</sup></td><td>1.77635683940 × 10<sup>−14</sup></td></tr>
+        <tr><td>282</td><td>1 (cell 7)</td><td>7.10542735760 × 10<sup>−13</sup></td><td>1.13686837722 × 10<sup>−13</sup></td></tr>
+        <tr><td>550</td><td>1 (cell 8)</td><td>3.41060513165 × 10<sup>−13</sup></td><td>2.84217094304 × 10<sup>−14</sup></td></tr>
+        <tr><td>2,098</td><td>1 (cell 47)</td><td>2.26485497024 × 10<sup>−14</sup></td><td>1.77635683940 × 10<sup>−14</sup></td></tr>
       </tbody>
     </table>
-    <p>The largest absolute deviation anywhere in the table is
-    1.42108547152 × 10<sup>−13</sup>, on the current column at 282, an order of magnitude inside the
-    1 × 10<sup>−12</sup> contract. At 282 the per-column deviations are 8.674 × 10<sup>−19</sup>
-    (area), 1.421 × 10<sup>−14</sup> (current), 3.608 × 10<sup>−16</sup> (radial moment) and
-    1.332 × 10<sup>−15</sup> (vertical moment) for the lobe, and 1.735 × 10<sup>−18</sup>,
-    1.421 × 10<sup>−13</sup>, 1.832 × 10<sup>−15</sup> and 4.510 × 10<sup>−16</sup> for the
-    partition; at 2,098 they are 6.776 × 10<sup>−21</sup>, 4.441 × 10<sup>−16</sup>,
-    3.990 × 10<sup>−17</sup> and 7.459 × 10<sup>−17</sup>, and 1.084 × 10<sup>−18</sup>,
-    1.776 × 10<sup>−14</sup>, 3.001 × 10<sup>−16</sup> and 2.327 × 10<sup>−16</sup>.</p>
-    <p>The relative deviations on the vertical-moment <i>column</i> are large — 4.229 × 10<sup>−2</sup>
-    at 282 and 5.958 × 10<sup>−1</sup> at 2,098 — and they are not a defect: the fan's origin is the
-    cell centre, so that column's reference value nearly cancels and the deviation is the absolute
-    4.510 × 10<sup>−16</sup> divided by a near-zero reference. Every other relative deviation is at or
-    below 3.25009496898 × 10<sup>−14</sup>.</p>
-    <p>At 550 the row is not a measurement of the lobe. The read books no cell there at all —
-    <code>booking_cells</code> sums to zero over 551 cells, where it is 2 at 282 and 2 at 2,098 — so
-    there is no owner cell for the clause to name, and the 16 largest-membership cells carry an empty
-    lobe fan with zero area, zero current and zero moments. What the row does establish is the
-    identity the remainder rests on: at this size the whole-cell fan matches the dense whole-cell
-    reference to 1.13686837722 × 10<sup>−13</sup> (per column 4.337 × 10<sup>−19</sup>,
-    5.684 × 10<sup>−14</sup>, 1.985 × 10<sup>−15</sup>, 8.153 × 10<sup>−17</sup>), and the booked
-    remainder is the whole cell there because <code>fragment_selected</code> is false for every
-    sampled cell. The lobe half of the 550 partition is unexercised for want of a live fragment, not
-    because it disagrees.</p>
+    <p>The largest absolute deviation is 7.10542735760 × 10<sup>−13</sup> on the 282 lobe's current,
+    inside the 1 × 10<sup>−12</sup> contract. Each tuple below is the absolute deviation in
+    (area, current, radial first moment, vertical first moment) order. At 282 the lobe tuple is
+    (3.209e−17, 7.105e−13, 1.185e−14, 1.421e−14), and the partition tuple is
+    (1.735e−18, 1.137e−13, 1.693e−15, 4.510e−16). At 550 the lobe tuple is
+    (1.496e−17, 3.411e−13, 8.243e−15, 5.551e−15), and the partition tuple is
+    (8.674e−19, 2.842e−14, 1.735e−15, 1.471e−15). At 2,098 the lobe tuple is
+    (1.030e−18, 2.265e−14, 1.344e−17, 2.446e−16), and the partition tuple is
+    (1.084e−18, 1.776e−14, 3.031e−16, 2.309e−16).</p>
+    <p>The 550 row is the carrier used by the map and cold solve, from the cache under
+    <code>r-20261014T174345284407-lean-map/cache</code>. It has exactly 550 cells and books cell 8.
+    The earlier 551-cell carrier came from a different cache and booked no owner cell; its zero-lobe
+    row is superseded. Large relative deviations in a nearly cancelled first-moment column do not
+    change the absolute 1 × 10<sup>−12</sup> result.</p>
   </section>
 
   <section id="lobe-share-partition-maps">
@@ -224,9 +219,9 @@ partition is a root at 282. The stall is reported and left as the next item.</p>
 measurement: the remainder takes its fan from the same builder that builds the lobe, the vertex-list
 reconstruction and the local signed-fan reduction are deleted, the reduction is the imported
 clip-quadrature rule, and the truncated rule that set the booked lobe's floor is gone with it. The
-partition agrees with the dense references to 1.42108547152 × 10<sup>&minus;13</sup> at 282 and
-1.77635683940 × 10<sup>&minus;14</sup> at 2,098; at 550 the read books no owner cell, so that row is the
-whole-cell identity with an empty lobe rather than a measured partition. The lobe partition passes all
+independent lobe reference agrees to at most 7.10542735760 × 10<sup>&minus;13</sup>, and the whole-cell
+partition to at most 1.13686837722 × 10<sup>&minus;13</sup>. The 550 carrier books cell 8, so all three
+sizes exercise the intended owner partition. The lobe partition passes all
 three map guards and at 2,098 passes where the half-plane cut fails. Clause 6 holds at 282 and is
 reported, not met, at 550: the solve stalls on a collapsing line search at a fixed point near
 1.55 × 10<sup>&minus;3</sup>, which is the item clause 6 named in advance and is left as the next item.

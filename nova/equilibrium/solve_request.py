@@ -18,7 +18,11 @@ from nova import __version__ as NOVA_VERSION
 if TYPE_CHECKING:
     import jax
 
-    from nova.equilibrium.constraint import ConstraintPair, ConstraintRecord
+    from nova.equilibrium.constraint import (
+        ConstraintPair,
+        ConstraintRecord,
+        VerticalPositionPin,
+    )
     from nova.equilibrium.forward import ForwardEquilibrium
     from nova.equilibrium.forward_operator import ForwardTopologyState
     from nova.equilibrium.observation import ConstraintPinSet
@@ -572,6 +576,7 @@ class ForwardSolveRequest:
     target_current: object | None = None
     constraint_pins: ConstraintPinSet | None = None
     constraint_pairs: tuple[ConstraintPair, ...] = ()
+    vertical_pin: VerticalPositionPin | None = None
     current: object | None = None
     prescribed_current: object | None = None
     enforce: tuple[str, ...] = ()

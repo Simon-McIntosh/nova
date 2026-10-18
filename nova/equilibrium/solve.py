@@ -22,10 +22,11 @@ import jax
 import jax.numpy as jnp
 import jax.scipy.linalg as jsp_linalg
 
+from nova.equilibrium.constraint import ConstraintBinding
+
 __all__ = [
     "Factor",
     "SolveResult",
-    "VerticalPin",
     "factor",
     "fixed_point",
     "pin_residual",
@@ -45,24 +46,6 @@ class Factor:
 
     lu: jax.Array
     pivots: jax.Array
-
-
-@jax.tree_util.register_dataclass
-@dataclass(frozen=True)
-class VerticalPin:
-    """One compensating unknown that holds a vertical position at a target.
-
-    The compensating unknown is the last element of the state: the current in
-    its spatial sign enters the resolved map through the runtime operands, so
-    the field shape is not captured in the traced program.  ``target`` is the
-    held current-centroid height in metres and ``pin_scale`` the row's declared
-    scale; ``initial`` seeds the unknown.  Target, scale and seed are runtime
-    leaves, so one compiled program serves any target and any pin.
-    """
-
-    target: jax.Array
-    pin_scale: jax.Array
-    initial: jax.Array
 
 
 @jax.tree_util.register_dataclass
@@ -200,32 +183,33 @@ def fixed_point(
     return _chord(residual_fn, flat, operands, factor, tolerance, max_corrections)
 
 
-def pin_residual(residual_fn, observation, pin):
+def pin_residual(residual_fn, observation):
     """Augment a map with one pin row held by one compensating unknown.
 
     The augmented state is the base state with the compensating unknown
     appended.  ``residual_fn(extended, operands)`` is the base map, which reads
     the unknown off the state's last element and adds its declared field
     through the runtime operands; ``observation(extended, operands)`` returns
-    the scalar the pin holds.  ``pin.target`` and ``pin.pin_scale`` are read
-    from the ``pin`` argument at runtime, so the traced program is the same for
-    any pin target.
+    the scalar the pin holds. The constraint binding carries the target, scale
+    and active flag as runtime leaves. With the flag clear, the last row holds
+    the compensating unknown at zero and the map is free.
     """
-    target = jnp.asarray(pin.target)
-    scale = jnp.asarray(pin.pin_scale)
 
-    def augmented(extended, operands):
+    def augmented(extended, packed):
+        operands, binding = packed
         base = jnp.reshape(residual_fn(extended, operands), (-1,))
-        row = jnp.reshape((observation(extended, operands) - target) / scale, (1,))
+        active = jnp.asarray(binding.payload, dtype=bool)
+        held = (observation(extended, operands) - binding.target[0]) / binding.scale[0]
+        row = jnp.reshape(jnp.where(active, held, extended[-1]), (1,))
         return jnp.concatenate((base, row))
 
     return augmented
 
 
-def pin_state(state, pin):
+def pin_state(state, binding: ConstraintBinding):
     """Return the base state extended by the pin's initial compensating unknown."""
     flat = jnp.reshape(jnp.asarray(state), (-1,))
-    seed = jnp.reshape(jnp.asarray(pin.initial), (1,))
+    seed = jnp.reshape(jnp.asarray(binding.initial_unknown), (1,))
     return jnp.concatenate((flat, seed))
 
 
@@ -234,7 +218,7 @@ def pinned_fixed_point(
     observation,
     state,
     operands,
-    pin,
+    binding: ConstraintBinding,
     *,
     factor=None,
     tolerance=DEFAULT_TOLERANCE,
@@ -242,17 +226,15 @@ def pinned_fixed_point(
 ):
     """Drive a map augmented by one vertical pin to ``tolerance``.
 
-    The pin's basis, target and scale ride in ``pin`` as runtime leaves, so a
-    single compiled program pins at any target value and degenerates to the
-    free map when the basis carries no leverage.  The terminal state's last
-    element is the compensating unknown; ``pin_residual``'s last row is the
-    pin's own residual.
+    One compiled program serves the free map and any target because the
+    binding and field basis remain runtime leaves. The last state element is
+    the compensating unknown.
     """
-    augmented = pin_residual(residual_fn, observation, pin)
+    augmented = pin_residual(residual_fn, observation)
     return fixed_point(
         augmented,
-        pin_state(state, pin),
-        operands,
+        pin_state(state, binding),
+        (operands, binding),
         factor=factor,
         tolerance=tolerance,
         max_corrections=max_corrections,

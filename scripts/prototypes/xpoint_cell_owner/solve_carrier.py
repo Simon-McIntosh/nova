@@ -15,6 +15,7 @@ import jax.numpy as jnp
 import numpy as np
 
 import nova
+from nova.equilibrium.constraint import CurrentCentroidConstraint
 from benchmarks import solovev_certificate as certificate
 from scripts.analytic_oracle_fixtures import measure as fixture
 from scripts.prototypes.fast_map_production.qualification import require_map
@@ -30,6 +31,23 @@ from scripts.prototypes.solve_options.point_bias import _exterior
 
 def save(path, result):
     path.write_text(json.dumps(result, indent=2, default=str) + "\n")
+
+
+def radial_field_jet(points):
+    """Value, gradient and Hessian of flux from one tesla of radial field."""
+    radius, height = jnp.asarray(points).T
+    zeros = jnp.zeros_like(radius)
+    return jnp.stack(
+        (
+            -2 * jnp.pi * radius * height,
+            -2 * jnp.pi * height,
+            -2 * jnp.pi * radius,
+            zeros,
+            -2 * jnp.pi * jnp.ones_like(radius),
+            zeros,
+        ),
+        axis=-1,
+    )
 
 
 def main():
@@ -65,6 +83,8 @@ def main():
         ),
     )
     parser.add_argument("--map-only", action="store_true")
+    parser.add_argument("--compare-vertical-pin", action="store_true")
+    parser.add_argument("--vertical-target", type=float)
     parser.add_argument(
         "--past-map-guard",
         action="store_true",
@@ -158,11 +178,31 @@ def main():
         return
 
     state = (context.reference / context.scale).reshape(-1)
+    pin_values = None
+    if args.compare_vertical_pin:
+        target = (
+            CurrentCentroidConstraint.booked_height(context.reference)
+            if args.vertical_target is None
+            else jnp.asarray(args.vertical_target, dtype=state.dtype)
+        )
+        values_basis = radial_field_jet(context.rule.points.reshape((-1, 2)))[:, 0]
+        jet_basis = radial_field_jet(context.window.nodes)
+        pin_values = (
+            jnp.asarray(False),
+            target,
+            jnp.asarray(float(jnp.median(context.geometry.pitch))),
+            jnp.asarray(1e-3),
+            values_basis,
+            jet_basis,
+        )
+        state = jnp.concatenate((state, jnp.asarray([0.0], dtype=state.dtype)))
+        result["vertical_target"] = float(target)
+        result["field_scale_tesla"] = 1e-3
     size = state.size
     lu = jnp.eye(size, dtype=state.dtype)
     pivots = jnp.arange(size, dtype=jnp.int32)
     compiled_step = jax.jit(
-        lambda point, carrier, unit, matrix, piv, rebuild: advance(
+        lambda point, carrier, unit, matrix, piv, rebuild, pin: advance(
             point,
             carrier,
             unit,
@@ -172,11 +212,12 @@ def main():
             profile,
             args.component,
             args.density_mode,
+            pin,
         )
     )
     started = perf_counter()
     correction = compiled_step.lower(
-        state, operands, context.scale, lu, pivots, True
+        state, operands, context.scale, lu, pivots, True, pin_values
     ).compile()
     result["correction_compile_seconds"] = perf_counter() - started
     result["correction_executable_bytes"] = (
@@ -189,33 +230,71 @@ def main():
         f"bytes={result['correction_executable_bytes']}",
         flush=True,
     )
-    for index in range(args.max_steps):
-        started = perf_counter()
-        state, residual, lu, pivots, factor_scale = correction(
-            state, operands, context.scale, lu, pivots, True
+    if args.compare_vertical_pin:
+        cases = (("unpinned", False), ("pinned", True))
+        result["comparison"] = {}
+    else:
+        cases = (("cold", False),)
+    for name, active in cases:
+        trial_state = state
+        trial_lu, trial_pivots = lu, pivots
+        trial_pin = (
+            (jnp.asarray(active), *pin_values[1:]) if pin_values is not None else None
         )
-        jax.block_until_ready(residual)
-        row = {
-            "correction": index + 1,
-            "residual": float(residual),
-            "factor_scale": float(factor_scale),
-            "wall_seconds": perf_counter() - started,
-        }
-        result["history"].append(row)
-        result["terminal_state"] = {
-            "moments": np.asarray(state.reshape((-1, 3)) * context.scale).tolist()
-        }
-        result["converged"] = row["residual"] <= 1e-12
-        save(args.output, result)
-        print(f"CORRECTION {json.dumps(row)}", flush=True)
-        if result["converged"] or row["factor_scale"] == 0:
-            break
-    print(
-        f"COLD cells={count} residual={result['history'][-1]['residual']:.12g} "
-        f"converged={result['converged']} "
-        f"guard_exceeded={bool(args.past_map_guard)}",
-        flush=True,
-    )
+        history = []
+        for index in range(args.max_steps):
+            started = perf_counter()
+            trial_state, residual, trial_lu, trial_pivots, factor_scale = correction(
+                trial_state,
+                operands,
+                context.scale,
+                trial_lu,
+                trial_pivots,
+                True,
+                trial_pin,
+            )
+            jax.block_until_ready(residual)
+            row = {
+                "correction": index + 1,
+                "residual": float(residual),
+                "factor_scale": float(factor_scale),
+                "wall_seconds": perf_counter() - started,
+            }
+            history.append(row)
+            moments = trial_state[:-1] if args.compare_vertical_pin else trial_state
+            terminal = {
+                "moments": np.asarray(moments.reshape((-1, 3)) * context.scale).tolist()
+            }
+            if args.compare_vertical_pin:
+                terminal["field_amplitude_tesla"] = float(
+                    trial_state[-1] * pin_values[3]
+                )
+                terminal["centroid_height"] = float(
+                    CurrentCentroidConstraint.booked_height(
+                        moments.reshape((-1, 3)) * context.scale
+                    )
+                )
+                result["comparison"][name] = {
+                    "history": history,
+                    "terminal_state": terminal,
+                    "converged": row["residual"] <= 1e-12,
+                }
+            else:
+                result["history"] = history
+                result["terminal_state"] = terminal
+                result["converged"] = row["residual"] <= 1e-12
+            save(args.output, result)
+            print(f"CORRECTION {name} {json.dumps(row)}", flush=True)
+            if row["residual"] <= 1e-12 or row["factor_scale"] == 0:
+                break
+        print(
+            f"COLD {name} cells={count} residual={history[-1]['residual']:.12g} "
+            f"converged={history[-1]['residual'] <= 1e-12} "
+            f"guard_exceeded={bool(args.past_map_guard)}",
+            flush=True,
+        )
+    if args.compare_vertical_pin:
+        return
     if not result["converged"]:
         raise ValueError(
             f"cold solve residual {result['history'][-1]['residual']} exceeds 1e-12"

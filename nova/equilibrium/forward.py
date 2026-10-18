@@ -105,6 +105,8 @@ from nova.equilibrium.conservation import (
 )
 from nova.equilibrium.constraint import (
     CircuitCurrentUnknown,
+    UniformRadialFieldUnknown,
+    VerticalPositionPin,
     CompensatorRule,
     CompensatorSelection,
     ConstraintPair,
@@ -2213,7 +2215,10 @@ class ForwardProfile:
                 "the bounded outer trace can be retained"
             )
         if (
-            pairs
+            any(
+                not isinstance(pair.unknown, UniformRadialFieldUnknown)
+                for pair in pairs
+            )
             and prescribed_current is None
             and self.operator.prescribed_current_field is None
         ):
@@ -2604,7 +2609,10 @@ class ForwardProfile:
     ) -> ForwardSolveReceipt:
         """Resolve one typed request whose constraint targets remain fixed."""
         active = self._with_source(request.source_profile, clip_mode=request.clip_mode)
-        if request.constraint_pairs and request.route not in _CONSTRAINABLE:
+        pairs = request.constraint_pairs
+        if request.vertical_pin is not None:
+            pairs = (*pairs, request.vertical_pin.pair(active.operator))
+        if pairs and request.route not in _CONSTRAINABLE:
             raise ValueError(
                 "augmented constraints require a route carrying a compensating "
                 f"unknown vector; available: {', '.join(_CONSTRAINABLE)}"
@@ -2635,7 +2643,7 @@ class ForwardProfile:
             current=request.current,
             target_current=request.target_current,
             prescribed_current=request.prescribed_current,
-            constraint_pairs=request.constraint_pairs,
+            constraint_pairs=pairs,
             enforce=request.enforce,
             pins=request.constraint_pins,
             current_pin=policy.current_pin,
@@ -2721,6 +2729,9 @@ class ForwardProfile:
             array = np.asarray(value)
             return tuple(array.shape), str(array.dtype)
 
+        request_pairs = request.constraint_pairs
+        if request.vertical_pin is not None:
+            request_pairs = (*request_pairs, request.vertical_pin.pair(self.operator))
         constraint_signature = tuple(
             (
                 type(pair.functional).__qualname__,
@@ -2732,7 +2743,7 @@ class ForwardProfile:
                     else pair.binding.elimination.maximum_steps
                 ),
             )
-            for pair in request.constraint_pairs
+            for pair in request_pairs
         )
         return (
             self.operator.program_identity,
@@ -2775,6 +2786,7 @@ class ForwardProfile:
         target_current=None,
         prescribed_current=None,
         constraint_pairs: tuple[ConstraintPair, ...] = (),
+        vertical_pin: VerticalPositionPin | None = None,
         enforce: Sequence[str] = (),
         pins: ConstraintPinSet | None = None,
         current_pin: bool | None = None,
@@ -2817,6 +2829,7 @@ class ForwardProfile:
                 or target_current is not None
                 or prescribed_current is not None
                 or constraint_pairs
+                or vertical_pin is not None
                 or enforce
                 or pins is not None
                 or current_pin is not None
@@ -2844,6 +2857,8 @@ class ForwardProfile:
 
         reject_unsupported_enforcement(enforce, self.source.closure_degrees)
         constraint_pairs = tuple(constraint_pairs)
+        if vertical_pin is not None:
+            constraint_pairs = (*constraint_pairs, vertical_pin.pair(self.operator))
         if constraint_pairs and route not in _CONSTRAINABLE:
             raise ValueError(
                 "augmented constraints require a route carrying a compensating "

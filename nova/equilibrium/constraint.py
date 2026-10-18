@@ -397,6 +397,102 @@ class CircuitCurrentUnknown:
 
 @jax.tree_util.register_pytree_node_class
 @dataclass(frozen=True)
+class UniformRadialFieldUnknown:
+    """Amplitude of a declared uniform radial field at the flux targets.
+
+    The axisymmetric flux ``-2π R Z B_R`` gives the requested radial field.
+    Its sampled image is a runtime leaf, so a changed geometry does not become
+    a closure constant in the Newton program.
+    """
+
+    flux_basis: object
+    field_scale: object
+
+    @property
+    def row_count(self) -> int:
+        return 1
+
+    def physical_value(self, normalized: jax.Array) -> jax.Array:
+        return jnp.atleast_1d(jnp.asarray(self.field_scale)) * normalized
+
+    def flux_delta(
+        self,
+        profile: ForwardProfile,
+        context: ConstraintContext,
+        functional: ConstraintFunctional[object],
+        payload: object,
+        normalized: jax.Array,
+    ) -> jax.Array:
+        del profile, context, functional, payload
+        return jnp.asarray(self.flux_basis) * self.physical_value(normalized)[0]
+
+    def tree_flatten(self):
+        return ((self.flux_basis, self.field_scale), None)
+
+    @classmethod
+    def tree_unflatten(cls, aux_data, children):
+        del aux_data
+        return cls(*children)
+
+
+@dataclass(frozen=True)
+class VerticalPositionPin:
+    """Current-centroid height and one declared source that can hold it.
+
+    A named vertical-field coil set supplies ``coil_direction`` in the
+    prescribed circuit order.  Without that set, the radial-field amplitude
+    is applied to an axisymmetric uniform-field flux image.
+    """
+
+    target_height: object
+    coil_direction: object | None = None
+    source_scale: object = 1.0
+    row_scale: object = 1.0
+    tolerance: object = 1e-10
+    initial_unknown: object = 0.0
+
+    def __post_init__(self) -> None:
+        _require_positive_if_concrete(self.source_scale, "vertical source scale")
+        _require_positive_if_concrete(self.row_scale, "vertical row scale")
+        _require_positive_if_concrete(self.tolerance, "vertical tolerance")
+        if self.coil_direction is not None:
+            direction = np.asarray(self.coil_direction)
+            if direction.ndim != 1 or not np.any(direction):
+                raise ValueError(
+                    "vertical-field coil set must name a nonzero direction"
+                )
+
+    def pair(self, operator: object) -> ConstraintPair:
+        if self.coil_direction is None:
+            coordinates = [operator.grid.coordinate, operator.wall.coordinate]
+            if operator.sample is not None:
+                coordinates.append(operator.sample.coordinate)
+            points = jnp.concatenate(tuple(jnp.asarray(x) for x in coordinates))
+            basis = -2 * jnp.pi * points[:, 0] * points[:, 1]
+            unknown = UniformRadialFieldUnknown(basis, self.source_scale)
+        else:
+            field = operator.prescribed_current_field
+            if field is None:
+                raise ValueError(
+                    "a named vertical-field coil set needs a prescribed field"
+                )
+            direction = jnp.asarray(self.coil_direction)
+            if direction.shape != (field.circuit_count,):
+                raise ValueError(
+                    "vertical-field coil direction must name every circuit"
+                )
+            unknown = CircuitCurrentUnknown(direction, self.source_scale)
+        binding = ConstraintBinding(
+            target=jnp.atleast_1d(self.target_height),
+            tolerance=jnp.atleast_1d(self.tolerance),
+            scale=jnp.atleast_1d(self.row_scale),
+            initial_unknown=jnp.atleast_1d(self.initial_unknown),
+        )
+        return ConstraintPair(CurrentCentroidConstraint(), unknown, binding)
+
+
+@jax.tree_util.register_pytree_node_class
+@dataclass(frozen=True)
 class ConstraintMultiplier:
     """Non-actuator multiplier applied to a functional's dual flux image."""
 
@@ -950,6 +1046,16 @@ class CurrentCentroidConstraint:
     @property
     def row_count(self) -> int:
         return len(self.components)
+
+    @staticmethod
+    def booked_height(moments: jax.Array) -> jax.Array:
+        """Current-centroid height from booked cell current and first moments."""
+        booked = jnp.asarray(moments)
+        if booked.ndim != 2 or booked.shape[-1] != 3:
+            raise ValueError(
+                "booked moments must have current, radial and vertical columns"
+            )
+        return jnp.sum(booked[:, 2]) / jnp.sum(booked[:, 0])
 
     def observed(
         self,
@@ -2073,6 +2179,8 @@ __all__ = [
     "IsofluxConstraint",
     "IsofluxReference",
     "ProfileAmplitudeUnknown",
+    "UniformRadialFieldUnknown",
+    "VerticalPositionPin",
     "WallGapConstraint",
     "WallGapTarget",
     "XPointConstraint",

@@ -129,10 +129,23 @@ def figure_links(rows):
         slug = machine.lower().replace("-", "")
         for index, start, subset in figure_chunks(machine, members):
             failures = sum(not comparison_allowed(row) for row in subset)
-            case_key = "".join(
-                f"<li>{number}: {html.escape(row['case'])}</li>"
-                for number, row in enumerate(subset, start=start + 1)
-            )
+            case_key = []
+            for number, row in enumerate(subset, start=start + 1):
+                note = ""
+                adapter = row["adapter_a"]
+                if comparison_allowed(row) and adapter["nova_axis_r"] is None:
+                    reason = adapter.get("nova_note") or "no qualified axis"
+                    if "coverage uncertified: " in reason:
+                        reason = reason.split("coverage uncertified: ")[-1].split(";")[
+                            0
+                        ]
+                    else:
+                        reason = reason.rsplit("; ", 1)[-1]
+                    note = (
+                        f" — nova refusal ({html.escape(adapter['nova_label'])}): "
+                        f"{html.escape(reason)}"
+                    )
+                case_key.append(f"<li>{number}: {html.escape(row['case'])}{note}</li>")
             suffix = "" if index == 0 else f"-{index + 1}"
             figures.append(
                 f"<figure><img src='/nova/figures/converged-forward-solve/"
@@ -146,7 +159,7 @@ def figure_links(rows):
                 f"axis and admitted saddle where present. The trace stores a refined "
                 f"saddle level but no refined coordinate, so no imas-efit saddle "
                 f"position is marked. Failed rebuilds carry no code comparison."
-                f"</figcaption><ol>{case_key}</ol></figure>"
+                f"<ol>{''.join(case_key)}</ol></figcaption></figure>"
             )
     return "\n".join(figures)
 
@@ -194,6 +207,10 @@ The nova axis and admitted saddle are read with the trace polarity.
 The plotted flux levels are shared across the code boundary contours
 within each panel. This compares decision rules on a supplied field,
 not two independently reconstructed equilibria.</p>
+<p>The imas-efit axes are the findax results stored in these trace exports,
+captured before imas-efit's global in-vessel findax landed on develop at
+merge <code>2c9aee797</code>. Records captured on the newer develop findax
+are not axis-comparable to these exports without rerunning a common rule.</p>
 <h2 id="efit-axis-adjudication-rebuild">Spline rebuild</h2>
 {rebuild_table(compared)}
 <h2 id="efit-axis-adjudication-figures">Poloidal panels</h2>
@@ -208,6 +225,10 @@ levels is a flux-level difference, not a measured saddle-position gap.</p>
 
 
 def build_fragment(rows, commits, verdict):
+    if not commits.strip():
+        raise ValueError(
+            "evidence fragment requires the commits that produced its tables"
+        )
     compared = [row for row in rows if row["machine"] != "JT-60SA"]
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="docs-project" content="nova"><meta name="reckon-type" content="evidence">
@@ -233,7 +254,7 @@ def main():
     parser.add_argument("--results", type=Path, required=True)
     parser.add_argument("--page", type=Path, required=True)
     parser.add_argument("--fragment", type=Path, required=True)
-    parser.add_argument("--commits", default="")
+    parser.add_argument("--commits", required=True)
     parser.add_argument("--verdict", default="partial")
     args = parser.parse_args()
     rows = json.loads(args.results.read_text())

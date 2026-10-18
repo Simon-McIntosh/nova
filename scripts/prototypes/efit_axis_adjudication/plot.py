@@ -54,7 +54,6 @@ COLOUR = {
 # one canvas width for every figure, so a reader meets one set of sizes; the
 # many-panel band of the figure style allows the smaller label size
 CANVAS_WIDTH = 14.0
-PANEL_HEIGHT = 4.8
 LABEL_SIZE = 12
 
 
@@ -128,11 +127,38 @@ def _sample_field(field, record):
 def _boundary_contour(ax, rs, zs, psi, level, wall, *, color, linestyle):
     lo, hi = float(np.nanmin(psi)), float(np.nanmax(psi))
     if not (lo <= level <= hi):
-        return
+        return False
     drawn = draw_flux_contours(
         ax, rs, zs, psi, [level], wall=wall, color=color, linewidth=1.0
     )
     drawn.set_linestyle(linestyle)
+    return _has_contours(drawn)
+
+
+def _has_contours(drawn):
+    return any(len(segment) > 1 for level in drawn.allsegs for segment in level)
+
+
+def _set_panel_geometry(ax, rings):
+    vessel = rings[0][0]
+    rlo, rhi = float(vessel[:, 0].min()), float(vessel[:, 0].max())
+    zlo, zhi = float(vessel[:, 1].min()), float(vessel[:, 1].max())
+    rpad = 0.025 * (rhi - rlo)
+    zpad = 0.025 * (zhi - zlo)
+    ax.set_xlim(rlo - rpad, rhi + rpad)
+    ax.set_ylim(zlo - zpad, zhi + zpad)
+    ax.set_aspect("equal")
+    ax.set_axis_off()
+
+
+def _panel_title(row):
+    if not all(key in row for key in ("machine", "slice", "iteration")):
+        return row["case"]
+    side = row["case"].rsplit("-", 1)[-1]
+    return (
+        f"{row['machine']} · slice {row['slice']} · {side}\n"
+        f"iteration {row['iteration']}"
+    )
 
 
 def _hollow_axis(ax, position, *, color, marker, size):
@@ -225,11 +251,17 @@ def draw_panel(ax, row):
 
     rs, zs, psi = _sample_field(field, record)
     levels = row["contour_levels"]
-    draw_flux_contours(
+    drawn = set()
+    contours = draw_flux_contours(
         ax, rs, zs, psi, levels, wall=wall, color="#c9c9c9", linewidth=0.8
     )
+    if _has_contours(contours):
+        drawn.add("psi contours")
 
     _draw_wall_loops(ax, row["path"])
+    drawn.add("vessel wall")
+    if any(role == "obstacle" for _, role in rings):
+        drawn.add("obstacle wall")
 
     a = row["adapter_a"]
 
@@ -247,25 +279,26 @@ def draw_panel(ax, row):
                 zorder_markers=4,
             )
             draw_nulls(ax, other_x_points=positions, style=style)
+            drawn.add(f"census {kind}")
 
     # imas-efit's escape bottleneck belongs to the escape walk, not to nova's
     # rebuild, so it is drawn before the failed-rebuild panels return.
     if row.get("escape"):
         _draw_escape_bottleneck(ax, row["escape"])
+        drawn.add("escape bottleneck")
 
     if row["rebuild"]["status"] != "pass":
-        ax.set_aspect("equal")
-        ax.set_axis_off()
+        _set_panel_geometry(ax, rings)
         ax.set_title(
-            f"{row.get('panel_label', row['case'])}\nrebuild failed: |grad psi|="
-            f"{row['rebuild']['grad_norm_at_axis']:.3g}; comparisons excluded",
+            f"{_panel_title(row)}\nrebuild failed: "
+            f"|grad psi|={row['rebuild']['grad_norm_at_axis']:.3g}",
             fontsize=LABEL_SIZE,
             pad=2,
         )
-        return
+        return drawn
 
     # Draw each code's boundary at its own level through the flux painter.
-    _boundary_contour(
+    if _boundary_contour(
         ax,
         rs,
         zs,
@@ -274,9 +307,10 @@ def draw_panel(ax, row):
         wall,
         color=COLOUR["efit"],
         linestyle="--",
-    )
+    ):
+        drawn.add("imas-efit boundary")
     if a is not None and a["nova_boundary_psi"] is not None:
-        _boundary_contour(
+        if _boundary_contour(
             ax,
             rs,
             zs,
@@ -285,13 +319,16 @@ def draw_panel(ax, row):
             wall,
             color=COLOUR["nova_a"],
             linestyle="-",
-        )
+        ):
+            drawn.add("adapter A boundary")
     # The trace carries a refined saddle level, but no refined position.
     draw_nulls(
         ax,
         magnetic_axis=[efit["axis_r"], efit["axis_z"]],
         x_points=np.asarray([saddle_mark]) if saddle_mark is not None else None,
+        style=replace(DEFAULT_INK, axis_color=COLOUR["efit"]),
     )
+    drawn.add("imas-efit axis")
 
     if a is not None:
         if a["nova_axis_r"] is not None:
@@ -302,6 +339,7 @@ def draw_panel(ax, row):
                 marker="o",
                 size=11,
             )
+            drawn.add("adapter A axis")
         if a["nova_saddle_r"] is not None:
             _marked_saddle(
                 ax,
@@ -309,12 +347,13 @@ def draw_panel(ax, row):
                 color=COLOUR["nova_a"],
                 marker="o",
             )
-    ax.set_aspect("equal")
-    ax.set_axis_off()
-    ax.set_title(row.get("panel_label", row["case"]), fontsize=LABEL_SIZE, pad=2)
+            drawn.add("adapter A saddle")
+    _set_panel_geometry(ax, rings)
+    ax.set_title(_panel_title(row), fontsize=LABEL_SIZE, pad=2)
+    return drawn
 
 
-def _legend_handles(include_comparisons=True, include_escape=False):
+def _legend_handles(drawn):
     from matplotlib.lines import Line2D
 
     handles = [
@@ -345,7 +384,13 @@ def _legend_handles(include_comparisons=True, include_escape=False):
             [], [], color=COLOUR["nova_a"], ls="-", lw=1.0, label="adapter A boundary"
         ),
         Line2D(
-            [], [], color="red", marker="^", ls="none", ms=8, label="imas-efit axis"
+            [],
+            [],
+            color=COLOUR["efit"],
+            marker="^",
+            ls="none",
+            ms=8,
+            label="imas-efit axis",
         ),
         Line2D(
             [],
@@ -396,17 +441,18 @@ def _legend_handles(include_comparisons=True, include_escape=False):
             label="census saddle",
         ),
     ]
-    if not include_escape:
-        handles = [item for item in handles if item.get_label() != "escape bottleneck"]
-    if include_comparisons:
-        return handles
-    return [
-        item
-        for item in handles
-        if item.get_label()
-        in {"psi contours", "vessel wall", "obstacle wall", "escape bottleneck"}
-        or item.get_label().startswith("census ")
-    ]
+    return [item for item in handles if item.get_label() in drawn]
+
+
+def _canvas_height(rows):
+    panel_width = (CANVAS_WIDTH - 0.8) / len(rows)
+    height = 0.0
+    for row in rows:
+        vessel = _wall_loops_by_role(row["path"])[0][0]
+        radial_span = float(np.ptp(vessel[:, 0]))
+        vertical_span = float(np.ptp(vessel[:, 1]))
+        height = max(height, panel_width * vertical_span / radial_span)
+    return height * 1.05 + 1.5
 
 
 def main():
@@ -439,22 +485,20 @@ def main():
     for machine, members in groups.items():
         for index, start, subset in figure_chunks(machine, members):
             n = len(subset)
-            fig, axes = plt.subplots(1, n, figsize=(CANVAS_WIDTH, PANEL_HEIGHT))
+            fig, axes = plt.subplots(
+                1, n, figsize=(CANVAS_WIDTH, _canvas_height(subset))
+            )
             axes = np.atleast_1d(axes).ravel()
-            for number, (ax, row) in enumerate(zip(axes, subset), start=start + 1):
-                row["panel_label"] = str(number)
-                draw_panel(ax, row)
+            drawn = set()
+            for ax, row in zip(axes, subset):
+                drawn.update(draw_panel(ax, row))
             slug = machine.lower().replace("-", "")
             suffix = "" if index == 0 else f"-{index + 1}"
+            handles = _legend_handles(drawn)
             legend = fig.legend(
-                handles=_legend_handles(
-                    include_comparisons=any(
-                        row["rebuild"]["status"] == "pass" for row in subset
-                    ),
-                    include_escape=any(row.get("escape") for row in subset),
-                ),
+                handles=handles,
                 loc="upper center",
-                ncol=4,
+                ncol=min(4, len(handles)),
                 frameon=False,
                 fontsize=LABEL_SIZE,
                 bbox_to_anchor=(0.5, 0.99),
@@ -469,12 +513,7 @@ def main():
             fig.subplots_adjust(
                 top=max(
                     0.2,
-                    legend_box.y0 / fig.bbox.height
-                    - (
-                        0.12
-                        if not any(row["rebuild"]["status"] == "pass" for row in subset)
-                        else 0.03
-                    ),
+                    (legend_box.y0 - 50.0) / fig.bbox.height,
                 ),
                 bottom=0.02,
                 left=0.01,

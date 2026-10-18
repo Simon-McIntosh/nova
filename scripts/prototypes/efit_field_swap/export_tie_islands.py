@@ -22,7 +22,7 @@ admitted saddle, the boundary level and the limited-or-diverted class -- in the
 record's decision fields. So a nova tie-island state becomes something imas-efit
 can open with its own reader.
 
-Usage: export_tie_islands.py <cache> <output-dir> <receipt> <requested-cells> ...
+Usage: export_tie_islands.py <cache> <output-dir> <receipt> <cells> [<receipt> <cells>]
 """
 
 # ruff: noqa: E402
@@ -248,7 +248,11 @@ def main(cache, out_dir, jobs):
 
 
 if __name__ == "__main__":
+    # Each carrier is named by its own receipt and its own requested cell count,
+    # so a receipt for one cell count can never be applied to another's carrier.
     cache, out_dir = sys.argv[1], sys.argv[2]
-    receipt_path = sys.argv[3]
-    requested = [int(value) for value in sys.argv[4:]]
-    sys.exit(main(cache, out_dir, [(receipt_path, cells) for cells in requested]))
+    rest = sys.argv[3:]
+    if len(rest) % 2:
+        raise SystemExit("usage: <cache> <out-dir> <receipt> <cells> [<receipt> <cells>]")
+    jobs = [(rest[index], int(rest[index + 1])) for index in range(0, len(rest), 2)]
+    sys.exit(main(cache, out_dir, jobs))

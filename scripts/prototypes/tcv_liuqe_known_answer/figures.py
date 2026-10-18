@@ -4,7 +4,13 @@ One panel per slice: LIUQE's psi map as unfilled line contours on one stated
 level array, the per-loop TCV wall, LIUQE's own axis, X-points and boundary
 outline, and nova's read over them -- its axis, its admitted saddle and the
 contour at its boundary flux. LIUQE is drawn in the default ink and nova in one
-feature colour, so the two null sets and the two boundaries stay separable.
+feature colour, so the two null sets and the two boundaries stay separable. A
+slice nova refuses is drawn with LIUQE's geometry alone and says so in its
+title, so a refusal is visible rather than silently missing from the figure.
+
+The archive readers are the driver's, imported rather than restated: one
+definition of what a LIUQE slice and a wall IDS are, so the table and the
+panels cannot disagree about the input.
 """
 
 from __future__ import annotations
@@ -18,7 +24,6 @@ import imas
 import matplotlib.pyplot as plt
 import numpy as np
 
-from nova.equilibrium.topology import TopologyConvention
 from nova.media.ink import DEFAULT_INK, poloidal_axes
 from nova.media.poloidal import (
     contour_levels,
@@ -27,6 +32,7 @@ from nova.media.poloidal import (
     draw_nulls,
     draw_wall,
 )
+from scripts.prototypes.tcv_liuqe_known_answer import measure
 
 NOVA_INK = dataclasses.replace(
     DEFAULT_INK,
@@ -34,43 +40,7 @@ NOVA_INK = dataclasses.replace(
     xpoint_color="#0070c0",
     separatrix_color="#0070c0",
 )
-SIGMA = float(TopologyConvention.from_cocos(17, 1.0).sigma)
-
-
-def read_wall(path):
-    db = imas.DBEntry(f"imas:hdf5?path={path}", "r", dd_version="4.1.0")
-    wall = db.get("wall")
-    rings = []
-    for description in wall.description_2d:
-        for unit in description.limiter.unit:
-            radius = np.asarray(unit.outline.r, dtype=float)
-            height = np.asarray(unit.outline.z, dtype=float)
-            if radius.size >= 3:
-                rings.append(np.column_stack((radius, height)))
-    db.close()
-    return tuple(rings)
-
-
-def slice_view(eq, index):
-    ts = eq.time_slice[index]
-    profiles = ts.profiles_2d[0]
-    quantities = ts.global_quantities
-    return dict(
-        rgrid=np.asarray(profiles.grid.dim1, dtype=float),
-        zgrid=np.asarray(profiles.grid.dim2, dtype=float),
-        psi=SIGMA * np.asarray(profiles.psi, dtype=float),
-        axis=(float(quantities.magnetic_axis.r), float(quantities.magnetic_axis.z)),
-        xpoints=np.asarray(
-            [(float(point.r), float(point.z)) for point in ts.boundary.x_point],
-            dtype=float,
-        ).reshape(-1, 2),
-        outline=np.column_stack(
-            (
-                np.asarray(ts.boundary.outline.r, dtype=float),
-                np.asarray(ts.boundary.outline.z, dtype=float),
-            )
-        ),
-    )
+READ_LABELS = ("limited", "diverted")
 
 
 def _nearest(values, coordinate):
@@ -108,7 +78,7 @@ def draw_panel(axes, view, row, wall_rings):
             axes, view["outline"][:, 0], view["outline"][:, 1], linestyle="--"
         )
     label = row.get("nova_label")
-    if label in ("limited", "diverted"):
+    if label in READ_LABELS:
         boundary_flux = row.get("nova_boundary_psi")
         if boundary_flux is not None and np.isfinite(boundary_flux):
             axes.contour(
@@ -146,10 +116,7 @@ def build(rows, eq, wall_rings, out_path):
     panels = np.atleast_1d(grid).ravel()
     for axes, row in zip(panels, rows):
         poloidal_axes(axes)
-        draw_panel(axes, slice_view(eq, row["index"]), row, wall_rings)
-        axes.set_xlim(0.55, 1.15)
-        axes.set_xlabel("R [m]")
-        axes.set_ylabel("Z [m]")
+        draw_panel(axes, measure.slice_view(eq, row["index"]), row, wall_rings)
     for axes in panels[len(rows) :]:
         axes.set_visible(False)
     figure.tight_layout()
@@ -167,7 +134,7 @@ def main():
     rows = json.loads(Path(args.rows).read_text())["rows"]
     db = imas.DBEntry(f"imas:hdf5?path={args.liuqe}", "r", dd_version="3.41.0")
     eq = db.get("equilibrium")
-    wall_rings = read_wall(args.wall)
+    wall_rings = measure.read_wall(args.wall)
     print("panels", len(rows), "wall rings", len(wall_rings), flush=True)
     build(rows, eq, wall_rings, args.out)
     db.close()

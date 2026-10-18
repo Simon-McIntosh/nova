@@ -42,6 +42,7 @@ from __future__ import annotations
 import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
+from typing import NamedTuple
 
 import jax
 import jax.numpy as jnp
@@ -75,6 +76,122 @@ TRACE_LIBRARY = Path(
 
 RESOLUTIONS = (16, 24, 32)
 CAPACITY_GROWTH = 8
+
+# A winding number computed from the unwrapped phase of grad psi lands on an
+# integer unless the loop passes through a critical point. The tolerance only
+# absorbs that rounding; the floor below is what catches a loop through a zero.
+WINDING_TOLERANCE = 0.2
+# |grad psi| below this fraction of the loop's own psi extent per sample
+# spacing is indistinguishable from zero at the arithmetic's precision, so a
+# critical point sitting on the loop makes the winding meaningless rather than
+# an integer to be trusted.
+GRADIENT_FLOOR_RELATIVE = float(np.sqrt(np.finfo(np.float64).eps))
+
+
+class Coverage(NamedTuple):
+    """The boundary-index certificate for one lattice's census.
+
+    While the census only proposes seeds from the cells it can condition, an
+    empty admitted-saddle set is a claim about the field that the census cannot
+    itself support. The certificate is read off the field instead: the degree of
+    grad psi on the domain boundary equals the index sum of the critical points
+    inside it, extrema counting +1 and saddles -1. Agreement means the admitted
+    set accounts for every critical point in the domain; disagreement means the
+    census missed one (or invented one), whatever it reported.
+    """
+
+    outer_winding: float
+    obstacle_winding: float
+    total: float
+    index_sum: float
+    min_gradient: float
+    floor: float
+    reliable: bool
+    certified: bool
+
+
+def _counterclockwise(ring):
+    """The ring closed and traversed counterclockwise, never the stored order.
+
+    The winding of a vector field along a closed curve changes sign with the
+    curve's direction, while a critical point's index does not. Every loop is
+    therefore taken in one known orientation, so the domain's index sum is the
+    outer loop's winding less each obstacle's -- both measured the same way --
+    rather than a sum of numbers whose signs depend on the source file.
+    """
+    points = np.asarray(ring, dtype=np.float64)
+    if not np.array_equal(points[0], points[-1]):
+        points = np.vstack((points, points[0]))
+    area = 0.5 * float(
+        np.sum(points[:-1, 0] * points[1:, 1] - points[1:, 0] * points[:-1, 1])
+    )
+    return points[::-1] if area < 0.0 else points
+
+
+def loop_winding(field, ring):
+    """Winding number of grad psi along a closed loop, and min |grad psi| on it."""
+    points = np.asarray(ring, dtype=np.float64)
+    if not np.array_equal(points[0], points[-1]):
+        points = np.vstack((points, points[0]))
+    gradient = np.asarray(
+        jax.vmap(lambda point: field.evaluate(point).gradient)(jnp.asarray(points))
+    )
+    magnitude = np.linalg.norm(gradient, axis=1)
+    phase = np.unwrap(np.arctan2(gradient[:, 1], gradient[:, 0]))
+    return float(phase[-1] - phase[0]) / (2.0 * np.pi), float(magnitude.min())
+
+
+def gradient_floor(field, ring):
+    """Rounding-referenced floor for |grad psi| on one loop.
+
+    A spline gradient carries rounding error of order the field's own variation
+    across one sample spacing, so that figure -- not any absolute scale -- is
+    what makes a loop's value indistinguishable from zero.
+    """
+    points = np.asarray(ring, dtype=np.float64)
+    closed = (
+        points
+        if np.array_equal(points[0], points[-1])
+        else np.vstack((points, points[0]))
+    )
+    spacing = float(np.min(np.linalg.norm(np.diff(closed, axis=0), axis=1)))
+    values = np.asarray([float(field.value(point)) for point in points])
+    return GRADIENT_FLOOR_RELATIVE * float(np.ptp(values)) / spacing
+
+
+def coverage_certificate(field, outer_ring, obstacle_rings, index_sum):
+    """Certify that the census admitted every critical point inside the domain.
+
+    The count is the outer loop's winding less the sum of the obstacle loops',
+    each taken counterclockwise -- never a per-loop equality,
+    which would hold trivially for a loop enclosing nothing. A loop whose
+    minimum |grad psi| falls to the rounding floor passes through a critical
+    point and carries no integer to compare, so the slice is left uncertified
+    rather than trusted on a number the arithmetic cannot support.
+    """
+    minimum = float("inf")
+    floor = 0.0
+    windings = []
+    for ring in (outer_ring, *obstacle_rings):
+        value, least = loop_winding(field, ring)
+        windings.append(value)
+        minimum = min(minimum, least)
+        floor = max(floor, gradient_floor(field, ring))
+    outer = windings[0]
+    obstacle = float(sum(windings[1:]))
+    total = outer - obstacle
+    reliable = minimum > floor
+    certified = reliable and abs(total - float(index_sum)) < WINDING_TOLERANCE
+    return Coverage(
+        outer_winding=outer,
+        obstacle_winding=obstacle,
+        total=total,
+        index_sum=float(index_sum),
+        min_gradient=minimum,
+        floor=floor,
+        reliable=reliable,
+        certified=certified,
+    )
 
 
 def resolve_trace(path):
@@ -126,6 +243,14 @@ class Decision:
     efit_span: float
     field_grad_at_efit_axis: float
     field_grad_at_nova_axis: float
+    coverage_outer_winding: float
+    coverage_obstacle_winding: float
+    coverage_winding: float
+    coverage_index_sum: float
+    coverage_min_gradient: float
+    coverage_floor: float
+    coverage_reliable: bool
+    coverage_certified: bool
     note: str = ""
 
 
@@ -162,14 +287,16 @@ def _efit_columns(case, source, record):
     )
 
 
-def _undecided(case, source, record, label, note, field_grad):
+def _undecided(case, source, record, label, note, field_grad, coverage=None):
     """A case with no nova decision, reported as such rather than as a decision.
 
     nova's census proposed no cellwise seed, or proposed seeds and admitted no
-    saddle, or the geometry could not be built. Reporting the read's own
-    fallback here would put a number in the nova column that is the axis level
-    wearing the boundary's name, which is exactly the misreading this table
-    exists to prevent.
+    saddle, or the boundary-index certificate could not close, or the geometry
+    could not be built. Reporting the read's own fallback here would put a
+    number in the nova column that is the axis level wearing the boundary's
+    name, which is exactly the misreading this table exists to prevent. The
+    certificate, where one was computed, is reported beside the refusal so the
+    reason is readable rather than asserted.
     """
     nan = float("nan")
     return Decision(
@@ -189,6 +316,16 @@ def _undecided(case, source, record, label, note, field_grad):
         nova_span=nan,
         field_grad_at_efit_axis=field_grad,
         field_grad_at_nova_axis=nan,
+        coverage_outer_winding=(nan if coverage is None else coverage.outer_winding),
+        coverage_obstacle_winding=(
+            nan if coverage is None else coverage.obstacle_winding
+        ),
+        coverage_winding=nan if coverage is None else coverage.total,
+        coverage_index_sum=nan if coverage is None else coverage.index_sum,
+        coverage_min_gradient=nan if coverage is None else coverage.min_gradient,
+        coverage_floor=nan if coverage is None else coverage.floor,
+        coverage_reliable=False if coverage is None else coverage.reliable,
+        coverage_certified=False if coverage is None else coverage.certified,
         note=note,
     )
 
@@ -346,14 +483,67 @@ def _field_gradient_at_nova_axis(field, reading):
     return float(np.linalg.norm(np.asarray(jax.jacfwd(field.value)(axis))))
 
 
-def _decision(case, source, record, resolutions=RESOLUTIONS):
-    """nova's decision on the record's spline, at the coarsest lattice that reads."""
-    field = TraceSplineField.from_record(record)
-    field_grad = _field_gradient_at_efit_axis(field, record)
-    convention = topology.TopologyConvention.from_cocos(17, 1.0)
-    policy = TopologyPolicy()
-    boundary_ring, obstacles = domain_rings(record)
+@dataclass
+class ReadOutcome:
+    """nova's read on one field, with the certificate that qualifies it."""
+
+    resolution: int | None
+    cells: int
+    capacity_fit: bool
+    candidates: int
+    saddles: int
+    label: str
+    axis: np.ndarray
+    axis_psi: float
+    boundary: np.ndarray
+    boundary_psi: float
+    boundary_flux: float
+    span: float
+    wall_level: float
+    coverage: Coverage | None
+    attempts: str
+
+
+def _empty_outcome(label, attempts, coverage=None):
+    nan = float("nan")
+    return ReadOutcome(
+        resolution=None,
+        cells=0,
+        capacity_fit=False,
+        candidates=0,
+        saddles=0,
+        label=label,
+        axis=np.asarray([nan, nan]),
+        axis_psi=nan,
+        boundary=np.asarray([nan, nan]),
+        boundary_psi=nan,
+        boundary_flux=nan,
+        span=nan,
+        wall_level=nan,
+        coverage=coverage,
+        attempts=attempts,
+    )
+
+
+def read_state(
+    field, boundary_ring, obstacles, convention, policy, resolutions=RESOLUTIONS
+):
+    """nova's read on one field, at the coarsest lattice that reads.
+
+    A lattice whose census admits no saddle is a limited state only where the
+    boundary-index certificate shows the census accounted for every critical
+    point in the domain. Where it does not, the lattice is refused rather than
+    decided: with the census' proposal coverage incomplete, an empty saddle set
+    is as consistent with a missed saddle as with a genuinely limited plasma,
+    and deciding limited on it would turn a coverage miss into a confident
+    wrong answer. A lattice with no admitted stationary root at all carries
+    nothing to read and is skipped outright.
+    """
+    outer = _counterclockwise(boundary_ring)
+    walls = tuple(_counterclockwise(ring) for ring in obstacles)
     attempts = []
+    uncertified = False
+    coverage = None
     for resolution in resolutions:
         cells, samples = lattice(boundary_ring, resolution, obstacles)
         geometry, fitted = fitted_geometry(cells, samples, (boundary_ring, *obstacles))
@@ -368,52 +558,127 @@ def _decision(case, source, record, resolutions=RESOLUTIONS):
             stack.append(points[axis_valid])
         previous = jnp.asarray(np.vstack(stack))
         roots = census(field, geometry, convention, policy, previous)
-        attempts.append(f"lattice {resolution}: candidates {int(roots.candidates)}")
-        if int(roots.candidates) == 0 or int(roots.saddles) == 0:
-            attempts[-1] += f", admitted saddles {int(roots.saddles)}"
+        candidates = int(roots.candidates)
+        admitted = int(roots.saddles)
+        index_sum = int(roots.axes) - admitted
+        coverage = coverage_certificate(field, outer, walls, index_sum)
+        attempts.append(
+            f"lattice {resolution}: candidates {candidates}, admitted saddles "
+            f"{admitted}, boundary winding {coverage.total:+.0f} (outer "
+            f"{coverage.outer_winding:+.0f} less obstacles "
+            f"{coverage.obstacle_winding:+.0f}), admitted index sum {index_sum:+d}, "
+            f"min |grad psi| {coverage.min_gradient:.2e} against floor "
+            f"{coverage.floor:.2e}"
+        )
+        if candidates == 0 and admitted == 0 and not bool(np.any(axis_valid)):
+            attempts[-1] += "; no stationary root to read"
             continue
-        reading = nova_read(field, roots.roots, geometry, convention, policy)
+        if admitted == 0 and not coverage.certified:
+            attempts[-1] += (
+                "; coverage uncertified: the boundary winding and the admitted "
+                "index sum disagree, so an unadmitted saddle is not excluded"
+                if coverage.reliable
+                else "; coverage uncertified: a critical point on the loop leaves "
+                "the boundary winding undefined"
+            )
+            uncertified = True
+            continue
+        try:
+            reading = nova_read(field, roots.roots, geometry, convention, policy)
+        except Exception as error:  # noqa: BLE001 - one lattice must not stop the sweep
+            attempts[-1] += f"; read failed {type(error).__name__}: {error}"
+            continue
         sigma = convention.sigma
-        boundary = np.asarray(reading.boundary)
+        boundary = np.asarray(reading.boundary, dtype=np.float64)
+        axis = np.asarray(reading.axis, dtype=np.float64)
         boundary_psi = float(sigma * field.evaluate(jnp.asarray(boundary)).value)
-        axis_psi = float(sigma * field.evaluate(jnp.asarray(reading.axis)).value)
+        axis_psi = float(sigma * field.evaluate(jnp.asarray(axis)).value)
         wall_values = np.asarray(
-            jax.vmap(lambda p: field.evaluate(p).value)(geometry.wall_points)
+            jax.vmap(lambda point: field.evaluate(point).value)(geometry.wall_points)
         )
         wall_level = float(np.max(sigma * wall_values))
-        label = np.asarray(reading.boundary_class)
-        note = " | ".join(attempts[:-1]) if len(attempts) > 1 else ""
-        if fitted:
-            note = (note + " | " if note else "") + (
-                f"contour mesh refitted at {CAPACITY_GROWTH}x capacity: nova's own "
-                "capacity admits no vertex for this wall"
-            )
-        return Decision(
-            **_efit_columns(case, source, record),
-            n_cells=len(cells),
+        return ReadOutcome(
             resolution=resolution,
+            cells=len(cells),
             capacity_fit=fitted,
-            nova_axis_psi=axis_psi,
-            nova_axis_r=float(np.asarray(reading.axis)[0]),
-            nova_axis_z=float(np.asarray(reading.axis)[1]),
-            nova_boundary_psi=float(np.asarray(reading.boundary_flux)),
-            nova_saddle_psi=boundary_psi,
-            nova_saddle_r=float(boundary[0]),
-            nova_saddle_z=float(boundary[1]),
-            nova_wall_level=wall_level,
-            nova_label="diverted" if int(label) else "limited",
-            nova_span=abs(float(np.asarray(reading.boundary_flux)) - axis_psi),
-            field_grad_at_efit_axis=field_grad,
-            field_grad_at_nova_axis=_field_gradient_at_nova_axis(field, reading),
-            note=note,
+            candidates=candidates,
+            saddles=admitted,
+            label="diverted" if int(np.asarray(reading.boundary_class)) else "limited",
+            axis=axis,
+            axis_psi=axis_psi,
+            boundary=boundary,
+            boundary_psi=boundary_psi,
+            boundary_flux=float(np.asarray(reading.boundary_flux)),
+            span=abs(float(np.asarray(reading.boundary_flux)) - axis_psi),
+            wall_level=wall_level,
+            coverage=coverage,
+            attempts="; ".join(attempts),
         )
-    return _undecided(
-        case,
-        source,
-        record,
-        "unqualified",
-        "; ".join(attempts) + "; no lattice admitted a saddle",
-        field_grad,
+    return _empty_outcome(
+        "coverage uncertified" if uncertified else "unqualified",
+        "; ".join(attempts)
+        + (
+            "; no lattice certified the census' coverage"
+            if uncertified
+            else "; no lattice admitted a saddle"
+        ),
+        coverage,
+    )
+
+
+def _decision(case, source, record, resolutions=RESOLUTIONS):
+    """nova's decision on the record's spline, at the coarsest lattice that reads."""
+    field = TraceSplineField.from_record(record)
+    field_grad = _field_gradient_at_efit_axis(field, record)
+    convention = topology.TopologyConvention.from_cocos(17, 1.0)
+    policy = TopologyPolicy()
+    boundary_ring, obstacles = domain_rings(record)
+    outcome = read_state(
+        field, boundary_ring, obstacles, convention, policy, resolutions
+    )
+    if outcome.resolution is None:
+        return _undecided(
+            case,
+            source,
+            record,
+            outcome.label,
+            outcome.attempts,
+            field_grad,
+            outcome.coverage,
+        )
+    coverage = outcome.coverage
+    note = outcome.attempts
+    if outcome.capacity_fit:
+        note = (note + " | " if note else "") + (
+            f"contour mesh refitted at {CAPACITY_GROWTH}x capacity: nova's own "
+            "capacity admits no vertex for this grid"
+        )
+    return Decision(
+        **_efit_columns(case, source, record),
+        n_cells=outcome.cells,
+        resolution=outcome.resolution,
+        capacity_fit=outcome.capacity_fit,
+        nova_axis_psi=outcome.axis_psi,
+        nova_axis_r=float(outcome.axis[0]),
+        nova_axis_z=float(outcome.axis[1]),
+        nova_boundary_psi=outcome.boundary_flux,
+        nova_saddle_psi=outcome.boundary_psi,
+        nova_saddle_r=float(outcome.boundary[0]),
+        nova_saddle_z=float(outcome.boundary[1]),
+        nova_wall_level=outcome.wall_level,
+        nova_label=outcome.label,
+        nova_span=outcome.span,
+        coverage_outer_winding=coverage.outer_winding,
+        coverage_obstacle_winding=coverage.obstacle_winding,
+        coverage_winding=coverage.total,
+        coverage_index_sum=coverage.index_sum,
+        coverage_min_gradient=coverage.min_gradient,
+        coverage_floor=coverage.floor,
+        coverage_reliable=coverage.reliable,
+        coverage_certified=coverage.certified,
+        field_grad_at_efit_axis=field_grad,
+        field_grad_at_nova_axis=_field_gradient_at_nova_axis(field, outcome.axis),
+        note=note,
     )
 
 

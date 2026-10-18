@@ -41,9 +41,33 @@ slice of both stores, so LIUQE's label is read from
 <code>efit_field_swap.spline_field.TraceSplineField</code> and read with the
 square lattice, the per-loop wall geometry and the read call of
 <code>efit_field_swap.crosscheck</code>, unmodified. The lattice is 16 cells to
-a side. A slice whose census admits no saddle is read as a limited state rather
-than skipped: a limited plasma stores no X-point, so an empty saddle set is a
-reading to score, not a slice to drop.</p>
+a side. A slice whose census admits no saddle is <em>not</em> automatically read
+as limited: while the census proposal-coverage defect is open, an admitted-saddle
+count of zero is a claim about the field that the census cannot support on its
+own, so defaulting to limited would turn a coverage miss into a confident wrong
+decision. Such a slice is read as limited only when its coverage is certified
+complete by an index count, and otherwise refused with the label
+<code>coverage uncertified</code>.</p>
+
+<p><strong>The certificate.</strong> The degree of &nabla;&psi; on the domain
+boundary equals the index sum of the admitted critical points inside it
+(extrema&nbsp;+1, saddles&nbsp;&minus;1). The domain is multi-loop &mdash; the
+vessel loop containing the axis, with contained loops as obstacles &mdash; so
+the count is the outer loop's winding <em>less</em> the sum of each obstacle
+loop's winding, each traversed counterclockwise; a per-loop equality would
+accept a domain it should refuse. If the minimum |&nabla;&psi;| along any loop
+falls below a rounding-referenced floor,
+&radic;<span style="text-decoration:overline">&epsilon;<sub>f64</sub></span>
+&middot; ptp&psi; / spacing, a critical point sits on or near the wall, the
+winding is unreliable, and the slice is marked coverage uncertified rather than
+the integer trusted. The decision lives once, in the owner
+<code>efit_field_swap.crosscheck.read_state</code>; the TCV driver presents the
+slice and reports what the owner returns.</p>
+
+<p>The per-slice windings, index sums, loop gradients and outcomes behind every
+label below are in the sweep receipt
+<code>receipts/tcv-liuqe-coverage-rows.jsonl</code> under this run directory;
+the certificate tests are in <code>receipts/coverage-tests.log</code>.</p>
 
 <h2>Per-slice comparison</h2>
 
@@ -82,10 +106,24 @@ are comparable.</p>
 
 <p><strong>Label agreement is 5 of 12</strong> (indices 0&ndash;1257 above). nova
 agrees with LIUQE on all three limited slices it read as limited (34, 46, 248)
-and on two diverted ones (291, 542). It disagrees on seven: it reads three
-diverted slices (0, 14, 456) as limited, and four limited slices (118, 206) as
+and on two diverted ones (291, 542). It disagrees on seven: it reads five
+diverted slices (0, 14, 456, 796, 1257) as limited, and two limited slices
+(118, 206) as
 diverted &mdash; those two at the wall, where its admitted saddle sits on the
 limiter.</p>
+
+<p><strong>Both references agree on the headline; they differ on two rows.</strong>
+imas-efit's reviewed LIUQE audit
+(<code>cbl-tcv-liuqe-escape/report.md</code> §4 with its
+<code>data/convention.tsv</code>) reports the same underlying escape levels from
+an independent read. Under its reference, which likewise falls back to X-point
+presence because <code>boundary/type</code> is unset, and which additionally
+counts t&nbsp;=&nbsp;0.027, 0.036 and 0.288&nbsp;s as limited because their
+outlines touch the inboard wall, the agreement is again
+<strong>5 of 12</strong> but the membership moves: slice 14 joins the limited
+rows and slice 291 becomes a disagreement. Scoring is on grid psi and positions
+only, since the stored scalars carry an additive gauge offset, and t&nbsp;=
+0.014 and 0.019&nbsp;s are excluded from axis and level scoring.</p>
 
 <p><strong>Largest gaps.</strong> The axis is the worst disagreeing quantity.
 On the diverted slices nova's axis lands 0.42&ndash;0.61&nbsp;m from LIUQE's,
@@ -120,10 +158,11 @@ range, and the wall is the one TCV limiter loop.</p>
      alt="Twelve poloidal panels of TCV 77549, LIUQE's psi contours with LIUQE's and nova's axis, X-point and boundary overlaid">
 <figcaption>TCV 77549, 1,703-slice LIUQE store, 17 distinct psi grids, one
 representative slice each. Titles give the time and both labels. Red is LIUQE,
-blue is nova. Left to right, top to bottom, in the table's order. On the three
-diverted slices nova reads as limited (0, 14, 456) its blue axis sits away from
-LIUQE's red one; on the limited slices the two axes nearly coincide while the
-labels still disagree on 118 and 206.</figcaption>
+blue is nova. Left to right, top to bottom, in the table's order. On the five
+diverted slices nova reads as limited (0, 14, 456, 796, 1257) its blue axis sits
+away from LIUQE's red one; on the limited slices the two axes nearly coincide
+while the labels still disagree on 118 and 206. A slice nova refuses draws
+LIUQE's geometry alone and says so in its title.</figcaption>
 </figure>
 
 <h2>Outcome</h2>
@@ -135,6 +174,20 @@ level, which tracks LIUQE closely, but in the <em>axis</em> on diverted fields:
 nova selects a corner stationary point whose flux has the wrong sign, and the
 limited-or-diverted decision follows from that axis. That is the finding this
 node hands on, and it is a property of the read, not of the LIUQE input.</p>
+
+<p><strong>How many of the five are real disagreements.</strong> The diverted
+slices nova reads as limited are those whose census admits no saddle. The
+boundary-index certificate separates the two causes. On the slices measured so
+far the certificate does <em>not</em> close: for t&nbsp;=&nbsp;0.014 (idx 0) and
+t&nbsp;=&nbsp;0.027 (idx 14) the outer winding is +1 against an admitted index
+sum of 0, with the minimum |&nabla;&psi;| on the loop well above the floor and
+coverage therefore reliable but uncertified. A winding that disagrees with the
+index sum means the census is missing critical points, not that the field is
+limited, so these are <strong>uncertified coverage misses, not real
+disagreements</strong> &mdash; nova has no basis to call the slice either way.
+The same columns for the remaining three (456, 796, 1257) are appended to
+<code>receipts/tcv-liuqe-coverage-rows.jsonl</code> as the sweep reaches them;
+none is reported here ahead of its row.</p>
 
 <p>Two limits. The lattice is 16 cells to a side, so the admitted saddle set is
 the coarsest one that reads; a finer lattice is the first thing to try before

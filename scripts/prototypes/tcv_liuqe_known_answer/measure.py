@@ -29,7 +29,6 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import imas
-import jax
 import jax.numpy as jnp
 import numpy as np
 
@@ -38,8 +37,6 @@ from nova.equilibrium.topology import TopologyPolicy
 from nova.jax.config import configure_dtypes
 from scripts.prototypes.efit_field_swap import crosscheck
 from scripts.prototypes.efit_field_swap.spline_field import TraceSplineField
-from scripts.prototypes.fast_map_production.kernel import read as nova_read
-from scripts.prototypes.read_robustness.census import census
 
 configure_dtypes()
 
@@ -154,76 +151,36 @@ def measure_slice(view, wall_rings, resolutions=RESOLUTIONS):
     field = TraceSplineField.from_record(state)
     convention = topology.TopologyConvention.from_cocos(17, 1.0)
     policy = TopologyPolicy()
-    sigma = convention.sigma
     boundary_ring, obstacles = crosscheck.domain_rings(state)
-    attempts = []
-    for resolution in resolutions:
-        cells, samples = crosscheck.lattice(boundary_ring, resolution, obstacles)
-        geometry, fitted = crosscheck.fitted_geometry(
-            cells, samples, (boundary_ring, *obstacles)
-        )
-        if geometry is None:
-            attempts.append(f"lattice {resolution}: contour mesh admits no vertex")
-            continue
-        initial = jax.jit(lambda: topology.read(field, geometry, convention, policy))()
-        axis_valid = np.asarray(initial.x_point_valid)
-        points = np.asarray(initial.x_points)
-        stack = [np.asarray(initial.axis)[None]]
-        if axis_valid.any():
-            stack.append(points[axis_valid])
-        previous = jnp.asarray(np.vstack(stack))
-        roots = census(field, geometry, convention, policy, previous)
-        candidates = int(roots.candidates)
-        admitted = int(roots.saddles)
-        attempts.append(
-            f"lattice {resolution}: candidates {candidates}, "
-            f"admitted saddles {admitted}"
-        )
-        # A limited state stores no X-point, so a lattice whose census admits no
-        # saddle still carries a reading to score against LIUQE's limited answer,
-        # and a slice at a lattice that never admits one would otherwise be
-        # dropped from the comparison. Only a lattice whose census admits no
-        # stationary root at all has nothing to read, and only that is skipped.
-        if candidates == 0 and admitted == 0 and not bool(np.any(axis_valid)):
-            attempts[-1] += "; no stationary root to read"
-            continue
-        try:
-            reading = nova_read(field, roots.roots, geometry, convention, policy)
-        except Exception as error:  # noqa: BLE001 - one lattice must not stop the sweep
-            attempts[-1] += f"; read failed {type(error).__name__}: {error}"
-            continue
-        boundary = np.asarray(reading.boundary, dtype=np.float64)
-        axis = np.asarray(reading.axis, dtype=np.float64)
-        label = int(np.asarray(reading.boundary_class))
-        return dict(
-            resolution=resolution,
-            fitted=fitted,
-            nova_candidates=candidates,
-            nova_saddles=admitted,
-            nova_axis=[float(axis[0]), float(axis[1])],
-            nova_axis_psi=float(sigma) * _value(field, axis),
-            nova_boundary=[float(boundary[0]), float(boundary[1])],
-            nova_boundary_psi=float(np.asarray(reading.boundary_flux)),
-            nova_label="diverted" if label else "limited",
-            nova_span=abs(
-                float(np.asarray(reading.boundary_flux))
-                - float(sigma) * _value(field, axis)
-            ),
-            attempts="; ".join(attempts),
-        )
-    return dict(
-        resolution=None,
-        fitted=False,
-        nova_candidates=None,
-        nova_saddles=None,
-        nova_axis=[float("nan")] * 2,
-        nova_axis_psi=float("nan"),
-        nova_boundary=[float("nan")] * 2,
-        nova_boundary_psi=float("nan"),
-        nova_label="unqualified",
-        nova_span=float("nan"),
-        attempts="; ".join(attempts) + "; no lattice admitted a reading",
+    outcome = crosscheck.read_state(
+        field, boundary_ring, obstacles, convention, policy, resolutions
     )
+    coverage = outcome.coverage
+    row = dict(
+        resolution=outcome.resolution,
+        fitted=outcome.capacity_fit,
+        nova_candidates=outcome.candidates,
+        nova_saddles=outcome.saddles,
+        nova_axis=[float(outcome.axis[0]), float(outcome.axis[1])],
+        nova_axis_psi=outcome.axis_psi,
+        nova_boundary=[float(outcome.boundary[0]), float(outcome.boundary[1])],
+        nova_boundary_psi=outcome.boundary_flux,
+        nova_label=outcome.label,
+        nova_span=outcome.span,
+        attempts=outcome.attempts,
+    )
+    for name in (
+        "outer_winding",
+        "obstacle_winding",
+        "total",
+        "index_sum",
+        "min_gradient",
+        "floor",
+        "reliable",
+        "certified",
+    ):
+        row[f"coverage_{name}"] = None if coverage is None else getattr(coverage, name)
+    return row
 
 
 def liuqe_reference(view, field):
@@ -288,6 +245,14 @@ def main():
                 nova_label="unread",
                 nova_span=float("nan"),
                 attempts=f"{type(error).__name__}: {error}",
+                coverage_outer_winding=None,
+                coverage_obstacle_winding=None,
+                coverage_total=None,
+                coverage_index_sum=None,
+                coverage_min_gradient=None,
+                coverage_floor=None,
+                coverage_reliable=None,
+                coverage_certified=None,
             )
         rows.append(row)
         print("done", index, row["liuqe_label"], row["nova_label"], flush=True)

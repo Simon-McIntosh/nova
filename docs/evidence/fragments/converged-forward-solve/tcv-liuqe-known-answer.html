@@ -8,6 +8,19 @@ disagreement is not in the boundary flux level, which tracks LIUQE closely, but
 in the axis nova selects on diverted fields: it lands in a vessel corner with a
 flux of the opposite sign, and the label follows from that axis.</p>
 
+<p id="tcv-liuqe-known-answer-certificate">The diverted slices it reads as
+limited are those whose census admits no saddle, and an empty saddle set is not
+on its own evidence of a limited plasma while the census proposal-coverage
+defect is open. Such a slice is read as limited only when the degree of
+&nabla;&psi; on the domain boundary equals the index sum of the admitted
+critical points inside it &mdash; outer loop winding less each obstacle loop's
+&mdash; and no loop's minimum |&nabla;&psi;| falls below a rounding-referenced
+floor; otherwise the read is refused as
+<code>coverage uncertified</code>. On the two such slices measured so far
+(t&nbsp;=&nbsp;0.014 and 0.027&nbsp;s) the winding is +1 against an admitted
+index sum of 0, so they are uncertified coverage misses rather than real
+disagreements.</p>
+
 <h3 id="tcv-liuqe-known-answer-inputs">Inputs</h3>
 
 <ul id="tcv-liuqe-known-answer-input-list">
@@ -56,8 +69,8 @@ admits a saddle, its X-point sits 0.054&ndash;0.062&nbsp;m from LIUQE's.</p>
      alt="Twelve poloidal panels of TCV 77549: LIUQE psi line contours with LIUQE's and nova's axis, X-point and boundary overlaid">
 <figcaption>One panel per slice. Red is LIUQE (axis, stored X-points, dashed
 boundary outline); blue is nova (axis, admitted saddle, nova's boundary
-contour). Nova reads three diverted slices (0, 14, 456) as limited and two
-limited slices (118, 206) as diverted.</figcaption>
+contour). Nova reads five diverted slices (0, 14, 456, 796, 1257) as limited
+and two limited slices (118, 206) as diverted.</figcaption>
 </figure>
 
 <h3 id="tcv-liuqe-known-answer-artifacts">Artifacts</h3>
@@ -67,9 +80,15 @@ limited slices (118, 206) as diverted.</figcaption>
 <code>scripts/prototypes/tcv_liuqe_known_answer/</code> &mdash;
 <code>measure.py</code> (per-slice read),
 <code>summarise.py</code> (merge and gaps),
-<code>figures.py</code> (panels), <code>test_measure.py</code> (the limited-slice
-check). The grid spline field and the per-loop wall geometry and read call are
-reused by import from <code>efit_field_swap</code>.</li>
+<code>figures.py</code> (panels), <code>sweep.py</code> (the per-slice certificate
+sweep), <code>test_coverage.py</code> (the boundary-index certificate checks).
+The grid spline field and the per-loop wall geometry and read call are
+reused by import from <code>efit_field_swap</code>, and a zero-saddle slice is
+read only when its coverage is certified complete by that index count.</li>
+<li id="tcv-liuqe-known-answer-artifact-receipts">Receipts: under this run's
+directory on GPFS &mdash; <code>receipts/tcv-liuqe-coverage-rows.jsonl</code>
+(per-slice windings, index sums, loop gradients and outcomes),
+<code>receipts/coverage-tests.log</code> (the certificate tests).</li>
 <li id="tcv-liuqe-known-answer-artifact-report">Report:
 <a href="/nova/research/tcv-liuqe-known-answer.html">TCV 77549 LIUQE
 known-answer</a>, carrying the full per-slice gap table.</li>

@@ -136,7 +136,8 @@ def run_row(cells, cache):
 
     lobe = mapped("lobe")
     halfplane = mapped("halfplane")
-    assert bool(lobe.valid) and bool(halfplane.valid)
+    assert bool(lobe.booking_valid) and bool(halfplane.booking_valid)
+    assert bool(lobe.topology_valid) and bool(halfplane.topology_valid)
     exterior, _ = _exterior(cache, built.carrier_key)
     if exterior is None:
         raise FileNotFoundError("the limited carrier has no read-only exterior")

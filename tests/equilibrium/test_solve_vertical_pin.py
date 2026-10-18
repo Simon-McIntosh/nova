@@ -1,210 +1,193 @@
-"""An elongated current carrier held by a booked-support centroid row."""
+"""Vertical current-centroid pin on the public augmented forward solve."""
+
+from __future__ import annotations
+
+from types import MethodType, SimpleNamespace
+from typing import NamedTuple
 
 import jax
 import jax.numpy as jnp
 import numpy as np
 import pytest
-from types import SimpleNamespace
 
-from nova.equilibrium import solve
 from nova.equilibrium.constraint import (
     CircuitCurrentUnknown,
-    ConstraintBinding,
-    ConstraintContext,
     CurrentCentroidConstraint,
     UniformRadialFieldUnknown,
     VerticalPositionPin,
 )
 from nova.equilibrium.forward import ForwardProfile
+from nova.equilibrium.observation import CurrentMomentObservation, MomentIntegralSupport
+from nova.equilibrium.solve_request import ExplicitSolveSeed, ForwardSolveRequest
 from nova.jax.config import configure_dtypes
 
 
 ELONGATION = 1.8
 RADIAL_HALF_WIDTH = 0.2
 FREE_HEIGHT = 0.5
-FIELD_LEVERAGE = 1.0
-TARGETS = (0.7, 0.9)
 SEED = np.asarray([1.0, 1.0, 0.30, 1.0, 1.0, 0.90], dtype=np.float64)
+TARGETS = (0.7, 0.9)
 
 
-def carrier_map(state, operands):
-    """The vertical restoring row weakens as the carrier elongates."""
-    elongation, field_basis = operands
-    first, first_r, first_z, second, second_r, second_z, field = state
+def _carrier_residual(flux):
+    first, first_r, first_z, second, second_r, second_z = flux
     low, high = first_z / first, second_z / second
-    height = CurrentCentroidConstraint.booked_height(state[:-1].reshape((2, 3)))
+    height = CurrentCentroidConstraint.booked_height(flux.reshape((2, 3)))
     return jnp.stack(
         (
             first - 1.0,
             second - 1.0,
             first_r - first,
             second_r - second,
-            (high - low) / (2 * RADIAL_HALF_WIDTH) - elongation,
-            (height - FREE_HEIGHT) / elongation**2 - field_basis * field,
+            (high - low) / (2 * RADIAL_HALF_WIDTH) - ELONGATION,
+            (height - FREE_HEIGHT) / ELONGATION**2,
         )
     )
 
 
-def centroid_height(state, operands):
-    del operands
-    return CurrentCentroidConstraint.booked_height(state[:-1].reshape((2, 3)))
+class _CarrierOperator:
+    """A six-moment flux map with one declared uniform radial-field image."""
+
+    def __init__(self):
+        self.grid = SimpleNamespace(
+            coordinate=jnp.asarray([[1.0, 0.0]] * 5 + [[1.0, -1.0 / (2 * jnp.pi)]])
+        )
+        self.wall = SimpleNamespace(coordinate=jnp.zeros((0, 2)))
+        self.sample = None
+        self.source = SimpleNamespace(closure_degrees=0)
+        self.prescribed_current_field = None
+        self.program_identity = "elongated-moment-carrier"
+
+    def with_source(self, source):
+        del source
+        return self
+
+    def with_clip_mode(self, clip_mode):
+        del clip_mode
+        return self
+
+    def flux_map(self, *args):
+        del args
+        return lambda flux: flux - _carrier_residual(flux)
+
+    def flux_map_with_shadow(self, *args):
+        del args
+        return lambda flux, shadow: jnp.where(
+            shadow, flux, flux - _carrier_residual(flux)
+        )
+
+    def residual_shadow_mask(self, flux, requested_class=None, previous_shadow=None):
+        del requested_class, previous_shadow
+        return jnp.zeros_like(flux, dtype=bool)
 
 
-def binding(target, active):
-    return ConstraintBinding(
-        target=[target],
-        tolerance=[1e-10],
-        scale=[1.0],
-        initial_unknown=[0.0],
-        payload=jnp.asarray(active),
+class _CarrierEquilibrium(NamedTuple):
+    flux: jax.Array
+    fixed_point: object
+    constraints: tuple[object, ...]
+    finite: object
+    topology: object = None
+    normalisation: object = None
+    constraint_outer: object = None
+
+
+def _profile():
+    profile = object.__new__(ForwardProfile)
+    profile.operator = _CarrierOperator()
+    profile.newton_steps = 8
+    profile._request_compilation_cache = set()
+
+    def receipt(flux, history, *_args, constraints=(), **_kwargs):
+        return _CarrierEquilibrium(
+            flux, history, constraints, SimpleNamespace(passed=jnp.asarray(True))
+        )
+
+    def observe(self, flux, *, support, requested_class=None, target_current=None):
+        del requested_class, target_current
+        assert support is MomentIntegralSupport.ALL_DOMAIN
+        moments = flux.reshape((2, 3))
+        total = jnp.sum(moments[:, 0])
+        return CurrentMomentObservation(
+            total,
+            jnp.sum(moments[:, 1]) / total,
+            CurrentCentroidConstraint.booked_height(moments),
+            support,
+        )
+
+    profile._receipt = receipt
+    profile.current_moment_observation = MethodType(observe, profile)
+    return profile
+
+
+def _request(profile, target, *, active=True):
+    return ForwardSolveRequest.from_defaults(
+        carrier_identity="elongated-moment-carrier",
+        source_profile=profile.source,
+        seed_policy=ExplicitSolveSeed(SEED),
+        policy_overrides={
+            "newton_steps": 8,
+            "gmres_iterations": 7,
+            "active_set_steps": 2,
+            "kernel_tolerance": 1e-12,
+            "qualification_tolerance": 1e-12,
+            "current_pin": False,
+            "compilation_cache": False,
+        },
+        vertical_pin=VerticalPositionPin(target, active=active),
     )
 
 
-def operands(leverage=FIELD_LEVERAGE):
-    return (jnp.asarray(ELONGATION), jnp.asarray(leverage))
+def _booked_terminal_height(flux):
+    moments = np.asarray(flux).reshape((2, 3))
+    return float(np.sum(moments[:, 2]) / np.sum(moments[:, 0]))
+
+
+def _terminal_elongation(flux):
+    moments = np.asarray(flux).reshape((2, 3))
+    low, high = moments[:, 2] / moments[:, 0]
+    return float((high - low) / (2 * RADIAL_HALF_WIDTH))
 
 
 def test_vertical_pin_declares_a_physical_field_source():
     configure_dtypes()
-    operator = SimpleNamespace(
-        grid=SimpleNamespace(coordinate=jnp.asarray([[1.0, 0.25]])),
-        wall=SimpleNamespace(coordinate=jnp.asarray([[1.5, -0.5]])),
-        sample=None,
-        prescribed_current_field=SimpleNamespace(circuit_count=2),
-    )
+    operator = _CarrierOperator()
     radial = VerticalPositionPin(0.7, source_scale=1e-3).pair(operator)
     assert isinstance(radial.unknown, UniformRadialFieldUnknown)
-    np.testing.assert_allclose(
-        np.asarray(radial.unknown.flux_basis),
-        -2 * np.pi * np.asarray([0.25, -0.75]),
-    )
+    np.testing.assert_allclose(np.asarray(radial.unknown.flux_basis), [0] * 5 + [1])
+    operator.prescribed_current_field = SimpleNamespace(circuit_count=2)
     coil = VerticalPositionPin(
         0.7, coil_direction=np.asarray([0.0, 1.0]), source_scale=100.0
     ).pair(operator)
     assert isinstance(coil.unknown, CircuitCurrentUnknown)
     np.testing.assert_array_equal(np.asarray(coil.unknown.direction[:, 0]), [0, 1])
-    free = VerticalPositionPin(0.7, active=False).pair(operator)
-    profile = SimpleNamespace(
-        current_moment_observation=lambda *args, **kwargs: SimpleNamespace(
-            value=lambda name: jnp.asarray(0.5)
-        )
-    )
-    row = free.functional.residual(
-        profile,
-        ConstraintContext(jnp.zeros(1), None, None, None),
-        jnp.asarray([0.0]),
-        free.binding.payload,
-        free.binding.target,
-        free.binding.scale,
-    )
-    np.testing.assert_array_equal(np.asarray(row), [0.0])
-    held = radial.functional.residual(
-        profile,
-        ConstraintContext(jnp.zeros(1), None, None, None),
-        jnp.asarray([0.0]),
-        radial.binding.payload,
-        radial.binding.target,
-        radial.binding.scale,
-    )
-    np.testing.assert_allclose(np.asarray(held), [-0.2])
-
-
-def test_typed_request_passes_vertical_pin_to_converged_route():
-    configure_dtypes()
-    operator = SimpleNamespace(
-        grid=SimpleNamespace(coordinate=jnp.asarray([[1.0, 0.0]])),
-        wall=SimpleNamespace(coordinate=jnp.asarray([[1.5, 0.0]])),
-        sample=None,
-    )
-    pin = VerticalPositionPin(0.7)
-    captured = {}
-
-    class Reached(RuntimeError):
-        pass
-
-    def reached(*args, **kwargs):
-        captured.update(kwargs)
-        raise Reached
-
-    active = SimpleNamespace(
-        operator=operator,
-        solve=reached,
-        _request_compilation_cache_key=lambda *args: (),
-        _configure_solve_compilation_cache=lambda *args: None,
-        _request_compilation_cache=set(),
-    )
-    active._with_source = lambda *args, **kwargs: active
-    policy = SimpleNamespace(
-        current_pin=False,
-        exact_kernels=True,
-        cached_machine=True,
-        compilation_cache=False,
-        kernel_options=lambda: {},
-    )
-    request = SimpleNamespace(
-        source_profile=None,
-        clip_mode="chord",
-        constraint_pairs=(),
-        vertical_pin=pin,
-        route="newton_krylov",
-        policy=policy,
-        target_current=None,
-        current=None,
-        prescribed_current=None,
-        enforce=(),
-        constraint_pins=None,
-        seed_policy=SimpleNamespace(resolve=lambda *args, **kwargs: SEED),
-    )
-    with pytest.raises(Reached):
-        ForwardProfile._solve_imposed_request(active, request)
-    assert len(captured["constraint_pairs"]) == 1
-    assert isinstance(
-        captured["constraint_pairs"][0].functional, CurrentCentroidConstraint
-    )
 
 
 @pytest.mark.slow
-def test_elongated_free_carrier_drifts_from_both_targets():
+def test_elongated_free_public_request_drifts():
     configure_dtypes()
-    assert ELONGATION >= 1.6
-    result = solve.pinned_fixed_point(
-        carrier_map, centroid_height, SEED, operands(), binding(TARGETS[0], False)
-    )
-    assert bool(result.converged)
-    height = float(centroid_height(result.state, operands()))
-    np.testing.assert_allclose(height, 0.5, atol=1e-10)
-    assert all(abs(height - target) > 1e-3 for target in TARGETS)
-    assert abs(float(result.state[-1])) <= 1e-12
+    assert jax.config.jax_enable_x64 is True
+    profile = _profile()
+    receipt = profile.solve(_request(profile, TARGETS[0], active=False))
+    flux = receipt.equilibrium.flux
+    assert bool(receipt.qualified)
+    assert float(receipt.equilibrium.fixed_point.residual) <= 1e-12
+    assert _terminal_elongation(flux) >= 1.6
+    assert abs(_booked_terminal_height(flux) - FREE_HEIGHT) <= 1e-10
+    assert abs(_booked_terminal_height(flux) - TARGETS[0]) >= 0.1
+    np.testing.assert_allclose(receipt.constraints[0].physical_unknown, [0.0])
 
 
 @pytest.mark.slow
-def test_pinned_carrier_holds_two_booked_centroid_targets():
+@pytest.mark.parametrize("target", TARGETS)
+def test_public_pinned_request_converges_to_booked_height(target):
     configure_dtypes()
-    fields = []
-    for target in TARGETS:
-        result = solve.pinned_fixed_point(
-            carrier_map, centroid_height, SEED, operands(), binding(target, True)
-        )
-        assert bool(result.converged)
-        assert float(result.residual) <= 1e-12
-        observed = float(centroid_height(result.state, operands()))
-        assert abs(observed - target) <= 1e-10
-        fields.append(float(result.state[-1]))
-    assert fields[0] != fields[1]
-
-
-@pytest.mark.slow
-def test_one_program_serves_free_and_two_pinned_carriers():
-    configure_dtypes()
-    program = jax.jit(
-        lambda state, ops, constraint: solve.pinned_fixed_point(
-            carrier_map, centroid_height, state, ops, constraint
-        )
-    )
-    compiled = program.lower(SEED, operands(), binding(TARGETS[0], False)).compile()
-    cases = [(TARGETS[0], False, FREE_HEIGHT)] + [(t, True, t) for t in TARGETS]
-    for target, active, expected in cases:
-        result = compiled(SEED, operands(), binding(target, active))
-        assert bool(result.converged)
-        assert float(result.residual) <= 1e-12
-        assert abs(float(centroid_height(result.state, operands())) - expected) <= 1e-10
+    assert jax.config.jax_enable_x64 is True
+    profile = _profile()
+    receipt = profile.solve(_request(profile, target))
+    flux = receipt.equilibrium.flux
+    assert bool(receipt.qualified)
+    assert float(receipt.equilibrium.fixed_point.residual) <= 1e-12
+    assert _terminal_elongation(flux) >= 1.6
+    assert abs(_booked_terminal_height(flux) - target) <= 1e-10
+    assert len(receipt.constraints) == 1
+    assert bool(receipt.constraints[0].qualified[0])

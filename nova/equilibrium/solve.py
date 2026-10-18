@@ -22,16 +22,11 @@ import jax
 import jax.numpy as jnp
 import jax.scipy.linalg as jsp_linalg
 
-from nova.equilibrium.constraint import ConstraintBinding
-
 __all__ = [
     "Factor",
     "SolveResult",
     "factor",
     "fixed_point",
-    "pin_residual",
-    "pin_state",
-    "pinned_fixed_point",
 ]
 
 BACKTRACKING_STEPS = 12
@@ -181,61 +176,3 @@ def fixed_point(
     if factor is None:
         return _cold(residual_fn, flat, operands, tolerance, max_corrections)
     return _chord(residual_fn, flat, operands, factor, tolerance, max_corrections)
-
-
-def pin_residual(residual_fn, observation):
-    """Augment a map with one pin row held by one compensating unknown.
-
-    The augmented state is the base state with the compensating unknown
-    appended.  ``residual_fn(extended, operands)`` is the base map, which reads
-    the unknown off the state's last element and adds its declared field
-    through the runtime operands; ``observation(extended, operands)`` returns
-    the scalar the pin holds. The constraint binding carries the target, scale
-    and active flag as runtime leaves. With the flag clear, the last row holds
-    the compensating unknown at zero and the map is free.
-    """
-
-    def augmented(extended, packed):
-        operands, binding = packed
-        base = jnp.reshape(residual_fn(extended, operands), (-1,))
-        active = jnp.asarray(binding.payload, dtype=bool)
-        held = (observation(extended, operands) - binding.target[0]) / binding.scale[0]
-        row = jnp.reshape(jnp.where(active, held, extended[-1]), (1,))
-        return jnp.concatenate((base, row))
-
-    return augmented
-
-
-def pin_state(state, binding: ConstraintBinding):
-    """Return the base state extended by the pin's initial compensating unknown."""
-    flat = jnp.reshape(jnp.asarray(state), (-1,))
-    seed = jnp.reshape(jnp.asarray(binding.initial_unknown), (1,))
-    return jnp.concatenate((flat, seed))
-
-
-def pinned_fixed_point(
-    residual_fn,
-    observation,
-    state,
-    operands,
-    binding: ConstraintBinding,
-    *,
-    factor=None,
-    tolerance=DEFAULT_TOLERANCE,
-    max_corrections=DEFAULT_MAX_CORRECTIONS,
-):
-    """Drive a map augmented by one vertical pin to ``tolerance``.
-
-    One compiled program serves the free map and any target because the
-    binding and field basis remain runtime leaves. The last state element is
-    the compensating unknown.
-    """
-    augmented = pin_residual(residual_fn, observation)
-    return fixed_point(
-        augmented,
-        pin_state(state, binding),
-        (operands, binding),
-        factor=factor,
-        tolerance=tolerance,
-        max_corrections=max_corrections,
-    )

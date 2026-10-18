@@ -33,7 +33,7 @@ def main():
     )
     state = tie_probe.build("diverted", 250, args.cache)
     sampled = tie_probe.make_sampler(state)
-    prior, warm_count = tie_probe.warm(state, sampled, -0.2, 0.17, 0.01)
+    prior, warm_count = tie_probe.warm(state, sampled, -0.2, 0.16, 0.01)
     offsets = (0.17323108126295567, 0.17323108126295570)
     rows = []
     for offset in offsets:
@@ -62,9 +62,18 @@ def main():
             iterations=12,
         )
         jax.block_until_ready(solved)
+        hessian = np.asarray(solved.jet.hessian)
+        gradient = np.asarray(solved.jet.gradient)
+        correction = np.einsum("nij,nj->ni", np.linalg.pinv(hessian), gradient)
+        cached = fixed_points._CachedField(
+            window.mesh, window.lookup, window.rows, state["reference"], window.exterior
+        )
+        contained = jax.vmap(cached.contains)(solved.position)
         rows.append(
             {
                 "offset": offset,
+                "pitch": float(jnp.median(state["geometry"].pitch)),
+                "position_tolerance": state["policy"].position_tolerance,
                 "seeds": np.asarray(seeds),
                 "census_valid": np.asarray(roots.valid).tolist(),
                 "census_positions": np.asarray(roots.position).tolist(),
@@ -75,12 +84,11 @@ def main():
                 "solved_valid": np.asarray(solved.valid).tolist(),
                 "solved_status": np.asarray(solved.status).tolist(),
                 "solved_iterations": np.asarray(solved.iterations).tolist(),
-                "solved_gradient": np.linalg.norm(
-                    np.asarray(solved.jet.gradient), axis=-1
-                ).tolist(),
-                "solved_determinants": np.linalg.det(
-                    np.asarray(solved.jet.hessian)
-                ).tolist(),
+                "solved_gradient": np.linalg.norm(gradient, axis=-1).tolist(),
+                "solved_correction": np.linalg.norm(correction, axis=-1).tolist(),
+                "solved_hessian": hessian.tolist(),
+                "solved_determinants": np.linalg.det(hessian).tolist(),
+                "solved_contained": np.asarray(contained).tolist(),
                 "reading_class": int(reading.boundary_class),
             }
         )

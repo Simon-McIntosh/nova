@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from types import MethodType, SimpleNamespace
 from typing import NamedTuple
 
@@ -28,8 +29,8 @@ from nova.jax.config import configure_dtypes
 
 
 ELONGATION = 1.8
-FREE_HEIGHT = 0.6
-SEED = np.asarray([1.0, 0.8, 0.30, 1.0, 1.2, 0.90], dtype=np.float64)
+VERTICAL_FORCING = 0.1
+SEED = np.asarray([1.0, 0.8, 0.24, 1.0, 1.2, 0.96], dtype=np.float64)
 TARGETS = (0.7, 0.9)
 
 
@@ -45,7 +46,7 @@ def _carrier_residual(flux):
             first_r - 0.8 * first,
             second_r - 1.2 * second,
             (high - low) / radial_span - ELONGATION,
-            (height - FREE_HEIGHT) / ELONGATION**2,
+            jnp.ones_like(height) * VERTICAL_FORCING / ELONGATION**2,
         )
     )
 
@@ -132,6 +133,7 @@ def _request(
     coil_direction=None,
     source_scale=1.0,
     compilation_cache=False,
+    include_pin=True,
 ):
     return ForwardSolveRequest.from_defaults(
         carrier_identity="elongated-moment-carrier",
@@ -146,11 +148,15 @@ def _request(
             "current_pin": False,
             "compilation_cache": compilation_cache,
         },
-        vertical_pin=VerticalPositionPin(
-            target,
-            active=active,
-            coil_direction=coil_direction,
-            source_scale=source_scale,
+        vertical_pin=(
+            VerticalPositionPin(
+                target,
+                active=active,
+                coil_direction=coil_direction,
+                source_scale=source_scale,
+            )
+            if include_pin
+            else None
         ),
     )
 
@@ -208,18 +214,16 @@ def test_vertical_pin_declares_a_physical_field_source():
 
 
 @pytest.mark.slow
-def test_elongated_free_public_request_drifts():
+def test_elongated_free_public_request_stalls():
     configure_dtypes()
     assert jax.config.jax_enable_x64 is True
     profile = _profile()
-    receipt = profile.solve(_request(profile, TARGETS[0], active=False))
+    receipt = profile.solve(_request(profile, TARGETS[0], include_pin=False))
     flux = receipt.equilibrium.flux
-    assert bool(receipt.qualified)
-    assert float(receipt.equilibrium.fixed_point.residual) <= 1e-12
+    assert not bool(receipt.qualified)
+    assert float(receipt.equilibrium.fixed_point.residual) >= 1e-3
     assert _terminal_elongation(flux) >= 1.6
-    seed_moments = SEED.reshape((2, 3))
-    expected_free = float(seed_moments[:, 2].sum() / seed_moments[:, 0].sum())
-    assert abs(_booked_terminal_height(flux) - expected_free) <= 1e-10
+    assert not bool(receipt.equilibrium.fixed_point.converged)
     assert abs(_booked_terminal_height(flux) - TARGETS[0]) >= 0.09
     np.testing.assert_allclose(receipt.constraints[0].physical_unknown, [0.0])
 
@@ -248,8 +252,10 @@ def test_public_request_passes_pin_operands_to_one_cache_identity(monkeypatch):
     profile._configure_solve_compilation_cache = lambda enabled: None
     original = fixed_point.newton_krylov
     seen = []
+    substituted_target = None
 
     def inspect_runtime_pair(*args, **kwargs):
+        nonlocal substituted_target
         runtime_pairs = kwargs.get("map_arguments", ())
         assert len(runtime_pairs) == 1 and len(runtime_pairs[0]) == 1
         pair = runtime_pairs[0][0]
@@ -259,23 +265,42 @@ def test_public_request_passes_pin_operands_to_one_cache_identity(monkeypatch):
                 float(np.asarray(pair.unknown.field_scale)),
             )
         )
+        if substituted_target is not None:
+            pair = replace(
+                pair,
+                binding=replace(pair.binding, target=jnp.asarray([substituted_target])),
+            )
+            kwargs["map_arguments"] = ((pair,),)
         return original(*args, **kwargs)
 
     monkeypatch.setattr(fixed_point, "newton_krylov", inspect_runtime_pair)
+    free = profile.solve(
+        _request(profile, TARGETS[0], include_pin=False, compilation_cache=True)
+    )
     first = profile.solve(
         _request(profile, TARGETS[0], compilation_cache=True, source_scale=1.0)
     )
     second = profile.solve(
         _request(profile, TARGETS[1], compilation_cache=True, source_scale=2.0)
     )
-    assert seen == [(TARGETS[0], 1.0), (TARGETS[1], 2.0)]
+    assert seen == [(0.0, 1.0), (TARGETS[0], 1.0), (TARGETS[1], 2.0)]
     assert len(profile._request_compilation_cache) == 1
-    assert not first.compilation_cache_hit
+    assert not free.compilation_cache_hit
+    assert first.compilation_cache_hit
     assert second.compilation_cache_hit
+    assert (
+        sum(not receipt.compilation_cache_hit for receipt in (free, first, second)) == 1
+    )
+    assert not bool(free.qualified)
+    assert float(free.equilibrium.fixed_point.residual) >= 1e-3
     for receipt, target in ((first, TARGETS[0]), (second, TARGETS[1])):
         assert bool(receipt.qualified)
         assert float(receipt.equilibrium.fixed_point.residual) <= 1e-12
         assert abs(_booked_terminal_height(receipt.equilibrium.flux) - target) <= 1e-10
+    substituted_target = 0.8
+    shifted = profile.solve(_request(profile, TARGETS[0]))
+    assert abs(_booked_terminal_height(shifted.equilibrium.flux) - 0.8) <= 1e-10
+    assert not bool(shifted.qualified)
 
 
 @pytest.mark.slow
@@ -325,8 +350,12 @@ def test_one_augmented_newton_program_serves_free_and_pinned_requests():
     ]:
         pair = _request(profile, target, active=active).vertical_pin.pair(operator)
         flux, unknown, residual, converged = compiled(seed, pair)
-        assert bool(converged)
-        assert float(residual) <= 1e-12
+        if active:
+            assert bool(converged)
+            assert float(residual) <= 1e-12
+        else:
+            assert not bool(converged)
+            assert float(residual) >= 1e-3
         assert _terminal_elongation(flux) >= 1.6
         assert abs(_booked_terminal_height(flux) - expected) <= 1e-10
         if not active:

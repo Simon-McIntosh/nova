@@ -1,0 +1,86 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "base_log_revision": null,
+  "call_site_count": 6,
+  "call_sites": [
+    "scripts/prototypes/fast_map_production/program.py:186",
+    "scripts/prototypes/fast_map_production/sweep.py:129",
+    "scripts/prototypes/fast_map_production/solver.py:99",
+    "scripts/prototypes/xpoint_cell_owner/owner_map.py:265",
+    "scripts/prototypes/xpoint_cell_owner/containing_owner_map.py:99",
+    "scripts/prototypes/xpoint_cell_owner/projected_owner_map.py:95"
+  ],
+  "completed_at": "2026-10-18T06:14:37.820Z",
+  "dispatched_at": "2026-10-18T06:04:22Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/fast_map_production/kernel.py",
+      "line": "201",
+      "severity": "blocking",
+      "text": "blocking: psi_rounding_enclosure is defined and unit-tested but never called from _merge_path_saddle or read at kernel.py:281, so done-when (3)'s requirement to cancel pairs whose persistence lies inside the psi rounding enclosure before admission is unimplemented and undisclosed, and at the 282-A tie the pair's persistence is exactly 0.0 inside the 9.05e-18 enclosure, so the clause applies to observed data rather than being moot; the node's exact spec makes an unreported deviation a blocker to report."
+    },
+    {
+      "file": "tests/test_fixed_points.py",
+      "line": "316",
+      "severity": "follow-on",
+      "text": "follow-on: the only assertion added for the admission exercises _merge_path_saddle with a hand-built five-cell carrier and never read(), so the behavioural fix that removes the class switch is guarded at the helper but not at its wiring, and done-when (6)'s read(...)-driving test is the missing guard."
+    },
+    {
+      "file": "gate-head.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the gate and after_suite name revision 9f97380ba while the reviewed head is 8abacf447; the two commits between them (5a55a943f, 8abacf447) touch only the probe script, so the failure delta is nil, but the recorded gate did not run at the revision being promoted."
+    },
+    {
+      "file": "manifest.md",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest carries no baseline_suite line, so the added-failure count for this run is unmeasured and the review records it as such."
+    }
+  ],
+  "head_log_revision": "9f97380ba74a18a0aacec571795f18e8677c2608",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 6 production call site(s)",
+    "diff": "read commit by commit against efd99eeb \u2014 af7659d5d replaces the argmax selection with _merge_path_saddle and adds psi_rounding_enclosure, 17432b9ca adds two CPU tests, 8ca6a1ae8 adds the bisecting probe, two commits (5a55a943f, 8abacf447) carry the identical subject and both touch the probe, and 60f52950a/9f97380ba add the fragment and research doc.",
+    "done_when": "items (1), (4), (7) are reported in docs/research/saddle-merge-path-admission.html, map fidelity (5) is the titan job 1288352 receipt, but done-when (3)'s clause \"cancel pairs whose persistence lies inside the psi rounding enclosure before admission\" is unmet \u2014 kernel.py:201 defines psi_rounding_enclosure and neither _merge_path_saddle nor read at kernel.py:281 calls it \u2014 and (5)-cold-solves and (6) are carried as follow-ons.",
+    "goal": "the goal is to admit the fast map bounding saddle on the axis merge path so booked current is continuous wherever boundary flux is; kernel.py:281-283 selects via _merge_path_saddle and the probe receipts adm2-282-head.json and adm3-550-head.json carry zero class changes at head where base carries 2 and 6, so the landed change meets the goal.",
+    "manifest": "read; status complete, its seven listed commits match git log efd99eeb..8abacf447, it names the 66-test gate (gate-head.log), the negative-control log (EXIT=1, one red id) and the titan map-fidelity job, but it carries no baseline_suite line so the reviewed run's added-failure count is unmeasured.",
+    "write_paths": "every commit in diff efd99eeb..8abacf447 changes only scripts/prototypes/fast_map_production/, tests/test_fixed_points.py, docs/research/saddle-merge-path-admission.html, docs/figures/converged-forward-solve/saddle-merge-path-admission/ and the evidence fragment, all inside the six declared write paths, with nova/equilibrium/fixed_points.py correctly left unmodified."
+  },
+  "justifications": {
+    "durability": "tests/test_fixed_points.py:316 calls _merge_path_saddle directly and never read(), so reverting the selection lines at kernel.py:281-282 to the replaced argmax would leave the test green and the booked-current step uncaught, though the applied negative control (negative-control.log, EXIT=1) genuinely reddens it.",
+    "evidence": "the header of gate-head.log records the 66-passed gate at REV=9f97380ba and the probe receipts adm2-282-base.json (2 changes) and adm3-550-base.json (6 changes) against head 0 independently reproduce the headline measure, but baseline_suite is absent so no failure delta is derived and the gate did not run at head 8abacf447.",
+    "fit": "_merge_path_saddle follows the surrounding kernel idiom and reuses _wall_path_ceiling, but psi_rounding_enclosure at kernel.py:201 is dead production code (defined and unit-tested, called by nothing), and two commits share one subject.",
+    "goal_fidelity": "kernel.py:281-283 admits the merge-path saddle and the head receipts carry no class switch, but done-when (3)'s enclosure-cancellation clause is unimplemented at kernel.py:201.",
+    "reuse": "the admission extends the existing _wall_path_ceiling owner at kernel.py:62 rather than forking a passage mechanism, and the probe duplicates the enclosure locally (saddle_admission_probe.py:34) only so the base arm can run without the new helper.",
+    "scope_discipline": "every path in git diff efd99eeb..8abacf447 --stat lies inside the six declared write paths and nova/equilibrium/fixed_points.py is untouched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to admit the fast map bounding saddle on the axis merge path so booked current is continuous wherever boundary flux is; kernel.py:281-283 selects via _merge_path_saddle and the probe receipts adm2-282-head.json and adm3-550-head.json carry zero class changes at head where base carries 2 and 6, so the landed change meets the goal.\nVERDICT done_when: items (1), (4), (7) are reported in docs/research/saddle-merge-path-admission.html, map fidelity (5) is the titan job 1288352 receipt, but done-when (3)'s clause \"cancel pairs whose persistence lies inside the psi rounding enclosure before admission\" is unmet \u2014 kernel.py:201 defines psi_rounding_enclosure and neither _merge_path_saddle nor read at kernel.py:281 calls it \u2014 and (5)-cold-solves and (6) are carried as follow-ons.\nVERDICT write_paths: every commit in diff efd99eeb..8abacf447 changes only scripts/prototypes/fast_map_production/, tests/test_fixed_points.py, docs/research/saddle-merge-path-admission.html, docs/figures/converged-forward-solve/saddle-merge-path-admission/ and the evidence fragment, all inside the six declared write paths, with nova/equilibrium/fixed_points.py correctly left unmodified.\nVERDICT manifest: read; status complete, its seven listed commits match git log efd99eeb..8abacf447, it names the 66-test gate (gate-head.log), the negative-control log (EXIT=1, one red id) and the titan map-fidelity job, but it carries no baseline_suite line so the reviewed run's added-failure count is unmeasured.\nVERDICT diff: read commit by commit against efd99eeb \u2014 af7659d5d replaces the argmax selection with _merge_path_saddle and adds psi_rounding_enclosure, 17432b9ca adds two CPU tests, 8ca6a1ae8 adds the bisecting probe, two commits (5a55a943f, 8abacf447) carry the identical subject and both touch the probe, and 60f52950a/9f97380ba add the fragment and research doc.\nCALL_SITES: scripts/prototypes/fast_map_production/program.py:186, scripts/prototypes/fast_map_production/sweep.py:129, scripts/prototypes/fast_map_production/solver.py:99, scripts/prototypes/xpoint_cell_owner/owner_map.py:265, scripts/prototypes/xpoint_cell_owner/containing_owner_map.py:99, scripts/prototypes/xpoint_cell_owner/projected_owner_map.py:95\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: kernel.py:281-283 admits the merge-path saddle and the head receipts carry no class switch, but done-when (3)'s enclosure-cancellation clause is unimplemented at kernel.py:201.\nSCORE evidence: 16\nJUSTIFICATION evidence: the header of gate-head.log records the 66-passed gate at REV=9f97380ba and the probe receipts adm2-282-base.json (2 changes) and adm3-550-base.json (6 changes) against head 0 independently reproduce the headline measure, but baseline_suite is absent so no failure delta is derived and the gate did not run at head 8abacf447.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff efd99eeb..8abacf447 --stat lies inside the six declared write paths and nova/equilibrium/fixed_points.py is untouched.\nSCORE durability: 11\nJUSTIFICATION durability: tests/test_fixed_points.py:316 calls _merge_path_saddle directly and never read(), so reverting the selection lines at kernel.py:281-282 to the replaced argmax would leave the test green and the booked-current step uncaught, though the applied negative control (negative-control.log, EXIT=1) genuinely reddens it.\nSCORE fit: 14\nJUSTIFICATION fit: _merge_path_saddle follows the surrounding kernel idiom and reuses _wall_path_ceiling, but psi_rounding_enclosure at kernel.py:201 is dead production code (defined and unit-tested, called by nothing), and two commits share one subject.\nSCORE reuse: 17\nJUSTIFICATION reuse: the admission extends the existing _wall_path_ceiling owner at kernel.py:62 rather than forking a passage mechanism, and the probe duplicates the enclosure locally (saddle_admission_probe.py:34) only so the base arm can run without the new helper.\nFINDING scripts/prototypes/fast_map_production/kernel.py:201 blocking: psi_rounding_enclosure is defined and unit-tested but never called from _merge_path_saddle or read at kernel.py:281, so done-when (3)'s requirement to cancel pairs whose persistence lies inside the psi rounding enclosure before admission is unimplemented and undisclosed, and at the 282-A tie the pair's persistence is exactly 0.0 inside the 9.05e-18 enclosure, so the clause applies to observed data rather than being moot; the node's exact spec makes an unreported deviation a blocker to report.\nFINDING tests/test_fixed_points.py:316 follow-on: the only assertion added for the admission exercises _merge_path_saddle with a hand-built five-cell carrier and never read(), so the behavioural fix that removes the class switch is guarded at the helper but not at its wiring, and done-when (6)'s read(...)-driving test is the missing guard.\nFINDING gate-head.log:1 follow-on: the gate and after_suite name revision 9f97380ba while the reviewed head is 8abacf447; the two commits between them (5a55a943f, 8abacf447) touch only the probe script, so the failure delta is nil, but the recorded gate did not run at the revision being promoted.\nFINDING manifest.md:1 follow-on: the reviewed manifest carries no baseline_suite line, so the added-failure count for this run is unmeasured and the review records it as such.",
+  "review_run_id": "r-20261018T060359436682-review-of-saddle-merge-path-admission-8abacf44745f",
+  "reviewed_base_sha": "efd99eeb9130ee80b08d29265815c65f2efbdb89",
+  "reviewed_head_sha": "8abacf44745f07f7a8d8a99b3943c4e799a66281",
+  "reviewed_run_id": "r-20261017T191934515411-saddle-merge-path-admission",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261018T060359436682-review-of-saddle-merge-path-admission-8abacf44745f"
+  },
+  "scores": {
+    "durability": 11,
+    "evidence": 16,
+    "fit": 14,
+    "goal_fidelity": 15,
+    "reuse": 17,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T06:16:26.333768+00:00",
+  "total": 92
+}

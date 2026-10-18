@@ -12,6 +12,7 @@ from scripts.prototypes.efit_field_swap.crosscheck import (
     wall_units,
 )
 from scripts.prototypes.efit_field_swap.spline_field import TraceSplineField
+from scripts.prototypes.efit_field_swap.orientation import read_convention
 from scripts.prototypes.fast_map_production.kernel import read as nova_read
 from scripts.prototypes.read_robustness.census import census
 
@@ -23,10 +24,9 @@ for pair_index in (0, 1):
     record = read_trace_record(rows[pair_index][1])
     field = TraceSplineField.from_record(record)
     cells, offsets = lattice(record.wall_ring, 16)
-    geometry = topology.TopologyGeometry.from_cells(
-        cells, offsets, wall_units(record)
-    )
-    convention = topology.TopologyConvention.from_cocos(17, 1.0)
+    geometry = topology.TopologyGeometry.from_cells(cells, offsets, wall_units(record))
+    field = field.sampled_for(geometry)
+    convention = read_convention(polarity=record.polarity)
     policy = TopologyPolicy()
     initial = jax.jit(lambda: topology.read(field, geometry, convention, policy))()
     valid = np.asarray(initial.x_point_valid)

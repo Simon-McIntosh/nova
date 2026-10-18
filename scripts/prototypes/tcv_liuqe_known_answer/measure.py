@@ -33,12 +33,12 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-from nova.equilibrium import topology
 from nova.equilibrium.wall_mask import wall_units_from_ids
 from nova.equilibrium.topology import TopologyPolicy
 from nova.jax.config import configure_dtypes
 from scripts.prototypes.efit_field_swap import crosscheck
 from scripts.prototypes.efit_field_swap.spline_field import TraceSplineField
+from scripts.prototypes.efit_field_swap.orientation import read_convention
 
 configure_dtypes()
 assert jax.config.jax_enable_x64 is True
@@ -122,6 +122,8 @@ def slice_view(eq, index):
         else np.empty((0, 2))
     )
     return dict(
+        dd_version=str(eq.ids_properties.version_put.data_dictionary),
+        plasma_current=float(gq.ip),
         time=float(np.asarray(eq.time)[index]),
         rgrid=rgrid,
         zgrid=zgrid,
@@ -175,7 +177,9 @@ def measure_slice(view, wall_rings, resolutions=RESOLUTIONS):
         view["axis"][1],
     )
     field = TraceSplineField.from_record(state)
-    convention = topology.TopologyConvention.from_cocos(17, 1.0)
+    convention = read_convention(
+        dd_version=view["dd_version"], plasma_current=view["plasma_current"]
+    )
     policy = TopologyPolicy()
     boundary_ring, obstacles = crosscheck.domain_rings(state)
     outcome = crosscheck.read_state(

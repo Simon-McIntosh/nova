@@ -212,10 +212,13 @@ slices contain 17 distinct psi grids. The wall IDS uses DD 4.1.0 and is read wit
 unset, so stored X-point presence supplies its limited or diverted label.</p>
 <h2>Certificate and scoring</h2>
 <p>A read qualifies only if the counterclockwise outer boundary winding minus obstacle
-windings equals the admitted critical-point index sum, every sampled boundary loop
-clears its gradient floor, and Bernstein enclosures exclude a gradient zero in every
-lattice cell without an admitted root. An uncleared box is bisected to depth 6; work
-stops after 20,000 boxes per lattice. Any remaining cell leaves the read
+windings equals the admitted critical-point index sum and every sampled loop clears
+its gradient floor. In every root-associated cell, a Krawczyk box must prove that
+the admitted root is the only gradient zero nearby: its Hessian enclosure makes
+the preconditioned gradient map a strict self-map with contraction norm below one.
+Bernstein enclosures then exclude zeros from every part of every lattice cell outside
+those boxes. An uncleared box is bisected to depth 6; work stops after 20,000 boxes
+per lattice, including root-box attempts. Any remaining cell leaves the read
 <em>coverage uncertified</em>. This is a refusal, not a limited answer.</p>
 <p>Flux pairs use the LIUQE grid spline, not the stored scalar psi values, whose gauge
 differs across blocks. Absolute flux gaps are divided by LIUQE's grid axis-to-boundary
@@ -237,19 +240,21 @@ or no reference X-point exists; it is never scored as zero.</p>
 job with the same certificate. Their complete attempts are in the paired field-swap
 receipt beside the LIUQE receipt.</p>
 <table><thead><tr><th>Record</th><th>Nova outcome</th><th>Boundary / index</th>
-<th>Empty lattice cells</th></tr></thead><tbody>{field_swap_table}</tbody></table>
+<th>Cell enclosure</th></tr></thead><tbody>{field_swap_table}</tbody></table>
 {figure_html}
-<p>The certificate counts are lattice cells: empty cells proved zero-free, empty cells
-left uncertified, and cells containing an admitted critical point. The receipt records
+<p>The certificate counts are lattice cells: cells proved zero-free away from the
+root boxes, cells left uncertified, and cells associated with an admitted root box.
+The receipt records
 each tried resolution and its refusal reason. A matching boundary index alone is not
 enough: an omitted extremum and saddle can cancel in that sum.</p>
 </body></html>\n"""
     fragment = f"""<section id="tcv-liuqe-known-answer">
 <h2 id="tcv-liuqe-known-answer-heading">TCV LIUQE known-answer boundary read</h2>
 <p id="tcv-liuqe-known-answer-summary">{summary}</p>
-<p id="tcv-liuqe-known-answer-certificate">The boundary-index check and the
-Bernstein gradient exclusion agree on qualified reads; any uncleared empty cell
-returns coverage uncertified. The twelve rows and all five prior field-swap refusals
+<p id="tcv-liuqe-known-answer-certificate">The boundary-index check, Krawczyk
+uniqueness boxes around admitted roots, and Bernstein gradient exclusion on the
+remaining cell regions agree on qualified reads. Any uncleared region returns
+coverage uncertified. The twelve rows and all five prior field-swap refusals
 were rescored in one CPU job. The per-slice comparison is in
 <a href="/nova/research/tcv-liuqe-known-answer.html">the research report</a>.</p>
 {figure_html}

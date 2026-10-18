@@ -150,6 +150,28 @@ def test_cancelled_missed_pair_is_refused(monkeypatch):
     assert not outcome.coverage.certified
 
 
+def test_occupied_cell_with_unlisted_pair_is_uncertified():
+    field = _maxima_and_saddle()
+    boundary = crosscheck.coverage_certificate(field, RING, (), 1)
+    assert boundary.certified and boundary.total == 1
+    cleared, unresolved, occupied = crosscheck.certify_empty_cells(
+        field, [RING], [(-0.35, 0.0)]
+    )
+    assert occupied == 1
+    assert cleared == 0
+    assert unresolved == 1
+
+
+def test_flat_occupied_cell_is_uncertified():
+    field = _field(np.zeros_like(RR))
+    cleared, unresolved, occupied = crosscheck.certify_empty_cells(
+        field, [RING], [(0.0, 0.0)], depth=3
+    )
+    assert occupied == 1
+    assert cleared == 0
+    assert unresolved == 1
+
+
 def test_constant_cell_reaches_depth_cap_and_is_uncertified():
     field = _field(np.zeros_like(RR))
     cell = np.asarray([RING[0], RING[1], RING[3], RING[4]])

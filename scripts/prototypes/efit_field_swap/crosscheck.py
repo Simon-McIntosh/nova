@@ -47,7 +47,7 @@ from typing import NamedTuple
 import jax
 import jax.numpy as jnp
 import numpy as np
-from shapely.geometry import Point, Polygon as ShapelyPolygon, box
+from shapely.geometry import Point, Polygon as ShapelyPolygon, box as shapely_box
 
 from nova.equilibrium import topology
 from nova.jax.config import configure_dtypes
@@ -95,9 +95,8 @@ class Coverage(NamedTuple):
     empty admitted-saddle set is a claim about the field that the census cannot
     itself support. The certificate is read off the field instead: the degree of
     grad psi on the domain boundary equals the index sum of the critical points
-    inside it, extrema counting +1 and saddles -1. Agreement means the admitted
-    set accounts for every critical point in the domain; disagreement means the
-    census missed one (or invented one), whatever it reported.
+    inside it, extrema counting +1 and saddles -1. Disagreement proves a
+    missed or invented root; agreement also needs a spline root-coverage proof.
     """
 
     outer_winding: float
@@ -177,33 +176,210 @@ def _patch_clear(controls, radial, vertical, ir, iz, box, depth):
     return False
 
 
-def certify_empty_cells(field, cells, admitted_points, *, depth=CELL_SUBDIVISION_DEPTH):
-    """Exclude grad-psi zeros in every lattice cell without an admitted root.
+def _hessian_controls(field, radial, vertical, grad_r, grad_z):
+    """Bernstein nets for the Jacobian of grad psi on each spline patch."""
+    dr = np.diff(radial)[None, :, None, None]
+    dz = np.diff(vertical)[:, None, None, None]
+    controls = (
+        (2.0 * np.diff(grad_r, axis=-1) / dr, 3.0 * np.diff(grad_r, axis=-2) / dz),
+        (3.0 * np.diff(grad_z, axis=-1) / dr, 2.0 * np.diff(grad_z, axis=-2) / dz),
+    )
+    # Differencing can cancel, so enclose its rounding from the undifferenced net.
+    base = np.max(np.abs(np.asarray(field.spline.coefficients)), axis=(-2, -1))
+    width_r = np.diff(radial)[None, :]
+    width_z = np.diff(vertical)[:, None]
+    scales = (
+        (6.0 * base / width_r**2, 9.0 * base / (width_r * width_z)),
+        (9.0 * base / (width_r * width_z), 6.0 * base / width_z**2),
+    )
+    return controls, scales
 
-    Each box is intersected with every spline patch it meets. De Casteljau
-    restriction gives Bernstein coefficients for each gradient component on
-    the intersection. A patch is clear when either component's outward-rounded
-    coefficient hull excludes zero. An unresolved box splits into four until
-    the depth or total-work cap; any remainder stays uncertified.
+
+def _hessian_bounds(controls, scales, radial, vertical, box, depth):
+    """Outward-padded Hessian interval across patches meeting a box."""
+    r0, r1, z0, z1 = box
+    ir0 = max(0, np.searchsorted(radial, r0, side="right") - 1)
+    ir1 = min(len(radial) - 2, np.searchsorted(radial, r1, side="left") - 1)
+    iz0 = max(0, np.searchsorted(vertical, z0, side="right") - 1)
+    iz1 = min(len(vertical) - 2, np.searchsorted(vertical, z1, side="left") - 1)
+    lower = np.full((2, 2), np.inf)
+    upper = np.full((2, 2), -np.inf)
+    gamma = (64 + 32 * depth) * np.finfo(float).eps
+    for iz in range(iz0, iz1 + 1):
+        pz0, pz1 = vertical[iz : iz + 2]
+        v0, v1 = (z0 - pz0) / (pz1 - pz0), (z1 - pz0) / (pz1 - pz0)
+        for ir in range(ir0, ir1 + 1):
+            pr0, pr1 = radial[ir : ir + 2]
+            u0, u1 = (r0 - pr0) / (pr1 - pr0), (r1 - pr0) / (pr1 - pr0)
+            for i in range(2):
+                for j in range(2):
+                    control = controls[i][j][iz, ir]
+                    net = _restrict_bernstein(
+                        control, max(0.0, u0), min(1.0, u1), axis=1
+                    )
+                    net = _restrict_bernstein(net, max(0.0, v0), min(1.0, v1), axis=0)
+                    scale = max(float(np.max(np.abs(control))), scales[i][j][iz, ir])
+                    pad = gamma * scale
+                    lower[i, j] = min(
+                        lower[i, j], np.nextafter(float(np.min(net)) - pad, -np.inf)
+                    )
+                    upper[i, j] = max(
+                        upper[i, j], np.nextafter(float(np.max(net)) + pad, np.inf)
+                    )
+    return lower, upper
+
+
+def _unique_root_box(field, point, box, hessian, scales, radial, vertical, depth):
+    """Prove one gradient zero by a Krawczyk contraction.
+
+    The spline Hessian interval bounds the derivative of grad psi. With a
+    nonsingular fixed C, T(x)=x-C grad psi(x) maps the box strictly into
+    itself and has infinity-norm derivative below one. Banach's theorem
+    then gives one and only one zero in the box.
+    """
+    lower, upper = _hessian_bounds(hessian, scales, radial, vertical, box, depth)
+    if not np.all(np.isfinite(lower)) or not np.all(np.isfinite(upper)):
+        return False
+    middle = 0.5 * (lower + upper)
+    try:
+        condition = np.linalg.cond(middle)
+    except np.linalg.LinAlgError:
+        return False
+    if not np.isfinite(condition) or condition > 1e12:
+        return False
+    try:
+        preconditioner = np.linalg.inv(middle)
+    except np.linalg.LinAlgError:
+        return False
+    gradient = np.asarray(field.evaluate(jnp.asarray(point)).gradient, dtype=float)
+    if not np.all(np.isfinite(gradient)):
+        return False
+    gamma = (64 + 32 * depth) * np.finfo(float).eps
+    error = np.empty((2, 2))
+    for i in range(2):
+        for j in range(2):
+            low_sum = high_sum = magnitude = 0.0
+            for k in range(2):
+                c = preconditioner[i, k]
+                a, b = c * lower[k, j], c * upper[k, j]
+                low_sum += min(a, b)
+                high_sum += max(a, b)
+                magnitude += abs(c) * max(abs(lower[k, j]), abs(upper[k, j]))
+            identity = float(i == j)
+            pad = gamma * (abs(identity) + magnitude)
+            error[i, j] = max(
+                abs(identity - high_sum - pad), abs(identity - low_sum + pad)
+            )
+    radii = 0.5 * np.asarray((box[1] - box[0], box[3] - box[2]))
+    correction = np.abs(preconditioner @ gradient)
+    coefficient_scale = float(np.max(np.abs(np.asarray(field.spline.coefficients))))
+    spacing = min(float(np.min(np.diff(radial))), float(np.min(np.diff(vertical))))
+    gradient_error = gamma * coefficient_scale / spacing
+    correction += np.abs(preconditioner) @ (gamma * np.abs(gradient) + gradient_error)
+    return bool(
+        np.max(np.sum(error, axis=1)) < 1.0 - gamma
+        and np.all(correction + error @ radii < (1.0 - gamma) * radii)
+    )
+
+
+def _inside_box(box, container):
+    return (
+        box[0] >= container[0]
+        and box[1] <= container[1]
+        and box[2] >= container[2]
+        and box[3] <= container[3]
+    )
+
+
+def _boxes_overlap(a, b):
+    return not (a[1] < b[0] or b[1] < a[0] or a[3] < b[2] or b[3] < a[2])
+
+
+def certify_empty_cells(field, cells, admitted_points, *, depth=CELL_SUBDIVISION_DEPTH):
+    """Account for one zero at each admitted root and exclude all other zeros.
+
+    A Krawczyk box proves uniqueness near each admitted root. Every remaining
+    part of every lattice cell must have a gradient component with strict sign
+    under its Bernstein enclosure. Unresolved boxes split to the depth or
+    total-work cap; any remainder stays uncertified.
     """
     radial, vertical, grad_r, grad_z = _gradient_controls(field)
+    hessian, scales = _hessian_controls(field, radial, vertical, grad_r, grad_z)
     points = np.asarray(admitted_points, dtype=float).reshape(-1, 2)
+    cell_boxes = []
+    for cell in cells:
+        low, high = np.min(cell, axis=0), np.max(cell, axis=0)
+        cell_boxes.append((low[0], high[0], low[1], high[1]))
+    root_boxes = []
+    unverified_cells = set()
+    work = 0
+    for point in points:
+        if not np.all(np.isfinite(point)):
+            return 0, max(1, len(cells)), 0
+        matching = []
+        for cell_number, box in enumerate(cell_boxes):
+            rounding = 256 * np.finfo(float).eps * max(1.0, *(abs(v) for v in box))
+            if (
+                box[0] - rounding <= point[0] <= box[1] + rounding
+                and box[2] - rounding <= point[1] <= box[3] + rounding
+            ):
+                matching.append((cell_number, box))
+        if not matching:
+            return 0, max(1, len(cells)), 0
+        widths = np.asarray([(b[1] - b[0], b[3] - b[2]) for _, b in matching])
+        radii = 0.45 * np.min(widths, axis=0)
+        margins = np.minimum(
+            point - np.asarray((radial[0], vertical[0])),
+            np.asarray((radial[-1], vertical[-1])) - point,
+        )
+        radii = np.minimum(radii, 0.5 * margins)
+        certified_root = False
+        for level in range(depth + 1):
+            if work >= CELL_WORK_LIMIT or np.any(radii <= 0):
+                break
+            work += 1
+            box = (
+                point[0] - radii[0],
+                point[0] + radii[0],
+                point[1] - radii[1],
+                point[1] + radii[1],
+            )
+            if (
+                _unique_root_box(
+                    field, point, box, hessian, scales, radial, vertical, level
+                )
+                and not any(_boxes_overlap(box, prior) for prior in root_boxes)
+                and not any(
+                    np.all(other >= (box[0], box[2]))
+                    and np.all(other <= (box[1], box[3]))
+                    for other in points
+                    if not np.array_equal(other, point)
+                )
+            ):
+                root_boxes.append(box)
+                certified_root = True
+                break
+            radii *= 0.5
+        if not certified_root:
+            unverified_cells.update(number for number, _ in matching)
     occupied = 0
     empty_cells = 0
+    occupied_cells = set()
     unresolved_cells = set()
     pending = []
-    for cell_number, cell in enumerate(cells):
-        low = np.min(cell, axis=0)
-        high = np.max(cell, axis=0)
-        rounding = 256 * np.finfo(float).eps * max(1.0, float(np.max(np.abs(cell))))
-        if np.any(
-            np.all((points >= low - rounding) & (points <= high + rounding), axis=1)
-        ):
+    for cell_number, box in enumerate(cell_boxes):
+        rounding = 256 * np.finfo(float).eps * max(1.0, *(abs(v) for v in box))
+        has_point = any(
+            box[0] - rounding <= point[0] <= box[1] + rounding
+            and box[2] - rounding <= point[1] <= box[3] + rounding
+            for point in points
+        )
+        if has_point or any(_boxes_overlap(box, root) for root in root_boxes):
             occupied += 1
+            occupied_cells.add(cell_number)
         else:
             empty_cells += 1
-            pending.append((low[0], high[0], low[1], high[1], 0, cell_number))
-    work = 0
+        pending.append((*box, 0, cell_number))
     while pending:
         if work >= CELL_WORK_LIMIT:
             unresolved_cells.update(item[-1] for item in pending)
@@ -217,10 +393,9 @@ def certify_empty_cells(field, cells, admitted_points, *, depth=CELL_SUBDIVISION
         ir1 = min(len(radial) - 2, np.searchsorted(radial, r1, side="left") - 1)
         iz0 = max(0, np.searchsorted(vertical, z0, side="right") - 1)
         iz1 = min(len(vertical) - 2, np.searchsorted(vertical, z1, side="left") - 1)
-        clear = all(
-            _patch_clear(
-                (grad_r, grad_z), radial, vertical, ir, iz, (r0, r1, z0, z1), level
-            )
+        box = (r0, r1, z0, z1)
+        clear = any(_inside_box(box, root) for root in root_boxes) or all(
+            _patch_clear((grad_r, grad_z), radial, vertical, ir, iz, box, level)
             for iz in range(iz0, iz1 + 1)
             for ir in range(ir0, ir1 + 1)
         )
@@ -235,7 +410,9 @@ def certify_empty_cells(field, cells, admitted_points, *, depth=CELL_SUBDIVISION
                 for a, b in ((r0, rm), (rm, r1))
                 for c, d in ((z0, zm), (zm, z1))
             )
-    return empty_cells - len(unresolved_cells), len(unresolved_cells), occupied
+    unresolved_cells.update(unverified_cells)
+    empty_uncertified = len(unresolved_cells - occupied_cells)
+    return empty_cells - empty_uncertified, len(unresolved_cells), occupied
 
 
 def _counterclockwise(ring):
@@ -338,14 +515,16 @@ def stationary_axis_admitted(field, roots, outer_ring, obstacle_rings, policy):
 
 
 def coverage_certificate(field, outer_ring, obstacle_rings, index_sum):
-    """Certify that the census admitted every critical point inside the domain.
+    """Check the necessary boundary-index condition for census coverage.
 
     The count is the outer loop's winding less the sum of the obstacle loops',
     each taken counterclockwise -- never a per-loop equality,
     which would hold trivially for a loop enclosing nothing. A loop whose
     minimum |grad psi| falls to the rounding floor passes through a critical
     point and carries no integer to compare, so the slice is left uncertified
-    rather than trusted on a number the arithmetic cannot support.
+    rather than trusted on a number the arithmetic cannot support. Equal
+    indices can also hide a cancelling root pair; cell enclosures decide
+    completeness in the full read.
     """
     minimum = float("inf")
     floor = 0.0
@@ -583,7 +762,7 @@ def lattice(wall_ring: np.ndarray, resolution: int, obstacles=()):
         for j in range(resolution):
             r0 = rmin + i * width
             z0 = zmin + j * height
-            cell = box(r0, z0, r0 + width, z0 + height)
+            cell = shapely_box(r0, z0, r0 + width, z0 + height)
             if not polygon.contains(cell.centroid) or any(
                 hole.covers(cell.centroid) for hole in holes
             ):

@@ -1,0 +1,73 @@
+<section id="tcv-liuqe-known-answer">
+<h2 id="tcv-liuqe-known-answer-heading">TCV 77549 LIUQE known-answer: nova's boundary read scored against LIUQE</h2>
+
+<p id="tcv-liuqe-known-answer-summary">nova's read was scored against the LIUQE
+reconstruction of TCV 77549 on the 17 distinct psi grids the archive actually
+carries. On each of the three slices that completed inside the node budget nova
+returned <code>unqualified</code>: its census admitted no saddle at lattices of
+24, 32 and 48 cells. The measure is unfinished; the archive is the dominant
+obstacle.</p>
+
+<h3 id="tcv-liuqe-known-answer-inputs">Inputs</h3>
+
+<ul id="tcv-liuqe-known-answer-input-list">
+<li id="tcv-liuqe-known-answer-input-source">LIUQE reconstruction,
+<code>public/imasdb/tcv/3/77549/1</code>, DD&nbsp;3.41.0, 1,703 slices over
+0.014&ndash;1.62&nbsp;s (the brief's stated count). Read in place,
+never written.</li>
+<li id="tcv-liuqe-known-answer-input-named">The brief's named input,
+<code>imas-efit/tests/data/imas/TCV/77549/validation/liuqe</code>, holds 50
+slices over a single frozen psi grid; its field is bit-identical across all
+fifty and equal to no source slice. It carries <code>MAG_ONLY</code> boundary
+geometry only.</li>
+<li id="tcv-liuqe-known-answer-input-wall">TCV wall IDS at
+<code>.../TCV/77549</code>, DD&nbsp;4.1.0: one limiter unit with a single
+512-point closed outline, R&nbsp;0.624&ndash;1.138, Z&nbsp;&minus;0.750&ndash;0.750.</li>
+</ul>
+
+<h3 id="tcv-liuqe-known-answer-findings">Two archive facts that bound the score</h3>
+
+<ul id="tcv-liuqe-known-answer-finding-list">
+<li id="tcv-liuqe-known-answer-finding-degenerate"><strong>The named input is
+degenerate.</strong> One psi grid across 50 slices (verified by a single md5
+digest over every slice, opened through <code>imas.DBEntry</code> in fresh
+processes).</li>
+<li id="tcv-liuqe-known-answer-finding-piecewise"><strong>The source grid is
+piecewise-constant.</strong> 1,703 slices carry only 17 distinct psi grids,
+each frozen over one contiguous block (block sizes 6, 8, 10, 10, 12, 72, 88,
+42, 43, 42, 43, 80, 86, 69, 185, 461, 446). A per-slice read inside a block
+would score one field repeatedly, so one representative slice per block is
+taken.</li>
+<li id="tcv-liuqe-known-answer-finding-label"><strong>The label enum is
+unset.</strong> <code>equilibrium/time_slice/boundary/type</code> is
+<code>&minus;999999999</code> on every slice of both stores, so LIUQE's
+limited-or-diverted label is read from <code>boundary/x_point</code> presence:
+absent through the limited phase (t&nbsp;0.046&ndash;0.288&nbsp;s), present
+elsewhere.</li>
+</ul>
+
+<h3 id="tcv-liuqe-known-answer-measure">Score</h3>
+
+<p id="tcv-liuqe-known-answer-score">0 of 3 slices scored. Indices 0, 6 and 14
+(all diverted), lattices 24/32/48 cells, LIUQE psi field 65&times;129 samples,
+TCV limiter as wall: nova's census admitted no saddle, so nova returned
+<code>unqualified</code> &mdash; no axis, no X-point, no label. The remaining
+14 selected slices did not complete inside the node budget.</p>
+
+<h3 id="tcv-liuqe-known-answer-artifacts">Artifacts</h3>
+
+<ul id="tcv-liuqe-known-answer-artifact-list">
+<li id="tcv-liuqe-known-answer-artifact-driver">Driver:
+<code>scripts/prototypes/tcv_liuqe_known_answer/measure.py</code>. Reuses
+<code>efit_field_swap.spline_field.TraceSplineField</code> (the grid spline
+field) and <code>efit_field_swap.crosscheck</code> (per-loop wall geometry,
+lattice, fitted contour mesh) by import, unmodified.</li>
+<li id="tcv-liuqe-known-answer-artifact-report">Report:
+<a href="/nova/research/tcv-liuqe-known-answer.html">TCV 77549 LIUQE
+known-answer</a>, carrying the per-slice LIUQE reference table.</li>
+</ul>
+
+<p id="tcv-liuqe-known-answer-no-figure">No poloidal panels are published: with
+no qualified nova read there is no nova boundary to draw beside LIUQE's, and a
+LIUQE-only panel would present a reference as a result.</p>
+</section>

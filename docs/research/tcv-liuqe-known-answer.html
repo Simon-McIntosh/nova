@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>TCV 77549 LIUQE known-answer: nova's boundary read scored against LIUQE</title>
+</head>
+<body>
+<h1>TCV 77549 LIUQE known-answer: nova's boundary read scored against LIUQE</h1>
+
+<p>The aim is a known-answer check of nova's topology read on a machine whose
+reconstruction is trusted. TCV 77549 is that machine: the LIUQE reconstruction
+is stored as an IMAS <code>equilibrium</code> IDS with a rectilinear
+<code>profiles_2d/psi</code> grid per slice, and nova's read is run unchanged on
+that field with the per-loop TCV wall. LIUQE's own axis, X-point, flux levels
+dominated this node. The measure below is incomplete and the reasons are data
+facts, stated first because they bound every number that follows.</p>
+
+<h2>What the archives actually carry</h2>
+
+<p>Two facts stop a per-slice score being produced as the brief imagined, and
+both were measured, not inferred.</p>
+
+<ol>
+<li><strong>The named input is degenerate.</strong> The brief names
+<code>imas-efit/tests/data/imas/TCV/77549/validation/liuqe</code> as the LIUQE
+equilibrium with 1,703 slices. That extract holds 50 slices over 0.793&ndash;0.839&nbsp;s,
+and <code>profiles_2d/psi</code> is bit-identical across all fifty (one md5
+digest over every slice, verified through <code>imas.DBEntry</code> in fresh
+processes), equal to no slice of the source reconstruction. Compressed as
+<code>MAG_ONLY</code> in imas-efit's data manifest, it kept the boundary
+geometry and dropped the per-slice field.</li>
+<li><strong>The source reconstruction's grid is piecewise-constant.</strong> The
+LIUQE reconstruction at
+<code>public/imasdb/tcv/3/77549/1</code> (DD&nbsp;3.41.0, 1,703 slices,
+0.014&ndash;1.62&nbsp;s, the brief's count) carries only <strong>17 distinct
+psi grids</strong> across its 1,703 slices, each frozen over one contiguous
+block (block sizes 6, 8, 10, 10, 12, 72, 88, 42, 43, 42, 43, 80, 86, 69, 185,
+461, 446). A per-slice read inside a block would score one field repeatedly.</li>
+</ol>
+
+<p>A third fact governs the label. <code>equilibrium/time_slice/boundary/type</code>
+is unset (<code>-999999999</code>) on every slice of both stores, so LIUQE's own
+limited-or-diverted label cannot be read from the enum the brief names. It is
+read instead from the boundary X-point LIUQE stored: absent through the limited
+phase, present through the diverted one.</p>
+
+<h2>Slice choice</h2>
+
+<p>Because the field is frozen within a block and independent across blocks, the
+snapshot takes one representative slice per distinct grid block &mdash; 17 slices
+spanning 0.014&ndash;1.62&nbsp;s, covering both phases (limited at
+t&nbsp;=&nbsp;0.046&ndash;0.287&nbsp;s, diverted before and after).</p>
+
+<h2>LIUQE reference per selected slice</h2>
+
+<p>LIUQE's own values, read from the opened IDS. Axis is
+<code>global_quantities/magnetic_axis</code>, levels are
+<code>global_quantities/psi_axis</code> and <code>psi_boundary</code> (Wb/rad),
+label is from <code>boundary/x_point</code> presence.</p>
+
+<table>
+<thead>
+<tr><th>index</th><th>t [s]</th><th>label</th><th>axis R [m]</th><th>axis Z [m]</th><th>&psi;<sub>axis</sub></th><th>&psi;<sub>bnd</sub></th><th>X-points</th></tr>
+</thead>
+<tbody>
+<tr><td>0</td><td>0.014</td><td>diverted</td><td>0.8096</td><td>&minus;0.1307</td><td>1.2062</td><td>1.1913</td><td>2</td></tr>
+<tr><td>6</td><td>0.019</td><td>diverted</td><td>0.8793</td><td>&minus;0.1281</td><td>1.1825</td><td>1.1456</td><td>2</td></tr>
+<tr><td>14</td><td>0.027</td><td>diverted</td><td>0.8831</td><td>&minus;0.0561</td><td>1.1687</td><td>1.1082</td><td>2</td></tr>
+<tr><td>24</td><td>0.036</td><td>diverted</td><td>0.8386</td><td>0.0099</td><td>1.1638</td><td>1.1010</td><td>2</td></tr>
+<tr><td>34</td><td>0.046</td><td>limited</td><td>0.8529</td><td>0.0561</td><td>1.1484</td><td>1.0813</td><td>0</td></tr>
+<tr><td>46</td><td>0.057</td><td>limited</td><td>0.8696</td><td>0.0704</td><td>1.1359</td><td>1.0483</td><td>0</td></tr>
+<tr><td>118</td><td>0.125</td><td>limited</td><td>0.8875</td><td>0.0576</td><td>1.0414</td><td>0.9332</td><td>0</td></tr>
+<tr><td>206</td><td>0.208</td><td>limited</td><td>0.8878</td><td>0.0576</td><td>0.9683</td><td>0.8230</td><td>0</td></tr>
+<tr><td>248</td><td>0.248</td><td>limited</td><td>0.8852</td><td>0.0613</td><td>0.9283</td><td>0.7794</td><td>0</td></tr>
+<tr><td>291</td><td>0.288</td><td>diverted</td><td>0.8769</td><td>0.0492</td><td>0.8840</td><td>0.7423</td><td>1</td></tr>
+<tr><td>333</td><td>0.328</td><td>diverted</td><td>0.8750</td><td>0.0254</td><td>0.8414</td><td>0.7019</td><td>1</td></tr>
+<tr><td>376</td><td>0.368</td><td>diverted</td><td>0.8816</td><td>0.0220</td><td>0.7993</td><td>0.6576</td><td>1</td></tr>
+<tr><td>456</td><td>0.444</td><td>diverted</td><td>0.8903</td><td>0.0045</td><td>0.7286</td><td>0.5739</td><td>1</td></tr>
+<tr><td>542</td><td>0.525</td><td>diverted</td><td>0.8953</td><td>&minus;0.0071</td><td>0.6547</td><td>0.4814</td><td>2</td></tr>
+<tr><td>611</td><td>0.590</td><td>diverted</td><td>0.8993</td><td>&minus;0.0305</td><td>0.5838</td><td>0.4141</td><td>2</td></tr>
+<tr><td>796</td><td>0.765</td><td>diverted</td><td>0.9022</td><td>&minus;0.0449</td><td>0.3885</td><td>0.2174</td><td>2</td></tr>
+<tr><td>1257</td><td>1.200</td><td>diverted</td><td>0.9092</td><td>&minus;0.0564</td><td>&minus;0.0630</td><td>&minus;0.2585</td><td>2</td></tr>
+</tbody>
+</table>
+
+<h2>nova's read</h2>
+
+<p>nova's read was run on each selected LIUQE psi grid (rebuilt through
+<code>efit_field_swap.spline_field</code>) on a square lattice inside the
+per-loop TCV wall, with the wall trace geometry and the read call reused from
+<code>efit_field_swap.crosscheck</code>. On the three slices that completed
+inside the budget &mdash; indices 0, 6 and 14, all diverted &mdash; nova's
+census admitted <strong>no saddle</strong> at lattices of 24, 32 and 48 cells,
+so nova returned <code>unqualified</code>: no axis, no X-point, no label.</p>
+
+<h2>Outcome</h2>
+
+<p><strong>The measure is unfinished.</strong> The dominant obstacle is the
+LIUQE archive: a per-slice score needs a per-slice field, and neither store
+supplies one over the pulse &mdash; the named extract has a single frozen grid,
+the source has 17 across 1,703 slices. Against that input nova's read qualified
+on none of the three slices it reached. The nearest measured figure is
+therefore not a gap but a qualification failure: 0 of 3 slices scored, all
+<code>unqualified</code>, on a field of 65&times;129 samples with the TCV
+limiter as wall.</p>
+
+<p>No representative poloidal panels are shown: with no qualified read there is
+no nova boundary to draw beside LIUQE's, and drawing LIUQE's alone would present
+a reference as a result. The driver
+<code>scripts/prototypes/tcv_liuqe_known_answer/measure.py</code> is committed
+and resumes against any slice list.</p>
+
+</body>
+</html>

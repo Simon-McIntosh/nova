@@ -25,12 +25,11 @@
 polygon enters positive beside the lobe entered negative, both built by
 <code>current._normal_rings</code> and reduced by the clip-quadrature owner's own imported rule. The
 vertex-list reconstruction and the local signed-fan reduction are deleted, and the truncated
-degree-five rule that set the booked lobe's floor went with them. The analytic check passes to
-1 × 10<sup>−13</sup>, the 282-cell map error lands 6.5 × 10<sup>−4</sup> below its guard, and the
-282-cell cold solve converges to 3.0 × 10<sup>−14</sup>. The partition gate holds at 282 and 2,098 to
-1.4 × 10<sup>−13</sup> and 1.8 × 10<sup>−14</sup>; at 550 the read books no owner cell, so that row is
-the whole-cell identity with an empty lobe rather than a measured partition. The 550 and 2,098 map
-rows and the 550 cold solve are blocked on a missing exterior fixture, named below.</p>
+degree-five rule that set the booked lobe's floor went with them. The partition agrees with dense
+references to 1.4 &times; 10<sup>&minus;13</sup> at 282 and 1.8 &times; 10<sup>&minus;14</sup> at 2,098; the lobe
+partition passes all three map guards; and the 282 cold solve converges to
+3.0 &times; 10<sup>&minus;14</sup>. The 550 cold solve stalls on a collapsing line search at
+1.5 &times; 10<sup>&minus;3</sup>, reported below and left as the next item.</p>
 
 <section id="lobe-share-partition-fan">
 <h2>The fan the remainder takes</h2>
@@ -128,18 +127,29 @@ partition is unexercised for want of a live fragment, not because it disagrees.<
 <table id="lobe-share-partition-maps-table">
 <thead><tr><th>carrier</th><th>guard</th><th>half-plane delivered</th><th>half-plane floor</th><th>lobe delivered</th><th>lobe floor</th></tr></thead>
 <tbody>
-<tr><td>282</td><td>1.0866e-3</td><td>1.08005994731e-3 pass</td><td>6.18989257731e-4</td><td>1.08655590095e-3 pass</td><td>6.18989257734e-4</td></tr>
-<tr><td>550</td><td>5e-4</td><td>4.09590445975e-4 pass</td><td>1.82141864746e-4</td><td colspan="2">not measured: the exterior store holds no group for this carrier</td></tr>
-<tr><td>2,098</td><td>1e-4</td><td>2.49299259136e-4 fail</td><td>1.76641360086e-5</td><td colspan="2">not measured: the exterior store holds no group for this carrier</td></tr>
+<tr><td>282</td><td>1.0866e-3</td><td>1.08006018256e-3 pass</td><td>6.18989257731e-4</td><td>1.08655590095e-3 pass</td><td>6.18989257731e-4</td></tr>
+<tr><td>550</td><td>5e-4</td><td>4.09606071189e-4 pass</td><td>1.82141864746e-4</td><td>4.87171143918e-4 pass</td><td>1.82141864746e-4</td></tr>
+<tr><td>2,098</td><td>1e-4</td><td>2.49303535497e-4 fail</td><td>1.76641360086e-5</td><td>9.47260994768e-5 pass</td><td>1.76641360086e-5</td></tr>
 </tbody>
 </table>
-<p id="lobe-share-partition-maps-finding">At 282 the lobe cut lands 6.5 × 10<sup>−4</sup> below the
-guard, within 0.6 % of the half-plane cut's error (1.08655590095 × 10<sup>−3</sup> against
-1.08005994731 × 10<sup>−3</sup>) and of the same order as its own reconstruction floor, which stands
-at 57 % of the delivered error. At this size the two representations of the owned region are not
-distinguishable by the map, and most of what remains is the carrier rather than the region. The 282
-row's top-ranked cell is not a driver: patching it back to its reference moments raises the error to
+<p id="lobe-share-partition-maps-finding">The lobe cut passes all three guards, and at 2,098 it is
+the representation that passes where the half-plane cut fails: 9.47260994768 × 10<sup>−5</sup>
+against the 1 × 10<sup>−4</sup> guard, where the half-plane cut delivers
+2.49303535497 × 10<sup>−4</sup> and misses it by 2.5×. That is the one size where the two
+representations of the owned region are separable, and it separates in favour of the lobe. At 282 the
+two are not distinguishable — 1.08655590095 × 10<sup>−3</sup> against
+1.08006018256 × 10<sup>−3</sup>, 0.6 % apart, both within the carrier's own reconstruction floor of
+6.18989257731 × 10<sup>−4</sup> — and most of what remains there is the carrier rather than the
+region. At 550 the lobe cut is 19 % above the half-plane cut
+(4.87171143918 × 10<sup>−4</sup> against 4.09606071189 × 10<sup>−4</sup>) while still clearing its
+guard by 2.6 %, and both sit above the same 1.82141864746 × 10<sup>−4</sup> floor. The 282 row's
+top-ranked cell is not a driver: patching it back to its reference moments raises the error to
 1.14776136182 × 10<sup>−3</sup>.</p>
+<p id="lobe-share-partition-maps-resolved">The 550 and 2,098 rows were first recorded here as not
+measured. They resolved when the measurement ran against a cache root that carries the exterior groups
+for those carriers: the root used first holds none, so <code>_exterior</code> returned a null and the run
+died on the addition rather than raising. That was a per-carrier fixture gap, and no pre-warm was built
+and no module outside this node's write scope was touched to close it.</p>
 </section>
 
 <section id="lobe-share-partition-solves">
@@ -148,7 +158,7 @@ row's top-ranked cell is not a driver: patching it back to its reference moments
 <thead><tr><th>carrier</th><th>corrections</th><th>terminal residual</th><th>converged</th></tr></thead>
 <tbody>
 <tr><td>282</td><td>5</td><td>3.00226232984e-14</td><td>yes</td></tr>
-<tr><td>550</td><td colspan="3">failed before the first correction: <code>_exterior</code> returns <code>None</code> for this carrier</td></tr>
+<tr><td>550</td><td>9</td><td>1.54987034401e-3</td><td>no — the line search collapsed</td></tr>
 </tbody>
 </table>
 <p id="lobe-share-partition-solves-finding">The 282 residual history is 1.62494366306 ×
@@ -157,17 +167,7 @@ row's top-ranked cell is not a driver: patching it back to its reference moments
 1.6 s each once the map and the correction program are compiled (16.5 s and 74.3 s), with no line
 search damping at any correction. The booked partition is a root the Newton correction accepts at
 this size.</p>
-<p id="lobe-share-partition-solves-blocker">The 550 row is not a stall and not a convergence failure.
-The job reached <code>JET_READY nodes=2132 cells=551</code> after 346 s of carrier build, then died
-at the terminal-state flux with <code>TypeError: unsupported operand type(s) for +: 'NoneType' and
-'jaxlib._jax.ArrayImpl'</code>, because <code>_exterior(context.cache, context.carrier_key)</code>
-returned <code>(None, None)</code> for this carrier: the exterior store holds no group matching this
-carrier's key at the exact support arm, and the module returns a null exterior rather than raising.
-The same call succeeds for the 282 carrier in the same run, so the gap is per-carrier fixture data,
-not a code path that the lobe component reaches. The remedy is an exterior pre-warm for the 550 and
-2,098 carriers, which is outside this node's write scope
-(<code>scripts/prototypes/solve_options/point_bias.py</code> and the fixture cache), and the same
-null exterior will stop the 550 and 2,098 rows of the map measurement at the identical line.</p>
+<p id="lobe-share-partition-solves-blocker">The 550 solve stalls on a collapsing line search, which is the item clause 6 named in advance. Its residual history, in units of 10<sup>&minus;3</sup> and one value per correction, is 1.74953783302, 1.62497701889, 1.57615839892, 1.55663074090, 1.55089981991, 1.54995715472, 1.54987035523, 1.54987034401, 1.54987034401: the residual decreases monotonically, but each correction moves it less than the last, and the final three sit on a fixed point to within 1 &times; 10<sup>&minus;10</sup>. The accepted step factor falls every correction &mdash; 0.5, 0.25, 0.0625, 0.03125, 0.0078125, 0.00390625, 0.000244140625, 3.0517578125 &times; 10<sup>&minus;5</sup>, then 0.0 &mdash; and at zero no step is taken at all, so the correction exits early with <code>converged=False</code> rather than at the eighteen-step ceiling. The residual neither diverges nor oscillates; it approaches a fixed point near 1.54987 &times; 10<sup>&minus;3</sup> that the Newton direction cannot leave by any positive step. The 1 &times; 10<sup>&minus;12</sup> contract is missed by ten orders of magnitude at this size, and the mechanism is the line search rather than the partition: the same booked partition is a root at 282. The stall is reported here and left as the next item.</p>
 <figure id="lobe-share-partition-panel-282-figure">
 <img src="/nova/figures/converged-forward-solve/lobe-share-partition/terminal-282.svg"
      alt="Solved and analytic poloidal flux contours at the 282-cell terminal state of the lobe-owned cold solve">
@@ -179,18 +179,18 @@ wall, and no axes or gridlines. Terminal residual 3.002262329835039e-14, converg
 
 <section id="lobe-share-partition-verdict">
 <h2>Verdict</h2>
-<p id="lobe-share-partition-verdict-body">Clauses 1 to 3 hold: the remainder takes its fan from the
+<p id="lobe-share-partition-verdict-body">Clauses 1 to 5 hold. The remainder takes its fan from the
 same builder that builds the lobe, the vertex-list reconstruction and the local signed-fan reduction
 are deleted, the reduction is the imported clip-quadrature rule, and the truncated rule that set the
 booked lobe's floor is gone with it. Clause 4 holds at 282 and 2,098, to
-1.42108547152 × 10<sup>−13</sup> and 1.77635683940 × 10<sup>−14</sup> against the
-1 × 10<sup>−12</sup> contract; at 550 no cell is booked by the read, so that row is the whole-cell
-identity with an empty lobe rather than a measured partition. Of clauses 5 and 6 the 282 rows have
-landed and are recorded above. The 550 and 2,098 map rows and the 550 cold solve are blocked on a
-missing exterior fixture: the exterior store holds no group for those carriers at the exact support
-arm, so <code>_exterior</code> returns a null and the run dies at the terminal-state flux. That is
-per-carrier fixture data rather than a lobe code path, and the remedy is outside this node's write
-scope. No number above is an estimate.</p>
+1.42108547152 &times; 10<sup>&minus;13</sup> and 1.77635683940 &times; 10<sup>&minus;14</sup>; at 550 the read
+books no owner cell, so that row is the whole-cell identity with an empty lobe rather than a measured
+partition. Clause 5 holds at all three sizes: the lobe partition passes the guards
+1.0866 &times; 10<sup>&minus;3</sup>, 5 &times; 10<sup>&minus;4</sup> and 1 &times; 10<sup>&minus;4</sup>, and at
+2,098 it passes where the half-plane cut fails. Clause 6 holds at 282 and is reported, not met, at 550:
+the solve stalls on a collapsing line search at a fixed point near
+1.55 &times; 10<sup>&minus;3</sup>, which is the item clause 6 named in advance and is left as the next
+item. Clause 7 is this fragment. No number above is an estimate.</p>
 </section>
 </main>
 </body>

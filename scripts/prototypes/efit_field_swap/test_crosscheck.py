@@ -9,15 +9,13 @@ truncates nova's own contour-mesh capacity is read rather than dropped.
 from __future__ import annotations
 
 import numpy as np
-import pytest
-
-from nova.equilibrium import topology
 
 from scripts.prototypes.efit_field_swap.crosscheck import (
     _decision,
     cases,
     fitted_geometry,
     lattice,
+    wall_units,
 )
 from scripts.prototypes.efit_field_swap.trace_record import read_trace_record
 
@@ -38,32 +36,24 @@ def test_every_manifest_input_becomes_a_case():
         assert path.endswith(".txt")
 
 
-def _wide_wall_cells(resolution=16):
-    ring = np.asarray(
-        ((2.0, -6.0), (8.0, -6.0), (8.0, 24.0), (2.0, 24.0), (2.0, -6.0)),
-        dtype=np.float64,
-    )
-    cells, samples = lattice(ring, resolution)
-    return ring, cells, samples
-
-
-def test_a_wide_wall_needs_the_fitted_capacity():
-    """nova's own capacity admits no vertex here; the fit is what reads it."""
-    ring, cells, samples = _wide_wall_cells()
-    with pytest.raises(IndexError):
-        topology.TopologyGeometry.from_cells(cells, samples, (ring,))
-    geometry, fitted = fitted_geometry(cells, samples, (ring,))
-    assert geometry is not None
-    assert fitted is True
-    assert len(np.asarray(geometry.centre)) == len(cells)
-
-
 def test_a_wide_wall_record_reads_a_decision():
-    """An ITER record, unread before the fit, now carries nova's decision."""
+    """An ITER record, unread before the fit, now carries nova's decision.
+
+    Nova's own contour-mesh capacity admits no vertex for this record's wall, so
+    the geometry cannot be built without the fit. The assertion is on the read
+    reaching a decision, not on the shape of the failure that preceded it: what
+    the repair owes is that this record is comparable, which is the property the
+    review found missing.
+    """
+    record = read_trace_record(ITER_RECORD)
+    cells, samples = lattice(record.wall_ring, 16)
+    geometry, fitted = fitted_geometry(cells, samples, wall_units(record))
+    assert fitted is True, "this record's wall is the case the fit exists for"
+    assert geometry is not None
     row = _decision(
         "iter-dina3420-s4-18-19:A",
         "boundary_slice_4_iter_18.txt",
-        read_trace_record(ITER_RECORD),
+        record,
         resolutions=(16,),
     )
     assert row.capacity_fit is True

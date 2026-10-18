@@ -37,28 +37,6 @@
     }
   },
   "dispatched_at": "2026-10-18T18:24:46Z",
-  "finding_dispositions": {
-    "0": {
-      "kind": "folded",
-      "node": "tcv-liuqe-known-answer",
-      "recorded_at": "2026-10-18T18:38:30.701155+00:00"
-    },
-    "1": {
-      "kind": "folded",
-      "node": "tcv-liuqe-known-answer",
-      "recorded_at": "2026-10-18T18:38:38.337845+00:00"
-    },
-    "2": {
-      "kind": "folded",
-      "node": "tcv-liuqe-known-answer",
-      "recorded_at": "2026-10-18T18:38:46.153744+00:00"
-    },
-    "3": {
-      "kind": "folded",
-      "node": "tcv-liuqe-known-answer",
-      "recorded_at": "2026-10-18T18:38:54.239195+00:00"
-    }
-  },
   "findings": [
     {
       "file": "scripts/prototypes/tcv_liuqe_known_answer/summarise.py",
@@ -117,6 +95,6 @@
   },
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-10-18T18:35:49.093703+00:00",
+  "timestamp": "2026-10-18T19:44:59.082095+00:00",
   "total": 91
 }

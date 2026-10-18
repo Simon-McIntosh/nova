@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "scripts/prototypes/efit_escape_comparison/compare.py:main",
+    "scripts/prototypes/efit_escape_comparison/compare.py:build_page",
+    "scripts/prototypes/efit_axis_adjudication/plot.py:main",
+    "scripts/prototypes/efit_axis_adjudication/plot.py:draw_panel"
+  ],
+  "completed_at": "2026-10-18T15:14:59Z",
+  "dispatched_at": "2026-10-18T15:07:30Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/efit_escape_comparison/compare.py",
+      "line": "161",
+      "severity": "blocking",
+      "text": "blocking: the wall candidate is reported as nova's admitted contact for four limited MAST-U rows, yet its level differs from nova_boundary_psi in every row (for fullPulse A, 0.0349953 versus 0.0199237); the comparison therefore names a contact that does not explain the decision level."
+    },
+    {
+      "file": "scripts/prototypes/efit_axis_adjudication/plot.py",
+      "line": "146",
+      "severity": "follow-on",
+      "text": "follow-on: _wall_loops_by_role duplicates crosscheck.py:292 domain_rings instead of extending its owner and, at line 167, labels every ring a vessel if axis containment is ambiguous where that owner raises."
+    },
+    {
+      "file": "scripts/prototypes/efit_escape_comparison/compare.py",
+      "line": "462",
+      "severity": "follow-on",
+      "text": "follow-on: the only added guard rejects a row count other than 26, while no added test would fail if the contact choice or marker overlay regressed; the recorded focused gate exercises the pre-existing rebuild check only."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T135138907744-efit-escape-level-comparison/manifest.md",
+      "line": "15",
+      "severity": "follow-on",
+      "text": "follow-on: baseline_suite and after_suite omit failure_count from the declared receipt shape, although their completed logs establish zero failures."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "24b53090fb22d802cce39b56502937442fba3107 adds the 26-side join and figures; 29e73a39f499f2d6512be9ef32bb78794be4dbe5 moves the marker before the failed-panel return and chooses a wall candidate for limited rows, but compare.py:161 still reports a wall value inconsistent with the selected boundary.",
+    "done_when": "brief.txt requires the 26 fields, per-disagreement diagnoses, and inspected figures; exports/rows.json contains 26 sides and the five rendered SVGs were inspected, but exports/test_after.log runs only the old rebuild test and never checks the new contact fields or marker.",
+    "goal": "brief.txt asks for a 26-side rule comparison and per-loop figures; docs/research/efit-escape-level-comparison.html:45-48 reports four limited nova rows with wall-contact levels different from their stated boundary levels, while all five figures contain the escape marker.",
+    "manifest": "manifest.md records both commits and the focused baseline and after logs; both logs finish with EXIT=0 and no failing ids, while the suite JSON omits the required failure_count.",
+    "write_paths": "brief.txt grants the comparison and plotting scripts, research page, evidence fragment, and figure directory; all nine paths in the base-to-head diff are inside those grants."
+  },
+  "justifications": {
+    "durability": "compare.py:462 raises when the generated row count is not 26, but the diff adds no test assertion, and the unchanged test_rebuild.py would remain green if compare.py:161 selected the wrong contact or plot.py:241 lost the marker.",
+    "evidence": "exports/test_baseline.log and exports/test_after.log each complete with zero failures, while the named test_rebuild.py gate does not assert compare.py:161 or plot.py:241; the rendered figures support the marker claim.",
+    "fit": "plot.py:214 calls the existing nova.media painters and compare.py:259 follows the surrounding report-generation style without forbidden source names, although plot.py:167 fails open on ambiguous vessel ownership.",
+    "goal_fidelity": "docs/research/efit-escape-level-comparison.html:45-48 contradicts its own description of an admitted contact on all four limited MAST-U rows, though the 26-side table and five inspected overlays are present.",
+    "reuse": "plot.py:146-176 duplicates the vessel-and-obstacle classification owned by scripts/prototypes/efit_field_swap/crosscheck.py:292-312 instead of wrapping or extending that owner.",
+    "scope_discipline": "the base-to-head diff changes only the nine paths granted in brief.txt, including scripts/prototypes/efit_escape_comparison/compare.py and scripts/prototypes/efit_axis_adjudication/plot.py."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: brief.txt asks for a 26-side rule comparison and per-loop figures; docs/research/efit-escape-level-comparison.html:45-48 reports four limited nova rows with wall-contact levels different from their stated boundary levels, while all five figures contain the escape marker.\nVERDICT done_when: brief.txt requires the 26 fields, per-disagreement diagnoses, and inspected figures; exports/rows.json contains 26 sides and the five rendered SVGs were inspected, but exports/test_after.log runs only the old rebuild test and never checks the new contact fields or marker.\nVERDICT write_paths: brief.txt grants the comparison and plotting scripts, research page, evidence fragment, and figure directory; all nine paths in the base-to-head diff are inside those grants.\nVERDICT manifest: manifest.md records both commits and the focused baseline and after logs; both logs finish with EXIT=0 and no failing ids, while the suite JSON omits the required failure_count.\nVERDICT diff: 24b53090fb22d802cce39b56502937442fba3107 adds the 26-side join and figures; 29e73a39f499f2d6512be9ef32bb78794be4dbe5 moves the marker before the failed-panel return and chooses a wall candidate for limited rows, but compare.py:161 still reports a wall value inconsistent with the selected boundary.\nCALL_SITES: scripts/prototypes/efit_escape_comparison/compare.py:main, scripts/prototypes/efit_escape_comparison/compare.py:build_page, scripts/prototypes/efit_axis_adjudication/plot.py:main, scripts/prototypes/efit_axis_adjudication/plot.py:draw_panel\nSCORE goal_fidelity: 12\nJUSTIFICATION goal_fidelity: docs/research/efit-escape-level-comparison.html:45-48 contradicts its own description of an admitted contact on all four limited MAST-U rows, though the 26-side table and five inspected overlays are present.\nSCORE evidence: 10\nJUSTIFICATION evidence: exports/test_baseline.log and exports/test_after.log each complete with zero failures, while the named test_rebuild.py gate does not assert compare.py:161 or plot.py:241; the rendered figures support the marker claim.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the base-to-head diff changes only the nine paths granted in brief.txt, including scripts/prototypes/efit_escape_comparison/compare.py and scripts/prototypes/efit_axis_adjudication/plot.py.\nSCORE durability: 0\nJUSTIFICATION durability: compare.py:462 raises when the generated row count is not 26, but the diff adds no test assertion, and the unchanged test_rebuild.py would remain green if compare.py:161 selected the wrong contact or plot.py:241 lost the marker.\nSCORE fit: 16\nJUSTIFICATION fit: plot.py:214 calls the existing nova.media painters and compare.py:259 follows the surrounding report-generation style without forbidden source names, although plot.py:167 fails open on ambiguous vessel ownership.\nSCORE reuse: 3\nJUSTIFICATION reuse: plot.py:146-176 duplicates the vessel-and-obstacle classification owned by scripts/prototypes/efit_field_swap/crosscheck.py:292-312 instead of wrapping or extending that owner.\nFINDING scripts/prototypes/efit_escape_comparison/compare.py:161 blocking: the wall candidate is reported as nova's admitted contact for four limited MAST-U rows, yet its level differs from nova_boundary_psi in every row (for fullPulse A, 0.0349953 versus 0.0199237); the comparison therefore names a contact that does not explain the decision level.\nFINDING scripts/prototypes/efit_axis_adjudication/plot.py:146 follow-on: _wall_loops_by_role duplicates crosscheck.py:292 domain_rings instead of extending its owner and, at line 167, labels every ring a vessel if axis containment is ambiguous where that owner raises.\nFINDING scripts/prototypes/efit_escape_comparison/compare.py:462 follow-on: the only added guard rejects a row count other than 26, while no added test would fail if the contact choice or marker overlay regressed; the recorded focused gate exercises the pre-existing rebuild check only.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T135138907744-efit-escape-level-comparison/manifest.md:15 follow-on: baseline_suite and after_suite omit failure_count from the declared receipt shape, although their completed logs establish zero failures.\n",
+  "review_run_id": "r-20261018T150642932422-review-of-efit-escape-level-comparison-29e73a39f499",
+  "reviewed_base_sha": "a0ed032e1c8fb62e1fbad18cea1c343052dc0dd0",
+  "reviewed_head_sha": "29e73a39f499f2d6512be9ef32bb78794be4dbe5",
+  "reviewed_run_id": "r-20261018T135138907744-efit-escape-level-comparison",
+  "reviewer": "review-of-efit-escape-level-comparison-29e73a39f499",
+  "scores": {
+    "durability": 0,
+    "evidence": 10,
+    "fit": 16,
+    "goal_fidelity": 12,
+    "reuse": 3,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T15:11:11Z",
+  "total": 61
+}

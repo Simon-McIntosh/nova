@@ -40,6 +40,48 @@ COLOUR = {
     "census": "#929292",
 }
 
+# one canvas width for every figure, so a reader meets one set of sizes; the
+# many-panel band of the figure style allows the smaller label size
+CANVAS_WIDTH = 14.0
+PANEL_HEIGHT = 3.6
+LABEL_SIZE = 12
+
+
+def _assert_no_clipping(fig):
+    """Refuse to write a figure whose text artists leave the canvas or overlap.
+
+    A label or legend entry that is cut off, or that lands on another, is a
+    defect in the delivered artifact however right the numbers are, so the
+    check runs on every save rather than relying on a reader noticing.  The
+    offending artists are named in the error.
+    """
+    fig.canvas.draw()
+    canvas = fig.bbox
+    boxes = []
+    for artist in fig.findobj(matplotlib.text.Text):
+        if not artist.get_visible() or not artist.get_text().strip():
+            continue
+        box = artist.get_window_extent(fig.canvas.get_renderer())
+        if box.width == 0 or box.height == 0:
+            continue
+        if box.x0 < canvas.x0 - 0.5 or box.x1 > canvas.x1 + 0.5 \
+                or box.y0 < canvas.y0 - 0.5 or box.y1 > canvas.y1 + 0.5:
+            raise RuntimeError(
+                f"text artist {artist.get_text()!r} leaves the canvas: "
+                f"{box.x0:.1f},{box.y0:.1f} to {box.x1:.1f},{box.y1:.1f} "
+                f"against canvas {canvas.x0:.1f},{canvas.y0:.1f} to "
+                f"{canvas.x1:.1f},{canvas.y1:.1f}"
+            )
+        boxes.append((box.x0, box.y0, box.x1, box.y1, artist.get_text()))
+    for i, first in enumerate(boxes):
+        for second in boxes[i + 1:]:
+            dx = min(first[2], second[2]) - max(first[0], second[0])
+            dy = min(first[3], second[3]) - max(first[1], second[1])
+            if dx > 1.0 and dy > 1.0:
+                raise RuntimeError(
+                    f"text artists {first[4]!r} and {second[4]!r} overlap"
+                )
+
 
 def _contour(ax, field, record, levels):
     rs = np.linspace(record.rgrid.min(), record.rgrid.max(), 200)
@@ -86,7 +128,8 @@ def draw_panel(ax, row):
                     colors=COLOUR["nova_a"], linestyles="-", linewidths=1.0)
     if b is not None:
         level = b["nova_boundary_level"]
-        if a is None or abs(level - a["nova_boundary_psi"]) > 1e-6:
+        a_level = a["nova_boundary_psi"] if a is not None else None
+        if a_level is None or abs(level - a_level) > 1e-6:
             _contour_at(ax, field, record, level,
                         colors=COLOUR["nova_b"], linestyles=":", linewidths=1.0)
 
@@ -129,7 +172,7 @@ def draw_panel(ax, row):
 
     ax.set_aspect("equal")
     ax.set_axis_off()
-    ax.set_title(row["case"], fontsize=8, pad=2)
+    ax.set_title(row["case"], fontsize=LABEL_SIZE, pad=2)
 
 
 def _legend_handles():
@@ -178,18 +221,33 @@ def main():
 
     for machine, members in groups.items():
         n = len(members)
-        ncols = min(4, n)
+        ncols = min(3, n)
         nrows = math.ceil(n / ncols)
-        fig, axes = plt.subplots(nrows, ncols, figsize=(3.5 * ncols, 3.5 * nrows))
+        fig, axes = plt.subplots(
+            nrows, ncols, figsize=(CANVAS_WIDTH, PANEL_HEIGHT * nrows)
+        )
         axes = np.atleast_1d(axes).ravel()
         for ax, row in zip(axes, members):
             draw_panel(ax, row)
         for ax in axes[n:]:
             ax.set_axis_off()
         slug = machine.lower().replace("-", "")
-        fig.legend(handles=_legend_handles(), loc="upper center", ncol=5,
-                   frameon=False, fontsize=8, bbox_to_anchor=(0.5, 1.0))
-        fig.tight_layout(rect=(0, 0, 1, 0.84))
+        legend = fig.legend(
+            handles=_legend_handles(), loc="lower center", ncol=5,
+            frameon=False, fontsize=LABEL_SIZE, bbox_to_anchor=(0.5, 1.0),
+            borderaxespad=0.0,
+        )
+        # reserve the legend's own measured height, so the panels never grow
+        # under it and the legend cannot run off the top of the canvas
+        fig.canvas.draw()
+        legend_top = legend.get_window_extent(
+            fig.canvas.get_renderer()
+        ).y1 / fig.bbox.height
+        fig.subplots_adjust(
+            top=max(0.2, legend_top - 0.03), bottom=0.02,
+            left=0.01, right=0.99, wspace=0.05, hspace=0.10,
+        )
+        _assert_no_clipping(fig)
         path = outdir / f"efit-axis-{slug}.svg"
         fig.savefig(path, format="svg")
         plt.close(fig)

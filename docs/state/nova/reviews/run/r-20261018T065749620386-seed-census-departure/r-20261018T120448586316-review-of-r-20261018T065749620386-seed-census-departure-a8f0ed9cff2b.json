@@ -54,6 +54,11 @@
       "kind": "exempted",
       "reason": "Split by the coordinator on 2026-10-18 into f-cfs-census-proposal-coverage: the remaining departures are proposal coverage holes (a cell proposes only when its own quadratic stationary point lies inside it), owned by that node; this node repaired the adjacent-pair admission defect.",
       "recorded_at": "2026-10-18T12:15:57.871160+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "seed-census-departure",
+      "recorded_at": "2026-10-18T12:16:10.817060+00:00"
     }
   },
   "findings": [

@@ -97,12 +97,17 @@ class TraceRecord:
         polygon, which serves as the wall for the sampled comparison.
         """
         if self.wall_r.size:
-            starts = np.column_stack((self.wall_r[:, 0], self.wall_z[:, 0]))
+            vertices = np.stack((self.wall_r, self.wall_z), axis=-1).reshape(-1, 2)
         elif self.polygon_r.size >= 3:
-            starts = np.column_stack((self.polygon_r, self.polygon_z))
+            vertices = np.column_stack((self.polygon_r, self.polygon_z))
         else:
             raise ValueError("trace has neither wall segments nor a wall polygon")
-        return np.vstack((starts, starts[0]))
+        keep = np.ones(len(vertices), dtype=bool)
+        keep[1:] = np.any(vertices[1:] != vertices[:-1], axis=1)
+        ring = vertices[keep]
+        if not np.array_equal(ring[-1], ring[0]):
+            ring = np.vstack((ring, ring[0]))
+        return ring
 
 
 def read_trace_record(path: str | Path) -> TraceRecord:

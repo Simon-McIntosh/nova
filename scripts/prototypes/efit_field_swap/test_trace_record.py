@@ -31,9 +31,11 @@ def test_header_grid_axis_polarity_and_wall_round_trip(tmp_path):
     assert record.psi.shape == (65, 65)
     assert record.polarity in (1, -1)
     assert record.verdict in (1, 2)
-    # The ordered wall ring closes one endpoint beyond the segment list.
+    # The ordered wall ring retains segment endpoints and closes at its start.
     ring = record.wall_ring
-    assert ring.shape == (record.wall_r.shape[0] + 1, 2)
+    assert ring.shape[1] == 2
+    np.testing.assert_array_equal(ring[0], ring[-1])
+    assert np.all(np.any(np.diff(ring, axis=0) != 0, axis=1))
 
     out = tmp_path / "roundtrip.txt"
     write_trace_record(out, record)
@@ -118,10 +120,23 @@ def test_wallless_crossing_uses_its_polygon_and_closes_it():
     np.testing.assert_array_equal(ring[0], ring[-1])
 
 
-def test_disconnected_trace_wall_closes_at_its_first_point():
+def test_open_trace_wall_keeps_its_last_endpoint_before_closing():
     source = read_trace_record(CAPTURE)
     wall_r = source.wall_r.copy()
     wall_r[-1, 1] += 0.1
     ring = replace(source, wall_r=wall_r).wall_ring
+    endpoints = np.stack((wall_r, source.wall_z), axis=-1)
+    for endpoint in endpoints.reshape(-1, 2):
+        assert np.any(np.all(ring == endpoint, axis=1))
+    np.testing.assert_array_equal(ring[-2], endpoints[-1, 1])
     np.testing.assert_array_equal(ring[0], ring[-1])
-    assert ring[-1, 0] != wall_r[-1, 1]
+    assert np.all(np.any(np.diff(ring, axis=0) != 0, axis=1))
+
+    closed_r = source.wall_r.copy()
+    closed_z = source.wall_z.copy()
+    closed_r[-1, 1] = closed_r[0, 0]
+    closed_z[-1, 1] = closed_z[0, 0]
+    closed = replace(source, wall_r=closed_r, wall_z=closed_z).wall_ring
+    np.testing.assert_array_equal(closed[-1], closed[0])
+    assert not np.array_equal(closed[-2], closed[-1])
+    assert np.all(np.any(np.diff(closed, axis=0) != 0, axis=1))

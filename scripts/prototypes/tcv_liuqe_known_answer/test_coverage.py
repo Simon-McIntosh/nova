@@ -14,10 +14,11 @@ import os
 from pathlib import Path
 
 import imas
+import jax.numpy as jnp
 import numpy as np
 import pytest
 
-from nova.equilibrium import topology
+from nova.equilibrium import fixed_points, topology
 from nova.equilibrium.topology import TopologyPolicy
 from nova.jax.config import configure_dtypes
 from scripts.prototypes.efit_field_swap import crosscheck
@@ -89,8 +90,25 @@ def test_field_with_a_missed_saddle_is_refused_not_read_limited(monkeypatch):
     assert not missed.certified
 
     def blind_census(f, geometry, convention, policy, previous):
-        """A census that admits both extrema and reports no saddle."""
-        return RootCensus(None, 1, 2, 0, 0, False, 0.0)
+        """A census that admits both maxima and reports no saddle.
+
+        Two negative-definite roots carry index +1 each, so the census is
+        claiming an index sum of two where the boundary winding is one: the
+        saddle it did not admit is the difference.
+        """
+        hessian = jnp.asarray([[[-1.0, 0.0], [0.0, -1.0]]] * 3)
+        jet = topology.FieldJet(
+            value=jnp.zeros(3), gradient=jnp.zeros((3, 2)), hessian=hessian
+        )
+        roots = fixed_points.FixedPointResult(
+            position=jnp.zeros((3, 2)),
+            jet=jet,
+            valid=jnp.ones(3, bool),
+            status=jnp.zeros(3, jnp.int32),
+            iterations=jnp.zeros(3, jnp.int32),
+            retried=jnp.zeros(3, bool),
+        )
+        return RootCensus(roots, 3, 2, 0, 0, False, 0.0)
 
     monkeypatch.setattr(crosscheck, "census", blind_census)
     outcome = crosscheck.read_state(field, RING, (), CONVENTION, POLICY, (16,))

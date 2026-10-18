@@ -159,6 +159,21 @@ def gradient_floor(field, ring):
     return GRADIENT_FLOOR_RELATIVE * float(np.ptp(values)) / spacing
 
 
+def admitted_index_sum(roots):
+    """Index sum of the admitted critical points: extrema +1, saddles -1.
+
+    Counted from the sign of the Hessian determinant at each admitted root, so
+    an extremum is +1 whatever sign the field's own maxima carry in the working
+    convention. The census' own extremum tally is not used: it counts only
+    negative-definite roots, so it reads zero on a field whose axis is a
+    minimum and would report a closed domain as uncertified.
+    """
+    hessian = np.asarray(roots.jet.hessian)
+    valid = np.asarray(roots.valid)
+    determinant = hessian[:, 0, 0] * hessian[:, 1, 1] - hessian[:, 0, 1] ** 2
+    return int(np.sum(np.where(determinant[valid] > 0.0, 1, -1)))
+
+
 def coverage_certificate(field, outer_ring, obstacle_rings, index_sum):
     """Certify that the census admitted every critical point inside the domain.
 
@@ -560,7 +575,7 @@ def read_state(
         roots = census(field, geometry, convention, policy, previous)
         candidates = int(roots.candidates)
         admitted = int(roots.saddles)
-        index_sum = int(roots.axes) - admitted
+        index_sum = admitted_index_sum(roots.roots)
         coverage = coverage_certificate(field, outer, walls, index_sum)
         attempts.append(
             f"lattice {resolution}: candidates {candidates}, admitted saddles "

@@ -2264,6 +2264,7 @@ class ForwardProfile:
             system.initial,
             **{
                 "newton_steps": self.newton_steps,
+                "map_arguments": (pairs,),
                 "shadow_mask_fn": system.shadow_mask_fn,
                 "promoted_shadow_mask_fn": system.promoted_shadow_mask_fn,
                 "shadowed_map_fn": system.shadowed_map_fn,

@@ -15,7 +15,10 @@ import jax.numpy as jnp
 import numpy as np
 
 import nova
-from nova.equilibrium.constraint import CurrentCentroidConstraint
+from nova.equilibrium.constraint import (
+    CurrentCentroidConstraint,
+    uniform_radial_field_jet,
+)
 from benchmarks import solovev_certificate as certificate
 from scripts.analytic_oracle_fixtures import measure as fixture
 from scripts.prototypes.fast_map_production.qualification import require_map
@@ -31,23 +34,6 @@ from scripts.prototypes.solve_options.point_bias import _exterior
 
 def save(path, result):
     path.write_text(json.dumps(result, indent=2, default=str) + "\n")
-
-
-def radial_field_jet(points):
-    """Value, gradient and Hessian of flux from one tesla of radial field."""
-    radius, height = jnp.asarray(points).T
-    zeros = jnp.zeros_like(radius)
-    return jnp.stack(
-        (
-            -2 * jnp.pi * radius * height,
-            -2 * jnp.pi * height,
-            -2 * jnp.pi * radius,
-            zeros,
-            -2 * jnp.pi * jnp.ones_like(radius),
-            zeros,
-        ),
-        axis=-1,
-    )
 
 
 def main():
@@ -185,8 +171,10 @@ def main():
             if args.vertical_target is None
             else jnp.asarray(args.vertical_target, dtype=state.dtype)
         )
-        values_basis = radial_field_jet(context.rule.points.reshape((-1, 2)))[:, 0]
-        jet_basis = radial_field_jet(context.window.nodes)
+        values_basis = uniform_radial_field_jet(context.rule.points.reshape((-1, 2)))[
+            :, 0
+        ]
+        jet_basis = uniform_radial_field_jet(context.window.nodes)
         pin_values = (
             jnp.asarray(False),
             target,

@@ -439,6 +439,24 @@ class UniformRadialFieldUnknown:
         return cls(*children)
 
 
+def uniform_radial_field_jet(points):
+    """Flux value, gradient and Hessian from one tesla of radial field."""
+    coordinate = jnp.asarray(points)
+    radius, height = coordinate[..., 0], coordinate[..., 1]
+    zeros = jnp.zeros_like(radius)
+    return jnp.stack(
+        (
+            -2 * jnp.pi * radius * height,
+            -2 * jnp.pi * height,
+            -2 * jnp.pi * radius,
+            zeros,
+            -2 * jnp.pi * jnp.ones_like(radius),
+            zeros,
+        ),
+        axis=-1,
+    )
+
+
 @dataclass(frozen=True)
 class VerticalPositionPin:
     """Current-centroid height and one declared source that can hold it.
@@ -473,7 +491,7 @@ class VerticalPositionPin:
             if operator.sample is not None:
                 coordinates.append(operator.sample.coordinate)
             points = jnp.concatenate(tuple(jnp.asarray(x) for x in coordinates))
-            basis = -2 * jnp.pi * points[:, 0] * points[:, 1]
+            basis = uniform_radial_field_jet(points)[:, 0]
             unknown = UniformRadialFieldUnknown(basis, self.source_scale)
         else:
             field = operator.prescribed_current_field
@@ -2024,7 +2042,7 @@ def assemble_augmented_system(
     def split(state):
         return state[:flux_size] * flux_scale, state[flux_size:]
 
-    def evaluate(state, shadow=None):
+    def evaluate(state, runtime_pairs, shadow=None):
         flux, unknowns = split(state)
         flux_shadow = (
             jnp.ravel(base_shadow_mask(flux))
@@ -2036,7 +2054,7 @@ def assemble_augmented_system(
         )
         context = ConstraintContext(flux, requested_class, target_current, flux_shadow)
         steps = []
-        for pair, row_slice in zip(pairs, row_slices, strict=True):
+        for pair, row_slice in zip(runtime_pairs, row_slices, strict=True):
             value = unknowns[row_slice]
             delta = pair.unknown.flux_delta(
                 profile, context, pair.functional, pair.binding.payload, value
@@ -2070,8 +2088,13 @@ def assemble_augmented_system(
             (jnp.ravel(flux_shadow), jnp.zeros(row_count, dtype=bool))
         )
 
-    def shadowed_map(state, shadow):
-        return evaluate(state, shadow)
+    def mapped(state, runtime_pairs=None):
+        return evaluate(state, pairs if runtime_pairs is None else runtime_pairs)
+
+    def shadowed_map(state, shadow, runtime_pairs=None):
+        return evaluate(
+            state, pairs if runtime_pairs is None else runtime_pairs, shadow
+        )
 
     observers = []
     for pair, row_slice in zip(pairs, row_slices, strict=True):
@@ -2093,7 +2116,7 @@ def assemble_augmented_system(
 
     return AugmentedConstraintSystem(
         initial=initial,
-        map_fn=lambda state: evaluate(state),
+        map_fn=mapped,
         shadow_mask_fn=shadow_mask,
         promoted_shadow_mask_fn=promoted_shadow_mask,
         shadowed_map_fn=shadowed_map,

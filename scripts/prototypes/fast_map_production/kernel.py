@@ -239,8 +239,30 @@ def _merge_path_saddle(geometry, roots, saddles, sigma, axis_ceiling):
 def read(field, roots, geometry, convention, policy, *, frame_gate=True):
     """Read both boundary candidates and axis-connected Bell support at fixed shape."""
     sigma = convention.sigma
-    axis = roots.position[0]
-    axis_flux = roots.jet.value[0]
+    coefficients = field.sampled_coefficient(geometry)
+    eigenvalues = jnp.linalg.eigvalsh(sigma * roots.jet.hessian)
+    inside = jax.vmap(lambda point: jnp.any(topology._inside_cells(geometry, point)))(
+        roots.position
+    )
+    extrema = (
+        roots.valid
+        & inside
+        & jnp.all(jnp.isfinite(roots.position), axis=1)
+        & jnp.isfinite(roots.jet.value)
+        & jnp.all(eigenvalues < 0, axis=1)
+    )
+    saddle = roots.valid & (eigenvalues[:, 0] < 0) & (eigenvalues[:, 1] > 0)
+    separation = jnp.linalg.norm(
+        roots.position[:, None] - roots.position[None], axis=-1
+    )
+    nearest = jnp.argmin(jnp.where(saddle[None], separation, jnp.inf), axis=1)
+    persistence = sigma * (roots.jet.value - roots.jet.value[nearest])
+    persistent = ~jnp.any(saddle) | (persistence > psi_rounding_enclosure(coefficients))
+    eligible = extrema & persistent
+    axis_index = jnp.argmax(jnp.where(eligible, sigma * roots.jet.value, -jnp.inf))
+    axis_live = jnp.any(eligible)
+    axis = roots.position[axis_index]
+    axis_flux = roots.jet.value[axis_index]
     wall_start = geometry.wall_points
     wall_end = wall_start[geometry.wall_following]
     wall_midpoint = (wall_start + wall_end) / 2
@@ -269,11 +291,8 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
         roots = jax.tree.map(
             lambda leaf: jnp.concatenate((leaf, jnp.zeros_like(leaf)), axis=0), roots
         )
-    eigenvalues = jnp.linalg.eigvalsh(sigma * roots.jet.hessian[1:])
-    saddles = roots.valid[1:] & (eigenvalues[:, 0] < 0) & (eigenvalues[:, 1] > 0)
-    if count == 1:
-        saddles = jnp.zeros_like(saddles)
-    coefficients = field.sampled_coefficient(geometry)
+        saddle = jnp.concatenate((saddle, jnp.zeros_like(saddle)))
+    saddles = saddle[1:]
     seed = jnp.argmin(jnp.sum((geometry.centre - axis) ** 2, axis=1))
     axis_ceiling = _wall_path_ceiling(
         geometry, coefficients, None, axis, None, -jnp.inf, seed, sigma, False
@@ -316,7 +335,7 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
         jnp.zeros(len(geometry.centre)),
         jnp.ones(len(geometry.centre)),
         jnp.zeros(len(geometry.centre), bool),
-        field.sampled_coefficient(geometry),
+        coefficients,
         form,
         saddle_live & near_saddle,
         jnp.zeros(len(geometry.centre), bool),
@@ -421,7 +440,7 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
         path_weight = connected.astype(fraction.dtype)
     membership = provisional.membership * path_weight
     valid = (
-        roots.valid[0]
+        axis_live
         & jnp.all(jnp.isfinite(approximate.field_coefficients))
         & jnp.all(jnp.isfinite(membership))
         & (jnp.sum(booking) <= capacity)
@@ -431,6 +450,8 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
         )
     )
     return provisional._replace(
+        axis=jnp.where(axis_live, provisional.axis, jnp.full_like(axis, jnp.nan)),
+        axis_flux=jnp.where(axis_live, provisional.axis_flux, jnp.nan),
         membership=membership,
         geometric_membership=provisional.membership,
         path_weight=path_weight,

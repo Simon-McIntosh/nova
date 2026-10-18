@@ -97,7 +97,7 @@ at the tie states with a negative control. The probes that located the departure
 the repair, so the measurement re-runs from the record.</p>
 </section>
 
-  <section id=""""seed-census-departure-round-two"""">
+  <section id="seed-census-departure-round-two">
     <h2>Control reinstated, and the departures measured</h2>
     <p id="seed-census-departure-control-live">The control now reinstates the dropping step from the live census source rather than reading an earlier trace: it substitutes the exact-zero comparison, bisects the adjacent pair at which that step loses a root, and runs both arms there. It exits nonzero while the reinstated step reproduces the loss, bisecting to 0.17323108126295622 and 0.17323108126295625 and reading 3 roots / 2 saddles against 2 / 1 there while the repaired arm reads 3 / 2 on both.</p>
     <p id="seed-census-departure-windows">Both windows were then run base beside head under one fixed prior. At 282 over 0.16 to 0.18 the arms agree state for state: 2 roots at 0.16, 3 from 0.161 to 0.173, 1 from 0.1735. At 550 over 0.10 to 0.14 they agree again: 2 through 0.113, 3 from 0.114 to 0.122, 1 from 0.123. Refined over 0.170 to 0.174 at 282 the count is not monotone, returning to 3 at 0.17335 after falling to 2.</p>

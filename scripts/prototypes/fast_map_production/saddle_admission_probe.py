@@ -27,17 +27,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-from scripts.prototypes.fast_map_production import tie_probe
-
-
-def psi_enclosure(coefficients):
-    """Binary64 enclosure of the fitted psi, computed here rather than imported, so
-    the probe can be run against a kernel revision that predates the helper."""
-    return (
-        2.0
-        * jnp.finfo(coefficients.dtype).eps
-        * jnp.max(jnp.abs(coefficients).sum(axis=1))
-    )
+from scripts.prototypes.fast_map_production import kernel, tie_probe
 
 
 def build(kind, cells, cache):
@@ -53,7 +43,7 @@ def sampler_with_enclosure(state):
         roots, reading, raw, eigenvalues, live, chosen = base(shifted, prior)
         exterior = state["jets"].exterior + shifted * state["jet_slope"]
         moving = replace(state["jets"], exterior=exterior).field(state["reference"])
-        enclosure = psi_enclosure(moving.sampled_coefficient(geometry))
+        enclosure = kernel.psi_rounding_enclosure(moving.sampled_coefficient(geometry))
         return roots, reading, raw, eigenvalues, live, chosen, enclosure
 
     return jax.jit(sampled)

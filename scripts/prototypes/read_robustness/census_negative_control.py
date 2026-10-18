@@ -24,7 +24,6 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-from nova.equilibrium import topology
 from scripts.prototypes.fast_map_production import tie_probe
 from scripts.prototypes.read_robustness import census_base_step
 
@@ -34,7 +33,8 @@ def count_roots(census_function, state, offset, prior):
 
     def run(shifted):
         varied = replace(
-            state["jets"], exterior=state["jets"].exterior + shifted * state["jet_slope"]
+            state["jets"],
+            exterior=state["jets"].exterior + shifted * state["jet_slope"],
         )
         field = varied.field(state["reference"])
         return census_function(
@@ -84,7 +84,10 @@ def main():
 
     low, high = args.low, args.high
     reference = int(np.asarray(count_roots(restored, state, low, prior).valid).sum())
-    if int(np.asarray(count_roots(restored, state, high, prior).valid).sum()) >= reference:
+    if (
+        int(np.asarray(count_roots(restored, state, high, prior).valid).sum())
+        >= reference
+    ):
         raise RuntimeError(
             f"the restored dropping step does not depart over {low}..{high}; "
             "there is no pair for this control to sit on"
@@ -93,7 +96,10 @@ def main():
         middle = (low + high) / 2
         if middle in (low, high):
             break
-        if int(np.asarray(count_roots(restored, state, middle, prior).valid).sum()) == reference:
+        if (
+            int(np.asarray(count_roots(restored, state, middle, prior).valid).sum())
+            == reference
+        ):
             low = middle
         else:
             high = middle
@@ -113,7 +119,8 @@ def main():
         print(
             f"offset {offset!r} restored {restored_summary['valid']} roots / "
             f"{restored_summary['saddles']} saddles  repaired "
-            f"{repaired_summary['valid']} roots / {repaired_summary['saddles']} saddles",
+            f"{repaired_summary['valid']} roots / "
+            f"{repaired_summary['saddles']} saddles",
             flush=True,
         )
         if restored_summary["valid"] < repaired_summary["valid"]:

@@ -91,7 +91,9 @@ def stages(field, geometry, convention, policy, previous):
     )
     earlier = jnp.arange(len(live))[None] < jnp.arange(len(live))[:, None]
     duplicate = jnp.any(
-        earlier & live[None] & (separation < 8 * policy.position_tolerance * jnp.min(geometry.pitch)),
+        earlier
+        & live[None]
+        & (separation < 8 * policy.position_tolerance * jnp.min(geometry.pitch)),
         axis=1,
     )
     deduped = live & ~duplicate

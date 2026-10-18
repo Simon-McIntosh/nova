@@ -1,0 +1,375 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    {
+      "assertion": "assert support is MomentIntegralSupport.ALL_DOMAIN",
+      "failure_condition": "Changing centroid observation support away from ALL_DOMAIN fails the fixture support guard.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 113
+    },
+    {
+      "assertion": "assert radial_span >= 0.39",
+      "failure_condition": "Collapsing the solved radial span below 0.39 m fails the nondegenerate geometry check.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 173
+    },
+    {
+      "assertion": "assert isinstance(radial.unknown, UniformRadialFieldUnknown)",
+      "failure_condition": "Selecting a different compensator for the coil-less pin fails the type check.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 181
+    },
+    {
+      "assertion": "np.testing.assert_allclose(np.asarray(radial.unknown.flux_basis), [0] * 5 + [1])",
+      "failure_condition": "Removing the radial response or changing its sign/normalization fails the fixed numerical basis check.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 182
+    },
+    {
+      "assertion": "np.testing.assert_allclose(np.asarray(uniform_radial_field_jet(jnp.asarray([[1.5, -0.5]])))[0], [1.5 * np.pi, np.pi, -3.0 * np.pi, 0.0, -2.0 * np.pi, 0.0])",
+      "failure_condition": "Changing any analytic flux-jet derivative sign or factor fails the independently written values.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 183
+    },
+    {
+      "assertion": "assert isinstance(coil.unknown, CircuitCurrentUnknown)",
+      "failure_condition": "Ignoring the declared circuit direction and selecting the fallback field fails the type check.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 194
+    },
+    {
+      "assertion": "np.testing.assert_array_equal(np.asarray(coil.unknown.direction[:, 0]), [0, 1])",
+      "failure_condition": "Selecting the wrong circuit column fails the literal direction check; this checks forwarding, not field effectiveness.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 195
+    },
+    {
+      "assertion": "np.testing.assert_allclose(delta, [0.0] * 5 + [25.0])",
+      "failure_condition": "Dropping current scale or using the wrong response column fails the independently computed 25-unit flux delta.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 203
+    },
+    {
+      "assertion": "assert bool(receipt.qualified)",
+      "failure_condition": "Removing coil authority prevents qualification.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 211
+    },
+    {
+      "assertion": "assert float(receipt.equilibrium.fixed_point.residual) <= 1e-12",
+      "failure_condition": "Removing coil authority leaves residual above the declared floor.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 212
+    },
+    {
+      "assertion": "assert abs(_booked_terminal_height(receipt.equilibrium.flux) - 0.7) <= 1e-10",
+      "failure_condition": "Ignoring the coil pin target leaves the independently summed moment height away from literal 0.7 m.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 213
+    },
+    {
+      "assertion": "assert jax.config.jax_enable_x64 is True",
+      "failure_condition": "Disabling double precision fails the configuration guard.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 219
+    },
+    {
+      "assertion": "assert not bool(receipt.qualified)",
+      "failure_condition": "Falsely qualifying the stalled free solve fails the refusal assertion.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 223
+    },
+    {
+      "assertion": "assert float(receipt.equilibrium.fixed_point.residual) >= 0.001",
+      "failure_condition": "Removing the constant vertical forcing makes the free residual small and fails the negative-control floor.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 224
+    },
+    {
+      "assertion": "assert _terminal_elongation(flux) >= 1.6",
+      "failure_condition": "Reducing fixture elongation below 1.6 fails the solved-state geometry check.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 225
+    },
+    {
+      "assertion": "assert not bool(receipt.equilibrium.fixed_point.converged)",
+      "failure_condition": "Reporting convergence on a stalled free solve fails the status guard.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 226
+    },
+    {
+      "assertion": "assert abs(_booked_terminal_height(flux) - TARGETS[0]) >= 0.09",
+      "failure_condition": "Accidentally applying the active target in free mode fails the independent height separation.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 227
+    },
+    {
+      "assertion": "np.testing.assert_allclose(receipt.constraints[0].physical_unknown, [0.0])",
+      "failure_condition": "Allowing compensation in inactive mode fails the zero physical-unknown assertion.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 228
+    },
+    {
+      "assertion": "assert jax.config.jax_enable_x64 is True",
+      "failure_condition": "Disabling double precision fails the configuration guard.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 235
+    },
+    {
+      "assertion": "assert bool(receipt.qualified)",
+      "failure_condition": "Removing radial authority prevents pinned qualification.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 239
+    },
+    {
+      "assertion": "assert float(receipt.equilibrium.fixed_point.residual) <= 1e-12",
+      "failure_condition": "Removing radial authority leaves pinned residual above tolerance.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 240
+    },
+    {
+      "assertion": "assert _terminal_elongation(flux) >= 1.6",
+      "failure_condition": "Reducing solved elongation below 1.6 fails the geometry requirement.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 241
+    },
+    {
+      "assertion": "assert abs(_booked_terminal_height(flux) - target) <= 1e-10",
+      "failure_condition": "Ignoring target or replacing booked_height with a constant fails independently summed terminal moments at one or both targets.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 242
+    },
+    {
+      "assertion": "assert len(receipt.constraints) == 1",
+      "failure_condition": "Dropping or duplicating the public constraint receipt fails the row count.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 243
+    },
+    {
+      "assertion": "assert bool(receipt.constraints[0].qualified[0])",
+      "failure_condition": "Omitting proper constraint qualification fails the row verdict.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 244
+    },
+    {
+      "assertion": "assert jax.config.jax_enable_x64 is True",
+      "failure_condition": "Disabling double precision fails the configuration guard.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 250
+    },
+    {
+      "assertion": "assert len(runtime_pairs) == 1 and len(runtime_pairs[0]) == 1",
+      "failure_condition": "Removing map_arguments from the public Newton call fails the runtime-pair structure check.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 260
+    },
+    {
+      "assertion": "assert seen == [(0.0, 1.0), (TARGETS[0], 1.0), (TARGETS[1], 2.0)]",
+      "failure_condition": "Mis-forwarding the requested target or source scale fails this spy equality; correct forwarding with ignored operands still passes, so consumption is protected separately by line 302.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 286
+    },
+    {
+      "assertion": "assert len(profile._request_compilation_cache) == 1",
+      "failure_condition": "Including pin activity, target or scale values in the cache identity creates multiple entries.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 287
+    },
+    {
+      "assertion": "assert not free.compilation_cache_hit",
+      "failure_condition": "Misreporting an initial cache miss as a hit fails.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 288
+    },
+    {
+      "assertion": "assert first.compilation_cache_hit",
+      "failure_condition": "Changing the active-pin cache shape creates an unexpected miss.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 289
+    },
+    {
+      "assertion": "assert second.compilation_cache_hit",
+      "failure_condition": "Keying on target or field-scale values creates an unexpected miss.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 290
+    },
+    {
+      "assertion": "assert sum((not receipt.compilation_cache_hit for receipt in (free, first, second))) == 1",
+      "failure_condition": "Any additional miss or no initial miss fails the cache-count assertion.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 291
+    },
+    {
+      "assertion": "assert not bool(free.qualified)",
+      "failure_condition": "Falsely qualifying the free request fails.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 294
+    },
+    {
+      "assertion": "assert float(free.equilibrium.fixed_point.residual) >= 0.001",
+      "failure_condition": "Removing free vertical forcing makes the free residual fall below the negative-control floor.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 295
+    },
+    {
+      "assertion": "assert bool(receipt.qualified)",
+      "failure_condition": "Dropping pin authority causes either active request to fail qualification.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 297
+    },
+    {
+      "assertion": "assert float(receipt.equilibrium.fixed_point.residual) <= 1e-12",
+      "failure_condition": "Dropping pin authority leaves an active residual above tolerance.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 298
+    },
+    {
+      "assertion": "assert abs(_booked_terminal_height(receipt.equilibrium.flux) - target) <= 1e-10",
+      "failure_condition": "Ignoring the requested target fails independently summed solved moments.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 299
+    },
+    {
+      "assertion": "assert abs(_booked_terminal_height(shifted.equilibrium.flux) - 0.8) <= 1e-10",
+      "failure_condition": "Reinstating closure-bound pairs ignores the substituted 0.8 runtime target and leaves the solved height at 0.7.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 302
+    },
+    {
+      "assertion": "assert not bool(shifted.qualified)",
+      "failure_condition": "Qualifying solely by solver residual would incorrectly accept a solved height of 0.8 against the original requested 0.7.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 303
+    },
+    {
+      "assertion": "assert jax.config.jax_enable_x64 is True",
+      "failure_condition": "Disabling double precision fails the configuration guard.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 309
+    },
+    {
+      "assertion": "assert bool(converged)",
+      "failure_condition": "Removing active pin authority prevents convergence in the compiled execution.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 354
+    },
+    {
+      "assertion": "assert float(residual) <= 1e-12",
+      "failure_condition": "Removing active pin authority leaves compiled residual above tolerance.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 355
+    },
+    {
+      "assertion": "assert not bool(converged)",
+      "failure_condition": "Falsely reporting convergence of the forced free map fails.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 357
+    },
+    {
+      "assertion": "assert float(residual) >= 0.001",
+      "failure_condition": "Removing forcing makes the free compiled residual pass and therefore fails this control.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 358
+    },
+    {
+      "assertion": "assert _terminal_elongation(flux) >= 1.6",
+      "failure_condition": "Collapsing the solved elongation fails the physical-extent bound.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 359
+    },
+    {
+      "assertion": "assert abs(_booked_terminal_height(flux) - expected) <= 1e-10",
+      "failure_condition": "Ignoring active target fails independently summed height; inactive branch independently expects seed centroid because the free correction cannot remove forcing.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 360
+    },
+    {
+      "assertion": "np.testing.assert_array_equal(unknown, [0.0])",
+      "failure_condition": "Allowing nonzero inactive compensation fails the zero-unknown check.",
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": 362
+    }
+  ],
+  "call_site_count": 6,
+  "call_sites": [
+    "nova/equilibrium/forward.py:ForwardProfile._solve_imposed_request",
+    "nova/equilibrium/forward.py:ForwardProfile._solve_augmented_constraints",
+    "nova/equilibrium/forward.py:ForwardProfile._request_compilation_cache_key",
+    "scripts/prototypes/xpoint_cell_owner/runtime_solve.py:residual",
+    "scripts/prototypes/xpoint_cell_owner/solve_carrier.py:main",
+    "scripts/prototypes/xpoint_cell_owner/panel_data.py:main"
+  ],
+  "completed_at": "2026-10-18T22:03:30Z",
+  "dispatched_at": "2026-10-18T21:52:44Z",
+  "figure_inspection": {
+    "render": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T215152195016-review-of-vertical-pin-5a56dafb5e68/reviewed-figure.png",
+    "source_revision": "5a56dafb5e68b0f066bcc6c0a7ea4c78265abee2",
+    "svg": "docs/figures/converged-forward-solve/vertical-pin/pin-response.svg",
+    "verdict": "Inspected rendered committed SVG: contours, wall, axis and X-point visible; legend readable and unclipped. convert returned 0 but emitted a temporary-file warning; rendered PNG was opened and visually verified."
+  },
+  "findings": [],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 6 production call site(s)",
+    "diff": "Reviewed the 22-commit sequence from 8e0ccc13a1d72fa47a4e48f37ca5d6131ad89fca to 5a56dafb5e68b0f066bcc6c0a7ea4c78265abee2; the final nova/equilibrium/solve.py diff is formatting only and the final functionality extends constraint.py and forward.py.",
+    "done_when": "tests/equilibrium/test_solve_vertical_pin.py:213-362 guards free stall, two pinned targets and one lowered program; compare-550-titan.log records the requested 550-cell comparison and head-suite-final.log records six pin tests passing.",
+    "goal": "The source brief.txt requests an optional centroid-height pin, and nova/equilibrium/constraint.py:463 plus forward.py:2624 wire its compensating unknown into the public solve.",
+    "manifest": "The source manifest.md:19-22 names the negative control and completed paired arms; base-suite-final.log and head-suite-final.log independently contain the same five failure ids and terminal EXIT=1 receipts.",
+    "write_paths": "The source manifest.md:3 grants the equilibrium files, prototype directory, pin test and documentation paths, and all 11 changed files fall within those grants."
+  },
+  "justifications": {
+    "durability": "tests/equilibrium/test_solve_vertical_pin.py:242 independently measures terminal height and line 302 checks a substituted a runtime target to expose closure capture; negative-control-forced-field.log records five failures when field authority is removed, though the 550-cell outcome remains receipt evidence rather than a committed regression test.",
+    "evidence": "head-suite-final.log records six passing pin tests and five inherited failures, while tests/equilibrium/test_solve_vertical_pin.py:332 measures one explicitly lowered augmented program separately from the public request-cache identity check at line 287.",
+    "fit": "nova/equilibrium/constraint.py:404 follows the existing compensating-unknown pytree protocol at line 334, and VerticalPositionPin composes the existing ConstraintPair and centroid functional without retained parallel solver wrappers.",
+    "goal_fidelity": "nova/equilibrium/constraint.py:486 and forward.py:2267 supply a physical field unknown and runtime pair, while compare-550-titan.log records residual improvement from 0.00154987034415 to 2.09179996955e-13.",
+    "reuse": "Capability searches found existing centroid, circuit and bounded exterior owners in nova/equilibrium/constraint.py:334,609,1057; the addition extends that owner, reuses CircuitCurrentUnknown, and centralizes the previously absent direct uniform-radial flux-jet basis at line 442.",
+    "scope_discipline": "The 11 paths in the base-to-head diff match source manifest.md:3, including panel_data.py under the declared prototype-directory grant."
+  },
+  "limitations": [
+    "Six-moment algebraic carrier tests the production augmented solver, not a full analytic equilibrium field discretization; the separate 550-cell physical carrier supplies that evidence.",
+    "The single lowered executable test and public cache identity test are distinct measurements, as the research page states.",
+    "Review worktree HEAD differs from reviewed head; all code and figure reads used explicit git objects."
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source brief.txt requests an optional centroid-height pin, and nova/equilibrium/constraint.py:463 plus forward.py:2624 wire its compensating unknown into the public solve.\nVERDICT done_when: tests/equilibrium/test_solve_vertical_pin.py:213-362 guards free stall, two pinned targets and one lowered program; compare-550-titan.log records the requested 550-cell comparison and head-suite-final.log records six pin tests passing.\nVERDICT write_paths: The source manifest.md:3 grants the equilibrium files, prototype directory, pin test and documentation paths, and all 11 changed files fall within those grants.\nVERDICT manifest: The source manifest.md:19-22 names the negative control and completed paired arms; base-suite-final.log and head-suite-final.log independently contain the same five failure ids and terminal EXIT=1 receipts.\nVERDICT diff: Reviewed the 22-commit sequence from 8e0ccc13a1d72fa47a4e48f37ca5d6131ad89fca to 5a56dafb5e68b0f066bcc6c0a7ea4c78265abee2; the final nova/equilibrium/solve.py diff is formatting only and the final functionality extends constraint.py and forward.py.\nCALL_SITES: nova/equilibrium/forward.py:ForwardProfile._solve_imposed_request, nova/equilibrium/forward.py:ForwardProfile._solve_augmented_constraints, nova/equilibrium/forward.py:ForwardProfile._request_compilation_cache_key, scripts/prototypes/xpoint_cell_owner/runtime_solve.py:residual, scripts/prototypes/xpoint_cell_owner/solve_carrier.py:main, scripts/prototypes/xpoint_cell_owner/panel_data.py:main\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: nova/equilibrium/constraint.py:486 and forward.py:2267 supply a physical field unknown and runtime pair, while compare-550-titan.log records residual improvement from 0.00154987034415 to 2.09179996955e-13.\nSCORE evidence: 19\nJUSTIFICATION evidence: head-suite-final.log records six passing pin tests and five inherited failures, while tests/equilibrium/test_solve_vertical_pin.py:332 measures one explicitly lowered augmented program separately from the public request-cache identity check at line 287.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The 11 paths in the base-to-head diff match source manifest.md:3, including panel_data.py under the declared prototype-directory grant.\nSCORE durability: 19\nJUSTIFICATION durability: tests/equilibrium/test_solve_vertical_pin.py:242 independently measures terminal height and line 302 checks a substituted a runtime target to expose closure capture; negative-control-forced-field.log records five failures when field authority is removed, though the 550-cell outcome remains receipt evidence rather than a committed regression test.\nSCORE fit: 20\nJUSTIFICATION fit: nova/equilibrium/constraint.py:404 follows the existing compensating-unknown pytree protocol at line 334, and VerticalPositionPin composes the existing ConstraintPair and centroid functional without retained parallel solver wrappers.\nSCORE reuse: 20\nJUSTIFICATION reuse: Capability searches found existing centroid, circuit and bounded exterior owners in nova/equilibrium/constraint.py:334,609,1057; the addition extends that owner, reuses CircuitCurrentUnknown, and centralizes the previously absent direct uniform-radial flux-jet basis at line 442.\n",
+  "review_run_id": "r-20261018T215152195016-review-of-vertical-pin-5a56dafb5e68",
+  "reviewed_base_sha": "8e0ccc13a1d72fa47a4e48f37ca5d6131ad89fca",
+  "reviewed_head_sha": "5a56dafb5e68b0f066bcc6c0a7ea4c78265abee2",
+  "reviewed_run_id": "r-20261018T141607544598-vertical-pin",
+  "scores": {
+    "durability": 19,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "suite_evidence": {
+    "after_failure_ids": [
+      "tests/equilibrium/test_topology_read.py::test_kernel_compile_growth[132]",
+      "tests/equilibrium/test_topology_read.py::test_kernel_compile_growth[300]",
+      "tests/equilibrium/test_topology_read.py::test_kernel_compile_growth[550]",
+      "tests/equilibrium/test_topology_read.py::test_saddle_support_order[diverted]",
+      "tests/equilibrium/test_topology_read.py::test_topology_class_and_membership[diverted]"
+    ],
+    "after_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T141607544598-vertical-pin/head-suite-final.log",
+    "baseline_failure_ids": [
+      "tests/equilibrium/test_topology_read.py::test_kernel_compile_growth[132]",
+      "tests/equilibrium/test_topology_read.py::test_kernel_compile_growth[300]",
+      "tests/equilibrium/test_topology_read.py::test_kernel_compile_growth[550]",
+      "tests/equilibrium/test_topology_read.py::test_saddle_support_order[diverted]",
+      "tests/equilibrium/test_topology_read.py::test_topology_class_and_membership[diverted]"
+    ],
+    "baseline_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T141607544598-vertical-pin/base-suite-final.log",
+    "note": "Only research and evidence HTML differ after the tested source head; two skips and seven xfails in each topology arm are unpassed checks.",
+    "source_matches_reviewed_head": true,
+    "tested_head_sha": "a4f6406cd702002ed51aa781e9231614ceca5edc"
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T22:06:14.218466+00:00",
+  "total": 118
+}

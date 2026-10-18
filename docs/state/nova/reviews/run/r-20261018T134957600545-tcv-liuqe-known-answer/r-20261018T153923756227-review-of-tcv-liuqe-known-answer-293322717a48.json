@@ -1,0 +1,89 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest records baseline_suite and after_suite as 'not run' (free text, not JSON), so no base or head arm log exists to derive an added-failure count from",
+  "call_site_count": 4,
+  "call_sites": [
+    "scripts/prototypes/tcv_liuqe_known_answer/measure.py:299-300 (__main__ calls main)",
+    "scripts/prototypes/tcv_liuqe_known_answer/measure.py:279 (main calls measure_slice)",
+    "scripts/prototypes/tcv_liuqe_known_answer/figures.py:172 (main calls build)",
+    "scripts/prototypes/tcv_liuqe_known_answer/summarise.py:81 (main calls merge)"
+  ],
+  "completed_at": "2026-10-18T15:54:55.194Z",
+  "dispatched_at": "2026-10-18T15:41:07Z",
+  "findings": [
+    {
+      "file": "docs/research/tcv-liuqe-known-answer.html",
+      "line": "85",
+      "severity": "blocking",
+      "text": "blocking: The summary at :85-86 disagrees on seven but reads 'three diverted slices (0, 14, 456) as limited, and four limited slices (118, 206) as diverted', while the receipt /tmp/tcvk/all.json and this report's own table at :66-77 carry 5 diverted->limited (0, 14, 456, 796, 1257) and 2 limited->diverted (118, 206); the counts reconcile with neither the parenthetical lists (3 and 2 items) nor the total of seven, so the delivered summary misstates the structure of its own result."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/tcv-liuqe-known-answer.html",
+      "line": "59",
+      "severity": "follow-on",
+      "text": "follow-on: The fragment caption enumerates only 5 of the 7 disagreements ('three diverted slices (0, 14, 456)' and 'two limited slices (118, 206)'), omitting 796 and 1257, which /tmp/tcvk/all.json and the report table both label diverted->limited; the figure caption at docs/research/tcv-liuqe-known-answer.html:123-126 omits the same two."
+    },
+    {
+      "file": "scripts/prototypes/tcv_liuqe_known_answer/measure.py",
+      "line": "182",
+      "severity": "follow-on",
+      "text": "follow-on: The zero-saddle fix was applied to measure_slice, which re-implements the decision loop the repository already owns at scripts/prototypes/efit_field_swap/crosscheck.py:349-417; crosscheck._decision still refuses a zero-saddle slice at crosscheck.py:372, so the two copies now diverge on exactly the limited slices this node set out to score, and the brief named efit_field_swap as the place to extend."
+    },
+    {
+      "file": "scripts/prototypes/tcv_liuqe_known_answer/figures.py",
+      "line": "40",
+      "severity": "follow-on",
+      "text": "follow-on: read_wall (figures.py:40-51) and slice_view (figures.py:54-73) duplicate the same two helpers at measure.py:77-89 and measure.py:101-132 within the one node, so the wall-IDS-to-rings reading exists twice and will drift."
+    },
+    {
+      "file": "scripts/prototypes/tcv_liuqe_known_answer/figures.py",
+      "line": "151",
+      "severity": "follow-on",
+      "text": "follow-on: axes.set_xlabel('R [m]') and set_ylabel('Z [m]') are called on a panel whose axis nova.media.ink.poloidal_axes:165 turns off with set_axis_off(), so neither label can render; the panel carries no 2D axes by the plotting rule, so these two calls are dead."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T134957600545-tcv-liuqe-known-answer/manifest.md",
+      "line": "13",
+      "severity": "follow-on",
+      "text": "follow-on: baseline_suite and after_suite are recorded as free-text 'not run' rather than the required single-line JSON with a command and log_path, and /tmp/tcvk/gate.log carries no header naming the revision, tree or command it ran at, so the focused gate's provenance cannot be reconstructed from the log."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s): the three prototype entry points and measure.py:279",
+    "diff": "Read both commits against a0ed032e; 13db33f37 adds measure.py plus the report and fragment, 293322717 replaces the zero-saddle skip with a limited-slice read in measure.py:182-189 and adds summarise.py, figures.py, test_measure.py, the report table and the SVG.",
+    "done_when": "docs/research/tcv-liuqe-known-answer.html:56-79 supplies the 12-slice gap table and :118-127 the panels, and measure.py:46/259 selects the twelve slices; all three clauses land, but test_measure.py asserts only clause 1's label on one slice and the suite arms are not run.",
+    "goal": "The goal is to score nova's boundary read on TCV 77549 LIUQE slices against LIUQE; docs/research/tcv-liuqe-known-answer.html:56-79 lands the 12-slice gap table and tcv-77549-liuqe-nova-boundary.svg the 12-panel figure, so the deliverable exists.",
+    "manifest": "The reviewed manifest.md reports status complete, commits 13db33f37 and 293322717, a focused gate passing (test_measure.py 1 passed in 184.92s at /tmp/tcvk/gate.log), and baseline_suite/after_suite 'not run' as free text.",
+    "write_paths": "The reviewed manifest declares five path families and git diff --stat a0ed032e..293322717 changes only files inside them; nova/ and scripts/prototypes/efit_field_swap are untouched."
+  },
+  "justifications": {
+    "durability": "test_measure.py:44 reddens on the pre-fix driver, shown by the negative control at /tmp/tcvk/control.log ('PREFIX LABEL unqualified ... candidates 0/1, admitted saddles 0'), so the limited-slice repair is guarded, but summarise.py, figures.py and the report carry no assertion.",
+    "evidence": "The only gate, test_measure.py:44, asserts one limited-slice label while the 12-slice result is corroborated only by the un-named receipt /tmp/tcvk/all.json, and baseline_suite/after_suite are recorded 'not run' so no delta against the base exists.",
+    "fit": "measure.py:44-46 and figures.py:23-29 follow the adapter and nova.media idiom and carry no plan labels, but figures.py:151-152 set axis labels on a panel that nova.media.ink.poloidal_axes:165 turns off.",
+    "goal_fidelity": "docs/research/tcv-liuqe-known-answer.html:56-79 scores nova's read on 12 LIUQE slices against LIUQE's own values, satisfying the goal, though the summary at :85-86 misstates the disagreement split.",
+    "reuse": "measure.py:144-226 re-implements the decision loop owned by scripts/prototypes/efit_field_swap/crosscheck.py:349-417 rather than extending it, and the fix applied to the copy leaves the owner refusing zero-saddle slices at crosscheck.py:372.",
+    "scope_discipline": "git diff --stat a0ed032e..293322717 changes only files under the four declared path families and leaves nova/ and scripts/prototypes/efit_field_swap unchanged."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The goal is to score nova's boundary read on TCV 77549 LIUQE slices against LIUQE; docs/research/tcv-liuqe-known-answer.html:56-79 lands the 12-slice gap table and tcv-77549-liuqe-nova-boundary.svg the 12-panel figure, so the deliverable exists.\nVERDICT done_when: docs/research/tcv-liuqe-known-answer.html:56-79 supplies the 12-slice gap table and :118-127 the panels, and measure.py:46/259 selects the twelve slices; all three clauses land, but test_measure.py asserts only clause 1's label on one slice and the suite arms are not run.\nVERDICT write_paths: The reviewed manifest declares five path families and git diff --stat a0ed032e..293322717 changes only files inside them; nova/ and scripts/prototypes/efit_field_swap are untouched.\nVERDICT manifest: The reviewed manifest.md reports status complete, commits 13db33f37 and 293322717, a focused gate passing (test_measure.py 1 passed in 184.92s at /tmp/tcvk/gate.log), and baseline_suite/after_suite 'not run' as free text.\nVERDICT diff: Read both commits against a0ed032e; 13db33f37 adds measure.py plus the report and fragment, 293322717 replaces the zero-saddle skip with a limited-slice read in measure.py:182-189 and adds summarise.py, figures.py, test_measure.py, the report table and the SVG.\nCALL_SITES: scripts/prototypes/tcv_liuqe_known_answer/measure.py:299-300 (__main__ calls main), scripts/prototypes/tcv_liuqe_known_answer/measure.py:279 (main calls measure_slice), scripts/prototypes/tcv_liuqe_known_answer/figures.py:172 (main calls build), scripts/prototypes/tcv_liuqe_known_answer/summarise.py:81 (main calls merge)\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: docs/research/tcv-liuqe-known-answer.html:56-79 scores nova's read on 12 LIUQE slices against LIUQE's own values, satisfying the goal, though the summary at :85-86 misstates the disagreement split.\nSCORE evidence: 10\nJUSTIFICATION evidence: The only gate, test_measure.py:44, asserts one limited-slice label while the 12-slice result is corroborated only by the un-named receipt /tmp/tcvk/all.json, and baseline_suite/after_suite are recorded 'not run' so no delta against the base exists.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat a0ed032e..293322717 changes only files under the four declared path families and leaves nova/ and scripts/prototypes/efit_field_swap unchanged.\nSCORE durability: 15\nJUSTIFICATION durability: test_measure.py:44 reddens on the pre-fix driver, shown by the negative control at /tmp/tcvk/control.log ('PREFIX LABEL unqualified ... candidates 0/1, admitted saddles 0'), so the limited-slice repair is guarded, but summarise.py, figures.py and the report carry no assertion.\nSCORE fit: 14\nJUSTIFICATION fit: measure.py:44-46 and figures.py:23-29 follow the adapter and nova.media idiom and carry no plan labels, but figures.py:151-152 set axis labels on a panel that nova.media.ink.poloidal_axes:165 turns off.\nSCORE reuse: 4\nJUSTIFICATION reuse: measure.py:144-226 re-implements the decision loop owned by scripts/prototypes/efit_field_swap/crosscheck.py:349-417 rather than extending it, and the fix applied to the copy leaves the owner refusing zero-saddle slices at crosscheck.py:372.\nFINDING docs/research/tcv-liuqe-known-answer.html:85 blocking: The summary at :85-86 disagrees on seven but reads 'three diverted slices (0, 14, 456) as limited, and four limited slices (118, 206) as diverted', while the receipt /tmp/tcvk/all.json and the report's own table have 5 diverted->limited (0, 14, 456, 796, 1257) and 2 limited->diverted (118, 206); the counts reconcile with neither its own lists nor the total of seven.\nFINDING docs/evidence/fragments/converged-forward-solve/tcv-liuqe-known-answer.html:59 follow-on: The fragment caption enumerates only 5 of the 7 disagreements, omitting 796 and 1257 which /tmp/tcvk/all.json labels diverted->limited; the figure caption at docs/research/tcv-liuqe-known-answer.html:123-126 omits the same two.\nFINDING scripts/prototypes/tcv_liuqe_known_answer/measure.py:182 follow-on: The zero-saddle fix was applied to measure_slice, which re-implements the decision loop owned at scripts/prototypes/efit_field_swap/crosscheck.py:349-417; crosscheck._decision still refuses a zero-saddle slice at crosscheck.py:372, so the copies diverge on exactly the limited slices this node set out to score.\nFINDING scripts/prototypes/tcv_liuqe_known_answer/figures.py:40 follow-on: read_wall (figures.py:40-51) and slice_view (figures.py:54-73) duplicate the same two helpers at measure.py:77-89 and measure.py:101-132 within the one node.\nFINDING scripts/prototypes/tcv_liuqe_known_answer/figures.py:151 follow-on: axes.set_xlabel and set_ylabel are called on a panel whose axis nova.media.ink.poloidal_axes:165 turns off, so neither label renders.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T134957600545-tcv-liuqe-known-answer/manifest.md:13 follow-on: baseline_suite and after_suite are free-text 'not run' rather than JSON, and /tmp/tcvk/gate.log carries no header naming the revision, tree or command it ran at, so the gate's provenance cannot be reconstructed.\nreviewed_base_sha: a0ed032e1c8fb62e1fbad18cea1c343052dc0dd0\nreviewed_head_sha: 293322717a4825aa6cce7c11dce11f70a2efb054\n",
+  "review_run_id": "r-20261018T153923756227-review-of-tcv-liuqe-known-answer-293322717a48",
+  "reviewed_base_sha": "a0ed032e1c8fb62e1fbad18cea1c343052dc0dd0",
+  "reviewed_head_sha": "293322717a4825aa6cce7c11dce11f70a2efb054",
+  "reviewed_run_id": "r-20261018T134957600545-tcv-liuqe-known-answer",
+  "scores": {
+    "durability": 15,
+    "evidence": 10,
+    "fit": 14,
+    "goal_fidelity": 16,
+    "reuse": 4,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T15:57:16.071515+00:00",
+  "total": 79
+}

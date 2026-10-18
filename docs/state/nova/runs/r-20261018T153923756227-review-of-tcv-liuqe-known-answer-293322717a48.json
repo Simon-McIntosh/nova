@@ -1,0 +1,388 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "read-only",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "9c77bdc3097b3e5a61cd016cdf35b75378290bae",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T153923756227-review-of-tcv-liuqe-known-answer-293322717a48/brief.md",
+    "sha256": "074007d5eed0444055e7c25ffa27d2b0da4719eb5300423fbc01715234ab365a"
+  },
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 4031272,
+      "input_tokens_cumulative": 4031272,
+      "output_tokens": 35514,
+      "output_tokens_cumulative": 35514,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-10-18T15:54:55.194Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-18T15:41:07Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": false,
+    "matched_measure": null,
+    "override": false,
+    "role": "review",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "report/fragment",
+    "scripts/prototypes/efit_field_swap/crosscheck.py:372",
+    "measure.py",
+    "read_wall/slice_view"
+  ],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.2857142857142857,
+    "plan": "converged-forward-solve",
+    "reason": "role-not-enforced:review",
+    "verdict": "exempt"
+  },
+  "lane": null,
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-18T16:39:33.639560+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-18T15:39:33Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 14,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 4,
+    "headroom": 7,
+    "mean_context": 130000,
+    "observed_at": "2026-10-18T15:39:19Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 14,
+      "aggregate_tokens_per_second": 266.438,
+      "detail": "",
+      "mean_tokens_per_second": 53.288,
+      "observed_at": "2026-10-18T15:39:19Z",
+      "runs": 5.0,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-18T15:54:55.194Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T153923756227-review-of-tcv-liuqe-known-answer-293322717a48/manifest.md",
+  "member": "disposable-r-20261018T153923756227-review-of-tcv-liuqe-known-answer-293322717a48",
+  "model_key": null,
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "review-of-tcv-liuqe-known-answer-293322717a48",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T134957600545-tcv-liuqe-known-answer/review-brief.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T153923756227-review-of-tcv-liuqe-known-answer-293322717a48/brief.md",
+    "brief_sha256": "074007d5eed0444055e7c25ffa27d2b0da4719eb5300423fbc01715234ab365a",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "critical",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 703,
+          "cached_input_tokens": 793661,
+          "input_tokens": 794366,
+          "output_tokens": 1121,
+          "reasoning_output_tokens": 177,
+          "total_tokens": 795487,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "the review for r-20261018T134957600545-tcv-liuqe-known-answer stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run's own baseline_suite and after_suite gate logs; the record is written at one of this run's declared write paths, under review-records/ inside the directory of run r-20261018T134957600545-tcv-liuqe-known-answer, and never in the worktree; the turn ends once that record is stored and the manifest reads complete",
+    "estimated_hours": null,
+    "goal": "attach an independent review to run r-20261018T134957600545-tcv-liuqe-known-answer",
+    "id": "review-of-tcv-liuqe-known-answer-293322717a48",
+    "images": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-18T15:39:33Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 14,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 4,
+      "headroom": 7,
+      "mean_context": 130000,
+      "observed_at": "2026-10-18T15:39:19Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 14,
+        "aggregate_tokens_per_second": 266.438,
+        "detail": "",
+        "mean_tokens_per_second": 53.288,
+        "observed_at": "2026-10-18T15:39:19Z",
+        "runs": 5.0,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T153923756227-review-of-tcv-liuqe-known-answer-293322717a48/manifest.md",
+    "negative_control": "",
+    "plan": "converged-forward-solve",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "review",
+    "section": "§2",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T134957600545-tcv-liuqe-known-answer/review-records/r-20261018T134957600545-tcv-liuqe-known-answer.json",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T134957600545-tcv-liuqe-known-answer/review-records/r-20261018T134957600545-tcv-liuqe-known-answer.at-293322717a4825aa6cce7c11dce11f70a2efb054.json"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 2316733.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "review-of-tcv-liuqe-known-answer-293322717a48",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-18T15:40:06.537336+00:00",
+    "score": 0.625,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:capability",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5002.522,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 707.682,
+      "context-estimate": 85.55,
+      "records": 928.029,
+      "verdict-inputs": 840.166
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.2857142857142857,
+  "plan_link": null,
+  "promoted_by": "review-self",
+  "promoted_revision": "9c77bdc3097b3e5a61cd016cdf35b75378290bae",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "id": "r-20261018T153923756227-review-of-tcv-liuqe-known-answer-293322717a48",
+    "reviewed_base_sha": "a0ed032e1c8fb62e1fbad18cea1c343052dc0dd0",
+    "reviewed_head_sha": "293322717a4825aa6cce7c11dce11f70a2efb054",
+    "scores": {
+      "durability": 15,
+      "evidence": 10,
+      "fit": 14,
+      "goal_fidelity": 16,
+      "reuse": 4,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 79
+  },
+  "review_tier": "full",
+  "role": "review",
+  "route_mode": "shadow",
+  "run_id": "r-20261018T153923756227-review-of-tcv-liuqe-known-answer-293322717a48",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "82c9dfee-1322-440a-82b0-cc6d5e097713",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 4031272,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 763.783,
+    "generated_tokens": 35514,
+    "generation_seconds": 653.395,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 70.7,
+    "machine_seconds": 110.388,
+    "peak_input_tokens": 162608,
+    "tokens_per_second": 54.35,
+    "wall_tokens_per_second": 46.5
+  },
+  "time_budget": "60m",
+  "tool_steps": 39.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 828,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-18T15:54:59Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-18T15:41:59Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261018T153923756227-review-of-tcv-liuqe-known-answer-293322717a48",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 5484,
+    "worker_pid": 893527
+  },
+  "worker_seconds": 724,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

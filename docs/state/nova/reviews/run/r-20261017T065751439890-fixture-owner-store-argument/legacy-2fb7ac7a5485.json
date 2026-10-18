@@ -1,0 +1,88 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 1,
+  "added_failure_ids": [
+    "tests/test_forward_support_clip_mode.py::test_operator_clip_modes_apply_through_with_clip_mode"
+  ],
+  "added_failures_note": "Raw base gate has five FAILED IDs and raw head gate has those five plus a 300-second timeout; a separate head-only rerun passes three tests, so the paired-gate delta is one and the adjudicated result is zero.",
+  "call_site_count": 6,
+  "call_sites": [
+    "scripts/prototypes/support/book.py:50",
+    "scripts/prototypes/support/book.py:59",
+    "scripts/prototypes/support/certificate_fixtures.py:241",
+    "scripts/prototypes/support/certificate_fixtures.py:259",
+    "scripts/analytic_oracle_fixtures/measure.py:1633",
+    "scripts/analytic_oracle_fixtures/measure.py:1645"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-10-17T06:58:13Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T065751439890-fixture-owner-store-argument/manifest.md",
+      "line": "121",
+      "severity": "follow-on",
+      "text": "follow-on: after_suite lists five failures, but its raw head gate log has a sixth timeout failure at test_operator_clip_modes_apply_through_with_clip_mode; the isolated rerun passes, so keep the raw paired-gate delta of one distinct from the adjudicated outcome."
+    },
+    {
+      "file": "tests/test_current_book_fragments.py",
+      "line": "318",
+      "severity": "follow-on",
+      "text": "follow-on: store.published and cold.cache['semantic_key'] derive from the same supplied session key, so this assertion survives a wrong key that moves both sides together; line 242 is the separate independent digest check."
+    },
+    {
+      "file": "tests/test_current_book_fragments.py",
+      "line": "303",
+      "severity": "follow-on",
+      "text": "follow-on: the second-build refusal exercises cached_machine only, so cached_fixture_exterior at measure.py:1458 can regress to rebuilding on every call without reddening this added test."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/fixture-owner-store-argument.html",
+      "line": "16",
+      "severity": "follow-on",
+      "text": "follow-on: plan-environment still says job 1287964 is queued and the gate has not run, while line 97 and the gate log record completed job 1288792."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/fixture-owner-store-argument.html",
+      "line": "97",
+      "severity": "follow-on",
+      "text": "follow-on: the claim that all twelve receipts were hits conflicts with the two cold 5,000-cell run1 receipts, even though the six run2 warm receipts support the result."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "scripts/prototypes/support/book.py:50, scripts/prototypes/support/book.py:59, scripts/prototypes/support/certificate_fixtures.py:241, scripts/prototypes/support/certificate_fixtures.py:259, scripts/analytic_oracle_fixtures/measure.py:1633, scripts/analytic_oracle_fixtures/measure.py:1645",
+    "diff": "Read fourteen commits from ad3c3f77..a0eefbdf: the first two change the fixture code, eleven subsequent evidence commits update the records, and the last adds the plotted warm-gate evidence.",
+    "done_when": "The prompt requires a warm six-row gate; logs/titan-warm-certificate-gate.log records two six-pass runs, and all six logs/rows-titan-warm/run2 receipts show both hits and zero builds, though the paired CPU logs contain one raw head-only timeout.",
+    "goal": "The source prompt asks for single builders; scripts/analytic_oracle_fixtures/measure.py:897,1458 now own the carrier and exterior flows, called by certificate_fixtures.py:241,259.",
+    "manifest": "The source manifest.md:6-121 reports a complete run and the warm gate, but after_suite omits a timeout failure present in logs/cpu-delta/head/tests_test_forward_support_clip_mode.py.log:57.",
+    "write_paths": "The source prompt:68-75 grants seven paths or roots; the eight paths in git diff ad3c3f77..a0eefbdf are all within them."
+  },
+  "justifications": {
+    "durability": "tests/test_current_book_fragments.py:242 fails on a wrong identity digest, lines 244-252 on a wrong publish or moved-identity lookup, lines 314-317 and 320 on wrong hit receipts or loaded nodes, and the red control proves a carrier rebuild refuses; lines 318-319 share the supplied session key and no analogous exterior refusal is added.",
+    "evidence": "logs/titan-warm-certificate-gate.log and logs/rows-titan-warm/run2 contain six passing warm receipts at the code revision, while manifest.md:121 understates the raw CPU failure delta.",
+    "fit": "scripts/analytic_oracle_fixtures/measure.py:785-895 adds store adapters in the fixture owner idiom, but fixture-owner-store-argument.html:16 and :97 retain contradictory gate-state prose.",
+    "goal_fidelity": "scripts/analytic_oracle_fixtures/measure.py:897,1458 owns both builds and certificate_fixtures.py:241,259 delegates to them through a store argument.",
+    "reuse": "Capability search found nova/database/zarrstore.py:83 and nova/database/content_store.py:669; measure.py:864 wraps the former and certificate_fixtures.py:197 extends the latter as a backend while fixture construction stays with its existing owners.",
+    "scope_discipline": "Every path in git diff ad3c3f77..a0eefbdf is under the seven grants in the source prompt:68-75 and supports the owner change or its evidence."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source prompt asks for single builders; scripts/analytic_oracle_fixtures/measure.py:897,1458 now own the carrier and exterior flows, called by certificate_fixtures.py:241,259.\nVERDICT done_when: The prompt requires a warm six-row gate; logs/titan-warm-certificate-gate.log records two six-pass runs, and all six logs/rows-titan-warm/run2 receipts show both hits and zero builds, though the paired CPU logs contain one raw head-only timeout.\nVERDICT write_paths: The source prompt:68-75 grants seven paths or roots; the eight paths in git diff ad3c3f77..a0eefbdf are all within them.\nVERDICT manifest: The source manifest.md:6-121 reports a complete run and the warm gate, but after_suite omits a timeout failure present in logs/cpu-delta/head/tests_test_forward_support_clip_mode.py.log:57.\nVERDICT diff: Read fourteen commits from ad3c3f77..a0eefbdf: the first two change the fixture code, eleven subsequent evidence commits update the records, and the last adds the plotted warm-gate evidence.\nCALL_SITES: scripts/prototypes/support/book.py:50, scripts/prototypes/support/book.py:59, scripts/prototypes/support/certificate_fixtures.py:241, scripts/prototypes/support/certificate_fixtures.py:259, scripts/analytic_oracle_fixtures/measure.py:1633, scripts/analytic_oracle_fixtures/measure.py:1645\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: scripts/analytic_oracle_fixtures/measure.py:897,1458 owns both builds and certificate_fixtures.py:241,259 delegates to them through a store argument.\nSCORE evidence: 17\nJUSTIFICATION evidence: logs/titan-warm-certificate-gate.log and logs/rows-titan-warm/run2 contain six passing warm receipts at the code revision, while manifest.md:121 understates the raw CPU failure delta.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: Every path in git diff ad3c3f77..a0eefbdf is under the seven grants in the source prompt:68-75 and supports the owner change or its evidence.\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_current_book_fragments.py:242 fails on a wrong identity digest, lines 244-252 on a wrong publish or moved-identity lookup, lines 314-317 and 320 on wrong hit receipts or loaded nodes, and the red control proves a carrier rebuild refuses; lines 318-319 share the supplied session key and no analogous exterior refusal is added.\nSCORE fit: 15\nJUSTIFICATION fit: scripts/analytic_oracle_fixtures/measure.py:785-895 adds store adapters in the fixture owner idiom, but fixture-owner-store-argument.html:16 and :97 retain contradictory gate-state prose.\nSCORE reuse: 19\nJUSTIFICATION reuse: Capability search found nova/database/zarrstore.py:83 and nova/database/content_store.py:669; measure.py:864 wraps the former and certificate_fixtures.py:197 extends the latter as a backend while fixture construction stays with its existing owners.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T065751439890-fixture-owner-store-argument/manifest.md:121 follow-on: after_suite lists five failures, but its raw head gate log has a sixth timeout failure at test_operator_clip_modes_apply_through_with_clip_mode; the isolated rerun passes, so keep the raw paired-gate delta of one distinct from the adjudicated outcome.\nFINDING tests/test_current_book_fragments.py:318 follow-on: store.published and cold.cache['semantic_key'] derive from the same supplied session key, so this assertion survives a wrong key that moves both sides together; line 242 is the separate independent digest check.\nFINDING tests/test_current_book_fragments.py:303 follow-on: the second-build refusal exercises cached_machine only, so cached_fixture_exterior at measure.py:1458 can regress to rebuilding on every call without reddening this added test.\nFINDING docs/evidence/fragments/converged-forward-solve/fixture-owner-store-argument.html:16 follow-on: plan-environment still says job 1287964 is queued and the gate has not run, while line 97 and the gate log record completed job 1288792.\nFINDING docs/evidence/fragments/converged-forward-solve/fixture-owner-store-argument.html:97 follow-on: the claim that all twelve receipts were hits conflicts with the two cold 5,000-cell run1 receipts, even though the six run2 warm receipts support the result.",
+  "review_run_id": "legacy-2fb7ac7a5485",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "ad3c3f77ea9c9f17f1d0a47a9195ecf68f33c3d5",
+  "reviewed_head_sha": "a0eefbdf2492cf3437f678dcce3ab7f9e2412486",
+  "reviewed_run_id": "r-20261017T065751439890-fixture-owner-store-argument",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 15,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T14:36:18Z",
+  "total": 103
+}

@@ -33,6 +33,13 @@
     "a860e8c2433836b79fae3a0d91d652773514e7d8"
   ],
   "completed_at": "2026-10-18T18:31:44Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "exempted",
+      "reason": "Evidence node; the duplicated spline builder is recorded for the prototype consolidation follow-on rather than repaired here.",
+      "recorded_at": "2026-10-18T18:34:16.070950+00:00"
+    }
+  },
   "dispatched_at": "2026-10-18T18:23:35Z",
   "finding_dispositions": {
     "0": {

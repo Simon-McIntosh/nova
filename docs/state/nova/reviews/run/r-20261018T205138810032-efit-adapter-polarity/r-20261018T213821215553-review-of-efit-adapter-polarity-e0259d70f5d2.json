@@ -1,0 +1,68 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "scripts/prototypes/efit_field_swap/crosscheck.py:_decision",
+    "scripts/prototypes/efit_field_swap/probe_read.py:module read",
+    "scripts/prototypes/efit_maximin_certificate/adapter_probe.py:decision",
+    "scripts/prototypes/tcv_liuqe_known_answer/measure.py:measure_slice"
+  ],
+  "completed_at": "2026-10-18T21:48:08Z",
+  "dispatched_at": "2026-10-18T21:39:09Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/efit_field_swap/spline_field.py",
+      "line": "68",
+      "severity": "follow-on",
+      "text": "follow-on: sampled_for and the new census protocol repeat the sampled jets, sample index and delegated evaluation of CensusField in scripts/prototypes/efit_maximin_certificate/adapter_probe.py:36; re-point that caller to the shared field adapter so the two implementations cannot drift."
+    },
+    {
+      "file": "scripts/prototypes/efit_field_swap/orientation.py",
+      "line": "18",
+      "severity": "follow-on",
+      "text": "follow-on: the DDv3 and DDv4 IDS branch lacks a test with a current sign that changes the old convention, so restoring the hard-coded IDS read in measure.py would leave the new ITER test and the present TCV rows green."
+    }
+  ],
+  "gate_receipts": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T205138810032-efit-adapter-polarity/after-suite.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T205138810032-efit-adapter-polarity/baseline-suite.log"
+  },
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "commits 97bc2528f989497acb3b1724bc526bfc35878bd6, 18e739895e1f8d85ac6320fedb29187625bbe135 and e0259d70f5d2bf7d591a623d70cf11123ac86bb0 add the orientation helper and callers, ten vessel panels, and the comparison record; scripts/prototypes/efit_field_swap/spline_field.py:68 also repeats a scoped census adapter.",
+    "done_when": "the source brief.txt:10 requires both suite arms, an ITER negative control, full comparisons and panels; baseline-suite.log:1 and after-suite.log:1 record complete six-file arms with 3 and 0 failures, iter-orientation-negative.log:1 records the restored-hard-code refusal, and docs/research/efit-adapter-polarity.html:67 links the inspected panels.",
+    "goal": "the source brief.txt:1 asks every external read to derive orientation from its equilibrium, and scripts/prototypes/efit_field_swap/orientation.py:8 plus its four runtime callers do so with the 28-record and 12-slice comparisons in docs/research/efit-adapter-polarity.html:26.",
+    "manifest": "the source manifest.md:6 is complete and names three commits, suite receipts, the negative-control log, 28 trace rows, 12 TCV slices, and the remaining reader defects.",
+    "write_paths": "the source manifest.md:3 declares six path groups, and git diff --name-only from 9d57124efaffc7eaae35c04af0e22f0949b7db59 to e0259d70f5d2bf7d591a623d70cf11123ac86bb0 lists 12 files all within them."
+  },
+  "justifications": {
+    "durability": "scripts/prototypes/efit_field_swap/test_crosscheck.py:60-64 checks an independently recorded negative polarity, a qualified outcome, distinct axis and boundary values, and their signed ordering; restoring the hard-coded convention fails line 62, while the IDS branch at scripts/prototypes/efit_field_swap/orientation.py:18 has no contrasting-sign test.",
+    "evidence": "the complete baseline-suite.log and after-suite.log receipts show three failures becoming zero, and iter-orientation-negative.log:25 shows the former convention failing the qualified ITER read.",
+    "fit": "scripts/prototypes/efit_field_swap/orientation.py:15 delegates signed-flux construction to nova/equilibrium/topology.py:2369, and the new names describe capabilities rather than plan stages.",
+    "goal_fidelity": "scripts/prototypes/efit_field_swap/orientation.py:8 derives the two requested conventions, and docs/research/efit-adapter-polarity.html:26 records every trace and TCV comparison while explicitly separating JT-60SA stress rows.",
+    "reuse": "scripts/prototypes/efit_field_swap/spline_field.py:68 rebuilds the exact sampled jets and index already owned by scripts/prototypes/efit_maximin_certificate/adapter_probe.py:36 in CensusField, rather than consolidating that adapter.",
+    "scope_discipline": "every changed path in the base-to-head diff is within the source manifest.md:3 write grants, including the two SVGs and the evidence fragment."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source brief.txt:1 asks every external read to derive orientation from its equilibrium, and scripts/prototypes/efit_field_swap/orientation.py:8 plus its four runtime callers do so with the 28-record and 12-slice comparisons in docs/research/efit-adapter-polarity.html:26.\nVERDICT done_when: the source brief.txt:10 requires both suite arms, an ITER negative control, full comparisons and panels; baseline-suite.log:1 and after-suite.log:1 record complete six-file arms with 3 and 0 failures, iter-orientation-negative.log:1 records the restored-hard-code refusal, and docs/research/efit-adapter-polarity.html:67 links the inspected panels.\nVERDICT write_paths: the source manifest.md:3 declares six path groups, and git diff --name-only from 9d57124efaffc7eaae35c04af0e22f0949b7db59 to e0259d70f5d2bf7d591a623d70cf11123ac86bb0 lists 12 files all within them.\nVERDICT manifest: the source manifest.md:6 is complete and names three commits, suite receipts, the negative-control log, 28 trace rows, 12 TCV slices, and the remaining reader defects.\nVERDICT diff: commits 97bc2528f989497acb3b1724bc526bfc35878bd6, 18e739895e1f8d85ac6320fedb29187625bbe135 and e0259d70f5d2bf7d591a623d70cf11123ac86bb0 add the orientation helper and callers, ten vessel panels, and the comparison record; scripts/prototypes/efit_field_swap/spline_field.py:68 also repeats a scoped census adapter.\nCALL_SITES: scripts/prototypes/efit_field_swap/crosscheck.py:_decision, scripts/prototypes/efit_field_swap/probe_read.py:module read, scripts/prototypes/efit_maximin_certificate/adapter_probe.py:decision, scripts/prototypes/tcv_liuqe_known_answer/measure.py:measure_slice\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: scripts/prototypes/efit_field_swap/orientation.py:8 derives the two requested conventions, and docs/research/efit-adapter-polarity.html:26 records every trace and TCV comparison while explicitly separating JT-60SA stress rows.\nSCORE evidence: 18\nJUSTIFICATION evidence: the complete baseline-suite.log and after-suite.log receipts show three failures becoming zero, and iter-orientation-negative.log:25 shows the former convention failing the qualified ITER read.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every changed path in the base-to-head diff is within the source manifest.md:3 write grants, including the two SVGs and the evidence fragment.\nSCORE durability: 16\nJUSTIFICATION durability: scripts/prototypes/efit_field_swap/test_crosscheck.py:60-64 checks an independently recorded negative polarity, a qualified outcome, distinct axis and boundary values, and their signed ordering; restoring the hard-coded convention fails line 62, while the IDS branch at scripts/prototypes/efit_field_swap/orientation.py:18 has no contrasting-sign test.\nSCORE fit: 18\nJUSTIFICATION fit: scripts/prototypes/efit_field_swap/orientation.py:15 delegates signed-flux construction to nova/equilibrium/topology.py:2369, and the new names describe capabilities rather than plan stages.\nSCORE reuse: 5\nJUSTIFICATION reuse: scripts/prototypes/efit_field_swap/spline_field.py:68 rebuilds the exact sampled jets and index already owned by scripts/prototypes/efit_maximin_certificate/adapter_probe.py:36 in CensusField, rather than consolidating that adapter.\nFINDING scripts/prototypes/efit_field_swap/spline_field.py:68 follow-on: sampled_for and the new census protocol repeat the sampled jets, sample index and delegated evaluation of CensusField in scripts/prototypes/efit_maximin_certificate/adapter_probe.py:36; re-point that caller to the shared field adapter so the two implementations cannot drift.\nFINDING scripts/prototypes/efit_field_swap/orientation.py:18 follow-on: the DDv3 and DDv4 IDS branch lacks a test with a current sign that changes the old convention, so restoring the hard-coded IDS read in measure.py would leave the new ITER test and the present TCV rows green.\n",
+  "review_run_id": "r-20261018T213821215553-review-of-efit-adapter-polarity-e0259d70f5d2",
+  "reviewed_base_sha": "9d57124efaffc7eaae35c04af0e22f0949b7db59",
+  "reviewed_head_sha": "e0259d70f5d2bf7d591a623d70cf11123ac86bb0",
+  "reviewed_run_id": "r-20261018T205138810032-efit-adapter-polarity",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T21:50:12.861877+00:00",
+  "total": 96
+}

@@ -39,6 +39,11 @@
   "call_sites": [],
   "completed_at": "2026-10-18T15:18:35Z",
   "dimension_dispositions": {
+    "evidence": {
+      "kind": "folded",
+      "node": "vertical-pin",
+      "recorded_at": "2026-10-18T15:25:45.358764+00:00"
+    },
     "goal_fidelity": {
       "kind": "folded",
       "node": "vertical-pin",

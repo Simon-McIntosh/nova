@@ -1,19 +1,23 @@
-"""Negative control: moving one wall vertex onto the separatrix moves nova's answer.
+"""Negative control: perturbing the input the decision is about moves the answer.
 
-The claim under test is that the decision the table reports is produced by the
-record's own geometry and field, not by the adapter's bookkeeping. The control
-takes one record whose read is qualified, moves a single wall vertex inward onto
-the level the read called the boundary, and re-runs the same pipeline. If the
-control vertex changes nothing the table would have to be treated as
-insensitive; if it changes the read, the pipeline is reading the geometry it is
-given.
+The read's input is the field and the cell geometry. A control that perturbs
+only the wall cannot falsify the table, because the record's field is its own
+spline and does not depend on the wall at all; the wall reaches the decision
+only by changing which cells the lattice contains, and dropping one cell in 132
+does not move an admitted saddle whose position is set by the field. That was
+measured: 2 and 25 per cent wall-vertex moves left the label, the boundary level
+and the admitted saddle byte-identical.
 
-The perturbed vertex is placed where a single ring edit is observable: the
-lattice cells whose sampling points fall outside the shrunk ring are dropped, so
-the cell set itself changes. Both states are reported with their census counts,
-so a difference can be attributed rather than asserted.
+So the control perturbs the field. The perturbation is a smooth shape change
+over the record's own grid, psi -> psi * (1 + amplitude * shape), where shape is
+a normalised sinusoid in r and z that vanishes nowhere. A shape change is chosen
+over a constant offset or a global scale because the read is invariant to both:
+an offset moves the axis and the boundary level by the same amount and a scale
+cancels, so neither can move a span. The mode is selected on the command line so
+the wall result stays reproducible.
 
-Usage: negative_control.py <pairs.tsv row index> <vertex index>
+Usage: negative_control.py field <row index> <amplitude>
+       negative_control.py wall  <row index> <vertex> <fraction>
 """
 
 from __future__ import annotations
@@ -30,15 +34,27 @@ from scripts.prototypes.efit_field_swap.crosscheck import (
 )
 from scripts.prototypes.efit_field_swap.trace_record import read_trace_record
 
+SPAN_TOLERANCE = 1e-3
+AXIS_TOLERANCE = 1e-3
 
-def perturb(record, vertex, fraction):
-    """Pull one wall vertex toward the record's axis level by ``fraction``."""
+
+def perturb_field(record, amplitude):
+    """Multiply the grid psi by a smooth, nowhere-vanishing shape."""
+    rgrid = np.asarray(record.rgrid, dtype=np.float64)
+    zgrid = np.asarray(record.zgrid, dtype=np.float64)
+    r = (rgrid - rgrid.mean()) / max(np.ptp(rgrid), 1e-30)
+    z = (zgrid - zgrid.mean()) / max(np.ptp(zgrid), 1e-30)
+    shape = 0.5 * (np.sin(2.0 * np.pi * r)[:, None] * np.cos(2.0 * np.pi * z)[None, :])
+    psi = np.asarray(record.psi, dtype=np.float64)
+    return replace(record, psi=psi * (1.0 + amplitude * shape))
+
+
+def perturb_wall(record, vertex, fraction):
+    """Pull one wall vertex toward the record's axis by ``fraction``."""
     ring = record.wall_ring
     axis = np.array([record.axis_r, record.axis_z])
     moved = ring.copy()
     moved[vertex] = moved[vertex] + fraction * (axis - moved[vertex])
-    # Rebuild the segment array from the moved ring so the record's own
-    # accessors (wall_ring, wall_units) see the perturbation.
     starts = moved[:-1]
     ends = np.vstack((moved[1:-1], moved[-1]))
     return replace(
@@ -48,41 +64,78 @@ def perturb(record, vertex, fraction):
     )
 
 
-def main(row_index=0, vertex=0, fraction=0.02, resolution=16):
+def report(base, shifted):
+    """Print both decisions and their deltas; return whether the answer moved."""
+    print(
+        "base      label=%-9s boundary_psi=%.6f axis=(%.5f,%.5f) span=%.6f cells=%d"
+        % (
+            base.nova_label,
+            base.nova_boundary_psi,
+            base.nova_axis_r,
+            base.nova_axis_z,
+            base.nova_span,
+            base.n_cells,
+        )
+    )
+    print(
+        "perturbed label=%-9s boundary_psi=%.6f axis=(%.5f,%.5f) span=%.6f cells=%d"
+        % (
+            shifted.nova_label,
+            shifted.nova_boundary_psi,
+            shifted.nova_axis_r,
+            shifted.nova_axis_z,
+            shifted.nova_span,
+            shifted.n_cells,
+        )
+    )
+    label_moved = base.nova_label != shifted.nova_label
+    span_delta = abs(base.nova_span - shifted.nova_span)
+    span_moved = span_delta > SPAN_TOLERANCE * max(abs(base.nova_span), 1e-30)
+    axis_moved = (
+        np.hypot(
+            base.nova_axis_r - shifted.nova_axis_r,
+            base.nova_axis_z - shifted.nova_axis_z,
+        )
+        > AXIS_TOLERANCE
+    )
+    print(
+        "deltas    label=%s span=%.3e axis=%.3e"
+        % (
+            label_moved,
+            span_delta,
+            np.hypot(
+                base.nova_axis_r - shifted.nova_axis_r,
+                base.nova_axis_z - shifted.nova_axis_z,
+            ),
+        )
+    )
+    moved = label_moved or span_moved or axis_moved
+    print("CONTROL", "CHANGED" if moved else "UNCHANGED")
+    return moved
+
+
+def main_field(row_index, amplitude, resolution=16):
     pairs = load_pairs()
     record = read_trace_record(resolve_trace(pairs[row_index][1]))
     base = _decision("control", "base", record, resolution)
-    moved = perturb(record, vertex, fraction)
-    shifted = _decision("control", "perturbed", moved, resolution)
-    print(
-        "base      label",
-        base.nova_label,
-        "boundary_psi",
-        round(base.nova_boundary_psi, 6),
-        "saddle",
-        np.round([base.nova_saddle_r, base.nova_saddle_z], 5),
-        "cells",
-        base.n_cells,
+    shifted = _decision(
+        "control", "perturbed", perturb_field(record, amplitude), resolution
     )
-    print(
-        "perturbed label",
-        shifted.nova_label,
-        "boundary_psi",
-        round(shifted.nova_boundary_psi, 6),
-        "saddle",
-        np.round([shifted.nova_saddle_r, shifted.nova_saddle_z], 5),
-        "cells",
-        shifted.n_cells,
+    return 0 if report(base, shifted) else 1
+
+
+def main_wall(row_index, vertex, fraction, resolution=16):
+    pairs = load_pairs()
+    record = read_trace_record(resolve_trace(pairs[row_index][1]))
+    base = _decision("control", "base", record, resolution)
+    shifted = _decision(
+        "control", "perturbed", perturb_wall(record, vertex, fraction), resolution
     )
-    changed = base.nova_label != shifted.nova_label or not np.isclose(
-        base.nova_boundary_psi, shifted.nova_boundary_psi
-    )
-    print("CONTROL", "CHANGED" if changed else "UNCHANGED")
-    return 0 if changed else 1
+    return 0 if report(base, shifted) else 1
 
 
 if __name__ == "__main__":
-    args = [int(value) for value in sys.argv[1:3]]
-    if len(sys.argv) > 3:
-        args.append(float(sys.argv[3]))
-    sys.exit(main(*args))
+    mode = sys.argv[1]
+    if mode == "wall":
+        sys.exit(main_wall(int(sys.argv[2]), int(sys.argv[3]), float(sys.argv[4])))
+    sys.exit(main_field(int(sys.argv[2]), float(sys.argv[3])))

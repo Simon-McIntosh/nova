@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Escape-level rule comparison | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_data/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<h1 id="efit-escape-level-comparison-title">Escape-level rule comparison</h1>
+<p id="efit-escape-level-comparison-summary">Nova's boundary read and imas-efit's
+escape-level rule are set side by side on the 26 sides of imas-efit's 13 paired
+trace records. Both rules are read from their own recorded output; neither is
+changed here and no verdict is stated on which rule is right. The escape columns
+come from imas-efit's escape-level replay (revision f009d75e), the nova columns
+from the field-swap per-loop sweep. On JT-60SA sides the comparison is rule
+consistency only, because no reconstruction there is trusted.</p>
+
+<h2 id="efit-escape-level-comparison-method">Method</h2>
+<p>The escape level is imas-efit's maximin, over axis-to-vessel paths inside the
+obstacle-aware vessel domain, of polarity&middot;&psi;. Its label is LIMITED (1)
+when the bottleneck is on the wall and DIVERTED (2) at an interior saddle. The
+first three columns of each row are the escape label, the refined escape level
+and the refined bottleneck (R, Z). Nova's columns are its label, its boundary
+level (the same maximin read by its own topology rule) and the contact it admits
+&mdash; an interior saddle with position, or a wall contact at nova's own
+boundary level with the position its read admitted. The strongest wall maximum
+over the whole vessel is not the contact: on the four MAST-U limited sides it
+sits on a lobe the axis-connected component never reaches and rises above the
+admitted level, so a limited row reports the admitted level, not that maximum.
+The gap is nova's boundary minus the escape level, absolute and divided
+by imas-efit's axis-to-boundary span. The escape axis column names the axis the
+escape walk started from; a flag marks the one side that uses the tracked maximum
+rather than the recorded axis.</p>
+
+<h2 id="efit-escape-level-comparison-table">(1) Per-side comparison</h2>
+<table><thead><tr><th>side</th><th>machine</th><th>loops</th><th>escape label</th><th>escape level</th><th>escape bottleneck (R, Z)</th><th>escape axis used</th><th>nova label</th><th>nova boundary</th><th>nova contact</th><th>nova axis</th><th>|&Delta;&psi;|</th><th>|&Delta;| / efit span</th></tr></thead><tbody>
+<tr><td>jt60sa-5slice-s5-301-302-A</td><td>JT-60SA</td><td>3</td><td>limited</td><td>0.105439</td><td>(4.47469, 0.153593)</td><td>(3.02948, 0.6678)<br><span class='muted'>recorded axis</span></td><td>diverted</td><td>0.311646</td><td>saddle &psi; 0.311646 at (3.20149, 1.10213)</td><td>(3.22583, 1.10584)</td><td>0.206207</td><td>0.229669</td></tr>
+<tr><td>jt60sa-5slice-s5-301-302-B</td><td>JT-60SA</td><td>3</td><td>limited</td><td>0.143636</td><td>(4.4767, 0.116463)</td><td>(3.25131, -0.360317)<br><span class='muted'>tracked maximum</span> <strong>&#9873;</strong></td><td>diverted</td><td>0.296796</td><td>saddle &psi; 0.296796 at (3.14414, 0.715541)</td><td>(3.4613, -0.372946)</td><td>0.15316</td><td>10.6477</td></tr>
+<tr><td>jt60sa-5slice-s5-133-134-A</td><td>JT-60SA</td><td>3</td><td>limited</td><td>0.0979378</td><td>(4.44581, -0.459603)</td><td>(3.24546, 0.158599)<br><span class='muted'>recorded axis</span></td><td>unqualified</td><td>&ndash;</td><td>&ndash;</td><td>(&ndash;, &ndash;)</td><td>&ndash;</td><td>&ndash;</td></tr>
+<tr><td>jt60sa-5slice-s5-133-134-B</td><td>JT-60SA</td><td>3</td><td>limited</td><td>0.0983512</td><td>(4.44548, -0.461685)</td><td>(3.24546, 0.158599)<br><span class='muted'>recorded axis</span></td><td>unqualified</td><td>&ndash;</td><td>&ndash;</td><td>(&ndash;, &ndash;)</td><td>&ndash;</td><td>&ndash;</td></tr>
+<tr><td>jt60sa-5slice-s1-15-16-A</td><td>JT-60SA</td><td>3</td><td>limited</td><td>0.140535</td><td>(4.47358, 0.174067)</td><td>(3.22371, 0.449869)<br><span class='muted'>recorded axis</span></td><td>diverted</td><td>0.513285</td><td>saddle &psi; 0.513285 at (3.29573, 1.08305)</td><td>(2.20667, 2.96412)</td><td>0.37275</td><td>0.579391</td></tr>
+<tr><td>jt60sa-5slice-s1-15-16-B</td><td>JT-60SA</td><td>3</td><td>limited</td><td>0.143009</td><td>(4.47312, 0.182566)</td><td>(3.22371, 0.449869)<br><span class='muted'>recorded axis</span></td><td>unqualified</td><td>&ndash;</td><td>&ndash;</td><td>(&ndash;, &ndash;)</td><td>&ndash;</td><td>&ndash;</td></tr>
+<tr><td>jt60sa-5slice-s2-135-136-A</td><td>JT-60SA</td><td>3</td><td>limited</td><td>0.14831</td><td>(4.47379, -0.170188)</td><td>(3.21947, 0.336016)<br><span class='muted'>recorded axis</span></td><td>unqualified</td><td>&ndash;</td><td>&ndash;</td><td>(&ndash;, &ndash;)</td><td>&ndash;</td><td>&ndash;</td></tr>
+<tr><td>jt60sa-5slice-s2-135-136-B</td><td>JT-60SA</td><td>3</td><td>limited</td><td>0.153625</td><td>(4.47647, -0.12066)</td><td>(3.21947, 0.336016)<br><span class='muted'>recorded axis</span></td><td>unqualified</td><td>&ndash;</td><td>&ndash;</td><td>(&ndash;, &ndash;)</td><td>&ndash;</td><td>&ndash;</td></tr>
+<tr><td>aug-17151-s5-4-5-A</td><td>AUG</td><td>29</td><td>diverted</td><td>0.0306806</td><td>(1.46785, -0.971563)</td><td>(1.68739, 0.0489997)<br><span class='muted'>recorded axis</span></td><td>diverted</td><td>0.0306806</td><td>saddle &psi; 0.0306806 at (1.46785, -0.971563)</td><td>(1.68763, 0.0491575)</td><td>7.97973e-17</td><td>4.40682e-16</td></tr>
+<tr><td>aug-17151-s5-4-5-B</td><td>AUG</td><td>29</td><td>diverted</td><td>0.0305844</td><td>(1.46824, -0.971497)</td><td>(1.68739, 0.0489997)<br><span class='muted'>recorded axis</span></td><td>diverted</td><td>0.0305844</td><td>saddle &psi; 0.0305844 at (1.46824, -0.971497)</td><td>(1.68739, 0.0489997)</td><td>6.59195e-17</td><td>3.63827e-16</td></tr>
+<tr><td>iter-dina3420-s4-18-19-A</td><td>ITER</td><td>1</td><td>limited</td><td>-10.2414</td><td>(8.36524, 0.293314)</td><td>(6.45636, 0.536703)<br><span class='muted'>recorded axis</span></td><td>diverted</td><td>-10.2231</td><td>saddle &psi; -10.2231 at (5.11399, -3.3787)</td><td>(5.11399, -3.3787)</td><td>0.0182995</td><td>0.00286055</td></tr>
+<tr><td>iter-dina3420-s4-18-19-B</td><td>ITER</td><td>1</td><td>diverted</td><td>-10.2022</td><td>(5.1136, -3.38049)</td><td>(6.45636, 0.536703)<br><span class='muted'>recorded axis</span></td><td>diverted</td><td>-10.2022</td><td>saddle &psi; -10.2022 at (5.1136, -3.38049)</td><td>(5.1136, -3.38049)</td><td>1.77636e-14</td><td>2.76823e-15</td></tr>
+<tr><td>mastu-fullPulse-s1-4-5-A</td><td>MAST-U</td><td>1</td><td>limited</td><td>0.0200243</td><td>(0.260841, -0.0738893)</td><td>(0.847306, -0.192074)<br><span class='muted'>recorded axis</span></td><td>limited</td><td>0.0199237</td><td>wall contact &psi; 0.0199237 at (0.260841, -0.0220652)</td><td>(0.841139, -0.197886)</td><td>0.000100578</td><td>0.000829105</td></tr>
+<tr><td>mastu-fullPulse-s1-4-5-B</td><td>MAST-U</td><td>1</td><td>diverted</td><td>0.0196524</td><td>(0.574934, 1.12267)</td><td>(0.847306, -0.192074)<br><span class='muted'>recorded axis</span></td><td>limited</td><td>0.020531</td><td>wall contact &psi; 0.020531 at (0.332797, 1.30309)</td><td>(0.847306, -0.192074)</td><td>0.000878531</td><td>0.0108664</td></tr>
+<tr><td>mastu-magnetics-integration-s1-13-14-A</td><td>MAST-U</td><td>1</td><td>limited</td><td>0.0360546</td><td>(0.260841, 0.00370124)</td><td>(0.902565, 0.00300192)<br><span class='muted'>recorded axis</span></td><td>limited</td><td>0.0374136</td><td>wall contact &psi; 0.0374136 at (0.538294, -1.50432)</td><td>(0.557313, -1.17147)</td><td>0.00135899</td><td>0.0178973</td></tr>
+<tr><td>mastu-magnetics-integration-s1-13-14-B</td><td>MAST-U</td><td>1</td><td>diverted</td><td>0.0360508</td><td>(0.556242, 1.17456)</td><td>(0.902565, 0.00300192)<br><span class='muted'>recorded axis</span></td><td>limited</td><td>0.0374341</td><td>wall contact &psi; 0.0374341 at (0.538294, -1.50432)</td><td>(0.557245, -1.17258)</td><td>0.00138331</td><td>0.0182979</td></tr>
+<tr><td>iter-fullPulse-s5-14-15-identity-A</td><td>ITER</td><td>1</td><td>limited</td><td>0.503587</td><td>(4.1053, 1.09012)</td><td>(6.33575, 0.526143)<br><span class='muted'>recorded axis</span></td><td>diverted</td><td>0.655809</td><td>saddle &psi; 0.655809 at (5.09467, -3.32113)</td><td>(5.09467, -3.32113)</td><td>0.152222</td><td>0.0108635</td></tr>
+<tr><td>iter-fullPulse-s5-14-15-identity-B</td><td>ITER</td><td>1</td><td>limited</td><td>0.528508</td><td>(4.1053, 1.08695)</td><td>(6.33575, 0.526143)<br><span class='muted'>recorded axis</span></td><td>diverted</td><td>0.621649</td><td>saddle &psi; 0.621649 at (4.67782, 4.54122)</td><td>(4.67782, 4.54122)</td><td>0.0931408</td><td>0.00659946</td></tr>
+<tr><td>iter-fullPulse-s2-2-3-crossing-A</td><td>ITER</td><td>1</td><td>diverted</td><td>-1.90304</td><td>(5.041, -3.39342)</td><td>(6.21713, 0.460244)<br><span class='muted'>recorded axis</span></td><td>diverted</td><td>-1.22775</td><td>saddle &psi; -1.22775 at (4.65418, 4.45274)</td><td>(4.65418, 4.45274)</td><td>0.675293</td><td>0.0569544</td></tr>
+<tr><td>iter-fullPulse-s2-2-3-crossing-B</td><td>ITER</td><td>1</td><td>limited</td><td>-1.87014</td><td>(4.1053, 0.841626)</td><td>(6.21713, 0.460244)<br><span class='muted'>recorded axis</span></td><td>diverted</td><td>-1.22765</td><td>saddle &psi; -1.22765 at (4.65416, 4.46383)</td><td>(4.65416, 4.46383)</td><td>0.642496</td><td>0.0533838</td></tr>
+<tr><td>iter-fullPulse-s1-10-11-revert-in-crossing-A</td><td>ITER</td><td>1</td><td>limited</td><td>-1.27183</td><td>(8.35569, 0.178915)</td><td>(6.56843, 0.507255)<br><span class='muted'>recorded axis</span></td><td>diverted</td><td>-1.05242</td><td>saddle &psi; -1.05242 at (4.76444, 4.52574)</td><td>(4.76444, 4.52574)</td><td>0.219411</td><td>0.0284093</td></tr>
+<tr><td>iter-fullPulse-s1-10-11-revert-in-crossing-B</td><td>ITER</td><td>1</td><td>diverted</td><td>-1.28772</td><td>(5.13297, -3.36092)</td><td>(6.56843, 0.507255)<br><span class='muted'>recorded axis</span></td><td>diverted</td><td>-1.11656</td><td>saddle &psi; -1.11656 at (4.76292, 4.52989)</td><td>(4.76292, 4.52989)</td><td>0.171166</td><td>0.0209601</td></tr>
+<tr><td>iter-dina105027-s1-4-5-revert-A</td><td>ITER</td><td>1</td><td>limited</td><td>-0.868082</td><td>(8.36029, 0.233942)</td><td>(6.71078, 0.391044)<br><span class='muted'>recorded axis</span></td><td>diverted</td><td>-0.633771</td><td>saddle &psi; -0.633771 at (4.98032, 4.48991)</td><td>(4.98032, 4.48991)</td><td>0.234311</td><td>0.17352</td></tr>
+<tr><td>iter-dina105027-s1-4-5-revert-B</td><td>ITER</td><td>1</td><td>diverted</td><td>-1.03134</td><td>(5.24766, -3.55423)</td><td>(6.71078, 0.391044)<br><span class='muted'>recorded axis</span></td><td>diverted</td><td>-0.759597</td><td>saddle &psi; -0.759597 at (4.98185, 4.50012)</td><td>(4.98185, 4.50012)</td><td>0.271747</td><td>0.171701</td></tr>
+<tr><td>synthetic_crossing-A</td><td>synthetic</td><td>1</td><td>limited</td><td>0.0142147</td><td>(0.85, 0.199991)</td><td>(1.44167, 0.2)<br><span class='muted'>recorded axis</span></td><td>diverted</td><td>0.0113383</td><td>saddle &psi; 0.0113383 at (1.47699, -0.422496)</td><td>(1.43334, 0.199991)</td><td>0.00287641</td><td>0.0029179</td></tr>
+<tr><td>synthetic_crossing-B</td><td>synthetic</td><td>1</td><td>limited</td><td>0.0125772</td><td>(0.85, 0.199991)</td><td>(1.44167, 0.2)<br><span class='muted'>recorded axis</span></td><td>diverted</td><td>0.0114041</td><td>saddle &psi; 0.0114041 at (1.47985, -0.422483)</td><td>(1.44166, 0.199991)</td><td>0.00117308</td><td>0.00118803</td></tr>
+</tbody></table>
+
+<h2 id="efit-escape-level-comparison-summary-table">(1) Label agreement by machine</h2>
+<table><thead><tr><th>machine</th><th>sides</th><th>agree</th><th>disagree</th><th>nova unqualified</th></tr></thead><tbody>
+<tr><td>JT-60SA</td><td>8</td><td>0</td><td>3</td><td>5</td></tr>
+<tr><td>AUG</td><td>2</td><td>2</td><td>0</td><td>0</td></tr>
+<tr><td>ITER</td><td>10</td><td>4</td><td>6</td><td>0</td></tr>
+<tr><td>MAST-U</td><td>4</td><td>2</td><td>2</td><td>0</td></tr>
+<tr><td>synthetic</td><td>2</td><td>0</td><td>2</td><td>0</td></tr>
+</tbody></table>
+<p>Agreement counts a side only where nova qualified a boundary decision; a side
+nova left unqualified is counted separately and is not an agreement or a
+disagreement. JT-60SA carries no trusted reconstruction, so its counts are rule
+consistency only.</p>
+
+<h2 id="efit-escape-level-comparison-diagnoses">(2) Disagreement diagnoses</h2>
+<ul>
+<li><code>jt60sa-5slice-s5-301-302-A</code> (escape limited, nova diverted): axis: nova reads (3.22583,1.10584) against the escape walk&#x27;s (3.02948,0.6678), 0.48003 m apart; obstacle loops: 3 wall loops read as separate units typed vessel; saddle-versus-wall contest: escape levels limited at 0.105439 on the wall, nova levels diverted at 0.311646</li>
+<li><code>jt60sa-5slice-s5-301-302-B</code> (escape limited, nova diverted): axis: nova reads (3.4613,-0.372946) against the escape walk&#x27;s (3.25131,-0.360317), 0.210367 m apart; obstacle loops: 3 wall loops read as separate units typed vessel; saddle-versus-wall contest: escape levels limited at 0.143636 on the wall, nova levels diverted at 0.296796</li>
+<li><code>jt60sa-5slice-s5-133-134-A</code> (escape limited, nova unqualified): nova refused a boundary decision: no lattice admitted a saddle, so only imas-efit&#x27;s escape label is recorded</li>
+<li><code>jt60sa-5slice-s5-133-134-B</code> (escape limited, nova unqualified): nova refused a boundary decision: no lattice admitted a saddle, so only imas-efit&#x27;s escape label is recorded</li>
+<li><code>jt60sa-5slice-s1-15-16-A</code> (escape limited, nova diverted): axis: nova reads (2.20667,2.96412) against the escape walk&#x27;s (3.22371,0.449869), 2.71217 m apart; obstacle loops: 3 wall loops read as separate units typed vessel; saddle-versus-wall contest: escape levels limited at 0.140535 on the wall, nova levels diverted at 0.513285</li>
+<li><code>jt60sa-5slice-s1-15-16-B</code> (escape limited, nova unqualified): nova refused a boundary decision: no lattice admitted a saddle, so only imas-efit&#x27;s escape label is recorded</li>
+<li><code>jt60sa-5slice-s2-135-136-A</code> (escape limited, nova unqualified): nova refused a boundary decision: no lattice admitted a saddle, so only imas-efit&#x27;s escape label is recorded</li>
+<li><code>jt60sa-5slice-s2-135-136-B</code> (escape limited, nova unqualified): nova refused a boundary decision: no lattice admitted a saddle, so only imas-efit&#x27;s escape label is recorded</li>
+<li><code>iter-dina3420-s4-18-19-A</code> (escape limited, nova diverted): axis: nova reads (5.11399,-3.3787) against the escape walk&#x27;s (6.45636,0.536703), 4.13912 m apart; saddle-versus-wall contest: escape levels limited at -10.2414 on the wall, nova levels diverted at -10.2231</li>
+<li><code>mastu-fullPulse-s1-4-5-B</code> (escape diverted, nova limited): saddle-versus-wall contest: escape levels diverted at 0.0196524 on the interior saddle, nova levels limited at 0.020531</li>
+<li><code>mastu-magnetics-integration-s1-13-14-B</code> (escape diverted, nova limited): axis: nova reads (0.557245,-1.17258) against the escape walk&#x27;s (0.902565,0.00300192), 1.22525 m apart; saddle-versus-wall contest: escape levels diverted at 0.0360508 on the interior saddle, nova levels limited at 0.0374341</li>
+<li><code>iter-fullPulse-s5-14-15-identity-A</code> (escape limited, nova diverted): axis: nova reads (5.09467,-3.32113) against the escape walk&#x27;s (6.33575,0.526143), 4.04249 m apart; saddle-versus-wall contest: escape levels limited at 0.503587 on the wall, nova levels diverted at 0.655809</li>
+<li><code>iter-fullPulse-s5-14-15-identity-B</code> (escape limited, nova diverted): axis: nova reads (4.67782,4.54122) against the escape walk&#x27;s (6.33575,0.526143), 4.34392 m apart; saddle-versus-wall contest: escape levels limited at 0.528508 on the wall, nova levels diverted at 0.621649</li>
+<li><code>iter-fullPulse-s2-2-3-crossing-B</code> (escape limited, nova diverted): axis: nova reads (4.65416,4.46383) against the escape walk&#x27;s (6.21713,0.460244), 4.29786 m apart; saddle-versus-wall contest: escape levels limited at -1.87014 on the wall, nova levels diverted at -1.22765</li>
+<li><code>iter-fullPulse-s1-10-11-revert-in-crossing-A</code> (escape limited, nova diverted): axis: nova reads (4.76444,4.52574) against the escape walk&#x27;s (6.56843,0.507255), 4.40483 m apart; saddle-versus-wall contest: escape levels limited at -1.27183 on the wall, nova levels diverted at -1.05242</li>
+<li><code>iter-dina105027-s1-4-5-revert-A</code> (escape limited, nova diverted): axis: nova reads (4.98032,4.48991) against the escape walk&#x27;s (6.71078,0.391044), 4.44918 m apart; saddle-versus-wall contest: escape levels limited at -0.868082 on the wall, nova levels diverted at -0.633771</li>
+<li><code>synthetic_crossing-A</code> (escape limited, nova diverted): saddle-versus-wall contest: escape levels limited at 0.0142147 on the wall, nova levels diverted at 0.0113383</li>
+<li><code>synthetic_crossing-B</code> (escape limited, nova diverted): saddle-versus-wall contest: escape levels limited at 0.0125772 on the wall, nova levels diverted at 0.0114041</li>
+</ul>
+
+<h2 id="efit-escape-level-comparison-figures">(3) Poloidal panels</h2>
+<p>Each panel is redrawn with the record's wall as its separate indexed loops and
+the escape bottleneck overlaid as its own marker, through the nova.media painters.
+The panel field is the record's own spline; the boundary levels of both codes and
+their fixed points are drawn as in the axis-adjudication evidence.</p>
+<figure><img src='/nova/figures/converged-forward-solve/efit-axis-adjudication/efit-axis-jt60sa.svg' alt='JT-60SA panels' width='100%'><figcaption>JT-60SA trace records. Each panel draws the record's own spline as line contours on shared levels, the wall as separate indexed loops, and the escape bottleneck as its own marker. Fixed points and boundary levels are identified in the legend.</figcaption></figure>
+<figure><img src='/nova/figures/converged-forward-solve/efit-axis-adjudication/efit-axis-aug.svg' alt='AUG panels' width='100%'><figcaption>AUG trace records. Each panel draws the record's own spline as line contours on shared levels, the wall as separate indexed loops, and the escape bottleneck as its own marker. Fixed points and boundary levels are identified in the legend.</figcaption></figure>
+<figure><img src='/nova/figures/converged-forward-solve/efit-axis-adjudication/efit-axis-iter.svg' alt='ITER panels' width='100%'><figcaption>ITER trace records. Each panel draws the record's own spline as line contours on shared levels, the wall as separate indexed loops, and the escape bottleneck as its own marker. Fixed points and boundary levels are identified in the legend.</figcaption></figure>
+<figure><img src='/nova/figures/converged-forward-solve/efit-axis-adjudication/efit-axis-mastu.svg' alt='MAST-U panels' width='100%'><figcaption>MAST-U trace records. Each panel draws the record's own spline as line contours on shared levels, the wall as separate indexed loops, and the escape bottleneck as its own marker. Fixed points and boundary levels are identified in the legend.</figcaption></figure>
+<figure><img src='/nova/figures/converged-forward-solve/efit-axis-adjudication/efit-axis-synthetic.svg' alt='synthetic panels' width='100%'><figcaption>synthetic trace records. Each panel draws the record's own spline as line contours on shared levels, the wall as separate indexed loops, and the escape bottleneck as its own marker. Fixed points and boundary levels are identified in the legend.</figcaption></figure>
+</main></body></html>  

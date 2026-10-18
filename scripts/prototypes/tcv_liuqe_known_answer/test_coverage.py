@@ -124,7 +124,7 @@ def test_cancelled_missed_pair_is_refused(monkeypatch):
     # extremum leaves the same index as the true field despite two missed roots.
     boundary = crosscheck.coverage_certificate(field, RING, (), 1)
     assert boundary.certified and boundary.total == 1
-    assert boundary.cells_cleared > 0 and boundary.cells_uncertified == 0
+    assert boundary.min_gradient > boundary.floor
 
     def blind_census(f, geometry, convention, policy, previous):
         hessian = jnp.asarray([[[-1.0, 0.0], [0.0, -1.0]]])

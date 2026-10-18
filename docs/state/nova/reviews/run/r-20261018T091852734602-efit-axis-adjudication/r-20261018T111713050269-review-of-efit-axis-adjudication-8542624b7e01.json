@@ -1,0 +1,93 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "base_log_revision": null,
+  "call_site_count": 3,
+  "call_sites": [
+    "scripts/prototypes/efit_axis_adjudication/analyse.py:294",
+    "scripts/prototypes/efit_axis_adjudication/plot.py:363",
+    "scripts/prototypes/efit_axis_adjudication/page.py:385"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-10-18T09:19:30Z",
+  "findings": [
+    {
+      "file": "docs/research/efit-axis-adjudication.html",
+      "line": "80",
+      "severity": "blocking",
+      "text": "blocking: The synthetic A and B recorded-axis spline gradients are 2.433e-4 and 2.638e-4 against the required rounding-level 1e-9 check; the field reconstruction is therefore unqualified for those records under done-when clause 1."
+    },
+    {
+      "file": "scripts/prototypes/efit_axis_adjudication/page.py",
+      "line": "315",
+      "severity": "blocking",
+      "text": "blocking: Adapter B polishes record-seeded and grid-bracketed stationary points and chooses the nearest result; its flux is computed from that result, so saying the exact imas-efit level match is by construction misstates the central provenance question, and the synthetic export levels differ by 1.19e-9 and 1.40e-9."
+    },
+    {
+      "file": "scripts/prototypes/efit_axis_adjudication/plot.py",
+      "line": "123",
+      "severity": "blocking",
+      "text": "blocking: The 22 psi contour levels are generated per record from the grid range but neither page.py:258 nor the figure labels state those levels, leaving an explicit poloidal-panel requirement unmet."
+    },
+    {
+      "file": "scripts/prototypes/efit_axis_adjudication/page.py",
+      "line": "195",
+      "severity": "follow-on",
+      "text": "follow-on: Saddle distance uses imas-efit's source grid node as the coordinate but pairs it with the refined saddle level; the summary labels that proxy as saddle distance without telling the reader it is a source-node distance."
+    },
+    {
+      "file": "scripts/prototypes/efit_axis_adjudication/test_rebuild.py",
+      "line": "46",
+      "severity": "follow-on",
+      "text": "follow-on: The negative-control assertion calls require_rebuild directly, so a regression that removes rebuild_table's call to that guard would still leave this test green while the page reports failed records as passing."
+    },
+    {
+      "file": "manifest.md",
+      "line": "15",
+      "severity": "follow-on",
+      "text": "follow-on: The reviewed run records a head test log but no baseline_suite or after_suite arm, so added_failure_count cannot be measured from paired gate logs and must remain null."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "I read all nine commits from 1b25eedd7574fda2220c02fc33fffd39db9433bd through 8542624b7e01a962c4e7149c23fe632ae9f39aa2; scripts/prototypes/efit_axis_adjudication/test_rebuild.py:46 adds a negative assertion and the later page and plot commits repair the earlier omissions.",
+    "done_when": "The five clauses in the source brief are partly evidenced by docs/research/efit-axis-adjudication.html:80-81 and out/results.json; the two synthetic gradients exceed 1e-9, and plot.py:123 draws psi contours without stating their levels in the page.",
+    "goal": "The source brief requests neutral plots and tables for the lead; docs/research/efit-axis-adjudication.html:54-89 carries 26 records and five figures, but its synthetic rebuilds fail and its adapter B provenance claim is too strong.",
+    "manifest": "The source manifest.md:15 records a passing focused rebuild test and names its log, but it has no baseline_suite or after_suite arms from which to measure added failures.",
+    "write_paths": "The brief grants scripts/prototypes/efit_axis_adjudication, the figure directory, the research page and the evidence fragment; the base-to-head diff changes only those four path families."
+  },
+  "justifications": {
+    "durability": "test_rebuild.py:21-23 fails if its page module cannot load, and its line 46 fails if require_rebuild accepts either synthetic axis or raises another error, as the tolerance mutation demonstrates; it never tests the generated page's fail label.",
+    "evidence": "test_rebuild.py:46 has a head gate and a red tolerance mutation in out/rebuild-negative-final.log, but the source manifest.md:15 supplies no comparable baseline and after suite arms.",
+    "fit": "plot.py:21 reuses nova.media.poloidal.draw_nulls and line 45 sets a common 14-inch canvas with text checks, while plot.py:123 leaves the contour levels unstated in the delivered captions.",
+    "goal_fidelity": "docs/research/efit-axis-adjudication.html:80-81 openly reports two failed rebuilds, while page.py:315-318 incorrectly presents adapter B's independently polished result as an exact match by construction.",
+    "reuse": "A capability search found scripts/prototypes/read_robustness/census.py:26 for a Bell-field census and nova/equilibrium/flux_surface_geometry.py:427 for spline interpolation, while field.py:17 and census.py:78 serve the independently required trace-spline analysis and plot.py:21 reuses the existing null glyph owner.",
+    "scope_discipline": "The base-to-head diff confines all changes to the brief's four path families, including scripts/prototypes/efit_axis_adjudication/analyse.py and docs/research/efit-axis-adjudication.html."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source brief requests neutral plots and tables for the lead; docs/research/efit-axis-adjudication.html:54-89 carries 26 records and five figures, but its synthetic rebuilds fail and its adapter B provenance claim is too strong.\nVERDICT done_when: The five clauses in the source brief are partly evidenced by docs/research/efit-axis-adjudication.html:80-81 and out/results.json; the two synthetic gradients exceed 1e-9, and plot.py:123 draws psi contours without stating their levels in the page.\nVERDICT write_paths: The brief grants scripts/prototypes/efit_axis_adjudication, the figure directory, the research page and the evidence fragment; the base-to-head diff changes only those four path families.\nVERDICT manifest: The source manifest.md:15 records a passing focused rebuild test and names its log, but it has no baseline_suite or after_suite arms from which to measure added failures.\nVERDICT diff: I read all nine commits from 1b25eedd7574fda2220c02fc33fffd39db9433bd through 8542624b7e01a962c4e7149c23fe632ae9f39aa2; scripts/prototypes/efit_axis_adjudication/test_rebuild.py:46 adds a negative assertion and the later page and plot commits repair the earlier omissions.\nCALL_SITES: scripts/prototypes/efit_axis_adjudication/analyse.py:294, scripts/prototypes/efit_axis_adjudication/plot.py:363, scripts/prototypes/efit_axis_adjudication/page.py:385\nSCORE goal_fidelity: 11\nJUSTIFICATION goal_fidelity: docs/research/efit-axis-adjudication.html:80-81 openly reports two failed rebuilds, while page.py:315-318 incorrectly presents adapter B's independently polished result as an exact match by construction.\nSCORE evidence: 12\nJUSTIFICATION evidence: test_rebuild.py:46 has a head gate and a red tolerance mutation in out/rebuild-negative-final.log, but the source manifest.md:15 supplies no comparable baseline and after suite arms.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The base-to-head diff confines all changes to the brief's four path families, including scripts/prototypes/efit_axis_adjudication/analyse.py and docs/research/efit-axis-adjudication.html.\nSCORE durability: 12\nJUSTIFICATION durability: test_rebuild.py:21-23 fails if its page module cannot load, and its line 46 fails if require_rebuild accepts either synthetic axis or raises another error, as the tolerance mutation demonstrates; it never tests the generated page's fail label.\nSCORE fit: 16\nJUSTIFICATION fit: plot.py:21 reuses nova.media.poloidal.draw_nulls and line 45 sets a common 14-inch canvas with text checks, while plot.py:123 leaves the contour levels unstated in the delivered captions.\nSCORE reuse: 19\nJUSTIFICATION reuse: A capability search found scripts/prototypes/read_robustness/census.py:26 for a Bell-field census and nova/equilibrium/flux_surface_geometry.py:427 for spline interpolation, while field.py:17 and census.py:78 serve the independently required trace-spline analysis and plot.py:21 reuses the existing null glyph owner.\nFINDING docs/research/efit-axis-adjudication.html:80 blocking: The synthetic A and B recorded-axis spline gradients are 2.433e-4 and 2.638e-4 against the required rounding-level 1e-9 check; the field reconstruction is therefore unqualified for those records under done-when clause 1.\nFINDING scripts/prototypes/efit_axis_adjudication/page.py:315 blocking: Adapter B polishes record-seeded and grid-bracketed stationary points and chooses the nearest result; its flux is computed from that result, so saying the exact imas-efit level match is by construction misstates the central provenance question, and the synthetic export levels differ by 1.19e-9 and 1.40e-9.\nFINDING scripts/prototypes/efit_axis_adjudication/plot.py:123 blocking: The 22 psi contour levels are generated per record from the grid range but neither page.py:258 nor the figure labels state those levels, leaving an explicit poloidal-panel requirement unmet.\nFINDING scripts/prototypes/efit_axis_adjudication/page.py:195 follow-on: Saddle distance uses imas-efit's source grid node as the coordinate but pairs it with the refined saddle level; the summary labels that proxy as saddle distance without telling the reader it is a source-node distance.\nFINDING scripts/prototypes/efit_axis_adjudication/test_rebuild.py:46 follow-on: The negative-control assertion calls require_rebuild directly, so a regression that removes rebuild_table's call to that guard would still leave this test green while the page reports failed records as passing.\nFINDING manifest.md:15 follow-on: The reviewed run records a head test log but no baseline_suite or after_suite arm, so added_failure_count cannot be measured from paired gate logs and must remain null.\nreviewed_base_sha: 1b25eedd7574fda2220c02fc33fffd39db9433bd\nreviewed_head_sha: 8542624b7e01a962c4e7149c23fe632ae9f39aa2\n",
+  "review_run_id": "r-20261018T111713050269-review-of-efit-axis-adjudication-8542624b7e01",
+  "reviewed_base_sha": "1b25eedd7574fda2220c02fc33fffd39db9433bd",
+  "reviewed_head_sha": "8542624b7e01a962c4e7149c23fe632ae9f39aa2",
+  "reviewed_run_id": "r-20261018T091852734602-efit-axis-adjudication",
+  "reviewer": {
+    "reviewer_run_id": "r-20261018T111713050269-review-of-efit-axis-adjudication-8542624b7e01"
+  },
+  "scores": {
+    "durability": 12,
+    "evidence": 12,
+    "fit": 16,
+    "goal_fidelity": 11,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T11:24:41.974598+00:00",
+  "total": 90
+}

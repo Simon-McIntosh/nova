@@ -1,0 +1,99 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "base_log_revision": null,
+  "call_site_count": 3,
+  "call_sites": [
+    "scripts/prototypes/efit_axis_adjudication/analyse.py:294",
+    "scripts/prototypes/efit_axis_adjudication/plot.py:363",
+    "scripts/prototypes/efit_axis_adjudication/page.py:388"
+  ],
+  "completed_at": "2026-10-18T11:34:47Z",
+  "dispatched_at": "2026-10-18T11:26:08Z",
+  "findings": [
+    {
+      "file": "docs/research/efit-axis-adjudication.html",
+      "line": "81",
+      "severity": "blocking",
+      "text": "blocking: Synthetic A and B recorded-axis spline gradients are 2.433e-4 and 2.638e-4 against the required rounding-level 1e-9 check, so done-when clause 1 remains unmet for those records."
+    },
+    {
+      "file": "scripts/prototypes/efit_axis_adjudication/page.py",
+      "line": "318",
+      "severity": "blocking",
+      "text": "blocking: Adapter B polishes record-seeded and grid-bracketed stationary points before choosing the nearest result, so its exact level match is measured rather than guaranteed by construction; the provenance claim overstates the central axis comparison."
+    },
+    {
+      "file": "scripts/prototypes/efit_axis_adjudication/plot.py",
+      "line": "123",
+      "severity": "blocking",
+      "text": "blocking: The 22 grey psi contours are chosen from each record's grid range but neither the plot nor its caption states their levels, leaving the explicit panel requirement unmet."
+    },
+    {
+      "file": "scripts/prototypes/efit_axis_adjudication/page.py",
+      "line": "195",
+      "severity": "blocking",
+      "text": "blocking: The disagreement table pairs imas-efit's source grid-node coordinates with its refined saddle level and calls the resulting separation a saddle distance, while plot.py:180 draws the source node as its X-point; the trace stores no refined coordinate, so these comparison positions need explicit proxy labels or independent reconstruction."
+    },
+    {
+      "file": "scripts/prototypes/efit_axis_adjudication/test_rebuild.py",
+      "line": "46",
+      "severity": "follow-on",
+      "text": "follow-on: The test invokes require_rebuild directly, so removing rebuild_table's call to it leaves the test green while the published page can mark failing records as passing."
+    },
+    {
+      "file": "manifest.md",
+      "line": "15",
+      "severity": "follow-on",
+      "text": "follow-on: The reviewed run records a head test log but no baseline_suite or after_suite fields, so added_failure_count cannot be derived from paired gate logs and must remain unmeasured."
+    },
+    {
+      "file": "scripts/prototypes/efit_axis_adjudication/plot.py",
+      "line": "102",
+      "severity": "follow-on",
+      "text": "follow-on: _contour and the direct wall plot at line 127 duplicate the capabilities owned by nova/media/poloidal.py:138 and :27 instead of using those painters, allowing plot conventions to drift."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "I read the ten commits from 1b25eedd7574fda2220c02fc33fffd39db9433bd through 90a818ba3d5d47c70a363baba28c02fca8c60d92 commit by commit and inspected the final script, page, fragment and five rendered figures; scripts/prototypes/efit_axis_adjudication/page.py:310 is the final flux-side wording change.",
+    "done_when": "The source brief's five clauses are only partly met: docs/research/efit-axis-adjudication.html:81-82 records two gradient failures, and scripts/prototypes/efit_axis_adjudication/plot.py:123 draws contour levels that the figure captions never state.",
+    "goal": "The source brief requests neutral plots and tables; docs/research/efit-axis-adjudication.html:55-90 supplies 26 record checks and five machine figures, but the source-node X-point comparison and adapter B provenance are misleading.",
+    "manifest": "The source run's manifest.md:15 records a passing focused rebuild test and its red mutation log, but it names no baseline_suite or after_suite arm for an added-failure comparison.",
+    "write_paths": "The source brief grants scripts/prototypes/efit_axis_adjudication, its figure directory, the research page and evidence fragment; the base-to-head diff changes only those paths."
+  },
+  "justifications": {
+    "durability": "scripts/prototypes/efit_axis_adjudication/test_rebuild.py:21 fails if the page module cannot load and line 46 fails if require_rebuild accepts either nonstationary synthetic axis, but no assertion fails if rebuild_table stops calling the guard.",
+    "evidence": "scripts/prototypes/efit_axis_adjudication/test_rebuild.py:46 has a recorded passing head run and failing tolerance mutation, while the source manifest.md:15 lacks the paired baseline_suite and after_suite receipts.",
+    "fit": "scripts/prototypes/efit_axis_adjudication/plot.py:183 uses nova.media.poloidal.draw_nulls and the paths obey naming rules, but line 123 omits the stated contour levels required by nova/AGENTS.md and the source brief.",
+    "goal_fidelity": "docs/research/efit-axis-adjudication.html:81-82 transparently reports the synthetic rebuild failures, but scripts/prototypes/efit_axis_adjudication/page.py:195 treats a source grid node as the refined saddle position in the lead's distance table.",
+    "reuse": "A capability search found nova/media/poloidal.py:138 and :27 already own unfilled flux-contour and wall drawing, while scripts/prototypes/efit_axis_adjudication/plot.py:102 and :127 redraw both directly rather than extend or wrap those painters.",
+    "scope_discipline": "Every base-to-head diff path, including scripts/prototypes/efit_axis_adjudication/analyse.py and docs/research/efit-axis-adjudication.html, is within the source brief's declared four path families."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source brief requests neutral plots and tables; docs/research/efit-axis-adjudication.html:55-90 supplies 26 record checks and five machine figures, but the source-node X-point comparison and adapter B provenance are misleading.\nVERDICT done_when: The source brief's five clauses are only partly met: docs/research/efit-axis-adjudication.html:81-82 records two gradient failures, and scripts/prototypes/efit_axis_adjudication/plot.py:123 draws contour levels that the figure captions never state.\nVERDICT write_paths: The source brief grants scripts/prototypes/efit_axis_adjudication, its figure directory, the research page and evidence fragment; the base-to-head diff changes only those paths.\nVERDICT manifest: The source run's manifest.md:15 records a passing focused rebuild test and its red mutation log, but it names no baseline_suite or after_suite arm for an added-failure comparison.\nVERDICT diff: I read the ten commits from 1b25eedd7574fda2220c02fc33fffd39db9433bd through 90a818ba3d5d47c70a363baba28c02fca8c60d92 commit by commit and inspected the final script, page, fragment and five rendered figures; scripts/prototypes/efit_axis_adjudication/page.py:310 is the final flux-side wording change.\nCALL_SITES: scripts/prototypes/efit_axis_adjudication/analyse.py:294, scripts/prototypes/efit_axis_adjudication/plot.py:363, scripts/prototypes/efit_axis_adjudication/page.py:388\nSCORE goal_fidelity: 9\nJUSTIFICATION goal_fidelity: docs/research/efit-axis-adjudication.html:81-82 transparently reports the synthetic rebuild failures, but scripts/prototypes/efit_axis_adjudication/page.py:195 treats a source grid node as the refined saddle position in the lead's distance table.\nSCORE evidence: 10\nJUSTIFICATION evidence: scripts/prototypes/efit_axis_adjudication/test_rebuild.py:46 has a recorded passing head run and failing tolerance mutation, while the source manifest.md:15 lacks the paired baseline_suite and after_suite receipts.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: Every base-to-head diff path, including scripts/prototypes/efit_axis_adjudication/analyse.py and docs/research/efit-axis-adjudication.html, is within the source brief's declared four path families.\nSCORE durability: 11\nJUSTIFICATION durability: scripts/prototypes/efit_axis_adjudication/test_rebuild.py:21 fails if the page module cannot load and line 46 fails if require_rebuild accepts either nonstationary synthetic axis, but no assertion fails if rebuild_table stops calling the guard.\nSCORE fit: 11\nJUSTIFICATION fit: scripts/prototypes/efit_axis_adjudication/plot.py:183 uses nova.media.poloidal.draw_nulls and the paths obey naming rules, but line 123 omits the stated contour levels required by nova/AGENTS.md and the source brief.\nSCORE reuse: 4\nJUSTIFICATION reuse: A capability search found nova/media/poloidal.py:138 and :27 already own unfilled flux-contour and wall drawing, while scripts/prototypes/efit_axis_adjudication/plot.py:102 and :127 redraw both directly rather than extend or wrap those painters.\nFINDING docs/research/efit-axis-adjudication.html:81 blocking: Synthetic A and B recorded-axis spline gradients are 2.433e-4 and 2.638e-4 against the required rounding-level 1e-9 check, so done-when clause 1 remains unmet for those records.\nFINDING scripts/prototypes/efit_axis_adjudication/page.py:318 blocking: Adapter B polishes record-seeded and grid-bracketed stationary points before choosing the nearest result, so its exact level match is measured rather than guaranteed by construction; the provenance claim overstates the central axis comparison.\nFINDING scripts/prototypes/efit_axis_adjudication/plot.py:123 blocking: The 22 grey psi contours are chosen from each record's grid range but neither the plot nor its caption states their levels, leaving the explicit panel requirement unmet.\nFINDING scripts/prototypes/efit_axis_adjudication/page.py:195 blocking: The disagreement table pairs imas-efit's source grid-node coordinates with its refined saddle level and calls the resulting separation a saddle distance, while plot.py:180 draws the source node as its X-point; the trace stores no refined coordinate, so these comparison positions need explicit proxy labels or independent reconstruction.\nFINDING scripts/prototypes/efit_axis_adjudication/test_rebuild.py:46 follow-on: The test invokes require_rebuild directly, so removing rebuild_table's call to it leaves the test green while the published page can mark failing records as passing.\nFINDING manifest.md:15 follow-on: The reviewed run records a head test log but no baseline_suite or after_suite fields, so added_failure_count cannot be derived from paired gate logs and must remain unmeasured.\nFINDING scripts/prototypes/efit_axis_adjudication/plot.py:102 follow-on: _contour and the direct wall plot at line 127 duplicate the capabilities owned by nova/media/poloidal.py:138 and :27 instead of using those painters, allowing plot conventions to drift.\nreviewed_base_sha: 1b25eedd7574fda2220c02fc33fffd39db9433bd\nreviewed_head_sha: 90a818ba3d5d47c70a363baba28c02fca8c60d92\n",
+  "review_run_id": "r-20261018T112528047569-review-of-efit-axis-adjudication-90a818ba3d5d",
+  "reviewed_base_sha": "1b25eedd7574fda2220c02fc33fffd39db9433bd",
+  "reviewed_head_sha": "90a818ba3d5d47c70a363baba28c02fca8c60d92",
+  "reviewed_run_id": "r-20261018T091852734602-efit-axis-adjudication",
+  "reviewer": {
+    "reviewer_run_id": "r-20261018T112528047569-review-of-efit-axis-adjudication-90a818ba3d5d"
+  },
+  "scores": {
+    "durability": 11,
+    "evidence": 10,
+    "fit": 11,
+    "goal_fidelity": 9,
+    "reuse": 4,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T11:31:20.545571+00:00",
+  "total": 65
+}

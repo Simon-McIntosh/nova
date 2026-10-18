@@ -8,11 +8,16 @@ truncates nova's own contour-mesh capacity is read rather than dropped.
 
 from __future__ import annotations
 
+from dataclasses import replace
+
+import numpy as np
+import pytest
 
 from scripts.prototypes.efit_field_swap.crosscheck import (
     _decision,
     _row,
     cases,
+    domain_rings,
     fitted_geometry,
     lattice,
     wall_units,
@@ -66,3 +71,41 @@ def test_missing_record_remains_an_explicit_unread_row(tmp_path):
     assert row.efit_label == "unread"
     assert row.nova_label == "unread"
     assert "FileNotFoundError" in row.note
+
+
+def test_indexed_wall_loops_keep_the_axis_boundary_and_exclude_obstacles():
+    source = read_trace_record(ITER_RECORD)
+    obstacle = np.asarray(((0.7, 0.7), (1.3, 0.7), (1.3, 1.3), (0.7, 1.3)))
+    vessel = np.asarray(((-2.0, -2.0), (2.0, -2.0), (2.0, 2.0), (-2.0, 2.0)))
+
+    def segments(vertices):
+        return np.stack((vertices, np.roll(vertices, -1, axis=0)), axis=1)
+
+    joined = np.concatenate((segments(obstacle), segments(vessel)))
+    record = replace(
+        source,
+        wall_r=joined[:, :, 0],
+        wall_z=joined[:, :, 1],
+        wall_index=np.asarray(((1, 4), (5, 8)), dtype=np.int32),
+        axis_r=0.0,
+        axis_z=0.0,
+    )
+    rings = record.wall_rings
+    assert len(rings) == 2
+    np.testing.assert_array_equal(rings[0][:-1], obstacle)
+    np.testing.assert_array_equal(rings[1][:-1], vessel)
+    with pytest.raises(ValueError, match="2 wall loops"):
+        len(record.wall_ring)
+
+    boundary, obstacles = domain_rings(record)
+    np.testing.assert_array_equal(boundary, rings[1])
+    assert len(obstacles) == 1
+    np.testing.assert_array_equal(obstacles[0], rings[0])
+    units = wall_units(record)
+    assert len(units) == 2
+    np.testing.assert_array_equal(units[0], rings[1])
+    np.testing.assert_array_equal(units[1], rings[0])
+    cells, _ = lattice(boundary, 8, obstacles)
+    centres = np.asarray([cell.mean(axis=0) for cell in cells])
+    assert len(cells) == 60
+    assert not np.any(np.all((centres > 0.7) & (centres < 1.3), axis=1))

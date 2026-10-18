@@ -46,8 +46,7 @@ from pathlib import Path
 import jax
 import jax.numpy as jnp
 import numpy as np
-from shapely.geometry import Polygon as ShapelyPolygon
-from shapely.geometry import box
+from shapely.geometry import Point, Polygon as ShapelyPolygon, box
 
 from nova.equilibrium import topology
 from nova.jax.config import configure_dtypes
@@ -102,6 +101,7 @@ class Decision:
     case: str
     record: str
     source: str
+    wall_loop_count: int
     n_cells: int
     resolution: int
     capacity_fit: bool
@@ -135,6 +135,11 @@ def _efit_columns(case, source, record):
         case=case,
         record=record.slice if record is not None else "",
         source=source,
+        wall_loop_count=(
+            len(record.wall_index)
+            if record is not None and record.wall_r.size
+            else (1 if record is not None and record.polygon_r.size >= 3 else 0)
+        ),
         efit_verdict=int(record.verdict) if record is not None else -1,
         efit_label=(
             "unread"
@@ -236,11 +241,15 @@ def fitted_geometry(cells, sampling_vertices, wall_units):
     return geometry, holder["fitted"]
 
 
-def lattice(wall_ring: np.ndarray, resolution: int):
-    """A square lattice of axis-aligned cells whose centres lie in the wall."""
+def lattice(wall_ring: np.ndarray, resolution: int, obstacles=()):
+    """A square lattice with centres inside the vessel and outside obstacles."""
     polygon = ShapelyPolygon(wall_ring)
     if not polygon.is_valid:
         polygon = polygon.buffer(0)
+    holes = []
+    for ring in obstacles:
+        hole = ShapelyPolygon(ring)
+        holes.append(hole if hole.is_valid else hole.buffer(0))
     rmin, zmin = wall_ring.min(axis=0)
     rmax, zmax = wall_ring.max(axis=0)
     width = (rmax - rmin) / resolution
@@ -252,7 +261,9 @@ def lattice(wall_ring: np.ndarray, resolution: int):
             r0 = rmin + i * width
             z0 = zmin + j * height
             cell = box(r0, z0, r0 + width, z0 + height)
-            if not polygon.contains(cell.centroid):
+            if not polygon.contains(cell.centroid) or any(
+                hole.covers(cell.centroid) for hole in holes
+            ):
                 continue
             r1, z1 = r0 + width, z0 + height
             cells.append(
@@ -278,12 +289,33 @@ def lattice(wall_ring: np.ndarray, resolution: int):
     return cells, np.asarray(offsets)
 
 
+def domain_rings(record: TraceRecord):
+    """Select the one indexed loop containing the stored axis as vessel."""
+    rings = record.wall_rings
+    if len(rings) == 1:
+        return rings[0], ()
+    axis = Point(record.axis_r, record.axis_z)
+    polygons = []
+    for ring in rings:
+        polygon = ShapelyPolygon(ring)
+        polygons.append(polygon if polygon.is_valid else polygon.buffer(0))
+    owners = [index for index, polygon in enumerate(polygons) if polygon.contains(axis)]
+    if len(owners) != 1:
+        raise ValueError(f"expected one axis-containing wall loop, found {len(owners)}")
+    owner = owners[0]
+    outer = polygons[owner]
+    obstacles = tuple(
+        ring
+        for index, ring in enumerate(rings)
+        if index != owner and outer.covers(polygons[index]) and polygons[index].area > 0
+    )
+    return rings[owner], obstacles
+
+
 def wall_units(record: TraceRecord):
-    """The record's wall as one closed unit."""
-    ring = record.wall_ring
-    if not np.allclose(ring[0], ring[-1]):
-        ring = np.vstack((ring, ring[0]))
-    return (ring,)
+    """Keep the vessel and its interior obstacles as separate wall units."""
+    boundary, obstacles = domain_rings(record)
+    return (boundary, *obstacles)
 
 
 def _field_gradient_at_efit_axis(field, record):
@@ -320,10 +352,11 @@ def _decision(case, source, record, resolutions=RESOLUTIONS):
     field_grad = _field_gradient_at_efit_axis(field, record)
     convention = topology.TopologyConvention.from_cocos(17, 1.0)
     policy = TopologyPolicy()
+    boundary_ring, obstacles = domain_rings(record)
     attempts = []
     for resolution in resolutions:
-        cells, samples = lattice(record.wall_ring, resolution)
-        geometry, fitted = fitted_geometry(cells, samples, wall_units(record))
+        cells, samples = lattice(boundary_ring, resolution, obstacles)
+        geometry, fitted = fitted_geometry(cells, samples, (boundary_ring, *obstacles))
         if geometry is None:
             attempts.append(f"lattice {resolution}: contour mesh admits no vertex")
             continue

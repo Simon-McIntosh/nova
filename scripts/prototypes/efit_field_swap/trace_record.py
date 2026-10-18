@@ -89,25 +89,50 @@ class TraceRecord:
         return self.verdict == 2
 
     @property
-    def wall_ring(self) -> np.ndarray:
-        """The wall polygon as ordered RZ vertices.
+    def wall_rings(self) -> tuple[np.ndarray, ...]:
+        """Each indexed wall loop as its own closed sequence of RZ vertices.
 
         ``wall_r``/``wall_z`` store the trace wall as consecutive segments
-        (``nwall`` rows of two endpoints). Some crossing traces store only the
-        polygon, which serves as the wall for the sampled comparison.
+        (``nwall`` rows of two endpoints). ``wall_index`` gives each loop's
+        inclusive one-based segment range. Some crossing traces store only the
+        polygon, which serves as one wall loop for the sampled comparison.
         """
         if self.wall_r.size:
-            vertices = np.stack((self.wall_r, self.wall_z), axis=-1).reshape(-1, 2)
+            if not self.wall_index.size:
+                raise ValueError("wall segments have no loop index")
+            rings = []
+            for first, last in self.wall_index:
+                if first < 1 or last < first or last > len(self.wall_r):
+                    raise ValueError("wall loop index exceeds segment array")
+                vertices = np.stack(
+                    (self.wall_r[first - 1 : last], self.wall_z[first - 1 : last]),
+                    axis=-1,
+                ).reshape(-1, 2)
+                rings.append(_closed_ring(vertices))
+            return tuple(rings)
         elif self.polygon_r.size >= 3:
             vertices = np.column_stack((self.polygon_r, self.polygon_z))
         else:
             raise ValueError("trace has neither wall segments nor a wall polygon")
-        keep = np.ones(len(vertices), dtype=bool)
-        keep[1:] = np.any(vertices[1:] != vertices[:-1], axis=1)
-        ring = vertices[keep]
-        if not np.array_equal(ring[-1], ring[0]):
-            ring = np.vstack((ring, ring[0]))
-        return ring
+        return (_closed_ring(vertices),)
+
+    @property
+    def wall_ring(self) -> np.ndarray:
+        """The only wall loop, refusing to join distinct indexed loops."""
+        rings = self.wall_rings
+        if len(rings) != 1:
+            raise ValueError(f"trace has {len(rings)} wall loops; choose a domain")
+        return rings[0]
+
+
+def _closed_ring(vertices: np.ndarray) -> np.ndarray:
+    """Keep all recorded endpoints and close once without a zero-length edge."""
+    keep = np.ones(len(vertices), dtype=bool)
+    keep[1:] = np.any(vertices[1:] != vertices[:-1], axis=1)
+    ring = vertices[keep]
+    if not np.array_equal(ring[-1], ring[0]):
+        ring = np.vstack((ring, ring[0]))
+    return ring
 
 
 def read_trace_record(path: str | Path) -> TraceRecord:

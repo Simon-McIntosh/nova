@@ -31,11 +31,14 @@ def test_header_grid_axis_polarity_and_wall_round_trip(tmp_path):
     assert record.psi.shape == (65, 65)
     assert record.polarity in (1, -1)
     assert record.verdict in (1, 2)
-    # The ordered wall ring retains segment endpoints and closes at its start.
-    ring = record.wall_ring
-    assert ring.shape[1] == 2
-    np.testing.assert_array_equal(ring[0], ring[-1])
-    assert np.all(np.any(np.diff(ring, axis=0) != 0, axis=1))
+    # Each indexed wall loop closes independently without dropping endpoints.
+    assert len(record.wall_rings) == len(record.wall_index) == 3
+    for ring in record.wall_rings:
+        assert ring.shape[1] == 2
+        np.testing.assert_array_equal(ring[0], ring[-1])
+        assert np.all(np.any(np.diff(ring, axis=0) != 0, axis=1))
+    with pytest.raises(ValueError, match="3 wall loops"):
+        len(record.wall_ring)
 
     out = tmp_path / "roundtrip.txt"
     write_trace_record(out, record)
@@ -122,21 +125,29 @@ def test_wallless_crossing_uses_its_polygon_and_closes_it():
 
 def test_open_trace_wall_keeps_its_last_endpoint_before_closing():
     source = read_trace_record(CAPTURE)
-    wall_r = source.wall_r.copy()
+    first, last = source.wall_index[-1]
+    wall_r = source.wall_r[first - 1 : last].copy()
+    wall_z = source.wall_z[first - 1 : last].copy()
     wall_r[-1, 1] += 0.1
-    ring = replace(source, wall_r=wall_r).wall_ring
-    endpoints = np.stack((wall_r, source.wall_z), axis=-1)
+    unit = replace(
+        source,
+        wall_r=wall_r,
+        wall_z=wall_z,
+        wall_index=np.asarray([[1, len(wall_r)]], dtype=np.int32),
+    )
+    ring = unit.wall_ring
+    endpoints = np.stack((wall_r, wall_z), axis=-1)
     for endpoint in endpoints.reshape(-1, 2):
         assert np.any(np.all(ring == endpoint, axis=1))
     np.testing.assert_array_equal(ring[-2], endpoints[-1, 1])
     np.testing.assert_array_equal(ring[0], ring[-1])
     assert np.all(np.any(np.diff(ring, axis=0) != 0, axis=1))
 
-    closed_r = source.wall_r.copy()
-    closed_z = source.wall_z.copy()
+    closed_r = wall_r.copy()
+    closed_z = wall_z.copy()
     closed_r[-1, 1] = closed_r[0, 0]
     closed_z[-1, 1] = closed_z[0, 0]
-    closed = replace(source, wall_r=closed_r, wall_z=closed_z).wall_ring
+    closed = replace(unit, wall_r=closed_r, wall_z=closed_z).wall_ring
     np.testing.assert_array_equal(closed[-1], closed[0])
     assert not np.array_equal(closed[-2], closed[-1])
     assert np.all(np.any(np.diff(closed, axis=0) != 0, axis=1))

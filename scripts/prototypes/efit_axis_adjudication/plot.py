@@ -242,12 +242,15 @@ def draw_panel(ax, row):
     efit = row["efit"]
     source = efit.get("saddle_source_position")
     saddle_mark = efit.get("saddle_plot_position")
-    if (
-        saddle_mark is not None
-        and source is not None
-        and np.allclose(saddle_mark, source, rtol=0, atol=1e-12)
-    ):
-        raise ValueError("grid-node saddle proxy cannot be painted")
+    if saddle_mark is not None:
+        source_proxy = source is not None and np.allclose(
+            saddle_mark, source, rtol=0, atol=1e-12
+        )
+        grid_proxy = np.any(
+            np.isclose(record.rgrid, saddle_mark[0], rtol=0, atol=1e-12)
+        ) and np.any(np.isclose(record.zgrid, saddle_mark[1], rtol=0, atol=1e-12))
+        if source_proxy or grid_proxy:
+            raise ValueError("grid-node saddle proxy cannot be painted")
 
     rs, zs, psi = _sample_field(field, record)
     levels = row["contour_levels"]

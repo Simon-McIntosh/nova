@@ -95,6 +95,17 @@ class EscapeOverlayTest(unittest.TestCase):
             adjudication_plot.draw_panel(ax, row)
         plt.close(fig)
 
+    def test_an_unrelated_grid_node_is_also_refused(self):
+        row = _blocking_rebuild_row(None)
+        record = parse_record(row["path"])
+        row["efit"] = {
+            "saddle_plot_position": [float(record.rgrid[20]), float(record.zgrid[20])]
+        }
+        fig, ax = plt.subplots()
+        with self.assertRaisesRegex(ValueError, "grid-node saddle proxy"):
+            adjudication_plot.draw_panel(ax, row)
+        plt.close(fig)
+
     def test_a_failed_rebuild_panel_still_carries_the_bottleneck(self):
         row = _blocking_rebuild_row({"bottleneck": [0.4, 0.6]})
         fig, ax = plt.subplots()

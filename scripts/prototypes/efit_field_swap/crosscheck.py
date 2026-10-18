@@ -103,10 +103,13 @@ class Decision:
     nova_label: str
     nova_span: float
     efit_span: float
+    field_grad_at_efit_axis: float
     note: str = ""
 
 
-def _unqualified(case, source, record, resolution, roots, initial):
+def _unqualified(
+    case, source, record, resolution, roots, initial, field_grad_at_efit_axis
+):
     """A case the lattice cannot qualify, reported as such rather than as a decision.
 
     nova's census proposed no cellwise seed, or proposed seeds and admitted no
@@ -138,6 +141,7 @@ def _unqualified(case, source, record, resolution, roots, initial):
         nova_label="unqualified",
         nova_span=float("nan"),
         efit_span=abs(record.fed_back_psi - record.axis_psi),
+        field_grad_at_efit_axis=field_grad_at_efit_axis,
         note=(
             f"lattice {resolution}: candidates {int(roots.candidates)}, "
             "admitted saddles 0; nova's read's axis fallback is not reported"
@@ -195,8 +199,23 @@ def wall_units(record: TraceRecord):
     return (ring,)
 
 
+def _field_gradient_at_efit_axis(field, record):
+    """|grad psi| at the axis imas-efit recorded in this same record.
+
+    This is the adapter's own falsification test and it runs on every row. If
+    the rebuilt spline is imas-efit's field, its gradient vanishes at the axis
+    imas-efit measured, to numerical precision, whatever the grid ordering,
+    units or frame. A row whose value is not near zero says the adapter is
+    wrong and nothing below it in the row can be read as a statement about
+    nova's decision rule.
+    """
+    axis = jnp.asarray([record.axis_r, record.axis_z])
+    return float(np.linalg.norm(np.asarray(jax.jacfwd(field.value)(axis))))
+
+
 def _decision(case, source, record, resolution):
     field = TraceSplineField.from_record(record)
+    field_grad = _field_gradient_at_efit_axis(field, record)
     cells, samples = lattice(record.wall_ring, resolution)
     geometry = topology.TopologyGeometry.from_cells(cells, samples, wall_units(record))
     convention = topology.TopologyConvention.from_cocos(17, 1.0)
@@ -211,7 +230,9 @@ def _decision(case, source, record, resolution):
     roots = census(field, geometry, convention, policy, previous)
     qualified = int(roots.candidates) > 0 and int(roots.saddles) > 0
     if not qualified:
-        return _unqualified(case, source, record, resolution, roots, initial)
+        return _unqualified(
+            case, source, record, resolution, roots, initial, field_grad
+        )
     reading = nova_read(field, roots.roots, geometry, convention, policy)
     sigma = convention.sigma
 
@@ -247,6 +268,7 @@ def _decision(case, source, record, resolution):
         nova_label="diverted" if int(label) else "limited",
         nova_span=abs(float(np.asarray(reading.boundary_flux)) - axis_psi),
         efit_span=abs(record.fed_back_psi - record.axis_psi),
+        field_grad_at_efit_axis=field_grad,
     )
 
 
@@ -313,6 +335,7 @@ def main(resolution=16, out=None):
                         if record is not None
                         else float("nan")
                     ),
+                    field_grad_at_efit_axis=float("nan"),
                     note=f"{type(error).__name__}: {error}",
                 )
             results.append(asdict(case))

@@ -1,0 +1,83 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The source manifest's completed baseline_suite names one failure, test_field_swap_record_reports_coverage_outcome, and its completed after_suite names no failures; set difference is empty.",
+  "assertion_audit": {
+    "scripts/prototypes/efit_field_swap/test_crosscheck.py:53-66": "The fitted-mesh and JT-60SA outcome assertions fail if a wide wall has no contour vertex, the read stays unqualified, the index is wrong or any cell stays uncleared.",
+    "scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py:125-162": "The cancelled-pair and occupied-cell assertions fail if equal boundary and admitted indices bypass the remaining cell enclosure; the old source produces unresolved 0, and line 162 fails.",
+    "scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py:165-183": "The flat occupied and constant empty cell assertions fail if a zero gradient is treated as strictly signed or a depth cap silently clears it.",
+    "scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py:186-217": "The invalid-axis refusal and valid limited-read assertions fail if an invalid axis is accepted or if a single true maximum is refused.",
+    "scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py:220-235": "The annular-domain and loop-critical-point assertions fail if obstacle winding is added, a nonzero winding is missed or a zero on the loop is treated as reliable.",
+    "scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py:242-275": "The real limited slice and synthetic outline assertions fail if a known limited read is refused, a 0.5 m outline span changes, the 0.1 m gap is scaled to anything but 0.2, or an absent X gap is invented.",
+    "scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py:85-118": "The analytic field's winding-one checks and missed-saddle refusal fail if a missing saddle is admitted as limited or the boundary index ceases to be measured independently of the supplied census."
+  },
+  "call_site_count": 5,
+  "call_sites": [
+    "scripts/prototypes/efit_field_swap/crosscheck.py:1035 (_decision calls read_state)",
+    "scripts/prototypes/tcv_liuqe_known_answer/measure.py:181 (measure_slice calls read_state)",
+    "scripts/prototypes/tcv_liuqe_known_answer/measure.py:272 (main calls measure_slice)",
+    "scripts/prototypes/tcv_liuqe_known_answer/report.py:162 (build calls measure_gaps)",
+    "scripts/prototypes/tcv_liuqe_known_answer/figures.py:115 (build calls draw_panel)"
+  ],
+  "completed_at": "2026-10-18T20:43:24Z",
+  "coupled_input_assertions": [],
+  "dispatched_at": "2026-10-18T20:36:14Z",
+  "figure_review": "Viewed all three final 1400-pixel PNG renderings; poloidal contours, wall loops, paired axes and boundary curves remain visible, with refusal panels labelled in the report captions.",
+  "findings": [
+    {
+      "file": "scripts/prototypes/tcv_liuqe_known_answer/measure.py",
+      "line": "146",
+      "severity": "follow-on",
+      "text": "follow-on: The axis-to-outline span repeats the point-to-segment distance algorithm owned by nova/equilibrium/boundary_comparison.py:81; the addition duplicates that capability rather than extending or wrapping its owner."
+    },
+    {
+      "file": "scripts/prototypes/tcv_liuqe_known_answer/measure.py",
+      "line": "179",
+      "severity": "follow-on",
+      "text": "follow-on: The LIUQE adapter hard-codes COCOS 17 and positive plasma current instead of using the equilibrium's own orientation, so a negative-current slice can be scored in the wrong flux polarity; the live plan already queues a polarity rescore."
+    },
+    {
+      "file": "scripts/prototypes/tcv_liuqe_known_answer/report.py",
+      "line": "171",
+      "severity": "follow-on",
+      "text": "follow-on: No added versioned assertion calls build or pins the per-slice absolute and relative maxima, so a regression can misattribute the report summary while the sixteen-test focused gate stays green; the one-off report change control does not provide durable coverage."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call sites",
+    "diff": "Read all twenty-one commits from a0ed032e to 86fcef09: they add the measurement, certification, report and figures, then repair occupied-cell coverage and rescore; the final twelve-path diff stays in scope.",
+    "done_when": "The brief's twelve-slice, paired-gap and figure clauses appear in docs/research/tcv-liuqe-known-answer.html:35-67; receipts/rescore-occupied-job.log records twelve rows plus five field-swap rows, and receipts/occupied-focused-final-head.log records sixteen passes.",
+    "goal": "The source brief asks for a measured TCV LIUQE comparison without changing nova's read; docs/research/tcv-liuqe-known-answer.html:1-35 supplies twelve slices, paired values, six explicit refusals and three contour figures.",
+    "manifest": "The source manifest.md:5-20 names twenty-one commits, completed base and head suite arms and their receipt paths; baseline-suite-occupied.log ends one failed and after-suite-final-head.log ends seven passed.",
+    "write_paths": "The source manifest.md:3 grants the TCV prototype, field-swap adapter, report, figure and fragment paths; git diff a0ed032e..86fcef09 changes twelve paths, all within those grants."
+  },
+  "justifications": {
+    "durability": "test_coverage.py:153-162 fails on the old occupied-cell false clearance in receipts/occupied-negative-control-fresh.log, though report.py:171-189 has no versioned maximum-attribution assertion.",
+    "evidence": "receipts/rescore-occupied-job.log names a completed twelve-row and five-row sweep, and receipts/baseline-suite-occupied.log plus after-suite-final-head.log show one base failure and zero head failures.",
+    "fit": "figures.py:27-33 uses nova.media painters and measure.py:94 uses wall_units_from_ids, but measure.py:179 hard-codes flux orientation rather than reading the IDS.",
+    "goal_fidelity": "docs/research/tcv-liuqe-known-answer.html:35-67 tabulates all twelve selected slices and supplies panels, while measure.py:179 still fixes the orientation sign.",
+    "reuse": "measure.py:146-164 duplicates the point-to-segment distance capability owned by nova/equilibrium/boundary_comparison.py:81-99; it neither extends nor wraps that owner.",
+    "scope_discipline": "The twenty-one-commit diff changes only the five path families granted by the source manifest.md:3."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source brief asks for a measured TCV LIUQE comparison without changing nova's read; docs/research/tcv-liuqe-known-answer.html:1-35 supplies twelve slices, paired values, six explicit refusals and three contour figures.\nVERDICT done_when: The brief's twelve-slice, paired-gap and figure clauses appear in docs/research/tcv-liuqe-known-answer.html:35-67; receipts/rescore-occupied-job.log records twelve rows plus five field-swap rows, and receipts/occupied-focused-final-head.log records sixteen passes.\nVERDICT write_paths: The source manifest.md:3 grants the TCV prototype, field-swap adapter, report, figure and fragment paths; git diff a0ed032e..86fcef09 changes twelve paths, all within those grants.\nVERDICT manifest: The source manifest.md:5-20 names twenty-one commits, completed base and head suite arms and their receipt paths; baseline-suite-occupied.log ends one failed and after-suite-final-head.log ends seven passed.\nVERDICT diff: Read all twenty-one commits from a0ed032e to 86fcef09: they add the measurement, certification, report and figures, then repair occupied-cell coverage and rescore; the final twelve-path diff stays in scope.\nCALL_SITES: scripts/prototypes/efit_field_swap/crosscheck.py:1035 (_decision calls read_state), scripts/prototypes/tcv_liuqe_known_answer/measure.py:181 (measure_slice calls read_state), scripts/prototypes/tcv_liuqe_known_answer/measure.py:272 (main calls measure_slice), scripts/prototypes/tcv_liuqe_known_answer/report.py:162 (build calls measure_gaps), scripts/prototypes/tcv_liuqe_known_answer/figures.py:115 (build calls draw_panel)\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/research/tcv-liuqe-known-answer.html:35-67 tabulates all twelve selected slices and supplies panels, while measure.py:179 still fixes the orientation sign.\nSCORE evidence: 18\nJUSTIFICATION evidence: receipts/rescore-occupied-job.log names a completed twelve-row and five-row sweep, and receipts/baseline-suite-occupied.log plus after-suite-final-head.log show one base failure and zero head failures.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The twenty-one-commit diff changes only the five path families granted by the source manifest.md:3.\nSCORE durability: 16\nJUSTIFICATION durability: test_coverage.py:153-162 fails on the old occupied-cell false clearance in receipts/occupied-negative-control-fresh.log, though report.py:171-189 has no versioned maximum-attribution assertion.\nSCORE fit: 17\nJUSTIFICATION fit: figures.py:27-33 uses nova.media painters and measure.py:94 uses wall_units_from_ids, but measure.py:179 hard-codes flux orientation rather than reading the IDS.\nSCORE reuse: 5\nJUSTIFICATION reuse: measure.py:146-164 duplicates the point-to-segment distance capability owned by nova/equilibrium/boundary_comparison.py:81-99; it neither extends nor wraps that owner.\nFINDING scripts/prototypes/tcv_liuqe_known_answer/measure.py:146 follow-on: The axis-to-outline span repeats the point-to-segment distance algorithm owned by nova/equilibrium/boundary_comparison.py:81; the addition duplicates that capability rather than extending or wrapping its owner.\nFINDING scripts/prototypes/tcv_liuqe_known_answer/measure.py:179 follow-on: The LIUQE adapter hard-codes COCOS 17 and positive plasma current instead of using the equilibrium's own orientation, so a negative-current slice can be scored in the wrong flux polarity; the live plan already queues a polarity rescore.\nFINDING scripts/prototypes/tcv_liuqe_known_answer/report.py:171 follow-on: No added versioned assertion calls build or pins the per-slice absolute and relative maxima, so a regression can misattribute the report summary while the sixteen-test focused gate stays green; the one-off report change control does not provide durable coverage.\n",
+  "review_run_id": "r-20261018T203535484254-review-of-tcv-liuqe-known-answer-86fcef09496b",
+  "reviewed_base_sha": "a0ed032e1c8fb62e1fbad18cea1c343052dc0dd0",
+  "reviewed_head_sha": "86fcef09496b9474fd9b0143978aafac6e856915",
+  "reviewed_run_id": "r-20261018T134957600545-tcv-liuqe-known-answer",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T20:44:25.440367+00:00",
+  "total": 94
+}

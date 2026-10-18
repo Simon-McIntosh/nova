@@ -12,36 +12,39 @@ import pytest
 
 from nova.equilibrium.constraint import (
     CircuitCurrentUnknown,
+    ConstraintContext,
     CurrentCentroidConstraint,
     UniformRadialFieldUnknown,
     VerticalPositionPin,
     assemble_augmented_system,
+    uniform_radial_field_jet,
 )
 from nova.equilibrium import fixed_point
 from nova.equilibrium.forward import ForwardProfile
+from nova.equilibrium.forward_operator import PrescribedCurrentField
 from nova.equilibrium.observation import CurrentMomentObservation, MomentIntegralSupport
 from nova.equilibrium.solve_request import ExplicitSolveSeed, ForwardSolveRequest
 from nova.jax.config import configure_dtypes
 
 
 ELONGATION = 1.8
-RADIAL_HALF_WIDTH = 0.2
-FREE_HEIGHT = 0.5
-SEED = np.asarray([1.0, 1.0, 0.30, 1.0, 1.0, 0.90], dtype=np.float64)
+FREE_HEIGHT = 0.6
+SEED = np.asarray([1.0, 0.8, 0.30, 1.0, 1.2, 0.90], dtype=np.float64)
 TARGETS = (0.7, 0.9)
 
 
 def _carrier_residual(flux):
     first, first_r, first_z, second, second_r, second_z = flux
     low, high = first_z / first, second_z / second
+    radial_span = second_r / second - first_r / first
     height = CurrentCentroidConstraint.booked_height(flux.reshape((2, 3)))
     return jnp.stack(
         (
             first - 1.0,
             second - 1.0,
-            first_r - first,
-            second_r - second,
-            (high - low) / (2 * RADIAL_HALF_WIDTH) - ELONGATION,
+            first_r - 0.8 * first,
+            second_r - 1.2 * second,
+            (high - low) / radial_span - ELONGATION,
             (height - FREE_HEIGHT) / ELONGATION**2,
         )
     )
@@ -121,7 +124,15 @@ def _profile():
     return profile
 
 
-def _request(profile, target, *, active=True):
+def _request(
+    profile,
+    target,
+    *,
+    active=True,
+    coil_direction=None,
+    source_scale=1.0,
+    compilation_cache=False,
+):
     return ForwardSolveRequest.from_defaults(
         carrier_identity="elongated-moment-carrier",
         source_profile=profile.source,
@@ -133,9 +144,14 @@ def _request(profile, target, *, active=True):
             "kernel_tolerance": 1e-12,
             "qualification_tolerance": 1e-12,
             "current_pin": False,
-            "compilation_cache": False,
+            "compilation_cache": compilation_cache,
         },
-        vertical_pin=VerticalPositionPin(target, active=active),
+        vertical_pin=VerticalPositionPin(
+            target,
+            active=active,
+            coil_direction=coil_direction,
+            source_scale=source_scale,
+        ),
     )
 
 
@@ -146,8 +162,10 @@ def _booked_terminal_height(flux):
 
 def _terminal_elongation(flux):
     moments = np.asarray(flux).reshape((2, 3))
-    low, high = moments[:, 2] / moments[:, 0]
-    return float((high - low) / (2 * RADIAL_HALF_WIDTH))
+    radial_span = float(np.ptp(moments[:, 1] / moments[:, 0]))
+    vertical_span = float(np.ptp(moments[:, 2] / moments[:, 0]))
+    assert radial_span >= 0.39
+    return vertical_span / radial_span
 
 
 def test_vertical_pin_declares_a_physical_field_source():
@@ -156,12 +174,37 @@ def test_vertical_pin_declares_a_physical_field_source():
     radial = VerticalPositionPin(0.7, source_scale=1e-3).pair(operator)
     assert isinstance(radial.unknown, UniformRadialFieldUnknown)
     np.testing.assert_allclose(np.asarray(radial.unknown.flux_basis), [0] * 5 + [1])
-    operator.prescribed_current_field = SimpleNamespace(circuit_count=2)
+    np.testing.assert_allclose(
+        np.asarray(uniform_radial_field_jet(jnp.asarray([[1.5, -0.5]])))[0],
+        [1.5 * np.pi, np.pi, -3.0 * np.pi, 0.0, -2.0 * np.pi, 0.0],
+    )
+    operator.prescribed_current_field = PrescribedCurrentField(
+        response=jnp.asarray([[0.0, 0.0]] * 5 + [[0.0, 1.0]]),
+        current=jnp.zeros(2),
+    )
     coil = VerticalPositionPin(
         0.7, coil_direction=np.asarray([0.0, 1.0]), source_scale=100.0
     ).pair(operator)
     assert isinstance(coil.unknown, CircuitCurrentUnknown)
     np.testing.assert_array_equal(np.asarray(coil.unknown.direction[:, 0]), [0, 1])
+    delta = coil.unknown.flux_delta(
+        SimpleNamespace(operator=operator),
+        ConstraintContext(jnp.zeros(6), None, None, None),
+        coil.functional,
+        coil.binding.payload,
+        jnp.asarray([0.25]),
+    )
+    np.testing.assert_allclose(delta, [0.0] * 5 + [25.0])
+    profile = _profile()
+    profile.operator.prescribed_current_field = operator.prescribed_current_field
+    receipt = profile.solve(
+        _request(
+            profile, 0.7, coil_direction=np.asarray([0.0, 1.0]), source_scale=100.0
+        )
+    )
+    assert bool(receipt.qualified)
+    assert float(receipt.equilibrium.fixed_point.residual) <= 1e-12
+    assert abs(_booked_terminal_height(receipt.equilibrium.flux) - 0.7) <= 1e-10
 
 
 @pytest.mark.slow
@@ -174,8 +217,10 @@ def test_elongated_free_public_request_drifts():
     assert bool(receipt.qualified)
     assert float(receipt.equilibrium.fixed_point.residual) <= 1e-12
     assert _terminal_elongation(flux) >= 1.6
-    assert abs(_booked_terminal_height(flux) - FREE_HEIGHT) <= 1e-10
-    assert abs(_booked_terminal_height(flux) - TARGETS[0]) >= 0.1
+    seed_moments = SEED.reshape((2, 3))
+    expected_free = float(seed_moments[:, 2].sum() / seed_moments[:, 0].sum())
+    assert abs(_booked_terminal_height(flux) - expected_free) <= 1e-10
+    assert abs(_booked_terminal_height(flux) - TARGETS[0]) >= 0.09
     np.testing.assert_allclose(receipt.constraints[0].physical_unknown, [0.0])
 
 
@@ -193,6 +238,44 @@ def test_public_pinned_request_converges_to_booked_height(target):
     assert abs(_booked_terminal_height(flux) - target) <= 1e-10
     assert len(receipt.constraints) == 1
     assert bool(receipt.constraints[0].qualified[0])
+
+
+@pytest.mark.slow
+def test_public_request_passes_pin_operands_to_one_cache_identity(monkeypatch):
+    configure_dtypes()
+    assert jax.config.jax_enable_x64 is True
+    profile = _profile()
+    profile._configure_solve_compilation_cache = lambda enabled: None
+    original = fixed_point.newton_krylov
+    seen = []
+
+    def inspect_runtime_pair(*args, **kwargs):
+        runtime_pairs = kwargs.get("map_arguments", ())
+        assert len(runtime_pairs) == 1 and len(runtime_pairs[0]) == 1
+        pair = runtime_pairs[0][0]
+        seen.append(
+            (
+                float(np.asarray(pair.binding.target)[0]),
+                float(np.asarray(pair.unknown.field_scale)),
+            )
+        )
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(fixed_point, "newton_krylov", inspect_runtime_pair)
+    first = profile.solve(
+        _request(profile, TARGETS[0], compilation_cache=True, source_scale=1.0)
+    )
+    second = profile.solve(
+        _request(profile, TARGETS[1], compilation_cache=True, source_scale=2.0)
+    )
+    assert seen == [(TARGETS[0], 1.0), (TARGETS[1], 2.0)]
+    assert len(profile._request_compilation_cache) == 1
+    assert not first.compilation_cache_hit
+    assert second.compilation_cache_hit
+    for receipt, target in ((first, TARGETS[0]), (second, TARGETS[1])):
+        assert bool(receipt.qualified)
+        assert float(receipt.equilibrium.fixed_point.residual) <= 1e-12
+        assert abs(_booked_terminal_height(receipt.equilibrium.flux) - target) <= 1e-10
 
 
 @pytest.mark.slow
@@ -237,7 +320,7 @@ def test_one_augmented_newton_program_serves_free_and_pinned_requests():
     program = jax.jit(production)
     compiled = program.lower(seed, free).compile()
     for target, active, expected in [
-        (TARGETS[0], False, FREE_HEIGHT),
+        (TARGETS[0], False, float(SEED[2] + SEED[5]) / float(SEED[0] + SEED[3])),
         *[(height, True, height) for height in TARGETS],
     ]:
         pair = _request(profile, target, active=active).vertical_pin.pair(operator)

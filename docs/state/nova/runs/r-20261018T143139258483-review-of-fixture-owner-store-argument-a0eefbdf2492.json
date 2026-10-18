@@ -886,6 +886,43 @@
   "plan_link": null,
   "promoted_by": "review-self",
   "promoted_revision": "8e0ccc13a1d72fa47a4e48f37ca5d6131ad89fca",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 5047,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261018T143139258483-review-of-fixture-owner-store-argument-a0eefbdf2492",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 5047,
+        "path": "/tmp/reckon-crew-scratch/r-20261018T143139258483-review-of-fixture-owner-store-argument-a0eefbdf2492"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-fixture-owner-store-argument-a0eefbdf2492",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

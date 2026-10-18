@@ -17,6 +17,11 @@
       "kind": "exempted",
       "reason": "The two synthetic crossing records are not spline-consistent at their recorded axis (|grad psi| 2.4e-4, 2.6e-4); that is a property of the inputs, which the page reports as a failed rebuild and excludes from every comparison, so clause 1 holds for the 24 measured records and is honestly reported failed for the two synthetic ones.",
       "recorded_at": "2026-10-18T12:43:57.829792+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "Evidence-only plotting node landing for the lead adjudication; recorded as a follow-on for the record, not repaired in another round.",
+      "recorded_at": "2026-10-18T12:44:04.846128+00:00"
     }
   },
   "findings": [

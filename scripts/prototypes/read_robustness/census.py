@@ -44,12 +44,20 @@ def census(field, geometry, convention, policy, previous):
     offset = -jnp.linalg.solve(safe, gradient[..., None])[..., 0]
     seeds = geometry.centre + geometry.pitch[:, None] * offset
     slot = jnp.arange(geometry.vertices.shape[1])
-    following = jnp.where(
-        slot[None] + 1 < geometry.vertex_count[:, None], slot[None] + 1, 0
+    # A cell fit may place its stationary point across a shared edge. Check
+    # its own polygon and the polygons sharing one edge with it: the ring is
+    # defined by the carrier's actual connectivity, including trimmed cells.
+    ring = jnp.concatenate(
+        (jnp.arange(len(seeds))[:, None], geometry.neighbour), axis=1
     )
-    end = jnp.take_along_axis(geometry.vertices, following[..., None], axis=1)
-    edge = end - geometry.vertices
-    relative = seeds[:, None] - geometry.vertices
+    ring_live = ring >= 0
+    ring = jnp.maximum(ring, 0)
+    vertices = geometry.vertices[ring]
+    counts = geometry.vertex_count[ring]
+    following = jnp.where(slot[None, None] + 1 < counts[..., None], slot + 1, 0)
+    end = jnp.take_along_axis(vertices, following[..., None], axis=2)
+    edge = end - vertices
+    relative = seeds[:, None, None] - vertices
     cross = topology._cross_plane(edge, relative)
     # A quadratic seed can land on a cell edge, where the cross product above
     # is zero to within its own rounding and its computed sign is set by
@@ -101,17 +109,31 @@ def census(field, geometry, convention, policy, previous):
         * (jnp.abs(edge[..., 0]) + jnp.abs(edge[..., 1]))
         * (jnp.abs(relative[..., 0]) + jnp.abs(relative[..., 1]))
         + (jnp.abs(edge[..., 0]) + jnp.abs(edge[..., 1]))
-        * (seed_uncertainty + fit_seed_uncertainty)[:, None]
+        * (seed_uncertainty + fit_seed_uncertainty)[:, None, None]
     )
-    inside = jnp.all(
-        jnp.where(
-            slot[None] < geometry.vertex_count[:, None], cross >= -rounding, True
-        ),
-        axis=1,
+    inside_ring = (
+        jnp.all(
+            jnp.where(slot[None, None] < counts[..., None], cross >= -rounding, True),
+            axis=2,
+        )
+        & ring_live
     )
+    inside = jnp.any(inside_ring, axis=1)
     candidate = conditioned & inside & jnp.all(jnp.isfinite(seeds), axis=1)
-    seed_capacity = max(4 * policy.null_capacity, previous.shape[0])
-    selected = jnp.nonzero(candidate, size=seed_capacity, fill_value=0)[0]
+    # A ring can contain one proposal from each of its incident fits. Reserve
+    # that many proposal slots for every root slot, then prefer the fits whose
+    # seeds are closest to stationary in the full field when a carrier exceeds
+    # the reserve. The overflow flag still exposes a truncated proposal set.
+    seed_capacity = min(
+        len(seeds), max(policy.null_capacity * ring.shape[1], previous.shape[0])
+    )
+    safe_seeds = jnp.where(candidate[:, None], seeds, geometry.centre)
+    residual = jax.vmap(lambda point: jnp.linalg.norm(field.evaluate(point).gradient))(
+        safe_seeds
+    )
+    selected = jnp.argsort(jnp.where(candidate, residual, jnp.inf), stable=True)[
+        :seed_capacity
+    ]
     live_seed = jnp.arange(seed_capacity) < jnp.sum(candidate)
     all_seeds = jnp.concatenate((previous, seeds[selected]))
     active = jnp.concatenate((jnp.ones(previous.shape[0], bool), live_seed))

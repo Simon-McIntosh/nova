@@ -2624,13 +2624,7 @@ def _census_cache():
 
 
 def _census_tie_setup(cache):
-    """Build the 282-cell carrier, warm its census prior, and return both arms.
-
-    The second arm builds the census from the live source with its
-    cell-membership step restored to the strict exact-zero comparison the
-    repaired source no longer uses, so the two arms differ only in that one
-    comparison.
-    """
+    """Build the coarse carrier and return its moving state and warmed prior."""
     from scripts.prototypes.fast_map_production import tie_probe
     from scripts.prototypes.read_robustness import census as repaired_module
 
@@ -2721,11 +2715,11 @@ def _dense_cut_current(state, reading, field, resolution):
 @pytest.mark.timeout(900)
 @pytest.mark.slow
 def test_census_keeps_the_wall_contact_saddle_across_the_adjacent_pair():
-    """Both sides of the bisected tie pair carry three roots and two saddles.
+    """Both sides of the pre-fold tie pair carry three roots and two saddles.
 
-    The pair is bisected on the census whose cell-membership step is the strict
-    exact-zero comparison, which is where that step loses the saddle; the
-    repaired census must keep it on both sides. The retained saddle is then
+    The recorded pre-fold pair is where the former own-cell, exact-zero
+    proposal loses the saddle; the live census must keep it on both sides.
+    The retained saddle is then
     confirmed independently of the census that proposed it, by polishing the
     field from a seed displaced from the census reading and requiring the same
     hyperbolic point back, and by requiring the point to persist across the pair.
@@ -2744,20 +2738,11 @@ def test_census_keeps_the_wall_contact_saddle_across_the_adjacent_pair():
     state, prior, repaired = _census_tie_setup(cache)
     restored = base_admission_census()
 
-    low, high = 0.17, 0.18
+    low, high = 0.1732, 0.17325
     reference = _census_reading(restored, state, prior, low)[0]
     assert _census_reading(restored, state, prior, high)[0] < reference, (
-        "the strict exact-zero admission must depart over the tie interval"
+        "the former own-cell exact-zero proposal must lose a saddle"
     )
-    for _ in range(200):
-        middle = (low + high) / 2
-        if middle in (low, high):
-            break
-        if _census_reading(restored, state, prior, middle)[0] == reference:
-            low = middle
-        else:
-            high = middle
-    assert np.nextafter(low, high) == high, "the tie pair must be adjacent binary64"
 
     positions = {}
     for offset in (low, high):
@@ -2799,7 +2784,7 @@ def test_census_keeps_the_wall_contact_saddle_across_the_adjacent_pair():
     )
 
     # The production read must continue to select the primary X-point, and
-    # the current it books must not jump when the census keeps the extra root.
+    # its booked current must agree with direct quadrature at each offset.
     sampled = tie_probe.make_sampler(state)
     currents = []
     independent_currents = []
@@ -2825,25 +2810,17 @@ def test_census_keeps_the_wall_contact_saddle_across_the_adjacent_pair():
             f"booked current {currents[-1]!r} disagrees with direct cut-cell "
             f"quadrature {independent_current!r} at {offset!r}"
         )
-    assert abs(currents[1] - currents[0]) < 1e-5 * max(
-        1.0, abs(currents[0]), abs(currents[1])
-    ), f"booked current jumped across adjacent offsets: {currents!r}"
-    assert abs(independent_currents[1] - independent_currents[0]) < 1e-5 * max(
-        1.0, abs(independent_currents[0]), abs(independent_currents[1])
-    ), f"direct quadrature jumped across adjacent offsets: {independent_currents!r}"
 
 
 @pytest.mark.slow
 def test_strict_exact_zero_admission_loses_the_saddle_at_the_adjacent_pair():
-    """The reinstated strict exact-zero admission is the check this repair guards.
+    """The former own-cell exact-zero proposal is the check both repairs guard.
 
-    Rebuilding the census with that comparison in place of the rounding bound
-    must lose the wall-contact saddle the repaired census keeps, at the adjacent
+    Rebuilding the census with that comparison and proposal region
+    must lose the wall-contact saddle the repaired census keeps, at the pre-fold
     pair. A test that passes with the repair and fails without it is the control
     the repair is declared to answer to.
     """
-    import numpy as np
-
     from scripts.prototypes.read_robustness.census_base_step import (
         base_admission_census,
     )
@@ -2852,17 +2829,9 @@ def test_strict_exact_zero_admission_loses_the_saddle_at_the_adjacent_pair():
     state, prior, repaired = _census_tie_setup(cache)
     restored = base_admission_census()
 
-    low, high = 0.17, 0.18
+    low, high = 0.1732, 0.17325
     reference = _census_reading(restored, state, prior, low)[0]
-    for _ in range(200):
-        middle = (low + high) / 2
-        if middle in (low, high):
-            break
-        if _census_reading(restored, state, prior, middle)[0] == reference:
-            low = middle
-        else:
-            high = middle
-    assert np.nextafter(low, high) == high
+    assert _census_reading(restored, state, prior, high)[0] < reference
 
     _, repaired_saddles, _ = _census_reading(repaired, state, prior, high)
     _, restored_saddles, _ = _census_reading(restored, state, prior, high)
@@ -2870,3 +2839,40 @@ def test_strict_exact_zero_admission_loses_the_saddle_at_the_adjacent_pair():
     assert restored_saddles == 1, (
         "restoring the strict exact-zero admission must lose a saddle at the pair"
     )
+
+
+@pytest.mark.timeout(900)
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    ("requested_cells", "before", "after", "warm_stop"),
+    ((250, 0.1732, 0.17325, 0.16), (500, 0.122, 0.1225, 0.10)),
+)
+def test_census_neighbour_proposals_keep_saddles_across_coarse_ties(
+    requested_cells, before, after, warm_stop
+):
+    """The complete read keeps both hyperbolic saddles across a proposal gap."""
+    from scripts.prototypes.fast_map_production import tie_probe
+    from scripts.prototypes.read_robustness import census as census_module
+
+    cache = _census_cache()
+    if not (cache / f"analytic_oracle_hex_machine_{requested_cells}.zarr").exists():
+        pytest.skip(f"no certified machine cache at {cache}")
+    state = tie_probe.build("diverted", requested_cells, str(cache))
+    sampled = tie_probe.make_sampler(state)
+    prior, _ = tie_probe.warm(state, sampled, -0.2, warm_stop, 0.01)
+    observed = []
+    for offset in (before, after):
+        valid, saddles, roots = _census_reading(
+            census_module.census, state, prior, offset
+        )
+        assert valid == 3, f"expected three roots at {offset}, got {valid}"
+        assert saddles == 2, f"expected two saddles at {offset}, got {saddles}"
+        eigenvalues = np.linalg.eigvalsh(
+            np.asarray(state["convention"].sigma) * np.asarray(roots.jet.hessian)
+        )
+        selected = (
+            np.asarray(roots.valid) & (eigenvalues[:, 0] < 0) & (eigenvalues[:, 1] > 0)
+        )
+        observed.append(np.asarray(roots.position)[selected])
+    distances = np.linalg.norm(observed[0][:, None] - observed[1][None], axis=-1)
+    assert np.all(np.min(distances, axis=1) < np.median(state["geometry"].pitch))

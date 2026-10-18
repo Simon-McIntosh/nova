@@ -10,6 +10,13 @@
     "scripts/prototypes/tcv_liuqe_known_answer/measure.py:258-260 (main calls liuqe_reference and measure_slice)"
   ],
   "completed_at": "2026-10-18T15:02:35Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "tcv-liuqe-known-answer",
+      "recorded_at": "2026-10-18T15:05:21.985352+00:00"
+    }
+  },
   "dispatched_at": "2026-10-18T14:54:19Z",
   "finding_dispositions": {
     "0": {

@@ -101,7 +101,7 @@ def test_field_with_a_missed_saddle_is_refused_not_read_limited(monkeypatch):
             value=jnp.zeros(3), gradient=jnp.zeros((3, 2)), hessian=hessian
         )
         roots = fixed_points.FixedPointResult(
-            position=jnp.zeros((3, 2)),
+            position=jnp.asarray([[-0.35, 0.0], [0.35, 0.0], [0.0, 0.0]]),
             jet=jet,
             valid=jnp.asarray([True, True, False]),
             status=jnp.zeros(3, jnp.int32),

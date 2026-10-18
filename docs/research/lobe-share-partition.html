@@ -31,8 +31,8 @@
     earlier booking is gone. This page records the construction, why one call of the builder cannot
     carry both selections, and the agreement of the booking with closed-form references that share
     neither its ring builder nor its quadrature. The largest lobe-reference deviation is
-    7.10542735760 × 10<sup>&minus;13</sup> and the largest whole-cell partition deviation is
-    1.13686837722 × 10<sup>&minus;13</sup>, both under the 1 × 10<sup>&minus;12</sup> contract. The lobe partition
+    3.26849658450 × 10<sup>&minus;13</sup> and the largest whole-cell partition deviation is
+    1.42108547152 × 10<sup>&minus;13</sup>, both under the 1 × 10<sup>&minus;12</sup> contract. The lobe partition
     passes all three map guards, and the 282 cold solve converges to 3.0 × 10<sup>&minus;14</sup>; the 550
     cold solve stalls on a collapsing line search and is left as the next item.</p>
   </header>
@@ -107,13 +107,17 @@
     booked reduction against the closed form over the polygon's triangles. It asserts that exactly
     one live slot carries the polygon once, that the reduction of that fan matches the closed form
     on a quadratic density, and that a negative fan subtracts: the signed booking of a square less
-    an inner quadrilateral equals the closed form over each. Two further tests call
+    an inner quadrilateral equals the difference of two independent closed-form polygon moments on
+    that same nonconstant density. Two further tests call
     <code>_whole_cell_rings</code> and <code>remaining_moments</code> on a padded triangle, and forbid
-    the booking builder while the independent lobe reference runs. All five pass. Restoring the
+    the booking builder while the independent lobe reference runs. Three parameterized checks also
+    force a missing owner, an invalid booking, and a 2 × 10<sup>−12</sup> deviation through the
+    reference probe; each is refused. All eight tests pass. Restoring the
     vertex-list remainder makes the padded-triangle test fail; restoring the builder-based lobe
     reference makes the forbidden-builder test fail. The fresh-process base arm reaches pytest's
     summary with two collection errors because the new test imports <code>_ring_moments</code>, which
-    the base does not define; the head arm collects and passes all five tests.</p>
+    the base does not define; the head arm collects and passes all eight tests. A probe invocation
+    missing the 2,098-cell carrier exits 1 before measuring any row.</p>
   </section>
 
   <section id="lobe-share-partition-partition">
@@ -121,24 +125,27 @@
     <p>For every owner cell of each carrier the lobe booking is compared with the dense lobe
     reference and the booked lobe plus the booked remainder is compared with the dense whole-cell
     reference, on area, current and both first moments, at 282, 550 and 2,098 cells. The measurement
-    is one allocation carrying all three sizes as rows, each row persisted as it lands.</p>
+    is one allocation carrying all three sizes as rows, each row persisted as it lands. The single
+    reference probe requires all three realised sizes, all owner bookings valid, finite values in
+    all four columns, and no absolute deviation above 1 × 10<sup>−12</sup>; it exits 0 only when
+    every row passes. This run exits 0 with no error rows.</p>
     <table id="lobe-share-partition-partition-table">
       <thead><tr><th>carrier</th><th>owner cells booked</th><th>lobe vs dense lobe, max |Δ|</th><th>lobe + remainder vs dense whole cell, max |Δ|</th></tr></thead>
       <tbody>
-        <tr><td>282</td><td>1 (cell 7)</td><td>7.10542735760 × 10<sup>−13</sup></td><td>1.13686837722 × 10<sup>−13</sup></td></tr>
-        <tr><td>550</td><td>1 (cell 8)</td><td>3.41060513165 × 10<sup>−13</sup></td><td>2.84217094304 × 10<sup>−14</sup></td></tr>
-        <tr><td>2,098</td><td>1 (cell 47)</td><td>2.26485497024 × 10<sup>−14</sup></td><td>1.77635683940 × 10<sup>−14</sup></td></tr>
+        <tr><td>282</td><td>1 (cell 7)</td><td>1.98951966013 × 10<sup>−13</sup></td><td>1.42108547152 × 10<sup>−13</sup></td></tr>
+        <tr><td>550</td><td>1 (cell 8)</td><td>3.26849658450 × 10<sup>−13</sup></td><td>2.84217094304 × 10<sup>−14</sup></td></tr>
+        <tr><td>2,098</td><td>1 (cell 47)</td><td>4.21884749358 × 10<sup>−14</sup></td><td>1.77635683940 × 10<sup>−14</sup></td></tr>
       </tbody>
     </table>
-    <p>The largest absolute deviation is 7.10542735760 × 10<sup>−13</sup> on the 282 lobe's current,
+    <p>The largest absolute deviation is 3.26849658450 × 10<sup>−13</sup> on the 550 lobe's current,
     inside the 1 × 10<sup>−12</sup> contract. Each tuple below is the absolute deviation in
     (area, current, radial first moment, vertical first moment) order. At 282 the lobe tuple is
-    (3.209e−17, 7.105e−13, 1.185e−14, 1.421e−14), and the partition tuple is
-    (1.735e−18, 1.137e−13, 1.693e−15, 4.510e−16). At 550 the lobe tuple is
-    (1.496e−17, 3.411e−13, 8.243e−15, 5.551e−15), and the partition tuple is
-    (8.674e−19, 2.842e−14, 1.735e−15, 1.471e−15). At 2,098 the lobe tuple is
-    (1.030e−18, 2.265e−14, 1.344e−17, 2.446e−16), and the partition tuple is
-    (1.084e−18, 1.776e−14, 3.031e−16, 2.309e−16).</p>
+    (8.674e−18, 1.990e−13, 3.192e−15, 5.329e−15), and the partition tuple is
+    (1.735e−18, 1.421e−13, 1.832e−15, 4.510e−16). At 550 the lobe tuple is
+    (1.453e−17, 3.268e−13, 2.859e−15, 3.775e−15), and the partition tuple is
+    (0, 2.842e−14, 1.707e−15, 1.582e−15). At 2,098 the lobe tuple is
+    (1.924e−18, 4.219e−14, 4.857e−17, 6.193e−16), and the partition tuple is
+    (1.084e−18, 1.776e−14, 3.001e−16, 2.327e−16).</p>
     <p>The 550 row is the carrier used by the map and cold solve, from the cache under
     <code>r-20261014T174345284407-lean-map/cache</code>. It has exactly 550 cells and books cell 8.
     The earlier 551-cell carrier came from a different cache and booked no owner cell; its zero-lobe
@@ -182,15 +189,18 @@ guard by 4.409905 × 10<sup>&minus;8</sup>.</p>
       <tbody>
         <tr><td>289</td><td>0</td><td>1.80391903624 × 10<sup>−4</sup></td><td>1.80391903624 × 10<sup>−4</sup></td><td>1.43236766265 × 10<sup>−4</sup></td></tr>
         <tr><td>553</td><td>0</td><td>7.13582881486 × 10<sup>−5</sup></td><td>7.13582881486 × 10<sup>−5</sup></td><td>4.66332420692 × 10<sup>−5</sup></td></tr>
-        <tr><td>2,105</td><td>unmeasured</td><td>unmeasured</td><td>unmeasured</td><td>unmeasured</td></tr>
+        <tr><td>2,105</td><td>0</td><td>1.44141390339 × 10<sup>−5</sup></td><td>1.44141390339 × 10<sup>−5</sup></td><td>4.69283642386 × 10<sup>−6</sup></td></tr>
       </tbody>
     </table>
-    <p id="lobe-share-partition-limited-result">On the measured limited carriers the two maps have
-    exactly the same moments and errors, with no X-point owner cell. The nonzero independent reference
-    errors show that the equality is not an empty measurement. The 2,105-cell carrier was built on
-    titan, but CUDA ran out of device memory loading the compiled map after JAX reported 4.15 GB of
-    captured constants; no 2,105 map error is claimed. The limited comparison therefore covers two
-    of the three requested sizes.</p>
+    <p id="lobe-share-partition-limited-result">At all three limited sizes the two maps have
+    exactly the same moments and errors, with no X-point owner cell. Their nonzero independent
+    reference errors show that the equality is not an empty measurement. The 289 and 553 rows ran on
+    titan. The 2,105-cell P100 attempt built the carrier but ran out of device memory loading a map
+    with 4.15 GB of captured constants; the CPU rerun on the fleet allocation completed with
+    <code>JAX_PLATFORMS=cpu</code>, a 4:50.30 wall and 20,830,864 kB maximum resident memory. It used
+    the shared <code>fine_grid_convergence.context.build</code> fixture builder, and the receipt has
+    zero errors and exit 0. The CPU reference error, 4.69283642386 × 10<sup>−6</sup>, is a positive
+    control for the final row.</p>
   </section>
 
   <section id="lobe-share-partition-solves">
@@ -235,11 +245,11 @@ partition is a root at 282. The stall is reported and left as the next item.</p>
 measurement: the remainder takes its fan from the same builder that builds the lobe, the vertex-list
 reconstruction and the local signed-fan reduction are deleted, the reduction is the imported
 clip-quadrature rule, and the truncated rule that set the booked lobe's floor is gone with it. The
-independent lobe reference agrees to at most 7.10542735760 × 10<sup>&minus;13</sup>, and the whole-cell
-partition to at most 1.13686837722 × 10<sup>&minus;13</sup>. The 550 carrier books cell 8, so all three
+independent lobe reference agrees to at most 3.26849658450 × 10<sup>&minus;13</sup>, and the whole-cell
+partition to at most 1.42108547152 × 10<sup>&minus;13</sup>. The 550 carrier books cell 8, so all three
 sizes exercise the intended owner partition. The lobe partition passes all
 three diverted map guards and at 2,098 passes where the half-plane cut fails. Limited controls are
-measured at 289 and 553 cells; the 2,105-cell map could not load on the P100. Clause 6 holds at 282 and is
+measured at 289, 553 and 2,105 cells, with the final row on CPU. Clause 6 holds at 282 and is
 reported, not met, at 550: the solve stalls on a collapsing line search at a fixed point near
 1.55 × 10<sup>&minus;3</sup>, which is the item clause 6 named in advance and is left as the next item.
 No number on this page is an estimate.</p>

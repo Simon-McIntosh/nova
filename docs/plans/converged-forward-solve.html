@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="357">
+<meta name="plan-version" content="358">
 <meta name="plan-modified" content="2026-10-18">
 </head>
 <body>
@@ -596,6 +596,11 @@
     <h4 class="r-fu-title">Find why the 550-cell lobe cold solve stalls on a collapsing line search (§5)</h4>
     <div class="r-fu-body"><p>From the owner-cell-current landing. Under the normal-form lobe owner, the 550-cell diverted cold solve stalls on a collapsing line search where the half-plane owner converged to 4.8e-13. A collapsing line search on a well-posed map suggests a kink or step in the lobe booking near the root. Run after <code>f-cfs-lobe-share-partition</code> lands, since the partition changes the map. Done when the stall is localised by step-scale scans along the Newton direction at the stalled iterate, the cause is named and repaired, and the 550 cold solve reaches 1e-12 with Taylor slopes of 2.</p></div>
     <pre class="r-fu-prompt">/reckon-build converged-forward-solve §5</pre>
+    </article>
+<article class="r-fu" data-id="f-cfs-census-proposal-coverage" data-status="open" data-written-by="s21-nova coordinator" data-written-at="2026-10-18" data-recommends-skill="/reckon-build converged-forward-solve §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Rework the census proposal so no hyperbolic saddle falls through a coverage hole</h4>
+    <div class="r-fu-body"><p>The seed-census node repaired the adjacent-pair admission defect, where a seed was refused on an edge cross product of rounding size. Two departures remain at 0.1735 on the 282-cell machine and 0.1225 on the 550-cell machine. Neither is a fold: the vanished saddles carry det H near ±4e-5 to 7e-5 with eigenvalues of opposite sign. The cause is proposal coverage. A cell proposes a seed only when its own quadratic stationary point lies inside it, and at those states only 3 of 282 cells do. Admitting the whole domain yields 153 candidates against a seed capacity of 64 selected by index, so the proposal, its capacity and its selection order must be settled together, with fixed shapes and no tuned constant.</p><p>The codex shadow measured a third, GPU-only instance on titan between offsets 0.17323108126297435 and 0.17323108126297437. The clive field-swap arm saw the same containment test leave zero seeds on JT-60SA record lattices.</p><p>Done when every root persists through 0.16 to 0.18 at 282 cells and 0.10 to 0.14 at 550 cells on CPU and on titan, or each remaining departure is a measured fold, with base beside head counts per state, a read-level test on the tie states, a negative control that restores the containment-only proposal, and a base and head regression gate run as one batch job.</p></div>
+    <pre class="r-fu-prompt">/reckon-build converged-forward-solve §2</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">

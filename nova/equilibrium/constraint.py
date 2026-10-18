@@ -450,6 +450,7 @@ class VerticalPositionPin:
     row_scale: object = 1.0
     tolerance: object = 1e-10
     initial_unknown: object = 0.0
+    active: object = True
 
     def __post_init__(self) -> None:
         _require_positive_if_concrete(self.source_scale, "vertical source scale")
@@ -487,6 +488,7 @@ class VerticalPositionPin:
             tolerance=jnp.atleast_1d(self.tolerance),
             scale=jnp.atleast_1d(self.row_scale),
             initial_unknown=jnp.atleast_1d(self.initial_unknown),
+            payload=jnp.asarray(self.active),
         )
         return ConstraintPair(CurrentCentroidConstraint(), unknown, binding)
 
@@ -1080,8 +1082,10 @@ class CurrentCentroidConstraint:
         target: jax.Array,
         scale: jax.Array,
     ) -> jax.Array:
-        del unknown
-        return (self.observed(profile, context, payload) - target) / scale
+        held = (self.observed(profile, context, payload) - target) / scale
+        if payload is None:
+            return held
+        return jnp.where(jnp.asarray(payload, dtype=bool), held, unknown)
 
     def dual_flux_image(
         self,
@@ -2116,6 +2120,15 @@ def constraint_records(
         physical_residual = observed - target
         scale = jnp.atleast_1d(jnp.asarray(binding.scale))
         tolerance = jnp.atleast_1d(jnp.asarray(binding.tolerance))
+        if (
+            isinstance(pair.functional, CurrentCentroidConstraint)
+            and binding.payload is not None
+        ):
+            physical_residual = jnp.where(
+                jnp.asarray(binding.payload, dtype=bool),
+                physical_residual,
+                value * scale,
+            )
         circuit = (
             pair.unknown if isinstance(pair.unknown, CircuitCurrentUnknown) else None
         )

@@ -10,6 +10,7 @@ from nova.equilibrium import solve
 from nova.equilibrium.constraint import (
     CircuitCurrentUnknown,
     ConstraintBinding,
+    ConstraintContext,
     CurrentCentroidConstraint,
     UniformRadialFieldUnknown,
     VerticalPositionPin,
@@ -82,6 +83,30 @@ def test_vertical_pin_declares_a_physical_field_source():
     ).pair(operator)
     assert isinstance(coil.unknown, CircuitCurrentUnknown)
     np.testing.assert_array_equal(np.asarray(coil.unknown.direction[:, 0]), [0, 1])
+    free = VerticalPositionPin(0.7, active=False).pair(operator)
+    profile = SimpleNamespace(
+        current_moment_observation=lambda *args, **kwargs: SimpleNamespace(
+            value=lambda name: jnp.asarray(0.5)
+        )
+    )
+    row = free.functional.residual(
+        profile,
+        ConstraintContext(jnp.zeros(1), None, None, None),
+        jnp.asarray([0.0]),
+        free.binding.payload,
+        free.binding.target,
+        free.binding.scale,
+    )
+    np.testing.assert_array_equal(np.asarray(row), [0.0])
+    held = radial.functional.residual(
+        profile,
+        ConstraintContext(jnp.zeros(1), None, None, None),
+        jnp.asarray([0.0]),
+        radial.binding.payload,
+        radial.binding.target,
+        radial.binding.scale,
+    )
+    np.testing.assert_allclose(np.asarray(held), [-0.2])
 
 
 def test_typed_request_passes_vertical_pin_to_converged_route():
@@ -147,7 +172,7 @@ def test_elongated_free_carrier_drifts_from_both_targets():
     )
     assert bool(result.converged)
     height = float(centroid_height(result.state, operands()))
-    np.testing.assert_allclose(height, FREE_HEIGHT, atol=1e-10)
+    np.testing.assert_allclose(height, 0.5, atol=1e-10)
     assert all(abs(height - target) > 1e-3 for target in TARGETS)
     assert abs(float(result.state[-1])) <= 1e-12
 

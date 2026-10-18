@@ -9,10 +9,13 @@ compared against what was written.
 
 from __future__ import annotations
 
+import json
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
 
+from scripts.prototypes.efit_field_swap import export_tie_islands
 from scripts.prototypes.efit_field_swap.crosscheck import load_pairs, resolve_trace
 from scripts.prototypes.efit_field_swap.export_states import export_row
 from scripts.prototypes.efit_field_swap.export_tie_islands import (
@@ -155,3 +158,83 @@ def test_receipt_cell_counts_must_match_the_carrier():
         validate_carrier(receipt, 250, 550)
     with pytest.raises(SystemExit, match="500/282"):
         validate_carrier(receipt, 500, 282)
+
+
+def test_main_exports_both_endpoints_of_every_bracket_for_each_carrier(
+    tmp_path, monkeypatch
+):
+    receipts = []
+    expected = {}
+    for requested, achieved in ((250, 282), (500, 550)):
+        receipt = _receipt(True, False)
+        receipt.update(
+            kind="diverted", requested_cells=requested, achieved_cells=achieved
+        )
+        first = receipt["bisected"][0]
+        second = {
+            "bracket": [0.2613, float(np.nextafter(0.2613, np.inf))],
+            "steps": 43,
+            "adjacent": True,
+            "unchanged": False,
+            "left": {"boundary_class": 0, "saddle_identity": 2},
+            "right": {"boundary_class": 0, "saddle_identity": 3},
+        }
+        receipt["bisected"].append(second)
+        path = tmp_path / f"{achieved}-receipt.json"
+        path.write_text(json.dumps(receipt))
+        receipts.append((path, requested))
+        for index, entry in enumerate((first, second), start=1):
+            for side, endpoint in (("left", 0), ("right", 1)):
+                expected[(achieved, index, side)] = (
+                    entry["bracket"][endpoint],
+                    [
+                        entry[side]["boundary_class"],
+                        entry[side]["saddle_identity"],
+                    ],
+                    requested,
+                )
+
+    built = []
+
+    def fake_build(kind, requested, cache):
+        built.append((kind, requested, cache))
+        achieved = {250: 282, 500: 550}[requested]
+        return {"geometry": SimpleNamespace(centre=np.zeros((achieved, 2)))}
+
+    observed = {}
+
+    def fake_export(state, offset, out_dir, tag, sampled, key, key_name):
+        assert sampled is state
+        assert key_name == "both"
+        achieved = len(state["geometry"].centre)
+        target = out_dir / f"{tag}.txt"
+        target.write_text("exported\n")
+        observed[tag] = (achieved, offset, list(key), target)
+        return target
+
+    monkeypatch.setattr(export_tie_islands.tie_probe, "build", fake_build)
+    monkeypatch.setattr(
+        export_tie_islands, "sampler_with_enclosure", lambda state: state
+    )
+    monkeypatch.setattr(export_tie_islands, "export", fake_export)
+    out_dir = tmp_path / "records"
+    assert export_tie_islands.main("read-only-cache", out_dir, receipts) == 0
+    assert built == [
+        ("diverted", 250, "read-only-cache"),
+        ("diverted", 500, "read-only-cache"),
+    ]
+    assert len(observed) == len(expected) == 8
+    assert len(list(out_dir.glob("*.txt"))) == 8
+    assert len(list(out_dir.glob("*.json"))) == 8
+    for (achieved, index, side), (offset, key, requested) in expected.items():
+        tag = f"diverted-{achieved}cells-edge{index}-{side}"
+        assert tag in observed
+        assert observed[tag][0:3] == (achieved, offset, key)
+        target = observed[tag][3]
+        sidecar = json.loads(target.with_suffix(".json").read_text())
+        assert sidecar["record"] == target.name
+        assert sidecar["requested_cells"] == requested
+        assert sidecar["achieved_cells"] == achieved
+        assert sidecar["side"] == side
+        assert sidecar["offset"] == offset
+        assert sidecar["exported_key"] == key

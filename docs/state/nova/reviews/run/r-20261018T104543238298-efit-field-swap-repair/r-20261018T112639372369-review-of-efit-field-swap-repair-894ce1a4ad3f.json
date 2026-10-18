@@ -1,0 +1,107 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    {
+      "fails_if": "the raw exported version or fixed decision fields differ from the independent literal expectations, or the raw grid, wall or psi differs from the source trace; a matching corruption in both raw parsers could survive",
+      "path": "scripts/prototypes/efit_field_swap/test_export_states.py:91-98"
+    },
+    {
+      "fails_if": "a wallless crossing no longer falls back to its four-point polygon or the resulting ring fails to close at its first point",
+      "path": "scripts/prototypes/efit_field_swap/test_trace_record.py:113-119"
+    },
+    {
+      "fails_if": "a wall with distinct first and last segment endpoints is closed by repeating its last endpoint instead of its first",
+      "path": "scripts/prototypes/efit_field_swap/test_trace_record.py:123-127"
+    },
+    {
+      "fails_if": "an inconsistent flag, zero-width binary64 bracket, or unchanged decision key ceases to raise SystemExit; the red base log demonstrates the zero-width case",
+      "path": "scripts/prototypes/efit_field_swap/test_export_states.py:134-142"
+    },
+    {
+      "fails_if": "bisected_offset returns a value other than the one fixed fixture value 0.1613; a hard-coded 0.1613 return survives because the assertion uses the receipt and entry returned by the same call",
+      "path": "scripts/prototypes/efit_field_swap/test_export_states.py:147"
+    },
+    {
+      "fails_if": "bisected_brackets yields zero or more than one item for a one-item receipt; truncating a multi-bracket receipt to its first item survives",
+      "path": "scripts/prototypes/efit_field_swap/test_export_states.py:148"
+    },
+    {
+      "fails_if": "requested or achieved carrier cell counts cease to be checked against the receipt and the two mismatched examples no longer raise SystemExit",
+      "path": "scripts/prototypes/efit_field_swap/test_export_states.py:153-157"
+    },
+    {
+      "fails_if": "a missing input raises or is silently omitted instead of returning an explicit unread row with the FileNotFoundError cause",
+      "path": "scripts/prototypes/efit_field_swap/test_crosscheck.py:65-70"
+    }
+  ],
+  "base_log_revision": "5179d0b7524a5ab6d8a87efa91d2051b2f6a3708",
+  "call_site_count": 4,
+  "call_sites": [
+    "scripts/prototypes/efit_field_swap/crosscheck.py:283/319/325",
+    "scripts/prototypes/efit_field_swap/export_tie_islands.py:233-245",
+    "scripts/prototypes/efit_field_swap/diagnose_seed.py:29",
+    "scripts/prototypes/efit_field_swap/probe_read.py:24"
+  ],
+  "completed_at": "2026-10-18T11:36:55Z",
+  "dispatched_at": "2026-10-18T11:27:36Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/efit_field_swap/test_export_states.py",
+      "line": "148",
+      "severity": "blocking",
+      "text": "blocking: The only bisected_brackets assertion supplies one bracket and no checked-in test invokes export_tie_islands.main; reverting its loop to the first bracket or just the left side leaves the 16-test gate green while losing required endpoints."
+    },
+    {
+      "file": "scripts/prototypes/efit_field_swap/test_export_states.py",
+      "line": "147",
+      "severity": "follow-on",
+      "text": "follow-on: The offset assertion compares output with an entry returned by the same helper and the one fixed fixture value 0.1613; a hard-coded 0.1613 return would pass, so a varied receipt is needed to prove receipt-derived offsets."
+    }
+  ],
+  "head_log_revision": "894ce1a4ad3fa28bc7f32cd1e11d71845b1a9da0",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "Production paths at scripts/prototypes/efit_field_swap/crosscheck.py:283/319/325 reach the changed wall and spline adapter, export_tie_islands.py:233-245 reaches bracket and carrier validation, and diagnose_seed.py:29 plus probe_read.py:24 reach TraceSplineField.",
+    "diff": "Four commits were read against 5179d0b: dc7e16c validates receipts, closes trace walls and adopts tensor_spline; 33f4f9a replaces the research table; 87b61d8 preserves unread rows and validates all brackets before export; 894ce1a appends the landing evidence.",
+    "done_when": "The quantitative gate at prompt.txt:125-126 requires all six repairs, 28 table inputs, both sides of the 282/550 transitions, two carriers, receipt refusals and paired logs; sweep.log:33 records ROWS 28, verify-exports.log:13 records eight endpoints and two carriers, negative-control.log fails the base zero-width guard, and baseline.log/after.log complete 12/12 and 16/16.",
+    "goal": "The source goal at prompt.txt:30 is to repair the field-swap cross-check so it answers six blocking review findings; export_tie_islands.py:173-275, trace_record.py:92-111 and the 28-row research table answer those six with five genuine census refusals stated explicitly.",
+    "manifest": "The source manifest names all four commits and ten changed paths, records base 12/12 and head 16/16 with readable gate logs, and cites exports/negative-control.log where the zero-width-bracket refusal fails on the base exporter.",
+    "write_paths": "The source dispatch fence at prompt.txt:101-107 grants six paths, including the repair evidence fragment; git diff --stat 5179d0b..894ce1a lists ten changed files and every one lies within that fence."
+  },
+  "justifications": {
+    "durability": "tests at scripts/prototypes/efit_field_swap/test_export_states.py:137-157 redden if numeric adjacency, changed-key or carrier-count refusals disappear, but :148 uses one bracket and never calls export_tie_islands.main, so returning to a first-bracket or one-sided export leaves the gate green.",
+    "evidence": "exports/baseline.log and exports/after.log carry complete revision-stamped 12/12 and 16/16 gates, while exports/sweep.log:33 and exports/verify-exports.log:13 record the quantitative outputs and exports/negative-control.log names the failing zero-width test.",
+    "fit": "scripts/prototypes/efit_field_swap/spline_field.py:31-55 uses the repository's TensorBSpline interface and export_tie_islands.py:173-224 follows the local receipt idiom without adding a forbidden source name.",
+    "goal_fidelity": "docs/research/efit-field-swap.html:31-64 reports all 28 inputs and the source run's exports/verify-exports.log:5-13 names eight transition endpoints plus two source carriers, with five sampled-geometry refusals stated rather than hidden.",
+    "reuse": "The capability search over scripts/prototypes/efit_field_swap and scripts/prototypes/fast_map_production found the receipt producer in bisect_tie_island.py:72-103 but no receipt validator, and spline_field.py:31 extends the existing nova/linalg/tensor_spline.py:264-325 owner rather than duplicating its evaluator.",
+    "scope_discipline": "The ten paths in git diff --stat 5179d0b..894ce1a fall under the six paths granted at source prompt.txt:101-107, including docs/evidence/fragments/converged-forward-solve/efit-field-swap-repair.html."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source goal at prompt.txt:30 is to repair the field-swap cross-check so it answers six blocking review findings; export_tie_islands.py:173-275, trace_record.py:92-111 and the 28-row research table answer those six with five genuine census refusals stated explicitly.\nVERDICT done_when: The quantitative gate at prompt.txt:125-126 requires all six repairs, 28 table inputs, both sides of the 282/550 transitions, two carriers, receipt refusals and paired logs; sweep.log:33 records ROWS 28, verify-exports.log:13 records eight endpoints and two carriers, negative-control.log fails the base zero-width guard, and baseline.log/after.log complete 12/12 and 16/16.\nVERDICT write_paths: The source dispatch fence at prompt.txt:101-107 grants six paths, including the repair evidence fragment; git diff --stat 5179d0b..894ce1a lists ten changed files and every one lies within that fence.\nVERDICT manifest: The source manifest names all four commits and ten changed paths, records base 12/12 and head 16/16 with readable gate logs, and cites exports/negative-control.log where the zero-width-bracket refusal fails on the base exporter.\nVERDICT diff: Four commits were read against 5179d0b: dc7e16c validates receipts, closes trace walls and adopts tensor_spline; 33f4f9a replaces the research table; 87b61d8 preserves unread rows and validates all brackets before export; 894ce1a appends the landing evidence.\nCALL_SITES: scripts/prototypes/efit_field_swap/crosscheck.py:283/319/325, scripts/prototypes/efit_field_swap/export_tie_islands.py:233-245, scripts/prototypes/efit_field_swap/diagnose_seed.py:29, scripts/prototypes/efit_field_swap/probe_read.py:24\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/research/efit-field-swap.html:31-64 reports all 28 inputs and the source run's exports/verify-exports.log:5-13 names eight transition endpoints plus two source carriers, with five sampled-geometry refusals stated rather than hidden.\nSCORE evidence: 18\nJUSTIFICATION evidence: exports/baseline.log and exports/after.log carry complete revision-stamped 12/12 and 16/16 gates, while exports/sweep.log:33 and exports/verify-exports.log:13 record the quantitative outputs and exports/negative-control.log names the failing zero-width test.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The ten paths in git diff --stat 5179d0b..894ce1a fall under the six paths granted at source prompt.txt:101-107, including docs/evidence/fragments/converged-forward-solve/efit-field-swap-repair.html.\nSCORE durability: 12\nJUSTIFICATION durability: tests at scripts/prototypes/efit_field_swap/test_export_states.py:137-157 redden if numeric adjacency, changed-key or carrier-count refusals disappear, but :148 uses one bracket and never calls export_tie_islands.main, so returning to a first-bracket or one-sided export leaves the gate green.\nSCORE fit: 19\nJUSTIFICATION fit: scripts/prototypes/efit_field_swap/spline_field.py:31-55 uses the repository's TensorBSpline interface and export_tie_islands.py:173-224 follows the local receipt idiom without adding a forbidden source name.\nSCORE reuse: 20\nJUSTIFICATION reuse: The capability search over scripts/prototypes/efit_field_swap and scripts/prototypes/fast_map_production found the receipt producer in bisect_tie_island.py:72-103 but no receipt validator, and spline_field.py:31 extends the existing nova/linalg/tensor_spline.py:264-325 owner rather than duplicating its evaluator.\nFINDING scripts/prototypes/efit_field_swap/test_export_states.py:148 blocking: The only bisected_brackets assertion supplies one bracket and no checked-in test invokes export_tie_islands.main; reverting its loop to the first bracket or just the left side leaves the 16-test gate green while losing required endpoints.\nFINDING scripts/prototypes/efit_field_swap/test_export_states.py:147 follow-on: The offset assertion compares output with an entry returned by the same helper and the one fixed fixture value 0.1613; a hard-coded 0.1613 return would pass, so a varied receipt is needed to prove receipt-derived offsets.\n",
+  "review_run_id": "r-20261018T112639372369-review-of-efit-field-swap-repair-894ce1a4ad3f",
+  "reviewed_base_sha": "5179d0b7524a5ab6d8a87efa91d2051b2f6a3708",
+  "reviewed_head_sha": "894ce1a4ad3fa28bc7f32cd1e11d71845b1a9da0",
+  "reviewed_run_id": "r-20261018T104543238298-efit-field-swap-repair",
+  "scores": {
+    "durability": 12,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "suite_delta_basis": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T104543238298-efit-field-swap-repair/exports/after.log",
+    "after_summary": "6+2+5+3 = 16 passed; EXIT=0",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T104543238298-efit-field-swap-repair/exports/baseline.log",
+    "baseline_summary": "4+2+4+2 = 12 passed; EXIT=0",
+    "limit": "Both named focused gate arms completed and list no failure ids; the sweep and export verifier are separate recorded measurements."
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T11:32:53.014Z",
+  "total": 108
+}

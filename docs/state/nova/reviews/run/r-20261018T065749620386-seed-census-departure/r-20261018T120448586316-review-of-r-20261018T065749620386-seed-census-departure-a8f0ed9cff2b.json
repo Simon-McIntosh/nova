@@ -48,6 +48,13 @@
     "scripts/prototypes/read_robustness/measure.py:407"
   ],
   "completed_at": "2026-10-18T12:13:59Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "seed-census-departure",
+      "recorded_at": "2026-10-18T12:17:26.898479+00:00"
+    }
+  },
   "dispatched_at": "2026-10-18T12:05:26Z",
   "finding_dispositions": {
     "0": {

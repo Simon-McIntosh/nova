@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="research">
+<meta name="plan-slug" content="vertical-pin">
+<meta name="plan-title" content="Vertical pin on the converged forward solve">
+<meta name="plan-summary" content="An elongated equilibrium is vertically degenerate, so a converged forward solve has no reason to sit at any height. The pin adds one compensating unknown and one residual row, both pure runtime operands, so one compiled program serves any target. The mechanism and its analytic gate land; production wiring and the 550-cell lobe run remain.">
+<meta name="plan-recorded-at" content="2026-10-18">
+<title>Vertical pin on the converged forward solve | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<h1 id="vertical-pin">Vertical pin on the converged forward solve</h1>
+
+<p>This note records the design and measured behaviour of an optional
+vertical-position pin on nova's converged forward solve, and states plainly
+which of its done-when items closed and which did not.</p>
+
+<h2 id="vertical-pin-problem">Why a pin</h2>
+<p>A current centroid is free to translate in height when the equilibrium is
+elongated: the elongation-driven vertical force
+<code>c&nbsp;Z&nbsp;(Z&nbsp;&minus;&nbsp;Z<sub>free</sub>)</code> loses stiffness
+with elongation, so the residual is nearly flat in <code>Z</code> near the free
+root and a converged solve can land the centre anywhere along that flat
+direction. The free root is not controlled by anything the operator commanded.
+A converged forward solve of an elongated state therefore needs a compensating
+unknown to hold the height at a commanded target.</p>
+
+<h2 id="vertical-pin-design">Design</h2>
+<p>The pin is built on the generic chord-Newton fixed-point solver, which owns
+no physics. Three additions sit in <code>nova/equilibrium/solve.py</code>:</p>
+<ul>
+<li><code>VerticalPin(target, pin_scale, initial)</code> &mdash; a registered
+dataclass whose fields are all runtime leaves, so nothing about a particular
+target, scale or seed is captured in the traced program.</li>
+<li><code>pin_residual(residual_fn, observation, pin)</code> &mdash; returns the
+base map augmented by one row
+<code>(observation(extended, operands) &minus; target) / pin_scale</code>, where
+<code>extended</code> is the base state with the compensating unknown appended.
+The base map reads the unknown off the extended state's last element and adds its
+declared field through the runtime operands.</li>
+<li><code>pin_state</code> and <code>pinned_fixed_point</code> &mdash; extend the
+state by the seed and drive the augmented map.</li>
+</ul>
+<p>Because the unknown is part of the state and the field it drives enters the
+map as an operand, the compiled program is the same pinned or unpinned and for
+any target value. The test counts one lowered-and-compiled program and calls it
+at two targets.</p>
+
+<h2 id="vertical-pin-why-state-operand">Why the unknown rides in the extended state</h2>
+<p>An alternative is to introduce the unknown as a genuine extra component:
+append it to the state, and let the base <code>residual_fn</code> read it off the
+last element. That is what the landed design does, and it is what makes the
+program's structure constant. Putting the unknown in the operands instead would
+make the map's dependence on it invisible to <code>factor</code>, which builds
+the Jacobian by vmapped forward-mode differentiation over the state's
+directions; the pin column would then be missing from the LU factor and the
+correction would not know it could move the unknown.</p>
+
+<h2 id="vertical-pin-carrier">Carrier and gate</h2>
+<p>The gate
+(<code>tests/equilibrium/test_solve_vertical_pin.py</code>) is an analytic
+elongated carrier on the current centroid with elongation
+<code>kappa = 1.8</code>. Its radial row is
+<code>(R &minus; R_centroid) + c&nbsp;Z&sup2;</code>; its vertical row is
+<code>c&nbsp;Z&nbsp;(Z &minus; Z<sub>free</sub>)</code> unpinned, reduced by
+<code>beta&nbsp;u</code> when the pin's unknown <code>u</code> is present. The
+seed is <code>[1.2, 0.62]</code>, deliberately off both targets so the pin's
+first correction carries real work.</p>
+<table>
+<thead><tr><th>Arm</th><th>Observed</th></tr></thead>
+<tbody>
+<tr><td>Unpinned (negative control for degeneracy)</td><td>converges to <code>Z = 0.5 = Z_free</code>, &gt; 1e-3 from either target: a drift, not a stall</td></tr>
+<tr><td>Pinned, target 0.70</td><td>residual &le; 1e-12, |height &minus; target| &le; 1e-10</td></tr>
+<tr><td>Pinned, target 0.90</td><td>residual &le; 1e-12, |height &minus; target| &le; 1e-10</td></tr>
+</tbody>
+</table>
+<p>Focused gate: <code>EXIT=0</code>, three tests passed in 10.44&nbsp;s on the
+CPU lane. The negative control (unknown's leverage removed) is
+<code>EXIT=1</code> with two named failing ids.</p>
+
+<figure>
+<img src="/nova/figures/converged-forward-solve/vertical-pin/pin-response.svg"
+     alt="Left: centroid height versus Newton correction: unpinned drifts to 0.5; pinned lines flat at 0.70 and 0.90. Right: line contours of the vertical residual field with the free root marked.">
+<figcaption>Left: current-centroid height after each Newton correction. The
+unpinned carrier reaches the free root <code>Z = 0.5</code>; each pinned carrier
+reaches its target on the first correction and holds it. Right: unfilled line
+contours of the vertical residual field
+<code>c&nbsp;Z&nbsp;(Z&nbsp;&minus;&nbsp;Z<sub>free</sub>)</code>, free root
+marked. Carrier <code>kappa = 1.8</code>, <code>c = 0.6</code>,
+<code>Z<sub>free</sub> = 0.5</code>; CPU x64 arithmetic; nova
+<code>a9b737eef</code>.</figcaption>
+</figure>
+
+<h2 id="vertical-pin-not-done">Not done</h2>
+<ul>
+<li><strong>Production wiring.</strong> The pin is not yet carried through the
+forward-solve seam. <code>ForwardSolveRequest</code> has no pin field, no
+production route builds a <code>ConstraintPair</code> whose unknown is the pin,
+and nothing maps a machine description to a declared vertical-field coil set or a
+uniform radial field. This is the largest remaining item: done-when (1) asks the
+converged solve to accept the pin, and only the generic solve does so far.</li>
+<li><strong>The 550-cell lobe run (done-when 3).</strong> The cold solve that
+stalls at 1.54987e-3 on a collapsing line search has not been re-run with the
+pin. Whether the stall clears is unmeasured.</li>
+<li><strong>Suite arms.</strong> Both suite arms were cut short by the
+background-run ceiling before their summary lines, so no delta against the
+orientation base is available. A complete run at a merged head is owed.</li>
+</ul>
+
+<h2 id="vertical-pin-followons">Follow-ons</h2>
+<ol>
+<li>Carry the pin through <code>ForwardSolveRequest</code>, <code>SolveRoute</code>
+and <code>ConstraintPair</code>, so a request names a target height and the
+unknown's declared source, and the solve reports the pin residual beside the base
+residual.</li>
+<li>Resolve a machine's vertical-field coil set (or uniform radial field) from
+its static description, so the pin needs no hand-declared source.</li>
+<li>Re-run the 550-cell lobe carrier with the pin against the stalled cold solve
+and report both residual histories.</li>
+<li>Run the suite arms to completion at a merged head and record the delta
+against the orientation base.</li>
+</ol>
+</main>
+</body>
+</html>

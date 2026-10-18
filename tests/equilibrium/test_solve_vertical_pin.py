@@ -23,7 +23,7 @@ R_TARGET = 0.0
 COUPLING = 0.6
 FIELD_LEVERAGE = 1.0
 
-SEED = jnp.asarray([1.2, 0.7])
+SEED = jnp.asarray([1.2, 0.62])
 TARGETS = (0.7, 0.9)
 OPERANDS = jnp.asarray([0.0])
 

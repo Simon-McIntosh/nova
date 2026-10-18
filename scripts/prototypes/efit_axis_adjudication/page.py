@@ -58,7 +58,14 @@ def census_table(row):
     out = ["<table><thead><tr><th>r</th><th>z</th><th>&psi;</th><th>type</th>"
            "<th>in wall</th><th>&lambda;&#8321;</th><th>&lambda;&#8322;</th>"
            "<th>efit side</th><th>nova A</th><th>nova B</th></tr></thead><tbody>"]
-    for point in row["census"]:
+    points = row["census"]
+    in_wall = [p for p in points if p["inside_wall"]]
+    outside = [p for p in points if not p["inside_wall"]]
+    # every in-wall point is listed; the out-of-wall set is listed whole up to a
+    # cap, so a record whose spline carries the ripple of an oscillatory field
+    # does not bury the reader.  The complete census is the results receipt.
+    capped = outside[:200]
+    for point in in_wall + capped:
         out.append(
             f"<tr><td>{fmt(point['r'],5)}</td><td>{fmt(point['z'],5)}</td>"
             f"<td>{fmt(point['psi'],6)}</td><td>{point['kind']}</td>"
@@ -67,6 +74,11 @@ def census_table(row):
             f"<td>{point['side_efit_boundary']}</td>"
             f"<td>{point['side_nova_a_boundary'] or '&ndash;'}</td>"
             f"<td>{point['side_nova_b_boundary'] or '&ndash;'}</td></tr>"
+        )
+    if len(outside) > len(capped):
+        out.append(
+            f"<tr><td colspan='10'>and {len(outside) - len(capped)} further out-of-wall "
+            f"census points not listed; the complete census is the results receipt</td></tr>"
         )
     out.append("</tbody></table>")
     return "\n".join(out)
@@ -130,6 +142,8 @@ def summary_table(rows):
         efit = row["efit"]
         a = row["adapter_a"]
         if a is None:
+            continue
+        if a["nova_axis_r"] is None:
             continue
         dr = a["nova_axis_r"] - efit["axis_r"]
         dz = a["nova_axis_z"] - efit["axis_z"]

@@ -81,7 +81,7 @@ def draw_panel(ax, row):
     # imas-efit boundary (dashed) and nova boundary (solid / dotted)
     _contour_at(ax, field, record, efit["boundary_level"],
                 colors=COLOUR["efit"], linestyles="--", linewidths=1.0)
-    if a is not None:
+    if a is not None and a["nova_boundary_psi"] is not None:
         _contour_at(ax, field, record, a["nova_boundary_psi"],
                     colors=COLOUR["nova_a"], linestyles="-", linewidths=1.0)
     if b is not None:
@@ -106,27 +106,58 @@ def draw_panel(ax, row):
 
     # nova axes and saddles, distinct styles
     if a is not None:
-        ax.plot(a["nova_axis_r"], a["nova_axis_z"], marker="o", markersize=7,
-                markerfacecolor="none", markeredgecolor=COLOUR["nova_a"],
-                markeredgewidth=1.4, linestyle="none")
-        ax.plot(a["nova_saddle_r"], a["nova_saddle_z"], marker="o", markersize=4,
-                markerfacecolor=COLOUR["nova_a"], markeredgecolor=COLOUR["nova_a"],
-                linestyle="none")
+        if a["nova_axis_r"] is not None:
+            ax.plot(a["nova_axis_r"], a["nova_axis_z"], marker="o", markersize=11,
+                    markerfacecolor="none", markeredgecolor=COLOUR["nova_a"],
+                    markeredgewidth=1.6, linestyle="none", zorder=6)
+        if a["nova_saddle_r"] is not None:
+            ax.plot(a["nova_saddle_r"], a["nova_saddle_z"], marker="o", markeredgecolor=COLOUR["nova_a"],
+                    markersize=5,
+                    markerfacecolor=COLOUR["nova_a"],
+                    linestyle="none", zorder=6)
     if b is not None:
         axis_pt = row["code_points"]["nova_b_axis"]
         if axis_pt is not None:
-            ax.plot(axis_pt["r"], axis_pt["z"], marker="s", markersize=6.5,
+            ax.plot(axis_pt["r"], axis_pt["z"], marker="s", markersize=10,
                     markerfacecolor="none", markeredgecolor=COLOUR["nova_b"],
-                    markeredgewidth=1.4, linestyle="none")
+                    markeredgewidth=1.6, linestyle="none", zorder=6)
         saddle = b["nova_saddle_position"]
         if saddle:
-            ax.plot(saddle[0], saddle[1], marker="s", markersize=4,
+            ax.plot(saddle[0], saddle[1], marker="s", markersize=5,
                     markerfacecolor=COLOUR["nova_b"],
-                    markeredgecolor=COLOUR["nova_b"], linestyle="none")
+                    markeredgecolor=COLOUR["nova_b"], linestyle="none", zorder=6)
 
     ax.set_aspect("equal")
     ax.set_axis_off()
     ax.set_title(row["case"], fontsize=8, pad=2)
+
+
+def _legend_handles():
+    from matplotlib.lines import Line2D
+
+    return [
+        Line2D([], [], color="#c9c9c9", lw=0.8, label="psi contours"),
+        Line2D([], [], color=COLOUR["wall"], lw=1.0, label="wall"),
+        Line2D([], [], color=COLOUR["efit"], ls="--", lw=1.0, label="imas-efit boundary"),
+        Line2D([], [], color=COLOUR["nova_a"], ls="-", lw=1.0, label="adapter A boundary"),
+        Line2D([], [], color=COLOUR["nova_b"], ls=":", lw=1.0, label="adapter B boundary"),
+        Line2D([], [], color="red", marker="^", ls="none", ms=8, label="imas-efit axis"),
+        Line2D([], [], color="red", marker="X", ls="none", ms=8, label="imas-efit X-point"),
+        Line2D([], [], color=COLOUR["nova_a"], marker="o", mfc="none", ls="none",
+               ms=9, label="adapter A axis"),
+        Line2D([], [], color=COLOUR["nova_a"], marker="o", ls="none", ms=5,
+               label="adapter A saddle"),
+        Line2D([], [], color=COLOUR["nova_b"], marker="s", mfc="none", ls="none",
+               ms=8, label="adapter B axis"),
+        Line2D([], [], color=COLOUR["nova_b"], marker="s", ls="none", ms=5,
+               label="adapter B saddle"),
+        Line2D([], [], color=COLOUR["census"], marker="^", mfc="none", ls="none",
+               ms=4, label="census maximum"),
+        Line2D([], [], color=COLOUR["census"], marker="v", mfc="none", ls="none",
+               ms=4, label="census minimum"),
+        Line2D([], [], color=COLOUR["census"], marker="x", ls="none", ms=4,
+               label="census saddle"),
+    ]
 
 
 def main():
@@ -156,7 +187,9 @@ def main():
         for ax in axes[n:]:
             ax.set_axis_off()
         slug = machine.lower().replace("-", "")
-        fig.tight_layout()
+        fig.legend(handles=_legend_handles(), loc="upper center", ncol=5,
+                   frameon=False, fontsize=8, bbox_to_anchor=(0.5, 1.0))
+        fig.tight_layout(rect=(0, 0, 1, 0.84))
         path = outdir / f"efit-axis-{slug}.svg"
         fig.savefig(path, format="svg")
         plt.close(fig)

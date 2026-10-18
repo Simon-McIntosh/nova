@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import pathlib
 
 import numpy as np
@@ -32,6 +33,10 @@ ADAPTER_B = pathlib.Path(
     "/home/ITER/mcintos/.config/reckon/crew/runs/"
     "r-20261018T063236394831-efit-field-swap/exports/measurements_final"
 )
+
+
+def finite(value):
+    return value if value is not None and math.isfinite(value) else None
 
 MACHINES = (
     ("jt60sa", "JT-60SA"),
@@ -76,6 +81,12 @@ def load_adapter_a():
     out = {}
     for row in data["rows"]:
         case = row["case"].replace(":", "-").lower()
+        # adapter A carries nan geometry where nova admits no axis or saddle;
+        # carry those as absent rather than as a point at nan
+        for key in ("nova_axis_r", "nova_axis_z", "nova_axis_psi",
+                    "nova_saddle_r", "nova_saddle_z", "nova_saddle_psi",
+                    "nova_boundary_psi", "field_grad_at_nova_axis"):
+            row[key] = finite(row.get(key))
         out[case] = row
     return out
 
@@ -114,8 +125,8 @@ def analyse(case_id, path, note, ad_a, ad_b, n_seed):
         wall_polygon=record.wall_polygon if len(record.wall_polygon) >= 3 else None,
     )
 
-    a = ad_a.get(case_id)
-    b = ad_b.get(case_id)
+    a = ad_a.get(case_id.lower())
+    b = ad_b.get(case_id.lower())
 
     def near_level(level):
         if level is None:
@@ -136,7 +147,10 @@ def analyse(case_id, path, note, ad_a, ad_b, n_seed):
                 "inside_wall": bool(p.inside_wall),
                 "grad_norm": float(np.linalg.norm(p.gradient)),
                 "side_efit_boundary": point_side(p.psi, record.wall_level),
-                "side_nova_a_boundary": point_side(p.psi, a["nova_boundary_psi"]) if a else None,
+                "side_nova_a_boundary": (
+                    point_side(p.psi, a["nova_boundary_psi"])
+                    if a and a["nova_boundary_psi"] is not None else None
+                ),
                 "side_nova_b_boundary": point_side(p.psi, b["nova"]["boundary_level"]) if b else None,
             }
         )
@@ -170,7 +184,7 @@ def analyse(case_id, path, note, ad_a, ad_b, n_seed):
     efit_axis = describe_code_point(
         record.axis_r, record.axis_z, record.axis_psi, "imas-efit axis (record)")
     nova_a_axis = None
-    if a is not None:
+    if a is not None and a["nova_axis_r"] is not None:
         nova_a_axis = describe_code_point(
             a["nova_axis_r"], a["nova_axis_z"], a["nova_axis_psi"],
             "adapter A nova axis (nova topology read)")
@@ -218,14 +232,16 @@ def analyse(case_id, path, note, ad_a, ad_b, n_seed):
         },
         "adapter_a": (
             {
-                "nova_axis_r": float(a["nova_axis_r"]),
-                "nova_axis_z": float(a["nova_axis_z"]),
-                "nova_axis_psi": float(a["nova_axis_psi"]),
-                "nova_saddle_r": float(a["nova_saddle_r"]),
-                "nova_saddle_z": float(a["nova_saddle_z"]),
-                "nova_saddle_psi": float(a["nova_saddle_psi"]),
-                "nova_boundary_psi": float(a["nova_boundary_psi"]),
+                "nova_axis_r": a["nova_axis_r"],
+                "nova_axis_z": a["nova_axis_z"],
+                "nova_axis_psi": a["nova_axis_psi"],
+                "nova_saddle_r": a["nova_saddle_r"],
+                "nova_saddle_z": a["nova_saddle_z"],
+                "nova_saddle_psi": a["nova_saddle_psi"],
+                "nova_boundary_psi": a["nova_boundary_psi"],
+                "nova_wall_level": a["nova_wall_level"],
                 "nova_label": a["nova_label"],
+                "nova_note": a.get("note"),
             }
             if a
             else None

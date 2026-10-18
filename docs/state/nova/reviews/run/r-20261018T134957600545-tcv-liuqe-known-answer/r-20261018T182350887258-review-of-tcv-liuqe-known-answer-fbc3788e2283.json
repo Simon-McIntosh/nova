@@ -1,0 +1,93 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Completed comparable source suite arms: baseline 1 failure, head 0 failures; set difference is empty.",
+  "assertion_audit": {
+    "scripts/prototypes/efit_field_swap/test_crosscheck.py:53-54": "The wide-wall vertex assertion fails if capacity fitting again produces no valid vertices.",
+    "scripts/prototypes/efit_field_swap/test_crosscheck.py:62-64": "The finite winding assertion fails if the record yields no boundary measurement; the accepted-label set is broad, and the lattice-16 note only echoes the input resolution.",
+    "scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py:114-118": "A census missing the saddle must refuse; returning limited, a resolution or a certified certificate makes the test fail.",
+    "scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py:125-126": "The true winding and certified result fail if the analytic field cannot close; index_sum == 1 is circular because 1 was passed to coverage_certificate.",
+    "scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py:145-149": "A cancelled missing extremum-saddle pair must still refuse; ignoring empty-cell enclosure makes line 145 fail, as the recorded negative control demonstrates.",
+    "scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py:158-160": "A constant zero-gradient cell must remain unresolved and unoccupied; certifying it as empty makes the assertions fail.",
+    "scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py:184-187": "A nonstationary invalid axis slot must refuse; accepting it as limited or reporting a certified read fails.",
+    "scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py:192-194": "A true one-maximum field must certify and read limited; refusing it or giving another label fails.",
+    "scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py:199-205": "The known annular domain has equal nonzero outer and obstacle windings and total zero; adding rather than subtracting the obstacle fails the zero-total and certification assertions.",
+    "scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py:211-212": "A critical point on the sampled loop must make winding unreliable; accepting it fails.",
+    "scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py:225-229": "The selected real LIUQE slice has no stored X-point and must read limited with zero uncleared cells; a refusal or other label fails.",
+    "scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py:85-90": "The analytic two-maxima field gives winding one; an incorrect winding or a certificate that accepts the deliberately wrong index two makes these assertions fail."
+  },
+  "call_site_count": 7,
+  "call_sites": [
+    "scripts/prototypes/efit_field_swap/crosscheck.py:856 (_decision calls read_state)",
+    "scripts/prototypes/tcv_liuqe_known_answer/measure.py:150 (measure_slice calls read_state)",
+    "scripts/prototypes/tcv_liuqe_known_answer/measure.py:235 (main calls measure_slice)",
+    "scripts/prototypes/tcv_liuqe_known_answer/sweep.py:66 (main calls measure_slice)",
+    "scripts/prototypes/tcv_liuqe_known_answer/figures.py:115 (build calls slice_view)",
+    "scripts/prototypes/tcv_liuqe_known_answer/report.py:261 (main builds the report from rows)",
+    "scripts/prototypes/tcv_liuqe_known_answer/report.py:75 (_row_html calls measure_gaps)"
+  ],
+  "completed_at": "2026-10-18T18:33:05Z",
+  "dispatched_at": "2026-10-18T18:24:46Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/tcv_liuqe_known_answer/summarise.py",
+      "line": "40",
+      "severity": "blocking",
+      "text": "blocking: Relative axis position gaps use axis-to-nearest-X distance and become undefined for limited LIUQE slices even though their boundary outlines exist; the source done_when requires a relative axis-to-boundary gap for each scored slice."
+    },
+    {
+      "file": "scripts/prototypes/tcv_liuqe_known_answer/sweep.py",
+      "line": "32",
+      "severity": "follow-on",
+      "text": "follow-on: The second CLI sweep duplicates measure.py:205-260, which already opens LIUQE, measures slices and writes rows; the two drivers have different defaults and failure records, so future scores can diverge."
+    },
+    {
+      "file": "scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py",
+      "line": "126",
+      "severity": "follow-on",
+      "text": "follow-on: The index_sum == 1 part of this assertion only echoes the 1 supplied to coverage_certificate on line 125, so it stays true when the coverage refusal regresses; the independently computed total and refusal assertions carry the real guard."
+    },
+    {
+      "file": "scripts/prototypes/efit_field_swap/test_crosscheck.py",
+      "line": "64",
+      "severity": "follow-on",
+      "text": "follow-on: Checking that the note contains lattice 16 only echoes the resolution 16 passed to _row on line 61; it cannot show that coverage certification ran or reached the expected result."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "Read the thirteen commits from a0ed032e to fbc3788e commit by commit and their combined diff: crosscheck.py adds coverage certification, the TCV prototype adds scoring and plots, and the final commit refreshes the report and three SVGs.",
+    "done_when": "The source brief requires at least twelve paired slice scores and contour panels; receipts/rescore-certified-job.log records ROWS 12 and FIELD_SWAP_ROWS 5, while summarise.py:40-42 leaves limited-slice relative position gaps undefined.",
+    "goal": "The source goal in brief.txt asks for a TCV LIUQE comparison; docs/research/tcv-liuqe-known-answer.html:24-55 gives twelve rows and three panels, but several requested relative position gaps are absent.",
+    "manifest": "The source manifest.md:5-18 names thirteen commits, eight focused passes, one completed baseline failure and a completed seven-pass head suite; both cited suite logs confirm those results.",
+    "write_paths": "The five families in the source manifest.md:3 contain all thirteen paths in the a0ed032e..fbc3788e diff, including its three replacement SVGs."
+  },
+  "justifications": {
+    "durability": "test_coverage.py:145 refuses a cancelled missed pair and receipts/negative-control.log shows that assertion fail on a mutated guard; test_coverage.py:126 also contains an input echo that adds no protection.",
+    "evidence": "receipts/rescore-certified-job.log records twelve LIUQE rows and five field-swap rows, and receipts/baseline-suite-final.log plus after-suite-landed.log give a completed 1-to-0 failure delta.",
+    "fit": "scripts/prototypes/tcv_liuqe_known_answer/figures.py:27-33 uses nova.media painters and crosscheck.py:714 keeps the read in its adapter owner without forbidden source names.",
+    "goal_fidelity": "docs/research/tcv-liuqe-known-answer.html:24-55 reports all twelve slices and three poloidal figures, but summarise.py:40-42 cannot provide a relative axis position gap for a limited LIUQE slice.",
+    "reuse": "scripts/prototypes/tcv_liuqe_known_answer/sweep.py:32-85 duplicates the archive loop and slice scoring already owned by measure.py:205-260, instead of extending that driver.",
+    "scope_discipline": "The thirteen changed paths in git diff a0ed032e..fbc3788e stay within the five path families declared by the source manifest.md:3."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source goal in brief.txt asks for a TCV LIUQE comparison; docs/research/tcv-liuqe-known-answer.html:24-55 gives twelve rows and three panels, but several requested relative position gaps are absent.\nVERDICT done_when: The source brief requires at least twelve paired slice scores and contour panels; receipts/rescore-certified-job.log records ROWS 12 and FIELD_SWAP_ROWS 5, while summarise.py:40-42 leaves limited-slice relative position gaps undefined.\nVERDICT write_paths: The five families in the source manifest.md:3 contain all thirteen paths in the a0ed032e..fbc3788e diff, including its three replacement SVGs.\nVERDICT manifest: The source manifest.md:5-18 names thirteen commits, eight focused passes, one completed baseline failure and a completed seven-pass head suite; both cited suite logs confirm those results.\nVERDICT diff: Read the thirteen commits from a0ed032e to fbc3788e commit by commit and their combined diff: crosscheck.py adds coverage certification, the TCV prototype adds scoring and plots, and the final commit refreshes the report and three SVGs.\nCALL_SITES: scripts/prototypes/efit_field_swap/crosscheck.py:856 (_decision calls read_state), scripts/prototypes/tcv_liuqe_known_answer/measure.py:150 (measure_slice calls read_state), scripts/prototypes/tcv_liuqe_known_answer/measure.py:235 (main calls measure_slice), scripts/prototypes/tcv_liuqe_known_answer/sweep.py:66 (main calls measure_slice), scripts/prototypes/tcv_liuqe_known_answer/figures.py:115 (build calls slice_view), scripts/prototypes/tcv_liuqe_known_answer/report.py:261 (main builds the report from rows), scripts/prototypes/tcv_liuqe_known_answer/report.py:75 (_row_html calls measure_gaps)\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: docs/research/tcv-liuqe-known-answer.html:24-55 reports all twelve slices and three poloidal figures, but summarise.py:40-42 cannot provide a relative axis position gap for a limited LIUQE slice.\nSCORE evidence: 18\nJUSTIFICATION evidence: receipts/rescore-certified-job.log records twelve LIUQE rows and five field-swap rows, and receipts/baseline-suite-final.log plus after-suite-landed.log give a completed 1-to-0 failure delta.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The thirteen changed paths in git diff a0ed032e..fbc3788e stay within the five path families declared by the source manifest.md:3.\nSCORE durability: 15\nJUSTIFICATION durability: test_coverage.py:145 refuses a cancelled missed pair and receipts/negative-control.log shows that assertion fail on a mutated guard; test_coverage.py:126 also contains an input echo that adds no protection.\nSCORE fit: 17\nJUSTIFICATION fit: scripts/prototypes/tcv_liuqe_known_answer/figures.py:27-33 uses nova.media painters and crosscheck.py:714 keeps the read in its adapter owner without forbidden source names.\nSCORE reuse: 5\nJUSTIFICATION reuse: scripts/prototypes/tcv_liuqe_known_answer/sweep.py:32-85 duplicates the archive loop and slice scoring already owned by measure.py:205-260, instead of extending that driver.\nFINDING scripts/prototypes/tcv_liuqe_known_answer/summarise.py:40 blocking: Relative axis position gaps use axis-to-nearest-X distance and become undefined for limited LIUQE slices even though their boundary outlines exist; the source done_when requires a relative axis-to-boundary gap for each scored slice.\nFINDING scripts/prototypes/tcv_liuqe_known_answer/sweep.py:32 follow-on: The second CLI sweep duplicates measure.py:205-260, which already opens LIUQE, measures slices and writes rows; the two drivers have different defaults and failure records, so future scores can diverge.\nFINDING scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py:126 follow-on: The index_sum == 1 part of this assertion only echoes the 1 supplied to coverage_certificate on line 125, so it stays true when the coverage refusal regresses; the independently computed total and refusal assertions carry the real guard.\nFINDING scripts/prototypes/efit_field_swap/test_crosscheck.py:64 follow-on: Checking that the note contains lattice 16 only echoes the resolution 16 passed to _row on line 61; it cannot show that coverage certification ran or reached the expected result.\nreviewed_base_sha: a0ed032e1c8fb62e1fbad18cea1c343052dc0dd0\nreviewed_head_sha: fbc3788e228330e9547deaeb10ea3c12d03cea25\n",
+  "review_run_id": "r-20261018T182350887258-review-of-tcv-liuqe-known-answer-fbc3788e2283",
+  "reviewed_base_sha": "a0ed032e1c8fb62e1fbad18cea1c343052dc0dd0",
+  "reviewed_head_sha": "fbc3788e228330e9547deaeb10ea3c12d03cea25",
+  "reviewed_run_id": "r-20261018T134957600545-tcv-liuqe-known-answer",
+  "scores": {
+    "durability": 15,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T18:35:49.093703+00:00",
+  "total": 91
+}

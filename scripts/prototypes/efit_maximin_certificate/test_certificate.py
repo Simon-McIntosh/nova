@@ -1,88 +1,59 @@
-"""The maximin certificate must reproduce each side's escape level and fire its cut.
-
-Three rows of the escape-level comparison start from the same axis on both codes,
-so each tests the boundary rule.  The certificate fixes the maximin of
-polarity*psi from the axis to a target by a descending union-find on the record's
-own scipy spline, and the blocking cut is the interface the axis component
-leaves when the target cannot be reached at a level.  The first test pins the
-measured maximin to imas-efit's escape level; the second is the negative control
-and requires the cut detector to fire on a level the target cannot attain.
-"""
+"""Exact endpoints and strict spline levels for the comparison records."""
 
 from __future__ import annotations
 
 import pathlib
-import unittest
 
-import numpy as np
+import pytest
 
+from scripts.prototypes.efit_maximin_certificate.bounds import enclosing_target_cut
 from scripts.prototypes.efit_maximin_certificate.certificate import (
-    Discrete,
-    blocking_cut,
     certify,
     load_record,
-    maximin,
-    sample_field,
     spline_of,
     vessel_ring,
 )
-
-REPORT = pathlib.Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/imas-efit/"
-    "continuous-boundary-level/cbl-saddle-admission"
-)
-MASTU_B = REPORT / "traces/mastu-fullPulse/boundary_slice_1_iter_5.txt"
-
-MASTU_CONTACT = (0.3327971398830414, 1.3030896186828613)
-MASTU_AXIS = (0.8473058496500641, -0.1920736910170366)
-MASTU_NOVA_LEVEL = 0.020530973894263525
-MASTU_EFIT_LEVEL = 0.019652442525099203
+from scripts.prototypes.efit_maximin_certificate.cuts import saddle_cut
+from scripts.prototypes.efit_maximin_certificate.run import ROWS
 
 
-def _discrete(path, n):
-    record = load_record(path)
+@pytest.mark.parametrize("spec", ROWS, ids=lambda spec: spec["case"])
+def test_exact_targets_and_claimed_levels(spec):
+    record = load_record(pathlib.Path(spec["source"]))
     spline = spline_of(record)
-    ring = vessel_ring(record)
-    pts, values, inside, n = sample_field(spline, ring, int(record.polarity), n)
-    return Discrete(pts, values, inside, n)
-
-
-class MaximinCertificateTest(unittest.TestCase):
-    def test_mastu_contact_maximin_is_below_nova_level(self):
-        """The maximin to nova's contact is imas-efit's level, below nova's."""
-        row = certify(
-            "mastu-fullPulse-s1-4-5-B",
-            str(MASTU_B),
-            MASTU_B,
-            MASTU_AXIS,
-            MASTU_CONTACT,
-            MASTU_NOVA_LEVEL,
-            MASTU_EFIT_LEVEL,
-            "limited",
-            "diverted",
-            n=400,
+    target = spec["target"]
+    value = float(record.polarity * spline.ev(*target))
+    if spec is ROWS[0]:
+        assert target == ROWS[0]["target"]
+        assert abs(value - spec["nova_level"]) < 1e-12
+        cut = saddle_cut(
+            spline, vessel_ring(record), spec["axis"], target, spec["nova_level"]
         )
-        self.assertAlmostEqual(row.maximin_axis_to_target, MASTU_EFIT_LEVEL, places=3)
-        self.assertLess(row.maximin_axis_to_target, MASTU_NOVA_LEVEL)
-        # the bottle is at the X-point region, not at the contact
-        self.assertLess(abs(row.path_min_at[0] - 0.575), 0.03)
-        self.assertLess(abs(row.path_min_at[1] - 1.123), 0.03)
-        # nova's own attaining path cannot reach the contact at nova's level
-        self.assertLess(row.path_min, MASTU_NOVA_LEVEL - 1e-4)
-
-    def test_cut_detector_fires_without_errors(self):
-        """Negative control: at a level above the maximin the cut must appear."""
-        discrete = _discrete(MASTU_B, 400)
-        ax = discrete.nearest(MASTU_AXIS)
-        tg = discrete.nearest(MASTU_CONTACT)
-        level = maximin(discrete, ax, tg)
-        self.assertTrue(np.isfinite(level))
-        exists, points = blocking_cut(discrete, ax, tg, level + 1e-3)
-        self.assertTrue(exists)
-        self.assertGreater(len(points), 0)
-        exists_low, _ = blocking_cut(discrete, ax, tg, level - 1e-3)
-        self.assertFalse(exists_low)
+        assert cut["separates"]
+        assert cut["bound"]["maximum_upper"] < spec["nova_level"]
+        assert abs(cut["saddle_value"] - spec["efit_level"]) < 1e-12
+        assert cut["bound"]["maximum_upper"] > spec["efit_level"]
+    else:
+        assert target == (0.85, 0.2)
+        assert spec["nova_level"] < value < spec["efit_level"]
+        assert 1e-11 < spec["efit_level"] - value < 2e-11
+        cut = enclosing_target_cut(
+            spline, record.polarity, target, spec["axis"], spec["efit_level"]
+        )
+        assert cut is not None
+        assert cut["bound"]["maximum_upper"] < spec["efit_level"]
+        assert cut["radius"] > 0
 
 
-if __name__ == "__main__":
-    unittest.main()
+@pytest.mark.parametrize("spec", ROWS, ids=lambda spec: spec["case"])
+def test_sampled_path_checks_exact_endpoints_and_continuous_minimum(spec):
+    row = certify(**spec, path=pathlib.Path(spec["source"]), n=400)
+    assert row.target == list(spec["target"])
+    assert row.attaining_path[0][:2] == pytest.approx(spec["axis"], abs=1e-14)
+    assert row.attaining_path[-1][:2] == pytest.approx(spec["target"], abs=1e-14)
+    assert row.path_bound["lower"] <= row.path_bound["upper"]
+    assert row.path_bound["midpoint_residual"] < row.path_bound["arithmetic_pad"]
+    if spec is ROWS[0]:
+        assert row.path_bound["upper"] < spec["nova_level"]
+    else:
+        assert row.path_bound["upper"] < spec["efit_level"]

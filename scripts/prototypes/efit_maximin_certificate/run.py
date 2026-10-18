@@ -1,11 +1,4 @@
-"""Driver: certify the three escape-comparison rows and write the exports.
-
-Rows come from ``docs/research/efit-escape-level-comparison.html`` (merged at
-03a0f1d04).  On all three the two codes start from the same axis, so each row
-tests the boundary rule rather than the axis.  Every path and cut is evaluated
-on the record's own scipy spline; nova's read and the field-swap adapter are not
-evaluated here at all.
-"""
+"""Export the captured comparison rows on each record's scipy spline."""
 
 from __future__ import annotations
 
@@ -61,8 +54,17 @@ ROWS = [
 
 
 def main(out_dir: pathlib.Path, n=800):
+    import nova
+
+    from scripts.prototypes.efit_maximin_certificate.cuts import make_cuts
+    from scripts.prototypes.efit_maximin_certificate.external_paths import (
+        main as evaluate_external_paths,
+    )
+
+    print(f"nova.__file__={nova.__file__}", flush=True)
     out_dir.mkdir(parents=True, exist_ok=True)
     rows = []
+    cuts = []
     for spec in ROWS:
         row = certify(
             case=spec["case"],
@@ -77,6 +79,9 @@ def main(out_dir: pathlib.Path, n=800):
             n=n,
         )
         write_row(row, out_dir)
+        cut_path = out_dir / f"{row.case}-certified-cut.txt"
+        cut = make_cuts(spec, cut_path)
+        cuts.append({"case": row.case, "path": str(cut_path), **cut})
         rows.append(row)
         print(
             f"done {row.case} maximin={row.maximin_axis_to_target} "
@@ -85,6 +90,8 @@ def main(out_dir: pathlib.Path, n=800):
         )
     payload = [r.__dict__ for r in rows]
     (out_dir / "certificates.json").write_text(json.dumps(payload, indent=2) + "\n")
+    (out_dir / "cuts.json").write_text(json.dumps(cuts, indent=2) + "\n")
+    evaluate_external_paths(out_dir / "external-path-bounds.json")
     print("ROWS", len(rows))
     return payload
 

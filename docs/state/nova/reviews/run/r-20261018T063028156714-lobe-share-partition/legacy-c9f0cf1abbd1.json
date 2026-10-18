@@ -1,0 +1,105 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Set difference of completed baseline_suite failure IDs from baseline-suite-head.log:29-34 and completed after_suite failure IDs from after-suite-head.log:7-9; the baseline errors are collection failures because the new test imports a symbol absent at the base.",
+  "assertion_analysis": [
+    "limited_map_gate.py:73 booked.valid fails if the reference booking is invalid.",
+    "limited_map_gate.py:133 booking_valid fails if either mapped arm rejects its booked moments.",
+    "limited_map_gate.py:134 topology_valid fails if either mapped arm rejects topology.",
+    "limited_map_gate.py:151 positive span and analytic variation fail on a degenerate certificate or read.",
+    "limited_map_gate.py:183 and lobe_partition_gate.py:168 and test_lobe_partition.py:17 fail if binary64 is disabled.",
+    "test_lobe_partition.py:90 fails if the private one-slot fan emits the wrong live-row count; it does not call _whole_cell_rings.",
+    "test_lobe_partition.py:108 fails if the booked polynomial fan disagrees with an independent polygon closed form.",
+    "test_lobe_partition.py:136 fails if negative signs cease subtracting, but survives a shared quadrature bias because all terms use _ring_moments.",
+    "test_lobe_partition.py:138 fails if the signed uniform-density integral disagrees with independent polygon areas.",
+    "test_lobe_partition.py:171 fails if the production remainder returns invalid; :172 fails if the production cell fan covers the wrong counted polygon; :173 fails if the production remainder fails to equal that polygon when the lobe is empty.",
+    "test_lobe_partition.py:199 fails if the independent reference has other than three triangles; the count-equals-length half moves together because lobe_reference returns len(triangles).",
+    "test_lobe_partition.py:200-202 fail if the independent lobe integral disagrees with the separate polygon closed form, and the monkeypatch at :195 fails a restored call to current._normal_rings."
+  ],
+  "base_log_revision": "80ee84b289d41d5a1bfbda8c3a5b94a7b2d7f1cd",
+  "call_site_count": 3,
+  "call_sites": [
+    "scripts/prototypes/xpoint_cell_owner/owner_map.py:161",
+    "scripts/prototypes/xpoint_cell_owner/owner_attribution.py:65",
+    "scripts/prototypes/xpoint_cell_owner/panel_data.py:75"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-10-18T06:30:51Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/xpoint_cell_owner/lobe_partition_gate.py",
+      "line": "203",
+      "severity": "blocking",
+      "text": "blocking: the runner prints a skipped row or any deviation and returns success without checking 1e-12 or validity, so EXIT=0 cannot establish the quantitative partition gate."
+    },
+    {
+      "file": "docs/research/lobe-share-partition.html",
+      "line": "185",
+      "severity": "blocking",
+      "text": "blocking: the required 2,105-cell limited map row is unmeasured after CUDA_ERROR_OUT_OF_MEMORY, so the all-three-sizes limited comparison in prompt.txt:105 is incomplete."
+    },
+    {
+      "file": "scripts/prototypes/xpoint_cell_owner/test_lobe_partition.py",
+      "line": "136",
+      "severity": "follow-on",
+      "text": "follow-on: signed and whole-minus-part are all computed by _ring_moments from the same test-supplied rings, so a shared quadrature bias leaves this assertion true; the independent constant-density check at :138 only covers that one density."
+    },
+    {
+      "file": "scripts/prototypes/xpoint_cell_owner/lobe_partition_gate.py",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: this new runner duplicates the lobe and remainder reference comparison owned by lobe_reference_probe.py:1-20 instead of extending its carrier loop."
+    },
+    {
+      "file": "scripts/prototypes/xpoint_cell_owner/limited_map_gate.py",
+      "line": "28",
+      "severity": "follow-on",
+      "text": "follow-on: _limited_context copies the map-context construction in fine_grid_convergence/context.py:89-163, creating a second owner for fixture assembly."
+    },
+    {
+      "file": "scripts/prototypes/xpoint_cell_owner/fan_probe.py",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the committed module declares itself a scratch probe outside the deliverable and adds an unused diagnostic surface."
+    }
+  ],
+  "head_log_revision": "c8c32619476783c8d5a258a4f3f5f2e293dc248c",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call sites",
+    "diff": "the nineteen ordered commits from 698ce55c4 through 46cc9d358 add the clip quadrature integration, independent lobe reference, five tests, measurement runners and evidence; test_lobe_partition.py:90,108,136,138,171-173,199-201 adds the guards assessed in assertion_analysis.",
+    "done_when": "prompt.txt:98-106 names three partition sizes, diverted and limited map rows and cold solves; partition-head-gate.log:31-33 records three passing deviations, research/lobe-share-partition.html:185 records the missing 2,105 limited row, and :203-204 records the permitted 550 stall.",
+    "goal": "prompt.txt:30 requires a single lobe and remainder booking through the clip owner; lobe_booking.py:40 and :201 use that owner and the three diverted partitions agree below 1e-12, while the limited third map row remains unmeasured.",
+    "manifest": "manifest.md records nineteen commits and the gate receipts; baseline-suite-head.log:29-34 has two collection errors, after-suite-head.log:7-9 has five passes, and limited-map-fixed-1288959.log:14-16 records device memory exhaustion.",
+    "write_paths": "prompt.txt:70-74 grants scripts/prototypes/xpoint_cell_owner and three named document or figure paths, and git diff --stat 80ee84b..46cc9d3 contains eleven files entirely within those paths."
+  },
+  "justifications": {
+    "durability": "test_lobe_partition.py:172-173 fails if the counted polygon or remainder is wrong and :195-201 fails if the reference calls the booking builder, but :136 reuses the same reducer on both sides and no test enforces the three-carrier threshold.",
+    "evidence": "lobe_partition_gate.py:203-213 only prints the deviations, so its EXIT=0 receipt does not assert the 1e-12 threshold even though partition-head-gate.log:31-33 records values below it.",
+    "fit": "lobe_booking.py:40 imports the established clip rule and its naming follows the surrounding JAX prototype code, while the added figure in docs/figures/converged-forward-solve/lobe-share-partition/terminal-282.svg renders legibly.",
+    "goal_fidelity": "lobe_booking.py:180-201 partitions each booked owner through the imported clip rule, but research/lobe-share-partition.html:185 leaves the required 2,105 limited map row unmeasured.",
+    "reuse": "lobe_partition_gate.py:1-20 repeats the lobe and remainder comparison already owned by lobe_reference_probe.py:1-20, and limited_map_gate.py:28-112 copies the carrier construction owned by fine_grid_convergence/context.py:89-163.",
+    "scope_discipline": "the eleven files in git diff 80ee84b..46cc9d3 lie within prompt.txt:70-74, while fan_probe.py:1-3 explicitly labels one committed file as scratch outside the deliverable."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: prompt.txt:30 requires a single lobe and remainder booking through the clip owner; lobe_booking.py:40 and :201 use that owner and the three diverted partitions agree below 1e-12, while the limited third map row remains unmeasured.\nVERDICT done_when: prompt.txt:98-106 names three partition sizes, diverted and limited map rows and cold solves; partition-head-gate.log:31-33 records three passing deviations, research/lobe-share-partition.html:185 records the missing 2,105 limited row, and :203-204 records the permitted 550 stall.\nVERDICT write_paths: prompt.txt:70-74 grants scripts/prototypes/xpoint_cell_owner and three named document or figure paths, and git diff --stat 80ee84b..46cc9d3 contains eleven files entirely within those paths.\nVERDICT manifest: manifest.md records nineteen commits and the gate receipts; baseline-suite-head.log:29-34 has two collection errors, after-suite-head.log:7-9 has five passes, and limited-map-fixed-1288959.log:14-16 records device memory exhaustion.\nVERDICT diff: the nineteen ordered commits from 698ce55c4 through 46cc9d358 add the clip quadrature integration, independent lobe reference, five tests, measurement runners and evidence; test_lobe_partition.py:90,108,136,138,171-173,199-201 adds the guards assessed in assertion_analysis.\nCALL_SITES: scripts/prototypes/xpoint_cell_owner/owner_map.py:161, scripts/prototypes/xpoint_cell_owner/owner_attribution.py:65, scripts/prototypes/xpoint_cell_owner/panel_data.py:75\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: lobe_booking.py:180-201 partitions each booked owner through the imported clip rule, but research/lobe-share-partition.html:185 leaves the required 2,105 limited map row unmeasured.\nSCORE evidence: 10\nJUSTIFICATION evidence: lobe_partition_gate.py:203-213 only prints the deviations, so its EXIT=0 receipt does not assert the 1e-12 threshold even though partition-head-gate.log:31-33 records values below it.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: the eleven files in git diff 80ee84b..46cc9d3 lie within prompt.txt:70-74, while fan_probe.py:1-3 explicitly labels one committed file as scratch outside the deliverable.\nSCORE durability: 14\nJUSTIFICATION durability: test_lobe_partition.py:172-173 fails if the counted polygon or remainder is wrong and :195-201 fails if the reference calls the booking builder, but :136 reuses the same reducer on both sides and no test enforces the three-carrier threshold.\nSCORE fit: 17\nJUSTIFICATION fit: lobe_booking.py:40 imports the established clip rule and its naming follows the surrounding JAX prototype code, while the added figure in docs/figures/converged-forward-solve/lobe-share-partition/terminal-282.svg renders legibly.\nSCORE reuse: 4\nJUSTIFICATION reuse: lobe_partition_gate.py:1-20 repeats the lobe and remainder comparison already owned by lobe_reference_probe.py:1-20, and limited_map_gate.py:28-112 copies the carrier construction owned by fine_grid_convergence/context.py:89-163.\nFINDING scripts/prototypes/xpoint_cell_owner/lobe_partition_gate.py:203 blocking: the runner prints a skipped row or any deviation and returns success without checking 1e-12 or validity, so EXIT=0 cannot establish the quantitative partition gate.\nFINDING docs/research/lobe-share-partition.html:185 blocking: the required 2,105-cell limited map row is unmeasured after CUDA_ERROR_OUT_OF_MEMORY, so the all-three-sizes limited comparison in prompt.txt:105 is incomplete.\nFINDING scripts/prototypes/xpoint_cell_owner/test_lobe_partition.py:136 follow-on: signed and whole-minus-part are all computed by _ring_moments from the same test-supplied rings, so a shared quadrature bias leaves this assertion true; the independent constant-density check at :138 only covers that one density.\nFINDING scripts/prototypes/xpoint_cell_owner/lobe_partition_gate.py:1 follow-on: this new runner duplicates the lobe and remainder reference comparison owned by lobe_reference_probe.py:1-20 instead of extending its carrier loop.\nFINDING scripts/prototypes/xpoint_cell_owner/limited_map_gate.py:28 follow-on: _limited_context copies the map-context construction in fine_grid_convergence/context.py:89-163, creating a second owner for fixture assembly.\nFINDING scripts/prototypes/xpoint_cell_owner/fan_probe.py:1 follow-on: the committed module declares itself a scratch probe outside the deliverable and adds an unused diagnostic surface.\n",
+  "review_run_id": "legacy-c9f0cf1abbd1",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "80ee84b289d41d5a1bfbda8c3a5b94a7b2d7f1cd",
+  "reviewed_head_sha": "46cc9d358bd539f1fe60557fda9e7cb5cfa85562",
+  "reviewed_run_id": "r-20261018T063028156714-lobe-share-partition",
+  "scores": {
+    "durability": 14,
+    "evidence": 10,
+    "fit": 17,
+    "goal_fidelity": 15,
+    "reuse": 4,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T11:55:59Z",
+  "total": 77
+}

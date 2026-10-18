@@ -163,7 +163,8 @@ def record_tables(rows):
             f"(source node {efit['saddle_source_node']}{source_text}); boundary level &psi; = "
             f"{fmt(efit['boundary_level'], 6)}; label {efit['label']}</li>"
             f"{a_line}{b_line}</ul>"
-            f"<p>in-wall extremum of &psi; in the polarity direction: {ext_line}</p>"
+            f"<p>most extreme censused in-wall stationary point in the polarity direction: "
+            f"{ext_line}</p>"
             f"<p>{row['n_census']} census points, {row['n_in_wall']} inside the wall.</p>"
             f"</div></div>"
             f"<h4>census</h4>{census_table(row)}"
@@ -305,8 +306,9 @@ records fail the gradient check at 2.433&times;10<sup>&minus;4</sup> and
 spline, but do not validate that this spline is the field from which their recorded axes came.</li>
 <li><strong>Census.</strong> Newton on &nabla;&psi; = 0 from a 120&times;120 seed lattice over the grid
 box, deduplicated at 10<sup>&minus;4</sup> m; points outside the grid box are dropped, where the
-spline extrapolates. Each point's Hessian eigenvalues give its type. A point lying on one side of a
-code's boundary contour is nearer that code's axis in &psi; than the boundary level.</li>
+spline extrapolates. Each point's Hessian eigenvalues give its type. The side columns state whether
+its &psi; is above, below or on each code's boundary level. This flux-side classification does not
+claim geometric containment in a particular contour component.</li>
 <li><strong>Adapter A axis rule.</strong> The nova axis comes from nova's own census: adapter A calls
 <code>nova.equilibrium.topology.read</code> on the spline field (<code>crosscheck.py</code>), so its
 axis is nova's topology read, unanchored to the record.</li>

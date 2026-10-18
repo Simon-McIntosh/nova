@@ -1,0 +1,74 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "90a818ba3d5d47c70a363baba28c02fca8c60d92",
+  "call_site_count": 3,
+  "call_sites": [
+    "scripts/prototypes/efit_axis_adjudication/analyse.py:320",
+    "scripts/prototypes/efit_axis_adjudication/plot.py:385",
+    "scripts/prototypes/efit_axis_adjudication/page.py:457"
+  ],
+  "completed_at": "2026-10-18T12:32:23Z",
+  "dispatched_at": "2026-10-18T12:23:16Z",
+  "findings": [
+    {
+      "file": "docs/research/efit-axis-adjudication.html",
+      "line": "90",
+      "severity": "blocking",
+      "text": "blocking: Both synthetic recorded axes have spline gradient norms 2.433e-4 and 2.638e-4 against the required rounding-level 1e-9 check, leaving the brief's every-record rebuild clause unmet even though the page labels and excludes them."
+    },
+    {
+      "file": "scripts/prototypes/efit_axis_adjudication/test_rebuild.py",
+      "line": "47",
+      "severity": "follow-on",
+      "text": "follow-on: The test supplies the same failed status its assertions expect, so replacing the numerical guard with a status-only check can leave both assertions green while a nonstationary record is accepted when its status is wrong."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/efit-axis-adjudication.html",
+      "line": "13",
+      "severity": "follow-on",
+      "text": "follow-on: The fragment's plan-commits metadata stops at be14caac2 and omits later content and figure commits through df9d4e7df, so its provenance does not identify the delivered revision."
+    }
+  ],
+  "head_log_revision": "df9d4e7df0f112ac3f358973b69e5db14fa79b4d",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "I read the 14 commits from 1b25eedd7574fda2220c02fc33fffd39db9433bd through df9d4e7df0f112ac3f358973b69e5db14fa79b4d by their path deltas and inspected the final scripts, research page, fragment and rendered figures; scripts/prototypes/efit_axis_adjudication/page.py:45-67 carries the repaired table guard.",
+    "done_when": "The source brief's five clauses require a successful spline rebuild for every record; docs/research/efit-axis-adjudication.html:90-91 records two gradient failures, while the manifest's focused gate tests only the rebuild table.",
+    "goal": "The source brief asks for neutral plots and tables; docs/research/efit-axis-adjudication.html:90-91 shows 24 comparable traces and two explicit synthetic exclusions, so the evidence is useful but the every-record rebuild clause remains unmet.",
+    "manifest": "The reviewed run's manifest.md records all 14 commits, all 14 changed paths, paired rebuild logs with two base failures and zero head failures, and five inspected SVGs.",
+    "write_paths": "The source brief grants the script, figure, research-page and evidence-fragment path families, and every file in the 1b25eedd7574fda2220c02fc33fffd39db9433bd..df9d4e7df0f112ac3f358973b69e5db14fa79b4d diff lies within them."
+  },
+  "justifications": {
+    "durability": "scripts/prototypes/efit_axis_adjudication/test_rebuild.py:47 supplies the failed status that lines 50-53 expect back, so the assertions can stay green if the production guard stops checking the measured gradient and trusts that status.",
+    "evidence": "The source manifest's baseline_suite and after_suite cite completed paired test logs, but scripts/prototypes/efit_axis_adjudication/test_rebuild.py:29-54 asserts only the synthetic rebuild refusal and table label, not the full 26-record census and panel measure.",
+    "fit": "scripts/prototypes/efit_axis_adjudication/plot.py:145-149 uses nova.media's shared contour and wall painters, and its final SVGs follow the surrounding figure vocabulary; the fragment's commit metadata at docs/evidence/fragments/converged-forward-solve/efit-axis-adjudication.html:13 is stale.",
+    "goal_fidelity": "docs/research/efit-axis-adjudication.html:90-91 transparently excludes the two synthetic traces whose required recorded-axis spline checks fail while supplying the requested comparison evidence for the other 24.",
+    "reuse": "A capability search found nova/media/poloidal.py:29,138,540 and nova/linalg/tensor_spline.py, and scripts/prototypes/efit_axis_adjudication/plot.py:22-23 uses the painters while field.py:17 uses independent SciPy evaluation required by the brief rather than the JAX spline owner.",
+    "scope_discipline": "Every changed path in the base-to-head diff is under the four granted families named in the source brief, including scripts/prototypes/efit_axis_adjudication and docs/research/efit-axis-adjudication.html."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source brief asks for neutral plots and tables; docs/research/efit-axis-adjudication.html:90-91 shows 24 comparable traces and two explicit synthetic exclusions, so the evidence is useful but the every-record rebuild clause remains unmet.\nVERDICT done_when: The source brief's five clauses require a successful spline rebuild for every record; docs/research/efit-axis-adjudication.html:90-91 records two gradient failures, while the manifest's focused gate tests only the rebuild table.\nVERDICT write_paths: The source brief grants the script, figure, research-page and evidence-fragment path families, and every file in the 1b25eedd7574fda2220c02fc33fffd39db9433bd..df9d4e7df0f112ac3f358973b69e5db14fa79b4d diff lies within them.\nVERDICT manifest: The reviewed run's manifest.md records all 14 commits, all 14 changed paths, paired rebuild logs with two base failures and zero head failures, and five inspected SVGs.\nVERDICT diff: I read the 14 commits from 1b25eedd7574fda2220c02fc33fffd39db9433bd through df9d4e7df0f112ac3f358973b69e5db14fa79b4d by their path deltas and inspected the final scripts, research page, fragment and rendered figures; scripts/prototypes/efit_axis_adjudication/page.py:45-67 carries the repaired table guard.\nCALL_SITES: scripts/prototypes/efit_axis_adjudication/analyse.py:320, scripts/prototypes/efit_axis_adjudication/plot.py:385, scripts/prototypes/efit_axis_adjudication/page.py:457\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: docs/research/efit-axis-adjudication.html:90-91 transparently excludes the two synthetic traces whose required recorded-axis spline checks fail while supplying the requested comparison evidence for the other 24.\nSCORE evidence: 13\nJUSTIFICATION evidence: The source manifest's baseline_suite and after_suite cite completed paired test logs, but scripts/prototypes/efit_axis_adjudication/test_rebuild.py:29-54 asserts only the synthetic rebuild refusal and table label, not the full 26-record census and panel measure.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: Every changed path in the base-to-head diff is under the four granted families named in the source brief, including scripts/prototypes/efit_axis_adjudication and docs/research/efit-axis-adjudication.html.\nSCORE durability: 9\nJUSTIFICATION durability: scripts/prototypes/efit_axis_adjudication/test_rebuild.py:47 supplies the failed status that lines 50-53 expect back, so the assertions can stay green if the production guard stops checking the measured gradient and trusts that status.\nSCORE fit: 17\nJUSTIFICATION fit: scripts/prototypes/efit_axis_adjudication/plot.py:145-149 uses nova.media's shared contour and wall painters, and its final SVGs follow the surrounding figure vocabulary; the fragment's commit metadata at docs/evidence/fragments/converged-forward-solve/efit-axis-adjudication.html:13 is stale.\nSCORE reuse: 19\nJUSTIFICATION reuse: A capability search found nova/media/poloidal.py:29,138,540 and nova/linalg/tensor_spline.py, and scripts/prototypes/efit_axis_adjudication/plot.py:22-23 uses the painters while field.py:17 uses independent SciPy evaluation required by the brief rather than the JAX spline owner.\nFINDING docs/research/efit-axis-adjudication.html:90 blocking: Both synthetic recorded axes have spline gradient norms 2.433e-4 and 2.638e-4 against the required rounding-level 1e-9 check, leaving the brief's every-record rebuild clause unmet even though the page labels and excludes them.\nFINDING scripts/prototypes/efit_axis_adjudication/test_rebuild.py:47 follow-on: The test supplies the same failed status its assertions expect, so replacing the numerical guard with a status-only check can leave both assertions green while a nonstationary record is accepted when its status is wrong.\nFINDING docs/evidence/fragments/converged-forward-solve/efit-axis-adjudication.html:13 follow-on: The fragment's plan-commits metadata stops at be14caac2 and omits later content and figure commits through df9d4e7df, so its provenance does not identify the delivered revision.\nreviewed_base_sha: 1b25eedd7574fda2220c02fc33fffd39db9433bd\nreviewed_head_sha: df9d4e7df0f112ac3f358973b69e5db14fa79b4d\n",
+  "review_run_id": "r-20261018T122242821904-review-of-efit-axis-adjudication-df9d4e7df0f1",
+  "reviewed_base_sha": "1b25eedd7574fda2220c02fc33fffd39db9433bd",
+  "reviewed_head_sha": "df9d4e7df0f112ac3f358973b69e5db14fa79b4d",
+  "reviewed_run_id": "r-20261018T091852734602-efit-axis-adjudication",
+  "reviewer": {
+    "reviewer_run_id": "r-20261018T122242821904-review-of-efit-axis-adjudication-df9d4e7df0f1"
+  },
+  "scores": {
+    "durability": 9,
+    "evidence": 13,
+    "fit": 17,
+    "goal_fidelity": 14,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T12:28:55.011252+00:00",
+  "total": 92
+}

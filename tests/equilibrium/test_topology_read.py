@@ -2870,3 +2870,40 @@ def test_strict_exact_zero_admission_loses_the_saddle_at_the_adjacent_pair():
     assert restored_saddles == 1, (
         "restoring the strict exact-zero admission must lose a saddle at the pair"
     )
+
+
+@pytest.mark.timeout(900)
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    ("requested_cells", "before", "after", "warm_stop"),
+    ((250, 0.1732, 0.17325, 0.16), (500, 0.122, 0.1225, 0.10)),
+)
+def test_census_neighbour_proposals_keep_saddles_across_coarse_ties(
+    requested_cells, before, after, warm_stop
+):
+    """The complete read keeps both hyperbolic saddles across a proposal gap."""
+    from scripts.prototypes.fast_map_production import tie_probe
+    from scripts.prototypes.read_robustness import census as census_module
+
+    cache = _census_cache()
+    if not (cache / f"analytic_oracle_hex_machine_{requested_cells}.zarr").exists():
+        pytest.skip(f"no certified machine cache at {cache}")
+    state = tie_probe.build("diverted", requested_cells, str(cache))
+    sampled = tie_probe.make_sampler(state)
+    prior, _ = tie_probe.warm(state, sampled, -0.2, warm_stop, 0.01)
+    observed = []
+    for offset in (before, after):
+        valid, saddles, roots = _census_reading(
+            census_module.census, state, prior, offset
+        )
+        assert valid == 3, f"expected three roots at {offset}, got {valid}"
+        assert saddles == 2, f"expected two saddles at {offset}, got {saddles}"
+        eigenvalues = np.linalg.eigvalsh(
+            np.asarray(state["convention"].sigma) * np.asarray(roots.jet.hessian)
+        )
+        selected = (
+            np.asarray(roots.valid) & (eigenvalues[:, 0] < 0) & (eigenvalues[:, 1] > 0)
+        )
+        observed.append(np.asarray(roots.position)[selected])
+    distances = np.linalg.norm(observed[0][:, None] - observed[1][None], axis=-1)
+    assert np.all(np.min(distances, axis=1) < np.median(state["geometry"].pitch))

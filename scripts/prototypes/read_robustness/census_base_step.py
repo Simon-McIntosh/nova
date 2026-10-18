@@ -1,25 +1,31 @@
-"""Load the stationary census with its exact-zero cell-membership step restored.
-
-The repaired census admits a cell seed whose edge cross product is negative only
-beyond the rounding that value carries. To falsify that repair it is not enough
-to read a trace taken earlier: the dropping step has to be reinstated and the
-census run again. This module does that by taking the census source as written,
-replacing the rounding-bearing comparison with the exact-zero one it replaced,
-and executing the result. The returned function is the census the repair exists
-to supersede, built from the current source rather than from a copy, so a later
-edit to the admission step cannot leave this control measuring a stale program.
-"""
+"""Rebuild the census with its former proposal and admission steps restored."""
 
 from pathlib import Path
 
 SOURCE = Path(__file__).with_name("census.py")
 REPAIRED = "cross >= -rounding"
 DROPPED = "cross >= 0"
+RING = "inside = jnp.any(inside_ring, axis=1)"
+OWN = "inside = inside_ring[:, 0]"
+
+
+def _with_own_cell_proposal(text):
+    if text.count(RING) != 1:
+        raise RuntimeError(f"expected exactly one {RING!r} in {SOURCE}")
+    return text.replace(RING, OWN)
+
+
+def containment_only_census():
+    """The live census with only the proposal region narrowed to its own cell."""
+    text = _with_own_cell_proposal(SOURCE.read_text())
+    namespace = {"__name__": "census_containment_control", "__file__": str(SOURCE)}
+    exec(compile(text, str(SOURCE), "exec"), namespace)
+    return namespace["census"]
 
 
 def base_admission_census():
     """The census with the named dropping step restored, from the live source."""
-    text = SOURCE.read_text()
+    text = _with_own_cell_proposal(SOURCE.read_text())
     count = text.count(REPAIRED)
     if count != 1:
         raise RuntimeError(

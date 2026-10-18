@@ -1,0 +1,81 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "call_site_count": 2,
+  "call_sites": [
+    "scripts/prototypes/tcv_liuqe_known_answer/measure.py:280 (__main__ calls main)",
+    "scripts/prototypes/tcv_liuqe_known_answer/measure.py:258-260 (main calls liuqe_reference and measure_slice)"
+  ],
+  "completed_at": "2026-10-18T15:02:35Z",
+  "dispatched_at": "2026-10-18T14:54:19Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/tcv_liuqe_known_answer/measure.py",
+      "line": "177",
+      "severity": "blocking",
+      "text": "blocking: A zero-saddle slice is skipped, so the driver cannot return limited even though limited slices are a required half of the comparison; the same check exists in the reused crosscheck owner and must be addressed for this measurement."
+    },
+    {
+      "file": "docs/research/tcv-liuqe-known-answer.html",
+      "line": "92",
+      "severity": "blocking",
+      "text": "blocking: Only three diverted slices completed, none qualified, and no nova-to-LIUQE gaps or limited and diverted panels were produced, so the brief's 12-slice comparison and figure clauses have not landed."
+    },
+    {
+      "file": "scripts/prototypes/tcv_liuqe_known_answer/measure.py",
+      "line": "144",
+      "severity": "follow-on",
+      "text": "follow-on: This decision pipeline duplicates scripts/prototypes/efit_field_swap/crosscheck.py:347-405, the existing owner; shared logic will diverge and the copied zero-saddle refusal already propagates a limitation into this driver."
+    },
+    {
+      "file": "scripts/prototypes/tcv_liuqe_known_answer/measure.py",
+      "line": "243",
+      "severity": "follow-on",
+      "text": "follow-on: The equilibrium IDS is opened and its per-signal time is used at line 123 without checking homogeneous_time, despite the source brief requiring that provenance check."
+    },
+    {
+      "file": "docs/research/tcv-liuqe-known-answer.html",
+      "line": "98",
+      "severity": "follow-on",
+      "text": "follow-on: The report calls the archive the dominant obstacle although the 17 distinct grids and both phase labels are present in its own table; the recorded reason the requested comparison is absent is that 14 selected reads did not complete and the other three did not qualify."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "Commit 13db33f3726d17781387092b22c73e4b54616172 adds scripts/prototypes/tcv_liuqe_known_answer/measure.py plus a research page and evidence fragment; its driver has no test assertions and repeats the existing crosscheck decision sequence.",
+    "done_when": "The source brief's three quantitative clauses are unmet because docs/research/tcv-liuqe-known-answer.html:92-109 supplies no axis, X-point or flux gaps and logs/measure.log has only three done lines without a ROWS completion receipt.",
+    "goal": "The source brief requires a per-slice nova versus LIUQE score and contour panels for at least 12 slices across limited and diverted phases; docs/research/tcv-liuqe-known-answer.html:92-109 reports only three unqualified diverted reads and no panels.",
+    "manifest": "The source manifest.md reports status complete and commit 13db33f3726d17781387092b22c73e4b54616172, but it also records only three of 17 slices measured, no figures, no focused gate, and baseline_suite and after_suite both not run.",
+    "write_paths": "The source manifest declares the driver and two documents under its permitted paths, and git diff a0ed032e1c8fb62e1fbad18cea1c343052dc0dd0..13db33f3726d17781387092b22c73e4b54616172 changes exactly those three paths."
+  },
+  "justifications": {
+    "durability": "scripts/prototypes/tcv_liuqe_known_answer/measure.py:1-281 adds no assertion or test, so no added assertion can be shown to fail if the comparison or limited classification regresses.",
+    "evidence": "logs/measure.log records three unqualified outcomes but has no ROWS summary, while the source manifest.md records neither a completed baseline_suite nor an after_suite and no quantitative comparison gate.",
+    "fit": "scripts/prototypes/tcv_liuqe_known_answer/measure.py:39-42 imports the adapter idiom but lines 243-245 omit the brief's homogeneous_time check and lines 177-179 force every zero-saddle case out before a limited label can be read.",
+    "goal_fidelity": "docs/research/tcv-liuqe-known-answer.html:92-109 explicitly reports zero of three slices scored and no required limited or diverted contour panels.",
+    "reuse": "scripts/prototypes/tcv_liuqe_known_answer/measure.py:144-196 duplicates the decision loop already owned by scripts/prototypes/efit_field_swap/crosscheck.py:347-405 rather than extending that owner, although it imports the owner's geometry and spline helpers.",
+    "scope_discipline": "the three files added by commit 13db33f3726d17781387092b22c73e4b54616172 all fall inside the source manifest.md orientation_write_paths and serve the stated TCV comparison."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source brief requires a per-slice nova versus LIUQE score and contour panels for at least 12 slices across limited and diverted phases; docs/research/tcv-liuqe-known-answer.html:92-109 reports only three unqualified diverted reads and no panels.\nVERDICT done_when: The source brief's three quantitative clauses are unmet because docs/research/tcv-liuqe-known-answer.html:92-109 supplies no axis, X-point or flux gaps and logs/measure.log has only three done lines without a ROWS completion receipt.\nVERDICT write_paths: The source manifest declares the driver and two documents under its permitted paths, and git diff a0ed032e1c8fb62e1fbad18cea1c343052dc0dd0..13db33f3726d17781387092b22c73e4b54616172 changes exactly those three paths.\nVERDICT manifest: The source manifest.md reports status complete and commit 13db33f3726d17781387092b22c73e4b54616172, but it also records only three of 17 slices measured, no figures, no focused gate, and baseline_suite and after_suite both not run.\nVERDICT diff: Commit 13db33f3726d17781387092b22c73e4b54616172 adds scripts/prototypes/tcv_liuqe_known_answer/measure.py plus a research page and evidence fragment; its driver has no test assertions and repeats the existing crosscheck decision sequence.\nCALL_SITES: scripts/prototypes/tcv_liuqe_known_answer/measure.py:280 (__main__ calls main), scripts/prototypes/tcv_liuqe_known_answer/measure.py:258-260 (main calls liuqe_reference and measure_slice)\nSCORE goal_fidelity: 4\nJUSTIFICATION goal_fidelity: docs/research/tcv-liuqe-known-answer.html:92-109 explicitly reports zero of three slices scored and no required limited or diverted contour panels.\nSCORE evidence: 3\nJUSTIFICATION evidence: logs/measure.log records three unqualified outcomes but has no ROWS summary, while the source manifest.md records neither a completed baseline_suite nor an after_suite and no quantitative comparison gate.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the three files added by commit 13db33f3726d17781387092b22c73e4b54616172 all fall inside the source manifest.md orientation_write_paths and serve the stated TCV comparison.\nSCORE durability: 0\nJUSTIFICATION durability: scripts/prototypes/tcv_liuqe_known_answer/measure.py:1-281 adds no assertion or test, so no added assertion can be shown to fail if the comparison or limited classification regresses.\nSCORE fit: 13\nJUSTIFICATION fit: scripts/prototypes/tcv_liuqe_known_answer/measure.py:39-42 imports the adapter idiom but lines 243-245 omit the brief's homogeneous_time check and lines 177-179 force every zero-saddle case out before a limited label can be read.\nSCORE reuse: 4\nJUSTIFICATION reuse: scripts/prototypes/tcv_liuqe_known_answer/measure.py:144-196 duplicates the decision loop already owned by scripts/prototypes/efit_field_swap/crosscheck.py:347-405 rather than extending that owner, although it imports the owner's geometry and spline helpers.\nFINDING scripts/prototypes/tcv_liuqe_known_answer/measure.py:177 blocking: A zero-saddle slice is skipped, so the driver cannot return limited even though limited slices are a required half of the comparison; the same check exists in the reused crosscheck owner and must be addressed for this measurement.\nFINDING docs/research/tcv-liuqe-known-answer.html:92 blocking: Only three diverted slices completed, none qualified, and no nova-to-LIUQE gaps or limited and diverted panels were produced, so the brief's 12-slice comparison and figure clauses have not landed.\nFINDING scripts/prototypes/tcv_liuqe_known_answer/measure.py:144 follow-on: This decision pipeline duplicates scripts/prototypes/efit_field_swap/crosscheck.py:347-405, the existing owner; shared logic will diverge and the copied zero-saddle refusal already propagates a limitation into this driver.\nFINDING scripts/prototypes/tcv_liuqe_known_answer/measure.py:243 follow-on: The equilibrium IDS is opened and its per-signal time is used at line 123 without checking homogeneous_time, despite the source brief requiring that provenance check.\nFINDING docs/research/tcv-liuqe-known-answer.html:98 follow-on: The report calls the archive the dominant obstacle although the 17 distinct grids and both phase labels are present in its own table; the recorded reason the requested comparison is absent is that 14 selected reads did not complete and the other three did not qualify.\nreviewed_base_sha: a0ed032e1c8fb62e1fbad18cea1c343052dc0dd0\nreviewed_head_sha: 13db33f3726d17781387092b22c73e4b54616172\n",
+  "review_run_id": "r-20261018T145332169753-review-of-tcv-liuqe-known-answer-13db33f3726d",
+  "reviewed_base_sha": "a0ed032e1c8fb62e1fbad18cea1c343052dc0dd0",
+  "reviewed_head_sha": "13db33f3726d17781387092b22c73e4b54616172",
+  "reviewed_run_id": "r-20261018T134957600545-tcv-liuqe-known-answer",
+  "scores": {
+    "durability": 0,
+    "evidence": 3,
+    "fit": 13,
+    "goal_fidelity": 4,
+    "reuse": 4,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T15:03:40.798152+00:00",
+  "total": 44
+}

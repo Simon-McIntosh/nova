@@ -245,7 +245,9 @@ def write_trace_record(path: str | Path, record: TraceRecord) -> None:
             )
         )
     for index in range(nlim):
-        lines.append(f"{int(record.wall_index[index, 0])} {int(record.wall_index[index, 1])}")
+        lines.append(
+            f"{int(record.wall_index[index, 0])} {int(record.wall_index[index, 1])}"
+        )
     for index in range(ncell):
         lines.append(
             _format_row(

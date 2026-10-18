@@ -1,5 +1,7 @@
 """Check the adapter's spline evaluator against scipy's own bispline."""
 
+# ruff: noqa: E402
+
 from __future__ import annotations
 
 from pathlib import Path

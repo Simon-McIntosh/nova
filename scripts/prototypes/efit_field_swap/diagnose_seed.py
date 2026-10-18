@@ -28,9 +28,7 @@ def main(pair_index=0, resolution=16):
     record = read_trace_record(rows[pair_index][1])
     field = TraceSplineField.from_record(record)
     cells, offsets = lattice(record.wall_ring, resolution)
-    geometry = topology.TopologyGeometry.from_cells(
-        cells, offsets, wall_units(record)
-    )
+    geometry = topology.TopologyGeometry.from_cells(cells, offsets, wall_units(record))
     policy = TopologyPolicy()
     coefficients = jnp.asarray(field.sampled_coefficient(geometry))
     hessian = jnp.stack(
@@ -40,9 +38,9 @@ def main(pair_index=0, resolution=16):
         ),
         axis=1,
     )
-    conditioned, safe = jax.vmap(
-        topology._conditioned_hessian, in_axes=(0, None)
-    )(hessian, policy.hessian_tolerance)
+    conditioned, safe = jax.vmap(topology._conditioned_hessian, in_axes=(0, None))(
+        hessian, policy.hessian_tolerance
+    )
     offset = -jnp.linalg.solve(safe, coefficients[:, 1:3, None])[..., 0]
 
     import numpy as np
@@ -62,9 +60,7 @@ def main(pair_index=0, resolution=16):
         ),
         axis=-1,
     )
-    values = np.asarray(
-        jax.vmap(jax.vmap(field.value))(jnp.asarray(samples))
-    )
+    values = np.asarray(jax.vmap(jax.vmap(field.value))(jnp.asarray(samples)))
     fitted = np.einsum("nsk,nk->ns", design, np.asarray(coefficients))
     residual = np.abs(fitted - values).max(axis=1)
 
@@ -94,7 +90,9 @@ def main(pair_index=0, resolution=16):
     print("inside", int(inside.sum()))
     print(
         "offset percentile 10/50/90",
-        np.round(np.percentile(np.linalg.norm(np.asarray(offset), axis=1), [10, 50, 90]), 3),
+        np.round(
+            np.percentile(np.linalg.norm(np.asarray(offset), axis=1), [10, 50, 90]), 3
+        ),
     )
     print(
         "local half width x",
@@ -104,9 +102,16 @@ def main(pair_index=0, resolution=16):
     )
     print("design cond median", float(np.median(np.linalg.cond(design))))
     nearest = int(
-        np.argmin(np.sum((centre - np.asarray([record.axis_r, record.axis_z])) ** 2, axis=1))
+        np.argmin(
+            np.sum((centre - np.asarray([record.axis_r, record.axis_z])) ** 2, axis=1)
+        )
     )
-    print("axis cell centre", centre[nearest], "true psi", float(field.value(jnp.asarray(centre[nearest]))))
+    print(
+        "axis cell centre",
+        centre[nearest],
+        "true psi",
+        float(field.value(jnp.asarray(centre[nearest]))),
+    )
     print("axis cell coefficients", np.round(np.asarray(coefficients)[nearest], 6))
     print("axis cell offset", np.round(np.asarray(offset)[nearest], 4))
     print("axis cell residual", residual[nearest])

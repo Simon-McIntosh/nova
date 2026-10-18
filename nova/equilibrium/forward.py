@@ -2605,14 +2605,25 @@ class ForwardProfile:
             seed_provenance=request.seed_policy.provenance(),
         )
 
+    @staticmethod
+    def _vertical_pin_for_request(
+        request: ForwardSolveRequest,
+    ) -> VerticalPositionPin | None:
+        if request.vertical_pin is not None:
+            return request.vertical_pin
+        if request.route == "newton_krylov":
+            return VerticalPositionPin(0.0, active=False)
+        return None
+
     def _solve_imposed_request(
         self, request: ForwardSolveRequest
     ) -> ForwardSolveReceipt:
         """Resolve one typed request whose constraint targets remain fixed."""
         active = self._with_source(request.source_profile, clip_mode=request.clip_mode)
         pairs = request.constraint_pairs
-        if request.vertical_pin is not None:
-            pairs = (*pairs, request.vertical_pin.pair(active.operator))
+        vertical_pin = self._vertical_pin_for_request(request)
+        if vertical_pin is not None:
+            pairs = (*pairs, vertical_pin.pair(active.operator))
         if pairs and request.route not in _CONSTRAINABLE:
             raise ValueError(
                 "augmented constraints require a route carrying a compensating "
@@ -2731,8 +2742,9 @@ class ForwardProfile:
             return tuple(array.shape), str(array.dtype)
 
         request_pairs = request.constraint_pairs
-        if request.vertical_pin is not None:
-            request_pairs = (*request_pairs, request.vertical_pin.pair(self.operator))
+        vertical_pin = self._vertical_pin_for_request(request)
+        if vertical_pin is not None:
+            request_pairs = (*request_pairs, vertical_pin.pair(self.operator))
         constraint_signature = tuple(
             (
                 type(pair.functional).__qualname__,

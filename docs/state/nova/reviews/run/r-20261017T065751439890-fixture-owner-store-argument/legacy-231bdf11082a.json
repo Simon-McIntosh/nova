@@ -16,6 +16,13 @@
     "scripts/analytic_oracle_fixtures/measure.py:1645"
   ],
   "completed_at": "",
+  "dimension_dispositions": {
+    "evidence": {
+      "kind": "folded",
+      "node": "fixture-owner-store-argument",
+      "recorded_at": "2026-10-18T08:44:11.007488+00:00"
+    }
+  },
   "dispatched_at": "2026-10-17T06:58:13Z",
   "finding_dispositions": {
     "0": {

@@ -50,6 +50,13 @@
     "scripts/prototypes/efit_field_swap/negative_control.py:main_field"
   ],
   "completed_at": "2026-10-18T09:15:28Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "efit-field-swap",
+      "recorded_at": "2026-10-18T09:23:12.802975+00:00"
+    }
+  },
   "dispatched_at": "2026-10-18T09:08:05Z",
   "finding_dispositions": {
     "0": {

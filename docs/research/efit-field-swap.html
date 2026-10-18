@@ -303,8 +303,11 @@
     <code>jt60sa-5slice-s5-133-134</code> at 16) by refining the in-wall lattice.</li>
     <li>Repair the contour mesh capacity in <code>TopologyGeometry.from_cells</code> so the ITER and MAST-U
     walls mesh, which is the single change that would take this table from five qualified cases to nineteen.</li>
-    <li>Measure the two admitted saddle positions on every case where both codes commit to one, which is what
-    turns the level difference above into a diagnosis.</li>
+    <li>Compare the two admitted saddle <em>positions</em> wherever both codes commit to one. This cannot be
+    done from these records: the version-2 layout stores imas-efit's refined saddle <em>level</em> and no
+    saddle position, so the comparison needs imas-efit to record one, or a level-surface intersection taken
+    against its own field. Recorded here because the step as it stood read as though the data were already in
+    the file.</li>
     <li>Bisect the 550-cell arm's moving offset so the second tie-island export is a bisected state rather
     than the unshifted carrier.</li>
     <li>Draw the qualified cases: imas-efit's axis and nova's axis on one field, with the wall, which is the

@@ -11,6 +11,8 @@ booking's clip rule.
 import jax
 import jax.numpy as jnp
 import numpy as np
+import pytest
+from pathlib import Path
 from types import SimpleNamespace
 
 from nova.jax.config import configure_dtypes
@@ -29,6 +31,7 @@ from scripts.prototypes.xpoint_cell_owner.lobe_reference import (
     lobe_reference,
     triangle_integral,
 )
+from scripts.prototypes.xpoint_cell_owner import lobe_reference_probe as probe
 
 SQUARE = ((0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0))
 CENTRE = (0.0, 0.0)
@@ -195,3 +198,43 @@ def test_lobe_reference_constructs_its_region_without_booking_builder(monkeypatc
     np.testing.assert_allclose(
         measured, _closed_form(vertices[:3], CENTRE, UNIT), rtol=0, atol=1e-13
     )
+
+
+@pytest.mark.parametrize(
+    ("owner_present", "valid", "offset"),
+    ((False, True, 0.0), (True, False, 0.0), (True, True, 2e-12)),
+)
+def test_reference_probe_refuses_missing_invalid_or_inaccurate_rows(
+    monkeypatch, owner_present, valid, offset
+):
+    selected = np.zeros(282, dtype=bool)
+    selected[0] = owner_present
+    reading = SimpleNamespace(
+        booking_cells=selected,
+        membership=np.ones(282),
+        boundary_flux=1.0,
+        axis_flux=0.0,
+    )
+    built = SimpleNamespace(
+        reference=np.zeros((282, 3)),
+        reading=lambda _: reading,
+        geometry=object(),
+        profile=None,
+        convention=SimpleNamespace(sigma=1.0),
+    )
+    monkeypatch.setattr(probe, "build", lambda *_: built)
+    monkeypatch.setattr(probe.program, "_density_coefficients", lambda *_: None)
+    monkeypatch.setattr(
+        probe,
+        "lobe_moments",
+        lambda *_, **__: (jnp.asarray([[offset, 0.0, 0.0, 0.0]]), jnp.asarray([valid])),
+    )
+    monkeypatch.setattr(
+        probe,
+        "remaining_moments",
+        lambda *_, **__: (jnp.zeros((1, 4)), jnp.asarray([True])),
+    )
+    monkeypatch.setattr(probe, "lobe_reference", lambda *_, **__: (np.zeros(4), (), 0))
+    monkeypatch.setattr(probe, "polygon_reference", lambda *_, **__: np.zeros(4))
+    with pytest.raises(AssertionError):
+        probe.run_row(250, Path("unused-cache"), SEGMENTS)

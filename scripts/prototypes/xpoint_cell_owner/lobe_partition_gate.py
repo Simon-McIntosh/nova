@@ -68,7 +68,7 @@ def deviation(booked, reference):
     }
 
 
-def run_row(cells, cache, capacity, segments):
+def run_row(cells, cache, capacity, segments, mode="booking", top=None):
     stage = Stage()
     context = build(cells, cache)
     stage.mark("build")
@@ -81,10 +81,26 @@ def run_row(cells, cache, capacity, segments):
     span = reading.boundary_flux - reading.axis_flux
     sigma = context.convention.sigma
 
-    active = np.asarray(reading.booking_cells) & (np.asarray(reading.membership) > 0)
-    indices = np.flatnonzero(active)
-    row = {"cells": cells, "segments": segments, "owner_cells": indices.tolist()}
-    if indices.size == 0 or indices.size > capacity:
+    membership = np.asarray(reading.membership)
+    if mode == "booking":
+        active = np.asarray(reading.booking_cells) & (membership > 0)
+        indices = np.flatnonzero(active)
+    else:
+        indices = np.flatnonzero(membership > 0)
+        if top is not None and indices.size > top:
+            order = np.argsort(-membership[indices])
+            indices = indices[order[:top]]
+    row = {
+        "cells": cells,
+        "realised": len(context.reference),
+        "segments": segments,
+        "mode": mode,
+        "owner_cells": indices.tolist(),
+    }
+    if indices.size == 0:
+        row["skipped"] = "no owner cell for this carrier"
+        return row
+    if indices.size > capacity:
         row["skipped"] = "owner cell count outside capacity"
         return row
 
@@ -146,6 +162,8 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--capacity", type=int, default=16)
     parser.add_argument("--segments", type=int, default=4)
+    parser.add_argument("--mode", choices=("booking", "membership"), default="booking")
+    parser.add_argument("--top", type=int, default=None)
     args = parser.parse_args()
     assert jax.config.jax_enable_x64 is True
 
@@ -164,7 +182,14 @@ def main():
     for cells in args.sizes:
         print(f"ROW cells={cells}", flush=True)
         try:
-            row = run_row(cells, args.cache, args.capacity, args.segments)
+            row = run_row(
+                cells,
+                args.cache,
+                args.capacity,
+                args.segments,
+                mode=args.mode,
+                top=args.top,
+            )
         except Exception as error:  # noqa: BLE001
             result["errors"].append({"cells": cells, "error": repr(error)})
             persist()

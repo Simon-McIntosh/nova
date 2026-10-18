@@ -27,9 +27,10 @@ polygon enters positive beside the lobe entered negative, both built by
 vertex-list reconstruction and the local signed-fan reduction are deleted, and the truncated
 degree-five rule that set the booked lobe's floor went with them. The analytic check passes to
 1 × 10<sup>−13</sup>, the 282-cell map error lands 6.5 × 10<sup>−4</sup> below its guard, and the
-282-cell cold solve converges to 3.0 × 10<sup>−14</sup>. The three-size partition gate, the 550 and
-2,098 map rows and the 550 cold solve were still in flight when this fragment was written; the rows
-that had landed are recorded below and the rest are named as remaining.</p>
+282-cell cold solve converges to 3.0 × 10<sup>−14</sup>. The partition gate holds at 282 and 2,098 to
+1.4 × 10<sup>−13</sup> and 1.8 × 10<sup>−14</sup>; at 550 the read books no owner cell, so that row is
+the whole-cell identity with an empty lobe rather than a measured partition. The 550 and 2,098 map
+rows and the 550 cold solve are blocked on a missing exterior fixture, named below.</p>
 
 <section id="lobe-share-partition-fan">
 <h2>The fan the remainder takes</h2>
@@ -85,18 +86,41 @@ identity holding to 1 × 10<sup>−13</sup>.</p>
 <section id="lobe-share-partition-partition">
 <h2>The partition against dense references</h2>
 <table id="lobe-share-partition-partition-table">
-<thead><tr><th>carrier</th><th>lobe vs dense lobe</th><th>lobe + remainder vs dense whole cell</th></tr></thead>
+<thead><tr><th>carrier</th><th>owner cells booked</th><th>lobe vs dense lobe, max |Δ|</th><th>lobe + remainder vs dense whole cell, max |Δ|</th></tr></thead>
 <tbody>
-<tr><td>282</td><td colspan="2">in flight in gate job 1288754</td></tr>
-<tr><td>550</td><td colspan="2">in flight in gate job 1288754</td></tr>
-<tr><td>2,098</td><td colspan="2">in flight in gate job 1288754</td></tr>
+<tr id="lobe-share-partition-partition-row-282"><td>282</td><td>1 (cell 7)</td><td>1.42108547152 × 10<sup>−14</sup></td><td>1.42108547152 × 10<sup>−13</sup></td></tr>
+<tr id="lobe-share-partition-partition-row-550"><td>550</td><td>0 booked by the read; the 16 largest-membership cells sampled</td><td>0 (the lobe is empty on all 16)</td><td>1.13686837722 × 10<sup>−13</sup></td></tr>
+<tr id="lobe-share-partition-partition-row-2098"><td>2,098</td><td>1 (cell 47)</td><td>4.44089209850 × 10<sup>−16</sup></td><td>1.77635683940 × 10<sup>−14</sup></td></tr>
 </tbody>
 </table>
-<p id="lobe-share-partition-partition-finding">For every owner cell the lobe booking is compared
-with the dense lobe reference and the booked lobe plus remainder with the dense whole cell reference,
-on area, current and both first moments, to 1 × 10<sup>−12</sup>. Neither reference uses the clip
-quadrature, so a disagreement larger than roundoff is a disagreement about the region rather than
-about the rule that integrates it. The rows had not landed at the time this fragment was written.</p>
+<p id="lobe-share-partition-partition-finding">Every booked owner cell is compared with the dense
+lobe reference and with the dense whole-cell reference over its lobe plus its remainder, on area,
+current and both first moments. Neither reference uses the clip quadrature, so a disagreement larger
+than roundoff is a disagreement about the region rather than about the rule that integrates it. The
+largest absolute deviation anywhere in the table is 1.42108547152 × 10<sup>−13</sup>, on the current
+column at 282, an order of magnitude inside the 1 × 10<sup>−12</sup> contract. The per-column
+deviations at 282 are 8.674 × 10<sup>−19</sup> (area), 1.421 × 10<sup>−14</sup> (current),
+3.608 × 10<sup>−16</sup> (radial moment) and 1.332 × 10<sup>−15</sup> (vertical moment) for the lobe,
+and 1.735 × 10<sup>−18</sup>, 1.421 × 10<sup>−13</sup>, 1.832 × 10<sup>−15</sup> and
+4.510 × 10<sup>−16</sup> for the partition; at 2,098 they are 6.776 × 10<sup>−21</sup>,
+4.441 × 10<sup>−16</sup>, 3.990 × 10<sup>−17</sup> and 7.459 × 10<sup>−17</sup> for the lobe and
+1.084 × 10<sup>−18</sup>, 1.776 × 10<sup>−14</sup>, 3.001 × 10<sup>−16</sup> and
+2.327 × 10<sup>−16</sup> for the partition.</p>
+<p id="lobe-share-partition-partition-relative">The relative deviations on the vertical-moment
+<i>column</i> are large — 4.229 × 10<sup>−2</sup> at 282 and 5.958 × 10<sup>−1</sup> at 2,098 — and
+they are not a defect: the fan's origin is the cell centre, so that column's reference value nearly
+cancels and the deviation is the absolute 4.510 × 10<sup>−16</sup> divided by a near-zero reference.
+Every other relative deviation is at or below 3.25009496898 × 10<sup>−14</sup>.</p>
+<p id="lobe-share-partition-partition-550">At 550 the row is not a measurement of the lobe. The
+read books no cell there at all — <code>booking_cells</code> sums to zero over 551 cells, where it is
+2 at 282 and 2 at 2,098 — so there is no owner cell for the clause to name, and the 16
+largest-membership cells carry an empty lobe fan with zero area, zero current and zero moments. What
+the row does establish is the identity the remainder rests on: at this size the whole-cell fan
+matches the dense whole-cell reference to 1.13686837722 × 10<sup>−13</sup> (per column
+4.337 × 10<sup>−19</sup>, 5.684 × 10<sup>−14</sup>, 1.985 × 10<sup>−15</sup>,
+8.153 × 10<sup>−17</sup>), and the booked remainder is the whole cell there because the
+<code>fragment_selected</code> flag is false for every sampled cell. The lobe half of the 550
+partition is unexercised for want of a live fragment, not because it disagrees.</p>
 </section>
 
 <section id="lobe-share-partition-maps">
@@ -105,8 +129,8 @@ about the rule that integrates it. The rows had not landed at the time this frag
 <thead><tr><th>carrier</th><th>guard</th><th>half-plane delivered</th><th>half-plane floor</th><th>lobe delivered</th><th>lobe floor</th></tr></thead>
 <tbody>
 <tr><td>282</td><td>1.0866e-3</td><td>1.08005994731e-3 pass</td><td>6.18989257731e-4</td><td>1.08655590095e-3 pass</td><td>6.18989257734e-4</td></tr>
-<tr><td>550</td><td>5e-4</td><td>4.09590445975e-4 pass</td><td>1.82141864746e-4</td><td>in flight</td><td>in flight</td></tr>
-<tr><td>2,098</td><td>1e-4</td><td>2.49299259136e-4 fail</td><td>1.76641360086e-5</td><td>in flight</td><td>in flight</td></tr>
+<tr><td>550</td><td>5e-4</td><td>4.09590445975e-4 pass</td><td>1.82141864746e-4</td><td colspan="2">not measured: the exterior store holds no group for this carrier</td></tr>
+<tr><td>2,098</td><td>1e-4</td><td>2.49299259136e-4 fail</td><td>1.76641360086e-5</td><td colspan="2">not measured: the exterior store holds no group for this carrier</td></tr>
 </tbody>
 </table>
 <p id="lobe-share-partition-maps-finding">At 282 the lobe cut lands 6.5 × 10<sup>−4</sup> below the
@@ -158,13 +182,15 @@ wall, and no axes or gridlines. Terminal residual 3.002262329835039e-14, converg
 <p id="lobe-share-partition-verdict-body">Clauses 1 to 3 hold: the remainder takes its fan from the
 same builder that builds the lobe, the vertex-list reconstruction and the local signed-fan reduction
 are deleted, the reduction is the imported clip-quadrature rule, and the truncated rule that set the
-booked lobe's floor is gone with it. Of clauses 4 to 6, the 282 rows of the map measurement and the
-cold solve have landed and are recorded above. Clause 6's 550 row failed on a fixture gap — the
-exterior store holds no group for that carrier at the exact support arm — and the same null exterior
-will stop the 550 and 2,098 rows of the map measurement at the same line, so those rows are blocked
-on data rather than on the lobe booking. Clause 4's three-size partition gate was still running at
-the deadline with only its first row started, so its rows are remaining work, not measurements. No
-number above is an estimate.</p>
+booked lobe's floor is gone with it. Clause 4 holds at 282 and 2,098, to
+1.42108547152 × 10<sup>−13</sup> and 1.77635683940 × 10<sup>−14</sup> against the
+1 × 10<sup>−12</sup> contract; at 550 no cell is booked by the read, so that row is the whole-cell
+identity with an empty lobe rather than a measured partition. Of clauses 5 and 6 the 282 rows have
+landed and are recorded above. The 550 and 2,098 map rows and the 550 cold solve are blocked on a
+missing exterior fixture: the exterior store holds no group for those carriers at the exact support
+arm, so <code>_exterior</code> returns a null and the run dies at the terminal-state flux. That is
+per-carrier fixture data rather than a lobe code path, and the remedy is outside this node's write
+scope. No number above is an estimate.</p>
 </section>
 </main>
 </body>

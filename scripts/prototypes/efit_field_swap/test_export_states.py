@@ -11,9 +11,11 @@ from __future__ import annotations
 
 
 import numpy as np
+import pytest
 
 from scripts.prototypes.efit_field_swap.crosscheck import load_pairs, resolve_trace
 from scripts.prototypes.efit_field_swap.export_states import export_row
+from scripts.prototypes.efit_field_swap.export_tie_islands import bisected_offset
 from scripts.prototypes.efit_field_swap.trace_record import (
     HEADER,
     read_trace_record,
@@ -65,3 +67,31 @@ def test_written_export_is_bit_stable(tmp_path):
     write_trace_record(first, source)
     write_trace_record(second, read_trace_record(first))
     assert first.read_text() == second.read_text()
+
+
+def _receipt(adjacent, unchanged):
+    return {
+        "key": "both",
+        "bisected": [
+            {
+                "bracket": [0.1613, 0.1613],
+                "steps": 42,
+                "adjacent": adjacent,
+                "unchanged": unchanged,
+                "left": {"boundary_class": 1, "saddle_identity": 0},
+                "right": {"boundary_class": 0, "saddle_identity": 2},
+            }
+        ],
+    }
+
+
+def test_an_unbisected_offset_is_refused(tmp_path):
+    """A tie-island state is a bisected one, so an interval is not exportable."""
+    for adjacent, unchanged in ((False, False), (True, True)):
+        with pytest.raises(SystemExit):
+            bisected_offset(_receipt(adjacent, unchanged), tmp_path / "receipt.json")
+
+
+def test_a_bisected_offset_is_taken_from_the_receipt(tmp_path):
+    offset, entry = bisected_offset(_receipt(True, False), tmp_path / "receipt.json")
+    assert offset == entry["bracket"][0] == 0.1613

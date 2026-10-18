@@ -8,6 +8,13 @@ saddle identity changes. Building the carrier is done exactly as
 -- against the same read-only cache, so the machine, field and bisected offset
 are the probe's rather than a reconstruction of them.
 
+The offset is **read out of a bisection receipt** produced by
+``bisect_tie_island.py`` rather than passed on the command line, so a state
+cannot be exported at an offset nobody bisected. A receipt whose bracket is not
+adjacent binary64, or whose two ends agree, is refused: it names an interval
+rather than a state. The provenance travels with the record as a sidecar JSON
+carrying the bracket, the step count and the decision keys on either side.
+
 What is written is a plain ``BOUNDARY_LEVEL_TRACE 2`` record: a rectilinear grid
 over the machine, the moving field evaluated on it, the machine's wall as
 segments and a polygon, and nova's own decision -- axis level and position, the
@@ -15,7 +22,7 @@ admitted saddle, the boundary level and the limited-or-diverted class -- in the
 record's decision fields. So a nova tie-island state becomes something imas-efit
 can open with its own reader.
 
-Usage: export_tie_islands.py <cache> <output-dir> [requested-cells offset ...]
+Usage: export_tie_islands.py <cache> <output-dir> <receipt> <requested-cells> ...
 """
 
 # ruff: noqa: E402
@@ -23,6 +30,7 @@ from nova.jax.config import configure_dtypes
 
 configure_dtypes()
 
+import json
 import sys
 from dataclasses import replace
 from pathlib import Path
@@ -71,9 +79,9 @@ def render(field, geometry, grid=GRID):
     rgrid = np.linspace(r0, r1, grid)
     zgrid = np.linspace(z0, z1, grid)
     points = np.stack(np.meshgrid(rgrid, zgrid, indexing="ij"), axis=-1)
-    psi = np.asarray(
-        jax.vmap(field.value)(jnp.asarray(points.reshape(-1, 2)))
-    ).reshape(grid, grid)
+    psi = np.asarray(jax.vmap(field.value)(jnp.asarray(points.reshape(-1, 2)))).reshape(
+        grid, grid
+    )
     return rgrid, zgrid, psi
 
 
@@ -162,19 +170,85 @@ def centre_count(geometry):
     return geometry.centre
 
 
-def main(cache, out_dir, cells=250, offset=0.0, kind="diverted"):
+def bisected_offset(receipt, path):
+    """The bisected offset a receipt records, refusing anything but a state.
+
+    The offset comes from the receipt rather than from a command-line argument,
+    and the bracket must be adjacent binary64 and must change the decision key.
+    A receipt failing either test names an interval or a non-transition, and
+    neither is a tie-island state.
+    """
+    usable = [
+        entry
+        for entry in receipt.get("bisected", [])
+        if entry.get("adjacent") and not entry.get("unchanged")
+    ]
+    if not usable:
+        raise SystemExit(
+            f"{path} records no adjacent bisected bracket: it names an interval "
+            "or a non-transition, so there is no tie-island state to export"
+        )
+    entry = usable[0]
+    return float(entry["bracket"][0]), entry
+
+
+def decision_key(row, key):
+    """A bisection row's decision key as a tuple, whatever key was bisected on."""
+    if key == "both":
+        return (int(row["boundary_class"]), int(row["saddle_identity"]))
+    return (row[key],)
+
+
+def main(cache, out_dir, jobs):
+    """jobs: one (receipt-path, requested-cells) pair per exported state."""
     Path(out_dir).mkdir(parents=True, exist_ok=True)
-    for requested, shift in zip(cells, offset):
-        state = tie_probe.build(kind, requested, cache)
+    for receipt_path, requested in jobs:
+        receipt = json.loads(Path(receipt_path).read_text())
+        offset, entry = bisected_offset(receipt, receipt_path)
+        state = tie_probe.build(receipt["kind"], requested, cache)
         achieved = len(centre_count(state["geometry"]))
-        tag = f"{kind}-{achieved}cells"
-        export(state, float(shift), out_dir, tag)
+        if achieved < requested:
+            raise SystemExit(
+                f"carrier requested {requested} cells realised {achieved}; the "
+                "receipt is for a different carrier and its offset does not apply"
+            )
+        tag = f"{receipt['kind']}-{achieved}cells"
+        print(
+            "BISECTED offset=%r bracket=%r steps=%d key=%s from=%s"
+            % (
+                offset,
+                entry["bracket"],
+                entry["steps"],
+                receipt["key"],
+                Path(receipt_path).name,
+            ),
+            flush=True,
+        )
+        target = export(state, offset, out_dir, tag)
+        target.with_suffix(".json").write_text(
+            json.dumps(
+                {
+                    "record": target.name,
+                    "kind": receipt["kind"],
+                    "requested_cells": requested,
+                    "achieved_cells": achieved,
+                    "offset": offset,
+                    "key": receipt["key"],
+                    "bracket": entry["bracket"],
+                    "steps": entry["steps"],
+                    "adjacent": entry["adjacent"],
+                    "left_key": list(decision_key(entry["left"], receipt["key"])),
+                    "right_key": list(decision_key(entry["right"], receipt["key"])),
+                },
+                indent=2,
+            )
+            + "\n"
+        )
     return 0
 
 
 if __name__ == "__main__":
     cache, out_dir = sys.argv[1], sys.argv[2]
-    pairs = sys.argv[3:]
-    requested = [int(pairs[i]) for i in range(0, len(pairs), 2)]
-    offsets = [float(pairs[i + 1]) for i in range(0, len(pairs), 2)]
-    sys.exit(main(cache, out_dir, requested, offsets))
+    receipt_path = sys.argv[3]
+    requested = [int(value) for value in sys.argv[4:]]
+    sys.exit(main(cache, out_dir, [(receipt_path, cells) for cells in requested]))

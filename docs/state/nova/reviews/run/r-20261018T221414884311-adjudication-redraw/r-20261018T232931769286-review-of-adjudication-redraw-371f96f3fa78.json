@@ -1,0 +1,66 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "baseline_suite (850f8adcc) failure_ids are five tests of the two efit_axis_adjudication test files (four painter refusals and the fragment-commits guard) and after_suite (371f96f3f) failure_ids are empty, so no failure present at the head is absent at the base; the five base failures are the guards the change adds, reddened by running the head test file against the base modules.",
+  "call_site_count": 3,
+  "call_sites": [
+    "scripts/prototypes/efit_axis_adjudication/refresh.py:refresh (called from analyse.py:325)",
+    "scripts/prototypes/efit_axis_adjudication/plot.py:main (figure driver)",
+    "scripts/prototypes/efit_axis_adjudication/page.py:main"
+  ],
+  "completed_at": "2026-10-18T23:40:42.058Z",
+  "dispatched_at": "2026-10-18T23:29:56Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/efit_axis_adjudication/plot.py",
+      "line": "243",
+      "text": "follow-on: the grid-node saddle proxy guard at plot.py:243-250 is unreachable from the production pipeline \u2014 refresh.py:57 and analyse.py:245 write only efit['saddle_source_position'], never efit['saddle_plot_position'], so saddle_mark is None for all 26 receipt rows and neither source_proxy nor grid_proxy can be true; the refusal is correct but no production row exercises it, so a later receipt that did supply a proxy position would be the first real test of the clause."
+    },
+    {
+      "file": "scripts/prototypes/efit_axis_adjudication/page.py",
+      "line": "132",
+      "text": "follow-on: figure_links names a local list case_key (page.py:132), the same identifier as the case_key.py normaliser its sibling drivers import; the two never collide at runtime because page.py does not import the module, but reusing the name for a list of HTML list items obscures the single case identity the module was added to establish."
+    },
+    {
+      "file": "manifest.md",
+      "line": "12",
+      "text": "follow-on: the manifest's changed_paths lists the nine written figures but omits docs/figures/converged-forward-solve/efit-axis-adjudication/efit-axis-jt60sa.svg, which the diff deletes across 850f8adcc..371f96f3f; a reader comparing the record against the diff finds a path in the diff absent from the manifest, the deletion surviving only in the evidence document."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read commit by commit, 20 files against 850f8adcc: plot.py masks the field to the vessel and refuses out-of-vessel census and a grid-node saddle proxy, refresh.py joins the census to the fixed adapter receipt, case_key.py holds one case normaliser, page.py regenerates the page and fragment, nine SVGs replace ten (efit-axis-jt60sa.svg deleted), plus the research page and fragment; no product source under nova/ is touched.",
+    "done_when": "done_when (3) asks for a painter test refusing an out-of-vessel census point or a grid-node saddle proxy with the unmasked census as negative control; test_escape_overlay.py:55 and :70 are exactly those two refusal tests, the after arm runs them green (after-suite-revised.log SUITE_SUMMARY completed=true failure_count=0) and the base arm reddens both (baseline-suite-revised.log failure_count=5), and negative-control-revised.log disables only the geometric clause (EXIT=1, one failed and one passed); (2) is supported by receipt-audit-revised.log binding the page's counts to refresh-results-owner.json and by zero 'jt60sa' tokens in the page; (1)'s 'both codes' axis and admitted saddles' is only half met because plot.py:286 draws imas-efit's axis and no imas-efit saddle.",
+    "goal": "the node goal is to redraw the axis-adjudication figures the lead rejected and correct their page; commits 9c3672205..371f96f3f mask the sampled field to the vessel (scripts/prototypes/efit_axis_adjudication/plot.py:230-241), drop the source grid-node saddle cross and the imas-efit saddle mark, delete docs/figures/converged-forward-solve/efit-axis-adjudication/efit-axis-jt60sa.svg, and regenerate docs/research/efit-axis-adjudication.html from the polarity-aware receipt (page.py:166 build_page).",
+    "manifest": "read the reviewed manifest.md; status complete, commits 9c3672205..371f96f3f listed, baseline_suite failure_count=5 against after_suite failure_count=0, negative_control_log named as a bare path, and blockers recording the absent imas-efit refined saddle coordinate.",
+    "write_paths": "read the dispatch fence at prompt.txt:88-94 (six granted paths); git diff --name-only 850f8adcc 371f96f3f lists only paths inside them, with nothing under nova/ or tests/."
+  },
+  "justifications": {
+    "durability": "the four added refusal tests are verified by reinstating the regression: the base arm runs the head test file against the base modules and both census tests redden there (baseline-suite-revised.log), and negative-control-revised.log disables only the geometric membership clause at plot.py:239 and shows test_census_geometry_is_checked_even_when_flag_is_checked redden while the independent flag test stays green.",
+    "evidence": "the gate is the done_when: after-suite-revised.log runs both efit_axis_adjudication test files and reports completed=true failure_count=0 while baseline-suite-revised.log reports failure_count=5 over the same files, receipt-audit-revised.log binds the page's counts to the receipt fields (RECEIPT_SUMMARY rows=26 compared=18 stress=8 in_vessel=184 figures=9), and render-inspection.log carries nine INSPECTED lines matching the manifest's byte figures.",
+    "fit": "the change follows the module idiom (private helpers beside _wall_loops_by_role at scripts/prototypes/efit_axis_adjudication/plot.py:133, matplotlib Agg, _assert_no_clipping retained) and introduces no plan, sprint or version label in any source name or comment.",
+    "goal_fidelity": "the redraw and page regeneration are met but done_when (1)'s clause 'both codes' axis and admitted saddles' is only half satisfied because scripts/prototypes/efit_axis_adjudication/plot.py:286 draws imas-efit's axis and passes x_points=None, the trace carrying a refined saddle level but no refined coordinate, which the manifest records under blockers.",
+    "reuse": "every added definition consumes an owner: scripts/prototypes/efit_axis_adjudication/plot.py:29 imports inside_wall_units (nova/media/sources/frame.py:56) rather than the private _inside_vessel the base carried, plot.py:110 wraps vessel_unit and material_unit (nova/equilibrium/wall_mask.py:223,228), plot.py:150 imports domain_rings (scripts/prototypes/efit_field_swap/crosscheck.py:795) for the vessel/obstacle split, and case_key.py:4 holds one case_key used by analyse.py:87, plot.py:474 and refresh.py:25.",
+    "scope_discipline": "every path in git diff --name-only 850f8adcc 371f96f3f lies inside the six paths enumerated at prompt.txt:88-94, and the manifest's changed_paths omits only the deleted efit-axis-jt60sa.svg rather than adding anything out of scope."
+  },
+  "node": "review-of-adjudication-redraw-371f96f3fa78",
+  "node:reviewed": "adjudication-redraw",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to redraw the rejected axis-adjudication figures and correct their page; commits 9c3672205..371f96f3f mask the sampled field to the vessel (scripts/prototypes/efit_axis_adjudication/plot.py:230-241), drop the grid-node saddle cross and the imas-efit saddle mark, delete efit-axis-jt60sa.svg and regenerate docs/research/efit-axis-adjudication.html from the polarity-aware receipt (page.py:166).\nVERDICT done_when: done_when (3) names painter tests refusing an out-of-vessel census point and a grid-node saddle proxy with the unmasked census as negative control; test_escape_overlay.py:55 and :70 are those tests, green in the after arm (after-suite-revised.log failure_count=0) and red in the base arm (baseline-suite-revised.log failure_count=5), and negative-control-revised.log disables only the geometric clause (EXIT=1, one failed, one passed); (2) is bound by receipt-audit-revised.log and zero jt60sa tokens in the page; (1)'s 'both codes' axis and admitted saddles' is half met because plot.py:286 draws imas-efit's axis and no imas-efit saddle.\nVERDICT write_paths: read the dispatch fence at prompt.txt:88-94 (six paths); git diff --name-only 850f8adcc 371f96f3f lists only paths inside them.\nVERDICT manifest: read; status complete, commits 9c3672205..371f96f3f, baseline_suite failure_count=5, after_suite failure_count=0, negative_control_log named as a bare path, blockers recording the absent refined saddle coordinate.\nVERDICT diff: read commit by commit against 850f8adcc; 20 files, all inside the declared scope, no nova/ product source touched.\nCALL_SITES: scripts/prototypes/efit_axis_adjudication/refresh.py:refresh (called from analyse.py:325), scripts/prototypes/efit_axis_adjudication/plot.py:main (figure driver), scripts/prototypes/efit_axis_adjudication/page.py:main\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: the redraw and page regeneration are met but done_when (1)'s 'both codes' axis and admitted saddles are only half satisfied, since scripts/prototypes/efit_axis_adjudication/plot.py:286 passes x_points=None and the manifest records the absent refined saddle coordinate under blockers.\nSCORE evidence: 18\nJUSTIFICATION evidence: after-suite-revised.log reports completed=true failure_count=0 over both test files while baseline-suite-revised.log reports failure_count=5, and receipt-audit-revised.log binds the page's counts to the receipt fields.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff --name-only 850f8adcc 371f96f3f lies inside the six granted paths at prompt.txt:88-94, with nothing under nova/ or tests/.\nSCORE durability: 18\nJUSTIFICATION durability: the base arm reddens both census refusal tests of scripts/prototypes/efit_axis_adjudication/test_escape_overlay.py:55 and :70, and negative-control-revised.log disables only the geometric clause at plot.py:239 to redden the geometry test while the flag test stays green.\nSCORE fit: 18\nJUSTIFICATION fit: the change keeps the module idiom (private helpers beside _wall_loops_by_role at scripts/prototypes/efit_axis_adjudication/plot.py:133, Agg backend, _assert_no_clipping retained) and introduces no plan or version label.\nSCORE reuse: 18\nJUSTIFICATION reuse: scripts/prototypes/efit_axis_adjudication/plot.py:29 imports inside_wall_units (nova/media/sources/frame.py:56) and plot.py:150 imports domain_rings (scripts/prototypes/efit_field_swap/crosscheck.py:795) rather than copying either, and case_key.py:4 consolidates the case normaliser.\nFINDING scripts/prototypes/efit_axis_adjudication/plot.py:243 follow-on: the grid-node saddle proxy guard is unreachable from the production pipeline because no code writes efit['saddle_plot_position'], so no receipt row exercises the refusal.\nFINDING scripts/prototypes/efit_axis_adjudication/page.py:132 follow-on: a local list is named case_key, the same identifier as the case_key.py normaliser the sibling drivers import, obscuring the one case identity that module establishes.\nFINDING manifest.md:12 follow-on: changed_paths omits the deleted docs/figures/converged-forward-solve/efit-axis-adjudication/efit-axis-jt60sa.svg that the diff carries.",
+  "review_run_id": "r-20261018T232931769286-review-of-adjudication-redraw-371f96f3fa78",
+  "reviewed_base_sha": "850f8adcc4e4399d8c30c99cd5fb8ea1782cf792",
+  "reviewed_head_sha": "371f96f3fa7808a9898cb56c1b466bf86228fa72",
+  "reviewed_run_id": "r-20261018T221414884311-adjudication-redraw",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T23:41:23.068666+00:00"
+}

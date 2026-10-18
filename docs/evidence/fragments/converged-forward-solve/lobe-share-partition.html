@@ -124,7 +124,7 @@ row's top-ranked cell is not a driver: patching it back to its reference moments
 <thead><tr><th>carrier</th><th>corrections</th><th>terminal residual</th><th>converged</th></tr></thead>
 <tbody>
 <tr><td>282</td><td>5</td><td>3.00226232984e-14</td><td>yes</td></tr>
-<tr><td>550</td><td colspan="3">in flight in titan job 1288747</td></tr>
+<tr><td>550</td><td colspan="3">failed before the first correction: <code>_exterior</code> returns <code>None</code> for this carrier</td></tr>
 </tbody>
 </table>
 <p id="lobe-share-partition-solves-finding">The 282 residual history is 1.62494366306 ×
@@ -133,6 +133,17 @@ row's top-ranked cell is not a driver: patching it back to its reference moments
 1.6 s each once the map and the correction program are compiled (16.5 s and 74.3 s), with no line
 search damping at any correction. The booked partition is a root the Newton correction accepts at
 this size.</p>
+<p id="lobe-share-partition-solves-blocker">The 550 row is not a stall and not a convergence failure.
+The job reached <code>JET_READY nodes=2132 cells=551</code> after 346 s of carrier build, then died
+at the terminal-state flux with <code>TypeError: unsupported operand type(s) for +: 'NoneType' and
+'jaxlib._jax.ArrayImpl'</code>, because <code>_exterior(context.cache, context.carrier_key)</code>
+returned <code>(None, None)</code> for this carrier: the exterior store holds no group matching this
+carrier's key at the exact support arm, and the module returns a null exterior rather than raising.
+The same call succeeds for the 282 carrier in the same run, so the gap is per-carrier fixture data,
+not a code path that the lobe component reaches. The remedy is an exterior pre-warm for the 550 and
+2,098 carriers, which is outside this node's write scope
+(<code>scripts/prototypes/solve_options/point_bias.py</code> and the fixture cache), and the same
+null exterior will stop the 550 and 2,098 rows of the map measurement at the identical line.</p>
 <figure id="lobe-share-partition-panel-282-figure">
 <img src="/nova/figures/converged-forward-solve/lobe-share-partition/terminal-282.svg"
      alt="Solved and analytic poloidal flux contours at the 282-cell terminal state of the lobe-owned cold solve">
@@ -148,9 +159,12 @@ wall, and no axes or gridlines. Terminal residual 3.002262329835039e-14, converg
 same builder that builds the lobe, the vertex-list reconstruction and the local signed-fan reduction
 are deleted, the reduction is the imported clip-quadrature rule, and the truncated rule that set the
 booked lobe's floor is gone with it. Of clauses 4 to 6, the 282 rows of the map measurement and the
-cold solve have landed and are recorded above; the three-size partition gate, the 550 and 2,098 map
-rows and the 550 cold solve were still running at the deadline and are remaining work, not
-measurements. No number above is an estimate.</p>
+cold solve have landed and are recorded above. Clause 6's 550 row failed on a fixture gap — the
+exterior store holds no group for that carrier at the exact support arm — and the same null exterior
+will stop the 550 and 2,098 rows of the map measurement at the same line, so those rows are blocked
+on data rather than on the lobe booking. Clause 4's three-size partition gate was still running at
+the deadline with only its first row started, so its rows are remaining work, not measurements. No
+number above is an estimate.</p>
 </section>
 </main>
 </body>

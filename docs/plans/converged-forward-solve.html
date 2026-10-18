@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="382">
+<meta name="plan-version" content="383">
 <meta name="plan-modified" content="2026-10-18">
 </head>
 <body>
@@ -628,6 +628,21 @@
 <article class="r-fu" data-id="f-cfs-tie-state-current-gap" data-status="open" data-written-by="s21-nova coordinator" data-written-at="2026-10-18" data-recommends-skill="/reckon-build converged-forward-solve §3" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Explain the 13% gap between booked and directly integrated current at the 282 tie states</h4>
     <div class="r-fu-body"><p>At the 282-cell tie pair, the seed-census node measured the booked plasma current at 129.234157 A, against 146.015393 A from an independent cut-cell quadrature of the physical field. That is a 13% gap, and its read test tolerates 15%, so the check passes while the two disagree by more than a tenth.</p><p>The node's tie state predates the normal-form lobe owner merged at d0e1d047e. Re-measure with that owner first. Then decide whether the remaining gap is a booking defect or a different region definition (booked support against the direct integration's region), and tighten the assertion to the agreement actually achieved. Never widen it to absorb a gap.</p></div>
+    <pre class="r-fu-prompt">/reckon-build converged-forward-solve §3</pre>
+    </article>
+<article class="r-fu" data-id="f-cfs-axis-ranking" data-status="open" data-written-by="s21-nova coordinator" data-written-at="2026-10-18" data-recommends-skill="/reckon-build converged-forward-solve §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Make nova&#x27;s read take the strongest polarity extremum as the magnetic axis</h4>
+    <div class="r-fu-body"><p>The efit-axis-adjudication census (docs/research/efit-axis-adjudication.html) shows nova's topology read choosing the wrong maximum as the axis. On jt60sa-5slice-s5-301-302:A it took a shallow maximum at (3.2258, 1.1058), psi 0.3117, Hessian eigenvalues (-18.55, -0.45), 0.026 m from a saddle at psi 0.311646. That is a near-fold island, while the strong maximum at psi 1.5768 sits at (3.3707, -0.2605). On s1-15-16:A it put the axis against the wall at the top of the vessel.</p><p>imas-efit's lead has ruled that findax takes the strongest polarity extremum inside the typed vessel domain, excluding coil interiors. nova's rule should rank axis candidates by polarity-signed psi and persistence, not accept a low-persistence island. The rule is nova's own, so the two codes still cross-check rather than converge. Test it on the adjudication records where a reconstruction is trusted, and on the TCV LIUQE slices.</p></div>
+    <pre class="r-fu-prompt">/reckon-build converged-forward-solve §2</pre>
+    </article>
+<article class="r-fu" data-id="f-cfs-certified-carrier-export" data-status="open" data-written-by="s21-nova coordinator" data-written-at="2026-10-18" data-recommends-skill="/reckon-build converged-forward-solve §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Export nova&#x27;s own certified analytic carriers to imas-efit</h4>
+    <div class="r-fu-body"><p>The field-swap brief asked for one limited and one diverted nova certified carrier state, exported in imas-efit's version-2 trace format. The delivered files records/boundary_slice_1_iter_4-nova-limited.txt and records/boundary_slice_5_iter_301-nova-diverted.txt are instead imas-efit's own record fields with nova's read substituted. The diverted one carries nova's defective shallow-maximum axis, so imas-efit's escape level labels it limited and the comparison measures nova's axis rather than either rule.</p><p>Export nova's analytic certified carriers (limited and diverted, at the certificate machines) as version-2 records on a 65x65 grid covering the wall's bounding box, with axis, polarity and per-loop wall. Write a README stating nova's decision for each, and re-read them through the codec. That export is the direction of the swap that tests imas-efit's rule on fields nova generated.</p></div>
+    <pre class="r-fu-prompt">/reckon-build converged-forward-solve §2</pre>
+    </article>
+<article class="r-fu" data-id="f-cfs-device-independent-cache-identity" data-status="open" data-written-by="s21-nova coordinator" data-written-at="2026-10-18" data-recommends-skill="/reckon-build converged-forward-solve §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Key the certificate fixture store on inputs, not on a device-computed wall array</h4>
+    <div class="r-fu-body"><p>The fixture-owner warm gate (job 1288792) found that the store digest hashes the wall array the fixture sources compute. That array differs marginally by device, so a carrier published from titan misses on CPU and on the H200, and each device rebuilds about 70 minutes of carriers at 5,000 cells.</p><p>Key the carrier identity on the inputs that define it: machine, cell count, support arm and source parameters. Do not key it on device-rounded computed arrays. A digest computed on two devices must agree, and the warm load must then hit across devices.</p><p>Whether device-specific entries already in the shared root stay is an operator decision recorded with this item.</p></div>
     <pre class="r-fu-prompt">/reckon-build converged-forward-solve §3</pre>
     </article>
 </section>

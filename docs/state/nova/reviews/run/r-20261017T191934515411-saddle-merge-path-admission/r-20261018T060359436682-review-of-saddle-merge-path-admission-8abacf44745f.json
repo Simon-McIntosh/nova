@@ -31,6 +31,11 @@
       "kind": "exempted",
       "reason": "the two commits between the gate revision 9f97380ba and head 8abacf447 touch only the probe script, so the gated code is identical; the review confirms a nil delta",
       "recorded_at": "2026-10-18T06:17:44.073898+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "map fidelity was measured base beside head and is bit-identical at every row; the CPU test files pass at head, and the census-certified-convergence node records a paired baseline for fixed_points tests",
+      "recorded_at": "2026-10-18T06:17:51.165759+00:00"
     }
   },
   "findings": [

@@ -11,6 +11,13 @@
   ],
   "completed_at": "2026-10-18T15:02:35Z",
   "dispatched_at": "2026-10-18T14:54:19Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "tcv-liuqe-known-answer",
+      "recorded_at": "2026-10-18T15:04:28.675808+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/tcv_liuqe_known_answer/measure.py",

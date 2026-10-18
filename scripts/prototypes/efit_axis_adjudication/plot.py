@@ -19,9 +19,9 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
-from shapely.geometry import Point, Polygon
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+from efit_field_swap.crosscheck import domain_rings
 from efit_field_swap.trace_record import read_trace_record
 
 from nova.media.ink import DEFAULT_INK
@@ -143,41 +143,25 @@ def _marked_saddle(ax, position, *, color, marker):
     draw_nulls(ax, x_points=np.asarray([position]), style=style)
 
 
-def _wall_loops_by_role(path, axis_r, axis_z):
+def _wall_loops_by_role(path):
     """Split the record's indexed wall loops into its vessel and its obstacles.
 
     The trace stores the wall as consecutive segments plus a one-based inclusive
     index per loop. Building each loop from that index, rather than drawing the
     whole segment array as one polyline, is what stops a false chord being drawn
     between the end of one loop and the start of the next on records that carry
-    more than one loop. The loop containing the stored axis is the vessel and
-    the loops it covers are its interior obstacles; a record with one loop is a
-    single vessel.
+    more than one loop. The vessel/obstacle split is the field-swap crosscheck's
+    own domain split, imported rather than copied, so a panel and the decision
+    it illustrates read one domain. That owner refuses an axis contained by more
+    than one loop, and the refusal propagates here: a panel is not drawn on a
+    domain whose vessel is undetermined.
     """
-    rings = read_trace_record(path).wall_rings
-    if len(rings) == 1:
-        return [(rings[0], "vessel")]
-    axis = Point(axis_r, axis_z)
-    polygons = []
-    for ring in rings:
-        polygon = Polygon(ring)
-        polygons.append(polygon if polygon.is_valid else polygon.buffer(0))
-    owners = [index for index, polygon in enumerate(polygons) if polygon.contains(axis)]
-    if len(owners) != 1:
-        return [(ring, "vessel") for ring in rings]
-    owner = owners[0]
-    outer = polygons[owner]
-    roles = []
-    for index, ring in enumerate(rings):
-        if index == owner:
-            roles.append((ring, "vessel"))
-        elif outer.covers(polygons[index]) and polygons[index].area > 0:
-            roles.append((ring, "obstacle"))
-    return roles
+    vessel, obstacles = domain_rings(read_trace_record(path))
+    return [(vessel, "vessel"), *((ring, "obstacle") for ring in obstacles)]
 
 
-def _draw_wall_loops(ax, path, axis_r, axis_z):
-    for ring, role in _wall_loops_by_role(path, axis_r, axis_z):
+def _draw_wall_loops(ax, path):
+    for ring, role in _wall_loops_by_role(path):
         draw_wall(
             ax,
             radius=ring[:, 0],
@@ -211,7 +195,7 @@ def draw_panel(ax, row):
     levels = row["contour_levels"]
     draw_flux_contours(ax, rs, zs, psi, levels, color="#c9c9c9", linewidth=0.8)
 
-    _draw_wall_loops(ax, row["path"], record.axis_r, record.axis_z)
+    _draw_wall_loops(ax, row["path"])
 
     efit = row["efit"]
     a = row["adapter_a"]

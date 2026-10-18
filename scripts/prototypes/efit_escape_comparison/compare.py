@@ -126,6 +126,42 @@ def build_rows(accuracy, endpoints, nova):
     return rows
 
 
+def nova_contact(nova_label, nova_boundary, n, nova_wall):
+    """The contact nova's read admitted, at the level that read decided.
+
+    A limited decision admits a wall contact: the boundary level nova published
+    is realised on the wall at the point its read admitted, so that point is
+    reported at nova's own boundary level. The wall extremum over the whole
+    vessel is a different quantity -- on a record whose strongest wall maximum
+    lies on a lobe the axis-connected component never reaches it sits above the
+    admitted level, as MAST-U's four limited sides do -- so it is never
+    reported as the contact. A diverted decision admits an interior saddle at
+    the level the read published for it.
+    """
+    if nova_label == "limited":
+        contact = {
+            "kind": "wall",
+            "level": nova_boundary,
+            "position": None,
+            "source": "wall contact at nova's boundary level",
+        }
+        if n.get("nova_saddle_r") is not None and n.get("nova_saddle_z") is not None:
+            contact["position"] = [n["nova_saddle_r"], n["nova_saddle_z"]]
+        if nova_boundary is None or not math.isfinite(nova_boundary):
+            return None
+        return contact
+    if nova_label == "diverted":
+        if n.get("nova_saddle_psi") is None or not math.isfinite(n["nova_saddle_psi"]):
+            return None
+        return {
+            "kind": "saddle",
+            "level": n["nova_saddle_psi"],
+            "position": [n["nova_saddle_r"], n["nova_saddle_z"]],
+            "source": "interior saddle at nova's published saddle level",
+        }
+    return None
+
+
 def join_side(pair, side, esc, endpoints, n):
     axis, axis_source = escape_axis(pair, side, endpoints)
     nova_axis = None
@@ -146,26 +182,7 @@ def join_side(pair, side, esc, endpoints, n):
         nova_span = n["nova_span"]
         efit_span = n["efit_span"]
         nova_wall = n["nova_wall_level"]
-        # The admitted contact is the one the label names: a limited decision
-        # admits a wall contact, a diverted decision an interior saddle. The
-        # other candidate is kept only as a fallback, so a limited table row
-        # never calls a finite saddle its boundary contact.
-        saddle_contact = None
-        if n.get("nova_saddle_psi") is not None and math.isfinite(n["nova_saddle_psi"]):
-            saddle_contact = {
-                "kind": "saddle",
-                "level": n["nova_saddle_psi"],
-                "position": [n["nova_saddle_r"], n["nova_saddle_z"]],
-            }
-        wall_contact = (
-            {"kind": "wall", "level": nova_wall, "position": None}
-            if nova_wall is not None and math.isfinite(nova_wall)
-            else None
-        )
-        if nova_label == "limited":
-            contact = wall_contact or saddle_contact
-        else:
-            contact = saddle_contact or wall_contact
+        contact = nova_contact(nova_label, nova_boundary, n, nova_wall)
 
     gap = None
     rel = None
@@ -195,7 +212,10 @@ def join_side(pair, side, esc, endpoints, n):
         "nova_boundary": nova_boundary,
         "nova_contact": contact,
         "nova_axis": nova_axis,
-        "nova_wall_contact": nova_wall,
+        "nova_wall_extremum": nova_wall,
+        "nova_admitted_point": None
+        if n is None or n.get("nova_saddle_r") is None
+        else [n["nova_saddle_r"], n["nova_saddle_z"]],
         "gap_abs": gap,
         "gap_rel": rel,
         "efit_span": efit_span,
@@ -283,6 +303,11 @@ def side_table(rows):
         elif contact["kind"] == "saddle":
             contact_text = (
                 f"saddle &psi; {fmt(contact['level'])} at "
+                f"({fmt(contact['position'][0])}, {fmt(contact['position'][1])})"
+            )
+        elif contact["position"] is not None:
+            contact_text = (
+                f"wall contact &psi; {fmt(contact['level'])} at "
                 f"({fmt(contact['position'][0])}, {fmt(contact['position'][1])})"
             )
         else:
@@ -386,8 +411,12 @@ when the bottleneck is on the wall and DIVERTED (2) at an interior saddle. The
 first three columns of each row are the escape label, the refined escape level
 and the refined bottleneck (R, Z). Nova's columns are its label, its boundary
 level (the same maximin read by its own topology rule) and the contact it admits
-&mdash; an interior saddle with position, or a wall contact with no recorded
-position. The gap is nova's boundary minus the escape level, absolute and divided
+&mdash; an interior saddle with position, or a wall contact at nova's own
+boundary level with the position its read admitted. The strongest wall maximum
+over the whole vessel is not the contact: on the four MAST-U limited sides it
+sits on a lobe the axis-connected component never reaches and rises above the
+admitted level, so a limited row reports the admitted level, not that maximum.
+The gap is nova's boundary minus the escape level, absolute and divided
 by imas-efit's axis-to-boundary span. The escape axis column names the axis the
 escape walk started from; a flag marks the one side that uses the tracked maximum
 rather than the recorded axis.</p>

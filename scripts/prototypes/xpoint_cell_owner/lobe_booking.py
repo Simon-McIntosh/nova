@@ -7,33 +7,23 @@ normal form hold the boundary on the separatrix across a whole cell. The rings
 arrive as a signed fan, so opposing edges cancel and no polygon union is needed.
 
 Area and moments come from the same fan, so the read's membership and the booked
-current share one integral at every carrier size. The rule is a degree-five
-triangle rule on the fan's triangles, so the fitted density quadratic and the
-displacement moments enter exactly and the profile representation is limited
-only by the profile itself.
+current share one integral at every carrier size. The quadrature and the
+triangle reduction are the clip-quadrature owner's own
+(``clip_quadrature._quadrature_from_arrays`` with ``signed=True``), so the rule
+that books an owner cell here is the rule that books one there, and a signed row
+lets a region be removed from another without a polygon union.
 
 The remainder of an owner cell, the cell with the lobe removed, is the same
-integral: the cell's own polygon fan enters positive and the lobe fan enters
-negative, and one call to the same rule evaluates both on the same points.
+integral over the same builder: the cell polygon enters as the star fan
+``current._normal_rings`` emits for a fully selected cell, the lobe fan enters
+negative, and one call to the owner's rule evaluates both.
 """
 
 import jax
 import jax.numpy as jnp
 
 from nova.equilibrium import current
-
-# Degree-five rule on the reference triangle; the weights sum to one.
-_DUNAVANT = jnp.asarray(
-    (
-        (1 / 3, 1 / 3, 0.225),
-        (0.0597158717, 0.4701420641, 0.1323941527),
-        (0.4701420641, 0.0597158717, 0.1323941527),
-        (0.4701420641, 0.4701420641, 0.1323941527),
-        (0.7974269853, 0.1012865073, 0.1259391805),
-        (0.1012865073, 0.7974269853, 0.1259391805),
-        (0.1012865073, 0.1012865073, 0.1259391805),
-    )
-)
+from nova.equilibrium.clip_quadrature import _quadrature_from_arrays
 
 
 def _quadratic(coefficients, x, y):
@@ -47,35 +37,26 @@ def _quadratic(coefficients, x, y):
     )
 
 
-def _fan_moments(rings, sizes, signs, origin, density_at):
-    """One degree-five rule over every triangle of a signed fan.
+def _ring_moments(rings, sizes, signs, origin, density_at):
+    """Area, current and both first moments of a signed ring fan.
 
-    ``rings`` carries one row per (fragment, edge) interval, each row a ring of
-    points about ``origin``; a row beyond its own size is masked out, and
-    ``signs`` lets a fan enter negatively so a region can be removed from
-    another without a polygon union.
+    The triangles and their quadrature are the owner's: one ring per row, the
+    row's leading vertex as the fan apex, a row with fewer than three live
+    vertices contributing nothing. ``signs`` lets a fan enter negatively, and
+    the density is evaluated only at points the owner already emitted, so no
+    quadrature is restated here.
     """
-    weights = _DUNAVANT[:, 2]
-    fractions = _DUNAVANT[:, :2]
-    slot = jnp.arange(rings.shape[1])
-    following = jnp.where(slot[None] + 1 < sizes[:, None], slot[None] + 1, 0)
-    end = jnp.take_along_axis(rings, following[..., None], axis=1)
-    first = rings - origin
-    second = end - origin
-    area = 0.5 * (first[..., 0] * second[..., 1] - first[..., 1] * second[..., 0])
-    live = (slot[None] < sizes[:, None]).astype(area.dtype)
-    area = area * live
-    points = (
-        origin
-        + fractions[:, 0, None] * first[..., None, :]
-        + fractions[:, 1, None] * second[..., None, :]
+    counts = jnp.asarray(sizes)
+    selection = jnp.ones(rings.shape[0], dtype=bool)
+    points, weights = _quadrature_from_arrays(
+        rings, counts, rings[:, 0, :], selection, signed=True
     )
-    weight = area[..., None] * signs[:, None, None] * weights[None, :]
-    weighted = weight * density_at(points)
+    weights = weights * signs[:, None]
+    weighted = weights * density_at(points)
     displacement = points - origin
     return jnp.stack(
         (
-            jnp.sum(weight * jnp.ones_like(weighted)),
+            jnp.sum(weights),
             jnp.sum(weighted),
             jnp.sum(weighted * displacement[..., 0]),
             jnp.sum(weighted * displacement[..., 1]),
@@ -103,26 +84,36 @@ def _density_of(geometry, reading, profile, index, density, span, sigma, density
     return density_at
 
 
-def _cell_rings(geometry, index, segments):
-    """The cell's own polygon as a centre fan, one row per subdivided edge.
+def _whole_cell_rings(geometry, reading, index, segments):
+    """The owner cell's own polygon as the star fan the ring builder emits.
 
-    The vertex count is read as a traced value and turned into a per-row size
-    rather than a slice, so the fan builds under ``vmap`` where no element of
-    the index array is concrete.
+    Every fragment slot is selected and one identity interval is placed on the
+    first strip of every edge, so ``current._normal_rings`` emits the cell's
+    straight-edge star fan. The separatrix-arc rows follow the straight rows in
+    that return value and are not part of the cell polygon, so they are dropped
+    by the static straight-row count. Both fans therefore come from the same
+    builder the lobe uses, and no vertex list is walked here.
     """
-    count = geometry.vertex_count[index]
-    centre = geometry.centre[index]
-    vertices = geometry.vertices[index]
-    following = jnp.concatenate((vertices[1:], vertices[:1]), axis=0)
-    fractions = jnp.linspace(0.0, 1.0, segments + 1)
-    edge = (
-        vertices[:, None, :]
-        + fractions[None, :, None] * (following - vertices)[:, None, :]
+    interval = reading.edge_interval[index]
+    identity = jnp.zeros_like(interval)
+    identity = identity.at[..., 0, 0].set(0.0)
+    identity = identity.at[..., 0, 1].set(1.0)
+    selected = jnp.ones(reading.fragment_selected.shape[1], dtype=bool)
+    rings, sizes = current._normal_rings(
+        geometry.vertices[index],
+        geometry.vertex_count[index],
+        geometry.centre[index],
+        reading.saddle_form,
+        selected,
+        identity,
+        segments,
     )
-    origin = jnp.broadcast_to(centre, (vertices.shape[0], 1, 2))
-    rings = jnp.concatenate((origin, edge), axis=1)
-    live = jnp.arange(vertices.shape[0]) < count
-    return rings, jnp.where(live, segments + 2, 0)
+    straight = (
+        reading.fragment_selected.shape[1]
+        * geometry.vertices.shape[1]
+        * interval.shape[-2]
+    )
+    return rings[:straight], sizes[:straight]
 
 
 def lobe_moments(
@@ -157,7 +148,7 @@ def lobe_moments(
         density_at = _density_of(
             geometry, reading, profile, index, density, span, sigma, density_mode
         )
-        return _fan_moments(
+        return _ring_moments(
             rings, sizes, jnp.ones(sizes.shape[0], rings.dtype), origin, density_at
         )
 
@@ -187,7 +178,7 @@ def remaining_moments(
 
     def one(index):
         origin = geometry.centre[index]
-        cell_rings, cell_sizes = _cell_rings(geometry, index, segments)
+        cell_rings, cell_sizes = _whole_cell_rings(geometry, reading, index, segments)
         lobe_rings, lobe_sizes = current._normal_rings(
             geometry.vertices[index],
             geometry.vertex_count[index],
@@ -197,19 +188,6 @@ def remaining_moments(
             reading.edge_interval[index],
             segments,
         )
-        width = max(cell_rings.shape[1], lobe_rings.shape[1])
-        if lobe_rings.shape[1] < width:
-            padding = jnp.zeros(
-                (lobe_rings.shape[0], width - lobe_rings.shape[1], 2),
-                lobe_rings.dtype,
-            )
-            lobe_rings = jnp.concatenate((lobe_rings, padding), axis=1)
-        if cell_rings.shape[1] < width:
-            padding = jnp.zeros(
-                (cell_rings.shape[0], width - cell_rings.shape[1], 2),
-                cell_rings.dtype,
-            )
-            cell_rings = jnp.concatenate((cell_rings, padding), axis=1)
         rings = jnp.concatenate((cell_rings, lobe_rings), axis=0)
         sizes = jnp.concatenate((cell_sizes, lobe_sizes), axis=0)
         signs = jnp.concatenate(
@@ -221,7 +199,7 @@ def remaining_moments(
         density_at = _density_of(
             geometry, reading, profile, index, density, span, sigma, density_mode
         )
-        return _fan_moments(rings, sizes, signs, origin, density_at)
+        return _ring_moments(rings, sizes, signs, origin, density_at)
 
     integrals = jax.vmap(one)(indices)
     valid = jnp.all(jnp.isfinite(integrals), axis=-1)

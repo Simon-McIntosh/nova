@@ -96,5 +96,13 @@ diverted and limited map-fidelity comparison at 282 and 550, and a test that dri
 at the tie states with a negative control. The probes that located the departure are committed beside
 the repair, so the measurement re-runs from the record.</p>
 </section>
+
+  <section id=""""seed-census-departure-round-two"""">
+    <h2>Control reinstated, and the departures measured</h2>
+    <p id="seed-census-departure-control-live">The control now reinstates the dropping step from the live census source rather than reading an earlier trace: it substitutes the exact-zero comparison, bisects the adjacent pair at which that step loses a root, and runs both arms there. It exits nonzero while the reinstated step reproduces the loss, bisecting to 0.17323108126295622 and 0.17323108126295625 and reading 3 roots / 2 saddles against 2 / 1 there while the repaired arm reads 3 / 2 on both.</p>
+    <p id="seed-census-departure-windows">Both windows were then run base beside head under one fixed prior. At 282 over 0.16 to 0.18 the arms agree state for state: 2 roots at 0.16, 3 from 0.161 to 0.173, 1 from 0.1735. At 550 over 0.10 to 0.14 they agree again: 2 through 0.113, 3 from 0.114 to 0.122, 1 from 0.123. Refined over 0.170 to 0.174 at 282 the count is not monotone, returning to 3 at 0.17335 after falling to 2.</p>
+    <p id="seed-census-departure-not-a-fold">Neither remaining departure is a fold. At 282 the wall-contact saddle's last state is 0.1732 with determinant -2.9608e-05 and eigenvalues -4.4544e-02 and +6.6469e-04, fifteen orders above the determinant's own forward error, with its nearest neighbour 6.06e-02 away before and 5.68e-02 after; at 550 the saddle reads -5.8060e-05 with nearest neighbour 1.2473e-01 before and 2.0958e+00 after. Printing the masks in order attributes both to the proposal: candidate cells fall from [3, 247, 263] to [3, 247] at 0.17325, and cell 263 is the only cell that ever proposed that saddle. Only 3 of 282 cells have their quadratic stationary point inside their own polygon at these states, so the census has a coverage hole at the wall-contact saddle; admitting the whole domain instead would raise candidates to 153 against a seed capacity of 64 selected by index.</p>
+    <p id="seed-census-departure-round-two-open">Done-when (3) is reported unmet rather than argued closed: the admission departure at the bisected pair is removed, but the 0.1735 and 0.1225 departures remain, are unchanged between the two arms, and need the proposal reworked with the capacity and selection order settled together. The read-level tie-state test is still not written.</p>
+  </section>
 </main></body>
 </html>

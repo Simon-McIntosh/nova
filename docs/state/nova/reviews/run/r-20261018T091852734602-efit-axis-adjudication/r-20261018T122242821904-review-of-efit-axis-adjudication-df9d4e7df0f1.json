@@ -11,6 +11,13 @@
     "scripts/prototypes/efit_axis_adjudication/page.py:457"
   ],
   "completed_at": "2026-10-18T12:32:23Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "Evidence-only plotting node; its durability is the published tables and figures, not a regression guard on production code.",
+      "recorded_at": "2026-10-18T12:44:18.277907+00:00"
+    }
+  },
   "dispatched_at": "2026-10-18T12:23:16Z",
   "finding_dispositions": {
     "0": {

@@ -306,6 +306,43 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "2abb1fb7093dc06a0f98eb5e1d8a7916d073c4f8",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 5031,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261018T231220965459-review-of-axis-ranking-4f1f4f55f179",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 5031,
+        "path": "/tmp/reckon-crew-scratch/r-20261018T231220965459-review-of-axis-ranking-4f1f4f55f179"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-axis-ranking-4f1f4f55f179",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

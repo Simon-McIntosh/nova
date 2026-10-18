@@ -87,6 +87,43 @@ def main():
         seed_np = np.asarray(seeds)
         centre_np = np.asarray(geometry.centre)
         candidate_np = np.asarray(candidate)
+        seed_capacity = max(4 * policy.null_capacity, prior.shape[0])
+        selected = jnp.nonzero(candidate, size=seed_capacity, fill_value=0)[0]
+        all_seeds = jnp.concatenate((prior, seeds[selected]))
+        active = jnp.concatenate(
+            (
+                jnp.ones(prior.shape[0], bool),
+                jnp.arange(seed_capacity) < jnp.sum(candidate),
+            )
+        )
+        polished = jax.vmap(topology.stationary_read, in_axes=(None, 0, None, None))(
+            field, all_seeds, jnp.median(geometry.pitch), policy
+        )
+        inside_wall = jax.vmap(
+            lambda point: jnp.any(topology._inside_cells(geometry, point))
+        )(polished.position)
+        live = active & polished.valid & inside_wall
+        separation = jnp.linalg.norm(
+            polished.position[:, None] - polished.position[None], axis=-1
+        )
+        earlier = jnp.arange(len(live))[None] < jnp.arange(len(live))[:, None]
+        duplicate = jnp.any(
+            earlier
+            & live[None]
+            & (separation < 8 * policy.position_tolerance * jnp.min(geometry.pitch)),
+            axis=1,
+        )
+        position_np = np.asarray(polished.position)
+        all_seed_np = np.asarray(all_seeds)
+        gradient_np = np.asarray(polished.jet.gradient)
+        hessian_np = np.asarray(polished.jet.hessian)
+        near_polished = np.flatnonzero(
+            np.asarray(active)
+            & (
+                (np.linalg.norm(all_seed_np - target, axis=1) < 0.2)
+                | (np.linalg.norm(position_np - target, axis=1) < 0.2)
+            )
+        )
         order = np.argsort(np.linalg.norm(seed_np - target, axis=1))[:6]
         owner = np.flatnonzero(np.asarray(topology._inside_cells(geometry, target)))
         indices = np.unique(np.concatenate((order, owner)))
@@ -94,6 +131,28 @@ def main():
         return {
             "candidate_count": int(candidate_np.sum()),
             "owner_cells": owner.tolist(),
+            "polished_near_target": [
+                {
+                    "index": int(index),
+                    "cell": int(selected[index - len(prior)])
+                    if index >= len(prior)
+                    else None,
+                    "seed": all_seed_np[index].tolist(),
+                    "position": position_np[index].tolist(),
+                    "valid": bool(polished.valid[index]),
+                    "reason": int(polished.reason[index]),
+                    "inside_wall": bool(inside_wall[index]),
+                    "duplicate": bool(duplicate[index]),
+                    "gradient_norm": float(np.linalg.norm(gradient_np[index])),
+                    "correction_norm": float(
+                        np.linalg.norm(
+                            np.linalg.pinv(hessian_np[index]) @ gradient_np[index]
+                        )
+                    ),
+                    "determinant": float(np.linalg.det(hessian_np[index])),
+                }
+                for index in near_polished
+            ],
             "near_target": [
                 {
                     "cell": int(index),

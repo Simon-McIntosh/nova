@@ -1,0 +1,88 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 1,
+  "added_failure_ids": [
+    "tests/test_forward_support_clip_mode.py::test_operator_clip_modes_apply_through_with_clip_mode"
+  ],
+  "added_failures_note": "Raw baseline_suite log has five FAILED ids; raw after_suite log has the same five plus the 300-second timeout in test_operator_clip_modes_apply_through_with_clip_mode. The separate head-only rerun reports 3 passed and RERUN_EXIT=0, so the source adjudicates the timeout as contention; the stored count remains the literal paired-gate delta.",
+  "call_site_count": 6,
+  "call_sites": [
+    "scripts/prototypes/support/book.py:50",
+    "scripts/prototypes/support/book.py:59",
+    "scripts/prototypes/support/certificate_fixtures.py:241",
+    "scripts/prototypes/support/certificate_fixtures.py:259",
+    "scripts/analytic_oracle_fixtures/measure.py:1633",
+    "scripts/analytic_oracle_fixtures/measure.py:1645"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-10-17T06:58:13Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/fixture-owner-store-argument.html",
+      "line": "96",
+      "severity": "blocking",
+      "text": "blocking: the required post-change warm six-row gate did not occur; all four completed titan receipts have carrier_cache_hit=false and exterior_cache_hit=false, and both 5,000-cell rows are unmeasured, so prior H200 results cannot establish this revision's done_when."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T065751439890-fixture-owner-store-argument/manifest.md",
+      "line": "108",
+      "severity": "follow-on",
+      "text": "follow-on: after_suite lists five failure IDs, but its own head gate log has a sixth timeout failure in test_operator_clip_modes_apply_through_with_clip_mode; the separate head rerun passes, yet the raw paired-gate delta is one and should be distinguished from the adjudicated result."
+    },
+    {
+      "file": "tests/test_current_book_fragments.py",
+      "line": "318",
+      "severity": "follow-on",
+      "text": "follow-on: store.published and cold.cache['semantic_key'] both derive from the same supplied store session key, so this assertion remains true if that key moves incorrectly; the separate digest test at line 242 provides the independent binding."
+    },
+    {
+      "file": "tests/test_current_book_fragments.py",
+      "line": "303",
+      "severity": "follow-on",
+      "text": "follow-on: the new bypass control calls cached_machine only, so a regression that always rebuilds cached_fixture_exterior at measure.py:1458 would not redden this added test."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/fixture-owner-store-argument.html",
+      "line": "16",
+      "severity": "follow-on",
+      "text": "follow-on: plan-environment still says titan job 1287964 is queued and the gate has not run, while this same revision's body at lines 82-96 records completed job 1288657; typed metadata misstates the evidence state."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "scripts/prototypes/support/book.py:50, scripts/prototypes/support/book.py:59, scripts/prototypes/support/certificate_fixtures.py:241, scripts/prototypes/support/certificate_fixtures.py:259, scripts/analytic_oracle_fixtures/measure.py:1633, scripts/analytic_oracle_fixtures/measure.py:1645",
+    "diff": "Read the eleven commits from ad3c3f77..ea776e9 individually: 26b311de5 moves the owners, f629e1dc3 restores the exterior load wall, and the remaining nine evidence commits leave the code unchanged.",
+    "done_when": "The source done_when requires a warm six-row certificate gate; logs/rows-titan/*.json contain four completed rows with both hit flags false, while fixture-owner-store-argument.html:91-92 records two unmeasured rows.",
+    "goal": "The source goal in the run metadata is a single builder for cached certificate fixtures; scripts/analytic_oracle_fixtures/measure.py:897,1458 own both flows and certificate_fixtures.py:241,259 delegates to them.",
+    "manifest": "The source manifest.md records eleven commits and a complete status, but its after_suite failure_ids omit the timeout failure present in logs/cpu-delta/head/tests_test_forward_support_clip_mode.py.log:57; a separate rerun passes.",
+    "write_paths": "The source run metadata and manifest.md:3 grant seven paths or roots; git diff ad3c3f77..ea776e9 changes six files, each inside those grants."
+  },
+  "justifications": {
+    "durability": "tests/test_current_book_fragments.py:294-320 refuses a second publish when a load is bypassed and the recorded red control confirms that refusal, but it exercises only the carrier and its line 318 key check is self-derived.",
+    "evidence": "fixture-owner-store-argument.html:87-96 and the row receipts show four cold passes and two unmeasured rows, so the required warm six-row gate has no result after this change.",
+    "fit": "scripts/analytic_oracle_fixtures/measure.py:785-894 adds descriptive store/session adapters beside the existing owners, while fixture-owner-store-argument.html:16 retains stale gate metadata.",
+    "goal_fidelity": "scripts/analytic_oracle_fixtures/measure.py:897,1458 now own both load-or-build paths, reached from the thin certificate_fixtures.py:241,259 callers.",
+    "reuse": "Capability search found nova/database/zarrstore.py:83 and nova/database/content_store.py:669; measure.py:864 wraps the former and certificate_fixtures.py:197 uses the latter rather than forking fixture construction.",
+    "scope_discipline": "The six paths in git diff ad3c3f77..ea776e9 all fall under the seven grants in the source manifest.md:3 and support the fixture-owner change."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source goal in the run metadata is a single builder for cached certificate fixtures; scripts/analytic_oracle_fixtures/measure.py:897,1458 own both flows and certificate_fixtures.py:241,259 delegates to them.\nVERDICT done_when: The source done_when requires a warm six-row certificate gate; logs/rows-titan/*.json contain four completed rows with both hit flags false, while fixture-owner-store-argument.html:91-92 records two unmeasured rows.\nVERDICT write_paths: The source run metadata and manifest.md:3 grant seven paths or roots; git diff ad3c3f77..ea776e9 changes six files, each inside those grants.\nVERDICT manifest: The source manifest.md records eleven commits and a complete status, but its after_suite failure_ids omit the timeout failure present in logs/cpu-delta/head/tests_test_forward_support_clip_mode.py.log:57; a separate rerun passes.\nVERDICT diff: Read the eleven commits from ad3c3f77..ea776e9 individually: 26b311de5 moves the owners, f629e1dc3 restores the exterior load wall, and the remaining nine evidence commits leave the code unchanged.\nCALL_SITES: scripts/prototypes/support/book.py:50, scripts/prototypes/support/book.py:59, scripts/prototypes/support/certificate_fixtures.py:241, scripts/prototypes/support/certificate_fixtures.py:259, scripts/analytic_oracle_fixtures/measure.py:1633, scripts/analytic_oracle_fixtures/measure.py:1645\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: scripts/analytic_oracle_fixtures/measure.py:897,1458 now own both load-or-build paths, reached from the thin certificate_fixtures.py:241,259 callers.\nSCORE evidence: 9\nJUSTIFICATION evidence: fixture-owner-store-argument.html:87-96 and the row receipts show four cold passes and two unmeasured rows, so the required warm six-row gate has no result after this change.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: The six paths in git diff ad3c3f77..ea776e9 all fall under the seven grants in the source manifest.md:3 and support the fixture-owner change.\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_current_book_fragments.py:294-320 refuses a second publish when a load is bypassed and the recorded red control confirms that refusal, but it exercises only the carrier and its line 318 key check is self-derived.\nSCORE fit: 16\nJUSTIFICATION fit: scripts/analytic_oracle_fixtures/measure.py:785-894 adds descriptive store/session adapters beside the existing owners, while fixture-owner-store-argument.html:16 retains stale gate metadata.\nSCORE reuse: 19\nJUSTIFICATION reuse: Capability search found nova/database/zarrstore.py:83 and nova/database/content_store.py:669; measure.py:864 wraps the former and certificate_fixtures.py:197 uses the latter rather than forking fixture construction.\nFINDING docs/evidence/fragments/converged-forward-solve/fixture-owner-store-argument.html:96 blocking: the required post-change warm six-row gate did not occur; all four completed titan receipts have carrier_cache_hit=false and exterior_cache_hit=false, and both 5,000-cell rows are unmeasured, so prior H200 results cannot establish this revision's done_when.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T065751439890-fixture-owner-store-argument/manifest.md:108 follow-on: after_suite lists five failure IDs, but its own head gate log has a sixth timeout failure in test_operator_clip_modes_apply_through_with_clip_mode; the separate head rerun passes, yet the raw paired-gate delta is one and should be distinguished from the adjudicated result.\nFINDING tests/test_current_book_fragments.py:318 follow-on: store.published and cold.cache['semantic_key'] both derive from the same supplied store session key, so this assertion remains true if that key moves incorrectly; the separate digest test at line 242 provides the independent binding.\nFINDING tests/test_current_book_fragments.py:303 follow-on: the new bypass control calls cached_machine only, so a regression that always rebuilds cached_fixture_exterior at measure.py:1458 would not redden this added test.\nFINDING docs/evidence/fragments/converged-forward-solve/fixture-owner-store-argument.html:16 follow-on: plan-environment still says titan job 1287964 is queued and the gate has not run, while this same revision's body at lines 82-96 records completed job 1288657; typed metadata misstates the evidence state.",
+  "review_run_id": "legacy-231bdf11082a",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "ad3c3f77ea9c9f17f1d0a47a9195ecf68f33c3d5",
+  "reviewed_head_sha": "ea776e985f55e2388281f9c0c1ccd390b1be6102",
+  "reviewed_run_id": "r-20261017T065751439890-fixture-owner-store-argument",
+  "scores": {
+    "durability": 15,
+    "evidence": 9,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T08:34:58.314Z",
+  "total": 96
+}

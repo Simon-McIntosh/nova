@@ -1,0 +1,81 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "Unmeasured: the reviewed manifest supplies no baseline_suite or after_suite, and its recorded gates are different probes rather than a comparable complete suite pair; zero would be fabricated.",
+  "call_site_count": 2,
+  "call_sites": [
+    "scripts/prototypes/xpoint_cell_owner/owner_map.py:161",
+    "scripts/prototypes/xpoint_cell_owner/solve_carrier.py:100"
+  ],
+  "completed_at": "2026-10-18T08:27:01Z",
+  "dispatched_at": "2026-10-18T08:19:03Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/xpoint_cell_owner/lobe_booking.py",
+      "line": "36",
+      "severity": "blocking",
+      "text": "blocking: the entire implementation remains an uncommitted worktree change at base=head 80ee84b289d41d5a1bfbda8c3a5b94a7b2d7f1cd, so the reviewed head contains no deliverable and cannot be promoted as the change."
+    },
+    {
+      "file": "scripts/prototypes/xpoint_cell_owner/lobe_booking.py",
+      "line": "62",
+      "severity": "blocking",
+      "text": "blocking: the patch replaces the required full-precision degree-five constants with the clip owner's 8-by-8 Gauss-Legendre rule; the recorded numerical agreement does not satisfy this explicit done_when clause."
+    },
+    {
+      "file": "scripts/prototypes/xpoint_cell_owner/lobe_booking.py",
+      "line": "69",
+      "severity": "blocking",
+      "text": "blocking: _partition_integrals manually reduces signed weights into current and first moments, duplicating the capability in nova/equilibrium/clip_quadrature.py:847-890 rather than extending that owner as the goal requires."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T063028156864-lobe-share-partition/manifest.md",
+      "line": "11",
+      "severity": "blocking",
+      "text": "blocking: the source run records neither baseline_suite nor after_suite and has no comparable complete suite gate logs, so added_failure_count and added_failure_ids cannot be derived honestly."
+    },
+    {
+      "file": "scripts/prototypes/xpoint_cell_owner/lobe_reference_probe.py",
+      "line": "40",
+      "severity": "follow-on",
+      "text": "follow-on: verify_result can refuse a fresh bad partition, but no committed regression test runs this probe; the recorded red control only checks a frozen base receipt."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "scripts/prototypes/xpoint_cell_owner/owner_map.py:161, scripts/prototypes/xpoint_cell_owner/solve_carrier.py:100",
+    "diff": "git log 80ee84b289d41d5a1bfbda8c3a5b94a7b2d7f1cd..HEAD is empty; the working diff edits lobe_booking.py, lobe_reference.py and lobe_reference_probe.py and leaves both evidence HTML files untracked, so there is no commit-by-commit landed diff.",
+    "done_when": "docs/plans/converged-forward-solve.html:592 requires 1e-12 partition agreement and remeasured maps; partition_receipt_guard.log records 3.244e-15/6.153e-15/1.275e-14 with EXIT=0 and negative_control_partition.log refuses the base receipt with EXIT=1, while the degree-five clause is unmet and no paired suite arms exist.",
+    "goal": "docs/plans/converged-forward-solve.html:591 asks for one ring fan and clip-owner reduction; the uncommitted patch at scripts/prototypes/xpoint_cell_owner/lobe_booking.py:36 builds one fan and its receipts pass, but no landed revision carries it and the specified degree-five constants were replaced.",
+    "manifest": "the source manifest.md:5-12 reads complete but states commits none and supplies neither baseline_suite nor after_suite, so its uncommitted patch and added-failure delta cannot be tied to a landed revision.",
+    "write_paths": "the source manifest.md:3 grants scripts/prototypes/xpoint_cell_owner and the two lobe evidence paths; git status and the working diff show five changed files, all inside those grants."
+  },
+  "justifications": {
+    "durability": "scripts/prototypes/xpoint_cell_owner/lobe_reference_probe.py:40-46 would refuse a fresh regression above 1e-12 or zero measured owner cells, but the only red control uses a stored base receipt and no committed test invokes the probe.",
+    "evidence": "partition_receipt_guard.log records all three partition comparisons and negative_control_partition.log records the known bad receipt's refusal, but source manifest.md has no baseline_suite or after_suite and both logs identify only the unchanged base SHA.",
+    "fit": "scripts/prototypes/xpoint_cell_owner/lobe_booking.py:36-57 keeps the existing JAX ring representation and uses descriptive symbols, while lobe_reference_probe.py:40-46 follows the probe's direct refusal style.",
+    "goal_fidelity": "scripts/prototypes/xpoint_cell_owner/lobe_booking.py:36-82 produces the measured partition, but line 62 uses the owner's 8-by-8 rule and the source manifest.md:11 records no commit.",
+    "reuse": "scripts/prototypes/xpoint_cell_owner/lobe_booking.py:62 wraps clip_quadrature._quadrature_from_arrays, but lines 69-81 duplicate the signed current and first-moment reduction already owned by nova/equilibrium/clip_quadrature.py:847-890.",
+    "scope_discipline": "the five dirty paths reported by git status sit inside source manifest.md:3's four granted path roots; no out-of-scope edit was observed."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: docs/plans/converged-forward-solve.html:591 asks for one ring fan and clip-owner reduction; the uncommitted patch at scripts/prototypes/xpoint_cell_owner/lobe_booking.py:36 builds one fan and its receipts pass, but no landed revision carries it and the specified degree-five constants were replaced.\nVERDICT done_when: docs/plans/converged-forward-solve.html:592 requires 1e-12 partition agreement and remeasured maps; partition_receipt_guard.log records 3.244e-15/6.153e-15/1.275e-14 with EXIT=0 and negative_control_partition.log refuses the base receipt with EXIT=1, while the degree-five clause is unmet and no paired suite arms exist.\nVERDICT write_paths: the source manifest.md:3 grants scripts/prototypes/xpoint_cell_owner and the two lobe evidence paths; git status and the working diff show five changed files, all inside those grants.\nVERDICT manifest: the source manifest.md:5-12 reads complete but states commits none and supplies neither baseline_suite nor after_suite, so its uncommitted patch and added-failure delta cannot be tied to a landed revision.\nVERDICT diff: git log 80ee84b289d41d5a1bfbda8c3a5b94a7b2d7f1cd..HEAD is empty; the working diff edits lobe_booking.py, lobe_reference.py and lobe_reference_probe.py and leaves both evidence HTML files untracked, so there is no commit-by-commit landed diff.\nCALL_SITES: scripts/prototypes/xpoint_cell_owner/owner_map.py:161, scripts/prototypes/xpoint_cell_owner/solve_carrier.py:100\nSCORE goal_fidelity: 11\nJUSTIFICATION goal_fidelity: scripts/prototypes/xpoint_cell_owner/lobe_booking.py:36-82 produces the measured partition, but line 62 uses the owner's 8-by-8 rule and the source manifest.md:11 records no commit.\nSCORE evidence: 11\nJUSTIFICATION evidence: partition_receipt_guard.log records all three partition comparisons and negative_control_partition.log records the known bad receipt's refusal, but source manifest.md has no baseline_suite or after_suite and both logs identify only the unchanged base SHA.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the five dirty paths reported by git status sit inside source manifest.md:3's four granted path roots; no out-of-scope edit was observed.\nSCORE durability: 9\nJUSTIFICATION durability: scripts/prototypes/xpoint_cell_owner/lobe_reference_probe.py:40-46 would refuse a fresh regression above 1e-12 or zero measured owner cells, but the only red control uses a stored base receipt and no committed test invokes the probe.\nSCORE fit: 18\nJUSTIFICATION fit: scripts/prototypes/xpoint_cell_owner/lobe_booking.py:36-57 keeps the existing JAX ring representation and uses descriptive symbols, while lobe_reference_probe.py:40-46 follows the probe's direct refusal style.\nSCORE reuse: 5\nJUSTIFICATION reuse: scripts/prototypes/xpoint_cell_owner/lobe_booking.py:62 wraps clip_quadrature._quadrature_from_arrays, but lines 69-81 duplicate the signed current and first-moment reduction already owned by nova/equilibrium/clip_quadrature.py:847-890.\nFINDING scripts/prototypes/xpoint_cell_owner/lobe_booking.py:36 blocking: the entire implementation remains an uncommitted worktree change at base=head 80ee84b289d41d5a1bfbda8c3a5b94a7b2d7f1cd, so the reviewed head contains no deliverable and cannot be promoted as the change.\nFINDING scripts/prototypes/xpoint_cell_owner/lobe_booking.py:62 blocking: the patch replaces the required full-precision degree-five constants with the clip owner's 8-by-8 Gauss-Legendre rule; the recorded numerical agreement does not satisfy this explicit done_when clause.\nFINDING scripts/prototypes/xpoint_cell_owner/lobe_booking.py:69 blocking: _partition_integrals manually reduces signed weights into current and first moments, duplicating the capability in nova/equilibrium/clip_quadrature.py:847-890 rather than extending that owner as the goal requires.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T063028156864-lobe-share-partition/manifest.md:11 blocking: the source run records neither baseline_suite nor after_suite and has no comparable complete suite gate logs, so added_failure_count and added_failure_ids cannot be derived honestly.\nFINDING scripts/prototypes/xpoint_cell_owner/lobe_reference_probe.py:40 follow-on: verify_result can refuse a fresh bad partition, but no committed regression test runs this probe; the recorded red control only checks a frozen base receipt.",
+  "review_run_id": "r-20261018T081832544191-review-of-r-20261018T063028156864-lobe-share-partition-80ee84b289d4",
+  "reviewed_base_sha": "80ee84b289d41d5a1bfbda8c3a5b94a7b2d7f1cd",
+  "reviewed_head_sha": "80ee84b289d41d5a1bfbda8c3a5b94a7b2d7f1cd",
+  "reviewed_run_id": "r-20261018T063028156864-lobe-share-partition",
+  "scores": {
+    "durability": 9,
+    "evidence": 11,
+    "fit": 18,
+    "goal_fidelity": 11,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T08:22:23+00:00",
+  "total": 73
+}

@@ -200,7 +200,9 @@ class ConstraintBinding:
                 "an eliminated constraint needs ConstraintElimination controls"
             )
         for name in ("target", "tolerance", "scale", "initial_unknown"):
-            object.__setattr__(self, name, jnp.asarray(getattr(self, name)))
+            value = getattr(self, name)
+            if not isinstance(value, jax.stages.ArgInfo):
+                object.__setattr__(self, name, jnp.asarray(value))
 
     def tree_flatten(self):
         """Keep policy static while all numerical binding values remain leaves."""

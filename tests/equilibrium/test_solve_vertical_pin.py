@@ -197,16 +197,14 @@ def test_pinned_carrier_holds_two_booked_centroid_targets():
 def test_one_program_serves_free_and_two_pinned_carriers():
     configure_dtypes()
     program = jax.jit(
-        lambda state, ops, target, active: solve.pinned_fixed_point(
-            carrier_map, centroid_height, state, ops, binding(target, active)
+        lambda state, ops, constraint: solve.pinned_fixed_point(
+            carrier_map, centroid_height, state, ops, constraint
         )
     )
-    compiled = program.lower(
-        SEED, operands(), jnp.asarray(TARGETS[0]), jnp.asarray(False)
-    ).compile()
+    compiled = program.lower(SEED, operands(), binding(TARGETS[0], False)).compile()
     cases = [(TARGETS[0], False, FREE_HEIGHT)] + [(t, True, t) for t in TARGETS]
     for target, active, expected in cases:
-        result = compiled(SEED, operands(), jnp.asarray(target), jnp.asarray(active))
+        result = compiled(SEED, operands(), binding(target, active))
         assert bool(result.converged)
         assert float(result.residual) <= 1e-12
         assert abs(float(centroid_height(result.state, operands())) - expected) <= 1e-10

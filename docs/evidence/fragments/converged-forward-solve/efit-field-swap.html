@@ -1,10 +1,11 @@
 <section id="efit-field-swap">
 <h2>Cross-checking nova's boundary read against imas-efit's trace records</h2>
 
-<p>Nova's boundary decision was to be measured on imas-efit's own fields, case
-by case, without shaping nova's rule by theirs. Three pieces are committed and
-green; the case-by-case sweep is measured but not yet independent evidence,
-and the reason is stated below with the instrument that shows it.</p>
+<p>Nova's boundary decision is measured on imas-efit's own fields, case by case,
+without shaping nova's rule by theirs. The adapter that presents a record's
+spline to nova's read is validated against scipy; the sweep records both codes'
+decision columns on every record, and marks a case unqualified rather than
+reporting nova's own axis fallback as a boundary level.</p>
 
 <h3>What is committed</h3>
 
@@ -46,35 +47,64 @@ level, limited-or-diverted label) with the source of each column named.</li>
 
 <h3>The measured limitation, and its instrument</h3>
 
-<p>On the record lattices tried so far, nova's census proposes <strong>no
-cellwise stationary seed at all</strong>: <code>RootCensus.candidates</code> is
-exactly <code>0</code> on <code>jt60sa-5slice-s5-301-302</code> and
-<code>jt60sa-5slice-s5-133-134</code> at a 16&times;16 lattice (132 retained
-cells, pitch 0.2508 m), while <code>RootCensus.axes</code> is <code>1</code> and
-<code>RootCensus.saddles</code> is <code>0</code>. Every cell's quadratic model
-is well conditioned (132 of 132 pass <code>_conditioned_hessian</code>), so the
-seed rejection is the containment test: on a cell whose span is comparable to
-the spline's own feature scale, the fitted quadratic places its stationary point
-outside the cell it was fitted on, and <code>census</code> discards it.</p>
+<p>The first full run of the sweep proposed <strong>no cellwise stationary seed
+at all</strong>: <code>RootCensus.candidates</code> was exactly <code>0</code> on
+<code>jt60sa-5slice-s5-301-302</code> at a 16&times;16 lattice (132 retained
+cells, pitch 0.2508 m), with <code>RootCensus.axes</code> <code>1</code> and
+<code>RootCensus.saddles</code> <code>0</code>. The failure was attributed rather
+than guessed, with two read-only instruments: a diagnostic that prints the fitted
+quadratic's stationary point against its cell and the containment test that
+rejects it, and a probe that prints the sample-point stencil against each cell
+centre.</p>
 
-<p>The consequence is visible in the decision columns and is the reason they are
-not yet independent evidence. With no saddle admitted, <code>gather</code> in
-<code>census</code> fills every saddle slot with the axis index, the
-merge-path saddle admission has an all-<code>-inf</code> margin and falls back
-to slot 0, and the reported boundary level collapses onto the axis level
-(1.5768 for record 301, against imas-efit's own stored boundary
-<code>fed_back_psi</code> of 0.6790). Nova's label on that record is
-<em>limited</em> where imas-efit's verdict is <em>diverted</em> — but that
-disagreement is produced by a missing seed, not by the two codes' decision
-rules, and it must not be reported as a decision difference until the seed
-proposal works on this geometry.</p>
+<p>What they show is a defect in the lattice, not in nova. Every cell's
+quadratic model was well conditioned, and the stencil was not: the median
+distance from a cell's sampling points to its own centre was 3.27 m, and the
+worst cell's stencil sat at the lattice origin. The measured design condition
+number was <code>1.7&nbsp;&times;&nbsp;10<sup>4</sup></code>. Nova's
+<code>TopologyGeometry.from_cells</code> takes <strong>absolute RZ sampling
+points</strong>, one set per cell, and prepends the cell centre to each set
+itself; the lattice was handing it per-cell <em>offsets</em>, so every cell's
+quadratic was fitted over points clustered at the origin. The fitted stationary
+point then landed 3.2 to 26.9 pitch lengths outside its cell, no cell contained
+its own seed, and the census proposed nothing.</p>
 
-<p>Because the axis reference would otherwise have come from nova's own
-(empty) seed set, the driver falls back to the lattice cell centre whose
-<code>sigma&nbsp;psi</code> is extremal, which is a quantity read from the
-record's own field but is nevertheless an outside reference rather than nova's
-own census. That substitution is recorded in the driver's docstring and in the
-manifest's follow-ons.</p>
+<p>With the lattice's sampling points placed around each cell's own centre:
+design condition number <code>19</code>, nine cells propose seeds, four distinct
+saddles are admitted, and nova's read returns a boundary level of
+<code>0.31165</code> with class <em>diverted</em> — agreeing with imas-efit's
+verdict <code>2</code> on that record. The earlier reading of this record, in
+which nova said <em>limited</em> against imas-efit's <em>diverted</em>, was an
+artefact of the seed failure and is withdrawn.</p>
+
+<p>The failure mode is worth stating because it is silent and plausible: a
+census that proposes nothing admits no saddle, <code>gather</code> then fills
+every saddle slot with the axis index, the merge-path margin is all
+<code>-inf</code>, slot 0 wins, and the read reports the axis level as a
+boundary level. That is exactly the number a reader would take for an answer.
+The driver therefore reports any case whose lattice admits no saddle as
+<strong>unqualified</strong>, with the census counts that disqualified it, and
+never prints the read's own fallback in its place. No axis-fallback value
+appears in the table.</p>
+
+<p>One record class remains unresolved rather than measured: the later rows of
+the pairs manifest name a worker worktree that no longer exists, and the driver
+resolves those rows by record name in imas-efit's own test data before giving
+up. A row that cannot be resolved at all is recorded <em>unread</em> with the
+exception text in its note, so a gap in the table is never silently a pass.</p>
+
+<h3>The decision table</h3>
+
+<p>Each row carries imas-efit's columns read from the record's stored status
+line (<code>verdict</code>, <code>axis_psi</code>, <code>saddle_refined</code>,
+<code>wall_level</code>, <code>fed_back_psi</code>) beside nova's columns
+computed by running the unmodified <code>read</code> and <code>census</code> on
+the record's spline field over the in-wall lattice. The table, its per-case
+instrument, and the diagnosis of the level difference live in
+<a href="/nova/research/efit-field-swap.html">the research document</a>; the
+machine-readable rows, with the census counts behind every unqualified case, are
+written by the sweep to <code>exports/disagreement.json</code> in the run
+directory.</p>
 
 <h3>Approximations that qualify every number</h3>
 
@@ -88,22 +118,22 @@ ring; the adapter closes it by appending the final segment's end.</li>
 <li>The comparison is of two codes' <em>decisions</em> on one field
 representation, not of two physics models, because the field consumed here is
 imas-efit's spline rather than a nova forward solve.</li>
+<li>A case whose lattice admits no saddle is reported unqualified; its missing
+nova column is a gap, not a zero.</li>
 </ul>
 
 <h3>Remaining work</h3>
 
 <ol>
-<li>Raise the in-wall cell resolution until nova's own census proposes cellwise
-seeds and admits a saddle on these records, then re-run the sweep. Until that
-lands the disagreement table has no independent nova column.</li>
-<li>Export nova's bisected tie-island states at 282 and 550 cells (both sides of
-each adjacent-double pair) and one limited and one diverted certified carrier
-state as version-2 trace records on a 65&times;65 grid under
-<code>exports/</code>, with a README giving each file's provenance and nova's
-own decision, and a test re-reading one export through the codec reader.</li>
-<li>Write the case-by-case disagreement table into
-<code>docs/research/efit-field-swap.html</code> once the sweep is meaningful,
-separating representation differences (grid spline against nova's operator
-field) from decision differences.</li>
+<li>Qualify the records whose lattice admits no saddle by refining the in-wall
+lattice, and compare the admitted saddle <em>position</em> on every case where
+both codes commit to one — that comparison, not the level alone, is what turns
+the level difference into a diagnosis.</li>
+<li>Export nova's bisected tie-island states at 282 and 550 cells and one
+limited and one diverted certified carrier state as version-2 trace records
+under <code>exports/</code>, with a README giving each file's provenance and
+nova's own decision, and a test re-reading one export through the codec reader.
+The certified machine rows for those cell counts were not located in the cached
+rows directory within this session's fence.</li>
 </ol>
 </section>

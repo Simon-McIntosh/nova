@@ -144,14 +144,14 @@
     <table id="lobe-share-partition-solves-table">
       <thead><tr><th>carrier</th><th>corrections</th><th>residual history</th><th>terminal residual</th><th>converged</th></tr></thead>
       <tbody>
-        <tr><td>282</td><td>5</td><td>4.7 × 10<sup>−3</sup> → 1.6 × 10<sup>−6</sup> → 7.6 × 10<sup>−10</sup> → 3.0 × 10<sup>−14</sup></td><td>3.00226232984 × 10<sup>−14</sup></td><td>yes</td></tr>
+        <tr><td>282</td><td>5</td><td>1.62494366306 × 10<sup>−3</sup> → 1.38083014549 × 10<sup>−4</sup> → 1.56598136856 × 10<sup>−6</sup> → 7.64280325698 × 10<sup>−10</sup> → 3.00226232984 × 10<sup>−14</sup></td><td>3.00226232984 × 10<sup>−14</sup></td><td>yes</td></tr>
         <tr><td>550</td><td colspan="4">in flight</td></tr>
       </tbody>
     </table>
-    <p id="lobe-share-partition-solves-finding">The 282 solve converges quadratically to
-    3.0 × 10<sup>−14</sup> in five corrections, each about 1.6 s of solve wall once the map and the
-    correction program are compiled (16.5 s and 74.3 s respectively), so the booked partition is a
-    root the Newton correction accepts at this size.</p>
+    <p id="lobe-share-partition-solves-finding">The 282 solve reaches
+    3.0 × 10<sup>−14</sup> in five corrections, each about 1.6 s of solve wall with no line search
+    damping once the map and the correction program are compiled (16.5 s and 74.3 s respectively),
+    so the booked partition is a root the Newton correction accepts at this size.</p>
     <figure id="lobe-share-partition-panel-282-figure">
       <img src="/nova/figures/converged-forward-solve/lobe-share-partition/terminal-282.svg"
            alt="Solved and analytic poloidal flux contours at the 282-cell terminal state of the lobe-owned cold solve">

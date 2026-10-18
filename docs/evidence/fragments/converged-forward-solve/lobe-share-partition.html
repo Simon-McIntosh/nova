@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="lobe-share-partition">
+<meta name="plan-title" content="Lobe share and cell partition">
+<meta name="plan-summary" content="Booking each X-point owner cell once from the lobe ring fan through the imported clip-quadrature owner, with the remainder taken from the same ring builder">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s5">
+<meta name="plan-commits" content="698ce55c4,49f04d62a,de3efb343,c67cce123">
+<meta name="plan-recorded-at" content="2026-10-18">
+<meta name="plan-verdict" content="partial">
+<meta name="plan-environment" content="all_debug and in-place rows on the fleet node, binary64 asserted at entry, JAX_PLATFORMS=cpu, exact clipped single-null diverted certificate realising 282, 550 and 2,098 cells">
+<title>Lobe share and cell partition | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<h1 id="lobe-share-partition-title">Lobe share and cell partition</h1>
+<p id="lobe-share-partition-summary">An owner cell is booked once from a single ring fan: the cell
+polygon enters positive beside the lobe entered negative, both built by
+<code>current._normal_rings</code> and reduced by the clip-quadrature owner's own imported rule. The
+vertex-list reconstruction and the local signed-fan reduction are deleted, and the truncated
+degree-five rule that set the booked lobe's floor went with them. The analytic check passes to
+1 × 10<sup>−13</sup>, the 282-cell map error lands 6.5 × 10<sup>−4</sup> below its guard, and the
+282-cell cold solve converges to 3.0 × 10<sup>−14</sup>. The three-size partition gate, the 550 and
+2,098 map rows and the 550 cold solve were still in flight when this fragment was written; the rows
+that had landed are recorded below and the rest are named as remaining.</p>
+
+<section id="lobe-share-partition-fan">
+<h2>The fan the remainder takes</h2>
+<p id="lobe-share-partition-fan-body">The remainder of an owner cell — the cell with the lobe
+removed — is the cell polygon's star fan entered positive beside the lobe's fan entered negative,
+reduced in one call, so the read's membership and the booked current are one integral over one set
+of points. Both fans come from <code>current._normal_rings</code>, the builder that already produces
+the lobe; the earlier reconstruction walked the polygon's vertex list instead, and it is deleted.</p>
+<p id="lobe-share-partition-fan-reason">One call cannot carry both selections. The builder takes a
+single <code>selected</code> vector and a single interval array and answers them with two families of
+rows: straight rows carrying the polygon's edges, and separatrix-arc rows carrying the boundary the
+normal form supplies, emitted after the straight rows for the sectors the selection makes live and
+only where the sector's sign is nonzero. The lobe's selection is the read's own — two live sectors of
+four, with the read's edge intervals. The cell polygon's is the identity over every edge with a
+degenerate interval, live in a sector the read has marked dead. Asking one call for both would need
+the builder to hold a second selection and interval array and to tag which row belongs to which
+request, which is a change to the accessor rather than a use of it. A second invocation is the
+smallest construction that keeps one builder: exactly one fragment slot is selected — straight rows
+are emitted per slot, so two live slots carry the polygon twice — one identity interval is placed on
+the first strip of every edge, and the separatrix-arc rows that follow are dropped by the static
+straight-row count.</p>
+<p id="lobe-share-partition-fan-defect">The slot count was the one defect found here. Selecting every
+fragment slot emitted the straight rows once per slot, so the cell fan carried the polygon twice and
+the booked remainder was the polygon rather than the polygon less the lobe. It is fixed, and the
+analytic check pins the single-slot contract.</p>
+</section>
+
+<section id="lobe-share-partition-reduction">
+<h2>The reduction is the owner's</h2>
+<p id="lobe-share-partition-reduction-body">The signed-fan reduction is
+<code>clip_quadrature._quadrature_from_arrays</code>, imported and called with
+<code>signed=True</code>. A row of three live vertices contributes exactly one triangle and a row of
+six contributes four, which is the effective triangle set the lobe reference integrates, so the rule
+that books an owner cell here is the rule that books one in the clip-quadrature owner. The wrapper
+that remains applies the row sign and the booked density and nothing else. The deleted degree-five
+Dunavant rule was carried to ten digits, and that truncation, not the fan, was the floor under the
+booked lobe; no ten-digit constant remains on this path.</p>
+</section>
+
+<section id="lobe-share-partition-check">
+<h2>The analytic check</h2>
+<p id="lobe-share-partition-check-body">The check builds the cell fan through
+<code>current._normal_rings</code> itself, driven with a form whose separatrix rays never reach the
+cell so only the straight rows are live, and compares the booked reduction against the closed form
+over the polygon's triangles — a reference that shares the ring builder and no quadrature with the
+booking. Three tests pass in 17.31 s on the fleet node with <code>JAX_PLATFORMS=cpu</code>: exactly
+one live slot carries the polygon once; the reduction matches the closed form on a quadratic density
+to 1 × 10<sup>−13</sup>; and a negative slot subtracts, so the signed booking of a square less an
+inner quadrilateral equals the closed form over each to 1 × 10<sup>−13</sup> with the signed
+identity holding to 1 × 10<sup>−13</sup>.</p>
+</section>
+
+<section id="lobe-share-partition-partition">
+<h2>The partition against dense references</h2>
+<table id="lobe-share-partition-partition-table">
+<thead><tr><th>carrier</th><th>lobe vs dense lobe</th><th>lobe + remainder vs dense whole cell</th></tr></thead>
+<tbody>
+<tr><td>282</td><td colspan="2">in flight in gate job 1288754</td></tr>
+<tr><td>550</td><td colspan="2">in flight in gate job 1288754</td></tr>
+<tr><td>2,098</td><td colspan="2">in flight in gate job 1288754</td></tr>
+</tbody>
+</table>
+<p id="lobe-share-partition-partition-finding">For every owner cell the lobe booking is compared
+with the dense lobe reference and the booked lobe plus remainder with the dense whole cell reference,
+on area, current and both first moments, to 1 × 10<sup>−12</sup>. Neither reference uses the clip
+quadrature, so a disagreement larger than roundoff is a disagreement about the region rather than
+about the rule that integrates it. The rows had not landed at the time this fragment was written.</p>
+</section>
+
+<section id="lobe-share-partition-maps">
+<h2>The map errors</h2>
+<table id="lobe-share-partition-maps-table">
+<thead><tr><th>carrier</th><th>guard</th><th>half-plane delivered</th><th>half-plane floor</th><th>lobe delivered</th><th>lobe floor</th></tr></thead>
+<tbody>
+<tr><td>282</td><td>1.0866e-3</td><td>1.08005994731e-3 pass</td><td>6.18989257731e-4</td><td>1.08655590095e-3 pass</td><td>6.18989257734e-4</td></tr>
+<tr><td>550</td><td>5e-4</td><td>4.09590445975e-4 pass</td><td>1.82141864746e-4</td><td>in flight</td><td>in flight</td></tr>
+<tr><td>2,098</td><td>1e-4</td><td>2.49299259136e-4 fail</td><td>1.76641360086e-5</td><td>in flight</td><td>in flight</td></tr>
+</tbody>
+</table>
+<p id="lobe-share-partition-maps-finding">At 282 the lobe cut lands 6.5 × 10<sup>−4</sup> below the
+guard, within 0.6 % of the half-plane cut's error (1.08655590095 × 10<sup>−3</sup> against
+1.08005994731 × 10<sup>−3</sup>) and of the same order as its own reconstruction floor, which stands
+at 57 % of the delivered error. At this size the two representations of the owned region are not
+distinguishable by the map, and most of what remains is the carrier rather than the region. The 282
+row's top-ranked cell is not a driver: patching it back to its reference moments raises the error to
+1.14776136182 × 10<sup>−3</sup>.</p>
+</section>
+
+<section id="lobe-share-partition-solves">
+<h2>Cold solves</h2>
+<table id="lobe-share-partition-solves-table">
+<thead><tr><th>carrier</th><th>corrections</th><th>terminal residual</th><th>converged</th></tr></thead>
+<tbody>
+<tr><td>282</td><td>5</td><td>3.00226232984e-14</td><td>yes</td></tr>
+<tr><td>550</td><td colspan="3">in flight in titan job 1288747</td></tr>
+</tbody>
+</table>
+<p id="lobe-share-partition-solves-finding">The 282 residual history is 1.62494366306 ×
+10<sup>−3</sup> → 1.38083014549 × 10<sup>−4</sup> → 1.56598136856 × 10<sup>−6</sup> →
+7.64280325698 × 10<sup>−10</sup> → 3.00226232984 × 10<sup>−14</sup>, in five corrections of about
+1.6 s each once the map and the correction program are compiled (16.5 s and 74.3 s), with no line
+search damping at any correction. The booked partition is a root the Newton correction accepts at
+this size.</p>
+<figure id="lobe-share-partition-panel-282-figure">
+<img src="/nova/figures/converged-forward-solve/lobe-share-partition/terminal-282.svg"
+     alt="Solved and analytic poloidal flux contours at the 282-cell terminal state of the lobe-owned cold solve">
+<figcaption id="lobe-share-partition-panel-282-caption">282-cell terminal state. Solved flux solid
+blue, analytic flux dashed dark grey on one shared physical level array, both null sets, the first
+wall, and no axes or gridlines. Terminal residual 3.002262329835039e-14, converged.</figcaption>
+</figure>
+</section>
+
+<section id="lobe-share-partition-verdict">
+<h2>Verdict</h2>
+<p id="lobe-share-partition-verdict-body">Clauses 1 to 3 hold: the remainder takes its fan from the
+same builder that builds the lobe, the vertex-list reconstruction and the local signed-fan reduction
+are deleted, the reduction is the imported clip-quadrature rule, and the truncated rule that set the
+booked lobe's floor is gone with it. Of clauses 4 to 6, the 282 rows of the map measurement and the
+cold solve have landed and are recorded above; the three-size partition gate, the 550 and 2,098 map
+rows and the 550 cold solve were still running at the deadline and are remaining work, not
+measurements. No number above is an estimate.</p>
+</section>
+</main>
+</body>
+</html>

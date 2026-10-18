@@ -86,6 +86,45 @@ class Decision:
     note: str = ""
 
 
+def _unqualified(case, source, record, resolution, roots, initial):
+    """A case the lattice cannot qualify, reported as such rather than as a decision.
+
+    nova's census proposed no cellwise seed, or proposed seeds and admitted no
+    saddle. Reporting the read's own fallback here would put a number in the
+    nova column that is the axis level wearing the boundary's name, which is
+    exactly the misreading this table exists to prevent.
+    """
+    return Decision(
+        case=case,
+        record=record.slice,
+        source=source,
+        n_cells=0,
+        efit_verdict=int(record.verdict),
+        efit_label="diverted" if record.diverted else "limited",
+        efit_axis_psi=record.axis_psi,
+        efit_axis_r=record.axis_r,
+        efit_axis_z=record.axis_z,
+        efit_saddle_refined=record.saddle_refined,
+        efit_wall_level=record.wall_level,
+        efit_fed_back_psi=record.fed_back_psi,
+        nova_axis_psi=float("nan"),
+        nova_axis_r=float("nan"),
+        nova_axis_z=float("nan"),
+        nova_boundary_psi=float("nan"),
+        nova_saddle_psi=float("nan"),
+        nova_saddle_r=float("nan"),
+        nova_saddle_z=float("nan"),
+        nova_wall_level=float("nan"),
+        nova_label="unqualified",
+        nova_span=float("nan"),
+        efit_span=abs(record.fed_back_psi - record.axis_psi),
+        note=(
+            f"lattice {resolution}: candidates {int(roots.candidates)}, "
+            "admitted saddles 0; nova's read's axis fallback is not reported"
+        ),
+    )
+
+
 def lattice(wall_ring: np.ndarray, resolution: int):
     """A square lattice of axis-aligned cells whose centres lie in the wall."""
     polygon = ShapelyPolygon(wall_ring)
@@ -109,15 +148,18 @@ def lattice(wall_ring: np.ndarray, resolution: int):
                 np.asarray(((r0, z0), (r1, z0), (r1, z1), (r0, z1)), dtype=np.float64)
             )
             step_r, step_z = 0.5 * width, 0.5 * height
+            mid_r, mid_z = 0.5 * (r0 + r1), 0.5 * (z0 + z1)
+            # The geometry's sampling vertices are absolute RZ points, one set
+            # per cell, and it prepends the cell centre itself.
             around = [
-                (-step_r, -step_z),
-                (step_r, -step_z),
-                (step_r, step_z),
-                (-step_r, step_z),
-                (0.0, -step_z),
-                (0.0, step_z),
-                (-step_r, 0.0),
-                (step_r, 0.0),
+                (mid_r - step_r, mid_z - step_z),
+                (mid_r + step_r, mid_z - step_z),
+                (mid_r + step_r, mid_z + step_z),
+                (mid_r - step_r, mid_z + step_z),
+                (mid_r, mid_z - step_z),
+                (mid_r, mid_z + step_z),
+                (mid_r - step_r, mid_z),
+                (mid_r + step_r, mid_z),
             ]
             offsets.append(np.asarray(around, dtype=np.float64))
     if not cells:
@@ -135,9 +177,9 @@ def wall_units(record: TraceRecord):
 
 def _decision(case, source, record, resolution):
     field = TraceSplineField.from_record(record)
-    cells, offsets = lattice(record.wall_ring, resolution)
+    cells, samples = lattice(record.wall_ring, resolution)
     geometry = topology.TopologyGeometry.from_cells(
-        cells, offsets, wall_units(record)
+        cells, samples, wall_units(record)
     )
     convention = topology.TopologyConvention.from_cocos(17, 1.0)
     policy = TopologyPolicy()
@@ -147,14 +189,11 @@ def _decision(case, source, record, resolution):
     stack = [np.asarray(initial.axis)[None]]
     if axis_valid.any():
         stack.append(points[axis_valid])
-    centres = np.asarray(geometry.centre)
-    centre_values = np.asarray(
-        jax.vmap(lambda point: field.evaluate(point).value)(jnp.asarray(centres))
-    )
-    extremum = centres[int(np.argmax(convention.sigma * centre_values))]
-    stack.append(extremum[None])
     previous = jnp.asarray(np.vstack(stack))
     roots = census(field, geometry, convention, policy, previous)
+    qualified = int(roots.candidates) > 0 and int(roots.saddles) > 0
+    if not qualified:
+        return _unqualified(case, source, record, resolution, roots, initial)
     reading = nova_read(field, roots.roots, geometry, convention, policy)
     sigma = convention.sigma
 

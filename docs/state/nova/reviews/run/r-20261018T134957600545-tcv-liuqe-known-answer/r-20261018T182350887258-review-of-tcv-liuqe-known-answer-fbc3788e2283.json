@@ -29,6 +29,13 @@
     "scripts/prototypes/tcv_liuqe_known_answer/report.py:75 (_row_html calls measure_gaps)"
   ],
   "completed_at": "2026-10-18T18:33:05Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "tcv-liuqe-known-answer",
+      "recorded_at": "2026-10-18T18:39:08.166662+00:00"
+    }
+  },
   "dispatched_at": "2026-10-18T18:24:46Z",
   "finding_dispositions": {
     "0": {

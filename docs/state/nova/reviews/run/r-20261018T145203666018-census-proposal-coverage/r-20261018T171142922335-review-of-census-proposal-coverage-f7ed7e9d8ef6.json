@@ -1,0 +1,68 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "de1186f066774069e31bc4f90b4d6920432bb5d7",
+  "call_site_count": 4,
+  "call_sites": [
+    "scripts/prototypes/read_robustness/read.py:55",
+    "scripts/prototypes/fast_map_production/tie_probe.py:138",
+    "scripts/prototypes/fast_map_production/sweep.py:121",
+    "scripts/prototypes/read_robustness/measure.py:407"
+  ],
+  "completed_at": "2026-10-18T17:20:57Z",
+  "dispatched_at": "2026-10-18T17:13:13Z",
+  "findings": [
+    {
+      "file": "tests/equilibrium/test_topology_read.py",
+      "line": "2848",
+      "severity": "follow-on",
+      "text": "follow-on: The 550-cell parameter tests offsets where containment-only proposals also retain 3 roots and 2 saddles, so this parameter does not fail if neighbour proposals regress at that carrier."
+    },
+    {
+      "file": "tests/equilibrium/test_topology_read.py",
+      "line": "2809",
+      "severity": "follow-on",
+      "text": "follow-on: The direct-current comparator receives membership, path weight and flux limits from the same reading that drives booked current, so a wrong support or limit can move both sides together and leave this assertion green."
+    }
+  ],
+  "head_log_revision": "3c280c45ef5a545639e39a8cd686b16653edda3c",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 runtime call sites",
+    "diff": "Twelve commits from 8fb29acd through f7ed7e9d change seven files; census.py:44-139 widens and ranks proposals, proposal_probe.py:22 delegates candidate counting, and test_topology_read.py:2844-2878 adds the paired read check.",
+    "done_when": "brief.txt requires paired window counts, fold or persistence evidence, a containment control and three-file base/head gates; window-282.json, window-550.json, fold-rounding-compiled.log, negative-control.log and head-gate-verified.log record them.",
+    "goal": "brief.txt asks for stationary proposal coverage; scripts/prototypes/read_robustness/census.py:121 recovers the 282-cell pre-fold saddle, while docs/research/census-proposal-coverage.html:68 leaves the TCV and JT-60SA adapters unmeasured.",
+    "manifest": "manifest.md is complete and names twelve commits, the base/head batch logs, the red containment control, and the unmeasured adapter follow-on.",
+    "write_paths": "manifest.md declares seven allowed paths, and git diff de1186f0..f7ed7e9d changes exactly seven files within those paths."
+  },
+  "justifications": {
+    "durability": "tests/equilibrium/test_topology_read.py:2868 turns red at the 282-cell high offset when containment-only proposals are restored, as negative-control.log records, but the 550-cell parameter remains green under that mutation.",
+    "evidence": "proposal_probe.py:22 reads the census's actual candidate count, and base-gate-cache.log plus head-gate-verified.log complete with identical twelve-id failure sets and zero added failures.",
+    "fit": "scripts/prototypes/read_robustness/census.py:44 uses the carrier's existing neighbour table with fixed-shape JAX operations, and its added source names contain no plan or release labels.",
+    "goal_fidelity": "scripts/prototypes/read_robustness/census.py:121 admits edge-neighbour seeds and preserves the measured 282-cell saddle, while docs/research/census-proposal-coverage.html:68 limits the claim to the tested carriers.",
+    "reuse": "proposal_probe.py:22 wraps the candidate owner in census.py:121, and proposal_compare.py:48 reuses tie_probe.row rather than implementing either capability again.",
+    "scope_discipline": "The seven paths in git diff de1186f0..f7ed7e9d all fall within the seven write_paths in manifest.md and serve the census, its measurements, or its research record."
+  },
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: de1186f066774069e31bc4f90b4d6920432bb5d7\nreviewed_head_sha: f7ed7e9d8ef62dfd4c0ba661e1707b04ef781955\nVERDICT goal: brief.txt asks for stationary proposal coverage; scripts/prototypes/read_robustness/census.py:121 recovers the 282-cell pre-fold saddle, while docs/research/census-proposal-coverage.html:68 leaves the TCV and JT-60SA adapters unmeasured.\nVERDICT done_when: brief.txt requires paired window counts, fold or persistence evidence, a containment control and three-file base/head gates; window-282.json, window-550.json, fold-rounding-compiled.log, negative-control.log and head-gate-verified.log record them.\nVERDICT write_paths: manifest.md declares seven allowed paths, and git diff de1186f0..f7ed7e9d changes exactly seven files within those paths.\nVERDICT manifest: manifest.md is complete and names twelve commits, the base/head batch logs, the red containment control, and the unmeasured adapter follow-on.\nVERDICT diff: Twelve commits from 8fb29acd through f7ed7e9d change seven files; census.py:44-139 widens and ranks proposals, proposal_probe.py:22 delegates candidate counting, and test_topology_read.py:2844-2878 adds the paired read check.\nCALL_SITES: scripts/prototypes/read_robustness/read.py:55, scripts/prototypes/fast_map_production/tie_probe.py:138, scripts/prototypes/fast_map_production/sweep.py:121, scripts/prototypes/read_robustness/measure.py:407\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: scripts/prototypes/read_robustness/census.py:121 admits edge-neighbour seeds and preserves the measured 282-cell saddle, while docs/research/census-proposal-coverage.html:68 limits the claim to the tested carriers.\nSCORE evidence: 18\nJUSTIFICATION evidence: proposal_probe.py:22 reads the census's actual candidate count, and base-gate-cache.log plus head-gate-verified.log complete with identical twelve-id failure sets and zero added failures.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The seven paths in git diff de1186f0..f7ed7e9d all fall within the seven write_paths in manifest.md and serve the census, its measurements, or its research record.\nSCORE durability: 16\nJUSTIFICATION durability: tests/equilibrium/test_topology_read.py:2868 turns red at the 282-cell high offset when containment-only proposals are restored, as negative-control.log records, but the 550-cell parameter remains green under that mutation.\nSCORE fit: 18\nJUSTIFICATION fit: scripts/prototypes/read_robustness/census.py:44 uses the carrier's existing neighbour table with fixed-shape JAX operations, and its added source names contain no plan or release labels.\nSCORE reuse: 19\nJUSTIFICATION reuse: proposal_probe.py:22 wraps the candidate owner in census.py:121, and proposal_compare.py:48 reuses tie_probe.row rather than implementing either capability again.\nFINDING tests/equilibrium/test_topology_read.py:2848 follow-on: The 550-cell parameter tests offsets where containment-only proposals also retain 3 roots and 2 saddles, so this parameter does not fail if neighbour proposals regress at that carrier.\nFINDING tests/equilibrium/test_topology_read.py:2809 follow-on: The direct-current comparator receives membership, path weight and flux limits from the same reading that drives booked current, so a wrong support or limit can move both sides together and leave this assertion green.\n",
+  "review_run_id": "r-20261018T171142922335-review-of-census-proposal-coverage-f7ed7e9d8ef6",
+  "reviewed_base_sha": "de1186f066774069e31bc4f90b4d6920432bb5d7",
+  "reviewed_head_sha": "f7ed7e9d8ef62dfd4c0ba661e1707b04ef781955",
+  "reviewed_run_id": "r-20261018T145203666018-census-proposal-coverage",
+  "reviewing_run_id": "r-20261018T171142922335-review-of-census-proposal-coverage-f7ed7e9d8ef6",
+  "rubric": "code",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T17:23:48.115218+00:00",
+  "total": 107
+}

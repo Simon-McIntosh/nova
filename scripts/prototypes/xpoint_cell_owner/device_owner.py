@@ -7,6 +7,7 @@ from numpy.polynomial.legendre import leggauss
 
 _OUTER_NODES, _OUTER_WEIGHTS = (jnp.asarray(row) for row in leggauss(128))
 _INNER_NODES = jnp.asarray((-1 / jnp.sqrt(3.0), 1 / jnp.sqrt(3.0)))
+_INNER_WEIGHTS = jnp.asarray((1.0, 1.0))
 
 
 def _quadratic(coefficients, x, y):
@@ -15,19 +16,24 @@ def _quadratic(coefficients, x, y):
 
 
 def _roots(a, b, c):
-    radical = jnp.sqrt(jnp.maximum(b * b - 4 * a * c, 0.0))
-    safe_a = jnp.where(jnp.abs(a) > 1e-14, a, 1.0)
-    safe_b = jnp.where(jnp.abs(b) > 1e-14, b, 1.0)
-    quadratic = jnp.stack(
-        ((-b - radical) / (2 * safe_a), (-b + radical) / (2 * safe_a))
-    )
-    linear = -c / safe_b
-    roots = jnp.where(jnp.abs(a) > 1e-14, quadratic, linear)
-    valid = jnp.where(
-        jnp.abs(a) > 1e-14,
-        b * b - 4 * a * c >= 0,
-        jnp.abs(b) > 1e-14,
-    )
+    """Roots of a v-quadratic in the cancellation-free symmetric form.
+
+    The symmetric form (-b +/- sqrt(b^2 - 4ac)) / 2a destroys the root nearer
+    zero whenever b^2 dominates 4ac, which is the regime of the fine-mesh cells
+    the owner region cuts through: the small root is then the one inside the
+    slice, and losing it moves the region boundary past a whole subinterval, so
+    that subinterval is dropped or counted entire.
+    """
+    squared = b * b - 4 * a * c
+    radical = jnp.sqrt(jnp.maximum(squared, 0.0))
+    quadratic = jnp.abs(a) > 1e-14
+    safe_a = jnp.where(quadratic, a, 1.0)
+    pivot = -0.5 * (b + jnp.where(b >= 0.0, radical, -radical))
+    pivot = jnp.where(jnp.abs(pivot) > 1e-300, pivot, 1.0)
+    paired = jnp.stack((pivot / safe_a, c / pivot))
+    linear = -c / jnp.where(jnp.abs(b) > 1e-14, b, 1.0)
+    roots = jnp.where(quadratic, paired, linear)
+    valid = jnp.where(quadratic, squared >= 0, jnp.abs(b) > 1e-14)
     return roots, valid
 
 
@@ -45,6 +51,9 @@ def integrate_cell(
     orientation_hessian=None,
     *,
     axis_component="halfplane",
+    density_mode="fitted",
+    profile=None,
+    span=None,
 ):
     """Replace the sampled saddle-sector booking for one containing cell.
 
@@ -52,6 +61,14 @@ def integrate_cell(
     branch cut. The cut follows the fitted cell quadratic's own principal axes
     by default; supplying the exact flux Hessian at the saddle instead keeps
     the cut direction independent of how well the fit resolves the curvature.
+
+    ``density_mode`` selects how the current density is represented inside the
+    owned region. ``"fitted"`` evaluates the quadratic fit of the composed
+    density in local pitch coordinates, so the flux enters the weighting only
+    through its own quadratic fit. ``"profile"`` evaluates the profile at the
+    quadrature nodes from the region-selecting flux itself, so the two share
+    one representation and no intermediate density fit is made. The region —
+    and therefore the area — is identical under both modes.
     """
     field = field_coefficients.at[0].add(-boundary_level) * sigma
     hessian = jnp.array(((2 * field[3], field[4]), (field[4], 2 * field[5])))
@@ -136,11 +153,14 @@ def integrate_cell(
     )
 
     def one_slice(u_value):
-        span = end[:, 0] - polygon[:, 0]
-        safe_span = jnp.where(jnp.abs(span) > 1e-14, span, 1.0)
-        edge_fraction = (u_value - polygon[:, 0]) / safe_span
+        u_extent = end[:, 0] - polygon[:, 0]
+        safe_extent = jnp.where(jnp.abs(u_extent) > 1e-14, u_extent, 1.0)
+        edge_fraction = (u_value - polygon[:, 0]) / safe_extent
         cross = (
-            live & (jnp.abs(span) > 1e-14) & (edge_fraction >= 0) & (edge_fraction < 1)
+            live
+            & (jnp.abs(u_extent) > 1e-14)
+            & (edge_fraction >= 0)
+            & (edge_fraction < 1)
         )
         crossing_v = polygon[:, 1] + edge_fraction * (end[:, 1] - polygon[:, 1])
         low = jnp.min(jnp.where(cross, crossing_v, jnp.inf))
@@ -161,13 +181,19 @@ def integrate_cell(
         v_nodes = middle_v[:, None] + (v_right - v_left)[:, None] * _INNER_NODES / 2
         local = (origin - centre) / pitch + u_value * plus + v_nodes[..., None] * minus
         x, y = local[..., 0], local[..., 1]
-        density = _quadratic(density_coefficients, x, y)
+        if density_mode == "profile":
+            normalized = 1.0 + _quadratic(field, x, y) / (sigma * span)
+            density = profile.current_density(centre[0] + pitch * x, normalized)
+        else:
+            density = _quadratic(density_coefficients, x, y)
         terms = jnp.stack(
             (jnp.ones_like(density), density, pitch * density * x, pitch * density * y),
             axis=-1,
         )
-        weights = jnp.where(positive, (v_right - v_left) / 2, 0.0)
-        return jnp.sum(terms * weights[:, None, None], axis=(0, 1))
+        weights = (
+            jnp.where(positive, (v_right - v_left) / 2, 0.0)[:, None] * _INNER_WEIGHTS
+        )
+        return jnp.sum(terms * weights[..., None], axis=(0, 1))
 
     values = jax.vmap(one_slice)(u.reshape(-1)).reshape(*u.shape, 4)
     moments = pitch * pitch * jnp.sum(values * outer_weights[..., None], axis=(0, 1))

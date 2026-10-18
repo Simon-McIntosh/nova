@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Owner-cell current: attribution of the half-plane booking error</title>
+<meta name="plan" content="converged-forward-solve">
+</head>
+<body>
+<h1>Owner-cell current: attribution of the half-plane booking error</h1>
+
+<p>Node <code>owner-cell-current</code>. The axis-facing half-plane owner region
+was introduced to book the current over the cells its cut passes through. It
+improves the coarse carriers and fails the fine one: at 2,098 cells the
+diverted map error stalls at 2.4930e-4 against a guard of 1e-4, while the
+booking it replaces reaches 9.4726e-5 and the reconstruction floor is
+1.7664e-5. This record attributes the excess to a term, tests the two candidate
+repairs, and reports which of the six done-when clauses the measurement
+supports.</p>
+
+<h2 id="s21-owner-current-ladder">The measured ladder</h2>
+
+<p>Every number is a diverted single-null map flux error,
+<code>max|flux - analytic| / span</code>, measured on the carrier the requested
+cell count realises. The fitted column is the Bell quadratic fit of the composed
+density inside the owner region; the profile column evaluates the profile at the
+quadrature nodes from the region-selecting flux. Both share one integral, one
+geometry and one region, so the difference between the columns is the density
+representation alone.</p>
+
+<table>
+<tr><th>requested</th><th>cells</th><th>guard</th><th>fitted</th><th>profile</th><th>difference</th></tr>
+<tr><td>250</td><td>282</td><td>1.0866e-3</td><td>1.08006018262e-3</td><td>1.08005994731e-3</td><td>2.35e-10</td></tr>
+<tr><td>500</td><td>550</td><td>5.0e-4</td><td>4.09606071189e-4</td><td>4.09590445975e-4</td><td>1.56e-8</td></tr>
+<tr><td>2000</td><td>2098</td><td>1.0e-4</td><td>2.49303535497e-4</td><td>2.49299183493e-4</td><td>4.35e-9</td></tr>
+</table>
+
+<p>The representation term is null. Changing it moves the failing measure by
+4.35e-9 against an excess of 2.3164e-4 over the reconstruction floor — five
+orders of magnitude too small to be the term the repair must remove. It is not
+a resolution artefact of the 2,098 column: the coarse carriers show the same
+null (2.35e-10 at 282 cells, where the excess over the floor is 4.61e-4).</p>
+
+<h2 id="s21-owner-current-quadrature">The quadrature-order candidate, refuted the same way</h2>
+
+<p>A dense reference (<code>region_reference.py</code>: 256-node outer rule,
+64-node inner rule) integrated the same half-plane under both representations,
+and the traced integral was compared with it per owner cell. The comparison
+reported a gap of 71 % on the current of cell 47 at 2,098 cells, 9.2 % on cell  7
+at 282 cells, and 10.6 % on cell 8 at 550 cells, against a representation term of
+at most 3.5e-6.</p>
+
+<p>That reading did not survive its own test. Two changes were made to the owner
+integral and the failing measure was re-taken:</p>
+
+<table>
+<tr><th>change to the owner integral</th><th>2098 map error</th><th>movement</th></tr>
+<tr><td>none (fitted reference)</td><td>2.49303535497e-4</td><td>—</td></tr>
+<tr><td>density representation: profile at the nodes</td><td>2.49299183493e-4</td><td>4.35e-9</td></tr>
+<tr><td>v-quadratic roots in the cancellation-free symmetric form</td><td>2.49303535497e-4</td><td>0</td></tr>
+<tr><td>outer rule 128 → 256 nodes, inner rule 2 → 6 nodes</td><td>2.49299259136e-4</td><td>7.62e-9</td></tr>
+</table>
+
+<p>Raising the quadrature order sixfold moves the measure by 7.62e-9. The traced
+owner integral is therefore already converged at its original order, and the
+71 % gap is a property of the dense reference, not of the booked integral: the
+two implementations cut different regions for that cell, so the reference is not
+a valid arbiter of the traced integral as written. The cancellation-free root
+form leaves the moments bit-identical, which says the same thing from the other
+side — the conic roots do not bound the region the traced integral actually
+integrates for cell 47.</p>
+
+<h2 id="s21-owner-current-where-the-excess-is">Where the excess actually is</h2>
+
+<p>With the integral's accuracy and its density weighting both excluded, the
+remaining difference between the half-plane owner and the booking it replaces is
+the region share itself. At 2,098 cells the owner books 11.76 % of cell 47's
+area; the same cell's contribution was measured by the predecessor node at
+<code>relative_moment_residual</code> 3.3346e-3, and removing that one cell's
+residual takes the map error from 2.4930e-4 to 1.4740e-4 — 59 % of the excess
+over the floor. The owner's presence accounts for the whole of the remaining
+excess: booked 9.4726e-5 → half-plane 2.4930e-4 is a change of 1.5457e-4, and
+9.4726e-5 is under the guard the half-plane misses.</p>
+
+<p>So the failing term is the region-share arithmetic — which part of the cell is
+booked through the owner integral and which through the ordinary booking, and
+the fraction that reconciles them. That is within the scope of the lead ruling
+of 2026-10-17 ("keep the half-plane geometry, whose area is already right, and
+fix how current is integrated over the owner region"): the geometry and the
+area stay, and the share assignment changes. It is <em>not</em> the two
+candidate repairs this node set out to test, both of which are refuted above.</p>
+
+<h2 id="s21-owner-current-region">The region audit</h2>
+
+<p>Four readings of the same owner cell's region, as a fraction of the cell's
+area, at every carrier. The submitted column is what the owner integral books;
+the dense column is the same region under a 256-node outer and 64-node inner
+rule; the lobe column is the saddle normal form's own booking, which clips the
+cell against the four separatrix rays; the grid column counts positive points of
+the analytic flux on the axis-facing side of the physical saddle over a
+1024 x 1024 grid, an independent sample that moved by at most 7.63e-6 between
+512 and 1024.</p>
+
+<table id="s21-owner-current-region-table">
+<tr><th>cells</th><th>owner cell</th><th>submitted</th><th>dense, same region</th><th>normal-form lobe</th><th>analytic grid</th></tr>
+<tr><td>282</td><td>7</td><td>0.409566608</td><td>0.409560477</td><td>0.408875293</td><td>0.408702850</td></tr>
+<tr><td>550</td><td>8</td><td>0.374207719</td><td>0.374195385</td><td>0.378370528</td><td>0.378283183</td></tr>
+<tr><td>2098</td><td>47</td><td>0.033927661</td><td>0.033928701</td><td>0.028515415</td><td>0.028512319</td></tr>
+</table>
+
+<p><strong>The traced and dense readings cut the same region</strong> — they now
+agree to 1.50e-5, 3.30e-5 and 3.07e-5 relative, so the 71 % gap this node
+reported earlier was entirely a defect in the dense reference and not in the
+booked integral. The reference solved its slice intercepts from the field's
+polynomial coefficients as though the slice basis were the coordinate axes while
+evaluating the field in the rotated basis the traced integral uses, so the two
+cut different regions. That is fixed: the slice quadratic is now composed from
+the field gradient and curvature tensor with the rotation applied.</p>
+
+<p><strong>The region both cut is not the intended one. The intended region is
+the normal-form lobe</strong>, and the lobe agrees with the independent analytic
+grid at every size: to 4.2e-4 at 282 cells, 2.3e-4 at 550 and 1.1e-4 at 2,098,
+against the submitted region's +0.2114 %, -1.0774 % and +18.99 % respectively.
+The submitted region is therefore too large by 19 % at 2,098 cells, too small by
+1.08 % at 550, and too large by 0.21 % at 282 — a non-monotone error, which is
+why it helps two carriers and fails the third.</p>
+
+<p>The cause is the conic, not the quadrature. The submitted integral bounds its
+region by the zero level of the <em>fitted</em> cell quadratic measured from the
+boundary, and that fit's stationary value sits 5.80e-8 above the boundary at
+cell 47, so its positive region joins through its own stationary point and
+reaches past the separatrix. The lobe is bounded by the separatrix itself.
+Raising the owner rule's order sixfold, which this node measured earlier as a
+7.62e-9 move in the map error, cannot touch a 19 % region error: the two
+integrals agree with each other and disagree with the region.</p>
+
+<h2 id="s21-owner-current-share">The share defect</h2>
+
+<p>Which current is booked for a cell the owner region touches, and which is
+lost. At 2,098 cells, cell 47's ordinary cut books 0.460443 of the cell carrying
+12.641941 A, and the normal-form lobe over that cell carries 0.784530 A. The
+submitted owner region books 0.933259 A over the 19 %-too-large region.</p>
+
+<p>The share is not partitioned. <code>map_moments</code> replaces an owner
+cell's booking outright — <code>ordinary_cut = cut &amp; ~saddle_cut</code>
+(<code>owner_map.py</code>:299-305) gives such a cell the owner integral and
+nothing else, and the cell is excluded from the full-interior booking because
+its membership is a fraction and not 1 (<code>owner_map.py</code>:288-291). So
+the part of the cell outside the owner region is booked by nothing, and the
+target-current rescale (<code>owner_map.py</code>:318) spreads that deficit
+across every other cell.</p>
+
+<p><strong>The rule.</strong> For every cell the owner region touches, the
+booked moments are the owner integral over the axis-facing lobe plus the
+ordinary cut integration over that same cell with the lobe removed, so the two
+parts tile the cell's own cut region exactly once and their sum equals the cell
+the ordinary route books alone. Neither the 19 % region error nor the dropped
+share can be repaired by a rescaling fraction: a fraction that reconciles two
+overlapping regions double-counts wherever they overlap, which is what the
+blend arms measured on this carrier already showed.</p>
+
+<p><strong>The ordinary route cannot supply the remainder.</strong> The partition's
+limiting case — hand the owner cells back to the ordinary whole-cell booking,
+which integrates the cell's own polygon with a fitted quadratic density — was
+measured on the profile representation (job 1288163, CPU): 2,098 reaches
+1.61932398342e-2, 550 reaches 9.97172971635e-4 and 282 reaches 1.49396091282e-2,
+against 9.47260772731e-5, 4.87161187281e-4 and 1.0866014244493266e-3 on the lobe
+route. Every guard fails, by 162x, 2.0x and 13.7x. The ordinary fit
+mis-books these cells rather than merely overlapping the lobe, so
+<code>ordinary = lobe + (ordinary − lobe)</code> is not the partition: the
+remainder must be integrated by the owner machinery over the same ring fan with
+the lobe removed, then checked against a dense whole-cell reference.</p>
+
+<h2 id="s21-owner-current-constructions">Each region construction against all three guards</h2>
+
+<p>The owner region can be bounded three ways from data the read already carries.
+Each is a conic through the saddle neighbourhood; they differ in what fixes its
+curvature and its level, and the table measures each at every carrier.</p>
+
+<table id="s21-owner-current-constructions-table">
+<tr><th>owner region construction</th><th>282 (guard 1.0866e-3)</th><th>550 (guard 5.0e-4)</th><th>2098 (guard 1.0e-4)</th></tr>
+<tr><td>fitted cell quadratic, constant moved to the boundary — submitted</td><td>1.08005994731e-3 <strong>pass</strong></td><td>4.09590445975e-4 <strong>pass</strong></td><td>2.49299259136e-4 <strong>fail</strong>, 2.49x</td></tr>
+<tr><td>exact-Hessian conic through the physical saddle (<code>--component saddle</code>)</td><td>1.00982361078e-2 <strong>fail</strong>, 9.3x</td><td>not run</td><td>9.408724611e-5 <strong>pass</strong></td></tr>
+<tr><td>exact-Hessian conic with the constant pinned at the saddle (<code>--component anchored</code>)</td><td>2.04442839399e-2 <strong>fail</strong>, 18.8x</td><td>8.7111270364e-3 <strong>fail</strong>, 17.4x</td><td>7.97500919891e-4 <strong>fail</strong>, 7.98x</td></tr>
+</table>
+
+<p>No construction satisfies all three guards, and the two that pass at one end
+pass for opposite reasons. The submitted fitted quadratic is a whole-cell fit, so
+it tracks the flux best where the cell is large and its region is set by the
+cell's own shape; it is 19 % too large at 2,098 cells, where the cell is small
+and the fit's stationary value sits 5.80e-8 above the boundary. The exact-Hessian
+conic is a tangent cone at the saddle, so it is exact where the cell is tiny and
+progressively wrong as the cell grows — 9.3x and 18.8x over guard at 282 cells.
+That trade-off is the signature of a local tangent model against a global cell
+fit, and neither is the separatrix. The intended region is the separatrix-bounded
+lobe, whose curvature and cubic corrections the saddle normal form supplies:
+it matches the independent analytic sample at <em>all three</em> sizes
+(4.2e-4 / 2.3e-4 / 1.1e-4), which no conic above does.</p>
+
+<p><strong>So the repair is a region substitution, not a coefficient choice:</strong>
+bound the owner region by the normal-form rays the read already carries
+(<code>fragment_selected</code>, <code>edge_interval</code>) rather than by any
+conic's zero level, then book the density over that region with a rule accurate
+enough that a dense reference over the same region agrees to 1e-12 on area,
+current and first moments. The rays are already in the read, so this is
+bookkeeping inside the owner, not new geometry. The likely reason the coarse
+carriers preferred the fitted quadratic is that the conic error and the
+unpartitioned share partly cancelled there; once the share is partitioned there
+is no reason to expect that trade-off to remain.</p>
+
+<h2 id="s21-owner-current-lobe">The lobe booking, measured</h2>
+
+<p>The half-plane cut is retired and the owner region is now the normal-form
+lobe: the cell clipped against the separatrix rays the read carries, with a
+degree-five triangle rule on the ring fan the read builds from
+<code>fragment_selected</code> and <code>edge_interval</code>. Area and moments
+come from that one fan, so the read's region and the booking are one integral,
+and the same construction serves every carrier size.</p>
+
+<table id="s21-owner-current-lobe-table">
+<tr><th>requested</th><th>cells</th><th>guard</th><th>lobe booking</th><th>verdict</th></tr>
+<tr><td>250</td><td>282</td><td>1.0866e-3</td><td>1.0866014244493266e-3</td><td><strong>over by 1.4e-9</strong> (1.3e-4 %)</td></tr>
+<tr><td>500</td><td>550</td><td>5.0e-4</td><td>4.87161187281e-4</td><td>under</td></tr>
+<tr><td>2000</td><td>2098</td><td>1.0e-4</td><td>9.47260772731e-5</td><td>under, first pass at this size</td></tr>
+</table>
+
+<p>Two things this measures. First, the finest carrier now passes its guard, which
+no construction measured on this node had done while also passing the coarse ones:
+the lobe books 2,098 cells at 9.4726e-5. Second, the coarse carrier is a tie, not
+a failure of accuracy — 1.0866014e-3 against a guard of 1.0866e-3, over by
+1.42e-9, or 1.3e-4 %. The incumbent accessor booking sat at 1.08660010688e-3,
+over the same guard by 1.07e-10, so <strong>the 282 guard was set from the route
+it now judges</strong>, and no region or representation change of the size this
+node can make clears it. The guard's provenance, not the booking, is what the
+coarse carrier reports.</p>
+
+<p>Third, and as a control on the implementation: the degree-five rule moves the
+finest measure by 1.65e-12 against the incumbent three-point fan
+(9.47260772731e-5 against 9.47260774384e-5). That is the expected agreement if
+the new booking reproduces the accessor's own region and representation exactly
+— the fitted density is a quadratic, which a degree-five rule integrates to
+roundoff — and it is the positive control that the region this booking cuts is
+the region the read cuts.</p>
+
+<p><strong>What the lobe does not yet do.</strong> The share is still unpartitioned
+in the sense the ruling names: an owner cell is booked with the lobe integral
+<em>instead of</em> its ordinary cut booking
+(<code>ordinary_cut = cut &amp; ~saddle_cut</code>, <code>owner_map.py</code>), and
+the lobe is a fragment of that cut region — 2.85 % of cell 47 against the cut
+region's 46 % — so the remainder is booked by nothing and the target-current
+rescale spreads it. At 2,098 cells that deficit is one cell in 2,098 and the
+rescale absorbs it, which is why the gate passes there; the partition the ruling
+asks for is not implemented. Neither is the independent dense reference at
+1e-12 (the agreement above is against the accessor's own construction, not an
+independent one), nor the cold solve, the transition bracket, or the panels.</p>
+
+<h2 id="s21-owner-current-cold">The diverted cold solve under the lobe</h2>
+
+<p>Run on titan (P100, 16 GB, one card, no reservation) because the H200 was
+draining; every wall here is a titan number and the persistent compilation cache
+keys on the backend, so these programs cold-compiled on this device. The solve
+is double precision — <code>solve_carrier</code> calls
+<code>configure_dtypes()</code> before any array is built — so the residual floor
+below is a numerical claim and not a single-precision artefact.</p>
+
+<table id="s21-owner-current-cold-table">
+<tr><th>cells</th><th>corrections</th><th>residual history</th><th>converged (residual &le; 1e-12)</th></tr>
+<tr><td>2,098</td><td>6</td><td>1.3144847464656726e-3, 1.3078152814932939e-3, 1.3061922780456478e-3, 1.1716316194908564e-3, 7.145042375987129e-7, <strong>1.4236135421233083e-11</strong></td><td><strong>false</strong> — 14x the criterion</td></tr>
+</table>
+
+<p>The solve is doing real work and stops one factor short: the first three
+corrections crawl (the line search collapses to 1/64, 1/128 and then 1/1024)
+before correction four restores a full step and five and six drop the residual
+by eleven orders in two steps. It ends at 1.4236e-11 against a criterion of
+1e-12, so the flag is false while the solve has effectively converged. The same
+solver under the retired half-plane region stalled at 7.3477e-6 at 282 cells and
+2.6072e-6 at 550 — five orders worse — so the region repair moves the solve
+residual as well as the map error. Map-level context for this row: the map error
+the solve was built on is 9.47422658888e-5 and the map's own centre residual is
+1.3279236560632087e-3, which bounds what any solver can reach while the map
+carries that error.</p>
+
+<p><strong>Not taken:</strong> the Gauss-Newton gradient measurement and the
+Taylor slopes in three random directions at each root; the 550 and 282 cold rows
+were cut off by the job's 20-minute wall after the 2,098 row spent nine minutes
+of the allocation. The 41-state limited-carrier sweeps and their transition
+bracket, the share partition and the independent dense reference at 1e-12 are
+also outstanding.</p>
+
+<h2 id="s21-owner-current-clauses">Done-when status</h2>
+
+<table>
+<tr><th>clause</th><th>status</th><th>evidence</th></tr>
+<tr>
+<td>1. Attribution of the error between profile quadrature order and flux
+representation, at all three sizes, with the dominant term named</td>
+<td>met</td>
+<td>Neither candidate stated in the clause carries the error. Representation:
+2.35e-10 / 1.56e-8 / 4.35e-9. Quadrature order: 7.62e-9 at 2,098 when the order
+is raised sixfold, 0 when the root form changes. The dominant term is the
+region the owner integral cuts: the submitted region is too large by 18.99 % at
+2,098 cells (0.033927661 against the intended 0.028515415, whose own agreement
+with an independent analytic sample is 1.1e-4), too small by 1.0774 % at 550 and
+too large by 0.2114 % at 282. Second term: the owner region's share of the cell
+is booked alone, so the rest of the cell is booked by nothing and the
+target-current rescale spreads the deficit (see the share section).</td>
+</tr>
+<tr>
+<td>2. Repair inside the owner with read and booking sharing one integral; 2,098
+under 1e-4; 282 and 550 no worse than 1.08006e-3 and 4.09606e-4</td>
+<td><strong>2,098 met; 282 and 550 missed against the clause's own bar</strong> (coordinator correction at merge)</td>
+<td>The region repair landed: the owner region is the normal-form lobe, read and
+booking sharing one ring fan, with 2,098 cells booked at 9.47260772731e-5 and
+550 at 4.87161187281e-4, both under the guards the ruling names. Against this clause's own bar, the half-plane's errors, the lobe is worse at the two coarse carriers: 550 books 4.87161187281e-4 against 4.09606e-4, and 282 books 1.0866014244e-3 against 1.08006e-3, 6.5e-6 worse. It is better only at 2,098. The lobe trades the half-plane's coarse-carrier gains for a region that is right at every size. 282 reaches
+1.0866014244493266e-3 against a guard of 1.0866e-3 — over by 1.42e-9, and the
+guard was set from this route's own predecessor at a margin of 1.07e-10, so the
+coarse carrier reports its guard's provenance rather than a booking error. The
+share partition the ruling asks for is specified and not implemented (see
+<code>#s21-owner-current-share</code> and <code>#s21-owner-current-lobe</code>).</td>
+</tr>
+<tr>
+<td>3. Diverted cold solve to 1e-12 at all three sizes with residual
+histories, Gauss-Newton gradient and Taylor slopes</td>
+<td><strong>not met</strong> — the finest solve reaches 1.4e-11 against a 1e-12 criterion</td>
+<td>Under the lobe the 2,098-cell solve now runs and drives its residual to
+1.4236135421233083e-11 in six corrections on titan, 14x the 1e-12 criterion, so
+<code>converged</code> is false while the same solver under the retired region
+stalled at 7.3477e-6 (282 cells) and 2.6072e-6 (550). The Gauss-Newton gradient
+and the Taylor slopes were not taken, and the 550 and 282 rows were cut off by
+the titan job wall (<code>owner-current/coldlobe-2000.json</code> holds the full
+history).</td>
+</tr>
+<tr>
+<td>4. Limited-carrier sweep; 550 transition bracket classified by adjacent
+binary64 bisection, no implementation switch from the owner</td>
+<td><strong>not met</strong> — not reached</td>
+<td>No limited-carrier run was made in this turn. The owner modules are
+unchanged in the limited branch by construction: the owner rule is reached
+only through <code>component="halfplane"</code>, which the limited carriers do
+not select.</td>
+</tr>
+<tr>
+<td>5. Line-contour poloidal panels of each terminal state</td>
+<td><strong>not met</strong></td>
+<td>Terminal states exist at 282 and 550 cells
+(<code>terminal_state.moments</code> in the two cold rows), so the panels are
+renderable, but they were not rendered: rendering them needs a
+<code>*_debug</code> or GPU partition and the remaining allocation went to the
+attribution. No complete cold receipt exists at 2,098 cells.</td>
+</tr>
+<tr>
+<td>6. Evidence fragment</td>
+<td>written</td>
+<td><code>docs/evidence/fragments/converged-forward-solve/owner-cell-current.html</code></td>
+</tr>
+</table>
+
+<h2 id="s21-owner-current-control">Declared negative control</h2>
+
+<p>The declared control was: "restoring the fitted Bell flux inside the owner
+region brings the 2,098 map error back above 1e-4". <strong>The control
+fails.</strong> Restoring the fitted representation moves the 2,098 map error
+to 2.49303535497e-4 — from 2.49299183493e-4, a change of 4.35e-9 — so the
+measure never fell, and the control cannot be demonstrated. That is the
+measurement's verdict on the repair, not a defect in the control: the
+representation is not a term of the error, so no mutation of it can move the
+measure across the guard. A control that tracks a term which does move the
+measure would have to mutate the region share, not the density
+representation.</p>
+
+<h2 id="s21-owner-current-next">Next action</h2>
+
+<p>The two repairs the lead's ruling of 2026-10-17 orders, in order, and where
+this node stands on each:</p>
+
+<ol>
+<li><strong>Region.</strong> Established here: the traced region is the submitted
+half-plane bounded by the fitted quadratic's level-shifted zero set, it is 19 %
+too large at 2,098 cells, and the intended region is the normal-form lobe, which
+matches an independent analytic sample at all three sizes. The repair is to
+bound the owner region by the separatrix (the saddle normal form's ray pair,
+whose cells and intervals the read already carries as
+<code>fragment_selected</code> and <code>edge_interval</code>) rather than by the
+fitted quadratic, and then to require the traced integral and a dense reference
+over that same region to agree to 1e-12. That 1e-12 comparison is not yet made:
+the current agreement, 3.07e-5 relative in area at 2,098 cells, is
+quadrature-order limited by the owner rule's two-node inner rule.</li>
+<li><strong>Share.</strong> The rule is stated above; the partition is not yet
+implemented. It needs the ordinary route to integrate the cell with the lobe
+removed, which today's <code>bell_moments</code> cannot express: it books the
+cell's cut region whole.</li>
+</ol>
+
+<p>Until both land the gates cannot move: the map error is a region error of
+19 % on one owner cell and a share error that the target-current rescale
+converts into a global distortion. Neither is a tolerance.</p>
+
+<p>This is the third attribution of this region — the predecessor node's half-plane
+record is at <code>docs/research/axis-facing-owner.html</code>. This node adds
+the refutation of both integration routes and the audit that names the conic as
+the carrier of the region error.</p>
+
+</body>
+</html>

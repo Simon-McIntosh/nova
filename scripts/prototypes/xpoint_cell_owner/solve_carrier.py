@@ -43,6 +43,7 @@ def main():
         choices=(
             "halfplane",
             "bell",
+            "lobe",
             "saddle",
             "pinned",
             "anchored",
@@ -52,6 +53,16 @@ def main():
             "inherited",
         ),
         default="halfplane",
+    )
+    parser.add_argument(
+        "--density-mode",
+        choices=("fitted", "profile"),
+        default="fitted",
+        help=(
+            "How the current density is represented inside the owned region: "
+            "the quadratic fit of the composed density, or the profile "
+            "evaluated at the quadrature nodes from the region-selecting flux."
+        ),
     )
     parser.add_argument("--map-only", action="store_true")
     parser.add_argument(
@@ -77,6 +88,7 @@ def main():
     result = {
         "kind": "diverted",
         "component": args.component,
+        "density_mode": args.density_mode,
         "cells": count,
         "history": [],
     }
@@ -86,7 +98,12 @@ def main():
 
     mapped = jax.jit(
         lambda moments, carrier: map_moments(
-            moments, *carrier[:7], profile, *carrier[7:], component=args.component
+            moments,
+            *carrier[:7],
+            profile,
+            *carrier[7:],
+            component=args.component,
+            density_mode=args.density_mode,
         )
     )
     started = perf_counter()
@@ -146,7 +163,15 @@ def main():
     pivots = jnp.arange(size, dtype=jnp.int32)
     compiled_step = jax.jit(
         lambda point, carrier, unit, matrix, piv, rebuild: advance(
-            point, carrier, unit, matrix, piv, rebuild, profile, args.component
+            point,
+            carrier,
+            unit,
+            matrix,
+            piv,
+            rebuild,
+            profile,
+            args.component,
+            args.density_mode,
         )
     )
     started = perf_counter()

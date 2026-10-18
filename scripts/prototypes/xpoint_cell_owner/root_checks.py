@@ -28,9 +28,11 @@ def save(path, result):
     path.write_text(json.dumps(result, indent=2) + "\n")
 
 
-def gauss_newton_gradient(point, operands, scale, profile, component="halfplane"):
+def gauss_newton_gradient(
+    point, operands, scale, profile, component="halfplane", density_mode="fitted"
+):
     """Accumulate the transposed Jacobian product from forward columns."""
-    value = residual(point, operands, scale, profile, component)
+    value = residual(point, operands, scale, profile, component, density_mode)
     count = point.size
     blocks = (count + DIRECTION_BLOCK - 1) // DIRECTION_BLOCK
     columns = jnp.zeros((blocks * DIRECTION_BLOCK, count), point.dtype)
@@ -41,7 +43,9 @@ def gauss_newton_gradient(point, operands, scale, profile, component="halfplane"
 
         def column(direction):
             return jax.jvp(
-                lambda trial: residual(trial, operands, scale, profile, component),
+                lambda trial: residual(
+                    trial, operands, scale, profile, component, density_mode
+                ),
                 (point,),
                 (direction,),
             )[1]
@@ -66,6 +70,7 @@ def main():
         choices=(
             "halfplane",
             "bell",
+            "lobe",
             "saddle",
             "pinned",
             "anchored",
@@ -74,6 +79,11 @@ def main():
             "oriented",
         ),
         default="halfplane",
+    )
+    parser.add_argument(
+        "--density-mode",
+        choices=("fitted", "profile"),
+        default="fitted",
     )
     args = parser.parse_args()
     assert jax.config.jax_enable_x64 is True
@@ -92,12 +102,12 @@ def main():
     scale = context.scale
     mapped = jax.jit(
         lambda point, carrier, unit: residual(
-            point, carrier, unit, profile, args.component
+            point, carrier, unit, profile, args.component, args.density_mode
         )
     )
     value, gradient = jax.jit(
         lambda point, carrier, unit: gauss_newton_gradient(
-            point, carrier, unit, profile, args.component
+            point, carrier, unit, profile, args.component, args.density_mode
         )
     )(state, operands, scale)
     value = np.asarray(value)
@@ -125,7 +135,9 @@ def main():
     steps = (1e-4, 3e-5, 1e-5, 3e-6, 1e-6, 3e-7, 1e-7)
     tangent_program = jax.jit(
         lambda point, direction, carrier, unit: jax.jvp(
-            lambda trial: residual(trial, carrier, unit, profile, args.component),
+            lambda trial: residual(
+                trial, carrier, unit, profile, args.component, args.density_mode
+            ),
             (point,),
             (direction,),
         )
@@ -162,7 +174,7 @@ def main():
 
     lu, pivots = jax.jit(
         lambda point, carrier, unit: factor(
-            point, carrier, unit, profile, args.component
+            point, carrier, unit, profile, args.component, args.density_mode
         )
     )(state, operands, scale)
     newton = jsp_linalg.lu_solve((lu, pivots), -jnp.asarray(value))

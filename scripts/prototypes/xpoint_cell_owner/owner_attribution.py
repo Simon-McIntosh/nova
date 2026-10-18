@@ -43,6 +43,11 @@ def main():
         ),
         default="halfplane",
     )
+    parser.add_argument(
+        "--density-mode",
+        choices=("fitted", "profile"),
+        default="fitted",
+    )
     args = parser.parse_args()
     assert jax.config.jax_enable_x64 is True
     assert jax.default_backend() in ("gpu", "cpu")
@@ -57,7 +62,12 @@ def main():
     profile = context.profile
     mapped = jax.jit(
         lambda moments, carrier: map_moments(
-            moments, *carrier[:7], profile, *carrier[7:], component=args.component
+            moments,
+            *carrier[:7],
+            profile,
+            *carrier[7:],
+            component=args.component,
+            density_mode=args.density_mode,
         )
     )
     state = mapped(context.reference, operands)

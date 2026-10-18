@@ -11,6 +11,7 @@ from scripts.prototypes.fast_map_production.kernel import read
 from scripts.prototypes.fast_read.ordinary_cut import bell_moments
 from scripts.prototypes.lean_map.quadrature import interior_moments
 from scripts.prototypes.xpoint_cell_owner.device_owner import integrate_cell
+from scripts.prototypes.xpoint_cell_owner.lobe_booking import lobe_moments
 
 
 def saddle_conic_coefficients(centres, pitches, saddle, hessian, level):
@@ -141,6 +142,7 @@ def owned_cut(
     capacity=16,
     component="halfplane",
     saddle_hessian=None,
+    density_mode="fitted",
 ):
     """Replace the sampled saddle-sector area and moment booking together."""
     if component == "inherited":
@@ -152,6 +154,26 @@ def owned_cut(
     count = jnp.sum(active, dtype=jnp.int32)
     indices = jnp.nonzero(active, size=capacity, fill_value=0)[0]
     density = program._density_coefficients(geometry, reading, profile)
+    if component == "lobe":
+        selected = reading.booking_cells & (reading.membership > 0)
+        count = jnp.sum(selected, dtype=jnp.int32)
+        indices = jnp.nonzero(selected, size=capacity, fill_value=0)[0]
+        integrals, integral_valid = lobe_moments(
+            geometry,
+            reading,
+            profile,
+            indices,
+            density,
+            reading.boundary_flux - reading.axis_flux,
+            sigma,
+            density_mode=density_mode,
+        )
+        live = jnp.arange(capacity) < count
+        packed = jnp.zeros((len(geometry.centre), 4), dtype=integrals.dtype)
+        packed = packed.at[indices].add(jnp.where(live[:, None], integrals, 0.0))
+        return reading, packed[:, 1:], (count <= capacity) & jnp.all(
+            ~live | integral_valid
+        )
     coefficients = reading.field_coefficients[indices]
     branch = "bell" if component == "bell" else "halfplane"
     orientation = None
@@ -194,10 +216,15 @@ def owned_cut(
         branch = "halfplane"
     cut_axes = (0, 0, 0, 0, 0, None, None, None, None, 0)
     orientation_axes = None if orientation is None else 0
-    selected = jax.vmap(
-        partial(integrate_cell, axis_component=branch),
-        in_axes=cut_axes + (orientation_axes,),
-    )(
+    span = reading.boundary_flux - reading.axis_flux
+    rule = partial(
+        integrate_cell,
+        axis_component=branch,
+        density_mode=density_mode,
+        profile=profile,
+        span=span,
+    )
+    selected = jax.vmap(rule, in_axes=cut_axes + (orientation_axes,))(
         geometry.vertices[indices],
         geometry.vertex_count[indices],
         geometry.centre[indices],
@@ -243,6 +270,7 @@ def map_moments(
     *,
     frame_gate=True,
     component="halfplane",
+    density_mode="fitted",
 ):
     """Replace fast_map_production.program.map_moments at the booked handoff."""
     cached = fixed_points._CachedField(
@@ -274,6 +302,7 @@ def map_moments(
         convention.sigma,
         component=component,
         saddle_hessian=roots.jet.hessian[saddle_root],
+        density_mode=density_mode,
     )
     selected = reading.selected_cells
     full = (

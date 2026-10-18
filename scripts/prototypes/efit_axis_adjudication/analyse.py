@@ -27,7 +27,7 @@ CANONICAL = pathlib.Path(
 )
 ADAPTER_A = pathlib.Path(
     "/home/ITER/mcintos/.config/reckon/crew/runs/"
-    "r-20261018T063236394668-efit-field-swap/exports/disagreement.json"
+    "r-20261018T205138810032-efit-adapter-polarity/exports/field-after-merged.json"
 )
 ADAPTER_B = pathlib.Path(
     "/home/ITER/mcintos/.config/reckon/crew/runs/"
@@ -83,7 +83,7 @@ def load_adapter_a():
     data = json.loads(ADAPTER_A.read_text())
     out = {}
     for row in data["rows"]:
-        case = row["case"].replace(":", "-").lower()
+        case = row["case"].replace(":", "-").replace("_", "-").lower()
         # adapter A carries nan geometry where nova admits no axis or saddle;
         # carry those as absent rather than as a point at nan
         for key in (
@@ -320,6 +320,10 @@ def main():
     for case_id, path, note in cases:
         results.append(analyse(case_id, path, note, ad_a, ad_b, args.n_seed))
         print(f"analysed {case_id}: {len(results[-1]['census'])} census points")
+
+    from refresh import refresh
+
+    results = refresh(results, json.loads(ADAPTER_A.read_text())["rows"])
 
     out = pathlib.Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)

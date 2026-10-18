@@ -50,6 +50,25 @@ class EscapeOverlayTest(unittest.TestCase):
         )
         plt.close(fig)
 
+    def test_outside_census_is_refused_before_painting(self):
+        row = _blocking_rebuild_row(None)
+        row["census"] = [{"r": 0.0, "z": 0.0, "kind": "saddle", "inside_wall": False}]
+        fig, ax = plt.subplots()
+        with self.assertRaisesRegex(ValueError, "outside the vessel"):
+            adjudication_plot.draw_panel(ax, row)
+        plt.close(fig)
+
+    def test_grid_node_saddle_proxy_is_refused_before_painting(self):
+        row = _blocking_rebuild_row(None)
+        row["efit"] = {
+            "saddle_source_position": [0.4, 0.6],
+            "saddle_plot_position": [0.4, 0.6],
+        }
+        fig, ax = plt.subplots()
+        with self.assertRaisesRegex(ValueError, "grid-node saddle proxy"):
+            adjudication_plot.draw_panel(ax, row)
+        plt.close(fig)
+
     def test_a_failed_rebuild_panel_still_carries_the_bottleneck(self):
         row = _blocking_rebuild_row({"bottleneck": [0.4, 0.6]})
         fig, ax = plt.subplots()

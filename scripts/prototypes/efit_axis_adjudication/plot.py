@@ -9,7 +9,6 @@ fill; psi is unfilled line contours; every coloured mark is in the legend.
 from __future__ import annotations
 
 import json
-import math
 import pathlib
 import sys
 from dataclasses import replace
@@ -19,6 +18,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.path import Path
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 from efit_field_swap.crosscheck import domain_rings
@@ -28,6 +28,7 @@ from nova.media.ink import DEFAULT_INK
 from nova.media.poloidal import draw_flux_contours, draw_nulls, draw_wall
 
 from field import FastField
+from page import figure_chunks
 from records import parse_record
 
 plt.rcParams.update(
@@ -52,7 +53,7 @@ COLOUR = {
 # one canvas width for every figure, so a reader meets one set of sizes; the
 # many-panel band of the figure style allows the smaller label size
 CANVAS_WIDTH = 14.0
-PANEL_HEIGHT = 3.6
+PANEL_HEIGHT = 4.8
 LABEL_SIZE = 12
 
 
@@ -106,16 +107,25 @@ def _assert_no_clipping(fig):
                 )
 
 
-def _sample_field(field, record):
+def _inside_vessel(positions, rings):
+    vessel = Path(rings[0][0]).contains_points(positions, radius=1e-10)
+    for ring, role in rings[1:]:
+        if role == "obstacle":
+            vessel &= ~Path(ring).contains_points(positions, radius=-1e-10)
+    return vessel
+
+
+def _sample_field(field, record, rings):
     rs = np.linspace(record.rgrid.min(), record.rgrid.max(), 200)
     zs = np.linspace(record.zgrid.min(), record.zgrid.max(), 220)
     RR, ZZ = np.meshgrid(rs, zs, indexing="ij")
     value, _, _, _, _, _ = field.jet(RR.ravel(), ZZ.ravel())
-    return rs, zs, value.reshape(RR.shape).T
+    inside = _inside_vessel(np.column_stack((RR.ravel(), ZZ.ravel())), rings)
+    return rs, zs, np.where(inside, value, np.nan).reshape(RR.shape).T
 
 
 def _boundary_contour(ax, rs, zs, psi, level, *, color, linestyle):
-    lo, hi = float(psi.min()), float(psi.max())
+    lo, hi = float(np.nanmin(psi)), float(np.nanmax(psi))
     if not (lo <= level <= hi):
         return
     drawn = draw_flux_contours(ax, rs, zs, psi, [level], color=color, linewidth=1.0)
@@ -190,24 +200,36 @@ def _draw_escape_bottleneck(ax, escape):
 def draw_panel(ax, row):
     record = parse_record(row["path"])
     field = FastField(record.rgrid, record.zgrid, record.psi)
+    rings = _wall_loops_by_role(row["path"])
+    points = row["census"]
+    positions = np.asarray([[p["r"], p["z"]] for p in points], dtype=float).reshape(
+        -1, 2
+    )
+    if any(not p["inside_wall"] for p in points) or (
+        len(positions) and not np.all(_inside_vessel(positions, rings))
+    ):
+        raise ValueError("census point outside the vessel")
+    efit = row["efit"]
+    source = efit.get("saddle_source_position")
+    saddle_mark = efit.get("saddle_plot_position")
+    if (
+        saddle_mark is not None
+        and source is not None
+        and np.allclose(saddle_mark, source, rtol=0, atol=1e-12)
+    ):
+        raise ValueError("grid-node saddle proxy cannot be painted")
 
-    rs, zs, psi = _sample_field(field, record)
+    rs, zs, psi = _sample_field(field, record, rings)
     levels = row["contour_levels"]
     draw_flux_contours(ax, rs, zs, psi, levels, color="#c9c9c9", linewidth=0.8)
 
     _draw_wall_loops(ax, row["path"])
 
-    efit = row["efit"]
     a = row["adapter_a"]
-    b = row["adapter_b"]
 
     for kind, marker in (("maximum", "^"), ("minimum", "v"), ("saddle", "x")):
         positions = np.asarray(
-            [
-                [point["r"], point["z"]]
-                for point in row["census"]
-                if point["kind"] == kind
-            ]
+            [[point["r"], point["z"]] for point in points if point["kind"] == kind]
         )
         if positions.size:
             style = replace(
@@ -229,7 +251,7 @@ def draw_panel(ax, row):
         ax.set_aspect("equal")
         ax.set_axis_off()
         ax.set_title(
-            f"{row['case']}\nrebuild failed: |grad psi|="
+            f"{row.get('panel_label', row['case'])}\nrebuild failed: |grad psi|="
             f"{row['rebuild']['grad_norm_at_axis']:.3g}; comparisons excluded",
             fontsize=LABEL_SIZE,
             pad=2,
@@ -250,25 +272,11 @@ def draw_panel(ax, row):
             color=COLOUR["nova_a"],
             linestyle="-",
         )
-    if b is not None:
-        _boundary_contour(
-            ax,
-            rs,
-            zs,
-            psi,
-            b["nova_boundary_level"],
-            color=COLOUR["nova_b"],
-            linestyle=":",
-        )
-
-    # imas-efit axis and X-point through the null vocabulary
-    x_point = None
-    if efit.get("saddle_source_position"):
-        x_point = np.array([efit["saddle_source_position"]])
+    # The trace carries a refined saddle level, but no refined position.
     draw_nulls(
         ax,
         magnetic_axis=[efit["axis_r"], efit["axis_z"]],
-        x_points=x_point,
+        x_points=np.asarray([saddle_mark]) if saddle_mark is not None else None,
     )
 
     if a is not None:
@@ -287,26 +295,12 @@ def draw_panel(ax, row):
                 color=COLOUR["nova_a"],
                 marker="o",
             )
-    if b is not None:
-        axis_pt = row["code_points"]["nova_b_axis"]
-        if axis_pt is not None:
-            _hollow_axis(
-                ax,
-                [axis_pt["r"], axis_pt["z"]],
-                color=COLOUR["nova_b"],
-                marker="s",
-                size=10,
-            )
-        saddle = b["nova_saddle_position"]
-        if saddle:
-            _marked_saddle(ax, saddle, color=COLOUR["nova_b"], marker="s")
-
     ax.set_aspect("equal")
     ax.set_axis_off()
-    ax.set_title(row["case"], fontsize=LABEL_SIZE, pad=2)
+    ax.set_title(row.get("panel_label", row["case"]), fontsize=LABEL_SIZE, pad=2)
 
 
-def _legend_handles(include_comparisons=True):
+def _legend_handles(include_comparisons=True, include_escape=False):
     from matplotlib.lines import Line2D
 
     handles = [
@@ -337,19 +331,7 @@ def _legend_handles(include_comparisons=True):
             [], [], color=COLOUR["nova_a"], ls="-", lw=1.0, label="adapter A boundary"
         ),
         Line2D(
-            [], [], color=COLOUR["nova_b"], ls=":", lw=1.0, label="adapter B boundary"
-        ),
-        Line2D(
             [], [], color="red", marker="^", ls="none", ms=8, label="imas-efit axis"
-        ),
-        Line2D(
-            [],
-            [],
-            color="red",
-            marker="X",
-            ls="none",
-            ms=8,
-            label="imas-efit saddle source grid-node proxy",
         ),
         Line2D(
             [],
@@ -369,25 +351,6 @@ def _legend_handles(include_comparisons=True):
             ls="none",
             ms=5,
             label="adapter A saddle",
-        ),
-        Line2D(
-            [],
-            [],
-            color=COLOUR["nova_b"],
-            marker="s",
-            mfc="none",
-            ls="none",
-            ms=8,
-            label="adapter B axis",
-        ),
-        Line2D(
-            [],
-            [],
-            color=COLOUR["nova_b"],
-            marker="s",
-            ls="none",
-            ms=5,
-            label="adapter B saddle",
         ),
         Line2D(
             [],
@@ -419,6 +382,8 @@ def _legend_handles(include_comparisons=True):
             label="census saddle",
         ),
     ]
+    if not include_escape:
+        handles = [item for item in handles if item.get_label() != "escape bottleneck"]
     if include_comparisons:
         return handles
     return [
@@ -457,61 +422,60 @@ def main():
 
     groups: dict[str, list] = {}
     for row in rows:
+        if row["machine"] == "JT-60SA":
+            continue
         groups.setdefault(row["machine"], []).append(row)
 
     for machine, members in groups.items():
-        n = len(members)
-        ncols = min(3, n)
-        nrows = math.ceil(n / ncols)
-        fig, axes = plt.subplots(
-            nrows, ncols, figsize=(CANVAS_WIDTH, PANEL_HEIGHT * nrows)
-        )
-        axes = np.atleast_1d(axes).ravel()
-        for ax, row in zip(axes, members):
-            draw_panel(ax, row)
-        for ax in axes[n:]:
-            ax.set_axis_off()
-        slug = machine.lower().replace("-", "")
-        legend = fig.legend(
-            handles=_legend_handles(
-                include_comparisons=any(
-                    row["rebuild"]["status"] == "pass" for row in members
-                )
-            ),
-            loc="upper center",
-            ncol=4,
-            frameon=False,
-            fontsize=LABEL_SIZE,
-            bbox_to_anchor=(0.5, 0.99),
-            borderaxespad=0.0,
-        )
-        fig.canvas.draw()
-        legend_box = legend.get_window_extent(fig.canvas.get_renderer())
-        if not fig.bbox.contains(legend_box.x0, legend_box.y0) or not fig.bbox.contains(
-            legend_box.x1, legend_box.y1
-        ):
-            raise RuntimeError(f"legend leaves canvas for {machine}")
-        fig.subplots_adjust(
-            top=max(
-                0.2,
-                legend_box.y0 / fig.bbox.height
-                - (
-                    0.12
-                    if not any(row["rebuild"]["status"] == "pass" for row in members)
-                    else 0.03
+        for index, start, subset in figure_chunks(machine, members):
+            n = len(subset)
+            fig, axes = plt.subplots(1, n, figsize=(CANVAS_WIDTH, PANEL_HEIGHT))
+            axes = np.atleast_1d(axes).ravel()
+            for number, (ax, row) in enumerate(zip(axes, subset), start=start + 1):
+                row["panel_label"] = str(number)
+                draw_panel(ax, row)
+            slug = machine.lower().replace("-", "")
+            suffix = "" if index == 0 else f"-{index + 1}"
+            legend = fig.legend(
+                handles=_legend_handles(
+                    include_comparisons=any(
+                        row["rebuild"]["status"] == "pass" for row in subset
+                    ),
+                    include_escape=any(row.get("escape") for row in subset),
                 ),
-            ),
-            bottom=0.02,
-            left=0.01,
-            right=0.99,
-            wspace=0.05,
-            hspace=0.10,
-        )
-        _assert_no_clipping(fig)
-        path = outdir / f"efit-axis-{slug}.svg"
-        fig.savefig(path, format="svg")
-        plt.close(fig)
-        print("wrote", path)
+                loc="upper center",
+                ncol=4,
+                frameon=False,
+                fontsize=LABEL_SIZE,
+                bbox_to_anchor=(0.5, 0.99),
+                borderaxespad=0.0,
+            )
+            fig.canvas.draw()
+            legend_box = legend.get_window_extent(fig.canvas.get_renderer())
+            if not fig.bbox.contains(
+                legend_box.x0, legend_box.y0
+            ) or not fig.bbox.contains(legend_box.x1, legend_box.y1):
+                raise RuntimeError(f"legend leaves canvas for {machine}")
+            fig.subplots_adjust(
+                top=max(
+                    0.2,
+                    legend_box.y0 / fig.bbox.height
+                    - (
+                        0.12
+                        if not any(row["rebuild"]["status"] == "pass" for row in subset)
+                        else 0.03
+                    ),
+                ),
+                bottom=0.02,
+                left=0.01,
+                right=0.99,
+                wspace=0.05,
+            )
+            _assert_no_clipping(fig)
+            path = outdir / f"efit-axis-{slug}{suffix}.svg"
+            fig.savefig(path, format="svg")
+            plt.close(fig)
+            print("wrote", path, flush=True)
 
 
 if __name__ == "__main__":

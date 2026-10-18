@@ -33,6 +33,7 @@ import jax.numpy as jnp
 import numpy as np
 
 from nova.equilibrium import topology
+from nova.equilibrium.wall_mask import wall_units_from_ids
 from nova.equilibrium.topology import TopologyPolicy
 from nova.jax.config import configure_dtypes
 from scripts.prototypes.efit_field_swap import crosscheck
@@ -75,13 +76,7 @@ def read_wall(path):
     """Every limiter unit outline of a wall IDS as one closed RZ ring each."""
     db = imas.DBEntry(f"imas:hdf5?path={path}", "r", dd_version="4.1.0")
     wall = db.get("wall")
-    rings = []
-    for description in wall.description_2d:
-        for unit in description.limiter.unit:
-            r = np.asarray(unit.outline.r, dtype=np.float64)
-            z = np.asarray(unit.outline.z, dtype=np.float64)
-            if r.size >= 3:
-                rings.append(np.column_stack((r, z)))
+    rings = [unit.vertices for unit in wall_units_from_ids(wall) if unit.r.size >= 3]
     db.close()
     return tuple(rings)
 
@@ -178,6 +173,10 @@ def measure_slice(view, wall_rings, resolutions=RESOLUTIONS):
         "floor",
         "reliable",
         "certified",
+        "cells_cleared",
+        "cells_uncertified",
+        "cells_occupied",
+        "subdivision_depth",
     ):
         row[f"coverage_{name}"] = None if coverage is None else getattr(coverage, name)
     return row

@@ -108,6 +108,134 @@ class Coverage(NamedTuple):
     floor: float
     reliable: bool
     certified: bool
+    cells_cleared: int = 0
+    cells_uncertified: int = 0
+    cells_occupied: int = 0
+    subdivision_depth: int = 0
+
+
+CELL_SUBDIVISION_DEPTH = 6
+CELL_WORK_LIMIT = 20000
+
+
+def _gradient_controls(field):
+    """Physical gradient components as Bernstein control nets per spline patch."""
+    spline = field.spline
+    radial = np.asarray(spline.radial)
+    vertical = np.asarray(spline.vertical)
+    coefficient = np.asarray(spline.coefficients)
+    dr = np.diff(radial)[None, :, None, None]
+    dz = np.diff(vertical)[:, None, None, None]
+    grad_r = 3.0 * np.diff(coefficient, axis=-1) / dr
+    grad_z = 3.0 * np.diff(coefficient, axis=-2) / dz
+    return radial, vertical, grad_r, grad_z
+
+
+def _split_bernstein(control, fraction, axis):
+    """The two exact de Casteljau restrictions of a Bernstein control net."""
+    levels = [np.asarray(control, dtype=float)]
+    for _ in range(control.shape[axis] - 1):
+        first = np.take(levels[-1], range(levels[-1].shape[axis] - 1), axis=axis)
+        second = np.take(levels[-1], range(1, levels[-1].shape[axis]), axis=axis)
+        levels.append((1.0 - fraction) * first + fraction * second)
+    left = np.stack([np.take(level, 0, axis=axis) for level in levels], axis=axis)
+    right = np.stack(
+        [np.take(level, -1, axis=axis) for level in levels[::-1]], axis=axis
+    )
+    return left, right
+
+
+def _restrict_bernstein(control, low, high, axis):
+    """Restrict one Bernstein axis to a closed subinterval of its patch."""
+    if low > 0.0:
+        _, control = _split_bernstein(control, low, axis)
+    if high < 1.0:
+        control, _ = _split_bernstein(control, (high - low) / (1.0 - low), axis)
+    return control
+
+
+def _strict_sign(control, depth):
+    """Outward-rounded coefficient hull excludes zero on the entire patch."""
+    scale = float(np.max(np.abs(control)))
+    gamma = (64 + 32 * depth) * np.finfo(float).eps
+    return bool(np.min(control) > gamma * scale or np.max(control) < -gamma * scale)
+
+
+def _patch_clear(controls, radial, vertical, ir, iz, box, depth):
+    r0, r1, z0, z1 = box
+    pr0, pr1 = radial[ir : ir + 2]
+    pz0, pz1 = vertical[iz : iz + 2]
+    u0 = max(0.0, (r0 - pr0) / (pr1 - pr0))
+    u1 = min(1.0, (r1 - pr0) / (pr1 - pr0))
+    v0 = max(0.0, (z0 - pz0) / (pz1 - pz0))
+    v1 = min(1.0, (z1 - pz0) / (pz1 - pz0))
+    for control in controls:
+        patch = _restrict_bernstein(control[iz, ir], u0, u1, axis=1)
+        patch = _restrict_bernstein(patch, v0, v1, axis=0)
+        if _strict_sign(patch, depth):
+            return True
+    return False
+
+
+def certify_empty_cells(field, cells, admitted_points, *, depth=CELL_SUBDIVISION_DEPTH):
+    """Exclude grad-psi zeros in every lattice cell without an admitted root.
+
+    Each box is intersected with every spline patch it meets. De Casteljau
+    restriction gives Bernstein coefficients for each gradient component on
+    the intersection. A patch is clear when either component's outward-rounded
+    coefficient hull excludes zero. An unresolved box splits into four until
+    the depth or total-work cap; any remainder stays uncertified.
+    """
+    radial, vertical, grad_r, grad_z = _gradient_controls(field)
+    points = np.asarray(admitted_points, dtype=float).reshape(-1, 2)
+    occupied = 0
+    empty_cells = 0
+    unresolved_cells = set()
+    pending = []
+    for cell_number, cell in enumerate(cells):
+        low = np.min(cell, axis=0)
+        high = np.max(cell, axis=0)
+        rounding = 256 * np.finfo(float).eps * max(1.0, float(np.max(np.abs(cell))))
+        if np.any(
+            np.all((points >= low - rounding) & (points <= high + rounding), axis=1)
+        ):
+            occupied += 1
+        else:
+            empty_cells += 1
+            pending.append((low[0], high[0], low[1], high[1], 0, cell_number))
+    work = 0
+    while pending:
+        if work >= CELL_WORK_LIMIT:
+            unresolved_cells.update(item[-1] for item in pending)
+            break
+        r0, r1, z0, z1, level, cell_number = pending.pop()
+        work += 1
+        if r0 < radial[0] or r1 > radial[-1] or z0 < vertical[0] or z1 > vertical[-1]:
+            unresolved_cells.add(cell_number)
+            continue
+        ir0 = max(0, np.searchsorted(radial, r0, side="right") - 1)
+        ir1 = min(len(radial) - 2, np.searchsorted(radial, r1, side="left") - 1)
+        iz0 = max(0, np.searchsorted(vertical, z0, side="right") - 1)
+        iz1 = min(len(vertical) - 2, np.searchsorted(vertical, z1, side="left") - 1)
+        clear = all(
+            _patch_clear(
+                (grad_r, grad_z), radial, vertical, ir, iz, (r0, r1, z0, z1), level
+            )
+            for iz in range(iz0, iz1 + 1)
+            for ir in range(ir0, ir1 + 1)
+        )
+        if clear:
+            pass
+        elif level == depth:
+            unresolved_cells.add(cell_number)
+        else:
+            rm, zm = (r0 + r1) / 2, (z0 + z1) / 2
+            pending.extend(
+                (a, b, c, d, level + 1, cell_number)
+                for a, b in ((r0, rm), (rm, r1))
+                for c, d in ((z0, zm), (zm, z1))
+            )
+    return empty_cells - len(unresolved_cells), len(unresolved_cells), occupied
 
 
 def _counterclockwise(ring):
@@ -270,6 +398,9 @@ class Decision:
     coverage_floor: float
     coverage_reliable: bool
     coverage_certified: bool
+    coverage_cells_cleared: int
+    coverage_cells_uncertified: int
+    coverage_cells_occupied: int
     note: str = ""
 
 
@@ -345,6 +476,11 @@ def _undecided(case, source, record, label, note, field_grad, coverage=None):
         coverage_floor=nan if coverage is None else coverage.floor,
         coverage_reliable=False if coverage is None else coverage.reliable,
         coverage_certified=False if coverage is None else coverage.certified,
+        coverage_cells_cleared=0 if coverage is None else coverage.cells_cleared,
+        coverage_cells_uncertified=0
+        if coverage is None
+        else coverage.cells_uncertified,
+        coverage_cells_occupied=0 if coverage is None else coverage.cells_occupied,
         note=note,
     )
 
@@ -581,21 +717,42 @@ def read_state(
         admitted = int(roots.saddles)
         index_sum = admitted_index_sum(roots.roots)
         coverage = coverage_certificate(field, outer, walls, index_sum)
+        root_valid = np.asarray(roots.roots.valid).copy()
+        if root_valid.size:
+            root_valid[0] = True
+        admitted_points = np.asarray(roots.roots.position)[root_valid]
+        try:
+            cleared, unresolved, occupied = certify_empty_cells(
+                field, cells, admitted_points
+            )
+            enclosure_error = ""
+        except Exception as error:  # noqa: BLE001 - an unknown read is caller-visible
+            cleared, unresolved, occupied = 0, len(cells), 0
+            enclosure_error = f"; enclosure failed {type(error).__name__}: {error}"
+        coverage = coverage._replace(
+            cells_cleared=cleared,
+            cells_uncertified=unresolved,
+            cells_occupied=occupied,
+            subdivision_depth=CELL_SUBDIVISION_DEPTH,
+            certified=coverage.certified and unresolved == 0,
+        )
         attempts.append(
             f"lattice {resolution}: candidates {candidates}, admitted saddles "
             f"{admitted}, boundary winding {coverage.total:+.0f} (outer "
             f"{coverage.outer_winding:+.0f} less obstacles "
             f"{coverage.obstacle_winding:+.0f}), admitted index sum {index_sum:+d}, "
             f"min |grad psi| {coverage.min_gradient:.2e} against floor "
-            f"{coverage.floor:.2e}"
+            f"{coverage.floor:.2e}, cells clear {cleared}, occupied "
+            f"{occupied}, uncertified {unresolved} at depth {CELL_SUBDIVISION_DEPTH} "
+            f"and work cap {CELL_WORK_LIMIT}{enclosure_error}"
         )
         if candidates == 0 and admitted == 0 and not bool(np.any(axis_valid)):
             attempts[-1] += "; no stationary root to read"
             continue
-        if admitted == 0 and not coverage.certified:
+        if not coverage.certified:
             attempts[-1] += (
-                "; coverage uncertified: the boundary winding and the admitted "
-                "index sum disagree, so an unadmitted saddle is not excluded"
+                "; coverage uncertified: boundary index or cell-gradient enclosure "
+                "does not exclude an unadmitted critical point"
                 if coverage.reliable
                 else "; coverage uncertified: a critical point on the loop leaves "
                 "the boundary winding undefined"
@@ -695,6 +852,9 @@ def _decision(case, source, record, resolutions=RESOLUTIONS):
         coverage_floor=coverage.floor,
         coverage_reliable=coverage.reliable,
         coverage_certified=coverage.certified,
+        coverage_cells_cleared=coverage.cells_cleared,
+        coverage_cells_uncertified=coverage.cells_uncertified,
+        coverage_cells_occupied=coverage.cells_occupied,
         field_grad_at_efit_axis=field_grad,
         field_grad_at_nova_axis=_field_gradient_at_nova_axis(field, outcome.axis),
         note=note,

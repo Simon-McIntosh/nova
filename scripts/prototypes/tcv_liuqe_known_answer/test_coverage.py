@@ -118,6 +118,48 @@ def test_field_with_a_missed_saddle_is_refused_not_read_limited(monkeypatch):
     assert outcome.coverage.total != outcome.coverage.index_sum
 
 
+def test_cancelled_missed_pair_is_refused(monkeypatch):
+    field = _maxima_and_saddle()
+    # The field contains two extrema and one saddle. Reporting just one
+    # extremum leaves the same index as the true field despite two missed roots.
+    boundary = crosscheck.coverage_certificate(field, RING, (), 1)
+    assert boundary.certified and boundary.total == boundary.index_sum == 1
+
+    def blind_census(f, geometry, convention, policy, previous):
+        hessian = jnp.asarray([[[-1.0, 0.0], [0.0, -1.0]]])
+        jet = topology.FieldJet(
+            value=jnp.zeros(1), gradient=jnp.zeros((1, 2)), hessian=hessian
+        )
+        roots = fixed_points.FixedPointResult(
+            position=jnp.asarray([[-0.35, 0.0]]),
+            jet=jet,
+            valid=jnp.asarray([True]),
+            status=jnp.zeros(1, jnp.int32),
+            iterations=jnp.zeros(1, jnp.int32),
+            retried=jnp.zeros(1, bool),
+        )
+        return RootCensus(roots, 1, 1, 0, 0, False, 0.0)
+
+    monkeypatch.setattr(crosscheck, "census", blind_census)
+    outcome = crosscheck.read_state(field, RING, (), CONVENTION, POLICY, (16,))
+    assert outcome.label == "coverage uncertified", outcome.attempts
+    assert outcome.resolution is None
+    assert outcome.coverage.total == outcome.coverage.index_sum
+    assert outcome.coverage.cells_uncertified > 0
+    assert not outcome.coverage.certified
+
+
+def test_constant_cell_reaches_depth_cap_and_is_uncertified():
+    field = _field(np.zeros_like(RR))
+    cell = np.asarray([RING[0], RING[1], RING[3], RING[4]])
+    cleared, unresolved, occupied = crosscheck.certify_empty_cells(
+        field, [cell], [], depth=3
+    )
+    assert cleared == 0
+    assert occupied == 0
+    assert unresolved == 1
+
+
 def test_certified_limited_field_reads_limited():
     outcome = crosscheck.read_state(_well(), RING, (), CONVENTION, POLICY, (16,))
     assert outcome.coverage is not None and outcome.coverage.certified
@@ -155,7 +197,6 @@ def test_limited_slice_is_read_only_when_coverage_is_certified():
         db.close()
     assert not view["xpoints"], "the chosen slice must be a limited one"
     reading = measure.measure_slice(view, measure.read_wall(str(WALL_STORE)), (24,))
-    if reading["nova_label"] == "limited":
-        assert reading["coverage_certified"] is True, reading["attempts"]
-    else:
-        assert reading["nova_label"] == "coverage uncertified", reading["attempts"]
+    assert reading["nova_label"] == "limited", reading["attempts"]
+    assert reading["coverage_certified"] is True, reading["attempts"]
+    assert reading["coverage_cells_uncertified"] == 0

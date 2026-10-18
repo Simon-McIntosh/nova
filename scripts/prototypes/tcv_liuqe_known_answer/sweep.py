@@ -11,13 +11,22 @@ from __future__ import annotations
 
 import argparse
 import json
+from dataclasses import asdict
 from pathlib import Path
 
 import imas
 
 from scripts.prototypes.tcv_liuqe_known_answer import measure
+from scripts.prototypes.efit_field_swap import crosscheck
 
 SLICES = (0, 6, 14, 24, 34, 46, 118, 206, 248, 291, 333, 376, 456, 542, 611, 796, 1257)
+REFUSED_CASES = {
+    "jt60sa-5slice-s5-133-134:A",
+    "jt60sa-5slice-s5-133-134:B",
+    "jt60sa-5slice-s1-15-16:B",
+    "jt60sa-5slice-s2-135-136:A",
+    "jt60sa-5slice-s2-135-136:B",
+}
 
 
 def main():
@@ -25,9 +34,11 @@ def main():
     parser.add_argument("--liuqe", required=True)
     parser.add_argument("--wall", required=True)
     parser.add_argument("--out", required=True)
+    parser.add_argument("--field-swap-out")
     parser.add_argument("--slices", default=",".join(str(index) for index in SLICES))
     parser.add_argument("--resolutions", default="16,24,32")
     args = parser.parse_args()
+    print("nova.__file__", __import__("nova").__file__, flush=True)
 
     indices = [int(token) for token in args.slices.split(",") if token.strip()]
     resolutions = tuple(int(r) for r in args.resolutions.split(","))
@@ -73,6 +84,24 @@ def main():
             )
     db.close()
     print("ROWS", len(indices), flush=True)
+    if args.field_swap_out:
+        field_out = Path(args.field_swap_out)
+        field_out.parent.mkdir(parents=True, exist_ok=True)
+        seen = set()
+        with field_out.open("w") as handle:
+            for case, source, path in crosscheck.cases():
+                if case not in REFUSED_CASES:
+                    continue
+                seen.add(case)
+                row = asdict(crosscheck._row(case, source, path, resolutions))
+                handle.write(json.dumps(row) + "\n")
+                handle.flush()
+                print("field-swap", case, row["nova_label"], flush=True)
+        if seen != REFUSED_CASES:
+            raise ValueError(
+                f"missing field-swap cases: {sorted(REFUSED_CASES - seen)}"
+            )
+        print("FIELD_SWAP_ROWS", len(seen), flush=True)
 
 
 if __name__ == "__main__":

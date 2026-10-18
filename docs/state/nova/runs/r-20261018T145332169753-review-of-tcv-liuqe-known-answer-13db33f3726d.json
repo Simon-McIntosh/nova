@@ -874,6 +874,43 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "de1186f066774069e31bc4f90b4d6920432bb5d7",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": true,
+    "process_stopped_pid": 567307,
+    "scratch_bytes": 5041,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261018T145332169753-review-of-tcv-liuqe-known-answer-13db33f3726d",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 5041,
+        "path": "/tmp/reckon-crew-scratch/r-20261018T145332169753-review-of-tcv-liuqe-known-answer-13db33f3726d"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-tcv-liuqe-known-answer-13db33f3726d",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

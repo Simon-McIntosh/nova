@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="efit-axis-adjudication">
+<meta name="plan-title" content="Effect axis adjudication">
+<meta name="plan-summary" content="Census of every imas-efit trace record's own spline, both codes' axes and saddles, for the lead to adjudicate the fixed-point disagreements">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s2">
+<meta name="plan-commits" content="dd5bdc5e9,da9daffa5,69aeab270">
+<meta name="plan-recorded-at" content="2026-10-18">
+<meta name="plan-verdict" content="partial">
+<title>Effect axis adjudication | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<h1 id="efit-axis-adjudication-rec-title">Effect axis adjudication</h1>
+<p id="efit-axis-adjudication-rec-summary">26 imas-efit boundary-level trace records each rebuilt
+from its own 65&times;65 grid with a scipy not-a-knot bicubic spline and censused exhaustively for
+stationary points; both codes' axes, saddles and boundary contours are drawn beside every census
+point. The full record is in
+<a href="/nova/research/efit-axis-adjudication.html">Effect axis adjudication</a>.</p>
+<div id="efit-axis-adjudication-rec-figures">
+<figure><img src='/nova/figures/converged-forward-solve/efit-axis-adjudication/efit-axis-aug.svg' alt='AUG panels' width='100%'><figcaption>AUG records: &psi; line contours (grey), the wall (dark), imas-efit's boundary contour (dashed blue), adapter A's boundary (solid orange) and adapter B's (dotted green); imas-efit's axis (solid triangle) and X-point (filled cross); adapter A's axis (hollow circle) and saddle (filled circle); adapter B's axis (hollow square) and saddle (filled square); every census stationary point as a hollow marker by type (triangle up maximum, triangle down minimum, cross saddle).</figcaption></figure>
+<figure><img src='/nova/figures/converged-forward-solve/efit-axis-adjudication/efit-axis-iter.svg' alt='ITER panels' width='100%'><figcaption>ITER records: &psi; line contours (grey), the wall (dark), imas-efit's boundary contour (dashed blue), adapter A's boundary (solid orange) and adapter B's (dotted green); imas-efit's axis (solid triangle) and X-point (filled cross); adapter A's axis (hollow circle) and saddle (filled circle); adapter B's axis (hollow square) and saddle (filled square); every census stationary point as a hollow marker by type (triangle up maximum, triangle down minimum, cross saddle).</figcaption></figure>
+<figure><img src='/nova/figures/converged-forward-solve/efit-axis-adjudication/efit-axis-jt60sa.svg' alt='JT-60SA panels' width='100%'><figcaption>JT-60SA records: &psi; line contours (grey), the wall (dark), imas-efit's boundary contour (dashed blue), adapter A's boundary (solid orange) and adapter B's (dotted green); imas-efit's axis (solid triangle) and X-point (filled cross); adapter A's axis (hollow circle) and saddle (filled circle); adapter B's axis (hollow square) and saddle (filled square); every census stationary point as a hollow marker by type (triangle up maximum, triangle down minimum, cross saddle).</figcaption></figure>
+<figure><img src='/nova/figures/converged-forward-solve/efit-axis-adjudication/efit-axis-mastu.svg' alt='MAST-U panels' width='100%'><figcaption>MAST-U records: &psi; line contours (grey), the wall (dark), imas-efit's boundary contour (dashed blue), adapter A's boundary (solid orange) and adapter B's (dotted green); imas-efit's axis (solid triangle) and X-point (filled cross); adapter A's axis (hollow circle) and saddle (filled circle); adapter B's axis (hollow square) and saddle (filled square); every census stationary point as a hollow marker by type (triangle up maximum, triangle down minimum, cross saddle).</figcaption></figure>
+<figure><img src='/nova/figures/converged-forward-solve/efit-axis-adjudication/efit-axis-synthetic.svg' alt='synthetic panels' width='100%'><figcaption>synthetic records: &psi; line contours (grey), the wall (dark), imas-efit's boundary contour (dashed blue), adapter A's boundary (solid orange) and adapter B's (dotted green); imas-efit's axis (solid triangle) and X-point (filled cross); adapter A's axis (hollow circle) and saddle (filled circle); adapter B's axis (hollow square) and saddle (filled square); every census stationary point as a hollow marker by type (triangle up maximum, triangle down minimum, cross saddle).</figcaption></figure>
+</div>
+<p id="efit-axis-adjudication-rec-rules">Adapter A's nova axis comes from nova's own topology read on
+the spline field; adapter B seeds its bracket census with the record axis and picks the nearest
+polished stationary point, so its axis level matches imas-efit's by construction.</p>
+</main></body></html>

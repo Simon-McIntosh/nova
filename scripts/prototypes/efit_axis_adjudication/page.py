@@ -91,12 +91,20 @@ def record_tables(rows):
         a = row["adapter_a"]
         b = row["adapter_b"]
         ext = row["axis_extremum"]
+        a_note = f" &mdash; {html.escape(a['nova_note'])}" if a and a.get("nova_note") else ""
         a_line = (
             f"<li>adapter A saddle &psi; = {fmt(a['nova_saddle_psi'],6)} at "
             f"({fmt(a['nova_saddle_r'],5)}, {fmt(a['nova_saddle_z'],5)}); "
-            f"nova boundary &psi; = {fmt(a['nova_boundary_psi'],6)}; label {a['nova_label']}</li>"
+            f"nova boundary &psi; = {fmt(a['nova_boundary_psi'],6)}; "
+            f"label {a['nova_label']}</li>"
             if a else "<li>adapter A: no row for this record</li>"
         )
+        if a and a["nova_axis_r"] is None:
+            a_line = (
+                f"<li>adapter A: nova admits no axis or saddle for this record; "
+                f"label {a['nova_label']}; boundary &psi; = "
+                f"{fmt(a['nova_boundary_psi'],6)}{a_note}</li>"
+            )
         b_line = (
             f"<li>adapter B saddle &psi; = {fmt(b['nova_saddle_level'],6)} at "
             f"({fmt(b['nova_saddle_position'][0],5)}, {fmt(b['nova_saddle_position'][1],5)}); "
@@ -223,7 +231,7 @@ of its 65&times;65 grid at <code>k=3, s=0</code>, evaluated through a coefficien
 census. Nothing here uses either nova field-swap adapter.</li>
 <li><strong>Rebuild check.</strong> At imas-efit's recorded axis the spline value must equal the
 record's axis &psi; and |&nabla;&psi;| must sit at rounding level; both are tabulated per record.</li>
-<li><strong>Census.</strong> Newton on &nabla;&psi; = 0 from a 110&times;110 seed lattice over the grid
+<li><strong>Census.</strong> Newton on &nabla;&psi; = 0 from a 120&times;120 seed lattice over the grid
 box, deduplicated at 10<sup>&minus;4</sup> m; points outside the grid box are dropped, where the
 spline extrapolates. Each point's Hessian eigenvalues give its type. A point lying on one side of a
 code's boundary contour is nearer that code's axis in &psi; than the boundary level.</li>
@@ -233,7 +241,12 @@ axis is nova's topology read, unanchored to the record.</li>
 <li><strong>Adapter B axis rule.</strong> The record axis is a seed only (<code>adapter.py</code>):
 adapter B seeds a bracket census with <code>(record.axis_r, record.axis_z)</code>, polishes it, and
 picks the stationary point nearest the record axis, reporting <code>reading.axis_flux</code>. Its
-exact match with imas-efit's axis level is therefore by construction.</li>
+exact match with imas-efit's axis level is therefore by construction. Adapter B records no axis
+<em>position</em>, so its axis is identified among the census points as the one whose &psi; equals its
+recorded <code>axis_level</code>; that match is stated in each panel's table.</li>
+<li><strong>Absent fixed points.</strong> Adapter A reports <code>NaN</code> geometry where nova admits no
+stationary point; those records carry no adapter A mark, and their geometry columns read
+&ndash;. Every one of them carries adapter A's own note in the per-record table.</li>
 </ul>
 
 <h2 id="efit-axis-adjudication-rebuild">(1) Rebuild check</h2>

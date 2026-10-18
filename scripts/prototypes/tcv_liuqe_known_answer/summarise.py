@@ -40,7 +40,11 @@ def measure_gaps(row):
     xpoints = np.asarray(row.get("liuqe_xpoints") or [], dtype=float).reshape(-1, 2)
     if len(xpoints):
         span_length = float(np.min(np.linalg.norm(xpoints - liuqe_axis, axis=1)))
-    if len(xpoints) and _finite(row.get("nova_boundary_psi")):
+    if (
+        len(xpoints)
+        and row.get("nova_label") == "diverted"
+        and _finite(row.get("nova_boundary_psi"))
+    ):
         x_gap = float(
             np.min(
                 np.linalg.norm(

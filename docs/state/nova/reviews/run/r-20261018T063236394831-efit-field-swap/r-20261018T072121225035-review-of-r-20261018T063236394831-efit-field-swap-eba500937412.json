@@ -1,0 +1,129 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [
+    {
+      "site": "scripts/prototypes/efit_field_swap/test_trace.py:21",
+      "would_fail_if": "The input fixture header ceased to be version 2; no implementation regression alone reddens this file-content check."
+    },
+    {
+      "site": "scripts/prototypes/efit_field_swap/test_trace.py:22-25",
+      "would_fail_if": "read_trace returned the wrong grid shape or shifted the first raw psi sample; other grid positions are unchecked against the Fortran file."
+    },
+    {
+      "site": "scripts/prototypes/efit_field_swap/test_trace.py:29",
+      "would_fail_if": "write_trace emitted a header other than version 2."
+    },
+    {
+      "site": "scripts/prototypes/efit_field_swap/test_trace.py:30-40",
+      "would_fail_if": "write_trace omitted or changed slice, iteration, verdict, axis or polarity while read_trace stayed fixed; a matching reader error could leave the round trip green."
+    },
+    {
+      "site": "scripts/prototypes/efit_field_swap/test_trace.py:53",
+      "would_fail_if": "write_trace corrupted any listed array while read_trace stayed fixed; coordinated row-order mistakes in both implementations survive."
+    },
+    {
+      "site": "scripts/prototypes/efit_field_swap/test_trace.py:59-60",
+      "would_fail_if": "read_trace accepted a version-1 header or raised the wrong exception."
+    },
+    {
+      "site": "scripts/prototypes/efit_field_swap/test_trace.py:74-75",
+      "would_fail_if": "grid_for or write_state emitted a grid other than 65 by 65 or a polygon with fewer than three vertices."
+    },
+    {
+      "site": "scripts/prototypes/efit_field_swap/test_trace.py:76-77",
+      "would_fail_if": "read_trace decoded a different boundary value or verdict from the receipt, but a wrong field or decision copied to both record and receipt leaves these assertions true."
+    },
+    {
+      "site": "scripts/prototypes/efit_field_swap/test_trace.py:104",
+      "would_fail_if": "root_census returned zero or more than one in-vessel stationary root on this fixture."
+    },
+    {
+      "site": "scripts/prototypes/efit_field_swap/test_trace.py:108",
+      "would_fail_if": "root_census returned a root outside the same geometry predicate the test calls; a defect shared with that predicate survives."
+    },
+    {
+      "site": "scripts/prototypes/efit_field_swap/export.py:79-80",
+      "would_fail_if": "write_trace changed exported psi or wall polygon while read_trace stayed fixed; matching reader/writer mistakes or a wrong source field remain green."
+    },
+    {
+      "site": "scripts/prototypes/efit_field_swap/measure.py:117; scripts/prototypes/efit_field_swap/export.py:183; scripts/prototypes/efit_field_swap/certified.py:98",
+      "would_fail_if": "configure_dtypes stopped enabling JAX binary64 before either measurement or export."
+    }
+  ],
+  "base_log_revision": "80ee84b289d41d5a1bfbda8c3a5b94a7b2d7f1cd",
+  "call_site_count": 4,
+  "call_sites": [
+    "scripts/prototypes/efit_field_swap/measure.py:main",
+    "scripts/prototypes/efit_field_swap/export.py:main",
+    "scripts/prototypes/efit_field_swap/certified.py:certified",
+    "scripts/prototypes/efit_field_swap/report.py:main"
+  ],
+  "completed_at": "2026-10-18T07:30:20Z",
+  "dispatched_at": "2026-10-18T07:22:23Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/efit_field_swap/adapter.py",
+      "line": "20",
+      "severity": "follow-on",
+      "text": "follow-on: SplineField duplicates the fit and value-gradient-Hessian capability of nova/linalg/tensor_spline.py:264-348 instead of wrapping that owner, leaving two implementations of the same spline field."
+    },
+    {
+      "file": "scripts/prototypes/efit_field_swap/test_trace.py",
+      "line": "53",
+      "severity": "follow-on",
+      "text": "follow-on: the round-trip array assertion compares a record read by read_trace with a second read after write_trace receives that record, so matching row-order mistakes in both functions survive; only the first grid sample has an independent raw-file check at line 23."
+    },
+    {
+      "file": "scripts/prototypes/efit_field_swap/test_trace.py",
+      "line": "76",
+      "severity": "follow-on",
+      "text": "follow-on: the export receipt's boundary level and label at lines 76-77 are copied from the same BoundaryTrace fields in export.py:83-86, so a wrong sampled field or decision can move both sides together without reddening the test."
+    },
+    {
+      "file": "scripts/prototypes/efit_field_swap/test_trace.py",
+      "line": "63",
+      "severity": "follow-on",
+      "text": "follow-on: the focused gate reads one selected export and no case table, so deleting another export or changing the 26-case comparison leaves its four tests green despite the done-when count."
+    }
+  ],
+  "head_log_revision": "80ee84b289d41d5a1bfbda8c3a5b94a7b2d7f1cd",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "commit eba50093741297e5781ddc20719c1979fba2f9c8 against 80ee84b289d41d5a1bfbda8c3a5b94a7b2d7f1cd adds nine files and 1317 lines, including the trace reader, spline adapter, exporter, tests and case table.",
+    "done_when": "prompt.txt:97-104 requires the reader, adapter, 26 case decisions, 18 exports and a table; gate-head.log records four passing tests, while exports/measurements_final and exports/receipts.json carry the full counts outside that gate.",
+    "goal": "prompt.txt:30 asks for nova reads, reciprocal fields and one disagreement table; docs/research/efit-field-swap.html:33-35 supplies the table and export.py:125-144 writes tie states, with the imas-efit handoff assigned to the coordinator.",
+    "manifest": "manifest.md records one commit, nine changed paths, base collection failure, head four-test pass, 26 qualified reads and 18 exports, corroborated by gate-base.log, gate-head.log and exports/receipts.json.",
+    "write_paths": "prompt.txt:70-74 grants the prototype directory, research page, figure directory and evidence fragment; all nine paths in commit eba50093741297e5781ddc20719c1979fba2f9c8 stay inside them."
+  },
+  "justifications": {
+    "durability": "test_trace.py:56-60 would redden if unsupported versions were accepted and test_trace.py:104 would redden if this trace gained an in-wall root, but test_trace.py:76-77 compares export values to receipts copied from those same values and the gate never checks all cases.",
+    "evidence": "gate-head.log records four passing tests from test_trace.py, while the 26 case rows and 18 export count in docs/research/efit-field-swap.html:22 and exports/receipts.json are artifact measurements rather than assertions in that gate.",
+    "fit": "adapter.py:230-241 hands its field, geometry and roots to the existing fast read, and the added source names describe their capability without plan-stage labels.",
+    "goal_fidelity": "docs/research/efit-field-swap.html:22 records all 26 cross-reads and export.py:125-144 emits the reciprocal tie fields the source goal requested.",
+    "reuse": "adapter.py:20-68 fits and evaluates a not-a-knot tensor cubic spline already owned by nova/linalg/tensor_spline.py:264-348; the search also found no existing boundary-trace reader in nova, scripts, tests or benchmarks.",
+    "scope_discipline": "every path added by commit eba50093741297e5781ddc20719c1979fba2f9c8 falls under the four grants in prompt.txt:70-74 and serves the exchange or its evidence."
+  },
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: 80ee84b289d41d5a1bfbda8c3a5b94a7b2d7f1cd\nreviewed_head_sha: eba50093741297e5781ddc20719c1979fba2f9c8\nVERDICT goal: prompt.txt:30 asks for nova reads, reciprocal fields and one disagreement table; docs/research/efit-field-swap.html:33-35 supplies the table and export.py:125-144 writes tie states, with the imas-efit handoff assigned to the coordinator.\nVERDICT done_when: prompt.txt:97-104 requires the reader, adapter, 26 case decisions, 18 exports and a table; gate-head.log records four passing tests, while exports/measurements_final and exports/receipts.json carry the full counts outside that gate.\nVERDICT write_paths: prompt.txt:70-74 grants the prototype directory, research page, figure directory and evidence fragment; all nine paths in commit eba50093741297e5781ddc20719c1979fba2f9c8 stay inside them.\nVERDICT manifest: manifest.md records one commit, nine changed paths, base collection failure, head four-test pass, 26 qualified reads and 18 exports, corroborated by gate-base.log, gate-head.log and exports/receipts.json.\nVERDICT diff: commit eba50093741297e5781ddc20719c1979fba2f9c8 against 80ee84b289d41d5a1bfbda8c3a5b94a7b2d7f1cd adds nine files and 1317 lines, including the trace reader, spline adapter, exporter, tests and case table.\nCALL_SITES: scripts/prototypes/efit_field_swap/measure.py:main, scripts/prototypes/efit_field_swap/export.py:main, scripts/prototypes/efit_field_swap/certified.py:certified, scripts/prototypes/efit_field_swap/report.py:main\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/research/efit-field-swap.html:22 records all 26 cross-reads and export.py:125-144 emits the reciprocal tie fields the source goal requested.\nSCORE evidence: 12\nJUSTIFICATION evidence: gate-head.log records four passing tests from test_trace.py, while the 26 case rows and 18 export count in docs/research/efit-field-swap.html:22 and exports/receipts.json are artifact measurements rather than assertions in that gate.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path added by commit eba50093741297e5781ddc20719c1979fba2f9c8 falls under the four grants in prompt.txt:70-74 and serves the exchange or its evidence.\nSCORE durability: 7\nJUSTIFICATION durability: test_trace.py:56-60 would redden if unsupported versions were accepted and test_trace.py:104 would redden if this trace gained an in-wall root, but test_trace.py:76-77 compares export values to receipts copied from those same values and the gate never checks all cases.\nSCORE fit: 16\nJUSTIFICATION fit: adapter.py:230-241 hands its field, geometry and roots to the existing fast read, and the added source names describe their capability without plan-stage labels.\nSCORE reuse: 4\nJUSTIFICATION reuse: adapter.py:20-68 fits and evaluates a not-a-knot tensor cubic spline already owned by nova/linalg/tensor_spline.py:264-348; the search also found no existing boundary-trace reader in nova, scripts, tests or benchmarks.\nFINDING scripts/prototypes/efit_field_swap/adapter.py:20 follow-on: SplineField duplicates the fit and value-gradient-Hessian capability of nova/linalg/tensor_spline.py:264-348 instead of wrapping that owner, leaving two implementations of the same spline field.\nFINDING scripts/prototypes/efit_field_swap/test_trace.py:53 follow-on: the round-trip array assertion compares a record read by read_trace with a second read after write_trace receives that record, so matching row-order mistakes in both functions survive; only the first grid sample has an independent raw-file check at line 23.\nFINDING scripts/prototypes/efit_field_swap/test_trace.py:76 follow-on: the export receipt's boundary level and label at lines 76-77 are copied from the same BoundaryTrace fields in export.py:83-86, so a wrong sampled field or decision can move both sides together without reddening the test.\nFINDING scripts/prototypes/efit_field_swap/test_trace.py:63 follow-on: the focused gate reads one selected export and no case table, so deleting another export or changing the 26-case comparison leaves its four tests green despite the done-when count.\n",
+  "review_run_id": "r-20261018T072121225035-review-of-r-20261018T063236394831-efit-field-swap-eba500937412",
+  "reviewed_base_sha": "80ee84b289d41d5a1bfbda8c3a5b94a7b2d7f1cd",
+  "reviewed_head_sha": "eba50093741297e5781ddc20719c1979fba2f9c8",
+  "reviewed_run_id": "r-20261018T063236394831-efit-field-swap",
+  "rubric": "code",
+  "scores": {
+    "durability": 7,
+    "evidence": 12,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 4,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T07:31:36.900014+00:00",
+  "total": 77
+}

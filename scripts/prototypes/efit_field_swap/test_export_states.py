@@ -12,6 +12,8 @@ from __future__ import annotations
 import json
 from types import SimpleNamespace
 
+import jax
+import jax.numpy as jnp
 import numpy as np
 import pytest
 
@@ -238,3 +240,51 @@ def test_main_exports_both_endpoints_of_every_bracket_for_each_carrier(
         assert sidecar["side"] == side
         assert sidecar["offset"] == offset
         assert sidecar["exported_key"] == key
+
+
+def test_export_refuses_a_live_decision_key_mismatch(tmp_path, monkeypatch):
+    assert jax.config.jax_enable_x64 is True
+    roots = SimpleNamespace(
+        jet=SimpleNamespace(value=jnp.asarray([0.25], dtype=jnp.float64)),
+        position=jnp.asarray([[1.0, 2.0]], dtype=jnp.float64),
+    )
+    reading = SimpleNamespace(
+        saddle_form=SimpleNamespace(position=jnp.asarray([1.0, 2.0])),
+        boundary_class=jnp.asarray(1),
+        wall_candidate=jnp.asarray(0.5),
+        saddle_candidate=jnp.asarray(0.25),
+        boundary_flux=jnp.asarray(0.25),
+        valid=True,
+        qualified=True,
+    )
+    calls = []
+
+    def sampled(shifted, prior=None):
+        calls.append(float(shifted))
+        if len(calls) != 1:
+            raise AssertionError("decision-key refusal was bypassed")
+        return (
+            roots,
+            reading,
+            jnp.asarray(0.0),
+            jnp.asarray([[1.0, -1.0]]),
+            jnp.asarray([True]),
+            jnp.asarray(0),
+            jnp.asarray(0.0),
+        )
+
+    state = {
+        "geometry": SimpleNamespace(),
+        "scale": 1.0,
+        "convention": SimpleNamespace(sigma=1),
+    }
+    monkeypatch.setattr(export_tie_islands, "moving_field", lambda *_: object())
+    with pytest.raises(
+        SystemExit,
+        match=r"export read at 0.5 has key \(1, 0\), receipt records \(0, 0\)",
+    ):
+        export_tie_islands.export(
+            state, 0.5, tmp_path, "wrong-key", sampled, (0, 0), "both"
+        )
+    assert calls == [0.5]
+    assert list(tmp_path.iterdir()) == []

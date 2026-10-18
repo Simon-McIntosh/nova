@@ -34,7 +34,26 @@ def main():
     state = tie_probe.build("diverted", 250, args.cache)
     sampled = tie_probe.make_sampler(state)
     prior, warm_count = tie_probe.warm(state, sampled, -0.2, 0.16, 0.01)
-    offsets = (0.17323108126295567, 0.17323108126295570)
+
+    def count(offset):
+        roots, *_ = sampled(jnp.asarray(offset * state["scale"]), prior)
+        return int(jnp.sum(roots.valid))
+
+    left, right = 0.17, 0.18
+    endpoint_counts = (count(left), count(right))
+    if endpoint_counts[0] <= endpoint_counts[1]:
+        raise RuntimeError(
+            f"census departure absent at scan endpoints: {endpoint_counts}"
+        )
+    while np.nextafter(left, right) < right:
+        middle = (left + right) / 2
+        if middle in (left, right):
+            break
+        if count(middle) == endpoint_counts[0]:
+            left = middle
+        else:
+            right = middle
+    offsets = (left, right)
     rows = []
     for offset in offsets:
         shifted = jnp.asarray(offset * state["scale"])
@@ -97,6 +116,8 @@ def main():
     result = {
         "cells": len(state["geometry"].centre),
         "warm_count": warm_count,
+        "endpoint_counts": endpoint_counts,
+        "adjacent": bool(np.nextafter(left, right) == right),
         "rows": rows,
     }
     Path(args.output).write_text(json.dumps(result, indent=2) + "\n")

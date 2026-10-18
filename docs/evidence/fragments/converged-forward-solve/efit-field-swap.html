@@ -137,6 +137,21 @@ centroid against vertex-mean and closed against stripped wall. This is a
 nova-core defect, out of this node's write scope, recorded as a follow-on with its
 reproduction.</p>
 
+<p>Those fourteen read now, and nova's read is unmodified in the doing: when
+nova's own capacity admits no vertex for a wall, the sweep rebuilds the cell
+geometry with an <code>8&times;</code> fitted capacity and records on the row
+that it did. The fit is in the adapter, not in nova's core, so the lead's
+decision that the two codes cross-check rather than converge is preserved. The
+table consequently carries all 28 manifest inputs where it carried 24: 13 rows
+read diverted, 6 read limited, 5 are unqualified by the census and 4 are unread.
+The four unread rows are a different failure with the same exception text: the
+four crossing records carry no wall segments at all (<code>wall_r</code> empty),
+so the adapter's own <code>wall_ring</code> raises before any geometry exists,
+and no capacity or reader choice makes a wall-less state readable. That is a gap
+in the exchange and is reported as one rather than counted as a disagreement.
+The five unqualified rows admit no saddle at resolution 16, 24 or 32, so the
+substituted square lattice and not the resolution is what stops them.</p>
+
 <h3>The negative control, and why it perturbs the field</h3>
 
 <p>The declared control was a wall perturbation, and as declared it
@@ -165,14 +180,20 @@ certified carrier states, made by rewriting only the decision fields of a source
 imas-efit record, so the grid, psi and wall in them are imas-efit's and the
 decision is nova's. Two are tie-island states, built by the probe that owns those
 carriers at the cell counts it bisects and rendered by nova, so everything in
-them is nova's written into imas-efit's layout. On the 282-cell carrier at the
-bisected offset <code>0.16133</code> nova's read returns <em>limited</em>; on the
-550-cell carrier it returns <em>diverted</em>. The
+them is nova's written into imas-efit's layout. Both tie-island offsets are
+bisected, each by its own receipt, with the probe's own <code>measure</code> and
+<code>bisect</code>: the 282-cell carrier at <code>0.013581788350157506</code>
+and the 550-cell carrier at <code>0.00960377400045224</code>, 52 steps each and
+each adjacent to the flip in binary64, and the exporter reads its offset out of
+the receipt rather than from a command line. The
 <code>&lt;probe kind&gt;-&lt;cells&gt;-nova-&lt;class&gt;</code> name answers two
-different questions and the two words are not in conflict. Only the 282-cell
-offset is a bisected one: no offset for the 550-cell arm is recorded anywhere this
-node could read, so that file carries the probe's unshifted carrier and the README
-says so.</p>
+different questions and the two words are not in conflict. The offset is
+bisected on the probe's read path while the class in the record is nova's read
+on the export's own census-seeded path; the two agree on the 282 arm (diverted,
+as its receipt says) and differ on the 550 arm, whose record reads
+<em>limited</em> where its receipt's left key reads diverted. Both numbers are in
+the sidecar beside the record, and the mismatch is reported rather than smoothed
+over.</p>
 
 <h3>The decision table</h3>
 
@@ -211,13 +232,17 @@ lattice, and compare the admitted saddle <em>position</em> on every case where
 both codes commit to one — that comparison, not the level alone, is what turns
 the level difference into a diagnosis.</li>
 <li>Repair the contour-mesh capacity in <code>TopologyGeometry.from_cells</code> so
-the ITER and MAST-U walls mesh, which is the single change that would take the
-qualified set from five records to nineteen.</li>
-<li>Bisect the 550-cell arm's moving offset so the second tie-island export is a
-bisected state rather than the unshifted carrier. The companion step, comparing
-the two codes' admitted saddle <em>positions</em>, cannot be taken from these
-records: the version-2 layout stores imas-efit's refined saddle <em>level</em>
-and no position, so it needs imas-efit to record one.</li>
+the ITER and MAST-U walls mesh in nova's core rather than through the adapter's
+fit. The outcome is measured: with the fit the table's qualified set goes from
+five records to nineteen, and only the core repair is still owed.</li>
+<li>Reconcile the two read paths behind the tie-island exports. The offset is
+bisected with the probe's <code>sampler_with_enclosure</code> and the class in
+the record comes from the export's <code>census</code>-seeded path; the same
+field, geometry and offset return class 1 and class 0 respectively on the
+550-cell carrier, so one of the two should follow the other. The companion step,
+comparing the two codes' admitted saddle <em>positions</em>, cannot be taken from
+these records: the version-2 layout stores imas-efit's refined saddle
+<em>level</em> and no position, so it needs imas-efit to record one.</li>
 <li>Draw the qualified cases: imas-efit's axis and nova's axis on one field, with
 the wall, which is the figure that makes the axis disagreement visible.</li>
 </ol>

@@ -173,37 +173,56 @@ def measure_slice(view, wall_rings, resolutions=RESOLUTIONS):
             stack.append(points[axis_valid])
         previous = jnp.asarray(np.vstack(stack))
         roots = census(field, geometry, convention, policy, previous)
-        attempts.append(f"lattice {resolution}: candidates {int(roots.candidates)}")
-        if int(roots.candidates) == 0 or int(roots.saddles) == 0:
-            attempts[-1] += f", admitted saddles {int(roots.saddles)}"
+        candidates = int(roots.candidates)
+        admitted = int(roots.saddles)
+        attempts.append(
+            f"lattice {resolution}: candidates {candidates}, "
+            f"admitted saddles {admitted}"
+        )
+        # A limited state stores no X-point, so a lattice whose census admits no
+        # saddle still carries a reading to score against LIUQE's limited answer,
+        # and a slice at a lattice that never admits one would otherwise be
+        # dropped from the comparison. Only a lattice whose census admits no
+        # stationary root at all has nothing to read, and only that is skipped.
+        if candidates == 0 and admitted == 0 and not bool(np.any(axis_valid)):
+            attempts[-1] += "; no stationary root to read"
             continue
-        reading = nova_read(field, roots.roots, geometry, convention, policy)
+        try:
+            reading = nova_read(field, roots.roots, geometry, convention, policy)
+        except Exception as error:  # noqa: BLE001 - one lattice must not stop the sweep
+            attempts[-1] += f"; read failed {type(error).__name__}: {error}"
+            continue
         boundary = np.asarray(reading.boundary, dtype=np.float64)
         axis = np.asarray(reading.axis, dtype=np.float64)
         label = int(np.asarray(reading.boundary_class))
         return dict(
             resolution=resolution,
             fitted=fitted,
+            nova_candidates=candidates,
+            nova_saddles=admitted,
             nova_axis=[float(axis[0]), float(axis[1])],
-            nova_axis_psi=sigma * _value(field, axis),
+            nova_axis_psi=float(sigma) * _value(field, axis),
             nova_boundary=[float(boundary[0]), float(boundary[1])],
             nova_boundary_psi=float(np.asarray(reading.boundary_flux)),
             nova_label="diverted" if label else "limited",
             nova_span=abs(
-                float(np.asarray(reading.boundary_flux)) - sigma * _value(field, axis)
+                float(np.asarray(reading.boundary_flux))
+                - float(sigma) * _value(field, axis)
             ),
             attempts="; ".join(attempts),
         )
     return dict(
         resolution=None,
         fitted=False,
+        nova_candidates=None,
+        nova_saddles=None,
         nova_axis=[float("nan")] * 2,
         nova_axis_psi=float("nan"),
         nova_boundary=[float("nan")] * 2,
         nova_boundary_psi=float("nan"),
         nova_label="unqualified",
         nova_span=float("nan"),
-        attempts="; ".join(attempts) + "; no lattice admitted a saddle",
+        attempts="; ".join(attempts) + "; no lattice admitted a reading",
     )
 
 

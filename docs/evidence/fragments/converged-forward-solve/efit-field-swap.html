@@ -1,0 +1,109 @@
+<section id="efit-field-swap">
+<h2>Cross-checking nova's boundary read against imas-efit's trace records</h2>
+
+<p>Nova's boundary decision was to be measured on imas-efit's own fields, case
+by case, without shaping nova's rule by theirs. Three pieces are committed and
+green; the case-by-case sweep is measured but not yet independent evidence,
+and the reason is stated below with the instrument that shows it.</p>
+
+<h3>What is committed</h3>
+
+<ul>
+<li><code>scripts/prototypes/efit_field_swap/trace_record.py</code> — a reader
+and writer for the <code>BOUNDARY_LEVEL_TRACE 2</code> record, laid out against
+<code>read_boundary_trace_record</code> / <code>write_boundary_trace_record</code>
+in imas-efit's <code>src/EFIT/boundary_level_trace.f90</code> rather than from a
+guess: header, dimension line, discrete-status line, seven-reals status line,
+then the <code>r</code> grid, the <code>z</code> grid, the wall segments, the
+limiter cell indices, the decision cells, the wall polygon and the row-major psi
+grid. Reals are written in the Fortran <code>ES26.17E3</code> spelling, so a
+captured record round-trips bit-exactly, and an emitted record carries 4978
+lines for a 65&times;65 grid.</li>
+
+<li><code>scripts/prototypes/efit_field_swap/spline_field.py</code> — the adapter
+that presents a record's psi grid to nova's <code>read</code>. imas-efit carries
+its flux as a tensor-product not-a-knot bicubic spline
+(<code>type(EZspline2)</code>, <code>bcs=(0,0)</code>, at
+<code>src/EFIT/null_detection.f90</code>), and the adapter rebuilds that same
+spline, so <strong>the spline is the field and nova's Biot-Savart operator is
+not used and no plasma current is booked</strong>. Value, gradient and Hessian
+are each a tensor contraction against a B-spline basis: every derivative of a
+B-spline is itself a B-spline of one lower degree whose coefficients are a
+divided difference of the parent's, so no hand-written derivative recurrence is
+needed and the result stays differentiable under <code>jax.jacfwd</code>, which
+the kernel's saddle curvature terms require. All six quantities agree with
+scipy's <code>bisplev</code> to <code>1e-9</code> relative on the field and to
+<code>1e-6</code> absolute on the second derivatives, at 64 pseudo-random
+interior points.</li>
+
+<li><code>scripts/prototypes/efit_field_swap/crosscheck.py</code> — the driver
+that rebuilds each record's field, builds a square-lattice cell geometry inside
+the record's own wall polygon, runs nova's <code>census</code> and
+<code>read</code> on it, and records both codes' decision columns (axis level
+and position, boundary level, admitted saddle position and level, wall contact
+level, limited-or-diverted label) with the source of each column named.</li>
+</ul>
+
+<h3>The measured limitation, and its instrument</h3>
+
+<p>On the record lattices tried so far, nova's census proposes <strong>no
+cellwise stationary seed at all</strong>: <code>RootCensus.candidates</code> is
+exactly <code>0</code> on <code>jt60sa-5slice-s5-301-302</code> and
+<code>jt60sa-5slice-s5-133-134</code> at a 16&times;16 lattice (132 retained
+cells, pitch 0.2508 m), while <code>RootCensus.axes</code> is <code>1</code> and
+<code>RootCensus.saddles</code> is <code>0</code>. Every cell's quadratic model
+is well conditioned (132 of 132 pass <code>_conditioned_hessian</code>), so the
+seed rejection is the containment test: on a cell whose span is comparable to
+the spline's own feature scale, the fitted quadratic places its stationary point
+outside the cell it was fitted on, and <code>census</code> discards it.</p>
+
+<p>The consequence is visible in the decision columns and is the reason they are
+not yet independent evidence. With no saddle admitted, <code>gather</code> in
+<code>census</code> fills every saddle slot with the axis index, the
+merge-path saddle admission has an all-<code>-inf</code> margin and falls back
+to slot 0, and the reported boundary level collapses onto the axis level
+(1.5768 for record 301, against imas-efit's own stored boundary
+<code>fed_back_psi</code> of 0.6790). Nova's label on that record is
+<em>limited</em> where imas-efit's verdict is <em>diverted</em> — but that
+disagreement is produced by a missing seed, not by the two codes' decision
+rules, and it must not be reported as a decision difference until the seed
+proposal works on this geometry.</p>
+
+<p>Because the axis reference would otherwise have come from nova's own
+(empty) seed set, the driver falls back to the lattice cell centre whose
+<code>sigma&nbsp;psi</code> is extremal, which is a quantity read from the
+record's own field but is nevertheless an outside reference rather than nova's
+own census. That substitution is recorded in the driver's docstring and in the
+manifest's follow-ons.</p>
+
+<h3>Approximations that qualify every number</h3>
+
+<ul>
+<li>The cell geometry is a square lattice at the record's own resolution inside
+the record's wall polygon, not nova's hex or Delaunay carrier mesh, so the Bell
+cell fit and the cell-boundary census differ in discretisation from a
+production nova run.</li>
+<li>The record stores its wall as consecutive segments rather than one closed
+ring; the adapter closes it by appending the final segment's end.</li>
+<li>The comparison is of two codes' <em>decisions</em> on one field
+representation, not of two physics models, because the field consumed here is
+imas-efit's spline rather than a nova forward solve.</li>
+</ul>
+
+<h3>Remaining work</h3>
+
+<ol>
+<li>Raise the in-wall cell resolution until nova's own census proposes cellwise
+seeds and admits a saddle on these records, then re-run the sweep. Until that
+lands the disagreement table has no independent nova column.</li>
+<li>Export nova's bisected tie-island states at 282 and 550 cells (both sides of
+each adjacent-double pair) and one limited and one diverted certified carrier
+state as version-2 trace records on a 65&times;65 grid under
+<code>exports/</code>, with a README giving each file's provenance and nova's
+own decision, and a test re-reading one export through the codec reader.</li>
+<li>Write the case-by-case disagreement table into
+<code>docs/research/efit-field-swap.html</code> once the sweep is meaningful,
+separating representation differences (grid spline against nova's operator
+field) from decision differences.</li>
+</ol>
+</section>

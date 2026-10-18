@@ -1,0 +1,93 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: both reviewed suite arms declare completed=false and their logs record no run; no comparable failure delta can be derived",
+  "assertion_audit": {
+    "test_coverage.py:115-118": "Fails if blind_census no longer produces an uncertified refusal, returns a resolution, reports certified coverage, or reports equal winding and admitted index.",
+    "test_coverage.py:123-125": "Fails if the one-maximum field no longer certifies with index one or is no longer read limited.",
+    "test_coverage.py:130-136": "Fails if the outer and obstacle windings cease to be nonzero and equal, the domain total stops subtracting them or being zero, or the zero-index domain is refused.",
+    "test_coverage.py:142-143": "Fails if a critical point at a sampled loop vertex is treated as reliable or certified.",
+    "test_coverage.py:156-161": "Fails if the selected LIUQE slice stores an X-point, a limited decision lacks certified coverage, or a non-limited decision has a label other than coverage uncertified; it does not require a limited decision and this test was deselected.",
+    "test_coverage.py:86-90": "Fails if the true field winding changes from one, the true index is refused, or the deliberately wrong index is certified; these values come from the analytic field and independently chosen index counts."
+  },
+  "call_site_count": 6,
+  "call_sites": [
+    "scripts/prototypes/efit_field_swap/crosscheck.py:655 (_decision calls read_state)",
+    "scripts/prototypes/tcv_liuqe_known_answer/measure.py:155 (measure_slice calls read_state)",
+    "scripts/prototypes/tcv_liuqe_known_answer/measure.py:236 (main calls measure_slice)",
+    "scripts/prototypes/tcv_liuqe_known_answer/sweep.py:55 (main calls measure_slice)",
+    "scripts/prototypes/tcv_liuqe_known_answer/figures.py:119 (build calls slice_view)",
+    "scripts/prototypes/tcv_liuqe_known_answer/summarise.py:91 (main calls measure_gaps)"
+  ],
+  "completed_at": "2026-10-18T17:08:11Z",
+  "dispatched_at": "2026-10-18T16:57:38Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/efit_field_swap/crosscheck.py",
+      "line": "203",
+      "severity": "blocking",
+      "text": "blocking: Equality of boundary winding and admitted index sum cannot certify that every critical point was found: an omitted extremum (+1) and saddle (-1) cancel, so read_state:595 can accept a zero-saddle field as limited despite a missed saddle; test_coverage.py:83-118 exercises only one missed saddle."
+    },
+    {
+      "file": "docs/research/tcv-liuqe-known-answer.html",
+      "line": "90",
+      "severity": "blocking",
+      "text": "blocking: The table and 5/12 headline use pre-certificate labels for slices 0 and 14, while receipts/tcv-liuqe-coverage-rows.jsonl records both as coverage uncertified; that receipt has only two rows, so the revised decision was not measured across the twelve reported slices."
+    },
+    {
+      "file": "docs/research/tcv-liuqe-known-answer.html",
+      "line": "83",
+      "severity": "blocking",
+      "text": "blocking: The comparison table omits the paired LIUQE and nova X-point positions and both boundary flux values, giving only their gaps, and omits the explicit axis-psi gap; the source done_when requires paired values and absolute and relative gaps per slice."
+    },
+    {
+      "file": "scripts/prototypes/tcv_liuqe_known_answer/measure.py",
+      "line": "74",
+      "severity": "follow-on",
+      "text": "follow-on: read_wall duplicates the IMAS limiter-unit extraction owned by nova/equilibrium/wall_mask.py:209-220 instead of extending or wrapping that owner; this copy also bypasses its single-description and unit validation."
+    },
+    {
+      "file": "scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py",
+      "line": "150",
+      "severity": "follow-on",
+      "text": "follow-on: The only real LIUQE slice assertion is marked slow and excluded by the recorded gate, and its branch accepts either a certified limited read or an uncertified refusal, so the gate cannot detect loss of actual limited-slice coverage."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 6 production call site(s)",
+    "diff": "Read all five commits against a0ed032e; scripts/prototypes/tcv_liuqe_known_answer/measure.py adds the score and scripts/prototypes/efit_field_swap/crosscheck.py adds the certificate, while the twelve-row report was not regenerated.",
+    "done_when": "The source brief requires twelve per-slice paired values and gaps plus panels; docs/research/tcv-liuqe-known-answer.html:83-86 omits paired X-point positions and both boundary flux values, while coverage-tests.log tests only four synthetic certificate cases.",
+    "goal": "The source brief asks for a LIUQE known-answer score; docs/research/tcv-liuqe-known-answer.html:89-103 contains twelve rows, but its labels for 0 and 14 conflict with the later sweep receipt.",
+    "manifest": "The source manifest.md reports five commits and a four-pass focused gate, but both suite arms have completed=false and the sweep receipt contains only two of the twelve reported slices.",
+    "write_paths": "The source manifest declares five path families; the nine paths in git diff a0ed032e..822de7c7 are all within scripts/prototypes/efit_field_swap, scripts/prototypes/tcv_liuqe_known_answer, and the declared research, evidence and figure paths."
+  },
+  "justifications": {
+    "durability": "test_coverage.py:83-143 would redden if the single-missed-saddle refusal, limited read, obstacle subtraction or sampled-loop floor regressed, but it cannot catch a missed extremum and saddle whose indices cancel and the real-slice test at :150 is deselected.",
+    "evidence": "receipts/coverage-tests.log records four passing synthetic tests, while baseline-suite.log and after-suite.log record no completed arms and receipts/tcv-liuqe-coverage-rows.jsonl has only two slices.",
+    "fit": "scripts/prototypes/efit_field_swap/crosscheck.py:547 keeps the decision in the adapter owner and scripts/prototypes/tcv_liuqe_known_answer/figures.py:67-103 uses the established media painters without forbidden source names.",
+    "goal_fidelity": "docs/research/tcv-liuqe-known-answer.html:89-103 presents a twelve-slice comparison, but its first two nova labels are already contradicted by the certificate sweep receipt.",
+    "reuse": "scripts/prototypes/efit_field_swap/crosscheck.py:547 extends the read owner, but scripts/prototypes/tcv_liuqe_known_answer/measure.py:74 duplicates IMAS wall-unit extraction already owned by nova/equilibrium/wall_mask.py:209.",
+    "scope_discipline": "git diff --name-only a0ed032e..822de7c7 lists nine files, all inside the five source write path families declared in manifest.md:3."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source brief asks for a LIUQE known-answer score; docs/research/tcv-liuqe-known-answer.html:89-103 contains twelve rows, but its labels for 0 and 14 conflict with the later sweep receipt.\nVERDICT done_when: The source brief requires twelve per-slice paired values and gaps plus panels; docs/research/tcv-liuqe-known-answer.html:83-86 omits paired X-point positions and both boundary flux values, while coverage-tests.log tests only four synthetic certificate cases.\nVERDICT write_paths: The source manifest declares five path families; the nine paths in git diff a0ed032e..822de7c7 are all within scripts/prototypes/efit_field_swap, scripts/prototypes/tcv_liuqe_known_answer, and the declared research, evidence and figure paths.\nVERDICT manifest: The source manifest.md reports five commits and a four-pass focused gate, but both suite arms have completed=false and the sweep receipt contains only two of the twelve reported slices.\nVERDICT diff: Read all five commits against a0ed032e; scripts/prototypes/tcv_liuqe_known_answer/measure.py adds the score and scripts/prototypes/efit_field_swap/crosscheck.py adds the certificate, while the twelve-row report was not regenerated.\nCALL_SITES: scripts/prototypes/efit_field_swap/crosscheck.py:655 (_decision calls read_state), scripts/prototypes/tcv_liuqe_known_answer/measure.py:155 (measure_slice calls read_state), scripts/prototypes/tcv_liuqe_known_answer/measure.py:236 (main calls measure_slice), scripts/prototypes/tcv_liuqe_known_answer/sweep.py:55 (main calls measure_slice), scripts/prototypes/tcv_liuqe_known_answer/figures.py:119 (build calls slice_view), scripts/prototypes/tcv_liuqe_known_answer/summarise.py:91 (main calls measure_gaps)\nSCORE goal_fidelity: 7\nJUSTIFICATION goal_fidelity: docs/research/tcv-liuqe-known-answer.html:89-103 presents a twelve-slice comparison, but its first two nova labels are already contradicted by the certificate sweep receipt.\nSCORE evidence: 3\nJUSTIFICATION evidence: receipts/coverage-tests.log records four passing synthetic tests, while baseline-suite.log and after-suite.log record no completed arms and receipts/tcv-liuqe-coverage-rows.jsonl has only two slices.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only a0ed032e..822de7c7 lists nine files, all inside the five source write path families declared in manifest.md:3.\nSCORE durability: 8\nJUSTIFICATION durability: test_coverage.py:83-143 would redden if the single-missed-saddle refusal, limited read, obstacle subtraction or sampled-loop floor regressed, but it cannot catch a missed extremum and saddle whose indices cancel and the real-slice test at :150 is deselected.\nSCORE fit: 15\nJUSTIFICATION fit: scripts/prototypes/efit_field_swap/crosscheck.py:547 keeps the decision in the adapter owner and scripts/prototypes/tcv_liuqe_known_answer/figures.py:67-103 uses the established media painters without forbidden source names.\nSCORE reuse: 5\nJUSTIFICATION reuse: scripts/prototypes/efit_field_swap/crosscheck.py:547 extends the read owner, but scripts/prototypes/tcv_liuqe_known_answer/measure.py:74 duplicates IMAS wall-unit extraction already owned by nova/equilibrium/wall_mask.py:209.\nFINDING scripts/prototypes/efit_field_swap/crosscheck.py:203 blocking: Equality of boundary winding and admitted index sum cannot certify that every critical point was found: an omitted extremum (+1) and saddle (-1) cancel, so read_state:595 can accept a zero-saddle field as limited despite a missed saddle; test_coverage.py:83-118 exercises only one missed saddle.\nFINDING docs/research/tcv-liuqe-known-answer.html:90 blocking: The table and 5/12 headline use pre-certificate labels for slices 0 and 14, while receipts/tcv-liuqe-coverage-rows.jsonl records both as coverage uncertified; that receipt has only two rows, so the revised decision was not measured across the twelve reported slices.\nFINDING docs/research/tcv-liuqe-known-answer.html:83 blocking: The comparison table omits the paired LIUQE and nova X-point positions and both boundary flux values, giving only their gaps, and omits the explicit axis-psi gap; the source done_when requires paired values and absolute and relative gaps per slice.\nFINDING scripts/prototypes/tcv_liuqe_known_answer/measure.py:74 follow-on: read_wall duplicates the IMAS limiter-unit extraction owned by nova/equilibrium/wall_mask.py:209-220 instead of extending or wrapping that owner; this copy also bypasses its single-description and unit validation.\nFINDING scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py:150 follow-on: The only real LIUQE slice assertion is marked slow and excluded by the recorded gate, and its branch accepts either a certified limited read or an uncertified refusal, so the gate cannot detect loss of actual limited-slice coverage.\nreviewed_base_sha: a0ed032e1c8fb62e1fbad18cea1c343052dc0dd0\nreviewed_head_sha: 822de7c7bbfc8d97e8df70a69df9c3b9fac1380a\n",
+  "review_run_id": "r-20261018T165645335244-review-of-tcv-liuqe-known-answer-822de7c7bbfc",
+  "reviewed_base_sha": "a0ed032e1c8fb62e1fbad18cea1c343052dc0dd0",
+  "reviewed_head_sha": "822de7c7bbfc8d97e8df70a69df9c3b9fac1380a",
+  "reviewed_run_id": "r-20261018T134957600545-tcv-liuqe-known-answer",
+  "scores": {
+    "durability": 8,
+    "evidence": 3,
+    "fit": 15,
+    "goal_fidelity": 7,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T17:08:55.500267+00:00",
+  "total": 58
+}

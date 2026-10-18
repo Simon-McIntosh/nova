@@ -1,0 +1,81 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Completed source suite arms: baseline 1 failed and 6 passed; head 7 passed; head-minus-baseline failure ids are empty.",
+  "assertion_audit": {
+    "scripts/prototypes/efit_field_swap/test_crosscheck.py:54": "Fails if fitted capacity still yields no valid contour vertex.",
+    "scripts/prototypes/efit_field_swap/test_crosscheck.py:62-66": "Independent JT-60SA record must read limited with winding and admitted index one, a positive number of cleared cells and zero uncleared cells; reverting coverage admission to a refusal or skipping enclosure reddens the corresponding line.",
+    "scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py:115-118": "A census that admits both extrema but misses the saddle must refuse, return no resolution, carry an uncertified certificate and disagree with the boundary index; reverting the refusal or the index comparison reddens a check.",
+    "scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py:126-127": "The known field must have winding one and a boundary gradient above its floor; corrupting either measured value reddens the check.",
+    "scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py:146-150": "A census that misses an extremum-saddle pair in empty cells must refuse despite equal boundary and admitted indices, leave no resolution, count an uncleared cell and remain uncertified; skipping the empty-cell exclusion reddens line 146 in the recorded negative control.",
+    "scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py:159-161": "A constant zero-gradient cell must be neither cleared nor occupied and must remain unresolved; treating its flat gradient as a strict sign reddens these checks.",
+    "scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py:185-188": "An invalid axis slot must refuse and name failed axis admission; treating an invalid root as sufficient reddens the label, resolution, certificate or attempt check.",
+    "scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py:193-195": "A true one-maximum field must certify with admitted index one and read limited; an overbroad refusal or changed index rule reddens a check.",
+    "scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py:200-206": "The analytic annular domain has nonzero equal outer and obstacle windings, total zero and a certified index; adding obstacle winding, failing to measure it or refusing the valid domain reddens a check.",
+    "scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py:212-213": "A stationary point on a boundary loop must make winding unreliable and uncertified; trusting the sampled zero reddens both checks.",
+    "scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py:226-230": "The chosen LIUQE slice must have no stored X-point and must return a certified limited read with zero uncleared cells; changing the selected input or a refusal regression reddens a check.",
+    "scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py:238,251-253": "The independent square outline makes the axis-to-boundary span 0.5 m and the synthetic 0.1 m axis gap relative 0.2, with no X-distance for a limited case; reverting the old X-distance denominator or fabricating an absent X-distance reddens a check.",
+    "scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py:86-90": "The analytic two-maximum, one-saddle field must wind once; changing the field winding or accepting an index sum of two reddens these checks."
+  },
+  "call_site_count": 5,
+  "call_sites": [
+    "scripts/prototypes/efit_field_swap/crosscheck.py:856 (_decision calls read_state)",
+    "scripts/prototypes/tcv_liuqe_known_answer/measure.py:181 (measure_slice calls read_state)",
+    "scripts/prototypes/tcv_liuqe_known_answer/measure.py:272 (main calls measure_slice)",
+    "scripts/prototypes/tcv_liuqe_known_answer/figures.py:115 (build calls slice_view)",
+    "scripts/prototypes/tcv_liuqe_known_answer/report.py:121 (build calls measure_gaps)"
+  ],
+  "completed_at": "2026-10-18T19:55:46Z",
+  "dispatched_at": "2026-10-18T19:47:29Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/efit_field_swap/crosscheck.py",
+      "line": "199",
+      "severity": "blocking",
+      "text": "blocking: Any cell containing one admitted root is skipped by the Bernstein exclusion; an additional missed extremum-saddle pair in that cell preserves the boundary index sum and can be labelled coverage certified, contrary to the report's completeness claim and without a test that would fail."
+    },
+    {
+      "file": "scripts/prototypes/tcv_liuqe_known_answer/report.py",
+      "line": "170",
+      "severity": "follow-on",
+      "text": "follow-on: The summary pairs independently maximized absolute and relative flux gaps as though they came from one slice; the report table shows the largest boundary gap 0.1085 at slice 46 has relative gap 0.911, while 2.482 belongs to slice 0."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "The seventeen commits from a0ed032e to 0a451acf add the comparison and certificate in scripts/prototypes, then update the report and three SVGs; crosscheck.py:195-205 leaves occupied cells unexamined.",
+    "done_when": "The brief requires at least twelve paired slices, gaps and figures; receipts/rescore-outline-job.log records ROWS 12 and FIELD_SWAP_ROWS 5, docs/research/tcv-liuqe-known-answer.html:28-57 tabulates them, and receipts/repair-after-final.log records seven passing tests.",
+    "goal": "The source brief asks for a TCV LIUQE read comparison; docs/research/tcv-liuqe-known-answer.html:25-57 supplies twelve slices and three poloidal figures, but its coverage certificate cannot establish the completeness it claims.",
+    "manifest": "The source manifest.md:5-20 lists seventeen commits and the completed suite arms; receipts/repair-baseline-final.log ends with one failure and receipts/repair-after-final.log ends with seven passes and EXIT=0.",
+    "write_paths": "The source manifest.md:3 grants the TCV prototype, field-swap adapter, report, figure and fragment families, and all twelve paths in the a0ed032e..0a451acf diff lie inside them."
+  },
+  "justifications": {
+    "durability": "test_coverage.py:145 reddens when the empty-cell exclusion is removed, as receipts/negative-control.log demonstrates, but no added assertion fails for a missed cancelling pair inside an occupied cell.",
+    "evidence": "receipts/rescore-outline-job.log records twelve rows and receipts/repair-after-final.log confirms the head gate, but test_coverage.py:121-150 exercises a missed pair only in cells without an admitted root.",
+    "fit": "figures.py:27-33 reuses nova.media painters and measure.py:89 reuses wall_units_from_ids; the added source names express capabilities rather than plan stages.",
+    "goal_fidelity": "docs/research/tcv-liuqe-known-answer.html:25-57 delivers the requested comparison, while crosscheck.py:195-205 cannot justify calling every accepted read coverage certified.",
+    "reuse": "crosscheck.py:180 extends the existing field-swap read owner, measure.py:237 owns the sole TCV driver, and a capability search found only the distinct polyline bounds owner in scripts/prototypes/efit_maximin_certificate/bounds.py:37.",
+    "scope_discipline": "Every path in git diff a0ed032e..0a451acf is within the five families declared in the source manifest.md:3."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source brief asks for a TCV LIUQE read comparison; docs/research/tcv-liuqe-known-answer.html:25-57 supplies twelve slices and three poloidal figures, but its coverage certificate cannot establish the completeness it claims.\nVERDICT done_when: The brief requires at least twelve paired slices, gaps and figures; receipts/rescore-outline-job.log records ROWS 12 and FIELD_SWAP_ROWS 5, docs/research/tcv-liuqe-known-answer.html:28-57 tabulates them, and receipts/repair-after-final.log records seven passing tests.\nVERDICT write_paths: The source manifest.md:3 grants the TCV prototype, field-swap adapter, report, figure and fragment families, and all twelve paths in the a0ed032e..0a451acf diff lie inside them.\nVERDICT manifest: The source manifest.md:5-20 lists seventeen commits and the completed suite arms; receipts/repair-baseline-final.log ends with one failure and receipts/repair-after-final.log ends with seven passes and EXIT=0.\nVERDICT diff: The seventeen commits from a0ed032e to 0a451acf add the comparison and certificate in scripts/prototypes, then update the report and three SVGs; crosscheck.py:195-205 leaves occupied cells unexamined.\nCALL_SITES: scripts/prototypes/efit_field_swap/crosscheck.py:856 (_decision calls read_state), scripts/prototypes/tcv_liuqe_known_answer/measure.py:181 (measure_slice calls read_state), scripts/prototypes/tcv_liuqe_known_answer/measure.py:272 (main calls measure_slice), scripts/prototypes/tcv_liuqe_known_answer/figures.py:115 (build calls slice_view), scripts/prototypes/tcv_liuqe_known_answer/report.py:121 (build calls measure_gaps)\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: docs/research/tcv-liuqe-known-answer.html:25-57 delivers the requested comparison, while crosscheck.py:195-205 cannot justify calling every accepted read coverage certified.\nSCORE evidence: 16\nJUSTIFICATION evidence: receipts/rescore-outline-job.log records twelve rows and receipts/repair-after-final.log confirms the head gate, but test_coverage.py:121-150 exercises a missed pair only in cells without an admitted root.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: Every path in git diff a0ed032e..0a451acf is within the five families declared in the source manifest.md:3.\nSCORE durability: 14\nJUSTIFICATION durability: test_coverage.py:145 reddens when the empty-cell exclusion is removed, as receipts/negative-control.log demonstrates, but no added assertion fails for a missed cancelling pair inside an occupied cell.\nSCORE fit: 18\nJUSTIFICATION fit: figures.py:27-33 reuses nova.media painters and measure.py:89 reuses wall_units_from_ids; the added source names express capabilities rather than plan stages.\nSCORE reuse: 20\nJUSTIFICATION reuse: crosscheck.py:180 extends the existing field-swap read owner, measure.py:237 owns the sole TCV driver, and a capability search found only the distinct polyline bounds owner in scripts/prototypes/efit_maximin_certificate/bounds.py:37.\nFINDING scripts/prototypes/efit_field_swap/crosscheck.py:199 blocking: Any cell containing one admitted root is skipped by the Bernstein exclusion; an additional missed extremum-saddle pair in that cell preserves the boundary index sum and can be labelled coverage certified, contrary to the report's completeness claim and without a test that would fail.\nFINDING scripts/prototypes/tcv_liuqe_known_answer/report.py:170 follow-on: The summary pairs independently maximized absolute and relative flux gaps as though they came from one slice; the report table shows the largest boundary gap 0.1085 at slice 46 has relative gap 0.911, while 2.482 belongs to slice 0.\nreviewed_base_sha: a0ed032e1c8fb62e1fbad18cea1c343052dc0dd0\nreviewed_head_sha: 0a451acfdb02d4b05a5d8f77c7a711943f0d4cce\n",
+  "review_run_id": "r-20261018T194649856711-review-of-tcv-liuqe-known-answer-0a451acfdb02",
+  "reviewed_base_sha": "a0ed032e1c8fb62e1fbad18cea1c343052dc0dd0",
+  "reviewed_head_sha": "0a451acfdb02d4b05a5d8f77c7a711943f0d4cce",
+  "reviewed_run_id": "r-20261018T134957600545-tcv-liuqe-known-answer",
+  "scores": {
+    "durability": 14,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T19:57:05.771014+00:00",
+  "total": 104
+}

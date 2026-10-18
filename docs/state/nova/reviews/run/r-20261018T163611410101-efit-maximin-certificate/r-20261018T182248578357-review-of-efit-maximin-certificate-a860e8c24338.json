@@ -34,6 +34,13 @@
   ],
   "completed_at": "2026-10-18T18:31:44Z",
   "dispatched_at": "2026-10-18T18:23:35Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "Recorded as a follow-on of a landed evidence node; the certificate conclusions do not rest on these assertions.",
+      "recorded_at": "2026-10-18T18:33:43.646957+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/efit_maximin_certificate/test_certificate.py",

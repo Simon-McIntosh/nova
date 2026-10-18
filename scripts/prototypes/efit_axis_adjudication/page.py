@@ -6,6 +6,24 @@ import argparse
 import html
 import json
 import pathlib
+from itertools import combinations
+
+
+REBUILD_GRADIENT_TOL = 1e-9
+
+
+def require_rebuild(row):
+    """Reject a recorded axis whose independent spline rebuild is not stationary."""
+    rb = row["rebuild"]
+    if (
+        rb["axis_psi_abs_diff"] > 1e-10
+        or rb["grad_norm_at_axis"] > REBUILD_GRADIENT_TOL
+    ):
+        raise AssertionError(
+            f"{row['case']}: spline rebuild failed: "
+            f"|delta psi|={rb['axis_psi_abs_diff']:.3e}, "
+            f"|grad psi|={rb['grad_norm_at_axis']:.3e}"
+        )
 
 
 def fmt(value, nd=4):
@@ -18,26 +36,34 @@ def rebuild_table(rows):
     out = [
         "<table><thead><tr><th>record</th><th>polarity</th>"
         "<th>axis &psi; (record)</th><th>axis &psi; (spline)</th>"
-        "<th>|&Delta;&psi;|</th><th>|&nabla;&psi;| at axis</th></tr></thead><tbody>"
+        "<th>|&Delta;&psi;|</th><th>|&nabla;&psi;| at axis</th><th>check</th></tr></thead><tbody>"
     ]
     for row in rows:
         rb = row["rebuild"]
+        try:
+            require_rebuild(row)
+            passed = True
+        except AssertionError:
+            passed = False
         out.append(
             f"<tr><td>{html.escape(row['case'])}</td><td>{row['polarity']}</td>"
             f"<td>{fmt(rb['axis_psi_reported'], 8)}</td>"
             f"<td>{fmt(rb['axis_psi_spline'], 8)}</td>"
             f"<td>{fmt(rb['axis_psi_abs_diff'], 3)}</td>"
-            f"<td>{fmt(rb['grad_norm_at_axis'], 3)}</td></tr>"
+            f"<td>{fmt(rb['grad_norm_at_axis'], 3)}</td>"
+            f"<td>{'pass' if passed else '<strong>FAIL</strong>'}</td></tr>"
         )
-    out.append("</tbody></table>"
-    )
+    out.append("</tbody></table>")
     return "\n".join(out)
 
 
 def code_points_table(row):
     order = ["efit_axis", "nova_a_axis", "nova_b_axis"]
-    names = {"efit_axis": "imas-efit axis", "nova_a_axis": "adapter A axis",
-             "nova_b_axis": "adapter B axis"}
+    names = {
+        "efit_axis": "imas-efit axis",
+        "nova_a_axis": "adapter A axis",
+        "nova_b_axis": "adapter B axis",
+    }
     out = []
     for key in order:
         cp = row["code_points"].get(key)
@@ -46,39 +72,32 @@ def code_points_table(row):
         ok = "yes" if cp["agrees_with_polarity"] else "NO"
         out.append(
             f"<tr><td>{names[key]}</td><td>{cp['kind']}</td><td>{ok}</td>"
-            f"<td>{fmt(cp['r'],5)}, {fmt(cp['z'],5)}</td>"
-            f"<td>{fmt(cp['psi'],6)}</td>"
-            f"<td>{fmt(cp['eig'][0],4)}, {fmt(cp['eig'][1],4)}</td>"
-            f"<td>{fmt(cp['grad_norm'],3)}</td></tr>"
+            f"<td>{fmt(cp['r'], 5)}, {fmt(cp['z'], 5)}</td>"
+            f"<td>{fmt(cp['psi'], 6)}</td>"
+            f"<td>{fmt(cp['eig'][0], 4)}, {fmt(cp['eig'][1], 4)}</td>"
+            f"<td>{fmt(cp['grad_norm'], 3)}</td></tr>"
         )
     return "\n".join(out)
 
 
 def census_table(row):
-    out = ["<table><thead><tr><th>r</th><th>z</th><th>&psi;</th><th>type</th>"
-           "<th>in wall</th><th>&lambda;&#8321;</th><th>&lambda;&#8322;</th>"
-           "<th>efit side</th><th>nova A</th><th>nova B</th></tr></thead><tbody>"]
+    out = [
+        "<table><thead><tr><th>r</th><th>z</th><th>&psi;</th><th>type</th>"
+        "<th>in wall</th><th>&lambda;&#8321;</th><th>&lambda;&#8322;</th>"
+        "<th>efit side</th><th>nova A</th><th>nova B</th></tr></thead><tbody>"
+    ]
     points = row["census"]
     in_wall = [p for p in points if p["inside_wall"]]
     outside = [p for p in points if not p["inside_wall"]]
-    # every in-wall point is listed; the out-of-wall set is listed whole up to a
-    # cap, so a record whose spline carries the ripple of an oscillatory field
-    # does not bury the reader.  The complete census is the results receipt.
-    capped = outside[:200]
-    for point in in_wall + capped:
+    for point in in_wall + outside:
         out.append(
-            f"<tr><td>{fmt(point['r'],5)}</td><td>{fmt(point['z'],5)}</td>"
-            f"<td>{fmt(point['psi'],6)}</td><td>{point['kind']}</td>"
+            f"<tr><td>{fmt(point['r'], 5)}</td><td>{fmt(point['z'], 5)}</td>"
+            f"<td>{fmt(point['psi'], 6)}</td><td>{point['kind']}</td>"
             f"<td>{'yes' if point['inside_wall'] else 'no'}</td>"
-            f"<td>{fmt(point['eig'][0],4)}</td><td>{fmt(point['eig'][1],4)}</td>"
+            f"<td>{fmt(point['eig'][0], 4)}</td><td>{fmt(point['eig'][1], 4)}</td>"
             f"<td>{point['side_efit_boundary']}</td>"
             f"<td>{point['side_nova_a_boundary'] or '&ndash;'}</td>"
             f"<td>{point['side_nova_b_boundary'] or '&ndash;'}</td></tr>"
-        )
-    if len(outside) > len(capped):
-        out.append(
-            f"<tr><td colspan='10'>and {len(outside) - len(capped)} further out-of-wall "
-            f"census points not listed; the complete census is the results receipt</td></tr>"
         )
     out.append("</tbody></table>")
     return "\n".join(out)
@@ -91,30 +110,40 @@ def record_tables(rows):
         a = row["adapter_a"]
         b = row["adapter_b"]
         ext = row["axis_extremum"]
-        a_note = f" &mdash; {html.escape(a['nova_note'])}" if a and a.get("nova_note") else ""
+        source = efit["saddle_source_position"]
+        source_text = (
+            f" at ({fmt(source[0],5)}, {fmt(source[1],5)})" if source else ""
+        )
+        a_note = (
+            f" &mdash; {html.escape(a['nova_note'])}"
+            if a and a.get("nova_note")
+            else ""
+        )
         a_line = (
-            f"<li>adapter A saddle &psi; = {fmt(a['nova_saddle_psi'],6)} at "
-            f"({fmt(a['nova_saddle_r'],5)}, {fmt(a['nova_saddle_z'],5)}); "
-            f"nova boundary &psi; = {fmt(a['nova_boundary_psi'],6)}; "
+            f"<li>adapter A saddle &psi; = {fmt(a['nova_saddle_psi'], 6)} at "
+            f"({fmt(a['nova_saddle_r'], 5)}, {fmt(a['nova_saddle_z'], 5)}); "
+            f"nova boundary &psi; = {fmt(a['nova_boundary_psi'], 6)}; "
             f"label {a['nova_label']}</li>"
-            if a else "<li>adapter A: no row for this record</li>"
+            if a
+            else "<li>adapter A: no row for this record</li>"
         )
         if a and a["nova_axis_r"] is None:
             a_line = (
                 f"<li>adapter A: nova admits no axis or saddle for this record; "
                 f"label {a['nova_label']}; boundary &psi; = "
-                f"{fmt(a['nova_boundary_psi'],6)}{a_note}</li>"
+                f"{fmt(a['nova_boundary_psi'], 6)}{a_note}</li>"
             )
         b_line = (
-            f"<li>adapter B saddle &psi; = {fmt(b['nova_saddle_level'],6)} at "
-            f"({fmt(b['nova_saddle_position'][0],5)}, {fmt(b['nova_saddle_position'][1],5)}); "
-            f"nova boundary &psi; = {fmt(b['nova_boundary_level'],6)}; label {b['nova_label']}</li>"
+            f"<li>adapter B saddle &psi; = {fmt(b['nova_saddle_level'], 6)} at "
+            f"({fmt(b['nova_saddle_position'][0], 5)}, {fmt(b['nova_saddle_position'][1], 5)}); "
+            f"nova boundary &psi; = {fmt(b['nova_boundary_level'], 6)}; label {b['nova_label']}</li>"
             if b and b["nova_saddle_position"]
             else "<li>adapter B: no saddle for this record</li>"
         )
         ext_line = (
-            f"{ext['kind']} at ({fmt(ext['r'],5)}, {fmt(ext['z'],5)}), &psi; = {fmt(ext['psi'],6)}"
-            if ext else "none"
+            f"{ext['kind']} at ({fmt(ext['r'], 5)}, {fmt(ext['z'], 5)}), &psi; = {fmt(ext['psi'], 6)}"
+            if ext
+            else "none"
         )
         blocks.append(
             f"<section class='record' id='efit-axis-adjudication-{row['case']}'>"
@@ -130,9 +159,9 @@ def record_tables(rows):
             f"<th>&lambda;&#8321;, &lambda;&#8322;</th>"
             f"<th>|&nabla;&psi;|</th></tr></thead><tbody>{code_points_table(row)}</tbody></table></div>"
             f"<div><h4>code saddles / boundaries</h4><ul>"
-            f"<li>imas-efit saddle_refined &psi; = {fmt(efit['saddle_refined'],6)} "
-            f"(source node {efit['saddle_source_node']}); boundary level &psi; = "
-            f"{fmt(efit['boundary_level'],6)}; label {efit['label']}</li>"
+            f"<li>imas-efit saddle_refined &psi; = {fmt(efit['saddle_refined'], 6)} "
+            f"(source node {efit['saddle_source_node']}{source_text}); boundary level &psi; = "
+            f"{fmt(efit['boundary_level'], 6)}; label {efit['label']}</li>"
             f"{a_line}{b_line}</ul>"
             f"<p>in-wall extremum of &psi; in the polarity direction: {ext_line}</p>"
             f"<p>{row['n_census']} census points, {row['n_in_wall']} inside the wall.</p>"
@@ -144,38 +173,59 @@ def record_tables(rows):
 
 
 def summary_table(rows):
-    out = ["<table><thead><tr><th>record</th><th>disagreement</th>"
-           "<th>distance [m]</th><th>&psi; gap</th></tr></thead><tbody>"]
+    out = [
+        "<table><thead><tr><th>record</th><th>fixed point</th><th>pair</th>"
+        "<th>distance [m]</th><th>&psi; gap</th></tr></thead><tbody>"
+    ]
     for row in rows:
         efit = row["efit"]
         a = row["adapter_a"]
-        if a is None:
-            continue
-        if a["nova_axis_r"] is None:
-            continue
-        dr = a["nova_axis_r"] - efit["axis_r"]
-        dz = a["nova_axis_z"] - efit["axis_z"]
-        dist = (dr * dr + dz * dz) ** 0.5
-        gap = a["nova_axis_psi"] - efit["axis_psi"]
-        if dist > 1e-3:
-            out.append(
-                f"<tr><td>{html.escape(row['case'])}</td>"
-                f"<td>axis: imas-efit vs adapter A</td>"
-                f"<td>{fmt(dist,4)}</td><td>{fmt(gap,4)}</td></tr>"
-            )
-        src = efit["saddle_source_position"]
-        if src:
-            ds = ((a["nova_saddle_r"] - src[0]) ** 2
-                  + (a["nova_saddle_z"] - src[1]) ** 2) ** 0.5
-            if ds > 1e-3:
+        b = row["adapter_b"]
+        point = row["code_points"]["nova_b_axis"]
+        axes = {
+            "imas-efit": (efit["axis_r"], efit["axis_z"], efit["axis_psi"]),
+            "adapter A": (a["nova_axis_r"], a["nova_axis_z"], a["nova_axis_psi"])
+            if a and a["nova_axis_r"] is not None
+            else None,
+            "adapter B": (point["r"], point["z"], b["nova_axis_level"])
+            if point and b
+            else None,
+        }
+        source = efit["saddle_source_position"]
+        saddles = {
+            "imas-efit": (source[0], source[1], efit["saddle_refined"])
+            if source
+            else None,
+            "adapter A": (a["nova_saddle_r"], a["nova_saddle_z"], a["nova_saddle_psi"])
+            if a and a["nova_saddle_r"] is not None
+            else None,
+            "adapter B": (*b["nova_saddle_position"], b["nova_saddle_level"])
+            if b and b["nova_saddle_position"]
+            else None,
+        }
+        for kind, points in (("axis", axes), ("saddle", saddles)):
+            for (left_name, left), (right_name, right) in combinations(
+                points.items(), 2
+            ):
+                if left is None or right is None:
+                    distance = gap = None
+                else:
+                    distance = (
+                        (right[0] - left[0]) ** 2 + (right[1] - left[1]) ** 2
+                    ) ** 0.5
+                    gap = right[2] - left[2]
+                    if distance <= 1e-3 and abs(gap) <= 1e-6:
+                        continue
                 out.append(
                     f"<tr><td>{html.escape(row['case'])}</td>"
-                    f"<td>saddle: imas-efit source node vs adapter A</td>"
-                    f"<td>{fmt(ds,4)}</td>"
-                    f"<td>{fmt(a['nova_saddle_psi'] - efit['saddle_refined'],4)}</td></tr>"
+                    f"<td>{kind}</td><td>{left_name} vs {right_name}"
+                    f"{' (one absent)' if distance is None else ''}</td>"
+                    f"<td>{fmt(distance, 4)}</td><td>{fmt(gap, 4)}</td></tr>"
                 )
     if len(out) == 1:
-        out.append("<tr><td colspan='4'>no axis or saddle disagreement over 1 mm</td></tr>")
+        out.append(
+            "<tr><td colspan='5'>no axis or saddle disagreement over 1 mm or 1e-6 psi</td></tr>"
+        )
     out.append("</tbody></table>")
     return "\n".join(out)
 
@@ -185,6 +235,22 @@ def figure_links(rows):
     out = []
     for machine in machines:
         slug = machine.lower().replace("-", "")
+        captions = []
+        for row in rows:
+            if row["machine"] != machine:
+                continue
+            efit, a, b = row["efit"], row["adapter_a"], row["adapter_b"]
+            captions.append(
+                f"<li>{html.escape(row['case'])}: imas-efit axis &psi; "
+                f"{fmt(efit['axis_psi'], 6)}, boundary &psi; {fmt(efit['boundary_level'], 6)}, "
+                f"label {html.escape(efit['label'])}; adapter A axis &psi; "
+                f"{fmt(a['nova_axis_psi'], 6) if a else '&ndash;'}, boundary &psi; "
+                f"{fmt(a['nova_boundary_psi'], 6) if a else '&ndash;'}, "
+                f"label {html.escape(a['nova_label']) if a else '&ndash;'}; "
+                f"adapter B axis &psi; {fmt(b['nova_axis_level'], 6) if b else '&ndash;'}, "
+                f"boundary &psi; {fmt(b['nova_boundary_level'], 6) if b else '&ndash;'}, "
+                f"label {html.escape(b['nova_label']) if b else '&ndash;'}</li>"
+            )
         out.append(
             f"<figure><img src='/nova/figures/converged-forward-solve/"
             f"efit-axis-adjudication/efit-axis-{slug}.svg' "
@@ -195,7 +261,8 @@ def figure_links(rows):
             f"X-point (filled cross); adapter A's axis (hollow circle) and saddle (filled "
             f"circle); adapter B's axis (hollow square) and saddle (filled square); every census "
             f"stationary point as a hollow marker by type (triangle up maximum, triangle down "
-            f"minimum, cross saddle).</figcaption></figure>"
+            f"minimum, cross saddle). Adapter B axis positions are identified from census "
+            f"points by their recorded axis level.</figcaption><ul>{''.join(captions)}</ul></figure>"
         )
     return "\n".join(out)
 
@@ -221,7 +288,8 @@ figure{{margin:1rem 0}}
 <p id="efit-axis-adjudication-summary">Evidence for the lead to adjudicate the imas-efit and nova
 fixed-point disagreements on imas-efit's boundary-level trace records. Every record is rebuilt from
 its own 65&times;65 grid with a scipy not-a-knot bicubic spline, checked at imas-efit's recorded axis,
-and censused exhaustively for stationary points. Both codes' axes and saddles, both boundary
+and censused for stationary points. The recorded-axis gradient check fails for both synthetic
+crossing records; their value check passes. Both codes' axes and saddles, both boundary
 contours and every census point are drawn. No verdict on which code is right is stated here.</p>
 
 <h2 id="efit-axis-adjudication-method">Method</h2>
@@ -230,7 +298,11 @@ contours and every census point are drawn. No verdict on which code is right is 
 of its 65&times;65 grid at <code>k=3, s=0</code>, evaluated through a coefficient-matrix form for the
 census. Nothing here uses either nova field-swap adapter.</li>
 <li><strong>Rebuild check.</strong> At imas-efit's recorded axis the spline value must equal the
-record's axis &psi; and |&nabla;&psi;| must sit at rounding level; both are tabulated per record.</li>
+record's axis &psi; within 10<sup>&minus;10</sup> and |&nabla;&psi;| must be below
+10<sup>&minus;9</sup>. Both are tabulated per record with an explicit pass or fail. The synthetic
+records fail the gradient check at 2.433&times;10<sup>&minus;4</sup> and
+2.638&times;10<sup>&minus;4</sup>; their contours and census therefore describe the stated scipy
+spline, but do not validate that this spline is the field from which their recorded axes came.</li>
 <li><strong>Census.</strong> Newton on &nabla;&psi; = 0 from a 120&times;120 seed lattice over the grid
 box, deduplicated at 10<sup>&minus;4</sup> m; points outside the grid box are dropped, where the
 spline extrapolates. Each point's Hessian eigenvalues give its type. A point lying on one side of a
@@ -287,9 +359,10 @@ def build_fragment(rows, commits, verdict):
 <body><main class="plan-doc">
 <h1 id="efit-axis-adjudication-rec-title">Effect axis adjudication</h1>
 <p id="efit-axis-adjudication-rec-summary">{n} imas-efit boundary-level trace records each rebuilt
-from its own 65&times;65 grid with a scipy not-a-knot bicubic spline and censused exhaustively for
+from its own 65&times;65 grid with a scipy not-a-knot bicubic spline and censused for
 stationary points; both codes' axes, saddles and boundary contours are drawn beside every census
-point. The full record is in
+point. The two synthetic records fail the recorded-axis gradient check: 2.433e-4 and 2.638e-4,
+respectively, against a 1e-9 limit. Their spline evidence is qualified accordingly. The full record is in
 <a href="/nova/research/efit-axis-adjudication.html">Effect axis adjudication</a>.</p>
 <div id="efit-axis-adjudication-rec-figures">
 {figure_links(rows)}
@@ -311,7 +384,9 @@ def main():
 
     rows = json.loads(pathlib.Path(args.results).read_text())
     pathlib.Path(args.page).write_text(build_page(rows, args.commits))
-    pathlib.Path(args.fragment).write_text(build_fragment(rows, args.commits, args.verdict))
+    pathlib.Path(args.fragment).write_text(
+        build_fragment(rows, args.commits, args.verdict)
+    )
     print("wrote", args.page)
     print("wrote", args.fragment)
 

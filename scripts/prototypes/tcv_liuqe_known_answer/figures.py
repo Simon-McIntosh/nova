@@ -5,8 +5,8 @@ level array, the per-loop TCV wall, LIUQE's own axis, X-points and boundary
 outline, and nova's read over them -- its axis, its admitted saddle and the
 contour at its boundary flux. LIUQE is drawn in the default ink and nova in one
 feature colour, so the two null sets and the two boundaries stay separable. A
-slice nova refuses is drawn with LIUQE's geometry alone and says so in its
-title, so a refusal is visible rather than silently missing from the figure.
+slice nova refuses is drawn with LIUQE's geometry alone; the report caption
+names its refusal so a missing nova boundary is explicit.
 
 The archive readers are the driver's, imported rather than restated: one
 definition of what a LIUQE slice and a wall IDS are, so the table and the
@@ -26,7 +26,6 @@ import numpy as np
 
 from nova.media.ink import DEFAULT_INK, poloidal_axes
 from nova.media.poloidal import (
-    contour_levels,
     draw_boundary,
     draw_flux_contours,
     draw_nulls,
@@ -43,30 +42,26 @@ NOVA_INK = dataclasses.replace(
 READ_LABELS = ("limited", "diverted")
 
 
-def _nearest(values, coordinate):
-    return int(np.argmin(np.abs(np.asarray(values) - float(coordinate))))
-
-
 def draw_panel(axes, view, row, wall_rings):
     rgrid, zgrid, psi = view["rgrid"], view["zgrid"], view["psi"]
-    grid_axis = float(
-        psi[_nearest(rgrid, view["axis"][0]), _nearest(zgrid, view["axis"][1])]
+    grid_axis = float(row["liuqe_axis_psi_grid"])
+    grid_boundary = float(row["liuqe_boundary_psi_grid"])
+    levels = np.linspace(
+        min(grid_axis, grid_boundary), max(grid_axis, grid_boundary), 12
     )
-    if len(view["xpoints"]):
-        grid_boundary = float(
-            np.mean(
-                [
-                    psi[_nearest(rgrid, point[0]), _nearest(zgrid, point[1])]
-                    for point in view["xpoints"]
-                ]
-            )
-        )
-    else:
-        grid_boundary = float(np.max(psi))
-    levels = contour_levels(psi, 14, axis=grid_axis, boundary=grid_boundary)
     for ring in wall_rings:
         draw_wall(axes, radius=ring[:, 0], height=ring[:, 1])
     draw_flux_contours(axes, rgrid, zgrid, psi.T, levels, wall=wall_rings)
+    axes.contour(
+        rgrid,
+        zgrid,
+        psi.T,
+        levels=[grid_boundary],
+        colors=[DEFAULT_INK.separatrix_color],
+        linestyles=["--"],
+        linewidths=1.1,
+        zorder=5,
+    )
     draw_nulls(
         axes,
         magnetic_axis=view["axis"],
@@ -75,7 +70,12 @@ def draw_panel(axes, view, row, wall_rings):
     )
     if view["outline"].size:
         draw_boundary(
-            axes, view["outline"][:, 0], view["outline"][:, 1], linestyle="--"
+            axes,
+            view["outline"][:, 0],
+            view["outline"][:, 1],
+            color="#929292",
+            linewidth=0.8,
+            linestyle=":",
         )
     label = row.get("nova_label")
     if label in READ_LABELS:
@@ -101,10 +101,6 @@ def draw_panel(axes, view, row, wall_rings):
             style=NOVA_INK,
             contain=wall_rings[0],
         )
-    axes.set_title(
-        f"t={row['liuqe_time']:.3f} s  LIUQE {row['liuqe_label']} / nova {label}",
-        fontsize=DEFAULT_INK.label_fontsize,
-    )
 
 
 def build(rows, eq, wall_rings, out_path):

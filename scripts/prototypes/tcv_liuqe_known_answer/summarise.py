@@ -55,10 +55,14 @@ def measure_gaps(row):
         span_flux = abs(float(axis_psi) - float(boundary_psi))
     if _finite(row.get("nova_boundary_psi")) and _finite(boundary_psi):
         boundary_gap = abs(float(row["nova_boundary_psi"]) - float(boundary_psi))
+    axis_psi_gap = float("nan")
+    if _finite(row.get("nova_axis_psi")) and _finite(axis_psi):
+        axis_psi_gap = abs(float(row["nova_axis_psi"]) - float(axis_psi))
     return dict(
         axis_gap=axis_gap,
         x_gap=x_gap,
         boundary_gap=boundary_gap,
+        axis_psi_gap=axis_psi_gap,
         span_length=span_length,
         span_flux=span_flux,
         axis_relative=axis_gap / span_length
@@ -69,6 +73,9 @@ def measure_gaps(row):
         else float("nan"),
         boundary_relative=boundary_gap / span_flux
         if _finite(boundary_gap) and _finite(span_flux) and span_flux > 0
+        else float("nan"),
+        axis_psi_relative=axis_psi_gap / span_flux
+        if _finite(axis_psi_gap) and _finite(span_flux) and span_flux > 0
         else float("nan"),
     )
 

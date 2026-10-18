@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="census-certified-convergence">
+  <meta name="plan-title" content="Adjacent-double saddle census investigation">
+  <meta name="plan-summary" content="The prototype census loses a hyperbolic saddle while the seeded production fixed-point solver retains it on both sides">
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-verifies" content="converged-forward-solve#s2">
+  <meta name="plan-recorded-at" content="2026-10-18">
+  <meta name="plan-verdict" content="partial">
+  <title>Adjacent-double saddle census evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+  <h1 id="census-certified-convergence-landing">Adjacent-double saddle census evidence</h1>
+  <p>The 282-cell diverted CPU census changes from three valid roots to two between adjacent binary64 offsets <code>0.17323108126295622</code> and <code>0.17323108126295625</code>; titan shows the same 3 → 2 loss at its adjacent pair <code>0.17323108126297435</code> → <code>0.17323108126297437</code>. The departing saddle remains hyperbolic, with determinant about −2.7385 × 10<sup>−5</sup>. The current orientation revision and the warm prior through 0.16 are recorded in the <a href="/nova/research/census-certified-convergence.html">full research record</a>.</p>
+  <p>Seeded from that last valid saddle position, <code>fixed_points.solve</code> returns it valid on both sides, with zero Newton iterations and row containment true. On CPU its gradient norm is 1.56 × 10<sup>−15</sup> and its final Newton correction is 2.27 × 10<sup>−12</sup> m against the applied 1.00 × 10<sup>−11</sup> m threshold. The solver therefore does not cause the measured departure. The quoted offset pair in the brief is not the loss edge under the current revision; the live CPU bisection found the pair above.</p>
+  <p>The prototype census still admits the same cell 263 quadratic seed on both sides. Direct polishing returns a valid, contained, nonduplicate saddle at both offsets. The warm caller has only two prior slots, so this wall-contact root relies on discovery every state. Supplying its last valid position as a third prior to the prototype census restores all three roots on the right. The original end-to-end compiled filter's exact rejection remains to be isolated; the implementation that owns that census is outside this worker's write grant. No production solver fix or negative-control claim is made from this measurement.</p>
+  <p>The orientation CPU gate over <code>tests/test_fixed_points.py</code> and <code>tests/test_fixed_point.py</code> completed 62 passed. The run directory <code>r-20261018T062147901424-census-certified-convergence</code> holds the paired CPU and titan JSON receipts and complete logs. Island-wide 282/550 counts, after tests, read-level regression, map fidelity, and cold solves remain open pending the owner and negative-control correction.</p>
+
+<h1 id="seed-census-departure-title">Adjacent-double saddle census investigation</h1>
+<p id="seed-census-departure-summary">The wall-contact saddle left the prototype census at an
+adjacent binary64 pair because the cell-membership test compared a cross product against exact
+zero. Cell 263 is the only proposal of that saddle, and its cross product on edge 4 reads
++3.02e-16 at offset 0.17323108126295622 and -5.77e-17 at 0.17323108126295625: a rounding-scale
+sign change in a difference of two nearly equal products, with every other stage unchanged and the
+determinant at -2.7384853775467097e-05 on both sides. The admission threshold now carries the
+rounding of the value it compares, composed from the determinant's forward error and the seed's
+solve-propagated uncertainty, and the pair reads 3 roots / 2 saddles on both sides.</p>
+
+<section id="seed-census-departure-dropping-line">
+<h2>The dropping line, with inputs on both sides</h2>
+<p id="seed-census-departure-dropping-line-statement">The rejecting step is
+<code>scripts/prototypes/read_robustness/census.py</code> line
+<code>inside = jnp.all(jnp.where(slot &lt; vertex_count, cross &gt;= 0, True), axis=1)</code>.
+Admitted at offset 0.17323108126295622 with cell 263 seed
+<code>(1.5334200115204297, 0.8981119327459057)</code>: cross on edge 4 <code>+3.0210231601966745e-16</code>,
+candidate cells <code>[3, 247, 263]</code>, census 3 roots / 2 saddles. Refused at offset
+0.17323108126295625 with seed <code>(1.533420011520433, 0.8981119327459)</code>: cross on edge 4
+<code>-5.772518423353144e-17</code>, candidate cells <code>[3, 247]</code>, census 2 roots / 1 saddle.
+The other edges are positive on both sides with smallest value <code>2.79e-3</code> and do not move;
+the seed moves about <code>3.3e-15</code> against an edge length of about <code>0.1</code>.</p>
+<p id="seed-census-departure-controls">Three controls separate the cause. The same stages run eagerly,
+and the same census compiled with the field passed as an argument, both keep three roots on both
+sides. Only the field constructed inside the compiled sampler of
+<code>fast_map_production/tie_probe.py</code> departs, where fused multiply-add contraction leaves the
+last bits of the varied jets different from the eager construction. That is why the predecessor's
+isolated <code>stationary_read</code>, containment and deduplication checks all passed on a root the
+end-to-end census had already dropped.</p>
+</section>
+
+<section id="seed-census-departure-repair">
+<h2>The repair and the counts it restores</h2>
+<p id="seed-census-departure-repair-statement">A seed is now admitted when its cross product is
+negative only beyond the rounding the value carries: the determinant's forward error,
+<code>4·eps·(|edge|1)·(|relative|1)</code>, plus the seed's solve-propagated uncertainty
+<code>eps·|pitch|·||H⁻¹||1·(||H||1·|offset|1+|gradient|1)</code> scaled by the edge length. The second
+term dominates at the saddle because it is unbounded in the conditioning of the 2x2 Hessian. Both
+terms are computed from the operands at the state being classified, so the decision is continuous in
+the field and no switch was added. Measured after the repair, at the fixed prior: offset
+0.17323108126295622 reads 3 roots / 2 saddles, and offset 0.17323108126295625 reads 3 roots /
+2 saddles.</p>
+<p id="seed-census-departure-determinant-term">The determinant term alone was measured first and is
+insufficient: at <code>2.86e-18</code> it does not cover the <code>5.77e-17</code> departure, and the
+pair still read 3 -&gt; 2. It is retained as one addend rather than replaced, because it is a real part
+of the error and dropping it would make the sum a fit rather than a bound.</p>
+<p id="seed-census-departure-window">Carrying the prior from 0.16 to 0.18 in 41 states, the census
+reads 2 roots / 1 saddle at 0.16, 3 / 2 from 0.161 through 0.173, and 1 / 1 from 0.1735 onward. The
+3 -&gt; 1 step near 0.1735 is pre-existing, not introduced here: the predecessor recorded 3 at 0.17 and
+1 at 0.18 on the same field. It remains uncharacterised between a genuine fold and a second admission
+defect, and is reported open.</p>
+<p id="seed-census-departure-enclosure">The unused <code>psi_rounding_enclosure</code> in
+<code>fast_map_production/kernel.py</code> bounds flux along the map, not the gradient or the edge
+cross product this admission test evaluates, so it does not fit. It was left in place rather than
+deleted; it is unused by this path either way.</p>
+</section>
+
+<section id="seed-census-departure-after-arm">
+<h2>After-arm gate and what remains unmeasured</h2>
+<p id="seed-census-departure-gate">Gated in the held compute allocation against the shared root
+environment over <code>tests/test_fixed_points.py</code>, <code>tests/test_fixed_point.py</code> and
+<code>tests/equilibrium/test_topology_read.py</code>: 75 of 104 collected tests reached, all passing,
+no failure and no error, cut by the node's own 480-second wall bound rather than by a defect. The
+base arm was not run within budget. The delta against base is nonetheless structurally zero and was
+verified: <code>grep -rl read_robustness tests/</code> returns no file, so no test in the named files
+imports the repaired module. The repair is confined to
+<code>scripts/prototypes/read_robustness/census.py</code>; <code>nova/equilibrium/topology.py</code>
+was read but not changed, and no product path was touched.</p>
+<p id="seed-census-departure-remaining">Unmeasured in this node: the 550-cell window 0.10-0.14, the
+diverted and limited map-fidelity comparison at 282 and 550, and a test that drives the read itself
+at the tie states with a negative control. The probes that located the departure are committed beside
+the repair, so the measurement re-runs from the record.</p>
+</section>
+
+  <section id="census-certified-convergence-control-round-two">
+    <h2>Control reinstated, and the departures measured</h2>
+    <p id="census-certified-convergence-control-live">The control now reinstates the dropping step from the live census source rather than reading an earlier trace: it substitutes the exact-zero comparison, bisects the adjacent pair at which that step loses a root, and runs both arms there. It exits nonzero while the reinstated step reproduces the loss, bisecting to 0.17323108126295622 and 0.17323108126295625 and reading 3 roots / 2 saddles against 2 / 1 there while the repaired arm reads 3 / 2 on both.</p>
+    <p id="census-certified-convergence-control-windows">Both windows were then run base beside head under one fixed prior. At 282 over 0.16 to 0.18 the arms agree state for state: 2 roots at 0.16, 3 from 0.161 to 0.173, 1 from 0.1735. At 550 over 0.10 to 0.14 they agree again: 2 through 0.113, 3 from 0.114 to 0.122, 1 from 0.123. Refined over 0.170 to 0.174 at 282 the count is not monotone, returning to 3 at 0.17335 after falling to 2.</p>
+    <p id="census-certified-convergence-control-not-a-fold">Neither remaining departure is a fold. At 282 the wall-contact saddle's last state is 0.1732 with determinant -2.9608e-05 and eigenvalues -4.4544e-02 and +6.6469e-04, fifteen orders above the determinant's own forward error, with its nearest neighbour 6.06e-02 away before and 5.68e-02 after; at 550 the saddle reads -5.8060e-05 with nearest neighbour 1.2473e-01 before and 2.0958e+00 after. Printing the masks in order attributes both to the proposal: candidate cells fall from [3, 247, 263] to [3, 247] at 0.17325, and cell 263 is the only cell that ever proposed that saddle. Only 3 of 282 cells have their quadratic stationary point inside their own polygon at these states, so the census has a coverage hole at the wall-contact saddle; admitting the whole domain instead would raise candidates to 153 against a seed capacity of 64 selected by index.</p>
+    <p id="census-certified-convergence-control-open">Done-when (3) is reported partially met: the admission departure at the bisected pair is removed and the census keeps the saddle across it, but the 0.1735 and 0.1225 departures remain, are unchanged between the two arms, and need the proposal reworked with the capacity and selection order settled together; those are the proposal coverage hole, owned by the census-proposal-coverage node. The read-level tie-state test and its reinstated-step control are written as tests of the 282 tie states, the first confirming the retained saddle against a polish made independently of the census that proposed it.</p>
+  </section>
+  <section id="seed-census-departure-fit-bound-detail">
+    <h2>Fit cancellation and the read-level control</h2>
+    <p>On a second CPU host, the compiled 282-cell sampler moved cell 263's edge cross from <code>+1.1117e-15</code> to <code>−1.2410e-15</code> between adjacent doubles while the departing saddle remained hyperbolic, <code>det H = −2.7385e-05</code>. The prior edge and solve bound was <code>7.6645e-17</code>; the own-node quadratic fit now contributes a computed dot-product rounding bound propagated through the Hessian solve. A focused test drives the production read, confirms three roots and two saddles on both sides, checks its primary X-point against a separate stationary polish, and checks booked-current continuity: <code>1 passed in 240.39 s</code>, <code>EXIT=0</code>. Substituting the live-source strict exact-zero admission makes the same test fail at the right offset, <code>1 failed in 213.60 s</code>, <code>EXIT=1</code>. Logs <code>read-gate-retry.log</code> and <code>negative-control-test.log</code> are in run <code>r-20261018T065749620386-seed-census-departure</code>.</p>
+    <p>New 41-state receipts at 282 and 550 cells match the strict-step base in every state. The 282-cell count is 2 roots / 1 saddle through 0.1605, 3 / 2 from 0.161 through 0.173, and 1 / 1 from 0.1735 onward. The 550-cell count is 2 / 1 through 0.113, 3 / 2 from 0.114 through 0.122, and 1 / 1 from 0.123 onward. Those last departures remain hyperbolic proposal-coverage losses assigned separately.</p>
+  </section>
+  <p id="seed-census-departure-regression-detail">The completed two-arm regression gate used the same three files in fresh base and head processes. The base arm at <code>efbeb794e60b1f4d39dcb886bb0e1b1148b5a419</code> had 5 failed, 88 passed, 7 errors in 1287.93 s; the repaired head at <code>4899dee1ff4234c664d84535366831ce0eb914a4</code> had 5 failed, 90 passed, 7 errors in 1525.25 s. All twelve failing IDs match: zero added failures, with both new tests passing.</p>
+  <p id="seed-census-departure-map-detail">The completed titan CUDA job compared four 41-state carriers at base and repaired head. Their complete JSON receipts match for all 164 states: diverted 282 cells (32 valid, 33 axis identities), diverted 550 (23, 31), limited 289 (37, 41), and limited 553 (25, 41). Each count is the same in both arms; both diverted transition records and every per-state oracle, boundary and current value match. All eight <code>map-cuda-*.log</code> files end <code>EXIT=0</code>, and their paired JSON files are in run <code>r-20261018T065749620386-seed-census-departure</code>.</p>
+  <p id="seed-census-departure-current-detail">A direct area quadrature of the moving physical field over the read's four selected cut cells supplies a current value independent of the sampler's booking routines: <code>146.015393 A</code> at the right adjacent state on a 32 × 32 per-triangle grid, against <code>129.234157 A</code> booked. The 16 × 16 grid gives <code>148.171383 A</code>. The revised test compares each booked value to its direct integral within 15% and requires both series to stay continuous across the pair. The stale census admission mirrors have been removed, and the research record states the flux check's actual <code>1e-7</code> tolerance.</p>
+  <p id="seed-census-departure-review-base-detail">The fresh focused topology-file base completed with <code>5 failed, 28 passed, 7 errors in 2042.18 s</code>, <code>EXIT=1</code>; repaired head completed with <code>5 failed, 28 passed, 7 errors in 2018.25 s</code>, <code>EXIT=1</code>. All twelve failing IDs match: zero added failures, with the new direct-current assertion passing. Restoring strict exact-zero admission makes that revised test fail at the right adjacent state, <code>1 failed in 212.11 s</code>, <code>EXIT=1</code>.</p>
+</main></body>
+</html>

@@ -40,18 +40,73 @@ def census(field, geometry, convention, policy, previous):
     conditioned, safe = jax.vmap(topology._conditioned_hessian, in_axes=(0, None))(
         hessian, policy.hessian_tolerance
     )
-    offset = -jnp.linalg.solve(safe, coefficients[:, 1:3, None])[..., 0]
+    gradient = coefficients[:, 1:3]
+    offset = -jnp.linalg.solve(safe, gradient[..., None])[..., 0]
     seeds = geometry.centre + geometry.pitch[:, None] * offset
     slot = jnp.arange(geometry.vertices.shape[1])
     following = jnp.where(
         slot[None] + 1 < geometry.vertex_count[:, None], slot[None] + 1, 0
     )
     end = jnp.take_along_axis(geometry.vertices, following[..., None], axis=1)
-    cross = topology._cross_plane(
-        end - geometry.vertices, seeds[:, None] - geometry.vertices
+    edge = end - geometry.vertices
+    relative = seeds[:, None] - geometry.vertices
+    cross = topology._cross_plane(edge, relative)
+    # A quadratic seed can land on a cell edge, where the cross product above
+    # is zero to within its own rounding and its computed sign is set by
+    # rounding: the cell then enters the candidate set in one state and leaves
+    # it in the next, and a stationary point proposed only by that cell is
+    # never polished. Admit a seed whose cross product is negative only beyond
+    # the rounding the value actually carries. The bound composes the edge
+    # cross product's forward error with uncertainty in the local Hessian
+    # solve and its fitted coefficients, all computed from their operands.
+    epsilon = jnp.finfo(seeds.dtype).eps
+    inverse = jnp.linalg.inv(safe)
+    hessian_scale = jnp.sum(jnp.abs(hessian), axis=(-2, -1))
+    displacement_scale = jnp.sum(jnp.abs(inverse), axis=(-2, -1)) * (
+        hessian_scale * jnp.sum(jnp.abs(offset), axis=-1)
+        + jnp.sum(jnp.abs(gradient), axis=-1)
+    )
+    seed_uncertainty = epsilon * jnp.abs(geometry.pitch) * displacement_scale
+    # The quadratic fit is a signed dot product, so cancellation can make its
+    # coefficient error much larger than eps times the fitted coefficient.
+    # Bound each row by the absolute dot-product terms, then propagate the
+    # gradient and Hessian errors through the same local solve as the seed.
+    samples = field.jets[field.sample_index, 0]
+    centres = jax.vmap(field.cell_value)(jnp.arange(len(samples)), geometry.centre)
+    samples = samples.at[:, 0].set(centres)
+    operation_count = 2 * samples.shape[1]
+    gamma = operation_count * epsilon / (1 - operation_count * epsilon)
+    fit_error = gamma * jnp.einsum(
+        "nij,nj->ni", jnp.abs(geometry.fit_inverse), jnp.abs(samples)
+    )
+    hessian_error = jnp.stack(
+        (
+            jnp.stack((2 * fit_error[:, 3], fit_error[:, 4]), axis=-1),
+            jnp.stack((fit_error[:, 4], 2 * fit_error[:, 5]), axis=-1),
+        ),
+        axis=1,
+    )
+    fit_seed_uncertainty = (
+        jnp.abs(geometry.pitch)
+        * jnp.sum(jnp.abs(inverse), axis=(-2, -1))
+        * (
+            jnp.sum(fit_error[:, 1:3], axis=-1)
+            + jnp.sum(jnp.abs(hessian_error), axis=(-2, -1))
+            * jnp.sum(jnp.abs(offset), axis=-1)
+        )
+    )
+    rounding = (
+        4.0
+        * epsilon
+        * (jnp.abs(edge[..., 0]) + jnp.abs(edge[..., 1]))
+        * (jnp.abs(relative[..., 0]) + jnp.abs(relative[..., 1]))
+        + (jnp.abs(edge[..., 0]) + jnp.abs(edge[..., 1]))
+        * (seed_uncertainty + fit_seed_uncertainty)[:, None]
     )
     inside = jnp.all(
-        jnp.where(slot[None] < geometry.vertex_count[:, None], cross >= 0, True),
+        jnp.where(
+            slot[None] < geometry.vertex_count[:, None], cross >= -rounding, True
+        ),
         axis=1,
     )
     candidate = conditioned & inside & jnp.all(jnp.isfinite(seeds), axis=1)

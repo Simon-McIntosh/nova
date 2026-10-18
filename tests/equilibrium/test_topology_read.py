@@ -2613,3 +2613,260 @@ def _measure_kernel_compile_growth(count, tmp_path):
         assert result.valid and result.qualified
     finally:
         jax.config.update("jax_enable_compilation_cache", cache_enabled)
+
+
+def _census_cache():
+    """The directory the analytic-oracle machine cache is resolved through."""
+    import os
+    from pathlib import Path
+
+    return Path(os.environ.get("NOVA_ANALYTIC_ORACLE_CACHE", ".nova"))
+
+
+def _census_tie_setup(cache):
+    """Build the 282-cell carrier, warm its census prior, and return both arms.
+
+    The second arm builds the census from the live source with its
+    cell-membership step restored to the strict exact-zero comparison the
+    repaired source no longer uses, so the two arms differ only in that one
+    comparison.
+    """
+    from scripts.prototypes.fast_map_production import tie_probe
+    from scripts.prototypes.read_robustness import census as repaired_module
+
+    machine = cache / "analytic_oracle_hex_machine_250.zarr"
+    if not machine.exists():
+        pytest.skip(
+            f"no certified machine cache at {cache}; set NOVA_ANALYTIC_ORACLE_CACHE"
+        )
+    state = tie_probe.build("diverted", 250, str(cache))
+    sampled = tie_probe.make_sampler(state)
+    prior, _ = tie_probe.warm(state, sampled, -0.2, 0.16, 0.01)
+    return state, prior, repaired_module.census
+
+
+def _census_reading(census_function, state, prior, offset):
+    """The valid roots of one census arm at one offset under the moving field."""
+    import jax.numpy as jnp
+
+    from scripts.prototypes.read_robustness.census_negative_control import (
+        count_roots,
+    )
+
+    roots = count_roots(census_function, state, offset, prior)
+    eigenvalue = jnp.linalg.eigvalsh(state["convention"].sigma * roots.jet.hessian)
+    saddle = roots.valid & (eigenvalue[:, 0] < 0) & (eigenvalue[:, 1] > 0)
+    return int(jnp.sum(roots.valid)), int(jnp.sum(saddle)), roots
+
+
+def _census_field(state, offset):
+    """The moving field of the tie probe at one offset, as its sampler builds it."""
+    import jax.numpy as jnp
+    from dataclasses import replace
+
+    varied = replace(
+        state["jets"],
+        exterior=state["jets"].exterior
+        + jnp.asarray(offset * state["scale"]) * state["jet_slope"],
+    )
+    return varied.field(state["reference"])
+
+
+def _dense_cut_current(state, reading, field, resolution):
+    """Integrate physical current on the selected tie-state cut cells directly."""
+    geometry = state["geometry"]
+    selected = np.flatnonzero(np.asarray(reading.membership) > 0)
+    assert len(selected) == 4, "the tie-state support must have four cut cells"
+    centre = np.asarray(geometry.centre)[selected]
+    vertices = np.asarray(geometry.vertices)[selected]
+    count = np.asarray(geometry.vertex_count)[selected]
+    slot = np.arange(vertices.shape[1])
+    following = np.where(slot[None] + 1 < count[:, None], slot[None] + 1, 0)
+    end = np.take_along_axis(vertices, following[..., None], axis=1)
+    first, second = vertices - centre[:, None], end - centre[:, None]
+    area = 0.5 * (first[..., 0] * second[..., 1] - first[..., 1] * second[..., 0])
+    area = np.where(slot[None] < count[:, None], area, 0.0)
+    assert np.all(area >= 0), "cut-cell fans must be counterclockwise"
+
+    grid = (np.arange(resolution) + 0.5) / resolution
+    u, v = np.meshgrid(grid, grid, indexing="ij")
+    radius = np.sqrt(u)
+    a = (radius * (1 - v))[None, None, ..., None]
+    b = (radius * v)[None, None, ..., None]
+    points = (
+        centre[:, None, None, None]
+        + a * first[:, :, None, None]
+        + b * second[:, :, None, None]
+    )
+    flat = points.reshape(-1, 2)
+    flux = np.asarray(jax.vmap(field.value)(jnp.asarray(flat)))
+    normalized = (flux - float(reading.axis_flux)) / (
+        float(reading.boundary_flux) - float(reading.axis_flux)
+    )
+    density = np.asarray(
+        state["profile"].current_density(
+            jnp.asarray(flat[:, 0]), jnp.asarray(normalized)
+        )
+    )
+    weight = (
+        np.repeat(
+            (area * np.asarray(reading.path_weight)[selected, None]).reshape(-1),
+            resolution * resolution,
+        )
+        / resolution**2
+    )
+    return float(np.sum(weight * density * (normalized <= 1)))
+
+
+@pytest.mark.timeout(900)
+@pytest.mark.slow
+def test_census_keeps_the_wall_contact_saddle_across_the_adjacent_pair():
+    """Both sides of the bisected tie pair carry three roots and two saddles.
+
+    The pair is bisected on the census whose cell-membership step is the strict
+    exact-zero comparison, which is where that step loses the saddle; the
+    repaired census must keep it on both sides. The retained saddle is then
+    confirmed independently of the census that proposed it, by polishing the
+    field from a seed displaced from the census reading and requiring the same
+    hyperbolic point back, and by requiring the point to persist across the pair.
+    Dense area quadrature of the moving field independently checks the current
+    booked on the four selected cut cells at each offset.
+    """
+    import numpy as np
+
+    from nova.equilibrium import topology
+    from scripts.prototypes.fast_map_production import tie_probe
+    from scripts.prototypes.read_robustness.census_base_step import (
+        base_admission_census,
+    )
+
+    cache = _census_cache()
+    state, prior, repaired = _census_tie_setup(cache)
+    restored = base_admission_census()
+
+    low, high = 0.17, 0.18
+    reference = _census_reading(restored, state, prior, low)[0]
+    assert _census_reading(restored, state, prior, high)[0] < reference, (
+        "the strict exact-zero admission must depart over the tie interval"
+    )
+    for _ in range(200):
+        middle = (low + high) / 2
+        if middle in (low, high):
+            break
+        if _census_reading(restored, state, prior, middle)[0] == reference:
+            low = middle
+        else:
+            high = middle
+    assert np.nextafter(low, high) == high, "the tie pair must be adjacent binary64"
+
+    positions = {}
+    for offset in (low, high):
+        valid, saddles, roots = _census_reading(repaired, state, prior, offset)
+        assert valid == 3, f"three roots expected at {offset!r}, read {valid}"
+        assert saddles == 2, f"two saddles expected at {offset!r}, read {saddles}"
+        positions[offset] = np.asarray(roots.position)[np.asarray(roots.valid)]
+
+    _, _, sample = _census_reading(repaired, state, prior, high)
+    hessians = np.asarray(sample.jet.hessian)
+    live = np.asarray(sample.valid)
+    eigenvalues = np.linalg.eigvalsh(np.asarray(state["convention"].sigma) * hessians)
+    saddle_index = int(
+        np.flatnonzero(live & (eigenvalues[:, 0] < 0) & (eigenvalues[:, 1] > 0))[0]
+    )
+    wall = np.asarray(sample.position)[saddle_index]
+
+    field = _census_field(state, high)
+    pitch = float(np.median(np.asarray(state["geometry"].pitch)))
+    displaced = wall + np.asarray([0.25 * pitch, -0.25 * pitch])
+    independent = topology.stationary_read(field, displaced, pitch, state["policy"])
+    assert bool(np.asarray(independent.valid)), (
+        "a seed displaced from the wall-contact root must return to it"
+    )
+    coincident = float(np.linalg.norm(np.asarray(independent.position) - wall))
+    assert coincident < 0.02 * pitch, (
+        f"independent polish landed {coincident!r} from the census reading"
+    )
+    assert np.linalg.det(np.asarray(independent.jet.hessian)) < 0, (
+        "the independently recovered stationary point must be hyperbolic"
+    )
+    assert float(np.asarray(independent.jet.value)) == pytest.approx(
+        float(np.asarray(sample.jet.value)[saddle_index]), rel=0, abs=1e-7
+    ), "the independently recovered point must carry the same flux value"
+
+    nearest = float(np.min(np.linalg.norm(positions[low] - wall, axis=1)))
+    assert nearest < 0.05 * pitch, (
+        f"the wall-contact saddle must persist across the pair, nearest {nearest!r}"
+    )
+
+    # The production read must continue to select the primary X-point, and
+    # the current it books must not jump when the census keeps the extra root.
+    sampled = tie_probe.make_sampler(state)
+    currents = []
+    independent_currents = []
+    for offset in (low, high):
+        roots, reading, raw, _, _, _ = sampled(offset * state["scale"], prior)
+        moving = _census_field(state, offset)
+        primary = topology.stationary_read(
+            moving, state["previous"][1], pitch, state["policy"]
+        )
+        assert bool(np.asarray(primary.valid))
+        assert bool(np.asarray(reading.valid and reading.qualified))
+        assert int(np.asarray(roots.valid).sum()) == 3
+        assert (
+            np.linalg.norm(
+                np.asarray(reading.saddle_form.position) - np.asarray(primary.position)
+            )
+            < 0.05 * pitch
+        ), "the read must select the independently polished X-point"
+        currents.append(float(np.asarray(raw)))
+        independent_current = _dense_cut_current(state, reading, moving, 32)
+        independent_currents.append(independent_current)
+        assert currents[-1] == pytest.approx(independent_current, rel=0.15), (
+            f"booked current {currents[-1]!r} disagrees with direct cut-cell "
+            f"quadrature {independent_current!r} at {offset!r}"
+        )
+    assert abs(currents[1] - currents[0]) < 1e-5 * max(
+        1.0, abs(currents[0]), abs(currents[1])
+    ), f"booked current jumped across adjacent offsets: {currents!r}"
+    assert abs(independent_currents[1] - independent_currents[0]) < 1e-5 * max(
+        1.0, abs(independent_currents[0]), abs(independent_currents[1])
+    ), f"direct quadrature jumped across adjacent offsets: {independent_currents!r}"
+
+
+@pytest.mark.slow
+def test_strict_exact_zero_admission_loses_the_saddle_at_the_adjacent_pair():
+    """The reinstated strict exact-zero admission is the check this repair guards.
+
+    Rebuilding the census with that comparison in place of the rounding bound
+    must lose the wall-contact saddle the repaired census keeps, at the adjacent
+    pair. A test that passes with the repair and fails without it is the control
+    the repair is declared to answer to.
+    """
+    import numpy as np
+
+    from scripts.prototypes.read_robustness.census_base_step import (
+        base_admission_census,
+    )
+
+    cache = _census_cache()
+    state, prior, repaired = _census_tie_setup(cache)
+    restored = base_admission_census()
+
+    low, high = 0.17, 0.18
+    reference = _census_reading(restored, state, prior, low)[0]
+    for _ in range(200):
+        middle = (low + high) / 2
+        if middle in (low, high):
+            break
+        if _census_reading(restored, state, prior, middle)[0] == reference:
+            low = middle
+        else:
+            high = middle
+    assert np.nextafter(low, high) == high
+
+    _, repaired_saddles, _ = _census_reading(repaired, state, prior, high)
+    _, restored_saddles, _ = _census_reading(restored, state, prior, high)
+    assert repaired_saddles == 2, "the repaired census keeps both saddles"
+    assert restored_saddles == 1, (
+        "restoring the strict exact-zero admission must lose a saddle at the pair"
+    )

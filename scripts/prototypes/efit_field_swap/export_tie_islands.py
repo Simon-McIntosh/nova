@@ -129,7 +129,7 @@ def export(state, offset, out_dir, tag):
         zgrid=zgrid,
         wall_r=wall_r,
         wall_z=wall_z,
-        wall_index=np.array([1, len(wall_r)], dtype=int),
+        wall_index=np.asarray([[1, len(wall_r)]], dtype=np.int32),
         cell_r=np.zeros(0),
         cell_z=np.zeros(0),
         polygon_r=ring[:, 0],

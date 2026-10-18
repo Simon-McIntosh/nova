@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import math
 import pathlib
+import sys
 from dataclasses import replace
 
 import matplotlib
@@ -18,6 +19,10 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
+from shapely.geometry import Point, Polygon
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+from efit_field_swap.trace_record import read_trace_record
 
 from nova.media.ink import DEFAULT_INK
 from nova.media.poloidal import draw_flux_contours, draw_nulls, draw_wall
@@ -39,6 +44,8 @@ COLOUR = {
     "nova_a": "#b5651d",  # adapter A
     "nova_b": "#2e7d32",  # adapter B
     "wall": "#444444",
+    "obstacle": "#8a8a8a",
+    "escape": "#b0182b",
     "census": "#929292",
 }
 
@@ -136,6 +143,66 @@ def _marked_saddle(ax, position, *, color, marker):
     draw_nulls(ax, x_points=np.asarray([position]), style=style)
 
 
+def _wall_loops_by_role(path, axis_r, axis_z):
+    """Split the record's indexed wall loops into its vessel and its obstacles.
+
+    The trace stores the wall as consecutive segments plus a one-based inclusive
+    index per loop. Building each loop from that index, rather than drawing the
+    whole segment array as one polyline, is what stops a false chord being drawn
+    between the end of one loop and the start of the next on records that carry
+    more than one loop. The loop containing the stored axis is the vessel and
+    the loops it covers are its interior obstacles; a record with one loop is a
+    single vessel.
+    """
+    rings = read_trace_record(path).wall_rings
+    if len(rings) == 1:
+        return [(rings[0], "vessel")]
+    axis = Point(axis_r, axis_z)
+    polygons = []
+    for ring in rings:
+        polygon = Polygon(ring)
+        polygons.append(polygon if polygon.is_valid else polygon.buffer(0))
+    owners = [index for index, polygon in enumerate(polygons) if polygon.contains(axis)]
+    if len(owners) != 1:
+        return [(ring, "vessel") for ring in rings]
+    owner = owners[0]
+    outer = polygons[owner]
+    roles = []
+    for index, ring in enumerate(rings):
+        if index == owner:
+            roles.append((ring, "vessel"))
+        elif outer.covers(polygons[index]) and polygons[index].area > 0:
+            roles.append((ring, "obstacle"))
+    return roles
+
+
+def _draw_wall_loops(ax, path, axis_r, axis_z):
+    for ring, role in _wall_loops_by_role(path, axis_r, axis_z):
+        draw_wall(
+            ax,
+            radius=ring[:, 0],
+            height=ring[:, 1],
+            color=COLOUR["wall" if role == "vessel" else "obstacle"],
+            linewidth=1.0,
+            linestyle="solid" if role == "vessel" else (0, (4, 3)),
+        )
+
+
+def _draw_escape_bottleneck(ax, escape):
+    """Mark imas-efit's escape bottleneck on top of every other panel mark."""
+    ax.plot(
+        [escape["bottleneck"][0]],
+        [escape["bottleneck"][1]],
+        marker="D",
+        linestyle="none",
+        markersize=7,
+        markerfacecolor="none",
+        markeredgecolor=COLOUR["escape"],
+        markeredgewidth=1.6,
+        zorder=12,
+    )
+
+
 def draw_panel(ax, row):
     record = parse_record(row["path"])
     field = FastField(record.rgrid, record.zgrid, record.psi)
@@ -144,10 +211,7 @@ def draw_panel(ax, row):
     levels = row["contour_levels"]
     draw_flux_contours(ax, rs, zs, psi, levels, color="#c9c9c9", linewidth=0.8)
 
-    wall = record.wall_polygon
-    draw_wall(
-        ax, radius=wall[:, 0], height=wall[:, 1], color=COLOUR["wall"], linewidth=1.0
-    )
+    _draw_wall_loops(ax, row["path"], record.axis_r, record.axis_z)
 
     efit = row["efit"]
     a = row["adapter_a"]
@@ -248,6 +312,9 @@ def draw_panel(ax, row):
         if saddle:
             _marked_saddle(ax, saddle, color=COLOUR["nova_b"], marker="s")
 
+    if row.get("escape"):
+        _draw_escape_bottleneck(ax, row["escape"])
+
     ax.set_aspect("equal")
     ax.set_axis_off()
     ax.set_title(row["case"], fontsize=LABEL_SIZE, pad=2)
@@ -258,7 +325,25 @@ def _legend_handles(include_comparisons=True):
 
     handles = [
         Line2D([], [], color="#c9c9c9", lw=0.8, label="psi contours"),
-        Line2D([], [], color=COLOUR["wall"], lw=1.0, label="wall"),
+        Line2D([], [], color=COLOUR["wall"], lw=1.0, label="vessel wall"),
+        Line2D(
+            [],
+            [],
+            color=COLOUR["obstacle"],
+            lw=1.0,
+            ls=(0, (4, 3)),
+            label="obstacle wall",
+        ),
+        Line2D(
+            [],
+            [],
+            color=COLOUR["escape"],
+            marker="D",
+            mfc="none",
+            ls="none",
+            ms=7,
+            label="escape bottleneck",
+        ),
         Line2D(
             [], [], color=COLOUR["efit"], ls="--", lw=1.0, label="imas-efit boundary"
         ),
@@ -353,9 +438,14 @@ def _legend_handles(include_comparisons=True):
     return [
         item
         for item in handles
-        if item.get_label() in {"psi contours", "wall"}
+        if item.get_label()
+        in {"psi contours", "vessel wall", "obstacle wall", "escape bottleneck"}
         or item.get_label().startswith("census ")
     ]
+
+
+def _normalise_case(case):
+    return case.lower().replace("_", "-").replace(":", "-")
 
 
 def main():
@@ -364,9 +454,18 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--results", required=True)
     parser.add_argument("--outdir", required=True)
+    parser.add_argument("--escape-map", default=None)
     args = parser.parse_args()
 
     rows = json.loads(pathlib.Path(args.results).read_text())
+    escape_map = (
+        json.loads(pathlib.Path(args.escape_map).read_text()) if args.escape_map else {}
+    )
+    escape_map = {_normalise_case(key): value for key, value in escape_map.items()}
+    for row in rows:
+        entry = escape_map.get(_normalise_case(row["case"]))
+        if entry:
+            row["escape"] = entry
     outdir = pathlib.Path(args.outdir)
     outdir.mkdir(parents=True, exist_ok=True)
 

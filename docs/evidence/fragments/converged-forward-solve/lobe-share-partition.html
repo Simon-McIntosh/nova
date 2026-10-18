@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="lobe-share-partition">
+<meta name="plan-title" content="Lobe share and cell partition">
+<meta name="plan-summary" content="Booking each X-point owner cell once from the lobe ring fan through the imported clip-quadrature owner, with the remainder taken from the same ring builder">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s5">
+<meta name="plan-commits" content="698ce55c4,49f04d62a,de3efb343,c67cce123,e50548d80,7e2026485,cfce8e4b0,c3eb7e017,c8c326194">
+<meta name="plan-recorded-at" content="2026-10-18">
+<meta name="plan-verdict" content="pass">
+<meta name="plan-environment" content="fleet CPU partition and 2105-cell limited rows, titan P100 289- and 553-cell controls, binary64 asserted at entry, exact clipped certificates">
+<title>Lobe share and cell partition | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<h1 id="lobe-share-partition-title">Lobe share and cell partition</h1>
+<p id="lobe-share-partition-summary">An owner cell is booked once from a single ring fan: the cell
+polygon enters positive beside the lobe entered negative, both built by
+<code>current._normal_rings</code> and reduced by the clip-quadrature owner's own imported rule. The
+vertex-list reconstruction and the local signed-fan reduction are deleted, and the truncated
+degree-five rule that set the booked lobe's floor went with them. The partition agrees with dense
+references to at most 3.26849658450 &times; 10<sup>&minus;13</sup> for the lobe and
+1.42108547152 &times; 10<sup>&minus;13</sup> for the whole cell; the lobe
+partition passes all three map guards; and the 282 cold solve converges to
+3.0 &times; 10<sup>&minus;14</sup>. The 550 cold solve stalls on a collapsing line search at
+1.5 &times; 10<sup>&minus;3</sup>, reported below and left as the next item.</p>
+
+<section id="lobe-share-partition-fan">
+<h2>The fan the remainder takes</h2>
+<p id="lobe-share-partition-fan-body">The remainder of an owner cell — the cell with the lobe
+removed — is the cell polygon's star fan entered positive beside the lobe's fan entered negative,
+reduced in one call, so the read's membership and the booked current are one integral over one set
+of points. Both fans come from <code>current._normal_rings</code>, the builder that already produces
+the lobe; the earlier reconstruction walked the polygon's vertex list instead, and it is deleted.</p>
+<p id="lobe-share-partition-fan-reason">One call cannot carry both selections. The builder takes a
+single <code>selected</code> vector and a single interval array and answers them with two families of
+rows: straight rows carrying the polygon's edges, and separatrix-arc rows carrying the boundary the
+normal form supplies, emitted after the straight rows for the sectors the selection makes live and
+only where the sector's sign is nonzero. The lobe's selection is the read's own — two live sectors of
+four, with the read's edge intervals. The cell polygon's is the identity over every edge with a
+degenerate interval, live in a sector the read has marked dead. Asking one call for both would need
+the builder to hold a second selection and interval array and to tag which row belongs to which
+request, which is a change to the accessor rather than a use of it. A second invocation is the
+smallest construction that keeps one builder: exactly one fragment slot is selected — straight rows
+are emitted per slot, so two live slots carry the polygon twice — one identity interval is placed on
+the first strip of every edge, and the separatrix-arc rows that follow are dropped by the static
+straight-row count.</p>
+<p id="lobe-share-partition-fan-defect">The slot count was the one defect found here. Selecting every
+fragment slot emitted the straight rows once per slot, so the cell fan carried the polygon twice and
+the booked remainder was the polygon rather than the polygon less the lobe. It is fixed, and the
+analytic check pins the single-slot contract.</p>
+</section>
+
+<section id="lobe-share-partition-reduction">
+<h2>The reduction is the owner's</h2>
+<p id="lobe-share-partition-reduction-body">The signed-fan reduction is
+<code>clip_quadrature._quadrature_from_arrays</code>, imported and called with
+<code>signed=True</code>. A row of three live vertices contributes exactly one triangle and a row of
+six contributes four, which is the effective triangle set the lobe reference integrates, so the rule
+that books an owner cell here is the rule that books one in the clip-quadrature owner. The wrapper
+that remains applies the row sign and the booked density and nothing else. The deleted degree-five
+Dunavant rule was carried to ten digits, and that truncation, not the fan, was the floor under the
+booked lobe; no ten-digit constant remains on this path.</p>
+</section>
+
+<section id="lobe-share-partition-check">
+<h2>The analytic check</h2>
+<p id="lobe-share-partition-check-body">The check builds the cell fan through
+<code>current._normal_rings</code> itself, driven with a form whose separatrix rays never reach the
+cell so only the straight rows are live, and compares the booked reduction against the closed form
+over the polygon's triangles. Eight tests pass: one live slot carries the polygon once; its reduction
+matches the closed form on a quadratic density; a negative slot subtracts against independent
+closed-form whole and inner polygon moments on that same nonconstant density; the remainder uses the
+counted polygon's closing edge even when the padded vertex differs; and the independent lobe
+reference runs while the booking ring builder is forbidden. Restoring the vertex-list remainder
+fails the counted-polygon test, and restoring the builder-based lobe reference fails the
+forbidden-builder test. Three of the eight force missing, invalid, and 2e-12-inaccurate rows through
+the reference probe; each is refused. An invocation missing the 2,098-cell carrier exits 1 before
+measuring any row. In fresh processes on the same test file, the base reaches a summary with
+two collection errors because it lacks <code>_ring_moments</code>; the head passes all eight.</p>
+</section>
+
+<section id="lobe-share-partition-partition">
+<h2>The partition against dense references</h2>
+<p id="lobe-share-partition-partition-gate">The consolidated reference probe persists every
+carrier row and exits 0 only when the 282, 550 and 2,098 carriers each have owner cells, valid
+bookings, finite values in all four columns, and lobe and whole-cell absolute errors no greater
+than 1e-12. This run exits 0 with no error rows; omitting the 2,098 carrier exits 1.</p>
+<table id="lobe-share-partition-partition-table">
+<thead><tr><th>carrier</th><th>owner cells booked</th><th>lobe vs dense lobe, max |Δ|</th><th>lobe + remainder vs dense whole cell, max |Δ|</th></tr></thead>
+<tbody>
+<tr id="lobe-share-partition-partition-row-282"><td>282</td><td>1 (cell 7)</td><td>1.98951966013 × 10<sup>−13</sup></td><td>1.42108547152 × 10<sup>−13</sup></td></tr>
+<tr id="lobe-share-partition-partition-row-550"><td>550</td><td>1 (cell 8)</td><td>3.26849658450 × 10<sup>−13</sup></td><td>2.84217094304 × 10<sup>−14</sup></td></tr>
+<tr id="lobe-share-partition-partition-row-2098"><td>2,098</td><td>1 (cell 47)</td><td>4.21884749358 × 10<sup>−14</sup></td><td>1.77635683940 × 10<sup>−14</sup></td></tr>
+</tbody>
+</table>
+<p id="lobe-share-partition-partition-finding">Every booked owner cell is compared with the dense
+lobe reference and with the dense whole-cell reference over its lobe plus its remainder, on area,
+current and both first moments. The lobe reference constructs its straight intervals and cubic-ray
+chords independently in NumPy, and both references integrate in closed form without the clip rule.
+The largest absolute deviation is 3.26849658450 × 10<sup>−13</sup>, inside the
+1 × 10<sup>−12</sup> contract. In area, current, radial moment, vertical moment order, the lobe and
+partition deviations are respectively: 282 — (8.674e−18, 1.990e−13, 3.192e−15, 5.329e−15) and
+(1.735e−18, 1.421e−13, 1.832e−15, 4.510e−16); 550 —
+(1.453e−17, 3.268e−13, 2.859e−15, 3.775e−15) and
+(0, 2.842e−14, 1.707e−15, 1.582e−15); 2,098 —
+(1.924e−18, 4.219e−14, 4.857e−17, 6.193e−16) and
+(1.084e−18, 1.776e−14, 3.001e−16, 2.327e−16).</p>
+<p id="lobe-share-partition-partition-550">The correct 550-cell carrier books cell 8 and exercises
+both sides of the partition. It comes from the cache used for the map and cold solve. A different
+cache produced the earlier 551-cell, zero-booked row; that row is superseded. Relative errors in a
+nearly cancelled first-moment column do not change the absolute agreement.</p>
+</section>
+
+<section id="lobe-share-partition-maps">
+<h2>The map errors</h2>
+<table id="lobe-share-partition-maps-table">
+<thead><tr><th>carrier</th><th>guard</th><th>half-plane delivered</th><th>half-plane floor</th><th>lobe delivered</th><th>lobe floor</th></tr></thead>
+<tbody>
+<tr><td>282</td><td>1.0866e-3</td><td>1.08006018256e-3 pass</td><td>6.18989257731e-4</td><td>1.08655590095e-3 pass</td><td>6.18989257731e-4</td></tr>
+<tr><td>550</td><td>5e-4</td><td>4.09606071189e-4 pass</td><td>1.82141864746e-4</td><td>4.87171143918e-4 pass</td><td>1.82141864746e-4</td></tr>
+<tr><td>2,098</td><td>1e-4</td><td>2.49303535497e-4 fail</td><td>1.76641360086e-5</td><td>9.47260994768e-5 pass</td><td>1.76641360086e-5</td></tr>
+</tbody>
+</table>
+<p id="lobe-share-partition-maps-finding">The lobe cut passes all three guards, and at 2,098 it is
+the representation that passes where the half-plane cut fails: 9.47260994768 × 10<sup>−5</sup>
+against the 1 × 10<sup>−4</sup> guard, where the half-plane cut delivers
+2.49303535497 × 10<sup>−4</sup> and misses it by 2.5×. That is the one size where the two
+representations of the owned region are separable, and it separates in favour of the lobe. At 282 the
+two are not distinguishable — 1.08655590095 × 10<sup>−3</sup> against
+1.08006018256 × 10<sup>−3</sup>, 0.6 % apart, both within the carrier's own reconstruction floor of
+6.18989257731 × 10<sup>−4</sup> — and most of what remains there is the carrier rather than the
+region. At 550 the lobe cut is 19 % above the half-plane cut
+(4.87171143918 × 10<sup>−4</sup> against 4.09606071189 × 10<sup>−4</sup>) while still clearing its
+guard by 2.6 %, and both sit above the same 1.82141864746 × 10<sup>−4</sup> floor. The 282 row's
+top-ranked cell is not a driver: patching it back to its reference moments raises the error to
+1.14776136182 × 10<sup>−3</sup>.</p>
+<p id="lobe-share-partition-maps-resolved">The 550 and 2,098 rows were first recorded here as not
+measured. They resolved when the measurement ran against a cache root that carries the exterior groups
+for those carriers: the root used first holds none, so <code>_exterior</code> returned a null and the run
+died on the addition rather than raising. That was a per-carrier fixture gap, and no pre-warm was built
+and no module outside this node's write scope was touched to close it.</p>
+<h3 id="lobe-share-partition-limited-title">Limited control</h3>
+<table id="lobe-share-partition-limited-table">
+<thead><tr><th>carrier</th><th>booked owner cells</th><th>half-plane error</th><th>lobe error</th><th>independent reference error</th></tr></thead>
+<tbody>
+<tr id="lobe-share-partition-limited-row-289"><td>289</td><td>0</td><td>1.80391903624e-4</td><td>1.80391903624e-4</td><td>1.43236766265e-4</td></tr>
+<tr id="lobe-share-partition-limited-row-553"><td>553</td><td>0</td><td>7.13582881486e-5</td><td>7.13582881486e-5</td><td>4.66332420692e-5</td></tr>
+<tr id="lobe-share-partition-limited-row-2105"><td>2,105</td><td>0</td><td>1.44141390339e-5</td><td>1.44141390339e-5</td><td>4.69283642386e-6</td></tr>
+</tbody>
+</table>
+<p id="lobe-share-partition-limited-finding">At all three limited sizes neither selection books
+an X-point owner, and the maps have exactly equal moments and errors. The independent reference
+errors are nonzero, a positive control for each measurement. The 289 and 553 rows ran on titan. The
+2,105-cell titan run failed to load the compiled map with <code>CUDA_ERROR_OUT_OF_MEMORY</code> after
+JAX reported 4.15 GB of captured constants. A fleet CPU rerun of that exact carrier through the
+shared context builder completed in 4:50.30, with 20,830,864 kB maximum resident memory, and
+recorded lobe and half-plane errors of 1.44141390339e-5, an independent reference error of
+4.69283642386e-6, no receipt errors and exit 0.</p>
+</section>
+
+<section id="lobe-share-partition-solves">
+<h2>Cold solves</h2>
+<table id="lobe-share-partition-solves-table">
+<thead><tr><th>carrier</th><th>corrections</th><th>terminal residual</th><th>converged</th></tr></thead>
+<tbody>
+<tr><td>282</td><td>5</td><td>3.00226232984e-14</td><td>yes</td></tr>
+<tr><td>550</td><td>9</td><td>1.54987034401e-3</td><td>no — the line search collapsed</td></tr>
+</tbody>
+</table>
+<p id="lobe-share-partition-solves-finding">The 282 residual history is 1.62494366306 ×
+10<sup>−3</sup> → 1.38083014549 × 10<sup>−4</sup> → 1.56598136856 × 10<sup>−6</sup> →
+7.64280325698 × 10<sup>−10</sup> → 3.00226232984 × 10<sup>−14</sup>, in five corrections of about
+1.6 s each once the map and the correction program are compiled (16.5 s and 74.3 s), with no line
+search damping at any correction. The booked partition is a root the Newton correction accepts at
+this size.</p>
+<p id="lobe-share-partition-solves-blocker">The 550 solve stalls on a collapsing line search, which is the item clause 6 named in advance. Its residual history, in units of 10<sup>&minus;3</sup> and one value per correction, is 1.74953783302, 1.62497701889, 1.57615839892, 1.55663074090, 1.55089981991, 1.54995715472, 1.54987035523, 1.54987034401, 1.54987034401: the residual decreases monotonically, but each correction moves it less than the last, and the final three sit on a fixed point to within 1 &times; 10<sup>&minus;10</sup>. The accepted step factor falls every correction &mdash; 0.5, 0.25, 0.0625, 0.03125, 0.0078125, 0.00390625, 0.000244140625, 3.0517578125 &times; 10<sup>&minus;5</sup>, then 0.0 &mdash; and at zero no step is taken at all, so the correction exits early with <code>converged=False</code> rather than at the eighteen-step ceiling. The residual neither diverges nor oscillates; it approaches a fixed point near 1.54987 &times; 10<sup>&minus;3</sup> that the Newton direction cannot leave by any positive step. The 1 &times; 10<sup>&minus;12</sup> contract is missed by ten orders of magnitude at this size, and the mechanism is the line search rather than the partition: the same booked partition is a root at 282. The stall is reported here and left as the next item.</p>
+<figure id="lobe-share-partition-panel-282-figure">
+<img src="/nova/figures/converged-forward-solve/lobe-share-partition/terminal-282.svg"
+     alt="Solved and analytic poloidal flux contours at the 282-cell terminal state of the lobe-owned cold solve">
+<figcaption id="lobe-share-partition-panel-282-caption">282-cell terminal state. Solved flux solid
+blue, analytic flux dashed dark grey on one shared physical level array, both null sets, the first
+wall, and no axes or gridlines. Terminal residual 3.002262329835039e-14, converged.</figcaption>
+</figure>
+</section>
+
+<section id="lobe-share-partition-verdict">
+<h2>Verdict</h2>
+<p id="lobe-share-partition-verdict-body">Clauses 1 to 4 and the diverted part of clause 5 hold. The remainder takes its fan from the
+same builder that builds the lobe, the vertex-list reconstruction and the local signed-fan reduction
+are deleted, the reduction is the imported clip-quadrature rule, and the truncated rule that set the
+booked lobe's floor is gone with it. Clause 4 holds at 282, 550 and 2,098: the independent lobe
+reference agrees to at most 3.26849658450 &times; 10<sup>&minus;13</sup>, and the whole-cell partition
+to at most 1.42108547152 &times; 10<sup>&minus;13</sup>. The 550 carrier books cell 8, so the lobe and
+remainder are both exercised. The diverted lobe partition passes the guards
+1.0866 &times; 10<sup>&minus;3</sup>, 5 &times; 10<sup>&minus;4</sup> and 1 &times; 10<sup>&minus;4</sup>, and at
+2,098 it passes where the half-plane cut fails. Limited controls agree at 289 and 553 cells; the
+2,105-cell map was measured on CPU after the P100 ran out of device memory. Clause 6 holds at 282 and is reported, not met, at 550:
+the solve stalls on a collapsing line search at a fixed point near
+1.55 &times; 10<sup>&minus;3</sup>, which is the item clause 6 named in advance and is left as the next
+item. Clause 7 is this fragment. No number above is an estimate.</p>
+</section>
+</main>
+</body>
+</html>

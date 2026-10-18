@@ -40,6 +40,7 @@ def main():
             "shifted",
             "ordinary",
             "oriented",
+            "lobe",
         ),
         default="halfplane",
     )

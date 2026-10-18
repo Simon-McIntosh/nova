@@ -2750,6 +2750,30 @@ def test_census_keeps_the_wall_contact_saddle_across_the_adjacent_pair():
         f"the wall-contact saddle must persist across the pair, nearest {nearest!r}"
     )
 
+    # The production read must continue to select the primary X-point, and
+    # the current it books must not jump when the census keeps the extra root.
+    sampled = tie_probe.make_sampler(state)
+    currents = []
+    for offset in (low, high):
+        roots, reading, raw, _, _, _ = sampled(offset * state["scale"], prior)
+        moving = _census_field(state, offset)
+        primary = topology.stationary_read(
+            moving, state["previous"][1], pitch, state["policy"]
+        )
+        assert bool(np.asarray(primary.valid))
+        assert bool(np.asarray(reading.valid and reading.qualified))
+        assert int(np.asarray(roots.valid).sum()) == 3
+        assert (
+            np.linalg.norm(
+                np.asarray(reading.saddle_form.position) - np.asarray(primary.position)
+            )
+            < 0.05 * pitch
+        ), "the read must select the independently polished X-point"
+        currents.append(float(np.asarray(raw)))
+    assert abs(currents[1] - currents[0]) < 1e-5 * max(
+        1.0, abs(currents[0]), abs(currents[1])
+    ), f"booked current jumped across adjacent offsets: {currents!r}"
+
 
 @pytest.mark.slow
 def test_strict_exact_zero_admission_loses_the_saddle_at_the_adjacent_pair():

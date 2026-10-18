@@ -381,7 +381,7 @@ Adapter B records no axis
 <em>position</em>, so its axis is identified among the census points as the one whose &psi; equals its
 recorded <code>axis_level</code>; the level matching rule is implemented in
 <code>scripts/prototypes/efit_axis_adjudication/analyse.py</code> and reported by this page generator
-<code>scripts/prototypes/efit_axis_adjudication/page.py</code>. The match is stated in each
+<code>scripts/prototypes/efit_axis_adjudication/page.py:376&ndash;384</code>. The match is stated in each
 measured panel's table.</li>
 <li><strong>imas-efit saddle position.</strong> The trace stores a refined saddle level and a source
 grid node, not a refined saddle coordinate. Every plotted cross and tabulated saddle distance

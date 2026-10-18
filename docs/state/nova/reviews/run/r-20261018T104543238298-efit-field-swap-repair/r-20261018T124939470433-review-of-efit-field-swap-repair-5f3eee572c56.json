@@ -1,0 +1,70 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run's baseline_suite and after_suite declare completed true and exit_status 0 at revisions 5179d0b7524a5ab6d8a87efa91d2051b2f6a3708 and 5f3eee572c56e197303a0dd4a0a61989bb1bb9a7; their opened logs (exports/baseline.log, exports/final-after.log) show 12 and 19 passing tests respectively, no failing ids, and both end EXIT=0, so no test this node added fails that its base did not.",
+  "call_site_count": 11,
+  "call_sites": [
+    "scripts/prototypes/efit_field_swap/crosscheck.py:352",
+    "scripts/prototypes/efit_field_swap/crosscheck.py:315",
+    "scripts/prototypes/efit_field_swap/export_states.py:24",
+    "scripts/prototypes/efit_field_swap/export_states.py:25",
+    "scripts/prototypes/efit_field_swap/export_tie_islands.py:41",
+    "scripts/prototypes/efit_field_swap/probe_read.py:8",
+    "scripts/prototypes/efit_field_swap/probe_read.py:14",
+    "scripts/prototypes/efit_field_swap/diagnose_seed.py:14",
+    "scripts/prototypes/efit_field_swap/probe_stencil.py:6",
+    "scripts/prototypes/efit_field_swap/negative_control.py:30",
+    "scripts/prototypes/efit_field_swap/spline_field.py:21"
+  ],
+  "completed_at": "2026-10-18T13:04:33.736Z",
+  "dispatched_at": "2026-10-18T12:50:29Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/efit_field_swap/crosscheck.py",
+      "line": "318",
+      "severity": "follow-on",
+      "text": "follow-on: contained wall loops are handed to the read as separate wall units that nova types as vessel, so an obstacle wall-contact event on a multi-loop record is mis-typed; the adapter declares this approximation on docs/evidence/fragments/converged-forward-solve/efit-field-swap-repair.html and any wall-contact comparison on those rows is bounded by it."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 11 production call sites across crosscheck.py, export_states.py, export_tie_islands.py, probe_read.py, diagnose_seed.py, probe_stencil.py, negative_control.py and spline_field.py",
+    "diff": "read all twelve commits from 5179d0b7524a to 5f3eee572c56; dc7e16c6 validates receipts and reads crossing polygons, 33f4f9a5/87b61d81 write the case table and preserve unread rows, 894ce1a4/bc599e04 add evidence and endpoint coverage, 013075134 retains wall endpoints, d5758df3f adds the live-key refusal test, 0369801b7 resolves indexed wall loops, and b0936a6a9/5f3eee572 refresh the docs.",
+    "done_when": "the source brief's six repairs each have a passed assertion; baseline.log records 12 tests passing across four fresh module processes at the source base sha and final-after.log records 19 at the head, sweep-loops.log ends ROWS 28 EXIT=0, verify-loop-counts.log reports LOOP_COUNTS {1: 18, 3: 8, 29: 2} and verify-loops.log reports VERIFIED 8 endpoints and 2 carriers.",
+    "goal": "docs/plans/converged-forward-solve.html:585 asks for a two-code field-swap cross-check and named six repairs; docs/research/efit-field-swap.html now carries 28 complete rows and scripts/prototypes/efit_field_swap/trace_record.py:92-118 resolves each indexed wall loop separately instead of joining them, with the export writing both sides of every adjacent-double transition.",
+    "manifest": "the source manifest reports twelve commits, ten changed paths, status complete, completed baseline_suite 12/12 and after_suite 19/19 arms with zero failure ids at the head sha, two recorded negative-control red logs, and export receipts under its run exports/ directory.",
+    "write_paths": "the source manifest grants scripts/prototypes/efit_field_swap, docs/research/efit-field-swap.html and the two docs/evidence/fragments/converged-forward-solve pages; git diff --name-only 5179d0b7524a..5f3eee572c56 lists ten files, all inside those grants, and no nova or imas-efit source is touched."
+  },
+  "justifications": {
+    "durability": "test_trace_record.py:126 and test_export_states.py:245 assert the repaired geometry and the live export decision-key refusal, and the recorded red logs wall-open-red.log and export-key-guard-red.log show each failing when its guard is removed.",
+    "evidence": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T104543238298-efit-field-swap-repair/exports/final-after.log names the head sha and records 19 passing tests across four fresh processes against 12 at the source base.",
+    "fit": "scripts/prototypes/efit_field_swap/trace_record.py:128 follows the module's consecutive-segment representation and the added names describe mechanisms with no plan labels.",
+    "goal_fidelity": "scripts/prototypes/efit_field_swap/trace_record.py:92-118 keeps each indexed loop as its own closed ring and crosscheck.py:352 selects the axis-containing loop, so all 28 rows are read and the prior joined-ring loss is gone.",
+    "reuse": "spline_field.py:31 wraps nova.linalg.tensor_spline.fit_tensor_spline instead of carrying a second B-spline evaluator, and a capability search found no owning helper for the trace segment-to-ring conversion.",
+    "scope_discipline": "the ten paths in git diff --name-only 5179d0b7524a..5f3eee572c56 are all within the source manifest's declared script, research and evidence grants."
+  },
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: 5179d0b7524a5ab6d8a87efa91d2051b2f6a3708\nreviewed_head_sha: 5f3eee572c56e197303a0dd4a0a61989bb1bb9a7\n\nVERDICT goal: docs/plans/converged-forward-solve.html:585 asks for a two-code field-swap cross-check and named six repairs; docs/research/efit-field-swap.html now carries 28 complete rows and scripts/prototypes/efit_field_swap/trace_record.py:92-118 resolves each indexed wall loop separately instead of joining them, with the export writing both sides of every adjacent-double transition.\nVERDICT done_when: the source brief's six repairs each have a passed assertion; baseline.log records 12 tests passing across four fresh module processes at the base sha and final-after.log records 19 at the head, sweep-loops.log ends ROWS 28 EXIT=0, verify-loop-counts.log reports LOOP_COUNTS {1: 18, 3: 8, 29: 2} and verify-loops.log reports VERIFIED 8 endpoints and 2 carriers.\nVERDICT write_paths: the source manifest grants scripts/prototypes/efit_field_swap, docs/research/efit-field-swap.html and the two docs/evidence/fragments/converged-forward-solve pages; git diff --name-only 5179d0b7524a..5f3eee572c56 lists ten files, all inside those grants, and no nova or imas-efit source is touched.\nVERDICT manifest: the source manifest reports twelve commits, ten changed paths, status complete, completed baseline_suite 12/12 and after_suite 19/19 arms with zero failure ids at the head sha, two recorded negative-control red logs, and export receipts under its run exports/ directory.\nVERDICT diff: read all twelve commits from 5179d0b7524a to 5f3eee572c56; dc7e16c6 validates receipts and reads crossing polygons, 33f4f9a5/87b61d81 write the case table and preserve unread rows, 894ce1a4/bc599e04 add evidence and endpoint coverage, 013075134 retains wall endpoints, d5758df3f adds the live-key refusal test, 0369801b7 resolves indexed wall loops, and b0936a6a9/5f3eee572 refresh the docs.\nCALL_SITES: scripts/prototypes/efit_field_swap/crosscheck.py:352, scripts/prototypes/efit_field_swap/crosscheck.py:315, scripts/prototypes/efit_field_swap/export_states.py:24, scripts/prototypes/efit_field_swap/export_states.py:25, scripts/prototypes/efit_field_swap/export_tie_islands.py:41, scripts/prototypes/efit_field_swap/probe_read.py:8, scripts/prototypes/efit_field_swap/probe_read.py:14, scripts/prototypes/efit_field_swap/diagnose_seed.py:14, scripts/prototypes/efit_field_swap/probe_stencil.py:6, scripts/prototypes/efit_field_swap/negative_control.py:30, scripts/prototypes/efit_field_swap/spline_field.py:21\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: scripts/prototypes/efit_field_swap/trace_record.py:92-118 keeps each indexed loop as its own closed ring and crosscheck.py:352 selects the axis-containing loop, so all 28 rows are read and the prior joined-ring loss is gone.\nSCORE evidence: 18\nJUSTIFICATION evidence: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T104543238298-efit-field-swap-repair/exports/final-after.log names the head sha and records 19 passing tests across four fresh processes against 12 at the base.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the ten paths in git diff --name-only 5179d0b7524a..5f3eee572c56 are all within the source manifest's declared script, research and evidence grants.\nSCORE durability: 17\nJUSTIFICATION durability: test_trace_record.py:126 and test_export_states.py:245 assert the repaired geometry and the live export decision-key refusal, and the recorded red logs wall-open-red.log and export-key-guard-red.log show each failing when its guard is removed.\nSCORE fit: 18\nJUSTIFICATION fit: scripts/prototypes/efit_field_swap/trace_record.py:128 follows the module's consecutive-segment representation and the added names (_closed_ring, domain_rings, bisected_brackets, validate_carrier) describe mechanisms with no plan labels.\nSCORE reuse: 19\nJUSTIFICATION reuse: spline_field.py:31 now wraps nova.linalg.tensor_spline.fit_tensor_spline instead of carrying a second B-spline evaluator, and a capability search found no owning helper for the trace segment-to-ring conversion the adapter performs.\nFINDING scripts/prototypes/efit_field_swap/crosscheck.py:318 follow-on: contained wall loops are handed to the read as separate wall units that nova types as vessel, so an obstacle wall-contact event on a multi-loop record is mis-typed; the adapter declares this approximation on docs/evidence/fragments/converged-forward-solve/efit-field-swap-repair.html and any wall-contact comparison on those rows is bounded by it.\n",
+  "review_run_id": "r-20261018T124939470433-review-of-efit-field-swap-repair-5f3eee572c56",
+  "reviewed_base_sha": "5179d0b7524a5ab6d8a87efa91d2051b2f6a3708",
+  "reviewed_head_sha": "5f3eee572c56e197303a0dd4a0a61989bb1bb9a7",
+  "reviewed_run_id": "r-20261018T104543238298-efit-field-swap-repair",
+  "reviewer": {
+    "backend": "deepseek-v4.1-flash"
+  },
+  "rubric": "review",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T12:59:05.256385+00:00",
+  "total": 109
+}

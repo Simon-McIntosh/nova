@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="374">
+<meta name="plan-version" content="375">
 <meta name="plan-modified" content="2026-10-18">
 </head>
 <body>
@@ -606,6 +606,11 @@
 <article class="r-fu" data-id="f-cfs-contour-mesh-capacity" data-status="open" data-written-by="s21-nova coordinator" data-written-at="2026-10-18" data-recommends-skill="/reckon-build converged-forward-solve §2" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Make the topology contour mesh size its vertices for wide walls, and refuse rather than return an empty mesh</h4>
     <div class="r-fu-body"><p>The efit-field-swap node found that <code>TopologyGeometry.from_cells</code> sizes its vertex array as <code>len(tree_centres) + len(points) + 1</code>. For a wide wall that is too small, and <code>build_contour_mesh</code> then returns a mesh with zero valid vertices instead of raising. The read later fails with an IndexError at nova/equilibrium/topology.py:2483 (index -1 on an empty array).</p><p>It took out every ITER and MAST-U record in the cross-check: 14 of 24 rows were unread. The node worked around it by refitting the capacity in its prototype adapter, because that node does not change nova's read.</p><p>The repair belongs in nova.equilibrium.topology:</p><ul><li>size the capacity from the geometry it must hold;</li><li>make an overflow refuse with a named error, never yield an empty mesh;</li><li>add a test on a wide-wall record that fails on the old sizing.</li></ul></div>
+    <pre class="r-fu-prompt">/reckon-build converged-forward-solve §2</pre>
+    </article>
+<article class="r-fu" data-id="f-cfs-tcv-liuqe-known-answer" data-status="open" data-written-by="s21-nova coordinator" data-written-at="2026-10-18" data-recommends-skill="/reckon-build converged-forward-solve §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Score nova&#x27;s boundary read on TCV 77549 LIUQE equilibria, a machine with a trusted reconstruction</h4>
+    <div class="r-fu-body"><p>Lead direction, 2026-10-18: add another tokamak with a known-good LIUQE solution, such as TCV, as a test case. JT-60SA has no trusted reconstruction, and SELENE is a data source, not an authority. TCV 77549 has a LIUQE equilibrium of 1,703 slices in imas-efit's tree at tests/data/imas/TCV/77549/validation/liuqe/equilibrium.h5, with wall.h5 and the machine description beside it. Read it with imas-python at the dd_version imas-efit's data manifest records, and check homogeneous_time.</p><p>One node, after efit-field-swap-repair lands so its grid-spline adapter and per-loop wall geometry are reused, not copied. It has three clauses:</p><ol><li>Choose LIUQE slices across the pulse that cover its limited and diverted phases.</li><li>Run nova's read on each slice's LIUQE psi map with the per-loop TCV wall, and tabulate the axis, X-point, boundary flux and label against LIUQE's own values.</li><li>Draw line-contour panels with both sets of fixed points and both boundaries.</li></ol><p>The same node redraws the efit-axis-adjudication panels with the per-loop wall. Those panels join JT-60SA's three loops and AUG's 29 into one ring, which draws a spurious chord.</p><p>imas-efit is invited to run its escape-level rule on the same slices.</p></div>
     <pre class="r-fu-prompt">/reckon-build converged-forward-solve §2</pre>
     </article>
 </section>

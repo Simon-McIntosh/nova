@@ -1,0 +1,149 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite": {
+    "command": "bash /home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T141607544598-vertical-pin/head-suite-runtime.sh",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 5,
+    "failure_ids": [
+      "tests/equilibrium/test_topology_read.py::test_kernel_compile_growth[132]",
+      "tests/equilibrium/test_topology_read.py::test_kernel_compile_growth[300]",
+      "tests/equilibrium/test_topology_read.py::test_kernel_compile_growth[550]",
+      "tests/equilibrium/test_topology_read.py::test_saddle_support_order[diverted]",
+      "tests/equilibrium/test_topology_read.py::test_topology_class_and_membership[diverted]"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T141607544598-vertical-pin/head-suite-runtime.log",
+    "revision": "d9354a16ba19e9dd5df87a5b1b5e4672a5b2ffe3"
+  },
+  "assertion_audit": [
+    {
+      "fails_if": "The radial image or jet is wrong, the declared coil direction or flux response is wrong, or the coil public solve misses the height or residual bounds; the zero-field mutation makes this group red.",
+      "path": "tests/equilibrium/test_solve_vertical_pin.py:168-198"
+    },
+    {
+      "fails_if": "The free solve misses qualification, residual, elongation, seed height, target distance or zero-unknown checks; the group cannot fail when the free state merely remains at its seed height, so it does not guard the requested drift or stall.",
+      "path": "tests/equilibrium/test_solve_vertical_pin.py:213-224"
+    },
+    {
+      "fails_if": "Either active public request misses qualification, 1e-12 residual, measured elongation, independently divided booked height within 1e-10 m of its target, or a qualified row; the zero-field mutation makes both target cases red.",
+      "path": "tests/equilibrium/test_solve_vertical_pin.py:231-240"
+    },
+    {
+      "fails_if": "Only the spy stops echoing the target and scale passed by the test; it stays green if the compiled map ignores those values, while terminal-height assertions at 275-278 test their effect.",
+      "path": "tests/equilibrium/test_solve_vertical_pin.py:271"
+    },
+    {
+      "fails_if": "The public logical cache key changes or the hit flag changes; it does not fail if two physical programs compile behind a single key.",
+      "path": "tests/equilibrium/test_solve_vertical_pin.py:272-274"
+    },
+    {
+      "fails_if": "The explicitly paired augmented wrapper cannot execute inactive and two active runtime pairs from one lower().compile() result, or its terminal residual, height, elongation and zero inactive unknown checks fail; no assertion exercises the public absent-pin path.",
+      "path": "tests/equilibrium/test_solve_vertical_pin.py:319-333"
+    }
+  ],
+  "base_log_revision": "8e0ccc13a1d72fa47a4e48f37ca5d6131ad89fca",
+  "baseline_suite": {
+    "command": "bash /home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T141607544598-vertical-pin/base-suite-runtime.sh",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 5,
+    "failure_ids": [
+      "tests/equilibrium/test_topology_read.py::test_kernel_compile_growth[132]",
+      "tests/equilibrium/test_topology_read.py::test_kernel_compile_growth[300]",
+      "tests/equilibrium/test_topology_read.py::test_kernel_compile_growth[550]",
+      "tests/equilibrium/test_topology_read.py::test_saddle_support_order[diverted]",
+      "tests/equilibrium/test_topology_read.py::test_topology_class_and_membership[diverted]"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T141607544598-vertical-pin/base-suite-runtime.log",
+    "revision": "8e0ccc13a1d72fa47a4e48f37ca5d6131ad89fca"
+  },
+  "call_site_count": 6,
+  "call_sites": [
+    "nova/equilibrium/forward.py:_solve_imposed_request:2612",
+    "nova/equilibrium/forward.py:_solve_augmented_constraints:2260",
+    "nova/equilibrium/forward.py:ForwardProfile.solve:2860",
+    "scripts/prototypes/xpoint_cell_owner/runtime_solve.py:residual:22",
+    "scripts/prototypes/xpoint_cell_owner/solve_carrier.py:main:165",
+    "scripts/prototypes/xpoint_cell_owner/panel_data.py:main:29"
+  ],
+  "completed_at": "2026-10-18T20:53:16Z",
+  "dispatched_at": "2026-10-18T20:46:04Z",
+  "findings": [
+    {
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": "222",
+      "severity": "blocking",
+      "text": "blocking: The free terminal height is asserted equal to the seed height and the free request qualifies at residual below 1e-12, so this control demonstrates neither drift nor stall; distance from a target never applied to that arm does not satisfy the requested negative control."
+    },
+    {
+      "file": "nova/equilibrium/forward.py",
+      "line": "2614",
+      "severity": "blocking",
+      "text": "blocking: An omitted optional pin contributes no ConstraintPair and takes a different state shape and solver path, while the one-executable check at tests/equilibrium/test_solve_vertical_pin.py:319 passes an inactive pair explicitly; the public pinned and unpinned calls are not shown to share one compiled program."
+    },
+    {
+      "file": "scripts/prototypes/xpoint_cell_owner/panel_data.py",
+      "line": "25",
+      "severity": "blocking",
+      "text": "blocking: The panel generator imports radial_field_jet from solve_carrier.py, which defines and imports only uniform_radial_field_jet, so the required flux panel cannot be regenerated from the landed source head."
+    },
+    {
+      "file": "nova/equilibrium/constraint.py",
+      "line": "442",
+      "severity": "follow-on",
+      "text": "follow-on: uniform_radial_field_jet duplicates the radial value -2\u03c0RZ owned by scripts/analytic_oracle_fixtures/measure.py:867 instead of extending or wrapping that owner; the two formulas can diverge despite sharing the same physical field."
+    },
+    {
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": "271",
+      "severity": "follow-on",
+      "text": "follow-on: The seen-target assertion compares a spy's echo of the passed target and field scale with those same test inputs, so it stays true if the compiled solver ignores them; the separate terminal-height checks carry the actual effect guard."
+    }
+  ],
+  "head_log_revision": "d9354a16ba19e9dd5df87a5b1b5e4672a5b2ffe3",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified six production call sites",
+    "diff": "Read all sixteen commit summaries and their base-to-head change through d3c105c0077989af7117fd51bc0f72f577a8d5a6; constraint.py adds the pair and field image, forward.py wires it, panel_data.py:25 imports an undefined helper, and the test, research, evidence and SVG are present.",
+    "done_when": "The source brief's 550-cell comparison is recorded in compare-550.json and the paired suite logs agree on five failure ids, while tests/equilibrium/test_solve_vertical_pin.py:211-224 does not assert a free drift or stall and :319-327 counts a wrapper rather than the absent-pin public route.",
+    "goal": "The source brief asks for a runtime vertical pin, an elongated free drift or stall, and a common compiled program; nova/equilibrium/constraint.py:461 adds the pin, but tests/equilibrium/test_solve_vertical_pin.py:222 keeps the free centroid at its seed and forward.py:2614 gives an absent pin a different layout.",
+    "manifest": "The source manifest.md names sixteen commits, the focused six-test pass and complete base-suite-runtime.log and head-suite-runtime.log receipts, both EXIT=1 with identical five topology failure ids.",
+    "write_paths": "The source manifest.md declares the equilibrium modules, xpoint_cell_owner subtree, pin test, research, evidence and figure paths; all eleven paths in the 8e0ccc13..d3c105c0 diff are inside that scope."
+  },
+  "justifications": {
+    "durability": "negative-control-runtime.log reddens five pin tests when the field image is zero, but tests/equilibrium/test_solve_vertical_pin.py:222 stays green for a free state that never drifts or stalls and :272 cannot detect recompilation.",
+    "evidence": "base-suite-runtime.log and head-suite-runtime.log give the same five failure ids and compare-550.json gives both histories, but tests/equilibrium/test_solve_vertical_pin.py:321 measures only an explicitly paired wrapper.",
+    "fit": "nova/equilibrium/constraint.py:461 follows the ConstraintPair idiom, while scripts/prototypes/xpoint_cell_owner/panel_data.py:25 imports a name that solve_carrier.py does not provide.",
+    "goal_fidelity": "nova/equilibrium/constraint.py:461 and compare-550.json show a working pin and cleared lobe stall, but tests/equilibrium/test_solve_vertical_pin.py:222 establishes no free drift and forward.py:2614 separates an omitted pin from the counted executable.",
+    "reuse": "nova/equilibrium/constraint.py:442 independently implements the radial value already owned by scripts/analytic_oracle_fixtures/measure.py:867, although it adds derivatives and the lobe runner now calls the new definition.",
+    "scope_discipline": "Every changed path in the 8e0ccc13..d3c105c0 diff is covered by the source manifest.md orientation_write_paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source brief asks for a runtime vertical pin, an elongated free drift or stall, and a common compiled program; nova/equilibrium/constraint.py:461 adds the pin, but tests/equilibrium/test_solve_vertical_pin.py:222 keeps the free centroid at its seed and forward.py:2614 gives an absent pin a different layout.\nVERDICT done_when: The source brief's 550-cell comparison is recorded in compare-550.json and the paired suite logs agree on five failure ids, while tests/equilibrium/test_solve_vertical_pin.py:211-224 does not assert a free drift or stall and :319-327 counts a wrapper rather than the absent-pin public route.\nVERDICT write_paths: The source manifest.md declares the equilibrium modules, xpoint_cell_owner subtree, pin test, research, evidence and figure paths; all eleven paths in the 8e0ccc13..d3c105c0 diff are inside that scope.\nVERDICT manifest: The source manifest.md names sixteen commits, the focused six-test pass and complete base-suite-runtime.log and head-suite-runtime.log receipts, both EXIT=1 with identical five topology failure ids.\nVERDICT diff: Read all sixteen commit summaries and their base-to-head change through d3c105c0077989af7117fd51bc0f72f577a8d5a6; constraint.py adds the pair and field image, forward.py wires it, panel_data.py:25 imports an undefined helper, and the test, research, evidence and SVG are present.\nCALL_SITES: nova/equilibrium/forward.py:_solve_imposed_request:2612, nova/equilibrium/forward.py:_solve_augmented_constraints:2260, nova/equilibrium/forward.py:ForwardProfile.solve:2860, scripts/prototypes/xpoint_cell_owner/runtime_solve.py:residual:22, scripts/prototypes/xpoint_cell_owner/solve_carrier.py:main:165, scripts/prototypes/xpoint_cell_owner/panel_data.py:main:29\nSCORE goal_fidelity: 11\nJUSTIFICATION goal_fidelity: nova/equilibrium/constraint.py:461 and compare-550.json show a working pin and cleared lobe stall, but tests/equilibrium/test_solve_vertical_pin.py:222 establishes no free drift and forward.py:2614 separates an omitted pin from the counted executable.\nSCORE evidence: 14\nJUSTIFICATION evidence: base-suite-runtime.log and head-suite-runtime.log give the same five failure ids and compare-550.json gives both histories, but tests/equilibrium/test_solve_vertical_pin.py:321 measures only an explicitly paired wrapper.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: Every changed path in the 8e0ccc13..d3c105c0 diff is covered by the source manifest.md orientation_write_paths.\nSCORE durability: 12\nJUSTIFICATION durability: negative-control-runtime.log reddens five pin tests when the field image is zero, but tests/equilibrium/test_solve_vertical_pin.py:222 stays green for a free state that never drifts or stalls and :272 cannot detect recompilation.\nSCORE fit: 13\nJUSTIFICATION fit: nova/equilibrium/constraint.py:461 follows the ConstraintPair idiom, while scripts/prototypes/xpoint_cell_owner/panel_data.py:25 imports a name that solve_carrier.py does not provide.\nSCORE reuse: 5\nJUSTIFICATION reuse: nova/equilibrium/constraint.py:442 independently implements the radial value already owned by scripts/analytic_oracle_fixtures/measure.py:867, although it adds derivatives and the lobe runner now calls the new definition.\nFINDING tests/equilibrium/test_solve_vertical_pin.py:222 blocking: The free terminal height is asserted equal to the seed height and the free request qualifies at residual below 1e-12, so this control demonstrates neither drift nor stall; distance from a target never applied to that arm does not satisfy the requested negative control.\nFINDING nova/equilibrium/forward.py:2614 blocking: An omitted optional pin contributes no ConstraintPair and takes a different state shape and solver path, while the one-executable check at tests/equilibrium/test_solve_vertical_pin.py:319 passes an inactive pair explicitly; the public pinned and unpinned calls are not shown to share one compiled program.\nFINDING scripts/prototypes/xpoint_cell_owner/panel_data.py:25 blocking: The panel generator imports radial_field_jet from solve_carrier.py, which defines and imports only uniform_radial_field_jet, so the required flux panel cannot be regenerated from the landed source head.\nFINDING nova/equilibrium/constraint.py:442 follow-on: uniform_radial_field_jet duplicates the radial value -2\u03c0RZ owned by scripts/analytic_oracle_fixtures/measure.py:867 instead of extending or wrapping that owner; the two formulas can diverge despite sharing the same physical field.\nFINDING tests/equilibrium/test_solve_vertical_pin.py:271 follow-on: The seen-target assertion compares a spy's echo of the passed target and field scale with those same test inputs, so it stays true if the compiled solver ignores them; the separate terminal-height checks carry the actual effect guard.",
+  "review_run_id": "r-20261018T204526932523-review-of-vertical-pin-d3c105c00779",
+  "reviewed_base_sha": "8e0ccc13a1d72fa47a4e48f37ca5d6131ad89fca",
+  "reviewed_head_sha": "d3c105c0077989af7117fd51bc0f72f577a8d5a6",
+  "reviewed_run_id": "r-20261018T141607544598-vertical-pin",
+  "scores": {
+    "durability": 12,
+    "evidence": 14,
+    "fit": 13,
+    "goal_fidelity": 11,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "suite_delta_basis": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T141607544598-vertical-pin/head-suite-runtime.log",
+    "after_summary": "5 failed, 26 passed, 2 skipped, 7 xfailed; conductor and solver 6 passed each, new pin 6 passed",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T141607544598-vertical-pin/base-suite-runtime.log",
+    "baseline_summary": "5 failed, 26 passed, 2 skipped, 7 xfailed; conductor and solver 6 passed each",
+    "limit": "The head suite ran at d9354a16; only evidence text changed between that revision and reviewed head d3c105c0."
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T20:51:07.044571+00:00",
+  "total": 75
+}

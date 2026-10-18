@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="409">
+<meta name="plan-version" content="410">
 <meta name="plan-modified" content="2026-10-18">
 </head>
 <body>
@@ -615,7 +615,7 @@
     <h4 class="r-fu-title">Score nova&#x27;s boundary read on TCV 77549 LIUQE equilibria, a machine with a trusted reconstruction</h4>
     <div class="r-fu-body"><p>Lead direction, 2026-10-18: add another tokamak with a known-good LIUQE solution, such as TCV, as a test case. JT-60SA has no trusted reconstruction, and SELENE is a data source, not an authority. TCV 77549 has a LIUQE equilibrium of 1,703 slices in imas-efit's tree at tests/data/imas/TCV/77549/validation/liuqe/equilibrium.h5, with wall.h5 and the machine description beside it. Read it with imas-python at the dd_version imas-efit's data manifest records, and check homogeneous_time.</p><p>One node, after efit-field-swap-repair lands so its grid-spline adapter and per-loop wall geometry are reused, not copied. It has three clauses:</p><ol><li>Choose LIUQE slices across the pulse that cover its limited and diverted phases.</li><li>Run nova's read on each slice's LIUQE psi map with the per-loop TCV wall, and tabulate the axis, X-point, boundary flux and label against LIUQE's own values.</li><li>Draw line-contour panels with both sets of fixed points and both boundaries.</li></ol><p>The same node redraws the efit-axis-adjudication panels with the per-loop wall. Those panels join JT-60SA's three loops and AUG's 29 into one ring, which draws a spurious chord.</p><p>imas-efit is invited to run its escape-level rule on the same slices.</p></div>
     <pre class="r-fu-prompt">/reckon-build converged-forward-solve §2</pre>
-    <p class="r-fu-outcome"><p>Landed at merge 253cbd721 (run r-20261018T134957600545-tcv-liuqe-known-answer; the review at 86fcef09 scored 94 with no added failures; <a href="/nova/research/tcv-liuqe-known-answer">TCV LIUQE known answer</a>). nova reads 12 TCV 77549 LIUQE slices and five field-swap rows through an adapter that certifies stationary-point coverage. The certificate is the boundary index count plus a Bernstein exclusion of grad &psi; zeros in every cell, including cells that already hold an admitted root. An earlier review found that gap and the repair closed it, with a negative control. Labels agree with LIUQE on 2 of 12 slices, and six slices are refused as coverage uncertified rather than defaulted to limited. The adapter still hard-codes a positive-current convention, which <code>f-cfs-adapter-polarity</code> fixes before the slices are rescored. Axis selection on the diverted slices is <code>f-cfs-axis-ranking</code>.</p></p>
+    <p class="r-fu-outcome"><p>Landed at merge 253cbd721 (run r-20261018T134957600545-tcv-liuqe-known-answer; the review at 86fcef09 scored 94 with no added failures; <a href="/nova/research/tcv-liuqe-known-answer">TCV LIUQE known answer</a>). nova reads 12 TCV 77549 LIUQE slices and five field-swap rows through an adapter that certifies stationary-point coverage. The certificate is the boundary index count plus a Bernstein exclusion of grad ψ zeros in every cell, including cells that already hold an admitted root. An earlier review found that gap and the repair closed it, with a negative control. Labels agree with LIUQE on 2 of 12 slices, and six slices are refused as coverage uncertified rather than defaulted to limited. The adapter still hard-codes a positive-current convention, which <code>f-cfs-adapter-polarity</code> fixes before the slices are rescored. Axis selection on the diverted slices is <code>f-cfs-axis-ranking</code>.</p></p>
     </article>
 <article class="r-fu" data-id="f-cfs-vertical-pin" data-status="open" data-written-by="s21-nova coordinator" data-written-at="2026-10-18" data-recommends-skill="/reckon-build converged-forward-solve §5" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Give the converged forward solve a vertical-position pin for elongated states</h4>
@@ -1719,6 +1719,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261018T193255551677-review-of-vertical-pin-4ba2cf475a12" data-who="reckon-build" data-when="2026-10-18T19:41:30Z">
     <div class="r-comment-body"><p>parsed review stored for 8e0ccc13a1d72fa47a4e48f37ca5d6131ad89fca..4ba2cf475a123ac4796addaec7ab881c8c99c19e at both granted review paths; six scores total 78/120, two blocking and three follow-on findings, source paired-suite added_failure_count 0</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261018T204526932523-review-of-vertical-pin-d3c105c00779" data-who="reckon-build" data-when="2026-10-18T20:53:16Z">
+    <div class="r-comment-body"><p>Parsed independent review stored under the reviewed run at both declared paths for base 8e0ccc13a1d72fa47a4e48f37ca5d6131ad89fca and head d3c105c0077989af7117fd51bc0f72f577a8d5a6; six scores total 75/120, three blocking and two follow-on findings, zero added failure ids.</p></div>
 </div>
 </section>
 </main>

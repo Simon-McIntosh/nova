@@ -54,6 +54,26 @@ CROSSING = Path(
     "/home/ITER/mcintos/.config/reckon/crew/reports/imas-efit/"
     "continuous-boundary-level/cbl-saddle-admission/crossing"
 )
+TRACE_LIBRARY = Path(
+    "/home/ITER/mcintos/Code/imas-efit/tests/unit/fortran/data/boundary_level"
+)
+
+
+def resolve_trace(path):
+    """Follow a pairs row whose path names a since-removed worktree.
+
+    The manifest was written from a worker worktree, so its later rows carry
+    that worktree's absolute path and no longer resolve. The same records are
+    tracked in imas-efit's own test data directory, so the row is resolved by
+    record name there rather than dropped.
+    """
+    candidate = Path(path)
+    if candidate.is_file():
+        return candidate
+    fallback = TRACE_LIBRARY / candidate.name
+    if fallback.is_file():
+        return fallback
+    raise FileNotFoundError(f"{path} and {fallback} both missing")
 
 
 @dataclass
@@ -178,9 +198,7 @@ def wall_units(record: TraceRecord):
 def _decision(case, source, record, resolution):
     field = TraceSplineField.from_record(record)
     cells, samples = lattice(record.wall_ring, resolution)
-    geometry = topology.TopologyGeometry.from_cells(
-        cells, samples, wall_units(record)
-    )
+    geometry = topology.TopologyGeometry.from_cells(cells, samples, wall_units(record))
     convention = topology.TopologyConvention.from_cocos(17, 1.0)
     policy = TopologyPolicy()
     initial = jax.jit(lambda: topology.read(field, geometry, convention, policy))()
@@ -251,25 +269,35 @@ def main(resolution=16, out=None):
     for parts in load_pairs():
         pair, a_path, b_path = parts[0], parts[1], parts[2]
         for side, path in (("A", a_path), ("B", b_path)):
-            record = read_trace_record(path)
+            record = None
             try:
-                case = _decision(
-                    f"{pair}:{side}", Path(path).name, record, resolution
-                )
+                record = read_trace_record(resolve_trace(path))
+                case = _decision(f"{pair}:{side}", Path(path).name, record, resolution)
             except Exception as error:  # noqa: BLE001 - one record must not stop the sweep
+                unread = float("nan")
                 case = Decision(
                     case=f"{pair}:{side}",
-                    record=record.slice,
+                    record=record.slice if record is not None else "",
                     source=Path(path).name,
                     n_cells=0,
-                    efit_verdict=record.verdict,
-                    efit_label="diverted" if record.diverted else "limited",
-                    efit_axis_psi=record.axis_psi,
-                    efit_axis_r=record.axis_r,
-                    efit_axis_z=record.axis_z,
-                    efit_saddle_refined=record.saddle_refined,
-                    efit_wall_level=record.wall_level,
-                    efit_fed_back_psi=record.fed_back_psi,
+                    efit_verdict=record.verdict if record is not None else -1,
+                    efit_label=(
+                        ("diverted" if record.diverted else "limited")
+                        if record is not None
+                        else "unread"
+                    ),
+                    efit_axis_psi=record.axis_psi if record is not None else unread,
+                    efit_axis_r=record.axis_r if record is not None else unread,
+                    efit_axis_z=record.axis_z if record is not None else unread,
+                    efit_saddle_refined=(
+                        record.saddle_refined if record is not None else unread
+                    ),
+                    efit_wall_level=(
+                        record.wall_level if record is not None else unread
+                    ),
+                    efit_fed_back_psi=(
+                        record.fed_back_psi if record is not None else unread
+                    ),
                     nova_axis_psi=float("nan"),
                     nova_axis_r=float("nan"),
                     nova_axis_z=float("nan"),
@@ -280,11 +308,20 @@ def main(resolution=16, out=None):
                     nova_wall_level=float("nan"),
                     nova_label="unread",
                     nova_span=float("nan"),
-                    efit_span=abs(record.fed_back_psi - record.axis_psi),
+                    efit_span=(
+                        abs(record.fed_back_psi - record.axis_psi)
+                        if record is not None
+                        else float("nan")
+                    ),
                     note=f"{type(error).__name__}: {error}",
                 )
             results.append(asdict(case))
             print("done", pair, side, case.nova_label, flush=True)
+            if out:
+                Path(out).write_text(
+                    json.dumps({"resolution": resolution, "rows": results}, indent=2)
+                    + "\n"
+                )
     for name in ("synthetic_crossing_a", "synthetic_crossing_b"):
         path = CROSSING / f"{name}.txt"
         if path.is_file():
@@ -292,7 +329,12 @@ def main(resolution=16, out=None):
             try:
                 case = _decision(name, path.name, record, resolution)
             except Exception as error:  # noqa: BLE001
-                print("skip", name, type(error).__name__ if False else type(error).__name__, flush=True)
+                print(
+                    "skip",
+                    name,
+                    type(error).__name__ if False else type(error).__name__,
+                    flush=True,
+                )
                 continue
             results.append(asdict(case))
             print("done", name, case.nova_label, flush=True)

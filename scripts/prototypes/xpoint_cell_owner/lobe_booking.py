@@ -87,18 +87,20 @@ def _density_of(geometry, reading, profile, index, density, span, sigma, density
 def _whole_cell_rings(geometry, reading, index, segments):
     """The owner cell's own polygon as the star fan the ring builder emits.
 
-    Every fragment slot is selected and one identity interval is placed on the
-    first strip of every edge, so ``current._normal_rings`` emits the cell's
-    straight-edge star fan. The separatrix-arc rows follow the straight rows in
-    that return value and are not part of the cell polygon, so they are dropped
-    by the static straight-row count. Both fans therefore come from the same
-    builder the lobe uses, and no vertex list is walked here.
+    Exactly one fragment slot is selected — the straight rows are emitted per
+    fragment slot, so two live slots would carry the polygon twice — and one
+    identity interval is placed on the first strip of every edge, so
+    ``current._normal_rings`` emits the cell's straight-edge star fan. The
+    separatrix-arc rows follow the straight rows in that return value and are
+    not part of the cell polygon, so they are dropped by the static
+    straight-row count. Both fans therefore come from the same builder the lobe
+    uses, and no vertex list is walked here.
     """
     interval = reading.edge_interval[index]
     identity = jnp.zeros_like(interval)
     identity = identity.at[..., 0, 0].set(0.0)
     identity = identity.at[..., 0, 1].set(1.0)
-    selected = jnp.ones(reading.fragment_selected.shape[1], dtype=bool)
+    selected = jnp.zeros(reading.fragment_selected.shape[1], dtype=bool).at[0].set(True)
     rings, sizes = current._normal_rings(
         geometry.vertices[index],
         geometry.vertex_count[index],

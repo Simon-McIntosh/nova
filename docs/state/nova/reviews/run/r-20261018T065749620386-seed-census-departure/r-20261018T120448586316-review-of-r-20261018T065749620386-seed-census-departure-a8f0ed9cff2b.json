@@ -1,0 +1,129 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Complete baseline_suite and after_suite logs each end at a pytest summary and EXIT=1; their 12 FAILED/ERROR IDs are identical (base 5 failed, 88 passed, 7 errors; head 5 failed, 90 passed, 7 errors), so the measured added-failure count is zero.",
+  "assertion_analysis": [
+    {
+      "condition": "No reachable failure after a successful module import; this assertion is vacuous.",
+      "line": "tests/equilibrium/test_topology_read.py:2697"
+    },
+    {
+      "condition": "Fails if the restored strict admission does not lose a root over the bracket.",
+      "line": "tests/equilibrium/test_topology_read.py:2701"
+    },
+    {
+      "condition": "Fails if the strict-arm bisection does not reach adjacent binary64 offsets.",
+      "line": "tests/equilibrium/test_topology_read.py:2712"
+    },
+    {
+      "condition": "Fail when the live repaired census loses a root or saddle at either offset; the strict-admission mutation made line 2717 fail in negative-control-test.log.",
+      "line": "tests/equilibrium/test_topology_read.py:2717-2718"
+    },
+    {
+      "condition": "Fail if a displaced independent polish cannot recover the sampled hyperbolic point with the stated position and flux tolerances, or if it does not persist across the pair.",
+      "line": "tests/equilibrium/test_topology_read.py:2734-2750"
+    },
+    {
+      "condition": "Fail if the sampler read is invalid, loses a root, or selects an X-point away from a separate polish from the fixed prior.",
+      "line": "tests/equilibrium/test_topology_read.py:2763-2771"
+    },
+    {
+      "condition": "Fails only when the two sampler current outputs differ beyond the relative tolerance; identical wrong values pass because neither side is an independent oracle.",
+      "line": "tests/equilibrium/test_topology_read.py:2773"
+    },
+    {
+      "condition": "Fail if the restored arm does not bisect to an adjacent pair or loses no saddle, or if the repaired arm loses a saddle.",
+      "line": "tests/equilibrium/test_topology_read.py:2807-2813"
+    }
+  ],
+  "call_site_count": 6,
+  "call_sites": [
+    "scripts/prototypes/fast_map_production/sweep.py:121",
+    "scripts/prototypes/fast_map_production/tie_probe.py:138",
+    "scripts/prototypes/fast_read/measure_sweep.py:112",
+    "scripts/prototypes/diverted_stall/sweep.py:112",
+    "scripts/prototypes/read_robustness/read.py:55",
+    "scripts/prototypes/read_robustness/measure.py:407"
+  ],
+  "completed_at": "2026-10-18T12:13:59Z",
+  "dispatched_at": "2026-10-18T12:05:26Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/read_robustness/census.py",
+      "line": "108",
+      "severity": "blocking",
+      "text": "blocking: the repaired census still loses a hyperbolic saddle at 0.173 to 0.1735 on 282 cells and 0.122 to 0.123 on 550 cells, with determinants far from roundoff, so done-when (3) and the broad goal remain unmet."
+    },
+    {
+      "file": "tests/equilibrium/test_topology_read.py",
+      "line": "2773",
+      "severity": "blocking",
+      "text": "blocking: booked current is compared only between two outputs of the same sampler, so both can move together to a wrong value while this assertion passes; done-when (5) requires an independently computed current value."
+    },
+    {
+      "file": "scripts/prototypes/read_robustness/census_identity_probe.py",
+      "line": "28",
+      "severity": "follow-on",
+      "text": "follow-on: this diagnostic duplicates the census.py:26 admission pipeline and omits its fit-cancellation term, while census_diagnose.py:21 separately mirrors the former strict-zero rule, so their stage receipts can disagree with the live owner."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/seed-census-departure-census-certified-convergence.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: commit e674213f8 added this path outside the exclusive write grant before e3ba2a93f removed it; the final diff is clean but the commit sequence breached scope."
+    },
+    {
+      "file": "docs/research/census-certified-convergence.html",
+      "line": "119",
+      "severity": "follow-on",
+      "text": "follow-on: the research record says the independent flux check uses 1e-9 absolute tolerance, while test_topology_read.py:2745 actually allows 1e-7, overstating the strength of that assertion."
+    },
+    {
+      "file": "tests/equilibrium/test_topology_read.py",
+      "line": "2697",
+      "severity": "follow-on",
+      "text": "follow-on: asserting the successfully imported tie_probe module is not None cannot fail on the tested path and adds no regression guard."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 6 production call sites",
+    "diff": "the 20 commits from efbeb794e to a8f0ed9cf change census.py:40-112, add two read tests at test_topology_read.py:2675-2814, add diagnostic scripts and evidence, and leave topology.py unchanged.",
+    "done_when": "prompt.txt:98-114 requires six measures; read-gate-retry.log, negative-control-test.log, the paired suite and CUDA receipts support the local repair, while both scan receipts fail clause (3) and tests/equilibrium/test_topology_read.py:2773 lacks an independent booked-current value for clause (5).",
+    "goal": "prompt.txt:30 requires retaining hyperbolic saddles across adjacent doubles; scripts/prototypes/read_robustness/census.py:108 repairs the bisected pair, while scan-new-282.json and scan-new-550.json still show later hyperbolic departures.",
+    "manifest": "manifest.md reports complete with all 20 reviewed commits and 12 final changed paths, cites the passing read test, failing mutation, complete paired suite and CUDA receipts, and names the remaining proposal-coverage departures.",
+    "write_paths": "prompt.txt:70-81 declares the exclusive paths; the final 12-path diff is inside them, but commit e674213f8 temporarily added an undeclared evidence-fragment path before e3ba2a93f removed it."
+  },
+  "justifications": {
+    "durability": "test_topology_read.py:2717 fails under the recorded strict-admission mutation, while line 2773 can pass for two equally wrong current values and neither test covers the later scan departures.",
+    "evidence": "gate-parallel-base.log and gate-parallel-head.log complete with identical 12 failure IDs, the mutation fails in negative-control-test.log, and all four CUDA receipt pairs match, while the same scan receipts establish the unmet window measure.",
+    "fit": "census.py:54-108 explains and computes its bound in local JAX style, but census_identity_probe.py:28 retains a separate stale mirror and census_diagnose.py:21 mirrors the former admission rule.",
+    "goal_fidelity": "census.py:108 retains the named adjacent-pair saddle, but scan-new-282.json and scan-new-550.json show repaired-arm 3-to-1 departures with saddle determinants -4.08e-5 and -5.81e-5.",
+    "reuse": "census_identity_probe.py:28 and census_diagnose.py:21 reimplement the seed admission and polishing already owned by census.py:26 instead of extending that owner, and the mirrors have drifted from the final fit bound.",
+    "scope_discipline": "the final 12-path diff fits prompt.txt:70-81, but e674213f8 wrote an undeclared evidence path that e3ba2a93f later deleted."
+  },
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: efbeb794e60b1f4d39dcb886bb0e1b1148b5a419\nreviewed_head_sha: a8f0ed9cff2b84799a5647135b551df91ac0f5a2\n\nVERDICT goal: prompt.txt:30 requires retaining hyperbolic saddles across adjacent doubles; scripts/prototypes/read_robustness/census.py:108 repairs the bisected pair, while scan-new-282.json and scan-new-550.json still show later hyperbolic departures.\nVERDICT done_when: prompt.txt:98-114 requires six measures; read-gate-retry.log, negative-control-test.log, the paired suite and CUDA receipts support the local repair, while both scan receipts fail clause (3) and tests/equilibrium/test_topology_read.py:2773 lacks an independent booked-current value for clause (5).\nVERDICT write_paths: prompt.txt:70-81 declares the exclusive paths; the final 12-path diff is inside them, but commit e674213f8 temporarily added an undeclared evidence-fragment path before e3ba2a93f removed it.\nVERDICT manifest: manifest.md reports complete with all 20 reviewed commits and 12 final changed paths, cites the passing read test, failing mutation, complete paired suite and CUDA receipts, and names the remaining proposal-coverage departures.\nVERDICT diff: the 20 commits from efbeb794e to a8f0ed9cf change census.py:40-112, add two read tests at test_topology_read.py:2675-2814, add diagnostic scripts and evidence, and leave topology.py unchanged.\nCALL_SITES: scripts/prototypes/fast_map_production/sweep.py:121, scripts/prototypes/fast_map_production/tie_probe.py:138, scripts/prototypes/fast_read/measure_sweep.py:112, scripts/prototypes/diverted_stall/sweep.py:112, scripts/prototypes/read_robustness/read.py:55, scripts/prototypes/read_robustness/measure.py:407\nSCORE goal_fidelity: 12\nJUSTIFICATION goal_fidelity: census.py:108 retains the named adjacent-pair saddle, but scan-new-282.json and scan-new-550.json show repaired-arm 3-to-1 departures with saddle determinants -4.08e-5 and -5.81e-5.\nSCORE evidence: 17\nJUSTIFICATION evidence: gate-parallel-base.log and gate-parallel-head.log complete with identical 12 failure IDs, the mutation fails in negative-control-test.log, and all four CUDA receipt pairs match, while the same scan receipts establish the unmet window measure.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: the final 12-path diff fits prompt.txt:70-81, but e674213f8 wrote an undeclared evidence path that e3ba2a93f later deleted.\nSCORE durability: 14\nJUSTIFICATION durability: test_topology_read.py:2717 fails under the recorded strict-admission mutation, while line 2773 can pass for two equally wrong current values and neither test covers the later scan departures.\nSCORE fit: 14\nJUSTIFICATION fit: census.py:54-108 explains and computes its bound in local JAX style, but census_identity_probe.py:28 retains a separate stale mirror and census_diagnose.py:21 mirrors the former admission rule.\nSCORE reuse: 5\nJUSTIFICATION reuse: census_identity_probe.py:28 and census_diagnose.py:21 reimplement the seed admission and polishing already owned by census.py:26 instead of extending that owner, and the mirrors have drifted from the final fit bound.\nFINDING scripts/prototypes/read_robustness/census.py:108 blocking: the repaired census still loses a hyperbolic saddle at 0.173 to 0.1735 on 282 cells and 0.122 to 0.123 on 550 cells, with determinants far from roundoff, so done-when (3) and the broad goal remain unmet.\nFINDING tests/equilibrium/test_topology_read.py:2773 blocking: booked current is compared only between two outputs of the same sampler, so both can move together to a wrong value while this assertion passes; done-when (5) requires an independently computed current value.\nFINDING scripts/prototypes/read_robustness/census_identity_probe.py:28 follow-on: this diagnostic duplicates the census.py:26 admission pipeline and omits its fit-cancellation term, while census_diagnose.py:21 separately mirrors the former strict-zero rule, so their stage receipts can disagree with the live owner.\nFINDING docs/evidence/fragments/converged-forward-solve/seed-census-departure-census-certified-convergence.html:1 follow-on: commit e674213f8 added this path outside the exclusive write grant before e3ba2a93f removed it; the final diff is clean but the commit sequence breached scope.\nFINDING docs/research/census-certified-convergence.html:119 follow-on: the research record says the independent flux check uses 1e-9 absolute tolerance, while test_topology_read.py:2745 actually allows 1e-7, overstating the strength of that assertion.\nFINDING tests/equilibrium/test_topology_read.py:2697 follow-on: asserting the successfully imported tie_probe module is not None cannot fail on the tested path and adds no regression guard.\n",
+  "review_run_id": "r-20261018T120448586316-review-of-r-20261018T065749620386-seed-census-departure-a8f0ed9cff2b",
+  "reviewed_base_sha": "efbeb794e60b1f4d39dcb886bb0e1b1148b5a419",
+  "reviewed_head_sha": "a8f0ed9cff2b84799a5647135b551df91ac0f5a2",
+  "reviewed_run_id": "r-20261018T065749620386-seed-census-departure",
+  "reviewer": {
+    "backend": "codex"
+  },
+  "rubric": "review",
+  "scores": {
+    "durability": 14,
+    "evidence": 17,
+    "fit": 14,
+    "goal_fidelity": 12,
+    "reuse": 5,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T12:11:13+00:00",
+  "total": 78
+}

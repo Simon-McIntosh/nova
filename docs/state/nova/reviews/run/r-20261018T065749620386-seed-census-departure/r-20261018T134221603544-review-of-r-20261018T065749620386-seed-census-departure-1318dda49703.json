@@ -41,6 +41,13 @@
   ],
   "completed_at": "2026-10-18T14:07:32.055Z",
   "dispatched_at": "2026-10-18T13:43:16Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "census-proposal-coverage",
+      "recorded_at": "2026-10-18T14:10:06.170284+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/read_robustness/census.py",

@@ -186,6 +186,23 @@
   <p>It is also the reason the qualified set is drawn entirely from JT-60SA and AUG-17151: those two machines'
   wall polygons mesh and the ITER and MAST-U ones do not, and nothing about the fields selects the split.</p>
 
+  <h2 id="efit-field-swap-control">The declared negative control did not discriminate</h2>
+
+  <p>The node declared a control: perturbing one record wall vertex onto the separatrix changes the nova
+  decision on that record. It was run, and <strong>it did not change the decision</strong>. On
+  <code>jt60sa-5slice-s5-301-302</code> A, moving wall vertex 5 two per cent of the way toward the record's
+  axis left the label <em>diverted</em>, the boundary level <code>0.311646</code> and the admitted saddle
+  <code>(3.20149, 1.10213)</code> byte-identical, on the same 132 cells. Raising the perturbation to
+  25 per cent dropped the lattice to 131 cells and changed none of the three.</p>
+
+  <p>The reason is structural and it bounds what the table can claim. The field is the record's own spline,
+  which does not depend on the wall at all; the wall reaches the decision only through the lattice, and one
+  fewer cell in 132 does not move an admitted saddle whose position is set by the field. So the control as
+  declared cannot falsify anything, and no reader should take the table as evidence that nova's decision
+  responds to wall geometry. A control that would discriminate has to perturb the field, or move the wall far
+  enough to remove the cells around the admitted saddle. That is recorded as a follow-on, and the control is
+  reported as failed rather than as a pass.</p>
+
   <h2 id="efit-field-swap-approximations">Approximations that qualify every number</h2>
 
   <ul>

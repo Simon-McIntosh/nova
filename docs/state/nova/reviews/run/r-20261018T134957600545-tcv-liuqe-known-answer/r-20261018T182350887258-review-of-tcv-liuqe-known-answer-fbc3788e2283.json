@@ -30,6 +30,13 @@
   ],
   "completed_at": "2026-10-18T18:33:05Z",
   "dispatched_at": "2026-10-18T18:24:46Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "tcv-liuqe-known-answer",
+      "recorded_at": "2026-10-18T18:38:30.701155+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/tcv_liuqe_known_answer/summarise.py",

@@ -1,0 +1,79 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Completed pytest arms: baseline-suite-repair.log has two collection ERROR IDs for the newly introduced test; after-suite-repair.log has zero failures, so the head-minus-base failure set is empty.",
+  "assertion_analysis": [
+    "test_lobe_partition.py:90 fails if the ring builder emits a number of live rows other than the four edges supplied by SQUARE.",
+    "test_lobe_partition.py:108 fails if booked quadratic fan moments differ from the independent closed-form polygon integral.",
+    "test_lobe_partition.py:136 fails if signed fan subtraction differs from independently integrated whole-minus-inner polygons on the nonconstant density.",
+    "test_lobe_partition.py:171-174 fails if a padded vertex replaces the counted triangle closing edge or if remaining_moments is invalid; the recorded vertex-list restoration makes it red.",
+    "test_lobe_partition.py:197 count == len(triangles) cannot fail because lobe_reference.py:208 sets count to len(triangles); the == 3 clause can fail if the reference emits the wrong number of triangles.",
+    "test_lobe_partition.py:198-200 fails if the independent lobe integral differs from a separate polygon closed form, and the forbidden-builder monkeypatch makes restoration of the shared builder fail.",
+    "test_lobe_partition.py:231-240 fails when a carrier row has no owner, an invalid lobe booking, or a lobe deviation of 2e-12.",
+    "lobe_reference_probe.py:49-54 fails when a carrier has no owner or has the wrong realised cell count.",
+    "lobe_reference_probe.py:92-109 fails when a booked array has the wrong shape, invalid or nonfinite values, or a lobe or partition deviation above 1e-12.",
+    "lobe_reference_probe.py:131-154 fails when any of the three requested carriers is omitted or any carrier row errors.",
+    "limited_map_gate.py:73-74 and :88 fail when the map reports invalid booking or topology or the analytic case has a degenerate flux span; this gate records map errors but does not assert the diverted guards."
+  ],
+  "base_log_revision": "80ee84b289d41d5a1bfbda8c3a5b94a7b2d7f1cd",
+  "call_site_count": 3,
+  "call_sites": [
+    "scripts/prototypes/xpoint_cell_owner/owner_map.py:161",
+    "scripts/prototypes/xpoint_cell_owner/owner_attribution.py:65",
+    "scripts/prototypes/xpoint_cell_owner/panel_data.py:75"
+  ],
+  "completed_at": "2026-10-18T12:33:04Z",
+  "dispatched_at": "2026-10-18T12:24:29Z",
+  "findings": [
+    {
+      "file": "docs/research/lobe-share-partition.html",
+      "line": "161",
+      "severity": "blocking",
+      "text": "blocking: the diverted table compares half-plane and lobe components but gives no measured base revision beside the head, so the explicit base-beside-head part of prompt.txt:105 is not evidenced by a revisioned receipt."
+    },
+    {
+      "file": "scripts/prototypes/xpoint_cell_owner/test_lobe_partition.py",
+      "line": "197",
+      "severity": "follow-on",
+      "text": "follow-on: count equals len(triangles) by construction in lobe_reference.py:208, so that half of the assertion moves with the returned value; the independent equality to 3 still guards this fixture."
+    }
+  ],
+  "head_log_revision": "f87ae35344834e649331b66a4f08624ec9234884",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "the twenty-two commits from 698ce55c4 through 84e9e968d change the signed fan integration, independent reference, carrier gate, eight tests, limited map runner and evidence, with the added assertions at test_lobe_partition.py:90-240 and lobe_reference_probe.py:49-109 examined against their reversions.",
+    "done_when": "prompt.txt:90-106 requires the shared fan, imported reduction, independent three-carrier references, map comparisons and cold solves; partition-asserted.log:4-9 and docs/research/lobe-share-partition.html:123-229 record those results, while the map table does not identify a measured base revision beside the head.",
+    "goal": "prompt.txt:30 requires the lobe and remainder to book each X-point owner cell once through the clip owner; lobe_booking.py:51-55 and :181-204 use the imported rule and partition-asserted.log:4-9 records sub-1e-12 agreement on all three carriers.",
+    "manifest": "manifest.md records twenty-two commits, the asserted partition gate, eight passing focused tests and completed baseline and after suite arms; baseline-suite-repair.log:29-33 has two base collection errors and after-suite-repair.log:2-5 passes.",
+    "write_paths": "prompt.txt:70-74 grants the owner prototype directory and three evidence paths; the ten paths in git diff 80ee84b289d41d5a1bfbda8c3a5b94a7b2d7f1cd..84e9e968d8db50dd22e7f0d349d26dd27c39b7ab all lie there."
+  },
+  "justifications": {
+    "durability": "test_lobe_partition.py:155-175 fails on restoring the vertex-list fan and :179-207 fails on restoring the builder-based reference, as negative-control-head.log:57-61 and negative-control-reference-head.log:58-62 confirm.",
+    "evidence": "lobe_reference_probe.py:49-109 asserts owner presence and the 1e-12 bound with an EXIT=0 receipt, but docs/research/lobe-share-partition.html:161-203 does not identify the base revision for the required base-beside-head map comparison.",
+    "fit": "lobe_booking.py:25-26 imports the established current and clip-quadrature owners, and the rendered terminal-282.svg referenced at docs/research/lobe-share-partition.html:230 is legible without forbidden source names.",
+    "goal_fidelity": "lobe_booking.py:181-204 and partition-asserted.log:4-9 satisfy the core partition goal at all three sizes, with the documented 550 cold stall permitted by prompt.txt:105-106.",
+    "reuse": "lobe_booking.py:51-52 wraps clip_quadrature.py:378, :104 and :141 use current.py:82, lobe_reference_probe.py:41 extends the existing probe, and limited_map_gate.py:39 wraps fine_grid_convergence/context.py:89.",
+    "scope_discipline": "every path in git diff 80ee84b289d41d5a1bfbda8c3a5b94a7b2d7f1cd..84e9e968d8db50dd22e7f0d349d26dd27c39b7ab is under prompt.txt:70-74 and the removed scratch and duplicate runners narrow the deliverable."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: prompt.txt:30 requires the lobe and remainder to book each X-point owner cell once through the clip owner; lobe_booking.py:51-55 and :181-204 use the imported rule and partition-asserted.log:4-9 records sub-1e-12 agreement on all three carriers.\nVERDICT done_when: prompt.txt:90-106 requires the shared fan, imported reduction, independent three-carrier references, map comparisons and cold solves; partition-asserted.log:4-9 and docs/research/lobe-share-partition.html:123-229 record those results, while the map table does not identify a measured base revision beside the head.\nVERDICT write_paths: prompt.txt:70-74 grants the owner prototype directory and three evidence paths; the ten paths in git diff 80ee84b289d41d5a1bfbda8c3a5b94a7b2d7f1cd..84e9e968d8db50dd22e7f0d349d26dd27c39b7ab all lie there.\nVERDICT manifest: manifest.md records twenty-two commits, the asserted partition gate, eight passing focused tests and completed baseline and after suite arms; baseline-suite-repair.log:29-33 has two base collection errors and after-suite-repair.log:2-5 passes.\nVERDICT diff: the twenty-two commits from 698ce55c4 through 84e9e968d change the signed fan integration, independent reference, carrier gate, eight tests, limited map runner and evidence, with the added assertions at test_lobe_partition.py:90-240 and lobe_reference_probe.py:49-109 examined against their reversions.\nCALL_SITES: scripts/prototypes/xpoint_cell_owner/owner_map.py:161, scripts/prototypes/xpoint_cell_owner/owner_attribution.py:65, scripts/prototypes/xpoint_cell_owner/panel_data.py:75\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: lobe_booking.py:181-204 and partition-asserted.log:4-9 satisfy the core partition goal at all three sizes, with the documented 550 cold stall permitted by prompt.txt:105-106.\nSCORE evidence: 16\nJUSTIFICATION evidence: lobe_reference_probe.py:49-109 asserts owner presence and the 1e-12 bound with an EXIT=0 receipt, but docs/research/lobe-share-partition.html:161-203 does not identify the base revision for the required base-beside-head map comparison.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in git diff 80ee84b289d41d5a1bfbda8c3a5b94a7b2d7f1cd..84e9e968d8db50dd22e7f0d349d26dd27c39b7ab is under prompt.txt:70-74 and the removed scratch and duplicate runners narrow the deliverable.\nSCORE durability: 18\nJUSTIFICATION durability: test_lobe_partition.py:155-175 fails on restoring the vertex-list fan and :179-207 fails on restoring the builder-based reference, as negative-control-head.log:57-61 and negative-control-reference-head.log:58-62 confirm.\nSCORE fit: 19\nJUSTIFICATION fit: lobe_booking.py:25-26 imports the established current and clip-quadrature owners, and the rendered terminal-282.svg referenced at docs/research/lobe-share-partition.html:230 is legible without forbidden source names.\nSCORE reuse: 20\nJUSTIFICATION reuse: lobe_booking.py:51-52 wraps clip_quadrature.py:378, :104 and :141 use current.py:82, lobe_reference_probe.py:41 extends the existing probe, and limited_map_gate.py:39 wraps fine_grid_convergence/context.py:89.\nFINDING docs/research/lobe-share-partition.html:161 blocking: the diverted table compares half-plane and lobe components but gives no measured base revision beside the head, so the explicit base-beside-head part of prompt.txt:105 is not evidenced by a revisioned receipt.\nFINDING scripts/prototypes/xpoint_cell_owner/test_lobe_partition.py:197 follow-on: count equals len(triangles) by construction in lobe_reference.py:208, so that half of the assertion moves with the returned value; the independent equality to 3 still guards this fixture.\n",
+  "review_run_id": "r-20261018T122346065819-review-of-r-20261018T063028156714-lobe-share-partition-84e9e968d8db",
+  "reviewed_base_sha": "80ee84b289d41d5a1bfbda8c3a5b94a7b2d7f1cd",
+  "reviewed_head_sha": "84e9e968d8db50dd22e7f0d349d26dd27c39b7ab",
+  "reviewed_run_id": "r-20261018T063028156714-lobe-share-partition",
+  "scores": {
+    "durability": 18,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T12:29:41.181137+00:00",
+  "total": 111
+}

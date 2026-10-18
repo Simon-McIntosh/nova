@@ -82,6 +82,18 @@ def _closed_form(vertices, centre, coefficients=DENSITY):
     return total
 
 
+def _density_at(points):
+    x, y = points[..., 0], points[..., 1]
+    return (
+        DENSITY[0]
+        + DENSITY[1] * x
+        + DENSITY[2] * y
+        + DENSITY[3] * x**2
+        + DENSITY[4] * x * y
+        + DENSITY[5] * y**2
+    )
+
+
 UNIT = (1.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 
 
@@ -93,16 +105,8 @@ def test_one_live_slot_carries_the_polygon_once():
 def test_cell_fan_matches_the_closed_form_over_the_polygon():
     rings, sizes = _cell_fan(SQUARE, CENTRE)
     origin = jnp.asarray(CENTRE)
-    density_at = lambda points: (  # noqa: E731
-        DENSITY[0]
-        + DENSITY[1] * points[..., 0]
-        + DENSITY[2] * points[..., 1]
-        + DENSITY[3] * points[..., 0] ** 2
-        + DENSITY[4] * points[..., 0] * points[..., 1]
-        + DENSITY[5] * points[..., 1] ** 2
-    )
     booked = np.asarray(
-        _ring_moments(rings, sizes, jnp.ones(rings.shape[0]), origin, density_at)
+        _ring_moments(rings, sizes, jnp.ones(rings.shape[0]), origin, _density_at)
     )
     dense = _closed_form(SQUARE, CENTRE)
     assert np.all(np.abs(booked - dense) < 1e-13), (booked, dense)
@@ -113,15 +117,6 @@ def test_a_negative_slot_subtracts_its_region():
     inner = ((0.25, 0.25), (0.75, 0.25), (0.75, 0.75), (0.5, 0.75))
     inner_rings, inner_sizes = _cell_fan(inner, CENTRE)
     origin = jnp.asarray(CENTRE)
-    ones = lambda points: jnp.ones(points.shape[:-1])  # noqa: E731
-    whole = np.asarray(
-        _ring_moments(rings, sizes, jnp.ones(rings.shape[0]), origin, ones)
-    )
-    part = np.asarray(
-        _ring_moments(
-            inner_rings, inner_sizes, jnp.ones(inner_rings.shape[0]), origin, ones
-        )
-    )
     signed = np.asarray(
         _ring_moments(
             jnp.concatenate((rings, inner_rings)),
@@ -130,12 +125,12 @@ def test_a_negative_slot_subtracts_its_region():
                 (jnp.ones(rings.shape[0]), -jnp.ones(inner_rings.shape[0]))
             ),
             origin,
-            ones,
+            _density_at,
         )
     )
-    assert np.all(np.abs(signed - (whole - part)) < 1e-13)
-    expected = _closed_form(SQUARE, CENTRE, UNIT) - _closed_form(inner, CENTRE, UNIT)
-    assert np.all(np.abs(signed - expected) < 1e-12)
+    whole = _closed_form(SQUARE, CENTRE)
+    part = _closed_form(inner, CENTRE)
+    np.testing.assert_allclose(signed, whole - part, rtol=0, atol=1e-12)
 
 
 def test_remainder_uses_the_ring_builders_counted_polygon():

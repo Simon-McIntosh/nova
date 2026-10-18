@@ -8,6 +8,8 @@ configure_dtypes()
 import argparse
 import json
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import patch
 
 import jax
 import jax.numpy as jnp
@@ -15,8 +17,6 @@ import numpy as np
 
 import nova
 from benchmarks import solovev_certificate as certificate
-from nova.equilibrium import current, fixed_points, topology
-from nova.equilibrium.solve_request import TopologyPolicy
 from scripts.analytic_oracle_fixtures import measure as fixture
 from scripts.prototypes.fine_grid_convergence import context
 from scripts.prototypes.lean_map.probe_bias import _image
@@ -26,92 +26,26 @@ from scripts.prototypes.xpoint_cell_owner.runtime_solve import without_profile
 
 
 def _limited_context(cells, cache):
-    """Build the limited analogue of the existing certificate map context."""
-    carrier, source, exact = certificate._case(
-        "weak-rotation-reactor-static", clip_mode="exact"
-    )
-    machine, key, _ = context._machine(cache, carrier, cells)
-    geometry = topology.TopologyGeometry.from_cells(
-        machine.cell_polygons, machine.sampling_vertices, (machine.wall_node,)
-    )
-    _, analytic_field, _, _, _ = context._analytic_inputs("limited")
-    field = context.certificate_field(analytic_field, "limited")
-    convention = topology.TopologyConvention.from_cocos(17, 1.0)
-    policy = TopologyPolicy()
-    reading = jax.jit(lambda: topology.read(field, geometry, convention, policy))()
-    samples = jax.vmap(field.value)(geometry.sample_points.reshape(-1, 2)).reshape(
-        geometry.sample_points.shape[:-1]
-    )
-    profile = fixture.analytic_profile(source)
-    booked = jax.jit(
-        lambda psi: current.book(
-            psi,
-            reading,
-            geometry,
-            profile,
-            current.Quadrature(sigma=convention.sigma),
-        )
-    )(samples)
-    assert bool(booked.valid)
-    reference = jnp.stack(
-        (booked.cell_current, booked.radial_moment, booked.vertical_moment), axis=-1
-    )
-    rule = context.triangle_rule(geometry)
-    fit, design = context.quadratic_fit(rule, geometry)
-    values, _ = context.build_values(machine, rule, field, reference)
-    coupling = topology.BiotMomentCoupling.from_polygons(machine.cell_polygons)
-    jets, _ = context.build_jets(coupling, geometry, field, reference)
-    roots = np.vstack(
-        (
-            np.asarray(reading.axis)[None],
-            np.asarray(reading.x_points)[np.asarray(reading.x_point_valid)],
+    """Use the shared builder with the limited certificate inputs."""
+    analytic_inputs = context._analytic_inputs
+    certificate_field = context.certificate_field
+    limited_case = SimpleNamespace(
+        _case=lambda _name, clip_mode: certificate._case(
+            "weak-rotation-reactor-static", clip_mode=clip_mode
         )
     )
-    window = fixed_points.RowCache(
-        jets.mesh,
-        jets.nodes,
-        jnp.arange(len(jets.nodes), dtype=jnp.int32),
-        jets.rows,
-        jets.exterior,
-    )
-    seeds = jnp.asarray(roots)
-    axis_sign = float(jnp.sign(field.evaluate(seeds[0]).hessian[0, 0]))
-    operands = (
-        values,
-        jets,
-        window,
-        rule,
-        fit,
-        design,
-        geometry,
-        profile,
-        seeds,
-        convention,
-        policy,
-        booked.raw_current,
-        axis_sign,
-    )
-    return context.Context(
-        geometry,
-        reference,
-        jnp.ones(3),
-        operands,
-        window,
-        values,
-        jets,
-        fit,
-        rule,
-        profile,
-        seeds,
-        convention,
-        policy,
-        axis_sign,
-        machine,
-        source,
-        exact,
-        key,
-        cache,
-    )
+    with (
+        patch.object(context, "certificate", limited_case),
+        patch.object(
+            context, "_analytic_inputs", lambda _name: analytic_inputs("limited")
+        ),
+        patch.object(
+            context,
+            "certificate_field",
+            lambda field, _name: certificate_field(field, "limited"),
+        ),
+    ):
+        return context.build(cells, cache)
 
 
 def run_row(cells, cache):

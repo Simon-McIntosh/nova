@@ -102,7 +102,14 @@ def _row_html(row):
     )
 
 
-def build(rows, field_swap_rows, receipt_path):
+def build(
+    rows,
+    field_swap_rows,
+    receipt_path,
+    *,
+    previous_rows=(),
+    previous_field_swap_rows=(),
+):
     if len(rows) != 12 or len({row["index"] for row in rows}) != 12:
         raise ValueError("report requires twelve distinct, completed sweep rows")
     if any(row.get("nova_label") == "unread" for row in rows):
@@ -111,6 +118,40 @@ def build(rows, field_swap_rows, receipt_path):
         raise ValueError("report requires five distinct field-swap refusal rows")
     if any(row.get("nova_label") == "unread" for row in field_swap_rows):
         raise ValueError("unread field-swap rows require review before reporting")
+    if previous_rows and len(previous_rows) != len(rows):
+        raise ValueError("comparison requires the same twelve slice identifiers")
+    if previous_field_swap_rows and len(previous_field_swap_rows) != len(
+        field_swap_rows
+    ):
+        raise ValueError("comparison requires the same five field-swap identifiers")
+
+    def verdict_changes(current, previous, identifier):
+        old_by_id = {item[identifier]: item for item in previous}
+        if previous and set(old_by_id) != {item[identifier] for item in current}:
+            raise ValueError("comparison identifiers differ")
+        return [
+            f"{item[identifier]}: {old_by_id[item[identifier]]['nova_label']} → "
+            f"{item['nova_label']}"
+            for item in current
+            if previous
+            and (
+                old_by_id[item[identifier]]["nova_label"] != item["nova_label"]
+                or old_by_id[item[identifier]].get("coverage_certified")
+                != item.get("coverage_certified")
+            )
+        ]
+
+    slice_changes = verdict_changes(rows, previous_rows, "index")
+    swap_changes = verdict_changes(field_swap_rows, previous_field_swap_rows, "case")
+    change_summary = (
+        "Coverage verdict changes from the preceding receipt: slices "
+        + ("; ".join(slice_changes) if slice_changes else "none")
+        + "; field-swap records "
+        + ("; ".join(swap_changes) if swap_changes else "none")
+        + "."
+        if previous_rows and previous_field_swap_rows
+        else ""
+    )
     agreements = sum(row["liuqe_label"] == row["nova_label"] for row in rows)
     refusals = sum(row["nova_label"] == "coverage uncertified" for row in rows)
     prior_limited = {0, 14, 456, 796, 1257}
@@ -229,6 +270,7 @@ The X pair uses the LIUQE X-point nearest nova's admitted saddle where both exis
 <p><strong>{summary}</strong> All twelve rows come from one rescore receipt:
 <code>{html.escape(str(receipt_path))}</code>. A dash means the value was not returned
 or no reference X-point exists; it is never scored as zero.</p>
+<p>{html.escape(change_summary)}</p>
 <table><thead><tr><th>Slice / time</th><th>LIUQE / nova label</th><th>Axis R,Z [m]</th>
 <th>Axis-to-boundary [m]</th><th>Axis-to-X [m]</th><th>Axis ψ</th>
 <th>X-point R,Z [m]</th><th>Boundary ψ from grid</th>
@@ -251,6 +293,7 @@ enough: an omitted extremum and saddle can cancel in that sum.</p>
     fragment = f"""<section id="tcv-liuqe-known-answer">
 <h2 id="tcv-liuqe-known-answer-heading">TCV LIUQE known-answer boundary read</h2>
 <p id="tcv-liuqe-known-answer-summary">{summary}</p>
+<p id="tcv-liuqe-known-answer-verdict-changes">{html.escape(change_summary)}</p>
 <p id="tcv-liuqe-known-answer-certificate">The boundary-index check, Krawczyk
 uniqueness boxes around admitted roots, and Bernstein gradient exclusion on the
 remaining cell regions agree on qualified reads. Any uncleared region returns
@@ -269,6 +312,8 @@ def main():
     parser.add_argument("--report", required=True)
     parser.add_argument("--fragment", required=True)
     parser.add_argument("--figure-rows", required=True)
+    parser.add_argument("--previous-rows")
+    parser.add_argument("--previous-field-swap-rows")
     args = parser.parse_args()
     source = Path(args.rows)
     rows = [json.loads(line) for line in source.read_text().splitlines() if line]
@@ -278,7 +323,31 @@ def main():
         if line
     ]
     rows.sort(key=lambda row: row["index"])
-    report, fragment, summary = build(rows, field_swap_rows, source)
+    previous_rows = (
+        [
+            json.loads(line)
+            for line in Path(args.previous_rows).read_text().splitlines()
+            if line
+        ]
+        if args.previous_rows
+        else []
+    )
+    previous_field_swap_rows = (
+        [
+            json.loads(line)
+            for line in Path(args.previous_field_swap_rows).read_text().splitlines()
+            if line
+        ]
+        if args.previous_field_swap_rows
+        else []
+    )
+    report, fragment, summary = build(
+        rows,
+        field_swap_rows,
+        source,
+        previous_rows=previous_rows,
+        previous_field_swap_rows=previous_field_swap_rows,
+    )
     Path(args.report).write_text(report)
     Path(args.fragment).write_text(fragment)
     figure_rows = Path(args.figure_rows)

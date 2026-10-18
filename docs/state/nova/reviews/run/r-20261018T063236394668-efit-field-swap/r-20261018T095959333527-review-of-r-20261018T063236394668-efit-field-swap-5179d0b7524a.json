@@ -1,0 +1,168 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    {
+      "fails_if": "the named capture is absent",
+      "path": "scripts/prototypes/efit_field_swap/test_trace_record.py:23-24"
+    },
+    {
+      "fails_if": "the decoded record has different dimensions, flags, stored scalars, or arrays from the captured source; symmetric codec errors can survive",
+      "path": "scripts/prototypes/efit_field_swap/test_trace_record.py:29-65"
+    },
+    {
+      "fails_if": "the emitted fixed header, dimensions, flags, scalar formatting, or line count changes",
+      "path": "scripts/prototypes/efit_field_swap/test_trace_record.py:80-100"
+    },
+    {
+      "fails_if": "an unsupported trace version is accepted",
+      "path": "scripts/prototypes/efit_field_swap/test_trace_record.py:106"
+    },
+    {
+      "fails_if": "value, gradient, or Hessian disagrees with SciPy bisplev at the sampled interior points",
+      "path": "scripts/prototypes/efit_field_swap/test_spline_field.py:29-59"
+    },
+    {
+      "fails_if": "JAX differentiation, vmap, or Hessian produces a nonfinite value; finite wrong values survive",
+      "path": "scripts/prototypes/efit_field_swap/test_spline_field.py:62-71"
+    },
+    {
+      "fails_if": "the synthetic export loses its supplied decision values, header, source grid, psi, or wall; measured export decisions are not checked",
+      "path": "scripts/prototypes/efit_field_swap/test_export_states.py:40-57"
+    },
+    {
+      "fails_if": "a write-read-write cycle changes bytes; a consistent codec error survives",
+      "path": "scripts/prototypes/efit_field_swap/test_export_states.py:67-69"
+    },
+    {
+      "fails_if": "case enumeration drops or duplicates a listed input or omits crossing names; measured decisions are not checked",
+      "path": "scripts/prototypes/efit_field_swap/test_crosscheck.py:28-36"
+    },
+    {
+      "fails_if": "the named real record no longer triggers a fit or no longer yields a qualified limited-or-diverted decision",
+      "path": "scripts/prototypes/efit_field_swap/test_crosscheck.py:48-60"
+    },
+    {
+      "fails_if": "the helper accepts a receipt whose own adjacent flag is false or unchanged flag is true; malformed brackets with permissive flags survive",
+      "path": "scripts/prototypes/efit_field_swap/test_export_states.py:88-92"
+    },
+    {
+      "fails_if": "the returned offset differs from the test-supplied 0.1613; the expectation is self-coupled to the supplied receipt and cannot validate other offsets",
+      "path": "scripts/prototypes/efit_field_swap/test_export_states.py:95-97"
+    }
+  ],
+  "call_site_count": 5,
+  "call_sites": [
+    "scripts/prototypes/efit_field_swap/crosscheck.py:_decision",
+    "scripts/prototypes/efit_field_swap/crosscheck.py:main",
+    "scripts/prototypes/efit_field_swap/export_states.py:main",
+    "scripts/prototypes/efit_field_swap/export_tie_islands.py:main",
+    "scripts/prototypes/efit_field_swap/negative_control.py:main_field"
+  ],
+  "completed_at": "2026-10-18T10:07:38Z",
+  "dispatched_at": "2026-10-18T10:00:28Z",
+  "findings": [
+    {
+      "file": "docs/research/efit-field-swap.html",
+      "line": "121",
+      "severity": "blocking",
+      "text": "blocking: the case table gives axis positions and spans, but omits the requested per-case boundary levels, absolute and span-relative boundary differences, admitted saddle levels and positions, and wall-contact levels; those data exist only in the JSON and selected prose, so the required disagreement table is incomplete."
+    },
+    {
+      "file": "scripts/prototypes/efit_field_swap/crosscheck.py",
+      "line": "416",
+      "severity": "blocking",
+      "text": "blocking: the sweep records five paired sides as unqualified and both synthetic crossing inputs as unread after wall_ring raises on their empty wall arrays; 9 of 28 inputs therefore have no nova boundary decision, leaving the stated all-input cross-check unmet."
+    },
+    {
+      "file": "scripts/prototypes/efit_field_swap/export_tie_islands.py",
+      "line": "191",
+      "severity": "blocking",
+      "text": "blocking: bisected_offset selects only the first bracket's left endpoint and main writes one state per cell count, so the right side of each adjacent-double pair requested at 282 and 550 cells is absent."
+    },
+    {
+      "file": "scripts/prototypes/efit_field_swap/export_tie_islands.py",
+      "line": "184",
+      "severity": "blocking",
+      "text": "blocking: receipt validation trusts adjacent and unchanged booleans without comparing binary64 endpoints or the decision keys; test_export_states.py:77-97 explicitly accepts a zero-width [0.1613, 0.1613] bracket as a bisected state."
+    },
+    {
+      "file": "scripts/prototypes/efit_field_swap/export_tie_islands.py",
+      "line": "210",
+      "severity": "blocking",
+      "text": "blocking: achieved < requested does not establish that receipt requested_cells and achieved_cells match the carrier; pairing the 282-cell receipt with a 550-cell carrier passes this guard and exports an offset bisected for another state."
+    },
+    {
+      "file": "docs/research/efit-field-swap.html",
+      "line": "414",
+      "severity": "blocking",
+      "text": "blocking: the 550-cell receipt's left key is diverted but the delivered 550-cell record reads limited on the export path, so that export is not a demonstrated adjacent-double transition for the read whose decision it carries."
+    },
+    {
+      "file": "scripts/prototypes/efit_field_swap/spline_field.py",
+      "line": "105",
+      "severity": "follow-on",
+      "text": "follow-on: TraceSplineField duplicates the not-a-knot JAX value, gradient and Hessian capability in nova/linalg/tensor_spline.py:264-325 rather than wrapping or extending the existing owner."
+    },
+    {
+      "file": "scripts/prototypes/efit_field_swap/test_export_states.py",
+      "line": "97",
+      "severity": "follow-on",
+      "text": "follow-on: the expected offset is the same 0.1613 supplied in _receipt and echoed by the returned entry, so a hard-coded 0.1613 result would pass and the assertion does not protect receipt selection for other offsets."
+    },
+    {
+      "file": "scripts/prototypes/efit_field_swap/crosscheck.py",
+      "line": "285",
+      "severity": "follow-on",
+      "text": "follow-on: when a trace wall's first and last points differ, wall_units appends the last point again rather than the first; the captured JT-60SA wall has distinct endpoints, so this creates a zero-length terminal edge instead of an explicitly closed unit."
+    },
+    {
+      "file": "manifest.md",
+      "line": "117",
+      "severity": "follow-on",
+      "text": "follow-on: baseline_suite and after_suite are prose rather than armed JSON, and no baseline gate log exists; the zero added failures can be inferred from the absent base test path and 12-pass head log but cannot be derived from paired suite logs as requested."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read all 23 commits from 80ee84b2 to 5179d0b7 by commit and the final 16-path diff; the repair adds row enumeration, fitted geometry, bisection receipts, two tests and revised documents.",
+    "done_when": "prompt.txt:91-103 requires all paired and synthetic decisions, both sides of each adjacent-double tie pair, and per-case boundary deltas; docs/research/efit-field-swap.html:121 and :248-260 leave those measures incomplete.",
+    "goal": "prompt.txt:30 requests decisions on imas-efit fields and nova tie exports; docs/research/efit-field-swap.html:258-260 records 19 qualified decisions among 28 inputs and exports/records contains one side per tie bracket.",
+    "manifest": "manifest.md:117-118 records a 12-pass gate and a prose zero-test baseline, while manifest.md:102 omits the changed evidence fragment from changed_paths.",
+    "write_paths": "prompt.txt:70-74 grants the prototype, research page, figure directory and evidence fragment; git diff --name-status 80ee84b2..5179d0b7 lists 16 paths, all within those grants."
+  },
+  "justifications": {
+    "durability": "test_crosscheck.py:28-60 checks enumeration and one real record, but test_export_states.py:77-97 accepts a zero-width bracket and its positive assertion reuses its own supplied offset.",
+    "evidence": "exports/gate_at_head.log records 12 passing tests and exports/sweep.log records 28 rows, but docs/research/efit-field-swap.html:121 does not assert the requested per-case boundary deltas.",
+    "fit": "crosscheck.py:281-285 duplicates the final wall vertex instead of closing the unit at its first vertex, and test_crosscheck.py:28-60 does not cover that wall contract.",
+    "goal_fidelity": "docs/research/efit-field-swap.html:248-260 shows four unread and five unqualified inputs, while export_tie_islands.py:191-192 emits only one side of each measured bracket.",
+    "reuse": "spline_field.py:105-175 implements a separate not-a-knot JAX spline and jet already owned by nova/linalg/tensor_spline.py:264-325 rather than extending that owner.",
+    "scope_discipline": "git diff --name-status 80ee84b2..5179d0b7 confines all 16 changed paths to the four scopes declared in prompt.txt:70-74, although manifest.md:102 misses the evidence fragment."
+  },
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: 80ee84b289d41d5a1bfbda8c3a5b94a7b2d7f1cd\nreviewed_head_sha: 5179d0b7524a5ab6d8a87efa91d2051b2f6a3708\nVERDICT goal: prompt.txt:30 requests decisions on imas-efit fields and nova tie exports; docs/research/efit-field-swap.html:258-260 records 19 qualified decisions among 28 inputs and exports/records contains one side per tie bracket.\nVERDICT done_when: prompt.txt:91-103 requires all paired and synthetic decisions, both sides of each adjacent-double tie pair, and per-case boundary deltas; docs/research/efit-field-swap.html:121 and :248-260 leave those measures incomplete.\nVERDICT write_paths: prompt.txt:70-74 grants the prototype, research page, figure directory and evidence fragment; git diff --name-status 80ee84b2..5179d0b7 lists 16 paths, all within those grants.\nVERDICT manifest: manifest.md:117-118 records a 12-pass gate and a prose zero-test baseline, while manifest.md:102 omits the changed evidence fragment from changed_paths.\nVERDICT diff: read all 23 commits from 80ee84b2 to 5179d0b7 by commit and the final 16-path diff; the repair adds row enumeration, fitted geometry, bisection receipts, two tests and revised documents.\nCALL_SITES: scripts/prototypes/efit_field_swap/crosscheck.py:_decision, scripts/prototypes/efit_field_swap/crosscheck.py:main, scripts/prototypes/efit_field_swap/export_states.py:main, scripts/prototypes/efit_field_swap/export_tie_islands.py:main, scripts/prototypes/efit_field_swap/negative_control.py:main_field\nSCORE goal_fidelity: 8\nJUSTIFICATION goal_fidelity: docs/research/efit-field-swap.html:248-260 shows four unread and five unqualified inputs, while export_tie_islands.py:191-192 emits only one side of each measured bracket.\nSCORE evidence: 10\nJUSTIFICATION evidence: exports/gate_at_head.log records 12 passing tests and exports/sweep.log records 28 rows, but docs/research/efit-field-swap.html:121 does not assert the requested per-case boundary deltas.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: git diff --name-status 80ee84b2..5179d0b7 confines all 16 changed paths to the four scopes declared in prompt.txt:70-74, although manifest.md:102 misses the evidence fragment.\nSCORE durability: 7\nJUSTIFICATION durability: test_crosscheck.py:28-60 checks enumeration and one real record, but test_export_states.py:77-97 accepts a zero-width bracket and its positive assertion reuses its own supplied offset.\nSCORE fit: 12\nJUSTIFICATION fit: crosscheck.py:281-285 duplicates the final wall vertex instead of closing the unit at its first vertex, and test_crosscheck.py:28-60 does not cover that wall contract.\nSCORE reuse: 4\nJUSTIFICATION reuse: spline_field.py:105-175 implements a separate not-a-knot JAX spline and jet already owned by nova/linalg/tensor_spline.py:264-325 rather than extending that owner.\nFINDING docs/research/efit-field-swap.html:121 blocking: the case table gives axis positions and spans, but omits the requested per-case boundary levels, absolute and span-relative boundary differences, admitted saddle levels and positions, and wall-contact levels; those data exist only in the JSON and selected prose, so the required disagreement table is incomplete.\nFINDING scripts/prototypes/efit_field_swap/crosscheck.py:416 blocking: the sweep records five paired sides as unqualified and both synthetic crossing inputs as unread after wall_ring raises on their empty wall arrays; 9 of 28 inputs therefore have no nova boundary decision, leaving the stated all-input cross-check unmet.\nFINDING scripts/prototypes/efit_field_swap/export_tie_islands.py:191 blocking: bisected_offset selects only the first bracket's left endpoint and main writes one state per cell count, so the right side of each adjacent-double pair requested at 282 and 550 cells is absent.\nFINDING scripts/prototypes/efit_field_swap/export_tie_islands.py:184 blocking: receipt validation trusts adjacent and unchanged booleans without comparing binary64 endpoints or the decision keys; test_export_states.py:77-97 explicitly accepts a zero-width [0.1613, 0.1613] bracket as a bisected state.\nFINDING scripts/prototypes/efit_field_swap/export_tie_islands.py:210 blocking: achieved < requested does not establish that receipt requested_cells and achieved_cells match the carrier; pairing the 282-cell receipt with a 550-cell carrier passes this guard and exports an offset bisected for another state.\nFINDING docs/research/efit-field-swap.html:414 blocking: the 550-cell receipt's left key is diverted but the delivered 550-cell record reads limited on the export path, so that export is not a demonstrated adjacent-double transition for the read whose decision it carries.\nFINDING scripts/prototypes/efit_field_swap/spline_field.py:105 follow-on: TraceSplineField duplicates the not-a-knot JAX value, gradient and Hessian capability in nova/linalg/tensor_spline.py:264-325 rather than wrapping or extending the existing owner.\nFINDING scripts/prototypes/efit_field_swap/test_export_states.py:97 follow-on: the expected offset is the same 0.1613 supplied in _receipt and echoed by the returned entry, so a hard-coded 0.1613 result would pass and the assertion does not protect receipt selection for other offsets.\nFINDING scripts/prototypes/efit_field_swap/crosscheck.py:285 follow-on: when a trace wall's first and last points differ, wall_units appends the last point again rather than the first; the captured JT-60SA wall has distinct endpoints, so this creates a zero-length terminal edge instead of an explicitly closed unit.\nFINDING manifest.md:117 follow-on: baseline_suite and after_suite are prose rather than armed JSON, and no baseline gate log exists; the zero added failures can be inferred from the absent base test path and 12-pass head log but cannot be derived from paired suite logs as requested.\n",
+  "review_run_id": "r-20261018T095959333527-review-of-r-20261018T063236394668-efit-field-swap-5179d0b7524a",
+  "reviewed_base_sha": "80ee84b289d41d5a1bfbda8c3a5b94a7b2d7f1cd",
+  "reviewed_head_sha": "5179d0b7524a5ab6d8a87efa91d2051b2f6a3708",
+  "reviewed_run_id": "r-20261018T063236394668-efit-field-swap",
+  "scores": {
+    "durability": 7,
+    "evidence": 10,
+    "fit": 12,
+    "goal_fidelity": 8,
+    "reuse": 4,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "suite_delta_basis": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T063236394668-efit-field-swap/exports/gate_at_head.log",
+    "after_summary": "12 passed in 124.60s (0:02:04); EXIT=0",
+    "baseline_suite": "manifest.md:117 states zero tests because the prototype directory was absent at 80ee84b2; git ls-tree confirmed that path absent and scripts/prototypes present, but the run supplies no baseline gate log.",
+    "limit": "Zero added failure ids is supported by the absent base test path and the completed head gate; no paired baseline suite log or full-suite delta was recorded."
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T10:08:23.693298+00:00",
+  "total": 59
+}

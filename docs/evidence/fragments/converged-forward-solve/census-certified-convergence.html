@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="census-certified-convergence">
+  <meta name="plan-title" content="Adjacent-double saddle census investigation">
+  <meta name="plan-summary" content="The prototype census loses a hyperbolic saddle while the seeded production fixed-point solver retains it on both sides">
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-verifies" content="converged-forward-solve#s2">
+  <meta name="plan-recorded-at" content="2026-10-18">
+  <meta name="plan-verdict" content="partial">
+  <title>Adjacent-double saddle census evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+  <h1 id="census-certified-convergence-landing">Adjacent-double saddle census evidence</h1>
+  <p>The 282-cell diverted CPU census changes from three valid roots to two between adjacent binary64 offsets <code>0.17323108126295622</code> and <code>0.17323108126295625</code>; titan shows the same 3 → 2 loss at its adjacent pair <code>0.17323108126297435</code> → <code>0.17323108126297437</code>. The departing saddle remains hyperbolic, with determinant about −2.7385 × 10<sup>−5</sup>. The current orientation revision and the warm prior through 0.16 are recorded in the <a href="/nova/research/census-certified-convergence.html">full research record</a>.</p>
+  <p>Seeded from that last valid saddle position, <code>fixed_points.solve</code> returns it valid on both sides, with zero Newton iterations and row containment true. On CPU its gradient norm is 1.56 × 10<sup>−15</sup> and its final Newton correction is 2.27 × 10<sup>−12</sup> m against the applied 1.00 × 10<sup>−11</sup> m threshold. The solver therefore does not cause the measured departure. The quoted offset pair in the brief is not the loss edge under the current revision; the live CPU bisection found the pair above.</p>
+  <p>The prototype census still admits the same cell 263 quadratic seed on both sides. Direct polishing returns a valid, contained, nonduplicate saddle at both offsets. The warm caller has only two prior slots, so this wall-contact root relies on discovery every state. Supplying its last valid position as a third prior to the prototype census restores all three roots on the right. The original end-to-end compiled filter's exact rejection remains to be isolated; the implementation that owns that census is outside this worker's write grant. No production solver fix or negative-control claim is made from this measurement.</p>
+  <p>The orientation CPU gate over <code>tests/test_fixed_points.py</code> and <code>tests/test_fixed_point.py</code> completed 62 passed. The run directory <code>r-20261018T062147901424-census-certified-convergence</code> holds the paired CPU and titan JSON receipts and complete logs. Island-wide 282/550 counts, after tests, read-level regression, map fidelity, and cold solves remain open pending the owner and negative-control correction.</p>
+</main></body>
+</html>

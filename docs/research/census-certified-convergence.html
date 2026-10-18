@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="census-certified-convergence">
+  <meta name="plan-title" content="Adjacent-double saddle census investigation">
+  <meta name="plan-summary" content="A hyperbolic saddle leaves the prototype census between adjacent doubles; the production fixed-point solver retains it when seeded">
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-verifies" content="converged-forward-solve#s2">
+  <meta name="plan-recorded-at" content="2026-10-18">
+  <meta name="plan-verdict" content="partial">
+  <title>Adjacent-double saddle census investigation | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+  <header>
+    <h1>Adjacent-double saddle census investigation</h1>
+    <p class="lead">The observed root loss reproduces in the prototype census. Given the last valid saddle position, <code>nova.equilibrium.fixed_points.solve</code> retains that root at both sides without a Newton update.</p>
+  </header>
+
+  <section id="census-certified-convergence-method">
+    <h2>Method and provenance</h2>
+    <p>The probe builds the diverted certified carrier requested at 250 cells (282 realised) from the predecessor's immutable machine cache, warms its root prior from offset −0.20 through 0.16 in 0.01 steps, and bisects the live root count over 0.17–0.18 to adjacent binary64 offsets. The same moving field and booked moments are passed to the prototype census and to <code>fixed_points.solve</code>; the latter is seeded with the prototype census's last valid saddle position. The logs print the resolved <code>nova</code> and <code>fixed_points</code> module paths. CPU runs in the held compute allocation; the GPU row runs on titan in one separate job. The orientation revision is <code>023a1da28d417f526b155b6401bf55d86ab818db</code>. The full JSON and logs are in run <code>r-20261018T062147901424-census-certified-convergence</code>.</p>
+    <p>The pair quoted in the node brief, 0.17323108126295567 → 0.17323108126295570, returns three valid roots on both sides with this revision and warm path. A fresh bisection is therefore necessary; treating that quoted pair as the current departure would confuse an absent observation with a measured cause. The predecessor's CPU receipt already contained the later pair shown below, and the present CPU bisection reproduces it.</p>
+  </section>
+
+  <section id="census-certified-convergence-pair">
+    <h2>The root and the rejecting function</h2>
+    <table>
+      <thead><tr><th>Backend</th><th>Adjacent offsets</th><th>Prototype census count</th><th><code>fixed_points.solve</code> saddle validity</th><th>Saddle gradient norm</th><th>Newton correction</th><th>Determinant</th></tr></thead>
+      <tbody>
+        <tr><td>CPU</td><td><code>0.17323108126295622</code> → <code>0.17323108126295625</code></td><td>3 → 2</td><td>true → true</td><td>1.56 × 10<sup>−15</sup> → 1.56 × 10<sup>−15</sup></td><td>2.27 × 10<sup>−12</sup> m on both sides</td><td>−2.738485377 × 10<sup>−5</sup> on both sides</td></tr>
+        <tr><td>titan GPU</td><td><code>0.17323108126297435</code> → <code>0.17323108126297437</code></td><td>3 → 2</td><td>true → true</td><td>3.50 × 10<sup>−16</sup> on both sides</td><td>4.87 × 10<sup>−13</sup> m on both sides</td><td>−2.738485377 × 10<sup>−5</sup> on both sides</td></tr>
+      </tbody>
+    </table>
+    <p>On CPU the departing root's last valid seed is <code>(1.5443909099814561, 0.8807534247193636)</code>. <code>fixed_points.solve</code> returns that position at each offset with status <code>CONVERGED</code>, zero iterations, and row containment true. Its applied position threshold is <code>1e-10 × 0.10046313387189021 = 1.004631338718902e-11 m</code>, above its reported correction by a factor 4.42. The solver has no deduplication gate. Its validity conjunction in <code>fixed_points.py</code> therefore does not reject this saddle; the determinant stays strongly negative, so this is not a fold.</p>
+    <p>The CPU and GPU departure offsets differ by about 1.8 × 10<sup>−14</sup>, while both are adjacent pairs on their own backend. This is a backend-qualified numerical location, not evidence that the root itself folds away.</p>
+  </section>
+
+  <section id="census-certified-convergence-filters">
+    <h2>What the prototype census can retain</h2>
+    <p>The independently inspected quadratic proposal has three candidate seeds on both CPU sides. Cell 263 remains candidate rank 2, with its seed near <code>(1.5334200115203, 0.8981119327462)</code>. Direct <code>topology.stationary_read</code> from that seed returns the wall-contact saddle on both sides, with a correction below 1 × 10<sup>−16</sup> m, valid reason <code>OK</code>, and no duplicate. The root is inside cell 249 by a minimum positive polygon cross product of 5.24 × 10<sup>−4</sup> on both sides, so the independent containment check has a substantial margin.</p>
+    <p>The end-to-end compiled prototype census nevertheless returns only one saddle on the right. The warm caller passes a two-position prior (axis and primary X-point), so the wall-contact saddle relies on the cell proposal every time. Passing the last valid wall-contact position as a third prior at the right offset restores two saddles and three valid roots in the same <code>scripts.prototypes.read_robustness.census.census</code> function. The direct carry test is a positive control: the census can represent and classify the root when its identity is maintained. It does not by itself identify which fused proposal, polishing, containment, or deduplication expression changes in the original two-prior program.</p>
+  </section>
+
+  <section id="census-certified-convergence-disposition">
+    <h2>Disposition and remaining measure</h2>
+    <p>The recorded attribution to <code>fixed_points.solve</code> is contradicted by the reproduced pair: its own convergence gate accepts the root on both sides. The disappearing count is produced by <code>scripts/prototypes/read_robustness/census.py</code>, called from <code>fast_map_production/tie_probe.py</code>, and its stationarity helper in <code>nova/equilibrium/topology.py</code>. Those two implementation files are outside this worker's write grant. The currently unused <code>psi_rounding_enclosure</code> in <code>fast_map_production/kernel.py</code> bounds flux, not the gradient used by either solver's validity test; using it as a gradient certificate would be dimensionally wrong. No product solver code has been changed.</p>
+    <p>At the orientation revision, the required CPU gate over <code>tests/test_fixed_points.py</code> and <code>tests/test_fixed_point.py</code> completed with 62 passed and no failures. The after arm, full 282/550 island census, read-level regression and negative control, map fidelity, and cold solves remain unmeasured because the repair target and declared negative control need a corrected write grant and done-when. The next concrete action is to authorise the actual census owner for repair, carry discovered root identities across states, and test the whole read at the two tie states. If the compiled path still loses the root with that carried prior, instrument its per-seed validity before changing a tolerance.</p>
+  </section>
+</main></body>
+</html>

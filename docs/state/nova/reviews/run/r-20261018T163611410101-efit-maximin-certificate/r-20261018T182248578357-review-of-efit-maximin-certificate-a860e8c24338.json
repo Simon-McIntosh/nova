@@ -1,0 +1,99 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Both completed suite arms report one identical failure: scripts/prototypes/efit_field_swap/test_crosscheck.py::test_a_wide_wall_record_reads_a_decision.",
+  "after_suite": {
+    "completed": true,
+    "failure_ids": [
+      "scripts/prototypes/efit_field_swap/test_crosscheck.py::test_a_wide_wall_record_reads_a_decision"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T163611410101-efit-maximin-certificate/logs/after-suite.log",
+    "revision": "a860e8c2433836b79fae3a0d91d652773514e7d8"
+  },
+  "baseline_suite": {
+    "completed": true,
+    "failure_ids": [
+      "scripts/prototypes/efit_field_swap/test_crosscheck.py::test_a_wide_wall_record_reads_a_decision"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T163611410101-efit-maximin-certificate/logs/baseline-suite-verified.log",
+    "revision": "3df1dda118296f6b73d2d335c4c0561cd69d1655"
+  },
+  "call_site_count": 5,
+  "call_sites": [
+    "scripts/prototypes/efit_maximin_certificate/run.py:main",
+    "scripts/prototypes/efit_maximin_certificate/cuts.py:make_cuts",
+    "scripts/prototypes/efit_maximin_certificate/external_paths.py:main",
+    "scripts/prototypes/efit_maximin_certificate/adapter_probe.py:main",
+    "scripts/prototypes/efit_maximin_certificate/field_identity.py:main"
+  ],
+  "commits_read": [
+    "44f96026d33fc99117be560eb1caad7fe3fd23ce",
+    "a860e8c2433836b79fae3a0d91d652773514e7d8"
+  ],
+  "completed_at": "2026-10-18T18:31:44Z",
+  "dispatched_at": "2026-10-18T18:23:35Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/efit_maximin_certificate/test_certificate.py",
+      "line": "27",
+      "severity": "follow-on",
+      "text": "follow-on: target is assigned from ROWS[0]['target'] at line 24 and then compared to that same value, so this assertion cannot fail when the recorded MAST-U target changes."
+    },
+    {
+      "file": "scripts/prototypes/efit_maximin_certificate/test_certificate.py",
+      "line": "51",
+      "severity": "follow-on",
+      "text": "follow-on: row.target is the target just passed through certify at line 50, so this check survives a coordinated input/output drift and adds no independent target oracle; the path endpoint checks guard connector omission separately."
+    },
+    {
+      "file": "scripts/prototypes/efit_maximin_certificate/certificate.py",
+      "line": "56",
+      "severity": "follow-on",
+      "text": "follow-on: spline_of rebuilds exactly the not-a-knot scipy spline already owned by TraceRecord.spline in scripts/prototypes/efit_axis_adjudication/records.py:68-70, creating a second definition for the same capability."
+    },
+    {
+      "file": "scripts/prototypes/efit_maximin_certificate/bounds.py",
+      "line": "82",
+      "severity": "follow-on",
+      "text": "follow-on: one midpoint residual only checks interpolation at sampled midpoints and does not establish the fixed 1e-12 arithmetic pad for every segment; the narrow synthetic cut margins therefore rely on an unvalidated roundoff allowance."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 runtime call sites",
+    "diff": "Read 44f96026d33fc99117be560eb1caad7fe3fd23ce and a860e8c2433836b79fae3a0d91d652773514e7d8 against 3df1dda118296f6b73d2d335c4c0561cd69d1655; certificate.py:237-259 now joins exact endpoints and bounds the path, while cuts.py:45-82 adds continuous cut checks.",
+    "done_when": "The source brief's three export clauses are evidenced by exports/README.md:11-44 and exports/cuts.json; logs/gate-focused-final.log:5 reports 6 passed, and the completed baseline-suite-verified.log:103-105 and after-suite.log:103-105 each have the same one failure, giving zero added failures.",
+    "goal": "The source brief requests three record-spline path/cut decisions and field identity; docs/research/efit-maximin-certificate.html:11-19 and :71-101 report all three with exact endpoints and the imported-field check.",
+    "manifest": "The source manifest.md:5-16 records complete, both commits, the exact head, six focused passes, and completed two-arm suite JSON with one identical failure ID in each arm.",
+    "write_paths": "The source brief grants scripts/prototypes/efit_maximin_certificate and the two named HTML files; git diff --name-only 3df1dda..a860e8c lists ten files, all within those declared paths."
+  },
+  "justifications": {
+    "durability": "test_certificate.py:28-45 would fail on a lost strict cut or incorrect full-precision endpoint level, and :52-59 would fail if exact path connectors or their threshold checks disappeared, though :27 and :51 follow their own inputs.",
+    "evidence": "logs/baseline-suite-verified.log:103-105 and logs/after-suite.log:103-105 finish with the same single failure, while logs/gate-focused-final.log:5 records six passing tests at the reviewed head.",
+    "fit": "scripts/prototypes/efit_maximin_certificate/run.py:52-94 follows the existing prototype driver style and the added source names carry no forbidden plan-stage labels.",
+    "goal_fidelity": "docs/research/efit-maximin-certificate.html:44-64 gives the exact target and continuous cut outcomes, and :71-101 names the nova admission step and verifies field agreement.",
+    "reuse": "certificate.py:56-57 duplicates TraceRecord.spline in scripts/prototypes/efit_axis_adjudication/records.py:68-70; searches for path maximin and continuous cuts found only the distinct Bell-cell passage in fast_map_production/kernel.py:211-239.",
+    "scope_discipline": "git diff 3df1dda..a860e8c changes only the ten paths listed in source manifest.md:7, all inside the source brief's grant."
+  },
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: 3df1dda118296f6b73d2d335c4c0561cd69d1655\nreviewed_head_sha: a860e8c2433836b79fae3a0d91d652773514e7d8\nVERDICT goal: The source brief requests three record-spline path/cut decisions and field identity; docs/research/efit-maximin-certificate.html:11-19 and :71-101 report all three with exact endpoints and the imported-field check.\nVERDICT done_when: The source brief's three export clauses are evidenced by exports/README.md:11-44 and exports/cuts.json; logs/gate-focused-final.log:5 reports 6 passed, and the completed baseline-suite-verified.log:103-105 and after-suite.log:103-105 each have the same one failure, giving zero added failures.\nVERDICT write_paths: The source brief grants scripts/prototypes/efit_maximin_certificate and the two named HTML files; git diff --name-only 3df1dda..a860e8c lists ten files, all within those declared paths.\nVERDICT manifest: The source manifest.md:5-16 records complete, both commits, the exact head, six focused passes, and completed two-arm suite JSON with one identical failure ID in each arm.\nVERDICT diff: Read 44f96026d33fc99117be560eb1caad7fe3fd23ce and a860e8c2433836b79fae3a0d91d652773514e7d8 against 3df1dda118296f6b73d2d335c4c0561cd69d1655; certificate.py:237-259 now joins exact endpoints and bounds the path, while cuts.py:45-82 adds continuous cut checks.\nCALL_SITES: scripts/prototypes/efit_maximin_certificate/run.py:main, scripts/prototypes/efit_maximin_certificate/cuts.py:make_cuts, scripts/prototypes/efit_maximin_certificate/external_paths.py:main, scripts/prototypes/efit_maximin_certificate/adapter_probe.py:main, scripts/prototypes/efit_maximin_certificate/field_identity.py:main\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/research/efit-maximin-certificate.html:44-64 gives the exact target and continuous cut outcomes, and :71-101 names the nova admission step and verifies field agreement.\nSCORE evidence: 18\nJUSTIFICATION evidence: logs/baseline-suite-verified.log:103-105 and logs/after-suite.log:103-105 finish with the same single failure, while logs/gate-focused-final.log:5 records six passing tests at the reviewed head.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 3df1dda..a860e8c changes only the ten paths listed in source manifest.md:7, all inside the source brief's grant.\nSCORE durability: 13\nJUSTIFICATION durability: test_certificate.py:28-45 would fail on a lost strict cut or incorrect full-precision endpoint level, and :52-59 would fail if exact path connectors or their threshold checks disappeared, though :27 and :51 follow their own inputs.\nSCORE fit: 18\nJUSTIFICATION fit: scripts/prototypes/efit_maximin_certificate/run.py:52-94 follows the existing prototype driver style and the added source names carry no forbidden plan-stage labels.\nSCORE reuse: 5\nJUSTIFICATION reuse: certificate.py:56-57 duplicates TraceRecord.spline in scripts/prototypes/efit_axis_adjudication/records.py:68-70; searches for path maximin and continuous cuts found only the distinct Bell-cell passage in fast_map_production/kernel.py:211-239.\nFINDING scripts/prototypes/efit_maximin_certificate/test_certificate.py:27 follow-on: target is assigned from ROWS[0]['target'] at line 24 and then compared to that same value, so this assertion cannot fail when the recorded MAST-U target changes.\nFINDING scripts/prototypes/efit_maximin_certificate/test_certificate.py:51 follow-on: row.target is the target just passed through certify at line 50, so this check survives a coordinated input/output drift and adds no independent target oracle; the path endpoint checks guard connector omission separately.\nFINDING scripts/prototypes/efit_maximin_certificate/certificate.py:56 follow-on: spline_of rebuilds exactly the not-a-knot scipy spline already owned by TraceRecord.spline in scripts/prototypes/efit_axis_adjudication/records.py:68-70, creating a second definition for the same capability.\nFINDING scripts/prototypes/efit_maximin_certificate/bounds.py:82 follow-on: one midpoint residual only checks interpolation at sampled midpoints and does not establish the fixed 1e-12 arithmetic pad for every segment; the narrow synthetic cut margins therefore rely on an unvalidated roundoff allowance.\n",
+  "review_run_id": "r-20261018T182248578357-review-of-efit-maximin-certificate-a860e8c24338",
+  "reviewed_base_sha": "3df1dda118296f6b73d2d335c4c0561cd69d1655",
+  "reviewed_head_sha": "a860e8c2433836b79fae3a0d91d652773514e7d8",
+  "reviewed_run_id": "r-20261018T163611410101-efit-maximin-certificate",
+  "scores": {
+    "durability": 13,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "source_manifest": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T163611410101-efit-maximin-certificate/manifest.md",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T18:29:06.887854+00:00",
+  "total": 92
+}

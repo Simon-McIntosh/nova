@@ -40,18 +40,47 @@ def census(field, geometry, convention, policy, previous):
     conditioned, safe = jax.vmap(topology._conditioned_hessian, in_axes=(0, None))(
         hessian, policy.hessian_tolerance
     )
-    offset = -jnp.linalg.solve(safe, coefficients[:, 1:3, None])[..., 0]
+    gradient = coefficients[:, 1:3]
+    offset = -jnp.linalg.solve(safe, gradient[..., None])[..., 0]
     seeds = geometry.centre + geometry.pitch[:, None] * offset
     slot = jnp.arange(geometry.vertices.shape[1])
     following = jnp.where(
         slot[None] + 1 < geometry.vertex_count[:, None], slot[None] + 1, 0
     )
     end = jnp.take_along_axis(geometry.vertices, following[..., None], axis=1)
-    cross = topology._cross_plane(
-        end - geometry.vertices, seeds[:, None] - geometry.vertices
+    edge = end - geometry.vertices
+    relative = seeds[:, None] - geometry.vertices
+    cross = topology._cross_plane(edge, relative)
+    # A quadratic seed can land on a cell edge, where the cross product above
+    # is zero to within its own rounding and its computed sign is set by
+    # rounding: the cell then enters the candidate set in one state and leaves
+    # it in the next, and a stationary point proposed only by that cell is
+    # never polished. Admit a seed whose cross product is negative only beyond
+    # the rounding the value actually carries. Two sources compose here and
+    # both are computed from the operands, with no tuned constant: the
+    # determinant's own forward error, and the displacement's error propagated
+    # through the local Hessian solve, which is unbounded in the conditioning
+    # of that 2x2 matrix and dominates at the saddle.
+    epsilon = jnp.finfo(seeds.dtype).eps
+    inverse = jnp.linalg.inv(safe)
+    hessian_scale = jnp.sum(jnp.abs(hessian), axis=(-2, -1))
+    displacement_scale = jnp.sum(jnp.abs(inverse), axis=(-2, -1)) * (
+        hessian_scale * jnp.sum(jnp.abs(offset), axis=-1)
+        + jnp.sum(jnp.abs(gradient), axis=-1)
+    )
+    seed_uncertainty = epsilon * jnp.abs(geometry.pitch) * displacement_scale
+    rounding = (
+        4.0
+        * epsilon
+        * (jnp.abs(edge[..., 0]) + jnp.abs(edge[..., 1]))
+        * (jnp.abs(relative[..., 0]) + jnp.abs(relative[..., 1]))
+        + (jnp.abs(edge[..., 0]) + jnp.abs(edge[..., 1]))
+        * seed_uncertainty[:, None]
     )
     inside = jnp.all(
-        jnp.where(slot[None] < geometry.vertex_count[:, None], cross >= 0, True),
+        jnp.where(
+            slot[None] < geometry.vertex_count[:, None], cross >= -rounding, True
+        ),
         axis=1,
     )
     candidate = conditioned & inside & jnp.all(jnp.isfinite(seeds), axis=1)

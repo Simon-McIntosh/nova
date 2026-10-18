@@ -23,12 +23,13 @@ from nova.equilibrium.topology import TopologyPolicy
 from nova.jax.config import configure_dtypes
 from scripts.prototypes.efit_field_swap import crosscheck
 from scripts.prototypes.efit_field_swap.spline_field import TraceSplineField
+from scripts.prototypes.efit_field_swap.orientation import read_convention
 from scripts.prototypes.read_robustness.census import RootCensus
 from scripts.prototypes.tcv_liuqe_known_answer import measure
 
 configure_dtypes()
 
-CONVENTION = topology.TopologyConvention.from_cocos(17, 1.0)
+CONVENTION = read_convention(polarity=1)
 POLICY = TopologyPolicy()
 
 LIUQE_STORE = Path(

@@ -26,6 +26,8 @@ class TraceSplineField:
     """A trace record's psi as a differentiable point field."""
 
     spline: TensorBSpline
+    jets: jax.Array | None = None
+    sample_index: jax.Array | None = None
 
     @classmethod
     def from_record(cls, record: TraceRecord) -> TraceSplineField:
@@ -40,6 +42,10 @@ class TraceSplineField:
     def value(self, point):
         point = jnp.asarray(point)
         return self.spline(point[0], point[1])
+
+    def cell_value(self, index, point):
+        """Evaluate the spline at a cell centre for the census error bound."""
+        return self.value(point)
 
     def evaluate(self, point):
         point = jnp.asarray(point)
@@ -59,9 +65,16 @@ class TraceSplineField:
         values = jax.vmap(self.value)(points).reshape(geometry.sample_points.shape[:-1])
         return jnp.einsum("nks,ns->nk", geometry.fit_inverse, values)
 
+    def sampled_for(self, geometry):
+        """Carry the exact cell samples used by the census rounding bound."""
+        points = geometry.sample_points.reshape(-1, 2)
+        samples = jax.vmap(self.value)(points)
+        index = jnp.arange(len(samples)).reshape(geometry.sample_points.shape[:2])
+        return TraceSplineField(self.spline, samples[:, None], index)
+
 
 jax.tree_util.register_dataclass(
     TraceSplineField,
-    data_fields=["spline"],
+    data_fields=["spline", "jets", "sample_index"],
     meta_fields=[],
 )

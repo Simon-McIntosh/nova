@@ -14,6 +14,7 @@ import numpy as np
 import pytest
 
 from scripts.prototypes.efit_field_swap.crosscheck import (
+    _decision,
     _row,
     cases,
     domain_rings,
@@ -52,6 +53,15 @@ def test_a_wide_wall_record_gets_a_fitted_mesh():
     assert fitted is True, "this record's wall is the case the fit exists for"
     assert geometry is not None
     assert np.any(np.asarray(geometry.contour_mesh.vertex_valid))
+
+
+def test_iter_read_uses_its_negative_flux_polarity():
+    record = read_trace_record(ITER_RECORD)
+    assert record.polarity == -1
+    row = _decision("iter", "trace", record)
+    assert row.nova_label in ("limited", "diverted"), row.note
+    assert row.nova_axis_psi != pytest.approx(row.nova_boundary_psi)
+    assert record.polarity * row.nova_axis_psi > record.polarity * row.nova_boundary_psi
 
 
 def test_field_swap_record_reports_coverage_outcome():

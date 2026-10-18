@@ -53,6 +53,7 @@ from nova.equilibrium import topology
 from nova.jax.config import configure_dtypes
 from nova.equilibrium.topology import TopologyPolicy
 from scripts.prototypes.efit_field_swap.spline_field import TraceSplineField
+from scripts.prototypes.efit_field_swap.orientation import read_convention
 from scripts.prototypes.efit_field_swap.trace_record import (
     TraceRecord,
     read_trace_record,
@@ -915,14 +916,17 @@ def read_state(
         if geometry is None:
             attempts.append(f"lattice {resolution}: contour mesh admits no vertex")
             continue
-        initial = jax.jit(lambda: topology.read(field, geometry, convention, policy))()
+        working_field = field.sampled_for(geometry)
+        initial = jax.jit(
+            lambda: topology.read(working_field, geometry, convention, policy)
+        )()
         axis_valid = np.asarray(initial.x_point_valid)
         points = np.asarray(initial.x_points)
         stack = [np.asarray(initial.axis)[None]]
         if axis_valid.any():
             stack.append(points[axis_valid])
         previous = jnp.asarray(np.vstack(stack))
-        roots = census(field, geometry, convention, policy, previous)
+        roots = census(working_field, geometry, convention, policy, previous)
         candidates = int(roots.candidates)
         admitted = int(roots.saddles)
         axis_admitted = stationary_axis_admitted(
@@ -983,19 +987,21 @@ def read_state(
             continue
         try:
             admitted_roots = roots.roots._replace(valid=jnp.asarray(root_valid))
-            reading = nova_read(field, admitted_roots, geometry, convention, policy)
+            reading = nova_read(
+                working_field, admitted_roots, geometry, convention, policy
+            )
         except Exception as error:  # noqa: BLE001 - one lattice must not stop the sweep
             attempts[-1] += f"; read failed {type(error).__name__}: {error}"
             continue
         sigma = convention.sigma
         boundary = np.asarray(reading.boundary, dtype=np.float64)
         axis = np.asarray(reading.axis, dtype=np.float64)
-        boundary_psi = float(sigma * field.evaluate(jnp.asarray(boundary)).value)
-        axis_psi = float(sigma * field.evaluate(jnp.asarray(axis)).value)
+        boundary_psi = float(field.evaluate(jnp.asarray(boundary)).value)
+        axis_psi = float(field.evaluate(jnp.asarray(axis)).value)
         wall_values = np.asarray(
             jax.vmap(lambda point: field.evaluate(point).value)(geometry.wall_points)
         )
-        wall_level = float(np.max(sigma * wall_values))
+        wall_level = float(wall_values[np.argmax(sigma * wall_values)])
         return ReadOutcome(
             resolution=resolution,
             cells=len(cells),
@@ -1029,7 +1035,7 @@ def _decision(case, source, record, resolutions=RESOLUTIONS):
     """nova's decision on the record's spline, at the coarsest lattice that reads."""
     field = TraceSplineField.from_record(record)
     field_grad = _field_gradient_at_efit_axis(field, record)
-    convention = topology.TopologyConvention.from_cocos(17, 1.0)
+    convention = read_convention(polarity=record.polarity)
     policy = TopologyPolicy()
     boundary_ring, obstacles = domain_rings(record)
     outcome = read_state(

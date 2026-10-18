@@ -23,6 +23,7 @@ from scripts.prototypes.efit_field_swap.crosscheck import (  # noqa: E402
     read_trace_record,
 )
 from scripts.prototypes.efit_field_swap.spline_field import TraceSplineField  # noqa: E402
+from scripts.prototypes.efit_field_swap.orientation import read_convention  # noqa: E402
 from scripts.prototypes.efit_maximin_certificate.run import ROWS  # noqa: E402
 from scripts.prototypes.fast_map_production.kernel import (  # noqa: E402
     _wall_path_ceiling,
@@ -61,7 +62,7 @@ def decision(record):
     """Use nova's own initial stationary roots with the merged fast read."""
     base = TraceSplineField.from_record(record)
     boundary, obstacles = domain_rings(record)
-    convention = topology.TopologyConvention.from_cocos(17, 1.0)
+    convention = read_convention(polarity=record.polarity)
     policy = TopologyPolicy()
     for resolution in (16, 24, 32):
         cells, samples = lattice(boundary, resolution, obstacles)

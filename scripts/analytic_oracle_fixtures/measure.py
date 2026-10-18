@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import argparse
 import ast
-from contextlib import contextmanager
+from collections.abc import Iterator
+from contextlib import AbstractContextManager, contextmanager
 from dataclasses import dataclass, field
 from functools import cached_property
 import fcntl
@@ -15,6 +16,7 @@ import os
 from pathlib import Path
 from time import perf_counter
 from types import SimpleNamespace
+from typing import Protocol
 
 import jax
 import jax.numpy as jnp
@@ -780,6 +782,118 @@ def _cache_lock(store: ZarrStore):
             fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
 
 
+class FixtureSession(Protocol):
+    """One open handle on a fixture store for a single identity.
+
+    The session holds whatever exclusion the backend needs across the whole
+    load-or-build sequence, so two processes racing one identity build it once
+    rather than once each. It carries the key and location the receipt records
+    and moves the fixture dataset in and out of the store.
+    """
+
+    key: str
+    location: str
+    lock_wait: float
+
+    def load(self) -> xarray.Dataset | None:
+        """Return the dataset stored under this identity, or ``None`` on a miss."""
+
+    def publish(self, data: xarray.Dataset) -> None:
+        """Persist ``data`` under this identity."""
+
+
+class FixtureStore(Protocol):
+    """Persistence backend for one cached fixture kind, keyed on its identity.
+
+    A store is the only part of the load-or-build flow that a fixture owner
+    cannot express for itself: the identity, the dataset codec and the receipt
+    are the owner's, and where the object lives and how it is made visible to a
+    concurrent reader are the store's. The owners take one so a caller can put a
+    fixture in the shared operand root without forking the flow that builds it.
+    """
+
+    def session(
+        self, identity: dict[str, object]
+    ) -> AbstractContextManager[FixtureSession]:
+        """Open a session on the object one identity addresses."""
+
+
+@dataclass
+class _ZarrSession:
+    """One group of a grouped zarr store, held open under its lock."""
+
+    store: ZarrStore
+    reader: ZarrStore
+
+    @property
+    def key(self) -> str:
+        return self.store.group
+
+    @property
+    def location(self) -> str:
+        return str(self.store.filepath)
+
+    lock_wait: float = 0.0
+
+    def load(self) -> xarray.Dataset | None:
+        try:
+            self.reader.load()
+        except FileNotFoundError:
+            return None
+        return self.reader.data
+
+    def publish(self, data: xarray.Dataset) -> None:
+        self.store.data = data
+        self.store.store(mode=self.store.get_mode())
+
+
+@contextmanager
+def _zarr_session(
+    filename: str, dirname: str | Path, identity: dict[str, object]
+) -> Iterator[FixtureSession]:
+    """Yield a session on one group of a grouped zarr store."""
+    store = ZarrStore(filename=filename, dirname=dirname)
+    store.group = store.hash_attrs(identity)
+    with _cache_lock(store) as lock_wait:
+        reader = ZarrStore(
+            filename=store.filename, dirname=store.dirname, group=store.group
+        )
+        yield _ZarrSession(store, reader, lock_wait)
+
+
+class ZarrFixtureStore:
+    """Persist a fixture as one group of a grouped zarr store.
+
+    This is the backend both owners use unless a caller names another, so a
+    carrier or an exterior is written where the in-run cache has always written
+    it: under ``NOVA_ANALYTIC_ORACLE_CACHE`` when that names an absolute
+    directory, and beside the caller under ``.nova`` otherwise. The group is
+    labelled by the identity digest and the whole load-or-build sequence is held
+    under an exclusive lock on the store file, which is what stops two processes
+    racing one identity from building it twice.
+    """
+
+    def __init__(self, filename: str, dirname: str | Path):
+        self.filename = filename
+        self.dirname = Path(dirname) if os.path.isabs(dirname) else dirname
+
+    def session(
+        self, identity: dict[str, object]
+    ) -> AbstractContextManager[FixtureSession]:
+        return _zarr_session(self.filename, self.dirname, identity)
+
+
+def carrier_store(requested_cells: int) -> FixtureStore:
+    """Return the default backend for one carrier resolution."""
+    dirname = os.environ.get("NOVA_ANALYTIC_ORACLE_CACHE", ".nova")
+    return ZarrFixtureStore(f"{CACHE_FILENAME}_{abs(requested_cells)}", dirname)
+
+
+def exterior_store() -> FixtureStore:
+    """Return the default backend for a clipped exterior fixture."""
+    return ZarrFixtureStore(EXTERIOR_CACHE_FILENAME, ".nova")
+
+
 def cached_machine(
     case: RotatingEquilibrium,
     requested_cells: int,
@@ -787,8 +901,16 @@ def cached_machine(
     wall_nodes: int,
     wall: np.ndarray | None = None,
     builder: str | None = None,
+    store: FixtureStore | None = None,
 ) -> OracleMachine:
-    """Warm-load one semantic carrier or publish a validated cold build."""
+    """Warm-load one semantic carrier or publish a validated cold build.
+
+    ``store`` is the backend the carrier is read from and published to; it
+    defaults to the grouped zarr store this function has always used, so an
+    existing caller is unchanged. A caller that needs the object somewhere else
+    - the certificate booking gate publishes under the shared operand root -
+    names its own and gets the same identity, dataset codec and receipt.
+    """
     builder = resolve_builder(builder)
     identity = cache_identity(
         case,
@@ -797,20 +919,15 @@ def cached_machine(
         wall=wall,
         builder=builder,
     )
-    dirname = os.environ.get("NOVA_ANALYTIC_ORACLE_CACHE", ".nova")
-    store = ZarrStore(
-        filename=f"{CACHE_FILENAME}_{abs(requested_cells)}",
-        dirname=Path(dirname) if os.path.isabs(dirname) else dirname,
-    )
-    store.group = store.hash_attrs(identity)
-    with _cache_lock(store) as lock_wait:
+    if store is None:
+        store = carrier_store(requested_cells)
+    with store.session(identity) as session:
         started = perf_counter()
-        reader = ZarrStore(
-            filename=store.filename, dirname=store.dirname, group=store.group
-        )
         try:
-            reader.load()
-            machine = _from_dataset(reader.data, identity, store.group)
+            data = session.load()
+            if data is None:
+                raise FileNotFoundError(session.location)
+            machine = _from_dataset(data, identity, session.key)
         except FileNotFoundError, KeyError, OSError, ValueError:
             load_seconds = perf_counter() - started
             build_started = perf_counter()
@@ -822,12 +939,10 @@ def cached_machine(
                 builder=builder,
             )
             build_seconds = perf_counter() - build_started
-            store.data = _dataset(machine, identity, store.group)
             store_started = perf_counter()
-            store.store(mode=store.get_mode())
+            session.publish(_dataset(machine, identity, session.key))
             store_seconds = perf_counter() - store_started
-            reader.load()
-            _from_dataset(reader.data, identity, store.group)
+            machine = _from_dataset(session.load(), identity, session.key)
             hit = False
         else:
             load_seconds = perf_counter() - started
@@ -836,10 +951,10 @@ def cached_machine(
             hit = True
     machine.cache.update(
         {
-            "store": str(store.filepath),
-            "semantic_key": store.group,
+            "store": session.location,
+            "semantic_key": session.key,
             "hit": hit,
-            "lock_wait_seconds": lock_wait,
+            "lock_wait_seconds": session.lock_wait,
             "load_seconds": load_seconds,
             "build_seconds": build_seconds,
             "store_seconds": store_seconds,
@@ -1348,62 +1463,75 @@ def cached_fixture_exterior(
     state: np.ndarray,
     *,
     support_arm: str = EXTERIOR_SUPPORT_ARM,
+    store: FixtureStore | None = None,
 ) -> tuple[CellCurrentMoments, np.ndarray, dict[str, object]]:
-    """Load or build the analytic-clipped fixture exterior for one carrier."""
+    """Load or build the analytic-clipped fixture exterior for one carrier.
+
+    ``store`` is the backend the exterior is read from and published to, and it
+    defaults to the zarr store this function has always used, so an existing
+    caller is unchanged. The dataset codec and the identity are the same
+    whichever backend is named; only where the object lives differs.
+    """
     identity = _exterior_cache_identity(case, analytic, machine, state, support_arm)
-    store = ZarrStore(filename=EXTERIOR_CACHE_FILENAME, dirname=".nova")
-    store.group = store.hash_attrs(identity)
-    with _cache_lock(store) as lock_wait:
+    if store is None:
+        store = exterior_store()
+    encoded = json.dumps(identity, sort_keys=True, separators=(",", ":"))
+    with store.session(identity) as session:
         started = perf_counter()
-        reader = ZarrStore(
-            filename=store.filename, dirname=store.dirname, group=store.group
-        )
         try:
-            reader.load()
-            if reader.data.attrs.get("semantic_identity") != json.dumps(
-                identity, sort_keys=True, separators=(",", ":")
-            ):
+            data = session.load()
+            if data is None:
+                raise FileNotFoundError(session.location)
+            if data.attrs.get("cache_schema") != EXTERIOR_CACHE_SCHEMA:
+                raise ValueError("fixture exterior cache schema mismatch")
+            if data.attrs.get("semantic_identity") != encoded:
                 raise ValueError("fixture exterior cache identity mismatch")
             moments = CellCurrentMoments(
                 *(
-                    np.asarray(reader.data[name].values, dtype=np.float64)
+                    np.asarray(data[name].values, dtype=np.float64)
                     for name in ("cell_current", "radial_moment", "vertical_moment")
                 )
             )
-            exterior = np.asarray(reader.data["exterior"].values, dtype=np.float64)
+            exterior = np.asarray(data["exterior"].values, dtype=np.float64)
             hit = True
+            load_seconds = perf_counter() - started
             build_seconds = 0.0
         except FileNotFoundError, KeyError, OSError, ValueError:
+            load_seconds = perf_counter() - started
             moments = exact_current_moments(
                 case, operator, state, analytic=analytic, support_arm=support_arm
             )
             coefficients = operator.coupling_current_moments(moments)
             exterior = np.asarray(state) - _internal_flux_image(operator, coefficients)
             build_seconds = perf_counter() - started
-            encoded = json.dumps(identity, sort_keys=True, separators=(",", ":"))
-            store.data = xarray.Dataset(
-                {
-                    "cell_current": (("cell",), np.asarray(moments.cell_current)),
-                    "radial_moment": (("cell",), np.asarray(moments.radial_moment)),
-                    "vertical_moment": (("cell",), np.asarray(moments.vertical_moment)),
-                    "exterior": (("target",), exterior),
-                },
-                attrs={
-                    "cache_schema": EXTERIOR_CACHE_SCHEMA,
-                    "cache_key": store.group,
-                    "semantic_identity": encoded,
-                },
+            session.publish(
+                xarray.Dataset(
+                    {
+                        "cell_current": (("cell",), np.asarray(moments.cell_current)),
+                        "radial_moment": (("cell",), np.asarray(moments.radial_moment)),
+                        "vertical_moment": (
+                            ("cell",),
+                            np.asarray(moments.vertical_moment),
+                        ),
+                        "exterior": (("target",), exterior),
+                    },
+                    attrs={
+                        "cache_schema": EXTERIOR_CACHE_SCHEMA,
+                        "cache_key": session.key,
+                        "semantic_identity": encoded,
+                    },
+                )
             )
-            store.store(mode=store.get_mode())
             hit = False
     return (
         moments,
         exterior,
         {
-            "store": str(store.filepath),
-            "semantic_key": store.group,
+            "store": session.location,
+            "semantic_key": session.key,
             "hit": hit,
-            "lock_wait_seconds": lock_wait,
+            "lock_wait_seconds": session.lock_wait,
+            "load_seconds": load_seconds,
             "build_seconds": build_seconds,
         },
     )

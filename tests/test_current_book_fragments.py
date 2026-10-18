@@ -5,7 +5,9 @@ from nova.jax.config import configure_dtypes
 
 configure_dtypes()
 
+from contextlib import contextmanager
 from dataclasses import dataclass
+import hashlib
 import json
 import os
 from types import SimpleNamespace
@@ -230,16 +232,89 @@ def test_certificate_fixture_is_addressed_by_the_carrier_identity(
     moved["discretisation"]["requested_cells"] = -552
     kind = certificate_fixtures.CARRIER_KIND
     payload = xarray.Dataset({"cell_current": (("cell",), np.arange(3.0))})
-    published = certificate_fixtures.publish_fixture(
-        kind, certificate_fixtures.fixture_digest(identity), payload
-    )
-    entry = certificate_fixtures.fixture_entry(
-        kind, certificate_fixtures.fixture_digest(identity)
-    )
-    assert entry == published
+    digest = certificate_fixtures.fixture_digest(identity)
+    # Recompute the key here from the canonical JSON rather than reading it back
+    # out of the store: a store that ignored an identity input, or named objects
+    # by anything coarser than the whole identity, would agree with itself and
+    # still fail this.
+    canonical = json.dumps(identity, sort_keys=True, separators=(",", ":")).encode()
+    independently_computed = hashlib.sha256(canonical).hexdigest()
+    assert digest == "sha256:" + independently_computed, digest
+    published = certificate_fixtures.publish_fixture(kind, digest, payload)
+    assert published.name == independently_computed, published
+    entry = certificate_fixtures.fixture_entry(kind, digest)
+    assert entry is not None and entry.name == independently_computed, entry
     assert (
         certificate_fixtures.fixture_entry(
             kind, certificate_fixtures.fixture_digest(moved)
         )
         is None
     ), "a moved identity loaded the fixture published under the original"
+
+
+class _RefusingSecondBuild:
+    """A store that refuses to publish one identity a second time.
+
+    A fixture owner publishes only on a miss, so a second call with the same
+    identity must load the object the first call published. If the load path is
+    bypassed the second call builds again and reaches this refusal, which is how
+    a hit-path test can fail rather than merely observing a receipt field.
+    """
+
+    def __init__(self, inner):
+        self.inner = inner
+        self.published: list[str] = []
+
+    @contextmanager
+    def session(self, identity):
+        with self.inner.session(identity) as inner_session:
+            yield _RefusingSecondBuildSession(inner_session, self)
+
+
+class _RefusingSecondBuildSession:
+    def __init__(self, inner, owner):
+        self.inner = inner
+        self.owner = owner
+
+    @property
+    def key(self):
+        return self.inner.key
+
+    @property
+    def location(self):
+        return self.inner.location
+
+    @property
+    def lock_wait(self):
+        return self.inner.lock_wait
+
+    def load(self):
+        return self.inner.load()
+
+    def publish(self, data):
+        if self.inner.key in self.owner.published:
+            raise RuntimeError(
+                f"a builder reached the store twice for {self.inner.key}"
+            )
+        self.owner.published.append(self.inner.key)
+        self.inner.publish(data)
+
+
+def test_second_call_loads_the_published_carrier(tmp_path, monkeypatch):
+    """A second call on one identity loads the fixture; it does not build it."""
+    from scripts.analytic_oracle_fixtures import measure as fixture
+    from scripts.prototypes.support import certificate_fixtures
+
+    monkeypatch.setenv("NOVA_BOOK_FIXTURE_ROOT", str(tmp_path))
+    store = _RefusingSecondBuild(certificate_fixtures.carrier_store())
+    case = fixture.analytic_case()
+    request = dict(wall_nodes=fixture.WALL_POINT_COUNT)
+    cold = fixture.cached_machine(case, -110, store=store, **request)
+    warm = fixture.cached_machine(case, -110, store=store, **request)
+    assert cold.cache["hit"] is False, cold.cache
+    assert cold.cache["build_seconds"] > 0.0, cold.cache
+    assert warm.cache["hit"] is True, warm.cache
+    assert warm.cache["build_seconds"] == 0.0, warm.cache
+    assert store.published == [cold.cache["semantic_key"]], store.published
+    assert warm.cache["semantic_key"] == cold.cache["semantic_key"]
+    np.testing.assert_array_equal(warm.node, cold.node)

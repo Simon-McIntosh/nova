@@ -15,40 +15,33 @@ import jax.numpy as jnp
 import numpy as np
 
 from scripts.prototypes.fast_map_production import tie_probe
+from scripts.prototypes.read_robustness import census as census_module
+from scripts.prototypes.read_robustness.census_base_step import containment_only_census
 
 
-def candidates(field, geometry):
-    coefficients = np.asarray(field.sampled_coefficient(geometry))
-    hessian = np.stack(
-        (
-            np.stack((2 * coefficients[:, 3], coefficients[:, 4]), axis=-1),
-            np.stack((coefficients[:, 4], 2 * coefficients[:, 5]), axis=-1),
-        ),
-        axis=1,
-    )
-    displacement = -np.linalg.solve(hessian, coefficients[:, 1:3, None])[..., 0]
-    seeds = (
-        np.asarray(geometry.centre) + np.asarray(geometry.pitch)[:, None] * displacement
-    )
-    polygons = np.asarray(geometry.vertices)
-    counts = np.asarray(geometry.vertex_count)
-    neighbours = np.asarray(geometry.neighbour)
-    ring = np.concatenate((np.arange(len(seeds))[:, None], neighbours), axis=1)
-    valid = ring >= 0
-    ring = np.maximum(ring, 0)
-    vertices = polygons[ring]
-    vertex_count = counts[ring]
-    slot = np.arange(vertices.shape[2])
-    following = np.where(
-        slot[None, None, :] + 1 < vertex_count[:, :, None], slot + 1, 0
-    )
-    end = np.take_along_axis(vertices, following[..., None], axis=2)
-    edge = end - vertices
-    relative = seeds[:, None, None, :] - vertices
-    cross = edge[..., 0] * relative[..., 1] - edge[..., 1] * relative[..., 0]
-    live = slot[None, None, :] < vertex_count[:, :, None]
-    inside = np.all(np.where(live, cross >= -1e-12, True), axis=2) & valid
-    return seeds, inside
+def candidates(field, state, census_function):
+    """Read the candidate count after the census's own admission checks."""
+    return census_function(
+        field,
+        state["geometry"],
+        state["convention"],
+        state["policy"],
+        state["previous"],
+    ).candidates
+
+
+def counter(state, census_function):
+    """Evaluate one census arm at offsets on the same moving field."""
+
+    @jax.jit
+    def count(offset):
+        varied = replace(
+            state["jets"],
+            exterior=state["jets"].exterior + offset * state["jet_slope"],
+        )
+        return candidates(varied.field(state["reference"]), state, census_function)
+
+    return count
 
 
 def main():
@@ -64,28 +57,31 @@ def main():
         f"backend={jax.default_backend()}",
         flush=True,
     )
+    own_census = containment_only_census()
     rows = []
     for requested, offsets in (
         (250, (0.1732, 0.17325, 0.1735)),
         (500, (0.122, 0.1225, 0.123)),
     ):
         state = tie_probe.build("diverted", requested, args.cache)
+        own_count = counter(state, own_census)
+        ring_count = counter(state, census_module.census)
+        geometry = state["geometry"]
+        reserve = min(
+            len(geometry.centre),
+            max(
+                state["policy"].null_capacity * (geometry.neighbour.shape[1] + 1),
+                state["previous"].shape[0],
+            ),
+        )
         for offset in offsets:
-            varied = replace(
-                state["jets"],
-                exterior=state["jets"].exterior
-                + jnp.asarray(offset * state["scale"]) * state["jet_slope"],
-            )
-            seeds, inside = candidates(
-                varied.field(state["reference"]), state["geometry"]
-            )
+            shifted = jnp.asarray(offset * state["scale"])
             row = {
-                "cells": len(seeds),
+                "cells": len(geometry.centre),
                 "offset": offset,
-                "own": int(inside[:, 0].sum()),
-                "ring": int(inside.any(axis=1).sum()),
-                "own_indices": np.flatnonzero(inside[:, 0]).tolist(),
-                "ring_indices": np.flatnonzero(inside.any(axis=1)).tolist(),
+                "own": int(np.asarray(own_count(shifted))),
+                "ring": int(np.asarray(ring_count(shifted))),
+                "reserve": reserve,
             }
             rows.append(row)
             print(row, flush=True)

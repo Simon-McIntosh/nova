@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="404">
+<meta name="plan-version" content="405">
 <meta name="plan-modified" content="2026-10-18">
 </head>
 <body>
@@ -1127,6 +1127,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261018T192200408612-review-of-tcv-liuqe-known-answer-0a451acfdb02" data-who="reckon-build" data-when="2026-10-18T19:39:45.935Z">
     <div class="r-comment-body"><p>Independent review of r-20261018T134957600545-tcv-liuqe-known-answer at head 0a451acfdb02d4b05a5d8f77c7a711943f0d4cce against base a0ed032e1c8fb62e1fbad18cea1c343052dc0dd0: six dimensions scored (goal_fidelity 18, evidence 18, scope_discipline 19, durability 17, fit 18, reuse 5; total 95), two findings, item aggregate 6.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-s2-same-axis-rows-settled" data-who="reckon-build" data-when="2026-10-18T20:05:00Z">
+    <div class="r-comment-body"><p>The three same-axis escape-level rows are settled for imas-efit's levels on both plans: MAST-U s1-4-5-B, synthetic_crossing-A and synthetic_crossing-B. imas-efit records the same result as c-s3-same-axis-rows-settled (imas-efit develop 22d64ecb5). Two independent methods agree on the same field, to about 1e-16: imas-efit's union-find level, and nova's interval certificates, which are Bernstein bounds on spline segments (<a href="/nova/research/efit-maximin-certificate">maximin certificate</a>, merge f4d494126).</p><ul><li>MAST-U: a wall-to-wall cut with certified maximum at most 0.0196524425261 separates the axis from nova's contact at 0.020531.</li><li>Synthetic rows: imas-efit's levels sit within about 1.5e-11 of nova's certified endpoint bounds. imas-efit attributes the gap to its wall-terminal vertex lying about 5e-12 m off (0.85, 0.2).</li><li>imas-efit's delivered paths are carrier lower bounds that fall 1.7e-8 (MAST-U) and 1.7e-6 (A) short of its exact levels.</li></ul><p>Everything left on these rows is nova's, under <code>f-cfs-limited-contact-connectivity</code>: the disconnected contact, the cell-level passage hiding the saddle inside the cell, the domain check, and the ranking of a pinching saddle against the true bottleneck.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

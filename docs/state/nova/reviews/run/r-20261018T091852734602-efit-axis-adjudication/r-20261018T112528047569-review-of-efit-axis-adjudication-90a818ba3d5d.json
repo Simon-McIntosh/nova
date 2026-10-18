@@ -13,6 +13,13 @@
   ],
   "completed_at": "2026-10-18T11:34:47Z",
   "dispatched_at": "2026-10-18T11:26:08Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "efit-axis-adjudication",
+      "recorded_at": "2026-10-18T11:39:47.901771+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/research/efit-axis-adjudication.html",

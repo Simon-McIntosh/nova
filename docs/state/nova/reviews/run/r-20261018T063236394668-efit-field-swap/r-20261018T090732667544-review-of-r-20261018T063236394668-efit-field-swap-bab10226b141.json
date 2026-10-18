@@ -1,0 +1,127 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    {
+      "fails_if": "the captured input is unavailable",
+      "path": "scripts/prototypes/efit_field_swap/test_trace_record.py:23-24"
+    },
+    {
+      "fails_if": "the decoded record has incorrect grid, polarity, verdict, or wall dimensions",
+      "path": "scripts/prototypes/efit_field_swap/test_trace_record.py:29-36"
+    },
+    {
+      "fails_if": "the writer and reader disagree on a recorded scalar or array; a symmetric codec error can survive",
+      "path": "scripts/prototypes/efit_field_swap/test_trace_record.py:42-69"
+    },
+    {
+      "fails_if": "the emitted header, fixed sample dimensions, flags, number spelling, or line count changes",
+      "path": "scripts/prototypes/efit_field_swap/test_trace_record.py:80-103"
+    },
+    {
+      "fails_if": "an unsupported header is accepted",
+      "path": "scripts/prototypes/efit_field_swap/test_trace_record.py:106"
+    },
+    {
+      "fails_if": "any evaluated value, gradient component, or Hessian component departs from scipy's independent spline by its asserted tolerance",
+      "path": "scripts/prototypes/efit_field_swap/test_spline_field.py:29-51"
+    },
+    {
+      "fails_if": "JAX grad, vmap, or Hessian derivative yields a nonfinite result; finite but incorrect results survive",
+      "path": "scripts/prototypes/efit_field_swap/test_spline_field.py:54-71"
+    },
+    {
+      "fails_if": "the synthetic export omits the file/header, fails to map a supplied decision field, or alters the source grid or wall; measured decisions are not tested",
+      "path": "scripts/prototypes/efit_field_swap/test_export_states.py:40-57"
+    },
+    {
+      "fails_if": "serializing the first serialized file changes its bytes; a consistent writer-reader corruption survives",
+      "path": "scripts/prototypes/efit_field_swap/test_export_states.py:67"
+    }
+  ],
+  "call_site_count": 5,
+  "call_sites": [
+    "scripts/prototypes/efit_field_swap/crosscheck.py:_decision",
+    "scripts/prototypes/efit_field_swap/crosscheck.py:main",
+    "scripts/prototypes/efit_field_swap/export_states.py:main",
+    "scripts/prototypes/efit_field_swap/export_tie_islands.py:export",
+    "scripts/prototypes/efit_field_swap/negative_control.py:main_field"
+  ],
+  "completed_at": "2026-10-18T09:15:28Z",
+  "dispatched_at": "2026-10-18T09:08:05Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/efit_field_swap/crosscheck.py",
+      "line": "373",
+      "severity": "blocking",
+      "text": "blocking: the sweep catches both synthetic crossing failures and skips them, while 14 of 24 paired rows are unread and five more unqualified, so the requested case-by-case boundary decision cannot be compared for every input."
+    },
+    {
+      "file": "scripts/prototypes/efit_field_swap/export_tie_islands.py",
+      "line": "165",
+      "severity": "blocking",
+      "text": "blocking: the delivered 550-cell trace was generated at offset 0.0 rather than a bisected tie-island offset, so one of the requested exchanged states is absent."
+    },
+    {
+      "file": "scripts/prototypes/efit_field_swap/spline_field.py",
+      "line": "105",
+      "severity": "follow-on",
+      "text": "follow-on: TraceSplineField duplicates the not-a-knot JAX tensor spline and its first and second derivatives already owned by nova/linalg/tensor_spline.py:264-325; it neither extends nor wraps that owner."
+    },
+    {
+      "file": "scripts/prototypes/efit_field_swap/test_export_states.py",
+      "line": "67",
+      "severity": "follow-on",
+      "text": "follow-on: the second export is made by rereading the first with the same codec, so a consistent writer-reader corruption can leave both texts equal and this assertion green."
+    },
+    {
+      "file": "scripts/prototypes/efit_field_swap/test_export_states.py",
+      "line": "28",
+      "severity": "follow-on",
+      "text": "follow-on: the added tests only exercise synthetic export rows, codec round trips and spline values; no assertion fails if the measured case labels, row coverage or tie-island offsets regress."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "all 18 commits from 80ee84b289d41d5a1bfbda8c3a5b94a7b2d7f1cd to bab10226b141804580aac8e4948322de389edec1 were read by commit and the final diff adds a trace codec, spline adapter, sweep, exports, tests and two documents across 14 files.",
+    "done_when": "prompt.txt:91-92 requires every trace and bisected tie-island states; exports/sweep.log:26-29 skips both synthetic crossings and exports/tie_island.log:8 records a zero offset at 550 cells.",
+    "goal": "prompt.txt:30 asks for a cross-code disagreement table and tie-island exports; exports/disagreement.json has only five qualified decisions and exports/README.md identifies the 550-cell export as unshifted.",
+    "manifest": "manifest.md records eight passing focused tests in exports/gate.log and states that 14 rows were unread, the declared wall control did not discriminate, and the 550-cell offset was not bisected.",
+    "write_paths": "prompt.txt:70-74 grants the prototype, research page, figure directory and evidence fragment; git diff --name-status from 80ee84b2 to bab10226 shows all 14 paths inside those grants."
+  },
+  "justifications": {
+    "durability": "scripts/prototypes/efit_field_swap/test_spline_field.py:29-51 compares the jet with independent scipy values, but no added test asserts the case decisions or bisected offsets and test_export_states.py:67 is self-coupled.",
+    "evidence": "exports/gate.log records eight passing tests, while exports/sweep.log:26-29 and exports/tie_island.log:8 demonstrate that the gate did not assert prompt.txt:91-92's full measure.",
+    "fit": "scripts/prototypes/efit_field_swap/crosscheck.py:244-290 calls the existing topology read and census with the project FieldJet contract, while leaving the prototype's limitations visible in its output.",
+    "goal_fidelity": "scripts/prototypes/efit_field_swap/crosscheck.py:367-380 omits both synthetic cases after exceptions, and exports/README.md:48 states that the 550-cell state is not bisected.",
+    "reuse": "scripts/prototypes/efit_field_swap/spline_field.py:105-175 duplicates the existing not-a-knot JAX value, gradient and Hessian capability owned by nova/linalg/tensor_spline.py:264-325 instead of extending that owner.",
+    "scope_discipline": "git diff --name-status 80ee84b2..bab10226 lists only scripts/prototypes/efit_field_swap and the two granted HTML paths, with no out-of-scope repository edit."
+  },
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: 80ee84b289d41d5a1bfbda8c3a5b94a7b2d7f1cd\nreviewed_head_sha: bab10226b141804580aac8e4948322de389edec1\nVERDICT goal: prompt.txt:30 asks for a cross-code disagreement table and tie-island exports; exports/disagreement.json has only five qualified decisions and exports/README.md identifies the 550-cell export as unshifted.\nVERDICT done_when: prompt.txt:91-92 requires every trace and bisected tie-island states; exports/sweep.log:26-29 skips both synthetic crossings and exports/tie_island.log:8 records a zero offset at 550 cells.\nVERDICT write_paths: prompt.txt:70-74 grants the prototype, research page, figure directory and evidence fragment; git diff --name-status from 80ee84b2 to bab10226 shows all 14 paths inside those grants.\nVERDICT manifest: manifest.md records eight passing focused tests in exports/gate.log and states that 14 rows were unread, the declared wall control did not discriminate, and the 550-cell offset was not bisected.\nVERDICT diff: all 18 commits from 80ee84b289d41d5a1bfbda8c3a5b94a7b2d7f1cd to bab10226b141804580aac8e4948322de389edec1 were read by commit and the final diff adds a trace codec, spline adapter, sweep, exports, tests and two documents across 14 files.\nCALL_SITES: scripts/prototypes/efit_field_swap/crosscheck.py:_decision, scripts/prototypes/efit_field_swap/crosscheck.py:main, scripts/prototypes/efit_field_swap/export_states.py:main, scripts/prototypes/efit_field_swap/export_tie_islands.py:export, scripts/prototypes/efit_field_swap/negative_control.py:main_field\nSCORE goal_fidelity: 7\nJUSTIFICATION goal_fidelity: scripts/prototypes/efit_field_swap/crosscheck.py:367-380 omits both synthetic cases after exceptions, and exports/README.md:48 states that the 550-cell state is not bisected.\nSCORE evidence: 9\nJUSTIFICATION evidence: exports/gate.log records eight passing tests, while exports/sweep.log:26-29 and exports/tie_island.log:8 demonstrate that the gate did not assert prompt.txt:91-92's full measure.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --name-status 80ee84b2..bab10226 lists only scripts/prototypes/efit_field_swap and the two granted HTML paths, with no out-of-scope repository edit.\nSCORE durability: 8\nJUSTIFICATION durability: scripts/prototypes/efit_field_swap/test_spline_field.py:29-51 compares the jet with independent scipy values, but no added test asserts the case decisions or bisected offsets and test_export_states.py:67 is self-coupled.\nSCORE fit: 15\nJUSTIFICATION fit: scripts/prototypes/efit_field_swap/crosscheck.py:244-290 calls the existing topology read and census with the project FieldJet contract, while leaving the prototype's limitations visible in its output.\nSCORE reuse: 4\nJUSTIFICATION reuse: scripts/prototypes/efit_field_swap/spline_field.py:105-175 duplicates the existing not-a-knot JAX value, gradient and Hessian capability owned by nova/linalg/tensor_spline.py:264-325 instead of extending that owner.\nFINDING scripts/prototypes/efit_field_swap/crosscheck.py:373 blocking: the sweep catches both synthetic crossing failures and skips them, while 14 of 24 paired rows are unread and five more unqualified, so the requested case-by-case boundary decision cannot be compared for every input.\nFINDING scripts/prototypes/efit_field_swap/export_tie_islands.py:165 blocking: the delivered 550-cell trace was generated at offset 0.0 rather than a bisected tie-island offset, so one of the requested exchanged states is absent.\nFINDING scripts/prototypes/efit_field_swap/spline_field.py:105 follow-on: TraceSplineField duplicates the not-a-knot JAX tensor spline and its first and second derivatives already owned by nova/linalg/tensor_spline.py:264-325; it neither extends nor wraps that owner.\nFINDING scripts/prototypes/efit_field_swap/test_export_states.py:67 follow-on: the second export is made by rereading the first with the same codec, so a consistent writer-reader corruption can leave both texts equal and this assertion green.\nFINDING scripts/prototypes/efit_field_swap/test_export_states.py:28 follow-on: the added tests only exercise synthetic export rows, codec round trips and spline values; no assertion fails if the measured case labels, row coverage or tie-island offsets regress.\n",
+  "review_run_id": "r-20261018T090732667544-review-of-r-20261018T063236394668-efit-field-swap-bab10226b141",
+  "reviewed_base_sha": "80ee84b289d41d5a1bfbda8c3a5b94a7b2d7f1cd",
+  "reviewed_head_sha": "bab10226b141804580aac8e4948322de389edec1",
+  "reviewed_run_id": "r-20261018T063236394668-efit-field-swap",
+  "scores": {
+    "durability": 8,
+    "evidence": 9,
+    "fit": 15,
+    "goal_fidelity": 7,
+    "reuse": 4,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "suite_delta_basis": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T063236394668-efit-field-swap/exports/gate.log",
+    "after_summary": "8 passed in 92.77s (0:01:32); EXIT=0",
+    "baseline_suite": "Source manifest reports zero tests collected and zero failures because scripts/prototypes/efit_field_swap is absent at base; git ls-tree of that path at reviewed_base_sha confirms absence; no baseline gate log exists.",
+    "limit": "No full-suite delta was measured; this is the source run's path-scoped gate only."
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T09:17:12.511540+00:00",
+  "total": 62
+}

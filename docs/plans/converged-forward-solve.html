@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="358">
+<meta name="plan-version" content="359">
 <meta name="plan-modified" content="2026-10-18">
 </head>
 <body>
@@ -984,6 +984,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261018T082419973011-review-of-r-20261018T065749620386-seed-census-departure-43bb48a70ea6" data-who="reckon-build" data-when="2026-10-18T08:34:02.443Z">
     <div class="r-comment-body"><p>Independent review of seed-census-departure at head 43bb48a70 against base efbeb794e60b: the admission repair at scripts/prototypes/read_robustness/census.py:82 is falsified by a real reinstated-step control (negative-control.log EXIT=1, 3 roots / 2 saddles against 2 / 1 at the bisected adjacent pair), but done-when (3) is unmet — scan-282.log and scan-550.log still show the census leaving 3 roots for 1 at 0.1735 and 0.1225 with the vanished saddles hyperbolic — and done-when (4) and (5)'s read-level test are unmeasured and unwritten; the record scores goal_fidelity 14, evidence 12, scope_discipline 18, durability 5, fit 15, reuse 16, total 80.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261018T090732667544-review-of-r-20261018T063236394668-efit-field-swap-bab10226b141" data-who="reckon-build" data-when="2026-10-18T09:15:28Z">
+    <div class="r-comment-body"><p>Independent review stored for base 80ee84b289d41d5a1bfbda8c3a5b94a7b2d7f1cd and head bab10226b141804580aac8e4948322de389edec1; six scores total 62, five findings including two blocking, and zero added failures; no plan edit.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

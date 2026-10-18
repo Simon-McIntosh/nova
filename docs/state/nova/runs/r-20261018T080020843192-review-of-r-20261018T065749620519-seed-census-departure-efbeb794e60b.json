@@ -884,6 +884,43 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "60376f59977a216ae2bf63df6e5828d670824bdf",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 5064,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261018T080020843192-review-of-r-20261018T065749620519-seed-census-departure-efbeb794e60b",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 5064,
+        "path": "/tmp/reckon-crew-scratch/r-20261018T080020843192-review-of-r-20261018T065749620519-seed-census-departure-efbeb794e60b"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-r-20261018T065749620519-seed-census-departure-efbeb794e60b",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

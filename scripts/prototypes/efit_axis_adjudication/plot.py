@@ -152,17 +152,15 @@ def draw_panel(ax, row):
         )
     if b is not None:
         level = b["nova_boundary_level"]
-        a_level = a["nova_boundary_psi"] if a is not None else None
-        if a_level is None or abs(level - a_level) > 1e-6:
-            _contour_at(
-                ax,
-                field,
-                record,
-                level,
-                colors=COLOUR["nova_b"],
-                linestyles=":",
-                linewidths=1.0,
-            )
+        _contour_at(
+            ax,
+            field,
+            record,
+            level,
+            colors=COLOUR["nova_b"],
+            linestyles=":",
+            linewidths=1.0,
+        )
 
     # census points, hollow by type
     for point in row["census"]:

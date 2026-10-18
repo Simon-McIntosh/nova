@@ -56,11 +56,9 @@ def census(field, geometry, convention, policy, previous):
     # rounding: the cell then enters the candidate set in one state and leaves
     # it in the next, and a stationary point proposed only by that cell is
     # never polished. Admit a seed whose cross product is negative only beyond
-    # the rounding the value actually carries. Two sources compose here and
-    # both are computed from the operands, with no tuned constant: the
-    # determinant's own forward error, and the displacement's error propagated
-    # through the local Hessian solve, which is unbounded in the conditioning
-    # of that 2x2 matrix and dominates at the saddle.
+    # the rounding the value actually carries. The bound composes the edge
+    # cross product's forward error with uncertainty in the local Hessian
+    # solve and its fitted coefficients, all computed from their operands.
     epsilon = jnp.finfo(seeds.dtype).eps
     inverse = jnp.linalg.inv(safe)
     hessian_scale = jnp.sum(jnp.abs(hessian), axis=(-2, -1))
@@ -69,13 +67,41 @@ def census(field, geometry, convention, policy, previous):
         + jnp.sum(jnp.abs(gradient), axis=-1)
     )
     seed_uncertainty = epsilon * jnp.abs(geometry.pitch) * displacement_scale
+    # The quadratic fit is a signed dot product, so cancellation can make its
+    # coefficient error much larger than eps times the fitted coefficient.
+    # Bound each row by the absolute dot-product terms, then propagate the
+    # gradient and Hessian errors through the same local solve as the seed.
+    samples = field.jets[field.sample_index, 0]
+    centres = jax.vmap(field.cell_value)(jnp.arange(len(samples)), geometry.centre)
+    samples = samples.at[:, 0].set(centres)
+    operation_count = 2 * samples.shape[1]
+    gamma = operation_count * epsilon / (1 - operation_count * epsilon)
+    fit_error = gamma * jnp.einsum(
+        "nij,nj->ni", jnp.abs(geometry.fit_inverse), jnp.abs(samples)
+    )
+    hessian_error = jnp.stack(
+        (
+            jnp.stack((2 * fit_error[:, 3], fit_error[:, 4]), axis=-1),
+            jnp.stack((fit_error[:, 4], 2 * fit_error[:, 5]), axis=-1),
+        ),
+        axis=1,
+    )
+    fit_seed_uncertainty = (
+        jnp.abs(geometry.pitch)
+        * jnp.sum(jnp.abs(inverse), axis=(-2, -1))
+        * (
+            jnp.sum(fit_error[:, 1:3], axis=-1)
+            + jnp.sum(jnp.abs(hessian_error), axis=(-2, -1))
+            * jnp.sum(jnp.abs(offset), axis=-1)
+        )
+    )
     rounding = (
         4.0
         * epsilon
         * (jnp.abs(edge[..., 0]) + jnp.abs(edge[..., 1]))
         * (jnp.abs(relative[..., 0]) + jnp.abs(relative[..., 1]))
         + (jnp.abs(edge[..., 0]) + jnp.abs(edge[..., 1]))
-        * seed_uncertainty[:, None]
+        * (seed_uncertainty + fit_seed_uncertainty)[:, None]
     )
     inside = jnp.all(
         jnp.where(

@@ -1,0 +1,106 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "review-base.log (base a8f0ed9c) and review-head.log (head c1da65335) each ran tests/equilibrium/test_topology_read.py to a pytest summary; both list the same 12 FAILED/ERROR IDs (5 failed, 28 passed, 7 errors), so the added-failure count is zero. The last three commits to head are docs-only (diff c1da65335..1318dda49 touches three docs paths), so the head arm covers the head code.",
+  "assertion_analysis": [
+    {
+      "condition": "Fails if the strict-arm bisection does not converge to adjacent binary64 offsets.",
+      "line": "tests/equilibrium/test_topology_read.py:2760"
+    },
+    {
+      "condition": "Fail when the repaired census drops a root or a saddle at either side of the bisected pair; the strict-admission mutation made this assertion red in review-negative-control.log.",
+      "line": "tests/equilibrium/test_topology_read.py:2765-2766"
+    },
+    {
+      "condition": "Fail if a polish seeded a quarter pitch away from the census reading does not return to it, is not hyperbolic, or carries a different flux.",
+      "line": "tests/equilibrium/test_topology_read.py:2780-2795"
+    },
+    {
+      "condition": "Fails if the retained saddle does not persist across the pair within five percent of a pitch.",
+      "line": "tests/equilibrium/test_topology_read.py:2797-2805"
+    },
+    {
+      "condition": "Fails if the production sampler read is invalid, loses a root, selects an X-point away from a separate polish, or if the booked current disagrees with the independent quadrature beyond rel=0.15.",
+      "line": "tests/equilibrium/test_topology_read.py:2807-2835"
+    },
+    {
+      "condition": "Fails if the census rebuilt with the dropped step restored does not lose a saddle, or if the repaired census loses one.",
+      "line": "tests/equilibrium/test_topology_read.py:2869-2870"
+    }
+  ],
+  "call_site_count": 6,
+  "call_sites": [
+    "scripts/prototypes/fast_map_production/sweep.py:121",
+    "scripts/prototypes/fast_map_production/tie_probe.py:138",
+    "scripts/prototypes/fast_read/measure_sweep.py:112",
+    "scripts/prototypes/diverted_stall/sweep.py:112",
+    "scripts/prototypes/read_robustness/read.py:55",
+    "scripts/prototypes/read_robustness/measure.py:407"
+  ],
+  "completed_at": "2026-10-18T14:07:32.055Z",
+  "dispatched_at": "2026-10-18T13:43:16Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/read_robustness/census.py",
+      "line": "108 follow-on",
+      "severity": "the repaired census still loses a hyperbolic saddle between 0.173 and 0.1735 at 282 cells and 0.122 and 0.123 at 550 cells with determinants -4.08e-5 and -5.81e-5 far from roundoff, so done-when (3) is unmet; the coordinator split that residue to f-cfs-census-proposal-coverage, so it does not hold this node.",
+      "text": "the repaired census still loses a hyperbolic saddle between 0.173 and 0.1735 at 282 cells and 0.122 and 0.123 at 550 cells with determinants -4.08e-5 and -5.81e-5 far from roundoff, so done-when (3) is unmet; the coordinator split that residue to f-cfs-census-proposal-coverage, so it does not hold this node."
+    },
+    {
+      "file": "scripts/prototypes/read_robustness/census_check.py",
+      "line": "44 follow-on",
+      "severity": "this diagnostic duplicates the census.py",
+      "text": "this diagnostic duplicates the census.py:40-121 admission bound and its rounding omits the seed and fit uncertainty terms census.py:69 and census.py:89 add, so the bound it prints is smaller than the live rule's and a reader cannot reconcile it with the census it claims to measure."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/seed-census-departure-census-certified-convergence.html",
+      "line": "1 follow-on",
+      "severity": "commit e674213f8 added this undeclared evidence path before e3ba2a93f removed it; the final tree is clean but the commit sequence breached the declared write grant.",
+      "text": "commit e674213f8 added this undeclared evidence path before e3ba2a93f removed it; the final tree is clean but the commit sequence breached the declared write grant."
+    },
+    {
+      "file": "tests/equilibrium/test_topology_read.py",
+      "line": "2824 follow-on",
+      "severity": "the independent-current assertion allows rel=0.15 while the recorded gap is 129.234157 A booked against 146.015393 A directly integrated, about 13 percent, so the check passes with the two values disagreeing by more than a tenth and constrains the booked current only loosely.",
+      "text": "the independent-current assertion allows rel=0.15 while the recorded gap is 129.234157 A booked against 146.015393 A directly integrated, about 13 percent, so the check passes with the two values disagreeing by more than a tenth and constrains the booked current only loosely."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "the 25 commits from efbeb79 to 1318dda49 change census.py:40-121 and one probe import, add two read tests at test_topology_read.py:2717-2871, add diagnostics, and leave topology.py unchanged.",
+    "done_when": "prompt.txt:98-114 states six clauses; clauses (1),(2),(4),(5),(6) are supported by the read gate, the failing mutation, both suite arms and the map receipts, and clause (3) is reported unmet by scan-new-282.json and scan-new-550.json.",
+    "goal": "prompt.txt:30 states the goal as stopping the census losing a hyperbolic saddle between adjacent doubles; census.py:98-108 repairs the bisected pair while later hyperbolic departures remain in the same windows.",
+    "manifest": "manifest.md reports complete with 25 commits, the passing read gate, the failing strict-admission control, both suite arms, the 164/164 CUDA comparison and the split residue.",
+    "write_paths": "prompt.txt:70-81 declares the exclusive paths; all ten final changed paths are inside them and one intermediate commit added a path outside the grant that a later commit removed."
+  },
+  "justifications": {
+    "durability": "test_topology_read.py:2765-2766 reddens under the recorded strict-admission mutation (review-negative-control.log, 1 failed, EXIT=1), and test_topology_read.py:2867-2870 rebuilds the dropped census from the live source rather than a copy.",
+    "evidence": "read-gate-retry.log ends 1 passed EXIT=0, review-negative-control.log ends 1 failed EXIT=1, review-base.log and review-head.log both end 5 failed, 28 passed, 7 errors with identical failure IDs, and the same scan receipts honestly record the unmet third clause.",
+    "fit": "census.py:50-61 states the rounding mechanism in mechanism terms with no plan, ticket or version label, matching the surrounding JAX style of census.py:26-48.",
+    "goal_fidelity": "census.py:98-108 repairs the reported adjacent-double admission loss and test_topology_read.py:2765-2766 holds 3 roots and 2 saddles there, but scan-new-282.json and scan-new-550.json show both arms losing the same hyperbolic saddle at 0.1735 and 0.123, so the broad goal is partly achieved.",
+    "reuse": "census_check.py:29 re-implements the cross-and-bound admission pipeline owned by census.py:29-121 instead of extending that owner, and its bound omits the seed and fit uncertainty terms census.py:69 and census.py:89 add.",
+    "scope_discipline": "every one of the ten final changed paths lies inside prompt.txt:70-81, but commit e674213f8 wrote an undeclared evidence fragment outside the grant before e3ba2a93f removed it."
+  },
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: efbeb794e60b1f4d39dcb886bb0e1b1148b5a419\nreviewed_head_sha: 1318dda497034b779a63c690ee2fa374df9327c0\n\nVERDICT goal: prompt.txt:30 states the goal as \"Stop the stationary-point census losing a hyperbolic saddle between adjacent doubles\"; scripts/prototypes/read_robustness/census.py:98-108 replaces the exact-zero cell-membership test with a computed rounding bound, and tests/equilibrium/test_topology_read.py:2765-2766 confirms 3 roots and 2 saddles on both sides of the bisected pair, while the census still loses a hyperbolic saddle later in the same windows.\nVERDICT done_when: prompt.txt:98-114 states six clauses; read-gate-retry.log (1 passed, EXIT=0), review-negative-control.log (1 failed, EXIT=1), review-base.log/review-head.log and the four map receipts support clauses (1),(2),(4),(5),(6), while the node's own scan-new-282.json and scan-new-550.json report clause (3) unmet with the repaired and restored arms identical.\nVERDICT write_paths: prompt.txt:70-81 declares the exclusive write paths; all ten paths of the final head diff lie inside them, but the intermediate commit e674213f8 added an eleventh path outside the grant.\nVERDICT manifest: read; it reports status complete with 25 commits, the passing read gate, the failing strict-admission control, both suite arms, the 164/164 CUDA map comparison, and names the residual proposal-coverage departures as a coordinator split.\nVERDICT diff: read commit by commit from efbeb79 to 1318dda49; the executable change is confined to census.py:40-121 plus a probe import swap at saddle_admission_probe.py:30, with the remainder tests, diagnostics and evidence prose, and nova/equilibrium/topology.py unchanged.\nCALL_SITES: scripts/prototypes/fast_map_production/sweep.py:121, scripts/prototypes/fast_map_production/tie_probe.py:138, scripts/prototypes/fast_read/measure_sweep.py:112, scripts/prototypes/diverted_stall/sweep.py:112, scripts/prototypes/read_robustness/read.py:55, scripts/prototypes/read_robustness/measure.py:407\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: census.py:98-108 repairs the reported adjacent-double admission loss and test_topology_read.py:2765-2766 holds 3 roots and 2 saddles there, but scan-new-282.json and scan-new-550.json show both arms losing the same hyperbolic saddle at 0.1735 and 0.123, so the broad goal is partly achieved.\nSCORE evidence: 17\nJUSTIFICATION evidence: read-gate-retry.log ends 1 passed EXIT=0, review-negative-control.log ends 1 failed EXIT=1, review-base.log and review-head.log both end 5 failed, 28 passed, 7 errors with identical failure IDs, and the same scan receipts honestly record the unmet third clause.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: every one of the ten final changed paths lies inside prompt.txt:70-81, but commit e674213f8 wrote docs/evidence/fragments/converged-forward-solve/seed-census-departure-census-certified-convergence.html outside the grant before e3ba2a93f removed it.\nSCORE durability: 18\nJUSTIFICATION durability: test_topology_read.py:2765-2766 reddens under the recorded strict-admission mutation (review-negative-control.log, 1 failed, EXIT=1), and test_topology_read.py:2867-2870 rebuilds the dropped census from the live source rather than a copy.\nSCORE fit: 17\nJUSTIFICATION fit: census.py:50-61 states the rounding mechanism in mechanism terms with no plan, ticket or version label, matching the surrounding JAX style of census.py:26-48.\nSCORE reuse: 5\nJUSTIFICATION reuse: census_check.py:29 re-implements the cross-and-bound admission pipeline owned by census.py:29-121 instead of extending that owner, and its bound omits the seed and fit uncertainty terms census.py:69 and census.py:89 add.\nFINDING scripts/prototypes/read_robustness/census.py:108 follow-on: the repaired census still loses a hyperbolic saddle between 0.173 and 0.1735 at 282 cells and 0.122 and 0.123 at 550 cells with determinants -4.08e-5 and -5.81e-5 far from roundoff, so done-when (3) is unmet; the coordinator split that residue to f-cfs-census-proposal-coverage, so it does not hold this node.\nFINDING scripts/prototypes/read_robustness/census_check.py:44 follow-on: this diagnostic duplicates the census.py:40-121 admission bound and its rounding omits the seed and fit uncertainty terms census.py:69 and census.py:89 add, so the bound it prints is smaller than the live rule's and a reader cannot reconcile it with the census it claims to measure.\nFINDING docs/evidence/fragments/converged-forward-solve/seed-census-departure-census-certified-convergence.html:1 follow-on: commit e674213f8 added this undeclared evidence path before e3ba2a93f removed it; the final tree is clean but the commit sequence breached the declared write grant.\nFINDING tests/equilibrium/test_topology_read.py:2824 follow-on: the independent-current assertion allows rel=0.15 while the recorded gap is 129.234157 A booked against 146.015393 A directly integrated, about 13 percent, so the check passes with the two values disagreeing by more than a tenth and constrains the booked current only loosely.\n",
+  "review_run_id": "r-20261018T134221603544-review-of-r-20261018T065749620386-seed-census-departure-1318dda49703",
+  "reviewed_base_sha": "efbeb794e60b1f4d39dcb886bb0e1b1148b5a419",
+  "reviewed_head_sha": "1318dda497034b779a63c690ee2fa374df9327c0",
+  "reviewed_run_id": "r-20261018T065749620386-seed-census-departure",
+  "reviewer": "review-of-r-20261018T065749620386-seed-census-departure-1318dda49703",
+  "rubric": null,
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 15,
+    "reuse": 5,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T13:57:13Z",
+  "total": 88
+}

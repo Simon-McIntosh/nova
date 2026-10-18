@@ -58,6 +58,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--base-revision", required=True)
     parser.add_argument("--cache", required=True)
+    parser.add_argument("--kind", choices=("limited", "diverted"), default="diverted")
     parser.add_argument("--cells", type=int, required=True)
     parser.add_argument("--scan")
     parser.add_argument("--offsets")
@@ -83,7 +84,7 @@ def main():
     base = load_census(args.base_revision, tree)
     from scripts.prototypes.read_robustness.census import census as head
 
-    state = tie_probe.build("diverted", args.cells, args.cache)
+    state = tie_probe.build(args.kind, args.cells, args.cache)
     arms = {}
     for name, function in (("base", base), ("head", head)):
         rows, warm_count = measure(state, function, offsets, args.warm_stop)
@@ -103,6 +104,7 @@ def main():
     ]
     result = {
         "base_revision": args.base_revision,
+        "kind": args.kind,
         "cells": len(state["geometry"].centre),
         "backend": jax.default_backend(),
         "map_equal": agreement,

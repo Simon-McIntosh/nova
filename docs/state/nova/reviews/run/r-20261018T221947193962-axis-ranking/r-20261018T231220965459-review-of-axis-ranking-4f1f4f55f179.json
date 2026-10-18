@@ -1,0 +1,74 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "baseline_suite (da4c4eb98) failure_ids are the five new reader tests failing on the base rule; after_suite (78ed4ac03) failure_ids are empty, so no failure present at the head is absent at the base and the added failure count is zero.",
+  "call_site_count": 6,
+  "call_sites": [
+    "scripts/prototypes/fast_map_production/program.py:12",
+    "scripts/prototypes/fast_map_production/sweep.py:25",
+    "scripts/prototypes/fast_map_production/solver.py:24",
+    "scripts/prototypes/efit_field_swap/crosscheck.py:61",
+    "scripts/prototypes/read_robustness/read.py:13",
+    "scripts/prototypes/fast_map_production/tie_probe.py:31"
+  ],
+  "completed_at": "2026-10-18T23:24:07.020Z",
+  "dispatched_at": "2026-10-18T23:13:03Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/fast_map_production/kernel.py",
+      "line": "278",
+      "text": "follow-on: the near-fold persistence gate is unguarded \u2014 removing or weakening the level_enclosure comparison leaves all five reader tests green, so done_when (1)'s low-persistence exclusion can regress silently; only the jt-direct.json probe, which is outside the suite, exercises it. The negative control restores the first-root rule and reddens four tests, none of which reach this branch."
+    },
+    {
+      "file": "scripts/prototypes/read_robustness/census.py",
+      "line": "167",
+      "text": "follow-on: the multi-axis retention (other_axes gathered after the saddles and marked valid) is covered by no suite test; its only verification is the one-off census_synthetic.py probe kept in the run directory rather than the repository, so a regression in the gather would not redden any gate."
+    },
+    {
+      "file": "docs/research/axis-ranking.html",
+      "line": "1",
+      "text": "follow-on: no poloidal flux-contour figure landed although docs/figures/converged-forward-solve/axis-ranking was a declared write path and the project mandate requires GS forward-solve evidence records to carry contour panels with both null sets and the vessel drawn; the 180-cell stress read that the island argument rests on is reported only in prose."
+    },
+    {
+      "file": "docs/research/axis-ranking.html",
+      "line": "46",
+      "text": "follow-on: the recorded after-suite arms run at revision 78ed4ac03 while the reviewed head is 4f1f4f55f; the three interposed commits are docs-only so the gate still measures the landed code, but the manifest's after_suite.revision does not equal the promoted head and a reader comparing the pair must resolve that gap themselves."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read commit by commit from da4c4eb98 to 4f1f4f55f; 192bfbb27 adds the ranking and census multi-axis retention, 78ed4ac03 adds the persistence enclosure, the remaining seven commits are docs, and no file outside the declared scope is touched.",
+    "done_when": "the done_when names reader tests plus TCV, field-swap and carrier measurements; the gate ran the three named test files in both arms (baseline-suite.log, after-suite-final.log) and the diagnostic receipts are recorded, but the 550/2000-cell carriers and coarse-window map states are explicitly unmeasured.",
+    "goal": "the goal is that read() ranks the census's valid in-vessel polarity extrema by sigma*psi and refuses invalid or wrong-type roots; scripts/prototypes/fast_map_production/kernel.py:241-288 at head implements exactly that, and the TCV receipts show seven wrong-type axes becoming refusals.",
+    "manifest": "read; status complete; it records baseline 5 failed/15 passed, after 20 passed/0 added, the first-head HDF5 open failure re-run clean, and blockers naming the unmeasured carriers.",
+    "write_paths": "read the manifest's declared paths; all five files in the diff (kernel.py, census.py, test_axis_ranking.py, docs/research/axis-ranking.html, docs/evidence/fragments/converged-forward-solve/axis-ranking.html) are inside them, and the declared figures path carries no file."
+  },
+  "justifications": {
+    "durability": "negative-control-final.log shows four of five tests redden when axis = roots.position[0] is restored, but the persistence branch at kernel.py:278 and the census retention at census.py:167 have no assertion that fails on their removal.",
+    "evidence": "baseline-suite.log and after-suite-final.log carry the revision, imported module path and a completed summary (5 failed/15 passed vs 0 failed/20 passed), and tcv-final.jsonl records ROWS 12/EXIT=0.",
+    "fit": "the added block follows the surrounding jnp/vmap style of read() at kernel.py:241 and introduces no name outside the repository's conventions.",
+    "goal_fidelity": "kernel.py:244-288 ranks the valid in-vessel polarity extrema and kernel.py:462 makes valid depend on axis_live, matching the goal, but the done_when's 550/2000-cell carrier and coarse-window identity clause is unmeasured.",
+    "reuse": "read() reuses psi_rounding_enclosure (kernel.py:201) and topology._inside_cells (nova/equilibrium/topology.py:2568), census.py:167 extends the existing gather owner, and no new definition forks a capability; the closest production analogue, forward_operator.py:1612, is distinct spline machinery.",
+    "scope_discipline": "all five changed paths in the diff (kernel.py, census.py, test_axis_ranking.py, docs/research/axis-ranking.html, docs/evidence/fragments/converged-forward-solve/axis-ranking.html) are inside the declared write paths."
+  },
+  "node": "review-of-axis-ranking-4f1f4f55f179",
+  "node:reviewed": "axis-ranking",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is that read() ranks the census's valid in-vessel polarity extrema by sigma*psi and refuses invalid or wrong-type roots; scripts/prototypes/fast_map_production/kernel.py:241-288 at head implements exactly that, and the TCV receipts show seven wrong-type axes becoming refusals.\nVERDICT done_when: the done_when names reader tests plus TCV, field-swap and carrier measurements; the gate ran the three named test files in both arms (baseline-suite.log, after-suite-final.log) and the diagnostic receipts are recorded, but the 550/2000-cell carriers and coarse-window map states are explicitly unmeasured.\nVERDICT write_paths: read the manifest's declared paths; all five files in the diff (kernel.py, census.py, test_axis_ranking.py, docs/research/axis-ranking.html, docs/evidence/fragments/converged-forward-solve/axis-ranking.html) are inside them, and the declared figures path carries no file.\nVERDICT manifest: read; status complete; it records baseline 5 failed/15 passed, after 20 passed/0 added, the first-head HDF5 open failure re-run clean, and blockers naming the unmeasured carriers.\nVERDICT diff: read commit by commit from da4c4eb98 to 4f1f4f55f; 192bfbb27 adds the ranking and census multi-axis retention, 78ed4ac03 adds the persistence enclosure, the remaining seven commits are docs, and no file outside the declared scope is touched.\nCALL_SITES: scripts/prototypes/fast_map_production/program.py:12, scripts/prototypes/fast_map_production/sweep.py:25, scripts/prototypes/fast_map_production/solver.py:24, scripts/prototypes/efit_field_swap/crosscheck.py:61, scripts/prototypes/read_robustness/read.py:13, scripts/prototypes/fast_map_production/tie_probe.py:31\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: kernel.py:244-288 ranks the valid in-vessel polarity extrema and kernel.py:462 makes valid depend on axis_live, matching the goal, but the done_when's 550/2000-cell carrier and coarse-window identity clause is unmeasured.\nSCORE evidence: 16\nJUSTIFICATION evidence: baseline-suite.log and after-suite-final.log carry the revision, imported module path and a completed summary (5 failed/15 passed vs 0 failed/20 passed), and tcv-final.jsonl records ROWS 12/EXIT=0.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: all five changed paths in the diff (kernel.py, census.py, test_axis_ranking.py, docs/research/axis-ranking.html, docs/evidence/fragments/converged-forward-solve/axis-ranking.html) are inside the declared write paths.\nSCORE durability: 12\nJUSTIFICATION durability: negative-control-final.log shows four of five tests redden when axis = roots.position[0] is restored, but the persistence branch at kernel.py:278 and the census retention at census.py:167 have no assertion that fails on their removal.\nSCORE fit: 17\nJUSTIFICATION fit: the added block follows the surrounding jnp/vmap style of read() at kernel.py:241 and introduces no name outside the repository's conventions.\nSCORE reuse: 17\nJUSTIFICATION reuse: read() reuses psi_rounding_enclosure (kernel.py:201) and topology._inside_cells (nova/equilibrium/topology.py:2568), census.py:167 extends the existing gather owner, and no new definition forks a capability; the closest production analogue, forward_operator.py:1612, is distinct spline machinery.\nFINDING scripts/prototypes/fast_map_production/kernel.py:278 follow-on: the near-fold persistence gate is unguarded \u2014 removing or weakening the level_enclosure comparison leaves all five reader tests green, so done_when (1)'s low-persistence exclusion can regress silently; only the jt-direct.json probe, which is outside the suite, exercises it.\nFINDING scripts/prototypes/read_robustness/census.py:167 follow-on: the multi-axis retention is covered by no suite test; its only verification is the one-off census_synthetic.py probe kept in the run directory rather than the repository.\nFINDING docs/research/axis-ranking.html:1 follow-on: no poloidal flux-contour figure landed although docs/figures/converged-forward-solve/axis-ranking was a declared write path and the project mandate requires GS evidence records to carry contour panels with both null sets and the vessel drawn.\nFINDING docs/research/axis-ranking.html:46 follow-on: the recorded after-suite arms run at revision 78ed4ac03 while the reviewed head is 4f1f4f55f; the three interposed commits are docs-only, but the manifest's after_suite.revision does not equal the promoted head.\n",
+  "review_run_id": "r-20261018T231220965459-review-of-axis-ranking-4f1f4f55f179",
+  "reviewed_base_sha": "da4c4eb98ee8c8806349cab28719e47ba02f35c3",
+  "reviewed_head_sha": "4f1f4f55f179984b42d3271fa9af68e5d7acbe4f",
+  "reviewed_run_id": "r-20261018T221947193962-axis-ranking",
+  "scores": {
+    "durability": 12,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "reuse": 17,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T23:22:00Z"
+}

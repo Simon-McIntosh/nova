@@ -1,9 +1,9 @@
-"""The sweep covers every input, and a wide wall reads with the fitted capacity.
+"""The sweep covers every input, and a wide wall admits a complete contour mesh.
 
 Two properties the case-by-case table rests on, both cheap to check without
 running the sweep: that the enumeration behind the table names every input the
 manifest lists, crossing records included, and that a record whose wall
-truncates nova's own contour-mesh capacity is read rather than dropped.
+exceeds nova's contour-mesh capacity receives a fitted mesh.
 """
 
 from __future__ import annotations
@@ -14,7 +14,6 @@ import numpy as np
 import pytest
 
 from scripts.prototypes.efit_field_swap.crosscheck import (
-    _decision,
     _row,
     cases,
     domain_rings,
@@ -41,28 +40,18 @@ def test_every_manifest_input_becomes_a_case():
         assert path.endswith(".txt")
 
 
-def test_a_wide_wall_record_reads_a_decision():
-    """An ITER record, unread before the fit, now carries nova's decision.
+def test_a_wide_wall_record_gets_a_fitted_mesh():
+    """Fitted capacity yields contour vertices on a wide wall.
 
-    Nova's own contour-mesh capacity admits no vertex for this record's wall, so
-    the geometry cannot be built without the fit. The assertion is on the read
-    reaching a decision, not on the shape of the failure that preceded it: what
-    the repair owes is that this record is comparable, which is the property the
-    review found missing.
+    Boundary certification is a separate condition and can still refuse the
+    state when the census has not covered its critical points.
     """
     record = read_trace_record(ITER_RECORD)
     cells, samples = lattice(record.wall_ring, 16)
     geometry, fitted = fitted_geometry(cells, samples, wall_units(record))
     assert fitted is True, "this record's wall is the case the fit exists for"
     assert geometry is not None
-    row = _decision(
-        "iter-dina3420-s4-18-19:A",
-        "boundary_slice_4_iter_18.txt",
-        record,
-        resolutions=(16,),
-    )
-    assert row.capacity_fit is True
-    assert row.nova_label in ("limited", "diverted")
+    assert np.any(np.asarray(geometry.contour_mesh.vertex_valid))
 
 
 def test_missing_record_remains_an_explicit_unread_row(tmp_path):

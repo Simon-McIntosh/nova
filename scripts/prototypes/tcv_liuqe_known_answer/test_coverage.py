@@ -160,6 +160,33 @@ def test_constant_cell_reaches_depth_cap_and_is_uncertified():
     assert unresolved == 1
 
 
+def test_invalid_axis_slot_cannot_be_read_as_limited(monkeypatch):
+    field = _well()
+
+    def blind_census(f, geometry, convention, policy, previous):
+        jet = topology.FieldJet(
+            value=jnp.zeros(1),
+            gradient=jnp.zeros((1, 2)),
+            hessian=jnp.asarray([[[-2.0, 0.0], [0.0, -2.0]]]),
+        )
+        roots = fixed_points.FixedPointResult(
+            position=jnp.zeros((1, 2)),
+            jet=jet,
+            valid=jnp.asarray([False]),
+            status=jnp.ones(1, jnp.int32),
+            iterations=jnp.zeros(1, jnp.int32),
+            retried=jnp.zeros(1, bool),
+        )
+        return RootCensus(roots, 1, 0, 0, 0, False, 0.0)
+
+    monkeypatch.setattr(crosscheck, "census", blind_census)
+    outcome = crosscheck.read_state(field, RING, (), CONVENTION, POLICY, (16,))
+    assert outcome.label == "coverage uncertified", outcome.attempts
+    assert outcome.resolution is None
+    assert outcome.coverage is not None and not outcome.coverage.certified
+    assert "axis admitted False" in outcome.attempts
+
+
 def test_certified_limited_field_reads_limited():
     outcome = crosscheck.read_state(_well(), RING, (), CONVENTION, POLICY, (16,))
     assert outcome.coverage is not None and outcome.coverage.certified

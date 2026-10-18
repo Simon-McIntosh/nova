@@ -299,10 +299,6 @@ def admitted_index_sum(roots):
     hessian = np.asarray(roots.jet.hessian)
     valid = np.asarray(roots.valid).copy()
     determinant = hessian[:, 0, 0] * hessian[:, 1, 1] - hessian[:, 0, 1] ** 2
-    # Slot zero is the stationary point the read uses as its axis, whether or
-    # not the census' own predicate classified it, so it always counts.
-    if valid.size:
-        valid[0] = True
     return int(np.sum(np.where(determinant[valid] > 0.0, 1, -1)))
 
 
@@ -716,10 +712,17 @@ def read_state(
         candidates = int(roots.candidates)
         admitted = int(roots.saddles)
         index_sum = admitted_index_sum(roots.roots)
-        coverage = coverage_certificate(field, outer, walls, index_sum)
+        try:
+            coverage = coverage_certificate(field, outer, walls, index_sum)
+        except Exception as error:  # noqa: BLE001 - refusal, never a false decision
+            attempts.append(
+                f"lattice {resolution}: boundary winding failed "
+                f"{type(error).__name__}: {error}; coverage uncertified"
+            )
+            uncertified = True
+            continue
         root_valid = np.asarray(roots.roots.valid).copy()
-        if root_valid.size:
-            root_valid[0] = True
+        axis_admitted = bool(root_valid.size and root_valid[0])
         admitted_points = np.asarray(roots.roots.position)[root_valid]
         try:
             cleared, unresolved, occupied = certify_empty_cells(
@@ -734,7 +737,7 @@ def read_state(
             cells_uncertified=unresolved,
             cells_occupied=occupied,
             subdivision_depth=CELL_SUBDIVISION_DEPTH,
-            certified=coverage.certified and unresolved == 0,
+            certified=coverage.certified and unresolved == 0 and axis_admitted,
         )
         attempts.append(
             f"lattice {resolution}: candidates {candidates}, admitted saddles "
@@ -743,7 +746,8 @@ def read_state(
             f"{coverage.obstacle_winding:+.0f}), admitted index sum {index_sum:+d}, "
             f"min |grad psi| {coverage.min_gradient:.2e} against floor "
             f"{coverage.floor:.2e}, cells clear {cleared}, occupied "
-            f"{occupied}, uncertified {unresolved} at depth {CELL_SUBDIVISION_DEPTH} "
+            f"{occupied}, uncertified {unresolved}, axis admitted {axis_admitted} "
+            f"at depth {CELL_SUBDIVISION_DEPTH} "
             f"and work cap {CELL_WORK_LIMIT}{enclosure_error}"
         )
         if candidates == 0 and admitted == 0 and not bool(np.any(axis_valid)):

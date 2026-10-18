@@ -142,7 +142,8 @@ def _lobe_triangles(geometry, reading, index, segments):
                     triangles.append((origin, start, end))
 
     sector_live = np.zeros(4, dtype=bool)
-    sector_live[np.flatnonzero(positive)[:2]] = selected[:2]
+    sectors = np.flatnonzero(positive)[:2]
+    sector_live[sectors] = selected[: len(sectors)]
     signs = sector_live.astype(int) - np.roll(sector_live, 1).astype(int)
     relative = vertices - position
     bound = 2 * np.max(np.linalg.norm(relative, axis=1))

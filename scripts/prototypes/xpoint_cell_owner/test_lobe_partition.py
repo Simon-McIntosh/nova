@@ -25,7 +25,10 @@ from scripts.prototypes.xpoint_cell_owner.lobe_booking import (
     _whole_cell_rings,
     remaining_moments,
 )
-from scripts.prototypes.xpoint_cell_owner.lobe_reference import triangle_integral
+from scripts.prototypes.xpoint_cell_owner.lobe_reference import (
+    lobe_reference,
+    triangle_integral,
+)
 
 SQUARE = ((0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0))
 CENTRE = (0.0, 0.0)
@@ -168,3 +171,32 @@ def test_remainder_uses_the_ring_builders_counted_polygon():
     assert bool(valid[0])
     np.testing.assert_allclose(whole, expected, rtol=0, atol=1e-13)
     np.testing.assert_allclose(np.asarray(remainder[0]), expected, rtol=0, atol=1e-13)
+
+
+def test_lobe_reference_constructs_its_region_without_booking_builder(monkeypatch):
+    vertices = ((0.0, 0.0), (1.0, 0.0), (0.0, 1.0), (9.0, 9.0))
+    geometry = SimpleNamespace(
+        vertices=jnp.asarray([vertices]),
+        vertex_count=jnp.asarray([3]),
+        centre=jnp.asarray([[0.0, 0.0]]),
+        pitch=jnp.asarray([1.0]),
+    )
+    intervals = jnp.zeros((1, 2, 4, STRIPS, 2))
+    intervals = intervals.at[0, 0, :3, 0, 1].set(1.0)
+    reading = SimpleNamespace(
+        saddle_form=_dead_form(CENTRE),
+        fragment_selected=jnp.asarray([[True, False]]),
+        edge_interval=intervals,
+    )
+
+    def forbidden_builder(*args, **kwargs):
+        raise AssertionError("the independent reference called the booking builder")
+
+    monkeypatch.setattr(current, "_normal_rings", forbidden_builder)
+    measured, triangles, count = lobe_reference(
+        geometry, reading, 0, jnp.asarray([UNIT]), segments=SEGMENTS
+    )
+    assert count == len(triangles) == 3
+    np.testing.assert_allclose(
+        measured, _closed_form(vertices[:3], CENTRE, UNIT), rtol=0, atol=1e-13
+    )

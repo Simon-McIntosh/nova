@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>efit-maximin-certificate evidence</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+</head>
+<body><main class="plan-doc">
+<h1 id="efit-maximin-certificate-h">Escape-level maximin certificates</h1>
+<p id="efit-maximin-certificate-p">Three same-axis rows of the escape-level
+comparison are settled by certificates on each record's own scipy spline. The
+maximin of polarity&middot;&psi; from the axis to a target is the descending
+union-find merge level; an attaining path is a breadth-first path inside that
+superlevel set. The maximin reproduces imas-efit's escape level to 6 significant
+figures on all three rows; imas-efit is right on all three.</p>
+<ul>
+<li id="efit-maximin-certificate-li-mastu"><code>mastu-fullPulse-s1-4-5-B</code>:
+maximin axis&rarr;nova contact (0.33280, 1.30309) is <strong>0.0196524</strong>,
+at the X-point (0.57376, 1.12305), 8.8e-4 below nova's level 0.020531. A blocking
+cut exists at nova's level, so nova's contact is unreachable there.</li>
+<li id="efit-maximin-certificate-li-synth-a"><code>synthetic_crossing_a</code>:
+maximin axis&rarr;(0.85, 0.2) is <strong>0.0142147</strong>, attaining imas-efit's
+level; no cut blocks it and nova's 0.011338 is an underestimate.</li>
+<li id="efit-maximin-certificate-li-synth-b"><code>synthetic_crossing_b</code>:
+maximin axis&rarr;(0.85, 0.2) is <strong>0.0125771</strong>, attaining imas-efit's
+level; nova's 0.011404 is an underestimate.</li>
+</ul>
+<p id="efit-maximin-certificate-exports">Exports (attaining paths, blocking cuts,
+JSON, README) under the run directory <code>exports/</code>. Focused gate
+<code>scripts/prototypes/efit_maximin_certificate/test_certificate.py</code>.</p>
+</main></body></html>

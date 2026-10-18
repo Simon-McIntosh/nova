@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Escape-level maximin certificates | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_data/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<h1 id="efit-maximin-certificate-title">Escape-level maximin certificates</h1>
+<p id="efit-maximin-certificate-summary">Three rows of the escape-level
+comparison (docs/research/efit-escape-level-comparison.html, merged at 03a0f1d04)
+start from the same axis on both codes, so they test the boundary rule rather
+than the axis. Both codes claim a maximin of polarity&middot;&psi; over
+axis-to-boundary paths. Each row is settled by a certificate evaluated on the
+record's own spline: which side's claimed level is attained by a real path, and
+which side's level is blocked by a cut. The maximin reproduces imas-efit's escape
+level to six significant figures on all three rows, and imas-efit is right on all
+three.</p>
+
+<h2 id="efit-maximin-certificate-method">Method</h2>
+<p>Each imas-efit <code>BOUNDARY_LEVEL_TRACE 2</code> record carries a 65&times;65
+psi grid and the wall ring it was traced against. For each row this node rebuilds
+the record's own not-a-knot bicubic spline with scipy
+(<code>RectBivariateSpline</code>, kx=ky=3, s=0), the object the
+axis-adjudication rebuild check uses, and evaluates
+<code>polarity&middot;&psi;</code> on it. Neither nova's read nor the field-swap
+adapter is evaluated: the field is the record's own scipy spline. The search runs
+on an 800&times;800 square sampling of the spline restricted to the wall ring
+(step 5.5&nbsp;mm on MAST-U, 2.6&nbsp;mm on synthetic).</p>
+<p>The maximin from the axis to a target is the largest level <code>L</code> for
+which <code>{polarity&middot;&psi &ge; L}</code> still connects the two points.
+It is read off a descending-level union-find (Kruskal), exact for the sampled
+field: the first level at which the axis node and the target node merge is the
+maximin. The attaining path is a breadth-first path inside that superlevel set,
+so its minimum equals the maximin by construction. A blocking cut exists when the
+target is not in the axis's component at the claimed level; it is reported as the
+below-level nodes bordering the axis component.</p>
+
+<h2 id="efit-maximin-certificate-rows">(1) The three rows</h2>
+<table><thead><tr><th>row</th><th>axis</th><th>target</th><th>nova level</th><th>efit level</th><th>maximin axis&rarr;target</th><th>path min at (R, Z)</th><th>cut at nova level</th><th>verdict</th></tr></thead><tbody>
+<tr><td>mastu-fullPulse-s1-4-5-B</td><td>(0.84731, &minus;0.19207)</td><td>nova wall contact (0.33280, 1.30309)</td><td>0.020531</td><td>0.0196524</td><td><strong>0.0196524</strong></td><td>(0.57376, 1.12305)</td><td><strong>yes</strong></td><td>imas-efit</td></tr>
+<tr><td>synthetic_crossing_a</td><td>(1.43334, 0.19999)</td><td>efit wall point (0.85, 0.2)</td><td>0.011338</td><td>0.0142147</td><td><strong>0.0142147</strong></td><td>(0.85, 0.19950)</td><td>no</td><td>imas-efit</td></tr>
+<tr><td>synthetic_crossing_b</td><td>(1.44166, 0.19999)</td><td>efit wall point (0.85, 0.2)</td><td>0.011404</td><td>0.0125772</td><td><strong>0.0125771</strong></td><td>(0.85, 0.19950)</td><td>no</td><td>imas-efit</td></tr>
+</tbody></table>
+<p>The maximin reproduces imas-efit's escape level to six significant figures on
+every row. This is the certificate: imas-efit's level is the true maximin, and a
+path attains it.</p>
+
+<h2 id="efit-maximin-certificate-mastu">(2) mastu-fullPulse-s1-4-5-B: nova's contact is blocked</h2>
+<p>Nova reads a limited state with its wall contact at (0.33280, 1.30309) and
+level 0.020531. That point's own <code>polarity&middot;&psi;</code> is 0.020531,
+so the level is the contact's tangency. But the maximin from the axis to that
+contact is <strong>0.0196524</strong>, attained at (0.57376, 1.12305) &mdash; the
+X-point region imas-efit named as its bottleneck (0.57493, 1.12267), 1.3&nbsp;mm
+away. imas-efit's prediction holds exactly: any path from the axis to nova's
+contact must cross that X-point, and the best level it can carry across is
+0.01965. At nova's level 0.020531 (&minus;8.8e-4 above the maximin) a blocking cut
+of 1478 sampled nodes separates the axis from the contact, so nova's contact sits
+on a lobe the axis never reaches at 0.020531. On this row nova's read admitted a
+wall contact at a level it cannot attain.</p>
+<p>The attaining path (axis to the contact) is exported as
+<code>mastu-fullPulse-s1-4-5-B-attaining-path.txt</code>; the cut as
+<code>mastu-fullPulse-s1-4-5-B-blocking-cut.txt</code>.</p>
+
+<h2 id="efit-maximin-certificate-synthetic">(3) synthetic_crossing-A and -B: no cut at imas-efit's level</h2>
+<p>On both synthetic rows the target is imas-efit's wall point (0.85, 0.2) and
+imas-efit's level is 0.0142147 (A) and 0.0125772 (B). The maximin from the axis to
+that wall point is <strong>0.0142147</strong> and <strong>0.0125771</strong>
+respectively: a path attains imas-efit's level on both, its minimum at the wall
+point itself. So no blocking cut exists at imas-efit's level &mdash; the cut
+detector finds the axis component reaches the wall point &mdash; and nova's
+claimed maximin, 0.011338 (A) and 0.011404 (B), is an underestimate of the true
+maximin to that wall point. nova's read admitted only the interior saddle
+(1.477, &minus;0.422) and its own maximin there is below the wall reach.</p>
+<p>The attaining paths are exported as
+<code>synthetic_crossing_a-attaining-path.txt</code> and
+<code>synthetic_crossing_b-attaining-path.txt</code>. Because the wall point's own
+level equals the maximin, the cut test at exactly imas-efit's level is marginal;
+the decider on these rows is the attaining path, which is unambiguous.</p>
+<p>Both synthetic records fail the axis-adjudication rebuild check
+(docs/research/efit-axis-adjudication.html): <code>|grad &psi;| = 2.4e-4</code>
+at the axis imas-efit recorded. The two codes nevertheless read the same field:
+the record's psi grid is one object, the spline is of that grid, and the same
+grid carries a stationary point at nova's axis (1.43334, 0.19999) where
+<code>|grad &psi;| = 2.3e-13</code>. imas-efit's stored axis is displaced from
+that stationary point by about 1e-5&nbsp;m; at the field's curvature there that
+displacement is the whole 2.4e-4 gradient. So the rebuild flag marks an axis
+metadata offset, not two different fields, and the maximin columns comparing the
+two rules are read on one field on both sides.</p>
+
+<h2 id="efit-maximin-certificate-efit-paths">(4) imas-efit attaining-path files</h2>
+<p>The imas-efit report directory
+<code>continuous-boundary-level/cbl-maximin-certificates/</code> exists (mtime
+2026-10-18 18:50Z) but as of this run holds only sources and logs
+(<code>maximin_cert.f90</code>, <code>run_cert.sh</code>, <code>run_cert.log</code>,
+<code>sides.tsv</code>) and no attaining-path text file. No imas-efit attaining
+path was delivered, so none is evaluated; recorded as absent. When one lands it
+can be evaluated on the same spline by the same driver.</p>
+
+<h2 id="efit-maximin-certificate-exports">Exports and gates</h2>
+<p>Plain-text exports and their format README sit under the run directory
+<code>exports/</code>. The focused gate is
+<code>scripts/prototypes/efit_maximin_certificate/test_certificate.py</code>: it
+pins the mastu maximin to imas-efit's level and, as its negative control, requires
+the cut detector to fire on a level the contact cannot attain and not to fire
+below the maximin.</p>
+</main></body></html>

@@ -1,0 +1,1606 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 9,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "a0ed032e1c8fb62e1fbad18cea1c343052dc0dd0",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T134957600545-tcv-liuqe-known-answer/brief.txt",
+    "sha256": "bfe1cad11d3fb29eafb8d40f97a70a5c11cf157bd5d1f3ed9e3f10515e1d8607"
+  },
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 159172992,
+      "cached_input_tokens_cumulative": 159172992,
+      "input_tokens": 160057246,
+      "input_tokens_cumulative": 160057246,
+      "output_tokens": 294012,
+      "output_tokens_cumulative": 294012,
+      "reasoning_output_tokens": 120816,
+      "reasoning_output_tokens_cumulative": 120816
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 20542,
+    "files": 15,
+    "removed": 70
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 197
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 260,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_cold_and_cached_plants_are_identical",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 328,
+        "name": "test_the_cache_is_written_by_the_circuit_tier_serialisers",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 371,
+        "name": "test_machine_passive_layers_change_screening_and_preserve_one_layer",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 824,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 623,
+        "name": "_slice_process",
+        "path": "tests/test_forward_profile_corsica.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "_assert_same_topology",
+        "path": "tests/test_fused_same_state_read.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 197
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_receipt_keeps_every_fitted_shot_unknown_without_can_evidence",
+        "path": "tests/test_mast_coil_case_temperature.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 197
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "_numeric_receipt",
+        "path": "tests/test_transport_ensemble.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "measure_slice",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/measure.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 237,
+        "name": "test_a_rule_call_elsewhere_in_the_body_does_not_cover_the_step",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "run_function": {
+        "line": 105,
+        "name": "build",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/report.py"
+      },
+      "window_line": 203
+    },
+    {
+      "existing_function": {
+        "line": 253,
+        "name": "test_a_rule_subject_covers_a_step_inside_it",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "run_function": {
+        "line": 105,
+        "name": "build",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/report.py"
+      },
+      "window_line": 203
+    },
+    {
+      "existing_function": {
+        "line": 417,
+        "name": "test_marker_census_refuses_a_module_without_markers",
+        "path": "tests/test_solve_program_size.py"
+      },
+      "run_function": {
+        "line": 105,
+        "name": "build",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/report.py"
+      },
+      "window_line": 203
+    },
+    {
+      "existing_function": {
+        "line": 559,
+        "name": "test_mast_efm_geometry_matches_host_contour_route",
+        "path": "tests/test_transport_geometry_reference.py"
+      },
+      "run_function": {
+        "line": 105,
+        "name": "build",
+        "path": "scripts/prototypes/tcv_liuqe_known_answer/report.py"
+      },
+      "window_line": 203
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "13db33f3726d17781387092b22c73e4b54616172",
+    "293322717a4825aa6cce7c11dce11f70a2efb054",
+    "fec1dd808e9ea8be7aaf841d6a0b3a1736524d89",
+    "d39d23e2b54510ae92150067ed9e8d411b01ffd2",
+    "822de7c7bbfc8d97e8df70a69df9c3b9fac1380a",
+    "68b1def770232179b3b651b610bfa1e7fa415e33",
+    "098ddfd762746e9ac0957df80cbb67f7af85adad",
+    "0b00981e3c47b693c34efef0e1fb5c9c5e71bc10",
+    "206d9cf8a1dff1845a5a5942d7ea43d2e5563c82",
+    "cb6f76b545338544817fd575705447a8a444117e",
+    "9a49bb4c2ceb200b31be607fb000a405fb3af14d",
+    "591a97077feb685630f14213e6b6b27e593962b5",
+    "fbc3788e228330e9547deaeb10ea3c12d03cea25",
+    "ce7e2a4d28be61844104c010371ae74e17ea85bb",
+    "b9f27142263d07ab60ea05c166b18410c33ad657",
+    "bd0ac0eafc85db2da56db0bf852eb04e9957a9dd",
+    "0a451acfdb02d4b05a5d8f77c7a711943f0d4cce",
+    "a8a34186ee03788913d96bcca210b6ae5034f000",
+    "7314ff9c05ec16b6c0e44da347ec3bd8447a82ef",
+    "be71ce5dff5facb4fb826fe6c759d34bc1252e09",
+    "86fcef09496b9474fd9b0143978aafac6e856915"
+  ],
+  "completed_at": "2026-10-18T20:35:33Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-18T13:51:19Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "env -C /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/tcv-liuqe-known-answer JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/tcv-liuqe-known-answer /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider --import-mode=importlib -q /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/tcv-liuqe-known-answer/scripts/prototypes/efit_field_swap/test_crosscheck.py /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/tcv-liuqe-known-answer/scripts/prototypes/efit_field_swap/test_spline_field.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T134957600545-tcv-liuqe-known-answer/receipts/after-suite-final-head.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.2857142857142857,
+    "plan": "converged-forward-solve",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-18T14:50:16.287988+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-18T13:50:16Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 1,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 7,
+    "headroom": 5,
+    "mean_context": 140000,
+    "observed_at": "2026-10-18T13:50:15Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 1,
+      "aggregate_tokens_per_second": 357.26,
+      "detail": "",
+      "mean_tokens_per_second": 68.704,
+      "observed_at": "2026-10-18T13:50:15Z",
+      "runs": 5.2,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-18T20:35:33Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-10-18T20:35:33Z",
+        "resets_at": 1792874442,
+        "used_percent": 75.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": {
+    "attempt": 6,
+    "kind": "lane-change",
+    "lanes": [
+      {
+        "changed_at": "2026-10-18T17:11:19Z",
+        "detail": "starting fresh because the session cannot follow the move from harness 'claude' to 'codex'",
+        "from_backend": "clive",
+        "from_harness": "claude",
+        "reason": "Three clive rounds on this node scored 44, 79 and 58; the remaining fix is a certified critical-point exclusion search, a deep numerical item; lead rule allows naming a lane with a stated reason.",
+        "session": "fresh",
+        "session_id": "84ed6858-0d2d-46a6-9085-6737bdc447de",
+        "session_source": "stream",
+        "to_backend": "codex",
+        "to_harness": "codex"
+      }
+    ],
+    "root_run_id": "r-20261018T134957600545-tcv-liuqe-known-answer"
+  },
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T134957600545-tcv-liuqe-known-answer/manifest.md",
+  "member": "disposable-r-20261018T134957600545-tcv-liuqe-known-answer",
+  "model_key": "sol",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "tcv-liuqe-known-answer",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.cache/nova-s21-briefs/pivot/tcv.full.txt",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T134957600545-tcv-liuqe-known-answer/brief.txt",
+    "brief_sha256": "bfe1cad11d3fb29eafb8d40f97a70a5c11cf157bd5d1f3ed9e3f10515e1d8607",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "critical",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1703,
+          "cached_input_tokens": 654979,
+          "input_tokens": 656684,
+          "output_tokens": 1823,
+          "reasoning_output_tokens": 122,
+          "total_tokens": 658507,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "docs/research/tcv-liuqe-known-answer.html carries nova read on at least 12 LIUQE slices spanning limited and diverted phases with the per-loop TCV wall, a per-slice table of axis, X-point, boundary psi and label against LIUQE with absolute and span-relative gaps and a label-agreement summary, and line-contour panels through nova.media painters (one SVG per figure, rendered and inspected); the evidence fragment cites them; both suite arms are recorded.",
+    "estimated_hours": null,
+    "goal": "Score nova boundary read on TCV 77549 LIUQE slices against the LIUQE answer",
+    "id": "tcv-liuqe-known-answer",
+    "images": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-18T13:50:16Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 1,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 7,
+      "headroom": 5,
+      "mean_context": 140000,
+      "observed_at": "2026-10-18T13:50:15Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 1,
+        "aggregate_tokens_per_second": 357.26,
+        "detail": "",
+        "mean_tokens_per_second": 68.704,
+        "observed_at": "2026-10-18T13:50:15Z",
+        "runs": 5.2,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T134957600545-tcv-liuqe-known-answer/manifest.md",
+    "negative_control": "",
+    "orchestrator_assessment": {
+      "reasoning": "standard",
+      "risk": "low",
+      "verification": "strict"
+    },
+    "plan": "converged-forward-solve",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "scripts/prototypes/tcv_liuqe_known_answer",
+      "scripts/prototypes/efit_field_swap",
+      "docs/research/tcv-liuqe-known-answer.html",
+      "docs/figures/converged-forward-solve/tcv-liuqe-known-answer",
+      "docs/evidence/fragments/converged-forward-solve/tcv-liuqe-known-answer.html"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 5941877.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "tcv-liuqe-known-answer",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-18T13:50:41.332783+00:00",
+    "score": 0.71875,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "Known-answer measurement on a trusted reconstruction (lead request); three done-when clauses; CPU; reuses the merged field-swap adapter by import.",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:capability",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.794,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 782.666,
+      "context-estimate": 155.856,
+      "records": 506.824,
+      "verdict-inputs": 696.804
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.2857142857142857,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "86fcef09496b9474fd9b0143978aafac6e856915",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "a0ed032e1c8fb62e1fbad18cea1c343052dc0dd0",
+    "reviewed_head_sha": "86fcef09496b9474fd9b0143978aafac6e856915",
+    "scores": {
+      "durability": 16,
+      "evidence": 18,
+      "fit": 17,
+      "goal_fidelity": 18,
+      "reuse": 5,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 94
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261018T134957600545-tcv-liuqe-known-answer",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a14fff-9fd5-7512-a02e-237b3e0cf99e",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 159172992,
+    "cumulative_input_tokens": 319230238,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 414828
+  },
+  "time_budget": "60m",
+  "tool_steps": 82.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 1155,
+        "budget_seconds": 3600,
+        "classification": "scoring",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 4755,
+        "exit_record": {
+          "attempt": 6,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-10-18T12:48:34Z",
+          "last_record_type": "result",
+          "launched_at": "2026-10-18T12:32:07Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261017T065751439890-fixture-owner-store-argument",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 69152,
+          "worker_pid": 3659105
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-18T12:48:34Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 3723,
+        "log_fresh": false,
+        "manifest_commits": [
+          "26b311de5 refactor(carriers): give the fixture owners a store argument",
+          "f629e1dc3 fix(carriers): carry the exterior load wall on the owner receipt",
+          "9440f81eb docs(evidence): record the single fixture owner and the warm gate",
+          "0e58b461e docs(evidence): carry the completed CPU delta on the single-owner record",
+          "3c4a6a2b4 docs(evidence): count the fixture-owner callers exactly",
+          "317a7b4ff docs(evidence): move the warm certificate gate to the titan rung",
+          "9f7b1e576 docs(evidence): stage the warm gate payload on the shared filesystem",
+          "3e1039100 docs(evidence): record the titan certificate gate and its cold rows",
+          "037be9a98 docs(evidence): correct the titan row timeline to the receipt times",
+          "da121a685 docs(evidence): name the two unmeasured rows by how they were cut",
+          "ea776e985 docs(evidence): count the store entries the cold rows published",
+          "55ba49c63 docs(evidence): measure the warm load path at this revision",
+          "d98c5597d docs(evidence): tabulate the warm loads the repair gate measured",
+          "a0eefbdf2 docs(evidence): record the warm six-row certificate gate on titan"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "e4bc53f5e18fddd514da05447ff1b4b0e61eaccbf93b268218add100a861663e",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T065751439890-fixture-owner-store-argument/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project nova --brief /home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T065751439890-fixture-owner-store-argument/review-brief.md --plan converged-forward-solve --section '§3' --role review --spec-level exact --node review-of-fixture-owner-store-argument-a0eefbdf2492 --goal 'attach an independent review to run r-20261017T065751439890-fixture-owner-store-argument' --done-when 'the review for r-20261017T065751439890-fixture-owner-store-argument stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the record is written at one of this run'\"'\"'s declared write paths, under review-records/ inside the directory of run r-20261017T065751439890-fixture-owner-store-argument, and never in the worktree; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T065751439890-fixture-owner-store-argument/review-records/r-20261017T065751439890-fixture-owner-store-argument.json --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T065751439890-fixture-owner-store-argument/review-records/r-20261017T065751439890-fixture-owner-store-argument.at-a0eefbdf2492cf3437f678dcce3ab7f9e2412486.json --time-budget 60m --session s21-nova --allow-unreconciled-runs --local",
+        "node": "fixture-owner-store-argument",
+        "phase": "complete",
+        "plan": "converged-forward-solve",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261017T065751439890-fixture-owner-store-argument",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 3773,
+        "terminal_at": "2026-10-18T12:47:41Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fixture-owner-store-argument"
+      },
+      {
+        "backend": "codex",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 15804,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion and an independent parsed review is attached; the run is ready for promotion",
+        "effective_phase": "stopped",
+        "elapsed_seconds": 19404,
+        "exit_record": {
+          "attempt": 3,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": null,
+          "exited_at": "2026-10-18T08:28:07Z",
+          "last_record_type": "item.started",
+          "launched_at": "2026-10-18T08:27:39Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261018T063028156864-lobe-share-partition",
+          "signal": 15,
+          "signal_name": "SIGTERM",
+          "stream_records_seen": 982,
+          "worker_pid": 2029173
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-18T08:28:07Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 19352,
+        "log_fresh": false,
+        "manifest_commits": [
+          "none; shadow run retains the uncommitted worktree patch"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "5bf5185dfea3288e901d4b5a29e59bec24ce5c5918ee99e90795f1002ab83214",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T063028156864-lobe-share-partition/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "sol",
+        "needs_help_complete": null,
+        "next_action": "reckon crew complete --run r-20261018T063028156864-lobe-share-partition --gate <verdict>",
+        "node": "lobe-share-partition",
+        "phase": "stopped",
+        "plan": "converged-forward-solve",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": true,
+        "review_status": "parsed",
+        "run_id": "r-20261018T063028156864-lobe-share-partition",
+        "session": "s21-nova",
+        "stored_phase": "stopped",
+        "terminal_age_seconds": 19317,
+        "terminal_at": "2026-10-18T08:28:40Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/shadow-codex-4d5af6dff614/lobe-share-partition"
+      },
+      {
+        "backend": "codex",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 1978,
+        "budget_seconds": 3600,
+        "classification": "scoring",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 5578,
+        "exit_record": {
+          "attempt": 6,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-10-18T13:17:49Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-10-18T12:18:09Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261018T065749620386-seed-census-departure",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 34754,
+          "worker_pid": 3575421
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-18T13:17:49Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 1975,
+        "log_fresh": false,
+        "manifest_commits": [
+          "9b23e83c493ea670cdd57991b2ac164b868488c2",
+          "e674213f8d443f3afb43c16aa7bc59c06c5436a5",
+          "e3ba2a93f643d3f5911a02dc8f897453933bdf9b",
+          "007ebbd720ae2cf2191b7ce7f95a107916988d1b",
+          "8a835dbd4014844b1d62c5b8353e984164fb7f15",
+          "1967c2fc5f07d2355fc330f880a984e911f13a93",
+          "1141dcd1c3ef6e199747924698e8cfb35dc0101b",
+          "43bb48a70ea6a1c8b5fb5a57da08279edf808071",
+          "a278307c1192adfdffeb1103e5b165925550e814",
+          "6ec6766fef5c7be72eb8118ab528f0061e0dbe4d",
+          "d96142597d54dc3a2c47d4216170d9771e60e808",
+          "880095411be503f989c33b400ce7a2d23cebc21d",
+          "0b700615f22d245d9ff236bc77cf959be2545a51",
+          "4899dee1ff4234c664d84535366831ce0eb914a4",
+          "5dd808452f18d1d965ef29f96b3bab6d0b357ded",
+          "bca47e30b2f10b4d5f9d84ec056c7fcf4f7bb25b",
+          "c971b0d622e144f0964fc533dcee18f4c059fc31",
+          "ea88bb034f0a872fd10065c875b1c5a810a72971",
+          "4027a26a09ad504a9a446fae699c91eaa261c648",
+          "a8f0ed9cff2b84799a5647135b551df91ac0f5a2",
+          "ce60cb5c6c52931ae940993d5ac184a2b9e07504",
+          "c1da653351c916435391c172e61be0169da19c00",
+          "0168eadca61b0c379dfe96c676d4ca6f63c1a8a8",
+          "77926e883d9371378155abc2efb7175af59180c3",
+          "1318dda497034b779a63c690ee2fa374df9327c0"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "dfb4c894a56644974bfb30dbbdd2ed0203948da8837184274ca6d2f88f76dc7a",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T065749620386-seed-census-departure/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "sol",
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project nova --brief /home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T065749620386-seed-census-departure/review-brief.md --plan converged-forward-solve --section '§2' --role review --spec-level exact --node review-of-r-20261018T065749620386-seed-census-departure-1318dda49703 --goal 'attach an independent review to run r-20261018T065749620386-seed-census-departure' --done-when 'the review for r-20261018T065749620386-seed-census-departure stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the record is written at one of this run'\"'\"'s declared write paths, under review-records/ inside the directory of run r-20261018T065749620386-seed-census-departure, and never in the worktree; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T065749620386-seed-census-departure/review-records/r-20261018T065749620386-seed-census-departure.json --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T065749620386-seed-census-departure/review-records/r-20261018T065749620386-seed-census-departure.at-1318dda497034b779a63c690ee2fa374df9327c0.json --time-budget 60m --session s21-nova --allow-unreconciled-runs --backend codex",
+        "node": "seed-census-departure",
+        "phase": "complete",
+        "plan": "converged-forward-solve",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261018T065749620386-seed-census-departure",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 2066,
+        "terminal_at": "2026-10-18T13:16:11Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/seed-census-departure"
+      },
+      {
+        "backend": "codex",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 21112,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion and an independent parsed review is attached; the run is ready for promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 24712,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-10-18T07:59:21Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-10-18T06:58:55Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261018T065749620519-seed-census-departure",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 993,
+          "worker_pid": 1546396
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-18T07:59:21Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 21081,
+        "log_fresh": false,
+        "manifest_commits": [],
+        "manifest_derived": false,
+        "manifest_digest": "50abe64bbe560e5a5824bd5c4a72ccd5a4c0c484ea3419f7821100356054f456",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T065749620519-seed-census-departure/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "sol",
+        "needs_help_complete": null,
+        "next_action": "reckon crew complete --run r-20261018T065749620519-seed-census-departure --gate <verdict>",
+        "node": "seed-census-departure",
+        "phase": "complete",
+        "plan": "converged-forward-solve",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": true,
+        "review_status": "parsed",
+        "run_id": "r-20261018T065749620519-seed-census-departure",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 21130,
+        "terminal_at": "2026-10-18T07:58:28Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/shadow-codex-b9519a2074a8/seed-census-departure"
+      }
+    ]
+  },
+  "wall_seconds": 24254,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 9,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-18T20:35:39Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-18T19:58:41Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261018T134957600545-tcv-liuqe-known-answer",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 41129,
+    "worker_pid": 3361307
+  },
+  "worker_seconds": 20631,
+  "worker_seconds_source": "stream_events+rollout_receipts",
+  "worktree_retention": null
+}

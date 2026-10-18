@@ -12,6 +12,13 @@
   ],
   "completed_at": "2026-10-18T12:32:23Z",
   "dispatched_at": "2026-10-18T12:23:16Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "The two synthetic crossing records are not spline-consistent at their recorded axis (|grad psi| 2.4e-4, 2.6e-4); that is a property of the inputs, which the page reports as a failed rebuild and excludes from every comparison, so clause 1 holds for the 24 measured records and is honestly reported failed for the two synthetic ones.",
+      "recorded_at": "2026-10-18T12:43:57.829792+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/research/efit-axis-adjudication.html",

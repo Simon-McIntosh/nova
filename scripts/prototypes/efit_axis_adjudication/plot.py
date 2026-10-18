@@ -407,7 +407,15 @@ def main():
         ):
             raise RuntimeError(f"legend leaves canvas for {machine}")
         fig.subplots_adjust(
-            top=max(0.2, legend_box.y0 / fig.bbox.height - 0.03),
+            top=max(
+                0.2,
+                legend_box.y0 / fig.bbox.height
+                - (
+                    0.12
+                    if not any(row["rebuild"]["status"] == "pass" for row in members)
+                    else 0.03
+                ),
+            ),
             bottom=0.02,
             left=0.01,
             right=0.99,

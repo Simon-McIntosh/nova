@@ -51,6 +51,11 @@
       "kind": "folded",
       "node": "census-proposal-coverage",
       "recorded_at": "2026-10-18T14:10:13.327146+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "The out-of-scope path was added and removed inside the run; the merged tree is clean, so there is nothing to repair.",
+      "recorded_at": "2026-10-18T14:10:20.664958+00:00"
     }
   },
   "findings": [

@@ -1,0 +1,92 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "call_site_count": 3,
+  "call_sites": [
+    "scripts/prototypes/efit_maximin_certificate/run.py:main",
+    "scripts/prototypes/efit_maximin_certificate/certificate.py:certify",
+    "scripts/prototypes/efit_maximin_certificate/certificate.py:write_row"
+  ],
+  "commits_read": [
+    "44f96026d33fc99117be560eb1caad7fe3fd23ce"
+  ],
+  "completed_at": "2026-10-18T17:16:28Z",
+  "dispatched_at": "2026-10-18T17:08:04Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/efit_maximin_certificate/certificate.py",
+      "line": "260",
+      "severity": "blocking",
+      "text": "blocking: certify saves cut points at efit_level but discards the cut points at nova_level, and write_row:297 exports the former as the mastu cut that manifest.md:18 and the report:57-63 claim was sampled at nova's level."
+    },
+    {
+      "file": "scripts/prototypes/efit_maximin_certificate/certificate.py",
+      "line": "230",
+      "severity": "blocking",
+      "text": "blocking: nearest snaps the synthetic wall target from (0.85, 0.2) to (0.85, 0.19949937); both exported path minima are below the imas-efit level by about 4e-8 and both exported cut files say exists True, so docs/research/efit-maximin-certificate.html:68-79 cannot claim an attaining path and no cut at that exact level."
+    },
+    {
+      "file": "scripts/prototypes/efit_maximin_certificate/certificate.py",
+      "line": "249",
+      "severity": "blocking",
+      "text": "blocking: path_min is taken from grid nodes before the path is resampled on the spline at lines 251-258; the exported mastu samples reach 0.01965233453 below the reported 0.01965240962, and no segment minima or exact endpoint connection is checked."
+    },
+    {
+      "file": "scripts/prototypes/efit_maximin_certificate/run.py",
+      "line": "3",
+      "severity": "blocking",
+      "text": "blocking: the driver explicitly bypasses nova's merged read and the field-swap adapter, so docs/research/efit-maximin-certificate.html:80-89 has no two-code field comparison and the requested cell-membership step that admitted nova's contact is unnamed."
+    },
+    {
+      "file": "scripts/prototypes/efit_maximin_certificate/test_certificate.py",
+      "line": "73",
+      "severity": "blocking",
+      "text": "blocking: the only cut test passes a maximin-derived threshold into blocking_cut and tests neither synthetic row nor either external claimed level, so changing a synthetic certificate or shifting both relative thresholds can leave every added assertion green."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T163611410101-efit-maximin-certificate/manifest.md",
+      "line": "15",
+      "severity": "blocking",
+      "text": "blocking: baseline_suite completed=false and after_suite is only the focused gate, so the required two-arm suite delta and added failure count cannot be measured from this run."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "commit 44f96026d33fc99117be560eb1caad7fe3fd23ce adds certificate.py, run.py, test_certificate.py, and two HTML files against base 3df1dda118296f6b73d2d335c4c0561cd69d1655; certificate.py:260-261 computes but discards the cut at nova's level.",
+    "done_when": "the source brief requires the mastu path, synthetic cuts or attaining paths, available imas-efit paths, and two suite arms; manifest.md:15-20 records an incomplete base arm and only a focused head gate, while the imas-efit path files appeared after its manifest was written.",
+    "goal": "the source brief asks for three same-spline path and cut certificates plus a field-identity check; docs/research/efit-maximin-certificate.html:39-89 reports three rows, but the exported levels and cuts do not prove its exact-level claims.",
+    "manifest": "source manifest.md:5-20 says complete and records 2 passing focused tests, while explicitly recording that neither required suite arm ran.",
+    "write_paths": "the source brief grants scripts/prototypes/efit_maximin_certificate and two HTML paths plus run exports; git diff --name-status 3df1dda..44f96026 lists five added files, all inside those paths."
+  },
+  "justifications": {
+    "durability": "scripts/prototypes/efit_maximin_certificate/test_certificate.py:51-84 pins only the mastu row, and its cut assertions derive their levels from maximin itself rather than from a fixed external claimed level.",
+    "evidence": "source manifest.md:15-16 has no completed baseline suite and substitutes the focused test for the after suite, while exports/synthetic_crossing_a-blocking-cut.txt:2 reports a cut that docs/research/efit-maximin-certificate.html:70 says does not exist.",
+    "fit": "scripts/prototypes/efit_maximin_certificate/run.py:63-89 follows the existing prototype driver pattern, but docs/research/efit-maximin-certificate.html:65-79 states a no-cut verdict contradicted by the driver's own exports.",
+    "goal_fidelity": "scripts/prototypes/efit_maximin_certificate/certificate.py:230-258 snaps the stated endpoints to sampled nodes and reports their node path minimum, so the exact spline path demanded by the brief is unproved.",
+    "reuse": "scripts/prototypes/fast_map_production/kernel.py:62 owns a Bell-geometry axis-to-cell path ceiling, whereas scripts/prototypes/efit_maximin_certificate/certificate.py:122 independently computes a sampled external-spline certificate and wraps the existing record parser at line 67.",
+    "scope_discipline": "the five files added by 44f96026 are confined to the source manifest.md:3 declared paths and each serves the certificate report or its focused gate."
+  },
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: 3df1dda118296f6b73d2d335c4c0561cd69d1655\nreviewed_head_sha: 44f96026d33fc99117be560eb1caad7fe3fd23ce\nVERDICT goal: the source brief asks for three same-spline path and cut certificates plus a field-identity check; docs/research/efit-maximin-certificate.html:39-89 reports three rows, but the exported levels and cuts do not prove its exact-level claims.\nVERDICT done_when: the source brief requires the mastu path, synthetic cuts or attaining paths, available imas-efit paths, and two suite arms; manifest.md:15-20 records an incomplete base arm and only a focused head gate, while the imas-efit path files appeared after its manifest was written.\nVERDICT write_paths: the source brief grants scripts/prototypes/efit_maximin_certificate and two HTML paths plus run exports; git diff --name-status 3df1dda..44f96026 lists five added files, all inside those paths.\nVERDICT manifest: source manifest.md:5-20 says complete and records 2 passing focused tests, while explicitly recording that neither required suite arm ran.\nVERDICT diff: commit 44f96026d33fc99117be560eb1caad7fe3fd23ce adds certificate.py, run.py, test_certificate.py, and two HTML files against base 3df1dda118296f6b73d2d335c4c0561cd69d1655; certificate.py:260-261 computes but discards the cut at nova's level.\nCALL_SITES: scripts/prototypes/efit_maximin_certificate/run.py:main, scripts/prototypes/efit_maximin_certificate/certificate.py:certify, scripts/prototypes/efit_maximin_certificate/certificate.py:write_row\nSCORE goal_fidelity: 6\nJUSTIFICATION goal_fidelity: scripts/prototypes/efit_maximin_certificate/certificate.py:230-258 snaps the stated endpoints to sampled nodes and reports their node path minimum, so the exact spline path demanded by the brief is unproved.\nSCORE evidence: 4\nJUSTIFICATION evidence: source manifest.md:15-16 has no completed baseline suite and substitutes the focused test for the after suite, while exports/synthetic_crossing_a-blocking-cut.txt:2 reports a cut that docs/research/efit-maximin-certificate.html:70 says does not exist.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the five files added by 44f96026 are confined to the source manifest.md:3 declared paths and each serves the certificate report or its focused gate.\nSCORE durability: 5\nJUSTIFICATION durability: scripts/prototypes/efit_maximin_certificate/test_certificate.py:51-84 pins only the mastu row, and its cut assertions derive their levels from maximin itself rather than from a fixed external claimed level.\nSCORE fit: 15\nJUSTIFICATION fit: scripts/prototypes/efit_maximin_certificate/run.py:63-89 follows the existing prototype driver pattern, but docs/research/efit-maximin-certificate.html:65-79 states a no-cut verdict contradicted by the driver's own exports.\nSCORE reuse: 18\nJUSTIFICATION reuse: scripts/prototypes/fast_map_production/kernel.py:62 owns a Bell-geometry axis-to-cell path ceiling, whereas scripts/prototypes/efit_maximin_certificate/certificate.py:122 independently computes a sampled external-spline certificate and wraps the existing record parser at line 67.\nFINDING scripts/prototypes/efit_maximin_certificate/certificate.py:260 blocking: certify saves cut points at efit_level but discards the cut points at nova_level, and write_row:297 exports the former as the mastu cut that manifest.md:18 and the report:57-63 claim was sampled at nova's level.\nFINDING scripts/prototypes/efit_maximin_certificate/certificate.py:230 blocking: nearest snaps the synthetic wall target from (0.85, 0.2) to (0.85, 0.19949937); both exported path minima are below the imas-efit level by about 4e-8 and both exported cut files say exists True, so docs/research/efit-maximin-certificate.html:68-79 cannot claim an attaining path and no cut at that exact level.\nFINDING scripts/prototypes/efit_maximin_certificate/certificate.py:249 blocking: path_min is taken from grid nodes before the path is resampled on the spline at lines 251-258; the exported mastu samples reach 0.01965233453 below the reported 0.01965240962, and no segment minima or exact endpoint connection is checked.\nFINDING scripts/prototypes/efit_maximin_certificate/run.py:3 blocking: the driver explicitly bypasses nova's merged read and the field-swap adapter, so docs/research/efit-maximin-certificate.html:80-89 has no two-code field comparison and the requested cell-membership step that admitted nova's contact is unnamed.\nFINDING scripts/prototypes/efit_maximin_certificate/test_certificate.py:73 blocking: the only cut test passes a maximin-derived threshold into blocking_cut and tests neither synthetic row nor either external claimed level, so changing a synthetic certificate or shifting both relative thresholds can leave every added assertion green.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T163611410101-efit-maximin-certificate/manifest.md:15 blocking: baseline_suite completed=false and after_suite is only the focused gate, so the required two-arm suite delta and added failure count cannot be measured from this run.\n",
+  "review_run_id": "r-20261018T170732628126-review-of-efit-maximin-certificate-44f96026d33f",
+  "reviewed_base_sha": "3df1dda118296f6b73d2d335c4c0561cd69d1655",
+  "reviewed_head_sha": "44f96026d33fc99117be560eb1caad7fe3fd23ce",
+  "reviewed_run_id": "r-20261018T163611410101-efit-maximin-certificate",
+  "scores": {
+    "durability": 5,
+    "evidence": 4,
+    "fit": 15,
+    "goal_fidelity": 6,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "source_manifest": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T163611410101-efit-maximin-certificate/manifest.md",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T17:12:29.055932+00:00",
+  "total": 68
+}

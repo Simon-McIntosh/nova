@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="research">
   <meta name="plan-slug" content="efit-field-swap">
   <meta name="plan-title" content="Reading imas-efit boundary trace records with nova's boundary read">
-  <meta name="plan-summary" content="nova's boundary read is run on imas-efit's own psi fields, on a cell geometry built inside each record's wall polygon, and both codes' decisions are compared case by case; the adapter that presents a record's not-a-knot bicubic spline to nova's read is validated against scipy and the two codes are measured on the same field representation rather than converged."></meta>
+  <meta name="plan-summary" content="nova's boundary read is run on imas-efit's own psi fields, on a cell geometry built inside each record's wall polygon, and both codes' decisions are compared case by case; the adapter is falsified against the axis each record itself records, the exported states carry nova's decision in imas-efit's own version-2 layout, and the negative control perturbs the field because a wall perturbation cannot move a decision whose input is the record's own spline."></meta>
   <meta name="plan-evidence-for" content="converged-forward-solve">
   <meta name="plan-verifies" content="converged-forward-solve#s2">
   <meta name="plan-recorded-at" content="2026-10-18">
@@ -32,8 +32,9 @@
 
   <p>The two are <strong>cross-checked rather than converged</strong>: imas-efit asked that nova's rule not be
   shaped by theirs, so this work does not change nova's read. It runs nova's read, a byte for byte
-  unmodified <code>kernel.read</code> with <code>read_robustness.census</code>, on imas-efit's fields, and
-  puts the two decisions side by side.</p>
+  unmodified <code>kernel.read</code> with <code>read_robustness.census</code>, on imas-efit's fields, puts
+  the two decisions side by side, and writes nova's own decisions back out in imas-efit's record layout so
+  this direction of the exchange exists as a file rather than as a claim.</p>
 
   <h2 id="efit-field-swap-adapter">The adapter, and what it substitutes</h2>
 
@@ -49,9 +50,36 @@
   B-spline of one lower degree whose coefficients are a divided difference of the parent's, so value,
   gradient and Hessian are each one tensor contraction against a basis kernel and the whole field stays
   differentiable under <code>jax.jacfwd</code>, which the kernel's third- and fourth-derivative saddle
-  curvature terms require. Measured against scipy's <code>bisplev</code> on the JT-60SA near-fold record at 64
-  pseudo-random interior points: the value agrees to <code>1e-9</code> relative and the second derivatives to
-  <code>1e-6</code> absolute.</p>
+  curvature terms require. Measured against scipy's <code>1e-9</code> relative on the value and
+  <code>1e-6</code> absolute on the second derivatives, at 64 pseudo-random interior points of the JT-60SA
+  near-fold record.</p>
+
+  <h2 id="efit-field-swap-falsify">The adapter is falsified before anything is laid at nova's door</h2>
+
+  <p>Two of this node's earlier observations are exactly what a mis-read grid would produce: a boundary
+  failure whose exception names an empty array, and two codes placing the axis of one field 1.37 m apart. So
+  the adapter is tested against the record itself before either is reported as a fact about nova. Every
+  record already carries the axis imas-efit found, and if the rebuilt spline is imas-efit's field then its
+  gradient vanishes there to numerical precision whichever way the grid is ordered, whatever units and frame
+  the sample points are in. <strong>It does.</strong> Over all ten readable records, <code>|grad psi|</code>
+  at imas-efit's own recorded axis is:</p>
+
+  <table>
+    <thead><tr><th>record</th><th>|grad psi| at imas-efit's axis</th></tr></thead>
+    <tbody>
+      <tr><td>jt60sa-5slice-s5-301-302 A</td><td>1.600e&minus;14</td></tr>
+      <tr><td>jt60sa-5slice-s5-301-302 B</td><td>4.368e&minus;15</td></tr>
+      <tr><td>jt60sa-5slice-s5-133-134 A / B</td><td>4.329e&minus;15 / 1.187e&minus;15</td></tr>
+      <tr><td>jt60sa-5slice-s1-15-16 A / B</td><td>2.880e&minus;14 / 3.627e&minus;14</td></tr>
+      <tr><td>jt60sa-5slice-s2-135-136 A / B</td><td>8.394e&minus;15 / 7.421e&minus;15</td></tr>
+      <tr><td>aug-17151-s5-4-5 A / B</td><td>3.289e&minus;15 / 2.602e&minus;15</td></tr>
+    </tbody>
+  </table>
+
+  <p>The value there also reproduces the record's own stored <code>axis_psi</code> to every printed digit. A
+  transposed, mis-ordered or offset grid cannot do either, so neither symptom is an artefact of the adapter,
+  and each is reported below as what it is: one a nova-core defect, the other a genuine difference in axis
+  selection.</p>
 
   <h2 id="efit-field-swap-stencil">The cell geometry, and the defect the first run had</h2>
 
@@ -85,85 +113,85 @@
   <em>nova</em> columns are produced by running nova's read on the record's spline field over the in-wall
   lattice: the admitted saddle position is the read's <code>boundary</code>, its level is the field evaluated
   there, the wall contact level is the maximum of <code>sigma&nbsp;psi</code> over the record's wall points,
-  and the label is the read's <code>boundary_class</code>.</p>
+  and the label is the read's <code>boundary_class</code>. The last two columns are the falsification test of
+  the section above, carried on every row rather than stated once.</p>
 
   <table>
     <thead>
-      <tr><th>case</th><th>efit label</th><th>nova label</th><th>efit boundary psi</th><th>nova boundary psi</th><th>efit span</th><th>nova span</th><th>note</th></tr>
+      <tr><th>case</th><th>efit label</th><th>nova label</th><th>efit axis</th><th>nova axis</th><th>efit span</th><th>nova span</th><th>|grad|@efit axis</th><th>|grad|@nova axis</th></tr>
     </thead>
     <tbody>
       <tr>
         <td>jt60sa-5slice-s5-301-302 A</td><td>diverted</td><td>diverted</td>
-        <td>0.67900</td><td>0.31165</td><td>0.89785</td><td>0.00005</td>
-        <td>labels agree; nova's saddle sits 0.03 m from its own axis</td>
+        <td>(3.37074, &minus;0.26053)</td><td>(3.22583, 1.10584)</td><td>0.89785</td><td>0.00005</td>
+        <td>1.6e&minus;14</td><td>2.8e&minus;15</td>
       </tr>
       <tr>
         <td>jt60sa-5slice-s5-301-302 B</td><td>limited</td><td>diverted</td>
-        <td>0.14364</td><td>0.29680</td><td>0.01438</td><td>1.06339</td>
-        <td>labels invert</td>
+        <td>(3.02948, 0.66780)</td><td>(3.46130, &minus;0.37295)</td><td>0.01438</td><td>1.06339</td>
+        <td>4.4e&minus;15</td><td>2.4e&minus;15</td>
       </tr>
       <tr>
         <td>jt60sa-5slice-s1-15-16 A</td><td>diverted</td><td>diverted</td>
-        <td>1.25044</td><td>0.51329</td><td>0.64335</td><td>0.49839</td>
-        <td>labels agree; axes disagree (0.28 m apart)</td>
+        <td>(3.22919, 0.44899)</td><td>(2.20667, 2.96412)</td><td>0.64335</td><td>0.49839</td>
+        <td>2.9e&minus;14</td><td>4.2e&minus;17</td>
       </tr>
       <tr>
         <td>aug-17151-s5-4-5 A</td><td>limited</td><td>limited</td>
-        <td>0.03087</td><td>0.14092</td><td>0.18108</td><td>0.07102</td>
-        <td>labels agree; axes identical to 1e-5</td>
+        <td>(1.68763, 0.04916)</td><td>(1.68763, 0.04916)</td><td>0.18108</td><td>0.07102</td>
+        <td>3.3e&minus;15</td><td>2.0e&minus;15</td>
       </tr>
       <tr>
         <td>aug-17151-s5-4-5 B</td><td>diverted</td><td>limited</td>
-        <td>0.03058</td><td>0.14073</td><td>0.18118</td><td>0.07103</td>
-        <td>labels invert</td>
+        <td>(1.68739, 0.04900)</td><td>(1.68739, 0.04900)</td><td>0.18118</td><td>0.07104</td>
+        <td>2.6e&minus;15</td><td>2.9e&minus;16</td>
       </tr>
       <tr>
-        <td>jt60sa-5slice-s5-133-134 A / B</td><td>diverted / limited</td><td>unqualified</td>
-        <td>&minus;0.04229 / 0.09835</td><td>&mdash;</td><td>0.76446 / 0.23303</td><td>&mdash;</td>
-        <td>lattice 16: candidates 1, admitted saddles 0</td>
+        <td>jt60sa-5slice-s5-133-134 A / B and s1-15-16 B, s2-135-136 A / B &mdash; 5 records</td>
+        <td>diverted / limited</td><td>unqualified</td>
+        <td colspan="2">&mdash;</td><td>0.76 / 0.23 / 0.93 / 0.83 / 0.17</td><td>&mdash;</td>
+        <td>1.2e&minus;15 &hellip; 3.6e&minus;14</td><td>&mdash;</td>
       </tr>
       <tr>
-        <td>jt60sa-5slice-s1-133-134 B, s2-135-136 A / B</td><td>limited / diverted / limited</td><td>unqualified</td>
-        <td colspan="4">nova's read's axis fallback is not reported</td>
-        <td>lattice 16: candidates 1, admitted saddles 0</td>
-      </tr>
-      <tr>
-        <td>iter-dina3420, mastu-fullPulse, mastu-magnetics-integration, iter-fullPulse (4 pairs), iter-dina105027 &mdash; 14 records</td>
+        <td>iter-dina3420, mastu-fullPulse, mastu-magnetics-integration, iter-fullPulse (3 pairs), iter-dina105027 &mdash; 14 records</td>
         <td>mixed</td><td>unread</td>
-        <td colspan="4"><code>IndexError: index -1 is out of bounds for axis 0 with size 0</code> at <code>nova/equilibrium/topology.py:2483</code></td>
-        <td>contour mesh admits no vertex for these walls</td>
+        <td colspan="6"><code>IndexError: index -1 is out of bounds for axis 0 with size 0</code> at <code>nova/equilibrium/topology.py:2483</code>; the contour mesh admits no vertex for these walls</td>
       </tr>
     </tbody>
   </table>
 
   <p>Five of the 24 records are qualified, five are unqualified by the census, and 14 cannot be read at all.
   The table is not a verdict on the two codes either way — it is a measurement, and a partial one. The rows
-  are machine-readable, with the census counts behind every unqualified case and the exception text behind
-  every unread one, in the sweep's <code>disagreement.json</code>.</p>
+  are machine-readable, with the census counts behind every unqualified case, the exception text behind every
+  unread one, and the two gradients on every readable one, in the sweep's
+  <code>disagreement.json</code>.</p>
 
   <h2 id="efit-field-swap-diagnosis">What the qualified cases show</h2>
 
+  <p><strong>The axis disagreement is real, and both axes are stationary points of the same field.</strong>
+  On <code>jt60sa-5slice-s5-301-302</code> imas-efit's axis is <code>(3.371, &minus;0.261)</code> and nova's is
+  <code>(3.226, 1.106)</code> — 1.37 m apart, on opposite sides of the same midplane. The gradient is
+  <code>1.6&nbsp;&times;&nbsp;10<sup>&minus;14</sup></code> at imas-efit's axis and
+  <code>2.8&nbsp;&times;&nbsp;10<sup>&minus;15</sup></code> at nova's, so this is not one code failing to find
+  a stationary point: the record's spline has more than one, and each code selects a different one. The same
+  holds on 301:B and on <code>s1-15-16</code> A. On AUG-17151 the two codes agree on the axis to five
+  decimals, which is the control that makes the JT-60SA reading meaningful: when the field has one stationary
+  point both find it, and when it has several they diverge. This is the largest disagreement in the table and
+  it is upstream of every label difference below it.</p>
+
   <p><strong>The label disagrees on the second member of an adjacent pair, and agrees on the first.</strong>
   On <code>jt60sa-5slice-s5-301-302</code> nova and imas-efit agree that state A is diverted; on state B
-  imas-efit says limited and nova says diverted — and inverted. On <code>aug-17151-s5-4-5</code> the pattern
-  repeats exactly: A agrees limited/limited, B inverts to limited against diverted. Two of the five qualified
-  cases invert, and both inversions are the B side of a pair. That is a signature of a systematic difference —
-  nova's read is not tracking whatever changes between the two members of a pair — rather than two independent
-  disagreements.</p>
+  imas-efit says limited and nova says diverted. On <code>aug-17151-s5-4-5</code> the pattern repeats exactly:
+  A agrees limited/limited, B is limited against diverted. Two of the five qualified cases invert, and both
+  inversions are the B side of a pair, on the same field, where the two codes' axes agree to five decimals in
+  the AUG case. That is a signature of a systematic difference in the boundary rule — nova's read is not
+  tracking whatever changes between the two members of a pair — rather than two independent disagreements.</p>
 
-  <p><strong>On AUG-17151 the axes agree to five decimals and the boundary levels do not.</strong> Both codes
-  place the axis at <code>(1.688, 0.049)</code> with level <code>0.21194</code>, so the field and the axis
-  finder are not in question. imas-efit's boundary is <code>0.03087</code>; nova's is <code>0.14092</code>, a
-  factor of 4.6 further out on a span of <code>0.181</code>. nova's admitted saddle sits at
-  <code>(1.694, &minus;0.299)</code> while imas-efit's refined saddle level is <code>0.03068</code> — that is, the
-  codes agree about where the answer is small and disagree about which level bounds the plasma.</p>
-
-  <p><strong>On JT-60SA the axes themselves disagree.</strong> On 301:A imas-efit's axis is at
-  <code>(3.371, &minus;0.261)</code> with level <code>1.57685</code> and nova's at
-  <code>(3.226, 1.106)</code> with level <code>0.31169</code> — 1.37 m apart and on opposite sides of the
-  midplane, on the same grid. On 301:B nova's axis is at <code>(3.461, &minus;0.373)</code> and imas-efit's at
-  <code>(3.029, 0.668)</code>. Two codes reading one spline and finding different axes is the single largest
-  disagreement in this table and it is upstream of every label difference below it.</p>
+  <p><strong>Where the axes agree the boundary levels do not.</strong> On AUG-17151 A both codes place the axis
+  at <code>(1.688, 0.049)</code> with level <code>0.21194</code>, so the field and the axis finder are not in
+  question. imas-efit's boundary span is <code>0.18108</code> with a refined saddle level of
+  <code>0.03087</code>; nova's is <code>0.07102</code>. The codes agree about where the answer is small and
+  disagree about which level bounds the plasma — a factor of 2.5 in the span, on one field, with one axis.</p>
 
   <p><strong>One qualified row is degenerate and is called that.</strong> On 301:A nova's admitted saddle,
   <code>(3.201, 1.102)</code>, is 0.026 m from nova's own axis, <code>(3.226, 1.106)</code>, and its level is
@@ -178,37 +206,88 @@
   <p>Every ITER and MAST-U record in the manifest fails identically:
   <code>IndexError: index -1 is out of bounds for axis 0 with size 0</code> at
   <code>nova/equilibrium/topology.py:2483</code>, where <code>np.flatnonzero(mesh.vertex_valid)</code> is
-  empty. The failure is not the record adapter — the same records parse, their walls close, and the in-wall
-  lattice builds 174 cells on <code>iter-dina3420-s4-18-19</code> against 132 on the JT-60SA records. The
-  contour mesh itself admits no vertex for those walls. This is a nova-core defect, out of this node's write
-  scope, recorded as a follow-on with its reproduction rather than worked around.</p>
+  empty. The two synthetic crossing records fail the same way. The failure is not the record adapter — the
+  same records parse, their walls close, and the in-wall lattice builds 174 cells on
+  <code>iter-dina3420-s4-18-19</code> for these walls against 132 on the JT-60SA records, and the field
+  gradient at imas-efit's own axis is <code>6.0&nbsp;&times;&nbsp;10<sup>&minus;14</sup></code> on the ITER
+  record, so the field is read correctly.</p>
+
+  <p>The cause is a capacity, not a geometry. <code>TopologyGeometry.from_cells</code> sizes its vertex array
+  as <code>len(tree_centres) + len(points) + 1</code>, which is too small for a wall whose segments generate
+  more contour-mesh vertices than that. <code>build_contour_mesh</code> then returns a mesh with
+  <strong>zero</strong> valid vertices instead of raising, so the failure surfaces two calls later as an empty
+  index. Measured by raising the capacity alone: ITER (174 lattice cells, 56 wall points) admits 0 vertices at
+  nova's capacity and 247 at four times it; MAST-U (156 cells, 97 wall points) admits 0 at nova's capacity and 291
+  at four times it; JT-60SA (132 cells, 116 wall points) admits 156 at every capacity. It is deterministic, there is no
+  NaN, and it reproduces under four combinations of centroid against vertex-mean and closed against stripped
+  wall. This is a nova-core defect, out of this node's write scope, recorded as a follow-on with its
+  reproduction rather than worked around.</p>
 
   <p>It is also the reason the qualified set is drawn entirely from JT-60SA and AUG-17151: those two machines'
   wall polygons mesh and the ITER and MAST-U ones do not, and nothing about the fields selects the split.</p>
 
-  <h2 id="efit-field-swap-control">The declared negative control did not discriminate</h2>
+  <h2 id="efit-field-swap-control">The negative control, and why it now perturbs the field</h2>
 
   <p>The node declared a control: perturbing one record wall vertex onto the separatrix changes the nova
-  decision on that record. It was run, and <strong>it did not change the decision</strong>. On
-  <code>jt60sa-5slice-s5-301-302</code> A, moving wall vertex 5 two per cent of the way toward the record's
-  axis left the label <em>diverted</em>, the boundary level <code>0.311646</code> and the admitted saddle
-  <code>(3.20149, 1.10213)</code> byte-identical, on the same 132 cells. Raising the perturbation to
-  25 per cent dropped the lattice to 131 cells and changed none of the three.</p>
+  decision on that record. As declared <strong>it did not</strong>. On <code>jt60sa-5slice-s5-301-302</code> A,
+  moving wall vertex 5 two per cent of the way toward the record's axis left the label <em>diverted</em>, the
+  boundary level <code>0.311646</code> and the admitted saddle <code>(3.20149, 1.10213)</code> byte-identical
+  on the same 132 cells; raising it to 25 per cent dropped the lattice to 131 cells and changed none of the
+  three.</p>
 
-  <p>The reason is structural and it bounds what the table can claim. The field is the record's own spline,
-  which does not depend on the wall at all; the wall reaches the decision only through the lattice, and one
-  fewer cell in 132 does not move an admitted saddle whose position is set by the field. So the control as
-  declared cannot falsify anything, and no reader should take the table as evidence that nova's decision
-  responds to wall geometry. A control that would discriminate has to perturb the field, or move the wall far
-  enough to remove the cells around the admitted saddle. That is recorded as a follow-on, and the control is
-  reported as failed rather than as a pass.</p>
+  <p>The reason is structural, and it bounds what the wall can ever control here: the field is the record's own
+  spline, which does not depend on the wall at all. The wall reaches the decision only through the cell set,
+  and one fewer cell in 132 does not move an admitted saddle whose position is set by the control. The control
+  therefore now perturbs <strong>the field</strong>, the input the decision is actually about, as a smooth
+  shape change over the record grid. A shape change is used rather than an offset or a global scale because
+  the read is invariant to both of those: an offset moves the axis and the boundary level together, and a
+  scale cancels.</p>
+
+  <table>
+    <thead><tr><th>control</th><th>record</th><th>perturbation</th><th>boundary span, base &rarr; perturbed</th><th>axis move</th><th>label</th><th>result</th></tr></thead>
+    <tbody>
+      <tr><td>wall</td><td>301:A</td><td>vertex 5, 2 % toward axis</td><td>0.000048 &rarr; 0.000048</td><td>0 m</td><td>unchanged</td><td><strong>UNCHANGED</strong></td></tr>
+      <tr><td>wall</td><td>301:A</td><td>vertex 5, 25 %</td><td>0.000048 &rarr; 0.000048</td><td>0 m</td><td>unchanged</td><td><strong>UNCHANGED</strong></td></tr>
+      <tr><td>field</td><td>301:A</td><td>shape, 0.2 %</td><td>0.000048 &rarr; 0.000055</td><td>4.8e&minus;04 m</td><td>unchanged</td><td><strong>CHANGED</strong></td></tr>
+      <tr><td>field</td><td>301:A</td><td>shape, 20 %</td><td>0.000048 &rarr; 0.001199</td><td>3.0e&minus;02 m</td><td>unchanged</td><td><strong>CHANGED</strong></td></tr>
+      <tr><td>field</td><td>aug:A</td><td>shape, 2 %</td><td>0.071022 &rarr; 0.070743</td><td>3.2e&minus;03 m</td><td>unchanged</td><td><strong>CHANGED</strong></td></tr>
+      <tr><td>field</td><td>aug:A</td><td>shape, 20 %</td><td>0.071022 &rarr; 0.069331</td><td>3.3e&minus;02 m</td><td>unchanged</td><td><strong>CHANGED</strong></td></tr>
+    </tbody>
+  </table>
+
+  <p>The field control discriminates at every amplitude on both records, and the wall control discriminates at
+  none. Two honest limits of what it shows on this evidence: <strong>the label does not flip at any amplitude
+  tested</strong>, up to a 20 per cent shape perturbation, so what the control demonstrates is that nova's axis
+  position and boundary level respond to the field, not that the limited-or-diverted decision is reachable from
+  here; and the first two field rows are run on the degenerate record, whose span is
+  <code>5&nbsp;&times;&nbsp;10<sup>&minus;5</sup></code>, which is why a proportionally large change there is
+  an absolutely small one. The two AUG rows are the ones to read: on a span of <code>0.071</code> a 2 per cent
+  field perturbation moves the axis <code>3.2&nbsp;&times;&nbsp;10<sup>&minus;3</sup></code> m and the span
+  <code>2.8&nbsp;&times;&nbsp;10<sup>&minus;4</sup></code>, against a wall perturbation that moved nothing.</p>
+
+  <h2 id="efit-field-swap-exports">The exports, and what a reader may take from each</h2>
+
+  <p>Four version-2 records are written under the run directory's <code>exports/records/</code> with a README
+  giving each one's provenance. Two are <em>certified carrier states</em>, made by rewriting only the decision
+  fields of a source imas-efit record, so the grid, psi and wall in them are imas-efit's and the decision is
+  nova's. Two are <em>bisected tie-island states</em>, built entirely by nova — the carrier comes from the
+  probe that owns it, at the cell counts it bisects — so everything in them is nova's, rendered into
+  imas-efit's layout.</p>
+
+  <p>The tie-island naming reads <code>&lt;probe kind&gt;-&lt;cells&gt;-nova-&lt;class&gt;</code>: on the
+  282-cell diverted carrier at the bisected offset <code>0.16133</code>, nova's read returns
+  <em>limited</em>, and on the 550-cell carrier it returns <em>diverted</em>. Only the 282-cell offset is a bisected one; no offset for the 550-cell arm is recorded anywhere this node could
+  read, so that file carries the probe's unshifted carrier and the README says so rather than presenting it as
+  bisected.</p>
 
   <h2 id="efit-field-swap-approximations">Approximations that qualify every number</h2>
 
   <ul>
     <li>The cell geometry is a square lattice at the record's own resolution inside the record's wall polygon,
     not nova's hex or Delaunay carrier mesh, so the Bell cell fit and the cell-boundary census differ in
-    discretisation from a production nova run.</li>
+    discretisation from a production nova run. This is why the gradient is reported at <em>both</em> codes'
+    axes: it is what separates a difference in the two codes' selection rules from an artefact of the lattice
+    this adapter substitutes.</li>
     <li>The record stores its wall as consecutive segments rather than one closed ring; the adapter closes it
     by appending the final segment's end.</li>
     <li>The field is imas-efit's spline, so no nova current booking, no Biot-Savart operator, and no self-
@@ -222,13 +301,14 @@
   <ol>
     <li>Qualify the records whose lattice admits no saddle (candidates 1, saddles 0 on
     <code>jt60sa-5slice-s5-133-134</code> at 16) by refining the in-wall lattice.</li>
-    <li>Export nova's bisected tie-island states at 282 and 550 cells and one limited and one diverted
-    certified carrier state as version-2 records under the run directory's <code>exports/</code>, with a README
-    giving each file's provenance and nova's own decision, and a test re-reading one export through the codec
-    reader. The certified machine rows for those cell counts were not located in the cached rows directory
-    within this session's fence.</li>
-    <li>Compare the two admitted saddle positions on every case where both codes commit to one, which is what
+    <li>Repair the contour mesh capacity in <code>TopologyGeometry.from_cells</code> so the ITER and MAST-U
+    walls mesh, which is the single change that would take this table from five qualified cases to nineteen.</li>
+    <li>Measure the two admitted saddle positions on every case where both codes commit to one, which is what
     turns the level difference above into a diagnosis.</li>
+    <li>Bisect the 550-cell arm's moving offset so the second tie-island export is a bisected state rather
+    than the unshifted carrier.</li>
+    <li>Draw the qualified cases: imas-efit's axis and nova's axis on one field, with the wall, which is the
+    figure that makes the axis disagreement visible.</li>
   </ol>
 </main></body>
 </html>

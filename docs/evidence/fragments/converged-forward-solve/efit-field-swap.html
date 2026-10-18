@@ -3,9 +3,37 @@
 
 <p>Nova's boundary decision is measured on imas-efit's own fields, case by case,
 without shaping nova's rule by theirs. The adapter that presents a record's
-spline to nova's read is validated against scipy; the sweep records both codes'
-decision columns on every record, and marks a case unqualified rather than
-reporting nova's own axis fallback as a boundary level.</p>
+spline to nova's read is falsified against each record's own stored axis;
+the sweep records both codes' decision columns on every record, and marks a case
+the lattice cannot qualify rather than reporting nova's own axis fallback as a
+boundary level. Nova's decisions are also written back out in imas-efit's own
+record layout, so the exchange exists as files rather than as a claim.</p>
+
+<h3>The adapter is falsified before anything is laid at nova's door</h3>
+
+<p>Two observations look like a mis-read grid: a boundary failure whose exception
+names an empty array, and two codes placing the axis of one field 1.37 m apart.
+Every record already carries the axis imas-efit found, so if the rebuilt spline
+is imas-efit's field its gradient vanishes there to numerical precision whatever
+the grid ordering, units or frame. <strong>It does</strong>, on all ten readable
+records, with <code>|grad&nbsp;psi|</code> between
+<code>1.2&nbsp;&times;&nbsp;10<sup>&minus;15</sup></code> and
+<code>3.6&nbsp;&times;&nbsp;10<sup>&minus;14</sup></code>, and the value there
+reproducing the record's own <code>axis_psi</code> to every printed digit. A
+transposed, mis-ordered or offset grid cannot do either, so neither symptom is an
+artefact of the adapter.</p>
+
+<p>The same test run at <em>both</em> axes then settles the axis disagreement. On
+<code>jt60sa-5slice-s5-301-302</code> the gradient is
+<code>1.6&nbsp;&times;&nbsp;10<sup>&minus;14</sup></code> at imas-efit's axis and
+<code>2.8&nbsp;&times;&nbsp;10<sup>&minus;15</sup></code> at nova's, so the record's
+spline has more than one stationary point and each code selects a different one;
+on AUG-17151, where the two codes agree on the axis to five decimals, both are
+stationary points of the same field. The axis disagreement is therefore a real
+difference in selection and upstream of every label difference. Where the axes
+agree the boundary levels still do not: on AUG-17151 A imas-efit's span is
+<code>0.18108</code> against nova's <code>0.07102</code>, on one field with one
+axis.</p>
 
 <h3>What is committed</h3>
 
@@ -93,6 +121,59 @@ resolves those rows by record name in imas-efit's own test data before giving
 up. A row that cannot be resolved at all is recorded <em>unread</em> with the
 exception text in its note, so a gap in the table is never silently a pass.</p>
 
+<p>The fourteen ITER and MAST-U records, and the two synthetic crossing records,
+fail for one reason that is a capacity rather than a geometry.
+<code>TopologyGeometry.from_cells</code> sizes its vertex array as
+<code>len(tree_centres) + len(points) + 1</code>, which is too small for a wall
+whose segments generate more contour-mesh vertices than that;
+<code>build_contour_mesh</code> then returns a mesh with <strong>zero</strong>
+valid vertices instead of raising, and the failure surfaces two calls later as
+<code>np.flatnonzero(mesh.vertex_valid)</code> being empty. Measured by raising
+the capacity alone: ITER (174 lattice cells, 56 wall points) admits 0 vertices at
+nova's capacity and 247 at four times it, MAST-U (156 cells, 97 wall points)
+admits 0 and 291, and JT-60SA (132 cells, 116 wall points) admits 156 at every
+capacity. Deterministic, no NaN, and reproduced under four combinations of
+centroid against vertex-mean and closed against stripped wall. This is a
+nova-core defect, out of this node's write scope, recorded as a follow-on with its
+reproduction.</p>
+
+<h3>The negative control, and why it perturbs the field</h3>
+
+<p>The declared control was a wall perturbation, and as declared it
+<strong>did not discriminate</strong>: moving one wall vertex 2 per cent toward
+the record's axis left the label, the boundary level and the admitted saddle
+byte-identical, and at 25 per cent it dropped one cell of 132 and changed none of
+the three. The reason is structural — the field is the record's own spline, which
+does not depend on the wall, and the wall reaches the decision only through the
+cell set. The control therefore perturbs <em>the field</em>, as a smooth shape
+change over the record grid rather than an offset or a global scale, because the
+read is invariant to both of those. It discriminates at every amplitude tried, on
+two records, while the wall control discriminates at none. Two limits are
+reported rather than smoothed over: the limited-or-diverted label does not flip at
+any amplitude up to a 20 per cent shape perturbation, so what is demonstrated is
+that nova's axis position and boundary level respond to the field; and on the
+degenerate record, whose span is
+<code>5&nbsp;&times;&nbsp;10<sup>&minus;5</sup></code>, a proportionally large
+change is an absolutely small one, so the non-degenerate AUG row is the one to
+read.</p>
+
+<h3>The exports</h3>
+
+<p>Four version-2 records are written under the run directory's
+<code>exports/records/</code>, with a README giving each one's provenance. Two are
+certified carrier states, made by rewriting only the decision fields of a source
+imas-efit record, so the grid, psi and wall in them are imas-efit's and the
+decision is nova's. Two are tie-island states, built by the probe that owns those
+carriers at the cell counts it bisects and rendered by nova, so everything in
+them is nova's written into imas-efit's layout. On the 282-cell carrier at the
+bisected offset <code>0.16133</code> nova's read returns <em>limited</em>; on the
+550-cell carrier it returns <em>diverted</em>. The
+<code>&lt;probe kind&gt;-&lt;cells&gt;-nova-&lt;class&gt;</code> name answers two
+different questions and the two words are not in conflict. Only the 282-cell
+offset is a bisected one: no offset for the 550-cell arm is recorded anywhere this
+node could read, so that file carries the probe's unshifted carrier and the README
+says so.</p>
+
 <h3>The decision table</h3>
 
 <p>Each row carries imas-efit's columns read from the record's stored status
@@ -129,11 +210,13 @@ nova column is a gap, not a zero.</li>
 lattice, and compare the admitted saddle <em>position</em> on every case where
 both codes commit to one — that comparison, not the level alone, is what turns
 the level difference into a diagnosis.</li>
-<li>Export nova's bisected tie-island states at 282 and 550 cells and one
-limited and one diverted certified carrier state as version-2 trace records
-under <code>exports/</code>, with a README giving each file's provenance and
-nova's own decision, and a test re-reading one export through the codec reader.
-The certified machine rows for those cell counts were not located in the cached
-rows directory within this session's fence.</li>
+<li>Repair the contour-mesh capacity in <code>TopologyGeometry.from_cells</code> so
+the ITER and MAST-U walls mesh, which is the single change that would take the
+qualified set from five records to nineteen.</li>
+<li>Bisect the 550-cell arm's moving offset so the second tie-island export is a
+bisected state rather than the unshifted carrier, and compare the admitted saddle
+<em>position</em> on every case where both codes commit to one.</li>
+<li>Draw the qualified cases: imas-efit's axis and nova's axis on one field, with
+the wall, which is the figure that makes the axis disagreement visible.</li>
 </ol>
 </section>

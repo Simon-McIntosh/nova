@@ -1,0 +1,290 @@
+"""A nova-decided export is read back through the record codec.
+
+The export writer is only useful if the record it emits is one imas-efit's own
+list-directed reader could open, so the check is a full re-read rather than a
+comparison of the file against the code the writer shares with the reader: the
+emitted record is parsed again and its decision fields, grid, wall and psi are
+compared against what was written.
+"""
+
+from __future__ import annotations
+
+import json
+from types import SimpleNamespace
+
+import jax
+import jax.numpy as jnp
+import numpy as np
+import pytest
+
+from scripts.prototypes.efit_field_swap import export_tie_islands
+from scripts.prototypes.efit_field_swap.crosscheck import load_pairs, resolve_trace
+from scripts.prototypes.efit_field_swap.export_states import export_row
+from scripts.prototypes.efit_field_swap.export_tie_islands import (
+    bisected_brackets,
+    bisected_offset,
+    validate_carrier,
+)
+from scripts.prototypes.efit_field_swap.trace_record import (
+    HEADER,
+    read_trace_record,
+    write_trace_record,
+)
+
+
+def _source_and_pairs():
+    return load_pairs()
+
+
+def _raw_fields(path):
+    """Read the Fortran text positions without using the trace codec."""
+    lines = path.read_text().splitlines()
+    dims = [int(value) for value in lines[1].split()]
+    nr, nz, nwall, nlim, ncell, npoly = dims[3:]
+    cursor = 4
+    radial = np.asarray([float(line) for line in lines[cursor : cursor + nr]])
+    cursor += nr
+    vertical = np.asarray([float(line) for line in lines[cursor : cursor + nz]])
+    cursor += nz
+    wall = np.asarray(
+        [
+            [float(value) for value in line.split()]
+            for line in lines[cursor : cursor + nwall]
+        ]
+    )
+    cursor += nwall + nlim + ncell + npoly
+    psi = np.asarray([float(line) for line in lines[cursor:]]).reshape(nr, nz)
+    return (
+        dims,
+        [float(value) for value in lines[3].split()],
+        radial,
+        vertical,
+        wall,
+        psi,
+    )
+
+
+def test_export_round_trips_through_the_codec(tmp_path):
+    pairs = _source_and_pairs()
+    row = {
+        "case": f"{pairs[0][0]}:A",
+        "nova_label": "diverted",
+        "nova_axis_psi": 1.25,
+        "nova_axis_r": 3.5,
+        "nova_axis_z": 0.25,
+        "nova_saddle_psi": 0.5,
+        "nova_boundary_psi": 0.5,
+    }
+    path = export_row(row, pairs, tmp_path)
+    assert path.is_file()
+    assert path.read_text().splitlines()[0] == HEADER
+
+    read_back = read_trace_record(path)
+    source = read_trace_record(resolve_trace(pairs[0][1]))
+    assert read_back.verdict == 2
+    assert read_back.diverted is True
+    assert read_back.axis_psi == 1.25
+    assert (read_back.axis_r, read_back.axis_z) == (3.5, 0.25)
+    assert read_back.saddle_refined == 0.5
+    assert read_back.fed_back_psi == 0.5
+    assert read_back.slice == source.slice
+    assert read_back.iteration == source.iteration
+    assert np.array_equal(read_back.rgrid, source.rgrid)
+    assert np.array_equal(read_back.zgrid, source.zgrid)
+    assert np.array_equal(read_back.psi, source.psi)
+    assert np.array_equal(read_back.wall_r, source.wall_r)
+    assert np.array_equal(read_back.polygon_r, source.polygon_r)
+
+    raw_export = _raw_fields(path)
+    raw_source = _raw_fields(resolve_trace(pairs[0][1]))
+    assert raw_export[0][2] == 2
+    assert raw_export[1][0:3] == [1.25, 3.5, 0.25]
+    assert raw_export[1][4] == raw_export[1][6] == 0.5
+    for exported, original in zip(raw_export[2:], raw_source[2:], strict=True):
+        np.testing.assert_array_equal(exported, original)
+
+
+def test_written_export_is_bit_stable(tmp_path):
+    pairs = _source_and_pairs()
+    source = read_trace_record(resolve_trace(pairs[0][1]))
+    first = tmp_path / "first.txt"
+    second = tmp_path / "second.txt"
+    write_trace_record(first, source)
+    write_trace_record(second, read_trace_record(first))
+    assert first.read_text() == second.read_text()
+
+
+def _receipt(adjacent, unchanged, right=None):
+    if right is None:
+        right = float(np.nextafter(0.1613, np.inf))
+    return {
+        "key": "both",
+        "requested_cells": 250,
+        "achieved_cells": 282,
+        "bisected": [
+            {
+                "bracket": [0.1613, right],
+                "steps": 42,
+                "adjacent": adjacent,
+                "unchanged": unchanged,
+                "left": {"boundary_class": 1, "saddle_identity": 0},
+                "right": {"boundary_class": 0, "saddle_identity": 2},
+            }
+        ],
+    }
+
+
+def test_an_unbisected_offset_is_refused(tmp_path):
+    """A tie-island state is a bisected one, so an interval is not exportable."""
+    for adjacent, unchanged in ((False, False), (True, True)):
+        with pytest.raises(SystemExit):
+            bisected_offset(_receipt(adjacent, unchanged), tmp_path / "receipt.json")
+    with pytest.raises(SystemExit, match="adjacent binary64"):
+        bisected_offset(_receipt(True, False, 0.1613), tmp_path / "receipt.json")
+    same_key = _receipt(True, False)
+    same_key["bisected"][0]["right"] = same_key["bisected"][0]["left"]
+    with pytest.raises(SystemExit, match="decision transition"):
+        bisected_offset(same_key, tmp_path / "receipt.json")
+
+
+def test_a_bisected_offset_is_taken_from_the_receipt(tmp_path):
+    offset, entry = bisected_offset(_receipt(True, False), tmp_path / "receipt.json")
+    assert offset == entry["bracket"][0] == 0.1613
+    assert len(list(bisected_brackets(_receipt(True, False), "receipt.json"))) == 1
+
+
+def test_receipt_cell_counts_must_match_the_carrier():
+    receipt = _receipt(True, False)
+    validate_carrier(receipt, 250, 282)
+    with pytest.raises(SystemExit, match="250/550"):
+        validate_carrier(receipt, 250, 550)
+    with pytest.raises(SystemExit, match="500/282"):
+        validate_carrier(receipt, 500, 282)
+
+
+def test_main_exports_both_endpoints_of_every_bracket_for_each_carrier(
+    tmp_path, monkeypatch
+):
+    receipts = []
+    expected = {}
+    for requested, achieved in ((250, 282), (500, 550)):
+        receipt = _receipt(True, False)
+        receipt.update(
+            kind="diverted", requested_cells=requested, achieved_cells=achieved
+        )
+        first = receipt["bisected"][0]
+        second = {
+            "bracket": [0.2613, float(np.nextafter(0.2613, np.inf))],
+            "steps": 43,
+            "adjacent": True,
+            "unchanged": False,
+            "left": {"boundary_class": 0, "saddle_identity": 2},
+            "right": {"boundary_class": 0, "saddle_identity": 3},
+        }
+        receipt["bisected"].append(second)
+        path = tmp_path / f"{achieved}-receipt.json"
+        path.write_text(json.dumps(receipt))
+        receipts.append((path, requested))
+        for index, entry in enumerate((first, second), start=1):
+            for side, endpoint in (("left", 0), ("right", 1)):
+                expected[(achieved, index, side)] = (
+                    entry["bracket"][endpoint],
+                    [
+                        entry[side]["boundary_class"],
+                        entry[side]["saddle_identity"],
+                    ],
+                    requested,
+                )
+
+    built = []
+
+    def fake_build(kind, requested, cache):
+        built.append((kind, requested, cache))
+        achieved = {250: 282, 500: 550}[requested]
+        return {"geometry": SimpleNamespace(centre=np.zeros((achieved, 2)))}
+
+    observed = {}
+
+    def fake_export(state, offset, out_dir, tag, sampled, key, key_name):
+        assert sampled is state
+        assert key_name == "both"
+        achieved = len(state["geometry"].centre)
+        target = out_dir / f"{tag}.txt"
+        target.write_text("exported\n")
+        observed[tag] = (achieved, offset, list(key), target)
+        return target
+
+    monkeypatch.setattr(export_tie_islands.tie_probe, "build", fake_build)
+    monkeypatch.setattr(
+        export_tie_islands, "sampler_with_enclosure", lambda state: state
+    )
+    monkeypatch.setattr(export_tie_islands, "export", fake_export)
+    out_dir = tmp_path / "records"
+    assert export_tie_islands.main("read-only-cache", out_dir, receipts) == 0
+    assert built == [
+        ("diverted", 250, "read-only-cache"),
+        ("diverted", 500, "read-only-cache"),
+    ]
+    assert len(observed) == len(expected) == 8
+    assert len(list(out_dir.glob("*.txt"))) == 8
+    assert len(list(out_dir.glob("*.json"))) == 8
+    for (achieved, index, side), (offset, key, requested) in expected.items():
+        tag = f"diverted-{achieved}cells-edge{index}-{side}"
+        assert tag in observed
+        assert observed[tag][0:3] == (achieved, offset, key)
+        target = observed[tag][3]
+        sidecar = json.loads(target.with_suffix(".json").read_text())
+        assert sidecar["record"] == target.name
+        assert sidecar["requested_cells"] == requested
+        assert sidecar["achieved_cells"] == achieved
+        assert sidecar["side"] == side
+        assert sidecar["offset"] == offset
+        assert sidecar["exported_key"] == key
+
+
+def test_export_refuses_a_live_decision_key_mismatch(tmp_path, monkeypatch):
+    assert jax.config.jax_enable_x64 is True
+    roots = SimpleNamespace(
+        jet=SimpleNamespace(value=jnp.asarray([0.25], dtype=jnp.float64)),
+        position=jnp.asarray([[1.0, 2.0]], dtype=jnp.float64),
+    )
+    reading = SimpleNamespace(
+        saddle_form=SimpleNamespace(position=jnp.asarray([1.0, 2.0])),
+        boundary_class=jnp.asarray(1),
+        wall_candidate=jnp.asarray(0.5),
+        saddle_candidate=jnp.asarray(0.25),
+        boundary_flux=jnp.asarray(0.25),
+        valid=True,
+        qualified=True,
+    )
+    calls = []
+
+    def sampled(shifted, prior=None):
+        calls.append(float(shifted))
+        if len(calls) != 1:
+            raise AssertionError("decision-key refusal was bypassed")
+        return (
+            roots,
+            reading,
+            jnp.asarray(0.0),
+            jnp.asarray([[1.0, -1.0]]),
+            jnp.asarray([True]),
+            jnp.asarray(0),
+            jnp.asarray(0.0),
+        )
+
+    state = {
+        "geometry": SimpleNamespace(),
+        "scale": 1.0,
+        "convention": SimpleNamespace(sigma=1),
+    }
+    monkeypatch.setattr(export_tie_islands, "moving_field", lambda *_: object())
+    with pytest.raises(
+        SystemExit,
+        match=r"export read at 0.5 has key \(1, 0\), receipt records \(0, 0\)",
+    ):
+        export_tie_islands.export(
+            state, 0.5, tmp_path, "wrong-key", sampled, (0, 0), "both"
+        )
+    assert calls == [0.5]
+    assert list(tmp_path.iterdir()) == []

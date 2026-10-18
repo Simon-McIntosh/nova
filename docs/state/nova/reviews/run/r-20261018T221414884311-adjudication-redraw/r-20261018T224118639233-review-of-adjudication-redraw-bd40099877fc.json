@@ -1,0 +1,67 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "baseline_suite (850f8adcc) failure_ids are the two painter refusal tests and after_suite (bd40099877) failure_ids are empty, so no failure present at the head is absent at the base; the two base failures are the guards the change adds, reddened by reinstating the old painter.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-18T23:00:00.142Z",
+  "dispatched_at": "2026-10-18T22:41:47Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/efit_axis_adjudication/plot.py",
+      "line": "110",
+      "text": "follow-on: _inside_vessel duplicates a capability nova already owns at nova/media/sources/frame.py:56 (inside_wall_units), which is also the predicate draw_flux_contours already applies when passed wall= (nova/media/poloidal.py:138); the addition neither extends nor wraps the owner, so a change to the vessel-minus-material semantics in nova reaches no adjudication panel or census, and the same private predicate is used a third time from refresh.py."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/efit-axis-adjudication.html",
+      "line": "6",
+      "text": "follow-on: the plan-commits meta was regenerated empty (content=\"\") where the base revision carried eleven commit shas, so the evidence fragment no longer names the revisions its tables describe and a reader cannot tell which commits produced the counts it states."
+    },
+    {
+      "file": "scripts/prototypes/efit_axis_adjudication/test_escape_overlay.py",
+      "line": "57",
+      "text": "follow-on: test_outside_census_is_refused_before_painting passes a point at (0,0) with inside_wall=False, and (0,0) is geometrically outside the synthetic vessel (probed: _inside_vessel returns False, vessel radius spans 0.85-2.15 m), so both refusal clauses at plot.py:207-212 shorten the trace at the same time; deleting the any(not p['inside_wall']) clause leaves the test green, so that clause is not independently guarded."
+    },
+    {
+      "file": "scripts/prototypes/efit_axis_adjudication/plot.py",
+      "line": "46",
+      "text": "follow-on: COLOUR['nova_b'] is now unreferenced after adapter B was dropped from the panels, and the case-key normaliser exists three times in the module (plot.py:398 _normalise_case, refresh.py:17 _case, analyse.py:86 inline), which a maintenance edit to the case convention would have to find and repeat."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read commit by commit, 18 files against 850f8adcc: plot.py masks the field and refuses out-of-vessel census and a grid-node saddle proxy, page.py and refresh.py regenerate the page and the receipt join, nine SVGs replace ten (efit-axis-jt60sa.svg deleted), plus the research page and two fragments; no product source under nova/ is touched.",
+    "done_when": "done_when (3) names a painter test refusing an out-of-vessel census point and a grid-node saddle proxy; tests/prototypes/efit_axis_adjudication/test_escape_overlay.py:53 and :61 are exactly those two tests, the after arm runs them green (after-suite-final.log SUITE_SUMMARY completed=true failure_count=0) and the base arm reddens both (baseline-suite.log failure_count=2); (1) and (2) are supported by render-committed.log nine INSPECTED lines and by audit_receipt.py's RECEIPT_SUMMARY binding page, receipt and files.",
+    "goal": "the node goal is to redraw the axis-adjudication figures the lead rejected and correct their page; commits 9c3672205..bd40099877 mask the sampled field to the vessel, drop the source grid-node saddle cross and the JT-60SA panel, and regenerate docs/research/efit-axis-adjudication.html from the polarity-aware receipt (plot.py:200 draw_panel, page.py:112 build_page).",
+    "manifest": "read the reviewed manifest.md; status complete, commits 9c3672205, 1bffc8ea3, bd40099877, baseline_suite failure_count=2 ids the two painter tests, after_suite failure_count=0, negative_control_log named as a bare path, blockers recording the absent imas-efit refined saddle coordinate.",
+    "write_paths": "read the dispatch fence (prompt.txt:88-94, six granted paths); git diff --name-status 850f8adcc bd40099877 lists only paths inside scripts/prototypes/efit_axis_adjudication, docs/research/efit-axis-adjudication.html, docs/figures/converged-forward-solve/efit-axis-adjudication and docs/evidence/fragments/converged-forward-solve/{efit-axis-adjudication,adjudication-redraw}.html."
+  },
+  "justifications": {
+    "durability": "the two added tests are verified by reinstating the regression: suite_arm.py runs the head test file against the base modules and both refusal tests redden (baseline-suite.log '2 failed, 4 passed'), so the guards are shown to fire rather than merely to pass.",
+    "evidence": "the gate is the done_when: after-suite-final.log runs both efit_axis_adjudication test files and reports failure_count=0 with completed=true, baseline-suite.log reports failure_count=2 for the same files, and render-committed.log records nine INSPECTED lines with the SVG byte sizes that appear in the manifest.",
+    "fit": "the change follows the module idiom (private helpers beside _wall_loops_by_role, _assert_no_clipping retained, matplotlib Agg), uses conventional commit subjects with bodies, and introduces no plan, sprint or version label in any source name or comment.",
+    "goal_fidelity": "the goal sentence is met: docs/figures/converged-forward-solve/efit-axis-adjudication holds nine vessel-masked SVGs with no jt60sa file, but done_when (1)'s clause 'both codes' axis and admitted saddles' is only half met because plot.py:283 draws imas-efit's axis and no imas-efit saddle, which the manifest records under blockers.",
+    "reuse": "plot.py:110 adds _inside_vessel, a private vessel-minus-obstacle point predicate, while nova owns that capability at nova/media/sources/frame.py:56 (inside_wall_units, consumed by draw_flux_contours(wall=) at nova/media/poloidal.py:138); the addition duplicates the owner rather than extending or wrapping it, and refresh.py:17 adds a third copy of the case-key normaliser beside plot.py:398 _normalise_case.",
+    "scope_discipline": "every path in git diff --name-status 850f8adcc bd40099877 lies inside the six paths the dispatch enumerated at prompt.txt:88-94, and no file under nova/ or tests/ appears in the diff."
+  },
+  "node": "review-of-adjudication-redraw-bd40099877fc",
+  "node:reviewed": "adjudication-redraw",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to redraw the rejected axis-adjudication figures and correct the page they sit on; commits 9c3672205..bd40099877 mask the sampled field to the vessel and regenerate docs/research/efit-axis-adjudication.html from the polarity-aware receipt (scripts/prototypes/efit_axis_adjudication/plot.py:200, page.py:112).\nVERDICT done_when: done_when (3) names a painter test refusing an out-of-vessel census point and a grid-node saddle proxy; scripts/prototypes/efit_axis_adjudication/test_escape_overlay.py:53 and :61 are those two tests, green in the after arm and red in the base arm, and render-committed.log records the nine inspections done_when (1) asks for.\nVERDICT write_paths: read prompt.txt:88-94 (six granted paths); git diff --name-status 850f8adcc bd40099877 lists only paths inside them.\nVERDICT manifest: read; status complete, commits 9c3672205, 1bffc8ea3, bd40099877, baseline_suite failure_count=2, after_suite failure_count=0, negative_control_log named as a bare path.\nVERDICT diff: read commit by commit against 850f8adcc; 18 files, all inside the declared scope, no nova/ product source touched.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: the goal is met but done_when (1)'s 'both codes' axis and admitted saddles' is only half met, since scripts/prototypes/efit_axis_adjudication/plot.py:283 draws imas-efit's axis and no imas-efit saddle and the manifest records that limit under blockers.\nSCORE evidence: 16\nJUSTIFICATION evidence: after-suite-final.log reports completed=true failure_count=0 over both efit_axis_adjudication test files, baseline-suite.log reports failure_count=2 over the same files, and render-committed.log carries nine INSPECTED lines matching the manifest's byte sizes.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in git diff --name-status 850f8adcc bd40099877 lies inside the six paths enumerated at prompt.txt:88-94.\nSCORE durability: 16\nJUSTIFICATION durability: suite_arm.py arms run the head test file against the base modules and scripts/prototypes/efit_axis_adjudication/test_escape_overlay.py:53 and :61 redden there, so the two refusal guards are shown to fire rather than merely to pass.\nSCORE fit: 17\nJUSTIFICATION fit: the change keeps the module idiom (private helpers beside _wall_loops_by_role, matplotlib Agg, _assert_no_clipping retained) and introduces no plan or version label in scripts/prototypes/efit_axis_adjudication/refresh.py or its siblings.\nSCORE reuse: 5\nJUSTIFICATION reuse: scripts/prototypes/efit_axis_adjudication/plot.py:110 adds _inside_vessel, duplicating the point-in-vessel-minus-material predicate nova owns at nova/media/sources/frame.py:56 without extending it.\nFINDING scripts/prototypes/efit_axis_adjudication/plot.py:110 follow-on: _inside_vessel duplicates nova/media/sources/frame.py:56 inside_wall_units, the same predicate draw_flux_contours applies when passed wall= (nova/media/poloidal.py:138), so wall-semantics changes in nova reach no panel.\nFINDING docs/evidence/fragments/converged-forward-solve/efit-axis-adjudication.html:6 follow-on: plan-commits was regenerated empty where the base carried eleven shas, so the fragment no longer names the revisions its tables describe.\nFINDING scripts/prototypes/efit_axis_adjudication/test_escape_overlay.py:57 follow-on: the census-refusal test passes a point that is outside on both the flag and the geometry (probed (0,0) is outside the 0.85-2.15 m vessel), so deleting the inside_wall clause at plot.py:207 leaves it green.\nFINDING scripts/prototypes/efit_axis_adjudication/plot.py:46 follow-on: COLOUR['nova_b'] is dead after adapter B left the panels and the case-key normaliser is now normalised in three places in the module.",
+  "review_run_id": "r-20261018T224118639233-review-of-adjudication-redraw-bd40099877fc",
+  "reviewed_base_sha": "850f8adcc4e4399d8c30c99cd5fb8ea1782cf792",
+  "reviewed_head_sha": "bd40099877fce8545463c9e2a4a02b25bf04b144",
+  "reviewed_run_id": "r-20261018T221414884311-adjudication-redraw",
+  "scores": {
+    "durability": 16,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "reuse": 5,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T23:01:19.031944+00:00"
+}

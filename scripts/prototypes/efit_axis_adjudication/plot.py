@@ -236,6 +236,11 @@ def draw_panel(ax, row):
             )
             draw_nulls(ax, other_x_points=positions, style=style)
 
+    # imas-efit's escape bottleneck belongs to the escape walk, not to nova's
+    # rebuild, so it is drawn before the failed-rebuild panels return.
+    if row.get("escape"):
+        _draw_escape_bottleneck(ax, row["escape"])
+
     if row["rebuild"]["status"] != "pass":
         ax.set_aspect("equal")
         ax.set_axis_off()
@@ -311,9 +316,6 @@ def draw_panel(ax, row):
         saddle = b["nova_saddle_position"]
         if saddle:
             _marked_saddle(ax, saddle, color=COLOUR["nova_b"], marker="s")
-
-    if row.get("escape"):
-        _draw_escape_bottleneck(ax, row["escape"])
 
     ax.set_aspect("equal")
     ax.set_axis_off()

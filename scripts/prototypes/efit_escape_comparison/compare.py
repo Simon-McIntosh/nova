@@ -146,16 +146,26 @@ def join_side(pair, side, esc, endpoints, n):
         nova_span = n["nova_span"]
         efit_span = n["efit_span"]
         nova_wall = n["nova_wall_level"]
+        # The admitted contact is the one the label names: a limited decision
+        # admits a wall contact, a diverted decision an interior saddle. The
+        # other candidate is kept only as a fallback, so a limited table row
+        # never calls a finite saddle its boundary contact.
+        saddle_contact = None
         if n.get("nova_saddle_psi") is not None and math.isfinite(n["nova_saddle_psi"]):
-            contact = {
+            saddle_contact = {
                 "kind": "saddle",
                 "level": n["nova_saddle_psi"],
                 "position": [n["nova_saddle_r"], n["nova_saddle_z"]],
             }
-        elif nova_wall is not None and math.isfinite(nova_wall):
-            contact = {"kind": "wall", "level": nova_wall, "position": None}
+        wall_contact = (
+            {"kind": "wall", "level": nova_wall, "position": None}
+            if nova_wall is not None and math.isfinite(nova_wall)
+            else None
+        )
+        if nova_label == "limited":
+            contact = wall_contact or saddle_contact
         else:
-            contact = None
+            contact = saddle_contact or wall_contact
 
     gap = None
     rel = None

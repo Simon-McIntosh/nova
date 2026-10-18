@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="373">
+<meta name="plan-version" content="374">
 <meta name="plan-modified" content="2026-10-18">
 </head>
 <body>
@@ -1017,6 +1017,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261018T122242821904-review-of-efit-axis-adjudication-df9d4e7df0f1" data-who="reckon-build" data-when="2026-10-18T12:32:23Z">
     <div class="r-comment-body"><p>Stored parsed review for source run r-20261018T091852734602-efit-axis-adjudication at its two granted review-record paths, base 1b25eedd7574fda2220c02fc33fffd39db9433bd and head df9d4e7df0f112ac3f358973b69e5db14fa79b4d, total 92/120, three findings including one blocking.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261018T091852734602-efit-axis-adjudication" data-who="reckon-build" data-when="2026-10-18T12:07:44Z">
+    <div class="r-comment-body"><p>Evidence-only adjudication record for 26 imas-efit traces: 24 measured records pass the spline rebuild gate and enter code comparisons; both synthetic inputs fail at 2.433e-4 and 2.638e-4 gradient norm against 1e-9 and are excluded from axis and saddle comparisons. All 5013 spline census points remain tabled and five painter-based machine SVGs are cited and inspected.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

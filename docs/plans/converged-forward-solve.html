@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="347">
+<meta name="plan-version" content="348">
 <meta name="plan-modified" content="2026-10-18">
 </head>
 <body>
@@ -1493,6 +1493,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261017T073925596435-axis-facing-owner" data-who="reckon-build" data-when="2026-10-17T10:03:20.564Z">
     <div class="r-comment-body"><p>§5's diverted map measurement is landed as docs/research/axis-facing-owner.html with its evidence fragment at docs/evidence/fragments/converged-forward-solve/axis-facing-owner.html — the 2098 guard failure is a REGRESSION introduced by the owner's replacement, not a target it inherited: re-measuring the sampling booking the owner replaces, through the identical read and handoff, gives 1.08660010688e-3 / 4.87161211918e-4 / 9.47260774384e-5 at 282 / 550 / 2098, which passes 550 and 2098 and fails 282 by 1.07e-10, and the 282 guard 1.0866e-3 is that booking's own error to eight significant figures; the delivered half-plane cut is better at 282 and 550 (1.08006018256e-3 and 4.09606071189e-4) and 2.63x worse at 2098 (2.49303535497e-4), where a single booked owner cell (cell 47) carries 59 % of the excess over the 1.76641360086e-5 floor with its area right to 1.5e-6 and its current off by 3.3e-3. Nine representations measured on all three carriers leave no conic under all three guards, and the measured target the region repair reaches is the inherited booking's own 9.47260774384e-5; the diverted cold solve converges to 1e-12 at 282 (3.14409717612e-13) and 550 (4.84764428524e-13), and at 2098 reaches one correction in 1254.7 s before the allocation expired, so clause 3's largest carrier is a CPU-budget limit rather than a convergence failure.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261018T060520511372-review-of-owner-cell-current-e05e47dc0ffd" data-who="reckon-build" data-when="2026-10-18T06:21:55.651Z">
+    <div class="r-comment-body"><p>none — this is a review node; it lands no code. Its deliverable is the review record, stored under the reviewed run&#x27;s directory.</p></div>
 </div>
 </section>
 </main>

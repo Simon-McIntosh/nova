@@ -26,6 +26,13 @@
   ],
   "completed_at": "",
   "dispatched_at": "2026-10-18T06:30:51Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "The base column is the half-plane owner measured and merged at bb89a2b10 (docs/research/owner-cell-current.html, errors 1.08006e-3, 4.09606e-4, 2.49299e-4), quoted in the brief as the base; the coordinator records that revision beside the table at merge.",
+      "recorded_at": "2026-10-18T12:44:25.312082+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/research/lobe-share-partition.html",

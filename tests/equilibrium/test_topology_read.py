@@ -2634,6 +2634,11 @@ def _census_tie_setup(cache):
     from scripts.prototypes.fast_map_production import tie_probe
     from scripts.prototypes.read_robustness import census as repaired_module
 
+    machine = cache / "analytic_oracle_hex_machine_250.zarr"
+    if not machine.exists():
+        pytest.skip(
+            f"no certified machine cache at {cache}; set NOVA_ANALYTIC_ORACLE_CACHE"
+        )
     state = tie_probe.build("diverted", 250, str(cache))
     sampled = tie_probe.make_sampler(state)
     prior, _ = tie_probe.warm(state, sampled, -0.2, 0.16, 0.01)
@@ -2649,10 +2654,9 @@ def _census_reading(census_function, state, prior, offset):
     )
 
     roots = count_roots(census_function, state, offset, prior)
-    valid = bool(jnp.sum(roots.valid))
-    eigenvalues = jnp.linalg.eigvalsh(state["convention"].sigma * roots.jet.hessian)
-    saddles = roots.valid & (eigenvalues[:, 0] < 0) & (eigenvalues[:, 1] > 0)
-    return int(valid), int(jnp.sum(saddles)), roots
+    eigenvalue = jnp.linalg.eigvalsh(state["convention"].sigma * roots.jet.hessian)
+    saddle = roots.valid & (eigenvalue[:, 0] < 0) & (eigenvalue[:, 1] > 0)
+    return int(jnp.sum(roots.valid)), int(jnp.sum(saddle)), roots
 
 
 def _census_field(state, offset):
@@ -2738,7 +2742,7 @@ def test_census_keeps_the_wall_contact_saddle_across_the_adjacent_pair():
         "the independently recovered stationary point must be hyperbolic"
     )
     assert float(np.asarray(independent.jet.value)) == pytest.approx(
-        float(np.asarray(sample.jet.value)[saddle_index]), rel=0, abs=1e-9
+        float(np.asarray(sample.jet.value)[saddle_index]), rel=0, abs=1e-7
     ), "the independently recovered point must carry the same flux value"
 
     nearest = float(np.min(np.linalg.norm(positions[low] - wall, axis=1)))

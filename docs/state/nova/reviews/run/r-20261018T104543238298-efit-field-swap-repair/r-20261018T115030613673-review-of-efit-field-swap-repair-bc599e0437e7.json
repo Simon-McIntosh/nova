@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run's baseline_suite and after_suite declare completed true and exit_status 0; their opened logs show 12 and 17 passing tests respectively and no failing IDs.",
+  "call_site_count": 6,
+  "call_sites": [
+    "scripts/prototypes/efit_field_swap/crosscheck.py:319",
+    "scripts/prototypes/efit_field_swap/crosscheck.py:325",
+    "scripts/prototypes/efit_field_swap/crosscheck.py:441",
+    "scripts/prototypes/efit_field_swap/export_tie_islands.py:245",
+    "scripts/prototypes/efit_field_swap/export_tie_islands.py:281",
+    "scripts/prototypes/efit_field_swap/diagnose_seed.py:29"
+  ],
+  "completed_at": "2026-10-18T12:02:15Z",
+  "dispatched_at": "2026-10-18T11:51:32Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/efit_field_swap/trace_record.py",
+      "line": "105",
+      "severity": "blocking",
+      "text": "blocking: for nonempty wall segments whose last end differs from the first start, wall_ring appends the first start directly after the last start and drops the recorded final endpoint, so the last wall segment is replaced by a different edge and the field-swap geometry can yield a wrong boundary decision; retain the last end before closing to the first point."
+    },
+    {
+      "file": "scripts/prototypes/efit_field_swap/test_trace_record.py",
+      "line": "127",
+      "severity": "blocking",
+      "text": "blocking: the new open-wall test asserts the discarded final endpoint is absent, so it passes on the geometry regression above and cannot protect the required closure behavior."
+    },
+    {
+      "file": "scripts/prototypes/efit_field_swap/test_export_states.py",
+      "line": "240",
+      "severity": "follow-on",
+      "text": "follow-on: exported_key is copied from the receipt key that the test supplied, while export is monkeypatched at line 219; this assertion stays green if export's live measure and key refusal at export_tie_islands.py:92-98 are removed, so it does not guard decision identity."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 6 production call sites",
+    "diff": "read five commits from 5179d0b7524a to bc599e0437e7; dc7e16c6 changes the trace ring, spline adapter and exporter, 33f4f9a5 writes the case table, 87b61d81 preserves unread rows and validates brackets, 894ce1a4 adds evidence, and bc599e04 adds the eight-endpoint test.",
+    "done_when": "the source brief names six repairs; the manifest's baseline_suite and after_suite resolve to completed 12/12 and 17/17 focused gates, sweep.log records ROWS 28, and verify-exports.log records eight transition endpoints plus two carriers, while test_trace_record.py:121-127 does not assert preservation of an open wall's last segment.",
+    "goal": "docs/plans/converged-forward-solve.html:585 asks for a two-code field swap; docs/research/efit-field-swap.html:31-112 carries 28 case decisions and the run exports ten reverse-exchange records, but trace_record.py:105 drops a segmented wall's final endpoint when it is open.",
+    "manifest": "the source run's manifest.md reports five commits and ten changed paths, complete status, two completed suite arms with zero failure IDs, a first-bracket mutation that fails the added endpoint test, and export receipts under exports/.",
+    "write_paths": "the source manifest grants scripts/prototypes/efit_field_swap, the named research page and evidence fragments; git diff --name-only from 5179d0b7524a to bc599e0437e7 lists ten files, all inside those grants."
+  },
+  "justifications": {
+    "durability": "test_export_states.py:226 fails when a bracket is omitted and its red log records 4/8, but test_trace_record.py:126 approves a ring that omits the open wall's last endpoint and test_export_states.py:240 echoes the receipt key while the real export guard is mocked.",
+    "evidence": "the baseline.log and review-after.log receipts identify the base and head and complete at 12/12 and 17/17, while sweep.log and verify-exports.log record 28 rows and eight endpoints plus two carriers.",
+    "fit": "spline_field.py:15-66 uses nova.linalg.tensor_spline's owned API and the changed names describe mechanisms, but trace_record.py:105 violates the trace wall's consecutive-segment representation documented at line 95.",
+    "goal_fidelity": "docs/research/efit-field-swap.html:31-112 reports the requested cases and exports, but trace_record.py:105 loses the last endpoint of an open segmented wall and can change a boundary decision on that input.",
+    "reuse": "a capability search found the spline owner at nova/linalg/tensor_spline.py:264-335, and spline_field.py:31-38 now wraps fit_tensor_spline instead of retaining its own basis and derivative implementation; no other added definition duplicates that owner.",
+    "scope_discipline": "the ten paths in git diff --name-only 5179d0b7524a..bc599e0437e7 are within the manifest's declared script, research and evidence paths; nova/equilibrium and imas-efit source are untouched."
+  },
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: 5179d0b7524a5ab6d8a87efa91d2051b2f6a3708\nreviewed_head_sha: bc599e0437e7e354d80f546c69183848ac667905\n\nVERDICT goal: docs/plans/converged-forward-solve.html:585 asks for a two-code field swap; docs/research/efit-field-swap.html:31-112 carries 28 case decisions and the run exports ten reverse-exchange records, but trace_record.py:105 drops a segmented wall's final endpoint when it is open.\nVERDICT done_when: the source brief names six repairs; the manifest's baseline_suite and after_suite resolve to completed 12/12 and 17/17 focused gates, sweep.log records ROWS 28, and verify-exports.log records eight transition endpoints plus two carriers, while test_trace_record.py:121-127 does not assert preservation of an open wall's last segment.\nVERDICT write_paths: the source manifest grants scripts/prototypes/efit_field_swap, the named research page and evidence fragments; git diff --name-only from 5179d0b7524a to bc599e0437e7 lists ten files, all inside those grants.\nVERDICT manifest: the source run's manifest.md reports five commits and ten changed paths, complete status, two completed suite arms with zero failure IDs, a first-bracket mutation that fails the added endpoint test, and export receipts under exports/.\nVERDICT diff: read five commits from 5179d0b7524a to bc599e0437e7; dc7e16c6 changes the trace ring, spline adapter and exporter, 33f4f9a5 writes the case table, 87b61d81 preserves unread rows and validates brackets, 894ce1a4 adds evidence, and bc599e04 adds the eight-endpoint test.\nCALL_SITES: scripts/prototypes/efit_field_swap/crosscheck.py:319, scripts/prototypes/efit_field_swap/crosscheck.py:325, scripts/prototypes/efit_field_swap/crosscheck.py:441, scripts/prototypes/efit_field_swap/export_tie_islands.py:245, scripts/prototypes/efit_field_swap/export_tie_islands.py:281, scripts/prototypes/efit_field_swap/diagnose_seed.py:29\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: docs/research/efit-field-swap.html:31-112 reports the requested cases and exports, but trace_record.py:105 loses the last endpoint of an open segmented wall and can change a boundary decision on that input.\nSCORE evidence: 18\nJUSTIFICATION evidence: the baseline.log and review-after.log receipts identify the base and head and complete at 12/12 and 17/17, while sweep.log and verify-exports.log record 28 rows and eight endpoints plus two carriers.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the ten paths in git diff --name-only 5179d0b7524a..bc599e0437e7 are within the manifest's declared script, research and evidence paths; nova/equilibrium and imas-efit source are untouched.\nSCORE durability: 12\nJUSTIFICATION durability: test_export_states.py:226 fails when a bracket is omitted and its red log records 4/8, but test_trace_record.py:126 approves a ring that omits the open wall's last endpoint and test_export_states.py:240 echoes the receipt key while the real export guard is mocked.\nSCORE fit: 17\nJUSTIFICATION fit: spline_field.py:15-66 uses nova.linalg.tensor_spline's owned API and the changed names describe mechanisms, but trace_record.py:105 violates the trace wall's consecutive-segment representation documented at line 95.\nSCORE reuse: 20\nJUSTIFICATION reuse: a capability search found the spline owner at nova/linalg/tensor_spline.py:264-335, and spline_field.py:31-38 now wraps fit_tensor_spline instead of retaining its own basis and derivative implementation; no other added definition duplicates that owner.\nFINDING scripts/prototypes/efit_field_swap/trace_record.py:105 blocking: for nonempty wall segments whose last end differs from the first start, wall_ring appends the first start directly after the last start and drops the recorded final endpoint, so the last wall segment is replaced by a different edge and the field-swap geometry can yield a wrong boundary decision; retain the last end before closing to the first point.\nFINDING scripts/prototypes/efit_field_swap/test_trace_record.py:127 blocking: the new open-wall test asserts the discarded final endpoint is absent, so it passes on the geometry regression above and cannot protect the required closure behavior.\nFINDING scripts/prototypes/efit_field_swap/test_export_states.py:240 follow-on: exported_key is copied from the receipt key that the test supplied, while export is monkeypatched at line 219; this assertion stays green if export's live measure and key refusal at export_tie_islands.py:92-98 are removed, so it does not guard decision identity.\n",
+  "review_run_id": "r-20261018T115030613673-review-of-efit-field-swap-repair-bc599e0437e7",
+  "reviewed_base_sha": "5179d0b7524a5ab6d8a87efa91d2051b2f6a3708",
+  "reviewed_head_sha": "bc599e0437e7e354d80f546c69183848ac667905",
+  "reviewed_run_id": "r-20261018T104543238298-efit-field-swap-repair",
+  "reviewer": {
+    "backend": "codex"
+  },
+  "rubric": "review",
+  "scores": {
+    "durability": 12,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T11:59:16.960148+00:00",
+  "total": 102
+}

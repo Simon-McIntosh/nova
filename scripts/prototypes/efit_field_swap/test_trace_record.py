@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from dataclasses import replace
 
 import numpy as np
 import pytest
@@ -104,3 +105,23 @@ def test_rejects_an_unknown_header(tmp_path):
     bad.write_text("BOUNDARY_LEVEL_TRACE 1\n")
     with pytest.raises(ValueError):
         read_trace_record(bad)
+
+
+def test_wallless_crossing_uses_its_polygon_and_closes_it():
+    crossing = read_trace_record(
+        Path(CAPTURE.parents[2]) / "crossing" / "synthetic_crossing_a.txt"
+    )
+    assert crossing.wall_r.shape[0] == 0
+    assert crossing.polygon_r.size == 4
+    ring = crossing.wall_ring
+    np.testing.assert_array_equal(ring[:-1, 0], crossing.polygon_r)
+    np.testing.assert_array_equal(ring[0], ring[-1])
+
+
+def test_disconnected_trace_wall_closes_at_its_first_point():
+    source = read_trace_record(CAPTURE)
+    wall_r = source.wall_r.copy()
+    wall_r[-1, 1] += 0.1
+    ring = replace(source, wall_r=wall_r).wall_ring
+    np.testing.assert_array_equal(ring[0], ring[-1])
+    assert ring[-1, 0] != wall_r[-1, 1]

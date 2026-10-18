@@ -15,7 +15,11 @@ import pytest
 
 from scripts.prototypes.efit_field_swap.crosscheck import load_pairs, resolve_trace
 from scripts.prototypes.efit_field_swap.export_states import export_row
-from scripts.prototypes.efit_field_swap.export_tie_islands import bisected_offset
+from scripts.prototypes.efit_field_swap.export_tie_islands import (
+    bisected_brackets,
+    bisected_offset,
+    validate_carrier,
+)
 from scripts.prototypes.efit_field_swap.trace_record import (
     HEADER,
     read_trace_record,
@@ -25,6 +29,34 @@ from scripts.prototypes.efit_field_swap.trace_record import (
 
 def _source_and_pairs():
     return load_pairs()
+
+
+def _raw_fields(path):
+    """Read the Fortran text positions without using the trace codec."""
+    lines = path.read_text().splitlines()
+    dims = [int(value) for value in lines[1].split()]
+    nr, nz, nwall, nlim, ncell, npoly = dims[3:]
+    cursor = 4
+    radial = np.asarray([float(line) for line in lines[cursor : cursor + nr]])
+    cursor += nr
+    vertical = np.asarray([float(line) for line in lines[cursor : cursor + nz]])
+    cursor += nz
+    wall = np.asarray(
+        [
+            [float(value) for value in line.split()]
+            for line in lines[cursor : cursor + nwall]
+        ]
+    )
+    cursor += nwall + nlim + ncell + npoly
+    psi = np.asarray([float(line) for line in lines[cursor:]]).reshape(nr, nz)
+    return (
+        dims,
+        [float(value) for value in lines[3].split()],
+        radial,
+        vertical,
+        wall,
+        psi,
+    )
 
 
 def test_export_round_trips_through_the_codec(tmp_path):
@@ -58,6 +90,14 @@ def test_export_round_trips_through_the_codec(tmp_path):
     assert np.array_equal(read_back.wall_r, source.wall_r)
     assert np.array_equal(read_back.polygon_r, source.polygon_r)
 
+    raw_export = _raw_fields(path)
+    raw_source = _raw_fields(resolve_trace(pairs[0][1]))
+    assert raw_export[0][2] == 2
+    assert raw_export[1][0:3] == [1.25, 3.5, 0.25]
+    assert raw_export[1][4] == raw_export[1][6] == 0.5
+    for exported, original in zip(raw_export[2:], raw_source[2:], strict=True):
+        np.testing.assert_array_equal(exported, original)
+
 
 def test_written_export_is_bit_stable(tmp_path):
     pairs = _source_and_pairs()
@@ -69,12 +109,16 @@ def test_written_export_is_bit_stable(tmp_path):
     assert first.read_text() == second.read_text()
 
 
-def _receipt(adjacent, unchanged):
+def _receipt(adjacent, unchanged, right=None):
+    if right is None:
+        right = float(np.nextafter(0.1613, np.inf))
     return {
         "key": "both",
+        "requested_cells": 250,
+        "achieved_cells": 282,
         "bisected": [
             {
-                "bracket": [0.1613, 0.1613],
+                "bracket": [0.1613, right],
                 "steps": 42,
                 "adjacent": adjacent,
                 "unchanged": unchanged,
@@ -90,8 +134,24 @@ def test_an_unbisected_offset_is_refused(tmp_path):
     for adjacent, unchanged in ((False, False), (True, True)):
         with pytest.raises(SystemExit):
             bisected_offset(_receipt(adjacent, unchanged), tmp_path / "receipt.json")
+    with pytest.raises(SystemExit, match="adjacent binary64"):
+        bisected_offset(_receipt(True, False, 0.1613), tmp_path / "receipt.json")
+    same_key = _receipt(True, False)
+    same_key["bisected"][0]["right"] = same_key["bisected"][0]["left"]
+    with pytest.raises(SystemExit, match="decision transition"):
+        bisected_offset(same_key, tmp_path / "receipt.json")
 
 
 def test_a_bisected_offset_is_taken_from_the_receipt(tmp_path):
     offset, entry = bisected_offset(_receipt(True, False), tmp_path / "receipt.json")
     assert offset == entry["bracket"][0] == 0.1613
+    assert len(list(bisected_brackets(_receipt(True, False), "receipt.json"))) == 1
+
+
+def test_receipt_cell_counts_must_match_the_carrier():
+    receipt = _receipt(True, False)
+    validate_carrier(receipt, 250, 282)
+    with pytest.raises(SystemExit, match="250/550"):
+        validate_carrier(receipt, 250, 550)
+    with pytest.raises(SystemExit, match="500/282"):
+        validate_carrier(receipt, 500, 282)

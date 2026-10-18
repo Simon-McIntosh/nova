@@ -282,7 +282,7 @@ def wall_units(record: TraceRecord):
     """The record's wall as one closed unit."""
     ring = record.wall_ring
     if not np.allclose(ring[0], ring[-1]):
-        ring = np.vstack((ring, ring[-1]))
+        ring = np.vstack((ring, ring[0]))
     return (ring,)
 
 

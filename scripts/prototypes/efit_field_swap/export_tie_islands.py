@@ -39,14 +39,15 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-from nova.equilibrium import topology
 from scripts.prototypes.efit_field_swap.trace_record import (
     TraceRecord,
     write_trace_record,
 )
 from scripts.prototypes.fast_map_production import tie_probe
-from scripts.prototypes.fast_map_production.kernel import read as nova_read
-from scripts.prototypes.read_robustness.census import census
+from scripts.prototypes.fast_map_production.saddle_admission_probe import (
+    measure,
+    sampler_with_enclosure,
+)
 
 DIVERTED = 2
 LIMITED = 1
@@ -85,18 +86,18 @@ def render(field, geometry, grid=GRID):
     return rgrid, zgrid, psi
 
 
-def export(state, offset, out_dir, tag):
+def export(state, offset, out_dir, tag, sampled, expected_key, key_name):
     geometry = state["geometry"]
     field = moving_field(state, offset)
     convention = state["convention"]
-    policy = state["policy"]
-    initial = jax.jit(lambda: topology.read(field, geometry, convention, policy))()
-    valid = np.asarray(initial.x_point_valid)
-    stack = [np.asarray(initial.axis)[None]]
-    if valid.any():
-        stack.append(np.asarray(initial.x_points)[valid])
-    roots = census(field, geometry, convention, policy, jnp.asarray(np.vstack(stack)))
-    reading = nova_read(field, roots.roots, geometry, convention, policy)
+    measured = measure(offset, state, sampled)
+    actual_key = decision_key(measured, key_name)
+    if actual_key != expected_key:
+        raise SystemExit(
+            f"export read at {offset!r} has key {actual_key}, "
+            f"receipt records {expected_key}"
+        )
+    _, reading, *_ = sampled(jnp.asarray(offset * state["scale"]))
     jax.block_until_ready(reading.boundary_flux)
     sigma = float(convention.sigma)
 
@@ -170,7 +171,7 @@ def centre_count(geometry):
     return geometry.centre
 
 
-def bisected_offset(receipt, path):
+def bisected_brackets(receipt, path):
     """The bisected offset a receipt records, refusing anything but a state.
 
     The offset comes from the receipt rather than from a command-line argument,
@@ -178,18 +179,32 @@ def bisected_offset(receipt, path):
     A receipt failing either test names an interval or a non-transition, and
     neither is a tie-island state.
     """
-    usable = [
-        entry
-        for entry in receipt.get("bisected", [])
-        if entry.get("adjacent") and not entry.get("unchanged")
-    ]
-    if not usable:
-        raise SystemExit(
-            f"{path} records no adjacent bisected bracket: it names an interval "
-            "or a non-transition, so there is no tie-island state to export"
-        )
-    entry = usable[0]
-    return float(entry["bracket"][0]), entry
+    entries = receipt.get("bisected", [])
+    if not entries:
+        raise SystemExit(f"{path} records no bisected bracket")
+    for entry in entries:
+        bracket = entry.get("bracket", [])
+        if len(bracket) != 2:
+            raise SystemExit(f"{path} has a bracket without two endpoints")
+        left, right = map(float, bracket)
+        adjacent = bool(np.isfinite(left) and np.nextafter(left, np.inf) == right)
+        left_key = decision_key(entry["left"], receipt["key"])
+        right_key = decision_key(entry["right"], receipt["key"])
+        changed = left_key != right_key
+        if not adjacent or not changed:
+            raise SystemExit(
+                f"{path} is not an adjacent binary64 decision transition: "
+                f"bracket={bracket!r}, keys={left_key!r}/{right_key!r}"
+            )
+        if entry.get("adjacent") is not True or entry.get("unchanged") is not False:
+            raise SystemExit(f"{path} receipt flags contradict its endpoints or keys")
+        yield left, right, entry
+
+
+def bisected_offset(receipt, path):
+    """The left endpoint of the first validated transition."""
+    left, _, entry = next(bisected_brackets(receipt, path))
+    return left, entry
 
 
 def decision_key(row, key):
@@ -199,51 +214,70 @@ def decision_key(row, key):
     return (row[key],)
 
 
+def validate_carrier(receipt, requested, achieved):
+    """Require both receipt cell counts to describe the built carrier."""
+    if (receipt.get("requested_cells"), receipt.get("achieved_cells")) != (
+        requested,
+        achieved,
+    ):
+        raise SystemExit(
+            f"carrier requested/achieved {requested}/{achieved} cells but "
+            f"receipt records {receipt.get('requested_cells')}/"
+            f"{receipt.get('achieved_cells')}"
+        )
+
+
 def main(cache, out_dir, jobs):
     """jobs: one (receipt-path, requested-cells) pair per exported state."""
     Path(out_dir).mkdir(parents=True, exist_ok=True)
     for receipt_path, requested in jobs:
         receipt = json.loads(Path(receipt_path).read_text())
-        offset, entry = bisected_offset(receipt, receipt_path)
         state = tie_probe.build(receipt["kind"], requested, cache)
         achieved = len(centre_count(state["geometry"]))
-        if achieved < requested:
-            raise SystemExit(
-                f"carrier requested {requested} cells realised {achieved}; the "
-                "receipt is for a different carrier and its offset does not apply"
-            )
+        validate_carrier(receipt, requested, achieved)
         tag = f"{receipt['kind']}-{achieved}cells"
-        print(
-            "BISECTED offset=%r bracket=%r steps=%d key=%s from=%s"
-            % (
-                offset,
-                entry["bracket"],
-                entry["steps"],
-                receipt["key"],
-                Path(receipt_path).name,
-            ),
-            flush=True,
-        )
-        target = export(state, offset, out_dir, tag)
-        target.with_suffix(".json").write_text(
-            json.dumps(
-                {
-                    "record": target.name,
-                    "kind": receipt["kind"],
-                    "requested_cells": requested,
-                    "achieved_cells": achieved,
-                    "offset": offset,
-                    "key": receipt["key"],
-                    "bracket": entry["bracket"],
-                    "steps": entry["steps"],
-                    "adjacent": entry["adjacent"],
-                    "left_key": list(decision_key(entry["left"], receipt["key"])),
-                    "right_key": list(decision_key(entry["right"], receipt["key"])),
-                },
-                indent=2,
-            )
-            + "\n"
-        )
+        sampled = sampler_with_enclosure(state)
+        for index, (left, right, entry) in enumerate(
+            bisected_brackets(receipt, receipt_path), start=1
+        ):
+            for side, offset, row in (
+                ("left", left, entry["left"]),
+                ("right", right, entry["right"]),
+            ):
+                expected_key = decision_key(row, receipt["key"])
+                target = export(
+                    state,
+                    offset,
+                    out_dir,
+                    f"{tag}-edge{index}-{side}",
+                    sampled,
+                    expected_key,
+                    receipt["key"],
+                )
+                target.with_suffix(".json").write_text(
+                    json.dumps(
+                        {
+                            "record": target.name,
+                            "kind": receipt["kind"],
+                            "requested_cells": requested,
+                            "achieved_cells": achieved,
+                            "offset": offset,
+                            "side": side,
+                            "key": receipt["key"],
+                            "bracket": entry["bracket"],
+                            "steps": entry["steps"],
+                            "left_key": list(
+                                decision_key(entry["left"], receipt["key"])
+                            ),
+                            "right_key": list(
+                                decision_key(entry["right"], receipt["key"])
+                            ),
+                            "exported_key": list(expected_key),
+                        },
+                        indent=2,
+                    )
+                    + "\n"
+                )
     return 0
 
 
@@ -253,6 +287,8 @@ if __name__ == "__main__":
     cache, out_dir = sys.argv[1], sys.argv[2]
     rest = sys.argv[3:]
     if len(rest) % 2:
-        raise SystemExit("usage: <cache> <out-dir> <receipt> <cells> [<receipt> <cells>]")
+        raise SystemExit(
+            "usage: <cache> <out-dir> <receipt> <cells> [<receipt> <cells>]"
+        )
     jobs = [(rest[index], int(rest[index + 1])) for index in range(0, len(rest), 2)]
     sys.exit(main(cache, out_dir, jobs))

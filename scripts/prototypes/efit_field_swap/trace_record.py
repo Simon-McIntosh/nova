@@ -93,12 +93,16 @@ class TraceRecord:
         """The wall polygon as ordered RZ vertices.
 
         ``wall_r``/``wall_z`` store the trace wall as consecutive segments
-        (``nwall`` rows of two endpoints); the ordered ring is the first
-        endpoint of each segment followed by the final segment's end.
+        (``nwall`` rows of two endpoints). Some crossing traces store only the
+        polygon, which serves as the wall for the sampled comparison.
         """
-        starts = np.column_stack((self.wall_r[:, 0], self.wall_z[:, 0]))
-        tail = np.array([[self.wall_r[-1, 1], self.wall_z[-1, 1]]])
-        return np.vstack((starts, tail))
+        if self.wall_r.size:
+            starts = np.column_stack((self.wall_r[:, 0], self.wall_z[:, 0]))
+        elif self.polygon_r.size >= 3:
+            starts = np.column_stack((self.polygon_r, self.polygon_z))
+        else:
+            raise ValueError("trace has neither wall segments nor a wall polygon")
+        return np.vstack((starts, starts[0]))
 
 
 def read_trace_record(path: str | Path) -> TraceRecord:

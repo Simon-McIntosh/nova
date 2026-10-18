@@ -1,0 +1,64 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Both completed suite logs report 66 passes and zero added failures; the after arm measures an uncommitted shadow patch, not the reviewed head.",
+  "call_site_count": 3,
+  "call_sites": [
+    "scripts/prototypes/fast_map_production/tie_probe.py:138",
+    "scripts/prototypes/fast_map_production/sweep.py:121",
+    "scripts/prototypes/read_robustness/read.py:55"
+  ],
+  "completed_at": "2026-10-18T08:06:30Z",
+  "dispatched_at": "2026-10-18T08:00:52Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T065749620519-seed-census-departure/manifest.md",
+      "line": "11",
+      "severity": "blocking",
+      "text": "blocking: commits is empty and source HEAD equals the reviewed base; seven changed tracked files remain uncommitted, so neither the repair nor its assertions can land at this revision."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T065749620519-seed-census-departure/gpu_pair.log",
+      "line": "8",
+      "severity": "blocking",
+      "text": "blocking: the titan adjacent pair retains two roots after three on the preceding double, so the required cross-backend saddle census still fails."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "git diff between reviewed base and head efbeb794e60b1f4d39dcb886bb0e1b1148b5a419 is empty, so there are no commits or added assertions to review; the candidate changes remain uncommitted in the source worktree.",
+    "done_when": "prompt.txt:107-113 requires root retention and a read-level gate; gpu_pair.log:7-8 records three roots then two on titan, so the quantitative objective remains unmet.",
+    "goal": "prompt.txt:30 asks that adjacent binary64 states retain a hyperbolic saddle; census.py:52 at the reviewed head still uses the strict cross test, and no repair was committed.",
+    "manifest": "manifest.md:5,11,22-23 reports complete with no commits and two 66-pass suite arms, but its after arm names an uncommitted shadow patch.",
+    "write_paths": "prompt.txt:70-81 declares the fenced paths; the committed diff is empty, while the seven tracked dirty candidate files reported by git diff stay within those paths."
+  },
+  "justifications": {
+    "durability": "tests/equilibrium/test_topology_read.py:2649 is only in the uncommitted candidate, so no assertion was added to the reviewed revision despite the candidate negative_control.log showing strict-cross restoration would fail it.",
+    "evidence": "manifest.md:22-23 and the two named logs show 66 passes in each arm, but the after arm is an uncommitted patch and gpu_pair.log:7-8 falsifies the stated root-retention goal.",
+    "fit": "scripts/prototypes/read_robustness/census.py:52 is unchanged in the committed revision, leaving no landed implementation whose local idiom or names can be credited.",
+    "goal_fidelity": "scripts/prototypes/read_robustness/census.py:52 still rejects negative edge crosses at the reviewed head and gpu_pair.log:8 still has only two roots.",
+    "reuse": "the committed diff adds no definition to duplicate an owner; a capability search found topology.py:1819 uses the existing cross-plane containment mechanism but no seed-specific rounding-bound owner.",
+    "scope_discipline": "git diff from the reviewed base to head is empty, and the dirty candidate paths listed in manifest.md:12 lie inside the fence in prompt.txt:70-81."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: prompt.txt:30 asks that adjacent binary64 states retain a hyperbolic saddle; census.py:52 at the reviewed head still uses the strict cross test, and no repair was committed.\nVERDICT done_when: prompt.txt:107-113 requires root retention and a read-level gate; gpu_pair.log:7-8 records three roots then two on titan, so the quantitative objective remains unmet.\nVERDICT write_paths: prompt.txt:70-81 declares the fenced paths; the committed diff is empty, while the seven tracked dirty candidate files reported by git diff stay within those paths.\nVERDICT manifest: manifest.md:5,11,22-23 reports complete with no commits and two 66-pass suite arms, but its after arm names an uncommitted shadow patch.\nVERDICT diff: git diff between reviewed base and head efbeb794e60b1f4d39dcb886bb0e1b1148b5a419 is empty, so there are no commits or added assertions to review; the candidate changes remain uncommitted in the source worktree.\nCALL_SITES: scripts/prototypes/fast_map_production/tie_probe.py:138, scripts/prototypes/fast_map_production/sweep.py:121, scripts/prototypes/read_robustness/read.py:55\nSCORE goal_fidelity: 0\nJUSTIFICATION goal_fidelity: scripts/prototypes/read_robustness/census.py:52 still rejects negative edge crosses at the reviewed head and gpu_pair.log:8 still has only two roots.\nSCORE evidence: 8\nJUSTIFICATION evidence: manifest.md:22-23 and the two named logs show 66 passes in each arm, but the after arm is an uncommitted patch and gpu_pair.log:7-8 falsifies the stated root-retention goal.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff from the reviewed base to head is empty, and the dirty candidate paths listed in manifest.md:12 lie inside the fence in prompt.txt:70-81.\nSCORE durability: 0\nJUSTIFICATION durability: tests/equilibrium/test_topology_read.py:2649 is only in the uncommitted candidate, so no assertion was added to the reviewed revision despite the candidate negative_control.log showing strict-cross restoration would fail it.\nSCORE fit: 0\nJUSTIFICATION fit: scripts/prototypes/read_robustness/census.py:52 is unchanged in the committed revision, leaving no landed implementation whose local idiom or names can be credited.\nSCORE reuse: 20\nJUSTIFICATION reuse: the committed diff adds no definition to duplicate an owner; a capability search found topology.py:1819 uses the existing cross-plane containment mechanism but no seed-specific rounding-bound owner.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T065749620519-seed-census-departure/manifest.md:11 blocking: commits is empty and source HEAD equals the reviewed base; seven changed tracked files remain uncommitted, so neither the repair nor its assertions can land at this revision.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T065749620519-seed-census-departure/gpu_pair.log:8 blocking: the titan adjacent pair retains two roots after three on the preceding double, so the required cross-backend saddle census still fails.\n",
+  "review_run_id": "r-20261018T080020843192-review-of-r-20261018T065749620519-seed-census-departure-efbeb794e60b",
+  "reviewed_base_sha": "efbeb794e60b1f4d39dcb886bb0e1b1148b5a419",
+  "reviewed_head_sha": "efbeb794e60b1f4d39dcb886bb0e1b1148b5a419",
+  "reviewed_run_id": "r-20261018T065749620519-seed-census-departure",
+  "scores": {
+    "durability": 0,
+    "evidence": 8,
+    "fit": 0,
+    "goal_fidelity": 0,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T08:04:38.797715+00:00",
+  "total": 48
+}

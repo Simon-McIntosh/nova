@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="353">
+<meta name="plan-version" content="354">
 <meta name="plan-modified" content="2026-10-18">
 </head>
 <body>
@@ -973,6 +973,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261018T075441414720-review-of-r-20261018T065749620386-seed-census-departure-007ebbd720ae" data-who="reckon-build" data-when="2026-10-18T08:02:46.009Z">
     <div class="r-comment-body"><p>Reviewed run r-20261018T065749620386-seed-census-departure at head 007ebbd72: scores goal_fidelity 15, evidence 10, scope_discipline 18, durability 2, fit 16, reuse 16 (total 77); two blocking findings (the census still drops 3 -&gt; 1 at offset 0.1735 uncharacterised, and the negative-control driver reads a saved trace rather than reinstating the dropping step) and one follow-on (the manifest omits two landed commits).</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261018T080020843192-review-of-r-20261018T065749620519-seed-census-departure-efbeb794e60b" data-who="reckon-build" data-when="2026-10-18T08:06:30Z">
+    <div class="r-comment-body"><p>Independent review of efbeb794e60b1f4d39dcb886bb0e1b1148b5a419 stored with six scores, six checklist verdicts, zero added failures, and two blocking findings; the source run has no committed delta and titan still drops a root.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

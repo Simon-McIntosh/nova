@@ -145,6 +145,38 @@ worker processes inside one allocation, not a reason for sixteen jobs.
   as separate jobs (a sweep of unrelated configurations), never for the rows of
   one receipt.
 
+### Small nodes, and a worker runs its own tests (binding, lead 2026-10-18)
+
+**A node carries at most three done-when clauses.** Split larger work into
+nodes chained by base, each landing on its own review. **Running its tests is
+part of a worker's job, and test time is not node work.** The lead ruled on
+2026-10-18 that "test work should not count as timing towards the node's
+work".
+
+Measured on 2026-10-18 across both lanes, most blocking review findings on
+converged-forward-solve came from nodes too big for their budget. Briefs
+carried five to seven clauses plus heavy gates inside a 60-minute budget.
+Workers cut gates to fit: suites ran in-process under `timeout 480`, a
+regression gate stopped at 75 of 104 tests, and baseline arms were skipped or
+left to hit their job limit. Gate-passed rates on that plan fell from 24 of 26
+(clive) and 8 of 10 (codex) to 9 of 21 and 0 of 13. Review medians show no
+lane fault behind it.
+
+- **Coordinator.** Split any node whose done-when needs more than three
+  clauses. Copy each heavy gate's command into the brief from a run that
+  worked, never composing one. Size `--time-budget` as the node's work plus the
+  gate's measured wall, until reckon stops counting gate and parked-wait time
+  against the budget; that request is with reckon.
+- **Worker.** Run the focused gate and both suite arms (`baseline_suite` at the
+  base, `after_suite` at the head) yourself, in fresh processes.
+  - On the fleet allocation (`SLURM_JOB_ID` set) run them in place.
+  - Otherwise submit them as one batch job under "One measurement, one SLURM
+    job".
+  - Never shorten a gate to fit the budget: no `timeout` around a suite and no
+    subset passed off as the whole. If the gate outlasts the turn, commit,
+    write the manifest, and park on the job with a sacct `wait_probe`.
+  - A gate cut short is reported as cut short, with the count it reached.
+
 ### The commit hook refuses worktree paths (binding)
 
 Worker worktrees are always removed after promotion, so a committed path into

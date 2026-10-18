@@ -93,6 +93,8 @@ def _row_html(row):
         f"<tr><th scope='row'>{row['index']}<br>{_number(row['liuqe_time'], 3)} s</th>"
         f"<td>{html.escape(row['liuqe_label'])}<br>{label}</td>"
         f"<td>{axis}</td>"
+        f"<td>{_number(gap['span_length'])}</td>"
+        f"<td>{_number(gap['axis_x_distance'])}</td>"
         f"<td>{axis_flux}</td>"
         f"<td>{_x_pair(row, gap)}</td>"
         f"<td>{boundary_flux}</td>"
@@ -117,6 +119,13 @@ def build(rows, field_swap_rows, receipt_path):
         for row in rows
     )
     gaps = [measure_gaps(row) for row in rows]
+    if any(not math.isfinite(gap["span_length"]) for gap in gaps):
+        raise ValueError("every slice requires LIUQE's boundary outline span")
+    if any(
+        math.isfinite(gap["axis_gap"]) and not math.isfinite(gap["axis_relative"])
+        for gap in gaps
+    ):
+        raise ValueError("a measured axis gap lacks its relative value")
     finite_axis = [gap["axis_gap"] for gap in gaps if math.isfinite(gap["axis_gap"])]
     finite_psi = [
         gap["boundary_gap"] for gap in gaps if math.isfinite(gap["boundary_gap"])
@@ -206,14 +215,16 @@ stops after 20,000 boxes per lattice. Any remaining cell leaves the read
 <em>coverage uncertified</em>. This is a refusal, not a limited answer.</p>
 <p>Flux pairs use the LIUQE grid spline, not the stored scalar psi values, whose gauge
 differs across blocks. Absolute flux gaps are divided by LIUQE's grid axis-to-boundary
-flux span. Position gaps are divided by LIUQE's axis-to-nearest-X distance where an
-X-point exists; the relative position gap is undefined for limited LIUQE slices.
+flux span. Position gaps are divided by the shortest distance from LIUQE's axis
+to its own piecewise-linear boundary outline, including limited slices. The
+axis-to-nearest-X distance is an extra measure when LIUQE stores an X-point.
 The X pair uses the LIUQE X-point nearest nova's admitted saddle where both exist.</p>
 <p><strong>{summary}</strong> All twelve rows come from one rescore receipt:
 <code>{html.escape(str(receipt_path))}</code>. A dash means the value was not returned
 or no reference X-point exists; it is never scored as zero.</p>
 <table><thead><tr><th>Slice / time</th><th>LIUQE / nova label</th><th>Axis R,Z [m]</th>
-<th>Axis ψ</th><th>X-point R,Z [m]</th><th>Boundary ψ from grid</th>
+<th>Axis-to-boundary [m]</th><th>Axis-to-X [m]</th><th>Axis ψ</th>
+<th>X-point R,Z [m]</th><th>Boundary ψ from grid</th>
 <th>Coverage certificate</th><th>Lattice</th></tr></thead><tbody>
 {table}
 </tbody></table>

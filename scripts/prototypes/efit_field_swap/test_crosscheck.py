@@ -59,9 +59,11 @@ def test_field_swap_record_reports_coverage_outcome():
         item for item in cases() if item[0] == "jt60sa-5slice-s5-133-134:A"
     )
     row = _row(case, source, path, resolutions=(16,))
-    assert row.nova_label in ("limited", "diverted", "coverage uncertified"), row.note
-    assert np.isfinite(row.coverage_winding), row.note
-    assert "lattice 16:" in row.note
+    assert row.nova_label == "limited", row.note
+    assert row.coverage_winding == pytest.approx(1), row.note
+    assert row.coverage_index_sum == 1, row.note
+    assert row.coverage_cells_cleared > 0, row.note
+    assert row.coverage_cells_uncertified == 0, row.note
 
 
 def test_missing_record_remains_an_explicit_unread_row(tmp_path):

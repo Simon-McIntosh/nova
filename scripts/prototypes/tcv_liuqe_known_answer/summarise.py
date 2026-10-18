@@ -2,11 +2,10 @@
 
 LIUQE is the reference. Each gap is also expressed as a fraction of the
 axis-to-boundary span on that slice, so slices at different plasma sizes and
-flux levels are comparable: a position gap is divided by the distance from
-LIUQE's axis to its nearest stored X-point, a flux gap by LIUQE's stored
-axis-to-boundary flux difference. A gap with no counterpart on the slice -- an
-X-point distance where LIUQE stores no X-point -- is left empty rather than
-filled with a number the data does not carry.
+flux levels are comparable: a position gap is divided by the shortest distance
+from LIUQE's axis to its stored boundary outline, and a flux gap by LIUQE's
+grid axis-to-boundary flux difference. The axis-to-X distance is reported
+separately when LIUQE stores an X-point.
 """
 
 from __future__ import annotations
@@ -31,15 +30,18 @@ def _finite(value):
 
 
 def measure_gaps(row):
-    axis_gap = x_gap = boundary_gap = span_length = float("nan")
+    axis_gap = x_gap = boundary_gap = axis_x_distance = float("nan")
     liuqe_axis = np.asarray(row["liuqe_axis"], dtype=float)
+    span_length = float(row["liuqe_axis_boundary_span"])
+    if not np.isfinite(span_length) or span_length <= 0:
+        raise ValueError("LIUQE axis-to-boundary span must be positive")
     if _finite(row.get("nova_axis_psi")):
         axis_gap = float(
             np.linalg.norm(np.asarray(row["nova_axis"], float) - liuqe_axis)
         )
     xpoints = np.asarray(row.get("liuqe_xpoints") or [], dtype=float).reshape(-1, 2)
     if len(xpoints):
-        span_length = float(np.min(np.linalg.norm(xpoints - liuqe_axis, axis=1)))
+        axis_x_distance = float(np.min(np.linalg.norm(xpoints - liuqe_axis, axis=1)))
     if (
         len(xpoints)
         and row.get("nova_label") == "diverted"
@@ -68,6 +70,7 @@ def measure_gaps(row):
         boundary_gap=boundary_gap,
         axis_psi_gap=axis_psi_gap,
         span_length=span_length,
+        axis_x_distance=axis_x_distance,
         span_flux=span_flux,
         axis_relative=axis_gap / span_length
         if _finite(axis_gap) and _finite(span_length)

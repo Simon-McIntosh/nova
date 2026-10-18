@@ -123,7 +123,8 @@ def test_cancelled_missed_pair_is_refused(monkeypatch):
     # The field contains two extrema and one saddle. Reporting just one
     # extremum leaves the same index as the true field despite two missed roots.
     boundary = crosscheck.coverage_certificate(field, RING, (), 1)
-    assert boundary.certified and boundary.total == boundary.index_sum == 1
+    assert boundary.certified and boundary.total == 1
+    assert boundary.cells_cleared > 0 and boundary.cells_uncertified == 0
 
     def blind_census(f, geometry, convention, policy, previous):
         hessian = jnp.asarray([[[-1.0, 0.0], [0.0, -1.0]]])
@@ -227,3 +228,26 @@ def test_limited_slice_is_read_only_when_coverage_is_certified():
     assert reading["nova_label"] == "limited", reading["attempts"]
     assert reading["coverage_certified"] is True, reading["attempts"]
     assert reading["coverage_cells_uncertified"] == 0
+
+
+def test_limited_axis_gap_uses_boundary_outline_span():
+    from scripts.prototypes.tcv_liuqe_known_answer.summarise import measure_gaps
+
+    outline = np.asarray(((0.0, 0.0), (2.0, 0.0), (2.0, 2.0), (0.0, 2.0)))
+    span = measure.axis_boundary_span((1.0, 0.5), outline)
+    assert span == pytest.approx(0.5)
+    row = {
+        "liuqe_axis": [1.0, 0.5],
+        "liuqe_axis_boundary_span": span,
+        "liuqe_xpoints": [],
+        "liuqe_axis_psi_grid": 0.0,
+        "liuqe_boundary_psi_grid": 1.0,
+        "nova_axis": [1.1, 0.5],
+        "nova_axis_psi": 0.1,
+        "nova_boundary_psi": 1.1,
+        "nova_label": "limited",
+    }
+    gaps = measure_gaps(row)
+    assert gaps["axis_gap"] == pytest.approx(0.1)
+    assert gaps["axis_relative"] == pytest.approx(0.2)
+    assert np.isnan(gaps["axis_x_distance"])

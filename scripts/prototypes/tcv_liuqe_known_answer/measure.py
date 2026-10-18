@@ -25,10 +25,11 @@ from __future__ import annotations
 
 import argparse
 import json
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path
 
 import imas
+import jax
 import jax.numpy as jnp
 import numpy as np
 
@@ -40,8 +41,17 @@ from scripts.prototypes.efit_field_swap import crosscheck
 from scripts.prototypes.efit_field_swap.spline_field import TraceSplineField
 
 configure_dtypes()
+assert jax.config.jax_enable_x64 is True
 
-RESOLUTIONS = (24, 32, 48)
+RESOLUTIONS = (16, 24, 32)
+SLICES = (0, 14, 34, 46, 118, 206, 248, 291, 456, 542, 796, 1257)
+REFUSED_CASES = {
+    "jt60sa-5slice-s5-133-134:A",
+    "jt60sa-5slice-s5-133-134:B",
+    "jt60sa-5slice-s1-15-16:B",
+    "jt60sa-5slice-s2-135-136:A",
+    "jt60sa-5slice-s2-135-136:B",
+}
 
 
 @dataclass(frozen=True)
@@ -133,6 +143,27 @@ def _grid_level(field, points):
     return float(np.mean(values))
 
 
+def axis_boundary_span(axis, outline):
+    """Shortest distance from the axis to LIUQE's piecewise-linear boundary."""
+    points = np.asarray(outline, dtype=np.float64)
+    if len(points) < 3 or not np.all(np.isfinite(points)):
+        raise ValueError("LIUQE boundary outline is missing or nonfinite")
+    start = points
+    edge = np.roll(points, -1, axis=0) - start
+    squared = np.einsum("ij,ij->i", edge, edge)
+    usable = squared > 0
+    if not np.any(usable):
+        raise ValueError("LIUQE boundary outline has no segments")
+    start, edge, squared = start[usable], edge[usable], squared[usable]
+    position = np.asarray(axis, dtype=np.float64)
+    fraction = np.clip(np.einsum("ij,ij->i", position - start, edge) / squared, 0, 1)
+    nearest = start + fraction[:, None] * edge
+    span = float(np.min(np.linalg.norm(position - nearest, axis=1)))
+    if not np.isfinite(span) or span <= 0:
+        raise ValueError("LIUQE axis-to-boundary span is not positive")
+    return span
+
+
 def measure_slice(view, wall_rings, resolutions=RESOLUTIONS):
     """nova's read on one LIUQE slice, against LIUQE's own stored values."""
     state = build_state(
@@ -191,6 +222,7 @@ def liuqe_reference(view, field):
         liuqe_boundary_psi_stored=view["psi_boundary"],
         liuqe_xpoints=[list(p) for p in view["xpoints"]],
         liuqe_label="diverted" if view["xpoints"] else "limited",
+        liuqe_axis_boundary_span=axis_boundary_span(view["axis"], view["outline"]),
     )
     ref["liuqe_axis_psi_grid"] = _value(field, view["axis"])
     if view["xpoints"]:
@@ -208,7 +240,8 @@ def main():
     parser.add_argument("--wall", required=True)
     parser.add_argument("--slices", required=True, help="comma-separated indices")
     parser.add_argument("--out", required=True)
-    parser.add_argument("--resolutions", default="24,32,48")
+    parser.add_argument("--field-swap-out")
+    parser.add_argument("--resolutions", default="16,24,32")
     args = parser.parse_args()
     print("nova.__file__", __import__("nova").__file__, flush=True)
 
@@ -217,47 +250,54 @@ def main():
     wall_rings = read_wall(args.wall)
     db = imas.DBEntry(f"imas:hdf5?path={args.liuqe}", "r", dd_version="3.41.0")
     eq = db.get("equilibrium")
-    rows = []
-    for index in slices:
-        view = slice_view(eq, index)
-        state = build_state(
-            view["rgrid"],
-            view["zgrid"],
-            view["psi"],
-            wall_rings,
-            view["axis"][0],
-            view["axis"][1],
-        )
-        field = TraceSplineField.from_record(state)
-        row = dict(index=index)
-        row.update(liuqe_reference(view, field))
-        try:
-            row.update(measure_slice(view, wall_rings, resolutions))
-        except Exception as error:  # noqa: BLE001 - one slice must not stop the sweep
-            row.update(
-                resolution=None,
-                fitted=False,
-                nova_axis=[float("nan")] * 2,
-                nova_axis_psi=float("nan"),
-                nova_boundary=[float("nan")] * 2,
-                nova_boundary_psi=float("nan"),
-                nova_label="unread",
-                nova_span=float("nan"),
-                attempts=f"{type(error).__name__}: {error}",
-                coverage_outer_winding=None,
-                coverage_obstacle_winding=None,
-                coverage_total=None,
-                coverage_index_sum=None,
-                coverage_min_gradient=None,
-                coverage_floor=None,
-                coverage_reliable=None,
-                coverage_certified=None,
+    if int(eq.ids_properties.homogeneous_time) != 1:
+        raise ValueError("LIUQE equilibrium must use its IDS-level time base")
+    output = Path(args.out)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with output.open("w") as handle:
+        for index in slices:
+            view = slice_view(eq, index)
+            state = build_state(
+                view["rgrid"],
+                view["zgrid"],
+                view["psi"],
+                wall_rings,
+                view["axis"][0],
+                view["axis"][1],
             )
-        rows.append(row)
-        print("done", index, row["liuqe_label"], row["nova_label"], flush=True)
+            field = TraceSplineField.from_record(state)
+            row = dict(index=index)
+            row.update(liuqe_reference(view, field))
+            try:
+                row.update(measure_slice(view, wall_rings, resolutions))
+            except Exception as error:  # noqa: BLE001 - preserve the failed slice
+                row.update(
+                    resolution=None,
+                    nova_label="unread",
+                    attempts=f"{type(error).__name__}: {error}",
+                )
+            handle.write(json.dumps(row) + "\n")
+            handle.flush()
+            print("done", index, row["liuqe_label"], row["nova_label"], flush=True)
     db.close()
-    Path(args.out).write_text(json.dumps({"rows": rows}, indent=2))
-    print("ROWS", len(rows))
+    print("ROWS", len(slices), flush=True)
+    if args.field_swap_out:
+        field_out = Path(args.field_swap_out)
+        field_out.parent.mkdir(parents=True, exist_ok=True)
+        seen = set()
+        with field_out.open("w") as handle:
+            for case, source, path in crosscheck.cases():
+                if case not in REFUSED_CASES:
+                    continue
+                seen.add(case)
+                row = asdict(crosscheck._row(case, source, path, resolutions))
+                handle.write(json.dumps(row) + "\n")
+                handle.flush()
+                print("field-swap", case, row["nova_label"], flush=True)
+        if seen != REFUSED_CASES:
+            missing = sorted(REFUSED_CASES - seen)
+            raise ValueError(f"missing field-swap cases: {missing}")
+        print("FIELD_SWAP_ROWS", len(seen), flush=True)
 
 
 if __name__ == "__main__":

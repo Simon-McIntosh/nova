@@ -56,6 +56,11 @@
       "kind": "exempted",
       "reason": "The out-of-scope path was added and removed inside the run; the merged tree is clean, so there is nothing to repair.",
       "recorded_at": "2026-10-18T14:10:20.664958+00:00"
+    },
+    "3": {
+      "kind": "folded",
+      "node": "tie-state-current-gap",
+      "recorded_at": "2026-10-18T14:10:29.439073+00:00"
     }
   },
   "findings": [

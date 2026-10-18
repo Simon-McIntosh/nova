@@ -1,0 +1,97 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed run's manifest carries no baseline_suite and no after_suite (classification.json records both as null), and its only gate log, gate-after.log, is the after arm cut at 75 of 104 collected tests with EXIT=124; with no base arm there is no measured delta, so the count is recorded as unmeasured rather than as zero.",
+  "call_site_count": 6,
+  "call_sites": [
+    "scripts/prototypes/fast_map_production/sweep.py:121",
+    "scripts/prototypes/fast_map_production/tie_probe.py:138",
+    "scripts/prototypes/fast_read/measure_sweep.py:112",
+    "scripts/prototypes/diverted_stall/sweep.py:112",
+    "scripts/prototypes/read_robustness/read.py:55",
+    "scripts/prototypes/read_robustness/measure.py:407"
+  ],
+  "completed_at": "2026-10-18T08:34:02.443Z",
+  "dispatched_at": "2026-10-18T08:24:46Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/read_robustness/census.py",
+      "line": "82",
+      "severity": "blocking",
+      "text": "blocking: done-when (3) is unmet \u2014 scan-282.log departs 3 roots to 1 at 0.1735 and scan-550.log at 0.1225, and the vanished roots there carry determinants 4.5134e-05, -4.0807e-05 and 6.7124e-05 with one eigenvalue pair of opposite sign, so the census still loses a hyperbolic saddle inside both windows the done-when names, as the manifest itself reports."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T065749620386-seed-census-departure/gate-after.log",
+      "line": "1",
+      "severity": "blocking",
+      "text": "blocking: done-when (4) is unmeasured \u2014 the only gate arm is cut by the node's own 480-second wall bound at 75 of 104 collected tests (EXIT=124), no base arm exists, and the manifest stores no baseline_suite/after_suite, so \"pass by delta against a recorded baseline\" is asserted by nothing; the structural argument that no test imports read_robustness shows no test can fail, which is not the same as a measured delta."
+    },
+    {
+      "file": "scripts/prototypes/read_robustness/census_negative_control.py",
+      "line": "140",
+      "severity": "blocking",
+      "text": "blocking: the only falsification the node landed returns 1 while the repair holds and 0 once the reinstated step is restored, and nothing asserts on that exit code \u2014 no test drives it and no test under tests/ imports the census \u2014 so done-when (5)'s read-level tie-state test is unwritten and a regression of the admission bound would be caught by no gate."
+    },
+    {
+      "file": "scripts/prototypes/read_robustness/census.py",
+      "line": "77",
+      "severity": "follow-on",
+      "text": "follow-on: done-when (2) asks for kernel.py's unused psi_rounding_enclosure to be used if it fits or deleted, and it is neither \u2014 census.py:77 leaves it in place with a prose justification, a deviation from an exact spec that was not repaired."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/census-certified-convergence.html",
+      "line": "100",
+      "severity": "follow-on",
+      "text": "follow-on: the section's id is written with doubled quotes and parses to an empty string (verified with html.parser), so the section recording the round-two control and disposition has no anchor and 43bb48a70, whose stated purpose was to give that element its own id, did not achieve it."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T065749620386-seed-census-departure/gate-after.log",
+      "line": "4",
+      "severity": "follow-on",
+      "text": "follow-on: the gate receipt is abridged, a bare \"...\" line standing in for the remainder of the run and its pytest summary, and its header names neither the revision nor the tree, so the 75-of-104 claim cannot be checked from the log it is quoted from."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 6 production call site(s)",
+    "diff": "read commit by commit against efbeb794e60b; 9b23e83c4 rewrites the admission test at census.py:52-86, e674213f8, e3ba2a93f, 1141dcd1c and 43bb48a70 append to docs/research/census-certified-convergence.html and the two fragments, and 007ebbd72, 8a835dbd4 and 1967c2fc5 add census_negative_control.py, census_base_step.py and census_departure_scan.py; no test file and no product source is touched, and every docs change is an append.",
+    "done_when": "read; six conditions, of which (1) the dropping line, (2) the computed bound and (6) the fragment are evidenced (census.py:54-79, docs/research/census-certified-convergence.html), the negative-control half of (5) now reproduces the loss (negative-control.log EXIT=1), and (3), (4) and (5)'s read-level test are unmet \u2014 the manifest reports (3) unmet, gate-after.log is cut at 75 of 104 tests with EXIT=124 and no base arm, and the manifest records done-when (5)'s read-level test NOT WRITTEN.",
+    "goal": "the node's goal is to stop the stationary-point census losing a hyperbolic saddle between adjacent doubles; scripts/prototypes/read_robustness/census.py:82 now admits a cell seed whose edge cross product is negative only within a composed rounding bound, and negative-control.log reads 3 roots / 2 saddles against 2 / 1 for the reinstated step at offsets 0.17323108126295622 and 0.17323108126295625, so the named class is repaired while scan-282.log and scan-550.log show the census still leaving 3 roots for 1 at 0.1735 and at 0.1225.",
+    "manifest": "read; it reports status complete with 8 commits and 10 changed paths (the earlier omission of e3ba2a93f and 007ebbd72 is repaired), names negative-control.log and the five probe logs, and declares done-when (3) unmet, the base gate arm unrun and (5)'s read-level test unwritten.",
+    "write_paths": "read; the declared set is scripts/prototypes/read_robustness, nova/equilibrium/topology.py, scripts/prototypes/fast_map_production, the three named test files, docs/research/census-certified-convergence.html, docs/figures/converged-forward-solve/census-certified-convergence and the two docs/evidence/fragments paths, and all ten files in the diff lie inside it with nova/equilibrium/topology.py untouched."
+  },
+  "justifications": {
+    "durability": "no file under tests/ imports read_robustness (grep -rl read_robustness tests/ returns nothing) and the diff adds no test, while census_negative_control.py:140 returns 1 by design while the repair holds, so no gate fails if census.py's admission bound regresses.",
+    "evidence": "negative-control.log (EXIT=1), scan-282.log, scan-282-fine.log and scan-550.log record the round-two measurements, but gate-after.log is cut at 75 of 104 tests by EXIT=124 with no base arm and the manifest stores no baseline_suite/after_suite, so done-when (4)'s delta is unmeasured.",
+    "fit": "census.py:54-79 states the mechanism and the composition of the bound in the module's own idiom, but docs/evidence/fragments/converged-forward-solve/census-certified-convergence.html:100 carries an id that parses to an empty string and names a rework round rather than a mechanism.",
+    "goal_fidelity": "census.py:82 repairs the bisected pair and negative-control.log records it, but scan-282.log and scan-550.log show the census still leaving 3 roots for 1 at 0.1735 and at 0.1225 with the vanished saddles at determinants -2.9608e-05 and -5.8060e-05.",
+    "reuse": "a capability search over scripts/prototypes and nova/equilibrium for an existing admission or rounding bound found kernel.psi_rounding_enclosure (scripts/prototypes/fast_map_production/kernel.py:201) and saddle_admission_probe.psi_enclosure, both of which bound the fitted psi value rather than the edge cross product this test evaluates, so no owner of this bound exists and none is duplicated.",
+    "scope_discipline": "every one of the ten changed files (scripts/prototypes/read_robustness/census.py and its five new probes, docs/research/census-certified-convergence.html and the two fragments) is inside the declared write paths, and no product source changed."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: efbeb794e60b1f4d39dcb886bb0e1b1148b5a419\nreviewed_head_sha: 43bb48a70ea6a1c8b5fb5a57da08279edf808071\n\nVERDICT goal: the node's goal is to stop the stationary-point census losing a hyperbolic saddle between adjacent doubles; scripts/prototypes/read_robustness/census.py:82 now admits a cell seed whose edge cross product is negative only within a composed rounding bound, and negative-control.log reads 3 roots / 2 saddles against 2 / 1 for the reinstated step at offsets 0.17323108126295622 and 0.17323108126295625, so the named class is repaired while scan-282.log and scan-550.log show the census still leaving 3 roots for 1 at 0.1735 and at 0.1225.\nVERDICT done_when: read; six conditions, of which (1) the dropping line, (2) the computed bound and (6) the fragment are evidenced (census.py:54-79, docs/research/census-certified-convergence.html), the negative-control half of (5) now reproduces the loss (negative-control.log EXIT=1), and (3), (4) and (5)'s read-level test are unmet \u2014 the manifest reports (3) unmet, gate-after.log is cut at 75 of 104 tests with EXIT=124 and no base arm, and the manifest records done-when (5)'s read-level test NOT WRITTEN.\nVERDICT write_paths: read; the declared set is scripts/prototypes/read_robustness, nova/equilibrium/topology.py, scripts/prototypes/fast_map_production, the three named test files, docs/research/census-certified-convergence.html, docs/figures/converged-forward-solve/census-certified-convergence and the two docs/evidence/fragments paths, and all ten files in the diff lie inside it with nova/equilibrium/topology.py untouched.\nVERDICT manifest: read; it reports status complete with 8 commits and 10 changed paths (the earlier omission of e3ba2a93f and 007ebbd72 is repaired), names negative-control.log and the five probe logs, and declares done-when (3) unmet, the base gate arm unrun and (5)'s read-level test unwritten.\nVERDICT diff: read commit by commit against efbeb794e60b; 9b23e83c4 rewrites the admission test at census.py:52-86, e674213f8, e3ba2a93f, 1141dcd1c and 43bb48a70 append to docs/research/census-certified-convergence.html and the two fragments, and 007ebbd72, 8a835dbd4 and 1967c2fc5 add census_negative_control.py, census_base_step.py and census_departure_scan.py; no test file and no product source is touched, and every docs change is an append.\nCALL_SITES: scripts/prototypes/fast_map_production/sweep.py:121, scripts/prototypes/fast_map_production/tie_probe.py:138, scripts/prototypes/fast_read/measure_sweep.py:112, scripts/prototypes/diverted_stall/sweep.py:112, scripts/prototypes/read_robustness/read.py:55, scripts/prototypes/read_robustness/measure.py:407\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: census.py:82 repairs the bisected pair and negative-control.log records it, but scan-282.log and scan-550.log show the census still leaving 3 roots for 1 at 0.1735 and at 0.1225 with the vanished saddles at determinants -2.9608e-05 and -5.8060e-05.\nSCORE evidence: 12\nJUSTIFICATION evidence: negative-control.log (EXIT=1), scan-282.log, scan-282-fine.log and scan-550.log record the round-two measurements, but gate-after.log is cut at 75 of 104 tests by EXIT=124 with no base arm and the manifest stores no baseline_suite/after_suite, so done-when (4)'s delta is unmeasured.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every one of the ten changed files (scripts/prototypes/read_robustness/census.py and its five new probes, docs/research/census-certified-convergence.html and the two fragments) is inside the declared write paths, and no product source changed.\nSCORE durability: 5\nJUSTIFICATION durability: no file under tests/ imports read_robustness (grep -rl read_robustness tests/ returns nothing) and the diff adds no test, while census_negative_control.py:140 returns 1 by design while the repair holds, so no gate fails if census.py's admission bound regresses.\nSCORE fit: 15\nJUSTIFICATION fit: census.py:54-79 states the mechanism and the composition of the bound in the module's own idiom, but docs/evidence/fragments/converged-forward-solve/census-certified-convergence.html:100 carries an id that parses to an empty string and names a rework round rather than a mechanism.\nSCORE reuse: 16\nJUSTIFICATION reuse: a capability search over scripts/prototypes and nova/equilibrium for an existing admission or rounding bound found kernel.psi_rounding_enclosure (scripts/prototypes/fast_map_production/kernel.py:201) and saddle_admission_probe.psi_enclosure, both of which bound the fitted psi value rather than the edge cross product this test evaluates, so no owner of this bound exists and none is duplicated.\nFINDING scripts/prototypes/read_robustness/census.py:82 blocking: done-when (3) is unmet \u2014 scan-282.log departs 3 roots to 1 at 0.1735 and scan-550.log at 0.1225, and the vanished roots there carry determinants 4.5134e-05, -4.0807e-05 and 6.7124e-05 with one eigenvalue pair of opposite sign, so the census still loses a hyperbolic saddle inside both windows the done-when names, as the manifest itself reports.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T065749620386-seed-census-departure/gate-after.log:1 blocking: done-when (4) is unmeasured \u2014 the only gate arm is cut by the node's own 480-second wall bound at 75 of 104 collected tests (EXIT=124), no base arm exists, and the manifest stores no baseline_suite/after_suite, so \"pass by delta against a recorded baseline\" is asserted by nothing; the structural argument that no test imports read_robustness shows no test can fail, which is not the same as a measured delta.\nFINDING scripts/prototypes/read_robustness/census_negative_control.py:140 blocking: the only falsification the node landed returns 1 while the repair holds and 0 once the reinstated step is restored, and nothing asserts on that exit code \u2014 no test drives it and no test under tests/ imports the census \u2014 so done-when (5)'s read-level tie-state test is unwritten and a regression of the admission bound would be caught by no gate.\nFINDING scripts/prototypes/read_robustness/census.py:77 follow-on: done-when (2) asks for kernel.py's unused psi_rounding_enclosure to be used if it fits or deleted, and it is neither \u2014 census.py:77 leaves it in place with a prose justification, a deviation from an exact spec that was not repaired.\nFINDING docs/evidence/fragments/converged-forward-solve/census-certified-convergence.html:100 follow-on: the section's id is written with doubled quotes and parses to an empty string (verified with html.parser), so the section recording the round-two control and disposition has no anchor and 43bb48a70, whose stated purpose was to give that element its own id, did not achieve it.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T065749620386-seed-census-departure/gate-after.log:4 follow-on: the gate receipt is abridged, a bare \"...\" line standing in for the remainder of the run and its pytest summary, and its header names neither the revision nor the tree, so the 75-of-104 claim cannot be checked from the log it is quoted from.\n",
+  "review_run_id": "r-20261018T082419973011-review-of-r-20261018T065749620386-seed-census-departure-43bb48a70ea6",
+  "reviewed_base_sha": "efbeb794e60b1f4d39dcb886bb0e1b1148b5a419",
+  "reviewed_head_sha": "43bb48a70ea6a1c8b5fb5a57da08279edf808071",
+  "reviewed_run_id": "r-20261018T065749620386-seed-census-departure",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "review",
+  "scores": {
+    "durability": 5,
+    "evidence": 12,
+    "fit": 15,
+    "goal_fidelity": 14,
+    "reuse": 16,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T08:31:41.163925+00:00",
+  "total": 80
+}

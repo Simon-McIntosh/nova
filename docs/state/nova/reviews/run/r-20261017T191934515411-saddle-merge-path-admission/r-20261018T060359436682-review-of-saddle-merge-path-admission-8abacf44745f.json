@@ -21,6 +21,11 @@
       "kind": "exempted",
       "reason": "clause withdrawn by the coordinator on new evidence: imas-efit lead reverted its cancellation ruling on 2026-10-18 after review showed enclosure-bound cancellation toggles as persistence drifts across the enclosure and steps the boundary by up to 0.956 of the span; nova admission excludes the wall-contact root without it; the unused psi_rounding_enclosure helper goes to census-certified-convergence, to serve as its convergence bound or be deleted",
       "recorded_at": "2026-10-18T06:17:30.399920+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "census-certified-convergence",
+      "recorded_at": "2026-10-18T06:17:37.360338+00:00"
     }
   },
   "findings": [

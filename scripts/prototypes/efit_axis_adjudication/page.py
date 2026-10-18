@@ -8,6 +8,8 @@ import json
 import math
 from pathlib import Path
 
+from analyse import ADAPTER_A
+
 
 REBUILD_GRADIENT_TOL = 1e-9
 
@@ -174,6 +176,10 @@ The polarity-aware nova read supplies every nova mark and decision in the
 comparison. {refused} records have no admitted nova axis. The census found
 {outside} points outside the vessel in these records; they remain in the
 receipt's total counts but appear in no panel or in-vessel census table.</p>
+<p>The nova decision fields come from the fixed adapter receipt at
+<code>{html.escape(str(ADAPTER_A))}</code>. The spline census is retained from
+the independent trace rebuild; vessel membership is recomputed from the
+indexed wall loops before painting.</p>
 <p>JT-60SA's {len(stress)} records are wrong-basin iterates, not equilibria;
 the third wall loop is a synthesised extended wall. They contribute to no
 agreement figure or comparison table and have no poloidal panel here.</p>

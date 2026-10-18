@@ -33,9 +33,9 @@ plt.rcParams.update(
 )
 
 COLOUR = {
-    "efit": "#1f4e79",       # imas-efit
-    "nova_a": "#b5651d",     # adapter A
-    "nova_b": "#2e7d32",     # adapter B
+    "efit": "#1f4e79",  # imas-efit
+    "nova_a": "#b5651d",  # adapter A
+    "nova_b": "#2e7d32",  # adapter B
     "wall": "#444444",
     "census": "#929292",
 }
@@ -58,14 +58,24 @@ def _assert_no_clipping(fig):
     fig.canvas.draw()
     canvas = fig.bbox
     boxes = []
+    hidden_ticks = {
+        id(label)
+        for ax in fig.axes
+        if not ax.axison
+        for label in (*ax.get_xticklabels(), *ax.get_yticklabels())
+    }
     for artist in fig.findobj(matplotlib.text.Text):
-        if not artist.get_visible() or not artist.get_text().strip():
+        if id(artist) in hidden_ticks or not artist.get_visible() or not artist.get_text().strip():
             continue
         box = artist.get_window_extent(fig.canvas.get_renderer())
         if box.width == 0 or box.height == 0:
             continue
-        if box.x0 < canvas.x0 - 0.5 or box.x1 > canvas.x1 + 0.5 \
-                or box.y0 < canvas.y0 - 0.5 or box.y1 > canvas.y1 + 0.5:
+        if (
+            box.x0 < canvas.x0 - 0.5
+            or box.x1 > canvas.x1 + 0.5
+            or box.y0 < canvas.y0 - 0.5
+            or box.y1 > canvas.y1 + 0.5
+        ):
             raise RuntimeError(
                 f"text artist {artist.get_text()!r} leaves the canvas: "
                 f"{box.x0:.1f},{box.y0:.1f} to {box.x1:.1f},{box.y1:.1f} "
@@ -74,7 +84,7 @@ def _assert_no_clipping(fig):
             )
         boxes.append((box.x0, box.y0, box.x1, box.y1, artist.get_text()))
     for i, first in enumerate(boxes):
-        for second in boxes[i + 1:]:
+        for second in boxes[i + 1 :]:
             dx = min(first[2], second[2]) - max(first[0], second[0])
             dy = min(first[3], second[3]) - max(first[1], second[1])
             if dx > 1.0 and dy > 1.0:
@@ -121,54 +131,115 @@ def draw_panel(ax, row):
     b = row["adapter_b"]
 
     # imas-efit boundary (dashed) and nova boundary (solid / dotted)
-    _contour_at(ax, field, record, efit["boundary_level"],
-                colors=COLOUR["efit"], linestyles="--", linewidths=1.0)
+    _contour_at(
+        ax,
+        field,
+        record,
+        efit["boundary_level"],
+        colors=COLOUR["efit"],
+        linestyles="--",
+        linewidths=1.0,
+    )
     if a is not None and a["nova_boundary_psi"] is not None:
-        _contour_at(ax, field, record, a["nova_boundary_psi"],
-                    colors=COLOUR["nova_a"], linestyles="-", linewidths=1.0)
+        _contour_at(
+            ax,
+            field,
+            record,
+            a["nova_boundary_psi"],
+            colors=COLOUR["nova_a"],
+            linestyles="-",
+            linewidths=1.0,
+        )
     if b is not None:
         level = b["nova_boundary_level"]
         a_level = a["nova_boundary_psi"] if a is not None else None
         if a_level is None or abs(level - a_level) > 1e-6:
-            _contour_at(ax, field, record, level,
-                        colors=COLOUR["nova_b"], linestyles=":", linewidths=1.0)
+            _contour_at(
+                ax,
+                field,
+                record,
+                level,
+                colors=COLOUR["nova_b"],
+                linestyles=":",
+                linewidths=1.0,
+            )
 
     # census points, hollow by type
     for point in row["census"]:
         marker = {"maximum": "^", "minimum": "v", "saddle": "x"}[point["kind"]]
-        ax.plot(point["r"], point["z"], marker=marker, markersize=3.0,
-                markerfacecolor="none", markeredgecolor=COLOUR["census"],
-                markeredgewidth=0.6, linestyle="none")
+        ax.plot(
+            point["r"],
+            point["z"],
+            marker=marker,
+            markersize=3.0,
+            markerfacecolor="none",
+            markeredgecolor=COLOUR["census"],
+            markeredgewidth=0.6,
+            linestyle="none",
+        )
 
     # imas-efit axis and X-point through the null vocabulary
     x_point = None
     if efit.get("saddle_source_position"):
         x_point = np.array([efit["saddle_source_position"]])
-    draw_nulls(ax, magnetic_axis=[efit["axis_r"], efit["axis_z"]],
-               x_points=x_point, contain=wall)
+    draw_nulls(
+        ax,
+        magnetic_axis=[efit["axis_r"], efit["axis_z"]],
+        x_points=x_point,
+        contain=wall,
+    )
 
     # nova axes and saddles, distinct styles
     if a is not None:
         if a["nova_axis_r"] is not None:
-            ax.plot(a["nova_axis_r"], a["nova_axis_z"], marker="o", markersize=11,
-                    markerfacecolor="none", markeredgecolor=COLOUR["nova_a"],
-                    markeredgewidth=1.6, linestyle="none", zorder=6)
+            ax.plot(
+                a["nova_axis_r"],
+                a["nova_axis_z"],
+                marker="o",
+                markersize=11,
+                markerfacecolor="none",
+                markeredgecolor=COLOUR["nova_a"],
+                markeredgewidth=1.6,
+                linestyle="none",
+                zorder=6,
+            )
         if a["nova_saddle_r"] is not None:
-            ax.plot(a["nova_saddle_r"], a["nova_saddle_z"], marker="o", markeredgecolor=COLOUR["nova_a"],
-                    markersize=5,
-                    markerfacecolor=COLOUR["nova_a"],
-                    linestyle="none", zorder=6)
+            ax.plot(
+                a["nova_saddle_r"],
+                a["nova_saddle_z"],
+                marker="o",
+                markeredgecolor=COLOUR["nova_a"],
+                markersize=5,
+                markerfacecolor=COLOUR["nova_a"],
+                linestyle="none",
+                zorder=6,
+            )
     if b is not None:
         axis_pt = row["code_points"]["nova_b_axis"]
         if axis_pt is not None:
-            ax.plot(axis_pt["r"], axis_pt["z"], marker="s", markersize=10,
-                    markerfacecolor="none", markeredgecolor=COLOUR["nova_b"],
-                    markeredgewidth=1.6, linestyle="none", zorder=6)
+            ax.plot(
+                axis_pt["r"],
+                axis_pt["z"],
+                marker="s",
+                markersize=10,
+                markerfacecolor="none",
+                markeredgecolor=COLOUR["nova_b"],
+                markeredgewidth=1.6,
+                linestyle="none",
+                zorder=6,
+            )
         saddle = b["nova_saddle_position"]
         if saddle:
-            ax.plot(saddle[0], saddle[1], marker="s", markersize=5,
-                    markerfacecolor=COLOUR["nova_b"],
-                    markeredgecolor=COLOUR["nova_b"], linestyle="none", zorder=6)
+            ax.plot(
+                saddle[0],
+                saddle[1],
+                marker="s",
+                markersize=5,
+                markerfacecolor=COLOUR["nova_b"],
+                markeredgecolor=COLOUR["nova_b"],
+                linestyle="none",
+                zorder=6,
+            )
 
     ax.set_aspect("equal")
     ax.set_axis_off()
@@ -181,25 +252,88 @@ def _legend_handles():
     return [
         Line2D([], [], color="#c9c9c9", lw=0.8, label="psi contours"),
         Line2D([], [], color=COLOUR["wall"], lw=1.0, label="wall"),
-        Line2D([], [], color=COLOUR["efit"], ls="--", lw=1.0, label="imas-efit boundary"),
-        Line2D([], [], color=COLOUR["nova_a"], ls="-", lw=1.0, label="adapter A boundary"),
-        Line2D([], [], color=COLOUR["nova_b"], ls=":", lw=1.0, label="adapter B boundary"),
-        Line2D([], [], color="red", marker="^", ls="none", ms=8, label="imas-efit axis"),
-        Line2D([], [], color="red", marker="X", ls="none", ms=8, label="imas-efit X-point"),
-        Line2D([], [], color=COLOUR["nova_a"], marker="o", mfc="none", ls="none",
-               ms=9, label="adapter A axis"),
-        Line2D([], [], color=COLOUR["nova_a"], marker="o", ls="none", ms=5,
-               label="adapter A saddle"),
-        Line2D([], [], color=COLOUR["nova_b"], marker="s", mfc="none", ls="none",
-               ms=8, label="adapter B axis"),
-        Line2D([], [], color=COLOUR["nova_b"], marker="s", ls="none", ms=5,
-               label="adapter B saddle"),
-        Line2D([], [], color=COLOUR["census"], marker="^", mfc="none", ls="none",
-               ms=4, label="census maximum"),
-        Line2D([], [], color=COLOUR["census"], marker="v", mfc="none", ls="none",
-               ms=4, label="census minimum"),
-        Line2D([], [], color=COLOUR["census"], marker="x", ls="none", ms=4,
-               label="census saddle"),
+        Line2D(
+            [], [], color=COLOUR["efit"], ls="--", lw=1.0, label="imas-efit boundary"
+        ),
+        Line2D(
+            [], [], color=COLOUR["nova_a"], ls="-", lw=1.0, label="adapter A boundary"
+        ),
+        Line2D(
+            [], [], color=COLOUR["nova_b"], ls=":", lw=1.0, label="adapter B boundary"
+        ),
+        Line2D(
+            [], [], color="red", marker="^", ls="none", ms=8, label="imas-efit axis"
+        ),
+        Line2D(
+            [], [], color="red", marker="X", ls="none", ms=8, label="imas-efit X-point"
+        ),
+        Line2D(
+            [],
+            [],
+            color=COLOUR["nova_a"],
+            marker="o",
+            mfc="none",
+            ls="none",
+            ms=9,
+            label="adapter A axis",
+        ),
+        Line2D(
+            [],
+            [],
+            color=COLOUR["nova_a"],
+            marker="o",
+            ls="none",
+            ms=5,
+            label="adapter A saddle",
+        ),
+        Line2D(
+            [],
+            [],
+            color=COLOUR["nova_b"],
+            marker="s",
+            mfc="none",
+            ls="none",
+            ms=8,
+            label="adapter B axis",
+        ),
+        Line2D(
+            [],
+            [],
+            color=COLOUR["nova_b"],
+            marker="s",
+            ls="none",
+            ms=5,
+            label="adapter B saddle",
+        ),
+        Line2D(
+            [],
+            [],
+            color=COLOUR["census"],
+            marker="^",
+            mfc="none",
+            ls="none",
+            ms=4,
+            label="census maximum",
+        ),
+        Line2D(
+            [],
+            [],
+            color=COLOUR["census"],
+            marker="v",
+            mfc="none",
+            ls="none",
+            ms=4,
+            label="census minimum",
+        ),
+        Line2D(
+            [],
+            [],
+            color=COLOUR["census"],
+            marker="x",
+            ls="none",
+            ms=4,
+            label="census saddle",
+        ),
     ]
 
 
@@ -233,19 +367,27 @@ def main():
             ax.set_axis_off()
         slug = machine.lower().replace("-", "")
         legend = fig.legend(
-            handles=_legend_handles(), loc="lower center", ncol=5,
-            frameon=False, fontsize=LABEL_SIZE, bbox_to_anchor=(0.5, 1.0),
+            handles=_legend_handles(),
+            loc="upper center",
+            ncol=4,
+            frameon=False,
+            fontsize=LABEL_SIZE,
+            bbox_to_anchor=(0.5, 0.99),
             borderaxespad=0.0,
         )
-        # reserve the legend's own measured height, so the panels never grow
-        # under it and the legend cannot run off the top of the canvas
         fig.canvas.draw()
-        legend_top = legend.get_window_extent(
-            fig.canvas.get_renderer()
-        ).y1 / fig.bbox.height
+        legend_box = legend.get_window_extent(fig.canvas.get_renderer())
+        if not fig.bbox.contains(legend_box.x0, legend_box.y0) or not fig.bbox.contains(
+            legend_box.x1, legend_box.y1
+        ):
+            raise RuntimeError(f"legend leaves canvas for {machine}")
         fig.subplots_adjust(
-            top=max(0.2, legend_top - 0.03), bottom=0.02,
-            left=0.01, right=0.99, wspace=0.05, hspace=0.10,
+            top=max(0.2, legend_box.y0 / fig.bbox.height - 0.03),
+            bottom=0.02,
+            left=0.01,
+            right=0.99,
+            wspace=0.05,
+            hspace=0.10,
         )
         _assert_no_clipping(fig)
         path = outdir / f"efit-axis-{slug}.svg"

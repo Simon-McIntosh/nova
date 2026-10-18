@@ -38,13 +38,20 @@ class RebuildCheckTest(unittest.TestCase):
                 )
                 row = {
                     "case": f"synthetic-crossing-{side.upper()}",
+                    "polarity": record.polarity,
                     "rebuild": {
+                        "axis_psi_reported": record.axis_psi,
+                        "axis_psi_spline": float(value[0]),
                         "axis_psi_abs_diff": abs(float(value[0]) - record.axis_psi),
                         "grad_norm_at_axis": float(np.linalg.norm(gradient[0])),
+                        "status": "rebuild failed",
                     },
                 }
                 with self.assertRaisesRegex(AssertionError, "spline rebuild failed"):
                     require_rebuild(row)
+                self.assertIn(
+                    "<strong>rebuild failed</strong>", page.rebuild_table([row])
+                )
 
 
 if __name__ == "__main__":

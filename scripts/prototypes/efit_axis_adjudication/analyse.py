@@ -38,6 +38,7 @@ ADAPTER_B = pathlib.Path(
 def finite(value):
     return value if value is not None and math.isfinite(value) else None
 
+
 MACHINES = (
     ("jt60sa", "JT-60SA"),
     ("aug", "AUG"),
@@ -72,7 +73,9 @@ def build_cases():
             cases.append((f"{pair}-{side}", path, note))
     for side in ("a", "b"):
         path = REPORT / "crossing" / f"synthetic_crossing_{side}.txt"
-        cases.append((f"synthetic-crossing-{side.upper()}", path, "synthetic crossing trace"))
+        cases.append(
+            (f"synthetic-crossing-{side.upper()}", path, "synthetic crossing trace")
+        )
     return cases
 
 
@@ -83,9 +86,16 @@ def load_adapter_a():
         case = row["case"].replace(":", "-").lower()
         # adapter A carries nan geometry where nova admits no axis or saddle;
         # carry those as absent rather than as a point at nan
-        for key in ("nova_axis_r", "nova_axis_z", "nova_axis_psi",
-                    "nova_saddle_r", "nova_saddle_z", "nova_saddle_psi",
-                    "nova_boundary_psi", "field_grad_at_nova_axis"):
+        for key in (
+            "nova_axis_r",
+            "nova_axis_z",
+            "nova_axis_psi",
+            "nova_saddle_r",
+            "nova_saddle_z",
+            "nova_saddle_psi",
+            "nova_boundary_psi",
+            "field_grad_at_nova_axis",
+        ):
             row[key] = finite(row.get(key))
         out[case] = row
     return out
@@ -117,6 +127,9 @@ def analyse(case_id, path, note, ad_a, ad_b, n_seed):
     )
     axis_value = float(axis_value[0])
     grad_norm = float(np.linalg.norm(grad[0]))
+    value_gap = float(abs(axis_value - record.axis_psi))
+    rebuild_ok = value_gap <= 1e-10 and grad_norm <= 1e-9
+    contour_levels = np.linspace(float(record.psi.min()), float(record.psi.max()), 22)
 
     points = census(
         field,
@@ -149,17 +162,22 @@ def analyse(case_id, path, note, ad_a, ad_b, n_seed):
                 "side_efit_boundary": point_side(p.psi, record.wall_level),
                 "side_nova_a_boundary": (
                     point_side(p.psi, a["nova_boundary_psi"])
-                    if a and a["nova_boundary_psi"] is not None else None
+                    if a and a["nova_boundary_psi"] is not None
+                    else None
                 ),
-                "side_nova_b_boundary": point_side(p.psi, b["nova"]["boundary_level"]) if b else None,
+                "side_nova_b_boundary": point_side(p.psi, b["nova"]["boundary_level"])
+                if b
+                else None,
             }
         )
 
     in_wall = [p for p in points if p.inside_wall]
     extremum = None
     if in_wall:
-        extremum = max(in_wall, key=lambda p: p.psi) if record.polarity > 0 else min(
-            in_wall, key=lambda p: p.psi
+        extremum = (
+            max(in_wall, key=lambda p: p.psi)
+            if record.polarity > 0
+            else min(in_wall, key=lambda p: p.psi)
         )
 
     def describe_code_point(r, z, level, source):
@@ -182,20 +200,27 @@ def analyse(case_id, path, note, ad_a, ad_b, n_seed):
 
     # (2) Hessian type for every axis either code reports
     efit_axis = describe_code_point(
-        record.axis_r, record.axis_z, record.axis_psi, "imas-efit axis (record)")
+        record.axis_r, record.axis_z, record.axis_psi, "imas-efit axis (record)"
+    )
     nova_a_axis = None
     if a is not None and a["nova_axis_r"] is not None:
         nova_a_axis = describe_code_point(
-            a["nova_axis_r"], a["nova_axis_z"], a["nova_axis_psi"],
-            "adapter A nova axis (nova topology read)")
+            a["nova_axis_r"],
+            a["nova_axis_z"],
+            a["nova_axis_psi"],
+            "adapter A nova axis (nova topology read)",
+        )
     nova_b_axis = None
     if b is not None:
         level = b["nova"]["axis_level"]
         match = near_level(level)
         if match is not None:
             nova_b_axis = describe_code_point(
-                match.position[0], match.position[1], level,
-                "adapter B axis (census point nearest nova axis level)")
+                match.position[0],
+                match.position[1],
+                level,
+                "adapter B axis (census point nearest nova axis level)",
+            )
             nova_b_axis["matched_by"] = "level"
 
     result = {
@@ -208,6 +233,7 @@ def analyse(case_id, path, note, ad_a, ad_b, n_seed):
         "verdict": record.verdict,
         "efit_label": record.label,
         "polarity": record.polarity,
+        "contour_levels": contour_levels.tolist(),
         "efit": {
             "axis_r": float(record.axis_r),
             "axis_z": float(record.axis_z),
@@ -227,8 +253,9 @@ def analyse(case_id, path, note, ad_a, ad_b, n_seed):
         "rebuild": {
             "axis_psi_reported": float(record.axis_psi),
             "axis_psi_spline": float(axis_value),
-            "axis_psi_abs_diff": float(abs(axis_value - record.axis_psi)),
+            "axis_psi_abs_diff": value_gap,
             "grad_norm_at_axis": float(grad_norm),
+            "status": "pass" if rebuild_ok else "rebuild failed",
         },
         "adapter_a": (
             {
@@ -245,7 +272,7 @@ def analyse(case_id, path, note, ad_a, ad_b, n_seed):
             }
             if a
             else None
-            ),
+        ),
         "adapter_b": (
             {
                 "nova_axis_level": float(b["nova"]["axis_level"]),

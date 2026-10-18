@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import math
 import pathlib
+from dataclasses import replace
 
 import matplotlib
 
@@ -18,7 +19,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-from nova.media.poloidal import draw_nulls
+from nova.media.ink import DEFAULT_INK
+from nova.media.poloidal import draw_flux_contours, draw_nulls, draw_wall
 
 from field import FastField
 from records import parse_record
@@ -65,7 +67,11 @@ def _assert_no_clipping(fig):
         for label in (*ax.get_xticklabels(), *ax.get_yticklabels())
     }
     for artist in fig.findobj(matplotlib.text.Text):
-        if id(artist) in hidden_ticks or not artist.get_visible() or not artist.get_text().strip():
+        if (
+            id(artist) in hidden_ticks
+            or not artist.get_visible()
+            or not artist.get_text().strip()
+        ):
             continue
         box = artist.get_window_extent(fig.canvas.get_renderer())
         if box.width == 0 or box.height == 0:
@@ -93,87 +99,113 @@ def _assert_no_clipping(fig):
                 )
 
 
-def _contour(ax, field, record, levels):
+def _sample_field(field, record):
     rs = np.linspace(record.rgrid.min(), record.rgrid.max(), 200)
     zs = np.linspace(record.zgrid.min(), record.zgrid.max(), 220)
     RR, ZZ = np.meshgrid(rs, zs, indexing="ij")
     value, _, _, _, _, _ = field.jet(RR.ravel(), ZZ.ravel())
-    PSI = value.reshape(RR.shape)
-    ax.contour(RR, ZZ, PSI, levels=levels, colors="#c9c9c9", linewidths=0.8)
+    return rs, zs, value.reshape(RR.shape).T
 
 
-def _contour_at(ax, field, record, level, **kwargs):
-    rs = np.linspace(record.rgrid.min(), record.rgrid.max(), 200)
-    zs = np.linspace(record.zgrid.min(), record.zgrid.max(), 220)
-    RR, ZZ = np.meshgrid(rs, zs, indexing="ij")
-    value, _, _, _, _, _ = field.jet(RR.ravel(), ZZ.ravel())
-    PSI = value.reshape(RR.shape)
-    lo, hi = PSI.min(), PSI.max()
+def _boundary_contour(ax, rs, zs, psi, level, *, color, linestyle):
+    lo, hi = float(psi.min()), float(psi.max())
     if not (lo <= level <= hi):
         return
-    ax.contour(RR, ZZ, PSI, levels=[level], **kwargs)
+    drawn = draw_flux_contours(ax, rs, zs, psi, [level], color=color, linewidth=1.0)
+    drawn.set_linestyle(linestyle)
+
+
+def _hollow_axis(ax, position, *, color, marker, size):
+    style = replace(
+        DEFAULT_INK, axis_marker=marker, axis_color=color, axis_markersize=size
+    )
+    count = len(ax.lines)
+    draw_nulls(ax, magnetic_axis=position, style=style)
+    for line in ax.lines[count:]:
+        line.set_markerfacecolor("none")
+        line.set_markeredgewidth(1.6)
+
+
+def _marked_saddle(ax, position, *, color, marker):
+    style = replace(
+        DEFAULT_INK,
+        xpoint_marker=marker,
+        xpoint_color=color,
+        xpoint_markersize=5,
+    )
+    draw_nulls(ax, x_points=np.asarray([position]), style=style)
 
 
 def draw_panel(ax, row):
     record = parse_record(row["path"])
     field = FastField(record.rgrid, record.zgrid, record.psi)
 
-    lo, hi = float(record.psi.min()), float(record.psi.max())
-    span = hi - lo
-    levels = np.linspace(lo, hi, 22)
-    _contour(ax, field, record, levels)
+    rs, zs, psi = _sample_field(field, record)
+    levels = row["contour_levels"]
+    draw_flux_contours(ax, rs, zs, psi, levels, color="#c9c9c9", linewidth=0.8)
 
     wall = record.wall_polygon
-    ax.plot(wall[:, 0], wall[:, 1], color=COLOUR["wall"], lw=1.0)
+    draw_wall(
+        ax, radius=wall[:, 0], height=wall[:, 1], color=COLOUR["wall"], linewidth=1.0
+    )
 
     efit = row["efit"]
     a = row["adapter_a"]
     b = row["adapter_b"]
 
-    # imas-efit boundary (dashed) and nova boundary (solid / dotted)
-    _contour_at(
-        ax,
-        field,
-        record,
-        efit["boundary_level"],
-        colors=COLOUR["efit"],
-        linestyles="--",
-        linewidths=1.0,
+    for kind, marker in (("maximum", "^"), ("minimum", "v"), ("saddle", "x")):
+        positions = np.asarray(
+            [
+                [point["r"], point["z"]]
+                for point in row["census"]
+                if point["kind"] == kind
+            ]
+        )
+        if positions.size:
+            style = replace(
+                DEFAULT_INK,
+                xpoint_marker=marker,
+                xpoint_color=COLOUR["census"],
+                xpoint_markersize=3.0,
+                xpoint_markeredgewidth=0.6,
+                zorder_markers=4,
+            )
+            draw_nulls(ax, other_x_points=positions, style=style)
+
+    if row["rebuild"]["status"] != "pass":
+        ax.set_aspect("equal")
+        ax.set_axis_off()
+        ax.set_title(
+            f"{row['case']}\nrebuild failed: |grad psi|="
+            f"{row['rebuild']['grad_norm_at_axis']:.3g}; comparisons excluded",
+            fontsize=LABEL_SIZE,
+            pad=2,
+        )
+        return
+
+    # Draw each code's boundary at its own level through the flux painter.
+    _boundary_contour(
+        ax, rs, zs, psi, efit["boundary_level"], color=COLOUR["efit"], linestyle="--"
     )
     if a is not None and a["nova_boundary_psi"] is not None:
-        _contour_at(
+        _boundary_contour(
             ax,
-            field,
-            record,
+            rs,
+            zs,
+            psi,
             a["nova_boundary_psi"],
-            colors=COLOUR["nova_a"],
-            linestyles="-",
-            linewidths=1.0,
+            color=COLOUR["nova_a"],
+            linestyle="-",
         )
     if b is not None:
-        level = b["nova_boundary_level"]
-        _contour_at(
+        _boundary_contour(
             ax,
-            field,
-            record,
-            level,
-            colors=COLOUR["nova_b"],
-            linestyles=":",
-            linewidths=1.0,
-        )
-
-    # census points, hollow by type
-    for point in row["census"]:
-        marker = {"maximum": "^", "minimum": "v", "saddle": "x"}[point["kind"]]
-        ax.plot(
-            point["r"],
-            point["z"],
-            marker=marker,
-            markersize=3.0,
-            markerfacecolor="none",
-            markeredgecolor=COLOUR["census"],
-            markeredgewidth=0.6,
-            linestyle="none",
+            rs,
+            zs,
+            psi,
+            b["nova_boundary_level"],
+            color=COLOUR["nova_b"],
+            linestyle=":",
         )
 
     # imas-efit axis and X-point through the null vocabulary
@@ -184,70 +216,47 @@ def draw_panel(ax, row):
         ax,
         magnetic_axis=[efit["axis_r"], efit["axis_z"]],
         x_points=x_point,
-        contain=wall,
     )
 
-    # nova axes and saddles, distinct styles
     if a is not None:
         if a["nova_axis_r"] is not None:
-            ax.plot(
-                a["nova_axis_r"],
-                a["nova_axis_z"],
+            _hollow_axis(
+                ax,
+                [a["nova_axis_r"], a["nova_axis_z"]],
+                color=COLOUR["nova_a"],
                 marker="o",
-                markersize=11,
-                markerfacecolor="none",
-                markeredgecolor=COLOUR["nova_a"],
-                markeredgewidth=1.6,
-                linestyle="none",
-                zorder=6,
+                size=11,
             )
         if a["nova_saddle_r"] is not None:
-            ax.plot(
-                a["nova_saddle_r"],
-                a["nova_saddle_z"],
+            _marked_saddle(
+                ax,
+                [a["nova_saddle_r"], a["nova_saddle_z"]],
+                color=COLOUR["nova_a"],
                 marker="o",
-                markeredgecolor=COLOUR["nova_a"],
-                markersize=5,
-                markerfacecolor=COLOUR["nova_a"],
-                linestyle="none",
-                zorder=6,
             )
     if b is not None:
         axis_pt = row["code_points"]["nova_b_axis"]
         if axis_pt is not None:
-            ax.plot(
-                axis_pt["r"],
-                axis_pt["z"],
+            _hollow_axis(
+                ax,
+                [axis_pt["r"], axis_pt["z"]],
+                color=COLOUR["nova_b"],
                 marker="s",
-                markersize=10,
-                markerfacecolor="none",
-                markeredgecolor=COLOUR["nova_b"],
-                markeredgewidth=1.6,
-                linestyle="none",
-                zorder=6,
+                size=10,
             )
         saddle = b["nova_saddle_position"]
         if saddle:
-            ax.plot(
-                saddle[0],
-                saddle[1],
-                marker="s",
-                markersize=5,
-                markerfacecolor=COLOUR["nova_b"],
-                markeredgecolor=COLOUR["nova_b"],
-                linestyle="none",
-                zorder=6,
-            )
+            _marked_saddle(ax, saddle, color=COLOUR["nova_b"], marker="s")
 
     ax.set_aspect("equal")
     ax.set_axis_off()
     ax.set_title(row["case"], fontsize=LABEL_SIZE, pad=2)
 
 
-def _legend_handles():
+def _legend_handles(include_comparisons=True):
     from matplotlib.lines import Line2D
 
-    return [
+    handles = [
         Line2D([], [], color="#c9c9c9", lw=0.8, label="psi contours"),
         Line2D([], [], color=COLOUR["wall"], lw=1.0, label="wall"),
         Line2D(
@@ -263,7 +272,13 @@ def _legend_handles():
             [], [], color="red", marker="^", ls="none", ms=8, label="imas-efit axis"
         ),
         Line2D(
-            [], [], color="red", marker="X", ls="none", ms=8, label="imas-efit X-point"
+            [],
+            [],
+            color="red",
+            marker="X",
+            ls="none",
+            ms=8,
+            label="imas-efit saddle source grid-node proxy",
         ),
         Line2D(
             [],
@@ -333,6 +348,14 @@ def _legend_handles():
             label="census saddle",
         ),
     ]
+    if include_comparisons:
+        return handles
+    return [
+        item
+        for item in handles
+        if item.get_label() in {"psi contours", "wall"}
+        or item.get_label().startswith("census ")
+    ]
 
 
 def main():
@@ -365,7 +388,11 @@ def main():
             ax.set_axis_off()
         slug = machine.lower().replace("-", "")
         legend = fig.legend(
-            handles=_legend_handles(),
+            handles=_legend_handles(
+                include_comparisons=any(
+                    row["rebuild"]["status"] == "pass" for row in members
+                )
+            ),
             loc="upper center",
             ncol=4,
             frameon=False,

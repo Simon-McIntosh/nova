@@ -15,6 +15,7 @@ import jax.numpy as jnp
 import numpy as np
 
 import nova
+from nova.equilibrium.constraint import uniform_radial_field_jet
 from benchmarks import solovev_certificate as certificate
 from scripts.analytic_oracle_fixtures import measure as fixture
 from scripts.prototypes.fine_grid_convergence.context import build
@@ -22,7 +23,6 @@ from scripts.prototypes.fine_grid_convergence.runtime_solve import without_profi
 from scripts.prototypes.lean_map.probe_bias import _image
 from scripts.prototypes.solve_options.point_bias import _exterior
 from scripts.prototypes.xpoint_cell_owner.owner_map import map_moments
-from scripts.prototypes.xpoint_cell_owner.solve_carrier import radial_field_jet
 from scripts.prototypes.xpoint_cell_owner.render import terminal_panel
 
 
@@ -84,12 +84,12 @@ def main():
             operands[0],
             exterior=operands[0].exterior
             + field_amplitude
-            * radial_field_jet(context.rule.points.reshape((-1, 2)))[:, 0],
+            * uniform_radial_field_jet(context.rule.points.reshape((-1, 2)))[:, 0],
         )
         window = replace(
             operands[2],
             exterior=operands[2].exterior
-            + field_amplitude * radial_field_jet(context.window.nodes),
+            + field_amplitude * uniform_radial_field_jet(context.window.nodes),
         )
         operands = (values, operands[1], window, *operands[3:])
     terminal = jax.jit(
@@ -105,7 +105,7 @@ def main():
     solved_flux = (
         exterior
         + _image(operator, moments)
-        + field_amplitude * radial_field_jet(coordinates)[:, 0]
+        + field_amplitude * uniform_radial_field_jet(coordinates)[:, 0]
     )
     result = {
         "cells": len(context.reference),

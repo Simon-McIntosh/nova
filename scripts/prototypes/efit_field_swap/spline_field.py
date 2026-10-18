@@ -204,3 +204,22 @@ class TraceSplineField:
             geometry.sample_points.shape[:-1]
         )
         return jnp.einsum("nks,ns->nk", geometry.fit_inverse, values)
+
+jax.tree_util.register_dataclass(
+    TraceSplineField,
+    data_fields=[
+        "value_coefficients",
+        "dr_coefficients",
+        "dz_coefficients",
+        "drr_coefficients",
+        "drz_coefficients",
+        "dzz_coefficients",
+        "knots_r",
+        "knots_z",
+        "knots_r_first",
+        "knots_z_first",
+        "knots_r_second",
+        "knots_z_second",
+    ],
+    meta_fields=[],
+)

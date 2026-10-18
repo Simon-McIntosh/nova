@@ -2672,6 +2672,53 @@ def _census_field(state, offset):
     return varied.field(state["reference"])
 
 
+def _dense_cut_current(state, reading, field, resolution):
+    """Integrate physical current on the selected tie-state cut cells directly."""
+    geometry = state["geometry"]
+    selected = np.flatnonzero(np.asarray(reading.membership) > 0)
+    assert len(selected) == 4, "the tie-state support must have four cut cells"
+    centre = np.asarray(geometry.centre)[selected]
+    vertices = np.asarray(geometry.vertices)[selected]
+    count = np.asarray(geometry.vertex_count)[selected]
+    slot = np.arange(vertices.shape[1])
+    following = np.where(slot[None] + 1 < count[:, None], slot[None] + 1, 0)
+    end = np.take_along_axis(vertices, following[..., None], axis=1)
+    first, second = vertices - centre[:, None], end - centre[:, None]
+    area = 0.5 * (first[..., 0] * second[..., 1] - first[..., 1] * second[..., 0])
+    area = np.where(slot[None] < count[:, None], area, 0.0)
+    assert np.all(area >= 0), "cut-cell fans must be counterclockwise"
+
+    grid = (np.arange(resolution) + 0.5) / resolution
+    u, v = np.meshgrid(grid, grid, indexing="ij")
+    radius = np.sqrt(u)
+    a = (radius * (1 - v))[None, None, ..., None]
+    b = (radius * v)[None, None, ..., None]
+    points = (
+        centre[:, None, None, None]
+        + a * first[:, :, None, None]
+        + b * second[:, :, None, None]
+    )
+    flat = points.reshape(-1, 2)
+    flux = np.asarray(jax.vmap(field.value)(jnp.asarray(flat)))
+    normalized = (flux - float(reading.axis_flux)) / (
+        float(reading.boundary_flux) - float(reading.axis_flux)
+    )
+    density = np.asarray(
+        state["profile"].current_density(
+            jnp.asarray(flat[:, 0]), jnp.asarray(normalized)
+        )
+    )
+    weight = (
+        np.repeat(
+            (area * np.asarray(reading.path_weight)[selected, None]).reshape(-1),
+            resolution * resolution,
+        )
+        / resolution**2
+    )
+    return float(np.sum(weight * density * (normalized <= 1)))
+
+
+@pytest.mark.timeout(900)
 @pytest.mark.slow
 def test_census_keeps_the_wall_contact_saddle_across_the_adjacent_pair():
     """Both sides of the bisected tie pair carry three roots and two saddles.
@@ -2682,6 +2729,8 @@ def test_census_keeps_the_wall_contact_saddle_across_the_adjacent_pair():
     confirmed independently of the census that proposed it, by polishing the
     field from a seed displaced from the census reading and requiring the same
     hyperbolic point back, and by requiring the point to persist across the pair.
+    Dense area quadrature of the moving field independently checks the current
+    booked on the four selected cut cells at each offset.
     """
     import numpy as np
 
@@ -2753,6 +2802,7 @@ def test_census_keeps_the_wall_contact_saddle_across_the_adjacent_pair():
     # the current it books must not jump when the census keeps the extra root.
     sampled = tie_probe.make_sampler(state)
     currents = []
+    independent_currents = []
     for offset in (low, high):
         roots, reading, raw, _, _, _ = sampled(offset * state["scale"], prior)
         moving = _census_field(state, offset)
@@ -2769,9 +2819,18 @@ def test_census_keeps_the_wall_contact_saddle_across_the_adjacent_pair():
             < 0.05 * pitch
         ), "the read must select the independently polished X-point"
         currents.append(float(np.asarray(raw)))
+        independent_current = _dense_cut_current(state, reading, moving, 32)
+        independent_currents.append(independent_current)
+        assert currents[-1] == pytest.approx(independent_current, rel=0.15), (
+            f"booked current {currents[-1]!r} disagrees with direct cut-cell "
+            f"quadrature {independent_current!r} at {offset!r}"
+        )
     assert abs(currents[1] - currents[0]) < 1e-5 * max(
         1.0, abs(currents[0]), abs(currents[1])
     ), f"booked current jumped across adjacent offsets: {currents!r}"
+    assert abs(independent_currents[1] - independent_currents[0]) < 1e-5 * max(
+        1.0, abs(independent_currents[0]), abs(independent_currents[1])
+    ), f"direct quadrature jumped across adjacent offsets: {independent_currents!r}"
 
 
 @pytest.mark.slow

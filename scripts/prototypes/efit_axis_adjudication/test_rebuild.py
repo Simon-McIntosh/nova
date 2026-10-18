@@ -26,6 +26,10 @@ require_rebuild = page.require_rebuild
 
 
 class RebuildCheckTest(unittest.TestCase):
+    def test_evidence_fragment_requires_source_commits(self):
+        with self.assertRaisesRegex(ValueError, "requires the commits"):
+            page.build_fragment([], "", "partial")
+
     def test_synthetic_recorded_axes_are_refused(self):
         for side in ("a", "b"):
             with self.subTest(side=side):

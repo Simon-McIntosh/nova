@@ -9,7 +9,6 @@ fill; psi is unfilled line contours; every coloured mark is in the legend.
 from __future__ import annotations
 
 import json
-import math
 import pathlib
 import sys
 from dataclasses import replace
@@ -24,10 +23,14 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 from efit_field_swap.crosscheck import domain_rings
 from efit_field_swap.trace_record import read_trace_record
 
+from nova.equilibrium.wall_mask import material_unit, vessel_unit
 from nova.media.ink import DEFAULT_INK
 from nova.media.poloidal import draw_flux_contours, draw_nulls, draw_wall
+from nova.media.sources.frame import inside_wall_units
 
+from case_key import case_key
 from field import FastField
+from page import figure_chunks
 from records import parse_record
 
 plt.rcParams.update(
@@ -42,7 +45,6 @@ plt.rcParams.update(
 COLOUR = {
     "efit": "#1f4e79",  # imas-efit
     "nova_a": "#b5651d",  # adapter A
-    "nova_b": "#2e7d32",  # adapter B
     "wall": "#444444",
     "obstacle": "#8a8a8a",
     "escape": "#b0182b",
@@ -52,7 +54,6 @@ COLOUR = {
 # one canvas width for every figure, so a reader meets one set of sizes; the
 # many-panel band of the figure style allows the smaller label size
 CANVAS_WIDTH = 14.0
-PANEL_HEIGHT = 3.6
 LABEL_SIZE = 12
 
 
@@ -106,6 +107,15 @@ def _assert_no_clipping(fig):
                 )
 
 
+def _typed_wall_units(rings):
+    return tuple(
+        vessel_unit(ring[:, 0], ring[:, 1])
+        if role == "vessel"
+        else material_unit(ring[:, 0], ring[:, 1])
+        for ring, role in rings
+    )
+
+
 def _sample_field(field, record):
     rs = np.linspace(record.rgrid.min(), record.rgrid.max(), 200)
     zs = np.linspace(record.zgrid.min(), record.zgrid.max(), 220)
@@ -114,12 +124,41 @@ def _sample_field(field, record):
     return rs, zs, value.reshape(RR.shape).T
 
 
-def _boundary_contour(ax, rs, zs, psi, level, *, color, linestyle):
-    lo, hi = float(psi.min()), float(psi.max())
+def _boundary_contour(ax, rs, zs, psi, level, wall, *, color, linestyle):
+    lo, hi = float(np.nanmin(psi)), float(np.nanmax(psi))
     if not (lo <= level <= hi):
-        return
-    drawn = draw_flux_contours(ax, rs, zs, psi, [level], color=color, linewidth=1.0)
+        return False
+    drawn = draw_flux_contours(
+        ax, rs, zs, psi, [level], wall=wall, color=color, linewidth=1.0
+    )
     drawn.set_linestyle(linestyle)
+    return _has_contours(drawn)
+
+
+def _has_contours(drawn):
+    return any(len(segment) > 1 for level in drawn.allsegs for segment in level)
+
+
+def _set_panel_geometry(ax, rings):
+    vessel = rings[0][0]
+    rlo, rhi = float(vessel[:, 0].min()), float(vessel[:, 0].max())
+    zlo, zhi = float(vessel[:, 1].min()), float(vessel[:, 1].max())
+    rpad = 0.025 * (rhi - rlo)
+    zpad = 0.025 * (zhi - zlo)
+    ax.set_xlim(rlo - rpad, rhi + rpad)
+    ax.set_ylim(zlo - zpad, zhi + zpad)
+    ax.set_aspect("equal")
+    ax.set_axis_off()
+
+
+def _panel_title(row):
+    if not all(key in row for key in ("machine", "slice", "iteration")):
+        return row["case"]
+    side = row["case"].rsplit("-", 1)[-1]
+    return (
+        f"{row['machine']} · slice {row['slice']} · {side}\n"
+        f"iteration {row['iteration']}"
+    )
 
 
 def _hollow_axis(ax, position, *, color, marker, size):
@@ -190,24 +229,48 @@ def _draw_escape_bottleneck(ax, escape):
 def draw_panel(ax, row):
     record = parse_record(row["path"])
     field = FastField(record.rgrid, record.zgrid, record.psi)
+    rings = _wall_loops_by_role(row["path"])
+    wall = _typed_wall_units(rings)
+    points = row["census"]
+    positions = np.asarray([[p["r"], p["z"]] for p in points], dtype=float).reshape(
+        -1, 2
+    )
+    if any(not p["inside_wall"] for p in points) or (
+        len(positions) and not np.all(inside_wall_units(positions, wall))
+    ):
+        raise ValueError("census point outside the vessel")
+    efit = row["efit"]
+    source = efit.get("saddle_source_position")
+    saddle_mark = efit.get("saddle_plot_position")
+    if saddle_mark is not None:
+        source_proxy = source is not None and np.allclose(
+            saddle_mark, source, rtol=0, atol=1e-12
+        )
+        grid_proxy = np.any(
+            np.isclose(record.rgrid, saddle_mark[0], rtol=0, atol=1e-12)
+        ) and np.any(np.isclose(record.zgrid, saddle_mark[1], rtol=0, atol=1e-12))
+        if source_proxy or grid_proxy:
+            raise ValueError("grid-node saddle proxy cannot be painted")
 
     rs, zs, psi = _sample_field(field, record)
     levels = row["contour_levels"]
-    draw_flux_contours(ax, rs, zs, psi, levels, color="#c9c9c9", linewidth=0.8)
+    drawn = set()
+    contours = draw_flux_contours(
+        ax, rs, zs, psi, levels, wall=wall, color="#c9c9c9", linewidth=0.8
+    )
+    if _has_contours(contours):
+        drawn.add("psi contours")
 
     _draw_wall_loops(ax, row["path"])
+    drawn.add("vessel wall")
+    if any(role == "obstacle" for _, role in rings):
+        drawn.add("obstacle wall")
 
-    efit = row["efit"]
     a = row["adapter_a"]
-    b = row["adapter_b"]
 
     for kind, marker in (("maximum", "^"), ("minimum", "v"), ("saddle", "x")):
         positions = np.asarray(
-            [
-                [point["r"], point["z"]]
-                for point in row["census"]
-                if point["kind"] == kind
-            ]
+            [[point["r"], point["z"]] for point in points if point["kind"] == kind]
         )
         if positions.size:
             style = replace(
@@ -219,57 +282,56 @@ def draw_panel(ax, row):
                 zorder_markers=4,
             )
             draw_nulls(ax, other_x_points=positions, style=style)
+            drawn.add(f"census {kind}")
 
     # imas-efit's escape bottleneck belongs to the escape walk, not to nova's
     # rebuild, so it is drawn before the failed-rebuild panels return.
     if row.get("escape"):
         _draw_escape_bottleneck(ax, row["escape"])
+        drawn.add("escape bottleneck")
 
     if row["rebuild"]["status"] != "pass":
-        ax.set_aspect("equal")
-        ax.set_axis_off()
+        _set_panel_geometry(ax, rings)
         ax.set_title(
-            f"{row['case']}\nrebuild failed: |grad psi|="
-            f"{row['rebuild']['grad_norm_at_axis']:.3g}; comparisons excluded",
+            f"{_panel_title(row)}\nrebuild failed: "
+            f"|grad psi|={row['rebuild']['grad_norm_at_axis']:.3g}",
             fontsize=LABEL_SIZE,
             pad=2,
         )
-        return
+        return drawn
 
     # Draw each code's boundary at its own level through the flux painter.
-    _boundary_contour(
-        ax, rs, zs, psi, efit["boundary_level"], color=COLOUR["efit"], linestyle="--"
-    )
+    if _boundary_contour(
+        ax,
+        rs,
+        zs,
+        psi,
+        efit["boundary_level"],
+        wall,
+        color=COLOUR["efit"],
+        linestyle="--",
+    ):
+        drawn.add("imas-efit boundary")
     if a is not None and a["nova_boundary_psi"] is not None:
-        _boundary_contour(
+        if _boundary_contour(
             ax,
             rs,
             zs,
             psi,
             a["nova_boundary_psi"],
+            wall,
             color=COLOUR["nova_a"],
             linestyle="-",
-        )
-    if b is not None:
-        _boundary_contour(
-            ax,
-            rs,
-            zs,
-            psi,
-            b["nova_boundary_level"],
-            color=COLOUR["nova_b"],
-            linestyle=":",
-        )
-
-    # imas-efit axis and X-point through the null vocabulary
-    x_point = None
-    if efit.get("saddle_source_position"):
-        x_point = np.array([efit["saddle_source_position"]])
+        ):
+            drawn.add("adapter A boundary")
+    # The trace carries a refined saddle level, but no refined position.
     draw_nulls(
         ax,
         magnetic_axis=[efit["axis_r"], efit["axis_z"]],
-        x_points=x_point,
+        x_points=np.asarray([saddle_mark]) if saddle_mark is not None else None,
+        style=replace(DEFAULT_INK, axis_color=COLOUR["efit"]),
     )
+    drawn.add("imas-efit axis")
 
     if a is not None:
         if a["nova_axis_r"] is not None:
@@ -280,6 +342,7 @@ def draw_panel(ax, row):
                 marker="o",
                 size=11,
             )
+            drawn.add("adapter A axis")
         if a["nova_saddle_r"] is not None:
             _marked_saddle(
                 ax,
@@ -287,26 +350,13 @@ def draw_panel(ax, row):
                 color=COLOUR["nova_a"],
                 marker="o",
             )
-    if b is not None:
-        axis_pt = row["code_points"]["nova_b_axis"]
-        if axis_pt is not None:
-            _hollow_axis(
-                ax,
-                [axis_pt["r"], axis_pt["z"]],
-                color=COLOUR["nova_b"],
-                marker="s",
-                size=10,
-            )
-        saddle = b["nova_saddle_position"]
-        if saddle:
-            _marked_saddle(ax, saddle, color=COLOUR["nova_b"], marker="s")
-
-    ax.set_aspect("equal")
-    ax.set_axis_off()
-    ax.set_title(row["case"], fontsize=LABEL_SIZE, pad=2)
+            drawn.add("adapter A saddle")
+    _set_panel_geometry(ax, rings)
+    ax.set_title(_panel_title(row), fontsize=LABEL_SIZE, pad=2)
+    return drawn
 
 
-def _legend_handles(include_comparisons=True):
+def _legend_handles(drawn):
     from matplotlib.lines import Line2D
 
     handles = [
@@ -337,19 +387,13 @@ def _legend_handles(include_comparisons=True):
             [], [], color=COLOUR["nova_a"], ls="-", lw=1.0, label="adapter A boundary"
         ),
         Line2D(
-            [], [], color=COLOUR["nova_b"], ls=":", lw=1.0, label="adapter B boundary"
-        ),
-        Line2D(
-            [], [], color="red", marker="^", ls="none", ms=8, label="imas-efit axis"
-        ),
-        Line2D(
             [],
             [],
-            color="red",
-            marker="X",
+            color=COLOUR["efit"],
+            marker="^",
             ls="none",
             ms=8,
-            label="imas-efit saddle source grid-node proxy",
+            label="imas-efit axis",
         ),
         Line2D(
             [],
@@ -369,25 +413,6 @@ def _legend_handles(include_comparisons=True):
             ls="none",
             ms=5,
             label="adapter A saddle",
-        ),
-        Line2D(
-            [],
-            [],
-            color=COLOUR["nova_b"],
-            marker="s",
-            mfc="none",
-            ls="none",
-            ms=8,
-            label="adapter B axis",
-        ),
-        Line2D(
-            [],
-            [],
-            color=COLOUR["nova_b"],
-            marker="s",
-            ls="none",
-            ms=5,
-            label="adapter B saddle",
         ),
         Line2D(
             [],
@@ -419,19 +444,18 @@ def _legend_handles(include_comparisons=True):
             label="census saddle",
         ),
     ]
-    if include_comparisons:
-        return handles
-    return [
-        item
-        for item in handles
-        if item.get_label()
-        in {"psi contours", "vessel wall", "obstacle wall", "escape bottleneck"}
-        or item.get_label().startswith("census ")
-    ]
+    return [item for item in handles if item.get_label() in drawn]
 
 
-def _normalise_case(case):
-    return case.lower().replace("_", "-").replace(":", "-")
+def _canvas_height(rows):
+    panel_width = (CANVAS_WIDTH - 0.8) / len(rows)
+    height = 0.0
+    for row in rows:
+        vessel = _wall_loops_by_role(row["path"])[0][0]
+        radial_span = float(np.ptp(vessel[:, 0]))
+        vertical_span = float(np.ptp(vessel[:, 1]))
+        height = max(height, panel_width * vertical_span / radial_span)
+    return height * 1.05 + 1.5
 
 
 def main():
@@ -447,9 +471,9 @@ def main():
     escape_map = (
         json.loads(pathlib.Path(args.escape_map).read_text()) if args.escape_map else {}
     )
-    escape_map = {_normalise_case(key): value for key, value in escape_map.items()}
+    escape_map = {case_key(key): value for key, value in escape_map.items()}
     for row in rows:
-        entry = escape_map.get(_normalise_case(row["case"]))
+        entry = escape_map.get(case_key(row["case"]))
         if entry:
             row["escape"] = entry
     outdir = pathlib.Path(args.outdir)
@@ -457,61 +481,53 @@ def main():
 
     groups: dict[str, list] = {}
     for row in rows:
+        if row["machine"] == "JT-60SA":
+            continue
         groups.setdefault(row["machine"], []).append(row)
 
     for machine, members in groups.items():
-        n = len(members)
-        ncols = min(3, n)
-        nrows = math.ceil(n / ncols)
-        fig, axes = plt.subplots(
-            nrows, ncols, figsize=(CANVAS_WIDTH, PANEL_HEIGHT * nrows)
-        )
-        axes = np.atleast_1d(axes).ravel()
-        for ax, row in zip(axes, members):
-            draw_panel(ax, row)
-        for ax in axes[n:]:
-            ax.set_axis_off()
-        slug = machine.lower().replace("-", "")
-        legend = fig.legend(
-            handles=_legend_handles(
-                include_comparisons=any(
-                    row["rebuild"]["status"] == "pass" for row in members
-                )
-            ),
-            loc="upper center",
-            ncol=4,
-            frameon=False,
-            fontsize=LABEL_SIZE,
-            bbox_to_anchor=(0.5, 0.99),
-            borderaxespad=0.0,
-        )
-        fig.canvas.draw()
-        legend_box = legend.get_window_extent(fig.canvas.get_renderer())
-        if not fig.bbox.contains(legend_box.x0, legend_box.y0) or not fig.bbox.contains(
-            legend_box.x1, legend_box.y1
-        ):
-            raise RuntimeError(f"legend leaves canvas for {machine}")
-        fig.subplots_adjust(
-            top=max(
-                0.2,
-                legend_box.y0 / fig.bbox.height
-                - (
-                    0.12
-                    if not any(row["rebuild"]["status"] == "pass" for row in members)
-                    else 0.03
+        for index, start, subset in figure_chunks(machine, members):
+            n = len(subset)
+            fig, axes = plt.subplots(
+                1, n, figsize=(CANVAS_WIDTH, _canvas_height(subset))
+            )
+            axes = np.atleast_1d(axes).ravel()
+            drawn = set()
+            for ax, row in zip(axes, subset):
+                drawn.update(draw_panel(ax, row))
+            slug = machine.lower().replace("-", "")
+            suffix = "" if index == 0 else f"-{index + 1}"
+            handles = _legend_handles(drawn)
+            legend = fig.legend(
+                handles=handles,
+                loc="upper center",
+                ncol=min(4, len(handles)),
+                frameon=False,
+                fontsize=LABEL_SIZE,
+                bbox_to_anchor=(0.5, 0.99),
+                borderaxespad=0.0,
+            )
+            fig.canvas.draw()
+            legend_box = legend.get_window_extent(fig.canvas.get_renderer())
+            if not fig.bbox.contains(
+                legend_box.x0, legend_box.y0
+            ) or not fig.bbox.contains(legend_box.x1, legend_box.y1):
+                raise RuntimeError(f"legend leaves canvas for {machine}")
+            fig.subplots_adjust(
+                top=max(
+                    0.2,
+                    (legend_box.y0 - 50.0) / fig.bbox.height,
                 ),
-            ),
-            bottom=0.02,
-            left=0.01,
-            right=0.99,
-            wspace=0.05,
-            hspace=0.10,
-        )
-        _assert_no_clipping(fig)
-        path = outdir / f"efit-axis-{slug}.svg"
-        fig.savefig(path, format="svg")
-        plt.close(fig)
-        print("wrote", path)
+                bottom=0.02,
+                left=0.01,
+                right=0.99,
+                wspace=0.05,
+            )
+            _assert_no_clipping(fig)
+            path = outdir / f"efit-axis-{slug}{suffix}.svg"
+            fig.savefig(path, format="svg")
+            plt.close(fig)
+            print("wrote", path, flush=True)
 
 
 if __name__ == "__main__":

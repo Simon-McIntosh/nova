@@ -1,10 +1,13 @@
 """One runtime-argument dense Newton correction for a moment map."""
 
+from dataclasses import replace
+
 import jax
 import jax.numpy as jnp
 import jax.scipy.linalg as jsp_linalg
 
 from scripts.prototypes.xpoint_cell_owner.owner_map import map_moments
+from nova.equilibrium.constraint import CurrentCentroidConstraint
 
 
 DIRECTION_BLOCK = 16
@@ -17,10 +20,27 @@ def without_profile(operands):
 
 
 def residual(
-    state, operands, scale, profile, component="halfplane", density_mode="fitted"
+    state,
+    operands,
+    scale,
+    profile,
+    component="halfplane",
+    density_mode="fitted",
+    pin=None,
 ):
     """Scaled moment residual with carrier arrays passed at runtime."""
-    moments = state.reshape((-1, 3)) * scale
+    moments_state = state if pin is None else state[:-1]
+    moments = moments_state.reshape((-1, 3)) * scale
+    if pin is not None:
+        active, target, row_scale, field_scale, values_basis, jet_basis = pin
+        field_value = state[-1] * field_scale
+        values = replace(
+            operands[0], exterior=operands[0].exterior + field_value * values_basis
+        )
+        window = replace(
+            operands[2], exterior=operands[2].exterior + field_value * jet_basis
+        )
+        operands = (values, operands[1], window, *operands[3:])
     mapped = map_moments(
         moments,
         *operands[:7],
@@ -29,11 +49,25 @@ def residual(
         component=component,
         density_mode=density_mode,
     )
-    return (mapped.moment_residual / scale).reshape(-1)
+    base = (mapped.moment_residual / scale).reshape(-1)
+    if pin is None:
+        return base
+    row = jnp.where(
+        active,
+        (CurrentCentroidConstraint.booked_height(moments) - target) / row_scale,
+        state[-1],
+    )
+    return jnp.concatenate((base, jnp.reshape(row, (1,))))
 
 
 def factor(
-    state, operands, scale, profile, component="halfplane", density_mode="fitted"
+    state,
+    operands,
+    scale,
+    profile,
+    component="halfplane",
+    density_mode="fitted",
+    pin=None,
 ):
     """Build dense Jacobian columns by vmapped JVP and factor them on device."""
     count = state.size
@@ -48,7 +82,7 @@ def factor(
         def column(direction):
             _, tangent = jax.jvp(
                 lambda probe: residual(
-                    probe, operands, scale, profile, component, density_mode
+                    probe, operands, scale, profile, component, density_mode, pin
                 ),
                 (state,),
                 (direction,),
@@ -73,13 +107,14 @@ def advance(
     profile,
     component="halfplane",
     density_mode="fitted",
+    pin=None,
 ):
     """Replace the state-capturing linearize correction with one jitted step."""
-    current = residual(state, operands, scale, profile, component, density_mode)
+    current = residual(state, operands, scale, profile, component, density_mode, pin)
     magnitude = jnp.max(jnp.abs(current))
     lu, pivots = jax.lax.cond(
         refactor,
-        lambda _: factor(state, operands, scale, profile, component, density_mode),
+        lambda _: factor(state, operands, scale, profile, component, density_mode, pin),
         lambda _: (lu, pivots),
         operand=None,
     )
@@ -92,7 +127,7 @@ def advance(
     def body(carry):
         trial, accepted, attempts, chosen = carry
         proposed = residual(
-            state + trial * step, operands, scale, profile, component, density_mode
+            state + trial * step, operands, scale, profile, component, density_mode, pin
         )
         take = jnp.max(jnp.abs(proposed)) < magnitude
         return (
@@ -113,5 +148,5 @@ def advance(
         ),
     )
     updated = state + chosen * step
-    end = residual(updated, operands, scale, profile, component, density_mode)
+    end = residual(updated, operands, scale, profile, component, density_mode, pin)
     return updated, jnp.max(jnp.abs(end)), lu, pivots, chosen

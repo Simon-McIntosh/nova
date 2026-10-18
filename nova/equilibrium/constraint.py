@@ -200,7 +200,9 @@ class ConstraintBinding:
                 "an eliminated constraint needs ConstraintElimination controls"
             )
         for name in ("target", "tolerance", "scale", "initial_unknown"):
-            object.__setattr__(self, name, jnp.asarray(getattr(self, name)))
+            value = getattr(self, name)
+            if not isinstance(value, jax.stages.ArgInfo):
+                object.__setattr__(self, name, jnp.asarray(value))
 
     def tree_flatten(self):
         """Keep policy static while all numerical binding values remain leaves."""
@@ -282,6 +284,8 @@ class ConstraintPair:
 
 def _require_positive_if_concrete(value: object, name: str) -> None:
     """Validate host values without forcing a traced value back to the host."""
+    if isinstance(value, jax.stages.ArgInfo):
+        return
     try:
         concrete = np.asarray(value)
     except TypeError, jax.errors.TracerArrayConversionError:
@@ -393,6 +397,122 @@ class CircuitCurrentUnknown:
         (rule,) = aux_data
         direction, ampere_scale, singular_values, authority = children
         return cls(direction, ampere_scale, singular_values, authority, rule)
+
+
+@jax.tree_util.register_pytree_node_class
+@dataclass(frozen=True)
+class UniformRadialFieldUnknown:
+    """Amplitude of a declared uniform radial field at the flux targets.
+
+    The axisymmetric flux ``-2π R Z B_R`` gives the requested radial field.
+    Its sampled image is a runtime leaf, so a changed geometry does not become
+    a closure constant in the Newton program.
+    """
+
+    flux_basis: object
+    field_scale: object
+
+    @property
+    def row_count(self) -> int:
+        return 1
+
+    def physical_value(self, normalized: jax.Array) -> jax.Array:
+        return jnp.atleast_1d(jnp.asarray(self.field_scale)) * normalized
+
+    def flux_delta(
+        self,
+        profile: ForwardProfile,
+        context: ConstraintContext,
+        functional: ConstraintFunctional[object],
+        payload: object,
+        normalized: jax.Array,
+    ) -> jax.Array:
+        del profile, context, functional, payload
+        return jnp.asarray(self.flux_basis) * self.physical_value(normalized)[0]
+
+    def tree_flatten(self):
+        return ((self.flux_basis, self.field_scale), None)
+
+    @classmethod
+    def tree_unflatten(cls, aux_data, children):
+        del aux_data
+        return cls(*children)
+
+
+def uniform_radial_field_jet(points):
+    """Flux value, gradient and Hessian from one tesla of radial field."""
+    coordinate = jnp.asarray(points)
+    radius, height = coordinate[..., 0], coordinate[..., 1]
+    zeros = jnp.zeros_like(radius)
+    return jnp.stack(
+        (
+            -2 * jnp.pi * radius * height,
+            -2 * jnp.pi * height,
+            -2 * jnp.pi * radius,
+            zeros,
+            -2 * jnp.pi * jnp.ones_like(radius),
+            zeros,
+        ),
+        axis=-1,
+    )
+
+
+@dataclass(frozen=True)
+class VerticalPositionPin:
+    """Current-centroid height and one declared source that can hold it.
+
+    A named vertical-field coil set supplies ``coil_direction`` in the
+    prescribed circuit order.  Without that set, the radial-field amplitude
+    is applied to an axisymmetric uniform-field flux image.
+    """
+
+    target_height: object
+    coil_direction: object | None = None
+    source_scale: object = 1.0
+    row_scale: object = 1.0
+    tolerance: object = 1e-10
+    initial_unknown: object = 0.0
+    active: object = True
+
+    def __post_init__(self) -> None:
+        _require_positive_if_concrete(self.source_scale, "vertical source scale")
+        _require_positive_if_concrete(self.row_scale, "vertical row scale")
+        _require_positive_if_concrete(self.tolerance, "vertical tolerance")
+        if self.coil_direction is not None:
+            direction = np.asarray(self.coil_direction)
+            if direction.ndim != 1 or not np.any(direction):
+                raise ValueError(
+                    "vertical-field coil set must name a nonzero direction"
+                )
+
+    def pair(self, operator: object) -> ConstraintPair:
+        if self.coil_direction is None:
+            coordinates = [operator.grid.coordinate, operator.wall.coordinate]
+            if operator.sample is not None:
+                coordinates.append(operator.sample.coordinate)
+            points = jnp.concatenate(tuple(jnp.asarray(x) for x in coordinates))
+            basis = uniform_radial_field_jet(points)[:, 0]
+            unknown = UniformRadialFieldUnknown(basis, self.source_scale)
+        else:
+            field = operator.prescribed_current_field
+            if field is None:
+                raise ValueError(
+                    "a named vertical-field coil set needs a prescribed field"
+                )
+            direction = jnp.asarray(self.coil_direction)
+            if direction.shape != (field.circuit_count,):
+                raise ValueError(
+                    "vertical-field coil direction must name every circuit"
+                )
+            unknown = CircuitCurrentUnknown(direction, self.source_scale)
+        binding = ConstraintBinding(
+            target=jnp.atleast_1d(self.target_height),
+            tolerance=jnp.atleast_1d(self.tolerance),
+            scale=jnp.atleast_1d(self.row_scale),
+            initial_unknown=jnp.atleast_1d(self.initial_unknown),
+            payload=jnp.asarray(self.active),
+        )
+        return ConstraintPair(CurrentCentroidConstraint(), unknown, binding)
 
 
 @jax.tree_util.register_pytree_node_class
@@ -951,6 +1071,16 @@ class CurrentCentroidConstraint:
     def row_count(self) -> int:
         return len(self.components)
 
+    @staticmethod
+    def booked_height(moments: jax.Array) -> jax.Array:
+        """Current-centroid height from booked cell current and first moments."""
+        booked = jnp.asarray(moments)
+        if booked.ndim != 2 or booked.shape[-1] != 3:
+            raise ValueError(
+                "booked moments must have current, radial and vertical columns"
+            )
+        return jnp.sum(booked[:, 2]) / jnp.sum(booked[:, 0])
+
     def observed(
         self,
         profile: ForwardProfile,
@@ -974,8 +1104,10 @@ class CurrentCentroidConstraint:
         target: jax.Array,
         scale: jax.Array,
     ) -> jax.Array:
-        del unknown
-        return (self.observed(profile, context, payload) - target) / scale
+        held = (self.observed(profile, context, payload) - target) / scale
+        if payload is None:
+            return held
+        return jnp.where(jnp.asarray(payload, dtype=bool), held, unknown)
 
     def dual_flux_image(
         self,
@@ -1861,7 +1993,11 @@ class ConstraintRecord(NamedTuple):
 
 @dataclass(frozen=True)
 class AugmentedConstraintSystem:
-    """Private fixed-shape map and callbacks assembled for one constraint tuple."""
+    """Fixed-shape map and callbacks for compensating rows, including pins.
+
+    An inactive centroid pin retains its row and unknown, so the same traced
+    system can serve free and pinned states through runtime pair leaves.
+    """
 
     initial: jax.Array
     map_fn: Callable[[jax.Array], jax.Array]
@@ -1906,7 +2042,7 @@ def assemble_augmented_system(
     def split(state):
         return state[:flux_size] * flux_scale, state[flux_size:]
 
-    def evaluate(state, shadow=None):
+    def evaluate(state, runtime_pairs, shadow=None):
         flux, unknowns = split(state)
         flux_shadow = (
             jnp.ravel(base_shadow_mask(flux))
@@ -1918,7 +2054,7 @@ def assemble_augmented_system(
         )
         context = ConstraintContext(flux, requested_class, target_current, flux_shadow)
         steps = []
-        for pair, row_slice in zip(pairs, row_slices, strict=True):
+        for pair, row_slice in zip(runtime_pairs, row_slices, strict=True):
             value = unknowns[row_slice]
             delta = pair.unknown.flux_delta(
                 profile, context, pair.functional, pair.binding.payload, value
@@ -1952,8 +2088,13 @@ def assemble_augmented_system(
             (jnp.ravel(flux_shadow), jnp.zeros(row_count, dtype=bool))
         )
 
-    def shadowed_map(state, shadow):
-        return evaluate(state, shadow)
+    def mapped(state, runtime_pairs=None):
+        return evaluate(state, pairs if runtime_pairs is None else runtime_pairs)
+
+    def shadowed_map(state, shadow, runtime_pairs=None):
+        return evaluate(
+            state, pairs if runtime_pairs is None else runtime_pairs, shadow
+        )
 
     observers = []
     for pair, row_slice in zip(pairs, row_slices, strict=True):
@@ -1975,7 +2116,7 @@ def assemble_augmented_system(
 
     return AugmentedConstraintSystem(
         initial=initial,
-        map_fn=lambda state: evaluate(state),
+        map_fn=mapped,
         shadow_mask_fn=shadow_mask,
         promoted_shadow_mask_fn=promoted_shadow_mask,
         shadowed_map_fn=shadowed_map,
@@ -2010,6 +2151,15 @@ def constraint_records(
         physical_residual = observed - target
         scale = jnp.atleast_1d(jnp.asarray(binding.scale))
         tolerance = jnp.atleast_1d(jnp.asarray(binding.tolerance))
+        if (
+            isinstance(pair.functional, CurrentCentroidConstraint)
+            and binding.payload is not None
+        ):
+            physical_residual = jnp.where(
+                jnp.asarray(binding.payload, dtype=bool),
+                physical_residual,
+                value * scale,
+            )
         circuit = (
             pair.unknown if isinstance(pair.unknown, CircuitCurrentUnknown) else None
         )
@@ -2073,6 +2223,8 @@ __all__ = [
     "IsofluxConstraint",
     "IsofluxReference",
     "ProfileAmplitudeUnknown",
+    "UniformRadialFieldUnknown",
+    "VerticalPositionPin",
     "WallGapConstraint",
     "WallGapTarget",
     "XPointConstraint",

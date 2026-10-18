@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="research">
+<meta name="plan-slug" content="vertical-pin">
+<meta name="plan-title" content="Vertical position of the converged forward solve">
+<meta name="plan-summary" content="A current-centroid pin with one declared field unknown converges the 550-cell diverted lobe carrier where the free solve stalls; the same compiled correction program serves both arms.">
+<meta name="plan-recorded-at" content="2026-10-18">
+<title>Vertical position of the converged forward solve | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<h1 id="vertical-pin">Vertical position of the converged forward solve</h1>
+<p>An elongated plasma can move vertically along a weak equilibrium direction. The free 550-cell diverted lobe solve reproduced a line-search stall at 1.54987034415 × 10<sup>−3</sup>. A current-centroid height row held by one radial-field amplitude reached 2.09179996955 × 10<sup>−13</sup> on the same booked map.</p>
+
+<h2 id="vertical-pin-interface">Public solve and source</h2>
+<p><code>ForwardSolveRequest.vertical_pin</code> and <code>ForwardProfile.solve(vertical_pin=...)</code> accept a <code>VerticalPositionPin</code>. It builds a <code>ConstraintPair</code> from the existing <code>CurrentCentroidConstraint</code> and a <code>ConstraintBinding</code>. The target is the current-centroid height on <code>ALL_DOMAIN</code> booked support. If the caller declares a vertical-field circuit direction, the single unknown is the current along that direction; the focused test solves this branch and checks its flux response. When no set is declared, the unknown is a uniform radial-field amplitude. One owner in <code>constraint.py</code> supplies the axisymmetric <code>−2π R Z B<sub>R</sub></code> flux value, gradient and Hessian to both the public pin and the lobe runner.</p>
+<p><code>AugmentedConstraintSystem</code> owns the pin row and compensating unknown. On the converged Newton route, an omitted pin becomes an inactive uniform-field pair: the runtime row mask fixes its unknown at zero while preserving the pinned state's shape. An active row holds the centroid. The public <code>ForwardProfile.solve</code> passes the complete pair through Newton-Krylov's <code>map_arguments</code>, so the target, field image and scale enter its compiled loop as runtime operands. A public test calls the solve with no pin and with two target heights and field scales; all three requests have one compilation-cache identity, with one miss and two hits. Replacing the runtime target with 0.8 m changes the terminal height to 0.8 m and makes the original 0.7 m request unqualified, demonstrating an effect beyond observing the passed argument. A separate lowered test compiles the augmented Newton-Krylov routines once and calls that executable for free and pinned pairs. Profile fitting does not enter either solve.</p>
+
+<h2 id="vertical-pin-analytic">Elongated analytic carrier</h2>
+<p>The analytic flux map books two equal-current cells with current, radial first moment and vertical first moment. At each terminal state, the independent test read divides the sum of booked vertical moments by the sum of booked currents; it does not call the solve's centroid observation. The cell centroids are 0.8 and 1.2 m radially and 0.24 and 0.96 m vertically, giving measured extents of 0.4 and 0.72 m. Their ratio is 1.8, above the asserted 1.6 floor. A constant vertical forcing of <code>0.1/κ²</code> leaves the free map without a root; the inactive unknown stays at zero. The radial-field unknown can balance that forcing while the active centroid row sets the target.</p>
+<table id="vertical-pin-analytic-table"><thead><tr><th>Arm</th><th>Result</th></tr></thead><tbody>
+<tr><td>Free, pin omitted</td><td>Stalls at scaled residual 0.0257201646091, with centroid height 0.6 m and no convergence.</td></tr>
+<tr><td>Pinned at 0.70 m</td><td>Converges with scaled residual ≤ 1 × 10<sup>−12</sup> and centroid error ≤ 1 × 10<sup>−10</sup> m.</td></tr>
+<tr><td>Pinned at 0.90 m</td><td>Converges to the same bounds with a different compensating field value.</td></tr>
+</tbody></table>
+<p>The public solve's terminal scaled residuals are 0.0257201646091 free, 7.77156117238 × 10<sup>−16</sup> at 0.70 m, and 1.05735526155 × 10<sup>−15</sup> at 0.90 m. Its measured booked heights are 0.6, 0.7 and 0.9 m respectively; only the pinned arms converge and qualify. One explicitly lowered executable containing the production <code>assemble_augmented_system</code> and Newton-Krylov routines serves all three runtime pairs. The committed-head focused gate passes six tests. The fixed-field mutation and the closure-form mutation receipts are retained in the run record; the former forces the pin tests red, and the latter fails at the missing runtime <code>map_arguments</code>.</p>
+
+<h2 id="vertical-pin-lobe">550-cell lobe comparison</h2>
+<p>The runner read the cached 550-cell machine and exterior in place. The reference-centroid target was −1.5176421094056895 × 10<sup>−5</sup> m. One tesla of radial-field basis was sampled at the quadrature and jet targets; the normalized source scale was 1 × 10<sup>−3</sup> T. The initial field amplitude was zero in both arms. The analytic-state map flux error was 4.87282015735 × 10<sup>−4</sup>, below its 5 × 10<sup>−4</sup> guard. A single correction program compiled in 47.276 s on titan, with an 8,166,485-byte executable; both arms used it.</p>
+<table id="vertical-pin-lobe-table"><thead><tr><th>Arm</th><th>Corrections</th><th>Terminal scaled residual</th><th>Centroid height [m]</th><th>Field [T]</th><th>Verdict</th></tr></thead><tbody>
+<tr><td>Free</td><td>9</td><td>1.54987034415 × 10<sup>−3</sup></td><td>−1.5166412334024038 × 10<sup>−5</sup></td><td>0</td><td>Line search collapsed; not converged</td></tr>
+<tr><td>Pinned</td><td>12</td><td>2.09179996955 × 10<sup>−13</sup></td><td>−1.5176421094056907 × 10<sup>−5</sup></td><td>−4.63849338263 × 10<sup>−6</sup></td><td>Converged</td></tr>
+</tbody></table>
+<p>The free residual history is <code>0.00174953783302, 0.00162497701900, 0.00157615839912, 0.00155663074100, 0.00155089981995, 0.00154995715479, 0.00154987035545, 0.00154987034415, 0.00154987034415</code>; the final line-search factor is zero. The pinned history is <code>0.00321011753594, 0.00277247555523, 0.00167106035416, 0.00127096865930, 0.00111461343717, 0.00104543480964, 0.000978316323559, 0.0000975812764044, 4.41066151133e-7, 2.32212661413e-12, 1.81043490376e-12, 2.09179996955e-13</code>. Its last five corrections accept full steps. The pin changes the path through the lobe and clears the measured stall.</p>
+
+<figure id="vertical-pin-terminal-figure"><img src="/nova/figures/converged-forward-solve/vertical-pin/pin-response.svg" alt="Pinned 550-cell diverted terminal poloidal flux: solved and analytic line contours at shared levels, solved and analytic nulls, and the vessel wall"><figcaption>Pinned 550-cell lobe terminal flux. Solved and analytic line contours share physical levels; both null sets and the 121-point first wall are shown. The sampled solved-versus-analytic flux difference has a nonzero 1.68508754522 × 10<sup>−5</sup> Wb supremum, confirming two distinct fields were rendered. Terminal scaled residual 2.09179996955 × 10<sup>−13</sup>; converged true. The uniform radial-field amplitude is −4.63849338263 × 10<sup>−6</sup> T.</figcaption></figure>
+
+<h2 id="vertical-pin-suites">Paired suite arms</h2>
+<p>The fresh paired base and source-head arms invoked the same pre-existing equilibrium modules and <code>tests/test_equilibrium_solve.py</code> in separate CPU processes with the repository root conftest. With 128 GB per all_debug job, both topology modules reached 5 failed, 26 passed, 2 skipped and 7 expected failures, in 2141.32 s at base and 2143.43 s at head. Their five failing ids matched, giving zero added and zero resolved failures. Conductor and solver modules passed 6 tests each; all 6 vertical-pin tests passed at head in 47.61 s. Both jobs exited with test status 1 from the inherited topology failures and no out-of-memory event. The seven expected compiler-wall failures remain unpassed checks; both complete logs and their exact failure-id delta are retained in the run record.</p>
+<p>The augmented production program count is one for free and pinned cases at both targets, measured by one <code>lower().compile()</code> call followed by three executions with different runtime pairs. The public route separately records one cache identity and one miss across its omitted-pin request and two active target and scale values. The free request stalls; both pinned requests meet the stated height and residual bounds.</p>
+</main>
+</body>
+</html>

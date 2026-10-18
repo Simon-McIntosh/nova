@@ -22,7 +22,12 @@ import jax
 import jax.numpy as jnp
 import jax.scipy.linalg as jsp_linalg
 
-__all__ = ["Factor", "SolveResult", "factor", "fixed_point"]
+__all__ = [
+    "Factor",
+    "SolveResult",
+    "factor",
+    "fixed_point",
+]
 
 BACKTRACKING_STEPS = 12
 DEFAULT_MAX_CORRECTIONS = 25

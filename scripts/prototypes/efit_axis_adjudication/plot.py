@@ -18,15 +18,17 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.path import Path
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 from efit_field_swap.crosscheck import domain_rings
 from efit_field_swap.trace_record import read_trace_record
 
+from nova.equilibrium.wall_mask import material_unit, vessel_unit
 from nova.media.ink import DEFAULT_INK
 from nova.media.poloidal import draw_flux_contours, draw_nulls, draw_wall
+from nova.media.sources.frame import inside_wall_units
 
+from case_key import case_key
 from field import FastField
 from page import figure_chunks
 from records import parse_record
@@ -43,7 +45,6 @@ plt.rcParams.update(
 COLOUR = {
     "efit": "#1f4e79",  # imas-efit
     "nova_a": "#b5651d",  # adapter A
-    "nova_b": "#2e7d32",  # adapter B
     "wall": "#444444",
     "obstacle": "#8a8a8a",
     "escape": "#b0182b",
@@ -107,28 +108,30 @@ def _assert_no_clipping(fig):
                 )
 
 
-def _inside_vessel(positions, rings):
-    vessel = Path(rings[0][0]).contains_points(positions, radius=1e-10)
-    for ring, role in rings[1:]:
-        if role == "obstacle":
-            vessel &= ~Path(ring).contains_points(positions, radius=-1e-10)
-    return vessel
+def _typed_wall_units(rings):
+    return tuple(
+        vessel_unit(ring[:, 0], ring[:, 1])
+        if role == "vessel"
+        else material_unit(ring[:, 0], ring[:, 1])
+        for ring, role in rings
+    )
 
 
-def _sample_field(field, record, rings):
+def _sample_field(field, record):
     rs = np.linspace(record.rgrid.min(), record.rgrid.max(), 200)
     zs = np.linspace(record.zgrid.min(), record.zgrid.max(), 220)
     RR, ZZ = np.meshgrid(rs, zs, indexing="ij")
     value, _, _, _, _, _ = field.jet(RR.ravel(), ZZ.ravel())
-    inside = _inside_vessel(np.column_stack((RR.ravel(), ZZ.ravel())), rings)
-    return rs, zs, np.where(inside, value, np.nan).reshape(RR.shape).T
+    return rs, zs, value.reshape(RR.shape).T
 
 
-def _boundary_contour(ax, rs, zs, psi, level, *, color, linestyle):
+def _boundary_contour(ax, rs, zs, psi, level, wall, *, color, linestyle):
     lo, hi = float(np.nanmin(psi)), float(np.nanmax(psi))
     if not (lo <= level <= hi):
         return
-    drawn = draw_flux_contours(ax, rs, zs, psi, [level], color=color, linewidth=1.0)
+    drawn = draw_flux_contours(
+        ax, rs, zs, psi, [level], wall=wall, color=color, linewidth=1.0
+    )
     drawn.set_linestyle(linestyle)
 
 
@@ -201,12 +204,13 @@ def draw_panel(ax, row):
     record = parse_record(row["path"])
     field = FastField(record.rgrid, record.zgrid, record.psi)
     rings = _wall_loops_by_role(row["path"])
+    wall = _typed_wall_units(rings)
     points = row["census"]
     positions = np.asarray([[p["r"], p["z"]] for p in points], dtype=float).reshape(
         -1, 2
     )
     if any(not p["inside_wall"] for p in points) or (
-        len(positions) and not np.all(_inside_vessel(positions, rings))
+        len(positions) and not np.all(inside_wall_units(positions, wall))
     ):
         raise ValueError("census point outside the vessel")
     efit = row["efit"]
@@ -219,9 +223,11 @@ def draw_panel(ax, row):
     ):
         raise ValueError("grid-node saddle proxy cannot be painted")
 
-    rs, zs, psi = _sample_field(field, record, rings)
+    rs, zs, psi = _sample_field(field, record)
     levels = row["contour_levels"]
-    draw_flux_contours(ax, rs, zs, psi, levels, color="#c9c9c9", linewidth=0.8)
+    draw_flux_contours(
+        ax, rs, zs, psi, levels, wall=wall, color="#c9c9c9", linewidth=0.8
+    )
 
     _draw_wall_loops(ax, row["path"])
 
@@ -260,7 +266,14 @@ def draw_panel(ax, row):
 
     # Draw each code's boundary at its own level through the flux painter.
     _boundary_contour(
-        ax, rs, zs, psi, efit["boundary_level"], color=COLOUR["efit"], linestyle="--"
+        ax,
+        rs,
+        zs,
+        psi,
+        efit["boundary_level"],
+        wall,
+        color=COLOUR["efit"],
+        linestyle="--",
     )
     if a is not None and a["nova_boundary_psi"] is not None:
         _boundary_contour(
@@ -269,6 +282,7 @@ def draw_panel(ax, row):
             zs,
             psi,
             a["nova_boundary_psi"],
+            wall,
             color=COLOUR["nova_a"],
             linestyle="-",
         )
@@ -395,10 +409,6 @@ def _legend_handles(include_comparisons=True, include_escape=False):
     ]
 
 
-def _normalise_case(case):
-    return case.lower().replace("_", "-").replace(":", "-")
-
-
 def main():
     import argparse
 
@@ -412,9 +422,9 @@ def main():
     escape_map = (
         json.loads(pathlib.Path(args.escape_map).read_text()) if args.escape_map else {}
     )
-    escape_map = {_normalise_case(key): value for key, value in escape_map.items()}
+    escape_map = {case_key(key): value for key, value in escape_map.items()}
     for row in rows:
-        entry = escape_map.get(_normalise_case(row["case"]))
+        entry = escape_map.get(case_key(row["case"]))
         if entry:
             row["escape"] = entry
     outdir = pathlib.Path(args.outdir)

@@ -14,6 +14,7 @@ import pathlib
 
 import numpy as np
 
+from case_key import case_key
 from records import parse_record
 from census import census, hessian_type
 from field import FastField
@@ -83,7 +84,7 @@ def load_adapter_a():
     data = json.loads(ADAPTER_A.read_text())
     out = {}
     for row in data["rows"]:
-        case = row["case"].replace(":", "-").replace("_", "-").lower()
+        case = case_key(row["case"])
         # adapter A carries nan geometry where nova admits no axis or saddle;
         # carry those as absent rather than as a point at nan
         for key in (

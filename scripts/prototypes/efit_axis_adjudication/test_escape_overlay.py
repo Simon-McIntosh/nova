@@ -20,6 +20,8 @@ import plot as adjudication_plot
 from analyse import REPORT
 from efit_field_swap.crosscheck import domain_rings
 from efit_field_swap.trace_record import read_trace_record
+from nova.media.sources.frame import inside_wall_units
+from records import parse_record
 
 
 def _markers(ax):
@@ -50,9 +52,33 @@ class EscapeOverlayTest(unittest.TestCase):
         )
         plt.close(fig)
 
-    def test_outside_census_is_refused_before_painting(self):
+    def test_census_flag_is_checked_even_when_position_is_inside(self):
         row = _blocking_rebuild_row(None)
-        row["census"] = [{"r": 0.0, "z": 0.0, "kind": "saddle", "inside_wall": False}]
+        record = parse_record(row["path"])
+        position = [record.axis_r, record.axis_z]
+        wall = adjudication_plot._typed_wall_units(
+            adjudication_plot._wall_loops_by_role(row["path"])
+        )
+        self.assertTrue(inside_wall_units([position], wall)[0])
+        row["census"] = [
+            {"r": position[0], "z": position[1], "kind": "saddle", "inside_wall": False}
+        ]
+        fig, ax = plt.subplots()
+        with self.assertRaisesRegex(ValueError, "outside the vessel"):
+            adjudication_plot.draw_panel(ax, row)
+        plt.close(fig)
+
+    def test_census_geometry_is_checked_even_when_flag_is_inside(self):
+        row = _blocking_rebuild_row(None)
+        record = parse_record(row["path"])
+        position = [record.rgrid.min() - 1.0, record.axis_z]
+        wall = adjudication_plot._typed_wall_units(
+            adjudication_plot._wall_loops_by_role(row["path"])
+        )
+        self.assertFalse(inside_wall_units([position], wall)[0])
+        row["census"] = [
+            {"r": position[0], "z": position[1], "kind": "saddle", "inside_wall": True}
+        ]
         fig, ax = plt.subplots()
         with self.assertRaisesRegex(ValueError, "outside the vessel"):
             adjudication_plot.draw_panel(ax, row)

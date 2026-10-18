@@ -8,14 +8,13 @@ from pathlib import Path
 
 import numpy as np
 
+from nova.media.sources.frame import inside_wall_units
+
+from case_key import case_key
 from census import hessian_type
 from field import FastField
-from plot import _inside_vessel, _wall_loops_by_role
+from plot import _typed_wall_units, _wall_loops_by_role
 from records import parse_record
-
-
-def _case(name):
-    return name.replace(":", "-").replace("_", "-").lower()
 
 
 def _finite(value):
@@ -23,16 +22,17 @@ def _finite(value):
 
 
 def refresh(rows, adapter_rows):
-    fixed = {_case(item["case"]): item for item in adapter_rows}
+    fixed = {case_key(item["case"]): item for item in adapter_rows}
     for row in rows:
-        item = fixed.get(_case(row["case"]))
+        item = fixed.get(case_key(row["case"]))
         if item is None:
             raise ValueError(f"fixed adapter receipt lacks {row['case']}")
         record = parse_record(row["path"])
         rings = _wall_loops_by_role(row["path"])
+        wall = _typed_wall_units(rings)
         points = row["census"]
         positions = np.asarray([[p["r"], p["z"]] for p in points]).reshape(-1, 2)
-        inside = _inside_vessel(positions, rings)
+        inside = inside_wall_units(positions, wall)
         row["census"] = []
         for point, admitted in zip(points, inside):
             if admitted:

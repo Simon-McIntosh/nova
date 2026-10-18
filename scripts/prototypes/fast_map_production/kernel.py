@@ -241,8 +241,26 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
     sigma = convention.sigma
     coefficients = field.sampled_coefficient(geometry)
     eigenvalues = jnp.linalg.eigvalsh(sigma * roots.jet.hessian)
-    inside = jax.vmap(lambda point: jnp.any(topology._inside_cells(geometry, point)))(
+    owner_cells = jax.vmap(lambda point: topology._inside_cells(geometry, point))(
         roots.position
+    )
+    inside = jnp.any(owner_cells, axis=1)
+    owner = jnp.argmax(owner_cells, axis=1)
+    local = (roots.position - geometry.centre[owner]) / geometry.pitch[owner, None]
+    x, y = local[:, 0], local[:, 1]
+    fitted = coefficients[owner]
+    fitted_value = (
+        fitted[:, 0]
+        + fitted[:, 1] * x
+        + fitted[:, 2] * y
+        + fitted[:, 3] * x * x
+        + fitted[:, 4] * x * y
+        + fitted[:, 5] * y * y
+    )
+    # A root-saddle pair inside the pointwise Bell representation discrepancy
+    # and binary rounding has no resolved persistence in the booked field.
+    level_enclosure = jnp.abs(roots.jet.value - fitted_value) + psi_rounding_enclosure(
+        coefficients
     )
     extrema = (
         roots.valid
@@ -257,7 +275,9 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
     )
     nearest = jnp.argmin(jnp.where(saddle[None], separation, jnp.inf), axis=1)
     persistence = sigma * (roots.jet.value - roots.jet.value[nearest])
-    persistent = ~jnp.any(saddle) | (persistence > psi_rounding_enclosure(coefficients))
+    persistent = ~jnp.any(saddle) | (
+        persistence > level_enclosure + level_enclosure[nearest]
+    )
     eligible = extrema & persistent
     axis_index = jnp.argmax(jnp.where(eligible, sigma * roots.jet.value, -jnp.inf))
     axis_live = jnp.any(eligible)

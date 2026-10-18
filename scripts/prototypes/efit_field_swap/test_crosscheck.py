@@ -54,6 +54,16 @@ def test_a_wide_wall_record_gets_a_fitted_mesh():
     assert np.any(np.asarray(geometry.contour_mesh.vertex_valid))
 
 
+def test_field_swap_record_reports_coverage_outcome():
+    case, source, path = next(
+        item for item in cases() if item[0] == "jt60sa-5slice-s5-133-134:A"
+    )
+    row = _row(case, source, path, resolutions=(16,))
+    assert row.nova_label in ("limited", "diverted", "coverage uncertified"), row.note
+    assert np.isfinite(row.coverage_winding), row.note
+    assert "lattice 16:" in row.note
+
+
 def test_missing_record_remains_an_explicit_unread_row(tmp_path):
     row = _row("missing", "missing.txt", str(tmp_path / "missing.txt"))
     assert row.case == "missing"

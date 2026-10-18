@@ -620,7 +620,7 @@ def _field_gradient_at_efit_axis(field, record):
     return float(np.linalg.norm(np.asarray(jax.jacfwd(field.value)(axis))))
 
 
-def _field_gradient_at_nova_axis(field, reading):
+def _field_gradient_at_nova_axis(field, axis):
     """|grad psi| at the axis nova's own read placed on this field.
 
     The paired test of the one above. If nova's axis is a true stationary point
@@ -630,7 +630,7 @@ def _field_gradient_at_nova_axis(field, reading):
     square-lattice cell geometry this adapter substitutes, and no claim about
     nova's axis rule can be made from this table.
     """
-    axis = jnp.asarray(reading.axis)
+    axis = jnp.asarray(axis)
     return float(np.linalg.norm(np.asarray(jax.jacfwd(field.value)(axis))))
 
 

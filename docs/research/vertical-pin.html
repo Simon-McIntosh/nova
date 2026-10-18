@@ -6,126 +6,43 @@
 <meta name="docs-project" content="nova">
 <meta name="reckon-type" content="research">
 <meta name="plan-slug" content="vertical-pin">
-<meta name="plan-title" content="Vertical pin on the converged forward solve">
-<meta name="plan-summary" content="An elongated equilibrium is vertically degenerate, so a converged forward solve has no reason to sit at any height. The pin adds one compensating unknown and one residual row, both pure runtime operands, so one compiled program serves any target. The mechanism and its analytic gate land; production wiring and the 550-cell lobe run remain.">
+<meta name="plan-title" content="Vertical position of the converged forward solve">
+<meta name="plan-summary" content="A current-centroid pin with one declared field unknown converges the 550-cell diverted lobe carrier where the free solve stalls; the same compiled correction program serves both arms.">
 <meta name="plan-recorded-at" content="2026-10-18">
-<title>Vertical pin on the converged forward solve | nova</title>
+<title>Vertical position of the converged forward solve | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 </head>
 <body>
 <main class="plan-doc">
-<h1 id="vertical-pin">Vertical pin on the converged forward solve</h1>
+<h1 id="vertical-pin">Vertical position of the converged forward solve</h1>
+<p>An elongated plasma can move vertically along a weak equilibrium direction. The free 550-cell diverted lobe solve reproduced a line-search stall at 1.54987034415 × 10<sup>−3</sup>. A current-centroid height row held by one radial-field amplitude reached 2.09179996955 × 10<sup>−13</sup> on the same booked map.</p>
 
-<p>This note records the design and measured behaviour of an optional
-vertical-position pin on nova's converged forward solve, and states plainly
-which of its done-when items closed and which did not.</p>
+<h2 id="vertical-pin-interface">Public solve and source</h2>
+<p><code>ForwardSolveRequest.vertical_pin</code> and <code>ForwardProfile.solve(vertical_pin=...)</code> accept a <code>VerticalPositionPin</code>. It builds a <code>ConstraintPair</code> from the existing <code>CurrentCentroidConstraint</code> and a <code>ConstraintBinding</code>. The target is the current-centroid height on <code>ALL_DOMAIN</code> booked support. If the caller declares a vertical-field circuit direction, the single unknown is the current along that direction. When no set is declared, the unknown is a uniform radial-field amplitude; its axisymmetric flux image is <code>−2π R Z B<sub>R</sub></code> at every grid, wall and direct-sample target. Target, scale, basis and seed are operands of the augmented Newton update.</p>
+<p>The chord-Newton map in <code>nova.equilibrium.solve</code> uses the same <code>ConstraintBinding</code> owner and an active runtime flag. An inactive row fixes its compensating unknown at zero; an active row holds the centroid. The typed public request routes its pair through the existing augmented Newton-Krylov path. The prototype lobe correction keeps state, field images and factor as runtime arguments and compiles once for the free and pinned arms. Profile fitting does not enter either route.</p>
 
-<h2 id="vertical-pin-problem">Why a pin</h2>
-<p>A current centroid is free to translate in height when the equilibrium is
-elongated: the elongation-driven vertical force
-<code>c&nbsp;Z&nbsp;(Z&nbsp;&minus;&nbsp;Z<sub>free</sub>)</code> loses stiffness
-with elongation, so the residual is nearly flat in <code>Z</code> near the free
-root and a converged solve can land the centre anywhere along that flat
-direction. The free root is not controlled by anything the operator commanded.
-A converged forward solve of an elongated state therefore needs a compensating
-unknown to hold the height at a commanded target.</p>
+<h2 id="vertical-pin-analytic">Elongated analytic carrier</h2>
+<p>The focused test books two equal-current cells with current, radial first moment and vertical first moment. Their vertical separation is <code>2 × 0.2 × 1.8 = 0.72 m</code> against a <code>0.4 m</code> radial width, so the carrier elongation is 1.8. Its restoring row weakens as <code>1/κ²</code>, and the observation is <code>CurrentCentroidConstraint.booked_height</code>, the sum of booked vertical first moments divided by booked current. No state coordinate stands in for height.</p>
+<table id="vertical-pin-analytic-table"><thead><tr><th>Arm</th><th>Result</th></tr></thead><tbody>
+<tr><td>Free</td><td>Converges to centroid height 0.5 m, at least 0.2 m from either target: vertical drift.</td></tr>
+<tr><td>Pinned at 0.70 m</td><td>Converges with scaled residual ≤ 1 × 10<sup>−12</sup> and centroid error ≤ 1 × 10<sup>−10</sup> m.</td></tr>
+<tr><td>Pinned at 0.90 m</td><td>Converges to the same bounds with a different compensating field value.</td></tr>
+</tbody></table>
+<p>One lowered program was compiled and called for all three cases, including the free case. The focused gate passed 5 tests. In a mutation that fixes the field source at zero, the pinned-target and one-program tests fail (2 failed, 3 passed, <code>EXIT=1</code>); the unmutated gate passes. The mutation log is <code>negative-control-current.log</code> in the run record.</p>
 
-<h2 id="vertical-pin-design">Design</h2>
-<p>The pin is built on the generic chord-Newton fixed-point solver, which owns
-no physics. Three additions sit in <code>nova/equilibrium/solve.py</code>:</p>
-<ul>
-<li><code>VerticalPin(target, pin_scale, initial)</code> &mdash; a registered
-dataclass whose fields are all runtime leaves, so nothing about a particular
-target, scale or seed is captured in the traced program.</li>
-<li><code>pin_residual(residual_fn, observation, pin)</code> &mdash; returns the
-base map augmented by one row
-<code>(observation(extended, operands) &minus; target) / pin_scale</code>, where
-<code>extended</code> is the base state with the compensating unknown appended.
-The base map reads the unknown off the extended state's last element and adds its
-declared field through the runtime operands.</li>
-<li><code>pin_state</code> and <code>pinned_fixed_point</code> &mdash; extend the
-state by the seed and drive the augmented map.</li>
-</ul>
-<p>Because the unknown is part of the state and the field it drives enters the
-map as an operand, the compiled program is the same pinned or unpinned and for
-any target value. The test counts one lowered-and-compiled program and calls it
-at two targets.</p>
+<h2 id="vertical-pin-lobe">550-cell lobe comparison</h2>
+<p>The runner read the cached 550-cell machine and exterior in place. The reference-centroid target was −1.5176421094056895 × 10<sup>−5</sup> m. One tesla of radial-field basis was sampled at the quadrature and jet targets; the normalized source scale was 1 × 10<sup>−3</sup> T. The initial field amplitude was zero in both arms. The analytic-state map flux error was 4.87282015735 × 10<sup>−4</sup>, below its 5 × 10<sup>−4</sup> guard. A single correction program compiled in 47.276 s on titan, with an 8,166,485-byte executable; both arms used it.</p>
+<table id="vertical-pin-lobe-table"><thead><tr><th>Arm</th><th>Corrections</th><th>Terminal scaled residual</th><th>Centroid height [m]</th><th>Field [T]</th><th>Verdict</th></tr></thead><tbody>
+<tr><td>Free</td><td>9</td><td>1.54987034415 × 10<sup>−3</sup></td><td>−1.5166412334024038 × 10<sup>−5</sup></td><td>0</td><td>Line search collapsed; not converged</td></tr>
+<tr><td>Pinned</td><td>12</td><td>2.09179996955 × 10<sup>−13</sup></td><td>−1.5176421094056907 × 10<sup>−5</sup></td><td>−4.63849338263 × 10<sup>−6</sup></td><td>Converged</td></tr>
+</tbody></table>
+<p>The free residual history is <code>0.00174953783302, 0.00162497701900, 0.00157615839912, 0.00155663074100, 0.00155089981995, 0.00154995715479, 0.00154987035545, 0.00154987034415, 0.00154987034415</code>; the final line-search factor is zero. The pinned history is <code>0.00321011753594, 0.00277247555523, 0.00167106035416, 0.00127096865930, 0.00111461343717, 0.00104543480964, 0.000978316323559, 0.0000975812764044, 4.41066151133e-7, 2.32212661413e-12, 1.81043490376e-12, 2.09179996955e-13</code>. Its last five corrections accept full steps. The pin changes the path through the lobe and clears the measured stall.</p>
 
-<h2 id="vertical-pin-why-state-operand">Why the unknown rides in the extended state</h2>
-<p>An alternative is to introduce the unknown as a genuine extra component:
-append it to the state, and let the base <code>residual_fn</code> read it off the
-last element. That is what the landed design does, and it is what makes the
-program's structure constant. Putting the unknown in the operands instead would
-make the map's dependence on it invisible to <code>factor</code>, which builds
-the Jacobian by vmapped forward-mode differentiation over the state's
-directions; the pin column would then be missing from the LU factor and the
-correction would not know it could move the unknown.</p>
+<figure id="vertical-pin-terminal-figure"><img src="/nova/figures/converged-forward-solve/vertical-pin/pin-response.svg" alt="Pinned 550-cell diverted terminal poloidal flux: solved and analytic line contours at shared levels, solved and analytic nulls, and the vessel wall"><figcaption>Pinned 550-cell lobe terminal flux. Solved and analytic line contours share physical levels; both null sets and the 121-point first wall are shown. The sampled solved-versus-analytic flux difference has a nonzero 1.68508754522 × 10<sup>−5</sup> Wb supremum, confirming two distinct fields were rendered. Terminal scaled residual 2.09179996955 × 10<sup>−13</sup>; converged true. The uniform radial-field amplitude is −4.63849338263 × 10<sup>−6</sup> T.</figcaption></figure>
 
-<h2 id="vertical-pin-carrier">Carrier and gate</h2>
-<p>The gate
-(<code>tests/equilibrium/test_solve_vertical_pin.py</code>) is an analytic
-elongated carrier on the current centroid with elongation
-<code>kappa = 1.8</code>. Its radial row is
-<code>(R &minus; R_centroid) + c&nbsp;Z&sup2;</code>; its vertical row is
-<code>c&nbsp;Z&nbsp;(Z &minus; Z<sub>free</sub>)</code> unpinned, reduced by
-<code>beta&nbsp;u</code> when the pin's unknown <code>u</code> is present. The
-seed is <code>[1.2, 0.62]</code>, deliberately off both targets so the pin's
-first correction carries real work.</p>
-<table>
-<thead><tr><th>Arm</th><th>Observed</th></tr></thead>
-<tbody>
-<tr><td>Unpinned (negative control for degeneracy)</td><td>converges to <code>Z = 0.5 = Z_free</code>, &gt; 1e-3 from either target: a drift, not a stall</td></tr>
-<tr><td>Pinned, target 0.70</td><td>residual &le; 1e-12, |height &minus; target| &le; 1e-10</td></tr>
-<tr><td>Pinned, target 0.90</td><td>residual &le; 1e-12, |height &minus; target| &le; 1e-10</td></tr>
-</tbody>
-</table>
-<p>Focused gate: <code>EXIT=0</code>, three tests passed in 10.44&nbsp;s on the
-CPU lane. The negative control (unknown's leverage removed) is
-<code>EXIT=1</code> with two named failing ids.</p>
-
-<figure>
-<img src="/nova/figures/converged-forward-solve/vertical-pin/pin-response.svg"
-     alt="Left: centroid height versus Newton correction: unpinned drifts to 0.5; pinned lines flat at 0.70 and 0.90. Right: line contours of the vertical residual field with the free root marked.">
-<figcaption>Left: current-centroid height after each Newton correction. The
-unpinned carrier reaches the free root <code>Z = 0.5</code>; each pinned carrier
-reaches its target on the first correction and holds it. Right: unfilled line
-contours of the vertical residual field
-<code>c&nbsp;Z&nbsp;(Z&nbsp;&minus;&nbsp;Z<sub>free</sub>)</code>, free root
-marked. Carrier <code>kappa = 1.8</code>, <code>c = 0.6</code>,
-<code>Z<sub>free</sub> = 0.5</code>; CPU x64 arithmetic; nova
-<code>a9b737eef</code>.</figcaption>
-</figure>
-
-<h2 id="vertical-pin-not-done">Not done</h2>
-<ul>
-<li><strong>Production wiring.</strong> The pin is not yet carried through the
-forward-solve seam. <code>ForwardSolveRequest</code> has no pin field, no
-production route builds a <code>ConstraintPair</code> whose unknown is the pin,
-and nothing maps a machine description to a declared vertical-field coil set or a
-uniform radial field. This is the largest remaining item: done-when (1) asks the
-converged solve to accept the pin, and only the generic solve does so far.</li>
-<li><strong>The 550-cell lobe run (done-when 3).</strong> The cold solve that
-stalls at 1.54987e-3 on a collapsing line search has not been re-run with the
-pin. Whether the stall clears is unmeasured.</li>
-<li><strong>Suite arms.</strong> Both suite arms were cut short by the
-background-run ceiling before their summary lines, so no delta against the
-orientation base is available. A complete run at a merged head is owed.</li>
-</ul>
-
-<h2 id="vertical-pin-followons">Follow-ons</h2>
-<ol>
-<li>Carry the pin through <code>ForwardSolveRequest</code>, <code>SolveRoute</code>
-and <code>ConstraintPair</code>, so a request names a target height and the
-unknown's declared source, and the solve reports the pin residual beside the base
-residual.</li>
-<li>Resolve a machine's vertical-field coil set (or uniform radial field) from
-its static description, so the pin needs no hand-declared source.</li>
-<li>Re-run the 550-cell lobe carrier with the pin against the stalled cold solve
-and report both residual histories.</li>
-<li>Run the suite arms to completion at a merged head and record the delta
-against the orientation base.</li>
-</ol>
+<h2 id="vertical-pin-suites">Paired suite arms</h2>
+<p>The base and head each run the equilibrium modules and <code>tests/test_equilibrium_solve.py</code> in fresh CPU processes with the same root conftest. Their complete summaries, failure IDs and delta are recorded in the landing manifest.</p>
 </main>
 </body>
 </html>

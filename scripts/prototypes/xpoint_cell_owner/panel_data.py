@@ -6,6 +6,7 @@ from nova.jax.config import configure_dtypes
 configure_dtypes()
 
 import argparse
+from dataclasses import replace
 import json
 from pathlib import Path
 
@@ -21,6 +22,8 @@ from scripts.prototypes.fine_grid_convergence.runtime_solve import without_profi
 from scripts.prototypes.lean_map.probe_bias import _image
 from scripts.prototypes.solve_options.point_bias import _exterior
 from scripts.prototypes.xpoint_cell_owner.owner_map import map_moments
+from scripts.prototypes.xpoint_cell_owner.solve_carrier import radial_field_jet
+from scripts.prototypes.xpoint_cell_owner.render import terminal_panel
 
 
 def main():
@@ -29,6 +32,7 @@ def main():
     parser.add_argument("--cache", type=Path, required=True)
     parser.add_argument("--start-json", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--svg", type=Path)
     parser.add_argument(
         "--component",
         choices=(
@@ -56,10 +60,11 @@ def main():
         f"nova={nova.__file__} module={__file__} cwd={Path.cwd().resolve()}", flush=True
     )
     saved = json.loads(args.start_json.read_text())
-    if "terminal_state" not in saved or not saved.get("history"):
+    terminal_saved = saved.get("comparison", {}).get("pinned", saved)
+    if "terminal_state" not in terminal_saved or not terminal_saved.get("history"):
         raise ValueError("terminal panel requires a completed cold receipt")
     context = build(args.cells, args.cache)
-    moments = jnp.asarray(saved["terminal_state"]["moments"])
+    moments = jnp.asarray(terminal_saved["terminal_state"]["moments"])
     operands = without_profile(context.operands)
     profile = context.profile
     machine = context.machine
@@ -71,6 +76,22 @@ def main():
     )
     exterior, _ = _exterior(context.cache, context.carrier_key)
     operator = fixture.forward_operator(context.source, machine)
+    field_amplitude = jnp.asarray(
+        terminal_saved["terminal_state"].get("field_amplitude_tesla", 0.0)
+    )
+    if field_amplitude != 0:
+        values = replace(
+            operands[0],
+            exterior=operands[0].exterior
+            + field_amplitude
+            * radial_field_jet(context.rule.points.reshape((-1, 2)))[:, 0],
+        )
+        window = replace(
+            operands[2],
+            exterior=operands[2].exterior
+            + field_amplitude * radial_field_jet(context.window.nodes),
+        )
+        operands = (values, operands[1], window, *operands[3:])
     terminal = jax.jit(
         lambda point, carrier: map_moments(
             point,
@@ -81,7 +102,11 @@ def main():
             density_mode=args.density_mode,
         )
     )(moments, operands)
-    solved_flux = exterior + _image(operator, moments)
+    solved_flux = (
+        exterior
+        + _image(operator, moments)
+        + field_amplitude * radial_field_jet(coordinates)[:, 0]
+    )
     result = {
         "cells": len(context.reference),
         "panel": {
@@ -91,11 +116,16 @@ def main():
             "analytic_flux": np.asarray(analytic)[: len(machine.node)].tolist(),
             "solved_roots": np.asarray(terminal.roots).tolist(),
             "analytic_roots": np.asarray(context.seeds).tolist(),
-            "terminal_residual": saved["history"][-1]["residual"],
-            "converged": bool(saved.get("converged")),
+            "terminal_residual": terminal_saved["history"][-1]["residual"],
+            "converged": bool(terminal_saved.get("converged")),
         },
     }
     args.output.write_text(json.dumps(result, indent=2) + "\n")
+    if args.svg is not None:
+        args.svg.parent.mkdir(parents=True, exist_ok=True)
+        terminal_panel(result, args.svg)
+        lines = args.svg.read_text().splitlines()
+        args.svg.write_text("\n".join(line.rstrip() for line in lines) + "\n")
     residual = result["panel"]["terminal_residual"]
     converged = result["panel"]["converged"]
     print(

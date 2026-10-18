@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="399">
+<meta name="plan-version" content="400">
 <meta name="plan-modified" content="2026-10-18">
 </head>
 <body>
@@ -1105,6 +1105,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261018T182350887258-review-of-tcv-liuqe-known-answer-fbc3788e2283" data-who="reckon-build" data-when="2026-10-18T18:33:05Z">
     <div class="r-comment-body"><p>Parsed review stored at the versioned path for reviewed base a0ed032e1c8fb62e1fbad18cea1c343052dc0dd0 and reviewed head fbc3788e228330e9547deaeb10ea3c12d03cea25, and copied to the canonical path; six scores total 91, one blocking and three follow-on findings, zero added failures.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261018T163611410101-efit-maximin-certificate" data-who="reckon-build" data-when="2026-10-18T17:44:20Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/converged-forward-solve/efit-maximin-certificate.html#efit-maximin-certificate-h — MAST-U nova contact blocked by a continuous cut with maximum &lt;= 0.019652442526100 below its 0.020530973894264 level; exact synthetic endpoints lie 1.56e-11 and 1.38e-11 below imas-efit&#x27;s full-precision claims, with closed certified cuts; six focused tests pass and suite delta is zero added failures.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

@@ -1,0 +1,409 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 3,
+  "attempt_kind": "lane-change",
+  "backend": "codex",
+  "base_sha": "3df1dda118296f6b73d2d335c4c0561cd69d1655",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T163611410101-efit-maximin-certificate/brief.txt",
+    "sha256": "a6a5f5cd2db3d4ebee54eb092ffd93c15276c1794603f52dc63e99985e8dbb30"
+  },
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 24931072,
+      "cached_input_tokens_cumulative": 24931072,
+      "input_tokens": 25152724,
+      "input_tokens_cumulative": 25152724,
+      "output_tokens": 62460,
+      "output_tokens_cumulative": 62460,
+      "reasoning_output_tokens": 24073,
+      "reasoning_output_tokens_cumulative": 24073
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 810,
+    "files": 10,
+    "removed": 254
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "a860e8c2433836b79fae3a0d91d652773514e7d8"
+  ],
+  "completed_at": "2026-10-18T17:44:20Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-18T16:37:24Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "bash /home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T163611410101-efit-maximin-certificate/exports/run-after-suite.sh",
+    "exit_status": 1,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T163611410101-efit-maximin-certificate/logs/after-suite.log"
+  },
+  "impl_move": {
+    "at_complete": 0.2857142857142857,
+    "at_dispatch": 0.2857142857142857,
+    "plan": "converged-forward-solve",
+    "reason": "Evidence-only certificate exchange with imas-efit; no product code changes.",
+    "verdict": "waived"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-18T17:36:26.673710+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-18T16:36:26Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 21,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 6,
+    "headroom": 4,
+    "mean_context": 136000,
+    "observed_at": "2026-10-18T16:36:05Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 21,
+      "aggregate_tokens_per_second": 281.211,
+      "detail": "",
+      "mean_tokens_per_second": 66.955,
+      "observed_at": "2026-10-18T16:36:05Z",
+      "runs": 4.2,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-18T17:44:20Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-10-18T17:44:20Z",
+        "resets_at": 1792874443,
+        "used_percent": 54.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": {
+    "attempt": 3,
+    "kind": "lane-change",
+    "lanes": [
+      {
+        "changed_at": "2026-10-18T17:21:48Z",
+        "detail": "starting fresh because the session cannot follow the move from harness 'claude' to 'codex'",
+        "from_backend": "clive",
+        "from_harness": "claude",
+        "reason": "Certificate rigour node: the clive attempt reviewed 68 with six blocking findings on numerical rigour (snapped targets, node-only minima, cut at the wrong level); the claims go to a peer code, so the repair needs certified bounds; lead rule allows naming a lane with a stated reason.",
+        "session": "fresh",
+        "session_id": "71284d58-81fd-4fad-8410-6e6bedc8df50",
+        "session_source": "stream",
+        "to_backend": "codex",
+        "to_harness": "codex"
+      }
+    ],
+    "root_run_id": "r-20261018T163611410101-efit-maximin-certificate"
+  },
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T163611410101-efit-maximin-certificate/manifest.md",
+  "member": "disposable-r-20261018T163611410101-efit-maximin-certificate",
+  "model_key": "sol",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "efit-maximin-certificate",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.cache/nova-s21-briefs/pivot/maximin.full.txt",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T163611410101-efit-maximin-certificate/brief.txt",
+    "brief_sha256": "a6a5f5cd2db3d4ebee54eb092ffd93c15276c1794603f52dc63e99985e8dbb30",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "critical",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 2360,
+          "cached_input_tokens": 839620,
+          "input_tokens": 841982,
+          "output_tokens": 848,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 842830,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "docs/research/efit-maximin-certificate.html carries nova attaining path for mastu-fullPulse-s1-4-5-B with its minimum polarity*psi on the record spline, nova blocking cut (or own maximin and attaining path) for synthetic_crossing-A and -B at the imas-efit levels, and the minimum polarity*psi along any delivered imas-efit attaining paths; plain-text exports with a README sit under the run directory; both suite arms recorded.",
+    "estimated_hours": null,
+    "goal": "Export nova maximin certificates for three escape-comparison rows so they close without judgement",
+    "id": "efit-maximin-certificate",
+    "images": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-18T16:36:26Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 21,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 6,
+      "headroom": 4,
+      "mean_context": 136000,
+      "observed_at": "2026-10-18T16:36:05Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 21,
+        "aggregate_tokens_per_second": 281.211,
+        "detail": "",
+        "mean_tokens_per_second": 66.955,
+        "observed_at": "2026-10-18T16:36:05Z",
+        "runs": 4.2,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T163611410101-efit-maximin-certificate/manifest.md",
+    "negative_control": "",
+    "orchestrator_assessment": {
+      "reasoning": "standard",
+      "risk": "low",
+      "verification": "strict"
+    },
+    "plan": "converged-forward-solve",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "scripts/prototypes/efit_maximin_certificate",
+      "docs/research/efit-maximin-certificate.html",
+      "docs/evidence/fragments/converged-forward-solve/efit-maximin-certificate.html",
+      "docs/figures/converged-forward-solve/efit-maximin-certificate"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 3313314.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "efit-maximin-certificate",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-18T16:36:48.067251+00:00",
+    "score": 0.71875,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "Certificate exchange with imas-efit on three same-axis rows; evidence only; three clauses; CPU.",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:capability",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.645,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 859.43,
+      "context-estimate": 61.954,
+      "records": 349.87,
+      "verdict-inputs": 662.325
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.2857142857142857,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "a860e8c2433836b79fae3a0d91d652773514e7d8",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "3df1dda118296f6b73d2d335c4c0561cd69d1655",
+    "reviewed_head_sha": "a860e8c2433836b79fae3a0d91d652773514e7d8",
+    "scores": {
+      "durability": 13,
+      "evidence": 18,
+      "fit": 18,
+      "goal_fidelity": 18,
+      "reuse": 5,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 92
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261018T163611410101-efit-maximin-certificate",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a15008-c24b-7061-b8b9-30d019fb972b",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 24931072,
+    "cumulative_input_tokens": 50083796,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 86533
+  },
+  "time_budget": "60m",
+  "tool_steps": 62.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 4016,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 3,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-18T17:44:24Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-18T17:21:52Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261018T163611410101-efit-maximin-certificate",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 14342,
+    "worker_pid": 1895383
+  },
+  "worker_seconds": 1355,
+  "worker_seconds_source": "stream_events+rollout_receipts",
+  "worktree_retention": null
+}

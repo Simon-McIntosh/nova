@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="census-proposal-coverage">
+  <meta name="plan-title" content="Stationary census proposal coverage">
+  <meta name="plan-summary" content="Neighbour proposals recover live saddles; direct degeneracy measurements distinguish the later folds">
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-verifies" content="converged-forward-solve#s2">
+  <meta name="plan-recorded-at" content="2026-10-18">
+  <title>Stationary census proposal coverage | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+  <header>
+    <h1>Stationary census proposal coverage</h1>
+    <p class="lead">A cell's own quadratic can place its stationary seed across a shared edge while the complete field still has a hyperbolic saddle. The census now admits proposals in the cell's edge-neighbour ring and ranks them by the complete field's gradient residual. The remaining coarse-window transitions are folds: the axis and wall saddle merge at measured stationary degeneracies.</p>
+  </header>
+  <section id="census-proposal-coverage-method">
+    <h2>Proposal, capacity and selection</h2>
+    <p>For each cell, the local fitted quadratic supplies one seed. A proposal is eligible when its seed is inside its own polygon or any polygon named by that cell's <code>TopologyGeometry.neighbour</code> row. This is an actual shared-edge ring, including trimmed wall cells, not a distance cutoff. The existing operand-derived cross-product rounding bound applies to each polygon in the ring. If a neighbouring fit places its seed in the saddle's cell, the corresponding edge-neighbour cell proposes it even when its own polygon misses it. After polishing, roots are deduplicated by position as before.</p>
+    <p>The fixed seed reserve is the smaller of the cell count and <code>null_capacity × (one cell + maximum edge neighbours)</code>, with previous-root slots covered separately. It is derived from the graph degree and declared root capacity; no measured offset or fitted geometric threshold enters the shape. Accepted candidates are sorted by the norm of the complete field's gradient at the seed, with stable ordering for ties, before that reserve is filled. An overflow remains an explicit census result rather than a silent index truncation.</p>
+    <table>
+      <thead><tr><th>Carrier</th><th>Offset</th><th>Own-cell proposals</th><th>Edge-ring proposals</th></tr></thead>
+      <tbody>
+        <tr><td>282 cells</td><td>0.1732</td><td>3</td><td>17</td></tr>
+        <tr><td>282 cells</td><td>0.17325</td><td>2</td><td>18</td></tr>
+        <tr><td>282 cells</td><td>0.1735</td><td>2</td><td>18</td></tr>
+        <tr><td>550 cells</td><td>0.122</td><td>3</td><td>19</td></tr>
+        <tr><td>550 cells</td><td>0.1225</td><td>3</td><td>21</td></tr>
+        <tr><td>550 cells</td><td>0.123</td><td>1</td><td>21</td></tr>
+      </tbody>
+    </table>
+    <p>The measured maximum in these tie states is 21 candidates, below the graph-derived reserve. The earlier whole-domain admission offered 153 seeds at 282 cells against the former index-ordered capacity of 64. The edge ring admits the nearby fits without paying for every distant fit in the carrier.</p>
+  </section>
+  <section id="census-proposal-coverage-folds">
+    <h2>The broad-window departures are stationary folds</h2>
+    <p>The earlier inference of a coverage hole through 0.1735 and 0.123 used the determinant at the last coarse state that held a saddle. A strongly negative determinant at that state does not rule out a fold before the next state. Solving the three simultaneous equations <code>∂Rψ = 0</code>, <code>∂Zψ = 0</code> and <code>det H = 0</code> in position and offset locates both degeneracies directly on the same moving field.</p>
+    <table>
+      <thead><tr><th>Carrier</th><th>Fold offset</th><th>Fold position (R, Z)</th><th>Scaled equation residuals (∂Rψ, ∂Zψ, det H)</th><th>Small Hessian eigenvalue</th></tr></thead>
+      <tbody>
+        <tr><td>282 cells</td><td>0.1734072390800926</td><td>(1.557873476354704, 0.8558605638459563)</td><td>(4.05e-13, 2.26e-13, −3.02e-14)</td><td>5.20e-18</td></tr>
+        <tr><td>550 cells</td><td>0.12261753742637584</td><td>(1.5578511881883474, 0.8559018825152425)</td><td>(3.82e-13, 1.79e-13, −1.15e-13)</td><td>2.43e-17</td></tr>
+      </tbody>
+    </table>
+    <p>The displayed equation residuals were multiplied by 1e5 for the nonlinear solve; the unscaled gradient and determinant are 1e-5 of those values. On the compiled offset trace, the absolute determinants at the folds are 3.015e-19 and 1.146e-18. A conservative eight-operation binary64 bound for the two-product determinant of the returned Hessian, <code>γ(8) × (|Hrr Hzz| + |Hrz Hzr|)</code> with <code>γ(8) = 8ε / (1 − 8ε)</code>, is 1.251e-18 and 1.250e-18, so both determinants lie inside it. At each fold the axis and saddle coincide, making their flux persistence zero against the fitted-flux rounding enclosures of 9.327e-18 and 8.184e-18. On the live side, the 282-cell pair at offset 0.1734 is 0.01136 m apart with determinants +5.72e-6 and −5.71e-6; the read returns only the distant primary saddle by 0.17345. At 550 cells, the axis and wall saddle are present at 0.1226 and gone by 0.1227. The stationary degeneracies, opposite determinant signs before them and vanishing separation establish folds rather than proposal losses at those later states.</p>
+    <p>The fold offsets are qualified by their numerical path. Rebuilding the field eagerly at the same stored coordinates yields determinants of +5.59e-15 and −5.35e-15 rather than the compiled trace's rounding-scale values, because the field construction contracts differently. The fold solve and enclosure above use the compiled moving-offset field evaluated by the census. The much wider pre-fold and post-fold count intervals do not depend on this last-bit distinction.</p>
+  </section>
+  <section id="census-proposal-coverage-verification">
+    <h2>Read and regression verification</h2>
+    <p>The read-level regression uses the same moving field and warm prior as the carrier sweep. At 282 cells, the recorded base reads 3 roots / 2 saddles at 0.1732 and 2 / 1 at 0.17325; the head reads 3 / 2 on both sides. The base and head map readings at those two offsets agree in classification, geometry, boundary flux and raw current, with only a last-bit saddle-candidate difference. At 550 cells, offsets 0.122 and 0.1225 each return 3 roots and 2 saddles before their measured fold. Both parametrised cases passed in 157.86 s. Applying only the declared containment-only mutation to an extracted copy of the committed source makes the 282-cell case fail at 0.17325 with 2 roots, while the unmutated case passes. The mutation log ends <code>EXIT=1</code> and names the failing test id.</p>
+    <table>
+      <thead><tr><th>Carrier and range</th><th>States</th><th>Base root counts</th><th>Head root counts</th><th>Map decisions, geometry and raw current</th></tr></thead>
+      <tbody>
+        <tr><td>Diverted 282, 0.16–0.18</td><td>41</td><td>2 to 0.1605; 3 to 0.173; 1 from 0.1735</td><td>Same in all 41</td><td>Same in all 41</td></tr>
+        <tr><td>Diverted 550, 0.10–0.14</td><td>41</td><td>2 to 0.113; 3 to 0.122; 1 from 0.123</td><td>Same in all 41</td><td>Same in all 41</td></tr>
+        <tr><td>Limited 289, −0.20–0.20</td><td>41</td><td>0 at both ends; 1 from −0.18 to 0.18</td><td>Same in all 41</td><td>Same in all 41</td></tr>
+        <tr><td>Limited 553, −0.20–0.20</td><td>41</td><td>0 outside −0.12–0.12; 1 inside</td><td>Same in all 41</td><td>Same in all 41</td></tr>
+      </tbody>
+    </table>
+    <p>The comparison records every state, not just a matching summary count. Boundary class, wall candidate, validity, qualification, boundary and saddle positions, and booked raw current are exactly equal in all 164 base/head rows. A few flux scalars differ only in their last bits: the largest absolute saddle-candidate difference is 6.94e-18 at 282 cells, 5.20e-18 at 550, 2.84e-14 at limited 289 and 5.68e-14 at limited 553. Limited boundary flux differs by at most 2.84e-14 and 1.42e-14 at the two sizes. These differences are at most four binary64 ulps of the compared value. Counts and discrete map receipts are unchanged where no departure occurs.</p>
+    <p>The recorded titan adjacent pair, 0.17323108126297435 and 0.17323108126297437, reads 3 roots on both sides in the base revision and the head revision under the fixed warm prior, with both map rows equal. The previously reported GPU-only loss therefore did not reproduce on this revision and input path; no GPU departure is claimed as repaired.</p>
+    <p>Regression gate: the base batch job completed all three named files in separate processes from immutable revision <code>de1186f066774069e31bc4f90b4d6920432bb5d7</code>, with the repository-root conftest and the certified-machine cache. <code>tests/test_fixed_points.py</code> passed 17/17, <code>tests/test_fixed_point.py</code> passed 45/45, and <code>tests/equilibrium/test_topology_read.py</code> ended with 5 failed, 28 passed and 7 errors in 1960.75 s. Its complete log ends <code>EXIT=1</code> and names all twelve failing test ids. The final head arm runs from immutable revision <code>9f1a0b00c226133717e7c425a2407312f549d169</code>; its complete receipt is pending.</p>
+  </section>
+</main></body>
+</html>

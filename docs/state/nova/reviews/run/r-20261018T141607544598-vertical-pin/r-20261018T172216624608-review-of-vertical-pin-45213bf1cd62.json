@@ -88,6 +88,13 @@
     "nova/equilibrium/forward.py:_solve_augmented_constraints:2252"
   ],
   "completed_at": "2026-10-18T17:33:20Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "vertical-pin",
+      "recorded_at": "2026-10-18T18:22:30.015465+00:00"
+    }
+  },
   "dispatched_at": "2026-10-18T17:23:19Z",
   "finding_dispositions": {
     "0": {

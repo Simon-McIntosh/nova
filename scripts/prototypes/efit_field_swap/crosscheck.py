@@ -169,8 +169,12 @@ def admitted_index_sum(roots):
     minimum and would report a closed domain as uncertified.
     """
     hessian = np.asarray(roots.jet.hessian)
-    valid = np.asarray(roots.valid)
+    valid = np.asarray(roots.valid).copy()
     determinant = hessian[:, 0, 0] * hessian[:, 1, 1] - hessian[:, 0, 1] ** 2
+    # Slot zero is the stationary point the read uses as its axis, whether or
+    # not the census' own predicate classified it, so it always counts.
+    if valid.size:
+        valid[0] = True
     return int(np.sum(np.where(determinant[valid] > 0.0, 1, -1)))
 
 

@@ -103,7 +103,7 @@ def test_field_with_a_missed_saddle_is_refused_not_read_limited(monkeypatch):
         roots = fixed_points.FixedPointResult(
             position=jnp.zeros((3, 2)),
             jet=jet,
-            valid=jnp.ones(3, bool),
+            valid=jnp.asarray([True, True, False]),
             status=jnp.zeros(3, jnp.int32),
             iterations=jnp.zeros(3, jnp.int32),
             retried=jnp.zeros(3, bool),

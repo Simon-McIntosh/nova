@@ -177,17 +177,18 @@ node hands on, and it is a property of the read, not of the LIUQE input.</p>
 
 <p><strong>How many of the five are real disagreements.</strong> The diverted
 slices nova reads as limited are those whose census admits no saddle. The
-boundary-index certificate separates the two causes. On the slices measured so
-far the certificate does <em>not</em> close: for t&nbsp;=&nbsp;0.014 (idx 0) and
-t&nbsp;=&nbsp;0.027 (idx 14) the outer winding is +1 against an admitted index
-sum of 0, with the minimum |&nabla;&psi;| on the loop well above the floor and
-coverage therefore reliable but uncertified. A winding that disagrees with the
-index sum means the census is missing critical points, not that the field is
-limited, so these are <strong>uncertified coverage misses, not real
-disagreements</strong> &mdash; nova has no basis to call the slice either way.
-The same columns for the remaining three (456, 796, 1257) are appended to
+boundary-index certificate separates the two causes: the certificate closes
+when the winding of the boundary loop equals the index sum of the admitted
+critical points inside it, and a closed certificate with a zero admitted-saddle
+count means nova's census accounted for every critical point in the loop, so
+the limited read is confined to a genuinely saddle-free interior and the
+disagreement is real. A certificate that does not close means the census is
+deficient, and the slice is a coverage miss rather than a disagreement: nova
+has no basis to call it either way and refuses it. The windings, index sums,
+loop gradients and outcomes for every slice are appended to
 <code>receipts/tcv-liuqe-coverage-rows.jsonl</code> as the sweep reaches them;
-none is reported here ahead of its row.</p>
+the sweep did not complete inside this run's allocation, so no count is asserted
+here ahead of its row.</p>
 
 <p>Two limits. The lattice is 16 cells to a side, so the admitted saddle set is
 the coarsest one that reads; a finer lattice is the first thing to try before

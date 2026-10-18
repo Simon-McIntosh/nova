@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run carried no machine-readable suite blocks (classification.json records manifest/data/baseline_suite=None and after_suite=None), so the count is taken from its loose gate logs: gate-after.log is the only arm and it was cut by the node's own 480 s wall bound (EXIT=124) after 75 of 104 tests with zero failures recorded, and no baseline arm log exists; the zero is therefore an observed count over the reached tests, not a completed delta, and the reviewed manifest's structural argument that no test under tests/ imports scripts/prototypes/read_robustness (re-verified: grep -rl read_robustness tests/ returns nothing) is what stands in for the missing base arm.",
+  "call_site_count": 4,
+  "call_sites": [
+    "scripts/prototypes/fast_map_production/sweep.py:34",
+    "scripts/prototypes/fast_map_production/tie_probe.py:37",
+    "scripts/prototypes/diverted_stall/sweep.py:31",
+    "scripts/prototypes/fast_read/measure_sweep.py:31"
+  ],
+  "completed_at": "2026-10-18T08:02:46.009Z",
+  "dispatched_at": "2026-10-18T07:55:07Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/read_robustness/census_negative_control.py",
+      "line": "30",
+      "severity": "blocking",
+      "text": "blocking: the declared negative control does not reinstate the dropping step -- it reads a pre-recorded trace and exits 0 when no departure is present, so it cannot falsify the repair it is meant to guard; the run's own negative-control.log records EXIT=0 with 'no departure in this trace' and the manifest states NOT EVIDENCED, leaving done_when (5)'s negative control unsatisfied."
+    },
+    {
+      "file": "scripts/prototypes/read_robustness/census.py",
+      "line": "82",
+      "severity": "blocking",
+      "text": "blocking: done_when (3) is unmet -- the census still departs from 3 roots to 1 at offset 0.1735 (check-after.log SCAN), and the departure is not shown to be a genuine fold because the vanished root's determinant and persistence at its last state were not measured, while the 550-cell 0.10-0.14 window was not run at all."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T065749620386-seed-census-departure/manifest.md",
+      "line": "11",
+      "severity": "follow-on",
+      "text": "follow-on: the manifest's commits: and changed_paths: (lines 11 and 15) omit e3ba2a93f (fragment landed on its node path) and 007ebbd72 (census_negative_control.py), so the record under-reports what landed even though the file was written after both existed."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read commit by commit against efbeb794e60b1f4d39dcb886bb0e1b1148b5a419; 9b23e83c4 changes census.py:44-86 and adds census_check.py and census_diagnose.py, e674213f8 and e3ba2a93f land the fragment on its node path, and 007ebbd72 adds census_negative_control.py; the three docs appends are pure insertions (74/0, 42/0, 6/0), so no predecessor content was replaced.",
+    "done_when": "read; it names six conditions and the manifest admits (3) is only partial (the 550-cell 0.10-0.14 window unmeasured and the 0.1735 departure uncharacterised), that the (4) regression gate was cut by the node's own 480 s wall bound (gate-after.log EXIT=124) with the base arm not run, and that (5)'s read-level test and a negative control that restores the dropping step were not written.",
+    "goal": "the node's goal is to stop the stationary-point census losing a hyperbolic saddle between adjacent doubles; scripts/prototypes/read_robustness/census.py:82 now admits a seed while its edge cross product is negative only within a computed rounding, and check-after.log FIXED_PRIOR reads 3 roots / 2 saddles at both 0.17323108126295622 and 0.17323108126295625, so the traced 282-B pair is repaired while the 3 -> 1 departure at 0.1735 stays open.",
+    "manifest": "read; it reports status complete, two commits and the after-arm gate result, but its commits:/changed_paths: (manifest.md:11, :15) omit e3ba2a93f and 007ebbd72 (census_negative_control.py), and negative_control_status (manifest.md:37) reads NOT EVIDENCED.",
+    "write_paths": "read; the manifest declares scripts/prototypes/read_robustness, nova/equilibrium/topology.py, scripts/prototypes/fast_map_production, the three test files and the docs paths, and every file in the diff (the four read_robustness scripts and the three docs files) is inside that set."
+  },
+  "justifications": {
+    "durability": "the diff adds no test file and no assertion that could fail on regression, and census_negative_control.py:35 only reads a saved trace (negative-control.log EXIT=0, 'no departure in this trace'), so the change has no guard.",
+    "evidence": "check-after.log records the FIXED_PRIOR 3/2 measurement, but the regression gate was cut by the node's own 480 s wall bound (gate-after.log EXIT=124) with the base arm not run, and the manifest carries no baseline_suite/after_suite, so the delta is argued structurally rather than measured.",
+    "fit": "the change follows the module's jnp idiom and states the mechanism in census.py:54-63 with no plan label and no name the naming rules forbid.",
+    "goal_fidelity": "census.py:82 admits a seed while its edge cross product is negative only within the computed rounding and check-after.log reads 3/2 at both offsets, fixing the named pair, but the census still drops from 3 roots to 1 at offset 0.1735 (docs/research/census-certified-convergence.html, 'The repair, and the counts it restores'), so the goal holds only for the traced instance.",
+    "reuse": "a capability search over scripts/prototypes named kernel.psi_rounding_enclosure (scripts/prototypes/fast_map_production/kernel.py:201), which bounds the fitted flux rather than the edge cross product this test evaluates, so it does not own this admission bound and no existing definition is duplicated.",
+    "scope_discipline": "every file in the diff (scripts/prototypes/read_robustness/census.py, census_check.py, census_diagnose.py, census_negative_control.py, the research record and the two fragments) lies inside the manifest's declared write paths."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: efbeb794e60b1f4d39dcb886bb0e1b1148b5a419\nreviewed_head_sha: 007ebbd720ae2cf2191b7ce7f95a107916988d1b\n\nVERDICT goal: the node's goal is to stop the stationary-point census losing a hyperbolic saddle between adjacent doubles; scripts/prototypes/read_robustness/census.py:82 now admits a seed while its edge cross product is negative only within a computed rounding, and check-after.log FIXED_PRIOR reads 3 roots / 2 saddles at both 0.17323108126295622 and 0.17323108126295625, so the traced 282-B pair is repaired while the 3 -> 1 departure at 0.1735 stays open.\nVERDICT done_when: read; it names six conditions and the manifest admits (3) is only partial (the 550-cell 0.10-0.14 window unmeasured and the 0.1735 departure uncharacterised), that the (4) regression gate was cut by the node's own 480 s wall bound (gate-after.log EXIT=124) with the base arm not run, and that (5)'s read-level test and a negative control that restores the dropping step were not written.\nVERDICT write_paths: read; the manifest declares scripts/prototypes/read_robustness, nova/equilibrium/topology.py, scripts/prototypes/fast_map_production, the three test files and the docs paths, and every file in the diff (the four read_robustness scripts and the three docs files) is inside that set.\nVERDICT manifest: read; it reports status complete, two commits and the after-arm gate result, but its commits:/changed_paths: (manifest.md:11, :15) omit e3ba2a93f and 007ebbd72 (census_negative_control.py), and negative_control_status (manifest.md:37) reads NOT EVIDENCED.\nVERDICT diff: read commit by commit against efbeb794e60b1f4d39dcb886bb0e1b1148b5a419; 9b23e83c4 changes census.py:44-86 and adds census_check.py and census_diagnose.py, e674213f8 and e3ba2a93f land the fragment on its node path, and 007ebbd72 adds census_negative_control.py; the three docs appends are pure insertions (74/0, 42/0, 6/0), so no predecessor content was replaced.\nCALL_SITES: scripts/prototypes/fast_map_production/sweep.py:34, scripts/prototypes/fast_map_production/tie_probe.py:37, scripts/prototypes/diverted_stall/sweep.py:31, scripts/prototypes/fast_read/measure_sweep.py:31\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: census.py:82 admits a seed while its edge cross product is negative only within the computed rounding and check-after.log reads 3/2 at both offsets, fixing the named pair, but the census still drops from 3 roots to 1 at offset 0.1735 (docs/research/census-certified-convergence.html, 'The repair, and the counts it restores'), so the goal holds only for the traced instance.\nSCORE evidence: 10\nJUSTIFICATION evidence: check-after.log records the FIXED_PRIOR 3/2 measurement, but the regression gate was cut by the node's own 480 s wall bound (gate-after.log EXIT=124) with the base arm not run, and the manifest carries no baseline_suite/after_suite, so the delta is argued structurally rather than measured.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every file in the diff (scripts/prototypes/read_robustness/census.py, census_check.py, census_diagnose.py, census_negative_control.py, the research record and the two fragments) lies inside the manifest's declared write paths.\nSCORE durability: 2\nJUSTIFICATION durability: the diff adds no test file and no assertion that could fail on regression, and census_negative_control.py:35 only reads a saved trace (negative-control.log EXIT=0, 'no departure in this trace'), so the change has no guard.\nSCORE fit: 16\nJUSTIFICATION fit: the change follows the module's jnp idiom and states the mechanism in census.py:54-63 with no plan label and no name the naming rules forbid.\nSCORE reuse: 16\nJUSTIFICATION reuse: a capability search over scripts/prototypes named kernel.psi_rounding_enclosure (scripts/prototypes/fast_map_production/kernel.py:201), which bounds the fitted flux rather than the edge cross product this test evaluates, so it does not own this admission bound and no existing definition is duplicated.\nFINDING scripts/prototypes/read_robustness/census_negative_control.py:30 blocking: the declared negative control does not reinstate the dropping step -- it reads a pre-recorded trace and exits 0 when no departure is present, so it cannot falsify the repair it is meant to guard; the run's own negative-control.log records EXIT=0 with 'no departure in this trace' and the manifest states NOT EVIDENCED, leaving done_when (5)'s negative control unsatisfied.\nFINDING scripts/prototypes/read_robustness/census.py:82 blocking: done_when (3) is unmet -- the census still departs from 3 roots to 1 at offset 0.1735 (check-after.log SCAN), and the departure is not shown to be a genuine fold because the vanished root's determinant and persistence at its last state were not measured, while the 550-cell 0.10-0.14 window was not run at all.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T065749620386-seed-census-departure/manifest.md:11 follow-on: the manifest's commits: and changed_paths: (lines 11 and 15) omit e3ba2a93f (fragment landed on its node path) and 007ebbd72 (census_negative_control.py), so the record under-reports what landed even though the file was written after both existed.\n",
+  "review_run_id": "r-20261018T075441414720-review-of-r-20261018T065749620386-seed-census-departure-007ebbd720ae",
+  "reviewed_base_sha": "efbeb794e60b1f4d39dcb886bb0e1b1148b5a419",
+  "reviewed_head_sha": "007ebbd720ae2cf2191b7ce7f95a107916988d1b",
+  "reviewed_run_id": "r-20261018T065749620386-seed-census-departure",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "review",
+  "scores": {
+    "durability": 2,
+    "evidence": 10,
+    "fit": 16,
+    "goal_fidelity": 15,
+    "reuse": 16,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T08:08:00+00:00",
+  "total": 77
+}

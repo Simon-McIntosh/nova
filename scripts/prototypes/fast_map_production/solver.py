@@ -688,6 +688,47 @@ def run(args):
                 / jnp.maximum(jnp.linalg.norm(rhs), 1e-30)
             ),
         }
+        if args.diagnose_step:
+            tangent = np.asarray(factor(jnp.asarray(step)))
+            base_vector = np.asarray(residual)
+            rows = []
+            for amount in (
+                1.0,
+                0.5,
+                0.25,
+                0.125,
+                0.0625,
+                0.03125,
+                0.015625,
+                0.00390625,
+                0.0009765625,
+                0.000244140625,
+            ):
+                vector = np.asarray(
+                    equation(
+                        point.reshape(-1) + amount * jnp.asarray(step), active_operands
+                    )
+                )
+                merit = (
+                    float(np.max(np.abs(vector)))
+                    if args.merit == "sup"
+                    else float(np.linalg.norm(vector))
+                )
+                rows.append(
+                    {
+                        "scale": amount,
+                        "merit": merit,
+                        "accepted": bool(np.isfinite(merit) and merit < original_merit),
+                        "taylor_remainder_two": float(
+                            np.linalg.norm(vector - base_vector - amount * tangent)
+                        ),
+                    }
+                )
+            row["step_diagnosis"] = {
+                "acceptance": "finite trial merit strictly below original merit",
+                "threshold": original_merit,
+                "rows": rows,
+            }
         state = mapped(candidate.reshape(reference.shape) * scale, *active_operands)
         jax.block_until_ready(state)
         block = np.asarray(state.moment_residual / scale)
@@ -1014,6 +1055,7 @@ def main():
     parser.add_argument("--line-search-depth", type=int, default=20)
     parser.add_argument("--merit", choices=("sup", "two"), default="sup")
     parser.add_argument("--taylor", action="store_true")
+    parser.add_argument("--diagnose-step", action="store_true")
     parser.add_argument("--exact-roots", action="store_true")
     parser.add_argument("--omit-saddle-derivative", action="store_true")
     parser.add_argument("--inspect-support", action="store_true")

@@ -2713,11 +2713,6 @@ def _dense_cut_current(state, reading, field, resolution):
 
 
 # Booked current against the independent cut-cell quadrature at the coarse tie.
-# The last measurement (32x32 per triangle) put the booked value 11.5% below
-# the physical-field integral, with the 16x16 integral 1.5% above the 32x32
-# one. The bound is the sum of those two measured terms, not a slack chosen to
-# admit the gap.
-# Booked current against the independent cut-cell quadrature at the coarse tie.
 # Measured with the normal-form lobe owner on the tie pair: booked 128.416249 /
 # 129.730881 A against 32x32 integrals 130.488250 / 131.468864 A, gaps of 1.59%
 # and 1.32%. The direct integral moves at most 0.12% between the 16, 32 and 64

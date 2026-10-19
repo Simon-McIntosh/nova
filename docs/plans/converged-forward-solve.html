@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="428">
+<meta name="plan-version" content="429">
 <meta name="plan-modified" content="2026-10-19">
 </head>
 <body>
@@ -675,7 +675,7 @@
     </article>
 <article class="r-fu" data-id="f-cfs-carrier-axis-orientation" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-written-by="reckon-build" data-written-at="2026-10-19" data-recommends-skill="/reckon-build converged-forward-solve §2" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">The read refuses the certified analytic carrier&#x27;s axis after axis ranking (§2)</h4>
-    <div class="r-fu-body"><p>On the 550- and 2,000-cell certified carriers, the analytic limited field read with its own axis (6.2, 0.0) as the prior root returns <code>valid=false</code> after axis ranking (merge 4763425e9); the first-root rule it replaced would have returned that axis. The probe builds <code>TopologyConvention.from_cocos(17, 1.0)</code>, and so do the prototype forward solve and its drivers (<code>fast_map_production/solver.py</code>, <code>sweep.py</code> and the <code>support</code> drivers). So either the analytic carrier's axis is a &psi; minimum under that convention, and every prototype route carried a sign-inconsistent convention the first-root rule hid, or a new axis gate wrongly refuses a correct axis. Until this lands, the prototype forward solve on certificate rows may fail on main. Dispatched as run r-20261019T014150673041-carrier-axis-orientation on codex; brief <code>~/.cache/nova-s21-briefs/pivot/carrieraxis.full.txt</code>.</p></div>
+    <div class="r-fu-body"><p>On the 550- and 2,000-cell certified carriers, the analytic limited field read with its own axis (6.2, 0.0) as the prior root returns <code>valid=false</code> after axis ranking (merge 4763425e9); the first-root rule it replaced would have returned that axis. The probe builds <code>TopologyConvention.from_cocos(17, 1.0)</code>, and so do the prototype forward solve and its drivers (<code>fast_map_production/solver.py</code>, <code>sweep.py</code> and the <code>support</code> drivers). So either the analytic carrier's axis is a ψ minimum under that convention, and every prototype route carried a sign-inconsistent convention the first-root rule hid, or a new axis gate wrongly refuses a correct axis. Until this lands, the prototype forward solve on certificate rows may fail on main. Dispatched as run r-20261019T014150673041-carrier-axis-orientation on codex; brief <code>~/.cache/nova-s21-briefs/pivot/carrieraxis.full.txt</code>.</p></div>
     <pre class="r-fu-prompt">/reckon-build converged-forward-solve §2</pre>
     </article>
 </section>
@@ -1192,6 +1192,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261018T233110930132-axis-slot-refusal" data-who="reckon-build" data-when="2026-10-19T01:20:02Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/converged-forward-solve/axis-slot-refusal.html#axis-slot-refusal-landing</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261019T024233037515-review-of-carrier-axis-orientation-f167fd746fa5" data-who="reckon-build" data-when="2026-10-19T02:59:34.226Z">
+    <div class="r-comment-body"><p>Reviewed carrier-axis-orientation f167fd746fa5 against base 1d1fd699d: the certified axis is not refused (goal premise refuted, route repaired) but removing --cache breaks three in-scope/out-of-scope job callers, blocking.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

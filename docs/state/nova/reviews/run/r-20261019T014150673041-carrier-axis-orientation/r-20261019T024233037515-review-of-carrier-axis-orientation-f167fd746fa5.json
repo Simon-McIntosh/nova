@@ -1,0 +1,68 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [
+    {
+      "failure_condition": "test_solver_loads_the_certified_carrier fails if certified_machine is absent or renamed (the base arm reddens by ImportError) and if the certified 550-carrier resolves to a number of cells other than 553, so it is a real guard on the new route; its failure at base is an ImportError of a symbol this run introduces, not an observation of the axis read.",
+      "lines": "test_carrier_axis.py:75-83"
+    },
+    {
+      "failure_condition": "test_certified_carrier_retains_analytic_axis reddens if the signed Hessian stops being negative definite (line 64), if the ranking gate refuses the certified axis so valid/qualified is false (line 66), or if the read selects a different root so the returned axis differs from the certified (6.2, 0.0) (line 67).",
+      "lines": "test_carrier_axis.py:64-67"
+    },
+    {
+      "failure_condition": "The reversed-convention block is an independent control: it builds TopologyConvention.from_cocos(17, -1.0) and requires the read to refuse (valid false, NaN axis). It reddens if the polarity gate stops firing on the wrong orientation, so it exercises the gate rather than restating a passed-in value.",
+      "lines": "test_carrier_axis.py:71-72"
+    },
+    {
+      "failure_condition": "Line 67 compares reading.axis against the same axis array the test placed at roots.position (line 50); with a single root the code returns that value whenever the read is not refused, so on its own this assertion cannot redden for any ranking regression except a refusal, which line 66 already catches. It is a duplicate of the input, not an independent measurement.",
+      "lines": "test_carrier_axis.py:67"
+    }
+  ],
+  "call_sites": [
+    "scripts/prototypes/fast_map_production/deep-job.sh:24",
+    "scripts/prototypes/fast_map_production/two_merit_job.sh:13",
+    "scripts/prototypes/fine_grid_convergence/cold-job.sh:28",
+    "scripts/prototypes/fine_grid_convergence/cold.py:12"
+  ],
+  "completed_at": "2026-10-19T02:59:34.226Z",
+  "dispatched_at": "2026-10-19T02:43:14Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/fast_map_production/solver.py",
+      "line": "1005",
+      "severity": "blocking",
+      "text": "blocking: the argparse parser at solver.py:1005-1032 no longer accepts --cache, but three sibling job scripts still pass it. scripts/prototypes/fast_map_production/deep-job.sh:24-25 runs `solver --kind diverted --cells $size --method gmres --cache \"$cache\" ...`, scripts/prototypes/fast_map_production/two_merit_job.sh:13-14 runs `solver --merit two --cache \"$cache\" ...`, and scripts/prototypes/fine_grid_convergence/cold-job.sh:32-33 runs `solver ... --cache \"$cache\" ...`; argparse now exits 2 with 'unrecognized arguments: --cache' before the solve starts. The removed option was the only way those callers named the cache directory, so the diverted producer routes the node did not re-measure stop launching. deep-job.sh and two_merit_job.sh are inside the node's declared write path (scripts/prototypes/fast_map_production) and would have been the correct place to drop the flag or replace it with the new certified identity; cold-job.sh is outside that path and is a follow-on. The 550-cell limited row the node did run passes --output only, so its gate never exercises a --cache caller and could not have caught this."
+    },
+    {
+      "file": "scripts/prototypes/fast_map_production/test_carrier_axis.py",
+      "line": "67",
+      "severity": "follow-on",
+      "text": "follow-on: `np.testing.assert_allclose(reading.axis, axis, atol=1e-12)` compares the read's returned axis against the same array the test supplied at roots.position (line 50). With one root the read returns that value whenever it is not refused, so the assertion holds for any accepted root and cannot redden for a ranking regression that line 66 does not already catch; it is a duplicate of the input rather than an independent source, and the durability of the axis acceptance rests on the valid/qualified assertion at line 66."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "scripts/prototypes/fast_map_production/deep-job.sh:24, scripts/prototypes/fast_map_production/two_merit_job.sh:13, scripts/prototypes/fine_grid_convergence/cold-job.sh:28, scripts/prototypes/fine_grid_convergence/cold.py:12",
+    "diff": "Read commit by commit against base 1d1fd699d: 27995735e adds test_carrier_axis.py (the 550-cell axis test); 47ef79d0a adds certified_machine/certified_exterior to solver.py and the loader test, and drops the --cache option and its _machine/_exterior imports; 48e1c1ed6 adds the research and landing documents; f167fd746 appends the Titan solve outcome. Four files changed, all inside the declared write paths.",
+    "done_when": "The source brief.txt:6-9 asks for the refusing gate and its eigenvalues/membership/persistence, a base-failing test, a converging 550-cell solve with both suite arms, the 5,000-cell carrier and the five TCV rows. The probes and suite arms are recorded (orientation_probe.log, mixed_geometry_probe.log, baseline_suite.log, after_suite.log), but the required convergence is unmet: the Titan receipt ends converged=false at residual 0.0012319931459852727 and the manifest reports it honestly.",
+    "goal": "The source node's goal (brief.txt:1) is to find and fix why nova's read refuses the certified analytic carrier's own axis after axis ranking landed. The landed diagnosis refutes the premise: orientation_probe.log shows the published certified carriers accept (6.2,0.0) at 553/2105/5167 cells, and mixed_geometry_probe.log shows the recorded refusal came from pairing the static field with the rotating carrier. The actual fault repaired is a separate prototype fixture route (solver.py:78).",
+    "manifest": "The source manifest.md records the axis test 2 passed, baseline 38 passed/1 failed, after 39 passed/0 failed, five TCV rows, and the Titan receipt at residual 0.0012319931459852727 converged=false; its failure_ids and negative_control_log (baseline_suite.log, exit 1) reconcile with the logs read.",
+    "write_paths": "The source brief.txt:13 fences scripts/prototypes/fast_map_production, scripts/prototypes/support, scripts/prototypes/read_robustness, docs/research/carrier-axis-orientation.html and docs/evidence/fragments/converged-forward-solve/carrier-axis-orientation.html plus run exports. The diff touches solver.py and test_carrier_axis.py under fast_map_production and the two documents, every one inside the fence."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261019T024233037515-review-of-carrier-axis-orientation-f167fd746fa5",
+  "reviewed_base_sha": "1d1fd699de9bc4f9c6c64b5e67669f0dbac76c4c",
+  "reviewed_head_sha": "f167fd746fa5f7af51587d98743667f4da98bfa9",
+  "reviewed_run_id": "r-20261019T014150673041-carrier-axis-orientation",
+  "scores": {
+    "durability": 16,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 15,
+    "reuse": 17,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T03:00:58.487995+00:00"
+}

@@ -68,13 +68,13 @@ def test_cocos_and_current_fix_the_same_axis_type():
     assert float(cocos17.sigma) == pytest.approx(float(cocos11.sigma))
 
 
-def test_grid_value_is_bilinear():
-    psi = np.asarray([[0.0, 1.0], [2.0, 3.0]])
-    r = np.asarray([0.0, 2.0])
-    z = np.asarray([0.0, 2.0])
+def test_grid_value_uses_the_read_spline():
+    r = np.linspace(0.0, 2.0, 5)
+    z = np.linspace(0.0, 2.0, 5)
+    psi = 2.0 * r[:, None] + z[None, :]
     assert orientation.grid_value(r, z, psi, (0.0, 0.0)) == pytest.approx(0.0)
-    assert orientation.grid_value(r, z, psi, (1.0, 1.0)) == pytest.approx(1.5)
-    assert orientation.grid_value(r, z, psi, (2.0, 2.0)) == pytest.approx(3.0)
+    assert orientation.grid_value(r, z, psi, (1.0, 1.0)) == pytest.approx(3.0)
+    assert orientation.grid_value(r, z, psi, (2.0, 2.0)) == pytest.approx(6.0)
 
 
 def test_agreeing_grid_is_read():
@@ -111,7 +111,7 @@ def test_negated_grid_against_its_scalars_is_refused():
 def test_additive_constant_leaves_the_verdict_unchanged():
     convention = orientation.read_convention(polarity=1)
     negated = -_scalar_field()
-    for offset in (0.0, 5.0, -123.0):
+    for offset in (0.0, 5.0, -123.0, 1.0e10):
         with pytest.raises(orientation.ReferenceSignError):
             orientation.check_axis_boundary_sign(
                 convention, GRID, GRID, negated + offset, AXIS, (CORNER,)
@@ -158,3 +158,23 @@ def test_trace_record_without_a_wall_in_its_grid_is_not_refused():
     record.wall_r = np.asarray([[9.0, 9.5]])
     record.wall_z = np.asarray([[9.0, 9.5]])
     assert orientation.check_trace_record(record) == {}
+
+
+def test_missing_ids_boundary_is_refused_with_slice_and_declaration():
+    convention = orientation.read_convention(dd_version="3.41.0", plasma_current=-1.0e5)
+    with pytest.raises(orientation.ReferenceSignError) as refused:
+        orientation.check_axis_boundary_sign(
+            convention,
+            GRID,
+            GRID,
+            _scalar_field(),
+            AXIS,
+            None,
+            scalar_axis_psi=1.0,
+            scalar_boundary_psi=-1.0,
+            slice_index=7,
+            declared="COCOS 11, Ip -100000 A",
+        )
+    assert "slice 7" in str(refused.value)
+    assert "COCOS 11, Ip -100000 A" in str(refused.value)
+    assert "no boundary" in str(refused.value)

@@ -25,6 +25,7 @@ from scripts.prototypes.efit_field_swap.orientation import (
     ReferenceSignError,
     check_axis_boundary_sign,
     check_trace_record,
+    grid_field,
     grid_value,
     read_convention,
 )
@@ -54,14 +55,19 @@ def guard_slice(view, index):
         f"Ip = {view['plasma_current']:+.3f} A"
     )
     point = boundary_points(view)
-    axis_value = grid_value(view["rgrid"], view["zgrid"], view["psi"], view["axis"])
+    field = grid_field(view["rgrid"], view["zgrid"], view["psi"])
+    axis_value = grid_value(
+        view["rgrid"], view["zgrid"], view["psi"], view["axis"], field=field
+    )
     boundary_value = (
         None
         if point is None
         else float(
             np.mean(
                 [
-                    grid_value(view["rgrid"], view["zgrid"], view["psi"], p)
+                    grid_value(
+                        view["rgrid"], view["zgrid"], view["psi"], p, field=field
+                    )
                     for p in point
                 ]
             )
@@ -93,6 +99,7 @@ def guard_slice(view, index):
             scalar_boundary_psi=view["psi_boundary"],
             slice_index=index,
             declared=declared,
+            field=field,
         )
     except ReferenceSignError as error:
         row["refused"] = True

@@ -18,11 +18,15 @@ unchanged.
 from __future__ import annotations
 
 import numpy as np
+import jax
+from types import SimpleNamespace
 
 from nova.equilibrium.topology import TopologyConvention
+from nova.jax.config import configure_dtypes
+from scripts.prototypes.efit_field_swap.spline_field import TraceSplineField
 
 _SIGN_TOLERANCE = 1e-9
-"""Relative floor below which a flux difference carries no orientation."""
+"""Floor relative to the gauge-invariant grid range."""
 
 
 class ReferenceSignError(ValueError):
@@ -50,12 +54,10 @@ def read_convention(*, polarity=None, dd_version=None, plasma_current=None):
     return TopologyConvention.from_cocos({3: 11, 4: 17}[major], plasma_current)
 
 
-def grid_value(rgrid, zgrid, psi, point):
-    """Bilinear sample of a rectilinear psi grid at one point.
-
-    The stored grid is the reference's own flux, so a sample carries whatever
-    gauge constant the reference chose; a difference of two samples cancels it.
-    """
+def grid_field(rgrid, zgrid, psi):
+    """Build the same spline field used by the external equilibrium read."""
+    configure_dtypes()
+    assert jax.config.jax_enable_x64
     r = np.asarray(rgrid, dtype=np.float64).ravel()
     z = np.asarray(zgrid, dtype=np.float64).ravel()
     values = np.asarray(psi, dtype=np.float64)
@@ -63,36 +65,35 @@ def grid_value(rgrid, zgrid, psi, point):
         raise ValueError(
             f"psi shape {values.shape} does not match grid {(r.size, z.size)}"
         )
+    return TraceSplineField.from_record(SimpleNamespace(rgrid=r, zgrid=z, psi=values))
+
+
+def grid_value(rgrid, zgrid, psi, point, *, field=None):
+    """Sample the reference's spline, preserving the read's interpolation."""
+    if field is None:
+        field = grid_field(rgrid, zgrid, psi)
+    r = np.asarray(rgrid, dtype=np.float64).ravel()
+    z = np.asarray(zgrid, dtype=np.float64).ravel()
     r0, z0 = float(point[0]), float(point[1])
     if not (r[0] <= r0 <= r[-1] and z[0] <= z0 <= z[-1]):
         raise ValueError(f"point ({r0}, {z0}) lies outside the psi grid")
-    ri = int(np.clip(np.searchsorted(r, r0) - 1, 0, r.size - 2))
-    zi = int(np.clip(np.searchsorted(z, z0) - 1, 0, z.size - 2))
-    tr = (r0 - r[ri]) / (r[ri + 1] - r[ri])
-    tz = (z0 - z[zi]) / (z[zi + 1] - z[zi])
-    return float(
-        (1.0 - tr) * (1.0 - tz) * values[ri, zi]
-        + tr * (1.0 - tz) * values[ri + 1, zi]
-        + (1.0 - tr) * tz * values[ri, zi + 1]
-        + tr * tz * values[ri + 1, zi + 1]
-    )
+    return float(field.value((r0, z0)))
 
 
-def _boundary_value(rgrid, zgrid, psi, boundary):
+def _boundary_value(rgrid, zgrid, psi, boundary, *, field):
     """Mean grid sample over one boundary point or an (n, 2) set of them."""
     points = np.asarray(boundary, dtype=np.float64).reshape(-1, 2)
     if points.shape[0] == 0:
         raise ValueError("boundary carries no point")
-    samples = [grid_value(rgrid, zgrid, psi, point) for point in points]
+    samples = [grid_value(rgrid, zgrid, psi, point, field=field) for point in points]
     return float(np.mean(samples))
 
 
 def flux_sign(span, scale):
     """Sign of a flux difference, or 0 where it is indistinguishable from zero.
 
-    The tolerance is relative to the magnitudes compared, so an additive gauge
-    constant never decides the sign and a genuinely flat field reads as
-    undecided rather than as either orientation.
+    The scale is a range or difference, never an absolute psi value, so an
+    additive gauge constant cannot turn a contradiction into an undecided sign.
     """
     span = float(span)
     if not np.isfinite(span):
@@ -122,7 +123,7 @@ def _refuse(required, signs, spans, *, slice_index=None, declared=""):
         return
     read = "; ".join(
         f"{name} psi axis - boundary = {spans[name]:+.6e} (sign {signs[name]:+d})"
-        for name in sorted(contradiction)
+        for name in sorted(signs)
     )
     raise ReferenceSignError(
         f"slice {slice_index} declares {declared}, requiring the magnetic axis to "
@@ -142,6 +143,7 @@ def check_axis_boundary_sign(
     scalar_boundary_psi=None,
     slice_index=None,
     declared="",
+    field=None,
 ):
     """Refuse a reference whose grid flux sign contradicts its declared orientation.
 
@@ -160,17 +162,22 @@ def check_axis_boundary_sign(
     Returns the measured signs ``{name: sign}`` on success.
     """
     required = _declared_sigma(convention)
-    axis_value = grid_value(rgrid, zgrid, psi, axis)
-    boundary_value = _boundary_value(rgrid, zgrid, psi, boundary)
+    if boundary is None or np.asarray(boundary).size == 0:
+        raise ReferenceSignError(
+            f"slice {slice_index} declares {declared}, requiring the magnetic axis to "
+            f"be a psi {_extremum(required)} (sign {required:+d}); no boundary "
+            "point is stored, so grid and scalar signs cannot be compared"
+        )
+    if field is None:
+        field = grid_field(rgrid, zgrid, psi)
+    axis_value = grid_value(rgrid, zgrid, psi, axis, field=field)
+    boundary_value = _boundary_value(rgrid, zgrid, psi, boundary, field=field)
     grid_span = axis_value - boundary_value
-    signs = {"grid": flux_sign(grid_span, max(abs(axis_value), abs(boundary_value)))}
+    signs = {"grid": flux_sign(grid_span, np.ptp(np.asarray(psi, dtype=np.float64)))}
     spans = {"grid": grid_span}
     if scalar_axis_psi is not None and scalar_boundary_psi is not None:
         scalar_span = float(scalar_axis_psi) - float(scalar_boundary_psi)
-        signs["scalar"] = flux_sign(
-            scalar_span,
-            max(abs(float(scalar_axis_psi)), abs(float(scalar_boundary_psi))),
-        )
+        signs["scalar"] = flux_sign(scalar_span, abs(scalar_span))
         spans["scalar"] = scalar_span
     _refuse(required, signs, spans, slice_index=slice_index, declared=declared)
     return signs
@@ -215,12 +222,19 @@ def check_trace_record(record, *, boundary=None):
     point = boundary if boundary is not None else trace_record_boundary(record)
     if point is None:
         return {}
+    field = grid_field(record.rgrid, record.zgrid, record.psi)
     axis_value = grid_value(
-        record.rgrid, record.zgrid, record.psi, (record.axis_r, record.axis_z)
+        record.rgrid,
+        record.zgrid,
+        record.psi,
+        (record.axis_r, record.axis_z),
+        field=field,
     )
-    boundary_value = _boundary_value(record.rgrid, record.zgrid, record.psi, point)
+    boundary_value = _boundary_value(
+        record.rgrid, record.zgrid, record.psi, point, field=field
+    )
     span = axis_value - boundary_value
-    signs = {"grid": flux_sign(span, max(abs(axis_value), abs(boundary_value)))}
+    signs = {"grid": flux_sign(span, np.ptp(np.asarray(record.psi, dtype=np.float64)))}
     _refuse(
         required,
         signs,

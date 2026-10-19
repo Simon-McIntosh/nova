@@ -171,10 +171,15 @@ and both trace read sites, <code>crosscheck._decision</code> and
 <code>probe_read.probe_record</code>.</p>
 <p>The tolerance is no longer a bare <code>1e-9</code> with no derivation. It is
 <code>_SIGN_TOLERANCE = 1024 * eps</code>, a thousand-fold margin over the
-double-precision unit roundoff, applied to the flux magnitude the compared
-spline samples carry; being relative and not an absolute psi value, it cannot be
-moved by the gauge. The curvature fallback names its own floor,
-<code>_CURVATURE_TOLERANCE = 1e-9</code> on the axis Hessian eigenvalues.</p>
+double-precision unit roundoff, applied to a flux width: the grid's
+peak-to-peak range (<code>np.ptp</code> of the stored psi) for a grid span, and
+the compared scalars' own difference for a scalar span. A range and a difference
+are each unchanged by a constant added to every psi sample, so the band cannot
+be moved by the gauge. A test adds <code>1e10</code> to a
+fixture and asserts each of the three outcomes - agrees, contradicts,
+undecidable - is the one the unshifted field produced. The curvature fallback
+names its own floor, <code>_CURVATURE_TOLERANCE = 1e-9</code> on the axis
+Hessian eigenvalues.</p>
 <p>The TCV driver read twelve hand-chosen slices of the 1703-slice store while
 the defect had been measured on seventeen distinct psi grids, so five slices had
 never been guarded. A scan of the store (<code>profiles_2d/psi</code> is
@@ -216,19 +221,26 @@ none is named with a span and no row changed.</p>
 <code>test_trace_record.py</code>, <code>test_coverage.py</code>) with the
 repository-root conftest, in fresh processes, selecting <code>-m "not slow"</code>.
 The base arm at <code>375241085</code> used the base sources with the head
-<code>test_orientation.py</code> overlaid, so the new tests are present: 6 failed,
-45 passed, one deselected in 440.79 s, the six failures being exactly the new
-undecidable-span tests (<code>AttributeError: ... has no attribute
-'UndecidableSignError'</code>, or the read sentinel reached). The head arm at
-<code>2379bb36</code>: 52 passed, one deselected, zero added failures, in
-490.11 s. A focused gate over the two touched test files passed 30, and the
-single failure it met is a pre-existing one outside the selected lane, recorded
-below.</p>
+<code>test_orientation.py</code> overlaid, so the new tests are present: 7 failed,
+45 passed, one deselected in 473.59 s, the seven failures being exactly the new
+tests - the six undecidable-span tests plus the gauge-invariance test
+(<code>AttributeError: ... has no attribute 'UndecidableSignError'</code>, or
+the read sentinel reached). The head arm at
+<code>c46ccd0768cc6a4a781bafbb959592e7a24434e4</code>: 53 passed,
+one deselected, zero added failures, in 537.36 s. A focused gate over the two
+touched test files passed 31, and the single failure it met is a pre-existing
+one outside the selected lane, recorded below.</p>
+<p>An earlier pass of the same three gates preceded the gauge-free tolerance
+repair, over six test files: the base arm then read 6 failed / 45 passed and the
+head arm 52 passed. The one added base failure and one added head pass are the
+gauge-invariance test the repair introduced; no other count moved.</p>
 <h3>Negative control</h3>
 <p>The declared mutation restores the zero-sign-as-agreement rule
 (<code>undecidable = []</code> in <code>_refuse</code>). The undecidable-span
 test then fails: pytest exits <code>EXIT=1</code> with six failing ids in
-<code>test_orientation.py</code>, none of which the head arm fails.</p>
+<code>test_orientation.py</code>, none of which the head arm fails; the gauge-invariance
+test added with the tolerance repair exercises the same entry point and is
+expected to fail under the same mutation, which was not re-run.</p>
 <h3>Pre-existing failure outside this node's lane</h3>
 <p><code>test_coverage.py::test_limited_slice_is_read_only_when_coverage_is_certified</code>
 (marked <code>slow</code>, so deselected from both arms) asserts that LIUQE

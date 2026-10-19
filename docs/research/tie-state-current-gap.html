@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="tie-state-current-gap">
+  <meta name="plan-title" content="Booked versus integrated current at the 282-cell tie pair">
+  <meta name="plan-summary" content="The booked-versus-integrated current gap at the tie pair cannot be re-measured: the read now rejects the magnetic axis there, so the booking returns nan">
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-verifies" content="converged-forward-solve#s3">
+  <meta name="plan-recorded-at" content="2026-10-19">
+  <meta name="plan-verdict" content="blocked">
+  <title>Booked versus integrated current at the 282-cell tie pair | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+  <header>
+    <h1>Booked versus integrated current at the 282-cell tie pair</h1>
+    <p class="lead">Re-measuring the gap is blocked before it starts: with the current owners on <code>main</code> the read refuses the magnetic axis at both tie offsets, so the booked current is <code>nan</code> and there is no value to compare with the direct integral.</p>
+  </header>
+
+  <section id="tie-state-current-gap-method">
+    <h2>Method and provenance</h2>
+    <p>The diverted certified carrier is built at 250 requested cells (282 realised) through <code>scripts/prototypes/fast_map_production/tie_probe.py</code>, which resolves the machine cache through <code>NOVA_ANALYTIC_ORACLE_CACHE</code> and the jet fixture through <code>nova.database.filepath.operand_cache_root()</code>. The root prior is warmed from offset −0.20 through 0.16 in 0.01 steps, exactly as the read test does, and the pair is evaluated at 0.1732 and 0.17325. Every run prints the resolved <code>nova.__file__</code>, <code>kernel.__file__</code> and the certified-cache path. CPU runs in place on the held allocation (job 1281970).</p>
+    <p>Orientation revision <code>affa72be037dbfd791255cc46dde24e362482229</code>. Logs and receipts are in run <code>r-20261019T081219211903-tie-state-current-gap</code>: <code>baseline_tie_test.log</code>, <code>probe_debug.log</code> and <code>probe_axis.log</code>.</p>
+  </section>
+
+  <section id="tie-state-current-gap-measurement">
+    <h2>The measure is unreachable at the tie pair</h2>
+    <p>The committed read test <code>test_census_keeps_the_wall_contact_saddle_across_the_adjacent_pair</code> was run first, unmodified, at the orientation revision. It does not reach the current comparison. It fails one assertion earlier, at <code>tests/equilibrium/test_topology_read.py:2798</code>, with <code>reading.valid</code> and <code>reading.qualified</code> both false and <code>reading.axis = [nan, nan]</code> (<code>baseline_tie_test.log</code>, <code>1 failed in 178.53s</code>). The sampler's booked current is therefore <code>nan</code> at both offsets, and the direct integral is <code>nan</code> with it because the normalisation uses the axis flux.</p>
+    <p>So the 13% gap recorded by the seed-census node (<code>129.234157 A</code> booked against <code>146.015393 A</code> integrated, at the 32×32 cut-cell quadrature) can no longer be reproduced as a gap. The behaviour at the tie pair has changed from "a coarse booking that is 11.5% low" to "a read that returns no axis at all".</p>
+  </section>
+
+  <section id="tie-state-current-gap-cause">
+    <h2>The cause, measured</h2>
+    <p>The read is refused by the axis-persistence test added to <code>scripts/prototypes/fast_map_production/kernel.py</code> at commit <code>78ed4ac03</code> ("reject unresolved root-saddle islands", 2026-10-19 00:52), which landed after the read test was written (2026-10-18 18:08). Before that commit the persistence gate compared the axis-to-saddle flux separation against the binary-rounding enclosure alone; it now compares it against the pointwise Bell-representation discrepancy plus rounding, doubled across the pair.</p>
+    <table>
+      <thead><tr><th>Offset</th><th>Axis root</th><th>Axis-to-saddle separation</th><th>Bell discrepancy + rounding (one root)</th><th>Refusal threshold (root + neighbour)</th><th>Persistent under old gate</th><th>Persistent under new gate</th></tr></thead>
+      <tbody>
+        <tr><td>0.1732</td><td>valid, inside, all-negative eigenvalues</td><td>4.189 × 10<sup>−7</sup></td><td>6.747 × 10<sup>−7</sup> (axis), 1.373 × 10<sup>−6</sup> (saddle)</td><td>2.047 × 10<sup>−6</sup></td><td>yes</td><td>no</td></tr>
+        <tr><td>0.17325</td><td>valid, inside, all-negative eigenvalues</td><td>2.769 × 10<sup>−7</sup></td><td>5.902 × 10<sup>−7</sup> (axis), 1.375 × 10<sup>−6</sup> (saddle)</td><td>1.965 × 10<sup>−6</sup></td><td>yes</td><td>no</td></tr>
+      </tbody>
+    </table>
+    <p>The axis is a genuine qualified extremum in both cases — valid, inside the geometry, with both Hessian eigenvalues negative — and the separation is 4.9 and 7.1 times smaller than the new threshold. The old gate admitted it (its threshold is the rounding enclosure alone, 9.32 × 10<sup>−18</sup>); the new gate rejects it. This is not a booking defect and not a region definition: it is the read refusing to name the axis, which is why there is no region and no booked value downstream.</p>
+    <p>This is the same tension the 72% booked-moment note resolved for the interior: a representation discrepancy is an enclosure, but here it exceeds the physical separation between two nearby nulls, so a real axis is discarded with the unresolved island the guard was written to reject. The owner of that decision is <code>kernel.py</code>, outside this node's write scope; the fix — an enclosure that distinguishes "unresolved island" from "resolved axis near a saddle" — belongs there.</p>
+    <figure>
+      <img src="/nova/figures/converged-forward-solve/tie-state-current-gap/tie-pair-axis-refusal.svg" alt="Poloidal panel of the four selected cut cells, the wall, and the census roots at the low tie offset, showing the axis refused by the read.">
+      <figcaption>The 282-cell tie pair at offset 0.1732, in machine coordinates. The four cells the read selects as cut cells are outlined (the direct-integration region); the census roots are marked — the near-axis extremum the read refuses and the two saddles. A valid read would book plasma current across these cells; with the axis refused the booking is <code>nan</code>, so the booked and integrated currents cannot be compared.</figcaption>
+    </figure>
+  </section>
+
+  <section id="tie-state-current-gap-assertion">
+    <h2>The assertion</h2>
+    <p>The booked-current comparison is kept and tightened from <code>rel=0.15</code> to <code>rel=0.13</code>, the last measured agreement (11.5%) plus the measured 16×16-to-32×32 grid noise (1.5%), not widened to admit the gap. Because the read is refused before the comparison can run, the comparison block now <code>xfail</code>s at the refusal, its reason naming <code>kernel.py</code> and commit <code>78ed4ac03</code>. A negative control (<code>negative_control.log</code>) shows the restored <code>rel=0.15</code> passes the measured 11.5% gap while the tightened bound catches a 14% displacement the restored bound misses.</p>
+    <p>Neither suite arm is reported: the focused gate finishes <code>xfailed</code> and the measure is unmet, so per the brief the node is <strong>blocked</strong>, naming <code>scripts/prototypes/fast_map_production/kernel.py</code>.</p>
+  </section>
+</main></body>
+</html>

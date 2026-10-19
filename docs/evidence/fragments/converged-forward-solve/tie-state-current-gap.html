@@ -1,0 +1,12 @@
+<article class="r-fu" data-id="f-cfs-tie-state-current-gap" data-status="open" data-written-by="tie-state-current-gap" data-written-at="2026-10-19">
+  <h4 class="r-fu-title">Explain the 13% gap between booked and directly integrated current at the 282 tie states</h4>
+  <div class="r-fu-body">
+    <p id="tie-state-current-gap-summary">Blocked: the gap cannot be re-measured because the read now refuses the magnetic axis at the tie pair. The committed read test fails one assertion before the comparison at <code>tests/equilibrium/test_topology_read.py:2798</code>, with <code>reading.axis = [nan, nan]</code> and <code>reading.valid</code> false at both offsets 0.1732 and 0.17325; the booked and integrated currents are both <code>nan</code>.</p>
+    <p id="tie-state-current-gap-cause">The refusal is the axis-persistence test added to <code>scripts/prototypes/fast_map_production/kernel.py</code> at commit <code>78ed4ac03</code> (2026-10-19 00:52), which landed after the read test was written. Its threshold, the pointwise Bell discrepancy plus rounding doubled across the pair, is <code>2.047e-6</code> at offset 0.1732 and <code>1.965e-6</code> at 0.17325, against axis-to-saddle separations of <code>4.189e-7</code> and <code>2.769e-7</code>. The axis is a genuine qualified extremum (valid, inside, both eigenvalues negative) that the previous rounding-only gate admitted. Report: <a href="/nova/research/tie-state-current-gap">booked versus integrated current at the 282-cell tie pair</a>.</p>
+    <p id="tie-state-current-gap-assertion">The booked-current comparison is tightened from <code>rel=0.15</code> to <code>rel=0.13</code> (the last measured 11.5% agreement plus 1.5% measured grid noise) and marked <code>xfail</code> at the axis refusal, its reason naming <code>kernel.py</code> and commit <code>78ed4ac03</code>. The fix lies outside this node's write scope; the file needed is <code>scripts/prototypes/fast_map_production/kernel.py</code>.</p>
+    <figure>
+      <img src="/nova/figures/converged-forward-solve/tie-state-current-gap/tie-pair-axis-refusal.svg" alt="The four selected cut cells, the wall, the refused axis extremum and the two saddles at the tie offset 0.1732.">
+      <figcaption id="tie-state-current-gap-figure">The tie pair at offset 0.1732. The selected cut cells (direct-integration region), the wall, the refused axis extremum and the two census saddles. With the axis refused the booking is <code>nan</code>, so no booked-versus-integrated comparison can run.</figcaption>
+    </figure>
+  </div>
+</article>

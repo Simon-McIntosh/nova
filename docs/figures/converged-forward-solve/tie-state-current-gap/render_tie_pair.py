@@ -17,7 +17,12 @@ crosses for the remaining qualified nulls.
 The read this figure draws is the production topology read at a revision whose
 axis-persistence floor the carrier passes; earlier revisions refuse the tie-pair
 axis, so regenerate from a tree carrying that fix rather than from the base this
-figure first landed against.
+figure first landed against. An invocation therefore names that tree on
+``PYTHONPATH`` and the analytic-oracle cache root, or the read returns no booked
+current and the run stops:
+
+    NOVA_ANALYTIC_ORACLE_CACHE=<cache> PYTHONPATH=<fix tree> python \
+        docs/figures/converged-forward-solve/tie-state-current-gap/render_tie_pair.py
 """
 
 from __future__ import annotations
@@ -93,12 +98,45 @@ def other_nulls(roots, axis, saddle) -> np.ndarray:
     return position[keep]
 
 
+def null_handles() -> list[plt.Line2D]:
+    """Return the null markers as the painter itself draws them.
+
+    Each handle is the artist ``draw_nulls`` created, captured by drawing that
+    one null set on a scratch axes. A hand-built handle drifts from the panel:
+    the legend here once showed the axis hollow and used its own cross glyph,
+    so it contradicted the marks it was naming. Capturing the artist removes
+    that class of drift, since the legend's glyph, fill, colour and size are
+    then the very ones the panel was drawn with.
+    """
+    handles: list[plt.Line2D] = []
+    for label, keyword in (
+        ("magnetic axis", {"magnetic_axis": np.array([[0.0, 0.0]])}),
+        ("admitted X-point", {"x_points": np.array([[0.0, 0.0]])}),
+        ("other qualified null", {"other_x_points": np.array([[0.0, 0.0]])}),
+    ):
+        scratch = plt.figure()
+        try:
+            poloidal.draw_nulls(scratch.add_subplot(), **keyword)
+            artist = scratch.axes[0].get_lines()[0]
+        finally:
+            plt.close(scratch)
+        artist.set_label(label)
+        handles.append(artist)
+    return handles
+
+
 def panel(axes, state, prior, offset, units) -> tuple[float, int]:
     """Draw one tie offset and return its booked current and selected cell count."""
     geometry = state["geometry"]
     roots, reading, booked, *_ = tie_probe.make_sampler(state)(
         offset * float(state["scale"]), prior
     )
+    if not np.isfinite(booked):
+        raise SystemExit(
+            "no booked current at offset %g: the tree on PYTHONPATH refuses the "
+            "tie-pair axis, so regenerate from one carrying the "
+            "axis-persistence fix" % offset
+        )
     poloidal_axes(axes)
     poloidal.draw_wall(axes, units=units, linestyle="solid")
     rings = selected_rings(geometry, reading)
@@ -152,35 +190,7 @@ def render(figure_path: Path, preview: Path | None = None) -> None:
         handles=[
             plt.Line2D([], [], color=CELL_COLOUR, lw=2.6, label="booked support"),
             plt.Line2D([], [], color=DEFAULT_INK.wall_color, lw=2.4, label="wall"),
-            plt.Line2D(
-                [],
-                [],
-                marker="^",
-                color="none",
-                markerfacecolor="none",
-                markeredgecolor=DEFAULT_INK.xpoint_color,
-                markersize=12,
-                label="magnetic axis",
-            ),
-            plt.Line2D(
-                [],
-                [],
-                marker="P",
-                color=DEFAULT_INK.xpoint_color,
-                linestyle="none",
-                markersize=10,
-                label="admitted X-point",
-            ),
-            plt.Line2D(
-                [],
-                [],
-                marker="P",
-                color="none",
-                markerfacecolor="none",
-                markeredgecolor=DEFAULT_INK.xpoint_color,
-                markersize=10,
-                label="other qualified null",
-            ),
+            *null_handles(),
         ],
         loc="upper center",
         bbox_to_anchor=(0.5, -0.01),

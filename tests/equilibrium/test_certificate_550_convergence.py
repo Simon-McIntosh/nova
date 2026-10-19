@@ -22,11 +22,18 @@ def test_stationary_root_tangent_at_exact_seed() -> None:
 
     configure_dtypes()
     assert jax.config.jax_enable_x64 is True
+    print(f"ROOT_MODULE={fixed_points.__file__}")
     cache = polynomial_cache()
     rows = cache.rows.at[:, 0, 0, 0].set(0.2 * cache.nodes[:, 1])
     rows = rows.at[:, 0, 0, 2].set(0.2)
     cache = replace(cache, rows=rows)
-    seed = jnp.asarray(((0.13, -0.21),))
+    initial = jnp.asarray(((0.13, -0.21),))
+    zero = jnp.zeros((1, 3))
+    seed = fixed_points.solve(
+        cache, zero, initial, initial, jnp.asarray(1.0)
+    ).position
+    at_seed = fixed_points.solve(cache, zero, seed, seed, jnp.asarray(1.0))
+    assert int(at_seed.iterations[0]) == 0
 
     def root(amplitude):
         moments = jnp.asarray(((amplitude, 0.0, 0.0),))

@@ -1,0 +1,586 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 6,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "affa72be037dbfd791255cc46dde24e362482229",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T081219211903-tie-state-current-gap/brief.txt",
+    "sha256": "c495733e444b37b34eb983d236845de51fdff584ceebacdb52c4448605614119"
+  },
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 3955104,
+      "input_tokens_cumulative": 3955104,
+      "output_tokens": 14116,
+      "output_tokens_cumulative": 14116,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 1829,
+    "files": 6,
+    "removed": 1
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 1982,
+        "name": "evaluate",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "run_function": {
+        "line": 409,
+        "name": "evaluate",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "evaluate",
+        "path": "tests/test_fixed_points.py"
+      },
+      "run_function": {
+        "line": 409,
+        "name": "evaluate",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 409,
+        "name": "evaluate",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "run_function": {
+        "line": 1982,
+        "name": "evaluate",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "window_line": 1982
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "evaluate",
+        "path": "tests/test_fixed_points.py"
+      },
+      "run_function": {
+        "line": 1982,
+        "name": "evaluate",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "window_line": 1982
+    },
+    {
+      "existing_function": {
+        "line": 2827,
+        "name": "test_strict_exact_zero_admission_loses_the_saddle_at_the_adjacent_pair",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "test_census_keeps_the_wall_contact_saddle_across_the_adjacent_pair",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "window_line": 2742
+    },
+    {
+      "existing_function": {
+        "line": 2726,
+        "name": "test_census_keeps_the_wall_contact_saddle_across_the_adjacent_pair",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "run_function": {
+        "line": 2827,
+        "name": "test_strict_exact_zero_admission_loses_the_saddle_at_the_adjacent_pair",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "window_line": 2835
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "47ff063757c53f863280da8694ea5f800d144a87",
+    "71c0027a6f1c7d4fc12e80d7e98546a8dfd87ae0",
+    "7841813b3f9cc4d19471b612e5129f5fd0fdc07b",
+    "2964474a15ce742767c5cec9f62cc724b42aeb50",
+    "11cdbca77eeec929c746920418ae183543039230",
+    "8014300dec1838dbdc6c1039022c936708c301f7",
+    "b32e0c0142ae663b0256ad7cde24cccf1af3d237",
+    "d26094ba8ed92c03586448538ea3bda8d2331870"
+  ],
+  "completed_at": "2026-10-19T22:26:03Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-19T08:14:02Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "NOVA_ANALYTIC_ORACLE_CACHE=/home/ITER/mcintos/.local/share/nova/0.11.0 JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -rA tests/equilibrium/test_topology_read.py::test_census_keeps_the_wall_contact_saddle_across_the_adjacent_pair",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T081219211903-tie-state-current-gap/focused_tie_merged.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.2857142857142857,
+    "plan": "converged-forward-solve",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-19T09:12:35.941697+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-19T08:12:35Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 28,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 8,
+    "headroom": 4,
+    "mean_context": 140000,
+    "observed_at": "2026-10-19T08:12:15Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 28,
+      "aggregate_tokens_per_second": 369.191,
+      "detail": "",
+      "mean_tokens_per_second": 48.578,
+      "observed_at": "2026-10-19T08:12:15Z",
+      "runs": 7.6,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-19T22:26:03Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T081219211903-tie-state-current-gap/manifest.md",
+  "member": "disposable-r-20261019T081219211903-tie-state-current-gap",
+  "model_key": "flash",
+  "negative_control": {
+    "added_failure_ids": [],
+    "comparison_arm": "none",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "../../../../../.config/reckon/crew/runs/r-20261019T081219211903-tie-state-current-gap/scratch/test_bound_negative_control.py::test_landed_bound_refuses_a_five_percent_displacement"
+    ],
+    "declaration": "Restore rel=0.15; a booked current displaced by the measured gap must then pass, showing the old bound could not see it.",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T081219211903-tie-state-current-gap/negative_control.log",
+    "reason": "The control ran and failed as declared: negative_control.log restores rel=0.15 against the measured pair (130.488250 A integral, 128.416249 A booked) and shows 0.15 admitting a 5% displacement that the landed rel=0.02 refuses (EXIT=1, failing id test_landed_bound_refuses_a_five_percent_displacement). Reckon cannot compare it, because both four-target suite arms were OOM-killed at item 42, the memory-unbounded 500-cell coarse-tie census, so neither arm is declared complete.",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T081219211903-tie-state-current-gap/negative_control.log",
+    "test_paths": [
+      "tests/equilibrium/test_topology_read.py"
+    ],
+    "verdict": "waived"
+  },
+  "no_commit": null,
+  "node": "tie-state-current-gap",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.cache/nova-s21-briefs/pivot/tiegap.full.txt",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T081219211903-tie-state-current-gap/brief.txt",
+    "brief_sha256": "c495733e444b37b34eb983d236845de51fdff584ceebacdb52c4448605614119",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "critical",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "coordinator": {
+      "authoring_turn": {
+        "detail": "the dispatching harness exposed no authoring-turn token usage",
+        "status": "unknown",
+        "tokens": null
+      },
+      "harness": null,
+      "runtime_session_id": null,
+      "session_id": "s21-nova"
+    },
+    "done_when": "Both currents at the 282-cell tie pair are re-measured with the lobe owner on main and the gap given; the remaining gap is attributed by measurement to booking or region definition, with booked support and integration region on one poloidal panel; the assertion is tightened to the achieved agreement with a stated margin and never widened, and both suite arms over tests/equilibrium/test_topology_read.py are recorded in docs/research/tie-state-current-gap.html.",
+    "estimated_hours": null,
+    "goal": "Explain the booked versus integrated current gap at the 282-cell tie pair and tighten its assertion",
+    "id": "tie-state-current-gap",
+    "images": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-19T08:12:35Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 28,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 8,
+      "headroom": 4,
+      "mean_context": 140000,
+      "observed_at": "2026-10-19T08:12:15Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 28,
+        "aggregate_tokens_per_second": 369.191,
+        "detail": "",
+        "mean_tokens_per_second": 48.578,
+        "observed_at": "2026-10-19T08:12:15Z",
+        "runs": 7.6,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T081219211903-tie-state-current-gap/manifest.md",
+    "negative_control": "Restore rel=0.15; a booked current displaced by the measured gap must then pass, showing the old bound could not see it.",
+    "orchestrator_assessment": {
+      "reasoning": "deep",
+      "risk": "moderate",
+      "verification": "strict"
+    },
+    "plan": "converged-forward-solve",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "tests/equilibrium/test_topology_read.py",
+      "docs/research/tie-state-current-gap.html",
+      "docs/evidence/fragments/converged-forward-solve/tie-state-current-gap.html",
+      "docs/figures/converged-forward-solve/tie-state-current-gap"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 5136226.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "tie-state-current-gap",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-19T08:12:54.741675+00:00",
+    "score": 0.64375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:state-render",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5001.899,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 1061.94,
+      "context-estimate": 76.728,
+      "records": 468.993,
+      "verdict-inputs": 950.138
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.2857142857142857,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "d26094ba8ed92c03586448538ea3bda8d2331870",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "8014300dec1838dbdc6c1039022c936708c301f7",
+    "reviewed_head_sha": "d26094ba8ed92c03586448538ea3bda8d2331870",
+    "scores": {
+      "durability": 10,
+      "evidence": 15,
+      "fit": 18,
+      "goal_fidelity": 16,
+      "reuse": 19,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 97
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261019T081219211903-tie-state-current-gap",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "9d232e28-fdf6-4cf1-947c-c4768d32de29",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 45236813,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 824.716,
+    "generated_tokens": 200328,
+    "generation_seconds": 299.424,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 78.8,
+    "machine_seconds": 525.292,
+    "peak_input_tokens": 181462,
+    "tokens_per_second": 669.04,
+    "wall_tokens_per_second": 242.91
+  },
+  "time_budget": "60m",
+  "tool_steps": 71.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "backend": "codex",
+        "budget_overrun": false,
+        "budget_overrun_seconds": 0,
+        "budget_seconds": 3600,
+        "classification": "scoring",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion, but the attached review is parsed; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 3090,
+        "exit_record": {
+          "attempt": 3,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-10-19T07:43:23Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-10-19T07:21:50Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261019T035634203950-reference-sign-guard",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 15770,
+          "worker_pid": 609651
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-19T07:43:23Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 1775,
+        "log_fresh": false,
+        "manifest_commits": [
+          "0638b6189d1a36a2166708fd011626915e8460aa",
+          "1cb509d4a5bbcaf20b885afada4c70a7dea6a1a4",
+          "9352767dd813544b7e0fd418de62d7dd73cbb261",
+          "4addf5bc96d535bbe0f200174beddd59426b7caa",
+          "6ffa96a7e5ea61e1e8edd8dc2d892e982af5a555",
+          "17ac642757dd8e0e553ec42ba51a3be85a1035e6",
+          "5c7b628404da233767ad24261e83770c70742370",
+          "73506348547020e95ac24bc8345604f4814b7290",
+          "b0e5d690196823533e9e403cb8d81034e5c56b78",
+          "9c58123c501792c20dc282044103e293e037c717"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "03d714d6db073f07bce060013117478d9995499a48448c0b027363e22d0747c2",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T035634203950-reference-sign-guard/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "sol",
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project nova --brief /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T035634203950-reference-sign-guard/review-brief.md --plan converged-forward-solve --section '§2' --role review --spec-level exact --node review-of-reference-sign-guard-9c58123c5017 --goal 'attach an independent review to run r-20261019T035634203950-reference-sign-guard' --done-when 'the review for r-20261019T035634203950-reference-sign-guard stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the record is written at one of this run'\"'\"'s declared write paths, under review-records/ inside the directory of run r-20261019T035634203950-reference-sign-guard, and never in the worktree; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T035634203950-reference-sign-guard/review-records/r-20261019T035634203950-reference-sign-guard.json --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T035634203950-reference-sign-guard/review-records/r-20261019T035634203950-reference-sign-guard.at-9c58123c501792c20dc282044103e293e037c717.json --time-budget 60m --session s21-nova --allow-unreconciled-runs --local",
+        "node": "reference-sign-guard",
+        "phase": "complete",
+        "plan": "converged-forward-solve",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": true,
+        "review_status": "parsed",
+        "run_id": "r-20261019T035634203950-reference-sign-guard",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 1854,
+        "terminal_at": "2026-10-19T07:41:57Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/reference-sign-guard"
+      }
+    ]
+  },
+  "wall_seconds": 51121,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 6,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-19T22:26:09Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-19T22:12:15Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261019T081219211903-tie-state-current-gap",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 31672,
+    "worker_pid": 3844716
+  },
+  "worker_seconds": 10426,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

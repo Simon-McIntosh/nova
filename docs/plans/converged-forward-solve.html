@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="474">
+<meta name="plan-version" content="475">
 <meta name="plan-modified" content="2026-10-20">
 </head>
 <body>
@@ -1679,6 +1679,9 @@ NO PRODUCT OR TEST SOURCE WAS CHANGED.  The 1e-10 tolerance was not widened.</p>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261019T214913017909-review-of-tie-state-current-gap-d26094ba8ed9" data-who="reckon-build" data-when="2026-10-19T22:06:17.588Z">
     <div class="r-comment-body"><p>review(review-of-tie-state-current-gap-d26094ba8ed9): attached to run r-20261019T081219211903-tie-state-current-gap for the delta 8014300de..d26094ba8; verdict parsed, 6 dimensions scored, 2 follow-on findings, 0 added failures.</p></div>
 </div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261019T081219211903-tie-state-current-gap" data-who="reckon-build" data-when="2026-10-19T22:26:03Z">
+    <div class="r-comment-body"><p>test(topology): the tie-pair booked current agrees with an independent cut-cell quadrature to 1.59% and 1.32% (grid noise 0.118%), so the bound is tightened from rel=0.15 to rel=0.02 and the read asserts valid and qualified directly.</p></div>
+</div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261010T203842322123-review-of-cfs-coupling-build-scale" data-who="reckon-build" data-when="2026-10-10T20:53:30.671Z">
     <div class="r-comment-body"><p>Independent review of run r-20261010T184700018486-cfs-coupling-build-scale at head e5e794122. Scores goal_fidelity 18, evidence 18, scope_discipline 17, durability 17, fit 18, reuse 19 (total 107). The node meets its goal (device builds baked into the carriers: 5,000 cells 151.2 s, 10,000 cells 271.3 s at 75% GPU) and lands all four clauses of the resumed ruling; this review reproduced the head gate (6 passed, EXIT=0) and re-derived the negative control at head (uniform row gap 1.361e-10 over the 1e-10 bound, EXIT=1, matching the run's own log to all digits) and verified the persisted-carrier and wall-hash claims directly against the stores. One regression: _flux_blocks gained a required keyword-only builder with no default, so scripts/accuracy_cost_ladder/measure.py:140 now raises TypeError, which falsifies the ruling's 'no existing caller changes behaviour' clause and was invisible to the delta lane. Follow-ons: the fragment's reproduce command no longer selects the device path at head, a module docstring overstates measured agreement, and the ruling's diverted half was not measurable in this fixture.</p></div>
 </div>
@@ -1983,7 +1986,7 @@ NO PRODUCT OR TEST SOURCE WAS CHANGED.  The 1e-10 tolerance was not widened.</p>
     <div class="r-comment-body"><p>docs/evidence/fragments/converged-forward-solve/certificate-550-map-mismatch.html#certificate-550-map-mismatch-landing — H200 limited rows converge at 5.919007114724242e-15 and 1.6457898427596102e-14 with Taylor slope 1.9991170757234091; diverted rows stall at 0.0015503357274161884 and 0.003627426010221647; restored clamp makes the committed test fail at 0.0012319931459882324.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261019T215550401376-review-of-certificate-diverted-stall-18f91b523614" data-who="reckon-build" data-when="2026-10-19T22:09:41.530Z">
-    <div class="r-comment-body"><p>review of run r-20261019T205320391343-certificate-diverted-stall at head 18f91b52361469265b659d75150bc610fcdbc205 (base ecdec59bddeffd0db0cd364de35f9698f0848525): goal_fidelity 4, evidence 7, scope_discipline 20, durability 0, fit 17, reuse 20, total 68; 3 findings (2 follow-on on the evidence fragment&#x27;s overstated measurements, 1 blocking on the undelivered convergence goal); the record is at runs/r-20261019T205320391343-certificate-diverted-stall/review-records/.</p></div>
+    <div class="r-comment-body"><p>review of run r-20261019T205320391343-certificate-diverted-stall at head 18f91b52361469265b659d75150bc610fcdbc205 (base ecdec59bddeffd0db0cd364de35f9698f0848525): goal_fidelity 4, evidence 7, scope_discipline 20, durability 0, fit 17, reuse 20, total 68; 3 findings (2 follow-on on the evidence fragment's overstated measurements, 1 blocking on the undelivered convergence goal); the record is at runs/r-20261019T205320391343-certificate-diverted-stall/review-records/.</p></div>
 </div>
 </section>
 </main>

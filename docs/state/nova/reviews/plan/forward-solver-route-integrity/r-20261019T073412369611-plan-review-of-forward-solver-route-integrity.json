@@ -76,6 +76,13 @@
       "finding": "reasoning-1",
       "reason": "About section 4's gate, and this build dispatches section 5 only. It stands for section 4's builder: lane runs writing into the pin directory must be dealt with, through f-fsri-lane-prelude-errexit-and-pin-writes, before section 4's hit count can mean anything.",
       "when": "2026-10-19T08:11:03.263447+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "wiring-2",
+      "reason": "Followup f-fsri-001 orders sections 1 to 3, which are deferred and carried by converged-forward-solve. The S21 coordinator, not this build, should close or rehome it; the lead has been told.",
+      "when": "2026-10-19T08:11:24.770845+00:00"
     }
   ],
   "responses": {
@@ -102,6 +109,12 @@
       "by": "",
       "reason": "",
       "when": "2026-10-19T08:09:42.736494+00:00"
+    },
+    "wiring-2": {
+      "action": "declined",
+      "by": "",
+      "reason": "Followup f-fsri-001 orders sections 1 to 3, which are deferred and carried by converged-forward-solve. The S21 coordinator, not this build, should close or rehome it; the lead has been told.",
+      "when": "2026-10-19T08:11:24.770845+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/forward-solver-route-integrity/r-20261019T073412369611-plan-review-of-forward-solver-route-integrity.json",

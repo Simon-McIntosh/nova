@@ -1,10 +1,10 @@
 """Draw one poloidal flux contour panel per exported certified carrier.
 
 Each panel shows the record's analytic psi as unfilled line contours on stated
-levels, the record's per-loop wall, both null sets (the read axis as a solid
-triangle and every admitted saddle as a filled cross) and the boundary level as
-its own contour. The panel follows nova's poloidal plotting rules: no axes, no
-grid, line contours only, the wall always drawn.
+levels, the record's per-loop wall, analytic and read nulls, and the boundary
+level as its own contour. The limited wall contact has a separate ring drawn
+above the wall and contour. The panel follows nova's poloidal plotting rules:
+no axes, no grid, line contours only, the wall always drawn.
 """
 
 # ruff: noqa: E402  (configure_dtypes must run before jax is imported)
@@ -38,6 +38,8 @@ PANEL_WIDTH_INCHES = 14.0
 PANEL_HEIGHT_INCHES = 8.0
 PANEL_DPI = 100
 CONTOUR_COUNT = 18
+CONTACT_MARKER_SIZE = 16.0
+CONTACT_MARKER_EDGE_WIDTH = 2.4
 
 
 def panel(record, kind: str, path: str | Path) -> Path:
@@ -56,7 +58,7 @@ def panel(record, kind: str, path: str | Path) -> Path:
     x_points = np.asarray(reading.x_points, dtype=float)[
         np.asarray(reading.x_point_valid)
     ]
-    # A limited boundary IS a wall contact, and the boundary contour runs along
+    # A limited boundary is a wall contact, and the boundary contour runs along
     # the wall there, so the contact is invisible without its own marker. A
     # diverted boundary is the saddle, already drawn as an X-point, so its
     # boundary point is not marked a second time.
@@ -113,9 +115,22 @@ def panel(record, kind: str, path: str | Path) -> Path:
         axes,
         magnetic_axis=axis,
         x_points=x_points,
-        strike_points=contacts,
         contain=ring,
     )
+    if contacts is not None:
+        contact = contacts[0]
+        axes.plot(
+            contact[0],
+            contact[1],
+            marker="o",
+            markersize=CONTACT_MARKER_SIZE,
+            markerfacecolor="white",
+            markeredgecolor=DEFAULT_INK.separatrix_color,
+            markeredgewidth=CONTACT_MARKER_EDGE_WIDTH,
+            linestyle="none",
+            zorder=DEFAULT_INK.zorder_markers + 2,
+            clip_on=False,
+        )
     legend = [
         Line2D(
             [],
@@ -161,6 +176,29 @@ def panel(record, kind: str, path: str | Path) -> Path:
                 ),
             )
         )
+    else:
+        legend.append(
+            Line2D(
+                [],
+                [],
+                color=DEFAULT_INK.separatrix_color,
+                marker="o",
+                markerfacecolor="white",
+                markeredgewidth=CONTACT_MARKER_EDGE_WIDTH,
+                linestyle="none",
+                markersize=CONTACT_MARKER_SIZE,
+                label="wall contact",
+            )
+        )
+    legend.append(
+        Line2D(
+            [],
+            [],
+            color=DEFAULT_INK.separatrix_color,
+            linewidth=DEFAULT_INK.separatrix_linewidth,
+            label="boundary",
+        )
+    )
     figure.legend(handles=legend, loc="upper center", ncol=len(legend), frameon=False)
     figure.savefig(path, format="svg")
     plt.close(figure)

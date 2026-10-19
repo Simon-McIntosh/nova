@@ -97,4 +97,5 @@ def test_second_device_loads_without_publishing_again(tmp_path, monkeypatch):
         assert loaded is not None
         np.testing.assert_array_equal(loaded["sample"], np.arange(3.0))
         assert json.loads(loaded.attrs["semantic_identity"]) == rounded
+        assert loaded.attrs["cache_key"] == reader.key
     assert len(list((tmp_path / fixtures.CARRIER_KIND / "sha256").iterdir())) == 1

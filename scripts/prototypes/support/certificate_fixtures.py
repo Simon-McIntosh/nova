@@ -93,6 +93,7 @@ def _encoded_identity(identity: dict[str, object]) -> str:
 def _defining_identity(identity: dict[str, object]) -> dict[str, object]:
     """Keep source inputs and revisions while omitting computed array digests."""
     canonical = json.loads(_encoded_identity(identity))
+    canonical["certificate_store_identity"] = "defining-inputs"
     if "discretisation" in canonical:
         canonical["discretisation"].pop("wall_content", None)
     if "machine_semantic_key" in canonical:
@@ -212,6 +213,8 @@ class _ContentSession:
             _defining_identity(self.identity)
         ):
             raise ValueError("certificate store identity mismatch")
+        if data.attrs.get("cache_key") != self.digest:
+            raise ValueError("certificate store key mismatch")
         data.attrs["semantic_identity"] = _encoded_identity(self.identity)
         return data
 
@@ -221,6 +224,7 @@ class _ContentSession:
         canonical.attrs["semantic_identity"] = _encoded_identity(
             _defining_identity(self.identity)
         )
+        canonical.attrs["cache_key"] = self.digest
         self.location = str(publish_fixture(self.kind, self.digest, canonical))
 
 

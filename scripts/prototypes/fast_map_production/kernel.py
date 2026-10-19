@@ -201,12 +201,20 @@ def _continuous_path_weight(
 def psi_rounding_enclosure(coefficients):
     """Binary64 enclosure of the fitted psi at a cell centre.
 
-    The Bell coefficients are one linear fit, so the psi they carry is uncertain
-    by the machine epsilon times the fit's absolute row sum. Two stationary
-    levels closer than this are one number rather than two features.
+    The Bell coefficients are one linear fit, but the fit's absolute row sum is
+    set by every star in the cell, so this bound is a property of the cell's
+    representation rather than of any particular level. It bounds the fitted
+    level's arithmetic error; it does not decide whether two stationary points
+    are separated features.
     """
     row_sum = jnp.abs(coefficients).sum(axis=1)
     return 2.0 * jnp.finfo(coefficients.dtype).eps * jnp.max(row_sum)
+
+
+# A root-saddle pair resolved to fewer than this many units in the last place of
+# their own levels is one stationary feature, not two. The read refuses such a
+# pair rather than publishing its upper member as the magnetic axis.
+PERSISTENCE_ULP_FLOOR = 8.0
 
 
 def _merge_path_saddle(geometry, roots, saddles, sigma, axis_ceiling):
@@ -245,23 +253,6 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
         roots.position
     )
     inside = jnp.any(owner_cells, axis=1)
-    owner = jnp.argmax(owner_cells, axis=1)
-    local = (roots.position - geometry.centre[owner]) / geometry.pitch[owner, None]
-    x, y = local[:, 0], local[:, 1]
-    fitted = coefficients[owner]
-    fitted_value = (
-        fitted[:, 0]
-        + fitted[:, 1] * x
-        + fitted[:, 2] * y
-        + fitted[:, 3] * x * x
-        + fitted[:, 4] * x * y
-        + fitted[:, 5] * y * y
-    )
-    # A root-saddle pair inside the pointwise Bell representation discrepancy
-    # and binary rounding has no resolved persistence in the booked field.
-    level_enclosure = jnp.abs(roots.jet.value - fitted_value) + psi_rounding_enclosure(
-        coefficients
-    )
     extrema = (
         roots.valid
         & inside
@@ -275,9 +266,17 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
     )
     nearest = jnp.argmin(jnp.where(saddle[None], separation, jnp.inf), axis=1)
     persistence = sigma * (roots.jet.value - roots.jet.value[nearest])
-    persistent = ~jnp.any(saddle) | (
-        persistence > level_enclosure + level_enclosure[nearest]
+    # Persistence is the difference of two stationary levels, so what decides
+    # whether the pair is resolved is the binary64 resolution of those levels
+    # themselves: a few units in the last place of the larger one. A pair whose
+    # signed separation sits inside that floor is one number rather than two
+    # features, however far apart the two roots lie on the plane.
+    level_resolution = (
+        PERSISTENCE_ULP_FLOOR
+        * jnp.finfo(roots.jet.value.dtype).eps
+        * jnp.maximum(jnp.abs(roots.jet.value), jnp.abs(roots.jet.value[nearest]))
     )
+    persistent = ~jnp.any(saddle) | (persistence > level_resolution)
     eligible = extrema & persistent
     axis_index = jnp.argmax(jnp.where(eligible, sigma * roots.jet.value, -jnp.inf))
     axis_live = jnp.any(eligible)

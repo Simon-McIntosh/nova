@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="converged-forward-solve">
+  <meta name="plan-title" content="Axis persistence near a saddle"></meta>
+  <meta name="plan-summary" content="Persistence is judged against the resolution of the root pair's own levels, not the cell fit's residual"></meta>
+  <meta name="plan-status" content="draft">
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-source" content="282-cell certified census carrier and the prototype axis gate"></meta>
+  <meta name="plan-source-quality" content="primary">
+  <meta name="plan-tags" content="equilibrium,topology,axis,stationary-points,binary64,floating-point"></meta>
+  <title>Axis persistence near a saddle | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <header>
+    <p class="eyebrow">Research input and execution evidence</p>
+    <h1>Axis persistence near a saddle</h1>
+    <p class="lead">The axis gate refuses a root–saddle pair whose signed level separation is below the binary64 resolution of the pair's own levels. At the 282-cell tie pair the separation is 4.19 × 10<sup>−7</sup> against a floor of 1.54 × 10<sup>−17</sup> — 2.2 × 10<sup>11</sup> units in the last place — so the axis is admitted. The field whose levels collapse onto each other at magnitude 10<sup>15</sup> separates by 1.125 against a floor of 1.776, 5.1 ULP, and is still refused. Restoring the old per-cell enclosure turns the tie-pair test red again, which is the negative control this record rests on.</p>
+  </header>
+
+  <section id="regression">
+    <h2>The gate that refused a resolved axis</h2>
+    <p>The census keeps a request whose magnetic axis sits 0.603 cell pitches from a saddle, and the read returned <code>axis = nan</code> at both tie offsets. The gate compared the pair's signed persistence against a per-cell enclosure: the discrepancy between the stationary point's own level and the same level evaluated from the cell's fitted Bell quadratic, plus that fit's binary64 row-sum bound. That statistic is a property of the cell's representation. Its row sum is set by every sample star in the cell and by any constant background in the field, so it grows with things that have nothing to do with whether two stationary points are distinct features. At the tie pair it reads 6.75 × 10<sup>−7</sup> at the axis and 4.98 × 10<sup>−7</sup> at the nearer saddle, and their sum exceeds the persistence by 2.80×, so the pair was refused.</p>
+    <p>Keeping that rejection is the point of the node. The gate exists to refuse a root–saddle pair that is one feature rather than two, and the repair is to pose the test against what actually decides that.</p>
+  </section>
+
+  <section id="criterion">
+    <h2>What decides whether two stationary points are separate</h2>
+    <p>Persistence is the signed difference of two stationary levels, σ(ψ<sub>axis</sub> − ψ<sub>saddle</sub>). Both levels are binary64 numbers, so the smallest difference that can exist between them is a few units in the last place of the larger one, and the smallest difference that can be <em>trusted</em> is a small multiple of it. The gate therefore compares the pair's signed separation against that resolution:</p>
+    <pre><code>level_resolution = PERSISTENCE_ULP_FLOOR
+                   * finfo(level.dtype).eps
+                   * maximum(|ψ_axis|, |ψ_saddle|)
+persistent = ~any(saddle) | (persistence &gt; level_resolution)</code></pre>
+    <p>The comparison needs no cell, no fit residual and no pitch. It asks the one question the gate is entitled to ask: are these two numbers distinguishable at the precision they are carried in? Everything the old enclosure measured — how well a quadratic interpolates this cell, how many stars the fit consumes — is a statement about the representation, and the representation is not what makes a pair resolved. For the same reason a fixed spatial enclosure would be the wrong instrument here: the tie pair's axis sits 0.0606 from its saddle, closer than a cell pitch, and a distance threshold would have to refuse it while admitting islands whose roots are further apart.</p>
+  </section>
+
+  <section id="measurements">
+    <h2>The three cases</h2>
+    <p>All rows are fresh evaluations of the committed prototype gate under the 282-cell certified carrier, with <code>configure_dtypes()</code> before any array and binary64 asserted. Persistence is σ(ψ<sub>axis</sub> − ψ<sub>nearest saddle</sub>); ULP is ε·max(|ψ<sub>axis</sub>|, |ψ<sub>saddle</sub>|), the separation of consecutive binary64 values at that magnitude.</p>
+    <table>
+      <caption>Signed persistence, the pair's own level resolution, and the verdict, for the tile-pair field at both offsets and for the prototype's island and control fields. "Old threshold" is the enclosure the gate used before the repair: |ψ − fitted quadratic| + row-sum bound, at the axis and at the nearer saddle, plus the coarse cell row-sum.</caption>
+      <thead><tr><th>Field</th><th>Persistence σ(ψ<sub>a</sub>−ψ<sub>s</sub>)</th><th>Pair level magnitude</th><th>ULP of that level</th><th>Persistence in ULP</th><th>New floor (8 ULP)</th><th>Old threshold</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr><th>tie pair, offset 0.1732</th><td>4.189 × 10<sup>−7</sup></td><td>8.642 × 10<sup>−3</sup></td><td>1.919 × 10<sup>−18</sup></td><td>2.18 × 10<sup>11</sup></td><td>1.535 × 10<sup>−17</sup></td><td>1.172 × 10<sup>−6</sup></td><td>admitted</td></tr>
+        <tr><th>tie pair, offset 0.17325</th><td>2.769 × 10<sup>−7</sup></td><td>8.644 × 10<sup>−3</sup></td><td>1.919 × 10<sup>−18</sup></td><td>1.44 × 10<sup>11</sup></td><td>1.535 × 10<sup>−17</sup></td><td>1.060 × 10<sup>−6</sup></td><td>admitted</td></tr>
+        <tr><th>island field, background 10<sup>15</sup></th><td>1.125</td><td>1.000 × 10<sup>15</sup></td><td>0.2220</td><td>5.07</td><td>1.776</td><td>1.138</td><td>refused</td></tr>
+        <tr><th>control, no background</th><td>1.10187</td><td>1.00125</td><td>2.223 × 10<sup>−16</sup></td><td>4.96 × 10<sup>15</sup></td><td>1.778 × 10<sup>−15</sup></td><td>0.05026</td><td>admitted</td></tr>
+      </tbody>
+    </table>
+    <p>At the tie pair the old threshold exceeded the persistence by 2.80× at offset 0.1732 and 3.83× at 0.17325, which is the refusal the census met. At the island the two thresholds agree on the verdict and disagree completely on the reason: the pair is genuinely one feature, its levels differing by 5.07 ULP, and the old statistic happened to notice only because a quadratic cannot represent a 10<sup>15</sup> background — its residual is 0.125 and 0.25 there, and the row-sum bound is 0.444, none of which has anything to do with the degeneracy.</p>
+    <p>The three cases separate by more than ten orders of magnitude on the new scale: 5.07 ULP is refused, 1.44 × 10<sup>11</sup> ULP and 4.96 × 10<sup>15</sup> ULP are admitted. The floor is 8.0 ULP, the smallest whole value above the island's 5.07 with margin 1.58×, and any floor between about 6 and 10<sup>10</sup> would produce the same four verdicts — the choice is not delicate.</p>
+    <figure>
+      <img src="/nova/figures/converged-forward-solve/axis-persistence-near-saddle/level-resolution.svg" alt="Signed persistence measured in units in the last place of the pair's own level, for the two tie-pair offsets, the island field and the control, with the 8 ULP floor marked.">
+      <figcaption>Persistence in ULP of the pair's own level, a logarithmic scale. The floor at 8 ULP is the dotted line; the island field sits below it and the two tie-pair offsets and the control sit far above.</figcaption>
+    </figure>
+  </section>
+
+  <section id="bounds">
+    <h2>What the criterion does and does not claim</h2>
+    <p>The gate is a resolution gate, and this record states its scope rather than implying more. It refuses a pair whose two levels cannot be told apart at the precision they are carried in — the degeneracy is representational, and no downstream arithmetic can recover a separation that was never written down. It does not refuse a pair whose levels are separable in binary64 but physically spurious, because nothing in the census distinguishes those two situations: a resolvable level difference is exactly what a physical pair looks like at this stage. The island rejection the ranking suite added still refuses, on the degenerate case it was written for.</p>
+    <p>The 0.603-pitch separation of the tie pair is retained but not used as the criterion. It is reported because it is what a reader will expect to be the deciding quantity, while the measurement says the deciding quantity is 2.2 × 10<sup>11</sup> binary64 steps at the pair's own level — a second, independent nearness that has nothing to do with how close the roots are on the plane.</p>
+  </section>
+
+  <section id="verification">
+    <h2>Verification</h2>
+    <p>The gate is the union of three runs over the four declared targets, because neither full-target arm can finish. Item 42 of 54, <code>test_census_neighbour_proposals_keep_saddles_across_coarse_ties[500 …]</code>, fills whatever memory it is given at both revisions: the 96G job is killed with batch MaxRSS 100443508K and the 256G job with 267889856K, both <code>EXIT=137</code>, both at that same item and both after items 1–41 have run. That is a pre-existing failure at 6dbbb251a and at 624d803cf, not a sizing defect, and a third allocation size buys nothing.</p>
+    <p>Items 1–41 therefore carry the comparison. Collected in file order, item 39 of <code>tests/equilibrium/test_topology_read.py</code> is <code>test_census_keeps_the_wall_contact_saddle_across_the_adjacent_pair</code>, and the two arms' progress strings differ at that one item and nowhere else: <code>F</code> at the base revision and a pass at the head, with the surrounding items identical between the arms. The base half is confirmed by name in a focused run of that single test at 6dbbb251a (job 1290365, one fresh process): <code>1 failed in 51.68 s</code>, <code>EXIT=1</code>, <code>axis = [nan nan]</code> and <code>valid = False</code> on the 282-cell, 1164-node carrier — the symptom the census reported. The head half is the same test green at 624d803cf (job 1290236).</p>
+    <p>The rest of the arm output is unchanged between the revisions, so none of it is an effect of the repair: identical error marks at items 14 (<code>test_biot_moment_point_derivatives</code>), 29–32 (the four <code>test_kernel_backed_carrier_read</code> cases) and 34–35 (the two <code>test_null_position_implicit_tangent</code> cases), and identical failures at items 19 and 23 (<code>test_topology_class_and_membership[diverted]</code> and <code>test_saddle_support_order[diverted]</code>) and 36–38 (the three <code>test_kernel_compile_growth</code> cases). Those are pre-existing at both revisions and are reported as such rather than folded into the gate.</p>
+    <p>Items 43–54 are the three targets the killed arms never reach — the prototype ranking suite, the carrier-axis suite and the read-robustness directory, 12 tests — and they run as their own pair of fresh processes in job 1290363: <code>12 passed in 94.15 s</code> at the base revision and <code>12 passed in 76.63 s</code> at the head, each <code>EXIT=0</code>. The prototype ranking suite keeps its island rejection there, rewritten to assert that the pair's signed separation sits below the pair's own level resolution at the 10<sup>15</sup> background and above it by more than 10<sup>10</sup> for the unshifted control.</p>
+    <p>The negative control is the decisive check and it passes: restoring the original per-cell enclosure in the repaired tree (job 1290178, one fresh process) turns the census test red again — <code>EXIT=1</code>, 1 failed in 48.83 s, <code>axis = [nan nan]</code>, <code>valid = False</code>, the main-branch symptom. The mutation's <code>read()</code> body was compared line for line against the commit that introduced the enclosure, so the failure is the enclosure's and not a stray edit's. Without that control, a head that passes proves only that something changed.</p>
+    <p><code>psi_rounding_enclosure</code> remains in the module as the binary64 enclosure of a fitted level, with its docstring naming that bound for what it is, and it is still used where a level's arithmetic error is what is being bounded.</p>
+  </section>
+</main>
+</body>
+</html>

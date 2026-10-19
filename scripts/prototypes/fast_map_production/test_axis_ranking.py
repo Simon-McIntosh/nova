@@ -13,7 +13,7 @@ import pytest
 from nova.equilibrium import fixed_points, topology
 from nova.equilibrium.solve_request import TopologyPolicy
 from scripts.prototypes.fast_map_production.kernel import (
-    psi_rounding_enclosure,
+    PERSISTENCE_ULP_FLOOR,
     read,
 )
 
@@ -119,33 +119,51 @@ def test_read_refuses_when_no_polarity_extremum(geometry):
     assert bool(jnp.all(jnp.isnan(reading.axis)))
 
 
-def test_read_refuses_extremum_within_rounding_enclosure(geometry):
-    """A level closer to its nearest saddle than the fit's rounding is not an axis.
+def test_read_refuses_extremum_within_the_pairs_own_level_resolution(geometry):
+    """A level inside the pair's own binary64 resolution is not an axis.
 
     Adding a large constant background to the double well leaves its stationary
-    roots and their signed persistence unchanged, while the fitted coefficients
-    - and so the binary64 enclosure of the fitted level - grow with the
-    background. At this background the selected extremum's persistence falls
-    inside the enclosure: the two levels are one number in binary64, the root
-    pair is unresolved, and the read must publish no axis. The control below
-    shows the same field with no background is accepted.
+    roots and their signed persistence unchanged, while the levels the
+    persistence is formed from grow with the background. At this background the
+    signed difference of the selected extremum and its nearest saddle is a few
+    units in the last place of the larger level: the two stationary points are
+    one number in binary64 rather than two features, so the read publishes no
+    axis. The control below shows the same field with no background is accepted,
+    because there the same persistence is resolved by many orders of magnitude.
+
+    The scale is the pair's own level magnitude, not the cell's fitted
+    coefficients: the fit's row sum is inflated by every other star in the cell
+    and by the background, and it says nothing about whether the pair is a
+    resolved feature.
     """
     convention = topology.TopologyConvention(jnp.asarray(-1.0), jnp.asarray(1.0))
     policy = TopologyPolicy()
 
     enclosed = DoubleWell(1.0, offset=1e15)
     found = roots(enclosed)
-    # The enclosure the read compares against is the fitted-level discrepancy
-    # plus the binary64 rounding bound; at this background both are comparable
-    # to the persistence, which the read must therefore refuse to resolve.
-    enclosure = float(psi_rounding_enclosure(enclosed.sampled_coefficient(geometry)))
+    levels = jnp.abs(found.jet.value)
+    resolution = float(
+        PERSISTENCE_ULP_FLOOR
+        * jnp.finfo(found.jet.value.dtype).eps
+        * jnp.maximum(levels[1], levels[2])
+    )
     persistence = float(jnp.abs(found.jet.value[1] - found.jet.value[2]))
-    assert persistence < 4.0 * enclosure, "the near-fold lies at the rounding scale"
+    assert persistence < resolution, "the near-fold lies inside the ULP floor"
     reading = read(enclosed, found, geometry, convention, policy)
     assert not bool(reading.valid)
     assert bool(jnp.all(jnp.isnan(reading.axis)))
 
     control = DoubleWell(1.0)
-    reading = read(control, roots(control), geometry, convention, policy)
+    reference = roots(control)
+    control_resolution = float(
+        PERSISTENCE_ULP_FLOOR
+        * jnp.finfo(reference.jet.value.dtype).eps
+        * float(jnp.max(jnp.abs(reference.jet.value)))
+    )
+    control_persistence = float(
+        jnp.abs(reference.jet.value[1] - reference.jet.value[2])
+    )
+    assert control_persistence > 1e10 * control_resolution
+    reading = read(control, reference, geometry, convention, policy)
     assert bool(reading.valid)
     assert bool(jnp.all(jnp.isfinite(reading.axis)))

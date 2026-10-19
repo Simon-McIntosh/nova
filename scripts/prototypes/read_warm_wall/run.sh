@@ -14,7 +14,7 @@ trap 'rm -rf "$scratch"' EXIT
 export TMPDIR="$scratch"
 revision=$(git -C "$worktree" rev-parse HEAD)
 printf 'REVISION=%s TREE=%s COMMAND=%s %s %s %s\n' "$revision" "$worktree" "$0" "$worktree" "$output" "$base_module"
-"$python" -c 'import os; from pathlib import Path; import nova; from nova.equilibrium import topology; print(f"NOVA={nova.__file__} MODULE={topology.__file__} CWD={Path.cwd().resolve()} JOB={os.environ.get(\"SLURM_JOB_ID\")}", flush=True)'
+"$python" -c 'import os; from pathlib import Path; import nova; from nova.equilibrium import topology; print(f"NOVA={nova.__file__} MODULE={topology.__file__} CWD={Path.cwd().resolve()} JOB={os.environ.get("SLURM_JOB_ID")}", flush=True)'
 failures=0
 for label in before after; do
   arm=""

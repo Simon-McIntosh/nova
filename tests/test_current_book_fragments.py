@@ -235,9 +235,13 @@ def test_certificate_fixture_is_addressed_by_the_carrier_identity(
     digest = certificate_fixtures.fixture_digest(identity)
     # Recompute the key here from the canonical JSON rather than reading it back
     # out of the store: a store that ignored an identity input, or named objects
-    # by anything coarser than the whole identity, would agree with itself and
+    # by anything coarser than the defining identity, would agree with itself and
     # still fail this.
-    canonical = json.dumps(identity, sort_keys=True, separators=(",", ":")).encode()
+    canonical = json.dumps(
+        certificate_fixtures._defining_identity(identity),
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode()
     independently_computed = hashlib.sha256(canonical).hexdigest()
     assert digest == "sha256:" + independently_computed, digest
     published = certificate_fixtures.publish_fixture(kind, digest, payload)

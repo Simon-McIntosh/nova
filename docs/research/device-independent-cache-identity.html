@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="research">
+<meta name="plan-slug" content="device-independent-cache-identity">
+<meta name="plan-title" content="Device-independent certificate fixture identity">
+<meta name="plan-summary" content="Certificate carriers load across CPU and H200 from one defining-input store key.">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s3">
+<meta name="plan-recorded-at" content="2026-10-19">
+<meta name="plan-verdict" content="partial">
+<title>Device-independent certificate fixture identity | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<h1 id="device-independent-cache-identity-record">Device-independent certificate fixture identity</h1>
+<p>The certificate store now addresses carriers and exteriors by defining inputs. The carrier key retains the analytic machine and constants, requested cells, wall node count and source mode, builder and builder revision. The exterior key retains the carrier key, source coefficients, analytic type, support arm and polygon-kernel revision. Computed wall, state and separatrix array digests no longer enter shared addresses. The stored payload carries this canonical identity and key; the fixture owner receives its local identity during a read, so its existing validation still runs.</p>
+
+<h2 id="device-independent-cache-identity-reproduction">Reproduction and refusal</h2>
+<p>At orientation base <code>6cce876e3b56347f3fe02de2186e2d8e42d275ac</code>, the new regression check changed only the computed wall digest from <code>device-a</code> to <code>device-b</code>. The carrier-key assertion failed; the matching exterior check, changing only computed state and boundary digests, also failed. The base log records both failing test IDs and <code>EXIT=1</code>. On the repaired head, all three focused checks pass. A negative control restored the raw-array digest during the test process; all three checks then failed with <code>EXIT=1</code>, including the warm-load test.</p>
+<p>The first migration attempt copied an older carrier payload without updating its embedded <code>cache_key</code>. The fixture owner refused that entry, which exposed the metadata requirement. A corrected entry uses a distinct defining-input schema marker and stores its canonical key. The mistaken entry remains in the store, untouched; the corrected loader does not address it.</p>
+
+<h2 id="device-independent-cache-identity-loads">Cross-device carrier loads</h2>
+<p>On allocation <code>1281970</code>, the CPU read four verified older payloads through <code>certificate_fixtures.read_fixture</code> and published new content-addressed entries. It then loaded those entries through <code>cached_carrier</code>. H200 job <code>1289904</code> independently computed the same four addresses and loaded those entries with no publication or rebuild. All eight reads reported <code>hit=true</code> and <code>build_seconds=0</code>. The source payloads and all pre-existing entries remain in place. The table gives the fixture owner's load wall; total call walls are retained in the job logs.</p>
+<table><thead><tr><th>Carrier</th><th>Realised cells</th><th>Shared digest</th><th>CPU load [s]</th><th>H200 load [s]</th><th>Build [s], each</th></tr></thead><tbody>
+<tr><td>limited, requested 550</td><td>553</td><td><code>96c6a6c9d1433f09</code></td><td>0.186</td><td>1.072</td><td>0</td></tr>
+<tr><td>limited, requested 2,000</td><td>2,105</td><td><code>a0cfe0fc1c23c374</code></td><td>0.356</td><td>0.197</td><td>0</td></tr>
+<tr><td>diverted, requested 550</td><td>550</td><td><code>6ff2af240886619b</code></td><td>0.201</td><td>0.068</td><td>0</td></tr>
+<tr><td>diverted, requested 2,000</td><td>2,098</td><td><code>bb1e1289b52e1f25</code></td><td>0.324</td><td>0.182</td><td>0</td></tr>
+</tbody></table>
+<p>The CPU and H200 logs name <code>nova.__file__</code>, selected backend, selected device and one record per carrier. The first H200 submission remained pending on resources while all eight cards were allocated and was cancelled before execution. Job <code>1289904</code> ran after the CPU publication, on the H200 itself.</p>
+
+<h2 id="device-independent-cache-identity-suite">Suite arms</h2>
+<p>Both CPU arms ran the named paths in fresh processes under the repository-root conftest. The base tree was extracted from <code>6cce876e3b56347f3fe02de2186e2d8e42d275ac</code>; the first head was <code>e42010d68e246119d2c74da30332707454418035</code>, and the two identity files were rerun at <code>4afdd07add68b4047103efd3674d34218f2c0328</code>. The base contour-tree attempt omitted its persisted certificate JSON inputs and produced two failures and two setup errors; after those 20 known-present inputs were extracted from the same base revision, all eight contour-tree tests passed. The repaired base log is the arm used in the delta below. The initial missing-input log remains in the run directory as a scaffolding failure.</p>
+<table><thead><tr><th>Path</th><th>Base</th><th>Head</th><th>Delta</th></tr></thead><tbody>
+<tr><td><code>scripts/prototypes/support</code></td><td>No tests existed; exit 5</td><td>3 passed</td><td>3 new checks pass</td></tr>
+<tr><td><code>tests/test_current_book_fragments.py</code></td><td>10 passed, 6 failed</td><td>10 passed, 6 failed at <code>4afdd07add68b4047103efd3674d34218f2c0328</code></td><td>No added failure</td></tr>
+<tr><td><code>tests/test_contour_tree_brute_force.py</code></td><td>8 passed</td><td>8 passed</td><td>None</td></tr>
+<tr><td><code>scripts/prototypes/fast_map_production/test_carrier_axis.py</code></td><td>4 passed</td><td>4 passed</td><td>None</td></tr>
+</tbody></table>
+<p>The six common <code>test_analytic_certificate_moments</code> failures refuse the CPU backend before they exercise certificate booking: <code>certificate rows require the GPU measurement lane</code>. GPU job <code>1289913</code> stayed pending on H200 resources and was cancelled before execution. Titan fallback job <code>1289915</code> ran for 20 minutes and was cancelled by operator direction during its base arm; its partial log has no suite summary. H200 job <code>1290060</code> ran the base and head GPU arms in separate processes and reached both summaries. The job exited 1 because the base arm failed. Its per-arm logs retain the commands, imported module paths, working directories and summaries.</p>
+<table><thead><tr><th>H200 certificate arm</th><th>Result</th><th>Wall</th><th>Qualification</th></tr></thead><tbody>
+<tr><td>Base</td><td>5 passed, 1 failed, 10 deselected</td><td>1,183.37 s</td><td>The 5,000-cell limited row hit pytest's 300 s per-test bound while JAX compiled <code>legacy-book</code>.</td></tr>
+<tr><td>Head</td><td>6 passed, 10 deselected</td><td>1,153.32 s</td><td>All six certificate rows completed.</td></tr>
+</tbody></table>
+<p>The base-only timeout is an incomplete measurement for that row, not evidence that the cache change accelerated its compilation: the arms ran sequentially and the head could reuse compilation state. The five completed base rows and all six head rows reach the GPU booking gate. The existing <code>test_certificate_fixture_is_addressed_by_the_carrier_identity</code> had independently hashed the raw identity, including <code>wall_content</code>. It now hashes the defining-input identity returned by the fixture module and passes. Fresh paired CPU processes ran that file and <code>scripts/prototypes/support/test_certificate_fixtures.py</code>: the base had 10 passes and 9 failures in 94.69 s; head <code>4afdd07add68b4047103efd3674d34218f2c0328</code> had 13 passes and 6 failures in 92.79 s. Because the support test file did not exist at the base revision, the same three support tests were copied into the extracted base tree; all three failed on the old store behavior and passed at head. The six failures shared by both arms are the CPU backend refusals above, leaving zero added failures. The receipts are <code>base_identity_suite.log</code> and <code>head_identity_suite.log</code> in the run directory.</p>
+
+<h2 id="device-independent-cache-identity-existing">Older device-specific entries retained</h2>
+<p>The inventory was taken before publication: 12 carriers and 12 exteriors. It lists every prior digest and payload size. No existing entry was deleted or overwritten. Whether to retire these device-specific objects remains an operator decision. One additional entry from the refused metadata attempt also remains, at <code>a5e6845919c7ea5b8ff1751c7fd16f35ea7be5941b9662c2a9dae4844a51f4ca</code>; its payload is 30,183,083 bytes and it is unreachable through the corrected key.</p>
+<table><thead><tr><th>Kind</th><th>Prior digest (SHA-256)</th><th>Payload bytes</th></tr></thead><tbody>
+<tr><td>carrier</td><td><code>508bd54b8f14535cd94174d56f7cd83c0d2a406698b739313e9ddff484165c6d</code></td><td>373,842,939</td></tr>
+<tr><td>carrier</td><td><code>d8a93f1dae069a509d2f3f4f656d2f115b7e8d87d6b7c9bc6884155d1ce1003d</code></td><td>30,183,083</td></tr>
+<tr><td>carrier</td><td><code>6470b95de77ad744865734f47b7039f3a232e2e281b5688c1ec1c9955088c530</code></td><td>29,623,939</td></tr>
+<tr><td>carrier</td><td><code>80cc3b56e4bdcec312db026767bf7d0cea0d1016b77e3cfd340bd343adf578ea</code></td><td>373,842,939</td></tr>
+<tr><td>carrier</td><td><code>b88609b1e7a7a8591109f5c668eeeb23629418fb353831207688e88722535c59</code></td><td>371,190,435</td></tr>
+<tr><td>carrier</td><td><code>5ef938762bce487cfec4633d12256198a8d7b022c68bb5ec063c08cb28de0cdb</code></td><td>29,623,939</td></tr>
+<tr><td>carrier</td><td><code>ec6c3f5aaa2ce05ddacebf394653e39e1cf0dc87aaafb478c451c6dde6e63d3b</code></td><td>2,119,627,059</td></tr>
+<tr><td>carrier</td><td><code>a922d6cec7e0c34503db6dad667d7281c395dff13849d3eed0d6a2aad23238c5</code></td><td>2,137,336,691</td></tr>
+<tr><td>carrier</td><td><code>48998bb5062b21d4c8953427e3727dcf5ceb7bddcc8dfaa31e6477dff17625d0</code></td><td>371,190,435</td></tr>
+<tr><td>carrier</td><td><code>d65ab47cb71f1a2a846d3f33590c62e267773d640dae5871b963bdb548e915ad</code></td><td>2,143,041,795</td></tr>
+<tr><td>carrier</td><td><code>5f9c73865c073da975aba23a37d9e8da65071fa184a9d8ad8607131e67a0b043</code></td><td>30,183,083</td></tr>
+<tr><td>carrier</td><td><code>ece83c8b5a01a323925d1de94fd6e710cc81907009b7c3314cb4e4a1b5f96320</code></td><td>2,119,627,059</td></tr>
+<tr><td>exterior</td><td><code>530638f64d715a51519828c4d143a48b384a903f287bf585653394e40e2e6f38</code></td><td>270,888</td></tr>
+<tr><td>exterior</td><td><code>ea7155cacc96a627ac78098a0c53cdcf827d57bc6d3b339e0d267edc5bbc7d01</code></td><td>41,560</td></tr>
+<tr><td>exterior</td><td><code>040ee56f573456de5799e0f8ff34095b6d067c9834f54f0020596368e3c19974</code></td><td>119,440</td></tr>
+<tr><td>exterior</td><td><code>b5e14be69fd2699446721a5e732d2d47d7a2aa54a705d5c297fdbbc0dd9664ed</code></td><td>272,008</td></tr>
+<tr><td>exterior</td><td><code>d29c0da0c394344fcb6bcf701a56475cc4234a31d24c36063acc8cf2276fde61</code></td><td>119,832</td></tr>
+<tr><td>exterior</td><td><code>4134ad25acc1c79935aed4d412fa996d930a660577d291b47804b99683351b29</code></td><td>41,248</td></tr>
+<tr><td>exterior</td><td><code>403d55c23f714b74fafc7837700dad16c8cc9a2b80cb708d4c56dc815b2188ec</code></td><td>119,832</td></tr>
+<tr><td>exterior</td><td><code>230ce0bf04c28aa09ecf434c98c5ea8e25ee71023de3a623e00d175cb762739e</code></td><td>41,560</td></tr>
+<tr><td>exterior</td><td><code>4827bc29177cfe388df22e6ef4b59df6e85b1752a021694d2d291cd9e594f13f</code></td><td>41,248</td></tr>
+<tr><td>exterior</td><td><code>f3bc1d218b3e0f92ea0d7d1f4c9524ad4636ce6a6c3e8b5d653ec5f5bf313d7e</code></td><td>119,440</td></tr>
+<tr><td>exterior</td><td><code>e3cb74cc8dad533f981d548b8207bc869a95c056e256d3d4383c185265d2b1cc</code></td><td>270,888</td></tr>
+<tr><td>exterior</td><td><code>babd8a0bd2434b129806d7cb9f8d13457c96fe52960bb822327ca619036763ed</code></td><td>272,376</td></tr>
+</tbody></table>
+
+<h2 id="device-independent-cache-identity-provenance">Reproducible evidence</h2>
+<p>Implementation commits are <code>99685e60f3f6e142ff65aff976dfd04bad6d61be</code>, <code>e42010d68e246119d2c74da30332707454418035</code> and <code>4afdd07add68b4047103efd3674d34218f2c0328</code>. The run directory is <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T075727697198-device-independent-cache-identity</code>. Its <code>base_identity_red.log</code>, <code>head_identity_after_metadata.log</code>, <code>negative_control.log</code>, <code>cpu_retry.log</code>, <code>h200_load.log</code> and per-module suite logs retain the commands and receipts. The four new keys were populated by copying verified old payloads through the store API, so this measurement establishes cross-device store identity and loading, not independent numerical equivalence of device-built carriers.</p>
+</main></body></html>

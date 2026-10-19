@@ -17,12 +17,11 @@ helpers below name it as the store the booking gate uses.
 
 The contract this store keeps:
 
-* **The key is the identity.** ``fixture.cache_identity`` (carrier) and
-  ``fixture._exterior_cache_identity`` (exterior) name every input a fixture
-  depends on - the closed-form constants, the discretisation, the builder and
-  its revision, the analytic state digest. The store digest is the SHA-256 of
-  that identity's canonical JSON, so a source change that moves any one input
-  addresses a different object rather than reloading a stale fixture.
+* **The key is the defining identity.** The fixture owners include computed
+  wall and state digests in their local identities. The shared store omits
+  those device-rounded fields and retains the machine, discretisation, source
+  parameters, support arm and kernel revision. Stored metadata records this
+  canonical identity while each owner sees its local metadata on load.
 * **Publication is the store's rename-onto-digest.** :func:`publish_fixture`
   hands the payload to ``nova.database.content_store.publish_files``, which
   lands it in a private directory and renames it onto its digest, so a reader
@@ -82,9 +81,25 @@ def kind_root(kind: str) -> Path:
 
 
 def fixture_digest(identity: dict[str, object]) -> str:
-    """Return the content-store digest naming one fixture from its identity."""
-    encoded = json.dumps(identity, sort_keys=True, separators=(",", ":")).encode()
+    """Return the digest of defining inputs, independent of device rounding."""
+    encoded = _encoded_identity(_defining_identity(identity)).encode()
     return "sha256:" + sha256_bytes(encoded)
+
+
+def _encoded_identity(identity: dict[str, object]) -> str:
+    return json.dumps(identity, sort_keys=True, separators=(",", ":"))
+
+
+def _defining_identity(identity: dict[str, object]) -> dict[str, object]:
+    """Keep source inputs and revisions while omitting computed array digests."""
+    canonical = json.loads(_encoded_identity(identity))
+    canonical["certificate_store_identity"] = "defining-inputs"
+    if "discretisation" in canonical:
+        canonical["discretisation"].pop("wall_content", None)
+    if "machine_semantic_key" in canonical:
+        canonical.pop("analytic_state_sha256_binary64", None)
+        canonical.pop("analytic_boundary_sha256_binary64", None)
+    return canonical
 
 
 def fixture_entry(kind: str, digest: str) -> Path | None:
@@ -177,10 +192,13 @@ class _ContentSession:
     a caller can assert that a fixture landed where it meant to publish.
     """
 
-    def __init__(self, kind: str, digest: str, location: str):
+    def __init__(
+        self, kind: str, digest: str, location: str, identity: dict[str, object]
+    ):
         self.kind = kind
         self.digest = digest
         self.location = location
+        self.identity = identity
         self.lock_wait = 0.0
 
     @property
@@ -188,10 +206,26 @@ class _ContentSession:
         return self.digest
 
     def load(self) -> xarray.Dataset | None:
-        return read_fixture(self.kind, self.digest)
+        data = read_fixture(self.kind, self.digest)
+        if data is None:
+            return None
+        if data.attrs.get("semantic_identity") != _encoded_identity(
+            _defining_identity(self.identity)
+        ):
+            raise ValueError("certificate store identity mismatch")
+        if data.attrs.get("cache_key") != self.digest:
+            raise ValueError("certificate store key mismatch")
+        data.attrs["semantic_identity"] = _encoded_identity(self.identity)
+        return data
 
     def publish(self, data: xarray.Dataset) -> None:
-        self.location = str(publish_fixture(self.kind, self.digest, data))
+        canonical = data.copy(deep=False)
+        canonical.attrs = dict(data.attrs)
+        canonical.attrs["semantic_identity"] = _encoded_identity(
+            _defining_identity(self.identity)
+        )
+        canonical.attrs["cache_key"] = self.digest
+        self.location = str(publish_fixture(self.kind, self.digest, canonical))
 
 
 class ContentStoreFixtureStore:
@@ -216,6 +250,7 @@ class ContentStoreFixtureStore:
             self.kind,
             digest,
             str(entry) if entry is not None else "",
+            identity,
         )
 
 

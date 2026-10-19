@@ -819,6 +819,43 @@
   "plan_link": null,
   "promoted_by": "review-self",
   "promoted_revision": "b1841a40a1b835bf4cfae3cdbcca094d858e87c7",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 5048,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261019T194619559903-review-of-tcv-liuqe-corrected-reference-8e41e37e58b2",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 5048,
+        "path": "/tmp/reckon-crew-scratch/r-20261019T194619559903-review-of-tcv-liuqe-corrected-reference-8e41e37e58b2"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-tcv-liuqe-corrected-reference-8e41e37e58b2",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

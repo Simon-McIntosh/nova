@@ -1,0 +1,69 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T075113620753-slow-caller-tests/logs/compile-head.log",
+  "assertion_analysis": [],
+  "base_log_revision": "6cce876e3b56347f3fe02de2186e2d8e42d275ac",
+  "baseline_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T075113620753-slow-caller-tests/logs/compile-base.log",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-19T09:30:35.142Z",
+  "dispatched_at": "2026-10-19T09:16:35Z",
+  "findings": [
+    {
+      "file": "tests/test_forward_receipt_raster.py",
+      "line": "18",
+      "severity": "follow-on",
+      "text": "follow-on: no committed test asserts the file carries the slow marker, so the only thing that reddens if the marker is removed is the default lane re-collecting the heavy test and failing at its 300 s bound, measured at 786.39 s in logs/negative-control-default-lane-base.log."
+    },
+    {
+      "file": "docs/research/slow-caller-tests.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the research record carries the base-versus-head wall comparison only as a table, with no figure, though the declared write paths include docs/figures/converged-forward-solve."
+    }
+  ],
+  "head_log_revision": "63c36b46e998356d2d1e6ab863531d964761444e",
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read commit by commit from 6cce876e3 to 63c36b46e; three files, 210 insertions and zero deletions.",
+    "done_when": "the done_when requires each file to run to a pytest summary on the H200 lane at base with wall, cache-guard rows and pass/fail recorded; the four run-dir logs raster-base, compile-base, raster-head and compile-head carry those summaries and markers, recorded in the manifest's baseline_suite and after_suite.",
+    "goal": "the node was to make tests/test_forward_receipt_raster.py and tests/test_forward_compile_identity.py finish and report on the H200 lane; the landed tree adds @pytest.mark.slow at tests/test_forward_receipt_raster.py:18 and records both files' H200 results at docs/research/slow-caller-tests.html:60-72.",
+    "manifest": "read; it names commits 7396520b0, 79930559b and 63c36b46e, cites the four H200 logs and the negative-control log, and its baseline_suite and after_suite both carry completed=true with the manifest's single failing id in both arms.",
+    "write_paths": "the manifest's orientation_write_paths grant tests/test_forward_receipt_raster.py, tests/test_forward_compile_identity.py, docs/research/slow-caller-tests.html, docs/evidence/fragments/converged-forward-solve/slow-caller-tests.html and docs/figures/converged-forward-solve; the 6cce876e3..63c36b46e diff changes only the first, third and fourth."
+  },
+  "justifications": {
+    "durability": "tests/test_forward_receipt_raster.py:18 adds a marker and no assertion, so the regression it guards is caught only by the default lane re-collecting the heavy test, as the red logs/negative-control-default-lane-base.log shows at 786.39s.",
+    "evidence": "raster-base.log reports 1 passed in 1501.04s with WALL-CLOCK-UNRELIABLE misses=1458 and raster-head.log 1 passed in 847.25s misses=0, matching the manifest, but the head default-lane collection figure has no cited log.",
+    "fit": "the @pytest.mark.slow marker at tests/test_forward_receipt_raster.py:18 is the marker registered at pyproject.toml:286-287 and the comment names the mechanism with no plan label.",
+    "goal_fidelity": "tests/test_forward_receipt_raster.py:18 marks the single heavy test slow and both files' H200 summaries are recorded at docs/research/slow-caller-tests.html:60-72.",
+    "reuse": "the change reuses the existing slow marker and the pyproject.toml:282 lane filter; a search of tests/test_collection_policy.py and pyproject.toml [tool.pytest.ini_options] found no second collection-policy owner to extend.",
+    "scope_discipline": "the 6cce876e3..63c36b46e diff touches only tests/test_forward_receipt_raster.py and the two declared docs files, with no deletion."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node was to make tests/test_forward_receipt_raster.py and tests/test_forward_compile_identity.py finish and report on the H200 lane; the landed tree adds @pytest.mark.slow at tests/test_forward_receipt_raster.py:18 and records both files' H200 results at docs/research/slow-caller-tests.html:60-72.\nVERDICT done_when: the done_when requires each file to run to a pytest summary on the H200 lane at base with wall, cache-guard rows and pass/fail recorded; the four run-dir logs raster-base, compile-base, raster-head and compile-head carry those summaries and markers, recorded in the manifest's baseline_suite and after_suite.\nVERDICT write_paths: the manifest's orientation_write_paths grant tests/test_forward_receipt_raster.py, tests/test_forward_compile_identity.py, docs/research/slow-caller-tests.html, docs/evidence/fragments/converged-forward-solve/slow-caller-tests.html and docs/figures/converged-forward-solve; the 6cce876e3..63c36b46e diff changes only the first, third and fourth.\nVERDICT manifest: read; it names commits 7396520b0, 79930559b and 63c36b46e, cites the four H200 logs and the negative-control log, and its baseline_suite and after_suite both carry completed=true with the single failing id tests/test_forward_compile_identity.py::test_traced_exterior_preserves_the_certificate_terminal_state in both arms.\nVERDICT diff: read commit by commit from 6cce876e3 to 63c36b46e; three files, 210 insertions and zero deletions: 7396520b0 adds the slow marker and comment plus the evidence fragment, 79930559b extends both docs, 63c36b46e records the head-arm H200 results.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: tests/test_forward_receipt_raster.py:18 marks the single heavy test slow and both files' H200 summaries are recorded at docs/research/slow-caller-tests.html:60-72.\nSCORE evidence: 17\nJUSTIFICATION evidence: raster-base.log reports 1 passed in 1501.04s with WALL-CLOCK-UNRELIABLE misses=1458 and raster-head.log 1 passed in 847.25s misses=0, matching the manifest, but the head default-lane collection figure has no cited log.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the 6cce876e3..63c36b46e diff touches only tests/test_forward_receipt_raster.py and the two declared docs files, with no deletion.\nSCORE durability: 14\nJUSTIFICATION durability: tests/test_forward_receipt_raster.py:18 adds a marker and no assertion, so the regression it guards is caught only by the default lane re-collecting the heavy test, as the red logs/negative-control-default-lane-base.log shows at 786.39s.\nSCORE fit: 19\nJUSTIFICATION fit: the @pytest.mark.slow marker at tests/test_forward_receipt_raster.py:18 is the marker registered at pyproject.toml:286-287 and the comment names the mechanism with no plan label.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change reuses the existing slow marker and the pyproject.toml:282 lane filter; a search of tests/test_collection_policy.py and pyproject.toml [tool.pytest.ini_options] found no second collection-policy owner to extend.\nFINDING tests/test_forward_receipt_raster.py:18 follow-on: no committed test asserts the file carries the slow marker, so the only thing that reddens if the marker is removed is the default lane re-collecting the heavy test and failing at its 300 s bound, measured at 786.39 s in logs/negative-control-default-lane-base.log.\nFINDING docs/research/slow-caller-tests.html:1 follow-on: the research record carries the base-versus-head wall comparison only as a table, with no figure, though the declared write paths include docs/figures/converged-forward-solve.\n",
+  "review_run_id": "r-20261019T091459834400-review-of-slow-caller-tests-63c36b46e998",
+  "reviewed_base_sha": "6cce876e3b56347f3fe02de2186e2d8e42d275ac",
+  "reviewed_commits": [
+    "7396520b03a3721e484f31cdc8b681f6df2198ad",
+    "79930559bcf7be1e399dea585dc28f10b60973fb",
+    "63c36b46e998356d2d1e6ab863531d964761444e"
+  ],
+  "reviewed_head_sha": "63c36b46e998356d2d1e6ab863531d964761444e",
+  "reviewed_run_id": "r-20261019T075113620753-slow-caller-tests",
+  "scores": {
+    "durability": 14,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T09:34:31.999926+00:00",
+  "total": 108
+}

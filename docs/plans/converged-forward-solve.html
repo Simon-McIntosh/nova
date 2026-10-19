@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="436">
+<meta name="plan-version" content="437">
 <meta name="plan-modified" content="2026-10-19">
 </head>
 <body>
@@ -1657,6 +1657,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261017T091457262890-review-of-trip-guard-counts-its-marker-645fc792cbf0" data-who="reckon-build" data-when="2026-10-17T09:22:04.790Z">
     <div class="r-comment-body"><p>Review of r-20261017T084815859798-trip-guard-counts-its-marker (head 645fc792cbf030285d1cee5e865caea7ebd40873) scores goal_fidelity 20, evidence 19, scope_discipline 20, durability 20, fit 19, reuse 20 against base cf92f9ae347caf402c4e1f03d925fbc9961f9947, 0 added failures, no blocking or follow-on findings.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261019T091459834400-review-of-slow-caller-tests-63c36b46e998" data-who="reckon-build" data-when="2026-10-19T09:30:35.142Z">
+    <div class="r-comment-body"><p>Review of run r-20261019T075113620753-slow-caller-tests (base 6cce876e3, head 63c36b46e): the node marks the receipt-raster solve slow and records both files&#x27; H200 arms; scores goal_fidelity 18, evidence 17, scope_discipline 20, durability 14, fit 19, reuse 20; added_failure_count 0; two follow-on findings (no committed marker guard; no figure in the research record); no blocking finding.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-s21-moment-space-ruling" data-who="reckon-build" data-when="2026-10-13T18:40:00Z">
     <div class="r-comment-body"><p>Lead ruling 2026-10-13: the forward solve's unknown is the cell current moments.</p><p>The locked read builds its field from booked moments: the Bell jets at the nodes are the jet coupling rows times m, plus the exterior's jets. So it cannot evaluate an arbitrary trial flux vector, but it can always evaluate a trial m. The solve therefore iterates m = book(read(psi_ext + G m)), and the flux is G m wherever output needs it.</p><ul><li>Newton runs on the device with autograd.</li><li>A dense <code>jax.jacfwd</code> Jacobian with a device LU is measured against a device-side Jacobian-free Krylov, replacing SciPy's host <code>newton_krylov</code>.</li><li>Autograd must be shown to pass through the read and the booking.</li><li><code>current.book</code> is vectorised. Its sequential cell scan costs 0.9 to 8 s per step at 2,000 to 10,000 cells.</li><li>The legacy support partition, the spline-clip read and the chord default are deleted.</li></ul></div>

@@ -25,7 +25,6 @@ def test_certified_limited_carrier_converges(tmp_path: Path) -> None:
         "--line-search",
         "--line-search-depth",
         "20",
-        "--vertical-pin",
         "--output",
         str(receipt_path),
     ]
@@ -41,6 +40,5 @@ def test_certified_limited_carrier_converges(tmp_path: Path) -> None:
     assert receipt["cells"] == 553
     assert receipt["carrier_cache"]["hit"]
     assert completed.returncode == 0, completed.stdout + completed.stderr
-    assert "vertical_pin" in receipt
     assert receipt["converged"]
     assert receipt["history"][-1]["residual"] <= 1e-12

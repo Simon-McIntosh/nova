@@ -19,7 +19,6 @@ import nova
 
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium import current, fixed_points, topology
-from nova.equilibrium.constraint import uniform_radial_field_jet
 from nova.equilibrium.solve_request import TopologyPolicy
 from scripts.analytic_oracle_fixtures import measure as fixture
 from scripts.prototypes.fast_map_production.kernel import read as fixed_shape_read
@@ -134,16 +133,6 @@ class CachedExterior:
 
 def run(args):
     kind, output = args.kind, args.output
-    if args.vertical_pin and (
-        args.probe
-        or args.taylor
-        or args.compare
-        or args.start_json
-        or args.continue_from
-        or args.warm
-        or args.inspect_support
-    ):
-        raise ValueError("vertical pin requires a cold solve")
     selected_read = original_read if args.original_read else fixed_shape_read
     mapped_program.read = selected_read
     if args.exact_roots:
@@ -279,50 +268,10 @@ def run(args):
     scale = jnp.asarray(
         (float(booked.raw_current) / len(reference)) * np.asarray((1.0, pitch, pitch))
     )
-    pin_target = jnp.sum(
-        reference[:, 0] * geometry.centre[:, 1] + reference[:, 2]
-    ) / jnp.sum(reference[:, 0])
-    field_scale = jnp.asarray(1e-3, dtype=reference.dtype)
-    value_field = uniform_radial_field_jet(rule.points.reshape(-1, 2))[:, 0]
-    jet_field = uniform_radial_field_jet(window.nodes)
 
-    def mapped_state(scaled, active_operands):
-        flat = scaled.reshape(-1)
-        moment_values = (
-            flat[:-1].reshape(reference.shape) * scale
-            if args.vertical_pin
-            else flat.reshape(reference.shape) * scale
-        )
-        field = (
-            flat[-1] * field_scale
-            if args.vertical_pin
-            else jnp.asarray(0.0, dtype=reference.dtype)
-        )
-        if args.vertical_pin:
-            active_values, active_jets, active_window, *remainder = active_operands
-            active_operands = (
-                replace(
-                    active_values, exterior=active_values.exterior + field * value_field
-                ),
-                active_jets,
-                replace(
-                    active_window, exterior=active_window.exterior + field * jet_field
-                ),
-                *remainder,
-            )
-        return mapped(moment_values, *active_operands), moment_values, field
-
-    def equation(scaled, active_operands):
-        state, _, _ = mapped_state(scaled, active_operands)
-        residual = (state.moment_residual / scale).reshape(-1)
-        if not args.vertical_pin:
-            return residual
-        centroid = jnp.sum(
-            state.moments[:, 0] * geometry.centre[:, 1] + state.moments[:, 2]
-        ) / jnp.sum(state.moments[:, 0])
-        return jnp.concatenate(
-            (residual, jnp.atleast_1d((centroid - pin_target) / pitch))
-        )
+    def equation(scaled, args):
+        state = mapped(scaled.reshape(reference.shape) * scale, *args)
+        return (state.moment_residual / scale).reshape(-1)
 
     def inspect_read(moments):
         cached = fixed_points._CachedField(
@@ -780,7 +729,43 @@ def run(args):
                 "threshold": original_merit,
                 "rows": rows,
             }
-        state, _, field = mapped_state(candidate, active_operands)
+            mismatch = (vector - base_vector - amount * tangent).reshape(
+                reference.shape
+            )
+            ordered = np.argsort(np.max(np.abs(mismatch), axis=1))[-10:][::-1]
+            row["step_diagnosis"]["directional_mismatch"] = [
+                {
+                    "cell": int(cell),
+                    "remainder": mismatch[cell].tolist(),
+                    "base": base_vector.reshape(reference.shape)[cell].tolist(),
+                    "tangent": tangent.reshape(reference.shape)[cell].tolist(),
+                    "trial": vector.reshape(reference.shape)[cell].tolist(),
+                }
+                for cell in ordered
+            ]
+            original_read = inspect_read(point.reshape(reference.shape) * scale)
+            trial_read = inspect_read(
+                (point.reshape(-1) + amount * jnp.asarray(step)).reshape(
+                    reference.shape
+                )
+                * scale
+            )
+            base_membership = np.asarray(original_read["membership"])
+            trial_membership = np.asarray(trial_read["membership"])
+            changed = np.flatnonzero(np.abs(trial_membership - base_membership) > 1e-12)
+            row["step_diagnosis"]["read_difference"] = {
+                "support_base": original_read["support_ids"],
+                "support_trial": trial_read["support_ids"],
+                "membership_changed": [
+                    {
+                        "cell": int(cell),
+                        "base": float(base_membership[cell]),
+                        "trial": float(trial_membership[cell]),
+                    }
+                    for cell in changed
+                ],
+            }
+        state = mapped(candidate.reshape(reference.shape) * scale, *active_operands)
         jax.block_until_ready(state)
         block = np.asarray(state.moment_residual / scale)
         hot = np.argsort(np.max(np.abs(block), axis=1))[-5:][::-1]
@@ -792,13 +777,9 @@ def run(args):
         row["saddle_cells"] = int(state.saddle_cells)
         row["boundary_class"] = int(state.boundary_class)
         row["booking_valid"] = bool(state.booking_valid)
-        if args.vertical_pin:
-            row["radial_field_tesla"] = float(field)
         if args.inspect_support:
             row["read"] = inspect_read(candidate.reshape(reference.shape) * scale)
-        return candidate if args.vertical_pin else candidate.reshape(
-            reference.shape
-        ), row
+        return candidate.reshape(reference.shape), row
 
     def compare_methods(point, active_operands):
         started = perf_counter()
@@ -1042,12 +1023,8 @@ def run(args):
         analytic = jnp.asarray(certificate._exact_state(name, exact, coordinates))
         exterior = certified_exterior(source, exact, machine, analytic)
         operator = fixture.forward_operator(source, machine)
-        terminal, moments, field = mapped_state(point, operands)
-        solved_flux = (
-            exterior
-            + _image(operator, moments)
-            + field * uniform_radial_field_jet(jnp.asarray(coordinates))[:, 0]
-        )
+        terminal = mapped(point * scale, *operands)
+        solved_flux = exterior + _image(operator, point * scale)
         return {
             "coordinates": np.asarray(machine.node).tolist(),
             "wall": np.asarray(machine.wall_node).tolist(),
@@ -1074,13 +1051,6 @@ def run(args):
         return
 
     point = reference / scale
-    if args.vertical_pin:
-        point = jnp.concatenate((point.reshape(-1), jnp.zeros((1,), point.dtype)))
-        result["vertical_pin"] = {
-            "target_height": float(pin_target),
-            "field_scale_tesla": float(field_scale),
-            "row_scale_metre": pitch,
-        }
     if args.continue_from:
         prior = json.loads(args.continue_from.read_text())
         point = jnp.asarray(prior["terminal_state"]["moments"]) / scale
@@ -1098,11 +1068,9 @@ def run(args):
         if row["residual"] <= 1e-12 or not row["accepted"]:
             break
     result["converged"] = history[-1]["residual"] <= 1e-12
-    terminal, moments, field = mapped_state(point, operands)
     result["terminal_state"] = {
-        "moments": np.asarray(moments).tolist(),
-        "roots": np.asarray(terminal.roots).tolist(),
-        "radial_field_tesla": float(field),
+        "moments": np.asarray(point * scale).tolist(),
+        "roots": np.asarray(mapped(point * scale, *operands).roots).tolist(),
     }
     result["panel"] = terminal_panel(
         point, history[-1]["residual"], result["converged"]
@@ -1124,7 +1092,6 @@ def main():
     parser.add_argument("--merit", choices=("sup", "two"), default="sup")
     parser.add_argument("--taylor", action="store_true")
     parser.add_argument("--diagnose-step", action="store_true")
-    parser.add_argument("--vertical-pin", action="store_true")
     parser.add_argument("--exact-roots", action="store_true")
     parser.add_argument("--omit-saddle-derivative", action="store_true")
     parser.add_argument("--inspect-support", action="store_true")

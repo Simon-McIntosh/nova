@@ -1,0 +1,87 @@
+<article class="r-fragment" data-node="topology-read-test-walls">
+  <h2 id="topology-read-test-walls-heading">Classify the red topology read tests by cause</h2>
+
+  <p id="topology-read-test-walls-measure"><strong>Measure.</strong> Sixteen node ids of
+  <code>tests/equilibrium/test_topology_read.py</code> × three revisions = 48 runs, one
+  fresh process each, per-test timeout disabled, on one allocation with nothing else in
+  it (job 1290186, <code>--partition=sirius</code>, 12 CPUs, 96&nbsp;GB, four hours).
+  Revisions: base <code>6cce876e3</code>, contour-tree-mesh merge
+  <code>5d40e0155</code>, main <code>32cb743e97</code>. The per-test timeout is disabled, so a
+  timeout is always the shortfall measured against a bound (<code>pyproject.toml</code>
+  <code>timeout = 300</code>), never an accident of the harness.</p>
+  <p id="topology-read-test-walls-count">Of the 48 runs, 30 pass, 9 are setup errors and 9
+  fail. The 9 failures are 3 GPU-gated ids × 3 revisions. The 9 setup errors are 3 ids × 3
+  revisions, all from one module-scoped fixture bound.</p>
+
+  <h2 id="topology-read-test-walls-causes">The three causes</h2>
+  <p id="topology-read-test-walls-device"><strong>Device gate.</strong>
+  <code>test_kernel_compile_growth[132|300|550]</code> asserts
+  <code>jax.default_backend() == "gpu"</code> inside its own measurement child, so on a
+  CPU partition the child exits 1 before compiling anything and the test fails on
+  <code>assert code == 0, f"kernel compile {arm} refused: {log}"</code> in 10.6–19&nbsp;s,
+  identically at all three revisions. On the H200 (job 1290213) the same three ids
+  xfail green at 706–726&nbsp;s, which is the declared
+  <code>KernelCompileBarrier</code> outcome — the read's cold compile exceeds its own
+  60&nbsp;s / 50&nbsp;MB qualification clause. The test is red on the CPU lane by
+  construction, not by regression.</p>
+
+  <p id="topology-read-test-walls-barrier"><strong>Shared compile barrier.</strong> The
+  seven ids drawing <code>kernel_compile_budget</code> — <code>test_biot_moment_point_derivatives</code>,
+  <code>test_kernel_backed_carrier_read</code> (4 parameterisations) and
+  <code>test_null_position_implicit_tangent</code> (2) — all carry
+  <code>@kernel_compile_expected_failure</code>, a strict xfail that admits only
+  <code>KernelCompileBarrier</code>. That fixture compiles the 132-cell Biot harmonic
+  kernel in a child under <code>process.wait(timeout=600)</code>, and the child does not
+  finish inside it at any revision: the evidence log reaches
+  <code>KERNEL_COMPILE_INPUT_READY</code> and then stops. Where the fixture's own
+  terminate produces <code>EXIT=-15</code>, the declared barrier is raised and the test
+  xfails green (measured at <code>5d40e0155</code>). Where the child is killed outright
+  (<code>EXIT=-9</code>) the fixture raises <code>RuntimeError: kernel prerequisite exited
+  -9</code>, which the strict xfail does not admit, so the id goes red.</p>
+
+  <p id="topology-read-test-walls-bound"><strong>Bound below the read's cost.</strong>
+  Against the configured 300&nbsp;s bound, <code>test_topology_class_and_membership[diverted]</code>
+  (359/386/371&nbsp;s) and <code>test_saddle_support_order[diverted]</code>
+  (419/383/385&nbsp;s) exceed the bound at all three revisions. These are also the two ids
+  the base revision already recorded as failing, so no merge introduced them.</p>
+
+  <h2 id="topology-read-test-walls-nonreproducing">What does not reproduce</h2>
+  <p id="topology-read-test-walls-headtimeouts">The three additional head failures in the
+  brief — <code>test_closed_form_resolution_probe[diverted]</code>,
+  <code>test_topology_class_and_membership[limited]</code> and
+  <code>test_saddle_support_order[limited]</code> — pass at every revision once the bound
+  is lifted, at 153–156&nbsp;s, 126–130&nbsp;s and 128–132&nbsp;s. The gate that recorded
+  them (<code>contour-mesh-capacity/verify-gate.log</code>, 2026-10-19T13:57Z) ran them
+  from the login node, <code>cwd=/home/ITER/mcintos/Code/nova</code>, serially, with
+  pytest-timeout active, and all three died at exactly
+  <code>Failed: Timeout (&gt;300.0s)</code>. The same work on a compute node takes a
+  little over 40% of the bound, so the difference is the lane, not the code.</p>
+
+  <p id="topology-read-test-walls-tangent"><strong>The root tangent changed nothing.</strong>
+  The <code>nova/equilibrium/fixed_points.py</code> root tangent (merge
+  <code>100bc5828</code>) lies between the two later revisions measured here and is an
+  ancestor of main, so its content is exercised by the main arm. No id changes verdict
+  across <code>5d40e0155</code> → main except the biot id's setup error form (declared
+  barrier vs SIGKILL), which is set by the host killing the compile, not by the read.
+  Every wall that moves between the two revisions moves in both directions across
+  similar ids and within the same-revision spread — 126→130, 386→371, 128→132, 383→385,
+  213→286, 623→617 — so no wall is attributable to the tangent.</p>
+
+  <h2 id="topology-read-test-walls-next">Next actions</h2>
+  <p id="topology-read-test-walls-next-device"><strong>GPU-gated ids.</strong> Give the
+  child's backend check a skip path, so a CPU lane reports the id as skipped rather than
+  refused, and run the qualification itself on the H200 where its xfail is meaningful.
+  Owner file: <code>tests/equilibrium/test_topology_read.py</code>.</p>
+  <p id="topology-read-test-walls-next-barrier"><strong>Fixture ids.</strong> The read's
+  cold 132-cell compile is the shared cost, and 600&nbsp;s is below it on this hardware.
+  Raise the fixture's bound to at least 900&nbsp;s to match the sibling
+  <code>test_kernel_compile_growth</code> safety stop, and have the fixture admit a
+  signal kill as well as its own terminate, so an out-of-memory death reports the barrier
+  it actually is. Owner file: <code>tests/equilibrium/test_topology_read.py</code>.</p>
+  <p id="topology-read-test-walls-next-bound"><strong>Bound-exceeding ids.</strong> Set the
+  <code>[diverted]</code> bound from the measurement: worst observed 419&nbsp;s, so
+  700&nbsp;s carries a 1.7× margin and a bound that an out-of-band run will not trip.
+  Owner file: <code>tests/equilibrium/test_topology_read.py</code>. The three
+  head-only timeouts need no test change: the gate that sees them should run on a compute
+  partition.</p>
+</article>

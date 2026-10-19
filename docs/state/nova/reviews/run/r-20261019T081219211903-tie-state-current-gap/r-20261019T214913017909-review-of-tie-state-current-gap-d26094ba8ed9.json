@@ -1,0 +1,38 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-19T22:06:17.588Z",
+  "dispatched_at": "2026-10-19T21:49:49Z",
+  "findings": [
+    {
+      "file": "docs/figures/converged-forward-solve/tie-state-current-gap/render_tie_pair.py",
+      "line": 106,
+      "severity": "follow-on",
+      "text": "The null_handles docstring carries changelog prose: it states what the legend once did wrong ('the legend here once showed the axis hollow and used its own cross glyph, so it contradicted the marks it was naming', lines 105-107) where the repository rule requires a comment to state the mechanism rather than the bug that motivated it. The commit body at d26094ba8 already owns that history. Rewrite to the mechanism - a hand-built handle reproduces the glyph by hand and can drift, whereas capturing the artist the painter created makes the legend's glyph, fill and size the objects the panel was drawn with - which is the reason the function is shaped this way. Low severity; the code is correct and no reader is misled."
+    },
+    {
+      "file": "tests/equilibrium/test_topology_read.py",
+      "line": 2721,
+      "severity": "follow-on",
+      "text": "The derivation above TIE_BOOKED_CURRENT_REL states the bound is 'the larger gap plus that measured grid noise' (line 2720): the larger measured gap 1.59% plus the measured grid noise 0.118% is 1.71%, but the constant landed is 0.02. The 0.29 points above the derived sum are a margin the comment does not state, while the node brief asked for the tightened bound to carry 'a stated margin for its measured noise'. State the margin (or set the constant to 0.0171 with the noise floor asserted) so the comment and the value reconcile. Follow-on only - the bound is conservative and honest, so the check still refuses to admit the gap."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to explain the booked-versus-integrated current gap at the 282-cell tie pair and tighten the assertion to the agreement achieved; the reviewed delta (8014300de..d26094ba8) is a repair round that redraws the tie-pair legend from the artists nova.media.poloidal.draw_nulls creates and deletes a superseded derivation comment, so it serves the goal's figure clause and the integrity of the bound rather than the measurement itself.\nVERDICT done_when: the source done_when's three clauses are met by earlier commits in the run (docs/research/tie-state-current-gap.html:41 records 1.59%/1.32% against a 0.118% quadrature floor; tests/equilibrium/test_topology_read.py:2819 asserts booked against the independent _dense_cut_current quadrature at rel=TIE_BOOKED_CURRENT_REL; the panel shows the wall and both null sets); the gained commits assert the figure half by regenerating docs/figures/converged-forward-solve/tie-state-current-gap/tie-pair-current-gap.svg and shipping render_tie_pair.py with a guard that refuses a tree whose read returns no booked current.\nVERDICT write_paths: read the five declared paths in the reviewed manifest.md and the goal; every path in the diff 8014300de..d26094ba8 lies inside them, and nothing outside them is touched.\nVERDICT manifest: read; it records status complete, the two suite arms as exit_status 137 with completed false (both killed at item 42), fig_render.log / fig_glyphs.log / fig_glyphs_guard.log / negative_control.log, and negative_control_log at the run directory.\nVERDICT diff: read commit by commit against base 8014300de; two commits on the same branch touch exactly five files (+73/-115) - the test comment deletion (b32e0c014), the null_handles legend repair, the panel guard, two caption rewrites and the regenerated SVG (d26094ba8) - and each lies inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: docs/figures/converged-forward-solve/tie-state-current-gap/render_tie_pair.py:170 draws the panel through poloidal_axes/draw_wall/draw_nulls and the repaired legend at line 193 takes those artists, so the goal's panel clause is served, but the gained commits change no measurement and no assertion.\nSCORE evidence: 15\nJUSTIFICATION evidence: fig_glyphs.log ends EXIT=0 and fig_glyphs_guard.log ends EXIT=1 with the SystemExit message, and the committed SVG shares the panel glyph ids (#m4626a79e73 axis, #mb33ac70019 x-point, #mecfae224ab other) with the panel groups, so the figure claim is verified rather than asserted; the run's suite arms remain completed false at item 42.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the diff 8014300de..d26094ba8 (tests/equilibrium/test_topology_read.py, both docs/*.html, render_tie_pair.py, tie-pair-current-gap.svg) is one of the four declared write paths in brief.txt:12, and the change carries nothing the goal does not imply.\nSCORE durability: 10\nJUSTIFICATION durability: no test imports render_tie_pair.py or the SVG, so a reintroduced hand-built legend handle would redden nothing; only the generator's own guard has a recorded negative control (fig_glyphs_guard.log, EXIT=1) and the suite arms were killed before their summary lines.\nSCORE fit: 18\nJUSTIFICATION fit: render_tie_pair.py:101 null_handles takes each handle from the artist draw_nulls creates (nova/media/poloidal.py:609 for the axis, :646 for the x-point, :678 for other nulls), so the legend now matches the module's vocabulary, and the captions in docs/research/tie-state-current-gap.html:44 and docs/evidence/fragments/converged-forward-solve/tie-state-current-gap.html:9 are corrected to 'solid triangle'.\nSCORE reuse: 19\nJUSTIFICATION reuse: null_handles extends the owner nova/media/poloidal.py:540 draw_nulls rather than re-implementing it, and a capability search of nova/media for an existing legend-handle helper found none (no legend construction outside traces.py docstrings), so the addition has no owner to fork.\nFINDING docs/figures/converged-forward-solve/tie-state-current-gap/render_tie_pair.py:106 follow-on: the null_handles docstring states what the legend once did wrong rather than the mechanism, which the repository rule places in the commit body, not the source.\nFINDING tests/equilibrium/test_topology_read.py:2721 follow-on: the comment derives the bound as 1.59%+0.118%=1.71% but the constant is 0.02, leaving a 0.29-point margin unstated where the brief asked for a stated margin.\n",
+  "review_run_id": "r-20261019T214913017909-review-of-tie-state-current-gap-d26094ba8ed9",
+  "reviewed_base_sha": "8014300dec1838dbdc6c1039022c936708c301f7",
+  "reviewed_head_sha": "d26094ba8ed92c03586448538ea3bda8d2331870",
+  "reviewed_run_id": "r-20261019T081219211903-tie-state-current-gap",
+  "scores": {
+    "durability": 10,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T22:07:10.637583+00:00",
+  "total": 97
+}

@@ -10,7 +10,7 @@
 <meta name="plan-summary" content="One limited and one diverted certified analytic carrier written as version-2 boundary trace records and re-read through the codec and nova's own topology read; a negated flux grid is refused on the declared COCOS-17 polarity.">
 <meta name="plan-evidence-for" content="converged-forward-solve">
 <meta name="plan-verifies" content="converged-forward-solve">
-<meta name="plan-commits" content="ea26beeeb,fb8e8773b,c1e87c413,37d5b1a91,4ffbc6adf,7408fb784">
+<meta name="plan-commits" content="ea26beeeb,fb8e8773b,c1e87c413,37d5b1a91,4ffbc6adf,7408fb784,055d84935,0d4fe1cb5,2b7f3d417,f299f89cc">
 <meta name="plan-recorded-at" content="2026-10-19">
 <meta name="plan-verdict" content="pass">
 <title>Certified carriers exported into the boundary trace format | nova</title>
@@ -45,7 +45,10 @@ saddle 1.4&times;10<sup>&minus;9</sup> Wb inside it; the read axis reproduces th
 analytic axis to 1.6&times;10<sup>&minus;7</sup> m and
 1.1&times;10<sup>&minus;7</sup> m respectively. The analytic X-point is
 (1.50253, &minus;1.01728) m, so the read saddle agrees with the certificate to
-4.4&times;10<sup>&minus;4</sup> m.</p>
+4.4&times;10<sup>&minus;4</sup> m. The committed round-trip test checks the
+independent analytic axes, the certificate's declared zero-flux boundary, and
+the diverted X-point within 1&times;10<sup>&minus;5</sup> m,
+1&times;10<sup>&minus;7</sup> Wb, and 1&times;10<sup>&minus;3</sup> m respectively.</p>
 
 <h2 id="certified-carrier-export-gate">Gate and delta against the base</h2>
 <p>Fresh processes against base revision <code>34d4c304b</code>, each arm
@@ -62,6 +65,9 @@ with an <code>EXIT</code> line.</p>
 </tbody>
 </table>
 <p>Delta: four tests added, all passing; zero failures added.</p>
+<p>The two rendered panels show the analytic axis and X-point as hollow grey
+markers beside nova's filled read markers. Their legends, wall and boundary
+contours were inspected at 1400 pixels; neither panel clips its labels.</p>
 
 <h2 id="certified-carrier-export-negative-control">Negative control</h2>
 <p>A record whose flux sign disagrees with the polarity it declares is refused

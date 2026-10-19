@@ -136,16 +136,19 @@
       <h2 id="panels">The exported states as poloidal contour panels</h2>
       <p>
         Each panel draws the record's own flux on stated levels, the per-loop
-        wall, both null sets (the read axis as a solid triangle, every admitted
-        saddle as a filled cross) and the boundary level as its own contour.
+        wall, the analytic certificate nulls beside nova's read nulls, and the
+        boundary level as its own contour. Hollow grey circles and diamonds
+        mark the analytic axis and X-point; nova's read axis is a filled
+        triangle and its admitted saddle a filled cross.
       </p>
       <figure>
         <img src="/nova/figures/converged-forward-solve/certified-carrier-export/nova-certified-limited.svg"
              alt="Limited carrier: analytic flux contours with the axis, the wall and the boundary level">
         <figcaption>
           <strong>Limited record.</strong> The static reactor carrier's
-          analytic flux as unfilled line contours, with the read axis at
-          (6.200, 0.000) m (solid triangle) and the boundary level
+          analytic flux as unfilled line contours, with the analytic axis
+          (hollow circle) and read axis (solid triangle) co-located at
+          (6.200, 0.000) m and the boundary level
           (2.23&times;10<sup>&minus;14</sup> Wb) drawn in its own style. The
           boundary is the outboard wall contact and runs along the wall there,
           so the contact point (7.8014, 0.0000) m is marked separately as a
@@ -158,9 +161,10 @@
              alt="Diverted carrier: analytic flux contours with the axis, the admitted saddle, the wall and the boundary level">
         <figcaption>
           <strong>Diverted record.</strong> The single-null carrier's analytic
-          flux as unfilled line contours, with the read axis at
-          (1.7871, 0.0468) m (solid triangle) and the lower saddle at
-          (1.5025, &minus;1.0173) m (filled cross) — the read admits one saddle.
+          flux as unfilled line contours, with the analytic axis (hollow
+          circle) and read axis (solid triangle) at (1.7871, 0.0468) m. The
+          analytic X-point (hollow diamond) and read saddle (filled cross) sit
+          at (1.5025, &minus;1.0173) m — the read admits one saddle.
           Its boundary level (&minus;1.39&times;10<sup>&minus;9</sup> Wb) is
           drawn in its own style and passes through that saddle, and no contact
           marker is drawn because a diverted boundary is a saddle rather than a
@@ -175,22 +179,29 @@
         Each record is re-read through <code>trace_record.read_trace_record</code>
         and then re-read by nova's own <code>nova.equilibrium.topology.read</code>
         on a square lattice built from the record's own wall. The re-read
+        uses the field-swap adapter's <code>wall_units</code> and
+        <code>read_convention</code> helpers for wall loops and COCOS-17 polarity. It
         reproduces the axis, the polarity and nova's boundary level within the
-        stated tolerances, under a committed test
+        stated tolerances against the independent analytic certificate, under
+        a committed test
         (<code>scripts/prototypes/certified_carrier_export/test_export_records.py</code>):
       </p>
       <ul>
         <li>polarity is the declared <code>+1</code>; the grid is 65&times;65; one
           wall ring survives the codec;</li>
-        <li>the axis matches the axis stored in the record to 1&times;10<sup>&minus;12</sup> m
-          and the analytic certificate axis to 1&times;10<sup>&minus;5</sup> m,
+        <li>the re-read axis matches the analytic certificate axis to
+          1&times;10<sup>&minus;5</sup> m,
           a stated ~60&times; margin over the measured 1.6&times;10<sup>&minus;7</sup> m
           (limited) and 1.1&times;10<sup>&minus;7</sup> m (diverted) agreement;</li>
-        <li>the boundary level matches the record's own fed-back level to
-          1&times;10<sup>&minus;12</sup> Wb and sits within
-          1&times;10<sup>&minus;7</sup> Wb of the certificate bound, a stated
+        <li>the re-read boundary level sits within
+          1&times;10<sup>&minus;7</sup> Wb of the certificate's declared zero-flux
+          bound, a stated
           ~70&times; margin over the measured 2.2&times;10<sup>&minus;14</sup> Wb
           (limited) and 1.4&times;10<sup>&minus;9</sup> Wb (diverted) agreement;</li>
+        <li>the diverted read boundary and its sole admitted saddle match the
+          analytic X-point within 1&times;10<sup>&minus;3</sup> m, a ~2.3&times;
+          margin over the measured 4.4&times;10<sup>&minus;4</sup> m agreement;
+          the limited read admits no saddle;</li>
         <li>the re-read class equals the class the export declared.</li>
       </ul>
       <p>

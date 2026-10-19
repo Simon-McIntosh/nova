@@ -72,10 +72,26 @@ imported by this test's route.</p>
 
 <p id="vertical-pin-free-height-negative-note">The declared mutation — "revert the fix" —
 has no fix to revert, because the free-request height assertion already passes unchanged at
-both revisions. The closest applicable mutation is applied instead and logged: making the
-inactive centroid row use the active (held) branch. The free request then moves the booked
-height from <code>0.6</code> to <code>0.7</code> (offset <code>0.1</code>) and the assertion
-fails, demonstrating that the assertion is sensitive to the held row and is not vacuous.</p>
+both revisions. The closest applicable mutation is applied instead, at runtime from a pytest
+plugin, so no repository file is written and none needs restoring: the inactive centroid row
+is made to take the held branch.
+
+<p id="vertical-pin-free-height-negative-observed">Under that mutation the free request no
+longer stalls — it <em>converges</em> (residual <code>1.887e-15</code>, terminal flux
+<code>[1.0, 0.8, -0.36, 1.0, 1.2, 0.36]</code>) — so the mutation is caught one assertion
+earlier, at line 357's stall floor (<code>assert not bool(converged)</code>), before the
+height assertion is reached. The booked height under the same mutation, read directly from
+the diagnostic probe, moves from <code>0.6</code> to <code>0.7</code> (offset
+<code>0.1</code>). The mutation therefore fails three of the file's six tests, and
+<code>test_one_augmented_newton_program_serves_free_and_pinned_requests</code> is one of
+them — an id the passing head arm does not fail — so the free-layout assertions are
+sensitive to the held row and are not vacuous.</p>
+
+<p id="vertical-pin-free-height-negative-caveat">The offset under the applied mutation
+(<code>0.1</code>) is not the recorded <code>3.86e-3</code>, and that mismatch is itself the
+finding: the mutation the brief declared describes a defect that is not present at HEAD.
+The recorded <code>3.86e-3</code> would require the held unknown to settle at
+<code>-0.25 · row₆</code> while still stalling, and no revision reachable here does that.</p>
 
 <p id="vertical-pin-free-height-commands">Commands run (login/fleet allocation, shared
 environment, never <code>uv</code>):

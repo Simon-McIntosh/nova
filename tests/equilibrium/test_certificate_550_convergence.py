@@ -29,9 +29,7 @@ def test_stationary_root_tangent_at_exact_seed() -> None:
     cache = replace(cache, rows=rows)
     initial = jnp.asarray(((0.13, -0.21),))
     zero = jnp.zeros((1, 3))
-    seed = fixed_points.solve(
-        cache, zero, initial, initial, jnp.asarray(1.0)
-    ).position
+    seed = fixed_points.solve(cache, zero, initial, initial, jnp.asarray(1.0)).position
     at_seed = fixed_points.solve(cache, zero, seed, seed, jnp.asarray(1.0))
     assert int(at_seed.iterations[0]) == 0
 

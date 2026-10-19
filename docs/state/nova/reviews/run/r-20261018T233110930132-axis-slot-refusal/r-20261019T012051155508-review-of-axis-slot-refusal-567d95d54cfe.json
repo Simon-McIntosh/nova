@@ -1,0 +1,82 @@
+{
+  "added_failure_count": 0,
+  "added_failure_derivation": "Derived from the reviewed run's own required suite arms recorded in its manifest: baseline_suite (revision dec3cc6a6 base crosscheck source with head test files) exit_status 1, failure_count 1, failure_ids [scripts/prototypes/efit_field_swap/test_crosscheck.py::test_invalid_axis_read_publishes_no_label]; after_suite (revision ddf0a3581) exit_status 0, failure_count 0, failure_ids []. The gained commits add no suite-arm failure the baseline arm did not carry, so added_failure_count is 0 and added_failure_ids is empty. Both arms are readable (completed true, summary line present in exports/baseline_suite.log and exports/after_suite.log). The gained test file ran separately and green (exports/census_axes.log, 2 passed), so it adds no failure either.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "scripts/prototypes/read_robustness/test_census_axes.py:92 test_census_retains_every_axis_not_only_the_seeded_one asserts both polarity axes are retained when the prior root is seeded on the shallower well",
+    "scripts/prototypes/read_robustness/test_census_axes.py:105 retention assertion is mutation-verified red by exports/negctl_census.log (1 failed, 1 passed, EXIT=1)",
+    "docs/research/axis-slot-refusal.html:32 TCV before/after table: 2 of 7 previously-labelled rows measured as refusals, 5 labelled not measured",
+    "docs/research/axis-slot-refusal.html:44 carrier table: 550-cell (607 cells) and 2000-cell (2097 cells) both valid=false; 5000-cell unread"
+  ],
+  "call_sites": "none",
+  "commits_read": [
+    "5d02ae62a6144290064bb845d47752fff8f30491",
+    "544899f36475f6a4e581b5266215dc5b7f3ac0d3",
+    "567d95d54cfe7ed0cf2e1d20d471556bb8ebb500"
+  ],
+  "completed_at": "2026-10-19T01:32:14.659Z",
+  "dispatched_at": "2026-10-19T01:21:27Z",
+  "evidence_inputs": [
+    "Reviewed diff base 5d02ae62a6144290064bb845d47752fff8f30491, head 567d95d54cfe7ed0cf2e1d20d471556bb8ebb500; gained commits 544899f36 and 567d95d54.",
+    "Gate log exports/census_axes.log (2 passed, EXIT=0) and negative control exports/negctl_census.log (1 failed, EXIT=1).",
+    "TCV arms exports/tcv_ab.log with exports/tcv-base.jsonl and exports/tcv-head.jsonl; carrier probe exports/carrier_cells.log.",
+    "The seven rows labelled from a NaN axis (0, 14, 34, 46, 118, 206, 248) were re-derived independently from exports/tcv-base.jsonl (nova_axis [NaN, NaN] with nova_label a limited/diverted label)."
+  ],
+  "findings": [
+    {
+      "file": "scripts/prototypes/read_robustness/test_census_axes.py",
+      "line": "57",
+      "severity": "follow-on",
+      "text": "The module-scope geometry fixture duplicates the identical 4x4 lattice fixture at scripts/prototypes/fast_map_production/test_axis_ranking.py:41, and _unequal_wells at line 32 reproduces that file's DoubleWell potential (line 24) with only the tilt changed, so two prototype test files carry the same field setup independently and a later change to the lattice or well would have to be made in both."
+    },
+    {
+      "file": "docs/research/axis-slot-refusal.html",
+      "line": "10",
+      "severity": "follow-on",
+      "text": "The plan-summary meta reads 'the carriage comparison at 550 and 2000 cells' where 'carrier' is meant, and that summary is rendered in every plan listing, so the typo is visible wherever the record is indexed."
+    }
+  ],
+  "gate_arms_note": "Reviewed run's arms: exports/baseline_suite.log (JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q scripts/prototypes/efit_field_swap/test_crosscheck.py scripts/prototypes/fast_map_production/test_axis_ranking.py; 1 failed, 12 passed) and exports/after_suite.log (same command; 13 passed, EXIT=0). The gained commit's own guard ran as exports/census_axes.log (same interpreter, -q scripts/prototypes/read_robustness/test_census_axes.py; 2 passed in 41.16s, EXIT=0) with its mutation recorded in exports/negctl_census.log (1 failed, 1 passed, EXIT=1). Independent review read the diff and the gate logs; it did not re-run the suite.",
+  "item_verdicts": {
+    "diff": "Read commit by commit against base 5d02ae62a: 544899f36 adds scripts/prototypes/read_robustness/test_census_axes.py and 567d95d54 rewrites docs/research/axis-slot-refusal.html and the landing fragment; three files, all inside the declared scope.",
+    "done_when": "Partially met: clause (2)'s multi-axis retention is fully measured (green run plus recorded red mutation), but clause (1) is measured on only 2 of the 7 TCV rows (slices 0 and 14; exports/tcv_ab.log) and clause (3)'s 5000-cell carrier was not read (exports/carrier_cells.log), the remaining rows being labelled 'not measured' in docs/research/axis-slot-refusal.html:52.",
+    "goal": "Met by the gained commits: the goal's remaining clause - a suite test guarding the multi-axis branch - is landed at scripts/prototypes/read_robustness/test_census_axes.py:92, which asserts both wells are retained when the prior root is seeded on the shallower one.",
+    "manifest": "Read; it states status complete with target_met false, records the census guard run and its mutation log, the two suite arms (baseline 1 failed/12 passed, after 13 passed), and the three unmeasured items under follow_ons, matching the artefacts on disk.",
+    "write_paths": "Read the source node's granted paths (scripts/prototypes/efit_field_swap/crosscheck.py, test_crosscheck.py, scripts/prototypes/fast_map_production/test_axis_ranking.py, scripts/prototypes/read_robustness/test_census_axes.py, docs/research/axis-slot-refusal.html, docs/evidence/fragments/converged-forward-solve/axis-slot-refusal.html, docs/figures/converged-forward-solve/axis-slot-refusal); every changed path in the diff is inside them."
+  },
+  "justifications": {
+    "durability": "The added retention assertion at scripts/prototypes/read_robustness/test_census_axes.py:105 compares retained positions against the test constant DEEP, independent of the value under test, and the reviewed run's own mutation (axis_index in place of axis_slots[...]) reddens it (exports/negctl_census.log EXIT=1); the sibling test at line 111 is not sensitive to that mutation but is not relied on for the guard.",
+    "evidence": "The census guard's removal is recorded red (exports/negctl_census.log EXIT=1, test_census_axes.py:106 failing) with its green run (exports/census_axes.log 2 passed), but the done_when's TCV table is measured on 2 of 7 rows (exports/tcv_ab.log) and the 5000-cell carrier is unread (exports/carrier_cells.log), so two of three measured clauses are partial and are labelled 'not measured' in docs/research/axis-slot-refusal.html.",
+    "fit": "The added module follows the surrounding prototype-test idiom - '# ruff: noqa: E402' with configure_dtypes() before any array and 'assert jax.config.jax_enable_x64 is True' (test_census_axes.py:10-25) - and carries no plan, sprint or version identifier in its names or comments.",
+    "goal_fidelity": "The goal's closing clause - guard the multi-axis branch with a suite test - is landed by 544899f36, which adds scripts/prototypes/read_robustness/test_census_axes.py:92 exercising the gather at scripts/prototypes/read_robustness/census.py:167; the adapter-refusal and near-fold clauses were landed and reviewed earlier.",
+    "reuse": "The added test reuses the owners of every capability it needs - nova.equilibrium.topology, nova.linalg.tensor_spline.fit_tensor_spline, scripts/prototypes/efit_field_swap/spline_field.py:TraceSplineField and scripts/prototypes/read_robustness/census.py:census - and a search of scripts/prototypes/support and the sibling test files found no module-level owner of a shared two-well test field for it to fork.",
+    "scope_discipline": "Every path in the diff 5d02ae62a..567d95d54 (scripts/prototypes/read_robustness/test_census_axes.py, docs/research/axis-slot-refusal.html, docs/evidence/fragments/converged-forward-solve/axis-slot-refusal.html) lies inside the source node's declared write_paths; no path outside the fence is modified."
+  },
+  "plan": "nova:converged-forward-solve",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to make the comparison adapter refuse invalid-axis reads and guard the near-fold and multi-axis branches with suite tests; the gained commit 544899f36 adds scripts/prototypes/read_robustness/test_census_axes.py, the multi-axis guard the goal names, so the gained commits complete it.\nVERDICT done_when: clause (2)'s multi-axis retention is met and recorded (exports/census_axes.log 2 passed; exports/negctl_census.log 1 failed under the gather mutation), but clause (1) is measured on only 2 of the seven TCV rows (exports/tcv_ab.log) and clause (3)'s 5000-cell carrier is unread (exports/carrier_cells.log), both labelled 'not measured' in docs/research/axis-slot-refusal.html.\nVERDICT write_paths: read the source node's granted paths (seven files under scripts/prototypes and docs); every path in the diff 5d02ae62a..567d95d54 is inside them.\nVERDICT manifest: read; it states status complete with target_met false and records the census guard run, the three negative-control logs and the three unmeasured items under follow_ons, matching the artefacts on disk.\nVERDICT diff: read commit by commit against base 5d02ae62a: 544899f36 adds scripts/prototypes/read_robustness/test_census_axes.py and 567d95d54 rewrites the two records; three files, all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: 544899f36 adds scripts/prototypes/read_robustness/test_census_axes.py:92, the multi-axis suite test the goal's second clause names, completing it.\nSCORE evidence: 13\nJUSTIFICATION evidence: the census mutation is recorded red (exports/negctl_census.log EXIT=1) but the TCV table is measured on 2 of 7 rows and the 5000-cell carrier is unread (exports/carrier_cells.log).\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff 5d02ae62a..567d95d54 is inside the source node's declared write_paths and nothing outside the fence changed.\nSCORE durability: 18\nJUSTIFICATION durability: the assertion at scripts/prototypes/read_robustness/test_census_axes.py:105 compares retained positions against the test constant DEEP and reddens under the reviewed run's own gather mutation (exports/negctl_census.log EXIT=1).\nSCORE fit: 18\nJUSTIFICATION fit: the module follows the surrounding idiom at scripts/prototypes/read_robustness/test_census_axes.py:10-25 (configure_dtypes before arrays, ruff E402 noqa) and carries no plan or version identifier.\nSCORE reuse: 20\nJUSTIFICATION reuse: the added test reuses scripts/prototypes/read_robustness/census.py:census, scripts/prototypes/efit_field_swap/spline_field.py:TraceSplineField and nova.linalg.tensor_spline.fit_tensor_spline, and no module-level owner of a shared two-well test field exists to fork.\nFINDING scripts/prototypes/read_robustness/test_census_axes.py:57 follow-on: the geometry fixture and _unequal_wells duplicate the identical lattice fixture and DoubleWell potential at scripts/prototypes/fast_map_production/test_axis_ranking.py:41 and :24.\nFINDING docs/research/axis-slot-refusal.html:10 follow-on: the plan-summary meta reads 'the carriage comparison' where 'carrier' is meant, a typo rendered in every plan listing.",
+  "review_kind": "independent review",
+  "review_run_id": "r-20261019T012051155508-review-of-axis-slot-refusal-567d95d54cfe",
+  "review_scope": "only the commits gained since the run was last reviewed (5d02ae62a..567d95d54)",
+  "reviewed_base_sha": "5d02ae62a6144290064bb845d47752fff8f30491",
+  "reviewed_head_sha": "567d95d54cfe7ed0cf2e1d20d471556bb8ebb500",
+  "reviewed_revision": "567d95d54cfe7ed0cf2e1d20d471556bb8ebb500",
+  "reviewed_run_id": "r-20261018T233110930132-axis-slot-refusal",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/axis-slot-refusal",
+  "reviewer_node": "review-of-axis-slot-refusal-567d95d54cfe",
+  "reviewer_run_id": "r-20261019T012051155508-review-of-axis-slot-refusal-567d95d54cfe",
+  "scores": {
+    "durability": 18,
+    "evidence": 13,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "section": "\u00a72",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T01:40:00Z",
+  "total": 107,
+  "verdict": "partial"
+}

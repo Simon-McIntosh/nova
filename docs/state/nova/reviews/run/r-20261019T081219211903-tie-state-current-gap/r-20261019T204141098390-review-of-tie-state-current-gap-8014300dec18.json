@@ -1,0 +1,32 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-19T20:56:31.121Z",
+  "dispatched_at": "2026-10-19T20:42:18Z",
+  "findings": [
+    {
+      "file": "docs/figures/converged-forward-solve/tie-state-current-gap/render_tie_pair.py",
+      "line": 158,
+      "severity": "follow-on",
+      "text": "The legend hand-builds handles that do not match what draw_nulls paints: the magnetic axis handle is drawn open (marker=\"^\", markerfacecolor=\"none\", lines 158-163) while nova/media/poloidal.py:606 plots the axis filled, and the admitted X-point handle uses marker \"P\" (line 168) where draw_nulls paints style.xpoint_marker = \"X\" (nova/media/ink.py:85). Both docs captions repeat the same wording ('magnetic axis open triangle, admitted X-point filled cross'), which contradicts nova/AGENTS.md's stated vocabulary ('solid triangle for the axis, filled cross for the admitted saddle, hollow markers for other qualified nulls'); a reader matching the legend to the plot sees the axis marked as hollow like the other qualified null when the drawn axis is solid. The data marks themselves are correct, so this does not hold the node."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to explain the booked-versus-integrated current gap at the 282-cell tie pair and tighten the assertion; the reviewed delta (11cdbca77..8014300de) is the repair round that repaints docs/figures/converged-forward-solve/tie-state-current-gap/tie-pair-current-gap.svg through nova.media with the axis off and ships its generator, which the commit body at 8014300de states and the diff confirms.\nVERDICT done_when: the source done_when's three clauses were carried by the earlier commits (docs/research/tie-state-current-gap.html:41 records 1.59%/1.32% against a 0.118% quadrature floor, tests/equilibrium/test_topology_read.py holds the rel=0.02 bound, and the panel shows wall and both null sets); the gained commit asserts the figure-conformance half by shipping render_tie_pair.py in the tree.\nVERDICT write_paths: read the four declared paths in the reviewed manifest.md and brief.txt; every path in the diff 11cdbca77..8014300de is inside them (docs/evidence/fragments/converged-forward-solve/tie-state-current-gap.html, docs/research/tie-state-current-gap.html, docs/figures/converged-forward-solve/tie-state-current-gap/render_tie_pair.py, docs/figures/converged-forward-solve/tie-state-current-gap/tie-pair-current-gap.svg).\nVERDICT manifest: read; it states status complete, records both suite arms as exit_status 137 with completed false, and names fig_render.log whose last line is EXIT=0 and which prints TIE_PAIR_FIGURE at the worktree path.\nVERDICT diff: read the single gained commit 8014300de against base 11cdbca77; four files changed (+1317/-772), the SVG is rewritten and the generator docs/figures/converged-forward-solve/tie-state-current-gap/render_tie_pair.py is added in-tree, and the two doc edits are two-line caption rewrites pointing at the new generator.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/figures/converged-forward-solve/tie-state-current-gap/render_tie_pair.py:96 calls poloidal_axes then draw_wall then draw_nulls, so the panel conforms to the goal's plotting constraint and the repaired figure is served.\nSCORE evidence: 15\nJUSTIFICATION evidence: the gained change is a figure and its generator, verified by rendering the committed SVG to PNG (I read 0 spine/tick/grid groups in the new SVG where the old carried 4 xtick groups) and by fig_render.log ending EXIT=0, but no test exercises the generator and the two suite arms remain killed at item 42 (completed false).\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the diff 11cdbca77..8014300de lies inside the four declared write paths, and the change carries nothing the figure-repair goal does not imply.\nSCORE durability: 8\nJUSTIFICATION durability: no test fails if the figure regresses - render_tie_pair.py is not imported by any test and the SVG carries no assertion, so a reintroduced spine or grid would redden nothing and only the manual render-and-look mandate at nova/AGENTS.md would catch it.\nSCORE fit: 13\nJUSTIFICATION fit: render_tie_pair.py:96-114 uses the shared painters (poloidal_axes, draw_wall, draw_nulls) and clean names, but its legend at render_tie_pair.py:158-163 shows the magnetic axis open where nova/media/poloidal.py:606 draws it filled.\nSCORE reuse: 18\nJUSTIFICATION reuse: the draw path extends the owners nova/media/ink.py:155 poloidal_axes, nova/media/poloidal.py:29 draw_wall and nova/media/poloidal.py:540 draw_nulls, and the added helpers wall_units/selected_rings/other_nulls reconstruct wall units from the labelled TopologyGeometry arrays (nova/equilibrium/topology.py:2395) for which no existing owner was found.\nFINDING docs/figures/converged-forward-solve/tie-state-current-gap/render_tie_pair.py:158 follow-on: the legend handles misidentify the drawn markers (axis shown open though draw_nulls paints it filled; admitted X-point shown as marker \"P\" though draw_nulls paints \"X\"), and both doc captions repeat 'magnetic axis open triangle', contradicting nova/AGENTS.md's 'solid triangle for the axis' vocabulary so the axis reads as hollow like the other qualified null.\n",
+  "review_run_id": "r-20261019T204141098390-review-of-tie-state-current-gap-8014300dec18",
+  "reviewed_base_sha": "11cdbca77eeec929c746920418ae183543039230",
+  "reviewed_head_sha": "8014300dec1838dbdc6c1039022c936708c301f7",
+  "reviewed_run_id": "r-20261019T081219211903-tie-state-current-gap",
+  "scores": {
+    "durability": 8,
+    "evidence": 15,
+    "fit": 13,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T20:58:12.208369+00:00",
+  "total": 91
+}

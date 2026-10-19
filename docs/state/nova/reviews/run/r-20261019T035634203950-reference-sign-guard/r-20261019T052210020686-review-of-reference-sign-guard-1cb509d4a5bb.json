@@ -1,0 +1,75 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "scripts/prototypes/tcv_liuqe_known_answer/reference_sign.py:85",
+    "scripts/prototypes/efit_field_swap/crosscheck.py:56",
+    "scripts/prototypes/efit_field_swap/probe_read.py:15"
+  ],
+  "completed_at": "2026-10-19T05:32:08.386Z",
+  "dispatched_at": "2026-10-19T05:23:18Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T035634203950-reference-sign-guard/after_suite.log",
+      "line": 1,
+      "severity": "blocking",
+      "text": "blocking: the after_suite arm is unreadable - the log shows 31 dots then EXIT=124 with no pytest summary line, and the manifest records completed=false, so done-when item 3 (both suite arms recorded) is not met and the added-failure delta is unmeasured; rerun the head arm under a longer bound or with the one slow real-store test excluded by an explicit -m selection."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T035634203950-reference-sign-guard/baseline_suite.log",
+      "line": 1,
+      "severity": "blocking",
+      "text": "blocking: the recorded baseline_suite log_path points at a file whose content is a later deselected rerun (31 passes, EXIT=0, no summary), which contradicts the baseline_suite JSON it is cited for (failure_count 1, test_coverage.py::test_limited_slice_is_read_only_when_coverage_is_certified); a reader opening the named log cannot corroborate the recorded numbers, so the baseline arm is not durably evidenced even though the manifest notes the overwrite."
+    },
+    {
+      "file": "scripts/prototypes/efit_field_swap/crosscheck.py",
+      "line": 56,
+      "severity": "follow-on",
+      "text": "follow-on: crosscheck.py reads trace records through read_convention but never calls check_trace_record, and probe_read.py:15 does the same, so the goal's 'rather than reading it' holds only at the guard API - the actual field-swap reader still reads a record whose grid contradicts its declared polarity; the goal text asks nova to catch the contradiction on the read path."
+    },
+    {
+      "file": "scripts/prototypes/tcv_liuqe_known_answer/reference_sign.py",
+      "line": 85,
+      "severity": "follow-on",
+      "text": "follow-on: guard_slice passes boundary_points(view), which returns None when a slice carries neither x-points nor an outline, into check_axis_boundary_sign, whose _boundary_value at orientation.py:81 does np.asarray(None, float).reshape(-1, 2) and raises a bare ValueError, not ReferenceSignError; a slice with no boundary would crash the driver instead of being recorded with a reason."
+    },
+    {
+      "file": "scripts/prototypes/efit_field_swap/orientation.py",
+      "line": 53,
+      "severity": "follow-on",
+      "text": "follow-on: grid_value adds a 25-line bilinear sampler for a rectilinear psi grid, a capability the repository already owns in scripts/prototypes/efit_field_swap/spline_field.py:25 (TraceSplineField, the record's own spline) and nova/equilibrium/flux_surface_geometry.py:427 (RectBivariateSpline) and nova/imas/profiles.py:300; the guard could sample through an owner instead of forking the mechanism."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read commit by commit (0638b6189, 1cb509d4a) against a5ebd580f; five files, 649 insertions, all inside the declared scope.",
+    "done_when": "the done_when names (1) refusal by orientation.py, (2) every TCV slice refused with every field-swap row unchanged, (3) both suite arms recorded; items 1 and 2 are met and shown, item 3 is half met because after_suite never reached its summary.",
+    "goal": "the goal is to make nova refuse, not read, a reference whose stored flux sign contradicts its declared convention; orientation.py:133 implements the check and reference_sign.py:46 drives it over the TCV store.",
+    "manifest": "read; it states status complete, records the guard, the 12-of-12 and 0-of-28 refusals, the 9 passing unit tests and the red negative control, and itself flags the after_suite arm as incomplete.",
+    "write_paths": "the source node was fenced to orientation.py, test_orientation.py, scripts/prototypes/tcv_liuqe_known_answer, and the two doc fragments; every path in the diff is inside them."
+  },
+  "justifications": {
+    "durability": "test_orientation.py:88 test_negated_grid_against_its_scalars_is_refused asserts a ReferenceSignError on a negated field, which reddens when the guard is removed as the negative-control run at negative-control.log:1 shows (6 failed), so the assertion is independent of the value under test.",
+    "evidence": "the driver result LIUQE_ROWS 12 REFUSED 12 and FIELD_SWAP_ROWS 28 REFUSED 0 is recorded in reference-sign.log with the per-slice spans corroborated by reference-sign-slices.json, but the required after_suite arm at after_suite.log:1 is unreadable (EXIT=124, no summary), so done-when item 3's delta is unmeasured.",
+    "fit": "orientation.py:53 grid_value and the surrounding helpers follow the module's numpy/ValueError idiom and use capability-named symbols with no plan label.",
+    "goal_fidelity": "orientation.py:133 adds the declared-convention grid/scalar sign check the goal names, but no existing reader reaches it: crosscheck.py:56 and probe_read.py:15 read trace records through read_convention and never call check_trace_record.",
+    "reuse": "orientation.py:53 grid_value re-implements rectilinear psi interpolation already owned by scripts/prototypes/efit_field_swap/spline_field.py:25 and nova/equilibrium/flux_surface_geometry.py:427 without extending either owner.",
+    "scope_discipline": "git diff a5ebd580f..1cb509d4a touches exactly the five declared paths (orientation.py, test_orientation.py, reference_sign.py, and the two doc fragments) and nothing else; the manifest's restored out-of-scope ruff-format sweep left no residual change."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261019T052210020686-review-of-reference-sign-guard-1cb509d4a5bb",
+  "review_text": "VERDICT goal: the goal is to make nova refuse, not read, a reference whose stored flux sign contradicts its declared convention; orientation.py:133 implements the check and reference_sign.py:46 drives it over the TCV store.\nVERDICT done_when: the done_when names (1) refusal by orientation.py, (2) every TCV slice refused with every field-swap row unchanged, (3) both suite arms recorded; items 1 and 2 are met and shown, item 3 is half met because after_suite never reached its summary.\nVERDICT write_paths: the source node was fenced to orientation.py, test_orientation.py, scripts/prototypes/tcv_liuqe_known_answer, and the two doc fragments; every path in the diff is inside them.\nVERDICT manifest: read; it states status complete, records the guard, the 12-of-12 and 0-of-28 refusals, the 9 passing unit tests and the red negative control, and itself flags the after_suite arm as incomplete.\nVERDICT diff: read commit by commit (0638b6189, 1cb509d4a) against a5ebd580f; five files, 649 insertions, all inside the declared scope.\nCALL_SITES: scripts/prototypes/tcv_liuqe_known_answer/reference_sign.py:85, scripts/prototypes/efit_field_swap/crosscheck.py:56, scripts/prototypes/efit_field_swap/probe_read.py:15\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: orientation.py:133 adds the declared-convention grid/scalar sign check the goal names, but no existing reader reaches it: crosscheck.py:56 and probe_read.py:15 read trace records through read_convention and never call check_trace_record.\nSCORE evidence: 8\nJUSTIFICATION evidence: the driver result LIUQE_ROWS 12 REFUSED 12 and FIELD_SWAP_ROWS 28 REFUSED 0 is recorded in reference-sign.log with the per-slice spans corroborated by reference-sign-slices.json, but the required after_suite arm at after_suite.log:1 is unreadable (EXIT=124, no summary), so done-when item 3's delta is unmeasured.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff a5ebd580f..1cb509d4a touches exactly the five declared paths (orientation.py, test_orientation.py, reference_sign.py, and the two doc fragments) and nothing else; the manifest's restored out-of-scope ruff-format sweep left no residual change.\nSCORE durability: 18\nJUSTIFICATION durability: test_orientation.py:88 test_negated_grid_against_its_scalars_is_refused asserts a ReferenceSignError on a negated field, which reddens when the guard is removed as the negative-control run at negative-control.log:1 shows (6 failed), so the assertion is independent of the value under test.\nSCORE fit: 17\nJUSTIFICATION fit: orientation.py:53 grid_value and the surrounding helpers follow the module's numpy/ValueError idiom and use capability-named symbols with no plan label.\nSCORE reuse: 5\nJUSTIFICATION reuse: orientation.py:53 grid_value re-implements rectilinear psi interpolation already owned by scripts/prototypes/efit_field_swap/spline_field.py:25 and nova/equilibrium/flux_surface_geometry.py:427 without extending either owner.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T035634203950-reference-sign-guard/after_suite.log:1 blocking: the after_suite arm is unreadable - the log shows 31 dots then EXIT=124 with no pytest summary line, and the manifest records completed=false, so done-when item 3 (both suite arms recorded) is not met and the added-failure delta is unmeasured; rerun the head arm under a longer bound or with the one slow real-store test excluded by an explicit -m selection.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T035634203950-reference-sign-guard/baseline_suite.log:1 blocking: the recorded baseline_suite log_path points at a file whose content is a later deselected rerun (31 passes, EXIT=0, no summary), which contradicts the baseline_suite JSON it is cited for (failure_count 1, test_coverage.py::test_limited_slice_is_read_only_when_coverage_is_certified); a reader opening the named log cannot corroborate the recorded numbers.\nFINDING scripts/prototypes/efit_field_swap/crosscheck.py:56 follow-on: crosscheck.py reads trace records through read_convention but never calls check_trace_record, and probe_read.py:15 does the same, so the goal's 'rather than reading it' holds only at the guard API - the actual field-swap reader still reads a record whose grid contradicts its declared polarity.\nFINDING scripts/prototypes/tcv_liuqe_known_answer/reference_sign.py:85 follow-on: guard_slice passes boundary_points(view), which returns None when a slice carries neither x-points nor an outline, into check_axis_boundary_sign, whose _boundary_value at orientation.py:81 does np.asarray(None, float).reshape(-1, 2) and raises a bare ValueError, not ReferenceSignError; a slice with no boundary would crash the driver instead of being recorded with a reason.\nFINDING scripts/prototypes/efit_field_swap/orientation.py:53 follow-on: grid_value adds a bilinear sampler for a rectilinear psi grid, a capability the repository already owns in scripts/prototypes/efit_field_swap/spline_field.py:25 and nova/equilibrium/flux_surface_geometry.py:427 and nova/imas/profiles.py:300; the guard could sample through an owner instead of forking the mechanism.",
+  "reviewed_base_sha": "a5ebd580f15eced4872a3131f782347810f7e5e9",
+  "reviewed_head_sha": "1cb509d4a5bbcaf20b885afada4c70a7dea6a1a4",
+  "reviewed_run_id": "r-20261019T035634203950-reference-sign-guard",
+  "scores": {
+    "durability": 18,
+    "evidence": 8,
+    "fit": 17,
+    "goal_fidelity": 15,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T05:32:57.488144+00:00"
+}

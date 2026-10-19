@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="462">
+<meta name="plan-version" content="463">
 <meta name="plan-modified" content="2026-10-19">
 </head>
 <body>
@@ -1299,17 +1299,52 @@ test_one_augmented_newton_program_serves_free_and_pinned_requests
 (tests/equilibrium/test_solve_vertical_pin.py:307) and the failure id now
 spells test_eliminated_constraint_runs_through_typed_solve_with_outer_trace
 with line cites :417 and :492, both of which match the definitions and the
-traceback headers in both arm logs. The follow-on that done_when clause (1)&#x27;s
+traceback headers in both arm logs. The follow-on that done_when clause (1)'s
 landing-revision run was substituted by a byte-identity argument is now
 discharged by a real run: logs/repro-327b8dfb1-archive.log records
-nova.__file__ inside the archive extract and &quot;6 passed ... EXIT=0&quot;. The
-manifest&#x27;s baseline_suite/after_suite are now single-line JSON carrying the
-two failing ids, derived here from the arm logs&#x27; traceback headers (the logs
+nova.__file__ inside the archive extract and "6 passed ... EXIT=0". The
+manifest's baseline_suite/after_suite are now single-line JSON carrying the
+two failing ids, derived here from the arm logs' traceback headers (the logs
 ran with -rN so they carry no FAILED summary line); both arms are identical,
 so added_failure_count is 0. Scores: goal_fidelity 17, evidence 16,
 scope_discipline 20, durability 8, fit 16, reuse 20. One follow-on finding
-remains: logs/suite-arms.slurm.log:21,33 still carries the job&#x27;s own derived
-block with &quot;failed&quot;: [] for both arms while the manifest cites it first.</p></div>
+remains: logs/suite-arms.slurm.log:21,33 still carries the job's own derived
+block with "failed": [] for both arms while the manifest cites it first.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261019T174432437525-vertical-pin-free-height" data-who="reckon-build" data-when="2026-10-19T19:20:57Z">
+    <div class="r-comment-body"><p>DETERMINATION: neither the solver nor the test is wrong at these revisions; the
+recorded 3.86e-3 offset DOES NOT REPRODUCE.  At HEAD 9beab06a4 the free request
+holds the booked height exactly at the seed value 0.6 (terminal flux bit-identical
+to SEED [1.0, 0.8, 0.24, 1.0, 1.2, 0.96], held unknown [0.0]).  The test passes,
+alone and in-file, at HEAD and when run at the landing revision 327b8dfb1.
+
+MECHANISM: the inactive CurrentCentroidConstraint row returns the normalised
+radial-field unknown itself (nova/equilibrium/constraint.py, residual), so
+compensator_step applies step = -row = -unknown and drives the held unknown to
+zero.  The carrier forced sixth row is the pure constant
+VERTICAL_FORCING/ELONGATION**2 = 0.0308641975 with zero flux gradient, so the
+Newton/Krylov increment on the five already-satisfied rows is exactly zero and
+the seed is retained as the terminal iterate.  Measured stalled residual
+2.572016e-2 = 0.0308641975 / flux_scale(1.2).
+
+WHEN IT LANDED: 327b8dfb1 rewrote the test on 2026-10-18.  Run directly at that
+revision -- git archive 327b8dfb1 nova tests scripts pyproject.toml conftest.py
+uv.lock into a scratch directory, the extract proven on the import path
+(nova.__file__ = .../scratch/archive-327b8dfb1/nova/__init__.py) -- the file is
+6 passed at exit 0, so the test PASSED when it landed.  Byte-identity of the test
+file, constraint.py and fixed_point.py between 327b8dfb1 and HEAD is a cross-check
+on that run, not a substitute for it.  The test is marked slow, so the default
+-m &#x27;not slow&#x27; lane never collects it.
+
+THE RECORDED VALUE: terminal flux 0.95228395 = 0.96 - 0.25*(VERTICAL_FORCING/
+ELONGATION**2), i.e. the held unknown at -0.25*row6 instead of 0 -- exactly the
+defect the brief names.  That state does not occur at either revision.  The only
+source delta between a711e2b0 and HEAD is in nova/biot/tiledassembly.py,
+nova/equilibrium/contour_tree_mesh.py, nova/equilibrium/fixed_points.py,
+nova/equilibrium/topology.py and nova/jax/config.py (XLA per-fusion autotune
+cache), none of which this test&#x27;s route imports.
+
+NO PRODUCT OR TEST SOURCE WAS CHANGED.  The 1e-10 tolerance was not widened.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

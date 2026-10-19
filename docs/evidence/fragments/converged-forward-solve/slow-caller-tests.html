@@ -74,20 +74,55 @@ result:  1/4 tests collected (3 deselected)</pre>
   <code>test_forward_receipt_raster.py::test_reduced_hex_request_receipt_records_absent_raster_flux</code>,
   which the head arm does not fail, since the head deselects it. Log:
   <code>logs/negative-control-default-lane-base.log</code>.</p>
+</section>
 
 <section id="slow-caller-tests-base-arm">
   <h2>Base arm on the H200 lane</h2>
-  <p>Both files were submitted to the reserved-H200 lane at base
-  <code>6cce876e3</code> as single measurement jobs (no array): raster
-  <code>1289785</code> (<code>--time 01:00:00</code>, per-test
-  <code>--timeout 1500</code>), compile-identity <code>1289786</code>
-  (<code>--time 02:30:00</code>, per-test <code>--timeout 1500</code>), each on
-  <code>98dci4-gpu-0003</code> with one H200. Results are recorded below as the
-  logs report them.</p>
+  <p>Both files ran on the reserved H200 lane at base <code>6cce876e3</code> as
+  single measurement jobs (no array), each on node <code>98dci4-gpu-0003</code>
+  with one H200. The raster file was job <code>1289785</code>
+  (<code>--time 01:00:00</code>), compile-identity job <code>1289786</code>
+  (<code>--time 02:30:00</code>), both with per-test
+  <code>--timeout 1500</code>.</p>
+  <table>
+    <thead><tr><th>file</th><th>job</th><th>summary</th><th>cache guard</th></tr></thead>
+    <tbody>
+      <tr><td><code>test_forward_receipt_raster.py</code></td><td>1289785</td><td>1 passed in 1501.04s (0:25:01)</td><td>WALL-CLOCK-UNRELIABLE misses=1458 budget=0</td></tr>
+      <tr><td><code>test_forward_compile_identity.py</code></td><td>1289786</td><td>1 failed, 2 passed, 1 warning in 1390.68s (0:23:10)</td><td>WALL-CLOCK-UNRELIABLE misses=5 budget=0</td></tr>
+    </tbody>
+  </table>
+  <p>The base failure is
+  <code>test_traced_exterior_preserves_the_certificate_terminal_state — assert
+  4.719945631213386e-12 &lt;= 1e-14</code>. The served prewarm compilation cache
+  was compiled for another revision, so the raster base wall is a cold compile
+  (1458 misses) rather than a solve.</p>
 </section>
 
 <section id="slow-caller-tests-head-arm">
   <h2>Head arm on the H200 lane</h2>
-  <p>Run after the raster test is marked slow, as one lane run per file with its
-  own log.</p>
+  <p>The raster test is marked slow at this revision, so the head arm measures
+  the change together with a warm cache. Raster job <code>1289905</code>
+  (<code>--time 01:00:00</code>), compile-identity job <code>1289912</code>
+  (<code>--time 02:00:00</code>), both run with <code>--durations=0</code>.</p>
+  <table>
+    <thead><tr><th>file</th><th>job</th><th>summary</th><th>cache guard</th></tr></thead>
+    <tbody>
+      <tr><td><code>test_forward_receipt_raster.py</code></td><td>1289905</td><td>1 passed in 847.25s (0:14:07)</td><td>wall-clock-reliable misses=0 budget=0</td></tr>
+      <tr><td><code>test_forward_compile_identity.py</code></td><td>1289912</td><td>1 failed, 2 passed, 1 warning in 1153.17s (0:19:13)</td><td>wall-clock-reliable misses=0 budget=0</td></tr>
+    </tbody>
+  </table>
+  <p>The head failure is the same id as base, with a slightly different value:
+  <code>assert 4.3309859247974134e-12 &lt;= 1e-14</code>. No new failure is
+  added by the change.</p>
+  <p><strong>Dominating test per file (from <code>--durations=0</code>).</strong>
+  Raster: its single test, 765.98 s of the 847.25 s wall. Compile-identity:
+  <code>test_traced_exterior_preserves_the_certificate_terminal_state</code> at
+  <strong>1009.30 s</strong>, against 33.60 s for
+  <code>test_certificate_rows_share_one_solve_program_per_mesh</code> and 25.01 s
+  for <code>test_compiled_slice_program_traces_conductor_exterior</code>. At a
+  warm cache the dominating cost is the solve itself, not the compile; at the
+  cold base cache the raster file's dominating cost is the compile
+  (<code>backend.compile_and_load</code>), measured in the negative-control
+  stack.</p>
 </section>
+

@@ -1,0 +1,146 @@
+<section id="tcv-liuqe-corrected-reference">
+<h2 id="tcv-liuqe-corrected-reference-heading">TCV 77549 LIUQE known answer on the sign-corrected reference</h2>
+
+<p id="tcv-liuqe-corrected-reference-source">Both readers now default to
+imas-efit's corrected full-pulse source,
+<code>/home/ITER/mcintos/public/efit/validation/TCV/77549/liuqe-corrected</code>,
+opened at its written Data Dictionary version <strong>3.41.0</strong> (COCOS 11),
+1,703 slices, 65 x 129 grids. The uncorrected input pulse
+(<code>/home/ITER/mcintos/public/imasdb/tcv/3/77549/1</code>) is no longer read
+by default. No compensation of any kind is applied to the flux: the guard's
+verdict is reported and nothing else.</p>
+
+<p id="tcv-liuqe-corrected-reference-guard">The orientation guard admits
+<strong>17 of 17</strong> sampled slices under COCOS 11 with
+<strong>0 refusals</strong> (<code>GUARD_ROWS 17 AGREES 17 REFUSED 0</code>).
+Every slice stores a negative plasma current (Ip between -1.849e4 A and
+-1.924e5 A), for which COCOS 11 fixes the magnetic axis as a psi maximum, and
+both the grid span and the stored scalar span are positive on every slice. Grid
+and scalar now agree with each other and with the declaration, so no slice is
+refused and none needed a sign inferred from the data. The guard's per-slice
+verdict is printed by <code>measure.py</code> and recorded in
+<code>guard.json</code>; spans and verdicts are tabulated below.</p>
+
+<table id="tcv-liuqe-corrected-reference-guard-table">
+<thead><tr><th>slice</th><th>t [s]</th><th>COCOS</th><th>verdict</th><th>grid span [Wb]</th><th>scalar span [Wb]</th></tr></thead>
+<tbody>
+<tr><td>0</td><td>0.014</td><td>11</td><td>agrees</td><td>+1.3709e-02</td><td>+1.4877e-02</td></tr>
+<tr><td>6</td><td>0.019</td><td>11</td><td>agrees</td><td>+2.0401e-02</td><td>+3.6953e-02</td></tr>
+<tr><td>14</td><td>0.027</td><td>11</td><td>agrees</td><td>+5.2611e-02</td><td>+6.0465e-02</td></tr>
+<tr><td>24</td><td>0.036</td><td>11</td><td>agrees</td><td>+1.1707e-01</td><td>+6.2809e-02</td></tr>
+<tr><td>34</td><td>0.046</td><td>11</td><td>agrees</td><td>+1.0035e-01</td><td>+6.7107e-02</td></tr>
+<tr><td>46</td><td>0.057</td><td>11</td><td>agrees</td><td>+1.1912e-01</td><td>+8.7627e-02</td></tr>
+<tr><td>118</td><td>0.125</td><td>11</td><td>agrees</td><td>+1.4626e-01</td><td>+1.0823e-01</td></tr>
+<tr><td>206</td><td>0.208</td><td>11</td><td>agrees</td><td>+1.5442e-01</td><td>+1.4538e-01</td></tr>
+<tr><td>248</td><td>0.248</td><td>11</td><td>agrees</td><td>+1.4559e-01</td><td>+1.4885e-01</td></tr>
+<tr><td>291</td><td>0.288</td><td>11</td><td>agrees</td><td>+1.4572e-01</td><td>+1.4163e-01</td></tr>
+<tr><td>333</td><td>0.328</td><td>11</td><td>agrees</td><td>+1.4197e-01</td><td>+1.3947e-01</td></tr>
+<tr><td>376</td><td>0.368</td><td>11</td><td>agrees</td><td>+1.4517e-01</td><td>+1.4172e-01</td></tr>
+<tr><td>456</td><td>0.444</td><td>11</td><td>agrees</td><td>+1.4848e-01</td><td>+1.5462e-01</td></tr>
+<tr><td>542</td><td>0.525</td><td>11</td><td>agrees</td><td>+1.6690e-01</td><td>+1.7333e-01</td></tr>
+<tr><td>611</td><td>0.590</td><td>11</td><td>agrees</td><td>+1.5519e-01</td><td>+1.6975e-01</td></tr>
+<tr><td>796</td><td>0.765</td><td>11</td><td>agrees</td><td>+1.7483e-01</td><td>+1.7104e-01</td></tr>
+<tr><td>1257</td><td>1.200</td><td>11</td><td>agrees</td><td>+2.0675e-01</td><td>+1.9548e-01</td></tr>
+</tbody>
+</table>
+
+<p id="tcv-liuqe-corrected-reference-grid-motion">The source's
+<code>profiles_2d/psi</code> grid <strong>does move across the pulse</strong>,
+and it is piecewise-constant in time within each block. A full census over all
+1,703 slices finds <strong>17 distinct grids</strong> whose block starts are
+exactly the 17 <code>SLICES</code> indices
+(<code>GRID_BLOCKS 17 0,6,14,24,34,46,118,206,248,291,333,376,456,542,611,796,1257</code>),
+and the 17 grids are pairwise distinct (smallest pairwise
+<code>max |psi_a - psi_b| = 1.72e-02</code>). Measured against slice 0,
+<code>max |psi(t) - psi(t0)|</code> reaches <strong>3.393e-01</strong>
+<code>(slice 611)</code>, while within a block it is exactly 0. The stored
+scalars move further still: against slice 0, <code>|psi_axis(t) - psi_axis(t0)|</code>
+reaches <strong>1.269</strong> <code>(slice 1257)</code> and
+<code>|psi_boundary(t) - psi_boundary(t0)|</code> reaches <strong>1.450</strong>.
+Per-slice values are in <code>grid_motion.json</code>; a representative
+selection:</p>
+
+<table id="tcv-liuqe-corrected-reference-motion-table">
+<thead><tr><th>slice</th><th>t [s]</th><th>max |psi - psi(t0)|</th><th>|psi_axis - psi_axis(t0)|</th><th>|psi_boundary - psi_boundary(t0)|</th></tr></thead>
+<tbody>
+<tr><td>0</td><td>0.014</td><td>0.000e+00</td><td>0.000e+00</td><td>0.000e+00</td></tr>
+<tr><td>34</td><td>0.046</td><td>1.702e-01</td><td>5.779e-02</td><td>1.100e-01</td></tr>
+<tr><td>206</td><td>0.208</td><td>1.677e-01</td><td>2.379e-01</td><td>3.684e-01</td></tr>
+<tr><td>456</td><td>0.444</td><td>2.572e-01</td><td>4.777e-01</td><td>6.174e-01</td></tr>
+<tr><td>611</td><td>0.590</td><td>3.393e-01</td><td>6.224e-01</td><td>7.772e-01</td></tr>
+<tr><td>796</td><td>0.765</td><td>3.100e-01</td><td>8.177e-01</td><td>9.739e-01</td></tr>
+<tr><td>1257</td><td>1.200</td><td>3.297e-01</td><td>1.269e+00</td><td>1.450e+00</td></tr>
+</tbody>
+</table>
+
+<p id="tcv-liuqe-corrected-reference-independent-slices">Because the block starts
+are exactly the sampled slices and no two share a grid,
+<strong>all 17 <code>SLICES</code> entries carry their own reconstruction and are
+therefore independent known answers</strong>: 0, 6, 14, 24, 34, 46, 118, 206,
+248, 291, 333, 376, 456, 542, 611, 796 and 1257. Every other slice in the store
+is a byte-copy of its block's grid and is not an independent answer. The window
+imas-efit checked (0.7930 to 0.8390 s) lies wholly inside the block starting at
+796 and ending at 1256, which is why that window is byte-frozen: the freeze is
+local to one block, not a property of the pulse. The wall store is unchanged.</p>
+
+<p id="tcv-liuqe-corrected-reference-window">No <code>SLICES</code> entry has a
+time inside 0.7930 to 0.8390 s (the adjacent samples are slice 796 at 0.765 s and
+slice 1257 at 1.200 s), so the specified fallback applies: the curated window
+slice nearest <code>LIMITED_SLICE</code> (34, t = 0.046 s) was selected, and
+since every window time lies above it that is <strong>window slice 0, the first
+window slice (t = 0.793 s)</strong>, marked <code>matched: False</code>. The
+curated window is
+<code>/home/ITER/mcintos/Code/imas-efit/tests/data/imas/TCV/77549/validation/liuqe</code>,
+DD <strong>4.1.0</strong>, 50 slices.</p>
+
+<p id="tcv-liuqe-corrected-reference-window-agreement">Under COCOS 17 the guard
+admits the window slice (<code>window_guard=agrees</code>), and the corrected
+source slice nearest it in time admits under COCOS 11
+(<code>source_guard=agrees</code>). Across the DD 3.41.0 to 4.1.0 conversion,
+which negates every flux field, the agreement is exact to the arithmetic:</p>
+<ul id="tcv-liuqe-corrected-reference-window-figures">
+<li>source span (COCOS 11) = +1.692570e-01 Wb; converted to COCOS 17 it is
+-1.692570e-01 Wb;</li>
+<li>window span (COCOS 17) = -1.692570e-01 Wb;</li>
+<li>span ratio window/converted = <strong>1.000000</strong>;</li>
+<li><code>max |(-psi_source) - psi_window|</code> over the shared 65 x 129 grid =
+<strong>0.000000e+00</strong> Wb.</li>
+</ul>
+<p id="tcv-liuqe-corrected-reference-window-conclusion">The window and the
+converted source are byte-identical on the grid and agree on the axis and
+boundary span to the relative arithmetic; the fallback window slice is one
+sample, so this confirms the correction at a single overlapping time rather than
+across the whole window; it names which quantities agree and reports none that
+does not.</p>
+
+<p id="tcv-liuqe-corrected-reference-gate">The coverage test now passes on the
+corrected reference. Both suite arms ran the same two targets
+(<code>scripts/prototypes/tcv_liuqe_known_answer</code> and
+<code>scripts/prototypes/efit_field_swap/test_orientation.py</code>) as fresh
+pytest processes on CPU under the repository root conftest, with the default
+fast-lane marker filter cleared so the slow test is collected.</p>
+<ul id="tcv-liuqe-corrected-reference-gate-figures">
+<li>base arm at <code>234be9a8e</code>, its own tree extracted to a scratch
+directory: <strong>1 failed, 31 passed</strong>, <code>EXIT=1</code>. The one
+failure is
+<code>test_limited_slice_is_read_only_when_coverage_is_certified</code>, the
+defect this node repairs.</li>
+<li>head arm at <code>f09aa6924</code>: <strong>32 passed, 0 failed</strong>,
+<code>EXIT=0</code>, including
+<code>test_limited_slice_is_read_only_when_coverage_is_certified PASSED</code>.</li>
+<li>delta: <strong>no added failure</strong>; the head arm's failure set is
+empty and the base arm's single failure is gone.</li>
+</ul>
+<p id="tcv-liuqe-corrected-reference-negative-control">The declared mutation --
+pointing the store back at the uncorrected input pulse through
+<code>TCV_LIUQE_STORE</code> -- was applied and its log kept
+(<code>negative_control.log</code>). The run is red as required:
+<code>EXIT=1</code>, <strong>1 failed, 12 passed</strong>, with
+<code>test_limited_slice_is_read_only_when_coverage_is_certified</code> failing
+on <code>ReferenceSignError: slice 34 declares DD 3.41.0 (COCOS 11) with
+Ip = -79712.148 A, requiring the magnetic axis to be a psi maximum (sign +1);
+the stored grid psi axis - boundary = -1.003465e-01 (sign -1); scalar psi axis -
+boundary = +6.710667e-02 (sign +1)</code>. That failing test id is one the head
+arm does not fail, so the guard is shown to refuse the defect rather than merely
+to accept the correction.</p>
+</section>

@@ -37,14 +37,14 @@ CONVENTION = read_convention(polarity=1)
 POLICY = TopologyPolicy()
 
 LIUQE_STORE = Path(
-    os.environ.get("TCV_LIUQE_STORE", "/home/ITER/mcintos/public/imasdb/tcv/3/77549/1")
+    os.environ.get("TCV_LIUQE_STORE", str(measure.SOURCE_LIUQE_STORE))
 )
 WALL_STORE = Path(
     os.environ.get(
         "TCV_WALL_STORE", "/home/ITER/mcintos/Code/imas-efit/tests/data/imas/TCV/77549"
     )
 )
-LIMITED_SLICE = 34
+LIMITED_SLICE = measure.LIMITED_SLICE
 
 GRID = np.linspace(-1.0, 1.0, 129)
 RR, ZZ = np.meshgrid(GRID, GRID, indexing="ij")

@@ -1,0 +1,79 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [
+    {
+      "failure_condition": "test_solver_loads_the_certified_carrier reddens if certified_machine is absent or renamed (the base arm fails by ImportError at baseline_suite) and if the certified 550 rung resolves to a machine other than 553 cells; it is a real guard on the new route, though its base failure observes the introduced symbol's absence rather than the axis read.",
+      "lines": "test_carrier_axis.py:91-92"
+    },
+    {
+      "failure_condition": "The assertion at line 73 reddens if the signed Hessian stops being negative definite; the block at lines 78-79 builds TopologyConvention.from_cocos(17,-1.0) and requires valid=false with a NaN axis, so it fires on the polarity gate rather than restating a passed-in value, and is an independent negative control.",
+      "lines": "test_carrier_axis.py:73-79"
+    },
+    {
+      "failure_condition": "np.testing.assert_allclose(reading.axis, expected_axis, atol=1e-12) compares the read's returned axis against the same array the test supplied at roots.position; with a single root the read returns that value whenever it is not refused, so this assertion cannot redden for any ranking regression that line 75 does not already catch and is a duplicate of the input, not an independent measurement.",
+      "lines": "test_carrier_axis.py:76"
+    },
+    {
+      "failure_condition": "test_solver_job_arguments_match_parser parses the actual deep-job.sh and two_merit_job.sh command lines through solver.main() and reddens with SystemExit when the command passes the removed --cache; solver_cli_negative.log shows FF on the pre-repair commands, so this guard is verified by reinstating the regression rather than by observing a passing run.",
+      "lines": "test_carrier_axis.py:96-120"
+    }
+  ],
+  "call_sites": [
+    "scripts/prototypes/fast_map_production/deep-job.sh:24",
+    "scripts/prototypes/fast_map_production/two_merit_job.sh:13",
+    "scripts/prototypes/fine_grid_convergence/cold-job.sh:28",
+    "scripts/prototypes/fine_grid_convergence/cold.py:12"
+  ],
+  "completed_at": "2026-10-19T04:11:33.952Z",
+  "dispatched_at": "2026-10-19T03:50:29Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/carrier-axis-orientation.html",
+      "line": "7",
+      "severity": "follow-on",
+      "text": "follow-on: the suite paragraph reports the fast-map arm as '14 passed and one failed' and the head as 'all 15 + 2 + 22', but the gate log solver_cli_baseline.log shows 16 passed and 1 failed for the fast-map arm (and 17 passed at the head), and both the same fragment's later paragraph (line 10, '17 fast-map ... 16 + 2 + 22') and the research record (docs/research/carrier-axis-orientation.html:48, '16 passed, 1 failed') give the current counts. The 14/15 figures are stale from before the two parser-test cases landed; a landing record that contradicts its own sibling paragraph and the log it cites misinforms the reader who opens the fragment."
+    },
+    {
+      "file": "scripts/prototypes/fast_map_production/test_carrier_axis.py",
+      "line": "76",
+      "severity": "follow-on",
+      "text": "follow-on: assert_allclose(reading.axis, expected_axis, atol=1e-12) compares the read's returned axis against the same array the test placed at roots.position, so with a single root the assertion holds for any accepted root and cannot redden for a ranking regression that the valid/qualified assertion at line 75 does not already catch; the axis acceptance durability rests on line 75, not on line 76."
+    },
+    {
+      "file": "scripts/prototypes/fast_map_production/solver.py",
+      "line": "78",
+      "severity": "follow-on",
+      "text": "follow-on: certified_machine re-derives the fixture identity with fixture.cache_identity(carrier, requested_cells=requested, wall_nodes=WALL_POINT_COUNT, wall=wall) instead of asking the owner whether the object is published, while the owner scripts/prototypes/support/certificate_fixtures.py:232 -> scripts/analytic_oracle_fixtures/measure.py:cached_machine builds the identity with an added builder=resolve_builder(builder). The pre-check omits that builder argument, so a later change to the owner's identity recipe would desync the guard from the digest cached_carrier actually requests; it is a duplicated recipe, not a fork of the loader, and the guard is otherwise a correct fail-before-cold-build wrapper."
+    },
+    {
+      "file": "scripts/prototypes/fine_grid_convergence/cold-job.sh",
+      "line": "28",
+      "severity": "follow-on",
+      "text": "follow-on: cold-job.sh:28-33 passes --cache both to its cold.py wrapper, which delegates to the fast_map_production solver parser, and directly to the solver, which no longer defines --cache; those two cold-job.sh lines are the one path into a production caller that would break, not the two the node fixed. Each command now exits 2 at argparse before the solve. The node was fenced out of scripts/prototypes/fine_grid_convergence and names this in the manifest follow_ons, so it is out of scope for this verdict and blocks nothing; it is recorded because the landed removal makes it reachable."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit against 1d1fd699d: 27995735e adds test_carrier_axis.py; 47ef79d0a adds certified_machine/certified_exterior and drops --cache and the _machine/_exterior imports; 48e1c1ed6 adds the research and landing docs; f167fd746 records the Titan outcome; 496244350 removes --cache from deep-job.sh and two_merit_job.sh and adds the parser test; 012234d69 derives the axis from the analytic field; 91cc2b10d records the parser repair. Six files, all inside the fence; the --cache removal from the two in-scope jobs repairs the blocking finding of the prior review at f167fd74.",
+    "done_when": "The brief (brief.txt:6-9) requires three things. Clause (1) is fully recorded (orientation_probe.log for the eigenvalues -30.548/-7.707, membership, no-saddle persistence; orientation_base_probe.log for the da4c4eb98 acceptance). Clause (2)'s base-failing test exists (test_solver_loads_the_certified_carrier, baseline_suite failure id) with a negative control (solver_cli_negative.log FF). Clause (3) is partly unmet: the 550-cell solve read its axis but did not converge (solver_550_titan.json converged=false, residual 0.0012319931459852727); the 5,000-cell carrier, the five TCV rows and both suite arms are recorded.",
+    "goal": "The source goal (brief.txt:1) is to make nova's read accept the certified analytic carrier axis again after axis ranking. The landed work does not change the read: orientation_probe.log shows the published static carriers already accept (6.2,0.0) at 553/2105/5167 cells, and orientation_base_probe.log BASE_ROW shows the pre-ranking revision da4c4eb98 accepted the same input, so the goal's premise is refuted and the repaired fault is a separate prototype fixture route in solver.py:78-112.",
+    "manifest": "Read manifest.md; its commits line lists the seven shas 27995735e..91cc2b10d, its baseline_suite JSON names solver_cli_baseline.log (1 failure, test_solver_loads_the_certified_carrier) and after_suite names solver_cli_after.log (0 failures), and its tests line reports the focused gate 4 passed; all reconcile with the logs read.",
+    "write_paths": "The declared fence (brief.txt:13) is scripts/prototypes/fast_map_production, scripts/prototypes/support, scripts/prototypes/read_robustness, docs/research/carrier-axis-orientation.html and docs/evidence/fragments/converged-forward-solve/carrier-axis-orientation.html plus run exports. The diff touches only solver.py, test_carrier_axis.py, deep-job.sh and two_merit_job.sh under fast_map_production and the two documents, every path inside the fence."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261019T034937490355-review-of-carrier-axis-orientation-91cc2b10d1c3",
+  "reviewed_base_sha": "1d1fd699de9bc4f9c6c64b5e67669f0dbac76c4c",
+  "reviewed_head_sha": "91cc2b10d1c380ee1120e2f007e5ed4582d877df",
+  "reviewed_run_id": "r-20261019T014150673041-carrier-axis-orientation",
+  "scores": {
+    "durability": 16,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 14,
+    "reuse": 16,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T04:13:09.804608+00:00"
+}

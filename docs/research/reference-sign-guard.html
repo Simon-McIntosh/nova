@@ -73,6 +73,10 @@ declared polarity by the spline's axis-to-boundary span. The four crossing scans
 carry no in-grid wall point, so their axis Hessians are checked instead; each
 is a maximum as its positive polarity requires. None is refused:
 <code>FIELD_SWAP_ROWS 28 REFUSED 0</code>. No field-swap row changes.</p>
+<p>The post-wiring run produced twenty-eight rows identical as parsed JSON to
+the pre-wiring guard receipt: <code>FIELD_SWAP_ROWS 28 IDENTICAL True</code>.
+This checks the two read-site additions against the complete trace set without
+inferring a compensating sign change.</p>
 
 <table>
 <tr><th>case</th><th>slice</th><th>polarity</th><th>grid check</th><th>measured sign</th><th>verdict</th></tr>
@@ -108,10 +112,9 @@ is a maximum as its positive polarity requires. None is refused:
 
 <h2>Negative control</h2>
 <p>The declared mutation removes the sign-consistency guard. With both guard
-entry points replaced by no-ops, pytest exits <code>EXIT=1</code> with nine
-failures. These include <code>test_negated_grid_against_its_scalars_is_refused</code>
-and <code>test_sign_mismatch_is_refused_before_reading_the_slice</code>, which
-then reaches the topology read. The synthetic IDS-shaped field declares DD
+entry points replaced by no-ops, pytest exits <code>EXIT=1</code> with eleven
+failures. These include the negated-grid and TCV read-path tests, and both new
+trace read-site tests. The TCV test then reaches the topology read. The synthetic IDS-shaped field declares DD
 3.41.0 (COCOS 11) and negative Ip, with stored scalars making the axis a psi
 maximum and a negated grid making it a minimum. The live guard refuses it,
 and adding a constant as large as <code>1e10</code> to the grid leaves the verdict
@@ -123,34 +126,38 @@ unchanged.</p>
 conftest, in fresh per-process invocations. The selection
 <code>-m "not slow"</code> was applied to both arms, excluding the same slow
 real-store test whose earlier attempt had exhausted a 480 s bound before the
-head summary. At base revision <code>a5ebd580f</code>, the suite completed with
-32 passed and one deselected in 324.94 s. At guarded head
-<code>17ac64275</code>, it completed with 33 passed and one deselected in
-386.30 s: zero added failures and one new passing test that makes the
-contradictory TCV view reach the guard before the topology read. The focused
-orientation and read-path gate completed with 11 passes; the guard-removal
-mutation produced nine failures, including the synthetic IDS sign test and
-the TCV read-path test.</p>
+head summary. In this fresh pair, base revision <code>a5ebd580f</code>
+completed with 32 passed and one deselected in 378.63 s. Guarded head
+<code>b0e5d6901</code> completed with 33 passed and one deselected in
+368.03 s: zero added failures and one new passing TCV read-path test. The two
+trace read-site tests live in <code>test_orientation.py</code>, which the base
+did not contain; they run in the focused gate instead. That gate completed
+with 13 passes, while removing the guard produced eleven failures.</p>
 
-<h2>Read-path scope</h2>
-<p>The LIUQE comparison now calls the guard before <code>crosscheck.read_state</code>.
-The field-swap table invokes <code>check_trace_record</code> directly and proves
-that all twenty-eight existing records are accepted. The field-swap comparison
-reader in <code>crosscheck.py</code> and the exploratory reader in
-<code>probe_read.py</code> still call <code>read_convention</code> without calling
-the guard. Those two files are outside this node's write grant, so their
-read-site wiring remains an explicit scope blocker; the table is not evidence
-that those readers invoke the guard.</p>
+<h2>Read-path coverage</h2>
+<p>The LIUQE comparison calls the guard before <code>crosscheck.read_state</code>.
+The field-swap comparison's <code>_decision</code> and the exploratory
+<code>probe_record</code> now call <code>check_trace_record</code> before either
+constructs a field or reaches topology. At each site a synthetic trace with
+opposite grid sign first reached field construction when the call was absent:
+the red tests printed <code>comparison built a field before checking the trace
+sign</code> and <code>probe built a field before checking the trace sign</code>,
+respectively. With the calls in place, both raise <code>ReferenceSignError</code>
+for slice 7 and polarity +1 before the sentinel is reached. Neither reader
+changes the sign of the data. A trace declares polarity; it has no written DD
+version or Ip field. <code>read_convention</code> interprets polarity +1 through
+the COCOS-17 positive-current orientation. The IDS test above pins the
+separate written-DD COCOS-and-Ip declaration.</p>
 
 <h2>Receipts</h2>
 <p>Under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T035634203950-reference-sign-guard</code>:
-<code>reference-sign-slices-fresh.json</code> and <code>field-swap-guarded.json</code>
-(the two tables), <code>reference-sign-fresh.log</code> and
-<code>field-swap-guarded.log</code> (the drivers),
-<code>tcv-read-guarded.json</code> and <code>tcv-read-guarded.log</code>
-(the actual read-path refusals), <code>negative-control-guarded.log</code>,
-<code>focused-guarded.log</code>, <code>baseline_suite_fresh.log</code> and
-<code>after_suite_guarded.log</code>.</p>
+<code>reference-sign-slices-fresh.json</code> and <code>tcv-read-guarded.json</code>
+(the TCV diagnostic and comparison refusals), <code>field-swap-guarded.json</code>
+and <code>field-swap-resume.json</code> (the identical twenty-eight-row trace
+tables), <code>crosscheck-red.log</code> and <code>probe-red.log</code> (the
+read-site reproductions), <code>field-swap-comparison-verified.log</code>,
+<code>negative-control-resume.log</code>, <code>focused-resume.log</code>,
+<code>baseline_suite_resume.log</code>, and <code>after_suite_resume.log</code>.</p>
 
 </body>
 </html>

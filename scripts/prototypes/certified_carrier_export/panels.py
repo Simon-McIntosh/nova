@@ -22,6 +22,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.lines import Line2D
 
 from nova.media.ink import DEFAULT_INK, poloidal_axes
 from nova.media.poloidal import (
@@ -31,6 +32,7 @@ from nova.media.poloidal import (
     draw_wall,
 )
 from scripts.prototypes.certified_carrier_export import export_records as export
+from tests.equilibrium.test_topology_read import _analytic_inputs
 
 PANEL_WIDTH_INCHES = 14.0
 PANEL_HEIGHT_INCHES = 8.0
@@ -38,8 +40,8 @@ PANEL_DPI = 100
 CONTOUR_COUNT = 18
 
 
-def panel(record, path: str | Path) -> Path:
-    """Draw one record's flux contour panel and write it as an SVG."""
+def panel(record, kind: str, path: str | Path) -> Path:
+    """Draw the read and certificate nulls on one record's flux panel."""
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     ring = record.wall_ring
@@ -47,6 +49,7 @@ def panel(record, path: str | Path) -> Path:
         figsize=(PANEL_WIDTH_INCHES, PANEL_HEIGHT_INCHES), dpi=PANEL_DPI
     )
     axes = figure.add_subplot(111)
+    axes.set_position((0.05, 0.06, 0.90, 0.82))
     poloidal_axes(axes, DEFAULT_INK)
     reading = export.read_record(record)
     axis = np.asarray(reading.axis, dtype=float)
@@ -83,6 +86,29 @@ def panel(record, path: str | Path) -> Path:
         wall=(ring,),
     )
     draw_wall(axes, ring[:, 0], ring[:, 1])
+    _oracle, _field, _wall, reference_axis, reference_saddle = _analytic_inputs(kind)
+    reference_color = "#666666"
+    axes.plot(
+        reference_axis[0],
+        reference_axis[1],
+        marker="o",
+        markersize=11,
+        markerfacecolor="none",
+        markeredgecolor=reference_color,
+        linestyle="none",
+        zorder=DEFAULT_INK.zorder_markers - 1,
+    )
+    if reference_saddle is not None:
+        axes.plot(
+            reference_saddle[0],
+            reference_saddle[1],
+            marker="D",
+            markersize=12,
+            markerfacecolor="none",
+            markeredgecolor=reference_color,
+            linestyle="none",
+            zorder=DEFAULT_INK.zorder_markers - 1,
+        )
     draw_nulls(
         axes,
         magnetic_axis=axis,
@@ -90,6 +116,52 @@ def panel(record, path: str | Path) -> Path:
         strike_points=contacts,
         contain=ring,
     )
+    legend = [
+        Line2D(
+            [],
+            [],
+            color=reference_color,
+            marker="o",
+            markerfacecolor="none",
+            linestyle="none",
+            markersize=11,
+            label="analytic axis",
+        ),
+        Line2D(
+            [],
+            [],
+            color=DEFAULT_INK.axis_color,
+            marker=DEFAULT_INK.axis_marker,
+            linestyle="none",
+            markersize=DEFAULT_INK.axis_markersize,
+            label="nova axis",
+        ),
+    ]
+    if reference_saddle is not None:
+        legend.extend(
+            (
+                Line2D(
+                    [],
+                    [],
+                    color=reference_color,
+                    marker="D",
+                    markerfacecolor="none",
+                    linestyle="none",
+                    markersize=12,
+                    label="analytic X-point",
+                ),
+                Line2D(
+                    [],
+                    [],
+                    color=DEFAULT_INK.xpoint_color,
+                    marker=DEFAULT_INK.xpoint_marker,
+                    linestyle="none",
+                    markersize=DEFAULT_INK.xpoint_markersize,
+                    label="nova saddle",
+                ),
+            )
+        )
+    figure.legend(handles=legend, loc="upper center", ncol=len(legend), frameon=False)
     figure.savefig(path, format="svg")
     plt.close(figure)
     return path
@@ -100,7 +172,9 @@ def main(directory: str) -> list[Path]:
     directory = Path(directory)
     for kind in ("limited", "diverted"):
         built = export.build_export(kind)
-        written.append(panel(built.record, directory / f"nova-certified-{kind}.svg"))
+        written.append(
+            panel(built.record, kind, directory / f"nova-certified-{kind}.svg")
+        )
     return written
 
 

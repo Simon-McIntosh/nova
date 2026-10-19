@@ -1,0 +1,440 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 3,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "1d1fd699de9bc4f9c6c64b5e67669f0dbac76c4c",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T014150673041-carrier-axis-orientation/brief.txt",
+    "sha256": "0c9d64b5430701e3b33a3d6a4f8b2638a5940c8441025ad40918858217b475c2"
+  },
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 65558016,
+      "cached_input_tokens_cumulative": 65558016,
+      "input_tokens": 66053757,
+      "input_tokens_cumulative": 66053757,
+      "output_tokens": 126723,
+      "output_tokens_cumulative": 126723,
+      "reasoning_output_tokens": 46879,
+      "reasoning_output_tokens_cumulative": 46879
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 233,
+    "files": 6,
+    "removed": 13
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "27995735ec4461d4ffb9b6d1ffcf1d667e7d1b12",
+    "47ef79d0ac379b08877340f4a4e514f3c8c0d2b1",
+    "48e1c1ed674fe5d22dc73d7f86bfb1b8532ce690",
+    "f167fd746fa5f7af51587d98743667f4da98bfa9",
+    "496244350f5102230267a91040d294a7504cad80",
+    "012234d6910e95bcdaa79299964bdad3bb695c50",
+    "91cc2b10d1c380ee1120e2f007e5ed4582d877df"
+  ],
+  "completed_at": "2026-10-19T03:48:27Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-19T01:42:40Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "scripts/prototypes/fine_grid_convergence/cold-job.sh:18-23",
+    "scripts/prototypes/fine_grid_convergence/cold.py:12-15",
+    "scripts/prototypes/fine_grid_convergence/cold-job.sh:28-33"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T014150673041-carrier-axis-orientation/exports/solver_cli_suite.py after",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T014150673041-carrier-axis-orientation/exports/solver_cli_after.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.2857142857142857,
+    "plan": "converged-forward-solve",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 5.615168888846349,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-10-20T02:27:00Z, which is after this node's 3600s horizon ending 2026-10-19T02:41:59.790229+00:00",
+    "horizon_ends_at": "2026-10-19T02:41:59.790229+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-19T01:41:58Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-20T02:27:00Z",
+    "resets_at": "2026-10-24T20:40:42Z",
+    "seconds_until_reset": 500323,
+    "state": "quiet",
+    "utilisation_pct": 97.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-19T01:41:58Z",
+    "read_at": "2026-10-19T01:41:59Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 97.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-19T03:48:27Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-10-19T03:48:27Z",
+        "resets_at": 1792874442,
+        "used_percent": 99.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T014150673041-carrier-axis-orientation/manifest.md",
+  "member": "disposable-r-20261019T014150673041-carrier-axis-orientation",
+  "model_key": "sol",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "carrier-axis-orientation",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.cache/nova-s21-briefs/pivot/carrieraxis.full.txt",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T014150673041-carrier-axis-orientation/brief.txt",
+    "brief_sha256": "0c9d64b5430701e3b33a3d6a4f8b2638a5940c8441025ad40918858217b475c2",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "critical",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1112,
+          "cached_input_tokens": 541991,
+          "input_tokens": 543105,
+          "output_tokens": 919,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 544024,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "The refusing gate at 550 and 2000 cells is named with the Hessian, vessel and persistence evidence and the carrier orientation derived from its field; the cause is fixed at its owner (one orientation owner for the analytic carrier, or the kernel gate) with a 550-cell carrier test that fails at main; the 550-cell prototype certificate row reads its axis and converges, the 5000 carrier and five unmeasured TCV rows are read; both suite arms recorded in docs/research/carrier-axis-orientation.html.",
+    "estimated_hours": null,
+    "goal": "Make the read accept the certified analytic carrier axis again after axis ranking",
+    "id": "carrier-axis-orientation",
+    "images": [],
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-19T01:41:58Z",
+      "read_at": "2026-10-19T01:41:59Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 97.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T014150673041-carrier-axis-orientation/manifest.md",
+    "negative_control": "Restore the present convention construction and kernel gate; the 550-cell carrier axis test must then fail.",
+    "orchestrator_assessment": {
+      "reasoning": "deep",
+      "risk": "critical",
+      "verification": "strict"
+    },
+    "plan": "converged-forward-solve",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "scripts/prototypes/fast_map_production",
+      "scripts/prototypes/support",
+      "scripts/prototypes/read_robustness",
+      "docs/research/carrier-axis-orientation.html",
+      "docs/evidence/fragments/converged-forward-solve/carrier-axis-orientation.html",
+      "docs/figures/converged-forward-solve/carrier-axis-orientation"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 5.614428289184578,
+      "derived": 0.19004606436160712,
+      "drain_hours": 168.0,
+      "effective_limit": 0.19004606436160712,
+      "elapsed_fraction": 0.17276914941964283,
+      "elapsed_hours": 29.025217102499994,
+      "group": "codex-sub",
+      "lift": {
+        "ends_at": "2026-10-24T20:41:00+00:00",
+        "ends_on": "time",
+        "form": "uncapped",
+        "group": "codex-sub",
+        "id": "codex-sub-1792306512-739e03",
+        "pace_multiple": null,
+        "remaining_seconds": 500327.218431,
+        "scope": "global"
+      },
+      "lift_hold": {
+        "held": false,
+        "kind": "uncapped"
+      },
+      "limited_by": "allowance",
+      "observed_at": "2026-10-19T01:42:12+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.030000000000000027,
+      "remaining_windows": null,
+      "resets_at": "2026-10-24T20:40:42Z",
+      "state": "observed",
+      "utilisation": 0.97,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.997354,
+      "decided_by": "window",
+      "margin": -0.3536039999999999,
+      "name": "carrier-axis-orientation",
+      "score": 0.64375,
+      "state": "observed",
+      "verdict": "hold",
+      "window_fill": 0.97
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.781569,
+        "observed_at": "2026-10-19T01:42:12+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-24T20:40:42Z",
+        "state": "observed",
+        "utilisation": 0.97,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": "codex-sub-1792306512-739e03",
+    "member": "codex",
+    "node": "carrier-axis-orientation",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-19T01:42:12.781569+00:00",
+    "score": 0.64375,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "The read refuses the certified carrier axis after axis ranking, which may break the prototype forward solve on certificate rows; critical read-path work, moved to codex as the lead directed for repairs of this kind; three clauses; CPU.",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.43,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {}
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.2857142857142857,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "91cc2b10d1c380ee1120e2f007e5ed4582d877df",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "1d1fd699de9bc4f9c6c64b5e67669f0dbac76c4c",
+    "reviewed_head_sha": "91cc2b10d1c380ee1120e2f007e5ed4582d877df",
+    "scores": {
+      "durability": 16,
+      "evidence": 14,
+      "fit": 17,
+      "goal_fidelity": 14,
+      "reuse": 16,
+      "scope_discipline": 18
+    },
+    "status": "parsed",
+    "total": null
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261019T014150673041-carrier-axis-orientation",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a151d3-a341-73d2-b28d-b8a0e94d6154",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 65558016,
+    "cumulative_input_tokens": 131611773,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 173602
+  },
+  "time_budget": "60m",
+  "tool_steps": 308.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 7547,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 3,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-19T03:48:32Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-19T03:05:44Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261019T014150673041-carrier-axis-orientation",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 1289,
+    "worker_pid": 2579261
+  },
+  "worker_seconds": 7508,
+  "worker_seconds_source": "rollout_receipts",
+  "worktree_retention": null
+}

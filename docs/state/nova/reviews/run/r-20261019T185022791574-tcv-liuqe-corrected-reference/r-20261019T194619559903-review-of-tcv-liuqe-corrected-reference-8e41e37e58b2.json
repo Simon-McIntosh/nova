@@ -1,0 +1,54 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-10-19T19:56:27.474Z",
+  "dispatched_at": "2026-10-19T19:46:45Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/tcv_liuqe_known_answer/measure.py",
+      "line": 328,
+      "severity": "follow-on",
+      "text": "guard_verdict and the grid_motion/window_selection/window_agreement/window_pass helpers the change adds carry no assertion anywhere: nothing in the suite calls them, so a regression in the grid census, the fallback selection or the converted-grid comparison would redden no test and the evidence fragment would keep its old numbers."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/tcv-liuqe-corrected-reference.html",
+      "line": 54,
+      "severity": "follow-on",
+      "text": "the pairwise-distinctness figure 'smallest pairwise max |psi_a - psi_b| = 1.72e-02' cites no artifact under logs/: GRID_BLOCKS and grid_motion.json are reproducible from measure.log, but this number came from an ad-hoc session script and is recorded nowhere a later reader can re-run it."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "no production call site reaches the change: the only importer of scripts/prototypes/tcv_liuqe_known_answer/measure is its own test file test_coverage.py, and nothing under nova/, apps/ or tests/ imports the module.",
+    "diff": "read commit by commit f09aa6924 (code: SOURCE_LIUQE_STORE/WINDOW_LIUQE_STORE and guard_verdict/grid_block_starts/grid_motion/window_selection/window_agreement/window_pass), 6c80af045 (the evidence fragment) and 8e41e37e5 (suite-arm and negative-control figures added to the fragment); all three inside the declared scope.",
+    "done_when": "the done_when names three measured items; the gate that ran (baseline_suite/after_suite over scripts/prototypes/tcv_liuqe_known_answer and scripts/prototypes/efit_field_swap/test_orientation.py) asserts item (3), and items (1)-(2) are measurements recorded in docs/evidence/fragments/converged-forward-solve/tcv-liuqe-corrected-reference.html and in logs/guard.json, logs/grid_motion.json and logs/window.json.",
+    "goal": "the goal is to read the TCV 77549 LIUQE known answer from imas-efit's sign-corrected reference rather than the uncorrected input pulse; measure.py:65 SOURCE_LIUQE_STORE and test_coverage.py:40 now default to /home/ITER/mcintos/public/efit/validation/TCV/77549/liuqe-corrected and the uncorrected path is gone from the readers.",
+    "manifest": "read; status complete, commits f09aa6924, 6c80af045, 8e41e37e5, baseline_suite 1 failed, after_suite 0 failed, negative_control_log EXIT=1 refusing slice 34 with ReferenceSignError.",
+    "write_paths": "the source brief fenced scripts/prototypes/tcv_liuqe_known_answer/measure.py, scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py and docs/evidence/fragments/converged-forward-solve/tcv-liuqe-corrected-reference.html plus logs; the diff touches exactly those three and no fourth file."
+  },
+  "justifications": {
+    "durability": "test_coverage.py:40 feeds the pre-existing test_limited_slice_is_read_only_when_coverage_is_certified from the corrected default and negative_control.log reddens it on the uncorrected store, but the added measurement helpers carry no assertion at all.",
+    "evidence": "baseline_suite.log ends '1 failed, 31 passed' at 234be9a8e and after_suite.log ends '32 passed' EXIT=0 at f09aa6924, both with a bare EXIT= line, so the no-added-failure claim is recorded rather than asserted.",
+    "fit": "the added constants and helpers follow the module's existing docstring-and-dataclass idiom of measure.py:117 and introduce no version, plan or ticket token in any name or comment.",
+    "goal_fidelity": "measure.py:65 and test_coverage.py:40 both default to the corrected DD 3.41.0 source and the fragment records 17 of 17 guard agreements with the grid-motion and window items measured.",
+    "reuse": "guard_verdict wraps check_axis_boundary_sign from scripts/prototypes/efit_field_swap/orientation.py rather than reimplementing it, and a capability search over scripts/ and nova/ found no existing owner for the optional IDS-child, grid-block or window-agreement helpers.",
+    "scope_discipline": "git diff 234be9a8e..8e41e37e5 changes only measure.py, test_coverage.py and the evidence fragment, each inside the brief's declared write paths."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261019T194619559903-review-of-tcv-liuqe-corrected-reference-8e41e37e58b2",
+  "reviewed_base_sha": "234be9a8eb73751146ab7e1f33137e99c2afa033",
+  "reviewed_head_sha": "8e41e37e58b2851885fc1d23e6f82dbf4a6f1af0",
+  "reviewed_run_id": "r-20261019T185022791574-tcv-liuqe-corrected-reference",
+  "scores": {
+    "durability": 14,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T19:59:15.498740+00:00",
+  "total": 105
+}

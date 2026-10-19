@@ -170,6 +170,22 @@ def test_crosscheck_refuses_a_bad_trace_before_building_the_field(monkeypatch):
     assert "polarity +1" in str(refused.value)
 
 
+def test_probe_refuses_a_bad_trace_before_building_the_field(monkeypatch):
+    from scripts.prototypes.efit_field_swap import probe_read
+
+    class UnreachableField:
+        @classmethod
+        def from_record(cls, record):
+            pytest.fail("probe built a field before checking the trace sign")
+
+    monkeypatch.setattr(probe_read, "TraceSplineField", UnreachableField)
+    record = _record(polarity=1, psi=-_scalar_field() + 0.5)
+    with pytest.raises(orientation.ReferenceSignError) as refused:
+        probe_read.probe_record("contradictory", record)
+    assert "slice 7" in str(refused.value)
+    assert "polarity +1" in str(refused.value)
+
+
 def test_trace_record_without_an_in_grid_wall_uses_axis_curvature():
     record = _record(polarity=1, psi=-_scalar_field())
     record.wall_r = np.asarray([[9.0, 9.5]])

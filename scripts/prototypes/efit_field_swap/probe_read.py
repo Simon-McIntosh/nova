@@ -12,16 +12,20 @@ from scripts.prototypes.efit_field_swap.crosscheck import (
     wall_units,
 )
 from scripts.prototypes.efit_field_swap.spline_field import TraceSplineField
-from scripts.prototypes.efit_field_swap.orientation import read_convention
+from scripts.prototypes.efit_field_swap.orientation import (
+    check_trace_record,
+    read_convention,
+)
 from scripts.prototypes.fast_map_production.kernel import read as nova_read
 from scripts.prototypes.read_robustness.census import census
 
 from nova.equilibrium import topology
 from nova.equilibrium.topology import TopologyPolicy
 
-rows = load_pairs()
-for pair_index in (0, 1):
-    record = read_trace_record(rows[pair_index][1])
+
+def probe_record(case, record):
+    """Inspect one trace through the exploratory topology read."""
+    check_trace_record(record)
     field = TraceSplineField.from_record(record)
     cells, offsets = lattice(record.wall_ring, 16)
     geometry = topology.TopologyGeometry.from_cells(cells, offsets, wall_units(record))
@@ -36,7 +40,7 @@ for pair_index in (0, 1):
     previous = jnp.asarray(np.vstack(stack))
     result = census(field, geometry, convention, policy, previous)
     print(
-        rows[pair_index][0],
+        case,
         "candidates",
         int(result.candidates),
         "axes",
@@ -61,3 +65,14 @@ for pair_index in (0, 1):
             round(record.fed_back_psi, 5),
             record.verdict,
         )
+
+
+def main():
+    rows = load_pairs()
+    for pair_index in (0, 1):
+        record = read_trace_record(rows[pair_index][1])
+        probe_record(rows[pair_index][0], record)
+
+
+if __name__ == "__main__":
+    main()

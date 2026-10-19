@@ -1,0 +1,45 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-19T08:30:07.512Z",
+  "dispatched_at": "2026-10-19T08:12:49Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/forward-solver-route-integrity.html:417",
+      "id": "reasoning-1",
+      "reason": "the two directories item 3 removes (`~/.cache/nova/jax-compilation`, `~/.cache/nova/kernels`) are exactly the ones the named routes own, and a benchmark pointed at an arbitrary path sits outside \u00a75's stated \"gate jobs\" aim, so the overbroad sentence does not send a builder's fix to the wrong code path.",
+      "text": "\u00a75 asserts \"Every nova route that enables the persistent cache also disables XLA's per-fusion autotune cache\", but its own enumeration names only three routes, and several nova modules enable the persistent cache by calling `jax.config.update(\"jax_compilation_cache_dir\", ...)` directly (e.g. `benchmarks/receipt_raster_check.py:129`, `benchmarks/receipt_topology_check.py:97`, `benchmarks/solve_compile_cadence.py:161`), which bypass both named functions and receive the export only when launched through the lane or pre-warm",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "0341dc058b5b6fa9af6b4e92d0bb78003744e0e9fc4b8e071aa9369b6c310852",
+  "plan_slug": "forward-solver-route-integrity",
+  "plan_version": 126,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261019T081156107541-plan-review-of-forward-solver-route-integrity",
+  "reviewed_blob_sha": "b0de70a171d2ea6352fad723eff928ed0f8eb5af",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every s5 anchor resolves: `nova/jax/config.py`, `nova/biot/tiledassembly.py` line 589, `scripts/h200_test_lane/run.sh`, `scripts/h200_test_lane/prewarm.sh`, `scripts/nova_lane/run.sh`, the three cited test files, and JAX's `compiler.py` near line 282 (per-process autotune write mode); `docs/research/xla-autotune-cache-on-gpfs.html` is a declared deliverable, not a dangling pointer.",
+    "done_when": "pass \u2014 \u00a75's done-when names its negative control explicitly (\"removing either export fails its test, which is the negative control\"), and each of its three clauses (export tests, runtime-identity test, titan zero-file run with a second-run cache hit) is measurable against a named artifact.",
+    "evidence_paths": "pass \u2014 evidence lands in the tracked `docs/research/xla-autotune-cache-on-gpfs.html`, and the arms use fresh cache roots under node-local `/tmp` as scratch only, never as the record.",
+    "naming": "pass \u2014 s5 introduces no plan labels, ticket numbers or version tags into symbols, filenames or comments; the only new names are JAX's own environment variables and a mechanism-named research file.",
+    "reasoning": "pass \u2014 all three checks hold: the stated root cause (autotune file creates in flight during teardown, matching the still-present 0-byte tmp files and the 09:39:25\u219209:40:32 window) is the one the cited evidence shows; the mechanism (setting `jax_persistent_cache_enable_xla_caches` to `none` before the identity is computed, plus the env export on the lane and pre-warm) is capable of producing the zero-file done-when; and its callers are named (`configure_persistent_compilation_cache`, `tiledassembly.compilation_cache`, the lane prelude, `prewarm.sh`). One sentence is broader than the evidence given \u2014 see the finding.",
+    "single_goal": "pass \u2014 every work item (disable the per-fusion cache on each route, the four-arm titan comparison, the cache inventory and removal) serves the one goal of removing autotune writes to GPFS.",
+    "wiring": "pass \u2014 \u00a75's `data-links` to `s4` resolves, and the \u00a74-after-\u00a75 ordering is stated in the \"Order with \u00a74\" paragraph (line 424) rather than only implied, answering the mutual-write hazard an earlier review raised."
+  },
+  "section_digests": {
+    "_document": "445fb84d09ecbb6217431a6840ec3f076c322cb32793546117ad5f3917d035cd",
+    "s-contract": "83d8d14d75c0216f84acbbb9ef71204975cc6134348d26b5158c593c9abfc624",
+    "s0": "80f310e76317b26c373d1244865223433df267fb8337045d575fe833c75b5858",
+    "s1": "80571c0e208f8095726792cc9d0029962c3966fed6f04e6dcb2ed1a5f352581b",
+    "s2": "f632de7fadccd34387c95c830a73120eb5234de722730bee800322a62a31db41",
+    "s3": "2912ba532e01c1f8a0dd30b1773900e600828c6bbb1cd315c7976868d2a940e5",
+    "s4": "da5c69a471b7ca2d81f157f637c5eda274244e01477238d60f1488532a220978",
+    "s5": "18e88a1dc50d7533207351b040608f128553877091b37d94bb55122c75b43b37"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T08:34:29.595963+00:00"
+}

@@ -10,9 +10,12 @@ from __future__ import annotations
 
 from dataclasses import replace
 
+import jax.numpy as jnp
 import numpy as np
 import pytest
 
+from nova.equilibrium.solve_request import TopologyPolicy
+from nova.linalg.tensor_spline import fit_tensor_spline
 from scripts.prototypes.efit_field_swap.crosscheck import (
     _decision,
     _row,
@@ -20,8 +23,11 @@ from scripts.prototypes.efit_field_swap.crosscheck import (
     domain_rings,
     fitted_geometry,
     lattice,
+    read_state,
     wall_units,
 )
+from scripts.prototypes.efit_field_swap.orientation import read_convention
+from scripts.prototypes.efit_field_swap.spline_field import TraceSplineField
 from scripts.prototypes.efit_field_swap.trace_record import read_trace_record
 
 ITER_RECORD = (
@@ -120,3 +126,42 @@ def test_indexed_wall_loops_keep_the_axis_boundary_and_exclude_obstacles():
     centres = np.asarray([cell.mean(axis=0) for cell in cells])
     assert len(cells) == 60
     assert not np.any(np.all((centres > 0.7) & (centres < 1.3), axis=1))
+
+
+def _paraboloid_field(radial, vertical, centre):
+    """A field whose only stationary point is a minimum at ``centre``."""
+    r = np.asarray(radial)[None, :]
+    z = np.asarray(vertical)[:, None]
+    values = (r - centre[0]) ** 2 + (z - centre[1]) ** 2
+    spline = fit_tensor_spline(
+        jnp.asarray(radial), jnp.asarray(vertical), jnp.asarray(values)
+    )
+    return TraceSplineField(spline=spline)
+
+
+def test_invalid_axis_read_publishes_no_label():
+    """A read that admits no polarity-valid axis publishes no limited/diverted label.
+
+    The declared positive-polarity convention expects the axis at a flux
+    maximum; this field's single interior extremum is a minimum, so the read
+    licenses no axis and leaves it NaN. The adapter must refuse - no boundary
+    and no limited/diverted label - rather than deciding from that read. The
+    negative control restores the label path and this test then fails.
+    """
+    radial = np.linspace(0.0, 4.0, 9)
+    vertical = np.linspace(-2.0, 2.0, 9)
+    field = _paraboloid_field(radial, vertical, (2.0, 0.0))
+    boundary_ring = np.asarray(
+        ((0.25, -1.75), (3.75, -1.75), (3.75, 1.75), (0.25, 1.75))
+    )
+    outcome = read_state(
+        field,
+        boundary_ring,
+        (),
+        read_convention(polarity=1),
+        TopologyPolicy(),
+        resolutions=(16,),
+    )
+    assert outcome.label == "refused invalid axis", outcome.attempts
+    assert not np.any(np.isfinite(outcome.axis))
+    assert not np.any(np.isfinite(outcome.boundary))

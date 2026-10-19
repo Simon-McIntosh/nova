@@ -909,6 +909,7 @@ def read_state(
     walls = tuple(_counterclockwise(ring) for ring in obstacles)
     attempts = []
     uncertified = False
+    refused = False
     coverage = None
     for resolution in resolutions:
         cells, samples = lattice(boundary_ring, resolution, obstacles)
@@ -996,6 +997,19 @@ def read_state(
         sigma = convention.sigma
         boundary = np.asarray(reading.boundary, dtype=np.float64)
         axis = np.asarray(reading.axis, dtype=np.float64)
+        # The read publishes a label only where it licensed an axis. A read
+        # that admitted no polarity-valid axis - the field's extremum carries
+        # the wrong type under the declared convention, or a root pair is
+        # unresolved within the rounding enclosure - leaves the axis NaN, and a
+        # limited/diverted label built from it would be a decision the read
+        # never made. Refuse instead and name the refusal.
+        if not bool(np.asarray(reading.valid)) or not np.all(np.isfinite(axis)):
+            attempts[-1] += (
+                "; refused: the read admitted no polarity-valid axis, so this "
+                "lattice publishes no boundary and no limited/diverted label"
+            )
+            refused = True
+            continue
         boundary_psi = float(field.evaluate(jnp.asarray(boundary)).value)
         axis_psi = float(field.evaluate(jnp.asarray(axis)).value)
         wall_values = np.asarray(
@@ -1020,12 +1034,18 @@ def read_state(
             attempts="; ".join(attempts),
         )
     return _empty_outcome(
-        "coverage uncertified" if uncertified else "unqualified",
+        "refused invalid axis"
+        if refused
+        else ("coverage uncertified" if uncertified else "unqualified"),
         "; ".join(attempts)
         + (
-            "; no lattice certified the census' coverage"
-            if uncertified
-            else "; no lattice admitted a saddle"
+            "; no lattice admitted a polarity-valid axis"
+            if refused
+            else (
+                "; no lattice certified the census' coverage"
+                if uncertified
+                else "; no lattice admitted a saddle"
+            )
         ),
         coverage,
     )

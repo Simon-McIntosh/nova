@@ -39,23 +39,30 @@ this id. Log:
 <code>negative-control-config-line-deleted.log</code>.</p>
 
 <h4>Titan two-pass measurement</h4>
-<p><strong>Not obtained within this node's fence.</strong> The probe driver
-<code>titan_autotune_probe.sh</code> (in the run directory, not the repository) runs the
-certificate row <code>test_analytic_certificate_moments[limited-550]</code> twice per arm
-against a node-local <code>/tmp</code> cache root, planning to count files under any
-<code>xla_gpu_per_fusion_autotune_cache_dir</code> and read the cache guard's hit/miss
-receipt. It was submitted through <code>scripts/nova_lane/run.sh --rungs titan</code> four
-times on 2026-10-19. The titan node (<code>98dci4-gpu-0002</code>, <code>gpu:p100:8</code>)
-showed 5 free cards but only 10&nbsp;G free memory (<code>AllocTRES
-cpu=14,mem=240G,gres/gpu=3</code> of <code>mem=250G</code>), so the 64&nbsp;G default
-request could not be admitted; three submissions (jobs 1289927, 1289930, 1289934) were
-cancelled by the launcher's pending-wait or sat <code>PENDING (Priority)</code> behind
-peer jobs until the fence expired. The arm is not reported as passed or failed. It is
-queued as job <strong>1289934</strong> (<code>--mem 8G --cores 2</code>) and is the
-remainder for a resumed or separately dispatched run.</p>
-<p>What the change rests on, absent that arm: the off-switch is set where the runtime
-identity is hashed (pinned by test), on the second cache route (pinned by test), and in
-both lane exports (pinned by test), and the mutation that removes it fails the pinning
-test. The titan arm was to show the count of autotune files created, not to establish the
-mechanism.</p>
+<p>One titan job (<strong>1290032</strong>, <code>98dci4-gpu-0002</code>, P100, 16m48s,
+exit 0) ran the certificate row <code>test_analytic_certificate_moments[limited-550]</code>
+twice per arm against its own node-local <code>/tmp</code> cache root, with the cache
+guard loaded on the second pass. Autotune files are counted under any
+<code>xla_gpu_per_fusion_autotune_cache_dir</code>.</p>
+<table>
+<thead><tr><th>arm</th><th>pass</th><th>autotune files before &rarr; after</th><th>cache guard (second pass)</th></tr></thead>
+<tbody>
+<tr><td>off (changed revision)</td><td>1</td><td>0 &rarr; 0</td><td>&mdash;</td></tr>
+<tr><td>off (changed revision)</td><td>2</td><td>0 &rarr; 0</td><td>hits 273, misses 0, served entries 264</td></tr>
+<tr><td>base behaviour</td><td>1</td><td>0 &rarr; 1408</td><td>&mdash;</td></tr>
+<tr><td>base behaviour</td><td>2</td><td>1408 &rarr; 1408</td><td>hits 273, misses 0, served entries 1672</td></tr>
+</tbody>
+</table>
+<p>Off: the changed revision creates <strong>zero</strong> autotune files across both
+passes, and its second pass reports <strong>273 compile-cache hits, 0 misses</strong>.
+Base behaviour &mdash; the same job with the key left at JAX's default, the base
+revision's setting for these files &mdash; creates <strong>1408</strong> autotune files on
+its first pass, so the zero is a count that can see a present file and not a cache that
+was never used.</p>
+<p>Honest labels for a reader: the base arm reproduces base behaviour by leaving
+<code>JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES</code> unset rather than checking out the
+base revision; for this question the two differ only in that key's value. And
+<code>/tmp</code> on <code>98dci4-gpu-0002</code> was removed with the allocation, so the
+per-pass logs are gone; the counts above are the ones the launcher log recorded, preserved
+at <code>titan-probe.log</code> in the run directory.</p>
 </section>

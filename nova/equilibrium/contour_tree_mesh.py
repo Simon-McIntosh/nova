@@ -37,11 +37,40 @@ from shapely.geometry import MultiPolygon, Polygon
 
 from nova.equilibrium.wall_mask import WallUnit, inside_polygon
 
-__all__ = ["ContourMesh", "build_contour_mesh"]
+__all__ = ["ContourMesh", "ContourMeshOverflow", "build_contour_mesh"]
 
 DEFAULT_VERTEX_CAPACITY = 4096
 DEFAULT_EDGE_CAPACITY = 16384
 DEFAULT_TRIANGLE_CAPACITY = 8192
+
+
+class ContourMeshOverflow(ValueError):
+    """Refusal when the clipped carrier holds more than a declared capacity.
+
+    The carrier is sized from the geometry it must hold, so an overflow means a
+    caller declared a capacity below the tree centres, the sampling stencil and
+    the vertices the wall segments generate. Both counts are carried so the
+    refusal states them.
+    """
+
+    def __init__(self, required: int, capacity: int, kind: str):
+        self.required = int(required)
+        self.capacity = int(capacity)
+        self.kind = str(kind)
+        super().__init__(
+            f"contour mesh {self.kind} capacity {self.capacity} is below the "
+            f"{self.required} the geometry holds"
+        )
+
+
+def _declared_capacity(kind: str, declared: int | None, required: int) -> int:
+    """Return the capacity to pad to, refusing a ceiling below the carrier."""
+    if declared is None:
+        return required
+    declared = int(declared)
+    if declared < required:
+        raise ContourMeshOverflow(required, declared, kind)
+    return declared
 
 
 def _unit_polygon(unit: WallUnit) -> Polygon | None:
@@ -190,25 +219,15 @@ def _pad(rows, capacity: int, fill):
     return np.concatenate([array, pad], axis=0)
 
 
-def build_contour_mesh(
-    centre_rz,
-    flux,
-    wall_units: Sequence[WallUnit],
-    *,
-    vertex_capacity: int = DEFAULT_VERTEX_CAPACITY,
-    edge_capacity: int = DEFAULT_EDGE_CAPACITY,
-    triangle_capacity: int = DEFAULT_TRIANGLE_CAPACITY,
-) -> ContourMesh:
-    """Build the clipped hex-centre triangulation carrying the contour tree."""
-    centre_rz = np.ascontiguousarray(centre_rz, dtype=np.float64)
-    flux = np.ascontiguousarray(flux, dtype=np.float64)
-    if centre_rz.ndim != 2 or centre_rz.shape[1] != 2:
-        raise ValueError("cell centres must have shape (cells, 2)")
-    if flux.shape != (centre_rz.shape[0],):
-        raise ValueError("one flux value is needed per cell centre")
-    if any(unit.kind == "vessel" for unit in wall_units) is False:
-        raise ValueError("no vessel unit supplied")
+def _clipped_carrier(
+    centre_rz, flux, wall_units: Sequence[WallUnit]
+) -> tuple[list, list, list, list, list, list]:
+    """Return the carrier lists the geometry produces, before any capacity.
 
+    The vertex list begins with the tree centres and grows by one for each
+    wall vertex the clipped triangulation generates, so its length is the
+    size the carrier must hold rather than a formula a wide wall can exceed.
+    """
     scale = float(np.max(np.abs(centre_rz))) if centre_rz.size else 1.0
     tolerance = max(1e-12, 1e-9 * max(1.0, scale))
     centre_valid = _inside_wall_units(centre_rz, wall_units)
@@ -274,40 +293,71 @@ def build_contour_mesh(
                 edge_order[key] = len(edges)
                 edges.append(key)
 
-    overflow = (
-        len(vertices) > vertex_capacity
-        or len(edges) > edge_capacity
-        or len(triangles) > triangle_capacity
+    return (
+        vertices,
+        vertex_psi,
+        vertex_valid,
+        vertex_is_wall,
+        edges,
+        triangles,
+    )
+
+
+def build_contour_mesh(
+    centre_rz,
+    flux,
+    wall_units: Sequence[WallUnit],
+    *,
+    vertex_capacity: int | None = None,
+    edge_capacity: int | None = None,
+    triangle_capacity: int | None = None,
+) -> ContourMesh:
+    """Build the clipped hex-centre triangulation carrying the contour tree.
+
+    A capacity left ``None`` is sized from the carrier the geometry produces,
+    so a wall whose segments generate more vertices than the tree centres
+    cannot overflow a fixed formula. A capacity that is supplied is a declared
+    ceiling: a carrier larger than it refuses with :class:`ContourMeshOverflow`
+    naming both counts, rather than returning a mesh with no valid vertex.
+    """
+    centre_rz = np.ascontiguousarray(centre_rz, dtype=np.float64)
+    flux = np.ascontiguousarray(flux, dtype=np.float64)
+    if centre_rz.ndim != 2 or centre_rz.shape[1] != 2:
+        raise ValueError("cell centres must have shape (cells, 2)")
+    if flux.shape != (centre_rz.shape[0],):
+        raise ValueError("one flux value is needed per cell centre")
+    if any(unit.kind == "vessel" for unit in wall_units) is False:
+        raise ValueError("no vessel unit supplied")
+    (
+        vertices,
+        vertex_psi,
+        vertex_valid,
+        vertex_is_wall,
+        edges,
+        triangles,
+    ) = _clipped_carrier(centre_rz, flux, wall_units)
+    vertex_capacity = _declared_capacity("vertex", vertex_capacity, len(vertices))
+    edge_capacity = _declared_capacity("edge", edge_capacity, len(edges))
+    triangle_capacity = _declared_capacity(
+        "triangle", triangle_capacity, len(triangles)
     )
 
     vertex_rz_arr = _pad(vertices, vertex_capacity, (0.0, 0.0))
+    vertex_psi_arr = _pad(vertex_psi, vertex_capacity, 0.0)
     vertex_valid_arr = _pad(vertex_valid, vertex_capacity, False)
     vertex_is_wall_arr = _pad(vertex_is_wall, vertex_capacity, False)
     edges_arr = _pad(edges, edge_capacity, (-1, -1)).astype(np.int32)
     triangle_arr = _pad(triangles, triangle_capacity, (-1, -1, -1)).astype(np.int32)
     edge_valid_arr = np.zeros(edge_capacity, dtype=bool)
-    edge_valid_arr[: min(len(edges), edge_capacity)] = True
+    edge_valid_arr[: len(edges)] = True
     triangle_valid_arr = np.zeros(triangle_capacity, dtype=bool)
-    triangle_valid_arr[: min(len(triangles), triangle_capacity)] = True
-    vertex_psi_arr = _pad(vertex_psi, vertex_capacity, 0.0)
-    if not overflow and np.any(vertex_valid_arr):
+    triangle_valid_arr[: len(triangles)] = True
+    if np.any(vertex_valid_arr):
         outside_value = float(np.min(vertex_psi_arr[vertex_valid_arr])) - max(
             1.0,
             float(np.ptp(vertex_psi_arr[vertex_valid_arr])),
         )
         vertex_psi_arr[~vertex_valid_arr] = outside_value
-    if overflow:
-        # A truncated mesh would carry triangle or edge indices past the vertex
-        # array. Refuse visibly: mark nothing valid and blank every index, so no
-        # consumer can read a corrupt carrier.
-        vertex_rz_arr = np.zeros_like(vertex_rz_arr)
-        vertex_psi_arr = np.zeros(vertex_capacity, dtype=np.float64)
-        vertex_valid_arr = np.zeros(vertex_capacity, dtype=bool)
-        vertex_is_wall_arr = np.zeros(vertex_capacity, dtype=bool)
-        edges_arr = np.full((edge_capacity, 2), -1, dtype=np.int32)
-        edge_valid_arr = np.zeros(edge_capacity, dtype=bool)
-        triangle_arr = np.full((triangle_capacity, 3), -1, dtype=np.int32)
-        triangle_valid_arr = np.zeros(triangle_capacity, dtype=bool)
 
     return ContourMesh(
         vertex_rz=jnp.asarray(vertex_rz_arr),
@@ -321,7 +371,7 @@ def build_contour_mesh(
         vertex_capacity=vertex_capacity,
         edge_capacity=edge_capacity,
         triangle_capacity=triangle_capacity,
-        overflow=overflow,
+        overflow=False,
     )
 
 

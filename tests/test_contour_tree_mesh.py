@@ -20,6 +20,7 @@ import jax.numpy as jnp  # noqa: E402
 
 from nova.equilibrium.contour_tree_mesh import (  # noqa: E402
     ContourMesh,
+    ContourMeshOverflow,
     build_contour_mesh,
 )
 from nova.equilibrium.wall_mask import material_unit, vessel_unit  # noqa: E402
@@ -129,25 +130,16 @@ def test_euler_characteristic_of_clipped_domain():
     assert v - e + t == 1
 
 
-def test_over_capacity_sets_overflow_flag():
+def test_over_capacity_refuses_with_named_error():
     rz = hex_lattice(9, 9)
     cap = 4
-    mesh = build_contour_mesh(
-        rz, linear_flux(rz), [circle_unit(3.5)], vertex_capacity=cap
-    )
-    assert mesh.overflow is True
-    # an over-capacity build must not hand a consumer a corrupt carrier: the
-    # vertex array is truncated to `cap`, so nothing may be marked valid and no
-    # valid triangle or edge may reference an index at or beyond `cap`.
-    assert not bool(np.asarray(mesh.vertex_valid).any())
-    assert not bool(np.asarray(mesh.vertex_is_wall).any())
-    assert not bool(np.asarray(mesh.edge_valid).any())
-    assert not bool(np.asarray(mesh.triangle_valid).any())
-    v_cap = mesh.vertex_capacity
-    edges = np.asarray(mesh.edges)[np.asarray(mesh.edge_valid)]
-    tris = np.asarray(mesh.triangles)[np.asarray(mesh.triangle_valid)]
-    for index in np.concatenate([edges.ravel(), tris.ravel()], dtype=int):
-        assert 0 <= index < v_cap
+    # an over-capacity build refuses with a named error stating both counts,
+    # rather than returning a truncated carrier a consumer could read as valid.
+    with pytest.raises(ContourMeshOverflow) as refusal:
+        build_contour_mesh(rz, linear_flux(rz), [circle_unit(3.5)], vertex_capacity=cap)
+    assert refusal.value.capacity == cap
+    assert refusal.value.required > cap
+    assert str(cap) in str(refusal.value)
     # a generous capacity on the same input is not an overflow
     ok = build(rz, [circle_unit(3.5)])
     assert ok.overflow is False

@@ -2468,6 +2468,11 @@ class TopologyGeometry:
         tree_centres = (
             centre if len(centre) >= 4 else np.unique(samples.reshape(-1, 2), axis=0)
         )
+        # The carrier is sized from what it must hold: the tree centres, the
+        # sampling stencil and every wall vertex the clipped triangulation
+        # generates. Leaving the capacities unset lets the builder size them
+        # from the carrier it produces, so a wide wall cannot overflow a fixed
+        # formula; a declared capacity that is exceeded refuses instead.
         mesh = build_contour_mesh(
             tree_centres,
             np.zeros(len(tree_centres)),
@@ -2475,11 +2480,10 @@ class TopologyGeometry:
                 WallUnit(np.asarray(u)[:, 0], np.asarray(u)[:, 1], kind="vessel")
                 for u in wall_units
             ),
-            vertex_capacity=len(tree_centres) + len(points) + 1,
-            edge_capacity=12 * (len(tree_centres) + len(points)),
-            triangle_capacity=6 * (len(tree_centres) + len(points)),
         )
         occupied = np.flatnonzero(np.asarray(mesh.vertex_valid))
+        if occupied.size == 0:
+            raise ValueError("topology contour mesh admits no valid vertex")
         vertex_size = int(occupied[-1]) + 2
         edge_size = max(1, int(np.sum(mesh.edge_valid)))
         triangle_size = max(1, int(np.sum(mesh.triangle_valid)))

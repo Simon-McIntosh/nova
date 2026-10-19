@@ -23,7 +23,10 @@ from nova.equilibrium.topology import TopologyPolicy
 from nova.jax.config import configure_dtypes
 from scripts.prototypes.efit_field_swap import crosscheck
 from scripts.prototypes.efit_field_swap.spline_field import TraceSplineField
-from scripts.prototypes.efit_field_swap.orientation import read_convention
+from scripts.prototypes.efit_field_swap.orientation import (
+    ReferenceSignError,
+    read_convention,
+)
 from scripts.prototypes.read_robustness.census import RootCensus
 from scripts.prototypes.tcv_liuqe_known_answer import measure
 
@@ -63,6 +66,31 @@ OBSTACLE = np.asarray(
 def _field(values):
     state = measure.build_state(GRID, GRID, values, (RING,), 0.0, 0.0)
     return TraceSplineField.from_record(state)
+
+
+def test_sign_mismatch_is_refused_before_reading_the_slice(monkeypatch):
+    grid = np.linspace(-1.0, 1.0, 41)
+    radial, vertical = np.meshgrid(grid, grid, indexing="ij")
+    view = dict(
+        index=7,
+        dd_version="3.41.0",
+        plasma_current=-1.0e5,
+        rgrid=grid,
+        zgrid=grid,
+        psi=radial**2 + vertical**2,
+        axis=(0.0, 0.0),
+        xpoints=[(0.8, 0.0)],
+        outline=RING,
+        psi_axis=1.0,
+        psi_boundary=0.0,
+    )
+
+    def read_reached(*args, **kwargs):
+        pytest.fail("topology read reached before checking the reference sign")
+
+    monkeypatch.setattr(crosscheck, "read_state", read_reached)
+    with pytest.raises(ReferenceSignError, match="slice 7 declares DD 3.41.0"):
+        measure.measure_slice(view, (RING,), (16,))
 
 
 def _well():

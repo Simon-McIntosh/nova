@@ -27,34 +27,22 @@ from scripts.prototypes.efit_field_swap.orientation import (
     check_trace_record,
     grid_field,
     grid_value,
+    ids_boundary_points,
+    ids_cocos,
+    ids_declaration,
     read_convention,
 )
 from scripts.prototypes.efit_field_swap.trace_record import read_trace_record
 from scripts.prototypes.tcv_liuqe_known_answer import measure
 
-DD_COCOS = {3: 11, 4: 17}
-
-
-def boundary_points(view):
-    """The boundary the declared span is measured to: the X-points, else the outline."""
-    if view["xpoints"]:
-        return np.asarray(view["xpoints"], dtype=np.float64)
-    if len(view["outline"]):
-        return np.asarray(view["outline"], dtype=np.float64)
-    return None
-
 
 def guard_slice(view, index):
     """Guard one LIUQE slice, returning the refusal or the measured signs."""
-    major = int(str(view["dd_version"]).split(".", 1)[0])
     convention = read_convention(
         dd_version=view["dd_version"], plasma_current=view["plasma_current"]
     )
-    declared = (
-        f"DD {view['dd_version']} (COCOS {DD_COCOS[major]}) with "
-        f"Ip = {view['plasma_current']:+.3f} A"
-    )
-    point = boundary_points(view)
+    declared = ids_declaration(view["dd_version"], view["plasma_current"])
+    point = ids_boundary_points(view)
     field = grid_field(view["rgrid"], view["zgrid"], view["psi"])
     axis_value = grid_value(
         view["rgrid"], view["zgrid"], view["psi"], view["axis"], field=field
@@ -76,7 +64,7 @@ def guard_slice(view, index):
     row = dict(
         index=index,
         dd_version=view["dd_version"],
-        cocos=DD_COCOS[major],
+        cocos=ids_cocos(view["dd_version"]),
         plasma_current=view["plasma_current"],
         declared_sigma=int(np.sign(float(convention.sigma))),
         scalar_span=view["psi_axis"] - view["psi_boundary"],

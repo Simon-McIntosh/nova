@@ -48,10 +48,32 @@ def read_convention(*, polarity=None, dd_version=None, plasma_current=None):
         return TopologyConvention.from_cocos(17, polarity)
     if dd_version is None or plasma_current is None:
         raise ValueError("IDS orientation needs DD version and plasma current")
+    return TopologyConvention.from_cocos(ids_cocos(dd_version), plasma_current)
+
+
+def ids_cocos(dd_version):
+    """COCOS of the Data Dictionary version that wrote an equilibrium."""
     major = int(str(dd_version).split(".", 1)[0])
     if major not in (3, 4):
         raise ValueError(f"unsupported equilibrium DD version: {dd_version}")
-    return TopologyConvention.from_cocos({3: 11, 4: 17}[major], plasma_current)
+    return {3: 11, 4: 17}[major]
+
+
+def ids_declaration(dd_version, plasma_current):
+    """Name the metadata that fixes an equilibrium's flux orientation."""
+    return (
+        f"DD {dd_version} (COCOS {ids_cocos(dd_version)}) with "
+        f"Ip = {plasma_current:+.3f} A"
+    )
+
+
+def ids_boundary_points(view):
+    """Stored X-points, else the outline; None if neither is present."""
+    if view["xpoints"]:
+        return np.asarray(view["xpoints"], dtype=np.float64)
+    if len(view["outline"]):
+        return np.asarray(view["outline"], dtype=np.float64)
+    return None
 
 
 def grid_field(rgrid, zgrid, psi):

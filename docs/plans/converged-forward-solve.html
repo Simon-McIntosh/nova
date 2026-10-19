@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="435">
+<meta name="plan-version" content="436">
 <meta name="plan-modified" content="2026-10-19">
 </head>
 <body>
@@ -1216,6 +1216,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261019T074429511604-review-of-reference-sign-guard-9c58123c5017" data-who="reckon-build" data-when="2026-10-19T08:05:23.706Z">
     <div class="r-comment-body"><p>review-of-reference-sign-guard-9c58123c5017: scores goal_fidelity 19, evidence 18, scope_discipline 16, durability 19, fit 18, reuse 19; added_failure_count 0 from baseline a5ebd580f (32 passed) and head b0e5d6901 (33 passed); three follow-on findings, none blocking; record parses and check-review returns ok:true.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261019T035634203950-reference-sign-guard" data-who="reckon-build" data-when="2026-10-19T07:43:17Z">
+    <div class="r-comment-body"><p>reference-sign-guard: TCV comparison refuses 12/12 sign-inconsistent LIUQE slices; both trace read sites refuse a contradictory polarity before field construction; all 28 accepted trace rows are identical before and after wiring; baseline 32 passed and head 33 passed with the same slow test deselected.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

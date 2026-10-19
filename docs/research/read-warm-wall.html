@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova"><meta name="reckon-type" content="research">
+<meta name="plan-slug" content="read-warm-wall"><meta name="plan-title" content="Topology read warm wall by stage">
+<meta name="plan-summary" content="H200 four-rung profile locates the topology read warm wall in its contour-tree stage">
+<meta name="plan-status" content="reference"><meta name="plan-informs" content="converged-forward-solve">
+<meta name="plan-evidence-for" content="converged-forward-solve"><meta name="plan-verifies" content="converged-forward-solve#s2">
+<meta name="plan-source" content="H200 analytic topology-read ladder"><meta name="plan-source-quality" content="primary">
+<meta name="plan-tags" content="equilibrium,topology,performance">
+<title>Topology read warm wall by stage | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css"><link rel="stylesheet" href="/_shared/dashboard.css">
+</head><body><main class="plan-doc">
+<header><p class="eyebrow">Research input</p><h1>Topology read warm wall by stage</h1><p class="lead">On the H200, the contour tree stage takes 80.328 s of a 81.315 s limited read at 10,000 cells. Its four-rung exponent is 1.472; the read remains above the 10 s target. The whole-minus-tree remainder is 0.987 s, so a sparse tree repair has room to reach the target, but this node does not implement it.</p></header>
+<section id="method"><h2>Method and provenance</h2>
+<p>The unchanged <code>nova.equilibrium.topology.read</code> receives the ladder's limited and diverted analytic fields and realised hex geometries at requested 550, 2,000, 5,000 and 10,000 cells. The prototype <code>scripts/prototypes/read_warm_wall/measure.py</code> times the whole read and four separately compiled stages: sampled field, contour tree, null census and support selection. Each executable runs once to warm, then its second call is timed through <code>jax.block_until_ready</code>. Compilation and geometry construction are excluded. The terminal support and component-label calls are nested diagnostics; their walls overlap support selection and are not additive rows. The split read must match the whole read's validity and fragment-component labels before a receipt is written.</p>
+<p>All eight rows ran inside H200 job <code>1289901</code> on <code>98dci4-gpu-0003</code> with <code>gres/gpu:1</code>; JAX reports <code>cuda:0</code> in each row. The job log prints the imported <code>nova</code> and <code>topology</code> paths and revision <code>32f0f3edeb4ca3c0bc4eee1a7ba31559992ea4bd</code>. Its full log and per-row JSON receipts are under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T075302603047-read-warm-wall-profile/h200_split_1h.log</code> and <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T075302603047-read-warm-wall-profile/h200_split/</code>. The maximum absolute difference between the four separate stage walls summed and the whole read wall is 2.5% across the eight rows; small share values and values near 100% should be read with that split-executable limit. XLA logged internal CUDA delay-kernel timing warnings before the diverted 550-cell and 10,000-cell rows; these walls use host <code>perf_counter</code> through <code>block_until_ready</code>, not that internal event timer.</p>
+</section>
+<section id="walls"><h2>Warm walls</h2>
+<p>The 10,000-cell limited whole read is 81.315 s, +0.9% against the previous 80.623 s H200 ladder reading. Both 10,000-cell reads return valid topology. The diverted total is 75.491 s. The stage walls below exclude compilation.</p>
+<table><caption>H200 warm wall by row [s]. Component labels are one terminal-support subcall, not the complete support selection.</caption><thead><tr><th>Case</th><th>Requested cells</th><th>Realised cells</th><th>Whole read</th><th>Sampled field</th><th>Contour tree</th><th>Null census</th><th>Support selection</th><th>Terminal support</th><th>Labels</th><th>Valid</th></tr></thead><tbody><tr><td>diverted</td><td>550</td><td>550</td><td>1.082</td><td>0.00032</td><td>1.097</td><td>0.0018</td><td>0.006</td><td>0.0021</td><td>0.0006</td><td>yes</td></tr>
+<tr><td>diverted</td><td>2000</td><td>2000</td><td>6.914</td><td>0.00036</td><td>7.043</td><td>0.0020</td><td>0.009</td><td>0.0027</td><td>0.0011</td><td>yes</td></tr>
+<tr><td>diverted</td><td>5000</td><td>5000</td><td>26.706</td><td>0.00032</td><td>26.635</td><td>0.0016</td><td>0.015</td><td>0.0041</td><td>0.0024</td><td>yes</td></tr>
+<tr><td>diverted</td><td>10000</td><td>10000</td><td>75.491</td><td>0.00052</td><td>73.585</td><td>0.0018</td><td>0.027</td><td>0.0075</td><td>0.0021</td><td>yes</td></tr>
+<tr><td>limited</td><td>550</td><td>550</td><td>1.136</td><td>0.00014</td><td>1.128</td><td>0.0014</td><td>0.005</td><td>0.0020</td><td>0.0008</td><td>yes</td></tr>
+<tr><td>limited</td><td>2000</td><td>2000</td><td>7.565</td><td>0.00030</td><td>7.403</td><td>0.0014</td><td>0.007</td><td>0.0029</td><td>0.0012</td><td>yes</td></tr>
+<tr><td>limited</td><td>5000</td><td>5000</td><td>28.413</td><td>0.00063</td><td>29.065</td><td>0.0012</td><td>0.012</td><td>0.0040</td><td>0.0017</td><td>yes</td></tr>
+<tr><td>limited</td><td>10000</td><td>10000</td><td>81.315</td><td>0.00015</td><td>80.328</td><td>0.0018</td><td>0.021</td><td>0.0083</td><td>0.0028</td><td>yes</td></tr></tbody></table>
+<figure><img src="/nova/figures/converged-forward-solve/read-warm-wall-profile/warm-stages.svg" alt="Log-log warm wall against realised cell count for the whole topology read and each stage, limited and diverted, with a 10 second target"><figcaption>One H200 job, two analytic cases and four realised carrier sizes. The blue stage is the dominant limited 10,000-cell stage; grey points mark the whole read where its curve nearly overlaps the tree. The dotted horizontal mark is the 10 s whole-read target. Each stage is timed as a separately warmed executable, so modest differences between their sum and the whole read arise from splitting JAX fusion and normal run variation.</figcaption></figure>
+<table><caption>Four-rung log-log fitted exponent and 10,000-cell standalone stage wall divided by the whole-read wall. Nested rows overlap support selection.</caption><thead><tr><th>Case</th><th>Stage</th><th>Exponent</th><th>10,000-cell wall [s]</th><th>Share of whole read</th></tr></thead><tbody><tr><td>limited</td><td>component labels (nested)</td><td>0.426</td><td>0.00283</td><td>0.0035%</td></tr>
+<tr><td>limited</td><td>contour tree</td><td>1.472</td><td>80.328</td><td>98.7860%</td></tr>
+<tr><td>limited</td><td>null census</td><td>0.064</td><td>0.00184</td><td>0.0023%</td></tr>
+<tr><td>limited</td><td>sampled field</td><td>0.173</td><td>0.00015</td><td>0.0002%</td></tr>
+<tr><td>limited</td><td>support selection</td><td>0.472</td><td>0.021</td><td>0.0254%</td></tr>
+<tr><td>limited</td><td>terminal support (nested)</td><td>0.456</td><td>0.00825</td><td>0.0102%</td></tr>
+<tr><td>limited</td><td>whole read</td><td>1.469</td><td>81.315</td><td>100.0000%</td></tr>
+<tr><td>diverted</td><td>component labels (nested)</td><td>0.471</td><td>0.00212</td><td>0.0028%</td></tr>
+<tr><td>diverted</td><td>contour tree</td><td>1.449</td><td>73.585</td><td>97.4755%</td></tr>
+<tr><td>diverted</td><td>null census</td><td>-0.010</td><td>0.00181</td><td>0.0024%</td></tr>
+<tr><td>diverted</td><td>sampled field</td><td>0.125</td><td>0.00052</td><td>0.0007%</td></tr>
+<tr><td>diverted</td><td>support selection</td><td>0.505</td><td>0.027</td><td>0.0361%</td></tr>
+<tr><td>diverted</td><td>terminal support (nested)</td><td>0.417</td><td>0.00752</td><td>0.0100%</td></tr>
+<tr><td>diverted</td><td>whole read</td><td>1.463</td><td>75.491</td><td>100.0000%</td></tr></tbody></table>
+</section>
+<section id="mechanism"><h2>Dominant mechanism and repair</h2>
+<p><code>topology.py:2976</code> calls the contour-tree builder. In <code>contour_tree.py</code>, the carrier-edge pass at line 237 and two vertex sweeps at line 364 iterate over growing carrier arrays; the split-node pass at line 186 scans the edge table for every vertex, and lines 482–488 form a dense node-by-vertex equality matrix. These repeated scans and the dense pairwise array explain the measured superlinear contour-tree stage. The read's component propagation is not the dominant wall; its standalone terminal call is shown in the table.</p>
+<p>The proposed repair is to use sparse indexed event and arc buffers for the sweeps and split insertions, and a scatter-built inverse vertex map in place of the dense equality matrix. Preserve stable value/index ordering, wall contact semantics, tree arcs, axis and X-point choices, and every cell's component labels and membership. Sorting then sets an expected O(N log N) cost, approximately exponent 1.0–1.2 over this range. The performance test should run the same four rungs for both analytic cases on an H200, assert a tree exponent at most 1.2 and a valid whole read at 10,000 cells no slower than 10 s, and compare tree structure and all topology outputs with the current implementation. The current 10,000-cell tree needs at least 8.9× speedup using the conservative 0.987 s whole-minus-tree remainder; that leaves a measured non-tree wall below 10 s, so the target looks feasible but unproved.</p>
+<p>The focused baseline and head topology-read gates each passed 1/1 in fresh CPU processes. A broader three-test probe completed with the same two 300 s membership-test timeout IDs on both revisions; it added no failure ID. This node changes only prototype and evidence files. Product repair and a post-repair H200 gate remain separate work.</p>
+</section></main></body></html>

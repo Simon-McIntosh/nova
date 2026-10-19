@@ -7,7 +7,7 @@ terminal flux is bit-identical to the seed and the booked height is exactly
 <code>0.6</code>. The recorded <code>3.86e-3</code> offset does not reproduce at HEAD, nor at
 the recorded base revision <code>a711e2b0</code> with the recorded command, nor under a
 one-core or four-core host configuration. The test
-<code>test_one_augmented_newton_program_servers_free_and_pinned_requests</code> passes, both
+<code>test_one_augmented_newton_program_serves_free_and_pinned_requests</code> passes, both
 alone and as part of its file. Neither party named by the brief is wrong at HEAD: the
 solver holds the unknown the free layout should hold, and the test's expectation is the
 correct physical expectation for this seed.</p>
@@ -47,11 +47,20 @@ omitted pin and an inactive pair are equivalent on this route.</p>
 <h3 id="vertical-pin-free-height-history">When the test landed</h3>
 
 <p id="vertical-pin-free-height-327b8dfb1"><code>327b8dfb1</code> ("make elongated free
-solve stall visibly") rewrote the test on 2026-10-18. The test file, <code>constraint.py</code>
-and <code>fixed_point.py</code> are byte-identical between <code>327b8dfb1</code> and HEAD
-(sha256 <code>a0df2963…</code> for the test, <code>7ec0441b…</code> for
-<code>fixed_point.py</code>), and no commit in <code>327b8dfb1..HEAD</code> touches either
-module. The test therefore passed when it landed. It is a <code>slow</code> test, so the
+solve stall visibly") rewrote the test on 2026-10-18. <strong>Run directly at that
+revision:</strong> the commit was extracted with
+<code>git archive 327b8dfb1 nova tests scripts pyproject.toml conftest.py uv.lock</code> into
+a scratch directory, and the file was run there with the archive on
+<code>PYTHONPATH</code>. Isolation is proven by the import, which resolved inside the
+extract: <code>nova.__file__ = …/scratch/archive-327b8dfb1/nova/__init__.py</code>.
+<strong>Verdict: 6 passed, exit 0</strong> — the test passed when it landed.</p>
+
+<p id="vertical-pin-free-height-327b8dfb1-cross-check">That run is the evidence; the
+byte-identity argument below is only a cross-check on it. The test file,
+<code>nova/equilibrium/constraint.py</code> and <code>nova/equilibrium/fixed_point.py</code>
+are byte-identical between <code>327b8dfb1</code> and HEAD (sha256 <code>a0df2963…</code>
+for the test, <code>7ec0441b…</code> for <code>fixed_point.py</code>), and no commit in
+<code>327b8dfb1..HEAD</code> touches either module. It is a <code>slow</code> test, so the
 default <code>-m 'not slow'</code> lane does not collect it.</p>
 
 <h3 id="vertical-pin-free-height-record">The recorded offset</h3>
@@ -107,9 +116,12 @@ file) over <code>tests/equilibrium/test_solve_vertical_pin.py</code>,
 <code>tests/test_fixed_point.py</code>, <code>tests/test_constraint_active_set.py</code>,
 <code>tests/test_equilibrium_constraint_protocol.py</code> and
 <code>tests/test_forward_constraints.py</code>. Each arm collected <strong>71 passed</strong>
-and the same two failures, <code>test_eliminated_constraint_runs_through_typed_solve_without_retrace</code>
-and <code>test_eliminated_constraint_reports_no_root_and_refuses_multiple_rows</code>. Both
-ids fail identically in both arms, so neither is introduced by this node.
+and the same two failures,
+<code>tests/test_equilibrium_constraint_protocol.py::test_eliminated_constraint_runs_through_typed_solve_with_outer_trace</code>
+(<code>tests/test_equilibrium_constraint_protocol.py:417</code>) and
+<code>tests/test_equilibrium_constraint_protocol.py::test_eliminated_constraint_reports_no_root_and_refuses_multiple_rows</code>
+(<code>tests/test_equilibrium_constraint_protocol.py:492</code>). Both ids fail identically in
+both arms, so neither is introduced by this node.
 <strong>No added failure.</strong> Whether those two are red on the base independently of
 this node is not settled here: this node produced no source delta, so the pair is the same
 on both sides by construction, and their prior status belongs to the node that owns that

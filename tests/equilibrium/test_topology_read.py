@@ -2712,6 +2712,15 @@ def _dense_cut_current(state, reading, field, resolution):
     return float(np.sum(weight * density * (normalized <= 1)))
 
 
+# Booked current against the independent cut-cell quadrature at the coarse tie.
+# Measured with the normal-form lobe owner on the tie pair: booked 128.416249 /
+# 129.730881 A against 32x32 integrals 130.488250 / 131.468864 A, gaps of 1.59%
+# and 1.32%. The direct integral moves at most 0.12% between the 16, 32 and 64
+# subdivisions of the same cut cells, so the bound is the larger gap plus that
+# measured grid noise, not a slack chosen to admit the gap.
+TIE_BOOKED_CURRENT_REL = 0.02
+
+
 @pytest.mark.timeout(900)
 @pytest.mark.slow
 def test_census_keeps_the_wall_contact_saddle_across_the_adjacent_pair():
@@ -2806,7 +2815,9 @@ def test_census_keeps_the_wall_contact_saddle_across_the_adjacent_pair():
         currents.append(float(np.asarray(raw)))
         independent_current = _dense_cut_current(state, reading, moving, 32)
         independent_currents.append(independent_current)
-        assert currents[-1] == pytest.approx(independent_current, rel=0.15), (
+        assert currents[-1] == pytest.approx(
+            independent_current, rel=TIE_BOOKED_CURRENT_REL
+        ), (
             f"booked current {currents[-1]!r} disagrees with direct cut-cell "
             f"quadrature {independent_current!r} at {offset!r}"
         )

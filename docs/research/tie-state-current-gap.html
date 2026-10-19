@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="tie-state-current-gap">
+  <meta name="plan-title" content="Booked versus integrated current at the 282-cell tie pair">
+  <meta name="plan-summary" content="With the normal-form lobe owner and the axis-persistence fix on main, the booked current at the tie pair agrees with an independent cut-cell quadrature to 1.6 percent, and the direct integral is grid-converged to 0.12 percent">
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-verifies" content="converged-forward-solve#s3">
+  <meta name="plan-recorded-at" content="2026-10-19">
+  <meta name="plan-verdict" content="resolved">
+  <title>Booked versus integrated current at the 282-cell tie pair | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+  <header>
+    <h1>Booked versus integrated current at the 282-cell tie pair</h1>
+    <p class="lead">With the normal-form lobe owner and the axis-persistence fix on <code>main</code>, the booked current at the tie pair is within 1.6% of an independent cut-cell quadrature of the physical field, and the direct integral does not move more than 0.12% with a fourfold change in quadrature grid. The bound is tightened from <code>rel=0.15</code> to <code>rel=0.02</code>.</p>
+  </header>
+
+  <section id="tie-state-current-gap-method">
+    <h2>Method and provenance</h2>
+    <p>The measurement runs in a scratch tree assembled from the fix revision rather than the worktree base, because the worktree base predates the fix. <code>/home/ITER/mcintos/Code/nova</code> is at <code>f4545ae4e</code>, and the only difference between it and <code>3d7463526</code> is one run-state JSON, so the checkout's <code>nova</code>, <code>scripts</code>, <code>tests</code>, <code>benchmarks</code>, <code>pyproject.toml</code> and <code>conftest.py</code> are the <code>3d7463526</code> code tree. Those are copied into <code>&lt;run&gt;/combined</code> and this node's committed test file is laid over it. Every log header prints <code>nova.__file__</code> and <code>kernel.__file__</code>, both resolving under that scratch tree.</p>
+    <p>The diverted certified carrier is built at 250 requested cells (282 realised) through <code>scripts/prototypes/fast_map_production/tie_probe.py</code>, which resolves the machine cache through <code>NOVA_ANALYTIC_ORACLE_CACHE</code> and the jet fixture through <code>nova.database.filepath.operand_cache_root()</code>. The root prior is warmed from offset −0.20 through 0.16 in 0.01 steps, as the read test does, and both tie offsets are evaluated. Orientation revision <code>affa72be0</code>; fix revision <code>3d7463526</code>. Logs and receipts are in run <code>r-20261019T081219211903-tie-state-current-gap</code>: <code>measure.log</code>, <code>measure_receipt.json</code>, <code>arm_baseline.log</code> and <code>arm_after.log</code>.</p>
+  </section>
+
+  <section id="tie-state-current-gap-measurement">
+    <h2>The measured gap</h2>
+    <table>
+      <thead><tr><th>Offset</th><th>Read valid</th><th>Booked current [A]</th><th>Direct 16×16 [A]</th><th>Direct 32×32 [A]</th><th>Direct 64×64 [A]</th><th>Gap vs 32×32</th></tr></thead>
+      <tbody>
+        <tr><td>0.1732</td><td>true</td><td>128.416249</td><td>130.352924</td><td>130.488250</td><td>130.334347</td><td>1.59%</td></tr>
+        <tr><td>0.17325</td><td>true</td><td>129.730881</td><td>131.626072</td><td>131.468864</td><td>131.473565</td><td>1.32%</td></tr>
+      </tbody>
+    </table>
+    <p>The read is valid and qualified at both offsets. The gap of 13% recorded by the seed-census node does not survive the normal-form lobe owner: the booked current moved up to within 1.3–1.6% of the independent integral. The residual is a booking approximation on the coarse map, not a region difference: the booked support and the direct integral cover the same four selected cut cells, so the two numbers are two ways of evaluating one region.</p>
+    <p>The direct integral's own grid dependence bounds how tightly the two can be compared. Between 16×16, 32×32 and 64×64 points per triangle the direct current moves at most 0.118% (at offset 0.1732, from 130.334347 to 130.488250), so the smaller grid puts the two booked values 1.59% and 1.32% from the physical integral with a quadrature floor of about 0.12%. A fourfold refinement to 64×64 does not close the gap — so the looser tolerance of <code>rel=0.15</code> was hiding a real, coarse-map booking approximation, and the tighter bound is the honest one.</p>
+    <figure>
+      <img src="/nova/figures/converged-forward-solve/tie-state-current-gap/tie-pair-current-gap.svg" alt="Poloidal panel of the selected cut cells at both tie offsets, the wall, the magnetic axis and the admitted X-point.">
+      <figcaption>One panel per tie offset. The teal outlines are the four cells the read selects as cut cells — the region the booking books and the region the quadrature integrates — over the machine wall; both null sets are marked, the magnetic axis with a solid triangle, the admitted X-point with a filled cross and the remaining qualified null hollow. The same four cells are selected at both offsets, so the region does not move: the booked and integrated currents differ only by the coarse-map approximation inside these cells. Regenerate with <code>docs/figures/converged-forward-solve/tie-state-current-gap/render_tie_pair.py</code>, which paints through <code>nova.media</code> (<code>poloidal_axes</code>, <code>draw_wall</code>, <code>draw_nulls</code>) and takes its legend glyphs from the same artists those painters draw.</figcaption>
+    </figure>
+  </section>
+
+  <section id="tie-state-current-gap-attribution">
+    <h2>Booking or region?</h2>
+    <p>By measurement the residual is a booking approximation, not a different region. The direct quadrature in <code>_dense_cut_current</code> selects the same cells the booking tags — <code>reading.membership &gt; 0</code>, four cells, asserted in the helper — and integrates the profile's current density over each cell's own fan with the read's <code>path_weight</code>. The booked value is the same cells evaluated through the read's fitted cut representation. There is no uncovered or double-counted area: the two integrals differ only in how the field and profile are evaluated inside identical cells, and that difference is 1.3–1.6% on the coarse 282-cell map. The gap was previously unmeasurable because the read refused the axis at both offsets under the pre-fix persistence gate; with the fix merged (<code>PERSISTENCE_ULP_FLOOR</code>, 8 ULP) the axis is admitted (persistence 4.189e-07 against a floor of 1.53e-17) and the comparison runs.</p>
+  </section>
+
+  <section id="tie-state-current-gap-assertion">
+    <h2>The assertion</h2>
+    <p>The booked-current bound is tightened from <code>rel=0.15</code> to <code>rel=0.02</code>, the larger measured gap (1.59%) plus the measured quadrature floor (0.12%), stated in the constant's comment. It is not widened to absorb a gap: the bound now sits just above the agreement the code achieves. The focused gate and both suite arms over <code>tests/equilibrium/test_topology_read.py</code> are recorded in the run directory; the file's last item, <code>test_census_neighbour_proposals_keep_saddles_across_coarse_ties[500-…]</code>, is memory-unbounded and is recorded as a failure present in both arms with the measured OOM that established it.</p>
+  </section>
+</main></body>
+</html>

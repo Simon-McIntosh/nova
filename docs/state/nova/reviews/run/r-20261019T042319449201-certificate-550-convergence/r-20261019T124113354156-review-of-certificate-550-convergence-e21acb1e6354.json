@@ -1,0 +1,78 @@
+{
+  "absent": [],
+  "added_failure_count": 1,
+  "added_failure_ids": [
+    "tests/equilibrium/test_certificate_550_convergence.py::test_certified_limited_carrier_root_tangent"
+  ],
+  "assertion_analysis": [
+    {
+      "failure_condition": "Reverting the implicit tangent (deleting the _stationary_position call at nova/equilibrium/fixed_points.py:650) makes the JVP of a converged root zero while the central difference stays (0, 0.1), so the allclose at tests/equilibrium/test_certificate_550_convergence.py:41 and :115 reddens; the base-tree copy of the same test demonstrates exactly this (exports/carrier_tangent_base_final.log, jvp=[0. 0.] central=[0. 0.1], EXIT=1).",
+      "lines": "tests/equilibrium/test_certificate_550_convergence.py:41,115-116"
+    },
+    {
+      "failure_condition": "The two sides are independent sources - the left is jax.jvp through the code under test, the right is a central finite difference of the same code at h=1/4096 - so no assertion compares a value against the variable the test passed in; the guard at line 116 (abs(tangent[1]) > 0.05) additionally fails if the implicit solve returns a trivially zero tangent.",
+      "lines": "tests/equilibrium/test_certificate_550_convergence.py:115-116"
+    },
+    {
+      "failure_condition": "The node's own measure, the 550-cell row reaching 1e-12, is asserted nowhere in the landed tree: the surviving carrier test has no convergence assertion (docs/research/certificate-550-convergence.html:47 states so), so a regression that widens the stall would leave the after suite green on this node's target.",
+      "lines": "tests/equilibrium/test_certificate_550_convergence.py:46-116"
+    }
+  ],
+  "call_sites": [
+    "nova/equilibrium/support_read.py:99",
+    "scripts/prototypes/fast_map_production/solver.py:280",
+    "scripts/prototypes/fast_map_production/solver.py:760",
+    "scripts/prototypes/fast_map_production/program.py:172",
+    "scripts/prototypes/lean_map/forward.py:65"
+  ],
+  "completed_at": "2026-10-19T13:04:02.910Z",
+  "dispatched_at": "2026-10-19T12:42:04Z",
+  "findings": [
+    {
+      "file": "tests/equilibrium/test_certificate_550_convergence.py",
+      "line": "46",
+      "severity": "follow-on",
+      "text": "follow-on: test_certified_limited_carrier_root_tangent loads the published 553-cell mesh but places a synthetic quadratic field and synthetic rows on it (lines 78-101) and asserts only the root tangent against a central difference (lines 115-116); it carries no assertion of the node's measure, so nothing in the suite reddens when the 550-cell convergence regresses further. The strict-xfail convergence assertion that commit 3bab5a7fe added (test_certified_limited_carrier_convergence_is_open at 3bab5a7fe, removed in e5ca25969) was the only executable record of the open stall, and after its removal the 1.2319931459852727 residual is documented in prose alone (docs/research/certificate-550-convergence.html:62). This holds no node: the coordinator asked for the tangent test rather than a convergence assertion."
+    },
+    {
+      "file": "docs/research/certificate-550-convergence.html",
+      "line": "48",
+      "severity": "follow-on",
+      "text": "follow-on: the recorded after_suite ran at revision 90829b93b (exports/after_suite.log:1), four commits and two test-file rewrites behind the reviewed head e21acb1e6, so its one failure - the setup error on test_certified_limited_carrier_root_tangent, a GPU-only subprocess run under the suite's CPU backend - is the added failure this record carries, and it measures a superseded fixture rather than the landed test file; the arm's PASSED counts likewise do not apply to the head. The head test does pass in the focused run (exports/carrier_tangent_head_final.log, EXIT=0), and the worker records the gap in the manifest, so the omission is disclosed rather than hidden."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "Read commit by commit over a711e2b064f840d153972c1690d4af82e3f6a365..e21acb1e635445460e21ef8494526303cad85916: 20 commits, 5 files, 339 insertions and no deletions - fixed_points.py adds the custom_jvp tangent, solver.py adds the --diagnose-step diagnostics, a new test file, and the research and evidence-fragment docs.",
+    "done_when": "Clause (1) is met - docs/research/certificate-550-convergence.html:24-46 gives the merit at ten step scales, Taylor slope 1.0000000074 and the strict-decrease acceptance test with threshold 0.0012319931459852727; clause (2) is unmet - no 1e-12 convergence, and the committed cached-carrier test (tests/equilibrium/test_certificate_550_convergence.py:46-116) asserts the root tangent, not convergence; clause (3) is partial - the two six-row jobs were cancelled after their 550-cell rows (docs/research/certificate-550-convergence.html:51) and both arms are recorded.",
+    "goal": "The node's goal is to find why the certified 550-cell limited carrier's forward solve rejects its only Newton correction and make it converge; the landed change delivers an implicit stationary-root tangent in nova/equilibrium/fixed_points.py:571-600, while the manifest landing line records the carrier still at residual 0.0012319931459852727, converged=false.",
+    "manifest": "Read: status complete, the landing line records the implicit root tangent met and 550 convergence not met with residual 0.0012319931459852727 and slope 1.000009, with baseline_suite (2 failures) and after_suite (1 failure, revision 90829b93b) as single-line JSON and negative_control_log exports/carrier_tangent_base_final.log.",
+    "write_paths": "The source fence (prompt.txt:91-98) names scripts/prototypes/fast_map_production, nova/equilibrium/solve.py, nova/equilibrium/solve_request.py, the test file, the research doc, the evidence fragment and the figure directory; the diff touches five of them plus nova/equilibrium/fixed_points.py, which resume-2-advice.txt:1 states was added to the grant."
+  },
+  "justifications": {
+    "durability": "tests/equilibrium/test_certificate_550_convergence.py:41 and :115 compare the JVP against a central difference computed from the same code, and the base-tree copy reddens on the removed tangent (exports/carrier_tangent_base_final.log, EXIT=1, jvp=[0. 0.] central=[0. 0.1]).",
+    "evidence": "The rejection is measured and recorded rather than claimed - the merit table, Taylor slope 1.0000000074 and the strict-decrease acceptance test with its threshold at docs/research/certificate-550-convergence.html:24-46 - with receipts under exports/, though the after suite ran at 90829b93b rather than the reviewed head.",
+    "fit": "The addition follows the module's existing custom_jvp idiom at nova/equilibrium/fixed_point.py:2968 and introduces no banned name or plan label.",
+    "goal_fidelity": "The amended deliverable lands in nova/equilibrium/fixed_points.py:571-600 (the implicit stationary-root tangent) but the goal's convergence objective is unmet: the manifest landing line records residual 0.0012319931459852727 with converged=false.",
+    "reuse": "nova/equilibrium/fixed_point.py:2968 (solve.defjvp / implicit_tangent) and nova/equilibrium/forward_operator.py:546 (_implicit_level_root) already own implicit root differentiation; _stationary_position at nova/equilibrium/fixed_points.py:571 re-implements the mechanism without extending or extracting either owner.",
+    "scope_discipline": "Every path in the base..head diff (git diff --stat a711e2b064f840d153972c1690d4af82e3f6a365..e21acb1e635445460e21ef8494526303cad85916) is inside the fence at prompt.txt:91-98, with nova/equilibrium/fixed_points.py granted at resume-2-advice.txt:1; no file outside the fence is touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to find why the certified 550-cell limited carrier's forward solve rejects its only Newton correction and make it converge; the landed change delivers an implicit stationary-root tangent in nova/equilibrium/fixed_points.py:571-600, while the manifest landing line records the carrier still at residual 0.0012319931459852727, converged=false.\nVERDICT done_when: Clause (1) is met - docs/research/certificate-550-convergence.html:24-46 gives the merit at ten step scales, Taylor slope 1.0000000074 and the strict-decrease acceptance test with threshold 0.0012319931459852727; clause (2) is unmet - no 1e-12 convergence, and the committed cached-carrier test asserts the root tangent, not convergence; clause (3) is partial - the six-row jobs were cancelled after their 550-cell rows and both arms are recorded.\nVERDICT write_paths: The source fence (prompt.txt:91-98) names seven paths and the diff touches five of them plus nova/equilibrium/fixed_points.py, whose grant was widened at resume-2-advice.txt:1.\nVERDICT manifest: Read; status complete, the landing line records the tangent met and 550 convergence not met with residual 0.0012319931459852727 and slope 1.000009, with both suite arms and the negative-control log recorded.\nVERDICT diff: Read commit by commit over a711e2b0..e21acb1e6: 20 commits, 5 files, 339 insertions and no deletions.\nCALL_SITES: nova/equilibrium/support_read.py:99, scripts/prototypes/fast_map_production/solver.py:280, scripts/prototypes/fast_map_production/solver.py:760, scripts/prototypes/fast_map_production/program.py:172, scripts/prototypes/lean_map/forward.py:65\nSCORE goal_fidelity: 12\nSCORE evidence: 12\nSCORE scope_discipline: 19\nSCORE durability: 14\nSCORE fit: 17\nSCORE reuse: 10\nFINDING tests/equilibrium/test_certificate_550_convergence.py:46 follow-on: the cached-carrier test asserts only the root tangent on a synthetic field over the carrier mesh, so the suite no longer reddens on the node's own 550-convergence measure.\nFINDING docs/research/certificate-550-convergence.html:48 follow-on: the recorded after suite ran at revision 90829b93b, not the reviewed head, so its one failure measures a superseded fixture.\n",
+  "review_run_id": "r-20261019T124113354156-review-of-certificate-550-convergence-e21acb1e6354",
+  "reviewed_base_sha": "a711e2b064f840d153972c1690d4af82e3f6a365",
+  "reviewed_head_sha": "e21acb1e635445460e21ef8494526303cad85916",
+  "reviewed_run_id": "r-20261019T042319449201-certificate-550-convergence",
+  "scores": {
+    "durability": 14,
+    "evidence": 12,
+    "fit": 17,
+    "goal_fidelity": 12,
+    "reuse": 10,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T13:11:06.211502+00:00",
+  "total": 84
+}

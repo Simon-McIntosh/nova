@@ -2803,20 +2803,7 @@ def test_census_keeps_the_wall_contact_saddle_across_the_adjacent_pair():
             moving, state["previous"][1], pitch, state["policy"]
         )
         assert bool(np.asarray(primary.valid))
-        if not bool(np.asarray(reading.valid and reading.qualified)):
-            # The read rejects the magnetic axis at the tie pair (axis flux
-            # nan), so no booked current is available to compare. The root
-            # persistence enclosure added to the read in
-            # scripts/prototypes/fast_map_production/kernel.py (commit
-            # 78ed4ac03) exceeds the axis-to-saddle flux separation here
-            # (1.37e-6 + 6.75e-7 against a 4.19e-7 separation at the low
-            # offset), so a genuine extremum is refused. The gap cannot be
-            # re-measured until that owner admits the axis.
-            pytest.xfail(
-                "read rejects the magnetic axis at the tie pair: the "
-                "persistence enclosure in fast_map_production/kernel.py "
-                "(78ed4ac03) exceeds the axis-to-saddle separation"
-            )
+        assert bool(np.asarray(reading.valid and reading.qualified))
         assert int(np.asarray(roots.valid).sum()) == 3
         assert (
             np.linalg.norm(

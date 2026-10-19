@@ -5,9 +5,14 @@ from nova.jax.config import configure_dtypes
 
 configure_dtypes()
 
+import shlex
+import sys
+from pathlib import Path
+
 import jax
 import jax.numpy as jnp
 import numpy as np
+import pytest
 
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium import fixed_points, topology
@@ -81,3 +86,31 @@ def test_solver_loads_the_certified_carrier():
     machine = certified_machine(case, "limited", 550, exact)
     assert machine.cache["hit"]
     assert len(machine.cell_polygons) == 553
+
+
+@pytest.mark.parametrize("job", ("deep-job.sh", "two_merit_job.sh"))
+def test_solver_job_arguments_match_parser(job, monkeypatch):
+    from scripts.prototypes.fast_map_production import solver
+
+    lines = (Path(__file__).parent / job).read_text().splitlines()
+    commands = []
+    for index, line in enumerate(lines):
+        if '"$python" -m scripts.prototypes.fast_map_production.solver' not in line:
+            continue
+        if "if " not in line:
+            continue
+        command = line.strip()
+        while command.endswith("\\"):
+            index += 1
+            command = command[:-1] + " " + lines[index].strip()
+        tokens = shlex.split(command.split("; then")[0].replace("$size", "500"))
+        commands.append(
+            tokens[tokens.index("scripts.prototypes.fast_map_production.solver") + 1 :]
+        )
+    assert len(commands) == 1
+    parsed = []
+    monkeypatch.setattr(solver, "run", parsed.append)
+    monkeypatch.setattr(sys, "argv", ["solver", *commands[0]])
+    solver.main()
+    assert len(parsed) == 1
+    assert parsed[0].kind == "diverted"

@@ -20,9 +20,9 @@ if ! MOMENT_DIRECTION_SEED=43 MOMENT_DIRECTION_NORM=1 "$python" -m scripts.proto
 fi
 
 for size in 500 2000; do
-  printf 'revision=%s tree=%s command=%s\n' "$revision" "$repo" "$python -m scripts.prototypes.fast_map_production.solver --kind diverted --cells $size --method gmres --cache $cache --output $run/deep-cold-$size.json --continue-from $run/local-cold-$size.json --line-search --line-search-depth 20 --max-steps 20"
+  printf 'revision=%s tree=%s command=%s\n' "$revision" "$repo" "$python -m scripts.prototypes.fast_map_production.solver --kind diverted --cells $size --method gmres --output $run/deep-cold-$size.json --continue-from $run/local-cold-$size.json --line-search --line-search-depth 20 --max-steps 20"
   if ! "$python" -m scripts.prototypes.fast_map_production.solver \
-    --kind diverted --cells "$size" --method gmres --cache "$cache" \
+    --kind diverted --cells "$size" --method gmres \
     --output "$run/deep-cold-$size.json" \
     --continue-from "$run/local-cold-$size.json" \
     --line-search --line-search-depth 20 --max-steps 20; then

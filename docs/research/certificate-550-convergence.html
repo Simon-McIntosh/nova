@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="research">
+<meta name="plan-slug" content="certificate-550-convergence">
+<meta name="plan-title" content="Certified limited carrier Newton convergence">
+<meta name="plan-summary" content="The certified 553-cell solve rejects a well-solved Newton equation because its map has a first-order directional mismatch; a vertical pin leaves the stall unchanged.">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s5">
+<meta name="plan-recorded-at" content="2026-10-19">
+<meta name="plan-verdict" content="partial">
+<title>Certified limited carrier Newton convergence | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<h1 id="certificate-550-convergence-record">Certified limited carrier Newton convergence</h1>
+<p>The carrier is the published <code>weak-rotation-reactor-static</code> object at requested 550 and realised 553 cells, read through the content-addressed certificate fixture owner. The route recovered the analytic axis at (6.2, 0.0) m. The six earlier fixture verdicts were booking passes, not forward-solve convergence measurements. Every solve and derivative observation below used one Titan P100 because real H200 submissions remained pending with a drained or reserved node reason; their stdout headers print <code>nova.__file__</code> and the source tree.</p>
+
+<h2 id="certificate-550-convergence-rejection">The rejected correction</h2>
+<p>The original certificate route reproduced the recorded defect. At its production seed the scaled maximum residual was <strong>0.0012319931459852727</strong>. GMRES solved the JVP linear equation to relative residual <strong>8.76037945980366e-11</strong> in 12 iterations. Its only correction was rejected (<code>accepted=false</code>, <code>factor_scale=0</code>), leaving <code>converged=false</code> against the unchanged 1e-12 limit. The acceptance test requires a finite trial merit strictly below the original maximum residual; its threshold at this iterate was 0.0012319931459852727.</p>
+<table id="certificate-550-convergence-merit"><caption>Merit along the rejected Newton direction; the 0.25 trial is nonfinite. Job 1289624, <code>diagnosis_h200.json</code>.</caption><thead><tr><th>Step scale</th><th>Scaled maximum residual</th><th>Accepted by strict decrease?</th></tr></thead><tbody>
+<tr><td>1</td><td>0.0014152311127003405</td><td>No</td></tr>
+<tr><td>0.5</td><td>0.0013236021602582798</td><td>No</td></tr>
+<tr><td>0.25</td><td>nonfinite</td><td>No</td></tr>
+<tr><td>0.125</td><td>0.0012548935303282724</td><td>No</td></tr>
+<tr><td>0.0625</td><td>0.001243443182381823</td><td>No</td></tr>
+<tr><td>0.03125</td><td>0.0012377181252370977</td><td>No</td></tr>
+<tr><td>0.015625</td><td>0.001234855625873247</td><td>No</td></tr>
+<tr><td>0.00390625</td><td>0.0012327087641262585</td><td>No</td></tr>
+<tr><td>0.0009765625</td><td>0.0012321720504029714</td><td>No</td></tr>
+<tr><td>0.000244140625</td><td>0.0012320378720788768</td><td>No</td></tr>
+</tbody></table>
+<p>The two-norm Taylor remainder <code>||F(x+h d)-F(x)-h Jd||</code> is 8.88607114578e-6 at h = 1/1024 and 2.22151776357e-6 at h = 1/4096. Their log ratio gives slope 1.0000000074, not the required 2. Thus the JVP's predicted decrease is not the finite map's directional change. At h = 1/4096 the selected support is unchanged; 91 cut-cell memberships move slightly, and paired cells 61 and 508 carry equal leading current-residual mismatches of about 3.45506e-7. The mismatch is distributed across symmetric edge cells rather than a single support exchange.</p>
+
+<h2 id="certificate-550-convergence-pin">Vertical-position control</h2>
+<p>Job 1289627 augmented this same row with the existing uniform radial-field basis and a current-centroid row, targeted at the analytic booked height 9.276322181002429e-17 m with a 1e-3 T source scale. GMRES again solved its linear system, to relative residual 7.666895564035161e-11, but the correction was rejected at every measured scale. Its merit values and first-order Taylor remainders match the free run to the shown precision; the terminal field amplitude is 0 T and the residual remains 0.0012319931459852727. A zero-height centroid pin therefore does not lift this carrier's stall, unlike the earlier diverted lobe carrier. The exploratory augmentation was removed from the product route after this measurement.</p>
+
+<h2 id="certificate-550-convergence-gates">Regression and paired suite</h2>
+<p>A committed slow test invokes the certificate solver against the cached carrier and requires the 553-cell receipt to converge at or below 1e-12. The baseline arm used the orientation base revision <code>a711e2b064f840d153972c1690d4af82e3f6a365</code> with the test copied into its extracted source tree. On one Titan P100 it failed after loading the carrier and reaching the solve: the command returned 1 because the terminal residual was 0.0012319931459852727. This is a failure at the stated numerical requirement rather than at fixture loading or argument parsing.</p>
+<p>The full baseline suite ran the four fast-map production test files, the generic equilibrium solve file, the vertical-pin file and the cached-carrier test in fresh processes, all with the repository-root conftest. It reached every summary: 28 passed and 2 failed. The failures are <code>test_one_augmented_newton_program_serves_free_and_pinned_requests</code>, whose free height differs from its CPU-specific pin by 0.0038580246913580973 m on this P100, and <code>test_certified_limited_carrier_converges</code>, the intended red regression. The after arm is pending the map repair; an added-failure verdict cannot yet be stated.</p>
+
+<h2 id="certificate-550-convergence-remaining">Outstanding measurement</h2>
+<p>The boundary-contact probe is measuring whether the limited wall winner changes between the upper and lower symmetric contacts across the small rejected step. The six-row before job is running the two cases at requested 550, 2,000 and 5,000 cells inside one Titan allocation; the after rows and the paired after suite remain unmeasured. The nearest certified limited result is still 0.0012319931459852727, dominated by the first-order map/JVP mismatch. The line-search acceptance and 1e-12 solve limit remain unchanged.</p>
+</main></body></html>

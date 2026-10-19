@@ -185,10 +185,14 @@ def test_fragment_capacity_is_refused():
 
 @pytest.mark.parametrize("kind", ["limited", "diverted"])
 @pytest.mark.parametrize("cells", [550, 2000, 5000])
-def test_analytic_certificate_moments(kind, cells):
+def test_analytic_certificate_moments(kind, cells, tmp_path):
+    backend = jax.default_backend()
+    if backend != "gpu":
+        pytest.skip(f"certificate rows require the GPU measurement lane, not {backend}")
+
     from scripts.prototypes.support.book import measure
 
-    row = measure(kind, cells, os.environ["NOVA_BOOK_RESULTS"])
+    row = measure(kind, cells, os.environ.get("NOVA_BOOK_RESULTS") or tmp_path)
     assert row["net_current_relative_error"] <= 1e-12, row
     assert row["private_cell_count"] > 0, row
     assert row["private_current"] == 0, row

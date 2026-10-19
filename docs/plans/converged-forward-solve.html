@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="464">
+<meta name="plan-version" content="465">
 <meta name="plan-modified" content="2026-10-19">
 </head>
 <body>
@@ -1348,6 +1348,9 @@ NO PRODUCT OR TEST SOURCE WAS CHANGED.  The 1e-10 tolerance was not widened.</p>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261019T194619559903-review-of-tcv-liuqe-corrected-reference-8e41e37e58b2" data-who="reckon-build" data-when="2026-10-19T19:56:27.474Z">
     <div class="r-comment-body"><p>attached an independent six-dimension review to run r-20261019T185022791574-tcv-liuqe-corrected-reference at base 234be9a8eb73751146ab7e1f33137e99c2afa033 / head 8e41e37e58b2851885fc1d23e6f82dbf4a6f1af0, scoring goal_fidelity 18 evidence 17 scope_discipline 20 durability 14 fit 17 reuse 19 (total 105), added_failure_count 0, with two follow-on findings; both stored record files pass crew check-review.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261019T185022791574-tcv-liuqe-corrected-reference" data-who="reckon-build" data-when="2026-10-19T19:44:19.659Z">
+    <div class="r-comment-body"><p>tcv-liuqe-corrected-reference: measure.py and test_coverage.py now read imas-efit&#x27;s corrected DD 3.41.0 full pulse by default; the sign guard admits 17 of 17 sampled slices under COCOS 11 with no compensation, the grid census finds 17 distinct blocks whose starts are exactly SLICES so all 17 are independent known answers, and the curated DD 4.1.0 COCOS-17 window agrees with the converted source at span ratio 1.000000 with grid max abs diff 0.0.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

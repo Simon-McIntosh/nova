@@ -20,6 +20,7 @@ later run loads the object this export took its wall from.
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass, replace
 from pathlib import Path
 
@@ -38,6 +39,7 @@ from scripts.prototypes.efit_field_swap.crosscheck import lattice
 from scripts.prototypes.efit_field_swap.spline_field import TraceSplineField
 from scripts.prototypes.efit_field_swap.trace_record import (
     TraceRecord,
+    _closed_ring,
     write_trace_record,
 )
 from scripts.prototypes.support.certificate_fixtures import cached_carrier
@@ -47,11 +49,15 @@ assert jax.config.jax_enable_x64
 
 GRID = 65
 CERTIFICATE_CELLS = 550
+MUTATION_ENV = "NOVA_CERTIFIED_EXPORT_MUTATION"
+NEGATE_PSI = "negate-psi"
 POLARITY = 1
 COCOS = 17
 LATTICE_RESOLUTION = 24
 DIVERTED_VERDICT = 2
 LIMITED_VERDICT = 1
+LIMITED_CLASS = 0
+DIVERTED_CLASS = 1
 
 
 @dataclass(frozen=True)
@@ -65,16 +71,6 @@ class CarrierExport:
     boundary_flux: float
     boundary_point: np.ndarray
     saddle_flux: float
-
-
-def _closed_ring(vertices: np.ndarray) -> np.ndarray:
-    """Close a vertex ring once, dropping consecutive duplicates."""
-    keep = np.ones(len(vertices), dtype=bool)
-    keep[1:] = np.any(vertices[1:] != vertices[:-1], axis=1)
-    ring = vertices[keep]
-    if not np.array_equal(ring[-1], ring[0]):
-        ring = np.vstack((ring, ring[0]))
-    return ring
 
 
 def analytic_field(kind: str):
@@ -135,15 +131,44 @@ def record_geometry(record: TraceRecord) -> topology.TopologyGeometry:
 
 
 def read_record(record: TraceRecord) -> topology.TopologyRead:
-    """Run nova's own read on a record's psi, wall and polarity.
+    """Run nova's own read on a record's psi, wall and declared polarity.
 
-    The geometry is the square lattice the record's own wall admits, so the
-    read is reproducible from the record alone.
+    The geometry is the square lattice the record's own wall admits and the
+    orientation is the record's own polarity against the written COCOS, so the
+    read is reproducible from the record alone and a record whose grid sign
+    disagrees with the polarity it declares cannot reproduce its own decision.
     """
     geometry = record_geometry(record)
     field = TraceSplineField.from_record(record).sampled_for(geometry)
-    convention = topology.TopologyConvention.from_cocos(COCOS, POLARITY)
+    convention = topology.TopologyConvention.from_cocos(COCOS, float(record.polarity))
     return jax.jit(topology.read)(field, geometry, convention, TopologyPolicy())
+
+
+def store_request(cells: int) -> int:
+    """Return the fixture-store request that addresses a carrier of ``cells``.
+
+    The store request and the machine's cell count are different numbers. The
+    published request for the coarse certificate machine is the negative
+    sentinel ``FIXTURE_REQUESTS["coarse"]``, while ``CERTIFICATE_CELLS`` is the
+    cell count of the machine that request builds. The signed request belongs
+    to the identity: :func:`measure.cache_identity` carries it, so ``-500`` and
+    ``500`` are two identities and only the signed one is the machine the
+    certificate booking gate published and this export took its wall from.
+    The sibling prototypes that load the same machine address it the same way.
+    """
+    from scripts.analytic_oracle_fixtures.measure import FIXTURE_REQUESTS
+
+    return int(FIXTURE_REQUESTS["coarse"]) if cells == CERTIFICATE_CELLS else -cells
+
+
+def mutation() -> str | None:
+    """Return the negative-control mutation named in the environment, if any.
+
+    A gate run sets ``NOVA_CERTIFIED_EXPORT_MUTATION`` to corrupt one property
+    of the written record, so the round-trip test has a state it must refuse.
+    The default is no mutation.
+    """
+    return os.environ.get(MUTATION_ENV) or None
 
 
 def build_export(kind: str, cells: int = CERTIFICATE_CELLS) -> CarrierExport:
@@ -153,8 +178,7 @@ def build_export(kind: str, cells: int = CERTIFICATE_CELLS) -> CarrierExport:
     )
     carrier, _source, exact = certificate._case(name, clip_mode="exact")
     wall = certificate._diverted_wall(exact) if kind == "diverted" else None
-    requested = -500 if cells == 550 else -cells
-    machine = cached_carrier(carrier, requested, wall)
+    machine = cached_carrier(carrier, store_request(cells), wall)
     field = analytic_field(kind)
     ring = wall_ring(machine)
     rgrid, zgrid = grid_axes(ring)
@@ -199,14 +223,14 @@ def build_export(kind: str, cells: int = CERTIFICATE_CELLS) -> CarrierExport:
     axis = np.asarray(reading.axis, dtype=np.float64)
     boundary = np.asarray(reading.boundary, dtype=np.float64)
     boundary_class = int(np.asarray(reading.boundary_class))
-    if (boundary_class == 1) != (kind == "diverted"):
+    if (boundary_class == DIVERTED_CLASS) != (kind == "diverted"):
         raise ValueError(
             f"the {kind} record read class {boundary_class} "
             "does not match its certificate class"
         )
     boundary_flux = float(np.asarray(reading.boundary_flux))
     x_valid = np.asarray(reading.x_point_valid)
-    if boundary_class == 1 and bool(x_valid.any()):
+    if boundary_class == DIVERTED_CLASS and bool(x_valid.any()):
         index = int(np.argmax(np.asarray(reading.x_point_flux)))
         saddle_flux = float(np.asarray(reading.x_point_flux)[index])
     else:
@@ -235,12 +259,20 @@ def build_export(kind: str, cells: int = CERTIFICATE_CELLS) -> CarrierExport:
 
 
 def write_export(export: CarrierExport, directory: str | Path) -> Path:
-    """Write one carrier export as a version-2 record and return its path."""
+    """Write one carrier export as a version-2 record and return its path.
+
+    The negative-control gate names a mutation through the environment, which
+    corrupts the record on its way to disk so the round-trip read has a state
+    it must refuse. Nothing else in the export path reads that variable.
+    """
     directory = Path(directory)
     directory.mkdir(parents=True, exist_ok=True)
-    verdict = "diverted" if export.boundary_class == 1 else "limited"
+    verdict = "diverted" if export.boundary_class == DIVERTED_CLASS else "limited"
     path = directory / f"nova-certified-{export.kind}-{verdict}.txt"
-    write_trace_record(path, export.record)
+    record = export.record
+    if mutation() == NEGATE_PSI:
+        record = replace(record, psi=-record.psi)
+    write_trace_record(path, record)
     return path
 
 

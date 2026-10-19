@@ -53,6 +53,13 @@ def panel(record, path: str | Path) -> Path:
     x_points = np.asarray(reading.x_points, dtype=float)[
         np.asarray(reading.x_point_valid)
     ]
+    # A limited boundary IS a wall contact, and the boundary contour runs along
+    # the wall there, so the contact is invisible without its own marker. A
+    # diverted boundary is the saddle, already drawn as an X-point, so its
+    # boundary point is not marked a second time.
+    contacts = None
+    if int(np.asarray(reading.boundary_class)) == export.LIMITED_CLASS:
+        contacts = np.asarray(reading.boundary, dtype=float).reshape(1, 2)
     flux = np.asarray(record.psi).T
     levels = contour_levels(
         flux, CONTOUR_COUNT, boundary=record.fed_back_psi, axis=record.axis_psi
@@ -76,7 +83,13 @@ def panel(record, path: str | Path) -> Path:
         wall=(ring,),
     )
     draw_wall(axes, ring[:, 0], ring[:, 1])
-    draw_nulls(axes, magnetic_axis=axis, x_points=x_points, contain=ring)
+    draw_nulls(
+        axes,
+        magnetic_axis=axis,
+        x_points=x_points,
+        strike_points=contacts,
+        contain=ring,
+    )
     figure.savefig(path, format="svg")
     plt.close(figure)
     return path

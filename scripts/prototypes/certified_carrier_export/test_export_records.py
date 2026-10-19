@@ -32,6 +32,7 @@ from tests.equilibrium.test_topology_read import _analytic_inputs
 # so the tolerance is a ~70x margin on the larger.
 AXIS_TOLERANCE = 1.0e-5
 BOUNDARY_TOLERANCE = 1.0e-7
+X_POINT_TOLERANCE = 1.0e-3
 # The axis the record itself stored is read back unchanged, so it reproduces to
 # the codec's own write precision rather than to a physics tolerance.
 STORED_TOLERANCE = 1.0e-12
@@ -39,9 +40,11 @@ GRID = export.GRID
 POLARITY = export.POLARITY
 
 
-def _certificate_axis(kind: str) -> np.ndarray:
-    _oracle, _field, _wall, axis, _saddle = _analytic_inputs(kind)
-    return np.asarray(axis, dtype=np.float64)
+def _certificate_geometry(kind: str) -> tuple[np.ndarray, np.ndarray | None]:
+    _oracle, _field, _wall, axis, saddle = _analytic_inputs(kind)
+    return np.asarray(axis, dtype=np.float64), (
+        None if saddle is None else np.asarray(saddle, dtype=np.float64)
+    )
 
 
 @pytest.mark.parametrize("kind", ["limited", "diverted"])
@@ -68,9 +71,24 @@ def test_round_trip(kind, tmp_path):
     boundary = float(np.asarray(reading.boundary_flux))
     assert abs(boundary - record.fed_back_psi) <= STORED_TOLERANCE
 
-    analytic_axis = _certificate_axis(kind)
+    analytic_axis, analytic_saddle = _certificate_geometry(kind)
+    if kind == "limited":
+        np.testing.assert_array_equal(analytic_axis, [6.2, 0.0])
     np.testing.assert_allclose(axis, analytic_axis, atol=AXIS_TOLERANCE)
-    assert abs(boundary) <= BOUNDARY_TOLERANCE
+    assert abs(boundary - 0.0) <= BOUNDARY_TOLERANCE
+    if kind == "diverted":
+        assert analytic_saddle is not None
+        np.testing.assert_allclose(
+            np.asarray(reading.boundary), analytic_saddle, atol=X_POINT_TOLERANCE
+        )
+        valid_points = np.asarray(reading.x_points)[np.asarray(reading.x_point_valid)]
+        assert len(valid_points) == 1
+        np.testing.assert_allclose(
+            valid_points[0], analytic_saddle, atol=X_POINT_TOLERANCE
+        )
+    else:
+        assert analytic_saddle is None
+        assert not np.any(np.asarray(reading.x_point_valid))
 
 
 @pytest.mark.parametrize("kind", ["limited", "diverted"])

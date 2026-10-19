@@ -16,13 +16,16 @@ tree=$(git rev-parse --show-toplevel)
 revision=$(git rev-parse HEAD)
 # A log's revision describes its run only when nothing else sits in the tree:
 # uncommitted edits make the revision a label for code the run never executed.
-dirty=$(git status --porcelain | wc -l | tr -d ' ')
+dirty=$(git status --porcelain -uno | wc -l | tr -d ' ')
 python=${PYTHON:-/home/ITER/mcintos/Code/nova/.venv/bin/python}
 targets="scripts/prototypes/certified_carrier_export/test_export_records.py"
+command="NOVA_CERTIFIED_EXPORT_MUTATION=$mutation JAX_PLATFORMS=cpu PYTHONPATH=$tree $python -m pytest -p no:cacheprovider -q -rf $targets"
+nova_file=$(PYTHONPATH="$tree" "$python" -c 'import nova; print(nova.__file__)')
 
 {
-  echo "# certified-carrier-export round-trip gate"
-  echo "# revision: $revision"
+  echo "# revision: $revision; tree: $tree; command: $command"
+  echo "# nova.__file__: $nova_file"
+  echo "# cwd: $(pwd -P)"
   if [ "$dirty" = "0" ]; then
     echo "# worktree: clean"
   else
@@ -31,11 +34,12 @@ targets="scripts/prototypes/certified_carrier_export/test_export_records.py"
   echo "# tree: $tree"
   echo "# date: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo "# mutation: ${mutation:-none}"
-  echo "# command: NOVA_CERTIFIED_EXPORT_MUTATION=$mutation $python -m pytest -p no:cacheprovider -q $targets"
+  echo "# command: $command"
 } > "$log"
 
 NOVA_CERTIFIED_EXPORT_MUTATION="$mutation" \
 JAX_PLATFORMS=cpu PYTHONPATH="$tree" \
   "$python" -m pytest -p no:cacheprovider -q -rf "$targets" >> "$log" 2>&1
-echo "EXIT=$?" >> "$log"
-grep -E '^(FAILED|ERROR)' "$log" | sort -u
+result=$?
+echo "EXIT=$result" >> "$log"
+exit "$result"

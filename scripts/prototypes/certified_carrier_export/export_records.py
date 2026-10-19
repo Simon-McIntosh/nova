@@ -35,7 +35,8 @@ import numpy as np
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium import topology
 from nova.equilibrium.solve_request import TopologyPolicy
-from scripts.prototypes.efit_field_swap.crosscheck import lattice
+from scripts.prototypes.efit_field_swap.crosscheck import lattice, wall_units
+from scripts.prototypes.efit_field_swap.orientation import read_convention
 from scripts.prototypes.efit_field_swap.spline_field import TraceSplineField
 from scripts.prototypes.efit_field_swap.trace_record import (
     TraceRecord,
@@ -127,7 +128,7 @@ def record_geometry(record: TraceRecord) -> topology.TopologyGeometry:
     """Return the read geometry a record's own wall admits."""
     ring = record.wall_ring
     cells, offsets = lattice(ring, LATTICE_RESOLUTION)
-    return topology.TopologyGeometry.from_cells(cells, offsets, (ring,))
+    return topology.TopologyGeometry.from_cells(cells, offsets, wall_units(record))
 
 
 def read_record(record: TraceRecord) -> topology.TopologyRead:
@@ -140,7 +141,7 @@ def read_record(record: TraceRecord) -> topology.TopologyRead:
     """
     geometry = record_geometry(record)
     field = TraceSplineField.from_record(record).sampled_for(geometry)
-    convention = topology.TopologyConvention.from_cocos(COCOS, float(record.polarity))
+    convention = read_convention(polarity=record.polarity)
     return jax.jit(topology.read)(field, geometry, convention, TopologyPolicy())
 
 

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="certified-carrier-export">
+<meta name="plan-title" content="Certified carriers exported into the boundary trace format">
+<meta name="plan-summary" content="One limited and one diverted certified analytic carrier written as version-2 boundary trace records and re-read through the codec and nova's own topology read; a negated flux grid is refused on the declared COCOS-17 polarity.">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve">
+<meta name="plan-commits" content="ea26beeeb,fb8e8773b">
+<meta name="plan-recorded-at" content="2026-10-19">
+<meta name="plan-verdict" content="pass">
+<title>Certified carriers exported into the boundary trace format | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<h1 id="certified-carrier-export">Certified carriers exported into the boundary trace format</h1>
+
+<p>nova's own certified analytic carriers were written the other way round from
+the field swap: into imas-efit's <code>BOUNDARY_LEVEL_TRACE 2</code> layout, so
+imas-efit's reader and escape-level rule can be run on fields nova generated.
+One limited and one diverted carrier, each loaded from the content-addressed
+certificate fixture store at 550 cells, were written as version-2 records
+carrying the analytic flux on a 65&times;65 grid over the wall bounding box, the
+read axis, the record polarity and the per-loop wall. Both round-trip through
+the codec and through nova's own topology read, and a negated flux grid is
+refused on each record's declared COCOS-17 polarity.</p>
+
+<h2 id="certified-carrier-export-decision">The decision each record states</h2>
+<table>
+<thead><tr><th>record</th><th>class</th><th>axis (R, Z) [m]</th><th>boundary level [Wb]</th><th>contact / saddle (R, Z) [m]</th></tr></thead>
+<tbody>
+<tr><td>limited</td><td>limited</td><td>(6.2000, 0.0000)</td><td>2.23&times;10<sup>&minus;14</sup></td><td>contact (7.8014, 0.0000)</td></tr>
+<tr><td>diverted</td><td>diverted</td><td>(1.7871, 0.0468)</td><td>&minus;1.39&times;10<sup>&minus;9</sup></td><td>saddle (1.5025, &minus;1.0173)</td></tr>
+</tbody>
+</table>
+<p>The analytic cases declare their boundary at zero flux. The limited contact
+sits 2.2&times;10<sup>&minus;14</sup> Wb inside that bound and the diverted
+saddle 1.4&times;10<sup>&minus;9</sup> Wb inside it; the read axis reproduces the
+analytic axis to 1.6&times;10<sup>&minus;7</sup> m and
+1.1&times;10<sup>&minus;7</sup> m respectively. The analytic X-point is
+(1.50253, &minus;1.01728) m, so the read saddle agrees with the certificate to
+4.4&times;10<sup>&minus;4</sup> m.</p>
+
+<h2 id="certified-carrier-export-gate">Gate and delta against the base</h2>
+<p>Fresh processes against base revision <code>34d4c304b</code>, each arm
+running the same test file.</p>
+<table>
+<thead><tr><th>arm</th><th>result</th><th>reading</th></tr></thead>
+<tbody>
+<tr><td><code>baseline_suite</code> at the base</td><td>0 passed, 2 collection errors, exit 2</td><td>the export module does not exist at the base, so the test module cannot import it. Intended delta, not a regression.</td></tr>
+<tr><td><code>after_suite</code> at the head</td><td>4 passed, exit 0</td><td>both carriers round-trip; both negated grids are refused.</td></tr>
+</tbody>
+</table>
+<p>Delta: four tests added, all passing; zero failures added.</p>
+
+<h2 id="certified-carrier-export-negative-control">Negative control</h2>
+<p>Negating the exported flux grid must make the round-trip test refuse the
+record on its declared COCOS and polarity rather than silently reproduce the
+decision. Both records are refused: the re-read is either invalid or returns a
+boundary class different from the one the export declared. A green round trip
+on the unmodified record therefore shows the polarity guard fires, not merely
+that some path succeeded.</p>
+
+<h2 id="certified-carrier-export-artifacts">Artifacts</h2>
+<ul>
+<li><code>scripts/prototypes/certified_carrier_export/export_records.py</code> &mdash; the record producer.</li>
+<li><code>scripts/prototypes/certified_carrier_export/test_export_records.py</code> &mdash; the round-trip and negative-control gate.</li>
+<li><code>scripts/prototypes/certified_carrier_export/panels.py</code> &mdash; the poloidal contour panels.</li>
+<li><code>docs/research/certified-carrier-export.html</code> &mdash; the full record, with both panels and the tolerances.</li>
+<li><code>docs/figures/converged-forward-solve/certified-carrier-export/</code> &mdash; one flux contour panel per record.</li>
+</ul>
+</main>
+</body>
+</html>

@@ -6,6 +6,13 @@
     "scripts/prototypes/certified_carrier_export/export_records.py:main"
   ],
   "completed_at": "2026-10-19T09:09:21.707Z",
+  "dimension_dispositions": {
+    "evidence": {
+      "kind": "folded",
+      "node": "certified-carrier-export",
+      "recorded_at": "2026-10-19T12:45:35.012280+00:00"
+    }
+  },
   "dispatched_at": "2026-10-19T08:52:07Z",
   "findings": [
     {

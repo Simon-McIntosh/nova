@@ -1167,9 +1167,10 @@ def run(args):
         "moments": np.asarray(point * scale).tolist(),
         "roots": np.asarray(mapped(point * scale, *operands).roots).tolist(),
     }
-    result["panel"] = terminal_panel(
-        point, history[-1]["residual"], result["converged"]
-    )
+    if not args.no_panel:
+        result["panel"] = terminal_panel(
+            point, history[-1]["residual"], result["converged"]
+        )
     save(output, result)
     require_solve(result)
 
@@ -1198,6 +1199,7 @@ def main():
     parser.add_argument("--compare", action="store_true")
     parser.add_argument("--compare-warm", action="store_true")
     parser.add_argument("--panel-only", action="store_true")
+    parser.add_argument("--no-panel", action="store_true")
     parser.add_argument("--probe", action="store_true")
     parser.add_argument("--map-only", action="store_true")
     parser.add_argument("--original-read", action="store_true")

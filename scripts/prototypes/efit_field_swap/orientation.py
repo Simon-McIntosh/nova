@@ -7,12 +7,21 @@ current. ``read_convention`` turns that declaration into the
 ``TopologyConvention`` the read consumes.
 
 A declared convention fixes the type of the magnetic axis as a flux extremum,
-so the flux a reference stores must agree with its own declaration. Where the
-stored grid reads the axis as the opposite extremum, the reference is internally
-inconsistent, and nova refuses it rather than reading it: a compensating sign
-flip is never inferred from the data. The comparison uses the difference between
-the axis flux and the boundary flux, which an additive gauge constant leaves
-unchanged.
+so the flux a reference stores must agree with its own declaration. The check
+has three outcomes and only one of them is acceptance:
+
+* *agrees* - the stored span carries the sign the declaration requires;
+* *contradicts* - the stored span carries the opposite sign, so the reference is
+  internally inconsistent, and nova refuses it rather than reading it (a
+  compensating sign flip is never inferred from the data);
+* *undecidable* - the stored span sits within the sign tolerance of zero, so it
+  fixes no extremum at all. An undecidable span is not an agreement and must not
+  be read as one: it is refused with ``UndecidableSignError``, naming the span
+  and the tolerance. A caller therefore cannot mistake "checked and agreed" for
+  "could not tell".
+
+The comparison uses the difference between the axis flux and the boundary flux,
+which an additive gauge constant leaves unchanged.
 """
 
 from __future__ import annotations
@@ -25,8 +34,29 @@ from nova.equilibrium.topology import TopologyConvention
 from nova.jax.config import configure_dtypes
 from scripts.prototypes.efit_field_swap.spline_field import TraceSplineField
 
-_SIGN_TOLERANCE = 1e-9
-"""Floor relative to the gauge-invariant grid range."""
+_SIGN_TOLERANCE = 1024.0 * float(np.finfo(np.float64).eps)
+"""Relative floor below which a flux span's sign cannot be decided.
+
+A span is the difference of two spline samples of the grid, so it is resolved
+only to the rounding of the flux it is a difference of: the double-precision
+unit roundoff ``eps = 2**-52`` bounds one sample's relative error and the
+difference of two such samples accumulates a few multiples of it, scaled by the
+flux magnitude the samples carry. The floor is a thousand-fold margin over that
+unit roundoff -- ``1024 * eps``, about ``2.3e-13`` -- applied to the flux
+magnitude, so a span resolved by the arithmetic is decidable while a span that
+only survives because two nearly equal samples cancelled to within the rounding
+is refused as undecidable. The floor is a relative tolerance, never an absolute
+psi value, so it does not grow with the gauge.
+"""
+
+_CURVATURE_TOLERANCE = 1e-9
+"""Relative floor on the axis Hessian eigenvalues for the curvature fallback.
+
+Where no wall point lies in the grid the axis type is read from the spline
+Hessian instead of a span. An eigenvalue whose magnitude lies within this
+relative floor of zero fixes no curvature, so the axis type is undecidable
+there too.
+"""
 
 
 class ReferenceSignError(ValueError):
@@ -35,6 +65,16 @@ class ReferenceSignError(ValueError):
     Raised where the grid, or the stored scalars, read the magnetic axis as the
     opposite flux extremum to the one the declared convention requires. The
     message names the slice, the declaration, and the measured signs.
+    """
+
+
+class UndecidableSignError(ReferenceSignError):
+    """A reference's stored flux span is within the sign tolerance of zero.
+
+    Raised where a span (or a curvature eigenvalue) is too close to zero to fix
+    the axis as either extremum. Such a reference is refused, not accepted: the
+    message names the slice, the declaration, the span and the tolerance the
+    span failed to clear.
     """
 
 
@@ -111,16 +151,29 @@ def _boundary_value(rgrid, zgrid, psi, boundary, *, field):
     return float(np.mean(samples))
 
 
-def flux_sign(span, scale):
-    """Sign of a flux difference, or 0 where it is indistinguishable from zero.
+def sign_tolerance(scale):
+    """The flux-width within which a span's sign is undecidable, as a number.
 
-    The scale is a range or difference, never an absolute psi value, so an
-    additive gauge constant cannot turn a contradiction into an undecided sign.
+    ``scale`` is the flux magnitude the compared samples carry, not the span.
+    The floor keeps the tolerance from collapsing to zero on a degenerate grid.
+    """
+    return _SIGN_TOLERANCE * max(abs(float(scale)), 1.0)
+
+
+def flux_sign(span, scale):
+    """Sign of a flux difference, or 0 where its sign cannot be decided.
+
+    The scale is the flux magnitude the compared samples carry, and the zero
+    band is a fixed multiple of the double-precision unit roundoff times that
+    magnitude, so a span whose sign the arithmetic resolves is decidable while a
+    span at the level of the rounding that produced it is not. The band is
+    relative, never an absolute psi value, so an additive gauge constant cannot
+    turn a decisive contradiction into an undecided sign.
     """
     span = float(span)
     if not np.isfinite(span):
         return 0
-    if abs(span) <= _SIGN_TOLERANCE * max(abs(float(scale)), 1.0):
+    if abs(span) <= sign_tolerance(scale):
         return 0
     return 1 if span > 0.0 else -1
 
@@ -136,21 +189,35 @@ def _extremum(sigma):
     return "maximum" if sigma > 0 else "minimum"
 
 
-def _refuse(required, signs, spans, *, slice_index=None, declared=""):
-    """Raise ``ReferenceSignError`` naming the slice, declaration and signs."""
+def _refuse(required, signs, spans, tolerances, *, slice_index=None, declared=""):
+    """Raise on a contradiction, else on an undecidable span, naming both.
+
+    A contradiction is decisive and is reported first. An undecidable span is
+    never accepted: where no span contradicts but one lies inside its tolerance
+    of zero, the reference fixes no extremum and is refused rather than read.
+    """
     contradiction = {
-        name: sign for name, sign in signs.items() if sign != 0 and sign != required
+        name: sign for name, sign in signs.items() if sign not in (0, required)
     }
-    if not contradiction:
-        return
-    read = "; ".join(
-        f"{name} psi axis - boundary = {spans[name]:+.6e} (sign {signs[name]:+d})"
-        for name in sorted(signs)
-    )
-    raise ReferenceSignError(
-        f"slice {slice_index} declares {declared}, requiring the magnetic axis to "
-        f"be a psi {_extremum(required)} (sign {required:+d}); the stored {read}"
-    )
+    if contradiction:
+        read = "; ".join(
+            f"{name} psi axis - boundary = {spans[name]:+.6e} (sign {signs[name]:+d})"
+            for name in sorted(signs)
+        )
+        raise ReferenceSignError(
+            f"slice {slice_index} declares {declared}, requiring the magnetic axis to "
+            f"be a psi {_extremum(required)} (sign {required:+d}); the stored {read}"
+        )
+    undecidable = sorted(name for name, sign in signs.items() if sign == 0)
+    if undecidable:
+        name = undecidable[0]
+        raise UndecidableSignError(
+            f"slice {slice_index} declares {declared}, requiring the magnetic axis to "
+            f"be a psi {_extremum(required)} (sign {required:+d}); the {name} span "
+            f"{spans[name]:+.6e} lies within the sign tolerance "
+            f"{tolerances[name]:.3e} of zero, so its sign is undecidable and the "
+            "reference is refused rather than read as agreement"
+        )
 
 
 def check_axis_boundary_sign(
@@ -178,8 +245,9 @@ def check_axis_boundary_sign(
     scalars that do not (and the reverse).
 
     The declared convention fixes whether the axis is a psi maximum or minimum;
-    a span whose sign disagrees is a refusal, and a span indistinguishable from
-    zero is left to the caller rather than resolved either way.
+    a span whose sign disagrees is a refusal, and a span within the sign
+    tolerance of zero fixes no extremum and is refused as undecidable rather
+    than accepted as agreement.
 
     Returns the measured signs ``{name: sign}`` on success.
     """
@@ -195,13 +263,26 @@ def check_axis_boundary_sign(
     axis_value = grid_value(rgrid, zgrid, psi, axis, field=field)
     boundary_value = _boundary_value(rgrid, zgrid, psi, boundary, field=field)
     grid_span = axis_value - boundary_value
-    signs = {"grid": flux_sign(grid_span, np.ptp(np.asarray(psi, dtype=np.float64)))}
+    grid_magnitude = float(np.max(np.abs(np.asarray(psi, dtype=np.float64))))
+    signs = {"grid": flux_sign(grid_span, grid_magnitude)}
     spans = {"grid": grid_span}
+    tolerances = {"grid": sign_tolerance(grid_magnitude)}
     if scalar_axis_psi is not None and scalar_boundary_psi is not None:
         scalar_span = float(scalar_axis_psi) - float(scalar_boundary_psi)
-        signs["scalar"] = flux_sign(scalar_span, abs(scalar_span))
+        scalar_magnitude = max(
+            abs(float(scalar_axis_psi)), abs(float(scalar_boundary_psi))
+        )
+        signs["scalar"] = flux_sign(scalar_span, scalar_magnitude)
         spans["scalar"] = scalar_span
-    _refuse(required, signs, spans, slice_index=slice_index, declared=declared)
+        tolerances["scalar"] = sign_tolerance(scalar_magnitude)
+    _refuse(
+        required,
+        signs,
+        spans,
+        tolerances,
+        slice_index=slice_index,
+        declared=declared,
+    )
     return signs
 
 
@@ -254,6 +335,24 @@ def check_trace_record(record, *, boundary=None):
             if np.all(eigenvalues > 1e-9)
             else 0
         )
+        largest = float(np.max(np.abs(eigenvalues))) if eigenvalues.size else 0.0
+        curvature_floor = _CURVATURE_TOLERANCE * max(largest, 1.0)
+        curvature_sign = (
+            1
+            if np.all(eigenvalues < -curvature_floor)
+            else -1
+            if np.all(eigenvalues > curvature_floor)
+            else 0
+        )
+        if curvature_sign == 0:
+            raise UndecidableSignError(
+                f"slice {record.slice} declares polarity {record.polarity:+d}, "
+                f"requiring a psi {_extremum(required)} (sign {required:+d}); "
+                "no boundary lies in the grid and the grid curvature at the stored "
+                f"axis has eigenvalues {eigenvalues.tolist()}, within the curvature "
+                f"tolerance {curvature_floor:.3e} of zero, so the axis type is "
+                "undecidable"
+            )
         if curvature_sign != required:
             raise ReferenceSignError(
                 f"slice {record.slice} declares polarity {record.polarity:+d}, "
@@ -274,11 +373,13 @@ def check_trace_record(record, *, boundary=None):
         record.rgrid, record.zgrid, record.psi, point, field=field
     )
     span = axis_value - boundary_value
-    signs = {"grid": flux_sign(span, np.ptp(np.asarray(record.psi, dtype=np.float64)))}
+    magnitude = float(np.max(np.abs(np.asarray(record.psi, dtype=np.float64))))
+    signs = {"grid": flux_sign(span, magnitude)}
     _refuse(
         required,
         signs,
         {"grid": span},
+        {"grid": sign_tolerance(magnitude)},
         slice_index=record.slice,
         declared=f"polarity {record.polarity:+d}",
     )

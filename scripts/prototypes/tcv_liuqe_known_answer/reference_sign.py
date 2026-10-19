@@ -23,6 +23,7 @@ import numpy as np
 from scripts.prototypes.efit_field_swap import crosscheck
 from scripts.prototypes.efit_field_swap.orientation import (
     ReferenceSignError,
+    UndecidableSignError,
     check_axis_boundary_sign,
     check_trace_record,
     grid_field,
@@ -72,6 +73,7 @@ def guard_slice(view, index):
         grid_boundary_psi=boundary_value,
         grid_span=None if boundary_value is None else axis_value - boundary_value,
         boundary_kind="xpoint" if view["xpoints"] else "outline",
+        outcome="",
         refused=False,
         reason="",
     )
@@ -89,10 +91,17 @@ def guard_slice(view, index):
             declared=declared,
             field=field,
         )
-    except ReferenceSignError as error:
+    except UndecidableSignError as error:
+        row["outcome"] = "undecidable"
         row["refused"] = True
         row["reason"] = str(error)
         return row
+    except ReferenceSignError as error:
+        row["outcome"] = "contradicts"
+        row["refused"] = True
+        row["reason"] = str(error)
+        return row
+    row["outcome"] = "agrees"
     row["measured_signs"] = signs
     return row
 
@@ -107,14 +116,22 @@ def field_swap_rows():
             source=source,
             polarity=record.polarity,
             slice=record.slice,
+            outcome="",
             refused=False,
             reason="",
         )
         try:
             row["measured_signs"] = check_trace_record(record)
-        except ReferenceSignError as error:
+        except UndecidableSignError as error:
+            row["outcome"] = "undecidable"
             row["refused"] = True
             row["reason"] = str(error)
+        except ReferenceSignError as error:
+            row["outcome"] = "contradicts"
+            row["refused"] = True
+            row["reason"] = str(error)
+        else:
+            row["outcome"] = "agrees"
         rows.append(row)
     return rows
 
@@ -122,13 +139,21 @@ def field_swap_rows():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--liuqe", required=True)
-    parser.add_argument("--slices", required=True, help="comma-separated indices")
+    parser.add_argument(
+        "--slices",
+        default="",
+        help="comma-separated indices; defaults to every distinct psi-grid block",
+    )
     parser.add_argument("--out", required=True)
     parser.add_argument("--field-swap-out")
     args = parser.parse_args()
     print("nova.__file__", __import__("nova").__file__, flush=True)
 
-    slices = [int(s) for s in args.slices.split(",") if s.strip()]
+    slices = (
+        [int(s) for s in args.slices.split(",") if s.strip()]
+        if args.slices
+        else list(measure.SLICES)
+    )
     db = imas.DBEntry(f"imas:hdf5?path={args.liuqe}", "r", dd_version="3.41.0")
     eq = db.get("equilibrium")
     if int(eq.ids_properties.homogeneous_time) != 1:
@@ -140,17 +165,25 @@ def main():
         print(
             "slice",
             index,
-            "refused" if row["refused"] else "read",
+            row["outcome"],
             f"grid_span={row['grid_span']!r}",
             f"scalar_span={row['scalar_span']!r}",
             flush=True,
         )
     db.close()
-    refused = sum(row["refused"] for row in rows)
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
+    refused = sum(row["refused"] for row in rows)
+    counts = {name: 0 for name in ("agrees", "contradicts", "undecidable")}
+    for row in rows:
+        counts[row["outcome"]] = counts.get(row["outcome"], 0) + 1
     out.write_text(json.dumps({"rows": rows}, indent=2) + "\n")
-    print(f"LIUQE_ROWS {len(rows)} REFUSED {refused}", flush=True)
+    print(
+        f"LIUQE_ROWS {len(rows)} REFUSED {refused} "
+        f"AGREES {counts['agrees']} CONTRADICTS {counts['contradicts']} "
+        f"UNDECIDABLE {counts['undecidable']}",
+        flush=True,
+    )
 
     if args.field_swap_out:
         swap = field_swap_rows()

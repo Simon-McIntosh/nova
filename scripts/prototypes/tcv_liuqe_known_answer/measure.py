@@ -49,7 +49,30 @@ configure_dtypes()
 assert jax.config.jax_enable_x64 is True
 
 RESOLUTIONS = (16, 24, 32)
-SLICES = (0, 14, 34, 46, 118, 206, 248, 291, 456, 542, 796, 1257)
+SLICES = (
+    0,
+    6,
+    14,
+    24,
+    34,
+    46,
+    118,
+    206,
+    248,
+    291,
+    333,
+    376,
+    456,
+    542,
+    611,
+    796,
+    1257,
+)
+"""One representative slice per distinct psi-grid block of the 1703-slice store.
+
+``profiles_2d/psi`` is piecewise-constant in time, so the store carries only
+these seventeen distinct grids; the start index of each block is listed so every
+distinct grid is guarded and scored exactly once."""
 REFUSED_CASES = {
     "jt60sa-5slice-s5-133-134:A",
     "jt60sa-5slice-s5-133-134:B",

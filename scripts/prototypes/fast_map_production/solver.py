@@ -755,6 +755,22 @@ def run(args):
             base_membership = np.asarray(original_read["membership"])
             trial_membership = np.asarray(trial_read["membership"])
             changed = np.flatnonzero(np.abs(trial_membership - base_membership) > 1e-12)
+
+            def root_positions(scaled):
+                return fixed_points.solve(
+                    window,
+                    scaled.reshape(reference.shape) * scale,
+                    seeds,
+                    seeds,
+                    jnp.median(geometry.pitch),
+                    axis_sign,
+                ).position
+
+            _, root_tangent = jax.jvp(
+                root_positions,
+                (point.reshape(-1),),
+                (jnp.asarray(step),),
+            )
             row["step_diagnosis"]["read_difference"] = {
                 "support_base": original_read["support_ids"],
                 "support_trial": trial_read["support_ids"],
@@ -762,6 +778,9 @@ def run(args):
                 "boundary_trial": trial_read["boundary"],
                 "boundary_flux_base": original_read["boundary_flux"],
                 "boundary_flux_trial": trial_read["boundary_flux"],
+                "roots_base": original_read["roots"],
+                "roots_trial": trial_read["roots"],
+                "roots_tangent": np.asarray(root_tangent).tolist(),
                 "membership_changed": [
                     {
                         "cell": int(cell),

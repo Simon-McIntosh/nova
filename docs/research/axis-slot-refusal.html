@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="research">
+<meta name="plan-slug" content="axis-slot-refusal">
+<meta name="plan-title" content="Comparison adapter refuses an invalid-axis read">
+<meta name="plan-summary" content="The field-swap adapter refuses a read that licensed no axis, and the near-fold persistence gate gains suite coverage; the TCV table, census retention test and carrier comparison remain unmeasured.">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s2">
+<meta name="plan-recorded-at" content="2026-10-19">
+<meta name="plan-verdict" content="partial">
+<title>Comparison adapter refuses an invalid-axis read | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<h1 id="axis-slot-refusal-research">Comparison adapter refuses an invalid-axis read</h1>
+<p><a href="/nova/evidence/fragments/converged-forward-solve/axis-slot-refusal.html#axis-slot-refusal-landing">Measured landing fragment</a></p>
+
+<h2 id="axis-slot-refusal-adapter-change">The adapter publishes a decision only for a read that licensed an axis</h2>
+<p>The axis-ranking merge (4763425e9) taught the fixed-shape read to rank valid in-vessel polarity extrema and to refuse when none qualifies, returning <code>valid=false</code> and a NaN axis. The field-swap comparison adapter <code>scripts/prototypes/efit_field_swap/crosscheck.py</code> did not consult that verdict: <code>read_state</code> took <code>reading.boundary</code> and <code>reading.axis</code> and published <code>"diverted" if boundary_class else "limited"</code> regardless. A NaN axis therefore still produced a plasma label.</p>
+<p>The repair inspects the read before it publishes. Where <code>reading.valid</code> is false or the axis is not finite, the lattice appends a refusal note, sets a refusal flag, and publishes no outcome for that resolution; if no resolution licenses an axis the adapter returns the label <code>refused invalid axis</code> with a NaN axis, a NaN boundary and a NaN boundary flux, and the note names the refusal. The refusal sits at the same seam the coverage certificate already uses, so the two refusals - incomplete census coverage and an unlicensed axis - stay distinct labels.</p>
+
+<h2 id="axis-slot-refusal-exercising-case">Exercising the refusal without the TCV data</h2>
+<p>A synthetic field carries a single interior stationary point that is a minimum, presented through the adapter's own spline field over a rectangle. Under the declared positive-polarity convention the axis is expected at a flux maximum, so the census types the extremum as the wrong kind, the read admits no axis and returns <code>valid=false</code>. The loop's boundary winding is +1 and the admitted index sum is +1, so the coverage certificate closes and the adapter reaches the read - the exact state the defect decided from. Under the present adapter that state returns <code>limited</code>; under the repair it returns <code>refused invalid axis</code>. This is the negative control: with the refusal guard removed the new test fails on <code>assert 'limited' == 'refused invalid axis'</code>, exit 1.</p>
+
+<h2 id="axis-slot-refusal-nearfold-gate">The near-fold persistence gate gains a test</h2>
+<p>The fixed-shape read refuses an extremum whose signed persistence to its nearest saddle is not resolved in the booked field: <code>persistent = ~any(saddle) | (persistence &gt; level_enclosure + level_enclosure[nearest])</code>, and <code>eligible = extrema &amp; persistent</code>. Nothing in the suite exercised it. The added test builds the double well under a large constant background. The background is a physical flux offset: it moves no stationary root and changes no signed persistence, but it grows the fitted coefficients and therefore the binary64 enclosure of the fitted level. At a 10^15 background the selected extremum's persistence lies inside that enclosure, the pair is one number in binary64, and the read publishes no axis; the same field with no background is accepted. Deleting the <code>persistent</code> comparison - <code>eligible = extrema</code> - restores <code>valid=true</code> and the test fails, exit 1.</p>
+
+<h2 id="axis-slot-refusal-arms">Suite arms</h2>
+<p>Both arms ran the same two test files - <code>test_crosscheck.py</code> and <code>test_axis_ranking.py</code> - in fresh processes with the repository-root conftest. The baseline arm ran the head test files against the pre-merge crosscheck source; it reached its summary with one failure (the new invalid-axis test) and 12 passes. The after arm reached its summary with 13 passes and zero added failures. Logs are named in the manifest.</p>
+
+<h2 id="axis-slot-refusal-remaining">Remaining work</h2>
+<p>Three items in this node's scope are measured work still to do, not blockers. The twelve TCV 77549 slices were not re-run through the TCV driver here, so the before/after label table is not reproduced in this record; the adapter change makes the seven NaN-axis rows that previously carried a label refuse, on the same seam the synthetic case exercises. The census multi-axis retention at <code>census.py:167</code> still has no suite test: driving <code>census</code> requires the full field protocol (a jet field, sample index and geometry), which was not assembled in this turn. The cached 550-, 2,000- and 5,000-cell carriers from the content-addressed fixture store were not read for the axis-versus-first-root comparison.</p>
+
+<h2 id="axis-slot-refusal-receipts">Receipts</h2>
+<p>Under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T233110930132-axis-slot-refusal/exports</code>: <code>baseline_suite.log</code>, <code>after_suite.log</code>, <code>negctl_crosscheck.log</code>, <code>negctl_kernel.log</code>, <code>gate_kernel.log</code>, and the reader probes <code>probe2.log</code>. The orientation base is <code>dec3cc6a6fc3790b8b8be1d75a68131bca7a3e2a</code>; the landing commit is <code>ddf0a3581</code>.</p>
+</main></body></html>

@@ -1632,6 +1632,48 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "6fdd275f42b64419fe51e3d572d6bc89da56fe4c",
+  "release": {
+    "arms_kept": [
+      {
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T083523749810-sign-guard-undecidable-span/scratch/pytest-base2",
+        "reason": "outside the node-local temp root /tmp"
+      }
+    ],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 1460879,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261019T083523749810-sign-guard-undecidable-span",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 1460879,
+        "path": "/tmp/reckon-crew-scratch/r-20261019T083523749810-sign-guard-undecidable-span"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/sign-guard-undecidable-span",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

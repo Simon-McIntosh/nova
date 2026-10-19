@@ -1,0 +1,68 @@
+<section id="xla-autotune-cache-off" data-reckon="evidence" data-node="xla-autotune-cache-off">
+<h3>xla-autotune-cache-off</h3>
+<p>Every nova route that enables JAX's persistent compilation cache also turns off XLA's
+per-fusion autotune cache. JAX defaults <code>jax_persistent_cache_enable_xla_caches</code>
+to the GPU per-fusion autotune directory, so a configured cache writes XLA's autotuner
+records beside the compiles &mdash; thousands of synchronous small-file creates per
+revision on GPFS, and none of them needed, since the autotuner re-decides the same way
+on the next process.</p>
+
+<h4>Change</h4>
+<ul>
+<li><code>nova/jax/config.py</code>: <code>configure_persistent_compilation_cache</code>
+sets <code>jax_persistent_cache_enable_xla_caches</code> to <code>none</code> before it
+computes the runtime identity, so the identity records the setting and the pin and the
+lane resolve one directory.</li>
+<li><code>nova/biot/tiledassembly.py</code>: <code>compilation_cache</code> applies the
+same setting on its own route.</li>
+<li><code>scripts/h200_test_lane/run.sh</code> payload prelude and
+<code>scripts/h200_test_lane/prewarm.sh</code> payload environment both export
+<code>JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES=none</code>.</li>
+</ul>
+
+<h4>Focused gate</h4>
+<p><code>UV_PROJECT_ENVIRONMENT=~/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest
+-p no:cacheprovider tests/test_compilation_cache_location.py
+tests/test_nova_lane_launcher.py</code> &rarr; <strong>18 passed in 98.13s</strong>,
+exit 0 (run on the fleet node, in place). The pins added: the recorded identity value and
+the live config key read <code>none</code>; two calls resolve the same directory; the
+tiledassembly route sets <code>none</code>; the h200 dry-run's rendered prelude and the
+pre-warm payload each carry the export.</p>
+
+<h4>Negative control</h4>
+<p>Declared mutation: delete the <code>config.py</code> line that sets the key. Run:
+<code>pytest -q
+tests/test_compilation_cache_location.py::test_persistent_cache_identity_disables_the_xla_autotune_cache</code>
+on the mutated tree &rarr; <strong>1 failed, EXIT=1</strong>, with
+<code>assert 'xla_gpu_per_...une_cache_dir' == 'none'</code>. The head arm does not fail
+this id. Log:
+<code>negative-control-config-line-deleted.log</code>.</p>
+
+<h4>Titan two-pass measurement</h4>
+<p>One titan job (<strong>1290032</strong>, <code>98dci4-gpu-0002</code>, P100, 16m48s,
+exit 0) ran the certificate row <code>test_analytic_certificate_moments[limited-550]</code>
+twice per arm against its own node-local <code>/tmp</code> cache root, with the cache
+guard loaded on the second pass. Autotune files are counted under any
+<code>xla_gpu_per_fusion_autotune_cache_dir</code>.</p>
+<table>
+<thead><tr><th>arm</th><th>pass</th><th>autotune files before &rarr; after</th><th>cache guard (second pass)</th></tr></thead>
+<tbody>
+<tr><td>off (changed revision)</td><td>1</td><td>0 &rarr; 0</td><td>&mdash;</td></tr>
+<tr><td>off (changed revision)</td><td>2</td><td>0 &rarr; 0</td><td>hits 273, misses 0, served entries 264</td></tr>
+<tr><td>base behaviour</td><td>1</td><td>0 &rarr; 1408</td><td>&mdash;</td></tr>
+<tr><td>base behaviour</td><td>2</td><td>1408 &rarr; 1408</td><td>hits 273, misses 0, served entries 1672</td></tr>
+</tbody>
+</table>
+<p>Off: the changed revision creates <strong>zero</strong> autotune files across both
+passes, and its second pass reports <strong>273 compile-cache hits, 0 misses</strong>.
+Base behaviour &mdash; the same job with the key left at JAX's default, the base
+revision's setting for these files &mdash; creates <strong>1408</strong> autotune files on
+its first pass, so the zero is a count that can see a present file and not a cache that
+was never used.</p>
+<p>Honest labels for a reader: the base arm reproduces base behaviour by leaving
+<code>JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES</code> unset rather than checking out the
+base revision; for this question the two differ only in that key's value. And
+<code>/tmp</code> on <code>98dci4-gpu-0002</code> was removed with the allocation, so the
+per-pass logs are gone; the counts above are the ones the launcher log recorded, preserved
+at <code>titan-probe.log</code> in the run directory.</p>
+</section>

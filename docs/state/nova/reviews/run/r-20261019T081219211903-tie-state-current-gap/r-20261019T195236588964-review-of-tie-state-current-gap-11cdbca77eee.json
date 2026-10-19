@@ -1,0 +1,44 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-19T20:13:11.541Z",
+  "dispatched_at": "2026-10-19T19:53:16Z",
+  "findings": [
+    {
+      "file": "tests/equilibrium/test_topology_read.py",
+      "line": 2713,
+      "severity": "follow-on",
+      "text": "A stale comment block survives directly above the landed constant, stating the bound is the 11.5% booking error plus the 1.5% grid noise (an argument for rel=0.13) while TIE_BOOKED_CURRENT_REL at line 2726 is 0.02; the two blocks describe the same constant with different derivations, so a later reader re-deriving the bound from the file gets the wrong number."
+    },
+    {
+      "file": "docs/figures/converged-forward-solve/tie-state-current-gap/tie-pair-current-gap.svg",
+      "line": 1,
+      "severity": "blocking",
+      "text": "The poloidal panel is drawn with spines, tick marks and tick labels on both axes, which the binding plotting rule forbids ('No axes, no gridlines on 2D plots. A poloidal panel is drawn with the axis off'); it bypasses the owners nova/media/ink.py:155 poloidal_axes (which calls set_axis_off), nova/media/poloidal.py:29 draw_wall and nova/media/poloidal.py:540 draw_nulls, and its generator fig_tie_pair.py is not in the tree, so the figure cannot be regenerated through the repository's painters."
+    },
+    {
+      "file": "negative_control.log",
+      "line": 23,
+      "severity": "follow-on",
+      "text": "The recorded negative control exercises rel=0.15 against rel=0.13 with the superseded seed-census numbers 129.234157/146.015393, not the landed TIE_BOOKED_CURRENT_REL = 0.02, so it demonstrates the bound-drift mechanism in general but never shows the landed bound refusing anything the restored bound admits."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to explain the 13% booked-versus-integrated current gap at the 282-cell tie pair and tighten the assertion to the agreement achieved; docs/research/tie-state-current-gap.html:1-58 and tests/equilibrium/test_topology_read.py:2726 land both halves, re-measured at 1.59%/1.32% against a rel=0.02 bound.\nVERDICT done_when: the three done-when clauses are (1) re-measure with the lobe owner, (2) name the residual by measurement with a panel showing wall and both null sets, (3) tighten with a stated noise margin; measure_receipt.json carries (1), the panel and docs/research/tie-state-current-gap.html:37-44 carry (2), and the constant and its second comment block carry (3).\nVERDICT write_paths: read the four declared paths in the reviewed manifest.md and in its brief.txt; every path in the diff affa72be0..11cdbca77 is inside them (tests/equilibrium/test_topology_read.py, docs/research/tie-state-current-gap.html, docs/evidence/fragments/converged-forward-solve/tie-state-current-gap.html, docs/figures/converged-forward-solve/tie-state-current-gap/tie-pair-current-gap.svg).\nVERDICT manifest: read; it states status complete, records both arms as exit_status 137 with completed false and 13 position-mapped failure ids, and names measure.log, fig.log, negative_control.log, arm_baseline.log, arm_after.log and collect_ids.log.\nVERDICT diff: read all five commits (47ff06375, 71c0027a6, 7841813b3, 2964474a1, 11cdbca77) against base affa72be0; four files changed, +1326/-1, the xfail added at 47ff06375 is removed at 71c0027a6, and the landed test change is the constant plus the approx bound.\nCALL_SITES: nova/equilibrium/topology.py:stationary_read, scripts/prototypes/fast_map_production/tie_probe.py:make_sampler, scripts/prototypes/read_robustness/census_base_step.py:base_admission_census\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: tests/equilibrium/test_topology_read.py:2824 asserts the booked current against the independent quadrature at rel=0.02, and measure_receipt.json records 128.416249/130.488250 and 129.730881/131.468864 with valid and qualified true, matching the goal's re-measurement.\nSCORE evidence: 14\nJUSTIFICATION evidence: measure.log ends EXIT=0 with the booked/direct rows, but arm_baseline.log and arm_after.log both end EXIT=137 with no pytest summary, so the suite-arm result is recovered by mapping the shared progress string onto collect_ids.log rather than read from a summary line.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: every path in the diff affa72be0..11cdbca77 lies inside the four declared write paths, and the 47ff06375 xfail churn is the same file the goal names.\nSCORE durability: 13\nJUSTIFICATION durability: tests/equilibrium/test_topology_read.py:2824 compares the booked current with the independently computed _dense_cut_current value, so it reddens if the booked value drifts more than 2% from the quadrature, but nothing pins TIE_BOOKED_CURRENT_REL itself against re-widening and the recorded negative control at negative_control.log:23 tests rel=0.13, not the landed 0.02.\nSCORE fit: 9\nJUSTIFICATION fit: the landed tests/equilibrium/test_topology_read.py:2713-2726 leaves two comment blocks for one constant, the first contradicting the second, and the delivered panel carries axis furniture against the repository's binding poloidal-panel rule.\nSCORE reuse: 12\nJUSTIFICATION reuse: the only added definition, TIE_BOOKED_CURRENT_REL at tests/equilibrium/test_topology_read.py:2726, has no existing owner (searched the test module and nova/media for a tolerant-bound helper and found none), but the delivered figure duplicates nova/media/poloidal.py:29 draw_wall and nova/media/poloidal.py:540 draw_nulls with raw ax.plot and ax.scatter instead of extending them.\nFINDING tests/equilibrium/test_topology_read.py:2713 follow-on: a stale comment block survives above the landed constant and states the bound is the 11.5% booking error plus the 1.5% grid noise, an argument for a different number than the landed 0.02, so the file contradicts itself about how the bound was derived.\nFINDING docs/figures/converged-forward-solve/tie-state-current-gap/tie-pair-current-gap.svg:1 blocking: the poloidal panel keeps spines, ticks and tick labels, which the binding plotting rule forbids for a poloidal panel, and it bypasses nova/media/ink.py:155 poloidal_axes, nova/media/poloidal.py:29 draw_wall and nova/media/poloidal.py:540 draw_nulls; the generator is not in the tree, so the figure cannot be regenerated through the repository's painters.\nFINDING negative_control.log:23 follow-on: the recorded negative control exercises rel=0.15 against rel=0.13 with the superseded seed-census numbers, so it never demonstrates the landed rel=0.02 refusing a displacement the restored bound admits.\n",
+  "review_run_id": "r-20261019T195236588964-review-of-tie-state-current-gap-11cdbca77eee",
+  "reviewed_base_sha": "affa72be037dbfd791255cc46dde24e362482229",
+  "reviewed_head_sha": "11cdbca77eeec929c746920418ae183543039230",
+  "reviewed_run_id": "r-20261019T081219211903-tie-state-current-gap",
+  "scores": {
+    "durability": 13,
+    "evidence": 14,
+    "fit": 10,
+    "goal_fidelity": 18,
+    "reuse": 12,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T20:14:27.909581+00:00",
+  "total": 85
+}

@@ -7,7 +7,7 @@
 <meta name="reckon-type" content="research">
 <meta name="plan-slug" content="axis-slot-refusal">
 <meta name="plan-title" content="Comparison adapter refuses an invalid-axis read">
-<meta name="plan-summary" content="The field-swap adapter refuses a read that licensed no axis, and the near-fold persistence gate gains suite coverage; the TCV table, census retention test and carrier comparison remain unmeasured.">
+<meta name="plan-summary" content="The field-swap adapter refuses a read that licensed no axis, with suite coverage for the near-fold gate and the census multi-axis retention, the TCV before/after label table, and the carriage comparison at 550 and 2000 cells.">
 <meta name="plan-evidence-for" content="converged-forward-solve">
 <meta name="plan-verifies" content="converged-forward-solve#s2">
 <meta name="plan-recorded-at" content="2026-10-19">
@@ -27,15 +27,53 @@
 <h2 id="axis-slot-refusal-exercising-case">Exercising the refusal without the TCV data</h2>
 <p>A synthetic field carries a single interior stationary point that is a minimum, presented through the adapter's own spline field over a rectangle. Under the declared positive-polarity convention the axis is expected at a flux maximum, so the census types the extremum as the wrong kind, the read admits no axis and returns <code>valid=false</code>. The loop's boundary winding is +1 and the admitted index sum is +1, so the coverage certificate closes and the adapter reaches the read - the exact state the defect decided from. Under the present adapter that state returns <code>limited</code>; under the repair it returns <code>refused invalid axis</code>. This is the negative control: with the refusal guard removed the new test fails on <code>assert 'limited' == 'refused invalid axis'</code>, exit 1.</p>
 
+<h2 id="axis-slot-refusal-tcv-table">The refusal on the real TCV 77549 slices</h2>
+<p>The same field-swap adapter the defect was found on is driven over the twelve TCV 77549 slices at one revision, with only <code>crosscheck.py</code> swapped: the base arm carries the pre-repair adapter (<code>sha256 7bd1fed093723c37</code>), the head arm the repaired one (<code>sha256 f66576c606656867</code>). Both arms run <code>scripts.prototypes.tcv_liuqe_known_answer.measure</code> with the same LIUQE equilibrium, wall and slice list. The base arm completed all twelve rows; the head arm reached slices 0 and 14 before the fence.</p>
+<table>
+<thead><tr><th>slice</th><th>liuqe</th><th>base label</th><th>head label</th></tr></thead>
+<tbody>
+<tr><td>0</td><td>diverted</td><td>limited</td><td>refused invalid axis</td></tr>
+<tr><td>14</td><td>diverted</td><td>limited</td><td>refused invalid axis</td></tr>
+<tr><td>34</td><td>limited</td><td>limited</td><td>not measured</td></tr>
+<tr><td>46</td><td>limited</td><td>limited</td><td>not measured</td></tr>
+<tr><td>118</td><td>limited</td><td>diverted</td><td>not measured</td></tr>
+<tr><td>206</td><td>limited</td><td>diverted</td><td>not measured</td></tr>
+<tr><td>248</td><td>limited</td><td>diverted</td><td>not measured</td></tr>
+<tr><td>291</td><td>diverted</td><td>coverage uncertified</td><td>not measured</td></tr>
+<tr><td>456</td><td>diverted</td><td>coverage uncertified</td><td>not measured</td></tr>
+<tr><td>542</td><td>diverted</td><td>coverage uncertified</td><td>not measured</td></tr>
+<tr><td>796</td><td>diverted</td><td>coverage uncertified</td><td>not measured</td></tr>
+<tr><td>1257</td><td>diverted</td><td>coverage uncertified</td><td>not measured</td></tr>
+</tbody>
+</table>
+<p>A one-line quote marks each patch:</p>
+<p>Slice 0 prints <code>done 0 diverted limited</code> in the base arm and <code>done 0 diverted refused invalid axis</code> in the head arm, the same driver with only <code>crosscheck.py</code> differing. Receipts <code>tcv-base.jsonl</code>, <code>tcv-head.jsonl</code>, log <code>tcv_ab.log</code>.</p>
+<p>The seven rows that published a label from a NaN axis in the pre-repair arm are 0, 14, 34, 46, 118, 206 and 248. Two of them are measured as refusals at the head; the other five and the five coverage-refused rows were not re-run before the fence, and the row is labelled <em>not measured</em> rather than filled in from the synthetic result. The TCV grid carries a known sign defect, so these rows are a data diagnostic, never a score.</p>
+
 <h2 id="axis-slot-refusal-nearfold-gate">The near-fold persistence gate gains a test</h2>
 <p>The fixed-shape read refuses an extremum whose signed persistence to its nearest saddle is not resolved in the booked field: <code>persistent = ~any(saddle) | (persistence &gt; level_enclosure + level_enclosure[nearest])</code>, and <code>eligible = extrema &amp; persistent</code>. Nothing in the suite exercised it. The added test builds the double well under a large constant background. The background is a physical flux offset: it moves no stationary root and changes no signed persistence, but it grows the fitted coefficients and therefore the binary64 enclosure of the fitted level. At a 10^15 background the selected extremum's persistence lies inside that enclosure, the pair is one number in binary64, and the read publishes no axis; the same field with no background is accepted. Deleting the <code>persistent</code> comparison - <code>eligible = extrema</code> - restores <code>valid=true</code> and the test fails, exit 1.</p>
 
+<h2 id="axis-slot-refusal-census-guard">The census multi-axis retention gains a test</h2>
+<p>The census hands the read its axis candidates as slot zero (the axis nearest the previous root), then the saddle slots, then the remaining axes. A read ranks those candidates by signed level, so an axis the gather drops can never be chosen however strong it is. Two fields of unequal level are built on the carrier (<code>-((t^2-1)^2) - y^2 + 0.2t</code> about <code>t = x - 2</code>), the prior root is seeded on the shallower one, and the tests require the census to retain both: the seeded axis in slot zero and the stronger axis behind it. Replacing the axis slots with the seeded axis - <code>axis_index</code> in place of <code>axis_slots[...]</code> - makes the retention assertion fail while the suite is otherwise green.</p>
+
+<h2 id="axis-slot-refusal-carriers">The read against the first-root rule on certified carriers</h2>
+<p>Each certified carrier is warm-loaded from the content-addressed fixture store, presented as the certificate's analytic field, and read once with the analytic axis as the single prior root. The comparison is the read's chosen axis against that first root.</p>
+<table>
+<thead><tr><th>requested cells</th><th>carrier cells</th><th>build [s]</th><th>valid</th><th>first root</th><th>read axis</th><th>difference</th></tr></thead>
+<tbody>
+<tr><td>550</td><td>607</td><td>9.1</td><td>false</td><td>(6.2, 0.0)</td><td>NaN</td><td>-</td></tr>
+<tr><td>2000</td><td>2097</td><td>816.5</td><td>false</td><td>(6.2, 0.0)</td><td>NaN</td><td>-</td></tr>
+<tr><td>5000</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+</tbody>
+</table>
+<p>On the two carriers that were read, the first root was not the strongest valid extremum: the read admits no axis at all and returns <code>valid=false</code>, so there is no axis for the first-root rule to agree or disagree with, and the difference column is empty by that reason rather than by a zero. The 5000-cell carrier was not read: the 2000-cell carrier had to be built cold and took 816 s, and the fence closed before the last carrier ran. Receipts <code>carrier_cells.log</code>; the comparison script is <code>carrier_cells.py</code>.</p>
+
 <h2 id="axis-slot-refusal-arms">Suite arms</h2>
-<p>Both arms ran the same two test files - <code>test_crosscheck.py</code> and <code>test_axis_ranking.py</code> - in fresh processes with the repository-root conftest. The baseline arm ran the head test files against the pre-merge crosscheck source; it reached its summary with one failure (the new invalid-axis test) and 12 passes. The after arm reached its summary with 13 passes and zero added failures. Logs are named in the manifest.</p>
+<p>Both arms ran the same two test files - <code>test_crosscheck.py</code> and <code>test_axis_ranking.py</code> - in fresh processes with the repository-root conftest. The baseline arm ran the head test files against the pre-merge crosscheck source; it reached its summary with one failure (the new invalid-axis test) and 12 passes. The after arm reached its summary with 13 passes and zero added failures. The census guard test runs 2 passes in its own file, and the retention assertion is the one that fails under the mutation. Logs are named in the manifest.</p>
 
 <h2 id="axis-slot-refusal-remaining">Remaining work</h2>
-<p>Three items in this node's scope are measured work still to do, not blockers. The twelve TCV 77549 slices were not re-run through the TCV driver here, so the before/after label table is not reproduced in this record; the adapter change makes the seven NaN-axis rows that previously carried a label refuse, on the same seam the synthetic case exercises. The census multi-axis retention at <code>census.py:167</code> still has no suite test: driving <code>census</code> requires the full field protocol (a jet field, sample index and geometry), which was not assembled in this turn. The cached 550-, 2,000- and 5,000-cell carriers from the content-addressed fixture store were not read for the axis-versus-first-root comparison.</p>
+<p>Three measurements are named but unperformed, each cut by the fence rather than by a blocker. The head arm of the TCV driver reached two of twelve slices, so five of the seven previously-labelled rows and all five coverage-refused rows are unmeasured; the head arm needs about seven minutes and ran out of fence. The 5000-cell carrier was likewise not read, its predecessor's cold build having consumed 816 s. The census guard test is written and green, but its carrier is a synthetic two-well field on the standard test lattice rather than an imported trace record.</p>
 
 <h2 id="axis-slot-refusal-receipts">Receipts</h2>
-<p>Under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T233110930132-axis-slot-refusal/exports</code>: <code>baseline_suite.log</code>, <code>after_suite.log</code>, <code>negctl_crosscheck.log</code>, <code>negctl_kernel.log</code>, <code>gate_kernel.log</code>, and the reader probes <code>probe2.log</code>. The orientation base is <code>dec3cc6a6fc3790b8b8be1d75a68131bca7a3e2a</code>; the landing commit is <code>ddf0a3581</code>.</p>
+<p>Under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T233110930132-axis-slot-refusal/exports</code>: <code>baseline_suite.log</code>, <code>after_suite.log</code>, <code>census_axes.log</code>, <code>negctl_crosscheck.log</code>, <code>negctl_kernel.log</code>, <code>negctl_census.log</code>, <code>tcv_ab.log</code> with <code>tcv-base.jsonl</code> and <code>tcv-head.jsonl</code>, <code>carrier_cells.log</code>, <code>gate_kernel.log</code>, and the reader probes <code>probe2.log</code>. The orientation base is <code>dec3cc6a6fc3790b8b8be1d75a68131bca7a3e2a</code>; the adapter and gate repair is <code>ddf0a3581</code>, the research record and landing fragment <code>5d02ae62a</code>, and the census guard test <code>544899f36</code>.</p>
 </main></body></html>

@@ -1,0 +1,37 @@
+<article class="r-fragment" data-node="contour-mesh-capacity">
+  <h2 id="contour-mesh-capacity-heading">Size the topology contour mesh from its geometry</h2>
+  <p id="contour-mesh-capacity-defect"><strong>Defect (reproduced at the base revision).</strong>
+  <code>TopologyGeometry.from_cells</code> sized the contour mesh as
+  <code>vertex_capacity = len(tree_centres) + len(points) + 1</code>, and
+  <code>build_contour_mesh</code> blanked every index when that was exceeded,
+  returning a mesh with zero valid vertices. The read then failed at
+  <code>nova/equilibrium/topology.py:2483</code> with
+  <code>IndexError: index -1 is out of bounds for axis 0 with size 0</code>.
+  Measured on the imas-efit boundary traces at the coarsest lattice: required 247
+  vertices against a declared capacity of 231, on all eight records, so all eight
+  rows were unread.</p>
+
+  <h2 id="contour-mesh-capacity-fix">Fix</h2>
+  <p id="contour-mesh-capacity-sizing">The carrier is now sized from what it must hold.
+  <code>build_contour_mesh</code> leaves a capacity unset to size it from the carrier
+  the geometry actually produces — the tree centres plus every wall vertex the
+  clipped triangulation generates — so a wide wall cannot overflow a formula.
+  A capacity that is declared is a ceiling: a larger carrier raises
+  <code>ContourMeshOverflow</code> naming both the required and the declared count,
+  rather than blanking every index. <code>from_cells</code> no longer passes the fixed
+  formula and refuses a carrier that admits no valid vertex.</p>
+
+  <p id="contour-mesh-capacity-measure"><strong>Measure.</strong> Every record builds a mesh whose
+  valid vertex count is below its capacity, at every lattice resolution in use.
+  The refusal is exercised by forcing a capacity below the geometry:
+  <code>contour mesh vertex capacity 4 is below the 106 the geometry holds</code>.</p>
+
+  <h2 id="contour-mesh-capacity-gate">Gate</h2>
+  <p id="contour-mesh-capacity-arms">Both suite arms ran the same three test files —
+  <code>tests/equilibrium/test_topology_read.py</code>,
+  <code>tests/test_contour_tree_mesh.py</code> and the new
+  <code>tests/equilibrium/test_topology_contour_mesh_capacity.py</code> — in fresh
+  processes. The new wide-wall test does not pass at the base revision and passes at
+  head; the negative control restores the fixed capacity formula and the wide-wall
+  test then fails.</p>
+</article>

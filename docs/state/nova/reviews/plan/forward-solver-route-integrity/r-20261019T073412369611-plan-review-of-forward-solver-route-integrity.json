@@ -69,6 +69,13 @@
       "finding": "done_when-1",
       "reason": "About section 4's done-when, and this build dispatches section 5 only. Section 4 is built after section 5 lands, and its builder owes the negative control the finding names.",
       "when": "2026-10-19T08:10:42.459933+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "About section 4's gate, and this build dispatches section 5 only. It stands for section 4's builder: lane runs writing into the pin directory must be dealt with, through f-fsri-lane-prelude-errexit-and-pin-writes, before section 4's hit count can mean anything.",
+      "when": "2026-10-19T08:11:03.263447+00:00"
     }
   ],
   "responses": {
@@ -77,6 +84,12 @@
       "by": "",
       "reason": "About section 4's done-when, and this build dispatches section 5 only. Section 4 is built after section 5 lands, and its builder owes the negative control the finding names.",
       "when": "2026-10-19T08:10:42.459933+00:00"
+    },
+    "reasoning-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "About section 4's gate, and this build dispatches section 5 only. It stands for section 4's builder: lane runs writing into the pin directory must be dealt with, through f-fsri-lane-prelude-errexit-and-pin-writes, before section 4's hit count can mean anything.",
+      "when": "2026-10-19T08:11:03.263447+00:00"
     },
     "reasoning-2": {
       "action": "acted",

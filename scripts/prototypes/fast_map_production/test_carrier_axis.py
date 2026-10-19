@@ -1,0 +1,72 @@
+"""The certificate field's declared axis is retained on its own carrier."""
+
+# ruff: noqa: E402
+from nova.jax.config import configure_dtypes
+
+configure_dtypes()
+
+import jax
+import jax.numpy as jnp
+import numpy as np
+
+from benchmarks import solovev_certificate as certificate
+from nova.equilibrium import fixed_points, topology
+from nova.equilibrium.solve_request import TopologyPolicy
+from scripts.prototypes.fast_map_production.kernel import read
+from scripts.prototypes.support.certificate_fixtures import cached_carrier
+from scripts.prototypes.support.geometry import certificate_field
+from tests.equilibrium.test_topology_read import _analytic_inputs
+
+
+class SampledField:
+    def __init__(self, analytic):
+        self.analytic = analytic
+
+    def value(self, point):
+        return self.analytic.value(point)
+
+    def evaluate(self, point):
+        return self.analytic.evaluate(point)
+
+    def sampled_coefficient(self, geometry):
+        samples = jax.vmap(self.value)(geometry.sample_points.reshape(-1, 2))
+        return jnp.einsum(
+            "nks,ns->nk",
+            geometry.fit_inverse,
+            samples.reshape(geometry.sample_points.shape[:-1]),
+        )
+
+
+def test_certified_carrier_retains_analytic_axis():
+    assert jax.config.jax_enable_x64 is True
+    case, _, _ = certificate._case("weak-rotation-reactor-static", clip_mode="exact")
+    machine = cached_carrier(case, -500, None)
+    assert machine.cache["hit"], "the certified carrier must already be published"
+    geometry = topology.TopologyGeometry.from_cells(
+        machine.cell_polygons, machine.sampling_vertices, (machine.wall_node,)
+    )
+    _, analytic, _, axis, _ = _analytic_inputs("limited")
+    field = SampledField(certificate_field(analytic, "limited"))
+    position = jnp.asarray(axis)[None]
+    roots = fixed_points.FixedPointResult(
+        position,
+        jax.vmap(field.evaluate)(position),
+        jnp.ones(1, bool),
+        jnp.zeros(1, jnp.int32),
+        jnp.zeros(1, jnp.int32),
+        jnp.zeros(1, bool),
+    )
+    assert bool(jnp.any(topology._inside_cells(geometry, position[0])))
+    convention = topology.TopologyConvention.from_cocos(17, 1.0)
+    eigenvalues = np.linalg.eigvalsh(
+        np.asarray(convention.sigma * roots.jet.hessian[0])
+    )
+    assert np.all(eigenvalues < 0)
+    reading = read(field, roots, geometry, convention, TopologyPolicy())
+    assert bool(reading.valid) and bool(reading.qualified)
+    np.testing.assert_allclose(reading.axis, axis, atol=1e-12)
+
+    reversed_convention = topology.TopologyConvention.from_cocos(17, -1.0)
+    refused = read(field, roots, geometry, reversed_convention, TopologyPolicy())
+    assert not bool(refused.valid)
+    assert bool(jnp.all(jnp.isnan(refused.axis)))

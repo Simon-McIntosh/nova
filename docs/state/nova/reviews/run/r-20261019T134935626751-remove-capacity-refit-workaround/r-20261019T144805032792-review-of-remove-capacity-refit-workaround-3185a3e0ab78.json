@@ -1,0 +1,61 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [
+    {
+      "failure_condition": "Reddens when the read regresses to the fixed capacity formula: the call at line 62 raises ContourMeshOverflow (a ValueError, nova/equilibrium/contour_tree_mesh.py:47) instead of returning, and were the regression instead a silent empty mesh the assertion np.any(...contour_mesh.vertex_valid) at line 63 fails on its own. The negative control demonstrates the raising form: logs/negative-control.log records the test red under a scratch topology.py whose capacity is len(tree_centres) + len(points) + 1, reporting vertex capacity 231 below the 247 the geometry holds. Neither side of the assertion is a value the test passed to the code under test, so it is not self-comparing. It is the only assertion the change adds.",
+      "lines": "scripts/prototypes/efit_field_swap/test_crosscheck.py:62-63"
+    }
+  ],
+  "call_sites": [
+    "scripts/prototypes/efit_field_swap/crosscheck.py:861 read_state (the production path that now calls TopologyGeometry.from_cells directly in place of the deleted fitted_geometry wrapper, recording a refusal into attempts over :858-870)",
+    "scripts/prototypes/efit_maximin_certificate/adapter_probe.py:69 decision (the deleted wrapper's second importer, now calling TopologyGeometry.from_cells in its resolution loop at :68-73)",
+    "scripts/prototypes/tcv_liuqe_known_answer/measure.py:232 measure_slice (the only reader of the deleted ReadOutcome.capacity_fit field, whose fitted row key is removed)"
+  ],
+  "completed_at": "2026-10-19T15:18:01.141Z",
+  "dispatched_at": "2026-10-19T14:48:34Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/tcv_liuqe_known_answer/measure.py",
+      "line": "232",
+      "severity": "follow-on",
+      "text": "follow-on: the dispatch fence (prompt.txt:88-94) names six exclusive paths and measure.py is not among them, yet the node drops fitted=outcome.capacity_fit from the row built in measure_slice, which calls crosscheck.read_state at measure.py:227. The edit is required rather than gratuitous, because crosscheck.ReadOutcome no longer carries capacity_fit and the line would otherwise raise AttributeError on the first call. It is disclosed in the manifest's changed_paths and in the node's own evidence fragment, and no concurrent node in the dispatch holds the file, so it does not hold the node; it is recorded because an edit outside the declared write scope is invisible to a coordinator reading the fence alone. A grep for fitted over scripts/prototypes/tcv_liuqe_known_answer/ is clean at the head, so no consumer of the removed column remains in that package."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T134935626751-remove-capacity-refit-workaround/manifest.md",
+      "line": "10",
+      "severity": "follow-on",
+      "text": "follow-on: the tests: line is not the literal command that ran. It carries the unsubstituted placeholder PYTHONPATH=<tree>, lists scripts/prototypes/efit_field_swap/test_crosscheck.py twice, and omits scripts/prototypes/efit_field_swap/test_trace_record.py, which both gate logs' own cmd: header lines include exactly once. Promotion fills its gate receipt from this line, so a re-run composed from it collects a different file set from the arm it claims to record. It does not hold the node: the real command is recoverable verbatim from the cmd: headers of logs/gate-base.log and logs/gate-head.log, and reckon/ledger.py:489 suite_observation_missing_fields requires only a non-empty command, so the record parses."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T134935626751-remove-capacity-refit-workaround/manifest.md",
+      "line": "17",
+      "severity": "follow-on",
+      "text": "follow-on: after_suite.command ends with a literal elision, scripts/prototypes/..., rather than the command that ran, where the baseline arm's command at manifest.md:16 is complete. The head arm's real argument list is in logs/gate-head.log's cmd: header; a reader taking this field at face value holds a command that cannot be handed to a shell."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit against base 74c613d71c7453e45037b73cd4685712dd99b7da. Commit 124ad219f deletes the wrapper, CAPACITY_GROWTH and the capacity_fit field from crosscheck.py and its call chain, rewrites adapter_probe.py's resolution loop, replaces the wide-wall test, and drops the write-only fitted key in measure.py. Commit 3185a3e0a appends a two-paragraph section to docs/evidence/fragments/converged-forward-solve/contour-mesh-capacity.html and adds docs/evidence/fragments/converged-forward-solve/remove-capacity-refit-workaround.html. No other file is touched.",
+    "done_when": "All three clauses hold and are evidenced. Deletions complete: grep for fitted_geometry, _fitted_capacity, CAPACITY_GROWTH and capacity_fit over scripts/, tests/ and nova/ at the head returns only tests/test_split_polish_nulls.py:567, an unrelated split-spline receipt test. The wide-wall test is replaced at scripts/prototypes/efit_field_swap/test_crosscheck.py:51-63 and the negative control at logs/negative-control.log shows it red under the restored fixed formula (FAILED, 1 failed, 6 deselected, EXIT=1). Both arms ran the named files as fresh processes: logs/gate-base.log 2 failed, 58 passed in 464.07s and logs/gate-head.log 1 failed, 59 passed in 531.80s, each ending EXIT=1, and the head's single failure is the base's own.",
+    "goal": "The node goal is to delete the field-swap contour-mesh capacity workaround the read now makes redundant. Commit 124ad219f deletes _fitted_capacity, fitted_geometry and CAPACITY_GROWTH from scripts/prototypes/efit_field_swap/crosscheck.py, drops the fitted_geometry import and call from scripts/prototypes/efit_maximin_certificate/adapter_probe.py, and removes the fitted/capacity_fit field from the cross-check row, the adapter probe output and the TCV read row rather than hard-coding it, so both callers build the geometry through nova.equilibrium.topology.TopologyGeometry.from_cells.",
+    "manifest": "Read in full. It records status complete, both commits (124ad219f, 3185a3e0a), both arms and the negative control each with a log path, a bare negative_control_log path, retry_failures none, and a follow_ons entry naming the pre-existing ReferenceSignError. Its tests: line (manifest.md:10) does not reproduce the command the gate logs' cmd: headers record and its after_suite.command (manifest.md:17) is truncated; both are recorded as findings. I re-derived added_failure_count=0 and added_failure_ids=[] from the two arm logs independently of the manifest's own fields.",
+    "write_paths": "The run's dispatch fence (prompt.txt:88-94) declares six exclusive paths: scripts/prototypes/efit_field_swap/crosscheck.py, scripts/prototypes/efit_field_swap/test_crosscheck.py, scripts/prototypes/efit_maximin_certificate/adapter_probe.py, docs/evidence/fragments/converged-forward-solve/contour-mesh-capacity.html, docs/evidence/fragments/converged-forward-solve/remove-capacity-refit-workaround.html and the docs/figures/converged-forward-solve/remove-capacity-refit-workaround directory. The diff names four of those plus scripts/prototypes/tcv_liuqe_known_answer/measure.py, which is outside the fence; the declared figures directory is unused."
+  },
+  "project": "nova",
+  "review": "VERDICT goal: the goal is to delete the field-swap contour-mesh capacity workaround the read now makes redundant, and commit 124ad219f deletes _fitted_capacity, fitted_geometry and CAPACITY_GROWTH from crosscheck.py and adapter_probe.py and builds both geometries through TopologyGeometry.from_cells (crosscheck.py:861, adapter_probe.py:69).\nVERDICT done_when: all three clauses hold - no reference to the deleted names remains in scripts/ or tests/ (my grep of the head tree returns only the unrelated tests/test_split_polish_nulls.py:567), the wide-wall test is replaced at test_crosscheck.py:51-63 and reddens under the restored fixed formula in logs/negative-control.log, and both arms are recorded in logs/gate-base.log (2 failed, 58 passed) and logs/gate-head.log (1 failed, 59 passed) with no added failure.\nVERDICT write_paths: the fence (prompt.txt:88-94) names six exclusive paths; the diff edits four of them and also scripts/prototypes/tcv_liuqe_known_answer/measure.py, which is outside the fence.\nVERDICT manifest: read; status complete with both commits, both arms and the negative control each carrying a log path, but its tests: line (manifest.md:10) and its after_suite.command (manifest.md:17) do not reproduce the commands the gate logs record.\nVERDICT diff: read commit by commit against base 74c613d71c7453e45037b73cd4685712dd99b7da; 124ad219f changes four code files, 3185a3e0a appends the evidence paragraph and adds the landing fragment, touching nothing else.\nCALL_SITES: scripts/prototypes/efit_field_swap/crosscheck.py:861 read_state, scripts/prototypes/efit_maximin_certificate/adapter_probe.py:69 decision, scripts/prototypes/tcv_liuqe_known_answer/measure.py:232 measure_slice\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: crosscheck.py:861 and adapter_probe.py:69 build the geometry through the owner TopologyGeometry.from_cells and the fitted-capacity field is removed rather than hard-coded.\nSCORE evidence: 15\nJUSTIFICATION evidence: logs/gate-base.log, logs/gate-head.log and logs/negative-control.log record the gate the done_when names, but the manifest's tests: line does not reproduce the command those logs carry.\nSCORE scope_discipline: 14\nJUSTIFICATION scope_discipline: scripts/prototypes/tcv_liuqe_known_answer/measure.py:232 is edited outside the declared fence and the declared docs/figures path is unused.\nSCORE durability: 18\nJUSTIFICATION durability: test_crosscheck.py:63 fails when the read's fixed capacity formula is restored, shown red with ContourMeshOverflow in logs/negative-control.log.\nSCORE fit: 18\nJUSTIFICATION fit: the parenthesised except at crosscheck.py:865 and the unparenthesised form at adapter_probe.py:72 both match the surrounding 3.14 idiom, and no name the naming rules forbid is introduced.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no definition and deletes the fork, delegating to the owner nova/equilibrium/topology.py:2405 TopologyGeometry.from_cells.\nFINDING scripts/prototypes/tcv_liuqe_known_answer/measure.py:232 follow-on: the fitted row key is dropped outside the declared fence, which the ReadOutcome change requires and the manifest and evidence fragment disclose.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T134935626751-remove-capacity-refit-workaround/manifest.md:10 follow-on: the tests: line carries PYTHONPATH=<tree>, duplicates test_crosscheck.py and omits test_trace_record.py, so the receipt cannot re-run the arm it records.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T134935626751-remove-capacity-refit-workaround/manifest.md:17 follow-on: after_suite.command is truncated with scripts/prototypes/..., so the head arm's command cannot be handed to a shell.\n",
+  "review_run_id": "r-20261019T144805032792-review-of-remove-capacity-refit-workaround-3185a3e0ab78",
+  "reviewed_base_sha": "74c613d71c7453e45037b73cd4685712dd99b7da",
+  "reviewed_head_sha": "3185a3e0ab78bfe065f37b6b63b905258b7f0461",
+  "reviewed_run_id": "r-20261019T134935626751-remove-capacity-refit-workaround",
+  "scores": {
+    "durability": 18,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 14
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T15:20:02.229701+00:00"
+}

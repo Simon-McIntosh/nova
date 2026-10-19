@@ -27,11 +27,19 @@
   <code>contour mesh vertex capacity 4 is below the 106 the geometry holds</code>.</p>
 
   <h2 id="contour-mesh-capacity-gate">Gate</h2>
-  <p id="contour-mesh-capacity-arms">Both suite arms ran the same three test files —
-  <code>tests/equilibrium/test_topology_read.py</code>,
-  <code>tests/test_contour_tree_mesh.py</code> and the new
-  <code>tests/equilibrium/test_topology_contour_mesh_capacity.py</code> — in fresh
-  processes. The new wide-wall test does not pass at the base revision and passes at
-  head; the negative control restores the fixed capacity formula and the wide-wall
-  test then fails.</p>
+  <p id="contour-mesh-capacity-arms">The focused pair —
+  <code>tests/equilibrium/test_topology_contour_mesh_capacity.py</code> and
+  <code>tests/test_contour_tree_mesh.py</code> — passes at head: 17 passed in
+  12.21&nbsp;s. The new wide-wall test does not pass at the base revision, where the
+  geometry required 247 vertices against a declared capacity of 231 and the read
+  raised <code>IndexError</code>.</p>
+  <p id="contour-mesh-capacity-arms">The three-arm regression gate over those two
+  files and <code>tests/equilibrium/test_topology_read.py</code> is <strong>begun
+  but not recorded</strong>. The base archive, the worktree and a control tree with
+  the fixed capacity formula restored were each run in a fresh process, and none
+  reached its summary line inside the node's time budget; the arms were stopped and
+  no <code>EXIT=</code> line was written. The rerun must run without the forced
+  per-test timeout, which sits below the repository's declared value and is a
+  candidate cause of the failures the two control arms showed before they were
+  stopped. No regression claim is made from them here.</p>
 </article>

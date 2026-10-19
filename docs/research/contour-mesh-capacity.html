@@ -49,7 +49,16 @@
     <p>The wide-wall test builds a real ITER trace record at the lattice that failed
     and asserts the valid vertex count is below the capacity. The overflow test
     forces a capacity below the geometry and asserts the named error carries both
-    numbers. Both suite arms and the negative control are recorded under the run
-    directory.</p>
+    numbers. The two files together pass in 12.21&nbsp;s.</p>
+    <p><strong>Open.</strong> The three-arm regression gate is begun but not
+    recorded. The base archive, the worktree and a control tree that restores the
+    fixed capacity formula were each run over
+    <code>tests/equilibrium/test_topology_read.py</code>,
+    <code>tests/test_contour_tree_mesh.py</code> and the new test file, and none
+    reached its summary line inside the node's time budget; the arms were stopped
+    and no <code>EXIT=</code> line was written. The gate must be rerun without the
+    forced per-test timeout, which sits below the repository's declared value and
+    is a candidate cause of the failures the two control arms showed before they
+    were stopped.</p>
   </section>
 </article>

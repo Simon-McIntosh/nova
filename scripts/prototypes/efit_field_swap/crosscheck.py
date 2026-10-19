@@ -53,7 +53,10 @@ from nova.equilibrium import topology
 from nova.jax.config import configure_dtypes
 from nova.equilibrium.topology import TopologyPolicy
 from scripts.prototypes.efit_field_swap.spline_field import TraceSplineField
-from scripts.prototypes.efit_field_swap.orientation import read_convention
+from scripts.prototypes.efit_field_swap.orientation import (
+    check_trace_record,
+    read_convention,
+)
 from scripts.prototypes.efit_field_swap.trace_record import (
     TraceRecord,
     read_trace_record,
@@ -1053,6 +1056,7 @@ def read_state(
 
 def _decision(case, source, record, resolutions=RESOLUTIONS):
     """nova's decision on the record's spline, at the coarsest lattice that reads."""
+    check_trace_record(record)
     field = TraceSplineField.from_record(record)
     field_grad = _field_gradient_at_efit_axis(field, record)
     convention = read_convention(polarity=record.polarity)

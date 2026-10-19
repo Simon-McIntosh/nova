@@ -1,0 +1,80 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "scripts/prototypes/certified_carrier_export/panels.py:panel",
+    "scripts/prototypes/certified_carrier_export/export_records.py:main"
+  ],
+  "completed_at": "2026-10-19T09:09:21.707Z",
+  "dispatched_at": "2026-10-19T08:52:07Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T080049312557-certified-carrier-export/logs/gate-after-082729.log",
+      "line": 1,
+      "severity": "blocking",
+      "text": "blocking: the manifest declares this file as negative_control_log, but it is the green head-arm suite (4 passed, no EXIT= line and no failing test id), so the negative-control evidence cannot be admitted under the rule requiring a non-zero EXIT and at least one failing test id the head arm does not fail; no red control log exists anywhere in the run."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T080049312557-certified-carrier-export/logs/gate-after-082729.log",
+      "line": 1,
+      "severity": "follow-on",
+      "text": "follow-on: the head-arm gate log carries no first line naming the revision, tree and command, and no EXIT line, so the recorded 4-passed result cannot be tied to c1e87c413; the baseline arm log likewise lacks a header, and the manifest records the arms as a prose `tests:` string rather than the baseline_suite/after_suite JSON."
+    },
+    {
+      "file": "scripts/prototypes/certified_carrier_export/export_records.py",
+      "line": 70,
+      "severity": "follow-on",
+      "text": "follow-on: `_closed_ring` is a verbatim copy of the codec owner's scripts/prototypes/efit_field_swap/trace_record.py:128 `_closed_ring` (whose TraceRecord.wall_rings already closes rings), so the module forks a capability it could import from the owner."
+    },
+    {
+      "file": "scripts/prototypes/certified_carrier_export/export_records.py",
+      "line": 44,
+      "severity": "follow-on",
+      "text": "follow-on: runtime code imports the private helper `_analytic_inputs` from the test module tests/equilibrium/test_topology_read.py, coupling the producer to a test file the brief fenced off; the analytic-input source belongs to a support owner, not a test."
+    },
+    {
+      "file": "scripts/prototypes/certified_carrier_export/export_records.py",
+      "line": 156,
+      "severity": "follow-on",
+      "text": "follow-on: `requested = -500 if cells == 550 else -cells` remaps the requested 550-cell case to a magic -500 with no explanation, leaving the fixture-store identity the record is keyed to opaque to a reader."
+    },
+    {
+      "file": "scripts/prototypes/certified_carrier_export/test_export_records.py",
+      "line": 66,
+      "severity": "follow-on",
+      "text": "follow-on: the negative-control assertion accepts `not valid` OR a class change, so it cannot show the refusal is due to the declared COCOS-17 polarity as docs/research/certified-carrier-export.html:150 claims; an unrelated geometric refusal satisfies it and it would not redden if only the polarity guard were removed."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read commit by commit (ea26beeeb producer and test, fb8e8773b panels, c1e87c413 docs) against 34d4c304b; seven files, 6454 insertions, all inside the declared scope, and both rendered panels inspect as line contours with the wall, both null sets and the boundary contour.",
+    "done_when": "the brief's three clauses name (1) both records readable through the codec, (2) a README with the boundary decision and certificate bounds, (3) a committed round-trip test with one panel per record; the codec round trip and decision table are present (test_export_records.py:34, exports/README.md), but the gate that would evidence clause 3 has no red negative-control log and its head-arm log carries no header or EXIT line.",
+    "goal": "the goal is to write one limited and one diverted nova certified analytic carrier into imas-efit's version-2 record layout with a README stating the decision; export_records.py:149 build_export and :236 write_export produce both records, and the committed docs/research/certified-carrier-export.html states the decision table.",
+    "manifest": "read; it records status complete, the three commits, the 4-passed after arm and a baseline of 2 collection errors, and declares negative_control_log = logs/gate-after-082729.log, which is the green head-arm log rather than a red control.",
+    "write_paths": "the source node was fenced to scripts/prototypes/certified_carrier_export, docs/research/certified-carrier-export.html, docs/evidence/fragments/converged-forward-solve/certified-carrier-export.html and docs/figures/converged-forward-solve/certified-carrier-export; the diff's seven files are all inside those paths."
+  },
+  "justifications": {
+    "durability": "test_export_records.py:56 asserts the re-read axis against the analytic certificate axis at 5e-2 m, an independent source that reddens if the export or the read regresses, though :51 and :53 compare the re-read against the record's own stored values and the :66 control cannot distinguish the polarity guard from an unrelated refusal.",
+    "evidence": "the after arm result (4 passed, logs/gate-after-082729.log) is recorded, but that log carries no revision/tree/command header and no EXIT line and the manifest's declared negative control points at this same green log, so the round trip's delta is only claimed in prose.",
+    "fit": "export_records.py follows the sibling prototype idiom and uses capability-named symbols with no plan label, but :44 imports the private `_analytic_inputs` from the test module tests/equilibrium/test_topology_read.py into runtime code and :156 remaps the cell count to a magic -500.",
+    "goal_fidelity": "export_records.py:149 builds and :236 writes both records with the read axis, polarity and per-loop wall, and docs/research/certified-carrier-export.html:70 states the limited/diverted decision and certificate bounds.",
+    "reuse": "export_records.py reuses the codec writer (trace_record.py:214), certificate_fixtures.cached_carrier and crosscheck.lattice, but :70 re-defines `_closed_ring` verbatim from the codec owner trace_record.py:128 and :116 re-implements a grid render the sibling efit_field_swap/export_tie_islands.py:72 already owns.",
+    "scope_discipline": "every one of the seven files in git diff 34d4c304b..c1e87c413 (producer, test, panels, two docs, two SVGs) is inside the declared write paths and nothing else is touched."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261019T085048918419-review-of-certified-carrier-export-c1e87c413daa",
+  "review_text": "VERDICT goal: the goal is to write one limited and one diverted nova certified analytic carrier into imas-efit's version-2 record layout with a README stating the decision; export_records.py:149 build_export and :236 write_export produce both records, and the committed docs/research/certified-carrier-export.html states the decision table.\nVERDICT done_when: the brief's three clauses name (1) both records readable through the codec, (2) a README with the boundary decision and certificate bounds, (3) a committed round-trip test with one panel per record; the codec round trip and decision table are present (test_export_records.py:34, exports/README.md), but the gate that would evidence clause 3 has no red negative-control log and its head-arm log carries no header or EXIT line.\nVERDICT write_paths: the source node was fenced to scripts/prototypes/certified_carrier_export, docs/research/certified-carrier-export.html, docs/evidence/fragments/converged-forward-solve/certified-carrier-export.html and docs/figures/converged-forward-solve/certified-carrier-export; the diff's seven files are all inside those paths.\nVERDICT manifest: read; it records status complete, the three commits, the 4-passed after arm and a baseline of 2 collection errors, and declares negative_control_log = logs/gate-after-082729.log, which is the green head-arm log rather than a red control.\nVERDICT diff: read commit by commit (ea26beeeb producer and test, fb8e8773b panels, c1e87c413 docs) against 34d4c304b; seven files, 6454 insertions, all inside the declared scope, and both rendered panels inspect as line contours with the wall, both null sets and the boundary contour.\nCALL_SITES: scripts/prototypes/certified_carrier_export/panels.py:panel, scripts/prototypes/certified_carrier_export/export_records.py:main\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: export_records.py:149 builds and :236 writes both records with the read axis, polarity and per-loop wall, and docs/research/certified-carrier-export.html:70 states the limited/diverted decision and certificate bounds.\nSCORE evidence: 9\nJUSTIFICATION evidence: the after arm result (4 passed, logs/gate-after-082729.log) is recorded, but that log carries no revision/tree/command header and no EXIT line and the manifest's declared negative control points at this same green log, so the round trip's delta is only claimed in prose.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every one of the seven files in git diff 34d4c304b..c1e87c413 (producer, test, panels, two docs, two SVGs) is inside the declared write paths and nothing else is touched.\nSCORE durability: 15\nJUSTIFICATION durability: test_export_records.py:56 asserts the re-read axis against the analytic certificate axis at 5e-2 m, an independent source that reddens if the export or the read regresses, though :51 and :53 compare the re-read against the record's own stored values and the :66 control cannot distinguish the polarity guard from an unrelated refusal.\nSCORE fit: 15\nJUSTIFICATION fit: export_records.py follows the sibling prototype idiom and uses capability-named symbols with no plan label, but :44 imports the private `_analytic_inputs` from the test module tests/equilibrium/test_topology_read.py into runtime code and :156 remaps the cell count to a magic -500.\nSCORE reuse: 10\nJUSTIFICATION reuse: export_records.py reuses the codec writer (trace_record.py:214), certificate_fixtures.cached_carrier and crosscheck.lattice, but :70 re-defines `_closed_ring` verbatim from the codec owner trace_record.py:128 and :116 re-implements a grid render the sibling efit_field_swap/export_tie_islands.py:72 already owns.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T080049312557-certified-carrier-export/logs/gate-after-082729.log:1 blocking: the manifest declares this file as negative_control_log, but it is the green head-arm suite (4 passed, no EXIT= line and no failing test id), so the negative-control evidence cannot be admitted under the rule requiring a non-zero EXIT and at least one failing test id the head arm does not fail; no red control log exists anywhere in the run.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T080049312557-certified-carrier-export/logs/gate-after-082729.log:1 follow-on: the head-arm gate log carries no first line naming the revision, tree and command, and no EXIT line, so the recorded 4-passed result cannot be tied to c1e87c413; the baseline arm log likewise lacks a header, and the manifest records the arms as a prose `tests:` string rather than the baseline_suite/after_suite JSON.\nFINDING scripts/prototypes/certified_carrier_export/export_records.py:70 follow-on: `_closed_ring` is a verbatim copy of the codec owner's scripts/prototypes/efit_field_swap/trace_record.py:128 `_closed_ring` (whose TraceRecord.wall_rings already closes rings), so the module forks a capability it could import from the owner.\nFINDING scripts/prototypes/certified_carrier_export/export_records.py:44 follow-on: runtime code imports the private helper `_analytic_inputs` from the test module tests/equilibrium/test_topology_read.py, coupling the producer to a test file the brief fenced off; the analytic-input source belongs to a support owner, not a test.\nFINDING scripts/prototypes/certified_carrier_export/export_records.py:156 follow-on: `requested = -500 if cells == 550 else -cells` remaps the requested 550-cell case to a magic -500 with no explanation, leaving the fixture-store identity the record is keyed to opaque to a reader.\nFINDING scripts/prototypes/certified_carrier_export/test_export_records.py:66 follow-on: the negative-control assertion accepts `not valid` OR a class change, so it cannot show the refusal is due to the declared COCOS-17 polarity as docs/research/certified-carrier-export.html:150 claims; an unrelated geometric refusal satisfies it and it would not redden if only the polarity guard were removed.",
+  "reviewed_base_sha": "34d4c304b292f15b891d467da56e2327d0d4f3a5",
+  "reviewed_head_sha": "c1e87c413daa2ca6304f436becd3017d7590357b",
+  "reviewed_run_id": "r-20261019T080049312557-certified-carrier-export",
+  "scores": {
+    "durability": 15,
+    "evidence": 9,
+    "fit": 15,
+    "goal_fidelity": 17,
+    "reuse": 10,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T09:04:16.203908+00:00"
+}

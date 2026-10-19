@@ -78,9 +78,10 @@ def draw(summary: dict, destination: Path, preview: Path) -> None:
     for axis, case in zip(axes, CASES, strict=True):
         rows = summary["rows"][case]
         cells = [row["realised_cells"] for row in rows]
+        totals = [row["warm_total_seconds"] for row in rows]
         axis.plot(
             cells,
-            [row["warm_total_seconds"] for row in rows],
+            totals,
             color="#4e4e4e",
             linewidth=2.6,
             linestyle="-",
@@ -97,6 +98,16 @@ def draw(summary: dict, destination: Path, preview: Path) -> None:
                 label=name,
                 zorder=4 if name == dominant else 3,
             )
+        axis.plot(
+            cells,
+            totals,
+            color="#4e4e4e",
+            linestyle="none",
+            marker="o",
+            markersize=6,
+            label="_nolegend_",
+            zorder=5,
+        )
         axis.axhline(
             10.0, color="#696969", linestyle=":", linewidth=1.2, label="10 s target"
         )
@@ -117,6 +128,9 @@ def draw(summary: dict, destination: Path, preview: Path) -> None:
     fig.tight_layout(rect=(0, 0, 1, 0.84))
     destination.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(destination)
+    destination.write_text(
+        "\n".join(line.rstrip() for line in destination.read_text().splitlines()) + "\n"
+    )
     fig.savefig(preview, dpi=100)
     plt.close(fig)
 

@@ -1,0 +1,21 @@
+<article id="remove-capacity-refit-workaround">
+  <h2 id="remove-capacity-refit-workaround-landing">Removing the field-swap contour-mesh capacity refit</h2>
+  <p id="remove-capacity-refit-workaround-summary">The topology read sizes its
+  contour mesh from the geometry it must hold, so the field-swap prototype's
+  capacity refit is deleted. <code>_fitted_capacity</code>,
+  <code>fitted_geometry</code> and <code>CAPACITY_GROWTH</code> are gone from
+  <code>scripts/prototypes/efit_field_swap/crosscheck.py</code> and
+  <code>scripts/prototypes/efit_maximin_certificate/adapter_probe.py</code>, and the
+  refitted-capacity column is removed rather than hard-coded from the cross-check
+  row and the adapter probe output.
+  <code>test_a_wide_wall_record_gets_a_fitted_mesh</code> is replaced by
+  <code>test_a_wide_wall_record_meshes_through_the_plain_read</code>.</p>
+  <p id="remove-capacity-refit-workaround-measure">Base arm (74c613d71): 2 failed,
+  58 passed. Head arm (124ad219f): 1 failed, 59 passed. No failure is added: the
+  head's single failure is the base's too, a pre-existing
+  <code>ReferenceSignError</code> in the TCV limited-slice test rather than this
+  change. The negative control restores the fixed capacity formula in a scratch copy
+  of <code>topology.py</code> and the new test then fails with
+  <code>ContourMeshOverflow: contour mesh vertex capacity 231 is below the 247 the
+  geometry holds</code>.</p>
+</article>

@@ -50,4 +50,29 @@
   base that file cannot import, since <code>ContourMeshOverflow</code> does not exist
   there. Restoring the fixed formula turns all eight wide-wall records red and leaves
   every other row unchanged.</p>
+<h2 id="remove-capacity-refit-workaround-retire">The field-swap prototype's capacity refit is retired</h2>
+  <p id="remove-capacity-refit-workaround-delete">With the read sizing its own
+  carrier, the field-swap prototype's refit is dead code.
+  <code>_fitted_capacity</code>, <code>fitted_geometry</code> and
+  <code>CAPACITY_GROWTH</code> are deleted from
+  <code>scripts/prototypes/efit_field_swap/crosscheck.py</code> and from its other
+  importer <code>scripts/prototypes/efit_maximin_certificate/adapter_probe.py</code>;
+  both now build the geometry through <code>TopologyGeometry.from_cells</code>
+  directly. The refitted-capacity column is removed from the cross-check row, the
+  adapter probe output and the TCV read row rather than left hard-coded, and
+  <code>test_a_wide_wall_record_gets_a_fitted_mesh</code> is replaced by
+  <code>test_a_wide_wall_record_meshes_through_the_plain_read</code>, which meshes
+  the same wide-wall record through the plain read.</p>
+  <p id="remove-capacity-refit-workaround-gate">No reference to the deleted names
+  remains in <code>scripts/</code> or <code>tests/</code>. The named test files ran
+  as two arms in fresh processes. Base (74c613d71): 2 failed, 58 passed. Head
+  (124ad219f): 1 failed, 59 passed. The head's only failure, the TCV limited-slice
+  test, is also the base's — a <code>ReferenceSignError</code> from the orientation
+  guard, not this change — so no failure is added. The negative control restores the
+  fixed capacity formula in a scratch copy of <code>topology.py</code>; the new test
+  then fails with <code>ContourMeshOverflow: contour mesh vertex capacity 231 is
+  below the 247 the geometry holds</code>.
+  <code>scripts/prototypes/tcv_liuqe_known_answer/measure.py</code> drops its
+  write-only <code>fitted</code> column, beyond the brief's two named files, so no
+  caller of the removed field is left broken.</p>
 </article>

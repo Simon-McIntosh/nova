@@ -70,3 +70,14 @@ def test_certified_carrier_retains_analytic_axis():
     refused = read(field, roots, geometry, reversed_convention, TopologyPolicy())
     assert not bool(refused.valid)
     assert bool(jnp.all(jnp.isnan(refused.axis)))
+
+
+def test_solver_loads_the_certified_carrier():
+    from scripts.prototypes.fast_map_production.solver import certified_machine
+
+    case, _, exact = certificate._case(
+        "weak-rotation-reactor-static", clip_mode="exact"
+    )
+    machine = certified_machine(case, "limited", 550, exact)
+    assert machine.cache["hit"]
+    assert len(machine.cell_polygons) == 553

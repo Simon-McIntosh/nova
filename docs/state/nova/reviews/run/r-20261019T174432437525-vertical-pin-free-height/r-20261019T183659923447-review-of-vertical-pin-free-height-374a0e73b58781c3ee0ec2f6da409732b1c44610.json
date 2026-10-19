@@ -1,0 +1,81 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [
+    {
+      "failure_condition": "The free-request assertion holds the terminal booked height against (SEED[2]+SEED[5])/(SEED[0]+SEED[3]), a value derived from the seed the solve is handed; it reddens if the free layout moves the held unknown, which the recorded defect did, so it is a live guard rather than a same-variable tautology. This node added no assertion of its own.",
+      "lines": "tests/equilibrium/test_solve_vertical_pin.py:360"
+    }
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-19T17:45:21Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/vertical-pin-free-height.html",
+      "line": "110",
+      "severity": "blocking",
+      "text": "blocking: the suite-arm paragraph records the failing id test_eliminated... test_eliminated_constraint_runs_through_typed_solve_without_retrace, but no such test exists; the id that fails in both arm logs is test_eliminated_constraint_runs_through_typed_solve_with_outer_trace (tests/test_equilibrium_constraint_protocol.py:417), so a reader cannot resolve the cited failure."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/vertical-pin-free-height.html",
+      "line": "10",
+      "severity": "blocking",
+      "text": "blocking: the determination names test_one_augmented_newton_program_servers_free_and_pinned_requests ('servers'); the test spelled in the repository is ..._serves_free_and_pinned_requests (tests/equilibrium/test_solve_vertical_pin.py:307), so the deliverable cites a non-existent id."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T174432437525-vertical-pin-free-height/manifest.md",
+      "line": "58",
+      "severity": "follow-on",
+      "text": "follow-on: baseline_suite and after_suite are prose rather than the single-line JSON the dispatch contract requires, and they cite logs/suite-arms.json, whose machine-readable 'failed' arrays are empty for both arms while the arm logs (head-tests_test_equilibrium_constraint_protocol.py.log) and the prose both record two failures each."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/vertical-pin-free-height.html",
+      "line": "49",
+      "severity": "follow-on",
+      "text": "follow-on: done_when clause (1) asked the test be run once at 327b8dfb1; the node ran at HEAD and at a711e2b0 and argued the intervening equality by byte-identity of three files rather than running at 327b8dfb1, so the 'passed when it landed' claim rests on an argument rather than on the named run."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "Read commit by commit against 9beab06a4: the three commits touch only docs/evidence/fragments/converged-forward-solve/vertical-pin-free-height.html, adding 123 lines and no source or test change.",
+    "done_when": "The source done_when names three clauses; the landed fragment records clause (1) as a determination, clause (2) as vacuous because nothing is wrong at HEAD, and clause (3) as the suite arms, whose logs repro-base-tree-cwd.log and the arm logs show 6 passed at a711e2b0 and 71 passed with the same two failures in both arms.",
+    "goal": "The source brief's goal is to settle why the free vertical-pin request moves its booked height; the landed fragment vertical-pin-free-height.html:4-8 determines it does not move at HEAD 9beab06a4 or at a711e2b0 and names the mechanism at constraint.py residual, leaving the recorded movement unsettled under follow_ons.",
+    "manifest": "The source manifest.md records status complete, commits acb00d813/adfce6558/374a0e73b, a red negative control at logs/negative-control.log (EXIT=1, three failing ids the head arm does not fail), and the suite-arm result, but carries baseline_suite/after_suite as prose and one misnamed failure id.",
+    "write_paths": "The source fence grants constraint.py, fixed_point.py, test_solve_vertical_pin.py, the fragment vertical-pin-free-height.html and a figure directory; the 9beab06a4..374a0e73b diff touches only the declared fragment and adds nothing outside it."
+  },
+  "justifications": {
+    "durability": "No assertion is added by this diff (a documentation-only change), so nothing guards the determination against regression; the sensitivity the node demonstrates rests on the pre-existing test at tests/equilibrium/test_solve_vertical_pin.py:360.",
+    "evidence": "The suite job 1290374 ran and all five arm logs are present, but the manifest's baseline_suite/after_suite are prose citing a suite-arms.json that records zero failures while the arm log shows two, and the fragment's failure id at line 110 does not resolve.",
+    "fit": "The fragment follows the landing-fragment idiom with node-prefixed element ids, but cites two test ids that do not exist (lines 10 and 110) and ends without a trailing newline.",
+    "goal_fidelity": "vertical-pin-free-height.html:4-8 settles the case that reproduces, but the recorded movement that motivated the node is left unresolved at lines 44-58, so the goal is only partly settled.",
+    "reuse": "The change adds no code definition, so there is no capability to fork; the production symbols it cites, nova/equilibrium/forward.py:2609 and nova/equilibrium/constraint.py:1054, exist as named.",
+    "scope_discipline": "The diff at 9beab06a4..374a0e73b changes exactly one file, docs/evidence/fragments/converged-forward-solve/vertical-pin-free-height.html, inside the declared write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source brief's goal is to settle why the free vertical-pin request moves its booked height; the landed fragment vertical-pin-free-height.html:4-8 determines it does not move at HEAD 9beab06a4 or at a711e2b0 and names the mechanism at constraint.py residual, leaving the recorded movement unsettled under follow_ons.\nVERDICT done_when: The source done_when names three clauses; the landed fragment records clause (1) as a determination, clause (2) as vacuous because nothing is wrong at HEAD, and clause (3) as the suite arms, whose logs repro-base-tree-cwd.log and the arm logs show 6 passed at a711e2b0 and 71 passed with the same two failures in both arms.\nVERDICT write_paths: The source fence grants constraint.py, fixed_point.py, test_solve_vertical_pin.py, the fragment vertical-pin-free-height.html and a figure directory; the 9beab06a4..374a0e73b diff touches only the declared fragment and adds nothing outside it.\nVERDICT manifest: The source manifest.md records status complete, commits acb00d813/adfce6558/374a0e73b, a red negative control at logs/negative-control.log (EXIT=1, three failing ids the head arm does not fail), and the suite-arm result, but carries baseline_suite/after_suite as prose and one misnamed failure id.\nVERDICT diff: Read commit by commit against 9beab06a4: the three commits touch only docs/evidence/fragments/converged-forward-solve/vertical-pin-free-height.html, adding 123 lines and no source or test change.\nCALL_SITES: none\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: vertical-pin-free-height.html:4-8 settles the case that reproduces, but the recorded movement that motivated the node is left unresolved at lines 44-58, so the goal is only partly settled.\nSCORE evidence: 13\nJUSTIFICATION evidence: The suite job 1290374 ran and all five arm logs are present, but the manifest's baseline_suite/after_suite are prose citing a suite-arms.json that records zero failures while the arm log shows two, and the fragment's failure id at line 110 does not resolve.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The diff at 9beab06a4..374a0e73b changes exactly one file, docs/evidence/fragments/converged-forward-solve/vertical-pin-free-height.html, inside the declared write paths.\nSCORE durability: 8\nJUSTIFICATION durability: No assertion is added by this diff (a documentation-only change), so nothing guards the determination against regression; the sensitivity the node demonstrates rests on the pre-existing test at tests/equilibrium/test_solve_vertical_pin.py:360.\nSCORE fit: 13\nJUSTIFICATION fit: The fragment follows the landing-fragment idiom with node-prefixed element ids, but cites two test ids that do not exist (lines 10 and 110) and ends without a trailing newline.\nSCORE reuse: 20\nJUSTIFICATION reuse: The change adds no code definition, so there is no capability to fork; the production symbols it cites, nova/equilibrium/forward.py:2609 and nova/equilibrium/constraint.py:1054, exist as named.\nFINDING docs/evidence/fragments/converged-forward-solve/vertical-pin-free-height.html:110 blocking: the suite-arm paragraph records a failing id that does not exist (\u2026_without_retrace); the id that fails in both arm logs is test_eliminated_constraint_runs_through_typed_solve_with_outer_trace.\nFINDING docs/evidence/fragments/converged-forward-solve/vertical-pin-free-height.html:10 blocking: the determination names \u2026_servers_free_and_pinned_requests; the repository spells the test \u2026_serves_free_and_pinned_requests.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T174432437525-vertical-pin-free-height/manifest.md:58 follow-on: baseline_suite/after_suite are prose, not the required JSON, and cite a suite-arms.json whose empty failed arrays contradict the two failures the arm logs and the prose both record.\nFINDING docs/evidence/fragments/converged-forward-solve/vertical-pin-free-height.html:49 follow-on: done_when asked a run at 327b8dfb1; the node substituted a byte-identity argument from HEAD and a711e2b0.\n",
+  "review_run_id": "r-20261019T183659923447-review-of-vertical-pin-free-height-374a0e73b58781c3ee0ec2f6da409732b1c44610",
+  "reviewed_base_sha": "9beab06a492a7e37bb662be57bb66b91fdf6baf9",
+  "reviewed_commits": [
+    "acb00d8135df79c6c74f8a832e46a37503fd9d71",
+    "adfce6558e7f50c0d912110fef9bacc4d1fef2bb",
+    "374a0e73b58781c3ee0ec2f6da409732b1c44610"
+  ],
+  "reviewed_head_sha": "374a0e73b58781c3ee0ec2f6da409732b1c44610",
+  "reviewed_run_id": "r-20261019T174432437525-vertical-pin-free-height",
+  "scores": {
+    "durability": 8,
+    "evidence": 13,
+    "fit": 13,
+    "goal_fidelity": 14,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T18:57:54.910735+00:00"
+}

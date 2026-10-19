@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="460">
+<meta name="plan-version" content="461">
 <meta name="plan-modified" content="2026-10-19">
 </head>
 <body>
@@ -1273,6 +1273,20 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261019T175602319935-review-of-axis-persistence-near-saddle-03cafa9ba65e" data-who="reckon-build" data-when="2026-10-19T18:11:39.772Z">
     <div class="r-comment-body"><p>review-of-axis-persistence-near-saddle-03cafa9ba65e: parsed review stored for r-20261019T132111829961-axis-persistence-near-saddle at head 03cafa9ba65eca02c8c0407cae9131b35325bedb from base 6dbbb251ac2b5ced4b3867d73614a8bc0241fd2c; six dimensions scored, 0 added failures, five follow-on findings.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261019T183659923447-review-of-vertical-pin-free-height-374a0e73b587" data-who="reckon-build" data-when="2026-10-19T18:55:33.751Z">
+    <div class="r-comment-body"><p>Review of r-20261019T174432437525-vertical-pin-free-height at head 374a0e73b, base 9beab06a4.
+The node is documentation-only: the 9beab06a4..374a0e73b diff adds one file,
+docs/evidence/fragments/converged-forward-solve/vertical-pin-free-height.html,
+and changes no source or test. Verdict: the recorded 3.86e-3 free-height offset
+reproduces in its own environment (the certificate-550 base tree) but not at HEAD
+or in a fresh a711e2b0 tree, where the free request holds the booked height at
+0.6 with terminal flux bit-identical to the seed; the fragment records that
+determination and its mechanism honestly and files the residual question as a
+follow-on. Findings: two test ids cited in the fragment do not resolve
+(a real failure-id mismatch at line 110, a typo at line 10) and the manifest&#x27;s
+suite fields are prose that cite a suite-arms.json whose empty failed arrays
+contradict the two failures the arm logs record. Scores 14/13/20/8/13/20.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

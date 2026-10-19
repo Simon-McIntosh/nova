@@ -1,0 +1,63 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-19T22:09:41.530Z",
+  "dispatched_at": "2026-10-19T21:56:19Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/certificate-diverted-stall.html",
+      "line": "24",
+      "severity": "follow-on",
+      "text": "follow-on: the sentence says the full-map forward-mode column matches the basis central difference \"to at most 3.2e-7 relative\" over cells 8, 18, 80, 227, 242, 247, 522 and 529, but the basis column probe (column_probe_diverted_550.json) probed only cells 8, 80, 227, 242 and 522 and its worst full-map column relative disagreement is 1.96e-5 at cell 8 block 2 h=1e-5 (3.17e-7 is that receipt's second-worst entry), so both the cell set and the bound overstate the measurement."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/certificate-diverted-stall.html",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "follow-on: the sentence says path_weight and membership are \"the only\" stages whose disagreement exceeds 1e-4 relative \"at that iterate\" and every other stage \"agrees to roundoff\", but the receipt (column_probe_diverted_2000.json) shows root_position, bell_area, bell_moments, cut_moments and geometric_membership also exceeding 1e-4 at cells 1644, 1748 and 1750, so the claim holds only for the residual-dominating cells 40 and 50."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T205320391343-certificate-diverted-stall/manifest.md",
+      "line": "10",
+      "severity": "blocking",
+      "text": "blocking: the node was dispatched to fix the diverted carrier's derivative at its owner and drive the 550 row to 1e-12, but the landed change is documentation only -- no fix, no committed diverted convergence test and no suite arms -- so it cannot land as the convergence deliverable the node names; the localization it does deliver is a valid partial evidence input and its own follow_ons already carry the remainder."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "the landed change is two static HTML documents; no production runtime code reaches them.",
+    "diff": "read both commits against base ecdec59bd; f38d38d9d adds the evidence fragment and 18f91b523 adds the research section, 39 insertions and no deletions, no code and no test.",
+    "done_when": "read the brief's three clauses; clause (1) is answered only for the 2,000-cell iterate and its 550-cell premise is refuted (certificate-diverted-stall.html:24), clause (2)'s fix, 1e-12 convergence and committed GPU test are not delivered, and clause (3)'s four-row H200 job and paired suite arms are not delivered (manifest.md:10).",
+    "goal": "the node's goal is \"Make the certified diverted carriers' forward solve converge\" (brief.txt:1); the landed diff adds two HTML documents and converges no carrier -- the diverted 550-cell and 2,000-cell rows remain stalled at 1.55e-3 and 3.63e-3 (certificate-diverted-stall.html:21,24), so the goal is not delivered.",
+    "manifest": "read; status complete with commits f38d38d9d and 18f91b523, and it honestly reports done_when (2) and (3) undelivered, baseline_suite/after_suite empty, no fix and no diverted convergence test.",
+    "write_paths": "read the manifest's declared write paths; the diff touches only docs/research/certificate-550-convergence.html and docs/evidence/fragments/converged-forward-solve/certificate-diverted-stall.html, both inside them."
+  },
+  "justifications": {
+    "durability": "the diff adds no assertion and the required committed diverted-carrier convergence test beside test_certified_limited_carrier_converges was not written, so nothing fails if the analysis regresses.",
+    "evidence": "manifest.md:21-22 leaves baseline_suite and after_suite empty and no 1e-12 convergence measure was run, though the two H200 probe receipts (column_probe_diverted_550.json, column_probe_diverted_2000.json) do exist and reproduce their quoted figures.",
+    "fit": "certificate-diverted-stall.html:10-20 follows the evidence-fragment idiom of its sibling diverted-stall.html, with mechanism-named anchors and hyphenated slugs, though the file ends without a trailing newline.",
+    "goal_fidelity": "certificate-diverted-stall.html:21 records a localization and a refutation and no converged carrier, so the goal \"make the certified diverted carriers' forward solve converge\" is not met.",
+    "reuse": "no code is added; a capability search over docs/evidence/fragments and docs/research found sibling records (diverted-stall.html, certificate-550-map-mismatch.html) covering different capabilities and none localizing the path-weight step, so this record is that capability's first owner.",
+    "scope_discipline": "git diff --stat ecdec59bd 18f91b523 lists only the two declared documentation paths and no test or source file."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is \"Make the certified diverted carriers' forward solve converge\" (brief.txt:1); the landed diff adds two HTML documents and converges no carrier -- the diverted 550-cell and 2,000-cell rows remain stalled at 1.55e-3 and 3.63e-3 (certificate-diverted-stall.html:21,24), so the goal is not delivered.\nVERDICT done_when: read the brief's three clauses; clause (1) is answered only for the 2,000-cell iterate and its 550-cell premise is refuted (certificate-diverted-stall.html:24), clause (2)'s fix, 1e-12 convergence and committed GPU test are not delivered, and clause (3)'s four-row H200 job and paired suite arms are not delivered (manifest.md:10).\nVERDICT write_paths: read the manifest's declared write paths; the diff touches only docs/research/certificate-550-convergence.html and docs/evidence/fragments/converged-forward-solve/certificate-diverted-stall.html, both inside them.\nVERDICT manifest: read; status complete with commits f38d38d9d and 18f91b523, and it honestly reports done-when (2) and (3) undelivered, baseline_suite/after_suite empty, no fix and no diverted convergence test.\nVERDICT diff: read both commits against base ecdec59bd; f38d38d9d adds the evidence fragment and 18f91b523 adds the research section, 39 insertions and no deletions, no code and no test.\nCALL_SITES: none\nSCORE goal_fidelity: 4\nJUSTIFICATION goal_fidelity: certificate-diverted-stall.html:21 records a localization and a refutation and no converged carrier, so the goal \"make the certified diverted carriers' forward solve converge\" is not met.\nSCORE evidence: 7\nJUSTIFICATION evidence: manifest.md:21-22 leaves baseline_suite and after_suite empty and no 1e-12 convergence measure was run, though the two H200 probe receipts (column_probe_diverted_550.json, column_probe_diverted_2000.json) do exist and reproduce their quoted figures.\nSCORE scope_discipline: 7\nJUSTIFICATION scope_discipline: git diff --stat ecdec59bd 18f91b523 lists only the two declared documentation paths and no test or source file.\nSCORE durability: 0\nJUSTIFICATION durability: the diff adds no assertion and the required committed diverted-carrier convergence test beside test_certified_limited_carrier_converges was not written, so nothing fails if the analysis regresses.\nSCORE fit: 17\nJUSTIFICATION fit: certificate-diverted-stall.html:10-20 follows the evidence-fragment idiom of its sibling diverted-stall.html, with mechanism-named anchors and hyphenated slugs, though the file ends without a trailing newline.\nSCORE reuse: 20\nJUSTIFICATION reuse: no code is added; a capability search over docs/evidence/fragments and docs/research found sibling records (diverted-stall.html, certificate-550-map-mismatch.html) covering different capabilities and none localizing the path-weight step, so this record is that capability's first owner.\nFINDING docs/evidence/fragments/converged-forward-solve/certificate-diverted-stall.html:24 follow-on: the sentence says the full-map forward-mode column matches the basis central difference \"to at most 3.2e-7 relative\" over cells 8, 18, 80, 227, 242, 247, 522 and 529, but the basis column probe (column_probe_diverted_550.json) probed only cells 8, 80, 227, 242 and 522 and its worst full-map column relative disagreement is 1.96e-5 at cell 8 block 2 h=1e-5 (3.17e-7 is that receipt's second-worst entry), so both the cell set and the bound overstate the measurement.\nFINDING docs/evidence/fragments/converged-forward-solve/certificate-diverted-stall.html:21 follow-on: the sentence says path_weight and membership are \"the only\" stages whose disagreement exceeds 1e-4 relative \"at that iterate\" and every other stage \"agrees to roundoff\", but the receipt (column_probe_diverted_2000.json) shows root_position, bell_area, bell_moments, cut_moments and geometric_membership also exceeding 1e-4 at cells 1644, 1748 and 1750, so the claim holds only for the residual-dominating cells 40 and 50.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T205320391343-certificate-diverted-stall/manifest.md:10 blocking: the node was dispatched to fix the diverted carrier's derivative at its owner and drive the 550 row to 1e-12, but the landed change is documentation only -- no fix, no committed diverted convergence test and no suite arms -- so it cannot land as the convergence deliverable the node names; the localization it does deliver is a valid partial evidence input and its own follow_ons already carry the remainder.\n",
+  "review_run_id": "r-20261019T215550401376-review-of-certificate-diverted-stall-18f91b523614",
+  "reviewed_base_sha": "ecdec59bddeffd0db0cd364de35f9698f0848525",
+  "reviewed_head_sha": "18f91b52361469265b659d75150bc610fcdbc205",
+  "reviewed_run_id": "r-20261019T205320391343-certificate-diverted-stall",
+  "scores": {
+    "durability": 0,
+    "evidence": 7,
+    "fit": 17,
+    "goal_fidelity": 4,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T22:07:54Z",
+  "total": 68
+}

@@ -50,9 +50,13 @@ def test_certified_carrier_retains_analytic_axis():
     geometry = topology.TopologyGeometry.from_cells(
         machine.cell_polygons, machine.sampling_vertices, (machine.wall_node,)
     )
-    _, analytic, _, axis, _ = _analytic_inputs("limited")
+    _, analytic, _, _, _ = _analytic_inputs("limited")
     field = SampledField(certificate_field(analytic, "limited"))
-    position = jnp.asarray(axis)[None]
+    expected_axis = np.asarray((float(analytic.radius), float(analytic.shift[1])))
+    position = jnp.asarray(expected_axis)[None]
+    np.testing.assert_allclose(
+        np.asarray(field.evaluate(position[0]).gradient), 0.0, atol=1e-12
+    )
     roots = fixed_points.FixedPointResult(
         position,
         jax.vmap(field.evaluate)(position),
@@ -69,7 +73,7 @@ def test_certified_carrier_retains_analytic_axis():
     assert np.all(eigenvalues < 0)
     reading = read(field, roots, geometry, convention, TopologyPolicy())
     assert bool(reading.valid) and bool(reading.qualified)
-    np.testing.assert_allclose(reading.axis, axis, atol=1e-12)
+    np.testing.assert_allclose(reading.axis, expected_axis, atol=1e-12)
 
     reversed_convention = topology.TopologyConvention.from_cocos(17, -1.0)
     refused = read(field, roots, geometry, reversed_convention, TopologyPolicy())

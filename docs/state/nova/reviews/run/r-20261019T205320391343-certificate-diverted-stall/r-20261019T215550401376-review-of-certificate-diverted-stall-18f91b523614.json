@@ -6,6 +6,11 @@
   "call_sites": [],
   "completed_at": "2026-10-19T22:09:41.530Z",
   "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "certificate-diverted-stall",
+      "recorded_at": "2026-10-19T22:14:47.720380+00:00"
+    },
     "evidence": {
       "kind": "folded",
       "node": "certificate-diverted-stall",

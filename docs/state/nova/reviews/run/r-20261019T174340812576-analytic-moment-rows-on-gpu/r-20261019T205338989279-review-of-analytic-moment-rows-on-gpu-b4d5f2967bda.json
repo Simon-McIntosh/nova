@@ -1,0 +1,64 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [
+    {
+      "failure_condition": "Each cell's number is compared against its receipt field by scratch/emit_table.py:check, which compares float(token) to float(fmt(row[field])) with fmt the generator's own formatter; reverting either corrected cell makes it redden (verified: limited 2000 read_image_error, limited 5000 exact_image_error, EXIT=1), so the two cells under correction are genuinely guarded by the check.",
+      "lines": "docs/evidence/fragments/converged-forward-solve/analytic-moment-rows.html:36-40"
+    },
+    {
+      "failure_condition": "The check compares the table against the generator's own rendering of the receipt (float(fmt(row[field]))), not the raw field, so a formatter that rounds a value (e.g. %.5f on a ratio near 6e-4) passes while the served number differs from the receipt by about 0.6%; it is a non-hand-editing check at generator rounding, not a fidelity check.",
+      "lines": "scratch/emit_table.py:check"
+    }
+  ],
+  "call_sites": [],
+  "completed_at": "2026-10-19T21:11:35.225Z",
+  "dispatched_at": "2026-10-19T20:54:52Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/analytic-moment-rows.html",
+      "line": "45",
+      "severity": "follow-on",
+      "text": "follow-on: the claim that 'a re-read of the table against every field names any cell that disagrees' rests on scratch/emit_table.py, which is uncommitted under the run directory and compares the table against the generator's own rendering (float(fmt(row[field]))) rather than the raw receipt value, so the guarantee is neither durable (unreachable once the run directory is cleaned) nor a fidelity check against the receipt itself, only that the table was not hand-edited at generator rounding."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/analytic-moment-rows.html",
+      "line": "40",
+      "severity": "follow-on",
+      "text": "follow-on: the diverted 2000 saddle ratios are served as 0.00062 / 0.00022 where h200-results/diverted-2000.json gives 0.0006163830118077075 / 0.00022163736352440343; the generator's %.5f decimal rendering lost a significant figure the previous text carried (6.16e-04 / 2.22e-04), so this row's reported value now differs from its receipt by about 0.6%, a precision regression introduced by the rewrite whose stated purpose was receipt fidelity."
+    }
+  ],
+  "item_verdicts": {
+    "assertions": "The delta adds no test assertion; its correctness is carried by the run-scratch checker scratch/emit_table.py --check, whose only recorded output is scratch/check.txt (78 numbers, 0 mismatches). I re-ran that checker against the committed fragment at b4d5f2967bda and it reported 78 compared, 0 mismatches, EXIT=0; against scratch/table.wrong with the two original values it reported exactly the two corrected fields and EXIT=1, so the check can fail and was shown to.",
+    "diff": "Read commit by commit against base 4fd405d0f8ce: the delta is one commit, b4d5f2967bda, one file, 9 insertions and 9 deletions in the H200 rows table and its two prose paragraphs; no assertion or bound is touched.",
+    "done_when": "The source brief.txt clause (2) asks all six rows to run as ONE job; the delta does not change that shape, it discloses at analytic-moment-rows.html:33 that job 1290367 hit its 02:00:00 wall and job 1290419 measured diverted 5000 separately, so clause (2)'s one-job shape remains unmet while every row was measured and passes; clauses (1) and (3) are unchanged by this delta.",
+    "goal": "The reviewed run's goal is that the six analytic certificate-moment rows measure only on the GPU lane; this delta is its correction commit, and the landed change (docs/evidence/fragments/converged-forward-solve/analytic-moment-rows.html:36-46) recomputes the six-row table so every cell carries its receipt's field and states the six rows ran as two H200 jobs, so the delta does what it set out to do.",
+    "manifest": "The source manifest.md records status complete, the five commits, and the two-job H200 wall; its checkpoint names the same two cells this delta corrects, and its results reconcile with the receipts under h200-results/.",
+    "write_paths": "The source prompt fenced tests/test_current_book_fragments.py and docs/evidence/fragments/converged-forward-solve/analytic-moment-rows.html; git diff 4fd405d0f8ce..b4d5f2967bda touches only the fragment html, inside those paths."
+  },
+  "justifications": {
+    "durability": "No committed test guards the served table; the only checker is scratch/emit_table.py under the run directory, which no CI or future reader can reach once that directory is cleaned, so an edited or regressed table reddens nothing in the repository.",
+    "evidence": "The correction is recorded and reproducible: emit_table.py --check over the committed fragment reports 'compared 78 numbers over 6 rows' and 'mismatches=0', and the reverted table reddens the same checker, but the checker itself is uncommitted scratch (see durability).",
+    "fit": "The fragment keeps the evidence-doc idiom and adds no forbidden name, but the generated table's %.5f rendering at analytic-moment-rows.html:40 rounds the diverted 2000 saddle ratios below the precision of the surrounding cells.",
+    "goal_fidelity": "docs/evidence/fragments/converged-forward-solve/analytic-moment-rows.html:38,40 now carry 2.6695e-06 and 3.1917e-05, matching h200-results/limited-2000.json and limited-5000.json, and all 78 table numbers reconcile with the six receipt JSONs.",
+    "reuse": "The landed change adds no definition to the repository; a search over scripts/ and nova/ for an existing receipt-to-evidence-table generator (grep for BOOKING_ROW, h200-results, operand_cache_root, and receipt/table generators) found only per-experiment measure scripts, not an owner this would fork.",
+    "scope_discipline": "git diff 4fd405d0f8ce..b4d5f2967bda --stat is a single file, docs/evidence/fragments/converged-forward-solve/analytic-moment-rows.html, inside the node's declared write paths."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261019T205338989279-review-of-analytic-moment-rows-on-gpu-b4d5f2967bda",
+  "reviewed_base_sha": "4fd405d0f8ce5103449e9767502cf1b72d899bfc",
+  "reviewed_head_sha": "b4d5f2967bda6b90fccba257352db9daa9d408d2",
+  "reviewed_run_id": "r-20261019T174340812576-analytic-moment-rows-on-gpu",
+  "scores": {
+    "durability": 9,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T21:13:23.640347+00:00",
+  "total": 100
+}

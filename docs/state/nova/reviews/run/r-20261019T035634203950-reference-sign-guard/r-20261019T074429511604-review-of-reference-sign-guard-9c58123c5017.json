@@ -1,0 +1,62 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "scripts/prototypes/tcv_liuqe_known_answer/measure.py:189",
+    "scripts/prototypes/efit_field_swap/crosscheck.py:1059",
+    "scripts/prototypes/efit_field_swap/probe_read.py:28"
+  ],
+  "completed_at": "2026-10-19T08:05:23.706Z",
+  "dispatched_at": "2026-10-19T07:45:38Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/efit_field_swap/crosscheck.py",
+      "line": 1059,
+      "severity": "follow-on",
+      "text": "follow-on: crosscheck.py and probe_read.py:28 were edited although the brief's literal 'Write only' list named orientation.py, test_orientation.py, tcv_liuqe_known_answer and the two doc fragments only; the edits are required by done-when item 1 and are declared in the manifest's orientation_write_paths, so this is an authorisation-bookkeeping gap rather than unauthorised work."
+    },
+    {
+      "file": "scripts/prototypes/efit_field_swap/orientation.py",
+      "line": 142,
+      "severity": "follow-on",
+      "text": "follow-on: _refuse treats any zero sign as agreement, so a slice whose grid span is within tolerance of zero is neither refused nor flagged and measure.py:189 accepts it silently; the caller cannot distinguish 'checked and agreed' from 'undecidable', which weakens the guard on a reference whose flux is genuinely flux-degenerate."
+    },
+    {
+      "file": "docs/research/reference-sign-guard.html",
+      "line": 59,
+      "severity": "follow-on",
+      "text": "follow-on: the brief's measured case states the stored scalars disagree with the grid on 17 of 17 slices, but the driver was given twelve worker-chosen slice indices, so 'every slice the driver reads' holds only for that selection and the file's remaining slices were never exercised by the guard."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read commit by commit (0638b6189 through 9c58123c5) against a5ebd580f; nine files, 896 insertions, of which the substantive guard is orientation.py:114-280 and the wiring is measure.py:189, crosscheck.py:1059 and probe_read.py:28.",
+    "done_when": "(1) met at orientation.py:156 against grid and stored scalars; (2) met by the twelve-row table at docs/research/reference-sign-guard.html:59 (LIUQE_ROWS 12 REFUSED 12) and FIELD_SWAP_ROWS 28 IDENTICAL True in field-swap-comparison-verified.log; (3) met by baseline_suite_resume.log and after_suite_resume.log, both reaching their summary line.",
+    "goal": "the goal is to make nova refuse, not read, a reference whose stored flux sign contradicts its declared convention; orientation.py:156 and orientation.py:233 implement the refusal and measure.py:189, crosscheck.py:1059 and probe_read.py:28 wire the three read sites.",
+    "manifest": "read; it records status complete, the twelve-of-twelve and zero-of-twenty-eight refusals, the thirteen-pass focused gate, the eleven-failure negative control, and both suite arms at revision a5ebd580f (32 passed) and b0e5d6901 (33 passed).",
+    "write_paths": "the manifest's orientation_write_paths lists orientation.py, test_orientation.py, crosscheck.py, probe_read.py, tcv_liuqe_known_answer, the two doc fragments and docs/research and docs/figures; every changed path in the diff is inside that set, though crosscheck.py and probe_read.py lie outside the brief's literal 'Write only' list."
+  },
+  "justifications": {
+    "durability": "test_orientation.py:88 test_negated_grid_against_its_scalars_is_refused reddens when the guard is removed, as negative-control-resume.log:3 shows with eleven failures including both trace read-site tests, so the assertions name a condition under which the code fails and are independent of the input the test controls.",
+    "evidence": "the done-when gate is measured and recorded, not claimed: baseline_suite_resume.log:8 and after_suite_resume.log:8 both reach a pytest summary (32 and 33 passed, EXIT=0), reference-sign-slices-fresh.json holds 12 refused rows, field-swap-comparison-verified.log prints FIELD_SWAP_ROWS 28 IDENTICAL True, and negative-control-resume.log:3 records EXIT=1 with eleven failures.",
+    "fit": "orientation.py:156 and its helpers follow the module's numpy/ValueError idiom and use capability-named symbols with no plan label or version suffix; ruff check --no-cache passes on all seven changed source files.",
+    "goal_fidelity": "orientation.py:156 check_axis_boundary_sign and orientation.py:233 check_trace_record refuse a grid whose axis-boundary span contradicts the declared convention, and orientation.py:139 _refuse names the slice, declaration and measured signs, exactly the deliverable the goal states.",
+    "reuse": "orientation.py:76 grid_field samples through the comparison's own spline via TraceSplineField.from_record, and orientation.py:59 ids_cocos reads the existing TopologyConvention.from_cocos owner, so the guard extends the spline and convention owners rather than forking them; a search for an existing sign-consistency guard over scripts/prototypes and nova found none.",
+    "scope_discipline": "every path in git diff a5ebd580f..9c58123c5 is inside the manifest's orientation_write_paths, but crosscheck.py:1059 and probe_read.py:28 were edited although the brief's literal 'Write only' list named neither file, so the change carries two files the brief did not authorise though done-when item 1 requires them."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261019T074429511604-review-of-reference-sign-guard-9c58123c5017",
+  "reviewed_base_sha": "a5ebd580f15eced4872a3131f782347810f7e5e9",
+  "reviewed_head_sha": "9c58123c501792c20dc282044103e293e037c717",
+  "reviewed_run_id": "r-20261019T035634203950-reference-sign-guard",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T08:07:35.737841+00:00"
+}

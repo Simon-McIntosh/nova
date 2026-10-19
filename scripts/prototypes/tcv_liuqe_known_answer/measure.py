@@ -4,21 +4,30 @@ The input is a LIUQE reconstruction stored as an IMAS ``equilibrium`` IDS: a
 rectilinear psi grid per time slice and a boundary polygon on a separate TCV
 ``wall`` IDS. The merged field-swap adapter supplies the pieces: the grid spline
 field (``efit_field_*swap.spline_field``) and the per-loop wall geometry and the
-nova read call (``efit_field_swap.crosscheck``). nova's read is run unchanged on
-LIUQE's own psi field with the per-loop TCV wall; LIUQE's stored axis, X-point,
-flux levels and label are the reference.
+nova read call (``efit_field_swap.crosscheck``). nova's read is confirmed
+unchanged on LIUQE's own psi field with the per-loop TCV wall; LIUQE's stored
+axis, X-point, flux levels and label are the reference.
 
-Two facts about the shipped LIUQE archives drive the slice choice and are
-reported beside every number:
+Two facts about the shipped LIUQE stores drive the slice choice and are reported
+beside every number:
 
 * ``boundary.type`` is unset (-999999999) on every slice, so LIUQE's own
   limited-or-diverted label is read from whether it stored a boundary X-point
   (``boundary/x_point``), which is absent through the limited phase and present
-  through the diverted one.
+  through the diverted one -- in DD 3.41.0. DD 4.1.0 carries the same structure
+  differently, so the X-point list is read only when the DD version stores one.
 * ``profiles_2d/psi`` is piecewise-constant in time: the 1703-slice store
-  carries only 17 distinct psi grids, each frozen over one contiguous block.
-  A per-slice read inside a block would score one field repeatedly, so the
-  snapshot takes one representative slice per distinct grid block.
+  carries only 17 distinct psi grids, each frozen over one contiguous block, and
+  the block starts are exactly ``SLICES``. A per-slice read inside a block would
+  score one field repeatedly, so the snapshot takes one representative slice per
+  distinct grid block.
+
+The default reference is imas-efit's corrected full-pulse source
+(``SOURCE_LIUQE_STORE``, DD 3.41.0), whose ``profiles_2d/psi`` is negated so the
+file is internally COCOS-11: the stored grid and the stored scalars agree, and
+the orientation guard admits every slice with no compensating sign. The curated
+DD 4.1.0 window (``WINDOW_LIUQE_STORE``) is COCOS-17 and is used only to confirm
+the correction against the full pulse across the DD conversion.
 """
 
 from __future__ import annotations
@@ -39,14 +48,32 @@ from nova.jax.config import configure_dtypes
 from scripts.prototypes.efit_field_swap import crosscheck
 from scripts.prototypes.efit_field_swap.spline_field import TraceSplineField
 from scripts.prototypes.efit_field_swap.orientation import (
+    ReferenceSignError,
+    UndecidableSignError,
     check_axis_boundary_sign,
+    grid_field,
+    grid_value,
     ids_boundary_points,
+    ids_cocos,
     ids_declaration,
     read_convention,
 )
 
 configure_dtypes()
 assert jax.config.jax_enable_x64 is True
+
+SOURCE_LIUQE_STORE = Path(
+    "/home/ITER/mcintos/public/efit/validation/TCV/77549/liuqe-corrected"
+)
+"""imas-efit's corrected TCV 77549 LIUQE full pulse, DD 3.41.0, internally COCOS-11."""
+
+WINDOW_LIUQE_STORE = Path(
+    "/home/ITER/mcintos/Code/imas-efit/tests/data/imas/TCV/77549/validation/liuqe"
+)
+"""The curated 50-slice window of the same pulse, DD 4.1.0, COCOS-17 throughout."""
+
+WINDOW_SECONDS = (0.7930, 0.8390)
+"""The time span the curated window covers, in the source's own time base."""
 
 RESOLUTIONS = (16, 24, 32)
 SLICES = (
@@ -73,6 +100,11 @@ SLICES = (
 ``profiles_2d/psi`` is piecewise-constant in time, so the store carries only
 these seventeen distinct grids; the start index of each block is listed so every
 distinct grid is guarded and scored exactly once."""
+
+LIMITED_SLICE = 34
+"""The limited-phase slice the coverage test reads; also the fallback selector
+for the curated window where no sampled slice falls inside it."""
+
 REFUSED_CASES = {
     "jt60sa-5slice-s5-133-134:A",
     "jt60sa-5slice-s5-133-134:B",
@@ -128,6 +160,19 @@ def _closed(vertices):
     return ring
 
 
+def getattr_optional(structure, name):
+    """A structure child that a DD version may not carry, or an empty list.
+
+    ``ids_structure`` raises ``AttributeError`` for a name the loaded Data
+    Dictionary has no node for, so a version-specific structure such as
+    ``boundary/x_point`` (DD 3) is absent rather than empty in DD 4.
+    """
+    try:
+        return getattr(structure, name)
+    except AttributeError:
+        return []
+
+
 def slice_view(eq, index):
     """LIUQE slice ``index`` as the field, wall ring selection happens in the driver."""
     ts = eq.time_slice[index]
@@ -137,9 +182,10 @@ def slice_view(eq, index):
     psi = np.asarray(p2.psi, dtype=np.float64)
     gq = ts.global_quantities
     axis = (float(gq.magnetic_axis.r), float(gq.magnetic_axis.z))
+    stored_xpoints = getattr_optional(ts.boundary, "x_point")
     xpoints = [
         (float(p.r), float(p.z))
-        for p in ts.boundary.x_point
+        for p in stored_xpoints
         if abs(float(p.r)) < 1e3 and abs(float(p.z)) < 1e3
     ]
     outline_r = np.asarray(ts.boundary.outline.r, dtype=np.float64)
@@ -279,12 +325,184 @@ def liuqe_reference(view, field):
     return ref
 
 
+def guard_verdict(view):
+    """The orientation guard's verdict for one slice, with no compensation.
+
+    Returns a row naming the declaration, the measured grid and scalar spans,
+    and the outcome: ``agrees`` when both spans carry the sign the declared
+    COCOS requires for the slice's plasma current, else ``contradicts`` or
+    ``undecidable`` carrying the refusal's own message. Nothing here negates,
+    offsets or otherwise compensates the stored flux.
+    """
+    convention = read_convention(
+        dd_version=view["dd_version"], plasma_current=view["plasma_current"]
+    )
+    point = ids_boundary_points(view)
+    field = grid_field(view["rgrid"], view["zgrid"], view["psi"])
+    axis_value = grid_value(
+        view["rgrid"], view["zgrid"], view["psi"], view["axis"], field=field
+    )
+    boundary_value = (
+        None
+        if point is None
+        else float(
+            np.mean(
+                [
+                    grid_value(
+                        view["rgrid"], view["zgrid"], view["psi"], p, field=field
+                    )
+                    for p in point
+                ]
+            )
+        )
+    )
+    row = dict(
+        index=view["index"],
+        dd_version=view["dd_version"],
+        cocos=ids_cocos(view["dd_version"]),
+        plasma_current=view["plasma_current"],
+        declared_sigma=int(np.sign(float(convention.sigma))),
+        boundary_kind="xpoint" if view["xpoints"] else "outline",
+        scalar_span=view["psi_axis"] - view["psi_boundary"],
+        grid_axis_psi=axis_value,
+        grid_boundary_psi=boundary_value,
+        grid_span=None if boundary_value is None else axis_value - boundary_value,
+        outcome="",
+        refused=False,
+        reason="",
+    )
+    try:
+        row["measured_signs"] = check_axis_boundary_sign(
+            convention,
+            view["rgrid"],
+            view["zgrid"],
+            view["psi"],
+            view["axis"],
+            point,
+            scalar_axis_psi=view["psi_axis"],
+            scalar_boundary_psi=view["psi_boundary"],
+            slice_index=view["index"],
+            declared=ids_declaration(view["dd_version"], view["plasma_current"]),
+            field=field,
+        )
+    except UndecidableSignError as error:
+        row["outcome"], row["refused"], row["reason"] = "undecidable", True, str(error)
+    except ReferenceSignError as error:
+        row["outcome"], row["refused"], row["reason"] = "contradicts", True, str(error)
+    else:
+        row["outcome"] = "agrees"
+    return row
+
+
+def grid_block_starts(eq):
+    """Indices at which ``profiles_2d/psi`` changes: one per distinct grid block."""
+    starts = []
+    previous = None
+    for index in range(len(eq.time_slice)):
+        psi = np.asarray(eq.time_slice[index].profiles_2d[0].psi, dtype=np.float64)
+        if previous is None or not np.array_equal(psi, previous):
+            starts.append(index)
+            previous = psi
+    return starts
+
+
+def grid_motion(eq, slices):
+    """Per-slice grid motion against slice 0, beside the scalars' own motion.
+
+    ``grid_motion`` is ``max |psi(t) - psi(t0)|`` over the slice's own grid
+    array, so it is zero exactly where the grid is a byte-copy of slice 0's and
+    grows with the width of the change where it is not. The scalar motions are
+    the same measure on ``psi_axis`` and ``psi_boundary``, which a frozen-grid
+    slice still moves.
+    """
+    times = np.asarray(eq.time, dtype=np.float64)
+    base = np.asarray(eq.time_slice[0].profiles_2d[0].psi, dtype=np.float64)
+    base_axis = float(eq.time_slice[0].global_quantities.psi_axis)
+    base_boundary = float(eq.time_slice[0].global_quantities.psi_boundary)
+    rows = []
+    for index in slices:
+        psi = np.asarray(eq.time_slice[index].profiles_2d[0].psi, dtype=np.float64)
+        gq = eq.time_slice[index].global_quantities
+        rows.append(
+            dict(
+                index=index,
+                time=float(times[index]),
+                grid_motion=float(np.max(np.abs(psi - base))),
+                axis_motion=abs(float(gq.psi_axis) - base_axis),
+                boundary_motion=abs(float(gq.psi_boundary) - base_boundary),
+                psi_axis=float(gq.psi_axis),
+                psi_boundary=float(gq.psi_boundary),
+            )
+        )
+    return rows
+
+
+def window_selection(source_times, window_times, slices):
+    """Curated window slices matched to the source's sampled slices.
+
+    A ``SLICES`` entry whose time falls inside ``WINDOW_SECONDS`` selects the
+    curated window slice nearest to it. Where no entry falls inside the window
+    the selection falls back to the single window time nearest
+    ``LIMITED_SLICE``, and each row is marked ``matched: False`` so a fallback
+    is never read as a time match.
+    """
+    picks = []
+    for index in slices:
+        time = float(source_times[index])
+        if WINDOW_SECONDS[0] <= time <= WINDOW_SECONDS[1]:
+            picks.append((index, int(np.argmin(np.abs(window_times - time))), True))
+    if not picks:
+        time = float(source_times[LIMITED_SLICE])
+        picks.append((None, int(np.argmin(np.abs(window_times - time))), False))
+    return picks
+
+
+def window_agreement(source_view, window_view, *, source_index, window_index, matched):
+    """Whether the curated window agrees with the corrected source at one time.
+
+    The DD 3.41.0 to 4.1.0 conversion negates every flux field, so the source's
+    COCOS-11 values are negated to their COCOS-17 equivalents before the
+    comparison. The span (axis minus boundary) is invariant under an additive
+    gauge constant and is compared as a ratio; the grid, whose coordinates the
+    two files share, is compared as a max absolute difference of the converted
+    source grid against the window grid.
+    """
+    source_span = source_view["psi_axis"] - source_view["psi_boundary"]
+    converted_span = -source_span
+    window_span = window_view["psi_axis"] - window_view["psi_boundary"]
+    converted_grid = -np.asarray(source_view["psi"], dtype=np.float64)
+    window_grid = np.asarray(window_view["psi"], dtype=np.float64)
+    return dict(
+        source_index=source_index,
+        window_index=window_index,
+        matched=matched,
+        source_time=source_view["time"],
+        window_time=window_view["time"],
+        source_psi_axis=source_view["psi_axis"],
+        source_psi_boundary=source_view["psi_boundary"],
+        converted_psi_axis=-source_view["psi_axis"],
+        converted_psi_boundary=-source_view["psi_boundary"],
+        window_psi_axis=window_view["psi_axis"],
+        window_psi_boundary=window_view["psi_boundary"],
+        converted_span=converted_span,
+        window_span=window_span,
+        span_ratio=window_span / converted_span if converted_span else None,
+        grid_max_abs_diff=float(np.max(np.abs(converted_grid - window_grid))),
+        window_guard=guard_verdict(window_view),
+        source_guard=guard_verdict(source_view),
+    )
+
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--liuqe", required=True)
+    parser.add_argument("--liuqe", default=str(SOURCE_LIUQE_STORE))
     parser.add_argument("--wall", required=True)
     parser.add_argument("--slices", required=True, help="comma-separated indices")
     parser.add_argument("--out", required=True)
+    parser.add_argument("--guard-out")
+    parser.add_argument("--grid-motion-out")
+    parser.add_argument("--window", default="")
+    parser.add_argument("--window-out", default="")
     parser.add_argument("--field-swap-out")
     parser.add_argument("--resolutions", default="16,24,32")
     args = parser.parse_args()
@@ -295,8 +513,49 @@ def main():
     wall_rings = read_wall(args.wall)
     db = imas.DBEntry(f"imas:hdf5?path={args.liuqe}", "r", dd_version="3.41.0")
     eq = db.get("equilibrium")
-    if int(eq.ids_properties.homogeneous_time) != 1:
-        raise ValueError("LIUQE equilibrium must use its IDS-level time base")
+    guard_rows = [guard_verdict(slice_view(eq, index)) for index in slices]
+    for row in guard_rows:
+        print(
+            "GUARD",
+            row["index"],
+            f"t={float(np.asarray(eq.time)[row['index']]):.6f}",
+            f"cocos={row['cocos']}",
+            f"outcome={row['outcome']}",
+            f"grid_span={row['grid_span']!r}",
+            f"scalar_span={row['scalar_span']:.6e}",
+            row["reason"],
+            flush=True,
+        )
+    if args.guard_out:
+        guard_out = Path(args.guard_out)
+        guard_out.parent.mkdir(parents=True, exist_ok=True)
+        guard_out.write_text(json.dumps({"rows": guard_rows}, indent=2) + "\n")
+    print(
+        "GUARD_ROWS",
+        len(guard_rows),
+        "AGREES",
+        sum(row["outcome"] == "agrees" for row in guard_rows),
+        "REFUSED",
+        sum(row["refused"] for row in guard_rows),
+        flush=True,
+    )
+    motion = grid_motion(eq, slices)
+    for row in motion:
+        print(
+            "GRID_MOTION",
+            row["index"],
+            f"t={row['time']:.6f}",
+            f"grid={row['grid_motion']:.6e}",
+            f"axis={row['axis_motion']:.6e}",
+            f"boundary={row['boundary_motion']:.6e}",
+            flush=True,
+        )
+    if args.grid_motion_out:
+        motion_out = Path(args.grid_motion_out)
+        motion_out.parent.mkdir(parents=True, exist_ok=True)
+        motion_out.write_text(json.dumps({"rows": motion}, indent=2) + "\n")
+    starts = grid_block_starts(eq)
+    print("GRID_BLOCKS", len(starts), ",".join(str(s) for s in starts), flush=True)
     output = Path(args.out)
     output.parent.mkdir(parents=True, exist_ok=True)
     with output.open("w") as handle:
@@ -343,6 +602,65 @@ def main():
             missing = sorted(REFUSED_CASES - seen)
             raise ValueError(f"missing field-swap cases: {missing}")
         print("FIELD_SWAP_ROWS", len(seen), flush=True)
+    if args.window:
+        window_pass(eq, args.window, slices, args.window_out)
+
+
+def _ratio_text(value):
+    """A ratio formatted for a log line, or ``None`` where it is undefined."""
+    return "None" if value is None else format(value, ".6f")
+
+
+def window_pass(eq, window_path, slices, out_path=""):
+    """Guard the curated window and compare it with the corrected source.
+
+    Every selected window slice is put through the guard under its own written
+    DD version (4.1.0, COCOS-17), and the source slice nearest it in time is the
+    comparison partner, converted to COCOS-17 by negating its flux.
+    """
+    source_times = np.asarray(eq.time, dtype=np.float64)
+    db = imas.DBEntry(f"imas:hdf5?path={window_path}", "r", dd_version="4.1.0")
+    try:
+        window = db.get("equilibrium")
+        window_times = np.asarray(window.time, dtype=np.float64)
+        rows = []
+        for source_index, window_index, matched in window_selection(
+            source_times, window_times, slices
+        ):
+            nearest = (
+                source_index
+                if source_index is not None
+                else int(np.argmin(np.abs(source_times - window_times[window_index])))
+            )
+            row = window_agreement(
+                slice_view(eq, nearest),
+                slice_view(window, window_index),
+                source_index=nearest,
+                window_index=window_index,
+                matched=matched,
+            )
+            rows.append(row)
+            print(
+                "WINDOW",
+                row["window_index"],
+                f"t={row['window_time']:.6f}",
+                f"matched={row['matched']}",
+                f"window_guard={row['window_guard']['outcome']}",
+                f"source_guard={row['source_guard']['outcome']}",
+                f"converted_span={row['converted_span']:.6e}",
+                f"window_span={row['window_span']:.6e}",
+                f"span_ratio={_ratio_text(row['span_ratio'])}",
+                f"grid_max_abs_diff={row['grid_max_abs_diff']:.6e}",
+                flush=True,
+            )
+    finally:
+        db.close()
+    if out_path:
+        path = Path(out_path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps({"rows": rows}, indent=2) + "\n")
+    print("WINDOW_ROWS", len(rows), flush=True)
+    return rows
 
 
 if __name__ == "__main__":

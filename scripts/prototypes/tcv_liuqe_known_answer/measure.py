@@ -230,7 +230,6 @@ def measure_slice(view, wall_rings, resolutions=RESOLUTIONS):
     coverage = outcome.coverage
     row = dict(
         resolution=outcome.resolution,
-        fitted=outcome.capacity_fit,
         nova_candidates=outcome.candidates,
         nova_saddles=outcome.saddles,
         nova_axis=[float(outcome.axis[0]), float(outcome.axis[1])],

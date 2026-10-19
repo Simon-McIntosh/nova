@@ -18,7 +18,6 @@ from nova.equilibrium.topology import TopologyPolicy  # noqa: E402
 from nova.jax.config import configure_dtypes  # noqa: E402
 from scripts.prototypes.efit_field_swap.crosscheck import (  # noqa: E402
     domain_rings,
-    fitted_geometry,
     lattice,
     read_trace_record,
 )
@@ -66,8 +65,11 @@ def decision(record):
     policy = TopologyPolicy()
     for resolution in (16, 24, 32):
         cells, samples = lattice(boundary, resolution, obstacles)
-        geometry, fitted = fitted_geometry(cells, samples, (boundary, *obstacles))
-        if geometry is None:
+        try:
+            geometry = topology.TopologyGeometry.from_cells(
+                cells, samples, (boundary, *obstacles)
+            )
+        except ValueError, IndexError:
             continue
         sampled = jax.vmap(base.value)(geometry.sample_points.reshape(-1, 2))
         sample_index = jnp.arange(len(sampled)).reshape(
@@ -105,7 +107,6 @@ def decision(record):
         return {
             "resolution": resolution,
             "cells": len(cells),
-            "capacity_fit": fitted,
             "axis": np.asarray(reading.axis).tolist(),
             "boundary": np.asarray(reading.boundary).tolist(),
             "boundary_flux": float(np.asarray(reading.boundary_flux)),

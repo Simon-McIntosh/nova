@@ -2,8 +2,9 @@
 
 Two properties the case-by-case table rests on, both cheap to check without
 running the sweep: that the enumeration behind the table names every input the
-manifest lists, crossing records included, and that a record whose wall
-exceeds nova's contour-mesh capacity receives a fitted mesh.
+manifest lists, crossing records included, and that a record whose wall exceeds a
+capacity sized from its tree centres still meshes, because the read sizes the
+contour mesh from the geometry it must hold.
 """
 
 from __future__ import annotations
@@ -15,13 +16,13 @@ import numpy as np
 import pytest
 
 from nova.equilibrium.solve_request import TopologyPolicy
+from nova.equilibrium.topology import TopologyGeometry
 from nova.linalg.tensor_spline import fit_tensor_spline
 from scripts.prototypes.efit_field_swap.crosscheck import (
     _decision,
     _row,
     cases,
     domain_rings,
-    fitted_geometry,
     lattice,
     read_state,
     wall_units,
@@ -47,17 +48,18 @@ def test_every_manifest_input_becomes_a_case():
         assert path.endswith(".txt")
 
 
-def test_a_wide_wall_record_gets_a_fitted_mesh():
-    """Fitted capacity yields contour vertices on a wide wall.
+def test_a_wide_wall_record_meshes_through_the_plain_read():
+    """The read sizes its own contour mesh, so a wide wall meshes directly.
 
-    Boundary certification is a separate condition and can still refuse the
-    state when the census has not covered its critical points.
+    This record's wall generates more contour vertices than a capacity sized
+    from its tree centres and sampling stencil would hold. The read sizes the
+    carrier from the geometry it must hold, so the plain read yields a mesh with
+    valid vertices. Restoring the fixed capacity formula in the read leaves the
+    mesh empty or refuses it, and this assertion fails.
     """
     record = read_trace_record(ITER_RECORD)
     cells, samples = lattice(record.wall_ring, 16)
-    geometry, fitted = fitted_geometry(cells, samples, wall_units(record))
-    assert fitted is True, "this record's wall is the case the fit exists for"
-    assert geometry is not None
+    geometry = TopologyGeometry.from_cells(cells, samples, wall_units(record))
     assert np.any(np.asarray(geometry.contour_mesh.vertex_valid))
 
 

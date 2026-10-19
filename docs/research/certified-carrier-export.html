@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="converged-forward-solve">
+  <meta name="plan-title" content="Certified-carrier export into the imas-efit boundary trace format">
+  <meta name="plan-summary" content="Export nova's own certified analytic carriers, one limited and one diverted, as version-2 boundary trace records, and re-read them through the codec and nova's own topology read">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-source-quality" content="primary">
+  <meta name="plan-recorded-at" content="2026-10-19">
+  <meta name="plan-read" content="1">
+  <meta name="plan-tags" content="equilibrium,topology,certificate,imas-efit,codec">
+  <title>Certified carriers exported into the boundary trace format | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p class="eyebrow">Research record &middot; measured export and round trip</p>
+      <h1>nova's certified carriers round-trip through the imas-efit boundary trace format</h1>
+      <p class="lead">
+        One limited and one diverted analytic certified carrier were written as
+        imas-efit <code>BOUNDARY_LEVEL_TRACE 2</code> records and reproduced
+        through the codec and through nova's own topology read. The limited
+        record re-reads as <strong>limited</strong> with its boundary at the
+        outboard wall contact, the diverted record as <strong>diverted</strong>
+        with its boundary at the lower saddle, and a negated flux grid is
+        <strong>refused</strong> on each record's declared COCOS-17 polarity.
+      </p>
+    </header>
+
+    <aside>
+      <p>
+        <strong>Scope.</strong> This is the reverse of the field swap. The swap
+        reads imas-efit records with nova's read; here nova writes its own
+        certified fields into imas-efit's record layout, so imas-efit's reader
+        and escape-level rule can be run on fields nova generated. The
+        deliverable is the record and the stated decision, not a new physics
+        result.
+      </p>
+      <p>
+        <strong>Record producer.</strong>
+        <code>scripts/prototypes/certified_carrier_export/export_records.py</code>.
+        Both carriers load from the content-addressed certificate fixture store
+        (<code>certificate-fixtures</code>, reached through
+        <code>scripts/prototypes/support/certificate_fixtures.py</code>) at 550
+        cells, so the machine and its wall are the objects the certificate
+        booking gate publishes under.
+      </p>
+    </aside>
+
+    <section>
+      <h2 id="record-layout">What each record carries</h2>
+      <p>
+        Each record holds nova's analytic total poloidal flux on a fixed
+        <strong>65&times;65 grid</strong> spanning the wall bounding box, plus
+        the read axis, the record polarity and the per-loop wall. The flux is
+        nova's analytic psi in the written convention, whole-weber flux per
+        poloidal plane, which the record states through its polarity field
+        <code>+1</code>: that is the DD version's COCOS-17 convention.
+      </p>
+      <p>
+        The wall is emitted as per-loop segment pairs with a one-based loop
+        index, so the codec reconstructs the whole ring from the record alone
+        and no reader has to know the machine.
+      </p>
+      <p>
+        The store request and the machine's cell count are different numbers.
+        The published request for the coarse certificate machine is the
+        negative sentinel <code>FIXTURE_REQUESTS["coarse"]</code>
+        (&minus;500), while the machine that request builds is the 550-cell
+        carrier this export takes its wall from. The signed request belongs to
+        the carrier's identity digest, so &minus;500 and 500 are two
+        identities and only the signed one is the machine the certificate
+        booking gate published.
+      </p>
+      <p>
+        A limited record admits no saddle, and the codec stores only reals, so
+        its saddle and wall levels repeat the boundary flux. Writing a NaN
+        there is not merely uninformative: the codec's real formatter has no
+        field width for it and the write raises. The repeat is the encoding
+        choice, not a measured level.
+      </p>
+    </section>
+
+    <section>
+      <h2 id="decisions">nova's boundary decision for each record</h2>
+      <table>
+        <thead>
+          <tr><th>record</th><th>class</th><th>axis (R, Z) [m]</th><th>boundary level [Wb]</th><th>contact / saddle (R, Z) [m]</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>limited</td><td>limited</td><td>(6.2000, 0.0000)</td>
+            <td>2.23&times;10<sup>&minus;14</sup></td><td>contact (7.8014, 0.0000)</td>
+          </tr>
+          <tr>
+            <td>diverted</td><td>diverted</td><td>(1.7871, 0.0468)</td>
+            <td>&minus;1.39&times;10<sup>&minus;9</sup></td>
+            <td>saddle (1.5025, &minus;1.0173)</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        <strong>Limited record.</strong> nova reads the static reactor carrier
+        as a limited topology. The axis sits at (6.200, 0.000) m and the
+        boundary is the outboard limiter contact at (7.8014, 0.0000) m, at level
+        2.23&times;10<sup>&minus;14</sup> Wb. There is no admitted saddle. The
+        certificate bound is the analytic closed-form boundary at 0.0 Wb; the
+        read places its boundary 2.2&times;10<sup>&minus;14</sup> Wb inside it.
+      </p>
+      <p>
+        <strong>Diverted record.</strong> nova reads the single-null carrier as
+        a diverted topology. The axis sits at (1.7871, 0.0468) m and the
+        boundary is the lower saddle at (1.5025, &minus;1.0173) m, at level
+        &minus;1.39&times;10<sup>&minus;9</sup> Wb. The certificate bound is the
+        analytic separatrix at 0.0 Wb; the read places the saddle
+        1.4&times;10<sup>&minus;9</sup> Wb inside it. The analytic X-point is
+        (1.50253, &minus;1.01728) m, so the read saddle agrees with the
+        certificate to 4.4&times;10<sup>&minus;4</sup> m.
+      </p>
+      <p>
+        The analytic cases declare their boundary at zero flux
+        (<code>closed_form_boundary_flux_wb = 0.0</code>), which is the bound
+        both records sit inside. The axis reproduces the analytic axis to
+        1.6&times;10<sup>&minus;7</sup> m (limited) and
+        1.1&times;10<sup>&minus;7</sup> m (diverted).
+      </p>
+    </section>
+
+    <section>
+      <h2 id="panels">The exported states as poloidal contour panels</h2>
+      <p>
+        Each panel draws the record's own flux on stated levels, the per-loop
+        wall, the analytic certificate nulls beside nova's read nulls, and the
+        boundary level as its own contour. Hollow grey circles and diamonds
+        mark the analytic axis and X-point; nova's read axis is a filled
+        triangle and its admitted saddle a filled cross. The red boundary line
+        has its own legend entry in both panels.
+      </p>
+      <figure>
+        <img src="/nova/figures/converged-forward-solve/certified-carrier-export/nova-certified-limited.svg"
+             alt="Limited carrier: analytic flux contours, both axes, the wall, red boundary and large hollow wall-contact ring">
+        <figcaption>
+          <strong>Limited record.</strong> The static reactor carrier's
+          analytic flux as unfilled line contours, with the analytic axis
+          (hollow circle) and read axis (solid triangle) co-located at
+          (6.200, 0.000) m and the boundary level
+          (2.23&times;10<sup>&minus;14</sup> Wb) drawn in its own style. The
+          boundary is the outboard wall contact and runs along the wall there.
+          The contact point (7.8014, 0.0000) m is drawn on top of both as a
+          large white-backed hollow red ring labelled <em>wall contact</em> in
+          the legend; no saddle is admitted. The wall is the record's own
+          per-loop ring.
+        </figcaption>
+      </figure>
+      <figure>
+        <img src="/nova/figures/converged-forward-solve/certified-carrier-export/nova-certified-diverted.svg"
+             alt="Diverted carrier: analytic flux contours with the axis, the admitted saddle, the wall and the boundary level">
+        <figcaption>
+          <strong>Diverted record.</strong> The single-null carrier's analytic
+          flux as unfilled line contours, with the analytic axis (hollow
+          circle) and read axis (solid triangle) at (1.7871, 0.0468) m. The
+          analytic X-point (hollow diamond) and read saddle (filled cross) sit
+          at (1.5025, &minus;1.0173) m — the read admits one saddle.
+          Its boundary level (&minus;1.39&times;10<sup>&minus;9</sup> Wb) is
+          the red line labelled <em>boundary</em> in the legend and passes
+          through that saddle. No contact
+          marker is drawn because a diverted boundary is a saddle rather than a
+          wall contact. The wall is the record's own per-loop ring.
+        </figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2 id="round-trip">Round trip</h2>
+      <p>
+        Each record is re-read through <code>trace_record.read_trace_record</code>
+        and then re-read by nova's own <code>nova.equilibrium.topology.read</code>
+        on a square lattice built from the record's own wall. The re-read
+        uses the field-swap adapter's <code>wall_units</code> and
+        <code>read_convention</code> helpers for wall loops and COCOS-17 polarity. It
+        reproduces the axis, the polarity and nova's boundary level within the
+        stated tolerances against the independent analytic certificate, under
+        a committed test
+        (<code>scripts/prototypes/certified_carrier_export/test_export_records.py</code>):
+      </p>
+      <ul>
+        <li>polarity is the declared <code>+1</code>; the grid is 65&times;65; one
+          wall ring survives the codec;</li>
+        <li>the re-read axis matches the analytic certificate axis to
+          1&times;10<sup>&minus;5</sup> m,
+          a stated ~60&times; margin over the measured 1.6&times;10<sup>&minus;7</sup> m
+          (limited) and 1.1&times;10<sup>&minus;7</sup> m (diverted) agreement;</li>
+        <li>the re-read boundary level sits within
+          1&times;10<sup>&minus;7</sup> Wb of the certificate's declared zero-flux
+          bound, a stated
+          ~70&times; margin over the measured 2.2&times;10<sup>&minus;14</sup> Wb
+          (limited) and 1.4&times;10<sup>&minus;9</sup> Wb (diverted) agreement;</li>
+        <li>the diverted read boundary and its sole admitted saddle match the
+          analytic X-point within 1&times;10<sup>&minus;3</sup> m, a ~2.3&times;
+          margin over the measured 4.4&times;10<sup>&minus;4</sup> m agreement;
+          the limited read admits no saddle;</li>
+        <li>the re-read class equals the class the export declared.</li>
+      </ul>
+      <p>
+        <strong>Negative control.</strong> Negating the exported flux grid must
+        make the round trip <em>refuse</em> the record on the polarity it
+        declares, and the refusal is named by its type rather than by a
+        disjunction. Both records refuse with
+        <code>NO_QUALIFIED_AXIS</code> and an unqualified axis; neither returns
+        a different boundary class, and neither is merely invalid for an
+        unstated reason. Declaring the opposite polarity on the same negated
+        grid restores the read — valid, the same boundary class, and a boundary
+        level equal and opposite to the unnegated one — so the guard is the
+        disagreement between the grid's sign and the declared COCOS-17
+        orientation, and a grid of the wrong sign cannot reproduce the decision
+        its own record carries.
+      </p>
+      <p>
+        The gate drives the same state through the record producer rather than
+        through the test: <code>NOVA_CERTIFIED_EXPORT_MUTATION=negate-psi</code>
+        corrupts the flux on its way to disk, so the round-trip test is the
+        thing that discovers the corruption. That arm exits nonzero and names
+        <code>test_round_trip[limited]</code> and
+        <code>test_round_trip[diverted]</code> as its failures, which is the
+        evidence that the round trip can fail.
+      </p>
+    </section>
+
+    <section>
+      <h2 id="gate">Gate and delta</h2>
+      <p>
+        The gate runs in fresh processes against the base revision
+        <code>34d4c304b</code>, each arm running the same test file, driven by
+        <code>scripts/prototypes/certified_carrier_export/gate.sh</code>. Every
+        log opens with the revision, the tree, the date and the exact command
+        and ends with an <code>EXIT</code> line, so a log carries its own
+        verdict.
+      </p>
+      <table>
+        <thead><tr><th>arm</th><th>result</th><th>reading</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>baseline_suite</code> at the base</td>
+            <td>0 passed, 2 collection errors, exit 2</td>
+            <td>the export module does not exist at the base, so the test module
+                cannot import it. This is the intended delta, not a regression.</td>
+          </tr>
+          <tr>
+            <td><code>after_suite</code> at the head</td>
+            <td>4 passed, exit 0</td>
+            <td>both carriers round-trip and both negated grids are refused with
+                the named reason.</td>
+          </tr>
+          <tr>
+            <td>negative control at the head, flux negated on the way to disk</td>
+            <td>2 failed, 2 passed, exit 1</td>
+            <td><code>test_round_trip[limited]</code> and
+                <code>test_round_trip[diverted]</code> fail, which is what makes
+                the passing arm evidence rather than a path that happens to
+                succeed.</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        Delta against the stated base: four tests added, all passing; zero
+        failures added.
+      </p>
+    </section>
+
+    <section>
+      <h2 id="limits">Limits of this record</h2>
+      <ul>
+        <li>The read geometry is the square lattice the record's own wall
+          admits, chosen so the read is reproducible from the record alone. It
+          is not the certificate machine's own mesh, so the boundary level it
+          returns is the read's answer on that lattice, and the agreement with
+          the certificate bound is a statement about both.</li>
+        <li>The limited record admits no saddle. Its stored saddle and wall
+          levels repeat the boundary flux because the codec's real writer
+          cannot carry a NaN; a consumer must read the class, not those
+          levels, to tell the two records apart.</li>
+        <li>The diverted record's boundary level is negative and small, on the
+          order of the numerical zero and not a physical flux offset.</li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>

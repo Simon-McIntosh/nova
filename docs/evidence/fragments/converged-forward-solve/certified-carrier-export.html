@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="certified-carrier-export">
+<meta name="plan-title" content="Certified carriers exported into the boundary trace format">
+<meta name="plan-summary" content="One limited and one diverted certified analytic carrier written as version-2 boundary trace records and re-read through the codec and nova's own topology read; a negated flux grid is refused on the declared COCOS-17 polarity.">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve">
+<meta name="plan-commits" content="ea26beeeb88440ce1cebe3f01438270113dfaadf,fb8e8773ba5ec7c0321b7a8a44ee2a85ad0de00f,c1e87c413daa2ca6304f436becd3017d7590357b,37d5b1a91d73a2f6537a75b15a73173caffb2269,4ffbc6adf3b0e67fca87083a90ad361c92e3e03a,7408fb78420d8763e5fb426afeed315388f65c17,055d84935e912083b6a18239da115534c1c381be,0d4fe1cb57c6ef36e8731029e30781c396cb76c7,2b7f3d417a572430039cf44fefae63368702be94,f299f89cc7709e0848373d68c4664761b2156a3f,fda5177a0ccca2de8f1151f515875a8f5b2413a8,74056d2a56f13fb735a3cf9166e0ea11eb80cc8d,8593f38d549ed1b3448ede2409926b687c9092d1">
+<meta name="plan-recorded-at" content="2026-10-19">
+<meta name="plan-verdict" content="pass">
+<title>Certified carriers exported into the boundary trace format | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<h1 id="certified-carrier-export">Certified carriers exported into the boundary trace format</h1>
+
+<p>nova's own certified analytic carriers were written the other way round from
+the field swap: into imas-efit's <code>BOUNDARY_LEVEL_TRACE 2</code> layout, so
+imas-efit's reader and escape-level rule can be run on fields nova generated.
+One limited and one diverted carrier, each loaded from the content-addressed
+certificate fixture store at 550 cells, were written as version-2 records
+carrying the analytic flux on a 65&times;65 grid over the wall bounding box, the
+read axis, the record polarity and the per-loop wall. Both round-trip through
+the codec and through nova's own topology read, and a negated flux grid is
+refused on each record's declared COCOS-17 polarity.</p>
+
+<h2 id="certified-carrier-export-decision">The decision each record states</h2>
+<table>
+<thead><tr><th>record</th><th>class</th><th>axis (R, Z) [m]</th><th>boundary level [Wb]</th><th>contact / saddle (R, Z) [m]</th></tr></thead>
+<tbody>
+<tr><td>limited</td><td>limited</td><td>(6.2000, 0.0000)</td><td>2.23&times;10<sup>&minus;14</sup></td><td>contact (7.8014, 0.0000)</td></tr>
+<tr><td>diverted</td><td>diverted</td><td>(1.7871, 0.0468)</td><td>&minus;1.39&times;10<sup>&minus;9</sup></td><td>saddle (1.5025, &minus;1.0173)</td></tr>
+</tbody>
+</table>
+<p>The analytic cases declare their boundary at zero flux. The limited contact
+sits 2.2&times;10<sup>&minus;14</sup> Wb inside that bound and the diverted
+saddle 1.4&times;10<sup>&minus;9</sup> Wb inside it; the read axis reproduces the
+analytic axis to 1.6&times;10<sup>&minus;7</sup> m and
+1.1&times;10<sup>&minus;7</sup> m respectively. The analytic X-point is
+(1.50253, &minus;1.01728) m, so the read saddle agrees with the certificate to
+4.4&times;10<sup>&minus;4</sup> m. The committed round-trip test checks the
+independent analytic axes, the certificate's declared zero-flux boundary, and
+the diverted X-point within 1&times;10<sup>&minus;5</sup> m,
+1&times;10<sup>&minus;7</sup> Wb, and 1&times;10<sup>&minus;3</sup> m respectively.</p>
+
+<h2 id="certified-carrier-export-gate">Gate and delta against the base</h2>
+<p>Fresh processes against base revision <code>34d4c304b</code>, each arm
+running the same test file, driven by
+<code>scripts/prototypes/certified_carrier_export/gate.sh</code>. Every log
+opens with the revision, the tree, the date and the exact command, and ends
+with an <code>EXIT</code> line.</p>
+<table>
+<thead><tr><th>arm</th><th>result</th><th>reading</th></tr></thead>
+<tbody>
+<tr><td><code>baseline_suite</code> at the base</td><td>0 passed, 2 collection errors, exit 2</td><td>the export module does not exist at the base, so the test module cannot import it. Intended delta, not a regression.</td></tr>
+<tr><td><code>after_suite</code> at the head</td><td>4 passed, exit 0</td><td>both carriers round-trip; both negated grids are refused with the named reason.</td></tr>
+<tr><td>negative control at the head, flux negated on the way to disk</td><td>2 failed, 2 passed, exit 1</td><td><code>test_round_trip[limited]</code> and <code>test_round_trip[diverted]</code> fail, which is what makes the passing arm evidence rather than a path that happens to succeed.</td></tr>
+</tbody>
+</table>
+<p>Delta: four tests added, all passing; zero failures added.</p>
+<p>The two rendered panels show the analytic axis and X-point as hollow grey
+markers beside nova's filled read markers. The limited wall contact at
+(7.8014, 0.0) m is a 16-point white-backed hollow ring above the wall and
+boundary, with its own legend entry. Both panels name the red boundary. The
+full 1400-pixel panels and contact/saddle crops were inspected; neither legend
+clips its labels.</p>
+
+<h2 id="certified-carrier-export-negative-control">Negative control</h2>
+<p>A record whose flux sign disagrees with the polarity it declares is refused
+with the refusal's own type, <code>NO_QUALIFIED_AXIS</code> and an unqualified
+axis, rather than by a disjunction over validity and class. Declaring the
+opposite polarity on the same negated grid restores the read to the same
+boundary class with an equal and opposite level, so the guard is the declared
+COCOS-17 orientation rather than a broken record. The gate drives that state
+through the producer (<code>NOVA_CERTIFIED_EXPORT_MUTATION=negate-psi</code>),
+so the round-trip test discovers the corruption and both tolerances are
+tightened to a stated ~60&times; margin over the measured agreement: axis
+1&times;10<sup>&minus;5</sup> m against a measured
+1.6&times;10<sup>&minus;7</sup> m, boundary
+1&times;10<sup>&minus;7</sup> Wb against a measured
+1.4&times;10<sup>&minus;9</sup> Wb.</p>
+
+<h2 id="certified-carrier-export-artifacts">Artifacts</h2>
+<ul>
+<li><code>scripts/prototypes/certified_carrier_export/export_records.py</code> &mdash; the record producer.</li>
+<li><code>scripts/prototypes/certified_carrier_export/test_export_records.py</code> &mdash; the round-trip and negative-control gate.</li>
+<li><code>scripts/prototypes/certified_carrier_export/panels.py</code> &mdash; the poloidal contour panels.</li>
+<li><code>docs/research/certified-carrier-export.html</code> &mdash; the full record, with both panels and the tolerances.</li>
+<li><code>docs/figures/converged-forward-solve/certified-carrier-export/</code> &mdash; one flux contour panel per record.</li>
+</ul>
+</main>
+</body>
+</html>

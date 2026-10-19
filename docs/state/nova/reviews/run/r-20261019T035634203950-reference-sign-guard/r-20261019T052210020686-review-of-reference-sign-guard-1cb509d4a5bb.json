@@ -20,6 +20,13 @@
     }
   },
   "dispatched_at": "2026-10-19T05:23:18Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "reference-sign-guard",
+      "recorded_at": "2026-10-19T05:36:16.700355+00:00"
+    }
+  },
   "findings": [
     {
       "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T035634203950-reference-sign-guard/after_suite.log",

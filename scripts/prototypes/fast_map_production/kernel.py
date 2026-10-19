@@ -383,7 +383,7 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
     wall_index = jnp.argmax(wall_scores)
     wall_score = wall_scores[wall_index]
     diverted = saddle_live & (saddle_score >= wall_score)
-    level = sigma * jnp.maximum(wall_score, saddle_score)
+    level = sigma * jnp.where(diverted, saddle_score, wall_score)
     boundary = jnp.where(
         diverted, roots.position[saddle_index], wall_points[wall_index]
     )

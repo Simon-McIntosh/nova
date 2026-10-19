@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="459">
+<meta name="plan-version" content="460">
 <meta name="plan-modified" content="2026-10-19">
 </head>
 <body>
@@ -1270,6 +1270,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261019T135834292256-topology-read-test-walls" data-who="reckon-build" data-when="2026-10-19T15:45:45Z">
     <div class="r-comment-body"><p>Two documents added, 341 lines, no test and no source touched. Measure: 48 fresh-process runs (16 node ids x 3 revisions, per-test timeout disabled) plus 9 H200 runs and 4 runs in two memory controls. Attribution: 3 ids are a device gate, red on a CPU lane by construction and xfail-green on the H200 at every revision in 686-726 s; 7 ids share a compile child that its own allocation kills, xfail-green at every revision including main when the allocation carries the compile; 2 ids genuinely exceed the 300 s bound at every revision (topology_class_and_membership[diverted] 359-386 s, saddle_support_order[diverted] 383-419 s); and the 3 head-only timeouts do not reproduce (126-156 s on compute, over 300 s only from the login node).</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261019T175602319935-review-of-axis-persistence-near-saddle-03cafa9ba65e" data-who="reckon-build" data-when="2026-10-19T18:11:39.772Z">
+    <div class="r-comment-body"><p>review-of-axis-persistence-near-saddle-03cafa9ba65e: parsed review stored for r-20261019T132111829961-axis-persistence-near-saddle at head 03cafa9ba65eca02c8c0407cae9131b35325bedb from base 6dbbb251ac2b5ced4b3867d73614a8bc0241fd2c; six dimensions scored, 0 added failures, five follow-on findings.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

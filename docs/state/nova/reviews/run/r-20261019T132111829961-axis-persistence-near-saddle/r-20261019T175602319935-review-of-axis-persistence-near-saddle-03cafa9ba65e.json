@@ -1,0 +1,75 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "scripts/prototypes/fast_map_production/program.py:12",
+    "scripts/prototypes/fast_map_production/solver.py:24",
+    "scripts/prototypes/fast_map_production/sweep.py:25",
+    "scripts/prototypes/fast_map_production/tie_probe.py:31",
+    "scripts/prototypes/fine_grid_convergence/context.py:20",
+    "scripts/prototypes/saddle_expansion/expansion.py:15",
+    "scripts/prototypes/xpoint_cell_owner/containing_owner_map.py:8",
+    "scripts/prototypes/efit_field_swap/crosscheck.py:64",
+    "scripts/prototypes/efit_field_swap/probe_read.py:19"
+  ],
+  "completed_at": "2026-10-19T18:11:39.772Z",
+  "dispatched_at": "2026-10-19T17:56:48Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/fast_map_production/test_axis_ranking.py:151",
+      "severity": "follow-on",
+      "text": "The rewritten island test forms its own `resolution` from the kernel's PERSISTENCE_ULP_FLOOR and the same found.jet.value levels, so `assert persistence < resolution` moves with the implementation rather than an independent source, and the refusal assertions at :153-154 hold under both the old per-cell enclosure and the new ULP criterion (the island is refused either way). The node's own diff therefore carries no assertion that fails if kernel.py reverts to the enclosure; that guard is the peer-owned item 39, red only under the negative control."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/axis-persistence-near-saddle.html:23",
+      "severity": "follow-on",
+      "text": "The fragment quotes the item-42 batch MaxRSS as 267869080K while docs/research/axis-persistence-near-saddle.html and the manifest both quote 267889856K for the same measurement; one metric is stored two ways in the landed evidence."
+    },
+    {
+      "file": "docs/figures/converged-forward-solve/axis-persistence-near-saddle/level-resolution.svg:1",
+      "severity": "follow-on",
+      "text": "The diff adds this figure, which is outside the four write paths the brief enumerates (kernel.py, test_axis_ranking.py, docs/research/..., docs/evidence/fragments/...); it is justified by the repository figure mandate and correctly served by project-absolute src, but it is not a path the brief named."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T132111829961-axis-persistence-near-saddle/manifest.md:22",
+      "severity": "follow-on",
+      "text": "The baseline_suite and after_suite `command` fields record `-m slow-or-not-slow` while the gate logs' own CMD headers record `-m \"slow or not slow\"`; the stored pair names a markexpr that is not runnable as written and does not match the command the logs show, so a promotion reading the command literally runs nothing."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T132111829961-axis-persistence-near-saddle/manifest.md:1",
+      "severity": "follow-on",
+      "text": "The brief required both suite arms as ONE sbatch job on --partition=sirius with --time=04:00:00 --cpus-per-task=12 --mem=96G; the landed gate is a union of jobs 1290236 (96G then 256G) and 1290363, and the logs record no partition, so the single-job shape and the named sirius lane cannot be confirmed from the record. The measurement itself is sound (only item 39 differs between the arms)."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit against 6dbbb251a; four commits touch five files, of which kernel.py (the criterion swap) and test_axis_ranking.py (the island test rewritten to the ULP criterion) are the substance and the two HTML records plus the SVG figure are the evidence input.",
+    "done_when": "The done_when names tests/equilibrium/test_topology_read.py::test_census_keeps_the_wall_contact_saddle_across_the_adjacent_pair; the manifest records the base half failing by name (focused_tie_base.log, EXIT=1, axis=[nan nan]) and the head half passing in suite_after.log, and the negative control (negative_control.log, EXIT=1) restores the enclosure and reddens it, so the gate asserts the measure.",
+    "goal": "The node goal is to admit the magnetic axis at the 282-cell tie pair while keeping the island rejection; scripts/prototypes/fast_map_production/kernel.py:271-279 in the landed head replaces the per-cell enclosure with the pair's own level resolution and the tie pair is admitted.",
+    "manifest": "Read; it reports the fix committed at 624d803cf, both four-target arms killed at item 42 (OOM at both revisions), items 43-54 passing at both, and the negative control red, with baseline_suite and after_suite carried as completed:false.",
+    "write_paths": "The manifest declares kernel.py, test_axis_ranking.py, docs/research/axis-persistence-near-saddle.html and docs/evidence/fragments/converged-forward-solve/axis-persistence-near-saddle.html; every code and record path in the diff is inside them, with the added figure under docs/figures the one path outside the brief's enumeration."
+  },
+  "justifications": {
+    "durability": "The regression guard is tests/equilibrium/test_topology_read.py::test_census_keeps_the_wall_contact_saddle_across_the_adjacent_pair, which the negative control (negative_control.log) proves red under the restored enclosure, but the node's own rewritten assertion at scripts/prototypes/fast_map_production/test_axis_ranking.py:151 moves with the kernel and cannot catch the revert.",
+    "evidence": "The gate measures the done_when (item 39 red at 6dbbb251a in focused_tie_base.log, green at 624d803cf in suite_after.log) and is recorded, but the arms never complete and the manifest's baseline_suite command at manifest.md:22 is not the command the logs ran.",
+    "fit": "The change uses the surrounding jnp idiom, adds one module-level constant beside the existing helper, and rewrites the psi_rounding_enclosure docstring in place with no plan, ticket or plan-label name (kernel.py:213-217).",
+    "goal_fidelity": "scripts/prototypes/fast_map_production/kernel.py:271-279 swaps the per-cell enclosure for PERSISTENCE_ULP_FLOOR times eps times max(|level_axis|,|level_saddle|), which admits the tie pair and keeps the island refusal, exactly the goal.",
+    "reuse": "The change edits the capability owner scripts/prototypes/fast_map_production/kernel.py in place and no repository owner of a persistence-resolution mechanism exists; the search over nova/equilibrium and the prototype trees found none, and psi_rounding_enclosure is kept and still used by scripts/prototypes/fast_map_production/saddle_admission_probe.py:46.",
+    "scope_discipline": "Every changed path is inside the declared write paths except docs/figures/converged-forward-solve/axis-persistence-near-saddle/level-resolution.svg, which the brief's four-path enumeration omits, and the diff carries nothing unrelated to the goal."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261019T175602319935-review-of-axis-persistence-near-saddle-03cafa9ba65e",
+  "reviewed_base_sha": "6dbbb251ac2b5ced4b3867d73614a8bc0241fd2c",
+  "reviewed_head_sha": "03cafa9ba65eca02c8c0407cae9131b35325bedb",
+  "reviewed_run_id": "r-20261019T132111829961-axis-persistence-near-saddle",
+  "scores": {
+    "durability": 16,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T18:13:40.020696+00:00"
+}

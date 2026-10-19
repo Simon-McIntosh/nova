@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="analytic-moment-rows">
+<meta name="plan-title" content="Analytic certificate-moment rows on the GPU lane">
+<meta name="plan-summary" content="The six analytic certificate-moment rows measure only on the GPU lane; off it the test now skips with the backend named instead of dying on a missing results directory.">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s2">
+<meta name="plan-recorded-at" content="2026-10-19">
+<meta name="plan-verdict" content="partial">
+<title>Analytic certificate-moment rows on the GPU lane | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<h1 id="analytic-moment-rows-on-gpu-landing">Analytic certificate-moment rows on the GPU lane</h1>
+<p id="analytic-moment-rows-on-gpu-summary">The six <code>test_analytic_certificate_moments</code> rows measure through <code>scripts/prototypes/support/book.py</code>, whose <code>measure</code> raises <code>RuntimeError("certificate rows require the GPU measurement lane")</code> on any backend other than the GPU. The test reached <code>os.environ["NOVA_BOOK_RESULTS"]</code> first, so on the CPU suite all six rows died with <code>KeyError: 'NOVA_BOOK_RESULTS'</code> before the backend guard, which reads as a broken measurement rather than a lane that cannot run here. The test now skips with a reason naming the backend, checked before the results directory is resolved, and takes that directory from <code>NOVA_BOOK_RESULTS</code> when set and from pytest's <code>tmp_path</code> otherwise. No assertion or bound changed.</p>
+<section id="analytic-moment-rows-on-gpu-arms"><h2>CPU suite arms</h2>
+<p>Both arms ran <code>tests/test_current_book_fragments.py</code> in a fresh process in place on fleet node 98dci4-clu-2002 (job 1281970), the same test file and repository-root conftest, with <code>PYTHONPATH</code> set to the worktree and <code>JAX_PLATFORMS=cpu</code>. The base arm ran the file at the base revision; the head arm ran the committed change. No added failure: the head failures are a subset of the base failures, and the six rows skip at head.</p>
+<table>
+<tr><th>Arm</th><th>Revision</th><th>Outcome</th><th>Exit</th></tr>
+<tr><td>base</td><td>9beab06a492a7e37bb662be57bb66b91fdf6baf9</td><td>6 failed, 10 passed</td><td>1</td></tr>
+<tr><td>head</td><td>496a5e765e8800125f19bba1f3ebbd164b6692ff</td><td>10 passed, 6 skipped</td><td>0</td></tr>
+<tr><td>negative control (GPU skip removed)</td><td>496a5e765e8800125f19bba1f3ebbd164b6692ff</td><td>6 failed, 10 passed</td><td>1</td></tr>
+</table>
+<p>The base arm fails exactly the six rows with <code>KeyError: 'NOVA_BOOK_RESULTS'</code>. The head arm fails none: the six are <code>SKIPPED [6] tests/test_current_book_fragments.py:191: certificate rows require the GPU measurement lane, not cpu</code>. Removing the skip (the negative control) makes the same six fail with <code>RuntimeError: certificate rows require the GPU measurement lane</code> at <code>scripts/prototypes/support/book.py:65</code>, so the skip is what carries the rows and the assertion set is unchanged.</p>
+</section>
+<section id="analytic-moment-rows-on-gpu-h200"><h2>H200 rows</h2>
+<p>The six rows ran as one job, 1290367, through <code>scripts/h200_test_lane/run.sh --cores 7 --mem 64G --time 02:00:00</code> on 98dci4-gpu-0003 (betelgeuse, reservation gpu_0003_grpA), not an array. The carriers and exteriors are reached through <code>scripts/prototypes/support/certificate_fixtures.py</code> (<code>carrier_store</code> and its exterior counterpart), the same path <code>measure</code> already used; each row reports its carrier and exterior digest, and every row published a miss into the shared content-addressed store under <code>nova.database.filepath.operand_cache_root()</code>.</p>
+<table>
+<tr><th>Row</th><th>Verdict</th><th>realised cells</th><th>net rel err</th><th>private cells / current</th><th>smooth cur / mom</th><th>saddle cur / mom</th><th>clip cur / mom</th><th>read / exact image err</th><th>oracle area unc.</th></tr>
+<tr><td>limited 550</td><td>pass</td><td>553</td><td>1.11e-16</td><td>61 / 0.0</td><td>0.77503 / 0.14726</td><td>0.0 / 0.0</td><td>2.39e-11 / 7.44e-12</td><td>1.777e-05 / 1.213e-05</td><td>1.84e-08</td></tr>
+<tr><td>diverted 550</td><td>pass</td><td>550</td><td>0.000e+00</td><td>213 / 0.0</td><td>0.08398 / 0.03278</td><td>0.01762 / 0.00580</td><td>1.36e-08 / 1.92e-09</td><td>1.151e-04 / 2.386e-02</td><td>6.90e-09</td></tr>
+<tr><td>limited 2000</td><td>pass</td><td>2105</td><td>1.11e-16</td><td>239 / 0.0</td><td>0.76100 / 0.13204</td><td>0.0 / 0.0</td><td>5.09e-11 / 2.10e-11</td><td>2.67e-05 / 7.09e-05</td><td>4.29e-08</td></tr>
+<tr><td>diverted 2000</td><td>pass</td><td>2098</td><td>2.22e-16</td><td>825 / 0.0</td><td>0.27796 / 0.06590</td><td>6.16e-04 / 2.22e-04</td><td>3.10e-09 / 1.08e-09</td><td>2.498e-05 / 5.781e-03</td><td>6.17e-08</td></tr>
+<tr><td>limited 5000</td><td>pending</td><td colspan="8">building its carrier on job 1290367 at the time of writing</td></tr>
+<tr><td>diverted 5000</td><td>pending</td><td colspan="8">queued behind limited 5000 in the same job</td></tr>
+</table>
+<p>Every completed row carries <code>device: cuda:0</code> and <code>job_id: 1290367</code>: the measurement ran on the H200, not on the CPU. The limits are unchanged: <code>net_current_relative_error &lt;= 1e-12</code>, <code>private_cell_count &gt; 0</code>, <code>private_current == 0</code>, each budget ratio <code>&lt;= 1</code>, each clip error <code>&lt;= 2e-6</code>, and <code>read_image_error &lt;= factor * exact_image_error + oracle_area_fraction_uncertainty</code> with <code>factor</code> 2 (limited) or 1 (diverted) plus <code>read_image_error &lt;= 1e-4</code> for limited. No bound was loosened.</p>
+<p>Per-row receipts (the <code>BOOKING_ROW</code> objects, one per row) are written under <code>h200-results/</code> in the run directory named below, and the launcher log carries the header (<code>SOURCE_REVISION</code>, <code>COMMAND</code>, <code>JAX_PLATFORMS</code>) and each row's verdict.</p>
+</section>
+<section id="analytic-moment-rows-on-gpu-receipts"><h2>Receipts</h2>
+<p>Run directory: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T174340812576-analytic-moment-rows-on-gpu</code>. Logs: <code>cpu-base-suite.log</code>, <code>cpu-head-suite.log</code>, <code>cpu-negative-control.log</code>, <code>h200-rows.log</code>. Row JSON and moments: <code>h200-results/</code>.</p>
+</section>
+</main></body></html>

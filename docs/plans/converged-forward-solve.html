@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="450">
+<meta name="plan-version" content="451">
 <meta name="plan-modified" content="2026-10-19">
 </head>
 <body>
@@ -1552,6 +1552,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261017T065751439890-fixture-owner-store-argument" data-who="reckon-build" data-when="2026-10-18T12:48:27Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/converged-forward-solve/fixture-owner-store-argument.html</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261019T135049236702-review-of-device-independent-cache-identity-0d23de28d617" data-who="reckon-build" data-when="2026-10-19T14:05:14Z">
+    <div class="r-comment-body"><p>Independent review of r-20261019T075727697198-device-independent-cache-identity at 0d23de28d6179fd7890522ef0e890729d8b1a735: parsed, six dimensions scored (goal_fidelity 19, evidence 15, scope_discipline 20, durability 17, fit 16, reuse 18), zero added failure IDs, three follow-on findings.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261010T203842322123-review-of-cfs-coupling-build-scale" data-who="reckon-build" data-when="2026-10-10T20:53:30.671Z">
     <div class="r-comment-body"><p>Independent review of run r-20261010T184700018486-cfs-coupling-build-scale at head e5e794122. Scores goal_fidelity 18, evidence 18, scope_discipline 17, durability 17, fit 18, reuse 19 (total 107). The node meets its goal (device builds baked into the carriers: 5,000 cells 151.2 s, 10,000 cells 271.3 s at 75% GPU) and lands all four clauses of the resumed ruling; this review reproduced the head gate (6 passed, EXIT=0) and re-derived the negative control at head (uniform row gap 1.361e-10 over the 1e-10 bound, EXIT=1, matching the run's own log to all digits) and verified the persisted-carrier and wall-hash claims directly against the stores. One regression: _flux_blocks gained a required keyword-only builder with no default, so scripts/accuracy_cost_ladder/measure.py:140 now raises TypeError, which falsifies the ruling's 'no existing caller changes behaviour' clause and was invisible to the delta lane. Follow-ons: the fragment's reproduce command no longer selects the device path at head, a module docstring overstates measured agreement, and the ruling's diverted half was not measurable in this fixture.</p></div>

@@ -1,0 +1,74 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [
+    {
+      "failure_condition": "test_carrier_key_ignores_computed_wall_bits_but_covers_inputs asserts fixture_digest(rounded) == fixture_digest(identity) after perturbing only wall_content.sha256; it fails if the digests stop stripping wall_content. The negative control (negative_control_final.log) reinstates that behaviour by neutering _defining_identity and the assertion reddens (3 failed, EXIT=1). Independent of any value the test passes in.",
+      "lines": "scripts/prototypes/support/test_certificate_fixtures.py:31"
+    },
+    {
+      "failure_condition": "The loop asserts each defining input (analytic_case, requested_cells, major_radius_m, builder_revision, builder) changes the digest; it fails if _defining_identity over-strips any of them. It is sensitive to over-stripping across the listed keys.",
+      "lines": "scripts/prototypes/support/test_certificate_fixtures.py:43"
+    },
+    {
+      "failure_condition": "test_second_device_loads_without_publishing_again asserts json.loads(loaded.attrs['semantic_identity']) == rounded and cache_key == reader.key; it fails if load() stops rewriting the stored defining identity back to the device-local identity, which is the contract the fixture owner's own validation depends on.",
+      "lines": "scripts/prototypes/support/test_certificate_fixtures.py:99"
+    },
+    {
+      "failure_condition": "The repointed assertion computes canonical from certificate_fixtures._defining_identity(identity) and compares sha256(canonical) to fixture_digest(identity); both sides route through the module's own private helper, so it reddens if fixture_digest stops calling _defining_identity but NOT if _defining_identity itself over-strips a defining input \u2014 the very regression the node introduced. See finding.",
+      "lines": "tests/test_current_book_fragments.py:241"
+    }
+  ],
+  "call_sites": [
+    "scripts/analytic_oracle_fixtures/measure.py:cached_machine",
+    "scripts/analytic_oracle_fixtures/measure.py:cached_fixture_exterior",
+    "scripts/prototypes/support/measure.py:machine_from_cache",
+    "scripts/prototypes/support/measure.py:exterior_from_cache"
+  ],
+  "completed_at": "2026-10-19T14:05:14Z",
+  "dispatched_at": "2026-10-19T13:51:17Z",
+  "findings": [
+    {
+      "file": "tests/test_current_book_fragments.py",
+      "line": "241",
+      "severity": "follow-on",
+      "text": "follow-on: the pre-existing digest assertion was repointed onto the module's own private helper. It now computes canonical = json.dumps(certificate_fixtures._defining_identity(identity)) (line 241) and compares it to certificate_fixtures.fixture_digest(identity) (line 246), so both sides move together through _defining_identity. It still catches fixture_digest dropping the helper, but it can no longer catch _defining_identity over-stripping a defining input (e.g. removing requested_cells or support_arm), which is exactly the failure mode this node's change introduces; that guard survives only in the new scripts/prototypes/support/test_certificate_fixtures.py:43."
+    },
+    {
+      "file": "scripts/prototypes/support/certificate_fixtures.py",
+      "line": "99",
+      "severity": "follow-on",
+      "text": "follow-on: _defining_identity strips the two analytic binary64 digests only when 'machine_semantic_key' is present, keyed on an unrelated marker rather than on the keys being removed. A carrier-shaped identity that carried analytic_state_sha256_binary64 would silently retain a device-rounded digest in its address, and the done_when claim that no identity hashes a device-rounded computed array would then be false by convention rather than by construction. Not reachable today because only the exterior identity carries those keys."
+    },
+    {
+      "file": "docs/research/device-independent-cache-identity.html",
+      "line": "39",
+      "severity": "follow-on",
+      "text": "follow-on: the paired arms the manifest records as baseline_suite/after_suite (identity_suite_arm.sh) cover only tests/test_current_book_fragments... tests/test_current_book_fragments.py and scripts/prototypes/support/test_certificate_fixtures.py, while done_when (3) names four paths. The contour-tree and carrier-axis rows in this table are from the earlier head e42010d68, not the landed 0d23de28d. Both paths are untouched by the change, so the added-failure delta is unaffected, but the two arms are not a single-revision measurement of all four named paths."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "Production call sites reaching the store are scripts/analytic_oracle_fixtures/measure.py:cached_machine (line 897) and cached_fixture_exterior (line 1458), reached through scripts/prototypes/support/measure.py:machine_from_cache (76) and exterior_from_cache (107); no test file counts.",
+    "diff": "Read the eight commits against 6cce876e3: two code commits (99685e60f keys by defining inputs, e42010d68 preserves canonical metadata) plus a test commit (4afdd07ad) and five docs commits; the total diff is 5 files, 242 insertions, 13 deletions, all within scope.",
+    "done_when": "The live done_when (live record node.done_when) names a base-failing identity test, cross-device store hit with no rebuild, and both suite arms; base_identity_suite.log (9 failed) and head_identity_suite.log (6 failed) record the arms and cpu_retry.log/h200_load.log record the cross-device hits, so the gate measures the assertion.",
+    "goal": "The node goal is to key the certificate fixture store on defining inputs so carriers load across devices; the landed certificate_fixtures.py:_defining_identity (scripts/prototypes/support/certificate_fixtures.py:93) strips wall_content and the two analytic binary64 digests from the shared key while retaining machine, cells, support arm, source parameters and kernel revision, and cpu_retry.log and h200_load.log report the same four carrier digests on CPU and H200 with hit=true and build_seconds=0.0 on the second device.",
+    "manifest": "manifest.md records status complete, lists all eight commits, both suite arms as single-line JSON (base 9 failures, head 6), the negative control (three failures) and the cross-device logs; its claims reconcile with the logs I opened.",
+    "write_paths": "The run fence (live pointer node.write_paths) grants six paths; every commit in the range touches only scripts/prototypes/support/certificate_fixtures.py, scripts/prototypes/support/test_certificate_fixtures.py, tests/test_current_book_fragments... tests/test_current_book_fragments.py, and the two docs files, all inside the fence."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261019T135049236702-review-of-device-independent-cache-identity-0d23de28d617",
+  "reviewed_base_sha": "6cce876e3b56347f3fe02de2186e2d8e42d275ac",
+  "reviewed_head_sha": "0d23de28d6179fd7890522ef0e890729d8b1a735",
+  "reviewed_run_id": "r-20261019T075727697198-device-independent-cache-identity",
+  "scores": {
+    "durability": 17,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T14:07:42.361712+00:00"
+}

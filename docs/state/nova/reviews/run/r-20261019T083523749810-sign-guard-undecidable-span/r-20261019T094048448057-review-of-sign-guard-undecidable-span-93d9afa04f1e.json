@@ -1,0 +1,77 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [
+    {
+      "failure_condition": "Independent of the value under test: reinstating the regression the node repaired (undecidable = [] in _refuse) makes check_axis_boundary_sign return an agreeing sign dict instead of raising, so pytest.raises(UndecidableSignError) reddens. This is exactly what logs/negative_control.log shows ('Failed: DID NOT RAISE UndecidableSignError' at :205, :220, :241, :259). The assertion at :214, by contrast, compares the message against orientation.sign_tolerance(2.0), the function under test, so it cannot redden on a sign_tolerance regression.",
+      "lines": "scripts/prototypes/efit_field_swap/test_orientation.py:205-217"
+    },
+    {
+      "failure_condition": "The two call-site tests monkeypatch crosscheck.TraceSplineField / probe_read.TraceSplineField with a class whose from_record calls pytest.fail, then assert UndecidableSignError. They fail if the guard does not refuse before field construction: with the negative-control mutation, logs/negative_control.log:276 and :290 show the field sentinel reached ('comparison built a field before checking the trace sign'), so the assertion is independent of what the trace record carries.",
+      "lines": "scripts/prototypes/efit_field_swap/test_orientation.py:262-276 and scripts/prototypes/efit_field_swap/test_orientation.py:279-290"
+    },
+    {
+      "failure_condition": "test_undecidable_sign_is_refused_before_reading_the_slice monkeypatches crosscheck.read_state to pytest.fail and asserts measure_slice raises UndecidableSignError match='undecidable'; independent of the passed-in view, because a guard failure reaches read_state and trips the sentinel. Not exercised by the base arm (the base tree carries the pre-change test_coverage.py), so its red-to-green rests on the negative control.",
+      "lines": "scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py:97-121"
+    }
+  ],
+  "call_sites": [
+    "scripts/prototypes/efit_field_swap/crosscheck.py:1059 check_trace_record (reached from crosscheck._decision)",
+    "scripts/prototypes/efit_field_swap/probe_read.py:28 check_trace_record (reached from probe_read.probe_record)",
+    "scripts/prototypes/tcv_liuqe_known_answer/measure.py:189 check_axis_boundary_sign (reached from measure.measure_slice)",
+    "scripts/prototypes/tcv_liuqe_known_answer/reference_sign.py:79 check_axis_boundary_sign (guard_slice)",
+    "scripts/prototypes/tcv_liuqe_known_answer/reference_sign.py:114 check_trace_record (field_swap_rows)"
+  ],
+  "completed_at": "2026-10-19T09:59:44.721Z",
+  "dispatched_at": "2026-10-19T09:42:13Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/efit_field_swap/orientation.py",
+      "line": "331",
+      "severity": "follow-on",
+      "text": "follow-on: dead code. The pre-change curvature_sign assignment (orientation.py:331-337, using an inline 1e-9) is left in check_trace_record and is immediately overwritten by the new assignment at orientation.py:340 that uses _CURVATURE_TOLERANCE. The first block computes a value that nothing reads, so a reader meets two curvature decisions in a row and must work out that the first is inert; the commit message ('the curvature fallback names its own eigenvalue floor the same way') reads as though the 1e-9 was replaced, but only a second computation was appended. No behavioural effect."
+    },
+    {
+      "file": "scripts/prototypes/efit_field_swap/orientation.py",
+      "line": "49",
+      "severity": "follow-on",
+      "text": "follow-on: the stated gauge-invariance is false. The module docstring at orientation.py:49 says the floor is 'a relative tolerance, never an absolute psi value, so it does not grow with the gauge', and the research record and evidence fragment repeat 'the gauge cannot move it'. sign_tolerance (orientation.py:161) returns _SIGN_TOLERANCE * max(abs(scale), 1.0) and the grid caller now passes scale = np.max(np.abs(psi)) (orientation.py:266); an additive gauge constant changes max|psi|, so the band does move with the gauge. The base used np.ptp(psi), which is gauge-free, so the change traded the invariant the old docstring claimed ('relative to the gauge-invariant grid range') for one the new text still claims but the code no longer holds. Failure is in the safe direction (a gauge offset can widen the band and turn a decisive span into a ref'd span, which is refused rather than accepted), but the three documents assert an invariant the arithmetic does not keep."
+    },
+    {
+      "file": "scripts/prototypes/efit_field_swap/test_orientation.py",
+      "line": "205",
+      "severity": "follow-on",
+      "text": "follow-on: the base arm does not discriminate behaviour. The six base-arm failures in logs/baseline_suite.log are all AttributeError: module 'scripts.prototypes.efit_field_swap.orientation' has no attribute 'UndecidableSignError', raised while evaluating the pytest.raises argument rather than on the guard's decision. The done_when clause 'a test of an undecidable span fails at your base revision and passes at head' is satisfied on the letter, but the failure reason is a missing symbol, so the base arm alone could not tell 'class added' from 'guard refuses'. The discriminating evidence is the recorded negative control, not this arm (6 failed, 12 passed, all six 'Did not raise UndecidableSignError' for the guard tests and the read sentinel reaching field construction for the two call-site tests)."
+    },
+    {
+      "file": "scripts/prototypes/efit_field_swap/test_orientation.py",
+      "line": "214",
+      "severity": "follow-on",
+      "text": "follow-on: a non-independent assertion. test_undecidable_grid_span_is_refused_not_read_as_agreement:214 asserts f\"{orientation.sign_tolerance(2.0):.3e}\" in message, comparing the code's raised message against a call to the very function under test (sign_tolerance, orientation.py:161). Both sides move together: if sign_tolerance regressed to 0 the raised message would carry '0.000e+00' formatted from tolerances[name] and the same call would produce '0.000e+00', so the ordinary positive call asserts the message contains itself. The test's real guard is the pytest.raises(UndecidableSignError) clause, which the negative control confirms reddens; this assertion adds no discriminating power and does not carry the durability of the test."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit against base 375241085: 2379bb369 adds UndecidableSignError, the restated _SIGN_TOLERANCE and _CURVATURE_TOLERANCE with their bases, sign_tolerance(), the three-way _refuse, the undecidable curvature branch, the widened measure.SLICES (12 -> 17 block starts), reference_sign.py outcome reporting, and six new tests; 93d9afa04 appends the research section and writes the landing evidence fragment. Eight files, all inside the declared write paths; the two suite-arm and negative-control logs are named under test_logs and exist on disk.",
+    "done_when": "brief.txt done_when (1) three outcomes with an undecidable span refused by a named error carrying the span and the tolerance: landed at orientation.py:200-215, _SIGN_TOLERANCE stated with its basis at orientation.py:37-49, and every caller refuses (measure.py:189, crosscheck.py:1059, probe_read.py:28). (2) the driver runs 17 slices and reports each outcome with scalar and grid spans: logs/reference-sign.log prints per-slice grid_span and scalar_span and 'LIUQE_ROWS 17 REFUSED 17 AGREES 0 CONTRADICTS 17 UNDECIDABLE 0'. (3) an undecidable-span test fails at base and passes at head, all 28 trace records re-read, both suite arms recorded: satisfied on the letter, with the base-arm failure reason being a missing symbol rather than a behavioural difference (see finding at test_orientation.py:205).",
+    "goal": "The source brief.txt:1 asks the node to make the reference sign guard refuse a flux span it cannot decide and run it over every TCV slice; the landed orientation.py separates agrees/contradicts/undecidable and raises UndecidableSignError (orientation.py:71-80, 200-215), and reference_sign.py reads all 17 distinct psi-grid blocks.",
+    "manifest": "Read: the manifest records 'head arm 52 passed 0 failed', 'base arm 6 new-test failures', 'all 17 LIUQE slices contradict (0 undecidable)', 'all 28 trace records agree (none undecidable, unchanged)', 'negative control red', and both suite arms as single-line JSON whose commands are literally runnable and whose log_path values name one log each. Every figure it quotes reconciles with the log it cites (logs/after_suite.log last line '52 passed, 1 deselected', logs/baseline_suite.log '6 failed, 45 passed, 1 deselected', logs/negative_control.log 'EXIT=1' with six ids).",
+    "write_paths": "The source manifest orientation_write_paths fences orientation.py, test_orientation.py, crosscheck.py, probe_read.py, scripts/prototypes/tcv_liuqe_known_answer, docs/research/reference-sign-guard.html and docs/evidence/fragments/converged-forward-solve/reference-sign-guard.html (plus sign-guard-undecidable-span.html and the figures dir); git diff --stat 375241085..93d9afa04 names exactly orientation.py, test_orientation.py, tcv_liuqe_known_answer/{measure,reference_sign,test_coverage}.py, docs/research/reference-sign-guard.html and two evidence fragments, all inside the fence. crosscheck.py and probe_read.py are declared but unchanged, which is correct: the refusal propagates through their existing check_trace_record call."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261019T094048448057-review-of-sign-guard-undecidable-span-93d9afa04f1e",
+  "reviewed_base_sha": "3752410851925e484c79953b2e4e3c3dcb9a6115",
+  "reviewed_head_sha": "93d9afa04f1e6a017c420af6926762b5ef8fef1c",
+  "reviewed_run_brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T083523749810-sign-guard-undecidable-span/brief.txt",
+  "reviewed_run_id": "r-20261019T083523749810-sign-guard-undecidable-span",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 15,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T12:36:20.734195+00:00"
+}

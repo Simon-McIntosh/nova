@@ -614,6 +614,12 @@ def compilation_cache(
     """
     import jax
 
+    # The persistent cache is this route's only cache; XLA's per-fusion autotune
+    # results would be written beside it, thousands of synchronous small files on
+    # shared storage, re-decided the same way on the next process.  Disable them
+    # wherever this route configures the cache.
+    jax.config.update("jax_persistent_cache_enable_xla_caches", "none")
+
     configured = jax.config.jax_compilation_cache_dir
     if directory is None:
         if configured is not None:

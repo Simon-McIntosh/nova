@@ -169,6 +169,40 @@ def test_h200_payload_keeps_sampler_and_pin_diagnostic(tmp_path: Path) -> None:
     assert "PINNED_REVISION" in result.stdout
 
 
+PREWARM_LANE = REPOSITORY_ROOT / "scripts" / "h200_test_lane" / "prewarm.sh"
+
+
+def test_h200_payload_prelude_disables_the_xla_autotune_cache(tmp_path: Path) -> None:
+    """The lane prelude exports the off-switch for the per-fusion autotune cache.
+
+    The dry-run prints the rendered prelude, so the export is checked where it
+    is delivered to the target rather than only in the script source.
+    """
+    result = subprocess.run(
+        [
+            "bash",
+            str(H200_CALLER),
+            "--dry-run",
+            "--log",
+            str(tmp_path / "lane.log"),
+            "--",
+            "tests/example_target.py",
+        ],
+        capture_output=True,
+        text=True,
+        cwd=REPOSITORY_ROOT,
+        env={**os.environ, "TMPDIR": "/tmp"},
+    )
+    assert result.returncode == 0, result.stderr
+    assert "export JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES=none" in result.stdout
+
+
+def test_prewarm_environment_disables_the_xla_autotune_cache() -> None:
+    """The pre-warm payload carries the same off-switch as the lane."""
+    text = PREWARM_LANE.read_text()
+    assert "export JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES=none" in text
+
+
 def test_payload_prelude_exports_reach_the_target(tmp_path: Path) -> None:
     """The payload prelude sets the environment the target runs under.
 

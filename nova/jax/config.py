@@ -171,6 +171,15 @@ def configure_persistent_compilation_cache(
 
     import jax
 
+    # JAX 0.11 defaults this key to the GPU per-fusion autotune directory, so a
+    # configured cache writes XLA's autotuner records alongside the compiles.  On
+    # shared storage those records are a synchronous small-file write per fusion,
+    # thousands per revision, and none of them is needed: the autotuner picks the
+    # same emitter on the next process.  Set it before the identity below, because
+    # the identity hashes this key and both the pin and the lane must carry the
+    # same setting to resolve one directory.
+    jax.config.update("jax_persistent_cache_enable_xla_caches", "none")
+
     resolved_root = Path(root).expanduser().resolve()
     runtime_identity = _persistent_cache_runtime_identity()
     encoded = json.dumps(

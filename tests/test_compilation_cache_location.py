@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import os
 from pathlib import Path
 import socket
@@ -194,3 +195,72 @@ def test_two_processes_compile_into_one_shared_default(tmp_path: Path) -> None:
     shared_root = cache_base / f"user-{os.getuid()}" / f"host-{socket.gethostname()}"
     assert directory.is_relative_to(shared_root)
     assert list(directory.glob("*-cache"))
+
+
+_CACHE_CONFIG_KEYS = (
+    "jax_persistent_cache_enable_xla_caches",
+    "jax_compilation_cache_dir",
+    "jax_compilation_cache_max_size",
+    "jax_persistent_cache_min_compile_time_secs",
+)
+
+
+@contextlib.contextmanager
+def _cache_configuration_restored():
+    """Restore the process-global JAX cache keys a test reconfigures."""
+    import jax
+
+    saved = {key: getattr(jax.config, key) for key in _CACHE_CONFIG_KEYS}
+    try:
+        yield
+    finally:
+        for key, value in saved.items():
+            jax.config.update(key, value)
+
+
+def test_persistent_cache_identity_disables_the_xla_autotune_cache(
+    tmp_path: Path,
+) -> None:
+    """The per-fusion autotune cache is off before the identity is hashed."""
+    import jax
+
+    from nova.jax.config import configure_persistent_compilation_cache
+
+    with _cache_configuration_restored():
+        cache = configure_persistent_compilation_cache(
+            tmp_path, minimum_compile_seconds=0.0
+        )
+        assert jax.config.jax_persistent_cache_enable_xla_caches == "none"
+        assert (
+            cache.runtime_identity["compiler_options"][
+                "jax_persistent_cache_enable_xla_caches"
+            ]
+            == "none"
+        )
+
+
+def test_two_persistent_cache_calls_resolve_one_directory(tmp_path: Path) -> None:
+    """Both calls carry the same identity, so they serve the same directory."""
+    from nova.jax.config import configure_persistent_compilation_cache
+
+    with _cache_configuration_restored():
+        first = configure_persistent_compilation_cache(
+            tmp_path, minimum_compile_seconds=0.0
+        )
+        second = configure_persistent_compilation_cache(
+            tmp_path, minimum_compile_seconds=0.0
+        )
+        assert first.directory == second.directory
+
+
+def test_tiledassembly_cache_disables_the_xla_autotune_cache(
+    tmp_path: Path,
+) -> None:
+    """The kernel-cache route applies the same setting as the solve route."""
+    import jax
+
+    from nova.biot.tiledassembly import compilation_cache
+
+    with _cache_configuration_restored():
+        compilation_cache(tmp_path / "kernels", min_compile_seconds=0.0)
+        assert jax.config.jax_persistent_cache_enable_xla_caches == "none"

@@ -22,6 +22,7 @@ readonly PINNED_ROOT="${NOVA_COMPILATION_CACHE_ROOT:-${DEFAULT_PINNED_ROOT}}"
 readonly PAYLOAD_PRELUDE="$(cat <<'PRELUDE'
 export JAX_PLATFORMS=cuda,cpu
 export JAX_ENABLE_COMPILATION_CACHE=1
+export JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES=none
 export JAX_PERSISTENT_CACHE_MIN_COMPILE_TIME_SECS=0
 export PYTEST_ADDOPTS="${PYTEST_ADDOPTS:-} -p cache_guard"
 export JAX_COMPILATION_CACHE_DIR="$("${NOVA_LANE_SHARED_PYTHON}" -c 'import cache_guard; print(cache_guard.pinned_cache_directory())')"

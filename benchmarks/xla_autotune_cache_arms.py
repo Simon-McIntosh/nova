@@ -56,8 +56,12 @@ ARM_LABELS = {
 
 
 def row_selection(kind: str, cells: int) -> str:
-    """Return the pytest -k expression that selects exactly one certificate row."""
-    return f"test_*_certificate_moments and {kind} and {cells}"
+    """Return the pytest -k expression that selects exactly one certificate row.
+
+    ``-k`` matches substrings; its grammar has no ``*`` glob, so a wildcard is
+    rejected as a usage error before collection and the row never runs.
+    """
+    return f"certificate_moments and {kind} and {cells}"
 
 
 def arm_environment(arm: str, root: Path) -> dict[str, str]:
@@ -113,14 +117,10 @@ def inventory(root: Path) -> dict[str, int]:
     return counts
 
 
-def cache_guard_receipt(log_path: Path) -> dict:
-    """Return the last CACHE_GUARD_RECEIPT object written to a run log."""
+def cache_guard_receipt_text(text: str) -> dict:
+    """Return the last CACHE_GUARD_RECEIPT object carried in run output."""
     receipt: dict = {}
-    try:
-        lines = log_path.read_text(encoding="utf-8", errors="replace").splitlines()
-    except OSError:
-        return receipt
-    for line in lines:
+    for line in text.splitlines():
         marker = "CACHE_GUARD_RECEIPT="
         if line.startswith(marker):
             try:
@@ -128,6 +128,35 @@ def cache_guard_receipt(log_path: Path) -> dict:
             except json.JSONDecodeError:
                 continue
     return receipt
+
+
+def cache_guard_receipt(log_path: Path) -> dict:
+    """Return the last CACHE_GUARD_RECEIPT object written to a run log."""
+    try:
+        text = log_path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return {}
+    return cache_guard_receipt_text(text)
+
+
+_MAXIMUM_LOG_LINE_CHARACTERS = 20000
+_DROPPED_LOG_PREFIXES = ("CACHE_GUARD_PREWARM=",)
+
+
+def trim_log(text: str) -> str:
+    """Return run output with the oversized pre-warm inventory dropped.
+
+    The cache guard prints one `CACHE_GUARD_PREWARM=` line carrying the whole
+    pre-warm inventory, which reaches a couple of megabytes and buries the rows
+    a reader needs.  The receipt line is small and is kept.
+    """
+    kept = [
+        line
+        for line in text.splitlines()
+        if not line.startswith(_DROPPED_LOG_PREFIXES)
+        and len(line) <= _MAXIMUM_LOG_LINE_CHARACTERS
+    ]
+    return "\n".join(kept) + "\n"
 
 
 def run_target_once(
@@ -158,11 +187,14 @@ def run_target_once(
         command, cwd=str(ROOT), env=environment, capture_output=True, text=True
     )
     wall = perf_counter() - started
-    log_path.write_text(completed.stdout + completed.stderr, encoding="utf-8")
+    text = completed.stdout + completed.stderr
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    log_path.write_text(trim_log(text), encoding="utf-8")
     return {
         "wall_seconds": wall,
         "exit_status": completed.returncode,
         "log": str(log_path),
+        "text": text,
     }
 
 
@@ -176,7 +208,7 @@ def measure_arm(
     cold = run_target_once(
         arm, root, workdir / "results", workdir / "cold.log", selection
     )
-    cold_receipt = cache_guard_receipt(Path(cold["log"]))
+    cold_receipt = cache_guard_receipt_text(cold["text"])
     after_cold = inventory(root)
     steady = []
     for index in range(repeats):
@@ -233,17 +265,25 @@ def seed_autotune_subtree(source: Path, destination: Path) -> int:
     return copied
 
 
-def drive(base: Path, repeats: int, kind: str, cells: int) -> dict:
-    """Run the four arms in order, each against its own prepared cache root."""
+def drive(
+    base: Path, repeats: int, kind: str, cells: int, logs: Path | None = None
+) -> dict:
+    """Run the four arms in order, each against its own prepared cache root.
+
+    ``base`` holds the four per-arm cache roots and is node-local scratch.
+    ``logs`` holds the per-arm run logs and is a durable directory, so a reader
+    can see why an arm produced what it did after the job's scratch is gone.
+    """
     base.mkdir(parents=True, exist_ok=True)
     selection = row_selection(kind, cells)
+    logs = base / "logs" if logs is None else logs
     roots = {arm: base / f"arm-{arm}" for arm in ARMS}
     for root in roots.values():
         if root.exists():
             shutil.rmtree(root)
     receipts = {}
     for arm in ARMS:
-        workdir = base / f"work-{arm}"
+        workdir = logs / f"work-{arm}"
         workdir.mkdir(parents=True, exist_ok=True)
         if arm == "b":
             seed_autotune_subtree(roots["a"], roots["b"])
@@ -337,8 +377,12 @@ def main() -> int:
         return 0
     if arguments.receipt is None:
         parser.error("--receipt is required unless --dry-run or --figure")
-    receipt = drive(arguments.base, arguments.repeats, arguments.kind, arguments.cells)
+    logs = arguments.receipt.parent / "xla-autotune-arm-logs"
+    receipt = drive(
+        arguments.base, arguments.repeats, arguments.kind, arguments.cells, logs
+    )
     arguments.receipt.parent.mkdir(parents=True, exist_ok=True)
+    receipt["logs_directory"] = str(logs)
     arguments.receipt.write_text(
         json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )

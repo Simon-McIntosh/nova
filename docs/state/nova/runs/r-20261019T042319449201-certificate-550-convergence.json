@@ -1,0 +1,582 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 4,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "a711e2b064f840d153972c1690d4af82e3f6a365",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T042319449201-certificate-550-convergence/brief.txt",
+    "sha256": "5c5391d1ce890f7d0008116f2550613306f34bac281ee64e835c5bb293ca54d8"
+  },
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 83008256,
+      "cached_input_tokens_cumulative": 83008256,
+      "input_tokens": 84269626,
+      "input_tokens_cumulative": 84269626,
+      "output_tokens": 175572,
+      "output_tokens_cumulative": 175572,
+      "reasoning_output_tokens": 74400,
+      "reasoning_output_tokens_cumulative": 74400
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 339,
+    "files": 5,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 371,
+        "name": "_near_edge_reference_rows",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 585,
+        "name": "linear_step",
+        "path": "scripts/prototypes/fast_map_production/solver.py"
+      },
+      "window_line": 698
+    },
+    {
+      "existing_function": {
+        "line": 114,
+        "name": "test_tangent_against_extended_precision",
+        "path": "tests/biot/test_near_collinear_tangent.py"
+      },
+      "run_function": {
+        "line": 585,
+        "name": "linear_step",
+        "path": "scripts/prototypes/fast_map_production/solver.py"
+      },
+      "window_line": 698
+    },
+    {
+      "existing_function": {
+        "line": 11,
+        "name": "_dataset_row",
+        "path": "tests/imas/test_diiid_machine_description.py"
+      },
+      "run_function": {
+        "line": 585,
+        "name": "linear_step",
+        "path": "scripts/prototypes/fast_map_production/solver.py"
+      },
+      "window_line": 698
+    },
+    {
+      "existing_function": {
+        "line": 15,
+        "name": "test_variant_set_exhausts_convention_digits_and_required_axes",
+        "path": "tests/imas/test_diiid_root_convention_sweep.py"
+      },
+      "run_function": {
+        "line": 585,
+        "name": "linear_step",
+        "path": "scripts/prototypes/fast_map_production/solver.py"
+      },
+      "window_line": 698
+    },
+    {
+      "existing_function": {
+        "line": 331,
+        "name": "test_conditioned_elliptic_combinations_match_a_high_precision_arbiter",
+        "path": "tests/test_biotgreens.py"
+      },
+      "run_function": {
+        "line": 585,
+        "name": "linear_step",
+        "path": "scripts/prototypes/fast_map_production/solver.py"
+      },
+      "window_line": 698
+    },
+    {
+      "existing_function": {
+        "line": 580,
+        "name": "test_smooth_merit_brackets_relative_sup_for_distributed_residuals",
+        "path": "tests/test_fixed_point.py"
+      },
+      "run_function": {
+        "line": 585,
+        "name": "linear_step",
+        "path": "scripts/prototypes/fast_map_production/solver.py"
+      },
+      "window_line": 698
+    },
+    {
+      "existing_function": {
+        "line": 243,
+        "name": "test_registry_contains_all_census_source_gaps",
+        "path": "tests/test_mast_catalog_geometry.py"
+      },
+      "run_function": {
+        "line": 585,
+        "name": "linear_step",
+        "path": "scripts/prototypes/fast_map_production/solver.py"
+      },
+      "window_line": 698
+    },
+    {
+      "existing_function": {
+        "line": 114,
+        "name": "test_the_seeded_held_out_extension_is_pinned_across_campaigns_and_polarities",
+        "path": "tests/test_parity_tolerances.py"
+      },
+      "run_function": {
+        "line": 585,
+        "name": "linear_step",
+        "path": "scripts/prototypes/fast_map_production/solver.py"
+      },
+      "window_line": 698
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "2aaff5da551eb7dce0a76af221216f3556152caf",
+    "9177452896307bd49d385c1fa0c9646094f6c811",
+    "016c03eb4bca89f83b1b083798c357943029c649",
+    "596a6e345b2828a62e1bc1dac009715821f397b2",
+    "b7eb95203545c21f1524c2b7cda041330e2d8394",
+    "36e24e125c0e3be324e94038876a5a3f8ab96647",
+    "344cafc2ce53d9700d4997f84c2aa137ae33abc1",
+    "27063732dfb02330bb28afcfcbb2666e9224be17",
+    "aa3edd52cbc68432650ecab6cca3fa87a45ff62f",
+    "740e5ef6ad686beda9ef9e8af2142802afd8ad07",
+    "bbaf823c77409dabe12d76d8439ffb970426f7b2",
+    "8c5a8453d0208d3cb7cc6ab165d3c5a9414e2ad9",
+    "a16ec32330215501d6c9d33ccf73032967c10545",
+    "6ff692111468e6e78dd89e5d69aee5a333edbaad",
+    "e4687adf42d07715a13c12afd1f601a804dafdf6",
+    "90829b93b9f90c2cbf63621a4fc9f325702f6e27",
+    "3bab5a7fe2ab4308497852907f7cee7c7c5f43a1",
+    "a6c680a0e9a2caf305f6b2625bc9f458726e0966",
+    "e5ca259694ee18995c5963df9055d56502a278cf",
+    "e21acb1e635445460e21ef8494526303cad85916"
+  ],
+  "completed_at": "2026-10-19T12:37:13Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-19T04:24:31Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T042319449201-certificate-550-convergence/exports/root_probe_after.json",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T042319449201-certificate-550-convergence/exports/negative_solve.json",
+    "scripts/prototypes/fast_map_production/kernel.py",
+    "read/membership",
+    "scripts/prototypes/sub_millisecond/measure_bell_cut.py",
+    "scripts/prototypes/fast_read/ordinary_cut.py;"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -s -q tests/equilibrium/test_certificate_550_convergence.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T042319449201-certificate-550-convergence/exports/carrier_tangent_head_final.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.2857142857142857,
+    "plan": "converged-forward-solve",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-19T05:23:37.013978+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-19T04:23:35Z",
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": "2026-10-26T03:55:48Z",
+    "seconds_until_reset": 603132,
+    "state": "quiet",
+    "utilisation_pct": 0.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-19T04:23:35Z",
+    "read_at": "2026-10-19T04:23:37Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 0.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-19T12:37:13Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-10-19T12:37:13Z",
+        "resets_at": 1792986948,
+        "used_percent": 10.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T042319449201-certificate-550-convergence/manifest.md",
+  "member": "disposable-r-20261019T042319449201-certificate-550-convergence",
+  "model_key": "sol",
+  "negative_control": {
+    "added_failure_ids": [],
+    "baseline_failure_ids": [
+      "tests/equilibrium/test_certificate_550_convergence.py::test_certified_limited_carrier_converges",
+      "tests/equilibrium/test_solve_vertical_pin.py::test_one_augmented_newton_program_serves_free_and_pinned_requests"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/equilibrium/test_certificate_550_convergence.py::test_certified_limited_carrier_root_tangent"
+    ],
+    "declaration": "Restore the present solve route; the cached 550-cell carrier convergence test must then fail.",
+    "head_failure_ids": [
+      "tests/equilibrium/test_certificate_550_convergence.py::test_certified_limited_carrier_root_tangent"
+    ],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T042319449201-certificate-550-convergence/exports/carrier_tangent_base_final.log",
+    "reason": "The declared mutation targeted convergence, which this node did not deliver; the delivered root tangent has its own control: the base copy of the committed test fails with JVP (0,0) against central (0,0.1) in exports/carrier_tangent_base_final.log while the head passes in exports/carrier_tangent_head_final.log. The recorded after arm ran at a superseded revision whose GPU-only subprocess errored under CPU, so it cannot serve as the head arm; the coordinator re-runs the suite at the merged head.",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T042319449201-certificate-550-convergence/exports/carrier_tangent_base_final.log",
+    "test_paths": [
+      "tests/equilibrium/test_certificate_550_convergence.py"
+    ],
+    "verdict": "waived"
+  },
+  "no_commit": null,
+  "node": "certificate-550-convergence",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.cache/nova-s21-briefs/pivot/cert550.full.txt",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T042319449201-certificate-550-convergence/brief.txt",
+    "brief_sha256": "5c5391d1ce890f7d0008116f2550613306f34bac281ee64e835c5bb293ca54d8",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "critical",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1814,
+          "cached_input_tokens": 604095,
+          "input_tokens": 605911,
+          "output_tokens": 1676,
+          "reasoning_output_tokens": 188,
+          "total_tokens": 607587,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "The rejected Newton correction at the stalled 550-cell iterate is localised (merit at stated step scales, Taylor slope, the refusing acceptance test) and the vertical pin effect measured; the cause is fixed at its owner without loosening the acceptance test or the 1e-12 limit, the row reaches 1e-12 with slope 2 and a committed cached-carrier test fails at main; the six certificate rows re-run before and after; both suite arms recorded in docs/research/certificate-550-convergence.html.",
+    "estimated_hours": null,
+    "goal": "Make the 550-cell certified limited carrier forward solve converge",
+    "id": "certificate-550-convergence",
+    "images": [],
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-19T04:23:35Z",
+      "read_at": "2026-10-19T04:23:37Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 0.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T042319449201-certificate-550-convergence/manifest.md",
+    "negative_control": "Restore the present solve route; the cached 550-cell carrier convergence test must then fail.",
+    "orchestrator_assessment": {
+      "reasoning": "deep",
+      "risk": "critical",
+      "verification": "strict"
+    },
+    "plan": "converged-forward-solve",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§5",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "scripts/prototypes/fast_map_production",
+      "nova/equilibrium/solve.py",
+      "nova/equilibrium/solve_request.py",
+      "tests/equilibrium/test_certificate_550_convergence.py",
+      "docs/research/certificate-550-convergence.html",
+      "docs/evidence/fragments/converged-forward-solve/certificate-550-convergence.html",
+      "docs/figures/converged-forward-solve/certificate-550-convergence",
+      "nova/equilibrium/fixed_points.py"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": null,
+      "derived": null,
+      "drain_hours": 168.0,
+      "effective_limit": null,
+      "elapsed_fraction": 0.002795399275793642,
+      "elapsed_hours": 0.46962707833333184,
+      "group": "codex-sub",
+      "lift": {
+        "ends_at": "2026-10-24T20:41:00+00:00",
+        "ends_on": "time",
+        "form": "uncapped",
+        "group": "codex-sub",
+        "id": "codex-sub-1792306512-739e03",
+        "pace_multiple": null,
+        "remaining_seconds": 490621.342518,
+        "scope": "global"
+      },
+      "lift_hold": {
+        "held": false,
+        "kind": "uncapped"
+      },
+      "limited_by": null,
+      "observed_at": "2026-10-19T04:23:58+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": "window too young to project: burn evidence is quantised too coarsely: 0.28% elapsed is below the 5% floor and 0% utilisation is below the 5% floor",
+      "remaining_budget": 1.0,
+      "remaining_windows": null,
+      "resets_at": "2026-10-26T03:55:48Z",
+      "state": "observed",
+      "utilisation": 0.0,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.0,
+      "decided_by": "window",
+      "margin": 0.64375,
+      "name": "certificate-550-convergence",
+      "score": 0.64375,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.0
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.657482,
+        "observed_at": "2026-10-19T04:23:58+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-26T03:55:48Z",
+        "state": "observed",
+        "utilisation": 0.0,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": "codex-sub-1792306512-739e03",
+    "member": "codex",
+    "node": "certificate-550-convergence",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-19T04:23:58.657482+00:00",
+    "score": 0.64375,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "Certificate forward-solve convergence on the critical path, after the loader repair; deep solver work kept on codex as the lead directed for repairs of this kind; three clauses; GPU with titan fallback.",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.425,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {}
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.2857142857142857,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "e21acb1e635445460e21ef8494526303cad85916",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "a711e2b064f840d153972c1690d4af82e3f6a365",
+    "reviewed_head_sha": "e21acb1e635445460e21ef8494526303cad85916",
+    "scores": {
+      "durability": 14,
+      "evidence": 12,
+      "fit": 17,
+      "goal_fidelity": 12,
+      "reuse": 10,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 84
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261019T042319449201-certificate-550-convergence",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§5",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a15267-d5e0-7d62-a5e2-901d47404473",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 83008256,
+    "cumulative_input_tokens": 167277882,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 249972
+  },
+  "time_budget": "60m",
+  "tool_steps": 490.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 29562,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 4,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-19T12:37:17Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-19T12:17:22Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261019T042319449201-certificate-550-convergence",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 1807,
+    "worker_pid": 4109105
+  },
+  "worker_seconds": 29520,
+  "worker_seconds_source": "rollout_receipts",
+  "worktree_retention": null
+}

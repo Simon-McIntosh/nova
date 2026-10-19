@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="certificate-550-map-mismatch">
+<meta name="plan-title" content="Certified carrier map derivative localization">
+<meta name="plan-summary" content="The limited carrier's first-order map mismatch starts at a no-saddle boundary-level clamp in the peer-held read kernel.">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s5">
+<meta name="plan-recorded-at" content="2026-10-19">
+<meta name="plan-verdict" content="partial">
+<title>Certified carrier map derivative localization | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<h1 id="certificate-550-map-mismatch-landing">Certified carrier map derivative localization</h1>
+<p id="certificate-550-map-mismatch-summary">H200 job 1290122 published a new 553-cell limited carrier entry in 125.451 s and reproduced the stalled scaled residual at <strong>0.0012319931459888489</strong>. Along its GMRES Newton direction, boundary flux has JVP −0.00691054971918 against centered derivative −0.00345527699785 at h = 1e-5, stable from 1e-4 to 1e-6. The limited read has one axis root; <code>scripts/prototypes/fast_map_production/kernel.py</code> pads a dummy zero saddle and unconditionally maximizes its level with the wall level. The stalled wall level is about 2.46e-14, so the centered perturbation crosses the zero clamp. Cells 61 and 508 inherit the kink: Bell current JVP is 28.0430 A per step at both cells versus centered derivatives 5.93933 A; geometric and final membership JVP is 0.000740308 at both cells versus centered derivatives near 0.000156913. Path-weight derivatives are zero, so the membership handoff adds no mismatch. The split polygon area has a NaN JVP, but its four-crossing selector is false for both cells and its derivative is inactive. The owner <code>kernel.py</code> is held by a concurrent node, so this node is blocked from repair. The 1e-12 convergence test, four-row H200 solve and paired suite arms remain unrun. <a href="/nova/research/certificate-550-convergence.html#certificate-550-map-mismatch">Full stage table and mechanism</a>.</p>
+</main></body></html>

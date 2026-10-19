@@ -10,18 +10,13 @@ rather than converged.
 
 Every record in the manifest gets a row. A record whose read fails is recorded
 with the exception text, and a record whose lattice admits no saddle is recorded
-with the census counts that disqualified it, so a gap is never silent. Two
-retries keep the gap small without inventing a decision:
-
-* the cell geometry is rebuilt at a coarser resolution first and, when the census
-  admits no saddle, at successively finer ones, because a saddle the lattice
-  cannot resolve is a limit of the substituted geometry rather than a property of
-  the field;
-* the contour mesh is rebuilt with a fitted capacity when nova's own capacity
-  truncates it to nothing, which is what happens on every wide wall in this
-  manifest. The fit is applied only where the native mesh has no valid vertex at
-  all, so no case that already read is changed by it, and the row says which
-  capacity served it.
+with the census counts that disqualified it, so a gap is never silent. One retry
+keeps the gap small without inventing a decision: the cell geometry is rebuilt at
+a coarser resolution first and, when the census admits no saddle, at successively
+finer ones, because a saddle the lattice cannot resolve is a limit of the
+substituted geometry rather than a property of the field. The contour mesh is
+sized by the read from the geometry it must hold, so a wide wall no longer needs
+a refitted capacity.
 
 Approximations this driver states plainly, because they qualify every number it
 emits:
@@ -79,7 +74,6 @@ TRACE_LIBRARY = Path(
 )
 
 RESOLUTIONS = (16, 24, 32)
-CAPACITY_GROWTH = 8
 
 # A winding number computed from the unwrapped phase of grad psi lands on an
 # integer unless the loop passes through a critical point. The tolerance only
@@ -582,7 +576,6 @@ class Decision:
     wall_loop_count: int
     n_cells: int
     resolution: int
-    capacity_fit: bool
     efit_verdict: int
     efit_label: str
     efit_axis_psi: float
@@ -667,7 +660,6 @@ def _undecided(case, source, record, label, note, field_grad, coverage=None):
         **_efit_columns(case, source, record),
         n_cells=0,
         resolution=0,
-        capacity_fit=False,
         nova_axis_psi=nan,
         nova_axis_r=nan,
         nova_axis_z=nan,
@@ -697,54 +689,6 @@ def _undecided(case, source, record, label, note, field_grad, coverage=None):
         coverage_cells_occupied=0 if coverage is None else coverage.cells_occupied,
         note=note,
     )
-
-
-def _fitted_capacity(holder):
-    """Wrap the contour-mesh builder so a truncating capacity is refitted.
-
-    ``TopologyGeometry.from_cells`` sizes the contour mesh as
-    ``len(tree_centres) + len(points) + 1``, which is too small for a wall whose
-    segments generate more vertices than that. The builder then returns a mesh
-    with *zero* valid vertices instead of raising, and the failure surfaces two
-    calls later as an empty index. The wrapper retries at a larger capacity only
-    in that case, so a geometry that already meshed is returned untouched.
-    """
-
-    def build(*args, **kwargs):
-        original = holder["original"]
-        mesh = original(*args, **kwargs)
-        if np.any(np.asarray(mesh.vertex_valid)):
-            return mesh
-        holder["fitted"] = True
-        grown = dict(kwargs)
-        for key in ("vertex_capacity", "edge_capacity", "triangle_capacity"):
-            if key in grown:
-                grown[key] = CAPACITY_GROWTH * grown[key]
-        return original(*args, **grown)
-
-    return build
-
-
-def fitted_geometry(cells, sampling_vertices, wall_units):
-    """Build the cell geometry, refitting a truncating contour-mesh capacity.
-
-    Returns the geometry and whether the fit was needed, or ``(None, True)`` when
-    even the fitted capacity admits no vertex.
-    """
-    from nova.equilibrium import contour_tree_mesh
-
-    holder = {"original": contour_tree_mesh.build_contour_mesh, "fitted": False}
-    contour_tree_mesh.build_contour_mesh = _fitted_capacity(holder)
-    try:
-        try:
-            geometry = topology.TopologyGeometry.from_cells(
-                cells, sampling_vertices, wall_units
-            )
-        except IndexError, ValueError:
-            return None, holder["fitted"]
-    finally:
-        contour_tree_mesh.build_contour_mesh = holder["original"]
-    return geometry, holder["fitted"]
 
 
 def lattice(wall_ring: np.ndarray, resolution: int, obstacles=()):
@@ -858,7 +802,6 @@ class ReadOutcome:
 
     resolution: int | None
     cells: int
-    capacity_fit: bool
     candidates: int
     saddles: int
     label: str
@@ -878,7 +821,6 @@ def _empty_outcome(label, attempts, coverage=None):
     return ReadOutcome(
         resolution=None,
         cells=0,
-        capacity_fit=False,
         candidates=0,
         saddles=0,
         label=label,
@@ -916,9 +858,15 @@ def read_state(
     coverage = None
     for resolution in resolutions:
         cells, samples = lattice(boundary_ring, resolution, obstacles)
-        geometry, fitted = fitted_geometry(cells, samples, (boundary_ring, *obstacles))
-        if geometry is None:
-            attempts.append(f"lattice {resolution}: contour mesh admits no vertex")
+        try:
+            geometry = topology.TopologyGeometry.from_cells(
+                cells, samples, (boundary_ring, *obstacles)
+            )
+        except (ValueError, IndexError) as error:
+            attempts.append(
+                f"lattice {resolution}: contour mesh admits no vertex "
+                f"({type(error).__name__}: {error})"
+            )
             continue
         working_field = field.sampled_for(geometry)
         initial = jax.jit(
@@ -1022,7 +970,6 @@ def read_state(
         return ReadOutcome(
             resolution=resolution,
             cells=len(cells),
-            capacity_fit=fitted,
             candidates=candidates,
             saddles=admitted,
             label="diverted" if int(np.asarray(reading.boundary_class)) else "limited",
@@ -1077,16 +1024,10 @@ def _decision(case, source, record, resolutions=RESOLUTIONS):
         )
     coverage = outcome.coverage
     note = outcome.attempts
-    if outcome.capacity_fit:
-        note = (note + " | " if note else "") + (
-            f"contour mesh refitted at {CAPACITY_GROWTH}x capacity: nova's own "
-            "capacity admits no vertex for this grid"
-        )
     return Decision(
         **_efit_columns(case, source, record),
         n_cells=outcome.cells,
         resolution=outcome.resolution,
-        capacity_fit=outcome.capacity_fit,
         nova_axis_psi=outcome.axis_psi,
         nova_axis_r=float(outcome.axis[0]),
         nova_axis_z=float(outcome.axis[1]),

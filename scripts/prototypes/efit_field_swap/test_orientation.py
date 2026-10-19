@@ -87,7 +87,7 @@ def test_agreeing_grid_is_read():
 
 def test_negated_grid_against_its_scalars_is_refused():
     """The stored grid is the negation of its scalars: the axis is a minimum."""
-    convention = orientation.read_convention(polarity=1)
+    convention = orientation.read_convention(dd_version="3.41.0", plasma_current=-1.0e5)
     negated = -_scalar_field() + 0.7
     with pytest.raises(orientation.ReferenceSignError) as refused:
         orientation.check_axis_boundary_sign(
@@ -100,12 +100,13 @@ def test_negated_grid_against_its_scalars_is_refused():
             scalar_axis_psi=1.0,
             scalar_boundary_psi=-1.0,
             slice_index=7,
-            declared="polarity +1",
+            declared="COCOS 11, Ip -100000 A",
         )
     message = str(refused.value)
     assert "slice 7" in message
-    assert "polarity +1" in message
-    assert "grid psi axis - boundary" in message
+    assert "COCOS 11, Ip -100000 A" in message
+    assert "grid psi axis - boundary" in message and "sign -1" in message
+    assert "scalar psi axis - boundary" in message and "sign +1" in message
 
 
 def test_additive_constant_leaves_the_verdict_unchanged():

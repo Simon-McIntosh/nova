@@ -98,4 +98,26 @@ environment, never <code>uv</code>):
 <code>PYTHONPATH=&lt;worktree&gt; /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -m 'slow or not slow' tests/equilibrium/test_solve_vertical_pin.py -v</code>
 at HEAD and, with <code>env -C &lt;base-tree&gt;</code>, at <code>a711e2b0</code>; both
 <code>6 passed</code>.</p>
+
+<h3 id="vertical-pin-free-height-suite">Suite arms</h3>
+
+<p id="vertical-pin-free-height-suite-result">Both arms ran as one job
+(<code>1290374</code>, <code>sirius</code>, 12 CPUs, 96 GB, 00:12:44, one fresh process per
+file) over <code>tests/equilibrium/test_solve_vertical_pin.py</code>,
+<code>tests/test_fixed_point.py</code>, <code>tests/test_constraint_active_set.py</code>,
+<code>tests/test_equilibrium_constraint_protocol.py</code> and
+<code>tests/test_forward_constraints.py</code>. Each arm collected <strong>71 passed</strong>
+and the same two failures, <code>test_eliminated_constraint_runs_through_typed_solve_without_retrace</code>
+and <code>test_eliminated_constraint_reports_no_root_and_refuses_multiple_rows</code>. Both
+ids fail identically in both arms, so neither is introduced by this node.
+<strong>No added failure.</strong> Whether those two are red on the base independently of
+this node is not settled here: this node produced no source delta, so the pair is the same
+on both sides by construction, and their prior status belongs to the node that owns that
+file.</p>
+
+<p id="vertical-pin-free-height-suite-arms">The two arms are the same revision: this node
+changed no source and no test file, so its only working-tree delta against the base is this
+evidence fragment, which no test imports. Running both arms is therefore a repeatability
+measurement rather than a before/after one, and it is recorded as such rather than presented
+as a delta.</p>
 </section>

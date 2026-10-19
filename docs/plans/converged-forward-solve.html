@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="448">
+<meta name="plan-version" content="449">
 <meta name="plan-modified" content="2026-10-19">
 </head>
 <body>
@@ -1243,6 +1243,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261019T131345058657-review-of-sign-guard-undecidable-span-6fdd275f42b6" data-who="reckon-build" data-when="2026-10-19T13:29:33.343Z">
     <div class="r-comment-body"><p>review-of-sign-guard-undecidable-span — independent review of run r-20261019T083523749810-sign-guard-undecidable-span, read at base 375241085 and head 6fdd275f. Scores (goal_fidelity 19, evidence 15, scope_discipline 18, durability 16, fit 18, reuse 20), added_failure_count 0, two follow-on findings (stale suite-arm numbers in the reference-sign-guard evidence fragment; no durable test for the 17-slice coverage). No blocking finding. Record at review-records/r-20261019T083523749810-sign-guard-undecidable-span.at-6fdd275f42b64419fe51e3d572d6bc89da56fe4c.json (status parsed, crew check-review ok).</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261019T083523749810-sign-guard-undecidable-span" data-who="reckon-build" data-when="2026-10-19T13:12:20Z">
+    <div class="r-comment-body"><p>sign-guard-undecidable-span — the guard separates agrees/contradicts/undecidable and refuses UndecidableSignError at every caller, with the tolerance scaled by a gauge-free flux width; the TCV driver reads all 17 LIUQE grids (17 contradict, 0 undecidable) and all 28 trace records agree and are unchanged; base arm 7 failed/45 passed, head arm 53 passed/0 failed, focused gate 31 passed, negative control EXIT=1 with 6 failing ids.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

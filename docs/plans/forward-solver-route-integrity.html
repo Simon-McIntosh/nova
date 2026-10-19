@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
-<meta name="plan-version" content="122">
+<meta name="plan-version" content="124">
 <meta name="plan-modified" content="2026-10-19">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 <meta name="plan-impl" content="0.67">
@@ -406,7 +406,7 @@
 <table>
 <thead><tr><th>cache directory</th><th>autotune entries</th><th>what they are</th></tr></thead>
 <tbody>
-<tr><td>pinned pre-warm directory <code>/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05</code></td><td>27,506</td><td>26,313 identical 133-byte records choosing the native emitter, the default; 213 GEMM results</td></tr>
+<tr><td>pinned pre-warm directory <code>/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05</code></td><td>27,506</td><td>26,313 identical 133-byte records choosing the native emitter, the default; 980 choosing the Triton block-level emitter; 213 GEMM results</td></tr>
 <tr><td>six runtime directories under <code>~/.cache/nova/jax-compilation</code>, also on GPFS</td><td>102,179</td><td>not classified; <code>runtime-0745ecebea4cb264e054</code> alone holds 91,502, last written 2026-09-16</td></tr>
 </tbody>
 </table>
@@ -421,6 +421,7 @@
 <p><strong>Done when.</strong> The dry-run lane payload and the pre-warm both export the setting, and a test pins each export; removing either export fails its test, which is the negative control. A test shows that <code>configure_persistent_compilation_cache</code> records <code>none</code> in the runtime identity and that two calls resolve the same directory. A titan run of the certificate target at the changed revision creates zero files under any <code>xla_gpu_per_fusion_autotune_cache_dir</code>, counted before and after, and its second run hits the compile cache. <code>docs/research/xla-autotune-cache-on-gpfs.html</code> carries the four-arm table, a figure of compile wall and solve wall per arm, a stated recommendation for the fusion-autotuner decision, the inventory and the removal listing.</p>
 <p><strong>Placement.</strong> The configuration and launcher tests (<code>tests/test_nova_lane_launcher.py</code>, <code>tests/test_compilation_cache_location.py</code>, <code>tests/test_forward_compilation_cache_root.py</code>) run in place on the fleet node. The GPU arms go to titan through <code>scripts/nova_lane/run.sh --rungs titan</code>. The H200 is drained: submit nothing to it.</p>
 <p><strong>Not in this section.</strong> The guard's <code>served_entries</code> count belongs to §4. <code>JAX_PERSISTENT_CACHE_MIN_COMPILE_TIME_SECS=0</code> stays; the per-arm count of compile entries created is the evidence for judging it later. Moving the default cache root off GPFS home is out of scope.</p>
+<p><strong>Order with §4.</strong> §4 also writes <code>scripts/h200_test_lane/prewarm.sh</code>, and its gate measures a pin. Once item 1 lands, the runtime directory and therefore the pin both move. So §4 is built after this section lands, from its head, and measured against the pin republished under the new setting; the two never run as concurrent nodes.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>

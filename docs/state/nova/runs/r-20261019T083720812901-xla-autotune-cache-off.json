@@ -1,0 +1,654 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 3,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "3752410851925e484c79953b2e4e3c3dcb9a6115",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 2750438,
+      "input_tokens_cumulative": 2750438,
+      "output_tokens": 8285,
+      "output_tokens_cumulative": 8285,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 26,
+    "files": 1,
+    "removed": 19
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_heterogeneous_padding_is_finite_at_source_corners",
+        "path": "tests/test_biotarctiledbackend.py"
+      },
+      "run_function": {
+        "line": 938,
+        "name": "one_block",
+        "path": "nova/biot/tiledassembly.py"
+      },
+      "window_line": 939
+    },
+    {
+      "existing_function": {
+        "line": 1491,
+        "name": "test_packed_arc_builds_one_vectorized_state_for_each_moment_family",
+        "path": "tests/test_biotpolygonanalytic.py"
+      },
+      "run_function": {
+        "line": 938,
+        "name": "one_block",
+        "path": "nova/biot/tiledassembly.py"
+      },
+      "window_line": 939
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_heterogeneous_padding_is_finite_at_source_corners",
+        "path": "tests/test_biotarctiledbackend.py"
+      },
+      "run_function": {
+        "line": 965,
+        "name": "over_blocks",
+        "path": "nova/biot/tiledassembly.py"
+      },
+      "window_line": 966
+    },
+    {
+      "existing_function": {
+        "line": 1491,
+        "name": "test_packed_arc_builds_one_vectorized_state_for_each_moment_family",
+        "path": "tests/test_biotpolygonanalytic.py"
+      },
+      "run_function": {
+        "line": 965,
+        "name": "over_blocks",
+        "path": "nova/biot/tiledassembly.py"
+      },
+      "window_line": 966
+    },
+    {
+      "existing_function": {
+        "line": 165,
+        "name": "test_a_whole_build_compiles_the_kernel_once",
+        "path": "tests/test_biottiledbackend.py"
+      },
+      "run_function": {
+        "line": 1149,
+        "name": "assemble",
+        "path": "nova/biot/tiledassembly.py"
+      },
+      "window_line": 1239
+    },
+    {
+      "existing_function": {
+        "line": 260,
+        "name": "pair_geometry",
+        "path": "tests/test_biottiledbackend.py"
+      },
+      "run_function": {
+        "line": 1149,
+        "name": "assemble",
+        "path": "nova/biot/tiledassembly.py"
+      },
+      "window_line": 1239
+    },
+    {
+      "existing_function": {
+        "line": 58,
+        "name": "_run_concurrent_cache_writers",
+        "path": "tests/test_forward_compilation_cache_root.py"
+      },
+      "run_function": {
+        "line": 54,
+        "name": "_run_concurrent_cache_writers",
+        "path": "tests/test_compilation_cache_location.py"
+      },
+      "window_line": 61
+    },
+    {
+      "existing_function": {
+        "line": 169,
+        "name": "test_two_processes_compile_into_one_shared_default",
+        "path": "tests/test_forward_compilation_cache_root.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "test_two_processes_compile_into_one_shared_default",
+        "path": "tests/test_compilation_cache_location.py"
+      },
+      "window_line": 185
+    },
+    {
+      "existing_function": {
+        "line": 151,
+        "name": "test_h200_payload_keeps_sampler_and_pin_diagnostic",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 175,
+        "name": "test_h200_payload_prelude_disables_the_xla_autotune_cache",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 181
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_pending_resource_reason_falls_to_next_rung",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 175,
+        "name": "test_h200_payload_prelude_disables_the_xla_autotune_cache",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 185
+    },
+    {
+      "existing_function": {
+        "line": 34,
+        "name": "test_dry_run_prints_a_submission_line_for_every_rung",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 206,
+        "name": "test_payload_prelude_exports_reach_the_target",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 224
+    },
+    {
+      "existing_function": {
+        "line": 81,
+        "name": "test_dry_run_pytest_keeps_the_callers_timeout",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 206,
+        "name": "test_payload_prelude_exports_reach_the_target",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 224
+    },
+    {
+      "existing_function": {
+        "line": 98,
+        "name": "test_dry_run_pytest_keeps_the_callers_equals_form_timeout",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 206,
+        "name": "test_payload_prelude_exports_reach_the_target",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 224
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_mem_zero_is_refused",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 206,
+        "name": "test_payload_prelude_exports_reach_the_target",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 223
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_pending_resource_reason_falls_to_next_rung",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 206,
+        "name": "test_payload_prelude_exports_reach_the_target",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 223
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_mem_zero_is_refused",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 265,
+        "name": "test_pending_resource_reason_falls_to_next_rung",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 283
+    },
+    {
+      "existing_function": {
+        "line": 151,
+        "name": "test_h200_payload_keeps_sampler_and_pin_diagnostic",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 265,
+        "name": "test_pending_resource_reason_falls_to_next_rung",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 284
+    },
+    {
+      "existing_function": {
+        "line": 175,
+        "name": "test_h200_payload_prelude_disables_the_xla_autotune_cache",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 265,
+        "name": "test_pending_resource_reason_falls_to_next_rung",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 284
+    },
+    {
+      "existing_function": {
+        "line": 206,
+        "name": "test_payload_prelude_exports_reach_the_target",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 265,
+        "name": "test_pending_resource_reason_falls_to_next_rung",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 283
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "ca6de3252a6daf299bcf87015ed3da631424ba2f"
+  ],
+  "completed_at": "2026-10-19T12:58:09Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-19T08:40:17Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "runs tests",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "~/.cache"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/test_compilation_cache_location.py tests/test_nova_lane_launcher.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T083720812901-xla-autotune-cache-off/head-focused-tests.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.0,
+    "plan": "forward-solver-route-integrity",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-19T09:37:44.148024+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-19T08:37:44Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 19,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 5,
+    "headroom": 6,
+    "mean_context": 177143,
+    "observed_at": "2026-10-19T08:37:40Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 19,
+      "aggregate_tokens_per_second": 352.523,
+      "detail": "",
+      "mean_tokens_per_second": 65.282,
+      "observed_at": "2026-10-19T08:37:40Z",
+      "runs": 5.4,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-19T12:58:09Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T083720812901-xla-autotune-cache-off/manifest.md",
+  "member": "disposable-r-20261019T083720812901-xla-autotune-cache-off",
+  "model_key": "flash",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_compilation_cache_location.py::test_persistent_cache_identity_disables_the_xla_autotune_cache"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "baseline_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_compilation_cache_location.py::test_persistent_cache_identity_disables_the_xla_autotune_cache"
+    ],
+    "declaration": "Delete the config.py or tiledassembly.py line that sets jax_persistent_cache_enable_xla_caches, or either prelude export; the matching test must fail. The base-revision titan pass must create autotune files, showing the zero count is not a cache that was never used.",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T083720812901-xla-autotune-cache-off/negative-control-config-line-deleted.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T083720812901-xla-autotune-cache-off/negative-control-config-line-deleted.log",
+    "test_paths": [
+      "tests/test_compilation_cache_location.py",
+      "tests/test_nova_lane_launcher.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "xla-autotune-cache-off",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "capability": {
+      "class": "general",
+      "requirements": {
+        "reasoning": "standard",
+        "risk": "moderate",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1697,
+          "cached_input_tokens": 265731,
+          "input_tokens": 267430,
+          "output_tokens": 206,
+          "reasoning_output_tokens": 157,
+          "total_tokens": 267636,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "25c693bf-b3c2-4f73-a9ef-fdc5a4a14704",
+      "session_id": "h200-drain-nova"
+    },
+    "done_when": "configure_persistent_compilation_cache in nova/jax/config.py sets jax_persistent_cache_enable_xla_caches to none before hashing the runtime identity, compilation_cache in nova/biot/tiledassembly.py applies the same setting, and scripts/h200_test_lane/run.sh's prelude and scripts/h200_test_lane/prewarm.sh export JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES=none; tests in tests/test_compilation_cache_location.py and tests/test_nova_lane_launcher.py pin the identity value, two-call directory agreement, the tiledassembly setting and both exports, and pass on the fleet node; a titan job (scripts/nova_lane/run.sh --rungs titan) runs tests/test_current_book_fragments.py::test_analytic_certificate_moments, or one row of it if six rows exceed the rung limit, twice against one node-local cache root: at the changed revision it creates zero files under any xla_gpu_per_fusion_autotune_cache_dir and its second pass reports compile-cache hits, while the same job at the base revision creates autotune files; the landing fragment docs/evidence/fragments/forward-solver-route-integrity/xla-autotune-cache-off.html records the file counts, hit counts and job ids",
+    "estimated_hours": 2.0,
+    "goal": "Disable XLA's per-fusion autotune cache on every nova route that enables the persistent compilation cache",
+    "id": "xla-autotune-cache-off",
+    "images": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-19T08:37:44Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 19,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 5,
+      "headroom": 6,
+      "mean_context": 177143,
+      "observed_at": "2026-10-19T08:37:40Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 19,
+        "aggregate_tokens_per_second": 352.523,
+        "detail": "",
+        "mean_tokens_per_second": 65.282,
+        "observed_at": "2026-10-19T08:37:40Z",
+        "runs": 5.4,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T083720812901-xla-autotune-cache-off/manifest.md",
+    "negative_control": "Delete the config.py or tiledassembly.py line that sets jax_persistent_cache_enable_xla_caches, or either prelude export; the matching test must fail. The base-revision titan pass must create autotune files, showing the zero count is not a cache that was never used.",
+    "plan": "forward-solver-route-integrity",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§5",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/jax/config.py",
+      "nova/biot/tiledassembly.py",
+      "scripts/h200_test_lane/run.sh",
+      "scripts/h200_test_lane/prewarm.sh",
+      "tests/test_compilation_cache_location.py",
+      "tests/test_nova_lane_launcher.py",
+      "docs/evidence/fragments/forward-solver-route-integrity/xla-autotune-cache-off.html",
+      "docs/figures/forward-solver-route-integrity/xla-autotune-cache-off"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 1189297.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "xla-autotune-cache-off",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-19T08:38:39.554634+00:00",
+    "score": 0.64375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "Unit tests run in place on the fleet node; GPU passes go to titan only; the H200 is drained, so submit nothing to it. Leave cache_guard.py alone (section 4 owns served_entries). The code-health review of config.py's neighbourhood is the one stored on 2026-10-19 (review-code-978c2c952214).",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:capability",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.87,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 910.61,
+      "context-estimate": 61.565,
+      "records": 351.59,
+      "verdict-inputs": 388.562
+    }
+  },
+  "plan": "forward-solver-route-integrity",
+  "plan_impl_at_dispatch": 0.0,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "ca6de3252a6daf299bcf87015ed3da631424ba2f",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "3752410851925e484c79953b2e4e3c3dcb9a6115",
+    "reviewed_head_sha": "ca6de3252a6daf299bcf87015ed3da631424ba2f",
+    "scores": {
+      "durability": 17,
+      "evidence": 17,
+      "fit": 19,
+      "goal_fidelity": 14,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": null
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261019T083720812901-xla-autotune-cache-off",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§5",
+  "session": "h200-drain-nova",
+  "session_harness": "claude",
+  "session_id": "2d4b0814-071f-4c25-b591-3b19be9530bb",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": 5,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 15253190,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 531.2,
+    "generated_tokens": 58173,
+    "generation_seconds": 210.128,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 81.9,
+    "machine_seconds": 321.072,
+    "peak_input_tokens": 188444,
+    "tokens_per_second": 276.85,
+    "wall_tokens_per_second": 109.51
+  },
+  "time_budget": "60m",
+  "tool_steps": 80.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 15472,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 3,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-19T12:58:18Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-19T12:49:15Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261019T083720812901-xla-autotune-cache-off",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 9838,
+    "worker_pid": 420871
+  },
+  "worker_seconds": 2488,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

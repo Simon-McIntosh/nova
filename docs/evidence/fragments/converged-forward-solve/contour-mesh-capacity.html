@@ -34,12 +34,20 @@
   geometry required 247 vertices against a declared capacity of 231 and the read
   raised <code>IndexError</code>.</p>
   <p id="contour-mesh-capacity-arms-open">The three-arm regression gate over those two
-  files and <code>tests/equilibrium/test_topology_read.py</code> is <strong>begun
-  but not recorded</strong>. The base archive, the worktree and a control tree with
-  the fixed capacity formula restored were each run in a fresh process, and none
-  reached its summary line inside the node's time budget; the arms were stopped and
-  no <code>EXIT=</code> line was written. The rerun must run without the forced
-  per-test timeout, which sits below the repository's declared value and is a
-  candidate cause of the failures the two control arms showed before they were
-  stopped. No regression claim is made from them here.</p>
+  files and <code>tests/equilibrium/test_topology_read.py</code> ran as one job —
+  base archive, head worktree, and a control tree with the fixed capacity formula
+  restored — each arm a fresh process writing its own log with an
+  <code>EXIT=</code> line. Base: 5 failed, 34 passed, 4 skipped, 9 errors. Head: 5
+  failed, 43 passed, 4 skipped, 7 errors. Control: 13 failed, 35 passed, 4 skipped,
+  7 errors.</p>
+  <p id="contour-mesh-capacity-arms-delta">The five failures and seven errors in
+  <code>test_topology_read.py</code> are the <em>same twelve ids in base and head</em>,
+  so this change adds none of them — several are the compute node's missing CUDA and
+  four rows skip for want of a certified machine cache, including
+  <code>test_census_keeps_the_wall_contact_saddle_across_the_adjacent_pair</code>,
+  which is unexercised here rather than passing or failing. The head arm's nine extra
+  passes are exactly the new file's eight wide-wall records and its overflow test; at
+  base that file cannot import, since <code>ContourMeshOverflow</code> does not exist
+  there. Restoring the fixed formula turns all eight wide-wall records red and leaves
+  every other row unchanged.</p>
 </article>

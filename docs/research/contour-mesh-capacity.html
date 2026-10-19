@@ -50,15 +50,30 @@
     and asserts the valid vertex count is below the capacity. The overflow test
     forces a capacity below the geometry and asserts the named error carries both
     numbers. The two files together pass in 12.21&nbsp;s.</p>
-    <p><strong>Open.</strong> The three-arm regression gate is begun but not
-    recorded. The base archive, the worktree and a control tree that restores the
-    fixed capacity formula were each run over
-    <code>tests/equilibrium/test_topology_read.py</code>,
-    <code>tests/test_contour_tree_mesh.py</code> and the new test file, and none
-    reached its summary line inside the node's time budget; the arms were stopped
-    and no <code>EXIT=</code> line was written. The gate must be rerun without the
-    forced per-test timeout, which sits below the repository's declared value and
-    is a candidate cause of the failures the two control arms showed before they
-    were stopped.</p>
+    <p><strong>The three-arm regression gate.</strong> Three trees were each run
+    in one job over <code>tests/equilibrium/test_topology_read.py</code>,
+    <code>tests/test_contour_tree_mesh.py</code> and
+    <code>tests/equilibrium/test_topology_contour_mesh_capacity.py</code>: the base
+    base revision, the head worktree, and a control tree that restores the fixed
+    capacity formula.</p>
+    <table>
+      <tr><th>arm</th><th>result</th><th>wall</th></tr>
+      <tr><td>base archive</td><td>5 failed, 34 passed, 4 skipped, 9 errors</td><td>18&nbsp;m&nbsp;27&nbsp;s</td></tr>
+      <tr><td>head worktree</td><td>5 failed, 43 passed, 4 skipped, 7 errors</td><td>29&nbsp;m&nbsp;57&nbsp;s</td></tr>
+      <tr><td>fixed formula restored</td><td>13 failed, 35 passed, 4 skipped, 7 errors</td><td>18&nbsp;m&nbsp;29&nbsp;s</td></tr>
+    </table>
+    <p>The five failures and seven errors that <code>test_topology_read.py</code>
+    reports are the <em>same twelve ids in base and head</em>, so the change adds
+    none. The head arm's extra nine passes are exactly the new file's eight
+    wide-wall records and its overflow test; at base that file cannot import, since
+    <code>ContourMeshOverflow</code> does not exist there. Restoring the fixed
+    formula turns all eight wide-wall records red and leaves every other row
+    unchanged, which is the negative control.</p>
+    <p>The twelve pre-existing rows are not this change's. Several of the errors
+    are the compute node's missing CUDA (<code>cuInit(0) failed</code>), and four
+    rows skip for want of a certified machine cache — including
+    <code>test_census_keeps_the_wall_contact_saddle_across_the_adjacent_pair</code>,
+    which is therefore <em>unexercised</em> in this environment rather than
+    passing or failing.</p>
   </section>
 </article>

@@ -112,4 +112,35 @@ boundary span to the relative arithmetic; the fallback window slice is one
 sample, so this confirms the correction at a single overlapping time rather than
 across the whole window; it names which quantities agree and reports none that
 does not.</p>
+
+<p id="tcv-liuqe-corrected-reference-gate">The coverage test now passes on the
+corrected reference. Both suite arms ran the same two targets
+(<code>scripts/prototypes/tcv_liuqe_known_answer</code> and
+<code>scripts/prototypes/efit_field_swap/test_orientation.py</code>) as fresh
+pytest processes on CPU under the repository root conftest, with the default
+fast-lane marker filter cleared so the slow test is collected.</p>
+<ul id="tcv-liuqe-corrected-reference-gate-figures">
+<li>base arm at <code>234be9a8e</code>, its own tree extracted to a scratch
+directory: <strong>1 failed, 31 passed</strong>, <code>EXIT=1</code>. The one
+failure is
+<code>test_limited_slice_is_read_only_when_coverage_is_certified</code>, the
+defect this node repairs.</li>
+<li>head arm at <code>f09aa6924</code>: <strong>32 passed, 0 failed</strong>,
+<code>EXIT=0</code>, including
+<code>test_limited_slice_is_read_only_when_coverage_is_certified PASSED</code>.</li>
+<li>delta: <strong>no added failure</strong>; the head arm's failure set is
+empty and the base arm's single failure is gone.</li>
+</ul>
+<p id="tcv-liuqe-corrected-reference-negative-control">The declared mutation --
+pointing the store back at the uncorrected input pulse through
+<code>TCV_LIUQE_STORE</code> -- was applied and its log kept
+(<code>negative_control.log</code>). The run is red as required:
+<code>EXIT=1</code>, <strong>1 failed, 12 passed</strong>, with
+<code>test_limited_slice_is_read_only_when_coverage_is_certified</code> failing
+on <code>ReferenceSignError: slice 34 declares DD 3.41.0 (COCOS 11) with
+Ip = -79712.148 A, requiring the magnetic axis to be a psi maximum (sign +1);
+the stored grid psi axis - boundary = -1.003465e-01 (sign -1); scalar psi axis -
+boundary = +6.710667e-02 (sign +1)</code>. That failing test id is one the head
+arm does not fail, so the guard is shown to refuse the defect rather than merely
+to accept the correction.</p>
 </section>

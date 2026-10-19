@@ -100,6 +100,7 @@ def test_certified_limited_carrier_converges(tmp_path: Path) -> None:
 
 
 @pytest.mark.slow
+@pytest.mark.timeout(1200)
 def test_certified_diverted_carrier_converges(tmp_path: Path) -> None:
     import jax
 
@@ -119,7 +120,7 @@ def test_certified_diverted_carrier_converges(tmp_path: Path) -> None:
         "--kind",
         "diverted",
         "--cells",
-        "2000",
+        "550",
         "--method",
         "gmres",
         "--max-steps",

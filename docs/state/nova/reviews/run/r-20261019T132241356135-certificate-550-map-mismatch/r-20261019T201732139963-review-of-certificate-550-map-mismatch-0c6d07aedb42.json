@@ -1,0 +1,58 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "scripts/prototypes/fast_map_production/solver.py:24 imports kernel.read as fixed_shape_read and builds every solver row's map through it",
+    "scripts/prototypes/fast_map_production/program.py:12 imports kernel.read and map_moments consumes it",
+    "scripts/prototypes/fast_map_production/sweep.py:25 imports kernel.read"
+  ],
+  "completed_at": "2026-10-19T20:36:39.351Z",
+  "dispatched_at": "2026-10-19T20:17:58Z",
+  "findings": [
+    {
+      "file": "tests/equilibrium/test_certificate_550_convergence.py",
+      "line": 60,
+      "severity": "follow-on",
+      "text": "the convergence guard skips unless jax.default_backend() == 'gpu', so it cannot redden the CPU paired suite the node's baseline_suite/after_suite arms run; the only arm the guard fires on is the separately submitted H200 job, and a regression reintroduced on a CPU lane would pass the paired suite silently."
+    },
+    {
+      "file": "scripts/prototypes/fast_read/ordinary_cut.py",
+      "line": 14,
+      "severity": "follow-on",
+      "text": "the split-polygon area carries a NaN JVP in the no-four-crossing branch (docs/research/certificate-550-convergence.html stage table, 'Split polygon area' row), recorded by the worker but not repaired; it does not enter cells 61 or 508, so it is outside this node's measured defect, but it is a latent derivative defect of the same class and is named for a separate node."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "kernel.read is imported by solver.py:24 (as fixed_shape_read), program.py:12 and sweep.py:25; no code under nova/ or apps/ imports the prototype kernel.",
+    "diff": "read commit by commit from 097f03c5d to 0c6d07aed: kernel.py one-line branch selection, solver.py raw_read refactor plus a stage-probe diagnostic block and --no-panel, the committed convergence test, the research doc and the new map-mismatch evidence fragment; five files, all inside scope.",
+    "done_when": "the done_when names three clauses; the gate that ran is the paired sirius suite (baseline_suite.log EXIT=0, after_suite.log EXIT=0, 27 passes each arm) plus the H200 committed-test job named in convergence_head.log, which asserts converged=true, residual<=1e-12 and Taylor slope in [1.9,2.1] on the cached carrier.",
+    "goal": "the node goal is to make the 550-cell certified limited carrier forward solve converge by fixing its residual derivative; kernel.py:386 now selects the wall level unless the live saddle is the boundary, and row_cuda_limited_550.json records converged=true at 5.919007114724242e-15.",
+    "manifest": "read; status complete, commits list twelve shas ddfcbe1fe..0c6d07aed, baseline_suite and after_suite both exit 0 with zero failures, negative_control_log EXIT=1 with the restored-clamp mutation rejecting residual 0.0012319931459882324.",
+    "write_paths": "the manifest's orientation_write_paths fence kernel.py, solver.py, the test file, measure_bell_cut.py, ordinary_cut.py, the research doc and the two evidence fragments plus docs/figures; all five changed files sit inside that set."
+  },
+  "justifications": {
+    "durability": "tests/equilibrium/test_certificate_550_convergence.py:84 asserts receipt['converged'] is True and history[-1]['residual'] <= 1e-12 from the solver's own receipt, and the restored-clamp mutation reddens it at 0.0012319931459882324, but the guard skips off-GPU so the CPU paired suite cannot exercise it.",
+    "evidence": "convergence_head.log ends '1 passed in 299.72s' EXIT=0 and negative_control.log ends '1 failed in 266.53s' EXIT=1 with require_solve rejecting 0.0012319931459882324 against 1e-12, so the base-fail and head-pass are recorded receipts rather than claims.",
+    "fit": "kernel.py:386 uses jnp.where on the same diverted predicate that already selects boundary on kernel.py:387, introducing no plan, version or ticket token in any name or comment.",
+    "goal_fidelity": "kernel.py:386 replaces level = sigma*maximum(wall_score, saddle_score) with sigma*jnp.where(diverted, saddle_score, wall_score), removing the spurious zero clamp the padded dummy saddle introduced, and row_cuda_limited_550.json then records converged=true at 5.919007114724242e-15 with Taylor slope 1.9991170757234091.",
+    "reuse": "the change branches in place and adds no definition; the stage probe reuses the existing bell_polygon, _split_polygons, bell_moments and polygon_area owners rather than reimplementing them, and a capability search over scripts/prototypes for a wall-versus-saddle level selector found kernel.py as the sole owner.",
+    "scope_discipline": "git diff 097f03c5d..0c6d07aed touches kernel.py, solver.py, the test file, docs/research/certificate-550-convergence.html and docs/evidence/fragments/converged-forward-solve/certificate-550-map-mismatch.html, each inside the manifest's declared write paths, though solver.py also carries a 66-line stage-probe diagnostic retained past the measurement."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261019T201732139963-review-of-certificate-550-map-mismatch-0c6d07aedb42",
+  "reviewed_base_sha": "097f03c5d7fb31df7652a6da996c2e658db2d44d",
+  "reviewed_head_sha": "0c6d07aedb4245e8f4cf3ec75a238d0f24122366",
+  "reviewed_run_id": "r-20261019T132241356135-certificate-550-map-mismatch",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T20:33:00+00:00",
+  "total": 114
+}

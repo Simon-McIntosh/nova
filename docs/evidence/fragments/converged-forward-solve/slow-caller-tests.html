@@ -44,15 +44,36 @@ result:  1/4 tests collected (3 deselected)</pre>
   heavy solve.</p>
 </section>
 
+<section id="slow-caller-tests-raster-dominant-cost">
+  <h2>What dominates the raster test: the XLA compile</h2>
+  <p>The negative-control run measures it directly. At the base revision under
+  the repository's own bound (<code>--timeout 300</code>, signal method) on the
+  host CPU, the single test fails inside
+  <code>jax/_src/compiler.py:350</code> in <code>backend.compile_and_load</code>:</p>
+  <p><code>FAILED
+  tests/test_forward_receipt_raster.py::test_reduced_hex_request_receipt_records_absent_raster_flux
+  - Failed: Timeout (&gt;300.0s) from pytest-timeout.<br />
+  1 failed in 786.39s (0:13:06)</code></p>
+  <p>At the 300 s mark execution was still inside the native XLA compile of the
+  request-seam solve program, so this file is dominated by the <strong>compile of
+  the solve program</strong>, not by the Newton iterations or the fixture. The
+  unreduced wall is 786.39 s: the timeout handler cannot pre-empt native code, so
+  the compile runs to completion and the pending timeout fires only when control
+  returns to the interpreter. That is why a per-test timeout is not a bound for
+  this class of test, and why the earlier H200 attempt reached no summary inside
+  its job wall.</p>
+</section>
+
 <section id="slow-caller-tests-negative-control">
   <h2>Negative control</h2>
   <p>Declared mutation: <em>restore the base files; the default-lane run of the
   file must again exceed its bound or reach no summary.</em> Applied by running
-  the base (unmarked) file under the default lane filter with the repository's
-  <code>--timeout 300</code>; the log shows the test collected and running past
-  its own bound with no summary. Log:
+  the base (unmarked) file under the default-lane filter with the repository's
+  <code>--timeout 300</code>. The log records a non-zero <code>EXIT=1</code> and
+  the failing id
+  <code>test_forward_receipt_raster.py::test_reduced_hex_request_receipt_records_absent_raster_flux</code>,
+  which the head arm does not fail, since the head deselects it. Log:
   <code>logs/negative-control-default-lane-base.log</code>.</p>
-</section>
 
 <section id="slow-caller-tests-base-arm">
   <h2>Base arm on the H200 lane</h2>

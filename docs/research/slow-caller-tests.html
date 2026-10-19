@@ -1,0 +1,68 @@
+<h1>Slow forward caller tests: making the default lane finish</h1>
+
+<p>Two forward test files had produced no result in either arm of recent gates.
+This record runs them on the reserved-H200 lane, names what dominates each, and
+makes the default lane finish without weakening either file.</p>
+
+<table>
+  <tbody>
+    <tr><th>revision (base and head)</th><td><code>6cce876e3</code> (base), <code>7396520b0</code> (head)</td></tr>
+    <tr><th>worktree</th><td><code>/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/slow-caller-tests</code></td></tr>
+    <tr><th>device</th><td>H200, node <code>98dci4-gpu-0003</code>, reservation <code>gpu_0003_grpA</code></td></tr>
+  </tbody>
+</table>
+
+<section id="slow-caller-tests-lane-defect">
+  <h2>The default lane was carrying a heavy solve</h2>
+  <p>The default lane is path-free <code>pytest</code>, configured in
+  <code>pyproject.toml</code> as <code>-m 'not slow'</code> with
+  <code>timeout = 300</code>. A collection-only run of the two files under that
+  filter reported <strong>1 collected, 3 deselected</strong>: the single test of
+  <code>tests/test_forward_receipt_raster.py</code> was collected because it
+  carried no marker, while all three tests of
+  <code>tests/test_forward_compile_identity.py</code> were deselected as
+  <code>slow</code>. So the raster solve ran in the fast lane, where it cannot
+  finish, and the compile-identity file was already correctly excluded.</p>
+</section>
+
+<section id="slow-caller-tests-dominance">
+  <h2>What dominates each file</h2>
+  <p><strong>Receipt raster.</strong> One test; it is the dominating test by
+  construction. The negative-control run shows its cost is the <strong>native XLA
+  compile</strong> of the request-seam solve program, not the Newton iterations
+  or the fixture: the failure lands in <code>jax/_src/compiler.py:350</code> in
+  <code>backend.compile_and_load</code>, and the wall does not stop at the
+  timeout because the handler cannot pre-empt native code.</p>
+  <p><strong>Compile identity.</strong> Three tests, each marked
+  <code>slow</code>. On the H200 the first,
+  <code>test_certificate_rows_share_one_solve_program_per_mesh</code>, passes;
+  the second, <code>test_traced_exterior_preserves...terminal_state</code>,
+  fails at base (full traceback recorded in the lane log). All three share the
+  same cost driver as the raster file: the compile of the certificate solve
+  program.</p>
+</section>
+
+<section id="slow-caller-tests-change">
+  <h2>Change</h2>
+  <p>The raster test gains <code>@pytest.mark.slow</code> with a comment naming
+  the mechanism. No assertion was deleted and no tolerance was loosened. After
+  the change the default-lane collection of the file reports
+  <strong>no tests collected (1 deselected)</strong>.</p>
+</section>
+
+<section id="slow-caller-tests-arms">
+  <h2>Arms on the H200 lane</h2>
+  <p>Each arm is one lane run per file, single job, no array. Commands and
+  results are recorded in the manifest's <code>baseline_suite</code> and
+  <code>after_suite</code> fields; the logs are under
+  <code>logs/</code> in the run directory.</p>
+  <table>
+    <thead><tr><th>arm</th><th>file</th><th>job</th><th>result</th></tr></thead>
+    <tbody>
+      <tr><td>base</td><td>test_forward_receipt_raster.py</td><td>1289785</td><td>see log</td></tr>
+      <tr><td>base</td><td>test_forward_compile_identity.py</td><td>1289786</td><td>test1 PASSED; test2 FAILED; test3 see log</td></tr>
+      <tr><td>head</td><td>test_forward_receipt_raster.py</td><td>pending</td><td>pending</td></tr>
+      <tr><td>head</td><td>test_forward_compile_identity.py</td><td>pending</td><td>pending</td></tr>
+    </tbody>
+  </table>
+</section>

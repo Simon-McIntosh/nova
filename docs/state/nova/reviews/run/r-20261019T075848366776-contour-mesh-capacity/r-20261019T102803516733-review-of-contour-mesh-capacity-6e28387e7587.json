@@ -1,0 +1,83 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [
+    {
+      "failure_condition": "Independent of the value under test: the assertion is satisfied by the real ITER trace geometry, and reinstating the regression it guards makes it fail. logs/negative_control.log:1489 shows the record test raising 'contour mesh vertex capacity 231 is below the 247 the geometry holds' for all 8 records once the fixed formula is restored at the from_cells call site, so the assertion reddens on exactly the capacity-formula regression.",
+      "lines": "tests/equilibrium/test_topology_contour_mesh_capacity.py:122-128"
+    },
+    {
+      "failure_condition": "pytest.raises(ContourMeshOverflow) is the guard and is independent: it reddens if build_contour_mesh returns a blanked mesh instead of refusing, which is the pre-change behaviour the old test_over_capacity_sets_overflow_flag asserted. The trailing asserts refusal.value.capacity == cap and str(cap) in str(refusal.value) compare against cap, the same value the test passed in, so they hold for any capacity the code echoes back and cannot redden on their own.",
+      "lines": "tests/test_contour_tree_mesh.py:139-142"
+    },
+    {
+      "failure_condition": "The named refusal's message content is checked by str(error.required) in str(error), where required is produced by the code under test and is not the input, so it is independent; but error.capacity == 3 and the \"3\" in str(error) half compare against the literal 3 the test passed as vertex_capacity, so those two sides move together and neither can redden on a capacity-adjacent regression.",
+      "lines": "tests/equilibrium/test_topology_contour_mesh_capacity.py:150-153"
+    }
+  ],
+  "call_sites": [
+    "nova/equilibrium/topology.py:2471 TopologyGeometry.from_cells calls build_contour_mesh",
+    "nova/equilibrium/topology.py:2972 reads geometry.contour_mesh",
+    "nova/equilibrium/topology.py:3063 reads geometry.contour_mesh",
+    "nova/equilibrium/topology.py:3206 reads mesh.overflow"
+  ],
+  "completed_at": "2026-10-19T10:39:23.989Z",
+  "dispatched_at": "2026-10-19T10:28:39Z",
+  "findings": [
+    {
+      "file": "tests/test_contour_tree_mesh.py",
+      "line": "133",
+      "severity": "blocking",
+      "text": "blocking: the fix commit (6c0567bf3) rewrites test_over_capacity_sets_overflow_flag into test_over_capacity_refuses_with_named_error in a file outside the node's declared write paths, which the brief and the node SPEC ('deviation is a blocker to report') forbid. The edit is genuinely required - the old test asserted the blanking behaviour the change removes, so the head arm cannot be green without it - but it was made without a scope grant and needs coordinator adjudication before the node lands. The manifest acknowledges it under evidence_inputs."
+    },
+    {
+      "file": "nova/equilibrium/contour_tree_mesh.py",
+      "line": "42",
+      "severity": "follow-on",
+      "text": "follow-on: DEFAULT_VERTEX_CAPACITY, DEFAULT_EDGE_CAPACITY and DEFAULT_TRIANGLE_CAPACITY (contour_tree_mesh.py:42-44) become unreferenced once the signature defaults change to None at contour_tree_mesh.py:319-321; nothing in the repository reads them (grep over nova/, apps/, scripts/), so they are dead names that still read as the function's defaults."
+    },
+    {
+      "file": "nova/equilibrium/contour_tree_mesh.py",
+      "line": "374",
+      "severity": "follow-on",
+      "text": "follow-on: build_contour_mesh now returns overflow=False unconditionally (contour_tree_mesh.py:374), so the ContourMesh.overflow field (contour_tree_mesh.py:181) is constant and the consumer branches on it at nova/equilibrium/topology.py:3206 and in scripts/prototypes are dead; the field is left in the pytree aux, so it also still varies nothing across a trace."
+    },
+    {
+      "file": "tests/equilibrium/test_topology_contour_mesh_capacity.py",
+      "line": "37",
+      "severity": "follow-on",
+      "text": "follow-on: TRACE_LIBRARY is an absolute path into another checkout, /home/ITER/mcintos/Code/imas-efit/tests/unit/fortran/data/boundary_level, so the checked-in test only exercises anything on this workstation; it is skipif-guarded (lines 41-45, 126) so it never fails elsewhere, but the per-record assertion is silently a no-op on any other machine."
+    },
+    {
+      "file": "docs/research/contour-mesh-capacity.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the research note and evidence fragment carry no figure. The user mandate requires a graphic wherever it would improve understanding, and the defect is a geometric one - a wall whose clipped triangulation adds more vertices than the tree centres, over a declared capacity - which a single poloidal panel of the carrier beside the wall would show directly."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "nova/equilibrium/topology.py:2471 (TopologyGeometry.from_cells, the production builder call), nova/equilibrium/topology.py:2972 and nova/equilibrium/topology.py:3063 (read geometry.contour_mesh), nova/equilibrium/topology.py:3206 (mesh.overflow consumer); no production caller outside topology.py resolves build_contour_mesh, and the remaining callers are scripts/prototypes.",
+    "diff": "Read commit by commit against base 6cce876e: 6c0567bf3 adds ContourMeshOverflow and _declared_capacity, factors _clipped_carrier out of build_contour_mesh, changes the capacity defaults to None, removes the blanking branch, drops the fixed formula from from_cells and adds the empty-carrier refusal, and edits both test files; cb404e951, 79a695ace, eae7bcb74 and 6e28387e7 are the research note and evidence fragment. Six files, five inside the declared scope and tests/test_contour_tree_mesh.py outside it.",
+    "done_when": "brief.txt done_when (1) and (2) land: the capacity is read off the carrier (contour_tree_mesh.py:68-75, 322-347) rather than a formula, and an overflow raises ContourMeshOverflow (contour_tree_mesh.py:45-64) stating both counts ('contour mesh vertex capacity 4 is below the 106 the geometry holds'). (1)'s per-record measure is asserted by tests/equilibrium/test_topology_contour_mesh_capacity.py:122-128 over the 8 imas-efit ITER traces, and (3)'s suite arms are recorded in the manifest's baseline_suite/after_suite over the three named files; the base arm's evidence that the record test fails without the fix is supplied by the negative control, not by the base arm, which collects the new file as one error.",
+    "goal": "The node's goal is 'Size the topology contour mesh from its geometry and refuse an overflow'; nova/equilibrium/contour_tree_mesh.py:322-347 sizes a capacity left None from the carrier the geometry produced and raises ContourMeshOverflow when a declared capacity is smaller, and nova/equilibrium/topology.py:2482 no longer passes the fixed formula, so the goal is met.",
+    "manifest": "Read; it states status complete, records the three-arm gate (base 5 failed/34 passed/9 errors, head 5 failed/43 passed/7 errors, control 13 failed/35 passed/7 errors) with its log paths, and itself flags the out-of-scope edit to tests/test_contour_tree_mesh.py as needing a coordinator scope decision.",
+    "write_paths": "Read the brief's granted paths and the manifest's changed_paths: nova/equilibrium/topology.py, nova/equilibrium/contour_tree_mesh.py, tests/equilibrium/test_topology_contour_mesh_capacity.py, docs/research/contour-mesh-capacity.html and docs/evidence/fragments/converged-forward-solve/contour-mesh-capacity.html are inside them, but tests/test_contour_tree_mesh.py (the fix commit's 26-line edit) is outside the declared write paths."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261019T102803516733-review-of-contour-mesh-capacity-6e28387e7587",
+  "reviewed_base_sha": "6cce876e3b56347f3fe02de2186e2d8e42d275ac",
+  "reviewed_head_sha": "6e28387e75874dfb7d533365ca49b5c2b06901b7",
+  "reviewed_run_brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T075848366776-contour-mesh-capacity/brief.txt",
+  "reviewed_run_id": "r-20261019T075848366776-contour-mesh-capacity",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 14,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 13
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T10:35:25.548375+00:00"
+}

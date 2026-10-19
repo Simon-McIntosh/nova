@@ -1,0 +1,80 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "scripts/prototypes/certified_carrier_export/export_records.py:main",
+    "scripts/prototypes/certified_carrier_export/panels.py:panel"
+  ],
+  "completed_at": "2026-10-19T13:32:57.401Z",
+  "dispatched_at": "2026-10-19T13:13:53Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T080049312557-certified-carrier-export/manifest.md",
+      "line": 43,
+      "severity": "blocking",
+      "text": "blocking: `negative_control_log: NEG_LOG_PATH` is a literal placeholder, not a path a reader can open, so the red-control evidence cannot be admitted. The `tests.negative_control` block at manifest.md:34 also claims revision 055d84935, but no complete red log covers that revision: the two runs at 055d84935 (logs/gate-negative-control-130430.log and -130839.log) are truncated after the header and one 'F' with no EXIT= line, while the only complete red control (logs/gate-negative-control-125727.log, exit 1, 2 failed 2 passed) ran at 4ffbc6adf. The pointer must name a readable red log at a revision whose run actually completed."
+    },
+    {
+      "file": "scripts/prototypes/certified_carrier_export/test_export_records.py",
+      "line": 65,
+      "severity": "follow-on",
+      "text": "follow-on: this assertion compares the re-read axis against `record.axis_r`/`record.axis_z`, which export_records.py:243-244 stored from that very reading (`replace(provisional, axis_r=float(axis[0]), axis_z=float(axis[1]))`), so the two sides move together and reverting the read leaves the assertion true; it is not independent of the value under test."
+    },
+    {
+      "file": "scripts/prototypes/certified_carrier_export/test_export_records.py",
+      "line": 69,
+      "severity": "follow-on",
+      "text": "follow-on: `abs(boundary - record.fed_back_psi) <= STORED_TOLERANCE` compares the re-read boundary level against `record.fed_back_psi`, which export_records.py:247 stored from the same read's `boundary_flux`, so both sides derive from the value under test and the assertion cannot redden on a read regression."
+    },
+    {
+      "file": "scripts/prototypes/certified_carrier_export/export_records.py",
+      "line": 46,
+      "severity": "follow-on",
+      "text": "follow-on: runtime producer code imports the private helper `_analytic_inputs` from the test module `tests/equilibrium/test_topology_read.py`, coupling the export to a test file the brief fenced off; the analytic-input source belongs to a support owner rather than a test module."
+    },
+    {
+      "file": "scripts/prototypes/certified_carrier_export/export_records.py",
+      "line": 143,
+      "severity": "follow-on",
+      "text": "follow-on: `topology.TopologyConvention.from_cocos(COCOS, float(record.polarity))` duplicates the existing owner `scripts/prototypes/efit_field_swap/orientation.py:48 read_convention(polarity=...)`, which does the same derivation plus its own polarity validation, so the module re-implements an owned capability instead of calling it; `record_geometry` at line 130 similarly re-derives the `(ring,)` wall tuple where the owner `scripts/prototypes/efit_field_swap/crosscheck.py:821 wall_units(record)` already builds it."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T080049312557-certified-carrier-export/manifest.md",
+      "line": 32,
+      "severity": "follow-on",
+      "text": "follow-on: the baseline_suite `command` carries the unsubstituted placeholder `<base-tree>` (`PYTHONPATH=<base-tree> ...`), so the recorded command is not the literal runnable command the delivery contract requires; the resolved path appears only in the log header of logs/gate-baseline-124302.log."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read commit by commit against 34d4c304b (ea26beeeb producer+test+panels, fb8e8773b panels, c1e87c413 docs, 37d5b1a91 gate.sh+refusal tightening, 4ffbc6adf docs, 7408fb784 and 055d84935 evidence); eight files, 6644 insertions, all inside the declared scope, and the two rendered panels inspect as line contours with the wall, both null sets and the boundary contour.",
+    "done_when": "the brief's three clauses are (1) both carriers as version-2 records read from the fixture store, (2) a README stating the boundary decision, (3) a committed round-trip test with one panel per record; all three are present (export_records.py, exports/README.md, test_export_records.py, docs/figures/converged-forward-solve/certified-carrier-export), and the round-trip gate measures clause 3, but the negative-control pointer that would evidence the gate's ability to fail is unusable at manifest.md:43.",
+    "goal": "the goal is to export one limited and one diverted nova certified analytic carrier as imas-efit version-2 boundary trace records; export_records.py:149 build_export and :252 write_export produce both records and docs/research/certified-carrier-export.html carries the decision table, so the goal is met.",
+    "manifest": "read; it records status complete, seven commits, a baseline of 2 collection errors at exit 2 and an after arm of 4 passed at exit 0, but `negative_control_log: NEG_LOG_PATH` at line 43 is a placeholder naming no file and the negative_control block claims a revision (055d84935) no complete red log covers.",
+    "write_paths": "the source node was fenced to scripts/prototypes/certified_carrier_export, docs/research/certified-carrier-export.html, docs/evidence/fragments/converged-forward-solve/certified-carrier-export.html and docs/figures/converged-forward-solve/certified-carrier-export plus run-dir logs and exports; all eight files in git diff 34d4c304b..055d84935 are inside those paths."
+  },
+  "justifications": {
+    "durability": "test_export_records.py:71-72 asserts the re-read axis against the analytic certificate axis (an independent source) and :92-93 asserts the negated grid is refused with TopologyReason.NO_QUALIFIED_AXIS, both of which redden on a read regression, but :65-67 and :69 compare the re-read against record.axis_r/axis_z and record.fed_back_psi, which the producer stored from that same reading.",
+    "evidence": "the after arm (4 passed, exit 0, logs/gate-after-125727.log with revision and EXIT lines) records the round trip and the baseline arm (exit 2) is recorded, but the declared negative_control_log is the placeholder NEG_LOG_PATH and the claimed revision 055d84935 has only truncated logs, so the gate's ability to fail is not citable.",
+    "fit": "export_records.py follows the sibling prototype idiom with capability-named symbols and no plan label, but line 46 imports the private `_analytic_inputs` from the test module tests/equilibrium/test_topology_read.py into runtime code.",
+    "goal_fidelity": "export_records.py:149 build_export builds and :252 write_export writes both carriers with the 65x65 analytic psi, the read axis, the polarity and the per-loop wall, and docs/research/certified-carrier-export.html states the limited/diverted decision and the certificate bounds.",
+    "reuse": "the module correctly imports the codec owner's symbols (trace_record.py:40-44 TraceRecord, _closed_ring, write_trace_record) and reuses lattice, TraceSplineField, cached_carrier and certificate_field, but read_record (line 143) re-derives the convention that orientation.py:48 read_convention owns and record_geometry (line 130) re-derives the wall tuple that crosscheck.py:821 wall_units owns.",
+    "scope_discipline": "every one of the eight files in git diff 34d4c304b..055d84935 (producer, gate.sh, test, panels, two docs, two SVGs) is inside the declared write paths and no out-of-scope path is touched."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261019T131228312517-review-of-certified-carrier-export-055d84935e91",
+  "review_text": "VERDICT goal: the goal is to export one limited and one diverted nova certified analytic carrier as imas-efit version-2 boundary trace records; export_records.py:149 build_export and :252 write_export produce both records and docs/research/certified-carrier-export.html carries the decision table, so the goal is met.\nVERDICT done_when: the brief's three clauses are (1) both carriers as version-2 records read from the fixture store, (2) a README stating the boundary decision, (3) a committed round-trip test with one panel per record; all three are present (export_records.py, exports/README.md, test_export_records.py, docs/figures/converged-forward-solve/certified-carrier-export), and the round-trip gate measures clause 3, but the negative-control pointer that would evidence the gate's ability to fail is unusable at manifest.md:43.\nVERDICT write_paths: the source node was fenced to scripts/prototypes/certified_carrier_export, docs/research/certified-carrier-export.html, docs/evidence/fragments/converged-forward-solve/certified-carrier-export.html and docs/figures/converged-forward-solve/certified-carrier-export plus run-dir logs and exports; all eight files in git diff 34d4c304b..055d84935 are inside those paths.\nVERDICT manifest: read; it records status complete, seven commits, a baseline of 2 collection errors at exit 2 and an after arm of 4 passed at exit 0, but `negative_control_log: NEG_LOG_PATH` at line 43 is a placeholder naming no file and the negative_control block claims a revision (055d84935) no complete red log covers.\nVERDICT diff: read commit by commit against 34d4c304b (ea26beeeb producer+test+panels, fb8e8773b panels, c1e87c413 docs, 37d5b1a91 gate.sh+refusal tightening, 4ffbc6adf docs, 7408fb784 and 055d84935 evidence); eight files, 6644 insertions, all inside the declared scope, and the two rendered panels inspect as line contours with the wall, both null sets and the boundary contour.\nCALL_SITES: scripts/prototypes/certified_carrier_export/export_records.py:main, scripts/prototypes/certified_carrier_export/panels.py:panel\nSCORE goal_fidelity: 18\nSCORE evidence: 13\nSCORE scope_discipline: 19\nSCORE durability: 14\nSCORE fit: 14\nSCORE reuse: 11\nJUSTIFICATION goal_fidelity: export_records.py:149 build_export builds and :252 write_export writes both carriers with the 65x65 analytic psi, the read axis, the polarity and the per-loop wall, and docs/research/certified-carrier-export.html states the limited/diverted decision and the certificate bounds.\nJUSTIFICATION evidence: the after arm (4 passed, exit 0, logs/gate-after-125727.log with revision and EXIT lines) records the round trip and the baseline arm (exit 2) is recorded, but the declared negative_control_log is the placeholder NEG_LOG_PATH and the claimed revision 055d84935 has only truncated logs, so the gate's ability to fail is not citable.\nJUSTIFICATION scope_discipline: every one of the eight files in git diff 34d4c304b..055d84935 (producer, gate.sh, test, panels, two docs, two SVGs) is inside the declared write paths and no out-of-scope path is touched.\nJUSTIFICATION durability: test_export_records.py:71-72 asserts the re-read axis against the analytic certificate axis (an independent source) and :92-93 asserts the negated grid is refused with TopologyReason.NO_QUALIFIED_AXIS, both of which redden on a read regression, but :65-67 and :69 compare the re-read against record.axis_r/axis_z and record.fed_back_psi, which the producer stored from that same reading.\nJUSTIFICATION fit: export_records.py follows the sibling prototype idiom with capability-named symbols and no plan label, but line 46 imports the private `_analytic_inputs` from the test module tests/equilibrium/test_topology_read.py into runtime code.\nJUSTIFICATION reuse: the module correctly imports the codec owner's symbols (trace_record.py:40-44 TraceRecord, _closed_ring, write_trace_record) and reuses lattice, TraceSplineField, cached_carrier and certificate_field, but read_record (line 143) re-derives the convention that orientation.py:48 read_convention owns and record_geometry (line 130) re-derives the wall tuple that crosscheck.py:821 wall_units owns.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T080049312557-certified-carrier-export/manifest.md:43 blocking: `negative_control_log: NEG_LOG_PATH` is a literal placeholder, not a path a reader can open, so the red-control evidence cannot be admitted. The `tests.negative_control` block at manifest.md:34 also claims revision 055d84935, but no complete red log covers that revision: the two runs at 055d84935 (logs/gate-negative-control-130430.log and -130839.log) are truncated after the header and one 'F' with no EXIT= line, while the only complete red control (logs/gate-negative-control-125727.log, exit 1, 2 failed 2 passed) ran at 4ffbc6adf. The pointer must name a readable red log at a revision whose run actually completed.\nFINDING scripts/prototypes/certified_carrier_export/test_export_records.py:65 follow-on: this assertion compares the re-read axis against `record.axis_r`/`record.axis_z`, which export_records.py:243-244 stored from that very reading (`replace(provisional, axis_r=float(axis[0]), axis_z=float(axis[1]))`), so the two sides move together and reverting the read leaves the assertion true; it is not independent of the value under test.\nFINDING scripts/prototypes/certified_carrier_export/test_export_records.py:69 follow-on: `abs(boundary - record.fed_back_psi) <= STORED_TOLERANCE` compares the re-read boundary level against `record.fed_back_psi`, which export_records.py:247 stored from the same read's `boundary_flux`, so both sides derive from the value under test and the assertion cannot redden on a read regression.\nFINDING scripts/prototypes/certified_carrier_export/export_records.py:46 follow-on: runtime producer code imports the private helper `_analytic_inputs` from the test module `tests/equilibrium/test_topology_read.py`, coupling the export to a test file the brief fenced off; the analytic-input source belongs to a support owner rather than a test module.\nFINDING scripts/prototypes/certified_carrier_export/export_records.py:143 follow-on: `topology.TopologyConvention.from_cocos(COCOS, float(record.polarity))` duplicates the existing owner `scripts/prototypes/efit_field_swap/orientation.py:48 read_convention(polarity=...)`, which does the same derivation plus its own polarity validation, so the module re-implements an owned capability instead of calling it; `record_geometry` at line 130 similarly re-derives the `(ring,)` wall tuple where the owner `scripts/prototypes/efit_field_swap/crosscheck.py:821 wall_units(record)` already builds it.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T080049312557-certified-carrier-export/manifest.md:32 follow-on: the baseline_suite `command` carries the unsubstituted placeholder `<base-tree>` (`PYTHONPATH=<base-tree> ...`), so the recorded command is not the literal runnable command the delivery contract requires; the resolved path appears only in the log header of logs/gate-baseline-124302.log.",
+  "reviewed_base_sha": "34d4c304b292f15b891d467da56e2327d0d4f3a5",
+  "reviewed_head_sha": "055d84935e912083b6a18239da115534c1c381be",
+  "reviewed_run_id": "r-20261019T080049312557-certified-carrier-export",
+  "scores": {
+    "durability": 14,
+    "evidence": 13,
+    "fit": 14,
+    "goal_fidelity": 18,
+    "reuse": 11,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T13:38:40.532524+00:00"
+}

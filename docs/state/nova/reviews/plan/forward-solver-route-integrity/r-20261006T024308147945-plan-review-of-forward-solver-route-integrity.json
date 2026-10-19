@@ -16,7 +16,24 @@
   "plan_slug": "forward-solver-route-integrity",
   "plan_version": 120,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "duplicate_owner-1",
+      "reason": "Outside this build, which dispatches section 5 only. The finding still holds for section 4: whoever builds section 4 should point its worker at cache_reuse_summary.served_keys, as owner comment c-20261006T023247151541 already says.",
+      "when": "2026-10-19T07:34:56.061752+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "Outside this build, which dispatches section 5 only. The finding still holds for section 4: whoever builds section 4 should point its worker at cache_reuse_summary.served_keys, as owner comment c-20261006T023247151541 already says.",
+      "when": "2026-10-19T07:34:56.061752+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/forward-solver-route-integrity/r-20261006T024308147945-plan-review-of-forward-solver-route-integrity.json",
   "review_run_id": "r-20261006T024308147945-plan-review-of-forward-solver-route-integrity",
   "reviewed_blob_sha": "0ac64afbf549994c5b89494e2b415c022d909f21",
   "rubric": "design",

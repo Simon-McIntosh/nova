@@ -139,22 +139,20 @@ def cache_guard_receipt(log_path: Path) -> dict:
     return cache_guard_receipt_text(text)
 
 
-_MAXIMUM_LOG_LINE_CHARACTERS = 20000
 _DROPPED_LOG_PREFIXES = ("CACHE_GUARD_PREWARM=",)
 
 
 def trim_log(text: str) -> str:
-    """Return run output with the oversized pre-warm inventory dropped.
+    """Return run output with the pre-warm inventory dropped.
 
     The cache guard prints one `CACHE_GUARD_PREWARM=` line carrying the whole
     pre-warm inventory, which reaches a couple of megabytes and buries the rows
-    a reader needs.  The receipt line is small and is kept.
+    a reader needs.  Only that prefix is dropped: the receipt line grows with
+    the number of programs and is the record the arm is read from, so a length
+    threshold must never select it.
     """
     kept = [
-        line
-        for line in text.splitlines()
-        if not line.startswith(_DROPPED_LOG_PREFIXES)
-        and len(line) <= _MAXIMUM_LOG_LINE_CHARACTERS
+        line for line in text.splitlines() if not line.startswith(_DROPPED_LOG_PREFIXES)
     ]
     return "\n".join(kept) + "\n"
 

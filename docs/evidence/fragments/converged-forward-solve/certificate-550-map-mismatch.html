@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="certificate-550-map-mismatch">
+<meta name="plan-title" content="Certified carrier map derivative localization">
+<meta name="plan-summary" content="The limited carrier's first-order map mismatch starts at a no-saddle boundary-level clamp in the read kernel.">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s5">
+<meta name="plan-recorded-at" content="2026-10-19">
+<meta name="plan-verdict" content="partial">
+<title>Certified carrier map derivative localization | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<h1 id="certificate-550-map-mismatch-landing">Certified carrier map derivative localization</h1>
+<p id="certificate-550-map-mismatch-summary">H200 job 1290122 published a new 553-cell limited carrier entry in 125.451 s and reproduced the stalled scaled residual at <strong>0.0012319931459888489</strong>. The base boundary-flux JVP was −0.00691054971918 against centered −0.00345527699785 at h = 1e-5. The limited read has one axis root; <code>scripts/prototypes/fast_map_production/kernel.py</code> padded a dummy zero saddle and maximized its level with the wall level even though no saddle was live. That clamp created a kink inherited by Bell area, cut-cell current and membership at cells 61 and 508. The path-weight handoff added no mismatch; the split polygon branch was inactive.</p>
+<p id="certificate-550-map-mismatch-repair">The read now selects the wall level unless the boundary is the live saddle. H200 job 1290384 measures boundary-flux JVP −0.00691054971918 against centered −0.00691055048740. Its first Newton correction has Taylor slope <strong>1.99911707572</strong>; three accepted corrections reach <strong>7.64538418985e-15</strong> against the unchanged 1e-12 limit. In one H200 job, the limited 550 and 2,105-cell requests converge at 5.91900711472e-15 and <strong>1.64578984276e-14</strong>; the diverted 550 and 2,098-cell requests stall at 0.00155033572742 and 0.00362742601022 after nine accepted corrections each. Their three missing H200 carrier entries were published anew in 262.526, 485.366 and 445.832 s build wall respectively. The paired sirius suite adds zero failures: base 27 passes; head 27 passes and one GPU-only skip. The H200 convergence regression passes, while its restored-clamp mutation fails at 0.0012319931459882324. <a href="/nova/research/certificate-550-convergence.html#certificate-550-map-mismatch">Full stage table and repair receipt</a>.</p>
+</main></body></html>

@@ -273,7 +273,7 @@ def run(args):
         state = mapped(scaled.reshape(reference.shape) * scale, *args)
         return (state.moment_residual / scale).reshape(-1)
 
-    def inspect_read(moments):
+    def raw_read(moments):
         cached = fixed_points._CachedField(
             window.mesh, window.lookup, window.rows, moments, window.exterior
         )
@@ -293,6 +293,10 @@ def run(args):
         reading = selected_read(
             FusedField(cached, coefficient), found, geometry, convention, policy
         )
+        return reading, found
+
+    def inspect_read(moments):
+        reading, found = raw_read(moments)
         jax.block_until_ready(reading)
         return {
             "support_ids": np.flatnonzero(np.asarray(reading.selected_cells)).tolist(),
@@ -731,6 +735,72 @@ def run(args):
                 "threshold": original_merit,
                 "rows": rows,
             }
+            if args.stage_probe:
+                from scripts.prototypes.fast_read.ordinary_cut import (
+                    _split_polygons,
+                    bell_moments as cut_moments,
+                )
+                from scripts.prototypes.sub_millisecond.measure_bell_cut import (
+                    bell_moments as ordinary_moments,
+                    bell_polygon,
+                )
+                from scripts.prototypes.sub_millisecond.measure_wall_march import (
+                    polygon_area,
+                )
+
+                cells = jnp.asarray((61, 508))
+
+                def stages(scaled):
+                    reading, _ = raw_read(scaled.reshape(reference.shape) * scale)
+                    polygon, count, _ = bell_polygon(
+                        geometry, reading, convention.sigma, 4
+                    )
+                    area = polygon_area(polygon, count)[cells]
+                    ordinary, _ = ordinary_moments(
+                        geometry, reading, profile, convention.sigma, 4
+                    )
+                    split, counts, _, four = _split_polygons(
+                        geometry, reading, convention.sigma
+                    )
+                    split_area = jnp.sum(
+                        jax.vmap(polygon_area, in_axes=(1, 1), out_axes=1)(
+                            split, counts
+                        ),
+                        axis=1,
+                    )[cells]
+                    combined, _, _ = cut_moments(
+                        geometry, reading, profile, convention.sigma
+                    )
+                    return {
+                        "bell_area": area,
+                        "bell_moments": ordinary[cells],
+                        "split_area": split_area,
+                        "cut_moments": combined[cells],
+                        "membership": reading.membership[cells],
+                        "geometric_membership": reading.geometric_membership[cells],
+                        "path_weight": reading.path_weight[cells],
+                        "four_crossings": four[cells].astype(jnp.float64),
+                        "boundary_flux": reading.boundary_flux[None],
+                    }
+
+                origin = point.reshape(-1)
+                direction = jnp.asarray(step)
+                base_stage, jvp_stage = jax.jvp(stages, (origin,), (direction,))
+                probes = {}
+                for size in (1e-4, 1e-5, 1e-6):
+                    positive = stages(origin + size * direction)
+                    negative = stages(origin - size * direction)
+                    probes[str(size)] = {
+                        key: {
+                            "base": np.asarray(value).tolist(),
+                            "jvp": np.asarray(jvp_stage[key]).tolist(),
+                            "central": np.asarray(
+                                (positive[key] - negative[key]) / (2 * size)
+                            ).tolist(),
+                        }
+                        for key, value in base_stage.items()
+                    }
+                row["step_diagnosis"]["stage_probe"] = probes
             mismatch = (vector - base_vector - amount * tangent).reshape(
                 reference.shape
             )
@@ -1097,9 +1167,10 @@ def run(args):
         "moments": np.asarray(point * scale).tolist(),
         "roots": np.asarray(mapped(point * scale, *operands).roots).tolist(),
     }
-    result["panel"] = terminal_panel(
-        point, history[-1]["residual"], result["converged"]
-    )
+    if not args.no_panel:
+        result["panel"] = terminal_panel(
+            point, history[-1]["residual"], result["converged"]
+        )
     save(output, result)
     require_solve(result)
 
@@ -1117,6 +1188,7 @@ def main():
     parser.add_argument("--merit", choices=("sup", "two"), default="sup")
     parser.add_argument("--taylor", action="store_true")
     parser.add_argument("--diagnose-step", action="store_true")
+    parser.add_argument("--stage-probe", action="store_true")
     parser.add_argument("--exact-roots", action="store_true")
     parser.add_argument("--omit-saddle-derivative", action="store_true")
     parser.add_argument("--inspect-support", action="store_true")
@@ -1127,6 +1199,7 @@ def main():
     parser.add_argument("--compare", action="store_true")
     parser.add_argument("--compare-warm", action="store_true")
     parser.add_argument("--panel-only", action="store_true")
+    parser.add_argument("--no-panel", action="store_true")
     parser.add_argument("--probe", action="store_true")
     parser.add_argument("--map-only", action="store_true")
     parser.add_argument("--original-read", action="store_true")

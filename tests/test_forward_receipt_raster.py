@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium import ForwardProfile
@@ -11,6 +12,10 @@ from nova.equilibrium.stencil_mesh import StencilMesh
 from scripts.analytic_oracle_fixtures import measure as oracle_fixture
 
 
+# Slow: the case builds an oracle machine and runs a full production request-seam
+# solve, which exceeds the default lane's per-test bound on the host CPU; the
+# receipt assertions below are unchanged.
+@pytest.mark.slow
 def test_reduced_hex_request_receipt_records_absent_raster_flux() -> None:
     """The public request seam retains a receipt on the reduced hex oracle."""
 

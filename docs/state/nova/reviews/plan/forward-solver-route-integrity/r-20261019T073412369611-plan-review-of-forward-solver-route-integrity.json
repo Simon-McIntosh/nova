@@ -62,9 +62,22 @@
       "finding": "reasoning-2",
       "reason": "",
       "when": "2026-10-19T08:10:13.044144+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "About section 4's done-when, and this build dispatches section 5 only. Section 4 is built after section 5 lands, and its builder owes the negative control the finding names.",
+      "when": "2026-10-19T08:10:42.459933+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "About section 4's done-when, and this build dispatches section 5 only. Section 4 is built after section 5 lands, and its builder owes the negative control the finding names.",
+      "when": "2026-10-19T08:10:42.459933+00:00"
+    },
     "reasoning-2": {
       "action": "acted",
       "by": "",

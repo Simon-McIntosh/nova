@@ -49,23 +49,34 @@ analytic axis to 1.6&times;10<sup>&minus;7</sup> m and
 
 <h2 id="certified-carrier-export-gate">Gate and delta against the base</h2>
 <p>Fresh processes against base revision <code>34d4c304b</code>, each arm
-running the same test file.</p>
+running the same test file, driven by
+<code>scripts/prototypes/certified_carrier_export/gate.sh</code>. Every log
+opens with the revision, the tree, the date and the exact command, and ends
+with an <code>EXIT</code> line.</p>
 <table>
 <thead><tr><th>arm</th><th>result</th><th>reading</th></tr></thead>
 <tbody>
 <tr><td><code>baseline_suite</code> at the base</td><td>0 passed, 2 collection errors, exit 2</td><td>the export module does not exist at the base, so the test module cannot import it. Intended delta, not a regression.</td></tr>
-<tr><td><code>after_suite</code> at the head</td><td>4 passed, exit 0</td><td>both carriers round-trip; both negated grids are refused.</td></tr>
+<tr><td><code>after_suite</code> at the head</td><td>4 passed, exit 0</td><td>both carriers round-trip; both negated grids are refused with the named reason.</td></tr>
+<tr><td>negative control at the head, flux negated on the way to disk</td><td>2 failed, 2 passed, exit 1</td><td><code>test_round_trip[limited]</code> and <code>test_round_trip[diverted]</code> fail, which is what makes the passing arm evidence rather than a path that happens to succeed.</td></tr>
 </tbody>
 </table>
 <p>Delta: four tests added, all passing; zero failures added.</p>
 
 <h2 id="certified-carrier-export-negative-control">Negative control</h2>
-<p>Negating the exported flux grid must make the round-trip test refuse the
-record on its declared COCOS and polarity rather than silently reproduce the
-decision. Both records are refused: the re-read is either invalid or returns a
-boundary class different from the one the export declared. A green round trip
-on the unmodified record therefore shows the polarity guard fires, not merely
-that some path succeeded.</p>
+<p>A record whose flux sign disagrees with the polarity it declares is refused
+with the refusal's own type, <code>NO_QUALIFIED_AXIS</code> and an unqualified
+axis, rather than by a disjunction over validity and class. Declaring the
+opposite polarity on the same negated grid restores the read to the same
+boundary class with an equal and opposite level, so the guard is the declared
+COCOS-17 orientation rather than a broken record. The gate drives that state
+through the producer (<code>NOVA_CERTIFIED_EXPORT_MUTATION=negate-psi</code>),
+so the round-trip test discovers the corruption and both tolerances are
+tightened to a stated ~60&times; margin over the measured agreement: axis
+1&times;10<sup>&minus;5</sup> m against a measured
+1.6&times;10<sup>&minus;7</sup> m, boundary
+1&times;10<sup>&minus;7</sup> Wb against a measured
+1.4&times;10<sup>&minus;9</sup> Wb.</p>
 
 <h2 id="certified-carrier-export-artifacts">Artifacts</h2>
 <ul>

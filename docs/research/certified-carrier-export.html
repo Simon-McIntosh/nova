@@ -69,6 +69,16 @@
         and no reader has to know the machine.
       </p>
       <p>
+        The store request and the machine's cell count are different numbers.
+        The published request for the coarse certificate machine is the
+        negative sentinel <code>FIXTURE_REQUESTS["coarse"]</code>
+        (&minus;500), while the machine that request builds is the 550-cell
+        carrier this export takes its wall from. The signed request belongs to
+        the carrier's identity digest, so &minus;500 and 500 are two
+        identities and only the signed one is the machine the certificate
+        booking gate published.
+      </p>
+      <p>
         A limited record admits no saddle, and the codec stores only reals, so
         its saddle and wall levels repeat the boundary flux. Writing a NaN
         there is not merely uninformative: the codec's real formatter has no
@@ -136,9 +146,11 @@
           <strong>Limited record.</strong> The static reactor carrier's
           analytic flux as unfilled line contours, with the read axis at
           (6.200, 0.000) m (solid triangle) and the boundary level
-          (2.23&times;10<sup>&minus;14</sup> Wb) drawn in its own style. No
-          saddle is admitted; the boundary is the outboard wall contact at
-          (7.8014, 0.0000) m. The wall is the record's own per-loop ring.
+          (2.23&times;10<sup>&minus;14</sup> Wb) drawn in its own style. The
+          boundary is the outboard wall contact and runs along the wall there,
+          so the contact point (7.8014, 0.0000) m is marked separately as a
+          hollow circle in the contact style; no saddle is admitted. The wall
+          is the record's own per-loop ring.
         </figcaption>
       </figure>
       <figure>
@@ -148,10 +160,11 @@
           <strong>Diverted record.</strong> The single-null carrier's analytic
           flux as unfilled line contours, with the read axis at
           (1.7871, 0.0468) m (solid triangle) and the lower saddle at
-          (1.5025, &minus;1.0173) m (filled cross). The boundary level
-          (&minus;1.39&times;10<sup>&minus;9</sup> Wb) is drawn in its own
-          style and passes through the saddle. The wall is the record's own
-          per-loop ring.
+          (1.5025, &minus;1.0173) m (filled cross) — the read admits one saddle.
+          Its boundary level (&minus;1.39&times;10<sup>&minus;9</sup> Wb) is
+          drawn in its own style and passes through that saddle, and no contact
+          marker is drawn because a diverted boundary is a saddle rather than a
+          wall contact. The wall is the record's own per-loop ring.
         </figcaption>
       </figure>
     </section>
@@ -170,20 +183,38 @@
         <li>polarity is the declared <code>+1</code>; the grid is 65&times;65; one
           wall ring survives the codec;</li>
         <li>the axis matches the axis stored in the record to 1&times;10<sup>&minus;12</sup> m
-          and the analytic certificate axis to 5&times;10<sup>&minus;2</sup> m;</li>
+          and the analytic certificate axis to 1&times;10<sup>&minus;5</sup> m,
+          a stated ~60&times; margin over the measured 1.6&times;10<sup>&minus;7</sup> m
+          (limited) and 1.1&times;10<sup>&minus;7</sup> m (diverted) agreement;</li>
         <li>the boundary level matches the record's own fed-back level to
           1&times;10<sup>&minus;12</sup> Wb and sits within
-          1&times;10<sup>&minus;6</sup> Wb of the certificate bound;</li>
+          1&times;10<sup>&minus;7</sup> Wb of the certificate bound, a stated
+          ~70&times; margin over the measured 2.2&times;10<sup>&minus;14</sup> Wb
+          (limited) and 1.4&times;10<sup>&minus;9</sup> Wb (diverted) agreement;</li>
         <li>the re-read class equals the class the export declared.</li>
       </ul>
       <p>
         <strong>Negative control.</strong> Negating the exported flux grid must
-        make the round-trip test <em>refuse</em> the record on its declared
-        COCOS and polarity rather than silently reproduce the decision. Both
-        records are refused: the read is either invalid or returns a different
-        boundary class than the export declared. A green round trip on the
-        unmodified record therefore shows the polarity guard fires, not merely
-        that a path succeeded.
+        make the round trip <em>refuse</em> the record on the polarity it
+        declares, and the refusal is named by its type rather than by a
+        disjunction. Both records refuse with
+        <code>NO_QUALIFIED_AXIS</code> and an unqualified axis; neither returns
+        a different boundary class, and neither is merely invalid for an
+        unstated reason. Declaring the opposite polarity on the same negated
+        grid restores the read — valid, the same boundary class, and a boundary
+        level equal and opposite to the unnegated one — so the guard is the
+        disagreement between the grid's sign and the declared COCOS-17
+        orientation, and a grid of the wrong sign cannot reproduce the decision
+        its own record carries.
+      </p>
+      <p>
+        The gate drives the same state through the record producer rather than
+        through the test: <code>NOVA_CERTIFIED_EXPORT_MUTATION=negate-psi</code>
+        corrupts the flux on its way to disk, so the round-trip test is the
+        thing that discovers the corruption. That arm exits nonzero and names
+        <code>test_round_trip[limited]</code> and
+        <code>test_round_trip[diverted]</code> as its failures, which is the
+        evidence that the round trip can fail.
       </p>
     </section>
 
@@ -191,7 +222,11 @@
       <h2 id="gate">Gate and delta</h2>
       <p>
         The gate runs in fresh processes against the base revision
-        <code>34d4c304b</code>, each arm running the same test file.
+        <code>34d4c304b</code>, each arm running the same test file, driven by
+        <code>scripts/prototypes/certified_carrier_export/gate.sh</code>. Every
+        log opens with the revision, the tree, the date and the exact command
+        and ends with an <code>EXIT</code> line, so a log carries its own
+        verdict.
       </p>
       <table>
         <thead><tr><th>arm</th><th>result</th><th>reading</th></tr></thead>
@@ -205,7 +240,16 @@
           <tr>
             <td><code>after_suite</code> at the head</td>
             <td>4 passed, exit 0</td>
-            <td>both carriers round-trip and both negated grids are refused.</td>
+            <td>both carriers round-trip and both negated grids are refused with
+                the named reason.</td>
+          </tr>
+          <tr>
+            <td>negative control at the head, flux negated on the way to disk</td>
+            <td>2 failed, 2 passed, exit 1</td>
+            <td><code>test_round_trip[limited]</code> and
+                <code>test_round_trip[diverted]</code> fail, which is what makes
+                the passing arm evidence rather than a path that happens to
+                succeed.</td>
           </tr>
         </tbody>
       </table>

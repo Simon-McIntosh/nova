@@ -12,18 +12,22 @@ import pytest
 
 from nova.equilibrium import fixed_points, topology
 from nova.equilibrium.solve_request import TopologyPolicy
-from scripts.prototypes.fast_map_production.kernel import read
+from scripts.prototypes.fast_map_production.kernel import (
+    psi_rounding_enclosure,
+    read,
+)
 
 assert jax.config.jax_enable_x64 is True
 
 
 class DoubleWell:
-    def __init__(self, sign):
+    def __init__(self, sign, offset=0.0):
         self.sign = sign
+        self.offset = offset
 
     def value(self, point):
         x, y = point[0] - 2.0, point[1]
-        return self.sign * (-((x * x - 1.0) ** 2) - y * y + 0.1 * x)
+        return self.sign * (-((x * x - 1.0) ** 2) - y * y + 0.1 * x) + self.offset
 
     def evaluate(self, point):
         value = self.value(point)
@@ -113,3 +117,35 @@ def test_read_refuses_when_no_polarity_extremum(geometry):
     assert not bool(reading.valid)
     assert not bool(reading.qualified)
     assert bool(jnp.all(jnp.isnan(reading.axis)))
+
+
+def test_read_refuses_extremum_within_rounding_enclosure(geometry):
+    """A level closer to its nearest saddle than the fit's rounding is not an axis.
+
+    Adding a large constant background to the double well leaves its stationary
+    roots and their signed persistence unchanged, while the fitted coefficients
+    - and so the binary64 enclosure of the fitted level - grow with the
+    background. At this background the selected extremum's persistence falls
+    inside the enclosure: the two levels are one number in binary64, the root
+    pair is unresolved, and the read must publish no axis. The control below
+    shows the same field with no background is accepted.
+    """
+    convention = topology.TopologyConvention(jnp.asarray(-1.0), jnp.asarray(1.0))
+    policy = TopologyPolicy()
+
+    enclosed = DoubleWell(1.0, offset=1e15)
+    found = roots(enclosed)
+    # The enclosure the read compares against is the fitted-level discrepancy
+    # plus the binary64 rounding bound; at this background both are comparable
+    # to the persistence, which the read must therefore refuse to resolve.
+    enclosure = float(psi_rounding_enclosure(enclosed.sampled_coefficient(geometry)))
+    persistence = float(jnp.abs(found.jet.value[1] - found.jet.value[2]))
+    assert persistence < 4.0 * enclosure, "the near-fold lies at the rounding scale"
+    reading = read(enclosed, found, geometry, convention, policy)
+    assert not bool(reading.valid)
+    assert bool(jnp.all(jnp.isnan(reading.axis)))
+
+    control = DoubleWell(1.0)
+    reading = read(control, roots(control), geometry, convention, policy)
+    assert bool(reading.valid)
+    assert bool(jnp.all(jnp.isfinite(reading.axis)))

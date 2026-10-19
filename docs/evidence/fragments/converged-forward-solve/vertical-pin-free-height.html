@@ -1,0 +1,135 @@
+<section id="vertical-pin-free-height-landing" data-node="vertical-pin-free-height">
+<h2>Why the free vertical-pin request moves its booked height</h2>
+
+<p id="vertical-pin-free-height-determination"><strong>Determination.</strong> At HEAD
+(<code>9beab06a4</code>) the free request does <em>not</em> move its booked height: the
+terminal flux is bit-identical to the seed and the booked height is exactly
+<code>0.6</code>. The recorded <code>3.86e-3</code> offset does not reproduce at HEAD, nor at
+the recorded base revision <code>a711e2b0</code> with the recorded command, nor under a
+one-core or four-core host configuration. The test
+<code>test_one_augmented_newton_program_serves_free_and_pinned_requests</code> passes, both
+alone and as part of its file. Neither party named by the brief is wrong at HEAD: the
+solver holds the unknown the free layout should hold, and the test's expectation is the
+correct physical expectation for this seed.</p>
+
+<h3 id="vertical-pin-free-height-mechanism">Mechanism and measured value</h3>
+
+<p id="vertical-pin-free-height-row">The inactive <code>CurrentCentroidConstraint</code>
+row returns the normalised radial-field unknown itself
+(<code>nova/equilibrium/constraint.py</code>, <code>residual</code>), so
+<code>compensator_step</code> applies <code>step = -row = -unknown</code> and drives the held
+unknown to zero. The carrier's forced sixth row is the pure constant
+<code>VERTICAL_FORCING / ELONGATION² = 0.0308641975</code>, whose gradient in the flux is
+exactly zero, so the least-squares/Krylov Newton increment on the five satisfiable rows is
+exactly zero; the seed already satisfies those five rows, so it is retained unchanged as the
+terminal iterate.</p>
+
+<table id="vertical-pin-free-height-values">
+<caption>Free-request terminal state, HEAD <code>9beab06a4</code>, synthetic augmented route</caption>
+<thead><tr><th>quantity</th><th>seed</th><th>terminal</th></tr></thead>
+<tbody>
+<tr><td>flux (booked moments)</td><td>[1.0, 0.8, 0.24, 1.0, 1.2, 0.96]</td><td>[1.0, 0.8, 0.24, 1.0, 1.2, 0.96]</td></tr>
+<tr><td>held radial-field unknown</td><td>[0.0]</td><td>[0.0]</td></tr>
+<tr><td>booked height</td><td>0.6</td><td>0.6</td></tr>
+<tr><td>offset from seed height</td><td>—</td><td>0.0</td></tr>
+</tbody>
+</table>
+
+<p id="vertical-pin-free-height-residual">The stalled residual is
+<code>2.572016e-2 = VERTICAL_FORCING / ELONGATION² / flux_scale = 0.0308641975 / 1.2</code>,
+which is above the test's <code>1e-3</code> stall floor, so the free request is correctly
+reported as not converged. The public no-pin route
+(<code>_request(..., include_pin=False)</code>, resolved through
+<code>ForwardProfile._vertical_pin_for_request</code>) returns the same terminal state
+<code>[1.0, 0.8, 0.24, 1.0, 1.2, 0.96]</code> and the same residual, confirming that an
+omitted pin and an inactive pair are equivalent on this route.</p>
+
+<h3 id="vertical-pin-free-height-history">When the test landed</h3>
+
+<p id="vertical-pin-free-height-327b8dfb1"><code>327b8dfb1</code> ("make elongated free
+solve stall visibly") rewrote the test on 2026-10-18. <strong>Run directly at that
+revision:</strong> the commit was extracted with
+<code>git archive 327b8dfb1 nova tests scripts pyproject.toml conftest.py uv.lock</code> into
+a scratch directory, and the file was run there with the archive on
+<code>PYTHONPATH</code>. Isolation is proven by the import, which resolved inside the
+extract: <code>nova.__file__ = …/scratch/archive-327b8dfb1/nova/__init__.py</code>.
+<strong>Verdict: 6 passed, exit 0</strong> — the test passed when it landed.</p>
+
+<p id="vertical-pin-free-height-327b8dfb1-cross-check">That run is the evidence; the
+byte-identity argument below is only a cross-check on it. The test file,
+<code>nova/equilibrium/constraint.py</code> and <code>nova/equilibrium/fixed_point.py</code>
+are byte-identical between <code>327b8dfb1</code> and HEAD (sha256 <code>a0df2963…</code>
+for the test, <code>7ec0441b…</code> for <code>fixed_point.py</code>), and no commit in
+<code>327b8dfb1..HEAD</code> touches either module. It is a <code>slow</code> test, so the
+default <code>-m 'not slow'</code> lane does not collect it.</p>
+
+<h3 id="vertical-pin-free-height-record">The recorded offset</h3>
+
+<p id="vertical-pin-free-height-recorded">The recorded failure
+(<code>r-20261019T042319449201</code>, <code>baseline_suite.log</code>) shows the terminal
+flux <code>[1.0, 0.8, 0.24, 1.0, 1.2, 0.95228395]</code>. That value is exactly
+<code>0.96 - 0.25 · (VERTICAL_FORCING / ELONGATION²)</code>, i.e. the held radial-field
+unknown had settled at <code>-0.25 · row₆</code> instead of <code>0</code> — precisely the
+defect the brief names, "a solver that moves an unknown the free layout should hold". That
+state does not occur at HEAD or at <code>a711e2b0</code>: the only source differences between
+the two are in <code>nova/biot/tiledassembly.py</code>, <code>nova/equilibrium/contour_tree_mesh.py</code>,
+<code>nova/equilibrium/fixed_points.py</code>, <code>nova/equilibrium/topology.py</code> and
+<code>nova/jax/config.py</code> (the XLA per-fusion autotune cache switch), none of which is
+imported by this test's route.</p>
+
+<h3 id="vertical-pin-free-height-negative">Negative control</h3>
+
+<p id="vertical-pin-free-height-negative-note">The declared mutation — "revert the fix" —
+has no fix to revert, because the free-request height assertion already passes unchanged at
+both revisions. The closest applicable mutation is applied instead, at runtime from a pytest
+plugin, so no repository file is written and none needs restoring: the inactive centroid row
+is made to take the held branch.
+
+<p id="vertical-pin-free-height-negative-observed">Under that mutation the free request no
+longer stalls — it <em>converges</em> (residual <code>1.887e-15</code>, terminal flux
+<code>[1.0, 0.8, -0.36, 1.0, 1.2, 0.36]</code>) — so the mutation is caught one assertion
+earlier, at line 357's stall floor (<code>assert not bool(converged)</code>), before the
+height assertion is reached. The booked height under the same mutation, read directly from
+the diagnostic probe, moves from <code>0.6</code> to <code>0.7</code> (offset
+<code>0.1</code>). The mutation therefore fails three of the file's six tests, and
+<code>test_one_augmented_newton_program_serves_free_and_pinned_requests</code> is one of
+them — an id the passing head arm does not fail — so the free-layout assertions are
+sensitive to the held row and are not vacuous.</p>
+
+<p id="vertical-pin-free-height-negative-caveat">The offset under the applied mutation
+(<code>0.1</code>) is not the recorded <code>3.86e-3</code>, and that mismatch is itself the
+finding: the mutation the brief declared describes a defect that is not present at HEAD.
+The recorded <code>3.86e-3</code> would require the held unknown to settle at
+<code>-0.25 · row₆</code> while still stalling, and no revision reachable here does that.</p>
+
+<p id="vertical-pin-free-height-commands">Commands run (login/fleet allocation, shared
+environment, never <code>uv</code>):
+<code>PYTHONPATH=&lt;worktree&gt; /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -m 'slow or not slow' tests/equilibrium/test_solve_vertical_pin.py -v</code>
+at HEAD and, with <code>env -C &lt;base-tree&gt;</code>, at <code>a711e2b0</code>; both
+<code>6 passed</code>.</p>
+
+<h3 id="vertical-pin-free-height-suite">Suite arms</h3>
+
+<p id="vertical-pin-free-height-suite-result">Both arms ran as one job
+(<code>1290374</code>, <code>sirius</code>, 12 CPUs, 96 GB, 00:12:44, one fresh process per
+file) over <code>tests/equilibrium/test_solve_vertical_pin.py</code>,
+<code>tests/test_fixed_point.py</code>, <code>tests/test_constraint_active_set.py</code>,
+<code>tests/test_equilibrium_constraint_protocol.py</code> and
+<code>tests/test_forward_constraints.py</code>. Each arm collected <strong>71 passed</strong>
+and the same two failures,
+<code>tests/test_equilibrium_constraint_protocol.py::test_eliminated_constraint_runs_through_typed_solve_with_outer_trace</code>
+(<code>tests/test_equilibrium_constraint_protocol.py:417</code>) and
+<code>tests/test_equilibrium_constraint_protocol.py::test_eliminated_constraint_reports_no_root_and_refuses_multiple_rows</code>
+(<code>tests/test_equilibrium_constraint_protocol.py:492</code>). Both ids fail identically in
+both arms, so neither is introduced by this node.
+<strong>No added failure.</strong> Whether those two are red on the base independently of
+this node is not settled here: this node produced no source delta, so the pair is the same
+on both sides by construction, and their prior status belongs to the node that owns that
+file.</p>
+
+<p id="vertical-pin-free-height-suite-arms">The two arms are the same revision: this node
+changed no source and no test file, so its only working-tree delta against the base is this
+evidence fragment, which no test imports. Running both arms is therefore a repeatability
+measurement rather than a before/after one, and it is recorded as such rather than presented
+as a delta.</p>
+</section>

@@ -153,11 +153,16 @@ def test_trace_record_with_agreeing_polarity_passes():
     assert signs["grid"] == 1
 
 
-def test_trace_record_without_a_wall_in_its_grid_is_not_refused():
+def test_trace_record_without_an_in_grid_wall_uses_axis_curvature():
     record = _record(polarity=1, psi=-_scalar_field())
     record.wall_r = np.asarray([[9.0, 9.5]])
     record.wall_z = np.asarray([[9.0, 9.5]])
-    assert orientation.check_trace_record(record) == {}
+    with pytest.raises(orientation.ReferenceSignError) as refused:
+        orientation.check_trace_record(record)
+    assert "grid curvature" in str(refused.value)
+
+    record.psi = _scalar_field()
+    assert orientation.check_trace_record(record)["grid curvature"] == 1
 
 
 def test_missing_ids_boundary_is_refused_with_slice_and_declaration():

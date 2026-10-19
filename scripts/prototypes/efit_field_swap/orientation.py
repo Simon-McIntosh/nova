@@ -213,16 +213,34 @@ def check_trace_record(record, *, boundary=None):
 
     The record declares its orientation through its polarity; the grid is
     sampled at the stored axis and at the record's wall polygon and their
-    difference is checked against the declaration. A record whose wall lies
-    outside its grid carries no boundary point and is left unrefused rather
-    than guessed at.
+    difference is checked against the declaration. Where no wall point lies
+    inside the grid, the spline's Hessian at the stored axis determines whether
+    that axis is a maximum or minimum.
     """
     convention = read_convention(polarity=record.polarity)
     required = _declared_sigma(convention)
     point = boundary if boundary is not None else trace_record_boundary(record)
-    if point is None:
-        return {}
     field = grid_field(record.rgrid, record.zgrid, record.psi)
+    if point is None:
+        eigenvalues = np.linalg.eigvalsh(
+            np.asarray(field.evaluate((record.axis_r, record.axis_z)).hessian)
+        )
+        curvature_sign = (
+            1
+            if np.all(eigenvalues < -1e-9)
+            else -1
+            if np.all(eigenvalues > 1e-9)
+            else 0
+        )
+        if curvature_sign != required:
+            raise ReferenceSignError(
+                f"slice {record.slice} declares polarity {record.polarity:+d}, "
+                f"requiring a psi {_extremum(required)} (sign {required:+d}); "
+                "no boundary lies in the grid and grid curvature at the stored "
+                f"axis has eigenvalues {eigenvalues.tolist()} "
+                f"(sign {curvature_sign:+d})"
+            )
+        return {"grid curvature": curvature_sign}
     axis_value = grid_value(
         record.rgrid,
         record.zgrid,

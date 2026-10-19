@@ -1,0 +1,61 @@
+<section id="xla-autotune-cache-off" data-reckon="evidence" data-node="xla-autotune-cache-off">
+<h3>xla-autotune-cache-off</h3>
+<p>Every nova route that enables JAX's persistent compilation cache also turns off XLA's
+per-fusion autotune cache. JAX defaults <code>jax_persistent_cache_enable_xla_caches</code>
+to the GPU per-fusion autotune directory, so a configured cache writes XLA's autotuner
+records beside the compiles &mdash; thousands of synchronous small-file creates per
+revision on GPFS, and none of them needed, since the autotuner re-decides the same way
+on the next process.</p>
+
+<h4>Change</h4>
+<ul>
+<li><code>nova/jax/config.py</code>: <code>configure_persistent_compilation_cache</code>
+sets <code>jax_persistent_cache_enable_xla_caches</code> to <code>none</code> before it
+computes the runtime identity, so the identity records the setting and the pin and the
+lane resolve one directory.</li>
+<li><code>nova/biot/tiledassembly.py</code>: <code>compilation_cache</code> applies the
+same setting on its own route.</li>
+<li><code>scripts/h200_test_lane/run.sh</code> payload prelude and
+<code>scripts/h200_test_lane/prewarm.sh</code> payload environment both export
+<code>JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES=none</code>.</li>
+</ul>
+
+<h4>Focused gate</h4>
+<p><code>UV_PROJECT_ENVIRONMENT=~/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest
+-p no:cacheprovider tests/test_compilation_cache_location.py
+tests/test_nova_lane_launcher.py</code> &rarr; <strong>18 passed in 98.13s</strong>,
+exit 0 (run on the fleet node, in place). The pins added: the recorded identity value and
+the live config key read <code>none</code>; two calls resolve the same directory; the
+tiledassembly route sets <code>none</code>; the h200 dry-run's rendered prelude and the
+pre-warm payload each carry the export.</p>
+
+<h4>Negative control</h4>
+<p>Declared mutation: delete the <code>config.py</code> line that sets the key. Run:
+<code>pytest -q
+tests/test_compilation_cache_location.py::test_persistent_cache_identity_disables_the_xla_autotune_cache</code>
+on the mutated tree &rarr; <strong>1 failed, EXIT=1</strong>, with
+<code>assert 'xla_gpu_per_...une_cache_dir' == 'none'</code>. The head arm does not fail
+this id. Log:
+<code>negative-control-config-line-deleted.log</code>.</p>
+
+<h4>Titan two-pass measurement</h4>
+<p><strong>Not obtained within this node's fence.</strong> The probe driver
+<code>titan_autotune_probe.sh</code> (in the run directory, not the repository) runs the
+certificate row <code>test_analytic_certificate_moments[limited-550]</code> twice per arm
+against a node-local <code>/tmp</code> cache root, planning to count files under any
+<code>xla_gpu_per_fusion_autotune_cache_dir</code> and read the cache guard's hit/miss
+receipt. It was submitted through <code>scripts/nova_lane/run.sh --rungs titan</code> four
+times on 2026-10-19. The titan node (<code>98dci4-gpu-0002</code>, <code>gpu:p100:8</code>)
+showed 5 free cards but only 10&nbsp;G free memory (<code>AllocTRES
+cpu=14,mem=240G,gres/gpu=3</code> of <code>mem=250G</code>), so the 64&nbsp;G default
+request could not be admitted; three submissions (jobs 1289927, 1289930, 1289934) were
+cancelled by the launcher's pending-wait or sat <code>PENDING (Priority)</code> behind
+peer jobs until the fence expired. The arm is not reported as passed or failed. It is
+queued as job <strong>1289934</strong> (<code>--mem 8G --cores 2</code>) and is the
+remainder for a resumed or separately dispatched run.</p>
+<p>What the change rests on, absent that arm: the off-switch is set where the runtime
+identity is hashed (pinned by test), on the second cache route (pinned by test), and in
+both lane exports (pinned by test), and the mutation that removes it fails the pinning
+test. The titan arm was to show the count of autotune files created, not to establish the
+mechanism.</p>
+</section>

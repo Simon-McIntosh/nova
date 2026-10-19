@@ -100,6 +100,57 @@ def test_certified_limited_carrier_converges(tmp_path: Path) -> None:
 
 
 @pytest.mark.slow
+def test_certified_diverted_carrier_converges(tmp_path: Path) -> None:
+    import jax
+
+    from nova.jax.config import configure_dtypes
+
+    configure_dtypes()
+    assert jax.config.jax_enable_x64 is True
+    if jax.default_backend() != "gpu":
+        pytest.skip("the cached carrier solve requires the H200 lane")
+
+    root = Path(__file__).resolve().parents[2]
+    output = tmp_path / "solve.json"
+    command = [
+        sys.executable,
+        "-m",
+        "scripts.prototypes.fast_map_production.solver",
+        "--kind",
+        "diverted",
+        "--cells",
+        "2000",
+        "--method",
+        "gmres",
+        "--max-steps",
+        "12",
+        "--line-search",
+        "--diagnose-step",
+        "--no-panel",
+        "--output",
+        str(output),
+    ]
+    run = subprocess.run(
+        command,
+        cwd=root,
+        env=os.environ.copy(),
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert run.returncode == 0, run.stdout[-2000:] + run.stderr[-2000:]
+    receipt = json.loads(output.read_text())
+    assert receipt["carrier_cache"]["hit"]
+    assert receipt["converged"] is True
+    assert receipt["history"][-1]["residual"] <= 1e-12
+    rows = receipt["history"][0]["step_diagnosis"]["rows"][-2:]
+    steps = np.array([row["scale"] for row in rows])
+    remainders = np.array([row["taylor_remainder_two"] for row in rows])
+    slope = np.log(remainders[0] / remainders[1]) / np.log(steps[0] / steps[1])
+    assert 1.9 <= slope <= 2.1, (slope, rows)
+
+
+@pytest.mark.slow
 def test_certified_limited_carrier_root_tangent() -> None:
     import jax
     import jax.numpy as jnp

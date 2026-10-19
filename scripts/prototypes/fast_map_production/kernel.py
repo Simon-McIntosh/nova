@@ -120,6 +120,28 @@ def _wall_effective_level(tangency, bottleneck):
     return jnp.minimum(tangency, bottleneck)
 
 
+def _flux_past_level_weight(peak, trough, level):
+    """Share of a cell's own flux excursion that lies past ``level``.
+
+    ``peak`` and ``trough`` bracket the flux the read's quadratic covers inside
+    one cell, so their difference is the cell's own resolution of the level. The
+    weight is one where the whole excursion is past the level and zero where
+    none of it is, with the linear share between. Its slope is one over an
+    excursion the map itself carries, which is what keeps the reported
+    derivative on the scale of the values it differentiates. A width fixed in
+    absolute flux is unresolvable at any step a solve can take, and the
+    derivative handed to the solver then disagrees with the values by whatever
+    that step happens to straddle.
+    """
+    span = peak - trough
+    safe = jnp.where(span > 0, span, jnp.ones_like(span))
+    return jnp.where(
+        span > 0,
+        jnp.clip((peak - level) / safe, 0, 1),
+        (peak >= level).astype(peak.dtype),
+    )
+
+
 def _continuous_path_weight(
     geometry, coefficients, form, axis, seed, sigma, level, radius, saddle_live
 ):
@@ -149,15 +171,15 @@ def _continuous_path_weight(
     curvature = 2 * (first + last - 2 * middle)
     slope = last - first - curvature
     fraction = jnp.clip(-slope / jnp.where(curvature < 0, 2 * curvature, 1), 0, 1)
-    peak = jnp.maximum(
-        jnp.maximum(first, last),
-        signed(local + fraction[..., None] * (local_end - local)),
-    )
+    turning = signed(local + fraction[..., None] * (local_end - local))
+    peak = jnp.maximum(jnp.maximum(first, last), turning)
+    trough = jnp.minimum(jnp.minimum(first, last), turning)
     peer = jnp.maximum(geometry.neighbour, 0)
     peer_edge = jnp.maximum(geometry.neighbour_edge, 0)
-    passage = jnp.minimum(peak, peak[peer, peer_edge])
-    flux_width = jnp.asarray(1e-8, dtype=passage.dtype)
-    flux_weight = jnp.clip(0.5 + (passage - level) / flux_width, 0, 1)
+    flux_weight = jnp.minimum(
+        _flux_past_level_weight(peak, trough, level),
+        _flux_past_level_weight(peak[peer, peer_edge], trough[peer, peer_edge], level),
+    )
 
     axis_sector = _local_axis_sector(geometry, axis, form)
     offset = midpoint - form.position

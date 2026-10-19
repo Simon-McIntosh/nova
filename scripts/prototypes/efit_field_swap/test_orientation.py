@@ -211,7 +211,44 @@ def test_undecidable_grid_span_is_refused_not_read_as_agreement():
     assert "grid span" in message
     assert "sign tolerance" in message
     assert "undecidable" in message
-    assert f"{orientation.sign_tolerance(2.0):.3e}" in message
+    # 1024 * eps, computed here independently of the function under test.
+    assert "2.274e-13" in message
+
+
+def test_sign_decision_is_unchanged_by_an_additive_gauge_constant():
+    """The band is a flux width, so shifting psi moves no outcome.
+
+    A grid's peak-to-peak range and the scalars' difference are both unchanged
+    by a constant added to every psi sample, so agrees, contradicts and
+    undecidable must each survive one.
+    """
+    convention = orientation.read_convention(polarity=1)
+    offset = 1.0e10
+    psi = _scalar_field()
+    agreeing = orientation.check_axis_boundary_sign(
+        convention, GRID, GRID, psi, AXIS, (CORNER,)
+    )
+    shifted_agreeing = orientation.check_axis_boundary_sign(
+        convention, GRID, GRID, psi + offset, AXIS, (CORNER,)
+    )
+    assert agreeing == shifted_agreeing == {"grid": 1}
+
+    flat = 2.0 + 1e-15 * psi
+    for candidate in (flat, flat + offset):
+        with pytest.raises(orientation.UndecidableSignError):
+            orientation.check_axis_boundary_sign(
+                convention, GRID, GRID, candidate, AXIS, (CORNER,)
+            )
+
+    for candidate in (-psi, -psi + offset):
+        with pytest.raises(orientation.ReferenceSignError) as refused:
+            orientation.check_axis_boundary_sign(
+                convention, GRID, GRID, candidate, AXIS, (CORNER,)
+            )
+        assert not isinstance(refused.value, orientation.UndecidableSignError)
+
+    for candidate in (psi, psi + offset):
+        assert orientation.check_trace_record(_record(1, candidate)) == {"grid": 1}
 
 
 def test_undecidable_grid_span_is_refused_with_slice_and_declaration():

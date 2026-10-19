@@ -41,12 +41,11 @@ A span is the difference of two spline samples of the grid, so it is resolved
 only to the rounding of the flux it is a difference of: the double-precision
 unit roundoff ``eps = 2**-52`` bounds one sample's relative error and the
 difference of two such samples accumulates a few multiples of it, scaled by the
-flux magnitude the samples carry. The floor is a thousand-fold margin over that
-unit roundoff -- ``1024 * eps``, about ``2.3e-13`` -- applied to the flux
-magnitude, so a span resolved by the arithmetic is decidable while a span that
-only survives because two nearly equal samples cancelled to within the rounding
-is refused as undecidable. The floor is a relative tolerance, never an absolute
-psi value, so it does not grow with the gauge.
+flux width the samples span. The floor is a thousand-fold margin over that unit
+roundoff -- ``1024 * eps``, about ``2.3e-13`` -- applied to a flux *width*: the
+grid's peak-to-peak range, or the compared scalars' own difference. A range and
+a difference are both invariant under an additive constant, so the band does not
+move with the gauge. ``sign_tolerance`` is the one place the product lives.
 """
 
 _CURVATURE_TOLERANCE = 1e-9
@@ -152,10 +151,13 @@ def _boundary_value(rgrid, zgrid, psi, boundary, *, field):
 
 
 def sign_tolerance(scale):
-    """The flux-width within which a span's sign is undecidable, as a number.
+    """The flux width within which a span's sign is undecidable, as a number.
 
-    ``scale`` is the flux magnitude the compared samples carry, not the span.
-    The floor keeps the tolerance from collapsing to zero on a degenerate grid.
+    ``scale`` is a flux width, never the span under test with no other content:
+    the grid's peak-to-peak range, or the compared scalars' own difference. Both
+    are invariant under an additive gauge constant, so the band an additive
+    constant cannot move is the band the comparison uses. The floor keeps the
+    tolerance from collapsing to zero on a degenerate grid.
     """
     return _SIGN_TOLERANCE * max(abs(float(scale)), 1.0)
 
@@ -163,12 +165,12 @@ def sign_tolerance(scale):
 def flux_sign(span, scale):
     """Sign of a flux difference, or 0 where its sign cannot be decided.
 
-    The scale is the flux magnitude the compared samples carry, and the zero
-    band is a fixed multiple of the double-precision unit roundoff times that
-    magnitude, so a span whose sign the arithmetic resolves is decidable while a
-    span at the level of the rounding that produced it is not. The band is
-    relative, never an absolute psi value, so an additive gauge constant cannot
-    turn a decisive contradiction into an undecided sign.
+    The scale is a flux width -- a range or a difference, never an absolute psi
+    value -- and the zero band is a fixed multiple of the double-precision unit
+    roundoff times that width, so a span whose sign the arithmetic resolves is
+    decidable while a span at the level of the rounding that produced it is not.
+    An additive gauge constant leaves the band unchanged, so it cannot turn a
+    decisive contradiction into an undecided sign.
     """
     span = float(span)
     if not np.isfinite(span):
@@ -263,18 +265,15 @@ def check_axis_boundary_sign(
     axis_value = grid_value(rgrid, zgrid, psi, axis, field=field)
     boundary_value = _boundary_value(rgrid, zgrid, psi, boundary, field=field)
     grid_span = axis_value - boundary_value
-    grid_magnitude = float(np.max(np.abs(np.asarray(psi, dtype=np.float64))))
-    signs = {"grid": flux_sign(grid_span, grid_magnitude)}
+    grid_width = float(np.ptp(np.asarray(psi, dtype=np.float64)))
+    signs = {"grid": flux_sign(grid_span, grid_width)}
     spans = {"grid": grid_span}
-    tolerances = {"grid": sign_tolerance(grid_magnitude)}
+    tolerances = {"grid": sign_tolerance(grid_width)}
     if scalar_axis_psi is not None and scalar_boundary_psi is not None:
         scalar_span = float(scalar_axis_psi) - float(scalar_boundary_psi)
-        scalar_magnitude = max(
-            abs(float(scalar_axis_psi)), abs(float(scalar_boundary_psi))
-        )
-        signs["scalar"] = flux_sign(scalar_span, scalar_magnitude)
+        signs["scalar"] = flux_sign(scalar_span, abs(scalar_span))
         spans["scalar"] = scalar_span
-        tolerances["scalar"] = sign_tolerance(scalar_magnitude)
+        tolerances["scalar"] = sign_tolerance(scalar_span)
     _refuse(
         required,
         signs,
@@ -328,13 +327,6 @@ def check_trace_record(record, *, boundary=None):
         eigenvalues = np.linalg.eigvalsh(
             np.asarray(field.evaluate((record.axis_r, record.axis_z)).hessian)
         )
-        curvature_sign = (
-            1
-            if np.all(eigenvalues < -1e-9)
-            else -1
-            if np.all(eigenvalues > 1e-9)
-            else 0
-        )
         largest = float(np.max(np.abs(eigenvalues))) if eigenvalues.size else 0.0
         curvature_floor = _CURVATURE_TOLERANCE * max(largest, 1.0)
         curvature_sign = (
@@ -373,13 +365,13 @@ def check_trace_record(record, *, boundary=None):
         record.rgrid, record.zgrid, record.psi, point, field=field
     )
     span = axis_value - boundary_value
-    magnitude = float(np.max(np.abs(np.asarray(record.psi, dtype=np.float64))))
-    signs = {"grid": flux_sign(span, magnitude)}
+    width = float(np.ptp(np.asarray(record.psi, dtype=np.float64)))
+    signs = {"grid": flux_sign(span, width)}
     _refuse(
         required,
         signs,
         {"grid": span},
-        {"grid": sign_tolerance(magnitude)},
+        {"grid": sign_tolerance(width)},
         slice_index=record.slice,
         declared=f"polarity {record.polarity:+d}",
     )

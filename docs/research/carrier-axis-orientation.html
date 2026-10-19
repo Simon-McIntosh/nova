@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="research">
+<meta name="plan-slug" content="carrier-axis-orientation">
+<meta name="plan-title" content="Certified carrier axis orientation">
+<meta name="plan-summary" content="The static certificate axis is a signed flux maximum; an earlier refusal paired its field with a different carrier identity.">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s2">
+<meta name="plan-recorded-at" content="2026-10-19">
+<meta name="plan-verdict" content="partial">
+<title>Certified carrier axis orientation | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<h1 id="carrier-axis-orientation-record">Certified carrier axis orientation</h1>
+<p><a href="/nova/evidence/fragments/converged-forward-solve/carrier-axis-orientation.html#carrier-axis-orientation-landing">Landing fragment</a></p>
+
+<h2 id="carrier-axis-orientation-reproduction">Which input the recorded refusal measured</h2>
+<p>The predecessor probe logged <code>valid=false</code>, <code>qualified=false</code>, and a NaN axis at 607 and 2,097 realised cells with (6.2, 0.0) as its only root. Its script paired <code>fixture.analytic_case()</code>, a rotating carrier, with the <code>_analytic_inputs("limited")</code> static field and loaded the older resolution-named Zarr cache. That pair is not the published static certificate. Reconstructing the rotating carrier geometry without its expensive coupling blocks reproduces the realised counts exactly. Its wall spans R = 0.97794 to 2.15 m, while the static field's declared axis is at R = 6.2 m. No cell contains that point at either rung: the closest cell centre is 4.05697 m away at 607 cells and 4.05071 m away at 2,097 cells. The gate that refuses is <code>inside = any(_inside_cells(geometry, root.position))</code> inside <code>kernel.read</code>; <code>extrema</code> then has no eligible root. The Hessian type is correct and the no-saddle persistence branch passes, but vessel membership is false. The mixed wall's largest sampled static-field ψ is −63.66830290168743 Wb, below the axis's +49.94072179477446 Wb by 113.60902469646189 Wb, so flux polarity is not the refusing clause.</p>
+<p>The content-addressed store under <code>certificate-fixtures</code> instead resolves the static <code>weak-rotation-reactor-static</code> case at requested 550, 2,000, and 5,000 cells to 553, 2,105, and 5,167 realised cells. The earlier refusal is a real observation on the mixed pair, but does not establish a refusal of the certified analytic carrier.</p>
+
+<h2 id="carrier-axis-orientation-polarity">The field's own orientation and the gate</h2>
+<p>For the limited static field, the definition is ψ(R,Z) = 2π[A − ½P(R² − R₀²)² − VZ²]. Its coefficients P = 0.031620221879352824 and V = 0.6132957357419372 are positive, so (R₀,Z) = (6.2,0) is a strict maximum, with Hessian diagonal entries −8πPR₀² and −4πV. COCOS 17 with positive current gives σ = +1 here. The eigenvalues of σ times the Hessian are −30.54837771115935 and −7.706901511539268. ψ at the axis is 49.94072179477446 Wb; the largest sampled wall ψ is −0.04915504379573112 Wb. Thus the signed axis level is above the wall, as the read requires.</p>
+<p>The axis lies inside a carrier cell on each published rung (553, 2,105, and 5,167 cells). The one-root census has no saddle, so the near-fold persistence condition passes by its explicit no-saddle branch; there is no finite axis-to-saddle persistence to estimate. The signed Hessian is negative definite, the root is valid and finite, and the ranking gate's <code>extrema</code> and <code>eligible</code> masks admit it. The read reports <code>valid=true</code>, <code>qualified=true</code>, and axis (6.2,0.0) on all three rungs. Reversing the current sign makes σ = −1 and signed eigenvalues +7.706901511539268 and +30.54837771115935; that negative control returns <code>valid=false</code> and a NaN axis. The polarity gate therefore fires on the known wrong orientation and accepts the field's actual orientation.</p>
+<p>The read from axis ranking's base revision <code>da4c4eb98</code> was also run on those same published 553- and 2,105-cell inputs. It returned <code>valid=true</code>, <code>qualified=true</code>, and (6.2,0.0) at both. The gate added by ranking therefore did not change the certified carrier's acceptance; the earlier NaN came from the mixed fixture pair.</p>
+
+<h2 id="carrier-axis-orientation-route">Prototype fixture route</h2>
+<p>The fixed-shape ranking gate needs no relaxation. The prototype solver did have a separate input-route fault: it read carrier and exterior groups from an older run cache, which has no 550-cell certificate entry. Its route now resolves the analytic case's published carrier and exterior identities through <code>scripts.prototypes.support.certificate_fixtures</code>, refuses a missing object before any cold build, and runs the same solve on the loaded machine. A 550-cell regression test checks the published carrier's axis and the solver's loader. With the pre-change solver restored in the base arm, <code>test_solver_loads_the_certified_carrier</code> fails by import; the head arm passes. This is a fixture-route repair; the axis selection rule remains intact.</p>
+
+<h2 id="carrier-axis-orientation-tcv">Five TCV 77549 data-diagnostic reads</h2>
+<p>The unchanged LIUQE grid adapter read the five slices the previous node had not reached, with the wall IDS at DD 4.1.0 and the equilibrium IDS at DD 3.41.0. Each grid's ψ at the LIUQE axis lies below ψ at its boundary; under the adapter's declared σ = +1 these are minima and the polarity gate refuses every row. The refusal is a diagnostic of the LIUQE grid sign, not a reason to invert the analytic carrier convention or relax axis ranking. No grid sign was compensated in this run.</p>
+<table><thead><tr><th>slice</th><th>LIUQE label</th><th>grid ψ at axis [Wb]</th><th>grid ψ at boundary [Wb]</th><th>nova read</th><th>coverage</th></tr></thead><tbody>
+<tr><td>34</td><td>limited</td><td>−0.18653943</td><td>−0.08619290</td><td>refused invalid axis</td><td>certified</td></tr>
+<tr><td>46</td><td>limited</td><td>−0.21909638</td><td>−0.09997632</td><td>refused invalid axis</td><td>certified</td></tr>
+<tr><td>118</td><td>limited</td><td>−0.18228829</td><td>−0.03602394</td><td>refused invalid axis</td><td>certified</td></tr>
+<tr><td>206</td><td>limited</td><td>−0.17922634</td><td>−0.02480308</td><td>refused invalid axis</td><td>certified</td></tr>
+<tr><td>248</td><td>limited</td><td>−0.12649604</td><td>+0.01909234</td><td>refused invalid axis</td><td>one cell uncertified on the finer lattices</td></tr>
+</tbody></table>
+
+<h2 id="carrier-axis-orientation-results">Solve and suite measurements</h2>
+<p>The three-module suite used fresh processes for the fast-map production, read-robustness and field-swap test files, with the repository-root conftest. The baseline scratch tree was extracted from the orientation base <code>1d1fd699de9bc4f9c6c64b5e67669f0dbac76c4c</code> and given the head carrier test file; the repaired head arm ran at <code>012234d6910e95bcdaa79299964bdad3bb695c50</code>. Both arms reached all three summaries. The base has 40 passes and one failure, <code>test_solver_loads_the_certified_carrier</code>, because its solver has no certified loader. The head has 41 passes and zero failures. The 550-cell axis test passes on both revisions; the axis ranking itself is already correct on the certified input.</p>
+<table><thead><tr><th>arm</th><th>fast-map tests</th><th>read-robustness tests</th><th>field-swap tests</th><th>suite result</th></tr></thead><tbody>
+<tr><td>baseline_suite</td><td>16 passed, 1 failed</td><td>2 passed</td><td>22 passed</td><td>complete; exit 1; 1 failure ID</td></tr>
+<tr><td>after_suite</td><td>17 passed</td><td>2 passed</td><td>22 passed</td><td>complete; exit 0; 0 failure IDs</td></tr>
+</tbody></table>
+<p>The latest combined logs are <code>solver_cli_baseline.log</code> and <code>solver_cli_after.log</code> under the run exports directory; their first lines name the revision, tree and runnable arm commands, and each contains the three fresh-process receipts. The first directory-wide field-swap attempt collected diagnostic modules under the repository's <code>--doctest-modules</code> setting and errored before the four named test files ran. Those collection attempts are kept separately as scaffolding failures; the named field-swap arms above are the suite measurements.</p>
+<p>The reviewed solver revision refused <code>--cache</code> at argparse before a solve. The two in-scope jobs, <code>deep-job.sh</code> and <code>two_merit_job.sh</code>, now omit it from both logged and executed solver commands, letting the solver select the content-addressed certified fixture. A test parses those actual job commands through the solver entry point: restoring the reviewed commands makes both test cases fail with <code>unrecognized arguments: --cache</code>, while the repaired head passes. Their other <code>--cache</code> users, including the probe, sweep and fast-read programs, own separate parsers. The out-of-scope fine-grid <code>cold-job.sh</code> still passes <code>--cache</code> both to its <code>cold.py</code> wrapper, which delegates to this solver parser, and directly to the solver; its repair is a follow-on.</p>
+<p>The 550-cell certificate solve ran on the Titan P100 fallback after the H200 submission remained pending for unavailable nodes. The receipt records 553 realised cells, the recovered analytic axis at (6.2, 0.0) m, centre residual 0.0012319931459852727 and terminal residual 0.0012319931459852727, with <code>converged=false</code>. Its only correction was rejected (<code>accepted=false</code>, <code>factor_scale=0</code>) despite a GMRES linear residual of 8.76037945980366 × 10<sup>−11</sup>; the solve then raised because its residual exceeded 10<sup>−12</sup>. The base solver could not load this 550-cell certificate from its older run cache, so it has no comparable terminal residual. The route now reads the certified carrier, but the convergence requirement remains unmet; the rejected correction dominates the remaining residual. The run receipts are <code>solver_550_titan.log</code> and <code>solver_550_titan.json</code> in the run exports directory.</p>
+</main></body></html>

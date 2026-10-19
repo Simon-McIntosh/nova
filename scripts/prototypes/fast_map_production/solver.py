@@ -34,8 +34,7 @@ from scripts.prototypes.lean_map.jets import build_jets
 from scripts.prototypes.lean_map.probe_bias import _image
 from scripts.prototypes.lean_map.quadrature import quadratic_fit, triangle_rule
 from scripts.prototypes.lean_map.values import build_values
-from scripts.prototypes.solve_options.point_bias import _exterior
-from scripts.prototypes.solve_options.profile import _machine
+from scripts.prototypes.support import certificate_fixtures
 from scripts.prototypes.support.geometry import certificate_field
 from tests.equilibrium.test_topology_read import _analytic_inputs
 
@@ -76,6 +75,44 @@ def generated_bytes(program):
     return method() if callable(method) else None
 
 
+def certified_machine(carrier, kind, cells, exact):
+    """Read the published carrier whose identity belongs to this analytic case."""
+    requested = -500 if cells == 550 else -cells
+    wall = certificate._diverted_wall(exact) if kind == "diverted" else None
+    identity = fixture.cache_identity(
+        carrier,
+        requested_cells=requested,
+        wall_nodes=fixture.WALL_POINT_COUNT,
+        wall=wall,
+    )
+    digest = certificate_fixtures.fixture_digest(identity)
+    if (
+        certificate_fixtures.fixture_entry(certificate_fixtures.CARRIER_KIND, digest)
+        is None
+    ):
+        raise FileNotFoundError(f"certified carrier is absent: {digest}")
+    machine = certificate_fixtures.cached_carrier(carrier, requested, wall)
+    assert machine.cache["hit"]
+    return machine
+
+
+def certified_exterior(source, exact, machine, analytic):
+    """Read the published exterior without starting a cold fixture build."""
+    identity = fixture._exterior_cache_identity(source, exact, machine, analytic)
+    digest = certificate_fixtures.fixture_digest(identity)
+    if (
+        certificate_fixtures.fixture_entry(certificate_fixtures.EXTERIOR_KIND, digest)
+        is None
+    ):
+        raise FileNotFoundError(f"certified exterior is absent: {digest}")
+    operator = fixture.forward_operator(source, machine)
+    _, exterior, receipt = certificate_fixtures.cached_exterior(
+        source, exact, machine, operator, analytic
+    )
+    assert receipt["hit"]
+    return exterior
+
+
 @jax.tree_util.register_dataclass
 @dataclass(frozen=True)
 class CachedExterior:
@@ -95,7 +132,7 @@ class CachedExterior:
 
 
 def run(args):
-    kind, cache, output = args.kind, args.cache, args.output
+    kind, output = args.kind, args.output
     selected_read = original_read if args.original_read else fixed_shape_read
     mapped_program.read = selected_read
     if args.exact_roots:
@@ -116,8 +153,8 @@ def run(args):
         "weak-rotation-reactor-static" if kind == "limited" else "diverted-single-null"
     )
     carrier, source, exact = certificate._case(name, clip_mode="exact")
-    machine, key, builder = _machine(cache, carrier, args.cells)
-    result = {"kind": kind, "cells": len(machine.node), "builder": builder}
+    machine = certified_machine(carrier, kind, args.cells, exact)
+    result = {"kind": kind, "cells": len(machine.node), "carrier_cache": machine.cache}
     save(output, result)
     geometry = topology.TopologyGeometry.from_cells(
         machine.cell_polygons, machine.sampling_vertices, (machine.wall_node,)
@@ -284,7 +321,7 @@ def run(args):
             (machine.node, machine.wall_node, machine.sample_coordinates)
         )
         analytic = jnp.asarray(certificate._exact_state(name, exact, coordinates))
-        exterior, _ = _exterior(cache, key)
+        exterior = certified_exterior(source, exact, machine, analytic)
         operator = fixture.forward_operator(source, machine)
         flux = exterior + _image(operator, centre.moments)
         span = float(jnp.abs(reading.boundary_flux - reading.axis_flux))
@@ -907,7 +944,7 @@ def run(args):
             (machine.node, machine.wall_node, machine.sample_coordinates)
         )
         analytic = jnp.asarray(certificate._exact_state(name, exact, coordinates))
-        exterior, _ = _exterior(cache, key)
+        exterior = certified_exterior(source, exact, machine, analytic)
         operator = fixture.forward_operator(source, machine)
         terminal = mapped(point * scale, *operands)
         solved_flux = exterior + _image(operator, point * scale)
@@ -970,7 +1007,6 @@ def main():
     parser.add_argument("--kind", choices=("limited", "diverted"), required=True)
     parser.add_argument("--cells", type=int, default=250)
     parser.add_argument("--method", choices=("krylov", "gmres", "dense"), required=True)
-    parser.add_argument("--cache", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--max-steps", type=int, default=20)
     parser.add_argument("--block", type=int, default=16)

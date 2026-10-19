@@ -13,6 +13,13 @@
   ],
   "call_sites": [],
   "completed_at": "2026-10-19T21:11:35.225Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "The change makes six GPU-only rows skip off the GPU with a stated reason. Its durable guard is the H200 lane, where all six rows pass every assertion; that lane runs the same test file. A CPU-side guard cannot exercise a measurement that refuses non-GPU backends by design.",
+      "recorded_at": "2026-10-19T21:15:40.767981+00:00"
+    }
+  },
   "dispatched_at": "2026-10-19T20:54:52Z",
   "findings": [
     {

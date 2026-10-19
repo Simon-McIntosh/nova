@@ -300,6 +300,8 @@ def run(args):
                 np.asarray(reading.normal_form_cells & (reading.membership > 0))
             ).tolist(),
             "membership": np.asarray(reading.membership).tolist(),
+            "boundary": np.asarray(reading.boundary).tolist(),
+            "boundary_flux": float(reading.boundary_flux),
             "roots": np.asarray(found.position).tolist(),
         }
 
@@ -756,6 +758,10 @@ def run(args):
             row["step_diagnosis"]["read_difference"] = {
                 "support_base": original_read["support_ids"],
                 "support_trial": trial_read["support_ids"],
+                "boundary_base": original_read["boundary"],
+                "boundary_trial": trial_read["boundary"],
+                "boundary_flux_base": original_read["boundary_flux"],
+                "boundary_flux_trial": trial_read["boundary_flux"],
                 "membership_changed": [
                     {
                         "cell": int(cell),

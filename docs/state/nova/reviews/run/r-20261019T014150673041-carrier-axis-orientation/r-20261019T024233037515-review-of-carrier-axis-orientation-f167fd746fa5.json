@@ -27,6 +27,13 @@
   ],
   "completed_at": "2026-10-19T02:59:34.226Z",
   "dispatched_at": "2026-10-19T02:43:14Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "carrier-axis-orientation",
+      "recorded_at": "2026-10-19T03:05:10.291016+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/fast_map_production/solver.py",

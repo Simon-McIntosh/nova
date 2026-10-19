@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="461">
+<meta name="plan-version" content="462">
 <meta name="plan-modified" content="2026-10-19">
 </head>
 <body>
@@ -1284,9 +1284,32 @@ or in a fresh a711e2b0 tree, where the free request holds the booked height at
 0.6 with terminal flux bit-identical to the seed; the fragment records that
 determination and its mechanism honestly and files the residual question as a
 follow-on. Findings: two test ids cited in the fragment do not resolve
-(a real failure-id mismatch at line 110, a typo at line 10) and the manifest&#x27;s
+(a real failure-id mismatch at line 110, a typo at line 10) and the manifest's
 suite fields are prose that cite a suite-arms.json whose empty failed arrays
 contradict the two failures the arm logs record. Scores 14/13/20/8/13/20.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261019T192229206811-review-of-vertical-pin-free-height-3d435a138e15" data-who="reckon-build" data-when="2026-10-19T19:38:52.642Z">
+    <div class="r-comment-body"><p>Review of run r-20261019T174432437525-vertical-pin-free-height at head
+3d435a138 over the single commit it gained since it was reviewed at
+374a0e73b (diff 374a0e73b..3d435a138, one file, +21/-9 in
+docs/evidence/fragments/converged-forward-solve/vertical-pin-free-height.html).
+Both blocking findings the previous review recorded are repaired and verified
+against the repository: the test id now spells
+test_one_augmented_newton_program_serves_free_and_pinned_requests
+(tests/equilibrium/test_solve_vertical_pin.py:307) and the failure id now
+spells test_eliminated_constraint_runs_through_typed_solve_with_outer_trace
+with line cites :417 and :492, both of which match the definitions and the
+traceback headers in both arm logs. The follow-on that done_when clause (1)&#x27;s
+landing-revision run was substituted by a byte-identity argument is now
+discharged by a real run: logs/repro-327b8dfb1-archive.log records
+nova.__file__ inside the archive extract and &quot;6 passed ... EXIT=0&quot;. The
+manifest&#x27;s baseline_suite/after_suite are now single-line JSON carrying the
+two failing ids, derived here from the arm logs&#x27; traceback headers (the logs
+ran with -rN so they carry no FAILED summary line); both arms are identical,
+so added_failure_count is 0. Scores: goal_fidelity 17, evidence 16,
+scope_discipline 20, durability 8, fit 16, reuse 20. One follow-on finding
+remains: logs/suite-arms.slurm.log:21,33 still carries the job&#x27;s own derived
+block with &quot;failed&quot;: [] for both arms while the manifest cites it first.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

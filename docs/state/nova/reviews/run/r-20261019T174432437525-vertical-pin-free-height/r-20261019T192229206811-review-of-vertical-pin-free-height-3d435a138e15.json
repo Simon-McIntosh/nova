@@ -1,0 +1,62 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [
+    {
+      "failure_condition": "The reviewed commit adds no assertion; the free-request booked-height guard it relies on holds the terminal height against (SEED[2]+SEED[5])/(SEED[0]+SEED[3]), a value derived from the seed handed to the solve rather than from the code under test, so it reddens if the free layout moves the held unknown. The run's runtime negative control (logs/negative-control.log, EXIT=1, three failing ids the head arm does not fail) shows the file is sensitive to that row.",
+      "lines": "tests/equilibrium/test_solve_vertical_pin.py:360"
+    }
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-19T19:38:52.642Z",
+  "dispatched_at": "2026-10-19T19:25:17Z",
+  "findings": [
+    {
+      "file": "logs/suite-arms.slurm.log",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed run's job-output summary still records \"failed\": [] for both arms (lines 21 and 33 of the slurm log) while the manifest's baseline_suite/after_suite and logs/suite-arms.json each list the same two failures, so the first-named log_path contradicts the failure record a reader is asked to reconcile."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "Read commit by commit against 374a0e73b: one commit, one file, +21/-9, correcting ..._servers to ..._serves and ..._without_retrace to ..._with_outer_trace with line cites, and replacing the byte-identity argument with a run at the landing revision.",
+    "done_when": "The source done_when names three clauses; clause (1)'s run at 327b8dfb1 is now recorded with its log (6 passed, EXIT=0), clause (2) is vacuous because the node changed no source, and clause (3)'s suite arms are in both arms' logs, read here.",
+    "goal": "The source node's goal is to settle why the free vertical-pin request moves its booked height; the reviewed commit docs/evidence/fragments/converged-forward-solve/vertical-pin-free-height.html repairs the two citations an earlier review found blocking and lands the run done_when clause (1) asked for.",
+    "manifest": "The source manifest.md records status complete, commits acb00d813/adfce6558/374a0e73b/3d435a138, single-line JSON baseline_suite/after_suite each listing the two protocol-test failures that the arm logs carry, and a red negative control at logs/negative-control.log (EXIT=1).",
+    "write_paths": "The source fence grants nova/equilibrium/constraint.py, nova/equilibrium/fixed_point.py, tests/equilibrium/test_solve_vertical_pin.py and the fragment; the 374a0e73b..3d435a138 diff touches only docs/evidence/fragments/converged-forward-solve/vertical-pin-free-height.html."
+  },
+  "justifications": {
+    "durability": "This diff adds no assertion (documentation only), so nothing in it fails if the determination regresses; the sensitivity it claims rests on the pre-existing assertion at tests/equilibrium/test_solve_vertical_pin.py:360.",
+    "evidence": "The corrected failure ids at vertical-pin-free-height.html:120-123 resolve to tests/test_equilibrium_constraint_protocol.py:417 and :492 and match the traceback headers in both arm logs, so the record's added_failure_count of zero is checkable.",
+    "fit": "The fragment keeps the node-prefixed element-id idiom and every cited test id now resolves, but the file still ends at </section> with no trailing newline (vertical-pin-free-height.html:135).",
+    "goal_fidelity": "vertical-pin-free-height.html:49-64 now records the run at 327b8dfb1 that done_when clause (1) named, and logs/repro-327b8dfb1-archive.log shows nova.__file__ inside the extract and 6 passed at EXIT=0.",
+    "reuse": "The diff adds no definition, so there is no capability to fork; the production symbols it cites, nova/equilibrium/forward.py:2609 and nova/equilibrium/constraint.py:1054, exist as named.",
+    "scope_discipline": "git diff --stat 374a0e73b 3d435a138 changes exactly one file, docs/evidence/fragments/converged-forward-solve/vertical-pin-free-height.html, which is inside the declared write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source node's goal is to settle why the free vertical-pin request moves its booked height; the reviewed commit docs/evidence/fragments/converged-forward-solve/vertical-pin-free-height.html repairs the two citations an earlier review found blocking and lands the run done_when clause (1) asked for.\nVERDICT done_when: The source done_when names three clauses; clause (1)'s run at 327b8dfb1 is now recorded with its log (6 passed, EXIT=0), clause (2) is vacuous because the node changed no source, and clause (3)'s suite arms are in both arms' logs, read here.\nVERDICT write_paths: The source fence grants nova/equilibrium/constraint.py, nova/equilibrium/fixed_point.py, tests/equilibrium/test_solve_vertical_pin.py and the fragment; the 374a0e73b..3d435a138 diff touches only docs/evidence/fragments/converged-forward-solve/vertical-pin-free-height.html.\nVERDICT manifest: The source manifest.md records status complete, commits acb00d813/adfce6558/374a0e73b/3d435a138, single-line JSON baseline_suite/after_suite each listing the two protocol-test failures that the arm logs carry, and a red negative control at logs/negative-control.log (EXIT=1).\nVERDICT diff: Read commit by commit against 374a0e73b: one commit, one file, +21/-9, correcting ..._servers to ..._serves and ..._without_retrace to ..._with_outer_trace with line cites, and replacing the byte-identity argument with a run at the landing revision.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: vertical-pin-free-height.html:49-64 now records the run at 327b8dfb1 that done_when clause (1) named, and logs/repro-327b8dfb1-archive.log shows nova.__file__ inside the extract and 6 passed at EXIT=0.\nSCORE evidence: 16\nJUSTIFICATION evidence: the corrected failure ids at vertical-pin-free-height.html:120-123 resolve to tests/test_equilibrium_constraint_protocol.py:417 and :492 and match the traceback headers in both arm logs, so the record's added_failure_count of zero is checkable.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 374a0e73b 3d435a138 changes exactly one file, docs/evidence/fragments/converged-forward-solve/vertical-pin-free-height.html, which is inside the declared write paths.\nSCORE durability: 8\nJUSTIFICATION durability: this diff adds no assertion (documentation only), so nothing in it fails if the determination regresses; the sensitivity it claims rests on the pre-existing assertion at tests/equilibrium/test_solve_vertical_pin.py:360.\nSCORE fit: 16\nJUSTIFICATION fit: the fragment keeps the node-prefixed element-id idiom and every cited test id now resolves, but the file still ends at </section> with no trailing newline (vertical-pin-free-height.html:135).\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no definition, so there is no capability to fork; the production symbols it cites, nova/equilibrium/forward.py:2609 and nova/equilibrium/constraint.py:1054, exist as named.\nFINDING logs/suite-arms.slurm.log:21 follow-on: the job output still records \"failed\": [] for both arms while the manifest and logs/suite-arms.json list two failures each, so the first-named log_path contradicts the failure record.\n",
+  "review_run_id": "r-20261019T192229206811-review-of-vertical-pin-free-height-3d435a138e15",
+  "reviewed_base_sha": "374a0e73b58781c3ee0ec2f6da409732b1c44610",
+  "reviewed_commits": [
+    "3d435a138e15468e4088f28fb597f15c26fc7c6c"
+  ],
+  "reviewed_head_sha": "3d435a138e15468e4088f28fb597f15c26fc7c6c",
+  "reviewed_run_id": "r-20261019T174432437525-vertical-pin-free-height",
+  "scores": {
+    "durability": 8,
+    "evidence": 16,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T19:40:08.667658+00:00",
+  "total": 97
+}

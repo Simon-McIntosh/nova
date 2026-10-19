@@ -1,0 +1,246 @@
+<article class="r-doc" data-kind="research">
+  <h1>Why the topology read tests are red: a device gate, a killed compile child, and a lane slower than the bound</h1>
+
+  <section id="topology-read-test-walls-summary">
+    <h2>Summary</h2>
+    <p>Each of the sixteen node ids of <code>tests/equilibrium/test_topology_read.py</code>
+    that is red on main was run at the base revision <code>6cce876e3</code>, at the
+    contour-tree-mesh merge <code>5d40e0155</code> and at main <code>32cb743e97</code> —
+    one fresh process per id, with the per-test timeout disabled, on one allocation with
+    nothing else in it. The redness has three distinct causes, and none of them is a
+    defect in the topology read itself.</p>
+
+    <table>
+      <thead><tr><th>cause</th><th>ids</th><th>the measurement</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>A device gate inside the measurement child</strong></td>
+          <td><code>test_kernel_compile_growth</code> ×3</td>
+          <td>red in 10.6–19&nbsp;s at every revision on a CPU partition, before any compile
+          is attempted; green, as its declared xfail, on the H200 in 686–726&nbsp;s</td>
+        </tr>
+        <tr>
+          <td><strong>A shared compile child killed by its own allocation</strong></td>
+          <td>the seven ids drawing <code>kernel_compile_budget</code></td>
+          <td>red only where the allocation cannot carry the compile: the child is
+          <code>SIGKILL</code>ed and the strict xfail turns a documented condition into an
+          error, because the fixture admits only the death it inflicts itself</td>
+        </tr>
+        <tr>
+          <td><strong>A per-test bound set below the read's cost</strong></td>
+          <td><code>test_topology_class_and_membership[diverted]</code>,
+          <code>test_saddle_support_order[diverted]</code></td>
+          <td>359–386&nbsp;s and 383–419&nbsp;s at all three revisions against a 300&nbsp;s
+          bound</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>The three <em>additional</em> head failures recorded in the brief —
+    <code>test_closed_form_resolution_probe[diverted]</code>,
+    <code>test_topology_class_and_membership[limited]</code> and
+    <code>test_saddle_support_order[limited]</code> — <strong>do not reproduce</strong>.
+    With the bound lifted on a compute node they pass at main in 153&nbsp;s, 130&nbsp;s and
+    132&nbsp;s, and at the base revision by the same margin in 156&nbsp;s, 126&nbsp;s and
+    131&nbsp;s. The gate that recorded them ran from the login node, where the same three
+    reads take upward of 300&nbsp;s.</p>
+
+    <p><strong>The <code>fixed_points.py</code> root tangent (merge
+    <code>100bc5828</code>) changed no test's wall, no test's verdict, and no test's
+    outcome.</strong> It lies between the two later revisions measured here and is an
+    ancestor of main, so the main arm exercises its content throughout. No id changes
+    verdict between <code>5d40e0155</code> and main; the walls that move do so in both
+    directions and within the spread the same id shows across revisions (126→130, 386→371,
+    128→132, 383→385). The one apparent exception is examined and dissolved in
+    <a href="#topology-read-test-walls-barrier">the shared compile barrier</a> below: the
+    <code>test_biot_moment_point_derivatives</code> error at main is reproduced away by a
+    control run at the same revision.</p>
+  </section>
+
+  <section id="topology-read-test-walls-method">
+    <h2>Method</h2>
+    <p>One sbatch job on <code>--partition=sirius</code> (job 1290186, 12 CPUs, 96&nbsp;GB,
+    four hours, node <code>98dci4-clu-5009</code>), with nothing else in the allocation.
+    Each revision was extracted with <code>git archive</code> — never <code>git worktree
+    add</code> — and each id ran in its own process with
+    <code>-p no:cacheprovider -p no:timeout</code>, its own <code>TMPDIR</code>, its own
+    <code>NOVA_TOPOLOGY_EVIDENCE_DIR</code>, and a 2700&nbsp;s safety stop that never
+    fired. Under <code>-p no:timeout</code> neither the <code>timeout = 300</code> option
+    in <code>pyproject.toml</code> nor any <code>@pytest.mark.timeout</code> is active,
+    which every log confirms twice over — <em>PytestConfigWarning: Unknown config option:
+    timeout</em> and <em>PytestUnknownMarkWarning: Unknown pytest.mark.timeout</em>. So a
+    timeout observed in that job measures a shortfall against a bound; it can never be an
+    accident of the harness.</p>
+    <p>Several of these tests stamp their evidence receipt with <code>git rev-parse
+    HEAD</code>, so each extracted tree carries a git directory of its own: a
+    <code>HEAD</code> naming that revision's full commit, with
+    <code>objects/info/alternates</code> at the shared object store. No git verb mutates
+    anything. Every log header records the revision, the tree, the command, and the
+    absolute path of the module actually imported; that path resolves inside the extracted
+    tree and never to the shared checkout.</p>
+    <p>Four further jobs fill the gaps the first could not, and each is named where its
+    result is used: job 1290213 (one H200 on <code>98dci4-gpu-0003</code>) measures the
+    three <code>test_kernel_compile_growth</code> ids where their own device gate lets them
+    run; job 1290232 (two ids in parallel, 250&nbsp;GB) and job 1290248 (one id, 450&nbsp;GB,
+    nothing else) re-measure <code>test_biot_moment_point_derivatives</code>, which the
+    first job lost to memory pressure.</p>
+  </section>
+
+  <section id="topology-read-test-walls-walls">
+    <h2>Walls, one fresh process per id</h2>
+    <p>Wall seconds at the base revision and at main, with the reading of each at the
+    revision of the tuple. <em>pass</em> means the test reached its own summary with the
+    per-test timeout disabled; <em>xfail</em> means a strict xfail matched its declared
+    exception; <em>gate</em> is the device assertion; <em>killed</em> is a child the
+    allocation took away.</p>
+    <table>
+      <thead><tr><th>node id</th><th>6cce876e3</th><th>5d40e0155</th><th>main</th><th>reading</th></tr></thead>
+      <tbody>
+        <tr><td>test_closed_form_resolution_probe[limited]</td><td>66</td><td>62</td><td>63</td><td>pass</td></tr>
+        <tr><td>test_closed_form_resolution_probe[diverted]</td><td>156</td><td>154</td><td>153</td><td>pass</td></tr>
+        <tr><td>test_topology_class_and_membership[limited]</td><td>126</td><td>128</td><td>130</td><td>pass</td></tr>
+        <tr><td>test_topology_class_and_membership[diverted]</td><td>359</td><td>386</td><td>371</td><td>pass, over the bound</td></tr>
+        <tr><td>test_saddle_support_order[limited]</td><td>131</td><td>128</td><td>132</td><td>pass</td></tr>
+        <tr><td>test_saddle_support_order[diverted]</td><td>419</td><td>383</td><td>385</td><td>pass, over the bound</td></tr>
+        <tr><td>test_kernel_compile_growth[132]</td><td>19 / 686</td><td>13 / 725</td><td>17 / 707</td><td>gate on CPU; xfail on the H200</td></tr>
+        <tr><td>test_kernel_compile_growth[300]</td><td>18 / 708</td><td>16 / 724</td><td>17 / 706</td><td>gate on CPU; xfail on the H200</td></tr>
+        <tr><td>test_kernel_compile_growth[550]</td><td>17 / 708</td><td>15 / 726</td><td>16 / 718</td><td>gate on CPU; xfail on the H200</td></tr>
+        <tr><td>test_biot_moment_point_derivatives</td><td>420 / 614 xfail</td><td>372 / 626 xfail</td><td>267 / 615 xfail</td><td>xfail when the compile child is carried</td></tr>
+        <tr><td>test_kernel_backed_carrier_read[1074-limited]</td><td>313</td><td>323</td><td>287</td><td>killed</td></tr>
+        <tr><td>test_kernel_backed_carrier_read[1074-diverted]</td><td>218</td><td>213</td><td>286</td><td>killed</td></tr>
+        <tr><td>test_kernel_backed_carrier_read[2616-limited]</td><td>319</td><td>306</td><td>218</td><td>killed</td></tr>
+        <tr><td>test_kernel_backed_carrier_read[2616-diverted]</td><td>353</td><td>330</td><td>286</td><td>killed</td></tr>
+        <tr><td>test_null_position_implicit_tangent[limited]</td><td>351</td><td>428</td><td>304</td><td>killed</td></tr>
+        <tr><td>test_null_position_implicit_tangent[diverted]</td><td>354</td><td>253</td><td>374</td><td>killed</td></tr>
+      </tbody>
+    </table>
+    <p>For the seven fixture ids the first number is the wall of a run whose compile child
+    was taken away by the allocation, so it is the wall of the id's own overhead and not of
+    a measurement — those rows are the ones the next section re-measures. For
+    <code>test_biot_moment_point_derivatives</code> the pair shows both readings: the wall
+    of the killed run, then the wall of the run that completed, whose child the fixture's
+    own 600&nbsp;s bound terminated.</p>
+  </section>
+
+  <section id="topology-read-test-walls-device">
+    <h2>Cause 1: a device gate inside the measurement child</h2>
+    <p><code>test_kernel_compile_growth</code> is written to xfail. It carries
+    <code>@pytest.mark.xfail(strict=True, raises=KernelCompileBarrier)</code>, whose reason
+    is that the cold read compile exceeds the read's own 60&nbsp;s / 50&nbsp;MB
+    qualification clause, over a 900&nbsp;s child safety stop. On the H200 it does exactly
+    that: job 1290213 reports all three parameterisations green as xfail at every revision,
+    in 686–726&nbsp;s, with the declared barrier.</p>
+    <p>On a CPU partition the child dies before it can produce a receipt, because
+    <code>_measure_kernel_compile_growth</code> asserts
+    <code>jax.default_backend() == "gpu"</code>. Its evidence log prints
+    <code>KERNEL_COMPILE_INPUT_READY</code> from the line before the compile, then
+    <code>assert jax.default_backend() == "gpu"</code> raises <code>AssertionError</code>
+    and nothing further is written.
+    The parent then fails on <code>assert code == 0, f"kernel compile {arm} refused:
+    {log}"</code> at <code>tests/equilibrium/test_topology_read.py:2496</code>. That is an
+    <code>AssertionError</code> and not a <code>KernelCompileBarrier</code>, so the strict
+    xfail converts it to a hard failure — the strict-xfail contract working as designed.
+    The id is red on the CPU lane by construction, in 10.6–19&nbsp;s, at every revision.</p>
+  </section>
+
+  <section id="topology-read-test-walls-barrier">
+    <h2>Cause 2: a shared compile child killed by its allocation</h2>
+    <p>Seven ids take the module-scoped <code>kernel_compile_budget</code> fixture:
+    <code>test_biot_moment_point_derivatives</code>,
+    <code>test_kernel_backed_carrier_read</code> at four parameterisations, and
+    <code>test_null_position_implicit_tangent</code> at two. Each carries
+    <code>@kernel_compile_expected_failure</code> — a strict xfail admitting only
+    <code>KernelCompileBarrier</code> — and <code>@pytest.mark.timeout(660)</code>. The
+    fixture spawns one child that compiles the 132-cell Biot harmonic kernel and waits
+    <code>process.wait(timeout=600)</code> for it; over the bound it terminates the child,
+    writes <code>WALL_LIMIT_SECONDS=600</code>, and raises <code>KernelCompileBarrier</code>.
+    The compile is genuinely longer than 600&nbsp;s at every revision, so the child reaches
+    <code>KERNEL_COMPILE_INPUT_READY</code> and never prints
+    <code>KERNEL_COMPILE_PREREQUISITE_COMPLETE</code>.</p>
+    <p>That is the condition the xfail declares, and on a node that can carry the compile
+    the id is <strong>green</strong>: at main, job 1290248 ran
+    <code>test_biot_moment_point_derivatives</code> alone with 450&nbsp;GB and it xfailed in
+    615&nbsp;s, its evidence log ending <code>WALL_LIMIT_SECONDS=600 / EXIT=-15</code> —
+    the fixture's own terminate, the declared barrier, the strict xfail satisfied. The same
+    id xfails at base (614&nbsp;s) and at the contour merge (626&nbsp;s) in job 1290232.</p>
+    <p>What makes the id <em>red</em> is nothing in the read. It is the allocation taking
+    the child away first. Where the host kills the child outright the evidence log ends
+    <code>EXIT=-9</code> with no <code>WALL_LIMIT_SECONDS</code> line, the fixture's
+    <code>if code:</code> branch raises <code>RuntimeError: kernel prerequisite exited -9</code>,
+    and a strict xfail that admits only <code>KernelCompileBarrier</code> reports that as an
+    error. Every one of the 21 fixture rows in job 1290186 died that way, at all three
+    revisions, under six concurrent native compiles in a 96&nbsp;GB allocation; job 1290232
+    reproduced it for main alone under two concurrent compiles in 250&nbsp;GB, and then
+    ended <code>OUT_OF_MEMORY</code>.</p>
+    <p><strong>This is a property of the allocation, not of a revision.</strong> The one
+    run that carried the compile at main — job 1290248, one id, 450&nbsp;GB, no sibling
+    compile — xfails green at the same revision where the two-id job errored. So the biot
+    id is not evidence of a merge effect, and the six remaining fixture ids share the same
+    fixture and the same child, so the same reading applies to them: their redness is the
+    kill, not the read. What this node measured directly is biot at all three revisions;
+    the other six were measured only under the memory pressure that caused the kill.</p>
+  </section>
+
+  <section id="topology-read-test-walls-bound">
+    <h2>Cause 3: a bound set below the read's cost</h2>
+    <p>Two ids exceed the configured 300&nbsp;s bound at every revision:
+    <code>test_topology_class_and_membership[diverted]</code> at 359/386/371&nbsp;s and
+    <code>test_saddle_support_order[diverted]</code> at 419/383/385&nbsp;s. Both are
+    already in the base revision's failing list, so no merge introduced them and no merge
+    can remove them: they are a bound whose value sits below the cost these two reads
+    observe on this hardware.</p>
+    <p>Their <code>[limited]</code> siblings show why the lane matters more than the
+    margin. Measured on a quiet compute node,
+    <code>test_closed_form_resolution_probe[diverted]</code>,
+    <code>test_topology_class_and_membership[limited]</code> and
+    <code>test_saddle_support_order[limited]</code> complete in 153–156&nbsp;s,
+    126–130&nbsp;s and 128–132&nbsp;s — comfortably inside 300&nbsp;s, at every revision.
+    The same three, run from the login node with pytest-timeout active, each stop at
+    <code>Failed: Timeout (&gt;300.0s)</code>. The login-node reading is the outlier: a
+    bound that is safe at 130&nbsp;s of work on a compute node is roughly half a bound at
+    login-node capacity.</p>
+  </section>
+
+  <section id="topology-read-test-walls-recommendations">
+    <h2>Recommendations</h2>
+    <ul>
+      <li>
+        <strong>Size the lane for the shared compile, and let the fixture admit the kill
+        it does not inflict.</strong> The fixture's expected-outcome set covers its own
+        terminate and nothing else, so a host kill — the ordinary consequence of an
+        under-provisioned allocation — reports as an error rather than the condition it
+        is. Widen that set so any death of the child over the bound raises
+        <code>KernelCompileBarrier</code>, and give the lane enough memory for the 132-cell
+        compile to run. Owner file:
+        <code>tests/equilibrium/test_topology_read.py</code>.
+      </li>
+      <li>
+        <strong>The three <code>test_kernel_compile_growth</code> ids are red on the CPU
+        lane by construction.</strong> Either the child's backend check becomes a skip when
+        no GPU is present, so a CPU lane reports the id as skipped rather than
+        <em>refused</em>, or the ids are marked to run only on the GPU lane. The
+        qualification already has a home — the H200, where it xfails as designed at every
+        revision. Owner file: <code>tests/equilibrium/test_topology_read.py</code>.
+      </li>
+      <li>
+        <strong>Set the two <code>[diverted]</code> bounds from the measurement.</strong>
+        The worst wall observed is 419&nbsp;s; a bound of <code>700</code> carries a
+        1.7&times; margin over it, which absorbs the spread these ids show across revisions
+        while keeping the bound able to catch an unbounded regression. Owner file:
+        <code>tests/equilibrium/test_topology_read.py</code>.
+      </li>
+      <li>
+        <strong>Run the topology-read gate on a compute partition, not the login
+        node.</strong> Three of the failures recorded against head are that artefact and
+        nothing else; they pass at every revision where the read is meant to run. No test
+        change is warranted for them.
+      </li>
+      <li>
+        <strong>The root tangent needs no action from this measurement.</strong> It changed
+        no wall by more than the spread within a single revision and no verdict at all,
+        once the run that carried the compile was compared with the run that killed it.
+      </li>
+    </ul>
+    <p>This node changed no test and no source.</p>
+  </section>
+</article>

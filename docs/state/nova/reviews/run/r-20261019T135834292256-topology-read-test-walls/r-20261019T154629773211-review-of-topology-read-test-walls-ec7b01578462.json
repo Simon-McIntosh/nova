@@ -1,0 +1,57 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-19T15:58:28.636Z",
+  "dispatched_at": "2026-10-19T15:46:53Z",
+  "findings": [
+    {
+      "file": "docs/research/topology-read-test-walls.html",
+      "line": "6",
+      "severity": "follow-on",
+      "text": "follow-on: the summary says the run covers \"the sixteen node ids ... that is red on main\", but at main only fifteen of the sixteen are red -- test_closed_form_resolution_probe[limited] passes in 63-66 s at every revision (out-1290186/results.tsv) and is counted into the red set, so the sentence describes the set that was run rather than the set that is red."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T135834292256-topology-read-test-walls/manifest.md",
+      "line": "12",
+      "severity": "follow-on",
+      "text": "follow-on: the tests: line is a prose description of the measurement job rather than the literal command a shell was handed, so the gate receipt cannot be re-run from this line; the underlying per-id commands are recorded in each log header (out-1290186/logs) but the manifest does not lift one into the field promotion reads."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "the landed change is two static HTML documents; no production runtime code reaches them.",
+    "diff": "read both commits against base 32cb743e9; b35556529 adds the research document and ec7b01578 adds the evidence fragment, 341 insertions and no deletions, no test and no source.",
+    "done_when": "read; clause (1)'s one-allocation measurement is job 1290186 (topology-walls/out-1290186, 48 rows in results.tsv), clause (2)'s attribution appears per id in the walls table and the three cause sections, clause (3)'s next action and owner file appear for each cause, and the fixed_points.py question is answered at :183-200.",
+    "goal": "the node's goal is to classify why tests/equilibrium/test_topology_read.py is red on main; docs/research/topology-read-test-walls.html:14-40 gives three distinct causes (a device gate, a compile child killed by its under-provisioned allocation, and a per-test bound below the read's cost) and reports each in the named research document.",
+    "manifest": "read; it reports status complete, commits b35556529 and ec7b01578, and names the measurement set on disk, though its tests: line (manifest.md:12) is a prose description rather than a runnable command and it carries no baseline_suite/after_suite arms.",
+    "write_paths": "read the manifest's declared write paths (docs/research/topology-read-test-walls.html, docs/evidence/fragments/converged-forward-solve/topology-read-test-walls.html, docs/figures/converged-forward-solve/topology-read-test-walls); the diff touches the first two and nothing else."
+  },
+  "justifications": {
+    "durability": "the diff is two HTML documents and adds no assertion, so nothing can fail if the analysis rots; the document's own recommendations (a widened bound) would silently invalidate its wall tables, and no guard asserts any claim in it.",
+    "evidence": "the gate is job 1290186 at topology-walls/out-1290186/results.tsv (48 rows = 16 ids x 3 revisions), and the claims I spot-checked reproduce: the device assertion at tests/equilibrium/test_topology_read.py:2496, the killed child EXIT=-9 against the control's EXIT=-15, the H200 xfail walls 686-726 s, and the bound overrun walls 359/386/371 and 419/383/385.",
+    "fit": "docs/research/topology-read-test-walls.html:1 uses the same <article class=\"r-doc\" data-kind=\"research\"> wrapper as docs/research/contour-mesh-capacity.html, the fragment uses the r-fragment/data-node wrapper its sibling fragment already carries, and the slugs are hyphenated with no plan label.",
+    "goal_fidelity": "docs/research/topology-read-test-walls.html:66-138 names all three causes with the measured wall for each id at 6cce876e3, 5d40e0155 and 32cb743e97, and :183-200 answers the fixed_points.py question, but :6 overstates the set as the \"sixteen node ids ... that is red on main\" when only fifteen are red at main (test_closed_form_resolution_probe[limited] passes at 63 s and is counted in).",
+    "reuse": "no code is added; a capability search over docs/research and docs/evidence/fragments for an existing classification of these tests found prior fragments that mention test_topology_read but none that attributes its redness, so this document is the first owner of that capability.",
+    "scope_discipline": "git diff --stat 32cb743e9 ec7b01578 lists only docs/research/topology-read-test-walls.html and docs/evidence/fragments/converged-forward-solve/topology-read-test-walls.html, both inside the manifest's declared write paths, and no test or source file is touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to classify why tests/equilibrium/test_topology_read.py is red on main; docs/research/topology-read-test-walls.html:14-40 gives three distinct causes (a device gate, a compile child killed by its under-provisioned allocation, and a per-test bound below the read's cost) and reports each in the named research document.\nVERDICT done_when: read; clause (1)'s one-allocation measurement is job 1290186 (topology-walls/out-1290186, 48 rows in results.tsv), clause (2)'s attribution appears per id in the walls table and the three cause sections, clause (3)'s next action and owner file appear for each cause, and the fixed_points.py question is answered at :183-200.\nVERDICT write_paths: read the manifest's declared write paths (docs/research/topology-read-test-walls.html, docs/evidence/fragments/converged-forward-solve/topology-read-test-walls.html, docs/figures/converged-forward-solve/topology-read-test-walls); the diff touches the first two and nothing else.\nVERDICT manifest: read; it reports status complete, commits b35556529 and ec7b01578, and names the measurement set on disk, though its tests: line (manifest.md:12) is a prose description rather than a runnable command and it carries no baseline_suite/after_suite arms.\nVERDICT diff: read both commits against base 32cb743e9; b35556529 adds the research document and ec7b01578 adds the evidence fragment, 341 insertions and no deletions, no test and no source.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/research/topology-read-test-walls.html:66-138 names all three causes with the measured wall for each id at 6cce876e3, 5d40e0155 and 32cb743e97, and :183-200 answers the fixed_points.py question, but :6 overstates the set as the \"sixteen node ids ... that is red on main\" when only fifteen are red at main (test_closed_form_resolution_probe[limited] passes at 63 s and is counted in).\nSCORE evidence: 18\nJUSTIFICATION evidence: the gate is job 1290186 at topology-walls/out-1290186/results.tsv (48 rows = 16 ids x 3 revisions), and the claims I spot-checked reproduce: the device assertion at tests/equilibrium/test_topology_read.py:2496, the killed child EXIT=-9 against the control's EXIT=-15, the H200 xfail walls 686-726 s, and the bound overrun walls 359/386/371 and 419/383/385.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 32cb743e9 ec7b01578 lists only docs/research/topology-read-test-walls.html and docs/evidence/fragments/converged-forward-solve/topology-read-test-walls.html, both inside the manifest's declared write paths, and no test or source file is touched.\nSCORE durability: 15\nJUSTIFICATION durability: the diff is two HTML documents and adds no assertion, so nothing can fail if the analysis rots; the document's own recommendations (a widened bound) would silently invalidate its wall tables, and no guard asserts any claim in it.\nSCORE fit: 19\nJUSTIFICATION fit: docs/research/topology-read-test-walls.html:1 uses the same <article class=\"r-doc\" data-kind=\"research\"> wrapper as docs/research/contour-mesh-capacity.html, the fragment uses the r-fragment/data-node wrapper its sibling fragment already carries, and the slugs are hyphenated with no plan label.\nSCORE reuse: 20\nJUSTIFICATION reuse: no code is added; a capability search over docs/research and docs/evidence/fragments for an existing classification of these tests found prior fragments that mention test_topology_read but none that attributes its redness, so this document is the first owner of that capability.\nFINDING docs/research/topology-read-test-walls.html:6 follow-on: the summary says the run covers \"the sixteen node ids ... that is red on main\", but at main only fifteen of the sixteen are red -- test_closed_form_resolution_probe[limited] passes in 63-66 s at every revision (out-1290186/results.tsv) and is counted into the red set, so the sentence describes the set that was run rather than the set that is red.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T135834292256-topology-read-test-walls/manifest.md:12 follow-on: the tests: line is a prose description of the measurement job rather than the literal command a shell was handed, so the gate receipt cannot be re-run from this line; the underlying per-id commands are recorded in each log header (out-1290186/logs) but the manifest does not lift one into the field promotion reads.\n",
+  "review_run_id": "r-20261019T154629773211-review-of-topology-read-test-walls-ec7b01578462",
+  "reviewed_base_sha": "32cb743e978319766ab7186ddbb701733dd9265f",
+  "reviewed_head_sha": "ec7b01578462227c0a580db8b9962c477dfb60d3",
+  "reviewed_run_id": "r-20261019T135834292256-topology-read-test-walls",
+  "scores": {
+    "durability": 15,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T16:02:00Z",
+  "total": 110
+}

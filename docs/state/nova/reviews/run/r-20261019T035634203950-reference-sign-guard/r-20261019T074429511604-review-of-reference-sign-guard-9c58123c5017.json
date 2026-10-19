@@ -13,6 +13,11 @@
       "kind": "exempted",
       "reason": "The coordinator widened the grant to crosscheck.py and probe_read.py before those edits; the write paths recorded on the run include both.",
       "recorded_at": "2026-10-19T08:23:30.928199+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "sign-guard-undecidable-span",
+      "recorded_at": "2026-10-19T08:23:51.031662+00:00"
     }
   },
   "findings": [

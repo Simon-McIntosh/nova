@@ -19,7 +19,7 @@ revision=$(git rev-parse HEAD)
 dirty=$(git status --porcelain -uno | wc -l | tr -d ' ')
 python=${PYTHON:-/home/ITER/mcintos/Code/nova/.venv/bin/python}
 targets="scripts/prototypes/certified_carrier_export/test_export_records.py"
-command="NOVA_CERTIFIED_EXPORT_MUTATION=$mutation JAX_PLATFORMS=cpu PYTHONPATH=$tree $python -m pytest -p no:cacheprovider -q -rf $targets"
+command="TMPDIR=${TMPDIR:-/tmp} NOVA_CERTIFIED_EXPORT_MUTATION=$mutation JAX_PLATFORMS=cpu PYTHONPATH=$tree $python -m pytest -p no:cacheprovider -q -rf $targets"
 nova_file=$(PYTHONPATH="$tree" "$python" -c 'import nova; print(nova.__file__)')
 
 {

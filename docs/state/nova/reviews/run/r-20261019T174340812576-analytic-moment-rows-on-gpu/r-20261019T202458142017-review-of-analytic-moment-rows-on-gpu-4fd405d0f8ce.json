@@ -1,0 +1,61 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [
+    {
+      "failure_condition": "The diff adds no assertion; it changes only the test's parameters, adds an early pytest.skip off the GPU lane, and defaults the results directory to os.environ.get('NOVA_BOOK_RESULTS') or tmp_path. Reverting the skip (the negative control) restores the RuntimeError at scripts/prototypes/support/book.py:65 and reddens the six rows on CPU, so the guard is observable, but no committed assertion pins the skip reason.",
+      "lines": "tests/test_current_book_fragments.py:188-195"
+    },
+    {
+      "failure_condition": "The existing row assertions compare row['...'] fields against independent literals (net_current_relative_error <= 1e-12, budget ratios <= 1) read from measure()'s own receipts, not against a value the test passed in, so each can fail if the measurement regresses; none was changed by this diff.",
+      "lines": "tests/test_current_book_fragments.py:197-215"
+    }
+  ],
+  "call_sites": [],
+  "completed_at": "2026-10-19T20:36:23.984Z",
+  "dispatched_at": "2026-10-19T20:25:23Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/analytic-moment-rows.html",
+      "line": "44",
+      "severity": "follow-on",
+      "text": "follow-on: done_when clause (2) asks all six rows to run as ONE job, but analytic-moment-rows.html:44 records job 1290367 cut by the 02:00:00 wall (slurmstepd TIME LIMIT, sacct TIMEOUT after 02:00:22) after the fifth row, with top-up job 1290419 measuring diverted 5000 separately, so the single-job shape is unmet even though every one of the six rows was measured on the H200 and passes."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/analytic-moment-rows.html",
+      "line": "38",
+      "severity": "follow-on",
+      "text": "follow-on: the limited 2000 row's read-image error is tabulated as 2.67e-05, but its receipt h200-results/limited-2000.json gives read_image_error 2.66948705731192e-06 (2.67e-06), a factor of ten high; the pass verdict survives (2.67e-06 is inside factor*exact_image_error+uncertainty and <= 1e-4) but the served table misreports the field."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/analytic-moment-rows.html",
+      "line": "40",
+      "severity": "follow-on",
+      "text": "follow-on: the limited 5000 row's exact-image error is tabulated as 3.45e-05, but its receipt h200-results/limited-5000.json gives exact_image_error 3.1916620704261736e-05 (3.19e-05); 3.45e-04 is the diverted 5000 row's exact-image error one line below, so the value looks copied across, and the served table misreported the field."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Four commits read against base: 496a5e765 adds the backend skip and the NOVA_BOOK_RESULTS-or-tmp_path default to the test, and 0eb7ac71e/4afb15674/4fd405d0f write the fragment; two files changed, no assertion or bound modified.",
+    "done_when": "The source brief.txt:11-24 names three clauses: (1) a backend-named skip checked before any environment read with the results directory from NOVA_BOOK_RESULTS or pytest tmp_path and no assertion or bound changed, (2) all six rows on the H200 as ONE job via scripts/h200_test_lane/run.sh --time=02:00:00, and (3) both CPU arms in fresh processes with no added failure and the six rows skipping at head; clauses (1) and (3) are met as recorded, clause (2) was met by two jobs.",
+    "goal": "The source brief.txt:1-5 asks the six analytic certificate-moment rows to run only where they can run, on the GPU lane; the landed change tests/test_current_book_fragments.py:189-195 skips the rows off the GPU lane naming the backend and calls measure on the GPU lane, and all six receipts under h200-results/ carry device cuda:0.",
+    "manifest": "The source manifest.md records status complete, the four commits, changed_paths equal to the diff, base 6 failed/10 passed and head 10 passed/6 skipped with their logs, and the two-job H200 wall; its results reconcile with cpu-base-suite.log and cpu-head-suite.log.",
+    "write_paths": "The source prompt.txt:88-92 fences four paths; git diff 9beab06a492a7e37bb662be57bb66b91fdf6baf9..4fd405d0f8ce5103449e9767502cf1b72d899bfc touches tests/test_current_book_fragments.py and docs/evidence/fragments/converged-forward-solve/analytic-moment-rows.html, both inside those paths."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261019T202458142017-review-of-analytic-moment-rows-on-gpu-4fd405d0f8ce",
+  "reviewed_base_sha": "9beab06a492a7e37bb662be57bb66b91fdf6baf9",
+  "reviewed_head_sha": "4fd405d0f8ce5103449e9767502cf1b72d899bfc",
+  "reviewed_run_id": "r-20261019T174340812576-analytic-moment-rows-on-gpu",
+  "scores": {
+    "durability": 14,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T20:41:29.299818+00:00",
+  "total": 104
+}

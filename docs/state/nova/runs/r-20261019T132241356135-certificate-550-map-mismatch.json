@@ -1402,6 +1402,43 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "0c6d07aedb4245e8f4cf3ec75a238d0f24122366",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 20096,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261019T132241356135-certificate-550-map-mismatch",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 20096,
+        "path": "/tmp/reckon-crew-scratch/r-20261019T132241356135-certificate-550-map-mismatch"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/certificate-550-map-mismatch",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

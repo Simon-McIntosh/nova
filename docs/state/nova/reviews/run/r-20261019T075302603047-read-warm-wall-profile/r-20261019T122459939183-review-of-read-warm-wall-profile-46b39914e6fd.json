@@ -1,0 +1,53 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [
+    {
+      "failure_condition": "Raises when the stage-by-stage reconstruction's fragment_component or valid differs from the whole topology.read output. It compares two independently computed outputs of the code under test (the split path against the whole path), not a value against the same input the test supplied, so it would redden if a stage were mis-sequenced or a fused path diverged. It is a real guard, but it lives in a prototype script run by hand, not in a test, so no suite runs it.",
+      "lines": "scripts/prototypes/read_warm_wall/measure.py:100"
+    },
+    {
+      "failure_condition": "Raises when the standalone component-label call's output differs from the read's fragment_component. Same independent-comparison shape as the first; it would redden on a label regression, but is reachable only when measure.py is run by hand.",
+      "lines": "scripts/prototypes/read_warm_wall/measure.py:120"
+    },
+    {
+      "failure_condition": "The report is a measurement node's deliverable and adds no assertion over its published numbers (exponents, shares, the 81.315 s total). Nothing reddens if the receipts are regenerated with different numbers and the prose is not updated.",
+      "lines": "docs/research/read-warm-wall.html walls/mechanism"
+    }
+  ],
+  "call_sites": [
+    "nova/equilibrium/topology.py:2976",
+    "nova/equilibrium/run_read.py",
+    "nova/equilibrium/contour_tree.py:186",
+    "nova/equilibrium/contour_tree.py:237",
+    "nova/equilibrium/contour_tree.py:364",
+    "nova/equilibrium/contour_tree.py:482"
+  ],
+  "completed_at": "2026-10-19T12:42:15.111Z",
+  "dispatched_at": "2026-10-19T12:25:31Z",
+  "findings": [],
+  "item_verdicts": {
+    "call_sites": "The landed change is documentation and prototype scripts under scripts/prototypes/, which no production module imports (grep of nova/ and tests/ for read_warm_wall finds no importer). The prototype instead calls into the production read path its report cites; the sites I opened and verified as matching the report's mechanism description are topology.py:2976 (the build_contour_tree call) and contour_tree.py:186,237,364,482-488, which the report names as the split-node pass, carrier-edge pass, vertex sweep and dense node-by-vertex equality matrix.",
+    "diff": "Read commit by commit against base 6cce876e3: ff54cb23d adds the prototype scripts, 32f0f3ede synchronizes the stage measurements and adds the receipts, 07f130486 lands the research doc and the landing fragment, 51741d1 clarifies the figure and stage table, 46b39914e corrects the fragment's research link. Six new files, no production or test source changed.",
+    "done_when": "The brief's three items plus the figure are all satisfied: (1) one H200 job (1289901) holds all eight rows (h200_split_1h.log, EXIT=0, device cuda:0), each row reports the warm total and per-stage wall via block_until_ready after a first warm call with compile reported separately (measure.py:31-43), and the 10, 10000-cell limited total 81.315 s reproduces the 80.623 s control at +0.86%, stated in the report as +0.9%; (2) the four-rung log-log exponents and 10000-cell shares are tabulated (h200-summary.json: limited contour tree exponent 1.472, share 98.786%), the dominant stage named and its mechanism tied to topology.py:2976 -> contour_tree.py:186,237,364,482-488; (3) a sparse/indexed repair is proposed with expected exponent 1.0-1.2, a described test and a measured 8.9x feasibility statement. The log-axis figure warm-stages.svg marks the 10 s target.",
+    "goal": "The source brief.txt goal is to profile the topology read's warm wall stage by stage on the H200, name what grows superlinearly, and change no product code. The landed diff at head 46b39914e adds scripts/prototypes/read_warm_wall/{measure.py,run.sh,summarize.py} plus docs/research/read-warm-wall.html and its fragment/figure, measuring the whole read and four separately compiled stages for limited and diverted at 550/2000/5000/10000 cells and naming the contour tree the dominant superlinear stage, with nothing under nova/ changed.",
+    "manifest": "Read; status complete, with commits ff54cb23d, 32f0f3ede, 07f130486, 51741d1, 46b39914e, the eight H200 receipts, the summary JSON, the research doc and the fragment named. Its baseline_suite and after_suite are the focused single-test (base_fast_suite.log, head_fast_suite.log, both 1 passed EXIT=0); the broader three-test probe is recorded under follow_ons with the same two 300 s timeout ids on both arms, so it contributes no added failure id.",
+    "write_paths": "The manifest declares write paths scripts/prototypes/read_warm_wall, docs/research/read-warm-wall.html, docs/evidence/fragments/converged-forward-solve/{read-warm-wall.html,read-warm-wall-profile.html} and docs/figures/converged-forward-solve/{read-warm-wall,read-warm-wall-profile}. git ls-tree at head lists exactly six new files, all inside those paths; nothing under nova/ or tests/ changed."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261019T122459939183-review-of-read-warm-wall-profile-46b39914e6fd",
+  "reviewed_base_sha": "6cce876e3b56347f3fe02de2186e2d8e42d275ac",
+  "reviewed_head_sha": "46b39914e6fd217641616dca9ac590c15def571f",
+  "reviewed_run_id": "r-20261019T075302603047-read-warm-wall-profile",
+  "scores": {
+    "durability": 11,
+    "evidence": 16,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T12:45:50.919648+00:00"
+}

@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="440">
+<meta name="plan-version" content="441">
 <meta name="plan-modified" content="2026-10-19">
 </head>
 <body>
@@ -1225,6 +1225,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261019T075848366776-contour-mesh-capacity" data-who="reckon-build" data-when="2026-10-19T10:26:08Z">
     <div class="r-comment-body"><p>contour-mesh-capacity: the topology contour carrier is sized from its geometry and refuses an overflow with ContourMeshOverflow naming both counts; all eight imas-efit ITER trace records that failed now build a mesh with valid vertices below capacity, where before they required 247 against a declared capacity of 231 and returned zero valid vertices, and the control tree that restores the fixed formula turns all eight red again.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261019T091252151820-review-of-read-warm-wall-profile-51741d1153d7" data-who="reckon-build" data-when="2026-10-19T09:29:40.774Z">
+    <div class="r-comment-body"><p>review of r-20261019T075302603047-read-warm-wall-profile at head 51741d1153d79d4031aa8de42e882a46a390aae2: scores goal_fidelity 19, evidence 16, scope_discipline 20, durability 11, fit 16, reuse 18; one blocking finding (fragment link to /nova/read-warm-wall.html misses the research/ segment); added_failure_count 0.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

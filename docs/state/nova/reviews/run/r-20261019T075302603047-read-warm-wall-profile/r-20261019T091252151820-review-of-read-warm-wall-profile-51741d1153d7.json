@@ -1,0 +1,59 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [
+    {
+      "failure_condition": "The first guard raises when the stage-by-stage reconstruction's fragment_component or valid differs from the whole topology.read output. It compares two independently computed outputs of the code under test (the split path against the whole path), not a value against the same input the test supplied, so it does redden if a stage is mis-sequenced or a fused path diverges; it is a real guard, but it lives in a prototype script, not a test, so no suite runs it.",
+      "lines": "scripts/prototypes/read_warm_wall/measure.py:88-92"
+    },
+    {
+      "failure_condition": "The second guard raises when the standalone component-label call's output differs from the read's fragment_component. Same independent-comparison shape as the first and it would redden on a label regression, but again it is only reachable when measure.py is run by hand.",
+      "lines": "scripts/prototypes/read_warm_wall/measure.py:116-118"
+    },
+    {
+      "failure_condition": "The report is a measurement node's deliverable and adds no assertion over the numbers it publishes (exponents, shares, the 81.315 s total). Nothing reddens if the receipts are regenerated with different numbers and the prose is not updated, so the recorded result is durable only to the extent a reader re-derives it from the receipts.",
+      "lines": "docs/research/read-warm-wall.html walls/mechanism"
+    }
+  ],
+  "call_sites": [
+    "nova/equilibrium/topology.py:2976",
+    "nova/equilibrium/contour_tree.py:186",
+    "nova/equilibrium/contour_tree.py:237",
+    "nova/equilibrium/contour_tree.py:364",
+    "nova/equilibrium/contour_tree.py:482"
+  ],
+  "completed_at": "2026-10-19T09:29:40.774Z",
+  "dispatched_at": "2026-10-19T09:13:54Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/read-warm-wall-profile.html",
+      "line": "1",
+      "severity": "blocking",
+      "text": "blocking: the landing fragment links its research record as href=\"/nova/read-warm-wall.html\", but the file it points at is docs/research/read-warm-wall.html and the served path is /nova/research/read-warm-wall.html. Every other research-doc link in docs/evidence/fragments/ carries the research/ segment (e.g. docs/evidence/fragments/converged-forward-solve/axis-ranking.html links /nova/research/axis-ranking.html), and this is the only root-level .html link in the whole fragments corpus, so the fragment's single outbound link 404s in the SPA and a reader landing on the evidence fragment cannot reach the report the node exists to produce. Fix by inserting research/ in the href."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "The landed change is documentation and prototype scripts, which no production code imports, so nothing reaches it at runtime; the production sites examined are the read path its mechanism claims cite (topology.py:2976 calling build_contour_tree, contour_tree.py:186,237,364,482-488), each of which I opened and confirmed matches the report's description.",
+    "diff": "Read commit by commit against base 6cce876e3: ff54cb23d adds the prototype scripts, 32f0f3ede synchronizes the stage measurements and adds the receipts, 07f130486 lands the research doc and the landing fragment, 51741d1 clarifies the figure and table. Six new files, 2524 insertions, no production or test source changed.",
+    "done_when": "The source done_when (brief.txt) names three items plus a figure. Item (1): one H200 job holds all eight rows (h200_split_1h.log, job 1289901, device cuda:0, EXIT=0); each row reports warm total and per-stage wall via block_until_ready after a first warm call (measure.py:34-45), and the 10,000-cell limited total 81.315 s reproduces the 80.623 s control within a stated +0.9% spread. Item (2): the four-rung log-log exponents and 10,000 shares are tabulated (contour tree exponent 1.472, 98.786%); the dominant stage is named and its mechanism tied to topology.py:2976 -> contour_tree.py:186,237,364,482-488. Item (3): a sparse/indexed repair is proposed with expected exponent 1.0-1.2, a described test, and a feasibility statement from the 0.987 s whole-minus-tree remainder. The figure warm-stages.svg is the log-log warm wall per stage with the 10 s target marked.",
+    "goal": "The source brief.txt:1-2 goal is to profile the topology read's warm wall stage by stage on the H200, name what grows superlinearly, and change no product code; the landed diff (docs/research/read-warm-wall.html plus scripts/prototypes/read_warm_wall/) measures the whole read and four separately compiled stages for limited and diverted at four rungs and names the contour tree stage as the dominant superlinear term, touching no file under nova/.",
+    "manifest": "Read; status complete, with commits ff54cb23d, 32f0f3ede, 07f130486, 51741d1, all eight H200 receipts, the summary JSON, the research doc and the fragment named. Its baseline_suite and after_suite are the focused test only (both 0 failures, 1 passed); the broader three-test probe is recorded under follow_ons with the same two 300 s timeout ids on both arms.",
+    "write_paths": "The source manifest.md declares write paths scripts/prototypes/read_warm_wall, docs/research/read-warm-wall.html, docs/evidence/fragments/converged-forward-solve/(read-warm-wall.html and read-warm-wall-profile.html) and docs/figures/converged-forward-solve/(read-warm-wall and read-warm-wall-profile); git diff --stat 6cce876..51741d1 touches only those six paths and nothing under nova/ or tests/), so the diff is inside the declared scope."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261019T091252151820-review-of-read-warm-wall-profile-51741d1153d7",
+  "reviewed_base_sha": "6cce876e3b56347f3fe02de2186e2d8e42d275ac",
+  "reviewed_head_sha": "51741d1153d79d4031aa8de42e882a46a390aae2",
+  "reviewed_run_id": "r-20261019T075302603047-read-warm-wall-profile",
+  "scores": {
+    "durability": 11,
+    "evidence": 16,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T12:32:46.419654+00:00"
+}

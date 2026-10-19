@@ -159,5 +159,106 @@ read-site reproductions), <code>field-swap-comparison-verified.log</code>,
 <code>negative-control-resume.log</code>, <code>focused-resume.log</code>,
 <code>baseline_suite_resume.log</code>, and <code>after_suite_resume.log</code>.</p>
 
+<h2>Undecidable spans: three outcomes, seventeen slices</h2>
+<p>The guard above treated a span within tolerance of zero as agreement. A slice
+whose stored grid fixed no flux extremum therefore passed neither refused nor
+flagged, and a caller could not tell "checked and agreed" from "could not tell".
+The check now separates three outcomes - <em>agrees</em>, <em>contradicts</em>
+and <em>undecidable</em> - and an undecidable span is refused with
+<code>UndecidableSignError</code>, naming the span and the tolerance it failed to
+clear. Every caller refuses on it: the TCV comparison <code>measure_slice</code>
+and both trace read sites, <code>crosscheck._decision</code> and
+<code>probe_read.probe_record</code>.</p>
+<p>The tolerance is no longer a bare <code>1e-9</code> with no derivation. It is
+<code>_SIGN_TOLERANCE = 1024 * eps</code>, a thousand-fold margin over the
+double-precision unit roundoff, applied to a flux width: the grid's
+peak-to-peak range (<code>np.ptp</code> of the stored psi) for a grid span, and
+the compared scalars' own difference for a scalar span. A range and a difference
+are each unchanged by a constant added to every psi sample, so the band cannot
+be moved by the gauge. A test adds <code>1e10</code> to a
+fixture and asserts each of the three outcomes - agrees, contradicts,
+undecidable - is the one the unshifted field produced. The curvature fallback
+names its own floor, <code>_CURVATURE_TOLERANCE = 1e-9</code> on the axis
+Hessian eigenvalues.</p>
+<p>The TCV driver read twelve hand-chosen slices of the 1703-slice store while
+the defect had been measured on seventeen distinct psi grids, so five slices had
+never been guarded. A scan of the store (<code>profiles_2d/psi</code> is
+piecewise-constant in time) finds the seventeen distinct grids at starts
+0, 6, 14, 24, 34, 46, 118, 206, 248, 291, 333, 376, 456, 542, 611, 796, 1257, and
+<code>measure.SLICES</code> now lists them. The driver reports each slice's
+outcome with its scalar and grid spans:</p>
+<table>
+<tr><th>slice</th><th>grid_span</th><th>scalar_span</th><th>outcome</th></tr>
+<tr><td>0</td><td>-1.371e-02</td><td>+1.488e-02</td><td>contradicts</td></tr>
+<tr><td>6</td><td>-2.040e-02</td><td>+3.695e-02</td><td>contradicts</td></tr>
+<tr><td>14</td><td>-5.261e-02</td><td>+6.046e-02</td><td>contradicts</td></tr>
+<tr><td>24</td><td>-1.171e-01</td><td>+6.281e-02</td><td>contradicts</td></tr>
+<tr><td>34</td><td>-1.003e-01</td><td>+6.711e-02</td><td>contradicts</td></tr>
+<tr><td>46</td><td>-1.191e-01</td><td>+8.763e-02</td><td>contradicts</td></tr>
+<tr><td>118</td><td>-1.463e-01</td><td>+1.082e-01</td><td>contradicts</td></tr>
+<tr><td>206</td><td>-1.544e-01</td><td>+1.454e-01</td><td>contradicts</td></tr>
+<tr><td>248</td><td>-1.456e-01</td><td>+1.489e-01</td><td>contradicts</td></tr>
+<tr><td>291</td><td>-1.457e-01</td><td>+1.416e-01</td><td>contradicts</td></tr>
+<tr><td>333</td><td>-1.420e-01</td><td>+1.395e-01</td><td>contradicts</td></tr>
+<tr><td>376</td><td>-1.452e-01</td><td>+1.417e-01</td><td>contradicts</td></tr>
+<tr><td>456</td><td>-1.485e-01</td><td>+1.546e-01</td><td>contradicts</td></tr>
+<tr><td>542</td><td>-1.669e-01</td><td>+1.733e-01</td><td>contradicts</td></tr>
+<tr><td>611</td><td>-1.552e-01</td><td>+1.697e-01</td><td>contradicts</td></tr>
+<tr><td>796</td><td>-1.645e-01</td><td>+1.710e-01</td><td>contradicts</td></tr>
+<tr><td>1257</td><td>-2.068e-01</td><td>+1.955e-01</td><td>contradicts</td></tr>
+</table>
+<p>Seventeen rows, seventeen refusals:
+<code>LIUQE_ROWS 17 REFUSED 17 AGREES 0 CONTRADICTS 17 UNDECIDABLE 0</code>. The
+outcome count is seventeen contradicting, as required. All twenty-eight
+field-swap trace records are re-read and all agree
+(<code>FIELD_SWAP_ROWS 28 REFUSED 0</code>: 14 grid <code>+1</code>, 10 grid
+<code>-1</code>, 4 curvature <code>+1</code>): none now reads undecidable, so
+none is named with a span and no row changed.</p>
+<h3>Suite arms</h3>
+<p>Both arms ran the same six test files
+(<code>test_crosscheck.py</code>, <code>test_export_states.py</code>,
+<code>test_orientation.py</code>, <code>test_spline_field.py</code>,
+<code>test_trace_record.py</code>, <code>test_coverage.py</code>) with the
+repository-root conftest, in fresh processes, selecting <code>-m "not slow"</code>.
+The base arm at <code>375241085</code> used the base sources with the head
+<code>test_orientation.py</code> overlaid, so the new tests are present: 7 failed,
+45 passed, one deselected in 473.59 s, the seven failures being exactly the new
+tests - the six undecidable-span tests plus the gauge-invariance test
+(<code>AttributeError: ... has no attribute 'UndecidableSignError'</code>, or
+the read sentinel reached). The head arm at
+<code>c46ccd0768cc6a4a781bafbb959592e7a24434e4</code>: 53 passed,
+one deselected, zero added failures, in 537.36 s. A focused gate over the two
+touched test files passed 31, and the single failure it met is a pre-existing
+one outside the selected lane, recorded below.</p>
+<p>An earlier pass of the same three gates preceded the gauge-free tolerance
+repair, over six test files: the base arm then read 6 failed / 45 passed and the
+head arm 52 passed. The one added base failure and one added head pass are the
+gauge-invariance test the repair introduced; no other count moved.</p>
+<h3>Negative control</h3>
+<p>The declared mutation restores the zero-sign-as-agreement rule
+(<code>undecidable = []</code> in <code>_refuse</code>). The undecidable-span
+test then fails: pytest exits <code>EXIT=1</code> with six failing ids in
+<code>test_orientation.py</code>, none of which the head arm fails; the gauge-invariance
+test added with the tolerance repair exercises the same entry point and is
+expected to fail under the same mutation, which was not re-run.</p>
+<h3>Pre-existing failure outside this node's lane</h3>
+<p><code>test_coverage.py::test_limited_slice_is_read_only_when_coverage_is_certified</code>
+(marked <code>slow</code>, so deselected from both arms) asserts that LIUQE
+slice 34 reads as <code>limited</code>. The parent guard refuses that slice - the
+grid contradicts its declaration on all seventeen grids - so the test raises
+<code>ReferenceSignError</code> before its read. This is not caused by the
+undecidable-span change: the refusal fires on a decisive span and is present at
+<code>375241085</code>. It is reported as a follow-on rather than repaired here,
+because its subject is the coverage certificate and it needs a non-LIUQE field
+to run, which is a different node.</p>
+<h3>Receipts</h3>
+<p>Under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T083523749810-sign-guard-undecidable-span/logs</code>:
+<code>reference-sign.log</code> and <code>reference-sign-slices.json</code> (the
+seventeen-slice outcomes and spans), <code>field-swap-guarded.json</code> (the
+twenty-eight re-read trace rows), <code>block_probe.log</code> (the seventeen
+block starts), <code>focused.log</code>, <code>baseline_suite.log</code>,
+<code>after_suite.log</code>, <code>negative_control.log</code>.</p>
+
 </body>
 </html>

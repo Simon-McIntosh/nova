@@ -198,6 +198,135 @@ def test_trace_record_without_an_in_grid_wall_uses_axis_curvature():
     assert orientation.check_trace_record(record)["grid curvature"] == 1
 
 
+def test_undecidable_grid_span_is_refused_not_read_as_agreement():
+    """A grid span below the sign tolerance fixes no extremum and is refused."""
+    convention = orientation.read_convention(polarity=1)
+    flat = 2.0 + 1e-15 * _scalar_field()
+    with pytest.raises(orientation.UndecidableSignError) as refused:
+        orientation.check_axis_boundary_sign(
+            convention, GRID, GRID, flat, AXIS, (CORNER,)
+        )
+    message = str(refused.value)
+    assert "slice None" in message
+    assert "grid span" in message
+    assert "sign tolerance" in message
+    assert "undecidable" in message
+    # 1024 * eps, computed here independently of the function under test.
+    assert "2.274e-13" in message
+
+
+def test_sign_decision_is_unchanged_by_an_additive_gauge_constant():
+    """The band is a flux width, so shifting psi moves no outcome.
+
+    A grid's peak-to-peak range and the scalars' difference are both unchanged
+    by a constant added to every psi sample, so agrees, contradicts and
+    undecidable must each survive one.
+    """
+    convention = orientation.read_convention(polarity=1)
+    offset = 1.0e10
+    psi = _scalar_field()
+    agreeing = orientation.check_axis_boundary_sign(
+        convention, GRID, GRID, psi, AXIS, (CORNER,)
+    )
+    shifted_agreeing = orientation.check_axis_boundary_sign(
+        convention, GRID, GRID, psi + offset, AXIS, (CORNER,)
+    )
+    assert agreeing == shifted_agreeing == {"grid": 1}
+
+    flat = 2.0 + 1e-15 * psi
+    for candidate in (flat, flat + offset):
+        with pytest.raises(orientation.UndecidableSignError):
+            orientation.check_axis_boundary_sign(
+                convention, GRID, GRID, candidate, AXIS, (CORNER,)
+            )
+
+    for candidate in (-psi, -psi + offset):
+        with pytest.raises(orientation.ReferenceSignError) as refused:
+            orientation.check_axis_boundary_sign(
+                convention, GRID, GRID, candidate, AXIS, (CORNER,)
+            )
+        assert not isinstance(refused.value, orientation.UndecidableSignError)
+
+    for candidate in (psi, psi + offset):
+        assert orientation.check_trace_record(_record(1, candidate)) == {"grid": 1}
+
+
+def test_undecidable_grid_span_is_refused_with_slice_and_declaration():
+    convention = orientation.read_convention(dd_version="3.41.0", plasma_current=-1.0e5)
+    flat = 1.0 + 1e-15 * _scalar_field()
+    with pytest.raises(orientation.UndecidableSignError) as refused:
+        orientation.check_axis_boundary_sign(
+            convention,
+            GRID,
+            GRID,
+            flat,
+            AXIS,
+            (CORNER,),
+            scalar_axis_psi=1.0,
+            scalar_boundary_psi=-1.0,
+            slice_index=7,
+            declared="COCOS 11, Ip -100000 A",
+        )
+    message = str(refused.value)
+    assert "slice 7" in message and "COCOS 11, Ip -100000 A" in message
+    assert "sign tolerance" in message and "undecidable" in message
+
+
+def test_zero_scalar_span_is_undecidable_even_when_the_grid_agrees():
+    """A zero scalar span fixes no extremum, so a grid that agrees cannot hide it."""
+    convention = orientation.read_convention(polarity=1)
+    with pytest.raises(orientation.UndecidableSignError) as refused:
+        orientation.check_axis_boundary_sign(
+            convention,
+            GRID,
+            GRID,
+            _scalar_field(),
+            AXIS,
+            (CORNER,),
+            scalar_axis_psi=0.5,
+            scalar_boundary_psi=0.5,
+            slice_index=9,
+            declared="polarity +1",
+        )
+    assert "scalar span" in str(refused.value)
+
+
+def test_undecidable_trace_record_is_refused():
+    record = _record(polarity=1, psi=2.0 + 1e-15 * _scalar_field())
+    with pytest.raises(orientation.UndecidableSignError) as refused:
+        orientation.check_trace_record(record)
+    assert "polarity +1" in str(refused.value)
+    assert "sign tolerance" in str(refused.value)
+
+
+def test_crosscheck_refuses_an_undecidable_trace_before_building_the_field(monkeypatch):
+    from scripts.prototypes.efit_field_swap import crosscheck
+
+    class UnreachableField:
+        @classmethod
+        def from_record(cls, record):
+            pytest.fail("comparison built a field before checking the trace sign")
+
+    monkeypatch.setattr(crosscheck, "TraceSplineField", UnreachableField)
+    record = _record(polarity=1, psi=2.0 + 1e-15 * _scalar_field())
+    with pytest.raises(orientation.UndecidableSignError):
+        crosscheck._decision("undecidable", "synthetic", record, (16,))
+
+
+def test_probe_refuses_an_undecidable_trace_before_building_the_field(monkeypatch):
+    from scripts.prototypes.efit_field_swap import probe_read
+
+    class UnreachableField:
+        @classmethod
+        def from_record(cls, record):
+            pytest.fail("probe built a field before checking the trace sign")
+
+    monkeypatch.setattr(probe_read, "TraceSplineField", UnreachableField)
+    record = _record(polarity=1, psi=2.0 + 1e-15 * _scalar_field())
+    with pytest.raises(orientation.UndecidableSignError):
+        probe_read.probe_record("undecidable", record)
+
+
 def test_missing_ids_boundary_is_refused_with_slice_and_declaration():
     convention = orientation.read_convention(dd_version="3.41.0", plasma_current=-1.0e5)
     with pytest.raises(orientation.ReferenceSignError) as refused:

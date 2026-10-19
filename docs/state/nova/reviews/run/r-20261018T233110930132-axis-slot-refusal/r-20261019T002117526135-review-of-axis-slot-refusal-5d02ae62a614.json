@@ -1,0 +1,92 @@
+{
+  "added_failure_count": 0,
+  "added_failure_derivation": "Derived from the reviewed run's own required suite arms recorded in its manifest: baseline_suite (revision dec3cc6a6 base crosscheck source with head test files) exit_status 1, failure_count 1, failure_ids [scripts/prototypes/efit_field_swap/test_crosscheck.py::test_invalid_axis_read_publishes_no_label]; after_suite (revision ddf0a3581) exit_status 0, failure_count 0, failure_ids []. The head arm adds no failure the baseline arm did not carry, so added_failure_count is 0 and added_failure_ids is empty. Both arms are readable (completed true, summary line present in exports/baseline_suite.log and exports/after_suite.log).",
+  "added_failure_ids": [],
+  "artifacts": [
+    "scripts/prototypes/efit_field_swap/crosscheck.py:1000 refusal branch added; label 'refused invalid axis' with NaN axis and NaN boundary on invalid read",
+    "scripts/prototypes/efit_field_swap/test_crosscheck.py:142 test_invalid_axis_read_publishes_no_label asserts label == 'refused invalid axis', axis non-finite, boundary non-finite",
+    "scripts/prototypes/fast_map_production/test_axis_ranking.py:122 test_read_refuses_extremum_within_rounding_enclosure asserts not reading.valid for the offset field and valid for the control",
+    "docs/research/axis-slot-refusal.html:37 names the three unmeasured items"
+  ],
+  "commits_read": [
+    "dec3cc6a6fc3790b8b8be1d75a68131bca7a3e2a",
+    "ddf0a3581d9aabceb3664718ed6d7942714e0905",
+    "5d02ae62a6144290064bb845d47752fff8f30491"
+  ],
+  "completed_at": "2026-10-19T00:29:21.832Z",
+  "dispatched_at": "2026-10-19T00:21:38Z",
+  "evidence_inputs": [
+    "Reviewed base dec3cc6a6fc3790b8b8be1d75a68131bca7a3e2a, head 5d02ae62a6144290064bb845d47752fff8f30491.",
+    "Gate arms exports/baseline_suite.log and exports/after_suite.log.",
+    "Negative controls exports/negctl_crosscheck.log (label path restored -> test red) and exports/negctl_kernel.log (persistent comparison removed -> test red).",
+    "The source node's goal and done_when (prompt.txt lines 30 and the FENCE EVIDENCE block lines 110-112)."
+  ],
+  "findings": [
+    {
+      "file": "scripts/prototypes/read_robustness/census.py",
+      "line": "167",
+      "severity": "blocking",
+      "text": "The multi-axis retention gather (the saddle_slots/axis_slots concatenation after the saddles) is named by the goal and done_when but no test guards it: scripts/prototypes/read_robustness/test_census_axes.py does not exist at the reviewed head, so removing the gather leaves every reader test green and the done_when's 'suite tests fail when ... the multi-axis retention is removed' is unmeasured."
+    },
+    {
+      "file": "docs/research/axis-slot-refusal.html",
+      "line": "37",
+      "severity": "blocking",
+      "text": "The done_when requires the seven TCV NaN-axis rows to become refusals 'with every other row unchanged' shown as a before/after table; the record instead asserts that outcome from a synthetic field only, so the adapter refusal is not verified on the real TCV rows the defect was found on."
+    },
+    {
+      "file": "docs/research/axis-slot-refusal.html",
+      "line": "37",
+      "severity": "blocking",
+      "text": "The done_when's third clause - the cached 550-, 2,000- and 5,000-cell carriers keep their axis where the first root was already strongest - is unmeasured, so the claim that the landed read() agrees with the first-root rule on the certified carriers has no receipt."
+    },
+    {
+      "file": "scripts/prototypes/fast_map_production/test_axis_ranking.py",
+      "line": "143",
+      "severity": "follow-on",
+      "text": "The near-fold test's precondition was widened from 'persistence < enclosure' (which failed at 1.125 < 0.444 in the reviewed run's exports/gate1.log) to 'persistence < 4.0 * enclosure'; the looser bound no longer establishes that the persistence lies inside the enclosure the read compares against, so the setup check is fragile even though the guard at line 145 is mutation-verified red by exports/negctl_kernel.log."
+    }
+  ],
+  "gate_arms_note": "Reviewed run's arms: exports/baseline_suite.log (JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q scripts/prototypes/efit_field_swap/test_crosscheck.py scripts/prototypes/fast_map_production/test_axis_ranking.py; 1 failed, 12 passed in 337.66s) and exports/after_suite.log (same command; 13 passed in 307.57s, EXIT=0). Independent review read the diff and gate logs; it did not re-run the suite.",
+  "item_verdicts": {
+    "diff": "Read commit by commit against base dec3cc6a6: ddf0a3581 changes crosscheck.py (the refusal branch) plus two test files, and 5d02ae62 adds the research record and the evidence fragment; five files, all inside the declared scope.",
+    "done_when": "Substantially unmet: of the done_when's clauses only 'suite tests fail when the near-fold gate is removed' and 'both suite arms recorded' hold; the seven-TCV-row before/after table, the multi-axis retention test, and the 550/2000/5000-cell carrier comparison are all absent from the reviewed head.",
+    "goal": "Partially met: the comparison adapter now refuses an invalid-axis read (scripts/prototypes/efit_field_swap/crosscheck.py:1000) and a suite test guards the near-fold gate, but the goal's 'guard ... the multi-axis branches with suite tests' is unmet because scripts/prototypes/read_robustness/test_census_axes.py was never written.",
+    "manifest": "Read; it states status complete with target_met false and records the two suite arms, the two negative-control logs and the three unmeasured items under follow_ons, matching the artefacts on disk.",
+    "write_paths": "Read the source node's granted paths (crosscheck.py, test_crosscheck.py, test_axis_ranking.py, test_census_axes.py, docs/research/axis-slot-refusal.html, docs/evidence/fragments/converged-forward-solve/axis-slot-refusal.html, docs/figures/converged-forward-solve/axis-slot-refusal); every changed path in the diff is inside them and the granted census test path is the one left unused."
+  },
+  "justifications": {
+    "durability": "Two guards land and each is mutation-verified red by the reviewed run's own negative controls, but the done_when's third guard does not exist and the carrier/first-root regression is untested; the near-fold test's guard (scripts/prototypes/fast_map_production/test_axis_ranking.py:145) is genuine and independent of the value it is handed.",
+    "evidence": "The gate asserts only part of the done_when: both suite arms are recorded (exports/baseline_suite.log 1 failed 12 passed, exports/after_suite.log 13 passed) and the two negative controls are recorded red (exports/negctl_crosscheck.log, exports/negctl_kernel.log), but the TCV before/after label table and the 550/2000/5000-cell carrier comparison are unmeasured, so the done_when's central 'seven rows refuse, every other row unchanged' claim is verified only on a synthetic field.",
+    "fit": "The added code matches the surrounding idiom of scripts/prototypes/efit_field_swap/crosscheck.py:909 (a refusal flag beside the existing uncertified flag, reuse of _empty_outcome), and the diff carries no plan, sprint or version identifier in names or comments.",
+    "goal_fidelity": "The goal's first clause lands and is tested, but the second clause's multi-axis suite test is absent: scripts/prototypes/read_robustness/test_census_axes.py is not in the diff dec3cc6a6..5d02ae62 and does not exist at the reviewed head, so the census gather at scripts/prototypes/read_robustness/census.py:167 stays unguarded.",
+    "reuse": "The refusal consults the read's existing verdict (reading.valid) and the existing _empty_outcome/_undecided seam at scripts/prototypes/efit_field_swap/crosscheck.py:651 rather than reimplementing axis validity, and the test reuses the owner symbols fit_tensor_spline, TraceSplineField and psi_rounding_enclosure; no capability is forked.",
+    "scope_discipline": "Every path in the diff dec3cc6a6..5d02ae62 lies inside the node's declared write_paths (crosscheck.py, test_crosscheck.py, test_axis_ranking.py, docs/research/axis-slot-refusal.html, docs/evidence/fragments/converged-forward-solve/axis-slot-refusal.html); no path outside the fence is modified."
+  },
+  "plan": "nova:converged-forward-solve",
+  "project": "nova",
+  "raw_text": "VERDICT partial-blocking: 89/100 at reviewed head 5d02ae62 (base dec3cc6a6). The adapter refuses an invalid-axis read and one suite test guards each of two branches; the multi-axis suite test, the TCV before/after table and the carrier comparison required by the done_when are absent. SCORE goal_fidelity 9, evidence 10, scope_discipline 20, durability 12, fit 18, reuse 20.",
+  "review_kind": "independent review",
+  "review_run_id": "r-20261019T002117526135-review-of-axis-slot-refusal-5d02ae62a614",
+  "reviewed_base_sha": "dec3cc6a6fc3790b8b8be1d75a68131bca7a3e2a",
+  "reviewed_head_sha": "5d02ae62a6144290064bb845d47752fff8f30491",
+  "reviewed_revision": "5d02ae62a6144290064bb845d47752fff8f30491",
+  "reviewed_run_id": "r-20261018T233110930132-axis-slot-refusal",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/axis-slot-refusal",
+  "reviewer_node": "review-of-axis-slot-refusal-5d02ae62a614",
+  "reviewer_run_id": "r-20261019T002117526135-review-of-axis-slot-refusal-5d02ae62a614",
+  "scores": {
+    "durability": 12,
+    "evidence": 10,
+    "fit": 18,
+    "goal_fidelity": 9,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "section": "\u00a72",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T00:40:00Z",
+  "total": 89,
+  "verdict": "partial-blocking"
+}

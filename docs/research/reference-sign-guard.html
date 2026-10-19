@@ -23,10 +23,16 @@ computed by <code>TopologyConvention.from_cocos</code> from the written conventi
 and the plasma-current sign, so DDv3 COCOS 11 with negative Ip and DDv4 COCOS 17
 with positive Ip both require <code>+1</code> and agree. The guard reads the sign
 of the grid psi at the stored axis minus the grid psi over the stored boundary.
-The difference cancels any additive gauge constant, so a reference cannot satisfy
-the check by re-choosing its zero. The stored scalars are checked with the same
-difference, so a grid that happens to agree cannot hide scalars that do not, and
-the reverse. A refusal names the slice, the declaration and both measured signs.</p>
+The difference cancels any additive gauge constant, and the tolerance is scaled
+by the grid's range rather than by its absolute value, so even a large change
+of zero cannot turn a contradictory sign into an undecided one. Grid values are
+sampled through the same tensor spline used by the comparison read. The stored
+scalars are checked with the same difference, so a grid that happens to agree
+cannot hide scalars that do not, and the reverse. Where a trace wall has no
+point inside its grid, the spline Hessian at the stored axis supplies an
+offset-independent maximum-or-minimum check. An IDS slice with no boundary is
+refused with that reason and its slice and declaration. A sign refusal names
+the slice, declaration and measured signs.</p>
 
 <h2>TCV 77549: every slice refused</h2>
 <p>The LIUQE store at <code>/home/ITER/mcintos/public/imasdb/tcv/3/77549/1</code>
@@ -37,63 +43,114 @@ stored axis minus grid psi over the stored boundary; <code>scalar_span</code> is
 the same difference of the stored scalars, in Wb/rad.</p>
 <table>
 <tr><th>slice</th><th>boundary</th><th>COCOS</th><th>Ip [A]</th><th>scalar_span</th><th>grid_span</th><th>grid sign</th><th>verdict</th></tr>
-<tr><td>0</td><td>x-point</td><td>11</td><td>-18490.4</td><td>+1.488e-2</td><td>-1.371e-2</td><td>-1</td><td>refused</td></tr>
-<tr><td>14</td><td>x-point</td><td>11</td><td>-69976.1</td><td>+6.046e-2</td><td>-5.260e-2</td><td>-1</td><td>refused</td></tr>
-<tr><td>34</td><td>outline</td><td>11</td><td>-79712.2</td><td>+6.711e-2</td><td>-1.002e-1</td><td>-1</td><td>refused</td></tr>
-<tr><td>46</td><td>outline</td><td>11</td><td>-102537.7</td><td>+8.763e-2</td><td>-1.190e-1</td><td>-1</td><td>refused</td></tr>
-<tr><td>118</td><td>outline</td><td>11</td><td>-123059.5</td><td>+1.082e-1</td><td>-1.461e-1</td><td>-1</td><td>refused</td></tr>
-<tr><td>206</td><td>outline</td><td>11</td><td>-138143.3</td><td>+1.454e-1</td><td>-1.542e-1</td><td>-1</td><td>refused</td></tr>
-<tr><td>248</td><td>outline</td><td>11</td><td>-138721.0</td><td>+1.489e-1</td><td>-1.454e-1</td><td>-1</td><td>refused</td></tr>
-<tr><td>291</td><td>x-point</td><td>11</td><td>-138544.8</td><td>+1.416e-1</td><td>-1.455e-1</td><td>-1</td><td>refused</td></tr>
-<tr><td>456</td><td>x-point</td><td>11</td><td>-154155.4</td><td>+1.546e-1</td><td>-1.484e-1</td><td>-1</td><td>refused</td></tr>
-<tr><td>542</td><td>x-point</td><td>11</td><td>-169172.8</td><td>+1.733e-1</td><td>-1.668e-1</td><td>-1</td><td>refused</td></tr>
-<tr><td>796</td><td>x-point</td><td>11</td><td>-170234.9</td><td>+1.710e-1</td><td>-1.746e-1</td><td>-1</td><td>refused</td></tr>
-<tr><td>1257</td><td>x-point</td><td>11</td><td>-192370.8</td><td>+1.955e-1</td><td>-2.066e-1</td><td>-1</td><td>refused</td></tr>
+<tr><td>0</td><td>x-point</td><td>11</td><td>-18490.4</td><td>+1.488e-02</td><td>-1.371e-02</td><td>-1</td><td>refused</td></tr>
+<tr><td>14</td><td>x-point</td><td>11</td><td>-69976.1</td><td>+6.046e-02</td><td>-5.261e-02</td><td>-1</td><td>refused</td></tr>
+<tr><td>34</td><td>outline</td><td>11</td><td>-79712.1</td><td>+6.711e-02</td><td>-1.003e-01</td><td>-1</td><td>refused</td></tr>
+<tr><td>46</td><td>outline</td><td>11</td><td>-102537.7</td><td>+8.763e-02</td><td>-1.191e-01</td><td>-1</td><td>refused</td></tr>
+<tr><td>118</td><td>outline</td><td>11</td><td>-123059.5</td><td>+1.082e-01</td><td>-1.463e-01</td><td>-1</td><td>refused</td></tr>
+<tr><td>206</td><td>outline</td><td>11</td><td>-138143.3</td><td>+1.454e-01</td><td>-1.544e-01</td><td>-1</td><td>refused</td></tr>
+<tr><td>248</td><td>outline</td><td>11</td><td>-138721.0</td><td>+1.489e-01</td><td>-1.456e-01</td><td>-1</td><td>refused</td></tr>
+<tr><td>291</td><td>x-point</td><td>11</td><td>-138544.8</td><td>+1.416e-01</td><td>-1.457e-01</td><td>-1</td><td>refused</td></tr>
+<tr><td>456</td><td>x-point</td><td>11</td><td>-154155.4</td><td>+1.546e-01</td><td>-1.485e-01</td><td>-1</td><td>refused</td></tr>
+<tr><td>542</td><td>x-point</td><td>11</td><td>-169172.8</td><td>+1.733e-01</td><td>-1.669e-01</td><td>-1</td><td>refused</td></tr>
+<tr><td>796</td><td>x-point</td><td>11</td><td>-170234.9</td><td>+1.710e-01</td><td>-1.748e-01</td><td>-1</td><td>refused</td></tr>
+<tr><td>1257</td><td>x-point</td><td>11</td><td>-192370.8</td><td>+1.955e-01</td><td>-2.068e-01</td><td>-1</td><td>refused</td></tr>
 </table>
 <p>Twelve rows, twelve refusals: <code>LIUQE_ROWS 12 REFUSED 12</code>. The
 declaration requires sign <code>+1</code>; the scalars carry it and the grid
-carries <code>-1</code> on every slice.</p>
+carries <code>-1</code> on every slice. Calling the comparison's
+<code>measure_slice</code> read on those same twelve real views now also refuses
+all twelve before the topology read: <code>TCV_READ_ROWS 12 REFUSED 12</code>.
+The synthetic read-path test first reproduced the missing call: a deliberately
+contradictory view reached the mocked topology read and failed with
+<code>topology read reached before checking the reference sign</code>. With the
+guard in place it raises <code>ReferenceSignError</code> first.</p>
 
 <h2>Field-swap rows unchanged</h2>
-<p>The guard is applied to all twenty-eight field-swap trace records, because a
-guard that refuses a good record is as wrong as one that reads a bad one. The
+<p>The guard is applied to all twenty-eight field-swap trace records. The
 twenty-four records whose wall lies inside their own grid agree with their
-declared polarity; the four crossing scans carry no wall and are checked on
-their stored scalars. None is refused: <code>FIELD_SWAP_ROWS 28 REFUSED 0</code>.
-No field-swap row changes.</p>
+declared polarity by the spline's axis-to-boundary span. The four crossing scans
+carry no in-grid wall point, so their axis Hessians are checked instead; each
+is a maximum as its positive polarity requires. None is refused:
+<code>FIELD_SWAP_ROWS 28 REFUSED 0</code>. No field-swap row changes.</p>
+
+<table>
+<tr><th>case</th><th>slice</th><th>polarity</th><th>grid check</th><th>measured sign</th><th>verdict</th></tr>
+<tr><td><code>jt60sa-5slice-s5-301-302:A</code></td><td>5</td><td>+1</td><td>grid</td><td>+1</td><td>accepted</td></tr>
+<tr><td><code>jt60sa-5slice-s5-301-302:B</code></td><td>5</td><td>+1</td><td>grid</td><td>+1</td><td>accepted</td></tr>
+<tr><td><code>jt60sa-5slice-s5-133-134:A</code></td><td>5</td><td>+1</td><td>grid</td><td>+1</td><td>accepted</td></tr>
+<tr><td><code>jt60sa-5slice-s5-133-134:B</code></td><td>5</td><td>+1</td><td>grid</td><td>+1</td><td>accepted</td></tr>
+<tr><td><code>jt60sa-5slice-s1-15-16:A</code></td><td>1</td><td>+1</td><td>grid</td><td>+1</td><td>accepted</td></tr>
+<tr><td><code>jt60sa-5slice-s1-15-16:B</code></td><td>1</td><td>+1</td><td>grid</td><td>+1</td><td>accepted</td></tr>
+<tr><td><code>jt60sa-5slice-s2-135-136:A</code></td><td>2</td><td>+1</td><td>grid</td><td>+1</td><td>accepted</td></tr>
+<tr><td><code>jt60sa-5slice-s2-135-136:B</code></td><td>2</td><td>+1</td><td>grid</td><td>+1</td><td>accepted</td></tr>
+<tr><td><code>aug-17151-s5-4-5:A</code></td><td>5</td><td>+1</td><td>grid</td><td>+1</td><td>accepted</td></tr>
+<tr><td><code>aug-17151-s5-4-5:B</code></td><td>5</td><td>+1</td><td>grid</td><td>+1</td><td>accepted</td></tr>
+<tr><td><code>iter-dina3420-s4-18-19:A</code></td><td>4</td><td>-1</td><td>grid</td><td>-1</td><td>accepted</td></tr>
+<tr><td><code>iter-dina3420-s4-18-19:B</code></td><td>4</td><td>-1</td><td>grid</td><td>-1</td><td>accepted</td></tr>
+<tr><td><code>mastu-fullPulse-s1-4-5:A</code></td><td>1</td><td>+1</td><td>grid</td><td>+1</td><td>accepted</td></tr>
+<tr><td><code>mastu-fullPulse-s1-4-5:B</code></td><td>1</td><td>+1</td><td>grid</td><td>+1</td><td>accepted</td></tr>
+<tr><td><code>mastu-magnetics-integration-s1-13-14:A</code></td><td>1</td><td>+1</td><td>grid</td><td>+1</td><td>accepted</td></tr>
+<tr><td><code>mastu-magnetics-integration-s1-13-14:B</code></td><td>1</td><td>+1</td><td>grid</td><td>+1</td><td>accepted</td></tr>
+<tr><td><code>iter-fullPulse-s5-14-15-identity:A</code></td><td>5</td><td>-1</td><td>grid</td><td>-1</td><td>accepted</td></tr>
+<tr><td><code>iter-fullPulse-s5-14-15-identity:B</code></td><td>5</td><td>-1</td><td>grid</td><td>-1</td><td>accepted</td></tr>
+<tr><td><code>iter-fullPulse-s2-2-3-crossing:A</code></td><td>2</td><td>-1</td><td>grid</td><td>-1</td><td>accepted</td></tr>
+<tr><td><code>iter-fullPulse-s2-2-3-crossing:B</code></td><td>2</td><td>-1</td><td>grid</td><td>-1</td><td>accepted</td></tr>
+<tr><td><code>iter-fullPulse-s1-10-11-revert-in-crossing:A</code></td><td>1</td><td>-1</td><td>grid</td><td>-1</td><td>accepted</td></tr>
+<tr><td><code>iter-fullPulse-s1-10-11-revert-in-crossing:B</code></td><td>1</td><td>-1</td><td>grid</td><td>-1</td><td>accepted</td></tr>
+<tr><td><code>iter-dina105027-s1-4-5-revert:A</code></td><td>1</td><td>-1</td><td>grid</td><td>-1</td><td>accepted</td></tr>
+<tr><td><code>iter-dina105027-s1-4-5-revert:B</code></td><td>1</td><td>-1</td><td>grid</td><td>-1</td><td>accepted</td></tr>
+<tr><td><code>crossing_scan_a</code></td><td>0</td><td>+1</td><td>grid curvature</td><td>+1</td><td>accepted</td></tr>
+<tr><td><code>crossing_scan_b</code></td><td>0</td><td>+1</td><td>grid curvature</td><td>+1</td><td>accepted</td></tr>
+<tr><td><code>synthetic_crossing_a</code></td><td>0</td><td>+1</td><td>grid curvature</td><td>+1</td><td>accepted</td></tr>
+<tr><td><code>synthetic_crossing_b</code></td><td>0</td><td>+1</td><td>grid curvature</td><td>+1</td><td>accepted</td></tr>
+</table>
 
 <h2>Negative control</h2>
-<p>The declared mutation removes the sign-consistency guard. With the two guard
-entry points replaced by no-ops, the negated-grid test fails:
-<code>test_negated_grid_against_its_scalars_is_refused</code> is in the red log
-with <code>EXIT=1</code>. The synthetic field is an IDS-shaped grid whose stored
-scalars put the axis at a psi maximum and whose grid is the negation, placing it
-at a minimum; the guard refuses it, and adding any constant to the grid leaves
-the verdict unchanged.</p>
+<p>The declared mutation removes the sign-consistency guard. With both guard
+entry points replaced by no-ops, pytest exits <code>EXIT=1</code> with nine
+failures. These include <code>test_negated_grid_against_its_scalars_is_refused</code>
+and <code>test_sign_mismatch_is_refused_before_reading_the_slice</code>, which
+then reaches the topology read. The synthetic IDS-shaped field declares DD
+3.41.0 (COCOS 11) and negative Ip, with stored scalars making the axis a psi
+maximum and a negated grid making it a minimum. The live guard refuses it,
+and adding a constant as large as <code>1e10</code> to the grid leaves the verdict
+unchanged.</p>
 
 <h2>Suite arms</h2>
 <p>Both arms ran the same five test files - the <code>efit_field_swap</code> and
 <code>tcv_liuqe_known_answer</code> test modules - with the repository-root
-conftest, in fresh per-process invocations, the baseline from a base-revision
-scratch tree and the after arm from this worktree. The baseline arm reached its
-summary with one failure,
-<code>test_limited_slice_is_read_only_when_coverage_is_certified</code>
-(a pre-existing slow real-store case, unaffected by this node), and 32 passes.
-The after arm did not complete inside the bound that was applied: it reached
-thirty-one tests and was killed at 480 s before its own summary, so its exit
-status is 124 and no after-arm summary line exists. The suite delta is therefore
-<em>not measured</em> by this run; the node's own behaviour is instead evidenced
-by the nine passing unit tests, the twelve-of-twelve refusals over the TCV store
-and the zero-of-twenty-eight field-swap refusals, and the red negative control.
-Completing the delta - both arms under a longer bound, or with the one slow
-real-store test excluded by an explicit selection - is left as a follow-on.</p>
+conftest, in fresh per-process invocations. The selection
+<code>-m "not slow"</code> was applied to both arms, excluding the same slow
+real-store test whose earlier attempt had exhausted a 480 s bound before the
+head summary. At base revision <code>a5ebd580f</code>, the suite completed with
+32 passed and one deselected in 324.94 s. At guarded head
+<code>17ac64275</code>, it completed with 33 passed and one deselected in
+386.30 s: zero added failures and one new passing test that makes the
+contradictory TCV view reach the guard before the topology read. The focused
+orientation and read-path gate completed with 11 passes; the guard-removal
+mutation produced nine failures, including the synthetic IDS sign test and
+the TCV read-path test.</p>
+
+<h2>Read-path scope</h2>
+<p>The LIUQE comparison now calls the guard before <code>crosscheck.read_state</code>.
+The field-swap table invokes <code>check_trace_record</code> directly and proves
+that all twenty-eight existing records are accepted. The field-swap comparison
+reader in <code>crosscheck.py</code> and the exploratory reader in
+<code>probe_read.py</code> still call <code>read_convention</code> without calling
+the guard. Those two files are outside this node's write grant, so their
+read-site wiring remains an explicit scope blocker; the table is not evidence
+that those readers invoke the guard.</p>
 
 <h2>Receipts</h2>
 <p>Under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T035634203950-reference-sign-guard</code>:
-<code>reference-sign-slices.json</code> and <code>reference-sign-field-swap.json</code>
-(the two tables), <code>reference-sign.log</code> (the driver), <code>orientation-unit.log</code>
-(the nine passing unit tests), <code>negative-control.log</code>, and
-<code>baseline_suite.log</code> and <code>after_suite.log</code>.</p>
+<code>reference-sign-slices-fresh.json</code> and <code>field-swap-guarded.json</code>
+(the two tables), <code>reference-sign-fresh.log</code> and
+<code>field-swap-guarded.log</code> (the drivers),
+<code>tcv-read-guarded.json</code> and <code>tcv-read-guarded.log</code>
+(the actual read-path refusals), <code>negative-control-guarded.log</code>,
+<code>focused-guarded.log</code>, <code>baseline_suite_fresh.log</code> and
+<code>after_suite_guarded.log</code>.</p>
 
 </body>
 </html>

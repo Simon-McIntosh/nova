@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="converged-forward-solve">
+  <meta name="plan-title" content="Axis persistence near a saddle | nova">
+  <meta name="plan-summary" content="The axis gate judges a root-saddle pair against the binary64 resolution of the pair's own levels"></meta>
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-recorded-at" content="2026-10-19">
+  <meta name="plan-verdict" content="complete">
+  <title>Axis persistence near a saddle | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+  <h1 id="axis-persistence-near-saddle-landing">Axis persistence near a saddle</h1>
+  <p id="axis-persistence-near-saddle-criterion">The axis gate now compares a root–saddle pair's signed persistence against <code>PERSISTENCE_ULP_FLOOR</code> (8.0) times <code>eps</code> times the larger of the pair's two level magnitudes — the binary64 resolution of the levels the persistence is formed from — in place of the per-cell enclosure <code>|ψ − fitted quadratic| + psi_rounding_enclosure</code>. The enclosure is a property of the cell's representation: its row sum is set by every sample star in the cell and by any constant background, so it grows with quantities that do not decide whether two stationary points are separate features. The <a href="/nova/research/axis-persistence-near-saddle.html">measured research record</a> carries the four-case table and the figure.</p>
+  <p id="axis-persistence-near-saddle-tiepair">At the 282-cell tie pair the axis sits 0.603 cell pitches from its nearer saddle and 0.0606 in absolute distance, and its signed persistence is 4.189 × 10<sup>−7</sup> against a floor of 1.535 × 10<sup>−17</sup> — 2.18 × 10<sup>11</sup> units in the census field's own last place at that level. The old threshold read 1.172 × 10<sup>−6</sup> there, 2.80× the persistence, and refused the axis; the census test reported <code>axis = nan</code>. The second offset, 0.17325, measures persistence 2.769 × 10<sup>−7</sup> against 1.060 × 10<sup>−6</sup>, 3.83×, with the same refusal.</p>
+  <p id="axis-persistence-near-saddle-island">The island field keeps its rejection. With its levels at magnitude 10<sup>15</sup> the pair separates by 1.125, which is 5.07 ULP there, and the floor of 8.0 ULP refuses it with 1.58× margin; the same field without the background separates by 1.10187, 4.96 × 10<sup>15</sup> ULP, and is admitted. The old statistic reached the same island verdict for an unrelated reason — a quadratic cannot represent that background, so its residual is 0.125 and 0.25 and the row-sum bound 0.444 — while at the tie pair the same statistic refused a pair resolved 11 orders of magnitude above its own last place.</p>
+  <p id="axis-persistence-near-saddle-verification">The census test passes at the repaired head. Restoring the original enclosure in the same tree is the negative control and turns it red again: a fresh process returns <code>EXIT=1</code>, 1 failed in 48.83 s, with <code>axis = [nan nan]</code> and <code>valid = False</code>, the symptom the census reported at main. The mutation's <code>read()</code> body was compared line for line against the commit that introduced the enclosure. Both suite arms over the four declared targets run as one partitioned job, each arm a fresh process.</p>
+  <p id="axis-persistence-near-saddle-scope">The criterion is a resolution gate and claims no more: it refuses a pair whose levels cannot be told apart in the precision they are carried in, and does not refuse a pair that is separable in binary64 but physically spurious, because a resolvable level difference is what a physical pair looks like at this stage. <code>psi_rounding_enclosure</code> stays in the module, its docstring naming it as the bound on a fitted level's arithmetic error rather than a test of separation.</p>
+</main></body>
+</html>

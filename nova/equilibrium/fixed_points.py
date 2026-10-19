@@ -568,6 +568,38 @@ def _adaptive(field, seeds, pitch, iterations):
     return position, jet, done, counts
 
 
+@jax.custom_jvp
+def _stationary_position(position, cache, moments, valid):
+    """Differentiate a converged root through its stationary equation."""
+    return position
+
+
+@_stationary_position.defjvp
+def _stationary_position_jvp(primals, tangents):
+    position, cache, moments, valid = primals
+    position_tangent, cache_tangent, moments_tangent, _ = tangents
+
+    def gradient_at_root(row_cache, current_moments):
+        field = _CachedField(
+            row_cache.mesh,
+            row_cache.lookup,
+            row_cache.rows,
+            current_moments,
+            row_cache.exterior,
+        )
+        return jax.vmap(field.evaluate)(position).gradient
+
+    _, gradient_tangent = jax.jvp(
+        gradient_at_root,
+        (cache, moments),
+        (cache_tangent, moments_tangent),
+    )
+    field = _CachedField(cache.mesh, cache.lookup, cache.rows, moments, cache.exterior)
+    hessian = jax.vmap(field.evaluate)(position).hessian
+    implicit = -jnp.linalg.solve(hessian, gradient_tangent[..., None])[..., 0]
+    return position, jnp.where(valid[:, None], implicit, position_tangent)
+
+
 @partial(jax.jit, static_argnames=("iterations",))
 def solve(
     cache: RowCache,
@@ -615,6 +647,8 @@ def solve(
     position, jet, converged = jax.lax.cond(
         jnp.any(wrong), retry, lambda _: (position, jet, converged), None
     )
+    position = _stationary_position(position, cache, moments, converged)
+    jet = jax.vmap(field.evaluate)(position)
     kind = _root_type(jet.hessian, axis_sign)
     needs_rows = ~jax.vmap(field.contains)(position)
     valid = converged & kind & ~needs_rows

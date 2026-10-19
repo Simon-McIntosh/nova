@@ -300,6 +300,8 @@ def run(args):
                 np.asarray(reading.normal_form_cells & (reading.membership > 0))
             ).tolist(),
             "membership": np.asarray(reading.membership).tolist(),
+            "boundary": np.asarray(reading.boundary).tolist(),
+            "boundary_flux": float(reading.boundary_flux),
             "roots": np.asarray(found.position).tolist(),
         }
 
@@ -688,6 +690,106 @@ def run(args):
                 / jnp.maximum(jnp.linalg.norm(rhs), 1e-30)
             ),
         }
+        if args.diagnose_step:
+            tangent = np.asarray(factor(jnp.asarray(step)))
+            base_vector = np.asarray(residual)
+            rows = []
+            for amount in (
+                1.0,
+                0.5,
+                0.25,
+                0.125,
+                0.0625,
+                0.03125,
+                0.015625,
+                0.00390625,
+                0.0009765625,
+                0.000244140625,
+            ):
+                vector = np.asarray(
+                    equation(
+                        point.reshape(-1) + amount * jnp.asarray(step), active_operands
+                    )
+                )
+                merit = (
+                    float(np.max(np.abs(vector)))
+                    if args.merit == "sup"
+                    else float(np.linalg.norm(vector))
+                )
+                rows.append(
+                    {
+                        "scale": amount,
+                        "merit": merit,
+                        "accepted": bool(np.isfinite(merit) and merit < original_merit),
+                        "taylor_remainder_two": float(
+                            np.linalg.norm(vector - base_vector - amount * tangent)
+                        ),
+                    }
+                )
+            row["step_diagnosis"] = {
+                "acceptance": "finite trial merit strictly below original merit",
+                "threshold": original_merit,
+                "rows": rows,
+            }
+            mismatch = (vector - base_vector - amount * tangent).reshape(
+                reference.shape
+            )
+            ordered = np.argsort(np.max(np.abs(mismatch), axis=1))[-10:][::-1]
+            row["step_diagnosis"]["directional_mismatch"] = [
+                {
+                    "cell": int(cell),
+                    "remainder": mismatch[cell].tolist(),
+                    "base": base_vector.reshape(reference.shape)[cell].tolist(),
+                    "tangent": tangent.reshape(reference.shape)[cell].tolist(),
+                    "trial": vector.reshape(reference.shape)[cell].tolist(),
+                }
+                for cell in ordered
+            ]
+            original_read = inspect_read(point.reshape(reference.shape) * scale)
+            trial_read = inspect_read(
+                (point.reshape(-1) + amount * jnp.asarray(step)).reshape(
+                    reference.shape
+                )
+                * scale
+            )
+            base_membership = np.asarray(original_read["membership"])
+            trial_membership = np.asarray(trial_read["membership"])
+            changed = np.flatnonzero(np.abs(trial_membership - base_membership) > 1e-12)
+
+            def root_positions(scaled):
+                return fixed_points.solve(
+                    window,
+                    scaled.reshape(reference.shape) * scale,
+                    seeds,
+                    seeds,
+                    jnp.median(geometry.pitch),
+                    axis_sign,
+                ).position
+
+            _, root_tangent = jax.jvp(
+                root_positions,
+                (point.reshape(-1),),
+                (jnp.asarray(step),),
+            )
+            row["step_diagnosis"]["read_difference"] = {
+                "support_base": original_read["support_ids"],
+                "support_trial": trial_read["support_ids"],
+                "boundary_base": original_read["boundary"],
+                "boundary_trial": trial_read["boundary"],
+                "boundary_flux_base": original_read["boundary_flux"],
+                "boundary_flux_trial": trial_read["boundary_flux"],
+                "roots_base": original_read["roots"],
+                "roots_trial": trial_read["roots"],
+                "roots_tangent": np.asarray(root_tangent).tolist(),
+                "membership_changed": [
+                    {
+                        "cell": int(cell),
+                        "base": float(base_membership[cell]),
+                        "trial": float(trial_membership[cell]),
+                    }
+                    for cell in changed
+                ],
+            }
         state = mapped(candidate.reshape(reference.shape) * scale, *active_operands)
         jax.block_until_ready(state)
         block = np.asarray(state.moment_residual / scale)
@@ -1014,6 +1116,7 @@ def main():
     parser.add_argument("--line-search-depth", type=int, default=20)
     parser.add_argument("--merit", choices=("sup", "two"), default="sup")
     parser.add_argument("--taylor", action="store_true")
+    parser.add_argument("--diagnose-step", action="store_true")
     parser.add_argument("--exact-roots", action="store_true")
     parser.add_argument("--omit-saddle-derivative", action="store_true")
     parser.add_argument("--inspect-support", action="store_true")

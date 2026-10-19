@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="certificate-550-convergence">
+<meta name="plan-title" content="Certified limited carrier convergence evidence">
+<meta name="plan-summary" content="The certified 553-cell correction is rejected with first-order Taylor mismatch; the vertical pin does not change it.">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s5">
+<meta name="plan-recorded-at" content="2026-10-19">
+<meta name="plan-verdict" content="partial">
+<title>Certified limited carrier convergence evidence | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<h1 id="certificate-550-convergence-landing">Certified limited carrier convergence evidence</h1>
+<p id="certificate-550-convergence-summary">The published limited carrier has 553 realised cells and its base free solve stops at scaled residual <strong>0.0012319931459852727</strong>, not converged against 1e-12. GMRES solves the linear equation to relative residual 8.76037945980366e-11, but a strict finite-decrease test rejects every measured step from 1 through 1/4096; the Taylor remainder has slope 1.0000000074 over the last pair. A current-centroid vertical pin leaves the same stall. The selected wall boundary moves smoothly and support is unchanged. The adaptive root's base JVP is zero although a 1/4096 finite step moves the axis vertically by 2.36027718e-5 m. The root owner now solves <code>Hψ · droot = −d(∇ψ)</code> for converged roots. <a href="/nova/research/certificate-550-convergence.html">Full measurement and gate record</a>.</p>
+<section id="certificate-550-convergence-gates"><h2>Gate state</h2><p>The implicit root tangent is delivered: the exact-seed test and the final cached 553-cell mesh test fail at base with JVP (0, 0) against a central derivative of (0, 0.1), and pass at head with JVP and central both (0, 0.1). On the physical carrier correction, the head root JVP is 0.0968274219 m per step vertically versus a 0.0966769534 m per step finite derivative. The full-map Taylor remainder still has slope about 1.000009, and its first Newton correction is identical to base: both stop at residual 0.0012319931459852727 with <code>converged=false</code>. The two six-row Titan jobs were cancelled by ID after both 550-cell rows completed; the 2,000-cell rows reached seed measurements but ran out of P100 device memory, limited 5,000 started without a residual, and diverted 5,000 never ran. The baseline suite has 28 passes and two failures; the completed after suite has 30 passes, one expected failure and one setup error from an intermediate GPU-only test subprocess under its CPU backend. The final carrier-mesh test replaced that subprocess and passed in a focused CPU run. A separate synthetic vertical-pin failure never calls the root owner. The acceptance rule and 1e-12 limit are unchanged.</p></section>
+</main></body></html>

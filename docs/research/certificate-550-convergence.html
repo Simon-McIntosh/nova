@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="research">
+<meta name="plan-slug" content="certificate-550-convergence">
+<meta name="plan-title" content="Certified limited carrier Newton convergence">
+<meta name="plan-summary" content="The certified 553-cell solve rejects a well-solved Newton equation because its map has a first-order directional mismatch; a vertical pin leaves the stall unchanged.">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s5">
+<meta name="plan-recorded-at" content="2026-10-19">
+<meta name="plan-verdict" content="partial">
+<title>Certified limited carrier Newton convergence | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<h1 id="certificate-550-convergence-record">Certified limited carrier Newton convergence</h1>
+<p>The carrier is the published <code>weak-rotation-reactor-static</code> object at requested 550 and realised 553 cells, read through the content-addressed certificate fixture owner. The route recovered the analytic axis at (6.2, 0.0) m. The six earlier fixture verdicts were booking passes, not forward-solve convergence measurements. Every solve and derivative observation below used one Titan P100 because real H200 submissions remained pending with a drained or reserved node reason; their stdout headers print <code>nova.__file__</code> and the source tree.</p>
+
+<h2 id="certificate-550-convergence-rejection">The rejected correction</h2>
+<p>The original certificate route reproduced the recorded defect. At its production seed the scaled maximum residual was <strong>0.0012319931459852727</strong>. GMRES solved the JVP linear equation to relative residual <strong>8.76037945980366e-11</strong> in 12 iterations. Its only correction was rejected (<code>accepted=false</code>, <code>factor_scale=0</code>), leaving <code>converged=false</code> against the unchanged 1e-12 limit. The acceptance test requires a finite trial merit strictly below the original maximum residual; its threshold at this iterate was 0.0012319931459852727.</p>
+<table id="certificate-550-convergence-merit"><caption>Merit along the rejected Newton direction; the 0.25 trial is nonfinite. Job 1289624, <code>diagnosis_h200.json</code>.</caption><thead><tr><th>Step scale</th><th>Scaled maximum residual</th><th>Accepted by strict decrease?</th></tr></thead><tbody>
+<tr><td>1</td><td>0.0014152311127003405</td><td>No</td></tr>
+<tr><td>0.5</td><td>0.0013236021602582798</td><td>No</td></tr>
+<tr><td>0.25</td><td>nonfinite</td><td>No</td></tr>
+<tr><td>0.125</td><td>0.0012548935303282724</td><td>No</td></tr>
+<tr><td>0.0625</td><td>0.001243443182381823</td><td>No</td></tr>
+<tr><td>0.03125</td><td>0.0012377181252370977</td><td>No</td></tr>
+<tr><td>0.015625</td><td>0.001234855625873247</td><td>No</td></tr>
+<tr><td>0.00390625</td><td>0.0012327087641262585</td><td>No</td></tr>
+<tr><td>0.0009765625</td><td>0.0012321720504029714</td><td>No</td></tr>
+<tr><td>0.000244140625</td><td>0.0012320378720788768</td><td>No</td></tr>
+</tbody></table>
+<p>The two-norm Taylor remainder <code>||F(x+h d)-F(x)-h Jd||</code> is 8.88607114578e-6 at h = 1/1024 and 2.22151776357e-6 at h = 1/4096. Their log ratio gives slope 1.0000000074, not the required 2. Thus the JVP's predicted decrease is not the finite map's directional change. At h = 1/4096 the selected support is unchanged; 91 cut-cell memberships move slightly, and paired cells 61 and 508 carry equal leading current-residual mismatches of about 3.45506e-7. The mismatch is distributed across symmetric edge cells rather than a single support exchange.</p>
+<p>The wall-contact control in Titan job 1289637 also keeps the selected limited boundary on one smooth branch: its point moves from (7.801395789307387, −1.249000902703301e-16) m to (7.801395789307387, −3.029366588136462e-8) m at h = 1/4096. The boundary flux changes only from 2.458885964545669e-14 to 0 Wb. The support remains the same. A jump between two separate upper and lower wall contacts therefore does not explain the first-order mismatch.</p>
+<p>The direct root control in Titan job 1289639 identifies the derivative gap. At the exact seed the solved axis is (6.2, 0) m and its JVP along the rejected correction is exactly (0, 0). At h = 1/4096, a fresh finite solve places it at approximately (6.1999999816, 2.36027718e-5) m: a displacement of (−1.83721891e-8, 2.36027718e-5) m and a finite vertical derivative of 0.0966769534 m per unit step. Inspection of <code>fixed_points._adaptive</code> explains the mismatch: its while loop takes no iterations when the seed is already converged, so differentiation through that branch gives the constant seed's zero tangent; a perturbed field requires iterations and moves the root.</p>
+<p>The owner repair now applies the implicit-function equation to every converged root: <code>Hψ · droot = −d(∇ψ)</code>, with the gradient parameter derivative evaluated at the fixed converged position. The returned jet is then evaluated at that position, so its tangent includes the implicit root displacement. No map, acceptance, pin, or limit compensation was added. The committed exact-seed test constructs a cached quadratic field, resolves its root, asserts zero adaptive iterations, and differentiates a linear vertical perturbation. The base route reports JVP (0, 0) against central difference (approximately 0, 0.1) and fails; the changed route reports vertical JVP 0.1 and passes at the same 1/4096 step.</p>
+<p>The full carrier falsifies the inference that this root tangent alone causes its Newton stall. The changed route's Taylor remainder is 1.32062218497e-8 at h = 1e-6 and 1.32059496526e-9 at h = 1e-7, a slope of approximately 1.000009, and its centered derivative error tends to 0.00660. Its first 550-cell solve still rejects the step at residual 0.0012319931459852727. Its 12-iteration GMRES correction and relative linear residual are identical to the base values; the correction array differs by zero. The head carrier root probe (job 1289763) measured the corrected vertical JVP as 0.0968274219 m per step against a 1/4096 finite derivative of 0.0966769534 m per step; its radial components were −7.20962e-5 and −7.52525e-5. Removing the tangent at head (job 1289760) restores the same 0.0012319931459852727 stall. Thus the root derivative is repaired, while the map still has an independent first-order directional mismatch.</p>
+
+<h2 id="certificate-550-convergence-pin">Vertical-position control</h2>
+<p>Job 1289627 augmented this same row with the existing uniform radial-field basis and a current-centroid row, targeted at the analytic booked height 9.276322181002429e-17 m with a 1e-3 T source scale. GMRES again solved its linear system, to relative residual 7.666895564035161e-11, but the correction was rejected at every measured scale. Its merit values and first-order Taylor remainders match the free run to the shown precision; the terminal field amplitude is 0 T and the residual remains 0.0012319931459852727. A zero-height centroid pin therefore does not lift this carrier's stall, unlike the earlier diverted lobe carrier. The exploratory augmentation was removed from the product route after this measurement.</p>
+
+<h2 id="certificate-550-convergence-gates">Regression and paired suite</h2>
+<p>The committed exact-seed test fails at orientation base <code>a711e2b064f840d153972c1690d4af82e3f6a365</code>: JVP (0, 0) against central derivative (approximately 0, 0.1). It passes with the implicit root tangent. The final cached-carrier test loads the published 553-cell mesh through the fixture store, places a quadratic field and linear vertical perturbation on that mesh, resolves an exact seed with zero adaptive iterations, and compares the root JVP with a central difference at h = 1/4096. The base test fails with JVP (0, 0) versus central (0, 0.1); the head test passes with JVP and central both (0, 0.1). It contains no convergence assertion: the separate full-map target is documented here as open.</p>
+<p>The full baseline suite ran the four fast-map production test files, the generic equilibrium solve file, the vertical-pin file and the original cached-carrier convergence test in fresh processes with the repository-root conftest. It reached every summary: 28 passed and 2 failed. The failures were <code>test_one_augmented_newton_program_serves_free_and_pinned_requests</code>, whose free height differs from its asserted height by 0.0038580246913580973 m on the CPU backend, and <code>test_certified_limited_carrier_converges</code>, the 550-cell convergence failure. The vertical-pin test uses a six-moment synthetic carrier and <code>fixed_point.newton_krylov</code>; it never calls <code>fixed_points.solve</code>, so its failure is independent of the stationary-root tangent. The after suite (job 1289745) reached all seven module summaries: 30 passed, one expected convergence failure, and one carrier-test setup error. That error came from launching a GPU-only solver subprocess under the suite's CPU backend; it did not reach the root code. The final committed carrier-mesh test replaced that subprocess and passed in a focused CPU run. The after suite's completed log records the intermediate test version, not a full rerun at this final head.</p>
+
+<h2 id="certificate-550-convergence-rows">Certificate rows at cancellation</h2>
+<p>The two six-row Titan jobs were cancelled by ID after their 550-cell rows had completed. The 2,000-cell rows in both arms loaded their cached carriers and reported their production-seed residuals, then failed during GMRES with <code>CUDA_ERROR_OUT_OF_MEMORY</code> on the P100; they have no terminal solve residual or convergence verdict. The limited 5,000-cell row started in both arms but was cancelled during setup before a residual existed. The diverted 5,000-cell row never started in either arm. These are measured receipt states, not extrapolated solve failures.</p>
+<table id="certificate-550-convergence-row-table"><caption>Before job 1289631 and after job 1289744; all rows used Titan P100. “Seed only” has no terminal solve verdict.</caption><thead><tr><th>Case</th><th>Realised cells</th><th>Before residual / convergence</th><th>After residual / convergence</th></tr></thead><tbody>
+<tr><td>Limited 550</td><td>553</td><td>0.0012319931459852727 / false</td><td>0.0012319931459852727 / false</td></tr>
+<tr><td>Diverted 550</td><td>550</td><td>0.0007374954224921476 / false</td><td>0.0007374950857510857 / false</td></tr>
+<tr><td>Limited 2,000</td><td>2,105</td><td>seed 0.0006759582908747246; terminal unavailable, device OOM</td><td>seed 0.0006759582908747246; terminal unavailable, device OOM</td></tr>
+<tr><td>Diverted 2,000</td><td>2,098</td><td>seed 0.0045642576526562515; terminal unavailable, device OOM</td><td>seed 0.0045642576526562515; terminal unavailable, device OOM</td></tr>
+<tr><td>Limited 5,000</td><td>5,167</td><td>carrier loaded; cancelled before residual</td><td>carrier loaded; cancelled before residual</td></tr>
+<tr><td>Diverted 5,000</td><td>—</td><td>never ran</td><td>never ran</td></tr>
+</tbody></table>
+
+<h2 id="certificate-550-convergence-remaining">Remaining full-map mismatch</h2>
+<p>The implicit stationary-root tangent is the delivered fix. It does not make the 550-cell map smooth or its Newton solve converge: the nearest after residual is <strong>0.0012319931459852727</strong>, <code>converged=false</code>, with Taylor slope approximately <strong>1.000009</strong> rather than 2. The after Newton correction is identical to base. The remaining first-order mismatch is localized to cut-cell current residuals around paired cells 61 and 508, with unchanged support and a smoothly moving wall contact. <code>scripts/prototypes/fast_map_production/kernel.py</code> owns the read and membership handoff; its imported Bell polygon and split-polygon implementations in <code>scripts/prototypes/sub_millisecond/measure_bell_cut.py</code> and <code>scripts/prototypes/fast_read/ordinary_cut.py</code> are candidates, not established causes. The completed root-probe and tangent-removal receipts are inputs for that next investigation. The acceptance test and 1e-12 limit remain unchanged.</p>
+</main></body></html>

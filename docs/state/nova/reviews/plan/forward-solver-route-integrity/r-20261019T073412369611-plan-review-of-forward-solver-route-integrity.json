@@ -1,0 +1,77 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-19T07:58:45.906Z",
+  "dispatched_at": "2026-10-19T07:38:27Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/forward-solver-route-integrity.html:392",
+      "id": "wiring-1",
+      "reason": "the author must declare an ordering (\u00a75 before \u00a74, or a serialised prewarm.sh write scope) and a dependency of \u00a74 on the row validator, or two dispatches will collide and one will measure a directory the other has retired.",
+      "text": "\u00a74 and \u00a75 declare no relationship, yet both write `scripts/h200_test_lane/prewarm.sh` and \u00a75 changes `jax_persistent_cache_enable_xla_caches`, which `_persistent_cache_runtime_identity` hashes into the versioned directory name, so dispatching \u00a74 and \u00a75 as two concurrent nodes collides on one file and \u00a75 silently retires the pin \u00a74 measured; and \u00a74's row-validator precondition exists only on the unlanded worktree 89fe2174d, tracked by the open followup f-fsri-prewarm-pin-land-or-drop, which \u00a74's owner note cites, so \u00a74 cannot be dispatched until that lands",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/forward-solver-route-integrity.html:398",
+      "id": "done_when-1",
+      "reason": "the node needs a stated negative control, e.g. the old `find | wc -l` count on a fixture carrying the autotune subtree, or its central lemma that the counter now counts program keys is untested.",
+      "text": "\u00a74's done-when asserts hits, a `served_entries` equality and an anchored-grep hit and names no negative control, unlike \u00a75's done-when at line 421, which states \"removing either export fails its test, which is the negative control\"; the equality can be satisfied by any counter that happens to agree on the fixture, so nothing shows the file-count defect is actually refused",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/forward-solver-route-integrity.html:400",
+      "id": "reasoning-1",
+      "reason": "without making the lane serve the pin read-only or requiring that followup first, the gate measures the lane's own pollution and cannot distinguish a covered pin from an uncovered one.",
+      "text": "\u00a74's first done-when clause requires a lane run \"against a directory holding only the pin's keys\" to report hits for the lane's own programs with zero compile seconds, but lane runs write their compiled programs into that same shared pin directory (open followup f-fsri-lane-prelude-errexit-and-pin-writes item 2, measured: a negative control read zero misses this way), so the clause is satisfied by the lane's own earlier writes rather than by the pre-warm, and \u00a74's counter fix does not address it",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/forward-solver-route-integrity.html:409",
+      "id": "reasoning-2",
+      "reason": "the section's mechanism and gates do not rest on the subtotal, so a reader loses only part of the evidence table's precision.",
+      "text": "\u00a75's pinned-directory row states 27,506 autotune entries and the columns that follow account for 26,313 + 213 = 26,526 of them, leaving 980 unaccounted with no third category named",
+      "type": "reasoning",
+      "would_change": false
+    },
+    {
+      "anchor": "docs/plans/forward-solver-route-integrity.html:462",
+      "id": "wiring-2",
+      "reason": "a live ordering followup that contradicts the section declarations will dispatch deferred work, so the author must close it or rehome it to converged-forward-solve as the sibling followup f-fsri-newton-lock-reopened already does.",
+      "text": "followup f-fsri-001 is still `open` and directs \"\u00a71 through the live codex node, then \u00a74, \u00a72 and \u00a73 in that order\", but the plan's own `plan-section-declarations` mark s1, s2 and s3 `deferred` and the \u00a72 outcome at 471 records them superseded by converged-forward-solve, and its body describes run r-20260919T090428129698 as \"in flight\" a month after it stopped",
+      "type": "wiring",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "fed601dd1b8c606cc5b3de296326c7e35c38b01bcf5737e8ef60658e97f2e750",
+  "plan_slug": "forward-solver-route-integrity",
+  "plan_version": 122,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261019T073412369611-plan-review-of-forward-solver-route-integrity",
+  "reviewed_blob_sha": "00d1ecd789a5bcfe57892e3d5f620d90861de36a",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every cited file, test and source line resolves (`tests/test_h200_cache_guard.py` and the \u00a75 research doc are correctly placed on the unlanded worktree `89fe2174d` and in \u00a75's future output rather than on main; `jax/_src/compiler.py` around line 282, `nova/jax/config.py:116-150` and `nova/equilibrium/forward.py:1977` were each reopened and match).",
+    "done_when": "a finding \u2014 \u00a75's done-when names its negative controls, but \u00a74's done-when does not, so \u00a74's guard cannot be shown to fire.",
+    "evidence_paths": "pass \u2014 \u00a75's evidence lands in `docs/research/xla-autotune-cache-on-gpfs.html` and figures under `docs/figures/forward-solver-route-integrity/`, both durable repository paths, and no section names a scratchpad or node-local temporary as a record.",
+    "naming": "pass \u2014 the plan's own record shows the one plan-stage symbol (`SLICE1_SOURCE`) was renamed to `CAPACITY_SCAN_SOURCE`, and no plan label survives into a symbol or comment.",
+    "reasoning": "a finding \u2014 \u00a74's mechanism (fixing the `served_entries` counter) does not make its own hit-count measure hold, because lane runs still write their compiled programs into the shared pin directory.",
+    "single_goal": "pass \u2014 \u00a74 (pre-warm key coverage) and \u00a75 (XLA autotune write path) each carry one deliverable; \u00a71's bundling of two regressions is inert behind its `deferred` declaration.",
+    "wiring": "a finding \u2014 \u00a74 and \u00a75 are both `implementable` and both rewrite `scripts/h200_test_lane/prewarm.sh`, and \u00a75's flag change moves the runtime-identity directory that \u00a74's gate is keyed on, yet no depends-on or ordering is declared between them."
+  },
+  "section_digests": {
+    "_document": "445fb84d09ecbb6217431a6840ec3f076c322cb32793546117ad5f3917d035cd",
+    "s-contract": "83d8d14d75c0216f84acbbb9ef71204975cc6134348d26b5158c593c9abfc624",
+    "s0": "80f310e76317b26c373d1244865223433df267fb8337045d575fe833c75b5858",
+    "s1": "80571c0e208f8095726792cc9d0029962c3966fed6f04e6dcb2ed1a5f352581b",
+    "s2": "f632de7fadccd34387c95c830a73120eb5234de722730bee800322a62a31db41",
+    "s3": "2912ba532e01c1f8a0dd30b1773900e600828c6bbb1cd315c7976868d2a940e5",
+    "s4": "da5c69a471b7ca2d81f157f637c5eda274244e01477238d60f1488532a220978",
+    "s5": "3791182e14b124ddd5501dccbc09d38ff6982b62c646730b819dde8f8827194e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T08:06:36.529844+00:00"
+}

@@ -11,11 +11,9 @@ axis, X-point, flux levels and label are the reference.
 Two facts about the shipped LIUQE stores drive the slice choice and are reported
 beside every number:
 
-* ``boundary.type`` is unset (-999999999) on every slice, so LIUQE's own
-  limited-or-diverted label is read from whether it stored a boundary X-point
-  (``boundary/x_point``), which is absent through the limited phase and present
-  through the diverted one -- in DD 3.41.0. DD 4.1.0 carries the same structure
-  differently, so the X-point list is read only when the DD version stores one.
+* ``boundary.type`` is unset (-999999999) on every slice. The reference label
+  follows the boundary outline's contact with the wall or a stored X-point;
+  an X-point outside a wall-limited outline does not make it diverted.
 * ``profiles_2d/psi`` is piecewise-constant in time: the 1703-slice store
   carries only 17 distinct psi grids, each frozen over one contiguous block, and
   the block starts are exactly ``SLICES``. A per-slice read inside a block would
@@ -43,6 +41,7 @@ import jax.numpy as jnp
 import numpy as np
 
 from nova.equilibrium.wall_mask import wall_units_from_ids
+from nova.equilibrium import boundary_comparison
 from nova.equilibrium.topology import TopologyPolicy
 from nova.jax.config import configure_dtypes
 from scripts.prototypes.efit_field_swap import crosscheck
@@ -112,6 +111,16 @@ REFUSED_CASES = {
     "jt60sa-5slice-s2-135-136:A",
     "jt60sa-5slice-s2-135-136:B",
 }
+
+WALL_CONTACT_TOLERANCE = 0.002
+XPOINT_CONTACT_TOLERANCE = 0.02
+"""Metre tolerances for sampled wall and X-point contacts on an outline.
+
+The corrected pulse's wall contacts are at most 0.00024 m for limited
+outlines, whereas its diverted outlines stand at least 0.009 m off the wall.
+The closest X-point to a diverted outline is within 0.011 m, while the nearest
+wall-limited outline with a stored X-point remains more than 0.044 m away.
+"""
 
 
 @dataclass(frozen=True)
@@ -241,6 +250,52 @@ def axis_boundary_span(axis, outline):
     return span
 
 
+def liuqe_boundary_geometry(view, wall_rings):
+    """Label the stored outline by wall and X-point proximity in metres."""
+    outline = np.asarray(view["outline"], dtype=np.float64)
+    if len(outline) < 3 or not wall_rings:
+        raise ValueError("LIUQE boundary and wall geometry are required")
+    closed_outline = _closed(outline)
+    wall_distance = min(
+        float(
+            np.min(
+                boundary_comparison._point_to_segment_distances(
+                    outline, _closed(np.asarray(ring, dtype=np.float64))
+                )
+            )
+        )
+        for ring in wall_rings
+    )
+    xpoint_distance = min(
+        (
+            float(
+                np.min(
+                    boundary_comparison._point_to_segment_distances(
+                        np.asarray([point], dtype=np.float64), closed_outline
+                    )
+                )
+            )
+            for point in view["xpoints"]
+        ),
+        default=float("nan"),
+    )
+    if xpoint_distance <= XPOINT_CONTACT_TOLERANCE:
+        label = "diverted"
+    elif wall_distance <= WALL_CONTACT_TOLERANCE:
+        label = "limited"
+    else:
+        raise ValueError(
+            f"LIUQE outline has no certified wall or X-point contact: "
+            f"wall {wall_distance:.5f} m, X-point {xpoint_distance:.5f} m"
+        )
+    return label, wall_distance, xpoint_distance
+
+
+def _boundary_view(view, wall_rings):
+    label, _, _ = liuqe_boundary_geometry(view, wall_rings)
+    return {**view, "xpoints": []} if label == "limited" else view
+
+
 def measure_slice(view, wall_rings, resolutions=RESOLUTIONS):
     """nova's read on one LIUQE slice, against LIUQE's own stored values."""
     state = build_state(
@@ -261,7 +316,7 @@ def measure_slice(view, wall_rings, resolutions=RESOLUTIONS):
         view["zgrid"],
         view["psi"],
         view["axis"],
-        ids_boundary_points(view),
+        ids_boundary_points(_boundary_view(view, wall_rings)),
         scalar_axis_psi=view["psi_axis"],
         scalar_boundary_psi=view["psi_boundary"],
         slice_index=view["index"],
@@ -306,17 +361,22 @@ def measure_slice(view, wall_rings, resolutions=RESOLUTIONS):
 
 def liuqe_reference(view, field):
     """LIUQE's own levels, both as stored and as read from its own grid."""
+    label, wall_distance, xpoint_distance = liuqe_boundary_geometry(
+        view, view["wall_rings"]
+    )
     ref = dict(
         liuqe_time=view["time"],
         liuqe_axis=list(view["axis"]),
         liuqe_axis_psi_stored=view["psi_axis"],
         liuqe_boundary_psi_stored=view["psi_boundary"],
         liuqe_xpoints=[list(p) for p in view["xpoints"]],
-        liuqe_label="diverted" if view["xpoints"] else "limited",
+        liuqe_label=label,
+        liuqe_wall_distance=wall_distance,
+        liuqe_xpoint_distance=xpoint_distance,
         liuqe_axis_boundary_span=axis_boundary_span(view["axis"], view["outline"]),
     )
     ref["liuqe_axis_psi_grid"] = _value(field, view["axis"])
-    if view["xpoints"]:
+    if label == "diverted":
         ref["liuqe_boundary_psi_grid"] = _grid_level(field, view["xpoints"])
     elif len(view["outline"]):
         ref["liuqe_boundary_psi_grid"] = _grid_level(field, view["outline"])
@@ -337,7 +397,10 @@ def guard_verdict(view):
     convention = read_convention(
         dd_version=view["dd_version"], plasma_current=view["plasma_current"]
     )
-    point = ids_boundary_points(view)
+    boundary_view = (
+        _boundary_view(view, view["wall_rings"]) if "wall_rings" in view else view
+    )
+    point = ids_boundary_points(boundary_view)
     field = grid_field(view["rgrid"], view["zgrid"], view["psi"])
     axis_value = grid_value(
         view["rgrid"], view["zgrid"], view["psi"], view["axis"], field=field
@@ -362,7 +425,7 @@ def guard_verdict(view):
         cocos=ids_cocos(view["dd_version"]),
         plasma_current=view["plasma_current"],
         declared_sigma=int(np.sign(float(convention.sigma))),
-        boundary_kind="xpoint" if view["xpoints"] else "outline",
+        boundary_kind="xpoint" if boundary_view["xpoints"] else "outline",
         scalar_span=view["psi_axis"] - view["psi_boundary"],
         grid_axis_psi=axis_value,
         grid_boundary_psi=boundary_value,
@@ -513,7 +576,12 @@ def main():
     wall_rings = read_wall(args.wall)
     db = imas.DBEntry(f"imas:hdf5?path={args.liuqe}", "r", dd_version="3.41.0")
     eq = db.get("equilibrium")
-    guard_rows = [guard_verdict(slice_view(eq, index)) for index in slices]
+    if eq.ids_properties.homogeneous_time != 1:
+        raise ValueError("equilibrium time base is not homogeneous")
+    guard_rows = [
+        guard_verdict({**slice_view(eq, index), "wall_rings": wall_rings})
+        for index in slices
+    ]
     for row in guard_rows:
         print(
             "GUARD",
@@ -561,6 +629,7 @@ def main():
     with output.open("w") as handle:
         for index in slices:
             view = slice_view(eq, index)
+            view["wall_rings"] = wall_rings
             state = build_state(
                 view["rgrid"],
                 view["zgrid"],

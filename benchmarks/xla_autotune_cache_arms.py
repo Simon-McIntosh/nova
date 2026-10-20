@@ -263,14 +263,32 @@ def seed_autotune_subtree(source: Path, destination: Path) -> int:
     return copied
 
 
+def write_receipt(path: Path | None, payload: dict) -> None:
+    """Write the whole receipt, so an interrupted run keeps every finished arm."""
+    if path is None:
+        return
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+
+
 def drive(
-    base: Path, repeats: int, kind: str, cells: int, logs: Path | None = None
+    base: Path,
+    repeats: int,
+    kind: str,
+    cells: int,
+    logs: Path | None = None,
+    receipt_path: Path | None = None,
 ) -> dict:
     """Run the four arms in order, each against its own prepared cache root.
 
     ``base`` holds the four per-arm cache roots and is node-local scratch.
     ``logs`` holds the per-arm run logs and is a durable directory, so a reader
     can see why an arm produced what it did after the job's scratch is gone.
+    ``receipt_path`` is rewritten as each arm completes: an arm's autotune file
+    count is read from the node-local cache root, so a measurement lost to a
+    wall-clock limit is recoverable only if its numbers were already written out.
     """
     base.mkdir(parents=True, exist_ok=True)
     selection = row_selection(kind, cells)
@@ -279,7 +297,15 @@ def drive(
     for root in roots.values():
         if root.exists():
             shutil.rmtree(root)
-    receipts = {}
+    receipts: dict[str, dict] = {}
+    payload = {
+        "row": {"kind": kind, "cells": cells},
+        "repeats": repeats,
+        "logs_directory": str(logs),
+        "arms": receipts,
+        "arms_completed": [],
+    }
+    write_receipt(receipt_path, payload)
     for arm in ARMS:
         workdir = logs / f"work-{arm}"
         workdir.mkdir(parents=True, exist_ok=True)
@@ -289,11 +315,21 @@ def drive(
             # the autotune subtree kept: seed the subtree, then measure as the
             # default so the row recompiles against the warm autotuner.
         receipts[arm] = measure_arm(arm, roots[arm], workdir, repeats, selection)
-    return {"row": {"kind": kind, "cells": cells}, "repeats": repeats, "arms": receipts}
+        payload["arms_completed"] = list(receipts)
+        write_receipt(receipt_path, payload)
+    return payload
 
 
-def figure_from_receipt(receipt: dict, figure_directory: Path) -> tuple[Path, Path]:
-    """Draw compile wall and steady-state solve wall per arm as one SVG and PNG."""
+def figure_from_receipt(
+    receipt: dict, figure_directory: Path, inspection_directory: Path | None = None
+) -> tuple[Path, Path | None]:
+    """Draw compile wall and steady-state solve wall per arm as one SVG.
+
+    The SVG is the published figure.  The PNG is a raster copy for the
+    producer's own inspection and goes to ``inspection_directory``, never
+    beside the SVG: a PNG twin in the figures tree doubles the file and drifts
+    from the SVG the page renders.
+    """
     import matplotlib
 
     matplotlib.use("Agg")
@@ -341,9 +377,12 @@ def figure_from_receipt(receipt: dict, figure_directory: Path) -> tuple[Path, Pa
     figure.tight_layout(rect=(0, 0, 1, 0.96))
     figure_directory.mkdir(parents=True, exist_ok=True)
     svg_path = figure_directory / "xla-autotune-arms-walls.svg"
-    png_path = figure_directory / "xla-autotune-arms-walls.png"
     figure.savefig(svg_path)
-    figure.savefig(png_path, dpi=100)
+    png_path = None
+    if inspection_directory is not None:
+        inspection_directory.mkdir(parents=True, exist_ok=True)
+        png_path = inspection_directory / "xla-autotune-arms-walls.png"
+        figure.savefig(png_path, dpi=100)
     plt.close(figure)
     return svg_path, png_path
 
@@ -361,6 +400,11 @@ def main() -> int:
     parser.add_argument(
         "--figure", type=Path, help="draw from --receipt into this directory"
     )
+    parser.add_argument(
+        "--inspection",
+        type=Path,
+        help="write the raster copy of the figure here for the producer to look at",
+    )
     arguments = parser.parse_args()
     if arguments.dry_run:
         for arm in ARMS:
@@ -370,22 +414,27 @@ def main() -> int:
         return 0
     if arguments.figure is not None:
         receipt = json.loads(arguments.receipt.read_text(encoding="utf-8"))
-        svg_path, png_path = figure_from_receipt(receipt, arguments.figure)
+        svg_path, png_path = figure_from_receipt(
+            receipt, arguments.figure, arguments.inspection
+        )
         print("SVG=%s PNG=%s" % (svg_path, png_path))
         return 0
     if arguments.receipt is None:
         parser.error("--receipt is required unless --dry-run or --figure")
     logs = arguments.receipt.parent / "xla-autotune-arm-logs"
     receipt = drive(
-        arguments.base, arguments.repeats, arguments.kind, arguments.cells, logs
-    )
-    arguments.receipt.parent.mkdir(parents=True, exist_ok=True)
-    receipt["logs_directory"] = str(logs)
-    arguments.receipt.write_text(
-        json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        arguments.base,
+        arguments.repeats,
+        arguments.kind,
+        arguments.cells,
+        logs,
+        arguments.receipt,
     )
     for arm in ARMS:
-        entry = receipt["arms"][arm]
+        entry = receipt["arms"].get(arm)
+        if entry is None:
+            print("ARM=%s not measured" % arm)
+            continue
         print(
             "ARM=%s cold_compile=%.3f cold_total=%.3f steady=%s files=%s"
             % (

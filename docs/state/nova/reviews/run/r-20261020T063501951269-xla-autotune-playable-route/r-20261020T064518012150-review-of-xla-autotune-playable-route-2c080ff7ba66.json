@@ -1,0 +1,56 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [
+    {
+      "failure_condition": "The single added assertion is assert \"export JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES=none\" in PAYLOAD.read_text(). It reads the real payload file rather than a value the test supplied, so it is independent of the code under test: deleting the export line reddens it, which the negative control demonstrates.",
+      "lines": "tests/test_playable_server.py:28"
+    }
+  ],
+  "call_sites": [
+    "scripts/playable_server/run.sh:74",
+    "scripts/playable_server/run.sh:97",
+    "scripts/playable_server/run.sh:157"
+  ],
+  "completed_at": "2026-10-20T06:57:00.786Z",
+  "dispatched_at": "2026-10-20T06:45:58Z",
+  "findings": [
+    {
+      "file": "tests/test_playable_server.py",
+      "line": "28",
+      "severity": "follow-on",
+      "text": "follow-on: the assertion is a substring match over the whole file, so '# export JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES=none' (the export commented out) still contains the asserted text and leaves the test green while the setting is inert. The negative control covers deletion but not commenting-out; a line-anchored or startswith check over a splitlines() pass would refuse both."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T063501951269-xla-autotune-playable-route/head.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the head arm and the manifest's after_suite both record revision 52702d307482ec0f35e0276e98c21c3a81d1cc91, the base, because the gate ran on the uncommitted working tree before 2c080ff7b was created; the after_suite revision therefore does not name the head it measured. The 12-vs-11 test count shows the run did contain the added test, so the evidence stands; the revision field alone is stale."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "scripts/playable_server/run.sh is the only production code that resolves or executes the payload: run.sh:74 binds payload to scripts/playable_server/payload.sh, run.sh:97 checks it exists for the dry run, and run.sh:157 hands it to sbatch as the job script, so the export lands in the serving job's environment.",
+    "diff": "Read commit by commit against base 52702d30: one file per concern inside scope on commit 2c080ff7b -- payload.sh adds one export line (payload.sh:26), tests/test_playable_server.py adds PAYLOAD and one test (tests/test_playable_server.py:24-28), and a new evidence fragment records the change, the gate and the control; 29 added lines, 0 deleted.",
+    "done_when": "The done_when asks that payload.sh export JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES=none beside its JAX_ENABLE_COMPILATION_CACHE and JAX_COMPILATION_CACHE_DIR exports, that a test in tests/test_playable_server.py assert the export, and that the named gate command pass on the fleet node; the diff adds the export at payload.sh:26 between the two cache exports, adds the asserting test, and head.log records the gate at EXIT=0 with 12 passed.",
+    "goal": "The source brief (prompt.txt GOAL) is 'Turn off XLA's per-fusion autotune cache on the playable_server route', and plan section 5 item 6 names the mechanism: export JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES=none in scripts/playable_server/payload.sh and pin it with a test in tests/test_playable_server.py; the landed commit 2c080ff7b does exactly that (payload.sh:26 export, tests/test_playable_server.py:26-28 test).",
+    "manifest": "Read the source manifest.md: status complete, one commit 2c080ff7b, tests line carries the literal gate command, artifacts cite baseline.log 11 passed / head.log 12 passed and the negative control, and negative_control_log names the red log as a bare path. Its after_suite.revision is 52702d30 rather than the landed 2c080ff7b (the gate ran before the commit), which the review records as a follow-on finding.",
+    "write_paths": "The source prompt fences scripts/playable_server/payload.sh, tests/test_playable_server.py, docs/evidence/fragments/forward-solver-route-integrity/xla-autotune-playable-route.html and the figures dir; git diff --stat 52702d30..2c080ff7b names exactly the first three of those and no other path."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261020T064518012150-review-of-xla-autotune-playable-route-2c080ff7ba66",
+  "reviewed_base_sha": "52702d307482ec0f35e0276e98c21c3a81d1cc91",
+  "reviewed_head_sha": "2c080ff7ba664565a82f04c0c950c625a26ac3d8",
+  "reviewed_run_id": "r-20261020T063501951269-xla-autotune-playable-route",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T06:57:06.020269+00:00",
+  "total": 112
+}

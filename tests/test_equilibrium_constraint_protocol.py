@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass, replace
 from types import SimpleNamespace
 from typing import NamedTuple
@@ -69,13 +70,50 @@ class _LinearOperator:
             current=jnp.asarray([0.0]),
         )
         self.source = SimpleNamespace(closure_degrees=0)
+        self.clip_mode = "chord"
+        coordinates = jnp.asarray([[1.0, 0.0], [2.0, 0.0]])
+        self.grid = SimpleNamespace(coordinate=coordinates[:1])
+        self.wall = SimpleNamespace(coordinate=coordinates[1:])
+        self.sample = None
+        self.moment_geometry = None
+        self.use_linear_moments = True
         self.changing_mask = changing_mask
+
+    @property
+    def program_identity(self) -> str:
+        digest = hashlib.sha256()
+        for coefficient in (
+            self.prescribed_current_field.response,
+            self.prescribed_current_field.current,
+        ):
+            value = np.asarray(coefficient)
+            digest.update(str(value.shape).encode())
+            digest.update(value.dtype.str.encode())
+            digest.update(value.tobytes())
+        return digest.hexdigest()
+
+    def with_source(self, source):
+        instance = object.__new__(type(self))
+        instance.__dict__ = self.__dict__.copy()
+        instance.source = source
+        return instance
+
+    def with_clip_mode(self, clip_mode):
+        instance = object.__new__(type(self))
+        instance.__dict__ = self.__dict__.copy()
+        instance.clip_mode = clip_mode
+        return instance
 
     def flux_map(self, *_args):
         return lambda flux: jnp.zeros_like(flux)
 
     def flux_map_with_shadow(self, *_args):
         return lambda flux, shadow: jnp.where(shadow, flux, jnp.zeros_like(flux))
+
+    def current_moments_and_observation(self, flux, _requested=None):
+        moments = SimpleNamespace(cell_current=jnp.asarray(flux)[:1])
+        masks = SimpleNamespace(core=jnp.ones((1,), dtype=bool))
+        return moments, None, masks, None
 
     def residual_shadow_mask(self, flux, _requested=None, previous_shadow=None):
         del previous_shadow
@@ -458,7 +496,14 @@ def test_eliminated_constraint_runs_through_typed_solve_with_outer_trace() -> No
     assert all(
         isinstance(step.inner_receipt, ForwardSolveReceipt) for step in trace.steps
     )
-    assert all(len(step.inner_receipt.constraints) == 1 for step in trace.steps)
+    assert all(
+        len(step.inner_receipt.constraints) == len(request.constraint_pairs) + 1
+        and np.array_equal(
+            np.asarray(step.inner_receipt.constraints[-1].physical_residual),
+            np.asarray(step.inner_receipt.constraints[-1].normalized_unknown),
+        )
+        for step in trace.steps
+    )
     assert bool(np.asarray(receipt.qualified))
 
     imposed = replace(

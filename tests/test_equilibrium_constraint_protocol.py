@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass, replace
 from types import SimpleNamespace
 from typing import NamedTuple
@@ -75,6 +76,19 @@ class _LinearOperator:
         self.wall = SimpleNamespace(coordinate=coordinates[1:])
         self.sample = None
         self.changing_mask = changing_mask
+
+    @property
+    def program_identity(self) -> str:
+        digest = hashlib.sha256()
+        for coefficient in (
+            self.prescribed_current_field.response,
+            self.prescribed_current_field.current,
+        ):
+            value = np.asarray(coefficient)
+            digest.update(str(value.shape).encode())
+            digest.update(value.dtype.str.encode())
+            digest.update(value.tobytes())
+        return digest.hexdigest()
 
     def with_source(self, source):
         instance = object.__new__(type(self))

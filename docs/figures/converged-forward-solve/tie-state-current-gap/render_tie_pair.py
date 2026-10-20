@@ -95,7 +95,8 @@ def draw_panel(axes, row, data, wall, physical_levels, zoom):
         contain=units,
     )
     read = row["read"]
-    for point, size in ((read["axis"], 130), (read["saddle"], 220)):
+    for point in read["root_positions"]:
+        size = 220 if np.linalg.norm(np.asarray(point) - read["saddle"]) < 1e-8 else 130
         axes.scatter(
             point[0],
             point[1],
@@ -174,7 +175,7 @@ def render(receipt, field_data, figure_path, preview):
                 markeredgecolor=READ_COLOUR,
                 linestyle="none",
                 markersize=12,
-                label="read axis and saddle candidate",
+                label="read roots (large ring: chosen candidate)",
             ),
         ]
         fig.legend(

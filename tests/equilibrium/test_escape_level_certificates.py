@@ -1,12 +1,41 @@
 """The boundary event lies inside independently certified escape brackets."""
 
 import jax
+import jax.numpy as jnp
 import pytest
 
 from nova.jax.config import configure_dtypes
 from scripts.prototypes.efit_field_swap.crosscheck import read_trace_record
 from scripts.prototypes.efit_maximin_certificate.adapter_probe import decision
 from scripts.prototypes.efit_maximin_certificate.run import ROWS
+
+
+def test_first_wall_escape_stays_on_the_axis_component():
+    """An equal-level carrier maximum must reach its physical wall contact."""
+    from nova.equilibrium import topology
+    from nova.equilibrium.solve_request import TopologyPolicy
+    from scripts.prototypes.fast_map_production.kernel import read
+    from scripts.prototypes.fast_map_production.test_axis_ranking import (
+        DoubleWell,
+        geometry,
+        roots,
+    )
+
+    configure_dtypes()
+    assert jax.config.jax_enable_x64 is True
+    field = DoubleWell(1.0)
+    carrier = geometry.__wrapped__()
+    convention = topology.TopologyConvention(jnp.asarray(-1.0), jnp.asarray(1.0))
+    reading = read(field, roots(field), carrier, convention, TopologyPolicy())
+    assert bool(reading.valid)
+    assert int(reading.boundary_class) == 0
+    assert float(reading.boundary[1]) == pytest.approx(-2.0, abs=1e-12)
+    assert float(reading.boundary[0]) == pytest.approx(
+        float(reading.axis[0]), abs=1e-10
+    )
+    assert float(reading.boundary_flux) == pytest.approx(
+        float(field.evaluate(reading.boundary).value), abs=1e-12
+    )
 
 
 @pytest.mark.slow

@@ -1,0 +1,43 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-20T10:04:40.598Z",
+  "dispatched_at": "2026-10-20T09:58:52Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/contour_tree_overflow/test_overflow.py",
+      "line": 41,
+      "severity": "follow-on",
+      "text": "follow-on: test_machine_overflow_reproduces pins the currently-refused behaviour (assert bool(tree.overflow)) and stands opposite the repair contract test_machine_carrier_fits_tree_capacity at line 30 in the same file; once the prescribed carrier-degree bound lands, one of the pair must invert, and the manifest's follow_ons do not name that edit."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/contour-tree-overflow.html",
+      "line": 20,
+      "severity": "follow-on",
+      "text": "follow-on: the fragment states the refusal is set by the adjacency bit, but probe.py instruments only five of the six overflow sources build_contour_tree unions; the final term at nova/equilibrium/contour_tree.py:514 (compact_edge_valid & ~edge_nodes_valid) is not measured, so the single-cause attribution rests on the other five reading false rather than on a counterfactual that raising the width clears the flag."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/contour-tree-overflow.html",
+      "line": 19,
+      "severity": "follow-on",
+      "text": "follow-on: the 550-cell paragraph calls the sweep-profile run's compiled-only overflow a 'distinct inconsistency' while the node measured only that main does not reproduce it; the cause is asserted, not established, at this node."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261020T095822795988-review-of-contour-tree-overflow-dea6570d1206",
+  "reviewed_base_sha": "db4375c2fb8a90d5f1fbfcf890bc95c1e36d9550",
+  "reviewed_head_sha": "dea6570d1206e2a777cac437fefc827a2a34e6b3",
+  "reviewed_run_id": "r-20261020T094123261955-contour-tree-overflow",
+  "scores": {
+    "durability": 16,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T10:04:43.619832+00:00",
+  "total": 108
+}

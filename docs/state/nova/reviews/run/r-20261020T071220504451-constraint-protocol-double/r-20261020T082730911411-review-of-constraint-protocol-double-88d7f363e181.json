@@ -1,0 +1,84 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T071220504451-constraint-protocol-double/after-final-head.log",
+  "assertion_analysis": [
+    {
+      "failure_condition": "Removing the automatic inactive vertical-position row (reverting commit 3748d5e18) makes len(step.inner_receipt.constraints) one short of len(request.constraint_pairs)+1, so the assertion reddens; the count clause is independent of the code under test because its right-hand side is built from the request the test declared.",
+      "lines": "499-506"
+    },
+    {
+      "failure_condition": "The row-identity clause compares physical_residual against normalized_unknown of the same code-produced row; for an active row these diverge and it reddens, but for a row whose two fields are both the held unknown (including zero) it can hold trivially, so it corroborates rather than independently guards the inactivity.",
+      "lines": "501-505"
+    }
+  ],
+  "base_log_revision": "020664f42b839215decd689125ba8e5c4aec0d64",
+  "baseline_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T071220504451-constraint-protocol-double/baseline.log",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-20T08:36:50.868Z",
+  "dispatched_at": "2026-10-20T08:27:57Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T071220504451-constraint-protocol-double/negative-control.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the negative control's own header records revision 9116568e, three commits before the reviewed head 88d7f363, so it was not re-run at the head that includes the authorized row-count assertion change d85732a; the AttributeError at forward.py:686 it reproduces (two occurrences, 2 failed/16 passed) still demonstrates the double's with_source is required, but it does not falsify the head revision."
+    },
+    {
+      "file": "tests/test_equilibrium_constraint_protocol.py",
+      "line": "95",
+      "severity": "follow-on",
+      "text": "follow-on: the added with_source/with_clip_mode/program_identity/grid/wall surface duplicates the capability of the existing local double _CarrierOperator at tests/equilibrium/test_solve_vertical_pin.py:54-83, which already mirrors the same operator members for the same vertical-row path; no shared operator-double owner exists, so this is local duplication rather than a fork of a repository-owned mechanism, but a shared fixture would remove it."
+    },
+    {
+      "file": "tests/test_equilibrium_constraint_protocol.py",
+      "line": "501",
+      "severity": "follow-on",
+      "text": "follow-on: the row-identity clause np.array_equal(constraints[-1].physical_residual, constraints[-1].normalized_unknown) compares two fields of one code-produced row, so it holds trivially when both are zero and is weaker corroboration than the independent count clause at line 499 that actually guards the automatic inactive vertical row."
+    }
+  ],
+  "head_log_revision": "88d7f363e18160c4fa01f72a19d82482ec0ff96d",
+  "item_verdicts": {
+    "diff": "Read commit by commit against base 020664f4: ee82dced adds the copy methods and fixture attributes, bcc182ef adds program_identity, 9116568e adds current_moments_and_observation, d85732a rewrites the one row-count assertion, and 6d2c16b/88d7f363 add the evidence fragment, 49 insertions and 1 deletion total.",
+    "done_when": "The brief's done-when is 18 of 18 in one fresh CPU process at head plus the literal negative control; after-final-head.log records revision 88d7f363, 18 passed in 127.28s and EXIT=0, while baseline.log at 020664f4 records 2 failed/16 passed and EXIT=1, so the delta is two repaired failures and zero added.",
+    "goal": "The reviewed brief (as amended by its two resume advice files) asks for the _LinearOperator test double to be completed so the two eliminated-constraint tests reach their own assertions; tests/test_equilibrium_constraint_protocol.py:73-118 now supplies clip_mode, grid, wall, sample, moment_geometry, use_linear_moments, program_identity, with_source, with_clip_mode and current_moments_and_observation, and the authorized row-count assertion is at lines 499-506.",
+    "manifest": "The reviewed manifest.md reads status complete, lists all six commits, both gate arms as single-line JSON each naming one log, the negative_control_log path, and the fragment; its stated 127.28s head wall matches after-final-head.log and its baseline 2 failed matches baseline.log.",
+    "write_paths": "The declared write paths are tests/test_equilibrium_constraint_protocol.py, docs/evidence/fragments/converged-forward-solve/constraint-protocol-double.html and docs/figures/converged-forward-solve/constraint-protocol-double; the 020664f4..88d7f363 diff changes only the test file and the fragment, both inside the grant."
+  },
+  "justifications": {
+    "durability": "tests/test_equilibrium_constraint_protocol.py:499 asserts the receipt row count equals len(request.constraint_pairs)+1, which reddens if the automatic inactive vertical-position row (commit 3748d5e18) is removed, and negative-control.log shows the two tests fail with AttributeError at forward.py:686 when with_source is removed.",
+    "evidence": "baseline.log (EXIT=1, 2 failed) and after-final-head.log (EXIT=0, 18 passed) are both on disk at the base and head revisions with # revision: and EXIT= header/footer lines, and the manifest quotes the same walls.",
+    "fit": "tests/test_equilibrium_constraint_protocol.py:95-108 mirrors the production signatures at nova/equilibrium/forward_operator.py:2673 and :2705 (shallow copy via object.__new__ and __dict__.copy()), and no added name carries a forbidden plan, version or ticket label.",
+    "goal_fidelity": "tests/test_equilibrium_constraint_protocol.py:73-118 supplies every operator member the eliminated-constraint path reaches, and after-final-head.log at 88d7f363 shows the two targeted tests green (18 passed).",
+    "reuse": "The added members mirror the production owner nova/equilibrium/forward_operator.py:2669-2712 and add no new product mechanism; the search over tests/ found a near-identical local double, _CarrierOperator at tests/equilibrium/test_solve_vertical_pin.py:54, but no shared operator-double owner exists to extend.",
+    "scope_discipline": "Every path in the 020664f4..88d7f363 diff (tests/test_equilibrium_constraint_protocol.py, docs/evidence/fragments/converged-forward-solve/constraint-protocol-double.html) lies inside the declared write paths, and no product source is touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The reviewed brief (as amended by its two resume advice files) asks the _LinearOperator test double to be completed so the two eliminated-constraint tests pass; tests/test_equilibrium_constraint_protocol.py:73-118 now supplies clip_mode, grid, wall, sample, moment_geometry, use_linear_moments, program_identity, with_source, with_clip_mode and current_moments_and_observation, with the authorized row-count assertion at lines 499-506.\nVERDICT done_when: The brief's done-when is 18 of 18 in one fresh CPU process at head plus the literal negative control; after-final-head.log at 88d7f363 records 18 passed in 127.28s and EXIT=0 against baseline.log at 020664f4 with 2 failed/16 passed and EXIT=1, a delta of two repaired failures and zero added.\nVERDICT write_paths: The declared grant is tests/test_equilibrium_constraint_protocol.py, docs/evidence/fragments/converged-forward-solve/constraint-protocol-double.html and docs/figures/converged-forward-solve/constraint-protocol-double; the 020664f4..88d7f363 diff changes only the first two, both inside the grant.\nVERDICT manifest: The reviewed manifest.md reads status complete, lists all six commits, both gate arms as single-line JSON each naming one log, the negative_control_log path and the fragment, and its 127.28s head wall matches after-final-head.log.\nVERDICT diff: Read commit by commit against base 020664f4, the six commits ee82dced..88d7f363 add the operator copy methods, program_identity, the moment observation, the row-count assertion change and the evidence fragment, 49 insertions and 1 deletion across the test file and docs/evidence/fragments/converged-forward-solve/constraint-protocol-double.html.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: tests/test_equilibrium_constraint_protocol.py:73-118 supplies every operator member the eliminated-constraint path reaches, and after-final-head.log shows the two targeted tests green at head.\nSCORE evidence: 17\nJUSTIFICATION evidence: baseline.log (EXIT=1, 2 failed) and after-final-head.log (EXIT=0, 18 passed) sit on disk at the base and head revisions with # revision: and EXIT= lines, and the manifest quotes the same walls.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the 020664f4..88d7f363 diff is inside the declared write paths and no product source changed.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_equilibrium_constraint_protocol.py:499 asserts the receipt row count equals len(request.constraint_pairs)+1, which reddens if the automatic inactive vertical-position row is removed, and negative-control.log shows both targeted tests fail with AttributeError at forward.py:686 when with_source is removed.\nSCORE fit: 18\nJUSTIFICATION fit: tests/test_equilibrium_constraint_protocol.py:95-108 mirrors the production signatures at nova/equilibrium/forward_operator.py:2673 and :2705 and no added name carries a forbidden plan, version or ticket label.\nSCORE reuse: 15\nJUSTIFICATION reuse: the added members mirror the production owner nova/equilibrium/forward_operator.py:2669-2712 rather than forking a product mechanism, and the tests/ search found a near-identical local double _CarrierOperator at tests/equilibrium/test_solve_vertical_pin.py:54 but no shared owner to extend.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T071220504451-constraint-protocol-double/negative-control.log:1 follow-on: the negative control's header records revision 9116568e, three commits before the reviewed head 88d7f363, so it does not falsify the head that includes the authorized row-count assertion change d85732a, though its reproduced AttributeError still shows the double's with_source is required.\nFINDING tests/test_equilibrium_constraint_protocol.py:95 follow-on: the added with_source/with_clip_mode/program_identity/grid/wall surface duplicates the existing local double _CarrierOperator at tests/equilibrium/test_solve_vertical_pin.py:54-83, with no shared operator-double owner to extend.\nFINDING tests/test_equilibrium_constraint_protocol.py:501 follow-on: the row-identity clause compares physical_residual against normalized_unknown of the same code-produced row and can hold trivially when both are zero, so the independent count clause at line 499 is the load-bearing guard.\n",
+  "review_run_id": "r-20261020T082730911411-review-of-constraint-protocol-double-88d7f363e181",
+  "reviewed_base_sha": "020664f42b839215decd689125ba8e5c4aec0d64",
+  "reviewed_commits": [
+    "ee82dceda99f8517ca47371f526d95c3b34728b3",
+    "bcc182efb7bb9ade3246932f9f6e097bb789ed19",
+    "9116568e74ebde29877e780aa5892c1148580013",
+    "6d2c16b3339f764adbba6414f747b31459a4d66b",
+    "d85732a722ca54614922dbdeae2ada6fd4a57ec7",
+    "88d7f363e18160c4fa01f72a19d82482ec0ff96d"
+  ],
+  "reviewed_head_sha": "88d7f363e18160c4fa01f72a19d82482ec0ff96d",
+  "reviewed_run_id": "r-20261020T071220504451-constraint-protocol-double",
+  "scores": {
+    "durability": 16,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 15,
+    "scope_discipline": 19
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T08:39:36.397268+00:00",
+  "total": 103
+}

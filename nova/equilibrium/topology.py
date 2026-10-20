@@ -1537,9 +1537,8 @@ def _conditioned_hessian(hessian, tolerance):
     return valid, jnp.where(valid, hessian, jnp.eye(2, dtype=hessian.dtype))
 
 
-@partial(jax.custom_jvp, nondiff_argnums=(4,))
-def _implicit_stationary_position(field, seed, pitch, tolerance, iterations):
-    """Polish a point using analytic jets, with an implicit position tangent.
+def _stationary_position_primal(field, seed, pitch, tolerance, iterations):
+    """Polish a point using analytic jets.
 
     The loop evaluates the jet once more than it steps, so the jet at the
     polished point comes from the same traced evaluation as every Newton step.
@@ -1562,6 +1561,12 @@ def _implicit_stationary_position(field, seed, pitch, tolerance, iterations):
         jnp.zeros((), dtype), jnp.zeros(2, dtype), jnp.zeros((2, 2), dtype)
     )
     return jax.lax.fori_loop(0, iterations + 1, step, (seed, empty))
+
+
+@partial(jax.custom_jvp, nondiff_argnums=(4,))
+def _implicit_stationary_position(field, seed, pitch, tolerance, iterations):
+    """Polish a pytree field with an implicit position tangent."""
+    return _stationary_position_primal(field, seed, pitch, tolerance, iterations)
 
 
 @_implicit_stationary_position.defjvp
@@ -1588,14 +1593,20 @@ def _implicit_stationary_position_jvp(iterations, primals, tangents):
 
 
 def stationary_read(field, seed, pitch, policy):
-    """Read a null from a pytree point evaluator, never from sampled flux.
+    """Read a null from a point evaluator, never from sampled flux.
 
     ``field.evaluate(point)`` returns a :class:`FieldJet` of the total field.
     Its plasma term evaluates the booked current through the Biot kernels;
     its exterior term evaluates the prescribed field at the same point.
-    The evaluator and all its numerical operands must be registered pytrees.
+    Registered pytree evaluators retain the implicit position tangent.
+    Plain callable objects supply primal values without a field tangent.
     """
-    point, jet = _implicit_stationary_position(
+    polish = (
+        _stationary_position_primal
+        if any(leaf is field for leaf in jax.tree_util.tree_leaves(field))
+        else _implicit_stationary_position
+    )
+    point, jet = polish(
         field,
         jnp.asarray(seed),
         pitch,
@@ -2017,6 +2028,114 @@ def _normal_form_cell_fragments(vertices, vertex_count, form, tolerance):
         jnp.where(
             valid, int(TopologyReason.OK), int(TopologyReason.UNRESOLVED_COMPONENT)
         ).astype(jnp.int32),
+    )
+
+
+def normal_form_fold_loop(
+    position, hessian, third, fourth, axis, level_offset, radius, segments=64
+):
+    """Close the near-fold lobe in the saddle's transverse normal form.
+
+    Completing the negative square retains the mixed cubic correction. The
+    weak-direction polynomial then closes the lobe at its first positive
+    turning point, rather than extrapolating local separatrix rays past it.
+    All coefficients come from the stationary jet, never sampled flux roots.
+    """
+    eigenvalue, eigenvector = jnp.linalg.eigh(hessian)
+    direction = eigenvector[:, 1]
+    direction *= jnp.where(jnp.dot(axis - position, direction) >= 0, 1.0, -1.0)
+    transverse = jnp.stack((-direction[1], direction[0]))
+    negative = jnp.where(eigenvalue[0] < 0, -eigenvalue[0], 1.0)
+    positive = jnp.where(eigenvalue[1] > 0, eigenvalue[1], 1.0)
+    along = jnp.einsum("ijk,i,j,k", third, direction, direction, direction)
+    mixed = jnp.einsum("ijk,i,j,k", third, direction, direction, transverse)
+    quartic = jnp.einsum(
+        "ijkl,i,j,k,l", fourth, direction, direction, direction, direction
+    )
+    a = positive / negative
+    b = along / (3 * negative)
+    c = (quartic + 3 * mixed * mixed / negative) / (12 * negative)
+    bend = mixed / (2 * negative)
+    roots = _quadratic_parameters(c, b, a)
+    extent = jnp.min(jnp.where(roots > 0, roots, jnp.inf))
+    finite = jnp.isfinite(extent)
+    extent = jnp.where(finite, extent, 1.0)
+    turns = _quadratic_parameters(4 * c, 3 * b, 2 * a)
+    peak = jnp.min(jnp.where((turns > 0) & (turns < extent), turns, extent))
+    delta = jnp.maximum(0.0, 2 * level_offset / negative)
+
+    def polynomial(u):
+        return u * u * (a + b * u + c * u * u) - delta
+
+    def bisect(_, bracket):
+        low, high = bracket
+        middle = (low + high) / 2
+        positive = polynomial(middle) > 0
+        lower_half = jnp.asarray((True, False))
+        move_high = positive == lower_half
+        return jnp.where(move_high, low, middle), jnp.where(move_high, middle, high)
+
+    low, high = jax.lax.fori_loop(
+        0, 40, bisect, (jnp.array((0.0, peak)), jnp.array((peak, extent)))
+    )
+    ends = jax.lax.stop_gradient((low + high) / 2)
+
+    def polish(_, u):
+        slope = u * (2 * a + 3 * b * u + 4 * c * u * u)
+        return u - polynomial(u) / jnp.where(jnp.abs(slope) > 1e-30, slope, 1.0)
+
+    ends = jax.lax.fori_loop(0, 2, polish, ends)
+    ends = jnp.where(delta == 0, jnp.array((0.0, extent)), ends)
+    parameter = (1 - jnp.cos(jnp.linspace(0.0, jnp.pi, segments + 1))) / 2
+    u = ends[0] + (ends[1] - ends[0]) * parameter
+    width_squared = polynomial(u)
+    interior = (jnp.arange(segments + 1) > 0) & (jnp.arange(segments + 1) < segments)
+    width = jnp.where(
+        interior,
+        jnp.sqrt(jnp.where(interior, jnp.maximum(width_squared, 1e-30), 1.0)),
+        0.0,
+    )
+    middle = bend * u * u
+    radial = jnp.concatenate((u, u[::-1]))
+    vertical = jnp.concatenate((middle - width, (middle + width)[::-1]))
+    loop = position + radial[:, None] * direction + vertical[:, None] * transverse
+    axis_along = jnp.dot(axis - position, direction)
+    live = finite & (eigenvalue[0] < 0) & (eigenvalue[1] > 0) & (extent < radius)
+    live &= (axis_along > 0) & (axis_along < extent) & (polynomial(peak) > 0)
+    return loop, live
+
+
+def clip_normal_form_loop(loop, vertices, vertex_count):
+    """Clip one closed normal-form component by a convex carrier cell."""
+    capacity = loop.shape[0] + vertices.shape[0]
+    points = jnp.pad(loop, ((0, vertices.shape[0]), (0, 0)))
+    slots = jnp.arange(capacity)
+
+    def clip(edge, state):
+        points, count = state
+        start = vertices[edge]
+        end = vertices[jnp.where(edge + 1 < vertex_count, edge + 1, 0)]
+        direction = end - start
+        following = jnp.where(slots + 1 < count, slots + 1, 0)
+        last = points[following]
+        first_side = _cross_plane(direction, points - start)
+        last_side = _cross_plane(direction, last - start)
+        first_in, last_in = first_side >= 0, last_side >= 0
+        crossing = first_in != last_in
+        denominator = first_side - last_side
+        parameter = first_side / jnp.where(crossing, denominator, 1.0)
+        intersection = points + parameter[:, None] * (last - points)
+        output = jnp.stack((intersection, last), axis=1).reshape(-1, 2)
+        mask = jnp.stack((crossing, last_in), axis=1) & (slots < count)[:, None]
+        indices = jnp.nonzero(mask.reshape(-1), size=capacity, fill_value=0)[0]
+        size = jnp.sum(mask, dtype=jnp.int32)
+        packed = jnp.where((slots < size)[:, None], output[indices], 0.0)
+        return jnp.where(edge < vertex_count, packed, points), jnp.where(
+            edge < vertex_count, size, count
+        )
+
+    return jax.lax.fori_loop(
+        0, vertices.shape[0], clip, (points, jnp.asarray(loop.shape[0], jnp.int32))
     )
 
 
@@ -2459,7 +2578,6 @@ class TopologyGeometry:
             following.extend(offset + (np.arange(len(unit)) + 1) % len(unit))
             units.extend([unit_index] * len(unit))
         from dataclasses import replace
-        from scipy.spatial import Delaunay
         from nova.equilibrium.contour_tree_mesh import build_contour_mesh
         from nova.equilibrium.wall_mask import WallUnit
 
@@ -2477,8 +2595,12 @@ class TopologyGeometry:
             tree_centres,
             np.zeros(len(tree_centres)),
             tuple(
-                WallUnit(np.asarray(u)[:, 0], np.asarray(u)[:, 1], kind="vessel")
-                for u in wall_units
+                WallUnit(
+                    np.asarray(u)[:, 0],
+                    np.asarray(u)[:, 1],
+                    kind="vessel" if index == 0 else "material",
+                )
+                for index, u in enumerate(wall_units)
             ),
         )
         occupied = np.flatnonzero(np.asarray(mesh.vertex_valid))
@@ -2501,18 +2623,12 @@ class TopologyGeometry:
             edge_capacity=edge_size,
             triangle_capacity=triangle_size,
         )
-        triangulation = Delaunay(tree_centres)
-        target = np.asarray(mesh.vertex_rz)
-        simplex = triangulation.find_simplex(target)
-        transform = triangulation.transform[np.maximum(simplex, 0)]
-        barycentric = np.einsum(
-            "nij,nj->ni", transform[:, :2], target - transform[:, 2]
-        )
-        barycentric = np.column_stack((barycentric, 1 - barycentric.sum(axis=1)))
-        sources = triangulation.simplices[np.maximum(simplex, 0)]
-        sources[: len(tree_centres)] = np.arange(len(tree_centres))[:, None]
-        barycentric[: len(tree_centres)] = (1.0, 0.0, 0.0)
-        barycentric[~np.asarray(mesh.vertex_valid)] = 0.0
+        # Evaluate every carrier vertex, including wall intersections, on the
+        # physical field. No interior-hull extrapolation enters the tree read.
+        tree_centres = np.asarray(mesh.vertex_rz)
+        sources = np.repeat(np.arange(len(tree_centres))[:, None], 3, axis=1)
+        barycentric = np.zeros_like(sources, dtype=np.float64)
+        barycentric[:, 0] = np.asarray(mesh.vertex_valid)
         return cls(
             *map(
                 jnp.asarray,
@@ -2714,29 +2830,51 @@ def _null_census(field, geometry, coefficient, policy, tree):
 
 
 def _wall_events(field, geometry, policy, sigma):
+    """Enumerate wall vertices and polished tangencies from multiple brackets.
+
+    A wall edge can contain several extrema of the field. Keeping each
+    tangency as a separate candidate allows connectivity to reject a remote
+    maximum without hiding a lower maximum on the axis component.
+    """
     start = geometry.wall_points
     edge = start[geometry.wall_following] - start
+    seeds = jnp.linspace(0.0, 1.0, 9)
 
     def one(first, direction):
         def step(_index, parameter):
-            jet = field.evaluate(first + parameter * direction)
+            points = first + parameter[:, None] * direction
+            jet = jax.vmap(field.evaluate)(points)
             first_derivative = jet.gradient @ direction
-            second_derivative = direction @ jet.hessian @ direction
+            second_derivative = jnp.einsum(
+                "i,nij,j->n", direction, jet.hessian, direction
+            )
             concave = sigma * second_derivative < 0.0
             update = first_derivative / jnp.where(concave, second_derivative, 1.0)
-            return jnp.where(concave, jnp.clip(parameter - update, 0.0, 1.0), parameter)
+            # Keep the polish inside its local seed bracket, so a Newton step
+            # cannot jump across another stationary wall event.
+            lower = jnp.maximum(0.0, seeds - 1.0 / 8)
+            upper = jnp.minimum(1.0, seeds + 1.0 / 8)
+            return jnp.where(
+                concave, jnp.clip(parameter - update, lower, upper), parameter
+            )
 
-        parameter = jax.lax.fori_loop(
-            0, policy.polish_iterations, step, jnp.asarray(0.5)
+        parameter = jax.lax.fori_loop(0, policy.polish_iterations, step, seeds)
+        points = first + parameter[:, None] * direction
+        jets = jax.vmap(field.evaluate)(points)
+        derivative = jets.gradient @ direction
+        curvature = jnp.einsum("i,nij,j->n", direction, jets.hessian, direction)
+        scale = jnp.maximum(jnp.max(jnp.abs(jets.value)), jnp.max(jnp.abs(curvature)))
+        stationary = (
+            jnp.abs(derivative) <= 64 * jnp.finfo(points.dtype).eps * scale
+        ) & (sigma * curvature < 0)
+        endpoints = jnp.stack((first, first + direction))
+        values = jnp.where(stationary, jets.value, -sigma * jnp.inf)
+        return jnp.concatenate((endpoints, points)), jnp.concatenate(
+            (_point_values(field, endpoints), values)
         )
-        points = first + jnp.asarray((0.0, 1.0, parameter))[:, None] * direction
-        values = _point_values(field, points)
-        selected = jnp.argmax(sigma * values)
-        return points[selected], values[selected]
 
-    if isinstance(field, TotalField):
-        return jax.lax.map(lambda pair: one(*pair), (start, edge))
-    return jax.vmap(one)(start, edge)
+    points, values = jax.lax.map(lambda pair: one(*pair), (start, edge))
+    return points.reshape(-1, 2), values.reshape(-1)
 
 
 def _connected_fragment_labels(area, intervals, geometry, tolerance):
@@ -2984,6 +3122,7 @@ def read(field, geometry, convention, policy):
         mesh.edges,
         mesh.edge_valid,
         sigma,
+        neighbour_capacity=mesh.neighbour_capacity,
     )
     nulls, live, required, census_resolved = _null_census(
         field, geometry, coefficient, policy, tree

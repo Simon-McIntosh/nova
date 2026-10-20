@@ -23,6 +23,7 @@ visible refusal rather than a truncated topology result.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from functools import partial
 from math import isfinite
 from typing import ClassVar, Protocol, TypeAlias
 
@@ -204,17 +205,24 @@ def _insert_split_nodes(
 
 
 def _carrier_adjacency(
-    edges: jax.Array, edge_valid: jax.Array, vertex_count: int
+    edges: jax.Array,
+    edge_valid: jax.Array,
+    vertex_count: int,
+    neighbour_capacity: int | None = None,
 ) -> tuple[jax.Array, jax.Array, jax.Array]:
     """Index each carrier edge once for constant-degree sweep visits.
 
-    Three-direction carriers have bounded vertex degree; ordinary sparse graphs
-    retain their full edge-width neighbourhood so the public graph contract is
-    unchanged.  An unexpected carrier degree is a visible capacity refusal.
+    A carrier supplies its measured maximum degree as static shape metadata.
+    Direct graph callers without that metadata retain a bounded dense-carrier
+    default or their full edge width when sparse. An undersized table refuses.
     """
 
     edge_count = edges.shape[0]
-    neighbour_capacity = 16 if edge_count > 2 * vertex_count else edge_count
+    if neighbour_capacity is None:
+        neighbour_capacity = (
+            min(edge_count, 32) if edge_count > 2 * vertex_count else edge_count
+        )
+    neighbour_capacity = max(1, neighbour_capacity)
     carrier_edges = edges.astype(CARRIER_INDEX_DTYPE)
     sources = jnp.concatenate((carrier_edges[:, 0], carrier_edges[:, 1]))
     targets = jnp.concatenate((carrier_edges[:, 1], carrier_edges[:, 0]))
@@ -411,7 +419,7 @@ def _sweep_tree(
     return result[4], result[5], output_edges, output_valid, overflow, order
 
 
-@jax.jit
+@partial(jax.jit, static_argnames=("neighbour_capacity",))
 def build_contour_tree(
     vertex_psi: jax.Array,
     vertex_valid: jax.Array,
@@ -419,6 +427,7 @@ def build_contour_tree(
     edges: jax.Array,
     edge_valid: jax.Array,
     sigma: jax.Array,
+    neighbour_capacity: int | None = None,
 ) -> ContourTreeArrays:
     """Build a contour tree from a fixed-capacity piecewise-linear edge graph.
 
@@ -435,7 +444,7 @@ def build_contour_tree(
     mesh_edge_capacity = edges.shape[0]
     signed = jnp.asarray(sigma, dtype=vertex_psi.dtype) * vertex_psi
     neighbours, neighbour_valid, adjacency_overflow = _carrier_adjacency(
-        edges, edge_valid, mesh_node_capacity
+        edges, edge_valid, mesh_node_capacity, neighbour_capacity
     )
     join = _sweep_tree(
         signed,

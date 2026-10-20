@@ -1,17 +1,16 @@
 """Piecewise-linear contour mesh on the hex carrier.
 
-The contour tree is built on a discrete field, and its topology must not depend
-on a tolerance. This module supplies that field's carrier: the three-direction
-triangulation of the hex cell centres, clipped to the multi-unit vessel polygon,
-with wall vertices placed where the triangulation meets the wall polyline.
+The contour tree is built on a discrete field. Its triangulation includes the
+cell centres and the supplied material boundaries, clipped to the occupiable
+vessel domain. Boundary samples follow the carrier spacing, so the interior
+centre hull cannot leave an uncovered strip beside the wall.
 
-The field is piecewise-linear. Flux is valued at the hex cell centres; a wall
-vertex takes its flux by linear interpolation on the triangle that contains it,
-from the SAME piecewise-linear field the tree is built on, so no smooth
-representation is needed to value the boundary. The result is a fixed-capacity
-ContourMesh of jax arrays, traceable through jit and vmap.
+Standalone callers supply centre flux; boundary values extend the adjacent
+linear field. TopologyGeometry evaluates its physical field directly at every
+resulting vertex, including boundary intersections. The fixed-capacity receipt
+is traceable through jit and vmap.
 
-Reuse (contour-tree-topology-authority reuse-map.md rows 1-3):
+Geometry primitives:
 
 * row 1 - scipy.spatial.Delaunay over the cell centres is the idiom of
   nova.biot.plasmagrid.PlasmaGrid.tessellate, which recovers the three-direction
@@ -31,7 +30,7 @@ from typing import Sequence
 import jax
 import jax.numpy as jnp
 import numpy as np
-from scipy.spatial import Delaunay
+from scipy.spatial import Delaunay, cKDTree
 import shapely
 from shapely.geometry import MultiPolygon, Polygon
 
@@ -151,10 +150,26 @@ def _inside_wall_units(
 
 
 def _barycentric_flux(point_rz, triangle_rz, triangle_psi) -> float:
-    """Return the linear field at point_rz on its containing triangle."""
+    """Extend the linear field, using the longest edge for a flat triangle."""
     a, b, c = triangle_rz
-    matrix = np.stack([b - a, c - a], axis=1)
-    weights = np.linalg.solve(matrix, np.asarray(point_rz) - a)
+    edges = np.asarray((b - a, c - b, a - c))
+    lengths = np.einsum("ij,ij->i", edges, edges)
+    scale = float(np.max(lengths))
+    determinant = float(np.linalg.det(np.stack((b - a, c - a), axis=1)))
+    if abs(determinant) <= np.finfo(float).eps * scale:
+        if scale == 0.0:
+            return float(np.mean(triangle_psi))
+        index = int(np.argmax(lengths))
+        start = triangle_rz[index]
+        end = triangle_rz[(index + 1) % 3]
+        fraction = np.dot(np.asarray(point_rz) - start, end - start) / scale
+        return float(
+            triangle_psi[index]
+            + fraction * (triangle_psi[(index + 1) % 3] - triangle_psi[index])
+        )
+    weights = np.linalg.solve(
+        np.stack((b - a, c - a), axis=1), np.asarray(point_rz) - a
+    )
     return float(
         triangle_psi[0]
         + weights[0] * (triangle_psi[1] - triangle_psi[0])
@@ -178,6 +193,7 @@ class ContourMesh:
     vertex_capacity: int = 0
     edge_capacity: int = 0
     triangle_capacity: int = 0
+    neighbour_capacity: int = 0
     overflow: bool = False
 
     def tree_flatten(self):
@@ -195,17 +211,25 @@ class ContourMesh:
             self.vertex_capacity,
             self.edge_capacity,
             self.triangle_capacity,
+            self.neighbour_capacity,
             self.overflow,
         )
 
     @classmethod
     def tree_unflatten(cls, aux, children):
-        vertex_capacity, edge_capacity, triangle_capacity, overflow = aux
+        (
+            vertex_capacity,
+            edge_capacity,
+            triangle_capacity,
+            neighbour_capacity,
+            overflow,
+        ) = aux
         return cls(
             *children,
             vertex_capacity=vertex_capacity,
             edge_capacity=edge_capacity,
             triangle_capacity=triangle_capacity,
+            neighbour_capacity=neighbour_capacity,
             overflow=overflow,
         )
 
@@ -230,12 +254,54 @@ def _clipped_carrier(
     """
     scale = float(np.max(np.abs(centre_rz))) if centre_rz.size else 1.0
     tolerance = max(1e-12, 1e-9 * max(1.0, scale))
-    centre_valid = _inside_wall_units(centre_rz, wall_units)
+    domain = _occupiable_geometry(wall_units)
+    triangulation = Delaunay(centre_rz)
+    spacing = np.median(cKDTree(centre_rz).query(centre_rz, k=2)[0][:, 1])
+    # Boundary samples complete the domain beyond the interior-centre hull.
+    # Linear extrapolation preserves affine fields for standalone mesh callers;
+    # the topology geometry evaluates its physical field at these same points.
+    boundary_points = []
+    for unit in wall_units:
+        if not unit.closed:
+            continue
+        ring = np.column_stack((unit.r, unit.z))
+        for a, b in zip(ring, np.roll(ring, -1, axis=0)):
+            count = max(1, int(np.ceil(np.linalg.norm(b - a) / spacing)))
+            boundary_points.extend(a + (b - a) * np.arange(count)[:, None] / count)
+    seen = {_key(point, tolerance) for point in centre_rz}
+    distinct = []
+    for point in boundary_points:
+        key = _key(point, tolerance)
+        if key not in seen:
+            distinct.append(point)
+            seen.add(key)
+    boundary_points = np.asarray(distinct).reshape(-1, 2)
+    nearest = cKDTree(centre_rz[triangulation.simplices].mean(axis=1))
+    simplex = triangulation.find_simplex(boundary_points)
+    simplex = np.where(simplex >= 0, simplex, nearest.query(boundary_points)[1])
+    boundary_flux = np.array(
+        [
+            _barycentric_flux(
+                point,
+                centre_rz[triangulation.simplices[index]],
+                flux[triangulation.simplices[index]],
+            )
+            for point, index in zip(boundary_points, simplex)
+        ]
+    )
+    centre_rz = np.concatenate((centre_rz, boundary_points))
+    flux = np.concatenate((flux, boundary_flux))
+    centre_valid = _covers(domain, centre_rz)
 
     vertices: list[tuple] = [(float(p[0]), float(p[1])) for p in centre_rz]
     vertex_psi: list[float] = [float(v) for v in flux]
     vertex_valid: list[bool] = [bool(v) for v in centre_valid]
-    vertex_is_wall: list[bool] = [False] * len(centre_rz)
+    vertex_is_wall: list[bool] = list(
+        np.asarray(
+            shapely.distance(shapely.points(centre_rz), domain.boundary) <= tolerance
+        )
+        & centre_valid
+    )
     dedup: dict[tuple, int] = {}
     for index, point in enumerate(vertices):
         dedup.setdefault(_key(point, tolerance), index)
@@ -252,7 +318,6 @@ def _clipped_carrier(
         dedup[key] = index
         return index
 
-    domain = _occupiable_geometry(wall_units)
     simplices = (
         Delaunay(centre_rz).simplices
         if centre_rz.size
@@ -274,15 +339,16 @@ def _clipped_carrier(
         for part in parts:
             if not isinstance(part, Polygon) or part.is_empty:
                 continue
-            corners = np.asarray(part.exterior.coords)[:-1]
-            if len(corners) < 3:
-                continue
-            indices = [
-                vertex_index(point, _barycentric_flux(point, corner, flux[simplex]))
-                for point in corners
-            ]
-            for k in range(1, len(indices) - 1):
-                triangles.append((indices[0], indices[k], indices[k + 1]))
+            # A clipped triangle can wrap a material hole or a concave wall.
+            # Constrained triangulation preserves every boundary segment.
+            pieces = shapely.constrained_delaunay_triangles(part)
+            for piece in pieces.geoms:
+                corners = np.asarray(piece.exterior.coords)[:-1]
+                indices = [
+                    vertex_index(point, _barycentric_flux(point, corner, flux[simplex]))
+                    for point in corners
+                ]
+                triangles.append(tuple(indices))
 
     edge_order: dict[tuple[int, int], int] = {}
     edges: list[tuple[int, int]] = []
@@ -341,6 +407,10 @@ def build_contour_mesh(
     triangle_capacity = _declared_capacity(
         "triangle", triangle_capacity, len(triangles)
     )
+    degree = np.bincount(
+        np.asarray(edges, dtype=np.int32).ravel(), minlength=vertex_capacity
+    )
+    neighbour_capacity = int(degree.max()) if degree.size else 0
 
     vertex_rz_arr = _pad(vertices, vertex_capacity, (0.0, 0.0))
     vertex_psi_arr = _pad(vertex_psi, vertex_capacity, 0.0)
@@ -371,6 +441,7 @@ def build_contour_mesh(
         vertex_capacity=vertex_capacity,
         edge_capacity=edge_capacity,
         triangle_capacity=triangle_capacity,
+        neighbour_capacity=neighbour_capacity,
         overflow=False,
     )
 

@@ -33,6 +33,8 @@ class FastRead(NamedTuple):
     edge_interval: jax.Array
     qualified: jax.Array
     valid: jax.Array
+    closed_loop: jax.Array | None = None
+    closed_live: jax.Array | None = None
 
 
 def bell_fraction_with_crossings(geometry, reading, sigma):
@@ -239,31 +241,77 @@ def psi_rounding_enclosure(coefficients):
 PERSISTENCE_ULP_FLOOR = 8.0
 
 
-def _merge_path_saddle(geometry, roots, saddles, sigma, axis_ceiling):
-    """Admit the saddle that bounds the axis merge path, before the wall contest.
+def _first_tree_events(field, geometry, axis, sigma, policy):
+    """Follow descending authority arcs from the axis to its first events."""
+    from nova.equilibrium.contour_tree import build_contour_tree
 
-    The merge path runs from the magnetic axis out to the boundary. The saddle
-    that bounds it is the one the axis reaches at a level at least its own: the
-    maximin passage from the axis to the saddle's own cell meets or exceeds the
-    saddle's level. A root sitting on a wall contact the axis reaches only below
-    its own level is off the merge path, even though an extremum there ties the
-    boundary level by construction. Candidates are therefore ranked by the
-    passage margin ``axis_ceiling - level``, so a tie between the wall contact
-    and the saddle can move only the classification label and never the admitted
-    saddle.
-
-    Fixed shape and traced: the index is resolved by ``argmax`` over a masked
-    margin, with no host-side branch, and the wall-versus-saddle contest is left
-    downstream of the decision.
-    """
-    levels = sigma * roots.jet.value[1:]
-    inside = jax.vmap(lambda point: topology._inside_cells(geometry, point))(
-        roots.position[1:]
+    mesh = geometry.contour_mesh
+    values = topology._point_values(field, geometry.contour_sample_points)
+    vertex_flux = jnp.sum(
+        values[geometry.contour_sources] * geometry.contour_weights, axis=1
     )
-    cells = jnp.argmax(inside, axis=1)
-    margin = jnp.where(saddles, axis_ceiling[cells] - levels, -jnp.inf)
-    index = jnp.argmax(margin)
-    return index, levels[index]
+    tree = build_contour_tree(
+        vertex_flux,
+        mesh.vertex_valid,
+        mesh.vertex_is_wall,
+        mesh.edges,
+        mesh.edge_valid,
+        sigma,
+    )
+    vertices = jnp.maximum(tree.node_vertex, 0)
+    points = mesh.vertex_rz[vertices]
+    maximum = tree.node_valid & (tree.critical_type == jnp.where(sigma > 0, 2, 0))
+    start = jnp.argmin(
+        jnp.where(maximum, jnp.sum((points - axis) ** 2, axis=1), jnp.inf)
+    )
+    levels = sigma * tree.node_psi
+    wall = mesh.vertex_is_wall[vertices] & tree.node_valid
+    left, right = tree.edges.T
+
+    def advance(_, state):
+        at, saddle_node, wall_node, active = state
+        other = jnp.where(left == at, right, left)
+        adjacent = tree.edge_valid & ((left == at) | (right == at))
+        descending = (levels[other] < levels[at]) | (
+            (levels[other] == levels[at]) & (other < at)
+        )
+        following = adjacent & descending & tree.node_valid[other]
+        unique = jnp.sum(following) == 1
+        next_node = other[jnp.argmax(following)]
+        move = active & unique
+        is_wall = wall[next_node]
+        is_saddle = (tree.critical_type[next_node] == 1) & ~is_wall
+        saddle_node = jnp.where(
+            move & is_saddle & (saddle_node < 0), next_node, saddle_node
+        )
+        wall_node = jnp.where(move & is_wall & (wall_node < 0), next_node, wall_node)
+        return (
+            jnp.where(move, next_node, at),
+            saddle_node,
+            wall_node,
+            move & ((saddle_node < 0) | (wall_node < 0)),
+        )
+
+    _, saddle_node, wall_node, _ = jax.lax.fori_loop(
+        0,
+        tree.node_valid.size,
+        advance,
+        (start, jnp.asarray(-1), jnp.asarray(-1), ~tree.overflow & jnp.any(maximum)),
+    )
+    saddle_seed = points[jnp.maximum(saddle_node, 0)]
+    polished = topology.stationary_read(
+        field, saddle_seed, jnp.median(geometry.pitch), policy
+    )
+    eigen = jnp.linalg.eigvalsh(sigma * polished.jet.hessian)
+    saddle_live = (saddle_node >= 0) & polished.valid & (eigen[0] < 0) & (eigen[1] > 0)
+    valid = ~tree.overflow & jnp.any(maximum) & ((wall_node >= 0) | saddle_live)
+    return (
+        polished,
+        saddle_live,
+        points[jnp.maximum(wall_node, 0)],
+        wall_node >= 0,
+        valid,
+    )
 
 
 def read(field, roots, geometry, convention, policy, *, frame_gate=True):
@@ -304,51 +352,43 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
     axis_live = jnp.any(eligible)
     axis = roots.position[axis_index]
     axis_flux = roots.jet.value[axis_index]
-    wall_start = geometry.wall_points
-    wall_end = wall_start[geometry.wall_following]
-    wall_midpoint = (wall_start + wall_end) / 2
-    node_flux = jax.vmap(lambda point: field.evaluate(point).value)(wall_start)
-    middle_flux = jax.vmap(lambda point: field.evaluate(point).value)(wall_midpoint)
-    signed_start = sigma * node_flux
-    signed_end = signed_start[geometry.wall_following]
-    signed_middle = sigma * middle_flux
-    curvature = 2 * (signed_start + signed_end - 2 * signed_middle)
-    slope = signed_end - signed_start - curvature
-    peak_fraction = jnp.clip(
-        -slope / jnp.where(curvature < 0, 2 * curvature, 1), 0.0, 1.0
-    )
-    peak = wall_start + peak_fraction[:, None] * (wall_end - wall_start)
-    peak_flux = jax.vmap(lambda point: field.evaluate(point).value)(peak)
-    candidate_points = jnp.stack((wall_start, wall_end, peak), axis=1)
-    candidate_values = jnp.stack(
-        (node_flux, node_flux[geometry.wall_following], peak_flux), axis=1
-    )
-    best_on_edge = jnp.argmax(sigma * candidate_values, axis=1)
-    edge_row = jnp.arange(len(wall_start))
-    wall_points = candidate_points[edge_row, best_on_edge]
-    wall_flux = candidate_values[edge_row, best_on_edge]
+    wall_points, wall_flux = topology._wall_events(field, geometry, policy, sigma)
     count = roots.position.shape[0]
     if count == 1:
         roots = jax.tree.map(
             lambda leaf: jnp.concatenate((leaf, jnp.zeros_like(leaf)), axis=0), roots
         )
         saddle = jnp.concatenate((saddle, jnp.zeros_like(saddle)))
-    saddles = saddle[1:]
-    seed = jnp.argmin(jnp.sum((geometry.centre - axis) ** 2, axis=1))
-    axis_ceiling = _wall_path_ceiling(
-        geometry, coefficients, None, axis, None, -jnp.inf, seed, sigma, False
+        inside = jnp.concatenate((inside, jnp.zeros_like(inside)))
+    saddle = saddle & inside
+    polished, saddle_live, wall_seed, wall_live, tree_valid = _first_tree_events(
+        field, geometry, axis, sigma, policy
     )
-    saddle_index, saddle_score = _merge_path_saddle(
-        geometry, roots, saddles, sigma, axis_ceiling
+    saddle_index = jnp.argmin(
+        jnp.where(
+            saddle, jnp.sum((roots.position - polished.position) ** 2, axis=1), jnp.inf
+        )
     )
-    saddle_index = 1 + saddle_index
-    saddle_live = jnp.any(saddles)
+    saddle_point = jnp.where(
+        saddle_live, polished.position, roots.position[saddle_index]
+    )
+    saddle_hessian = jnp.where(
+        saddle_live, polished.jet.hessian, roots.jet.hessian[saddle_index]
+    )
+    saddle_score = sigma * polished.jet.value
+    wall_distance = jnp.sum((wall_points - wall_seed) ** 2, axis=1)
+    tree_wall_index = jnp.argmin(
+        jnp.where(jnp.isfinite(wall_flux), wall_distance, jnp.inf)
+    )
+    wall_passage = jnp.where(
+        wall_live & (jnp.arange(wall_flux.size) == tree_wall_index), jnp.inf, -jnp.inf
+    )
     third, fourth = topology._curvature_derivatives(
-        field, roots.position[saddle_index], jnp.median(geometry.pitch)
+        field, saddle_point, jnp.median(geometry.pitch)
     )
     form = topology.saddle_normal_form(
-        roots.position[saddle_index],
-        sigma * roots.jet.hessian[saddle_index],
+        saddle_point,
+        sigma * saddle_hessian,
         sigma * third,
         policy.hessian_tolerance,
         sigma * fourth,
@@ -367,7 +407,7 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
     approximate = FastRead(
         axis,
         axis_flux,
-        roots.position[saddle_index],
+        saddle_point,
         sigma * initial_score,
         jnp.asarray(0, jnp.int32),
         sigma * raw_wall_score,
@@ -386,28 +426,14 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
         jnp.asarray(True),
     )
     seed = jnp.argmin(jnp.sum((geometry.centre - axis) ** 2, axis=1))
-    wall_cell = jax.vmap(
-        lambda point: jnp.argmax(topology._inside_cells(geometry, point))
-    )(wall_points)
-    ceiling = _wall_path_ceiling(
-        geometry,
-        approximate.field_coefficients,
-        form,
-        axis,
-        saddle_live & near_saddle,
-        saddle_score,
-        seed,
-        sigma,
-        frame_gate,
-    )
-    wall_scores = _wall_effective_level(sigma * wall_flux, ceiling[wall_cell])
+    wall_scores = _wall_effective_level(sigma * wall_flux, wall_passage)
     wall_index = jnp.argmax(wall_scores)
     wall_score = wall_scores[wall_index]
     diverted = saddle_live & (saddle_score >= wall_score)
-    level = sigma * jnp.where(diverted, saddle_score, wall_score)
-    boundary = jnp.where(
-        diverted, roots.position[saddle_index], wall_points[wall_index]
+    level = sigma * jnp.maximum(
+        jnp.where(saddle_live, saddle_score, -jnp.inf), wall_score
     )
+    boundary = jnp.where(diverted, saddle_point, wall_points[wall_index])
     normal = saddle_live & near_saddle
     approximate = approximate._replace(
         boundary=boundary,
@@ -479,15 +505,64 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
 
         connected = ungated(geometry, provisional, sigma, seed)
         path_weight = connected.astype(fraction.dtype)
+    closed_loop, closed_live = topology.normal_form_fold_loop(
+        form.position,
+        sigma * saddle_hessian,
+        sigma * third,
+        sigma * fourth,
+        axis,
+        sigma * level - saddle_score,
+        radius,
+    )
+    closed_live &= saddle_live
+
+    def closed_fractions(loop):
+        polygons, counts = jax.vmap(
+            topology.clip_normal_form_loop, in_axes=(None, 0, 0)
+        )(loop, geometry.vertices, geometry.vertex_count)
+        return polygon_area(polygons, counts) / geometry.full_area
+
+    closed_fraction = jax.lax.cond(
+        closed_live, closed_fractions, lambda _: jnp.zeros_like(fraction), closed_loop
+    )
+    closed_cells = closed_fraction > 0
+    provisional = provisional._replace(
+        membership=jnp.where(closed_live, closed_fraction, provisional.membership),
+        booking_cells=jnp.where(closed_live, closed_cells, provisional.booking_cells),
+        closed_loop=closed_loop,
+        closed_live=closed_live,
+    )
+    # One explicitly closed lobe owns every clipped piece; its graph cannot
+    # cross to the opposing saddle branch. Keep the ordinary path weight for
+    # components represented by the open normal form.
+    path_weight = jnp.where(
+        closed_live, closed_cells.astype(path_weight.dtype), path_weight
+    )
+    connected = jnp.where(closed_live, closed_cells, connected)
     membership = provisional.membership * path_weight
+    attained = field.evaluate(boundary).value
+    boundary_enclosure = (
+        128
+        * jnp.finfo(level.dtype).eps
+        * jnp.maximum(jnp.abs(level), jnp.abs(attained))
+    )
+    boundary_attained = jnp.isfinite(level) & (
+        jnp.abs(attained - level) <= boundary_enclosure
+    )
     valid = (
         axis_live
+        & tree_valid
+        & boundary_attained
         & jnp.all(jnp.isfinite(approximate.field_coefficients))
         & jnp.all(jnp.isfinite(membership))
-        & (jnp.sum(booking) <= capacity)
-        & jnp.all(jnp.where(row, fragments.valid, True))
+        & (jnp.sum(provisional.booking_cells) <= capacity)
+        & (closed_live | jnp.all(jnp.where(row, fragments.valid, True)))
         & jnp.all(
-            jnp.where(connected & ~booking & (fraction > 0), ordinary_valid, True)
+            jnp.where(
+                ~closed_live & connected & ~booking & (fraction > 0),
+                ordinary_valid,
+                True,
+            )
         )
     )
     return provisional._replace(

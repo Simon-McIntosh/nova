@@ -1,0 +1,28 @@
+<section id="xla-autotune-pin-republish" data-reckon="evidence" data-node="xla-autotune-pin-republish">
+  <h3>H200 pre-warm pin republish attempt</h3>
+  <p>The pre-warm was submitted without <code>--wait</code> from revision
+  <code>52702d307482ec0f35e0276e98c21c3a81d1cc91</code>, which exports
+  <code>JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES=none</code>. Job <code>1290841</code>
+  started on <code>98dci4-gpu-0003</code> and resolved the new runtime directory below.</p>
+  <table>
+    <thead><tr><th>runtime directory</th><th>autotune subtrees</th><th>autotune files after job</th></tr></thead>
+    <tbody>
+      <tr><td><code>runtime-7b315420b55b91bffb05</code> (retired candidate)</td><td>1</td><td>31,667</td></tr>
+      <tr><td><code>runtime-d23b975337df890821f8</code> (attempted)</td><td>0</td><td>0</td></tr>
+    </tbody>
+  </table>
+  <p>The same recursive file counter found the old subtree's 31,667 files, so it can
+  see autotune files. The attempted directory's zero does not certify the off-switch:
+  the pre-warm did not finish compiling or publish a valid pin.</p>
+  <p>The first certificate row reported <code>CUDA_ERROR_OUT_OF_MEMORY</code> while
+  trying to allocate 104.85 GiB, and another row reported missing
+  <code>analytic_oracle_hex_machine_1000.zarr</code>. No per-program receipt was written.
+  The publisher writes <code>prewarm-latest.json</code> even when rows fail, so job
+  <code>1290841</code> was cancelled after 2m04s before publication. The pin still names
+  <code>runtime-7b315420b55b91bffb05</code> from job <code>1273581</code>.
+  Compile seconds, hits and misses for this attempted pre-warm are unavailable, and a
+  lane dry run cannot yet resolve to a new published directory.</p>
+  <p>The full job log and both file counts are in the run record under
+  <code>r-20261020T063401929208-xla-autotune-pin-republish</code>. Republish requires
+  an H200 pre-warm that completes every row and emits a receipt before the pin moves.</p>
+</section>

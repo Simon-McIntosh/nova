@@ -142,35 +142,6 @@ def _flux_past_level_weight(peak, trough, level):
     )
 
 
-def _cell_containment_weight(geometry, point):
-    """Continuous share of each cell that contains ``point``.
-
-    A hard point-in-cell test is a step in the point's position, and the saddle
-    position is a quantity of the map, so a connectivity gate built on it
-    inherits that step wherever the saddle crosses a cell edge. This returns,
-    for every cell, the point's signed distance to its nearest edge (positive
-    inside), reduced by the cell's own shortest edge length: one deep inside a
-    cell, zero once the point is half an edge length beyond an edge, and the
-    linear share between. The length comes from the cell itself, so the ramp is
-    as wide as the cell's own resolution of the position and narrows as the mesh
-    refines, and no step survives the point crossing an edge.
-    """
-    vertices = geometry.vertices
-    count = geometry.vertex_count
-    slot = jnp.arange(vertices.shape[1])
-    following = jnp.where(slot[None] + 1 < count[:, None], slot[None] + 1, 0)
-    end = jnp.take_along_axis(vertices, following[..., None], axis=1)
-    edge = end - vertices
-    length = jnp.linalg.norm(edge, axis=-1)
-    safe = jnp.where(length > 0, length, jnp.ones_like(length))
-    cross = topology._cross_plane(edge, point[None, None, :] - vertices)
-    distance = cross / safe
-    live = slot[None, :] < count[:, None]
-    margin = jnp.min(jnp.where(live, distance, jnp.inf), axis=1)
-    scale = jnp.min(jnp.where(length > 0, length, jnp.inf), axis=1)
-    return jnp.clip(0.5 + margin / jnp.maximum(scale, 1e-30), 0, 1).astype(cross.dtype)
-
-
 def _continuous_path_weight(
     geometry, coefficients, form, axis, seed, sigma, level, radius, saddle_live
 ):
@@ -230,7 +201,7 @@ def _continuous_path_weight(
     near_weight = jnp.clip(0.5 + (radius - distance) / length_width, 0, 1)
     near_weight = jnp.maximum(
         near_weight,
-        _cell_containment_weight(geometry, form.position),
+        topology._inside_cells(geometry, form.position).astype(near_weight.dtype),
     )
     near_weight = jnp.where(saddle_live, near_weight, 0)
     frame_weight = 1 - near_weight[:, None] * (1 - sector_weight)

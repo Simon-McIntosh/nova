@@ -1,0 +1,66 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-20T03:29:23.291Z",
+  "dispatched_at": "2026-10-20T03:13:03Z",
+  "findings": [
+    {
+      "file": "docs/research/xla-autotune-cache-on-gpfs.html",
+      "line": "58",
+      "severity": "follow-on",
+      "text": "follow-on: the figure's alt text still reads \"Grouped bars per arm: cold compile wall beside median steady-state solve wall for the four cache configurations\", the rendering this same commit replaced, so a reader of the alt alone is told the figure shows a median bar for the steady state -- the reading the commit removed as unsupported by the three overlapping passes."
+    },
+    {
+      "file": "benchmarks/xla_autotune_cache_arms.py",
+      "line": "399",
+      "severity": "follow-on",
+      "text": "follow-on: plt.style.use(\"data-ink\") is wrapped in `except OSError: pass`, so on a host without the dotfiles style sheet the figure silently falls back to matplotlib defaults -- framed legend, gridlines on, top and right spines drawn, 10 pt ticks -- and a figure that breaks the repository's plot rules is published with no signal; the other benchmark call sites let the error surface or read the sheet by path."
+    },
+    {
+      "file": "benchmarks/xla_autotune_cache_arms.py",
+      "line": "326",
+      "severity": "follow-on",
+      "text": "follow-on: negative_control_failure and report_negative_control are new pure functions over the receipt with no test in the repository; the only falsification of the control is the run directory's control-void.log, which is not versioned, so a regression in the decision itself (the arm (c) comparison inverted, or the wrong receipt key read) is caught only by a fresh four-arm titan run rather than by the suite."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "Read the single commit c9553bd61..6eb3dc493 commit by commit: three files, 390 insertions and 257 deletions -- benchmarks/xla_autotune_cache_arms.py (104/28) adding the receipt-driven control and redrawing the figure, docs/research/xla-autotune-cache-on-gpfs.html (3/1) rewriting the figcaption and adding a method paragraph, and the regenerated SVG (283/228) -- with no test file and no product source touched.",
+    "done_when": "The done_when names one certificate row on one titan GPU through scripts/nova_lane/run.sh --rungs titan in four arms with a fresh node-local root each, plus per-arm compile wall, steady wall over at least three repeats, compile and autotune file counts, one inspected SVG and a (d)-against-(c) recommendation; the manifest records that gate as titan job 1290668 with all four arms complete and exit 0, and this repair round adds no new measurement, its recorded evidence being the control-holds and control-void logs on the measured receipt and the figure regenerated from titan-arms-3.json.",
+    "goal": "The node's goal is 'Measure what XLA's per-fusion autotuner and its persistent cache cost and buy on the certificate target'; the commits gained since the previous review are the repair round -- benchmarks/xla_autotune_cache_arms.py:326-370 now reads the declared cache control from the receipt and :376-450 draws the steady passes as points with a median rule -- so the gained change serves the goal's measurement rather than decorating it.",
+    "manifest": "Read manifest.md: status complete, the four arms with cold/compile/steady walls and file counts, six retry failures each with an attribution (the last a scaffolding line covering the selector, launcher, sizing, limit, log trimming, figure split and control copy), the negative control stated in both directions with control-void.log named as its red log, and a commits field that now names all seven commits of the run where the previous review found only three.",
+    "write_paths": "The node was fenced to benchmarks/xla_autotune_cache_arms.py, docs/research/xla-autotune-cache-on-gpfs.html, docs/figures/forward-solver-route-integrity/xla-autotune-cache, docs/figures/forward-solver-route-integrity/xla-autotune-arms and docs/evidence/fragments/forward-solver-route-integrity/xla-autotune-arms.html; git diff --shortstat c9553bd61..6eb3dc493 changes three files and each one is inside them."
+  },
+  "justifications": {
+    "durability": "The control is now enforced in landed code at benchmarks/xla_autotune_cache_arms.py:487 and :506, so deleting the arm (c) override at :88 makes a real run print NEGATIVE_CONTROL=void and exit 3, but no test drives :326 with a synthetic receipt, so the decision logic itself stays unpinned between GPU runs.",
+    "evidence": "control-holds.log ends EXIT=0 with NEGATIVE_CONTROL=holds arm_a=1423 arm_c=0 and control-void.log ends EXIT=3 with the void reason on a receipt carrying arm (c)=5, and re-running the committed benchmarks/xla_autotune_cache_arms.py:484 --figure against the run's titan-arms-3.json reproduces the committed docs/figures/forward-solver-route-integrity/xla-autotune-cache/xla-autotune-arms-walls.svg with no differing element beyond matplotlib's per-render element ids.",
+    "fit": "The added symbols (negative_control_failure, report_negative_control) are mechanism-named with docstrings stating the rule, and plt.style.use(\"data-ink\") at benchmarks/xla_autotune_cache_arms.py:399 is the idiom of roughly fifteen other modules in benchmarks/ and scripts/, though the OSError swallow at :400 has no precedent in those call sites.",
+    "goal_fidelity": "benchmarks/xla_autotune_cache_arms.py:376-450 draws each arm's three steady passes as points with an hlines median and :326-370 reads the cache control back from the receipt, which is what the node's measurement goal needed after the previous review found the chart contradicted the table.",
+    "reuse": "Searching nova/media/ink.py for the hex literals, the data-ink style sheet, and benchmarks/ by capability (receipt-driven negative control, steady-pass scatter) found no owner for either addition -- ink.py binds #3366cc, not the #3b6ea5 this commit moved to, and no module owns a receipt control check -- so the two definitions extend rather than duplicate an existing mechanism.",
+    "scope_discipline": "git diff --shortstat c9553bd61096313e21a346a47a8665753c0d8e32 6eb3dc49382d1845d20a5a4623777ef7f25cf2c2 reports three files, and benchmarks/xla_autotune_cache_arms.py, docs/research/xla-autotune-cache-on-gpfs.html and docs/figures/forward-solver-route-integrity/xla-autotune-cache/xla-autotune-arms-walls.svg are each inside the declared write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to measure what XLA's per-fusion autotuner and its persistent cache cost and buy on the certificate target, and the commits gained since the previous review are the repair round; benchmarks/xla_autotune_cache_arms.py:326-370 reads the declared cache control from the receipt and :376-450 draws the steady passes as points with a median rule.\nVERDICT done_when: the done_when names one certificate row on one titan GPU in four arms with a fresh node-local root each plus per-arm compile wall, three steady repeats, file counts, one inspected SVG and a (d)-against-(c) recommendation; the manifest records that gate as titan job 1290668 with every arm complete, and this round adds no new measurement, resting on the control-holds and control-void logs and the figure regenerated from titan-arms-3.json.\nVERDICT write_paths: read the five declared paths; git diff --shortstat c9553bd61..6eb3dc493 changes three files -- the harness, the research page and the SVG -- and every one is inside them.\nVERDICT manifest: read manifest.md; it reports the four arms with walls and file counts, six attributed retry failures, the control in both directions with control-void.log named, and now names all seven commits of the run where the previous review found only three.\nVERDICT diff: read the single commit c9553bd61..6eb3dc493 commit by commit -- three files, 390 insertions, 257 deletions, no test file and no product source touched.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: benchmarks/xla_autotune_cache_arms.py:376-450 draws the three steady passes as points with a median rule and :326-370 reads the cache control from the receipt, which is what the measurement goal needed after the previous review.\nSCORE evidence: 17\nJUSTIFICATION evidence: control-holds.log ends EXIT=0 with NEGATIVE_CONTROL=holds arm_a=1423 arm_c=0 and control-void.log ends EXIT=3 on a receipt with arm (c)=5, and re-running the committed harness --figure against the run's titan-arms-3.json reproduces the committed SVG element for element.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --shortstat c9553bd61..6eb3dc493 reports three files, all inside the declared write paths, with no test file and no product source touched.\nSCORE durability: 13\nJUSTIFICATION durability: the control is enforced in landed code at benchmarks/xla_autotune_cache_arms.py:487 and :506 so deleting the arm (c) override at :88 makes a run exit 3, but no test drives :326 with a synthetic receipt, leaving the decision logic unpinned.\nSCORE fit: 17\nJUSTIFICATION fit: benchmarks/xla_autotune_cache_arms.py:326-370 names its functions by mechanism and plt.style.use(\"data-ink\") at :399 is the benchmarks/ idiom, but the OSError swallow at :400 has no precedent among those call sites.\nSCORE reuse: 18\nJUSTIFICATION reuse: no owner exists for a receipt-driven negative-control check, and the #3b6ea5 hue this commit moved to is unbound in nova/media/ink.py, so the additions extend rather than duplicate.\nFINDING docs/research/xla-autotune-cache-on-gpfs.html:58 follow-on: the figure's alt text still describes the grouped median bars this commit replaced, so a reader of the alt alone is told the figure shows the reading the commit removed as unsupported.\nFINDING benchmarks/xla_autotune_cache_arms.py:399 follow-on: plt.style.use(\"data-ink\") is wrapped in `except OSError: pass`, so on a host without the dotfiles sheet the figure silently falls back to matplotlib defaults with gridlines, top and right spines and a framed legend, and a figure breaking the repository's plot rules is published with no signal.\nFINDING benchmarks/xla_autotune_cache_arms.py:326 follow-on: the new negative_control_failure and report_negative_control have no test in the repository; the only falsification of the control is the unversioned run-directory control-void.log, so a regression in the decision logic is caught only by a fresh four-arm titan run.\n",
+  "review_run_id": "r-20261020T031132238743-review-of-xla-autotune-arms-6eb3dc49382d",
+  "reviewed_base_sha": "c9553bd61096313e21a346a47a8665753c0d8e32",
+  "reviewed_head_sha": "6eb3dc49382d1845d20a5a4623777ef7f25cf2c2",
+  "reviewed_run_base": "3752410851925e484c79953b2e4e3c3dcb9a6115",
+  "reviewed_run_head": "6eb3dc49382d1845d20a5a4623777ef7f25cf2c2",
+  "reviewed_run_id": "r-20261019T084133374403-xla-autotune-arms",
+  "scores": {
+    "durability": 13,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T03:29:24.403078+00:00",
+  "total": 104
+}

@@ -75,6 +75,8 @@ class _LinearOperator:
         self.grid = SimpleNamespace(coordinate=coordinates[:1])
         self.wall = SimpleNamespace(coordinate=coordinates[1:])
         self.sample = None
+        self.moment_geometry = None
+        self.use_linear_moments = True
         self.changing_mask = changing_mask
 
     @property
@@ -107,6 +109,11 @@ class _LinearOperator:
 
     def flux_map_with_shadow(self, *_args):
         return lambda flux, shadow: jnp.where(shadow, flux, jnp.zeros_like(flux))
+
+    def current_moments_and_observation(self, flux, _requested=None):
+        moments = SimpleNamespace(cell_current=jnp.asarray(flux)[:1])
+        masks = SimpleNamespace(core=jnp.ones((1,), dtype=bool))
+        return moments, None, masks, None
 
     def residual_shadow_mask(self, flux, _requested=None, previous_shadow=None):
         del previous_shadow

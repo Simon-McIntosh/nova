@@ -1,0 +1,78 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-20T02:59:15.023Z",
+  "dispatched_at": "2026-10-20T02:46:49Z",
+  "findings": [
+    {
+      "file": "benchmarks/xla_autotune_cache_arms.py",
+      "line": "317",
+      "severity": "follow-on",
+      "text": "follow-on: the declared negative control is recorded but never asserted in the landed code \u2014 drive() stores each arm's files_after_cold and returns, so a regression that makes arm (c) behave like the default (renamed env var, dropped override) would still exit 0 with a void comparison; the check lives only in the run directory's uncommitted verify-arms-record.sh, so nothing in the repository fails when the harness stops exercising the cache."
+    },
+    {
+      "file": "benchmarks/xla_autotune_cache_arms.py",
+      "line": "120",
+      "severity": "follow-on",
+      "text": "follow-on: cache_guard_receipt_text re-parses the CACHE_GUARD_RECEIPT= line that scripts/h200_test_lane/cache_reuse_summary.py:47 (lane_receipt) already owns, and the '-cache' suffix hardcoded at :113 duplicates MARKER_SUFFIX at scripts/h200_test_lane/cache_reuse_summary.py:16; the harness already puts that directory on PYTHONPATH at :72, so the owner is importable and the fork is avoidable, though the owner is fenced to the sibling xla-autotune-cache-off node."
+    },
+    {
+      "file": "benchmarks/xla_autotune_cache_arms.py",
+      "line": "48",
+      "severity": "follow-on",
+      "text": "follow-on: COLOURS = {'compile': '#3366cc', ...} reuses a colour the repository has already given to another component \u2014 nova/media/ink.py:45 binds #3366cc to DEFAULT_INK.flux_color (confined flux surfaces) \u2014 and the figure hand-rolls despine and grid-off rather than importing the repository's one style module or plt.style.use('data-ink') as other benchmark figures do (benchmarks/contour_tree_sweep_placement.py:504), so one hue now names two unrelated things and the colour table is forked beside its owner."
+    },
+    {
+      "file": "benchmarks/xla_autotune_cache_arms.py",
+      "line": "368",
+      "severity": "follow-on",
+      "text": "follow-on: the x tick labels are drawn at fontsize=12 while the y tick labels are 14, so a single figure carries two tick-label sizes, against the repository rule that one size is kept throughout a figure (a many-panel figure may drop to 13/11, not mix)."
+    },
+    {
+      "file": "manifest.md",
+      "line": "10",
+      "severity": "follow-on",
+      "text": "follow-on: the manifest's commits field names 3 of the 6 commits in the landed diff (6fa30f914, 56c7285fb, c9553bd61) and omits 2a5ddb4c4, 44beb1090 and 5fb9a4d83, so a reader comparing the manifest to 3752410851..c9553bd61 cannot account for half the change from the record alone."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "Read commit by commit from 3752410851925e484c79953b2e4e3c3dcb9a6115 to c9553bd61096313e21a346a47a8665753c0d8e32: six commits, 4 files, 1721 insertions, no deletions and no test or product source touched \u2014 a 452-line four-arm harness, a research page, a landing fragment and one SVG.",
+    "done_when": "The done_when names tests/test_current_book_fragments.py::test_analytic_certificate_moments on one titan GPU through scripts/nova_lane/run.sh --rungs titan in four arms with a fresh node-local root each, and requires the research page to report per-arm compile seconds per program, total compile wall, steady wall over at least three repeats, compile and autotune files, one inspected SVG, and a recommendation from (d) against (c); every one of those is present and the gate that ran is recorded, but the gate log the manifest cites re-derives the record rather than being the measurement log.",
+    "goal": "The node's goal is 'Measure what XLA's per-fusion autotuner and its persistent cache cost and buy on the certificate target'; benchmarks/xla_autotune_cache_arms.py:49,276-320 implements the four arms and docs/research/xla-autotune-cache-on-gpfs.html:1-88 reports them, so the landed change does what the goal states.",
+    "manifest": "Read manifest.md: status complete, the four arms reported with cold/compile/steady walls and file counts, retry_failures recording six distinct earlier failures with a scaffolding attribution, and the negative control stated in both directions; its commits field names only 3 of the 6 landed commits and its tests field is prose rather than the literal command, which the gate log's own '# command:' line supplies instead.",
+    "write_paths": "The node was fenced to benchmarks/xla_autotune_cache_arms.py, docs/research/xla-autotune-cache-on-gpfs.html, docs/figures/forward-solver-route-integrity/xla-autotune-cache, docs/evidence/fragments/forward-solver-route-integrity/xla-autotune-arms.html and docs/figures/forward-solver-route-integrity/xla-autotune-arms; git diff --stat 3752410851925e484c79953b2e4e3c3dcb9a6115 c9553bd61096313e21a346a47a8665753c0d8e32 changes exactly four paths, all inside them."
+  },
+  "justifications": {
+    "durability": "The diff adds no assertion that can fail: benchmarks/xla_autotune_cache_arms.py:233-249 returns records and drive() at :317-319 only writes them, so reverting the arm (c) environment override at :84-85 leaves every check green, and the only check that would redden lives in the run directory's uncommitted verify-arms-record.sh.",
+    "evidence": "docs/research/xla-autotune-cache-on-gpfs.html:37-58 reports per-arm compile wall, steady walls over three repeats and compile/autotune file counts matching titan-arms-3.json, and gate-arms-record.log ends EXIT=0 with 16 checks, but the cited gate log re-derives the record from durable files rather than being the measurement log and its header names no revision (titan-arms-3.log:6 carries SOURCE_REVISION=6fa30f914).",
+    "fit": "benchmarks/xla_autotune_cache_arms.py:390-448 follows the argparse-and-PATH_ROOT idiom of benchmarks/compile_abort_probe.py:1-120, and every name is mechanism-named with no plan label or version, but the figure at :366-371 mixes two tick-label sizes.",
+    "goal_fidelity": "benchmarks/xla_autotune_cache_arms.py:276-320 runs the four arms the goal names (default cold, compile cleared with autotune kept, JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES=none, --xla_gpu_experimental_enable_fusion_autotuner=false) and docs/research/xla-autotune-cache-on-gpfs.html:44-58 states the (d)-against-(c) recommendation the goal asks for.",
+    "reuse": "The measurement capability has no owner \u2014 searching benchmarks/, scripts/h200_test_lane/ and nova/ by rglob-over-a-cache-root and autotune-subtree classification found no prior compile/autotune split \u2014 yet the addition forks two owned pieces: the colour literal at benchmarks/xla_autotune_cache_arms.py:48 against nova/media/ink.py:45 and the receipt parse at :120 against scripts/h200_test_lane/cache_reuse_summary.py:47.",
+    "scope_discipline": "git diff --stat 3752410851..c9553bd61 lists only benchmarks/xla_autotune_cache_arms.py, docs/research/xla-autotune-cache-on-gpfs.html, docs/evidence/fragments/forward-solver-route-integrity/xla-autotune-arms.html and docs/figures/forward-solver-route-integrity/xla-autotune-cache/xla-autotune-arms-walls.svg, every one inside the declared write paths, with no test or product source touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to measure what XLA's per-fusion autotuner and its persistent cache cost and buy on the certificate target; benchmarks/xla_autotune_cache_arms.py:49,276-320 runs the four named arms and docs/research/xla-autotune-cache-on-gpfs.html states the (d)-against-(c) recommendation.\nVERDICT done_when: the done_when names one certificate row on one titan GPU through scripts/nova_lane/run.sh --rungs titan in four arms with a fresh node-local root each and a specific set of reported quantities; the manifest records the run as titan job 1290668 with all four arms complete and the research page reports every named quantity, though the gate log it cites re-derives the record rather than measuring.\nVERDICT write_paths: read the five declared paths from the brief; git diff --stat 3752410851925e484c79953b2e4e3c3dcb9a6115 c9553bd61096313e21a346a47a8665753c0d8e32 changes four paths and every one is inside them.\nVERDICT manifest: read manifest.md; it reports the four arms with walls and file counts, records six retry failures with a scaffolding attribution, and states the negative control in both directions, but its commits field omits three of the six landed commits and its tests field is prose rather than the literal command.\nVERDICT diff: read commit by commit from 3752410851925e484c79953b2e4e3c3dcb9a6115 to c9553bd61096313e21a346a47a8665753c0d8e32; six commits, four files, 1721 insertions, no test or product source, all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: benchmarks/xla_autotune_cache_arms.py:276-320 runs the four arms the goal names and docs/research/xla-autotune-cache-on-gpfs.html:44-58 states the (d)-against-(c) recommendation.\nSCORE evidence: 17\nJUSTIFICATION evidence: docs/research/xla-autotune-cache-on-gpfs.html:37-58 reports the per-arm walls and file counts that reconcile with titan-arms-3.json and gate-arms-record.log ends EXIT=0, but that gate log re-derives the record and names no revision.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 3752410851..c9553bd61 lists four paths, all inside the declared write paths, with no test or product source touched.\nSCORE durability: 8\nJUSTIFICATION durability: benchmarks/xla_autotune_cache_arms.py:317-319 only writes each arm's record, so reverting the arm (c) override at :84-85 leaves every check green; the only reddening check is in the uncommitted run-directory verify-arms-record.sh.\nSCORE fit: 16\nJUSTIFICATION fit: benchmarks/xla_autotune_cache_arms.py:390-448 follows the benchmarks/ argparse idiom with mechanism-named symbols, but its figure at :366-371 mixes two tick-label sizes.\nSCORE reuse: 13\nJUSTIFICATION reuse: benchmarks/xla_autotune_cache_arms.py:48 reuses the #3366cc colour owned by nova/media/ink.py:45 and :120 re-parses the receipt owned by scripts/h200_test_lane/cache_reuse_summary.py:47, though the autotune/compile split itself has no owner.\nFINDING benchmarks/xla_autotune_cache_arms.py:317 follow-on: the declared negative control is recorded but never asserted in the landed harness, so a regression that makes arm (c) reproduce the default would still exit 0 with a void comparison; the check lives only in the run directory's uncommitted verify-arms-record.sh.\nFINDING benchmarks/xla_autotune_cache_arms.py:120 follow-on: cache_guard_receipt_text duplicates the CACHE_GUARD_RECEIPT= parse owned by scripts/h200_test_lane/cache_reuse_summary.py:47 and :113 duplicates its MARKER_SUFFIX at :16, in a directory the harness already puts on PYTHONPATH at :72.\nFINDING benchmarks/xla_autotune_cache_arms.py:48 follow-on: COLOURS reuses #3366cc, which nova/media/ink.py:45 binds to DEFAULT_INK.flux_color for confined flux surfaces, and hand-rolls despine and grid-off instead of the repository style module other benchmark figures use.\nFINDING benchmarks/xla_autotune_cache_arms.py:368 follow-on: the x tick labels are drawn at fontsize 12 while the y tick labels are 14, so one figure carries two tick-label sizes against the repository rule that a single size is kept throughout a figure.\nFINDING manifest.md:10 follow-on: the commits field names 3 of the 6 commits in the landed diff and omits 2a5ddb4c4, 44beb1090 and 5fb9a4d83, so the record alone cannot account for half the change.\n",
+  "review_run_id": "r-20261020T024519554939-review-of-xla-autotune-arms-c9553bd61096",
+  "reviewed_base_sha": "3752410851925e484c79953b2e4e3c3dcb9a6115",
+  "reviewed_head_sha": "c9553bd61096313e21a346a47a8665753c0d8e32",
+  "reviewed_run_base": "3752410851925e484c79953b2e4e3c3dcb9a6115",
+  "reviewed_run_head": "c9553bd61096313e21a346a47a8665753c0d8e32",
+  "reviewed_run_id": "r-20261019T084133374403-xla-autotune-arms",
+  "scores": {
+    "durability": 8,
+    "evidence": 17,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "reuse": 13,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T03:16:24.369911+00:00",
+  "total": 93
+}

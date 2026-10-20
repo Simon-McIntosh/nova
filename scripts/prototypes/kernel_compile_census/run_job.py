@@ -114,11 +114,14 @@ def main():
     parser.add_argument("--worker", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--row-limit", type=int, default=10800)
+    parser.add_argument("--select", action="append")
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     passed = True
     for name in PROGRAMS:
         for size in (4, 64) if name in KERNELS else (132, 550):
+            if args.select and f"{name}:{size}" not in args.select:
+                continue
             passed = (
                 run_one(args.worker, args.output, name, size, args.row_limit) and passed
             )

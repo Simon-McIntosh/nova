@@ -5,6 +5,7 @@ platform="$1"
 worker="$2"
 output="$3"
 driver="$4"
+shift 4
 scratch="$(mktemp -d "/tmp/$USER-$SLURM_JOB_ID-XXXX")"
 trap 'rm -rf "$scratch"' EXIT
 export TMPDIR="$scratch"
@@ -18,7 +19,7 @@ fi
 export PYTHONPATH="$PWD"
 printf 'job=%s node=%s platform=%s\n' "$SLURM_JOB_ID" "$SLURMD_NODENAME" "$platform"
 /home/ITER/mcintos/Code/nova/.venv/bin/python "$driver" \
-  --worker "$worker" --output "$output" --row-limit 10800
+  --worker "$worker" --output "$output" --row-limit 10800 "$@"
 code=$?
 printf 'EXIT=%s\n' "$code"
 exit "$code"

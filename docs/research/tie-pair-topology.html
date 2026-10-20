@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="tie-pair-topology">
+  <meta name="plan-title" content="Independent topology of the census tie pair">
+  <meta name="plan-summary" content="The upper saddle pinches the axis component before the lower saddle; the published read selects the lower candidate and books four cells beyond the pinch">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-verifies" content="converged-forward-solve#s2">
+  <meta name="plan-recorded-at" content="2026-10-20">
+  <title>Independent topology of the census tie pair | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+  <header>
+    <p class="eyebrow">Topology evidence</p>
+    <h1>Independent topology of the census tie pair</h1>
+    <p class="lead">The read's axis is the field maximum. Its lower <code>saddle_form</code> is not the first saddle on that maximum's merge path and is not an admitted X-point: the read says <code>boundary_class=0</code>. On the published source revision the four booked cells lie beyond the upper saddle, which is the first separator. The 128.416 A and 129.731 A booking is therefore an integral over the read's chosen region, not evidence that the region is confined plasma.</p>
+  </header>
+
+  <section id="tie-pair-topology-provenance">
+    <h2>Source and independent method</h2>
+    <p>The 282 realised-cell diverted carrier is built by <code>tie_probe.build("diverted", 250, cache)</code>. Its exterior is displaced by <code>offset * scale * jet_slope</code>; <code>_census_field</code> constructs exactly that moving field. The recorded current comparison used source revision <code>3d7463526</code>, preserved under run <code>r-20261019T081219211903-tie-state-current-gap/combined</code>. This investigation replays that source with <code>NOVA_ANALYTIC_ORACLE_CACHE=/home/ITER/mcintos/.local/share/nova/0.11.0</code>, <code>JAX_PLATFORMS=cpu</code> and binary64 enabled before any array. The log prints <code>nova.__file__</code> and <code>kernel.__file__</code>; the replay reproduces 128.4162487596 A and 129.7308813507 A. The assigned checkout at base <code>52702d307</code> has a later path-weight rule and books zero at both offsets, while its stationary points, axis and lower saddle candidate agree with the preserved source.</p>
+    <p>The independent finder in <code>scripts/prototypes/tie_pair_topology/stationary.py</code> samples the moving field's own <code>value</code> on 320×320 and 640×640 vessel grids. Two finite-difference gradient sign changes propose roots. Newton polishing then uses the field's exact <code>evaluate</code> gradient and Hessian, not the read's census or mesh coefficients. The wall polygon filters candidates; Hessian eigenvalues classify every in-vessel point. Both resolutions return the same three points at each offset (36/35 candidate cells at 320, 52/52 at 640). A separate analytic field gives one maximum and two saddles; removing its saddle term makes the required saddle assertion fail by test id.</p>
+    <p>The merge-path check floods the inside-wall raster in descending signed flux from the independently found maximum, taking the minimum field level along each eight-neighbour path and the maximum over paths. It is independent of <code>kernel._wall_path_ceiling</code>. Each of the four booked cells contains 251–1,024 sampled points. At a level halfway between maximum and upper saddle, the axis component is detected (31 and 20 raster points), with zero wall and zero booked-cell points. At a level one-quarter of the persistence below the saddle, the same component has 1,537 and 1,527 points, touches the wall at 47 points for each offset, and enters the booked cells at 1,191 and 1,203 points. This positive control establishes that the graph sees the maximum and a real support connection before using its absence above the saddle as evidence. The raster gives a lower bound on continuous passage; the 320→640 change is retained below rather than represented as an exact wall-contact certificate.</p>
+  </section>
+
+  <section id="tie-pair-topology-stationary">
+    <h2>The field's stationary points</h2>
+    <p>Coordinates are (R, Z) in metres; flux is the moving field's own ψ in webers. The convention has σ=+1, so the maximum carries the plasma polarity. Eigenvalue signs are those of the exact Hessian. “Axis gap” is ψ<sub>maximum</sub>−ψ<sub>point</sub>; only the upper saddle is the maximum's first merge-tree pairing. Newton gradient residuals are at most 3.3×10<sup>−17</sup>.</p>
+    <table>
+      <thead><tr><th>Offset</th><th>Type</th><th>R [m]</th><th>Z [m]</th><th>ψ [Wb]</th><th>Hessian eigenvalues</th><th>Axis gap [Wb]</th></tr></thead>
+      <tbody>
+        <tr><td>0.17320</td><td>maximum</td><td>1.571984419</td><td>+0.829563252</td><td>+0.008642077190</td><td>−0.0451482, −0.000706317</td><td>0</td></tr>
+        <tr><td>0.17320</td><td>upper saddle</td><td>1.543227803</td><td>+0.882895157</td><td>+0.008641658279</td><td>−0.0445443, +0.000664694</td><td>4.18910483×10<sup>−7</sup></td></tr>
+        <tr><td>0.17320</td><td>lower saddle</td><td>1.489970356</td><td>−1.182502019</td><td>−0.011367010395</td><td>−0.118762, +0.0784899</td><td>0.02000908758; downstream, not the pairing</td></tr>
+        <tr><td>0.17325</td><td>maximum</td><td>1.570203542</td><td>+0.832901588</td><td>+0.008644306219</td><td>−0.0451181, −0.000613437</td><td>0</td></tr>
+        <tr><td>0.17325</td><td>upper saddle</td><td>1.545147918</td><td>+0.879359169</td><td>+0.008644029313</td><td>−0.0445920, +0.000581401</td><td>2.76905487×10<sup>−7</sup></td></tr>
+        <tr><td>0.17325</td><td>lower saddle</td><td>1.489969172</td><td>−1.182538198</td><td>−0.011370503589</td><td>−0.118772, +0.0784993</td><td>0.02001480981; downstream, not the pairing</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="tie-pair-topology-merge">
+    <h2>Which event the axis component reaches first</h2>
+    <p>Descending from the maximum, the confined component pinches at the upper saddle. A path to the upper wall and to each of the four booked cells then becomes available; the lower saddle is about 0.020 Wb farther down the sweep. The raster passage to the upper saddle and wall converges toward the exact upper saddle level from below as the grid doubles. At a flux halfway between the maximum and upper saddle, the grid cell containing the axis passes the level and every booked cell fails it.</p>
+    <table>
+      <thead><tr><th>Offset</th><th>First saddle ψ [Wb]</th><th>Best wall passage, 320 → 640 [Wb]</th><th>Best passage to each booked cell, 640 [Wb]</th><th>Read boundary ψ [Wb]</th></tr></thead>
+      <tbody>
+        <tr><td>0.17320</td><td>0.008641658279</td><td>0.008641601582 → 0.008641637259</td><td>at most 0.008641637259</td><td>0.008641024247</td></tr>
+        <tr><td>0.17325</td><td>0.008644029313</td><td>0.008643959206 → 0.008644010930</td><td>at most 0.008644010930</td><td>0.008643443433</td></tr>
+      </tbody>
+    </table>
+    <figure>
+      <img src="/nova/figures/converged-forward-solve/tie-state-current-gap/tie-pair-current-gap.svg" alt="Two full-vessel field-contour panels and two enlarged upper-saddle panels, with independent maximum and saddles, the read's axis and lower candidate, and the four booked cells.">
+      <figcaption>Each column is one offset of the moving field. Upper panels use the same physical ψ levels (−0.010, −0.007, −0.004, −0.001, +0.002, +0.005, +0.007, +0.0085 Wb); the teal contour adds the exact upper-saddle level for that offset. Lower panels enlarge the upper vessel and use the shared dimensionless levels (ψ−ψ<sub>upper saddle</sub>)/(ψ<sub>maximum</sub>−ψ<sub>upper saddle</sub>) = 0, 0.1, 0.25, 0.5 and 0.75. Solid triangle and filled cross are the independently found maximum and upper saddle; the hollow cross is the lower saddle. Orange rings mark all three roots returned by the read; the larger ring around the lower saddle identifies its chosen <code>saddle_form</code>. Teal polygons are the four booked cells from the published read. The lower candidate is far below the contour pinch and is not an admitted X-point because the read's boundary class is limited. Rendered by <code>render_tie_pair.py</code> from the saved physical field raster and measurement receipt; the producer inspected the PNG preview.</figcaption>
+    </figure>
+  </section>
+
+  <section id="tie-pair-topology-verdict">
+    <h2>Verdict on the read</h2>
+    <table>
+      <thead><tr><th>Output</th><th>Verdict</th><th>Measured rule and consequence</th></tr></thead>
+      <tbody>
+        <tr><td>Axis</td><td>Consistent</td><td>The read's coordinates differ from the independent maximum by under 1.1×10<sup>−12</sup> m at both offsets. The eligible-extremum and persistence rule in <code>scripts/prototypes/fast_map_production/kernel.py:256–283</code> at the published revision admits the small but resolved upper pair (persistence 4.189×10<sup>−7</sup> and 2.769×10<sup>−7</sup> Wb).</td></tr>
+        <tr><td>Admitted X-point</td><td>Inconsistent description and candidate</td><td>The read actually admits no X-point: <code>boundary_class=0</code>. Its <code>saddle_form</code> lies on the lower saddle. The rule at published <code>kernel.py:237–244</code> maximises coarse cell passage minus the candidate's own level. The lower saddle's margin is +3.191×10<sup>−5</sup> / +3.200×10<sup>−5</sup> Wb, versus −7.152×10<sup>−8</sup> / −2.005×10<sup>−7</sup> Wb for the upper saddle. Thus the low saddle wins despite being reached after the upper pinch. The subsequent comparison at <code>kernel.py:381–393</code> calls the boundary limited because its chosen saddle level is −0.01137 Wb versus wall candidate +0.00864 Wb. Calling this lower <code>saddle_form</code> the “admitted X-point” in the earlier figure is false.</td></tr>
+        <tr><td>Booked support</td><td>Inconsistent at the published revision</td><td>Cells 263, 265, 266 and 267 are beyond the upper pinch. The published <code>kernel.py:440–460</code> propagates a smooth cell-edge path weight at its chosen boundary level, giving each cell weight 0.5 and memberships 0.126–0.447; <code>tie_probe.py:150–155</code> then books 128.416/129.731 A. Direct quadrature of exactly those cells agrees within 1.6%, but does not establish the axis-connected region. In the assigned checkout the newer path weight gives no selected cells and zero booked current while still choosing the lower candidate; that changed outcome is not a demonstrated topology repair.</td></tr>
+      </tbody>
+    </table>
+    <p>This is the disconnected-lobe failure class of <code>f-cfs-limited-contact-connectivity</code>: a coarse cell-edge passage misses the intra-cell upper saddle, so a wall-side lobe is treated as reachable at a boundary level below the axis component's first pinch. The MAST-U row in the linked <a href="/nova/research/efit-maximin-certificate.html">maximin certificate</a> has a different field, but the same invalid inference from a contact on a disconnected lobe.</p>
+  </section>
+
+  <section id="tie-pair-topology-disposition">
+    <h2>Repair and admissibility</h2>
+    <p>At the read owner, select the first separator on the axis extremum's continuous or certified contour-tree merge path. Preserve the upper saddle as a barrier inside its own cell when computing wall escape and support connectivity; then form membership only from the axis-connected component above that first event. A lower saddle's positive coarse passage margin must not outrank an earlier, slightly negative-margin upper saddle. Re-run both offsets with the same physical field, assert the upper saddle is encountered first, the reported boundary class matches the chosen physical event, and each booked cut-cell fraction lies on the confined axis component. Check the 282-cell carrier before extrapolating to finer meshes.</p>
+    <p>The field is a smooth, well-resolved three-null perturbation of a certified carrier, not a solved equilibrium with a force-balance receipt. The published <em>read plus booking</em> is not an admissible current-bearing equilibrium representation: it puts current beyond the first axis-component separator. The independent field alone can support a small upper-axis island; this record cannot certify it as a self-consistent Grad–Shafranov equilibrium. A precise continuous wall-contact level is not certified by the raster, although the 320→640 path and contours identify the upper saddle as the first resolved separator.</p>
+    <p>The existing <code>test_census_keeps_the_wall_contact_saddle_across_the_adjacent_pair</code> is correct about three roots, two saddles, and the lower root's persistence across offsets. Its “primary X-point” assertion is not correct: it polishes the lower saddle from <code>state["previous"][1]</code> and requires <code>reading.saddle_form</code> to match it. That assertion must instead identify the first saddle on the maximum's merge path, require the read's actual boundary class and point to agree with that event, and reject booked cells outside the confined axis component. The 2% booked-versus-direct-current assertion may remain only as a quadrature check after topology is independently accepted; both integrals now cover the same wrong four cells.</p>
+    <p><strong>Physics ruling for the lead:</strong> if the upper-saddle separatrix meets the upper vessel within the continuous wall-contact uncertainty, should this near-wall state be classified as diverted by that saddle or limited by the first contact? The choice affects the final boundary label. It does not make the lower saddle first or validate the four upper-wall booked cells.</p>
+  </section>
+</main></body>
+</html>

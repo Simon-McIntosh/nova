@@ -1,0 +1,50 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-20T12:40:27.798Z",
+  "dispatched_at": "2026-10-20T12:25:48Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/contour_tree_sweep_profile/test_brute_receipt_identity.py",
+      "line": 1,
+      "severity": "follow-on",
+      "text": "The new receipt-identity guard sits under scripts/prototypes/, which pyproject.toml [tool.pytest.ini_options] testpaths (line 289: [\"tests\", \"nova/imas/...\"]) does not collect, so no repository gate runs it; a regression in the seven receipt fields would redden nothing in the default lane, and the identity comparison added in test_profile.py:46 does not close the gap because it is in the same uncollected tree."
+    },
+    {
+      "file": "scripts/prototypes/contour_tree_sweep_profile/test_profile.py",
+      "line": 69,
+      "severity": "follow-on",
+      "text": "The test records the root-hop counts (counts[name] = depth) but asserts only depth[\"visits\"] at line 68; nothing asserts the bounded root-hop depth that is the node's actual goal, so reinstating the unbounded, uncompressed sweep (the pre-repair _neighbour_roots pointer-doubling) reddens no test \u2014 the receipt is unchanged by that regression and the depth is measured and written to JSON but never compared."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T093537299203-contour-tree-union-find/brute-identity.log",
+      "line": 1,
+      "severity": "follow-on",
+      "text": "The gate log's first line names REVISION=cd169244542ed6f8bacbcde8bb7bb4db864c4409, but the file it ran (test_brute_receipt_identity.py) does not exist at that revision; it was added in 0f80a85c7, so the log cannot be reconciled against the commit it cites."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T093537299203-contour-tree-union-find/manifest.md",
+      "line": 16,
+      "severity": "follow-on",
+      "text": "the manifest's tests: field names a script path (.../gpu-recheck.sh) rather than the literal command a shell was handed, so a reader cannot re-run the gate from that line alone and must fall back to each log's own COMMAND= header."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to stop the contour-tree warm wall growing with exponent 1.5 by giving the sweeps a bounded-depth component representation and batched arc emission; nova/equilibrium/contour_tree.py:301 (_sweep_tree) now carries ranks and path compression and emits arcs once through _batch_edges at nova/equilibrium/contour_tree.py:121.\nVERDICT done_when: the done_when's three measures are the seven-field identity checks, one H200 four-rung measurement per carrier, and one suite job running both arms with a fresh process per file; the manifest records H200 job 1291092, the 16 repaired rows under gpu-recheck/rows, and suite job 1291093's base/after EXIT= lines in suite-recheck/base-suite.log and suite-recheck/after-suite.log.\nVERDICT write_paths: the diff touches nova/equilibrium/contour_tree.py, scripts/prototypes/contour_tree_sweep_profile/{profile.py,test_profile.py,test_brute_receipt_identity.py}, docs/research/contour-tree-sweep-profile.html, docs/evidence/fragments/converged-forward-solve/contour-tree-union-find.html and benchmarks/contour_tree_sweep_placement.py; every path but the benchmark is inside brief.txt's declared scope, and the benchmark is inside the repair round's granted scope (resume-4-advice.txt) and the manifest's orientation_write_paths, though the manifest's own audit at benchmark-repair-audit.log still refuses it against the original dispatch scope.\nVERDICT manifest: read; it reports status complete, the five commits, H200 10000-cell whole reads of 1.105 s limited and 1.143 s diverted, both suite arms as single-line JSON at revision cd1692445 with 20 and 13 failure ids, and the negative control log path.\nVERDICT diff: read commit by commit against db4375c2f; 511a22e06 replaces _append_edges with _batch_edges and adds rank balancing and path compression, cd1692445 makes the padded node-valid scatter an order-independent max, 0f80a85c7 adds the stored-carrier receipt comparator, 0d27fb7ad records the measurements, cd96df9c restores the benchmark import; seven files changed.\nCALL_SITES: nova/equilibrium/topology.py:2980 (build_contour_tree, imported at :2974), benchmarks/contour_tree_sweep_placement.py:195\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the measured four-rung exponents fall to 0.994 and 0.976 from the base 1.473 and 1.458, and the 10,000-cell whole read is 1.1045 s and 1.143 s against the 10 s target, taken from gpu-recheck/rows/read-after-limited-10000.json and read-after-diverted-10000.json.\nSCORE evidence: 16\nJUSTIFICATION evidence: the done_when's rows exist and are valid (gpu-recheck/rows/read-after-limited-10000.json warm_total_seconds 1.1045 against base 74.788), but every gate log names REVISION=cd1692445 rather than the reviewed head cd96df9c, and brute-identity.log names a revision that does not contain the file it ran.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: every path in git diff db4375c2f..cd96df9c is inside a granted write path, though benchmarks/contour_tree_sweep_placement.py is outside brief.txt's list and inside only the later repair-round grant.\nSCORE durability: 13\nJUSTIFICATION durability: scripts/prototypes/contour_tree_sweep_profile/test_brute_receipt_identity.py:34 compares the installed builder against the unmodified base module (identical to db4375c2f's file) and is shown to redden by the visit-order control in gpu-recheck/negative-control.log, but it lives outside pyproject testpaths and no test asserts the bounded root-hop depth the node exists to produce.\nSCORE fit: 18\nJUSTIFICATION fit: the added helpers at nova/equilibrium/contour_tree.py:109 and :121 carry the module's own docstring idiom, and the new comment at nova/equilibrium/contour_tree.py:517 states the mechanism rather than a tracker reference.\nSCORE reuse: 20\nJUSTIFICATION reuse: a search of nova/ for union-find, disjoint-set, path-compression and rank-balancing owners found none, so the rank-balanced forest inside _sweep_tree extends the only owner of component membership and duplicates no existing mechanism.\nFINDING scripts/prototypes/contour_tree_sweep_profile/test_brute_receipt_identity.py:1 follow-on: the new receipt-identity guard is outside pytest testpaths\nFINDING scripts/prototypes/contour_tree_sweep_profile/test_profile.py:69 follow-on: the bounded root-hop depth is recorded but never asserted, so the performance repair is unguarded against regression\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T093537299203-contour-tree-union-find/brute-identity.log:1 follow-on: the log names a revision that does not contain the test file it ran\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T093537299203-contour-tree-union-find/manifest.md:16 follow-on: the tests field names a script path rather than the literal command",
+  "review_run_id": "r-20261020T122321999602-review-of-contour-tree-union-find-cd96df9c116a",
+  "reviewed_base_sha": "db4375c2fb8a90d5f1fbfcf890bc95c1e36d9550",
+  "reviewed_head_sha": "cd96df9c116aa2c413b390b74a35534a219afe23",
+  "reviewed_run_id": "r-20261020T093537299203-contour-tree-union-find",
+  "scores": {
+    "durability": 13,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T12:40:33.578138+00:00",
+  "total": 103
+}

@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="research">
+<meta name="plan-slug" content="xla-autotune-cache-on-gpfs">
+<meta name="plan-title" content="XLA autotune cache writes on GPFS">
+<meta name="plan-summary" content="Four-arm measurement of XLA's persistent compile cache and per-fusion autotune cache on the certificate target, on one titan GPU, with a recommendation for the fusion-autotuner decision.">
+<meta name="plan-tags" content="jax,xla,cache,titan,equilibrium,timing">
+<meta name="plan-informs" content="forward-solver-route-integrity">
+<meta name="plan-recorded-at" content="2026-10-20">
+<title>XLA autotune cache writes on GPFS | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<header>
+<p class="eyebrow">Cache measurement · titan job 1290668 · measured 2026-10-20</p>
+<h1>XLA autotune cache writes on GPFS</h1>
+<p class="lede"><strong>The per-fusion autotune cache buys nothing measurable on the certificate target, and the two ways of turning it off are not equivalent.</strong> Four arms were measured on one titan P100: the JAX default on a cold cache, the compile cache cleared with the autotune subtree kept, the persistent cache's XLA caches set to <code>none</code>, and the experimental fusion autotuner disabled by XLA flag. Compile wall, steady solve wall and the files each arm left under its cache root separate the four. Disabling the autotuner leaves twelve autotune files behind; setting the XLA cache to <code>none</code> leaves none.</p>
+</header>
+
+<h2 id="s1">§1 — What was measured</h2>
+
+<p>The target is one row of the certificate driver, <code>tests/test_current_book_fragments.py::test_analytic_certificate_moments[550-diverted]</code>: the six rows of that module exceed the rung's time limit, so the diverted 550-cell row stands for them. The harness is <code>benchmarks/xla_autotune_cache_arms.py</code>. Each arm gets a fresh cache root under node-local <code>/tmp</code>, then runs the row once cold and three more times against the cache the cold pass left. Every pass loads the cache guard as a pytest plugin, which records each program's compile seconds, its cache key, and whether the executable was persisted or read back.</p>
+
+<p>All four arms ran inside one scheduler job on one device: titan partition, node <code>98dci4-gpu-0002</code>, an Nvidia P100, job <strong>1290668</strong>, 2 cores and 8&nbsp;GB, a 75-minute limit, elapsed 54:59, exit 0. The device matters for reading the numbers: 16&nbsp;GB of device memory and fp64 throughput well below the drained H200's, so every wall below is read <em>relative to the other arms measured beside it</em> and is never an H200 figure. The two other jobs holding that node throughout are why an arm takes 15 to 20 minutes here against 11 on the two earlier attempts.</p>
+
+<table>
+<caption>Four arms, one certificate row, one titan P100 (job 1290668). Walls are seconds. The compile column is the per-program compile seconds the cache guard recorded, summed over the arm; the cold pass column is the whole pytest process wall for the cold pass. Steady solve is the same process wall on the three following passes against the cache the cold pass filled; the median is of those three.</caption>
+<thead>
+<tr>
+<th scope="col">Arm</th>
+<th scope="col">Cold pass wall (s)</th>
+<th scope="col">Cold compile wall (s)</th>
+<th scope="col">Programs recorded with nonzero compile</th>
+<th scope="col">Steady passes (s)</th>
+<th scope="col">Steady median (s)</th>
+<th scope="col">Compile entries</th>
+<th scope="col">Autotune entries</th>
+</tr>
+</thead>
+<tbody>
+<tr><th scope="row">(a) JAX default, cold cache</th><td>324.9</td><td>80.0</td><td>8 of 266</td><td>167.8 / 196.7 / 187.2</td><td>187.2</td><td>266</td><td>1423</td></tr>
+<tr><th scope="row">(b) compile cache cleared, autotune kept</th><td>245.8</td><td>78.0</td><td>8 of 266</td><td>222.0 / 158.4 / 180.3</td><td>180.3</td><td>266</td><td>1566</td></tr>
+<tr><th scope="row">(c) <code>JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES=none</code></th><td>264.9</td><td>81.0</td><td>8 of 266</td><td>191.6 / 210.3 / 176.6</td><td>191.6</td><td>266</td><td>0</td></tr>
+<tr><th scope="row">(d) <code>--xla_gpu_experimental_enable_fusion_autotuner=false</code></th><td>260.1</td><td>76.0</td><td>8 of 266</td><td>152.4 / 196.4 / 158.3</td><td>158.3</td><td>266</td><td>12</td></tr>
+</tbody>
+</table>
+
+<p>The compile wall is carried by eight programs and is the same eight in every arm. The guard records whole seconds, so the other 258 programs record 0 — below its one-second resolution, which is not the same statement as compiling instantly. The largest program is <code>jit_read</code> at 25&nbsp;s, then a group of <code>jit__lambda</code> programs at 17 to 18, 10 to 11, 8 to 9 and 6&nbsp;s, and <code>jit_read_qualification</code> like 8&nbsp;s. Summed over the eight, the four arms span 76.0 to 81.0&nbsp;s, and the per-arm difference between them is one program's rounding, not a different program set.</p>
+
+<figure>
+  <img src="/nova/figures/forward-solver-route-integrity/xla-autotune-cache/xla-autotune-arms-walls.svg"
+       alt="Grouped bars per arm: cold compile wall beside median steady-state solve wall for the four cache configurations">
+  <figcaption>Cold compile wall (blue) and median steady-state solve wall (olive) per arm, job 1290668. The compile wall is flat across all four arms within one program's rounding, 76.0 to 81.0&nbsp;s. The steady bars are medians of three passes whose spread is 152.4 to 222.0&nbsp;s across the whole table; the arms were measured one after another on a shared node, so a bar's position carries node load as well as the cache setting.</figcaption>
+</figure>
+
+<h2 id="s2">§2 — The cache behaves the same in all four arms</h2>
+
+<p>The persistent compile cache is what carries the certificate target across passes, and none of the four configurations changes it. Every arm wrote 266 compile entries, then missed all 266 on its cold pass, then settled to 0 or 27 misses on the repeats: (a) 266, 0, 27, 0; (b) 266, 27, 0, 0; (c) 266, 27, 0, 0; (d) 266, 0, 27, 0. The 27 appears in a different repeat slot in different arms, so it is a second small compile set that a repeat re-materialises, not a property of any arm.</p>
+
+<p>That the compile wall is the same eight programs at the same seconds in every arm is the load-bearing negative result. Turning XLA's per-fusion autotune cache off changes nothing the compiler records: the same 266 programs are compiled, the same executable is cached, and the cold pass costs the same. Whatever the fusion autotuner chooses on this target, it does not move compile wall or the cached program set at the resolution this instrument has.</p>
+
+<h2 id="s3">§3 — Arm (d) against arm (c): the two ways to stop the writes are not the same</h2>
+
+<p>Both arms stop the per-fusion autotuner, and they leave different amounts behind. Arm (c), which sets the persistent cache's XLA caches to <code>none</code>, wrote <strong>0</strong> autotune entries. Arm (d), which passes <code>--xla_gpu_experimental_enable_fusion_autotuner=false</code>, wrote <strong>12</strong> — against 1423 and 1566 in the two default arms. So the XLA flag does not empty the autotune directory, it removes the fusion records and leaves something else writing there, which matches the pinned directory's contents: it holds GEMM results beside the fusion records. A route that passes the flag but leaves the cache enabled keeps a small, unpruned write path into the directory that took the H200 down.</p>
+
+<p>On wall clock the two arms are not separable here. Compile wall is 76.0&nbsp;s against 81.0&nbsp;s, one program's rounding in a set of eight whose total is dominated by a 25-second <code>jit_read</code>. Steady-solve medians are 158.3&nbsp;s against 191.6&nbsp;s, but the repeats overlap — (d) 152.4 to 196.4 against (c) 176.6 to 210.3 — and each arm ran at a different point in a 55-minute window on a node carrying two other jobs, so the 33-second gap in the medians cannot be separated from node load at three repeats. The honest reading is that this measurement does not distinguish the two arms on solve wall, and that neither shows a compile-wall penalty.</p>
+
+<p><strong>Recommendation for the plan's fusion-autotuner decision: set the persistent cache's XLA caches to <code>none</code>, rather than passing <code>--xla_gpu_experimental_enable_fusion_autotuner=false</code>.</strong> The evidence is (i) the autotuner's benefit is unmeasured on this target — keeping it costs nothing detectable in compile or solve wall, so nothing is given up that this measurement can see; (ii) the write path it opens is the demonstrated cost, five in-flight creates at about 11&nbsp;s each on GPFS being what drained the H200 on 2026-10-17; and (iii) between the two ways of closing it, the XLA cache setting closes it completely and the XLA flag leaves twelve writes a run. If the flag is chosen anyway, the twelve residual autotune writes per run belong in the decision record, and they are not pruned by anything.</p>
+
+<p>Either choice changes the runtime-versioned cache directory, because <code>_persistent_cache_runtime_identity</code> hashes <code>jax_persistent_cache_enable_xla_caches</code> and <code>XLA_FLAGS</code> into its name, so the pre-warm and the lane must carry the same setting before the identity is computed and the pin must be republished from a new pre-warm.</p>
+
+<h2 id="s4">§4 — What this measurement does not cover</h2>
+
+<p>One row of one driver on one P100, three repeats per arm, one cold pass each; the six certificate rows are not measured individually. The steady walls carry a spread of 152 to 222&nbsp;s across the table, most of which is node load rather than cache configuration, so no claim here rests on a solve-wall difference smaller than that scatter. The per-program compile record resolves to whole seconds. Inventorying the pinned root's contents and listing what may be removed belong to the node that owns the cache configuration; this page records only what the four arms created under their own fresh roots.</p>
+
+<section id="s5">
+<h2>Method and reproduction</h2>
+<p>Harness: <code>benchmarks/xla_autotune_cache_arms.py</code>, one cache root per arm under node-local <code>/tmp</code>, <code>JAX_PERSISTENT_CACHE_MIN_COMPILE_TIME_SECS=0</code>, one cold pass then three repeats, the cache guard loaded per pass with its miss budget raised so the guard reports rather than refuses. Submitted through <code>scripts/nova_lane/run.sh --rungs titan</code> as job 1290668. Receipt with every per-program row: the run directory's <code>titan-arms-3.json</code>; per-pass logs in <code>xla-autotune-arm-logs/</code>.</p>
+</section>
+</main>
+</body>
+</html>

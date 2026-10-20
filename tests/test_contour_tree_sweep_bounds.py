@@ -11,6 +11,7 @@ from types import ModuleType
 
 import jax
 import jax.numpy as jnp
+import pytest
 
 from benchmarks.contour_tree_brute_force import (
     certificate_fixtures,
@@ -30,6 +31,26 @@ from scripts.prototypes.contour_tree_sweep_profile.profile import (
 configure_dtypes()
 assert jax.config.jax_enable_x64 is True
 
+_RECEIPT_REFERENCE = "511a22e06^:nova/equilibrium/contour_tree.py"
+_RECEIPT_REFERENCE_REASON = f"missing receipt reference {_RECEIPT_REFERENCE}"
+
+
+def _receipt_reference_available() -> bool:
+    if os.environ.get("REFERENCE_CONTOUR_TREE_MODULE") is not None:
+        return True
+
+    root = Path(__file__).resolve().parents[1]
+    result = subprocess.run(
+        ["git", "cat-file", "-e", _RECEIPT_REFERENCE],
+        cwd=root,
+        capture_output=True,
+        text=True,
+    )
+    return result.returncode == 0
+
+
+_HAS_RECEIPT_REFERENCE = _receipt_reference_available()
+
 
 def _receipt_reference():
     """Load the source that recorded the fixture receipts."""
@@ -39,8 +60,17 @@ def _receipt_reference():
         return load_builder(Path(reference_path))
 
     root = Path(__file__).resolve().parents[1]
+    available = subprocess.run(
+        ["git", "cat-file", "-e", _RECEIPT_REFERENCE],
+        cwd=root,
+        capture_output=True,
+        text=True,
+    )
+    if available.returncode != 0:
+        pytest.skip(_RECEIPT_REFERENCE_REASON)
+
     source = subprocess.run(
-        ["git", "show", "511a22e06^:nova/equilibrium/contour_tree.py"],
+        ["git", "show", _RECEIPT_REFERENCE],
         cwd=root,
         check=True,
         capture_output=True,
@@ -53,6 +83,10 @@ def _receipt_reference():
     return module
 
 
+@pytest.mark.skipif(
+    not _HAS_RECEIPT_REFERENCE,
+    reason=_RECEIPT_REFERENCE_REASON,
+)
 def test_brute_force_fixture_receipts_match_recorded_fields() -> None:
     """Each stored carrier retains all seven receipt fields bit for bit."""
 

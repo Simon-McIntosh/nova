@@ -2841,7 +2841,8 @@ def _wall_events(field, geometry, policy, sigma):
     seeds = jnp.linspace(0.0, 1.0, 9)
 
     def one(first, direction):
-        def step(_index, parameter):
+        def step(index, state):
+            parameter, _ = state
             points = first + parameter[:, None] * direction
             jet = jax.vmap(field.evaluate)(points)
             first_derivative = jet.gradient @ direction
@@ -2854,13 +2855,20 @@ def _wall_events(field, geometry, policy, sigma):
             # cannot jump across another stationary wall event.
             lower = jnp.maximum(0.0, seeds - 1.0 / 8)
             upper = jnp.minimum(1.0, seeds + 1.0 / 8)
-            return jnp.where(
+            updated = jnp.where(
                 concave, jnp.clip(parameter - update, lower, upper), parameter
             )
+            return jnp.where(index < policy.polish_iterations, updated, parameter), jet
 
-        parameter = jax.lax.fori_loop(0, policy.polish_iterations, step, seeds)
+        empty_jet = FieldJet(
+            jnp.zeros_like(seeds),
+            jnp.zeros((seeds.size, 2), dtype=seeds.dtype),
+            jnp.zeros((seeds.size, 2, 2), dtype=seeds.dtype),
+        )
+        parameter, jets = jax.lax.fori_loop(
+            0, policy.polish_iterations + 1, step, (seeds, empty_jet)
+        )
         points = first + parameter[:, None] * direction
-        jets = jax.vmap(field.evaluate)(points)
         derivative = jets.gradient @ direction
         curvature = jnp.einsum("i,nij,j->n", direction, jets.hessian, direction)
         scale = jnp.maximum(jnp.max(jnp.abs(jets.value)), jnp.max(jnp.abs(curvature)))

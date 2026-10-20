@@ -1,0 +1,789 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 5,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "1dc96ee0b9931c21feb567f799baae353779928d",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T061532000394-contour-tree-sweep-profile/brief.txt",
+    "sha256": "bafb633bca76de2b998b8fec913954d12031baa1445857032a25094195a8e145"
+  },
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 19722624,
+      "cached_input_tokens_cumulative": 19722624,
+      "input_tokens": 19972041,
+      "input_tokens_cumulative": 19972041,
+      "output_tokens": 88657,
+      "output_tokens_cumulative": 88657,
+      "reasoning_output_tokens": 34098,
+      "reasoning_output_tokens_cumulative": 34098
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 3026,
+    "files": 8,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 37,
+        "name": "summarize",
+        "path": "scripts/prototypes/contour_tree_sweep_profile/summarize.py"
+      },
+      "window_line": 91
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 37,
+        "name": "summarize",
+        "path": "scripts/prototypes/contour_tree_sweep_profile/summarize.py"
+      },
+      "window_line": 91
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "test_shot_to_shot_state_flips_are_preserved_not_averaged",
+        "path": "tests/calibrate/test_pair_state.py"
+      },
+      "run_function": {
+        "line": 37,
+        "name": "summarize",
+        "path": "scripts/prototypes/contour_tree_sweep_profile/summarize.py"
+      },
+      "window_line": 92
+    },
+    {
+      "existing_function": {
+        "line": 13,
+        "name": "test_banked_inputs_align_on_every_frame_identity",
+        "path": "tests/imas/test_diiid_circuit_ensemble_assessment.py"
+      },
+      "run_function": {
+        "line": 37,
+        "name": "summarize",
+        "path": "scripts/prototypes/contour_tree_sweep_profile/summarize.py"
+      },
+      "window_line": 92
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 37,
+        "name": "summarize",
+        "path": "scripts/prototypes/contour_tree_sweep_profile/summarize.py"
+      },
+      "window_line": 91
+    },
+    {
+      "existing_function": {
+        "line": 260,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 37,
+        "name": "summarize",
+        "path": "scripts/prototypes/contour_tree_sweep_profile/summarize.py"
+      },
+      "window_line": 92
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 37,
+        "name": "summarize",
+        "path": "scripts/prototypes/contour_tree_sweep_profile/summarize.py"
+      },
+      "window_line": 91
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 37,
+        "name": "summarize",
+        "path": "scripts/prototypes/contour_tree_sweep_profile/summarize.py"
+      },
+      "window_line": 92
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 37,
+        "name": "summarize",
+        "path": "scripts/prototypes/contour_tree_sweep_profile/summarize.py"
+      },
+      "window_line": 91
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 37,
+        "name": "summarize",
+        "path": "scripts/prototypes/contour_tree_sweep_profile/summarize.py"
+      },
+      "window_line": 92
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 37,
+        "name": "summarize",
+        "path": "scripts/prototypes/contour_tree_sweep_profile/summarize.py"
+      },
+      "window_line": 91
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 37,
+        "name": "summarize",
+        "path": "scripts/prototypes/contour_tree_sweep_profile/summarize.py"
+      },
+      "window_line": 92
+    },
+    {
+      "existing_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 37,
+        "name": "summarize",
+        "path": "scripts/prototypes/contour_tree_sweep_profile/summarize.py"
+      },
+      "window_line": 92
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 37,
+        "name": "summarize",
+        "path": "scripts/prototypes/contour_tree_sweep_profile/summarize.py"
+      },
+      "window_line": 92
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "_assert_same_topology",
+        "path": "tests/test_fused_same_state_read.py"
+      },
+      "run_function": {
+        "line": 37,
+        "name": "summarize",
+        "path": "scripts/prototypes/contour_tree_sweep_profile/summarize.py"
+      },
+      "window_line": 91
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 37,
+        "name": "summarize",
+        "path": "scripts/prototypes/contour_tree_sweep_profile/summarize.py"
+      },
+      "window_line": 92
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 37,
+        "name": "summarize",
+        "path": "scripts/prototypes/contour_tree_sweep_profile/summarize.py"
+      },
+      "window_line": 91
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 37,
+        "name": "summarize",
+        "path": "scripts/prototypes/contour_tree_sweep_profile/summarize.py"
+      },
+      "window_line": 91
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 37,
+        "name": "summarize",
+        "path": "scripts/prototypes/contour_tree_sweep_profile/summarize.py"
+      },
+      "window_line": 91
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 37,
+        "name": "summarize",
+        "path": "scripts/prototypes/contour_tree_sweep_profile/summarize.py"
+      },
+      "window_line": 91
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 37,
+        "name": "summarize",
+        "path": "scripts/prototypes/contour_tree_sweep_profile/summarize.py"
+      },
+      "window_line": 92
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 37,
+        "name": "summarize",
+        "path": "scripts/prototypes/contour_tree_sweep_profile/summarize.py"
+      },
+      "window_line": 92
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 37,
+        "name": "summarize",
+        "path": "scripts/prototypes/contour_tree_sweep_profile/summarize.py"
+      },
+      "window_line": 91
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 37,
+        "name": "summarize",
+        "path": "scripts/prototypes/contour_tree_sweep_profile/summarize.py"
+      },
+      "window_line": 91
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 37,
+        "name": "summarize",
+        "path": "scripts/prototypes/contour_tree_sweep_profile/summarize.py"
+      },
+      "window_line": 92
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "_numeric_receipt",
+        "path": "tests/test_transport_ensemble.py"
+      },
+      "run_function": {
+        "line": 37,
+        "name": "summarize",
+        "path": "scripts/prototypes/contour_tree_sweep_profile/summarize.py"
+      },
+      "window_line": 91
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 37,
+        "name": "summarize",
+        "path": "scripts/prototypes/contour_tree_sweep_profile/summarize.py"
+      },
+      "window_line": 92
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 37,
+        "name": "summarize",
+        "path": "scripts/prototypes/contour_tree_sweep_profile/summarize.py"
+      },
+      "window_line": 92
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "51c4ad85846004f977a2ce2006f78d99fc05b8ff",
+    "81927151e11e9131c789e0485e66618d1c5c2b6d",
+    "c3241935f3c51f6d68a4ecc68067db939c28bfcb",
+    "1939fa6af231baccd8075a53bf096e83345f4e90",
+    "d28642fd33dc63d1d1acb59db34e4dc9067538b8"
+  ],
+  "completed_at": "2026-10-20T09:13:12Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-20T06:16:49Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q scripts/prototypes/contour_tree_sweep_profile/test_profile.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T061532000394-contour-tree-sweep-profile/main/identity.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.2857142857142857,
+    "plan": "converged-forward-solve",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 2.040980754020564,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-10-23T03:40:39Z, which is after this node's 3600s horizon ending 2026-10-20T07:16:13.359412+00:00",
+    "horizon_ends_at": "2026-10-20T07:16:13.359412+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-20T06:16:12Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-23T03:40:39Z",
+    "resets_at": "2026-10-26T03:55:48Z",
+    "seconds_until_reset": 509975,
+    "state": "quiet",
+    "utilisation_pct": 32.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-20T06:16:12Z",
+    "read_at": "2026-10-20T06:16:13Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 32.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-20T09:13:12Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-10-20T09:13:12Z",
+        "resets_at": 1793082762,
+        "used_percent": 23.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T061532000394-contour-tree-sweep-profile/manifest.md",
+  "member": "disposable-r-20261020T061532000394-contour-tree-sweep-profile",
+  "model_key": "sol",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "contour-tree-sweep-profile",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.cache/nova-s21-briefs/oct20/contour-tree-sweep-profile.txt",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T061532000394-contour-tree-sweep-profile/brief.txt",
+    "brief_sha256": "bafb633bca76de2b998b8fec913954d12031baa1445857032a25094195a8e145",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "critical",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1200,
+          "cached_input_tokens": 361756,
+          "input_tokens": 362958,
+          "output_tokens": 975,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 363933,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "40d3a43c-d1f4-4016-9584-4e663183c12c",
+      "session_id": "s21-nova"
+    },
+    "done_when": "docs/research/contour-tree-sweep-profile.html reports from one H200 job at 550, 2,000, 5,000 and 10,000 cells, limited and diverted, the warm wall and exponent of each tree stage, the sweep visit count with total and maximum pointer-doubling iterations and wall per visit, and a prescribed repair naming algorithm, replaced functions, expected 10,000-cell wall and the receipts that stay bit-identical",
+    "estimated_hours": null,
+    "goal": "Per-stage warm-wall profile of the contour-tree build that names the stage carrying the 1.5 exponent, with a prescribed repair",
+    "id": "contour-tree-sweep-profile",
+    "images": [],
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-20T06:16:12Z",
+      "read_at": "2026-10-20T06:16:13Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 32.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T061532000394-contour-tree-sweep-profile/manifest.md",
+    "negative_control": "Perturb one visit order in the instrumented sweep; the profiler identity test against build_contour_tree receipts must fail.",
+    "orchestrator_assessment": {
+      "reasoning": "deep",
+      "risk": "moderate",
+      "verification": "strict"
+    },
+    "plan": "converged-forward-solve",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/research/contour-tree-sweep-profile.html",
+      "docs/evidence/fragments/converged-forward-solve/contour-tree-sweep-profile.html",
+      "scripts/prototypes/contour_tree_sweep_profile/",
+      "docs/figures/converged-forward-solve/contour-tree-sweep-profile/",
+      "docs/figures/converged-forward-solve/contour-tree-sweep-profile"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 2.040753773390738,
+      "derived": 0.17248528685317463,
+      "drain_hours": 168.0,
+      "effective_limit": 0.17248528685317463,
+      "elapsed_fraction": 0.15680480623015874,
+      "elapsed_hours": 26.343207446666668,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-20T06:16:23+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.6799999999999999,
+      "remaining_windows": null,
+      "resets_at": "2026-10-26T03:55:48Z",
+      "state": "observed",
+      "utilisation": 0.32,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.241664,
+      "decided_by": "window",
+      "margin": 0.40208600000000005,
+      "name": "contour-tree-sweep-profile",
+      "score": 0.64375,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.32
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.546808,
+        "observed_at": "2026-10-20T06:16:23+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-26T03:55:48Z",
+        "state": "observed",
+        "utilisation": 0.32,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": null,
+    "member": "codex",
+    "node": "contour-tree-sweep-profile",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-20T06:16:23.546808+00:00",
+    "score": 0.64375,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "Lead directive 2026-10-20: difficult tasks go to the codex lane. The 10 s warm-read target is on the critical path; one clive repair attempt moved the wall 5-8 percent without naming the stage, so this needs a careful device-level attribution.",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:jev",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5007.719,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 2372.912,
+      "context-estimate": 72.689,
+      "records": 1264.082,
+      "verdict-inputs": 1004.17
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.2857142857142857,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "d28642fd33dc63d1d1acb59db34e4dc9067538b8",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "1dc96ee0b9931c21feb567f799baae353779928d",
+    "reviewed_head_sha": "d28642fd33dc63d1d1acb59db34e4dc9067538b8",
+    "scores": {
+      "durability": 18,
+      "evidence": 19,
+      "fit": 18,
+      "goal_fidelity": 19,
+      "reuse": 16,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 110
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261020T061532000394-contour-tree-sweep-profile",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a157f4-cae5-7d63-bfbe-c036a9afd5b4",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": 1,
+  "throughput": {
+    "cumulative_cached_input_tokens": 19722624,
+    "cumulative_input_tokens": 39694665,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 122755
+  },
+  "time_budget": "60m",
+  "tool_steps": 63.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 10583,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 5,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": null,
+    "exited_at": "2026-10-20T09:13:17Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-20T08:59:44Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261020T061532000394-contour-tree-sweep-profile",
+    "signal": 9,
+    "signal_name": "SIGKILL",
+    "stream_records_seen": 608,
+    "worker_pid": 3859095
+  },
+  "worker_seconds": 10562,
+  "worker_seconds_source": "rollout_receipts",
+  "worktree_retention": null
+}

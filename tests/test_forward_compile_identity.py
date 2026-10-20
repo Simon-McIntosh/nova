@@ -126,6 +126,7 @@ def test_certificate_rows_share_one_solve_program_per_mesh():
 
 
 @pytest.mark.slow
+@pytest.mark.timeout(3840)
 def test_traced_exterior_preserves_the_certificate_terminal_state():
     """Binding or tracing one exterior agrees to floating-point precision."""
     configure_dtypes()
@@ -173,6 +174,7 @@ def test_traced_exterior_preserves_the_certificate_terminal_state():
 
 
 @pytest.mark.slow
+@pytest.mark.timeout(3840)
 def test_compiled_slice_program_traces_conductor_exterior():
     """Two prescribed conductor states reuse one compiled slice StableHLO."""
     configure_dtypes()

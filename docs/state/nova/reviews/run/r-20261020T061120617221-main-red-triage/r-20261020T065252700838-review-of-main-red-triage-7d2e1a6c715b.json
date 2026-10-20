@@ -1,0 +1,75 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-20T07:05:13.880Z",
+  "dispatched_at": "2026-10-20T06:54:06Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/main-red-triage.html",
+      "line": "58",
+      "severity": "follow-on",
+      "text": "follow-on: cites docs/evidence/fragments/converged-forward-solve/trip-guard-counts-its-marker.html as the record of commit d0245d008, and no such file exists (the nearest is trip-body-lowered-once.html), so the one pointer supporting the stale-report conclusion resolves nowhere; the conclusion itself still stands on the fragment's own EXIT=0 log at triage-logs/trips-are-a-scan.log."
+    },
+    {
+      "file": "manifest.md",
+      "line": "test_logs",
+      "severity": "follow-on",
+      "text": "follow-on: the test_logs entry for the batch arm reads /home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T061120617221-main-red-triage//home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T061120617221-main-red-triage/triage-logs/identity-batch-1290828.log, a doubled prefix that resolves to no file; it also omits triage-logs/forward-compile-identity.log, which the fragment cites, so that log is reachable only through the fragment."
+    },
+    {
+      "file": "triage-logs/identity-batch-1290828.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the source brief names sirius for the one batch job a file that exceeds the in-place budget goes to, and the job ran on all_debug; the shape the brief asks for (one sbatch job, explicit memory, node-local mktemp scratch removed by trap, parked on the job) was met, so only the partition name deviates."
+    }
+  ],
+  "gate_sources": {
+    "after_suite": null,
+    "baseline_suite": null,
+    "note": "the reviewed run records baseline_suite and after_suite as not-run because the change is one evidence fragment and touches no source; added_failure_count 0 is derived from that, and the run's own per-file base-revision logs are cited under triage_logs.",
+    "triage_logs": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T061120617221-main-red-triage/triage-logs/constraint-protocol.log",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T061120617221-main-red-triage/triage-logs/trips-are-a-scan.log",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T061120617221-main-red-triage/triage-logs/forward-compile-identity.log",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T061120617221-main-red-triage/triage-logs/identity-batch-1290828.log"
+    ]
+  },
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "Read commit by commit against base 1dc96ee0b9931c21feb567f799baae353779928d; two commits, both docs(evidence), one file, 331 insertions and no deletions, no test and no product source touched, which matches the node's stated charter.",
+    "done_when": "The source done_when names the fragment and requires, for every failing or erroring test at base, the test id, the exception and first failing line copied from the log, the owning function file and line read from the traceback, a classification and a prescription with a negative control; the fragment delivers all of these for the two tests/test_equilibrium_constraint_protocol.py failures and the one tests/test_forward_compile_identity.py failure, and states that tests/test_solve_trips_are_a_scan.py has no failure, citing its EXIT=0 log.",
+    "goal": "The source goal is a triage of the tests red on main in the constraint-protocol, trips-are-a-scan and forward-compile-identity files so each can be repaired by a short prescribed node; docs/evidence/fragments/converged-forward-solve/main-red-triage.html carries one section per file, each with its base-revision summary, and covers every failing test the base logs contain.",
+    "manifest": "Read; status complete, commits 6efdb2241 and 7d2e1a6c7, changed_paths the fragment only, baseline_suite and after_suite recorded as null/not-run because no source changed; its triage-logs all exist and each carries a final bare EXIT= line, but its test_logs entry for the batch arm is a doubled path that resolves to no file.",
+    "write_paths": "The source brief grants docs/evidence/fragments/converged-forward-solve/main-red-triage.html and the docs/figures/converged-forward-solve/main-red-triage directory; git diff 1dc96ee0b9931c21feb567f799baae353779928d..7d2e1a6c715b9a5fe67825ee81b63fe37b0f8bab changes only the first of those, 331 insertions in one file."
+  },
+  "justifications": {
+    "durability": "The landed change adds no assertion anywhere; the only check it participates in is the repository-wide tests/test_artifacts_carry_no_worktree_paths.py, which would fail if the fragment named a worktree path, and the fragment's own analysis would regress silently.",
+    "evidence": "Every cited log exists under the reviewed run directory and ends in a bare EXIT= line (constraint-protocol.log EXIT=1, trips-are-a-scan.log EXIT=0, identity-batch-1290828.log EXIT=1), and the fragment's central claims verify against the code at base (nova/equilibrium/forward.py:682, :686 and :2622, nova/equilibrium/solve_request.py:584), but the fragment also cites docs/evidence/fragments/converged-forward-solve/trip-guard-counts-its-marker.html and no such file exists.",
+    "fit": "The fragment follows the evidence-fragment convention of its directory (a fenced command form with placeholder paths and a per-file summary table) and names no plan, sprint or ticket identifier.",
+    "goal_fidelity": "docs/evidence/fragments/converged-forward-solve/main-red-triage.html:1-22 records the base revision and one fresh CPU process per file, and its three file sections triage each file the goal names.",
+    "reuse": "The change adds no definition; it points at the owners that already hold each capability (nova/equilibrium/forward.py, nova/equilibrium/forward_operator.py, nova/equilibrium/fixed_point.py) rather than restating their logic, and I found no competing triage mechanism it forks.",
+    "scope_discipline": "git diff 1dc96ee0b9931c21feb567f799baae353779928d 7d2e1a6c715b9a5fe67825ee81b63fe37b0f8bab --stat shows one file changed, docs/evidence/fragments/converged-forward-solve/main-red-triage.html, inside the declared write paths and nothing else."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source node's goal is a triage of the tests red on main in the constraint-protocol, trips-are-a-scan and forward-compile-identity files so each can be repaired by a short prescribed node, and docs/evidence/fragments/converged-forward-solve/main-red-triage.html carries one section per file, each stating its base-revision summary.\nVERDICT done_when: the done_when names that fragment and requires every failing test at base to carry its id, exception and first failing line copied from the log, the owning function file and line read from the traceback, and a classification with a prescription and negative control; the fragment does this for the two tests/test_equilibrium_constraint_protocol.py failures at triage-logs/constraint-protocol.log and the one tests/test_forward_compile_identity.py failure at triage-logs/identity-batch-1290828.log, and records tests/test_solve_trips_are_a_scan.py as having no failure.\nVERDICT write_paths: the source brief grants docs/evidence/fragments/converged-forward-solve/main-red-triage.html and the docs/figures/converged-forward-solve/main-red-triage directory, and git diff --stat from 1dc96ee0b9931c21feb567f799baae353779928d changes only the first, 331 insertions in one file.\nVERDICT manifest: read; status complete with commits 6efdb2241 and 7d2e1a6c7 and baseline_suite/after_suite recorded not-run because no source changed, and all four triage logs exist and end in a bare EXIT= line, though the test_logs entry for the batch arm is a doubled path that resolves to no file.\nVERDICT diff: read commit by commit against base 1dc96ee0b9931c21feb567f799baae353779928d; two docs(evidence) commits, one file, 331 insertions and no deletions, touching no test and no product source.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/converged-forward-solve/main-red-triage.html carries one section per file the goal names, with the base revision and the per-file process stated at :1-22.\nSCORE evidence: 16\nJUSTIFICATION evidence: each cited log exists under the reviewed run directory and ends in a bare EXIT= line, but the fragment cites docs/evidence/fragments/converged-forward-solve/trip-guard-counts-its-marker.html and no such file exists.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 1dc96ee0b9931c21feb567f799baae353779928d 7d2e1a6c715b9a5fe67825ee81b63fe37b0f8bab --stat lists only docs/evidence/fragments/converged-forward-solve/main-red-triage.html.\nSCORE durability: 6\nJUSTIFICATION durability: the landed change adds no assertion, so only the repository-wide tests/test_artifacts_carry_no_worktree_paths.py guards it at promotion.\nSCORE fit: 18\nJUSTIFICATION fit: the fragment follows the evidence-fragment convention of docs/evidence/fragments/converged-forward-solve/ and names no plan, sprint or ticket identifier.\nSCORE reuse: 19\nJUSTIFICATION reuse: the change adds no definition and points at the owners that already hold each capability, nova/equilibrium/forward.py and nova/equilibrium/forward_operator.py.\nFINDING docs/evidence/fragments/converged-forward-solve/main-red-triage.html:58 follow-on: cites trip-guard-counts-its-marker.html, which does not exist, as the record of commit d0245d008.\nFINDING manifest.md:test_logs follow-on: the batch-arm log path carries a doubled prefix and resolves to no file, and triage-logs/forward-compile-identity.log is omitted.\nFINDING triage-logs/identity-batch-1290828.log:1 follow-on: the single batch job ran on all_debug where the source brief names sirius.",
+  "review_run_id": "r-20261020T065252700838-review-of-main-red-triage-7d2e1a6c715b",
+  "reviewed_base_sha": "1dc96ee0b9931c21feb567f799baae353779928d",
+  "reviewed_head_sha": "7d2e1a6c715b9a5fe67825ee81b63fe37b0f8bab",
+  "reviewed_run_id": "r-20261020T061120617221-main-red-triage",
+  "scores": {
+    "durability": 6,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T07:00:00Z",
+  "total": 98
+}

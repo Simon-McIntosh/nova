@@ -12,9 +12,11 @@ import pytest
 
 from scripts.prototypes.contour_tree_sweep_profile.profile import (
     assert_identity,
+    assert_sweep_identity,
     inputs,
-    instrumented_build,
+    instrumented_sweep,
     load_builder,
+    replay_build,
     roots_with_depth,
 )
 
@@ -36,17 +38,31 @@ def test_instrumented_receipt_identity(kind: str, cells: int) -> None:
     reference = module.build_contour_tree(*arguments)
     jax.block_until_ready(reference)
     mutation = os.environ.get("MUTATE_VISIT_ORDER") == "1"
-    executable, depths = instrumented_build(module, arguments, mutation=mutation)
-    candidate = executable(*arguments)
-    jax.block_until_ready(candidate)
+    vertex_flux, vertex_valid, vertex_is_wall, edges, edge_valid, sigma = arguments
+    signed = jnp.asarray(sigma, dtype=vertex_flux.dtype) * vertex_flux
+    adjacency = module._carrier_adjacency(edges, edge_valid, vertex_flux.size)
+    neighbours, neighbour_valid, _ = adjacency
     counts = {}
-    for name, visits in depths.items():
-        assert len(visits) == arguments[0].size
-        counts[name] = {
-            "visits": len(visits),
-            "roots_total": sum(visits),
-            "roots_max": max(visits),
-        }
+    passes = {}
+    for name, descending in (("join", True), ("split", False)):
+        sweep_args = (
+            signed,
+            vertex_valid,
+            vertex_is_wall,
+            neighbours,
+            neighbour_valid,
+            descending,
+            vertex_flux.size,
+            edges.shape[0],
+        )
+        native = module._sweep_tree(*sweep_args)
+        counted, depth = instrumented_sweep(module, sweep_args, mutation=mutation)
+        assert_sweep_identity(native, counted)
+        assert depth["visits"] == vertex_flux.size
+        counts[name] = depth
+        passes[name] = counted
+    candidate = replay_build(module, arguments, adjacency, passes)
+    assert_identity(reference, candidate)
     if not mutation:
         output = Path(os.environ["PROFILE_OUTPUT"])
         output.mkdir(parents=True, exist_ok=True)
@@ -56,7 +72,7 @@ def test_instrumented_receipt_identity(kind: str, cells: int) -> None:
                     "case": kind,
                     "requested_cells": cells,
                     "realised_cells": realised_cells,
-                    "vertices": int(arguments[0].size),
+                    "vertices": int(vertex_flux.size),
                     "counts": counts,
                 },
                 indent=2,
@@ -64,4 +80,3 @@ def test_instrumented_receipt_identity(kind: str, cells: int) -> None:
             )
             + "\n"
         )
-    assert_identity(reference, candidate)

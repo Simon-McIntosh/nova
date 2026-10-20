@@ -107,39 +107,60 @@ def roots_with_depth(parents, neighbours):
     return jax.lax.while_loop(unresolved, advance, (neighbours, jnp.int32(0)))
 
 
-def instrumented_build(module, arguments, mutation: bool = False):
-    """Return a compiled builder and its exact per-pass pointer-depth counters."""
+def instrumented_sweep(module, arguments, mutation: bool = False):
+    """Count parent-link rounds while preserving the sweep's output arrays."""
 
-    counts: dict[str, list[int]] = {"join": [], "split": []}
-    selected_sweep = perturbed_sweep(module) if mutation else module._sweep_tree
-    original_roots = module._neighbour_roots
+    counts: list[int] = []
+    selected = perturbed_sweep(module) if mutation else module._sweep_tree
 
-    def tracked_sweep(*args):
-        name = "join" if args[5] else "split"
+    def counted_roots(parents, neighbours):
+        roots, depth = roots_with_depth(parents, neighbours)
+        jax.debug.callback(lambda value: counts.append(int(value)), depth)
+        return roots
 
-        def counted_roots(parents, neighbours):
-            roots, depth = roots_with_depth(parents, neighbours)
-            jax.debug.callback(lambda value: counts[name].append(int(value)), depth)
-            return roots
+    sweep = FunctionType(
+        selected.__code__,
+        {**selected.__globals__, "_neighbour_roots": counted_roots},
+        selected.__name__,
+        selected.__defaults__,
+        selected.__closure__,
+    )
+    executable = jax.jit(sweep, static_argnums=(5, 6, 7)).lower(*arguments).compile()
+    result = executable(*arguments[:5])
+    jax.block_until_ready(result)
+    return result, {
+        "visits": len(counts),
+        "roots_total": sum(counts),
+        "roots_max": max(counts),
+    }
 
-        try:
-            module._neighbour_roots = counted_roots
-            selected_sweep.__globals__["_neighbour_roots"] = counted_roots
-            return selected_sweep(*args)
-        finally:
-            module._neighbour_roots = original_roots
-            selected_sweep.__globals__["_neighbour_roots"] = original_roots
+
+def replay_build(module, arguments, adjacency, passes):
+    """Feed counted sweep arrays through the builder's unchanged merge logic."""
 
     raw_builder = module.build_contour_tree.__wrapped__
+
+    def recorded_sweep(*args):
+        return passes["join" if args[5] else "split"]
+
     builder = FunctionType(
         raw_builder.__code__,
-        {**raw_builder.__globals__, "_sweep_tree": tracked_sweep},
+        {
+            **raw_builder.__globals__,
+            "_carrier_adjacency": lambda *args: adjacency,
+            "_sweep_tree": recorded_sweep,
+        },
         raw_builder.__name__,
         raw_builder.__defaults__,
         raw_builder.__closure__,
     )
-    executable = jax.jit(builder).lower(*arguments).compile()
-    return executable, counts
+    return builder(*arguments)
+
+
+def assert_sweep_identity(reference, candidate):
+    for index, (left, right) in enumerate(zip(reference, candidate, strict=True)):
+        if not np.array_equal(np.asarray(left), np.asarray(right)):
+            raise AssertionError(f"sweep output {index} differs")
 
 
 def assert_identity(reference, candidate):
@@ -218,14 +239,20 @@ def measure(module, kind: str, cells: int):
     )
     stages["split insertion"] = insert_wall
     compiles["split insertion"] = insert_compile
-    stages["other build"] = max(
-        0.0,
-        full_wall
-        - adjacency_wall
-        - stages["join sweep"]
-        - stages["split sweep"]
-        - insert_wall,
+
+    def remaining_build(tree_args, carrier_adjacency, join_pass, split_pass):
+        return replay_build(
+            module,
+            tree_args,
+            carrier_adjacency,
+            {"join": join_pass, "split": split_pass},
+        )
+
+    _, rest_wall, rest_compile = compiled_wall(
+        remaining_build, arguments, adjacency, join, split
     )
+    stages["other build"] = rest_wall
+    compiles["other build"] = rest_compile
     assert_identity(full, module.build_contour_tree(*arguments))
     return {
         "case": kind,

@@ -1537,9 +1537,8 @@ def _conditioned_hessian(hessian, tolerance):
     return valid, jnp.where(valid, hessian, jnp.eye(2, dtype=hessian.dtype))
 
 
-@partial(jax.custom_jvp, nondiff_argnums=(4,))
-def _implicit_stationary_position(field, seed, pitch, tolerance, iterations):
-    """Polish a point using analytic jets, with an implicit position tangent.
+def _stationary_position_primal(field, seed, pitch, tolerance, iterations):
+    """Polish a point using analytic jets.
 
     The loop evaluates the jet once more than it steps, so the jet at the
     polished point comes from the same traced evaluation as every Newton step.
@@ -1562,6 +1561,12 @@ def _implicit_stationary_position(field, seed, pitch, tolerance, iterations):
         jnp.zeros((), dtype), jnp.zeros(2, dtype), jnp.zeros((2, 2), dtype)
     )
     return jax.lax.fori_loop(0, iterations + 1, step, (seed, empty))
+
+
+@partial(jax.custom_jvp, nondiff_argnums=(4,))
+def _implicit_stationary_position(field, seed, pitch, tolerance, iterations):
+    """Polish a pytree field with an implicit position tangent."""
+    return _stationary_position_primal(field, seed, pitch, tolerance, iterations)
 
 
 @_implicit_stationary_position.defjvp
@@ -1588,14 +1593,20 @@ def _implicit_stationary_position_jvp(iterations, primals, tangents):
 
 
 def stationary_read(field, seed, pitch, policy):
-    """Read a null from a pytree point evaluator, never from sampled flux.
+    """Read a null from a point evaluator, never from sampled flux.
 
     ``field.evaluate(point)`` returns a :class:`FieldJet` of the total field.
     Its plasma term evaluates the booked current through the Biot kernels;
     its exterior term evaluates the prescribed field at the same point.
-    The evaluator and all its numerical operands must be registered pytrees.
+    Registered pytree evaluators retain the implicit position tangent.
+    Plain callable objects supply primal values without a field tangent.
     """
-    point, jet = _implicit_stationary_position(
+    polish = (
+        _stationary_position_primal
+        if any(leaf is field for leaf in jax.tree_util.tree_leaves(field))
+        else _implicit_stationary_position
+    )
+    point, jet = polish(
         field,
         jnp.asarray(seed),
         pitch,
@@ -3111,6 +3122,7 @@ def read(field, geometry, convention, policy):
         mesh.edges,
         mesh.edge_valid,
         sigma,
+        neighbour_capacity=mesh.neighbour_capacity,
     )
     nulls, live, required, census_resolved = _null_census(
         field, geometry, coefficient, policy, tree

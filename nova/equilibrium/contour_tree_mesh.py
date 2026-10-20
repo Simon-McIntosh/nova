@@ -150,10 +150,26 @@ def _inside_wall_units(
 
 
 def _barycentric_flux(point_rz, triangle_rz, triangle_psi) -> float:
-    """Return the linear field at point_rz on its containing triangle."""
+    """Extend the linear field, using the longest edge for a flat triangle."""
     a, b, c = triangle_rz
-    matrix = np.stack([b - a, c - a], axis=1)
-    weights = np.linalg.solve(matrix, np.asarray(point_rz) - a)
+    edges = np.asarray((b - a, c - b, a - c))
+    lengths = np.einsum("ij,ij->i", edges, edges)
+    scale = float(np.max(lengths))
+    determinant = float(np.linalg.det(np.stack((b - a, c - a), axis=1)))
+    if abs(determinant) <= np.finfo(float).eps * scale:
+        if scale == 0.0:
+            return float(np.mean(triangle_psi))
+        index = int(np.argmax(lengths))
+        start = triangle_rz[index]
+        end = triangle_rz[(index + 1) % 3]
+        fraction = np.dot(np.asarray(point_rz) - start, end - start) / scale
+        return float(
+            triangle_psi[index]
+            + fraction * (triangle_psi[(index + 1) % 3] - triangle_psi[index])
+        )
+    weights = np.linalg.solve(
+        np.stack((b - a, c - a), axis=1), np.asarray(point_rz) - a
+    )
     return float(
         triangle_psi[0]
         + weights[0] * (triangle_psi[1] - triangle_psi[0])
@@ -177,6 +193,7 @@ class ContourMesh:
     vertex_capacity: int = 0
     edge_capacity: int = 0
     triangle_capacity: int = 0
+    neighbour_capacity: int = 0
     overflow: bool = False
 
     def tree_flatten(self):
@@ -194,17 +211,25 @@ class ContourMesh:
             self.vertex_capacity,
             self.edge_capacity,
             self.triangle_capacity,
+            self.neighbour_capacity,
             self.overflow,
         )
 
     @classmethod
     def tree_unflatten(cls, aux, children):
-        vertex_capacity, edge_capacity, triangle_capacity, overflow = aux
+        (
+            vertex_capacity,
+            edge_capacity,
+            triangle_capacity,
+            neighbour_capacity,
+            overflow,
+        ) = aux
         return cls(
             *children,
             vertex_capacity=vertex_capacity,
             edge_capacity=edge_capacity,
             triangle_capacity=triangle_capacity,
+            neighbour_capacity=neighbour_capacity,
             overflow=overflow,
         )
 
@@ -382,6 +407,10 @@ def build_contour_mesh(
     triangle_capacity = _declared_capacity(
         "triangle", triangle_capacity, len(triangles)
     )
+    degree = np.bincount(
+        np.asarray(edges, dtype=np.int32).ravel(), minlength=vertex_capacity
+    )
+    neighbour_capacity = int(degree.max()) if degree.size else 0
 
     vertex_rz_arr = _pad(vertices, vertex_capacity, (0.0, 0.0))
     vertex_psi_arr = _pad(vertex_psi, vertex_capacity, 0.0)
@@ -412,6 +441,7 @@ def build_contour_mesh(
         vertex_capacity=vertex_capacity,
         edge_capacity=edge_capacity,
         triangle_capacity=triangle_capacity,
+        neighbour_capacity=neighbour_capacity,
         overflow=False,
     )
 

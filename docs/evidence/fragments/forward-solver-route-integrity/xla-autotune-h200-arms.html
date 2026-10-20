@@ -1,0 +1,59 @@
+<!-- fragment: xla-autotune-h200-arms -->
+<section id="xla-autotune-h200-arms">
+<h3>Turning XLA's per-fusion autotune cache off costs no more than about 5&nbsp;s on a 259-program cold compile on the H200, and nothing visible in the steady state</h3>
+
+<p>The four-arm certificate measurement
+(<code>benchmarks/xla_autotune_cache_arms.py</code>, unchanged from the base
+revision) ran on <strong>one H200 NVL</strong> as a single scheduler job,
+<strong>job 1290845</strong> (node <code>98dci4-gpu-0003</code>, 4 cores,
+64&nbsp;GB, a 75-minute limit, elapsed 25:00, exit 0 on the cold pass and all
+three repeats of every arm), each arm against a fresh node-local cache root under
+<code>/tmp</code>, through <code>scripts/nova_lane/run.sh --rungs h200</code> at
+revision <code>52702d307482ec0f35e0276e98c21c3a81d1cc91</code>. The row is
+<code>tests/test_current_book_fragments.py::test_analytic_certificate_moments[550-diverted]</code>.</p>
+
+<table id="xla-autotune-h200-arms-table">
+<caption>Four arms, one certificate row, one H200 NVL (job 1290845). Walls in seconds. Hits/misses are the cache guard's compile-cache lookups: cold pass; each repeat.</caption>
+<tr><th>arm</th><th>cold pass wall</th><th>cold compile wall</th><th>programs w/ nonzero compile</th><th>hits/misses per pass</th><th>steady passes</th><th>steady median</th><th>compile entries</th><th>autotune entries</th></tr>
+<tr><td>a</td><td>139.4</td><td>45.0</td><td>7 of 259</td><td>11/259; 270/0</td><td>79.1 / 79.8 / 79.9</td><td>79.8</td><td>259</td><td>1354</td></tr>
+<tr><td>b</td><td>129.6</td><td>40.0</td><td>7 of 259</td><td>11/259; 270/0</td><td>80.0 / 78.7 / 79.7</td><td>79.7</td><td>259</td><td>1354</td></tr>
+<tr><td>c</td><td>137.6</td><td>45.0</td><td>7 of 259</td><td>11/259; 270/0</td><td>77.1 / 78.7 / 77.9</td><td>77.9</td><td>259</td><td>0</td></tr>
+<tr><td>d</td><td>132.4</td><td>42.0</td><td>7 of 259</td><td>11/259; 270/0</td><td>81.0 / 86.7 / 80.2</td><td>81.0</td><td>259</td><td>12</td></tr>
+</table>
+
+<p><strong>Arm (b) against arm (c).</strong> Arm (b) recompiles with the
+per-fusion autotune cache kept, <strong>40.0&nbsp;s</strong> of cold compile
+wall; arm (b) is the arm that runs the row again after the compile entries are
+removed, so its autotuner reads its cached emitter choices. Arm (c), with the
+autotune cache disabled, recompiles the same 259 programs in
+<strong>45.0&nbsp;s</strong>. The 5.0&nbsp;s difference, spread across the cold
+pass's 259 compile misses, is about <strong>19&nbsp;ms of compile wall per
+miss</strong> — at the guard's one-second resolution this is one second on each
+of the largest programs, so the defensible statement is that turning the cache
+off costs <em>no more than</em> about 5&nbsp;s on a 259-program cold compile and
+nothing visible in the steady state, where all twelve repeats across the four
+arms sit between 77.1 and 86.7&nbsp;s.</p>
+
+<p><strong>Declared negative control satisfied.</strong> Arm (a) wrote
+<strong>1354</strong> autotune entries and arm (c) wrote <strong>0</strong>, so
+the harness reached the autotune cache and the file-level comparison is not
+void; the harness prints <code>NEGATIVE_CONTROL=holds arm_a=1354 arm_c=0</code>
+and draws the figure only when the control holds. Consistent with titan, arm (d)
+(the XLA fusion-autotuner flag) still wrote <strong>12</strong> autotune entries,
+so the flag does not close the write path that the cache setting closes.</p>
+
+<p><strong>Figure.</strong> One SVG drawn by the harness's <code>--figure</code>
+into <code>docs/figures/forward-solver-route-integrity/xla-autotune-h200/</code>
+(three steady-state passes as points with a median tick beside the cold compile
+wall bar), rendered to PNG in the run directory and inspected. The titan
+figure's alt text was corrected in the same commit to describe three points per
+arm and a median tick rather than median bars.</p>
+
+<p><strong>Not in this node's scope.</strong> The plan's fusion-autotuner
+decision follows from the titan page; this node supplies the H200 repeat and its
+per-miss figure. The H200 run did not separate arms (c) and (d) on wall clock,
+and nothing here changes the titan recommendation. Receipt with every per-program
+row: the run directory's <code>h200-arms-3.json</code>; launcher log
+<code>h200-arms-3.log</code>; per-pass logs under
+<code>xla-autotune-arm-logs/</code>.</p>
+</section>

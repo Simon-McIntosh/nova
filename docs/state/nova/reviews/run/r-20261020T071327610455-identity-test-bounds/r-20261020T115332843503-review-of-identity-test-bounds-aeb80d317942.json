@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T071327610455-identity-test-bounds/after-suite-validated.log",
+  "assertion_analysis": [
+    {
+      "failure_condition": "Removing @pytest.mark.timeout(3840) reverts the test to the 300 s global bound and it fails with Failed: Timeout (>300.0s) instead of reaching its own identity assertions; the marker-removed negative control at head reproduces exactly this.",
+      "lines": "129-130"
+    },
+    {
+      "failure_condition": "Removing @pytest.mark.timeout(3840) reverts the compiled-slice test to the 300 s global bound; its H200 wall is 25.01 s so on CPU it would only trip on a genuine hang, guarded by the bound itself.",
+      "lines": "177-178"
+    }
+  ],
+  "assertion_note": "the diff adds no assertions; the two decorators are the guard",
+  "base_log_revision": "020664f42b839215decd689125ba8e5c4aec0d64",
+  "baseline_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T071327610455-identity-test-bounds/baseline-suite-validated.log",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-20T12:00:36.429Z",
+  "dispatched_at": "2026-10-20T11:54:10Z",
+  "findings": [
+    {
+      "file": "tests/test_forward_compile_identity.py",
+      "line": "177",
+      "severity": "follow-on",
+      "text": "follow-on: the brief asks N to be 1.5x each test's own CPU wall, but only the combined two-test CPU wall (2532.78 s, cpu-measurement-1290974.log) was measured, so the compiled-slice test carries 3840 s where max(its own CPU wall, 25.01 s H200) x 1.5 would be far tighter; a genuine hang in that test surfaces only after 64 minutes on the CPU lane. The bound is above the measured wall so it never under-bounds, and the deviation is disclosed in the commit body and the evidence fragment."
+    }
+  ],
+  "head_log_revision": "aeb80d317942c7b1c6a470bff7b1e9dd0fc87858",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 0 production call site(s)",
+    "diff": "Commit aeb80d317 adds @pytest.mark.timeout(3840) at tests/test_forward_compile_identity.py:129 and :177 and a new evidence fragment docs/figures/../docs/evidence/fragments/converged-forward-solve/identity-test-bounds.html; 16 insertions, no product source, no tolerance and no assertion touched.",
+    "done_when": "The source brief.txt requires both decorators with N from the measured walls and the file at head in a fresh CPU process to terminate test_traced_exterior on its own assertion or pass, never on Timeout; after-suite-validated.log records 3 passed at aeb80d317 in 2052.93 s with EXIT=0, and negative-control-validated.log reverts the marker and records the traced test failing Failed: Timeout (>300.0s) with EXIT=1.",
+    "goal": "The source brief.txt asks for a per-test bound above each solve test's measured wall so the CPU lane reports the real condition instead of a timeout; tests/test_forward_compile_identity.py:129 and :177 now carry @pytest.mark.timeout(3840) on test_traced_exterior_preserves_the_certificate_terminal_state and test_compiled_slice_program_traces_conductor_exterior.",
+    "manifest": "The source run's manifest.md names commit aeb80d317, the two changed paths, the H200 walls (1009.30 s and 25.01 s), the combined CPU wall 2532.78 s, a readable baseline_suite (1 failure: test_traced_exterior) and after_suite (0 failures, EXIT=0), and the marker-removed negative control reproducing the 300 s timeout.",
+    "write_paths": "The source manifest declares tests/test_forward_compile_identity.py, docs/evidence/fragments/converged-forward-solve/identity-test-bounds.html and docs/figures/converged-forward-solve/identity-test-bounds; the aeb80d317 diff changes only the first two."
+  },
+  "justifications": {
+    "durability": "Removing the marker at tests/test_forward_compile_identity.py:129 reddens the CPU run with Failed: Timeout (>300.0s), which negative-control-validated.log:196 records, so the decorator is the guard that fails if this change regresses.",
+    "evidence": "baseline-suite-validated.log and negative-control-validated.log both record 1 failed, 2 passed in ~1095 s with the traced test failing Failed: Timeout (>300.0s) and EXIT=1, while after-suite-validated.log records 3 passed in 2052.93 s with EXIT=0, and the promotion gate reads those EXIT lines.",
+    "fit": "The @pytest.mark.timeout(N) decorator at tests/test_forward_compile_identity.py:129 and :177 matches the repository's existing per-test override idiom (tests/equilibrium/test_certificate_550_convergence.py:162, tests/biot/test_elliptic_tangent_recurrences.py:466) and adds no forbidden source name.",
+    "goal_fidelity": "tests/test_forward_compile_identity.py:129 and :177 raise each solve test's bound to 3840 s, above the 2532.78 s combined CPU wall and the 1009.30 s H200 wall, so the CPU lane reaches the traced test's own assertions or passes rather than tripping the 300 s default.",
+    "reuse": "Capability search over tests/ for a per-test timeout found the pytest-timeout marker already owned and used across tests/ (tests/equilibrium/test_certificate_550_convergence.py:162, tests/biot/test_range_tangent_recurrences.py:359); the change uses that owner with no new definition and no second mechanism.",
+    "scope_discipline": "The aeb80d317 diff changes only tests/test_forward_compile_identity.py and docs/evidence/fragments/converged-forward-solve/identity-test-bounds.html, both inside the source manifest's declared write paths, and touches no tolerance, assertion or product source."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source brief.txt asks for a per-test bound above each solve test's measured wall so the CPU lane reports the real condition instead of a timeout; tests/test_forward_compile_identity.py:129 and :177 now carry @pytest.mark.timeout(3840).\nVERDICT done_when: the source brief.txt requires both decorators with N from the measured walls and the file at head in a fresh CPU process to terminate test_traced_exterior on its own assertion or pass, never on Timeout; after-suite-validated.log records 3 passed at aeb80d317 in 2052.93 s with EXIT=0, and negative-control-validated.log reverts the marker and records the traced test failing Failed: Timeout (>300.0s) with EXIT=1.\nVERDICT write_paths: the source manifest declares tests/test_forward_compile_identity.py, docs/evidence/fragments/converged-forward-solve/identity-test-bounds.html and docs/figures/converged-forward-solve/identity-test-bounds; the aeb80d317 diff changes only the first two.\nVERDICT manifest: read; it names commit aeb80d317, the two changed paths, the H200 walls 1009.30 s and 25.01 s, the combined CPU wall 2532.78 s, a readable baseline_suite (1 failure: test_traced_exterior) and after_suite (0 failures, EXIT=0), and the marker-removed negative control reproducing the 300 s timeout.\nVERDICT diff: commit aeb80d317 adds @pytest.mark.timeout(3840) at tests/test_forward_compile_identity.py:129 and :177 and a new evidence fragment docs/evidence/fragments/converged-forward-solve/identity-test-bounds.html; 16 insertions, no product source, no tolerance and no assertion touched.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: tests/test_forward_compile_identity.py:129 and :177 raise each solve test's bound to 3840 s, above the 2532.78 s combined CPU wall and the 1009.30 s H200 wall, so the CPU lane reaches the traced test's own assertions or passes rather than tripping the 300 s default.\nSCORE evidence: 18\nJUSTIFICATION evidence: baseline-suite-validated.log and negative-control-validated.log both record 1 failed, 2 passed with the traced test failing Failed: Timeout (>300.0s) and EXIT=1, while after-suite-validated.log records 3 passed in 2052.93 s with EXIT=0.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the aeb80d317 diff changes only tests/test_forward_compile_identity.py and docs/evidence/fragments/converged-forward-solve/identity-test-bounds.html, both inside the declared write paths.\nSCORE durability: 19\nJUSTIFICATION durability: removing the marker at tests/test_forward_compile_identity.py:129 reddens the CPU run with Failed: Timeout (>300.0s), which negative-control-validated.log:196 records.\nSCORE fit: 20\nJUSTIFICATION fit: the @pytest.mark.timeout(N) decorator at tests/test_forward_compile_identity.py:129 and :177 matches the existing per-test override idiom (tests/equilibrium/test_certificate_550_convergence.py:162).\nSCORE reuse: 20\nJUSTIFICATION reuse: the change uses the repository's already-owned pytest-timeout marker (tests/equilibrium/test_certificate_550_convergence.py:162, tests/biot/test_range_tangent_recurrences.py:359) with no new definition and no second mechanism.\nFINDING tests/test_forward_compile_identity.py:177 follow-on: the brief asks N to be 1.5x each test's own CPU wall, but only the combined two-test CPU wall (2532.78 s) was measured, so the compiled-slice test carries 3840 s where a tighter per-test bound was asked for; the bound never under-bounds and the deviation is disclosed in the commit body and the evidence fragment.\n",
+  "review_run_id": "r-20261020T115332843503-review-of-identity-test-bounds-aeb80d317942",
+  "reviewed_base_sha": "020664f42b839215decd689125ba8e5c4aec0d64",
+  "reviewed_commits": [
+    "aeb80d317942c7b1c6a470bff7b1e9dd0fc87858"
+  ],
+  "reviewed_head_sha": "aeb80d317942c7b1c6a470bff7b1e9dd0fc87858",
+  "reviewed_run_id": "r-20261020T071327610455-identity-test-bounds",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 20,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T12:03:56.993558+00:00",
+  "total": 115
+}

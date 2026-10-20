@@ -56,7 +56,7 @@
 <figure>
   <img src="/nova/figures/forward-solver-route-integrity/xla-autotune-cache/xla-autotune-arms-walls.svg"
        alt="Grouped bars per arm: cold compile wall beside median steady-state solve wall for the four cache configurations">
-  <figcaption>Cold compile wall (blue) and median steady-state solve wall (olive) per arm, job 1290668. The compile wall is flat across all four arms within one program's rounding, 76.0 to 81.0&nbsp;s. The steady bars are medians of three passes whose spread is 152.4 to 222.0&nbsp;s across the whole table; the arms were measured one after another on a shared node, so a bar's position carries node load as well as the cache setting.</figcaption>
+  <figcaption>Per arm, job 1290668: the cold compile wall as one bar (blue, one measurement per arm), and the three steady-state solve passes as points (amber) with a rule at their median. The compile bars are flat across all four arms within one program's rounding, 76.0 to 81.0&nbsp;s. The points are the honest reading of the steady state: an arm's three passes span 29 to 64&nbsp;s and the arms' spans overlap, so arm (d)'s median sits 33&nbsp;s below arm (c)'s while (d)'s slowest pass is within 20&nbsp;s of (c)'s fastest. The arms ran one after another on a node carrying two other jobs, so a point's height carries node load as well as the cache setting.</figcaption>
 </figure>
 
 <h2 id="s2">§2 — The cache behaves the same in all four arms</h2>
@@ -82,6 +82,8 @@
 <section id="s5">
 <h2>Method and reproduction</h2>
 <p>Harness: <code>benchmarks/xla_autotune_cache_arms.py</code>, one cache root per arm under node-local <code>/tmp</code>, <code>JAX_PERSISTENT_CACHE_MIN_COMPILE_TIME_SECS=0</code>, one cold pass then three repeats, the cache guard loaded per pass with its miss budget raised so the guard reports rather than refuses. Submitted through <code>scripts/nova_lane/run.sh --rungs titan</code> as job 1290668. Receipt with every per-program row: the run directory's <code>titan-arms-3.json</code>; per-pass logs in <code>xla-autotune-arm-logs/</code>.</p>
+
+<p>The harness reads the negative control back from the receipt before it draws: arm (a)'s autotune count must be above 0 and arm (c)'s must be 0. A receipt that fails either prints <code>NEGATIVE_CONTROL=void</code> with the reason and exits 3 without writing a figure, so a chart is never published from a run whose cache was never exercised. Demonstrated on this receipt (holds, exit 0, figure written) and on a copy of it in the run directory with arm (c)'s count set to 5 (<code>NEGATIVE_CONTROL=void</code>, exit 3, no figure written); both logs are the run directory's <code>control-holds.log</code> and <code>control-void.log</code>.</p>
 </section>
 </main>
 </body>

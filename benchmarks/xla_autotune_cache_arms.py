@@ -45,7 +45,10 @@ SHARED_PYTHON = Path("/home/ITER/mcintos/Code/nova/.venv/bin/python")
 CACHE_GUARD_DIRECTORY = ROOT / "scripts/h200_test_lane"
 TARGET_PATH = "tests/test_current_book_fragments.py"
 AUTOTUNE_DIR_NAME = "xla_gpu_per_fusion_autotune_cache_dir"
-COLOURS = {"compile": "#3366cc", "solve": "#8aa04a"}
+# Two hues nova.media has not bound to anything: its ink vocabulary holds the
+# flux blue, the red and orange accents and the grey ladder, so a figure read
+# beside a media panel must not reuse them for a different meaning.
+COLOURS = {"compile": "#3b6ea5", "solve": "#b8791a"}
 ARMS = ("a", "b", "c", "d")
 ARM_LABELS = {
     "a": "default cold",
@@ -320,10 +323,66 @@ def drive(
     return payload
 
 
+def negative_control_failure(receipt: dict) -> str | None:
+    """Return why the autotune-file control fails, or None where it holds.
+
+    Arm (a) runs the default configuration, so its root must carry autotune
+    files: a root with none means the harness never exercised the cache and the
+    file-level comparison is void.  Arm (c) disables XLA's autotune caches, so
+    its root must carry none: any entry there means the switch did not take
+    effect and the arm is not the configuration it claims to be.  Both counts
+    are read from ``files_after_cold``, which each arm records from its own
+    root, so the check is a read of the measurement rather than a re-run of it.
+    """
+    arms = receipt.get("arms", {})
+    counts: dict[str, int] = {}
+    for arm in ("a", "c"):
+        entry = arms.get(arm)
+        if entry is None:
+            return (
+                "arm (%s) is absent from the receipt, so the control cannot be read"
+                % arm
+            )
+        counts[arm] = entry.get("files_after_cold", {}).get("autotune_entries", 0)
+    if counts["a"] <= 0:
+        return (
+            "arm (a) created %d autotune entries, so the harness never exercised "
+            "the cache and the comparison is void" % counts["a"]
+        )
+    if counts["c"] != 0:
+        return (
+            "arm (c) created %d autotune entries where the autotune cache is "
+            "disabled, so the switch did not take effect" % counts["c"]
+        )
+    return None
+
+
+def report_negative_control(receipt: dict) -> int:
+    """Print the control's verdict and return the exit status it implies."""
+    failure = negative_control_failure(receipt)
+    if failure is None:
+        print(
+            "NEGATIVE_CONTROL=holds arm_a=%d arm_c=%d"
+            % (
+                receipt["arms"]["a"]["files_after_cold"]["autotune_entries"],
+                receipt["arms"]["c"]["files_after_cold"]["autotune_entries"],
+            )
+        )
+        return 0
+    print("NEGATIVE_CONTROL=void %s" % failure)
+    return 3
+
+
 def figure_from_receipt(
     receipt: dict, figure_directory: Path, inspection_directory: Path | None = None
 ) -> tuple[Path, Path | None]:
-    """Draw compile wall and steady-state solve wall per arm as one SVG.
+    """Draw cold compile wall and the steady-state solve passes per arm as one SVG.
+
+    The compile wall is one cold measurement per arm, so a bar is that number.
+    The steady-state passes are three separate runs of the row against a warm
+    cache, and they are drawn as the three points they are: the passes of two
+    arms overlap while their medians do not, so a bar of the median alone
+    reports a difference the measurement does not support.
 
     The SVG is the published figure.  The PNG is a raster copy for the
     producer's own inspection and goes to ``inspection_directory``, never
@@ -336,14 +395,13 @@ def figure_from_receipt(
     import matplotlib.pyplot as plt
     import numpy as np
 
+    try:
+        plt.style.use("data-ink")
+    except OSError:
+        pass
     arms = [arm for arm in ARMS if arm in receipt["arms"]]
     compile_wall = [receipt["arms"][arm]["cold_compile_seconds"] for arm in arms]
-    solve_wall = [
-        float(np.median(receipt["arms"][arm]["steady_seconds"]))
-        if receipt["arms"][arm]["steady_seconds"]
-        else 0.0
-        for arm in arms
-    ]
+    passes = [receipt["arms"][arm]["steady_seconds"] for arm in arms]
     positions = np.arange(len(arms))
     width = 0.36
     figure, axes = plt.subplots(figsize=(14, 6))
@@ -352,29 +410,41 @@ def figure_from_receipt(
         compile_wall,
         width,
         color=COLOURS["compile"],
-        label="cold compile wall",
+        label="cold compile wall (one pass per arm)",
         zorder=2,
     )
-    axes.bar(
-        positions + width / 2,
-        solve_wall,
-        width,
-        color=COLOURS["solve"],
-        label="steady-state solve wall",
-        zorder=2,
-    )
+    for index, values in enumerate(passes):
+        center = positions[index] + width / 2
+        if not values:
+            continue
+        offsets = np.linspace(-0.07, 0.07, len(values))
+        axes.scatter(
+            center + offsets,
+            values,
+            s=70,
+            color=COLOURS["solve"],
+            zorder=4,
+            label="steady-state solve pass (three per arm)" if index == 0 else None,
+        )
+        axes.hlines(
+            float(np.median(values)),
+            center - 0.13,
+            center + 0.13,
+            color=COLOURS["solve"],
+            linewidth=2.4,
+            zorder=5,
+            label="median pass" if index == 0 else None,
+        )
     axes.set_xticks(positions)
-    axes.set_xticklabels(
-        [f"{arm}: {ARM_LABELS[arm]}" for arm in arms], rotation=0, fontsize=12
-    )
-    axes.set_ylabel("wall [s]", fontsize=16)
-    axes.tick_params(labelsize=14)
-    for spine in ("top", "right"):
-        axes.spines[spine].set_visible(False)
-    axes.grid(False)
-    axes.set_axisbelow(True)
-    figure.legend(loc="upper center", frameon=False, ncols=2, fontsize=14)
-    figure.tight_layout(rect=(0, 0, 1, 0.96))
+    axes.set_xticklabels([f"{arm}: {ARM_LABELS[arm]}" for arm in arms])
+    axes.set_ylabel("wall [s]")
+    axes.tick_params(axis="both", labelsize=14)
+    # The limit must clear the solve passes as well as the bars: taking it from
+    # the compile walls alone draws the passes outside the axes.
+    top = max(compile_wall + [value for group in passes for value in group])
+    axes.set_ylim(0, top * 1.15)
+    figure.legend(loc="upper center", ncols=3)
+    figure.tight_layout(rect=(0, 0, 1, 0.93))
     figure_directory.mkdir(parents=True, exist_ok=True)
     svg_path = figure_directory / "xla-autotune-arms-walls.svg"
     figure.savefig(svg_path)
@@ -414,6 +484,9 @@ def main() -> int:
         return 0
     if arguments.figure is not None:
         receipt = json.loads(arguments.receipt.read_text(encoding="utf-8"))
+        status = report_negative_control(receipt)
+        if status:
+            return status
         svg_path, png_path = figure_from_receipt(
             receipt, arguments.figure, arguments.inspection
         )
@@ -430,6 +503,9 @@ def main() -> int:
         logs,
         arguments.receipt,
     )
+    status = report_negative_control(receipt)
+    if status:
+        return status
     for arm in ARMS:
         entry = receipt["arms"].get(arm)
         if entry is None:

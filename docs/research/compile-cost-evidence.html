@@ -118,6 +118,7 @@
 
 
 
+
 <!-- kernel census start -->
 <h2 id="kernel-compile-census">Kernel-backed compile census</h2>
 <p>Every row uses a fresh process with the persistent compilation cache disabled before JAX initialises. Because that setting bypasses JAX's persistent-cache hooks, the driver adds its observed backend compile to the cache ledger as one unpersisted miss; no row with a hit is called cold. Host memory is sampled every ten seconds and combined with the child process's peak RSS for short rows. A dash means no executable or measurement was produced. The CPU topology compile was killed at the 450 GB allocation limit; its lower and sampled peak remain evidence, and the row does not claim an executable. H200 was pending for resources after a real submission; the GPU retry therefore ran on titan, whose P100 identity stays explicit in its row receipts. A graph is classed constant when expanded equations differ by less than 5% and StableHLO bytes grow by less than 20% across the two sizes.</p>
@@ -136,7 +137,7 @@
 <tr><td>point_jet</td><td>4</td><td>constant</td><td>23,095</td><td>106,218</td><td>3,043,945</td><td>248,745,034</td><td>3,811.06</td><td>185.5</td><td>compiled; 1 miss, 0 hits</td><td>Tesla P100-PCIE-16GB</td><td>112.59</td><td>2.7</td><td>4,821,660</td><td>compiled; 1 miss, 0 hits</td></tr>
 <tr><td>point_jet</td><td>64</td><td>constant</td><td>23,095</td><td>106,218</td><td>3,102,469</td><td>251,601,017</td><td>3,464.85</td><td>185.7</td><td>compiled; 1 miss, 0 hits</td><td>Tesla P100-PCIE-16GB</td><td>95.86</td><td>2.5</td><td>5,281,199</td><td>compiled; 1 miss, 0 hits</td></tr>
 <tr><td>production_point_batch</td><td>132</td><td>constant</td><td>36,848</td><td>161,338</td><td>4,935,526</td><td>260,031,308</td><td>5,566.89</td><td>274.9</td><td>compiled; 1 miss, 0 hits</td><td>Tesla P100-PCIE-16GB</td><td>124.52</td><td>3.1</td><td>4,515,512</td><td>compiled; 1 miss, 0 hits</td></tr>
-<tr><td>production_point_batch</td><td>550</td><td>constant</td><td>35,855</td><td>159,259</td><td>4,840,485</td><td>250,929,948</td><td>5,153.07</td><td>271.4</td><td>compiled; 1 miss, 0 hits</td><td>Tesla P100-PCIE-16GB</td><td>—</td><td>0.9</td><td>—</td><td>input-ready</td></tr>
+<tr><td>production_point_batch</td><td>550</td><td>constant</td><td>35,855</td><td>159,259</td><td>4,840,485</td><td>250,929,948</td><td>5,153.07</td><td>271.4</td><td>compiled; 1 miss, 0 hits</td><td>Tesla P100-PCIE-16GB</td><td>—</td><td>1.0</td><td>—</td><td>lowered; compile still in progress or interrupted</td></tr>
 <tr><td>prototype_point_batch</td><td>132</td><td>constant</td><td>36,848</td><td>161,338</td><td>4,935,526</td><td>260,229,844</td><td>4,967.70</td><td>274.7</td><td>compiled; 1 miss, 0 hits</td><td>—</td><td>—</td><td>—</td><td>—</td><td>not yet measured</td></tr>
 <tr><td>prototype_point_batch</td><td>550</td><td>constant</td><td>35,855</td><td>159,259</td><td>4,840,485</td><td>251,116,833</td><td>5,036.50</td><td>270.4</td><td>compiled; 1 miss, 0 hits</td><td>—</td><td>—</td><td>—</td><td>—</td><td>not yet measured</td></tr>
 <tr><td>topology_read</td><td>132</td><td>constant</td><td>56,262</td><td>858,047</td><td>8,067,558</td><td>—</td><td>—</td><td>449.1</td><td>killed during compile after 2940 s at memory ceiling</td><td>—</td><td>—</td><td>—</td><td>—</td><td>not yet measured</td></tr>
@@ -145,7 +146,7 @@
 <tr><td>certificate_map</td><td>550</td><td>unresolved</td><td>12,094</td><td>13,074</td><td>1,628,445</td><td>5,374,155</td><td>2.37</td><td>1.8</td><td>compiled; 1 miss, 0 hits</td><td>—</td><td>—</td><td>—</td><td>—</td><td>not yet measured</td></tr>
 </tbody></table>
 <h3>Point jet source ranking</h3>
-<p>The point jet denominator is 106,218 expanded equations. Every equation is counted once; the unattributed bucket is retained where JAX supplied no project source frame. The full ranking below is derived from <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T063117190776-kernel-compile-census/cpu/point_jet-4.json</code>.</p>
+<p>The point jet denominator is 106,218 expanded equations. Every equation is counted once; the unattributed bucket is retained where JAX supplied no project source frame. The full ranking below is derived from <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T063117190776-kernel-compile-census/cpu/point_jet-4.json</code>. The leading attributed functions are <code>_harmonic_pair_step</code> (23.21%), <code>_product_sum_step</code> (9.07%), <code>_pole_forward_step</code> (7.10%).</p>
 <table><thead><tr><th>Owner file and line</th><th>Function</th><th>Expanded equations</th><th>Share of point jet</th></tr></thead><tbody>
 <tr><td><code>nova/biot/rangefunction.py:518</code></td><td><code>_harmonic_pair_step</code></td><td>24,653</td><td>23.21%</td></tr>
 <tr><td><code>nova/biot/rangefunction.py:527</code></td><td><code>_product_sum_step</code></td><td>9,633</td><td>9.07%</td></tr>
@@ -778,6 +779,7 @@
 <tr><td><code>scripts/prototypes/fast_map_production/kernel.py:111</code></td><td><code>_wall_effective_level</code></td><td>1</td></tr>
 </tbody></table></details>
 <!-- kernel census end -->
+
 
 
 

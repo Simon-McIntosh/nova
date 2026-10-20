@@ -120,11 +120,22 @@ def source_rows(cpu_dirs):
             + "</code></td><td>"
             + f"{count:,}</td><td>{100 * count / denominator:.2f}%</td></tr>"
         )
+    leaders = [
+        item
+        for item in point["source_function_ranking"]
+        if item["file"] != "<unattributed>"
+    ][:3]
+    summary = ", ".join(
+        f"<code>{escape(item['function'])}</code> "
+        f"({100 * item['expanded_equations'] / denominator:.2f}%)"
+        for item in leaders
+    )
     return (
         f"<p>The point jet denominator is {denominator:,} expanded equations. "
         "Every equation is counted once; the unattributed bucket is retained where "
         "JAX supplied no project source frame. The full ranking below is derived "
-        f"from <code>{escape(str(point_path))}</code>.</p>\n"
+        f"from <code>{escape(str(point_path))}</code>. "
+        f"The leading attributed functions are {summary}.</p>\n"
         "<table><thead><tr><th>Owner file and line</th><th>Function</th>"
         "<th>Expanded equations</th><th>Share of point jet</th></tr></thead><tbody>\n"
         + "\n".join(rows)

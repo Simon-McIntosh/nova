@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="488">
+<meta name="plan-version" content="489">
 <meta name="plan-modified" content="2026-10-20">
 </head>
 <body>
@@ -1604,6 +1604,9 @@ NO PRODUCT OR TEST SOURCE WAS CHANGED.  The 1e-10 tolerance was not widened.</p>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261019T223150157038-coarse-tie-census-memory" data-who="reckon-build" data-when="2026-10-20T07:01:06Z">
     <div class="r-comment-body"><p>blocked - the 500-cell coarse-tie census exhausts memory in a single XLA CPU compile of jit(vmap(_source_jets)) declared at scripts/prototypes/read_route/jets.py:321 with its graph generated in nova/biot/polygonanalytic.py, neither in this node's write scope; measured ~300 MB/s growing to 118620 MB at t=1340 s in one sirius job, and run to completion against a 400 GB cap the same compile returned only at t=7044 s (1 h 57 m) at a 380777 MB peak, cell-count-independent (79042 MB at the 250-cell machine with the operand cache bypassed), while the cached 250-cell arm peaks at 1798.6 MB.</p></div>
 </div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261020T060157074841-tie-pair-membership-collapse" data-who="reckon-build" data-when="2026-10-20T07:16:46Z">
+    <div class="r-comment-body"><p>Centering the map-derived edge ramp restores four tie-state cut cells at both offsets from zero on base; committed focused gate passes and the kernel-only control fails on the required assertion; H200 rows and paired suites are queued for measurement.</p></div>
+</div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261010T184522536142-cfs-current-book-fragments" data-who="reckon-build" data-when="2026-10-10T18:46:29.609Z">
     <div class="r-comment-body"><p>Implemented traced current.book over connected multi-polygon membership using the widened signed-ring exact clip. Six certificate rows pass: diverted read image errors 1.15131582e-4, 2.49842782e-5, 3.95031905e-6 at 550/2098/5158 cells; limited errors 1.77777866e-5, 2.66948705e-6, 5.45231060e-7 at 553/2105/5167. Maximum net-current error 2.22e-16, excluded current zero, legacy control 0.197326978718; evidence docs/evidence/fragments/converged-forward-solve/cfs-current-book.html#cfs-current-book-fragments-booking and one three-rung SVG; audit-doc 0 errors.</p></div>
 </div>
@@ -2028,7 +2031,7 @@ NO PRODUCT OR TEST SOURCE WAS CHANGED.  The 1e-10 tolerance was not widened.</p>
     <div class="r-comment-body"><p>triage of the three files reported red on main is recorded at docs/evidence/fragments/converged-forward-solve/main-red-triage.html; tests/test_solve_trips_are_a_scan.py is fully green at base 1dc96ee0b (16 passed, exit 0) so that report is stale and owes no repair node; the two tests/test_equilibrium_constraint_protocol.py failures share one cause and one prescription (the stale _LinearOperator double predates the operator interface widening in 09a0b9b90, now reached because the guard at forward.py:682 no longer returns early), 2 failed of 18 with no other test red; tests/test_forward_compile_identity.py has exactly one red test, test_traced_exterior_preserves_the_certificate_terminal_state, failing by per-test timeout on CPU against the repository own 300s bound while the GPU arm reaches the same test and misses its 1e-14 identity bound by 433x, so that file owes one node rather than the two the brief named.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261020T065252700838-review-of-main-red-triage-7d2e1a6c715b" data-who="reckon-build" data-when="2026-10-20T07:05:13.880Z">
-    <div class="r-comment-body"><p>the independent review of run r-20261020T061120617221-main-red-triage at head 7d2e1a6c715b9a5fe67825ee81b63fe37b0f8bab: goal_fidelity 19, evidence 16, scope_discipline 20, fit 18, reuse 19, durability 6; no blocking finding; three follow-ons recorded (a dangling trip-guard-counts-its-marker.html citation in the fragment, a doubled batch-arm path in the source manifest&#x27;s test_logs, and the batch job running on all_debug where the source brief named sirius)</p></div>
+    <div class="r-comment-body"><p>the independent review of run r-20261020T061120617221-main-red-triage at head 7d2e1a6c715b9a5fe67825ee81b63fe37b0f8bab: goal_fidelity 19, evidence 16, scope_discipline 20, fit 18, reuse 19, durability 6; no blocking finding; three follow-ons recorded (a dangling trip-guard-counts-its-marker.html citation in the fragment, a doubled batch-arm path in the source manifest's test_logs, and the batch job running on all_debug where the source brief named sirius)</p></div>
 </div>
 </section>
 </main>

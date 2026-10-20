@@ -2711,7 +2711,7 @@ def _dense_cut_current(state, reading, field, resolution):
     """Integrate physical current on the selected tie-state cut cells directly."""
     geometry = state["geometry"]
     selected = np.flatnonzero(np.asarray(reading.membership) > 0)
-    assert len(selected) == 4, "the tie-state support must have four cut cells"
+    assert len(selected) > 0, "the confined axis component must carry support"
     centre = np.asarray(geometry.centre)[selected]
     vertices = np.asarray(geometry.vertices)[selected]
     count = np.asarray(geometry.vertex_count)[selected]
@@ -2753,14 +2753,7 @@ def _dense_cut_current(state, reading, field, resolution):
     return float(np.sum(weight * density * (normalized <= 1)))
 
 
-# Booked current against the independent cut-cell quadrature at the coarse tie.
-# Measured with the normal-form lobe owner on the tie pair: booked 128.416249 /
-# 129.730881 A against 32x32 integrals 130.488250 / 131.468864 A, gaps of 1.59%
-# and 1.32%. The direct integral moves at most 0.12% between the 16, 32 and 64
-# subdivisions of the same cut cells, so the bound is the larger gap plus that
-# measured grid noise, not a slack chosen to admit the gap. That derivation
-# reaches 1.59% + 0.12% = 1.71%, so the bound carries 0.29 percentage points of
-# margin over it up to 0.02.
+# Quadrature is checked only after the support's component has been verified.
 TIE_BOOKED_CURRENT_REL = 0.02
 
 
@@ -2775,8 +2768,8 @@ def test_census_keeps_the_wall_contact_saddle_across_the_adjacent_pair():
     confirmed independently of the census that proposed it, by polishing the
     field from a seed displaced from the census reading and requiring the same
     hyperbolic point back, and by requiring the point to persist across the pair.
-    Dense area quadrature of the moving field independently checks the current
-    booked on the four selected cut cells at each offset.
+    The first separator and confined component are checked independently before
+    area quadrature checks current on the selected cells at each offset.
     """
     import numpy as np
 
@@ -2835,35 +2828,65 @@ def test_census_keeps_the_wall_contact_saddle_across_the_adjacent_pair():
         f"the wall-contact saddle must persist across the pair, nearest {nearest!r}"
     )
 
-    # The production read must continue to select the primary X-point, and
-    # its booked current must agree with direct quadrature at each offset.
+    # The first event is the upper saddle paired with the nearby maximum.
     sampled = tie_probe.make_sampler(state)
-    currents = []
-    independent_currents = []
     for offset in (low, high):
         roots, reading, raw, _, _, _ = sampled(offset * state["scale"], prior)
         moving = _census_field(state, offset)
-        primary = topology.stationary_read(
-            moving, state["previous"][1], pitch, state["policy"]
+        upper = topology.stationary_read(
+            moving, np.asarray([1.54, 0.88]), pitch, state["policy"]
         )
-        assert bool(np.asarray(primary.valid))
+        assert bool(np.asarray(upper.valid))
+        assert np.linalg.det(np.asarray(upper.jet.hessian)) < 0
         assert bool(np.asarray(reading.valid and reading.qualified))
         assert int(np.asarray(roots.valid).sum()) == 3
-        assert (
-            np.linalg.norm(
-                np.asarray(reading.saddle_form.position) - np.asarray(primary.position)
-            )
-            < 0.05 * pitch
-        ), "the read must select the independently polished X-point"
-        currents.append(float(np.asarray(raw)))
+        assert int(reading.boundary_class) == 1, (
+            "the first separator on the maximum's merge path is the upper saddle"
+        )
+        np.testing.assert_allclose(reading.boundary, upper.position, atol=1e-8)
+        assert float(reading.boundary_flux) == pytest.approx(
+            float(upper.jet.value), rel=0, abs=1e-13
+        )
+        _assert_confined_tie_cells(state, moving, reading, upper)
         independent_current = _dense_cut_current(state, reading, moving, 32)
-        independent_currents.append(independent_current)
-        assert currents[-1] == pytest.approx(
+        assert float(raw) == pytest.approx(
             independent_current, rel=TIE_BOOKED_CURRENT_REL
         ), (
-            f"booked current {currents[-1]!r} disagrees with direct cut-cell "
-            f"quadrature {independent_current!r} at {offset!r}"
+            f"booked current {float(raw)!r} disagrees with "
+            f"quadrature {independent_current!r}"
         )
+
+
+def _assert_confined_tie_cells(state, moving, reading, upper):
+    """Flood an independent physical-field raster above the first separator."""
+    from scipy.ndimage import label
+    from shapely import contains_xy
+    from shapely.geometry import Polygon
+
+    axis = np.asarray(reading.axis)
+    radial = np.linspace(axis[0] - 0.2, axis[0] + 0.2, 320)
+    vertical = np.linspace(axis[1] - 0.2, axis[1] + 0.2, 320)
+    rr, zz = np.meshgrid(radial, vertical)
+    points = np.stack((rr.ravel(), zz.ravel()), axis=-1)
+    flux = np.asarray(jax.jit(jax.vmap(moving.value))(jnp.asarray(points))).reshape(
+        rr.shape
+    )
+    level = float(upper.jet.value)
+    components, _ = label(flux > level)
+    axis_row = np.argmin(abs(vertical - axis[1]))
+    axis_column = np.argmin(abs(radial - axis[0]))
+    core_label = components[axis_row, axis_column]
+    assert core_label != 0, "the raster must see the known maximum above the saddle"
+    core = components == core_label
+    assert core.sum() > 4, "the independent confined component must be resolved"
+    assert not np.any(core[[0, -1], :]) and not np.any(core[:, [0, -1]])
+    selected = np.flatnonzero(np.asarray(reading.membership) > 0)
+    assert len(selected) > 0, "zero booking is not a confined-component repair"
+    for cell in selected:
+        count = int(state["geometry"].vertex_count[cell])
+        polygon = Polygon(np.asarray(state["geometry"].vertices[cell, :count]))
+        intersects = contains_xy(polygon, rr, zz) & core
+        assert np.any(intersects), f"booked cell {cell} lies beyond the first separator"
 
 
 @pytest.mark.slow

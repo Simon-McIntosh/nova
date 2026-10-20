@@ -102,11 +102,11 @@ def null_handles() -> list[plt.Line2D]:
     """Return the null markers as the painter itself draws them.
 
     Each handle is the artist ``draw_nulls`` created, captured by drawing that
-    one null set on a scratch axes. A hand-built handle drifts from the panel:
-    the legend here once showed the axis hollow and used its own cross glyph,
-    so it contradicted the marks it was naming. Capturing the artist removes
-    that class of drift, since the legend's glyph, fill, colour and size are
-    then the very ones the panel was drawn with.
+    one null set on a scratch axes. Capturing the artist ties the legend's
+    glyph, fill, colour and size to the marks the panel was actually drawn
+    with, so legend and panel cannot disagree. A hand-built handle is a second
+    description of the same mark, and any change to the painter then moves one
+    of them and not the other.
     """
     handles: list[plt.Line2D] = []
     for label, keyword in (

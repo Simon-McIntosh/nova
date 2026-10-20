@@ -24,6 +24,8 @@
   <title>Kernel Compile Barrier | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="3">
+<meta name="plan-modified" content="2026-10-20">
 </head>
 <body>
   <main class="plan-doc">
@@ -38,7 +40,7 @@
         <tr><td>kernel-backed topology read</td><td>about 1.25 million expanded equations and 39 MB of StableHLO at 132, 300 and 550 cells alike; H200 cold compile over 900 s, then 628 to 640 s after the shared-kernel read, against a 60 s clause</td><td>converged-forward-solve, anchor <code>cfs-topology-read-kernel-scope</code>; node <code>cfs-read-shared-kernel</code></td></tr>
         <tr><td>Biot point jet</td><td>83.6 s cold, in a fresh process with the cache disabled before JAX initialises</td><td>node <code>cfs-kernel-cold-compile-correction</code>, merge <code>b6f1efd95</code></td></tr>
         <tr><td>nested <code>jax.jacfwd</code> point jet, orders 1 to 4</td><td>65.75, 198.39, 413.37 and 984.58 s on the H200; <code>jax.experimental.jet</code> does not trace the kernel</td><td>node <code>proto-taylor</code></td></tr>
-        <tr><td>jets build point batch, <code>jax.jit(jax.vmap(_source_jets))</code> at <code>scripts/prototypes/read_route/jets.py:321</code>, 2,132 nodes, CPU</td><td>7,044 s and 381 GB peak host memory, from one compile</td><td>node <code>coarse-tie-census-memory</code>, sirius job 1290593</td></tr>
+        <tr><td>jets build point batch, <code>jax.jit(jax.vmap(_source_jets))</code> at <code>scripts/prototypes/read_route/jets.py:321</code>, 2,132 nodes, CPU</td><td>7,044 s and 381 GB peak host memory, from one compile</td><td>crew run <code>r-20261019T223150157038-coarse-tie-census-memory</code> on converged-forward-solve §2, sirius job 1290593</td></tr>
         <tr><td>same build, 282 cells, operand cache bypassed</td><td>79 GB peak; growth about 300 MB/s and independent of the cell count</td><td>node <code>coarse-tie-census-memory</code></td></tr>
       </tbody>
     </table>
@@ -57,35 +59,35 @@
 
     <h2 id="s3">§3 — A bounded jets build</h2>
     <section data-reckon="section" data-id="s3" data-effort-hours="8.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-attempts="0" data-status="implementable" data-links=""></section>
-    <p>The jets build compiles <code>jax.jit(jax.vmap(_source_jets, in_axes=(0, None)))</code> once and then runs it batch by batch, so a single compile carries the whole cost: 7,044 s and 381 GB at 2,132 nodes. Bound that compile, using the §2 tangents and the packed-moment terms §1 ranks, so that its graph does not grow with the node count.</p>
+    <p>The jets build compiles <code>jax.jit(jax.vmap(_source_jets, in_axes=(0, None)))</code> once and then runs it batch by batch, so a single compile carries the whole cost: 7,044 s and 381 GB at 2,132 nodes. That cost does not grow with the node count (§0: about 300 MB/s of growth, the same at 282 cells); it is the size of the one point program, which unrolls the derivative graph of <code>packed_analytic_moments</code> and the elliptic terms. Bound that program, using the §2 tangents and the packed-moment terms §1 ranks. The expression is defined twice and both definitions are in scope: the production row program <code>_row_program</code> at <code>nova/equilibrium/fixed_points.py:389</code> (its <code>_source_jets</code> at <code>:204</code>, reached through <code>nova/equilibrium/support_read.py</code>), which the read's 60 s clause applies to, and the prototype build at <code>scripts/prototypes/read_route/jets.py:321</code>. Bounding only the prototype does not meet this section.</p>
     <p>Done when: (1) at 282 and 2,132 nodes the point batch compiles once, in at most 600 s and 64 GB peak host memory on CPU and at most 60 s on the H200, fresh process and cache disabled; (2) the built jet rows match the base build to 1e-13 relative at every node at both sizes; (3) the 500-cell coarse-tie census test runs against an empty operand store under <code>--mem=64G</code> and passes on its own assertion.</p>
 
     <h2 id="s4">§4 — The topology read meets its compile clause</h2>
     <section data-reckon="section" data-id="s4" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-attempts="0" data-status="implementable" data-links=""></section>
     <p>With the kernel terms bounded, the kernel-backed topology read should meet the compile clause converged-forward-solve already holds it to. This section removes the expected failures that record the barrier, so the suite asserts the bound directly.</p>
-    <p>Done when: (1) on the H200, fresh process and cache disabled, the kernel-backed topology read compiles in at most 60 s, with an executable of at most 50 MB and at most 64 GB of host memory, at 132, 300 and 550 cells; (2) the strict xfail on <code>test_kernel_compile_growth</code> is removed and the test passes there; (3) the seven <code>kernel_compile_budget</code> fixture ids pass rather than xfail, in one H200 job that runs the whole file.</p>
+    <p>Done when: (1) on the H200, fresh process and cache disabled, the kernel-backed topology read compiles in at most 60 s, with an executable of at most 50 MB and at most 64 GB of host memory, at 132, 300 and 550 cells; (2) the strict xfail on <code>test_kernel_compile_growth</code> is removed and the test passes there; (3) the module-level strict marker <code>kernel_compile_expected_failure</code> (<code>tests/equilibrium/test_topology_read.py:39</code>, raising <code>KernelCompileBarrier</code>) is removed from every test that carries it, and the seven <code>kernel_compile_budget</code> fixture ids then pass on their own assertions, in one H200 job that runs the whole file. Leaving the marker in place while the compile meets the bound turns those ids into strict XPASS failures, so the marker removal is part of this clause.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="tangent-representation" data-choice="scan-or-exact" data-by="lead" data-when="2026-10-06">
-        <p class="r-dec-q">Which tangent forms may bound a kernel term's graph?</p>
-        <p class="r-dec-ctx">Inherited from converged-forward-solve's kernel-loop-representation and tangent-identity-tolerance rulings of 2026-10-06.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt chosen" data-value="scan-or-exact">Scan-form tangents at 1e-9 relative, or exact tangents within three times the primal; primal bit-identical</button>
-          <button class="r-opt" data-value="relax">Relax the identity tolerance or the compile clause</button>
-        </p>
-        <p class="r-dec-rat">A fixed-capacity scan tangent of harmonic_moments compiled in 1.43 s and agreed with jax.jvp of the base to 1.04e-10, where the exact tangent took 54.1 s. The Hessian only steers Newton and the implicit null tangent, so 1e-9 sits far below every solve tolerance. Relaxing either bound is forbidden without the lead.</p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="tangent-representation" data-choice="scan-or-exact" data-by="lead" data-when="2026-10-06">
+    <p class="r-dec-q">Which tangent forms may bound a kernel term&#x27;s graph?</p>
+    <p class="r-dec-ctx">Inherited from converged-forward-solve&#x27;s kernel-loop-representation and tangent-identity-tolerance rulings of 2026-10-06.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="scan-or-exact">Scan-form tangents at 1e-9 relative, or exact tangents within three times the primal; primal bit-identical</button>
+      <button class="r-opt" data-value="relax">Relax the identity tolerance or the compile clause</button>
+      </p>
+    <p class="r-dec-rat">A fixed-capacity scan tangent of harmonic_moments compiled in 1.43 s and agreed with jax.jvp of the base to 1.04e-10, where the exact tangent took 54.1 s. The Hessian only steers Newton and the implicit null tangent, so 1e-9 sits far below every solve tolerance. Relaxing either bound is forbidden without the lead.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-kcb-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="s21-nova" data-written-at="2026-10-20" data-recommends-skill="/reckon-build kernel-compile-barrier §1">
-        <h4 class="r-fu-title">Run the compile census of every kernel-backed program</h4>
-        <div class="r-fu-body">The plan is authored. §1 measures each program's graph, cold compile wall and host memory, and ranks the source terms that carry the expanded graph, which §2 and §3 then target.</div>
-        <pre class="r-fu-prompt">/reckon-build kernel-compile-barrier §1</pre>
-      </article>
-    </section>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-kcb-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="s21-nova" data-written-at="2026-10-20" data-recommends-skill="/reckon-build kernel-compile-barrier §1" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Run the compile census of every kernel-backed program</h4>
+    <div class="r-fu-body">The plan is authored. §1 measures each program's graph, cold compile wall and host memory, and ranks the source terms that carry the expanded graph, which §2 and §3 then target.</div>
+    <pre class="r-fu-prompt">/reckon-build kernel-compile-barrier §1</pre>
+    </article>
+</section>
   </main>
 </body>
 </html>

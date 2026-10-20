@@ -41,6 +41,7 @@ import jax.numpy as jnp
 import numpy as np
 
 from nova.equilibrium.wall_mask import wall_units_from_ids
+from nova.equilibrium import boundary_comparison
 from nova.equilibrium.topology import TopologyPolicy
 from nova.jax.config import configure_dtypes
 from scripts.prototypes.efit_field_swap import crosscheck
@@ -249,30 +250,33 @@ def axis_boundary_span(axis, outline):
     return span
 
 
-def _point_to_segments(points, outline):
-    """Minimum Euclidean distance from points to a closed RZ polyline."""
-    ring = _closed(np.asarray(outline, dtype=np.float64))
-    start = ring[:-1]
-    edge = ring[1:] - start
-    squared = np.einsum("ij,ij->i", edge, edge)
-    usable = squared > 0
-    if not np.any(usable):
-        raise ValueError("boundary polyline has no segments")
-    start, edge, squared = start[usable], edge[usable], squared[usable]
-    delta = np.asarray(points, dtype=np.float64)[:, None, :] - start[None, :, :]
-    fraction = np.clip(np.einsum("pij,ij->pi", delta, edge) / squared, 0, 1)
-    foot = start[None, :, :] + fraction[:, :, None] * edge[None, :, :]
-    return float(np.min(np.linalg.norm(np.asarray(points)[:, None, :] - foot, axis=2)))
-
-
 def liuqe_boundary_geometry(view, wall_rings):
     """Label the stored outline by wall and X-point proximity in metres."""
     outline = np.asarray(view["outline"], dtype=np.float64)
     if len(outline) < 3 or not wall_rings:
         raise ValueError("LIUQE boundary and wall geometry are required")
-    wall_distance = min(_point_to_segments(outline, ring) for ring in wall_rings)
+    closed_outline = _closed(outline)
+    wall_distance = min(
+        float(
+            np.min(
+                boundary_comparison._point_to_segment_distances(
+                    outline, _closed(np.asarray(ring, dtype=np.float64))
+                )
+            )
+        )
+        for ring in wall_rings
+    )
     xpoint_distance = min(
-        (_point_to_segments(np.asarray([point]), outline) for point in view["xpoints"]),
+        (
+            float(
+                np.min(
+                    boundary_comparison._point_to_segment_distances(
+                        np.asarray([point], dtype=np.float64), closed_outline
+                    )
+                )
+            )
+            for point in view["xpoints"]
+        ),
         default=float("nan"),
     )
     if xpoint_distance <= XPOINT_CONTACT_TOLERANCE:

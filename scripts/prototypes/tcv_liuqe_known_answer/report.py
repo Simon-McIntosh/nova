@@ -6,6 +6,7 @@ import argparse
 import html
 import json
 import math
+import statistics
 from pathlib import Path
 
 from scripts.prototypes.tcv_liuqe_known_answer.summarise import measure_gaps
@@ -129,14 +130,32 @@ def build(rows, receipt_path):
         raise ValueError("unread rows require review before reporting")
     if any(row.get("liuqe_label") not in ("limited", "diverted") for row in rows):
         raise ValueError("reference geometry must classify every slice")
-    agreements = sum(row["liuqe_label"] == row["nova_label"] for row in rows)
+    label_mismatches = [
+        row["index"] for row in rows if row["liuqe_label"] != row["nova_label"]
+    ]
     refusals = sum(row["nova_label"] not in ("limited", "diverted") for row in rows)
     diagnoses = "\n".join(filter(None, (_diagnosis(row) for row in rows)))
-    count_diagnosed = diagnoses.count("<li>")
+    gaps = [measure_gaps(row) for row in rows]
+    boundary_fractions = [
+        gap["boundary_relative"]
+        for gap in gaps
+        if math.isfinite(gap["boundary_relative"])
+    ]
+    if not boundary_fractions:
+        raise ValueError("no measurable boundary-flux gaps")
+    boundary_threshold = 0.05
+    above_threshold = sum(
+        fraction > boundary_threshold for fraction in boundary_fractions
+    )
     summary = (
-        f"{agreements} of 17 geometric labels agree; {refusals} nova reads refuse "
-        f"a label; {count_diagnosed} slices have a label or measurable boundary "
-        "flux difference."
+        f"{len(label_mismatches)} of 17 geometric labels differ "
+        f"(slices {', '.join(map(str, label_mismatches)) or 'none'}); "
+        f"{refusals} nova reads refuse a label. Boundary-flux |Δψ| divided "
+        "by LIUQE's grid axis-to-boundary flux span: median "
+        f"{_number(statistics.median(boundary_fractions), 3)}, range "
+        f"{_number(min(boundary_fractions), 3)}–"
+        f"{_number(max(boundary_fractions), 3)}; {above_threshold} of "
+        f"{len(boundary_fractions)} exceed {boundary_threshold:.3f} (5%)."
     )
     table = "\n".join(_row_html(row) for row in rows)
     figure_root = "/nova/figures/converged-forward-solve/tcv-liuqe-known-answer"

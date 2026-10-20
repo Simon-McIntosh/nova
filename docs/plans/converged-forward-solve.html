@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="518">
+<meta name="plan-version" content="519">
 <meta name="plan-modified" content="2026-10-21">
 </head>
 <body>
@@ -1670,6 +1670,9 @@ NO PRODUCT OR TEST SOURCE WAS CHANGED.  The 1e-10 tolerance was not widened.</p>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261020T215327143648-read-first-event-semantics" data-who="reckon-build" data-when="2026-10-20T23:19:17Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/converged-forward-solve/read-first-event-semantics.html#read-first-event-semantics-landing — Six fresh CPU process pairs move from 10 failed/15 passed at base to 25 passed at head; direct trace meets 4 value-only/6 jet budget; literal kernel revert fails the new escape assertion; six adjacent-double pairs show no admitted boundary or saddle identity switch.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261020T231840748163-review-of-read-first-event-semantics-f8304435ae4a" data-who="reckon-build" data-when="2026-10-20T23:25:16.445Z">
+    <div class="r-comment-body"><p>The review of r-20261020T215327143648-read-first-event-semantics at f8304435ae4abc0465a5102b7e6a0d44d0ff41e8 scores goal_fidelity 18, evidence 16, scope_discipline 18, durability 17, fit 15, reuse 19, records added_failure_count 0 with no added failure ids, and carries three follow-on findings (a non-independent assertion in tests/test_fixed_points.py:361, a missing slow mark in tests/equilibrium/test_escape_level_certificates.py:13, and a weakened boundary_attained guard in scripts/prototypes/fast_map_production/kernel.py:556); no blocking finding.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261010T184522536142-cfs-current-book-fragments" data-who="reckon-build" data-when="2026-10-10T18:46:29.609Z">
     <div class="r-comment-body"><p>Implemented traced current.book over connected multi-polygon membership using the widened signed-ring exact clip. Six certificate rows pass: diverted read image errors 1.15131582e-4, 2.49842782e-5, 3.95031905e-6 at 550/2098/5158 cells; limited errors 1.77777866e-5, 2.66948705e-6, 5.45231060e-7 at 553/2105/5167. Maximum net-current error 2.22e-16, excluded current zero, legacy control 0.197326978718; evidence docs/evidence/fragments/converged-forward-solve/cfs-current-book.html#cfs-current-book-fragments-booking and one three-rung SVG; audit-doc 0 errors.</p></div>

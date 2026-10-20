@@ -1,0 +1,44 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-20T23:25:16.445Z",
+  "dispatched_at": "2026-10-20T23:19:04Z",
+  "findings": [
+    {
+      "file": "tests/test_fixed_points.py",
+      "line": 361,
+      "severity": "follow-on",
+      "text": "np.testing.assert_array_equal(saddle.position, points[1]) compares against the value the test's own polish stub returns (position=points[1], line 351), so it holds whatever _first_tree_events does; the discriminating assertions are wall == points[3] (line 362) and the live/valid booleans (line 360)."
+    },
+    {
+      "file": "tests/equilibrium/test_escape_level_certificates.py",
+      "line": 13,
+      "severity": "follow-on",
+      "text": "the added read test runs about 64 s and carries no @pytest.mark.slow and no timeout while every other test in the file carries them (line 41), so it lands in the default fast lane the marker policy keeps clear of heavy solves."
+    },
+    {
+      "file": "scripts/prototypes/fast_map_production/kernel.py",
+      "line": 556,
+      "severity": "follow-on",
+      "text": "attained now derives from the same quantities level is built from (level, line 446), so boundary_attained (line 562) no longer compares the published level against an independent field evaluation; the removed independent check is restored only at test level in tests/equilibrium/test_escape_level_certificates.py:36."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is a one-sentence deliverable to repair the first-separator read in scripts/prototypes/fast_map_production/kernel.py; the diff rewrites _first_tree_events (kernel.py:244) to walk the axis component's descending frontier arcs and refuse where a reached saddle will not resolve.\nVERDICT done_when: the done_when's three clauses name the six field tests without an assertion change, the trace/certified-coverage/path-admission tests, the tie-pair and escape-level tests and a literal kernel-revert control; the manifest records each and the six fresh after-*.log arms pass with zero failures.\nVERDICT write_paths: the fence lists kernel.py, test_axis_ranking.py, test_carrier_axis.py, tests/test_fixed_points.py and the evidence fragment; the coordinator's resume advice (resume-1-advice.txt, 2026-10-21 00:35Z) grants nova/equilibrium/topology.py and tests/equilibrium/test_escape_level_certificates.py, and every path in the diff sits inside that union.\nVERDICT manifest: read; status complete, five commits listed, baseline_suite/after_suite carry the escape-file pair naming one log each, and negative_control_log names wall-escape-negative.log.\nVERDICT diff: read commit by commit against 7430c618f; five commits touch scripts/prototypes/fast_map_production/kernel.py, tests/test_fixed_points.py, nova/equilibrium/topology.py, tests/equilibrium/test_escape_level_certificates.py and docs/evidence/fragments/converged-forward-solve/read-first-event-semantics.html, all inside scope.\nCALL_SITES: scripts/prototypes/fast_map_production/program.py, scripts/prototypes/fast_map_production/solver.py, scripts/prototypes/fast_map_production/sweep.py, scripts/prototypes/fast_map_production/tie_probe.py, scripts/prototypes/fast_map_production/saddle_admission_probe.py, scripts/prototypes/efit_field_swap/crosscheck.py, scripts/prototypes/efit_field_swap/probe_read.py\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: kernel.py:272 walks visited-to-unvisited frontier arcs at levels[other] <= levels[source] from the axis maximum, and kernel.py:317 refuses when a reached saddle is not live rather than admitting a remote wall.\nSCORE evidence: 16\nJUSTIFICATION evidence: the manifest's after_suite (after-escape-level-expanded.log: 11 passed, EXIT=0) and the six paired arms in paired-selected-summary.log record the delta, but the ten pre-existing escape-level tests still pass at base (baseline-escape-expanded.log), so the done_when clause that the escape-level tests must fail under the literal revert holds only for the one added test.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in the diff is inside the fence or the coordinator's explicit grant in resume-1-advice.txt, and nova/equilibrium/topology.py:2838 is the granted surplus-jet-trace removal.\nSCORE durability: 17\nJUSTIFICATION durability: wall-escape-negative.log fails on tests/equilibrium/test_escape_level_certificates.py:30 with kernel.py reverted (1 failed, EXIT=1) and passes at head, so the added assertion reddens on the regression it guards.\nSCORE fit: 15\nJUSTIFICATION fit: scripts/prototypes/fast_map_production/kernel.py:272 follows the module's traced fori_loop idiom, but tests/equilibrium/test_escape_level_certificates.py:13 omits the slow mark its siblings carry at line 41.\nSCORE reuse: 19\nJUSTIFICATION reuse: the change extends the existing _first_tree_events (kernel.py:244) and topology._wall_events (nova/equilibrium/topology.py:2832) rather than adding a second traversal, so no axis-component first-event walk owner is duplicated.\nFINDING tests/test_fixed_points.py:361 follow-on: np.testing.assert_array_equal(saddle.position, points[1]) compares against the value the test's own polish stub returns (position=points[1], line 351), so it holds whatever _first_tree_events does; the discriminating assertions are wall == points[3] (line 362) and the live/valid booleans (line 360).\nFINDING tests/equilibrium/test_escape_level_certificates.py:13 follow-on: the added read test runs about 64 s and carries no @pytest.mark.slow and no timeout while every other test in the file carries them (line 41), so it lands in the default fast lane the marker policy keeps clear of heavy solves.\nFINDING scripts/prototypes/fast_map_production/kernel.py:556 follow-on: attained now derives from the same quantities level is built from (level, line 446), so boundary_attained (line 562) no longer compares the published level against an independent field evaluation; the removed independent check is restored only at test level in tests/equilibrium/test_escape_level_certificates.py:36.\n",
+  "review_run_id": "r-20261020T231840748163-review-of-read-first-event-semantics-f8304435ae4a",
+  "reviewed_base_sha": "7430c618f657a0a169c9fa04135654514e2298c6",
+  "reviewed_head_sha": "f8304435ae4abc0465a5102b7e6a0d44d0ff41e8",
+  "reviewed_run_id": "r-20261020T215327143648-read-first-event-semantics",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 15,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T23:25:43.535222+00:00",
+  "total": 103
+}

@@ -1,0 +1,81 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [
+    {
+      "failure_condition": "assert_identity compares all seven receipt fields of the installed build against the same fields rebuilt from revision 511a22e06^ (the pre-repair source loaded as an independent module); a change to any receipt field in nova/equilibrium/contour_tree.py reddens it.",
+      "lines": "80"
+    },
+    {
+      "failure_condition": "fail if the sweep stops visiting each vertex; vertex_count is taken from the input size, not from the instrument, so the two sides are independent.",
+      "lines": "109"
+    },
+    {
+      "failure_condition": "fail if the parent structure the sweep builds exceeds ceil(log2(vertex_count))+1 hops; reinstating the pre-repair merge (shadow negative control) reddens it at 52 > 15.",
+      "lines": "110"
+    }
+  ],
+  "base_log_revision": "bd4f94220d2ede306cc2409f7ffab13004d2afe9",
+  "baseline_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T124900117804-contour-tree-guards-in-lane/logs/baseline-collect.log",
+  "call_site_count": 3,
+  "call_sites": [
+    "nova/equilibrium/contour_tree.py:build_contour_tree",
+    "nova/equilibrium/contour_tree.py:_sweep_tree",
+    "nova/equilibrium/contour_tree.py:_carrier_adjacency"
+  ],
+  "completed_at": "2026-10-20T13:31:02.807Z",
+  "dispatched_at": "2026-10-20T13:20:45Z",
+  "findings": [
+    {
+      "file": "tests/test_contour_tree_sweep_bounds.py",
+      "line": "43",
+      "severity": "follow-on",
+      "text": "follow-on: when REFERENCE_CONTOUR_TREE_MODULE is unset the identity guard's only fallback is a hard-coded `git show 511a22e06^:nova/equilibrium/contour_tree.py` subprocess, so in a shallow clone or any tree lacking that commit the new default-lane guard errors during collection instead of skipping; the guard then reports a red on the very lane this node exists to serve, for a reason unrelated to the code under test."
+    },
+    {
+      "file": "tests/test_contour_tree_sweep_bounds.py",
+      "line": "99",
+      "severity": "follow-on",
+      "text": "follow-on: the depth test feeds the sweep unsigned `jnp.asarray(vertex_psi)` while the profile module it imports measures on the sigma-signed flux (scripts/prototypes/contour_tree_sweep_profile/profile.py:205), so the two measured sweep directions do not reproduce the inputs the profiling baseline recorded; the rank-balanced bound holds for any order or sign, so this is a fidelity gap rather than a wrong assertion."
+    }
+  ],
+  "head_log_revision": "bd4f94220d2ede306cc2409f7ffab13004d2afe9",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "One commit c22f2d1e5 adds tests/test_contour_tree_sweep_bounds.py (118 lines) and the 16-line evidence fragment; the diff contains no production-code change and stays inside the declared write paths.",
+    "done_when": "The done_when (brief.txt:7) requires a fresh CPU pytest pass, a default collect-only line, and a literal negative control that reddens the depth assertion; logs/head-cpu-gate.log records 2 passed EXIT=0 under JAX_PLATFORMS=cpu, logs/default-collect.log lists both tests at 7953/8956, and logs/negative-control-retry.log fails on the bound assertion at 52 > 15 with EXIT=1.",
+    "goal": "The source brief.txt dispatches a single default-lane file that carries the contour-tree receipt-identity guard and the missing root-hop depth guard; tests/test_contour_tree_sweep_bounds.py:56 and :86 add exactly those two, the second reading depth through the profile's existing counter (scripts/prototypes/contour_tree_sweep_profile/profile.py:141) rather than a new instrument.",
+    "manifest": "Read; manifest.md records commit c22f2d1e5, both changed paths, the head gate result, the negative control and its log, and status complete, though its baseline_suite and after_suite lines are empty and its negative-control note names the mutation as a root-lookup change when the shadow reinstates the whole pre-repair merge.",
+    "write_paths": "The manifest declares tests/test_contour_tree_sweep_bounds.py and docs/evidence/fragments/converged-forward-solve/contour-tree-guards-in-lane.html; the single commit c22f2d1e5 changes exactly those two paths and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/test_contour_tree_sweep_bounds.py:110 fails when the pre-repair union-find merge is reinstated (shadow control: 52 > 15), and :80 fails if any of the seven receipt fields regresses, both against sources independent of the code under test.",
+    "evidence": "logs/head-cpu-gate.log's summary line records 2 passed in 160.41 s with EXIT=0, logs/default-collect.log records both tests collected at 7953/8956, and logs/negative-control-retry.log records the pre-repair walk failing the bound at 52 > 15 with EXIT=1.",
+    "fit": "tests/test_contour_tree_sweep_bounds.py:1-29 follows the prototype guards' idiom and imports their helpers, and introduces no plan, ticket or version token in any name or docstring.",
+    "goal_fidelity": "tests/test_contour_tree_sweep_bounds.py:56 asserts all seven receipt fields against a separately loaded revision and :110 asserts the join and split sweeps stay within ceil(log2(vertex_count))+1, matching the two guards the brief.txt asks for in the default lane.",
+    "reuse": "assert_identity, inputs, instrumented_sweep and load_builder are imported from scripts/prototypes/contour_tree_sweep_profile/profile.py and the fixtures from benchmarks/contour_tree_brute_force.py rather than re-implemented, so the depth counter is the profile's own instrument.",
+    "scope_discipline": "git diff bd4f94220..c22f2d1e5 changes only tests/test_contour_tree_sweep_bounds.py and docs/evidence/fragments/converged-forward-solve/contour-tree-guards-in-lane.html, both inside the manifest's declared write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source brief.txt dispatches a single default-lane file that carries the contour-tree receipt-identity guard and the done-when's missing root-hop depth guard; tests/test_contour_tree_sweep_bounds.py:56 and :86 add exactly those two, the second reading depth through the profile's existing counter at scripts/prototypes/contour_tree_sweep_profile/profile.py:141 rather than a new instrument.\nVERDICT done_when: The done_when (brief.txt:7) requires a fresh CPU pytest pass, a default collect-only line and a literal negative control that reddens the depth assertion; logs/head-cpu-gate.log records 2 passed EXIT=0 under JAX_PLATFORMS=cpu, logs/default-collect.log lists both tests at 7953/8956, and logs/negative-control-retry.log fails on the bound assertion at 52 > 15 with EXIT=1.\nVERDICT write_paths: The manifest declares tests/test_contour_tree_sweep_bounds.py and docs/evidence/fragments/converged-forward-solve/contour-tree-guards-in-lane.html; commit c22f2d1e5 changes exactly those two paths and nothing else.\nVERDICT manifest: Read; manifest.md records commit c22f2d1e5, both changed paths, the head gate result, the negative control and its log, and status complete, though its baseline_suite and after_suite lines are empty and its negative-control note describes the shadow as a root-lookup mutation when the shadow actually reinstates the whole pre-repair merge.\nVERDICT diff: One commit c22f2d1e5 adds tests/test_contour_tree_sweep_bounds.py (118 lines) and the 16-line evidence fragment, with no production-code change and nothing outside the declared write paths.\nCALL_SITES: nova/equilibrium/contour_tree.py:build_contour_tree, nova/equilibrium/contour_tree.py:_sweep_tree, nova/equilibrium/contour_tree.py:_carrier_adjacency\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: tests/test_contour_tree_sweep_bounds.py:56 asserts all seven receipt fields against a separately loaded revision and :110 bounds the join and split sweeps at ceil(log2(vertex_count))+1, matching both guards the brief asks to move into the default lane.\nSCORE evidence: 19\nJUSTIFICATION evidence: logs/head-cpu-gate.log's summary line records 2 passed in 160.41 s with EXIT=0, logs/default-collect.log records both tests collected at 7953/8956, and logs/negative-control-retry.log records the pre-repair walk failing the bound at 52 > 15 with EXIT=1.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: git diff bd4f94220..c22f2d1e5 changes only tests/test_contour_tree_sweep_bounds.py and docs/evidence/fragments/converged-forward-solve/contour-tree-guards-in-lane.html, both inside the manifest's declared write paths.\nSCORE durability: 19\nJUSTIFICATION durability: tests/test_contour_tree_sweep_bounds.py:110 fails when the pre-repair union-find merge is reinstated (shadow control 52 > 15) and :80 fails if any of the seven receipt fields regresses, each against a source independent of the code under test.\nSCORE fit: 18\nJUSTIFICATION fit: tests/test_contour_tree_sweep_bounds.py:1-29 follows the prototype guards' idiom and imports their helpers, and introduces no plan, ticket or version token in any name or docstring.\nSCORE reuse: 19\nJUSTIFICATION reuse: assert_identity, inputs, instrumented_sweep and load_builder are imported from scripts/prototypes/contour_tree_sweep_profile/profile.py and the fixtures from benchmarks/contour_tree_brute_force.py rather than re-implemented, so the depth counter is the profile's own instrument.\nFINDING tests/test_contour_tree_sweep_bounds.py:43 follow-on: when REFERENCE_CONTOUR_TREE_MODULE is unset the identity guard's only fallback is a hard-coded `git show 511a22e06^:nova/equilibrium/contour_tree.py` subprocess, so in a shallow clone or any tree lacking that commit the new default-lane guard errors during collection instead of skipping.\nFINDING tests/test_contour_tree_sweep_bounds.py:99 follow-on: the depth test feeds the sweep unsigned jnp.asarray(vertex_psi) while the profile module it imports measures on the sigma-signed flux at scripts/prototypes/contour_tree_sweep_profile/profile.py:205, so the two measured directions do not reproduce the inputs the profiling baseline recorded.\n",
+  "review_run_id": "r-20261020T132005587648-review-of-contour-tree-guards-in-lane-c22f2d1e5e94",
+  "reviewed_base_sha": "bd4f94220d2ede306cc2409f7ffab13004d2afe9",
+  "reviewed_commits": [
+    "c22f2d1e5e9433ec872fcdb20480f762737a5805"
+  ],
+  "reviewed_head_sha": "c22f2d1e5e9433ec872fcdb20480f762737a5805",
+  "reviewed_run_id": "r-20261020T124900117804-contour-tree-guards-in-lane",
+  "scores": {
+    "durability": 19,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 18
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T13:32:05.846769+00:00",
+  "total": 112
+}

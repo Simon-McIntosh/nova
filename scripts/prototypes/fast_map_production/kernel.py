@@ -246,7 +246,7 @@ def _first_tree_events(field, geometry, axis, sigma, policy):
     from nova.equilibrium.contour_tree import build_contour_tree
 
     mesh = geometry.contour_mesh
-    values = jax.vmap(field.value)(geometry.contour_sample_points)
+    values = topology._point_values(field, geometry.contour_sample_points)
     vertex_flux = jnp.sum(
         values[geometry.contour_sources] * geometry.contour_weights, axis=1
     )
@@ -540,7 +540,7 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
     )
     connected = jnp.where(closed_live, closed_cells, connected)
     membership = provisional.membership * path_weight
-    attained = field.value(boundary)
+    attained = field.evaluate(boundary).value
     boundary_enclosure = (
         128
         * jnp.finfo(level.dtype).eps

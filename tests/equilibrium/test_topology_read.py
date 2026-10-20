@@ -2983,7 +2983,10 @@ def _quadratic_wall_read_inputs():
     )
     convention = topology.TopologyConvention.from_cocos(17, 1.0)
     policy = TopologyPolicy()
-    return field, roots, geometry, convention, policy
+    from scripts.prototypes.fast_map_production.program import FusedField
+
+    sampled = field.sampled_coefficient(geometry)
+    return FusedField(field, sampled), roots, geometry, convention, policy
 
 
 def test_fast_read_refuses_a_wall_level_not_attained_at_its_point(monkeypatch):
@@ -2999,7 +3002,10 @@ def test_fast_read_refuses_a_wall_level_not_attained_at_its_point(monkeypatch):
         kernel, "_wall_effective_level", lambda flux, passage: flux + 0.01
     )
     refused = jax.jit(lambda: kernel.read(field, roots, geometry, convention, policy))()
-    assert abs(float(field.value(refused.boundary) - refused.boundary_flux)) > 0.009
+    assert (
+        abs(float(field.evaluate(refused.boundary).value - refused.boundary_flux))
+        > 0.009
+    )
     assert not bool(refused.valid), "an unattained boundary must be refused"
 
 

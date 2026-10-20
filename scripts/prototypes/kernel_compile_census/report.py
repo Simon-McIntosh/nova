@@ -126,7 +126,7 @@ def source_rows(cpu_dirs):
 
 
 def other_sources(cpu_dirs):
-    rows = []
+    groups = []
     for program in PROGRAMS:
         if program == "point_jet":
             continue
@@ -134,23 +134,31 @@ def other_sources(cpu_dirs):
         sources = cpu_dirs[:1] if program == "packed_analytic_moments" else cpu_dirs
         data, path = receipt(sources, program, size)
         ranking = data.get("source_function_ranking", [])
-        for source in ranking[:5]:
+        if not ranking:
+            size = 64 if program in KERNELS else 550
+            data, path = receipt(sources, program, size)
+            ranking = data.get("source_function_ranking", [])
+        rows = []
+        for source in ranking:
             rows.append(
-                "<tr><td>"
-                + escape(program)
-                + "</td><td><code>"
+                "<tr><td><code>"
                 + escape(f"{source['file']}:{source['line']}")
                 + "</code></td>"
                 "<td><code>" + escape(source["function"]) + "</code></td>"
-                f"<td>{source['expanded_equations']:,}</td><td><code>"
-                + escape(str(path))
-                + "</code></td></tr>"
+                f"<td>{source['expanded_equations']:,}</td></tr>"
             )
-    return (
-        "<table><thead><tr><th>Program</th><th>Owner file and line</th>"
-        "<th>Function</th><th>Expanded equations</th><th>Full receipt</th>"
-        "</tr></thead><tbody>\n" + "\n".join(rows) + "\n</tbody></table>"
-    )
+        groups.append(
+            "<details><summary>"
+            + escape(program)
+            + f" ({len(rows)} owners)"
+            + "</summary><p>Full receipt: <code>"
+            + escape(str(path))
+            + "</code>.</p><table><thead><tr><th>Owner file and line</th>"
+            "<th>Function</th><th>Expanded equations</th></tr></thead><tbody>\n"
+            + "\n".join(rows)
+            + "\n</tbody></table></details>"
+        )
+    return "\n".join(groups)
 
 
 def main():
@@ -170,14 +178,16 @@ def main():
 {START}
 <h2 id="kernel-compile-census">Kernel-backed compile census</h2>
 <p>Every row uses a fresh process with the persistent compilation cache disabled before JAX initialises. Because that setting bypasses JAX's persistent-cache hooks, the driver adds its observed backend compile to the cache ledger as one unpersisted miss; no row with a hit is called cold. Host memory is sampled every ten seconds and combined with the child process's peak RSS for short rows. A dash means no executable or measurement was produced. The CPU topology compile was killed at the 450 GB allocation limit; its lower and sampled peak remain evidence, and the row does not claim an executable. H200 was pending for resources after a real submission; the GPU retry therefore ran on titan, whose P100 identity stays explicit in its row receipts. A graph is classed constant when expanded equations differ by less than 5% and StableHLO bytes grow by less than 20% across the two sizes.</p>
+<p>The standalone point and packed kernels map over 4 and 64 target points around one hexagonal source. Harmonic moments use 43 orders; pole moments use 10 requested orders with a 43-entry source family; harmonic multiplication uses two nine-term series. Production and prototype row programs batch three and four points respectively over 132- and 550-cell source couplings. The read uses the limited analytic field and realised hex carrier; the certificate map uses the limited certified carrier and booked moments.</p>
+<p>The earlier 1.25-million-equation, 39 MB topology record measured a within-scope scalar-scan arm, while these rows trace the current <code>topology.read</code>; the program identities differ, so the smaller current count does not contradict that receipt. The earlier 7,044 s and 381 GB jets build compiled at 2,132 nodes; these rows batch three or four points with 132 or 550 source cells, so the wall and memory figures are different shapes. The earlier 83.6 s point-jet wall is an H200 measurement; titan's P100 wall is reported under its own device name.</p>
 <p>The original packed-moment probe evaluated one point even when labelled 4 or 64, so those two receipts are excluded from the comparison pending the batched repair. The 132-cell certificate carrier was absent from the published fixture store; its row remains explicit until the in-memory carrier build completes.</p>
 <table><thead><tr><th>Program</th><th>Scale</th><th>Graph</th><th>Unique eqns</th><th>Expanded eqns</th><th>StableHLO bytes</th><th>CPU executable bytes</th><th>CPU cold s</th><th>CPU peak GiB</th><th>CPU outcome</th><th>GPU device</th><th>GPU cold s</th><th>GPU peak GiB</th><th>GPU executable bytes</th><th>GPU outcome</th></tr></thead><tbody>
 {table_rows(cpu_dirs, gpu_dirs)}
 </tbody></table>
 <h3>Point jet source ranking</h3>
 {source_rows(cpu_dirs)}
-<h3>Leading owners of the other programs</h3>
-<p>Five leading owners per program are shown. Each named receipt carries its complete source ranking, including all smaller contributors.</p>
+<h3>Source rankings of the other programs</h3>
+<p>Each program's complete ranking is ordered by expanded equations and can be opened below. Where the smaller size did not reach graph tracing, the larger size supplies its owner ranking.</p>
 {other_sources(cpu_dirs)}
 {END}
 """

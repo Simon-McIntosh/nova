@@ -6,6 +6,11 @@
   "call_sites": [],
   "completed_at": "2026-10-20T03:45:26.041Z",
   "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "certificate-diverted-2000-probe",
+      "recorded_at": "2026-10-20T04:05:02.168441+00:00"
+    },
     "goal_fidelity": {
       "kind": "folded",
       "node": "certificate-diverted-2000-probe",

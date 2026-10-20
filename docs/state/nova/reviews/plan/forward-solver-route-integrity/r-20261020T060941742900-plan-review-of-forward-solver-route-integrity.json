@@ -1,0 +1,53 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-20T06:24:58.319Z",
+  "dispatched_at": "2026-10-20T06:10:03Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/forward-solver-route-integrity.html:422",
+      "id": "single_goal-1",
+      "reason": "the build splits the section into per-item nodes, so the author can scope the harness hardening to its own node without touching the section's mechanism.",
+      "text": "\u00a75 item 6 puts two deliverables in one item, closing the last autotune-writing route (`scripts/playable_server/payload.sh`, pinned by a test) beside unrelated harness hardening (\"let a missing `data-ink` style sheet raise\" and \"add a unit test of its negative-control check\"), so a node scoped to item 6 would be graded on a route closure and a figure-harness cleanup at once",
+      "type": "single_goal",
+      "would_change": false
+    },
+    {
+      "anchor": "docs/plans/forward-solver-route-integrity.html:424",
+      "id": "done_when-1",
+      "reason": "the control exists and is discoverable in the harness the same clause names, so naming it would tighten the record without redirecting a node.",
+      "text": "the H200 clause reads \"The H200 run of the four arms completes with the negative control holding\" but names no control; the only control in play is the harness's own arm-(a)\u22651 / arm-(c)=0 autotune-file check inside `benchmarks/xla_autotune_cache_arms.py`, which the plan never declares, so a reader of the done-when alone cannot say what the H200 run must show",
+      "type": "done_when",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "feb068d22abf0d294bdc89838f5cfd99ec63095ce7442cfe5c335030edf545b9",
+  "plan_slug": "forward-solver-route-integrity",
+  "plan_version": 134,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261020T060941742900-plan-review-of-forward-solver-route-integrity",
+  "reviewed_blob_sha": "a685a8ee1b77d76a36ec037fd2271985a5f2d53b",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every file s5 cites resolves in the tree (`benchmarks/xla_autotune_cache_arms.py`, `docs/research/xla-autotune-cache-on-gpfs.html`, `scripts/playable_server/payload.sh`, `tests/test_playable_server.py`, `scripts/h200_test_lane/prewarm.sh`, `scripts/h200_test_lane/run.sh`, `scripts/nova_lane/run.sh`, `nova/biot/tiledassembly.py`, `nova/jax/config.py`), the cited merges `097f03c5d` and `c35bf765f` resolve, and `runtime-7b315420b55b91bffb05` matches the table at line 409.",
+    "done_when": "pass \u2014 \u00a75's done-when names negative controls for the exports (\"removing either export fails its test\") and for the playable_server export (\"deleting the export fails that test\"), states the titan autotune-file count \"counted before and after\", and the H200 clause carries a falsifiable count; each clause can fail.",
+    "evidence_paths": "pass \u2014 item 2's receipts land in the run directory and the research page, item 4's numbers land in `docs/research/xla-autotune-cache-on-gpfs.html`, and only the throwaway cache roots (not evidence) go under node-local `/tmp`.",
+    "naming": "pass \u2014 the changed text carries no plan labels, stage names or version tags into code; the job ids, merge shas and artifact directory names appear only in plan prose, which is the plan's own record.",
+    "reasoning": "pass \u2014 the stated root cause (JAX's `jax_persistent_cache_enable_xla_caches` default plus `xla_gpu_per_fusion_autotune_cache_dir`) matches the cited job-1287897 evidence, the mechanism runs on named real call sites (`configure_persistent_compilation_cache` at `nova/jax/config.py:181`, `compilation_cache` at `nova/biot/tiledassembly.py:621`, the `scripts/h200_test_lane/run.sh` prelude export, `scripts/h200_test_lane/prewarm.sh:59`, and the still-unfixed `scripts/playable_server/payload.sh:25`), and the arm numbers in the decision (78.0 s / 81.0 s) match the cited research page.",
+    "single_goal": "a finding \u2014 \u00a75 now closes six heterogeneous items in one section, and item 6 bundles the last autotune-writing route with unrelated harness/figure hardening.",
+    "wiring": "pass \u2014 \u00a75 and \u00a74 mutually declare `data-links` and the \u00a75 \"Order with \u00a74\" paragraph states \u00a74 builds after \u00a75 from its head; \u00a75's own item ordering (item 3's removals gated on item 5) is resolved by the Placement paragraph, and no dependency the section needs is missing."
+  },
+  "section_digests": {
+    "_document": "10549da271339833386fd29b6d6b7506a21b514e6c97cc51b1a97d5b6d6bb1bf",
+    "s-contract": "83d8d14d75c0216f84acbbb9ef71204975cc6134348d26b5158c593c9abfc624",
+    "s0": "80f310e76317b26c373d1244865223433df267fb8337045d575fe833c75b5858",
+    "s1": "80571c0e208f8095726792cc9d0029962c3966fed6f04e6dcb2ed1a5f352581b",
+    "s2": "f632de7fadccd34387c95c830a73120eb5234de722730bee800322a62a31db41",
+    "s3": "2912ba532e01c1f8a0dd30b1773900e600828c6bbb1cd315c7976868d2a940e5",
+    "s4": "da5c69a471b7ca2d81f157f637c5eda274244e01477238d60f1488532a220978",
+    "s5": "3eceab734ef256613c430ffb3fca1ab6698059a2fabc81dcdbb92c6a02473985"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T06:27:10.746224+00:00"
+}

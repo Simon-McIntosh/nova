@@ -21,6 +21,7 @@ import jax.numpy as jnp  # noqa: E402
 import numpy as np  # noqa: E402
 import nova  # noqa: E402
 from nova.equilibrium import topology  # noqa: E402
+from nova.equilibrium import contour_tree as installed_contour_tree  # noqa: E402
 from tests.equilibrium import test_topology_read as oracle_fixture  # noqa: E402
 
 assert jax.config.jax_enable_x64 is True
@@ -37,6 +38,8 @@ FIELDS = (
 
 
 def load_builder(path: Path):
+    if path.resolve() == Path(installed_contour_tree.__file__).resolve():
+        return installed_contour_tree
     spec = importlib.util.spec_from_file_location("contour_tree_profile_target", path)
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
@@ -253,7 +256,6 @@ def measure(module, kind: str, cells: int):
     )
     stages["other build"] = rest_wall
     compiles["other build"] = rest_compile
-    assert_identity(full, module.build_contour_tree(*arguments))
     return {
         "case": kind,
         "requested_cells": cells,
@@ -264,6 +266,9 @@ def measure(module, kind: str, cells: int):
         "module": str(Path(module.__file__).resolve()),
         "nova_module": str(Path(nova.__file__).resolve()),
         "job_id": os.environ.get("SLURM_JOB_ID"),
+        "receipt_overflow": bool(full.overflow),
+        "receipt_nodes": int(full.node_valid.sum()),
+        "receipt_edges": int(full.edge_valid.sum()),
         "stage_seconds": stages,
         "compile_seconds": compiles,
         "passes": passes,

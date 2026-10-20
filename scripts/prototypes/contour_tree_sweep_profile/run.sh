@@ -3,19 +3,30 @@ set -uo pipefail
 
 worktree=$1
 output=$2
+module=$3
+comparison_module=$4
+comparison_row=$5
 python=/home/ITER/mcintos/Code/nova/.venv/bin/python
 export PYTHONPATH="$worktree" NOVA_WORKTREE="$worktree"
-export CONTOUR_TREE_MODULE="$output/contour_tree_sparse.py"
+export CONTOUR_TREE_MODULE="$module"
 export PROFILE_OUTPUT="$output/rows"
 export NOVA_COMPILATION_CACHE_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
 export XLA_PYTHON_CLIENT_PREALLOCATE=false
 export JAX_PLATFORMS=cuda,cpu
+mkdir -p "$output"
 scratch=$(mktemp -d /tmp/"$USER"-"$SLURM_JOB_ID"-XXXX)
 trap 'rm -rf "$scratch"' EXIT
 export TMPDIR="$scratch"
 revision=$(git -C "$worktree" rev-parse HEAD)
 printf 'REVISION=%s TREE=%s COMMAND=%s %s %s\n' "$revision" "$worktree" "$0" "$worktree" "$output"
 "$python" -c 'import nova; from pathlib import Path; import jax; print("NOVA=" + str(Path(nova.__file__).resolve()) + " CWD=" + str(Path.cwd().resolve()) + " DEVICE=" + str(jax.devices()[0]), flush=True)'
+
+"$python" "$worktree/scripts/prototypes/contour_tree_sweep_profile/diagnose.py" \
+  --module "$module" --kind limited --cells 550 \
+  --output "$output/overflow-main.json"
+"$python" "$worktree/scripts/prototypes/contour_tree_sweep_profile/diagnose.py" \
+  --module "$comparison_module" --kind limited --cells 550 \
+  --output "$output/overflow-comparison.json"
 
 command="$python -m pytest -p no:cacheprovider -q $worktree/scripts/prototypes/contour_tree_sweep_profile/test_profile.py"
 printf 'REVISION=%s TREE=%s COMMAND=%s\n' "$revision" "$worktree" "$command" > "$output/identity.log"
@@ -48,5 +59,8 @@ for kind in limited diverted; do
       --output "$output/rows/$kind-$cells.json" || failures=1
   done
 done
+"$python" "$worktree/scripts/prototypes/contour_tree_sweep_profile/profile.py" \
+  --module "$comparison_module" --kind limited --cells 550 \
+  --output "$comparison_row" || failures=1
 printf 'EXIT=%s\n' "$failures"
 exit "$failures"

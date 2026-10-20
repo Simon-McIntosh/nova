@@ -1,0 +1,69 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-20T03:45:26.041Z",
+  "dispatched_at": "2026-10-20T03:32:49Z",
+  "findings": [
+    {
+      "file": "tests/equilibrium/test_certificate_550_convergence.py",
+      "line": 155,
+      "severity": "follow-on",
+      "text": "follow-on: the landed 2,000-cell diverted test is marked xfail(strict=True) because the row does not converge (head residual 2.2567326434608685e-2, converged=false), so the node's done-when clause (2) -- 'the diverted 2,000-cell row reaches 1e-12 ... and pass at head' -- is unmet and only the mark keeps the suite green; the goal this node was dispatched for is not achieved."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/certificate-diverted-2000.html",
+      "line": 8,
+      "severity": "follow-on",
+      "text": "follow-on: the two remaining candidates are cited with wrong call sites; _local_axis_sector (def at kernel.py:51) is said to be 'called at kernel.py:213' but its call sites are kernel.py:97, 184 and 356, and _flux_past_level_weight (def at kernel.py:123) is said to be 'called at kernel.py:209 and kernel.py:210' but is called at kernel.py:180 and 181 -- lines 209-213 are the near-weight and sector-weight computation, so the pointer misdirects the next probe."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/certificate-diverted-2000.html",
+      "line": 12,
+      "severity": "follow-on",
+      "text": "follow-on: the claimed negative control does not control the landed change -- the net diff carries no kernel.py change (kernel.py is byte-identical to base 1c97e17be), so overwriting kernel.py with the base in H200 job 1290655 is a no-op against the head and the control (residual 0.022567326444942717) shows only that the test is red at both revisions, not that it discriminates them."
+    },
+    {
+      "file": "tests/equilibrium/test_certificate_550_convergence.py",
+      "line": 163,
+      "severity": "follow-on",
+      "text": "follow-on: the new test duplicates the body of its sibling test_certified_diverted_carrier_converges (tests/equilibrium/test_certificate_550_convergence.py:105) -- same subprocess invocation, same receipt reads and same slope assertion, differing only in --cells 2000 -- rather than sharing a helper, though a separate committed test was the brief's own request."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "none -- the landed change is a test file and two documents; no production module imports or is reached by it (grep over the tree for test_certificate_550_convergence finds no production caller), and the kernel.py edit it once carried is reverted so kernel.py is identical to base.",
+    "diff": "read the twelve commits 483aece78..50dd15886 against base 1c97e17be; the net diff is 3 files (+73/-1) -- tests/equilibrium/test_certificate_550_convergence.py +59, docs/evidence/fragments/converged-forward-solve/certificate-diverted-2000.html +13 (new), docs/research/certificate-550-convergence.html +1/-1 -- and the kernel.py edit at 483aece78 is reverted at 12ce33bc5, so the landed tree carries no runtime change.",
+    "done_when": "read the brief's three clauses; (3) is delivered -- the two stale figures are corrected and each cited to its job (job 1290518), the paired suite ran base 1c97e17be 27 passed 2 skipped against head 2d31cc004 27 passed 3 skipped, and a sacct wait_probe is declared -- but (1) is unmet (the named saddle-cell membership was refuted, not the jumping decision) and (2) is unmet (the diverted 2,000-cell row stalls at 2.2567326434608685e-2 and the test is xfailed rather than passing at head).",
+    "goal": "the goal \"Make the certified diverted 2,000-cell carrier's forward solve converge\" (brief.txt:1) is not met: the row still stalls at 2.2567326434608685e-2 after twelve corrections, converged=false, so the only carrier the goal names does not converge.",
+    "manifest": "read; status complete, commits 483aece78..50dd15886 listed, both suite arms recorded completed with zero failures, the refutation and the remaining candidates set out, and the diverted 2,000-cell stall carried honestly as a follow-on rather than claimed converged.",
+    "write_paths": "read the manifest's declared write paths; every path in the net diff is inside them -- the test file, the evidence fragment and the research document -- and the reverted kernel.py is also inside."
+  },
+  "justifications": {
+    "durability": "the only landed runtime artefact is the strict xfail at tests/equilibrium/test_certificate_550_convergence.py:155, which reddens when the row converges but guards nothing about the landed change; there is no code to regress (kernel.py is identical to base) and the added 900 s timeout mark at :52 is not asserted by any test.",
+    "evidence": "the done-when's measure is the committed test run on the H200 (h200_gate2.log: 2 passed 1 xfailed in 2221.86 s, EXIT=0) and the four-row residual receipt (h200_rows_gate.log, H200 1290652), but the asserted 1e-12 is not reached, the after arm ran at 2d31cc004 rather than the reviewed head 50dd15886, and the control at h200_control_gate.log reverts a kernel change the landed tree does not carry.",
+    "fit": "the new test mirrors its sibling tests/equilibrium/test_certificate_550_convergence.py:104 in import style, marks and assertion shape and introduces no forbidden name, but the evidence fragment misdirects a reader to kernel.py:209-213 for calls that sit at kernel.py:180-184 and 356.",
+    "goal_fidelity": "the goal names one carrier, the certified diverted 2,000-cell row, and it does not converge at head; docs/evidence/fragments/converged-forward-solve/certificate-diverted-2000.html:10 records converged=false at 2.2567326434608685e-2, so the landed change records the failure rather than delivering the convergence.",
+    "reuse": "the addition forks no production capability -- it reuses scripts/prototypes/fast_map_production/solver.py and the read path -- but its body is a near-exact copy of the sibling at tests/equilibrium/test_certificate_550_convergence.py:105 rather than extending it, and the brief itself asked for a separate committed test.",
+    "scope_discipline": "git diff --stat 1c97e17be 50dd15886 lists only tests/equilibrium/test_certificate_550_convergence.py, docs/evidence/fragments/converged-forward-solve/certificate-diverted-2000.html and docs/research/certificate-550-convergence.html, all inside the declared write paths, with kernel.py net-unchanged."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is \"Make the certified diverted 2,000-cell carrier's forward solve converge\" (brief.txt:1); the landed tree leaves that row at converged=false, 2.2567326434608685e-2 after twelve corrections (docs/evidence/fragments/converged-forward-solve/certificate-diverted-2000.html:10), so the goal is not met.\nVERDICT done_when: read the brief's three clauses; (1) names the jumping decision and makes it continuous -- unmet, the saddle-cell membership was tried and refuted (1.4e-10 relative move) and reverted, and the remaining candidates are named but not fixed; (2) the diverted 2,000-cell row reaches 1e-12 and the committed GPU test passes at head -- unmet, the row stalls at 2.2567326434608685e-2 and the test is xfail(strict=True); (3) both suite arms as one job beside the two corrected stale figures and a sacct wait_probe -- met (baseline_suite.log, after_suite.log, docs/research/certificate-550-convergence.html:96).\nVERDICT write_paths: read the manifest's declared paths; every file in the net diff is inside them (tests/equilibrium/test_certificate_550_convergence.py, docs/evidence/fragments/converged-forward-solve/certificate-diverted-2000.html, docs/research/certificate-550-convergence.html) and kernel.py is net-unchanged.\nVERDICT manifest: read; status complete, commits 483aece78..50dd15886 listed, both suite arms completed with zero failures, the refutation recorded, and the diverted 2,000-cell stall carried as a follow-on rather than claimed converged.\nVERDICT diff: read the twelve commits 483aece78..50dd15886 against base 1c97e17be; the net diff is 3 files (+73/-1), the kernel.py edit at 483aece78 is reverted at 12ce33bc5, and the rest are tests and evidence.\nCALL_SITES: none\nSCORE goal_fidelity: 4\nJUSTIFICATION goal_fidelity: the goal names the certified diverted 2,000-cell carrier and it does not converge at head, docs/evidence/fragments/converged-forward-solve/certificate-diverted-2000.html:10 recording converged=false at 2.2567326434608685e-2.\nSCORE evidence: 11\nJUSTIFICATION evidence: the done-when's measure is the committed test run on the H200 (h200_gate2.log: 2 passed 1 xfailed in 2221.86 s), but the asserted 1e-12 is not reached and the control (h200_control_gate.log) reverts a kernel change the landed tree does not carry.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: git diff --stat 1c97e17be 50dd15886 lists only the test file and the two declared documents, all inside the write paths, with kernel.py net-unchanged.\nSCORE durability: 7\nJUSTIFICATION durability: the only landed runtime artefact is the strict xfail at tests/equilibrium/test_certificate_550_convergence.py:155, which reddens when the row converges but guards nothing about the landed change, and the added timeout mark at :52 is not asserted.\nSCORE fit: 14\nJUSTIFICATION fit: the new test mirrors its sibling tests/equilibrium/test_certificate_550_convergence.py:104 and introduces no forbidden name, but the evidence fragment misdirects a reader to kernel.py:209-213 for calls that sit at kernel.py:180-184 and 356.\nSCORE reuse: 12\nJUSTIFICATION reuse: the addition forks no production capability (it reuses scripts/prototypes/fast_map_production/solver.py) but duplicates the sibling at tests/equilibrium/test_certificate_550_convergence.py:105 rather than extending it.\nFINDING tests/equilibrium/test_certificate_550_convergence.py:155 follow-on: the landed 2,000-cell diverted test is marked xfail(strict=True) because the row does not converge (head residual 2.2567326434608685e-2, converged=false), so the node's done-when clause (2) is unmet and only the mark keeps the suite green.\nFINDING docs/evidence/fragments/converged-forward-solve/certificate-diverted-2000.html:8 follow-on: the two remaining candidates are cited with wrong call sites -- _local_axis_sector is called at kernel.py:97, 184 and 356 not :213, and _flux_past_level_weight at kernel.py:180 and 181 not :209 and :210 -- so the pointer misdirects the next probe.\nFINDING docs/evidence/fragments/converged-forward-solve/certificate-diverted-2000.html:12 follow-on: the negative control does not control the landed change -- kernel.py is byte-identical to base, so reverting it in H200 job 1290655 is a no-op against the head and the control shows the test is red at both revisions rather than that it discriminates them.\nFINDING tests/equilibrium/test_certificate_550_convergence.py:163 follow-on: the new test duplicates the body of its sibling at tests/equilibrium/test_certificate_550_convergence.py:105 rather than sharing a helper, though a separate committed test was the brief's own request.",
+  "review_run_id": "r-20261020T033125739608-review-of-certificate-diverted-2000-50dd15886ac9",
+  "reviewed_base_sha": "1c97e17be8795a57659c05cd7454cdab32d231ed",
+  "reviewed_head_sha": "50dd15886ac9a6708649af9995de55b7b83a0049",
+  "reviewed_run_id": "r-20261020T004248229275-certificate-diverted-2000",
+  "scores": {
+    "durability": 7,
+    "evidence": 11,
+    "fit": 14,
+    "goal_fidelity": 4,
+    "reuse": 12,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T03:55:00Z",
+  "total": 66
+}

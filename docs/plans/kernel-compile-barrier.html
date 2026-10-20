@@ -24,7 +24,7 @@
   <title>Kernel Compile Barrier | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="7">
 <meta name="plan-modified" content="2026-10-20">
 </head>
 <body>
@@ -89,6 +89,11 @@
     <pre class="r-fu-prompt">/reckon-build kernel-compile-barrier §1</pre>
     </article>
 </section>
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s3" data-id="c-20261020-coarse-tie-run-phase" data-who="reckon-build" data-when="2026-10-20T07:03:00Z">
+    <div class="r-comment-body"><p>From crew run <code>r-20261019T223150157038-coarse-tie-census-memory</code>, landed as evidence at merge <code>19a02ca16</code> (failed, correct refusal): a second provisioning job (sirius 1290676, 450G, 5 h) reproduced the cold compile at 7,013 s and about 378 GB, then held that memory for a further ~11,000 s in the 533-batch node loop without publishing the operand. So the jets build's cost is not only its compile: the batch loop after it also outlasts a five-hour wall at 2,132 nodes. §3's done-when (1) bounds the compile; the node that builds §3 should also report the loop's wall per batch, so a bounded compile is not followed by an unbounded run. The 500-cell coarse-tie census test stays a known failure until §3 lands. <a href="/nova/evidence/fragments/converged-forward-solve/coarse-tie-census-memory.html">evidence</a></p></div>
+</div>
+</section>
+</main>
 </body>
 </html>

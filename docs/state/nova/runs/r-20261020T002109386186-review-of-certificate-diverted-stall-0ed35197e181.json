@@ -817,6 +817,43 @@
   "plan_link": null,
   "promoted_by": "review-self",
   "promoted_revision": "89906c0d58b6e1df8f8327148d289e56dc6f7c24",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 16084,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261020T002109386186-review-of-certificate-diverted-stall-0ed35197e181",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 16084,
+        "path": "/tmp/reckon-crew-scratch/r-20261020T002109386186-review-of-certificate-diverted-stall-0ed35197e181"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-certificate-diverted-stall-0ed35197e181",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

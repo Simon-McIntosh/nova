@@ -1,0 +1,55 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "scripts/prototypes/tcv_liuqe_known_answer/measure.py:295",
+    "scripts/prototypes/tcv_liuqe_known_answer/measure.py:364",
+    "scripts/prototypes/tcv_liuqe_known_answer/report.py:244"
+  ],
+  "completed_at": "2026-10-20T08:27:29.711Z",
+  "dispatched_at": "2026-10-20T08:12:15Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/tcv_liuqe_known_answer/report.py",
+      "line": "150",
+      "severity": "follow-on",
+      "text": "follow-on: the corrected headline (label_mismatches, the boundary-flux distribution and the 0.05 fraction-of-span threshold at report.py:146) is built by no test, so the overstatement it replaced -- 'slices have a label or measurable boundary flux difference' counted at a 1e-09 threshold -- could return unnoticed; test_coverage.py contains no reference to report.py and test_boundary_geometry.py exercises only measure.py, leaving the whole summary sentence unguarded."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "the landed change is reached only from prototype drivers in its own package -- measure.py:295 (_boundary_view) and measure.py:364 (measure_slice) call liuqe_boundary_geometry, and report.py:244 calls build; no runtime code under nova/ imports scripts/prototypes/tcv_liuqe_known_answer.",
+    "diff": "read commit 25cf4195c against base 2894fc08b commit by commit; one commit, five files, 49 insertions and 26 deletions -- measure.py delegates its outline distances to the repository owner, report.py:133-157 separates label differences from the boundary-flux distribution, and the three documents republish that sentence.",
+    "done_when": "read; clause (2)'s agreeing-label count and stated fraction-of-span threshold are now visible at docs/evidence/fragments/converged-forward-solve/tcv-liuqe-refresh.html:2 and docs/research/tcv-liuqe-known-answer.html:10, and I recomputed all four figures from the receipt exports/corrected-rows.jsonl and matched them exactly; clause (3)'s redrawn panels are unchanged by this increment.",
+    "goal": "the node's goal is to re-score nova's read against LIUQE on the sign-corrected TCV 77549 reference and redraw the boundary panels so the limited phases compare correctly; this increment carries the follow-on reuse and headline repairs, and docs/research/tcv-liuqe-known-answer.html:10 now reads '3 of 17 geometric labels differ (slices 333, 376, 1257)' so slices 0 and 6 read as agreeing limited phases.",
+    "manifest": "read; it reports status complete, the five commits c35840ee through 25cf4195c, baseline_suite and after_suite at 0 failures pointing at base_coverage.log and review_coverage.log, review_geometry.log at 1 pass for 25cf4195c, and a landing that names 3/17 label differences with median 0.033 and six slices above 0.050.",
+    "write_paths": "read the source brief's declared write paths; every path this increment touches -- scripts/prototypes/tcv_liuqe_known_answer/measure.py, scripts/prototypes/tcv_liuqe_known_answer/report.py, docs/research/tcv-liuqe-known-answer.html, docs/evidence/fragments/converged-forward-solve/tcv-liuqe-known-answer.html and docs/evidence/fragments/converged-forward-solve/tcv-liuqe-refresh.html -- is inside them."
+  },
+  "justifications": {
+    "durability": "the increment adds no assertion anywhere, so the corrected headline at report.py:150 has no guard at all and the misleading count it replaced could return silently, while the measure.py:262 delegation is exercised only by test_boundary_geometry.py:29 through loose bounds (wall distance < 0.002 m against a measured 0.00003 m, X-point distance > 0.02 m against 0.2676 m) that a wrong-but-close distance would still satisfy.",
+    "evidence": "the head gate logs name their revision and end in an EXIT= line, and I recomputed the published headline independently from the run's own receipt: exports/corrected-rows.jsonl gives label mismatches exactly [333, 376, 1257] and fractions median 0.032824 (0.033), min 0.004167 (0.004), max 7.217730 (7.218) with 6 of 17 above 0.05, matching docs/research/tcv-liuqe-known-answer.html:10 digit for digit, though exports/corrected-rows.jsonl is job 1290933 which this increment left untouched, so the numbers are carried from a receipt predating the head by four commits.",
+    "fit": "measure.py:44 imports the owner module in the file's existing nova-import block and report.py:9 adds statistics beside the module's json and math imports, and no added name carries a version, phase, ticket or run id, though measure.py:262 reaches a private helper rather than a public owner API as scripts already do elsewhere.",
+    "goal_fidelity": "docs/research/tcv-liuqe-known-answer.html:10 now separates the three label differences (slices 333, 376, 1257) from the boundary-flux distribution, so the early limited slices 0 and 6 no longer read as disagreements, and scripts/prototypes/tcv_liuqe_known_answer/report.py:150 builds that sentence from label_mismatches and the measured fractions rather than a threshold count.",
+    "reuse": "the increment deletes the duplicated _point_to_segments and scripts/prototypes/tcv_liuqe_known_answer/measure.py:262 and :273 now call the repository's owner nova/equilibrium/boundary_comparison.py:81 _point_to_segment_distances, whose clip-and-project arithmetic it had re-implemented; a search over nova/ for a point-to-nearest-segment definition finds that function as the only owner, so nothing is forked.",
+    "scope_discipline": "git diff --stat 2894fc08b9054bd2788d4e463b8218d36e31b6be 25cf4195cec8f1e541a21c99752443d73c9ea0b0 lists exactly the five declared files (measure.py, report.py, the research page and both evidence fragments) and touches neither scripts/prototypes/tcv_liuqe_known_answer/test_boundary_geometry.py, test_coverage.py, scripts/prototypes/fast_map_production/kernel.py nor anything under nova/."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to re-score nova's read against LIUQE on the sign-corrected TCV 77549 reference and redraw the boundary panels so the limited phases compare correctly; this increment carries the follow-on reuse and headline repairs, and docs/research/tcv-liuqe-known-answer.html:10 now reads '3 of 17 geometric labels differ (slices 333, 376, 1257)' so slices 0 and 6 read as agreeing limited phases.\nVERDICT done_when: read; clause (2)'s agreeing-label count and the fraction-of-span threshold are stated at docs/evidence/fragments/converged-forward-solve/tcv-liuqe-refresh.html:2 and docs/research/tcv-liuqe-known-answer.html:10, and I recomputed all four quoted numbers from exports/corrected-rows.jsonl and matched them exactly; clause (3)'s redrawn panels are unchanged by this increment.\nVERDICT write_paths: read the source brief's declared write paths; every path this increment touches (measure.py, report.py, docs/research/tcv-liuqe-known-answer.html and both evidence fragments) is inside them.\nVERDICT manifest: read; it reports status complete, commits c35840ee through 25cf4195c, baseline_suite and after_suite both at 0 failures pointing at base_coverage.log and review_coverage.log, review_geometry.log at 1 pass for head 25cf4195c, and a landing naming 3/17 label differences with median 0.033 and six slices above 0.050.\nVERDICT diff: read commit 25cf4195c against base 2894fc08b; one commit, five files, 49 insertions and 26 deletions, all inside the declared scope, with no test file touched.\nCALL_SITES: scripts/prototypes/tcv_liuqe_known_answer/measure.py:295, scripts/prototypes/tcv_liuqe_known_answer/measure.py:364, scripts/prototypes/tcv_liuqe_known_answer/report.py:244\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/research/tcv-liuqe-known-answer.html:10 separates the three label differences from the boundary-flux distribution, so the early limited slices 0 and 6 no longer read as disagreements, and report.py:150 builds that sentence from label_mismatches and the measured fractions.\nSCORE evidence: 17\nJUSTIFICATION evidence: I recomputed the published headline from exports/corrected-rows.jsonl (mismatches [333, 376, 1257]; fractions median 0.032824, min 0.004167, max 7.217730, 6 of 17 above 0.05) and it matches docs/research/tcv-liuqe-known-answer.html:10 digit for digit, though that receipt is job 1290933 and predates the head by four commits.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 2894fc08b9054bd2788d4e463b8218d36e31b6be 25cf4195cec8f1e541a21c99752443d73c9ea0b0 lists exactly the five declared files and touches neither test_boundary_geometry.py, test_coverage.py, kernel.py nor anything under nova/.\nSCORE durability: 11\nJUSTIFICATION durability: the increment adds no assertion, so the headline repair at report.py:150 has no guard and measure.py:262's delegation is covered only by test_boundary_geometry.py:29's loose bounds (wall < 0.002 m against a measured 0.00003 m; X-point > 0.02 m against 0.2676 m).\nSCORE fit: 17\nJUSTIFICATION fit: measure.py:44 and report.py:9 extend the files' existing import blocks and no added name carries a version, phase, ticket or run id, though measure.py:262 calls a private owner helper rather than a public API.\nSCORE reuse: 20\nJUSTIFICATION reuse: the increment deletes the duplicated _point_to_segments and measure.py:262 calls the repository's owner nova/equilibrium/boundary_comparison.py:81 _point_to_segment_distances, which a search over nova/ confirms is the only definition of that capability.\nFINDING scripts/prototypes/tcv_liuqe_known_answer/report.py:150 follow-on: the corrected summary sentence and its 0.05 threshold at report.py:146 are exercised by no test -- test_coverage.py does not reference report.py and test_boundary_geometry.py covers only measure.py -- so the overstating headline this commit removed could return silently.",
+  "review_run_id": "r-20261020T081131693623-review-of-tcv-liuqe-refresh-25cf4195cec8",
+  "reviewed_base_sha": "2894fc08b9054bd2788d4e463b8218d36e31b6be",
+  "reviewed_head_sha": "25cf4195cec8f1e541a21c99752443d73c9ea0b0",
+  "reviewed_run_id": "r-20261020T063745768870-tcv-liuqe-refresh",
+  "scores": {
+    "durability": 11,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T08:21:00Z",
+  "total": 103
+}

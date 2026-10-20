@@ -23,6 +23,7 @@ export PYTHONPATH="${root}"
 export JAX_PLATFORMS=cuda,cpu
 export JAX_ENABLE_COMPILATION_CACHE=1
 export JAX_COMPILATION_CACHE_DIR="${cache_root}"
+export JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES=none
 export JAX_PERSISTENT_CACHE_MIN_COMPILE_TIME_SECS=0
 #: Emit "Persistent compilation cache hit" lines at WARNING so the serving log
 #: shows the second keyframe riding the cache.

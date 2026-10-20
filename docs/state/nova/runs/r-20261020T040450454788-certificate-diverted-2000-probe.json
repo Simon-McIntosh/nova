@@ -871,6 +871,71 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "c9f2e420d6f1c1c14b24ece00b5b873f9eab3561",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "manifest is blocked; process kept for resume",
+    "scratch_bytes": 5027,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261020T040450454788-certificate-diverted-2000-probe",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 5027,
+        "path": "/tmp/reckon-crew-scratch/r-20261020T040450454788-certificate-diverted-2000-probe"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "unintegrated",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [],
+          "head": "c9f2e420d6f1c1c14b24ece00b5b873f9eab3561",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/certificate-diverted-2000-probe",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-10-20T05:56:37Z",
+            "session_id": "84a819bc-dae6-4669-a0dd-6dd14debd584",
+            "session_source": "stream",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/certificate-diverted-2000-probe"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "this worktree is the working directory of recoverable session 84a819bc-dae6-4669-a0dd-6dd14debd584"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_retention": {
+      "classification": "retained-for-resume",
+      "retained_at": "2026-10-20T05:56:37Z",
+      "session_id": "84a819bc-dae6-4669-a0dd-6dd14debd584",
+      "session_source": "stream",
+      "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/certificate-diverted-2000-probe"
+    },
+    "worktree_withheld": "retained as the working directory of recoverable session 84a819bc-dae6-4669-a0dd-6dd14debd584"
+  },
   "resume_waiver": {
     "reason": "lead directive 2026-10-20: difficult nodes go to the codex lane; the clive session is near its usable context and the successor carries the census findings",
     "session_id": "84a819bc-dae6-4669-a0dd-6dd14debd584",

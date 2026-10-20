@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="516">
+<meta name="plan-version" content="517">
 <meta name="plan-modified" content="2026-10-20">
 </head>
 <body>
@@ -1664,6 +1664,9 @@ NO PRODUCT OR TEST SOURCE WAS CHANGED.  The 1e-10 tolerance was not widened.</p>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261020T205356651319-read-producer-repairs" data-who="reckon-build" data-when="2026-10-20T21:17:30Z">
     <div class="r-comment-body"><p>Finite carrier interpolation and measured-degree table landed: 2 limited exports, 4 capacity tests and 2 sweep bounds pass; 10,000-cell read remains overflowed at 256/255 and six field reads remain invalid.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261020T212900476016-review-of-read-producer-repairs-d15966fd4c52" data-who="reckon-build" data-when="2026-10-20T21:47:47.747Z">
+    <div class="r-comment-body"><p>Reviewed run r-20261020T205356651319-read-producer-repairs at head d15966fd4c521dbb24225996a3234f2b03898365 against base baebdd1ff1b1c0477ef8b290ff2248e98dbd2854: carrier and adjacency repairs land, the field seam does not, one blocking reuse finding (duplicated mastu_inputs against probe.py) and four follow-on findings.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261010T184522536142-cfs-current-book-fragments" data-who="reckon-build" data-when="2026-10-10T18:46:29.609Z">
     <div class="r-comment-body"><p>Implemented traced current.book over connected multi-polygon membership using the widened signed-ring exact clip. Six certificate rows pass: diverted read image errors 1.15131582e-4, 2.49842782e-5, 3.95031905e-6 at 550/2098/5158 cells; limited errors 1.77777866e-5, 2.66948705e-6, 5.45231060e-7 at 553/2105/5167. Maximum net-current error 2.22e-16, excluded current zero, legacy control 0.197326978718; evidence docs/evidence/fragments/converged-forward-solve/cfs-current-book.html#cfs-current-book-fragments-booking and one three-rung SVG; audit-doc 0 errors.</p></div>

@@ -1,0 +1,89 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "nova/equilibrium/topology.py:3125",
+    "nova/equilibrium/topology.py:2583",
+    "scripts/prototypes/certified_carrier_export/export_records.py:130"
+  ],
+  "completed_at": "2026-10-20T21:47:47.747Z",
+  "dimensions": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit",
+    "reuse"
+  ],
+  "dispatched_at": "2026-10-20T21:29:27Z",
+  "findings": [
+    "scripts/prototypes/contour_tree_overflow/test_overflow.py:19 blocking: the file re-implements mastu_inputs inline instead of importing it from its owner scripts/prototypes/contour_tree_overflow/probe.py, which the repository already carries; probe.py and a test_overflow.py importing probe.py both exist on main at 868a3d92d, so this addition duplicates the owner rather than extending it and lands an add/add conflict at the same path.",
+    "docs/evidence/fragments/converged-forward-solve/read-producer-repairs.html:15 follow-on: the fragment explains the archived carrier's overflow as an adjacency overflow removed by the width change, but the node's own base arm measures degree 9 against the old fixed width of 16 and prints nodes=34/256, edges=33/255, so neither the neighbour table nor the node/edge capacity was saturated and the mechanism the repair removes is never identified or quoted.",
+    "scripts/prototypes/contour_tree_overflow/test_overflow.py:60 follow-on: the capacity assertion was narrowed from the first attempt's '> 16' to '> 0' (head-overflow.log:60 is the same assertion failing at 9), so the file no longer establishes that the machine carrier needs a wider table and cannot redden for the fixed-width defect it was written against.",
+    "scripts/prototypes/contour_tree_overflow/test_overflow.py:46 follow-on: test_machine_overflow_reproduces now asserts the opposite of its name with no comment recording the inversion, so a reader comparing it with the pinned reproduction on main reads it as still pinning the refusal.",
+    "nova/equilibrium/contour_tree.py:203 follow-on: the default neighbour capacity for a direct dense-graph caller moved from 16 to min(edge_count, 32) in the same change though the overflow record prescribes only a safe edge-count bound there, so the default path silently widens for every caller that supplies no measured degree."
+  ],
+  "justifications": {
+    "durability": "The carrier repair is guarded by the pre-existing scripts/prototypes/certified_carrier_export/test_export_records.py::test_round_trip[limited], red at base (base-export.log) and green at head, and the undersized-declaration refusal is guarded by test_overflow.py:88, which reddens on the reverted code by construction of its width.",
+    "evidence": "The base and head arms are on disk with revision, imported module path and EXIT for each named file, but only the export pair is carried as structured baseline_suite/after_suite and one of the two declared negative controls could not be demonstrated (manifest negative_control_note; base-overflow.log runs at degree 9).",
+    "fit": "The changed modules follow the surrounding style, but scripts/prototypes/contour_tree_overflow/test_overflow.py:46 keeps the name test_machine_overflow_reproduces while asserting the refused carrier is now accepted.",
+    "goal_fidelity": "One of three done-when clauses is met in full and the field seam named in the goal is not repaired: six tests in scripts/prototypes/fast_map_production/test_axis_ranking.py still fail at nova/equilibrium/topology.py:1596's new primal path (head-axis-final.log, 5 failed 1 passed).",
+    "reuse": "scripts/prototypes/contour_tree_overflow/test_overflow.py:19 re-implements mastu_inputs, which scripts/prototypes/contour_tree_overflow/probe.py already owns, in the same prototype directory the node was writing into.",
+    "scope_discipline": "Every path in the diff is inside the node's declared write grant and no test assertion outside scripts/prototypes/contour_tree_overflow/test_overflow.py is touched."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261020T212900476016-review-of-read-producer-repairs-d15966fd4c52",
+  "reviewed_base_sha": "baebdd1ff1b1c0477ef8b290ff2248e98dbd2854",
+  "reviewed_head_sha": "d15966fd4c521dbb24225996a3234f2b03898365",
+  "reviewed_run_id": "r-20261020T205356651319-read-producer-repairs",
+  "rubric": {
+    "evidence_read": [
+      "manifest.md",
+      "status-repair.json",
+      "base-export.log",
+      "head-export-committed.log",
+      "base-overflow.log",
+      "base-overflow-overlay.log",
+      "head-overflow.log",
+      "head-overflow-retry.log",
+      "base-tenk.log",
+      "head-tenk.log",
+      "base-axis.log",
+      "head-axis-final.log",
+      "base-carrier.log",
+      "base-sweep.log",
+      "head-sweep.log",
+      "base-brute.log",
+      "head-brute.log",
+      "axis-diagnosis.log",
+      "tenk-diagnosis.log"
+    ],
+    "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/read-producer-repairs",
+    "verified_rerun": {
+      "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -q -p no:cacheprovider scripts/prototypes/contour_tree_overflow/test_overflow.py",
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T212900476016-review-of-read-producer-repairs-d15966fd4c52/logs/review-head-overflow.log",
+      "result": "4 passed",
+      "revision": "d15966fd4c521dbb24225996a3234f2b03898365"
+    }
+  },
+  "scores": {
+    "durability": 15,
+    "evidence": 12,
+    "fit": 13,
+    "goal_fidelity": 12,
+    "reuse": 5,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T21:47:52.505339+00:00",
+  "total": 73,
+  "verdicts": {
+    "call_sites": "nova/equilibrium/topology.py:3125 read passes mesh.neighbour_capacity into build_contour_tree; nova/equilibrium/topology.py:2583 TopologyGeometry.from_cells reaches build_contour_mesh and _barycentric_flux. The tests' own consumer scripts/prototypes/fast_map_production/kernel.py is not reached by the changed code.",
+    "diff": "Read commit by commit against baebdd1ff: 948887d5d changes three production modules and adds a test file, d15966fd adds the evidence fragment; 180 insertions across 5 files, no path outside the grant.",
+    "done_when": "Clause (1) is met and clause (2)'s capacity contract is met, but clause (2)'s ten-thousand-cell element and clause (3) are not: head-export-committed.log is 2 passed, my re-run of the named test at d15966fd is 4 passed, base-tenk.log and head-tenk.log are the same 1 failed at both revisions.",
+    "goal": "The node goal is to repair the first-separator producer layer so its carrier, tree and field seams stop failing; the carrier seam is repaired (nova/equilibrium/contour_tree_mesh.py:153 finite degenerate extension) and the tree seam is sized from the measured degree (nova/equilibrium/contour_tree.py:190), while the field seam at nova/equilibrium/topology.py:1596 now reaches its callers' validity assertions and still fails there.",
+    "manifest": "Read; it records both commits (948887d5d, d15966fd4) with per-file base and head logs, the negative-control log, and the as-delivered status 'blocked' that status-repair.json changed to 'complete' after the coordinator accepted a partial delivery.",
+    "write_paths": "Read the node's declared write paths from its brief; five paths in the diff (nova/equilibrium/contour_tree_mesh.py, nova/equilibrium/contour_tree.py, nova/equilibrium/topology.py, scripts/prototypes/contour_tree_overflow/test_overflow.py, docs/evidence/fragments/converged-forward-solve/read-producer-repairs.html) are all inside them."
+  }
+}

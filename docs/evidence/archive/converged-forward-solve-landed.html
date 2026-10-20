@@ -89,6 +89,16 @@
     <p>Merge <code>05023a0aa</code>. MAST-U s1-4-5-B carrier vertices reach degree 19, 22 and 18 at resolutions 16, 24 and 32, above the fixed 16-neighbour table width, so the read is refused; a carrier-degree-derived width is prescribed. <a href="/nova/evidence/fragments/converged-forward-solve/contour-tree-overflow.html">fragment</a></p>
   </section>
 
+  <section id="identity-test-bounds">
+    <h2>§6 — the identity solve tests are bounded by their measured walls</h2>
+    <p>Merge <code>691f2a9d4</code>. Both solve tests in test_forward_compile_identity.py carry a 3,840 s per-test bound; with the bound lifted they pass on CPU in 2,532.78 s together, so the 4.33e-12 traced-versus-bound identity miss is H200-only.</p>
+  </section>
+
+  <section id="contour-tree-union-find">
+    <h2>§2 — the 10,000-cell warm read falls to 1.1 s</h2>
+    <p>Merge <code>3392ef9c1</code>. The contour-tree sweeps keep component roots in a rank-balanced union-find with path compression and emit arcs in one batch, bit-identical in all seven receipt fields. On the H200 the 10,000-cell whole read falls from 79.3 s to 1.105 s limited and 1.143 s diverted, against the 10 s target. <a href="/nova/evidence/fragments/converged-forward-solve/contour-tree-union-find.html">fragment</a></p>
+  </section>
+
 </main>
 </body>
 </html>

@@ -1,0 +1,74 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [
+    {
+      "failure_condition": "the skipif marker reddens the file into a SKIP (not a pass) when git cat-file cannot resolve 511a22e06^:nova/equilibrium/contour_tree.py; the added control is positive on the skip direction (empty GIT_DIR run logged SKIPPED with the named reason) but no committed assertion fails if the availability probe itself regresses.",
+      "lines": "86"
+    }
+  ],
+  "base_log_revision": "c22f2d1e5e9433ec872fcdb20480f762737a5805",
+  "baseline_suite_log": "",
+  "call_site_count": 4,
+  "call_sites": [
+    "nova/equilibrium/topology.py:2980",
+    "nova/equilibrium/contour_tree.py:build_contour_tree",
+    "nova/equilibrium/contour_tree.py:_sweep_tree",
+    "nova/equilibrium/contour_tree.py:_carrier_adjacency"
+  ],
+  "completed_at": "2026-10-20T13:57:37.373Z",
+  "dispatched_at": "2026-10-20T13:49:13Z",
+  "findings": [
+    {
+      "file": "tests/test_contour_tree_sweep_bounds.py",
+      "line": "86",
+      "severity": "follow-on",
+      "text": "follow-on: the added skip turns a missing reference object into a silent pass, so the receipt-identity guard this node exists to add can be absent in a shallow clone or any tree without 511a22e06 while the default lane stays green; the guard then reports safety it does not provide for a reason unrelated to the code under test."
+    },
+    {
+      "file": "tests/test_contour_tree_sweep_bounds.py",
+      "line": "52",
+      "severity": "follow-on",
+      "text": "follow-on: no committed test asserts the skip path, so a regression in _receipt_reference_available (for example a constant False, or a git binary absent so subprocess.run raises at import) leaves the whole receipt guard inert and the suite green; the availability control is verified only by an uncommitted run-local log."
+    }
+  ],
+  "head_log_revision": "1d2f6dde16d08a39328a85410eacb708fe827a3c",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "Read commit by commit against base c22f2d1e5: one commit, 24 added lines in tests/test_contour_tree_sweep_bounds.py only, adding an availability probe, a skipif marker and a pytest.skip fallback; no production-code change.",
+    "done_when": "brief.txt:7 requires a fresh CPU pass, a default collect-only line and a literal negative control; the manifest records after_suite 2 passed EXIT=0 in logs/final-head-cpu-gate.log, head collection 7953/8956, and logs/negative-control-retry.log failing the depth bound at 52 > 15 with EXIT=1, and the delta does not disturb any of those.",
+    "goal": "The gained commit 1d2f6dde1 fixes the guard the earlier review flagged: tests/test_contour_tree_sweep_bounds.py:38 adds _receipt_reference_available and :86 marks the receipt test skipif when the reference object is absent, so the file is collected and green in the default lane instead of erroring at collection.",
+    "manifest": "Read; it records commits [c22f2d1e5, 1d2f6dde1], status complete, after_suite as one JSON object with failure_count 0 and log logs/final-head-cpu-gate.log, negative_control_log as a bare path, and a named-collection refusal on its failed attempt, though its baseline_suite line is empty.",
+    "write_paths": "The manifest declares tests/test_contour_tree_sweep_bounds.py, docs/evidence/fragments/converged-forward-solve/contour-tree-guards-in-lane.html and docs/figures/converged-forward-solve/contour-tree-guards-in-lane; the gained commit c22f2d1e5..1d2f6dde1 changes only tests/test_contour_tree_sweep_bounds.py."
+  },
+  "justifications": {
+    "durability": "tests/test_contour_tree_sweep_bounds.py:52 computes availability once and :86 skips on it, so a regression that makes availability read False leaves the receipt guard inert with a green suite and no assertion fails.",
+    "evidence": "logs/final-unavailable-reference.log shows the control firing (1 passed, 1 skipped with the named reason, EXIT=0) and logs/final-head-cpu-gate.log shows 2 passed EXIT=0, but both are run-local and neither is committed as a gate.",
+    "fit": "tests/test_contour_tree_sweep_bounds.py:38-52 follows the import-time-guard idiom already used at :31-32 and introduces no plan, version or ticket token in any name.",
+    "goal_fidelity": "tests/test_contour_tree_sweep_bounds.py:86 applies skipif(not _HAS_RECEIPT_REFERENCE) and :69 falls back to pytest.skip(_RECEIPT_REFERENCE_REASON), so a missing reference no longer errors the default-lane guard.",
+    "reuse": "no existing helper owns git-object availability in nova or scripts, so the probe is new and small; it reuses load_builder from the prototype profile rather than adding a second loader.",
+    "scope_discipline": "git diff c22f2d1e5..1d2f6dde1 touches only tests/test_contour_tree_sweep_bounds.py, inside the declared write paths, and changes nothing else."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the gained commit 1d2f6dde1 fixes the guard the earlier review flagged; tests/test_contour_tree_sweep_bounds.py:38 adds _receipt_reference_available and :86 marks the receipt test skipif when the reference object is absent, so the file is collected and green in the default lane instead of erroring at collection.\nVERDICT done_when: brief.txt:7 requires a fresh CPU pass, a default collect-only line and a literal negative control; the manifest records after_suite 2 passed EXIT=0 in logs/final-head-cpu-gate.log, head collection 7953/8956, and logs/negative-control-retry.log failing the depth bound at 52 > 15 with EXIT=1, none of which the delta disturbs.\nVERDICT write_paths: the manifest declares tests/test_contour_tree_sweep_bounds.py, docs/evidence/fragments/converged-forward-solve/contour-tree-guards-in-lane.html and docs/evidence under figures; the gained commit c22f2d1e5..1d2f6dde1 changes only tests/test_contour_tree_sweep_bounds.py.\nVERDICT manifest: read; it records commits [c22f2d1e5, 1d2f6dde1], status complete, after_suite as one JSON object with failure_count 0 and log logs/final-head-cpu-gate.log, negative_control_log as a bare path, though its baseline_suite line is empty.\nVERDICT diff: read commit by commit against base c22f2d1e5; one commit, 24 added lines in tests/test_contour_tree_sweep_bounds.py only, adding an availability probe at :38, a skipif marker at :86 and a pytest.skip fallback at :69; no production-code change.\nCALL_SITES: nova/equilibrium/topology.py:2980, nova/equilibrium/contour_tree.py:build_contour_tree, nova/equilibrium/contour_tree.py:_sweep_tree, nova/equilibrium/contour_tree.py:_carrier_adjacency\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: tests/test_contour_tree_sweep_bounds.py:86 applies skipif(not _HAS_RECEIPT_REFERENCE) and :69 falls back to pytest.skip(_RECEIPT_REFERENCE_REASON), so a missing reference no longer errors the default-lane guard.\nSCORE evidence: 16\nJUSTIFICATION evidence: logs/final-unavailable-reference.log shows the control firing (1 passed, 1 skipped with the named reason, EXIT=0) and logs/final-head-cpu-gate.log shows 2 passed EXIT=0, but both are run-local and neither is committed as a gate.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff c22f2d1e5..1d2f6dde1 touches only tests/test_contour_tree_sweep_bounds.py, inside the declared write paths, and changes nothing else.\nSCORE durability: 11\nJUSTIFICATION durability: tests/test_contour_tree_sweep_bounds.py:52 computes availability once and :86 skips on it, so a regression that makes availability read False leaves the receipt guard inert with a green suite and no assertion fails.\nSCORE fit: 17\nJUSTIFICATION fit: tests/test_contour_tree_sweep_bounds.py:38-52 follows the import-time-guard idiom already used at :31-32 and introduces no plan, version or ticket token in any name.\nSCORE reuse: 17\nJUSTIFICATION reuse: no existing helper owns git-object availability in nova or scripts, so the probe is new and small, reusing load_builder from the prototype profile rather than adding a second loader.\nFINDING tests/test_contour_tree_sweep_bounds.py:86 follow-on: the added skip turns a missing reference object into a silent pass, so the receipt-identity guard this node exists to add can be absent in a shallow clone or any tree without 511a22e06 while the default lane stays green.\nFINDING tests/test_contour_tree_sweep_bounds.py:52 follow-on: no committed test asserts the skip path, so a regression in _receipt_reference_available (a constant False, or a git binary absent so subprocess.run raises at import) leaves the whole receipt guard inert and the suite green; it is verified only by an uncommitted run-local log.\n",
+  "review_run_id": "r-20261020T134830680572-review-of-contour-tree-guards-in-lane-1d2f6dde16d0",
+  "reviewed_base_sha": "c22f2d1e5e9433ec872fcdb20480f762737a5805",
+  "reviewed_commits": [
+    "1d2f6dde16d08a39328a85410eacb708fe827a3c"
+  ],
+  "reviewed_head_sha": "1d2f6dde16d08a39328a85410eacb708fe827a3c",
+  "reviewed_run_id": "r-20261020T124900117804-contour-tree-guards-in-lane",
+  "scores": {
+    "durability": 11,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 17,
+    "scope_discipline": 19
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T13:57:38.716036+00:00",
+  "total": 98
+}

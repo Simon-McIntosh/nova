@@ -1,0 +1,23 @@
+<section id="xla-autotune-playable-route" data-reckon="evidence" data-node="xla-autotune-playable-route">
+<h3>playable server disables the per-fusion autotune cache</h3>
+
+<p><code>scripts/playable_server/payload.sh</code> enables JAX's persistent
+compilation cache through environment variables. It now also exports
+<code>JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES=none</code>, preventing XLA's
+per-fusion autotune records from being written beside the compile cache.
+<code>tests/test_playable_server.py::test_payload_disables_xla_per_fusion_autotune_cache</code>
+pins the payload setting.</p>
+
+<h4>Focused gate</h4>
+<p><code>UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/test_playable_server.py -q</code>
+&rarr; <strong>12 passed in 16.44s</strong>, <code>EXIT=0</code> at revision
+<code>52702d307482ec0f35e0276e98c21c3a81d1cc91</code>. The baseline at the same
+revision passed 11 tests in 19.20s.</p>
+
+<h4>Negative control</h4>
+<p>Deleted the payload export while leaving the new test in place. The focused
+gate reported <code>FAILED tests/test_playable_server.py::test_payload_disables_xla_per_fusion_autotune_cache</code>,
+1 failed and 11 passed, <code>EXIT=1</code>. The export was restored after the
+run. The preserved control log is
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T063501951269-xla-autotune-playable-route/negative-control.log</code>.</p>
+</section>

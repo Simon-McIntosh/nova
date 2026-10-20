@@ -21,6 +21,11 @@ from apps.playable.main import parse_launch_arguments, session_arguments
 ROOT = Path(__file__).resolve().parents[1]
 RUN = ROOT / "scripts" / "playable_server" / "run.sh"
 STATUS = ROOT / "scripts" / "playable_server" / "status.sh"
+PAYLOAD = ROOT / "scripts" / "playable_server" / "payload.sh"
+
+
+def test_payload_disables_xla_per_fusion_autotune_cache():
+    assert "export JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES=none" in PAYLOAD.read_text()
 
 
 def test_launch_arguments_supply_session_defaults():

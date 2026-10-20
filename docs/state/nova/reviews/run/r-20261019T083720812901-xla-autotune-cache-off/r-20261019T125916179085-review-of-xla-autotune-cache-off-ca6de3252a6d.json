@@ -1,0 +1,73 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [
+    {
+      "failure_condition": "assert jax.config.jax_persistent_cache_enable_xla_caches == 'none' after configure_persistent_compilation_cache. Fails if the config.update line is deleted: the key keeps JAX's default, as the negative-control log records ('xla_gpu_per_...une_cache_dir' == 'none'). Independent (a literal versus the live config), and verified by reinstating the regression.",
+      "lines": "tests/test_compilation_cache_location.py:233"
+    },
+    {
+      "failure_condition": "assert cache.runtime_identity['compiler_options']['jax_persistent_cache_enable_xla_caches'] == 'none'. Fails if the key is not set before _persistent_cache_runtime_identity hashes it, because the identity would carry the default string; this is the assertion the kept negative control reddens.",
+      "lines": "tests/test_compilation_cache_location.py:235-241"
+    },
+    {
+      "failure_condition": "assert first.directory == second.directory compares two calls to the same function. It fails only on non-deterministic identity hashing and would pass with the off-switch absent, so it guards determinism, not the change's claim. Recorded as a follow-on rather than counted as coverage of the off-switch.",
+      "lines": "tests/test_compilation_cache_location.py:251-256"
+    },
+    {
+      "failure_condition": "assert jax.config.jax_persistent_cache_enable_xla_caches == 'none' after compilation_cache. Fails if the tiledassembly line is deleted, the tiledassembly route's own mutation. No negative-control log pins this specific line, but the assertion names a code change that reddens it.",
+      "lines": "tests/test_compilation_cache_location.py:264"
+    },
+    {
+      "failure_condition": "The prelude test asserts 'export JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES=none' appears in the dry-run's rendered stdout (fails if the run.sh prelude line is removed); the prewarm test asserts the same string in prewarm.sh's source (fails if that export is removed). Both compare against a literal absent from the script when the line is deleted.",
+      "lines": "tests/test_nova_lane_launcher.py:186 and :193"
+    }
+  ],
+  "call_sites": [
+    "nova/equilibrium/forward.py:2386 (_configure_solve_compilation_cache -> configure_persistent_compilation_cache)",
+    "scripts/labeller_batch/shard.py:246 (configure_persistent_compilation_cache)",
+    "scripts/h200_test_lane/prewarm.sh:67 (pre-warm payload resolves its directory through configure_persistent_compilation_cache)",
+    "nova/biot/tiledassembly.py:736 (tile_evaluator -> configure_production_compilation_cache -> compilation_cache)",
+    "scripts/h200_test_lane/run.sh:25 (payload prelude delivered to every gate job the lane launches)"
+  ],
+  "completed_at": "2026-10-19T13:17:44.037Z",
+  "dispatched_at": "2026-10-19T12:59:53Z",
+  "findings": [
+    {
+      "file": "scripts/playable_server/payload.sh",
+      "line": "24",
+      "severity": "follow-on",
+      "text": "follow-on: the playable_server serving route sets JAX_ENABLE_COMPILATION_CACHE=1 and JAX_COMPILATION_CACHE_DIR=\"${cache_root}\" (line 25) but does not set JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES=none, so it still writes XLA per-fusion autotune records under its cache root. It is a nova route that enables the persistent compilation cache, which the goal ('every nova route') covers, and it is outside this node's declared write paths, so it is recorded rather than repaired."
+    },
+    {
+      "file": "tests/test_compilation_cache_location.py",
+      "line": "251",
+      "severity": "follow-on",
+      "text": "follow-on: test_two_persistent_cache_calls_resolve_one_directory asserts first.directory == second.directory, two outputs of the same function. It is deterministic-function coverage, not an independent check, and would pass even if the off-switch were removed; it should not be counted as protecting the change."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "See CALL_SITES.",
+    "diff": "Read commit by commit against base 3752410851925e484c79953b2e4e3c3dcb9a6115. 1447ebcab adds the off-switch in two modules and two shell scripts plus 104 lines of tests (6 files); dc2d995cc adds the 61-line evidence fragment; ca6de3252 updates the fragment with the titan two-pass table and counts. No file outside the declared write paths changed.",
+    "done_when": "The source done_when (prompt.txt:101-105) names the four settings, tests in tests/test_compilation_cache_location.py and tests/test_nova_lane_launcher.py pinning the identity value, two-call directory agreement, the tiledassembly setting and both exports, and a titan job running the certificate target twice at the changed revision (zero autotune files, second pass hits) against the same job at base (autotune files created). The focused gate ran those two files (18 passed, head-focused-tests.log:6 EXIT=0); titan job 1290032 ran the certificate row twice per arm (titan-probe.log:16-24), the off arm 0->0 both passes with 273 hits / 0 misses on pass 2, the base arm 0->1408 then 1408->1408. The gate asserts the done_when's measure.",
+    "goal": "The source goal (prompt.txt:30) is to disable XLA's per-fusion autotune cache on every nova route that enables the persistent compilation cache. The landed change (1447ebcab) sets jax_persistent_cache_enable_xla_caches to none in nova/jax/config.py:174-179 (the solve/labeller route, before the identity hash) and nova/biot/tiledassembly.py:617-621 (the kernel route), and exports JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES=none from scripts/h200_test_lane/run.sh:25 and scripts/h200_test_lane/prewarm.sh:59. A second persistent-cache route remains uncovered: scripts/playable_server/payload.sh:24-25 sets JAX_ENABLE_COMPILATION_CACHE=1 and JAX_COMPILATION_CACHE_DIR without the off-switch (see finding).",
+    "manifest": "Read; it states the three routes set the key, 18 focused tests pass (18 passed, EXIT=0), the negative control fails the identity pin at EXIT=1, and titan job 1290032 records the two-pass counts; commit list 1447ebcab dc2d995cc ca6de3252 and changed_paths agree with the diff. baseline_suite and after_suite are null, so no suite arm was run for this node.",
+    "write_paths": "The source prompt.txt:69-77 fences eight paths including the two tests, the two lane scripts, nova/jax/config.py, nova/biot/tiledassembly.py, the evidence fragment and a figures directory. git diff --stat 37524108..ca6de3252 names exactly six source/test paths plus the fragment, all inside the fence; the figures directory is declared but unused."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261019T125916179085-review-of-xla-autotune-cache-off-ca6de3252a6d",
+  "reviewed_base_sha": "3752410851925e484c79953b2e4e3c3dcb9a6115",
+  "reviewed_head_sha": "ca6de3252a6daf299bcf87015ed3da631424ba2f",
+  "reviewed_run_id": "r-20261019T083720812901-xla-autotune-cache-off",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 14,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T13:17:48.242695+00:00"
+}

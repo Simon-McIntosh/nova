@@ -25,8 +25,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
-<meta name="plan-version" content="127">
-<meta name="plan-modified" content="2026-10-19">
+<meta name="plan-version" content="128">
+<meta name="plan-modified" content="2026-10-20">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 <meta name="plan-impl" content="0.67">
 </head>
@@ -907,7 +907,10 @@
     <div class="r-comment-body"><p>Evaluate the payload prelude in the payload shell instead of `bash -c` so its exports reach pytest; the launcher test fails at base 9300a7714 (1 failed/8 passed) and passes at head b091aa8d8 (9 passed), and an H200 lane run now loads the guard (job 1280627, CACHE_GUARD_MARKER=wall-clock-reliable misses=13, budget=100000) while budget 0 against a served directory lacking the programs ends WALL-CLOCK-UNRELIABLE misses=13 with EXIT_STATUS=1 (job 1280632).</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261019T083720812901-xla-autotune-cache-off" data-who="reckon-build" data-when="2026-10-19T12:58:09Z">
-    <div class="r-comment-body"><p>docs/evidence/fragments/forward-solver-route-integrity/xla-autotune-cache-off.html — configure_persistent_compilation_cache sets jax_persistent_cache_enable_xla_caches=none before hashing the runtime identity, tiledassembly compilation_cache applies the same setting, and the h200 lane prelude and pre-warm payload export it; 18 focused tests pass; deleting the config line fails the identity pin (EXIT=1); titan job 1290032 creates zero autotune files at the changed revision across both passes with 273 second-pass compile-cache hits and 0 misses, against 1408 autotune files with the key left at JAX&#x27;s default</p></div>
+    <div class="r-comment-body"><p>docs/evidence/fragments/forward-solver-route-integrity/xla-autotune-cache-off.html — configure_persistent_compilation_cache sets jax_persistent_cache_enable_xla_caches=none before hashing the runtime identity, tiledassembly compilation_cache applies the same setting, and the h200 lane prelude and pre-warm payload export it; 18 focused tests pass; deleting the config line fails the identity pin (EXIT=1); titan job 1290032 creates zero autotune files at the changed revision across both passes with 273 second-pass compile-cache hits and 0 misses, against 1408 autotune files with the key left at JAX's default</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261019T125916179085-review-of-xla-autotune-cache-off-ca6de3252a6d" data-who="reckon-build" data-when="2026-10-19T13:17:44.037Z">
+    <div class="r-comment-body"><p>review record for run r-20261019T083720812901-xla-autotune-cache-off stored at review-records/r-20261019T083720812901-xla-autotune-cache-off.json — 6 dimensions scored 0..20 (goal_fidelity 14, evidence 17, scope_discipline 20, durability 17, fit 19, reuse 20) at base 3752410851925e484c79953b2e4e3c3dcb9a6115 / head ca6de3252a6daf299bcf87015ed3da631424ba2f; two follow-on findings, both follow-on, no blocking finding.</p></div>
 </div>
 </section>
 </main>

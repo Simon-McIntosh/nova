@@ -395,10 +395,7 @@ def figure_from_receipt(
     import matplotlib.pyplot as plt
     import numpy as np
 
-    try:
-        plt.style.use("data-ink")
-    except OSError:
-        pass
+    plt.style.use("data-ink")
     arms = [arm for arm in ARMS if arm in receipt["arms"]]
     compile_wall = [receipt["arms"][arm]["cold_compile_seconds"] for arm in arms]
     passes = [receipt["arms"][arm]["steady_seconds"] for arm in arms]

@@ -1,0 +1,16 @@
+<!-- fragment: xla-autotune-harness-checks -->
+<section id="xla-autotune-harness-checks">
+<h3>The four-arm harness refuses a missing plot style and proves its cache control can fail</h3>
+
+<p><code>benchmarks/xla_autotune_cache_arms.py</code> now lets a missing
+<code>data-ink</code> style sheet raise from Matplotlib instead of silently
+rendering with defaults. The focused tests cover both receipt conditions: the
+control holds when arm (a) records entries and arm (c) records none, and reports
+failure when arm (c) records an entry or arm (a) records none.</p>
+
+<p>The assigned gate passed <strong>4 tests</strong>. The declared negative
+control inverted the arm (c) comparison; the void-receipt test then failed with
+<code>failure is None</code> and <code>EXIT=1</code>, as required. The original
+comparison was restored before landing. Logs: the run directory's
+<code>focused-gate-retry.log</code> and <code>negative-control.log</code>.</p>
+</section>

@@ -1,0 +1,100 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-20T06:12:22.027Z",
+  "dispatched_at": "2026-10-20T06:04:28Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/kernel-compile-barrier.html#s1",
+      "id": "reuse_search-1",
+      "reason": "\u00a71 should extend the existing attribution and measurement owners and add its affected rows to `compile-cost-evidence.html` instead of standing up a parallel census and doc.",
+      "text": "\u00a71's done-when names a new census doc, but `docs/research/compile-cost-evidence.html` already carries the compile ledger with census rows (per-program compile wall, StableHLO/HLO instruction counts, executable bytes, cache result) and \u00a71's own measure list is exactly the `scripts/prototypes/order2/attribution.py:6` attribution (`attribute_graph` \u2192 per-call-site `expanded_equations`, `body_share`, `kernel_call_partition_equations`) plus the `scripts/prototypes/read_route/measure.py:202` lower/compile wall with `:223` `runtime_executable().serialize()` bytes, and `scripts/prototypes/fast_read/measure_fused.py:51` generated-code bytes; the plan cites none of these and proposes to re-author them",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/fixed_points.py:204",
+      "id": "duplicate_owner-1",
+      "reason": "the honest change is to extend the owner (`nova/equilibrium/fixed_points.py`) and redirect the prototype to it, so one bounded program serves the read's 60 s clause and the prototype; bounding both forks the cost rather than removing it.",
+      "text": "the jets build expression is defined twice and the plan bounds both rather than unifying: `nova/equilibrium/fixed_points.py:204` (`_source_jets`) with its jitted `_row_program` at `:389`, and a second hand-written copy `scripts/prototypes/read_route/jets.py:229` (`_source_jets`) with its own `jax.jit(jax.vmap(_source_jets, in_axes=(0, None)))` at `:321`, which imports `packed_analytic_moments` from `nova.biot.polygonanalytic:2641` directly instead of reaching the production program \u2014 \u00a73 states both are in scope and that bounding only the prototype does not meet the section, i.e. it pays the bounding work twice and leaves two programs to keep in step",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "scripts/prototypes/order2/attribution.py:6",
+      "id": "duplicate_owner-2",
+      "reason": "\u00a71 must extend `scripts/prototypes/order2/attribution.py` (and reuse `tests/jaxpr_scans.py`) rather than write a third descent and a third equation counter, or the census will disagree with the attribution the resolved read already relies on.",
+      "text": "\u00a71's ranking clause (the source functions ranked by the expanded equations each contributes, with owner file and line) duplicates the owner that already does this: `attribute_graph` walks nested compiled functions and reports `expanded_equations`, `body_share` and `kernel_call_partition_equations` per kernel call site, and `tests/jaxpr_scans.py:1` already owns the shared lowered-jaxpr descent that any equation census must use",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "19ce93cdcf42d8b03fabf517180391135f4ff5f59e1fa0d0c41cc29a2cf3dacf",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 3,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reuse_search-1",
+      "reason": "",
+      "when": "2026-10-20T06:14:15.495454+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-20T06:14:21.455688+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "duplicate_owner-2",
+      "reason": "",
+      "when": "2026-10-20T06:14:27.209177+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-20T06:14:21.455688+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-20T06:14:27.209177+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-20T06:14:15.495454+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-kernel-compile-barrier.v3.json",
+  "review_run_id": "r-20261020T060410586038-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "92bc1ec1a50828604c68a47e48e857af307bf902",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the plan introduces no new module; \u00a72 bounds kernel terms by extending the existing per-helper private-tangent pattern (`nova/biot/completeelliptic.py:516`, `nova/biot/elliptic.py:1356`), and the mechanism it adds (a fixed-capacity scan or an exact tangent) hides the derivative graph behind the same primal interface rather than adding surface.",
+    "duplicate_owner": "a finding \u2014 the plan requires bounding both definitions of one jets expression instead of consolidating on one owner (`nova/equilibrium/fixed_points.py`), and \u00a71's census re-authors equation attribution already owned by `scripts/prototypes/order2/attribution.py`.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72's tangents follow the repo's existing private-helper pattern (private scanned tangents, not exported), \u00a71's deliverable is a research doc outside all four families, and \u00a74 retires surface (the xfail marker and the fixture's expected-failure set) rather than adding any.",
+    "reuse_search": "a finding \u2014 \u00a71 proposes a compile census instrument and doc but cites only the cache-guard rows; it does not cite the machinery that already attributes expanded jaxpr equations to kernel call sites (`scripts/prototypes/order2/attribution.py`), already measures the read-route compile wall and executable bytes (`scripts/prototypes/read_route/measure.py`), already owns the lowered-jaxpr descent (`tests/jaxpr_scans.py`), or already holds the compile ledger (`docs/research/compile-cost-evidence.html`).",
+    "thin_wrapper": "pass \u2014 no parallel thin layer is proposed: \u00a72 reuses the two tangent forms the 2026-10-06 ruling already fixed and \u00a74 retires the `KernelCompileBarrier` expected-failure set rather than wrapping it, so the honesty test is met by extension-and-retirement rather than by a new shell."
+  },
+  "section_digests": {
+    "_document": "76bd47b632f76205c6b048aef6b7a270a9229bec90839b52aad6d50a9d7014b3",
+    "s0": "7c180b231527b42ff4243dcf9b8749acb230944714e5d4d386ee0712056aed94",
+    "s1": "c71857a9597548412a863633d09c095353caa0d80585e8ecb3263ec074035851",
+    "s2": "4b4ae60065134cb7cdc8a4479e5525cf0785449c22833f6d824f728d3a0deaf2",
+    "s3": "927ff8ef4e3705bf5ee26e8e06c91c11662af16f43c446e06e8a3b0c00bb7303",
+    "s4": "043c0ccddafb69cbd714f400a3810894eb704687755dfb014b018a750adc8b16"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T06:14:14.009408+00:00"
+}

@@ -106,6 +106,7 @@ def run_one(worker, output, name, size, limit):
         ),
         flush=True,
     )
+    return process.returncode == 0 and record.get("phase") == "compiled"
 
 
 def main():
@@ -115,9 +116,14 @@ def main():
     parser.add_argument("--row-limit", type=int, default=10800)
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
+    passed = True
     for name in PROGRAMS:
         for size in (4, 64) if name in KERNELS else (132, 550):
-            run_one(args.worker, args.output, name, size, args.row_limit)
+            passed = (
+                run_one(args.worker, args.output, name, size, args.row_limit) and passed
+            )
+    if not passed:
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":

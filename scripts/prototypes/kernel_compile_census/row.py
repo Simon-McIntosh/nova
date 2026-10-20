@@ -78,18 +78,25 @@ def program(name, size):
             return lambda target, kernel, current: jax.vmap(
                 lambda point: kernel.evaluate(point, current)
             )(target), (points, coupling, moments)
-        return lambda target, kernel: polygonanalytic.packed_analytic_moments(
-            jnp,
-            jnp.broadcast_to(target[0], kernel.norm.shape),
-            jnp.broadcast_to(target[1], kernel.norm.shape),
-            kernel.edge,
-            kernel.weight,
-            kernel.norm,
-            kernel.centre.T,
-            kernel.centre.T,
-            kernel.reflection_axis,
-            kernel.reflection_partner,
-        ), (points[0], coupling)
+
+        def packed_batch(targets, kernel):
+            def single(target):
+                return polygonanalytic.packed_analytic_moments(
+                    jnp,
+                    jnp.broadcast_to(target[0], kernel.norm.shape),
+                    jnp.broadcast_to(target[1], kernel.norm.shape),
+                    kernel.edge,
+                    kernel.weight,
+                    kernel.norm,
+                    kernel.centre.T,
+                    kernel.centre.T,
+                    kernel.reflection_axis,
+                    kernel.reflection_partner,
+                )
+
+            return jax.vmap(single)(targets)
+
+        return packed_batch, (points, coupling)
     field, geometry = fixture(size)
     if name == "topology_read":
         from nova.equilibrium.solve_request import TopologyPolicy
@@ -128,7 +135,12 @@ def certificate_map(size):
     carrier, source, exact = certificate._case(
         "weak-rotation-reactor-static", clip_mode="exact"
     )
-    machine = solver.certified_machine(carrier, "limited", size, exact)
+    try:
+        machine = solver.certified_machine(carrier, "limited", size, exact)
+    except FileNotFoundError:
+        machine = fixture.build_machine(
+            carrier, -size, wall_nodes=fixture.WALL_POINT_COUNT, wall=None
+        )
     geometry = topology.TopologyGeometry.from_cells(
         machine.cell_polygons, machine.sampling_vertices, (machine.wall_node,)
     )

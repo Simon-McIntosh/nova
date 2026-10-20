@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-04T14:24:10",
+  "updated": "2026-10-20T22:44:33",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -550371,8 +550371,22 @@
         "reason": "utilisation 93% with burn multiple unknown is at or above the 92.0% ceiling for a dispatch (ceiling 100% less 5% resume reserve and 3% coordinator reserve) Resolve with `reckon crew preflight`, then `reckon crew dispatch`; for an existing blocked run, use `reckon crew resume-ready`.",
         "closed_by_purpose": "dispatch",
         "resumption_fired": false
+      },
+      {
+        "hold_id": "hold-codex-20261020204431",
+        "backend": "codex",
+        "purpose": "dispatch",
+        "opened_at": "2026-10-20T20:44:31Z",
+        "closed_at": null,
+        "held_seconds": null,
+        "utilisation_pct": 100.0,
+        "resets_at": "2026-10-27T06:32:42Z",
+        "effective_ceiling_pct": 92.0,
+        "reason": "utilisation 100% with burn multiple 11.8x and projected exhaustion 2026-10-21T09:44:20Z is at or above the 92.0% ceiling for a dispatch (ceiling 100% less 5% resume reserve and 3% coordinator reserve); the account surface was read at 2026-10-20T20:44:30Z and is the operative reading Resolve with `reckon crew budget --check`, then `reckon crew dispatch`; for an existing blocked run, use `reckon crew resume --ready`.",
+        "closed_by_purpose": null,
+        "resumption_fired": false
       }
     ],
-    "_version": 3376
+    "_version": 3377
   }
 }

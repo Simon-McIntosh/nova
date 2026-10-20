@@ -2943,3 +2943,53 @@ def test_census_neighbour_proposals_keep_saddles_across_coarse_ties(
         observed.append(np.asarray(roots.position)[selected])
     distances = np.linalg.norm(observed[0][:, None] - observed[1][None], axis=-1)
     assert np.all(np.min(distances, axis=1) < np.median(state["geometry"].pitch))
+
+
+def test_fast_read_refuses_a_wall_level_not_attained_at_its_point(monkeypatch):
+    """A graph bottleneck cannot masquerade as a physical wall tangency."""
+    from nova.equilibrium import fixed_points, topology
+    from scripts.prototypes.fast_map_production import kernel
+
+    class Field:
+        def value(self, point):
+            return -jnp.sum((point - jnp.array((2.0, 0.0))) ** 2)
+
+        def evaluate(self, point):
+            return FieldJet(
+                self.value(point), -2 * (point - jnp.array((2.0, 0.0))), -2 * jnp.eye(2)
+            )
+
+        def sampled_coefficient(self, geometry):
+            values = jax.vmap(self.value)(geometry.sample_points.reshape(-1, 2))
+            return jnp.einsum(
+                "nks,ns->nk",
+                geometry.fit_inverse,
+                values.reshape(geometry.sample_points.shape[:-1]),
+            )
+
+    field = Field()
+    vertices = _hexagon(0.5) + np.asarray((2.0, 0.0))
+    geometry = topology.TopologyGeometry.from_cells(
+        (vertices,), vertices[None], (vertices,)
+    )
+    axis = jnp.array(((2.0, 0.0),))
+    roots = fixed_points.FixedPointResult(
+        axis,
+        jax.vmap(field.evaluate)(axis),
+        jnp.array((True,)),
+        jnp.zeros(1, dtype=jnp.int32),
+        jnp.zeros(1, dtype=jnp.int32),
+        jnp.array((False,)),
+    )
+    convention = topology.TopologyConvention.from_cocos(17, 1.0)
+    policy = TopologyPolicy()
+    correct = jax.jit(lambda: kernel.read(field, roots, geometry, convention, policy))()
+    assert bool(correct.valid), (
+        "the known quadratic wall contact must first be admitted"
+    )
+    monkeypatch.setattr(
+        kernel, "_wall_effective_level", lambda flux, passage: flux + 0.01
+    )
+    refused = jax.jit(lambda: kernel.read(field, roots, geometry, convention, policy))()
+    assert abs(float(field.value(refused.boundary) - refused.boundary_flux)) > 0.009
+    assert not bool(refused.valid), "an unattained boundary must be refused"

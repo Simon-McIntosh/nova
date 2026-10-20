@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="498">
+<meta name="plan-version" content="499">
 <meta name="plan-modified" content="2026-10-20">
 </head>
 <body>
@@ -1618,6 +1618,9 @@ NO PRODUCT OR TEST SOURCE WAS CHANGED.  The 1e-10 tolerance was not widened.</p>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261020T071515450589-review-of-tie-pair-topology-511f9dcc100f" data-who="reckon-build" data-when="2026-10-20T07:29:47.527Z">
     <div class="r-comment-body"><p>Reviewed run r-20261020T063628565128-tie-pair-topology landed as five commits against base 52702d307482ec0f35e0276e98c21c3a81d1cc91, all inside the six granted write paths, editing no product source, no test and no kernel.py; the analytic finder gate passed with a verified red saddle-1 control and its figures and numbers reproduce, with three follow-on findings and no blocking defect.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261019T125717206720-contour-tree-sparse-build" data-who="reckon-build" data-when="2026-10-20T09:08:46Z">
+    <div class="r-comment-body"><p>contour-tree-sparse-build: the contour-tree build now assembles carrier adjacency, split insertion and the node-to-vertex inverse map from sparse sorted and scattered buffers; receipts are bit-identical to the base build on every brute-force fixture; the suite the node ran found and closed a capacity refusal the sparse adjacency introduced, so the head adds no failure against the base; the H200 ladder (job 1290126) shows the target is NOT met — 5-8% of warm wall, exponent unchanged at about 1.50, and a 10,000-cell whole read of 75.9 s limited against the 10 s target.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261010T184522536142-cfs-current-book-fragments" data-who="reckon-build" data-when="2026-10-10T18:46:29.609Z">
     <div class="r-comment-body"><p>Implemented traced current.book over connected multi-polygon membership using the widened signed-ring exact clip. Six certificate rows pass: diverted read image errors 1.15131582e-4, 2.49842782e-5, 3.95031905e-6 at 550/2098/5158 cells; limited errors 1.77777866e-5, 2.66948705e-6, 5.45231060e-7 at 553/2105/5167. Maximum net-current error 2.22e-16, excluded current zero, legacy control 0.197326978718; evidence docs/evidence/fragments/converged-forward-solve/cfs-current-book.html#cfs-current-book-fragments-booking and one three-rung SVG; audit-doc 0 errors.</p></div>

@@ -1,0 +1,68 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "the reviewed run's manifest carries no baseline_suite or after_suite block, because the node changed no product source and no test file (its diff is the research page, a landing fragment and one generated SVG), so no suite arm was run and there are no gate logs to derive failure ids from; both fields are derived as zero/empty from that absence rather than from a green suite.",
+  "call_site_count": 1,
+  "call_sites": [
+    "scripts/git-hooks/pre-commit"
+  ],
+  "completed_at": "2026-10-20T07:43:52.484Z",
+  "dispatched_at": "2026-10-20T07:26:06Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T063312428036-xla-autotune-h200-arms/manifest.md",
+      "line": "12",
+      "severity": "follow-on",
+      "text": "follow-on: the done_when requires one SVG drawn by the harness's --figure, but tests and test_logs record only the lane run, so the command that produced the committed SVG is recoverable only by reconstructing it; it does reproduce that SVG byte-identically from h200-arms-3.json."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T063312428036-xla-autotune-h200-arms/h200-arms-3-gate.log",
+      "line": "15",
+      "severity": "follow-on",
+      "text": "follow-on: the wrapper's note says the lines below are copied verbatim, yet the copied ARM block carries only arms a, b and c, so a reader of the manifest's cited gate log cannot see arm (d)'s row or the launcher's EXIT_STATUS line; the final EXIT=0 is authored by the wrapper, which the manifest discloses."
+    },
+    {
+      "file": "docs/research/xla-autotune-cache-on-gpfs.html",
+      "line": "119",
+      "severity": "follow-on",
+      "text": "follow-on: the section \"What this measurement does not cover\" still reads \"on one P100\" and quotes a 152-to-222 s steady-wall spread from the titan table alone, so the page's own limitations section under-covers the H200 arms the same commit added."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 1 production call site(s)",
+    "diff": "read commit by commit against base 52702d30; one commit, three files, +1309/-4 - 59 lines of fragment, 43 added and 4 deleted in the research page, and one 1207-line generated SVG.",
+    "done_when": "the done_when names benchmarks/xla_autotune_cache_arms.py through scripts/nova_lane/run.sh --rungs h200; the manifest tests line is that command, h200-arms-3-gate.log ends EXIT=0 with NEGATIVE_CONTROL=holds arm_a=1354 arm_c=0, and h200-arms-3.json lists all four arms in arms_completed.",
+    "goal": "the goal is to measure on one H200 what turning XLA's per-fusion autotune cache off costs per compile miss; docs/research/xla-autotune-cache-on-gpfs.html:84-88 states it as about 19 ms of cold compile wall per miss from the 5.0 s gap between arms (b) and (c).",
+    "manifest": "read; status complete, one commit, changed_paths matching the diff, and its evidence_inputs table agrees with h200-arms-3.json to the digit; its checkpoint discloses that the cited gate log is an authored wrapper over the launcher's own log.",
+    "write_paths": "the declared paths are the research page, the landing fragment and the two docs/figures directories; all three files in commit 589bb14c2 lie inside them."
+  },
+  "justifications": {
+    "durability": "the diff adds no assertion at all; no test reddens if the fragment's and the figure's numbers drift from h200-arms-3.json, and the only guard reaching the new files is tests/test_artifacts_carry_no_worktree_paths.py, which this change does not strengthen.",
+    "evidence": "h200-arms-3-gate.log:14-18 and h200-arms-3.json carry the four arms, the control verdict and the walls the table restates, though the --figure invocation the done_when names is recorded nowhere.",
+    "fit": "the fragment follows the fragment convention of its siblings under docs/evidence/fragments/forward-solver-route-integrity/ and the committed SVG uses the mandated data-ink style with a frameless legend.",
+    "goal_fidelity": "docs/evidence/fragments/forward-solver-route-integrity/xla-autotune-h200-arms.html:16-27 answers the goal's per-miss question from the receipt's own arm data.",
+    "reuse": "the diff adds no definition; the figure is drawn by the existing benchmarks/xla_autotune_cache_arms.py --figure, and a search across nova and docs for another XLA-autotune figure owner found only the sibling titan figure, a different device, not a duplicate mechanism.",
+    "scope_discipline": "git diff 52702d30..589bb14c2 touches only the three declared paths, with no product or test file changed."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to measure on one H200 what turning XLA's per-fusion autotune cache off costs per compile miss; docs/research/xla-autotune-cache-on-gpfs.html:84-88 states it as about 19 ms of cold compile wall per miss from the 5.0 s gap between arms (b) and (c).\nVERDICT done_when: the done_when names benchmarks/xla_autotune_cache_arms.py through scripts/nova_lane/run.sh --rungs h200; the manifest tests line is that command, h200-arms-3-gate.log ends EXIT=0 with NEGATIVE_CONTROL=holds arm_a=1354 arm_c=0, and h200-arms-3.json lists all four arms in arms_completed.\nVERDICT write_paths: the declared paths are the research page, the landing fragment and the two docs/figures directories; all three files in commit 589bb14c2 lie inside them.\nVERDICT manifest: read; status complete, one commit, changed_paths matching the diff, and its evidence_inputs table agrees with h200-arms-3.json to the digit; its checkpoint discloses that the cited gate log is an authored wrapper over the launcher's own log.\nVERDICT diff: read commit by commit against base 52702d30; one commit, three files, +1309/-4 - 59 lines of fragment, 43 added and 4 deleted in the research page, and one 1207-line generated SVG.\nCALL_SITES: scripts/git-hooks/pre-commit\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/forward-solver-route-integrity/xla-autotune-h200-arms.html:16-27 answers the goal's per-miss question from the receipt's own arm data.\nCALL_SITES_NOTE: none beyond the commit-time hook; the change is documentation and carries no runtime code path in nova.\nSCORE evidence: 16\nJUSTIFICATION evidence: h200-arms-3-gate.log:14-18 and h200-arms-3.json carry the four arms, the control verdict and the walls the table restates, though the --figure invocation the done_when names is recorded nowhere.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff 52702d30..589bb14c2 touches only the three declared paths, with no product or test file changed.\nSCORE durability: 8\nJUSTIFICATION durability: the diff adds no assertion at all; no test reddens if the fragment's and the figure's numbers drift from h200-arms-3.json, and the only guard reaching the new files is tests/test_artifacts_carry_no_worktree_paths.py, which this change does not strengthen.\nSCORE fit: 18\nJUSTIFICATION fit: the fragment follows the fragment convention of its siblings under docs/evidence/fragments/forward-solver-route-integrity/ and the committed SVG uses the mandated data-ink style with a frameless legend.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no definition; the figure is drawn by the existing benchmarks/xla_autotune_cache_arms.py --figure, and a search across nova and docs for another XLA-autotune figure owner found only the sibling titan figure, a different device, not a duplicate mechanism.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T063312428036-xla-autotune-h200-arms/manifest.md:12 follow-on: the done_when requires one SVG drawn by the harness's --figure, but tests and test_logs record only the lane run, so the command that produced the committed SVG is recoverable only by reconstructing it; it does reproduce that SVG byte-identically from h200-arms-3.json.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T063312428036-xla-autotune-h200-arms/h200-arms-3-gate.log:15 follow-on: the wrapper's note says the lines below are copied verbatim, yet the copied ARM block carries only arms a, b and c, so a reader of the manifest's cited gate log cannot see arm (d)'s row or the launcher's EXIT_STATUS line; the final EXIT=0 is authored by the wrapper, which the manifest discloses.\nFINDING docs/research/xla-autotune-cache-on-gpfs.html:119 follow-on: the section \"What this measurement does not cover\" still reads \"on one P100\" and quotes a 152-to-222 s steady-wall spread from the titan table alone, so the page's own limitations section under-covers the H200 arms the same commit added.\n",
+  "review_run_id": "r-20261020T072529313135-review-of-xla-autotune-h200-arms-589bb14c2598",
+  "reviewed_base_sha": "52702d307482ec0f35e0276e98c21c3a81d1cc91",
+  "reviewed_head_sha": "589bb14c2598bc32a8db03d0235020924b80762c",
+  "reviewed_run_id": "r-20261020T063312428036-xla-autotune-h200-arms",
+  "scores": {
+    "durability": 8,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T07:50:32.211049+00:00",
+  "total": 99
+}

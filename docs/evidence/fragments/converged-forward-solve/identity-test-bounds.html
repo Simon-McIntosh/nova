@@ -1,0 +1,14 @@
+<section id="identity-test-bounds-cpu-wall-and-timeouts">
+  <h2>CPU solve identity holds within the measured bound</h2>
+  <p>The two solve tests passed on CPU with pytest's timeout lifted, in one
+  fresh process taking 2532.78 s combined (job 1290974, log
+  <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T071327610455-identity-test-bounds/cpu-measurement-1290974.log</code>).
+  The combined wall is used as an upper bound for each test's individual CPU
+  wall. On H200, the traced exterior test took 1009.30 s and the compiled slice
+  test took 25.01 s. Each test now has a 3840 s timeout: 1.5 times the CPU upper
+  bound, rounded up to a whole minute.</p>
+  <p>The traced exterior identity passes on CPU. The previously observed
+  <code>4.3309859247974134e-12</code> against the <code>1e-14</code> tolerance
+  remains an H200-only failure; no assertion, tolerance or product source was
+  changed.</p>
+</section>

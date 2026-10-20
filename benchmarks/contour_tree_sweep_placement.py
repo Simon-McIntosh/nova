@@ -29,7 +29,7 @@ from benchmarks.contour_tree_brute_force import (
 from nova.equilibrium.contour_tree import (
     ContourTreeArrays,
     ContourTreeResult,
-    _append_edges,
+    _batch_edges,
     _carrier_adjacency,
     _insert_split_nodes,
     build_contour_tree,
@@ -98,9 +98,8 @@ def _parallel_sweep_tree(
     births = index
     node_valid = jnp.zeros(node_capacity, dtype=bool)
     node_type = jnp.full(node_capacity, -1, dtype=jnp.int32)
-    output_edges = jnp.zeros((edge_capacity, 2), dtype=jnp.int32)
-    output_valid = jnp.zeros(edge_capacity, dtype=bool)
-    overflow = jnp.asarray(False)
+    arc_sources = jnp.zeros((vertex_count, neighbour_count), dtype=jnp.int32)
+    arc_valid = jnp.zeros((vertex_count, neighbour_count), dtype=bool)
     wall_flag = jnp.zeros(vertex_count, dtype=bool)
 
     def visit(rank: int, state):
@@ -110,9 +109,8 @@ def _parallel_sweep_tree(
             births,
             node_valid,
             node_type,
-            output_edges,
-            output_valid,
-            overflow,
+            arc_sources,
+            arc_valid,
             wall_flag,
         ) = state
         parents = _parallel_roots(parents)
@@ -152,14 +150,8 @@ def _parallel_sweep_tree(
         )
         connect = usable & (saddle | terminal | first_wall)
         sources = births[neighbour_root]
-        output_edges, output_valid, overflow = _append_edges(
-            output_edges,
-            output_valid,
-            overflow,
-            sources,
-            representative & connect,
-            vertex,
-        )
+        arc_sources = arc_sources.at[rank].set(sources)
+        arc_valid = arc_valid.at[rank].set(representative & connect)
         parents = parents.at[neighbour_root].set(
             jnp.where(root_active & usable, vertex, parents[neighbour_root])
         )
@@ -179,9 +171,8 @@ def _parallel_sweep_tree(
             births,
             node_valid,
             node_type,
-            output_edges,
-            output_valid,
-            overflow,
+            arc_sources,
+            arc_valid,
             wall_flag,
         )
 
@@ -195,13 +186,16 @@ def _parallel_sweep_tree(
             births,
             node_valid,
             node_type,
-            output_edges,
-            output_valid,
-            overflow,
+            arc_sources,
+            arc_valid,
             wall_flag,
         ),
     )
-    return result[3], result[4], result[5], result[6], result[7], order
+    targets = jnp.broadcast_to(order[:, None], arc_sources.shape)
+    output_edges, output_valid, overflow = _batch_edges(
+        result[5], result[6], targets, edge_capacity
+    )
+    return result[3], result[4], output_edges, output_valid, overflow, order
 
 
 @jax.jit

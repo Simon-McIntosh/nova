@@ -1,0 +1,80 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [
+    {
+      "failure_condition": "test_pointer_counter_sees_known_chain: the counter is asked to walk a fixed three-node parent array [1,2,2] from node 0 and must report depth 2. It fails if the counting loop stops one link early or late, or if pointer-doubling is introduced, because depth would then be 1 or 3 \u2014 so it is a positive control that the counter sees a known-present depth, and it is the assertion that guards the instrument's semantics rather than its non-invasiveness. test_instrumented_receipt_identity, assert depth[\"visits\"] == vertex_flux.size: fails if the injected jax.debug.callback stops firing once per fori_loop visit (drops to 0), or if the injected _neighbour_roots is not the symbol the sweep resolves. Its two sides are independent \u2014 the count is produced by JAX executing the injected call site, the right side is the fixture's vertex count. It is not the self-comparison shape: reverting the fixture input cannot make it true. test_instrumented_receipt_identity, assert_sweep_identity(native, counted) (profile.py:163): compares the module's own _sweep_tree against a FunctionType copy whose only difference is an injected counted_roots, on the same sweep_args. Both sides take the test's input, so this is the shape the rule warns about only if the injected path is a pass-through; it is not \u2014 counted_roots calls roots_with_depth, which is a re-implementation of _neighbour_roots carrying a depth counter. It fails on any divergence of the injected path's output arrays, and the recorded negative control shows it reddening when the visit order is rotated by one position (main/negative-control.log, EXIT=1). test_instrumented_receipt_identity, assert_identity(reference, candidate) (profile.py:169): compares seven receipt fields of build_contour_tree against a replay whose _carrier_adjacency and _sweep_tree are replaced by the measured passes and the measured adjacency. It would fail if the recorded passes were fed to the wrong pass slot, if the injected adjacency omitted its third return, or if the instrumented arrays differed by one entry; it is a strict equality over 7 arrays, so it cannot be satisfied by construction. It lacks its own negative control \u2014 the recorded mutation fails earlier, at assert_sweep_identity, so the receipt-level equality is not itself shown reddening. That is a coverage gap about which claim has been falsified (non-invasiveness is shown; the replay-through-native-merge equality is only argued), not a self-comparison defect, and the doc states the control's failure point honestly ('on sweep output zero').",
+      "lines": "scripts/prototypes/contour_tree_sweep_profile/test_profile.py:29-30 (test_pointer_counter_sees_known_chain); 58-61 (test_instrumented_receipt_identity)",
+      "verdict": "no assertion added by this run compares a value against the same variable the test supplied; the equivalence assertions compare two distinct implementations over a shared input, and both are falsifiable by a named change to the injected path."
+    }
+  ],
+  "call_sites": [],
+  "changed_paths": [
+    "docs/research/contour-tree-sweep-profile.html",
+    "docs/evidence/fragments/converged-forward-solve/contour-tree-sweep-profile.html",
+    "docs/figures/converged-forward-solve/contour-tree-sweep-profile/warm-stages.svg",
+    "scripts/prototypes/contour_tree_sweep_profile/profile.py",
+    "scripts/prototypes/contour_tree_sweep_profile/test_profile.py",
+    "scripts/prototypes/contour_tree_sweep_profile/run.sh",
+    "scripts/prototypes/contour_tree_sweep_profile/diagnose.py",
+    "scripts/prototypes/contour_tree_sweep_profile/summarize.py"
+  ],
+  "commit_list": [
+    "51c4ad85846004f977a2ce2006f78d99fc05b8ff",
+    "81927151e11e9131c789e0485e66618d1c5c2b6d",
+    "c3241935f3c51f6d68a4ecc68067db939c28bfcb",
+    "1939fa6af231baccd8075a53bf096e83345f4e90",
+    "d28642fd33dc63d1d1acb59db34e4dc9067538b8"
+  ],
+  "completed_at": "2026-10-20T09:29:01.960Z",
+  "dispatched_at": "2026-10-20T09:14:04Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/contour_tree_sweep_profile/summarize.py",
+      "line": "112",
+      "severity": "follow-on",
+      "text": "follow-on: check_text() is a third copy of the figure text-bound and text-overlap guard already present as a private helper in scripts/prototypes/xpoint_cell_owner/render.py:24-43 (_save) and scripts/prototypes/fine_grid_convergence/render.py:37-56 (_save). The three implementations are functionally the same guard against the findobj(plt.Text) artists. No owner module exists to extend \u2014 the search over nova/media/ and scripts/prototypes/support/ found no exported save-with-check, and the repo-side rule that one style module owns this function is not yet realised for prototype figures \u2014 so this is a duplication rather than a bypass of an existing entry point. It matters because the guard is the mechanism three separate nodes rely on to satisfy the artifact check, and a fourth copy will be written unless one is extracted. Does not hold the node: the landed figure was rendered and inspected and its guard passed."
+    },
+    {
+      "file": "scripts/prototypes/contour_tree_sweep_profile/summarize.py",
+      "line": "102",
+      "severity": "follow-on",
+      "text": "follow-on: the projection's depth bound is the literal 14 (depth_bound, also inlined at lines 103 and 105) rather than derived from the largest vertex count in the ladder. For n=10,028 a union-by-rank forest bounds depth at floor(log2 n)=13, so 14 is correct for these four rungs and the doc states it correctly, but a re-run over a different ladder would silently reuse 14 and mis-state the projection, which is the receipt the repair node is meant to be measured against. Small and prototype-scoped; a max(ceil(log2(n))) over the ladder removes it."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit against base 1dc96ee0b, which git rev-parse 51c4ad858^ confirms is the run's first parent. 51c4ad858 adds profile.py, run.sh and test_profile.py: the instrumented sweep, the counter, the receipt-identity test and the first ladder. 81927151e rewrites the identity test to replay counted passes through the builder's own merge logic rather than comparing only the sweep outputs, and moves the sweep comparison to the native function \u2014 this is the commit that makes the identity claim mean what it says. c3241935f adds diagnose.py, the overflow provenance diagnostic, and the receipt_overflow/receipt_nodes/receipt_edges fields to each row. 1939fa6af adds summarize.py (exponent fit, figure, text-bound check) and the SVG. d28642fd3 adds the research document and the evidence fragment. Nothing in the diff is outside the goal, and no name, comment or filename carries a plan or ticket identifier \u2014 the 'stage' hits in profile.py and summarize.py are the domain word for a build stage, not a plan label.",
+    "done_when": "The done_when asks for one H200 job at four sizes per case, warm with compile reported separately, reporting stage walls with a fitted exponent each, visit and root-round counters with wall per visit, and a prescription naming algorithm, file and line, the expected 10,000-cell wall, the bit-identical receipts and a negative control. Every clause is met and the gate the worker ran (its own identity test) is the gate the done_when named. The three claims I could check against files rather than prose all reconcile exactly: the doc's stage table equals main/rows/*.json stage_seconds, the round table equals main/rows/counts-*.json, and both fitted exponent tables equal summary.json's stages[].exponent and counts[].round_exponent to the printed precision (e.g. limited full build 1.4730, join round 1.5228, split round 1.5403). The expected 10,000-cell wall of 8.99 s limited / 9.76 s diverted reproduces from summary.json's repair_estimate. I also tested the estimate's model rather than taking its caveat on trust: fitting T = C*visits + B*rounds to the two no-append arms at 550 and 10,000 gives C about 23 us per visit against B about 15.8 us per round, whose 5000-cell prediction is 26.6 s against 27.9 s measured, so the per-visit term the projection omits is about 0.5 s and the estimate is sound rather than optimistic. The doc labels the projection an estimate and states that the <=10 s whole-read target is not yet met \u2014 the claim the brief asked for is the expected wall, and it is given as one.",
+    "goal": "The node goal is to measure why the contour-tree sweep makes the topology read's warm wall grow with exponent about 1.5, and to prescribe the repair. docs/research/contour-tree-sweep-profile.html delivers both halves: the stage walls and per-stage least-squares exponents at 550/2,000/5,000/10,000 cells for both carriers, and a prescription in section #repair naming union-by-rank with path compression over _sweep_tree (nova/equilibrium/contour_tree.py:243, parent update at :338) and bounded root queries replacing _neighbour_roots (:99-105), with batched arc emission replacing the per-visit _append_edges (:108). The 1.5 is attributed by measurement to the two parent-link sweeps, whose round counts fit 1.523/1.540 limited and 1.519/1.547 diverted while visits grow at exactly one per vertex. I checked the brief's leading candidate against the source: _neighbour_roots really is jax.lax.while_loop(unresolved, lambda roots: parents[roots], neighbours) \u2014 one parent link per iteration, not pointer doubling \u2014 and the visit loop really does chain parents (parents.at[neighbour_root].set(...vertex...) followed by parents.at[vertex].set(vertex)), so the doc's correction of the brief's 'pointer-doubling' premise is accurate and is itself part of the answer.",
+    "manifest": "Read. It states status complete, names the eight changed paths and the five commits, and its artifacts line carries the headline metrics. Its test_logs and negative_control_log point at main/identity.log and main/negative-control.log, both of which I opened: identity.log ends '9 passed in 912.86s' then EXIT=0, negative-control.log ends '1 failed, 8 deselected in 30.87s' then EXIT=1 with FAILED test_instrumented_receipt_identity[550-limited]. Its baseline_suite and after_suite are empty, which the brief and the manifest both attribute to no product source changing; since the diff confirms that, the empty arm pair is the correct record rather than a missing one, and added_failure_count is 0. Its changed_paths line is complete and its retry_failures carries one id with a scaffolding attribution.",
+    "write_paths": "The run declared docs/research/contour-tree-sweep-profile.html, docs/evidence/fragments/converged-forward-solve/contour-tree-sweep-profile.html, scripts/prototypes/contour_tree_sweep_profile/ and docs/figures/converged-forward-solve/contour-tree-sweep-profile/. git diff --stat 1dc96ee0b..d28642fd3 names exactly eight files, all inside those paths: the two documents, warm-stages.svg, and profile.py, test_profile.py, run.sh, diagnose.py, summarize.py. No nova/ path is touched, and contour_tree.py and read_warm_wall/measure.py \u2014 both named as off-limits \u2014 have unchanged blobs across the five commits."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261020T091332186444-review-of-contour-tree-sweep-profile-d28642fd33dc",
+  "reviewed_base_sha": "1dc96ee0b9931c21feb567f799baae353779928d",
+  "reviewed_head_sha": "d28642fd33dc63d1d1acb59db34e4dc9067538b8",
+  "reviewed_run_id": "r-20261020T061532000394-contour-tree-sweep-profile",
+  "reviewed_run_orientation_base_sha": "1dc96ee0b9931c21feb567f799baae353779928d",
+  "scope_note": "Whole-run review of a measurement-and-prescription node. The run changes no product source: the diff is two documents, one SVG and five files under scripts/prototypes/contour_tree_sweep_profile/. nova/equilibrium/contour_tree.py is the measured subject, not the change, so the review reads it only to check that the landed analysis of it is true. No suite arms were owed and none were recorded, so added_failure_count is derived from an empty arm pair.",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T09:29:08.283313+00:00",
+  "total": 110,
+  "verification": [
+    "git merge-base --is-ancestor d28642fd3 HEAD -> NO; the reviewed head is not an ancestor of this review worktree (this tree sits at abffafad5), so every read was taken from the reviewed revision with git show <sha>:<path>.",
+    "git rev-parse 51c4ad858^ -> 1dc96ee0b, confirming the reviewed base is the run's first parent and the five commits are the whole run.",
+    "Stage and counter reconciliation: every number in the research document's two tables equals the corresponding value in main/rows/*.json and summary.json, compared programmatically, including the fitted exponents.",
+    "Gate logs opened: main/identity.log (9 passed, EXIT=0, REVISION=c3241935f, MODULE=<worktree>/nova/equilibrium/contour_tree.py) and main/negative-control.log (1 failed, EXIT=1, mutated COMMAND line). No suite arms exist because no product source changed.",
+    "Figure: git show 1939fa6af:docs/figures/converged-forward-solve/contour-tree-sweep-profile/warm-stages.svg extracted and rendered to PNG at 1400 px, then inspected. Log-log, despined, no gridlines, frameless figure-level legend, no clipped or overlapping text, join and split sweeps on top in the subject colour, neutrals for the near-linear stages. The render is clean and the caption's claim about what the panel shows is accurate.",
+    "Anchor check: the documents cite converged-forward-solve#s2 and the fragment carries plan-verdict complete; docs/plans/converged-forward-solve.html contains a section with data-id s2, and 'complete' is an established value among the existing fragments.",
+    "Worktree-path check: the five commits contain no occurrence of 'reckon-worktrees' in any changed file, so the pre-commit relativize rule is satisfied."
+  ]
+}

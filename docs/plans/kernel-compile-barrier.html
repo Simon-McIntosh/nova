@@ -24,7 +24,7 @@
   <title>Kernel Compile Barrier | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="8">
+<meta name="plan-version" content="9">
 <meta name="plan-modified" content="2026-10-20">
 </head>
 <body>
@@ -94,7 +94,10 @@
     <div class="r-comment-body"><p>From crew run <code>r-20261019T223150157038-coarse-tie-census-memory</code>, landed as evidence at merge <code>19a02ca16</code> (failed, correct refusal): a second provisioning job (sirius 1290676, 450G, 5 h) reproduced the cold compile at 7,013 s and about 378 GB, then held that memory for a further ~11,000 s in the 533-batch node loop without publishing the operand. So the jets build's cost is not only its compile: the batch loop after it also outlasts a five-hour wall at 2,132 nodes. §3's done-when (1) bounds the compile; the node that builds §3 should also report the loop's wall per batch, so a bounded compile is not followed by an unbounded run. The 500-cell coarse-tie census test stays a known failure until §3 lands. <a href="/nova/evidence/fragments/converged-forward-solve/coarse-tie-census-memory.html">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20261020T182736067263-review-of-kernel-compile-census-4ffc11e39106" data-who="reckon-build" data-when="2026-10-20T18:39:53.637Z">
-    <div class="r-comment-body"><p>Review of kernel-compile-census at 4ffc11e39106d58fe7d29a93cf7f93586fda1ee2 scores goal_fidelity 18, evidence 15, scope_discipline 19, durability 16, fit 18, reuse 17, with two follow-on findings and no blocking finding; the census ledger reconciles with the run&#x27;s own receipts and its H200 rows are titan P100 rows recorded as a manifest follow-on.</p></div>
+    <div class="r-comment-body"><p>Review of kernel-compile-census at 4ffc11e39106d58fe7d29a93cf7f93586fda1ee2 scores goal_fidelity 18, evidence 15, scope_discipline 19, durability 16, fit 18, reuse 17, with two follow-on findings and no blocking finding; the census ledger reconciles with the run's own receipts and its H200 rows are titan P100 rows recorded as a manifest follow-on.</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261020T063117190776-kernel-compile-census" data-who="reckon-build" data-when="2026-10-20T18:26:17Z">
+    <div class="r-comment-body"><p>The compile ledger reports all 18 two-size graph rows and a source ranking against 106218 expanded point-jet equations, with _harmonic_pair_step contributing 24653 (23.21%). Titan compiled all 18 rows, CPU topology compilation exceeded 450 GB, and CPU certificate input preparation exceeded 64 GB at 132 cells.</p></div>
 </div>
 </section>
 </main>

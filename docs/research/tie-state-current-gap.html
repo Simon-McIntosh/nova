@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="research">
   <meta name="plan-slug" content="tie-state-current-gap">
   <meta name="plan-title" content="Booked versus integrated current at the 282-cell tie pair">
-  <meta name="plan-summary" content="With the normal-form lobe owner and the axis-persistence fix on main, the booked current at the tie pair agrees with an independent cut-cell quadrature to 1.6 percent, and the direct integral is grid-converged to 0.12 percent">
+  <meta name="plan-summary" content="Historical quadrature agreement covered an unconfined region; the upper-separator candidate selects the right event but still overbooks the island">
   <meta name="plan-evidence-for" content="converged-forward-solve">
   <meta name="plan-verifies" content="converged-forward-solve#s3">
   <meta name="plan-recorded-at" content="2026-10-19">
@@ -19,7 +19,7 @@
 <body><main class="plan-doc">
   <header>
     <h1>Booked versus integrated current at the 282-cell tie pair</h1>
-    <p class="lead">With the normal-form lobe owner and the axis-persistence fix on <code>main</code>, the booked current at the tie pair is within 1.6% of an independent cut-cell quadrature of the physical field, and the direct integral does not move more than 0.12% with a fourfold change in quadrature grid. The bound is tightened from <code>rel=0.15</code> to <code>rel=0.02</code>.</p>
+    <p class="lead">The historical 1.6% quadrature agreement below compared two integrals over the same unconfined region. The lower saddle_form was not an admitted X-point: the read reported a limited boundary. The <a href="/nova/research/tie-pair-topology.html">independent topology</a> identifies the upper saddle as the first separator. The <a href="/nova/research/read-first-separator.html">first-separator candidate</a> now selects that event but still overbooks the small axis island; its failing measurements and remaining owner changes are recorded separately. The historical table is retained as provenance, not a claim about current main.</p>
   </header>
 
   <section id="tie-state-current-gap-method">
@@ -29,7 +29,7 @@
   </section>
 
   <section id="tie-state-current-gap-measurement">
-    <h2>The measured gap</h2>
+    <h2>The historical measured gap</h2>
     <table>
       <thead><tr><th>Offset</th><th>Read valid</th><th>Booked current [A]</th><th>Direct 16×16 [A]</th><th>Direct 32×32 [A]</th><th>Direct 64×64 [A]</th><th>Gap vs 32×32</th></tr></thead>
       <tbody>
@@ -37,22 +37,22 @@
         <tr><td>0.17325</td><td>true</td><td>129.730881</td><td>131.626072</td><td>131.468864</td><td>131.473565</td><td>1.32%</td></tr>
       </tbody>
     </table>
-    <p>The read is valid and qualified at both offsets. The gap of 13% recorded by the seed-census node does not survive the normal-form lobe owner: the booked current moved up to within 1.3–1.6% of the independent integral. The residual is a booking approximation on the coarse map, not a region difference: the booked support and the direct integral cover the same four selected cut cells, so the two numbers are two ways of evaluating one region.</p>
+    <p>The historical read reported valid and qualified at both offsets. The gap of 13% recorded by the seed-census node does not survive the normal-form lobe owner: the booked current moved up to within 1.3–1.6% of the independent integral. The residual is a booking approximation on the coarse map, not a region difference: the booked support and the direct integral cover the same four selected cut cells, so the two numbers are two ways of evaluating one region.</p>
     <p>The direct integral's own grid dependence bounds how tightly the two can be compared. Between 16×16, 32×32 and 64×64 points per triangle the direct current moves at most 0.118% (at offset 0.1732, from 130.334347 to 130.488250), so the smaller grid puts the two booked values 1.59% and 1.32% from the physical integral with a quadrature floor of about 0.12%. A fourfold refinement to 64×64 does not close the gap — so the looser tolerance of <code>rel=0.15</code> was hiding a real, coarse-map booking approximation, and the tighter bound is the honest one.</p>
     <figure>
-      <img src="/nova/figures/converged-forward-solve/tie-state-current-gap/tie-pair-current-gap.svg" alt="Poloidal panel of the selected cut cells at both tie offsets, the wall, the magnetic axis and the admitted X-point.">
-      <figcaption>One panel per tie offset. The teal outlines are the four cells the read selects as cut cells — the region the booking books and the region the quadrature integrates — over the machine wall; both null sets are marked, the magnetic axis with a solid triangle, the admitted X-point with a filled cross and the remaining qualified null hollow. The same four cells are selected at both offsets, so the region does not move: the booked and integrated currents differ only by the coarse-map approximation inside these cells. Regenerate with <code>docs/figures/converged-forward-solve/tie-state-current-gap/render_tie_pair.py</code>, which paints through <code>nova.media</code> (<code>poloidal_axes</code>, <code>draw_wall</code>, <code>draw_nulls</code>) and takes its legend glyphs from the same artists those painters draw.</figcaption>
+      <img src="/nova/figures/converged-forward-solve/tie-state-current-gap/tie-pair-current-gap.svg" alt="Poloidal panel of the selected cut cells at both tie offsets, the wall, the magnetic axis and the lower saddle candidate.">
+      <figcaption>The regenerated figure shows the unaccepted first-separator candidate, not the historical four-cell read in the table. Left: offset 0.17320; right: 0.17325. Top panels show shared physical field levels; bottom panels show the upper separator at shared normalized levels. Teal is the physical separator, dashed near-black curves are the candidate's signed booking rings, grey marks are independent nulls and smaller orange marks are the read's coincident nulls. The lower candidate remains hollow. The candidate selects cell 247 and books 17.0765/12.7600 A against 128×128 direct integrals of 5.80350/3.60379 A. These are field perturbations, not converged forward states. The <code>render_tie_pair.py</code> generator uses <code>nova.media</code> wall and null painters and captures every null legend handle from the artists <code>draw_nulls</code> creates.</figcaption>
     </figure>
   </section>
 
   <section id="tie-state-current-gap-attribution">
     <h2>Booking or region?</h2>
-    <p>By measurement the residual is a booking approximation, not a different region. The direct quadrature in <code>_dense_cut_current</code> selects the same cells the booking tags — <code>reading.membership &gt; 0</code>, four cells, asserted in the helper — and integrates the profile's current density over each cell's own fan with the read's <code>path_weight</code>. The booked value is the same cells evaluated through the read's fitted cut representation. There is no uncovered or double-counted area: the two integrals differ only in how the field and profile are evaluated inside identical cells, and that difference is 1.3–1.6% on the coarse 282-cell map. The gap was previously unmeasurable because the read refused the axis at both offsets under the pre-fix persistence gate; with the fix merged (<code>PERSISTENCE_ULP_FLOOR</code>, 8 ULP) the axis is admitted (persistence 4.189e-07 against a floor of 1.53e-17) and the comparison runs.</p>
+    <p>The residual compares two integrals over the same chosen region; it does not certify that region as axis-connected confined plasma. The direct quadrature in <code>_dense_cut_current</code> selects the same cells the booking tags — <code>reading.membership &gt; 0</code>, four cells in that historical measurement — and integrates the profile's current density over each cell's own fan with the read's <code>path_weight</code>. The booked value is the same cells evaluated through the read's fitted cut representation. The two integrals evaluate the field and profile inside identical cells, and that difference is 1.3–1.6% on the coarse 282-cell map. The gap was previously unmeasurable because the read refused the axis at both offsets under the pre-fix persistence gate; with the fix merged (<code>PERSISTENCE_ULP_FLOOR</code>, 8 ULP) the axis is admitted (persistence 4.189e-07 against a floor of 1.53e-17) and the comparison runs.</p>
   </section>
 
   <section id="tie-state-current-gap-assertion">
     <h2>The assertion</h2>
-    <p>The booked-current bound is tightened from <code>rel=0.15</code> to <code>rel=0.02</code>, the larger measured gap (1.59%) plus the measured quadrature floor (0.12%), stated in the constant's comment. It is not widened to absorb a gap: the bound now sits just above the agreement the code achieves. The focused gate and both suite arms over <code>tests/equilibrium/test_topology_read.py</code> are recorded in the run directory; the file's last item, <code>test_census_neighbour_proposals_keep_saddles_across_coarse_ties[500-…]</code>, is memory-unbounded and is recorded as a failure present in both arms with the measured OOM that established it.</p>
+    <p>The booked-current bound is tightened from <code>rel=0.15</code> to <code>rel=0.02</code>, the larger measured gap (1.59%) plus the measured quadrature floor (0.12%), derived from that historical quadrature measurement. It is not widened to absorb a gap: the bound sat above the historical agreement; the corrected-topology candidate currently fails it. The focused gate and both suite arms over <code>tests/equilibrium/test_topology_read.py</code> are recorded in the run directory; the file's last item, <code>test_census_neighbour_proposals_keep_saddles_across_coarse_ties[500-…]</code>, is memory-unbounded and is recorded as a failure present in both arms with the measured OOM that established it.</p>
   </section>
 </main></body>
 </html>

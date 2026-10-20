@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="read-first-separator">
+<meta name="plan-title" content="First separator candidate: blocked before acceptance">
+<meta name="plan-summary" content="Four regressions reproduce; the candidate selects the upper tie saddle but overbooks it and still fails all certified escape brackets">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s2">
+<meta name="plan-recorded-at" content="2026-10-20">
+<meta name="plan-commits" content="99e7969290b4891b6d3023f95d0ae692084fe579,e652e88359fabbc70c98ec6aeb7c261b2d1b109c">
+<meta name="plan-verdict" content="blocked">
+<title>First separator candidate | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head><body><main class="plan-doc">
+<section id="read-first-separator-landing">
+<h1>First separator candidate: blocked before acceptance</h1>
+<p>The node is not delivered as a repair. Test commit <code>99e7969290b4891b6d3023f95d0ae692084fe579</code> rewrites the tie assertion around the independent upper separator and adds the three certified escape brackets. Experiment <code>e652e88359fabbc70c98ec6aeb7c261b2d1b109c</code> retains cell-edge saddle barriers and calls the existing wall-event polisher. It is explicitly unaccepted recovery material; do not promote it as completed implementation.</p>
+<p>The base <code>d39b4670b8644481ead3ec2b7497133ec028dde5</code> still picks the lower tie saddle and a limited boundary, but books zero rather than the older record's 128.4 A. Loading that complete baseline kernel byte-for-byte under its normal import name makes all four rewritten/new tests fail on their own assertions, with no skips: <code>negative-control.log</code> records <code>4 failed, 1 warning in 292.51s</code> and <code>EXIT=1</code>. The head also fails all four IDs, so there is no passing-head negative-control pair.</p>
+<table><thead><tr><th>Measure</th><th>Candidate result</th><th>Acceptance</th></tr></thead><tbody>
+<tr><td>Tie boundary, offsets 0.17320 / 0.17325</td><td>Upper saddle, diverted, 0.008641658279465385 / 0.008644029313061028 Wb; selected cell 247 intersects the independently flooded confined component</td><td>Boundary check reached; fragment booking still fails</td></tr>
+<tr><td>Tie current</td><td>17.0764961466 / 12.7600388908 A booked, versus 5.80350442098 / 3.60379128347 A at 128×128 direct quadrature</td><td>Fails retained 2% bound</td></tr>
+<tr><td>MAST-U / synthetic A / synthetic B escape</td><td>0.0203163032415694 / 0.0136001857646499 / 0.0135421721811575 Wb</td><td>All three outside their independent brackets</td></tr>
+<tr><td>TCV, H200, paired Sirius suite, transition bisections</td><td>Not submitted after the focused failures and owner scope boundary</td><td>No acceptance claim</td></tr>
+</tbody></table>
+<figure><img src="/nova/figures/converged-forward-solve/tie-state-current-gap/tie-pair-current-gap.svg" alt="Physical tie-field contours and the unaccepted candidate's booked rings at both offsets.">
+<figcaption>Left 0.17320, right 0.17325; full-vessel views above, upper-separator details below. The physical field is unchanged; read nulls coincide with the reference maximum and upper saddle. Shared contour levels, wall and both null sets are drawn through the existing media vocabulary. Dashed rings show the candidate's excessive support. This is a topology perturbation, not a terminal solve. The SVG was rendered to PNG and inspected; null legend handles are the draw_nulls artists, and the save checks label bounds and overlaps.</figcaption></figure>
+<p>Request scope for <code>nova/equilibrium/topology.py</code>: its one-start-per-edge <code>_wall_events</code> misses the synthetic contact near Z=0.2 and returns a different stationary point near Z=0.77053, while its normal-form cell fragments do not represent the near-fold closed island accurately. Also grant <code>nova/equilibrium/current.py</code> and <code>scripts/prototypes/fast_map_production/program.py</code> if the corrected fragment representation changes the ring/booking interface. Those owners were not edited. The candidate's coarse maximin graph still attaches bottleneck values to remote contacts, violating the no-floating-boundary invariant.</p>
+<p>The <a href="/nova/research/read-first-separator.html">full research record</a> carries exact intervals, owner diagnosis, logs, checks and caveats. Durable evidence root: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T073801469402-read-first-separator</code>. The next action is the owner-scope repair, then the focused head/negative pair and the specified TCV, H200 and Sirius gates. This fragment closes no plan section or followup.</p>
+</section></main></body></html>

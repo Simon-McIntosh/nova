@@ -1,4 +1,4 @@
-"""Show where the contour-tree carrier stops before the physical wall."""
+"""Compare the contour-tree carrier and the physical wall event."""
 
 from __future__ import annotations
 
@@ -76,7 +76,8 @@ def render(receipt, output, preview):
         triangles = np.asarray(mesh.triangles)[np.asarray(mesh.triangle_valid)]
         spline = RectBivariateSpline(record.rgrid, record.zgrid, record.psi)
         centre_values = spline.ev(
-            np.asarray(geometry.centre)[:, 0], np.asarray(geometry.centre)[:, 1]
+            np.asarray(geometry.contour_sample_points)[:, 0],
+            np.asarray(geometry.contour_sample_points)[:, 1],
         )
         values = np.sum(
             centre_values[np.asarray(geometry.contour_sources)]
@@ -93,7 +94,15 @@ def render(receipt, output, preview):
         flux = spline.ev(rr.ravel(), zz.ravel()).reshape(rr.shape)
         units = (WallUnit(boundary[:, 0], boundary[:, 1], kind="vessel", closed=True),)
         axis_node = row["tree_nodes"][row["path"][0]]
-        saddle = row["reached"]
+        reached = row["reached"]
+        saddle = next(
+            n
+            for n in row["tree_nodes"]
+            if n["type"] == 1
+            and not n["wall"]
+            and n["polish_valid"]
+            and np.prod(n["polish_eigenvalues"]) < 0
+        )
         levels = [spec["efit_level"], 0.03, 0.1, 0.3, 0.6]
         for band, ax in enumerate(axes[:, column]):
             poloidal_axes(ax)
@@ -140,12 +149,24 @@ def render(receipt, output, preview):
                 style=replace(DEFAULT_INK, axis_color=TREE_NULL),
                 contain=units,
             )
-            tree_saddle = null_artist(
-                ax,
-                "tree saddle vertex",
-                other_x_points=np.asarray([saddle["position"]]),
-                style=replace(DEFAULT_INK, xpoint_color=TREE_NULL),
-            )
+            if reached["wall"]:
+                (tree_saddle,) = ax.plot(
+                    *reached["position"],
+                    marker="o",
+                    linestyle="none",
+                    color=TREE_NULL,
+                    markerfacecolor="white",
+                    markersize=7,
+                    label="tree wall vertex",
+                    zorder=8,
+                )
+            else:
+                tree_saddle = null_artist(
+                    ax,
+                    "tree saddle vertex",
+                    other_x_points=np.asarray([reached["position"]]),
+                    style=replace(DEFAULT_INK, xpoint_color=TREE_NULL),
+                )
             (contact,) = ax.plot(
                 0.85,
                 spec["axis"][1],

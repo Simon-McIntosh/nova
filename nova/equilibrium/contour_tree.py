@@ -106,49 +106,43 @@ class ContourTreeArrays:
     overflow: jax.Array
 
 
-def _neighbour_roots(parents: jax.Array, neighbours: jax.Array) -> jax.Array:
-    """Follow only the adjacency entries required by one sweep visit."""
+def _neighbour_roots(
+    parents: jax.Array, neighbours: jax.Array
+) -> tuple[jax.Array, jax.Array]:
+    """Find adjacent components and compress their queried paths."""
 
     def unresolved(roots: jax.Array) -> jax.Array:
         return jnp.any(roots != parents[roots])
 
-    return jax.lax.while_loop(unresolved, lambda roots: parents[roots], neighbours)
+    roots = jax.lax.while_loop(unresolved, lambda roots: parents[roots], neighbours)
+    return parents.at[neighbours].set(roots), roots
 
 
-def _append_edges(
-    edges: jax.Array,
-    edge_valid: jax.Array,
-    overflow: jax.Array,
+def _batch_edges(
     sources: jax.Array,
     source_valid: jax.Array,
-    target: jax.Array,
+    targets: jax.Array,
+    capacity: int,
 ) -> tuple[jax.Array, jax.Array, jax.Array]:
-    """Append distinct undirected arcs in bounded slots without truncation."""
+    """Keep the first occurrence of each arc in sweep order, then compact once."""
 
-    capacity = edges.shape[0]
-    slot_count = sources.size
-    destination = jnp.broadcast_to(target, (slot_count,))
-    arc = jnp.sort(
-        jnp.stack((sources.astype(jnp.int32), destination.astype(jnp.int32)), axis=1),
-        axis=1,
+    source = sources.reshape(-1)
+    requested = source_valid.reshape(-1) & (source != targets.reshape(-1))
+    arc = jnp.sort(jnp.stack((source, targets.reshape(-1)), axis=1), axis=1)
+    position = jnp.arange(source.size, dtype=jnp.int32)
+    order = jnp.lexsort((position, ~requested, arc[:, 1], arc[:, 0]))
+    sorted_arc = arc[order]
+    sorted_requested = requested[order]
+    previous_same = jnp.all(sorted_arc[1:] == sorted_arc[:-1], axis=1)
+    previous_requested = sorted_requested[:-1]
+    first = sorted_requested & ~jnp.concatenate(
+        (jnp.zeros((1,), dtype=bool), previous_same & previous_requested)
     )
-    requested = source_valid & (sources != destination)
-    duplicate = jnp.any(
-        edge_valid[:, None] & jnp.all(edges[:, None, :] == arc[None, :, :], axis=2),
-        axis=0,
-    )
-    eligible = requested & ~duplicate
-    free_slots = jnp.nonzero(~edge_valid, size=capacity, fill_value=0)[0]
-    free_count = jnp.sum(~edge_valid)
-    rank = jnp.cumsum(eligible.astype(jnp.int32)) - 1
-    fits = eligible & (rank < free_count)
-    slot = jnp.where(fits, free_slots[jnp.minimum(rank, capacity - 1)], capacity)
-    table = jnp.concatenate((edges, jnp.zeros((1, 2), dtype=edges.dtype)))
-    valid = jnp.concatenate((edge_valid, jnp.zeros((1,), dtype=bool)))
-    table = table.at[slot].set(jnp.where(fits[:, None], arc, table[slot]))
-    valid = valid.at[slot].set(fits | valid[slot])
-    overflow = overflow | jnp.any(eligible & ~fits)
-    return table[:capacity], valid[:capacity], overflow
+    eligible = jnp.zeros(source.size, dtype=bool).at[order].set(first)
+    edge_count = jnp.sum(eligible, dtype=jnp.int32)
+    selected = jnp.nonzero(eligible, size=capacity, fill_value=0)[0]
+    valid = jnp.arange(capacity, dtype=jnp.int32) < edge_count
+    return jnp.where(valid[:, None], arc[selected], 0), valid, edge_count > capacity
 
 
 def _insert_split_nodes(
@@ -288,32 +282,32 @@ def _sweep_tree(
         jnp.where(vertex_valid[order], index, jnp.asarray(-1, dtype=jnp.int32))
     )
     parents = index
+    ranks = jnp.zeros(vertex_count, dtype=jnp.int32)
     active = jnp.zeros(vertex_count, dtype=bool)
     births = index
     node_valid = jnp.zeros(node_capacity, dtype=bool)
     node_type = jnp.full(node_capacity, -1, dtype=jnp.int32)
-    output_edges = jnp.zeros((edge_capacity, 2), dtype=jnp.int32)
-    output_valid = jnp.zeros(edge_capacity, dtype=bool)
-    overflow = jnp.asarray(False)
+    arc_sources = jnp.zeros((vertex_count, neighbour_count), dtype=jnp.int32)
+    arc_valid = jnp.zeros((vertex_count, neighbour_count), dtype=bool)
     wall_flag = jnp.zeros(vertex_count, dtype=bool)
 
     def visit(rank, state):
         (
             parents,
+            ranks,
             active,
             births,
             node_valid,
             node_type,
-            output_edges,
-            output_valid,
-            overflow,
+            arc_sources,
+            arc_valid,
             wall_flag,
         ) = state
         vertex = order[rank].astype(jnp.int32)
         usable = vertex_valid[vertex]
         adjacent = neighbour_valid[vertex]
         neighbour = jnp.where(adjacent, neighbours[vertex], vertex)
-        neighbour_root = _neighbour_roots(parents, neighbour)
+        parents, neighbour_root = _neighbour_roots(parents, neighbour)
         root_active = adjacent & active[neighbour]
         earlier = jnp.arange(neighbour_count)[:, None] < jnp.arange(neighbour_count)
         repeated = jnp.any(
@@ -345,36 +339,52 @@ def _sweep_tree(
         )
         connect = usable & (saddle | terminal | first_wall)
         sources = births[neighbour_root]
-        output_edges, output_valid, overflow = _append_edges(
-            output_edges,
-            output_valid,
-            overflow,
-            sources,
-            representative & connect,
-            vertex,
-        )
-        parents = parents.at[neighbour_root].set(
-            jnp.where(root_active & usable, vertex, parents[neighbour_root])
-        )
-        parents = parents.at[vertex].set(vertex)
+        arc_sources = arc_sources.at[rank].set(sources)
+        arc_valid = arc_valid.at[rank].set(representative & connect)
         first_root = jnp.argmax(representative).astype(jnp.int32)
         inherited = births[neighbour_root[first_root]]
-        births = births.at[vertex].set(
-            jnp.where(extremum | saddle | first_wall, vertex, inherited)
+        maximum_rank = jnp.max(jnp.where(representative, ranks[neighbour_root], -1))
+        candidate_rank = jnp.concatenate((ranks[vertex][None], ranks[neighbour_root]))
+        candidate_valid = jnp.concatenate((jnp.ones((1,), dtype=bool), representative))
+        winning_index = jnp.argmax(
+            jnp.where(candidate_valid, candidate_rank, -1)
+        ).astype(jnp.int32)
+        winner = jnp.where(
+            winning_index == 0, vertex, neighbour_root[winning_index - 1]
+        )
+        winning_rank = jnp.maximum(maximum_rank, ranks[vertex])
+        tied = jnp.sum(representative & (ranks[neighbour_root] == winning_rank)) + (
+            ranks[vertex] == winning_rank
+        )
+        ranks = ranks.at[winner].set(
+            jnp.where(usable, winning_rank + (tied > 1), ranks[winner])
+        )
+        parents = parents.at[neighbour_root].set(
+            jnp.where(root_active & usable, winner, parents[neighbour_root])
+        )
+        parents = parents.at[vertex].set(jnp.where(usable, winner, vertex))
+        births = births.at[winner].set(
+            jnp.where(
+                usable,
+                jnp.where(extremum | saddle | first_wall, vertex, inherited),
+                births[winner],
+            )
         )
         active = active.at[vertex].set(usable)
-        wall_flag = wall_flag.at[vertex].set(
-            usable & (vertex_is_wall[vertex] | neighbour_wall)
+        wall_flag = wall_flag.at[winner].set(
+            jnp.where(
+                usable, vertex_is_wall[vertex] | neighbour_wall, wall_flag[winner]
+            )
         )
         return (
             parents,
+            ranks,
             active,
             births,
             node_valid,
             node_type,
-            output_edges,
-            output_valid,
-            overflow,
+            arc_sources,
+            arc_valid,
             wall_flag,
         )
 
@@ -384,17 +394,21 @@ def _sweep_tree(
         visit,
         (
             parents,
+            ranks,
             active,
             births,
             node_valid,
             node_type,
-            output_edges,
-            output_valid,
-            overflow,
+            arc_sources,
+            arc_valid,
             wall_flag,
         ),
     )
-    return result[3], result[4], result[5], result[6], result[7], order
+    targets = jnp.broadcast_to(order[:, None], arc_sources.shape)
+    output_edges, output_valid, overflow = _batch_edges(
+        result[6], result[7], targets, edge_capacity
+    )
+    return result[4], result[5], output_edges, output_valid, overflow, order
 
 
 @jax.jit

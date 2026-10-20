@@ -40,7 +40,9 @@ FIELDS = (
 def load_builder(path: Path):
     if path.resolve() == Path(installed_contour_tree.__file__).resolve():
         return installed_contour_tree
-    spec = importlib.util.spec_from_file_location("contour_tree_profile_target", path)
+    spec = importlib.util.spec_from_file_location(
+        f"contour_tree_profile_{path.stem}", path
+    )
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
@@ -97,7 +99,7 @@ def perturbed_sweep(module):
 
 
 def roots_with_depth(parents, neighbours):
-    """Follow the same parent links while counting pointer-doubling rounds."""
+    """Count root-query rounds before compressing the queried paths."""
 
     def unresolved(state):
         roots, _ = state
@@ -119,7 +121,7 @@ def instrumented_sweep(module, arguments, mutation: bool = False):
     def counted_roots(parents, neighbours):
         roots, depth = roots_with_depth(parents, neighbours)
         jax.debug.callback(lambda value: counts.append(int(value)), depth)
-        return roots
+        return parents.at[neighbours].set(roots), roots
 
     sweep = FunctionType(
         selected.__code__,
@@ -176,20 +178,24 @@ def assert_identity(reference, candidate):
 
 
 def without_append_wall(module, sweep_args):
-    original = module._append_edges
+    original = module._batch_edges
 
-    def skip(edges, valid, overflow, sources, source_valid, target):
-        return edges, valid, overflow
+    def skip(sources, valid, targets, capacity):
+        return (
+            jnp.zeros((capacity, 2), dtype=jnp.int32),
+            jnp.zeros((capacity,), dtype=bool),
+            jnp.asarray(False),
+        )
 
     try:
-        module._append_edges = skip
+        module._batch_edges = skip
 
         def no_append(*dynamic):
             return module._sweep_tree(*dynamic, *sweep_args[5:])
 
         _, wall, compile_seconds = compiled_wall(no_append, *sweep_args[:5])
     finally:
-        module._append_edges = original
+        module._batch_edges = original
     return wall, compile_seconds
 
 

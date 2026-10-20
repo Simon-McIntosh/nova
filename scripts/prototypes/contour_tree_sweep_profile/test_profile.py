@@ -34,9 +34,13 @@ def test_pointer_counter_sees_known_chain() -> None:
 @pytest.mark.parametrize("cells", (550, 2000, 5000, 10000))
 def test_instrumented_receipt_identity(kind: str, cells: int) -> None:
     module = load_builder(Path(os.environ["CONTOUR_TREE_MODULE"]))
+    baseline = load_builder(Path(os.environ["REFERENCE_CONTOUR_TREE_MODULE"]))
     arguments, realised_cells = inputs(kind, cells)
+    expected = baseline.build_contour_tree(*arguments)
+    jax.block_until_ready(expected)
     reference = module.build_contour_tree(*arguments)
     jax.block_until_ready(reference)
+    assert_identity(expected, reference)
     mutation = os.environ.get("MUTATE_VISIT_ORDER") == "1"
     vertex_flux, vertex_valid, vertex_is_wall, edges, edge_valid, sigma = arguments
     signed = jnp.asarray(sigma, dtype=vertex_flux.dtype) * vertex_flux

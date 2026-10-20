@@ -52,16 +52,18 @@ def draw_panel(axes, view, row, wall_rings):
     for ring in wall_rings:
         draw_wall(axes, radius=ring[:, 0], height=ring[:, 1])
     draw_flux_contours(axes, rgrid, zgrid, psi.T, levels, wall=wall_rings)
-    axes.contour(
+    reference_contour = draw_flux_contours(
+        axes,
         rgrid,
         zgrid,
         psi.T,
-        levels=[grid_boundary],
-        colors=[DEFAULT_INK.separatrix_color],
-        linestyles=["--"],
-        linewidths=1.1,
+        [grid_boundary],
+        wall=wall_rings,
+        color="#666666",
+        linewidth=1.0,
         zorder=5,
     )
+    reference_contour.set_linestyle(":")
     draw_nulls(
         axes,
         magnetic_axis=view["axis"],
@@ -73,21 +75,23 @@ def draw_panel(axes, view, row, wall_rings):
             axes,
             view["outline"][:, 0],
             view["outline"][:, 1],
-            color="#929292",
-            linewidth=0.8,
-            linestyle=":",
+            color=DEFAULT_INK.separatrix_color,
+            linewidth=1.6,
+            linestyle="--",
         )
     label = row.get("nova_label")
     if label in READ_LABELS:
         boundary_flux = row.get("nova_boundary_psi")
         if boundary_flux is not None and np.isfinite(boundary_flux):
-            axes.contour(
+            draw_flux_contours(
+                axes,
                 rgrid,
                 zgrid,
                 psi.T,
-                levels=[float(boundary_flux)],
-                colors=[NOVA_INK.separatrix_color],
-                linewidths=1.1,
+                [float(boundary_flux)],
+                wall=wall_rings,
+                color=NOVA_INK.separatrix_color,
+                linewidth=1.1,
                 zorder=6,
             )
         draw_nulls(
@@ -111,6 +115,9 @@ def build(rows, eq, wall_rings, out_path):
     for axes, row in zip(panels, rows):
         poloidal_axes(axes)
         draw_panel(axes, measure.slice_view(eq, row["index"]), row, wall_rings)
+        axes.set_title(
+            f"{row['index']} · {row['liuqe_time']:.3f} s", fontsize=14, pad=8
+        )
     for axes in panels[len(rows) :]:
         axes.set_visible(False)
     figure.tight_layout()
@@ -124,9 +131,13 @@ def main():
     parser.add_argument("--rows", required=True)
     parser.add_argument("--liuqe", required=True)
     parser.add_argument("--wall", required=True)
-    parser.add_argument("--out", required=True)
+    output = parser.add_mutually_exclusive_group(required=True)
+    output.add_argument("--out")
+    output.add_argument("--out-dir")
     args = parser.parse_args()
-    rows = json.loads(Path(args.rows).read_text())["rows"]
+    rows = [
+        json.loads(line) for line in Path(args.rows).read_text().splitlines() if line
+    ]
     db = imas.DBEntry(f"imas:hdf5?path={args.liuqe}", "r", dd_version="3.41.0")
     eq = db.get("equilibrium")
     if eq.ids_properties.homogeneous_time != 1:
@@ -134,9 +145,26 @@ def main():
     wall_rings = measure.read_wall(args.wall)
     print("nova.__file__", __import__("nova").__file__, flush=True)
     print("panels", len(rows), "wall rings", len(wall_rings), flush=True)
-    build(rows, eq, wall_rings, args.out)
+    if args.out_dir:
+        if len(rows) != 17:
+            raise ValueError("three-panel render requires all corrected slice rows")
+        destination = Path(args.out_dir)
+        destination.mkdir(parents=True, exist_ok=True)
+        groups = (("early", rows[:6]), ("middle", rows[6:12]), ("late", rows[12:]))
+        outputs = [
+            build(
+                group,
+                eq,
+                wall_rings,
+                destination / f"tcv-77549-liuqe-nova-boundary-{name}.svg",
+            )
+            for name, group in groups
+        ]
+    else:
+        outputs = [build(rows, eq, wall_rings, args.out)]
     db.close()
-    print("WROTE", args.out, flush=True)
+    for path in outputs:
+        print("WROTE", path, flush=True)
 
 
 if __name__ == "__main__":

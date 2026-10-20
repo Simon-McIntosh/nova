@@ -57,16 +57,18 @@ def _diagnosis(row):
     """Locate each different boundary decision on the common LIUQE grid."""
     gap = measure_gaps(row)
     label_differs = row["liuqe_label"] != row["nova_label"]
-    flux_differs = (
-        math.isfinite(gap["boundary_relative"]) and gap["boundary_relative"] > 0.05
-    )
+    flux_differs = math.isfinite(gap["boundary_gap"]) and gap["boundary_gap"] > 1e-9
     if not label_differs and not flux_differs:
         return ""
     reference_level = row["liuqe_boundary_psi_grid"]
     measured_level = row.get("nova_boundary_psi")
     evidence = (
+        f"LIUQE ψaxis {_number(row['liuqe_axis_psi_grid'])}, "
+        f"nova ψaxis {_number(row.get('nova_axis_psi'))}; "
         f"LIUQE ψboundary {_number(reference_level)}, nova {_number(measured_level)}; "
         f"LIUQE axis {_point(row['liuqe_axis'])}, nova {_point(row.get('nova_axis'))}; "
+        f"nova boundary {_point(row.get('nova_boundary'))}; "
+        f"{row.get('nova_saddles', '—')} admitted saddles; "
         f"wall contact {_number(row['liuqe_wall_distance'])} m, "
         f"nearest stored X-point {_number(row['liuqe_xpoint_distance'])} m "
         "from outline."
@@ -98,12 +100,19 @@ def _diagnosis(row):
                 "the selected basin against LIUQE's stored axis"
             )
         if label_differs or flux_differs:
+            prescription = (
+                "recompute the effective wall path ceiling and admitted saddle "
+                "score on LIUQE's ψ, then compare the chosen contact with its outline"
+                if label_differs
+                else "compare the discrete wall or saddle candidate level with "
+                "LIUQE's sampled outline level and refine the candidate where "
+                "that comparison identifies an error"
+            )
             parts.append(
                 f"boundary choice differs by {_number(gap['boundary_gap'])} ψ "
                 f"({_number(gap['boundary_relative'], 3)} reference spans): "
                 "kernel.py:403–409 compares the wall path level with the admitted "
-                "saddle; inspect both levels and their wall or X-point location "
-                "on LIUQE's ψ before changing that rule"
+                f"saddle; {prescription}"
             )
         departure = "; ".join(parts) + "."
     return (
@@ -126,8 +135,8 @@ def build(rows, receipt_path):
     count_diagnosed = diagnoses.count("<li>")
     summary = (
         f"{agreements} of 17 geometric labels agree; {refusals} nova reads refuse "
-        f"a label; {count_diagnosed} slices differ in label or boundary flux by "
-        "more than 5% of the LIUQE axis-to-boundary flux span."
+        f"a label; {count_diagnosed} slices have a label or measurable boundary "
+        "flux difference."
     )
     table = "\n".join(_row_html(row) for row in rows)
     figure_root = "/nova/figures/converged-forward-solve/tcv-liuqe-known-answer"
@@ -137,7 +146,8 @@ def build(rows, receipt_path):
         f"alt='LIUQE and nova boundary comparison for slices "
         f"{group[0]['index']} through {group[-1]['index']}'>"
         "<figcaption>Corrected COCOS-11 LIUQE ψ: common line-contour levels; "
-        "stored outline dotted grey, LIUQE boundary dashed, nova boundary blue; "
+        "LIUQE stored outline dashed red, grid contour at the outline's mean "
+        "sampled ψ dotted grey, nova boundary blue; "
         "both null sets and the wall are marked. "
         + "; ".join(
             f"{row['index']}: LIUQE {row['liuqe_label']}, nova {row['nova_label']}"
@@ -169,13 +179,15 @@ No sign compensation is applied in nova.</p>
 <p><strong>{summary}</strong> All rows come from one sirius job receipt:
 <code>{html.escape(str(receipt_path))}</code>. A dash means absent or refused,
 never zero. Boundary flux and axes from both readers are evaluated on the same
-LIUQE grid spline.</p>
+LIUQE grid spline. The stored outline defines LIUQE's geometric label; the
+grey diagnostic contour at the outline's mean sampled grid ψ may depart from
+that outline and does not change its label.</p>
 <table><thead><tr><th>Slice / time</th><th>LIUQE / nova</th>
 <th>Wall / X distance [m]</th><th>Axis R,Z [m]</th><th>Stored X / nova saddle [m]</th>
 <th>Boundary ψ on LIUQE grid</th><th>Coverage</th><th>Lattice</th></tr></thead>
 <tbody>{table}</tbody></table>
-<h2>Departures on LIUQE ψ</h2><p>Every label disagreement, refusal, or boundary
-flux gap above 5% of LIUQE's axis-to-boundary span is listed. The cited
+<h2>Departures on LIUQE ψ</h2><p>Every label disagreement, refusal, or measurable
+boundary flux gap is listed. The cited
 rules are the read decisions to inspect; each prescription stays conditional
 on the measured field and preserves a coverage refusal until it is certified.</p>
 <ol>{diagnoses}</ol>

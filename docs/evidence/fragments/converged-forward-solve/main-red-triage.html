@@ -1,0 +1,312 @@
+<section id="main-red-triage-scope">
+  <h2>Triage of the three files reported red on main</h2>
+  <p>Base revision <code>1dc96ee0b9931c21feb567f799baae353779928d</code>. Each
+  file was run once as its own fresh process on the fleet allocation
+  (job 1281970) with <code>JAX_PLATFORMS=cpu</code>, the repository's shared
+  interpreter, <code>-m "slow or not slow"</code> and a per-file log. No test
+  and no product source was edited by this node.</p>
+  <p>The command form the shell was handed, once per file, with
+  <code>&lt;file&gt;</code> the file named in the row:</p>
+  <pre>JAX_PLATFORMS=cpu PYTHONPATH=&lt;worktree&gt; TMPDIR=&lt;run&gt;/scratch/&lt;file&gt; \
+  /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest \
+  -p no:cacheprovider -rA -m "slow or not slow" &lt;worktree&gt;/tests/&lt;file&gt;</pre>
+  <table>
+    <thead><tr><th>file</th><th>summary at base</th><th>log</th></tr></thead>
+    <tbody>
+      <tr><td><code>tests/test_equilibrium_constraint_protocol.py</code></td><td>2 failed, 16 passed in 121.28s (<code>EXIT=1</code>)</td><td><code>triage-logs/constraint-protocol.log</code></td></tr>
+      <tr><td><code>tests/test_solve_trips_are_a_scan.py</code></td><td>16 passed in 55.00s (<code>EXIT=0</code>)</td><td><code>triage-logs/trips-are-a-scan.log</code></td></tr>
+      <tr><td><code>tests/test_forward_compile_identity.py</code></td><td>see the identity section</td><td><code>triage-logs/forward-compile-identity.log</code></td></tr>
+    </tbody>
+  </table>
+  <p>All three logs live under
+  <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T061120617221-main-red-triage/</code>.</p>
+</section>
+
+<section id="main-red-triage-trips-are-green">
+  <h2>`test_solve_trips_are_a_scan.py` is not red at this revision</h2>
+  <p>The brief names four trip-body and Newton-budget scan guards as red. At base
+  <code>1dc96ee0b</code> the whole file is green: <strong>16 passed, 0 failed,
+  0 errored, exit 0</strong> (<code>triage-logs/trips-are-a-scan.log</code>,
+  last line <code>EXIT=0</code>). The four guards specifically named all pass,
+  together with the other twelve parametrisations:</p>
+  <pre>PASSED tests/test_solve_trips_are_a_scan.py::test_active_trip_body_is_lowered_once[2]
+PASSED tests/test_solve_trips_are_a_scan.py::test_active_trip_body_is_lowered_once[5]
+PASSED tests/test_solve_trips_are_a_scan.py::test_newton_step_body_is_lowered_once[2]
+PASSED tests/test_solve_trips_are_a_scan.py::test_newton_step_body_is_lowered_once[5]
+PASSED tests/test_solve_trips_are_a_scan.py::test_reduced_trip_body_and_newton_budget_are_scans[3-5]
+PASSED tests/test_solve_trips_are_a_scan.py::test_reduced_trip_body_and_newton_budget_are_scans[6-9]</pre>
+  <p><strong>Classification: no failure to repair — the report is stale.</strong>
+  The file's last change is <code>d0245d008</code> (2026-10-17,
+  <em>test(equilibrium): attribute trip-body guard barriers to their own
+  marker</em>), the node that made these guards difference a marked lowering
+  against the same program unmarked; its own record
+  (<code>docs/evidence/fragments/converged-forward-solve/trip-guard-counts-its-marker.html</code>)
+  states the file went from 4 failed / 12 passed to 16 passed. The four guards
+  reach <code>nova/equilibrium/fixed_point.py</code>
+  (<code>_newton_krylov_inner</code>, <code>_qualified_krylov_step</code>, last
+  touched <code>f3a1f8e30</code> 2026-10-03) and
+  <code>nova/equilibrium/reduced_newton.py</code>
+  (<code>_compiled_slice_solver</code>, last touched <code>a359f8fed</code>
+  2026-09-22); nothing since those commits breaks the guard counts.</p>
+  <p><strong>Prescription: none.</strong> A node dispatched to repair this file
+  would have nothing to change. Its negative control would be vacuous, which is
+  itself the signal that the report is stale. If a lane still shows this file
+  red, that lane is running a revision older than <code>d0245d008</code>, and
+  the finding belongs to that lane's revision, not to main. No file or line is
+  named because there is nothing to change.</p>
+</section>
+
+<section id="main-red-triage-elimination-with-source">
+  <h2>Both `test_equilibrium_constraint_protocol.py` failures share one cause</h2>
+  <p>The two named tests are the only failures in the file (2 failed, 16 passed).
+  Both raise at the same product line with the same exception, and both reach it
+  through the same call chain. The exception and the first failing line, copied
+  from <code>triage-logs/constraint-protocol.log</code>:</p>
+  <pre>E       AttributeError: '_LinearOperator' object has no attribute 'with_source'
+
+nova/equilibrium/forward.py:686: AttributeError
+
+nova/equilibrium/forward.py:2622: in _solve_imposed_request
+    active = self._with_source(request.source_profile, clip_mode=request.clip_mode)
+nova/equilibrium/forward.py:2491: in solve_target
+    receipt = self._solve_imposed_request(inner_request)
+nova/equilibrium/forward.py:2507: in _solve_eliminated_request
+    final_receipt, compensating = solve_target(target)
+nova/equilibrium/forward.py:2443: in _solve_request
+    return self._solve_eliminated_request(request, index)
+nova/equilibrium/forward.py:2857: in solve
+    return self._solve_request(initial_flux)</pre>
+  <table>
+    <thead><tr><th>test id</th><th>exception</th><th>first failing line</th></tr></thead>
+    <tbody>
+      <tr><td><code>tests/test_equilibrium_constraint_protocol.py::test_eliminated_constraint_runs_through_typed_solve_with_outer_trace</code></td><td><code>AttributeError</code></td><td><code>nova/equilibrium/forward.py:686</code></td></tr>
+      <tr><td><code>tests/test_equilibrium_constraint_protocol.py::test_eliminated_constraint_reports_no_root_and_refuses_multiple_rows</code></td><td><code>AttributeError</code></td><td><code>nova/equilibrium/forward.py:686</code></td></tr>
+    </tbody>
+  </table>
+  <p>The failing call sites in the test are
+  <code>test_equilibrium_constraint_protocol.py:443</code> and
+  <code>:518</code>, both <code>receipt = profile.solve(request)</code> with a
+  <code>policy="eliminated"</code> constraint pair. The other sixteen tests in
+  the file pass because they never enter <code>ForwardProfile.solve</code> with
+  a constraint pair; for instance
+  <code>test_linear_circuit_and_nonlinear_multiplier_rows_converge</code> calls
+  <code>profile._solve_augmented_constraints</code> directly
+  (<code>test_equilibrium_constraint_protocol.py:156</code>) and so never reaches
+  <code>_solve_imposed_request</code>.</p>
+</section>
+
+<section id="main-red-triage-elimination-owner">
+  <h2>The owner, read from the traceback and the code</h2>
+  <p>The exception is raised in <code>ForwardProfile._with_source</code> at
+  <code>nova/equilibrium/forward.py:686</code>:
+  <code>active.operator = self.operator.with_source(source)</code>. That line was
+  last touched by <code>a4de1caf51</code> (2026-09-16). The guard that governs
+  whether it is reached is <code>forward.py:682</code>:</p>
+  <pre>if source is self.source and clip_mode is None:
+    return self</pre>
+  <p>That guard line was last touched by <code>09a0b9b90</code> (2026-10-02,
+  <em>feat(equilibrium): carry support clipping through solve requests</em>),
+  which also added the <code>clip_mode</code> field to
+  <code>ForwardSolveRequest</code> (<code>nova/equilibrium/solve_request.py:584</code>,
+  default <code>"chord"</code>) and the two lines that apply it
+  (<code>forward.py:687-688</code>). The caller,
+  <code>forward.py:2622</code>, passes <code>clip_mode=request.clip_mode</code>
+  unconditionally, and <code>request.clip_mode</code> defaults to
+  <code>"chord"</code>, never <code>None</code>. So the early return at line 682
+  can no longer fire from this caller: <code>operator.with_source</code> is now
+  reached on <em>every</em> imposed or eliminated request, whether or not the
+  source or the clip mode actually changed.</p>
+  <p>The operator method itself is real and is not missing in production:
+  <code>ForwardFluxOperator.with_source</code> is at
+  <code>nova/equilibrium/forward_operator.py:2673</code> and
+  <code>with_clip_mode</code> at <code>:2705</code>, with
+  <code>clip_mode: str = "chord"</code> at <code>:2342</code> — the same default
+  the request carries. <code>forward_operator.py</code> was last touched by
+  <code>5a12ba63b</code> (2026-10-10).</p>
+  <p>The test double that lacks the method is <code>_LinearOperator</code> at
+  <code>tests/test_equilibrium_constraint_protocol.py:65</code>, which the
+  profile builder installs as <code>profile.operator</code>
+  (<code>test_equilibrium_constraint_protocol.py:96</code>). It implements
+  <code>flux_map</code>, <code>flux_map_with_shadow</code>,
+  <code>residual_shadow_mask</code> and <code>dual_flux_image</code>, but neither
+  <code>with_source</code> nor <code>with_clip_mode</code>. The test file was last
+  touched by <code>211d75798</code> (2026-10-02 15:46), which predates
+  <code>09a0b9b90</code> (2026-10-02 19:36) by under four hours.</p>
+</section>
+
+<section id="main-red-triage-elimination-classification">
+  <h2>Classification and prescription</h2>
+  <p><strong>Classification: test defect — a stale test double, not a product
+  defect and not environment.</strong> Production is unaffected: the real
+  <code>ForwardFluxOperator</code> implements both methods (<code>:2673</code>,
+  <code>:2705</code>), so no production caller breaks. The double
+  <code>_LinearOperator</code> predates the operator interface widening in
+  <code>09a0b9b90</code>, and every other test in this file passes because it
+  avoids the one product path that now calls the widened interface.</p>
+  <p>The proximate cause is the guard at <code>forward.py:682</code>: before
+  <code>09a0b9b90</code> it read <code>if source is self.source:</code>, which
+  returned <code>self</code> for these tests because
+  <code>request.source_profile is profile.source</code>, so
+  <code>with_source</code> was never called and the double's omission stayed
+  latent. Widening the guard to <code>and clip_mode is None</code> while the
+  caller always passes a concrete <code>clip_mode</code> removed that no-op path
+  for every imposed request.</p>
+  <p><strong>Prescription (primary).</strong> File
+  <code>tests/test_equilibrium_constraint_protocol.py</code>, in class
+  <code>_LinearOperator</code> at line 65: add the two methods the imposed and
+  eliminated solve path now calls on the operator —
+  <code>with_source(self, source)</code> returning a shallow copy of the double
+  with <code>source</code> replaced, and
+  <code>with_clip_mode(self, clip_mode)</code> returning a shallow copy with a
+  <code>clip_mode</code> attribute set (the double gains
+  <code>self.clip_mode = "chord"</code> in <code>__init__</code> to mirror the
+  operator default) — leaving every assertion, tolerance and test body
+  untouched.</p>
+  <p><strong>Negative control.</strong> Revert that one change (remove the two
+  methods from the double, or rename one of them) and re-run the file: both tests
+  must fail again with
+  <code>AttributeError: '_LinearOperator' object has no attribute 'with_source'</code>
+  at <code>nova/equilibrium/forward.py:686</code>, exit 1, against 16 passed for
+  the remaining tests. That is exactly the reproduction quoted above, recorded at
+  <code>triage-logs/constraint-protocol.log</code>; the positive arm is the same
+  command with the two methods present, which must report <strong>18 passed,
+  0 failed, exit 0</strong>.</p>
+  <p><strong>Alternative prescription (product side, optional, not required for
+  green).</strong> File <code>nova/equilibrium/forward.py</code>, line 682:
+  change the guard to also return <code>self</code> when the requested clip mode
+  already equals the operator's active one, so the no-op path its docstring
+  promises (<em>bind request-owned source and clip choices without rebuilding
+  geometry</em>) is restored. This is a real, if minor, behaviour change —
+  every imposed request currently rebuilds the operator through
+  <code>with_source</code> — but it is <em>not</em> the smaller change: any such
+  guard must read the operator's clip mode
+  (<code>ForwardFluxOperator.clip_mode</code>, or the fixture lacks it too), so
+  it still requires the double to be extended. If both prescriptions are taken,
+  the test-double completion must land first, because the product guard cannot
+  distinguish a no-op from a real change without the operator-side attribute and
+  would otherwise fail the two tests in a new place.</p>
+  <p>This pair of failures shares one cause and one prescription; they are not
+  two nodes.</p>
+</section>
+
+<section id="main-red-triage-identity">
+  <h2>`test_forward_compile_identity.py`: one test fails, on two arms that fail differently</h2>
+  <p>Fresh CPU process, log
+  <code>triage-logs/forward-compile-identity.log</code>, base
+  <code>1dc96ee0b</code>. Three tests collected; the run did not print a summary
+  line before the harness stopped the process, so the log is explicitly
+  incomplete and carries no <code>EXIT</code> line. The per-test state it did
+  record is unambiguous:</p>
+  <table id="main-red-triage-identity-table">
+    <thead><tr><th>test id</th><th>result at base (CPU)</th><th>first failing line</th></tr></thead>
+    <tbody>
+      <tr><td><code>test_certificate_rows_share_one_solve_program_per_mesh</code></td><td><strong>passed</strong> (the <code>.</code> before the first timeout banner)</td><td>none</td></tr>
+      <tr><td><code>test_traced_exterior_preserves_the_certificate_terminal_state</code></td><td><strong>failed</strong></td><td><code>Failed: Timeout (&gt;300.0s) from pytest-timeout</code></td></tr>
+      <tr><td><code>test_compiled_slice_program_traces_conductor_exterior</code></td><td>not reached in this process</td><td>none</td></tr>
+    </tbody>
+  </table>
+  <p>The timeout is the repository's own bound, not one this node imposed:
+  <code>pyproject.toml</code> configures <code>timeout = 300</code> with the
+  <code>signal</code> method, and the log's header prints
+  <code>timeout: 300.0s</code> / <code>timeout method: signal</code>. The banner
+  fires twice inside the second test, and the captured stack shows the
+  interpreter held at
+  <code>selectors.py:452 in select</code> →
+  <code>base_events.py:2008 in _run_once</code> → <code>zarr_io</code>'s
+  event loop thread, with every other thread parked in
+  <code>concurrent/futures/thread.py:116 in _worker</code> waiting on the work
+  queue. So the wall is spent in the native XLA compile and solve, and the
+  handler interrupts the interpreter only when it regains control.</p>
+  <p><strong>Prior evidence on the H200 lane for the same test, with a different
+  failure.</strong> The node <code>slow-caller-tests</code> ran all three tests on
+  the H200 (its fragment
+  <code>docs/evidence/fragments/converged-forward-solve/slow-caller-tests.html</code>,
+  job 1289912, head <code>63c36b46e</code>) and reported <em>1 failed, 2 passed
+  in 1153.17s</em>, the failure being
+  <code>assert 4.3309859247974134e-12 &lt;= 1e-14</code>, <em>the same value in
+  its base and head arms</em>. That is the same test as the CPU timeout:
+  <code>test_traced_exterior_preserves_the_certificate_terminal_state</code>, the
+  only test in the file asserting a <code>1e-14</code> bound
+  (<code>RELATIVE_IDENTITY_TOLERANCE = 1.0e-14</code>,
+  <code>tests/test_forward_compile_identity.py:23</code>, asserted at
+  <code>:171</code> and <code>:172</code>). On the H200 that test dominates the
+  file at <strong>1009.30s</strong> against 33.60s and 25.01s for the other two,
+  so its wall exceeds the 300s bound by more than 3× there as well — the bound
+  simply does not fire on the GPU, because the interpreter never regains control
+  inside the native compile.</p>
+  <p>So the same test is red on both arms at this base, and the two arms do not
+  agree on why: on CPU it is cut by the per-test bound before it can reach an
+  assertion, and on the GPU it reaches the assertion and misses the bound by
+  433×.</p>
+</section>
+
+<section id="main-red-triage-identity-owner">
+  <h2>Owner of the identity failure, from the code</h2>
+  <p>The CPU-arm first failing line is pytest-timeout's, so its owner is the
+  per-test bound rather than a product line. The GPU-arm failure reaches
+  <code>tests/test_forward_compile_identity.py:171</code>
+  (<code>assert max_relative_flux_difference &lt;= RELATIVE_IDENTITY_TOLERANCE</code>),
+  whose operands come from the two solves built at
+  <code>test_forward_compile_identity.py:139</code> and <code>:149</code> —
+  <code>fixed_point.newton_krylov</code> driven by the <em>traced</em> map
+  (<code>operator.traced_flux_map</code>, <code>:72</code>) against the same
+  solver driven by the <em>bound</em> map (<code>operator.flux_map</code>,
+  <code>:150</code>). The product owner is therefore
+  <code>nova/equilibrium/fixed_point.py</code> (<code>newton_krylov</code>,
+  <code>_bind_traced_map_arguments</code>), last touched by
+  <code>f3a1f8e30</code> (2026-10-03), with the traced map itself owned by
+  <code>nova/equilibrium/forward_operator.py</code>
+  (<code>traced_flux_map</code>, last touched <code>5a12ba63b</code>,
+  2026-10-10). The test file was last touched by <code>f7e94d844</code>
+  (2026-10-12, <em>refactor(oracle): require the exterior support arm at every
+  caller</em>), which is the commit that named the <code>support_arm="legacy"</code>
+  argument this test's fixture passes at <code>:36</code>.</p>
+</section>
+
+<section id="main-red-triage-identity-prescription">
+  <h2>Classification and prescription for the identity file</h2>
+  <p><strong>Classification: environment or harness on the CPU arm (the per-test
+  bound), and a separate product question on the GPU arm.</strong> The CPU
+  failure is the repository's own 300s <code>pytest-timeout</code> bound meeting
+  a test whose measured H200 wall is 1009.30s; it is not a product defect and no
+  product line is at fault for it. The GPU arm's
+  <code>4.33e-12 &lt;= 1e-14</code> is a genuine identity miss in the traced
+  versus bound solve, unchanged between the two revisions that arm measured, so
+  it is <em>not</em> a regression from any recent landing — but it is a
+  product-level claim that currently fails and it is not the CPU arm's failure.</p>
+  <p><strong>Prescription (primary, environment, ~30 minutes).</strong> File
+  <code>tests/test_forward_compile_identity.py</code>, on the two tests that
+  build and run a solve — <code>test_traced_exterior_preserves_the_certificate_terminal_state</code>
+  (decorator at <code>:128</code>) and
+  <code>test_compiled_slice_program_traces_conductor_exterior</code>
+  (decorator at <code>:175</code>): raise the per-test bound above their
+  measured wall, by adding one line to the existing
+  <code>@pytest.mark.slow</code> stack, <code>@pytest.mark.timeout(1800)</code>,
+  so the CPU lane reports each test's real assertion instead of a bound. The
+  wall is already measured: 1009.30s for the first on the H200, so a CPU bound
+  needs headroom above that, not below it.</p>
+  <p><strong>Negative control for that prescription.</strong> With the bound
+  raised, re-run the file on the CPU arm: the second test must stop reporting
+  <code>Failed: Timeout (&gt;300.0s)</code> and must instead terminate on its own
+  assert, exit 1 with a summary line the base log lacks. On the H200 lane the
+  same file must still report exactly one failure, and that failure must be the
+  <code>&lt;= 1e-14</code> assert — i.e. the change must not turn the CPU arm
+  green, only move it from a bound to the assertion it was hiding. A CPU arm that
+  reports <em>3 passed</em> means the CPU numbers are not the GPU numbers and the
+  bound change has masked a device dependence rather than exposed it.</p>
+  <p><strong>Prescription (secondary, product, its own node — not the CPU
+  arm's failure).</strong> File <code>nova/equilibrium/fixed_point.py</code>: the
+  traced and bound map drivers of <code>newton_krylov</code> differ by
+  <code>4.33e-12</code> relative in the terminal flux against a stated
+  <code>1e-14</code> bound at
+  <code>tests/test_forward_compile_identity.py:171</code>. Either the two paths
+  are not the same computation and the identity claim is wrong, or the bound is
+  tighter than the arithmetic allows; that is a measurement to make, not a
+  tolerance to widen blind. The negative control is a third path: drive the same
+  solver from the <em>same</em> map twice and require the difference to be
+  bit-zero; if it is not, the dispersion is in the solver and not in the map
+  tracing, which settles which side owns it.</p>
+  <p>This prescription touches one file and the primary prescription touches one
+  line; they are ordered as written — the bound must be raised before the CPU
+  arm can show whether the product clause holds there at all.</p>
+</section>

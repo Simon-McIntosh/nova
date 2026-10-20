@@ -20,11 +20,11 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="jax,h200,throughput,equilibrium">
   <meta name="plan-blocks" content="converged-forward-solve">
-  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
   <title>Kernel Compile Barrier | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="9">
+<meta name="plan-version" content="10">
 <meta name="plan-modified" content="2026-10-20">
 </head>
 <body>
@@ -48,7 +48,7 @@
     <p>Locked rulings this plan inherits, from converged-forward-solve, 2026-10-06. The primal arithmetic (flux, field, booking, residual, null positions) stays bit-identical to the base kernels. Tangents may take a fixed-capacity scan form held to 1e-9 relative against <code>jax.jvp</code> of the base, and exact hand-written tangents stay where they already compile within three times the primal. Relaxing the identity tolerance or the compile clause is forbidden without the lead. The 15 elliptic helpers the point jet reaches already carry private tangents inside three times their primal, so the remaining cost lies in terms that work did not reach; §1 finds them before anything is rewritten.</p>
 
     <h2 id="s1">§1 — Compile census of every kernel-backed program</h2>
-    <section data-reckon="section" data-id="s1" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-attempts="0" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s1" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-attempts="0" data-status="done" data-links=""></section>
     <p>Measure, before changing anything, where the compiled graph comes from. The programs are the point jet, <code>harmonic_moments</code> and <code>harmonic_pole_moments</code> (<code>nova/biot/elliptic.py:240</code>, <code>:410</code>) and <code>harmonic_multiply</code> (<code>nova/biot/rangefunction.py:134</code>) each alone, <code>packed_analytic_moments</code> (<code>nova/biot/polygonanalytic.py:2641</code>), the jets build's point batch, the kernel-backed topology read, and the certificate map. Each runs in a fresh process with the compilation cache disabled before JAX initialises, and each row asserts its own cache miss from the cache-guard rows, because a warm cache once passed for a cold compile.</p>
     <p>The census extends the instruments that already exist rather than writing a third: equations are attributed to kernel call sites by <code>attribute_graph</code> in <code>scripts/prototypes/order2/attribution.py</code> (its <code>expanded_equations</code>, <code>body_share</code> and <code>kernel_call_partition_equations</code>) over the shared lowered-jaxpr descent in <code>tests/jaxpr_scans.py</code>; compile wall and executable bytes are measured as <code>scripts/prototypes/read_route/measure.py</code> does (lower and compile at <code>:202</code>, <code>runtime_executable().serialize()</code> at <code>:223</code>), and generated-code bytes as <code>scripts/prototypes/fast_read/measure_fused.py:51</code> does. Its rows join the compile ledger in <code>docs/research/compile-cost-evidence.html</code>, so there is one ledger.</p>
     <p>Done when <code>docs/research/compile-cost-evidence.html</code> carries a census section reporting, for every program above: (1) unique and expanded jaxpr equations, StableHLO bytes and executable bytes at two sizes (132 and 550 cells, or 4 and 64 points for a kernel alone), so each graph is classed as constant or growing; (2) the cold compile wall and peak host memory sampled every 10 s, on the H200 as one job and on CPU as one sirius job sized from the measured 381 GB; (3) the source functions ranked by the expanded equations each contributes, with owner file and line, as the target list for §2 and §3, and each function's share of the point jet's expanded equations, which is the denominator §2 done-when (2) measures its fall against. <code>attribute_graph</code> today ranks call sites, constructs and primitives and carries bare function names; it is extended to emit this per-source ranking with file and line from the equations' tracebacks, keeping its existing outputs for its current callers.</p>
@@ -83,10 +83,11 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-kcb-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="s21-nova" data-written-at="2026-10-20" data-recommends-skill="/reckon-build kernel-compile-barrier §1" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-kcb-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="s21-nova" data-written-at="2026-10-20" data-recommends-skill="/reckon-build kernel-compile-barrier §1" data-resolved-at="2026-10-20T20:42:36+00:00" data-resolved-by="s21-nova">
     <h4 class="r-fu-title">Run the compile census of every kernel-backed program</h4>
     <div class="r-fu-body">The plan is authored. §1 measures each program's graph, cold compile wall and host memory, and ranks the source terms that carry the expanded graph, which §2 and §3 then target.</div>
     <pre class="r-fu-prompt">/reckon-build kernel-compile-barrier §1</pre>
+    <p class="r-fu-outcome">§1 landed at merge 44f73061f; the ranking is the target list for §2 and §3.</p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -98,6 +99,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20261020T063117190776-kernel-compile-census" data-who="reckon-build" data-when="2026-10-20T18:26:17Z">
     <div class="r-comment-body"><p>The compile ledger reports all 18 two-size graph rows and a source ranking against 106218 expanded point-jet equations, with _harmonic_pair_step contributing 24653 (23.21%). Titan compiled all 18 rows, CPU topology compilation exceeded 450 GB, and CPU certificate input preparation exceeded 64 GB at 132 cells.</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-close-s1" data-who="reckon-build" data-when="2026-10-20T20:10:00Z">
+    <div class="r-comment-body"><p>§1 landed (merge <code>44f73061f</code>): 18 rows; ranking led by <code>_harmonic_pair_step</code> at 23.21 percent of the point jet's expanded equations, the target list for §2 and §3. Follow-ons for §2: the per-row cache-miss assertion holds in form only with the cache disabled, and the ranking cites each owner function's first line rather than each equation's line. H200 cold timing is still unmeasured. <a href="/nova/evidence/archive/kernel-compile-barrier-landed.html#s1">evidence</a></p></div>
 </div>
 </section>
 </main>

@@ -44,6 +44,51 @@
     <p>Read-backs: the plan went through six local read-backs (11, 4, 3, 2, 0, 0 two-reading sentences), the design document through one (5, then 0 after repair). The design read-back loop is recorded under <code>~/.config/reckon/crew/reports/nova/s21-nova/</code>.</p>
   </section>
 
+  <section id="coarse-tie-census-memory">
+    <h2>§2 — the 500-cell coarse-tie census cannot fit 64G (correct refusal)</h2>
+    <p>Merge <code>19a02ca16</code>. One cold XLA CPU compile of the jets point batch takes 7,044 s at a 380,777 MB peak, independent of cell count, and a second 450G provisioning job held about 378 GB for a further 11,000 s in the batch loop without publishing. The bound is owned by <a href="/nova/kernel-compile-barrier.html">kernel-compile-barrier</a> §3. <a href="/nova/evidence/fragments/converged-forward-solve/coarse-tie-census-memory.html">fragment</a></p>
+  </section>
+
+  <section id="main-red-triage">
+    <h2>§6 — triage of the files red on main</h2>
+    <p>Merge <code>ba2f89ec8</code>. trips-are-a-scan was green (stale report); the two constraint-protocol failures shared one stale test double; forward-compile-identity had one red test, cut by its 300 s bound on CPU and missing its 1e-14 identity at 4.33e-12 on the H200. <a href="/nova/evidence/fragments/converged-forward-solve/main-red-triage.html">fragment</a></p>
+  </section>
+
+  <section id="adjudication-saddle-marks">
+    <h2>§2 — adjudication panels draw wall contacts as contacts</h2>
+    <p>Merge <code>178a0cd0a</code>. Of 14 adapter A marks the panels called saddles, 6 are stationary saddles and 8 are wall contacts, measured on each trace field; the painter now draws each by its class and the nine panels are regenerated. Raised by the lead on 2026-10-20. <a href="/nova/evidence/fragments/converged-forward-solve/adjudication-saddle-marks.html">fragment</a></p>
+  </section>
+
+  <section id="tie-pair-topology">
+    <h2>§2 — the tie state&#x27;s first separator is the upper saddle</h2>
+    <p>Merge <code>46599fb8c</code>. An independent finder shows one maximum and two saddles; the first separator on the maximum's merge path is the upper saddle, 4.19e-7 and 2.77e-7 Wb below the axis, while the read reported the lower saddle and booked four cells beyond the separator. Raised by the lead on 2026-10-20; the repair is node read-first-separator. <a href="/nova/research/tie-pair-topology.html">research</a></p>
+  </section>
+
+  <section id="tcv-liuqe-refresh">
+    <h2>§5 — TCV 77549 re-scored on the sign-corrected reference</h2>
+    <p>Merge <code>59f36d840</code>. LIUQE's label now comes from its boundary outline; on imas-efit's corrected pulse 14 of 17 labels agree, and slices 333, 376 and 1257 are localised to the read's axis ranking and wall-versus-saddle choice. The early, middle and late panels are redrawn. Raised by the lead on 2026-10-20. <a href="/nova/evidence/fragments/converged-forward-solve/tcv-liuqe-refresh.html">fragment</a></p>
+  </section>
+
+  <section id="constraint-protocol-double">
+    <h2>§6 — the constraint-protocol test double carries the solve&#x27;s operator surface</h2>
+    <p>Merge <code>f8fdfc2f1</code>. The double gains the members the eliminated-constraint path reaches, and the receipt row count accounts for the inactive vertical-position row free requests carry since <code>3748d5e18</code>; the file goes from 2 failed to 18 of 18. <a href="/nova/evidence/fragments/converged-forward-solve/constraint-protocol-double.html">fragment</a></p>
+  </section>
+
+  <section id="contour-tree-sparse-build">
+    <h2>§2 — contour-tree buffers from sparse indices</h2>
+    <p>Merge <code>7af8eaab5</code>. Adjacency, split insertion and the inverse map are built from sparse sorted buffers, bit-identical to the dense build; 5 to 8 percent of the warm read, exponent unchanged at about 1.5. <a href="/nova/evidence/fragments/converged-forward-solve/contour-tree-sparse-build.html">fragment</a></p>
+  </section>
+
+  <section id="contour-tree-sweep-profile">
+    <h2>§2 — the parent-chain sweeps carry the 1.5 exponent</h2>
+    <p>Merge <code>93506eb05</code>. On the H200 the 10,000-cell warm tree took 79.3 s limited and 72.7 s diverted; the join and split sweeps carried exponents 1.47 and 1.46 through pointer-chasing depth. Prescribed a rank-balanced union-find with batched arc emission. <a href="/nova/research/contour-tree-sweep-profile.html">research</a></p>
+  </section>
+
+  <section id="contour-tree-overflow">
+    <h2>§2 — the MAST-U carrier exceeds the tree&#x27;s neighbour width</h2>
+    <p>Merge <code>05023a0aa</code>. MAST-U s1-4-5-B carrier vertices reach degree 19, 22 and 18 at resolutions 16, 24 and 32, above the fixed 16-neighbour table width, so the read is refused; a carrier-degree-derived width is prescribed. <a href="/nova/evidence/fragments/converged-forward-solve/contour-tree-overflow.html">fragment</a></p>
+  </section>
+
 </main>
 </body>
 </html>

@@ -1,6 +1,26 @@
 """Attribute expanded JAX equations to the read's kernel call sites."""
 
 from collections import Counter
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[3]
+
+
+def _source_owner(equation):
+    """Return the innermost project frame that produced an equation."""
+    traceback = equation.source_info.traceback
+    if traceback is not None:
+        codes, lines = traceback.raw_frames()
+        for code, line in zip(codes, lines):
+            path = Path(code.co_filename)
+            try:
+                relative = path.relative_to(ROOT)
+            except ValueError:
+                continue
+            if relative.parts[0] in {"nova", "scripts", "tests"}:
+                return str(relative), int(code.co_firstlineno), code.co_name
+    return "<unattributed>", 0, "<unattributed>"
 
 
 def attribute_graph(graph):
@@ -16,6 +36,7 @@ def attribute_graph(graph):
     hessians = []
     primitives = Counter()
     constructs = Counter()
+    sources = Counter()
 
     def trace_names(equation):
         traceback = equation.source_info.traceback
@@ -52,6 +73,7 @@ def attribute_graph(graph):
                 if stage is None and candidate in names:
                     local_stage = candidate
             primitives[equation.primitive.name] += 1
+            sources[_source_owner(equation)] += 1
             nested = walk(equation.params, location, local_stage)
             total += nested
             if nested:
@@ -83,4 +105,14 @@ def attribute_graph(graph):
         ),
         "top_nested_constructs_overlapping": constructs.most_common(12),
         "top_primitives_disjoint": primitives.most_common(12),
+        "source_function_ranking": [
+            {
+                "file": file,
+                "line": line,
+                "function": function,
+                "expanded_equations": count,
+                "share": count / total,
+            }
+            for (file, line, function), count in sources.most_common()
+        ],
     }

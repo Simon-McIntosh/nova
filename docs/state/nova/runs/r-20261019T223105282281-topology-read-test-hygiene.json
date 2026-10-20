@@ -275,6 +275,39 @@
     "reason": "corrective-run:resume",
     "verdict": "exempt"
   },
+  "integrated_gate_check": {
+    "base_verdict": "passed",
+    "changed_paths_differing": [],
+    "checkout_descends_from_integrated_revision": true,
+    "checkout_on_integrated_revision": false,
+    "checkout_revision": "10f2644d75fc721e4fa7933964736fdaef74e9e6",
+    "exit_status": 1,
+    "finding": {
+      "base_verdict": "passed",
+      "exit_status": 1,
+      "failure_ids": [
+        "tests/equilibrium/test_topology_read.py::test_census_keeps_the_wall_contact_saddle_across_the_adjacent_pair"
+      ],
+      "integrated_revision": "05c0ea5b0340a1d2b9f5b3a1cde0f53de9e565a7",
+      "integrated_verdict": "failed",
+      "message": "the gate passed at the worker's base but reports failed on the integrated revision 05c0ea5b0340: the merge changes what this node's gate proves, so a base-green run alone is not enough to push. Re-run the node's gate on the merged tree, land the code the merged tree requires, or record explicitly why this finding is accepted",
+      "reason": null
+    },
+    "gate_command": "env -u NOVA_ANALYTIC_ORACLE_CACHE JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -rA tests/equilibrium/test_topology_read.py::test_census_keeps_the_wall_contact_saddle_across_the_adjacent_pair tests/equilibrium/test_topology_read.py::test_kernel_compile_growth",
+    "gate_command_source": "option",
+    "integrated_revision": "05c0ea5b0340a1d2b9f5b3a1cde0f53de9e565a7",
+    "integrated_verdict": "failed",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T223105282281-topology-read-test-hygiene/verify-gate.log",
+    "ok": false,
+    "ran": true,
+    "reason": null,
+    "recorded_gate_seconds": 41.39,
+    "replay_bound_seconds": 1500.0,
+    "replay_bound_source": "explicit",
+    "replay_elapsed_seconds": null,
+    "timed_out": false,
+    "worktree_roots_rewritten": []
+  },
   "lane": "clive",
   "lane_advisory": {
     "backend": "clive",

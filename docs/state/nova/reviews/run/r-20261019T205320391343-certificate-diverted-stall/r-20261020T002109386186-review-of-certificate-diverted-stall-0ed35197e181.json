@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "scripts/prototypes/fast_map_production/kernel.py:441",
+    "scripts/prototypes/fast_map_production/solver.py"
+  ],
+  "completed_at": "2026-10-20T00:35:11.624Z",
+  "dispatched_at": "2026-10-20T00:21:42Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/certificate-diverted-stall.html",
+      "line": 31,
+      "severity": "follow-on",
+      "text": "follow-on: the limited 550-cell terminal residual is quoted as 5.487413e-15 (repeated at :32), but the run's own receipt row_diverted_limited_550.json and diverted_rows.log both record 5.826522628556676e-15, so the figure is unsourced from this run's measurements."
+    },
+    {
+      "file": "docs/research/certificate-550-convergence.html",
+      "line": 96,
+      "severity": "follow-on",
+      "text": "follow-on: the paragraph states the diverted 2,000-cell row's terminal state twice with different figures -- 'ten accepted corrections ... 2.256802e-2' and later 'twelve accepted corrections ... 2.2567326437862224e-2' -- and the receipt row_diverted_diverted_2000.json records twelve corrections ending at 2.2567326437862224e-2, so the first pair is stale and the paragraph contradicts itself."
+    },
+    {
+      "file": "scripts/prototypes/fast_map_production/kernel.py",
+      "line": 123,
+      "severity": "follow-on",
+      "text": "follow-on: _flux_past_level_weight re-implements a level weight whose width is the measured flux excursion, already present at scripts/prototypes/fine_grid_convergence/edge_components.py:52 and path_weight.py:53, so the capability is duplicated rather than extended."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/certificate-diverted-stall.html",
+      "line": 36,
+      "severity": "follow-on",
+      "text": "follow-on: the goal names the diverted carriers plural and the 2,000-cell diverted carrier still stalls at 2.2567326437862224e-2, carried here as an open follow-on rather than converged."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "kernel.py:441 (_continuous_path_weight inside read) and scripts/prototypes/fast_map_production/solver.py are the runtime callers reached by the change.",
+    "diff": "read the nine commits 18f91b523..0ed35197e against base 18f91b523; kernel.py +36/-7, the test +52, the two documents +23, all inside scope.",
+    "done_when": "the brief's clause (1) stage comparison, clause (2) fix plus 1e-12 convergence plus committed GPU test, and clause (3) four-row H200 job and paired suite are all delivered and recorded (certified_pair.log, baseline_suite.log, after_suite.log).",
+    "goal": "the goal \"Make the certified diverted carriers\u2019 forward solve converge\" (brief.txt:1) is met for the 550-cell carrier (2.2444290278587732e-13) and unmet for the 2,000-cell carrier (2.2567326437862224e-2) at certificate-diverted-stall.html:31,36.",
+    "manifest": "read; status complete, commit list f38d38d9d..0ed35197e, both suite arms completed with zero failures, diverted 2,000-cell stall carried as an open follow-on.",
+    "write_paths": "the diff touches kernel.py, tests/equilibrium/test_certificate_550_convergence.py and the two declared documents, all inside the manifest's declared paths."
+  },
+  "justifications": {
+    "durability": "the added assertion at tests/equilibrium/test_certificate_550_convergence.py:142 reddens on the reverted kernel (certified_pair.log CONTROL_EXIT=1), though it skips on the CPU lane.",
+    "evidence": "the done-when's measure is the committed test run on the H200 (certified_pair.log: head EXIT=0 in 435.23 s, reverted-kernel control EXIT=1 on the convergence assertion), though certificate-diverted-stall.html:31 misquotes a row's residual.",
+    "fit": "kernel.py:123 is mechanism-named with a mechanism docstring matching the surrounding read helpers, and the test mirrors its sibling test_certified_limited_carrier_converges.",
+    "goal_fidelity": "kernel.py:123 drives the 550-cell diverted carrier to 2.2444290278587732e-13 but the 2,000-cell carrier the same goal names stalls at 2.2567326437862224e-2 (certificate-diverted-stall.html:36).",
+    "reuse": "kernel.py:123 duplicates the excursion-share level weight already implemented at scripts/prototypes/fine_grid_convergence/edge_components.py:52 and path_weight.py:53 rather than extending it, though the reversed import direction blocks reuse there.",
+    "scope_discipline": "git diff --stat 18f91b523 0ed35197e lists only kernel.py, the test file and the two declared documents, all inside the manifest's write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is \"Make the certified diverted carriers' forward solve converge\" (brief.txt:1); the landed fix at scripts/prototypes/fast_map_production/kernel.py:123 drives the 550-cell diverted carrier to 2.2444290278587732e-13 (docs/evidence/fragments/converged-forward-solve/certificate-diverted-stall.html:31), but the 2,000-cell diverted carrier still stalls at 2.2567326437862224e-2 (:36), so one of the two carriers the goal names converges.\nVERDICT done_when: read the brief's three clauses; clause (1)'s stage comparison is reported (the 550-cell iterate shows no derivative disagreement, worst 1.96e-5; the 2,000-cell iterate localizes it to the connectivity mask), clause (2)'s fix, 1e-12 convergence and committed GPU test are delivered (job 1290594: the diverted test passes in 435.23 s at head and exits 1 after 746 s against the reverted kernel), and clause (3)'s four-row H200 job (1290518) and paired suite (sirius 1290512) are delivered.\nVERDICT write_paths: read the manifest's declared write paths; the diff touches scripts/prototypes/fast_map_production/kernel.py, tests/equilibrium/test_certificate_550_convergence.py and the two declared documents, all inside them.\nVERDICT manifest: read; status complete, commits f38d38d9d..0ed35197e, baseline_suite and after_suite both completed with zero failures in either arm, and the diverted 2,000-cell stall carried honestly as an open follow-on.\nVERDICT diff: read the nine commits 18f91b523..0ed35197e; d03faa230 adds _flux_past_level_weight and rewires _continuous_path_weight, 607d05039 adds test_certified_diverted_carrier_converges, and the remaining seven are evidence and research updates.\nCALL_SITES: scripts/prototypes/fast_map_production/kernel.py:441 (_continuous_path_weight call inside read), scripts/prototypes/fast_map_production/solver.py\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: kernel.py:123 drives the 550-cell diverted carrier to 2.2444290278587732e-13, but the 2,000-cell carrier named by the same goal still stalls at 2.2567326437862224e-2 (certificate-diverted-stall.html:36).\nSCORE evidence: 16\nJUSTIFICATION evidence: the done-when's measure is the committed test run on the H200 (certified_pair.log: head EXIT=0 in 435.23 s, reverted-kernel control EXIT=1 on the convergence assertion), though certificate-diverted-stall.html:31 misquotes a row's residual.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 18f91b523 0ed35197e lists only kernel.py, the test file and the two declared documents, all inside the manifest's write paths.\nSCORE durability: 18\nJUSTIFICATION durability: the added assertion at tests/equilibrium/test_certificate_550_convergence.py:142 reddens on the reverted kernel (certified_pair.log CONTROL_EXIT=1), though it skips on the CPU lane.\nSCORE fit: 18\nJUSTIFICATION fit: kernel.py:123 is mechanism-named with a mechanism docstring matching the surrounding read helpers, and the test mirrors its sibling test_certified_limited_carrier_converges.\nSCORE reuse: 10\nJUSTIFICATION reuse: kernel.py:123 duplicates the excursion-share level weight already implemented at scripts/prototypes/fine_grid_convergence/edge_components.py:52 and path_weight.py:53 rather than extending it, though the reversed import direction blocks reuse there.\nFINDING docs/evidence/fragments/converged-forward-solve/certificate-diverted-stall.html:31 follow-on: the limited 550-cell terminal residual is quoted as 5.487413e-15 (repeated at :32), but the run's own receipt row_diverted_limited_550.json and diverted_rows.log both record 5.826522628556676e-15, so the figure is unsourced from this run's measurements.\nFINDING docs/research/certificate-550-convergence.html:96 follow-on: the paragraph states the diverted 2,000-cell row's terminal state twice with different figures -- \"ten accepted corrections ... 2.256802e-2\" and later \"twelve accepted corrections ... 2.2567326437862224e-2\" -- and the receipt row_diverted_diverted_2000.json records twelve corrections ending at 2.2567326437862224e-2, so the first pair is stale and the paragraph contradicts itself.\nFINDING scripts/prototypes/fast_map_production/kernel.py:123 follow-on: _flux_past_level_weight re-implements a level weight whose width is the measured flux excursion, already present at scripts/prototypes/fine_grid_convergence/edge_components.py:52 and path_weight.py:53, so the capability is duplicated rather than extended.\nFINDING docs/evidence/fragments/converged-forward-solve/certificate-diverted-stall.html:36 follow-on: the goal names the diverted carriers plural and the 2,000-cell diverted carrier still stalls at 2.2567326437862224e-2, carried here as an open follow-on rather than converged.",
+  "review_run_id": "r-20261020T002109386186-review-of-certificate-diverted-stall-0ed35197e181",
+  "reviewed_base_sha": "18f91b52361469265b659d75150bc610fcdbc205",
+  "reviewed_head_sha": "0ed35197e1816224a41963600ae0ffa7d0f5752c",
+  "reviewed_run_id": "r-20261019T205320391343-certificate-diverted-stall",
+  "scores": {
+    "durability": 18,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 14,
+    "reuse": 10,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T00:00:00Z",
+  "total": 96
+}

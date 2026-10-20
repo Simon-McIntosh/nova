@@ -13,6 +13,13 @@
   ],
   "call_sites": [],
   "completed_at": "2026-10-20T01:29:09.477Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "The node was briefed as measurement only, with docs-only write paths, so it could not add a guarding test. The guard it lacks is a two-loop test asserting the boundary contacts the obstacle, recorded as a follow-on for the next node that writes kernel.py read tests.",
+      "recorded_at": "2026-10-20T01:37:46.531668+00:00"
+    }
+  },
   "dispatched_at": "2026-10-20T01:20:13Z",
   "findings": [
     {

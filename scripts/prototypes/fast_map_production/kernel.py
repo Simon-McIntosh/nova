@@ -239,31 +239,114 @@ def psi_rounding_enclosure(coefficients):
 PERSISTENCE_ULP_FLOOR = 8.0
 
 
-def _merge_path_saddle(geometry, roots, saddles, sigma, axis_ceiling):
-    """Admit the saddle that bounds the axis merge path, before the wall contest.
+def _axis_component_passages(
+    geometry, coefficients, roots, saddle, axis, sigma, targets
+):
+    """Carry maximin levels through edge ports, preserving intra-cell saddles.
 
-    The merge path runs from the magnetic axis out to the boundary. The saddle
-    that bounds it is the one the axis reaches at a level at least its own: the
-    maximin passage from the axis to the saddle's own cell meets or exceeds the
-    saddle's level. A root sitting on a wall contact the axis reaches only below
-    its own level is off the merge path, even though an extremum there ties the
-    boundary level by construction. Candidates are therefore ranked by the
-    passage margin ``axis_ceiling - level``, so a tie between the wall contact
-    and the saddle can move only the classification label and never the admitted
-    saddle.
-
-    Fixed shape and traced: the index is resolved by ``argmax`` over a masked
-    margin, with no host-side branch, and the wall-versus-saddle contest is left
-    downstream of the decision.
+    A cell is not one connected superlevel component: opposite ascending
+    branches of a saddle in that cell join only at the saddle level. Ports
+    retain that distinction until the merge, including for an axis or contact
+    sharing the saddle's cell. All loops and arrays have carrier-fixed shapes.
     """
-    levels = sigma * roots.jet.value[1:]
-    inside = jax.vmap(lambda point: topology._inside_cells(geometry, point))(
-        roots.position[1:]
+    vertices = geometry.vertices
+    slots = jnp.arange(vertices.shape[1])
+    following = jnp.where(
+        slots[None] + 1 < geometry.vertex_count[:, None], slots[None] + 1, 0
     )
-    cells = jnp.argmax(inside, axis=1)
-    margin = jnp.where(saddles, axis_ceiling[cells] - levels, -jnp.inf)
-    index = jnp.argmax(margin)
-    return index, levels[index]
+    end = jnp.take_along_axis(vertices, following[..., None], axis=1)
+
+    def signed(points):
+        local = (points - geometry.centre[:, None]) / geometry.pitch[:, None, None]
+        x, y = local[..., 0], local[..., 1]
+        return sigma * (
+            coefficients[:, 0, None]
+            + coefficients[:, 1, None] * x
+            + coefficients[:, 2, None] * y
+            + coefficients[:, 3, None] * x * x
+            + coefficients[:, 4, None] * x * y
+            + coefficients[:, 5, None] * y * y
+        )
+
+    first, middle, last = signed(vertices), signed((vertices + end) / 2), signed(end)
+    curvature = 2 * (first + last - 2 * middle)
+    slope = last - first - curvature
+    parameter = jnp.clip(-slope / jnp.where(curvature < 0, 2 * curvature, 1), 0, 1)
+    turning = vertices + parameter[..., None] * (end - vertices)
+    values = jnp.stack((first, last, signed(turning)), axis=-1)
+    points = jnp.stack((vertices, end, turning), axis=-2)
+    choice = jnp.argmax(values, axis=-1)
+    ports = jnp.take_along_axis(points, choice[..., None, None], axis=-2)[..., 0, :]
+    peak = jnp.max(values, axis=-1)
+    peak = jnp.where(slots[None] < geometry.vertex_count[:, None], peak, -jnp.inf)
+    owners = jax.vmap(lambda point: topology._inside_cells(geometry, point))(
+        roots.position
+    )
+    _, vectors = jnp.linalg.eigh(sigma * roots.jet.hessian)
+    ascending = vectors[..., 1]
+    port_side = jnp.einsum(
+        "snei,si->sne", ports[None] - roots.position[:, None, None], ascending
+    )
+    levels = sigma * roots.jet.value
+    active = saddle[:, None] & owners
+    cross = port_side[..., :, None] * port_side[..., None, :] < 0
+    barrier = jnp.min(
+        jnp.where(
+            active[..., None, None] & cross, levels[:, None, None, None], jnp.inf
+        ),
+        axis=0,
+    )
+    links = jnp.minimum(jnp.minimum(peak[:, :, None], peak[:, None, :]), barrier)
+    axis_owner = topology._inside_cells(geometry, axis)
+    axis_side = jnp.einsum("si,si->s", axis - roots.position, ascending)
+    axis_barrier = jnp.min(
+        jnp.where(
+            active[..., None] & (axis_side[:, None, None] * port_side < 0),
+            levels[:, None, None],
+            jnp.inf,
+        ),
+        axis=0,
+    )
+    initial = jnp.where(axis_owner[:, None], jnp.minimum(peak, axis_barrier), -jnp.inf)
+    peer = jnp.maximum(geometry.neighbour, 0)
+    peer_edge = jnp.maximum(geometry.neighbour_edge, 0)
+    shared = jnp.minimum(peak, peak[peer, peer_edge])
+
+    def relax(_, current):
+        across = jnp.where(
+            geometry.neighbour >= 0,
+            jnp.minimum(shared, current[peer, peer_edge]),
+            -jnp.inf,
+        )
+        within = jnp.max(jnp.minimum(links, current[:, None, :]), axis=-1)
+        return jnp.maximum(current, jnp.maximum(across, within))
+
+    passage = jax.lax.fori_loop(0, 2 * len(geometry.centre), relax, initial)
+
+    def reach(point):
+        owner = topology._inside_cells(geometry, point)
+        side = jnp.einsum("si,si->s", point - roots.position, ascending)
+        cap = jnp.min(
+            jnp.where(
+                active[..., None] & (side[:, None, None] * port_side < 0),
+                levels[:, None, None],
+                jnp.inf,
+            ),
+            axis=0,
+        )
+        through = jnp.max(
+            jnp.where(owner[:, None], jnp.minimum(passage, cap), -jnp.inf)
+        )
+        direct_cap = jnp.min(
+            jnp.where(
+                active & (axis_side * side < 0)[:, None], levels[:, None], jnp.inf
+            ),
+            axis=0,
+        )
+        direct = jnp.max(jnp.where(owner & axis_owner, direct_cap, -jnp.inf))
+        return jnp.maximum(through, direct)
+
+    return jax.vmap(reach)(roots.position), jax.vmap(reach)(targets), passage
 
 
 def read(field, roots, geometry, convention, policy, *, frame_gate=True):
@@ -304,45 +387,25 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
     axis_live = jnp.any(eligible)
     axis = roots.position[axis_index]
     axis_flux = roots.jet.value[axis_index]
-    wall_start = geometry.wall_points
-    wall_end = wall_start[geometry.wall_following]
-    wall_midpoint = (wall_start + wall_end) / 2
-    node_flux = jax.vmap(lambda point: field.evaluate(point).value)(wall_start)
-    middle_flux = jax.vmap(lambda point: field.evaluate(point).value)(wall_midpoint)
-    signed_start = sigma * node_flux
-    signed_end = signed_start[geometry.wall_following]
-    signed_middle = sigma * middle_flux
-    curvature = 2 * (signed_start + signed_end - 2 * signed_middle)
-    slope = signed_end - signed_start - curvature
-    peak_fraction = jnp.clip(
-        -slope / jnp.where(curvature < 0, 2 * curvature, 1), 0.0, 1.0
-    )
-    peak = wall_start + peak_fraction[:, None] * (wall_end - wall_start)
-    peak_flux = jax.vmap(lambda point: field.evaluate(point).value)(peak)
-    candidate_points = jnp.stack((wall_start, wall_end, peak), axis=1)
-    candidate_values = jnp.stack(
-        (node_flux, node_flux[geometry.wall_following], peak_flux), axis=1
-    )
-    best_on_edge = jnp.argmax(sigma * candidate_values, axis=1)
-    edge_row = jnp.arange(len(wall_start))
-    wall_points = candidate_points[edge_row, best_on_edge]
-    wall_flux = candidate_values[edge_row, best_on_edge]
+    wall_points, wall_flux = topology._wall_events(field, geometry, policy, sigma)
     count = roots.position.shape[0]
     if count == 1:
         roots = jax.tree.map(
             lambda leaf: jnp.concatenate((leaf, jnp.zeros_like(leaf)), axis=0), roots
         )
         saddle = jnp.concatenate((saddle, jnp.zeros_like(saddle)))
-    saddles = saddle[1:]
-    seed = jnp.argmin(jnp.sum((geometry.centre - axis) ** 2, axis=1))
-    axis_ceiling = _wall_path_ceiling(
-        geometry, coefficients, None, axis, None, -jnp.inf, seed, sigma, False
+        inside = jnp.concatenate((inside, jnp.zeros_like(inside)))
+    saddle = saddle & inside
+    saddle_passage, wall_passage, port_passage = _axis_component_passages(
+        geometry, coefficients, roots, saddle, axis, sigma, wall_points
     )
-    saddle_index, saddle_score = _merge_path_saddle(
-        geometry, roots, saddles, sigma, axis_ceiling
+    saddle_levels = sigma * roots.jet.value
+    saddle_reach = jnp.where(
+        saddle, jnp.minimum(saddle_levels, saddle_passage), -jnp.inf
     )
-    saddle_index = 1 + saddle_index
-    saddle_live = jnp.any(saddles)
+    saddle_index = jnp.argmax(saddle_reach)
+    saddle_score = saddle_levels[saddle_index]
+    saddle_live = jnp.any(saddle)
     third, fourth = topology._curvature_derivatives(
         field, roots.position[saddle_index], jnp.median(geometry.pitch)
     )
@@ -386,25 +449,13 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
         jnp.asarray(True),
     )
     seed = jnp.argmin(jnp.sum((geometry.centre - axis) ** 2, axis=1))
-    wall_cell = jax.vmap(
-        lambda point: jnp.argmax(topology._inside_cells(geometry, point))
-    )(wall_points)
-    ceiling = _wall_path_ceiling(
-        geometry,
-        approximate.field_coefficients,
-        form,
-        axis,
-        saddle_live & near_saddle,
-        saddle_score,
-        seed,
-        sigma,
-        frame_gate,
-    )
-    wall_scores = _wall_effective_level(sigma * wall_flux, ceiling[wall_cell])
+    wall_scores = _wall_effective_level(sigma * wall_flux, wall_passage)
     wall_index = jnp.argmax(wall_scores)
     wall_score = wall_scores[wall_index]
     diverted = saddle_live & (saddle_score >= wall_score)
-    level = sigma * jnp.where(diverted, saddle_score, wall_score)
+    level = sigma * jnp.maximum(
+        jnp.where(saddle_live, saddle_score, -jnp.inf), wall_score
+    )
     boundary = jnp.where(
         diverted, roots.position[saddle_index], wall_points[wall_index]
     )

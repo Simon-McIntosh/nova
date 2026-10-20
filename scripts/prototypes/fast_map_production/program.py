@@ -88,16 +88,7 @@ def _saddle_moments(geometry, reading, profile, capacity=16):
     count = jnp.sum(active, dtype=jnp.int32)
     indices = jnp.nonzero(active, size=capacity, fill_value=0)[0]
 
-    def one(index):
-        rings, sizes = current._normal_rings(
-            geometry.vertices[index],
-            geometry.vertex_count[index],
-            geometry.centre[index],
-            reading.saddle_form,
-            reading.fragment_selected[index],
-            reading.edge_interval[index],
-            4,
-        )
+    def integrate(index, rings, sizes):
         origin = geometry.centre[index]
         slot = jnp.arange(rings.shape[1])
         following = jnp.where(slot[None] + 1 < sizes[:, None], slot[None] + 1, 0)
@@ -136,6 +127,32 @@ def _saddle_moments(geometry, reading, profile, capacity=16):
                 jnp.sum(weighted * displacement[..., 1]),
             )
         )
+
+    def one(index):
+        def ordinary(_):
+            rings, sizes = current._normal_rings(
+                geometry.vertices[index],
+                geometry.vertex_count[index],
+                geometry.centre[index],
+                reading.saddle_form,
+                reading.fragment_selected[index],
+                reading.edge_interval[index],
+                4,
+            )
+            return integrate(index, rings, sizes)
+
+        if getattr(reading, "closed_loop", None) is None:
+            return ordinary(None)
+
+        def closed(_):
+            rings, sizes = current._closed_normal_rings(
+                reading.closed_loop,
+                geometry.vertices[index],
+                geometry.vertex_count[index],
+            )
+            return integrate(index, rings, sizes)
+
+        return jax.lax.cond(reading.closed_live, closed, ordinary, None)
 
     packed = jax.vmap(one)(indices)
     live = jnp.arange(capacity) < count

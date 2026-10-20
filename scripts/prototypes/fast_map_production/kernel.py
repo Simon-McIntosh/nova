@@ -33,6 +33,8 @@ class FastRead(NamedTuple):
     edge_interval: jax.Array
     qualified: jax.Array
     valid: jax.Array
+    closed_loop: jax.Array | None = None
+    closed_live: jax.Array | None = None
 
 
 def bell_fraction_with_crossings(geometry, reading, sigma):
@@ -346,7 +348,7 @@ def _axis_component_passages(
         direct = jnp.max(jnp.where(owner & axis_owner, direct_cap, -jnp.inf))
         return jnp.maximum(through, direct)
 
-    return jax.vmap(reach)(roots.position), jax.vmap(reach)(targets), passage
+    return jax.vmap(reach)(roots.position), jax.lax.map(reach, targets), passage
 
 
 def read(field, roots, geometry, convention, policy, *, frame_gate=True):
@@ -400,12 +402,91 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
         geometry, coefficients, roots, saddle, axis, sigma, wall_points
     )
     saddle_levels = sigma * roots.jet.value
+    radius = jnp.maximum(
+        policy.normal_form_radius,
+        policy.normal_form_pitch_floor * jnp.median(geometry.pitch),
+    )
+    seed = jnp.argmin(jnp.sum((geometry.centre - axis) ** 2, axis=1))
+    wall_owners = jax.vmap(lambda point: topology._inside_cells(geometry, point))(
+        wall_points
+    )
+    wall_cells = jnp.argmax(wall_owners, axis=1)
+
+    def inspect_escape(index, carry):
+        passage, admitted = carry
+
+        def inspect(current):
+            point = roots.position[index]
+            third, fourth = topology._curvature_derivatives(
+                field, point, jnp.median(geometry.pitch)
+            )
+            barrier_form = topology.saddle_normal_form(
+                point,
+                sigma * roots.jet.hessian[index],
+                sigma * third,
+                policy.hessian_tolerance,
+                sigma * fourth,
+            )
+            near = topology._inside_cells(geometry, point) | (
+                jnp.linalg.norm(geometry.centre - point, axis=1) < radius
+            )
+
+            def contacts(origin, origin_cell):
+                ceiling = _wall_path_ceiling(
+                    geometry,
+                    coefficients,
+                    barrier_form,
+                    origin,
+                    near,
+                    saddle_levels[index],
+                    origin_cell,
+                    sigma,
+                    frame_gate,
+                )
+                sector = _local_axis_sector(geometry, origin, barrier_form)
+                wall_sector = topology._normal_form_sectors(wall_points, barrier_form)[
+                    :, sector
+                ]
+                return jnp.where(
+                    near[wall_cells] & ~wall_sector,
+                    jnp.minimum(ceiling[wall_cells], saddle_levels[index]),
+                    ceiling[wall_cells],
+                )
+
+            _, directions = jnp.linalg.eigh(sigma * roots.jet.hessian[index])
+            direction = directions[:, 1]
+            direction = direction * jnp.where(
+                jnp.dot(axis - point, direction) >= 0, 1.0, -1.0
+            )
+            private = point - 0.5 * jnp.median(geometry.pitch) * direction
+            private_seed = jnp.argmin(jnp.sum((geometry.centre - private) ** 2, axis=1))
+            private_ceiling = contacts(private, private_seed)
+            private_wall = jnp.max(jnp.minimum(sigma * wall_flux, private_ceiling))
+            local = jnp.linalg.norm(axis - point) < radius
+            on_axis = (saddle_passage[index] >= saddle_levels[index]) | local
+            accepted = on_axis & (private_wall >= saddle_levels[index])
+            return jnp.minimum(current, contacts(axis, seed)), accepted
+
+        result, accepted = jax.lax.cond(
+            saddle[index],
+            inspect,
+            lambda current: (current, jnp.asarray(False)),
+            passage,
+        )
+        return result, admitted.at[index].set(accepted)
+
+    wall_passage, escape_saddles = jax.lax.fori_loop(
+        0,
+        roots.position.shape[0],
+        inspect_escape,
+        (wall_passage, jnp.zeros_like(saddle)),
+    )
     saddle_reach = jnp.where(
-        saddle, jnp.minimum(saddle_levels, saddle_passage), -jnp.inf
+        escape_saddles, jnp.minimum(saddle_levels, saddle_passage), -jnp.inf
     )
     saddle_index = jnp.argmax(saddle_reach)
     saddle_score = saddle_levels[saddle_index]
-    saddle_live = jnp.any(saddle)
+    saddle_live = jnp.any(escape_saddles)
     third, fourth = topology._curvature_derivatives(
         field, roots.position[saddle_index], jnp.median(geometry.pitch)
     )
@@ -530,15 +611,63 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
 
         connected = ungated(geometry, provisional, sigma, seed)
         path_weight = connected.astype(fraction.dtype)
+    closed_loop, closed_live = topology.normal_form_fold_loop(
+        form.position,
+        sigma * roots.jet.hessian[saddle_index],
+        sigma * third,
+        sigma * fourth,
+        axis,
+        sigma * level - saddle_score,
+        radius,
+    )
+    closed_live &= saddle_live
+
+    def closed_fractions(loop):
+        polygons, counts = jax.vmap(
+            topology.clip_normal_form_loop, in_axes=(None, 0, 0)
+        )(loop, geometry.vertices, geometry.vertex_count)
+        return polygon_area(polygons, counts) / geometry.full_area
+
+    closed_fraction = jax.lax.cond(
+        closed_live, closed_fractions, lambda _: jnp.zeros_like(fraction), closed_loop
+    )
+    closed_cells = closed_fraction > 0
+    provisional = provisional._replace(
+        membership=jnp.where(closed_live, closed_fraction, provisional.membership),
+        booking_cells=jnp.where(closed_live, closed_cells, provisional.booking_cells),
+        closed_loop=closed_loop,
+        closed_live=closed_live,
+    )
+    # One explicitly closed lobe owns every clipped piece; its graph cannot
+    # cross to the opposing saddle branch. Keep the ordinary path weight for
+    # components represented by the open normal form.
+    path_weight = jnp.where(
+        closed_live, closed_cells.astype(path_weight.dtype), path_weight
+    )
+    connected = jnp.where(closed_live, closed_cells, connected)
     membership = provisional.membership * path_weight
+    attained = field.value(boundary)
+    boundary_enclosure = (
+        128
+        * jnp.finfo(level.dtype).eps
+        * jnp.maximum(jnp.abs(level), jnp.abs(attained))
+    )
+    boundary_attained = jnp.isfinite(level) & (
+        jnp.abs(attained - level) <= boundary_enclosure
+    )
     valid = (
         axis_live
+        & boundary_attained
         & jnp.all(jnp.isfinite(approximate.field_coefficients))
         & jnp.all(jnp.isfinite(membership))
-        & (jnp.sum(booking) <= capacity)
-        & jnp.all(jnp.where(row, fragments.valid, True))
+        & (jnp.sum(provisional.booking_cells) <= capacity)
+        & (closed_live | jnp.all(jnp.where(row, fragments.valid, True)))
         & jnp.all(
-            jnp.where(connected & ~booking & (fraction > 0), ordinary_valid, True)
+            jnp.where(
+                ~closed_live & connected & ~booking & (fraction > 0),
+                ordinary_valid,
+                True,
+            )
         )
     )
     return provisional._replace(

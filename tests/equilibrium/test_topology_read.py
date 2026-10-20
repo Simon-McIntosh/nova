@@ -2707,50 +2707,54 @@ def _census_field(state, offset):
     return varied.field(state["reference"])
 
 
+def _confined_tie_raster(reading, field, resolution):
+    """Resolve the axis component directly on the physical field."""
+    from scipy.ndimage import label
+
+    axis = np.asarray(reading.axis)
+    step = 0.24 / resolution
+    radial = axis[0] - 0.12 + (np.arange(resolution) + 0.5) * step
+    vertical = axis[1] - 0.12 + (np.arange(resolution) + 0.5) * step
+    rr, zz = np.meshgrid(radial, vertical)
+    points = np.stack((rr.ravel(), zz.ravel()), axis=-1)
+    evaluate = jax.jit(jax.vmap(field.value))
+    flux = np.concatenate(
+        [
+            np.asarray(evaluate(jnp.asarray(part)))
+            for part in np.array_split(points, resolution // 16)
+        ]
+    ).reshape(rr.shape)
+    components, _ = label(flux > float(reading.boundary_flux))
+    core_label = components[resolution // 2, resolution // 2]
+    assert core_label != 0, "the raster must see the known maximum above the saddle"
+    core = components == core_label
+    assert core.sum() > 4, "the independent confined component must be resolved"
+    assert not np.any(core[[0, -1], :]) and not np.any(core[:, [0, -1]])
+    return rr, zz, flux, core, step
+
+
 def _dense_cut_current(state, reading, field, resolution):
-    """Integrate physical current on the selected tie-state cut cells directly."""
-    geometry = state["geometry"]
+    """Integrate only the independently flooded physical axis component."""
+    from shapely import contains_xy
+    from shapely.geometry import Polygon
+
+    rr, zz, flux, core, step = _confined_tie_raster(reading, field, 20 * resolution)
     selected = np.flatnonzero(np.asarray(reading.membership) > 0)
     assert len(selected) > 0, "the confined axis component must carry support"
-    centre = np.asarray(geometry.centre)[selected]
-    vertices = np.asarray(geometry.vertices)[selected]
-    count = np.asarray(geometry.vertex_count)[selected]
-    slot = np.arange(vertices.shape[1])
-    following = np.where(slot[None] + 1 < count[:, None], slot[None] + 1, 0)
-    end = np.take_along_axis(vertices, following[..., None], axis=1)
-    first, second = vertices - centre[:, None], end - centre[:, None]
-    area = 0.5 * (first[..., 0] * second[..., 1] - first[..., 1] * second[..., 0])
-    area = np.where(slot[None] < count[:, None], area, 0.0)
-    assert np.all(area >= 0), "cut-cell fans must be counterclockwise"
-
-    grid = (np.arange(resolution) + 0.5) / resolution
-    u, v = np.meshgrid(grid, grid, indexing="ij")
-    radius = np.sqrt(u)
-    a = (radius * (1 - v))[None, None, ..., None]
-    b = (radius * v)[None, None, ..., None]
-    points = (
-        centre[:, None, None, None]
-        + a * first[:, :, None, None]
-        + b * second[:, :, None, None]
-    )
-    flat = points.reshape(-1, 2)
-    flux = np.asarray(jax.vmap(field.value)(jnp.asarray(flat)))
-    normalized = (flux - float(reading.axis_flux)) / (
+    weight = np.zeros(rr.shape)
+    for cell in selected:
+        count = int(state["geometry"].vertex_count[cell])
+        polygon = Polygon(np.asarray(state["geometry"].vertices[cell, :count]))
+        within = contains_xy(polygon, rr, zz)
+        weight[within] = float(reading.path_weight[cell])
+    assert np.all(weight[core] > 0), "booking must cover the whole confined component"
+    normalized = (flux[core] - float(reading.axis_flux)) / (
         float(reading.boundary_flux) - float(reading.axis_flux)
     )
     density = np.asarray(
-        state["profile"].current_density(
-            jnp.asarray(flat[:, 0]), jnp.asarray(normalized)
-        )
+        state["profile"].current_density(jnp.asarray(rr[core]), jnp.asarray(normalized))
     )
-    weight = (
-        np.repeat(
-            (area * np.asarray(reading.path_weight)[selected, None]).reshape(-1),
-            resolution * resolution,
-        )
-        / resolution**2
-    )
-    return float(np.sum(weight * density * (normalized <= 1)))
+    return float(np.sum(weight[core] * density) * step**2)
 
 
 # Quadrature is checked only after the support's component has been verified.
@@ -2859,27 +2863,13 @@ def test_census_keeps_the_wall_contact_saddle_across_the_adjacent_pair():
 
 def _assert_confined_tie_cells(state, moving, reading, upper):
     """Flood an independent physical-field raster above the first separator."""
-    from scipy.ndimage import label
     from shapely import contains_xy
     from shapely.geometry import Polygon
 
-    axis = np.asarray(reading.axis)
-    radial = np.linspace(axis[0] - 0.2, axis[0] + 0.2, 320)
-    vertical = np.linspace(axis[1] - 0.2, axis[1] + 0.2, 320)
-    rr, zz = np.meshgrid(radial, vertical)
-    points = np.stack((rr.ravel(), zz.ravel()), axis=-1)
-    flux = np.asarray(jax.jit(jax.vmap(moving.value))(jnp.asarray(points))).reshape(
-        rr.shape
+    assert float(reading.boundary_flux) == pytest.approx(
+        float(upper.jet.value), abs=1e-13
     )
-    level = float(upper.jet.value)
-    components, _ = label(flux > level)
-    axis_row = np.argmin(abs(vertical - axis[1]))
-    axis_column = np.argmin(abs(radial - axis[0]))
-    core_label = components[axis_row, axis_column]
-    assert core_label != 0, "the raster must see the known maximum above the saddle"
-    core = components == core_label
-    assert core.sum() > 4, "the independent confined component must be resolved"
-    assert not np.any(core[[0, -1], :]) and not np.any(core[:, [0, -1]])
+    rr, zz, _, core, _ = _confined_tie_raster(reading, moving, 640)
     selected = np.flatnonzero(np.asarray(reading.membership) > 0)
     assert len(selected) > 0, "zero booking is not a confined-component repair"
     for cell in selected:

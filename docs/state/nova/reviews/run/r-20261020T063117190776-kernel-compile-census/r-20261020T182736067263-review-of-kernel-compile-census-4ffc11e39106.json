@@ -1,0 +1,103 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "measured zero: the reviewed manifest records baseline_suite and after_suite as not-run with the plan's stated reason that no product source changes, so no arm log exists to derive added failures from; a suite-arm count is owed by a separate test node per this node's evidence fence.",
+  "assertion_analysis": [
+    {
+      "condition_to_fail": "The shared counter tests/equilibrium/test_topology_read.py:_jaxpr_equation_counts changes how it counts a nested jit body, so it no longer returns five unique and seven expanded equations for _twice.",
+      "file": "scripts/prototypes/kernel_compile_census/test_attribution.py",
+      "line": 29
+    },
+    {
+      "condition_to_fail": "attribute_graph double-counts a nested equation or stops descending into a nested jaxpr, returning other than 7 expanded equations.",
+      "file": "scripts/prototypes/kernel_compile_census/test_attribution.py",
+      "line": 31
+    },
+    {
+      "condition_to_fail": "The per-equation sources increment at scripts/prototypes/order2/attribution.py:76 is removed or moved outside the equation loop, so the ranking no longer partitions the expanded total.",
+      "file": "scripts/prototypes/kernel_compile_census/test_attribution.py",
+      "line": 33
+    },
+    {
+      "condition_to_fail": "_source_owner returns the unattributed sentinel, for example if ROOT at scripts/prototypes/order2/attribution.py:6 resolves to the wrong parent or the project-frame filter drops every frame.",
+      "file": "scripts/prototypes/kernel_compile_census/test_attribution.py",
+      "line": 34
+    },
+    {
+      "condition_to_fail": "A row whose compile hit the persistent cache would record a hit, but row.py:31 and row.py:276 disable the cache, so the ledger is empty, row.py:277 writes the miss itself and this assertion cannot fail.",
+      "file": "scripts/prototypes/kernel_compile_census/row.py",
+      "line": 287
+    }
+  ],
+  "base_log_revision": null,
+  "call_site_count": 1,
+  "call_sites": [
+    "scripts/prototypes/order2/compare.py:91"
+  ],
+  "completed_at": "2026-10-20T18:39:53.637Z",
+  "dispatched_at": "2026-10-20T18:28:44Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/kernel_compile_census/row.py",
+      "line": "287",
+      "severity": "follow-on",
+      "text": "follow-on: the per-row cache-miss assertion cannot fail. With JAX_ENABLE_COMPILATION_CACHE false (row.py:31, row.py:276) cache_guard records no rows, so the driver writes its own miss at row.py:277 and then asserts at row.py:287 that it is there and that hits are zero; hit_count is trivially zero because no lookup is ever instrumented, so brief.txt:9's 'each row asserting its own cache miss from the cache-guard rows' is satisfied in form only. Cold-ness genuinely rests on the cache being disabled before JAX initialises plus the import-time assertion at row.py:31, and the ledger prose discloses the synthesis, so the node need not be held for it."
+    },
+    {
+      "file": "scripts/prototypes/order2/attribution.py",
+      "line": "16",
+      "severity": "follow-on",
+      "text": "follow-on: _source_owner unpacks the per-equation frame lines at attribution.py:16 and discards them, so the emitted ranking line is the owner function's co_firstlineno rather than the line of each contributing equation; done_when item 3 asks only for owner file and line so the delivered ledger satisfies the clause, but brief.txt:10's 'file and line from each equation's traceback' is not what the code records and a reader cannot locate the contributing equations from the table."
+    }
+  ],
+  "head_log_revision": "4ffc11e39106d58fe7d29a93cf7f93586fda1ee2",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "Read commit by commit from 6809966b5e8e4c5f5d7bbb921f2939353e347c6a to 4ffc11e39106d58fe7d29a93cf7f93586fda1ee2; eight files and 1,467 insertions add the census driver, a report generator, the source ranking in attribution.py and the ledger and fragment rows, all inside the declared scope.",
+    "done_when": "brief.txt:7-13 requires, per program, unique/expanded equations plus StableHLO and executable bytes at two sizes, the cold wall and 10 s-sampled peak memory on H200-as-one-job and CPU-as-one-sirius-job with a per-row cache-miss assertion, and a source ranking with owner file and line; the ledger and receipts supply every element at both sizes, but the GPU rows are titan P100 rather than H200 (recorded in manifest follow_ons) and the per-row cache-miss assertion at scripts/prototypes/kernel_compile_census/row.py:287 cannot fail.",
+    "goal": "The source brief.txt:1 asks the node to measure where the compiled graph of every kernel-backed program comes from; the census section of docs/research/compile-cost-evidence.html reports two-size graph counts, cold compile receipts and a traceback-derived source ranking for all nine named programs, so the goal is met.",
+    "manifest": "Read the source manifest.md; it names ten commits, eight changed paths, the literal focused-gate command with a recorded EXIT=0 head log at revision 4ffc11e39106d58fe7d29a93cf7f93586fda1ee2, a negative-control log with EXIT=1, and baseline_suite/after_suite not-run with the plan's no-product-source reason.",
+    "write_paths": "brief.txt:14 grants docs/research/compile-cost-evidence.html, scripts/prototypes/order2/attribution.py, scripts/prototypes/kernel_compile_census/, docs/evidence/fragments/kernel-compile-barrier/kernel-compile-census.html and docs/figures/kernel-compile-barrier/kernel-compile-census/; every path in the base-to-head diff lies inside that set."
+  },
+  "justifications": {
+    "durability": "scripts/prototypes/kernel_compile_census/test_attribution.py:29-38 guards the ranking against an independently computed count from tests/equilibrium/test_topology_read.py, and its negative control reddened at EXIT=1, but the driver's own cache-miss assertion at row.py:287 is vacuous in the configuration it runs in.",
+    "evidence": "The recorded receipts reconcile with the ledger table exactly (cpu/point_jet-4.json expanded_equations 106218, stablehlo_bytes 3043945, executable_bytes 248745034, cold 3811.06 s, 185.5 GiB), but brief.txt:9's H200 rows are titan P100 rows and the per-row cache-miss assertion at row.py:287 cannot fail.",
+    "fit": "The added modules follow the surrounding script idiom and carry no plan, ticket or version identifiers, matching scripts/prototypes/order2/compare.py:39 and scripts/h200_test_lane/cache_guard.py's existing import style.",
+    "goal_fidelity": "docs/research/compile-cost-evidence.html reports all nine brief.txt:3 programs at two sizes with unique/expanded equations, StableHLO bytes, executable bytes, cold wall, sampled peak memory and a source ranking, satisfying brief.txt:1.",
+    "reuse": "The census extends the owners it consumes rather than forking them (attribution.py:105-115 adds a key while keeping existing outputs, and row.py:26-28 reuses cache_guard, attribute_graph and _jaxpr_equation_counts); a search for a pre-existing source-function ranking over scripts/ found none.",
+    "scope_discipline": "Every path in the 6809966b5e8e4c5f5d7bbb921f2939353e347c6a..4ffc11e39106d58fe7d29a93cf7f93586fda1ee2 diff is inside the write set granted by brief.txt:14, and no file under nova/ is touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source brief.txt:1 asks to measure where the compiled graph of every kernel-backed program comes from; the census section of docs/research/compile-cost-evidence.html reports two-size graph counts, cold compile receipts and a traceback-derived source ranking for all nine programs named at brief.txt:3.\nVERDICT done_when: brief.txt:7-13 requires two-size unique and expanded equations with StableHLO and executable bytes, the cold wall and 10 s-sampled peak memory on H200 as one job and on CPU as one sirius job with a per-row cache-miss assertion, and a source ranking with owner file and line; the ledger and receipts supply every element, but the GPU rows are titan P100 rather than H200 (manifest follow_ons) and the cache-miss assertion at scripts/prototypes/kernel_compile_census/row.py:287 cannot fail.\nVERDICT write_paths: brief.txt:14 grants the ledger, scripts/prototypes/order2/attribution.py, scripts/prototypes/kernel_compile_census/, the evidence fragment and the figures directory; every path in the 6809966b5e8e4c5f5d7bbb921f2939353e347c6a..4ffc11e39106d58fe7d29a93cf7f93586fda1ee2 diff is inside that set.\nVERDICT manifest: read the source manifest.md; it names ten commits, eight changed paths, the literal focused-gate command with a head log recording EXIT=0 at 4ffc11e39106d58fe7d29a93cf7f93586fda1ee2, a negative-control log with EXIT=1, and baseline_suite and after_suite not-run with the plan's reason.\nVERDICT diff: read commit by commit against the base; eight files and 1,467 insertions add the census driver, a report generator, the source ranking in attribution.py and the ledger and fragment rows, all inside the declared scope.\nCALL_SITES: scripts/prototypes/order2/compare.py:91\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/research/compile-cost-evidence.html reports all nine brief.txt:3 programs at two sizes with unique and expanded equations, StableHLO bytes, executable bytes, cold wall, sampled peak memory and a source ranking.\nSCORE evidence: 15\nJUSTIFICATION evidence: cpu/point_jet-4.json reconciles with the ledger row exactly (106218 expanded, 3043945 StableHLO, 248745034 executable, 3811.06 s, 185.5 GiB), but brief.txt:9's H200 rows are titan P100 rows and row.py:287 cannot fail.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the 6809966b5e8e4c5f5d7bbb921f2939353e347c6a..4ffc11e39106d58fe7d29a93cf7f93586fda1ee2 diff is inside the write set granted by brief.txt:14 and no file under nova/ is touched.\nSCORE durability: 16\nJUSTIFICATION durability: scripts/prototypes/kernel_compile_census/test_attribution.py:29-38 guards the ranking against an independently computed count from tests/equilibrium/test_topology_read.py and its negative control reddened at EXIT=1, but row.py:287 is vacuous in the configuration it runs in.\nSCORE fit: 18\nJUSTIFICATION fit: the added modules follow the surrounding script idiom with no plan or ticket identifiers, matching the import style of scripts/prototypes/order2/compare.py:39.\nSCORE reuse: 17\nJUSTIFICATION reuse: attribution.py:105-115 adds a key while keeping existing outputs and row.py:26-28 reuses cache_guard, attribute_graph and _jaxpr_equation_counts, extending those owners rather than forking them; a search over scripts/ found no pre-existing source ranking.\nFINDING scripts/prototypes/kernel_compile_census/row.py:287 follow-on: the per-row cache-miss assertion cannot fail because the cache is disabled, so the driver writes its own miss at row.py:277 and asserts it, satisfying brief.txt:9's cache-guard clause in form only; cold-ness rests instead on row.py:31 and the disabled cache, and the ledger prose discloses the synthesis.\nFINDING scripts/prototypes/order2/attribution.py:16 follow-on: _source_owner discards the per-equation frame lines, so the ranking records only the owner function's co_firstlineno; brief.txt:10's file and line from each equation's traceback is not what the code records, though done_when item 3's owner file and line is satisfied.\n",
+  "review_run_id": "r-20261020T182736067263-review-of-kernel-compile-census-4ffc11e39106",
+  "reviewed_base_sha": "6809966b5e8e4c5f5d7bbb921f2939353e347c6a",
+  "reviewed_commits": [
+    "b6d80440b6f580d82fc34f9ffccf364de116b959",
+    "701c9bff6b972ab9468a65828af63b8ea780d75c",
+    "785a8b85413c638fc03dd934eaa0ee705e1bbfcd",
+    "d584bde8aadd9b0c1cceb73c45e5c9b2bb08c046",
+    "7bb1ef1f95917bd0d5aaa7579a00f14c96bc7ee7",
+    "772dfd05d11e3208746721cd6ecae303957cd8bd",
+    "8de10cbae14993f5ecbfd80761ff1242774c8141",
+    "ddfec3f4fdeeeba8eb901c29dcba995d13c6bc3b",
+    "e22510300a9d4c9b3a00cf2c517dbdc661a22fd9",
+    "4ffc11e39106d58fe7d29a93cf7f93586fda1ee2"
+  ],
+  "reviewed_head_sha": "4ffc11e39106d58fe7d29a93cf7f93586fda1ee2",
+  "reviewed_run_id": "r-20261020T063117190776-kernel-compile-census",
+  "scores": {
+    "durability": 16,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 17,
+    "scope_discipline": 19
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T18:45:44.669188+00:00",
+  "total": 103
+}

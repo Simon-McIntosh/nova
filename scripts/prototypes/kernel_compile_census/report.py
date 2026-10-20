@@ -48,8 +48,13 @@ def status(row):
     if row.get("error"):
         return escape(row["error"])
     if row.get("process_exit") == -9:
+        stage = (
+            "before graph tracing while preparing inputs"
+            if row.get("phase") == "no-receipt"
+            else "during compile"
+        )
         return (
-            f"killed during compile after {row.get('elapsed_seconds', 0):.0f} s "
+            f"killed {stage} after {row.get('elapsed_seconds', 0):.0f} s "
             "at memory ceiling"
         )
     if row.get("process_exit") == -15:
@@ -64,8 +69,18 @@ def table_rows(cpu_dirs, gpu_dirs):
     for program in PROGRAMS:
         sizes = (4, 64) if program in KERNELS else (132, 550)
         sources = cpu_dirs[:1] if program == "packed_analytic_moments" else cpu_dirs
-        pair = [receipt(sources, program, size)[0] for size in sizes]
-        first, second = pair
+        pair = [
+            (
+                receipt(sources, program, size)[0],
+                receipt(gpu_dirs, program, size)[0],
+            )
+            for size in sizes
+        ]
+        graph_pair = [
+            cpu if cpu.get("expanded_equations") is not None else gpu
+            for cpu, gpu in pair
+        ]
+        first, second = graph_pair
         a, b = first.get("expanded_equations"), second.get("expanded_equations")
         hlo_a, hlo_b = first.get("stablehlo_bytes"), second.get("stablehlo_bytes")
         graph_class = (
@@ -80,15 +95,14 @@ def table_rows(cpu_dirs, gpu_dirs):
             if a and b and hlo_a and hlo_b
             else "unresolved"
         )
-        for size, cpu in zip(sizes, pair, strict=True):
-            gpu, _ = receipt(gpu_dirs, program, size)
+        for size, (cpu, gpu), graph in zip(sizes, pair, graph_pair, strict=True):
             row = [
                 escape(program),
                 str(size),
                 graph_class,
-                value(cpu, "unique_equations"),
-                value(cpu, "expanded_equations"),
-                value(cpu, "stablehlo_bytes"),
+                value(graph, "unique_equations"),
+                value(graph, "expanded_equations"),
+                value(graph, "stablehlo_bytes"),
                 value(cpu, "executable_bytes"),
                 value(cpu, "cold_compile_wall_seconds", 2),
                 peak(cpu),
@@ -143,7 +157,9 @@ def source_rows(cpu_dirs):
     )
 
 
-def other_sources(cpu_dirs):
+def other_sources(cpu_dirs, gpu_dirs):
+    point, _ = receipt(cpu_dirs, "point_jet", 4)
+    denominator = point.get("expanded_equations")
     groups = []
     for program in PROGRAMS:
         if program == "point_jet":
@@ -156,6 +172,10 @@ def other_sources(cpu_dirs):
             size = 64 if program in KERNELS else 550
             data, path = receipt(sources, program, size)
             ranking = data.get("source_function_ranking", [])
+        if not ranking:
+            size = 4 if program in KERNELS else 132
+            data, path = receipt(gpu_dirs, program, size)
+            ranking = data.get("source_function_ranking", [])
         rows = []
         for source in ranking:
             rows.append(
@@ -163,7 +183,8 @@ def other_sources(cpu_dirs):
                 + escape(f"{source['file']}:{source['line']}")
                 + "</code></td>"
                 "<td><code>" + escape(source["function"]) + "</code></td>"
-                f"<td>{source['expanded_equations']:,}</td></tr>"
+                f"<td>{source['expanded_equations']:,}</td>"
+                f"<td>{100 * source['expanded_equations'] / denominator:.2f}%</td></tr>"
             )
         groups.append(
             "<details><summary>"
@@ -172,7 +193,8 @@ def other_sources(cpu_dirs):
             + "</summary><p>Full receipt: <code>"
             + escape(str(path))
             + "</code>.</p><table><thead><tr><th>Owner file and line</th>"
-            "<th>Function</th><th>Expanded equations</th></tr></thead><tbody>\n"
+            "<th>Function</th><th>Expanded equations</th>"
+            "<th>Share of point jet</th></tr></thead><tbody>\n"
             + "\n".join(rows)
             + "\n</tbody></table></details>"
         )
@@ -198,15 +220,15 @@ def main():
 <p>Every row uses a fresh process with the persistent compilation cache disabled before JAX initialises. Because that setting bypasses JAX's persistent-cache hooks, the driver adds its observed backend compile to the cache ledger as one unpersisted miss; no row with a hit is called cold. Host memory is sampled every ten seconds and combined with the child process's peak RSS for short rows. A dash means no executable or measurement was produced. The CPU topology compile was killed at the 450 GB allocation limit; its lower and sampled peak remain evidence, and the row does not claim an executable. H200 was pending for resources after a real submission; the GPU retry therefore ran on titan, whose P100 identity stays explicit in its row receipts. A graph is classed constant when expanded equations differ by less than 5% and StableHLO bytes grow by less than 20% across the two sizes.</p>
 <p>The standalone point and packed kernels map over 4 and 64 target points around one hexagonal source. Harmonic moments use 43 orders; pole moments use 10 requested orders with a 43-entry source family; harmonic multiplication uses two nine-term series. Production and prototype row programs batch three and four points respectively over 132- and 550-cell source couplings. The read uses the limited analytic field and realised hex carrier; the certificate map uses the limited certified carrier and booked moments.</p>
 <p>The earlier 1.25-million-equation, 39 MB topology record measured a within-scope scalar-scan arm, while these rows trace the current <code>topology.read</code>; the program identities differ, so the smaller current count does not contradict that receipt. The earlier 7,044 s and 381 GB jets build compiled at 2,132 nodes; these rows batch three or four points with 132 or 550 source cells, so the wall and memory figures are different shapes. The earlier 83.6 s point-jet wall is an H200 measurement; titan's P100 wall is reported under its own device name.</p>
-<p>The original packed-moment probe evaluated one point even when labelled 4 or 64, so those two receipts are excluded from the comparison pending the batched repair. The 132-cell certificate carrier was absent from the published fixture store; its row remains explicit until the in-memory carrier build completes.</p>
+<p>The original packed-moment probe evaluated one point even when labelled 4 or 64; the table uses corrected batched CPU receipts. The 132-cell certificate carrier was absent from the published fixture store. A 64 GB sirius repair job was killed after 5,460 s while preparing its inputs, before graph tracing; the table keeps that CPU outcome and takes the 132-cell graph counts from the successfully compiled titan row. The 550-cell CPU certificate row compiled.</p>
 <table><thead><tr><th>Program</th><th>Scale</th><th>Graph</th><th>Unique eqns</th><th>Expanded eqns</th><th>StableHLO bytes</th><th>CPU executable bytes</th><th>CPU cold s</th><th>CPU peak GiB</th><th>CPU outcome</th><th>GPU device</th><th>GPU cold s</th><th>GPU peak GiB</th><th>GPU executable bytes</th><th>GPU outcome</th></tr></thead><tbody>
 {table_rows(cpu_dirs, gpu_dirs)}
 </tbody></table>
 <h3>Point jet source ranking</h3>
 {source_rows(cpu_dirs)}
 <h3>Source rankings of the other programs</h3>
-<p>Each program's complete ranking is ordered by expanded equations and can be opened below. Where the smaller size did not reach graph tracing, the larger size supplies its owner ranking.</p>
-{other_sources(cpu_dirs)}
+<p>Each program's complete ranking is ordered by expanded equations and can be opened below. Shares use the same 106,218-equation point jet denominator. Where the smaller CPU size did not reach graph tracing, the larger CPU size supplies its owner ranking; titan is the fallback if neither CPU size reached it.</p>
+{other_sources(cpu_dirs, gpu_dirs)}
 {END}
 """
     ledger = ROOT / "docs/research/compile-cost-evidence.html"
@@ -226,8 +248,10 @@ def main():
         "host memory and traceback-derived source ranking. The point jet measured "
         "106,218 expanded equations on CPU; rangefunction._harmonic_pair_step "
         "owns 24,653 of them (23.21%). The read lowered at both sizes before "
-        "the 450 GB CPU allocation killed compilation. GPU rows and any repaired "
-        "certificate row are reported in the ledger with their measured outcome.</p>\n"
+        "the 450 GB CPU allocation killed compilation. Titan compiled all 18 GPU "
+        "rows, including the read and both certificate sizes. The 132-cell "
+        "certificate CPU repair was killed at 64 GB before graph tracing; its "
+        "graph counts come from titan.</p>\n"
         "</section>\n"
     )
 

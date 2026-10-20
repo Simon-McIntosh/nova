@@ -1,0 +1,61 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "scripts/prototypes/tcv_liuqe_known_answer/reference_sign.py:37",
+    "scripts/prototypes/tcv_liuqe_known_answer/figures.py:34",
+    "scripts/prototypes/tcv_liuqe_known_answer/report.py:11"
+  ],
+  "completed_at": "2026-10-20T07:51:16.370Z",
+  "dispatched_at": "2026-10-20T07:34:54Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/tcv_liuqe_known_answer/measure.py",
+      "line": "252",
+      "severity": "follow-on",
+      "text": "follow-on: _point_to_segments duplicates nova/equilibrium/boundary_comparison.py:81 _point_to_segment_distances, the repository's owner of the point-to-nearest-polyline-segment distance; the arithmetic is the same clip-and-project minimum, so this is a duplicate rather than an extension or a wrap, and the owner was reachable because scripts elsewhere import private nova helpers."
+    },
+    {
+      "file": "scripts/prototypes/tcv_liuqe_known_answer/report.py",
+      "line": "135",
+      "severity": "follow-on",
+      "text": "follow-on: count_diagnosed counts every slice whose boundary flux gap exceeds 1e-09 (loosened from a fraction-of-span threshold during the final docs commit), so the headline '17 slices have a label or measurable boundary flux difference' published at docs/research/tcv-liuqe-known-answer.html:10 counts all 17 rows and reads as seventeen disagreements when only three labels differ, overstating the residual mismatch a reader takes from the summary."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "the landed change is reached only from prototype drivers inside its own package (reference_sign.py:37, figures.py:34, report.py:11); no runtime code under nova/ imports it.",
+    "diff": "read all four commits against base 52702d307482ec0f35e0276e98c21c3a81d1cc91; the code changes are confined to scripts/prototypes/tcv_liuqe_known_answer/ and the remainder are the regenerated research html, two evidence fragments and the three SVGs.",
+    "done_when": "read; clause (1) is measure.py:268 liuqe_boundary_geometry (wall 0.002 m, X-point 0.020 m) with the distances on every row and a base/head failing pair in logs/base_geometry.log and logs/head_geometry.log, clause (2) is the single-job receipt exports/corrected-rows.jsonl (17 rows, sweep-1290933.log 'ROWS 17' and 'EXIT=0') with the report.py prose naming the corrected pulse, clause (3) is the three redrawn SVGs (figures.log EXIT=0, render-review.log EXIT=0) plus the per-slice Departures list at :32-49 naming kernel.py:302-305 and kernel.py:403-409.",
+    "goal": "the node's goal is to re-score nova's read against LIUQE on the sign-corrected TCV 77549 reference and redraw the boundary panels so the limited phases compare correctly; docs/research/tcv-liuqe-known-answer.html:6-7 records the corrected COCOS-11 pulse and :12-29 shows slices 0 and 14 now agree as 'limited' with the residual early-slice axis gap (0.1905 m) and boundary flux gap (7.218 spans) localised at :32-49.",
+    "manifest": "read; it reports status complete, the four commits c35840ee, 8b091d7a, 99b79120 and 2894fc08b, the coverage arms at 13 passed each, the geometry arms in test_logs, negative_control_log = logs/base_geometry.log, and a follow_ons entry handing the kernel.py read repair to the next node.",
+    "write_paths": "read the source manifest's declared write paths; the diff touches scripts/prototypes/tcv_liuqe_known_answer/{measure,report,figures,test_boundary_geometry}.py, docs/research/tcv-liuqe-known-answer.html, docs/evidence/fragments/converged-forward-solve/tcv-liuqe-{known-answer,refresh}.html and three files under docs/figures/converged-forward-solve/tcv-liuqe-known-answer/, every one inside the declared scope."
+  },
+  "justifications": {
+    "durability": "test_stored_xpoints_outside_limited_boundary_do_not_make_it_diverted (scripts/prototypes/tcv_liuqe_known_answer/test_boundary_geometry.py:29) genuinely fails at base -- logs/base_geometry.log shows \"AssertionError: assert 'diverted' == 'limited'\" against the reverted X-point-presence rule -- but it is the only new guard: report.py's build and _diagnosis and figures.py are covered by no test, and the homogeneous_time check at measure.py:571 has none.",
+    "evidence": "the gate logs carry EXIT= lines and reconcile with the manifest -- base_coverage.log and after_coverage.log 13 passed, base_geometry.log EXIT=1 with FAILED test_stored_xpoints_outside_limited_boundary_do_not_make_it_diverted and head_geometry.log/after_geometry.log 1 passed -- and the receipt exports/corrected-rows.jsonl holds exactly 17 rows (sweep-1290933.log 'ROWS 17' and 'EXIT=0'), though the manifest's baseline_suite/after_suite JSON name only test_coverage.py while the focused label test's base and head arms sit in test_logs.",
+    "fit": "measure.py:268 liuqe_boundary_geometry and measure.py:252 _point_to_segments follow the module's dataclass and numpy idiom, and no added name carries a version, phase, ticket or run id.",
+    "goal_fidelity": "docs/research/tcv-liuqe-known-answer.html:6-7 re-scores the corrected 17-block pulse, and the table at :12-29 plus the Departures list at :32-49 answer the lead's early-limited observation (slices 0 and 14 now 'limited' for both readers), though the headline at :10 reads '17 slices have a label or measurable boundary flux difference' against the 1e-09 threshold in report.py:135, so it overstates the residual mismatch.",
+    "reuse": "measure.py:252 _point_to_segments re-implements the point-to-nearest-polyline-segment distance already owned by nova/equilibrium/boundary_comparison.py:81 _point_to_segment_distances with identical clip-and-project arithmetic, and scripts/ already import private nova helpers (window_demonstration/run_window.py:26), so the owner was reachable and the addition duplicates it rather than extending it.",
+    "scope_discipline": "git diff --stat 52702d307482ec0f35e0276e98c21c3a81d1cc91 2894fc08b9054bd2788d4e463b8218d36e31b6be lists only the ten declared files (measure.py, test_boundary_geometry.py, report.py, figures.py, the two evidence fragments, the research html and three SVGs), all inside the source manifest's write paths, with kernel.py, nova/ and test_coverage.py untouched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to re-score nova's read against LIUQE on the sign-corrected TCV 77549 reference and redraw the boundary panels so the limited phases compare correctly; docs/research/tcv-liuqe-known-answer.html:6-7 records the corrected COCOS-11 pulse and :12-29 shows slices 0 and 14 now agree as 'limited' with the residual early-slice axis gap (0.1905 m) and boundary flux gap (7.218 spans) localised at :32-49.\nVERDICT done_when: read; clause (1) is measure.py:268 liuqe_boundary_geometry (wall 0.002 m, X-point 0.020 m) with the distances on every row and a base/head failing pair in logs/base_geometry.log and logs/head_geometry.log, clause (2) is the single-job receipt exports/corrected-rows.jsonl (17 rows, sweep-1290933.log 'ROWS 17' and 'EXIT=0') with the report.py prose naming the corrected pulse, clause (3) is the three redrawn SVGs (figures.log EXIT=0, render-review.log EXIT=0) plus the per-slice Departures list at :32-49 naming kernel.py:302-305 and kernel.py:403-409.\nVERDICT write_paths: read the source manifest's declared write paths; the diff touches scripts/prototypes/tcv_liuqe_known_answer/{measure,report,figures,test_boundary_geometry}.py, docs/research/tcv-liuqe-known-answer.html, docs/evidence/fragments/converged-forward-solve/tcv-liuqe-{known-answer,refresh}.html and three files under docs/figures/converged-forward-solve/tcv-liuqe-known-answer/, every one inside the declared scope.\nVERDICT manifest: read; it reports status complete, the four commits c35840ee, 8b091d7a, 99b79120 and 2894fc08b, the coverage arms at 13 passed each, the geometry arms in test_logs, negative_control_log = logs/base_geometry.log, and a follow_ons entry handing the kernel.py read repair to the next node.\nVERDICT diff: read all four commits against base 52702d307482ec0f35e0276e98c21c3a81d1cc91; the code changes are confined to scripts/prototypes/tcv_liuqe_known_answer/ and the remainder are the regenerated research html, two evidence fragments and the three SVGs.\nCALL_SITES: scripts/prototypes/tcv_liuqe_known_answer/reference_sign.py:37, scripts/prototypes/tcv_liuqe_known_answer/figures.py:34, scripts/prototypes/tcv_liuqe_known_answer/report.py:11\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/research/tcv-liuqe-known-answer.html:6-7 re-scores the corrected 17-block pulse and the table at :12-29 plus the Departures list at :32-49 answer the lead's early-limited observation, though the headline at :10 reports '17 slices have a label or measurable boundary flux difference' against report.py:135's 1e-09 threshold, overstating the residual mismatch.\nSCORE evidence: 17\nJUSTIFICATION evidence: the gate logs carry EXIT= lines and reconcile with the manifest (base_coverage.log and after_coverage.log 13 passed; base_geometry.log EXIT=1 against head_geometry.log and after_geometry.log 1 passed) and exports/corrected-rows.jsonl holds exactly 17 rows, though the manifest's baseline_suite/after_suite JSON name only test_coverage.py while the focused label test's arms sit in test_logs.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 52702d307482ec0f35e0276e98c21c3a81d1cc91 2894fc08b9054bd2788d4e463b8218d36e31b6be lists only the ten declared files, all inside the source manifest's write paths, with kernel.py, nova/ and test_coverage.py untouched.\nSCORE durability: 14\nJUSTIFICATION durability: test_boundary_geometry.py:29 genuinely fails at base (logs/base_geometry.log: \"assert 'diverted' == 'limited'\") but it is the only new guard, since report.py's build and _diagnosis and figures.py are covered by no test and the homogeneous_time check at measure.py:571 has none.\nSCORE fit: 18\nJUSTIFICATION fit: measure.py:268 liuqe_boundary_geometry and measure.py:252 _point_to_segments follow the module's dataclass and numpy idiom, and no added name carries a version, phase, ticket or run id.\nSCORE reuse: 5\nJUSTIFICATION reuse: measure.py:252 _point_to_segments duplicates nova/equilibrium/boundary_comparison.py:81 _point_to_segment_distances rather than extending the owner.\nFINDING scripts/prototypes/tcv_liuqe_known_answer/measure.py:252 follow-on: _point_to_segments duplicates nova/equilibrium/boundary_comparison.py:81 _point_to_segment_distances, the repository's owner of the point-to-nearest-polyline-segment distance; the arithmetic is the same clip-and-project minimum, so this is a duplicate rather than an extension or a wrap, and the owner was reachable because scripts elsewhere import private nova helpers.\nFINDING scripts/prototypes/tcv_liuqe_known_answer/report.py:135 follow-on: count_diagnosed counts every slice whose boundary flux gap exceeds 1e-09 (loosened from a fraction-of-span threshold during the final docs commit), so the headline '17 slices have a label or measurable boundary flux difference' published at docs/research/tcv-liuqe-known-answer.html:10 counts all 17 rows and reads as seventeen disagreements when only three labels differ, overstating the residual mismatch a reader takes from the summary.",
+  "review_run_id": "r-20261020T073413526222-review-of-tcv-liuqe-refresh-2894fc08b905",
+  "reviewed_base_sha": "52702d307482ec0f35e0276e98c21c3a81d1cc91",
+  "reviewed_head_sha": "2894fc08b9054bd2788d4e463b8218d36e31b6be",
+  "reviewed_run_id": "r-20261020T063745768870-tcv-liuqe-refresh",
+  "scores": {
+    "durability": 14,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T07:46:29Z",
+  "total": 92
+}

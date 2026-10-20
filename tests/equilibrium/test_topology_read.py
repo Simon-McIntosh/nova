@@ -2945,11 +2945,11 @@ def test_census_neighbour_proposals_keep_saddles_across_coarse_ties(
     assert np.all(np.min(distances, axis=1) < np.median(state["geometry"].pitch))
 
 
-def test_fast_read_refuses_a_wall_level_not_attained_at_its_point(monkeypatch):
-    """A graph bottleneck cannot masquerade as a physical wall tangency."""
+def _quadratic_wall_read_inputs():
+    """A resolved axis and a known physical contact for refusal controls."""
     from nova.equilibrium import fixed_points, topology
-    from scripts.prototypes.fast_map_production import kernel
 
+    @jax.tree_util.register_static
     class Field:
         def value(self, point):
             return -jnp.sum((point - jnp.array((2.0, 0.0))) ** 2)
@@ -2983,6 +2983,14 @@ def test_fast_read_refuses_a_wall_level_not_attained_at_its_point(monkeypatch):
     )
     convention = topology.TopologyConvention.from_cocos(17, 1.0)
     policy = TopologyPolicy()
+    return field, roots, geometry, convention, policy
+
+
+def test_fast_read_refuses_a_wall_level_not_attained_at_its_point(monkeypatch):
+    """A graph bottleneck cannot masquerade as a physical wall tangency."""
+    from scripts.prototypes.fast_map_production import kernel
+
+    field, roots, geometry, convention, policy = _quadratic_wall_read_inputs()
     correct = jax.jit(lambda: kernel.read(field, roots, geometry, convention, policy))()
     assert bool(correct.valid), (
         "the known quadratic wall contact must first be admitted"
@@ -2993,3 +3001,22 @@ def test_fast_read_refuses_a_wall_level_not_attained_at_its_point(monkeypatch):
     refused = jax.jit(lambda: kernel.read(field, roots, geometry, convention, policy))()
     assert abs(float(field.value(refused.boundary) - refused.boundary_flux)) > 0.009
     assert not bool(refused.valid), "an unattained boundary must be refused"
+
+
+def test_fast_read_refuses_an_overflowed_contour_tree(monkeypatch):
+    """A refused authority receipt cannot publish a read from its prefix."""
+    from dataclasses import replace
+    from nova.equilibrium import contour_tree
+    from scripts.prototypes.fast_map_production import kernel
+
+    field, roots, geometry, convention, policy = _quadratic_wall_read_inputs()
+    correct = jax.jit(lambda: kernel.read(field, roots, geometry, convention, policy))()
+    assert bool(correct.valid), "the complete authority receipt must first be admitted"
+    builder = contour_tree.build_contour_tree
+    monkeypatch.setattr(
+        contour_tree,
+        "build_contour_tree",
+        lambda *args: replace(builder(*args), overflow=jnp.asarray(True)),
+    )
+    refused = jax.jit(lambda: kernel.read(field, roots, geometry, convention, policy))()
+    assert not bool(refused.valid), "an overflowed tree prefix must be refused"

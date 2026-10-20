@@ -1,15 +1,14 @@
 """Piecewise-linear contour mesh on the hex carrier.
 
-The contour tree is built on a discrete field, and its topology must not depend
-on a tolerance. This module supplies that field's carrier: the three-direction
-triangulation of the hex cell centres, clipped to the multi-unit vessel polygon,
-with wall vertices placed where the triangulation meets the wall polyline.
+The contour tree is built on a discrete field. Its triangulation includes the
+cell centres and the supplied material boundaries, clipped to the occupiable
+vessel domain. Boundary samples follow the carrier spacing, so the interior
+centre hull cannot leave an uncovered strip beside the wall.
 
-The field is piecewise-linear. Flux is valued at the hex cell centres; a wall
-vertex takes its flux by linear interpolation on the triangle that contains it,
-from the SAME piecewise-linear field the tree is built on, so no smooth
-representation is needed to value the boundary. The result is a fixed-capacity
-ContourMesh of jax arrays, traceable through jit and vmap.
+Standalone callers supply centre flux; boundary values extend the adjacent
+linear field. TopologyGeometry evaluates its physical field directly at every
+resulting vertex, including boundary intersections. The fixed-capacity receipt
+is traceable through jit and vmap.
 
 Geometry primitives:
 
@@ -244,7 +243,14 @@ def _clipped_carrier(
         for a, b in zip(ring, np.roll(ring, -1, axis=0)):
             count = max(1, int(np.ceil(np.linalg.norm(b - a) / spacing)))
             boundary_points.extend(a + (b - a) * np.arange(count)[:, None] / count)
-    boundary_points = np.asarray(boundary_points)
+    seen = {_key(point, tolerance) for point in centre_rz}
+    distinct = []
+    for point in boundary_points:
+        key = _key(point, tolerance)
+        if key not in seen:
+            distinct.append(point)
+            seen.add(key)
+    boundary_points = np.asarray(distinct).reshape(-1, 2)
     nearest = cKDTree(centre_rz[triangulation.simplices].mean(axis=1))
     simplex = triangulation.find_simplex(boundary_points)
     simplex = np.where(simplex >= 0, simplex, nearest.query(boundary_points)[1])

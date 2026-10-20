@@ -56,6 +56,8 @@ def test_contour_domain_reaches_the_vessel(spec, resolution):
     live = np.asarray(mesh.vertex_valid)
     wall = live & np.asarray(mesh.vertex_is_wall)
     assert wall.any(), "nonempty vessel has zero contour-wall vertices"
+    all_points = np.asarray(mesh.vertex_rz)[live]
+    assert len(np.unique(np.round(all_points, 10), axis=0)) == len(all_points)
     points = np.asarray(mesh.vertex_rz)[wall]
     vessel = Polygon(boundary)
     from shapely.geometry import Point

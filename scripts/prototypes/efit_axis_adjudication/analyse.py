@@ -118,6 +118,80 @@ def point_side(value: float, level: float) -> str:
     return "on"
 
 
+def classify_boundary_point(record, adapter):
+    """Measure the adapter's boundary coordinate on the trace's own field.
+
+    A hyperbolic Hessian alone does not make a stationary point. Normalize the
+    gradient by the panel flux span and grid extent, and measure wall proximity
+    against the actual segments, without joining distinct wall loops.
+    """
+    if adapter is None or adapter["nova_saddle_r"] is None:
+        return None
+    position = np.array([adapter["nova_saddle_r"], adapter["nova_saddle_z"]])
+    if not np.isfinite(position).all():
+        raise ValueError("boundary coordinate must be finite")
+    length = float(max(np.ptp(record.rgrid), np.ptp(record.zgrid)))
+    flux_span = float(np.ptp(record.psi))
+    if not np.isfinite(flux_span) or flux_span <= 0 or length <= 0:
+        raise ValueError("boundary classification requires positive field scales")
+    field = FastField(record.rgrid, record.zgrid, record.psi)
+    eig, _, gradient = hessian_type(field, *position)
+    value, _ = field.value_gradient(position[:1], position[1:])
+    starts = np.column_stack((record.wall_r[:, 0], record.wall_z[:, 0]))
+    ends = np.column_stack((record.wall_r[:, 1], record.wall_z[:, 1]))
+    segments = ends - starts
+    squared_length = np.sum(segments * segments, axis=1)
+    fraction = np.divide(
+        np.sum((position - starts) * segments, axis=1),
+        squared_length,
+        out=np.zeros_like(squared_length),
+        where=squared_length > 0,
+    )
+    nearest = starts + np.clip(fraction, 0, 1)[:, None] * segments
+    distances = np.linalg.norm(position - nearest, axis=1)
+    wall_index = int(np.argmin(distances))
+    grad_norm = float(np.linalg.norm(gradient))
+    relative_gradient = grad_norm * length / flux_span
+    gradient_tolerance = 1e-9
+    wall_tolerance = 1e-9 * length
+    stationary = relative_gradient <= gradient_tolerance and eig[0] < 0 < eig[1]
+    kind = (
+        "stationary saddle"
+        if stationary
+        else "wall contact"
+        if distances[wall_index] <= wall_tolerance
+        else "neither"
+    )
+    return {
+        "r": float(position[0]),
+        "z": float(position[1]),
+        "psi": float(value[0]),
+        "psi_reported": adapter["nova_saddle_psi"],
+        "grad_norm": grad_norm,
+        "gradient": gradient.tolist(),
+        "relative_gradient": relative_gradient,
+        "gradient_tolerance": gradient_tolerance,
+        "eig": eig.tolist(),
+        "flux_span": flux_span,
+        "length_scale": length,
+        "wall_distance": float(distances[wall_index]),
+        "wall_tolerance": wall_tolerance,
+        "nearest_wall_segment": wall_index,
+        "class": kind,
+    }
+
+
+def classify_boundary_marks(rows):
+    """Attach field measurements to receipts, including explicit absent marks."""
+    for row in rows:
+        if row["machine"] == "JT-60SA":
+            continue
+        row["code_points"]["nova_a_boundary_point"] = classify_boundary_point(
+            parse_record(row["path"]), row["adapter_a"]
+        )
+    return rows
+
+
 def analyse(case_id, path, note, ad_a, ad_b, n_seed):
     record = parse_record(path)
     field = FastField(record.rgrid, record.zgrid, record.psi)
@@ -312,24 +386,33 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", required=True)
     parser.add_argument("--n-seed", type=int, default=120)
+    parser.add_argument(
+        "--receipt",
+        type=pathlib.Path,
+        help="Classify boundary marks in an existing census receipt.",
+    )
     args = parser.parse_args()
 
-    ad_a = load_adapter_a()
-    ad_b = load_adapter_b()
-    cases = build_cases()
-    results = []
-    for case_id, path, note in cases:
-        results.append(analyse(case_id, path, note, ad_a, ad_b, args.n_seed))
-        print(f"analysed {case_id}: {len(results[-1]['census'])} census points")
+    if args.receipt:
+        results = json.loads(args.receipt.read_text())
+    else:
+        ad_a = load_adapter_a()
+        ad_b = load_adapter_b()
+        cases = build_cases()
+        results = []
+        for case_id, path, note in cases:
+            results.append(analyse(case_id, path, note, ad_a, ad_b, args.n_seed))
+            print(f"analysed {case_id}: {len(results[-1]['census'])} census points")
 
-    from refresh import refresh
+        from refresh import refresh
 
-    results = refresh(results, json.loads(ADAPTER_A.read_text())["rows"])
+        results = refresh(results, json.loads(ADAPTER_A.read_text())["rows"])
+    classify_boundary_marks(results)
 
     out = pathlib.Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.parent.joinpath("results.json").write_text(json.dumps(results, indent=1))
-    print("wrote", out.parent / "results.json")
+    out.write_text(json.dumps(results, indent=1, allow_nan=False))
+    print("wrote", out)
 
 
 if __name__ == "__main__":

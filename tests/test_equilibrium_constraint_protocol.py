@@ -496,7 +496,14 @@ def test_eliminated_constraint_runs_through_typed_solve_with_outer_trace() -> No
     assert all(
         isinstance(step.inner_receipt, ForwardSolveReceipt) for step in trace.steps
     )
-    assert all(len(step.inner_receipt.constraints) == 1 for step in trace.steps)
+    assert all(
+        len(step.inner_receipt.constraints) == len(request.constraint_pairs) + 1
+        and np.array_equal(
+            np.asarray(step.inner_receipt.constraints[-1].physical_residual),
+            np.asarray(step.inner_receipt.constraints[-1].normalized_unknown),
+        )
+        for step in trace.steps
+    )
     assert bool(np.asarray(receipt.qualified))
 
     imposed = replace(

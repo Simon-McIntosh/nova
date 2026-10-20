@@ -106,9 +106,7 @@ def draw_panel(axes, view, row, wall_rings):
 def build(rows, eq, wall_rings, out_path):
     columns = min(4, len(rows))
     lines = int(np.ceil(len(rows) / columns))
-    figure, grid = plt.subplots(
-        lines, columns, figsize=(3.6 * columns, 3.9 * lines), dpi=110
-    )
+    figure, grid = plt.subplots(lines, columns, figsize=(14, 3.9 * lines), dpi=100)
     panels = np.atleast_1d(grid).ravel()
     for axes, row in zip(panels, rows):
         poloidal_axes(axes)
@@ -117,6 +115,7 @@ def build(rows, eq, wall_rings, out_path):
         axes.set_visible(False)
     figure.tight_layout()
     figure.savefig(out_path, format="svg")
+    plt.close(figure)
     return out_path
 
 
@@ -130,7 +129,10 @@ def main():
     rows = json.loads(Path(args.rows).read_text())["rows"]
     db = imas.DBEntry(f"imas:hdf5?path={args.liuqe}", "r", dd_version="3.41.0")
     eq = db.get("equilibrium")
+    if eq.ids_properties.homogeneous_time != 1:
+        raise ValueError("equilibrium time base is not homogeneous")
     wall_rings = measure.read_wall(args.wall)
+    print("nova.__file__", __import__("nova").__file__, flush=True)
     print("panels", len(rows), "wall rings", len(wall_rings), flush=True)
     build(rows, eq, wall_rings, args.out)
     db.close()

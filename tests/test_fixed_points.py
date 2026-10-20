@@ -313,35 +313,68 @@ def _path_roots(geometry, levels):
     )
 
 
-def test_path_admission_rejects_the_wall_contact_root():
-    """The bounding saddle of the axis path is admitted, not the higher root.
+def test_path_admission_rejects_the_wall_contact_root(monkeypatch):
+    """The axis component reaches its saddle before a higher private wall root."""
+    from nova.equilibrium import contour_tree, topology
+    from scripts.prototypes.fast_map_production.kernel import _first_tree_events
 
-    The wall-contact root carries a level above the gate by construction: its
-    extremum ties the boundary level, so ranking saddles by level would admit it
-    and step the booked current. Admission ranks each saddle by the axis-path
-    passage to its own cell minus its own level, so the wall root, whose cell the
-    axis reaches only at the gate level (-0.5) and not at its own (+0.3), loses.
-    """
-    from scripts.prototypes.fast_map_production.kernel import _merge_path_saddle
+    levels = jnp.asarray([1.0, -0.5, 0.3, -0.6])
+    tree = contour_tree.ContourTreeArrays(
+        node_vertex=jnp.arange(4),
+        node_psi=levels,
+        node_valid=jnp.ones(4, bool),
+        critical_type=jnp.asarray([2, 1, 1, 1]),
+        edges=jnp.asarray([[0, 1], [1, 2], [1, 3]]),
+        edge_valid=jnp.ones(3, bool),
+        overflow=jnp.asarray(False),
+    )
+    points = jnp.asarray([[0.0, 0.0], [1.0, 0.0], [2.0, 0.0], [1.0, 1.0]])
+    geometry = SimpleNamespace(
+        contour_mesh=SimpleNamespace(
+            vertex_rz=points,
+            vertex_is_wall=jnp.asarray([False, False, True, True]),
+            vertex_valid=jnp.ones(4, bool),
+            edges=jnp.asarray([[0, 1], [1, 2], [1, 3]]),
+            edge_valid=jnp.ones(3, bool),
+        ),
+        contour_sample_points=points,
+        contour_sources=jnp.arange(4)[:, None],
+        contour_weights=jnp.ones((4, 1)),
+        pitch=jnp.ones(1),
+    )
+    monkeypatch.setattr(contour_tree, "build_contour_tree", lambda *args: tree)
+    monkeypatch.setattr(topology, "_point_values", lambda *args: levels)
+    resolved = True
 
-    geometry = _path_carrier()
-    ceiling = jnp.asarray([1.0, 0.5, -0.5, -0.5, -2.0])
-    levels = np.array([1.0, -0.5, 0.3])
-    roots = _path_roots(geometry, levels)
-    saddles = jnp.asarray([True, True])
-    sigma = jnp.asarray(1.0)
+    def polish(*args):
+        return SimpleNamespace(
+            position=points[1],
+            jet=FieldJet(levels[1], jnp.zeros(2), jnp.diag(jnp.asarray([-1.0, 1.0]))),
+            valid=jnp.asarray(resolved),
+        )
 
-    index, score = _merge_path_saddle(geometry, roots, saddles, sigma, ceiling)
-    # Root 1 (the gate) is admitted; root 2 (the wall contact) is not.
-    assert int(index) == 0, f"admitted saddle index {int(index)}"
-    assert float(score) == levels[1], f"admitted level {float(score)}"
+    monkeypatch.setattr(topology, "stationary_read", polish)
+    saddle, saddle_live, wall, wall_live, valid = _first_tree_events(
+        None, geometry, points[0], jnp.asarray(1.0), None
+    )
+    assert bool(valid) and bool(saddle_live) and bool(wall_live)
+    np.testing.assert_array_equal(saddle.position, points[1])
+    np.testing.assert_array_equal(wall, points[3])
+    assert int(jnp.argmax(levels[1:3])) == 1  # Level ranking picks the wrong root.
 
-    # Falsification: an argmax over saddle levels, the behaviour the admission
-    # replaced, admits the wall-contact root and so the assertion would fail.
-    wall_level = sigma * roots.jet.value
-    argmax_index = int(jnp.argmax(jnp.where(saddles, wall_level[1:], -jnp.inf)))
-    assert argmax_index != int(index)
-    assert argmax_index == 1
+    resolved = False
+    _, saddle_live, _, wall_live, valid = _first_tree_events(
+        None, geometry, points[0], jnp.asarray(1.0), None
+    )
+    assert bool(wall_live) and not bool(saddle_live) and not bool(valid)
+
+    wall_first = replace(tree, edges=jnp.asarray([[0, 2], [2, 1], [1, 3]]))
+    monkeypatch.setattr(contour_tree, "build_contour_tree", lambda *args: wall_first)
+    _, saddle_live, wall, wall_live, valid = _first_tree_events(
+        None, geometry, points[0], jnp.asarray(1.0), None
+    )
+    assert bool(valid) and bool(wall_live) and not bool(saddle_live)
+    np.testing.assert_array_equal(wall, points[2])
 
 
 def test_psi_rounding_enclosure_bounds_the_fit():

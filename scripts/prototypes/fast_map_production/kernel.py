@@ -269,16 +269,19 @@ def _first_tree_events(field, geometry, axis, sigma, policy):
     left, right = tree.edges.T
 
     def advance(_, state):
-        at, saddle_node, wall_node, active = state
-        other = jnp.where(left == at, right, left)
-        adjacent = tree.edge_valid & ((left == at) | (right == at))
-        descending = (levels[other] < levels[at]) | (
-            (levels[other] == levels[at]) & (other < at)
+        visited, saddle_node, wall_node, active = state
+        from_left = visited[left] & ~visited[right]
+        from_right = visited[right] & ~visited[left]
+        source = jnp.where(from_left, left, right)
+        other = jnp.where(from_left, right, left)
+        following = (
+            tree.edge_valid
+            & (from_left | from_right)
+            & tree.node_valid[other]
+            & (levels[other] <= levels[source])
         )
-        following = adjacent & descending & tree.node_valid[other]
-        unique = jnp.sum(following) == 1
-        next_node = other[jnp.argmax(following)]
-        move = active & unique
+        next_node = other[jnp.argmax(jnp.where(following, levels[other], -jnp.inf))]
+        move = active & jnp.any(following)
         is_wall = wall[next_node]
         is_saddle = (tree.critical_type[next_node] == 1) & ~is_wall
         saddle_node = jnp.where(
@@ -286,17 +289,22 @@ def _first_tree_events(field, geometry, axis, sigma, policy):
         )
         wall_node = jnp.where(move & is_wall & (wall_node < 0), next_node, wall_node)
         return (
-            jnp.where(move, next_node, at),
+            visited.at[next_node].set(visited[next_node] | move),
             saddle_node,
             wall_node,
-            move & ((saddle_node < 0) | (wall_node < 0)),
+            move & (wall_node < 0),
         )
 
     _, saddle_node, wall_node, _ = jax.lax.fori_loop(
         0,
         tree.node_valid.size,
         advance,
-        (start, jnp.asarray(-1), jnp.asarray(-1), ~tree.overflow & jnp.any(maximum)),
+        (
+            jnp.zeros_like(tree.node_valid).at[start].set(True),
+            jnp.asarray(-1),
+            jnp.asarray(-1),
+            ~tree.overflow & jnp.any(maximum),
+        ),
     )
     saddle_seed = points[jnp.maximum(saddle_node, 0)]
     polished = topology.stationary_read(
@@ -304,7 +312,12 @@ def _first_tree_events(field, geometry, axis, sigma, policy):
     )
     eigen = jnp.linalg.eigvalsh(sigma * polished.jet.hessian)
     saddle_live = (saddle_node >= 0) & polished.valid & (eigen[0] < 0) & (eigen[1] > 0)
-    valid = ~tree.overflow & jnp.any(maximum) & ((wall_node >= 0) | saddle_live)
+    valid = (
+        ~tree.overflow
+        & jnp.any(maximum)
+        & ((wall_node >= 0) | saddle_live)
+        & ((saddle_node < 0) | saddle_live)
+    )
     return (
         polished,
         saddle_live,
@@ -540,7 +553,7 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
     )
     connected = jnp.where(closed_live, closed_cells, connected)
     membership = provisional.membership * path_weight
-    attained = field.evaluate(boundary).value
+    attained = jnp.where(diverted, polished.jet.value, wall_flux[wall_index])
     boundary_enclosure = (
         128
         * jnp.finfo(level.dtype).eps

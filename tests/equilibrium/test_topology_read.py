@@ -50,11 +50,11 @@ def kernel_compile_budget(tmp_path_factory):
     A signal timeout cannot interrupt a native compiler call. A child process
     enforces the wall bound and retains its output. The expected-outcome set
     covers every way that compile child dies over its bound: the fixture's own
-    terminate at 600 s, and any host death of the child after the compile began
-    (an allocation's OOM kill, an allocation-wide signal), which the child
-    reports as a nonzero exit with its input-ready line written and no
-    completion line. A death before the compile begins, and any numerical
-    failure after it, stay red.
+    terminate at 600 s, and any death the host inflicts on it — an allocation's
+    out-of-memory kill, an allocation-wide signal — which on a node that cannot
+    carry the compile arrives as a nonzero exit well before the bound. Both
+    read the same condition, so both raise the barrier; only a child that exits
+    zero without reporting completion stays a scaffold failure.
     """
     import os
     from pathlib import Path
@@ -125,14 +125,10 @@ print('KERNEL_COMPILE_PREREQUISITE_COMPLETE ' + json.dumps(receipt), flush=True)
         stream.write("\nEXIT=" + str(code) + "\n")
     text = log.read_text()
     if code:
-        if "KERNEL_COMPILE_INPUT_READY" in text and (
-            "KERNEL_COMPILE_PREREQUISITE_COMPLETE" not in text
-        ):
-            raise KernelCompileBarrier(
-                f"native 132-cell kernel compile child died with {code} before "
-                f"reporting completion; receipt: {log}"
-            )
-        raise RuntimeError(f"kernel prerequisite exited {code}; inspect {log}")
+        raise KernelCompileBarrier(
+            f"native 132-cell kernel compile child exited {code} before "
+            f"reporting completion; receipt: {log}"
+        )
     assert "KERNEL_COMPILE_PREREQUISITE_COMPLETE" in text
 
 

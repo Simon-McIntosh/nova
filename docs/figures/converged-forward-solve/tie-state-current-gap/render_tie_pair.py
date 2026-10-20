@@ -221,6 +221,10 @@ def render(receipt, field_data, figure_path, preview):
         figure_path.parent.mkdir(parents=True, exist_ok=True)
         check_text(fig)
         fig.savefig(figure_path, format="svg")
+        figure_path.write_text(
+            "\n".join(line.rstrip() for line in figure_path.read_text().splitlines())
+            + "\n"
+        )
         if preview:
             preview.parent.mkdir(parents=True, exist_ok=True)
             fig.savefig(preview, format="png", dpi=100)

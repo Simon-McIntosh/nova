@@ -580,6 +580,64 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "7ed7d96225ede59ac918dbe0b8050d5d8ffd2239",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'failed' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "no terminal manifest was delivered",
+    "scratch_bytes": 5024,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261020T060157074841-tie-pair-membership-collapse",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 5024,
+        "path": "/tmp/reckon-crew-scratch/r-20261020T060157074841-tie-pair-membership-collapse"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "unintegrated",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [],
+          "head": "7ed7d96225ede59ac918dbe0b8050d5d8ffd2239",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/tie-pair-membership-collapse",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-10-20T07:16:46Z",
+            "session_id": "01a157e7-d4a0-7741-a91b-29b3b3ce6aa9",
+            "session_source": "pointer",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/tie-pair-membership-collapse"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "this worktree is the working directory of recoverable session 01a157e7-d4a0-7741-a91b-29b3b3ce6aa9"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_withheld": "gate verdict 'failed' is not passing; worktree retained for recovery"
+  },
   "resume_remedy": {
     "command": "reckon crew resume --run r-20261020T060157074841-tie-pair-membership-collapse --advice continue",
     "session_id": "01a157e7-d4a0-7741-a91b-29b3b3ce6aa9",

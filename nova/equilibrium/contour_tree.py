@@ -231,19 +231,18 @@ def _carrier_adjacency(
             jnp.arange(edge_count, dtype=CARRIER_INDEX_DTYPE),
         )
     )
-    selected = jnp.nonzero(keep, size=sources.size, fill_value=0)[0]
-    sources = sources[selected]
-    targets = targets[selected]
-    edge_index = edge_index[selected]
-    order = jnp.lexsort((edge_index, sources))
+    row_key = jnp.where(keep, sources, vertex_count)
+    order = jnp.lexsort((edge_index, row_key))
+    key = row_key[order]
     sources = sources[order]
     targets = targets[order]
-    degree = jnp.bincount(sources, length=vertex_count).astype(CARRIER_INDEX_DTYPE)
+    keep = keep[order]
+    degree = jnp.bincount(key, length=vertex_count + 1).astype(CARRIER_INDEX_DTYPE)
     starts = jnp.concatenate(
         (jnp.zeros((1,), dtype=CARRIER_INDEX_DTYPE), jnp.cumsum(degree)[:-1])
     )
-    position = jnp.arange(sources.size, dtype=CARRIER_INDEX_DTYPE) - starts[sources]
-    fits = position < neighbour_capacity
+    position = jnp.arange(sources.size, dtype=CARRIER_INDEX_DTYPE) - starts[key]
+    fits = keep & (position < neighbour_capacity)
     row = jnp.where(fits, sources, vertex_count)
     column = jnp.minimum(position, neighbour_capacity - 1)
     padded = jnp.zeros(
@@ -254,7 +253,7 @@ def _carrier_adjacency(
     padded_valid = jnp.zeros((vertex_count + 1, neighbour_capacity), dtype=bool)
     padded_valid = padded_valid.at[row, column].set(fits)
     neighbour_valid = padded_valid[:vertex_count]
-    overflow = jnp.any(position >= neighbour_capacity)
+    overflow = jnp.any(keep & (position >= neighbour_capacity))
     return neighbours, neighbour_valid, overflow
 
 

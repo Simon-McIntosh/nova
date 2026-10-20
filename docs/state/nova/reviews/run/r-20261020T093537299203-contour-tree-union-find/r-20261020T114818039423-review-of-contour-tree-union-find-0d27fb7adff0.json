@@ -1,0 +1,50 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-20T12:01:34.936Z",
+  "dispatched_at": "2026-10-20T11:49:04Z",
+  "findings": [
+    {
+      "file": "benchmarks/contour_tree_sweep_placement.py",
+      "line": 32,
+      "severity": "blocking",
+      "text": "The landed diff removes _append_edges from nova/equilibrium/contour_tree.py (renamed to _batch_edges with the different signature (sources, source_valid, targets, capacity)), but this tracked module still does 'from nova.equilibrium.contour_tree import ... _append_edges ...' at line 32 and calls it at line 155, so importing or running the benchmark now raises ImportError. The file is outside the node's declared write paths so the worker could not repair it, and no gate in the run imports it, which is why the break is silent."
+    },
+    {
+      "file": "scripts/prototypes/contour_tree_sweep_profile/test_brute_receipt_identity.py",
+      "line": 1,
+      "severity": "follow-on",
+      "text": "The new receipt-identity guard sits under scripts/prototypes/, which pyproject's [tool.pytest.ini_options] testpaths does not collect, so no repository gate runs it and a future regression in the seven receipt fields reddens nothing in the default lane. The same applies to the assertion added in scripts/prototypes/contour_tree_sweep_profile/test_profile.py."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T093537299203-contour-tree-union-find/brute-identity.log",
+      "line": 1,
+      "severity": "follow-on",
+      "text": "The gate log's first line names REVISION=cd169244542ed6f8bacbcde8bb7bb4db864c4409, but the file it ran (test_brute_receipt_identity.py) does not exist at that revision; it was added 2 minutes later in 0f80a85c7. The revision header therefore names a tree the tested artifact is not in, so the log cannot be reconciled against the commit it cites."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T093537299203-contour-tree-union-find/manifest.md",
+      "line": 16,
+      "severity": "follow-on",
+      "text": "the manifest's tests: field names a script path (.../gpu-recheck.sh) rather than the literal command a shell was handed, so a reader cannot re-run the gate from that line alone and must fall back to the log's own COMMAND= header."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to stop the contour-tree warm wall growing with exponent 1.5 by giving the sweeps a bounded-depth component representation and batched arc emission; nova/equilibrium/contour_tree.py:254 (_sweep_tree) now carries ranks/path compression and emits arcs once through _batch_edges at nova/equilibrium/contour_tree.py:121.\nVERDICT done_when: the done_when's three measures are the seven-field identity checks, one H200 four-rung measurement per carrier, and one suite job running both arms with fresh processes; the manifest records H200 job 1291092, the 8 repaired rows under gpu-recheck/rows, and suite job 1291093's base/after EXIT= lines in suite-recheck/base-suite.log and suite-recheck/after-suite.log.\nVERDICT write_paths: the diff touches nova/equilibrium/contour_tree.py, scripts/prototypes/contour_tree_sweep_profile/{profile.py,test_profile.py,test_brute_receipt_identity.py}, docs/research/contour-tree-sweep-profile.html and docs/evidence/fragments/converged-forward-solve/contour-tree-union-find.html, all inside the manifest's orientation_write_paths and the brief's declared scope.\nVERDICT manifest: read; it reports status complete, the four commits, h200 10000-cell whole reads of 1.105 s limited and 1.143 s diverted, both suite arms as single-line JSON at revision cd1692445 with 20 and 13 failure ids, and the negative control log path.\nVERDICT diff: read commit by commit against db4375c2f; 511a22e06 replaces _append_edges with _batch_edges and adds rank balancing and compression, cd1692445 makes the padded node-valid scatter an order-independent max, 0f80a85c7 adds the stored-carrier receipt comparator, 0d27fb7ad records the measurements; six files changed, all in scope.\nCALL_SITES: nova/equilibrium/topology.py:2974 (build_contour_tree import and call at :2980), benchmarks/contour_tree_sweep_placement.py:32\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the measured four-rung exponents fall to 0.994 and 0.976 from the base 1.473 and 1.458, and the 10,000-cell whole read is 1.105 s and 1.143 s against the 10 s target, both taken from nova's H200 rows under gpu-recheck/rows/read-after-*-10000.json.\nSCORE evidence: 15\nJUSTIFICATION evidence: the done_when's rows exist and are valid (gpu-recheck/rows/read-after-limited-10000.json warm_total_seconds 1.1045), but every gate log names REVISION=cd1692445 rather than the reviewed head 0d27fb7ad, and brute-identity.log's named revision does not contain the file it ran.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in git diff db4375c2f..0d27fb7ad is inside the declared write paths, though the change removes the _append_edges symbol that benchmarks/contour_tree_sweep_placement.py:32 imports from outside that scope.\nSCORE durability: 14\nJUSTIFICATION durability: scripts/prototypes/contour_tree_sweep_profile/test_brute_receipt_identity.py:33 compares the installed builder against a separately loaded base module over 26 fixtures and is shown to redden by the visit-order control in gpu-recheck/negative-control.log, but it lives outside pyproject [tool.pytest.ini_options] testpaths and so no repository gate runs it.\nSCORE fit: 18\nJUSTIFICATION fit: the added helpers at nova/equilibrium/contour_tree.py:109 and :121 carry the module's own docstring idiom, and the new comment at nova/equilibrium/contour_tree.py:517 states the mechanism rather than a tracker reference.\nSCORE reuse: 20\nJUSTIFICATION reuse: a search of nova/ for union-find, disjoint-set, path-compression and rank- balancing owners found none, so the rank-balanced forest inside _sweep_tree extends the only owner of component membership and duplicates no existing mechanism.\nFINDING benchmarks/contour_tree_sweep_placement.py:32 blocking: the removal of _append_edges breaks this tracked module's import.\nFINDING scripts/prototypes/contour_tree_sweep_profile/test_brute_receipt_identity.py:1 follow-on: the new receipt-identity guard is outside pytest testpaths so no gate runs it.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T093537299203-contour-tree-union-find/brute-identity.log:1 follow-on: the log names a revision that does not contain the test file it ran.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T093537299203-contour-tree-union-find/manifest.md:16 follow-on: the tests field names a script path rather than the literal command.",
+  "review_run_id": "r-20261020T114818039423-review-of-contour-tree-union-find-0d27fb7adff0",
+  "reviewed_base_sha": "db4375c2fb8a90d5f1fbfcf890bc95c1e36d9550",
+  "reviewed_head_sha": "0d27fb7adff00103673022f5c4303547955726cd",
+  "reviewed_run_id": "r-20261020T093537299203-contour-tree-union-find",
+  "scores": {
+    "durability": 14,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T12:11:53.528861+00:00",
+  "total": 104
+}

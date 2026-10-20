@@ -2567,7 +2567,6 @@ class TopologyGeometry:
             following.extend(offset + (np.arange(len(unit)) + 1) % len(unit))
             units.extend([unit_index] * len(unit))
         from dataclasses import replace
-        from scipy.spatial import Delaunay
         from nova.equilibrium.contour_tree_mesh import build_contour_mesh
         from nova.equilibrium.wall_mask import WallUnit
 
@@ -2585,8 +2584,12 @@ class TopologyGeometry:
             tree_centres,
             np.zeros(len(tree_centres)),
             tuple(
-                WallUnit(np.asarray(u)[:, 0], np.asarray(u)[:, 1], kind="vessel")
-                for u in wall_units
+                WallUnit(
+                    np.asarray(u)[:, 0],
+                    np.asarray(u)[:, 1],
+                    kind="vessel" if index == 0 else "material",
+                )
+                for index, u in enumerate(wall_units)
             ),
         )
         occupied = np.flatnonzero(np.asarray(mesh.vertex_valid))
@@ -2609,18 +2612,12 @@ class TopologyGeometry:
             edge_capacity=edge_size,
             triangle_capacity=triangle_size,
         )
-        triangulation = Delaunay(tree_centres)
-        target = np.asarray(mesh.vertex_rz)
-        simplex = triangulation.find_simplex(target)
-        transform = triangulation.transform[np.maximum(simplex, 0)]
-        barycentric = np.einsum(
-            "nij,nj->ni", transform[:, :2], target - transform[:, 2]
-        )
-        barycentric = np.column_stack((barycentric, 1 - barycentric.sum(axis=1)))
-        sources = triangulation.simplices[np.maximum(simplex, 0)]
-        sources[: len(tree_centres)] = np.arange(len(tree_centres))[:, None]
-        barycentric[: len(tree_centres)] = (1.0, 0.0, 0.0)
-        barycentric[~np.asarray(mesh.vertex_valid)] = 0.0
+        # Evaluate every carrier vertex, including wall intersections, on the
+        # physical field. No interior-hull extrapolation enters the tree read.
+        tree_centres = np.asarray(mesh.vertex_rz)
+        sources = np.repeat(np.arange(len(tree_centres))[:, None], 3, axis=1)
+        barycentric = np.zeros_like(sources, dtype=np.float64)
+        barycentric[:, 0] = np.asarray(mesh.vertex_valid)
         return cls(
             *map(
                 jnp.asarray,

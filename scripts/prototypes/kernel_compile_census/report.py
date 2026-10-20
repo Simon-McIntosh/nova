@@ -48,7 +48,14 @@ def status(row):
     if row.get("error"):
         return escape(row["error"])
     if row.get("process_exit") == -9:
-        return "killed during compile at memory ceiling"
+        return (
+            f"killed during compile after {row.get('elapsed_seconds', 0):.0f} s "
+            "at memory ceiling"
+        )
+    if row.get("process_exit") == -15:
+        return f"terminated after {row.get('elapsed_seconds', 0):.0f} s"
+    if row.get("process_exit") is None and row.get("phase") == "lowered":
+        return "lowered; compile still in progress or interrupted"
     return escape(str(row.get("phase", "no receipt")))
 
 
@@ -206,7 +213,8 @@ def main():
         "<h3>Kernel compile census</h3>\n"
         "<p>The compile ledger carries the two-size graph counts, cold compile receipts, "
         "host memory and traceback-derived source ranking. The point jet measured "
-        "106,218 expanded equations on CPU; the read lowered at both sizes before "
+        "106,218 expanded equations on CPU; rangefunction._harmonic_pair_step "
+        "owns 24,653 of them (23.21%). The read lowered at both sizes before "
         "the 450 GB CPU allocation killed compilation. GPU rows and any repaired "
         "certificate row are reported in the ledger with their measured outcome.</p>\n"
         "</section>\n"

@@ -1,0 +1,62 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [
+    {
+      "failure_condition": "The diff adds no assertion: it is a research document, an evidence fragment and two SVGs, with 0 deletions and no test file. There is therefore no added assertion whose independence could be judged, and none that a reverted mutation would redden.",
+      "lines": "none in the diff"
+    },
+    {
+      "failure_condition": "The nearest existing guard, test_two_loop_domain_counts_outer_winding_less_obstacle, asserts coverage.obstacle_winding == coverage.outer_winding and coverage.total == 0.0 against the resolved coverage object rather than against a value the test passed in, so it is independent \u2014 but it measures the coverage certificate, not the boundary contact the node's answer rests on, and it would stay green under a per-unit filter at kernel.py:285-307.",
+      "lines": "scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py:275-283"
+    }
+  ],
+  "call_sites": [],
+  "completed_at": "2026-10-20T01:29:09.477Z",
+  "dispatched_at": "2026-10-20T01:20:13Z",
+  "findings": [
+    {
+      "file": "docs/research/obstacle-loop-limiting.html",
+      "line": "41",
+      "severity": "follow-on",
+      "text": "follow-on: the done-when's real-wall rung asks for a real multi-unit wall, but TCV 77549's wall IDS carries one wall description with one limiter unit of 512 vertices (scratch/tcv_slice.log: 'wall descriptions 1' / 'limiter units 1 sizes [512]' / 'wall units 1 sizes [512]'), so the node measured a single-unit wall. The absence is reported honestly at docs/research/obstacle-loop-limiting.html:41 and verified against the 512 vertices, so this is an unmet rung of the done-when rather than a false claim; the obstacle behaviour on real multi-ring geometry remains unmeasured."
+    },
+    {
+      "file": "docs/research/obstacle-loop-limiting.html",
+      "line": "55",
+      "severity": "follow-on",
+      "text": "follow-on: the scripts and JSON receipts the measurement rests on live only under the run scratch directory named at docs/research/obstacle-loop-limiting.html:55 (/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T003241698218-obstacle-loop-limiting/scratch/), not in the landed commit; the doc is self-contained as prose but the two-loop number cannot be reproduced from the repository alone once the run directory is pruned. The brief allowed scripts under the run directory, so this is a durability limitation rather than a scope breach."
+    },
+    {
+      "file": "scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py",
+      "line": "275",
+      "severity": "follow-on",
+      "text": "follow-on: no landed test fails if this node's answer regresses. The only two-loop test asserts coverage windings (outer_winding, obstacle_winding, total, certified) at test_coverage.py:275-283 and never the boundary contact, so a per-unit filter added at scripts/prototypes/fast_map_production/kernel.py:285-307 that excluded an obstacle's edges would leave the 13-test suite green (EXIT=0 in scratch/gate_coverage.log) while the doc's answer went stale."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "The landed change is documentation and figures; no runtime code can reach a document, so there is no production call site for it and the CALL_SITES line reads none. The read path the document is about I verified in place, because the claim depends on it: scripts/prototypes/fast_map_production/kernel.py:247 read (candidate set :285-307, selection :382-387), nova/equilibrium/topology.py:2405 from_cells, nova/equilibrium/contour_tree_mesh.py:306 build_contour_mesh.",
+    "diff": "Read against the base 89906c0d: one commit, 8b1f378ad, adding four files and changing none (3571 insertions, 0 deletions). It introduces the research doc, an evidence fragment, and two SVG poloidal panels. No product source and no test is touched, so the node's own baseline_suite/after_suite arms are correctly absent and added_failure_count is derived as 0.",
+    "done_when": "The evidence fence asks for the multi-ring read path stated with file and line, a two-loop field and one real TCV wall slice measuring whether the published boundary touches, ignores or crosses the obstacle, with poloidal panels, and any defect's owner and fix. Rungs (1) and (3) are met and (1) verified: topology.py:2405 from_cells concatenates per unit at :2453-2460 and stores at :2528-2530, tags every unit kind=\"vessel\" at :2480-2481, contour_tree_mesh.py:86-108 _occupiable_geometry unions vessel units, and kernel.py:247 read decides the boundary. Rung (2) is half met: the two-loop field is measured and control-tested, but the real-wall repeat used a single-unit wall (finding above).",
+    "goal": "The goal is to establish whether nova's topology read lets an in-vessel obstacle loop supply the limiting contact. The landed doc answers yes and grounds it in the read: kernel.py:285-307 builds the wall candidate set from every unit in geometry.wall_points with no per-unit filter, and kernel.py:382 selects wall_index = jnp.argmax(wall_scores) over all of them, so nothing privileges the outer ring. I read those lines at the reviewed revision and they say what the doc says.",
+    "manifest": "The source manifest reads status complete, names the one commit 8b1f378ad, the four changed paths, the base 89906c0d, the gate command and its 13-passed result, and the two measurement receipts. Its artifacts line reconciles with scratch/two_loop_final.json (boundary (0.25, 0.0), boundary_psi -0.0625, dist_to_obstacle 0.0, dist_to_outer 0.25) and scratch/tcv_slice.json (boundary (0.624, 0.057), nearest_wall_distance 0.0, wall_units 1).",
+    "write_paths": "The source prompt fences docs/research/obstacle-loop-limiting.html, docs/figures/converged-forward-solve/obstacle-loop-limiting and docs/evidence/fragments/converged-forward-solve/obstacle-loop-limiting.html. git show --stat 8b1f378ad names exactly those three paths (four files: the doc, the fragment, and two SVGs under the figure tree) and no other."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261020T011912754175-review-of-obstacle-loop-limiting-8b1f378adddd",
+  "reviewed_base_sha": "89906c0d58b6e1df8f8327148d289e56dc6f7c24",
+  "reviewed_head_sha": "8b1f378adddd402c6ec7936eb8dd036fb94bec43",
+  "reviewed_run_id": "r-20261020T003241698218-obstacle-loop-limiting",
+  "scores": {
+    "durability": 8,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T01:31:55.381196+00:00",
+  "total": 99
+}

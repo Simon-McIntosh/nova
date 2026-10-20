@@ -1,0 +1,123 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-20T05:48:40.177Z",
+  "dispatched_at": "2026-10-20T05:39:08Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/kernel-compile-barrier.html:66",
+      "id": "done_when-1",
+      "reason": "a worker editing to \u00a74 as written would meet done-when (3) with a red suite and no instruction that the marker must also be removed.",
+      "text": "\u00a74 done-when (3) says the seven `kernel_compile_budget` fixture ids \"pass rather than xfail\", but those ids carry the module-level strict `@kernel_compile_expected_failure` marker (tests/equilibrium/test_topology_read.py:39-43, raises=KernelCompileBarrier), so a fix that actually made them compile within bound would turn them into strict XPASS failures, not passes; \u00a74's stated edit removes only the `test_kernel_compile_growth` xfail at line 2423",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/kernel-compile-barrier.html:60",
+      "id": "reasoning-1",
+      "reason": "the stated mechanism points at a growth that the cited evidence says is absent, sending the node at the wrong variable instead of the unrolled `packed_analytic_moments` derivative graph the source manifest names.",
+      "text": "\u00a73 states the bound is needed \"so that its graph does not grow with the node count\", but the plan's own \u00a70 table and its cited source say the opposite: the cost is cell/node-count-independent (390 MB/s growth, 7,044 s flat, \"cell-count-independent\"), so a worker taking the mechanism clause literally would measure the graph across 282 and 2,132 nodes, observe no growth, and have no lever to pull",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/kernel-compile-barrier.html:60",
+      "id": "reasoning-2",
+      "reason": "a node that bounds the cited prototype and leaves the production definition untouched can satisfy \u00a73's done-when while the read the plan exists to fix still carries the compile.",
+      "text": "\u00a73 names only the prototype site `scripts/prototypes/read_route/jets.py:321` for `jax.jit(jax.vmap(_source_jets, in_axes=(0, None)))`, but the shipped path evaluates a second, separately-defined copy of the same expression at `nova/equilibrium/fixed_points.py:389` (`_row_program`, `_source_jets` at `nova/equilibrium/fixed_points.py:204`), reached by `nova/equilibrium/support_read.py:99`; the production caller the plan's 60 s clause actually applies to is never named",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/kernel-compile-barrier.html:41",
+      "id": "anchors_resolve-1",
+      "reason": "the run id and its manifest are reachable from the crew run directory and carry the 7,044 s / 380,777 MB figures, so the anchor is resolvable by a persistent path even though it is not a plan node.",
+      "text": "the \u00a70 row for the jets build cites \"node `coarse-tie-census-memory`\", but that id is not a node in any plan (it appears nowhere in `docs/plans/` or `docs/evidence/` except this plan); it resolves only as the crew run `r-20261019T223150157038-coarse-tie-census-memory`, whose manifest is currently `status: waiting` and unlanded, so a reader following the citation into `converged-forward-solve` finds nothing",
+      "type": "anchors_resolve",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "b828d29aa6c71541b5fe14fe0a7f6202c53eccd185eb624cff745df6ebe4c85d",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 0,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "",
+      "when": "2026-10-20T05:51:49.892907+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-20T05:51:55.958309+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-2",
+      "reason": "",
+      "when": "2026-10-20T05:51:59.497202+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "anchors_resolve-1",
+      "reason": "",
+      "when": "2026-10-20T05:52:03.487485+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-20T05:52:03.487485+00:00"
+    },
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-20T05:51:49.892907+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-20T05:51:55.958309+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-20T05:51:59.497202+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-kernel-compile-barrier.v0.json",
+  "review_run_id": "r-20261020T053832332787-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "e93808f2836feacf60987dc2ef10347d1884c190",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `nova/biot/elliptic.py:240/:410`, `nova/biot/rangefunction.py:134`, `nova/biot/polygonanalytic.py:2641`, `scripts/prototypes/read_route/jets.py:321`, merge `b6f1efd95` and the fragment anchor `cfs-topology-read-kernel-scope` all resolve; `/nova/cpu-compile-abort.html` exists with `plan-status=superseded`.",
+    "done_when": "a finding \u2014 \u00a74 done-when (3) requires the seven `kernel_compile_budget` ids to pass, but they carry the `@kernel_compile_expected_failure` strict xfail (tests/equilibrium/test_topology_read.py:39), and \u00a74 names only the removal of the `test_kernel_compile_growth` xfail.",
+    "evidence_paths": "pass \u2014 \u00a71 writes `docs/research/kernel-compile-census.html` in-repo and the cold-compile gates run as named H200/sirius jobs, not a session scratchpad.",
+    "naming": "pass \u2014 sections use `\u00a71`/`\u00a72` structural labels and followup id `f-kcb-001` as plan data; no plan label, ticket number or version tag reaches a code symbol or filename.",
+    "reasoning": "a finding \u2014 \u00a73 attributes the jets-build compile cost to a graph that grows with the node count, and separately targets only the prototype build site, while the plan's own cited measurements show the cost is already flat and the production build is a separate definition.",
+    "single_goal": "pass \u2014 \u00a71 measures, \u00a72 bounds kernel tangents, \u00a73 bounds the jets build, \u00a74 removes the topology read's expected failures; each section states one deliverable.",
+    "wiring": "pass \u2014 the plan declares `plan-blocks=converged-forward-solve`, and every cited node id resolves: `cfs-read-shared-kernel`, `cfs-kernel-cold-compile-correction`, `proto-taylor` and `cfs-kernel-compile-cost` are nodes in `docs/plans/converged-forward-solve.html`, and `coarse-tie-census-memory` resolves as crew run `r-20261019T223150157038-coarse-tie-census-memory`."
+  },
+  "section_digests": {
+    "_document": "76bd47b632f76205c6b048aef6b7a270a9229bec90839b52aad6d50a9d7014b3",
+    "s0": "0be3a043d2ef84a90d08e15e32e169edd918b3a12736ef900c4b917aa2d852ed",
+    "s1": "c71857a9597548412a863633d09c095353caa0d80585e8ecb3263ec074035851",
+    "s2": "4b4ae60065134cb7cdc8a4479e5525cf0785449c22833f6d824f728d3a0deaf2",
+    "s3": "3818d73e122b9c072ef18c803c0801bd18bc69bfbfac24004c63d1c20bd4f6cd",
+    "s4": "cd96f26c55d9df05a9a80919cdc7ccce240a5904f2056f596710493e35067038"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T05:51:48.186384+00:00"
+}

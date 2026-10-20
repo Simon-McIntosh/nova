@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="511">
+<meta name="plan-version" content="512">
 <meta name="plan-modified" content="2026-10-20">
 </head>
 <body>
@@ -1648,7 +1648,10 @@ NO PRODUCT OR TEST SOURCE WAS CHANGED.  The 1e-10 tolerance was not widened.</p>
     <div class="r-comment-body"><p>Independent review of run r-20261020T093537299203-contour-tree-union-find at head cd96df9c116aa2c413b390b74a35534a219afe23; scores goal_fidelity 19, evidence 16, scope_discipline 17, durability 13, fit 18, reuse 20; zero added failures; four follow-on findings, no blocking finding.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261020T132005587648-review-of-contour-tree-guards-in-lane-c22f2d1e5e94" data-who="reckon-build" data-when="2026-10-20T13:31:02.807Z">
-    <div class="r-comment-body"><p>Independent review of r-20261020T124900117804-contour-tree-guards-in-lane at c22f2d1e5 (base bd4f94220): parsed record scoring goal_fidelity 19, evidence 19, scope_discipline 18, durability 19, fit 18, reuse 19; two follow-on findings on the new test&#x27;s hard-coded reference revision and its unsigned sweep input; no blocking defects.</p></div>
+    <div class="r-comment-body"><p>Independent review of r-20261020T124900117804-contour-tree-guards-in-lane at c22f2d1e5 (base bd4f94220): parsed record scoring goal_fidelity 19, evidence 19, scope_discipline 18, durability 19, fit 18, reuse 19; two follow-on findings on the new test's hard-coded reference revision and its unsigned sweep input; no blocking defects.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261020T124900117804-contour-tree-guards-in-lane" data-who="reckon-build" data-when="2026-10-20T13:48:15Z">
+    <div class="r-comment-body"><p>Added default-lane seven-field receipt identity and bounded sweep-depth guards; head collected 7953/8956, CPU gate passed 2 tests in 160.41 s, and the parent-walk control failed at 52 hops against 15; evidence: docs/evidence/fragments/converged-forward-solve/contour-tree-guards-in-lane.html#contour-tree-guards-in-lane-landing.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261010T184522536142-cfs-current-book-fragments" data-who="reckon-build" data-when="2026-10-10T18:46:29.609Z">
     <div class="r-comment-body"><p>Implemented traced current.book over connected multi-polygon membership using the widened signed-ring exact clip. Six certificate rows pass: diverted read image errors 1.15131582e-4, 2.49842782e-5, 3.95031905e-6 at 550/2098/5158 cells; limited errors 1.77777866e-5, 2.66948705e-6, 5.45231060e-7 at 553/2105/5167. Maximum net-current error 2.22e-16, excluded current zero, legacy control 0.197326978718; evidence docs/evidence/fragments/converged-forward-solve/cfs-current-book.html#cfs-current-book-fragments-booking and one three-rung SVG; audit-doc 0 errors.</p></div>

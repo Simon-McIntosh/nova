@@ -514,9 +514,12 @@ def build_contour_tree(
     vertex_node = vertex_node.at[write_source[::-1]].set(
         jnp.where(compact_node_valid, slots, 0)[::-1]
     )
-    vertex_has_node = jnp.zeros(vertex_count, dtype=bool)
-    vertex_has_node = vertex_has_node.at[write_source[::-1]].set(
-        compact_node_valid[::-1]
+    # Padding repeats vertex zero; a reduction makes those writes order-independent.
+    vertex_has_node = (
+        jnp.zeros(vertex_count, dtype=jnp.int32)
+        .at[write_source]
+        .max(compact_node_valid.astype(jnp.int32))
+        .astype(bool)
     )
     compact_edges = vertex_node[merged_edges[edge_source]]
     edge_nodes_valid = jnp.all(vertex_has_node[merged_edges[edge_source]], axis=1)

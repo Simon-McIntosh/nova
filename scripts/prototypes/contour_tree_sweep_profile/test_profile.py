@@ -36,7 +36,10 @@ def test_instrumented_receipt_identity(kind: str, cells: int) -> None:
     module = load_builder(Path(os.environ["CONTOUR_TREE_MODULE"]))
     baseline = load_builder(Path(os.environ["REFERENCE_CONTOUR_TREE_MODULE"]))
     arguments, realised_cells = inputs(kind, cells)
-    expected = baseline.build_contour_tree(*arguments)
+    cpu = jax.local_devices(backend="cpu")[0]
+    expected = baseline.build_contour_tree(
+        *(jax.device_put(argument, cpu) for argument in arguments)
+    )
     jax.block_until_ready(expected)
     reference = module.build_contour_tree(*arguments)
     jax.block_until_ready(reference)

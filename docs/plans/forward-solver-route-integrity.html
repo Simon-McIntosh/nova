@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
-<meta name="plan-version" content="137">
+<meta name="plan-version" content="138">
 <meta name="plan-modified" content="2026-10-20">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 <meta name="plan-impl" content="0.67">
@@ -935,6 +935,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261020T064557737341-review-of-xla-autotune-harness-checks-6b743440cb14" data-who="reckon-build" data-when="2026-10-20T06:59:26.832Z">
     <div class="r-comment-body"><p>review-of-xla-autotune-harness-checks-6b743440cb14: reviewed r-20261020T063626112801-xla-autotune-harness-checks at 52702d307..6b743440c, scoring goal_fidelity 19, evidence 17, scope_discipline 20, durability 18, fit 19, reuse 20; the record is parsed, carries no blocking findings and two follow-ons.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261020T063312428036-xla-autotune-h200-arms" data-who="reckon-build" data-when="2026-10-20T07:22:57.982Z">
+    <div class="r-comment-body"><p>Measured the four-arm XLA autotune-cache harness on one H200 NVL (job 1290845, node 98dci4-gpu-0003, exit 0) — arm (b) 40.0 s and arm (c) 45.0 s cold compile wall, a 5.0 s difference, about 19 ms per compile miss at the guard&#x27;s one-second resolution, with no steady-state separation (all twelve repeats 77.1-86.7 s) and NEGATIVE_CONTROL=holds arm_a=1354 arm_c=0; landed an H200 section and per-arm table in docs/research/xla-autotune-cache-on-gpfs.html, the harness-drawn SVG in docs/figures/forward-solver-route-integrity/xla-autotune-h200/xla-autotune-arms-walls.svg, and the fragment docs/evidence/fragments/forward-solver-route-integrity/xla-autotune-h200-arms.html.</p></div>
 </div>
 </section>
 </main>

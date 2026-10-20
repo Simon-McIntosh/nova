@@ -1,0 +1,97 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T125717206720-contour-tree-sparse-build/sparse-build/suite/after_suite_head.log",
+  "assertion_analysis": [
+    {
+      "failure_condition": "Restoring the dense equality matrix and clearing SPARSE_INDEXED_BUILD makes contour_tree.SPARSE_INDEXED_BUILD False, so this assertion reddens; sparse-build/negative_control.log shows exactly that with EXIT=1 and test_sparse_indexed_build_marker_is_present in the summary.",
+      "lines": "101"
+    },
+    {
+      "failure_condition": "The digest is compared against _BASE_INTEGER_DIGESTS, constants recorded from the base build's own receipts, so it reddens whenever the head build's six integer/boolean arrays diverge from the base build's; it is independent of the head code because the right-hand side was not produced by it.",
+      "lines": "113"
+    },
+    {
+      "failure_condition": "The expected side is vertex_flux[node_vertex], built from the array the test itself passed in, so it holds trivially if the build both mis-gathers and reports the same wrong node_vertex; its independence rests on node_vertex being pinned by the digest at line 113.",
+      "lines": "118"
+    }
+  ],
+  "base_log_revision": "efd1d9553f3bd7efcc777f7a92ffc14e78fa6635",
+  "baseline_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T125717206720-contour-tree-sparse-build/sparse-build/suite/baseline_suite.log",
+  "call_site_count": 1,
+  "call_sites": [
+    "nova/equilibrium/topology.py:2974"
+  ],
+  "completed_at": "2026-10-20T09:21:16.877Z",
+  "dispatched_at": "2026-10-20T09:10:01Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/contour_tree.py",
+      "line": "260",
+      "severity": "follow-on",
+      "text": "follow-on: the node goal's outcome is not delivered - the four-rung exponent is unchanged at about 1.50 (sparse-build/h200/comparison.json) and the 10,000-cell whole read is 72.0-75.9 s against the 10 s target; the remaining dominant cost is the unchanged _sweep_tree fori_loop, named but not instrumented, so near-linear scaling is work for a next node rather than a defect to repair here."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T125717206720-contour-tree-sparse-build/sparse-build/suite/after_suite_head.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the after arm is an assembly, not one process at the head - six of its seven files are carried forward from 94d532f63 (job 1290984) and only the sparse-build file ran at bbc9f37a, justified only because 94d532f63..bbc9f37a touches no file but the test and the fragment."
+    },
+    {
+      "file": "tests/test_contour_tree_sparse_build.py",
+      "line": "118",
+      "severity": "follow-on",
+      "text": "follow-on: np.array_equal(node_psi[valid], gathered[valid]) builds its expected side from vertex_flux, the array the test itself passed in, so it is a contract-shaped check whose independence rests on node_vertex being separately pinned by digest at line 113 rather than on the gather alone."
+    }
+  ],
+  "head_log_revision": "c352209dc7ad4af767f5040d7247f8553c1104d1",
+  "item_verdicts": {
+    "diff": "Seven files, eleven commits against base efd1d9553; the spine is a194ff511 (sparse _append_edges, split-only iteration, sorted carrier adjacency, scatter vertex_node), b65fd38fa (invalid carrier endpoints routed to a padding row), bbc9f37a (portability-split test pin), the rest docs, figure and close-out.",
+    "done_when": "Three clauses, all recorded: a committed equivalence test at tests/test_contour_tree_sparse_build.py proving identities at 550 and 2000 cells on both analytic cases; H200 job 1290126 with before/after warm, tree and compile walls at four rungs for both cases plus the tree exponent and the 10 s target (sparse-build/h200/comparison.json); both suite arms recorded in docs/research/read-warm-wall.html. The target is recorded unmet with the nearest figure.",
+    "goal": "The node goal is 'Make the contour-tree build of the topology read scale near-linearly'; the landed change replaces the repeated scans and dense equality matrix with sparse indexed buffers and a scatter-built inverse map (nova/equilibrium/contour_tree.py:126-256 and :498-506), but the measured exponent is unchanged at about 1.50, so the goal's scaling outcome is not delivered.",
+    "manifest": "Read; status complete, baseline_suite and after_suite as single-line JSON each naming one log (the after arm names after_suite_head.log), negative_control_log empty (path only), test_logs and artifacts present, and its own text states the target is not met.",
+    "write_paths": "The dispatch fence grants eight paths; the efd1d9553..c352209dc diff changes nova/equilibrium/contour_tree.py, tests/test_contour_tree_sparse_build.py, scripts/prototypes/read_warm_wall/measure.py, scripts/prototypes/read_warm_wall/run.sh, docs/research/read-warm-wall.html, docs/figures/converged-forward-solve/read-warm-wall-profile/warm-stages.svg and docs/evidence/fragments/converged-forward-solve/contour-tree-sparse-build.html, every one inside the grant. The brief.txt prose omits the last but the fence lists it."
+  },
+  "justifications": {
+    "durability": "tests/test_contour_tree_sparse_build.py:101 reddens when the sparse path is removed (sparse-build/negative_control.log exits 1 with test_sparse_indexed_build_marker_is_present failing) and line 113 compares against base-build digest constants rather than the head.",
+    "evidence": "H200 job 1290126 records both builds at four rungs for both cases in sparse-build/h200/comparison.json with the exponent and the 10 s target, and the two suite arms are recorded in sparse-build/suite/baseline_suite.json and sparse-build/suite/after_suite.json.",
+    "fit": "The rewrites at nova/equilibrium/contour_tree.py:126-256 follow the module's existing jnp sort/scatter idiom and no added symbol or comment carries a forbidden plan, version or ticket label.",
+    "goal_fidelity": "The named structures were replaced at nova/equilibrium/contour_tree.py:126-256 and :498-506, but sparse-build/h200/comparison.json shows the four-rung whole-read exponent is 1.501 (limited) and 1.495 (diverted) against base 1.467/1.473, so the build does not scale near-linearly.",
+    "reuse": "A search over nova/ for adjacency, lexsort and scatter builders found no owner of a sparse carrier-adjacency or inverse-map capability outside nova/equilibrium/contour_tree.py, which the change extends rather than forks.",
+    "scope_discipline": "Every path in the efd1d9553..c352209dc diff lies inside the eight granted write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The node goal is 'Make the contour-tree build of the topology read scale near-linearly'; the landed change (nova/equilibrium/contour_tree.py:59, SPARSE_INDEXED_BUILD) does replace the repeated scans and the dense equality matrix with sparse indexed buffers and a scatter-built inverse map, but the goal's scaling outcome is measured NOT achieved - sparse-build/h200/comparison.json records the four-rung exponent unchanged at 1.501 limited / 1.495 diverted against the base 1.467 / 1.473.\nVERDICT done_when: The done_when's three clauses are met in letter - a committed equivalence test (tests/test_contour_tree_sparse_build.py), one H200 job (1290126) reporting before/after warm, tree and compile walls at four rungs for both cases with the tree exponent and the 10,000-cell target, and both suite arms recorded in docs/research/read-warm-wall.html - and the target is recorded unmet with the nearest figure (72.0 s).\nVERDICT write_paths: The dispatch fence grants eight paths (nova/equilibrium/contour_tree.py; tests/test_contour_tree_sparse_build.py; scripts/prototypes/read_warm_wall; docs/research/read-warm-wall.html; docs/evidence/fragments/converged-forward-solve/read-warm-wall-profile.html; docs/figures/converged-forward-solve/read-warm-wall-profile; docs/evidence/fragments/converged-forward-solve/contour-tree-sparse-build.html; docs/figures/converged-forward-solve/contour-tree-sparse-build) and every path in the diff lies inside them.\nVERDICT manifest: Read; status complete, ten commits listed, baseline_suite and after_suite as single-line JSON each naming one log, negative_control_log, test_logs and artifacts present; the manifest states the scaling target is not met\nVERDICT diff: Read commit by commit against base efd1d9553: a194ff511 rewrites _append_edges/_insert_split_nodes/_carrier_adjacency and the vertex_node inverse map, b65fd38fa fixes the carrier-endpoint padding, bbc9f37a rewrites the test pin, and c659a0831/09d6f4459/3e77c086c/94d532f63/756141238/5d498f4a2/a3ebf2081/c352209dc carry docs, figure and close-out - seven files, 1061 insertions and 1322 deletions.\nCALL_SITES: nova/equilibrium/topology.py:2974 (build_contour_tree call inside the warm topology read)\nSCORE goal_fidelity: 7\nJUSTIFICATION goal_fidelity: The named structures were replaced at nova/equilibrium/contour_tree.py:126-256 and :498-506, but sparse-build/h200/comparison.json shows the four-rung whole-read exponent is 1.501 (limited) and 1.495 (diverted) against base 1.467/1.473 - the change does not make the build scale near-linearly.\nSCORE evidence: 16\nJUSTIFICATION evidence: H200 job 1290126 records both builds at four rungs for both cases in sparse-build/h200/comparison.json with the exponent and the 10 s target, and the two suite arms are recorded in sparse-build/suite/baseline_suite.json and after_suite.json.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: Every path in the efd1d9553..c352209dc diff (contour_tree.py, the new test, the two prototype scripts, read-warm-wall.html, the figure dir, the two evidence fragments) lies inside the eight granted write paths.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_contour_tree_sparse_build.py:101 reddens when the sparse path is removed - sparse-build/negative_control.log exits 1 with test_sparse_indexed_build_marker_is_present failing - and the digest assertion at line 113 compares against base-build constants rather than the head.\nSCORE fit: 18\nJUSTIFICATION fit: The rewrites at nova/equilibrium/contour_tree.py:126-256 follow the module's existing jnp scatter/sort idiom, and no added symbol or comment carries a forbidden plan, version or ticket label.\nSCORE reuse: 20\nJUSTIFICATION reuse: A search over nova/ for adjacency, lexsort and scatter builders found no owner of a sparse carrier-adjacency or inverse-map capability outside nova/equilibrium/contour_tree.py, which the change extends rather than forks.\nFINDING nova/equilibrium/contour_tree.py:260 follow-on: the node goal's outcome is not delivered - the four-rung exponent is unchanged at about 1.50 (sparse-build/h200/comparison.json) and the 10,000-cell whole read is 72.0-75.9 s against the 10 s target; the remaining dominant cost is the unchanged _sweep_tree fori_loop, named but not instrumented, so the near-linear scaling goal is work for a next node rather than a defect to repair here.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T125717206720-contour-tree-sparse-build/sparse-build/suite/after_suite_head.log:1 follow-on: the after arm was not run as one process at the head - six of its seven files are carried forward from 94d532f63 (job 1290984) and only the sparse-build file ran at bbc9f37a, so the reviewed revision's after_suite is an assembly rather than a single job's output, justified only because 94d532f63..bbc9f37a touches no file but the test and the fragment.\nFINDING tests/test_contour_tree_sparse_build.py:118 follow-on: the assertion np.array_equal(node_psi[valid], gathered[valid]) builds its expected side from vertex_flux, the array the test itself passed in, so it is a contract-shaped check whose independence rests on node_vertex being separately pinned by digest at line 113 rather than on the gather alone.",
+  "review_run_id": "r-20261020T090921357768-review-of-contour-tree-sparse-build-c352209dc7ad",
+  "reviewed_base_sha": "efd1d9553f3bd7efcc777f7a92ffc14e78fa6635",
+  "reviewed_commits": [
+    "a194ff5119780bc4ece1706d44364846fc5a2496",
+    "c659a08310e027738670541a5bd2cc1eca1f3268",
+    "09d6f4459a1037f4f17bab615e0debade075d96d",
+    "3e77c086c5758851f9a64e7ff8e9c4087717e576",
+    "5d498f4a2bdf0f58ec4df5eff1bf1b9bdb086531",
+    "b65fd38fa",
+    "756141238",
+    "94d532f63",
+    "a3ebf2081",
+    "bbc9f37a0271e88cb8d6b87653c573547deb24f5",
+    "c352209dc7ad4af767f5040d7247f8553c1104d1"
+  ],
+  "reviewed_head_sha": "c352209dc7ad4af767f5040d7247f8553c1104d1",
+  "reviewed_run_id": "r-20261019T125717206720-contour-tree-sparse-build",
+  "scores": {
+    "durability": 16,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 7,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "self_comparison_assertions": [
+    "tests/test_contour_tree_sparse_build.py:118 np.array_equal(node_psi[valid], gathered[valid]) - expected side derived from the test's own input array"
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T09:21:19.753853+00:00",
+  "total": 96
+}

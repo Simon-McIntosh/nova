@@ -1,0 +1,123 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-20T06:28:51.460Z",
+  "dispatched_at": "2026-10-20T06:18:09Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/kernel-compile-barrier.html:63",
+      "id": "reasoning-1",
+      "reason": "\u00a73 tells the worker the expression runs on the read path through `support_read.py`, so it either searches the wrong module for the caller it must not break or concludes the bound is dead code; naming `maintain_rows` and its real caller (and saying the read driver that maintains the row window does not exist in `nova/` yet) changes what the node must do.",
+      "text": "\u00a73 says the production row program `_row_program` (`nova/equilibrium/fixed_points.py:389`, `_source_jets` at `:204`) is \"reached through `nova/equilibrium/support_read.py`\", but `support_read.py` never reaches it: it imports `fixed_points` and calls `build_mesh` (:53), `solve` (:99), `field_from_jets` (:109) and `topology.read_at_stationary_points` (:110), and it receives an already-built `RowCache` as an argument (\"the bounded row window kept by `fixed_points.maintain_rows`\", :94) rather than maintaining one. The only code that evaluates `_row_program` is `fixed_points.maintain_rows` (:411, evaluating it at :476), and a repo-wide search finds its callers only in `tests/test_fixed_points.py:180,186,206` and six prototype measure scripts (`scripts/prototypes/fast_read/measure_fused.py:140`, `diverted_stall/measure.py:173`, `fast_map_production/solver.py:214`, `batched_factor/measure.py:212`, `fixed_points/latency_gate.py:43`, `fused_convergence/measure.py:171`) \u2014 no `nova/` production caller. `_source_jets` and `_row_program` also appear nowhere in `nova/` outside `fixed_points.py`. A \u00a73 worker that follows the named caller into `support_read.py` finds no path to the expression it is told to bound",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/kernel-compile-barrier.html:64",
+      "id": "reasoning-2",
+      "reason": "the clause is either unattainable for the authorised scan form (and a worker that wrote one would report a false failure at the gate) or it silently forces the exact-tangent form, which the decision permits only \"within three times the primal\" and which measured 54.1 s; the section must state which form it requires or restate the tolerance.",
+      "text": "\u00a73 done-when (2) requires \"the built jet rows match the base build to 1e-13 relative at every node\", while \u00a73's mechanism (line 63) bounds the program \"using the \u00a72 tangents\", and the plan's own decision `tangent-representation` (line 80) admits a fixed-capacity scan tangent at only \"1e-9 relative against `jax.jvp` of the base\" (measured 1.04e-10 against a 1e-9 bound). A scan tangent is accurate to roughly 1e-10, a thousand times coarser than the 1e-13 the same section demands, so the mechanism the section names cannot satisfy the measure it asserts",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/kernel-compile-barrier.html:54",
+      "id": "reasoning-3",
+      "reason": "\u00a72's reduction clause is measured against a per-term share that \u00a71 is never told to emit, so a \u00a71 worker can satisfy done-when (3) as written with call-site rows and leave \u00a72 with no denominator to compare its fall against.",
+      "text": "\u00a71 done-when (3) requires \"the source functions ranked by the expanded equations each contributes, with owner file and line\", but the instrument the section cites for attribution, `attribute_graph` (`scripts/prototypes/order2/attribution.py:6`), ranks something else: its ranked outputs are `top_nested_constructs_overlapping` and `top_primitives_disjoint` (construct and XLA primitive names, each capped at `most_common(12)`, :84-85), and its `source_functions` field carries bare `code.co_name` strings on call-site rows with no file and no line (:25, :64). The plan's own prose says only that \"equations are attributed to kernel call sites by `attribute_graph` (its `expanded_equations`, `body_share` and `kernel_call_partition_equations`)\" \u2014 call-site and `value_gradient`-invocation attribution, none of the three named fields a per-source ranking \u2014 while \u00a72 done-when (2) consumes \"the share \u00a71 attributes to the changed terms\"",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/kernel-compile-barrier.html:44",
+      "id": "anchors_resolve-1",
+      "reason": "the two rows cite the same run and now disagree in form, so a reader checking the 282-cell number cannot open its source from the row that carries it; the fix is the same one already applied one line above.",
+      "text": "the \u00a70 row for the 282-cell direct compile cites \"node `coarse-tie-census-memory`\", which resolves to no node in any plan (`grep -rn` over `docs/plans/` and `docs/evidence/` finds the id only in this plan and in the previous review record; the thing that resolves is the crew run `r-20261019T223150157038-coarse-tie-census-memory`, whose manifest carries the 79,042 MB / ~300 MB/s figures this row quotes). The sibling row at line 43 was corrected to cite that crew run by name during the previous review's answer, and this row kept the bare id",
+      "type": "anchors_resolve",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "14634204640768be3968226d36e87b81bb1b93dba8c258e8334b078619349779",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 5,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-20T06:30:27.675648+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-2",
+      "reason": "",
+      "when": "2026-10-20T06:30:39.848064+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-3",
+      "reason": "",
+      "when": "2026-10-20T06:30:43.231889+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "anchors_resolve-1",
+      "reason": "",
+      "when": "2026-10-20T06:30:45.983092+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-20T06:30:45.983092+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-20T06:30:27.675648+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-20T06:30:39.848064+00:00"
+    },
+    "reasoning-3": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-20T06:30:43.231889+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-kernel-compile-barrier.v5.json",
+  "review_run_id": "r-20261020T061747519091-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "5a94395b37ceda71fd2da8982c673f00ab7afb58",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 every file and anchor in the plan resolves (all ten cited source paths exist, and the `:240`, `:410`, `:134`, `:2641`, `:389`, `:204`, `:229`, `:321`, `:202`, `:223` line anchors land on the named symbols), but the \u00a70 row at line 44 cites a node id that is not a node.",
+    "done_when": "pass \u2014 every section's clause is a number a later reader can read off a log or a ledger (compile seconds, executable bytes, peak host memory, relative agreement to a stated base), and the two controls that matter are declared: \u00a71's \"each row asserts its own cache miss from the cache-guard rows\" and \u00a73's re-run of the 500-cell census under `--mem=64G`, the condition that killed it.",
+    "evidence_paths": "pass \u2014 \u00a71 writes into the tracked ledger `docs/research/compile-cost-evidence.html`, and \u00a72's identity sets and \u00a73's compile logs follow the repository's `docs/evidence/fragments/` convention; no section names a session scratchpad or node-local temporary path.",
+    "naming": "pass \u2014 no plan label, stage name, ticket number or version tag reaches a symbol or a filename, and no cited comment carries changelog prose.",
+    "reasoning": "a finding \u2014 \u00a73's mechanism names a caller that does not reach the expression it bounds, and its `1e-13` row-agreement clause is unattainable for the \u00a72 tangent form the same sentence tells it to use.",
+    "single_goal": "a finding \u2014 \u00a71 carries the census measurement and the ranked target list as one deliverable, and the cited instrument emits call-site attribution rather than the per-source ranking the clause (3) measure consumes.",
+    "wiring": "pass \u2014 \u00a72's dependence on \u00a71's ranking, \u00a73's on \u00a71 and \u00a72, and \u00a74's on \u00a72 and \u00a73 are each stated in the section prose (`s2` \"the terms \u00a71 ranks highest\", `s3` \"using the \u00a72 tangents and the packed-moment terms \u00a71 ranks\", `s4` \"With the kernel terms bounded\"), and the plan declares its parent relation to `converged-forward-solve` through `plan-blocks`."
+  },
+  "section_digests": {
+    "_document": "76bd47b632f76205c6b048aef6b7a270a9229bec90839b52aad6d50a9d7014b3",
+    "s0": "7c180b231527b42ff4243dcf9b8749acb230944714e5d4d386ee0712056aed94",
+    "s1": "0c82979ae5bf9001f746a58ccad47c6d867f03a149a3a3293cfd133d7b72094e",
+    "s2": "4b4ae60065134cb7cdc8a4479e5525cf0785449c22833f6d824f728d3a0deaf2",
+    "s3": "5ac6a420de0c3c38dd33dd77f891932097bebcb1f3d0a6b3f942253d82aa547c",
+    "s4": "043c0ccddafb69cbd714f400a3810894eb704687755dfb014b018a750adc8b16"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T06:30:25.655009+00:00"
+}

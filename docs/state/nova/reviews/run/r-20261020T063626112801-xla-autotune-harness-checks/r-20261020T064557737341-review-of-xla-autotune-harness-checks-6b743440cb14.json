@@ -1,0 +1,60 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed manifest names no baseline_suite or after_suite arm, so the added-failure count is unmeasured; this 0 is a placeholder the store's annotate_review_of_run replaces with an explicit null and an unmeasured note at read time.",
+  "call_site_count": 2,
+  "call_sites": [
+    "benchmarks/xla_autotune_cache_arms.py:490",
+    "benchmarks/xla_autotune_cache_arms.py:362"
+  ],
+  "completed_at": "2026-10-20T06:59:26.832Z",
+  "dispatched_at": "2026-10-20T06:46:30Z",
+  "findings": [
+    {
+      "file": ".config/reckon/crew/runs/r-20261020T063626112801-xla-autotune-harness-checks/manifest.md",
+      "line": "16",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest carries no baseline_suite or after_suite arm, so the added-failure count over the reviewed run's own gate logs is unmeasured; the record's added_failure_count 0 is a placeholder that the store's annotate_review_of_run replaces with an explicit null and note."
+    },
+    {
+      "file": ".config/reckon/crew/runs/r-20261020T063626112801-xla-autotune-harness-checks/focused-gate-retry.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the gate log's header names revision 52702d307, the seed the worktree stood on, rather than the landed head 6b743440c, so the named revision does not resolve to a tree holding tests/test_xla_autotune_cache_arms.py; the tree path on line 2 is what ties the log to the change."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit against base 52702d307. One commit, 6b743440c: benchmarks/xla_autotune_cache_arms.py (4 deletions, 1 insertion) drops the OSError fallback; tests/test_xla_autotune_cache_arms.py (54 insertions) adds a receipt helper and four tests; the evidence fragment (16 insertions) records the change and the gate. No other file changed.",
+    "done_when": "The done_when names the focused pytest command over tests/test_xla_autotune_cache_arms.py and requires the three negative_control_failure outcomes plus the style raise. The gate the worker ran is that command; focused-gate-retry.log records '4 passed in 4.52s' and EXIT=0, and the four test functions cover exactly the three control outcomes and the raise.",
+    "goal": "The node goal is 'Pin the four-arm autotune harness's style and negative-control checks with tests'. The landed change does exactly that: benchmarks/xla_autotune_cache_arms.py:399 removes the try/except OSError that swallowed a missing data-ink sheet, and tests/test_xla_autotune_cache_arms.py adds four tests. This is plan section 5 item 6 verbatim (docs/plans/forward-solver-route-integrity.html:422).",
+    "manifest": "Read. status complete; commits 6b743440c; changed_paths the three fenced files; tests the focused command; test_logs focused-gate.log, focused-gate-retry.log, negative-control.log; negative_control_log names negative-control.log alone; a retry_failures entry attributes the monkeypatch AttributeError to scaffolding. The manifest names no baseline_suite/after_suite arms, which is honest for an implement node whose done-when names only the focused gate.",
+    "write_paths": "The declaration is benchmarks/xla_autotune_cache_arms.py, tests/test_xla_autotune_cache_arms.py, docs/evidence/fragments/forward-solver-route-integrity/xla-autotune-harness-checks.html (plus an unused docs/figures tree). The diff touches the first three and no other path."
+  },
+  "justifications": {
+    "durability": "tests/test_xla_autotune_cache_arms.py:43 fails if the OSError fallback is reinstated at benchmarks/xla_autotune_cache_arms.py:395, and :23-35 redden if either autotune-count comparison is inverted, as negative-control.log shows for arm (c).",
+    "evidence": "focused-gate-retry.log records '4 passed in 4.52s' EXIT=0 and negative-control.log records a genuine red with EXIT=1, but both header lines name revision 52702d307 rather than the head 6b743440c.",
+    "fit": "tests/test_xla_autotune_cache_arms.py follows the surrounding style and no added or changed name carries a plan, version or ticket token.",
+    "goal_fidelity": "benchmarks/xla_autotune_cache_arms.py:399 lets the missing data-ink sheet raise, and tests/test_xla_autotune_cache_arms.py:20-53 pin the three negative_control_failure outcomes and the raise the done_when names.",
+    "reuse": "the change adds no definition owning a capability the repository already has; benchmarks/xla_autotune_cache_arms.py:399 loads the same data-ink sheet six sibling benchmarks load, and the tests extend the module's own negative_control_failure.",
+    "scope_discipline": "git diff --stat 52702d307..6b743440c lists only the three declared write paths and no other file."
+  },
+  "node": "review-of-xla-autotune-harness-checks-6b743440cb14",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to pin the four-arm autotune harness's style and negative-control checks with tests; the landed diff removes the silent data-ink fallback at benchmarks/xla_autotune_cache_arms.py:399 and adds tests/test_xla_autotune_cache_arms.py pinning negative_control_failure.\nVERDICT done_when: the done_when names the focused pytest command over tests/test_xla_autotune_cache_arms.py; the manifest records it and focused-gate-retry.log shows '4 passed in 4.52s' then EXIT=0, and negative-control.log shows the arm (c) test failing EXIT=1.\nVERDICT write_paths: the dispatch fenced benchmarks/xla_autotune_cache_arms.py, tests/test_xla_autotune_cache_arms.py and docs/evidence/fragments/forward-solver-route-integrity/xla-autotune-harness-checks.html; git diff --stat over the base..head range names exactly those three files.\nVERDICT manifest: read; it declares status complete, commits ['6b743440cb14968a2d53cd43bdb5fb059c79a0b3'], the focused gate command, focused-gate-retry.log and negative-control.log, and a retry attributed to scaffolding (a malformed monkeypatch target).\nVERDICT diff: read the single commit 6b743440c against base 52702d307482ec0f35e0276e98c21c3a81d1cc91; it deletes the try/except OSError fallback around plt.style.use('data-ink') in figure_from_receipt, adds 54 lines of tests, and adds a 16-line evidence fragment, all inside the declared write paths.\nCALL_SITES: benchmarks/xla_autotune_cache_arms.py:490, benchmarks/xla_autotune_cache_arms.py:362\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: benchmarks/xla_autotune_cache_arms.py:399 now calls plt.style.use/data-ink unguarded so a missing sheet raises, and tests/test_xla_autotune_cache_arms.py:20-53 pin the three negative_control_failure outcomes and the raise.\nSCORE evidence: 17\nJUSTIFICATION evidence: focused-gate-retry.log records '4 passed in 4.52s' EXIT=0 for the named command, and negative-control.log records a genuine red (assert None is not None, EXIT=1); the gate logs name revision 52702d307 (the seed the worktree stood on), not the head 6b743440c, so a reader resolving the named revision finds no test file.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 52702d307..6b743440c lists only benchmarks/xla_autotune_cache_arms.py, tests/test_xla_autotune_cache_arms.py and docs/evidence/fragments/forward-solver-route-integrity/xla-autotune-harness-checks.html, the three declared write paths.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_xla_autotune_cache_arms.py:43 fails if the OSError fallback is reinstated (the monkeypatch at :37 raises OSError, which the base try/except swallowed, so pytest.raises would not fire), and :23-35 redden if either autotune-count comparison is inverted, as negative-control.log demonstrates for arm (c).\nSCORE fit: 19\nJUSTIFICATION fit: the module docstring and the `import benchmarks.xla_autotune_cache_arms as harness` import follow the test style of the tree, and no symbol, filename or comment carries a plan, version or ticket token.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no definition for a capability the repository owns; it removes a local fallback so the benchmark uses the one data-ink style sheet that benchmarks/xla_autotune_cache_arms.py:399 and six sibling benchmarks already load, and the tests extend the module's own negative_control_failure.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T063626112801-xla-autotune-harness-checks/manifest.md:16 follow-on: the reviewed manifest carries no baseline_suite or after_suite arm, so the added-failure count is unmeasured; the record's added_failure_count 0 is a placeholder that the store's own annotate_review_of_run replaces with an explicit null and note.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T063626112801-xla-autotune-harness-checks/focused-gate-retry.log:1 follow-on: the gate log's revision header names the seed 52702d307 rather than the landed head 6b743440c, so the recorded revision does not resolve to a tree holding tests/test_xla_autotune_cache_arms.py; the tree path on line 2 is what ties the log to the change.\n",
+  "review_run_id": "r-20261020T064557737341-review-of-xla-autotune-harness-checks-6b743440cb14",
+  "reviewed_base_sha": "52702d307482ec0f35e0276e98c21c3a81d1cc91",
+  "reviewed_head_sha": "6b743440cb14968a2d53cd43bdb5fb059c79a0b3",
+  "reviewed_run_id": "r-20261020T063626112801-xla-autotune-harness-checks",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T07:03:36.089459+00:00",
+  "total": 113
+}

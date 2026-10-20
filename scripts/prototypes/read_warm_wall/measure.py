@@ -5,11 +5,13 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import os
 from pathlib import Path
 import resource
 import subprocess
+import sys
 from time import perf_counter
 
 from nova.jax.config import configure_dtypes
@@ -26,7 +28,32 @@ from tests.equilibrium import test_topology_read as oracle_fixture
 
 assert jax.config.jax_enable_x64 is True
 
-ROOT = Path(os.environ["NOVA_WORKTREE"]).resolve()
+
+def _root() -> Path:
+    """Resolve the tree under measurement from the environment, at call time."""
+
+    return Path(os.environ["NOVA_WORKTREE"]).resolve()
+
+
+_INSTALLED_BUILDER = str(Path(contour_tree.__file__).resolve())
+
+
+def _install_base_module(path: str) -> None:
+    """Point every builder call at a module loaded from ``path``.
+
+    ``topology.read`` rebinds ``build_contour_tree`` from the module at call
+    time and the standalone contour stage reads it as a module attribute, so
+    rebinding ``contour_tree.build_contour_tree`` moves both arms of the
+    comparison onto the other implementation.
+    """
+
+    global _INSTALLED_BUILDER
+    spec = importlib.util.spec_from_file_location("contour_tree_base", path)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules["contour_tree_base"] = module
+    spec.loader.exec_module(module)
+    contour_tree.build_contour_tree = module.build_contour_tree
+    _INSTALLED_BUILDER = str(Path(path).resolve())
 
 
 def _timed_stage(function, *args):
@@ -57,7 +84,7 @@ def _contour_stage(centre_flux, geometry, sigma):
     )
 
 
-def measure(kind: str, cells: int) -> dict:
+def measure(kind: str, cells: int, label: str) -> dict:
     _oracle, field, wall, _axis, saddle = oracle_fixture._analytic_inputs(kind)
     geometry = oracle_fixture._realised_hex_geometry(wall, cells)
     policy = TopologyPolicy(
@@ -126,10 +153,12 @@ def measure(kind: str, cells: int) -> dict:
     }
     return {
         "revision": subprocess.check_output(
-            ["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True
+            ["git", "-C", str(_root()), "rev-parse", "HEAD"], text=True
         ).strip(),
         "cwd": str(Path.cwd().resolve()),
         "module": str(Path(topology.__file__).resolve()),
+        "builder_module": _INSTALLED_BUILDER,
+        "label": label,
         "job_id": os.environ.get("SLURM_JOB_ID"),
         "device": str(jax.devices()[0]),
         "case": kind,
@@ -163,8 +192,12 @@ def main() -> None:
     parser.add_argument("--kind", choices=("limited", "diverted"), required=True)
     parser.add_argument("--cells", type=int, required=True)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--label", default="after")
+    parser.add_argument("--base-module", default=None)
     args = parser.parse_args()
-    row = measure(args.kind, args.cells)
+    if args.base_module is not None:
+        _install_base_module(args.base_module)
+    row = measure(args.kind, args.cells, args.label)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(row, indent=2, sort_keys=True) + "\n")
     print("PROFILE_ROW " + json.dumps(row, sort_keys=True), flush=True)

@@ -56,6 +56,16 @@ so the narrow integer is exact rather than an approximation.
 """
 
 
+SPARSE_INDEXED_BUILD: bool = True
+"""The build assembles its sweeps from sparse indexed buffers.
+
+True marks that ``build_contour_tree`` resolves carrier adjacency, split-node
+insertion and the node-to-vertex inverse map by sorting and scatter rather than
+by repeated full-table scans and a dense node-by-vertex equality matrix.  It is
+the marker a test asserts to confirm the sparse path is the one in use.
+"""
+
+
 class FluxCurrentSignError(ValueError):
     """The current sign and raw flux ordering disagree with declared COCOS."""
 
@@ -116,22 +126,29 @@ def _append_edges(
     """Append distinct undirected arcs in bounded slots without truncation."""
 
     capacity = edges.shape[0]
-
-    def append(index, state):
-        table, valid, overflow_bit = state
-        source = sources[index]
-        destination = target if target.ndim == 0 else target[index]
-        requested = source_valid[index] & (source != destination)
-        arc = jnp.sort(jnp.stack((source, destination)))
-        duplicate = jnp.any(valid & jnp.all(table == arc, axis=1))
-        slot = jnp.argmin(jnp.where(valid, capacity, jnp.arange(capacity)))
-        has_slot = jnp.any(~valid)
-        write = requested & ~duplicate & has_slot
-        table = table.at[slot].set(jnp.where(write, arc, table[slot]))
-        valid = valid.at[slot].set(valid[slot] | write)
-        return table, valid, overflow_bit | (requested & ~duplicate & ~has_slot)
-
-    return jax.lax.fori_loop(0, sources.size, append, (edges, edge_valid, overflow))
+    slot_count = sources.size
+    destination = jnp.broadcast_to(target, (slot_count,))
+    arc = jnp.sort(
+        jnp.stack((sources.astype(jnp.int32), destination.astype(jnp.int32)), axis=1),
+        axis=1,
+    )
+    requested = source_valid & (sources != destination)
+    duplicate = jnp.any(
+        edge_valid[:, None] & jnp.all(edges[:, None, :] == arc[None, :, :], axis=2),
+        axis=0,
+    )
+    eligible = requested & ~duplicate
+    free_slots = jnp.nonzero(~edge_valid, size=capacity, fill_value=0)[0]
+    free_count = jnp.sum(~edge_valid)
+    rank = jnp.cumsum(eligible.astype(jnp.int32)) - 1
+    fits = eligible & (rank < free_count)
+    slot = jnp.where(fits, free_slots[jnp.minimum(rank, capacity - 1)], capacity)
+    table = jnp.concatenate((edges, jnp.zeros((1, 2), dtype=edges.dtype)))
+    valid = jnp.concatenate((edge_valid, jnp.zeros((1,), dtype=bool)))
+    table = table.at[slot].set(jnp.where(fits[:, None], arc, table[slot]))
+    valid = valid.at[slot].set(fits | valid[slot])
+    overflow = overflow | jnp.any(eligible & ~fits)
+    return table[:capacity], valid[:capacity], overflow
 
 
 def _insert_split_nodes(
@@ -153,14 +170,19 @@ def _insert_split_nodes(
 
     capacity = edges.shape[0]
     edge_indices = jnp.arange(capacity, dtype=jnp.int32)
+    split_vertices = jnp.nonzero(split_only, size=split_only.size, fill_value=0)[
+        0
+    ].astype(jnp.int32)
+    split_count = jnp.sum(split_only)
 
     def above(left: jax.Array, right: jax.Array) -> jax.Array:
         return (values[left] > values[right]) | (
             (values[left] == values[right]) & (left < right)
         )
 
-    def insert(vertex: jax.Array, state):
+    def insert(index: jax.Array, state):
         nodes, table, valid, overflow_bit = state
+        vertex = split_vertices[index]
         source = table[:, 0]
         target = table[:, 1]
         crosses = valid & (above(source, vertex) != above(target, vertex))
@@ -170,8 +192,7 @@ def _insert_split_nodes(
         )
         has_arc = jnp.any(crosses)
         has_slot = jnp.any(~valid)
-        requested = split_only[vertex]
-        write = requested & has_arc & has_slot
+        write = has_arc & has_slot
         old = table[arc_slot]
         table = table.at[arc_slot].set(
             jnp.where(write, jnp.stack((old[0], vertex)), old)
@@ -181,10 +202,10 @@ def _insert_split_nodes(
         )
         valid = valid.at[free_slot].set(valid[free_slot] | write)
         nodes = nodes.at[vertex].set(nodes[vertex] | write)
-        return nodes, table, valid, overflow_bit | (requested & ~write)
+        return nodes, table, valid, overflow_bit | ~write
 
     return jax.lax.fori_loop(
-        0, values.size, insert, (node_valid, edges, edge_valid, overflow)
+        0, split_count, insert, (node_valid, edges, edge_valid, overflow)
     )
 
 
@@ -201,42 +222,38 @@ def _carrier_adjacency(
     edge_count = edges.shape[0]
     neighbour_capacity = 16 if edge_count > 2 * vertex_count else edge_count
     carrier_edges = edges.astype(CARRIER_INDEX_DTYPE)
-    neighbours = jnp.zeros(
-        (vertex_count, neighbour_capacity), dtype=CARRIER_INDEX_DTYPE
+    sources = jnp.concatenate((carrier_edges[:, 0], carrier_edges[:, 1]))
+    targets = jnp.concatenate((carrier_edges[:, 1], carrier_edges[:, 0]))
+    keep = jnp.concatenate((edge_valid, edge_valid)).astype(bool)
+    edge_index = jnp.concatenate(
+        (
+            jnp.arange(edge_count, dtype=CARRIER_INDEX_DTYPE),
+            jnp.arange(edge_count, dtype=CARRIER_INDEX_DTYPE),
+        )
     )
-    neighbour_valid = jnp.zeros((vertex_count, neighbour_capacity), dtype=bool)
-    counts = jnp.zeros(vertex_count, dtype=CARRIER_INDEX_DTYPE)
-    overflow = jnp.asarray(False)
-
-    def append(edge_index: int, state):
-        table, valid, counts, overflow = state
-        left, right = carrier_edges[edge_index]
-        write = edge_valid[edge_index]
-        left_slot = counts[left]
-        right_slot = counts[right]
-        left_fits = left_slot < neighbour_capacity
-        right_fits = right_slot < neighbour_capacity
-        left_slot = jnp.minimum(left_slot, neighbour_capacity - 1)
-        right_slot = jnp.minimum(right_slot, neighbour_capacity - 1)
-        table = table.at[left, left_slot].set(
-            jnp.where(write & left_fits, right, table[left, left_slot])
-        )
-        table = table.at[right, right_slot].set(
-            jnp.where(write & right_fits, left, table[right, right_slot])
-        )
-        valid = valid.at[left, left_slot].set(
-            valid[left, left_slot] | (write & left_fits)
-        )
-        valid = valid.at[right, right_slot].set(
-            valid[right, right_slot] | (write & right_fits)
-        )
-        counts = counts.at[left].add(write)
-        counts = counts.at[right].add(write)
-        return table, valid, counts, overflow | (write & ~(left_fits & right_fits))
-
-    neighbours, neighbour_valid, _, overflow = jax.lax.fori_loop(
-        0, edge_count, append, (neighbours, neighbour_valid, counts, overflow)
+    row_key = jnp.where(keep, sources, vertex_count)
+    order = jnp.lexsort((edge_index, row_key))
+    key = row_key[order]
+    sources = sources[order]
+    targets = targets[order]
+    keep = keep[order]
+    degree = jnp.bincount(key, length=vertex_count + 1).astype(CARRIER_INDEX_DTYPE)
+    starts = jnp.concatenate(
+        (jnp.zeros((1,), dtype=CARRIER_INDEX_DTYPE), jnp.cumsum(degree)[:-1])
     )
+    position = jnp.arange(sources.size, dtype=CARRIER_INDEX_DTYPE) - starts[key]
+    fits = keep & (position < neighbour_capacity)
+    row = jnp.where(fits, sources, vertex_count)
+    column = jnp.minimum(position, neighbour_capacity - 1)
+    padded = jnp.zeros(
+        (vertex_count + 1, neighbour_capacity), dtype=CARRIER_INDEX_DTYPE
+    )
+    padded = padded.at[row, column].set(jnp.where(fits, targets, 0))
+    neighbours = padded[:vertex_count]
+    padded_valid = jnp.zeros((vertex_count + 1, neighbour_capacity), dtype=bool)
+    padded_valid = padded_valid.at[row, column].set(fits)
+    neighbour_valid = padded_valid[:vertex_count]
+    overflow = jnp.any(keep & (position >= neighbour_capacity))
     return neighbours, neighbour_valid, overflow
 
 
@@ -478,15 +495,17 @@ def build_contour_tree(
     edge_count = jnp.sum(merged_valid, dtype=jnp.int32)
     edge_source = jnp.nonzero(merged_valid, size=edge_capacity, fill_value=0)[0]
     compact_edge_valid = jnp.arange(edge_capacity) < edge_count
-    carrier_vertex = jnp.arange(vertex_count, dtype=jnp.int32)
-    node_matches = (
-        node_source[:, None] == carrier_vertex[None, :]
-    ) & compact_node_valid[:, None]
-    vertex_node = jnp.argmax(node_matches, axis=0).astype(jnp.int32)
-    compact_edges = vertex_node[merged_edges[edge_source]]
-    edge_nodes_valid = jnp.all(
-        jnp.any(node_matches, axis=0)[merged_edges[edge_source]], axis=1
+    vertex_node = jnp.zeros(vertex_count, dtype=jnp.int32)
+    write_source = jnp.where(compact_node_valid, node_source, 0)
+    vertex_node = vertex_node.at[write_source[::-1]].set(
+        jnp.where(compact_node_valid, slots, 0)[::-1]
     )
+    vertex_has_node = jnp.zeros(vertex_count, dtype=bool)
+    vertex_has_node = vertex_has_node.at[write_source[::-1]].set(
+        compact_node_valid[::-1]
+    )
+    compact_edges = vertex_node[merged_edges[edge_source]]
+    edge_nodes_valid = jnp.all(vertex_has_node[merged_edges[edge_source]], axis=1)
     overflow = (
         overflow
         | adjacency_overflow

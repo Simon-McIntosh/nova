@@ -1,0 +1,649 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "7430c618f657a0a169c9fa04135654514e2298c6",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T215327143648-read-first-event-semantics/brief.txt",
+    "sha256": "a307b35298dca2e4757bbb632c539dcfd90517f822e7523a048172e3eac92d97"
+  },
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 52744704,
+      "cached_input_tokens_cumulative": 52744704,
+      "input_tokens": 53050556,
+      "input_tokens_cumulative": 53050556,
+      "output_tokens": 88629,
+      "output_tokens_cumulative": 88629,
+      "reasoning_output_tokens": 36873,
+      "reasoning_output_tokens_cumulative": 36873
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-10-20T23:19:17Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-20T21:54:07Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/equilibrium/test_escape_level_certificates.py -q",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T215327143648-read-first-event-semantics/after-escape-level-expanded.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.2857142857142857,
+    "plan": "converged-forward-solve",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 10.946011981249887,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-10-21T11:50:19Z, which is after this node's 3600s horizon ending 2026-10-20T22:53:35.784478+00:00",
+    "horizon_ends_at": "2026-10-20T22:53:35.784478+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-20T21:53:34Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-21T11:50:19Z",
+    "resets_at": "2026-10-27T06:32:42Z",
+    "seconds_until_reset": 549547,
+    "state": "quiet",
+    "utilisation_pct": 100.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-20T21:53:34Z",
+    "read_at": "2026-10-20T21:53:35Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 100.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-20T23:19:17Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-10-20T23:19:17Z",
+        "resets_at": 1793082762,
+        "used_percent": 100.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T215327143648-read-first-event-semantics/manifest.md",
+  "member": "disposable-r-20261020T215327143648-read-first-event-semantics",
+  "model_key": "sol",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/equilibrium/test_escape_level_certificates.py::test_first_wall_escape_stays_on_the_axis_component"
+    ],
+    "baseline_failure_ids": [
+      "tests/equilibrium/test_escape_level_certificates.py::test_first_wall_escape_stays_on_the_axis_component"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/equilibrium/test_escape_level_certificates.py::test_first_wall_escape_stays_on_the_axis_component"
+    ],
+    "declaration": "Revert only the kernel.py change; the six field tests and the escape-level tests must fail on their own assertions, not skip.",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T215327143648-read-first-event-semantics/wall-escape-negative.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T215327143648-read-first-event-semantics/wall-escape-negative.log",
+    "test_paths": [
+      "scripts/prototypes/fast_map_production/test_axis_ranking.py",
+      "scripts/prototypes/fast_map_production/test_carrier_axis.py",
+      "tests/equilibrium/test_escape_level_certificates.py",
+      "tests/test_fixed_points.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": "its commits ride the read-first-separator chain from integration base 7430c618f and land on main with the chain's integration node",
+  "node": "read-first-event-semantics",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.cache/nova-s21-briefs/oct20/read-first-event-semantics.txt",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T215327143648-read-first-event-semantics/brief.txt",
+    "brief_sha256": "a307b35298dca2e4757bbb632c539dcfd90517f822e7523a048172e3eac92d97",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "critical",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 912,
+          "cached_input_tokens": 892677,
+          "input_tokens": 893591,
+          "output_tokens": 1881,
+          "reasoning_output_tokens": 141,
+          "total_tokens": 895472,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "40d3a43c-d1f4-4016-9584-4e663183c12c",
+      "session_id": "s21-nova"
+    },
+    "done_when": "The six axis-ranking and carrier-axis field tests pass without an assertion change and the non-Morse 0.020999 Wb boundary jump is gone with every pinned switch classified as a crossing or fold, the kernel tracing, certified-limited coverage and path-admission tests pass with the latter exercising the tree authority, and the tie-pair and escape-level certificate tests still pass, all by delta against the base in fresh CPU processes",
+    "estimated_hours": null,
+    "goal": "Read semantics of the first-separator read: a first-event consumer that yields the axis component's event on every field and refuses at an unresolved saddle",
+    "id": "read-first-event-semantics",
+    "images": [],
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-20T21:53:34Z",
+      "read_at": "2026-10-20T21:53:35Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 100.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T215327143648-read-first-event-semantics/manifest.md",
+    "negative_control": "Revert only the kernel.py change; the six field tests and the escape-level tests must fail on their own assertions, not skip.",
+    "orchestrator_assessment": {
+      "reasoning": "deep",
+      "risk": "critical",
+      "verification": "strict"
+    },
+    "plan": "converged-forward-solve",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "scripts/prototypes/fast_map_production/kernel.py",
+      "scripts/prototypes/fast_map_production/test_axis_ranking.py",
+      "scripts/prototypes/fast_map_production/test_carrier_axis.py",
+      "tests/test_fixed_points.py",
+      "docs/evidence/fragments/converged-forward-solve/read-first-event-semantics.html",
+      "docs/figures/converged-forward-solve/read-first-event-semantics",
+      "nova/equilibrium/topology.py",
+      "tests/equilibrium/test_escape_level_certificates.py"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 10.943823781778184,
+      "derived": 0.10051331435284395,
+      "drain_hours": 168.0,
+      "effective_limit": 0.10051331435284395,
+      "elapsed_fraction": 0.09137574032076723,
+      "elapsed_hours": 15.351124373888894,
+      "group": "codex-sub",
+      "lift": {
+        "ends_at": "2026-10-27T06:32:42+00:00",
+        "ends_on": "reset",
+        "form": "credits",
+        "group": "codex-sub",
+        "id": "codex-sub-1792529492-26f087",
+        "pace_multiple": null,
+        "remaining_seconds": 549535.952254,
+        "scope": "global"
+      },
+      "lift_hold": {
+        "held": false,
+        "kind": "credits"
+      },
+      "limited_by": "allowance",
+      "observed_at": "2026-10-20T21:53:46+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.0,
+      "remaining_windows": null,
+      "resets_at": "2026-10-27T06:32:42Z",
+      "state": "observed",
+      "utilisation": 1.0,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 1.0,
+      "decided_by": "window",
+      "margin": -0.26249999999999996,
+      "name": "read-first-event-semantics",
+      "score": 0.7375,
+      "state": "observed",
+      "verdict": "hold",
+      "window_fill": 1.0
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.047746,
+        "observed_at": "2026-10-20T21:53:46+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-27T06:32:42Z",
+        "state": "observed",
+        "utilisation": 1.0,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": "codex-sub-1792529492-26f087",
+    "member": "codex",
+    "node": "read-first-event-semantics",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-20T21:53:46.047746+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "refuse",
+    "answering_model": null,
+    "backend": null,
+    "comment": "Lead directive 2026-10-20: the read-repair chain runs on codex under the 10,000-credit lift codex-sub-1792529492-26f087; second chained node, deep read semantics, one codex worker at a time.",
+    "confidence": null,
+    "decision_source": "refused",
+    "effort": null,
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 109.113756,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn_multiple": 10.948277552255194,
+        "congestion": {
+          "lift": {
+            "ends_at": "2026-10-27T06:32:42+00:00",
+            "ends_on": "reset",
+            "form": "credits",
+            "group": "codex-sub",
+            "id": "codex-sub-1792529492-26f087",
+            "pace_multiple": null,
+            "remaining_seconds": 549558.433725,
+            "scope": "global"
+          }
+        },
+        "context": null,
+        "days_to_reset": 6.360591495879629,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 1,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": 0.10047242543402778,
+        "prior_outcomes": null,
+        "reasons": [
+          "budget-ceiling: 100% at or above 100%"
+        ],
+        "resets_at": "2026-10-27T06:32:42+00:00",
+        "stale": false,
+        "suits": "The lane's frontier model, strongest and slowest, about five times sol's token price. Suits deep or open-ended design, elevated or critical risk, and nodes that already failed on another model.",
+        "utilisation_pct": 100.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 109.113756,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn_multiple": 10.948277552255194,
+        "congestion": {
+          "lift": {
+            "ends_at": "2026-10-27T06:32:42+00:00",
+            "ends_on": "reset",
+            "form": "credits",
+            "group": "codex-sub",
+            "id": "codex-sub-1792529492-26f087",
+            "pace_multiple": null,
+            "remaining_seconds": 549558.433725,
+            "scope": "global"
+          }
+        },
+        "context": null,
+        "days_to_reset": 6.360591495879629,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 0,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": 0.10047242543402778,
+        "prior_outcomes": null,
+        "reasons": [
+          "budget-ceiling: 100% at or above 100%"
+        ],
+        "resets_at": "2026-10-27T06:32:42+00:00",
+        "stale": false,
+        "suits": "The lane's fast, affordable model, about a twentieth of sol's token price. Suits well-defined, less difficult work: reviews, exact-spec implementation, tests and documentation.",
+        "utilisation_pct": 100.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 109.113756,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn_multiple": 10.948277552255194,
+        "congestion": {
+          "lift": {
+            "ends_at": "2026-10-27T06:32:42+00:00",
+            "ends_on": "reset",
+            "form": "credits",
+            "group": "codex-sub",
+            "id": "codex-sub-1792529492-26f087",
+            "pace_multiple": null,
+            "remaining_seconds": 549558.433725,
+            "scope": "global"
+          }
+        },
+        "context": null,
+        "days_to_reset": 6.360591495879629,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "outcomes": {
+          "failed": 3,
+          "not-run": 0,
+          "passed": 15,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 18,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": 0.10047242543402778,
+        "prior_outcomes": null,
+        "reasons": [
+          "budget-ceiling: 100% at or above 100%"
+        ],
+        "resets_at": "2026-10-27T06:32:42+00:00",
+        "stale": false,
+        "suits": "The lane default, a previous-generation general model. Suits guided implementation, tests and full reviews at standard or deep reasoning and moderate risk. About twenty times luna's token price and a fifth of astra's.",
+        "utilisation_pct": 100.0,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": "no-eligible-candidates; default-backend-ineligible",
+    "family": null,
+    "jev_latency_ms": 0.0,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 3260.186,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "questions": {},
+    "rendered_state": "{\"node\":{\"role\":\"implement\",\"spec_level\":\"guided\",\"capability\":{\"version\":\"1.0\",\"class\":\"orchestrator\",\"requirements\":{\"reasoning\":\"deep\",\"verification\":\"strict\",\"risk\":\"critical\"}},\"orchestrator_assessment\":{\"reasoning\":\"deep\",\"risk\":\"critical\",\"verification\":\"strict\"},\"goal\":\"Read semantics of the first-separator read: a first-event consumer that yields the axis component's event on every field and refuses at an unresolved saddle\",\"done_when\":\"The six axis-ranking and carrier-axis field tests pass without an assertion change and the non-Morse 0.020999 Wb boundary jump is gone with every pinned switch classified as a crossing or fold, the kernel tracing, certified-limited coverage and path-admission tests pass with the latter exercising the tree authority, and the tie-pair and escape-level certificate tests still pass, all by delta against the base in fresh CPU processes\",\"urgency\":{\"due\":null,\"seconds_to_due\":null,\"reason\":null},\"estimated_context\":63156,\"estimated_hours\":10.0,\"estimated_hours_source\":\"section\",\"attempts\":0,\"write_path_count\":5,\"negative_control_declared\":true,\"serving_lanes\":[],\"serving_lane_count\":0,\"hold_waits_for\":null},\"orchestrator_comment\":\"Lead directive 2026-10-20: the read-repair chain runs on codex under the 10,000-credit lift codex-sub-1792529492-26f087; second chained node, deep read semantics, one codex worker at a time.\",\"candidates\":{},\"return_times\":{},\"lanes\":{},\"local_lane\":{\"admission\":\"unavailable\",\"expected_wait_s\":731,\"expected_wait_profile_age_s\":1608.934444,\"running\":9,\"waiting\":0,\"queue_position\":1,\"headroom\":1,\"worker_slots\":2,\"tokens_per_second\":47.577,\"read_at\":\"2026-10-20T21:53:27.031376+00:00\"}}",
+    "rendered_token_estimate": 418,
+    "stage_ms": {
+      "budget-snapshot": 225.196,
+      "context-estimate": 22.896,
+      "records": 356.164,
+      "verdict-inputs": 205.937
+    },
+    "template_digest": "cb9d48e7fca5878b52cc4affdedfdee9f5e04b929f720979b14d0d78b8456ced",
+    "usage": {}
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.2857142857142857,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "f8304435ae4abc0465a5102b7e6a0d44d0ff41e8",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "7430c618f657a0a169c9fa04135654514e2298c6",
+    "reviewed_head_sha": "f8304435ae4abc0465a5102b7e6a0d44d0ff41e8",
+    "scores": {
+      "durability": 17,
+      "evidence": 16,
+      "fit": 15,
+      "goal_fidelity": 18,
+      "reuse": 19,
+      "scope_discipline": 18
+    },
+    "status": "parsed",
+    "total": 103
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261020T215327143648-read-first-event-semantics",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a15b4e-e262-7332-b0c3-cbc5e64dcd32",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 52744704,
+    "cumulative_input_tokens": 105795260,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 125502
+  },
+  "time_budget": "60m",
+  "tool_steps": 137.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 5110,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-20T23:19:22Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-20T22:36:09Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261020T215327143648-read-first-event-semantics",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 813,
+    "worker_pid": 780511
+  },
+  "worker_seconds": 5094,
+  "worker_seconds_source": "rollout_receipts",
+  "worktree_retention": null
+}

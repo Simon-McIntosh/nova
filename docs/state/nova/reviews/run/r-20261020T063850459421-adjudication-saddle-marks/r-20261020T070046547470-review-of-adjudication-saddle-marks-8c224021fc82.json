@@ -1,0 +1,76 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [
+    {
+      "failure_condition": "Decorrelated: the expected Counter is a literal from the source trace corpus (6 stationary saddle, 8 wall contact), and the left side is recomputed from analyse.build_cases() reading the real adapter receipt and trace files. Removing the gradient term from the classifier, or classifying a contact as a saddle, reddens it.",
+      "independent": "independent",
+      "lines": "scripts/prototypes/efit_axis_adjudication/test_boundary_marks.py:109-110"
+    },
+    {
+      "failure_condition": "The test passes a class-'wall contact' point to the saddle painter and requires ValueError; deleting the guard at plot.py:189 makes it fail with DID NOT RAISE. The source run demonstrated exactly that: negative-suite.log records 1 failed (this test) and 9 passed with EXIT=1 on the mutated painter, while the unmutated head passes it.",
+      "independent": "independent",
+      "lines": "scripts/prototypes/efit_axis_adjudication/test_boundary_marks.py:65-73"
+    },
+    {
+      "failure_condition": "The gauge-transformed field (psi -> -3*psi + 17) is an input the code under test never sees on the left side; the assertion compares the transformed classification against the untransformed one. A classifier that used raw |grad psi| without the flux span, or that used a signed gradient, reddens it.",
+      "independent": "independent",
+      "lines": "scripts/prototypes/efit_axis_adjudication/test_boundary_marks.py:54-62"
+    },
+    {
+      "failure_condition": "The parametrize table supplies class -> (marker, label) and the assertion compares the code's returned label, the drawn marker and the legend handle against those literals. Changing a marker or a label wording in plot.py reddens the corresponding row; it is a contract check on the painter's mapping, not a comparison of a value against itself.",
+      "independent": "independent",
+      "lines": "scripts/prototypes/efit_axis_adjudication/test_boundary_marks.py:84-93"
+    },
+    {
+      "failure_condition": "Weakly independent: the right side recomputes relative_gradient from the same call's returned grad_norm, length_scale and flux_span, so it pins the returned record's internal consistency rather than the value against an outside source. It does redden if the normalisation formula changes, but it cannot catch a consistently wrong normalisation. Worth naming; it carries no durability weight here because the classifier's real-data assertion above does.",
+      "independent": "self-consistent only",
+      "lines": "scripts/prototypes/efit_axis_adjudication/test_boundary_marks.py:41-43"
+    },
+    {
+      "failure_condition": "A stationary extremum (psi = r^2 + z^2) must not be typed a saddle. Dropping the eigenvalue-sign clause at analyse.py:157 reddens it.",
+      "independent": "independent",
+      "lines": "scripts/prototypes/efit_axis_adjudication/test_boundary_marks.py:46-51"
+    }
+  ],
+  "call_sites": [
+    "scripts/prototypes/efit_axis_adjudication/plot.py:546 -> plot.py:382 (_draw_boundary_point reached from draw_panel in main())",
+    "scripts/prototypes/efit_axis_adjudication/analyse.py:410 (classify_boundary_marks reached from main())",
+    "scripts/prototypes/efit_axis_adjudication/refresh.py:16 (imports plot helpers, not the changed painter)"
+  ],
+  "completed_at": "2026-10-20T07:17:52.516Z",
+  "dispatched_at": "2026-10-20T07:01:12Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/efit_axis_adjudication/analyse.py",
+      "line": "140-152",
+      "severity": "follow-on",
+      "text": "follow-on: classify_boundary_point inlines a point-to-nearest-segment distance (segment vectors, projected fraction clipped to [0,1], per-segment norm, argmin) that the repository already owns. The owner is nova/equilibrium/boundary_comparison.py:81 _point_to_segment_distances, a chunked vectorised form of the same projection over a polyline; scripts/dual_basin_audit/audit_diverted_separatrix.py:112 _point_segment_distance is a second existing copy. The addition duplicates rather than extends or wraps the owner. This is not repairable inside this node: the brief fences it out of nova/, and the prototype directory's own stated contract (census.py:1-5, 'shares no code with either nova field-swap adapter') makes independent re-derivation deliberate for these cross-check scripts. Recorded so a future consolidation pass can decide between extending the owner and extracting a prototype-local helper instead of inlining a fourth copy."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "plot.py:382 (_draw_boundary_point) is reached at runtime from draw_panel at plot.py:256 via plot.py:546 in main(); classify_boundary_marks at analyse.py:184 is reached from main() at analyse.py:410. refresh.py:16 imports _typed_wall_units and _wall_loops_by_role from plot but not the changed painter. Nothing outside the prototype directory imports these modules, so the changed code has no production call site in the package.",
+    "diff": "Read commit by commit. 147f1ac8 ('fix: classify boundary marks before painting saddles') changes analyse.py (classify_boundary_point, classify_boundary_marks, a --receipt path in main and a direct --out write with allow_nan=False), plot.py (_marked_saddle now takes the point and refuses a non-stationary class; _draw_boundary_point; draw_panel checks the receipt coordinate against the adapter coordinate; three legend entries) and adds test_boundary_marks.py. 8c224021 ('docs: record field checks for boundary markers') changes only docs -- the evidence fragment, the research page and the nine regenerated SVGs. No source file differs between the two commits, so the code the gate ran at 147f1ac8 is the code at the reviewed head. All 14 changed paths are inside the declared scope.",
+    "done_when": "Three clauses. (1) Every mark classified from the field with gradient against the flux scale, Hessian eigenvalues and wall distance, as a table of slice, side, position and the measured numbers: the fragment's table at docs/evidence/fragments/converged-forward-solve/adjudication-saddle-marks.html:7-22 carries all 14 rows with G, eigenvalues and wall distance. (2) plot.py draws each class with a truthful legend, classification lives in the receipt, and a test fails when a wall contact reaches the saddle painter: plot.py:187-215 and plot.py:441-472, analyse.py:184-192, test_boundary_marks.py:65-73 -- met. (3) The nine panels regenerated, rendered and inspected, and each contact-versus-diverted panel listed with the contact level, the imas-efit X-point level and the census saddles: the fragment's second table at :25-29 carries all three such records; I reproduced the count independently from the receipt and got exactly 3 records with class 'wall contact' and efit label 'diverted' (mastu-magnetics-integration-s1-13-14-B, iter-fullpulse-s5-14-15-identity-B, iter-dina105027-s1-4-5-revert-B), and 14 marks = 6 stationary saddle + 8 wall contact, matching the fragment.",
+    "goal": "The source brief.txt:1-9 asks the node to check every 'adapter A saddle' mark in the nine EFIT axis-adjudication panels against the field and stop the panels calling a wall contact a saddle. The landed change measures each mark on its own trace spline and paints it by class, so the goal is met: analyse.py:121-192 adds the measurement, plot.py:187-215 dispatches on the class, and the label 'adapter A saddle' is gone from plot.py.",
+    "manifest": "The source manifest.md records status complete, commits 147f1ac8 and 8c224021, base 52702d30, a 20-test head arm plus a mutation arm, and a landing line. Its baseline_suite records 10 failures at base and after_suite 0 at 147f1ac8; I read both logs directly and both carry a header naming the revision and tree, a JSON summary line and a bare EXIT= line (base EXIT=1, head EXIT=0).",
+    "write_paths": "The source prompt fences scripts/prototypes/efit_axis_adjudication/ (analyse.py, plot.py, the new test), docs/research/efit-axis-adjudication.html, docs/evidence/fragments/converged-forward-solve/adjudication-saddle-marks.html, docs/figures/converged-forward-solve/efit-axis-adjudication/ plus logs and exports under the run directory. git diff --stat 52702d30..8c224021 names exactly 14 files: 3 under scripts/prototypes/efit_axis_adjudication/, 1 evidence fragment, 1 research page and 9 SVGs under the declared figure directory. No file outside the declaration is touched, and no path under nova/ is touched."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261020T070046547470-review-of-adjudication-saddle-marks-8c224021fc82",
+  "reviewed_base_sha": "52702d307482ec0f35e0276e98c21c3a81d1cc91",
+  "reviewed_head_sha": "8c224021fc825a568c31236855de0ed081a3c034",
+  "reviewed_run_id": "r-20261020T063850459421-adjudication-saddle-marks",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T07:17:54.942712+00:00",
+  "total": 98
+}

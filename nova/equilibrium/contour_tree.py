@@ -21,6 +21,9 @@ The receipt's node and edge capacities are derived from the carrier by
 capacity is the carrier's own vertex or edge slot count, so a wide carrier is
 never refused by a bound chosen for another one, and a capacity a caller
 declares smaller than the carrier needs sets the receipt's ``overflow`` refusal.
+The neighbour table's width comes from the carrier's degree, measured
+host-side where the carrier is concrete and bounded by its edge count where it
+is only a traced shape; see :func:`measured_degree_capacity`.
 :data:`ContourTreeResult` keeps its own DD field capacities because the mapping
 to DD 4.1.0 is a separate, narrower contract.
 """
@@ -34,6 +37,7 @@ from typing import ClassVar, Protocol, TypeAlias
 
 import jax
 import jax.numpy as jnp
+import numpy as np
 
 from nova_cocos import convention
 
@@ -151,6 +155,36 @@ def _batch_edges(
     return jnp.where(valid[:, None], arc[selected], 0), valid, edge_count > capacity
 
 
+def measured_degree_capacity(
+    edges: jax.Array, edge_valid: jax.Array, vertex_count: int
+) -> int | None:
+    """Count the carrier's own maximum live degree, when the carrier is concrete.
+
+    The width of the neighbour table is the leading cost of both sweeps: the
+    table is ``(vertex_count, width)`` and each visit compares every pair of a
+    vertex's neighbours against it.  A width taken from the carrier's slot count
+    rather than from its degree therefore multiplies the build by the ratio
+    between them, which on a ten-thousand-cell mesh is the difference between a
+    two-minute file and a stalled one.
+
+    The count is a host-side measurement over the concrete edge list, so a
+    carrier that exists only as a traced shape returns ``None`` and the caller
+    falls back to a bound the traced shape can support.  This is the measured
+    two-pass count: the degree is counted per vertex here, and the sweep's
+    union-find pass walks the resulting table.
+    """
+
+    if isinstance(edges, jax.core.Tracer) or isinstance(edge_valid, jax.core.Tracer):
+        return None
+    endpoints = np.asarray(edges, dtype=np.int64).reshape(-1, 2)
+    keep = np.asarray(edge_valid, dtype=bool).reshape(-1)
+    endpoints = endpoints[keep]
+    if endpoints.size == 0:
+        return 0
+    degree = np.bincount(endpoints.ravel(), minlength=vertex_count)
+    return int(degree.max())
+
+
 def carrier_node_capacity(declared: int | None, vertex_slots: int) -> int:
     """Resolve the receipt's node capacity from the carrier it is given.
 
@@ -248,14 +282,18 @@ def _carrier_adjacency(
 
     A carrier supplies its measured maximum degree as static shape metadata,
     which is the width the production read uses.  A caller that supplies none
-    gets the safe edge-count bound: no vertex can hold more neighbours than the
-    graph has edges, so that width never refuses a graph whose degree the graph
-    itself permits.  A declared width below the measured degree refuses.
+    gets the carrier's own measured degree where it can be counted host-side,
+    through :func:`measured_degree_capacity`: a table no wider than the degree
+    visits every neighbour the carrier has, so that width refuses nothing the
+    graph permits.  A carrier that exists only as a traced shape cannot be
+    counted, and falls back to the safe edge-count bound, which no graph can
+    exceed.  A declared width below the measured degree refuses.
     """
 
     edge_count = edges.shape[0]
     if neighbour_capacity is None:
-        neighbour_capacity = edge_count
+        measured = measured_degree_capacity(edges, edge_valid, vertex_count)
+        neighbour_capacity = edge_count if measured is None else measured
     neighbour_capacity = max(1, neighbour_capacity)
     carrier_edges = edges.astype(CARRIER_INDEX_DTYPE)
     sources = jnp.concatenate((carrier_edges[:, 0], carrier_edges[:, 1]))
@@ -704,5 +742,6 @@ __all__ = [
     "carrier_edge_capacity",
     "carrier_node_capacity",
     "dd_emittable_nodes",
+    "measured_degree_capacity",
     "sigma_for_state",
 ]

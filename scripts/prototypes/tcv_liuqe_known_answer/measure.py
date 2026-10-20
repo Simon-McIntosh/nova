@@ -572,6 +572,8 @@ def main():
     wall_rings = read_wall(args.wall)
     db = imas.DBEntry(f"imas:hdf5?path={args.liuqe}", "r", dd_version="3.41.0")
     eq = db.get("equilibrium")
+    if eq.ids_properties.homogeneous_time != 1:
+        raise ValueError("equilibrium time base is not homogeneous")
     guard_rows = [
         guard_verdict({**slice_view(eq, index), "wall_rings": wall_rings})
         for index in slices

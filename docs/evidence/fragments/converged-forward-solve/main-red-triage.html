@@ -15,7 +15,7 @@
     <tbody>
       <tr><td><code>tests/test_equilibrium_constraint_protocol.py</code></td><td>2 failed, 16 passed in 121.28s (<code>EXIT=1</code>)</td><td><code>triage-logs/constraint-protocol.log</code></td></tr>
       <tr><td><code>tests/test_solve_trips_are_a_scan.py</code></td><td>16 passed in 55.00s (<code>EXIT=0</code>)</td><td><code>triage-logs/trips-are-a-scan.log</code></td></tr>
-      <tr><td><code>tests/test_forward_compile_identity.py</code></td><td>see the identity section</td><td><code>triage-logs/forward-compile-identity.log</code></td></tr>
+      <tr><td><code>tests/test_forward_compile_identity.py</code></td><td>1 failed, 2 passed in 1353.28s (<code>EXIT=1</code>)</td><td><code>triage-logs/identity-batch-1290828.log</code></td></tr>
     </tbody>
   </table>
   <p>All three logs live under
@@ -191,20 +191,30 @@ nova/equilibrium/forward.py:2857: in solve
 
 <section id="main-red-triage-identity">
   <h2>`test_forward_compile_identity.py`: one test fails, on two arms that fail differently</h2>
-  <p>Fresh CPU process, log
-  <code>triage-logs/forward-compile-identity.log</code>, base
-  <code>1dc96ee0b</code>. Three tests collected; the run did not print a summary
-  line before the harness stopped the process, so the log is explicitly
-  incomplete and carries no <code>EXIT</code> line. The per-test state it did
-  record is unambiguous:</p>
+  <p>Two CPU arms at base <code>1dc96ee0b</code>. The first is the in-place
+  process on the tracked allocation, log
+  <code>triage-logs/forward-compile-identity.log</code>; it did not print a
+  summary line before the harness stopped it, so that log is explicitly
+  incomplete and carries no <code>EXIT</code> line. The second is one batch job
+  (<code>all_debug</code>, job 1290828, its own node, and a node-local
+  <code>mktemp -d /tmp/$USER-$SLURM_JOB_ID-XXXX</code> scratch removed by trap),
+  log <code>triage-logs/identity-batch-1290828.log</code>, which ran to its
+  summary line.</p>
   <table id="main-red-triage-identity-table">
     <thead><tr><th>test id</th><th>result at base (CPU)</th><th>first failing line</th></tr></thead>
     <tbody>
-      <tr><td><code>test_certificate_rows_share_one_solve_program_per_mesh</code></td><td><strong>passed</strong> (the <code>.</code> before the first timeout banner)</td><td>none</td></tr>
-      <tr><td><code>test_traced_exterior_preserves_the_certificate_terminal_state</code></td><td><strong>failed</strong></td><td><code>Failed: Timeout (&gt;300.0s) from pytest-timeout</code></td></tr>
-      <tr><td><code>test_compiled_slice_program_traces_conductor_exterior</code></td><td>not reached in this process</td><td>none</td></tr>
+      <tr><td><code>test_certificate_rows_share_one_solve_program_per_mesh</code></td><td><strong>passed</strong> in both arms</td><td>none</td></tr>
+      <tr><td><code>test_traced_exterior_preserves_the_certificate_terminal_state</code></td><td><strong>failed</strong> in both arms</td><td><code>E       Failed: Timeout (&gt;300.0s) from pytest-timeout.</code> (batch log line 231)</td></tr>
+      <tr><td><code>test_compiled_slice_program_traces_conductor_exterior</code></td><td><strong>passed</strong> (batch arm; not reached in the in-place arm)</td><td>none</td></tr>
     </tbody>
   </table>
+  <p>The batch arm's own summary, verbatim from the log: <code>1 failed, 2 passed,
+  1 warning in 1353.28s (0:22:33)</code>, its last line <code>EXIT=1</code>. So
+  exactly one test in this file is red at base and it is the named
+  <code>test_traced_exterior_preserves_the_certificate_terminal_state</code>;
+  the other two pass, including the compile-identity test
+  <code>test_certificate_rows_share_one_solve_program_per_mesh</code>, which the
+  brief also named.</p>
   <p>The timeout is the repository's own bound, not one this node imposed:
   <code>pyproject.toml</code> configures <code>timeout = 300</code> with the
   <code>signal</code> method, and the log's header prints
@@ -309,4 +319,13 @@ nova/equilibrium/forward.py:2857: in solve
   <p>This prescription touches one file and the primary prescription touches one
   line; they are ordered as written — the bound must be raised before the CPU
   arm can show whether the product clause holds there at all.</p>
+  <p><strong>One premise in the brief is not borne out.</strong> The brief names
+  two failing tests in this file, the second being "the compile-identity test".
+  At base <code>1dc96ee0b</code> there is no such failure: the batch arm shows
+  <code>test_certificate_rows_share_one_solve_program_per_mesh</code> passing,
+  and the only red test is
+  <code>test_traced_exterior_preserves_the_certificate_terminal_state</code>. If
+  the second named test is instead
+  <code>test_compiled_slice_program_traces_conductor_exterior</code>, that passes
+  too. So this file owes exactly one repair node, not two.</p>
 </section>

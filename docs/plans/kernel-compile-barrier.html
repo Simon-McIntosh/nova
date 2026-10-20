@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="kernel-compile-barrier">
+  <meta name="plan-title" content="Kernel Compile Barrier — bound the Biot kernel expression so every kernel-backed program compiles in seconds">
+  <meta name="plan-summary" content="Cold compiles of the Biot kernel expression take minutes to hours and up to 381 GB; bound them so the read meets 60 s, 50 MB and 64 GB">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="24.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="critical">
+  <meta name="plan-sprint" content="S21">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="jax,h200,throughput,equilibrium">
+  <meta name="plan-blocks" content="converged-forward-solve">
+  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
+  <title>Kernel Compile Barrier | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s0">Why this plan exists</h2>
+    <p>Lead directive, 2026-10-20: the compile barrier is critical and recurrent, and it gets a plan of its own rather than living as rulings and side notes inside <a href="/nova/converged-forward-solve.html">converged-forward-solve</a>. Every program that evaluates a Biot coupling kernel and its derivatives traces the same expression: the harmonic recurrences in <code>nova/biot/elliptic.py</code> and <code>nova/biot/rangefunction.py</code>, and the packed polygon moments in <code>nova/biot/polygonanalytic.py</code>. XLA compiles that expression cold, and the cost does not depend on the mesh. Nothing in today's code bounds it, so each new kernel-backed program pays it again, in the solve, in test fixtures and in a test suite's memory.</p>
+    <p>What it costs, measured:</p>
+    <table>
+      <thead>
+        <tr><th>Program</th><th>Measured cold cost</th><th>Source</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>kernel-backed topology read</td><td>about 1.25 million expanded equations and 39 MB of StableHLO at 132, 300 and 550 cells alike; H200 cold compile over 900 s, then 628 to 640 s after the shared-kernel read, against a 60 s clause</td><td>converged-forward-solve, anchor <code>cfs-topology-read-kernel-scope</code>; node <code>cfs-read-shared-kernel</code></td></tr>
+        <tr><td>Biot point jet</td><td>83.6 s cold, in a fresh process with the cache disabled before JAX initialises</td><td>node <code>cfs-kernel-cold-compile-correction</code>, merge <code>b6f1efd95</code></td></tr>
+        <tr><td>nested <code>jax.jacfwd</code> point jet, orders 1 to 4</td><td>65.75, 198.39, 413.37 and 984.58 s on the H200; <code>jax.experimental.jet</code> does not trace the kernel</td><td>node <code>proto-taylor</code></td></tr>
+        <tr><td>jets build point batch, <code>jax.jit(jax.vmap(_source_jets))</code> at <code>scripts/prototypes/read_route/jets.py:321</code>, 2,132 nodes, CPU</td><td>7,044 s and 381 GB peak host memory, from one compile</td><td>node <code>coarse-tie-census-memory</code>, sirius job 1290593</td></tr>
+        <tr><td>same build, 282 cells, operand cache bypassed</td><td>79 GB peak; growth about 300 MB/s and independent of the cell count</td><td>node <code>coarse-tie-census-memory</code></td></tr>
+      </tbody>
+    </table>
+    <p>Where it surfaces as red or killed work: <code>tests/equilibrium/test_topology_read.py::test_kernel_compile_growth</code> is a strict xfail on <code>KernelCompileBarrier</code>; the seven ids that draw <code>kernel_compile_budget</code> xfail because their compile child is killed; <code>test_census_neighbour_proposals_keep_saddles_across_coarse_ties</code> at 500 cells killed two suite jobs at 96 GB and 256 GB, hiding every test after it in the process; and the superseded <a href="/nova/cpu-compile-abort.html">cpu-compile-abort</a> plan's LLVM section-memory aborts are the same cost on CPU. converged-forward-solve's acceptance table already states the bounds this plan owns: compile wall at most 60 s on the H200 with the warm cache excluded, executable at most 50 MB, and at most 64 GB resident on the host during a cold compile.</p>
+    <p>Locked rulings this plan inherits, from converged-forward-solve, 2026-10-06. The primal arithmetic (flux, field, booking, residual, null positions) stays bit-identical to the base kernels. Tangents may take a fixed-capacity scan form held to 1e-9 relative against <code>jax.jvp</code> of the base, and exact hand-written tangents stay where they already compile within three times the primal. Relaxing the identity tolerance or the compile clause is forbidden without the lead. The 15 elliptic helpers the point jet reaches already carry private tangents inside three times their primal, so the remaining cost lies in terms that work did not reach; §1 finds them before anything is rewritten.</p>
+
+    <h2 id="s1">§1 — Compile census of every kernel-backed program</h2>
+    <section data-reckon="section" data-id="s1" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-attempts="0" data-status="implementable" data-links=""></section>
+    <p>Measure, before changing anything, where the compiled graph comes from. The programs are the point jet, <code>harmonic_moments</code> and <code>harmonic_pole_moments</code> (<code>nova/biot/elliptic.py:240</code>, <code>:410</code>) and <code>harmonic_multiply</code> (<code>nova/biot/rangefunction.py:134</code>) each alone, <code>packed_analytic_moments</code> (<code>nova/biot/polygonanalytic.py:2641</code>), the jets build's point batch, the kernel-backed topology read, and the certificate map. Each runs in a fresh process with the compilation cache disabled before JAX initialises, and each row asserts its own cache miss from the cache-guard rows, because a warm cache once passed for a cold compile.</p>
+    <p>Done when <code>docs/research/kernel-compile-census.html</code> reports, for every program above: (1) unique and expanded jaxpr equations, StableHLO bytes and executable bytes at two sizes (132 and 550 cells, or 4 and 64 points for a kernel alone), so each graph is classed as constant or growing; (2) the cold compile wall and peak host memory sampled every 10 s, on the H200 as one job and on CPU as one sirius job sized from the measured 381 GB; (3) the source functions ranked by the expanded equations each contributes, with owner file and line, as the target list for §2 and §3.</p>
+
+    <h2 id="s2">§2 — Bounded tangents for the ranked kernel terms</h2>
+    <section data-reckon="section" data-id="s2" data-effort-hours="8.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-attempts="0" data-status="implementable" data-links=""></section>
+    <p>Give the terms §1 ranks highest, beyond the 15 elliptic helpers already done, a tangent whose graph is bounded, in one of the two forms the 2026-10-06 rulings accept: a fixed-capacity scan over the term order, or an exact hand-written tangent that compiles within three times its primal. The primal arithmetic does not change.</p>
+    <p>Done when: (1) the primal of every changed kernel is bit-identical to the base, and its tangent rows agree with <code>jax.jvp</code> of the base to 1e-9 relative, on the 10,000-point polygon and filament jet identity sets used by <code>cfs-kernel-compile-cost</code>; (2) the point jet's expanded equations fall by at least the share §1 attributes to the changed terms, and its cold compile on the H200, fresh process and cache disabled, falls from 83.6 s to 10 s or less; (3) the kernel tests pass at head with no added failure, with both suite arms run as one sirius job.</p>
+
+    <h2 id="s3">§3 — A bounded jets build</h2>
+    <section data-reckon="section" data-id="s3" data-effort-hours="8.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-attempts="0" data-status="implementable" data-links=""></section>
+    <p>The jets build compiles <code>jax.jit(jax.vmap(_source_jets, in_axes=(0, None)))</code> once and then runs it batch by batch, so a single compile carries the whole cost: 7,044 s and 381 GB at 2,132 nodes. Bound that compile, using the §2 tangents and the packed-moment terms §1 ranks, so that its graph does not grow with the node count.</p>
+    <p>Done when: (1) at 282 and 2,132 nodes the point batch compiles once, in at most 600 s and 64 GB peak host memory on CPU and at most 60 s on the H200, fresh process and cache disabled; (2) the built jet rows match the base build to 1e-13 relative at every node at both sizes; (3) the 500-cell coarse-tie census test runs against an empty operand store under <code>--mem=64G</code> and passes on its own assertion.</p>
+
+    <h2 id="s4">§4 — The topology read meets its compile clause</h2>
+    <section data-reckon="section" data-id="s4" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-attempts="0" data-status="implementable" data-links=""></section>
+    <p>With the kernel terms bounded, the kernel-backed topology read should meet the compile clause converged-forward-solve already holds it to. This section removes the expected failures that record the barrier, so the suite asserts the bound directly.</p>
+    <p>Done when: (1) on the H200, fresh process and cache disabled, the kernel-backed topology read compiles in at most 60 s, with an executable of at most 50 MB and at most 64 GB of host memory, at 132, 300 and 550 cells; (2) the strict xfail on <code>test_kernel_compile_growth</code> is removed and the test passes there; (3) the seven <code>kernel_compile_budget</code> fixture ids pass rather than xfail, in one H200 job that runs the whole file.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="tangent-representation" data-choice="scan-or-exact" data-by="lead" data-when="2026-10-06">
+        <p class="r-dec-q">Which tangent forms may bound a kernel term's graph?</p>
+        <p class="r-dec-ctx">Inherited from converged-forward-solve's kernel-loop-representation and tangent-identity-tolerance rulings of 2026-10-06.</p>
+        <p class="r-dec-opts">
+          <button class="r-opt chosen" data-value="scan-or-exact">Scan-form tangents at 1e-9 relative, or exact tangents within three times the primal; primal bit-identical</button>
+          <button class="r-opt" data-value="relax">Relax the identity tolerance or the compile clause</button>
+        </p>
+        <p class="r-dec-rat">A fixed-capacity scan tangent of harmonic_moments compiled in 1.43 s and agreed with jax.jvp of the base to 1.04e-10, where the exact tangent took 54.1 s. The Hessian only steers Newton and the implicit null tangent, so 1e-9 sits far below every solve tolerance. Relaxing either bound is forbidden without the lead.</p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-kcb-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="s21-nova" data-written-at="2026-10-20" data-recommends-skill="/reckon-build kernel-compile-barrier §1">
+        <h4 class="r-fu-title">Run the compile census of every kernel-backed program</h4>
+        <div class="r-fu-body">The plan is authored. §1 measures each program's graph, cold compile wall and host memory, and ranks the source terms that carry the expanded graph, which §2 and §3 then target.</div>
+        <pre class="r-fu-prompt">/reckon-build kernel-compile-barrier §1</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

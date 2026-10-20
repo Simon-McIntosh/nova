@@ -69,7 +69,24 @@ class _LinearOperator:
             current=jnp.asarray([0.0]),
         )
         self.source = SimpleNamespace(closure_degrees=0)
+        self.clip_mode = "chord"
+        coordinates = jnp.asarray([[1.0, 0.0], [2.0, 0.0]])
+        self.grid = SimpleNamespace(coordinate=coordinates[:1])
+        self.wall = SimpleNamespace(coordinate=coordinates[1:])
+        self.sample = None
         self.changing_mask = changing_mask
+
+    def with_source(self, source):
+        instance = object.__new__(type(self))
+        instance.__dict__ = self.__dict__.copy()
+        instance.source = source
+        return instance
+
+    def with_clip_mode(self, clip_mode):
+        instance = object.__new__(type(self))
+        instance.__dict__ = self.__dict__.copy()
+        instance.clip_mode = clip_mode
+        return instance
 
     def flux_map(self, *_args):
         return lambda flux: jnp.zeros_like(flux)

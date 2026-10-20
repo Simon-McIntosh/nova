@@ -172,14 +172,41 @@ def _hollow_axis(ax, position, *, color, marker, size):
         line.set_markeredgewidth(1.6)
 
 
-def _marked_saddle(ax, position, *, color, marker):
+def _marked_saddle(ax, point, *, color, marker):
+    if point["class"] != "stationary saddle":
+        raise ValueError("only a stationary saddle may use the saddle painter")
     style = replace(
         DEFAULT_INK,
         xpoint_marker=marker,
         xpoint_color=color,
         xpoint_markersize=5,
     )
-    draw_nulls(ax, x_points=np.asarray([position]), style=style)
+    draw_nulls(ax, x_points=np.asarray([[point["r"], point["z"]]]), style=style)
+
+
+def _draw_boundary_point(ax, point):
+    """Use the receipt's field classification, never the adapter's key name."""
+    kind = point["class"]
+    if kind == "stationary saddle":
+        _marked_saddle(ax, point, color=COLOUR["nova_a"], marker="X")
+        return "nova stationary saddle"
+    markers = {"wall contact": "s", "neither": "o"}
+    if kind not in markers:
+        raise ValueError(f"unknown boundary-point class: {kind}")
+    ax.plot(
+        point["r"],
+        point["z"],
+        marker=markers[kind],
+        markerfacecolor="none",
+        markeredgecolor=COLOUR["nova_a"],
+        markeredgewidth=1.6,
+        markersize=7,
+        linestyle="none",
+        zorder=12,
+    )
+    return (
+        "nova wall contact" if kind == "wall contact" else "nova other boundary point"
+    )
 
 
 def _wall_loops_by_role(path):
@@ -344,13 +371,15 @@ def draw_panel(ax, row):
             )
             drawn.add("adapter A axis")
         if a["nova_saddle_r"] is not None:
-            _marked_saddle(
-                ax,
-                [a["nova_saddle_r"], a["nova_saddle_z"]],
-                color=COLOUR["nova_a"],
-                marker="o",
-            )
-            drawn.add("adapter A saddle")
+            point = row["code_points"]["nova_a_boundary_point"]
+            if point is None or (point["r"], point["z"]) != (
+                a["nova_saddle_r"],
+                a["nova_saddle_z"],
+            ):
+                raise ValueError(
+                    "boundary-point classification does not match its mark"
+                )
+            drawn.add(_draw_boundary_point(ax, point))
     _set_panel_geometry(ax, rings)
     ax.set_title(_panel_title(row), fontsize=LABEL_SIZE, pad=2)
     return drawn
@@ -409,10 +438,30 @@ def _legend_handles(drawn):
             [],
             [],
             color=COLOUR["nova_a"],
-            marker="o",
+            marker="X",
             ls="none",
             ms=5,
-            label="adapter A saddle",
+            label="nova stationary saddle",
+        ),
+        Line2D(
+            [],
+            [],
+            color=COLOUR["nova_a"],
+            marker="s",
+            mfc="none",
+            ls="none",
+            ms=7,
+            label="nova wall contact",
+        ),
+        Line2D(
+            [],
+            [],
+            color=COLOUR["nova_a"],
+            marker="o",
+            mfc="none",
+            ls="none",
+            ms=7,
+            label="nova other boundary point",
         ),
         Line2D(
             [],

@@ -49,6 +49,7 @@ def test_stationary_root_tangent_at_exact_seed() -> None:
 
 
 @pytest.mark.slow
+@pytest.mark.timeout(900)
 def test_certified_limited_carrier_converges(tmp_path: Path) -> None:
     import jax
 

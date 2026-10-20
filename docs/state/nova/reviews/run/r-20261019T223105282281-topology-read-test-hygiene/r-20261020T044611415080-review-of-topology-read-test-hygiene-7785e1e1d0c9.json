@@ -1,0 +1,76 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 1,
+  "added_failure_ids": [
+    "tests/equilibrium/test_topology_read.py::test_census_neighbour_proposals_keep_saddles_across_coarse_ties[500-0.122-0.1225-0.1]"
+  ],
+  "added_failures_note": "differenced from the reviewed manifest's baseline_suite (12 failing at 2b26147c1, log logs/baseline-arm-1290659.log) and after_suite (1 failing at ed5a13a03, log logs/after-arm-1290659.log); the single after id is absent from the base failing set and its base counterpart skipped at exit 0 rather than ran.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-20T05:03:15.148Z",
+  "dispatched_at": "2026-10-20T04:48:03Z",
+  "findings": [
+    {
+      "file": "tests/equilibrium/test_topology_read.py",
+      "line": "2663",
+      "text": "follow-on: _census_cache re-derives the version suffix verbatim from nova/database/filepath.py:476; Path(FilePath(dirname='user_data.nova').path) returns the same /home/ITER/mcintos/.local/share/nova/0.11.0, so the copy drifts from the owner's convention."
+    },
+    {
+      "file": "tests/equilibrium/test_topology_read.py",
+      "line": "2674",
+      "text": "follow-on: the census tie ids are only asserted not to fail; reverting _census_cache makes them SKIP at exit 0, which the gate scores as a pass, so the silent-skip regression is unguarded."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T223105282281-topology-read-test-hygiene/negative-control/negative-control.log",
+      "line": "9",
+      "text": "follow-on: the manifest says this log ends EXIT=0 but its last line is 'CONTROL_RESULT 1 skipped in 56.62s' with no EXIT= line, so the control has no readable status."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T223105282281-topology-read-test-hygiene/manifest.md",
+      "line": "7",
+      "text": "follow-on: wait_probe is declared twice and the first value pastes a sentence onto the JSON list, leaving the wait block unparseable."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T223105282281-topology-read-test-hygiene/manifest.md",
+      "line": "24",
+      "text": "follow-on: after_suite records one failure id absent from baseline_suite's twelve, an id killed at 96 GB inside its own unbounded build, so the change adds a failure where done_when(3) required none."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read commit by commit: 2a0b908a4 lands the skip, cache clause, 700 s marks and two prose rewrites; 887c4eb07 widens the fixture barrier to any nonzero exit; 94abc41de, ed5a13a03 and 7785e1e1d are the evidence-record docs commits; no production source is touched.",
+    "done_when": "the done_when requires the three defects closed and both suite arms run as one sirius job (12 cpus, 96 GB) over the file's 42 ids with the cache unset and no added failure; job 1290659 and its two arm logs are recorded, but the 'no added failure' clause is unmet by one id.",
+    "goal": "the node goal is to make tests/equilibrium/test_topology_read.py report each id's real condition rather than an artefact of its lane; the landed diff skips the compile-growth ids off the GPU naming the backend (:2445), admits any nonzero child death as the compile barrier (:128), carries the two measured-slow membership ids from a 300 s to a 700 s bound (:1814,:1957), and resolves the census cache through the filepath user-data root (:2663).",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T223105282281-topology-read-test-hygiene/manifest.md; status complete, five commits, baseline_suite 12 failing at 2b26147c1 and after_suite 1 failing at ed5a13a03, each completed with a log path; the wait block is left populated under status complete and its wait_probe line is duplicated and garbled.",
+    "write_paths": "the reviewed manifest declares three write paths; git diff --stat 2b26147c1..7785e1e1d changes exactly tests/equilibrium/test_topology_read.py (+52), docs/figures/converged-forward-solve/tie-state-current-gap/render_tie_pair.py (6/-6) and the new evidence fragment, all inside them."
+  },
+  "justifications": {
+    "durability": "reverting the skip, the barrier or the 700 s marks reddens the arm, but reverting _census_cache (tests/equilibrium/test_topology_read.py:2674) makes the census ids skip at exit 0, which no assertion catches.",
+    "evidence": "logs/after-arm-1290659.log ends 'SUMMARY arm=head ids=42 failing=1' / 'EXIT=1' at ed5a13a03 and the base arm 'failing=12', so the gate is real and recorded, but the head arm carries one added failure the done_when forbade.",
+    "fit": "the added code follows the file's idiom and resolves through nova.database.filepath.FilePath as nova/circuit/coupled_plant.py:469 does; no name carries a plan, issue or version label.",
+    "goal_fidelity": "tests/equilibrium/test_topology_read.py:2445 skips naming the backend and :1814/:1957 carry the 700 s bound, so each id now reports its own condition; clause (3)'s no-added-failure target is the one shortfall.",
+    "reuse": "tests/equilibrium/test_topology_read.py:2663 duplicates the version-suffix construction of nova/database/filepath.py:476 instead of using that owner's dirname='user_data.nova' idiom, which returns the identical path.",
+    "scope_discipline": "every path in git diff 2b26147c1..7785e1e1d is a declared write path; only the manifest's orientation_write_paths mis-lists a figure directory instead of render_tie_pair.py."
+  },
+  "node": "review-of-topology-read-test-hygiene-7785e1e1d0c9",
+  "node:reviewed": "topology-read-test-hygiene",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to make tests/equilibrium/test_topology_read.py report each id's real condition rather than an artefact of its lane; the landed diff at tests/equilibrium/test_topology_read.py:2445 skips the compile-growth ids off the GPU naming the backend, at :128 admits any nonzero child exit as KernelCompileBarrier, at :1814 and :1957 marks only the [diverted] ids 700 s, and at :2663 resolves the census cache through the filepath user-data root.\nVERDICT done_when: the done_when names both suite arms as one sbatch job on --partition=sirius with --cpus-per-task=12 and --mem=96G over the file's 42 ids, one process each, cache unset; the manifest's baseline_suite/after_suite name job 1290659 and its logs (logs/baseline-arm-1290659.log, logs/after-arm-1290659.log) carry those results, but clause (3)'s 'no added failure' is not met: after_suite records 1 added id.\nVERDICT write_paths: the reviewed manifest declares tests/equilibrium/test_topology_read.py, docs/figures/converged-forward-solve/tie-state-current-gap/render_tie_pair.py and the evidence fragment; git diff --stat 2b26147c1..7785e1e1d changes exactly those three files and nothing else.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T223105282281-topology-read-test-hygiene/manifest.md; status complete, commits 2a0b908a4 94abc41de 887c4eb07 ed5a13a03 7785e1e1d, baseline_suite 12 failing and after_suite 1 failing, both completed true with log paths.\nVERDICT diff: read commit by commit against 2b26147c1; 2a0b908a4 adds the skip, the cache clause, the 700 s marks and the two comment/docstring rewrites, 887c4eb07 widens the fixture barrier, and the three docs commits record the arms; every path is inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: tests/equilibrium/test_topology_read.py:2445 now skips naming the backend and :1814/:1957 carry the 700 s bound so each id reports its own condition, which is the goal; the one shortfall is that clause (3)'s no-added-failure target is unmet.\nSCORE evidence: 14\nJUSTIFICATION evidence: logs/after-arm-1290659.log ends 'SUMMARY arm=head ids=42 failing=1' with 'EXIT=1' at the head revision ed5a13a03, so the gate ran and is recorded, but its single nonzero id (census [500-0.122-0.1225-0.1], exit 137) is an added failure the done_when forbade, and the negative-control log it cites lacks the EXIT line the manifest claims.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: tests/equilibrium/test_topology_read.py:1814, :1957, :2445, :2663 and docs/figures/converged-forward-solve/tie-state-current-gap/render_tie_pair.py:105 are all inside the declared write paths; the only slack is the manifest's orientation_write_paths naming a figure directory rather than the file the diff touches.\nSCORE durability: 11\nJUSTIFICATION durability: the skip (:2445), the fixture barrier (:128) and the 700 s marks (:1814,:1957) all redden the arm if reverted, but tests/equilibrium/test_topology_read.py:2674's skip means a reverted _census_cache makes the census ids skip with exit 0, which no assertion catches, so the silent-skip defect this node removes can silently return.\nSCORE fit: 17\nJUSTIFICATION fit: tests/equilibrium/test_topology_read.py:2663 resolves through nova.database.filepath.FilePath as nova/circuit/coupled_plant.py:469 already does, the names carry no plan or version label, and the render_tie_pair.py:105 docstring states the mechanism rather than the changelog.\nSCORE reuse: 5\nJUSTIFICATION reuse: tests/equilibrium/test_topology_read.py:2663 re-derives 'nova.__version__.replace(\".post\", \"+\").split(\"+\")[0]' verbatim from nova/database/filepath.py:476, whose public dirname=\"user_data.nova\" idiom returns the identical path, so the version join duplicates the owner instead of extending it.\nFINDING tests/equilibrium/test_topology_read.py:2663 follow-on: the two lines reproduce nova/database/filepath.py:470-477 (_resolve_relative's 'nova' case) exactly; Path(FilePath(dirname='user_data.nova').path) yields the same /home/ITER/mcintos/.local/share/nova/0.11.0, so a change to the owner's version convention moves the owner and not this copy.\nFINDING tests/equilibrium/test_topology_read.py:2674 follow-on: nothing asserts the census tie ids RAN, only that they did not fail; reverting _census_cache returns them to SKIPPED at exit 0, which the gate's per-id exit summary scores as a pass, so the silent skip the node exists to remove is unguarded.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T223105282281-topology-read-test-hygiene/negative-control/negative-control.log:9 follow-on: the manifest's negative_control_note states the log ends EXIT=0, but the file's last line is 'CONTROL_RESULT 1 skipped in 56.62s' with no EXIT= line, so admission finds no status to read and the recorded control cannot be checked.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T223105282281-topology-read-test-hygiene/manifest.md:7 follow-on: the wait_probe key is declared twice, and the first value is a garbled concatenation of the JSON list and a sentence ('...\"State\"]ory-1290754.log carries the peak resident set...'), leaving the wait is malformed for any reader parsing it.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T223105282281-topology-read-test-hygiene/manifest.md:24 follow-on: after_suite records failure_count 1 with id test_census_neighbour_proposals_keep_saddles_across_coarse_ties[500-0.122-0.1225-0.1], an id absent from baseline_suite's twelve, so the landed change adds one failure where done_when(3) required none; the id is killed at 96 GB inside its own unbounded build and its base counterpart skipped rather than ran.",
+  "review_run_id": "r-20261020T044611415080-review-of-topology-read-test-hygiene-7785e1e1d0c9",
+  "reviewed_base_sha": "2b26147c1f91ff30017efdcf0b327dcbb28073b2",
+  "reviewed_head_sha": "7785e1e1d0c944b31d70f6adb67da25d6de05257",
+  "reviewed_run_id": "r-20261019T223105282281-topology-read-test-hygiene",
+  "scores": {
+    "durability": 11,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 5,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T04:58:55+00:00",
+  "total": 82
+}

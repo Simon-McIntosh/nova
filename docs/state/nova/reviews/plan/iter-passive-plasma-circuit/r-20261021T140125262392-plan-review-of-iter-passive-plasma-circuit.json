@@ -1,0 +1,68 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-21T14:33:40.181Z",
+  "dispatched_at": "2026-10-21T14:16:37Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/iter-passive-plasma-circuit.html:189",
+      "id": "reasoning-1",
+      "reason": "the node's entire check 3 depends on an input the plan never establishes it holds, so a worker either blocks on finding one or substitutes an equilibrium of its own choosing, and the plan is the semantic authority that should name it.",
+      "text": "check 3 now measures \"a reconstruction-style presentation ... agrees within relative 1e-3 with the plant its own equilibrium gives through the generic path\", where the reference is \"an ITER equilibrium from a code whose flux functions agree with its flux map at the edge\", \"chosen by measuring that agreement, not assumed\"; \u00a76 names no code, no pulse and no existing artefact for that equilibrium, and states no threshold for the edge agreement that would make the 1e-3 plant tolerance reachable, while every other check in the plan names its data (DINA 105069/3, DINA 105013/1, the pinned plant entry, a MAST reconstruction)",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/iter-passive-plasma-circuit.html:189",
+      "id": "reasoning-2",
+      "reason": "as written the plan asserts both that this operation moves DINA by more than check 3's tolerance and that it measured 1.2e-4, so a node cannot tell which quantity to reproduce or whether DINA was in fact excluded on a valid measure.",
+      "text": "the exclusion of DINA rests on \"On DINA 105014/1, withholding the separatrix moved the dominant passive modes by 1.0 to 1.3e-3\", but \u00a75's landed record for the same case measures that same presentation change at 1.163e-05 on the section flux and 1.163e-04 on the modal projection, passing the predeclared 1e-3 (`docs/evidence/fragments/iter-passive-plasma-circuit/reconstructed-plasma-plant.html`), and \u00a76 never defines \"the dominant passive modes\" or says whether its figure is the reduced or the full machine",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/iter-passive-plasma-circuit.html:189",
+      "id": "done_when-1",
+      "reason": "the rewritten check reports success on the unfixed code, so \u00a76's only discriminating measure is check 2's zero-build counter, and a node that sees check 3 green will believe the reconstruction arm on the full machine has been demonstrated when nothing in that check shows it.",
+      "text": "check 3's two arms are the reference equilibrium's generic-path plant and its reconstruction-style plant, both assembled from the same sectioned set, so on the code before this change (the negative control's red arm is a base-revision run) both arms still agree within 1e-3 and check 3 passes; the previous formulation it replaced \u2014 \"\u00a75's reconstruction-style presentation of 105014/1 runs on the full machine instead of the reduced one\" \u2014 failed on that code because the full-machine run was impossible",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/iter-passive-plasma-circuit.html:189",
+      "id": "anchors_resolve-1",
+      "reason": "the ruling is recorded in the body of commit `9e6f24d4d` and the plan's comment thread, so a node reading \u00a76 finds it, but the plan's own convention of carrying the lead's decisions in the Decisions block would place it there with its rationale.",
+      "text": "\"DINA is not the reference for this check, because its flux functions and flux maps are known not to agree at the edge (lead, 2026-10-21)\" records a lead ruling that changes what check 3 runs, but the plan's `r-decisions` block carries no such decision (its four entries are all 14 October).",
+      "type": "anchors_resolve",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "630eab5c37c2c3e1a641d09ef41d18fd397bb7406de0f7d2f6205e204eeeb817",
+  "plan_slug": "iter-passive-plasma-circuit",
+  "plan_version": 22,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261021T140125262392-plan-review-of-iter-passive-plasma-circuit",
+  "reviewed_blob_sha": "5e79b0a9ea19ebd9d6ef6231689c9103f6dc91cf",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 the 2026-10-21 lead ruling that excludes DINA is cited inline but is not recorded in the plan's Decisions block, where every other lead decision on this plan lives.",
+    "done_when": "a finding \u2014 check 3 as rewritten compares two arms that both read the same geometry, so it also passes on the code before the change and cannot show \u00a76's cache change works.",
+    "evidence_paths": "pass \u2014 the changed text names durable roots (`.cache/iter-passive-plasma-circuit/sectioned-conductor-set/<digest>/`, `coupled-plant/<digest>/`); the gate-log location was settled by an earlier review and is not re-raised.",
+    "naming": "pass \u2014 the added text introduces no plan label, stage name, ticket number or version tag; `105069/3`, `105013/1` and `105014/1` are DINA data identifiers, and the added sentences state mechanism, not changelog.",
+    "reasoning": "a finding \u2014 check 3's only input, the \"self-consistent\" reference equilibrium, is named nowhere and its acceptance threshold is unstated, and the DINA number the exclusion rests on is not reconcilable with \u00a75's landed measurement of the same operation on the same case.",
+    "single_goal": "pass \u2014 \u00a76 carries one deliverable (the sectioned-set cache carries the refined geometry, or the parameters that regenerate it, so any plasma source drives the full ITER plant without a rebuild).",
+    "wiring": "pass \u2014 \u00a76's relationships are unchanged by the edit and its cited artefacts resolve (`scripts/iter_sectioned_conductor_set/build.py`, `save_circuit_system`/`load_circuit_system` and `load_sectioned_machine`/`save_sectioned_geometry` in `nova/circuit/passive.py`, `coupled_plant` in `nova/circuit/coupled_plant.py`, the pinned entry `.cache/iter-passive-plasma-circuit/coupled-plant/28148563521d92a2198b/plant.npz`, present on disk)."
+  },
+  "section_digests": {
+    "_document": "c69c21b94eb11351d8126a4f5f582fd9172b921964583f7aa0c8a90ac831b0a4",
+    "s1": "fd450fda152b172eb82e80c548ab9e5fa16c20b15f3b14ae415c0ed18ceb7a8c",
+    "s2": "fbea1d197646f2baba636205f10434c799bb3ce88f19dfa3ef779d98d25c50fb",
+    "s3": "56e06d1f8c060952b209edbc0a1c98e3f22e1cad48fcc1e6d6f04eb464d977bf",
+    "s4": "f8534dfd59d3f9812bc19d36079033b715faafd53488ec44ddfec9f088a03e93",
+    "s5": "39b83394b03af8bd027560dfc1db14bc1176968fc3aa2a93635fed656c03c8ec",
+    "s6": "616c5d1f9013d89242ced26ac9e424d14d7ff85cb25bc668cb92cde136402850"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-21T19:15:29.134394+00:00"
+}

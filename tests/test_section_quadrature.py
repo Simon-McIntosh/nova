@@ -8,9 +8,9 @@ from shapely.geometry import Polygon
 from nova.equilibrium.wall_mask import polygon_area
 from nova.imas.mast_passive_inductance import PassiveError, section_quadrature
 
-#: a notch the fan from the first corner cannot see across
+#: a notched L whose first corner cannot see across its own notch
 L_SHAPE = np.array(
-    [[0.0, 0.0], [2.0, 0.0], [2.0, 1.0], [1.0, 1.0], [1.0, 2.0], [0.0, 2.0]]
+    [[2.0, 1.0], [1.0, 1.0], [1.0, 2.0], [0.0, 2.0], [0.0, 0.0], [2.0, 0.0]]
 )
 
 #: an L-shaped ribbon 0.05 m thick, bent through a right angle

@@ -348,12 +348,29 @@ def test_unseen_source_drives_the_full_plant_with_zero_rebuilds(tmp_path, monkey
 
 
 @pytest.mark.slow
+@pytest.mark.xfail(
+    strict=True,
+    reason=(
+        "reference waits on the DD3-to-COCOS-17 translator; DINA flux functions "
+        "and maps disagree at the edge"
+    ),
+)
 def test_reconstruction_style_presentation_agrees_within_tolerance(tmp_path):
     """105014/1 presented as a reconstruction meets relative 1e-3 on the plant.
 
     The reconstruction-style source drives the same cached sectioned machine as
     the DINA-path source, and the two plants' plasma-flux arrays agree within
     the relative tolerance §5 predeclared.
+
+    Expected to fail on its own assertion, hence ``strict=True``: the DINA case
+    the arm was built on disagrees between its stored flux functions and its
+    flux map at the edge, so the arm needs a reference case whose flux functions
+    do agree with the field they must generate. No such case reaches this path
+    until the DD3 to COCOS 17 translator exists: every non-DINA source under
+    /work/imas/shared/imasdb/ITER/3 is DD3 data carrying its own convention,
+    which the plasma-source orientation contract refuses, because that contract
+    encodes one fixed orientation rather than translating the source's DD
+    version.
     """
     if not (ENTRY_12MM / SECTIONED_GEOMETRY_FILE).exists():
         pytest.skip("the scratch sectioned-set entry is not present on this host")

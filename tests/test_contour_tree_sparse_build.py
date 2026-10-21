@@ -101,6 +101,23 @@ def test_sparse_indexed_build_marker_is_present():
     assert contour_tree.SPARSE_INDEXED_BUILD is True
 
 
+@pytest.mark.slow
+@pytest.mark.parametrize("kind", ["limited", "diverted"])
+def test_carrier_triangles_have_resolved_area(kind: str):
+    """Deduplicated carrier vertices must not leave zero-area graph faces."""
+
+    _oracle, _field, wall, _axis, _saddle = oracle._analytic_inputs(kind)
+    mesh = oracle._realised_hex_geometry(wall, 2000).contour_mesh
+    triangle = np.asarray(mesh.triangles)[np.asarray(mesh.triangle_valid)]
+    point = np.asarray(mesh.vertex_rz)[triangle]
+    first = point[:, 1] - point[:, 0]
+    second = point[:, 2] - point[:, 0]
+    doubled_area = np.abs(first[:, 0] * second[:, 1] - first[:, 1] * second[:, 0])
+    edge = np.stack((first, second, point[:, 2] - point[:, 1]), axis=1)
+    scale = np.max(np.sum(edge * edge, axis=-1), axis=1)
+    assert np.all(doubled_area > 64 * np.finfo(float).eps * scale)
+
+
 @pytest.mark.parametrize("kind", ["limited", "diverted"])
 @pytest.mark.parametrize("cells", [550, 2000])
 def test_sparse_build_matches_base_receipt(kind: str, cells: int):

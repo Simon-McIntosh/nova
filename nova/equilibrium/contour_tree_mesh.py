@@ -348,6 +348,16 @@ def _clipped_carrier(
                     vertex_index(point, _barycentric_flux(point, corner, flux[simplex]))
                     for point in corners
                 ]
+                a, b, c = (np.asarray(vertices[index]) for index in indices)
+                first, second = b - a, c - a
+                doubled_area = abs(first[0] * second[1] - first[1] * second[0])
+                edge_scale = max(
+                    np.dot(first, first),
+                    np.dot(second, second),
+                    np.dot(c - b, c - b),
+                )
+                if doubled_area <= 64 * np.finfo(float).eps * edge_scale:
+                    continue
                 triangles.append(tuple(indices))
 
     edge_order: dict[tuple[int, int], int] = {}

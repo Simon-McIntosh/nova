@@ -1,0 +1,83 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-21T21:21:33.954Z",
+  "dispatched_at": "2026-10-21T21:00:58Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iter-passive-plasma-circuit/r-20261021T205632138767-plan-review-of-iter-passive-plasma-circuit/plan.html:195",
+      "id": "reasoning-1",
+      "reason": "unless the node places the geometry correction upstream of the digest (or extends the key over the refinement and the coil cache), a rebuild silently serves the pre-repair matrix and \u00a77's guarantee \"A rebuild then never reads a pre-repair matrix\" is false while its negative control still passes.",
+      "text": "\u00a77 asserts the geometry repair is automatically keyed (\"a corrected jacket geometry changes the conductor columns the key already covers\"), but `build.py` derives the sectioned-set digest from the PRE-refinement source columns and source polygon vertices plus the subdivision parameters only (`scripts/iter_sectioned_conductor_set/build.py:230-239`), while the geometry the build actually links is produced downstream by `subdivide_passive_thickness` (`build.py:222`) \u2014 and \u00a77's own check (1) compares \"the jacket and conductor polygons of VSU and VSL\", the refinement's output. A correction landing in the refinement leaves the digest unchanged, so the cache-hit branch (`build.py:242-248`) loads the pre-repair `linkage.npy` wholesale and the repaired geometry never reaches the matrix; the coil block is cached under a separate key again (`build.py:262-268`, tag `b\"finite-source:6\"`) whose load validates only shape, not positivity.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iter-passive-plasma-circuit/r-20261021T205632138767-plan-review-of-iter-passive-plasma-circuit/plan.html:189",
+      "id": "wiring-1",
+      "reason": "a node on \u00a76 check 3 dispatched after \u00a77's key change (or one on \u00a77 against \u00a76's pre-change key) builds and measures against an entry the other node invalidated, so the two must be ordered or \u00a77 must state that it supersedes \u00a76's remaining check.",
+      "text": "\u00a77 requires the repair to change the sectioned-set key and to hand power_convertor a new key, and \u00a76 line 191 says \"If the key derivation for new entries has to change, power_convertor is told the new key before the change merges\"; yet \u00a76 is itself still `implementable` with check 3 pending against that same cache, and neither section declares an ordering between them.",
+      "type": "wiring",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "ccbeda5a486583124e57257d9dbe4e5e41af832fe6f1391a9f1a24b9190f4d8e",
+  "plan_slug": "iter-passive-plasma-circuit",
+  "plan_version": 30,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-21T21:22:02.925360+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "",
+      "when": "2026-10-21T21:22:07.112900+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-21T21:22:02.925360+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-21T21:22:07.112900+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-iter-passive-plasma-circuit.v30.json",
+  "review_run_id": "r-20261021T205632138767-plan-review-of-iter-passive-plasma-circuit",
+  "reviewed_blob_sha": "c34860f7241e260032db75ad62753c260a47970d",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `scripts/iter_sectioned_conductor_set/build.py` and `guard_positive_definite` (`nova/circuit/linkage.py:291`) resolve, `linkage.npy` is the file `build.py` writes (line 241), and \"the 12 mm and 6 mm sets\" resolve to real cache keys (`scripts/iter_vessel_evolution/evolve.py`, 0.006 \u2192 2163 passive circuits).",
+    "done_when": "pass \u2014 \u00a77's three clauses are measurable (split a stated 6.6e-5 excess, a positive-definiteness result, a delivered plant entry and key) and the section names a literal negative control that can fail on the unfixed code (\"revert the repair, and the Schur complement again has the two negative eigenvalues\").",
+    "evidence_paths": "pass \u2014 the only artefact locations \u00a77 names are the durable in-repo caches (`.cache/iter-passive-plasma-circuit/sectioned-conductor-set/<digest>/`, `linkage.npy`), consistent with the declared gate-log location under `.cache/iter-passive-plasma-circuit/gate-logs/`, which exists; no session scratchpad or node-local temp path is named.",
+    "naming": "pass \u2014 \u00a77's prose names mechanisms (`guard_positive_definite`, the finite-source linkage, the Schur complement) rather than plan labels; no ticket number or stage name appears in the section text.",
+    "reasoning": "a finding \u2014 \u00a77's mechanism for propagating the geometry repair into the cache does not run on the path the key covers.",
+    "single_goal": "pass \u2014 \u00a77 states one goal in its heading (make the coil and passive linkage positive definite); attribution, repair and hand-off are the steps of that one deliverable.",
+    "wiring": "a finding \u2014 \u00a77 changes the sectioned-set cache key but declares no relationship to \u00a76, whose pending check 3 and whose \"power_convertor is told the new key before the change merges\" clause both run on that same key (snapshot lines 189\u2013191, 195)."
+  },
+  "section_digests": {
+    "_document": "9089b3d51bacedf8b789082a7c5656db85f9c3bd1fe196a55b7b774ad7634317",
+    "s1": "fd450fda152b172eb82e80c548ab9e5fa16c20b15f3b14ae415c0ed18ceb7a8c",
+    "s2": "fbea1d197646f2baba636205f10434c799bb3ce88f19dfa3ef779d98d25c50fb",
+    "s3": "56e06d1f8c060952b209edbc0a1c98e3f22e1cad48fcc1e6d6f04eb464d977bf",
+    "s4": "f8534dfd59d3f9812bc19d36079033b715faafd53488ec44ddfec9f088a03e93",
+    "s5": "39b83394b03af8bd027560dfc1db14bc1176968fc3aa2a93635fed656c03c8ec",
+    "s6": "315ddfe4d045aed64c52a21768f30159f8ee06c4d7c45409eeaa661cbe6b6c2f",
+    "s7": "dff5406747ad6491062b24b94fb60834924ced10b471f9df5c0100a7f1716028"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-21T21:21:59.190543+00:00"
+}

@@ -1,0 +1,82 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-21T08:18:03.325Z",
+  "dispatched_at": "2026-10-21T08:00:53Z",
+  "findings": [
+    {
+      "anchor": "&sect;6 (plan.html:189)",
+      "id": "done_when-1",
+      "reason": "as written that arm measures nothing, so the node's headline claim (\"any plasma source drives the full ITER plant without rebuilding the sectioned set\") can be closed on an arm that the pre-change code passes; the fix is one clause naming the caches that are cleared, or dropping 105052/1 for a second genuinely unseen case.",
+      "text": "the second check declares DINA 105052/1 a source \"the cache has not seen\", but the plan's own record has 105052/1 built and driven already (\u00a72 landed \"on 105014/1 and 105052/1\", `c-close-s2` in this snapshot; the resolved 105052/1 plant is named in the plan's own evidence), and the check never says which cache is reset \u2014 the plant cache holds a per-source entry in `.cache/iter-passive-plasma-circuit/coupled-plant/<digest>/plant.npz`. Because `coupled_plant` returns `load_coupled_plant(plant_path)` before any conductor or linkage work (`nova/circuit/coupled_plant.py:255-256`) and the plant digest already folds the source's time base and currents, the 105052/1 arm is served warm and its build counter reads zero on the unfixed code too \u2014 the very outcome the sentence beside it warns about (\"A warm call for an already-built source proves nothing here\").",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "&sect;6 (plan.html:189)",
+      "id": "reasoning-1",
+      "reason": "naming the two caches and the sectioned-set writer/loader (`scripts/iter_sectioned_conductor_set/build.py`, `save_circuit_system`/`load_circuit_system`) removes the one placement that satisfies check 1's wording while making check 2 impossible, so a node would otherwise be free to implement the storage in the wrong cache.",
+      "text": "\u00a76's opening and first check treat \"the cache\" as a single artifact (\"the cached ITER sectioned set keeps its linkage and passive system\"; \"the cache stores the refined conductor geometry \u2026 and the cache key covers them\"), but the linkage sits in two caches with different keys, and neither the plan nor the snapshot names the code that writes the one the fix requires. The sectioned set cached under `.cache/iter-passive-plasma-circuit/sectioned-conductor-set/<digest>/` is source-independent (built from the machine description by `scripts/iter_sectioned_conductor_set/build.py`, which persists a `PassiveCircuitSystem` carrying circuits, `lmat`, `r_diag` and `m_channel` \u2014 no conductor polygons), whereas the plant cache at `coupled-plant/<digest>/` is keyed per source and already folds `machine.conductors` into its digest (`_cache_digest`, `nova/circuit/coupled_plant.py:492-493`). \u00a76 names `coupled_plant` as the reader but no writer, and \"the cache key covers them\" is true today of the plant key while the storage the check asks for must land in the source-independent sectioned-set cache; a node that adds the geometry to the keyed plant cache instead leaves check 2 unachievable, since `coupled_plant` looks up `directory/digest` for the source's own digest and would find no entry for a source it has not seen.",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "30c10501e16ee382e0bc1243dbedd6b4561b4856c003fd4430e309b4c4f4d074",
+  "plan_slug": "iter-passive-plasma-circuit",
+  "plan_version": 16,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "",
+      "when": "2026-10-21T08:20:07.947002+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-21T08:20:13.858949+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-21T08:20:07.947002+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-21T08:20:13.858949+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-iter-passive-plasma-circuit.v16.json",
+  "review_run_id": "r-20261021T080003723232-plan-review-of-iter-passive-plasma-circuit",
+  "reviewed_blob_sha": "5d7056dafcceb612dbb63a61dcc2c891febb6f7f",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `coupled_plant` resolves (`nova/circuit/coupled_plant.py:122`), `load_coupled_plant` resolves (`nova/circuit/passive.py:1169`), the pinned entry `coupled-plant/28148563521d92a2198b/plant.npz` resolves against both the code's key layout and the plan's own evidence (`docs/evidence/fragments/iter-passive-plasma-circuit/passive-skin-effect.html:92`, `tests/test_coupled_plant.py:486`), \"\u00a75's predeclared relative 1e-3\" resolves to \u00a75's landed record, and 105069/3 resolves as power_convertor's selected Stage 1+2 scenario (`power_convertor/tests/test_sro_scenario_selection.py:131`).",
+    "done_when": "a finding \u2014 \u00a76's second check names DINA 105052/1 as a source \"the cache has not seen\" while the plan's own record shows 105052/1 has already been built and driven.",
+    "evidence_paths": "pass \u2014 \u00a76 names no scratch or node-local path; the evidence it produces lands with the section's fragment and gate logs under the durable `.cache/iter-passive-plasma-circuit/` tree, as \u00a71\u2013\u00a75 already do.",
+    "naming": "pass \u2014 \u00a76 introduces no symbol, file or comment carrying a plan label, stage name or ticket number; \"105014/1\" and \"105069/3\" are data identifiers, not plan labels.",
+    "reasoning": "a finding \u2014 \u00a76 speaks of \"the cache\" as one artifact, but the linkage lives in two differently-keyed caches, and the code that writes the one the fix needs is never named.",
+    "single_goal": "pass \u2014 \u00a76 carries one deliverable (the sectioned-set cache carries what a plasma source needs), and its three checks plus the compatibility paragraph are facets of that one goal.",
+    "wiring": "pass \u2014 \u00a76 is reached by followup `f-ippc-002` (`data-recommends-skill=\"/reckon-build iter-passive-plasma-circuit \u00a76\"`), and power_convertor's gate requires `nova:iter-passive-plasma-circuit#s4`, not `#s6`, so no declared dependency is missing and none points at the wrong node."
+  },
+  "section_digests": {
+    "_document": "c69c21b94eb11351d8126a4f5f582fd9172b921964583f7aa0c8a90ac831b0a4",
+    "s1": "fd450fda152b172eb82e80c548ab9e5fa16c20b15f3b14ae415c0ed18ceb7a8c",
+    "s2": "fbea1d197646f2baba636205f10434c799bb3ce88f19dfa3ef779d98d25c50fb",
+    "s3": "56e06d1f8c060952b209edbc0a1c98e3f22e1cad48fcc1e6d6f04eb464d977bf",
+    "s4": "f8534dfd59d3f9812bc19d36079033b715faafd53488ec44ddfec9f088a03e93",
+    "s5": "39b83394b03af8bd027560dfc1db14bc1176968fc3aa2a93635fed656c03c8ec",
+    "s6": "a35a73d9b1d8be2075d47e5c61984118756087ea948b3a65ef04f06fe5540913"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-21T08:20:05.141497+00:00"
+}

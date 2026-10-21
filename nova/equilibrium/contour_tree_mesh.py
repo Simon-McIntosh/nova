@@ -303,8 +303,10 @@ def _clipped_carrier(
         & centre_valid
     )
     dedup: dict[tuple, int] = {}
-    for index, point in enumerate(vertices):
-        dedup.setdefault(_key(point, tolerance), index)
+    # A clipped corner cannot reuse a nearby centre outside the wall.
+    for index, (point, valid) in enumerate(zip(vertices, vertex_valid)):
+        if valid:
+            dedup.setdefault(_key(point, tolerance), index)
 
     def vertex_index(point, psi_value) -> int:
         key = _key(point, tolerance)

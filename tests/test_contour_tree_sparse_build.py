@@ -118,6 +118,18 @@ def test_carrier_triangles_have_resolved_area(kind: str):
     assert np.all(doubled_area > 64 * np.finfo(float).eps * scale)
 
 
+@pytest.mark.slow
+@pytest.mark.parametrize("kind", ["limited", "diverted"])
+def test_clipped_carrier_faces_use_occupiable_vertices(kind: str):
+    """Every face entering a contour sweep uses vertices inside the wall."""
+
+    _oracle, _field, wall, _axis, _saddle = oracle._analytic_inputs(kind)
+    mesh = oracle._realised_hex_geometry(wall, 2000).contour_mesh
+    faces = np.asarray(mesh.triangles)[np.asarray(mesh.triangle_valid)]
+    valid = np.asarray(mesh.vertex_valid)
+    assert np.all(valid[faces])
+
+
 @pytest.mark.parametrize("kind", ["limited", "diverted"])
 @pytest.mark.parametrize("cells", [550, 2000])
 def test_sparse_build_matches_base_receipt(kind: str, cells: int):

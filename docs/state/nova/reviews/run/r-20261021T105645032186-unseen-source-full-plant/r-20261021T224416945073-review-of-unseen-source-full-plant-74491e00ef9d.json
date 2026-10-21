@@ -2,6 +2,13 @@
   "added_failure_count": 0,
   "added_failure_ids": [],
   "completed_at": "2026-10-21T23:12:45.328Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "unseen-source-full-plant",
+      "recorded_at": "2026-10-21T23:21:06.991038+00:00"
+    }
+  },
   "dispatched_at": "2026-10-21T22:45:01Z",
   "findings": [
     {

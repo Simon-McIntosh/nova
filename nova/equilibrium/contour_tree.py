@@ -16,8 +16,16 @@ carries :data:`CRITICAL_TYPE_OUTSIDE`, outside the DD minimum/saddle/maximum
 vocabulary, and :func:`dd_emittable_nodes` excludes it from the DD
 ``contour_tree`` mapping.
 
-The fixed capacities are 256 nodes and 255 edges.  A capacity overflow is a
-visible refusal rather than a truncated topology result.
+The receipt's node and edge capacities are derived from the carrier by
+:func:`carrier_node_capacity` and :func:`carrier_edge_capacity`: an undeclared
+capacity is the carrier's own vertex or edge slot count, so a wide carrier is
+never refused by a bound chosen for another one, and a capacity a caller
+declares smaller than the carrier needs sets the receipt's ``overflow`` refusal.
+The neighbour table's width comes from the carrier's degree, measured
+host-side where the carrier is concrete and bounded by its edge count where it
+is only a traced shape; see :func:`measured_degree_capacity`.
+:data:`ContourTreeResult` keeps its own DD field capacities because the mapping
+to DD 4.1.0 is a separate, narrower contract.
 """
 
 from __future__ import annotations
@@ -29,6 +37,7 @@ from typing import ClassVar, Protocol, TypeAlias
 
 import jax
 import jax.numpy as jnp
+import numpy as np
 
 from nova_cocos import convention
 
@@ -146,6 +155,65 @@ def _batch_edges(
     return jnp.where(valid[:, None], arc[selected], 0), valid, edge_count > capacity
 
 
+def measured_degree_capacity(
+    edges: jax.Array, edge_valid: jax.Array, vertex_count: int
+) -> int | None:
+    """Count the carrier's own maximum live degree, when the carrier is concrete.
+
+    The width of the neighbour table is the leading cost of both sweeps: the
+    table is ``(vertex_count, width)`` and each visit compares every pair of a
+    vertex's neighbours against it.  A width taken from the carrier's slot count
+    rather than from its degree therefore multiplies the build by the ratio
+    between them, which on a ten-thousand-cell mesh is the difference between a
+    two-minute file and a stalled one.
+
+    The count is a host-side measurement over the concrete edge list, so a
+    carrier that exists only as a traced shape returns ``None`` and the caller
+    falls back to a bound the traced shape can support.  This is the measured
+    two-pass count: the degree is counted per vertex here, and the sweep's
+    union-find pass walks the resulting table.
+    """
+
+    if isinstance(edges, jax.core.Tracer) or isinstance(edge_valid, jax.core.Tracer):
+        return None
+    endpoints = np.asarray(edges, dtype=np.int64).reshape(-1, 2)
+    keep = np.asarray(edge_valid, dtype=bool).reshape(-1)
+    endpoints = endpoints[keep]
+    if endpoints.size == 0:
+        return 0
+    degree = np.bincount(endpoints.ravel(), minlength=vertex_count)
+    return int(degree.max())
+
+
+def carrier_node_capacity(declared: int | None, vertex_slots: int) -> int:
+    """Resolve the receipt's node capacity from the carrier it is given.
+
+    An undeclared capacity is the carrier's own vertex slot count: every
+    critical point this build can emit is one carrier vertex, so that is the
+    smallest bound that never refuses a legitimate receipt, and it grows with
+    the mesh instead of being fixed for one of them.  A declared capacity is
+    kept as given, so a caller that declares fewer rows than the carrier needs
+    receives a refused receipt rather than a truncated tree.
+    """
+
+    if declared is None:
+        return vertex_slots
+    return max(1, int(declared))
+
+
+def carrier_edge_capacity(declared: int | None, edge_slots: int) -> int:
+    """Resolve the receipt's edge capacity from the carrier it is given.
+
+    The merged join and split arcs are collected over the carrier's own edge
+    slots, so an undeclared capacity is that slot count.  A declared capacity
+    below what the carrier needs refuses, exactly as for nodes.
+    """
+
+    if declared is None:
+        return edge_slots
+    return max(1, int(declared))
+
+
 def _insert_split_nodes(
     node_valid: jax.Array,
     edges: jax.Array,
@@ -212,16 +280,20 @@ def _carrier_adjacency(
 ) -> tuple[jax.Array, jax.Array, jax.Array]:
     """Index each carrier edge once for constant-degree sweep visits.
 
-    A carrier supplies its measured maximum degree as static shape metadata.
-    Direct graph callers without that metadata retain a bounded dense-carrier
-    default or their full edge width when sparse. An undersized table refuses.
+    A carrier supplies its measured maximum degree as static shape metadata,
+    which is the width the production read uses.  A caller that supplies none
+    gets the carrier's own measured degree where it can be counted host-side,
+    through :func:`measured_degree_capacity`: a table no wider than the degree
+    visits every neighbour the carrier has, so that width refuses nothing the
+    graph permits.  A carrier that exists only as a traced shape cannot be
+    counted, and falls back to the safe edge-count bound, which no graph can
+    exceed.  A declared width below the measured degree refuses.
     """
 
     edge_count = edges.shape[0]
     if neighbour_capacity is None:
-        neighbour_capacity = (
-            min(edge_count, 32) if edge_count > 2 * vertex_count else edge_count
-        )
+        measured = measured_degree_capacity(edges, edge_valid, vertex_count)
+        neighbour_capacity = edge_count if measured is None else measured
     neighbour_capacity = max(1, neighbour_capacity)
     carrier_edges = edges.astype(CARRIER_INDEX_DTYPE)
     sources = jnp.concatenate((carrier_edges[:, 0], carrier_edges[:, 1]))
@@ -419,7 +491,10 @@ def _sweep_tree(
     return result[4], result[5], output_edges, output_valid, overflow, order
 
 
-@partial(jax.jit, static_argnames=("neighbour_capacity",))
+@partial(
+    jax.jit,
+    static_argnames=("neighbour_capacity", "node_capacity", "edge_capacity"),
+)
 def build_contour_tree(
     vertex_psi: jax.Array,
     vertex_valid: jax.Array,
@@ -428,6 +503,8 @@ def build_contour_tree(
     edge_valid: jax.Array,
     sigma: jax.Array,
     neighbour_capacity: int | None = None,
+    node_capacity: int | None = None,
+    edge_capacity: int | None = None,
 ) -> ContourTreeArrays:
     """Build a contour tree from a fixed-capacity piecewise-linear edge graph.
 
@@ -436,12 +513,18 @@ def build_contour_tree(
     receipt.  Equal raw values are ordered by vertex index, the required
     simulation-of-simplicity rule, so this function has no value tolerance and
     remains traceable through both :func:`jax.jit` and :func:`jax.vmap`.
+
+    The emitted node and edge capacities come from the carrier unless the caller
+    declares them; see :func:`carrier_node_capacity` and
+    :func:`carrier_edge_capacity`.  The sweeps themselves are always sized by
+    the carrier, so a declared capacity below what the carrier produces is
+    reported through ``overflow`` rather than truncating the tree.
     """
 
-    node_capacity = ContourTreeResult.node_capacity
-    edge_capacity = ContourTreeResult.edge_capacity
     mesh_node_capacity = vertex_psi.size
     mesh_edge_capacity = edges.shape[0]
+    node_capacity = carrier_node_capacity(node_capacity, mesh_node_capacity)
+    edge_capacity = carrier_edge_capacity(edge_capacity, mesh_edge_capacity)
     signed = jnp.asarray(sigma, dtype=vertex_psi.dtype) * vertex_psi
     neighbours, neighbour_valid, adjacency_overflow = _carrier_adjacency(
         edges, edge_valid, mesh_node_capacity, neighbour_capacity
@@ -656,6 +739,9 @@ __all__ = [
     "ContourTreeState",
     "FluxCurrentSignError",
     "build_contour_tree",
+    "carrier_edge_capacity",
+    "carrier_node_capacity",
     "dd_emittable_nodes",
+    "measured_degree_capacity",
     "sigma_for_state",
 ]

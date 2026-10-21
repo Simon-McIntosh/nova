@@ -1,0 +1,89 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "This figure review ran no suite, so the count is the neutral value the record shape requires and not a measurement; no base/head gate pair was read and no suite-delta is claimed.",
+  "attachment_map": {
+    "final-terminal-preview.png (1400x1000, written by the reviewed run's own final render job 1292424)": "docs/figures/converged-forward-solve/read-correction-path/terminal-forward-states.svg",
+    "terminal-forward-states.png (4200x3000, rendered here from the reviewed head's committed blob)": "docs/figures/converged-forward-solve/read-correction-path/terminal-forward-states.svg"
+  },
+  "attachment_note": "The reviewed run's directory carries one raster attachment, final-terminal-preview.png (1400x1000), written at 2026-10-21 22:02Z by the same render call that wrote the SVG (final-render-terminal.log: revision 8993e1a5d, FIGURE=.../terminal-forward-states.svg BYTES=... and PREVIEW=.../final-terminal-preview.png, EXIT=0). It is the reviewed head's figure: the reviewed head's committed blob is byte-identical to the file on disk in the reviewed worktree (git cat-file -s e9444fd44:... = 256490; wc -c on disk = 256490; worktree clean at HEAD e9444fd44), so the preview and the SVG are the same figure. I also rendered the reviewed head's committed blob myself with ImageMagick (convert -density 300, 4200x3000) and cropped panels at 250-400 percent; the two renders agree in content. Pixel measurements below are taken on the run's own preview, the zooms on my render. A second raster, terminal-preview.png (1400x1000, 2026-10-21 05:23Z), is the superseded figure from commit 0a6d1bf30's parent and is NOT the reviewed head's figure (the SVG changed again in 0a6d1bf30, 5724 insertions / 2554 deletions); it was not reviewed. The base sha 94aeed72 is confirmed an ancestor of the reviewed head e9444fd44 (git merge-base --is-ancestor exit 0).",
+  "completed_at": "2026-10-21T23:43:30.059Z",
+  "dispatched_at": "2026-10-21T23:15:59Z",
+  "figure_checks": {
+    "clipping": "Zero non-white pixels in the outer 2 px frame of the 1400x1000 render (measured with PIL on the run's final-terminal-preview.png), so nothing is clipped at the canvas edge.",
+    "null_marker_occlusion": "Around the nine retained markers detected in the panels, charcoal ink within a 60x60 px box is 5 to 99 px against 392 to 805 retained px (ratio 0.01 to 0.22), so the reference-style null shows only as a thin rim under the retained glyph, and almost not at all in the limited panels, even though the legend names the two styles separately.",
+    "reference_visibility": "Visible reference-dash ink is far smaller than retained ink because the retained series is drawn over the reference: 2819 charcoal px in total, of which 2674 are dashed-stroke ink outside the small legend blobs, against 45683 retained px (about 5.9 percent). Per quadrant the visible reference ink is thin but nonzero everywhere: limited 553 578 px, limited 2,105 602 px, diverted 550 865 px, diverted 2,098 774 px, against 10584 to 12222 retained px in each. The reference is legible where the two fields differ and near-invisible where they coincide.",
+    "render_provenance": "The reviewed head's committed blob is byte-identical to the file the run rendered and verified (256490 bytes both), and the worktree at e9444fd44 is clean, so the run's own preview and the on-disk SVG are the same artifact. An independent render of the head blob with ImageMagick agreed in content. Provenance is by construction and byte identity, not by a fuzzy image match.",
+    "values_from_the_receipt": "The render log records shared per-panel level arrays (limited 550 and 2,000 share the eight levels 0.0 to 47.43556002370251; diverted 550 and 2,000 share eight levels near 0.0 to 0.0054) and x_points_drawn 0 for every limited read and 1 for every diverted read, so the limited panels correctly carry no saddle and the diverted panels correctly carry one."
+  },
+  "figure_verdicts": [
+    {
+      "attachment": "final-terminal-preview.png",
+      "figure": "docs/figures/converged-forward-solve/read-correction-path/terminal-forward-states.svg",
+      "render_check": {
+        "canvas": "1400x1000 (final-terminal-preview.png)",
+        "charcoal_px_total": 2819,
+        "outer_frame_non_white_px": 0,
+        "retained_teal_px": 45683,
+        "wall_black_px": 5039
+      },
+      "rubric": {
+        "contrast": "pass. All marks and text clear 3:1 on white: teal #1f6f8b approximately 5.7:1, charcoal #333333 approximately 12.6:1, wall #000000 approximately 21:1.",
+        "data_ink": "pass. Contour lines are the only data ink: 45683 retained px and 2819 charcoal px outside the legend glyphs, against 5039 black px that are the wall plus the dashed strokes. Nothing is shaded or filled except the null glyphs the repository's flux-map rule requires.",
+        "decoration": "pass. No grid, spine, tick label, background fill, band or shadow; the axis is off. The four titles and the legend are the only text.",
+        "label_collision": "pass. Zero non-white pixels in the outer 2 px frame of the 1400x1000 render, so no title or legend text is clipped; the four panel titles sit in their own shelves and the three legend columns do not touch.",
+        "legibility": "pass. Four panels, each titled above it and drawn with axes off, over one frameless six-entry legend: 'retained field' (solid teal), 'reference field' (dashed charcoal), 'retained axis' (teal triangle), 'reference axis' (charcoal triangle), 'retained saddle' (teal cross), 'reference saddle' (charcoal cross). In the two diverted panels the retained and analytic fields visibly separate and the dashed reference reads clearly. Legend glyphs occupy one clean band near the bottom of the canvas and no glyph touches another.",
+        "table_form": "pass. A 2x2 grid of poloidal flux maps with walls and null sets is a spatial relationship, not a table."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "evidence": "SVG path styles: the axes_1..axes_4 paths carry 'stroke: #333333; stroke-dasharray: 8.88,3.84; stroke-width: 2.4'; the retained groups carry 'stroke: #1f6f8b; stroke-width: 2'. Pixel counts measured with PIL on final-terminal-preview.png.",
+      "file": "docs/figures/converged-forward-solve/read-correction-path/terminal-forward-states.svg",
+      "line": null,
+      "severity": "follow-on",
+      "summary": "The reference series is largely occluded by the retained series drawn over it, and the occluding line is the thinner one. Each panel draws the reference contours first (stroke #333333, dashed 8.88,3.84, width 2.4) and the retained contours after, on top (stroke #1f6f8b, solid, width 2.0), so where the two agree the reader sees one teal line with a dark dotted edge rather than two marks. On the run's 1400x1000 render only 2674 px of reference dash ink are visible against 45683 retained px, falling to 578 and 602 px in the two limited panels where the fields coincide, and the legend draws both series keys at 2.4 pt so the width hierarchy the reader sees is not the one the legend implies. A reader of the limited panels cannot recover the analytic contour positions independently; only the diverted panels, where the fields separate, let the reference be read on its own. This does not meet the blocking bar - the disagreement is visible exactly where it is nonzero, and the two series are separated by dash pattern as well as colour - but it is the figure's weakest reading and is recorded for the coordinator."
+    },
+    {
+      "evidence": "docs/evidence/fragments/converged-forward-solve/read-correction-path.html line 24 (the figure element's alt and figcaption); reviewed manifest artifacts 'diverted2098 strict xfail 0.0262254747411'; final-render-terminal.log 'limited 550 retained' and 'limited 2000 retained' each x_points_drawn 0.",
+      "file": "docs/evidence/fragments/converged-forward-solve/read-correction-path.html",
+      "line": 24,
+      "severity": "follow-on",
+      "summary": "The figure's accessible alt text describes an artifact the render does not show, and the caption names one panel by a count its own title contradicts. The alt reads 'Four certified poloidal terminal states over analytic reference contours, with walls and both sets of magnetic axes and saddles', but the reviewed run's own receipt records the diverted 2,098-cell row as a strict xfail at residual 0.0262254747411 (not certified), and the render log records x_points_drawn 0 for all four limited reads, so no saddle is drawn in the two limited panels at all. The caption beneath is accurate and discloses both facts ('the diverted 2,000-cell panel shows its nonconverged terminal field'), so the defect is confined to the alt text, which is the only description a screen-reader user receives. The caption also calls the panel 'the diverted 2,000-cell panel' where the panel title reads 'Diverted, 2,098 cells', a nominal-versus-measured cell count that the title and the receipt both resolve to 2,098. No edit made (read-only review)."
+    }
+  ],
+  "item_verdicts": {
+    "caption_independence": "The caption does not merely repeat the figure's title. The figure carries no title element (identity is in the file name and the per-panel shelf titles), and the caption states the render job and device, the two series and their styles, the shared level array per panel, that axes are off, and that the diverted panel is nonconverged. It is a description, not a restatement; its one inaccuracy, the '2,000-cell' name for the 'Diverted, 2,098 cells' panel, is recorded inside finding 2.",
+    "finding_materiality": "Two follow-on findings, no blocking finding. Nothing is clipped (zero frame ink), no label overlaps another label or the data, no text is unreadable, and the image is not tabular, so none of the blocking categories the rubric names is met. Finding 1 sits close to the blocking boundary and is stated with its measurements so the coordinator can judge it.",
+    "rendered_artifact": "The reviewed head's figure was opened as an image both as the run's own 1400x1000 preview (byte-identical SVG provenance) and as my own 4200x3000 render of the head blob, and inspected at native resolution and in 250-400 percent crops of three panels and the legend. No verdict below is read from the source file alone.",
+    "scope": "Read-only. No file was edited, created, moved, deleted, redrawn, relabelled or reformatted; the only writes are this record at its two declared paths and the run manifest. The renders and crops were made under the session scratchpad from the reviewed head's own blob."
+  },
+  "justifications": {
+    "durability": "This record is written at both declared paths and checked with `reckon crew check --review --record` before the manifest is closed.",
+    "evidence": "Provenance is by construction and byte identity: the head blob and the rendered file are both 256490 bytes and the worktree at head is clean, so the preview is the reviewed artifact. The base sha is confirmed an ancestor of the head. Occlusion, clipping and ink counts are pixel measurements on the run's own preview.",
+    "legibility": "Read from the rendered image: crops of the limited 553, diverted 550 and diverted 2,098 axis regions and of the legend, plus the whole-figure render, show every title and legend entry unclipped and each series traceable; the reference-occlusion caveat is measured rather than asserted.",
+    "scope_discipline": "This review is read-only; both findings are reported in this record and no source, figure or caption was changed."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261021T231514778984-review-of-read-correction-path-e9444fd44c35-figure",
+  "reviewed_base_sha": "94aeed7246f89b00eae1952f9e8b3a3a8aef0ccb",
+  "reviewed_figures": [
+    "docs/figures/converged-forward-solve/read-correction-path/terminal-forward-states.svg"
+  ],
+  "reviewed_head_sha": "e9444fd44c35688678eea60b3cc0873125927ab3",
+  "reviewed_run_id": "r-20261021T005136987306-read-correction-path",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: pass. Four poloidal line-contour panels on one canvas, each titled in a shelf above it ('Limited, 553 cells', 'Limited, 2,105 cells', 'Diverted, 550 cells', 'Diverted, 2,098 cells'), axes off, with one frameless six-entry legend below the panels. The retained field reads as a teal line and the reference as charcoal dashes; the four terminal states are distinguishable at a glance. The occlusion of the reference series is recorded as finding 1 but does not stop a reader reading the figure.",
+    "RUBRIC data_ink: pass. Line contours only. Outside the legend the 1400x1000 render holds 45683 retained-teal px, 2819 charcoal px and 5039 black px, and the only solid fills are the required null-marker glyphs and the white page; no gradient, band or area fill is drawn.",
+    "RUBRIC decoration: pass. No gridlines, spine, tick, background fill or drop shadow; the axis furniture is off per the repository's poloidal rule. The white space in the top-left quadrant and beneath the panels is 2x2 grid layout, not decoration.",
+    "RUBRIC contrast: pass. Retained teal #1f6f8b is about 5.7:1 on white, reference charcoal #333333 about 12.6:1, the wall black about 21:1, and all title and legend text is near-black on white; every mark clears the 3:1 graphics floor, and the two contour series are additionally separated by dash pattern.",
+    "RUBRIC table_form: pass. Four spatially arranged poloidal flux maps with stationary points and a wall are a spatial relationship; the comparison the caption claims (retained against its analytic reference on shared per-panel levels) is what a contour overlay carries and a table would not.",
+    "RUBRIC label_collision: pass. Zero non-white pixels in the outer 2 px frame of the 1400x1000 render, so no title or legend text is clipped, and every title and legend entry occupies its own band. The overlapping null markers of finding 1 are markers, not labels."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-21T23:44:22.482815+00:00",
+  "total": null
+}

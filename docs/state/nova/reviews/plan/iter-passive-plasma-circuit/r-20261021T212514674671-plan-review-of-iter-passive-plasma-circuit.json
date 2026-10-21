@@ -1,0 +1,62 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-21T21:50:11.004Z",
+  "dispatched_at": "2026-10-21T21:34:02Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/iter-passive-plasma-circuit.html:195",
+      "id": "reasoning-1",
+      "reason": "the section's whole purpose is that a rebuild never reads a pre-repair matrix, and without naming nova's in-repo pinned key consumer one of the two callers \u00a76 relies on silently keeps serving the pre-repair entry or fails to resolve it.",
+      "text": "\u00a77 requires the repair to change both caches' keys (\"So the repair extends both keys to cover whatever it changes\") and its clause (3) names only the external consumer to hand the new key to (\"power_convertor receives a new plant entry for 105069/3 and its key\"), but nova's own `scripts/iter_vessel_evolution/evolve.py:33` pins the two sectioned-set digests this repair re-keys as literals \u2014 `MESH_KEY = {0.012: \"68df15665ab2ea45f427\", 0.006: \"06ff06d3eb7a4448f0fe\"}` \u2014 and `conductor_geometry` resolves its entry through them at `evolve.py:94` (`load_sectioned_machine(CONDUCTOR_CACHE / MESH_KEY[surface_layer])`), so a node that re-keys the 12 mm and 6 mm sets as \u00a77 requires leaves those literals pointing at the pre-repair entries (the very entries \u00a77's own load guard is meant to refuse)",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "4bd8159c3f1d12a82faee1aac66bc3e902ad52336603d24e3360063a44ac626d",
+  "plan_slug": "iter-passive-plasma-circuit",
+  "plan_version": 31,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-21T21:50:54.803751+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-21T21:50:54.803751+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-iter-passive-plasma-circuit.v31.json",
+  "review_run_id": "r-20261021T212514674671-plan-review-of-iter-passive-plasma-circuit",
+  "reviewed_blob_sha": "751e771ae60c8fe528ee5dd1f438e3fa71ca6086",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `scripts/iter_sectioned_conductor_set/build.py`, `subdivide_passive_thickness` (nova/circuit/conductor.py:129), `guard_positive_definite` (nova/circuit/linkage.py:291), the cache tag `finite-source:6` (build.py:265), the pinned entry `coupled-plant/28148563521d92a2198b` named in \u00a76, and power_convertor's record `averaged-plant-energy-refusal` at commit `9c654e94` all resolve; the cited numbers check out against that evidence (v\u1d40Lv = 5.857080e-4 H, \u2016Mv\u2016\u00b2 = 5.857464e-4 H, excess 6.6e-5 relative, negative eigenvalues \u22123.84e-8 and \u22123.25e-8 H).",
+    "done_when": "pass \u2014 \u00a77's three clauses are measurable (overlap attribution between geometry and quadrature; joint coil-plus-passive positive definiteness on the 12 mm and 6 mm sets; a delivered entry and key) and it names a literal negative control matched to its own measure, \"revert the repair, and the Schur complement again has the two negative eigenvalues\", which is the same quantity the power_convertor evidence refused on.",
+    "evidence_paths": "pass \u2014 \u00a77 names no gate-log path of its own, but its artifacts land in the sectioned-set and coupled-plant caches \u00a76 already names (`.cache/iter-passive-plasma-circuit/sectioned-conductor-set/<digest>/`, `coupled-plant/<digest>/`), and the gate-log directory is supplied by the dispatch brief as it was for the earlier sections.",
+    "naming": "pass \u2014 \u00a77 introduces no plan labels, stage names, ticket numbers or version tags; `finite-source:6`, VSU/VSL and the case numbers are code and data anchors, not plan labels.",
+    "reasoning": "a finding \u2014 \u00a77's mechanism for keying the repair runs on `build.py`'s derivation but the plan names only power_convertor as the consumer of the changed key, omitting nova's own pinned consumer, so the re-key does not reach that caller.",
+    "single_goal": "pass \u2014 \u00a77 carries one deliverable, a positive-definite coil-plus-passive linkage, with clause (1) the attribution that selects the repair and clause (3) its delivery; it is at the section-size limit of three clauses but not two goals.",
+    "wiring": "pass \u2014 \u00a77 declares its ordering against \u00a76's remaining check 3 (\"\u00a76's remaining check 3 runs after this section, against the entry this section writes\") and names its consumer (\u00a77 hands power_convertor a new plant entry and key), and no depends-on, informs or gates target is missing or points at a node that does not exist."
+  },
+  "section_digests": {
+    "_document": "9089b3d51bacedf8b789082a7c5656db85f9c3bd1fe196a55b7b774ad7634317",
+    "s1": "fd450fda152b172eb82e80c548ab9e5fa16c20b15f3b14ae415c0ed18ceb7a8c",
+    "s2": "fbea1d197646f2baba636205f10434c799bb3ce88f19dfa3ef779d98d25c50fb",
+    "s3": "56e06d1f8c060952b209edbc0a1c98e3f22e1cad48fcc1e6d6f04eb464d977bf",
+    "s4": "f8534dfd59d3f9812bc19d36079033b715faafd53488ec44ddfec9f088a03e93",
+    "s5": "39b83394b03af8bd027560dfc1db14bc1176968fc3aa2a93635fed656c03c8ec",
+    "s6": "315ddfe4d045aed64c52a21768f30159f8ee06c4d7c45409eeaa661cbe6b6c2f",
+    "s7": "c23910f89d98a74c94994a5c3e676cc07f73ceb5064e22dacbaa1bf160c57852"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-21T21:50:50.595941+00:00"
+}

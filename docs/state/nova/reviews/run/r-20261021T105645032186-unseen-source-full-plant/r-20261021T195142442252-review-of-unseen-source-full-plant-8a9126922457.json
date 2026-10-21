@@ -1,0 +1,69 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-21T20:09:46.017Z",
+  "dispatched_at": "2026-10-21T19:52:15Z",
+  "findings": [
+    {
+      "detail": "The first section was written at 56a3277bd, before the shaped-section repair (92ec74686), and was never corrected when sections 2 and 3 were appended. It states 'The plant build itself ... stops on a defect one layer past the loader' and 'The two DINA arms and the reconstruction-tolerance arm are therefore not met and are reported as not met'; its Gate paragraph heads the run at 1eacfd3c8, not at the reviewed head. The completed outcome lives in the sibling fragment docs/evidence/fragments/iter-passive-plasma-circuit/unseen-source-shaped-section-flux.html, which is not the file the done-when points a reader at. A coordinator reading the named fragment for writeback is told the opposite of the manifest's 'Done-when (1) MET / (2) MET'.",
+      "file": "docs/evidence/fragments/iter-passive-plasma-circuit/unseen-source-full-plant.html",
+      "line": 2,
+      "severity": "blocking",
+      "summary": "The evidence fragment named by the done-when still asserts the plant build stops and the two DINA arms are not met, contradicting the manifest at the same head."
+    },
+    {
+      "detail": "The closure (reconstruction arm restored to DINA, marked strict-xfail, reference handed to a DD3-to-COCOS-17 translator) is recorded only in the run's resume-4-advice.txt. docs/plans/iter-passive-plasma-circuit.html section 6 still reads 'agrees with the DINA-path plant within relative 1e-3' and carries data-status=\"implementable\", so the plan and the named fragment both disagree with the manifest's 'complete'.",
+      "file": "docs/evidence/fragments/iter-passive-plasma-circuit/unseen-source-full-plant.html",
+      "line": 38,
+      "severity": "follow-on",
+      "summary": "The fragment ends its localisation section on 'This node reports status: blocked' and carries no record of the lead's closure ruling, while the plan section on disk still states the original done-when."
+    },
+    {
+      "detail": "The fields read 'one all_debug job: for each of tests/test_prescribed_plasma.py, ... a fresh process at head' and 'the same job: git archive 2c14b3ffc into a /tmp tree removed by trap, ...'. The manifest contract refuses a sentence naming the suite instead of the literal command, and the log carries no '# command:' header to fall back on.",
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261021T105645032186-unseen-source-full-plant/manifest.md",
+      "line": 206,
+      "severity": "follow-on",
+      "summary": "The manifest carries no `tests:` key and its after_suite/baseline_suite `command` fields are prose, so the gate receipt cannot be re-run."
+    },
+    {
+      "detail": "The last line is '=== DONE Wed Oct 21 07:28:51 PM UTC 2026+0000' and the file contains zero lines matching `^EXIT=`. Per-file `EXIT_FILE=<file>=<code>` markers are present inside it, but the per-arm terminator promotion reads is absent, so the manifest's exit_status is the only source for the arm status.",
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261021T105645032186-unseen-source-full-plant/scratch/gate_final.log",
+      "line": 279,
+      "severity": "follow-on",
+      "summary": "The gate log has no bare `EXIT=<code>` last line, so the gate's own status is unread from the log."
+    },
+    {
+      "detail": "Lines 417-419 sit at column 0 inside test_thin_polygon_strip_is_integrated_not_missed while their leading comment line is indented. ruff format does not reindent comment bodies, so the node's path-scoped lint pass did not catch it.",
+      "file": "tests/test_prescribed_plasma.py",
+      "line": 417,
+      "severity": "follow-on",
+      "summary": "A comment continuation is left at column 0 inside a function body, breaking the file's indentation style."
+    },
+    {
+      "detail": "nova/circuit/linkage.py:86 section_grid and nova/imas/mast_passive_inductance.py:221 quadrature_grid are the same accumulate-and-concatenate shape with the same return tuple; the new helper is a third copy for PolygonSection. polygon_quadrature (nova/imas/prescribed_plasma.py:77) is likewise a sibling of mast_passive_inductance.section_quadrature, and its genuinely better interior rule was not offered back to that owner.",
+      "file": "nova/imas/prescribed_plasma.py",
+      "line": 156,
+      "severity": "follow-on",
+      "summary": "_polygon_point_grid duplicates the (r, z, weight, owner) concatenation that nova/circuit/linkage.py:section_grid already owns, without extending the owner."
+    }
+  ],
+  "project": "nova",
+  "review": "VERDICT goal: the node goal is to drive plasma sources the plant cache has never seen through the full ITER plant from the sectioned-set cache and to write the geometry into the real entries; the landed diff does this through nova/imas/prescribed_plasma.py:77 and tests/test_unseen_source_full_plant.py:270, with the reconstruction-agreement clause left as a documented strict xfail at tests/test_unseen_source_full_plant.py:318.\nVERDICT done_when: read the brief's three checks; checks 1 and 2 are asserted at tests/test_unseen_source_full_plant.py:373 and :295, while check 3 is not asserted \u2014 its assertion is expected to fail at tests/test_unseen_source_full_plant.py:348.\nVERDICT write_paths: read the manifest's declared paths plus the recorded scope extension in the run's resume-1-advice.txt; every path in the diff is inside them except docs/evidence/fragments/iter-passive-plasma-circuit/unseen-source-shaped-section-flux.html, which no declared list names.\nVERDICT manifest: read; it states status complete and records after_suite 1 failed / 17 passed for tests/test_coupled_plant.py with the identical failure at base, but emits no `tests:` line and names no EXIT= gate terminator.\nVERDICT diff: read commit by commit against 970c04c6b (the node's own orientation base, ten commits, seven files, head 8a9126922); the code change is the shaped-section quadrature repair, the renamed evolve loader, and the new coverage.\nCALL_SITES: nova/circuit/coupled_plant.py:304, nova/imas/prescribed_plasma.py:126, nova/imas/prescribed_plasma.py:188, scripts/iter_vessel_evolution/evolve.py:310\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: nova/imas/prescribed_plasma.py:77 replaces the bounding-box rule that refused 42 of the machine's 1,304 shaped sections, so a new source reaches the plant, but the reconstruction agreement clause is only xfailed at tests/test_unseen_source_full_plant.py:318.\nSCORE evidence: 11\nJUSTIFICATION evidence: the gate ran and is recorded in scratch/gate_final.log, but the fragment the done-when names says the checks are not met (docs/evidence/fragments/iter-passive-plasma-circuit/unseen-source-full-plant.html:2) and the log carries no EXIT= terminator at line 279.\nSCORE scope_discipline: 21\nJUSTIFICATION scope_discipline: nova/imas/prescribed_plasma.py and tests/test_prescribed_plasma.py are authorised by the run's resume-1-advice.txt, and only docs/evidence/fragments/iter-passive-plasma-circuit/unseen-source-shaped-section-flux.html falls outside every declared list.\nSCORE durability: 15\nJUSTIFICATION durability: the zero-rebuild spies cover every module binding with a non-empty-binding assertion (tests/test_unseen_source_full_plant.py:110) and the thin-section checks compare against independent dense references, but both slow guards skip on a host without the run's scratch cache (tests/test_unseen_source_full_plant.py:270).\nSCORE fit: 16\nJUSTIFICATION fit: scripts/iter_vessel_evolution/evolve.py:85 renames conductor_geometry to the mechanism-named sectioned_conductor_geometry, though tests/test_prescribed_plasma.py:417 leaves an unindented comment block.\nSCORE reuse: 8\nJUSTIFICATION reuse: nova/imas/prescribed_plasma.py:156 _polygon_point_grid re-implements the (r, z, weight, owner) concatenation owned by nova/circuit/linkage.py:86 section_grid and mirrored at nova/imas/mast_passive_inductance.py:221 quadrature_grid, without extending either.\nFINDING docs/evidence/fragments/iter-passive-plasma-circuit/unseen-source-full-plant.html:2 blocking: the fragment named by the done-when still states the plant build stops and the DINA arms are not met, contradicting the manifest's MET at the same head.\nFINDING docs/evidence/fragments/iter-passive-plasma-circuit/unseen-source-full-plant.html:38 follow-on: the fragment closes on status blocked and records no closure ruling, and docs/plans/iter-passive-plasma-circuit.html section 6 still carries the DINA reference.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261021T105645032186-unseen-source-full-plant/manifest.md:206 follow-on: no `tests:` line and prose `command` fields, so the gate receipt cannot be re-run.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261021T105645032186-unseen-source-full-plant/scratch/gate_final.log:279 follow-on: no bare EXIT= last line, so the gate's status is unread from the log.\nFINDING tests/test_prescribed_plasma.py:417 follow-on: a comment continuation is left at column 0 inside the function body.\nFINDING nova/imas/prescribed_plasma.py:156 follow-on: _polygon_point_grid duplicates nova/circuit/linkage.py:86 section_grid's concatenation without extending it.",
+  "review_run_id": "r-20261021T195142442252-review-of-unseen-source-full-plant-8a9126922457",
+  "reviewed_at": "2026-10-21T22:05:00Z",
+  "reviewed_base_sha": "970c04c6bc44349e812f3ad0b22009c8d7815eaa",
+  "reviewed_head_sha": "8a9126922457f78d7591ccde30d83f3b3a517f04",
+  "reviewed_run_id": "r-20261021T105645032186-unseen-source-full-plant",
+  "scores": {
+    "durability": 15,
+    "evidence": 11,
+    "fit": 16,
+    "goal_fidelity": 14,
+    "reuse": 8,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-21T20:10:36.549532+00:00",
+  "total": 80
+}

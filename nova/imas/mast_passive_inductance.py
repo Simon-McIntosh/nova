@@ -44,6 +44,8 @@ from typing import Any, Mapping, Sequence
 import numpy as np
 import shapely
 
+from nova.equilibrium.wall_mask import polygon_area
+
 from nova.biot.polygon import polygon_greens
 from nova.imas.mast_passive_response import (
     CASE_FAMILY,
@@ -73,6 +75,15 @@ target coarsens the pitch in both directions at once, which costs resolution
 mostly along the length -- the direction the linked flux varies slowly along.
 The count is a target and not a hard ceiling: the grid is laid on the bounding
 box in whole cells, so a section can land slightly over it.
+"""
+
+POLYGON_REFINEMENTS = 1
+"""Times each triangulated sub-triangle is split four ways for a shaped section.
+
+One split gives a centroid per sub-triangle of the outline's triangulation, which
+already integrates a field that varies linearly across the section exactly.  The
+count is a parameter only so a caller sampling a curved field more finely can ask
+for one.
 """
 
 
@@ -173,20 +184,40 @@ def passive_turns(geometry: Mapping[str, Any]) -> tuple[PassiveTurn, ...]:
 
 
 def section_quadrature(
-    turn: PassiveTurn,
+    section: PassiveTurn | np.ndarray,
     *,
     cells_across: int = CELLS_ACROSS_THICKNESS,
     point_target: int = QUADRATURE_POINT_TARGET,
+    refinements: int = POLYGON_REFINEMENTS,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Return interior quadrature points and equal-area weights for one section.
+    """Return interior quadrature points and area weights for one section.
 
-    The pitch resolves the section's thickness unless doing so would pass the
-    point target, in which case it coarsens to the pitch the target allows.
-    Cells whose centre lies outside the outline are dropped, so a bent shell is
-    sampled inside its wall and not across the void its bounding box spans.
-    The weights sum to one, which makes the reduction against them a section
-    mean.
+    A :class:`PassiveTurn` is sampled on an interior grid whose pitch resolves
+    its own thickness, so a bent shell is sampled inside its wall and not across
+    the void its bounding box spans; the weights sum to one, which makes the
+    reduction against them a section mean.
+
+    A bare ``(N, 2)`` vertex array is a shaped section arriving from another
+    source, and is triangulated instead: the outline's constrained Delaunay
+    triangulation covers a simple polygon whatever its shape, which a fan from
+    one corner does NOT, because a corner of a non-convex section cannot see all
+    of it.  Each triangle is split four ways ``refinements`` times, every point
+    is a sub-triangle centroid and so lies inside the section, and the weights
+    are the sub-triangle areas, which sum to the section's area and integrate a
+    field that varies linearly across it exactly.
     """
+
+    if isinstance(section, PassiveTurn):
+        return _turn_quadrature(section, cells_across, point_target)
+    return _polygon_quadrature(np.asarray(section, float), refinements)
+
+
+def _turn_quadrature(
+    turn: PassiveTurn,
+    cells_across: int,
+    point_target: int,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Interior grid sampling of one turn's section, equal-area weighted."""
 
     polygon = shapely.Polygon(turn.vertices)
     area = abs(polygon.area)
@@ -216,6 +247,63 @@ def section_quadrature(
     point_z = mesh_z[inside]
     weight = np.full(point_r.size, 1.0 / point_r.size)
     return (point_r, point_z, weight)
+
+
+def _polygon_quadrature(
+    vertices: np.ndarray,
+    refinements: int,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Interior quadrature of a simple polygon, weighted by area [m^2].
+
+    The outline's constrained Delaunay triangulation respects the boundary, so no
+    point lands in a concave notch or outside a thin strip, and a section
+    enclosing no area is refused by name.  Every point is a sub-triangle centroid
+    and the weights are the sub-triangle areas, which sum to the polygon's own
+    shoelace area.
+    """
+
+    area = polygon_area(vertices[:, 0], vertices[:, 1])
+    if area <= 0.0:
+        raise PassiveError("section encloses no area")
+    parts = shapely.constrained_delaunay_triangles(shapely.Polygon(vertices)).geoms
+    triangles = np.array(
+        [np.asarray(part.exterior.coords, float)[:-1] for part in parts]
+    )
+    if triangles.ndim != 3 or triangles.shape[1:] != (3, 2) or triangles.shape[0] == 0:
+        raise PassiveError("the section did not triangulate into triangles")
+    covered = float(np.abs([_signed_area(triangle) for triangle in triangles]).sum())
+    if not math.isclose(covered, area, rel_tol=1e-9, abs_tol=0.0):
+        raise PassiveError("the triangulation does not cover the section")
+    for _ in range(max(int(refinements), 0)):
+        triangles = np.concatenate([_split(triangle) for triangle in triangles])
+    centres = triangles.mean(axis=1)
+    weights = np.abs([_signed_area(triangle) for triangle in triangles])
+    return (centres[:, 0], centres[:, 1], weights)
+
+
+def _split(triangle: np.ndarray) -> np.ndarray:
+    """Split one triangle into its four midpoint sub-triangles."""
+
+    left, right, top = triangle
+    mid_left = 0.5 * (left + right)
+    mid_right = 0.5 * (right + top)
+    mid_top = 0.5 * (top + left)
+    return np.array(
+        [
+            (left, mid_left, mid_top),
+            (mid_left, right, mid_right),
+            (mid_top, mid_right, top),
+            (mid_left, mid_right, mid_top),
+        ]
+    )
+
+
+def _signed_area(triangle: np.ndarray) -> float:
+    """Signed area of one triangle, from its own two edge vectors [m^2]."""
+
+    edge_a = triangle[1] - triangle[0]
+    edge_b = triangle[2] - triangle[0]
+    return 0.5 * float(edge_a[0] * edge_b[1] - edge_a[1] * edge_b[0])
 
 
 def quadrature_grid(

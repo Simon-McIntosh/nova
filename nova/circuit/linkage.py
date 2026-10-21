@@ -33,6 +33,7 @@ import numpy as np
 from nova.biot.greens import cylinder_greens, hybrid_greens
 from nova.biot.polygon import polygon_greens
 from nova.circuit.conductor import ConductorSet, PolygonSection
+from nova.imas.mast_passive_inductance import section_quadrature
 
 #: floor on the section extents fed to the source-side flux integration [m] --
 #: a guard against a zero-thickness section, NEVER a conducting-area model (a
@@ -84,60 +85,6 @@ def section_points(
     )
 
 
-def polygon_area(vertices: np.ndarray) -> float:
-    """Enclosed area [m^2] of a polygon-section outline, orientation-free."""
-    corners = np.asarray(vertices, float)
-    radius, height = corners[:, 0], corners[:, 1]
-    return 0.5 * abs(
-        float(np.dot(radius, np.roll(height, -1)) - np.dot(height, np.roll(radius, -1)))
-    )
-
-
-def polygon_quadrature(
-    vertices: np.ndarray,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Interior quadrature points of a polygon section, area-weighted.
-
-    The section is fanned into triangles from its first corner and each triangle
-    is split four ways, so every point is the centroid of a sub-triangle that
-    lies inside the section by construction.  A section thinner than any fixed
-    grid spacing is therefore sampled like any other; a bounding-box grid cannot
-    do this, because its points are placed on the box and a thin enough section
-    contains none of them.  Weights are sub-triangle area fractions, so they sum
-    to one whatever the section's shape and orientation.
-
-    Reciprocity through :func:`nova.biot.polygon.polygon_greens` averages the
-    same section without sampling, and was measured too slow to use here: that
-    kernel costs about 2.1 s per section against 4.6 s for EVERY one of the
-    machine's shaped sections at their sampled points, so a plant build would
-    take tens of minutes rather than seconds.
-    """
-    corners = np.asarray(vertices, float)
-    if polygon_area(corners) <= 0.0:
-        raise ValueError("polygon section encloses no area")
-    apex = corners[0]
-    centres: list[np.ndarray] = []
-    areas: list[float] = []
-    for index in range(1, corners.shape[0] - 1):
-        left, right = corners[index], corners[index + 1]
-        mid_left, mid_right = 0.5 * (apex + left), 0.5 * (apex + right)
-        mid_edge = 0.5 * (left + right)
-        for corner_a, corner_b, corner_c in (
-            (apex, mid_left, mid_right),
-            (mid_left, left, mid_edge),
-            (mid_right, mid_edge, right),
-            (mid_left, mid_edge, mid_right),
-        ):
-            centres.append((corner_a + corner_b + corner_c) / 3.0)
-            edge_a = corner_b - corner_a
-            edge_b = corner_c - corner_a
-            product = edge_a[0] * edge_b[1] - edge_a[1] * edge_b[0]
-            areas.append(0.5 * abs(float(product)))
-    total = float(np.sum(areas))
-    if total <= 0.0:
-        raise ValueError("polygon section encloses no area")
-    points = np.array(centres)
-    return points[:, 0], points[:, 1], np.array(areas) / total
 
 
 def section_grid(
@@ -151,8 +98,10 @@ def section_grid(
     A group is either an array of filament rows, sampled as axis-aligned
     rectangles by :func:`section_points`, or one shaped
     :class:`~nova.circuit.conductor.PolygonSection` sampled by
-    :func:`polygon_quadrature`, whose points lie inside a section too thin for
-    any bounding-box grid.  ``delta`` and ``n_max`` size the rectangular
+    :func:`nova.imas.mast_passive_inductance.section_quadrature`, whose points
+    lie inside any simple outline, however thin or bent, because it triangulates
+    the outline rather than sampling its bounding box.  ``delta`` and ``n_max``
+    size the rectangular
     sampling only; the shaped split follows from the section's own corners.  A
     group that is ``None`` contributes no points and keeps its index, so a
     caller can hand in one entry per circuit with only the shaped ones filled.
@@ -169,12 +118,14 @@ def section_grid(
         if group is None:
             continue
         if isinstance(group, PolygonSection):
-            sub_r, sub_z, sub_weight = polygon_quadrature(
+            sub_r, sub_z, sub_weight = section_quadrature(
                 np.asarray(group.vertices, float)
             )
             point_r.append(sub_r)
             point_z.append(sub_z)
-            weight.append(float(group.current_share) * sub_weight)
+            weight.append(
+                float(group.current_share) * sub_weight / float(sub_weight.sum())
+            )
             owner.append(np.full(sub_r.size, index, dtype=np.int64))
             continue
         for row in group:

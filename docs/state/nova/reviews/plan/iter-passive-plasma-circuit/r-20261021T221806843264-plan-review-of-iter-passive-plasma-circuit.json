@@ -1,0 +1,104 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-21T22:39:34.790Z",
+  "dispatched_at": "2026-10-21T22:18:38Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/iter-passive-plasma-circuit.html:195",
+      "id": "wiring-1",
+      "reason": "without the wait recorded on \u00a76's own node and followup, its check 3 can run and pass on a substrate \u00a77 immediately invalidates, so the ordering must be declared where \u00a76's dispatch reads it.",
+      "text": "\u00a77 declares \"\u00a76's remaining check 3 runs after this section, against the entry this section writes\", an ordering that reaches \u00a76 from \u00a77's side only: \u00a76's status line still says \"A node dispatched on this section does check 3 only\" and \"Check 3 waits on dd-cocos-ingest \u00a73\", and its open followup (f-ippc-002) names no wait on \u00a77, so a node dispatched on \u00a76 today runs check 3 against the pre-repair cache entry whose key \u00a77 then retires",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/iter-passive-plasma-circuit.html:195",
+      "id": "done_when-1",
+      "reason": "the refusal is a required deliverable stated as existing behaviour, and the node can close \u00a77's three clauses with the key change alone, leaving the asserted guard absent and the \"with the refusal removed\" test impossible to write.",
+      "text": "\u00a77 states \"Loading an entry also checks that its joint linkage is positive definite and refuses one that is not, so a stale entry is caught by name rather than served\" and requires a test that fails \"with the refusal removed\", but no such refusal exists: `load_sectioned_machine` (`nova/circuit/passive.py:1176`) refuses only a missing geometry file, `load_circuit_system` (`:1082`) performs no energy check, and `guard_positive_definite` (`nova/circuit/linkage.py:291`) silently floors the spectrum instead of refusing \u2014 the guard is named in none of \u00a77's three done-when clauses and exercised by no control",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/iter-passive-plasma-circuit.html:195",
+      "id": "reasoning-1",
+      "reason": "a node cannot tell from \u00a77 whether it must re-key or retire the source-less entry the ~20 pinned power_convertor studies load, and either choice it makes is defensible under one of the two sentences.",
+      "text": "\u00a77 clause (3) delivers \"a new plant entry for 105069/3 and its key, with their pinned entry untouched\", then says \"this section's key change supersedes the pre-change key that \u00a76's compatibility paragraph names\", but the key \u00a76's compatibility paragraph names is the pinned entry's own (`coupled-plant/28148563521d92a2198b/plant.npz` at \u00a7191, which the cited record reproduces and which holds 1,312 passive modes and no plasma source), so the key \u00a77 supersedes and the key \u00a77 delivers belong to different entries",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "c898c197ed3cfbab61659254953b472c07de97cc3b2f3adf749631a9eadff35c",
+  "plan_slug": "iter-passive-plasma-circuit",
+  "plan_version": 34,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "",
+      "when": "2026-10-21T22:40:27.475273+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "",
+      "when": "2026-10-21T22:40:31.613852+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-21T22:40:35.512011+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-21T22:40:31.613852+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-21T22:40:35.512011+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-21T22:40:27.475273+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-iter-passive-plasma-circuit.v34.json",
+  "review_run_id": "r-20261021T221806843264-plan-review-of-iter-passive-plasma-circuit",
+  "reviewed_blob_sha": "27b74f0543d7f93184b7cfa981603cee662f7b13",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 verified in the tree: `scripts/iter_sectioned_conductor_set/build.py` (annulus->square at :74-80 and :110-115; the finite-source coil block at :276-287; the `finite-source:6` tag at :265), `MESH_KEY` at `scripts/iter_vessel_evolution/evolve.py:33` with both digests on disk (`68df15665ab2ea45f427`, `06ff06d3eb7a4448f0fe`), the digests it says are also pinned (`tests/test_sectioned_set_geometry_cache.py:39`, `tests/test_coupled_plant.py:434` and `:679`), `guard_positive_definite` (`nova/circuit/linkage.py:291`), the two cache entries holding only `linkage.npy` and `system.npz`, and power_convertor's record at `docs/evidence/fragments/shared-coil-supply-model/averaged-plant-energy-refusal.html` (numbers agree: v\u1d40Lv 0.0005857079994463, \u2016Mv\u2016\u00b2 0.0005857463772138, eigenvalues \u22123.8378e-8 and \u22123.2486e-8 H).",
+    "done_when": "a finding \u2014 \u00a77 requires a load-time positive-definite refusal and a test for it, but no done-when clause carries that refusal, and no such refusal exists in the loader today.",
+    "evidence_paths": "pass \u2014 \u00a77's artefacts land in the durable cache trees it names (`.cache/iter-passive-plasma-circuit/sectioned-conductor-set/<digest>/`, `coupled-plant/<digest>/`) and its red arm falls under the repo's established `.cache/iter-passive-plasma-circuit/gate-logs/` convention, never a scratchpad or node-local path.",
+    "naming": "pass \u2014 \u00a77 introduces no symbol and carries no plan label, stage name, ticket number or version tag; `MESH_KEY` and `finite-source:6` are existing code identifiers and the shas it cites are provenance.",
+    "reasoning": "a finding \u2014 \u00a77 both says power_convertor's pinned plant entry is untouched and that its key change supersedes the pre-change key \u00a76's compatibility paragraph names, but the key \u00a76 names is the pinned entry's own, so the key superseded and the key delivered are different entries.",
+    "single_goal": "pass \u2014 s7 carries one deliverable, the positive-definite joint coil-plus-passive linkage, with cause attribution as its first step and delivery of the re-keyed entry as its last; attribution, repair and hand-off are three clauses of one verdict.",
+    "wiring": "a finding \u2014 \u00a77 now asserts that \"\u00a76's remaining check 3 runs after this section\", a \u00a76\u2192\u00a77 ordering, but \u00a76's own node text and the open followup that dispatches it carry no wait on \u00a77 and \u00a76 is `implementable` now."
+  },
+  "section_digests": {
+    "_document": "9089b3d51bacedf8b789082a7c5656db85f9c3bd1fe196a55b7b774ad7634317",
+    "s1": "fd450fda152b172eb82e80c548ab9e5fa16c20b15f3b14ae415c0ed18ceb7a8c",
+    "s2": "fbea1d197646f2baba636205f10434c799bb3ce88f19dfa3ef779d98d25c50fb",
+    "s3": "56e06d1f8c060952b209edbc0a1c98e3f22e1cad48fcc1e6d6f04eb464d977bf",
+    "s4": "f8534dfd59d3f9812bc19d36079033b715faafd53488ec44ddfec9f088a03e93",
+    "s5": "39b83394b03af8bd027560dfc1db14bc1176968fc3aa2a93635fed656c03c8ec",
+    "s6": "315ddfe4d045aed64c52a21768f30159f8ee06c4d7c45409eeaa661cbe6b6c2f",
+    "s7": "1cfd9cac5f52214e2334e4b7116ef6ed56e5c4ec61d15cc7645e2037536de56e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-21T22:40:24.529669+00:00"
+}

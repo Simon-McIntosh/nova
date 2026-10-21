@@ -1,0 +1,82 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-21T08:51:12.778Z",
+  "dispatched_at": "2026-10-21T08:38:50Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/iter-passive-plasma-circuit.html:190 (snapshot \u00a76)",
+      "id": "reasoning-1",
+      "reason": "an implementer following the closing sentence stores the geometry in the source-keyed plant cache, which by \u00a76's own justification cannot serve a new source, so check 2's new-source calls would still rebuild and the fix would fail its own measure.",
+      "text": "\u00a76's compatibility paragraph says of the pinned plant entry \"the geometry is stored beside the plant rather than in place of it\", but check 1 (\u00a7189) states \"The geometry belongs in the sectioned-set cache, because a source-keyed entry cannot serve a source it has never seen\"; the two sentences place the geometry in different caches",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/iter-passive-plasma-circuit.html:189",
+      "id": "reasoning-2",
+      "reason": "",
+      "text": "(snapshot \u00a76) \u2014 \u00a76 requires that \"any plasma source drives the full ITER plant without rebuilding the sectioned set\", but `coupled_plant(machine, source)` takes the sectioned machine as an argument and loads no sectioned-set cache itself (`nova/circuit/coupled_plant.py:164`), and the only caller that today obtains the refined geometry rebuilds it in-process via `subdivide_passive_thickness` (`scripts/iter_vessel_evolution/evolve.py:88` `conductor_geometry`), not through the cache \u2014 \u00a76 names the reader `load_circuit_system` but no production caller that must be changed to read the geometry from the cache; WOULD_CHANGE_THE_PLAN: yes \u2014 REASON: without naming that caller the node can land the geometry in the cache while every source still rebuilds the sectioned set in the consumer, leaving check 2's zero-build counter red and the mechanism reached by no production path.",
+      "type": "reasoning",
+      "would_change": null
+    }
+  ],
+  "plan_fingerprint": "482678630797e75f3fcabe909dcf562fdb7dc22302958065af8aa7ac9dd219d1",
+  "plan_slug": "iter-passive-plasma-circuit",
+  "plan_version": 17,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-21T08:52:47.285718+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-2",
+      "reason": "",
+      "when": "2026-10-21T08:52:56.310427+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-21T08:52:47.285718+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-21T08:52:56.310427+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-iter-passive-plasma-circuit.v17.json",
+  "review_run_id": "r-20261021T083812976382-plan-review-of-iter-passive-plasma-circuit",
+  "reviewed_blob_sha": "cc58c843fc5790adf079acef0616c246a256538c",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every \u00a76 anchor resolves in the tree: `scripts/iter_sectioned_conductor_set/build.py`, `save_circuit_system`/`load_circuit_system` (`nova/circuit/passive.py:1059`, `:1080`), `coupled_plant` (`nova/circuit/coupled_plant.py:122`), `load_coupled_plant` (`nova/circuit/passive.py:1169`), and the pinned entry `.cache/iter-passive-plasma-circuit/coupled-plant/28148563521d92a2198b/plant.npz` (present on disk); \u00a76's cited cases also resolve (105013/1 is in the DINA case list, 105069/3 is power_convertor's selected stage-1+2 scenario).",
+    "done_when": "pass \u2014 \u00a76 states a measurable negative control (\"re-driving a cache entry that lacks its geometry with a new source is refused with a named error, never rebuilt silently or served as a reduced machine\") and a pre-change red arm for check 2, and each of the three checks names a countable outcome.",
+    "evidence_paths": "pass \u2014 the two caches \u00a76 names resolve under `.cache/iter-passive-plasma-circuit/` (`sectioned-conductor-set/<digest>/` and `coupled-plant/<digest>/`), which survive the run, not a node-local temporary path.",
+    "naming": "pass \u2014 \u00a76's symbols carry no plan labels, stage names, ticket numbers or version tags; `105069/3`, `105013/1`, `105014/1` are dataset identifiers, not plan IDs.",
+    "reasoning": "a finding \u2014 \u00a76's closing paragraph names the plant cache as the home of the geometry, contradicting check 1 in the same section, which places the geometry in the source-independent sectioned-set cache; \u00a76 also names no production caller that reads the geometry back to assemble the machine `coupled_plant` takes as an argument.",
+    "single_goal": "pass \u2014 \u00a76 carries one deliverable (the sectioned-set cache carries the refined geometry so any plasma source drives the full ITER plant without a rebuild).",
+    "wiring": "pass \u2014 \u00a76 is the one remaining node of a landed \u00a71\u2013\u00a75, reached from followup f-ippc-002 (`/reckon-build iter-passive-plasma-circuit \u00a76`); no dependency, informs or gate edge in this snapshot points at a node that does not exist."
+  },
+  "section_digests": {
+    "_document": "c69c21b94eb11351d8126a4f5f582fd9172b921964583f7aa0c8a90ac831b0a4",
+    "s1": "fd450fda152b172eb82e80c548ab9e5fa16c20b15f3b14ae415c0ed18ceb7a8c",
+    "s2": "fbea1d197646f2baba636205f10434c799bb3ce88f19dfa3ef779d98d25c50fb",
+    "s3": "56e06d1f8c060952b209edbc0a1c98e3f22e1cad48fcc1e6d6f04eb464d977bf",
+    "s4": "f8534dfd59d3f9812bc19d36079033b715faafd53488ec44ddfec9f088a03e93",
+    "s5": "39b83394b03af8bd027560dfc1db14bc1176968fc3aa2a93635fed656c03c8ec",
+    "s6": "6c47080445eca2ab2f1ac73174d5bdbff5a21438e9148f365b958ce8ef73ddb1"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-21T08:52:42.274146+00:00"
+}

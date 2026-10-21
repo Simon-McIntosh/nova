@@ -467,7 +467,9 @@ def test_zero_area_polygon_is_refused(current):
     """A degenerate section is refused by name rather than integrated."""
     from nova.circuit.conductor import PolygonSection
 
-    section = PolygonSection(3, np.array([[7.0, -0.2], [7.1, -0.2], [7.2, -0.2], [7.3, -0.2]]))
+    section = PolygonSection(
+        3, np.array([[7.0, -0.2], [7.1, -0.2], [7.2, -0.2], [7.3, -0.2]])
+    )
     with pytest.raises(ValueError, match="encloses no area"):
         _section_flux_from_grid(current, section)
 
@@ -612,5 +614,7 @@ def test_polygon_flux_change_on_a_real_slice(tmp_path):
         conductors, conductors.rows(rectangular), 0.05, 8
     )
     point_flux = plasma_flux_at_points(current, point_r, point_z)
-    reference = np.bincount(owner, weights=weight * point_flux, minlength=len(rectangular))
+    reference = np.bincount(
+        owner, weights=weight * point_flux, minlength=len(rectangular)
+    )
     np.testing.assert_array_equal(linked[np.isin(circuits, rectangular)], reference)

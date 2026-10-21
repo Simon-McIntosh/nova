@@ -81,6 +81,19 @@ def test_analytic_axis_and_saddle_converge_in_small_mesh():
     assert np.all(result.status == fixed.FixedPointStatus.CONVERGED)
 
 
+def test_backtracking_reaches_axis_after_newton_overshoot():
+    cache = polynomial_cache(True)
+    seed = jnp.asarray(((0.13, 0.09),))
+    result = fixed.solve(
+        cache, jnp.zeros((1, 3)), seed, seed, jnp.asarray(1.0), iterations=5
+    )
+    assert result.valid[0]
+    assert not result.retried[0]
+    assert result.iterations[0] <= 5
+    np.testing.assert_allclose(result.position[0], (0.13, -0.21), atol=1e-10)
+    assert np.linalg.norm(result.jet.gradient[0]) < 1e-10
+
+
 def test_wrong_axis_retries_previous_fixed_point():
     cache = polynomial_cache(True)
     previous = jnp.asarray(((0.13, -0.21), (0.13, -0.21 + 2 / 3)))

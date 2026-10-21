@@ -556,9 +556,30 @@ def _adaptive(field, seeds, pitch, iterations):
         return (carry[0] < iterations) & jnp.any(carry[4] & ~carry[5])
 
     def update(carry):
-        index, position, _, correction, usable, done, counts = carry
+        index, position, jet, correction, usable, done, counts = carry
         active = usable & ~done
-        position -= jnp.where(active[:, None], correction, 0.0)
+        merit = jnp.linalg.norm(jet.gradient, axis=-1)
+
+        def try_step(trial):
+            attempt, fraction, chosen, accepted = trial
+            candidate = position - fraction[:, None] * correction
+            candidate_jet = jax.vmap(field.evaluate)(candidate)
+            candidate_merit = jnp.linalg.norm(candidate_jet.gradient, axis=-1)
+            take = (
+                active
+                & ~accepted
+                & jnp.isfinite(candidate_merit)
+                & (candidate_merit < merit)
+            )
+            chosen = jnp.where(take[:, None], candidate, chosen)
+            accepted |= take
+            fraction = jnp.where(accepted, fraction, fraction * 0.5)
+            return attempt + 1, fraction, chosen, accepted
+
+        trial = (jnp.asarray(0), jnp.ones_like(merit), position, ~active)
+        _, _, position, _ = jax.lax.while_loop(
+            lambda state: (state[0] < 8) & jnp.any(~state[3]), try_step, trial
+        )
         jet, correction, usable, done = evaluate(position)
         return index + 1, position, jet, correction, usable, done, counts + active
 

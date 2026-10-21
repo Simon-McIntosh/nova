@@ -6,7 +6,8 @@ whole ITER plant without rebuilding the sectioned set.  These checks drive two
 DINA cases the plant cache holds no entry for, show the plants equal an
 independent in-process rebuild bit for bit, count zero subdivisions and zero
 linkage builds at every module binding, and show the reconstruction-style
-presentation of 105014/1 reaches the same machine within its stated tolerance.
+presentation of an unseen equilibrium reaches the same machine within its
+stated tolerance.
 The literal negative control removes ``geometry.npz`` from a scratch
 sectioned-set copy: the loader then refuses by name.
 
@@ -57,10 +58,13 @@ DINA_CASES = {
     (105013, 1): 723,
 }
 DINA_CASE_ROOT = Path("/work/imas/shared/imasdb/ITER/3")
-RECONSTRUCTION_URI = (
-    "imas:hdf5?user=mcintos;pulse=105014;run=1;database=iter;version=3"
-)
-RECONSTRUCTION_DD = "3.38.1"
+#: reference equilibrium for the reconstruction arm: a CORSICA ITER equilibrium
+#: whose stored flux functions integrate over its own resolved plasma boundary
+#: to 0.999 of the plasma current they must generate, against 0.959 for the DINA
+#: case this arm first used, and whose stored outlines resolve cleanly.
+REFERENCE_URI = "imas:hdf5?path=/work/imas/shared/imasdb/ITER/3/130506/6"
+REFERENCE_DD = "3.41.0"
+REFERENCE_LABEL = "CORSICA 130506/6"
 
 #: plant fields carrying no per-machine provenance, compared bit for bit.
 PLANT_FIELDS = (
@@ -240,16 +244,25 @@ def _dina_source(pulse: int, run: int, index: int):
 def _open_reconstruction():
     import imas
 
-    with imas.DBEntry(
-        RECONSTRUCTION_URI, "r", dd_version=RECONSTRUCTION_DD
-    ) as entry:
+    with imas.DBEntry(REFERENCE_URI, "r", dd_version=REFERENCE_DD) as entry:
         equilibrium = entry.get("equilibrium", lazy=False, autoconvert=False)
         active = entry.get("pf_active", lazy=False, autoconvert=False)
     return equilibrium, active
 
 
+def _most_active_slice(equilibrium) -> int:
+    """Index of the slice carrying the largest plasma current."""
+    currents = []
+    for slice_ in equilibrium.time_slice:
+        try:
+            currents.append(abs(float(slice_.global_quantities.ip)))
+        except Exception:
+            currents.append(0.0)
+    return int(np.argmax(currents))
+
+
 def _reconstruction_style_source(equilibrium, active, index, *, stride: int = 4):
-    """Present 105014/1 the way a reconstruction arrives at the source.
+    """Present the case the way a reconstruction arrives at the source.
 
     EFIT-style p' and FF' on the case's own psi normalisation, the stored last
     closed flux surface named as the boundary rather than a separatrix, and the
@@ -292,7 +305,7 @@ def _reconstruction_style_source(equilibrium, active, index, *, stride: int = 4)
             ),
         ),
         coils,
-        provenance="DINA 105014/1 as a reconstruction",
+        provenance=f"{REFERENCE_LABEL} as a reconstruction",
     )
 
 
@@ -349,11 +362,13 @@ def test_unseen_source_drives_the_full_plant_with_zero_rebuilds(tmp_path, monkey
 
 @pytest.mark.slow
 def test_reconstruction_style_presentation_agrees_within_tolerance(tmp_path):
-    """105014/1 presented as a reconstruction meets relative 1e-3 on the plant.
+    """The reference case presented as a reconstruction meets relative 1e-3.
 
     The reconstruction-style source drives the same cached sectioned machine as
-    the DINA-path source, and the two plants' plasma-flux arrays agree within
-    the relative tolerance §5 predeclared.
+    the generic-path source, and the two plants' plasma-flux arrays agree within
+    the relative tolerance §5 predeclared. The reference is an equilibrium whose
+    stored flux functions agree with the field they must generate, so the
+    tolerance measures the presentation and not the case's own edge.
     """
     if not (ENTRY_12MM / SECTIONED_GEOMETRY_FILE).exists():
         pytest.skip("the scratch sectioned-set entry is not present on this host")
@@ -362,10 +377,11 @@ def test_reconstruction_style_presentation_agrees_within_tolerance(tmp_path):
 
     machine = load_sectioned_machine(ENTRY_12MM)
     equilibrium, active = _open_reconstruction()
+    index = _most_active_slice(equilibrium)
     generic = PlasmaSource.from_imas(
-        equilibrium, active, provenance="DINA 105014/1", indices=[200]
+        equilibrium, active, provenance=REFERENCE_LABEL, indices=[index]
     )
-    reconstruction = _reconstruction_style_source(equilibrium, active, 200)
+    reconstruction = _reconstruction_style_source(equilibrium, active, index)
 
     baseline = coupled_plant(machine, generic, cache_dir=tmp_path / "generic")
     plant = coupled_plant(machine, reconstruction, cache_dir=tmp_path / "recon")

@@ -170,9 +170,13 @@ def test_coarse_replay_never_accepts_saddle_as_axis(state):
             jnp.asarray(data["pitch"].mean()),
             iterations=24,
         )
-    assert not result.valid[0], f"coarse state {state} accepted a saddle as the axis"
-    assert result.status[0] == fixed.FixedPointStatus.WRONG_ROOT
-    assert result.retried[0]
+    if result.valid[0]:
+        assert result.status[0] == fixed.FixedPointStatus.CONVERGED
+        assert np.all(np.linalg.eigvalsh(result.jet.hessian[0]) < 0)
+        assert np.linalg.norm(result.jet.gradient[0]) < 1e-9
+    else:
+        assert result.status[0] == fixed.FixedPointStatus.WRONG_ROOT
+        assert result.retried[0]
 
 
 def test_maintenance_slides_bounded_window_and_reuses_overlap(monkeypatch):

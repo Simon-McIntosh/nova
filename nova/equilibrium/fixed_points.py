@@ -565,11 +565,14 @@ def _adaptive(field, seeds, pitch, iterations):
             candidate = position - fraction[:, None] * correction
             candidate_jet = jax.vmap(field.evaluate)(candidate)
             candidate_merit = jnp.linalg.norm(candidate_jet.gradient, axis=-1)
+            missing_rows = ~jax.vmap(field.contains)(candidate)
             take = (
                 active
                 & ~accepted
-                & jnp.isfinite(candidate_merit)
-                & (candidate_merit < merit)
+                & (
+                    missing_rows
+                    | (jnp.isfinite(candidate_merit) & (candidate_merit < merit))
+                )
             )
             chosen = jnp.where(take[:, None], candidate, chosen)
             accepted |= take

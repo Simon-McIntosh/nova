@@ -15,7 +15,9 @@ only carries the result, so the circuit models stay machine-agnostic.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
+from pathlib import Path
 
 import numpy as np
 
@@ -239,6 +241,70 @@ def subdivide_passive_thickness(
         parent=np.asarray(parents, dtype=np.int64),
         resistance_factor=np.asarray(factors, dtype=np.float64),
     )
+
+
+def save_conductor_geometry(
+    path: Path | str,
+    subdivision: ThicknessSubdivision,
+    *,
+    extra: Mapping[str, np.ndarray] | None = None,
+) -> None:
+    """Persist a refined conductor set with its circuit and parent map.
+
+    Stores every geometry column, the polygon section overrides and the
+    subdivision's circuit/parent map, exactly as built (float64 and int64, no
+    rounding), so a reload reproduces the set a rebuild would.  ``extra``
+    carries caller-owned arrays alongside the geometry in the same file.
+    """
+    conductors = subdivision.conductors
+    polygons = conductors.polygon_sections
+    offsets = np.cumsum([0, *[len(np.asarray(p.vertices)) for p in polygons]])
+    vertices = (
+        np.concatenate([np.asarray(p.vertices, dtype=np.float64) for p in polygons])
+        if polygons
+        else np.empty((0, 2))
+    )
+    payload = {
+        name: np.asarray(getattr(conductors, name)) for name in conductors._columns
+    }
+    payload.update(
+        circuits=subdivision.circuits,
+        parent=subdivision.parent,
+        resistance_factor=subdivision.resistance_factor,
+        polygon_offsets=np.asarray(offsets, dtype=np.int64),
+        polygon_circuit=np.asarray([p.circuit for p in polygons], dtype=np.int64),
+        polygon_share=np.asarray([p.current_share for p in polygons], dtype=np.float64),
+        polygon_vertices=vertices,
+    )
+    payload.update(extra or {})
+    np.savez_compressed(Path(path), **payload)
+
+
+def load_conductor_geometry(path: Path | str) -> ThicknessSubdivision:
+    """Read back a refined conductor set stored by :func:`save_conductor_geometry`."""
+    with np.load(path) as stored:
+        offsets = np.asarray(stored["polygon_offsets"], dtype=np.int64)
+        vertices = np.asarray(stored["polygon_vertices"], dtype=np.float64)
+        polygons = tuple(
+            PolygonSection(
+                int(circuit),
+                vertices[offsets[index] : offsets[index + 1]],
+                float(share),
+            )
+            for index, (circuit, share) in enumerate(
+                zip(stored["polygon_circuit"], stored["polygon_share"], strict=True)
+            )
+        )
+        conductors = ConductorSet(
+            **{name: stored[name] for name in ConductorSet._columns},
+            polygon_sections=polygons,
+        )
+        return ThicknessSubdivision(
+            conductors=conductors,
+            circuits=np.asarray(stored["circuits"], dtype=np.int64),
+            parent=np.asarray(stored["parent"], dtype=np.int64),
+            resistance_factor=np.asarray(stored["resistance_factor"], dtype=np.float64),
+        )
 
 
 @dataclass(frozen=True)

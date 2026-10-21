@@ -83,19 +83,21 @@ def plasma_module():
 
 
 def conductor_geometry(surface_layer: float):
-    """Rebuild the refined conductor set so its geometry and parent map are in hand."""
-    from nova.circuit.conductor import subdivide_passive_thickness
+    """Read the refined conductor set and its parent map from the cache entry.
 
-    build = build_module()
-    conductors, coil_names, owner, thickness, source_resistance, passive_name = (
-        build.source_conductors()
+    The entry holds the geometry its sectioned set was built from, so the
+    refinement is loaded rather than rebuilt; ``subdivide_passive_thickness`` is
+    never called on this path.
+    """
+    from nova.circuit.passive import load_sectioned_machine
+
+    machine = load_sectioned_machine(CONDUCTOR_CACHE / MESH_KEY[surface_layer])
+    return (
+        machine.conductors,
+        list(machine.coil_names),
+        machine.section_coil,
+        machine.subdivision,
     )
-    n_section = len(owner)
-    source_passive = np.arange(n_section, n_section + len(thickness))
-    refined = subdivide_passive_thickness(
-        conductors, source_passive, thickness, 0.04, surface_layer_m=surface_layer
-    )
-    return conductors, coil_names, owner, refined
 
 
 def load_system(surface_layer: float):

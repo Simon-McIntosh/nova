@@ -21,9 +21,11 @@ from nova.circuit.linkage import (
     guard_positive_definite,
 )
 from nova.circuit.passive import (
+    SECTIONED_GEOMETRY_FILE,
     PassiveCircuitSystem,
     load_circuit_system,
     save_circuit_system,
+    save_sectioned_geometry,
     terminal_impedance_spectrum,
 )
 from nova.imas.pulsedesign import ITER
@@ -175,6 +177,31 @@ def unsectioned_coil_conductors(active) -> ConductorSet:
     return ConductorSet(**columns)
 
 
+def write_geometry(
+    cache_dir: Path | None,
+    refined,
+    coil_names,
+    section_coil,
+) -> Path | None:
+    """Persist the refined conductor geometry beside the linkage at this key.
+
+    The geometry is what a plasma source's flux is read at, so a new source can
+    drive the entry's machine without rebuilding the refined set.  The key
+    already covers every geometry input, so the entry's directory is unchanged.
+    """
+    if cache_dir is None:
+        return None
+    path = cache_dir / SECTIONED_GEOMETRY_FILE
+    if path.exists():
+        return path
+    return save_sectioned_geometry(
+        cache_dir,
+        refined,
+        coil_names=coil_names,
+        section_coil=np.asarray(section_coil, dtype=np.int64),
+    )
+
+
 def calculate(
     max_thickness: float,
     section_n_max: int,
@@ -210,6 +237,7 @@ def calculate(
         np.asarray([max_thickness, surface_layer_m or 0, section_n_max]).tobytes()
     )
     cache_dir = cache_root / digest.hexdigest()[:20] if cache_root else None
+    write_geometry(cache_dir, refined, coil_names, owner)
     matrix_path = cache_dir / "linkage.npy" if cache_dir else None
     cache_hit = bool(matrix_path and matrix_path.exists())
     started = perf_counter()

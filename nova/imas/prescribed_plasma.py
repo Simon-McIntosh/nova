@@ -7,17 +7,8 @@ import numpy as np
 from nova.biot.greens import greens_psi, hybrid_greens
 from nova.biot.polygon import polygon_greens
 from nova.circuit.conductor import ConductorSet, PolygonSection
-from nova.circuit.linkage import section_grid
+from nova.circuit.linkage import polygon_quadrature, section_grid
 from nova.imas.profiles import PrescribedCurrent
-
-
-def polygon_area(vertices: np.ndarray) -> float:
-    """Enclosed area [m^2] of a polygon-section outline, orientation-free."""
-    corners = np.asarray(vertices, float)
-    radius, height = corners[:, 0], corners[:, 1]
-    return 0.5 * abs(
-        float(np.dot(radius, np.roll(height, -1)) - np.dot(height, np.roll(radius, -1)))
-    )
 
 
 def plasma_cells(
@@ -74,50 +65,6 @@ def plasma_flux_at_points(
     return result.reshape(target_r.shape)
 
 
-def polygon_quadrature(
-    vertices: np.ndarray,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Interior quadrature points of a polygon section, area-weighted.
-
-    The section is fanned into triangles from its first corner and each triangle
-    is split four ways, so every point is the centroid of a sub-triangle that
-    lies inside the section by construction.  A section thinner than any fixed
-    grid spacing is therefore sampled like any other; a bounding-box grid cannot
-    do this, because its points are placed on the box and a thin enough section
-    contains none of them.  Weights are sub-triangle area fractions, so they sum
-    to one whatever the section's shape and orientation.
-
-    Reciprocity through :func:`nova.biot.polygon.polygon_greens` averages the
-    same section without sampling, and was measured too slow to use here: that
-    kernel costs about 2.1 s per section against 4.6 s for EVERY one of the
-    machine's shaped sections at their sampled points, so a plant build would
-    take tens of minutes rather than seconds.
-    """
-    corners = np.asarray(vertices, float)
-    if polygon_area(corners) <= 0.0:
-        raise ValueError("polygon section encloses no area")
-    apex = corners[0]
-    centres: list[np.ndarray] = []
-    areas: list[float] = []
-    for index in range(1, corners.shape[0] - 1):
-        left, right = corners[index], corners[index + 1]
-        mid_left, mid_right = 0.5 * (apex + left), 0.5 * (apex + right)
-        mid_edge = 0.5 * (left + right)
-        for corner_a, corner_b, corner_c in (
-            (apex, mid_left, mid_right),
-            (mid_left, left, mid_edge),
-            (mid_right, mid_edge, right),
-            (mid_left, mid_edge, mid_right),
-        ):
-            centres.append((corner_a + corner_b + corner_c) / 3.0)
-            areas.append(0.5 * abs(float(np.cross(corner_b - corner_a, corner_c - corner_a))))
-    total = float(np.sum(areas))
-    if total <= 0.0:
-        raise ValueError("polygon section encloses no area")
-    points = np.array(centres)
-    return points[:, 0], points[:, 1], np.array(areas) / total
-
-
 def plasma_linked_flux(
     current: PrescribedCurrent,
     conductors: ConductorSet,
@@ -145,44 +92,19 @@ def plasma_linked_flux(
         )
         result[np.isin(circuits, rectangular)] = rectangular_flux
     if polygons:
-        point_r, point_z, weight, owner = _polygon_point_grid(polygons, circuits)
-        point_flux = plasma_flux_at_points(current, point_r, point_z)
-        result += np.bincount(
-            owner, weights=weight * point_flux, minlength=len(circuits)
-        )
+        shaped = [polygons.get(int(circuit)) for circuit in circuits]
+        if any(section is not None for section in shaped):
+            point_r, point_z, weight, owner = section_grid(
+                conductors,
+                shaped,
+                section_spacing,
+                section_n_max,
+            )
+            point_flux = plasma_flux_at_points(current, point_r, point_z)
+            result += np.bincount(
+                owner, weights=weight * point_flux, minlength=len(circuits)
+            )
     return circuits, result
-
-
-def _polygon_point_grid(
-    polygons: dict[int, PolygonSection], circuits: np.ndarray
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    """Every shaped circuit's quadrature points in one array, with owners.
-
-    The points of every section are gathered so the plasma flux is evaluated for
-    all of them in a single call; the weight carries each section's turn share
-    and its area fraction together.
-    """
-    point_r: list[np.ndarray] = []
-    point_z: list[np.ndarray] = []
-    weight: list[np.ndarray] = []
-    owner: list[np.ndarray] = []
-    for index, circuit in enumerate(circuits):
-        polygon = polygons.get(int(circuit))
-        if polygon is None:
-            continue
-        sub_r, sub_z, sub_weight = polygon_quadrature(
-            np.asarray(polygon.vertices, float)
-        )
-        point_r.append(sub_r)
-        point_z.append(sub_z)
-        weight.append(float(polygon.current_share) * sub_weight)
-        owner.append(np.full(sub_r.size, index, dtype=np.int64))
-    return (
-        np.concatenate(point_r),
-        np.concatenate(point_z),
-        np.concatenate(weight),
-        np.concatenate(owner),
-    )
 
 
 def polygon_plasma_flux(

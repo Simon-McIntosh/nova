@@ -8,12 +8,12 @@ import numpy as np
 import pytest
 
 from nova.circuit.conductor import ConductorSet
+from nova.circuit.linkage import polygon_quadrature
 from nova.imas.prescribed_plasma import (
     plasma_flux_at_points,
     plasma_linked_flux,
     plasma_linked_flux_history,
     polygon_plasma_flux,
-    polygon_quadrature,
 )
 from nova.imas.profiles import prescribe_current_density
 from scripts.iter_prescribed_plasma.measure import current_vector
@@ -414,8 +414,8 @@ def test_thin_polygon_strip_is_integrated_not_missed(coarse_current):
     assert linked == pytest.approx(reference, rel=SECTION_FLUX_TOLERANCE)
 
     # The section's quadrature points lie inside it by construction, which is what
-# the bounding-box rule cannot guarantee: on the machine it is the neighbouring
-# sections of exactly this shape that it refuses outright.
+    # the bounding-box rule cannot guarantee: on the machine it is the neighbouring
+    # sections of exactly this shape that it refuses outright.
     from shapely import contains_xy
     from shapely.geometry import Polygon
 

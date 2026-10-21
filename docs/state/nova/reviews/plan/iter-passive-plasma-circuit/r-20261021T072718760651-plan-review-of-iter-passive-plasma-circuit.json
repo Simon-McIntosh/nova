@@ -1,0 +1,145 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-21T07:51:49.486Z",
+  "dispatched_at": "2026-10-21T07:33:18Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iter-passive-plasma-circuit/r-20261021T072718760651-plan-review-of-iter-passive-plasma-circuit/plan.html:189",
+      "id": "done_when-1",
+      "reason": "as written the node can close having demonstrated only what already worked, so the check must drive a source the cache has not seen (or count builds across a new-source call) or the section's whole claim goes unmeasured. (v15's amended negative control, \"re-driving a cache entry that lacks its geometry with a new source is refused\", moves toward the case the check needs but the second check itself is unchanged there.)",
+      "text": "\u00a76's second check (\"DINA 105014/1 and 105052/1 each drive the full ITER plant from a warm cache and return the plant a cold build returns, bit for bit, with no rebuild of the sectioned set, shown by a counter on the build\") passes on the unfixed code and so cannot show the change: `coupled_plant` returns `load_coupled_plant(plant_path)` at `nova/circuit/coupled_plant.py:255-256` before any conductor or linkage work, and its digest already folds the source's time base and currents (`_cache_digest`, `:511-522`), so a warm call for a source already built rebuilds nothing today \u2014 this is exactly \u00a74's landed \"the call returns the same plant cold and from its cache\" check, recorded at `c-close-s4` (snapshot:250). The section's purpose is that a *new* source reuses the sectioned set, and no clause of the done-when requires the build counter to advance on a new source",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iter-passive-plasma-circuit/r-20261021T072718760651-plan-review-of-iter-passive-plasma-circuit/plan.html:144",
+      "id": "reasoning-1",
+      "reason": "the control as stated would pass whatever the plasma model does and fails only if the passive coupling is broken, so the node's guard is aimed at the wrong term and must remove the passive structure (or the passive term) to be a control on the mechanism \u00a73 names.",
+      "text": "\u00a73's \"Negative control: removing the plasma drive brings back the bare-coil residual\" is inconsistent with the evidence \u00a73 itself cites: the section's first paragraph puts the bare-coil residual at about 1 kV rms (attributed to `iter-power-supply-model` \u00a78, which resolves and states it explicitly \u2014 `power_convertor/docs/research/iter-scenario-supply-loading.html`: PF2 1133.4, PF3 1200.2, PF4 974.8, PF5 1139.2 V rms, \"roughly 0.97\u20131.20 kV rms\"), while the landed evidence for \u00a73 records \"the plasma term is a few volts, because the plasma ramps over tens of seconds\" and attributes the reduction from the bare-coil residual to the *passive* coupling (\"the passive coupling removes about 40 % of the bare-coil residual\", `docs/evidence/archive/iter-passive-plasma-circuit-landed.html#iter-vessel-evolution`). Removing a few-volt term cannot restore a kilovolt residual",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iter-passive-plasma-circuit/r-20261021T072718760651-plan-review-of-iter-passive-plasma-circuit/plan.html:189",
+      "id": "reasoning-2",
+      "reason": "the section changes the stored artifact's contents and its key without naming the callers it reaches, so a schema or key change silently breaks studies pinned to the digest path and the node cannot be closed on a verdict about them. (This is the gap v15's \"Existing entries stay readable\" paragraph and its \"a test loads an entry written by the pre-change code\" clause close.)",
+      "text": "\u00a76 requires the cache to store the refined conductor geometry \"and the cache key covers them\", and the 20-char digest is the cache *directory name* that a consumer outside this repository pins: `load_coupled_plant` is called with a hard-coded `/coupled-plant/28148563521d92a2198b/plant.npz` in four power_convertor test modules (`tests/test_nova_plant.py:341`, `tests/test_plant_sections.py:42`, `tests/test_vs1_discharge.py:77`, `tests/test_fast_discharge.py:89`; the file is on disk at `~/Code/nova/.cache/iter-passive-plasma-circuit/coupled-plant/28148563521d92a2198b/plant.npz`), yet \u00a76 names no clause that an entry written before the change still loads and no consumer of that pinned path",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iter-passive-plasma-circuit/r-20261021T072718760651-plan-review-of-iter-passive-plasma-circuit/plan.html:174",
+      "id": "done_when-2",
+      "reason": "\u00a74 has landed and its evidence record already carries the perturbation control (\"perturbing one cached array fails that comparison\", #iter-coupled-plant-call) and the refused-0.1 %-criterion arm, so adding the clause now would change prose the node no longer acts on; it is worth carrying into the next node's template rather than into this closed section.",
+      "text": "\u00a74's done-when (\"Done when two checks pass: the call returns the same plant cold and from its cache, tested in nova; the reduced plant's terminal impedance matches the full model's to 1 %\") states no negative control, where \u00a71, \u00a72, \u00a73, \u00a75 and \u00a76 each do",
+      "type": "done_when",
+      "would_change": false
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iter-passive-plasma-circuit/r-20261021T072718760651-plan-review-of-iter-passive-plasma-circuit/plan.html:90",
+      "id": "anchors_resolve-1",
+      "reason": "the section is landed and its figures are published and indexed under the topic directories, so the stale sentence misdirects nobody who follows the evidence anchor; correcting it is a one-line edit at the next authoring pass.",
+      "text": "\"Figures go in `docs/figures/iter-passive-plasma-circuit/`\" names a directory that does not exist in the reviewed tree; the \u00a71 figures landed under per-topic directories (`docs/figures/iter-sectioned-conductor-set/`, `docs/figures/iter-vessel-evolution/`, `docs/figures/iter-coupled-plant-call/`, `docs/figures/iter-prescribed-plasma/`), which is the convention the served figure index uses, so the pointer is to a path no reader can open",
+      "type": "anchors_resolve",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "67251dd9394b6a3a47421f14009cbe3741134236b1c51758a8fc5d5ee4fe5463",
+  "plan_slug": "iter-passive-plasma-circuit",
+  "plan_version": 14,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "",
+      "when": "2026-10-21T07:53:43.755358+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-2",
+      "reason": "",
+      "when": "2026-10-21T07:54:42.858556+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "\u00a73 landed at 8e3676bcb; its record already carries controls on the passive mechanism (a single ring recovers the analytic L/R decay to 1.4e-13 and a 2 % integrator mutation breaks it), so rewording a landed control changes no node",
+      "when": "2026-10-21T07:54:50.176826+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-2",
+      "reason": "\u00a74 landed at c4c7abd78 and its record carries the perturbation control and the refused 0.1 % criterion arm; prose the node no longer acts on is not edited",
+      "when": "2026-10-21T07:54:56.054006+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "anchors_resolve-1",
+      "reason": "\u00a71 landed and its figures are published under per-topic directories reached through the evidence anchor; the stale pointer misdirects no executing node",
+      "when": "2026-10-21T07:55:03.638453+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "\u00a71 landed and its figures are published under per-topic directories reached through the evidence anchor; the stale pointer misdirects no executing node",
+      "when": "2026-10-21T07:55:03.638453+00:00"
+    },
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-21T07:53:43.755358+00:00"
+    },
+    "done_when-2": {
+      "action": "declined",
+      "by": "",
+      "reason": "\u00a74 landed at c4c7abd78 and its record carries the perturbation control and the refused 0.1 % criterion arm; prose the node no longer acts on is not edited",
+      "when": "2026-10-21T07:54:56.054006+00:00"
+    },
+    "reasoning-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "\u00a73 landed at 8e3676bcb; its record already carries controls on the passive mechanism (a single ring recovers the analytic L/R decay to 1.4e-13 and a 2 % integrator mutation breaks it), so rewording a landed control changes no node",
+      "when": "2026-10-21T07:54:50.176826+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-21T07:54:42.858556+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-iter-passive-plasma-circuit.v14.json",
+  "review_run_id": "r-20261021T072718760651-plan-review-of-iter-passive-plasma-circuit",
+  "reviewed_blob_sha": "73577eac25aceb89ccc71139cf6158b67a468517",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \u00a71 names a figure directory that does not exist.",
+    "done_when": "a finding \u2014 \u00a76's second check cannot fail on the current tree, so it measures \u00a74's landed round-trip rather than this section's change; the same item also carries \u00a74's missing negative control.",
+    "evidence_paths": "pass \u2014 \u00a71 states its figure destination and the landed sections' records are durable (`docs/evidence/archive/iter-passive-plasma-circuit-landed.html`, one evidence section per node), with no gate log or receipt on a scratch or node-local path.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags reach source or symbols; the identifiers in the plan's prose that carry a stage flavour (`g-istt-1`, `g-jccm-4`, `PF2`, `CS1U`) are gate ids and machine components, not code names, and the commit shas in the comments are evidence provenance rather than plan labels.",
+    "reasoning": "a finding \u2014 \u00a73's declared negative control cannot produce the outcome it claims, because the term it removes is the one the plan's own cited measurement values at a few volts.",
+    "single_goal": "pass \u2014 each of \u00a71\u2013\u00a76 names one deliverable (a conductor set; a prescribed plasma; the evolved vessel currents; one imported call and its result type; the generic source; the cache carrying what a source needs), and \u00a76's three checks all measure that one deliverable.",
+    "wiring": "pass \u2014 the document's `plan-blocks` declaration (`power_convertor:iter-switched-terminal-transients`, meta line 23) and its two cross-references, \u00a74 as the evidence of power_convertor's `g-istt-1` and \u00a75 as that of `g-jccm-4`, both resolve (`iter-switched-terminal-transients.html:510` closed/passed; `jt60sa-coil-circuit-model.html:588` open with its record naming this plan's \u00a75), and \u00a76's dependence on \u00a71's sectioned set, \u00a74's call and \u00a75's reconstruction arm is stated in its own body."
+  },
+  "section_digests": {
+    "_document": "c69c21b94eb11351d8126a4f5f582fd9172b921964583f7aa0c8a90ac831b0a4",
+    "s1": "fd450fda152b172eb82e80c548ab9e5fa16c20b15f3b14ae415c0ed18ceb7a8c",
+    "s2": "fbea1d197646f2baba636205f10434c799bb3ce88f19dfa3ef779d98d25c50fb",
+    "s3": "56e06d1f8c060952b209edbc0a1c98e3f22e1cad48fcc1e6d6f04eb464d977bf",
+    "s4": "f8534dfd59d3f9812bc19d36079033b715faafd53488ec44ddfec9f088a03e93",
+    "s5": "39b83394b03af8bd027560dfc1db14bc1176968fc3aa2a93635fed656c03c8ec",
+    "s6": "18a31d6951d4a59c5a0f36808297724d8b1be822e12042c53e1e74e482ea310b"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-21T07:53:37.392392+00:00"
+}

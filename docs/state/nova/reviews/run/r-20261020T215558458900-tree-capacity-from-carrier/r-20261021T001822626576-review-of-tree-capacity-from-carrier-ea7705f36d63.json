@@ -1,0 +1,50 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-21T00:46:00.625Z",
+  "dispatched_at": "2026-10-21T00:18:48Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/tree-capacity-from-carrier.html",
+      "line": "19",
+      "severity": "follow-on",
+      "text": "follow-on: the paragraph tag carries a stray Python conditional in its attribute list, <p id=\"tree-capacity-from-carrier-records\" if False else \"tree-capacity-from-carrier-records\">, so the fragment is malformed HTML with bogus attributes (if, False, else). It is the node's declared landing artefact, and a grep over docs/ finds this leak in this file alone, so it was introduced here rather than by the fragment tooling. The id and the prose are intact, so the damage is markup only."
+    },
+    {
+      "file": "nova/equilibrium/contour_tree.py",
+      "line": "158",
+      "severity": "follow-on",
+      "text": "follow-on: measured_degree_capacity re-implements the carrier's maximum-degree count that nova/equilibrium/contour_tree_mesh.py:410-413 already computes and exposes as ContourMesh.neighbour_capacity (np.bincount over the raveled edge list, then max). The two agree and production never reaches the new default, because topology.read passes neighbour_capacity=mesh.neighbour_capacity (nova/equilibrium/topology.py:3118), so this is a latent duplicate rather than a behavioural fork; it does not extend the existing owner."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/tree-capacity-from-carrier.html",
+      "line": "17",
+      "severity": "follow-on",
+      "text": "follow-on: the node's own baseline_suite (7430c618f, fleet node, base-gate.log) and after_suite (a72e3f25c, sirius job 1291687, head-gate.log) arms ran on different hosts, so the recorded delta is confounded -- the fleet base failed the two 10000-cell rows with overflow=True while the sirius head fails six smaller rows at a 1e-13 tolerance. The manifest discloses this and supplies a matched base arm (baseline_suite_on_sirius, job 1291689) that reproduces the same six, so the attribution is sound, but the manifest's primary delta line is unusable as recorded."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/tree-capacity-from-carrier.html",
+      "line": "12",
+      "severity": "follow-on",
+      "text": "follow-on: done_when clause 1 requires the seven receipt fields bit-identical with tests/test_contour_tree_sweep_bounds.py and tests/test_contour_tree_brute_force.py passing, but both files are red at base and head (1 failed, 1 passed; 3 failed, 3 passed, 2 errors) because benchmarks/contour_tree_brute_force.py declares VERTEX_CAPACITY=256 for a certificate part holding 257 vertices. Delta is zero, so the change adds nothing, but the bit-identity assertion has no live guard and the done_when's parenthetical 'pass' is not met."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is contour-tree node, edge and default neighbour capacities derived from the carrier, with an overflow test that can redden; nova/equilibrium/contour_tree.py:188-209 adds carrier_node_capacity and carrier_edge_capacity (an undeclared capacity is the carrier's slot count) and :158 measured_degree_capacity, and I re-ran [10000-limited] at head on this fleet node, where the base arm overflowed, and it passed in 171.70s.\nVERDICT done_when: clause 1's overflow repair is shown (base-gate.log reads reason=1 with overflow=Array(True) for [10000-limited] at 7430c618f, and my same-host head re-run plus head-test_read_ten_thousand_cells.log pass both 10000 rows), clause 2's dense-graph test is green (tests/test_contour_tree_capacity_from_carrier.py, my re-run 3 passed in 11.71s), but clause 3 is met only in substituted form: the historical MAST-U degrees 19/22/18 no longer exist (the probe measures 9/11/12), so the width-16 refusal is asserted on a constructed 24-leaf fan and the declared literal negative control is replaced by restoring min(edge_count,32); the parenthetical that the sweep-bounds and brute-force files pass is also not met.\nVERDICT write_paths: the manifest declares nova/equilibrium/contour_tree.py, scripts/prototypes/contour_tree_overflow/test_overflow.py, tests/test_contour_tree_capacity_from_carrier.py and docs/evidence/fragments/converged-forward-solve/tree-capacity-from-carrier.html, and git diff 7430c618f..ea7705f36 touches exactly those four files and no other.\nVERDICT manifest: read at the landed head; status complete, all three done-when clauses reported with their deviation, a negative_control_log that exists and reproduces (restoring min(edge_count,32) reddens test_dense_graph_of_degree_above_thirty_two_bounds_without_refusal, 1 failed, 2 passed, EXIT=1), and an honest disclosure that baseline_suite (fleet base) and after_suite (sirius head) are not matched arms, resolved by a separately run base arm on sirius (job 1291689).\nVERDICT diff: read commit by commit against 7430c618f; six commits, four files, +322/-25, all inside the declared paths -- 370075856 and a72e3f25c change contour_tree.py and add tests/test_contour_tree_capacity_from_carrier.py, 5179b8087 rewrites scripts/prototypes/contour_tree_overflow/test_overflow.py, and 09f4816d8, b256f0110 and ea7705f36 land the evidence fragment.\nCALL_SITES: nova/equilibrium/topology.py:3118 (topology.read -> build_contour_tree), nova/equilibrium/contour_tree_mesh.py:410-413 (ContourMesh.neighbour_capacity, the degree owner the new default mirrors)\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: nova/equilibrium/contour_tree.py:188-209 makes an undeclared node or edge capacity the carrier's slot count and :294-296 takes the neighbour width from the carrier's measured degree, and the 10000-cell limited read passes at head on the same fleet node whose base arm overflowed.\nSCORE evidence: 14\nJUSTIFICATION evidence: the gate ran the four files at base and head and the delta is zero on the matched sirius pair (base-sirius-read.log and head-test_read_ten_thousand_cells.log list the same six rows), but the manifest's own baseline_suite and after_suite are fleet-base versus sirius-head, and done_when clause 1's bit-identity guard (tests/test_contour_tree_sweep_bounds.py, tests/test_contour_tree_brute_force.py) is red at both arms.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 7430c618f657a0a169c9fa04135654514e2298c6..ea7705f36d63e9c2b3b80febd5cf981f29a90dda touches exactly the four declared paths and nothing outside them.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_contour_tree_capacity_from_carrier.py:75 asserts overflow fires when capacities are declared below the carrier and tests/test_contour_tree_capacity_from_carrier.py:82 asserts it does not when they fit, and the declared negative control reddens :93 (negative-control.log, 1 failed, 2 passed, EXIT=1), so each added assertion names the code change that would falsify it.\nSCORE fit: 16\nJUSTIFICATION fit: nova/equilibrium/contour_tree.py:158-209 follows the module's mechanism-named-helper idiom and introduces no prohibited name, but docs/evidence/fragments/converged-forward-solve/tree-capacity-from-carrier.html:19 carries a malformed attribute.\nSCORE reuse: 10\nJUSTIFICATION reuse: nova/equilibrium/contour_tree.py:158 measured_degree_capacity duplicates the max-degree count already owned at nova/equilibrium/contour_tree_mesh.py:410-413 rather than extending it, while carrier_node_capacity and carrier_edge_capacity at :188-209 have no prior owner.\nFINDING docs/evidence/fragments/converged-forward-solve/tree-capacity-from-carrier.html:19 follow-on: the paragraph carries a stray Python conditional in its attribute list, so the node's declared landing artefact is malformed HTML; the leak is unique to this file across docs/.\nFINDING nova/equilibrium/contour_tree.py:158 follow-on: measured_degree_capacity re-implements the carrier max-degree count that nova/equilibrium/contour_tree_mesh.py:410-413 already owns; production reaches it only through topology.read, which passes the mesh degree explicitly, so the duplicate is latent.\nFINDING docs/evidence/fragments/converged-forward-solve/tree-capacity-from-carrier.html:17 follow-on: the manifest's primary baseline_suite and after_suite arms ran on different hosts, confounding the recorded delta; the manifest discloses it and supplies a matched sirius base arm (job 1291689), so the six tolerance rows are attributed correctly, but the primary delta line misleads a naive reader.\nFINDING docs/evidence/fragments/converged-forward-solve/tree-capacity-from-carrier.html:12 follow-on: done_when clause 1 requires seven receipt fields bit-identical with the sweep-bounds and brute-force files green, but those files are red at base and head on an out-of-scope 256-vertex benchmark capacity, so the bit-identity claim has no live guard.\n",
+  "review_run_id": "r-20261021T001822626576-review-of-tree-capacity-from-carrier-ea7705f36d63",
+  "reviewed_base_sha": "7430c618f657a0a169c9fa04135654514e2298c6",
+  "reviewed_head_sha": "ea7705f36d63e9c2b3b80febd5cf981f29a90dda",
+  "reviewed_run_id": "r-20261020T215558458900-tree-capacity-from-carrier",
+  "scores": {
+    "durability": 17,
+    "evidence": 14,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 10,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-21T00:46:06.212826+00:00",
+  "total": 94
+}

@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="iter-passive-plasma-circuit">
   <meta name="plan-title" content="ITER Passive and Prescribed-Plasma Circuit">
   <meta name="plan-summary" content="Evolve ITER vessel currents driven by sectioned coils and a DINA-prescribed plasma, all couplings from nova, given to the converter model by one imported call">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="in-progress">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="20.0">
   <meta name="plan-capability-version" content="1.0">
@@ -25,7 +25,7 @@
   <title>ITER Passive and Prescribed-Plasma Circuit | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="19">
+<meta name="plan-version" content="20">
 <meta name="plan-modified" content="2026-10-21">
 </head>
 <body>
@@ -252,6 +252,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-s4-sections-landed" data-who="reckon-build" data-when="2026-10-15T12:58:00Z">
     <div class="r-comment-body"><p>Section-level matrices landed (merged <code>837c96fa2</code>): <code>CoupledPlant</code> now carries section inductance, resistance and mode coupling beside the terminal fields. The cache key covers every stored output's inputs, and the terminals are formed in the call as the series reduction of the section block (29 tests pass; perturbing one section's self inductance breaks the reduction check). Review 107/120, passed with follow-ons. Open follow-on: a machine that supplies its own terminal values skips the derivation (<code>nova/circuit/coupled_plant.py</code>, near line 179), so terminals that disagree with the section block are served unchecked. The call should assert terminal equals series reduction whenever both are present. The gate logs are headed at the parent revision <code>56d246c1c</code>, while the tests they ran are in <code>ad81f87bc</code>.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261021T092616643306-sectioned-set-geometry-cache" data-who="reckon-build" data-when="2026-10-21T10:19:14.462Z">
+    <div class="r-comment-body"><p>sectioned-set geometry cache: the build writes the refined conductor geometry (ConductorSet columns, polygon sections, circuit and parent map) beside linkage.npy and system.npz at the unchanged sectioned-set key, and load_sectioned_machine assembles the machine coupled_plant takes from an entry; measured by tests/test_sectioned_set_geometry_cache.py, whose six tests pass: the loaded geometry is bit-identical to an in-process subdivide_passive_thickness rebuild on a small fixture and on a scratch copy of the real 12 mm entry, an entry holding only linkage.npy and system.npz is refused with SectionedGeometryMissing, load_coupled_plant still loads the pinned 28148563521d92a2198b plant entry, and a spy on subdivide_passive_thickness records zero calls through evolve.conductor_geometry.</p></div>
 </div>
 </section>
 </main>

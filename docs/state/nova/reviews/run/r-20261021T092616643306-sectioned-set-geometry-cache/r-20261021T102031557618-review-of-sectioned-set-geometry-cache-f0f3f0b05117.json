@@ -1,0 +1,67 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "scripts/iter_sectioned_conductor_set/build.py:calculate (via write_geometry)",
+    "scripts/iter_vessel_evolution/evolve.py:conductor_geometry (via load_sectioned_machine)"
+  ],
+  "completed_at": "2026-10-21T10:46:55.937Z",
+  "dispatched_at": "2026-10-21T10:22:33Z",
+  "findings": [
+    {
+      "file": "tests/test_sectioned_set_geometry_cache.py",
+      "line": "177",
+      "severity": "follow-on",
+      "text": "assert plant.n_coil == len(machine.coil_names) compares the plant's coil_names -- a copy of the machine.coil_names the test itself passed in at line 169 -- against that same input, so the two sides move together and the assertion cannot fail on the regression it appears to guard; the n_section assertion at line 178 has the same shape."
+    },
+    {
+      "file": "tests/test_sectioned_set_geometry_cache.py",
+      "line": "216",
+      "severity": "follow-on",
+      "text": "the zero-rebuild spy patches nova.circuit.conductor.subdivide_passive_thickness, but nova/circuit/passive.py binds that name at import (line 61), so a rebuild introduced inside load_sectioned_machine would call passive's own binding and leave the asserted calls list empty."
+    },
+    {
+      "file": "scripts/iter_vessel_evolution/evolve.py",
+      "line": "96",
+      "severity": "follow-on",
+      "text": "conductor_geometry's first returned element changed meaning from the unsectioned source conductors to the refined conductors (machine.conductors) while keeping its position and the caller's name, so a consumer other than the one caller that ignores it would silently receive the refined set."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read commit by commit against base 2c14b3ffc; ab3612ff2 adds geometry serialisation in conductor.py, the loader in passive.py and the build/evolve wiring, and f0f3f0b05 adds the evidence fragment.",
+    "done_when": "the done_when names bit-identity against an in-process subdivide_passive_thickness rebuild on a small fixture and the real 12 mm entry, a named refusal of a geometry-less entry, and an unchanged pinned plant load; tests/test_sectioned_set_geometry_cache.py carries each clause and the manifest records the gate and its result.",
+    "goal": "the node goal is to make the sectioned-set cache carry the refined conductor geometry and drive the machine from a single loader; nova/circuit/passive.py:1176 load_sectioned_machine and nova/circuit/conductor.py:246 save_conductor_geometry are that change.",
+    "manifest": "read; it states after_suite 11 files 184 passed 0 failed and baseline_suite 10 files 178 passed 0 failed, names the run-arm.sh gate, and records the negative-control log at scratch/negative-control.log.",
+    "write_paths": "read the manifest's declared paths; every path in the diff is inside the declared set."
+  },
+  "justifications": {
+    "durability": "the negative control at scratch/negative-control.log reddens test_geometry_round_trips_bit_identical when write_geometry returns None, but the zero-rebuild spy at tests/test_sectioned_set_geometry_cache.py:216 is namespace-limited and the assertion at line 177 is tautological.",
+    "evidence": "the gate is tests/test_sectioned_set_geometry_cache.py (6 passed, after-test_sectioned_set_geometry_cache.log) with base/head arms 178/184 passed and the negative-control red log, all recorded in the manifest.",
+    "fit": "save_conductor_geometry/load_conductor_geometry at nova/circuit/conductor.py:246 sit beside the existing save_circuit_system/load_circuit_system pair, and the commit bodies carry no AI attribution and no banned identifiers.",
+    "goal_fidelity": "nova/circuit/passive.py:1176 load_sectioned_machine returns the conductors, series wiring, coil names, passive system and section fields the coupled_plant call reads, which is the goal's one loader.",
+    "reuse": "no owner of conductor-geometry serialisation exists in nova/circuit/conductor.py, nova/circuit/passive.py or nova/database, so the addition extends the ConductorSet owner rather than forking it.",
+    "scope_discipline": "every file in the diff against 2c14b3ffc is one of the manifest's declared write paths, and no plant or coupled_plant file is touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to make the sectioned cache carry the refined conductor geometry and drive the machine from a single loader; nova/circuit/passive.py:1176 load_sectioned_machine and nova/circuit/conductor.py:246 save_conductor_geometry are that change.\nVERDICT done_when: the done_when names bit-identity against an in-process subdivide_passive_thickness rebuild on a small fixture and the real 12 mm entry, a named refusal of a geometry-less entry, and an unchanged pinned plant load; tests/test_sectioned_set_geometry_cache.py carries each clause and the manifest records the gate and its result.\nVERDICT write_paths: read the manifest's declared paths; every path in the diff -- nova/circuit/conductor.py, nova/circuit/passive.py, scripts/iter_sectioned_conductor_set/build.py, scripts/iter_vessel_evolution/evolve.py, tests/test_sectioned_set_geometry_cache.py and the evidence fragment -- is inside the declared set.\nVERDICT manifest: read; it states after_suite 11 files 184 passed 0 failed and baseline_suite 10 files 178 passed 0 failed, names the run-arm.sh gate, and records the negative-control log at scratch/negative-control.log.\nVERDICT diff: read commit by commit against base 2c14b3ffc; ab3612ff2 adds geometry serialisation in conductor.py, the loader in passive.py and the build/evolve wiring, and f0f3f0b05 adds the evidence fragment.\nCALL_SITES: scripts/iter_sectioned_conductor_set/build.py:calculate (via write_geometry), scripts/iter_vessel_evolution/evolve.py:conductor_geometry (via load_sectioned_machine)\nSCORE goal_fidelity: 19\nSCORE evidence: 18\nSCORE scope_discipline: 19\nSCORE durability: 17\nSCORE fit: 18\nSCORE reuse: 19\nJUSTIFICATION goal_fidelity: nova/circuit/passive.py:1176 load_sectioned_machine returns the conductors, series wiring, coil names, passive system and section fields the coupled_plant call reads.\nJUSTIFICATION evidence: tests/test_sectioned_set_geometry_cache.py 6 passed, base/head arms 178/184 passed, negative-control red log recorded in the manifest.\nJUSTIFICATION scope_discipline: every file in the diff against 2c14b3ffc is inside the manifest's declared write paths.\nJUSTIFICATION durability: the negative control reddens test_geometry_round_trips_bit_identical when write_geometry returns None, but the spy at tests/test_sectioned_set_geometry_cache.py:216 is namespace-limited and the assertion at line 177 is tautological.\nJUSTIFICATION fit: save_conductor_geometry/load_conductor_geometry at nova/circuit/conductor.py:246 sit beside the existing save_circuit_system/load_circuit_system pair.\nJUSTIFICATION reuse: no owner of conductor-geometry serialisation exists, so the addition extends nova/circuit/conductor.py rather than forking it.\nFINDING tests/test_sectioned_set_geometry_cache.py:177 follow-on: assert plant.n_coil == len(machine.coil_names) compares the plant's coil_names against the same input the test passed in, so the two sides move together.\nFINDING tests/test_sectioned_set_geometry_cache.py:178 follow-on: assert plant.n_section == machine.section_coil.size has the same shape.\nFINDING scripts/iter_vessel_evolution/evolve.py:96 follow-on: conductor_geometry's first returned element changed meaning from the unsectioned to the refined conductors while keeping its position and the caller's name.\n",
+  "review_run_id": "r-20261021T102031557618-review-of-sectioned-set-geometry-cache-f0f3f0b05117",
+  "reviewed_base_sha": "2c14b3ffcffe95af103e3663517bb6456a804590",
+  "reviewed_head_sha": "f0f3f0b05117a995c4bd1b239e38663c517907e6",
+  "reviewed_run_id": "r-20261021T092616643306-sectioned-set-geometry-cache",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-21T10:46:58.569223+00:00",
+  "total": 110
+}

@@ -25,7 +25,7 @@
   <title>ITER Passive and Prescribed-Plasma Circuit | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="20">
+<meta name="plan-version" content="21">
 <meta name="plan-modified" content="2026-10-21">
 </head>
 <body>
@@ -255,6 +255,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261021T092616643306-sectioned-set-geometry-cache" data-who="reckon-build" data-when="2026-10-21T10:19:14.462Z">
     <div class="r-comment-body"><p>sectioned-set geometry cache: the build writes the refined conductor geometry (ConductorSet columns, polygon sections, circuit and parent map) beside linkage.npy and system.npz at the unchanged sectioned-set key, and load_sectioned_machine assembles the machine coupled_plant takes from an entry; measured by tests/test_sectioned_set_geometry_cache.py, whose six tests pass: the loaded geometry is bit-identical to an in-process subdivide_passive_thickness rebuild on a small fixture and on a scratch copy of the real 12 mm entry, an entry holding only linkage.npy and system.npz is refused with SectionedGeometryMissing, load_coupled_plant still loads the pinned 28148563521d92a2198b plant entry, and a spy on subdivide_passive_thickness records zero calls through evolve.conductor_geometry.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261021T102031557618-review-of-sectioned-set-geometry-cache-f0f3f0b05117" data-who="reckon-build" data-when="2026-10-21T10:46:55.937Z">
+    <div class="r-comment-body"><p>review of r-20261021T092616643306-sectioned-set-geometry-cache recorded at review-records/r-20261021T092616643306-sectioned-set-geometry-cache.json (parsed, base 2c14b3ffc head f0f3f0b05): goal_fidelity 19, evidence 18, scope_discipline 19, durability 17, fit 18, reuse 19, zero added failures, three follow-on findings (a tautological plant.n_coil assertion at tests/test_sectioned_set_geometry_cache.py:177, a namespace-limited zero-rebuild spy at line 216, and a silently changed first return element of evolve.conductor_geometry at evolve.py:96); no blocking findings.</p></div>
 </div>
 </section>
 </main>

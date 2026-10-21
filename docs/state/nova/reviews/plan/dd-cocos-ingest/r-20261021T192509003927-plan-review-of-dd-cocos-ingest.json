@@ -1,0 +1,145 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-21T19:42:06.478Z",
+  "dispatched_at": "2026-10-21T19:30:58Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/dd-cocos-ingest.html#s5",
+      "id": "wiring-1",
+      "reason": "a \u00a75 node launched on the declared ordering discovers a blocking dependency on \u00a72's translator and on \u00a71's census file that the wiring did not name.",
+      "text": "\u00a75 is declared to \"run beside \u00a72\", but its mechanism translates \"in COCOS 17 after translation\" and its check (2) reports DINA/CORSICA through the \u00a72 translator, so a \u00a75 node dispatched before \u00a72 cannot measure what its done-when requires",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/dd-cocos-ingest.html#s3",
+      "id": "done_when-1",
+      "reason": "check (2) is an absence claim with no positive control shown (nothing proves the search can find a fixed-orientation sign test still present), so the node cannot demonstrate its guard fires.",
+      "text": "\u00a73 declares no negative control: its checks are: from_imas prescribes/refuses; \"a search for a remaining fixed-orientation sign test returns none\"; tests pass by delta \u2014 an inverted-guard reader would still be caught by \u00a72's control, but \u00a73 shows the reader path itself only by absence",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/dd-cocos-ingest.html#s4",
+      "id": "done_when-2",
+      "reason": "without a mutation (a consumer deliberately left un-converted) the node cannot distinguish \"converted\" from \"was already 17\", which is exactly the case \u00a74 has to tell apart.",
+      "text": "\u00a74 declares no negative control for \"every internal consumer works in COCOS 17\"; a test that fixes a known-COCOS-17 state and checks sign-sensitive output shows the consumer runs, not that a consumer left in the wrong convention would be refused",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/dd-cocos-ingest.html#s4",
+      "id": "reasoning-1",
+      "reason": "the node either concludes no consumer actually changes (making \u00a74 vacuous) or must name which expectations are allowed to flip, and the plan states neither.",
+      "text": "\u00a74 done-when (1) requires \"every internal consumer ... works in COCOS 17\" while (2) requires \"the certified forward-solve rows and the analytic oracles keep their published values\", yet a consumer that was not already in COCOS 17 and is converted at its boundary must flip its sign-sensitive outputs, so (2) cannot hold for it as written",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/dd-cocos-ingest.html#s2",
+      "id": "reasoning-2",
+      "reason": "the node cannot call the named function with the tuple the plan names; the observables-to-digits mapping (and where `e_bp` comes from, the DD version's fixed digit) must be stated or the mechanism as written is not executable.",
+      "text": "\u00a72 says conformance is decided from \"the plasma current, B0, the \u03c8 ordering from axis to boundary, and the sign of q\" \"through nova_cocos.identify_convention\", but that function's signature is `identify_convention(*, sigma_bp, e_bp, sigma_r_phi_z, sigma_rho_theta_phi)` (packages/nova-cocos/src/nova_cocos/__init__.py:129) \u2014 four COCOS digits, including the flux-normalisation exponent `e_bp`, which is not among the four listed observables and is not derivable from sign data alone",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "a240f072b386ca1dd7507fd22487e11572eb328aa32d19bf5e07e25c6c46e07f",
+  "plan_slug": "dd-cocos-ingest",
+  "plan_version": 0,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "",
+      "when": "2026-10-21T19:44:49.659783+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "",
+      "when": "2026-10-21T19:44:52.365524+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "done_when-2",
+      "reason": "",
+      "when": "2026-10-21T19:44:55.003275+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-21T19:44:58.418281+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-2",
+      "reason": "",
+      "when": "2026-10-21T19:45:01.144181+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-21T19:44:52.365524+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-21T19:44:55.003275+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-21T19:44:58.418281+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-21T19:45:01.144181+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-21T19:44:49.659783+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-dd-cocos-ingest.v0.json",
+  "review_run_id": "r-20261021T192509003927-plan-review-of-dd-cocos-ingest",
+  "reviewed_blob_sha": "8db6754b8c1224eaa76e446066dfbbe58eeda74f",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every cited file, symbol, plan and decision resolves; the one non-existent path is a declared output, and no extensionless href is at issue.",
+    "done_when": "a finding \u2014 \u00a73 and \u00a74 each name no negative control, and \u00a73's check (2) is itself an absence claim (\"a search ... returns none\") with no positive control.",
+    "evidence_paths": "pass \u2014 the \u00a71 census and the \u00a75 table land on the durable `docs/research/dd-cocos-census.html`; no node routes evidence to a scratchpad or node-local path.",
+    "naming": "pass \u2014 no plan label, stage name, ticket number or version tag reaches a proposed symbol, filename or comment.",
+    "reasoning": "a finding \u2014 \u00a74's done-when (2) and (1) are in tension, and \u00a72's stated determination mechanism does not match the signature of the `identify_convention` it names.",
+    "single_goal": "pass \u2014 each of \u00a71\u2013\u00a75 carries one deliverable, and \u00a75's reference adjudication is the consequence of its own measure rather than a second one.",
+    "wiring": "a finding \u2014 the followup `f-ddc-001` declares \"\u00a75 can run beside \u00a72\", but \u00a75's measurement runs \"in COCOS 17 after translation\" and reports CORSICA through the \u00a72 translator, so \u00a75 depends on \u00a72 (and on \u00a71's census file it writes into), not beside it."
+  },
+  "section_digests": {
+    "_document": "29f5087fa0e5ad0f917b1ff80b913ce5d8f06b32d5c716728522ab06567b4f3c",
+    "s0": "2407e28f2db9011d45035f6b86c463b1b4e36000c85f35e7d35de056f2cbb5d9",
+    "s1": "a73e7c69edf2d0bc9850cc6146cd87b1c1615921ac95be2062f7c8da066c784d",
+    "s2": "df46d35f979d5d4279b05156a3971be9d04b4b90b482ee403f7154d140f2a0d6",
+    "s3": "1aed3f223b1f9744d690d8aaa08b53206d088735db0d8372624e814ae0b73f1d",
+    "s4": "af5eec0e524822965aa094866864d918c63f5160e71bbede8f44d5f86c05b6cc",
+    "s5": "94078844cde0216ea2c463cb059852a5155054cdafcb880d5f5a828977abe820"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-21T19:44:48.292041+00:00"
+}

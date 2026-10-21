@@ -21,12 +21,12 @@
   <meta name="plan-sprint" content="S24">
   <meta name="plan-tags" content="iter,machine-description,equilibrium">
   <meta name="plan-blocks" content="power_convertor:iter-switched-terminal-transients">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
   <title>ITER Passive and Prescribed-Plasma Circuit | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="13">
-<meta name="plan-modified" content="2026-10-15">
+<meta name="plan-version" content="14">
+<meta name="plan-modified" content="2026-10-21">
 </head>
 <body>
   <main class="plan-doc">
@@ -181,15 +181,25 @@
     <p>This section is the evidence power_convertor's gate g-istt-1 waits on.</p>
 
     <h2 id="s5">§5 — A reconstructed plasma as the source</h2>
-<section data-reckon="section" data-id="s5" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s5" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
 <p>The same coupled plant serves a measured pulse as well as a DINA simulation. The lead decided (14 October 2026) that the plasma source must accept a reconstructed equilibrium too, so the switched model can replay real discharges: JT-60SA first, where a smaller machine of similar construction lets the stray capacitances and inductances be observed against measured coil voltages and currents.</p><p>The prescription of §2 already works from an IMAS equilibrium: a closed boundary, the 1-D flux functions, the 2-D ψ map and the plasma current. This section makes the source explicit and generic. A plasma source is an equilibrium (simulated or reconstructed) plus the coil-current series that goes with it. The narrow call of §4 takes either. A reconstruction carries its own conventions, so the reading states them, through nova's existing readers and COCOS handling rather than a new one:</p><ul><li>EFIT-style p′ and FF′ on its own ψ normalisation;</li><li>a boundary that may be the last closed flux surface rather than a separatrix;</li><li>coil currents that may come from a different source and cadence than the equilibrium.</li></ul><p>Done when three checks pass. First, a reconstruction nova already reads (one of its DIII-D or MAST reconstructions, or a JT-60SA reconstruction if one is found) is prescribed through the same path, and its linked flux at the coils and flux loops matches the reconstruction's own ψ within a stated tolerance. Second, the same call returns a coupled plant for that machine and pulse. Third, a DINA case run through the generic source gives the plant §4 returns for it, unchanged. Negative control: handing the call a reconstruction with its ψ sign convention flipped is refused or detected, not silently prescribed.</p>
+
+    <h2 id="s6">§6 — Any plasma source drives the full ITER plant from the cache</h2>
+<section data-reckon="section" data-id="s6" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<p>The cached ITER sectioned set keeps its linkage and passive system but not the refined conductor geometry it was built from. <code>coupled_plant</code> reads the source's flux at every passive circuit, so a plasma source cannot drive the full ITER plant from the cache, and §5's reconstruction arm had to run on a reduced sectioned machine. This section makes the cache carry what a source needs, so any plasma source, a DINA case or a reconstructed pulse, drives the full ITER plant without rebuilding the sectioned set.</p><p>Done when three checks pass. First, the cache stores the refined conductor geometry, or the subdivision parameters that regenerate it bit for bit, beside the linkage it already keeps, and the cache key covers them. Second, DINA 105014/1 and 105052/1 each drive the full ITER plant from a warm cache and return the plant a cold build returns, bit for bit, with no rebuild of the sectioned set, shown by a counter on the build rather than by wall time. Third, §5's reconstruction-style presentation of 105014/1 runs on the full machine instead of the reduced one and agrees with the DINA-path plant within §5's predeclared relative 1e-3. Negative control: a cache entry without its geometry is refused with a named error, never rebuilt silently or served as a reduced machine.</p>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-ippc-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-14" data-recommends-skill="/reckon-build iter-passive-plasma-circuit §1" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ippc-001" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-14" data-recommends-skill="/reckon-build iter-passive-plasma-circuit §1" data-resolved-at="2026-10-21T07:26:37+00:00" data-resolved-by="reckon-build">
     <h4 class="r-fu-title">Build the sectioned ITER conductor set</h4>
     <div class="r-fu-body"><p>§1 and §2 have no prerequisite and run in parallel. §3 needs both, and §4 needs §1 and §3. power_convertor's iter-switched-terminal-transients §6 waits on §4. The design review must be composed and answered before the first dispatch.</p></div>
     <pre class="r-fu-prompt">/reckon-build iter-passive-plasma-circuit §1</pre>
+    <p class="r-fu-outcome">§1 to §5 have landed; the remaining work is §6, queued as f-ippc-002.</p>
+    </article>
+<article class="r-fu" data-id="f-ippc-002" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-build" data-written-at="2026-10-21 07:27" data-recommends-skill="/reckon-build iter-passive-plasma-circuit §6" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Let any plasma source drive the full ITER plant from the cache</h4>
+    <div class="r-fu-body"><p>§5 closed for the reconstructed-source call. The cached ITER sectioned set lacks its refined conductor geometry, so a new plasma source cannot drive the full plant without a rebuild. The lead asked on 2026-10-21 for this to be fixed.</p></div>
+    <pre class="r-fu-prompt">/reckon-build iter-passive-plasma-circuit §6</pre>
     </article>
 </section>
 <section data-reckon="decisions" id="decisions" class="r-decisions">
@@ -232,6 +242,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-s5-plant-landed" data-who="reckon-build" data-when="2026-10-15T14:32:00Z">
     <div class="r-comment-body"><p>The plant checks landed (merged <code>838789ec2</code>). <code>coupled_plant</code> takes a generic plasma source. 105014/1 through it returns the earlier plant bit for bit. The same slice presented the way a reconstruction arrives (EFIT-style p′ and FF′, last closed surface, coarser coil cadence) agrees within a predeclared relative 1e-3. The call refuses a flipped-sign source, and a machine whose supplied terminals disagree with their section reduction by 1 %; each refusal has a red log with the guard removed. 20 tests pass, review passed. §5 stays open on one point. The reconstruction arm runs on a reduced sectioned machine, because the cached ITER sectioned set keeps its linkage and system but not the refined conductor geometry it was built from. A plasma source therefore cannot re-drive it, since the call reads the source's flux at every passive circuit. Follow-on: the cache keeps the conductor geometry, or its subdivision parameters, so any plasma source can drive the full ITER plant without a rebuild.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-21T07:27:00Z">
+    <div class="r-comment-body"><p>§5 closed by the lead on 2026-10-21 for the reconstructed-source call (merged <code>838789ec2</code>): <code>coupled_plant</code> takes a DINA case or a reconstructed pulse through one generic <code>PlasmaSource</code>; MAST matches its own ψ below 8 mWb; the DINA path is unchanged bit for bit; the reconstruction-style presentation agrees within 1e-3; a flipped sign and inconsistent terminals are refused. The ITER cache point, that a new source cannot drive the full ITER plant without a rebuild, moves to §6. This is the evidence power_convertor's gate g-jccm-4 cites. <a href="/nova/evidence/archive/iter-passive-plasma-circuit-landed.html#reconstructed-source-plant">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-close-s4" data-who="reckon-build" data-when="2026-10-15T09:40:00Z">
     <div class="r-comment-body"><p>§4 landed (merged <code>c4c7abd78</code>): one public call and result type; cold equals cached; the reduced plant is within 1 % of the full model for all 14 coils to 5 kHz. This is the evidence for power_convertor's gates g-istt-1 and g-jspr-1. The serialiser and screening duplication is being repaired without changing the surface. <a href="/nova/evidence/archive/iter-passive-plasma-circuit-landed.html#iter-coupled-plant-call">evidence</a></p></div>

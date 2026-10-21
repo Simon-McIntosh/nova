@@ -1,0 +1,124 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-21T19:39:57.530Z",
+  "dispatched_at": "2026-10-21T19:26:25Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/iter-passive-plasma-circuit.html:189",
+      "id": "reasoning-1",
+      "reason": "a node dispatched on \u00a76 as written would re-implement check 1, which is already landed and promoted, and the section's stated root cause no longer describes the tree.",
+      "text": "\u00a76 opens \"The cached ITER sectioned set keeps its linkage and passive system but not the refined conductor geometry it was built from\", and its first check is to make the build write that geometry \"beside the existing files at the same key\", but \u00a76's own comment at line 261 records exactly that work already landed (\"the build writes the refined conductor geometry ... beside linkage.npy and system.npz at the unchanged sectioned-set key, and load_sectioned_machine assembles the machine coupled_plant takes from an entry; measured by tests/test_sectioned_set_geometry_cache.py, whose six tests pass\") and that run was promoted (`645f6b03c`), with `load_sectioned_machine` and `SectionedGeometryMissing` present in `nova/circuit/passive.py` \u2014 while \u00a76 was rewritten at 21:15 local, after that landing",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/iter-passive-plasma-circuit.html:189",
+      "id": "reasoning-2",
+      "reason": "if dd-cocos \u00a75 revises the reference, \u00a76 check 3 names a stale equilibrium and its justification cites a measure the dependent plan has called an operator artefact.",
+      "text": "\u00a76 check 3 fixes CORSICA 130506/6 as \"the reference\" and justifies it with a survey measure (\"its stored flux functions integrate closest to its plasma current: 0.999, against 0.959 for DINA 105014/1\"), but the plan \u00a76 says it waits on \u2014 `docs/plans/dd-cocos-ingest.html` \u2014 states in its \u00a75 that the survey ranking the ITER sources \"could not measure\" the lead's edge-consistency criterion because \"its map-implied current carried a uniform factor of 225 to 300 in every case, DINA included, which is an operator artefact\" and makes \u00a75(3) \"the reference choice of iter-passive-plasma-circuit \u00a76 is confirmed or revised on that table\", so the sibling plan treats the same choice as open where \u00a76 treats it as settled",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/iter-passive-plasma-circuit.html:189",
+      "id": "wiring-1",
+      "reason": "a coordinator reading \u00a76 would dispatch it as independent of dd-cocos-ingest and a worker would find its check-2 sources refused by an unlanded guard.",
+      "text": "\u00a76 declares its wait only inside check 3 (\"This check waits on that translator (decision d-ippc-dd-cocos)\"), yet check 2 drives DINA 105069/3 and 105013/1, which the decision d-ippc-dd-cocos and `docs/plans/dd-cocos-ingest.html` \u00a70/\u00a72 classify as conforming COCOS 11 sources \u2014 the class the current orientation guard refuses (`nova/imas/plasma_source.py:73-79`, `span * self.plasma_current >= 0`), so check 2 cannot run until the translator and reader migration land \u2014 and this plan declares no dependency edge on `dd-cocos-ingest`, whose `plan-blocks` points the other way only",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/iter-passive-plasma-circuit.html:190",
+      "id": "anchors_resolve-1",
+      "reason": "the anchor names a code path in the present tense that the cited file contradicts, so the mechanism \u00a76 relies on is described against a version of the file that no longer exists.",
+      "text": "\u00a76 says \"The callers that today rebuild the geometry in-process read it from that loader instead, among them `conductor_geometry` in `scripts/iter_vessel_evolution/evolve.py`, which calls `subdivide_passive_thickness`\", but that function's own docstring at `scripts/iter_vessel_evolution/evolve.py:85-90` now reads \"the refinement is loaded rather than rebuilt; `subdivide_passive_thickness` is never called on this path\" and it calls `load_sectioned_machine`",
+      "type": "anchors_resolve",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "6c62d556f9809ef0c36d02fd07fa301178b00338e68d0439fd919a914da53c8d",
+  "plan_slug": "iter-passive-plasma-circuit",
+  "plan_version": 24,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-21T19:41:44.066088+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-2",
+      "reason": "",
+      "when": "2026-10-21T19:41:53.248458+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "anchors_resolve-1",
+      "reason": "",
+      "when": "2026-10-21T19:41:55.952460+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "",
+      "when": "2026-10-21T19:41:59.211009+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-21T19:41:55.952460+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-21T19:41:44.066088+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-21T19:41:53.248458+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-21T19:41:59.211009+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-iter-passive-plasma-circuit.v24.json",
+  "review_run_id": "r-20261021T192127343380-plan-review-of-iter-passive-plasma-circuit",
+  "reviewed_blob_sha": "80a1514588515211e654fab03063ff41f8b3ddbe",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \u00a76 names `conductor_geometry` in `scripts/iter_vessel_evolution/evolve.py` as a caller that rebuilds geometry by calling `subdivide_passive_thickness`, but that function now documents the opposite.",
+    "done_when": "pass \u2014 \u00a76 names a negative control (\"re-driving a cache entry that lacks its geometry with a new source is refused with a named error\") and its checks 1\u20133 are each measurable.",
+    "evidence_paths": "pass \u2014 \u00a76 declares artefact stores under `.cache/iter-passive-plasma-circuit/{sectioned-conductor-set,coupled-plant}/<digest>/`; the gate-log path is named by the dispatch brief (declined previously, unchanged).",
+    "naming": "pass \u2014 no plan labels, stage names or ticket numbers reach \u00a76's symbols, and the DD COCOS decision is described by mechanism.",
+    "reasoning": "a finding \u2014 \u00a76's premise (the cache does not carry the conductor geometry) is contradicted by \u00a76's own landed record in the same section, and check 3's reference is asserted as settled while the plan it depends on reserves that choice.",
+    "single_goal": "pass \u2014 \u00a76 carries one deliverable: make the cache carry the refined conductor geometry so any source drives the full plant without a rebuild.",
+    "wiring": "a finding \u2014 \u00a76's check 3 waits on the DD3 translator of a different plan (`dd-cocos-ingest`, which declares `plan-blocks: iter-passive-plasma-circuit`) but this plan declares no dependency on it (no `plan-links`; only `plan-blocks` outward to power_convertor)."
+  },
+  "section_digests": {
+    "_document": "a03aba66646f225a048e7e59f698fbbeb11899a70692d62a7a5cff6129a12c8e",
+    "s1": "fd450fda152b172eb82e80c548ab9e5fa16c20b15f3b14ae415c0ed18ceb7a8c",
+    "s2": "fbea1d197646f2baba636205f10434c799bb3ce88f19dfa3ef779d98d25c50fb",
+    "s3": "56e06d1f8c060952b209edbc0a1c98e3f22e1cad48fcc1e6d6f04eb464d977bf",
+    "s4": "f8534dfd59d3f9812bc19d36079033b715faafd53488ec44ddfec9f088a03e93",
+    "s5": "39b83394b03af8bd027560dfc1db14bc1176968fc3aa2a93635fed656c03c8ec",
+    "s6": "d1c1f59f91f27ee40109d48e8891283edf53964e98ed85967d2378a5a0474c85"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-21T19:41:41.829194+00:00"
+}

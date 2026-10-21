@@ -374,7 +374,7 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
         saddle = jnp.concatenate((saddle, jnp.zeros_like(saddle)))
         inside = jnp.concatenate((inside, jnp.zeros_like(inside)))
     saddle = saddle & inside
-    polished, saddle_live, wall_seed, wall_live, tree_valid = _first_tree_events(
+    polished, saddle_live, _wall_seed, _wall_live, tree_valid = _first_tree_events(
         field, geometry, axis, sigma, policy
     )
     saddle_index = jnp.argmin(
@@ -389,13 +389,6 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
         saddle_live, polished.jet.hessian, roots.jet.hessian[saddle_index]
     )
     saddle_score = sigma * polished.jet.value
-    wall_distance = jnp.sum((wall_points - wall_seed) ** 2, axis=1)
-    tree_wall_index = jnp.argmin(
-        jnp.where(jnp.isfinite(wall_flux), wall_distance, jnp.inf)
-    )
-    wall_passage = jnp.where(
-        wall_live & (jnp.arange(wall_flux.size) == tree_wall_index), jnp.inf, -jnp.inf
-    )
     third, fourth = topology._curvature_derivatives(
         field, saddle_point, jnp.median(geometry.pitch)
     )
@@ -439,7 +432,21 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
         jnp.asarray(True),
     )
     seed = jnp.argmin(jnp.sum((geometry.centre - axis) ** 2, axis=1))
-    wall_scores = _wall_effective_level(sigma * wall_flux, wall_passage)
+    wall_cell = jax.vmap(
+        lambda point: jnp.argmax(topology._inside_cells(geometry, point))
+    )(wall_points)
+    ceiling = _wall_path_ceiling(
+        geometry,
+        approximate.field_coefficients,
+        form,
+        axis,
+        saddle_live & near_saddle,
+        saddle_score,
+        seed,
+        sigma,
+        frame_gate,
+    )
+    wall_scores = _wall_effective_level(sigma * wall_flux, ceiling[wall_cell])
     wall_index = jnp.argmax(wall_scores)
     wall_score = wall_scores[wall_index]
     diverted = saddle_live & (saddle_score >= wall_score)

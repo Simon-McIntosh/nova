@@ -82,12 +82,14 @@ def plasma_module():
     )
 
 
-def conductor_geometry(surface_layer: float):
-    """Read the refined conductor set and its parent map from the cache entry.
+def sectioned_conductor_geometry(surface_layer: float):
+    """Read the sectioned conductor set and its parent map from the cache entry.
 
     The entry holds the geometry its sectioned set was built from, so the
     refinement is loaded rather than rebuilt; ``subdivide_passive_thickness`` is
-    never called on this path.
+    never called on this path.  The conductors returned are the refined
+    sectioned set the entry was built from -- the same set the loader exposes as
+    ``subdivision.conductors`` -- not the unsectioned source winding.
     """
     from nova.circuit.passive import load_sectioned_machine
 
@@ -305,7 +307,9 @@ def main():
     measure = plasma_module()
 
     matrix, system = load_system(args.surface_layer)
-    conductors, coil_names, owner, refined = conductor_geometry(args.surface_layer)
+    conductors, coil_names, owner, refined = sectioned_conductor_geometry(
+        args.surface_layer
+    )
     if list(coil_names) != NOVA_CHANNELS:
         raise ValueError("cached channels disagree with the sectioned coil order")
     if not np.array_equal(refined.circuits, system.circuits):

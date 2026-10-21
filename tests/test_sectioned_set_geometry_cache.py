@@ -44,6 +44,11 @@ PINNED_PLANT = Path(
 )
 REFINEMENT_MAX_THICKNESS_M = 0.04
 
+#: the small fixture's inputs, counted independently of the machine the loader
+#: returns so the plant's dimensions are checked against the source, not itself
+SMALL_COIL_NAMES = ("PFa", "PFb")
+SMALL_SECTION_COIL = np.array([0, 1])
+
 
 def _build_module():
     spec = importlib.util.spec_from_file_location(
@@ -124,7 +129,11 @@ def _small_fixture(tmp_path, *, with_geometry: bool = True):
     entry = tmp_path / "entry"
     refined = _refine_small()
     circuits = _write_entry(
-        entry, refined, ["PFa", "PFb"], np.array([0, 1]), with_geometry=with_geometry
+        entry,
+        refined,
+        list(SMALL_COIL_NAMES),
+        SMALL_SECTION_COIL,
+        with_geometry=with_geometry,
     )
     return entry, refined, circuits
 
@@ -174,8 +183,11 @@ def test_loader_returns_the_machine_coupled_plant_takes(tmp_path):
     assert machine.section_names == ["PFa section 1", "PFb section 1"]
     np.testing.assert_array_equal(machine.series, np.array([[1.0, 0.0], [0.0, 1.0]]))
     plant = coupled_plant(machine, None, cache_dir=tmp_path / "plant")
-    assert plant.n_coil == len(machine.coil_names)
-    assert plant.n_section == machine.section_coil.size
+    # Counted from the fixture's own inputs, not from the machine the loader
+    # returns: comparing a plant to the machine it was built from cannot show
+    # that either one carries the right number of channels.
+    assert plant.n_coil == len(SMALL_COIL_NAMES)
+    assert plant.n_section == SMALL_SECTION_COIL.size
 
 
 def test_entry_without_geometry_is_refused_by_name(tmp_path):
@@ -198,27 +210,61 @@ def test_pinned_plant_entry_loads_unchanged():
     assert plant.n_modes > 0
 
 
-def test_conductor_geometry_reads_from_the_cache(tmp_path, monkeypatch):
-    """`evolve.conductor_geometry` loads the entry and never rebuilds it."""
+def _spy_every_binding(monkeypatch, original, calls, message):
+    """Replace ``original`` at every module binding and report the bindings.
+
+    The build functions are bound by name into several modules, so patching one
+    module's attribute leaves the others live and the count reads a false zero.
+    """
+    import sys
+
+    def spy(*args, **kwargs):
+        calls.append(args)
+        raise AssertionError(message)
+
+    bound = []
+    for module in list(sys.modules.values()):
+        if module is None or not getattr(module, "__name__", None):
+            continue
+        for name, value in list(vars(module).items()):
+            if value is original:
+                monkeypatch.setattr(module, name, spy, raising=False)
+                bound.append(f"{module.__name__}.{name}")
+    return bound
+
+
+def test_sectioned_conductor_geometry_reads_from_the_cache(tmp_path, monkeypatch):
+    """The vessel-evolution loader reads the entry and rebuilds nothing."""
     import scripts.iter_vessel_evolution.evolve as evolve
+    from nova.circuit.linkage import circuit_linkage_matrix
 
     entry, refined, _circuits = _small_fixture(tmp_path)
     surface_layer = 0.012
     monkeypatch.setattr(evolve, "CONDUCTOR_CACHE", tmp_path)
     monkeypatch.setattr(evolve, "MESH_KEY", {surface_layer: "entry"})
-    calls = []
-    from nova.circuit import conductor as conductor_module
+    subdivide_calls: list = []
+    linkage_calls: list = []
+    bound_subdivide = _spy_every_binding(
+        monkeypatch,
+        subdivide_passive_thickness,
+        subdivide_calls,
+        "subdivide_passive_thickness was called on the load path",
+    )
+    bound_linkage = _spy_every_binding(
+        monkeypatch,
+        circuit_linkage_matrix,
+        linkage_calls,
+        "circuit_linkage_matrix was called on the load path",
+    )
+    assert bound_subdivide, "no binding of subdivide_passive_thickness was guarded"
+    assert bound_linkage, "no binding of circuit_linkage_matrix was guarded"
 
-    def counted(*args, **kwargs):
-        calls.append(args)
-        raise AssertionError("subdivide_passive_thickness was called on the load path")
-
-    monkeypatch.setattr(conductor_module, "subdivide_passive_thickness", counted)
-    conductors, coil_names, owner, subdivision = evolve.conductor_geometry(
+    conductors, coil_names, owner, subdivision = evolve.sectioned_conductor_geometry(
         surface_layer
     )
 
-    assert calls == [], "the geometry was rebuilt instead of loaded"
+    assert subdivide_calls == [], "the geometry was rebuilt instead of loaded"
+    assert linkage_calls == [], "the linkage was rebuilt instead of loaded"
     assert coil_names == ["PFa", "PFb"]
     np.testing.assert_array_equal(np.asarray(owner), np.array([0, 1]))
     _assert_geometry_equal(subdivision, refined)

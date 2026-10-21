@@ -1,0 +1,83 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-21T23:47:30.806Z",
+  "dispatched_at": "2026-10-21T23:36:18Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/iter-passive-plasma-circuit.html:195",
+      "id": "reasoning-1",
+      "reason": "the plan makes the storage/loader identity the basis for both the repair target and the load-time refusal, so the wrong operand sends the repair and its check to a matrix the plant never consumes.",
+      "text": "\u00a77 states \"build.py writes linkage.npy only on a sectioned-set miss, and the coil block it splices in is never re-saved. So the build stores the joint matrix it actually uses, coil block included.\" The two halves contradict. `scripts/iter_sectioned_conductor_set/build.py:258` writes `linkage.npy` from the all-circuit `circuit_linkage_matrix(refined.conductors, circuits, section_n_max=section_n_max)` call, and only afterwards `:287` splices the separate finite-source block (`:276-282`, `finite_source=True`, `section_n_max=6`) into the in-memory `matrix`. The spliced block is therefore exactly the one never re-saved, so the stored file's coil block is NOT the block the build uses. `load_sectioned_machine` (`nova/circuit/passive.py:1193`) reads `matrix = np.load(entry / \"linkage.npy\")` and sets `section_inductance = matrix[:n_section, :n_section]` with no re-splice, and `coupled_plant` consumes `machine.section_inductance` (`nova/circuit/coupled_plant.py:190`, `:218`), so the delivered plant reads the stored coil block while \u00a77's clause (1) names the finite-source replacement as the quadrature candidate and clause (2) derives \"every coil's bare inductance\" from the spliced block (`build.py:302`, `coil_matrix = series.T @ matrix[:n_section, :n_section] @ series`). A probe or repair node reasoning from \"the stored matrix is the used matrix\" would repair the wrong operand, and the loader's new positive-definite check (which reads the file) would not cover the finite-source block the attribution points at.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/iter-passive-plasma-circuit.html:195",
+      "id": "anchors_resolve-1",
+      "reason": "a dispatched node can re-measure the passive-block spectrum itself, and the plan already requires it to attribute those negatives, so an uncited starting number does not change the plan's direction.",
+      "text": "\u00a77 clause (1) states as established \"37 negative eigenvalues at 12 mm (minimum \u22122.53e-7 H) and 175 at 6 mm (minimum \u22129.45e-8 H)\" with no cited record, commit or receipt, where every other measurement in the paragraph cites power_convertor's `averaged-plant-energy-refusal` / commit `9c654e94` or the survey.",
+      "type": "anchors_resolve",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "3e3e7f81d9955753f15b8ea9b7322b1b0a9e169bd6286fd7589c7a40486fcd67",
+  "plan_slug": "iter-passive-plasma-circuit",
+  "plan_version": 42,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-21T23:49:46.366588+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "anchors_resolve-1",
+      "reason": "the passive-block counts were measured by the sixth plan review (r-20261021T224401759213) on the stored linkage.npy, and the node re-measures and attributes them as its first clause",
+      "when": "2026-10-21T23:49:51.450517+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "the passive-block counts were measured by the sixth plan review (r-20261021T224401759213) on the stored linkage.npy, and the node re-measures and attributes them as its first clause",
+      "when": "2026-10-21T23:49:51.450517+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-21T23:49:46.366588+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-iter-passive-plasma-circuit.v42.json",
+  "review_run_id": "r-20261021T233546267851-plan-review-of-iter-passive-plasma-circuit",
+  "reviewed_blob_sha": "fd205df65597ea288b8cc07f5c0af3c8df7886eb",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 verified in the tree: `guard_positive_definite` (`nova/circuit/linkage.py:291`, default `floor_frac=1e-4`), `load_sectioned_machine` (`nova/circuit/passive.py:1176`, refuses a missing geometry file first), `MESH_KEY` (`scripts/iter_vessel_evolution/evolve.py:33-35`) holding both `68df15665ab2ea45f427` (12 mm) and `06ff06d3eb7a4448f0fe` (6 mm), the 12 mm digest pinned exactly where \u00a77 names it (`tests/test_sectioned_set_geometry_cache.py:39`, `tests/test_coupled_plant.py:434` and `:679`), and the tag `finite-source:6` (`scripts/iter_sectioned_conductor_set/build.py:265`). The extensionless href to iter-switched-terminal-transients resolves as `<path>.html` (house convention).",
+    "done_when": "pass \u2014 \u00a77's done-when is measurable (joint coil-plus-passive linkage positive definite for the 12 mm and 6 mm sets, every coil's bare inductance positive, VSU/VSL within a stated tolerance of an independent single-coil-in-jacket reference, the loader refusal exercised with the refusal removed failing its own assertion) and it names a literal negative control (\"revert the repair, and the Schur complement again has the two negative eigenvalues\").",
+    "evidence_paths": "pass \u2014 \u00a77's artefacts land in the durable nova caches it names by shape (`.cache/iter-passive-plasma-circuit/sectioned-conductor-set/<digest>/`, `coupled-plant/<digest>/`, the pinned `coupled-plant/28148563521d92a2198b/plant.npz`), not a session or node-local scratch path; the gate-log location follows the repo convention the earlier \u00a76 evidence-paths finding was declined against.",
+    "naming": "pass \u2014 \u00a77 carries no plan labels, stage names, ticket numbers or version tags into code; `finite-source:6` is a cache tag (an artifact key), not a symbol name.",
+    "reasoning": "a finding \u2014 \u00a77's newly added claim that \"the build stores the joint matrix it actually uses, coil block included\" is contradicted by `build.py`, where `linkage.npy` is saved before the finite-source coil block is spliced in and the loader never re-splices.",
+    "single_goal": "pass \u2014 \u00a77's three clauses (attribute, repair, deliver) are one deliverable: the coil-plus-passive linkage stores positive energy, re-keyed and delivered.",
+    "wiring": "pass \u2014 \u00a77's two relationships resolve on both sides: \u00a76's status line (line 189) names \u00a77's repaired sectioned-set entry as one of the two things its check 3 waits on, and \u00a77's clause (3) (line 195) records the same wait (\"\u00a76's remaining check 3 runs after this section, against the sectioned-set entry this section writes, and \u00a76 records the same wait\"); \u00a77's delivery to power_convertor's new 105069/3 plant entry is named and the pinned entry `coupled-plant/28148563521d92a2198b` is explicitly excluded from re-keying."
+  },
+  "section_digests": {
+    "_document": "9089b3d51bacedf8b789082a7c5656db85f9c3bd1fe196a55b7b774ad7634317",
+    "s1": "fd450fda152b172eb82e80c548ab9e5fa16c20b15f3b14ae415c0ed18ceb7a8c",
+    "s2": "fbea1d197646f2baba636205f10434c799bb3ce88f19dfa3ef779d98d25c50fb",
+    "s3": "56e06d1f8c060952b209edbc0a1c98e3f22e1cad48fcc1e6d6f04eb464d977bf",
+    "s4": "f8534dfd59d3f9812bc19d36079033b715faafd53488ec44ddfec9f088a03e93",
+    "s5": "39b83394b03af8bd027560dfc1db14bc1176968fc3aa2a93635fed656c03c8ec",
+    "s6": "ddb051fb521c38e5dc1340741e4680a09626b66b416f568ab6ebf5b3f81b3545",
+    "s7": "bab8d3583fd9d8ec4cb1c6622ec1eb2c1aeb81dcce7caa692619bc2e2465ad6b"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-21T23:49:43.005344+00:00"
+}

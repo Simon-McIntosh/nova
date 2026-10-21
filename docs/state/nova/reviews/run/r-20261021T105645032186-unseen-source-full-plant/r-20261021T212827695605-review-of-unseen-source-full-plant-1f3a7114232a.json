@@ -1,0 +1,69 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-21T21:51:55.929Z",
+  "dispatched_at": "2026-10-21T21:29:12Z",
+  "findings": [
+    {
+      "detail": "The field reads scratch/probe_time.log. That file is the pre-repair reproduction of the old ValueError (polygon circuit 828 has no quadrature points); it has no bare EXIT= last line and no failing test id, so it is not admissible against the negative-control field. The run's actual refusal exercise is tests/test_unseen_source_full_plant.py::test_negative_control_entry_without_geometry_is_refused, whose log is scratch/negative_control.log (1 passed in 97.25s), and no red log for the polygon-quadrature repair's negative control (restore the bounding-box grid and the thin-strip test fails) is present in the run directory.",
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261021T105645032186-unseen-source-full-plant/manifest.md",
+      "line": 275,
+      "severity": "blocking",
+      "summary": "negative_control_log names a pre-repair probe traceback that carries no EXIT= line, so the negative-control admission cannot read it."
+    },
+    {
+      "detail": "The import was live in the pre-refactor plasma_linked_flux, which measured the reciprocity kernel before rejecting it on cost; after the shaped path moved to section_grid the import was left behind. A ruff check of the file returns exactly this one F401.",
+      "file": "nova/imas/prescribed_plasma.py",
+      "line": 8,
+      "severity": "follow-on",
+      "summary": "polygon_greens is imported but never used, a leftover of the reuse refactor; ruff F401 fails on the file."
+    },
+    {
+      "detail": "The gate log records a DeprecationWarning at linkage.py:133 ('Arrays of 2-dimensional vectors are deprecated') on every invocation. The value is a weight denominator in polygon_quadrature, so a future NumPy raise would break every shaped-section plant build.",
+      "file": "nova/circuit/linkage.py",
+      "line": 133,
+      "severity": "follow-on",
+      "summary": "polygon_quadrature computes its triangle areas with np.cross on 2-D vectors, which NumPy 2.x deprecates and a future release removes."
+    },
+    {
+      "detail": "section_quadrature returns (r, z, weight) for one polygon section, as polygon_quadrature now does for a PolygonSection. The node consolidated the (r, z, weight, owner) concatenation into section_grid, which is the right move for that shape, but the quadrature rule itself was added as a third sibling rather than offered back to the owner. The new triangle-fan rule is strictly better than that owner's bounding-box grid, so the improvement belongs at the owner.",
+      "file": "nova/imas/mast_passive_inductance.py",
+      "line": 175,
+      "severity": "follow-on",
+      "summary": "section_quadrature already owns interior quadrature points and area weights for a polygon cross-section; linkage.polygon_quadrature duplicates the capability without extending it."
+    },
+    {
+      "detail": "polygon_plasma_flux reproduces polygon_quadrature's points, weights and current-share product for one section; its only callers are tests/test_prescribed_plasma.py:413 and :437. It is a second entry point for a capability section_grid already serves.",
+      "file": "nova/imas/prescribed_plasma.py",
+      "line": 110,
+      "severity": "follow-on",
+      "summary": "polygon_plasma_flux duplicates section_grid's shaped branch for a single section and has no production caller."
+    },
+    {
+      "detail": "The plan's third check reads that the reconstruction arm agrees with the DINA-path plant within 1e-3, which resume-3-advice.txt redefined and resume-4-advice.txt closed as strict-xfail pending a DD3-to-COCOS-17 translator. The node correctly did not edit the plan, so the coordinator owns reconciling plan section 6 with the landed state before promotion reads it.",
+      "file": "docs/plans/iter-passive-plasma-circuit.html",
+      "line": 188,
+      "severity": "follow-on",
+      "summary": "Plan section 6 still carries data-status=implementable and a done-when whose third clause names the DINA reference, disagreeing with the closure the run landed."
+    }
+  ],
+  "project": "nova",
+  "review": "VERDICT goal: the node goal is that plasma sources the plant cache has never seen drive the full ITER plant from the sectioned-set cache with no sectioned-set rebuild; the landed diff does this through nova/circuit/linkage.py:96 and nova/imas/prescribed_plasma.py:68 with tests/test_unseen_source_full_plant.py:270 driving DINA 105069/3 and 105013/1 bit-identically with zero rebuilds, while the reconstruction-agreement clause is left as a documented strict xfail at tests/test_unseen_source_full_plant.py:318. VERDICT done_when: read the brief's three checks; check 1 is receipted in scratch/part1_report.json (linkage and system sha256 identical before and after, geometry sha256 afa6f9f0 and 1c10a1fd matching the two geometry.npz on disk) and check 2 is asserted at tests/test_unseen_source_full_plant.py:295 and :305, while check 3's assertion is expected to fail at tests/test_unseen_source_full_plant.py:348 rather than pass. VERDICT write_paths: read the brief's seven paths plus the recorded extensions in resume-1-advice.txt (nova/imas/prescribed_plasma.py, tests/test_prescribed_plasma.py) and resume-5-advice.txt (nova/circuit/linkage.py); every path the source commits touch is inside that union, and no file outside it was changed. VERDICT manifest: read; it states status complete, both suite arms as single-line JSON over scratch/gate_importers.log (head c1fb16494 against base 2c14b3ffc, the one coupled-plant failure identical in both arms so the delta is zero), and it now carries a runnable tests: line and a bare EXIT=1 terminator, repairing the previous review's three manifest findings. VERDICT diff: read commit by commit against 970c04c6b, the node's own base (fourteen commits, nine files, head 1f3a71142); the code change is the shaped-section quadrature repair and the section_grid reuse refactor, the evolve loader rename with its caller, and the new coverage; the last three commits are docs-only and the gate job ran at c1fb16494, which the fragment states. CALL_SITES: nova/circuit/coupled_plant.py:304, nova/imas/prescribed_plasma.py:126, scripts/iter_vessel_evolution/evolve.py:310 SCORE goal_fidelity: 13 JUSTIFICATION goal_fidelity: nova/imas/prescribed_plasma.py:98 replaced the bounding-box quadrature that refused 42 of the machine's 1,304 shaped circuits, so both unseen cases reach the full plant, but the third clause is only xfailed at tests/test_unseen_source_full_plant.py:318. SCORE evidence: 14 JUSTIFICATION evidence: scratch/part1_report.json's geometry sha256 values match the two geometry.npz on disk and the two-arm gate in scratch/gate_importers.log shows the same single failure at both revisions, but check 3 has no passing receipt anywhere in the run. SCORE scope_discipline: 16 JUSTIFICATION scope_discipline: every file in the source commits is inside the declared write paths as extended by resume-1-advice.txt and resume-5-advice.txt. SCORE durability: 15 JUSTIFICATION durability: tests/test_prescribed_plasma.py:427 asserts a thin strip against an independent dense reference with a positive control at line 410, and tests/test_unseen_source_full_plant.py:110 spies every module binding and asserts the guard installed, but both slow guards skip on a host without the run's scratch cache (tests/test_unseen_source_full_plant.py:270). SCORE fit: 15 JUSTIFICATION fit: scripts/iter_vessel_evolution/evolve.py:85 renames conductor_geometry to the mechanism-named sectioned_conductor_geometry and nova/circuit/linkage.py:96 follows the module's naming, though nova/imas/prescribed_plasma.py:8 leaves an unused import that ruff flags. SCORE reuse: 12 JUSTIFICATION reuse: nova/circuit/linkage.py:142 section_grid, the existing owner, was extended to accept PolygonSection groups and the duplicate _polygon_point_grid was deleted, but nova/circuit/linkage.py:96 polygon_quadrature re-implements the section-interior quadrature owned by nova/imas/mast_passive_inductance.py:175 section_quadrature without extending it. FINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261021T105645032186-unseen-source-full-plant/manifest.md:275 blocking: negative_control_log points at scratch/probe_time.log, a pre-repair traceback with no EXIT= line, so the negative-control admission cannot read it. FINDING nova/imas/prescribed_plasma.py:8 follow-on: polygon_greens is imported but unused (ruff F401). FINDING nova/circuit/linkage.py:133 follow-on: np.cross on 2-D vectors warns under NumPy 2.0 and will raise in a future release, breaking polygon_quadrature weights. FINDING nova/imas/mast_passive_inductance.py:175 follow-on: section_quadrature owns polygon section quadrature; linkage.polygon_quadrature duplicates it rather than extending the owner. FINDING nova/imas/prescribed_plasma.py:110 follow-on: polygon_plasma_flux duplicates section_grid's shaped branch and has no production caller. FINDING docs/plans/iter-passive-plasma-circuit.html:188 follow-on: plan section 6 still reads data-status=implementable with the DINA-named third check, disagreeing with the landed closure.",
+  "review_run_id": "r-20261021T212827695605-review-of-unseen-source-full-plant-1f3a7114232a",
+  "reviewed_at": "2026-10-21T21:52:00Z",
+  "reviewed_base_sha": "970c04c6bc44349e812f3ad0b22009c8d7815eaa",
+  "reviewed_head_sha": "1f3a7114232ae4cceeb67aeb0b10c2b138631f76",
+  "reviewed_run_id": "r-20261021T105645032186-unseen-source-full-plant",
+  "scores": {
+    "durability": 15,
+    "evidence": 14,
+    "fit": 15,
+    "goal_fidelity": 13,
+    "reuse": 12,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-21T21:55:43.994665+00:00",
+  "total": 85
+}

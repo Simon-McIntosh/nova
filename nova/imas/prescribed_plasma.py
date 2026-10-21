@@ -5,9 +5,8 @@ from __future__ import annotations
 import numpy as np
 
 from nova.biot.greens import greens_psi, hybrid_greens
-from nova.biot.polygon import polygon_greens
-from nova.circuit.conductor import ConductorSet, PolygonSection
-from nova.circuit.linkage import polygon_quadrature, section_grid
+from nova.circuit.conductor import ConductorSet
+from nova.circuit.linkage import section_grid
 from nova.imas.profiles import PrescribedCurrent
 
 
@@ -105,18 +104,6 @@ def plasma_linked_flux(
                 owner, weights=weight * point_flux, minlength=len(circuits)
             )
     return circuits, result
-
-
-def polygon_plasma_flux(
-    current: PrescribedCurrent,
-    polygon: PolygonSection,
-) -> float:
-    """Plasma flux [Wb] averaged over one polygon circuit's own cross-section."""
-    point_r, point_z, weight = polygon_quadrature(
-        np.asarray(polygon.vertices, float)
-    )
-    flux = plasma_flux_at_points(current, point_r, point_z)
-    return polygon.current_share * float(np.dot(weight, flux))
 
 
 def plasma_linked_flux_history(

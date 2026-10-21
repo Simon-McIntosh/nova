@@ -8,12 +8,11 @@ import numpy as np
 import pytest
 
 from nova.circuit.conductor import ConductorSet
-from nova.circuit.linkage import polygon_quadrature
+from nova.circuit.linkage import section_grid
 from nova.imas.prescribed_plasma import (
     plasma_flux_at_points,
     plasma_linked_flux,
     plasma_linked_flux_history,
-    polygon_plasma_flux,
 )
 from nova.imas.profiles import prescribe_current_density
 from scripts.iter_prescribed_plasma.measure import current_vector
@@ -276,6 +275,33 @@ def _bounding_box_linked_flux(
     )
 
 
+def _shaped_conductors(section):
+    """A conductor set whose only circuit is one shaped section."""
+    return ConductorSet(
+        r=np.array([0.0]),
+        z=np.array([0.0]),
+        dr=np.zeros(1),
+        dz=np.zeros(1),
+        current_share=np.ones(1),
+        circuit=np.array([section.circuit]),
+        polygon_sections=(section,),
+    )
+
+
+def _section_flux_from_grid(current, section, *, spacing=0.05, cap=8):
+    """Linked flux [Wb] of one shaped section, reduced from the shared grid.
+
+    Returns the flux with the section's own quadrature points, so a caller can
+    also assert where the points landed.
+    """
+    point_r, point_z, weight, owner = section_grid(
+        _shaped_conductors(section), [section], spacing, cap
+    )
+    assert owner.size == point_r.size == weight.size
+    flux = plasma_flux_at_points(current, point_r, point_z)
+    return float(np.dot(weight, flux)), point_r, point_z
+
+
 def _dense_section_reference(current, polygon, *, samples: int = 64):
     """Area-averaged plasma flux over the section from a dense interior grid.
 
@@ -410,16 +436,15 @@ def test_thin_polygon_strip_is_integrated_not_missed(coarse_current):
     assert count > 5_000, "the reference samples are too few to be a reference"
     assert reference != 0.0
 
-    linked = polygon_plasma_flux(coarse_current, section)
+    linked, point_r, point_z = _section_flux_from_grid(coarse_current, section)
     assert linked == pytest.approx(reference, rel=SECTION_FLUX_TOLERANCE)
 
-    # The section's quadrature points lie inside it by construction, which is what
-    # the bounding-box rule cannot guarantee: on the machine it is the neighbouring
-    # sections of exactly this shape that it refuses outright.
+    # The shared grid's points lie inside the section by construction, which is
+    # what the bounding-box rule cannot guarantee: on the machine it is the
+    # neighbouring sections of exactly this shape that it cannot sample.
     from shapely import contains_xy
     from shapely.geometry import Polygon
 
-    point_r, point_z, _weight = polygon_quadrature(section.vertices)
     assert np.all(contains_xy(Polygon(section.vertices), point_r, point_z))
 
 
@@ -434,7 +459,7 @@ def test_thin_axis_facing_strip_matches_its_dense_average(coarse_current):
     section = _thin_strip()
     reference, count = _dense_section_reference(coarse_current, section, samples=64)
     assert count > 3_000, "the reference grid is not dense enough to be a reference"
-    linked = polygon_plasma_flux(coarse_current, section)
+    linked, _point_r, _point_z = _section_flux_from_grid(coarse_current, section)
     assert linked == pytest.approx(reference, rel=SECTION_FLUX_TOLERANCE)
 
 
@@ -444,7 +469,7 @@ def test_zero_area_polygon_is_refused(current):
 
     section = PolygonSection(3, np.array([[7.0, -0.2], [7.1, -0.2], [7.2, -0.2], [7.3, -0.2]]))
     with pytest.raises(ValueError, match="encloses no area"):
-        polygon_plasma_flux(current, section)
+        _section_flux_from_grid(current, section)
 
 
 SECTIONED_ENTRY = Path(
@@ -455,6 +480,45 @@ SECTIONED_ENTRY = Path(
 DINA_CASE_URI = "imas:hdf5?user=mcintos;pulse=105014;run=1;database=iter;version=3"
 DINA_CASE_DD = "3.38.1"
 SLICE_INDEX = 200
+
+
+@pytest.mark.slow
+def test_machine_section_the_box_rule_cannot_sample_is_linked(current):
+    """A shaped circuit of the real 12 mm machine that the box rule cannot sample.
+
+    The section drives the shared grid: every quadrature point lands inside the
+    section's own outline, which is what a bounding-box midpoint grid cannot
+    guarantee for a sliver this thin, and the flux it links agrees with a dense
+    average over the same interior.
+    """
+    from shapely import contains_xy
+    from shapely.geometry import Polygon
+
+    from nova.circuit.passive import load_sectioned_machine
+
+    if not (SECTIONED_ENTRY / "geometry.npz").exists():
+        pytest.skip("the scratch sectioned-set entry is not present on this host")
+    machine = load_sectioned_machine(SECTIONED_ENTRY)
+    polygons = machine.conductors.polygon_by_circuit()
+    unsamplable = [
+        circuit
+        for circuit, polygon in sorted(polygons.items())
+        if not _bounding_box_points(polygon)[0].size
+    ]
+    assert unsamplable, "no machine section defeats the bounding-box grid"
+    circuit = 828 if 828 in unsamplable else unsamplable[0]
+
+    linked, point_r, point_z = _section_flux_from_grid(current, polygons[circuit])
+    assert np.all(contains_xy(Polygon(polygons[circuit].vertices), point_r, point_z))
+
+    for samples in (64, 128, 256, 512):
+        reference, count = _dense_section_reference(
+            current, polygons[circuit], samples=samples
+        )
+        if count >= 200:
+            break
+    assert count >= 200, "no reference grid resolved the section's interior"
+    assert linked == pytest.approx(reference, rel=SECTION_FLUX_TOLERANCE)
 
 
 @pytest.mark.slow

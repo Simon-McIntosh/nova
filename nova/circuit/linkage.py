@@ -129,9 +129,10 @@ def polygon_quadrature(
             (mid_left, mid_edge, mid_right),
         ):
             centres.append((corner_a + corner_b + corner_c) / 3.0)
-            areas.append(
-                0.5 * abs(float(np.cross(corner_b - corner_a, corner_c - corner_a)))
-            )
+            edge_a = corner_b - corner_a
+            edge_b = corner_c - corner_a
+            product = edge_a[0] * edge_b[1] - edge_a[1] * edge_b[0]
+            areas.append(0.5 * abs(float(product)))
     total = float(np.sum(areas))
     if total <= 0.0:
         raise ValueError("polygon section encloses no area")

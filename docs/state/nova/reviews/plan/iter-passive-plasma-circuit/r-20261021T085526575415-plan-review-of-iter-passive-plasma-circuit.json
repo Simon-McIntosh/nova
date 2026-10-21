@@ -1,0 +1,82 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-21T09:16:06.759Z",
+  "dispatched_at": "2026-10-21T09:00:06Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/iter-passive-plasma-circuit.html:189",
+      "id": "reasoning-1",
+      "reason": "as written a node can satisfy check 2 against the pre-change entry it finds at the same digest (or skip check 1's write as a cache hit) while the negative control requires that same entry to be refused, so the plan must state that the sectioned set is re-written with its positive control before the two new-source calls, and how a pre-change entry is distinguished from a post-change one at one key.",
+      "text": "\u00a76's check 2 runs \"with the sectioned set cached\" against entries that the negative control of the same section says must be refused, because the sectioned-set digest already folds the geometry and so is unchanged by adding it \u2014 the two cached entries on disk (`sectioned-conductor-set/{06ff06d3eb7a4448f0fe,68df15665ab2ea45f427}/`) hold only `linkage.npy` and `system.npz`, and `scripts/iter_sectioned_conductor_set/build.py:203-211` already folds the conductor columns, `section.vertices` and `[max_thickness, surface_layer_m, section_n_max]` into the key, so a changed build recomputes the same digest over a directory that has no geometry",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/iter-passive-plasma-circuit.html:189",
+      "id": "evidence_paths-1",
+      "reason": "the repository already keeps gate logs under `.cache/iter-passive-plasma-circuit/gate-logs/` and the dispatch brief supplies the write paths, so the node lands its log where its predecessors did without a decision the plan must settle.",
+      "text": "\u00a76 names where its artefacts are stored (`.cache/iter-passive-plasma-circuit/sectioned-conductor-set/<digest>/`, `coupled-plant/<digest>/`) but no path for its gate log, so its three checks and its zero-build counter have no declared durable evidence location",
+      "type": "evidence_paths",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "62e65b8546f41ae824bbecf1ae9be037f1db19499f4c06f9d051874533fc95de",
+  "plan_slug": "iter-passive-plasma-circuit",
+  "plan_version": 18,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-21T09:17:27.013939+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "evidence_paths-1",
+      "reason": "the dispatch brief names the gate-log path under .cache/iter-passive-plasma-circuit/gate-logs/, where the earlier sections landed theirs",
+      "when": "2026-10-21T09:17:30.848252+00:00"
+    }
+  ],
+  "responses": {
+    "evidence_paths-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "the dispatch brief names the gate-log path under .cache/iter-passive-plasma-circuit/gate-logs/, where the earlier sections landed theirs",
+      "when": "2026-10-21T09:17:30.848252+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-21T09:17:27.013939+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-iter-passive-plasma-circuit.v18.json",
+  "review_run_id": "r-20261021T085526575415-plan-review-of-iter-passive-plasma-circuit",
+  "reviewed_blob_sha": "a2c32e4c944c8e7551d9aa28e1ab7faab0484ae3",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 all ten cited commits (`c39d9aba9`, `dabd37cb5`, `c20fda519`, `8e3676bcb`, `6c0f4db5d`, `838789ec2`, `c4c7abd78`, `837c96fa2`, `56d246c1c`, `ad81f87bc`) resolve as commits; all six fragment ids cited in `docs/evidence/archive/iter-passive-plasma-circuit-landed.html` (`iter-prescribed-plasma`, `iter-sectioned-conductor-set`, `iter-vessel-evolution`, `reconstructed-plasma-source`, `reconstructed-source-plant`, `iter-coupled-plant-call`) are present; `nova/circuit/{passive,propagate,linkage,screening,coupled_plant}.py`, `nova/imas/{pulsedesign,machine,equilibrium,extrapolate,profiles,pf_passive}.py` and every named symbol (`ITER`, `MachineSection`, `CrossSection`, `PoloidalFieldActive`, `PoloidalFieldPassive`, `Wall`, `Profile.fluxfunctions`, `Profile.j_tor_rbs`, `PF_Passive`, `save_circuit_system`, `load_circuit_system`, `save_eigenbasis`, `load_coupled_plant`, `coupled_plant`, `conductor_geometry`, `subdivide_passive_thickness`) exist; `scripts/iter_sectioned_conductor_set/build.py` and `scripts/iter_vessel_evolution/evolve.py` exist; the pinned plant entry `.cache/iter-passive-plasma-circuit/coupled-plant/28148563521d92a2198b/plant.npz` exists; the extensionless hrefs resolve as `<path>.html` (`power_convertor/docs/plans/iter-switched-terminal-transients.html` exists, and the gates it cites \u2014 `g-istt-1` in that plan, `g-jspr-1` in `jt60sa-switched-pulse-replay.html`, `g-jccm-4` in `jt60sa-coil-circuit-model.html` \u2014 all resolve, as does \u00a78 of `iter-power-supply-model.html`).",
+    "done_when": "pass \u2014 each node names a measurable check and a declared negative control (\u00a71 \"removing the passive structure gives the bare coil impedance\"; \u00a72 \"moving the distribution 1 cm vertically changes the linked flux by the predicted \u2202\u03c8/\u2202Z\"; \u00a73 \"removing the plasma drive brings back the bare-coil residual\"; \u00a75 \"a reconstruction with its \u03c8 sign convention flipped is refused\"; \u00a76 \"re-driving a cache entry that lacks its geometry with a new source is refused with a named error\"), and \u00a76's check 2 carries the pre-change red arm that \u00a76 names (\"on the code before this change, the same two calls rebuild the sectioned set or refuse\").",
+    "evidence_paths": "a finding \u2014 \u00a76 declares the two cache roots its artefacts land in but names no gate-log or evidence path for its own three checks or its zero-build counter, so the reader has to infer the repository's `gate-logs` convention.",
+    "naming": "pass \u2014 the plan's code-facing names are mechanism names (`sectioned conductor set`, `coupled_plant`, `PlasmaSource`, `coupled-plant/<digest>`); the only label-like tokens are record labels (followup ids `f-ippc-001`/`f-ippc-002`, decision keys, and power_convertor's gate ids) which sit in plan metadata and prose, not in a symbol, path or comment the plan proposes to add.",
+    "reasoning": "a finding \u2014 \u00a76's root cause matches its evidence and its mechanism runs on the real path (the caller `nova/circuit/coupled_plant.py:302` reaches `plasma_linked_flux_history(currents, conductors)`, which needs the full `ConductorSet`, while `save_circuit_system` at `nova/circuit/passive.py:1059` stores only the passive system and `conductor_geometry` at `scripts/iter_vessel_evolution/evolve.py:85` does rebuild that geometry in-process), but check 2's cache state contradicts the section's own negative control.",
+    "single_goal": "pass \u2014 \u00a76 carries one deliverable (the cache carries the refined conductor geometry behind one loader), \u00a71 one conductor set, \u00a72 the prescribed plasma, \u00a73 the evolved vessel currents, \u00a74 the imported call, \u00a75 the generic source.",
+    "wiring": "pass \u2014 \u00a76 is the only live node, it depends on \u00a71 and \u00a74/\u00a75 which are landed, and the build order (\u00a73 needs \u00a71+\u00a72; \u00a74 needs \u00a71+\u00a73) is carried in f-ippc-001's body and in `plan-blocks=\"power_convertor:iter-switched-terminal-transients\"`; every named node exists and no relationship points at the wrong one."
+  },
+  "section_digests": {
+    "_document": "c69c21b94eb11351d8126a4f5f582fd9172b921964583f7aa0c8a90ac831b0a4",
+    "s1": "fd450fda152b172eb82e80c548ab9e5fa16c20b15f3b14ae415c0ed18ceb7a8c",
+    "s2": "fbea1d197646f2baba636205f10434c799bb3ce88f19dfa3ef779d98d25c50fb",
+    "s3": "56e06d1f8c060952b209edbc0a1c98e3f22e1cad48fcc1e6d6f04eb464d977bf",
+    "s4": "f8534dfd59d3f9812bc19d36079033b715faafd53488ec44ddfec9f088a03e93",
+    "s5": "39b83394b03af8bd027560dfc1db14bc1176968fc3aa2a93635fed656c03c8ec",
+    "s6": "c5ad4c081332bb7411622fe37123e42ef765023c9b7ba36772009d20b615205a"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-21T09:17:24.081609+00:00"
+}

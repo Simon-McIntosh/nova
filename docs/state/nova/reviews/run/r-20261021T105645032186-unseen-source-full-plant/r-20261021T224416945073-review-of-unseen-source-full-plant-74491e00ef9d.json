@@ -1,0 +1,76 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-21T23:12:45.328Z",
+  "dispatched_at": "2026-10-21T22:45:01Z",
+  "findings": [
+    {
+      "detail": "after_suite and baseline_suite both name scratch/gate_imports2.log, whose own header is '=== head 0390ababc23e60eb0dcf6e84d9dcc8ab290e53ad', and the manifest's gate paragraph states 'the commits after it are docs only, so both arms describe this head' - but the head is 74491e00e, 'test(prescribed_plasma): wrap the two lines that ran past the column limit', a test-file change that also postdates the manifest's mtime. That commit's message claims 'The gate job is rerun at this revision'; the rerun exists as scratch/gate_imports3.log (job 1292464, header '=== head 74491e00ef9d6fa35b5cc0afbc0efcf64431bcdd') and its head arm collected nothing: nine consecutive 'ERROR: file or directory not found' with EXIT_FILE=<file>=4 for every gate file, because gate_final.sh runs pytest on relative paths while the job's working directory was not the worktree, and its header prints nova.__file__ = /home/ITER/mcintos/Code/nova/nova/__init__.py rather than the worktree's. Only the base arm ran there. The manifest's artifact list also omits 74491e00e from the commits carrying the closure. The repair is cheap (rerun the gate at 74491e00e with the worktree as the job's working directory, or re-point the rows at the 0390ababc gate and record 74491e00e as whitespace-only), but as stored the reviewed head has no gate of its own.",
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261021T105645032186-unseen-source-full-plant/manifest.md",
+      "line": 232,
+      "severity": "blocking",
+      "summary": "the suite rows name revision 0390ababc while the reviewed head is 74491e00e, and the reviewed head's own gate rerun ran no head arm at all, so the reviewed revision carries no valid gate measurement."
+    },
+    {
+      "detail": "nova/circuit/linkage.py:87 computes 0.5*abs(dot(r, roll(z,-1)) - dot(z, roll(r,-1))), the same expression as the public nova/equilibrium/wall_mask.py:300 polygon_area(r, z) (listed in that module's __all__ at wall_mask.py:62) and as nova/imas/diiid_machine_ids.py:194 _shoelace_area. It duplicates rather than calls or extends either owner; the only differences are the input shape ((N,2) vertices against two arrays) and the dropped size<3 guard.",
+      "file": "nova/circuit/linkage.py",
+      "line": 87,
+      "severity": "follow-on",
+      "summary": "polygon_area re-implements the absolute shoelace area the repository already owns, without extending the owner."
+    },
+    {
+      "detail": "nova/circuit/linkage.py:96 returns interior points and area weights summing to one for one polygon section; nova/imas/mast_passive_inductance.py:175 section_quadrature already does that job, by a bounding-box grid with a containment filter. The node consolidated the (r, z, weight, owner) concatenation into the existing section_grid owner at nova/circuit/linkage.py:143, which is the right move, and records the residual duplication as a follow-on in the fragment; but the quadrature rule itself is a second implementation of an owned capability, so the improvement belongs at the owner.",
+      "file": "nova/circuit/linkage.py",
+      "line": 96,
+      "severity": "follow-on",
+      "summary": "polygon_quadrature duplicates the interior-section quadrature capability owned by section_quadrature rather than extending it."
+    },
+    {
+      "detail": "The fan at nova/circuit/linkage.py:110-122 fans triangles (apex=corners[0], corners[i], corners[i+1]) and takes each sub-triangle's centroid as a quadrature point, and every consumer weights plasma flux at those points by sub-triangle area. For a convex section that is exact; for a concave one the fan's triangles lie only partly inside the polygon, so points and their weights fall outside it, while the docstring asserts every point 'lies inside the section by construction ... whatever its shape, thickness or orientation'. The rule it replaced filtered its grid with shapely contains_xy before normalising, so this is a latent weakening of the guard the repair removed. The machine's shaped sections in use are thin convex quads and tests/test_prescribed_plasma.py:448 asserts containment on the tested sliver, so no current caller reaches the concave case; a section that is not star-shaped from its first corner would be sampled outside itself.",
+      "file": "nova/circuit/linkage.py",
+      "line": 96,
+      "severity": "follow-on",
+      "summary": "the triangle fan covers the polygon only if it is star-shaped from its first corner, and the containment filter the replaced rule applied was dropped."
+    },
+    {
+      "detail": "tests/test_unseen_source_full_plant.py:350-403 is the only coverage of the reconstruction-style presentation, and every assertion inside it (the plasma_times equality at :390 and the two assert_allclose calls at :391-396) sits inside an arm that is expected to fail. A regression there cannot redden the suite; only an unexpected pass can. That is honest about the open measurement, and the live plan defers check 3 to dd-cocos-ingest section 3, but the durability of this path rests on no assertion.",
+      "file": "tests/test_unseen_source_full_plant.py",
+      "line": 350,
+      "severity": "follow-on",
+      "summary": "the reconstruction arm is xfail(strict=True), so nothing in it can fail the suite and the reconstruction path has no regression guard."
+    },
+    {
+      "detail": "tests/test_unseen_source_full_plant.py:363 reads 'the relative tolerance section-5 predeclared', citing a plan section from source. The naming rules ban plan and section references in docstrings and comments, because the source must read without the plan; the same sentence reads cleanly as 'the predeclared relative tolerance'.",
+      "file": "tests/test_unseen_source_full_plant.py",
+      "line": 363,
+      "severity": "follow-on",
+      "summary": "a plan-section reference in a docstring leaks a plan label into source."
+    },
+    {
+      "detail": "ruff check over the six changed Python files returns exactly one finding, tests/test_unseen_source_full_plant.py:401 E501 (100 > 88), in the f-string printing the reconstruction arm's measured extremes. The head commit 74491e00e exists to wrap two over-long lines in tests/test_prescribed_plasma.py and left this third one in place, so the file still fails a lint run that names it.",
+      "file": "tests/test_unseen_source_full_plant.py",
+      "line": 401,
+      "severity": "follow-on",
+      "summary": "a 100-column line survives in the new test file, the one file the head's own column-wrap commit did not reach."
+    }
+  ],
+  "project": "nova",
+  "review": "VERDICT goal: the node goal is that plasma sources the plant cache has never seen drive the full ITER plant from the sectioned-set cache with no sectioned-set rebuild, and the landed change does that through the shaped-section sampling added at nova/circuit/linkage.py:96 and folded into the existing section_grid owner at nova/circuit/linkage.py:143, driven by tests/test_unseen_source_full_plant.py:300 for DINA 105069/3 and 105013/1, while the reconstruction-agreement clause is left as a strict xfail at tests/test_unseen_source_full_plant.py:350 pending the DD3-to-COCOS-17 translator the live plan names. VERDICT done_when: read the brief's three checks; check 1's receipts are the predecessor node's (scratch/part1_report.json, linkage.npy and system.npz sha256 unchanged, geometry.npz gain) and this node's fragment; check 2 is asserted at tests/test_unseen_source_full_plant.py:313-347 through load_sectioned_machine and coupled_plant with the zero-rebuild spies at :321-334, and I confirmed both suite arms record its result; check 3 has no passing receipt anywhere in the run, because the arm is pytest.mark.xfail(strict=True) at tests/test_unseen_source_full_plant.py:350 and the live plan section 6 now states check 3 waits on dd-cocos-ingest section 3 and section 7. VERDICT write_paths: the brief declares eight paths (nova/circuit/passive.py, conductor.py, coupled_plant.py, scripts/iter_sectioned_conductor_set/build.py, scripts/iter_vessel_evolution/evolve.py, tests/test_sectioned_set_geometry_cache.py, tests/test_unseen_source_full_plant.py, the unseen-source-full-plant.html fragment); the node's own commits also touch nova/circuit/linkage.py, nova/imas/prescribed_plasma.py, tests/test_prescribed_plasma.py and docs/evidence/fragments/iter-passive-plasma-circuit/unseen-source-shaped-section-flux.html, none of which is declared, and the landed change carries real behaviour (the shaped-section quadrature repair that moves the pinned plant by up to 1.0e-2 relative). VERDICT manifest: read; it states status complete, records the gate over scratch/gate_imports2.log at head 0390ababc against base 2c14b3ffc with one failure identical in both arms (zero added failures), and I verified that pairing in the log itself; but its after_suite/baseline_suite rows name a revision one commit behind the reviewed head, its prose asserts the post-gate commits are docs-only, and the reviewed head's own rerun log shows a head arm that ran nothing. VERDICT diff: read commit by commit against 970c04c6b, the parent of the node's first commit (the run's brief declares base 2c14b3ffc, which the base arm archived); seventeen commits, eight files; the earlier reviews' follow-ons (tautological plant.n_coil assertion, namespace-limited spy, silently renamed evolve return) are repaired in tests/test_sectioned_set_geometry_cache.py:183-235 and scripts/iter_vessel_evolution/evolve.py:85, the np.cross deprecation and the unused polygon_greens import are gone, and the remaining code change is the shaped-section quadrature repair with its reuse refactor. CALL_SITES: nova/circuit/coupled_plant.py:304 (reaches plasma_linked_flux_history and so the repaired plasma_linked_flux), nova/circuit/passive.py:126 (linkage.section_grid on the row-array path), nova/imas/prescribed_plasma.py:113, scripts/iter_vessel_evolution/evolve.py:310 SCORE goal_fidelity: 14 JUSTIFICATION goal_fidelity: nova/imas/prescribed_plasma.py:96 now routes every shaped circuit through section_grid, so both unseen DINA cases reach the full 1,607-filament plant at tests/test_unseen_source_full_plant.py:336, and only the third clause is deferred, as an xfail(strict) at tests/test_unseen_source_full_plant.py:350 whose DINA reference the live plan calls invalid. SCORE evidence: 11 JUSTIFICATION evidence: the gate in scratch/gate_imports2.log asserts the done-when's measures and its failure set is identical in both arms (verified: 5.55111512e-17 in each), but that log is headed at 0390ababc while the reviewed head is 74491e00e, and the head's own rerun at scratch/gate_imports3.log:6-23 collected zero tests and imported /home/ITER/mcintos/Code/nova/nova/__init__.py. SCORE scope_discipline: 12 JUSTIFICATION scope_discipline: nova/circuit/linkage.py, nova/imas/prescribed_plasma.py and tests/test_prescribed_plasma.py are outside the brief's declared write paths and carry the 1.0e-2 flux change, though the plan records the repair as belonging to this node. SCORE durability: 15 JUSTIFICATION durability: tests/test_unseen_source_full_plant.py:321-338 spies every module binding of both build functions and asserts the guard installed, and tests/test_prescribed_plasma.py:436-440 compares the new quadrature against an independent dense reference with a positive control, but the reconstruction arm at tests/test_unseen_source_full_plant.py:350 is xfail(strict) and so cannot fail on its own assertions, and the check-2 tests skip without the run's scratch cache (tests/test_unseen_source_full_plant.py:310). SCORE fit: 14 JUSTIFICATION fit: scripts/iter_vessel_evolution/evolve.py:85 renames the loader to the mechanism-named sectioned_conductor_geometry with its single caller updated, but tests/test_unseen_source_full_plant.py:363 carries a section reference in its docstring and tests/test_unseen_source_full_plant.py:401 is 100 columns under ruff. SCORE reuse: 5 JUSTIFICATION reuse: nova/circuit/linkage.py:87 polygon_area re-implements the absolute shoelace area owned by nova/equilibrium/wall_mask.py:300 without extending it, and nova/circuit/linkage.py:96 polygon_quadrature duplicates the section-interior quadrature owned by nova/imas/mast_passive_inductance.py:175, though the shaped path was correctly folded into the existing section_grid owner at nova/circuit/linkage.py:143. FINDING (see structured findings) the reviewed manifest:232 blocking: the suite rows name head 0390ababc while the reviewed head is 74491e00e, and the reviewed head's own gate rerun collected no tests and imported the main checkout's nova, so the reviewed revision carries no valid gate arm. FINDING nova/circuit/linkage.py:87 follow-on: polygon_area duplicates the public owner nova/equilibrium/wall_mask.py:300 (and its copy at nova/imas/diiid_machine_ids.py:194) instead of calling it. FINDING nova/circuit/linkage.py:96 follow-on: polygon_quadrature re-implements the interior-section quadrature that nova/imas/mast_passive_inductance.py:175 section_quadrature already owns, without extending that owner. FINDING nova/circuit/linkage.py:96 follow-on: the fan-from-first-corner rule drops the containment filter the replaced rule applied, so a section that is not star-shaped from its first corner is sampled at points outside it, while the docstring claims every point lies inside by construction whatever its shape. FINDING tests/test_unseen_source_full_plant.py:350 follow-on: the reconstruction arm is xfail(strict=True), so it cannot fail on its own assertions and gives the reconstruction path no regression guard. FINDING tests/test_unseen_source_full_plant.py:363 follow-on: a plan-section reference in a docstring leaks a plan label into source, which the naming rules forbid. FINDING tests/test_unseen_source_full_plant.py:401 follow-on: a 100-column line (ruff E501) survives in the new test file, the one file the head's own column-wrap commit did not reach.",
+  "review_run_id": "r-20261021T224416945073-review-of-unseen-source-full-plant-74491e00ef9d",
+  "reviewed_at": "2026-10-21T23:20:00Z",
+  "reviewed_base_sha": "970c04c6bc44349e812f3ad0b22009c8d7815eaa",
+  "reviewed_head_sha": "74491e00ef9d6fa35b5cc0afbc0efcf64431bcdd",
+  "reviewed_run_id": "r-20261021T105645032186-unseen-source-full-plant",
+  "scores": {
+    "durability": 15,
+    "evidence": 11,
+    "fit": 14,
+    "goal_fidelity": 14,
+    "reuse": 5,
+    "scope_discipline": 12
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-21T23:17:44.335662+00:00",
+  "total": 71
+}

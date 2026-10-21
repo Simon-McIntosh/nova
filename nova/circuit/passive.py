@@ -56,6 +56,8 @@ from nova.circuit.conductor import (
     PolygonSection,
     SensorSet,
     ThicknessSubdivision,
+    load_conductor_geometry,
+    save_conductor_geometry,
     subdivide_passive_thickness,
 )
 from nova.circuit.linkage import (
@@ -1099,6 +1101,128 @@ def load_circuit_system(path: Path | str) -> PassiveCircuitSystem:
             resistivity=float(stored["resistivity"]),
             section_scale=stored["section_scale"],
         )
+
+
+#: the file a sectioned-set entry carries beside ``linkage.npy`` and
+#: ``system.npz``: the refined conductor geometry the linkage was built from
+SECTIONED_GEOMETRY_FILE = "geometry.npz"
+
+
+class SectionedGeometryMissing(FileNotFoundError):
+    """A sectioned-set entry holds no refined conductor geometry.
+
+    An entry written before the geometry was cached carries only ``linkage.npy``
+    and ``system.npz``.  A plasma source cannot read its flux at the entry's
+    passive circuits without the geometry, so a request for a machine from such
+    an entry is refused rather than silently served a reduced or rebuilt set.
+    """
+
+
+@dataclass(frozen=True)
+class SectionedMachine:
+    conductors: ConductorSet
+    series: np.ndarray
+    coil_names: list[str]
+    passive_circuits: np.ndarray
+    passive_system: PassiveCircuitSystem
+    section_names: list[str]
+    section_coil: np.ndarray
+    section_inductance: np.ndarray
+    section_resistance: np.ndarray
+    section_passive_mutual: np.ndarray
+    parent: np.ndarray
+    resistance_factor: np.ndarray
+    coil_inductance: np.ndarray | None = None
+    coil_resistance: np.ndarray | None = None
+    label: str = "sectioned-machine"
+
+    @property
+    def subdivision(self) -> ThicknessSubdivision:
+        """The refined conductor geometry the entry was built from."""
+        return ThicknessSubdivision(
+            conductors=self.conductors,
+            circuits=self.passive_circuits,
+            parent=self.parent,
+            resistance_factor=self.resistance_factor,
+        )
+
+
+def save_sectioned_geometry(
+    entry: Path | str,
+    subdivision: ThicknessSubdivision,
+    *,
+    coil_names,
+    section_coil,
+) -> Path:
+    """Write the refined conductor geometry into a sectioned-set cache entry.
+
+    Stored beside ``linkage.npy`` and ``system.npz`` at the same key, since the
+    entry's key already covers every geometry input.
+    """
+    entry = Path(entry)
+    entry.mkdir(parents=True, exist_ok=True)
+    path = entry / SECTIONED_GEOMETRY_FILE
+    save_conductor_geometry(
+        path,
+        subdivision,
+        extra={
+            "coil_names": np.array([str(name) for name in coil_names]),
+            "section_coil": np.asarray(section_coil, dtype=np.int64),
+        },
+    )
+    return path
+
+
+def load_sectioned_machine(entry: Path | str) -> SectionedMachine:
+    """Assemble the machine ``coupled_plant`` takes from a sectioned-set entry.
+
+    Reads the refined conductor geometry, the linkage and the passive system
+    from one cache entry.  An entry without the geometry file is refused with
+    :class:`SectionedGeometryMissing`.
+    """
+    entry = Path(entry)
+    geometry_path = entry / SECTIONED_GEOMETRY_FILE
+    if not geometry_path.exists():
+        raise SectionedGeometryMissing(
+            f"sectioned-set entry {entry} holds no {SECTIONED_GEOMETRY_FILE}"
+        )
+    subdivision = load_conductor_geometry(geometry_path)
+    with np.load(geometry_path) as stored:
+        coil_names = [str(name) for name in stored["coil_names"]]
+        section_coil = np.asarray(stored["section_coil"], dtype=np.int64)
+    matrix = np.load(entry / "linkage.npy")
+    system = load_circuit_system(entry / "system.npz")
+    if not np.array_equal(subdivision.circuits, system.circuits):
+        raise ValueError(
+            f"sectioned-set entry {entry} stores a geometry whose circuits "
+            "disagree with its passive system"
+        )
+
+    n_section = section_coil.size
+    n_coil = len(coil_names)
+    series = np.zeros((n_section, n_coil))
+    series[np.arange(n_section), section_coil] = 1.0
+    counts: dict[int, int] = {}
+    section_names = []
+    for owner in section_coil:
+        ordinal = counts.get(int(owner), 0)
+        counts[int(owner)] = ordinal + 1
+        section_names.append(f"{coil_names[int(owner)]} section {ordinal + 1}")
+    return SectionedMachine(
+        conductors=subdivision.conductors,
+        series=series,
+        coil_names=coil_names,
+        passive_circuits=np.asarray(system.circuits, dtype=np.int64),
+        passive_system=system,
+        section_names=section_names,
+        section_coil=section_coil,
+        section_inductance=matrix[:n_section, :n_section],
+        section_resistance=np.zeros(n_section),
+        section_passive_mutual=matrix[n_section:, :n_section],
+        parent=subdivision.parent,
+        resistance_factor=subdivision.resistance_factor,
+        label=f"sectioned-{entry.name}",
+    )
 
 
 def save_eigenbasis(path: Path | str, basis: PassiveEigenbasis) -> None:

@@ -4,26 +4,28 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="nova">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="dd-cocos-ingest">
-  <meta name="plan-title"     content="DD COCOS Ingest — COCOS 11 and 17 In, COCOS 17 Within">
-  <meta name="plan-summary"   content="Read DD3 as COCOS 11 and DD4 as COCOS 17 through one translator, refuse non-conforming data, and run nova internally in COCOS 17">
-  <meta name="plan-status"    content="draft">
-  <meta name="plan-roi"       content="high">
-  <meta name="plan-effort-hours" content="16">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="dd-cocos-ingest">
+  <meta name="plan-title" content="DD COCOS Ingest — COCOS 11 and 17 In, COCOS 17 Within">
+  <meta name="plan-summary" content="Read DD3 as COCOS 11 and DD4 as COCOS 17 through one translator, refuse non-conforming data, and run nova internally in COCOS 17">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="16.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-reasoning" content="deep">
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-capability-risk" content="elevated">
-  <meta name="plan-sprint"    content="S21">
-  <meta name="plan-owner"     content="Simon McIntosh">
-  <meta name="plan-tags"      content="equilibrium,schema,cocos">
-  <meta name="plan-blocks"    content="iter-passive-plasma-circuit">
+  <meta name="plan-sprint" content="S21">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="equilibrium,schema,cocos">
+  <meta name="plan-blocks" content="iter-passive-plasma-circuit">
   <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
   <title>DD COCOS Ingest | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="5">
+<meta name="plan-modified" content="2026-10-21">
 </head>
 <body>
   <main class="plan-doc">
@@ -40,20 +42,20 @@
 
     <h2 id="s2">§2 — One reusable DD3 translator, with DD4 passthrough and a conformance refusal</h2>
 <section data-reckon="section" data-id="s2" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
-    <p>One module translates an equilibrium-bearing IDS read at DD3 into COCOS 17, and passes DD4 through unchanged. It decides conformance from the data's own sign tuple (the plasma current, B0, the ψ ordering from axis to boundary, and the sign of q) through <code>nova_cocos.identify_convention</code>. It refuses data whose tuple does not match its DD version's COCOS with a named error that states the DD version, the expected COCOS and the measured sign tuple. The translation applies <code>nova_cocos.convention_transform(source=11, target=17)</code> to every quantity in the census, so the factors come from the one table.</p>
+    <p>One module translates an equilibrium-bearing IDS read at DD3 into COCOS 17, and passes DD4 through unchanged. It decides conformance through <code>nova_cocos.identify_convention(sigma_bp=, e_bp=, sigma_r_phi_z=, sigma_rho_theta_phi=)</code>, which takes the four COCOS digits rather than observables. Two digits are fixed by the DD version: e_Bp = 1 and σ_RφZ = +1 for both COCOS 11 and COCOS 17. The other two are derived from the data's own observables: σ_Bp from the sign of (ψ_boundary − ψ_axis) times the sign of the plasma current, and σ_ρθφ from the sign of q times the signs of the plasma current and B0. The data conforms when the convention identified from those four digits is the DD version's. It refuses data whose tuple does not match its DD version's COCOS with a named error that states the DD version, the expected COCOS and the measured sign tuple. The translation applies <code>nova_cocos.convention_transform(source=11, target=17)</code> to every quantity in the census, so the factors come from the one table.</p>
     <p>Done when: (1) CORSICA 130506/6 (DD 3.41.0) translated by the module matches, quantity by quantity, the analytic COCOS 11 → 17 mapping of the same slice, and a DD4 fixture passes bit-identically; (2) over every slice above 1 MA, DINA 105014/1 is refused by name, while DINA 105052/1, 105069/3, 105013/1 and CORSICA 130506/6 are accepted; (3) the module has one public entry point that readers call, documented in its docstring with the two DD conventions. Literal negative control: negate ψ on a conforming DD3 slice and the module refuses it.</p>
 
 
     <h2 id="s3">§3 — The readers go through the translator</h2>
 <section data-reckon="section" data-id="s3" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
     <p>Every reader in the census takes its data through the §2 module, starting with <code>nova/imas/plasma_source.py</code>, whose fixed-orientation guard is removed in favour of the module's conformance refusal. The plasma source then works in COCOS 17 whatever DD version it was read from.</p>
-    <p>Done when: (1) <code>PlasmaSource.from_imas</code> prescribes CORSICA 130506/6 and DINA 105069/3, and refuses DINA 105014/1 by name; (2) every census reader calls the §2 entry point, and a search for a remaining fixed-orientation sign test returns none; (3) the readers' test files pass by delta against the base, each in its own fresh process, with every changed expectation named by the reader it belongs to. This section unblocks the reconstruction check of iter-passive-plasma-circuit §6, whose reference is CORSICA 130506/6.</p>
+    <p>Done when: (1) <code>PlasmaSource.from_imas</code> prescribes CORSICA 130506/6 and DINA 105069/3, and refuses DINA 105014/1 by name; (2) every census reader calls the §2 entry point, and a search for a remaining fixed-orientation sign test returns none; (3) the readers' test files pass by delta against the base, each in its own fresh process, with every changed expectation named by the reader it belongs to. Positive control for (2): a fixed-orientation sign test planted in a scratch copy of one reader is found by the same search. Literal negative control: restore the old guard in <code>plasma_source.py</code>, and CORSICA 130506/6 is refused again. This section unblocks the reconstruction check of iter-passive-plasma-circuit §6, whose reference is CORSICA 130506/6.</p>
 
 
     <h2 id="s4">§4 — nova's internals run in COCOS 17</h2>
 <section data-reckon="section" data-id="s4" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
     <p>The internal consumers the census lists (the forward solve, the topology read, transport, the circuit tier and their caches) work in COCOS 17. A consumer still in another convention is converted at its own boundary, never by a sign flip at a call site.</p>
-    <p>Done when: (1) every internal consumer in the census works in COCOS 17, each shown by a test that fixes a known COCOS 17 state and checks the consumer's sign-sensitive output; (2) the certified forward-solve rows and the analytic oracles keep their published values, by delta against the base; (3) cached artefacts whose stored fields change convention carry the convention in their key, and an entry written before the change is refused or translated, never served silently.</p>
+    <p>Done when: (1) every internal consumer in the census works in COCOS 17, each shown by a test that fixes a known COCOS 17 state and checks the consumer's sign-sensitive output; (2) the certified forward-solve rows and the analytic oracles keep their published magnitudes, by delta against the base. A consumer converted to COCOS 17 flips its sign-sensitive outputs, so every flipped expectation is named with its consumer and the COCOS factor that flips it, and no other expectation changes; (3) cached artefacts whose stored fields change convention carry the convention in their key, and an entry written before the change is refused or translated, never served silently. Literal negative control: leave one converted consumer in its old convention in a scratch copy, and its COCOS 17 test fails on its own assertion.</p>
 
 
     <h2 id="s5">§5 — A valid measure of edge consistency between flux functions and flux map</h2>
@@ -63,21 +65,21 @@
 
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="d-ddc-convention" data-choice="nova reads DD3 as COCOS 11 and DD4 as COCOS 17, uses COCOS 17 internally everywhere, treats non-conforming data as invalid, and translates DD3 through one reusable translator built on nova_cocos" data-by="Simon McIntosh" data-when="2026-10-21T21:30:00+00:00">
-        <p class="r-dec-q">Which COCOS does nova read and use, and which data is valid?</p>
-        <p class="r-dec-rat">Lead ruling, 2026-10-21: nova ingests data from the Data Dictionary, so the convention follows the DD version, not any one code's output. Recorded first as d-ippc-dd-cocos on iter-passive-plasma-circuit.</p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="d-ddc-convention" data-choice="nova reads DD3 as COCOS 11 and DD4 as COCOS 17, uses COCOS 17 internally everywhere, treats non-conforming data as invalid, and translates DD3 through one reusable translator built on nova_cocos" data-by="Simon McIntosh" data-when="2026-10-21T21:30:00+00:00">
+    <p class="r-dec-q">Which COCOS does nova read and use, and which data is valid?</p>
+    <p class="r-dec-rat">Lead ruling, 2026-10-21: nova ingests data from the Data Dictionary, so the convention follows the DD version, not any one code&#x27;s output. Recorded first as d-ippc-dd-cocos on iter-passive-plasma-circuit.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-ddc-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-21 21:30">
-        <h4 class="r-fu-title">Take the census of IDS readers and their conventions</h4>
-        <div class="r-fu-body"><p>§1 has no prerequisite. §2 needs §1's quantity list, §3 needs §2, and §4 needs §3. §5 can run beside §2. The design review is composed and answered before the first dispatch.</p></div>
-        <pre class="r-fu-prompt">/reckon-build dd-cocos-ingest §1</pre>
-      </article>
-    </section>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-ddc-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-21 21:30" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Take the census of IDS readers and their conventions</h4>
+    <div class="r-fu-body"><p>§1 has no prerequisite. §2 needs §1's quantity list, §3 needs §2, and §4 needs §3. §5 needs §2's translator, because it measures in COCOS 17 after translation, and §1's census file, which it writes into; it can run beside §3. The design review is composed and answered before the first dispatch.</p></div>
+    <pre class="r-fu-prompt">/reckon-build dd-cocos-ingest §1</pre>
+    </article>
+</section>
   </main>
 </body>
 </html>

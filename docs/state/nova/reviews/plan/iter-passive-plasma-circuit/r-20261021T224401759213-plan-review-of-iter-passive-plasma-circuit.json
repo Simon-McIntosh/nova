@@ -1,0 +1,83 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-21T23:11:15.244Z",
+  "dispatched_at": "2026-10-21T22:50:11Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/iter-passive-plasma-circuit.html:195",
+      "id": "reasoning-1",
+      "reason": "the attribution clause must carry the passive block's native indefiniteness (or clause (2) must state that the passive sub-block floor stays) or the node repairs the jackets, measures an indefinite joint, and has no cause left in the plan to attribute it to.",
+      "text": "\u00a77 attributes the indefiniteness to the eight VS3 jackets and requires the repaired build to give \"a joint coil-plus-passive linkage that is positive definite for the 12 mm and 6 mm sets, without any floor applied to the joint matrix\", but the target is not reachable from that mechanism: the stored `linkage.npy` at the two sectioned-set entries holds the unfloored joint (`build.py` writes `circuit_linkage_matrix`'s raw output; only `system.npz`'s `lmat` is guarded), and its passive sub-block is natively indefinite \u2014 37 negative eigenvalues at 12 mm (minimum \u22122.5279581e-07 H) and 175 at 6 mm (minimum \u22129.4509e-08 H) \u2014 with no support on the jacket rows: removing rows 608\u2013615, the jacket rows power_convertor's trace identifies, leaves all 37 negative eigenvalues intact (minimum unchanged). The cited record says the same in its own words (\"The upstream raw passive block itself has 37 negative eigenvalues\"; \"Making that passive block positive did not make the joint coil/passive linkage positive\"), so the passive block is a third cause that \u00a77's clause (1) never names and clause (2) never measures \u2014 a node repairing only the jacket coupling will find the joint still indefinite and be unable to close clause (2)",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/iter-passive-plasma-circuit.html:195",
+      "id": "done_when-1",
+      "reason": "as written the loader refusal is either vacuous (it refuses everything) or its test proves nothing about the guard, so the plan must state which matrix the refusal is evaluated on \u2014 the guarded passive block assembled joint, not the raw `linkage.npy` \u2014 or the node ships a guard that refuses the repaired entry itself.",
+      "text": "\u00a77 requires both \"a joint coil-plus-passive linkage that is positive definite\" and a test that \"copies a pre-repair entry into a scratch cache and asserts the loader refuses it by name\", but because every stored entry carries the native passive-block negatives this test would refuse a repaired entry exactly as it refuses a pre-repair one, so it cannot show the new guard fires on stale data rather than on all data, and the section's literal control (\"revert the repair, and the Schur complement again has the two negative eigenvalues\") measures the coil Schur complement, not the joint linkage the loader check is specified on",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "40d3a68c610a8f3f803e8920260bf6b82fd6226d1d03dad3d817c8611ae5fa57",
+  "plan_slug": "iter-passive-plasma-circuit",
+  "plan_version": 38,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-21T23:12:01.850572+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "",
+      "when": "2026-10-21T23:12:06.426876+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-21T23:12:06.426876+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-21T23:12:01.850572+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-iter-passive-plasma-circuit.v38.json",
+  "review_run_id": "r-20261021T224401759213-plan-review-of-iter-passive-plasma-circuit",
+  "reviewed_blob_sha": "1b387f9c102df6751f06b051bc03a11998960ba0",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 verified in the tree: `guard_positive_definite` (`nova/circuit/linkage.py:291`), `load_sectioned_machine` (`nova/circuit/passive.py:1176`, geometry-only refusal at :1186), the coil-block tag `finite-source:6` (`scripts/iter_sectioned_conductor_set/build.py:265`), `MESH_KEY` (`scripts/iter_vessel_evolution/evolve.py:33-35`), the retired 12 mm digest pinned at `tests/test_sectioned_set_geometry_cache.py:39` and twice at `tests/test_coupled_plant.py:434,679`, both sectioned-set and plant cache entries present on disk, `d60da1cec` (`git cat-file -t` = commit), and power_convertor's record `averaged-plant-energy-refusal` (numbers agree: v\u1d40Lv 0.0005857079994463, \u2016Mv\u2016\u00b2 0.0005857463772138, eigenvalues \u22123.8378e-8 and \u22123.2486e-8 H, jacket rows removed \u2192 0 negative).",
+    "done_when": "a finding \u2014 \u00a77 clause (2) requires the repaired build to give a joint coil-plus-passive linkage that is positive definite \"without any floor applied to the joint matrix\", a target the section's own attributed repair cannot reach, and its loader-refusal test is therefore written against a condition every entry on disk already meets.",
+    "evidence_paths": "pass \u2014 \u00a77's rebuilt set and delivered entry land in the durable `.cache/iter-passive-plasma-circuit/sectioned-conductor-set/<digest>/` and `coupled-plant/<digest>/` trees it names, and its red arms follow the repo's `.cache/iter-passive-plasma-circuit/gate-logs/` convention; nothing lands in a scratchpad or node-local path.",
+    "naming": "pass \u2014 \u00a77 introduces no symbol, path or comment; `MESH_KEY`/`finite-source:6` are existing code identifiers and the shas it cites are provenance, as elsewhere in the plan.",
+    "reasoning": "a finding \u2014 \u00a77's attribution step names geometry and quadrature of the coil-to-jacket coupling as the two causes of the indefinite joint linkage, but the stored joint linkage's passive block is itself indefinite with no support on the eight jacket rows, so the stated mechanism cannot produce the positive-definite joint clause (2) asserts.",
+    "single_goal": "pass \u2014 \u00a77 carries one deliverable, the positive-definite joint linkage, with cause attribution as its first clause and delivery of the re-keyed entry as its last.",
+    "wiring": "pass \u2014 \u00a76's status line and the open followup f-ippc-002 now both declare check 3's wait on \u00a77, symmetric with \u00a77's own \"\u00a76's remaining check 3 runs after this section ... and \u00a76 records the same wait\", and f-ippc-003 dispatches \u00a77 with its geometry/quadrature candidates named."
+  },
+  "section_digests": {
+    "_document": "9089b3d51bacedf8b789082a7c5656db85f9c3bd1fe196a55b7b774ad7634317",
+    "s1": "fd450fda152b172eb82e80c548ab9e5fa16c20b15f3b14ae415c0ed18ceb7a8c",
+    "s2": "fbea1d197646f2baba636205f10434c799bb3ce88f19dfa3ef779d98d25c50fb",
+    "s3": "56e06d1f8c060952b209edbc0a1c98e3f22e1cad48fcc1e6d6f04eb464d977bf",
+    "s4": "f8534dfd59d3f9812bc19d36079033b715faafd53488ec44ddfec9f088a03e93",
+    "s5": "39b83394b03af8bd027560dfc1db14bc1176968fc3aa2a93635fed656c03c8ec",
+    "s6": "ddb051fb521c38e5dc1340741e4680a09626b66b416f568ab6ebf5b3f81b3545",
+    "s7": "5d9c15f3fbf510cb2eec004ad2db6765bdb50fbdced309fe5f0d587815574341"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-21T23:11:58.346129+00:00"
+}

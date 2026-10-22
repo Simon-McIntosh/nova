@@ -83,76 +83,41 @@ def _density_coefficients(geometry, reading, profile):
 
 
 def _saddle_moments(geometry, reading, profile, capacity=16):
-    """Book selected saddle sectors using profile values on signed ring fans."""
+    """Book the booking cells over the composite support, split at the disk.
+
+    Each booking cell books ``(C ∩ D ∩ N) ∪ (C ∩ Dᶜ ∩ Q)`` through the shared
+    clip-quadrature owner, with the same density the ordinary consumer uses. No
+    copied fan reduction is applied here. The signed-flux convention is taken
+    from the read, so callers need not restate it.
+    """
     active = reading.booking_cells & (reading.membership > 0)
     count = jnp.sum(active, dtype=jnp.int32)
     indices = jnp.nonzero(active, size=capacity, fill_value=0)[0]
-
-    def integrate(index, rings, sizes):
-        origin = geometry.centre[index]
-        slot = jnp.arange(rings.shape[1])
-        following = jnp.where(slot[None] + 1 < sizes[:, None], slot[None] + 1, 0)
-        end = jnp.take_along_axis(rings, following[..., None], axis=1)
-        first = rings - origin
-        second = end - origin
-        area = 0.5 * (first[..., 0] * second[..., 1] - first[..., 1] * second[..., 0])
-        area = jnp.where(slot[None] < sizes[:, None], area, 0.0)
-        barycentric = jnp.asarray(((2 / 3, 1 / 6), (1 / 6, 2 / 3), (1 / 6, 1 / 6)))
-        points = (
-            origin
-            + barycentric[:, 0, None] * first[..., None, :]
-            + barycentric[:, 1, None] * second[..., None, :]
-        )
-        local = (points - origin) / geometry.pitch[index]
-        x, y = local[..., 0], local[..., 1]
-        coefficient = reading.field_coefficients[index]
-        flux = (
-            coefficient[0]
-            + coefficient[1] * x
-            + coefficient[2] * y
-            + coefficient[3] * x * x
-            + coefficient[4] * x * y
-            + coefficient[5] * y * y
-        )
-        normalized = (flux - reading.axis_flux) / (
-            reading.boundary_flux - reading.axis_flux
-        )
-        density = profile.current_density(points[..., 0], normalized)
-        weighted = area[..., None] * density / 3
-        displacement = points - origin
-        return jnp.stack(
-            (
-                jnp.sum(weighted),
-                jnp.sum(weighted * displacement[..., 0]),
-                jnp.sum(weighted * displacement[..., 1]),
-            )
-        )
+    sigma = reading.sigma
+    coefficient = reading.field_coefficients
+    signed = sigma * coefficient
+    signed = signed.at[:, 0].add(-sigma * reading.boundary_flux)
 
     def one(index):
-        def ordinary(_):
-            rings, sizes = current._normal_rings(
-                geometry.vertices[index],
-                geometry.vertex_count[index],
-                geometry.centre[index],
-                reading.saddle_form,
-                reading.fragment_selected[index],
-                reading.edge_interval[index],
-                4,
-            )
-            return integrate(index, rings, sizes)
-
-        if getattr(reading, "closed_loop", None) is None:
-            return ordinary(None)
-
-        def closed(_):
-            rings, sizes = current._closed_normal_rings(
-                reading.closed_loop,
-                geometry.vertices[index],
-                geometry.vertex_count[index],
-            )
-            return integrate(index, rings, sizes)
-
-        return jax.lax.cond(reading.closed_live, closed, ordinary, None)
+        moments, _ = current.composite_cut_moments(
+            geometry.vertices[index],
+            geometry.vertex_count[index],
+            geometry.centre[index],
+            geometry.pitch[index],
+            reading.saddle_form,
+            coefficient[index],
+            signed[index],
+            profile,
+            reading.fragment_selected[index],
+            reading.edge_interval[index],
+            reading.fragment_selected[index],
+            reading.axis_flux,
+            reading.boundary_flux,
+            reading.disk_position,
+            reading.disk_radius,
+            8,
+        )
+        return moments
 
     packed = jax.vmap(one)(indices)
     live = jnp.arange(capacity) < count

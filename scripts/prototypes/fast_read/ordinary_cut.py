@@ -3,9 +3,8 @@
 import jax
 import jax.numpy as jnp
 
-from nova.equilibrium.separatrix_clip import padded_polynomial_current_moments
+from nova.equilibrium import current
 from scripts.prototypes.sub_millisecond.measure_bell_cut import (
-    bell_moments as single_moments,
     bell_polygon as single_polygon,
 )
 from scripts.prototypes.sub_millisecond.measure_wall_march import polygon_area
@@ -158,63 +157,46 @@ def bell_fraction(geometry, reading, sigma):
     )
 
 
-def bell_moments(geometry, reading, profile, sigma):
-    ordinary, ordinary_valid = single_moments(geometry, reading, profile, sigma, 4)
-    split, counts, split_valid, four = _split_polygons(geometry, reading, sigma)
+def composite_cut_moments(geometry, reading, profile, sigma, segments=8):
+    """Book every cut cell over (C∩D∩N) ∪ (C∩Dᶜ∩Q) through the shared owner.
+
+    Every cut cell books the same one support: the selected normal-form portion
+    inside the effective disk about the saddle and the ordinary quadratic cut
+    outside it. Neither a scalar blend nor a whole-cell replacement chosen by
+    centre distance, crossing count or ordinary validity is used here; those
+    remain qualification checks on the read.
+    """
     centre, pitch = geometry.centre, geometry.pitch
-    polynomial = reading.field_coefficients
-    span = reading.boundary_flux - reading.axis_flux
+    form = reading.saddle_form
+    coefficient = reading.field_coefficients
+    signed = sigma * coefficient
+    signed = signed.at[:, 0].add(-sigma * reading.boundary_flux)
 
-    def density(x, y):
-        flux = (
-            polynomial[:, 0]
-            + polynomial[:, 1] * x
-            + polynomial[:, 2] * y
-            + polynomial[:, 3] * x * x
-            + polynomial[:, 4] * x * y
-            + polynomial[:, 5] * y * y
+    def one(index):
+        moments, _ = current.composite_cut_moments(
+            geometry.vertices[index],
+            geometry.vertex_count[index],
+            centre[index],
+            pitch[index],
+            form,
+            coefficient[index],
+            signed[index],
+            profile,
+            reading.fragment_selected[index],
+            reading.edge_interval[index],
+            reading.fragment_selected[index],
+            reading.axis_flux,
+            reading.boundary_flux,
+            reading.disk_position,
+            reading.disk_radius,
+            segments,
         )
-        return profile.current_density(
-            centre[:, 0] + pitch * x, (flux - reading.axis_flux) / span
-        )
+        return moments
 
-    origin = density(0, 0)
-    radial_positive, radial_negative = density(1, 0), density(-1, 0)
-    vertical_positive, vertical_negative = density(0, 1), density(0, -1)
-    radial = (radial_positive - radial_negative) / 2
-    vertical = (vertical_positive - vertical_negative) / 2
-    coefficients = jnp.stack(
-        (
-            origin,
-            radial,
-            vertical,
-            (radial_positive + radial_negative) / 2 - origin,
-            density(1, 1) - radial_positive - vertical_positive + origin,
-            (vertical_positive + vertical_negative) / 2 - origin,
-        ),
-        axis=1,
-    )
-    cells = len(centre)
-    flattened = (cells * 2,)
-    values, first = padded_polynomial_current_moments(
-        split.reshape(flattened + split.shape[2:]),
-        counts.reshape(flattened),
-        jnp.broadcast_to(centre[:, None], (cells, 2, 2)).reshape(flattened + (2,)),
-        jnp.broadcast_to(pitch[:, None, None], (cells, 2, 2)).reshape(flattened + (2,)),
-        jnp.broadcast_to(coefficients[:, None], (cells, 2, 6)).reshape(
-            flattened + (6,)
-        ),
-    )
-    split_moments = jnp.stack(
-        (
-            values.reshape(cells, 2).sum(axis=1),
-            first.reshape(cells, 2, 2).sum(axis=1)[:, 0],
-            first.reshape(cells, 2, 2).sum(axis=1)[:, 1],
-        ),
-        axis=1,
-    )
-    return (
-        jnp.where(four[:, None], split_moments, ordinary),
-        jnp.where(four, split_valid, ordinary_valid),
-        four,
-    )
+    return jax.vmap(one)(jnp.arange(len(centre)))
+
+
+def bell_moments(geometry, reading, profile, sigma):
+    """Return the composite booking for every cell and the read's qualification."""
+    moments = composite_cut_moments(geometry, reading, profile, sigma)
+    return moments, jnp.ones(len(geometry.centre), dtype=bool), reading.booking_cells

@@ -35,6 +35,23 @@ class FastRead(NamedTuple):
     valid: jax.Array
     closed_loop: jax.Array | None = None
     closed_live: jax.Array | None = None
+    disk_position: jax.Array | None = None
+    disk_radius: jax.Array | None = None
+    refusal: jax.Array | None = None
+    sigma: jax.Array | None = None
+
+
+# A read refuses by name rather than switching support or truncating cells: an
+# owner polygon reaching outside the effective disk, or more booking cells than
+# the fixed saddle capacity, is a qualified refusal, never a silent repair.
+REFUSAL_NONE = 0
+REFUSAL_OWNER_NOT_CONTAINED = 1
+REFUSAL_SADDLE_CAPACITY = 2
+REFUSAL_NAMES = {
+    REFUSAL_NONE: "none",
+    REFUSAL_OWNER_NOT_CONTAINED: "owner-not-contained",
+    REFUSAL_SADDLE_CAPACITY: "saddle-capacity-overflow",
+}
 
 
 def bell_fraction_with_crossings(geometry, reading, sigma):
@@ -585,6 +602,29 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
             )
         )
     )
+    vertex_live = (
+        jnp.arange(geometry.vertices.shape[1])[None, :] < geometry.vertex_count[:, None]
+    )
+    owner_distance = jnp.max(
+        jnp.where(
+            vertex_live,
+            jnp.linalg.norm(geometry.vertices - form.position, axis=-1),
+            0.0,
+        ),
+        axis=1,
+    )
+    owner_not_contained = jnp.any(saddle_owner & (owner_distance > radius))
+    capacity_overflow = jnp.sum(provisional.booking_cells) > capacity
+    refusal = jnp.where(
+        owner_not_contained,
+        jnp.int32(REFUSAL_OWNER_NOT_CONTAINED),
+        jnp.where(
+            capacity_overflow,
+            jnp.int32(REFUSAL_SADDLE_CAPACITY),
+            jnp.int32(REFUSAL_NONE),
+        ),
+    )
+    valid = valid & (refusal == REFUSAL_NONE)
     return provisional._replace(
         axis=jnp.where(axis_live, provisional.axis, jnp.full_like(axis, jnp.nan)),
         axis_flux=jnp.where(axis_live, provisional.axis_flux, jnp.nan),
@@ -595,4 +635,8 @@ def read(field, roots, geometry, convention, policy, *, frame_gate=True):
         fragment_selected=selected_sector & connected[:, None],
         qualified=valid & (~diverted | form.valid),
         valid=valid,
+        disk_position=form.position,
+        disk_radius=radius,
+        refusal=refusal,
+        sigma=jnp.asarray(sigma),
     )

@@ -24,7 +24,7 @@
   <title>DD COCOS Ingest | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="27">
+<meta name="plan-version" content="28">
 <meta name="plan-modified" content="2026-10-22">
 <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;dd-cocos-ingest#s1&quot;],&quot;s3&quot;:[&quot;dd-cocos-ingest#s2&quot;],&quot;s4&quot;:[&quot;dd-cocos-ingest#s3&quot;],&quot;s5&quot;:[&quot;dd-cocos-ingest#s1&quot;,&quot;dd-cocos-ingest#s2&quot;]}">
 </head>
@@ -98,6 +98,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-close-s1" data-who="reckon-build" data-when="2026-10-22T08:30:00Z">
     <div class="r-comment-body"><p>§1 landed at merge <code>c188c6851</code> (node dd-cocos-census, head <code>ce1033f74</code>, re-review with no blocking finding). Two stated searches cover 494 lines in 62 files and 80 lines in 25 files, with a planted positive control, and the flux-loop and magnetic-probe readers are included. Fixture verdicts from <code>nova_cocos.identify_convention</code>:</p><ul><li>COCOS 11: CORSICA 130506/6 and /403, and DINA 105052/1, 105069/3, 105027/1 and 105013/1.</li><li>Non-conforming, σ_Bp = −1: DINA 105014/1, in both imasdb trees.</li><li>COCOS 3: the MAST corpus.</li></ul><p>The only fixed-orientation sign test in the tree is <code>plasma_source.py:76</code>; inverting it in a scratch copy swaps which fixtures are accepted and refused. For §4, <code>nova/io/ingest.py</code> and <code>nova/io/signalstore.py</code> key their caches on the DD version, not the convention. Record: <a href="/nova/research/dd-cocos-census">dd-cocos-census</a>.</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261022T073213473843-dd-cocos-census" data-who="reckon-build" data-when="2026-10-22T08:10:20Z">
+    <div class="r-comment-body"><p>dd-cocos-census landed section 1: the census record at docs/research/dd-cocos-census.html covers every reader and hard-coded sign found by two stated searches (494 lines over 62 files; 80 lines over 25 files) with a planted positive control, each reader carrying a fixture-backed nova_cocos.identify_convention verdict (CORSICA 130506/6 and 130506/403, DINA 105052/1 and 105069/3 to COCOS 11; DINA 105014/1 to sigma_Bp -1, non-conforming; MAST corpus to COCOS 3), the flux-loop and pick-up readers (nova/imas/magnetics.py, nova/imas/io_magnetics.py) listed with no convention declared, the internal consumers listed as the section 4 migration list, and the inverted-guard negative control flipping the plasma_source verdict.</p></div>
 </div>
 </section>
 </main>

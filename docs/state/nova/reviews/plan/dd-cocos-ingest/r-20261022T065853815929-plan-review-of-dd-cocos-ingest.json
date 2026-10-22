@@ -1,0 +1,44 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-22T07:10:10.672Z",
+  "dispatched_at": "2026-10-22T06:59:17Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/dd-cocos-ingest.html:71",
+      "id": "reasoning-1",
+      "reason": "without naming `nova/imas/parity_tolerances.py` as the owner the node either adds a second source of truth for the same field or silently re-thresholds it, and a reader cannot tell from `PROFILE_RESIDUAL_RMS`'s bound or \u00a75's constant which decides whether CORSICA 130506/6 is \"consistent\".",
+      "text": "\u00a75's first reported form is, by its own words, \"the parity chain's own figure, unchanged: \u2026 RMS(j_\u03c6,profile \u2212 j_\u03c6,grid) / max|j_\u03c6,grid|\", which is exactly the field the parity chain publishes as `PROFILE_RESIDUAL_RMS` (`nova/imas/mast_parity_chain.py:569`, the output of `_profile_reproduction_residuals`) and judges against the pre-registered bound in `nova/imas/parity_tolerances.py:140` (bound 0.075868, basis \"four times the 0.018967 committed-stamp profile reference\"); \u00a75 nonetheless declares \"the threshold that calls a source consistent is fixed from the analytic state's discretisation error before any IDS row is read\", naming no owner and not saying whether that threshold replaces the registered bound for form one or governs only the band forms, so the node introduces a competing acceptance constant for a quantity that already has one, in a plan whose \u00a71 states that later sections \"extend rather than duplicate\" the owners that exist",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "81c019fdf91f425fd5d91bd114aa2cf0d442a908e1f585e95d092223d3d63c54",
+  "plan_slug": "dd-cocos-ingest",
+  "plan_version": 22,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261022T065853815929-plan-review-of-dd-cocos-ingest",
+  "reviewed_blob_sha": "90232f7b8d6c659b3102d6a637fa11677cc879cd",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every anchor \u00a75 names resolves: `nova/imas/mast_parity_chain.py::_profile_reproduction_residuals` exists (line 397), scores interior in-limiter cells of the whole slice, assembles \u0394* inline by central differences and recovers j_\u03c6 as \u2212\u0394*/(`TOTAL_FLUX_FACTOR`\u00b7\u03bc0\u00b7R) (lines 471\u2013479) with `TOTAL_FLUX_FACTOR` imported from `nova/equilibrium/convention.py` (line 30, defined line 65, and consistent with that module's \u0394*\u03a6 = \u22122\u03c0\u03bc0R\u00b7j_\u03c6 at lines 22\u201325); `CerfonFreidbergSingleNull` is in `nova/equilibrium/analytic_single_null.py` (line 249, docstring \"Exact lower-single-null Solov'ev solution\") with a `grad_shafranov_source` method (line 470); and `iter-passive-plasma-circuit#s6` exists with its provisional reference CORSICA 130506/6 and its wait on this plan's \u00a73.",
+    "done_when": "pass \u2014 \u00a75's three clauses are each measurable (the residual's order on `CerfonFreidbergSingleNull` with a 1 % FF\u2032 perturbation detected, a named per-source table, and the adjudicated reference), and the clause carries a literal negative control that makes the guard fire: perturbing FF\u2032 only in the edge band while the flux map is held fixed must be reported inconsistent beyond the fixed threshold, which is the one state a measure that confirms everything cannot pass.",
+    "evidence_paths": "pass \u2014 \u00a75's table lands in `docs/research/dd-cocos-census.html`, a durable in-tree path, written after \u00a71 by the declared `depends-on`, not in a session scratchpad or a node-local temporary directory.",
+    "naming": "pass \u2014 \u00a75 carries no plan label, stage name, ticket number or version tag into any symbol, file or comment it proposes, and its prose states the mechanism rather than the change history.",
+    "reasoning": "a finding \u2014 \u00a75 fixes an acceptance threshold with no owner while the same normalised figure already carries a pre-registered bound, and it does not say which of its three reported forms that threshold governs.",
+    "single_goal": "pass \u2014 \u00a75 delivers one thing, a validated edge-consistency measure; the table and the confirm-or-revise of iter-passive-plasma-circuit \u00a76's reference are the outputs that measure licenses, not a second deliverable, and iter-passive-plasma-circuit \u00a76 check 3 (line 190) assigns exactly that adjudication to \u00a75, so the two records agree rather than duplicating a decision independently.",
+    "wiring": "pass \u2014 `s5` declares `depends-on` `dd-cocos-ingest#s1` and `dd-cocos-ingest#s2` in both the section metadata and its `data-links`, and both target sections exist; \u00a75 needs \u00a71's census file (it writes into it) and \u00a72's translator (it measures in COCOS 17 after translation), and needs no other section, so no edge is missing and none points at the wrong node."
+  },
+  "section_digests": {
+    "_document": "0944b41fbee062214508f8e371bdb6d46b75eb62d96e4606b5e91e6893187ad0",
+    "s0": "2407e28f2db9011d45035f6b86c463b1b4e36000c85f35e7d35de056f2cbb5d9",
+    "s1": "8493846bddbd37e17766c3f28357c4dec07fde5dad711cf4d8096db87e577f89",
+    "s2": "c04010c9d3220b801a2204ca2332e0e1b38ab2d52fe717e10a913fc22e93450c",
+    "s3": "c2fc45691180bf97593adce2764029469a1131b8009f469996a577e1ec90a479",
+    "s4": "4575ae7595a93b2959851d0b00e53208977b19cf45b52e80902f78998d5a51cb",
+    "s5": "3732f014ee5efe2f2a8fa2b7632f33350cba50ef222b8e3ddfd0657d30782900"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T07:12:01.123105+00:00"
+}

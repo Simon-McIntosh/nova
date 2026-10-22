@@ -81,6 +81,9 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+from nova_cocos import identify_convention
+
+from nova.io.sourcemap import determine_digits
 
 LEVEL1 = Path("/work/projects/imas_gpu/mast/level1/shots")
 
@@ -796,92 +799,6 @@ def flux_loop_two_pi_ratio(shot: int) -> dict[str, Any] | None:
         "psi_at_loop": psi_at_loop[usable].tolist(),
         "loop_flux": flux[usable].tolist(),
     }
-
-
-def determine_digits(rows: list[dict[str, Any]]) -> dict[str, Any]:
-    """Reduce the per-shot sign table to the four COCOS digits."""
-    signed = [r for r in rows if r.get("has_signs")]
-    if not signed:
-        return {"n_shots": 0}
-
-    sigma_ip = np.array([np.sign(r["ip"]) for r in signed])
-    sigma_psi = np.array([np.sign(r["psi_boundary"] - r["psi_axis"]) for r in signed])
-    sigma_bp = sigma_psi * sigma_ip
-
-    b0 = np.array([r["b0"] for r in signed])
-    q95 = np.array([r["q_95"] for r in signed])
-    have_q = np.isfinite(b0) & np.isfinite(q95) & (q95 != 0.0)
-    sigma_rtp = np.sign(q95[have_q]) * sigma_ip[have_q] * np.sign(b0[have_q])
-
-    dp = np.array([r["dp_dpsi"] for r in signed])
-    have_dp = np.isfinite(dp) & (dp != 0.0)
-    dp_expected = -sigma_ip[have_dp] * sigma_bp[have_dp]
-    dp_agrees = np.sign(dp[have_dp]) == dp_expected
-
-    irod = np.array([r["irod"] for r in signed])
-    have_rod = np.isfinite(irod) & np.isfinite(b0) & (irod != 0.0) & (b0 != 0.0)
-    rod_agrees = np.sign(irod[have_rod]) == np.sign(b0[have_rod])
-
-    def unanimous(a: np.ndarray) -> tuple[int, float]:
-        if a.size == 0:
-            return 0, 0.0
-        vals, counts = np.unique(a, return_counts=True)
-        best = int(vals[int(np.argmax(counts))])
-        return best, float(counts.max() / a.size)
-
-    bp, bp_frac = unanimous(sigma_bp)
-    rtp, rtp_frac = unanimous(sigma_rtp)
-    return {
-        "n_shots": len(signed),
-        "sigma_bp": bp,
-        "sigma_bp_unanimity": bp_frac,
-        "sigma_rho_theta_phi": rtp,
-        "sigma_rho_theta_phi_unanimity": rtp_frac,
-        "ip_positive_fraction": float(np.mean(sigma_ip > 0)),
-        "b0_negative_fraction": float(np.mean(b0[np.isfinite(b0)] < 0))
-        if np.isfinite(b0).any()
-        else float("nan"),
-        "axis_is_flux_maximum_fraction": float(
-            np.mean([r["psi_axis_minus_boundary"] > 0 for r in signed])
-        ),
-        "dp_dpsi_cross_check_pass_fraction": float(np.mean(dp_agrees))
-        if dp_agrees.size
-        else float("nan"),
-        "dp_dpsi_cross_check_n": int(dp_agrees.size),
-        "rod_field_consistency_pass_fraction": float(np.mean(rod_agrees))
-        if rod_agrees.size
-        else float("nan"),
-        "rod_field_consistency_n": int(rod_agrees.size),
-    }
-
-
-def cocos_from_digits(
-    sigma_bp: int, e_bp: int, sigma_r_phi_z: int, sigma_rho_theta_phi: int
-) -> int:
-    """Sauter & Medvedev CPC 184 (2013) Table I reverse lookup."""
-    table = {
-        1: (+1, 0, +1, +1),
-        2: (+1, 0, -1, +1),
-        3: (-1, 0, +1, -1),
-        4: (-1, 0, -1, -1),
-        5: (+1, 0, +1, -1),
-        6: (+1, 0, -1, -1),
-        7: (-1, 0, +1, +1),
-        8: (-1, 0, -1, +1),
-        11: (+1, 1, +1, +1),
-        12: (+1, 1, -1, +1),
-        13: (-1, 1, +1, -1),
-        14: (-1, 1, -1, -1),
-        15: (+1, 1, +1, -1),
-        16: (+1, 1, -1, -1),
-        17: (-1, 1, +1, +1),
-        18: (-1, 1, -1, +1),
-    }
-    want = (sigma_bp, e_bp, sigma_r_phi_z, sigma_rho_theta_phi)
-    for value, digits in table.items():
-        if digits == want:
-            return value
-    raise ValueError(f"no COCOS for digits {want}")
 
 
 #: keys dropped from the persisted per-shot rows because the grouped tables
@@ -1689,7 +1606,7 @@ def main() -> int:
     all_ratios = np.array([x for r in ratio_rows for x in r["ratios"]])
     e_bp = 0 if abs(float(np.median(all_ratios)) - 2 * np.pi) < 1.0 else 1
 
-    verdict = cocos_from_digits(
+    verdict = identify_convention(
         sigma_bp=digits["sigma_bp"],
         e_bp=e_bp,
         sigma_r_phi_z=+1,

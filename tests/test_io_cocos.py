@@ -30,7 +30,6 @@ from nova_cocos import (
     identify_convention,
     transform_factor,
 )
-from nova.scripts.identify_source_cocos import cocos_from_digits
 
 MAST_SOURCE = 3
 MAST_MEASURED_FLUX = 13
@@ -50,16 +49,16 @@ def test_every_convention_is_its_own_digits():
 _DIGIT_NAMES = ("sigma_bp", "e_bp", "sigma_r_phi_z", "sigma_rho_theta_phi")
 
 
-def test_the_table_agrees_with_the_pinned_source_verdict():
-    """The digits here are the ones the source-convention audit was pinned against.
+def test_the_table_is_the_only_transcription_of_the_digits():
+    """One table, so the forward lookup must agree with the table it reads.
 
-    Two tables of the same published constant is one too many unless they are
-    checked against each other, so this is the check: the audit's reverse lookup
-    and this module's forward one must name the same convention for all sixteen.
+    A convention's digits and the convention those digits name are the same
+    statement read in two directions; a second transcription of the published
+    constant elsewhere in the tree would be a second source of truth for it.
     """
 
     for entry in conventions():
-        assert cocos_from_digits(**dict(zip(_DIGIT_NAMES, entry.digits))) == (
+        assert identify_convention(**dict(zip(_DIGIT_NAMES, entry.digits))) == (
             entry.identifier
         )
 

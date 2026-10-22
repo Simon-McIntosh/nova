@@ -299,7 +299,7 @@ def build_receipt(
     """Route the static entry through Nova and classify every quantity."""
     from nova.imas.diiid_machine_ids import repair_limiter_ring
     from nova.imas.machine import StaticMachineDescription
-    from nova.io.cocos import (
+    from nova_cocos import (
         B0_LIKE,
         DODPSI_LIKE,
         IP_LIKE,

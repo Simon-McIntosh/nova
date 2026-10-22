@@ -49,7 +49,17 @@ from nova.imas.machine_evidence import (
     require_int,
     require_string,
 )
-from nova_cocos import TRANSFORMATIONS, convention_transform
+from nova_cocos import (
+    TRANSFORMATIONS,
+    B0_LIKE,
+    DODPSI_LIKE,
+    IP_LIKE,
+    PSI_LIKE,
+    Q_LIKE,
+    convention,
+    convention_transform,
+    identify_convention,
+)
 from nova.io.ingest import PROVISIONAL_NAMESPACE
 from nova.io.standardname import StandardNameResolver
 
@@ -719,6 +729,276 @@ def _relative_error(recovered: np.ndarray, raw: np.ndarray) -> float:
     if scale == 0.0:
         return float(np.max(np.abs(recovered[finite] - raw[finite])))
     return float(np.max(np.abs(recovered[finite] - raw[finite])) / scale)
+
+
+DD3_CONVENTION = 11
+"""The COCOS the Data Dictionary major version 3 publishes equilibrium data in."""
+
+DD4_CONVENTION = 17
+"""The COCOS the Data Dictionary major version 4 publishes equilibrium data in."""
+
+NOVA_CONVENTION = DD4_CONVENTION
+"""The convention nova works in internally, so a DD4 read passes through."""
+
+EQUILIBRIUM_GROUP = "equilibrium"
+"""The source group every equilibrium quantity row belongs to."""
+
+_DD_EQUILIBRIUM_QUANTITIES: tuple[tuple[str, str, str], ...] = (
+    ("profiles_2d/psi", PSI_LIKE, "Wb"),
+    ("profiles_1d/psi", PSI_LIKE, "Wb"),
+    ("profiles_1d/dpressure_dpsi", DODPSI_LIKE, "Pa/Wb"),
+    ("profiles_1d/f_df_dpsi", DODPSI_LIKE, "T.m/Wb"),
+    ("profiles_1d/q", Q_LIKE, "1"),
+    ("global_quantities/ip", IP_LIKE, "A"),
+    ("global_quantities/psi_axis", PSI_LIKE, "Wb"),
+    ("global_quantities/psi_boundary", PSI_LIKE, "Wb"),
+    ("global_quantities/q_axis", Q_LIKE, "1"),
+    ("global_quantities/q_95", Q_LIKE, "1"),
+    ("boundary_separatrix/psi", PSI_LIKE, "Wb"),
+    ("vacuum_toroidal_field/b0", B0_LIKE, "T"),
+)
+"""One row per equilibrium quantity a convention rescales, with its DD unit.
+
+The transformation type is the Data Dictionary's own tag for the quantity, so
+the factor follows from the two conventions rather than from a table here.
+"""
+
+
+def dd_equilibrium_convention(dd_version: str) -> int:
+    """Return the COCOS nova reads a Data Dictionary version's equilibrium data as.
+
+    DD3 data is COCOS 11 and DD4 data is COCOS 17.  Any other major version
+    names no convention nova reads, so it is refused rather than guessed.
+    """
+
+    text = require_string(dd_version, "DD version", SourceMapError)
+    major = text.split(".", 1)[0].strip()
+    if major == "3":
+        return DD3_CONVENTION
+    if major == "4":
+        return DD4_CONVENTION
+    raise SourceMapError(
+        f"no COCOS is declared for Data Dictionary version {text!r}; nova reads "
+        f"DD3 as COCOS {DD3_CONVENTION} and DD4 as COCOS {DD4_CONVENTION}"
+    )
+
+
+def determine_digits(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """Reduce per-slice sign rows to the four COCOS digits.
+
+    ``sigma_Bp`` comes from Sauter Eq. 23, ``sign(psi_boundary - psi_axis) =
+    sigma_Ip * sigma_Bp``, cross-checked against ``sign(dp/dpsi) = -sigma_Ip *
+    sigma_Bp``.  ``sigma_rho_theta_phi`` comes from ``sign(q) = sigma_Ip *
+    sigma_B0 * sigma_rho_theta_phi``.  ``e_Bp`` and ``sigma_RphiZ`` are not
+    derivable from scalar equilibrium quantities and are supplied by the caller:
+    a Data Dictionary read takes both from its DD version, and the archive
+    reader measures ``e_Bp`` with a flux-loop ratio.  A digit no row pins is
+    reported as ``0`` -- undetermined -- rather than defaulted to a sign.
+    """
+
+    signed = [r for r in rows if r.get("has_signs")]
+    if not signed:
+        return {"n_shots": 0}
+
+    sigma_ip = np.array([np.sign(r["ip"]) for r in signed])
+    sigma_psi = np.array([np.sign(r["psi_boundary"] - r["psi_axis"]) for r in signed])
+    sigma_bp = sigma_psi * sigma_ip
+
+    b0 = np.array([r["b0"] for r in signed])
+    q95 = np.array([r["q_95"] for r in signed])
+    have_q = np.isfinite(b0) & np.isfinite(q95) & (q95 != 0.0)
+    sigma_rtp = np.sign(q95[have_q]) * sigma_ip[have_q] * np.sign(b0[have_q])
+
+    dp = np.array([r["dp_dpsi"] for r in signed])
+    have_dp = np.isfinite(dp) & (dp != 0.0)
+    dp_expected = -sigma_ip[have_dp] * sigma_bp[have_dp]
+    dp_agrees = np.sign(dp[have_dp]) == dp_expected
+
+    irod = np.array([r["irod"] for r in signed])
+    have_rod = np.isfinite(irod) & np.isfinite(b0) & (irod != 0.0) & (b0 != 0.0)
+    rod_agrees = np.sign(irod[have_rod]) == np.sign(b0[have_rod])
+
+    def unanimous(a: np.ndarray) -> tuple[int, float]:
+        if a.size == 0:
+            return 0, 0.0
+        vals, counts = np.unique(a, return_counts=True)
+        best = int(vals[int(np.argmax(counts))])
+        return best, float(counts.max() / a.size)
+
+    bp, bp_frac = unanimous(sigma_bp[np.isfinite(sigma_bp)])
+    rtp, rtp_frac = unanimous(sigma_rtp[np.isfinite(sigma_rtp)])
+    return {
+        "n_shots": len(signed),
+        "sigma_bp": bp,
+        "sigma_bp_unanimity": bp_frac,
+        "sigma_rho_theta_phi": rtp,
+        "sigma_rho_theta_phi_unanimity": rtp_frac,
+        "ip_positive_fraction": float(np.mean(sigma_ip > 0)),
+        "b0_negative_fraction": float(np.mean(b0[np.isfinite(b0)] < 0))
+        if np.isfinite(b0).any()
+        else float("nan"),
+        "axis_is_flux_maximum_fraction": float(
+            np.mean([r["psi_axis_minus_boundary"] > 0 for r in signed])
+        ),
+        "dp_dpsi_cross_check_pass_fraction": float(np.mean(dp_agrees))
+        if dp_agrees.size
+        else float("nan"),
+        "dp_dpsi_cross_check_n": int(dp_agrees.size),
+        "rod_field_consistency_pass_fraction": float(np.mean(rod_agrees))
+        if rod_agrees.size
+        else float("nan"),
+        "rod_field_consistency_n": int(rod_agrees.size),
+    }
+
+
+_UNSET_MAGNITUDE = 1.0e30
+"""Above this a Data Dictionary float is its 'unset' sentinel, not a measurement."""
+
+
+def _observed(value: float) -> float:
+    """Return a Data Dictionary float, with an unset sentinel read as absent."""
+
+    number = float(value)
+    if not np.isfinite(number) or abs(number) >= _UNSET_MAGNITUDE:
+        return float("nan")
+    return number
+
+
+def _digits(row: Mapping[str, float]) -> dict[str, Any]:
+    """The four digits one equilibrium slice's observables pin.
+
+    A slice whose flux samples are absent or unset pins nothing, so it reports
+    no digit rather than a sign derived from the sentinel.
+    """
+
+    ip = _observed(row["ip"])
+    psi_axis = _observed(row["psi_axis"])
+    psi_boundary = _observed(row["psi_boundary"])
+    has_ip = bool(np.isfinite(ip))
+    return determine_digits(
+        [
+            {
+                "has_signs": has_ip,
+                "ip": ip,
+                "psi_axis": psi_axis,
+                "psi_boundary": psi_boundary,
+                "psi_axis_minus_boundary": psi_axis - psi_boundary,
+                "b0": _observed(row["b0"]),
+                "q_95": _observed(row["q"]),
+                "dp_dpsi": np.nan,
+                "irod": np.nan,
+            }
+        ]
+    )
+
+
+def translate_equilibrium(
+    *,
+    source_name: str,
+    dd_version: str,
+    ip: float,
+    psi_axis: float,
+    psi_boundary: float,
+    q: float,
+    b0: float,
+) -> SourceSignalMap:
+    """Translate one Data Dictionary equilibrium read into COCOS 17, or refuse it.
+
+    The Data Dictionary fixes a read's COCOS by its major version: DD3 data is
+    COCOS 11 and DD4 data is COCOS 17.  nova works in COCOS 17, so a DD4 read
+    passes through with a factor of one on every quantity and a DD3 read is
+    converted.  ``e_Bp = 1`` and ``sigma_RphiZ = +1`` are fixed by the DD
+    version, since COCOS 11 and COCOS 17 share both; ``sigma_Bp`` and
+    ``sigma_rho_theta_phi`` come from the data -- ``ip``, ``psi_axis``,
+    ``psi_boundary``, ``q`` and ``b0`` are the observables that pin them.
+
+    A read whose measured digits name a convention other than its own DD
+    version's is refused through this map's blocked path, by name, stating the
+    DD version, the expected COCOS and the measured digits.  A digit the slice
+    does not pin -- an unpopulated ``q`` or ``b0`` leaves
+    ``sigma_rho_theta_phi`` undetermined -- leaves that digit unchecked rather
+    than guessed, so ``sigma_Bp`` alone still decides conformance.
+    """
+
+    expected = dd_equilibrium_convention(dd_version)
+    digits = _digits(
+        {"ip": ip, "psi_axis": psi_axis, "psi_boundary": psi_boundary, "q": q, "b0": b0}
+    )
+    sigma_bp = int(digits.get("sigma_bp", 0))
+    sigma_rtp = int(digits.get("sigma_rho_theta_phi", 0))
+    reference = convention(expected)
+    measured: int | None = None
+    if sigma_rtp != 0 and sigma_bp != 0:
+        measured = identify_convention(
+            sigma_bp=sigma_bp,
+            e_bp=1,
+            sigma_r_phi_z=+1,
+            sigma_rho_theta_phi=sigma_rtp,
+        )
+    conforming = sigma_bp in (0, reference.sigma_bp) and sigma_rtp in (
+        0,
+        reference.sigma_rho_theta_phi,
+    )
+    if not conforming:
+        stated_bp = (
+            "not derivable (psi unpopulated)" if sigma_bp == 0 else f"{sigma_bp:+d}"
+        )
+        stated_rtp = (
+            "not derivable (q or B0 unpopulated)"
+            if sigma_rtp == 0
+            else f"{sigma_rtp:+d}"
+        )
+        measured_text = "none" if measured is None else f"COCOS {measured}"
+        return SourceSignalMap.create(
+            (),
+            (
+                BlockedSignal(
+                    source_group=EQUILIBRIUM_GROUP,
+                    source_channel=source_name,
+                    target_path=EQUILIBRIUM_GROUP,
+                    reason=(
+                        f"{source_name} is written at DD {dd_version}, which nova "
+                        f"reads as COCOS {expected}, but its measured digits are "
+                        f"sigma_Bp={stated_bp}, e_Bp=1, sigma_RphiZ=+1, "
+                        f"sigma_rho_theta_phi={stated_rtp}, which name "
+                        f"{measured_text} -- the data does not conform to its own "
+                        "Data Dictionary version"
+                    ),
+                    unmet=(
+                        f"a conforming DD {dd_version} equilibrium carries COCOS "
+                        f"{expected}: sigma_Bp={reference.sigma_bp:+d} and "
+                        f"sigma_rho_theta_phi={reference.sigma_rho_theta_phi:+d}"
+                    ),
+                ),
+            ),
+        )
+    signals = tuple(
+        SourceSignal(
+            standard_name=f"{EQUILIBRIUM_GROUP}/{path}",
+            catalog_status=ACCEPTED,
+            source_group=EQUILIBRIUM_GROUP,
+            source_channel=f"{EQUILIBRIUM_GROUP}/{path}",
+            source_unit=unit,
+            target_path=f"{EQUILIBRIUM_GROUP}/{path}",
+            target_unit=unit,
+            target_index=None,
+            transformation=transformation,
+            source_convention=expected,
+            target_convention=NOVA_CONVENTION,
+            unit_factor=1.0,
+            channel_factor=1.0,
+            time_base=f"{EQUILIBRIUM_GROUP}_time",
+            evidence=FieldEvidence.PUBLISHED,
+            statement=(
+                f"{source_name} publishes {path} in the convention DD {dd_version} "
+                f"carries, COCOS {expected}; the target is COCOS {NOVA_CONVENTION} and "
+                "the factor is the two conventions' composition with no unit or "
+                "channel term"
+            ),
+        )
+        for path, transformation, unit in _DD_EQUILIBRIUM_QUANTITIES
+    )
+    return SourceSignalMap.create(signals)
 
 
 def served_targets(source_map: SourceSignalMap) -> dict[str, Sequence[int]]:

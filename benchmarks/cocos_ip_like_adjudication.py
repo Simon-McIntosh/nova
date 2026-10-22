@@ -137,7 +137,7 @@ def current_round_trip(current: float) -> dict[str, float | bool]:
 def nova_engine_claim() -> dict[str, float]:
     """Read Nova's claim only after the independent derivation is complete."""
 
-    from nova.io.cocos import (  # noqa: PLC0415
+    from nova_cocos import (  # noqa: PLC0415
         B0_LIKE,
         DODPSI_LIKE,
         IP_LIKE,

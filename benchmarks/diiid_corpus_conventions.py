@@ -26,7 +26,7 @@ import numpy as np
 from scipy.interpolate import RegularGridInterpolator
 
 from nova.equilibrium.map_extraction import apply_delta_star
-from nova.io.cocos import (
+from nova_cocos import (
     B0_LIKE,
     DODPSI_LIKE,
     IP_LIKE,

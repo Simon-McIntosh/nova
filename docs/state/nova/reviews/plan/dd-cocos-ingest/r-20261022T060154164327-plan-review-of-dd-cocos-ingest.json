@@ -88,7 +88,24 @@
   "plan_slug": "dd-cocos-ingest",
   "plan_version": 5,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reuse_search-1",
+      "reason": "",
+      "when": "2026-10-22T06:09:08.256028+00:00"
+    }
+  ],
+  "responses": {
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-22T06:09:08.256028+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/dd-cocos-ingest/r-20261022T060154164327-plan-review-of-dd-cocos-ingest.json",
   "review_run_id": "r-20261022T060154164327-plan-review-of-dd-cocos-ingest",
   "reviewed_blob_sha": "35791419b4667fc87b0854b312b027fc1348c64b",
   "rubric": "design",

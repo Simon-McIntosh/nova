@@ -123,9 +123,22 @@
       "finding": "reuse_search-5",
       "reason": "",
       "when": "2026-10-22T06:09:37.243581+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-22T06:09:44.550338+00:00"
     }
   ],
   "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-22T06:09:44.550338+00:00"
+    },
     "reuse_search-1": {
       "action": "acted",
       "by": "",

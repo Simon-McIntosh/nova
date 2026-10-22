@@ -11,11 +11,13 @@ refusal.
 from __future__ import annotations
 
 import hashlib
+import os
 import shutil
 from pathlib import Path
 
 import numpy as np
 import pytest
+from scipy.special import ellipe, ellipk
 
 from nova.circuit.passive import (
     JointLinkageNotPositiveDefinite,
@@ -25,7 +27,12 @@ from nova.circuit.screening import plasma_self_inductance
 
 ROOT = Path(__file__).resolve().parents[1]
 CACHE = Path("/home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit")
-ENTRY_ROOT = CACHE / "sectioned-conductor-set"
+#: the sectioned-set root the arms read.  A fenced worker cannot write the shared
+#: cache, so a build under test names its own root here and the arms measure the
+#: entries that build produced rather than skipping on an uninstalled one.
+ENTRY_ROOT = Path(
+    os.environ.get("NOVA_SECTIONED_SET_ROOT", CACHE / "sectioned-conductor-set")
+)
 
 #: the sectioned-set keys the repair retired, named by the nodes that pinned
 #: them.  They may still exist as directories under the shared cache, which is
@@ -45,13 +52,83 @@ PINNED_PLANT_ENTRY = "28148563521d92a2198b"
 PINNED_PLANT = CACHE / "coupled-plant" / PINNED_PLANT_ENTRY / "plant.npz"
 PINNED_PLANT_SHA256 = "7800a4d8db5ea452fca7e0a18179f8939f85e08e8503b61e4e1bbee8d3c06b6c"
 
-#: the single-conductor-in-jacket dense coaxial reference the vertical coils'
-#: bare inductances are stated against [H], and the tolerance on them.
-COAXIAL_REFERENCE_H = 4.370137793331819e-05
-COAXIAL_TOLERANCE = 0.03
+#: the annulus each VS3 turn is wound from, in the machine description [m].
+TURN_ANNULUS = (0.01695, 0.02300)
 
-#: machine-description cross-section of one VS3 conductor annulus [m]
-CONDUCTOR_ANNULUS = (0.01695, 0.02300)
+#: the four turn annuli of each vertical coil, in series, at the (R, Z) centres
+#: ``pf_active`` gives them [m].  A vertical coil is four turns, not one ring, so
+#: its bare inductance is the sum of the four self terms and the six distinct
+#: mutual pairs between them -- which is why a single-ring closed form at R = 6 m
+#: (4.370e-05 H) is not a reference for either coil.
+VS3_TURNS = {
+    "VSU": (
+        (5.80665907, 4.93980766),
+        (5.86330474, 4.91128576),
+        (5.78032370, 4.88598875),
+        (5.83643430, 4.85653910),
+    ),
+    "VSL": (
+        (7.55055806, -2.50001788),
+        (7.49633281, -2.54109841),
+        (7.51139746, -2.44931726),
+        (7.45665771, -2.49006112),
+    ),
+}
+
+#: tolerance on each coil's bare inductance and on the coil-to-coil mutual,
+#: against their own turn references.  Stated from the measurement: the stored
+#: series map stands 0.25 per cent above its reference for VSU (5.630347e-04
+#: against 5.644469e-04) and 0.28 per cent for VSL (7.560341e-04 against
+#: 7.581931e-04), while the VSU-VSL mutual agrees to 0.0006 per cent
+#: (4.241052e-05 against 4.241026e-05).  One per cent is about four times the
+#: largest measured disagreement, and the disagreement that remains sits in the
+#: self terms, where the sector discretisation lives.
+TURN_REFERENCE_TOLERANCE = 0.01
+
+#: permeability of free space [H/m]
+MU0 = 4e-7 * np.pi
+
+
+def _coaxial_mutual(r1: float, r2: float, dz: float) -> float:
+    """Mutual inductance of two coaxial circular loops [H]."""
+    k2 = 4.0 * r1 * r2 / ((r1 + r2) ** 2 + dz**2)
+    k = np.sqrt(k2)
+    return float(
+        MU0 * np.sqrt(r1 * r2) * ((2.0 / k - k) * ellipk(k2) - (2.0 / k) * ellipe(k2))
+    )
+
+
+def _turn_self(r: float) -> float:
+    """One turn's self inductance, from the repository's closed form [H]."""
+    return float(plasma_self_inductance(r, np.sqrt(np.prod(TURN_ANNULUS))))
+
+
+def _turn_reference(turns) -> float:
+    """A coil's bare inductance as its four turn annuli in series [H].
+
+    The four self terms plus twice each of the six distinct mutual pairs, which
+    is the energy of one ampere through all four turns in series.  Every term is
+    an independent closed form: the repository's ring self inductance and the
+    coaxial ring mutual.
+    """
+    total = 0.0
+    for index, (r, z) in enumerate(turns):
+        total += _turn_self(r)
+        for r2, z2 in turns[index + 1 :]:
+            total += 2.0 * _coaxial_mutual(r, r2, abs(z - z2))
+    return float(total)
+
+
+def _coupling_reference(first, second) -> float:
+    """The mutual inductance between two vertical coils, turn by turn [H]."""
+    return float(
+        sum(
+            _coaxial_mutual(r1, r2, abs(z1 - z2))
+            for r1, z1 in first
+            for r2, z2 in second
+        )
+    )
+
 
 #: files the retired-digest search must skip, and why.  This module is the
 #: record of what was retired, so it is the one file that has to name the
@@ -97,44 +174,61 @@ def test_every_coil_bare_inductance_is_positive(label):
 
 
 @pytest.mark.parametrize("label", ["12mm", "6mm"])
-def test_vertical_coil_bare_inductance_matches_the_coaxial_reference(label):
-    """VSU's and VSL's bare inductances match the dense coaxial reference.
+def test_vertical_coil_bare_inductance_matches_its_turn_reference(label):
+    """VSU's and VSL's bare inductances match their own four-turn references.
 
-    Recorded pre-repair evidence, kept as the numbers the repair had to move:
-    the reduced annulus arm gave 4.1926e-5 H at 8 sectors and 4.1627e-5 H at 16
-    against the reference's 4.1581e-5 H, with a coupling of 0.93 against the
-    reference's 0.9759.  The tolerance is stated against the reference, not
-    against the arm's own earlier output.  The units are henries throughout, so
-    the tolerance is a relative one.
+    Each vertical coil is four turns in series at the four turn annuli
+    ``pf_active`` gives, so the reference is built per coil from the four self
+    terms and the six mutual pairs between them -- never from a generic single
+    ring.  The reduced series map stands 0.25 per cent above the reference for
+    VSU and 0.28 per cent for VSL, so the tolerance is one per cent, about four
+    times the measured disagreement.  The units are henries, so it is relative.
     """
     entry = _entry(label)
     _skip_without(entry, "linkage.npy", "system.npz", "geometry.npz")
     machine = load_sectioned_machine(entry)
     coil_matrix = machine.series.T @ machine.section_inductance @ machine.series
     names = list(machine.coil_names)
-    for name in ("VSU", "VSL"):
+    for name, turns in VS3_TURNS.items():
         measured = float(np.diag(coil_matrix)[names.index(name)])
-        assert measured == pytest.approx(COAXIAL_REFERENCE_H, rel=COAXIAL_TOLERANCE), (
+        reference = _turn_reference(turns)
+        assert measured == pytest.approx(reference, rel=TURN_REFERENCE_TOLERANCE), (
             name,
             measured,
+            reference,
         )
 
 
-def test_coaxial_reference_is_the_repository_closed_form():
-    """The reference the tolerance is stated against agrees with the closed form.
-
-    The closed form at the annulus's geometric-mean wire radius gives the value
-    ``COAXIAL_REFERENCE_H`` records, so the tolerance is stated against a form
-    the repository already owns.  Recorded pre-repair the constant held a dense
-    filament sum of 4.1581e-5 H, which the same closed form exceeded by 5.1 per
-    cent: the two are the same physical quantity at the same radius, and the
-    constant now carries the form the repository computes.
-    """
-    radius = 6.0
-    closed_form = float(
-        plasma_self_inductance(radius, np.sqrt(np.prod(CONDUCTOR_ANNULUS)))
+@pytest.mark.parametrize("label", ["12mm", "6mm"])
+def test_vertical_coil_coupling_matches_its_turn_reference(label):
+    """The VSU-VSL mutual agrees with the same per-coil reference."""
+    entry = _entry(label)
+    _skip_without(entry, "linkage.npy", "system.npz", "geometry.npz")
+    machine = load_sectioned_machine(entry)
+    coil_matrix = machine.series.T @ machine.section_inductance @ machine.series
+    names = list(machine.coil_names)
+    measured = float(coil_matrix[names.index("VSU"), names.index("VSL")])
+    reference = _coupling_reference(VS3_TURNS["VSU"], VS3_TURNS["VSL"])
+    assert measured == pytest.approx(reference, rel=TURN_REFERENCE_TOLERANCE), (
+        measured,
+        reference,
     )
-    assert closed_form == pytest.approx(COAXIAL_REFERENCE_H, rel=0.01)
+
+
+def test_turn_reference_is_built_from_the_repository_closed_form():
+    """The per-coil reference is four turns deep, not one ring.
+
+    One turn's self term is ``plasma_self_inductance`` at the annulus's
+    geometric-mean wire radius, and the coil reference adds the six mutual pairs
+    between its turns.  A single ring at R = 6 m (4.370e-05 H) is one turn at a
+    radius no VS3 turn sits at, which is why neither coil could match the
+    single-ring constant: the coil reference is about 12.9 times it.
+    """
+    one_turn = _turn_self(6.0)
+    reference = _turn_reference(VS3_TURNS["VSU"])
+    assert one_turn == pytest.approx(4.370137793331819e-05, rel=0.01)
+    assert reference == pytest.approx(5.64446939481016e-04, rel=1e-6)
+    assert reference > 12.0 * one_turn
 
 
 def _pre_repair_copy(scratch: Path) -> None:

@@ -17,12 +17,17 @@ the whole sectioned set.
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import numpy as np
 import pytest
 
-from nova.circuit.conductor import ConductorSet, PolygonSection
+from nova.circuit.conductor import (
+    ConductorSet,
+    annulus_sector_columns,
+    annulus_sector_vertices,
+)
 from nova.circuit.screening import plasma_self_inductance
 from scripts.iter_sectioned_conductor_set.build import (
     ANNULUS_SECTORS,
@@ -31,10 +36,17 @@ from scripts.iter_sectioned_conductor_set.build import (
 
 ROOT = Path(__file__).resolve().parents[1]
 CACHE = Path("/home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit")
+#: the sectioned-set root the entry arms read.  A fenced worker cannot write the
+#: shared cache, so a build under test names its own root here and the entry arms
+#: measure the entries that build produced rather than skipping on an uninstalled
+#: one.
+ENTRY_ROOT = Path(
+    os.environ.get("NOVA_SECTIONED_SET_ROOT", CACHE / "sectioned-conductor-set")
+)
 PINNED_PLANT = CACHE / "coupled-plant/28148563521d92a2198b/plant.npz"
 ENTRIES = {
-    "12mm": CACHE / "sectioned-conductor-set/66c10162f3e37adb2679",
-    "6mm": CACHE / "sectioned-conductor-set/f3a24fdd12eae6348f3a",
+    "12mm": ENTRY_ROOT / "66c10162f3e37adb2679",
+    "6mm": ENTRY_ROOT / "f3a24fdd12eae6348f3a",
 }
 #: the eight jacket source centroids, upper then lower (r, z) [m]
 JACKET_CENTROID = np.array(
@@ -182,49 +194,31 @@ def _annulus_objects():
 
 
 def _sector_vertices(r0, z0, ri, ro, n_sector, k):
-    """One annular-sector quadrangle: outer arc then inner arc, k = 0..n-1."""
-    t0 = 2 * np.pi * k / n_sector
-    t1 = 2 * np.pi * (k + 1) / n_sector
-    return np.asarray(
-        [
-            (r0 + ro * np.cos(t0), z0 + ro * np.sin(t0)),
-            (r0 + ro * np.cos(t1), z0 + ro * np.sin(t1)),
-            (r0 + ri * np.cos(t1), z0 + ri * np.sin(t1)),
-            (r0 + ri * np.cos(t0), z0 + ri * np.sin(t0)),
-        ],
-        float,
-    )
+    """One annular-sector quadrangle, from the subdivision's own owner."""
+    return annulus_sector_vertices(r0, z0, ri, ro, n_sector, k)
 
 
 def _annulus_ports(records, annulus, n_sector, first_circuit):
-    """One annulus as ``n_sector`` equal-share sector circuits, with shapes."""
+    """One annulus as ``n_sector`` equal-share sector circuits, with shapes.
 
+    The sector rows and their shaped sections come from
+    :func:`annulus_sector_columns`, the owner of the annulus subdivision, so
+    this arm and the sectioned-set build cut an annulus the same way.
+    """
     polygons = []
-    columns = {name: [] for name in ConductorSet._columns}
+    columns: dict[str, list[float]] = {name: [] for name in ConductorSet._columns}
     circuit = first_circuit
     labels = []
     ri, ro = annulus
     for key, r0, z0 in records:
-        for k in range(n_sector):
-            vertices = _sector_vertices(r0, z0, ri, ro, n_sector, k)
-            polygons.append(PolygonSection(circuit, vertices, 1.0 / n_sector))
-            centre = vertices.mean(axis=0)
-            span = np.ptp(vertices, axis=0)
-            for name, value in zip(
-                ConductorSet._columns,
-                (
-                    centre[0],
-                    centre[1],
-                    max(span[0], 1e-6),
-                    max(span[1], 1e-6),
-                    1.0,
-                    circuit,
-                ),
-                strict=True,
-            ):
-                columns[name].append(value)
-            labels.append((key, circuit))
-            circuit += 1
+        rows, sections = annulus_sector_columns(
+            r0, z0, ri, ro, 1.0, circuit, n_sector, circuit_stride=1
+        )
+        polygons.extend(sections)
+        for name in ConductorSet._columns:
+            columns[name].extend(float(value) for value in rows[name])
+        labels.extend((key, circuit + index) for index in range(n_sector))
+        circuit += n_sector
     return ConductorSet(**columns, polygon_sections=tuple(polygons)), labels
 
 
@@ -233,10 +227,10 @@ def _annulus_arm(n_sector=8, workers=4):
 
     Each conductor and jacket is its machine-description annulus, cut into
     ``n_sector`` equal-share sector polygons in separate circuits.  The returned
-    linkage entry folds the SOURCE share once, so the physical port reduction --
-    the share applied to source and observer alike -- weights each sector by the
-    square root of its share.  That weight is what makes the summed arm
-    reproduce the closed-form ring self-inductance of one conductor.
+    linkage entry folds the SOURCE share once, and each sector row carries the
+    same share, so the share is already in the matrix twice over -- source and
+    observer -- and the port reduction is the plain sum over the annulus's
+    sectors.  Weighting again would count the share a third time.
     """
     from nova.circuit.linkage import circuit_linkage_matrix
 
@@ -250,7 +244,7 @@ def _annulus_arm(n_sector=8, workers=4):
     matrix = circuit_linkage_matrix(
         combined, range(n_circuit), section_n_max=6, workers=workers
     )
-    weight = 1.0 / np.sqrt(n_sector)
+    weight = 1.0
     coil_keys = sorted({key for key, _ in labels})
     jacket_keys = [key for key, _ in jacket_labels[::n_sector]]
     wc = np.zeros((n_circuit, len(coil_keys)))
@@ -299,11 +293,12 @@ def test_annulus_sector_arm_reproduces_the_ring_self_inductance():
     matrix = circuit_linkage_matrix(
         _concat(single, jacket_only), range(2 * n), section_n_max=6, workers=1
     )
-    # the linkage entry folds the source share once, so the physical port
-    # reduction applies the share to source and observer alike: weight sqrt(1/n),
-    # which is what makes the summed arm converge on the ring it discretises
+    # each sector row and its shaped section already carry the sector share
+    # 1/n, so the matrix entries hold the share twice over -- source and
+    # observer -- and the port reduction is the plain sum: weighting again
+    # would count the share a third time and shrink the arm by 1/n
     weight = np.zeros(2 * n)
-    weight[:n] = 1.0 / np.sqrt(n)
+    weight[:n] = 1.0
     arm = float(weight @ matrix @ weight)
     radius = conductors[0][1]
     reference = float(

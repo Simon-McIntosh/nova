@@ -1,0 +1,52 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-22T14:04:25.407Z",
+  "dispatched_at": "2026-10-22T13:51:37Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/dd-cocos-ingest.html:60",
+      "id": "reasoning-1",
+      "reason": "the refusal is the whole second half of s3's changed MAST paragraph and its done-when (1), so the node must either invent an unplanned non-DD conformance entry point or drop the MAST refusal and leave `test_mast_flipped_psi_is_refused` red; the plan also gives that route's digit source as \"\u03c8, Ip and q\", which cannot yield \u03c3_\u03c1\u03b8\u03c6 without B0.",
+      "text": "s3 says the MAST route is refused by `PlasmaSource.from_mast`'s \"declared COCOS 3 conformance check\" through the \u00a72 module, but \u00a72's sole conformance entry point, `translate_equilibrium` (`nova/io/sourcemap.py:895`), is DD-version-scoped: it takes `dd_version` and resolves the target through `dd_equilibrium_convention` (`nova/io/sourcemap.py:767`), which returns only for major versions 3 and 4 and raises \"no COCOS is declared\" for anything else. The MAST route is a non-DD archive read (the census record at `docs/research/dd-cocos-census.html` row for `nova/imas/mast_solve_inputs.py` records the source as \"non-DD (FAIR-MAST)\"), and `from_mast` (`nova/imas/plasma_source.py:146`) builds slices from `EquilibriumFrame` (`nova/media/sources/frame.py:94`), whose fields carry no `q` or `b0` \u2014 the two observables `determine_digits` needs for \u03c3_\u03c1\u03b8\u03c6 (`nova/io/sourcemap.py:807-810`). So s3 relies on a \"measured digits vs COCOS 3\" refusal that neither \u00a72 nor any cited owner builds.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/dd-cocos-ingest.html:60",
+      "id": "done_when-1",
+      "reason": "without either keeping a slice-level orientation refusal (which contradicts line 59) or re-pointing this fourth test and naming its updated `match` message, s3's gate fails on its own mechanism, and the node is left to choose between two unstated options.",
+      "text": "s3 (and done-when (1) at line 68) asserts `tests/test_plasma_source.py::test_mast_flipped_psi_is_refused` \"stays green\" once the guard moves, but the test (`tests/test_plasma_source.py:60-77`) never calls `from_mast` on the flipped data: it takes `source.slices[0]`, builds `replace(original, psi=-original.psi, psi_samples=-..., psi_axis=-..., psi_boundary=-...)`, and calls `flipped.prescribe()` directly, expecting `ValueError(match=\"psi ordering disagree\")`. s3 line 59 removes that guard from `prescribe`, which is the only psi-orientation refusal at that call site (the remaining `ValueError`s in `nova/imas/plasma_source.py` are lines 33, 40, 107, 191 and 193, none of them about flux orientation), so the call raises nothing and the test fails. s3 lists it among the tests that stay green and omits it from the three tests it says turn red, so its done-when (1) at line 68 (\"`test_mast_flipped_psi_is_refused` stays green\") and the three-clause gate at line 68 are unmet as written.",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "59b9a768677ac4df8f73a4335d0cb1d261b2875bb7a0907c004b2a47b243e73d",
+  "plan_slug": "dd-cocos-ingest",
+  "plan_version": 45,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261022T134849894489-plan-review-of-dd-cocos-ingest",
+  "reviewed_blob_sha": "10310f118f5612868e6a37073775cc0dd03115d9",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `nova/imas/plasma_source.py`, `nova/imas/extrapolate.py`, and the four named test ids all resolve; `extrapolate.py:301` (`# COCOS11`) sits in `Extrapolate.update` (defined line 292) and `:345` (`# COCOS`) in the plotting helper `plot_2d_masked` (defined line 339), exactly as s3 states.",
+    "done_when": "a finding \u2014 s3 done-when (1) asserts `test_mast_flipped_psi_is_refused` \"stays green\" through `from_mast`'s conformance check, but the test never calls `from_mast` on the flipped slice and the guard it does exercise is the one s3 removes.",
+    "evidence_paths": "pass \u2014 s3's record is `docs/research/dd-cocos-census.html`, an in-repository file, not a scratchpad or node-local temporary path.",
+    "naming": "pass \u2014 s3 introduces no plan label, stage name, ticket number or version tag into a symbol or comment, and no changelog prose.",
+    "reasoning": "a finding \u2014 s3 requires a non-DD conformance refusal on the MAST route and locates it in \"the \u00a72 module\", but \u00a72's only conformance entry point is Data-Dictionary-scoped and names no archive convention.",
+    "single_goal": "pass \u2014 s3 carries one deliverable: the census readers take their equilibrium data through the \u00a72 entry point, with the three re-pointed DINA tests as its consequence rather than a second goal.",
+    "wiring": "pass \u2014 s3's `data-links=\"dd-cocos-ingest#s2\"` matches the `plan-section-depends-on` edge `s3:[s2]`, s4 depends on s3, and f-ddc-001's stated ordering (\u00a72\u2192\u00a73\u2192\u00a74) agrees; every edge resolves to a section that exists."
+  },
+  "section_digests": {
+    "_document": "0944b41fbee062214508f8e371bdb6d46b75eb62d96e4606b5e91e6893187ad0",
+    "s0": "d7c3143494e97518c859457355f006ec1a3961adf5e50d514822385ec2941326",
+    "s1": "8493846bddbd37e17766c3f28357c4dec07fde5dad711cf4d8096db87e577f89",
+    "s2": "38e4a6fd8cb459d4e887ae55cc12b322f74419e30f3f46aaa3022d95172c4f71",
+    "s3": "23e66c23c85d94b5907e4fbe3b0dc3f58e25056f889d69cc2b50a029b2d32826",
+    "s4": "d6a70aa2dd32032baf0b25d96203690d339d0869464e29c0f3620c5c535bca9c",
+    "s5": "db46395f9321959e91cc657923e567fa72cda1e12fa3aa977d6a83243b8e1d36"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T14:10:12.136096+00:00"
+}

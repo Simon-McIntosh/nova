@@ -24,7 +24,24 @@
   "plan_slug": "dd-cocos-ingest",
   "plan_version": 64,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "read_frame and PlasmaSlice carry no q row, so the node reports that column absent; the p-prime and FF-prime half of the table is the one that carries the 2 pi hazard and stays required",
+      "when": "2026-10-22T19:47:42.156246+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "read_frame and PlasmaSlice carry no q row, so the node reports that column absent; the p-prime and FF-prime half of the table is the one that carries the 2 pi hazard and stays required",
+      "when": "2026-10-22T19:47:42.156246+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/dd-cocos-ingest/r-20261022T185623464255-plan-review-of-dd-cocos-ingest.json",
   "review_run_id": "r-20261022T185623464255-plan-review-of-dd-cocos-ingest",
   "reviewed_blob_sha": "6ab5f3b29c6f04634f04f9673811ec41999a1192",
   "rubric": "content",

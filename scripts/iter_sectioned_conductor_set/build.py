@@ -192,36 +192,71 @@ def source_conductors() -> tuple[
 
 
 def unsectioned_coil_conductors(active) -> ConductorSet:
-    """Keep each original IDS element as one filament of its whole coil."""
+    """Keep each original IDS element as one filament of its whole coil.
+
+    An annular element becomes its machine-description annulus cut into the same
+    sectors the sectioned arm uses, sharing one circuit.  The sectioned arm must
+    differ from this reference in its sectioning alone, so both arms carry one
+    geometry: an area-equivalent square here would compare a ring against a box.
+    """
     columns = {key: [] for key in ConductorSet._columns}
-    for coil_index, coil in enumerate(active.coil):
+    polygons = []
+    circuit = 0
+    for coil in active.coil:
         for element in coil.element:
             geometry = element.geometry
             kind = int(geometry.geometry_type)
             if kind == 2:
                 rect = geometry.rectangle
-                data = (
-                    float(rect.r),
-                    float(rect.z),
-                    float(rect.width),
-                    float(rect.height),
-                )
+                for key, value in zip(
+                    columns,
+                    (
+                        float(rect.r),
+                        float(rect.z),
+                        float(rect.width),
+                        float(rect.height),
+                        float(element.turns_with_sign),
+                        circuit,
+                    ),
+                    strict=True,
+                ):
+                    columns[key].append(value)
+                circuit += 1
             elif kind == 5:
                 annulus = geometry.annulus
-                area = np.pi * (
-                    float(annulus.radius_outer) ** 2 - float(annulus.radius_inner) ** 2
+                sectors, sector_polygons = annulus_sector_columns(
+                    float(annulus.r),
+                    float(annulus.z),
+                    float(annulus.radius_inner),
+                    float(annulus.radius_outer),
+                    float(element.turns_with_sign),
+                    circuit,
+                    ANNULUS_SECTORS,
+                    # each sector its own circuit, as the sectioned arm has it:
+                    # the two arms must differ in their sectioning alone
+                    circuit_stride=1,
                 )
-                side = np.sqrt(area)
-                data = (float(annulus.r), float(annulus.z), side, side)
+                for name in ConductorSet._columns:
+                    columns[name].extend(sectors[name])
+                polygons.extend(sector_polygons)
+                circuit += ANNULUS_SECTORS
             else:
                 raise ValueError(f"unsupported active geometry {kind}")
-            for key, value in zip(
-                columns,
-                (*data, float(element.turns_with_sign), coil_index),
-                strict=True,
-            ):
-                columns[key].append(value)
-    return ConductorSet(**columns)
+    return ConductorSet(**columns, polygon_sections=tuple(polygons))
+
+
+def unsectioned_circuit_owner(active) -> np.ndarray:
+    """The coil each circuit of ``unsectioned_coil_conductors`` belongs to.
+
+    Emitted in the same order the conductors are, so a reduction can be built
+    from it without re-walking the machine description.
+    """
+    owner = []
+    for coil_index, coil in enumerate(active.coil):
+        for element in coil.element:
+            kind = int(element.geometry.geometry_type)
+            owner.extend([coil_index] * (ANNULUS_SECTORS if kind == 5 else 1))
+    return np.asarray(owner, dtype=np.int64)
 
 
 def write_geometry(

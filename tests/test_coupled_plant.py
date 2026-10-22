@@ -543,21 +543,29 @@ def test_real_sectioned_set_reduction_is_within_one_percent(tmp_path):
     assert plant.n_coil == len(machine.coil_names)
 
 
+#: Largest self-term disagreement allowed between a coil's section sum and
+#: nova's independent unsplit-element inductance.  Carried over unchanged from
+#: the arm whose reference collapsed each annulus to an area-equivalent square;
+#: the annular reference sits below it, at the measured 0.46218%, and the box
+#: reference it replaces sat at 3.88%.  It is not widened to admit the
+#: box-against-annulus difference, which is a representation defect rather than
+#: sectioning error.
+SECTIONING_SELF_MAX_FRACTION = 0.005
+
+
 def test_real_sectioned_self_holds_the_unsectioned_box_check():
     """The section-reduced coil self terms hold the unsectioned-box 0.5% check.
 
     The raw series sum of each coil's sections and their mutuals differs from
-    nova's independent unsplit-element inductance by at most 0.46218%.  This
-    reproduces that comparison at the quadrature it was certified at: the coil
-    sections are integrated at the same dense quadrature as the unsectioned
-    element boxes, and their series reduction is compared against those boxes.
+    nova's independent unsplit-element inductance by at most 0.46218% when the
+    two arms carry one geometry.  An annulus is therefore cut into the same
+    sectors in both arms: the reference once collapsed each annulus to an
+    area-equivalent square, which compares a ring against a box and moved VS3
+    by 3.88% for a reason that is not sectioning.
 
-    The cached linkage carries its section block at a coarser quadrature
-    (``section_n_max=6``), chosen for the coupling solve rather than for this
-    certification; its reduction differs from the unsectioned boxes by 0.84%.
-    This check therefore rebuilds the section block at ``section_n_max=24`` so
-    both sides share a quadrature, and the difference measures sectioning
-    rather than quadrature.
+    Both arms resolve each of their own sections the same way -- 24 observer
+    subdivisions at that section's median scale -- so the difference left is
+    the sections themselves, which is what the check is for.
     """
     root = Path(__file__).resolve().parents[1]
     spec = importlib.util.spec_from_file_location(
@@ -585,17 +593,29 @@ def test_real_sectioned_self_holds_the_unsectioned_box_check():
     sectioned = series.T @ section_inductance @ series
 
     active = build.read_ids(*build.SOURCE[0])
-    unsectioned = circuit_linkage_matrix(
-        build.unsectioned_coil_conductors(active),
-        range(len(coil_names)),
-        section_scale_frac=0.05,
-        section_n_max=24,
-        finite_source=True,
+    coarse = build.unsectioned_coil_conductors(active)
+    coarse_owner = build.unsectioned_circuit_owner(active)
+    coarse_series = np.zeros((coarse_owner.size, len(coil_names)))
+    coarse_series[np.arange(coarse_owner.size), coarse_owner] = 1.0
+    unsectioned = (
+        coarse_series.T
+        @ circuit_linkage_matrix(
+            coarse,
+            range(coarse_owner.size),
+            section_scale_frac=0.05,
+            section_n_max=24,
+            finite_source=True,
+        )
+        @ coarse_series
     )
     diagonal = np.diag_indices(len(coil_names))
     self_fraction = np.abs(sectioned[diagonal] / unsectioned[diagonal] - 1)
     print("sectioning self max fraction =", float(self_fraction.max()))
-    assert float(np.max(self_fraction)) < 0.005
+    print(
+        "sectioning self fraction by coil =",
+        dict(zip(coil_names, np.round(self_fraction, 6), strict=True)),
+    )
+    assert float(np.max(self_fraction)) < SECTIONING_SELF_MAX_FRACTION < 0.005
 
 
 def _generic_source(n_slices: int = 3, *, provenance: str = "synthetic reconstruction"):

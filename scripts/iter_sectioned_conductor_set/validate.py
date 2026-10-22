@@ -13,6 +13,7 @@ from nova.circuit.linkage import circuit_linkage_matrix
 from scripts.iter_sectioned_conductor_set.build import (
     SOURCE,
     read_ids,
+    unsectioned_circuit_owner,
     unsectioned_coil_conductors,
 )
 
@@ -66,12 +67,19 @@ def compare(receipt: dict, unsectioned_matrix: np.ndarray | None = None) -> dict
     if unsectioned_matrix is None:
         active = read_ids(*SOURCE[0])
         conductors = unsectioned_coil_conductors(active)
-        unsectioned_matrix = circuit_linkage_matrix(
-            conductors,
-            range(len(names)),
-            section_scale_frac=0.05,
-            section_n_max=24,
-            finite_source=True,
+        owner = unsectioned_circuit_owner(active)
+        series = np.zeros((owner.size, len(names)))
+        series[np.arange(owner.size), owner] = 1.0
+        unsectioned_matrix = (
+            series.T
+            @ circuit_linkage_matrix(
+                conductors,
+                range(owner.size),
+                section_scale_frac=0.05,
+                section_n_max=24,
+                finite_source=True,
+            )
+            @ series
         )
     unsectioned = np.asarray(unsectioned_matrix)
     if unsectioned.shape != matrix.shape:

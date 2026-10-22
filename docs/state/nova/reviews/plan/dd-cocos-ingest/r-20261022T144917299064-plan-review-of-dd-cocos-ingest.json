@@ -1,0 +1,60 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-22T15:13:29.299Z",
+  "dispatched_at": "2026-10-22T14:55:25Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/dd-cocos-ingest.html:60",
+      "id": "reasoning-1",
+      "reason": "",
+      "text": "\u2014 s3 says of the COCOS 3 to",
+      "type": "reasoning",
+      "would_change": null
+    },
+    {
+      "anchor": "docs/plans/dd-cocos-ingest.html:61",
+      "id": "done_when-1",
+      "reason": "",
+      "text": "\u2014 s3 states \"Three green",
+      "type": "done_when",
+      "would_change": null
+    },
+    {
+      "anchor": "docs/plans/dd-cocos-ingest.html:59",
+      "id": "done_when-2",
+      "reason": "",
+      "text": "\u2014 s3 says the guard \"stays,",
+      "type": "done_when",
+      "would_change": null
+    }
+  ],
+  "plan_fingerprint": "504da96d6fba61097dcf60ae48dea8c602cae8b90472d99d12a8a39b4bd16691",
+  "plan_slug": "dd-cocos-ingest",
+  "plan_version": 51,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261022T144917299064-plan-review-of-dd-cocos-ingest",
+  "reviewed_blob_sha": "2e1e96058016324e9315557aaad0bf7670cae196",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every s3 anchor resolves: `PlasmaSlice.prescribe`",
+    "done_when": "a finding \u2014 done-when (3) is scoped to \"the three tests",
+    "evidence_paths": "pass \u2014 s3's evidence is its gate log and the run",
+    "naming": "pass \u2014 s3 introduces no plan label, stage name, ticket number or",
+    "reasoning": "a finding \u2014 the MAST clause's stated basis (\"the two",
+    "single_goal": "pass \u2014 s3 carries one deliverable: the census readers take",
+    "wiring": "pass \u2014 s3's `data-links=\"dd-cocos-ingest#s2\"` and the head"
+  },
+  "section_digests": {
+    "_document": "0944b41fbee062214508f8e371bdb6d46b75eb62d96e4606b5e91e6893187ad0",
+    "s0": "d7c3143494e97518c859457355f006ec1a3961adf5e50d514822385ec2941326",
+    "s1": "8493846bddbd37e17766c3f28357c4dec07fde5dad711cf4d8096db87e577f89",
+    "s2": "38e4a6fd8cb459d4e887ae55cc12b322f74419e30f3f46aaa3022d95172c4f71",
+    "s3": "3a4e1f6e5b5630057c2d0799419f3aeb2b4607dc37a020cabf4ad28bad3d2949",
+    "s4": "d6a70aa2dd32032baf0b25d96203690d339d0869464e29c0f3620c5c535bca9c",
+    "s5": "db46395f9321959e91cc657923e567fa72cda1e12fa3aa977d6a83243b8e1d36"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T15:17:51.396611+00:00"
+}

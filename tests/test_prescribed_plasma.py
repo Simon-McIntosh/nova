@@ -475,9 +475,8 @@ def test_zero_area_polygon_is_refused(current):
 
 
 SECTIONED_ENTRY = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/runs"
-    "/r-20261021T105645032186-unseen-source-full-plant/scratch/sectioned-cache"
-    "/68df15665ab2ea45f427"
+    "/home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit"
+    "/sectioned-conductor-set/66c10162f3e37adb2679"
 )
 DINA_CASE_URI = "imas:hdf5?user=mcintos;pulse=105014;run=1;database=iter;version=3"
 DINA_CASE_DD = "3.38.1"

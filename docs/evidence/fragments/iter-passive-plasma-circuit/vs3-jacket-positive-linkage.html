@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="iter-passive-plasma-circuit">
+<meta name="plan-evidence-for" content="iter-passive-plasma-circuit">
+<meta name="plan-verifies" content="iter-passive-plasma-circuit#s7">
+<title>VS3 jacket positive linkage | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<section data-reckon="evidence" data-node="vs3-jacket-positive-linkage" id="vs3-jacket-positive-linkage">
+
+<h3 id="vs3-jacket-positive-linkage-repro">The cached plant refusal reproduces exactly</h3>
+<p>The pinned plant <code>coupled-plant/28148563521d92a2198b/plant.npz</code> reads
+SHA-256 <code>7800a4d8db5ea452fca7e0a18179f8939f85e08e8503b61e4e1bbee8d3c06b6c</code>
+and provenance <code>iter-sectioned-12mm</code>, <code>nova 0.11.0.post10061+g9829c310c</code>.
+With <code>L</code> its 14-coil block and <code>M</code> its 1,312 mode couplings,
+<code>S = L − MᵀM</code> has <strong>two negative eigenvalues, −3.8377767548×10<sup>−8</sup> H
+(VSU) and −3.2485732465×10<sup>−8</sup> H (VSL)</strong>, matching power_convertor's
+record to every printed digit.</p>
+
+<h3 id="vs3-jacket-positive-linkage-geometry">The machine description puts the jacket outside; the builder puts it inside</h3>
+<p>Reading the <code>SOURCE</code> the builder actually uses
+(<code>pf_active</code> 111001/204, <code>pf_passive</code> 115004/6):</p>
+<table>
+<thead><tr><th>Object</th><th>IDS geometry</th><th>Builder row</th></tr></thead>
+<tbody>
+<tr><td>VS3 conductor (VSU/VSL, 8 sections)</td><td>annulus r<sub>i</sub>=16.95 mm, r<sub>o</sub>=23.00 mm</td><td>square 27.556 mm at the coil centre</td></tr>
+<tr><td>VS3 steel jacket (VS3U1SS…VS3L4SS, 8 loops)</td><td>annulus r<sub>i</sub>=26.5 mm, r<sub>o</sub>=29.5 mm</td><td>square 22.974 mm at the same centre</td></tr>
+</tbody>
+</table>
+<p><img src="/nova/figures/iter-passive-plasma-circuit/vs3-jacket-positive-linkage.svg"
+alt="Left: the machine-description annuli, the steel jacket concentric and outside the
+conductor. Right: the builder's two squares at the same centre, the smaller jacket
+square inside the larger conductor square.">
+Left: the cross-sections the machine description holds, at the same centre, both in
+mm. Right: the two rows <code>build.py</code> stores for them — the conductor's
+27.56 mm square and, inside it, the jacket's 22.97 mm square. The radial ordering is
+inverted: the object that should screen the conductor from outside is computed from
+inside it.</p>
+
+<p>The IDS places the jacket annulus (26.5–29.5 mm) <em>outside</em> the conductor
+annulus (16.95–23.0 mm), concentric with it. <code>build.py</code>'s
+<code>source_conductors</code> collapses each annulus to a square of side
+<code>sqrt(area)</code> at the section centre, so the conductor's 27.556 mm square
+is the larger: <strong>the jacket square lies entirely inside the conductor square
+it should surround</strong>. That is the measured representation defect.</p>
+
+<h3 id="vs3-jacket-positive-linkage-arms">Attribution arm by arm</h3>
+<p>Reduced model: the eight VSU/VSL conductor sections and the eight jacket rows
+exactly as <code>source_conductors</code> builds them, linked with
+<code>circuit_linkage_matrix(section_n_max=6)</code>. <code>S</code> is the 2×2
+coil Schur complement <code>L − M P<sup>−1</sup>Mᵀ</code>.</p>
+<table>
+<thead><tr><th>Arm</th><th>smallest eig of S</th><th>negatives</th><th>largest λ of MᵀM v = λLv</th></tr></thead>
+<tbody>
+<tr><td>as built (jacket square inside conductor)</td><td>−1.5106×10<sup>−8</sup></td><td>2</td><td>1.00002220</td></tr>
+<tr><td>coil block at the hybrid rule (cause b removed)</td><td>−1.5104×10<sup>−8</sup></td><td>2</td><td>1.00002220</td></tr>
+<tr><td>jacket square placed at its outer diameter (naive cause a)</td><td>−1.9419×10<sup>−7</sup></td><td>2</td><td>1.00028657</td></tr>
+</tbody>
+</table>
+<p><strong>Quadrature is not the cause.</strong> Integrating the coil self-block at
+the same hybrid rule as the coil-to-jacket mutuals (removing the separate
+finite-source rule) moves the smallest eigenvalue by 1.5×10<sup>−13</sup> H on the
+coil self terms and the largest generalised eigenvalue by 2×10<sup>−9</sup>, against
+the measured 2.2×10<sup>−5</sup> excess. The separate finite-source rule contributes
+essentially nothing to the over-screening.</p>
+<p><strong>The corrected-geometry arm is validated.</strong> Inflating the jacket
+square to its outer diameter makes S <em>more</em> negative (−1.94×10<sup>−7</sup>
+against −1.51×10<sup>−8</sup>), so "a bigger square outside" is not the fix. The
+repair that works is the IDS annulus itself, and the realisation matters. One
+circuit holding an outer disc at +1 and a core disc at −1, both at the section
+centre, is invalid: with a net-zero circuit current the observer weighting cancels
+and the jacket block computes as exactly zero, which would remove the negatives by
+removing the jacket's coupling rather than by relocating it. Splitting that pair
+into two circuits makes the 16×16 jacket block singular (smallest eigenvalue
+−1.38×10<sup>−8</sup>) because the two discs are nearly coincident. Discs cannot
+carry an annulus here; sectors can.</p>
+<p>Each conductor and each jacket is therefore its machine-description annulus cut
+into <code>N</code> equal-sector quadrangle circuits with an equal area share,
+linked through the same polygon-section kernel
+(<code>polygon_greens(n_panels=8, n_nodes=24)</code>), and reduced to the two coil
+terminals and the eight jacket terminals. The reduction weight is
+<code>1/√N</code> per sector, not <code>1/N</code>: the returned linkage entry
+folds the source share once, and the physical port reduction applies the share to
+source and observer alike.</p>
+<table>
+<thead><tr><th>N</th><th>smallest eig of S [H]</th><th>negatives</th><th>largest λ of MᵀMv = λLv</th><th>max |k(VSU, jacket)|</th><th>L<sub>diag</sub> [H]</th></tr></thead>
+<tbody>
+<tr><td>8</td><td>+6.4926×10<sup>−6</sup></td><td>0</td><td>0.990058570</td><td>0.929340</td><td>5.6394×10<sup>−4</sup>, 7.5724×10<sup>−4</sup></td></tr>
+<tr><td>16</td><td>+6.8941×10<sup>−6</sup></td><td>0</td><td>0.989458133</td><td>0.931067</td><td>5.6273×10<sup>−4</sup>, 7.5569×10<sup>−4</sup></td></tr>
+<tr><td>32</td><td>+7.0126×10<sup>−6</sup></td><td>0</td><td>0.989272220</td><td>0.931463</td><td>5.6245×10<sup>−4</sup>, 7.5533×10<sup>−4</sup></td></tr>
+</tbody>
+</table>
+<p>S is positive definite at every N, the negatives are gone, λ<sub>max</sub> stays
+below one and converges (0.99006 → 0.98946 → 0.98927), the coil self terms converge
+to 0.2 per cent, and the VS coil to jacket coupling is 0.93 &lt; 1. Against a dense
+coaxial-filament reference built from the analytic mutual of two circular loops,
+one conductor annulus and its jacket give L = 4.1926×10<sup>−5</sup> H at N=8 and
+4.1627×10<sup>−5</sup> H at N=16 against the reference's 4.1581×10<sup>−5</sup> H,
+and k = 0.9806 / 0.9792 against 0.9759 — agreement to 0.8 per cent, then 0.1 per
+cent, in the absolute inductance. The closed form gives a third, independent
+anchor: μ<sub>0</sub>a(ln(8a/ρ) − 2) at the annulus's geometric-mean wire radius
+is 4.2054×10<sup>−5</sup> H, 1.1 per cent from the dense sum and within the same
+3 per cent band the test asserts of the arm. The
+residual 1 per cent of over-screening in λ<sub>max</sub> is what the repaired build
+still has to answer for; it is no longer an indefinite energy.</p>
+<p><strong>What ran is the geometry, not the discretisation.</strong> An earlier
+reduction weighted each sector by <code>1/N</code> and reported L halving with every
+doubling of N. That was a reduction-normalisation error in the arm, not a property
+of the annulus: the correct weight makes the summed arm converge on the closed-form
+ring self-inductance, which is what the table above shows.</p>
+
+<h3 id="vs3-jacket-positive-linkage-passive">The passive block's own negatives</h3>
+<table>
+<thead><tr><th>Set</th><th>passive block</th><th>negatives</th><th>minimum [H]</th><th>supported on jacket rows</th></tr></thead>
+<tbody>
+<tr><td>12 mm (<code>68df15665ab2ea45f427</code>)</td><td>1312×1312</td><td>37</td><td>−2.527958×10<sup>−7</sup></td><td>0 of 37</td></tr>
+<tr><td>6 mm (<code>06ff06d3eb7a4448f0fe</code>)</td><td>2163×2163</td><td>175</td><td>−9.450930×10<sup>−8</sup></td><td>0 of 175</td></tr>
+</tbody>
+</table>
+<p>The <code>linkage.npy</code> that <code>build.py</code> stores at each sectioned-set
+key is unfloored; only <code>system.npz</code>'s <code>lmat</code> is guarded. The raw
+passive sub-block is indefinite on its own and the negative eigenvectors peak on
+vessel rows (12 mm peaks 163, 169, 124, 175, 178, 181; 6 mm peaks 183, 161, 257,
+156, 188, 351), never on the eight jacket rows — so this is independent of the
+geometry defect above.</p>
+<p><strong>Its source is observer quadrature resolution.</strong> The leading mode is
+localised rather than global: at 12 mm, 43 of 1312 rows carry the eigenvector above
+1 per cent of its peak, and the block restricted to those 43 rows reproduces the
+cached eigenvalue (−2.527915×10<sup>−7</sup> H against −2.527958×10<sup>−7</sup> H);
+at 6 mm, 36 of 2163 rows, −9.4452×10<sup>−8</sup> H against
+−9.4509×10<sup>−8</sup> H. Holding that fixed block and refining the observer
+sub-grid moves the negatives toward zero and then past it:</p>
+<table>
+<thead><tr><th>observer grid</th><th>12 mm min [H]</th><th>12 mm negatives</th><th>6 mm min [H]</th><th>6 mm negatives</th></tr></thead>
+<tbody>
+<tr><td>as built (<code>scale 1.0</code>)</td><td>−6.0488×10<sup>−7</sup></td><td>14</td><td>−8.6333×10<sup>−7</sup></td><td>14</td></tr>
+<tr><td><code>scale 0.50</code></td><td><strong>+8.9801×10<sup>−8</sup></strong></td><td><strong>0</strong></td><td>−7.6165×10<sup>−8</sup></td><td>7</td></tr>
+<tr><td><code>scale 0.25</code></td><td>−1.3502×10<sup>−8</sup></td><td>6</td><td><strong>+2.9691×10<sup>−8</sup></strong></td><td><strong>2</strong></td></tr>
+</tbody>
+</table>
+<p>A finer observer sub-grid is what removes them, monotonically, and at
+<code>scale 0.5</code> the 12 mm block has no negative eigenvalue at all. Both
+other knobs are inert on this block: <code>section_n_max</code> from 6 to 12 to 24
+changes nothing to every printed digit (the sub-division is already capped by
+<code>delta</code>), and raising the polygon source rule from the linkage's
+8-panel, 24-node call to the kernel's own 16×48 default moves the mode <em>away</em>
+from zero by 4 per cent (−5.672×10<sup>−7</sup> → −5.894×10<sup>−7</sup> H at
+12 mm), converged there at 32×96. <strong>So the vessel negatives are an
+under-resolved observer quadrature on the thin vessel sections, not a geometry
+defect — and they are removable by refining the observer grid, which is the rule
+the repair node can apply to the whole joint matrix.</strong></p>
+<p>One caveat on how to read that table. The reduced fixture holds only the support
+rows, so <code>median_section_scale</code> over its rows is not the full build's
+and its matrix differs from the cached one by up to 1.6×10<sup>−6</sup> H —
+comparable to the eigenvalues being tracked. What the measurement supports is the
+<em>trend</em> in the observer grid and the localisation of the mode, not the
+absolute values in the reduction; the cached block's own eigenvalue is
+−2.5279×10<sup>−7</sup> H at 12 mm, and the 43-row restriction reproduces it to
+four significant figures, which is what licenses attributing the mode to those
+rows.</p>
+
+<h3 id="vs3-jacket-positive-linkage-status">What landed and what is owed</h3>
+<p>This is the attribution node. Both causes are attributed — one with a validated
+arm, one with a refinement that names the source — and <strong>no product source
+was changed and no cache entry was written</strong>. The repair is the next node's
+work, starting from this tip.</p>
+<ul>
+<li>Attributed: the coil over-screening is the conductor/jacket <em>geometry</em>.
+The builder's area-equivalent squares invert the radial ordering, and the
+IDS-faithful sector-annulus arm repairs it — S positive definite at N = 8, 16 and
+32, λ<sub>max</sub> &lt; 1 and converging, and both L and k within 1 per cent of an
+independent coaxial-filament reference.</li>
+<li>Attributed: the passive block's own vessel-row negatives are <em>observer
+quadrature resolution</em> on the thin vessel sections. Refining the observer
+sub-grid drives them monotonically to zero and past it, and at
+<code>scale 0.5</code> the 12 mm block has no negative eigenvalue at all.</li>
+<li>Landed: <code>tests/test_vs3_jacket_positive_linkage.py</code> — 7 tests,
+including the green sector-annulus arm against its red arm (the square
+representation, two negative eigenvalues), the arm's absolute inductance against
+the closed-form ring self-inductance, and the plant reproduction.</li>
+<li>Owed to the next node: the joint positive-definite build for 12 mm and 6 mm —
+storing the joint matrix it actually uses, coil block included, on the refined
+observer grid — the loader check refusing by name an entry whose stored joint
+linkage is not positive definite, the re-keyed sectioned-set entries, and the
+rebuilt 105069/3 plant entry. The pinned <code>28148563521d92a2198b</code> is
+untouched and its SHA-256 is unchanged.</li>
+</ul>
+<p>Logs: <code>logs/diag_energy.log</code> (plant reproduction),
+<code>logs/attribute.log</code> (as-built arm table),
+<code>logs/sector_arm.log</code> (the validated arm and the filament reference),
+<code>logs/refine_negatives.log</code> (the observer ladder),
+<code>logs/passive_block.log</code> (passive spectra and jacket-row support),
+<code>logs/new_test.log</code> (head arm, <code>7 passed</code>),
+<code>logs/negative_control.log</code>.</p>
+</section>
+</body>
+</html>

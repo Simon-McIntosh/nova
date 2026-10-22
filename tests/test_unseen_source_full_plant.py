@@ -39,15 +39,15 @@ from nova.circuit.passive import (
 ROOT = Path(__file__).resolve().parents[1]
 
 #: scratch sectioned-set cache root the build wrote geometry.npz into, holding
-#: the two real entries at their unchanged keys.
+#: the real entries at their derived keys.
 SCRATCH_ROOT = Path(
     os.environ.get(
         "NOVA_UNSEEN_SOURCE_SCRATCH",
-        "/home/ITER/mcintos/.config/reckon/crew/runs"
-        "/r-20261021T105645032186-unseen-source-full-plant/scratch/sectioned-cache",
+        "/home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit"
+        "/sectioned-conductor-set",
     )
 )
-ENTRY_12MM = SCRATCH_ROOT / "68df15665ab2ea45f427"
+ENTRY_12MM = SCRATCH_ROOT / "66c10162f3e37adb2679"
 SURFACE_LAYER_M = 0.012
 MAX_LAYER_THICKNESS_M = 0.04
 
@@ -57,9 +57,7 @@ DINA_CASES = {
     (105013, 1): 723,
 }
 DINA_CASE_ROOT = Path("/work/imas/shared/imasdb/ITER/3")
-RECONSTRUCTION_URI = (
-    "imas:hdf5?user=mcintos;pulse=105014;run=1;database=iter;version=3"
-)
+RECONSTRUCTION_URI = "imas:hdf5?user=mcintos;pulse=105014;run=1;database=iter;version=3"
 RECONSTRUCTION_DD = "3.38.1"
 
 #: plant fields carrying no per-machine provenance, compared bit for bit.
@@ -240,9 +238,7 @@ def _dina_source(pulse: int, run: int, index: int):
 def _open_reconstruction():
     import imas
 
-    with imas.DBEntry(
-        RECONSTRUCTION_URI, "r", dd_version=RECONSTRUCTION_DD
-    ) as entry:
+    with imas.DBEntry(RECONSTRUCTION_URI, "r", dd_version=RECONSTRUCTION_DD) as entry:
         equilibrium = entry.get("equilibrium", lazy=False, autoconvert=False)
         active = entry.get("pf_active", lazy=False, autoconvert=False)
     return equilibrium, active
@@ -398,7 +394,8 @@ def test_reconstruction_style_presentation_agrees_within_tolerance(tmp_path):
     print(
         "RECONSTRUCTION_FULL_MACHINE "
         f"max_abs_flux_diff_wb={float(np.max(difference)):.9f} "
-        f"max_rel_flux_diff={float(np.max(difference / np.abs(baseline.section_plasma_flux))):.3e} "
+        "max_rel_flux_diff="
+        f"{float(np.max(difference / np.abs(baseline.section_plasma_flux))):.3e} "
         "tolerance=1e-03"
     )
 

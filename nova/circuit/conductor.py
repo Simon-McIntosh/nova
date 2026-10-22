@@ -116,6 +116,90 @@ class ConductorSet:
         return np.array(cr), np.array(cz)
 
 
+def annulus_sector_vertices(
+    r: float,
+    z: float,
+    radius_inner: float,
+    radius_outer: float,
+    n_sector: int,
+    index: int,
+) -> np.ndarray:
+    """One equal-angle sector of a concentric annulus, as a ``(4, 2)`` quad.
+
+    A machine-description annulus is a tubular cross-section, and its radial
+    ordering carries the physics: an outer jacket screens the conductor it
+    surrounds only if it is modelled OUTSIDE it.  Cutting the annulus into
+    ``n_sector`` equal-angle sectors keeps that ordering, and every sector has
+    the same area ``pi (ro^2 - ri^2) / n_sector``, so the sectors are equal
+    current shares of one circuit.
+    """
+    if not 0 < radius_inner < radius_outer or n_sector < 1:
+        raise ValueError("annulus radii must be positive and increasing")
+    if not 0 <= index < n_sector:
+        raise ValueError("sector index outside the annulus subdivision")
+    start = 2 * np.pi * index / n_sector
+    stop = 2 * np.pi * (index + 1) / n_sector
+    return np.asarray(
+        [
+            (r + radius_outer * np.cos(start), z + radius_outer * np.sin(start)),
+            (r + radius_outer * np.cos(stop), z + radius_outer * np.sin(stop)),
+            (r + radius_inner * np.cos(stop), z + radius_inner * np.sin(stop)),
+            (r + radius_inner * np.cos(start), z + radius_inner * np.sin(start)),
+        ],
+        dtype=np.float64,
+    )
+
+
+def annulus_sector_columns(
+    r,
+    z,
+    radius_inner,
+    radius_outer,
+    current_share,
+    circuit,
+    n_sector: int,
+    *,
+    circuit_stride: int = 0,
+) -> tuple[dict[str, np.ndarray], list[PolygonSection]]:
+    """The ``n_sector`` conductor rows and shaped sections of one annulus.
+
+    Returns ``(columns, polygons)`` -- one row per sector, each carrying
+    ``current_share / n_sector`` so the sectors of the annulus sum to the
+    annulus's own share, plus one :class:`PolygonSection` per sector with the
+    same share.  ``circuit_stride`` gives each sector its own circuit id
+    (``circuit + index * stride``) where the sector must be an independent
+    current path rather than one filament of a shared circuit.
+    """
+    columns: dict[str, np.ndarray] = {}
+    polygons = []
+    for index in range(n_sector):
+        sector_circuit = int(circuit) + index * int(circuit_stride)
+        vertices = annulus_sector_vertices(
+            float(r),
+            float(z),
+            float(radius_inner),
+            float(radius_outer),
+            n_sector,
+            index,
+        )
+        centre = vertices.mean(axis=0)
+        span = np.ptp(vertices, axis=0)
+        row = {
+            "r": float(centre[0]),
+            "z": float(centre[1]),
+            "dr": max(float(span[0]), 1e-6),
+            "dz": max(float(span[1]), 1e-6),
+            "current_share": float(current_share) / n_sector,
+            "circuit": sector_circuit,
+        }
+        for name, value in row.items():
+            columns.setdefault(name, []).append(value)
+        polygons.append(
+            PolygonSection(sector_circuit, vertices, float(current_share) / n_sector)
+        )
+    return {name: np.asarray(values) for name, values in columns.items()}, polygons
+
+
 @dataclass(frozen=True)
 class ThicknessSubdivision:
     """Independent skin-current layers and their unsplit parent circuits."""
@@ -352,4 +436,6 @@ __all__ = [
     "ConductorSet",
     "PolygonSection",
     "SensorSet",
+    "annulus_sector_columns",
+    "annulus_sector_vertices",
 ]

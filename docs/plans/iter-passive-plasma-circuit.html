@@ -25,7 +25,7 @@
   <title>ITER Passive and Prescribed-Plasma Circuit | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="46">
+<meta name="plan-version" content="47">
 <meta name="plan-modified" content="2026-10-22">
 </head>
 <body>
@@ -290,7 +290,15 @@
     <div class="r-comment-body"><p>test(circuit): validate the annulus geometry arm and attribute the vessel negatives (48c4c9d10) — the corrected-geometry arm is validated: each VS3 conductor and jacket represented as its machine-description annulus, cut into N equal-share sector polygons in separate circuits and linked through the existing polygon-section kernel, gives a coil Schur complement that is positive definite at N = 8, 16 and 32 (min +6.4926e-6, +6.8941e-6, +7.0126e-6 H), a largest generalised eigenvalue below one and converging (0.990058570, 0.989458133, 0.989272220), coil self terms converging to 0.2 per cent, and a VS-coil-to-jacket coupling of 0.93 against 0.976 from a dense coaxial-filament reference; one conductor annulus reproduces the closed-form ring self-inductance to 0.3 per cent at N=16. The reduction weights each sector by the square root of its share because the returned linkage entry folds the source share once. The passive block's vessel-row negatives are separately attributed to observer quadrature resolution: the mode is carried by 43 of 1312 rows at 12 mm and 36 of 2163 at 6 mm, and refining the observer sub-grid drives the negatives monotonically to zero and past it, with no negative eigenvalue left in the 12 mm block at half the median section scale. No product source changed and no cache entry was written.</p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261022T014720760908-review-of-vs3-jacket-positive-linkage-48c4c9d104ed" data-who="reckon-build" data-when="2026-10-22T02:08:17.865Z">
-    <div class="r-comment-body"><p>review(r-20261022T003311440700-vs3-jacket-positive-linkage at 48c4c9d10): parsed record scoring all six dimensions (goal_fidelity 6, evidence 8, scope_discipline 20, durability 14, fit 15, reuse 5) with two blocking findings (a clipped figure label and the node&#x27;s goal undelivered) and four follow-ons.</p></div>
+    <div class="r-comment-body"><p>review(r-20261022T003311440700-vs3-jacket-positive-linkage at 48c4c9d10): parsed record scoring all six dimensions (goal_fidelity 6, evidence 8, scope_discipline 20, durability 14, fit 15, reuse 5) with two blocking findings (a clipped figure label and the node's goal undelivered) and four follow-ons.</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261022T063526221968-review-of-vs3-linkage-repair-5d52a37bc4eb" data-who="reckon-build" data-when="2026-10-22T06:46:57.161Z">
+    <div class="r-comment-body"><p>Independent review of r-20261022T022444210455-vs3-linkage-repair at head
+5d52a37bc4eb2900a18f23476517a75e82c8ce6a: parsed, six dimensions scored,
+three blocking findings (the vs3-linkage-repair.html evidence document the
+Done-when names is absent; the 6 mm entry stores 40 negative eigenvalues so
+clause (1) is unmet; VSU/VSL bare inductance misses the stated 3 per cent
+under either reduction) and seven follow-ons.</p></div>
 </div>
 </section>
 </main>

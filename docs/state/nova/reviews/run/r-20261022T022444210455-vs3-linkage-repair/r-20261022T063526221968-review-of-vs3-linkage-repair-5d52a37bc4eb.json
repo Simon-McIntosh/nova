@@ -1,0 +1,146 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 2,
+  "added_failure_ids": [
+    "test_repaired_passive_block_is_positive_definite[12mm]",
+    "test_repaired_passive_block_is_positive_definite[6mm]"
+  ],
+  "added_failures_note": "Derived by delta from the reviewed run's own suite records: baseline_suite (48c4c9d104edfa2cdd8d9b08d0883e3da02d00fe) failure_ids are [test_real_entry_geometry_round_trips, test_real_sectioned_set_reduction_is_within_one_percent]; after_suite (5d52a37bc4eb2900a18f23476517a75e82c8ce6a) failure_ids are the two positive-definite cases listed above, so the added set is those two. Both head failures sit at tests/test_vs3_jacket_positive_linkage.py and the manifest attributes them to scaffolding (the rebuilt entries are not installed in the read-only cache); the 6 mm one is independently a real measure failure.",
+  "assertion_analysis": [
+    {
+      "condition_to_fail": "The stored linkage.npy holds a negative eigenvalue or lost the finite-source coil block; deleting the refusal or reverting the splice makes it fail.",
+      "file": "tests/test_vs3_linkage_repair.py",
+      "line": 100
+    },
+    {
+      "condition_to_fail": "load_sectioned_machine returns a machine for a matrix with a negative eigenvalue; it fails if the JointLinkageNotPositiveDefinite raise is removed, but its scratch matrix is synthesised by flipping the smallest eigenvalue when no retired entry is present, so the fixture is not the pre-repair entry its name claims.",
+      "file": "tests/test_vs3_linkage_repair.py",
+      "line": 160
+    },
+    {
+      "condition_to_fail": "The installed repaired entry's passive block holds any negative eigenvalue; on this host the arm fails at np.load with FileNotFoundError because the entry is not installed, so it does not yet assert the measure.",
+      "file": "tests/test_vs3_jacket_positive_linkage.py",
+      "line": 110
+    },
+    {
+      "condition_to_fail": "VSU's or VSL's reduced bare inductance leaves the 3 per cent band around COAXIAL_REFERENCE_H; the source manifest records the series reduction at 12.88x and 17.30x that reference, so this assertion would fail were the entry installed.",
+      "file": "tests/test_vs3_linkage_repair.py",
+      "line": 117
+    }
+  ],
+  "base_log_revision": "48c4c9d104edfa2cdd8d9b08d0883e3da02d00fe",
+  "call_site_count": 1,
+  "call_sites": [
+    "scripts/iter_vessel_evolution/evolve.py:119"
+  ],
+  "completed_at": "2026-10-22T06:46:57.161Z",
+  "dispatched_at": "2026-10-22T06:35:53Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/iter-passive-plasma-circuit/vs3-linkage-repair.html",
+      "line": "1",
+      "severity": "blocking",
+      "text": "blocking: The evidence document the Done-when names is absent at head, so none of the three done-when clauses has a recorded receipt; git ls-tree 5d52a37bc4eb2900a18f23476517a75e82c8ce6a of the fragments directory lists no vs3-linkage-repair.html."
+    },
+    {
+      "file": "scripts/iter_sectioned_conductor_set/build.py",
+      "line": 380,
+      "severity": "blocking",
+      "text": "blocking: The 6 mm entry built by the re-keyed build stores a joint linkage with 40 negative eigenvalues (minimum -4.009411e-08 H, all in the passive block), so done-when clause (1)'s positive-definite requirement is unmet for the 6 mm set and the loader refuses the entry this node delivers."
+    },
+    {
+      "file": "scripts/iter_sectioned_conductor_set/build.py",
+      "line": 361,
+      "severity": "blocking",
+      "text": "blocking: VSU's and VSL's reduced bare inductance does not match the dense coaxial reference within the stated 3 per cent under either reduction the stored geometry admits (5.63e-4 and 7.56e-4 H against 4.37e-5 H, or 2.20e-6 and 2.95e-6 H), so done-when clause (1)'s tolerance is unmet and the coupling gap it was to close is unresolved."
+    },
+    {
+      "file": "tests/test_vs3_linkage_repair.py",
+      "line": 117,
+      "severity": "blocking",
+      "text": "blocking: test_vertical_coil_bare_inductance_matches_the_coaxial_reference asserts VSU/VSL within 3 per cent of COAXIAL_REFERENCE_H, which the source manifest's own measurement contradicts; it skips on this host only because the entry is uninstalled, so the suite reports 7 skipped rather than the failure the measure implies."
+    },
+    {
+      "file": "tests/test_vs3_linkage_repair.py",
+      "line": 110,
+      "severity": "follow-on",
+      "text": "follow-on: Six of the twelve entry-reading assertions skip on this host because the rebuilt entries were never installed into /home/ITER/mcintos/Code/nova/.cache, so the head gate reports 5 passed 7 skipped in this file and the central positive-definiteness measure is not exercised by any arm that ran."
+    },
+    {
+      "file": "scripts/iter_sectioned_conductor_set/validate.py",
+      "line": 67,
+      "severity": "follow-on",
+      "text": "follow-on: This file, tests/test_prescribed_plasma.py and tests/test_unseen_source_full_plant.py are changed but are outside the brief's declared write paths, which required the node to stop and name any such file; only validate.py is named in the manifest's follow_ons."
+    },
+    {
+      "file": "tests/test_vs3_jacket_positive_linkage.py",
+      "line": 184,
+      "severity": "follow-on",
+      "text": "follow-on: _sector_vertices and _annulus_ports re-implement the annulus-sector geometry that nova/circuit/conductor.py:119 annulus_sector_vertices and :153 annulus_sector_columns now own, so the fixture can drift from the builder it is meant to test."
+    },
+    {
+      "file": "docs/figures/iter-passive-plasma-circuit/vs3-jacket-positive-linkage.svg",
+      "line": 1371,
+      "severity": "follow-on",
+      "text": "follow-on: The clipped label is fixed by editing the two text-group translate x values directly in the SVG; no figure generator or save-with-check source changed in the diff, so the mandated re-render through the check path left no recorded run even though the rendered PNG reads clean."
+    },
+    {
+      "file": "logs/negative-control.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: The literal negative control declared two negative eigenvalues with the square representation restored; the arm reports 56 negatives over 128 coil arms (minimum -5.706e-07 H) because its Schur complement is not reduced to the fourteen coil channels, so control_holds is false and the declared count was not reproduced."
+    },
+    {
+      "file": "logs/gate-head-all.log",
+      "line": 10,
+      "severity": "follow-on",
+      "text": "follow-on: The coupled-plant head arm was cut short at the deadline (11 passed, 1 skipped) and reached no summary line, so after_suite.completed is false and that file is the one gate file reporting nothing either way."
+    }
+  ],
+  "head_log_revision": "5d52a37bc4eb2900a18f23476517a75e82c8ce6a",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "Read commit by commit against 48c4c9d104edfa2cdd8d9b08d0883e3da02d00fe; seven commits across 12 files add the annulus-sector helpers to nova/circuit/conductor.py, the JointLinkageNotPositiveDefinite refusal to nova/circuit/passive.py, the re-keyed build and the new tests/test_vs3_linkage_repair.py.",
+    "done_when": "The brief's Done-when names three clauses in docs/evidence/fragments/iter-passive-plasma-circuit/vs3-linkage-repair.html; that file does not exist at head (git ls-tree of the fragments directory lists no vs3-linkage-repair.html), clause (1)'s positive-definite requirement is unmet for 6 mm and VSU/VSL is outside the stated tolerance, while clause (2)'s re-key, digest search and loader refusal are delivered.",
+    "goal": "The source node goal is to store a positive-definite coil-plus-passive linkage on the corrected annulus geometry, re-keyed, with stale entries refused and a rebuilt 105069/3 plant; scripts/iter_sectioned_conductor_set/build.py stores the spliced joint matrix and the loader refuses stale entries, but the source manifest records the 6 mm entry still holding 40 negative eigenvalues, so the positive-definite half of the goal holds for 12 mm only.",
+    "manifest": "Read; manifest.md records status complete, names seven commits and two gate logs, states baseline_suite 2 failures and after_suite 2 failures with the coupled-plant arm cut short, and in follow_ons concedes the 6 mm indefiniteness, the VSU/VSL reference mismatch and the non-reproduced negative-control count.",
+    "write_paths": "The brief fences the node to build.py, evolve.py, four nova/circuit and imas modules, six test files, the two vs3 evidence/figure files and its own logs and scratch; the base-to-head diff also changes scripts/iter_sectioned_conductor_set/validate.py, tests/test_prescribed_plasma.py and tests/test_unseen_source_full_plant.py, none of which the brief lists."
+  },
+  "justifications": {
+    "durability": "tests/test_vs3_linkage_repair.py:test_loader_refuses_a_pre_repair_entry_by_name fails if the refusal in nova/circuit/passive.py:1210 is removed, but tests/test_vs3_linkage_repair.py:test_stored_joint_linkage_is_positive_definite skips on this host because the rebuilt entries are uninstalled, so the central measure has no failing-on-regression test that actually ran.",
+    "evidence": "The done-when's evidence file docs/evidence/fragments/iter-passive-plasma-circuit/vs3-linkage-repair.html is absent at head and the head gate's central arms skip or fail, so the measure is claimed from scratch measurements rather than shown by a recorded passing gate.",
+    "fit": "nova/circuit/conductor.py:119 annulus_sector_vertices and :153 annulus_sector_columns follow the module's numpy idiom and carry no plan or version labels, though the same file's sibling tests re-implement the sector geometry.",
+    "goal_fidelity": "scripts/iter_sectioned_conductor_set/build.py and the loader refusal land the re-key and stale-entry refusal and the 12 mm entry is positive definite, but the goal's positive-definite linkage is unmet for 6 mm (40 negatives) and VSU/VSL miss the stated tolerance.",
+    "reuse": "nova/circuit/conductor.py:119-198 is the first owner of annulus-sector polygons and correctly extends the PolygonSection machinery, but tests/test_vs3_jacket_positive_linkage.py:_sector_vertices and _annulus_ports re-implement that helper rather than calling it.",
+    "scope_discipline": "scripts/iter_sectioned_conductor_set/validate.py, tests/test_prescribed_plasma.py and tests/test_unseen_source_full_plant.py are outside the brief's write list, and the required vs3-linkage-repair.html fragment the done-when names was never written."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source node goal is to store a positive-definite coil-plus-passive linkage on the corrected annulus geometry, re-keyed, with stale entries refused and a rebuilt 105069/3 plant; scripts/iter_sectioned_conductor_set/build.py stores the spliced joint matrix and the loader refuses stale entries, but the source manifest records the 6 mm entry still holding 40 negative eigenvalues, so the positive-definite half of the goal holds for 12 mm only.\nVERDICT done_when: The brief's Done-when names three clauses in docs/evidence/fragments/iter-passive-plasma-circuit/vs3-linkage-repair.html; that file does not exist at head (git ls-tree of the fragments directory lists no vs3-linkage-repair.html), clause (1)'s positive-definite requirement is unmet for 6 mm and VSU/VSL is outside the stated tolerance, while clause (2)'s re-key, digest search and loader refusal are delivered.\nVERDICT write_paths: The brief fences the node to build.py, evolve.py, four nova/circuit and imas modules, six test files, the two vs3 evidence/figure files and its own logs and scratch; the base-to-head diff also changes scripts/iter_sectioned_conductor_set/validate.py, tests/test_prescribed_plasma.py and tests/test_unseen_source_full_plant.py, none of which the brief lists.\nVERDICT manifest: Read; manifest.md records status complete, names seven commits and two gate logs, states baseline_suite 2 failures and after_suite 2 failures with the coupled-plant arm cut short, and in follow_ons concedes the 6 mm indefiniteness, the VSU/VSL reference mismatch and the non-reproduced negative-control count.\nVERDICT diff: Read commit by commit against 48c4c9d104edfa2cdd8d9b08d0883e3da02d00fe; seven commits across 12 files add the annulus-sector helpers to nova/circuit/conductor.py, the JointLinkageNotPositiveDefinite refusal to nova/circuit/passive.py, the re-keyed build and the new tests/test_vs3_linkage_repair.py.\nCALL_SITES: scripts/iter_vessel_evolution/evolve.py:119\nSCORE goal_fidelity: 10\nJUSTIFICATION goal_fidelity: scripts/iter_sectioned_conductor_set/build.py and the loader refusal land the re-key and stale-entry refusal and the 12 mm entry is positive definite, but the goal's positive-definite linkage is unmet for 6 mm (40 negatives) and VSU/VSL miss the stated tolerance.\nSCORE evidence: 6\nJUSTIFICATION evidence: The done-when's evidence file docs/evidence/fragments/iter-passive-plasma-circuit/vs3-linkage-repair.html is absent at head and the head gate's central arms skip or fail, so the measure is claimed from scratch measurements rather than shown by a recorded passing gate.\nSCORE scope_discipline: 10\nJUSTIFICATION scope_discipline: scripts/iter_sectioned_conductor_set/validate.py, tests/test_prescribed_plasma.py and tests/test_unseen_source_full_plant.py are outside the brief's write list, and the required vs3-linkage-repair.html fragment the done-when names was never written.\nSCORE durability: 9\nJUSTIFICATION durability: tests/test_vs3_linkage_repair.py:test_loader_refuses_a_pre_repair_entry_by_name fails if the refusal in nova/circuit/passive.py:1210 is removed, but tests/test_vs3_linkage_repair.py:test_stored_joint_linkage_is_positive_definite skips on this host because the rebuilt entries are uninstalled, so the central measure has no failing-on-regression test that actually ran.\nSCORE fit: 15\nJUSTIFICATION fit: nova/circuit/conductor.py:119 annulus_sector_vertices and :153 annulus_sector_columns follow the module's numpy idiom and carry no plan or version labels, though the same file's sibling tests re-implement the sector geometry.\nSCORE reuse: 13\nJUSTIFICATION reuse: nova/circuit/conductor.py:119-198 is the first owner of annulus-sector polygons and correctly extends the PolygonSection machinery, but tests/test_vs3_jacket_positive_linkage.py:_sector_vertices and _annulus_ports re-implement that helper rather than calling it.\nFINDING docs/evidence/fragments/iter-passive-plasma-circuit/vs3-linkage-repair.html:1 blocking: The evidence document the Done-when names is absent at head, so none of the three done-when clauses has a recorded receipt; git ls-tree 5d52a37bc4eb2900a18f23476517a75e82c8ce6a of the fragments directory lists no vs3-linkage-repair.html.\nFINDING scripts/iter_sectioned_conductor_set/build.py:380 blocking: The 6 mm entry built by the re-keyed build stores a joint linkage with 40 negative eigenvalues (minimum -4.009411e-08 H, all in the passive block), so done-when clause (1)'s positive-definite requirement is unmet for the 6 mm set and the loader refuses the entry this node delivers.\nFINDING scripts/iter_sectioned_conductor_set/build.py:361 blocking: VSU's and VSL's reduced bare inductance does not match the dense coaxial reference within the stated 3 per cent under either reduction the stored geometry admits (5.63e-4 and 7.56e-4 H against 4.37e-5 H, or 2.20e-6 and 2.95e-6 H), so done-when clause (1)'s tolerance is unmet and the coupling gap it was to close is unresolved.\nFINDING tests/test_vs3_linkage_repair.py:117 blocking: test_vertical_coil_bare_inductance_matches_the_coaxial_reference asserts VSU/VSL within 3 per cent of COAXIAL_REFERENCE_H, which the source manifest's own measurement contradicts; it skips on this host only because the entry is uninstalled, so the suite reports 7 skipped rather than the failure the measure implies.\nFINDING tests/test_vs3_linkage_repair.py:110 follow-on: Six of the twelve entry-reading assertions skip on this host because the rebuilt entries were never installed into /home/ITER/mcintos/Code/nova/.cache, so the head gate reports 5 passed 7 skipped in this file and the central positive-definiteness measure is not exercised by any arm that ran.\nFINDING scripts/iter_sectioned_conductor_set/validate.py:67 follow-on: This file, tests/test_prescribed_plasma.py and tests/test_unseen_source_full_plant.py are changed but are outside the brief's declared write paths, which required the node to stop and name any such file; only validate.py is named in the manifest's follow_ons.\nFINDING tests/test_vs3_jacket_positive_linkage.py:184 follow-on: _sector_vertices and _annulus_ports re-implement the annulus-sector geometry that nova/circuit/conductor.py:119 annulus_sector_vertices and :153 annulus_sector_columns now own, so the fixture can drift from the builder it is meant to test.\nFINDING docs/figures/iter-passive-plasma-circuit/vs3-jacket-positive-linkage.svg:1371 follow-on: The clipped label is fixed by editing the two text-group translate x values directly in the SVG; no figure generator or save-with-check source changed in the diff, so the mandated re-render through the check path left no recorded run even though the rendered PNG reads clean.\nFINDING logs/negative-control.log:1 follow-on: The literal negative control declared two negative eigenvalues with the square representation restored; the arm reports 56 negatives over 128 coil arms (minimum -5.706e-07 H) because its Schur complement is not reduced to the fourteen coil channels, so control_holds is false and the declared count was not reproduced.\nFINDING logs/gate-head-all.log:10 follow-on: The coupled-plant head arm was cut short at the deadline (11 passed, 1 skipped) and reached no summary line, so after_suite.completed is false and that file is the one gate file reporting nothing either way.\n",
+  "review_run_id": "r-20261022T063526221968-review-of-vs3-linkage-repair-5d52a37bc4eb",
+  "reviewed_base_sha": "48c4c9d104edfa2cdd8d9b08d0883e3da02d00fe",
+  "reviewed_commits": [
+    "f763dfb40",
+    "2279fe568",
+    "4d9dcd767",
+    "268201640",
+    "b3cb02ff3",
+    "ad4874261",
+    "5d52a37bc"
+  ],
+  "reviewed_head_sha": "5d52a37bc4eb2900a18f23476517a75e82c8ce6a",
+  "reviewed_run_id": "r-20261022T022444210455-vs3-linkage-repair",
+  "scores": {
+    "durability": 9,
+    "evidence": 6,
+    "fit": 15,
+    "goal_fidelity": 10,
+    "reuse": 13,
+    "scope_discipline": 10
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T06:00:00Z",
+  "total": 63
+}

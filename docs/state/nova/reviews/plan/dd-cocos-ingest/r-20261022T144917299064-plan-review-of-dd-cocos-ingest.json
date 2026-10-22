@@ -46,6 +46,13 @@
       "finding": "done_when-1",
       "reason": "",
       "when": "2026-10-22T15:23:59.254004+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "done_when-2",
+      "reason": "",
+      "when": "2026-10-22T15:24:32.450704+00:00"
     }
   ],
   "responses": {
@@ -54,6 +61,12 @@
       "by": "",
       "reason": "",
       "when": "2026-10-22T15:23:59.254004+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-22T15:24:32.450704+00:00"
     },
     "reasoning-1": {
       "action": "acted",

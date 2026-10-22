@@ -1,0 +1,44 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-22T18:44:18.348Z",
+  "dispatched_at": "2026-10-22T18:29:51Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/dd-cocos-ingest/r-20261022T182643229721-plan-review-of-dd-cocos-ingest/plan.html:68",
+      "id": "done_when-1",
+      "reason": "the brief would name both sites (or the module/helper boundary), so the node converts every \u03c8-like row `read_frame` returns instead of one of three, and the negative control covers the map.",
+      "text": "\u00a73 done-when (1) says \"the one site that owns the MAST flux conversion is `read_frame`. Its `TOTAL_FLUX_FACTOR` multiplication is replaced by the declared 3-to-17 flux factor in that same place\", but the flux-map conversion is not in `read_frame`'s body: `read_frame` multiplies twice itself (`flux_axis`, `flux_boundary`, mast_efit.py:116-117) and gets the map from the private helper `_flux_map`, which multiplies at mast_efit.py:87; the declared-factor test the same clause specifies cannot catch a miss because the declared convention would still be 3, so a node that edits only `read_frame` ships a reader whose axes are declared-converted and whose map stays a hard-coded 2\u03c0 \u2014 the very half-conversion done-when (1) exists to prevent",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "fd5d8a0f007d94566113450eef97b6bf5433094a746f33b8c218ae706fdfe246",
+  "plan_slug": "dd-cocos-ingest",
+  "plan_version": 62,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261022T182643229721-plan-review-of-dd-cocos-ingest",
+  "reviewed_blob_sha": "a05c4d7a36cf228ee012357244f71c55e878b3ac",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `nova/media/sources/mast_efit.py::read_frame`, `_flux_map` (line 87), `nova/equilibrium/convention.py::TOTAL_FLUX_FACTOR` (line 65, exported) and line 74's pinned flag, `nova/database/filepath.py::canonical_key` (337) and `hash_attrs` (392), `nova/io/signalstore.py::SignalStore.cache_key` (49), `nova/io/ingest.py` writing `cocos` into `dataset.attrs` (112-116), `nova/imas/extrapolate.py:301` and `:345` (`plot_2d_masked`, line 339), and every named test id (`tests/test_plasma_source.py::test_dina_generic_source_reproduces_existing_prescription`, `tests/test_coupled_plant.py::test_dina_case_through_the_generic_source_is_unchanged`, `::test_reconstruction_route_into_the_plant_meets_the_stated_tolerance`, `tests/test_prescribed_plasma.py::test_polygon_flux_change_on_a_real_slice`, `tests/test_unseen_source_full_plant.py:56-57` `DINA_CASES` = {(105069,3), (105013,1)}, `test_mast_flipped_psi_is_refused` matching the live message at `nova/imas/plasma_source.py:76`) all resolve.",
+    "done_when": "a finding \u2014 \u00a73 done-when (1) names `read_frame` as \"the one site that owns the MAST flux conversion\" and replaces \"its `TOTAL_FLUX_FACTOR` multiplication\" there, but the flux-map conversion is not in `read_frame` and neither is the plan's control able to catch the omission (see FINDING).",
+    "evidence_paths": "pass \u2014 \u00a73's and \u00a74's records land in the census doc `docs/research/dd-cocos-census.html` (`/nova/research/dd-cocos-census`) and the \u00a72 evidence fragment, both tracked repository paths, not a scratchpad or node-local temp.",
+    "naming": "pass \u2014 no plan labels, ticket numbers or version tags reach a symbol or comment; the new-site names are mechanism words (`prescribe`'s internal COCOS 17 check, `SignalStore.cache_key`).",
+    "reasoning": "pass \u2014 the root cause matches the evidence. The guard's live predicate is `span * plasma_current >= 0` (`nova/imas/plasma_source.py:71-73`), i.e. accept \u03c3_Bp = \u22121, and `nova_cocos.convention(17)` is \u03c3_bp = \u22121 with `convention(11)` \u03c3_bp = +1, so untranslated COCOS 11 DD3 slices are refused as \u00a73 says; I recomputed `nova_cocos.convention_transform`: 3\u219217 gives \u03c8 2\u03c0, q \u22121, d/d\u03c8 1/(2\u03c0), and 13\u219217 \u03c8 1.0, exactly as \u00a73 line 60 states and \u00a73 done-when (1) needs for its control to be red; `read_frame`/`from_mast` apply no second factor (plasma_source.py:146-178 multiplies nothing), and \u00a74's cache claim holds \u2014 `cache_key` hashes only `{\"uri\",\"dd_version\"}` while the DD is unchanged by the \u00a72 translation, so a pre-existing entry would be served under an unchanged key without \u00a74's fix.",
+    "single_goal": "pass \u2014 \u00a73 carries one goal (the census readers move onto the \u00a72 translator) and \u00a74 one (internals run in COCOS 17); the MAST-route sub-clauses sit inside \u00a73's single reader goal.",
+    "wiring": "pass \u2014 `depends-on` (`s3:[s2]`, `s4:[s3]`, `s5:[s1,s2]`) agrees with each section's `data-links` and every target section exists; `plan-blocks iter-passive-plasma-circuit` matches \u00a73's stated unblock."
+  },
+  "section_digests": {
+    "_document": "0944b41fbee062214508f8e371bdb6d46b75eb62d96e4606b5e91e6893187ad0",
+    "s0": "d7c3143494e97518c859457355f006ec1a3961adf5e50d514822385ec2941326",
+    "s1": "8493846bddbd37e17766c3f28357c4dec07fde5dad711cf4d8096db87e577f89",
+    "s2": "38e4a6fd8cb459d4e887ae55cc12b322f74419e30f3f46aaa3022d95172c4f71",
+    "s3": "a2428ec08b9ad252450362366270774c402bc55c032dc25471c006a7d6b18f93",
+    "s4": "5fec46897afddfefa542d8feec59f87425f62eb157c961086e299a411c1ddaaa",
+    "s5": "db46395f9321959e91cc657923e567fa72cda1e12fa3aa977d6a83243b8e1d36"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T18:50:01.991335+00:00"
+}

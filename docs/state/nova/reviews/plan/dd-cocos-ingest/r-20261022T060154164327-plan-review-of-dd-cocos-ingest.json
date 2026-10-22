@@ -144,6 +144,13 @@
       "finding": "duplicate_owner-3",
       "reason": "",
       "when": "2026-10-22T06:10:00.891101+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "thin_wrapper-1",
+      "reason": "",
+      "when": "2026-10-22T06:10:08.463815+00:00"
     }
   ],
   "responses": {
@@ -194,6 +201,12 @@
       "by": "",
       "reason": "",
       "when": "2026-10-22T06:09:37.243581+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-22T06:10:08.463815+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/dd-cocos-ingest/r-20261022T060154164327-plan-review-of-dd-cocos-ingest.json",

@@ -171,7 +171,41 @@ def confined_component(reading):
     return loop, live
 
 
-def composite_cut_moments(geometry, reading, profile, sigma, segments=8):
+MOMENT_SLOTS = 3
+
+BAND_CAPACITY = 160
+"""Cells one trace of the composite books, before the booking refuses.
+
+The composite allocates a quadrature over every ring a cell carries, so a trace
+per mesh cell costs the whole mesh rather than the boundary band the research
+record estimates. ``booking_band`` gathers the cells the composite books to this
+capacity, and a band wider than it refuses by name instead of truncating: the
+refusal is returned as an invalid booking, the way the saddle booking refuses
+past its capacity of 16.
+"""
+
+
+def dense_cells(geometry, reading):
+    """Return the whole cells the ordinary bell route covers.
+
+    These are the cells whose quadratic cut is complete, so they book no cut
+    support and are excluded from the band the composite applies to.
+    """
+    return (
+        (reading.geometric_membership >= 1 - 1e-14)
+        & (geometry.vertex_count == 6)
+        & ~reading.booking_cells
+    )
+
+
+def booking_band(geometry, reading):
+    """Return the cells the composite books, as this read's cut set."""
+    return (reading.membership > 0) & ~dense_cells(geometry, reading)
+
+
+def composite_cut_moments(
+    geometry, reading, profile, sigma, segments=8, capacity=BAND_CAPACITY
+):
     """Book every cut cell over (C∩D∩N) ∪ (C∩Dᶜ∩Q) through the shared owner.
 
     Every cut cell books the same one support: the selected normal-form portion
@@ -180,6 +214,10 @@ def composite_cut_moments(geometry, reading, profile, sigma, segments=8):
     admits. Neither a scalar blend nor a whole-cell replacement chosen by
     centre distance, crossing count or ordinary validity is used here; those
     remain qualification checks on the read.
+
+    Only the cells the composite books are traced, gathered to ``capacity`` by
+    ``booking_band``, and a band wider than that capacity refuses rather than
+    truncating, so one trace costs the cut band instead of the whole mesh.
     """
     centre, pitch = geometry.centre, geometry.pitch
     form = reading.saddle_form
@@ -210,10 +248,20 @@ def composite_cut_moments(geometry, reading, profile, sigma, segments=8):
         )
         return moments
 
-    return jax.vmap(one)(jnp.arange(len(centre)))
+    band = booking_band(geometry, reading)
+    count = jnp.sum(band, dtype=jnp.int32)
+    filled = count <= capacity
+    indices = jnp.nonzero(band, size=capacity, fill_value=0)[0]
+    packed = jax.vmap(one)(indices)
+    live = jnp.arange(capacity) < jnp.where(filled, count, 0)
+    moments = jnp.zeros((len(centre), MOMENT_SLOTS), dtype=packed.dtype)
+    moments = moments.at[indices].add(jnp.where(live[:, None], packed, 0.0))
+    return moments, filled
 
 
-def bell_moments(geometry, reading, profile, sigma):
-    """Return the composite booking for every cell and the read's qualification."""
-    moments = composite_cut_moments(geometry, reading, profile, sigma)
-    return moments, jnp.ones(len(geometry.centre), dtype=bool), reading.booking_cells
+def bell_moments(geometry, reading, profile, sigma, capacity=BAND_CAPACITY):
+    """Book the band cells and report whether the band fitted its capacity."""
+    moments, filled = composite_cut_moments(
+        geometry, reading, profile, sigma, capacity=capacity
+    )
+    return moments, filled, reading.booking_cells

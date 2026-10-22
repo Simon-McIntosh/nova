@@ -8,7 +8,11 @@ import jax.numpy as jnp
 
 from nova.equilibrium import current, fixed_points
 from scripts.prototypes.lean_map.quadrature import interior_moments
-from scripts.prototypes.fast_read.ordinary_cut import bell_moments, confined_component
+from scripts.prototypes.fast_read.ordinary_cut import (
+    bell_moments,
+    confined_component,
+    dense_cells,
+)
 from scripts.prototypes.fast_map_production.kernel import read
 
 
@@ -185,11 +189,7 @@ def map_moments(
     field = FusedField(cached, coefficient)
     reading = read(field, roots, geometry, convention, policy, frame_gate=frame_gate)
     selected = reading.selected_cells
-    full = (
-        (reading.geometric_membership >= 1 - 1e-14)
-        & (geometry.vertex_count == 6)
-        & ~reading.booking_cells
-    )
+    full = dense_cells(geometry, reading)
     interior = interior_moments(
         rule, gauss_flux, profile, reading.axis_flux, reading.boundary_flux, full
     )
@@ -211,6 +211,7 @@ def map_moments(
         jnp.all(roots.valid)
         & reading.valid
         & reading.qualified
+        & ordinary_valid
         & jnp.all(~ordinary_cut | ordinary_valid)
         & saddle_valid
         & ~missing

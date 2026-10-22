@@ -25,7 +25,7 @@
   <title>ITER Passive and Prescribed-Plasma Circuit | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="50">
+<meta name="plan-version" content="51">
 <meta name="plan-modified" content="2026-10-22">
 </head>
 <body>
@@ -320,6 +320,9 @@ touches any canvas edge.</p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-20261022-vs3-split" data-who="reckon-build" data-when="2026-10-22T08:25:00Z">
     <div class="r-comment-body"><p><strong>Coordinator split, 2026-10-22: §7 closes on the 12 mm set, and the 6 mm passive block becomes its own investigation.</strong></p><p>What the repair node measured:</p><ul><li>The VS3 annuli built as sector polygons make the 12 mm joint linkage positive definite with no floor: smallest eigenvalue +2.51e-9 H, all fourteen coil channels positive.</li><li>Against a four-turn reference built for each coil, VSU's and VSL's series-map bare inductances stand at 0.9975 and 0.9972 of the reference. The earlier single-ring reference at an assumed 6.0 m was not a reference for either coil.</li><li>The loader refuses a non-positive-definite entry by name.</li><li>The 6 mm passive block keeps 40 negatives, minimum -4.01e-8 H. That is a smallest eigenvalue of -9.19e-4 of the mean self term, against +5.69e-5 at 12 mm.</li><li>It is not observer quadrature: sub-cell refinement is inert.</li><li>It is not over-coupling of neighbouring footprints: no leading pair's correlation exceeds 1 (the largest is 0.988), and the 12 mm set carries the same floor-inflated rows.</li></ul><p>The 6 mm entry is built under its new key and refused by name, and its test arms are strict xfail. The 105069/3 plant is rebuilt against the 12 mm set. Followup f-ippc-004 carries the collective near-singularity.</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261022T094056106510-review-of-vs3-linkage-repair-4f28d5a57293" data-who="reckon-build" data-when="2026-10-22T10:06:35.034Z">
+    <div class="r-comment-body"><p>review of r-20261022T022444210455-vs3-linkage-repair at base 48c4c9d104edfa2cdd8d9b08d0883e3da02d00fe, head 4f28d5a57293be46ca646d8c318d1feafc012d5c: parsed, all six dimensions scored (goal_fidelity 15, evidence 12, scope_discipline 14, durability 17, fit 16, reuse 18), zero added failures over the arms that completed, five follow-on findings and no blocking finding; record at review-records/r-20261022T022444210455-vs3-linkage-repair.json and its at-4f28d5a57293be46ca646d8c318d1feafc012d5c.json copy.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261022-105013-nonconforming" data-who="reckon-build" data-when="2026-10-22T09:15:00Z">
     <div class="r-comment-body"><p><strong>Correction to the convention record of d-ippc-dd-cocos, 2026-10-22.</strong> The ruling's rationale lists DINA 105013/1 as conforming to COCOS 11, measured on σ_Bp alone. Scanned in full by dd-cocos-ingest §2, 105013/1 carries σ_ρθφ = −1 on all 766 slices above 1 MA (b0 stored at +2.65 T with q &gt; 0), which contradicts COCOS 11. It is therefore invalid as DD3 data, as 105014/1 is. Both 2.65 T DINA pulses are non-conforming, and the 5.3 T pulses 105052/1 and 105069/3 conform. The rebuilt 105069/3 plant is unaffected. The §6 unseen-source check that drove 105013/1 through the plant exercised the cache path, not the convention, and §6 check 3 is referenced to CORSICA 130506/6.</p></div>

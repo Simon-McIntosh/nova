@@ -1,0 +1,127 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived by delta from the reviewed run's own suite records. baseline_suite (48c4c9d104edfa2cdd8d9b08d0883e3da02d00fe) failure_ids are [test_real_entry_geometry_round_trips, test_real_sectioned_set_reduction_is_within_one_percent], failure_count 2. after_suite (958e0cd23) records completed:false and exit_status null: at head the five fast files reported zero failures (iter_sectioned 12 passed; prescribed_plasma 11 passed 2 skipped; sectioned_set_geometry_cache 5 passed 1 skipped; vs3_jacket_positive_linkage 6 passed 1 xfailed; vs3_linkage_repair 10 passed 4 xfailed; unseen_source_full_plant 2 passed 1 xfailed), and logs/gate-r3-head-test_coupled_plant.log truncates after nine tests with no EXIT line, so the file that carries one of the two base reds has no readable head arm. No failure is added over the arms that completed; the delta for test_coupled_plant.py is unverified rather than zero, and test_real_entry_geometry_round_trips now SKIPS at head (tests/test_sectioned_set_geometry_cache.py:283) rather than passing.",
+  "assertion_analysis": [
+    {
+      "condition_to_fail": "Reverting build.py's spliced store or writing an indefinite joint matrix makes the zero-negative assertion fail; dropping the splice makes the shape assertion fail.",
+      "file": "tests/test_vs3_linkage_repair.py",
+      "line": 169
+    },
+    {
+      "condition_to_fail": "Deleting the JointLinkageNotPositiveDefinite raise in nova/circuit/passive.py:1210 makes the loader return a machine and the pytest.raises assertion fails; the matrix is an independently measured artefact, not a value the test supplied.",
+      "file": "tests/test_vs3_linkage_repair.py",
+      "line": 273
+    },
+    {
+      "condition_to_fail": "Nothing realistic: the assertion is a substring presence check, so a comment mentioning the derived key would satisfy it even if no pin had moved.",
+      "file": "tests/test_vs3_linkage_repair.py",
+      "line": 324
+    },
+    {
+      "condition_to_fail": "Restoring the area-equivalent square representation reddens the zero-negative, lambda_max and coupling assertions on the sector arm.",
+      "file": "tests/test_vs3_jacket_positive_linkage.py",
+      "line": 293
+    },
+    {
+      "condition_to_fail": "Any change putting the jacket annulus inside the conductor annulus fails the min/max radius assertions against the machine-description annuli.",
+      "file": "tests/test_vs3_jacket_positive_linkage.py",
+      "line": 330
+    }
+  ],
+  "base_log_revision": "48c4c9d104edfa2cdd8d9b08d0883e3da02d00fe",
+  "call_site_count": 4,
+  "call_sites": [
+    "scripts/iter_vessel_evolution/evolve.py:119",
+    "scripts/iter_sectioned_conductor_set/build.py:95",
+    "scripts/iter_sectioned_conductor_set/build.py:144",
+    "scripts/iter_sectioned_conductor_set/build.py:227"
+  ],
+  "completed_at": "2026-10-22T10:06:35.034Z",
+  "dispatched_at": "2026-10-22T09:43:08Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/iter-passive-plasma-circuit/vs3-linkage-repair.html",
+      "line": "145",
+      "severity": "follow-on",
+      "text": "The negative-control paragraph says the square-arm control holds \"qualitatively\" and explains the 56-versus-2 count as the Schur complement being \"taken over the 128 coil arms rather than reduced to the fourteen coil channels first\", but the receipt it cites (logs/negative-control.log) records the reduced arm at reduced_negative_count 0 with reduced_min_eigenvalue_h exactly 0.0 over 2 populated channels of 14, so the reduction was taken and is degenerate -- a zero from 12 structurally empty channels read as the absence of the defect. Neither arm reproduces the two negative eigenvalues the brief's literal negative control declares, and the attribution that the square geometry caused the indefiniteness is therefore unproven by this run, though the plan accepts the refusal on other measurements."
+    },
+    {
+      "file": "docs/evidence/fragments/iter-passive-plasma-circuit/vs3-linkage-repair.html",
+      "line": "239",
+      "severity": "follow-on",
+      "text": "The gate paragraph states that seven files were run at the repaired head and that each log ends with its bare exit status, but logs/gate-r3-head-test_coupled_plant.log ends after nine tests with no EXIT= line, so the head arm of tests/test_coupled_plant.py never completed and the base red tests/test_coupled_plant.py::test_real_sectioned_set_reduction_is_within_one_percent is unverified at head. The manifest records after_suite completed:false accurately; the fragment's receipt sentence overstates it."
+    },
+    {
+      "file": "docs/figures/iter-passive-plasma-circuit/build_vs3_jacket_positive_linkage.py",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "A new 247-line module was added outside the brief's write list, which grants docs/figures/iter-passive-plasma-circuit/vs3-jacket-positive-linkage.svg only; it also carries its own save_checked/check_text clipping-and-overlap gate for which nova/media and nova/graphics have no owner, so the addition is defensible but lies outside the declared fence and is disclosed only in the manifest's follow_ons."
+    },
+    {
+      "file": "tests/test_vs3_linkage_repair.py",
+      "line": "324",
+      "severity": "follow-on",
+      "text": "test_repaired_keys_are_pinned_where_the_retired_ones_were asserts only that each derived key appears as a substring in three files, so it passes for a file that merely mentions the key and does not show the pin moved; the retired-digest half of the same claim (test_retired_digests_are_gone_from_the_tree at line 304) is a real search and does read the tree."
+    },
+    {
+      "file": "tests/test_vs3_linkage_repair.py",
+      "line": "59",
+      "severity": "follow-on",
+      "text": "Done-when (1)'s 6 mm half is unmet: the 6 mm entry stores 40 negative eigenvalues with a smallest value of -4.009411e-08 H, independently re-measured from scratch/cache/f3a24fdd12eae6348f3a/linkage.npy, and its five arms are pytest.mark.xfail(strict=True). The plan's split comment c-20261022-vs3-split accepts this as the intended refusal at that layer, so it does not hold the node, but the node's own goal text still reads \"positive definite for the 12 mm and 6 mm sets\"."
+    }
+  ],
+  "head_log_revision": "958e0cd23",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "Read commit by commit across the thirteen commits between 48c4c9d104edfa2cdd8d9b08d0883e3da02d00fe and 4f28d5a57293be46ca646d8c318d1feafc012d5c: 14 files, +1548/-433, the functional change confined to conductor.py's shared annulus-sector helper, build.py's sector build and spliced store, passive.py's loader refusal and evolve.py's re-key, with the remainder tests, the evidence fragment and the regenerated figure.",
+    "done_when": "The brief's three clauses were read against the gate: (1) holds at 12 mm (1847x1847, zero negatives, min +2.512976e-09 H, independently re-measured from scratch/cache/66c10162f3e37adb2679/linkage.npy) and does not hold at 6 mm (40 negatives, min -4.009411e-08 H); (2) the retired digests appear nowhere under nova/, scripts/ or tests/ except the record module that names them, MESH_KEY in scripts/iter_vessel_evolution/evolve.py:33 moved to the derived keys, and tests/test_vs3_linkage_repair.py:273 asserts the loader's refusal; (3) each new key, its sha256 and the unchanged pinned-plant sha256 are named in the manifest artifacts and every one of them re-verified by hashing the artifacts; the gate itself is incomplete at head, since logs/gate-r3-head-test_coupled_plant.log truncates after nine tests with no EXIT line.",
+    "goal": "The node goal is to repair the sectioned-set build so the stored coil-plus-passive linkage is positive definite, re-key it, refuse stale entries, and write the rebuilt 105069/3 plant; scripts/iter_sectioned_conductor_set/build.py:374 now saves the joint matrix after the finite-source coil block is spliced in and nova/circuit/passive.py:1208 refuses a non-positive-definite entry by name, and the rebuilt 12 mm entry is positive definite (min +2.512976e-09 H over 1847 rows) while the 6 mm entry still stores 40 negative eigenvalues, which the plan's own split comment (docs/plans/iter-passive-plasma-circuit.html, comment c-20261022-vs3-split) accepts as an intended refusal rather than an unfinished repair.",
+    "manifest": "Read in full at .config/reckon/crew/runs/r-20261022T022444210455-vs3-linkage-repair/manifest.md; it records the 12 mm/6 mm split, the checked-in sha256s (all four re-verified against the artifacts), after_suite completed:false with the head coupled-plant arm still in flight, and negative_control_note reporting control_holds false for the square arm rather than adjusting it.",
+    "write_paths": "The brief grants eleven source and test paths, the fragment and the figure svg; the diff also changes scripts/iter_sectioned_conductor_set/validate.py, tests/test_prescribed_plasma.py and tests/test_unseen_source_full_plant.py and adds docs/figures/iter-passive-plasma-circuit/build_vs3_jacket_positive_linkage.py, all outside the declared list and all disclosed in the manifest's follow_ons (3) and (4)."
+  },
+  "justifications": {
+    "durability": "tests/test_vs3_linkage_repair.py:273 loads a genuinely indefinite matrix (45 negatives, min -2.527958e-07 H) through the loader and would fail on its own pytest.raises assertion with the refusal removed, and tests/test_vs3_jacket_positive_linkage.py:330 would redden if the build reverted to area-equivalent squares.",
+    "evidence": "The headline numbers were re-measured from the artifacts (both entry spectra, all four sha256s, the retired-digest search), but logs/gate-r3-head-test_coupled_plant.log has no EXIT line and the negative control's square arm does not reproduce its declared two negatives.",
+    "fit": "nova/circuit/passive.py:1121 mirrors the SectionedGeometryMissing idiom beside it and the annulus helper follows conductor.py's existing ConductorSet._columns idiom, while scripts/iter_vessel_evolution/evolve.py:39's NOVA_CHANNELS was exploded one entry per line by a magic trailing comma for a two-line key edit.",
+    "goal_fidelity": "scripts/iter_sectioned_conductor_set/build.py:374 stores the spliced joint matrix and nova/circuit/passive.py:1208 refuses a stale entry, so the goal is met at 12 mm, but the 6 mm entry the goal text names still stores 40 negatives (tests/test_vs3_linkage_repair.py:59 marks its arms strict xfails on that measurement).",
+    "reuse": "The annulus subdivision is shared through nova/circuit/conductor.py:153 rather than re-derived in each arm, the duplicated ring closed form was dropped for nova.circuit.screening.plasma_self_inductance, and a search of nova/media and nova/graphics found no owner for a save-with-check figure writer, so docs/figures/iter-passive-plasma-circuit/build_vs3_jacket_positive_linkage.py:145 is the first.",
+    "scope_discipline": "Four changed paths lie outside the brief's write list, named in the manifest's follow_ons (3) and (4) and in tests/test_vs3_linkage_repair.py's self-exclusion, and no changed path touches a shared or cross-cutting file."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is a positive-definite coil-plus-passive linkage, re-keyed, with stale entries refused and the 105069/3 plant rebuilt; scripts/iter_sectioned_conductor_set/build.py:374 saves the joint matrix after splicing the finite-source coil block and nova/circuit/passive.py:1208 refuses a stale entry, so the goal holds at 12 mm while the 6 mm entry still stores 40 negatives, which the plan's split comment c-20261022-vs3-split accepts as an intended refusal.\nVERDICT done_when: read the brief's three clauses against the gate; (1) holds at 12 mm (zero negatives, min +2.512976e-09 H, re-measured from the stored entry) and not at 6 mm (40 negatives, min -4.009411e-08 H), (2) the retired digests are gone from nova/, scripts/ and tests/ except tests/test_vs3_linkage_repair.py:41 and the refusal is asserted at line 273, (3) every key and sha256 in the manifest artifacts re-verified, but logs/gate-r3-head-test_coupled_plant.log has no EXIT line so the gate did not complete at head.\nVERDICT write_paths: the brief grants eleven source and test paths plus the fragment and the svg figure; the diff also changes scripts/iter_sectioned_conductor_set/validate.py, tests/test_prescribed_plasma.py and tests/test_unseen_source_full_plant.py and adds docs/figures/iter-passive-plasma-circuit/build_vs3_jacket_positive_linkage.py, all outside the declared write paths and all disclosed in the manifest follow_ons (3) and (4).\nVERDICT manifest: read in full; it records the sha256 of each artifact (all re-verified against the files), after_suite completed:false with the coupled-plant head arm in flight, and negative_control_note reporting control_holds false rather than adjusting the count.\nVERDICT diff: read commit by commit between 48c4c9d104edfa2cdd8d9b08d0883e3da02d00fe and 4f28d5a57293be46ca646d8c318d1feafc012d5c; 14 files, +1548/-433, the functional change confined to nova/circuit/conductor.py, scripts/iter_sectioned_conductor_set/build.py, nova/circuit/passive.py and scripts/iter_vessel_evolution/evolve.py.\nCALL_SITES: scripts/iter_vessel_evolution/evolve.py:119, scripts/iter_sectioned_conductor_set/build.py:95, scripts/iter_sectioned_conductor_set/build.py:144, scripts/iter_sectioned_conductor_set/build.py:227\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: scripts/iter_sectioned_conductor_set/build.py:374 stores the spliced joint matrix and nova/circuit/passive.py:1208 refuses a stale entry, so the goal is met at 12 mm, but the 6 mm entry the goal text names still stores 40 negatives.\nSCORE evidence: 12\nJUSTIFICATION evidence: the headline numbers were re-measured from the artifacts (both entry spectra, four sha256s, the retired-digest search), but logs/gate-r3-head-test_coupled_plant.log has no EXIT line and docs/evidence/fragments/iter-passive-plasma-circuit/vs3-linkage-repair.html:145 claims a qualitative control its own receipt does not support.\nSCORE scope_discipline: 14\nJUSTIFICATION scope_discipline: four changed paths lie outside the brief's write list, named in the manifest's follow_ons (3) and (4), and no changed path touches a shared or cross-cutting file.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_vs3_linkage_repair.py:273 loads a genuinely indefinite matrix (45 negatives, min -2.527958e-07 H) through the loader and fails with the refusal removed, while tests/test_vs3_linkage_repair.py:324 asserts only that a key string appears somewhere in three files.\nSCORE fit: 16\nJUSTIFICATION fit: nova/circuit/passive.py:1121 mirrors the SectionedGeometryMissing idiom beside it, while scripts/iter_vessel_evolution/evolve.py:39's NOVA_CHANNELS list was exploded one entry per line by a magic trailing comma for a two-line key edit.\nSCORE reuse: 18\nJUSTIFICATION reuse: the annulus subdivision is shared through nova/circuit/conductor.py:153 and the duplicated ring closed form was dropped for nova.circuit.screening.plasma_self_inductance, and a search of nova/media and nova/graphics found no owner for a save-with-check figure writer.\nFINDING docs/evidence/fragments/iter-passive-plasma-circuit/vs3-linkage-repair.html:145 follow-on: the square-arm negative control is claimed to hold qualitatively while its own receipt logs/negative-control.log records the reduced arm at 0 negatives with min exactly 0.0 over 2 populated channels of 14, a zero from 12 structurally empty channels, so neither arm reproduces the declared two negatives.\nFINDING docs/evidence/fragments/iter-passive-plasma-circuit/vs3-linkage-repair.html:239 follow-on: the gate paragraph says each of seven head logs ends with its bare exit status, but logs/gate-r3-head-test_coupled_plant.log stops after nine tests with no EXIT line.\nFINDING docs/figures/iter-passive-plasma-circuit/build_vs3_jacket_positive_linkage.py:1 follow-on: a new 247-line generator was added outside the brief's write list, which grants the svg only, and it carries its own clipping check with no repository owner.\nFINDING tests/test_vs3_linkage_repair.py:324 follow-on: test_repaired_keys_are_pinned_where_the_retired_ones_were asserts only substring presence, so it does not show any pin moved.\nFINDING tests/test_vs3_linkage_repair.py:59 follow-on: done-when (1)'s 6 mm half is unmet (40 negatives, min -4.009411e-08 H) and its arms are strict xfails; the plan's split comment c-20261022-vs3-split accepts the refusal, so it does not hold the node.\n",
+  "review_run_id": "r-20261022T094056106510-review-of-vs3-linkage-repair-4f28d5a57293",
+  "reviewed_base_sha": "48c4c9d104edfa2cdd8d9b08d0883e3da02d00fe",
+  "reviewed_commits": [
+    "f763dfb40",
+    "2279fe568",
+    "4d9dcd767",
+    "268201640",
+    "b3cb02ff3",
+    "ad4874261",
+    "5d52a37bc",
+    "2ee9d4bc2",
+    "42d8ff804",
+    "f31b29096",
+    "85f972866",
+    "958e0cd23",
+    "4f28d5a57"
+  ],
+  "reviewed_head_sha": "4f28d5a57293be46ca646d8c318d1feafc012d5c",
+  "reviewed_run_id": "r-20261022T022444210455-vs3-linkage-repair",
+  "scores": {
+    "durability": 17,
+    "evidence": 12,
+    "fit": 16,
+    "goal_fidelity": 15,
+    "reuse": 18,
+    "scope_discipline": 14
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T10:00:00Z",
+  "total": 92
+}

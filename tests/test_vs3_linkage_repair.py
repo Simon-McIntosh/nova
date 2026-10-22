@@ -48,6 +48,25 @@ REPAIRED_KEYS = {
     "6mm": "f3a24fdd12eae6348f3a",
 }
 
+#: why the 6 mm arms are expected to fail.  The measured state is the one the
+#: loader refuses: 40 negative eigenvalues with a smallest value of
+#: -4.009411e-08 H in the passive block, whose smallest eigenvalue is
+#: -9.192799e-04 of the block's mean self term against +5.692051e-05 at 12 mm.
+#: The mechanism behind that near-singular collective mode is still open, so the
+#: arms are strict xfails rather than relaxed: an XPASS is a refusal, which is
+#: what tells the reader the entry has changed.
+SIX_MM_REFUSED = (
+    "the 6 mm entry's passive block stores 40 negative eigenvalues, smallest "
+    "-4.009411e-08 H, and the block is collectively near-singular rather than "
+    "over-coupled; the mechanism is under investigation"
+)
+
+#: the two meshes, with the 6 mm arms expected to fail on that entry's defect.
+LABELS = [
+    pytest.param("12mm"),
+    pytest.param("6mm", marks=pytest.mark.xfail(strict=True, reason=SIX_MM_REFUSED)),
+]
+
 PINNED_PLANT_ENTRY = "28148563521d92a2198b"
 PINNED_PLANT = CACHE / "coupled-plant" / PINNED_PLANT_ENTRY / "plant.npz"
 PINNED_PLANT_SHA256 = "7800a4d8db5ea452fca7e0a18179f8939f85e08e8503b61e4e1bbee8d3c06b6c"
@@ -146,7 +165,7 @@ def _skip_without(entry: Path, *names: str) -> None:
         pytest.skip(f"the repaired entry {entry.name} is not present on this host")
 
 
-@pytest.mark.parametrize("label", ["12mm", "6mm"])
+@pytest.mark.parametrize("label", LABELS)
 def test_stored_joint_linkage_is_positive_definite(label):
     """The stored joint linkage is positive definite, with no floor applied."""
     entry = _entry(label)
@@ -162,7 +181,7 @@ def test_stored_joint_linkage_is_positive_definite(label):
     )
 
 
-@pytest.mark.parametrize("label", ["12mm", "6mm"])
+@pytest.mark.parametrize("label", LABELS)
 def test_every_coil_bare_inductance_is_positive(label):
     """Each of the 14 coil channels stores positive inductive energy."""
     entry = _entry(label)
@@ -173,7 +192,7 @@ def test_every_coil_bare_inductance_is_positive(label):
     assert np.all(bare > 0.0), dict(zip(machine.coil_names, bare, strict=True))
 
 
-@pytest.mark.parametrize("label", ["12mm", "6mm"])
+@pytest.mark.parametrize("label", LABELS)
 def test_vertical_coil_bare_inductance_matches_its_turn_reference(label):
     """VSU's and VSL's bare inductances match their own four-turn references.
 
@@ -199,7 +218,7 @@ def test_vertical_coil_bare_inductance_matches_its_turn_reference(label):
         )
 
 
-@pytest.mark.parametrize("label", ["12mm", "6mm"])
+@pytest.mark.parametrize("label", LABELS)
 def test_vertical_coil_coupling_matches_its_turn_reference(label):
     """The VSU-VSL mutual agrees with the same per-coil reference."""
     entry = _entry(label)

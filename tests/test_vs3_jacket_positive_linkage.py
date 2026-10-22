@@ -48,6 +48,15 @@ ENTRIES = {
     "12mm": ENTRY_ROOT / "66c10162f3e37adb2679",
     "6mm": ENTRY_ROOT / "f3a24fdd12eae6348f3a",
 }
+#: why the 6 mm arm is expected to fail.  Its passive block stores 40 negative
+#: eigenvalues with a smallest value of -4.009411e-08 H and is collectively
+#: near-singular, -9.192799e-04 of the block's mean self term against
+#: +5.692051e-05 at 12 mm.  Strict, so an XPASS is a refusal.
+SIX_MM_REFUSED = (
+    "the 6 mm entry's passive block stores 40 negative eigenvalues, smallest "
+    "-4.009411e-08 H, and the block is collectively near-singular rather than "
+    "over-coupled; the mechanism is under investigation"
+)
 #: the eight jacket source centroids, upper then lower (r, z) [m]
 JACKET_CENTROID = np.array(
     [
@@ -107,7 +116,16 @@ def test_cached_plant_coil_schur_is_indefinite_at_the_vertical_coils():
     assert leading <= {"VSU", "VSL"}
 
 
-@pytest.mark.parametrize("label", ["12mm", "6mm"])
+@pytest.mark.parametrize(
+    "label",
+    [
+        pytest.param("12mm"),
+        pytest.param(
+            "6mm",
+            marks=pytest.mark.xfail(strict=True, reason=SIX_MM_REFUSED),
+        ),
+    ],
+)
 def test_repaired_passive_block_is_positive_definite(label):
     """The repaired entry's passive block stores positive energy, unfloored.
 

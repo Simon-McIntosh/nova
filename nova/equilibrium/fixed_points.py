@@ -580,7 +580,7 @@ def _adaptive(field, seeds, pitch, iterations):
             )
             return candidate_merit, valid
 
-        candidate_merit, candidate_valid = jax.lax.map(score, candidates)
+        candidate_merit, candidate_valid = jax.vmap(score)(candidates)
 
         choice = _select_backtracking_candidate(
             factors[:, None],

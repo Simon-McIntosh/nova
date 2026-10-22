@@ -8,6 +8,13 @@
   ],
   "completed_at": "2026-10-22T19:13:16.964Z",
   "dispatched_at": "2026-10-22T18:46:24Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "non-blocking provenance and citation follow-on on a landed regeneration; the installed arm digest was verified against the entry by the coordinator at install",
+      "recorded_at": "2026-10-22T19:28:16.984710+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/iter_vessel_evolution/evolve.py",

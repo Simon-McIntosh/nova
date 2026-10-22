@@ -8,6 +8,11 @@
       "kind": "exempted",
       "reason": "manifest-only finding on a promoted run: the H200 command is recorded in the gate log headers and in the evidence anchor, and the run record is closed",
       "recorded_at": "2026-10-22T06:06:08.364151+00:00"
+    },
+    "6": {
+      "kind": "exempted",
+      "reason": "the blockers line described the write-grant gap the coordinator closed by widening before promotion; the run is promoted, so the stale line has no reader",
+      "recorded_at": "2026-10-22T06:06:15.646016+00:00"
     }
   },
   "findings": [

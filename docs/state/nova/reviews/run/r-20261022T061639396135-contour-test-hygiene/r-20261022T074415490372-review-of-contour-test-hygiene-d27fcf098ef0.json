@@ -7,6 +7,13 @@
   ],
   "completed_at": "2026-10-22T07:51:53.078Z",
   "dispatched_at": "2026-10-22T07:44:56Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "queued as followup f-cfs-contour-test-followons on converged-forward-solve; non-blocking test-quality follow-on",
+      "recorded_at": "2026-10-22T07:55:47.800724+00:00"
+    }
+  },
   "findings": [
     {
       "file": "manifest.md",

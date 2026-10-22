@@ -14,6 +14,7 @@ the physical value, not a gap in the data.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import importlib.util
 import json
 import sys
@@ -133,6 +134,42 @@ def load_system(surface_layer: float):
     matrix = np.load(directory / "linkage.npy")
     system = load_circuit_system(directory / "system.npz")
     return matrix, system
+
+
+def sectioned_set_provenance(surface_layer: float) -> dict[str, str]:
+    """The sectioned-set key the arm's circuits came from, and its linkage digest.
+
+    The key alone does not pin the linkage a sectioned set was built with: an
+    entry can be rewritten under the same key.  Hashing the stored ``linkage.npy``
+    records the matrix the arm's currents were actually propagated through.
+    """
+    key = MESH_KEY[surface_layer]
+    linkage = CONDUCTOR_CACHE / key / "linkage.npy"
+    return {
+        "sectioned_set_key": key,
+        "linkage_sha256": hashlib.sha256(linkage.read_bytes()).hexdigest(),
+    }
+
+
+def write_arm(
+    output_dir: Path,
+    pulse: int,
+    surface_layer: float,
+    times: np.ndarray,
+    i_passive: np.ndarray,
+    i_noplasma: np.ndarray,
+) -> Path:
+    """Write one arm's currents, tagged with the sectioned set they were built on."""
+    output_dir.mkdir(parents=True, exist_ok=True)
+    path = output_dir / f"evolved-{pulse}-{int(surface_layer * 1000):03d}.npz"
+    np.savez(
+        path,
+        times=times,
+        i_passive=i_passive,
+        i_noplasma=i_noplasma,
+        **sectioned_set_provenance(surface_layer),
+    )
+    return path
 
 
 def read_case(pulse: int):
@@ -319,6 +356,12 @@ def main():
     parser.add_argument("--pulse", type=int, choices=(105014, 105052), required=True)
     parser.add_argument("--surface-layer", type=float, default=0.012)
     parser.add_argument("--plasma-slices", type=int, default=24)
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=OUTPUT,
+        help="directory the arm npz is written to (defaults to the cache)",
+    )
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
 
@@ -465,12 +508,16 @@ def main():
         }
     )
 
-    OUTPUT.mkdir(parents=True, exist_ok=True)
-    np.savez(
-        OUTPUT / f"evolved-{args.pulse}-{int(args.surface_layer * 1000):03d}.npz",
-        times=times,
-        i_passive=chosen["i_passive"],
-        i_noplasma=chosen["i_noplasma"],
+    arm = write_arm(
+        args.output_dir,
+        args.pulse,
+        args.surface_layer,
+        times,
+        chosen["i_passive"],
+        chosen["i_noplasma"],
+    )
+    result.update(
+        {"arm_path": str(arm), **sectioned_set_provenance(args.surface_layer)}
     )
     if args.output:
         args.output.write_text(json.dumps(result, indent=2, default=float))

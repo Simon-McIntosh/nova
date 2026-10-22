@@ -185,3 +185,33 @@ def test_driver_assembly_couples_sections_passive_and_plasma():
     state = evolve.integrate(tau, np.eye(n_section), times, drive)
     assert state.shape == (times.size, n_section)
     assert np.abs(state).max() > 0
+
+
+def test_arm_names_the_sectioned_set_it_was_built_on(tmp_path):
+    """The written arm records the sectioned-set key it loaded and its digest.
+
+    The key alone does not pin the linkage: an entry can be rewritten under the
+    same key, so the digest is read independently from the entry's own file
+    rather than compared with what the writer believed it had.
+    """
+    import hashlib
+
+    evolve = _module("evolve")
+
+    surface_layer = 0.012
+    times = np.linspace(0.0, 1.0, 7)
+    i_passive = np.arange(21.0).reshape(7, 3)
+    i_noplasma = -i_passive
+
+    path = evolve.write_arm(
+        tmp_path, 105052, surface_layer, times, i_passive, i_noplasma
+    )
+    assert path.parent == tmp_path, "the arm did not land in the named directory"
+
+    entry = evolve.CONDUCTOR_CACHE / evolve.MESH_KEY[surface_layer]
+    digest = hashlib.sha256((entry / "linkage.npy").read_bytes()).hexdigest()
+    arm = np.load(path)
+    assert str(arm["sectioned_set_key"]) == evolve.MESH_KEY[surface_layer]
+    assert str(arm["linkage_sha256"]) == digest
+    np.testing.assert_array_equal(arm["times"], times)
+    np.testing.assert_array_equal(arm["i_passive"], i_passive)

@@ -2,8 +2,9 @@
 
 ``maintain_rows`` builds or slides a row window outside the compiled solve.
 ``solve`` contracts only the iterate triangle's rows and returns NEEDS_ROWS
-without building anything when its trajectory exits that window. All numerical
-mesh, row and moment operands remain runtime arguments to the device program.
+without building anything when its iterate is outside that window. Trial steps
+outside the window are refused before becoming iterates. All numerical mesh,
+row and moment operands remain runtime arguments to the device program.
 """
 
 from dataclasses import dataclass
@@ -658,9 +659,10 @@ def solve(
     shape (points, 2), with the axis first. ``axis_sign`` is -1 for a maximum
     and +1 for a minimum. A wrong root is retried from the last accepted
     ``previous`` point using topology.stationary_read, and rejected if it still
-    has the wrong Hessian type. A missing row returns NEEDS_ROWS; the caller
-    must run maintenance outside its timed solve before retrying. Refused
-    positions describe the attempted trajectory, never an accepted warm start.
+    has the wrong Hessian type. An iterate with a missing row returns NEEDS_ROWS;
+    the caller must run maintenance outside its timed solve before retrying.
+    A trial that leaves the row window is refused and can leave NOT_CONVERGED
+    at the last finite in-window iterate.
     """
     field = _CachedField(cache.mesh, cache.lookup, cache.rows, moments, cache.exterior)
     position, jet, converged, counts = _adaptive(field, seeds, pitch, iterations)

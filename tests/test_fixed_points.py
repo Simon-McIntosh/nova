@@ -291,6 +291,7 @@ def test_closed_form_equilibrium_on_small_hex_mesh(kind):
 
 
 def test_newton_trajectory_leaves_rows_without_building(monkeypatch):
+    """An attempted row exit leaves the accepted iterate in the cached domain."""
     first = polynomial_cache(True)
     first_nodes = np.asarray(first.nodes)
     nodes = np.concatenate((first_nodes, first_nodes + (1.5, 0.0)))
@@ -313,10 +314,14 @@ def test_newton_trajectory_leaves_rows_without_building(monkeypatch):
     monkeypatch.setattr(fixed, "_row_program", forbidden)
     seed = jnp.asarray(((0.2, -0.21),))
     result = fixed.solve(cache, jnp.zeros((1, 3)), seed, seed, jnp.asarray(1.0))
-    assert result.iterations[0] == 1
-    assert result.position[0, 0] > 0.75
+    field = fixed._CachedField(
+        cache.mesh, cache.lookup, cache.rows, jnp.zeros((1, 3)), cache.exterior
+    )
+    assert result.iterations[0] == 12
+    assert bool(field.contains(result.position[0]))
+    assert np.all(np.isfinite(result.jet.gradient))
     assert not result.valid[0]
-    assert result.status[0] == fixed.FixedPointStatus.NEEDS_ROWS
+    assert result.status[0] == fixed.FixedPointStatus.NOT_CONVERGED
 
 
 def _path_carrier():

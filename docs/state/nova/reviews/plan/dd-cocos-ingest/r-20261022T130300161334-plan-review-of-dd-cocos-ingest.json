@@ -1,0 +1,60 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-22T13:22:48.672Z",
+  "dispatched_at": "2026-10-22T13:04:46Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/dd-cocos-ingest.html:59",
+      "id": "reasoning-1",
+      "reason": "\u00a73 states no replacement refusal for the archive route, and its own control (done-when (2)'s evidence that the sign test is *gone*) measures the opposite of a working guard, so the MAST source would silently accept a reversed flux family.",
+      "text": "\u00a73 removes `PlasmaSlice.prescribe`'s fixed-orientation guard \"in favour of the module's conformance refusal\", but `translate_equilibrium` (nova/io/sourcemap.py:895) only refuses Data Dictionary reads; `PlasmaSource.from_mast` (nova/imas/plasma_source.py:146) feeds the same `prescribe` from the COCOS 3 MAST level-1 archive, and it is the archive path \u2014 not the DD path \u2014 that today's green test `tests/test_plasma_source.py::test_mast_flipped_psi_is_refused` (line 60) and `scripts/reconstructed_plasma_source/baseline_sign.py:49` (`raise AssertionError(\"flipped psi reached the current prescription\")`) exist to protect, so a node following \u00a73 deletes a live guard from a path \u00a72's refusal never reaches",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/dd-cocos-ingest.html:60",
+      "id": "done_when-1",
+      "reason": "a node can pass \u00a73's declared gate green while those three fail at the merged head, so the plan must name them (and the conforming pulse, 105052/1 or 105069/3, they re-point to) or the refusal's blast radius lands on the coordinator as an unattributed regression.",
+      "text": "done-when (1) requires `PlasmaSource.from_imas` to refuse DINA 105014/1, and done-when (3) scopes the gate to \"the readers' test files \u2026 by delta against the base\", but three currently-green, non-xfail `slow` tests drive `from_imas` on that exact pulse and belong to no reader's test file: `tests/test_plasma_source.py::test_dina_generic_source_reproduces_existing_prescription` (line 80), `tests/test_coupled_plant.py::test_dina_case_through_the_generic_source_is_unchanged` (line 843), and `tests/test_prescribed_plasma.py::test_polygon_flux_change_on_a_real_slice` (line 526, `from_imas` at line 548)",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/dd-cocos-ingest.html:60",
+      "id": "anchors_resolve-1",
+      "reason": "the census records both line numbers explicitly (row `extrapolate.py::Extrapolate.update`, line 37 of `docs/research/dd-cocos-census.html`), so the node's edit is the same whichever method the literal is attributed to; the misclassification only misdescribes it.",
+      "text": "\u00a73 says \"`nova/imas/extrapolate.py::Extrapolate.update`, whose `# COCOS` literals at lines 301 and 345 are reads, not writes\", but `nova/imas/extrapolate.py:345` (`_levels = -levels[::-1]  # COCOS`) sits in `Extrapolate.plot_2d_masked` (defined at line 339, a plotting helper), and it negates contour levels for display rather than reading a COCOS-dependent quantity",
+      "type": "anchors_resolve",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "10d9a9b8305e0952b8614c49bb316844a582bbb2cc5701ef5b7197fa75a5f9bf",
+  "plan_slug": "dd-cocos-ingest",
+  "plan_version": 41,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261022T130300161334-plan-review-of-dd-cocos-ingest",
+  "reviewed_blob_sha": "d6950e1d69d6c28d17e7290135a1c2750f19a1b9",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 `nova/imas/extrapolate.py::Extrapolate.update` resolves, but only one of the two `# COCOS` literals \u00a73 attributes to it is in that method: line 345 is in `Extrapolate.plot_2d_masked`.",
+    "done_when": "a finding \u2014 the only negative control \u00a73 declares is on `plasma_source.py`, so the requirement in done-when (1) that DINA 105014/1 be refused leaves three currently-green tests in files \u00a73 never names red.",
+    "evidence_paths": "pass \u2014 the only record \u00a73 names is \u00a71's durable census document `docs/research/dd-cocos-census.html`; its gate is the readers' own test files in-tree, not a scratchpad.",
+    "naming": "pass \u2014 \u00a73 introduces no new symbol names, and its prose carries no plan labels, stage names or ticket numbers.",
+    "reasoning": "a finding \u2014 \u00a73 removes the tree's only fixed-orientation guard outright, but the replacement it names (the \u00a72 DD conformance refusal) does not exist on the non-DD MAST route that shares `PlasmaSlice.prescribe`, so that route is left with no refusal and no control.",
+    "single_goal": "pass \u2014 s3 carries one deliverable (the census readers move onto the \u00a72 entry point) and its three done-when clauses all measure that one deliverable.",
+    "wiring": "pass \u2014 s3 declares `data-links=\"dd-cocos-ingest#s2\"` and `plan-section-depends-on` gives s2 as s3's only prerequisite; both resolve, and the cross-plan claim in \u00a73 (\"unblocks the reconstruction check of iter-passive-plasma-circuit \u00a76, whose reference is CORSICA 130506/6\") is confirmed \u2014 that plan's \u00a76 check 3 names CORSICA 130506/6 and states it waits on dd-cocos-ingest \u00a73."
+  },
+  "section_digests": {
+    "_document": "0944b41fbee062214508f8e371bdb6d46b75eb62d96e4606b5e91e6893187ad0",
+    "s0": "d7c3143494e97518c859457355f006ec1a3961adf5e50d514822385ec2941326",
+    "s1": "8493846bddbd37e17766c3f28357c4dec07fde5dad711cf4d8096db87e577f89",
+    "s2": "38e4a6fd8cb459d4e887ae55cc12b322f74419e30f3f46aaa3022d95172c4f71",
+    "s3": "38fbd5c048f0353246124235be1613d47cca94649d36ab029d5ed97ac2cd0d29",
+    "s4": "d6a70aa2dd32032baf0b25d96203690d339d0869464e29c0f3620c5c535bca9c",
+    "s5": "db46395f9321959e91cc657923e567fa72cda1e12fa3aa977d6a83243b8e1d36"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T13:29:21.757296+00:00"
+}

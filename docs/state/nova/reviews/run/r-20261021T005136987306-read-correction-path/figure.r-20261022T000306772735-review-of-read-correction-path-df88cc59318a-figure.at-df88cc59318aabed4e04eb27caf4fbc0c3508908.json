@@ -1,0 +1,86 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "This is a figure review and ran no suite. The count and the id list are the neutral values the record shape requires, not a measurement; no base/head gate pair was read and no suite-delta is claimed.",
+  "attachment_map": {
+    "image-0.png (1400x1000 RGBA, attached to this review run)": "docs/figures/converged-forward-solve/read-correction-path/terminal-forward-states.svg"
+  },
+  "attachment_note": "The attached raster was opened and judged directly. Provenance was confirmed rather than assumed: the attached PNG is 1400x1000 with a 1. The SVG's viewBox is 1008x720 pt, aspect 1.4, matching 1400/1000, and the reviewed run's caption states 'The SVG was rendered to a 1,400-pixel PNG, visually inspected'. The head's committed blob was additionally extracted (`git show df88cc593:docs/figures/converged-forward-solve/read-correction-path/terminal-forward-states.svg`) and re-rendered at density 300 (4200x3000) with ImageMagick for the upscaled crops and pixel measurements below, so every claim below is read from the artifact rather than from its source text.",
+  "completed_at": "2026-10-22T00:17:53.156Z",
+  "dispatched_at": "2026-10-22T00:03:42Z",
+  "figure_checks": {
+    "clipping": "Attached render 1400x1000: non-white pixels in the outer 1 px, 2 px and 3 px frames are 0, 0 and 0. Nothing is clipped.",
+    "encoding_from_the_source": "Measured from the SVG's style blocks and glyph definitions. Contours: 32 solid teal (#1f6f8b) paths at stroke-width 2.0 and 1 at 2.4; 33 dashed charcoal (#333333) paths at stroke-width 2.4 with stroke-dasharray 8.88,3.84, i.e. about eight levels per panel drawn twice. Wall: 4 paths, stroke #000000, fill none, one per panel. Null marker glyphs, by half-extent: retained axis 3.25 pt vs reference axis 4.75 pt; retained saddle 3.75 pt vs reference saddle 5.25 pt. Marker coordinates: limited 553 retained axis (270.414, 174.890) vs reference axis (270.416, 174.838); limited 2,105 retained axis (767.834, 174.515) vs reference (768.349, 174.838); diverted 550 retained axis (265.204, 491.143) vs reference (265.184, 491.102), retained saddle (232.585, 615.062) vs reference saddle (232.050, 615.011); diverted 2,098 retained axis (763.136, 491.141) vs reference (763.117, 491.102), retained saddle (730.069, 615.634) vs reference saddle (729.982, 615.011). Separations therefore range 0.04 pt to 0.62 pt on a 1008 pt canvas, i.e. 0.06 to 0.86 px at the delivered 1400 px render.",
+    "font_to_render": "Titles and legend are single-size body text; at the 1400 px render the title cap height measured about 20 px and the legend labels about 17 px, both above the page's ~12 px body text and legible without zoom.",
+    "label_geometry": "Panel titles and legend labels were located by decoding the SVG's subsetted glyph runs (matplotlib font subsets offset each codepoint by 0x1d) and reading each text group's `translate(x, y) scale(0.1 -0.1)` transform. Titles: 'Limited, 553 cells' at (193.20, 22.52), 'Limited, 2,105 cells' at (684.46, 22.52), 'Diverted, 550 cells' at (189.15, 349.64), 'Diverted, 2,098 cells' at (680.40, 349.64). Legend row 1 at y=678.48: 'retained field' x=312.01, 'retained axis' x=468.67, 'retained saddle' x=623.32. Legend row 2 at y=697.98: 'reference field' x=312.01, 'reference axis' x=468.67, 'reference saddle' x=623.32. Both rows and the widest label fall inside the 1008x720 pt canvas with the 3 px render frame empty.",
+    "render_provenance": "The attached image-0.png was opened with Read and judged directly; it is 1400x1000 RGBA, matching the aspect of the SVG's 1008x720 pt viewBox and the caption's own statement that the SVG was rendered to a 1,400-pixel PNG. For measurement the head's committed blob was extracted and re-rendered independently at 4.17x (`convert -density 300 -background white -flatten`, 4200x3000), and all crops and pixel counts below come from that render. The reviewed base 94aeed72 was confirmed an ancestor of the reviewed head df88cc59 (`git merge-base --is-ancestor` exit 0)."
+  },
+  "figure_verdicts": [
+    {
+      "attachment": "image-0.png",
+      "figure": "docs/figures/converged-forward-solve/read-correction-path/terminal-forward-states.svg",
+      "rubric": {
+        "contrast": "pass. All text is near-black on white (panel titles and the six legend labels), well above 4.5:1. The teal #1f6f8b data strokes read about 5.4:1 against the white background and the charcoal #333333 strokes about 12.6:1, so no series is lost to low contrast.",
+        "data_ink": "pass. Only data ink is present: contour strokes, four wall curves, six panel null markers and their two legend swatches per style. No grid, no shading, no background fill and no decorative band.",
+        "decoration": "pass. Axes are off in every panel -- no spines, ticks, tick labels or gridlines -- and the legend is frameless with no box. Nothing on the canvas is stylisation.",
+        "label_collision": "pass. Zero non-white pixels in the outer 3 px frame of the 1400x1000 render, at every band width 1, 2 and 3, so nothing is clipped at the canvas edge. The four panel titles occupy separate bands above their own panels (SVG y=22.52 for the top row, y=349.64 for the bottom row) and the six legend labels sit in two clearly separated rows (SVG y=678.48 and y=697.98) with about 155 pt of horizontal clearance between columns. No label overlaps another label, a marker or a contour.",
+        "legibility": "pass, with two encoding defects recorded as findings 1 and 2. Four titled poloidal panels in a 2x2 grid -- 'Limited, 553 cells', 'Limited, 2,105 cells', 'Diverted, 550 cells', 'Diverted, 2,098 cells' (titles decoded from the SVG's subsetted glyph runs and confirmed on the render). Each panel draws nested teal flux contours, the first wall as a solid charcoal closed curve, and a single filled triangle at the magnetic axis; the two diverted panels additionally show a cross marker at the lower X-point. One frameless two-row, three-column figure-level legend sits below the panels. The quantity the caption certifies -- a solved field lying on its analytic reference -- is visible where the two differ, most clearly along the top of the Limited, 2,105 cells panel, where the charcoal dashes separate from the teal by several pixels. The panel-to-panel shape difference is read at a glance. Findings 1 and 2 concern how the two series and the two null sets are encoded, not whether the panels can be read.",
+        "table_form": "pass. The figure depicts poloidal flux contours, a wall and null locations -- a spatial relationship that no table carries; the captions' per-row residuals are supplied as text on the page, not as an image of a table."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "evidence": "attached image-0.png; 4.17x re-render of `git show df88cc593:docs/figures/converged-forward-solve/read-correction-path/terminal-forward-states.svg`; SVG glyph defs m0ef2673822 (retained axis, half-extent 3.25), mb4e7775de4 (reference axis, 4.75), mcbcf22836c (retained saddle, 3.75), m81311702d2 (reference saddle, 5.25) and their <use> coordinates; caption at docs/evidence/fragments/converged-forward-solve/read-correction-path.html:24",
+      "file": "docs/figures/converged-forward-solve/read-correction-path/terminal-forward-states.svg",
+      "line": null,
+      "severity": "follow-on",
+      "summary": "Both null sets are drawn in every panel, but the two marks nest inside one another at sub-pixel separation and cannot be told apart, so the caption's claim that the figure 'draws the wall, both magnetic axes, and both admitted saddles' is not verifiable from the render. The reference marker is drawn from a larger glyph centred on the retained one, and the two centroids coincide: in the Limited, 553 cells panel the retained axis sits at SVG (270.414, 174.890) and the reference axis at (270.416, 174.838), a 0.05 pt separation (0.07 px at the delivered 1400 px render), with glyph half-extents 3.25 pt and 4.75 pt. In a 4.17x render that composite reads unmistakably as a single teal triangle with a thick charcoal border, not as two markers; the legend's 'retained axis' and 'reference axis' swatches, by contrast, are two triangles of different sizes standing apart. The diverted saddles behave the same way: retained (232.585, 615.062) against reference (232.050, 615.011), 0.54 pt apart, with half-extents 3.75 pt and 5.25 pt, so the two crosses fuse into one blocky mark with dark corners showing. The consequence for a reader is that no axis or saddle offset can be seen at all, and a null mismatch between the solved and analytic fields of the size these rows are being certified against would be invisible in this idiom; the caption's numeric residuals are the only place that agreement can be read. Recorded as follow-on and not blocking: every panel remains readable, and the nesting does convey coincidence, which is the intended meaning."
+    },
+    {
+      "evidence": "attached image-0.png; 4.17x re-render; SVG style blocks (`stroke: #1f6f8b; stroke-width: 2` x32, `stroke: #333333; stroke-width: 2.4` x33 with `stroke-dasharray: 8.88,3.84` x33); colour-classified scanlines at y=640, 700 and 760 of the 4200x3000 render; caption at docs/evidence/fragments/converged-forward-solve/read-correction-path.html:24",
+      "file": "docs/figures/converged-forward-solve/read-correction-path/terminal-forward-states.svg",
+      "line": null,
+      "severity": "follow-on",
+      "summary": "The analytic reference is drawn heavier and darker than the solved field it lies beneath, so at the delivered resolution the reference is not a separable second series and the contour edge reads as ragged stipple rather than as two curves. Measured in the source: 33 dashed charcoal (#333333) reference paths at stroke-width 2.4 against 32 solid teal (#1f6f8b) retained paths at stroke-width 2.0. A horizontal scanline through the Limited, 553 cells panel of the 4.17x render shows each contour as a run of teal with charcoal appearing only as a one- to two-pixel sliver on the flanks and only where a dash falls -- so at the 1400 px width the reader receives, the reference is roughly a one-pixel intermittent fringe on the teal line. Where the fields diverge slightly the charcoal protrudes beyond the teal and the composite edge breaks into dark specks; this is most visible in the Limited, 553 cells panel, whose coarse mesh already gives a blocky contour, so a reader cannot separate mesh jaggedness from the double-draw texture. The caption explains the intended reading ('they read as one line with a dashed edge; that agreement is the result'), and that reading does survive where the two series separate -- most clearly along the top of the Limited, 2,105 cells panel, where the dashes stand several pixels clear of the teal. The defect is that the repository's layering rule calls for the beneath series to be thinner and lighter than the subject, and here it is 20 percent thicker and considerably darker, which puts the visual weight of every contour on the baseline rather than on the certified solved field. Recorded as follow-on and not blocking: no series is lost, the separation is still readable where the fields differ, and no label or mark is obscured."
+    }
+  ],
+  "item_verdicts": {
+    "caption_independence": "The caption is not a restatement of a title. The figure carries no title -- identity is in the file name and the caption -- and the caption names each panel with its terminal residual (4.6e-15, 1.3e-14, 9.0e-14, and the strict xfail at 0.0262), states the encoding ('solved contours are drawn on top as thinner solid blue lines over the dashed charcoal analytic reference, on one shared physical level array'), states the read ('Where the fields agree, they read as one line with a dashed edge'), and records the job, the device and the render check. It is independent of the title and it is accurate about the drawing it describes: the solved series really is drawn thinner (2.0 pt) than the reference (2.4 pt) and on top of it. Its claim that the figure 'draws the wall, both magnetic axes, and both admitted saddles' is accurate about what is drawn, and finding 1 records that the result is not visible to a reader.",
+    "finding_materiality": "Two follow-on findings, no blocking finding. No label is clipped (0 non-white pixels in the outer 3 px frame), no label overlaps another label or the data, no text is unreadable, and the figure does not depict tabular data, so none of the blocking categories is met.",
+    "rendered_artifact": "The single attached figure was opened with Read and inspected as an image at its native 1400x1000 and in upscaled crops of each panel, the axis markers, the X-point markers and the legend.",
+    "scope": "Read-only. No file was edited, created, moved, deleted, redrawn, relabelled or reformatted; the only writes are this record at its two declared paths and the run manifest."
+  },
+  "justifications": {
+    "durability": "The record is written at both declared paths and checked with `reckon crew check --review --record` before the manifest is closed.",
+    "evidence": "Provenance is by construction: the attached PNG matches the SVG's aspect and the caption's own statement of the render width, and the measurements come from a render of `git show df88cc59:<svg>`. The reviewed base is confirmed an ancestor of the reviewed head. Panel titles and legend labels were decoded from the SVG's subsetted glyphs, not guessed.",
+    "legibility": "Read from the attached render and from an independently produced 4.17x render of the reviewed head's own committed blob; the null-marker and contour-encoding claims are measured on pixels and on the SVG's glyph and style definitions rather than judged by eye alone.",
+    "scope_discipline": "This review is read-only; findings are reported in this record and no source, figure or caption was changed."
+  },
+  "prior_records": {
+    "note": "An earlier figure review of this same file at head e9444fd44c raised two follow-on findings: (1) the reference series is largely occluded by the retained series drawn over it; (2) the figure's alt text and a caption count described an artifact the render did not show. Finding 2 above restates (1) because it is not repaired at the head under review -- the stroke widths are unchanged (reference 2.4 dashed charcoal beneath retained 2.0 solid teal) -- so a coordinator should read it as outstanding, not new. The alt-text and caption defects were repaired by the head under review: df88cc593 rewrote the alt to distinguish 'converged certified limited states at 553 and 2,105 cells' from 'the strict-xfail diverted state at 2,098 cells', and the caption's panel names now match the titles ('Limited, 553 cells', not a contradicting count). Finding 1 above is new to this record.",
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261021T005136987306-read-correction-path/review-records/r-20261021T005136987306-read-correction-path.figure.at-e9444fd44c35688678eea60b3cc0873125927ab3.json",
+    "reviewed_head_sha": "e9444fd44c35688678eea60b3cc0873125927ab3"
+  },
+  "project": "nova",
+  "review_run_id": "r-20261022T000306772735-review-of-read-correction-path-df88cc59318a-figure",
+  "reviewed_base_sha": "94aeed7246f89b00eae1952f9e8b3a3a8aef0ccb",
+  "reviewed_figures": [
+    "docs/figures/converged-forward-solve/read-correction-path/terminal-forward-states.svg"
+  ],
+  "reviewed_head_sha": "df88cc59318aabed4e04eb27caf4fbc0c3508908",
+  "reviewed_run_id": "r-20261021T005136987306-read-correction-path",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: pass, with two encoding defects recorded as findings 1 and 2 (the reference null markers are nested inside larger retained glyphs at sub-pixel separation, and the reference field renders as an intermittent 1-px charcoal fringe rather than a separable second series at the delivered 1400 px).",
+    "RUBRIC data_ink: pass",
+    "RUBRIC decoration: pass",
+    "RUBRIC contrast: pass",
+    "RUBRIC table_form: pass",
+    "RUBRIC label_collision: pass"
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T00:20:03.780151+00:00",
+  "total": null
+}

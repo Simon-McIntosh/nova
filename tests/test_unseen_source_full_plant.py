@@ -21,7 +21,7 @@ import importlib.util
 import os
 import shutil
 import sys
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
@@ -204,12 +204,10 @@ def _open_dina(pulse: int, run: int):
 def _dina_source(pulse: int, run: int, index: int):
     """One DINA slice as a generic ``PlasmaSource``.
 
-    These two cases store their poloidal flux with axis and boundary in the same
-    sense as their plasma current -- the opposite of the COCOS 17 convention the
-    generic prescription expects -- so the stored flux family is oriented by the
-    sign the existing reader derives (``sign(-ip / span)``) before it is
-    prescribed.  Both arms consume the identical source, so the orientation does
-    not enter the bit-identity or the tolerance comparisons.
+    Both cases conform to their written DD version's convention, so the reader
+    is the one that orients the stored flux family: the DD3 read is translated
+    to COCOS 17 before any slice is built, and no caller re-orients it. Both arms
+    consume the identical source.
     """
     from nova.imas.plasma_source import PlasmaSource
 
@@ -217,22 +215,6 @@ def _dina_source(pulse: int, run: int, index: int):
     source = PlasmaSource.from_imas(
         equilibrium, active, provenance=f"DINA {pulse}/{run}", indices=[index]
     )
-    global_ = equilibrium.time_slice[index].global_quantities
-    span = float(global_.psi_boundary) - float(global_.psi_axis)
-    if np.sign(-float(global_.ip) / span) < 0:
-        original = source.slices[0]
-        source = replace(
-            source,
-            slices=(
-                replace(
-                    original,
-                    psi=-original.psi,
-                    psi_samples=-original.psi_samples,
-                    psi_axis=-original.psi_axis,
-                    psi_boundary=-original.psi_boundary,
-                ),
-            ),
-        )
     return source
 
 

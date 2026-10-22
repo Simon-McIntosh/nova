@@ -35,6 +35,13 @@
     "scripts/iter_vessel_evolution/evolve.py:119"
   ],
   "completed_at": "2026-10-22T06:46:57.161Z",
+  "dimension_dispositions": {
+    "evidence": {
+      "kind": "folded",
+      "node": "vs3-linkage-repair",
+      "recorded_at": "2026-10-22T06:49:42.839689+00:00"
+    }
+  },
   "dispatched_at": "2026-10-22T06:35:53Z",
   "findings": [
     {

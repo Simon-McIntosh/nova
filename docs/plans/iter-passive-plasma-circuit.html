@@ -25,7 +25,7 @@
   <title>ITER Passive and Prescribed-Plasma Circuit | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="48">
+<meta name="plan-version" content="49">
 <meta name="plan-modified" content="2026-10-22">
 </head>
 <body>
@@ -212,6 +212,11 @@
     <div class="r-fu-body"><p>power_convertor's integrated run is blocked on the indefinite VSU and VSL Schur complement in the cached ITER plant. Geometry (jackets inside their conductors) and quadrature (mixed coil-block rules) are both candidates; §7 attributes, repairs and re-pins.</p></div>
     <pre class="r-fu-prompt">/reckon-build iter-passive-plasma-circuit §7</pre>
     </article>
+<article class="r-fu" data-id="f-ippc-004" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-build" data-written-at="2026-10-22 08:25" data-recommends-skill="/reckon-build iter-passive-plasma-circuit §7" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Find what drops the 6 mm passive block&#x27;s collective mode through zero</h4>
+    <div class="r-fu-body"><p>The 6 mm sectioned-set entry's passive block is collectively near-singular. Its smallest eigenvalue is -9.19e-4 of the mean self term (40 negatives, minimum -4.01e-8 H), against +5.69e-5 at 12 mm. Measured on the repair node's tip, two hypotheses are ruled out. Observer quadrature is ruled out because sub-cell refinement is inert. Footprint overlap is ruled out because no leading pair's correlation exceeds 1, and the 12 mm set has the same sub-floor rows. The repair node proposed the next measurement: compare the two blocks' spectra on their shared physical sections, and read the finite-source splice in <code>scripts/iter_sectioned_conductor_set/build.py</code> for whether the 6 mm set's observer quadrature puts its passive rows on the same footing as the 12 mm set's. Done when the 6 mm joint linkage is positive definite with no floor and the strict-xfail 6 mm arms pass as XPASS, or the cause is named and shown to need a geometry ruling.</p></div>
+    <pre class="r-fu-prompt">/reckon-build iter-passive-plasma-circuit §7</pre>
+    </article>
 </section>
 <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -309,9 +314,12 @@ Parsed; all six rubric items answered, all six pass. Two follow-on findings,
 no blocking finding: the caption re-anchor was a hand edit of two SVG text
 transforms rather than a re-render, and the conductor-annulus leader stops a
 few pixels short of the blue band and crosses the red jacket band to reach
-its caption. The prior review&#x27;s blocking clipping finding is repaired: the
+its caption. The prior review's blocking clipping finding is repaired: the
 full sentence now renders with 111 px of right margin and no non-white pixel
 touches any canvas edge.</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-20261022-vs3-split" data-who="reckon-build" data-when="2026-10-22T08:25:00Z">
+    <div class="r-comment-body"><p><strong>Coordinator split, 2026-10-22: §7 closes on the 12 mm set, and the 6 mm passive block becomes its own investigation.</strong></p><p>What the repair node measured:</p><ul><li>The VS3 annuli built as sector polygons make the 12 mm joint linkage positive definite with no floor: smallest eigenvalue +2.51e-9 H, all fourteen coil channels positive.</li><li>Against a four-turn reference built for each coil, VSU's and VSL's series-map bare inductances stand at 0.9975 and 0.9972 of the reference. The earlier single-ring reference at an assumed 6.0 m was not a reference for either coil.</li><li>The loader refuses a non-positive-definite entry by name.</li><li>The 6 mm passive block keeps 40 negatives, minimum -4.01e-8 H. That is a smallest eigenvalue of -9.19e-4 of the mean self term, against +5.69e-5 at 12 mm.</li><li>It is not observer quadrature: sub-cell refinement is inert.</li><li>It is not over-coupling of neighbouring footprints: no leading pair's correlation exceeds 1 (the largest is 0.988), and the 12 mm set carries the same floor-inflated rows.</li></ul><p>The 6 mm entry is built under its new key and refused by name, and its test arms are strict xfail. The 105069/3 plant is rebuilt against the 12 mm set. Followup f-ippc-004 carries the collective near-singularity.</p></div>
 </div>
 </section>
 </main>

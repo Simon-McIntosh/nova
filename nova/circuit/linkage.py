@@ -24,6 +24,7 @@ the physical inductance matrix is symmetric by reciprocity.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from concurrent.futures import ProcessPoolExecutor
 from multiprocessing import get_context
 
@@ -31,7 +32,8 @@ import numpy as np
 
 from nova.biot.greens import cylinder_greens, hybrid_greens
 from nova.biot.polygon import polygon_greens
-from nova.circuit.conductor import ConductorSet
+from nova.circuit.conductor import ConductorSet, PolygonSection
+from nova.imas.mast_passive_inductance import section_quadrature
 
 #: floor on the section extents fed to the source-side flux integration [m] --
 #: a guard against a zero-thickness section, NEVER a conducting-area model (a
@@ -83,24 +85,50 @@ def section_points(
     )
 
 
+
+
 def section_grid(
     conductors: ConductorSet,
-    groups: list[np.ndarray],
+    groups: Sequence[np.ndarray | PolygonSection | None],
     delta: float,
     n_max: int,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Concatenated cross-section sub-points of every filament group.
 
-    Returns ``(r, z, weight, owner)`` -- the weight folds each filament's
-    current share with its section quadrature weight; ``owner`` maps each point
-    back to its group index, for a :func:`numpy.bincount` reduction.
+    A group is either an array of filament rows, sampled as axis-aligned
+    rectangles by :func:`section_points`, or one shaped
+    :class:`~nova.circuit.conductor.PolygonSection` sampled by
+    :func:`nova.imas.mast_passive_inductance.section_quadrature`, whose points
+    lie inside any simple outline, however thin or bent, because it triangulates
+    the outline rather than sampling its bounding box.  ``delta`` and ``n_max``
+    size the rectangular
+    sampling only; the shaped split follows from the section's own corners.  A
+    group that is ``None`` contributes no points and keeps its index, so a
+    caller can hand in one entry per circuit with only the shaped ones filled.
+
+    Returns ``(r, z, weight, owner)`` -- the weight folds each group's current
+    share with its section quadrature weight; ``owner`` maps each point back to
+    its group index, for a :func:`numpy.bincount` reduction.
     """
     point_r: list[np.ndarray] = []
     point_z: list[np.ndarray] = []
     weight: list[np.ndarray] = []
     owner: list[np.ndarray] = []
-    for index, rows in enumerate(groups):
-        for row in rows:
+    for index, group in enumerate(groups):
+        if group is None:
+            continue
+        if isinstance(group, PolygonSection):
+            sub_r, sub_z, sub_weight = section_quadrature(
+                np.asarray(group.vertices, float)
+            )
+            point_r.append(sub_r)
+            point_z.append(sub_z)
+            weight.append(
+                float(group.current_share) * sub_weight / float(sub_weight.sum())
+            )
+            owner.append(np.full(sub_r.size, index, dtype=np.int64))
+            continue
+        for row in group:
             sub_r, sub_z, sub_w = section_points(
                 float(conductors.r[row]),
                 float(conductors.z[row]),

@@ -3,13 +3,24 @@
 from __future__ import annotations
 
 import numpy as np
-from shapely import contains_xy
-from shapely.geometry import Polygon
 
 from nova.biot.greens import greens_psi, hybrid_greens
 from nova.circuit.conductor import ConductorSet
-from nova.circuit.linkage import section_grid, section_points
+from nova.circuit.linkage import section_grid
 from nova.imas.profiles import PrescribedCurrent
+
+
+def plasma_cells(
+    current: PrescribedCurrent, *, vertical_offset: float = 0.0
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """The (r, z, current) of every plasma cell carrying current [A]."""
+    source_r, source_z = np.meshgrid(current.radius, current.height, indexing="ij")
+    live = np.flatnonzero(current.cell_current.ravel())
+    return (
+        source_r.ravel()[live],
+        source_z.ravel()[live] + vertical_offset,
+        current.cell_current.ravel()[live],
+    )
 
 
 def plasma_flux_at_points(
@@ -25,15 +36,11 @@ def plasma_flux_at_points(
     )
     if np.any(target_r <= 0):
         raise ValueError("target radius must be positive")
-    source_r, source_z = np.meshgrid(current.radius, current.height, indexing="ij")
-    live = np.flatnonzero(current.cell_current.ravel())
-    source_r = source_r.ravel()[live]
-    source_z = source_z.ravel()[live] + vertical_offset
-    amps = current.cell_current.ravel()[live]
+    source_r, source_z, amps = plasma_cells(current, vertical_offset=vertical_offset)
     result = np.zeros(target_r.size)
     flat_r, flat_z = target_r.ravel(), target_z.ravel()
-    for start in range(0, len(live), 256):
-        stop = min(start + 256, len(live))
+    for start in range(0, amps.size, 256):
+        stop = min(start + 256, amps.size)
         with np.errstate(divide="ignore", invalid="ignore"):
             kernel = greens_psi(
                 flat_r[:, None],
@@ -83,23 +90,19 @@ def plasma_linked_flux(
             owner, weights=weight * point_flux, minlength=len(rectangular)
         )
         result[np.isin(circuits, rectangular)] = rectangular_flux
-    for index, circuit in enumerate(circuits):
-        polygon = polygons.get(int(circuit))
-        if polygon is None:
-            continue
-        vertices = np.asarray(polygon.vertices, float)
-        extent = np.ptp(vertices, axis=0)
-        mid = np.mean([vertices.min(axis=0), vertices.max(axis=0)], axis=0)
-        point_r, point_z, weight = section_points(
-            mid[0], mid[1], extent[0], extent[1], section_spacing, section_n_max
-        )
-        inside = contains_xy(Polygon(vertices), point_r, point_z)
-        if not np.any(inside):
-            raise ValueError(f"polygon circuit {circuit} has no quadrature points")
-        weight = weight[inside] / weight[inside].sum()
-        result[index] = polygon.current_share * np.dot(
-            weight, plasma_flux_at_points(current, point_r[inside], point_z[inside])
-        )
+    if polygons:
+        shaped = [polygons.get(int(circuit)) for circuit in circuits]
+        if any(section is not None for section in shaped):
+            point_r, point_z, weight, owner = section_grid(
+                conductors,
+                shaped,
+                section_spacing,
+                section_n_max,
+            )
+            point_flux = plasma_flux_at_points(current, point_r, point_z)
+            result += np.bincount(
+                owner, weights=weight * point_flux, minlength=len(circuits)
+            )
     return circuits, result
 
 

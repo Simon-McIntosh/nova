@@ -1,0 +1,64 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-22T07:59:10.014Z",
+  "dispatched_at": "2026-10-22T07:51:23Z",
+  "findings": [
+    {
+      "file": "docs/research/dd-cocos-census.html",
+      "line": "30",
+      "severity": "blocking",
+      "text": "blocking: the reader table omits the IDS readers of COCOS-dependent signals \u00a71 names \u2014 nova/imas/magnetics.py:88 reads ids.flux_loop and nova/imas/io_magnetics.py:88-104 declares and reads flux_loop, b_field_pol_probe and b_field_tor_probe. Those are the flux-loop and pick-up signals whose sign follows psi or B_p, so done_when's \"every IDS reader\" is not met and \u00a73's \"every census reader\" would let them escape the translator. Add rows giving each its assumed convention (both read raw IDS values with none declared, as the Equilibrium/getslice row already records)."
+    },
+    {
+      "file": "docs/research/dd-cocos-census.html",
+      "line": "70",
+      "severity": "follow-on",
+      "text": "follow-on: the \"slices sampled > 1 MA\" column disagrees with the cited fixture log for two rows \u2014 DINA 105069/3 reads \"5 of 4855\" and DINA 105013/1 reads \"2 of 2352\", while fixture_verdicts.log records n_slices_above_1MA_sampled of 45 and 20 for the same pulses (the 5 and 2 are dina_verdicts.jsonl's n_above_1MA over an 8-row sample, not the fixture scan). Correct the two cells to 45 and 20 so the table reconciles with the log it cites."
+    },
+    {
+      "file": "docs/research/dd-cocos-census.html",
+      "line": "29",
+      "severity": "follow-on",
+      "text": "follow-on: the positive-control claim overstates its second count \u2014 it says the planted reader is found by \"3 lines by Search A, 4 lines by Search B\", but running both commands on scratch/planted_reader.py returns 3 lines each (A: 6,7,10; B: 8,9,10). The control's purpose still holds (the planted sign test at :8 is found), but the recorded figure is wrong."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "none \u2014 this is a docs-only change; no production runtime code reaches it, and the node's own test and measurement scripts under the run directory do not count as call sites.",
+    "diff": "Read the single gained commit 9c256959 against base b8b8d5b2c; it adds only docs/research/dd-cocos-census.html (81 lines) and docs/evidence/fragments/dd-cocos-ingest/dd-cocos-census.html (18 lines), with no code change.",
+    "done_when": "The gate asserts the three clauses \u2014 two searches with stated hit counts and a planted positive control (reproduced exactly: 494/62, 80/25, 1 sign test), a fixture-backed identify_convention verdict with the fixture named per row, and the internal-consumer migration list \u2014 plus the inverted-guard negative control, whose log shows the verdict flipping.",
+    "goal": "The goal is a census of every place nova reads, writes or hard-codes a COCOS-dependent quantity; docs/research/dd-cocos-census.html:30-42 carries the reader table, :43-53 the internal consumers, :54-61 the owners.",
+    "manifest": "The source manifest records status complete, one commit 9c256959, the two changed paths, both search commands with counts, the fixture verdicts, and the negative control; its logs on disk (dina_verdicts.log, fixture_verdicts.log, extra_verdicts.log, negative_control.log, audit-doc.log) all end EXIT=0.",
+    "write_paths": "The source brief grants docs/research/dd-cocos-census.html plus logs and scratch under the run directory; git diff b8b8d5b2c..9c256959 touches only that record and its evidence fragment, both inside the declared scope."
+  },
+  "justifications": {
+    "durability": "The census is a document, so no test reddens if it regresses; its durable guards are the two search counts (re-run here and reproduced exactly at docs/research/dd-cocos-census.html:27) and the falsifiable negative control at :83-84, neither of which fails automatically if a claim is edited out.",
+    "evidence": "Both search commands reproduce their stated counts (494/62, 80/25, and exactly one sign test at nova/imas/plasma_source.py:76) and negative_control.log shows the guard inversion flipping the verdict, but docs/research/dd-cocos-census.html:70-71 report a sampled-slice count that contradicts the fixture_verdicts.log it cites.",
+    "fit": "docs/research/dd-cocos-census.html follows the research specimen (frontmatter at :1-13, method/readers/internal/owners/verdicts/control; audit-doc exits 0 with one info-level long-<pre> note), and the commit scope docs(dd-cocos-ingest) matches the plan slug used by its predecessors 6751d7a0d and 6c507ae20.",
+    "goal_fidelity": "docs/research/dd-cocos-census.html:30-42 covers the reader population with the convention each assumes and a fixture-backed verdict, and every code line it cites checks out (extrapolate.py:301, pulsedesign.py:531, inverse.py:245, biot/contour.py:198, convention.py:65, observation_kernels.py:41, ingest.py:66, signalstore.py:51), but the table omits the magnetics readers of \u00a71-listed signals.",
+    "reuse": "The landed change adds only documents and no definition, so there is no capability to fork; the census extends the plan's existing owner list (nova_cocos, sourcemap.py, convention.py, canonical_key) rather than introducing a mechanism.",
+    "scope_discipline": "git diff b8b8d5b2c..9c256959 changes only docs/research/dd-cocos-census.html and docs/evidence/fragments/dd-cocos-ingest/dd-cocos-census.html, both inside the two paths the source brief grants."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The goal is a census of every place nova reads, writes or hard-codes a COCOS-dependent quantity; docs/research/dd-cocos-census.html:30-42 carries the reader table, :43-53 the internal consumers, :54-61 the owners.\nVERDICT done_when: The gate asserts the three clauses \u2014 two searches with stated hit counts and a planted positive control (reproduced exactly: 494/62, 80/25, 1 sign test), a fixture-backed identify_convention verdict with the fixture named per row, and the internal-consumer migration list \u2014 plus the inverted-guard negative control, whose log shows the verdict flipping.\nVERDICT write_paths: The source brief grants docs/research/dd-cocos-census.html plus logs and scratch under the run directory; git diff b8b8d5b2c..9c256959 touches only that record and its evidence fragment, both inside the declared scope.\nVERDICT manifest: The source manifest records status complete, one commit 9c256959, the two changed paths, both search commands with counts, the fixture verdicts, and the negative control; its logs on disk (dina_verdicts.log, fixture_verdicts.log, extra_verdicts.log, negative_control.log, audit-doc.log) all end EXIT=0.\nVERDICT diff: Read the single gained commit 9c256959 against base b8b8d5b2c; it adds only docs/research/dd-cocos-census.html (81 lines) and docs/evidence/fragments/dd-cocos-ingest/dd-cocos-census.html (18 lines), with no code change.\nCALL_SITES: none\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: docs/research/dd-cocos-census.html:30-42 covers the reader population with the convention each assumes and a fixture-backed verdict, and every code line it cites checks out (extrapolate.py:301, pulsedesign.py:531, inverse.py:245, biot/contour.py:198, convention.py:65, observation_kernels.py:41, ingest.py:66, signalstore.py:51), but the table omits the magnetics readers of \u00a71-listed signals.\nSCORE evidence: 14\nJUSTIFICATION evidence: Both search commands reproduce their stated counts (494/62, 80/25, and exactly one sign test at nova/imas/plasma_source.py:76) and negative_control.log shows the guard inversion flipping the verdict, but docs/research/dd-cocos-census.html:70-71 report a sampled-slice count that contradicts the fixture_verdicts.log it cites.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff b8b8d5b2c..9c256959 changes only docs/research/dd-cocos-census.html and docs/evidence/fragments/dd-cocos-ingest/dd-cocos-census.html, both inside the two paths the source brief grants.\nSCORE durability: 13\nJUSTIFICATION durability: The census is a document, so no test reddens if it regresses; its durable guards are the two search counts re-run and reproduced exactly (docs/research/dd-cocos-census.html:27) and the falsifiable inverted-guard negative control whose log flips the verdict (:83-84), neither of which fails automatically if a claim is edited out.\nSCORE fit: 18\nJUSTIFICATION fit: docs/research/dd-cocos-census.html follows the research specimen (frontmatter at :1-13, then method/readers/internal/owners/verdicts/control; audit-doc exits 0 with one info-level long-<pre> note), and the commit scope docs(dd-cocos-ingest) matches the plan slug used by its predecessors 6751d7a0d and 6c507ae20.\nSCORE reuse: 20\nJUSTIFICATION reuse: The landed change adds only documents and no definition, so there is no capability to fork; the census extends the plan's existing owner list (nova_cocos, sourcemap.py, convention.py, canonical_key) rather than introducing a mechanism.\nFINDING docs/research/dd-cocos-census.html:30 blocking: the reader table omits the IDS readers of COCOS-dependent signals \u00a71 names \u2014 nova/imas/magnetics.py:88 reads ids.flux_loop and nova/imas/io_magnetics.py:88-104 declares and reads flux_loop, b_field_pol_probe and b_field_tor_probe \u2014 so done_when's \"every IDS reader\" is not met and \u00a73's \"every census reader\" would let them escape the translator.\nFINDING docs/research/dd-cocos-census.html:70 follow-on: the \"slices sampled > 1 MA\" column disagrees with the cited fixture log for DINA 105069/3 (5 vs 45) and DINA 105013/1 (2 vs 20), mixing dina_verdicts.jsonl's 8-row n_above_1MA with the fixture scan's sampled count.\nFINDING docs/research/dd-cocos-census.html:29 follow-on: the positive-control claim says the planted reader is found by \"3 lines by Search A, 4 lines by Search B\", but both commands return 3 lines on scratch/planted_reader.py.\n",
+  "review_run_id": "r-20261022T075054587986-review-of-dd-cocos-census-9c256959d41f",
+  "reviewed_base_sha": "b8b8d5b2cc733626b70d311dfeb1f1f4fcbc8f82",
+  "reviewed_head_sha": "9c256959d41f6e5cb63204563c621feffa1be4e6",
+  "reviewed_run_id": "r-20261022T073213473843-dd-cocos-census",
+  "scores": {
+    "durability": 13,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 15,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T08:22:00+00:00",
+  "total": 100
+}

@@ -1118,6 +1118,18 @@ class SectionedGeometryMissing(FileNotFoundError):
     """
 
 
+class JointLinkageNotPositiveDefinite(ValueError):
+    """A sectioned-set entry stores a coil-plus-passive linkage with negative energy.
+
+    The joint linkage is the inductance the plant's energies are built from, so
+    every eigenvalue must be positive: a non-positive one is not a rounding
+    residue but a matrix that will store negative energy for some current
+    vector.  An entry written before the annulus geometry and observer
+    quadrature were repaired carries exactly that, so the refusal separates a
+    repaired entry from a stale one instead of serving the stale one.
+    """
+
+
 @dataclass(frozen=True)
 class SectionedMachine:
     conductors: ConductorSet
@@ -1178,7 +1190,9 @@ def load_sectioned_machine(entry: Path | str) -> SectionedMachine:
 
     Reads the refined conductor geometry, the linkage and the passive system
     from one cache entry.  An entry without the geometry file is refused with
-    :class:`SectionedGeometryMissing`.
+    :class:`SectionedGeometryMissing`, and one whose stored joint linkage
+    carries negative energy is refused with
+    :class:`JointLinkageNotPositiveDefinite`.
     """
     entry = Path(entry)
     geometry_path = entry / SECTIONED_GEOMETRY_FILE
@@ -1191,6 +1205,13 @@ def load_sectioned_machine(entry: Path | str) -> SectionedMachine:
         coil_names = [str(name) for name in stored["coil_names"]]
         section_coil = np.asarray(stored["section_coil"], dtype=np.int64)
     matrix = np.load(entry / "linkage.npy")
+    smallest = float(np.linalg.eigvalsh(matrix).min())
+    if not smallest > 0.0:
+        raise JointLinkageNotPositiveDefinite(
+            f"sectioned-set entry {entry} stores a joint linkage with a "
+            f"non-positive eigenvalue ({smallest:.6e} H): every coil and "
+            "passive current stores positive energy, so this entry is refused"
+        )
     system = load_circuit_system(entry / "system.npz")
     if not np.array_equal(subdivision.circuits, system.circuits):
         raise ValueError(

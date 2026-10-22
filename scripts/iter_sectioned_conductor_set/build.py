@@ -14,6 +14,7 @@ import numpy as np
 from nova.circuit.conductor import (
     ConductorSet,
     PolygonSection,
+    annulus_sector_columns,
     subdivide_passive_thickness,
 )
 from nova.circuit.linkage import (
@@ -38,6 +39,22 @@ SOURCE = (
     (124001, 3, "pf_passive"),
 )
 FREQUENCY = np.geomspace(0.1, 5000.0, 21)
+
+#: equal-angle sectors each machine-description annulus is cut into.  A tube's
+#: cross-section is an annulus, and the radial ordering is the physics: the
+#: outer jacket screens the conductor it surrounds only when it is modelled
+#: outside it.  The count is the measured convergence of the reduced coil
+#: Schur complement's largest generalised eigenvalue fit -- 0.99006 at 8,
+#: 0.98946 at 16 and 0.98927 at 32 sector circuits, so 16 is within 0.02 per
+#: cent of the converged value at half the kernel cost of 32.
+ANNULUS_SECTORS = 16
+
+#: observer sub-grid rule for the sectioned linkage, folded into the key.  The
+#: vessel rows are the thin layers ``subdivide_passive_thickness produces``, and
+#: the machine-wide median section scale under-resolves them; half the scale,
+#: capped at 12 sub-cells per dimension, is the refinement the negative
+#: vessel-row modes are attributed to.
+OBSERVER_SCALE_FRACTION = 0.5
 
 
 def read_ids(pulse: int, run: int, name: str):
@@ -75,11 +92,19 @@ def source_conductors() -> tuple[
                 )
             elif section.section.name == "annulus":
                 data = section.section.data
-                area = np.pi * (
-                    float(data["radius_outer"]) ** 2 - float(data["radius_inner"]) ** 2
+                sectors, sector_polygons = annulus_sector_columns(
+                    section.centre[0],
+                    section.centre[1],
+                    float(data["radius_inner"]),
+                    float(data["radius_outer"]),
+                    section.turns,
+                    circuit,
+                    ANNULUS_SECTORS,
                 )
-                side = np.sqrt(area)
-                append(*section.centre, side, side, section.turns, circuit)
+                for name in ConductorSet._columns:
+                    columns[name].extend(sectors[name])
+                polygons.extend(sector_polygons)
+                coil_owner.extend([index] * (ANNULUS_SECTORS - 1))
             else:
                 raise ValueError(f"unsupported winding section {section.section.name}")
     passive_thickness = []
@@ -108,12 +133,30 @@ def source_conductors() -> tuple[
                 append(*(start + end) / 2, float(span[0]), float(span[1]), 1.0, circuit)
             elif kind == 5:
                 annulus = element.geometry.annulus
-                area = np.pi * (
-                    float(annulus.radius_outer) ** 2 - float(annulus.radius_inner) ** 2
-                )
-                side = np.sqrt(area)
                 thickness = float(annulus.radius_outer) - float(annulus.radius_inner)
-                append(float(annulus.r), float(annulus.z), side, side, 1.0, circuit)
+                # one annulus is N parallel sector paths of the same loop, so the
+                # sector resistance is N times the loop's for the parallel
+                # combination to return the source resistance
+                sectors, sector_polygons = annulus_sector_columns(
+                    float(annulus.r),
+                    float(annulus.z),
+                    float(annulus.radius_inner),
+                    float(annulus.radius_outer),
+                    1.0,
+                    circuit,
+                    ANNULUS_SECTORS,
+                    circuit_stride=1,
+                )
+                for name in ConductorSet._columns:
+                    columns[name].extend(sectors[name])
+                polygons.extend(sector_polygons)
+                loop_resistance = ANNULUS_SECTORS * (
+                    float(loop.resistance) if loop.resistance.has_value else np.nan
+                )
+                passive_thickness.extend([thickness] * ANNULUS_SECTORS)
+                passive_resistance.extend([loop_resistance] * ANNULUS_SECTORS)
+                passive_name.extend([str(loop.name)] * ANNULUS_SECTORS)
+                continue
             elif kind == 2:
                 rect = element.geometry.rectangle
                 thickness = min(abs(float(rect.width)), abs(float(rect.height)))
@@ -233,6 +276,11 @@ def calculate(
     for section in conductors.polygon_sections:
         digest.update(np.asarray(section.vertices).tobytes())
     digest.update(b"polygon:8x24")
+    # the annulus sector count and the observer sub-grid rule are linkage
+    # inputs as much as the source columns are, so they enter the key: a
+    # repaired entry must not be served to a request that predates them.
+    digest.update(b"annulus-sectors:%d" % ANNULUS_SECTORS)
+    digest.update(b"observer:%.6g" % OBSERVER_SCALE_FRACTION)
     digest.update(
         np.asarray([max_thickness, surface_layer_m or 0, section_n_max]).tobytes()
     )
@@ -250,19 +298,17 @@ def calculate(
         matrix = circuit_linkage_matrix(
             refined.conductors,
             circuits,
+            section_scale_frac=OBSERVER_SCALE_FRACTION,
             section_n_max=section_n_max,
             workers=workers,
         )
-        if cache_dir:
-            cache_dir.mkdir(parents=True, exist_ok=True)
-            np.save(matrix_path, matrix)
     build_seconds = perf_counter() - started
     series = np.zeros((n_section, len(coil_names)))
     series[np.arange(n_section), owner] = 1.0
     coil_digest = hashlib.sha256()
     for name in conductors._columns:
         coil_digest.update(np.asarray(getattr(conductors, name))[:n_section].tobytes())
-    coil_digest.update(b"finite-source:6")
+    coil_digest.update(b"finite-source:6:observer:%.6g" % OBSERVER_SCALE_FRACTION)
     coil_path = (
         cache_root / f"coil-{coil_digest.hexdigest()[:20]}.npy" if cache_root else None
     )
@@ -276,6 +322,7 @@ def calculate(
         coil_linkage = circuit_linkage_matrix(
             conductors,
             range(n_section),
+            section_scale_frac=OBSERVER_SCALE_FRACTION,
             section_n_max=6,
             workers=workers,
             finite_source=True,
@@ -285,6 +332,13 @@ def calculate(
             np.save(coil_path, coil_linkage)
     coil_build_seconds = perf_counter() - coil_started
     matrix[:n_section, :n_section] = coil_linkage
+    # the finite-source coil block is spliced in ABOVE, so the matrix written
+    # here is the joint coil-plus-passive matrix the build goes on to use.  A
+    # loader that reads this file must never have to re-splice, and a store
+    # written before the splice would hand it a matrix nothing computed.
+    if cache_dir and not cache_hit:
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        np.save(matrix_path, matrix)
     active = read_ids(*SOURCE[0])
     source_coil_names = [
         str(coil.name).rsplit("(", 1)[-1].removesuffix(")") for coil in active.coil

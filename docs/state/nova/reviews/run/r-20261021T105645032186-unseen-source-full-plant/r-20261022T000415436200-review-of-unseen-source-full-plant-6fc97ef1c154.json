@@ -1,0 +1,40 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "nova/circuit/passive.py:126",
+    "nova/circuit/linkage.py:284",
+    "nova/circuit/linkage.py:403",
+    "nova/circuit/linkage.py:455",
+    "nova/imas/mast_passive_inductance.py:327",
+    "nova/imas/prescribed_plasma.py:82",
+    "nova/imas/prescribed_plasma.py:96",
+    "scripts/iter_vessel_evolution/evolve.py:307"
+  ],
+  "completed_at": "2026-10-22T00:15:21.541Z",
+  "dispatched_at": "2026-10-22T00:04:58Z",
+  "findings": [
+    "follow-on: tests/test_unseen_source_full_plant.py:310 - at the red-arm base 2c14b3ffc the gate reports SKIP_MISSING for this file (scratch/gate_importers5.log:161), so the red arm the brief required never executes the new tests and the run records no evidence that they redden on the regression they guard.",
+    "follow-on: manifest.md artifacts section - the artifacts field names neither the two geometry.npz absolute paths nor the sha256 receipt that done-when (1) and the coordinator's install step require; the receipt exists on disk at scratch/part1_report.json with linkage/system digests identical before and after, both geometry.npz digests, and both real coupled-plant entries with sha256 and mtime.",
+    "follow-on: docs/evidence/fragments/iter-passive-plasma-circuit/unseen-source-shaped-section-flux.html:1 - a second evidence fragment was committed outside the brief's declared write paths and outside every scope extension granted in the resume advices.",
+    "follow-on: nova/imas/mast_passive_inductance.py:301 - _signed_area re-implements a signed-area helper the repository already owns as a polygon variant at nova/equilibrium/separatrix_clip.py:102 and as a shoelace variant at nova/imas/diiid_machine_ids.py:194, so a third spelling of the same rule now has to be maintained.",
+    "follow-on: nova/circuit/linkage.py:85 - three consecutive blank lines were introduced above section_grid, spacing no neighbouring function in the module uses."
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261022T000415436200-review-of-unseen-source-full-plant-6fc97ef1c154",
+  "reviewed_base_sha": "970c04c6bc44349e812f3ad0b22009c8d7815eaa",
+  "reviewed_head_sha": "6fc97ef1c1543cbf882ff9e8e205a59176b017e6",
+  "reviewed_run_id": "r-20261021T105645032186-unseen-source-full-plant",
+  "scores": {
+    "durability": 14,
+    "evidence": 13,
+    "fit": 15,
+    "goal_fidelity": 18,
+    "reuse": 16,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T00:16:46.386922+00:00",
+  "total": 91
+}

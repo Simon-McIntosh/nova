@@ -1,0 +1,53 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "scripts/iter_vessel_evolution/evolve.py:main",
+    "power_convertor/scripts/iter/late_pf_excess.py:268",
+    "power_convertor/scripts/iter/flux_balance.py:341"
+  ],
+  "completed_at": "2026-10-22T19:13:16.964Z",
+  "dispatched_at": "2026-10-22T18:46:24Z",
+  "findings": [
+    {
+      "file": "scripts/iter_vessel_evolution/evolve.py",
+      "line": 150,
+      "severity": "follow-on",
+      "text": "sectioned_set_provenance re-reads linkage.npy from disk at write time instead of digesting the matrix load_system already loaded (evolve.py:133), so a regeneration spanning minutes can record a digest of a matrix the arm's currents were not propagated through, which is the exact condition the docstring at evolve.py:142-144 says the field rules out."
+    },
+    {
+      "file": "docs/evidence/fragments/iter-passive-plasma-circuit/evolved-105052-rekey.html",
+      "line": 5,
+      "severity": "follow-on",
+      "text": "the fragment names the test as test_*_arm_names_the_sectioned_set_it_was_built_on, while the stored id is test_arm_names_the_sectioned_set_it_was_built_on (tests/test_iter_vessel_evolution.py:190), so the evidence record points at an id no reader can run."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "the added functions are reached in production through scripts/iter_vessel_evolution/evolve.py:main, and the arm npz is consumed outside this repository by power_convertor/scripts/iter/late_pf_excess.py:268 and power_convertor/scripts/iter/flux_balance.py:341.",
+    "diff": "read commit by commit against ff86419e7c6c5050228ac887fae987d88d1b2dde; 35e05e588d3731afc469a8fe30f3c4119cae0e6e adds sectioned_set_provenance and write_arm plus the new test, b09120e733eec21842ceb9d8237c0e032f78608d adds the evidence fragment, and nothing else changed.",
+    "done_when": "the done_when's three clauses are met and re-read: evolve.py:139 sectioned_set_provenance writes both fields into the npz, the regenerated arm has i_passive (29230, 1432) with times 29230, and the manifest records base 7 passed / head 8 passed with EXIT=0 in logs/base-suite.log and logs/head-suite.log.",
+    "goal": "the node's goal is to rebuild the cached DINA 105052 12 mm vessel-evolution arm on the re-keyed sectioned set and make every arm name the set it was built on; scripts/iter_vessel_evolution/evolve.py:154 write_arm now stores sectioned_set_key and linkage_sha256 and takes --output-dir, and the rebuilt arm at the run directory arm/evolved-105052-012.npz carries both.",
+    "manifest": "read; it reports status complete, commits 35e05e588 and b09120e73, arm sha256 41d51e0282e954e5e3fa50ac4b7235bb4c5cba5b06d53076527fa89bb56921bb and both suite arms, each of which I re-read from the arm file and the logs.",
+    "write_paths": "the declared write paths are scripts/iter_vessel_evolution/evolve.py, tests/test_iter_vessel_evolution.py and docs/evidence/fragments/iter-passive-plasma-circuit/evolved-105052-rekey.html plus logs and the arm under the run directory; git diff --stat ff86419e7 b09120e73 lists exactly those three tracked files, +102/-6."
+  },
+  "plan_slug": "iter-passive-plasma-circuit",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to rebuild the cached DINA 105052 12 mm vessel-evolution arm on the re-keyed sectioned set and make every arm name the set it was built on; scripts/iter_vessel_evolution/evolve.py:154 (write_arm) now stores sectioned_set_key and linkage_sha256 and takes --output-dir, and the rebuilt arm at <run>/arm/evolved-105052-012.npz carries them.\nVERDICT done_when: the done_when's three clauses are met and I re-read each: evolve.py:139 sectioned_set_provenance writes both fields into the npz, the regenerated arm has i_passive (29230, 1432) with times 29230, and the manifest records base 7 passed / head 8 passed with EXIT=0 in logs/base-suite.log and logs/head-suite.log.\nVERDICT write_paths: the declared write paths are scripts/iter_vessel_evolution/evolve.py, tests/test_iter_vessel_evolution.py and docs/evidence/fragments/iter-passive-plasma-circuit/evolved-105052-rekey.html (plus logs and the arm under the run directory); git diff --stat ff86419e7 b09120e73 lists exactly those three tracked files, +102/-6.\nVERDICT manifest: read; it reports status complete, commits 35e05e588 and b09120e73, arm sha256 41d51e0282e954e5e3fa50ac4b7235bb4c5cba5b06d53076527fa89bb56921bb, and both suite arms, all of which I re-read from the arm file and the logs rather than from the account.\nVERDICT diff: read commit by commit against ff86419e7c6c5050228ac887fae987d88d1b2dde; 35e05e588d3731afc469a8fe30f3c4119cae0e6e adds sectioned_set_provenance and write_arm plus the new test, and b09120e733eec21842ceb9d8237c0e032f78608d adds the evidence fragment, with nothing else changed.\nCALL_SITES: scripts/iter_vessel_evolution/evolve.py:main (the script entry point that calls write_arm), power_convertor/scripts/iter/late_pf_excess.py:268, power_convertor/scripts/iter/flux_balance.py:341 (external consumers that np.load the arm npz and read i_passive)\nSCORE goal_fidelity: 19\nSCORE evidence: 18\nSCORE scope_discipline: 19\nSCORE durability: 17\nSCORE fit: 18\nSCORE reuse: 18\nJUSTIFICATION goal_fidelity: scripts/iter_vessel_evolution/evolve.py:154 writes both provenance fields beside the currents and --output-dir defaults to OUTPUT, so the goal's \"every arm names the sectioned set it was built on\" holds on the ordinary cache write path, not only on a run-directory one.\nJUSTIFICATION evidence: the gate is tests/test_iter_vessel_evolution.py (logs/base-suite.log 7 passed EXIT=0, logs/head-suite.log 8 passed EXIT=0) and it asserts the done_when's measure, while logs/negative-control.txt shows the declared mutation reddening at the assertion (KeyError, 1 failed, EXIT=1).\nJUSTIFICATION scope_discipline: git diff ff86419e7 b09120e73 touches only the three declared paths; the regenerated arm and the logs sit under the run directory the brief allowed.\nJUSTIFICATION durability: tests/test_iter_vessel_evolution.py:215 compares the stored digest against one the test computes itself from the cache entry's linkage.npy, so reinstating a wrong-linkage write reddens it; the key assertion at :214 shares MESH_KEY with the producer, so it cannot detect a wrong constant, and the recorded mutation dropped both fields, leaving the digest assertion's own failure path undemonstrated.\nJUSTIFICATION fit: scripts/iter_vessel_evolution/evolve.py:139-172 follows the module's existing idiom of module-level Path constants, type-annotated helpers and numpy save/load, and introduces no plan, node or run identifier in a name or comment.\nJUSTIFICATION reuse: searched nova/ for an existing digest owner and found nova/imas/diiid_passive.py:195 (_sha256, a module-private path digest) and nova/imas/machine_evidence.py:491 (a canonical-bytes digest), neither of which owns a cache-entry provenance digest; scripts/iter_sectioned_conductor_set/build.py:312,347 digest the key's inputs rather than the stored linkage, so the addition forks nothing.\nFINDING scripts/iter_vessel_evolution/evolve.py:150 follow-on: sectioned_set_provenance re-reads linkage.npy from disk at write time instead of digesting the matrix load_system already loaded (evolve.py:133), so a regeneration spanning minutes can record a digest of a matrix the arm's currents were not propagated through, which is the exact condition the docstring at evolve.py:142-144 says the field rules out.\nFINDING docs/evidence/fragments/iter-passive-plasma-circuit/evolved-105052-rekey.html:5 follow-on: the fragment names the test as test_*_arm_names_the_sectioned_set_it_was_built_on, while the stored id is test_arm_names_the_sectioned_set_it_was_built_on (tests/test_iter_vessel_evolution.py:190), so the evidence record points at an id no reader can run.\n",
+  "review_run_id": "r-20261022T181149341758-review-of-evolved-105052-rekey-b09120e733ee",
+  "reviewed_base_sha": "ff86419e7c6c5050228ac887fae987d88d1b2dde",
+  "reviewed_head_sha": "b09120e733eec21842ceb9d8237c0e032f78608d",
+  "reviewed_run_id": "r-20261022T173520387975-evolved-105052-rekey",
+  "rubric": "landed",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T18:55:00Z",
+  "total": 109
+}

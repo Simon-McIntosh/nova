@@ -94,6 +94,30 @@ def test_backtracking_reaches_axis_after_newton_overshoot():
     assert np.linalg.norm(result.jet.gradient[0]) < 1e-10
 
 
+def test_root_backtracking_refuses_nonfinite_out_of_domain_trial():
+    class BoundedQuadratic:
+        def contains(self, point):
+            return (point[0] >= 0.2) & (point[0] <= 1.0)
+
+        def evaluate(self, point):
+            inside = self.contains(point)
+            return FieldJet(
+                jnp.where(inside, 0.5 * jnp.dot(point, point), jnp.nan),
+                jnp.where(inside, point, jnp.full_like(point, jnp.nan)),
+                jnp.eye(2, dtype=point.dtype),
+            )
+
+    seed = jnp.asarray(((0.3, 0.0),))
+    position, jet, _, counts = jax.jit(
+        lambda initial: fixed._adaptive(
+            BoundedQuadratic(), initial, jnp.asarray(1.0), 1
+        )
+    )(seed)
+    np.testing.assert_allclose(position[0], (0.225, 0.0), atol=1e-14, rtol=0)
+    assert np.all(np.isfinite(jet.gradient))
+    assert counts[0] == 1
+
+
 def test_wrong_axis_retries_previous_fixed_point():
     cache = polynomial_cache(True)
     previous = jnp.asarray(((0.13, -0.21), (0.13, -0.21 + 2 / 3)))

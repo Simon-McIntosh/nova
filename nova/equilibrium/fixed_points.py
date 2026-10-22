@@ -19,6 +19,7 @@ import numpy as np
 
 from nova.biot.polygonanalytic import packed_analytic_moments
 from nova.equilibrium import topology
+from nova.equilibrium.fixed_point import _select_backtracking_candidate
 from nova.equilibrium.solve_request import TopologyPolicy
 
 __all__ = [
@@ -559,30 +560,46 @@ def _adaptive(field, seeds, pitch, iterations):
         index, position, jet, correction, usable, done, counts = carry
         active = usable & ~done
         merit = jnp.linalg.norm(jet.gradient, axis=-1)
+        factors = jnp.asarray(
+            (1.0, 0.5, 0.25, 0.125, 0.0625, 0.03125, 0.015625, 0.0078125),
+            dtype=position.dtype,
+        )
+        candidates = (
+            position[None, :, :] - factors[:, None, None] * correction[None, :, :]
+        )
 
-        def try_step(trial):
-            attempt, fraction, chosen, accepted = trial
-            candidate = position - fraction[:, None] * correction
+        def score(candidate):
             candidate_jet = jax.vmap(field.evaluate)(candidate)
             candidate_merit = jnp.linalg.norm(candidate_jet.gradient, axis=-1)
-            missing_rows = ~jax.vmap(field.contains)(candidate)
-            take = (
-                active
-                & ~accepted
-                & (
-                    missing_rows
-                    | (jnp.isfinite(candidate_merit) & (candidate_merit < merit))
-                )
+            valid = (
+                jax.vmap(field.contains)(candidate)
+                & jnp.all(jnp.isfinite(candidate), axis=-1)
+                & jnp.isfinite(candidate_jet.value)
+                & jnp.all(jnp.isfinite(candidate_jet.gradient), axis=-1)
+                & jnp.all(jnp.isfinite(candidate_jet.hessian), axis=(-2, -1))
             )
-            chosen = jnp.where(take[:, None], candidate, chosen)
-            accepted |= take
-            fraction = jnp.where(accepted, fraction, fraction * 0.5)
-            return attempt + 1, fraction, chosen, accepted
+            return candidate_merit, valid
 
-        trial = (jnp.asarray(0), jnp.ones_like(merit), position, ~active)
-        _, _, position, _ = jax.lax.while_loop(
-            lambda state: (state[0] < 8) & jnp.any(~state[3]), try_step, trial
+        candidate_merit, candidate_valid = jax.lax.map(score, candidates)
+
+        choice = _select_backtracking_candidate(
+            factors[:, None],
+            candidate_merit,
+            candidate_merit,
+            merit,
+            merit,
+            merit,
+            candidate_merit,
+            merit,
+            False,
+            True,
+            candidate_valid,
+            decrease_only=True,
         )
+        chosen = jnp.take_along_axis(
+            jnp.swapaxes(candidates, 0, 1), choice.selected[:, None, None], axis=1
+        )[:, 0, :]
+        position = jnp.where((active & choice.accepted)[:, None], chosen, position)
         jet, correction, usable, done = evaluate(position)
         return index + 1, position, jet, correction, usable, done, counts + active
 

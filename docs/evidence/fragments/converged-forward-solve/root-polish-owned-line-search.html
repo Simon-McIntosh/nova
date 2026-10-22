@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova"><meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="converged-forward-solve">
+<meta name="plan-evidence-for" content="converged-forward-solve"><meta name="plan-verifies" content="converged-forward-solve#s2">
+<meta name="plan-title" content="Axis-root backtracking authority">
+<meta name="plan-summary" content="The root polish uses the owned sufficient-decrease selector and refuses non-finite or out-of-domain trials.">
+<title>Axis-root backtracking authority | nova</title></head><body><main class="plan-doc">
+<section id="root-polish-owned-line-search-landing"><h1>Axis-root backtracking authority</h1>
+<p id="root-polish-owned-line-search-defect">The previous root-polish loop accepted a candidate whenever <code>missing_rows</code> was true, independently of its merit. The direct red test constructed a quadratic field whose seed is (0.3, 0), with admissible radial coordinate at least 0.2. The full Newton step lands at (0, 0), where the field value and gradient are non-finite and <code>contains</code> is false. The old source took that full step and failed <code>test_root_backtracking_refuses_nonfinite_out_of_domain_trial</code> on its own position assertion: actual 0 against the admissible expected 0.225, <code>EXIT=1</code> in <code>root-owned-red-direct.log</code>.</p>
+<table id="root-polish-owned-line-search-ladder"><thead><tr><th>Fraction</th><th>Radial candidate</th><th>Domain and field</th><th>Selection</th></tr></thead><tbody>
+<tr><td>1</td><td>0</td><td>Outside; value and gradient non-finite</td><td>Refused</td></tr>
+<tr><td>1/2</td><td>0.15</td><td>Outside; value and gradient non-finite</td><td>Refused</td></tr>
+<tr><td>1/4</td><td>0.225</td><td>Inside; gradient merit 0.225 from 0.3</td><td>Accepted under the shared sufficient-decrease rule</td></tr>
+</tbody></table>
+<p id="root-polish-owned-line-search-repair">The root solver now scores its eight trial fractions, checks finite position, value, gradient and Hessian together with field containment, and passes that validity mask to <code>fixed_point._select_backtracking_candidate</code>. The owned selector applies its existing sufficient-decrease slope and returns the first admissible fraction. The inline step-halving loop is gone. The model-trust route used by other callers is unchanged; the root call requests decrease-only selection. A failed ladder leaves the incumbent in place, so an invalid point is not committed. Both the new refusal test and the existing Newton-overshoot regression pass in <code>root-owned-focused.log</code>, which ends <code>EXIT=0</code>.</p>
+<p id="root-polish-owned-line-search-trace">On the same one-root quadratic trace, the outer JAX program stays at 98 equations. Its adaptive-loop body moves from 106 to 134 equations; the removed inline step loop had 29, while the replacement ladder-scoring scan has 23. Counting these nested bodies once gives 233 before and 255 after, a growth of 22 equations, smaller than the 29-equation step loop it replaces. The production correction gate is recorded separately in the run manifest after execution. The other backtracking copy in <code>scripts/prototypes/fast_map_production/solver.py</code> remains a follow-on outside this task's source scope.</p>
+</section></main></body></html>

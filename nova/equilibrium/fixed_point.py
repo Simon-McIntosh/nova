@@ -1155,12 +1155,23 @@ def _select_backtracking_candidate(
     predicted_current_merit: jax.Array,
     model_trust_selection: jax.Array | bool,
     own_mask_acceptance: jax.Array | bool,
+    candidate_valid: jax.Array | None = None,
+    decrease_only: bool = False,
 ) -> _BacktrackingSelection:
     """Select one ladder candidate under the production decrease authorities."""
     required = acceptance_reference * (1.0 - _SUFFICIENT_DECREASE_SLOPE * factors)
     sufficient = jnp.isfinite(merits) & jnp.isfinite(residuals) & (merits <= required)
+    if candidate_valid is not None:
+        sufficient &= candidate_valid
     sufficient &= ~jnp.asarray(own_mask_acceptance) | (residuals < incumbent_residual)
-    selected = jnp.argmax(sufficient)
+    selected = jnp.argmax(sufficient, axis=0)
+    if decrease_only:
+        return _BacktrackingSelection(
+            selected=selected,
+            accepted=jnp.any(sufficient, axis=0),
+            model_distrusted=jnp.asarray(False),
+            selected_model_unreliable=jnp.asarray(False),
+        )
     selected_trusted = _model_decrease_is_trusted(
         predicted_merits[selected],
         merits[selected],

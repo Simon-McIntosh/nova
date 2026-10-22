@@ -31,29 +31,52 @@ DD_VERSION = "3.38.1"
 
 #: cache key per surface-layer: the sectioned conductor set's two meshes
 MESH_KEY = {
-    0.012: "68df15665ab2ea45f427",  # 1312 passive circuits
-    0.006: "06ff06d3eb7a4448f0fe",  # 2163 passive circuits
+    0.012: "66c10162f3e37adb2679",
+    0.006: "f3a24fdd12eae6348f3a",
 }
 
 #: nova's 14 coil channels in the cached system's column order
 NOVA_CHANNELS = [
-    "CS3U", "CS2U", "CS1U", "CS1L", "CS2L", "CS3L",
-    "PF1", "PF2", "PF3", "PF4", "PF5", "PF6", "VSU", "VSL",
+    "CS3U",
+    "CS2U",
+    "CS1U",
+    "CS1L",
+    "CS2L",
+    "CS3L",
+    "PF1",
+    "PF2",
+    "PF3",
+    "PF4",
+    "PF5",
+    "PF6",
+    "VSU",
+    "VSL",
 ]
 
 #: DINA coil name -> nova channels it energises.  CS1U and CS1L are in series on
 #: one supply (equal currents); VSU and VSL are one circuit in anti-series
 #: (equal and opposite), the sign carried by the drive.
 DINA_TO_NOVA = {
-    "CS3U": ("CS3U",), "CS2U": ("CS2U",), "CS2L": ("CS2L",), "CS3L": ("CS3L",),
-    "PF1": ("PF1",), "PF2": ("PF2",), "PF3": ("PF3",), "PF4": ("PF4",),
-    "PF5": ("PF5",), "PF6": ("PF6",),
-    "CS1": ("CS1U", "CS1L"), "VS3": ("VSU", "VSL"),
+    "CS3U": ("CS3U",),
+    "CS2U": ("CS2U",),
+    "CS2L": ("CS2L",),
+    "CS3L": ("CS3L",),
+    "PF1": ("PF1",),
+    "PF2": ("PF2",),
+    "PF3": ("PF3",),
+    "PF4": ("PF4",),
+    "PF5": ("PF5",),
+    "PF6": ("PF6",),
+    "CS1": ("CS1U", "CS1L"),
+    "VS3": ("VSU", "VSL"),
 }
 
 #: how many DINA coils a nova channel's voltage is summed into for comparison
 NOVA_TO_DINA = {
-    "CS1U": "CS1", "CS1L": "CS1", "VSU": "VS3", "VSL": "VS3",
+    "CS1U": "CS1",
+    "CS1L": "CS1",
+    "VSU": "VS3",
+    "VSL": "VS3",
     **{
         name: name
         for name in NOVA_CHANNELS
@@ -195,8 +218,10 @@ def prescribed_vs3_history(pulse: int, n_points: int, times: np.ndarray):
             continue
         rows_by_point.setdefault(int(row["target_index"]), []).append(row)
         tolerance = max(tolerance, float(row["tolerance_wb"]))
-    ordered = [sorted(rows_by_point[key], key=lambda row: row["time"])
-               for key in sorted(rows_by_point)]
+    ordered = [
+        sorted(rows_by_point[key], key=lambda row: row["time"])
+        for key in sorted(rows_by_point)
+    ]
     if len(ordered) != n_points:
         raise ValueError(
             f"prescribed-plasma check has {len(ordered)} VS3 points, "
@@ -251,9 +276,7 @@ def integrate(tau, vectors, times, psi_circuit):
     return state @ vectors.T
 
 
-def psis_and_voltages(
-    times, series, matrix, i_channel, i_passive, psi_plasma_section
-):
+def psis_and_voltages(times, series, matrix, i_channel, i_passive, psi_plasma_section):
     """Section-level coupled flux and the per-channel voltage of the whole flux."""
     n_section = series.shape[0]
     Lcc = matrix[:n_section, :n_section]
@@ -266,9 +289,7 @@ def psis_and_voltages(
     return psi_coil, voltage_coil
 
 
-def per_coil_voltage_residual(
-    times, nova_voltage, dina_voltage
-) -> dict:
+def per_coil_voltage_residual(times, nova_voltage, dina_voltage) -> dict:
     """Rms and peak residual per DINA coil, nova channels summed into it."""
     channels = {}
     for column, name in enumerate(NOVA_CHANNELS):
@@ -335,7 +356,9 @@ def main():
         times, i_channel, dina_voltage = coil_currents(active, vsl_sign)
         keep = coverage_mask(active, passive, times)
         times, i_channel, dina_voltage = (
-            times[keep], i_channel[keep], dina_voltage[keep]
+            times[keep],
+            i_channel[keep],
+            dina_voltage[keep],
         )
         psi_plasma = interp_to(slice_times, times, plasma_flux)
         psi_plasma_section = interp_to(section_slice_times, times, section_plasma)
@@ -391,7 +414,10 @@ def main():
         times,
         psimap_residual,
         analysis.passive_flux_at_points(
-            refined.conductors, system.circuits, chosen["i_passive"], times,
+            refined.conductors,
+            system.circuits,
+            chosen["i_passive"],
+            times,
             vs3_centroids,
         ),
         dina_passive_flux(active, passive, measure, vs3_centroids, times),
@@ -401,7 +427,10 @@ def main():
         times,
         psimap_residual,
         analysis.passive_flux_at_points(
-            refined.conductors, system.circuits, chosen["i_noplasma"], times,
+            refined.conductors,
+            system.circuits,
+            chosen["i_noplasma"],
+            times,
             vs3_centroids,
         ),
         dina_passive_flux(active, passive, measure, vs3_centroids, times),
@@ -415,9 +444,7 @@ def main():
             "times": int(times.size),
             "plasma_slices": int(slice_times.size),
             "passive_current_peak_a": float(np.abs(chosen["i_passive"]).max()),
-            "passive_current_rms_a": float(
-                np.sqrt(np.mean(chosen["i_passive"] ** 2))
-            ),
+            "passive_current_rms_a": float(np.sqrt(np.mean(chosen["i_passive"] ** 2))),
             "plasma_flux_peak_wb": float(np.abs(plasma_flux).max()),
             "positive_control": analysis.positive_control(),
             "vsl_sign_test": {

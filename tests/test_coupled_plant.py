@@ -431,7 +431,7 @@ def test_real_sectioned_set_reduction_is_within_one_percent(tmp_path):
     root = Path(__file__).resolve().parents[1]
     cache = Path(
         "/home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit"
-        "/sectioned-conductor-set/68df15665ab2ea45f427"
+        "/sectioned-conductor-set/66c10162f3e37adb2679"
     )
     if not (cache / "linkage.npy").exists():
         pytest.skip("the sectioned conductor cache is not present on this host")
@@ -676,7 +676,7 @@ DINA_URI = "imas:hdf5?user=mcintos;pulse=105014;run=1;database=iter;version=3"
 DINA_DD_VERSION = "3.38.1"
 ITER_SECTION_CACHE = Path(
     "/home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit"
-    "/sectioned-conductor-set/68df15665ab2ea45f427"
+    "/sectioned-conductor-set/66c10162f3e37adb2679"
 )
 
 

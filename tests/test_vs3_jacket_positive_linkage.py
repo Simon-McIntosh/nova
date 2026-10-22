@@ -17,19 +17,24 @@ the whole sectioned set.
 
 from __future__ import annotations
 
-import importlib.util
-import sys
 from pathlib import Path
 
 import numpy as np
 import pytest
 
+from nova.circuit.conductor import ConductorSet, PolygonSection
+from nova.circuit.screening import plasma_self_inductance
+from scripts.iter_sectioned_conductor_set.build import (
+    ANNULUS_SECTORS,
+    source_conductors,
+)
+
 ROOT = Path(__file__).resolve().parents[1]
 CACHE = Path("/home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit")
 PINNED_PLANT = CACHE / "coupled-plant/28148563521d92a2198b/plant.npz"
 ENTRIES = {
-    "12mm": (CACHE / "sectioned-conductor-set/68df15665ab2ea45f427", 37, -2.527958e-07),
-    "6mm": (CACHE / "sectioned-conductor-set/06ff06d3eb7a4448f0fe", 175, -9.450930e-08),
+    "12mm": CACHE / "sectioned-conductor-set/66c10162f3e37adb2679",
+    "6mm": CACHE / "sectioned-conductor-set/f3a24fdd12eae6348f3a",
 }
 #: the eight jacket source centroids, upper then lower (r, z) [m]
 JACKET_CENTROID = np.array(
@@ -46,28 +51,12 @@ JACKET_CENTROID = np.array(
 )
 
 
-def _load_build():
-    spec = importlib.util.spec_from_file_location(
-        "iter_sectioned_build_jacket",
-        ROOT / "scripts" / "iter_sectioned_conductor_set/build.py",
-    )
-    module = importlib.util.module_from_spec(spec)
-    sys.modules["iter_sectioned_build_jacket"] = module
-    spec.loader.exec_module(module)
-    return module
-
-
 def _vertical_arms():
-    """The VSU/VSL conductor sections and jacket rows, as build.py reads them."""
-    import numpy as np
-
-    builder = _load_build()
-    conductors, coil_names, owner, _thickness, _res, passive_name = (
-        builder.source_conductors()
-    )
+    """The VSU/VSL conductor circuits and jacket circuits, as build.py reads them."""
+    conductors, coil_names, owner, _thickness, _res, passive_name = source_conductors()
     n_section = len(owner)
     jackets = [i for i, n in enumerate(passive_name) if "VS3" in n and "Jacket" in n]
-    assert len(jackets) == 8, "the eight VS3 jacket loops must be present"
+    assert len(jackets) == 8 * ANNULUS_SECTORS, "the eight VS3 jackets must be present"
     vsu, vsl = coil_names.index("VSU"), coil_names.index("VSL")
     sections = [i for i, o in enumerate(owner) if o in (vsu, vsl)]
     series = np.zeros((len(sections), 2))
@@ -83,7 +72,7 @@ def _schur(conductors, circuits, series, finite_source):
     full = circuit_linkage_matrix(
         conductors, circuits, section_n_max=6, workers=1, finite_source=finite_source
     )
-    n_sec = full.shape[0] - 8
+    n_sec = full.shape[0] - 8 * ANNULUS_SECTORS
     coil = series.T @ full[:n_sec, :n_sec] @ series
     mutual = series.T @ full[:n_sec, n_sec:]
     passive = full[n_sec:, n_sec:]
@@ -107,38 +96,43 @@ def test_cached_plant_coil_schur_is_indefinite_at_the_vertical_coils():
 
 
 @pytest.mark.parametrize("label", ["12mm", "6mm"])
-def test_passive_block_negatives_lie_outside_the_jacket_rows(label):
-    """The raw passive block is indefinite independently of the eight jackets."""
-    entry, count, floor = ENTRIES[label]
+def test_repaired_passive_block_is_positive_definite(label):
+    """The repaired entry's passive block stores positive energy, unfloored.
+
+    Recorded pre-repair evidence, kept as the number the repair had to move:
+    the raw passive block of the entry at the retired key held 37 (12 mm) and
+    175 (6 mm) negative eigenvalues, with minima -2.527958e-7 H and
+    -9.450930e-8 H, none supported on the eight jacket rows.  Those numbers are
+    a statement about the retired entry, not about this one; the entry this
+    test reads is the repaired build and carries no negative eigenvalue.
+    """
+    entry = ENTRIES[label]
     matrix = np.load(entry / "linkage.npy")
     system = np.load(entry / "system.npz")
     n_passive = system["lmat"].shape[0]
     n_section = matrix.shape[0] - n_passive
+    assert n_section > 0, "the stored linkage lost the finite-source coil block"
     block = matrix[n_section:, n_section:]
-    values, vectors = np.linalg.eigh(block)
-    negatives = np.flatnonzero(values < 0)
-    assert negatives.size == count
-    assert values.min() == pytest.approx(floor, rel=1e-5)
-    radius = np.asarray(system["centroid_r"], float)
-    height = np.asarray(system["centroid_z"], float)
-    jacket_rows = {
-        int(np.argmin(np.abs(radius - r) + np.abs(height - z)))
-        for r, z in JACKET_CENTROID
-    }
-    peaks = {int(np.argmax(np.abs(vectors[:, k]))) for k in negatives}
-    assert peaks.isdisjoint(jacket_rows)
+    values = np.linalg.eigvalsh(block)
+    assert int((values < 0).sum()) == 0, values.min()
+    assert values.min() > 0
 
 
-def test_reduced_vertical_block_reproduces_the_two_negatives():
-    """The jacket square collapse, as build.py lays it down, is indefinite."""
+def test_repaired_reduced_vertical_block_is_positive_definite():
+    """The reduced vertical-coil Schur complement stores positive energy.
+
+    Recorded pre-repair evidence, kept as the number the repair had to move:
+    with the area-equivalent square representation this reduced block held two
+    negative eigenvalues with a smallest value of -1.5106e-8 H.  The annulus
+    sectors the build now lays down give a positive-definite block, and the
+    separate finite-source rule for the coil self-block is not what makes it so.
+    """
     conductors, series, circuits = _vertical_arms()
     _coil, _schur_matrix, values = _schur(conductors, circuits, series, False)
-    assert int((values < 0).sum()) == 2
-    assert values.min() == pytest.approx(-1.51e-08, rel=0.1)
-    # the quadrature mismatch (coil block finite-source vs hybrid mutual) is not
-    # the cause: unifying the rule moves the smallest eigenvalue by ~2e-9.
+    assert int((values < 0).sum()) == 0, values
+    assert values.min() > 0
     _coil, _schur_matrix, hybrid = _schur(conductors, circuits, series, True)
-    assert hybrid.min() == pytest.approx(values.min(), rel=0.01)
+    assert int((hybrid < 0).sum()) == 0, hybrid
 
 
 #: machine-description cross-sections: VS3 conductor and its steel jacket [m]
@@ -148,29 +142,33 @@ JACKET_ANNULUS = (0.0265, 0.0295)
 
 def _annulus_objects():
     """The eight VS3 conductor and eight jacket annuli as (key, r, z) records."""
-    builder = _load_build()
-    conductors, coil_names, owner, _thickness, _res, passive_name = (
-        builder.source_conductors()
-    )
+    conductors, coil_names, owner, _thickness, _res, passive_name = source_conductors()
     n_section = len(owner)
     vsu, vsl = coil_names.index("VSU"), coil_names.index("VSL")
+    # the sectors of one annulus share its centre, so the section list is
+    # de-duplicated by position rather than listed once per sector circuit
     coils = []
+    seen_sections = set()
     for i, o in enumerate(owner):
-        if o in (vsu, vsl):
-            coils.append(
-                (
-                    "VSU" if o == vsu else "VSL",
-                    float(conductors.r[i]),
-                    float(conductors.z[i]),
-                )
-            )
+        if o not in (vsu, vsl):
+            continue
+        position = (round(float(conductors.r[i]), 9), round(float(conductors.z[i]), 9))
+        if position in seen_sections:
+            continue
+        seen_sections.add(position)
+        coils.append(("VSU" if o == vsu else "VSL", *position))
     jackets = []
+    seen = set()
     for j, name in enumerate(passive_name):
         if "VS3" in name and "Jacket" in name:
+            label = name.split(",")[-1].strip()
+            if label in seen:
+                continue
+            seen.add(label)
             row = int(np.flatnonzero(conductors.circuit == n_section + j)[0])
             jackets.append(
                 (
-                    name.split(",")[-1].strip(),
+                    label,
                     float(conductors.r[row]),
                     float(conductors.z[row]),
                 )
@@ -196,7 +194,6 @@ def _sector_vertices(r0, z0, ri, ro, n_sector, k):
 
 def _annulus_ports(records, annulus, n_sector, first_circuit):
     """One annulus as ``n_sector`` equal-share sector circuits, with shapes."""
-    from nova.circuit.conductor import ConductorSet, PolygonSection
 
     polygons = []
     columns = {name: [] for name in ConductorSet._columns}
@@ -263,7 +260,6 @@ def _annulus_arm(n_sector=8, workers=4):
 
 def _concat(first, second):
     """One ConductorSet holding both, keeping shaped sections and circuit ids."""
-    from nova.circuit.conductor import ConductorSet
 
     columns = {
         name: np.concatenate([getattr(first, name), getattr(second, name)])
@@ -275,20 +271,9 @@ def _concat(first, second):
     )
 
 
-def _ring_self(major, ri, ro):
-    """Closed-form self-inductance of a thin ring of mean radius ``major`` [H]."""
-    rho = np.sqrt(ri * ro)
-    return 4e-7 * np.pi * major * (np.log(8 * major / rho) - 2)
-
-
-def test_annulus_sector_arm_repairs_the_negativity_its_square_leaves():
-    """Red: the square collapse.  Green: the IDS-faithful annulus sectors."""
-    conductors, series, circuits = _vertical_arms()
-    _coil, _schur_matrix, square_values = _schur(conductors, circuits, series, False)
-    assert int((square_values < 0).sum()) == 2
-    assert square_values.min() < 0
-
-    L, M, P = _annulus_arm(n_sector=8)
+def test_annulus_sector_arm_is_positive_definite_and_does_not_over_screen():
+    """The IDS-faithful annulus sectors store positive energy and screen below one."""
+    L, M, P = _annulus_arm(n_sector=ANNULUS_SECTORS)
     schur = L - M @ np.linalg.solve(P, M.T)
     values = np.linalg.eigvalsh(schur)
     assert int((values < 0).sum()) == 0, values
@@ -303,30 +288,54 @@ def test_annulus_sector_arm_reproduces_the_ring_self_inductance():
     """The arm's absolute inductance matches the closed-form ring it discretises."""
     from nova.circuit.linkage import circuit_linkage_matrix
 
+    n = ANNULUS_SECTORS
     conductors, jackets = _annulus_objects()
-    single, _labels = _annulus_ports(conductors[:1], CONDUCTOR_ANNULUS, 8, 0)
-    jacket_only, _jacket_labels = _annulus_ports(jackets[:1], JACKET_ANNULUS, 8, 8)
+    single, _labels = _annulus_ports(conductors[:1], CONDUCTOR_ANNULUS, n, 0)
+    jacket_only, _jacket_labels = _annulus_ports(jackets[:1], JACKET_ANNULUS, n, n)
     matrix = circuit_linkage_matrix(
-        _concat(single, jacket_only), range(16), section_n_max=6, workers=1
+        _concat(single, jacket_only), range(2 * n), section_n_max=6, workers=1
     )
-    wc = np.zeros((16, 1))
-    wc[:8, 0] = 1.0 / np.sqrt(8)
-    arm = float((wc.T @ matrix @ wc)[0, 0])
-    reference = _ring_self(conductors[0][1], *CONDUCTOR_ANNULUS)
+    # the linkage entry folds the source share once, so the physical port
+    # reduction applies the share to source and observer alike: weight sqrt(1/n),
+    # which is what makes the summed arm converge on the ring it discretises
+    weight = np.zeros(2 * n)
+    weight[:n] = 1.0 / np.sqrt(n)
+    arm = float(weight @ matrix @ weight)
+    radius = conductors[0][1]
+    reference = float(
+        plasma_self_inductance(radius, np.sqrt(np.prod(CONDUCTOR_ANNULUS)))
+    )
     assert arm == pytest.approx(reference, rel=0.03), (arm, reference)
 
 
-def test_jacket_square_lies_inside_the_conductor_it_should_surround():
-    """The builder's area-equivalent squares invert the IDS radial ordering."""
+def test_jacket_annulus_lies_outside_the_conductor_it_surrounds():
+    """The build places each VS3 jacket annulus outside the conductor it screens.
+
+    Recorded pre-repair evidence, kept as the geometry the repair had to change:
+    ``source_conductors`` collapsed each annulus to a square of side sqrt(area)
+    which put the jacket's 22.974 mm square inside the conductor's 27.556 mm
+    square at the same centre, inverting the machine description's radial
+    ordering.
+    """
     conductors, _series, circuits = _vertical_arms()
-    section_row = int(np.flatnonzero(conductors.circuit == circuits[0])[0])
-    jacket_row = int(np.flatnonzero(conductors.circuit == circuits[-8])[0])
-    conductor_side = float(conductors.dr[section_row]) * 1000
-    jacket_side = float(conductors.dr[jacket_row]) * 1000
-    assert conductor_side == pytest.approx(27.556, abs=0.01)
-    assert jacket_side == pytest.approx(22.974, abs=0.01)
-    # same centre, and the jacket square is the smaller of the two
-    assert float(conductors.r[section_row]) == pytest.approx(
-        float(conductors.r[jacket_row])
+    coils, jackets = _annulus_objects()
+    polygons = conductors.polygon_by_circuit()
+    conductor_circuit = int(circuits[0])
+    jacket_circuit = int(circuits[-8 * ANNULUS_SECTORS])
+    _key, conductor_r, conductor_z = coils[0]
+    _jkey, jacket_r, jacket_z = jackets[0]
+    conductor_radius = np.ptp(
+        np.linalg.norm(
+            np.asarray(polygons[conductor_circuit].vertices)
+            - np.array([conductor_r, conductor_z]),
+            axis=1,
+        )
     )
-    assert jacket_side < conductor_side
+    jacket_vertices = np.linalg.norm(
+        np.asarray(polygons[jacket_circuit].vertices) - np.array([jacket_r, jacket_z]),
+        axis=1,
+    )
+    assert float(conductor_radius) == pytest.approx(2 * 0.0230, abs=1e-4)
+    assert float(jacket_vertices.min()) == pytest.approx(0.0265, abs=1e-4)
+    assert float(jacket_vertices.max()) == pytest.approx(0.0295, abs=1e-4)
+    assert jacket_vertices.min() > conductor_radius / 2

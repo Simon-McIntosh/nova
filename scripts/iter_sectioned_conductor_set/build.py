@@ -100,6 +100,10 @@ def source_conductors() -> tuple[
                     section.turns,
                     circuit,
                     ANNULUS_SECTORS,
+                    # each sector is its own circuit: a section-shape override is
+                    # indexed by circuit, so sectors sharing an id would leave
+                    # only one of them visible to the linkage kernel
+                    circuit_stride=1,
                 )
                 for name in ConductorSet._columns:
                     columns[name].extend(sectors[name])

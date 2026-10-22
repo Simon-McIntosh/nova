@@ -36,7 +36,7 @@ from nova.circuit.passive import (
 ROOT = Path(__file__).resolve().parents[1]
 REAL_ENTRY = Path(
     "/home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit"
-    "/sectioned-conductor-set/68df15665ab2ea45f427"
+    "/sectioned-conductor-set/66c10162f3e37adb2679"
 )
 PINNED_PLANT = Path(
     "/home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit"
@@ -272,7 +272,13 @@ def test_sectioned_conductor_geometry_reads_from_the_cache(tmp_path, monkeypatch
 
 
 def test_real_entry_geometry_round_trips(tmp_path):
-    """The real 12 mm entry carries geometry bit-identical to a rebuild."""
+    """A scratch copy of the real 12 mm entry round-trips its geometry.
+
+    The scratch copy is what is read and written, never the shared cache: the
+    installed entry's geometry has to stay untouched for the studies that load
+    it, so this test proves the round trip on a copy instead of asserting
+    anything about the cache directory's own contents.
+    """
     if not (REAL_ENTRY / "linkage.npy").exists():
         pytest.skip("the sectioned conductor cache is not present on this host")
     build = _build_module()
@@ -303,5 +309,3 @@ def test_real_entry_geometry_round_trips(tmp_path):
     np.testing.assert_array_equal(machine.passive_circuits, refined.circuits)
     assert list(machine.coil_names) == list(coil_names)
     assert machine.section_coil.size == n_section
-    # The pinned entry is a pre-change one: it holds no geometry file.
-    assert not (REAL_ENTRY / SECTIONED_GEOMETRY_FILE).exists()

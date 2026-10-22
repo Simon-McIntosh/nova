@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="531">
+<meta name="plan-version" content="532">
 <meta name="plan-modified" content="2026-10-22">
 </head>
 <body>
@@ -1715,6 +1715,9 @@ NO PRODUCT OR TEST SOURCE WAS CHANGED.  The 1e-10 tolerance was not widened.</p>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261022T074415490372-review-of-contour-test-hygiene-d27fcf098ef0" data-who="reckon-build" data-when="2026-10-22T07:51:53.078Z">
     <div class="r-comment-body"><p>Independent review of the contour-test-hygiene node stored at review-records/r-20261022T061639396135-contour-test-hygiene.json and its head-keyed twin, scoring goal_fidelity 15, evidence 13, scope_discipline 20, durability 17, fit 15, reuse 17 with five follow-on findings and no blocking finding.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261022T061639396135-contour-test-hygiene" data-who="reckon-build" data-when="2026-10-22T07:43:33Z">
+    <div class="r-comment-body"><p>The capacity-overflow check asserts the build&#x27;s own jit decoration (the bare call was already compiled at base; the test now proves it and the negative control removes the decoration to redden it), the sparse-build receipt check compares against the brute-force host traversal on any host where the receipt has no virtual outside node, the 2,000-cell rows keep the host-independent structural relation, and contour-test-hygiene.html no longer claims the test bypassed compilation.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261010T184522536142-cfs-current-book-fragments" data-who="reckon-build" data-when="2026-10-10T18:46:29.609Z">
     <div class="r-comment-body"><p>Implemented traced current.book over connected multi-polygon membership using the widened signed-ring exact clip. Six certificate rows pass: diverted read image errors 1.15131582e-4, 2.49842782e-5, 3.95031905e-6 at 550/2098/5158 cells; limited errors 1.77777866e-5, 2.66948705e-6, 5.45231060e-7 at 553/2105/5167. Maximum net-current error 2.22e-16, excluded current zero, legacy control 0.197326978718; evidence docs/evidence/fragments/converged-forward-solve/cfs-current-book.html#cfs-current-book-fragments-booking and one three-rung SVG; audit-doc 0 errors.</p></div>

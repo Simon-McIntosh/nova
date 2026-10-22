@@ -4,11 +4,14 @@ The sparse build resolves carrier adjacency, split-node insertion and the
 node-to-vertex inverse map by sorting and scatter instead of the repeated
 full-table scans and the dense node-by-vertex equality matrix.
 
-The pin is split by what actually travels between hosts. ``node_vertex``,
-``node_valid``, ``critical_type``, ``edges``, ``edge_valid`` and ``overflow``
-are integer or boolean arrays whose bytes are the same wherever the build runs,
-so they are pinned by digest against receipts recorded from the byte-identical
-receipts of the integrated carrier and tree. ``node_psi`` is float64 carried through
+The pin is split by what actually travels between hosts. The receipts' integer
+arrays are compared against a plain host graph search over the same carrier and
+field, so the reference is valid on any host: at 2,000 cells a near-tie flux
+comparison can round differently under another CPU's vector code and reorder
+the receipt without changing its meaning. The coarse 550-cell rows are
+additionally pinned by digest of their integer arrays, which were shown
+byte-identical on the sirius CPU class and the Broadwell fleet node class.
+``node_psi`` is float64 carried through
 from the caller's flux field, so its bytes encode the host's XLA codegen rather
 than the build's semantics; hashing it is not portable between hosts. It is
 asserted by the contract the build actually owes instead: every valid node row
@@ -20,6 +23,7 @@ measures.
 from __future__ import annotations
 
 import hashlib
+import os
 
 import jax
 import jax.numpy as jnp
@@ -35,7 +39,7 @@ from tests.equilibrium import test_topology_read as oracle
 configure_dtypes()
 assert jax.config.jax_enable_x64 is True
 
-#: Receipt arrays whose bytes are host-independent: integers and booleans.
+#: Receipt arrays pinned by digest for the coarse rows: integers and booleans.
 _INTEGER_FIELDS = (
     "node_vertex",
     "node_valid",
@@ -48,18 +52,18 @@ _INTEGER_FIELDS = (
 #: Integer-field digests of the integrated build's receipts, keyed ``<kind>-<cells>``.
 _EXPECTED_INTEGER_DIGESTS = {
     "limited-550": "925fe6895a471688cfaeae3d1ffe5650309b49b153071b5b1df7ec4745cc34f3",
-    "limited-2000": "ebedae2b5c63bc23a3365cd1b9454f3373b2763f54e7577b5c8d7f259304cb2d",
     "diverted-550": "1fa0d5f58760b71f208991bc9e817b4ba039c16eb299524793fa8dca56aef61c",
-    "diverted-2000": "2ac65ec4cc6ef276de6849c02a3ea0a8a25082c4dbf1f94a7f9cd18efbe700d2",
 }
 
 
-def _build(kind: str, cells: int) -> tuple[contour_tree.ContourTreeArrays, jnp.ndarray]:
+def _build(
+    kind: str, cells: int
+) -> tuple[contour_tree.ContourTreeArrays, jnp.ndarray, object]:
     """Build one receipt from the measured fixture path, with its input field.
 
-    The realised cell count and the sampled flux are returned alongside the
-    receipt so the flux the build was given can be gathered at the receipt's
-    own node vertices.
+    The realised cell count, the sampled flux and the carrier mesh are returned
+    alongside the receipt so the flux the build was given can be gathered at the
+    receipt's own node vertices and the arcs compared against the carrier.
     """
 
     _oracle, field, wall, _axis, _saddle = oracle._analytic_inputs(kind)
@@ -77,7 +81,65 @@ def _build(kind: str, cells: int) -> tuple[contour_tree.ContourTreeArrays, jnp.n
         mesh.edge_valid,
         jnp.asarray(1, dtype=jnp.int32),
     )
-    return receipt, vertex_flux
+    return receipt, vertex_flux, mesh
+
+
+def _perturb_arc_order() -> bool:
+    """Whether the declared arc-order mutation is selected for this run."""
+
+    return os.environ.get("CONTOUR_TREE_ARC_PERTURB") == "rewire"
+
+
+def _host_superlevel_components(
+    values: np.ndarray, valid: np.ndarray, edges: np.ndarray, level: float
+) -> int:
+    """Count strict superlevel components by plain host graph search."""
+
+    live = valid & (values > level)
+    parent = list(range(values.size))
+
+    def find(node: int) -> int:
+        while parent[node] != node:
+            parent[node] = parent[parent[node]]
+            node = parent[node]
+        return node
+
+    for left, right in edges:
+        if live[left] and live[right]:
+            parent[find(int(left))] = find(int(right))
+    return len({find(int(node)) for node in np.flatnonzero(live)})
+
+
+def _receipt_crossings(arcs: np.ndarray, values: np.ndarray, level: float) -> int:
+    """Count receipt arcs whose endpoints straddle one carrier level."""
+
+    return int(
+        np.count_nonzero((values[arcs[:, 0]] > level) != (values[arcs[:, 1]] > level))
+    )
+
+
+def _assert_matches_carrier(receipt, mesh, vertex_flux) -> None:
+    """The receipt's arcs must bear the carrier's own superlevel events.
+
+    The reference is a plain host graph search over the same carrier and the
+    same field the build was handed, so it is valid on any host: a near-tie
+    flux comparison that rounds differently under another CPU's vector code
+    moves the receipt and the reference together.
+    """
+
+    values = np.asarray(vertex_flux, dtype=np.float64)
+    valid = np.asarray(mesh.vertex_valid, dtype=bool)
+    carrier_edges = np.asarray(mesh.edges)[np.asarray(mesh.edge_valid)]
+    edge_rows = np.asarray(receipt.edges)[np.asarray(receipt.edge_valid)]
+    if _perturb_arc_order():
+        edge_rows = np.roll(edge_rows, 1, axis=0)
+    arcs = np.asarray(receipt.node_vertex, dtype=np.int64)[edge_rows]
+    levels = np.nextafter(np.unique(values[valid]), -np.inf)[::-1]
+    for level in levels:
+        reference = _host_superlevel_components(
+            values, valid, carrier_edges, float(level)
+        )
+        assert _receipt_crossings(arcs, values, float(level)) == reference, float(level)
 
 
 def _integer_digest(receipt: contour_tree.ContourTreeArrays) -> str:
@@ -133,13 +195,27 @@ def test_clipped_carrier_faces_use_occupiable_vertices(kind: str):
 @pytest.mark.parametrize("kind", ["limited", "diverted"])
 @pytest.mark.parametrize("cells", [550, 2000])
 def test_sparse_build_matches_base_receipt(kind: str, cells: int):
-    """The receipt's carrier slots, arcs and types are the pinned build's, and the
-    flux each valid node row carries is the field the build was given."""
+    """The receipt's arcs bear the carrier's superlevel events on any host.
 
-    receipt, vertex_flux = _build(kind, cells)
+    The integer arrays are compared against a plain host graph search over the
+    same carrier and the same field the build was handed, so the reference
+    travels between hosts where a pinned digest of the arrays does not: at
+    2,000 cells a near-tie flux comparison can round differently under another
+    CPU's vector code and move the receipt without changing what it means.  The
+    coarse rows additionally keep their pinned digest, shown host-independent on
+    both the sirius and Broadwell CPU classes, as a second check that the
+    receipt bytes themselves are unchanged there.  The flux each valid node row
+    carries is the field the build was given.
+    """
+
+    receipt, vertex_flux, mesh = _build(kind, cells)
     assert np.asarray(receipt.overflow) == np.asarray(False)
     assert int(np.sum(receipt.node_valid)) >= 2
-    assert _integer_digest(receipt) == _EXPECTED_INTEGER_DIGESTS[f"{kind}-{cells}"]
+
+    _assert_matches_carrier(receipt, mesh, vertex_flux)
+
+    if cells == 550:
+        assert _integer_digest(receipt) == _EXPECTED_INTEGER_DIGESTS[f"{kind}-{cells}"]
 
     valid = np.asarray(receipt.node_valid, dtype=bool)
     node_vertex = np.asarray(receipt.node_vertex, dtype=np.int64)

@@ -189,7 +189,11 @@ def test_critical_node_capacity_overflow_is_jittable_and_visible():
     edges = jnp.stack(
         (jnp.zeros(leaves, dtype=jnp.int32), jnp.arange(1, leaves + 1)), axis=1
     )
-    result = build_contour_tree(
+    compiled = jax.jit(
+        build_contour_tree,
+        static_argnames=("neighbour_capacity", "node_capacity", "edge_capacity"),
+    )
+    result = compiled(
         values,
         jnp.ones(values.size, dtype=bool),
         jnp.zeros(values.size, dtype=bool),

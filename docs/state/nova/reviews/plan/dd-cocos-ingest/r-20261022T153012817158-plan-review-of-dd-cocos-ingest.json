@@ -1,0 +1,52 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-22T16:04:04.306Z",
+  "dispatched_at": "2026-10-22T15:52:56Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/dd-cocos-ingest.html:68",
+      "id": "done_when-1",
+      "reason": "the node cannot demonstrate the translation it is asked for, and the deferred `p\u2032`/`FF\u2032` gap reaches \u00a74 unmeasured because this done-when never exercises it.",
+      "text": "done-when (1) requires `PlasmaSource.from_mast` to translate COCOS 3 to COCOS 17, but \u00a73's own body (line 60) says the MAST flux rows' declared factor \"equals today's `TOTAL_FLUX_FACTOR`\" so \"their values are unchanged for every caller\", sends `p\u2032` and `FF\u2032` through raw and defers that 2\u03c0 gap to \u00a74, and names no `q` row on that route \u2014 so the mechanism changes no value a reader can observe and the clause cannot fail",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/dd-cocos-ingest.html:68",
+      "id": "reasoning-1",
+      "reason": "the node is told both to keep the guard and to show its search returns nothing, so it must either weaken the search or drop the guard; without a stated exemption for the guard re-expressed against `nova_cocos.convention(17)` the clause is unsound as written.",
+      "text": "done-when (2) asserts that \"\u00a71's sign search, run again, finds no fixed-orientation sign test or `# COCOS` sign site in any reader\", yet \u00a73's body (line 59) keeps `prescribe`'s test (`span * I_p >= 0`, `nova/imas/plasma_source.py:76`), which \u00a71's own census close recorded as \"the only fixed-orientation sign test in the tree\" \u2014 the search cannot return empty while that guard stands",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "3a8d404bcb218b48f996bc225fd20d15b73b13c18966f482e40323348684272f",
+  "plan_slug": "dd-cocos-ingest",
+  "plan_version": 55,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261022T153012817158-plan-review-of-dd-cocos-ingest",
+  "reviewed_blob_sha": "9b07f871506330dd8ed5d110374a72a74eff699a",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `nova/imas/plasma_source.py::PlasmaSlice.prescribe` (guard at `plasma_source.py:76`), `::from_mast` (`:146`) and `::from_imas` (`:181`) exist; `nova/media/sources/mast_efit.py::read_frame` exists (`:102`) and applies `TOTAL_FLUX_FACTOR` to flux at `:87`, `:116`\u2013`:117`; `Extrapolate.update` is at `extrapolate.py:292` with its `# COCOS` literal at `:301`, and `plot_2d_masked` at `:331` with its literal at `:345`, as \u00a73 states; each of the four re-pointed tests resolves (`tests/test_plasma_source.py:80`, `tests/test_coupled_plant.py:844`, `tests/test_coupled_plant.py:871`, `tests/test_prescribed_plasma.py:526`).",
+    "done_when": "a finding \u2014 \u00a73's done-when (1) requires `PlasmaSource.from_mast` to translate COCOS 3 to COCOS 17, but the section's own mechanism leaves every value on that route unchanged, so the clause cannot fail.",
+    "evidence_paths": "pass \u2014 \u00a73 names no session scratchpad or node-local temporary path; evidence sits in the readers' test files and the census record at `docs/research/dd-cocos-census.html`, both in the repository.",
+    "naming": "pass \u2014 \u00a73 brings no plan label, ticket number or version tag into a symbol or comment; the `psi ordering disagree` substring is a message substring the section deliberately keeps, not a plan label.",
+    "reasoning": "a finding \u2014 \u00a73 keeps `prescribe`'s fixed-orientation sign test while asserting the \u00a71 search finds no such test in any reader, which the plan's own census evidence contradicts.",
+    "single_goal": "pass \u2014 \u00a73 carries one goal, \"the readers go through the \u00a72 translator\"; the four re-pointed DINA tests and the re-run sign search are the evidence for that one goal, not a second deliverable.",
+    "wiring": "pass \u2014 `s3` declares `data-links=\"dd-cocos-ingest#s2\"` and the snapshot's `plan-section-depends-on` gives `s3 \u2192 s2`; both resolve to nodes that exist and no relationship points at the wrong node."
+  },
+  "section_digests": {
+    "_document": "0944b41fbee062214508f8e371bdb6d46b75eb62d96e4606b5e91e6893187ad0",
+    "s0": "d7c3143494e97518c859457355f006ec1a3961adf5e50d514822385ec2941326",
+    "s1": "8493846bddbd37e17766c3f28357c4dec07fde5dad711cf4d8096db87e577f89",
+    "s2": "38e4a6fd8cb459d4e887ae55cc12b322f74419e30f3f46aaa3022d95172c4f71",
+    "s3": "6222a6258d0b50ced33ecdd77db11fca6bd959719693610078866dc735ceebce",
+    "s4": "d6a70aa2dd32032baf0b25d96203690d339d0869464e29c0f3620c5c535bca9c",
+    "s5": "db46395f9321959e91cc657923e567fa72cda1e12fa3aa977d6a83243b8e1d36"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T16:12:09.632374+00:00"
+}

@@ -46,9 +46,22 @@
       "finding": "done_when-1",
       "reason": "",
       "when": "2026-10-22T13:36:30.169159+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "anchors_resolve-1",
+      "reason": "",
+      "when": "2026-10-22T13:38:42.191531+00:00"
     }
   ],
   "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-22T13:38:42.191531+00:00"
+    },
     "done_when-1": {
       "action": "acted",
       "by": "",

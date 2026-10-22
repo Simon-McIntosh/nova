@@ -20,11 +20,11 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="equilibrium,schema,cocos">
   <meta name="plan-blocks" content="iter-passive-plasma-circuit">
-  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
   <title>DD COCOS Ingest | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="36">
+<meta name="plan-version" content="37">
 <meta name="plan-modified" content="2026-10-22">
 <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;dd-cocos-ingest#s1&quot;],&quot;s3&quot;:[&quot;dd-cocos-ingest#s2&quot;],&quot;s4&quot;:[&quot;dd-cocos-ingest#s3&quot;],&quot;s5&quot;:[&quot;dd-cocos-ingest#s1&quot;,&quot;dd-cocos-ingest#s2&quot;]}">
 </head>
@@ -43,7 +43,7 @@
 
 
     <h2 id="s2">§2 — One reusable DD3 translator, with DD4 passthrough and a conformance refusal</h2>
-<section data-reckon="section" data-id="s2" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="dd-cocos-ingest#s1"></section>
+<section data-reckon="section" data-id="s2" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="done" data-links="dd-cocos-ingest#s1"></section>
     <p>The translator takes an equilibrium-bearing IDS read at DD3 into COCOS 17 and passes DD4 through unchanged, and it is built by extending the owners §1 names, not beside them.</p>
     <ul>
       <li><strong>Digits from observables.</strong> <code>nova/scripts/identify_source_cocos.py::determine_digits</code> already derives σ_Bp from sign(ψ_edge − ψ_axis) · sign(Ip), cross-checked against p′, and σ_ρθφ from sign(q) · sign(Ip) · sign(B0). The same script measures e_Bp separately, through <code>flux_loop_two_pi_ratio</code>, reduced in its caller. <code>nova_cocos</code> stays standard-library only, as its packaging contract requires, and owns only the four-digits-to-convention lookup. <code>determine_digits</code> uses numpy, so it moves out of the script into <code>nova/io/sourcemap.py</code>, the conversion owner, which already imports <code>nova_cocos</code>. Readers call that one validated derivation, and the e_Bp measurement stays with the archive reader that needs it. For a DD read, e_Bp = 1 and σ_RφZ = +1 are fixed by the DD version, since COCOS 11 and COCOS 17 share both; σ_Bp and σ_ρθφ come from the data. The data conforms when <code>nova_cocos.identify_convention</code> on those four digits returns the DD version's convention.</li>
@@ -106,7 +106,10 @@
     <div class="r-comment-body"><p><strong>Correction to the census verdict for DINA 105013/1, 2026-10-22.</strong> The census sampled 20 slices and recorded σ_Bp = +1 as consistent with COCOS 11. The translator node scanned the whole pulse and found σ_ρθφ = −1 on all 766 slices above 1 MA: b0 is stored at +2.65 T with q &gt; 0. With σ_Bp = +1, e_Bp = 1 and σ_RφZ = +1, that contradicts COCOS 11. The two 2.65 T DINA pulses form a mirrored pair. 105014/1 reads exactly COCOS 17's digits, and 105013/1 reads COCOS 17's digits with q mirrored. Neither conforms to DD3. Both 5.3 T pulses, 105052/1 and 105069/3, conform on every slice. Under d-ddc-convention, 105013/1 is invalid as DD3 data and refused by name. §2's acceptance list and §5's source list are corrected to match. The earlier close comment on §1 stands as written at the time; this comment supersedes its 105013/1 entry.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261022T095957874627-review-of-dd-translator-1f32c239d79e" data-who="reckon-build" data-when="2026-10-22T10:22:47.140Z">
-    <div class="r-comment-body"><p>review of r-20261022T082744999453-dd-translator @ 1f32c239d — one blocking finding (after_suite&#x27;s gate receipt is unreadable as recorded), five follow-on findings; scores goal_fidelity 19, evidence 14, scope_discipline 19, durability 17, fit 18, reuse 20</p></div>
+    <div class="r-comment-body"><p>review of r-20261022T082744999453-dd-translator @ 1f32c239d — one blocking finding (after_suite's gate receipt is unreadable as recorded), five follow-on findings; scores goal_fidelity 19, evidence 14, scope_discipline 19, durability 17, fit 18, reuse 20</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-close-s2" data-who="reckon-build" data-when="2026-10-22T10:50:00Z">
+    <div class="r-comment-body"><p>§2 landed at merge <code>d217e6b6b</code> (node dd-translator, head <code>1f32c239d</code>, review with no blocking finding once the coordinator re-ran its gate). <code>translate_equilibrium</code> on <code>nova/io/sourcemap.py</code> translates DD3 equilibrium reads to COCOS 17 and passes DD4 through, with <code>determine_digits</code> moved there from the identification script.</p><ul><li>Refused by name, each with the contradicting digit stated: DINA 105014/1 on σ_Bp and 105013/1 on σ_ρθφ.</li><li>Accepted on every slice above 1 MA: DINA 105052/1 and 105069/3, and CORSICA 130506/6.</li><li>DD4 passthrough: the DD 4.1.0 layers of <code>iter_corsica_130506</code> pass through with every factor exactly 1.0, and 130506/403 agrees with them in sign at shared times.</li><li>Deleted: <code>cocos_from_digits</code> and the <code>nova/io/cocos.py</code> shim.</li><li>Negative control: negating ψ on a conforming DD3 slice is refused by name.</li></ul><p>The gate's six files pass at the tip and at the merged head: 87 tests. The readers move onto the translator in §3. Record: <a href="/nova/evidence/fragments/dd-cocos-ingest/dd-translator">dd-translator</a>.</p></div>
 </div>
 </section>
 </main>

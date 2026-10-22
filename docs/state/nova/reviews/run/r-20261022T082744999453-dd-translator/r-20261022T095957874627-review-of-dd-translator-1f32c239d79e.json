@@ -18,6 +18,11 @@
       "kind": "exempted",
       "reason": "gate and control receipts re-run by the coordinator at the merged head; the digits-table cross-check and passthrough assertion move with dd-cocos-ingest section 3, which rewrites the reader tests",
       "recorded_at": "2026-10-22T12:35:13.551047+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "gate and control receipts re-run by the coordinator at the merged head; the digits-table cross-check and passthrough assertion move with dd-cocos-ingest section 3, which rewrites the reader tests",
+      "recorded_at": "2026-10-22T12:35:40.120888+00:00"
     }
   },
   "findings": [

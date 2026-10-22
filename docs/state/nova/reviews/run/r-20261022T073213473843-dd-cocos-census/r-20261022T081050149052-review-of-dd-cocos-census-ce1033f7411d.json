@@ -12,6 +12,11 @@
       "kind": "exempted",
       "reason": "census-table cell and control-log nits; dd-cocos-ingest section 5 writes its table into the same census record and corrects them there",
       "recorded_at": "2026-10-22T08:26:28.993368+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "census-table cell and control-log nits; dd-cocos-ingest section 5 writes its table into the same census record and corrects them there",
+      "recorded_at": "2026-10-22T08:26:40.675914+00:00"
     }
   },
   "findings": [

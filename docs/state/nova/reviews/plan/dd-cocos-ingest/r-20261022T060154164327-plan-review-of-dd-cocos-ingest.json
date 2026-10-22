@@ -1,0 +1,114 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-22T06:06:44.372Z",
+  "dispatched_at": "2026-10-22T06:02:17Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/nova/scripts/identify_source_cocos.py:801",
+      "id": "reuse_search-1",
+      "reason": "the observable-to-digits derivation is the reusable half of \u00a72, so the plan should either call this validated implementation or state why a second calibration of the same four digits is needed.",
+      "text": "the derivation \u00a72 proposes (\"\u03c3_Bp from the sign of (\u03c8_boundary \u2212 \u03c8_axis) times the sign of the plasma current, and \u03c3_\u03c1\u03b8\u03c6 from the sign of q times the signs of the plasma current and B0\") is already implemented at `determine_digits` (lines 807-814) from per-slice observables read at `_convention_signs` (line 663), with the e_Bp flux-loop 2\u03c0 ratio measured by `flux_loop_two_pi_ratio` (line 716); the plan states the same algebra and cites none of it, and the module's own docstring records the digit `e_Bp` as the one worth measuring from data rather than reading off a unit string",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/nova/io/sourcemap.py:125",
+      "id": "reuse_search-2",
+      "reason": "\u00a72 must name the existing conversion-and-refusal owner and say whether it extends it, or nova gains a second refusal path for the same class of unconvertible data.",
+      "text": "\u00a72's \"translator with a conformance refusal\" duplicates machinery already owned here: `SourceSignal.convention_factor` (line 128) derives the factor through `nova_cocos.convention_transform` from a declared source and target convention, and `BlockedSignal` (line 322) is the existing refusal for a quantity whose conversion is inadmissible, described in the module docstring as a channel that \"is not given a weight of one and quietly served\"; \u00a72 cites only `nova_cocos` and neither extends nor mentions the sourcemap refusal",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/nova/imas/mast_solve_inputs.py:97",
+      "id": "reuse_search-3",
+      "reason": "two independently declared source conventions at the same read boundary will disagree the first time a reader accepts both, and \u00a72 must reconcile them rather than add a third declaration.",
+      "text": "the source-target convention declaration \u00a72 proposes to introduce already exists at this boundary as `SOURCE_CONVENTION = 3` (line 97), `TARGET_CONVENTION = 17` (line 100) and `MEASURED_FLUX_CONVENTION = 13` (line 103), feeding `SourceSignal` rows whose `convention_factor` comes from `nova_cocos`; \u00a72 adds a DD3 source convention of 11 and a target of 17 without saying how it composes with the source and target already declared for the MAST read path",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/nova/imas/mast_parity_chain.py:397",
+      "id": "reuse_search-4",
+      "reason": "\u00a75 is the measure of whether the reference equilibrium choice is right, so it must extend the residual and operator that are already used for the same comparison or its numbers will not be comparable to the ones nova already reports.",
+      "text": "\u00a75 proposes to \"build the measure properly\" of edge consistency between flux functions and flux map, but `_profile_reproduction_residuals` (line 397, called at line 632) already computes exactly that: `RMS(j_phi_nova \u2212 j_phi_grid)` where the grid read applies the structured-grid Grad-Shafranov operator to the plasma-generated flux, scored over interior in-limiter cells with a complete stencil; the operator algebra it rests on is `nova/equilibrium/convention.py::grad_shafranov_source` (line 78) and `delta_star_from_current_density` (line 73), and a Solov'ev-family analytic state already exists at `nova/equilibrium/analytic_single_null.py:470`; \u00a75 cites none of these",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/nova/imas/extrapolate.py:301",
+      "id": "reuse_search-5",
+      "reason": "\u00a71 is the migration list for \u00a73 and \u00a74, and a census scoped narrower than the search \u00a73 runs mid-plan hands the author a clean search result over a codebase that still hard-codes convention in at least six places.",
+      "text": "\u00a73's done-when \"a search for a remaining fixed-orientation sign test returns none\" will not be satisfied by the search \u00a71 scopes (\"under `nova/` and `scripts/`\" for IDS-path readers), because convention is hard-coded as a bare negation marked only by a `# COCOS` comment at these sites: `nova/imas/extrapolate.py:301` (`internal = -self.psi_rbs(...)  # COCOS11`) and `:345`; `nova/imas/pulsedesign.py:531`, `:544`, `:581`; `nova/equilibrium/inverse.py:245` (`-self[\"psi_boundary\"]  # COCOS`); `nova/biot/contour.py:198` (`psi = norm(psi)  # COCOS`); the plan names only `nova/imas/plasma_source.py::PlasmaSlice.prescribe`, and the writer at `pulsedesign.py` and the internal consumers at `inverse.py` and `biot/contour.py` fall outside \u00a71's reader scoping while \u00a73's search will still match them",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/nova/scripts/identify_source_cocos.py:858",
+      "id": "duplicate_owner-1",
+      "reason": "the plan's central claim is that it adds no second table, and leaving this one in place means the claim is only true of the code the plan writes, not of the code it lands beside.",
+      "text": "`cocos_from_digits` is a second copy of the digits-to-convention lookup, and it carries its own inline transcription of Sauter & Medvedev Table I (lines 862-879), duplicating the table and function the plan correctly identifies as nova's one COCOS algebra at `packages/nova-cocos/src/nova_cocos/__init__.py::identify_convention` (line 129) over `CONVENTION_DIGITS`; the duplicate is already depended on by `tests/test_io_cocos.py:33` and `tests/test_mastcocos.py:26`, which is why it has survived; the table's owner is `nova_cocos`, so the extension is to delete the copy and repoint its importers",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/nova/equilibrium/convention.py:1",
+      "id": "duplicate_owner-2",
+      "reason": "\u00a74 is the section that changes what every internal consumer means, so it must name `nova/equilibrium/convention.py` as the internal-convention owner and the filepath key mechanism as the cache owner, or the conversion boundary will be re-declared per consumer.",
+      "text": "\u00a74 requires that \"every internal consumer in the census works in COCOS 17\" and that a converted consumer is \"converted at its own boundary, never by a sign flip at a call site\", but this module is already the pinned owner of the internal convention, stating the total-flux and current-density sign chain that fixes it and exporting `TOTAL_FLUX_FACTOR` to fourteen importing modules (`nova/equilibrium/source.py:49`, `conservation.py:74`, `constraint.py:21`, `map_extraction.py:32`, `sol_closure.py:37`, `shape_inverse.py:55`, `continuation.py:124`, `nova/imas/mast_parity_chain.py:30`, `nova/media/sources/mast_efit.py:30`, among others), and the plan cites it nowhere; \u00a74's cache requirement (done-when 3) similarly names no owner while `nova/database/filepath.py::canonical_key` (line 337) and `hash_attrs` (line 392) own the cache key and `nova/io/ingest.py:116` already writes a `cocos` attribute into the store",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/nova/io/cocos.py:1",
+      "id": "duplicate_owner-3",
+      "reason": "this is a one-line cleanup on a shim that already re-exports the correct names, so it is worth recording but would not change the plan's design.",
+      "text": "the compat shim's own docstring states it \"is retired once those importers name `nova_cocos` directly\", and the plan's translator would be the natural moment to complete that retirement by having each census reader import `nova_cocos` rather than reach through `nova.io.cocos`; \u00a72 says only that the factors come from the one table",
+      "type": "duplicate_owner",
+      "would_change": false
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/nova/io/sourcemap.py:125",
+      "id": "thin_wrapper-1",
+      "reason": "the honest change is to extend the existing conversion and refusal owner to the equilibrium read path, and the plan should say what makes that impossible if it is.",
+      "text": "\u00a72's translator forwards to `nova_cocos.convention_transform` and adds a conformance check whose refusal semantics already exist as `BlockedSignal` in the module that owns per-quantity convention conversion, and the plan nowhere says why that machinery cannot be extended to carry an equilibrium IDS read rather than having a second module beside it; the same question applies to the DD4 \"passthrough\" branch, which is a branch over existing behaviour rather than new behaviour",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/dd-cocos-ingest.html:45",
+      "id": "interface_budget-1",
+      "reason": "the section that adds the surface must account for it in its own text, and forcing that accounting here is what surfaces `cocos_from_digits` as the thing to retire rather than leave beside the new entry point.",
+      "text": "the supplied counts are public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 adds a new public entry point (\"the module has one public entry point that readers call, documented in its docstring\") and a named refusal error for non-conforming data, and its own text names nothing it retires or merges \u2014 the retirement it has in mind is stated in \u00a73's text (line 52, removing the fixed-orientation guard in `plasma_source.py`), not in \u00a72's, and \u00a72 does not state why nothing can be retired",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "62ed0065ae803ffd490dd49abdbd64cec855229059a072e87467e1303b22986b",
+  "plan_slug": "dd-cocos-ingest",
+  "plan_version": 5,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261022T060154164327-plan-review-of-dd-cocos-ingest",
+  "reviewed_blob_sha": "35791419b4667fc87b0854b312b027fc1348c64b",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a72 is one module with one documented public entry point hiding the digit derivation, the conformance refusal and the factor algebra, and the plan does not spread one mechanism across parallel shallow wrappers.",
+    "duplicate_owner": "a finding \u2014 \u00a72 leaves a second digits-to-convention table and a second observable-to-digit derivation beside their existing owners, and \u00a74 names no owner for the convention-carrying cache key.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 adds a public entry point and a named refusal error without naming, in its own text, what it retires or merges, or why nothing can be.",
+    "reuse_search": "a finding \u2014 the plan proposes an observable-to-COCOS-digits derivation and a DD3-to-COCOS-17 translator without citing `nova/scripts/identify_source_cocos.py`, `nova/io/sourcemap.py` or `nova/imas/mast_solve_inputs.py`, each of which already implements one half of what \u00a72 and \u00a75 add.",
+    "thin_wrapper": "a finding \u2014 \u00a72's translator is a thin layer over `nova_cocos.convention_transform` plus the conversion-and-refusal machinery `nova/io/sourcemap.py` already owns, and the plan states no reason that machinery cannot be extended."
+  },
+  "section_digests": {
+    "_document": "29f5087fa0e5ad0f917b1ff80b913ce5d8f06b32d5c716728522ab06567b4f3c",
+    "s0": "2407e28f2db9011d45035f6b86c463b1b4e36000c85f35e7d35de056f2cbb5d9",
+    "s1": "a73e7c69edf2d0bc9850cc6146cd87b1c1615921ac95be2062f7c8da066c784d",
+    "s2": "cb1d001748441be81ff35bb6557ef0bc57f1e1c03cc0cf0a802ebf7558d45991",
+    "s3": "a71acb5332566b86acac04012730d8d5590e243ea8a95fb8fc227f8d324e33ce",
+    "s4": "6d65939e36a617ec3fcbaf8cdabe4665584f8615e05718828ec8a2e1443506bd",
+    "s5": "94078844cde0216ea2c463cb059852a5155054cdafcb880d5f5a828977abe820"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T06:08:09.919657+00:00"
+}

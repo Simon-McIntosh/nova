@@ -53,11 +53,15 @@ COAXIAL_TOLERANCE = 0.03
 #: machine-description cross-section of one VS3 conductor annulus [m]
 CONDUCTOR_ANNULUS = (0.01695, 0.02300)
 
-#: files that still name a retired digest and lie outside this node's write
-#: scope: each is a copy of an entry under another run's scratch directory and
-#: loads it through ``load_sectioned_machine``, so the refusal reaches them
-#: too.  Recorded here rather than silently excluded from the search.
+#: files the retired-digest search must skip, and why each is skipped rather
+#: than silently passed over.  The first two still name a retired digest and lie
+#: outside this node's write scope: each copies an entry under another run's
+#: scratch directory and loads it through ``load_sectioned_machine``, so the
+#: refusal reaches them too.  This module is the record of what was retired, so
+#: it is the one file that has to name the retired keys.
+SELF = Path(__file__).name
 OUT_OF_SCOPE_DIGEST_PINS = (
+    SELF,
     "test_prescribed_plasma.py",
     "test_unseen_source_full_plant.py",
 )

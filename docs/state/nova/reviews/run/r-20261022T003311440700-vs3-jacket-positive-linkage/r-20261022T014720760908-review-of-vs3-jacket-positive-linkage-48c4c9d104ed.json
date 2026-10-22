@@ -1,0 +1,155 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "The reviewed run wrote no baseline_suite and no after_suite (the manifest's both fields are null and no base/head arm log exists under its logs/), so no suite delta is derivable and none is claimed. Its only recorded gate is its own new test file: logs/new_test.log reports 7 passed, EXIT=0, and this review reproduced that arm independently at the reviewed head 48c4c9d104 in an extracted head tree (7 passed in 74.71s, EXIT=0) with no failure ids. The count and id list are therefore the neutral values the record shape requires, not a measured delta against a base arm.",
+  "call_sites": "none",
+  "completed_at": "2026-10-22T02:08:17.865Z",
+  "dispatched_at": "2026-10-22T01:49:46Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "vs3-linkage-repair",
+      "recorded_at": "2026-10-22T02:09:25.282219+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "vs3-linkage-repair",
+      "recorded_at": "2026-10-22T02:09:49.466849+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "vs3-linkage-repair",
+      "recorded_at": "2026-10-22T02:09:57.065590+00:00"
+    },
+    "3": {
+      "kind": "folded",
+      "node": "vs3-linkage-repair",
+      "recorded_at": "2026-10-22T02:10:06.961031+00:00"
+    },
+    "4": {
+      "kind": "folded",
+      "node": "vs3-linkage-repair",
+      "recorded_at": "2026-10-22T02:10:17.070370+00:00"
+    },
+    "5": {
+      "kind": "folded",
+      "node": "vs3-linkage-repair",
+      "recorded_at": "2026-10-22T02:10:37.437016+00:00"
+    }
+  },
+  "findings": [
+    {
+      "evidence": "committed blob at 48c4c9d104 re-rendered with ImageMagick at density 140 shows the annotation ending at the canvas edge; the identical blob re-rendered after widening only the root width/viewBox from 1008 pt to 1300 pt shows the full sentence, so the text artist lies outside the 1008 pt canvas rather than being dropped by the renderer.",
+      "file": "docs/figures/iter-passive-plasma-circuit/vs3-jacket-positive-linkage.svg",
+      "line": 4,
+      "severity": "blocking",
+      "summary": "the right panel's direct label is clipped by the canvas; the last word of 'the jacket square lies inside the conductor square it should surround' is absent from the delivered figure"
+    },
+    {
+      "evidence": "git diff 473c6ff42..48c4c9d104 changes three files, none of them production source; the manifest checkpoint reads 'no product source changed and no cache entry written'; the pinned plant sha256 7800a4d8db5ea452fca7e0a18179f8939f85e08e8503b61e4e1bbee8d3c06b6c is deliberately unchanged.",
+      "file": "docs/evidence/fragments/iter-passive-plasma-circuit/vs3-jacket-positive-linkage.html",
+      "line": 188,
+      "severity": "blocking",
+      "summary": "the node's goal (positive-definite joint linkage and a re-pinned 105069/3 plant) is not delivered; the landed change is attribution only"
+    },
+    {
+      "evidence": "tests/test_vs3_jacket_positive_linkage.py:281 returns 4e-7*pi*major*(log(8*major/rho)-2) with rho=sqrt(ri*ro); nova/circuit/screening.py:578 plasma_self_inductance returns mu0*r_axis*(log(8*r_axis/effective)-2+0.5*li) and is identical at elongation 1 and li 0 with minor_radius=rho.",
+      "file": "tests/test_vs3_jacket_positive_linkage.py",
+      "line": 281,
+      "severity": "follow-on",
+      "summary": "_ring_self duplicates a closed form the repository already owns"
+    },
+    {
+      "evidence": "tests/test_vs3_jacket_positive_linkage.py:132 asserts the reduced square-collapsed block has exactly two negative eigenvalues and :94 asserts the pinned plant's Schur complement has them; the fragment's owed list at docs/evidence/fragments/iter-passive-plasma-circuit/vs3-jacket-positive-linkage.html:188 is precisely the work that removes them.",
+      "file": "tests/test_vs3_jacket_positive_linkage.py",
+      "line": 132,
+      "severity": "follow-on",
+      "summary": "two of the added tests assert the pre-repair defect is still present and will redden when the owed repair lands"
+    },
+    {
+      "evidence": "tests/test_vs3_jacket_positive_linkage.py:49-56 uses importlib.util.spec_from_file_location with the name 'iter_sectioned_build_jacket', while tests/test_iter_sectioned_conductor_set.py:18 imports the same file as 'from scripts.iter_sectioned_conductor_set.build import calculate', so a run collecting both executes build.py twice.",
+      "file": "tests/test_vs3_jacket_positive_linkage.py",
+      "line": 49,
+      "severity": "follow-on",
+      "summary": "_load_build executes the builder module a second time under an ad-hoc module name instead of importing it"
+    },
+    {
+      "evidence": "manifest.md line 5 reads 'status: in-progress'; classification.json records manifest/data/status = 'in-progress', which is none of complete, blocked or failed.",
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T003311440700-vs3-jacket-positive-linkage/manifest.md",
+      "line": 5,
+      "severity": "follow-on",
+      "summary": "the source run's status is outside the recognised vocabulary"
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit (5f200d373, then 48c4c9d10) against base 473c6ff42; both commits are test-and-evidence only -- a new 332-line test module, a 204-line evidence fragment and a 1489-line two-panel SVG -- and the tests exercise production kernels (nova.circuit.linkage.circuit_linkage_matrix, nova.circuit.conductor.ConductorSet/PolygonSection) without altering them.",
+    "done_when": "The done_when is three clauses -- attribute both causes, repair them at their source with a positive-definite joint build and an independent single-coil reference, and write a rebuilt 105069/3 plant -- plus a literal negative control; clause 1 landed with a validated arm and a recorded refinement, while clauses 2 and 3 did not land at all, and the negative control required by the done_when (revert the repair and see the two negative eigenvalues return) cannot exist because no repair landed; the worker substituted an inverted-assertion control instead (logs/negative_control.log, EXIT=1).",
+    "goal": "The source node's goal is that the ITER coil and passive linkage is positive definite, with the jacket excess and the passive-block negatives attributed and repaired and a re-pinned 105069/3 plant; the landed commits change only tests/test_vs3_jacket_positive_linkage.py and two docs. Read at the reviewed head, no product source is touched, the linkage is not made positive definite and no plant entry is re-pinned; the node's own record concedes this at docs/evidence/fragments/iter-passive-plasma-circuit/vs3-jacket-positive-linkage.html:188.",
+    "manifest": "Read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T003311440700-vs3-jacket-positive-linkage/manifest.md; it states the head arm (7 passed in 86.87 s, failure_ids []) and names seven logs, and its checkpoint is explicit that only done-when 1 closed with no product source changed; it carries no baseline_suite and no after_suite, and its status is 'in-progress', which is not one of the recognised values complete/blocked/failed.",
+    "write_paths": "The manifest declares eleven source paths plus a fragment, a figure directory and run logs/scratch; every one of the three paths in the diff (tests/test_vs3_jacket_positive_linkage.py, docs/evidence/fragments/iter-passive-plasma-circuit/vs3-jacket-positive-linkage.html, docs/figures/iter-passive-plasma-circuit/vs3-jacket-positive-linkage.svg) is inside those declared paths and nothing else is touched."
+  },
+  "justifications": {
+    "durability": "tests/test_vs3_jacket_positive_linkage.py:319 fails if build.py stops collapsing the VS3 annulus to its area-equivalent square, but tests/test_vs3_jacket_positive_linkage.py:94 and :132 pin the pre-repair defect and will redden when the repair the fragment owes lands.",
+    "evidence": "the manifest's tests line runs tests/test_vs3_jacket_positive_linkage.py alone and its baseline_suite and after_suite are null, so the done_when's named five-file base-and-head gate was never run, though the attribution measurements themselves are logged and the head arm reproduces.",
+    "fit": "tests/test_vs3_jacket_positive_linkage.py:49 loads build.py through importlib under an ad-hoc module name where tests/test_iter_sectioned_conductor_set.py:18 imports it directly, and the test reaches the private ConductorSet._columns attribute.",
+    "goal_fidelity": "docs/evidence/fragments/iter-passive-plasma-circuit/vs3-jacket-positive-linkage.html:188 names the joint positive-definite build and the rebuilt plant entry as owed, so the goal's end state is not delivered.",
+    "reuse": "tests/test_vs3_jacket_positive_linkage.py:281 re-implements the closed-form ring self-inductance owned at nova/circuit/screening.py:578 (plasma_self_inductance) without extending it, though the rest of the module reuses the repository's linkage and conductor kernels.",
+    "scope_discipline": "the diff touches only tests/test_vs3_jacket_positive_linkage.py and the two declared docs paths, and carries nothing the goal does not imply."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261022T014720760908-review-of-vs3-jacket-positive-linkage-48c4c9d104ed",
+  "reviewed_base_sha": "473c6ff42c2cd6338d8e4225c2dc10b4219edf57",
+  "reviewed_change": {
+    "commits": [
+      "5f200d37334d8eda6e41280dec73e65dec189604",
+      "48c4c9d104edfa2cdd8d9b08d0883e3da02d00fe"
+    ],
+    "diffstat": "3 files changed, 2025 insertions(+), 0 deletions(-) against the base",
+    "files": [
+      "tests/test_vs3_jacket_positive_linkage.py",
+      "docs/evidence/fragments/iter-passive-plasma-circuit/vs3-jacket-positive-linkage.html",
+      "docs/figures/iter-passive-plasma-circuit/vs3-jacket-positive-linkage.svg"
+    ],
+    "production_source_changed": false
+  },
+  "reviewed_head_sha": "48c4c9d104edfa2cdd8d9b08d0883e3da02d00fe",
+  "reviewed_run_id": "r-20261022T003311440700-vs3-jacket-positive-linkage",
+  "rubric_lines": [
+    "VERDICT goal: the goal requires a positive-definite joint linkage and a re-pinned 105069/3 plant, and docs/evidence/fragments/iter-passive-plasma-circuit/vs3-jacket-positive-linkage.html:188 records both as owed rather than landed.",
+    "VERDICT done_when: done-when clauses 2 and 3 are unmet and the required negative control (revert the repair) cannot exist; the run's tests: line ran only tests/test_vs3_jacket_positive_linkage.py, not the five-file base-and-head gate the done_when names.",
+    "VERDICT write_paths: all three changed paths are inside the declared write paths and no path outside them is touched.",
+    "VERDICT manifest: read; it reports the head arm at 7 passed in 86.87 s and names its logs, but carries no baseline_suite/after_suite and its status 'in-progress' is outside the recognised vocabulary.",
+    "VERDICT diff: both commits are test-and-evidence only; no production source changed, so the landed change alters no runtime behaviour.",
+    "CALL_SITES: none",
+    "SCORE goal_fidelity: 6",
+    "JUSTIFICATION goal_fidelity: docs/evidence/fragments/iter-passive-plasma-circuit/vs3-jacket-positive-linkage.html:188 names the joint positive-definite build and the rebuilt plant entry as owed, so the goal's end state is not delivered.",
+    "SCORE evidence: 8",
+    "JUSTIFICATION evidence: the manifest's tests line runs tests/test_vs3_jacket_positive_linkage.py alone and its baseline_suite and after_suite are null, so the done_when's named five-file base-and-head gate was never run, though the attribution measurements themselves are logged and the head arm reproduces.",
+    "SCORE scope_discipline: 20",
+    "JUSTIFICATION scope_discipline: the diff touches only tests/test_vs3_jacket_positive_linkage.py and the two declared docs paths, and carries nothing the goal does not imply.",
+    "SCORE durability: 14",
+    "JUSTIFICATION durability: tests/test_vs3_jacket_positive_linkage.py:319 fails if build.py stops collapsing the VS3 annulus to its area-equivalent square, but tests/test_vs3_jacket_positive_linkage.py:94 and :132 pin the pre-repair defect and will redden when the repair the fragment owes lands.",
+    "SCORE fit: 15",
+    "JUSTIFICATION fit: tests/test_vs3_jacket_positive_linkage.py:49 loads build.py through importlib under an ad-hoc module name where tests/test_iter_sectioned_conductor_set.py:18 imports it directly, and the test reaches the private ConductorSet._columns attribute.",
+    "SCORE reuse: 5",
+    "JUSTIFICATION reuse: tests/test_vs3_jacket_positive_linkage.py:281 re-implements the closed-form ring self-inductance owned at nova/circuit/screening.py:578 (plasma_self_inductance) without extending it, though the rest of the module reuses the repository's linkage and conductor kernels.",
+    "FINDING docs/figures/iter-passive-plasma-circuit/vs3-jacket-positive-linkage.svg:4 blocking: the right panel's two-line direct label runs past the canvas and is cut off in the delivered figure; the root element's width=\"1008pt\" viewBox=\"0 0 1008 460.8\" is too narrow for the annotation, and re-rendering the same committed blob on a widened 1300 pt viewBox shows the full sentence 'the jacket square lies inside the conductor square it should surround', so the text lies outside the canvas rather than the renderer dropping it -- nova's figure rules make a clipped label a blocking defect.",
+    "FINDING docs/evidence/fragments/iter-passive-plasma-circuit/vs3-jacket-positive-linkage.html:188 blocking: the node's goal is a positive-definite joint linkage and a re-pinned 105069/3 plant, and the landed change delivers neither -- no product source is modified and no cache entry written -- so a promotion of this head lands an attribution study in place of the goal.",
+    "FINDING tests/test_vs3_jacket_positive_linkage.py:281 follow-on: _ring_self duplicates the closed form that nova/circuit/screening.py:578 already owns as plasma_self_inductance (mu0*R*(ln(8R/a)-2) at elongation 1 and internal inductance 0); it duplicates rather than extends or wraps the owner.",
+    "FINDING tests/test_vs3_jacket_positive_linkage.py:132 follow-on: this test and :94 assert the pre-repair state (two negative eigenvalues in the reduced square-collapsed block and in the pinned plant), so the repair node the fragment owes must re-point them and a later reader may mistake them for a regression when they redden.",
+    "FINDING tests/test_vs3_jacket_positive_linkage.py:49 follow-on: _load_build executes scripts/iter_sectioned_conductor_set/build.py a second time under the ad-hoc module name 'iter_sectioned_build_jacket' while four other test modules import it as scripts.iter_sectioned_conductor_set.build, duplicating the module's execution and its module-level state.",
+    "FINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T003311440700-vs3-jacket-positive-linkage/manifest.md:5 follow-on: the source run's status is 'in-progress', outside the recognised complete/blocked/failed vocabulary, so the record classifies as unreadable and would slip a review guard written against those three values."
+  ],
+  "scores": {
+    "durability": 14,
+    "evidence": 8,
+    "fit": 15,
+    "goal_fidelity": 6,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T02:05:00Z",
+  "total": 68
+}

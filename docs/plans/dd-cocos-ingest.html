@@ -24,7 +24,7 @@
   <title>DD COCOS Ingest | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="38">
+<meta name="plan-version" content="39">
 <meta name="plan-modified" content="2026-10-22">
 <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;dd-cocos-ingest#s1&quot;],&quot;s3&quot;:[&quot;dd-cocos-ingest#s2&quot;],&quot;s4&quot;:[&quot;dd-cocos-ingest#s3&quot;],&quot;s5&quot;:[&quot;dd-cocos-ingest#s1&quot;,&quot;dd-cocos-ingest#s2&quot;]}">
 </head>
@@ -57,7 +57,7 @@
     <h2 id="s3">§3 — The readers go through the translator</h2>
 <section data-reckon="section" data-id="s3" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="dd-cocos-ingest#s2"></section>
     <p>Every reader in the census takes its data through the §2 module, starting with <code>nova/imas/plasma_source.py</code>, whose fixed-orientation guard is removed in favour of the module's conformance refusal. The plasma source then works in COCOS 17 whatever DD version it was read from.</p>
-    <p>Done when: (1) <code>PlasmaSource.from_imas</code> prescribes CORSICA 130506/6 and DINA 105069/3, and refuses DINA 105014/1 by name; (2) every census reader calls the §2 entry point, and §1's sign search, run again, finds no fixed-orientation sign test or <code># COCOS</code> sign site in any reader; the remaining sites in writers and internal consumers are §4's; (3) the readers' test files pass by delta against the base, each in its own fresh process, with every changed expectation named by the reader it belongs to. Positive control for (2): a fixed-orientation sign test planted in a scratch copy of one reader is found by the same search. Literal negative control: restore the old guard in <code>plasma_source.py</code>, and CORSICA 130506/6 is refused again. This section unblocks the reconstruction check of iter-passive-plasma-circuit §6, whose reference is CORSICA 130506/6.</p>
+    <p>Done when: (1) <code>PlasmaSource.from_imas</code> prescribes CORSICA 130506/6 and DINA 105069/3, and refuses DINA 105014/1 and 105013/1 by name, each with the digit it contradicts; (2) every census reader calls the §2 entry point, and §1's sign search, run again, finds no fixed-orientation sign test or <code># COCOS</code> sign site in any reader; the remaining sites in writers and internal consumers are §4's; (3) the readers' test files pass by delta against the base, each in its own fresh process, with every changed expectation named by the reader it belongs to. Positive control for (2): a fixed-orientation sign test planted in a scratch copy of one reader is found by the same search. Literal negative control: restore the old guard in <code>plasma_source.py</code>, and CORSICA 130506/6 is refused again. This section unblocks the reconstruction check of iter-passive-plasma-circuit §6, whose reference is CORSICA 130506/6.</p>
 
 
     <h2 id="s4">§4 — nova's internals run in COCOS 17</h2>

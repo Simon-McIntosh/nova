@@ -1,0 +1,76 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-22T06:20:07.123Z",
+  "dispatched_at": "2026-10-22T06:13:55Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/dd-cocos-ingest.html#s1",
+      "id": "wiring-1",
+      "reason": "with no declared edges a node can be dispatched against \u00a72's translator before it exists, and \u00a75's whole measure is defined \"in COCOS 17 after translation\".",
+      "text": "every section is emitted with an empty `data-links`, so although followup `f-ddc-001` says \"\u00a72 needs \u00a71's quantity list, \u00a73 needs \u00a72, and \u00a74 needs \u00a73. \u00a75 needs \u00a72's translator ... and \u00a71's census file\", none of those edges exists in the plan's relationships; a dispatcher reading links sees five independent nodes and can start \u00a73 or \u00a75 before \u00a72. Sibling plans in the same directory populate the attribute and the convention is available in this repo: `docs/plans/forward-solver-route-integrity.html` carries `data-links=\"forward-solver-route-integrity#s5\"` on `s4` and `data-links=\"forward-solver-route-integrity#s4\"` on `s5`, and `docs/plans/cocos-standalone-distribution.html` carries `data-links=\"imas-ambix:jt60sa-facility-mint#s2\"`. This is the same exposure the earlier wiring-1 finding named for \u00a75; it was answered by editing the followup prose, which leaves the relationship field empty and the mis-ordering reachable.",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/dd-cocos-ingest.html#s5 (snapshot line 71)",
+      "id": "done_when-1",
+      "reason": "\u00a75 decides another plan's reference equilibrium, and without a control that rejects a known-inconsistent source its confirm verdict cannot fail.",
+      "text": "\u00a75's done-when has three clauses and no negative control: (1) the residual is zero on the analytic Solov'ev state and a 1 % FF\u2032 perturbation is detected, (2) the measure is reported for DINA 105052/1, 105069/3, 105013/1 and CORSICA 130506/6, (3) \"the reference choice of iter-passive-plasma-circuit \u00a76 is confirmed or revised on that table\". The 1 % FF\u2032 clause is a sensitivity control on the instrument, not a control on the decision the section exists to make: nothing in \u00a75 makes the measure see a source whose flux functions and flux map disagree at the edge, so a lenient or mis-normalised measure confirms the reference and iter-passive-plasma-circuit \u00a76 check 3 is then rebuilt against it. Every other section declares its control in the plan's own idiom (\"Literal negative control: ...\"), which makes this omission measurable rather than stylistic.",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/dd-cocos-ingest.html#s5 (snapshot line 70)",
+      "id": "reasoning-1",
+      "reason": "\u00a75's done-when (2) fixes the table's contents, and the author must either state which normalisation the IDS table uses or require both forms be reported before the numbers can be read against the parity chain's.",
+      "text": "\u00a75 says it \"reports it as an absolute current density and against the local profile current, so its numbers are comparable to the parity chain's\", but the function it extends normalises differently: `nova/imas/mast_parity_chain.py::_profile_reproduction_residuals` documents \"Each row is ``RMS(j_phi_nova - j_phi_grid) / max(abs(j_phi_grid))``\" (line 408), a slice-global maximum, not the local profile current. A row normalised locally cannot be compared with a parity-chain row normalised by the slice maximum, so the stated purpose of the extension is not met by the stated form.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/dd-cocos-ingest.html#s2 (snapshot line 48)",
+      "id": "reasoning-2",
+      "reason": "the derivation the sentence names exists in the same script, and no DD-read node consumes e_Bp from it, so no node is sent down a wrong path.",
+      "text": "\u00a72 says `nova/scripts/identify_source_cocos.py::determine_digits` \"already derives \u03c3_Bp from ..., \u03c3_\u03c1\u03b8\u03c6 from ...; and e_Bp from the flux-loop 2\u03c0 ratio\", but `determine_digits` (line 801) returns only `sigma_bp` and `sigma_rho_theta_phi` plus diagnostics; the 2\u03c0 ratio comes from `flux_loop_two_pi_ratio` (line 716) and is reduced to `e_bp` in the caller at line 1690. The capability exists in the cited script, so the mechanism is sound; the attribution is not exact. It is immaterial to the DD path, where \u00a72 fixes e_Bp = 1 by DD version.",
+      "type": "reasoning",
+      "would_change": false
+    },
+    {
+      "anchor": "docs/plans/dd-cocos-ingest.html#s2 (snapshot line 49)",
+      "id": "reasoning-3",
+      "reason": "done-when (3)'s \"search for either name under nova/, scripts/ and tests/ returning nothing\" already forces that call site to change, so the omission cannot cause a silent pass.",
+      "text": "\u00a72 lists the importers of `cocos_from_digits` as `tests/test_io_cocos.py` and `tests/test_mastcocos.py`, but the production caller is `nova/scripts/identify_source_cocos.py:1692` (`verdict = cocos_from_digits(...)`), which a rename of `determine_digits` into `nova_cocos` also has to move.",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "b1d4ea81435f8cb79b48399e4b9bed2985a2374fd0c7960f499ee08f328ab792",
+  "plan_slug": "dd-cocos-ingest",
+  "plan_version": 11,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261022T061336194758-plan-review-of-dd-cocos-ingest",
+  "reviewed_blob_sha": "31c02527bd1948f19a9850e2c4dcd070b200b102",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every cited path resolves (`nova/imas/plasma_source.py`, `nova/io/sourcemap.py`, `nova/io/ingest.py:66`, `nova/scripts/identify_source_cocos.py:801,858`, `nova/equilibrium/convention.py:65,73,78`, `nova/database/filepath.py:337,392`, `nova/imas/mast_parity_chain.py:397`, `nova/equilibrium/analytic_single_null.py:470`, `docs/plans/iter-passive-plasma-circuit.html#s6`, `tests/test_io_cocos.py`, `tests/test_mastcocos.py`), and the cited line numbers for the sign sites are exact (`extrapolate.py` 301/345, `pulsedesign.py` 531/544/581, `inverse.py` 245, `contour.py` 198). `docs/research/dd-cocos-census.html` does not exist yet, which is correct: \u00a71 creates it. No extensionless hrefs to resolve.",
+    "done_when": "a finding \u2014 \u00a71, \u00a72, \u00a73 and \u00a74 each declare a literal negative control, but \u00a75 declares none, so the section that decides the reference equilibrium for iter-passive-plasma-circuit \u00a76 cannot show its measure refuses a bad source.",
+    "evidence_paths": "pass \u2014 \u00a71 and \u00a75 both write `docs/research/dd-cocos-census.html`, a tracked path under the repository; no node directs evidence to a scratchpad or a node-local temporary path.",
+    "naming": "pass \u2014 proposed symbols are mechanism-named (`SourceSignal`, `convention_factor`, `BlockedSignal`, `canonical_key`), no `_v2`/`_new` pairs are introduced, and the decision identifier `d-ddc-convention` / `d-ippc-dd-cocos` appears only in document prose, which is where a decision id belongs.",
+    "reasoning": "a further finding, not plan-changing \u2014 \u00a72's list of `cocos_from_digits` importers omits the production call site.",
+    "single_goal": "pass \u2014 \u00a71 census, \u00a72 translator, \u00a73 readers, \u00a74 internals, \u00a75 edge measure; each section names one deliverable. \u00a74 is the largest (6.0 h) but carries one goal with three clauses on one verdict.",
+    "wiring": "a finding \u2014 all five sections (s1\u2013s5) carry `data-links=\"\"` in the snapshot and in `docs/plans/dd-cocos-ingest.html`, so the chain \u00a72\u2190\u00a71, \u00a73\u2190\u00a72, \u00a74\u2190\u00a73, \u00a75\u2190\u00a72,\u00a71 exists only as prose inside followup `f-ddc-001`."
+  },
+  "section_digests": {
+    "_document": "29f5087fa0e5ad0f917b1ff80b913ce5d8f06b32d5c716728522ab06567b4f3c",
+    "s0": "2407e28f2db9011d45035f6b86c463b1b4e36000c85f35e7d35de056f2cbb5d9",
+    "s1": "8493846bddbd37e17766c3f28357c4dec07fde5dad711cf4d8096db87e577f89",
+    "s2": "97adf919e0a835f901b72eee6509324b7b5c90dd94a2921e2680671f53350dbd",
+    "s3": "c2fc45691180bf97593adce2764029469a1131b8009f469996a577e1ec90a479",
+    "s4": "4575ae7595a93b2959851d0b00e53208977b19cf45b52e80902f78998d5a51cb",
+    "s5": "de9a927c79d5b7c110fe5258624b653559f4717f158cc5167b5efe3ac519bea6"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T06:22:25.163870+00:00"
+}

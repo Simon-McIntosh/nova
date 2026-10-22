@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "completed_at": "2026-10-22T05:41:27.361Z",
   "dispatched_at": "2026-10-22T05:26:28Z",
+  "finding_dispositions": {
+    "5": {
+      "kind": "exempted",
+      "reason": "manifest-only finding on a promoted run: the H200 command is recorded in the gate log headers and in the evidence anchor, and the run record is closed",
+      "recorded_at": "2026-10-22T06:06:08.364151+00:00"
+    }
+  },
   "findings": [
     "tests/test_contour_tree_merge.py:192 follow-on: the diff replaced `jax.jit(build_contour_tree)(...)` with a plain `build_contour_tree(...)` call, so test_critical_node_capacity_overflow_is_jittable_and_visible no longer exercises compilation although its name and docstring still claim it; a jit-compatibility regression in build_contour_tree would now leave this test green.",
     "docs/evidence/fragments/converged-forward-solve/read-correction-path.html:24 follow-on: the figure caption and the final-gate tables name job 1292424 at 8993e1a5d as the 'Final H200 job', while the head-revision gate is job 1292525 at c84c432e; a grep of the committed fragment finds no reference to 1292525 or 1292526, so the deliverable the done-when names records no receipt of the revision this node actually landed at (residuals 5.45658e-15 / 1.50204e-14 / 1.31512e-13 at followon/certified-rows-followon.log:14-16).",

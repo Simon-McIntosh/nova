@@ -157,18 +157,34 @@ def bell_fraction(geometry, reading, sigma):
     )
 
 
+def confined_component(reading):
+    """Return the read's closed normal-form component as ``(loop, live)``.
+
+    A read that carries no closed component books the split unrestrained, so
+    the absence of the fields is represented as ``None`` rather than as an
+    empty loop, which would erase the ordinary cut instead.
+    """
+    loop = getattr(reading, "closed_loop", None)
+    live = getattr(reading, "closed_live", None)
+    if loop is None or live is None:
+        return None
+    return loop, live
+
+
 def composite_cut_moments(geometry, reading, profile, sigma, segments=8):
     """Book every cut cell over (C∩D∩N) ∪ (C∩Dᶜ∩Q) through the shared owner.
 
     Every cut cell books the same one support: the selected normal-form portion
     inside the effective disk about the saddle and the ordinary quadratic cut
-    outside it. Neither a scalar blend nor a whole-cell replacement chosen by
+    outside it, both restricted to the closed normal-form component the read
+    admits. Neither a scalar blend nor a whole-cell replacement chosen by
     centre distance, crossing count or ordinary validity is used here; those
     remain qualification checks on the read.
     """
     centre, pitch = geometry.centre, geometry.pitch
     form = reading.saddle_form
     coefficient = reading.field_coefficients
+    confined = confined_component(reading)
     signed = sigma * coefficient
     signed = signed.at[:, 0].add(-sigma * reading.boundary_flux)
 
@@ -190,6 +206,7 @@ def composite_cut_moments(geometry, reading, profile, sigma, segments=8):
             reading.disk_position,
             reading.disk_radius,
             segments,
+            confined=confined,
         )
         return moments
 

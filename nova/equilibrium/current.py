@@ -194,6 +194,29 @@ def effective_disk(form, geometry, policy_radius, pitch_floor):
     return form.position, radius
 
 
+def _inside_loop(points, polygon, size):
+    """Crossing-number test over the first ``size`` vertices of a padded loop.
+
+    The clip that produces ``polygon`` pads the tail with the origin, so the
+    test reads only the live prefix. A ray cast from each point counts the
+    edges it crosses; an odd count is the interior. No orientation is assumed,
+    so a lobe traced either way is read the same.
+    """
+    slots = jnp.arange(polygon.shape[0])
+    live = slots < size
+    following = jnp.where(slots + 1 < size, slots + 1, 0)
+    start = jnp.where(live[:, None], polygon, 0.0)
+    end = jnp.where(live[:, None], polygon[following], 0.0)
+    x, y = points[..., 0][..., None], points[..., 1][..., None]
+    x0, y0, x1, y1 = start[:, 0], start[:, 1], end[:, 0], end[:, 1]
+    rising = (y0 > y) & (y1 <= y)
+    falling = (y1 > y) & (y0 <= y)
+    run = y1 - y0
+    crossing = x0 + (x1 - x0) * (y - y0) / jnp.where(run != 0, run, 1.0)
+    crosses = (rising | falling) & (x < crossing) & live[None, :]
+    return jnp.sum(crosses, axis=-1) % 2 == 1
+
+
 def _disk_split_moments(
     rings,
     counts,
@@ -208,6 +231,7 @@ def _disk_split_moments(
     *,
     keep_inside,
     force_whole=False,
+    confined=None,
 ):
     """Signed fan moments restricted to the disk interior or exterior.
 
@@ -217,6 +241,12 @@ def _disk_split_moments(
     set with one density contract and no copied fan reduction. The exchanged
     area vanishes with the node spacing, which is what makes the booking
     continuous across a disk entry or exit.
+
+    ``confined`` carries ``(polygon, size, live)`` for the closed normal-form
+    component the read admits, already clipped to this cell. When it is given
+    and live, both halves of the split are additionally restricted to it, so a
+    booking cell books only current inside the confined component and never the
+    whole ordinary cut. With no confined component the split is used.
 
     ``force_whole`` drops the disk restriction and integrates the whole ring
     set. It exists only so the continuity check can apply its ``--force-conic
@@ -244,6 +274,9 @@ def _disk_split_moments(
     density = profile.current_density(points[..., 0], normalized)
     radial = jnp.sum((points - disk_centre) ** 2, axis=-1) <= radius**2
     keep = jnp.where(keep_inside, radial, ~radial)
+    if confined is not None:
+        polygon, size, live = confined
+        keep = jnp.where(live, keep & _inside_loop(points, polygon, size), keep)
     keep = jnp.where(force_whole, True, keep)
     weight = jnp.where(keep, weights, 0.0)
     displacement = points - centre
@@ -274,6 +307,7 @@ def composite_cut_moments(
     radius,
     segments,
     force_conic_right=False,
+    confined=None,
 ):
     """Book one cut cell over a single support split at the disk boundary.
 
@@ -284,7 +318,19 @@ def composite_cut_moments(
     physical local flux used to evaluate the density; ``conic_coefficient``
     carries the same flux in the signed, level-subtracted form the ordinary cut
     traces its positive region with.
+
+    ``confined`` carries the read's own closed normal-form component as
+    ``(loop, live)``. It is clipped to this cell once and handed to both halves,
+    so the booking follows the connectivity the read already publishes rather
+    than the whole ordinary cut; a read with no admitted closed component books
+    the split uninterruptedly.
     """
+    if confined is None:
+        split_confined = None
+    else:
+        loop, live = confined
+        polygon, size = topology.clip_normal_form_loop(loop, vertices, count)
+        split_confined = (polygon, size, live)
     normal_rings, normal_counts = _normal_rings(
         vertices, count, centre, form, selected, intervals, segments
     )
@@ -303,6 +349,7 @@ def composite_cut_moments(
         disk_centre,
         radius,
         keep_inside=True,
+        confined=split_confined,
     )
     outside = _disk_split_moments(
         conic_rings,

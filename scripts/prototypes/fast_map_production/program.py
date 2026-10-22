@@ -8,7 +8,7 @@ import jax.numpy as jnp
 
 from nova.equilibrium import current, fixed_points
 from scripts.prototypes.lean_map.quadrature import interior_moments
-from scripts.prototypes.fast_read.ordinary_cut import bell_moments
+from scripts.prototypes.fast_read.ordinary_cut import bell_moments, confined_component
 from scripts.prototypes.fast_map_production.kernel import read
 
 
@@ -82,21 +82,38 @@ def _density_coefficients(geometry, reading, profile):
     )
 
 
-def _saddle_moments(geometry, reading, profile, capacity=16):
+def _saddle_moments(geometry, reading, profile, capacity=16, per_cell=None):
     """Book the booking cells over the composite support, split at the disk.
 
     Each booking cell books ``(C ∩ D ∩ N) ∪ (C ∩ Dᶜ ∩ Q)`` through the shared
     clip-quadrature owner, with the same density the ordinary consumer uses. No
     copied fan reduction is applied here. The signed-flux convention is taken
     from the read, so callers need not restate it.
+
+    ``per_cell`` carries the same composite moments already computed for every
+    cell by the ordinary consumer. A caller holding them passes them here so
+    the composite body is traced once for the map instead of once for every
+    cell and again for the booking slots; the booking is then a gather, and the
+    two routes agree by construction because both read one trace of one owner.
     """
     active = reading.booking_cells & (reading.membership > 0)
     count = jnp.sum(active, dtype=jnp.int32)
     indices = jnp.nonzero(active, size=capacity, fill_value=0)[0]
     sigma = reading.sigma
+    confined = confined_component(reading)
     coefficient = reading.field_coefficients
     signed = sigma * coefficient
     signed = signed.at[:, 0].add(-sigma * reading.boundary_flux)
+
+    if per_cell is not None:
+        packed = per_cell[indices]
+        live = jnp.arange(capacity) < count
+        scattered = (
+            jnp.zeros((len(geometry.centre), 3), dtype=packed.dtype)
+            .at[indices]
+            .add(jnp.where(live[:, None], packed, 0.0))
+        )
+        return scattered, count <= capacity
 
     def one(index):
         moments, _ = current.composite_cut_moments(
@@ -116,6 +133,7 @@ def _saddle_moments(geometry, reading, profile, capacity=16):
             reading.disk_position,
             reading.disk_radius,
             8,
+            confined=confined,
         )
         return moments
 
@@ -181,7 +199,9 @@ def map_moments(
     cut = (reading.membership > 0) & ~full
     saddle_cut = cut & reading.booking_cells
     ordinary_cut = cut & ~saddle_cut
-    saddle, saddle_valid = _saddle_moments(geometry, reading, profile)
+    saddle, saddle_valid = _saddle_moments(
+        geometry, reading, profile, per_cell=ordinary
+    )
     raw = (
         interior + jnp.where(ordinary_cut[:, None], ordinary, 0.0) + saddle
     ) * reading.path_weight[:, None]

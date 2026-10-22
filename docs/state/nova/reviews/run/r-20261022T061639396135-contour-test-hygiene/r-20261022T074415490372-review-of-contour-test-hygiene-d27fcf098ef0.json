@@ -1,0 +1,84 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 1,
+  "call_sites": [
+    "nova/equilibrium/topology.py:3126"
+  ],
+  "completed_at": "2026-10-22T07:51:53.078Z",
+  "dispatched_at": "2026-10-22T07:44:56Z",
+  "findings": [
+    {
+      "file": "manifest.md",
+      "line": "24",
+      "severity": "follow-on",
+      "text": "follow-on: the after_suite arm names command '... tests/test_contour_tree_sparse_build.py tests/test_contour_tree_merge.py -ra' but its log_path points at logs/head2-sparse.log, whose own header command runs only test_contour_tree_sparse_build.py and whose summary is '9 passed in 197.49s'; the two-file gate the arm claims is not evidenced by the log it records, and the head merge arm exists only as logs/head2-merge.log (11 passed) with no JSON arm. baseline_suite at line 23 likewise names only the sparse file, so the done_when's base arm of the merge file is recorded in no arm. The measurements are real and green on disk; the receipts point a reader at the wrong log."
+    },
+    {
+      "file": "tests/test_contour_tree_sparse_build.py",
+      "line": "234",
+      "severity": "follow-on",
+      "text": "follow-on: at 2,000 cells outside_present is True, so brute_force=not outside_present is False at line 232, the level-by-level comparison with _component_count/_tree_count at lines 138-149 is skipped, and the pinned digest is not kept (the guard is 'if cells == 550'); those rows retain only the structural relation at lines 122-135. A build returning the same valid-node and valid-arc counts over a reordered 2,000-cell topology therefore satisfies every assertion, so the done_when's 'reference that is valid on any host ... compared array by array' is met for the 550-cell rows and not for the 2,000-cell rows, which the manifest's own follow_ons concede."
+    },
+    {
+      "file": "tests/test_contour_tree_sparse_build.py",
+      "line": "11",
+      "severity": "follow-on",
+      "text": "follow-on: the module docstring's rationale sentence reads 'a byte-order digest travels between hosts where the traversal does not', which is the opposite of the change's premise: the whole repair exists because the byte-order digest does NOT travel between hosts while the traversal does. The sentence is false as written and inverts the reason the file was rewritten."
+    },
+    {
+      "file": "tests/test_contour_tree_sparse_build.py",
+      "line": "93",
+      "severity": "follow-on",
+      "text": "follow-on: _perturb_arc_order selects a second env-var mutation, CONTOUR_TREE_ARC_PERTURB=rewire, where the repository's existing declared-mutation idiom is CONTOUR_TREE_CORRUPT at tests/test_contour_tree_brute_force.py; two selectors for one idea invite a red log that does not say which mutation produced it."
+    },
+    {
+      "file": "tests/test_contour_tree_sparse_build.py",
+      "line": "207",
+      "severity": "follow-on",
+      "text": "follow-on: no recorded log demonstrates the final head's test_sparse_build_matches_carrier_reference failing under the arc perturbation; the perturbation log on disk, logs/head-fleet-sparse-perturb.log, is at revision f3990dc36 and names the pre-rename test_sparse_build_matches_base_receipt, so the done_when's 'failing when the sparse build's arc order is perturbed' is evidenced on an earlier revision of the file rather than the reviewed head."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "build_contour_tree, the function under test, is called at runtime only from nova/equilibrium/topology.py:3126 in production; the other callers (benchmarks/contour_tree_brute_force.py, contour_tree_explanatory_figure.py, contour_tree_sweep_placement.py) are benchmark scripts, not runtime paths.",
+    "diff": "Read all six commits against base 4ff706d76: 41c3b47a5 re-wraps the capacity test and adds a carrier check, 95e8220e6 and f3990dc36 key the reference on the tree invariant, 2e4154492 writes the citation correction and the contour-test-hygiene fragment, 9d7cd0ccd replaces the redundant wrapper with the decoration assertion and the brute-force comparison, and d27fcf098 is docs-only.",
+    "done_when": "Item 1 met: build_contour_tree carries @partial(jax.jit, static_argnames=('neighbour_capacity','node_capacity','edge_capacity')) at nova/equilibrium/contour_tree.py:494 in base 4ff706d76, so the test asserts the decoration hasattr(build_contour_tree,'__wrapped__') and the compiled overflow, and the literal control (a Python branch on a traced value) reddens at logs/negative-control-jit-branch-on-traced.log with TracerBoolConversionError while the decoration-removal control reddens at logs/negcontrol-jit-decoration-removed.log. Item 2 partly met: the 550-cell rows compare array-per-level with _component_count/_tree_count and keep the pinned digest, passing on the all_debug gate (gate-base-sparse.log 9 passed) and the Broadwell fleet node (logs/head2-sparse.log 9 passed), and the arc perturbation reddens 4 of 9 at logs/head-fleet-sparse-perturb.log; the 2,000-cell rows take the structural relation only. Item 3 met: read-correction-path.html cites H200 1292525 and sirius 1292526 at c84c432e9 with residuals 5.45658468389e-15, 1.50203992779e-14, 1.31511977230e-13 and 0.0262254747411, which match ROW_METRIC lines 14-17 of /home/ITER/mcintos/.config/reckon/crew/runs/r-20261021T005136987306-read-correction-path/followon/certified-rows-followon.log, keeping 1292424 only as the earlier render.",
+    "goal": "The brief.txt goal is to make the contour-tree jit and sparse-build receipt tests measure what they claim on any host and to correct the read-repair fragment; tests/test_contour_tree_merge.py:184-224 now asserts the build's own jit decoration and the compiled overflow, tests/test_contour_tree_sparse_build.py:207-238 compares the receipt against the brute-force host traversal, and docs/evidence/fragments/converged-forward-solve/read-correction-path.html:24 cites the landed revision's gate, so the goal is reached with the 2,000-cell content coverage narrowed to a structural relation.",
+    "manifest": "The source manifest.md is status complete, names commits 41c3b47a5, 95e8220e6, f3990dc36, 2e4154492, 9d7cd0ccd and d27fcf098, lists the four changed paths, and carries readable baseline_suite and after_suite receipts; the after_suite log_path (logs/head2-sparse.log) does not match its own two-file command, and baseline_suite covers only the sparse file.",
+    "write_paths": "The brief.txt grants tests/test_contour_tree_merge.py, tests/test_contour_tree_sparse_build.py, docs/evidence/fragments/converged-forward-solve/read-correction-path.html, docs/evidence/fragments/converged-forward-solve/contour-test-hygiene.html and logs under the run directory; git diff --stat 4ff706d76 d27fcf098 changes exactly those four files, 168 insertions and 37 deletions, with no change to nova/equilibrium/contour_tree.py or any other production source."
+  },
+  "justifications": {
+    "durability": "tests/test_contour_tree_merge.py:200 reddens when the jit decoration is removed (logs/negcontrol-jit-decoration-removed.log EXIT=1) and tests/test_contour_tree_sparse_build.py:122 reddens under the arc perturbation, while the 2,000-cell rows at line 234 carry no content assertion that fails on a reordered receipt.",
+    "evidence": "The gate logs are real and green (gate-base-sparse.log 9 passed EXIT=0 at 4ff706d76, gate-head-sparse.log 9 passed EXIT=0 at f3990dc36, logs/head2-sparse.log 9 passed at 9d7cd0ccd), but manifest.md:24 points after_suite at a log whose command runs only one of the two files its own command names.",
+    "fit": "tests/test_contour_tree_sparse_build.py:11 states a rationale the change contradicts and line 93 adds a second env-var mutation selector beside the existing CONTOUR_TREE_CORRUPT idiom.",
+    "goal_fidelity": "tests/test_contour_tree_sparse_build.py:234 narrows the 2,000-cell rows to the structural relation at lines 122-135 with no content reference, so the file measures what it claims for the 550-cell rows and only a weaker invariant for the 2,000-cell rows.",
+    "reuse": "tests/test_contour_tree_sparse_build.py:36 imports and calls the owner's _component_count and _tree_count from benchmarks/contour_tree_brute_force.py:178-215 rather than reimplementing the host traversal, though it re-composes that module's compare() level loop at lines 140-149.",
+    "scope_discipline": "git diff --stat 4ff706d76 d27fcf098 names only the four declared non-log paths, with nova/equilibrium/contour_tree.py unchanged, so the exclusive write scope is respected."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The brief.txt goal is to make the contour-tree jit and sparse-build receipt tests measure what they claim on any host and to correct the read-repair fragment; tests/test_contour_tree_merge.py:184-224 now asserts the build's own jit decoration and the compiled overflow, tests/test_contour_tree_sparse_build.py:207-238 compares the receipt against the brute-force host traversal, and docs/evidence/fragments/converged-forward-solve/read-correction-path.html:24 cites the landed revision's gate, so the goal is reached with the 2,000-cell content coverage narrowed to a structural relation.\nVERDICT done_when: Item 1 met: build_contour_tree carries @partial(jax.jit, static_argnames=('neighbour_capacity','node_capacity','edge_capacity')) at nova/equilibrium/contour_tree.py:494 in base 4ff706d76, so the test asserts the decoration hasattr(build_contour_tree,'__wrapped__') and the compiled overflow, and the literal control (a Python branch on a traced value) reddens at logs/negative-control-jit-branch-on-traced.log with TracerBoolConversionError while the decoration-removal control reddens at logs/negcontrol-jit-decoration-removed.log. Item 2 partly met: the 550-cell rows compare array-per-level with _component_count/_tree_count and keep the pinned digest, passing on the all_debug gate (gate-base-sparse.log 9 passed) and the Broadwell fleet node (logs/head2-sparse.log 9 passed), and the arc perturbation reddens 4 of 9 at logs/head-fleet-sparse-perturb.log; the 2,000-cell rows take the structural relation only. Item 3 met: read-correction-path.html cites H200 1292525 and sirius 1292526 at c84c432e9 with residuals 5.45658468389e-15, 1.50203992779e-14, 1.31511977230e-13 and 0.0262254747411, which match ROW_METRIC lines 14-17 of /home/ITER/mcintos/.config/reckon/crew/runs/r-20261021T005136987306-read-correction-path/followon/certified-rows-followon.log, keeping 1292424 only as the earlier render.\nVERDICT write_paths: The brief.txt grants tests/test_contour_tree_merge.py, tests/test_contour_tree_sparse_build.py, docs/evidence/fragments/converged-forward-solve/read-correction-path.html, docs/evidence/fragments/converged-forward-solve/contour-test-hygiene.html and logs under the run directory; git diff --stat 4ff706d76 d27fcf098 changes exactly those four files, 168 insertions and 37 deletions, with no change to nova/equilibrium/contour_tree.py or any other production source.\nVERDICT manifest: The source manifest.md is status complete, names commits 41c3b47a5, 95e8220e6, f3990dc36, 2e4154492, 9d7cd0ccd and d27fcf098, lists the four changed paths, and carries readable baseline_suite and after_suite receipts; the after_suite log_path (logs/head2-sparse.log) does not match its own two-file command, and baseline_suite covers only the sparse file.\nVERDICT diff: Read all six commits against base 4ff706d76: 41c3b47a5 re-wraps the capacity test and adds a carrier check, 95e8220e6 and f3990dc36 key the reference on the tree invariant, 2e4154492 writes the citation correction and the contour-test-hygiene fragment, 9d7cd0ccd replaces the redundant wrapper with the decoration assertion and the brute-force comparison, and d27fcf098 is docs-only.\nCALL_SITES: nova/equilibrium/topology.py:3126\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: tests/test_contour_tree_sparse_build.py:234 narrows the 2,000-cell rows to the structural relation at lines 122-135 with no content reference, so the file measures what it claims for the 550-cell rows and only a weaker invariant for the 2,000-cell rows.\nSCORE evidence: 13\nJUSTIFICATION evidence: The gate logs are real and green (gate-base-sparse.log 9 passed EXIT=0 at 4ff706d76, gate-head-sparse.log 9 passed EXIT=0 at f3990dc36, logs/head2-sparse.log 9 passed at 9d7cd0ccd), but manifest.md:24 points after_suite at a log whose command runs only one of the two files its own command names.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 4ff706d76 d27fcf098 names only the four declared non-log paths, with nova/equilibrium/contour_tree.py unchanged, so the exclusive write scope is respected.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_contour_tree_merge.py:200 reddens when the jit decoration is removed (logs/negcontrol-jit-decoration-removed.log EXIT=1) and tests/test_contour_tree_sparse_build.py:122 reddens under the arc perturbation, while the 2,000-cell rows at line 234 carry no content assertion that fails on a reordered receipt.\nSCORE fit: 15\nJUSTIFICATION fit: tests/test_contour_tree_sparse_build.py:11 states a rationale the change contradicts and line 93 adds a second env-var mutation selector beside the existing CONTOUR_TREE_CORRUPT idiom.\nSCORE reuse: 17\nJUSTIFICATION reuse: tests/test_contour_tree_sparse_build.py:36 imports and calls the owner's _component_count and _tree_count from benchmarks/contour_tree_brute_force.py:178-215 rather than reimplementing the host traversal, though it re-composes that module's compare() level loop at lines 140-149.\nFINDING manifest.md:24 follow-on: the after_suite arm names a two-file command but its log_path logs/head2-sparse.log runs only test_contour_tree_sparse_build.py (9 passed), so the recorded arm's log does not evidence the merged run it claims and the head merge arm has no JSON arm; baseline_suite likewise names only the sparse file.\nFINDING tests/test_contour_tree_sparse_build.py:234 follow-on: at 2,000 cells brute_force is False and the pinned digest is dropped, so those rows retain only the structural relation and a build returning the same node and arc counts over a reordered 2,000-cell topology passes every assertion.\nFINDING tests/test_contour_tree_sparse_build.py:11 follow-on: the module docstring's rationale sentence is inverted, stating a byte-order digest travels between hosts where the traversal does not, the opposite of the change's premise.\nFINDING tests/test_contour_tree_sparse_build.py:93 follow-on: _perturb_arc_order adds a second env-var mutation selector, CONTOUR_TREE_ARC_PERTURB=rewire, where the repository's existing idiom is CONTOUR_TREE_CORRUPT at tests/test_contour_tree_brute_force.py.\nFINDING tests/test_contour_tree_sparse_build.py:207 follow-on: no recorded log shows the final head's test_sparse_build_matches_carrier_reference failing under the arc perturbation; logs/head-fleet-sparse-perturb.log is at f3990dc36 under the pre-rename name.\n",
+  "review_run_id": "r-20261022T074415490372-review-of-contour-test-hygiene-d27fcf098ef0",
+  "reviewed_base_sha": "4ff706d76634e048e0889ba04d723095fd2a68d5",
+  "reviewed_commits": [
+    "41c3b47a5",
+    "95e8220e6",
+    "f3990dc36",
+    "2e4154492",
+    "9d7cd0ccd",
+    "d27fcf098"
+  ],
+  "reviewed_head_sha": "d27fcf098ef0c82150bae988dc973f3bf8b5629a",
+  "reviewed_run_id": "r-20261022T061639396135-contour-test-hygiene",
+  "scores": {
+    "durability": 17,
+    "evidence": 13,
+    "fit": 15,
+    "goal_fidelity": 15,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T07:53:38.704788+00:00",
+  "total": 97
+}

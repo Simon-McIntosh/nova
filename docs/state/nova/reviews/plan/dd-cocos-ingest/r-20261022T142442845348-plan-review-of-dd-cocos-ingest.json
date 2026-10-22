@@ -1,0 +1,44 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-22T14:38:01.155Z",
+  "dispatched_at": "2026-10-22T14:27:20Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/dd-cocos-ingest.html:60",
+      "id": "reasoning-1",
+      "reason": "\u00a73's done-when (2) requires every census reader of a COCOS-dependent quantity to take it through the \u00a72 entry point, so a node will go looking for a sourcemap declaration on the MAST route that does not exist and will rewire or wrongly certify the wrong module (`mast_solve_inputs.py` is a separate reader, reached from the parity chain and solve-inputs tests, not from `from_mast`); naming `mast_efit.py` as the boundary, or saying the MAST EFIT frame read stays on its existing `TOTAL_FLUX_FACTOR` path, is what makes the claim checkable.",
+      "text": "\u00a73 says \"The MAST read translates COCOS 3 to COCOS 17 through the sourcemap's declared conversion, as `mast_solve_inputs.py` already declares it\", yet `from_mast` is fed by `mast_source()` (`scripts/reconstructed_plasma_source/measure.py:29-37`) from `nova.media.sources.mast_efit.read_pulse`/`read_frame`, and no caller of `from_mast` imports `mast_solve_inputs`; `read_frame` (mast_efit.py:101-135) applies only `TOTAL_FLUX_FACTOR` from `nova.equilibrium.convention` and carries no `SourceSignal`/`source_convention` declaration",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "c8970d898e932ffee1792a26ce14ced9d3edbd8b0bd7a5c88da24f82ac1db0e6",
+  "plan_slug": "dd-cocos-ingest",
+  "plan_version": 50,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261022T142442845348-plan-review-of-dd-cocos-ingest",
+  "reviewed_blob_sha": "b0483171a48a8e6fd1263325ce4413e8ba6cabae",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `nova/imas/plasma_source.py::PlasmaSlice.prescribe` (guard at plasma_source.py:70-77), `tests/test_plasma_source.py::test_mast_flipped_psi_is_refused` (line 60), `nova/imas/extrapolate.py` lines 301 and 345, `magnetics.py::Magnetics.flux_loop`, `io_magnetics.py::Magnetics` and `mast_solve_inputs.py` all exist as named.",
+    "done_when": "pass \u2014 \u00a73's done-when states measurable clauses (from_imas prescribes CORSICA 130506/6 and DINA 105069/3, refuses 105014/1 and 105013/1 each with its contradicting digit; the re-pointed tests pass by delta in fresh processes) and declares both a literal negative control (bypass the translation and CORSICA 130506/6 is refused again) and a positive control for its search; note only that clause (1)'s \"stays green as written\" for `test_mast_flipped_psi_is_refused` sits in mild tension with line 59's \"re-expressed ... refused by name\", which could change the message the test matches on \u2014 it is self-caught by the clause itself, so no finding.",
+    "evidence_paths": "pass \u2014 \u00a73 names no scratch path; its record is the \u00a71 census file `docs/research/dd-cocos-census.html` and the plan's evidence fragment, both durable and git-tracked.",
+    "naming": "pass \u2014 \u00a73 introduces no plan labels, stage names or ticket numbers, and its prose states mechanism (\u03c3_Bp, the COCOS digits) rather than a tracker entry.",
+    "reasoning": "a finding \u2014 \u00a73 names `mast_solve_inputs.py` as the module declaring the MAST read's COCOS 3 to 17 conversion, but that module is not on the `PlasmaSource.from_mast` path; the frame reader `from_mast` actually consumes is `nova/media/sources/mast_efit.py`, which rescales flux only by `TOTAL_FLUX_FACTOR` and declares no sourcemap conversion.",
+    "single_goal": "pass \u2014 \u00a73 carries one deliverable, the readers moving onto the \u00a72 translator; the three re-pointed tests and the re-run of \u00a71's search are evidence for that one goal, not a second one.",
+    "wiring": "pass \u2014 \u00a73 declares `data-links=\"dd-cocos-ingest#s2\"` and the meta block's `plan-section-depends-on` carries `s3: [s2]`, which is the edge \u00a73 needs (the readers go through the \u00a72 translator)."
+  },
+  "section_digests": {
+    "_document": "0944b41fbee062214508f8e371bdb6d46b75eb62d96e4606b5e91e6893187ad0",
+    "s0": "d7c3143494e97518c859457355f006ec1a3961adf5e50d514822385ec2941326",
+    "s1": "8493846bddbd37e17766c3f28357c4dec07fde5dad711cf4d8096db87e577f89",
+    "s2": "38e4a6fd8cb459d4e887ae55cc12b322f74419e30f3f46aaa3022d95172c4f71",
+    "s3": "4e2bccd136a2461892c1c77b4ea382b127d8bca014bb75e5f1c21a95dd613de8",
+    "s4": "d6a70aa2dd32032baf0b25d96203690d339d0869464e29c0f3620c5c535bca9c",
+    "s5": "db46395f9321959e91cc657923e567fa72cda1e12fa3aa977d6a83243b8e1d36"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T14:45:09.982590+00:00"
+}

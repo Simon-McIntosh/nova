@@ -1,0 +1,58 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-22T08:21:39.976Z",
+  "dispatched_at": "2026-10-22T08:11:16Z",
+  "findings": [
+    {
+      "file": "docs/research/dd-cocos-census.html",
+      "line": "74",
+      "severity": "follow-on",
+      "text": "follow-on: the CORSICA 130506/403 row's \"slices sampled > 1 MA\" cell reads \"6 of 51\", but that 6 is the evenly spaced 6-slice sample extra_verdicts.py takes (idx = linspace(0, n-1, min(6, n)) with no ip > 1 MA filter) over 51 total slices, and the value appears nowhere in fixture_verdicts.log/.jsonl (count 0), which the table caption at :67 names as the column's source. This is the same provenance mismatch the node repaired in ce1033f74 for the DINA 105069/3 and 105013/1 rows; the row's digits and its COCOS 11 verdict are independently correct, so only the cell's stated provenance is wrong."
+    },
+    {
+      "file": "docs/research/dd-cocos-census.html",
+      "line": "29",
+      "severity": "follow-on",
+      "text": "follow-on: the positive-control paragraph cites planted_control.log, which fails the gate-log contract twice over: its command header records the literal placeholder `grep -rEn '<search A pattern>' scratch/planted_reader.py` rather than the search pattern, so the control cannot be re-run from its own log (negative_control.log by contrast carries a full literal command), and its last line is `B count: 3` rather than a bare `EXIT=<n>` sentinel, so a reader cannot tell a completed control from a truncated one. The control also ran against scratch/planted_reader.py rather than over the stated nova/ scripts/ packages/ population. The result itself stands \u2014 re-running both stated patterns on that file returns exactly the three A lines (6, 7, 10) and three B lines (8, 9, 10) the record claims \u2014 but the recorded command does not reproduce it."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "none \u2014 the landed change is two HTML records; no production runtime code reaches them, and the node's own measurement scripts under its run directory do not count as call sites.",
+    "diff": "Read the three commits against base b8b8d5b2c: 9c256959d adds docs/research/dd-cocos-census.html (+81) and its evidence fragment (+18); b11c50af8 adds the two magnetics reader rows (+5/-3); ce1033f74 corrects the sampled-slice counts and the positive-control line (4 changed lines). Only these two documents, no code.",
+    "done_when": "The three clauses are asserted and their results recorded: both search commands re-run here reproduce their counts exactly (494/62, 80/25, and exactly one fixed-orientation sign test at nova/imas/plasma_source.py:76); the reader table carries the convention each assumes, the DD versions its tests exercise and a fixture-backed identify_convention verdict with the fixture named; the internal consumers are listed as the \u00a74 migration list; and the literal negative control holds, negative_control.log showing the shipped guard accepting DINA 105014/1 (sigma_Bp -1) and refusing CORSICA 130506/6 (sigma_Bp +1) while the inverted guard does the reverse.",
+    "goal": "The goal is a census of every place nova reads, writes or hard-codes a COCOS-dependent quantity; docs/research/dd-cocos-census.html:31-45 carries the reader table, :46-56 the internal-consumer \u00a74 migration list, :57-65 the existing owners, :66-78 the fixture-backed verdicts and :79-82 the negative control and the \u00a72-\u00a75 scope note.",
+    "manifest": "The source manifest records status complete, commits 9c256959d/b11c50af8/ce1033f74, the two changed paths, both search commands with counts, the fixture verdicts and the repair negative control; its logs on disk (fixture_verdicts.log, dina_verdicts.log, extra_verdicts.log, negative_control.log, planted_control.log, repair_negative_control.log, audit-doc.log) all end EXIT=0. It declares no baseline_suite or after_suite, so no added failures are derivable.",
+    "write_paths": "The source brief grants docs/research/dd-cocos-census.html plus logs and scratch under the run directory; git diff --name-status b8b8d5b2c..ce1033f74 lists exactly two added files, docs/research/dd-cocos-census.html and docs/evidence/fragments/dd-cocos-ingest/dd-cocos-census.html, both inside the declared scope."
+  },
+  "justifications": {
+    "durability": "No test reddens if the census regresses: the diff adds no test file, and its falsifiable checks (the two search counts and the inverted-guard control at docs/research/dd-cocos-census.html:79-80) are run-directory scripts and prose claims that nothing re-executes, so a future reader who bypasses the census is caught by no assertion.",
+    "evidence": "Both search commands reproduce their stated counts exactly (494 lines/62 files; 80 lines/25 files; one sign test at nova/imas/plasma_source.py:76) and the planted control's lines verify on re-run, but docs/research/dd-cocos-census.html:74 reports a sampled-slice figure whose provenance contradicts the fixture_verdicts.log the caption at :67 cites.",
+    "fit": "docs/research/dd-cocos-census.html follows the reckon research specimen (meta frontmatter at :1-14, method/readers/internal/owners/verdicts/control sections; reckon audit-doc exits 0 with a single info-level long-<pre> note) and introduces no forbidden name; the commit subjects carry the plan slug used by their predecessors.",
+    "goal_fidelity": "docs/research/dd-cocos-census.html:31-45 covers the reader population with the quantity, assumption, tested DD versions and a fixture-backed verdict for each row, and every code line it cites checks out (extrapolate.py:301 and :345, pulsedesign.py:531/:544/:581, inverse.py:245, contour.py:198, ingest.py:66, signalstore.py:51, convention.py:65, observation_kernels.py:41, thomson.py:118, magnetics.py:86, io_magnetics.py:144, mast_solve_inputs.py:103/:109, topology.py:2497), so the only blemish is the mislabelled provenance of one support cell.",
+    "reuse": "The landed change adds only documents and defines no function, class or module, so there is no capability to fork; the census instead names the owners that already exist (nova_cocos, nova/io/sourcemap.py, nova/scripts/identify_source_cocos.py::determine_digits, nova/equilibrium/convention.py, nova/database/filepath.py::canonical_key) and extends none.",
+    "scope_discipline": "git diff --name-status b8b8d5b2c..ce1033f74 changes only docs/research/dd-cocos-census.html and docs/evidence/fragments/dd-cocos-ingest/dd-cocos-census.html, both inside the two paths the source brief grants, and the committed records carry no worktree or absolute home path (grep count 0)."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The goal is a census of every place nova reads, writes or hard-codes a COCOS-dependent quantity; docs/research/dd-cocos-census.html:31-45 carries the reader table, :46-56 the internal-consumer \u00a74 migration list, :57-65 the owners and :66-82 the verdicts, negative control and scope note.\nVERDICT done_when: The gate asserts all three clauses and the literal control, and both search commands re-run here reproduce their counts exactly (494/62, 80/25, one sign test at nova/imas/plasma_source.py:76), with negative_control.log showing the inverted guard flipping the plasma_source verdict.\nVERDICT write_paths: The source brief grants docs/research/dd-cocos-census.html plus run-directory logs and scratch; git diff --name-status b8b8d5b2c..ce1033f74 lists exactly that record and its evidence fragment.\nVERDICT manifest: Read; it records status complete, the three commits, both search commands with counts, the fixture verdicts and the repair negative control, and every log it cites ends EXIT=0; it declares no baseline_suite or after_suite.\nVERDICT diff: Read the three commits against base b8b8d5b2c \u2014 two added HTML records only, no code, and every row added by b11c50af8 is inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/research/dd-cocos-census.html:31-45 covers the population with a fixture-backed verdict per reader and every code line it cites verifies, leaving only one mislabelled support cell.\nSCORE evidence: 17\nJUSTIFICATION evidence: both search counts reproduce exactly and the planted control verifies on re-run, but docs/research/dd-cocos-census.html:74 states a sampled-slice figure whose provenance contradicts the fixture_verdicts.log cited at :67.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-status b8b8d5b2c..ce1033f74 changes only the two documents the source brief grants, and the records carry no worktree path.\nSCORE durability: 8\nJUSTIFICATION durability: the diff adds no test file and nothing re-executes the search counts or the inverted-guard control recorded at docs/research/dd-cocos-census.html:79-80, so no assertion fails if the census regresses.\nSCORE fit: 18\nJUSTIFICATION fit: docs/research/dd-cocos-census.html follows the reckon research specimen and passes reckon audit-doc with zero errors (audit-doc.log), introducing no forbidden name.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds documents only and defines nothing, and the census names the existing owners it would extend (nova_cocos, nova/io/sourcemap.py, nova/equilibrium/convention.py, nova/database/filepath.py::canonical_key) rather than duplicating them.\nFINDING docs/research/dd-cocos-census.html:74 follow-on: the CORSICA 130506/403 \"slices sampled > 1 MA\" cell reads \"6 of 51\", but that 6 is extra_verdicts.py's evenly spaced 6-slice sample with no ip > 1 MA filter and appears nowhere in the fixture_verdicts.log the caption at :67 cites, the same provenance mismatch ce1033f74 repaired for two other rows.\nFINDING docs/research/dd-cocos-census.html:29 follow-on: the positive-control paragraph cites planted_control.log, whose command header records the placeholder `grep -rEn '<search A pattern>' scratch/planted_reader.py` and whose last line is `B count: 3` rather than a bare `EXIT=<n>`, so the control can neither be re-run from its log nor be told complete from truncated; re-running both stated patterns on that file does reproduce the claimed three A lines and three B lines.",
+  "review_run_id": "r-20261022T081050149052-review-of-dd-cocos-census-ce1033f7411d",
+  "reviewed_base_sha": "b8b8d5b2cc733626b70d311dfeb1f1f4fcbc8f82",
+  "reviewed_head_sha": "ce1033f7411d9cef01903cd96d4f7915a6933fc9",
+  "reviewed_run_id": "r-20261022T073213473843-dd-cocos-census",
+  "scores": {
+    "durability": 8,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T08:21:43.578179+00:00",
+  "total": 101
+}

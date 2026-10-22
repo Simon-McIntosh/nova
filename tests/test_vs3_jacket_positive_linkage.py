@@ -141,38 +141,42 @@ JACKET_ANNULUS = (0.0265, 0.0295)
 
 
 def _annulus_objects():
-    """The eight VS3 conductor and eight jacket annuli as (key, r, z) records."""
+    """The eight VS3 conductor and eight jacket annuli as (key, r, z) records.
+
+    Each sector carries the centroid of its own quadrangle, so an annulus centre
+    is the mean of the centres of its sectors, not any one sector row.
+    """
     conductors, coil_names, owner, _thickness, _res, passive_name = source_conductors()
     n_section = len(owner)
     vsu, vsl = coil_names.index("VSU"), coil_names.index("VSL")
-    # the sectors of one annulus share its centre, so the section list is
-    # de-duplicated by position rather than listed once per sector circuit
     coils = []
-    seen_sections = set()
-    for i, o in enumerate(owner):
-        if o not in (vsu, vsl):
-            continue
-        position = (round(float(conductors.r[i]), 9), round(float(conductors.z[i]), 9))
-        if position in seen_sections:
-            continue
-        seen_sections.add(position)
-        coils.append(("VSU" if o == vsu else "VSL", *position))
-    jackets = []
-    seen = set()
-    for j, name in enumerate(passive_name):
-        if "VS3" in name and "Jacket" in name:
-            label = name.split(",")[-1].strip()
-            if label in seen:
-                continue
-            seen.add(label)
-            row = int(np.flatnonzero(conductors.circuit == n_section + j)[0])
-            jackets.append(
+    for coil_index, label in ((vsu, "VSU"), (vsl, "VSL")):
+        rows = np.flatnonzero(owner == coil_index).reshape(-1, ANNULUS_SECTORS)
+        for run in rows:
+            coils.append(
                 (
                     label,
-                    float(conductors.r[row]),
-                    float(conductors.z[row]),
+                    float(np.mean(conductors.r[run])),
+                    float(np.mean(conductors.z[run])),
                 )
             )
+    element_rows: dict[str, list[int]] = {}
+    for row, name in enumerate(passive_name):
+        if "VS3" not in name or "Jacket" not in name:
+            continue
+        element_rows.setdefault(str(name).split(",")[-1].strip(), []).append(
+            n_section + row
+        )
+    jackets = []
+    for label, rows in element_rows.items():
+        index = np.asarray(rows)
+        jackets.append(
+            (
+                label,
+                float(np.mean(conductors.r[index])),
+                float(np.mean(conductors.z[index])),
+            )
+        )
     assert len(coils) == 8 and len(jackets) == 8
     return coils, jackets
 
@@ -324,18 +328,21 @@ def test_jacket_annulus_lies_outside_the_conductor_it_surrounds():
     jacket_circuit = int(circuits[-8 * ANNULUS_SECTORS])
     _key, conductor_r, conductor_z = coils[0]
     _jkey, jacket_r, jacket_z = jackets[0]
-    conductor_radius = np.ptp(
-        np.linalg.norm(
-            np.asarray(polygons[conductor_circuit].vertices)
-            - np.array([conductor_r, conductor_z]),
-            axis=1,
-        )
+    conductor_vertices = np.linalg.norm(
+        np.asarray(polygons[conductor_circuit].vertices)
+        - np.array([conductor_r, conductor_z]),
+        axis=1,
     )
     jacket_vertices = np.linalg.norm(
         np.asarray(polygons[jacket_circuit].vertices) - np.array([jacket_r, jacket_z]),
         axis=1,
     )
-    assert float(conductor_radius) == pytest.approx(2 * 0.0230, abs=1e-4)
-    assert float(jacket_vertices.min()) == pytest.approx(0.0265, abs=1e-4)
-    assert float(jacket_vertices.max()) == pytest.approx(0.0295, abs=1e-4)
-    assert jacket_vertices.min() > conductor_radius / 2
+    assert float(conductor_vertices.min()) == pytest.approx(
+        CONDUCTOR_ANNULUS[0], abs=1e-4
+    )
+    assert float(conductor_vertices.max()) == pytest.approx(
+        CONDUCTOR_ANNULUS[1], abs=1e-4
+    )
+    assert float(jacket_vertices.min()) == pytest.approx(JACKET_ANNULUS[0], abs=1e-4)
+    assert float(jacket_vertices.max()) == pytest.approx(JACKET_ANNULUS[1], abs=1e-4)
+    assert jacket_vertices.min() > conductor_vertices.max()

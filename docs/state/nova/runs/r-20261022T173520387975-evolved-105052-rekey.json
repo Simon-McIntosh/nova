@@ -1,0 +1,411 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "ff86419e7c6c5050228ac887fae987d88d1b2dde",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T173520387975-evolved-105052-rekey/brief.txt",
+    "sha256": "48bccea01bdd034dd22831794c48fb15d67523d5946c988deafdc068c8868150"
+  },
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 8619046,
+      "input_tokens_cumulative": 8619046,
+      "output_tokens": 35930,
+      "output_tokens_cumulative": 35930,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 102,
+    "files": 3,
+    "removed": 6
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "35e05e588d3731afc469a8fe30f3c4119cae0e6e",
+    "b09120e733eec21842ceb9d8237c0e032f78608d"
+  ],
+  "completed_at": "2026-10-22T18:10:39.697Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-22T17:37:41Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/.cache/nova-s21-gates/evolved-105052-merged.sh",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T173520387975-evolved-105052-rekey/gate.log"
+  },
+  "impl_move": {
+    "at_complete": 0.9,
+    "at_dispatch": 0.9,
+    "plan": "iter-passive-plasma-circuit",
+    "reason": "regeneration inside the landed vessel-evolution section after the VS3 re-key",
+    "verdict": "waived"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-22T18:35:57.948280+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-22T17:35:57Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 11,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 5,
+    "headroom": 6,
+    "mean_context": 200000,
+    "observed_at": "2026-10-22T17:35:54Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 11,
+      "aggregate_tokens_per_second": 192.776,
+      "detail": "",
+      "mean_tokens_per_second": 48.194,
+      "observed_at": "2026-10-22T17:35:54Z",
+      "runs": 4.0,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-22T18:10:39.697Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T173520387975-evolved-105052-rekey/manifest.md",
+  "member": "disposable-r-20261022T173520387975-evolved-105052-rekey",
+  "model_key": "flash",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_iter_vessel_evolution.py::test_arm_names_the_sectioned_set_it_was_built_on"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_iter_vessel_evolution.py::test_arm_names_the_sectioned_set_it_was_built_on"
+    ],
+    "declaration": "drop the sectioned_set_key field from the npz, and the new test fails",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T173520387975-evolved-105052-rekey/logs/negative-control.txt",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T173520387975-evolved-105052-rekey/logs/negative-control.txt",
+    "test_paths": [
+      "tests/test_iter_vessel_evolution.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "evolved-105052-rekey",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.cache/nova-s21-briefs/oct22/evolved-105052-rekey.txt",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T173520387975-evolved-105052-rekey/brief.txt",
+    "brief_sha256": "48bccea01bdd034dd22831794c48fb15d67523d5946c988deafdc068c8868150",
+    "capability": {
+      "class": "general",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "moderate",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 974,
+          "cached_input_tokens": 800953,
+          "input_tokens": 801929,
+          "output_tokens": 2976,
+          "reasoning_output_tokens": 672,
+          "total_tokens": 804905,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "40d3a43c-d1f4-4016-9584-4e663183c12c",
+      "session_id": "s21-nova"
+    },
+    "done_when": "docs/evidence/fragments/iter-passive-plasma-circuit/evolved-105052-rekey.html records: (1) evolve.py writes sectioned_set_key and linkage_sha256 into the npz and takes --output-dir, with a test asserting both; (2) the regenerated 105052 12 mm arm with i_passive of 1,432 columns, its sha256 and absolute path; (3) the evolution tests passing by delta in fresh processes",
+    "estimated_hours": null,
+    "goal": "Regenerate the 105052 vessel-evolution arm at 12 mm on the re-keyed sectioned set and record the sectioned-set key and linkage sha256 in every arm",
+    "id": "evolved-105052-rekey",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-22T17:35:57Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 11,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 5,
+      "headroom": 6,
+      "mean_context": 200000,
+      "observed_at": "2026-10-22T17:35:54Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 11,
+        "aggregate_tokens_per_second": 192.776,
+        "detail": "",
+        "mean_tokens_per_second": 48.194,
+        "observed_at": "2026-10-22T17:35:54Z",
+        "runs": 4.0,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T173520387975-evolved-105052-rekey/manifest.md",
+    "negative_control": "drop the sectioned_set_key field from the npz, and the new test fails",
+    "plan": "iter-passive-plasma-circuit",
+    "regenerate_paths": [],
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "scripts/iter_vessel_evolution/evolve.py",
+      "tests/test_iter_vessel_evolution.py",
+      "docs/evidence/fragments/iter-passive-plasma-circuit/evolved-105052-rekey.html",
+      "docs/figures/iter-passive-plasma-circuit/evolved-105052-rekey"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 1270608.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "evolved-105052-rekey",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-22T17:36:39.473152+00:00",
+    "score": 0.64375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "Difficulty low to moderate, openness low: a small evolve.py change plus a heavy deterministic regeneration. power_convertor switched-terminal section 14 waits on it.",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:capability",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.416,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 608.077,
+      "context-estimate": 428.486,
+      "records": 1226.487,
+      "verdict-inputs": 290.289
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.9,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "b09120e733eec21842ceb9d8237c0e032f78608d",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "ff86419e7c6c5050228ac887fae987d88d1b2dde",
+    "reviewed_head_sha": "b09120e733eec21842ceb9d8237c0e032f78608d",
+    "scores": {
+      "durability": 17,
+      "evidence": 18,
+      "fit": 18,
+      "goal_fidelity": 19,
+      "reuse": 18,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 109
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261022T173520387975-evolved-105052-rekey",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "e7e7d877-b346-483c-b93b-4a2dbe923d08",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 8619046,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 1914.31,
+    "generated_tokens": 35930,
+    "generation_seconds": 1028.812,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 60.8,
+    "machine_seconds": 885.498,
+    "peak_input_tokens": 139991,
+    "tokens_per_second": 34.92,
+    "wall_tokens_per_second": 18.77
+  },
+  "time_budget": "60m",
+  "tool_steps": 85.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 1978,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-22T18:10:48Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-22T17:38:38Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261022T173520387975-evolved-105052-rekey",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 5554,
+    "worker_pid": 2121518
+  },
+  "worker_seconds": 1837,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

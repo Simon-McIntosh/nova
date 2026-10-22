@@ -25,7 +25,7 @@
   <title>ITER Passive and Prescribed-Plasma Circuit | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="54">
+<meta name="plan-version" content="55">
 <meta name="plan-modified" content="2026-10-22">
 </head>
 <body>
@@ -261,6 +261,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261022T181149341758-review-of-evolved-105052-rekey-b09120e733ee" data-who="reckon-build" data-when="2026-10-22T19:13:16.964Z">
     <div class="r-comment-body"><p>An independent review of the landed node evolved-105052-rekey is stored for run r-20261022T173520387975-evolved-105052-rekey with six dimension scores (goal_fidelity 19, evidence 18, scope_discipline 19, durability 17, fit 18, reuse 18), the revision pair ff86419e7..b09120e73, added_failure_count 0, two follow-on findings and no blocking finding; the arm, both suite arms and the negative control were re-read from the artefacts, not from the workers account.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261022T173520387975-evolved-105052-rekey" data-who="reckon-build" data-when="2026-10-22T18:10:39.697Z">
+    <div class="r-comment-body"><p>evolve.py now writes sectioned_set_key and linkage_sha256 into every arm npz and takes --output-dir (default the cache); the 105052 12 mm arm was regenerated against the re-keyed entry 66c10162f3e37adb2679 and carries 1,432 passive columns where the retired arm carried 1,312, with times unchanged at 29,230. Tests: base 7 passed, head 8 passed; the declared mutation (dropping the field from the npz) reddens only the new test at EXIT=1.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-close-s4" data-who="reckon-build" data-when="2026-10-15T09:40:00Z">
     <div class="r-comment-body"><p>§4 landed (merged <code>c4c7abd78</code>): one public call and result type; cold equals cached; the reduced plant is within 1 % of the full model for all 14 coils to 5 kHz. This is the evidence for power_convertor's gates g-istt-1 and g-jspr-1. The serialiser and screening duplication is being repaired without changing the surface. <a href="/nova/evidence/archive/iter-passive-plasma-circuit-landed.html#iter-coupled-plant-call">evidence</a></p></div>

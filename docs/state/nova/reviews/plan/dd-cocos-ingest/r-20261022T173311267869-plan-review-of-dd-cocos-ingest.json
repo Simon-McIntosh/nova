@@ -1,0 +1,52 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-22T17:46:50.392Z",
+  "dispatched_at": "2026-10-22T17:34:21Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/dd-cocos-ingest/r-20261022T173311267869-plan-review-of-dd-cocos-ingest/plan.html:61",
+      "id": "done_when-1",
+      "reason": "done-when (3) requires the readers' test files to pass by delta, so the node meets an unplanned red slow test with no declared re-point and must pick a replacement case itself (only 105052/1 and 105069/3 conform), which is a plan decision the brief does not make.",
+      "text": "\u00a73 lists four green tests that \"prescribe DINA 105014/1, which \u00a72 refuses\", but \u00a73's own done-when (1) requires `PlasmaSource.from_imas` to refuse DINA 105013/1 too, and `tests/test_unseen_source_full_plant.py::test_unseen_source_drives_the_full_plant_with_zero_rebuilds` (line 296) drives `from_imas` over `DINA_CASES = {(105069, 3): 1688, (105013, 1): 723}` (lines 54\u201357), reaching `prescribe` through `coupled_plant` (`nova/circuit/coupled_plant.py:303`), so it goes red under \u00a73 and is named by no unit",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/dd-cocos-ingest/r-20261022T173311267869-plan-review-of-dd-cocos-ingest/plan.html:68",
+      "id": "wiring-1",
+      "reason": "a node implementing \u00a73 skips line 345 as \u00a74's and a node implementing \u00a74 skips it as \u00a73's, so the site survives both sections unless \u00a74's enumeration names it.",
+      "text": "\u00a73 says `nova/imas/extrapolate.py`'s literal at line 345 \"is an internal consumer and belongs to \u00a74\", while \u00a74's own text (`plan.html:73`) enumerates its internal-consumer sign sites as \"the `pulsedesign.py` writer, `inverse.py`, `biot/contour.py`; `extrapolate.py` is a reader and moves in \u00a73\" \u2014 the two sections each send that one sign site to the other",
+      "type": "wiring",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "dc6bbec33ad0dcebc45e82757da2202928b534c9bdea3d5105bc4b06b62e5129",
+  "plan_slug": "dd-cocos-ingest",
+  "plan_version": 57,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261022T173311267869-plan-review-of-dd-cocos-ingest",
+  "reviewed_blob_sha": "b07cc82a51f50a8aa0663c66ada86884eda2f89b",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `nova_cocos.convention`, `translate_equilibrium`, `TOTAL_FLUX_FACTOR`, `read_frame`, `plot_2d_masked`, the `magnetics.py` / `io_magnetics.py` readers and all four named tests resolve as cited.",
+    "done_when": "a finding \u2014 \u00a73's account of the tests DINA 105014/1 refusal breaks is incomplete: no node handles `tests/test_unseen_source_full_plant.py` driving the refused 105013/1.",
+    "evidence_paths": "pass \u2014 \u00a73's record is the git-tracked `docs/research/dd-cocos-census.html`, not a scratch path.",
+    "naming": "pass \u2014 \u00a73's new symbols and comments are mechanism-named; no plan label, stage name or ticket number reaches code.",
+    "reasoning": "pass \u2014 the stated root cause (prescribe's guard was right for COCOS 17 and the arriving data was wrong) matches the guard and the measured digits, and \u00a73 names `from_imas` / `from_mast` as the callers that must translate.",
+    "single_goal": "pass \u2014 \u00a73 carries one deliverable, the census readers taking their data through the \u00a72 translator.",
+    "wiring": "a finding \u2014 \u00a73 hands `plot_2d_masked`'s `# COCOS` literal to \u00a74 while \u00a74's own text says the whole of `extrapolate.py` moves in \u00a73, so the site is owned by neither."
+  },
+  "section_digests": {
+    "_document": "0944b41fbee062214508f8e371bdb6d46b75eb62d96e4606b5e91e6893187ad0",
+    "s0": "d7c3143494e97518c859457355f006ec1a3961adf5e50d514822385ec2941326",
+    "s1": "8493846bddbd37e17766c3f28357c4dec07fde5dad711cf4d8096db87e577f89",
+    "s2": "38e4a6fd8cb459d4e887ae55cc12b322f74419e30f3f46aaa3022d95172c4f71",
+    "s3": "5344214515cfef9e8265cfd81a770ab35bcb46b9ebab707dbb14472efe366741",
+    "s4": "d6a70aa2dd32032baf0b25d96203690d339d0869464e29c0f3620c5c535bca9c",
+    "s5": "db46395f9321959e91cc657923e567fa72cda1e12fa3aa977d6a83243b8e1d36"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T17:51:18.272257+00:00"
+}

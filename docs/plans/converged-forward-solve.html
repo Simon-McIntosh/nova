@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="530">
+<meta name="plan-version" content="531">
 <meta name="plan-modified" content="2026-10-22">
 </head>
 <body>
@@ -699,6 +699,11 @@
 <article class="r-fu" data-id="f-cfs-one-backtracking-ladder" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-build" data-written-at="2026-10-22 06:20" data-recommends-skill="/reckon-build converged-forward-solve §2" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">One backtracking ladder for the root polish and the prototype solver</h4>
     <div class="r-fu-body"><p>The review of the read-repair chain at <code>c84c432e9</code> found the backtracking factor ladder declared twice. <code>nova/equilibrium/fixed_points.py</code> re-declares an eight-entry tuple beside the owned six-entry <code>_BACKTRACKING_FACTORS</code> in <code>nova/equilibrium/fixed_point.py</code>, which <code>reduced_newton.py</code> already imports. A third copy of the step selection sits in <code>scripts/prototypes/fast_map_production/solver.py</code>, lines 655 to 672. Unifying the ladders changes the axis root polish that repaired the limited 553 floor. The node therefore runs the H200 certified rows (limited 553, limited 2105 and diverted 550 at or below 1e-12, with Taylor slopes in [1.9, 2.1]) and reports the trace count before and after. It runs on the cut-cell split's tip, because both nodes move those rows.</p></div>
+    <pre class="r-fu-prompt">/reckon-build converged-forward-solve §2</pre>
+    </article>
+<article class="r-fu" data-id="f-cfs-contour-test-followons" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="reckon-build" data-written-at="2026-10-22 08:00" data-recommends-skill="/reckon-build converged-forward-solve §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Finish the contour-tree receipt test: one mutation selector, a true docstring, a content check at 2,000 cells</h4>
+    <div class="r-fu-body"><p>The review of contour-test-hygiene at <code>d27fcf098</code> (landed at <code>9362f6cfb</code>) left five follow-ons on <code>tests/test_contour_tree_sparse_build.py</code>:</p><ul><li>The module docstring's rationale sentence says a byte-order digest travels between hosts where the traversal does not, which inverts the measured fact.</li><li><code>_perturb_arc_order</code> adds a second mutation selector, <code>CONTOUR_TREE_ARC_PERTURB</code>, beside the existing <code>CONTOUR_TREE_CORRUPT</code> idiom in <code>tests/test_contour_tree_brute_force.py</code>.</li><li>The arc-perturbation red log predates the final head and names the pre-rename test.</li><li>The 2,000-cell rows keep only the structural relation, because the brute-force count excludes the wall-join arcs those rows carry. A content reference that accounts for the virtual outside node would close it.</li><li>The run's after_suite arm cites a one-file log for a two-file command.</li></ul></div>
     <pre class="r-fu-prompt">/reckon-build converged-forward-solve §2</pre>
     </article>
 </section>

@@ -9,6 +9,11 @@
       "node": "cut-cell-split",
       "recorded_at": "2026-10-22T06:16:24.471093+00:00"
     },
+    "4": {
+      "kind": "folded",
+      "node": "cut-cell-split",
+      "recorded_at": "2026-10-22T06:16:31.644510+00:00"
+    },
     "5": {
       "kind": "exempted",
       "reason": "manifest-only finding on a promoted run: the H200 command is recorded in the gate log headers and in the evidence anchor, and the run record is closed",

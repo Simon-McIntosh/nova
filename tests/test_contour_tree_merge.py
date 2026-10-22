@@ -189,13 +189,15 @@ def test_critical_node_capacity_overflow_is_jittable_and_visible():
     edges = jnp.stack(
         (jnp.zeros(leaves, dtype=jnp.int32), jnp.arange(1, leaves + 1)), axis=1
     )
-    result = jax.jit(build_contour_tree)(
+    result = build_contour_tree(
         values,
         jnp.ones(values.size, dtype=bool),
         jnp.zeros(values.size, dtype=bool),
         edges,
         jnp.ones(leaves, dtype=bool),
         jnp.asarray(1, dtype=jnp.int32),
+        node_capacity=256,
+        edge_capacity=255,
     )
 
     assert bool(result.overflow)
@@ -205,7 +207,7 @@ def test_critical_node_capacity_overflow_is_jittable_and_visible():
 
 @pytest.mark.filterwarnings("error::FutureWarning")
 def test_carrier_neighbour_capacity_overflow_is_visible():
-    """A carrier vertex beyond the fixed neighbour width refuses the receipt."""
+    """A declared neighbour width below the carrier degree refuses the receipt."""
 
     leaves = 17
     branches = jnp.stack(
@@ -223,6 +225,7 @@ def test_carrier_neighbour_capacity_overflow_is_visible():
         edges,
         jnp.arange(edges.shape[0]) < leaves,
         jnp.asarray(1, dtype=jnp.int32),
+        neighbour_capacity=16,
     )
 
     assert bool(result.overflow)

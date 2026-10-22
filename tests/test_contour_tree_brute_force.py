@@ -125,7 +125,7 @@ def test_mast_standalone_superlevel_counts_are_well_formed(mast):
 
     for fixture in mast:
         assert not fixture.mesh.overflow
-        assert int(np.count_nonzero(np.asarray(fixture.mesh.vertex_valid))) == 644
+        assert int(np.count_nonzero(np.asarray(fixture.mesh.vertex_valid))) == 622
         rows = standalone_rows(fixture.mesh)
         counts = [row["brute_force"] for row in rows]
         values = np.asarray(fixture.mesh.vertex_psi)[

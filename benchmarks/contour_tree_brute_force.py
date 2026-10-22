@@ -25,13 +25,13 @@ from nova.media.sources.plasma_mesh import hex_mesh
 ROOT = Path(__file__).resolve().parents[1]
 PART_ROOT = ROOT / "docs/figures/gs-absolute-accuracy/solovev/production-route-parts"
 FIGURE_ROOT = ROOT / "docs/figures/contour-tree-topology-authority/brute-force"
-VERTEX_CAPACITY = 256
+VERTEX_CAPACITY = 258
 EDGE_CAPACITY = 2048
 TRIANGLE_CAPACITY = 1024
 
 # The hex generator selects 464 carrier cells from this target resolution.
 MAST_CELLS = 400
-# Two masked centres remain in the fixed carrier beside its 644 live vertices.
+# Keep spare slots beside the wall-complete carrier's live vertices.
 MAST_VERTEX_CAPACITY = 646
 MAST_EDGE_CAPACITY = 2048
 MAST_TRIANGLE_CAPACITY = 2048
@@ -108,9 +108,9 @@ def certificate_rung_fixtures() -> tuple[Fixture, ...]:
                 coordinate,
                 flux,
                 [vessel_unit(wall[:, 0], wall[:, 1], name=payload["case"])],
-                vertex_capacity=count + 128,
-                edge_capacity=3 * count + 256,
-                triangle_capacity=2 * count + 256,
+                vertex_capacity=count + 256,
+                edge_capacity=3 * count + 512,
+                triangle_capacity=2 * count + 512,
             )
             if mesh.overflow:
                 raise RuntimeError(f"certificate mesh capacity refused: {path.name}")

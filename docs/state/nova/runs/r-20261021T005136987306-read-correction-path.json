@@ -1,0 +1,1705 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 32,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "94aeed7246f89b00eae1952f9e8b3a3a8aef0ccb",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261021T005136987306-read-correction-path/brief.txt",
+    "sha256": "2d6d258802ec18d095090ac1b75aec0e2d238349871c0fb5763b300652f2d13a"
+  },
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 253710848,
+      "cached_input_tokens_cumulative": 253710848,
+      "input_tokens": 257304995,
+      "input_tokens_cumulative": 257304995,
+      "output_tokens": 550106,
+      "output_tokens_cumulative": 550106,
+      "reasoning_output_tokens": 218259,
+      "reasoning_output_tokens_cumulative": 218259
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 37,
+    "files": 17,
+    "removed": 10665
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 158,
+        "name": "promotion_stub",
+        "path": "tests/test_measured_candidate_acceptance.py"
+      },
+      "run_function": {
+        "line": 1393,
+        "name": "accept_newton_ladder",
+        "path": "nova/equilibrium/fixed_point.py"
+      },
+      "window_line": 1404
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_certified_limited_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_certified_diverted_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_certified_diverted_2000_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 223,
+        "name": "test_the_program_emits_each_refusal_end_to_end",
+        "path": "tests/test_bank_drift_support_audit.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 24
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 260,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_cold_and_cached_plants_are_identical",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 328,
+        "name": "test_the_cache_is_written_by_the_circuit_tier_serialisers",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 371,
+        "name": "test_machine_passive_layers_change_screening_and_preserve_one_layer",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 824,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 623,
+        "name": "_slice_process",
+        "path": "tests/test_forward_profile_corsica.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_receipt_keeps_every_fitted_shot_unknown_without_can_evidence",
+        "path": "tests/test_mast_coil_case_temperature.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 27
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 27
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 582,
+        "name": "test_keyframe_measurement_failure_exits_nonzero",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 24
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_receipt",
+        "path": "tests/test_contour_tree_explanatory_figure.py"
+      },
+      "run_function": {
+        "line": 251,
+        "name": "test_virtual_slot_is_typed_outside_and_excluded_from_dd",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 278
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "_build",
+        "path": "tests/test_contour_tree_sparse_build.py"
+      },
+      "run_function": {
+        "line": 251,
+        "name": "test_virtual_slot_is_typed_outside_and_excluded_from_dd",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 279
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_brute_force_fixture_receipts_match_recorded_fields",
+        "path": "tests/test_contour_tree_sweep_bounds.py"
+      },
+      "run_function": {
+        "line": 251,
+        "name": "test_virtual_slot_is_typed_outside_and_excluded_from_dd",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 278
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "c84c432e97a7bb800f656107b8ea2c08fb6a47e5",
+    "b6bbf445dec15f83779d7284aab85e3ffe92fb28",
+    "8010a71637a23cd0e228738970664ca9ebbda590",
+    "244d079e220d4fad9303bb895065d6ae7d4184a6",
+    "df88cc59318aabed4e04eb27caf4fbc0c3508908",
+    "e9444fd44c35688678eea60b3cc0873125927ab3",
+    "0a6d1bf3044bc7c4d19382826d779898b626084e",
+    "3739ed52c9a1331c73554bff539b113896dfe3c4",
+    "8993e1a5d67e34d21bd935edc5e6a0b7df68d407",
+    "8fe01ad342e4e7ef1a3e11c3d6fd459921fa2dc9",
+    "25450ebc88426aaf8b9dc8ab5975e7e4bb432eac",
+    "a6471006bd97dcda1a93036bab0d59da54833765",
+    "0f067c2a748be60498d48ffd5ec3a09b1fcf81c8",
+    "a7f04aacf85c9576955cddaab3f47a01a90ad267",
+    "eeef363c3349544f5bf4c51ce4b6932674aeb3b5",
+    "20f5623215cc81d62e579929d2d7ec206aefbe4f",
+    "52a44fd639d1c748b0e87d78813c859421a57c1b",
+    "a57e5415fcab4d222d92faca8b8f982722f2f0cb",
+    "d116e49912893cd542a9127a97829badb8deca53",
+    "33f19576a5324e394cc718c4d30a6eefdccf9156",
+    "c0263ab094b3cefa92247a479329845643c5e412",
+    "5bb0b4aa13b163d1d168b4dade950869416ff13c",
+    "4cc640ba637b56b0fa328cafbb795613a9d840a3",
+    "c24c900ec6137439728daadcda72097f3ac57932",
+    "e5b28b702bb71297cf0e19809c5db3bff178c2ac",
+    "c09e138e5b4a9bf62c67189de726d7c50bf29462",
+    "dff894e775dbd0241149a768bd9d15316f14422e",
+    "c36770147e3cefd7fd94e545c9defa14e675850e",
+    "68b98460da26fc0ad3bf0ab61c9c736e12afc8ea",
+    "88be24bd2d152c4240ecd40114e355876915f05f",
+    "d9f98c75b2f823fc01457d1aa394827503235f2b",
+    "90f7295e9ff5e9f2e1909cb1b032308a65766b5a",
+    "350a59cf37149c58e3a7cd727976fab7d862d59b",
+    "65c8b44167d8a6bb4464aafe39fe1d05c349ed33",
+    "efd75169d7ec1a7ef3ccde0f533899b769c0ced4",
+    "0692fd934bde2158c2bae1bc405f8af39cdaf54f",
+    "fd9643141863c9d3b1da6642ae3057565258d220",
+    "981aa07f5f96bc60487e16d0d08ea33248d8f560",
+    "885bbb03394afbd96393ec84f27c07be3e5a234e",
+    "aa6a0529f7cf670aabc04f090e39722bb9026c03",
+    "3014acdfd8332a35218e5a13f72a6679033b9b88",
+    "89c8be0a5217ae4737734c8fefc24633ceec8406"
+  ],
+  "completed_at": "2026-10-22T05:24:19Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-21T00:52:20Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "ordinary/saddle",
+    "scripts/prototypes/fast_map_production/solver.py"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "sbatch --wait /home/ITER/mcintos/.config/reckon/crew/runs/r-20261021T005136987306-read-correction-path/followon/paired_suites_followon.sbatch",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261021T005136987306-read-correction-path/followon/paired-suites-followon.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.2857142857142857,
+    "plan": "converged-forward-solve",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 9.171418172995269,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-10-21T17:10:58Z, which is after this node's 3600s horizon ending 2026-10-21T01:51:46.434201+00:00",
+    "horizon_ends_at": "2026-10-21T01:51:46.434201+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-21T00:51:45Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-21T17:10:58Z",
+    "resets_at": "2026-10-27T06:32:42Z",
+    "seconds_until_reset": 538856,
+    "state": "quiet",
+    "utilisation_pct": 100.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-21T00:51:45Z",
+    "read_at": "2026-10-21T00:51:46Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 100.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-22T05:24:19Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-10-22T05:24:19Z",
+        "resets_at": 1793082762,
+        "used_percent": 100.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261021T005136987306-read-correction-path/manifest.md",
+  "member": "disposable-r-20261021T005136987306-read-correction-path",
+  "model_key": "sol",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_fixed_points.py::test_backtracking_reaches_axis_after_newton_overshoot"
+    ],
+    "baseline_failure_ids": [
+      "scripts/prototypes/contour_tree_overflow/test_overflow.py::test_machine_carrier_fits_tree_capacity",
+      "scripts/prototypes/contour_tree_sweep_profile/test_brute_receipt_identity.py::test_independent_carrier_receipts_match_base",
+      "scripts/prototypes/contour_tree_sweep_profile/test_brute_receipt_identity.py::test_monotone_carrier_receipt_matches_base",
+      "scripts/prototypes/contour_tree_sweep_profile/test_profile.py::test_instrumented_receipt_identity[10000-diverted]",
+      "scripts/prototypes/contour_tree_sweep_profile/test_profile.py::test_instrumented_receipt_identity[10000-limited]",
+      "scripts/prototypes/contour_tree_sweep_profile/test_profile.py::test_instrumented_receipt_identity[2000-diverted]",
+      "scripts/prototypes/contour_tree_sweep_profile/test_profile.py::test_instrumented_receipt_identity[2000-limited]",
+      "scripts/prototypes/contour_tree_sweep_profile/test_profile.py::test_instrumented_receipt_identity[5000-diverted]",
+      "scripts/prototypes/contour_tree_sweep_profile/test_profile.py::test_instrumented_receipt_identity[5000-limited]",
+      "scripts/prototypes/contour_tree_sweep_profile/test_profile.py::test_instrumented_receipt_identity[550-diverted]",
+      "scripts/prototypes/contour_tree_sweep_profile/test_profile.py::test_instrumented_receipt_identity[550-limited]",
+      "tests/equilibrium/test_escape_level_certificates.py::test_boundary_matches_certified_escape[mastu-fullPulse-s1-4-5-B]",
+      "tests/equilibrium/test_escape_level_certificates.py::test_boundary_matches_certified_escape[synthetic_crossing_a]",
+      "tests/equilibrium/test_escape_level_certificates.py::test_boundary_matches_certified_escape[synthetic_crossing_b]",
+      "tests/equilibrium/test_escape_level_certificates.py::test_contour_domain_preserves_a_material_hole_and_capacity_refusal",
+      "tests/equilibrium/test_escape_level_certificates.py::test_contour_domain_reaches_the_vessel[synthetic_crossing_a-16]",
+      "tests/equilibrium/test_escape_level_certificates.py::test_contour_domain_reaches_the_vessel[synthetic_crossing_a-24]",
+      "tests/equilibrium/test_escape_level_certificates.py::test_contour_domain_reaches_the_vessel[synthetic_crossing_a-32]",
+      "tests/equilibrium/test_escape_level_certificates.py::test_contour_domain_reaches_the_vessel[synthetic_crossing_b-16]",
+      "tests/equilibrium/test_escape_level_certificates.py::test_contour_domain_reaches_the_vessel[synthetic_crossing_b-24]",
+      "tests/equilibrium/test_escape_level_certificates.py::test_contour_domain_reaches_the_vessel[synthetic_crossing_b-32]",
+      "tests/equilibrium/test_escape_level_certificates.py::test_first_wall_escape_stays_on_the_axis_component",
+      "tests/equilibrium/test_read_correction_path.py::test_adjacent_saddle_booking_keeps_one_representation",
+      "tests/equilibrium/test_topology_contour_mesh_capacity.py::test_wide_wall_record_builds_below_capacity[iter-dina105027-s1-4-5-revert-a.txt]",
+      "tests/equilibrium/test_topology_contour_mesh_capacity.py::test_wide_wall_record_builds_below_capacity[iter-dina105027-s1-4-5-revert-b.txt]",
+      "tests/equilibrium/test_topology_contour_mesh_capacity.py::test_wide_wall_record_builds_below_capacity[iter-fullPulse-s1-10-11-revert-in-crossing-a.txt]",
+      "tests/equilibrium/test_topology_contour_mesh_capacity.py::test_wide_wall_record_builds_below_capacity[iter-fullPulse-s1-10-11-revert-in-crossing-b.txt]",
+      "tests/equilibrium/test_topology_contour_mesh_capacity.py::test_wide_wall_record_builds_below_capacity[iter-fullPulse-s2-2-3-crossing-a.txt]",
+      "tests/equilibrium/test_topology_contour_mesh_capacity.py::test_wide_wall_record_builds_below_capacity[iter-fullPulse-s2-2-3-crossing-b.txt]",
+      "tests/equilibrium/test_topology_contour_mesh_capacity.py::test_wide_wall_record_builds_below_capacity[iter-fullPulse-s5-14-15-identity-a.txt]",
+      "tests/equilibrium/test_topology_contour_mesh_capacity.py::test_wide_wall_record_builds_below_capacity[iter-fullPulse-s5-14-15-identity-b.txt]",
+      "tests/equilibrium/test_topology_read.py::test_biot_moment_point_derivatives",
+      "tests/equilibrium/test_topology_read.py::test_census_keeps_the_wall_contact_saddle_across_the_adjacent_pair",
+      "tests/equilibrium/test_topology_read.py::test_kernel_backed_carrier_read[1074-diverted]",
+      "tests/equilibrium/test_topology_read.py::test_kernel_backed_carrier_read[1074-limited]",
+      "tests/equilibrium/test_topology_read.py::test_kernel_backed_carrier_read[2616-diverted]",
+      "tests/equilibrium/test_topology_read.py::test_kernel_backed_carrier_read[2616-limited]",
+      "tests/equilibrium/test_topology_read.py::test_null_position_implicit_tangent[diverted]",
+      "tests/equilibrium/test_topology_read.py::test_null_position_implicit_tangent[limited]",
+      "tests/test_batched_labeller.py::test_masked_conditioning_keeps_the_augmented_multiplier",
+      "tests/test_batched_labeller.py::test_result_contains_fixed_shape_topology_fields",
+      "tests/test_batched_labeller.py::test_two_elements_match_compiled_route_and_padded_batch",
+      "tests/test_boundary_flux_derivative.py::test_forward_terminal_boundary_flux_matches_held_point_difference",
+      "tests/test_certificate_exterior_support.py::test_exterior_closure_falls_below_booking[2000]",
+      "tests/test_certificate_exterior_support.py::test_exterior_closure_falls_below_booking[5000]",
+      "tests/test_connectivity_boundary.py::test_continuous_through_marginal_transition",
+      "tests/test_connectivity_boundary.py::test_forward_topology_margin_tracks_reachable_wall_and_terminal_gate",
+      "tests/test_contour_tree_capacity_from_carrier.py::test_declared_capacity_below_the_carrier_needs_is_refused",
+      "tests/test_contour_tree_capacity_from_carrier.py::test_dense_graph_of_degree_above_thirty_two_bounds_without_refusal",
+      "tests/test_contour_tree_capacity_from_carrier.py::test_undeclared_capacities_are_the_carrier_slot_counts",
+      "tests/test_equilibrium_forward.py::test_the_solve_defaults_to_the_root_find",
+      "tests/test_equilibrium_forward_solve.py::test_a_terminal_class_contradiction_stays_in_its_branch_receipt",
+      "tests/test_equilibrium_forward_solve.py::test_an_externally_supplied_flux_map_is_qualified_by_the_same_receipt",
+      "tests/test_equilibrium_forward_solve.py::test_current_uses_profile_support_and_pointwise_open_selection",
+      "tests/test_equilibrium_forward_solve.py::test_the_accelerated_solve_reaches_its_fixed_point",
+      "tests/test_equilibrium_forward_solve.py::test_the_accelerator_routes_agree_on_the_fixed_point",
+      "tests/test_equilibrium_forward_solve.py::test_the_batched_ensemble_solve_matches_the_per_slice_solve",
+      "tests/test_equilibrium_forward_solve.py::test_the_conservation_receipt_meets_its_registered_tolerances",
+      "tests/test_equilibrium_forward_solve.py::test_the_host_iteration_exits_early_on_the_shared_residual",
+      "tests/test_equilibrium_forward_solve.py::test_the_host_iteration_reproduces_the_traced_ladder",
+      "tests/test_equilibrium_forward_solve.py::test_the_host_root_find_holds_the_equilibrium_it_is_seeded_on",
+      "tests/test_equilibrium_forward_solve.py::test_the_moment_map_is_differentiable_against_finite_differences",
+      "tests/test_equilibrium_forward_solve.py::test_the_plasma_current_is_differentiable_in_the_conductor_current",
+      "tests/test_equilibrium_forward_solve.py::test_the_receipt_records_an_untouched_absolute_source",
+      "tests/test_equilibrium_forward_solve.py::test_the_relaxed_iteration_floors_at_the_flux_resolution",
+      "tests/test_equilibrium_forward_solve.py::test_the_solve_is_differentiable_in_the_conductor_current",
+      "tests/test_equilibrium_forward_solve.py::test_the_solve_reaches_one_equilibrium_from_several_seeds",
+      "tests/test_equilibrium_forward_solve.py::test_the_solve_refuses_to_enforce_a_moment",
+      "tests/test_equilibrium_forward_solve.py::test_the_topology_read_publishes_every_domain",
+      "tests/test_equilibrium_sol.py::test_declaring_a_continuation_on_an_empty_domain_changes_nothing",
+      "tests/test_equilibrium_sol.py::test_no_current_appears_beyond_the_support_in_the_solved_map",
+      "tests/test_equilibrium_sol.py::test_the_batched_continued_solve_matches_the_single_slice",
+      "tests/test_equilibrium_sol.py::test_the_continuation_moves_the_solution_by_a_resolvable_bounded_amount",
+      "tests/test_equilibrium_sol.py::test_the_continued_equilibrium_meets_its_conservation_tolerances",
+      "tests/test_equilibrium_sol.py::test_the_continued_solve_reaches_its_fixed_point",
+      "tests/test_equilibrium_sol.py::test_the_exponential_family_publishes_the_amplitude_it_truncates",
+      "tests/test_equilibrium_sol.py::test_the_host_and_traced_routes_agree_on_the_continued_map",
+      "tests/test_equilibrium_sol.py::test_the_private_flux_branch_is_labelled_and_reached_by_its_own_closure",
+      "tests/test_equilibrium_sol.py::test_the_scrape_off_current_is_published_in_its_own_ledger_row",
+      "tests/test_equilibrium_sol.py::test_the_static_path_is_unchanged_when_no_continuation_is_declared",
+      "tests/test_equilibrium_sol.py::test_varying_the_private_flux_policy_moves_only_its_own_current",
+      "tests/test_forward_operator_axes.py::test_tensor_product_grid_class_margin_is_read_on_the_spline",
+      "tests/test_labeller_parallel.py::test_both_writers_pass_the_solved_class_into_the_centroid_reads",
+      "tests/test_labeller_parallel.py::test_failure_after_conditioned_solve_begins_stays_conditioned",
+      "tests/test_labeller_parallel.py::test_host_route_matches_shard_slice_record_on_solovev",
+      "tests/test_labeller_parallel.py::test_seed_admission_failure_is_recorded_as_skipped",
+      "tests/test_limiter_spline_minimum.py::test_selected_wall_keeps_restricted_minimum_bits",
+      "tests/test_operand_cache.py::test_jet_matrix_persists_by_default",
+      "tests/test_prescribed_current_solve.py::test_solve_and_solve_branch_trace_prescribed_current_replacements",
+      "tests/test_prescribed_current_solve.py::test_solve_none_reproduces_the_stored_vector_bit_identically",
+      "tests/test_read_ten_thousand_cells.py::test_closed_form_read_is_accurate_and_compatible[2000-diverted]",
+      "tests/test_read_ten_thousand_cells.py::test_closed_form_read_is_accurate_and_compatible[2000-limited]",
+      "tests/test_read_ten_thousand_cells.py::test_closed_form_read_is_accurate_and_compatible[5000-diverted]",
+      "tests/test_read_ten_thousand_cells.py::test_closed_form_read_is_accurate_and_compatible[5000-limited]",
+      "tests/test_read_ten_thousand_cells.py::test_closed_form_read_is_accurate_and_compatible[550-diverted]",
+      "tests/test_read_ten_thousand_cells.py::test_closed_form_read_is_accurate_and_compatible[550-limited]",
+      "tests/test_solve_path_census_inputs.py::test_solve_path_prefix_slices_do_not_feed_the_null_census",
+      "tests/test_solve_receipt_topology.py::test_terminal_receipt_matches_an_independent_topology_read",
+      "tests/test_solve_receipt_topology.py::test_terminal_receipt_uses_only_resolvable_cell_domains",
+      "tests/test_transport_coupled_window.py::test_coreless_branch_outcome_names_its_sample_and_window_exchange",
+      "tests/test_transport_coupled_window.py::test_equilibrium_sweep_consumes_interpolated_sources_and_returns_receipts",
+      "tests/test_two_class_recovery.py::test_banked_diverted_state_is_a_machine_precision_pinned_root",
+      "tests/test_two_class_recovery.py::test_cold_limited_branch_recovers_each_banked_root[coarse]",
+      "tests/test_two_class_recovery.py::test_cold_limited_branch_recovers_each_banked_root[fine]",
+      "tests/test_two_class_recovery.py::test_cold_seed_receipts_keep_one_fixed_branch_axis_under_vmap",
+      "tests/test_two_class_recovery.py::test_diverted_near_basin_perturbation_ladder_recovers_banked_root"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_fixed_points.py::test_backtracking_reaches_axis_after_newton_overshoot"
+    ],
+    "declaration": "Revert only the correction-path change; the first certified row's correction must again be non-finite.",
+    "head_failure_ids": [
+      "scripts/prototypes/contour_tree_sweep_profile/test_brute_receipt_identity.py::test_independent_carrier_receipts_match_base",
+      "scripts/prototypes/contour_tree_sweep_profile/test_brute_receipt_identity.py::test_monotone_carrier_receipt_matches_base",
+      "scripts/prototypes/contour_tree_sweep_profile/test_profile.py::test_instrumented_receipt_identity[10000-diverted]",
+      "scripts/prototypes/contour_tree_sweep_profile/test_profile.py::test_instrumented_receipt_identity[10000-limited]",
+      "scripts/prototypes/contour_tree_sweep_profile/test_profile.py::test_instrumented_receipt_identity[2000-diverted]",
+      "scripts/prototypes/contour_tree_sweep_profile/test_profile.py::test_instrumented_receipt_identity[2000-limited]",
+      "scripts/prototypes/contour_tree_sweep_profile/test_profile.py::test_instrumented_receipt_identity[5000-diverted]",
+      "scripts/prototypes/contour_tree_sweep_profile/test_profile.py::test_instrumented_receipt_identity[5000-limited]",
+      "scripts/prototypes/contour_tree_sweep_profile/test_profile.py::test_instrumented_receipt_identity[550-diverted]",
+      "scripts/prototypes/contour_tree_sweep_profile/test_profile.py::test_instrumented_receipt_identity[550-limited]",
+      "tests/equilibrium/test_topology_contour_mesh_capacity.py::test_wide_wall_record_builds_below_capacity[iter-dina105027-s1-4-5-revert-a.txt]",
+      "tests/equilibrium/test_topology_contour_mesh_capacity.py::test_wide_wall_record_builds_below_capacity[iter-dina105027-s1-4-5-revert-b.txt]",
+      "tests/equilibrium/test_topology_contour_mesh_capacity.py::test_wide_wall_record_builds_below_capacity[iter-fullPulse-s1-10-11-revert-in-crossing-a.txt]",
+      "tests/equilibrium/test_topology_contour_mesh_capacity.py::test_wide_wall_record_builds_below_capacity[iter-fullPulse-s1-10-11-revert-in-crossing-b.txt]",
+      "tests/equilibrium/test_topology_contour_mesh_capacity.py::test_wide_wall_record_builds_below_capacity[iter-fullPulse-s2-2-3-crossing-a.txt]",
+      "tests/equilibrium/test_topology_contour_mesh_capacity.py::test_wide_wall_record_builds_below_capacity[iter-fullPulse-s2-2-3-crossing-b.txt]",
+      "tests/equilibrium/test_topology_contour_mesh_capacity.py::test_wide_wall_record_builds_below_capacity[iter-fullPulse-s5-14-15-identity-a.txt]",
+      "tests/equilibrium/test_topology_contour_mesh_capacity.py::test_wide_wall_record_builds_below_capacity[iter-fullPulse-s5-14-15-identity-b.txt]",
+      "tests/equilibrium/test_topology_read.py::test_biot_moment_point_derivatives",
+      "tests/equilibrium/test_topology_read.py::test_kernel_backed_carrier_read[1074-diverted]",
+      "tests/equilibrium/test_topology_read.py::test_kernel_backed_carrier_read[1074-limited]",
+      "tests/equilibrium/test_topology_read.py::test_kernel_backed_carrier_read[2616-diverted]",
+      "tests/equilibrium/test_topology_read.py::test_kernel_backed_carrier_read[2616-limited]",
+      "tests/equilibrium/test_topology_read.py::test_null_position_implicit_tangent[diverted]",
+      "tests/equilibrium/test_topology_read.py::test_null_position_implicit_tangent[limited]",
+      "tests/test_batched_labeller.py::test_masked_conditioning_keeps_the_augmented_multiplier",
+      "tests/test_batched_labeller.py::test_result_contains_fixed_shape_topology_fields",
+      "tests/test_batched_labeller.py::test_two_elements_match_compiled_route_and_padded_batch",
+      "tests/test_boundary_flux_derivative.py::test_forward_terminal_boundary_flux_matches_held_point_difference",
+      "tests/test_certificate_exterior_support.py::test_exterior_closure_falls_below_booking[2000]",
+      "tests/test_certificate_exterior_support.py::test_exterior_closure_falls_below_booking[5000]",
+      "tests/test_connectivity_boundary.py::test_continuous_through_marginal_transition",
+      "tests/test_connectivity_boundary.py::test_forward_topology_margin_tracks_reachable_wall_and_terminal_gate",
+      "tests/test_equilibrium_forward.py::test_the_solve_defaults_to_the_root_find",
+      "tests/test_equilibrium_forward_solve.py::test_a_terminal_class_contradiction_stays_in_its_branch_receipt",
+      "tests/test_equilibrium_forward_solve.py::test_an_externally_supplied_flux_map_is_qualified_by_the_same_receipt",
+      "tests/test_equilibrium_forward_solve.py::test_current_uses_profile_support_and_pointwise_open_selection",
+      "tests/test_equilibrium_forward_solve.py::test_the_accelerated_solve_reaches_its_fixed_point",
+      "tests/test_equilibrium_forward_solve.py::test_the_accelerator_routes_agree_on_the_fixed_point",
+      "tests/test_equilibrium_forward_solve.py::test_the_batched_ensemble_solve_matches_the_per_slice_solve",
+      "tests/test_equilibrium_forward_solve.py::test_the_conservation_receipt_meets_its_registered_tolerances",
+      "tests/test_equilibrium_forward_solve.py::test_the_host_iteration_exits_early_on_the_shared_residual",
+      "tests/test_equilibrium_forward_solve.py::test_the_host_iteration_reproduces_the_traced_ladder",
+      "tests/test_equilibrium_forward_solve.py::test_the_host_root_find_holds_the_equilibrium_it_is_seeded_on",
+      "tests/test_equilibrium_forward_solve.py::test_the_moment_map_is_differentiable_against_finite_differences",
+      "tests/test_equilibrium_forward_solve.py::test_the_plasma_current_is_differentiable_in_the_conductor_current",
+      "tests/test_equilibrium_forward_solve.py::test_the_receipt_records_an_untouched_absolute_source",
+      "tests/test_equilibrium_forward_solve.py::test_the_relaxed_iteration_floors_at_the_flux_resolution",
+      "tests/test_equilibrium_forward_solve.py::test_the_solve_is_differentiable_in_the_conductor_current",
+      "tests/test_equilibrium_forward_solve.py::test_the_solve_reaches_one_equilibrium_from_several_seeds",
+      "tests/test_equilibrium_forward_solve.py::test_the_solve_refuses_to_enforce_a_moment",
+      "tests/test_equilibrium_forward_solve.py::test_the_topology_read_publishes_every_domain",
+      "tests/test_equilibrium_sol.py::test_declaring_a_continuation_on_an_empty_domain_changes_nothing",
+      "tests/test_equilibrium_sol.py::test_no_current_appears_beyond_the_support_in_the_solved_map",
+      "tests/test_equilibrium_sol.py::test_the_batched_continued_solve_matches_the_single_slice",
+      "tests/test_equilibrium_sol.py::test_the_continuation_moves_the_solution_by_a_resolvable_bounded_amount",
+      "tests/test_equilibrium_sol.py::test_the_continued_equilibrium_meets_its_conservation_tolerances",
+      "tests/test_equilibrium_sol.py::test_the_continued_solve_reaches_its_fixed_point",
+      "tests/test_equilibrium_sol.py::test_the_exponential_family_publishes_the_amplitude_it_truncates",
+      "tests/test_equilibrium_sol.py::test_the_host_and_traced_routes_agree_on_the_continued_map",
+      "tests/test_equilibrium_sol.py::test_the_private_flux_branch_is_labelled_and_reached_by_its_own_closure",
+      "tests/test_equilibrium_sol.py::test_the_scrape_off_current_is_published_in_its_own_ledger_row",
+      "tests/test_equilibrium_sol.py::test_the_static_path_is_unchanged_when_no_continuation_is_declared",
+      "tests/test_equilibrium_sol.py::test_varying_the_private_flux_policy_moves_only_its_own_current",
+      "tests/test_forward_operator_axes.py::test_tensor_product_grid_class_margin_is_read_on_the_spline",
+      "tests/test_labeller_parallel.py::test_both_writers_pass_the_solved_class_into_the_centroid_reads",
+      "tests/test_labeller_parallel.py::test_failure_after_conditioned_solve_begins_stays_conditioned",
+      "tests/test_labeller_parallel.py::test_host_route_matches_shard_slice_record_on_solovev",
+      "tests/test_labeller_parallel.py::test_seed_admission_failure_is_recorded_as_skipped",
+      "tests/test_limiter_spline_minimum.py::test_selected_wall_keeps_restricted_minimum_bits",
+      "tests/test_operand_cache.py::test_jet_matrix_persists_by_default",
+      "tests/test_prescribed_current_solve.py::test_solve_and_solve_branch_trace_prescribed_current_replacements",
+      "tests/test_prescribed_current_solve.py::test_solve_none_reproduces_the_stored_vector_bit_identically",
+      "tests/test_read_ten_thousand_cells.py::test_closed_form_read_is_accurate_and_compatible[2000-diverted]",
+      "tests/test_read_ten_thousand_cells.py::test_closed_form_read_is_accurate_and_compatible[2000-limited]",
+      "tests/test_read_ten_thousand_cells.py::test_closed_form_read_is_accurate_and_compatible[5000-diverted]",
+      "tests/test_read_ten_thousand_cells.py::test_closed_form_read_is_accurate_and_compatible[5000-limited]",
+      "tests/test_read_ten_thousand_cells.py::test_closed_form_read_is_accurate_and_compatible[550-diverted]",
+      "tests/test_read_ten_thousand_cells.py::test_closed_form_read_is_accurate_and_compatible[550-limited]",
+      "tests/test_solve_path_census_inputs.py::test_solve_path_prefix_slices_do_not_feed_the_null_census",
+      "tests/test_solve_receipt_topology.py::test_terminal_receipt_matches_an_independent_topology_read",
+      "tests/test_solve_receipt_topology.py::test_terminal_receipt_uses_only_resolvable_cell_domains",
+      "tests/test_transport_coupled_window.py::test_coreless_branch_outcome_names_its_sample_and_window_exchange",
+      "tests/test_transport_coupled_window.py::test_equilibrium_sweep_consumes_interpolated_sources_and_returns_receipts",
+      "tests/test_two_class_recovery.py::test_banked_diverted_state_is_a_machine_precision_pinned_root",
+      "tests/test_two_class_recovery.py::test_cold_limited_branch_recovers_each_banked_root[coarse]",
+      "tests/test_two_class_recovery.py::test_cold_limited_branch_recovers_each_banked_root[fine]",
+      "tests/test_two_class_recovery.py::test_cold_seed_receipts_keep_one_fixed_branch_axis_under_vmap",
+      "tests/test_two_class_recovery.py::test_diverted_near_basin_perturbation_ladder_recovers_banked_root"
+    ],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261021T005136987306-read-correction-path/root-negative-test.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261021T005136987306-read-correction-path/root-negative-test.log",
+    "test_paths": [
+      "tests/equilibrium/test_read_correction_path.py",
+      "tests/test_contour_tree_brute_force.py",
+      "tests/test_contour_tree_explanatory_figure.py",
+      "tests/test_contour_tree_merge.py",
+      "tests/test_contour_tree_scatter_equivalence.py",
+      "tests/test_contour_tree_sparse_build.py",
+      "tests/test_fixed_points.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "read-correction-path",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.cache/nova-s21-briefs/oct20/read-correction-path.txt",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261021T005136987306-read-correction-path/brief.txt",
+    "brief_sha256": "2d6d258802ec18d095090ac1b75aec0e2d238349871c0fb5763b300652f2d13a",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "critical",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 700,
+          "cached_input_tokens": 937656,
+          "input_tokens": 938358,
+          "output_tokens": 1488,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 939846,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "40d3a43c-d1f4-4016-9584-4e663183c12c",
+      "session_id": "s21-nova"
+    },
+    "done_when": "The first non-finite operation in the correction path is localised by measurement and repaired at its owner with the cell-266 ordinary and saddle-fragment booking continuous, limited 550, limited 2,000 and diverted 550 converge to 1e-12 with Taylor slope near 2 in one H200 job with contour panels, and both suite arms over the changed-module importers and the paired list run as one sirius job on one partition with no added failure beyond named changed-intent tests",
+    "estimated_hours": null,
+    "goal": "The first-separator read chain's correction path repaired and integrated, with continuous cell booking and converged certified rows",
+    "id": "read-correction-path",
+    "images": [],
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-21T00:51:45Z",
+      "read_at": "2026-10-21T00:51:46Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 100.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261021T005136987306-read-correction-path/manifest.md",
+    "negative_control": "Revert only the correction-path change; the first certified row's correction must again be non-finite.",
+    "orchestrator_assessment": {
+      "reasoning": "deep",
+      "risk": "critical",
+      "verification": "strict"
+    },
+    "plan": "converged-forward-solve",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "scripts/prototypes/fast_map_production/kernel.py",
+      "scripts/prototypes/fast_map_production/program.py",
+      "scripts/prototypes/fast_map_production/solver.py",
+      "nova/equilibrium/current.py",
+      "docs/evidence/fragments/converged-forward-solve/read-correction-path.html",
+      "docs/figures/converged-forward-solve/read-correction-path/",
+      "docs/figures/converged-forward-solve/read-correction-path",
+      "tests/equilibrium/test_read_correction_path.py",
+      "nova/equilibrium/contour_tree.py",
+      "nova/equilibrium/contour_tree_mesh.py",
+      "nova/equilibrium/topology.py",
+      "tests/test_contour_tree_sparse_build.py",
+      "nova/equilibrium/fixed_points.py",
+      "tests/test_fixed_points.py",
+      "tests/test_contour_tree_brute_force.py",
+      "tests/test_contour_tree_explanatory_figure.py",
+      "tests/test_contour_tree_merge.py",
+      "tests/test_contour_tree_scatter_equivalence.py",
+      "benchmarks/contour_tree_brute_force.py",
+      "nova/equilibrium/fixed_point.py",
+      "docs/evidence/fragments/converged-forward-solve/contour-chain-added-failures.html",
+      "docs/evidence/fragments/converged-forward-solve/root-polish-owned-line-search.html",
+      "docs/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.json",
+      "docs/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.svg",
+      "docs/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.png"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 9566482.0,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 9.169686849516099,
+      "derived": 0.11996047608300267,
+      "drain_hours": 168.0,
+      "effective_limit": 0.11996047608300267,
+      "elapsed_fraction": 0.10905497825727514,
+      "elapsed_hours": 18.321236347222225,
+      "group": "codex-sub",
+      "lift": {
+        "ends_at": "2026-10-27T06:32:42+00:00",
+        "ends_on": "reset",
+        "form": "credits",
+        "group": "codex-sub",
+        "id": "codex-sub-1792529492-26f087",
+        "pace_multiple": null,
+        "remaining_seconds": 538843.54915,
+        "scope": "global"
+      },
+      "lift_hold": {
+        "held": false,
+        "kind": "credits"
+      },
+      "limited_by": "allowance",
+      "observed_at": "2026-10-21T00:51:58+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.0,
+      "remaining_windows": null,
+      "resets_at": "2026-10-27T06:32:42Z",
+      "state": "observed",
+      "utilisation": 1.0,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 1.0,
+      "decided_by": "window",
+      "margin": -0.26249999999999996,
+      "name": "read-correction-path",
+      "score": 0.7375,
+      "state": "observed",
+      "verdict": "hold",
+      "window_fill": 1.0
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.45085,
+        "observed_at": "2026-10-21T00:51:58+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-27T06:32:42Z",
+        "state": "observed",
+        "utilisation": 1.0,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": "codex-sub-1792529492-26f087",
+    "member": "codex",
+    "node": "read-correction-path",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-21T00:51:58.450850+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "refuse",
+    "answering_model": null,
+    "backend": null,
+    "comment": "Lead directive 2026-10-20: the read-repair chain runs on codex under the 10,000-credit lift; third and final chained node, deep correction-path diagnosis plus integration, one codex worker at a time.",
+    "confidence": null,
+    "decision_source": "refused",
+    "effort": null,
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 1619.730802,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn_multiple": 9.173128720154706,
+        "congestion": {
+          "lift": {
+            "ends_at": "2026-10-27T06:32:42+00:00",
+            "ends_on": "reset",
+            "form": "credits",
+            "group": "codex-sub",
+            "id": "codex-sub-1792529492-26f087",
+            "pace_multiple": null,
+            "remaining_seconds": 538868.296821,
+            "scope": "global"
+          }
+        },
+        "context": null,
+        "days_to_reset": 6.236868775439816,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 1,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": 0.119915465437996,
+        "prior_outcomes": null,
+        "reasons": [
+          "reserved-lane: codex is reserved while the orchestrators it shares with it needs it; its window reading is unknown or stale"
+        ],
+        "resets_at": "2026-10-27T06:32:42+00:00",
+        "stale": true,
+        "suits": "The lane's frontier model, strongest and slowest, about five times sol's token price. Suits deep or open-ended design, elevated or critical risk, and nodes that already failed on another model.",
+        "utilisation_pct": 100.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 1619.730802,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn_multiple": 9.173128720154706,
+        "congestion": {
+          "lift": {
+            "ends_at": "2026-10-27T06:32:42+00:00",
+            "ends_on": "reset",
+            "form": "credits",
+            "group": "codex-sub",
+            "id": "codex-sub-1792529492-26f087",
+            "pace_multiple": null,
+            "remaining_seconds": 538868.296821,
+            "scope": "global"
+          }
+        },
+        "context": null,
+        "days_to_reset": 6.236868775439816,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 0,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": 0.119915465437996,
+        "prior_outcomes": null,
+        "reasons": [
+          "reserved-lane: codex is reserved while the orchestrators it shares with it needs it; its window reading is unknown or stale"
+        ],
+        "resets_at": "2026-10-27T06:32:42+00:00",
+        "stale": true,
+        "suits": "The lane's fast, affordable model, about a twentieth of sol's token price. Suits well-defined, less difficult work: reviews, exact-spec implementation, tests and documentation.",
+        "utilisation_pct": 100.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 1619.730802,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn_multiple": 9.173128720154706,
+        "congestion": {
+          "lift": {
+            "ends_at": "2026-10-27T06:32:42+00:00",
+            "ends_on": "reset",
+            "form": "credits",
+            "group": "codex-sub",
+            "id": "codex-sub-1792529492-26f087",
+            "pace_multiple": null,
+            "remaining_seconds": 538868.296821,
+            "scope": "global"
+          }
+        },
+        "context": null,
+        "days_to_reset": 6.236868775439816,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "outcomes": {
+          "failed": 3,
+          "not-run": 0,
+          "passed": 16,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 19,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": 0.119915465437996,
+        "prior_outcomes": null,
+        "reasons": [
+          "reserved-lane: codex is reserved while the orchestrators it shares with it needs it; its window reading is unknown or stale"
+        ],
+        "resets_at": "2026-10-27T06:32:42+00:00",
+        "stale": true,
+        "suits": "The lane default, a previous-generation general model. Suits guided implementation, tests and full reviews at standard or deep reasoning and moderate risk. About twenty times luna's token price and a fifth of astra's.",
+        "utilisation_pct": 100.0,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": "no-eligible-candidates; default-backend-ineligible",
+    "family": null,
+    "jev_latency_ms": 0.0,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 2943.081,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "questions": {},
+    "rendered_state": "{\"node\":{\"role\":\"implement\",\"spec_level\":\"guided\",\"capability\":{\"version\":\"1.0\",\"class\":\"orchestrator\",\"requirements\":{\"reasoning\":\"deep\",\"verification\":\"strict\",\"risk\":\"critical\"}},\"orchestrator_assessment\":{\"reasoning\":\"deep\",\"risk\":\"critical\",\"verification\":\"strict\"},\"goal\":\"The first-separator read chain's correction path repaired and integrated, with continuous cell booking and converged certified rows\",\"done_when\":\"The first non-finite operation in the correction path is localised by measurement and repaired at its owner with the cell-266 ordinary and saddle-fragment booking continuous, limited 550, limited 2,000 and diverted 550 converge to 1e-12 with Taylor slope near 2 in one H200 job with contour panels, and both suite arms over the changed-module importers and the paired list run as one sirius job on one partition with no added failure beyond named changed-intent tests\",\"urgency\":{\"due\":null,\"seconds_to_due\":null,\"reason\":null},\"estimated_context\":77111,\"estimated_hours\":10.0,\"estimated_hours_source\":\"section\",\"attempts\":0,\"write_path_count\":6,\"negative_control_declared\":true,\"serving_lanes\":[],\"serving_lane_count\":0,\"hold_waits_for\":null},\"orchestrator_comment\":\"Lead directive 2026-10-20: the read-repair chain runs on codex under the 10,000-credit lift; third and final chained node, deep correction-path diagnosis plus integration, one codex worker at a time.\",\"candidates\":{},\"return_times\":{},\"lanes\":{},\"local_lane\":{\"admission\":\"unavailable\",\"expected_wait_s\":1373.75,\"expected_wait_profile_age_s\":4526.432309,\"running\":7,\"waiting\":0,\"queue_position\":1,\"headroom\":4,\"worker_slots\":2,\"tokens_per_second\":57.142,\"read_at\":\"2026-10-21T00:51:36.804273+00:00\"}}",
+    "rendered_token_estimate": 424,
+    "stage_ms": {
+      "budget-snapshot": 230.155,
+      "context-estimate": 23.156,
+      "records": 227.3,
+      "verdict-inputs": 206.475
+    },
+    "template_digest": "cb9d48e7fca5878b52cc4affdedfdee9f5e04b929f720979b14d0d78b8456ced",
+    "usage": {}
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.2857142857142857,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "c84c432e97a7bb800f656107b8ea2c08fb6a47e5",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "94aeed7246f89b00eae1952f9e8b3a3a8aef0ccb",
+    "reviewed_head_sha": "c84c432e97a7bb800f656107b8ea2c08fb6a47e5",
+    "scores": {
+      "durability": 15,
+      "evidence": 14,
+      "fit": 17,
+      "goal_fidelity": 14,
+      "reuse": 13,
+      "scope_discipline": 13
+    },
+    "status": "parsed",
+    "total": 86
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261021T005136987306-read-correction-path",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a15bf2-1095-7fd3-ac48-35e5a0f06309",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 253710848,
+    "cumulative_input_tokens": 511015843,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 768365
+  },
+  "time_budget": "60m",
+  "tool_steps": 46.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 102719,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 32,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-22T05:24:20Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-22T05:16:31Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261021T005136987306-read-correction-path",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 4624,
+    "worker_pid": 3327715
+  },
+  "worker_seconds": 102700,
+  "worker_seconds_source": "rollout_receipts",
+  "worktree_retention": null
+}

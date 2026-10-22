@@ -4,6 +4,11 @@
   "completed_at": "2026-10-22T05:41:27.361Z",
   "dispatched_at": "2026-10-22T05:26:28Z",
   "finding_dispositions": {
+    "2": {
+      "kind": "folded",
+      "node": "cut-cell-split",
+      "recorded_at": "2026-10-22T06:16:24.471093+00:00"
+    },
     "5": {
       "kind": "exempted",
       "reason": "manifest-only finding on a promoted run: the H200 command is recorded in the gate log headers and in the evidence anchor, and the run record is closed",

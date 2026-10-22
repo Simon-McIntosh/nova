@@ -1,0 +1,62 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-22T10:22:47.140Z",
+  "dispatched_at": "2026-10-22T10:01:07Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T082744999453-dd-translator/logs/head_suite_summary.txt",
+      "line": "12",
+      "severity": "blocking",
+      "text": "blocking: the head arm's summary, which the manifest names as after_suite.log_path, ends at its last per-file row with no bare `EXIT=` last line (the base summary has one at line 10), and its per-file log for the node's central new test file, logs/head_test_dd_translator.log, stops at four progress dots with no pytest summary line and no EXIT line at all, so the arm's exit_status 0 and completed true are unreadable at exactly the place the manifest contract says promotion reads them; this review re-ran that one file at the reviewed head in a fresh process (9 passed, 1 warning in 201.61s, EXIT=0, review-test-dd-translator.log), so the underlying work is green and it is the receipt that has to be repaired."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T082744999453-dd-translator/manifest.md",
+      "line": "16",
+      "severity": "follow-on",
+      "text": "follow-on: after_suite names revision 171dbde40c8ba7844161f44a4f17a277048c5b94 while the log it cites on the same line, logs/head_suite_summary.txt:1, and logs/head_test_dd_translator.log:1 both name 1f32c239d79e9e45356db2f3e76ea76041f3d84c, so the arm's recorded revision disagrees with its own receipt; the two differ by the docs-only fragment, so no measurement moves."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T082744999453-dd-translator/manifest.md",
+      "line": "15",
+      "severity": "follow-on",
+      "text": "follow-on: baseline_suite and after_suite both state a command carrying an unsubstituted placeholder (PYTHONPATH=<base-tree> and PYTHONPATH=<worktree>), and the tests field at line 11 is a JSON array of file names rather than the literal command, so promotion's gate receipt is filled from lines that cannot be re-run."
+    },
+    {
+      "file": "tests/test_io_cocos.py",
+      "line": "61",
+      "severity": "follow-on",
+      "text": "follow-on: test_the_table_is_the_only_transcription_of_the_digits repeats verbatim the assertion already made at tests/test_io_cocos.py:44 and compares nova_cocos.identify_convention against nova_cocos's own conventions(), so the two sides move together; the change deleted the assertion that did cross-check independently (cocos_from_digits against the table), leaving the sixteen-entry table checked only against itself despite the docstring's claim about a second transcription."
+    },
+    {
+      "file": "tests/test_dd_translator.py",
+      "line": "336",
+      "severity": "follow-on",
+      "text": "follow-on: the assertion compares a call to the code under test against the very value the test handed it, so it holds whatever apply() does once the factor is one; it carries information only jointly with the independent assertion at line 335, and durability here does not rest on it."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T082744999453-dd-translator/manifest.md",
+      "line": "13",
+      "severity": "follow-on",
+      "text": "follow-on: negative_control_log names logs/negative_control_mutation.log, a mutation script whose EXIT=1 line carries no failing test id, while the admission rule reads a red log for a failing test id the head arm does not fail; the passing arm beside it, logs/negative_control.log, is green by design, so neither artefact alone states which id the control reddens."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is one reusable Data Dictionary equilibrium translator, DD4 passthrough and a by-name conformance refusal; the landed change adds translate_equilibrium at nova/io/sourcemap.py:895 with dd_equilibrium_convention at :767 and determine_digits moved into the sourcemap at :786, and moves the four benchmarks off the deleted nova/io/cocos.py.\nVERDICT done_when: the dispatched brief's clause (2) still lists DINA 105013/1 as accepted, but the live plan's section 2 done-when (2) and the coordinator's ruling recorded at runs/r-20261022T082744999453-dd-translator/resume-1-advice.txt refuse 105014/1 and 105013/1 and accept 105052/1, 105069/3 and 130506/6; tests/test_dd_translator.py:228 asserts exactly that partition over every slice above 1 MA with each refusal asserted to name its contradicting digit, and clause (3)'s search is reproduced at zero hits with a positive control (below).\nVERDICT write_paths: the manifest declares nova/io/sourcemap.py, nova/scripts/identify_source_cocos.py, nova/io/cocos.py, the four benchmarks, tests/test_io_sourcemap.py, tests/test_io_cocos.py, tests/test_mastcocos.py, tests/test_dd_translator.py and the fragment; `git diff --stat b5763ee6b6dbfc0454fc1797477c896f5b508400 1f32c239d79e9e45356db2f3e76ea76041f3d84c` touches exactly eleven paths, every one of them inside that set, and tests/test_io_sourcemap.py is declared but unmodified.\nVERDICT manifest: read at the reviewed head; status complete with both commits listed, the acceptance and refusal partition recorded, and the guard-removal control described in negative_control_note; it carries four record defects (after_suite names a revision its own log header contradicts, both suite commands carry angle-bracket placeholders, the tests field names files rather than a literal command, and the head arm's log for the new test file is truncated), and none of them touches the landed code.\nVERDICT diff: read commit by commit against b5763ee6b; 171dbde40 carries the whole change (sourcemap +282/-0 excluding the import block, nova/io/cocos.py deletion -46, the script -91, the benchmark import moves, and the new 371-line test file) and 1f32c239 is docs-only, adding the 45-line evidence fragment, so the head arm's code revision is 171dbde40.\nCALL_SITES: nova/scripts/identify_source_cocos.py:1594 (sourcemap determine_digits), benchmarks/diiid_ids_machine_description.py, benchmarks/diiid_root_convention_sweep.py, benchmarks/diiid_corpus_conventions.py, benchmarks/cocos_ip_like_adjudication.py (all four import nova_cocos directly, replacing the deleted nova.io.cocos); translate_equilibrium itself has no production caller yet, which section 3 owns\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/io/sourcemap.py:895 builds the equilibrium map from SourceSignal rows over the twelve quantities at :745 and refuses through BlockedSignal at :959, which is the plan's one-entry-point requirement met by extending the conversion owner rather than beside it.\nSCORE evidence: 14\nJUSTIFICATION evidence: the acceptance/refusal partition and the DD4 bit-identity at tests/test_dd_translator.py:228 and :263 measure the done-when, but after_suite's cited log, logs/head_suite_summary.txt, ends at its last per-file row with no bare EXIT= line and its per-file log for the new test file stops at four progress dots.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff b5763ee6b6dbfc0454fc1797477c896f5b508400..1f32c239d79e9e45356db2f3e76ea76041f3d84c changes eleven declared paths and no reader, which is the boundary the brief set by leaving plasma_source.py and every other reader alone for the next section.\nSCORE durability: 17\nJUSTIFICATION durability: the negated-flux refusal at tests/test_dd_translator.py:352 reddens on exactly the mutation the manifest recorded. The digit-refusal assertion at tests/test_io_cocos.py:61 does not, because it checks nova_cocos against nova_cocos.\nSCORE fit: 18\nJUSTIFICATION fit: the new module docstring at nova/io/sourcemap.py:745 and the quantity table follow the existing tuple-of-rows idiom of the file, and no added name carries a plan label, version suffix or ticket reference.\nSCORE reuse: 20\nJUSTIFICATION reuse: translate_equilibrium reuses SourceSignal, SourceSignalMap.create and BlockedSignal rather than adding a type, takes its factors from nova_cocos.convention_transform, and a search over nova/ for a Data Dictionary version to COCOS mapping found no earlier owner.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T082744999453-dd-translator/logs/head_suite_summary.txt:12 blocking: the head arm's summary, which the manifest names as after_suite.log_path, ends at its last per-file row with no bare `EXIT=` last line (the base summary has one at line 10), and its per-file log for the node's central new test file, logs/head_test_dd_translator.log, stops at four progress dots with no pytest summary line and no EXIT line at all, so the arm's exit_status 0 and completed true are unreadable at exactly the place the manifest contract says promotion reads them; this review re-ran that one file at the reviewed head in a fresh process (9 passed, 1 warning in 201.61s, EXIT=0, review-test-dd-translator.log), so the underlying work is green; it is the receipt that has to be repaired.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T082744999453-dd-translator/manifest.md:16 follow-on: after_suite names revision 171dbde40c8ba7844161f44a4f17a277048c5b94 while the log it cites on the same line, logs/head_suite_summary.txt:1, and logs/head_test_dd_translator.log:1 both name 1f32c239d79e9e45356db2f3e76ea76041f3d84c, so the arm's recorded revision disagrees with its own receipt (the two differ by the docs-only fragment, so no measurement moves).\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T082744999453-dd-translator/manifest.md:15 follow-on: baseline_suite and after_suite both state a command carrying an unsubstituted placeholder (`PYTHONPATH=<base-tree>` and `PYTHONPATH=<worktree>`), and the tests field at line 11 is a JSON array of file names rather than the manifest contract's literal command, so promotion's gate receipt is filled from a line that cannot be re-run.\nFINDING tests/test_io_cocos.py:61 follow-on: test_the_table_is_the_only_transcription_of_the_digits repeats verbatim the assertion already made at tests/test_io_cocos.py:44 and compares nova_cocos.identify_convention against nova_cocos's own conventions(), so the two sides move together; the change deleted the assertion that did cross-check independently (cocos_from_digits against the table), leaving the sixteen-entry table checked only against itself despite the docstring's claim about a second transcription.\nFINDING tests/test_dd_translator.py:336 follow-on: `assert safety.apply([row[\"q\"]])[0] == row[\"q\"]` compares a call to the code under test against the very value the test handed it, so it holds whatever apply() does once the factor is one; it carries information only jointly with the independent assertion at line 335, and durability here does not rest on it.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T082744999453-dd-translator/manifest.md:13 follow-on: negative_control_log names logs/negative_control_mutation.log, which is a mutation script whose EXIT=1 line carries no failing test id, while the admission rule reads a red log for a failing test id the head arm does not fail; the passing arm beside it, logs/negative_control.log, is green by design, so neither artefact alone states which id the control reddens.\n",
+  "review_run_id": "r-20261022T095957874627-review-of-dd-translator-1f32c239d79e",
+  "reviewed_base_sha": "b5763ee6b6dbfc0454fc1797477c896f5b508400",
+  "reviewed_head_sha": "1f32c239d79e9e45356db2f3e76ea76041f3d84c",
+  "reviewed_run_id": "r-20261022T082744999453-dd-translator",
+  "scores": {
+    "durability": 17,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T10:26:03.351912+00:00",
+  "total": 107
+}

@@ -15,6 +15,7 @@ import jax.numpy as jnp
 from nova.equilibrium import topology
 from nova.equilibrium.clip_quadrature import (
     ClippedCurrentMoments,
+    _quadrature_from_arrays,
     clipped_support_current_moments,
 )
 from nova.equilibrium.stencil_mesh import FluxFieldPolynomial
@@ -180,6 +181,110 @@ def _normal_rings(vertices, count, centre, form, selected, intervals, segments):
             (straight_count, jnp.where(active.reshape(-1), segments + 2, 0))
         ),
     )
+
+
+def effective_disk(form, geometry, policy_radius, pitch_floor):
+    """Return the effective neighbourhood centre and radius about the saddle.
+
+    The radius is ``max(r_nf, pitch_floor * median pitch)``; the centre is the
+    selected saddle. Both are runtime policy operands, so the caller supplies
+    the configured radius and floor and this owner only composes them.
+    """
+    radius = jnp.maximum(policy_radius, pitch_floor * jnp.median(geometry.pitch))
+    return form.position, radius
+
+
+def _disk_split_moments(
+    rings,
+    counts,
+    centre,
+    pitch,
+    coefficient,
+    axis_flux,
+    boundary_flux,
+    profile,
+    disk_centre,
+    radius,
+    *,
+    keep_inside,
+    force_whole=False,
+):
+    """Signed fan moments restricted to the disk interior or exterior.
+
+    A cut cell books one binary support, ``(C ∩ D ∩ N) ∪ (C ∩ Dᶜ ∩ Q)``. The
+    restriction to each half of the effective disk is applied by weighting the
+    shared clip-quadrature nodes, so both portions are integrated on one node
+    set with one density contract and no copied fan reduction. The exchanged
+    area vanishes with the node spacing, which is what makes the booking
+    continuous across a disk entry or exit.
+
+    ``force_whole`` drops the disk restriction and integrates the whole ring
+    set. It exists only so the continuity check can apply its ``--force-conic
+    -right`` mutation -- the right-hand (exterior) support replaced by the whole
+    ordinary cut at the same density and weight -- and require that mutation to
+    fail the same assertion.
+    """
+    live = counts >= 3
+    centroids = jnp.broadcast_to(centre, (rings.shape[0], 2))
+    points, weights = _quadrature_from_arrays(
+        rings, counts, centroids, live, signed=True
+    )
+    local = (points - centre) / pitch
+    x, y = local[..., 0], local[..., 1]
+    flux = (
+        coefficient[0]
+        + coefficient[1] * x
+        + coefficient[2] * y
+        + coefficient[3] * x * x
+        + coefficient[4] * x * y
+        + coefficient[5] * y * y
+    )
+    span = boundary_flux - axis_flux
+    normalized = (flux - axis_flux) / jnp.where(span != 0, span, 1.0)
+    density = profile.current_density(points[..., 0], normalized)
+    radial = jnp.sum((points - disk_centre) ** 2, axis=-1) <= radius**2
+    keep = jnp.where(keep_inside, radial, ~radial)
+    keep = jnp.where(force_whole, True, keep)
+    weight = jnp.where(keep, weights, 0.0)
+    displacement = points - centre
+    return jnp.stack(
+        (
+            jnp.sum(weight * density),
+            jnp.sum(weight * density * displacement[..., 0]),
+            jnp.sum(weight * density * displacement[..., 1]),
+        )
+    )
+
+
+def composite_cut_moments(
+    vertices, count, centre, pitch, form, conic_coefficient, profile,
+    selected, intervals, conic_selected, axis_flux, boundary_flux,
+    disk_centre, radius, segments, force_conic_right=False,
+):
+    """Book one cut cell over a single support split at the disk boundary.
+
+    Inside the disk the support is the selected normal-form sector; outside it
+    the support is the ordinary quadratic cut. Both portions are integrated on
+    the shared clip-quadrature nodes with the same density, and their moments
+    add because their interiors are disjoint.
+    """
+    normal_rings, normal_counts = _normal_rings(
+        vertices, count, centre, form, selected, intervals, segments
+    )
+    conic_rings, conic_counts, conic_valid = _conic_rings(
+        vertices, count, centre, pitch, conic_coefficient, conic_selected, segments
+    )
+    inside = _disk_split_moments(
+        normal_rings, normal_counts, centre, pitch, conic_coefficient,
+        axis_flux, boundary_flux, profile, disk_centre,
+        radius, keep_inside=True,
+    )
+    outside = _disk_split_moments(
+        conic_rings, conic_counts, centre, pitch, conic_coefficient,
+        axis_flux, boundary_flux, profile, disk_centre,
+        radius, keep_inside=False, force_whole=force_conic_right,
+    )
+    return inside + outside, conic_valid
 
 
 def book(psi, read, geometry, profile, quadrature=Quadrature()):

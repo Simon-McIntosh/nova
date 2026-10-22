@@ -24,7 +24,7 @@
   <title>DD COCOS Ingest | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="37">
+<meta name="plan-version" content="38">
 <meta name="plan-modified" content="2026-10-22">
 <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;dd-cocos-ingest#s1&quot;],&quot;s3&quot;:[&quot;dd-cocos-ingest#s2&quot;],&quot;s4&quot;:[&quot;dd-cocos-ingest#s3&quot;],&quot;s5&quot;:[&quot;dd-cocos-ingest#s1&quot;,&quot;dd-cocos-ingest#s2&quot;]}">
 </head>
@@ -110,6 +110,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-close-s2" data-who="reckon-build" data-when="2026-10-22T10:50:00Z">
     <div class="r-comment-body"><p>§2 landed at merge <code>d217e6b6b</code> (node dd-translator, head <code>1f32c239d</code>, review with no blocking finding once the coordinator re-ran its gate). <code>translate_equilibrium</code> on <code>nova/io/sourcemap.py</code> translates DD3 equilibrium reads to COCOS 17 and passes DD4 through, with <code>determine_digits</code> moved there from the identification script.</p><ul><li>Refused by name, each with the contradicting digit stated: DINA 105014/1 on σ_Bp and 105013/1 on σ_ρθφ.</li><li>Accepted on every slice above 1 MA: DINA 105052/1 and 105069/3, and CORSICA 130506/6.</li><li>DD4 passthrough: the DD 4.1.0 layers of <code>iter_corsica_130506</code> pass through with every factor exactly 1.0, and 130506/403 agrees with them in sign at shared times.</li><li>Deleted: <code>cocos_from_digits</code> and the <code>nova/io/cocos.py</code> shim.</li><li>Negative control: negating ψ on a conforming DD3 slice is refused by name.</li></ul><p>The gate's six files pass at the tip and at the merged head: 87 tests. The readers move onto the translator in §3. Record: <a href="/nova/evidence/fragments/dd-cocos-ingest/dd-translator">dd-translator</a>.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261022T082744999453-dd-translator" data-who="reckon-build" data-when="2026-10-22T09:56:05Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/dd-cocos-ingest/dd-translator.html @ 1f32c239d</p></div>
 </div>
 </section>
 </main>

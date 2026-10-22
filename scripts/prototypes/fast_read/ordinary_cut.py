@@ -185,6 +185,19 @@ past its capacity of 16.
 """
 
 
+BAND_BATCH = 16
+"""Cells one dispatch of the band trace covers.
+
+The composite materialises its support over every ring, every quadrature node
+and every clip slot of each cell it traces, so one dispatch over the whole band
+holds a ``(cells, rings, nodes, slots)`` array whose leading axis is the band
+capacity. On the limited 550 carrier that is 39.87 GiB for a single array at
+capacity 160. Walking the band in fixed batches inside one compiled loop keeps
+the support each cell books unchanged while one dispatch holds ``BAND_BATCH``
+cells' worth of it.
+"""
+
+
 def dense_cells(geometry, reading):
     """Return the whole cells the ordinary bell route covers.
 
@@ -204,7 +217,13 @@ def booking_band(geometry, reading):
 
 
 def composite_cut_moments(
-    geometry, reading, profile, sigma, segments=8, capacity=BAND_CAPACITY
+    geometry,
+    reading,
+    profile,
+    sigma,
+    segments=8,
+    capacity=BAND_CAPACITY,
+    batch=BAND_BATCH,
 ):
     """Book every cut cell over (C∩D∩N) ∪ (C∩Dᶜ∩Q) through the shared owner.
 
@@ -251,17 +270,32 @@ def composite_cut_moments(
     band = booking_band(geometry, reading)
     count = jnp.sum(band, dtype=jnp.int32)
     filled = count <= capacity
+    if capacity % batch:
+        raise ValueError("band capacity must divide into the batch width")
     indices = jnp.nonzero(band, size=capacity, fill_value=0)[0]
-    packed = jax.vmap(one)(indices)
+    width = jnp.result_type(geometry.pitch, 1.0)
+
+    def step(index, packed):
+        cells = jax.lax.dynamic_slice(indices, (index * batch,), (batch,))
+        return packed.at[index].set(jax.vmap(one)(cells))
+
+    packed = jax.lax.fori_loop(
+        0,
+        capacity // batch,
+        step,
+        jnp.zeros((capacity // batch, batch, MOMENT_SLOTS), dtype=width),
+    ).reshape(capacity, MOMENT_SLOTS)
     live = jnp.arange(capacity) < jnp.where(filled, count, 0)
     moments = jnp.zeros((len(centre), MOMENT_SLOTS), dtype=packed.dtype)
     moments = moments.at[indices].add(jnp.where(live[:, None], packed, 0.0))
     return moments, filled
 
 
-def bell_moments(geometry, reading, profile, sigma, capacity=BAND_CAPACITY):
+def bell_moments(
+    geometry, reading, profile, sigma, capacity=BAND_CAPACITY, batch=BAND_BATCH
+):
     """Book the band cells and report whether the band fitted its capacity."""
     moments, filled = composite_cut_moments(
-        geometry, reading, profile, sigma, capacity=capacity
+        geometry, reading, profile, sigma, capacity=capacity, batch=batch
     )
     return moments, filled, reading.booking_cells

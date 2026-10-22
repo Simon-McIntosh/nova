@@ -7,6 +7,13 @@
   "call_sites": [],
   "completed_at": "2026-10-22T07:59:10.014Z",
   "dispatched_at": "2026-10-22T07:51:23Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-dd-cocos-census-9c256959d41f",
+      "recorded_at": "2026-10-22T08:04:59.570645+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/research/dd-cocos-census.html",

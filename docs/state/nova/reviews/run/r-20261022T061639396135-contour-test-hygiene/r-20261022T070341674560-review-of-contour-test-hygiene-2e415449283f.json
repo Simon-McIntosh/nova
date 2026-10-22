@@ -7,6 +7,13 @@
   ],
   "completed_at": "2026-10-22T07:13:43.944Z",
   "dispatched_at": "2026-10-22T07:04:14Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-contour-test-hygiene-2e415449283f",
+      "recorded_at": "2026-10-22T07:45:00.989266+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_contour_tree_sparse_build.py",

@@ -10,6 +10,13 @@
   "figures_reviewed": [
     "docs/figures/iter-passive-plasma-circuit/vs3-jacket-positive-linkage.svg"
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "vs3-linkage-repair",
+      "recorded_at": "2026-10-22T06:58:30.439195+00:00"
+    }
+  },
   "findings": [
     {
       "evidence": "commit 2279fe568 changes the SVG by four lines and moves only the two text_37/text_38 translate x values from 728.48559 to 647.5; the file's own matplotlib render stamp still reads dc:date 2026-10-22T03:32:45.260866, older than that commit (05:07), so no renderer wrote the file after the edit; and the annotation connector in patch_14 still starts at (851.078, 325.080), the position matplotlib computed for the old text box, instead of following its caption. Independently reached by the peer text review of the same head at docs/state run record finding line 1371.",

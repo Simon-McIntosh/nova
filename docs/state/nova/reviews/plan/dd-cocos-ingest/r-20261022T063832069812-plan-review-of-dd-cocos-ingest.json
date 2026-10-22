@@ -1,0 +1,60 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-22T06:49:59.121Z",
+  "dispatched_at": "2026-10-22T06:38:52Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/dd-cocos-ingest.html:54",
+      "id": "anchors_resolve-1",
+      "reason": "the node must be told which file and which DD version its DD3 CORSICA read comes from, or the section's central done-when passes on an arm that does not exercise the translator it exists to prove. (The same DD3/CORSICA assumption is carried into s5's done-when (2) table and into iter-passive-plasma-circuit \u00a76, so the answer is needed before either dispatches.)",
+      "text": "s2 done-when (1) makes CORSICA 130506/6 (stated \"DD 3.41.0\") the case on which the DD3 translator is demonstrated, but the repository's only records of CORSICA 130506 give DD 4.1.0 \u2014 `tests/data-manifest.json:50` (`iter_corsica_130506`, both layers at 4.1.0) and `docs/evidence/fragments/forward-profile-validator-set/fpv-layer-fetch.html:15` (\"CORSICA 130506, DINA 105027 and ASTRA 131046 \u2026 dd_version (4.1.0 throughout)\") \u2014 and the plan names neither a path nor a version for a DD3 CORSICA source; under the plan's own ruling (snapshot line 34) DD 4.1.0 is COCOS 17, so on the fixture the repo holds, done-when (1) is satisfied by the DD4 passthrough arm and the \"analytic COCOS 11 \u2192 17 mapping\" comparison is never made.",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/dd-cocos-ingest.html:71",
+      "id": "reasoning-1",
+      "reason": "the formula the node implements is undetermined until the denominator's scope is fixed, and the plan's claim that \"each row reads directly against the parity chain's figures\" holds only for the slice-wide max.",
+      "text": "s5 takes the residual into \"a band inside the boundary\" yet describes its second reported form as \"the parity chain's own normalisation, RMS(j_\u03c6,profile \u2212 j_\u03c6,grid) / max|j_\u03c6,grid| over the slice\"; the parity chain's denominator is the maximum over its own scored cells (`nova/imas/mast_parity_chain.py:489`, `reference_scale = float(np.max(np.abs(reference)))` where `reference = grid_current_density[finite]`), so once the numerator is restricted to a band the denominator's scope \u2014 the slice-wide max or the band's \u2014 is unstated, and the two differ by an unstated factor.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/dd-cocos-ingest.html:71",
+      "id": "reasoning-2",
+      "reason": "\u00a75 replaces the survey's map-implied current's operator with the parity chain's validated operator and factor whatever the original cause was, so an unproven attribution does not change what the node builds; it only leaves the diagnosis uncheckable by a later reader.",
+      "text": "s5 attributes the survey's \"uniform factor of 225 to 300 in every case, DINA included\" to \"an operator artefact\" without citing the survey or the operator that produced it, and a factor that varies from 225 to 300 across cases is per-case constant rather than one uniform constant, so the artefact is not fully characterised by the text.",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "4edca703b734bb4770527878ede05e3349a495fa84a4a076234dc82b430ea31e",
+  "plan_slug": "dd-cocos-ingest",
+  "plan_version": 20,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261022T063832069812-plan-review-of-dd-cocos-ingest",
+  "reviewed_blob_sha": "d253dec35e8789c534f79fc2f014726345fc619d",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 s2's done-when names CORSICA 130506/6 as DD 3.41.0, while the repository's two records of CORSICA 130506 give DD 4.1.0.",
+    "done_when": "pass \u2014 each of s2's three clauses names a measurable arm (per-quantity match against the analytic COCOS 11 \u2192 17 mapping, the refusal/acceptor lists over slices above 1 MA, before/after search hit counts of zero) and carries a literal negative control (\"negate \u03c8 on a conforming DD3 slice and the read is refused\"); s5's three clauses carry a literal negative control (edge-band FF\u2032 perturbation reported inconsistent beyond a threshold fixed before any IDS row is read).",
+    "evidence_paths": "pass \u2014 s5's table and s1's census land in the committed `docs/research/dd-cocos-census.html`; no scratchpad or node-local temporary path is named as an evidence destination, and the scratch file s2 plants is a control, not the evidence.",
+    "naming": "pass \u2014 no plan label, stage name, ticket number or version tag enters a symbol, file or comment; COCOS 11 and 17 are domain conventions, and the cited owners (`determine_digits`, `flux_loop_two_pi_ratio`, `cocos_from_digits`, `nova_cocos.identify_convention`, `convention_transform`) all exist under those names.",
+    "reasoning": "two findings \u2014 s5 takes the residual into a band but reports the parity chain's slice-wide normalisation without fixing the denominator's scope; and it attributes the survey's 225\u2013300 factor to an uncited operator artefact.",
+    "single_goal": "pass \u2014 s2 is one deliverable, the DD3 translator with DD4 passthrough and refusal, whose digits-table consolidation is the means by which it is built on the one owner \u00a71 names rather than a second table; s5 is one measure.",
+    "wiring": "pass \u2014 s2 carries `data-links=\"dd-cocos-ingest#s1\"` and s5 `data-links=\"dd-cocos-ingest#s1,dd-cocos-ingest#s2\"`, matching `plan-section-depends-on` `{s2:[s1], s3:[s2], s4:[s3], s5:[s1,s2]}`, and f-ddc-001's stated ordering (\u00a75 needs \u00a72's translator and \u00a71's census file, and runs beside \u00a73) agrees with those edges."
+  },
+  "section_digests": {
+    "_document": "0944b41fbee062214508f8e371bdb6d46b75eb62d96e4606b5e91e6893187ad0",
+    "s0": "2407e28f2db9011d45035f6b86c463b1b4e36000c85f35e7d35de056f2cbb5d9",
+    "s1": "8493846bddbd37e17766c3f28357c4dec07fde5dad711cf4d8096db87e577f89",
+    "s2": "41df9d909e36e41bf64a34d02d9a6d86ebc74637388021b565f99033b0235efe",
+    "s3": "c2fc45691180bf97593adce2764029469a1131b8009f469996a577e1ec90a479",
+    "s4": "4575ae7595a93b2959851d0b00e53208977b19cf45b52e80902f78998d5a51cb",
+    "s5": "24355a2a45f9f4b2ee59560b75f5b172a1e2361dbe6a0c17cb157cb208a3ae8f"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T06:53:32.956109+00:00"
+}

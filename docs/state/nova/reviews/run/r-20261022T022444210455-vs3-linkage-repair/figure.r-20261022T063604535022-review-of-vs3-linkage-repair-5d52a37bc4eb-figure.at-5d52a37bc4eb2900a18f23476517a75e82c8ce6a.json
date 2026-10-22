@@ -1,0 +1,65 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "A figure review runs no suite, so no base/head arm was measured and no delta is claimed; the neutral values the record shape requires are recorded deliberately rather than left absent.",
+  "attachments_reviewed": [
+    "image-0.png"
+  ],
+  "completed_at": "2026-10-22T06:53:59.400Z",
+  "dispatched_at": "2026-10-22T06:36:32Z",
+  "figures_reviewed": [
+    "docs/figures/iter-passive-plasma-circuit/vs3-jacket-positive-linkage.svg"
+  ],
+  "findings": [
+    {
+      "evidence": "commit 2279fe568 changes the SVG by four lines and moves only the two text_37/text_38 translate x values from 728.48559 to 647.5; the file's own matplotlib render stamp still reads dc:date 2026-10-22T03:32:45.260866, older than that commit (05:07), so no renderer wrote the file after the edit; and the annotation connector in patch_14 still starts at (851.078, 325.080), the position matplotlib computed for the old text box, instead of following its caption. Independently reached by the peer text review of the same head at docs/state run record finding line 1371.",
+      "file": "docs/figures/iter-passive-plasma-circuit/vs3-jacket-positive-linkage.svg",
+      "line": 1371,
+      "severity": "follow-on",
+      "summary": "the caption was re-anchored by hand-editing two text-transform x values rather than re-rendering the figure, so the canvas-edge check the project's save path enforces never ran on the delivered file and the next caption edit can silently reintroduce the clipping this change fixed."
+    },
+    {
+      "evidence": "the conductor leader's data-side endpoint is svg (296.637, 269.624), radius 23.60 mm about the axis origin, against the blue annulus outer radius 23.00 mm; a pixel walk from that tip finds white at 2-3 px and solid blue from 4 px inward, so the tip clears the band by about 3 px at 1400 px width. Continuing outward the same walk crosses white for 6-12 px and meets the red jacket band at 15 px, which is the jacket band the line is drawn across. The jacket-annulus leader (line 557) stops about 5 px outside the red outer edge by the same measure.",
+      "file": "docs/figures/iter-passive-plasma-circuit/vs3-jacket-positive-linkage.svg",
+      "line": 911,
+      "severity": "follow-on",
+      "summary": "the conductor-annulus leader stops a few rendered pixels short of the blue band it names and then crosses the red jacket band on its way to its caption, so at close inspection the blue leader reads as if it were pointing at the jacket ring."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "RUBRIC legibility: passes: at 1400x640 both panels read at a glance -- the two concentric annuli and the two nested squares are distinguishable immediately, each caption is set in the colour of the shape it names, the axis tick labels clear ~12 px, and the three leaders attach to the geometry they describe.\nRUBRIC data_ink: passes: the drawn geometry carries the weight -- two solid annular bands (0.6 mm wide in the drawing's own scale does not apply; they are the radial extents 16.95-23.0 mm and 26.5-29.5 mm) and two 2.4 pt square outlines on white, with no gradient, no colour ramp and no fill beneath the data.\nRUBRIC decoration: passes: nothing decorative is drawn -- no gridlines, no background fill, no shading band, no drop shadow and no styled theme; the only fill in the file is the figure page's own white patch.\nRUBRIC contrast: passes: every text colour clears the white background -- the jacket red #b4553f measures 4.87:1 and the conductor blue #2f6f9f 5.39:1 against white, both above the 4.5:1 body-text floor, and all tick and axis labels are black.\nRUBRIC table_form: passes: the figure states a spatial relationship that a table cannot -- that the jacket square (22.97 mm) sits inside the conductor square (27.56 mm) it should surround, against the true annuli where the jacket (26.5-29.5 mm) encloses the conductor (16.95-23.0 mm); the five lengths appear only as labels on the drawn geometry.\nRUBRIC label_collision: passes: nothing is clipped or overlapping -- the content bounding box (x 20..1288, y 61..576 of a 1400x640 canvas) leaves 111 px at the right and 61 px at the top, no non-white pixel touches any canvas edge, and the caption the earlier review found cut at the canvas edge now reads in full, including 'surround'.",
+  "review_run_id": "r-20261022T063604535022-review-of-vs3-linkage-repair-5d52a37bc4eb-figure",
+  "reviewed_base_sha": "48c4c9d104edfa2cdd8d9b08d0883e3da02d00fe",
+  "reviewed_commits": [
+    "f763dfb40",
+    "2279fe568",
+    "4d9dcd767",
+    "268201640",
+    "b3cb02ff3",
+    "ad4874261",
+    "5d52a37bc"
+  ],
+  "reviewed_head_sha": "5d52a37bc4eb2900a18f23476517a75e82c8ce6a",
+  "reviewed_run_id": "r-20261022T022444210455-vs3-linkage-repair",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "passes: every text colour clears the white background -- the jacket red #b4553f measures 4.87:1 and the conductor blue #2f6f9f 5.39:1 against white, both above the 4.5:1 body-text floor, and all tick and axis labels are black.",
+    "data_ink": "passes: the drawn geometry carries the weight -- two solid annular bands (0.6 mm wide in the drawing's own scale does not apply; they are the radial extents 16.95-23.0 mm and 26.5-29.5 mm) and two 2.4 pt square outlines on white, with no gradient, no colour ramp and no fill beneath the data.",
+    "decoration": "passes: nothing decorative is drawn -- no gridlines, no background fill, no shading band, no drop shadow and no styled theme; the only fill in the file is the figure page's own white patch.",
+    "label_collision": "passes: nothing is clipped or overlapping -- the content bounding box (x 20..1288, y 61..576 of a 1400x640 canvas) leaves 111 px at the right and 61 px at the top, no non-white pixel touches any canvas edge, and the caption the earlier review found cut at the canvas edge now reads in full, including 'surround'.",
+    "legibility": "passes: at 1400x640 both panels read at a glance -- the two concentric annuli and the two nested squares are distinguishable immediately, each caption is set in the colour of the shape it names, the axis tick labels clear ~12 px, and the three leaders attach to the geometry they describe.",
+    "table_form": "passes: the figure states a spatial relationship that a table cannot -- that the jacket square (22.97 mm) sits inside the conductor square (27.56 mm) it should surround, against the true annuli where the jacket (26.5-29.5 mm) encloses the conductor (16.95-23.0 mm); the five lengths appear only as labels on the drawn geometry."
+  },
+  "rubric_lines": [
+    "RUBRIC legibility: passes: at 1400x640 both panels read at a glance -- the two concentric annuli and the two nested squares are distinguishable immediately, each caption is set in the colour of the shape it names, the axis tick labels clear ~12 px, and the three leaders attach to the geometry they describe.",
+    "RUBRIC data_ink: passes: the drawn geometry carries the weight -- two solid annular bands (0.6 mm wide in the drawing's own scale does not apply; they are the radial extents 16.95-23.0 mm and 26.5-29.5 mm) and two 2.4 pt square outlines on white, with no gradient, no colour ramp and no fill beneath the data.",
+    "RUBRIC decoration: passes: nothing decorative is drawn -- no gridlines, no background fill, no shading band, no drop shadow and no styled theme; the only fill in the file is the figure page's own white patch.",
+    "RUBRIC contrast: passes: every text colour clears the white background -- the jacket red #b4553f measures 4.87:1 and the conductor blue #2f6f9f 5.39:1 against white, both above the 4.5:1 body-text floor, and all tick and axis labels are black.",
+    "RUBRIC table_form: passes: the figure states a spatial relationship that a table cannot -- that the jacket square (22.97 mm) sits inside the conductor square (27.56 mm) it should surround, against the true annuli where the jacket (26.5-29.5 mm) encloses the conductor (16.95-23.0 mm); the five lengths appear only as labels on the drawn geometry.",
+    "RUBRIC label_collision: passes: nothing is clipped or overlapping -- the content bounding box (x 20..1288, y 61..576 of a 1400x640 canvas) leaves 111 px at the right and 61 px at the top, no non-white pixel touches any canvas edge, and the caption the earlier review found cut at the canvas edge now reads in full, including 'surround'."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T06:52:00Z",
+  "total": null
+}

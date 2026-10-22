@@ -24,7 +24,24 @@
   "plan_slug": "dd-cocos-ingest",
   "plan_version": 45,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-22T14:13:34.801668+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-22T14:13:34.801668+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/dd-cocos-ingest/r-20261022T134849894489-plan-review-of-dd-cocos-ingest.json",
   "review_run_id": "r-20261022T134849894489-plan-review-of-dd-cocos-ingest",
   "reviewed_blob_sha": "10310f118f5612868e6a37073775cc0dd03115d9",
   "rubric": "content",

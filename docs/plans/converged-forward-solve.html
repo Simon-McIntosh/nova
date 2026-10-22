@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="527">
+<meta name="plan-version" content="528">
 <meta name="plan-modified" content="2026-10-22">
 </head>
 <body>
@@ -695,6 +695,11 @@
     <h4 class="r-fu-title">Book each cut cell over one support split at the normal-form neighbourhood boundary</h4>
     <div class="r-fu-body"><p>Implements the 2026-10-21 ruling (c-20261021-cut-cell-split-ruling) on the read-repair chain's tip, once it lands. The owners are named in the research record: support selection in <code>kernel.py::read</code>; the branch portions in <code>topology.py::_normal_form_cell_fragments</code>; the disk intersection beside <code>current._normal_rings</code> and <code>_conic_rings</code>; and <code>program.py::_saddle_moments</code> and <code>ordinary_cut.py::bell_moments</code> consuming one support and density contract through <code>clip_quadrature._quadrature_from_arrays</code>. A continuity test moves one cell across the disk-entry, disk-exit, owner-transfer and selector thresholds, with the literal mutation <code>--force-conic-right</code> as its red arm.</p></div>
     <pre class="r-fu-prompt">/reckon-build converged-forward-solve §3</pre>
+    </article>
+<article class="r-fu" data-id="f-cfs-one-backtracking-ladder" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-build" data-written-at="2026-10-22 06:20" data-recommends-skill="/reckon-build converged-forward-solve §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">One backtracking ladder for the root polish and the prototype solver</h4>
+    <div class="r-fu-body"><p>The review of the read-repair chain at <code>c84c432e9</code> found the backtracking factor ladder declared twice. <code>nova/equilibrium/fixed_points.py</code> re-declares an eight-entry tuple beside the owned six-entry <code>_BACKTRACKING_FACTORS</code> in <code>nova/equilibrium/fixed_point.py</code>, which <code>reduced_newton.py</code> already imports. A third copy of the step selection sits in <code>scripts/prototypes/fast_map_production/solver.py</code>, lines 655 to 672. Unifying the ladders changes the axis root polish that repaired the limited 553 floor. The node therefore runs the H200 certified rows (limited 553, limited 2105 and diverted 550 at or below 1e-12, with Taylor slopes in [1.9, 2.1]) and reports the trace count before and after. It runs on the cut-cell split's tip, because both nodes move those rows.</p></div>
+    <pre class="r-fu-prompt">/reckon-build converged-forward-solve §2</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">

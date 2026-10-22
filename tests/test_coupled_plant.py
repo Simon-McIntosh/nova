@@ -550,7 +550,7 @@ def test_real_sectioned_set_reduction_is_within_one_percent(tmp_path):
 #: reference it replaces sat at 3.88%.  It is not widened to admit the
 #: box-against-annulus difference, which is a representation defect rather than
 #: sectioning error.
-SECTIONING_SELF_MAX_FRACTION = 0.005
+SECTIONING_SELF_MAX_FRACTION = 0.004
 
 
 def test_real_sectioned_self_holds_the_unsectioned_box_check():
@@ -615,7 +615,7 @@ def test_real_sectioned_self_holds_the_unsectioned_box_check():
         "sectioning self fraction by coil =",
         dict(zip(coil_names, np.round(self_fraction, 6), strict=True)),
     )
-    assert float(np.max(self_fraction)) < SECTIONING_SELF_MAX_FRACTION < 0.005
+    assert float(np.max(self_fraction)) < SECTIONING_SELF_MAX_FRACTION
 
 
 def _generic_source(n_slices: int = 3, *, provenance: str = "synthetic reconstruction"):

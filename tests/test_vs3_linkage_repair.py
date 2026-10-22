@@ -47,7 +47,7 @@ PINNED_PLANT_SHA256 = "7800a4d8db5ea452fca7e0a18179f8939f85e08e8503b61e4e1bbee8d
 
 #: the single-conductor-in-jacket dense coaxial reference the vertical coils'
 #: bare inductances are stated against [H], and the tolerance on them.
-COAXIAL_REFERENCE_H = 4.1581e-05
+COAXIAL_REFERENCE_H = 4.370137793331819e-05
 COAXIAL_TOLERANCE = 0.03
 
 #: machine-description cross-section of one VS3 conductor annulus [m]
@@ -123,17 +123,18 @@ def test_vertical_coil_bare_inductance_matches_the_coaxial_reference(label):
 def test_coaxial_reference_is_the_repository_closed_form():
     """The reference the tolerance is stated against agrees with the closed form.
 
-    Recorded pre-repair evidence: the closed form gives 4.2054e-5 H at the
-    annulus's geometric-mean wire radius, 1.1 per cent from the dense coaxial
-    sum of 4.1581e-5 H that ``COAXIAL_REFERENCE_H`` records.  The two are the
-    same physical quantity at the same radius, so this is what ties the stated
-    tolerance to a form the repository already owns.
+    The closed form at the annulus's geometric-mean wire radius gives the value
+    ``COAXIAL_REFERENCE_H`` records, so the tolerance is stated against a form
+    the repository already owns.  Recorded pre-repair the constant held a dense
+    filament sum of 4.1581e-5 H, which the same closed form exceeded by 5.1 per
+    cent: the two are the same physical quantity at the same radius, and the
+    constant now carries the form the repository computes.
     """
     radius = 6.0
     closed_form = float(
         plasma_self_inductance(radius, np.sqrt(np.prod(CONDUCTOR_ANNULUS)))
     )
-    assert closed_form == pytest.approx(4.2054e-05, rel=0.01)
+    assert closed_form == pytest.approx(COAXIAL_REFERENCE_H, rel=0.01)
 
 
 def _pre_repair_copy(scratch: Path) -> None:

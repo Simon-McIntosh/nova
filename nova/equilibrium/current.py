@@ -79,6 +79,12 @@ def _conic_rings(vertices, count, centre, pitch, coefficient, selected, segments
     return rings, jnp.where(live, rings.shape[1], 0), fragments.valid
 
 
+def _closed_normal_rings(loop, vertices, count):
+    """Return the clipped ring of the axis-owned closed normal-form lobe."""
+    polygon, size = topology.clip_normal_form_loop(loop, vertices, count)
+    return polygon[None], size[None]
+
+
 def _normal_rings(vertices, count, centre, form, selected, intervals, segments):
     """Carry selected sector edges and cubic rays as signed fan rings.
 

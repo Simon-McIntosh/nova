@@ -81,6 +81,43 @@ def test_analytic_axis_and_saddle_converge_in_small_mesh():
     assert np.all(result.status == fixed.FixedPointStatus.CONVERGED)
 
 
+def test_backtracking_reaches_axis_after_newton_overshoot():
+    cache = polynomial_cache(True)
+    seed = jnp.asarray(((0.13, 0.09),))
+    result = fixed.solve(
+        cache, jnp.zeros((1, 3)), seed, seed, jnp.asarray(1.0), iterations=5
+    )
+    assert result.valid[0]
+    assert not result.retried[0]
+    assert result.iterations[0] <= 5
+    np.testing.assert_allclose(result.position[0], (0.13, -0.21), atol=1e-10)
+    assert np.linalg.norm(result.jet.gradient[0]) < 1e-10
+
+
+def test_root_backtracking_refuses_nonfinite_out_of_domain_trial():
+    class BoundedQuadratic:
+        def contains(self, point):
+            return (point[0] >= 0.2) & (point[0] <= 1.0)
+
+        def evaluate(self, point):
+            inside = self.contains(point)
+            return FieldJet(
+                jnp.where(inside, 0.5 * jnp.dot(point, point), jnp.nan),
+                jnp.where(inside, point, jnp.full_like(point, jnp.nan)),
+                jnp.eye(2, dtype=point.dtype),
+            )
+
+    seed = jnp.asarray(((0.3, 0.0),))
+    position, jet, _, counts = jax.jit(
+        lambda initial: fixed._adaptive(
+            BoundedQuadratic(), initial, jnp.asarray(1.0), 1
+        )
+    )(seed)
+    np.testing.assert_allclose(position[0], (0.225, 0.0), atol=1e-14, rtol=0)
+    assert np.all(np.isfinite(jet.gradient))
+    assert counts[0] == 1
+
+
 def test_wrong_axis_retries_previous_fixed_point():
     cache = polynomial_cache(True)
     previous = jnp.asarray(((0.13, -0.21), (0.13, -0.21 + 2 / 3)))
@@ -157,9 +194,13 @@ def test_coarse_replay_never_accepts_saddle_as_axis(state):
             jnp.asarray(data["pitch"].mean()),
             iterations=24,
         )
-    assert not result.valid[0], f"coarse state {state} accepted a saddle as the axis"
-    assert result.status[0] == fixed.FixedPointStatus.WRONG_ROOT
-    assert result.retried[0]
+    if result.valid[0]:
+        assert result.status[0] == fixed.FixedPointStatus.CONVERGED
+        assert np.all(np.linalg.eigvalsh(result.jet.hessian[0]) < 0)
+        assert np.linalg.norm(result.jet.gradient[0]) < 1e-9
+    else:
+        assert result.status[0] == fixed.FixedPointStatus.WRONG_ROOT
+        assert result.retried[0]
 
 
 def test_maintenance_slides_bounded_window_and_reuses_overlap(monkeypatch):
@@ -250,6 +291,7 @@ def test_closed_form_equilibrium_on_small_hex_mesh(kind):
 
 
 def test_newton_trajectory_leaves_rows_without_building(monkeypatch):
+    """An attempted row exit leaves the accepted iterate in the cached domain."""
     first = polynomial_cache(True)
     first_nodes = np.asarray(first.nodes)
     nodes = np.concatenate((first_nodes, first_nodes + (1.5, 0.0)))
@@ -272,10 +314,14 @@ def test_newton_trajectory_leaves_rows_without_building(monkeypatch):
     monkeypatch.setattr(fixed, "_row_program", forbidden)
     seed = jnp.asarray(((0.2, -0.21),))
     result = fixed.solve(cache, jnp.zeros((1, 3)), seed, seed, jnp.asarray(1.0))
-    assert result.iterations[0] == 1
-    assert result.position[0, 0] > 0.75
+    field = fixed._CachedField(
+        cache.mesh, cache.lookup, cache.rows, jnp.zeros((1, 3)), cache.exterior
+    )
+    assert result.iterations[0] == 12
+    assert bool(field.contains(result.position[0]))
+    assert np.all(np.isfinite(result.jet.gradient))
     assert not result.valid[0]
-    assert result.status[0] == fixed.FixedPointStatus.NEEDS_ROWS
+    assert result.status[0] == fixed.FixedPointStatus.NOT_CONVERGED
 
 
 def _path_carrier():
@@ -313,35 +359,68 @@ def _path_roots(geometry, levels):
     )
 
 
-def test_path_admission_rejects_the_wall_contact_root():
-    """The bounding saddle of the axis path is admitted, not the higher root.
+def test_path_admission_rejects_the_wall_contact_root(monkeypatch):
+    """The axis component reaches its saddle before a higher private wall root."""
+    from nova.equilibrium import contour_tree, topology
+    from scripts.prototypes.fast_map_production.kernel import _first_tree_events
 
-    The wall-contact root carries a level above the gate by construction: its
-    extremum ties the boundary level, so ranking saddles by level would admit it
-    and step the booked current. Admission ranks each saddle by the axis-path
-    passage to its own cell minus its own level, so the wall root, whose cell the
-    axis reaches only at the gate level (-0.5) and not at its own (+0.3), loses.
-    """
-    from scripts.prototypes.fast_map_production.kernel import _merge_path_saddle
+    levels = jnp.asarray([1.0, -0.5, 0.3, -0.6])
+    tree = contour_tree.ContourTreeArrays(
+        node_vertex=jnp.arange(4),
+        node_psi=levels,
+        node_valid=jnp.ones(4, bool),
+        critical_type=jnp.asarray([2, 1, 1, 1]),
+        edges=jnp.asarray([[0, 1], [1, 2], [1, 3]]),
+        edge_valid=jnp.ones(3, bool),
+        overflow=jnp.asarray(False),
+    )
+    points = jnp.asarray([[0.0, 0.0], [1.0, 0.0], [2.0, 0.0], [1.0, 1.0]])
+    geometry = SimpleNamespace(
+        contour_mesh=SimpleNamespace(
+            vertex_rz=points,
+            vertex_is_wall=jnp.asarray([False, False, True, True]),
+            vertex_valid=jnp.ones(4, bool),
+            edges=jnp.asarray([[0, 1], [1, 2], [1, 3]]),
+            edge_valid=jnp.ones(3, bool),
+        ),
+        contour_sample_points=points,
+        contour_sources=jnp.arange(4)[:, None],
+        contour_weights=jnp.ones((4, 1)),
+        pitch=jnp.ones(1),
+    )
+    monkeypatch.setattr(contour_tree, "build_contour_tree", lambda *args: tree)
+    monkeypatch.setattr(topology, "_point_values", lambda *args: levels)
+    resolved = True
 
-    geometry = _path_carrier()
-    ceiling = jnp.asarray([1.0, 0.5, -0.5, -0.5, -2.0])
-    levels = np.array([1.0, -0.5, 0.3])
-    roots = _path_roots(geometry, levels)
-    saddles = jnp.asarray([True, True])
-    sigma = jnp.asarray(1.0)
+    def polish(*args):
+        return SimpleNamespace(
+            position=points[1],
+            jet=FieldJet(levels[1], jnp.zeros(2), jnp.diag(jnp.asarray([-1.0, 1.0]))),
+            valid=jnp.asarray(resolved),
+        )
 
-    index, score = _merge_path_saddle(geometry, roots, saddles, sigma, ceiling)
-    # Root 1 (the gate) is admitted; root 2 (the wall contact) is not.
-    assert int(index) == 0, f"admitted saddle index {int(index)}"
-    assert float(score) == levels[1], f"admitted level {float(score)}"
+    monkeypatch.setattr(topology, "stationary_read", polish)
+    saddle, saddle_live, wall, wall_live, valid = _first_tree_events(
+        None, geometry, points[0], jnp.asarray(1.0), None
+    )
+    assert bool(valid) and bool(saddle_live) and bool(wall_live)
+    np.testing.assert_array_equal(saddle.position, points[1])
+    np.testing.assert_array_equal(wall, points[3])
+    assert int(jnp.argmax(levels[1:3])) == 1  # Level ranking picks the wrong root.
 
-    # Falsification: an argmax over saddle levels, the behaviour the admission
-    # replaced, admits the wall-contact root and so the assertion would fail.
-    wall_level = sigma * roots.jet.value
-    argmax_index = int(jnp.argmax(jnp.where(saddles, wall_level[1:], -jnp.inf)))
-    assert argmax_index != int(index)
-    assert argmax_index == 1
+    resolved = False
+    _, saddle_live, _, wall_live, valid = _first_tree_events(
+        None, geometry, points[0], jnp.asarray(1.0), None
+    )
+    assert bool(wall_live) and not bool(saddle_live) and not bool(valid)
+
+    wall_first = replace(tree, edges=jnp.asarray([[0, 2], [2, 1], [1, 3]]))
+    monkeypatch.setattr(contour_tree, "build_contour_tree", lambda *args: wall_first)
+    _, saddle_live, wall, wall_live, valid = _first_tree_events(
+        None, geometry, points[0], jnp.asarray(1.0), None
+    )
+    assert bool(valid) and bool(wall_live) and not bool(saddle_live)
+    np.testing.assert_array_equal(wall, points[2])
 
 
 def test_psi_rounding_enclosure_bounds_the_fit():

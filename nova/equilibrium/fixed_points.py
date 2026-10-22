@@ -2,8 +2,9 @@
 
 ``maintain_rows`` builds or slides a row window outside the compiled solve.
 ``solve`` contracts only the iterate triangle's rows and returns NEEDS_ROWS
-without building anything when its trajectory exits that window. All numerical
-mesh, row and moment operands remain runtime arguments to the device program.
+without building anything when its iterate is outside that window. Trial steps
+outside the window are refused before becoming iterates. All numerical mesh,
+row and moment operands remain runtime arguments to the device program.
 """
 
 from dataclasses import dataclass
@@ -19,6 +20,7 @@ import numpy as np
 
 from nova.biot.polygonanalytic import packed_analytic_moments
 from nova.equilibrium import topology
+from nova.equilibrium.fixed_point import _select_backtracking_candidate
 from nova.equilibrium.solve_request import TopologyPolicy
 
 __all__ = [
@@ -556,9 +558,49 @@ def _adaptive(field, seeds, pitch, iterations):
         return (carry[0] < iterations) & jnp.any(carry[4] & ~carry[5])
 
     def update(carry):
-        index, position, _, correction, usable, done, counts = carry
+        index, position, jet, correction, usable, done, counts = carry
         active = usable & ~done
-        position -= jnp.where(active[:, None], correction, 0.0)
+        merit = jnp.linalg.norm(jet.gradient, axis=-1)
+        factors = jnp.asarray(
+            (1.0, 0.5, 0.25, 0.125, 0.0625, 0.03125, 0.015625, 0.0078125),
+            dtype=position.dtype,
+        )
+        candidates = (
+            position[None, :, :] - factors[:, None, None] * correction[None, :, :]
+        )
+
+        def score(candidate):
+            candidate_jet = jax.vmap(field.evaluate)(candidate)
+            candidate_merit = jnp.linalg.norm(candidate_jet.gradient, axis=-1)
+            valid = (
+                jax.vmap(field.contains)(candidate)
+                & jnp.all(jnp.isfinite(candidate), axis=-1)
+                & jnp.isfinite(candidate_jet.value)
+                & jnp.all(jnp.isfinite(candidate_jet.gradient), axis=-1)
+                & jnp.all(jnp.isfinite(candidate_jet.hessian), axis=(-2, -1))
+            )
+            return candidate_merit, valid
+
+        candidate_merit, candidate_valid = jax.vmap(score)(candidates)
+
+        choice = _select_backtracking_candidate(
+            factors[:, None],
+            candidate_merit,
+            candidate_merit,
+            merit,
+            merit,
+            merit,
+            candidate_merit,
+            merit,
+            False,
+            True,
+            candidate_valid,
+            decrease_only=True,
+        )
+        chosen = jnp.take_along_axis(
+            jnp.swapaxes(candidates, 0, 1), choice.selected[:, None, None], axis=1
+        )[:, 0, :]
+        position = jnp.where((active & choice.accepted)[:, None], chosen, position)
         jet, correction, usable, done = evaluate(position)
         return index + 1, position, jet, correction, usable, done, counts + active
 
@@ -617,9 +659,10 @@ def solve(
     shape (points, 2), with the axis first. ``axis_sign`` is -1 for a maximum
     and +1 for a minimum. A wrong root is retried from the last accepted
     ``previous`` point using topology.stationary_read, and rejected if it still
-    has the wrong Hessian type. A missing row returns NEEDS_ROWS; the caller
-    must run maintenance outside its timed solve before retrying. Refused
-    positions describe the attempted trajectory, never an accepted warm start.
+    has the wrong Hessian type. An iterate with a missing row returns NEEDS_ROWS;
+    the caller must run maintenance outside its timed solve before retrying.
+    A trial that leaves the row window is refused and can leave NOT_CONVERGED
+    at the last finite in-window iterate.
     """
     field = _CachedField(cache.mesh, cache.lookup, cache.rows, moments, cache.exterior)
     position, jet, converged, counts = _adaptive(field, seeds, pitch, iterations)

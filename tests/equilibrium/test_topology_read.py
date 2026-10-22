@@ -2707,60 +2707,57 @@ def _census_field(state, offset):
     return varied.field(state["reference"])
 
 
-def _dense_cut_current(state, reading, field, resolution):
-    """Integrate physical current on the selected tie-state cut cells directly."""
-    geometry = state["geometry"]
-    selected = np.flatnonzero(np.asarray(reading.membership) > 0)
-    assert len(selected) == 4, "the tie-state support must have four cut cells"
-    centre = np.asarray(geometry.centre)[selected]
-    vertices = np.asarray(geometry.vertices)[selected]
-    count = np.asarray(geometry.vertex_count)[selected]
-    slot = np.arange(vertices.shape[1])
-    following = np.where(slot[None] + 1 < count[:, None], slot[None] + 1, 0)
-    end = np.take_along_axis(vertices, following[..., None], axis=1)
-    first, second = vertices - centre[:, None], end - centre[:, None]
-    area = 0.5 * (first[..., 0] * second[..., 1] - first[..., 1] * second[..., 0])
-    area = np.where(slot[None] < count[:, None], area, 0.0)
-    assert np.all(area >= 0), "cut-cell fans must be counterclockwise"
+def _confined_tie_raster(reading, field, resolution):
+    """Resolve the axis component directly on the physical field."""
+    from scipy.ndimage import label
 
-    grid = (np.arange(resolution) + 0.5) / resolution
-    u, v = np.meshgrid(grid, grid, indexing="ij")
-    radius = np.sqrt(u)
-    a = (radius * (1 - v))[None, None, ..., None]
-    b = (radius * v)[None, None, ..., None]
-    points = (
-        centre[:, None, None, None]
-        + a * first[:, :, None, None]
-        + b * second[:, :, None, None]
-    )
-    flat = points.reshape(-1, 2)
-    flux = np.asarray(jax.vmap(field.value)(jnp.asarray(flat)))
-    normalized = (flux - float(reading.axis_flux)) / (
+    axis = np.asarray(reading.axis)
+    step = 0.24 / resolution
+    radial = axis[0] - 0.12 + (np.arange(resolution) + 0.5) * step
+    vertical = axis[1] - 0.12 + (np.arange(resolution) + 0.5) * step
+    rr, zz = np.meshgrid(radial, vertical)
+    points = np.stack((rr.ravel(), zz.ravel()), axis=-1)
+    evaluate = jax.jit(jax.vmap(field.value))
+    flux = np.concatenate(
+        [
+            np.asarray(evaluate(jnp.asarray(part)))
+            for part in np.array_split(points, resolution // 16)
+        ]
+    ).reshape(rr.shape)
+    components, _ = label(flux > float(reading.boundary_flux))
+    core_label = components[resolution // 2, resolution // 2]
+    assert core_label != 0, "the raster must see the known maximum above the saddle"
+    core = components == core_label
+    assert core.sum() > 4, "the independent confined component must be resolved"
+    assert not np.any(core[[0, -1], :]) and not np.any(core[:, [0, -1]])
+    return rr, zz, flux, core, step
+
+
+def _dense_cut_current(state, reading, field, resolution):
+    """Integrate only the independently flooded physical axis component."""
+    from shapely import contains_xy
+    from shapely.geometry import Polygon
+
+    rr, zz, flux, core, step = _confined_tie_raster(reading, field, 20 * resolution)
+    selected = np.flatnonzero(np.asarray(reading.membership) > 0)
+    assert len(selected) > 0, "the confined axis component must carry support"
+    weight = np.zeros(rr.shape)
+    for cell in selected:
+        count = int(state["geometry"].vertex_count[cell])
+        polygon = Polygon(np.asarray(state["geometry"].vertices[cell, :count]))
+        within = contains_xy(polygon, rr, zz)
+        weight[within] = float(reading.path_weight[cell])
+    assert np.all(weight[core] > 0), "booking must cover the whole confined component"
+    normalized = (flux[core] - float(reading.axis_flux)) / (
         float(reading.boundary_flux) - float(reading.axis_flux)
     )
     density = np.asarray(
-        state["profile"].current_density(
-            jnp.asarray(flat[:, 0]), jnp.asarray(normalized)
-        )
+        state["profile"].current_density(jnp.asarray(rr[core]), jnp.asarray(normalized))
     )
-    weight = (
-        np.repeat(
-            (area * np.asarray(reading.path_weight)[selected, None]).reshape(-1),
-            resolution * resolution,
-        )
-        / resolution**2
-    )
-    return float(np.sum(weight * density * (normalized <= 1)))
+    return float(np.sum(weight[core] * density) * step**2)
 
 
-# Booked current against the independent cut-cell quadrature at the coarse tie.
-# Measured with the normal-form lobe owner on the tie pair: booked 128.416249 /
-# 129.730881 A against 32x32 integrals 130.488250 / 131.468864 A, gaps of 1.59%
-# and 1.32%. The direct integral moves at most 0.12% between the 16, 32 and 64
-# subdivisions of the same cut cells, so the bound is the larger gap plus that
-# measured grid noise, not a slack chosen to admit the gap. That derivation
-# reaches 1.59% + 0.12% = 1.71%, so the bound carries 0.29 percentage points of
-# margin over it up to 0.02.
+# Quadrature is checked only after the support's component has been verified.
 TIE_BOOKED_CURRENT_REL = 0.02
 
 
@@ -2775,8 +2772,8 @@ def test_census_keeps_the_wall_contact_saddle_across_the_adjacent_pair():
     confirmed independently of the census that proposed it, by polishing the
     field from a seed displaced from the census reading and requiring the same
     hyperbolic point back, and by requiring the point to persist across the pair.
-    Dense area quadrature of the moving field independently checks the current
-    booked on the four selected cut cells at each offset.
+    The first separator and confined component are checked independently before
+    area quadrature checks current on the selected cells at each offset.
     """
     import numpy as np
 
@@ -2835,35 +2832,51 @@ def test_census_keeps_the_wall_contact_saddle_across_the_adjacent_pair():
         f"the wall-contact saddle must persist across the pair, nearest {nearest!r}"
     )
 
-    # The production read must continue to select the primary X-point, and
-    # its booked current must agree with direct quadrature at each offset.
+    # The first event is the upper saddle paired with the nearby maximum.
     sampled = tie_probe.make_sampler(state)
-    currents = []
-    independent_currents = []
     for offset in (low, high):
         roots, reading, raw, _, _, _ = sampled(offset * state["scale"], prior)
         moving = _census_field(state, offset)
-        primary = topology.stationary_read(
-            moving, state["previous"][1], pitch, state["policy"]
+        upper = topology.stationary_read(
+            moving, np.asarray([1.54, 0.88]), pitch, state["policy"]
         )
-        assert bool(np.asarray(primary.valid))
+        assert bool(np.asarray(upper.valid))
+        assert np.linalg.det(np.asarray(upper.jet.hessian)) < 0
         assert bool(np.asarray(reading.valid and reading.qualified))
         assert int(np.asarray(roots.valid).sum()) == 3
-        assert (
-            np.linalg.norm(
-                np.asarray(reading.saddle_form.position) - np.asarray(primary.position)
-            )
-            < 0.05 * pitch
-        ), "the read must select the independently polished X-point"
-        currents.append(float(np.asarray(raw)))
+        assert int(reading.boundary_class) == 1, (
+            "the first separator on the maximum's merge path is the upper saddle"
+        )
+        np.testing.assert_allclose(reading.boundary, upper.position, atol=1e-8)
+        assert float(reading.boundary_flux) == pytest.approx(
+            float(upper.jet.value), rel=0, abs=1e-13
+        )
+        _assert_confined_tie_cells(state, moving, reading, upper)
         independent_current = _dense_cut_current(state, reading, moving, 32)
-        independent_currents.append(independent_current)
-        assert currents[-1] == pytest.approx(
+        assert float(raw) == pytest.approx(
             independent_current, rel=TIE_BOOKED_CURRENT_REL
         ), (
-            f"booked current {currents[-1]!r} disagrees with direct cut-cell "
-            f"quadrature {independent_current!r} at {offset!r}"
+            f"booked current {float(raw)!r} disagrees with "
+            f"quadrature {independent_current!r}"
         )
+
+
+def _assert_confined_tie_cells(state, moving, reading, upper):
+    """Flood an independent physical-field raster above the first separator."""
+    from shapely import contains_xy
+    from shapely.geometry import Polygon
+
+    assert float(reading.boundary_flux) == pytest.approx(
+        float(upper.jet.value), abs=1e-13
+    )
+    rr, zz, _, core, _ = _confined_tie_raster(reading, moving, 640)
+    selected = np.flatnonzero(np.asarray(reading.membership) > 0)
+    assert len(selected) > 0, "zero booking is not a confined-component repair"
+    for cell in selected:
+        count = int(state["geometry"].vertex_count[cell])
+        polygon = Polygon(np.asarray(state["geometry"].vertices[cell, :count]))
+        intersects = contains_xy(polygon, rr, zz) & core
+        assert np.any(intersects), f"booked cell {cell} lies beyond the first separator"
 
 
 @pytest.mark.slow
@@ -2930,3 +2943,86 @@ def test_census_neighbour_proposals_keep_saddles_across_coarse_ties(
         observed.append(np.asarray(roots.position)[selected])
     distances = np.linalg.norm(observed[0][:, None] - observed[1][None], axis=-1)
     assert np.all(np.min(distances, axis=1) < np.median(state["geometry"].pitch))
+
+
+def _quadratic_wall_read_inputs():
+    """A resolved axis and a known physical contact for refusal controls."""
+    from nova.equilibrium import fixed_points, topology
+
+    @jax.tree_util.register_static
+    class Field:
+        def value(self, point):
+            return -jnp.sum((point - jnp.array((2.0, 0.0))) ** 2)
+
+        def evaluate(self, point):
+            return FieldJet(
+                self.value(point), -2 * (point - jnp.array((2.0, 0.0))), -2 * jnp.eye(2)
+            )
+
+        def sampled_coefficient(self, geometry):
+            values = jax.vmap(self.value)(geometry.sample_points.reshape(-1, 2))
+            return jnp.einsum(
+                "nks,ns->nk",
+                geometry.fit_inverse,
+                values.reshape(geometry.sample_points.shape[:-1]),
+            )
+
+    field = Field()
+    vertices = _hexagon(0.5) + np.asarray((2.0, 0.0))
+    geometry = topology.TopologyGeometry.from_cells(
+        (vertices,), vertices[None], (vertices,)
+    )
+    axis = jnp.array(((2.0, 0.0),))
+    roots = fixed_points.FixedPointResult(
+        axis,
+        jax.vmap(field.evaluate)(axis),
+        jnp.array((True,)),
+        jnp.zeros(1, dtype=jnp.int32),
+        jnp.zeros(1, dtype=jnp.int32),
+        jnp.array((False,)),
+    )
+    convention = topology.TopologyConvention.from_cocos(17, 1.0)
+    policy = TopologyPolicy()
+    from scripts.prototypes.fast_map_production.program import FusedField
+
+    sampled = field.sampled_coefficient(geometry)
+    return FusedField(field, sampled), roots, geometry, convention, policy
+
+
+def test_fast_read_refuses_a_wall_level_not_attained_at_its_point(monkeypatch):
+    """A graph bottleneck cannot masquerade as a physical wall tangency."""
+    from scripts.prototypes.fast_map_production import kernel
+
+    field, roots, geometry, convention, policy = _quadratic_wall_read_inputs()
+    correct = jax.jit(lambda: kernel.read(field, roots, geometry, convention, policy))()
+    assert bool(correct.valid), (
+        "the known quadratic wall contact must first be admitted"
+    )
+    monkeypatch.setattr(
+        kernel, "_wall_effective_level", lambda flux, passage: flux + 0.01
+    )
+    refused = jax.jit(lambda: kernel.read(field, roots, geometry, convention, policy))()
+    assert (
+        abs(float(field.evaluate(refused.boundary).value - refused.boundary_flux))
+        > 0.009
+    )
+    assert not bool(refused.valid), "an unattained boundary must be refused"
+
+
+def test_fast_read_refuses_an_overflowed_contour_tree(monkeypatch):
+    """A refused authority receipt cannot publish a read from its prefix."""
+    from dataclasses import replace
+    from nova.equilibrium import contour_tree
+    from scripts.prototypes.fast_map_production import kernel
+
+    field, roots, geometry, convention, policy = _quadratic_wall_read_inputs()
+    correct = jax.jit(lambda: kernel.read(field, roots, geometry, convention, policy))()
+    assert bool(correct.valid), "the complete authority receipt must first be admitted"
+    builder = contour_tree.build_contour_tree
+    monkeypatch.setattr(
+        contour_tree,
+        "build_contour_tree",
+        lambda *args: replace(builder(*args), overflow=jnp.asarray(True)),
+    )
+    refused = jax.jit(lambda: kernel.read(field, roots, geometry, convention, policy))()
+    assert not bool(refused.valid), "an overflowed tree prefix must be refused"

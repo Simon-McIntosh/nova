@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from dataclasses import replace
 from pathlib import Path
 
 import matplotlib
@@ -12,7 +13,6 @@ matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.lines import Line2D
 
 from nova.equilibrium.wall_mask import WallUnit
 from nova.media import poloidal
@@ -54,7 +54,7 @@ def draw_panel(axes, row, data, wall, physical_levels, zoom):
             r, z, display, levels=[0], colors=CELL_COLOUR, linewidths=2.0, zorder=7
         )
         axes.set_xlim(1.37, 1.67)
-        axes.set_ylim(0.77, 1.13)
+        axes.set_ylim(0.70, 1.13)
     else:
         axes.contour(
             r,
@@ -79,40 +79,107 @@ def draw_panel(axes, row, data, wall, physical_levels, zoom):
         axes.set_ylim(float(wall[:, 1].min()) - 0.04, float(wall[:, 1].max()) + 0.04)
     poloidal.draw_wall(axes, units=units, linestyle="solid")
     for cell in row["read"]["support"]:
-        polygon = np.asarray(cell["vertices"])
-        axes.plot(
-            np.r_[polygon[:, 0], polygon[0, 0]],
-            np.r_[polygon[:, 1], polygon[0, 1]],
-            color=CELL_COLOUR,
-            lw=2.5,
-            zorder=5,
-        )
+        for ring in cell.get("rings", [cell["vertices"]]):
+            polygon = np.asarray(ring)
+            axes.plot(
+                np.r_[polygon[:, 0], polygon[0, 0]],
+                np.r_[polygon[:, 1], polygon[0, 1]],
+                color="#333333",
+                linestyle="--",
+                lw=2.0,
+                zorder=5,
+            )
     poloidal.draw_nulls(
         axes,
         magnetic_axis=np.asarray(axis["position"]),
         x_points=np.asarray([upper["position"]]),
         other_x_points=np.asarray([lower["position"]]),
+        style=replace(DEFAULT_INK, axis_color=FIELD_COLOUR, xpoint_color=FIELD_COLOUR),
         contain=units,
     )
     read = row["read"]
-    for point in read["root_positions"]:
-        size = 220 if np.linalg.norm(np.asarray(point) - read["saddle"]) < 1e-8 else 130
-        axes.scatter(
-            point[0],
-            point[1],
-            marker="o",
-            s=size,
-            facecolors="none",
-            edgecolors=READ_COLOUR,
-            linewidths=1.8,
-            zorder=9,
-        )
-    axes.set_title(
-        f"{row['offset']:.5f}" + (" · saddle detail" if zoom else " · vessel"),
-        loc="left",
-        pad=12,
-        fontsize=14,
+    read_style = replace(
+        DEFAULT_INK,
+        axis_color=READ_COLOUR,
+        xpoint_color=READ_COLOUR,
+        axis_markersize=6,
+        xpoint_markersize=6,
     )
+    roots = np.asarray(read["root_positions"])
+    other = roots[
+        (np.linalg.norm(roots - np.asarray(read["axis"]), axis=1) > 1e-8)
+        & (np.linalg.norm(roots - np.asarray(read["saddle"]), axis=1) > 1e-8)
+    ]
+    poloidal.draw_nulls(
+        axes,
+        magnetic_axis=read["axis"],
+        x_points=np.asarray([read["saddle"]]) if read["boundary_class"] else None,
+        other_x_points=other,
+        style=read_style,
+        contain=units,
+    )
+
+
+def null_handles():
+    """Capture legend handles from the same null artists used in the panels."""
+    handles = []
+    for label, keyword in (
+        ("reference maximum", {"magnetic_axis": np.array([0.0, 0.0])}),
+        ("reference separator", {"x_points": np.array([[0.0, 0.0]])}),
+        ("other saddle", {"other_x_points": np.array([[0.0, 0.0]])}),
+        (
+            "read maximum",
+            {
+                "magnetic_axis": np.array([0.0, 0.0]),
+                "style": replace(
+                    DEFAULT_INK, axis_color=READ_COLOUR, axis_markersize=6
+                ),
+            },
+        ),
+        (
+            "read separator",
+            {
+                "x_points": np.array([[0.0, 0.0]]),
+                "style": replace(
+                    DEFAULT_INK, xpoint_color=READ_COLOUR, xpoint_markersize=6
+                ),
+            },
+        ),
+    ):
+        scratch, axis = plt.subplots()
+        keyword.setdefault(
+            "style",
+            replace(DEFAULT_INK, axis_color=FIELD_COLOUR, xpoint_color=FIELD_COLOUR),
+        )
+        poloidal.draw_nulls(axis, **keyword)
+        artist = axis.get_lines()[0]
+        artist.set_label(label)
+        handles.append(artist)
+        plt.close(scratch)
+    return handles
+
+
+def check_text(figure):
+    """Refuse clipped or overlapping visible labels before saving the artifact."""
+    figure.canvas.draw()
+    renderer = figure.canvas.get_renderer()
+    labels = [
+        text
+        for text in figure.findobj(matplotlib.text.Text)
+        if text.get_visible() and text.get_text()
+    ]
+    boxes = [(text, text.get_window_extent(renderer)) for text in labels]
+    for text, box in boxes:
+        if not figure.bbox.contains(box.x0, box.y0) or not figure.bbox.contains(
+            box.x1, box.y1
+        ):
+            raise ValueError(f"clipped label: {text.get_text()}")
+    for index, (text, box) in enumerate(boxes):
+        for peer, other in boxes[index + 1 :]:
+            if box.overlaps(other):
+                raise ValueError(
+                    f"overlapping labels: {text.get_text()} / {peer.get_text()}"
+                )
 
 
 def render(receipt, field_data, figure_path, preview):
@@ -130,59 +197,21 @@ def render(receipt, field_data, figure_path, preview):
         for column, row in enumerate(rows):
             draw_panel(axes[0, column], row, data, wall, physical_levels, False)
             draw_panel(axes[1, column], row, data, wall, physical_levels, True)
-        legend = [
-            Line2D([], [], color=FIELD_COLOUR, lw=1.2, label="field contours"),
-            Line2D(
-                [],
-                [],
-                color=CELL_COLOUR,
-                lw=2,
-                label="top saddle level and booked cells",
-            ),
-            Line2D(
-                [],
-                [],
-                marker=DEFAULT_INK.axis_marker,
-                color=DEFAULT_INK.axis_color,
-                linestyle="none",
-                markersize=10,
-                label="field maximum",
-            ),
-            Line2D(
-                [],
-                [],
-                marker=DEFAULT_INK.xpoint_marker,
-                color=DEFAULT_INK.xpoint_color,
-                linestyle="none",
-                markersize=10,
-                label="field top saddle",
-            ),
-            Line2D(
-                [],
-                [],
-                marker=DEFAULT_INK.xpoint_marker,
-                markerfacecolor="none",
-                markeredgecolor=DEFAULT_INK.xpoint_color,
-                linestyle="none",
-                markersize=10,
-                label="field bottom saddle",
-            ),
-            Line2D(
-                [],
-                [],
-                marker="o",
-                markerfacecolor="none",
-                markeredgecolor=READ_COLOUR,
-                linestyle="none",
-                markersize=12,
-                label="read roots (large ring: chosen candidate)",
-            ),
-        ]
+        (contour_handle,) = axes[0, 0].plot(
+            [], [], color=FIELD_COLOUR, lw=1.2, label="field contours"
+        )
+        (support_handle,) = axes[0, 0].plot(
+            [], [], color=CELL_COLOUR, lw=2, label="physical separator"
+        )
+        (rings_handle,) = axes[0, 0].plot(
+            [], [], color="#333333", linestyle="--", lw=2, label="booked rings"
+        )
+        legend = [contour_handle, support_handle, rings_handle, *null_handles()]
         fig.legend(
             handles=legend,
             loc="lower center",
-            ncol=3,
-            bbox_to_anchor=(0.5, 0.0),
+            ncol=4,
+            bbox_to_anchor=(0.5, 0.015),
             frameon=False,
             fontsize=13,
         )
@@ -190,7 +219,12 @@ def render(receipt, field_data, figure_path, preview):
             left=0.02, right=0.98, top=0.93, bottom=0.10, wspace=0.04, hspace=0.12
         )
         figure_path.parent.mkdir(parents=True, exist_ok=True)
+        check_text(fig)
         fig.savefig(figure_path, format="svg")
+        figure_path.write_text(
+            "\n".join(line.rstrip() for line in figure_path.read_text().splitlines())
+            + "\n"
+        )
         if preview:
             preview.parent.mkdir(parents=True, exist_ok=True)
             fig.savefig(preview, format="png", dpi=100)

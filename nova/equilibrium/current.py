@@ -257,16 +257,33 @@ def _disk_split_moments(
 
 
 def composite_cut_moments(
-    vertices, count, centre, pitch, form, conic_coefficient, profile,
-    selected, intervals, conic_selected, axis_flux, boundary_flux,
-    disk_centre, radius, segments, force_conic_right=False,
+    vertices,
+    count,
+    centre,
+    pitch,
+    form,
+    flux_coefficient,
+    conic_coefficient,
+    profile,
+    selected,
+    intervals,
+    conic_selected,
+    axis_flux,
+    boundary_flux,
+    disk_centre,
+    radius,
+    segments,
+    force_conic_right=False,
 ):
     """Book one cut cell over a single support split at the disk boundary.
 
     Inside the disk the support is the selected normal-form sector; outside it
     the support is the ordinary quadratic cut. Both portions are integrated on
     the shared clip-quadrature nodes with the same density, and their moments
-    add because their interiors are disjoint.
+    add because their interiors are disjoint. ``flux_coefficient`` carries the
+    physical local flux used to evaluate the density; ``conic_coefficient``
+    carries the same flux in the signed, level-subtracted form the ordinary cut
+    traces its positive region with.
     """
     normal_rings, normal_counts = _normal_rings(
         vertices, count, centre, form, selected, intervals, segments
@@ -275,14 +292,31 @@ def composite_cut_moments(
         vertices, count, centre, pitch, conic_coefficient, conic_selected, segments
     )
     inside = _disk_split_moments(
-        normal_rings, normal_counts, centre, pitch, conic_coefficient,
-        axis_flux, boundary_flux, profile, disk_centre,
-        radius, keep_inside=True,
+        normal_rings,
+        normal_counts,
+        centre,
+        pitch,
+        flux_coefficient,
+        axis_flux,
+        boundary_flux,
+        profile,
+        disk_centre,
+        radius,
+        keep_inside=True,
     )
     outside = _disk_split_moments(
-        conic_rings, conic_counts, centre, pitch, conic_coefficient,
-        axis_flux, boundary_flux, profile, disk_centre,
-        radius, keep_inside=False, force_whole=force_conic_right,
+        conic_rings,
+        conic_counts,
+        centre,
+        pitch,
+        flux_coefficient,
+        axis_flux,
+        boundary_flux,
+        profile,
+        disk_centre,
+        radius,
+        keep_inside=False,
+        force_whole=force_conic_right,
     )
     return inside + outside, conic_valid
 

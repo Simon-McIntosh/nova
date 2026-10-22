@@ -831,3 +831,26 @@ def test_a_session_mixing_stored_and_empty_frames_is_refused(tmp_path):
     )
     with pytest.raises(ValueError, match="boundary polyline"):
         read_labels(4242, dirname=tmp_path)
+
+
+def test_the_mast_reader_declares_the_three_to_seventeen_flux_factor(monkeypatch):
+    """The one module that owns the MAST flux conversion declares its COCOS 3.
+
+    The archive's flux rows are multiplied by the factor the sourcemap derives
+    between the declared source convention and COCOS 17.  That factor must be
+    the internal total-flux factor, so the 2*pi is applied exactly once on the
+    route; moving the declared source convention to 13, which shares COCOS 17's
+    ``e_Bp``, drops the factor to one and this test fails.
+    """
+
+    from nova.equilibrium.convention import TOTAL_FLUX_FACTOR
+    from nova.io import sourcemap
+    from nova_cocos import PSI_LIKE, convention_transform
+
+    assert sourcemap.MAST_FLUX_TRANSFORMATION == PSI_LIKE
+    assert sourcemap.mast_flux_factor() == pytest.approx(TOTAL_FLUX_FACTOR)
+
+    monkeypatch.setattr(sourcemap, "MAST_SOURCE_CONVENTION", 13)
+    assert sourcemap.mast_flux_factor() == pytest.approx(1.0)
+    assert sourcemap.mast_flux_factor() != pytest.approx(TOTAL_FLUX_FACTOR)
+    assert convention_transform(source=13, target=sourcemap.NOVA_CONVENTION) is not None

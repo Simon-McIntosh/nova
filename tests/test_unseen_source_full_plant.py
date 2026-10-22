@@ -6,7 +6,8 @@ whole ITER plant without rebuilding the sectioned set.  These checks drive two
 DINA cases the plant cache holds no entry for, show the plants equal an
 independent in-process rebuild bit for bit, count zero subdivisions and zero
 linkage builds at every module binding, and show the reconstruction-style
-presentation of 105014/1 reaches the same machine within its stated tolerance.
+presentation of a conforming DINA pulse reaches the same machine within its
+stated tolerance.
 The literal negative control removes ``geometry.npz`` from a scratch
 sectioned-set copy: the loader then refuses by name.
 
@@ -54,11 +55,11 @@ MAX_LAYER_THICKNESS_M = 0.04
 #: DINA (pulse, run) -> a high-current slice whose prescription is valid.
 DINA_CASES = {
     (105069, 3): 1688,
-    (105013, 1): 723,
+    (105052, 1): 723,
 }
 DINA_CASE_ROOT = Path("/work/imas/shared/imasdb/ITER/3")
-RECONSTRUCTION_URI = "imas:hdf5?user=mcintos;pulse=105014;run=1;database=iter;version=3"
-RECONSTRUCTION_DD = "3.38.1"
+RECONSTRUCTION_URI = "imas:hdf5?path=/work/imas/shared/imasdb/ITER/3/105069/3"
+RECONSTRUCTION_DD = "3.39.0"
 
 #: plant fields carrying no per-machine provenance, compared bit for bit.
 PLANT_FIELDS = (
@@ -204,7 +205,7 @@ def _dina_source(pulse: int, run: int, index: int):
     """One DINA slice as a generic ``PlasmaSource``.
 
     These two cases store their poloidal flux with axis and boundary in the same
-    sense as their plasma current -- the opposite of the 105014 convention the
+    sense as their plasma current -- the opposite of the COCOS 17 convention the
     generic prescription expects -- so the stored flux family is oriented by the
     sign the existing reader derives (``sign(-ip / span)``) before it is
     prescribed.  Both arms consume the identical source, so the orientation does
@@ -245,7 +246,7 @@ def _open_reconstruction():
 
 
 def _reconstruction_style_source(equilibrium, active, index, *, stride: int = 4):
-    """Present 105014/1 the way a reconstruction arrives at the source.
+    """Present a conforming DINA pulse the way a reconstruction arrives at the source.
 
     EFIT-style p' and FF' on the case's own psi normalisation, the stored last
     closed flux surface named as the boundary rather than a separatrix, and the
@@ -288,13 +289,13 @@ def _reconstruction_style_source(equilibrium, active, index, *, stride: int = 4)
             ),
         ),
         coils,
-        provenance="DINA 105014/1 as a reconstruction",
+        provenance="DINA 105069/3 as a reconstruction",
     )
 
 
 @pytest.mark.slow
 def test_unseen_source_drives_the_full_plant_with_zero_rebuilds(tmp_path, monkeypatch):
-    """105069/3 and 105013/1 drive the full ITER plant, rebuilding nothing.
+    """105069/3 and 105052/1 drive the full ITER plant, rebuilding nothing.
 
     The machine is assembled from the scratch sectioned-set entry by
     ``load_sectioned_machine``; the plant each source returns is compared field
@@ -352,7 +353,7 @@ def test_unseen_source_drives_the_full_plant_with_zero_rebuilds(tmp_path, monkey
     ),
 )
 def test_reconstruction_style_presentation_agrees_within_tolerance(tmp_path):
-    """105014/1 presented as a reconstruction meets relative 1e-3 on the plant.
+    """105069/3 presented as a reconstruction meets relative 1e-3 on the plant.
 
     The reconstruction-style source drives the same cached sectioned machine as
     the DINA-path source, and the two plants' plasma-flux arrays agree within
@@ -376,7 +377,7 @@ def test_reconstruction_style_presentation_agrees_within_tolerance(tmp_path):
     machine = load_sectioned_machine(ENTRY_12MM)
     equilibrium, active = _open_reconstruction()
     generic = PlasmaSource.from_imas(
-        equilibrium, active, provenance="DINA 105014/1", indices=[200]
+        equilibrium, active, provenance="DINA 105069/3", indices=[200]
     )
     reconstruction = _reconstruction_style_source(equilibrium, active, 200)
 

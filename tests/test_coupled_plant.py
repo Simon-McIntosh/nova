@@ -692,8 +692,8 @@ def test_generic_source_drives_the_plant(tmp_path):
     )
 
 
-DINA_URI = "imas:hdf5?user=mcintos;pulse=105014;run=1;database=iter;version=3"
-DINA_DD_VERSION = "3.38.1"
+DINA_URI = "imas:hdf5?path=/work/imas/shared/imasdb/ITER/3/105069/3"
+DINA_DD_VERSION = "3.39.0"
 ITER_SECTION_CACHE = Path(
     "/home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit"
     "/sectioned-conductor-set/66c10162f3e37adb2679"
@@ -752,7 +752,7 @@ def _iter_sectioned_machine():
 
 
 def _dina_equilibrium_and_coils(indices):
-    """Open DINA 105014/1's equilibrium slices and its active-coil series."""
+    """Open DINA 105069/3's equilibrium slices and its active-coil series."""
     import imas
 
     with imas.DBEntry(DINA_URI, "r", dd_version=DINA_DD_VERSION) as entry:
@@ -812,12 +812,12 @@ def _reconstruction_style_source(equilibrium, active, indices, *, stride: int = 
             )
         )
     return PlasmaSource(
-        tuple(slices), coils, provenance="DINA 105014/1 as a reconstruction"
+        tuple(slices), coils, provenance="DINA 105069/3 as a reconstruction"
     )
 
 
 def _dina_sources(index: int = 200):
-    """DINA 105014/1 through both source presentations, opened once.
+    """DINA 105069/3 through both source presentations, opened once.
 
     Returns the generic source and the minimal source carrying DINA's own
     prescription, the latter built the way the call is driven today, so the
@@ -835,14 +835,14 @@ def _dina_sources(index: int = 200):
         label="dina-native",
     )
     generic = PlasmaSource.from_imas(
-        equilibrium, active, provenance="DINA 105014/1", indices=[index]
+        equilibrium, active, provenance="DINA 105069/3", indices=[index]
     )
     return generic, reference
 
 
 @pytest.mark.slow
 def test_dina_case_through_the_generic_source_is_unchanged(tmp_path):
-    """105014/1 through the generic source returns today's plant.
+    """105069/3 through the generic source returns today's plant.
 
     The reference is built the way the call is driven today: a minimal source
     carrying DINA's own prescription.  The generic source reproduces that
@@ -894,10 +894,10 @@ def test_reconstruction_route_into_the_plant_meets_the_stated_tolerance(tmp_path
     machine = _reduced_machine()
     equilibrium, active = _dina_equilibrium_and_coils([200])
     generic = PlasmaSource.from_imas(
-        equilibrium, active, provenance="DINA 105014/1", indices=[200]
+        equilibrium, active, provenance="DINA 105069/3", indices=[200]
     )
     reconstruction = _reconstruction_style_source(equilibrium, active, [200])
-    assert reconstruction.label == "DINA 105014/1 as a reconstruction"
+    assert reconstruction.label == "DINA 105069/3 as a reconstruction"
 
     baseline = coupled_plant(machine, generic, cache_dir=tmp_path / "generic")
     plant = coupled_plant(

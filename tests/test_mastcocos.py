@@ -18,13 +18,13 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from nova_cocos import identify_convention
+from nova.io.sourcemap import determine_digits
 from nova.scripts.identify_source_cocos import (
     LEVEL1,
     build_configuration_ranges,
     canonical_closed_curve,
     canonical_physical_geometry,
-    cocos_from_digits,
-    determine_digits,
     fingerprint_shot,
     flux_loop_two_pi_ratio,
     physical_geometry_equivalent,
@@ -91,12 +91,14 @@ def _sigma_rho_theta_phi(sample: dict) -> int:
 
 
 def test_source_digits_give_cocos_three():
-    assert cocos_from_digits(**SOURCE_DIGITS) == MAST_SOURCE_COCOS
+    assert identify_convention(**SOURCE_DIGITS) == MAST_SOURCE_COCOS
 
 
 def test_target_digits_give_cocos_seventeen():
     assert (
-        cocos_from_digits(sigma_bp=-1, e_bp=1, sigma_r_phi_z=+1, sigma_rho_theta_phi=+1)
+        identify_convention(
+            sigma_bp=-1, e_bp=1, sigma_r_phi_z=+1, sigma_rho_theta_phi=+1
+        )
         == TARGET_COCOS
     )
 
@@ -120,7 +122,7 @@ def test_table_is_a_bijection():
                 for rz in (-1, 1)
                 for rtp in (-1, 1)
             ]
-            if cocos_from_digits(**d) == value
+            if identify_convention(**d) == value
         )
         key = tuple(sorted(digits.items()))
         assert key not in seen
@@ -144,7 +146,7 @@ def test_both_sign_cohorts_are_cocos_three(name, cohort):
         "sigma_rho_theta_phi": _sigma_rho_theta_phi(cohort),
     }
     assert digits == SOURCE_DIGITS, name
-    assert cocos_from_digits(**digits) == MAST_SOURCE_COCOS
+    assert identify_convention(**digits) == MAST_SOURCE_COCOS
 
 
 def test_axis_flux_extremum_is_not_a_convention_invariant():
@@ -225,7 +227,7 @@ def test_transformed_quantities_read_back_as_cocos_seventeen(name, cohort):
         "sigma_r_phi_z": +1,
         "sigma_rho_theta_phi": _sigma_rho_theta_phi(transformed),
     }
-    assert cocos_from_digits(**digits) == TARGET_COCOS, name
+    assert identify_convention(**digits) == TARGET_COCOS, name
     # the pressure-gradient identity must survive the transform too
     assert (
         np.sign(transformed["dp_dpsi"])
@@ -412,7 +414,7 @@ def test_corpus_sample_re_derives_cocos_three():
     assert digits["sigma_bp"] == SOURCE_DIGITS["sigma_bp"]
     assert digits["sigma_rho_theta_phi"] == SOURCE_DIGITS["sigma_rho_theta_phi"]
     assert (
-        cocos_from_digits(
+        identify_convention(
             sigma_bp=digits["sigma_bp"],
             e_bp=SOURCE_DIGITS["e_bp"],
             sigma_r_phi_z=SOURCE_DIGITS["sigma_r_phi_z"],

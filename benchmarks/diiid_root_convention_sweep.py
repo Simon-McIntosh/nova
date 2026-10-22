@@ -40,7 +40,7 @@ from nova.imas.diiid_description import (
     vacuum_psi,
     vacuum_response,
 )
-from nova.io.cocos import (
+from nova_cocos import (
     B0_LIKE,
     CONVENTION_DIGITS,
     DODPSI_LIKE,

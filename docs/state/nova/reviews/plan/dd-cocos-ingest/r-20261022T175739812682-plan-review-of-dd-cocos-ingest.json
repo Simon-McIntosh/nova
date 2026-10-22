@@ -1,0 +1,52 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-22T18:15:04.275Z",
+  "dispatched_at": "2026-10-22T17:58:58Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/dd-cocos-ingest.html:74",
+      "id": "reasoning-1",
+      "reason": "the mechanism as written targets a stored attribute rather than the key function, so a node following it invalidates nothing and stale convention-bearing entries are served silently, the exact outcome the done-when forbids; naming the caller (signalstore's key, machine group) is required for the check to run on the real path.",
+      "text": "\u00a74 done-when (3) requires convention-carrying cache keys \"through `canonical_key`\u2026 over the `cocos` attribute `nova/io/ingest.py` already writes into the store\", but ingest.py:116 writes `cocos` only into the dataset `attrs` (verified: `dataset.attrs = {\u2026 \"cocos\": self.cocos \u2026}`), it is not a key input; the cache key that must gain the convention is `SignalStore`'s `hash_attrs({\"uri\", \"dd_version\"})` (nova/io/signalstore.py:51, keyed on DD version, confirmed by \u00a71's own close comment) \u2014 so the node will look at ingest.py's attribute and miss the real key site",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/dd-cocos-ingest.html:68",
+      "id": "reasoning-2",
+      "reason": "the section asserts the values are unchanged and the done-when names the other locus, so without stating which single site owns the conversion the plan leaves a factor-of-2\u03c0 error reachable on the MAST path assigned to \u00a74's consumers.",
+      "text": "\u00a73 done-when (1) puts the flux-row COCOS 3 declaration on `PlasmaSource.from_mast`, but \u00a73's body (line 60) says \"the reader declares exactly those flux rows\" where \"the reader\" is `nova/media/sources/mast_efit.py::read_frame`, which today rescales flux by `TOTAL_FLUX_FACTOR` (verified mast_efit.py:87,116\u2013117); the plan never states that read_frame's multiplication moves into the sourcemap declaration, so a node that adds the declaration at from_mast while leaving read_frame's `TOTAL_FLUX_FACTOR` in place applies the 2\u03c0 twice and, contrary to the body's \"their values are unchanged for every caller\", every MAST flux row gains a factor of 2\u03c0",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "e68729bef5bb4bbd1ae566b44cdbdf675723f5c4898bb2584b7891a9c44995bd",
+  "plan_slug": "dd-cocos-ingest",
+  "plan_version": 59,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261022T175739812682-plan-review-of-dd-cocos-ingest",
+  "reviewed_blob_sha": "c8e1d85026c371bfe678d799b21c1fba00f7ce42",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 verified in the worktree: `plasma_source.py:78 \u2192 prescribe` guard and its message substring `psi ordering disagree`; `extrapolate.py:301` in `Extrapolate.update` (def 292) and `:345` in `plot_2d_masked` (def 339); `mast_efit.py::read_frame` rescaling flux by `TOTAL_FLUX_FACTOR` (87,116\u2013117); `nova_cocos.convention(17)` (packages/nova-cocos/src/nova_cocos/__init__.py:117); `filepath.py::canonical_key` (337) and `hash_attrs` (392); `ingest.py` `cocos` attribute (66,116); all five re-pointed tests and their pulses; and the \u00a73 transform claim is exact \u2014 `convention_transform(3\u219217)` gives \u03c8-like 2\u03c0, q-like \u22121, d/d\u03c8 1/(2\u03c0), and `convention_transform(13\u219217)` gives \u03c8-like 1.",
+    "done_when": "pass \u2014 \u00a73 declares a literal negative control (bypass translation and CORSICA 130506/6 is refused) and a positive control (a planted sign test is found), and \u00a74 declares a literal negative control (leave one converted consumer in its old convention and its COCOS 17 test fails); each is falsifiable.",
+    "evidence_paths": "pass \u2014 gate records land in `docs/research/dd-cocos-census.html` and the repo evidence tree, not a scratchpad.",
+    "naming": "pass \u2014 no plan labels, ticket ids or version tags in \u00a73/\u00a74 symbols; the sections name mechanisms (`prescribe`'s internal check, `convention_factor`, `canonical_key`).",
+    "reasoning": "a finding \u2014 \u00a74's cache-key mechanism (`canonical_key` over ingest.py's `cocos` attribute) names a bug where the artefact key is actually computed, so it does not reach the cache the done-when requires; and \u00a73's MAST declaration locus is split between `read_frame` (body) and `PlasmaSource.from_mast` (done-when), leaving the 2\u03c0 conversion's single owner unstated.",
+    "single_goal": "pass \u2014 \u00a73 is the readers move onto the translator; \u00a74 is nova's internals run in COCOS 17; each closes on one verdict.",
+    "wiring": "pass \u2014 `plan-section-depends-on` declares s3\u2192s4\u2192s5(s1,s2), each dependent node exists and the declared direction matches the section bodies."
+  },
+  "section_digests": {
+    "_document": "0944b41fbee062214508f8e371bdb6d46b75eb62d96e4606b5e91e6893187ad0",
+    "s0": "d7c3143494e97518c859457355f006ec1a3961adf5e50d514822385ec2941326",
+    "s1": "8493846bddbd37e17766c3f28357c4dec07fde5dad711cf4d8096db87e577f89",
+    "s2": "38e4a6fd8cb459d4e887ae55cc12b322f74419e30f3f46aaa3022d95172c4f71",
+    "s3": "5d86d349e0b26d86337ba18af38f0e78826ee71f832f3f5dda4bd375f86e3723",
+    "s4": "080cce60ac529b031357b50a0c76c5792bd76edf6dd15348c907e89e1ad19521",
+    "s5": "db46395f9321959e91cc657923e567fa72cda1e12fa3aa977d6a83243b8e1d36"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T18:17:58.706919+00:00"
+}

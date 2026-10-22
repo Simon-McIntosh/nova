@@ -754,6 +754,43 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "e06c204138a79b3ac2287f5cb09c8e9b65e8f16d",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": true,
+    "process_stopped_pid": 3914134,
+    "scratch_bytes": 31195,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261022T081050149052-review-of-dd-cocos-census-ce1033f7411d",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 31195,
+        "path": "/tmp/reckon-crew-scratch/r-20261022T081050149052-review-of-dd-cocos-census-ce1033f7411d"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-dd-cocos-census-ce1033f7411d",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

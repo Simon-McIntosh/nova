@@ -7,6 +7,13 @@
   "call_sites": [],
   "completed_at": "2026-10-22T08:21:39.976Z",
   "dispatched_at": "2026-10-22T08:11:16Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "census-table cell and control-log nits; dd-cocos-ingest section 5 writes its table into the same census record and corrects them there",
+      "recorded_at": "2026-10-22T08:26:28.993368+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/research/dd-cocos-census.html",

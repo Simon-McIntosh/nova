@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="iter-passive-plasma-circuit">
+<meta name="plan-evidence-for" content="iter-passive-plasma-circuit">
+<meta name="plan-verifies" content="iter-passive-plasma-circuit#s7">
+<title>VS3 linkage repair | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<section data-reckon="evidence" data-node="vs3-linkage-repair" id="vs3-linkage-repair">
+
+<p>What the repaired sectioned set stores, what it does not, and the measurement
+each statement rests on. Receipts are named per clause; every number below is
+read from the log or the stored entry it names, not restated from an earlier
+document.</p>
+
+<h3 id="vs3-linkage-repair-keys">The retired keys are gone and the derived keys are pinned</h3>
+<p>The build now gives each annulus sector its own circuit — a section-shape
+override is indexed by circuit, so sectors sharing an id leave all but one
+invisible to the linkage kernel — which moves both keys. The repair retired
+<code>68df15665ab2ea45f427</code> (12 mm) and <code>06ff06d3eb7a4448f0fe</code>
+(6 mm) for the derived <code>66c10162f3e37adb2679</code> and
+<code>f3a24fdd12eae6348f3a</code>. A tree-wide search for the retired digests
+over <code>nova/</code>, <code>scripts/</code> and <code>tests/</code> finds
+none outside this record, and every in-tree pin moved: the three pins the clause
+names are in <code>scripts/iter_vessel_evolution/evolve.py</code>,
+<code>tests/test_coupled_plant.py</code> and
+<code>tests/test_sectioned_set_geometry_cache.py</code>.</p>
+<p><em>Receipt:</em> <code>tests/test_vs3_linkage_repair.py::test_retired_digests_are_gone_from_the_tree</code>
+and <code>::test_repaired_keys_are_pinned_where_the_retired_ones_were</code>.</p>
+
+<h3 id="vs3-linkage-repair-clause-one">Done-when (1) holds for the 12 mm entry and not for the 6 mm</h3>
+<p>Each entry's stored <code>linkage.npy</code> is the joint coil-plus-passive
+matrix the build actually uses, so every eigenvalue of it must be positive.</p>
+<table>
+<thead><tr><th>Entry</th><th>Joint size</th><th>Smallest eigenvalue</th><th>Negatives</th><th>Clause (1)</th></tr></thead>
+<tbody>
+<tr><td>12 mm <code>66c10162f3e37adb2679</code></td><td>1847×1847</td><td>+2.512976×10<sup>−9</sup> H</td><td>0</td><td>holds</td></tr>
+<tr><td>6 mm <code>f3a24fdd12eae6348f3a</code></td><td>2698×2698</td><td>−4.009411×10<sup>−8</sup> H</td><td>40</td><td><strong>does not hold</strong></td></tr>
+</tbody>
+</table>
+<p>All forty 6 mm negatives lie in the passive block: that block's own smallest
+eigenvalue is the same −4.009411×10<sup>−8</sup> H, so the finite-source coil
+block spliced in at the top adds none, and the six most negative eigenvectors
+are supported on passive rows 0–5 — r = 1.687 m, z = 4.444…4.705 m, |dr| = 0.74 m,
+|dz| = 5.232×10<sup>−2</sup> m, current share 13.85. The
+<code>load_sectioned_machine</code> refusal fires on this entry:</p>
+<p><code>JointLinkageNotPositiveDefinite: sectioned-set entry …/f3a24fdd12eae6348f3a
+stores a joint linkage with a non-positive eigenvalue (-4.009411e-08 H)</code></p>
+<p>A pre-repair entry is refused the same way, and a repaired copy of the same
+entry loads, so the refusal separates the two rather than refusing everything.</p>
+<p><em>Receipt:</em> <code>tests/test_vs3_linkage_repair.py::test_stored_joint_linkage_is_positive_definite</code>,
+<code>::test_loader_refuses_a_pre_repair_entry_by_name</code>,
+<code>::test_repaired_entry_is_not_refused</code>;
+<code>tests/test_vs3_jacket_positive_linkage.py::test_repaired_passive_block_is_positive_definite</code>
+— 12 mm passes, 6 mm fails.</p>
+
+<h3 id="vs3-linkage-repair-refinement">The 6 mm negatives do not move with the observer quadrature</h3>
+<p>The mechanism the code hints at is real and is not the cause. The 6 mm layer
+produces rows whose |dz| = 5.017×10<sup>−3</sup> m falls under
+<code>SECTION_FLOOR</code> = 10<sup>−2</sup> m, 372 rows under the floor in all,
+476 under it radially, against a median section scale of 8.285×10<sup>−2</sup> m.</p>
+<table>
+<thead><tr><th>Observer scale</th><th>Sub-cells per dimension</th><th>Section floor [m]</th><th>Smallest eigenvalue [H]</th><th>Negatives</th></tr></thead>
+<tbody>
+<tr><td>0.50</td><td>12</td><td>10<sup>−2</sup></td><td>+1.841061×10<sup>−5</sup></td><td>0</td></tr>
+<tr><td>0.50</td><td>24</td><td>10<sup>−2</sup></td><td>+1.833410×10<sup>−5</sup></td><td>0</td></tr>
+<tr><td>0.50</td><td>48</td><td>10<sup>−2</sup></td><td>+1.833410×10<sup>−5</sup></td><td>0</td></tr>
+<tr><td>0.20</td><td>48</td><td>10<sup>−4</sup></td><td>+1.688180×10<sup>−5</sup></td><td>0</td></tr>
+<tr><td>0.05</td><td>64</td><td>10<sup>−5</sup></td><td>+1.645705×10<sup>−5</sup></td><td>0</td></tr>
+</tbody>
+</table>
+<p>Two things follow, and the second is why this ends blocked rather than fixed.
+Sub-cell count is <strong>inert</strong>: 24 and 48 sub-cells give the same
+eigenvalue to every printed digit, because the observer rule caps the subdivision
+at the section scale, so refinement in that knob buys nothing. And the trend runs
+the wrong way: as the remaining knob is loosened, this neighbourhood's smallest
+eigenvalue falls monotonically, 1.841×10<sup>−5</sup> → 1.646×10<sup>−5</sup> H,
+so the negatives are not quadrature error converging to zero as the quadrature is
+refined. No floor was applied, and no tolerance was widened.</p>
+<p><em>Receipt:</em> <code>logs/repair-probe-c.log</code>, mode <code>all</code>,
+one process, <code>EXIT=0</code>.</p>
+
+<h3 id="vs3-linkage-repair-reference">VSU's and VSL's bare inductance against their own four-turn references</h3>
+<p>A vertical coil is four turns in series at the four turn annuli
+<code>pf_active</code> gives, not one ring. The reference is therefore built per
+coil: each turn's self term from the repository's own closed form at the
+annulus's geometric-mean wire radius, plus twice each of the six distinct mutual
+pairs between the turns, the mutual being the coaxial ring form through the
+elliptic integrals. The reduced series map is compared with it directly.</p>
+<table>
+<thead><tr><th>Quantity</th><th>Turn reference [H]</th><th>Stored series map [H]</th><th>Ratio</th></tr></thead>
+<tbody>
+<tr><td>VSU bare</td><td>5.6444694×10<sup>−4</sup></td><td>5.6303468×10<sup>−4</sup></td><td>0.997498</td></tr>
+<tr><td>VSL bare</td><td>7.5819314×10<sup>−4</sup></td><td>7.5603408×10<sup>−4</sup></td><td>0.997152</td></tr>
+<tr><td>VSU–VSL mutual</td><td>4.2410256×10<sup>−5</sup></td><td>4.2410517×10<sup>−5</sup></td><td>1.000006</td></tr>
+</tbody>
+</table>
+<p>The stored values stand 0.25 and 0.28 per cent <em>above</em> their
+references for the two bare inductances, and the mutual agrees to 0.0006 per
+cent. The declared tolerance is <strong>1 per cent</strong>, about four times the
+largest measured disagreement; the residual sits in the self terms, which is
+<em>where the sector discretisation lives</em> — the mutual is an off-diagonal
+pair and reproduces to six parts in 10<sup>7</sup>.</p>
+<p>A single ring at R = 6 m, 4.3701378×10<sup>−5</sup> H, is one turn at a radius
+no VS3 turn sits at, and neither coil is that quantity: the coil reference is
+12.9 times it. Measuring the coils against it is what produced the earlier
+<code>12.88×</code> and <code>17.30×</code> ratios, and it is why that constant no
+longer appears as a reference for either coil.</p>
+<p><em>Receipt:</em> <code>tests/test_vs3_linkage_repair.py::test_vertical_coil_bare_inductance_matches_its_turn_reference</code>,
+<code>::test_vertical_coil_coupling_matches_its_turn_reference</code>,
+<code>::test_turn_reference_is_built_from_the_repository_closed_form</code>;
+<code>logs/gate-linkage_repair.log</code>.</p>
+
+<h3 id="vs3-linkage-repair-negative-control">Negative control</h3>
+<p>The loader half fires: a pre-repair joint linkage copied into a scratch entry
+is refused by name, measured at 45 negative eigenvalues and a minimum of
+−2.527958×10<sup>−7</sup> H before the refusal. The square-arm half did not
+reproduce the declared count: with the area-equivalent square representation
+restored, the coil Schur complement came out indefinite with 56 negatives over
+128 coil arms and a minimum of −5.706064×10<sup>−7</sup> H, against the two the
+declaration names, because that arm's Schur complement is taken over the 128 coil
+arms rather than reduced to the fourteen coil channels first. The qualitative
+control holds; the declared count was not reproduced and is reported rather than
+adjusted.</p>
+<p><em>Receipt:</em> <code>logs/negative-control.log</code>.</p>
+
+<h3 id="vs3-linkage-repair-open">What remains open</h3>
+<p>Done-when (1) does not hold for the 6 mm entry, so the run is blocked on it
+and no entry is offered for installation as a finished pair. The next step the
+measurement points to is the passive block's own linkage at the 6 mm layer's
+sub-floor rows, not a finer observer grid: a floor cannot be the remedy because
+applying one is what the clause forbids, and the trend above shows the
+neighbourhood is not converging to positivity.</p>
+
+</section>
+</body>
+</html>

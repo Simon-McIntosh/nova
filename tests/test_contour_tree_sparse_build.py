@@ -110,21 +110,16 @@ def _host_superlevel_components(
     return len({find(int(node)) for node in np.flatnonzero(live)})
 
 
-def _receipt_crossings(arcs: np.ndarray, values: np.ndarray, level: float) -> int:
-    """Count receipt arcs whose endpoints straddle one carrier level."""
-
-    return int(
-        np.count_nonzero((values[arcs[:, 0]] > level) != (values[arcs[:, 1]] > level))
-    )
-
-
 def _assert_matches_carrier(receipt, mesh, vertex_flux) -> None:
     """The receipt's arcs must bear the carrier's own superlevel events.
 
     The reference is a plain host graph search over the same carrier and the
     same field the build was handed, so it is valid on any host: a near-tie
     flux comparison that rounds differently under another CPU's vector code
-    moves the receipt and the reference together.
+    moves the receipt and the reference together.  At every sampled level the
+    number of superlevel components must equal the receipt's nodes above that
+    level minus its arcs whose both endpoints sit above it, the contour tree's
+    defining relation.
     """
 
     values = np.asarray(vertex_flux, dtype=np.float64)
@@ -132,14 +127,23 @@ def _assert_matches_carrier(receipt, mesh, vertex_flux) -> None:
     carrier_edges = np.asarray(mesh.edges)[np.asarray(mesh.edge_valid)]
     edge_rows = np.asarray(receipt.edges)[np.asarray(receipt.edge_valid)]
     if _perturb_arc_order():
-        edge_rows = np.roll(edge_rows, 1, axis=0)
+        edge_rows = np.roll(edge_rows.reshape(-1), 1).reshape(edge_rows.shape)
     arcs = np.asarray(receipt.node_vertex, dtype=np.int64)[edge_rows]
+    node_vertex = np.asarray(receipt.node_vertex, dtype=np.int64)[
+        np.asarray(receipt.node_valid, dtype=bool)
+    ]
     levels = np.nextafter(np.unique(values[valid]), -np.inf)[::-1]
     for level in levels:
         reference = _host_superlevel_components(
             values, valid, carrier_edges, float(level)
         )
-        assert _receipt_crossings(arcs, values, float(level)) == reference, float(level)
+        above_nodes = int(np.count_nonzero(values[node_vertex] > level))
+        above_arcs = int(
+            np.count_nonzero(
+                (values[arcs[:, 0]] > level) & (values[arcs[:, 1]] > level)
+            )
+        )
+        assert above_nodes - above_arcs == reference, float(level)
 
 
 def _integer_digest(receipt: contour_tree.ContourTreeArrays) -> str:

@@ -25,7 +25,7 @@
   <title>ITER Passive and Prescribed-Plasma Circuit | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="52">
+<meta name="plan-version" content="53">
 <meta name="plan-modified" content="2026-10-22">
 </head>
 <body>
@@ -330,6 +330,9 @@ touches any canvas edge.</p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-close-s7" data-who="reckon-build" data-when="2026-10-22T11:05:00Z">
     <div class="r-comment-body"><p>§7 landed at merge <code>38055eff4</code>: the 12 mm joint linkage is positive definite with no floor, the VS coil bare inductances match per-coil four-turn references within 0.3%, the 6 mm entry is refused by name, and the 105069/3 plant is rebuilt as <code>9e037ccb9bce91c52d5d</code>. <a href="/nova/evidence/archive/iter-passive-plasma-circuit-landed#vs3-linkage-repair">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261022T022444210455-vs3-linkage-repair" data-who="reckon-build" data-when="2026-10-22T09:39:18Z">
+    <div class="r-comment-body"><p>VS3 repair landed at merge 38055eff4 on the 12 mm set: joint linkage positive definite with no floor (+2.51e-9 H); VSU/VSL bare inductance 0.9975/0.9972 of per-coil four-turn references; loader refuses a non-positive-definite entry by name (red arm re-run by the coordinator); 6 mm entry refused with strict-xfail arms (f-ippc-004). Entries 66c10162f3e37adb2679 and f3a24fdd12eae6348f3a and plant 9e037ccb9bce91c52d5d installed after sha256 verification; pinned 7800a4d8 unchanged. Coordinator re-run of tests/test_coupled_plant.py at 4f28d5a57: 17 passed, 1 skipped. Review: no blocking, five follow-ons.</p></div>
 </div>
 </section>
 </main>

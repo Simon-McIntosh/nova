@@ -49,18 +49,53 @@ def test_every_convention_is_its_own_digits():
 _DIGIT_NAMES = ("sigma_bp", "e_bp", "sigma_r_phi_z", "sigma_rho_theta_phi")
 
 
-def test_the_table_is_the_only_transcription_of_the_digits():
-    """One table, so the forward lookup must agree with the table it reads.
+# Sauter & Medvedev CPC 184 (2013) Table I, transcribed here from the paper so
+# this file is an independent source for the published constants rather than a
+# second reading of the module's own table.  The 1-8 block and the 11-18 block
+# carry the same (sigma_Bp, sigma_RphiZ, sigma_rho_theta_phi) in the same order
+# and differ only in e_Bp: the second block is the first with the 2*pi moved
+# into the flux, which is why a convention and its flux scaling differ by ten.
+_TABLE_I_BASE: dict[int, tuple[int, int, int]] = {
+    1: (+1, +1, +1),
+    2: (+1, -1, +1),
+    3: (-1, +1, -1),
+    4: (-1, -1, -1),
+    5: (+1, +1, -1),
+    6: (+1, -1, -1),
+    7: (-1, +1, +1),
+    8: (-1, -1, +1),
+}
+_FLUX_CARRYING_BLOCK = 10
 
-    A convention's digits and the convention those digits name are the same
-    statement read in two directions; a second transcription of the published
-    constant elsewhere in the tree would be a second source of truth for it.
+
+def _table_i() -> dict[int, tuple[int, int, int, int]]:
+    """Return Table I as (sigma_Bp, e_Bp, sigma_RphiZ, sigma_rho_theta_phi)."""
+
+    table = {}
+    for identifier, (sigma_bp, sigma_r_phi_z, sigma_rho_phi_z) in _TABLE_I_BASE.items():
+        table[identifier] = (sigma_bp, 0, sigma_r_phi_z, sigma_rho_phi_z)
+        table[identifier + _FLUX_CARRYING_BLOCK] = (
+            sigma_bp,
+            1,
+            sigma_r_phi_z,
+            sigma_rho_phi_z,
+        )
+    return table
+
+
+def test_table_i_is_transcribed_independently_of_the_module():
+    """Every row of the published table identifies the convention it came from.
+
+    The transcription above is the independent source: the module's own digits
+    table is compared against it, so a digit changed on either side has to
+    disagree with the other rather than with itself.
     """
 
-    for entry in conventions():
-        assert identify_convention(**dict(zip(_DIGIT_NAMES, entry.digits))) == (
-            entry.identifier
-        )
+    table = _table_i()
+    assert len(table) == 16
+    for identifier, digits in table.items():
+        assert identify_convention(**dict(zip(_DIGIT_NAMES, digits))) == identifier
+    assert {key: tuple(value) for key, value in CONVENTION_DIGITS.items()} == table
 
 
 @pytest.mark.parametrize("transformation", sorted(TRANSFORMATIONS))

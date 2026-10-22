@@ -14,9 +14,13 @@ reconstructing a uniform axis is required, but the endpoints must be
 preserved -- so the axis is rebuilt with :func:`numpy.linspace` between the
 stored ends only after confirming the stored spacing is uniform to float32.
 
-*The flux is per radian.* It is multiplied by
-:data:`nova.equilibrium.convention.TOTAL_FLUX_FACTOR` once, here, so every
-record downstream is Nova's total poloidal flux in Wb.
+*The flux is per radian, in COCOS 3.* Every flux row is multiplied by
+:func:`nova.io.sourcemap.mast_flux_factor` once, here, so every record
+downstream is Nova's total poloidal flux in Wb, in COCOS 17. This module is the
+one owner of the MAST flux conversion, so no caller rescales it again. The
+factor equals :data:`nova.equilibrium.convention.TOTAL_FLUX_FACTOR`, which is
+what makes the declared COCOS 3 to COCOS 17 flux conversion and the internal
+total-flux factor the same number.
 """
 
 from __future__ import annotations
@@ -28,6 +32,7 @@ import numpy as np
 
 from nova.catalog.mast_geometry import shaped_section_vertices
 from nova.equilibrium.convention import TOTAL_FLUX_FACTOR
+from nova.io.sourcemap import mast_flux_factor
 from nova.imas.mast_vacuum_cohort import SHOT_STORE
 from nova.media.sources.frame import EquilibriumFrame, MachineGeometry, Pulse
 
@@ -84,7 +89,7 @@ def _flux_map(group: Any, index: int, radius: np.ndarray) -> np.ndarray:
     stored_profile = np.asarray(group["profile_r"], dtype=np.float64)[columns]
     if not np.allclose(stored_profile, radius, rtol=2.0e-7, atol=1.0e-8):
         raise ValueError("the finite psirz columns do not match the stored gridr")
-    return TOTAL_FLUX_FACTOR * raw[:, columns]
+    return mast_flux_factor() * raw[:, columns]
 
 
 def read_geometry(group: Any) -> MachineGeometry:
@@ -113,8 +118,8 @@ def read_frame(group: Any, index: int) -> EquilibriumFrame:
         radius=radius,
         height=height,
         flux=_flux_map(group, index, radius),
-        flux_axis=TOTAL_FLUX_FACTOR * float(group["psi_axis"][index]),
-        flux_boundary=TOTAL_FLUX_FACTOR * float(group["psi_boundary"][index]),
+        flux_axis=mast_flux_factor() * float(group["psi_axis"][index]),
+        flux_boundary=mast_flux_factor() * float(group["psi_boundary"][index]),
         psi_norm=np.asarray(group["psi_norm"], dtype=float),
         p_prime=np.asarray(group["pprime"][index], dtype=float),
         ff_prime=np.asarray(group["ffprime"][index], dtype=float),

@@ -764,6 +764,32 @@ the factor follows from the two conventions rather than from a table here.
 """
 
 
+MAST_SOURCE_CONVENTION = 3
+"""The COCOS the MAST level-1 EFIT archive publishes its flux in.
+
+The archive is not a Data Dictionary read, so its convention is not implied by
+a DD version and has to be declared.  It is measured rather than assumed: the
+MAST EFIT reconstruction on the level-1 store is COCOS 3.
+"""
+
+MAST_FLUX_TRANSFORMATION = PSI_LIKE
+"""The transformation every flux row of the MAST archive carries."""
+
+
+def mast_flux_factor() -> float:
+    """Return the factor the MAST archive's flux rows take into COCOS 17.
+
+    COCOS 3 and COCOS 17 share ``sigma_Bp`` and ``sigma_RphiZ`` and differ in
+    ``e_Bp``, so a flux-like row converts by ``2*pi`` with no sign change.  The
+    MAST frame reader applies this factor and nothing else, so the 2*pi is
+    applied exactly once on every flux row of that route.
+    """
+
+    return convention_transform(
+        source=MAST_SOURCE_CONVENTION, target=NOVA_CONVENTION
+    ).factor(MAST_FLUX_TRANSFORMATION)
+
+
 def dd_equilibrium_convention(dd_version: str) -> int:
     """Return the COCOS nova reads a Data Dictionary version's equilibrium data as.
 

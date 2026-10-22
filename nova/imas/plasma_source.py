@@ -8,7 +8,31 @@ from typing import Any, Sequence
 import numpy as np
 
 from nova.imas.profiles import PrescribedCurrent, prescribe_current_density
+from nova.io.sourcemap import NOVA_CONVENTION, translate_equilibrium
 from nova.media.sources.frame import EquilibriumFrame
+from nova_cocos import convention
+
+
+def _observed(value: Any) -> float:
+    """Return a scalar IDS value, or nan when the IDS leaves it unset."""
+    try:
+        number = float(value)
+    except TypeError, ValueError, AttributeError:
+        return float("nan")
+    return number if np.isfinite(number) else float("nan")
+
+
+def _vacuum_field(b0: np.ndarray, index: int) -> float:
+    """Return the toroidal field an equilibrium slice is read against [T]."""
+    if b0.size == 0:
+        return float("nan")
+    return float(b0[0] if b0.size == 1 else b0[index])
+
+
+def _translated(signal_map: Any, path: str, values: Any) -> Any:
+    """Return one quantity converted from its source convention into COCOS 17."""
+    signals = {signal.standard_name: signal for signal in signal_map.signals}
+    return signals[path].apply(values)
 
 
 @dataclass(frozen=True)
@@ -67,15 +91,20 @@ class PlasmaSlice:
     boundary_outline: np.ndarray | None = None
 
     def prescribe(self) -> PrescribedCurrent:
-        """Prescribe current after checking the declared flux orientation."""
+        """Prescribe current after checking the internal COCOS 17 flux orientation."""
+        sigma_bp = convention(NOVA_CONVENTION).sigma_bp
         span = self.psi_boundary - self.psi_axis
         if (
             not np.isfinite(span)
             or not np.isfinite(self.plasma_current)
             or self.plasma_current == 0
-            or span * self.plasma_current >= 0
+            or sigma_bp * span * self.plasma_current <= 0
         ):
-            raise ValueError("plasma current sign and psi ordering disagree with COCOS")
+            raise ValueError(
+                "plasma current sign and psi ordering disagree with COCOS "
+                f"{NOVA_CONVENTION}: sigma_Bp={sigma_bp:+d} requires "
+                "sign(psi_boundary - psi_axis) = sigma_Bp * sign(ip)"
+            )
         return prescribe_current_density(
             self.radius,
             self.height,
@@ -186,7 +215,14 @@ class PlasmaSource:
         provenance: str,
         indices: Sequence[int] | None = None,
     ) -> PlasmaSource:
-        """Use native IMAS equilibrium slices and the active-coil time base."""
+        """Read an equilibrium IDS into COCOS 17 and the active-coil time base.
+
+        Every convention-bearing quantity passes through
+        :func:`nova.io.sourcemap.translate_equilibrium`, so a DD3 read arrives
+        as COCOS 11 and leaves as COCOS 17 and a DD4 read passes through
+        unchanged.  A read whose measured digits do not name its own DD version's
+        convention is refused there, by name, before any slice is built.
+        """
         if int(equilibrium.ids_properties.homogeneous_time) != 1:
             raise ValueError("equilibrium needs its IDS time base")
         if int(active.ids_properties.homogeneous_time) != 1:
@@ -200,6 +236,8 @@ class PlasmaSource:
             ),
         )
         slices = []
+        dd_version = str(equilibrium.ids_properties.version_put.data_dictionary)
+        b0 = np.asarray(equilibrium.vacuum_toroidal_field.b0, float).ravel()
         selected = range(len(equilibrium.time_slice)) if indices is None else indices
         for index in selected:
             slice_ = equilibrium.time_slice[index]
@@ -208,18 +246,61 @@ class PlasmaSource:
             map_ = slice_.profiles_2d[0]
             outline = slice_.boundary_separatrix.outline
             boundary = slice_.boundary.outline
+            signal_map = translate_equilibrium(
+                source_name=provenance,
+                dd_version=dd_version,
+                ip=_observed(global_.ip),
+                psi_axis=_observed(global_.psi_axis),
+                psi_boundary=_observed(global_.psi_boundary),
+                q=_observed(global_.q_95),
+                b0=_vacuum_field(b0, index),
+            )
+            if signal_map.blocked:
+                raise ValueError(
+                    "; ".join(blocked.reason for blocked in signal_map.blocked)
+                )
             slices.append(
                 PlasmaSlice(
                     time=float(slice_.time),
                     radius=np.asarray(map_.grid.dim1),
                     height=np.asarray(map_.grid.dim2),
-                    psi=np.asarray(map_.psi),
-                    psi_samples=np.asarray(profile.psi),
-                    p_prime=np.asarray(profile.dpressure_dpsi),
-                    ff_prime=np.asarray(profile.f_df_dpsi),
-                    psi_axis=float(global_.psi_axis),
-                    psi_boundary=float(global_.psi_boundary),
-                    plasma_current=float(global_.ip),
+                    psi=_translated(
+                        signal_map, "equilibrium/profiles_2d/psi", map_.psi
+                    ),
+                    psi_samples=_translated(
+                        signal_map, "equilibrium/profiles_1d/psi", profile.psi
+                    ),
+                    p_prime=_translated(
+                        signal_map,
+                        "equilibrium/profiles_1d/dpressure_dpsi",
+                        profile.dpressure_dpsi,
+                    ),
+                    ff_prime=_translated(
+                        signal_map,
+                        "equilibrium/profiles_1d/f_df_dpsi",
+                        profile.f_df_dpsi,
+                    ),
+                    psi_axis=float(
+                        _translated(
+                            signal_map,
+                            "equilibrium/global_quantities/psi_axis",
+                            global_.psi_axis,
+                        )
+                    ),
+                    psi_boundary=float(
+                        _translated(
+                            signal_map,
+                            "equilibrium/global_quantities/psi_boundary",
+                            global_.psi_boundary,
+                        )
+                    ),
+                    plasma_current=float(
+                        _translated(
+                            signal_map,
+                            "equilibrium/global_quantities/ip",
+                            global_.ip,
+                        )
+                    ),
                     outline=np.c_[np.asarray(outline.r), np.asarray(outline.z)],
                     axis=(
                         float(global_.magnetic_axis.r),

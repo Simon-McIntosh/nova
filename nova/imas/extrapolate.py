@@ -11,7 +11,9 @@ from nova.biot.biot import Nbiot
 from nova.imas.dataset import Ids, ImasIds
 from nova.imas.ids_index import IdsIndex
 from nova.imas.operate import Operate
+from nova.io.sourcemap import NOVA_CONVENTION
 from nova.linalg.regression import MoorePenrose
+from nova_cocos import convention
 
 
 # pylint: disable=too-many-ancestors
@@ -298,7 +300,10 @@ class Extrapolate(Grid, Operate):
         height = self.aloc["z"][ionize]
         plasma_index = self.plasmagrid.data.source_plasma_index
         matrix = self.plasmagrid["Psi"][ionize[plasma]]
-        internal = -self.psi_rbs(radius, height)  # COCOS11
+        # sigma_Bp of the internal convention carries the flux of the response
+        # matrix into the sign the plasma grid is stated in
+        sigma_bp = convention(NOVA_CONVENTION).sigma_bp
+        internal = sigma_bp * self.psi_rbs(radius, height)
         target = internal - matrix[:, plasma_index] * float(self["ip"])
         moore_penrose = MoorePenrose(
             matrix=matrix[:, self.saloc["free"]], gamma=self.gamma

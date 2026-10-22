@@ -182,23 +182,47 @@ def test_large_carrier_with_few_critical_points_stays_qualified():
 
 @pytest.mark.filterwarnings("error::FutureWarning")
 def test_critical_node_capacity_overflow_is_jittable_and_visible():
-    """Too many events refuse the receipt without raising or losing the flag."""
+    """Too many events refuse the receipt without raising or losing the flag.
+
+    ``build_contour_tree`` carries its own jit decoration, so the compiled call
+    is the one the bare name makes.  That claim is asserted here rather than
+    assumed: the name must expose its unwrapped Python source, the compiled and
+    unwrapped receipts must agree array for array, and the overflow flag must
+    survive the compiled path.  Dropping the decoration removes ``__wrapped__``
+    and reddens this test.
+    """
 
     leaves = 257
     values = jnp.concatenate((jnp.asarray([0.0]), jnp.arange(1, leaves + 1.0)))
     edges = jnp.stack(
         (jnp.zeros(leaves, dtype=jnp.int32), jnp.arange(1, leaves + 1)), axis=1
     )
-    result = build_contour_tree(
+    assert hasattr(build_contour_tree, "__wrapped__")
+    arguments = (
         values,
         jnp.ones(values.size, dtype=bool),
         jnp.zeros(values.size, dtype=bool),
         edges,
         jnp.ones(leaves, dtype=bool),
         jnp.asarray(1, dtype=jnp.int32),
-        node_capacity=256,
-        edge_capacity=255,
     )
+    result = build_contour_tree(*arguments, node_capacity=256, edge_capacity=255)
+    eager = build_contour_tree.__wrapped__(
+        *arguments, node_capacity=256, edge_capacity=255
+    )
+
+    for name in (
+        "node_vertex",
+        "node_psi",
+        "node_valid",
+        "critical_type",
+        "edges",
+        "edge_valid",
+        "overflow",
+    ):
+        assert np.array_equal(
+            np.asarray(getattr(result, name)), np.asarray(getattr(eager, name))
+        )
 
     assert bool(result.overflow)
     assert int(np.sum(result.node_valid)) == 256

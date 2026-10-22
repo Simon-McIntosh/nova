@@ -1,0 +1,52 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-22T12:50:46.263Z",
+  "dispatched_at": "2026-10-22T12:39:29Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/dd-cocos-ingest.html:60",
+      "id": "done_when-1",
+      "reason": "without a stated carve-out (or a convention-free entry point) a \u00a73 node either invents a call for a reader with no translation to perform or records a pass its search cannot show.",
+      "text": "\u00a73(2) requires that \"every census reader calls the \u00a72 entry point\", but the census's reader table includes the flux-loop and probe readers `nova/imas/magnetics.py::Magnetics.flux_loop` and `nova/imas/io_magnetics.py::Magnetics`, which read sensor identity and geometry and for which the census states no digits are derivable and that \"the choice is \u00a72's\" (pass them through convention-free, or declare a convention at each boundary); \u00a72 landed only `nova/io/sourcemap.py::translate_equilibrium`, which takes equilibrium observables (`ip`, `psi_axis`, `psi_boundary`, `q`, `b0`) and returns a `SourceSignalMap`, and `nova/io/sourcemap.py` contains no reference to magnetics, flux loops or probes, so those readers have no \u00a72 entry point to call and the clause cannot be satisfied as written",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/dd-cocos-ingest.html:60",
+      "id": "reasoning-1",
+      "reason": "a one-line classification of `extrapolate.py` as an internal consumer is needed before the check keys on a zero-hit search over readers.",
+      "text": "\u00a73(2) treats \"any reader\" as a set its rerun of \u00a71's sign search can show empty, but the census's IDS-reader table carries the row `nova/imas/extrapolate.py::Extrapolate.update` (\"Reader of the row above\") while the plan's \u00a73 body and \u00a74 both put that file's `# COCOS` literals (`extrapolate.py:301`, `:345`) in \u00a74's writer/internal-consumer set, so the search returns two live hits in a file the census calls a reader and the node cannot tell whether to clear them or defer them; the mechanism and the measure disagree on which section owns a named site",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "3ac2b1e2be17281b190400af092a8a783f6c9748d09c4c4ca0086b8cdacd1349",
+  "plan_slug": "dd-cocos-ingest",
+  "plan_version": 39,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261022T123846211501-plan-review-of-dd-cocos-ingest",
+  "reviewed_blob_sha": "4be2f9ce9e34c6e5d50094935bcf75bdbdb99914",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `nova/imas/plasma_source.py` exists with a guard at line 76, its `PlasmaSource.from_imas` classmethod exists (plasma_source.py:181) and is the row the census lists (`docs/research/dd-cocos-census.html:32`), and iter-passive-plasma-circuit \u00a76 resolves with CORSICA 130506/6 as its provisional reference.",
+    "done_when": "a finding \u2014 the changed clause of \u00a73(1) is sound (refusing DINA 105013/1 beside 105014/1, each with its contradicting digit, matches \u00a72's landed refusal on \u03c3_\u03c1\u03b8\u03c6), but \u00a73(1) has no statement of the path the refusal comes from, and \u00a73(2) requires *every* census reader to call the \u00a72 entry point, which the census's own convention-free geometry readers cannot do.",
+    "evidence_paths": "pass \u2014 \u00a73 names no scratch path; its checks write to the readers' own test files and its search counts are reproducible commands, so nothing durable is left in a temporary directory.",
+    "naming": "pass \u2014 \u00a73 introduces no symbol, file or comment carrying a plan label, stage name or ticket number.",
+    "reasoning": "a finding \u2014 \u00a73(2) asserts a search can be shown to find no `# COCOS` sign site in any reader, but the census's IDS-reader table lists `nova/imas/extrapolate.py::Extrapolate.update`, whose `# COCOS` literals \u00a73 and \u00a74 both assign to \u00a74.",
+    "single_goal": "pass \u2014 \u00a73 carries one deliverable, that the census readers route their reads through the \u00a72 translator and the plasma-source guard retires.",
+    "wiring": "pass \u2014 s3 declares `dd-cocos-ingest#s2` in both the plan-level `plan-section-depends-on` map and its own `data-links`, and \u00a72 is the translator it consumes; no other edge is owed by s3."
+  },
+  "section_digests": {
+    "_document": "0944b41fbee062214508f8e371bdb6d46b75eb62d96e4606b5e91e6893187ad0",
+    "s0": "d7c3143494e97518c859457355f006ec1a3961adf5e50d514822385ec2941326",
+    "s1": "8493846bddbd37e17766c3f28357c4dec07fde5dad711cf4d8096db87e577f89",
+    "s2": "38e4a6fd8cb459d4e887ae55cc12b322f74419e30f3f46aaa3022d95172c4f71",
+    "s3": "cb769ab3a8b7a1a4955402a724b86add94fefafd629d3aeb1dca2bd28b0b4ad2",
+    "s4": "4575ae7595a93b2959851d0b00e53208977b19cf45b52e80902f78998d5a51cb",
+    "s5": "db46395f9321959e91cc657923e567fa72cda1e12fa3aa977d6a83243b8e1d36"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T12:54:51.459338+00:00"
+}

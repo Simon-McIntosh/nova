@@ -31,6 +31,13 @@
       "finding": "done_when-1",
       "reason": "",
       "when": "2026-10-22T17:53:00.451324+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "",
+      "when": "2026-10-22T17:53:39.053058+00:00"
     }
   ],
   "responses": {
@@ -39,6 +46,12 @@
       "by": "",
       "reason": "",
       "when": "2026-10-22T17:53:00.451324+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-22T17:53:39.053058+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/dd-cocos-ingest/r-20261022T173311267869-plan-review-of-dd-cocos-ingest.json",

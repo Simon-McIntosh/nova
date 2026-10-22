@@ -41,6 +41,13 @@
   ],
   "completed_at": "2026-10-22T10:06:35.034Z",
   "dispatched_at": "2026-10-22T09:43:08Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "non-blocking evidence and test-quality follow-on on a landed node; the 6 mm investigation f-ippc-004 rewrites the strict-xfail arms, the repinned-key test and the square-arm control it reduces to coil channels",
+      "recorded_at": "2026-10-22T12:33:05.494141+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/iter-passive-plasma-circuit/vs3-linkage-repair.html",

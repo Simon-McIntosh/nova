@@ -141,12 +141,185 @@ def test_reduced_vertical_block_reproduces_the_two_negatives():
     assert hybrid.min() == pytest.approx(values.min(), rel=0.01)
 
 
+#: machine-description cross-sections: VS3 conductor and its steel jacket [m]
+CONDUCTOR_ANNULUS = (0.01695, 0.02300)
+JACKET_ANNULUS = (0.0265, 0.0295)
+
+
+def _annulus_objects():
+    """The eight VS3 conductor and eight jacket annuli as (key, r, z) records."""
+    builder = _load_build()
+    conductors, coil_names, owner, _thickness, _res, passive_name = (
+        builder.source_conductors()
+    )
+    n_section = len(owner)
+    vsu, vsl = coil_names.index("VSU"), coil_names.index("VSL")
+    coils = []
+    for i, o in enumerate(owner):
+        if o in (vsu, vsl):
+            coils.append(
+                (
+                    "VSU" if o == vsu else "VSL",
+                    float(conductors.r[i]),
+                    float(conductors.z[i]),
+                )
+            )
+    jackets = []
+    for j, name in enumerate(passive_name):
+        if "VS3" in name and "Jacket" in name:
+            row = int(np.flatnonzero(conductors.circuit == n_section + j)[0])
+            jackets.append(
+                (
+                    name.split(",")[-1].strip(),
+                    float(conductors.r[row]),
+                    float(conductors.z[row]),
+                )
+            )
+    assert len(coils) == 8 and len(jackets) == 8
+    return coils, jackets
+
+
+def _sector_vertices(r0, z0, ri, ro, n_sector, k):
+    """One annular-sector quadrangle: outer arc then inner arc, k = 0..n-1."""
+    t0 = 2 * np.pi * k / n_sector
+    t1 = 2 * np.pi * (k + 1) / n_sector
+    return np.asarray(
+        [
+            (r0 + ro * np.cos(t0), z0 + ro * np.sin(t0)),
+            (r0 + ro * np.cos(t1), z0 + ro * np.sin(t1)),
+            (r0 + ri * np.cos(t1), z0 + ri * np.sin(t1)),
+            (r0 + ri * np.cos(t0), z0 + ri * np.sin(t0)),
+        ],
+        float,
+    )
+
+
+def _annulus_ports(records, annulus, n_sector, first_circuit):
+    """One annulus as ``n_sector`` equal-share sector circuits, with shapes."""
+    from nova.circuit.conductor import ConductorSet, PolygonSection
+
+    polygons = []
+    columns = {name: [] for name in ConductorSet._columns}
+    circuit = first_circuit
+    labels = []
+    ri, ro = annulus
+    for key, r0, z0 in records:
+        for k in range(n_sector):
+            vertices = _sector_vertices(r0, z0, ri, ro, n_sector, k)
+            polygons.append(PolygonSection(circuit, vertices, 1.0 / n_sector))
+            centre = vertices.mean(axis=0)
+            span = np.ptp(vertices, axis=0)
+            for name, value in zip(
+                ConductorSet._columns,
+                (
+                    centre[0],
+                    centre[1],
+                    max(span[0], 1e-6),
+                    max(span[1], 1e-6),
+                    1.0,
+                    circuit,
+                ),
+                strict=True,
+            ):
+                columns[name].append(value)
+            labels.append((key, circuit))
+            circuit += 1
+    return ConductorSet(**columns, polygon_sections=tuple(polygons)), labels
+
+
+def _annulus_arm(n_sector=8, workers=4):
+    """Coil and jacket port matrices of the IDS-faithful annulus arm.
+
+    Each conductor and jacket is its machine-description annulus, cut into
+    ``n_sector`` equal-share sector polygons in separate circuits.  The returned
+    linkage entry folds the SOURCE share once, so the physical port reduction --
+    the share applied to source and observer alike -- weights each sector by the
+    square root of its share.  That weight is what makes the summed arm
+    reproduce the closed-form ring self-inductance of one conductor.
+    """
+    from nova.circuit.linkage import circuit_linkage_matrix
+
+    coils, jackets = _annulus_objects()
+    conductors, labels = _annulus_ports(coils, CONDUCTOR_ANNULUS, n_sector, 0)
+    jacket_set, jacket_labels = _annulus_ports(
+        jackets, JACKET_ANNULUS, n_sector, len(coils) * n_sector
+    )
+    combined = _concat(conductors, jacket_set)
+    n_circuit = len(labels) + len(jacket_labels)
+    matrix = circuit_linkage_matrix(
+        combined, range(n_circuit), section_n_max=6, workers=workers
+    )
+    weight = 1.0 / np.sqrt(n_sector)
+    coil_keys = sorted({key for key, _ in labels})
+    jacket_keys = [key for key, _ in jacket_labels[::n_sector]]
+    wc = np.zeros((n_circuit, len(coil_keys)))
+    wj = np.zeros((n_circuit, len(jacket_keys)))
+    for index, (key, _circuit) in enumerate(labels):
+        wc[index, coil_keys.index(key)] = weight
+    for index, (key, _circuit) in enumerate(jacket_labels):
+        wj[len(labels) + index, jacket_keys.index(key)] = weight
+    return wc.T @ matrix @ wc, wc.T @ matrix @ wj, wj.T @ matrix @ wj
+
+
+def _concat(first, second):
+    """One ConductorSet holding both, keeping shaped sections and circuit ids."""
+    from nova.circuit.conductor import ConductorSet
+
+    columns = {
+        name: np.concatenate([getattr(first, name), getattr(second, name)])
+        for name in ConductorSet._columns
+    }
+    return ConductorSet(
+        **columns,
+        polygon_sections=(*first.polygon_sections, *second.polygon_sections),
+    )
+
+
+def _ring_self(major, ri, ro):
+    """Closed-form self-inductance of a thin ring of mean radius ``major`` [H]."""
+    rho = np.sqrt(ri * ro)
+    return 4e-7 * np.pi * major * (np.log(8 * major / rho) - 2)
+
+
+def test_annulus_sector_arm_repairs_the_negativity_its_square_leaves():
+    """Red: the square collapse.  Green: the IDS-faithful annulus sectors."""
+    conductors, series, circuits = _vertical_arms()
+    _coil, _schur_matrix, square_values = _schur(conductors, circuits, series, False)
+    assert int((square_values < 0).sum()) == 2
+    assert square_values.min() < 0
+
+    L, M, P = _annulus_arm(n_sector=8)
+    schur = L - M @ np.linalg.solve(P, M.T)
+    values = np.linalg.eigvalsh(schur)
+    assert int((values < 0).sum()) == 0, values
+    assert values.min() > 0
+    lam = np.linalg.eigvalsh(np.linalg.solve(L, M @ np.linalg.solve(P, M.T)))
+    assert lam.max() < 1.0
+    coupling = np.abs(M / np.sqrt(np.diag(L)[:, None] * np.diag(P)[None, :]))
+    assert coupling.max() < 1.0
+
+
+def test_annulus_sector_arm_reproduces_the_ring_self_inductance():
+    """The arm's absolute inductance matches the closed-form ring it discretises."""
+    from nova.circuit.linkage import circuit_linkage_matrix
+
+    conductors, jackets = _annulus_objects()
+    single, _labels = _annulus_ports(conductors[:1], CONDUCTOR_ANNULUS, 8, 0)
+    jacket_only, _jacket_labels = _annulus_ports(jackets[:1], JACKET_ANNULUS, 8, 8)
+    matrix = circuit_linkage_matrix(
+        _concat(single, jacket_only), range(16), section_n_max=6, workers=1
+    )
+    wc = np.zeros((16, 1))
+    wc[:8, 0] = 1.0 / np.sqrt(8)
+    arm = float((wc.T @ matrix @ wc)[0, 0])
+    reference = _ring_self(conductors[0][1], *CONDUCTOR_ANNULUS)
+    assert arm == pytest.approx(reference, rel=0.03), (arm, reference)
+
+
 def test_jacket_square_lies_inside_the_conductor_it_should_surround():
     """The builder's area-equivalent squares invert the IDS radial ordering."""
     conductors, _series, circuits = _vertical_arms()
-    section_row = int(
-        np.flatnonzero(conductors.circuit == circuits[0])[0]
-    )
+    section_row = int(np.flatnonzero(conductors.circuit == circuits[0])[0])
     jacket_row = int(np.flatnonzero(conductors.circuit == circuits[-8])[0])
     conductor_side = float(conductors.dr[section_row]) * 1000
     jacket_side = float(conductors.dr[jacket_row]) * 1000

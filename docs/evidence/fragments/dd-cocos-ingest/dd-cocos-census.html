@@ -1,0 +1,18 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="dd-cocos-ingest">
+<meta name="plan-evidence-for" content="dd-cocos-ingest">
+<meta name="plan-verifies" content="dd-cocos-ingest#s1">
+<meta name="plan-recorded-at" content="2026-10-22">
+<title>DD COCOS census — landing | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+</head><body><main class="plan-doc">
+<section id="dd-cocos-census-landing">
+<h1 id="dd-cocos-census-landing-title">DD COCOS census</h1>
+<p id="dd-cocos-census-landing-outcome">The census landed in <a href="/nova/research/dd-cocos-census.html">docs/research/dd-cocos-census.html</a>. Two stated searches fix the population over <code>nova/</code>, <code>scripts/</code> and <code>packages/</code>: COCOS-dependent IDS paths (494 lines, 62 files) and COCOS comments plus fixed-orientation sign tests (80 lines, 25 files, of which exactly 1 is a sign test — <code>nova/imas/plasma_source.py:76</code>). A planted scratch reader is found by both searches as the positive control.</p>
+<p id="dd-cocos-census-landing-measure">Fixture-backed <code>nova_cocos.identify_convention</code> verdicts: CORSICA 130506/6 (DD 3.41.0) → 11 conforming; CORSICA 130506/403 (DD 3.38.1) → 11; DINA 105052/1 → 11; DINA 105069/3 → 11; DINA 105013/1 → σ<sub>Bp</sub>+1 (consistent); DINA 105014/1 → σ<sub>Bp</sub>−1, non-conforming, in both the <code>work</code> and home imasdb trees.</p>
+<p id="dd-cocos-census-landing-control">Negative control: inverting <code>PlasmaSlice.prescribe</code>'s guard in a scratch copy flips the verdict — the shipped guard accepts DINA 105014/1 (σ<sub>Bp</sub>−1) and refuses CORSICA 130506/6 (σ<sub>Bp</sub>+1); the inverted guard does the reverse. Log: <code>…/r-20261022T073213473843-dd-cocos-census/negative_control.log</code>.</p>
+<p id="dd-cocos-census-landing-scope">The census does not show §2–§5 mis-scoped. One item §1 does not name is recorded for §4: <code>nova/io/ingest.py</code>'s <code>cocos: int = 11</code> default and <code>nova/io/signalstore.py</code>'s cache key write and key on the source DD version rather than on a convention.</p>
+</section>
+</main></body></html>

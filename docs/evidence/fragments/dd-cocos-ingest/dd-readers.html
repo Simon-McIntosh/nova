@@ -1,0 +1,256 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="dd-cocos-ingest">
+<meta name="plan-status" content="in-progress">
+<meta name="plan-evidence-for" content="dd-cocos-ingest">
+<meta name="plan-verifies" content="dd-cocos-ingest#s3">
+<meta name="plan-recorded-at" content="2026-10-23">
+<title>The IDS readers on the COCOS translator | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+</head><body><main class="plan-doc">
+<section id="dd-readers-scope">
+<h2>The IDS readers on the COCOS translator</h2>
+<p id="dd-readers-scope-state">This node is split: the plasma source, the MAST frame
+reader, <code>Extrapolate.update</code>, the re-pointed tests and both plant helpers
+landed here, and <code>nova/imas/equilibrium.py</code> and
+<code>nova/imas/getslice.py</code> close as a node of their own. The reader changes
+below are committed and their gates are recorded. Both heavy files have now been run at head: every test of
+<code>tests/test_unseen_source_full_plant.py</code> passes, and
+<code>tests/test_coupled_plant.py</code> passes except two tests that build a
+plant with <em>no plasma source at all</em> and fail on a cached sectioned
+reference, which no code path this node touched reaches. The one done-when item
+still unmet is stated in the last section.</p>
+</section>
+
+<section id="dd-readers-plasma-source">
+<h3>PlasmaSource translates every convention-bearing quantity into COCOS 17</h3>
+<p id="dd-readers-plasma-source-entry">The one entry point is
+<code>nova.io.sourcemap.translate_equilibrium</code>.
+<code>PlasmaSource.from_imas</code> now reads the DD version from
+<code>equilibrium.ids_properties.version_put.data_dictionary</code> and, before any
+<code>PlasmaSlice</code> is built, takes that slice's <code>ip</code>,
+<code>psi_axis</code>, <code>psi_boundary</code>, <code>q_95</code> and
+<code>b0</code> through the translator. The translated <code>SourceSignalMap</code>
+is then applied quantity by quantity — <code>profiles_2d/psi</code>,
+<code>profiles_1d/psi</code>, <code>dpressure_dpsi</code>, <code>f_df_dpsi</code>,
+<code>global_quantities/psi_axis</code>, <code>global_quantities/psi_boundary</code>
+and <code>global_quantities/ip</code> — so no raw IDS value reaches a slice. A
+blocked map is raised by name, with the DD version, the expected COCOS and the
+measured digits, before the slice exists. Each row is fetched by target path
+through the map's own lookup, <code>SourceSignalMap.for_target</code>, so the
+reader holds no second copy of the map's indexing.</p>
+<p id="dd-readers-plasma-source-factors">The factors the DD3 to COCOS 17 mapping
+applies are those of the algebra, not a table here: <code>psi_like</code> −1 and
+<code>dodpsi_like</code> −1 (COCOS 11 and COCOS 17 differ in
+<code>sigma_Bp</code>), <code>ip_like</code>, <code>b0_like</code> and
+<code>q_like</code> all +1. The profile coordinate
+<code>(psi−psi_axis)/(psi_boundary−psi_axis)</code> is therefore invariant, and with
+both flux functions flipping alongside the flux map, the current density, the
+integrated current and the boundary outline are unchanged by the translation.</p>
+</section>
+
+<section id="dd-readers-guard">
+<h3>The plasma-source guard stays, re-expressed as the internal COCOS 17 check</h3>
+<p id="dd-readers-guard-check"><code>PlasmaSlice.prescribe</code> still refuses a
+slice whose flux ordering contradicts the current, and it is still the only
+sign site in any reader. Its digit now comes from the algebra —
+<code>nova_cocos.convention(NOVA_CONVENTION).sigma_bp</code>, which is −1 — rather
+than from a literal, so the condition is
+<code>sigma_Bp · (psi_boundary − psi_axis) · ip &gt; 0</code>. The refusal message
+keeps the substring <code>psi ordering disagree</code> that
+<code>test_mast_flipped_psi_is_refused</code> matches. This is the one permitted
+hit of the sign search and is named here as the exemption.</p>
+</section>
+
+<section id="dd-readers-mast">
+<h3>The MAST flux conversion is declared once, in one module</h3>
+<p id="dd-readers-mast-owner"><code>nova/media/sources/mast_efit.py</code> is the
+one module that owns the MAST flux conversion. The archive is not a DD read, so
+its convention is declared rather than implied:
+<code>nova.io.sourcemap.MAST_SOURCE_CONVENTION = 3</code> and
+<code>mast_flux_factor()</code>, which is
+<code>convention_transform(source=3, target=NOVA_CONVENTION).factor(psi_like)</code>
+= 2π. All three flux rows carry that declared factor in place: the flux map in
+<code>_flux_map</code> and the axis and boundary flux in <code>read_frame</code>.
+<code>PlasmaSource.from_mast</code> applies no further factor, so the 2π is applied
+exactly once on every ψ-like row. COCOS 3 and COCOS 17 share
+<code>sigma_Bp = −1</code>, so a conforming MAST slice passes the internal check
+and a reversed flux family is still refused.</p>
+<p id="dd-readers-mast-rows"><strong>Rows <code>read_frame</code> does not convert,
+and who converts them.</strong> <code>p_prime</code> (<code>pprime</code>),
+<code>ff_prime</code> (<code>ffprime</code>) and any <code>q</code> row are passed
+through raw. Their COCOS 3 to 17 factors are <code>dodpsi_like</code> 1/(2π) and
+<code>q_like</code> −1, and <em>no caller on that route converts them</em>: the
+media painters, <code>mast_parity_gate</code>, the transport route and the
+<code>scripts/</code> entry points all take the frame values as they are handed
+over, so a raw COCOS 3 <code>p′</code> or <code>FF′</code> reaching COCOS 17 code
+is a 2π error. That is a finding for §4, not a change made here — the two flux
+functions and <code>q</code> are unchanged for every caller by this node.</p>
+<p id="dd-readers-mast-row-test"><strong>The three rows are covered by reading
+them, not by restating the factor.</strong>
+<code>tests/test_media.py::test_each_mast_flux_row_carries_the_declared_factor</code>
+reads one synthetic <code>efm</code> group twice: once under the shipped COCOS&nbsp;3
+declaration and once with <code>sourcemap.MAST_SOURCE_CONVENTION</code> patched to
+13, whose factor is one. Each of <code>flux</code>, <code>flux_axis</code> and
+<code>flux_boundary</code> must then be exactly 2π times its COCOS&nbsp;13 reading,
+so a row that ignored the declaration and carried a literal would fail. The red arm
+was run and kept: reverting the axis row in <code>read_frame</code> to a hard-coded
+factor of one in a scratch copy reddens the test in 8.06&nbsp;s
+(<code>1.5</code> against <code>9.424778</code>), log
+<code>logs/mast_row_red.log</code>, <code>EXIT=1</code>; the file was then restored
+byte-identically and the test passes in 5.72&nbsp;s.</p>
+</section>
+
+<section id="dd-readers-sensor-signatures">
+<h3>Sensor readers: identity and geometry only</h3>
+<p id="dd-readers-sensors-exempt"><code>nova/imas/io_magnetics.py</code> reads
+sensor identity (<code>name</code>, <code>identifier</code>), geometry
+(<code>position</code>, <code>area</code>, <code>gm9</code>,
+<code>indices_differential</code>) and the diagnostic kind. It reads no signal
+sample, so it carries no convention and is exempt.
+<code>nova/imas/magnetics.py::Magnetics.flux_loop</code> reads
+<code>name</code> and <code>identifier</code> through
+<code>from_AoS</code> and is likewise exempt. No consumer in <code>nova/</code> or
+<code>scripts/</code> reads a flux-loop or pick-up signal sample from either
+module, so there is no sensor signal whose sign follows ψ or B_p on this route to
+convert. Should one be added, the conversion belongs at this boundary through
+<code>SourceSignal.convention_factor</code>.</p>
+</section>
+
+<section id="dd-readers-extrapolate">
+<h3>Extrapolate.update</h3>
+<p id="dd-readers-extrapolate-update">The <code># COCOS11</code> literal in
+<code>Extrapolate.update</code> is gone. Its negation was the internal
+convention's poloidal orientation, so the line now reads
+<code>convention(NOVA_CONVENTION).sigma_bp * self.psi_rbs(radius, height)</code>,
+computed once from the algebra. The display negation at
+<code>plot_2d_masked</code> is unchanged and remains §4's.</p>
+</section>
+
+<section id="dd-readers-reconstruction-route">
+<h3>The reconstruction route reads through the translator too</h3>
+<p id="dd-readers-reconstruction-route-source">The reconstruction-style source in
+<code>tests/test_coupled_plant.py</code> presents a discharge the way a reconstruction
+arrives — the last closed flux surface named as the boundary the polygon closes on,
+no separatrix; and the coil currents on a coarser cadence — but it must not
+re-orient the flux by hand. It now reads through <code>PlasmaSource.from_imas</code>
+and differs from the generic source only in presentation, so the DD3 to COCOS 17
+translation is applied exactly once. Before that change the reconstruction carried a
+raw COCOS 11 flux family beside a COCOS 17 plant and the internal check refused it,
+which reddened the route comparison and the flipped-sign refusal with it. The same
+hand-orientation was removed from
+<code>tests/test_coupled_plant.py</code> for the same reason.</p>
+</section>
+
+<section id="dd-readers-sign-search">
+<h3>The sign search, run again</h3>
+<p id="dd-readers-sign-search-hits">The census's sign search, run over
+<code>nova/ scripts/ packages/</code> at this head,
+<code>grep -rEn 'COCOS|span \* (ip|self\.plasma_current)|-self\.psi_rbs|= -data|-self\._data\.psi2d|norm\(psi\)|-self\["psi_boundary"\]' nova/ scripts/ packages/ --include=*.py</code>,
+returns <strong>103 lines in 26 files</strong>. Almost all of them are prose: the
+translator's and the MAST module's docstrings, the census's own
+<code>nova_cocos</code> digit plumbing, and the prototypes. The sign sites that
+remain are, by class: <strong>the one permitted reader hit</strong>, the internal
+COCOS 17 check in <code>PlasmaSource.prescribe</code>
+(<code>sigma_bp * span * self.plasma_current</code>, line 101), which takes its
+σ_Bp from <code>nova_cocos.convention(NOVA_CONVENTION)</code>; <strong>writer
+sites</strong>, <code>nova/imas/pulsedesign.py</code> lines 531, 544 and 581, which
+negate a solution before writing it; and <strong>internal consumers</strong>,
+<code>nova/imas/extrapolate.py:350</code> (contour levels for display),
+<code>nova/imas/flux.py:94</code> (a commented line),
+<code>nova/biot/contour.py:198</code> and
+<code>nova/equilibrium/inverse.py:245</code>. Every writer and consumer site is §4's,
+as the plan states.</p>
+<p id="dd-readers-sign-search-split-readers">The two readers this node did not touch,
+<code>nova/imas/equilibrium.py</code> and <code>nova/imas/getslice.py</code>, have
+<strong>no hit at all</strong> in the sign search: neither carries a
+fixed-orientation sign test or a <code># COCOS</code> sign site. What they do carry
+is 38 and 2 hits from the census's second search, the one for readers of
+COCOS-dependent IDS paths, because both read <code>profiles_2d.psi</code>,
+<code>profiles_1d.psi</code>, <code>dpressure_dpsi</code>, <code>f_df_dpsi</code>,
+<code>psi_axis</code> and <code>psi_boundary</code> raw and neither passes them
+through the translator. Their <code>psi_norm</code> renormalisation — the profile
+coordinate divided by its own endpoints — is why the omission is invisible rather
+than wrong in the plotted field. They are the split-out node's work, and the search
+run here is what shows the split is not a loose end left in a sign site.</p>
+<p id="dd-readers-sign-search-control"><strong>Positive control.</strong> A fixed-orientation
+sign test planted in a scratch copy of one reader is found by the same search. Over
+copies of <code>nova/</code>, <code>scripts/</code> and <code>packages/</code> the search
+returns 103 lines in 26 files, the same as the committed tree; adding
+<code>return -self._data.psi2d</code> to the scratch <code>nova/imas/getslice.py</code>
+takes it to 104 lines in 27 files, with the new hit named at
+<code>nova/imas/getslice.py:136</code>. The search therefore reports a sign site that
+exists rather than merely quiet on the tree as it stands, and the two readers this
+node did not touch are quiet in the same run.</p>
+</section>
+
+<section id="dd-readers-heavy-arm">
+<h3>The heavy arm, and the negative control</h3>
+<p id="dd-readers-heavy-arm-result">The two full-plant files ran as one
+<code>sirius</code> job, one fresh pytest process per file:
+<code>tests/test_unseen_source_full_plant.py</code> returned <strong>2 passed, 1
+xfailed</strong> in 152.72 s, and <code>tests/test_coupled_plant.py</code>
+<strong>14 passed, 4 failed</strong> in 408.97 s. Two of the four were this node's:
+both test helpers built their slices from raw IDS values, so a DD3 flux family in
+COCOS 11 met a COCOS 17 plant and <code>prescribe</code>'s internal check refused
+it. Both now read through the translator, and the two tests pass at head —
+the route comparison in its pair run and the flipped-sign refusal alone in 93 s,
+where beside its sibling it had hit a 300 s pulse-read timeout. The other two are
+the machine-only tests above.</p>
+<p id="dd-readers-negative-control"><strong>The declared negative control, run:</strong>
+bypassing the translation in <code>PlasmaSource.from_imas</code> — returning the raw
+values, so raw DD3 values reach the slices — reddens
+<code>tests/test_plasma_source.py::test_from_imas_prescribes_corsica_130506_6</code>
+in 16.11 s with <code>plasma current sign and psi ordering disagree with COCOS 17:
+sigma_Bp=-1 requires sign(psi_boundary - psi_axis) = sigma_Bp * sign(ip)</code>.
+CORSICA 130506/6 is refused again by the internal check exactly as declared, and
+the working file was restored byte-identically afterwards.</p>
+</section>
+
+<section id="dd-readers-remainder">
+<h3>What is still open, and what the split-out node owns</h3>
+<p id="dd-readers-remainder-split">
+<strong>The split-out node:</strong> <code>nova/imas/equilibrium.py</code> and
+<code>nova/imas/getslice.py</code> still read their convention-bearing quantities
+raw, and moving them onto the translator is its own piece of work with its own
+data-opening tests: that reader's <code>psi_norm</code> renormalisation absorbs the
+sign flip, so the omission is invisible in the plotted field rather than visibly
+wrong, and it has to be brought onto the translator with a gate that can see it.
+Neither file is touched here.</p>
+<p id="dd-readers-remainder-machine-tests">
+<strong>The two machine-only tests</strong> of <code>tests/test_coupled_plant.py</code>
+build a plant with <em>no plasma source at all</em>, so no quantity this node
+translates is read on their path. Both were run at the base revision
+<code>e986c9314</code> and at head, each in its own fresh process, and judged by
+delta:</p>
+<table id="dd-readers-plant-delta">
+<tr><th>test</th><th>base <code>e986c9314</code></th><th>head</th><th>verdict</th></tr>
+<tr><td><code>test_real_sectioned_set_reduction_is_within_one_percent</code></td>
+<td>1 failed (10.68 s)</td><td>1 failed (23.19 s)</td>
+<td>pre-existing: identical numbers both sides —
+<code>[0,0]: 0.7608871129712627 (ACTUAL), 0.7641872409367593 (DESIRED)</code>,
+196 of 196 mismatched, max abs difference 0.01539421. The test compares a
+one-layer plant built now against the cached sectioned reference at
+<code>~/.cache/iter-passive-plasma-circuit/coupled-plant/…/plant.npz</code>, so
+the reference is what has gone stale.</td></tr>
+<tr><td><code>test_real_sectioned_self_holds_the_unsectioned_box_check</code></td>
+<td>1 passed (997.02 s)</td><td>1 passed (989.49 s)</td>
+<td>passes on both sides once <code>--timeout=1200</code> is passed: it is a slow
+polygon integral of about 16 minutes, not a hang. The failure this node first
+reported for it was the repository's 300 s default timeout cutting a passing
+test, so it is not a failure at all.</td></tr>
+</table>
+<p id="dd-readers-remainder-machine-tests-note">So the node adds no failure on
+either: one is pre-existing and unmeasured before this run, the other was a
+timeout that the raised budget removes. Note the correction behind the first
+submission: its base arms exited 97 — the <code>cd</code> failed — because the
+base tree had been staged under the login node's <code>/tmp</code>, which a compute
+node cannot see. It is staged on GPFS for the arms reported here.</p>
+<p id="dd-readers-remainder-open"><strong>Also open:</strong> the rebuilt-cell count
+for the replacement conforming pulse <code>105052/1</code> was carried over from
+<code>105013/1</code> as 723 and has not been measured, and the full-plant test of
+<code>tests/test_unseen_source_full_plant.py</code> takes a long wall, which belongs
+on a debug partition.</p>
+</section>
+</main></body></html>

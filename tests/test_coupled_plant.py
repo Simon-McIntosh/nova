@@ -19,7 +19,7 @@ from nova.circuit.coupled_plant import (
 )
 from nova.circuit.linkage import circuit_linkage_matrix, ring_resistance
 from nova.circuit.passive import NOMINAL_STEEL_RESISTIVITY, PassiveCircuitSystem
-from nova.imas.plasma_source import CoilCurrentSeries, PlasmaSlice, PlasmaSource
+from nova.imas.plasma_source import CoilCurrentSeries, PlasmaSource
 from nova.imas.prescribed_plasma import plasma_linked_flux_history
 from nova.imas.profiles import PrescribedCurrent
 from nova.media.sources.frame import EquilibriumFrame
@@ -692,8 +692,8 @@ def test_generic_source_drives_the_plant(tmp_path):
     )
 
 
-DINA_URI = "imas:hdf5?user=mcintos;pulse=105014;run=1;database=iter;version=3"
-DINA_DD_VERSION = "3.38.1"
+DINA_URI = "imas:hdf5?path=/work/imas/shared/imasdb/ITER/3/105069/3"
+DINA_DD_VERSION = "3.39.0"
 ITER_SECTION_CACHE = Path(
     "/home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit"
     "/sectioned-conductor-set/66c10162f3e37adb2679"
@@ -752,7 +752,7 @@ def _iter_sectioned_machine():
 
 
 def _dina_equilibrium_and_coils(indices):
-    """Open DINA 105014/1's equilibrium slices and its active-coil series."""
+    """Open DINA 105069/3's equilibrium slices and its active-coil series."""
     import imas
 
     with imas.DBEntry(DINA_URI, "r", dd_version=DINA_DD_VERSION) as entry:
@@ -764,15 +764,15 @@ def _dina_equilibrium_and_coils(indices):
 def _reconstruction_style_source(equilibrium, active, indices, *, stride: int = 4):
     """Present DINA's data the way a reconstruction arrives at the source.
 
-    The plasma is prescribed from EFIT-style p' and FF' on DINA's own psi
-    normalisation, with the stored last closed flux surface named as the
-    boundary rather than being called a separatrix, and the coil currents are
-    resampled onto a coarser cadence -- every ``stride``-th row of their own
-    clock -- so the coil story reaches the source on an independent cadence,
-    as a reconstruction's separately acquired coil traces do.
+    The plasma is read through the source's own IDS reader, so its flux family
+    arrives in COCOS 17 as every other reader's does, and is then presented the
+    way a reconstruction arrives: the stored last closed flux surface is named
+    as the boundary the polygon closes on, with no separatrix outline or
+    x-point to prefer, and the coil currents are resampled onto a coarser
+    cadence -- every ``stride``-th row of their own clock -- so the coil story
+    reaches the source on an independent cadence, as a reconstruction's
+    separately acquired coil traces do.
     """
-    from nova.imas.plasma_source import CoilCurrentSeries
-
     coil_time = np.asarray(active.time, float)
     sampled = np.arange(0, coil_time.size, stride)
     coils = CoilCurrentSeries(
@@ -782,42 +782,21 @@ def _reconstruction_style_source(equilibrium, active, indices, *, stride: int = 
             [np.asarray(coil.current.data, float)[sampled] for coil in active.coil]
         ),
     )
-    slices = []
-    for index in indices:
-        slice_ = equilibrium.time_slice[index]
-        global_ = slice_.global_quantities
-        profile = slice_.profiles_1d
-        map_ = slice_.profiles_2d[0]
-        lcfs = slice_.boundary.outline
-        slices.append(
-            PlasmaSlice(
-                time=float(slice_.time),
-                radius=np.asarray(map_.grid.dim1),
-                height=np.asarray(map_.grid.dim2),
-                psi=np.asarray(map_.psi),
-                psi_samples=np.asarray(profile.psi),
-                p_prime=np.asarray(profile.dpressure_dpsi),
-                ff_prime=np.asarray(profile.f_df_dpsi),
-                psi_axis=float(global_.psi_axis),
-                psi_boundary=float(global_.psi_boundary),
-                plasma_current=float(global_.ip),
-                outline=np.empty((0, 2)),
-                axis=(
-                    float(global_.magnetic_axis.r),
-                    float(global_.magnetic_axis.z),
-                ),
-                flux_derivative_scale=2 * np.pi,
-                x_points=(),
-                boundary_outline=np.c_[np.asarray(lcfs.r), np.asarray(lcfs.z)],
-            )
-        )
-    return PlasmaSource(
-        tuple(slices), coils, provenance="DINA 105014/1 as a reconstruction"
+    source = PlasmaSource.from_imas(
+        equilibrium,
+        active,
+        provenance="DINA 105069/3 as a reconstruction",
+        indices=indices,
     )
+    slices = tuple(
+        replace(slice_, outline=np.empty((0, 2)), x_points=())
+        for slice_ in source.slices
+    )
+    return replace(source, slices=slices, coils=coils)
 
 
 def _dina_sources(index: int = 200):
-    """DINA 105014/1 through both source presentations, opened once.
+    """DINA 105069/3 through both source presentations, opened once.
 
     Returns the generic source and the minimal source carrying DINA's own
     prescription, the latter built the way the call is driven today, so the
@@ -835,14 +814,14 @@ def _dina_sources(index: int = 200):
         label="dina-native",
     )
     generic = PlasmaSource.from_imas(
-        equilibrium, active, provenance="DINA 105014/1", indices=[index]
+        equilibrium, active, provenance="DINA 105069/3", indices=[index]
     )
     return generic, reference
 
 
 @pytest.mark.slow
 def test_dina_case_through_the_generic_source_is_unchanged(tmp_path):
-    """105014/1 through the generic source returns today's plant.
+    """105069/3 through the generic source returns today's plant.
 
     The reference is built the way the call is driven today: a minimal source
     carrying DINA's own prescription.  The generic source reproduces that
@@ -894,10 +873,10 @@ def test_reconstruction_route_into_the_plant_meets_the_stated_tolerance(tmp_path
     machine = _reduced_machine()
     equilibrium, active = _dina_equilibrium_and_coils([200])
     generic = PlasmaSource.from_imas(
-        equilibrium, active, provenance="DINA 105014/1", indices=[200]
+        equilibrium, active, provenance="DINA 105069/3", indices=[200]
     )
     reconstruction = _reconstruction_style_source(equilibrium, active, [200])
-    assert reconstruction.label == "DINA 105014/1 as a reconstruction"
+    assert reconstruction.label == "DINA 105069/3 as a reconstruction"
 
     baseline = coupled_plant(machine, generic, cache_dir=tmp_path / "generic")
     plant = coupled_plant(

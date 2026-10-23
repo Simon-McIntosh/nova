@@ -274,7 +274,14 @@ def test_the_dd4_fixture_passes_through_bit_identically(tmp_path):
         for signal in source_map.signals:
             assert signal.source_convention == DD4_CONVENTION
             assert signal.target_convention == NOVA_CONVENTION
-            assert signal.convention_factor == 1.0
+            # The analytic composition carries the measure: DD4 is COCOS 17
+            # already, so every transformation's factor is the identity's. The
+            # sample comparison beside it only shows ``apply`` carries whatever
+            # factor the row holds, since it compares the converted samples with
+            # the samples the test handed in.
+            assert signal.convention_factor == pytest.approx(
+                _analytic_factor(signal.transformation, COCOS_17, COCOS_17)
+            )
             raw = np.array([0.0, -1.5, np.nan, 7.0])
             assert np.array_equal(signal.apply(raw), raw, equal_nan=True)
 

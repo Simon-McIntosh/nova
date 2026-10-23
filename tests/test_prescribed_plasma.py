@@ -478,8 +478,8 @@ SECTIONED_ENTRY = Path(
     "/home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit"
     "/sectioned-conductor-set/66c10162f3e37adb2679"
 )
-DINA_CASE_URI = "imas:hdf5?user=mcintos;pulse=105014;run=1;database=iter;version=3"
-DINA_CASE_DD = "3.38.1"
+DINA_CASE_URI = "imas:hdf5?path=/work/imas/shared/imasdb/ITER/3/105069/3"
+DINA_CASE_DD = "3.39.0"
 SLICE_INDEX = 200
 
 
@@ -524,7 +524,7 @@ def test_machine_section_the_box_rule_cannot_sample_is_linked(current):
 
 @pytest.mark.slow
 def test_polygon_flux_change_on_a_real_slice(tmp_path):
-    """Per-circuit change in linked flux on one 105014/1 slice, and the maximum.
+    """Per-circuit change in linked flux on one 105069/3 slice, and the maximum.
 
     Every polygon circuit the bounding-box rule could sample is compared with
     the reciprocity kernel on the same slice of the same source, so the table
@@ -546,7 +546,7 @@ def test_polygon_flux_change_on_a_real_slice(tmp_path):
         equilibrium = entry.get("equilibrium", lazy=False, autoconvert=False)
         active = entry.get("pf_active", lazy=False, autoconvert=False)
     source = PlasmaSource.from_imas(
-        equilibrium, active, provenance="DINA 105014/1", indices=[SLICE_INDEX]
+        equilibrium, active, provenance="DINA 105069/3", indices=[SLICE_INDEX]
     )
     current = list(source.prescribed_currents())[0]
     conductors = machine.conductors

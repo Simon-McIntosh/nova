@@ -1,0 +1,365 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="dd-cocos-ingest">
+<meta name="plan-status" content="in-progress">
+<meta name="plan-evidence-for" content="dd-cocos-ingest">
+<meta name="plan-verifies" content="dd-cocos-ingest#s5">
+<meta name="plan-recorded-at" content="2026-10-23">
+<title>The sign of the flux-function current relation at COCOS 17 | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+</head><body><main class="plan-doc">
+
+<section id="flux-function-sign-scope">
+<h2>The sign of the flux-function current relation at COCOS 17</h2>
+<p id="flux-function-sign-scope-verdict">Three routes agree, and they say
+<strong>plus</strong>: at COCOS 17 the toroidal current density is</p>
+<p id="flux-function-sign-scope-relation" style="text-align:center">
+j<sub>&#966;</sub>
+= +2&#960; ( R &#8706;p/&#8706;&#968; + F &#8706;F/&#8706;&#968; / (&#956;<sub>0</sub> R) )
+</p>
+<p id="flux-function-sign-scope-owner">with &#968; the Data Dictionary&rsquo;s own
+signed poloidal flux and the derivatives taken against it.
+<code>nova.equilibrium.convention.toroidal_current_density</code> states the
+<strong>minus</strong>, together with a negated derivative
+(<code>p&prime; = &minus;dp/d&#934;</code>), while declaring
+<code>convention(17)</code>. It therefore reproduces the historically correct
+current magnitude and an anti-parallel current direction when it is fed the
+Data Dictionary&rsquo;s own derivatives. That is the disagreement
+followup <code>f-ddc-006</code> repairs; this node changes no production
+module.</p>
+<p id="flux-function-sign-scope-routes">The routes are the general digit form
+evaluated at the two conventions, the DD4-native regression (COCOS 17 by
+definition, needing no translation), and imas-ambix&rsquo;s convention owner
+read-only. The third is a partial cross-check and is reported as such below
+rather than counted as an independent confirmation of the whole relation.</p>
+</section>
+
+<section id="flux-function-sign-general">
+<h3>The general form, and what 11 to 17 does to it</h3>
+<p id="flux-function-sign-general-form">Sauter &amp; Medvedev (CPC 184, 2013)
+describe each convention by four digits
+(<code>&#963;<sub>Bp</sub></code>, <code>e<sub>Bp</sub></code>,
+<code>&#963;<sub>R&#966;Z</sub></code>,
+<code>&#963;<sub>&#961;&#952;&#966;</sub></code>), which
+<code>packages/nova-cocos/src/nova_cocos/__init__.py</code> transcribes as
+<code>CONVENTION_DIGITS</code> as Table I. Writing the poloidal flux the
+convention carries as
+<code>&#968;<sup>(c)</sup></code> and the flux per radian as
+<code>&#936;/(2&#960;)</code>, the Grad&ndash;Shafranov source term in those
+digits is</p>
+<p id="flux-function-sign-general-expression" style="text-align:center">
+j<sub>&#966;</sub> =
+&minus; &#963;<sub>Bp</sub> (2&#960;)<sup>e<sub>Bp</sub></sup>
+[ R &#8706;p/&#8706;&#968;<sup>(c)</sup>
++ F &#8706;F/&#8706;&#968;<sup>(c)</sup> / (&#956;<sub>0</sub> R) ]
+</p>
+<p id="flux-function-sign-general-terms">The three pieces each do one job.
+<code>e<sub>Bp</sub></code> decides whether the factor 2&#960; is present: it
+is the digit that records the move to total flux
+<code>&#934; = 2&#960; R A<sub>&#966;</sub> = 2&#960;&#968;</code>, and
+<code>e<sub>Bp</sub> = 1</code> supplies the 2&#960;. The overall sign is set
+by <code>&#963;<sub>Bp</sub></code>, which is also the sign relating
+<code>&#968;</code> to <code>R A<sub>&#966;</sub></code>:
+<code>&#963;<sub>Bp</sub> = +1</code> means the convention&rsquo;s
+<code>&#968;</code> increases the way the digit says, and
+<code>&#963;<sub>Bp</sub> = &minus;1</code> the other way. Since the derivative
+is taken against the convention&rsquo;s own <code>&#968;</code>, flipping
+<code>&#963;<sub>Bp</sub></code> flips the derivative too, and the two signs
+cancel inside the written equation.
+<code>&#963;<sub>R&#966;Z</sub></code> and
+<code>&#963;<sub>&#961;&#952;&#966;</sub></code> fix the handedness of the
+coordinate triples; they do not enter the source term of this equation but
+they fix the sign of <code>q</code> and of <code>B<sub>0</sub></code>, which is
+how they are measured below.</p>
+<p id="flux-function-sign-general-citations">Of Sauter &amp; Medvedev&rsquo;s
+numbered equations, two are cited here because the repository itself cites
+them and they can be checked against the code in one read: <strong>Eq. 23</strong>,
+<code>sign(&#968;<sub>boundary</sub> &minus; &#968;<sub>axis</sub>) =
+&#963;<sub>Ip</sub> &#963;<sub>Bp</sub></code>, which
+<code>nova/io/sourcemap.py:815</code> uses to form
+<code>&#963;<sub>Bp</sub></code>; and <strong>Eq. 22</strong>, the consistency
+relation between <code>dp/d&#968;</code> and the same product, which is the
+cross-check at <code>nova/io/sourcemap.py:840</code>. The remaining equations
+of the paper could not be retrieved from this workstation during the run
+(the publisher refused the fetch), so the general expression above is stated
+in the digit algebra the repository implements rather than attributed to a
+particular numbered equation that was not read. What is measured below does
+not rest on those citations: it rests on the regression.</p>
+
+<table id="flux-function-sign-general-table">
+<caption>The same physical current written at COCOS 11 and COCOS 17</caption>
+<thead><tr><th>convention</th><th>&#963;<sub>Bp</sub></th>
+<th>e<sub>Bp</sub></th><th>&#963;<sub>R&#966;Z</sub></th>
+<th>&#963;<sub>&#961;&#952;&#966;</sub></th>
+<th>sign of the bracket</th><th>&#968; against R A<sub>&#966;</sub></th></tr></thead>
+<tbody>
+<tr><td>COCOS 11 (DD3)</td><td>+1</td><td>1</td><td>+1</td><td>+1</td>
+<td>&minus;</td><td>same direction</td></tr>
+<tr><td>COCOS 17 (DD4)</td><td>&minus;1</td><td>1</td><td>+1</td><td>+1</td>
+<td>+</td><td>opposite direction</td></tr>
+</tbody>
+</table>
+<p id="flux-function-sign-general-invariance">So the equation is the same
+written at either convention; what changes between them is which way the flux
+runs, and therefore the sign of the numbers the derivatives carry. A
+translation from COCOS 11 to COCOS 17 negates both
+<code>&#968;</code> and <code>dp/d&#968;</code>, which
+<code>packages/nova-cocos</code> exposes as
+<code>convention_transform(11, 17).factor(PSI_LIKE) = &minus;1</code> and
+<code>.factor(DODPSI_LIKE) = &minus;1</code>. That identity is what
+<code>test_the_digit_form_gives_the_same_current_in_cocos_11_and_17</code>
+pins, and it is why the DD4 regression below and the raw DD3-source
+regressions must not be read as two conventions disagreeing.</p>
+</section>
+
+<section id="flux-function-sign-dd4">
+<h3>The DD4-native regression, cell by cell</h3>
+<p id="flux-function-sign-dd4-method">The measurement is
+<code>scripts/flux_function_sign/measure.py</code>. It takes the pinned DD 4.1.0
+reference layer of <code>iter_corsica_130506</code> named in
+<code>tests/data-manifest.json</code> (digest checked before opening; the layer
+is COCOS 17 by definition, so nothing is translated), opens it through
+<code>imas.DBEntry</code> at its written version, asserts
+<code>homogeneous_time == 1</code>, fits the stored non-uniform
+<code>profiles_2d</code> map with a cubic spline onto a uniform
+65 &times; 129 grid, and forms two currents on that grid:</p>
+<ul id="flux-function-sign-dd4-currents">
+<li><strong>grid current</strong>: the map through
+<code>nova.equilibrium.map_extraction.apply_delta_star</code>, the
+repository&rsquo;s one structured-grid Grad&ndash;Shafranov operator, in A m<sup>&minus;2</sup>;</li>
+<li><strong>profile current</strong>: <code>factor &times; (R &middot; dp/d&#968;
++ FF&prime;/(&#956;<sub>0</sub>R))</code> from the stored
+<code>dpressure_dpsi</code> and <code>f_df_dpsi</code>, interpolated onto the
+map&rsquo;s normalised flux, with <code>factor</code> set to <code>+2&#960;</code>
+and to <code>&minus;2&#960;</code> in two arms.</li>
+</ul>
+<p id="flux-function-sign-dd4-regression">A single sign leaves the two fields
+collinear; a wrong one reverses the correlation. The table gives the
+least-squares slope of the grid current on the profile current over every cell
+where the stencil is complete, its Pearson correlation, and the RMS residual
+as a fraction of the grid current&rsquo;s RMS. The last column is the integral
+of the grid current over the scored area divided by the recorded plasma
+current, which is near one exactly when the operator&rsquo;s units and the
+total-flux reading are right.</p>
+
+<table id="flux-function-sign-dd4-table">
+<caption>DD4 4.1.0, <code>iter_corsica_130506</code> &mdash; DD4-native, COCOS 17 by definition</caption>
+<thead><tr><th>slice</th><th>I<sub>p</sub> [MA]</th>
+<th>slope at +2&#960;</th><th>corr</th><th>residual / grid rms</th>
+<th>slope at &minus;2&#960;</th><th>corr</th>
+<th>&int;j dA / I<sub>p</sub></th></tr></thead>
+<tbody>
+<tr><td>0</td><td>&minus;15</td><td>+1.01339</td><td>+0.93769</td><td>0.2352</td>
+<td>&minus;1.01339</td><td>&minus;0.93769</td><td>0.9955</td></tr>
+<tr><td>1</td><td>&minus;15</td><td>+1.01459</td><td>+0.93339</td><td>0.2421</td>
+<td>&minus;1.01459</td><td>&minus;0.93339</td><td>0.9957</td></tr>
+<tr><td>3</td><td>&minus;15</td><td>+1.01530</td><td>+0.93166</td><td>0.2449</td>
+<td>&minus;1.01530</td><td>&minus;0.93166</td><td>0.9954</td></tr>
+</tbody>
+</table>
+
+<p id="flux-function-sign-dd4-reading">Three of the layer&rsquo;s four slices
+were sampled. The <code>+2&#960;</code> arm is collinear at unit slope with a
+positive correlation on every slice; the <code>&minus;2&#960;</code> arm is
+collinear with the opposite slope. The integral ratio sits within half a per
+cent of one, which is the evidence that <code>&#968;</code> is being read as
+the total flux the 2&#960; belongs to. The residual is a quarter of the grid
+current&rsquo;s RMS and does not distinguish the two arms &mdash; it is the
+sign of the slope that does, and scatter of that size is what a spline
+re-sampling of a coarser stored grid leaves behind.</p>
+<p id="flux-function-sign-dd4-ebp">The same layer pins <code>e<sub>Bp</sub></code>
+from magnitude alone: the operator&rsquo;s integral is 1.00003, 1.00005 and
+1.00006 times the recorded current under <code>e<sub>Bp</sub> = 1</code>, and
+6.2834 times it under <code>e<sub>Bp</sub> = 0</code>. The ratio near one is
+the <code>e<sub>Bp</sub> = 1</code> reading, and the near-2&#960; ratio is what
+a missing 2&#960; factor looks like.</p>
+
+<h4 id="flux-function-sign-dd4-control-heading">The literal negative control</h4>
+<p id="flux-function-sign-dd4-control">The declared mutation is
+&ldquo;feed the DD4 regression the flux map with psi negated; the slope sign
+reverses&rdquo;. Negating the map fed to the operator and leaving the flux
+functions where they are gives, on the same three slices, slopes of
+&minus;1.01339, &minus;1.01459 and &minus;1.01530 with correlations
+&minus;0.93769, &minus;0.93339 and &minus;0.93166, and integral ratios of
+&minus;0.9955, &minus;0.9957 and &minus;0.9954. Every sign reverses and no
+magnitude moves, which is what a real sign measurement must do and what a
+measurement that is really reporting the interpolation would not.</p>
+<p id="flux-function-sign-dd4-control-check">The same mutation applied to the
+check itself turns the passing arm red. Running the test file with the
+recorded regression literals replaced by the slopes the negated-map run
+produced gives <code>EXIT=1</code> with
+<code>test_the_cocos_17_relation_carries_plus_two_pi</code> FAILED, while the
+head arm passes. The log is the run&rsquo;s <code>negative-control.log</code>.</p>
+</section>
+
+<section id="flux-function-sign-ambix">
+<h3>Cross-check against imas-ambix, read-only</h3>
+<p id="flux-function-sign-ambix-what">The convention owner is
+<code>~/Code/imas-ambix/imas_ambix/challenge/convention.py</code>. Its
+<code>_integrated_current</code> states the Ampere half of the relation as
+<code>density = &minus;delta_star / (tau &middot; &#956;<sub>0</sub> &middot; R)</code>
+with <code>total_flux = factor &middot; source_flux</code>, where the factor is
+2&#960; when the convention carries total flux. That is the same
+<code>&Delta;&#42;&#968; = &minus;&#956;<sub>0</sub> R j<sub>&#966;</sub></code>
+with <code>&#968;</code> the total flux that nova&rsquo;s operator applies, and
+it is consistent with the <code>e<sub>Bp</sub> = 1</code> and 2&#960; parts of
+the relation.</p>
+<p id="flux-function-sign-ambix-partial">It does <strong>not</strong>
+independently state the sign multiplying the
+<code>R p&prime; + FF&prime;/(&#956;<sub>0</sub>R)</code> bracket: the source
+term is an input to that function, not something it forms from stored
+derivatives. So the cross-check confirms the Ampere side and the 2&#960;, and
+adds no evidence about the bracket&rsquo;s sign. This route is recorded as
+partial rather than as a third agreement, and the conclusion below rests on
+the first two routes.</p>
+</section>
+
+<section id="flux-function-sign-sources">
+<h3>Each source&rsquo;s COCOS from its own data</h3>
+<p id="flux-function-sign-sources-method">Five archive sources were opened at
+their written DD version through <code>imas.DBEntry</code>, with
+<code>homogeneous_time</code> checked, and read at one slice each. Three
+digits are measured from the stored fields:</p>
+<ul id="flux-function-sign-sources-digits">
+<li><code>&#963;<sub>Bp</sub></code> and
+<code>&#963;<sub>&#961;&#952;&#966;</sub></code> through
+<code>nova.io.sourcemap.determine_digits</code>, from the sign of
+<code>&#968;<sub>boundary</sub> &minus; &#968;<sub>axis</sub></code> against
+<code>I<sub>p</sub></code> and from <code>sign(q<sub>95</sub>)</code> against
+<code>I<sub>p</sub></code> and <code>B<sub>0</sub></code>;</li>
+<li><code>e<sub>Bp</sub></code> from magnitude, as above, by the ratio of the
+map&rsquo;s integral current to <code>I<sub>p</sub></code> under each reading;</li>
+<li>the sign the Grad&ndash;Shafranov relation itself implies between the map
+and the stored <code>p&prime;</code>, <code>FF&prime;</code> &mdash; the
+regression&rsquo;s slope sign.</li>
+</ul>
+<p id="flux-function-sign-sources-rdpz"><code>&#963;<sub>R&#966;Z</sub></code> is
+<strong>not</strong> derivable from scalar equilibrium quantities, and
+<code>determine_digits</code> says so in its own docstring: it is supplied by
+the caller. All five files are written in DD 3.38&ndash;3.41, for which
+<code>nova.io.sourcemap.dd_equilibrium_convention</code> fixes it to +1, so
+the tuples below are completed from the declared DD version and that digit
+alone is not measured. It is the one digit here that could hide a
+disagreement.</p>
+
+<table id="flux-function-sign-sources-table">
+<caption>Digits read from stored fields; <code>&#963;<sub>R&#966;Z</sub></code> from the declared DD version</caption>
+<thead><tr><th>source</th><th>DD</th><th>slice</th>
+<th>&#963;<sub>Bp</sub></th><th>e<sub>Bp</sub></th>
+<th>&#963;<sub>R&#966;Z</sub></th><th>&#963;<sub>&#961;&#952;&#966;</sub></th>
+<th>reads as</th><th>GS-implied &#963;<sub>Bp</sub></th>
+<th>GS slope</th><th>corr</th></tr></thead>
+<tbody>
+<tr><td>CORSICA 130506/6</td><td>3.41.0</td><td>1</td>
+<td>+1</td><td>1</td><td>+1</td><td>+1</td><td>COCOS 11</td><td>+1 (agrees)</td>
+<td>+1.00127</td><td>+0.99500</td></tr>
+<tr><td>DINA 105052/1</td><td>3.38.1</td><td>75</td>
+<td>+1</td><td>1</td><td>+1</td><td>+1</td><td>COCOS 11</td><td>+1 (agrees)</td>
+<td>+0.99036</td><td>+0.99994</td></tr>
+<tr><td>DINA 105069/3</td><td>3.39.0</td><td>76</td>
+<td>+1</td><td>1</td><td>+1</td><td>+1</td><td>COCOS 11</td><td>+1 (agrees)</td>
+<td>+1.03385</td><td>+0.99686</td></tr>
+<tr><td>DINA 105014/1</td><td>3.38.1</td><td>117</td>
+<td>&minus;1</td><td>1</td><td>+1</td><td>+1</td><td><strong>COCOS 17</strong></td><td>&minus;1 (agrees)</td>
+<td>+0.98794</td><td>+0.99817</td></tr>
+<tr><td>DINA 105013/1</td><td>3.38.1</td><td>116</td>
+<td>+1</td><td>1</td><td>+1</td><td>&minus;1</td><td><strong>COCOS 15</strong></td><td>+1 (agrees)</td>
+<td><strong>&minus;1.00087</strong></td><td><strong>&minus;1.00000</strong></td></tr>
+</tbody>
+</table>
+
+<p id="flux-function-sign-sources-agreement">The GS-implied
+<code>&#963;<sub>Bp</sub></code> is <code>&minus;sign(&int;j dA / I<sub>p</sub>)</code>,
+and it agrees with <code>determine_digits</code> on all five sources, which is
+the expected outcome and not the interesting one. <code>e<sub>Bp</sub> = 1</code>
+on all five: the integral ratio is within 3&ndash;7 per cent of one under that
+reading and near 2&#960; under the other.</p>
+<p id="flux-function-sign-sources-conforming">Three of the five are COCOS 11,
+which is what a DD3 file should be, and are conforming: CORSICA 130506/6,
+DINA 105052/1 and DINA 105069/3. Two are <strong>not</strong> conforming to the
+DD version they are written in. DINA 105014/1 carries
+<code>&#963;<sub>Bp</sub> = &minus;1</code> in a DD3 file, which reads as
+COCOS 17, and its flux map&rsquo;s polarity is consistent with that
+(<code>&#968;</code> is a minimum at the axis, and the integral ratio is
++0.9991). DINA 105013/1 carries <code>&#963;<sub>&#961;&#952;&#966;</sub> = &minus;1</code>,
+which reads as COCOS 15, and its <code>B<sub>0</sub></code> is stored with the
+opposite sign from the other four.</p>
+<p id="flux-function-sign-sources-105014">105014/1 is the useful one for the
+relation rather than for the census: it is a source at
+<code>&#963;<sub>Bp</sub> = &minus;1</code> whose stored derivatives are still
+collinear with the map at <strong>+2&#960;</strong>. So the plus sign is not a
+property of <code>&#963;<sub>Bp</sub> = &minus;1</code> data; it is the written
+equation, unchanged across the 11-to-17 mapping, exactly as the digit form
+predicts.</p>
+<p id="flux-function-sign-sources-105013">DINA 105013/1 is the one
+<strong>disagreement</strong> in this table and it is a finding, not a
+reconciliation to be chosen. Its map and its stored
+<code>p&prime;</code>, <code>FF&prime;</code> are collinear at
+<strong>&minus;2&#960;</strong> (slope &minus;1.00087, correlation
+&minus;1.00000 to five places), which no other source does and which no
+rounding explains: the correlation is essentially exact. The same slice also
+fails <code>determine_digits</code>&rsquo;s own
+<code>dp/d&#968;</code> consistency check
+(<code>dp_dpsi_cross_check_pass_fraction = 0.0</code>), so the stored pressure
+derivative carries the opposite sign from the one its
+<code>&#968;</code> convention implies. The two facts are the same fact seen
+twice: this file&rsquo;s flux functions are stored against the opposite flux
+direction from its map. Whether the archive file is wrong or the writer
+intended a convention the DD version does not name cannot be settled from the
+stored fields. DINA 105069/3 also fails that cross-check
+(<code>pass_fraction = 0.0</code>) while its regression is +2&#960; and clean
+(slope +1.03385, correlation +0.99686), so the cross-check failure alone does
+not predict the regression sign, and the two are reported separately.</p>
+<p id="flux-function-sign-sources-dina">DINA sources are not
+sign-trustworthy by the plan&rsquo;s own account, and 105013/1 is the concrete
+case: its digits read cleanly from its globals while the GS relation between
+its own map and its own flux functions disagrees with them. That is exactly
+the disagreement the dispatch asked to have flagged rather than resolved.</p>
+</section>
+
+<section id="flux-function-sign-check">
+<h3>The check, and what it turns on</h3>
+<p id="flux-function-sign-check-tests"><code>tests/test_flux_function_sign.py</code>
+carries three tests. Two pass at the head:</p>
+<ul id="flux-function-sign-check-passing">
+<li><code>test_the_digit_form_gives_the_same_current_in_cocos_11_and_17</code>
+&mdash; the 11-to-17 transform negates <code>&#968;</code> and the derivative
+together, and the written current is unchanged;</li>
+<li><code>test_the_cocos_17_relation_carries_plus_two_pi</code> &mdash; the
+relation equals <code>+2&#960;(R p&prime; + FF&prime;/(&#956;<sub>0</sub>R))</code>,
+<code><code>TOTAL_FLUX_FACTOR == 2&#960;</code></code>, and the recorded
+DD4 slopes and correlations are positive and within five per cent of one.</li>
+</ul>
+<p id="flux-function-sign-check-xfail">The third,
+<code>test_nova_owner_matches_the_cocos_17_relation</code>, is
+<code>xfail(strict=True)</code>: it asserts that
+<code>toroidal_current_density</code> equals the transcribed relation, and it
+fails because the owner returns the negated value for the same inputs. Its
+reason states the mechanism in plain words, so the repair of
+<code>nova/equilibrium/convention.py</code> turns a strict xfail into an
+XPASS and the suite reports it rather than absorbing it silently.</p>
+<p id="flux-function-sign-check-gate">The gate ran in one fresh process from
+the worktree:</p>
+<pre id="flux-function-sign-check-command">UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD \
+  uv run --no-sync pytest -p no:cacheprovider --basetemp=&lt;scratch&gt; \
+  tests/test_flux_function_sign.py -v</pre>
+<p id="flux-function-sign-check-result">The result is
+<code>2 passed, 1 xfailed in 15.98s</code> with <code>EXIT=0</code>. The module
+served was the worktree&rsquo;s own
+(<code>.../flux-function-sign/nova/__init__.py</code>), printed in the
+log header beside the revision and the command.</p>
+</section>
+
+<section id="flux-function-sign-reach">
+<h3>What this does not cover</h3>
+<p id="flux-function-sign-reach-scope">The measurement reads one DD4 layer and
+one slice of each of five archive files. It does not measure
+<code>&#963;<sub>R&#966;Z</sub></code>, which no scalar field carries; it does
+not settle whether 105013/1&rsquo;s file or its writer is at fault; and it
+changes no production module. The owner repair is
+<code>f-ddc-006</code>&rsquo;s work, and this node&rsquo;s strict xfail is what
+will report the repair landing.</p>
+</section>
+
+</main></body></html>

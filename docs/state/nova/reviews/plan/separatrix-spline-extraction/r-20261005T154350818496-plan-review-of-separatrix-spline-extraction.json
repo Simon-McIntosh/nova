@@ -31,6 +31,13 @@
       "finding": "duplicate_owner-1",
       "reason": "section 4 has landed with compare_closed_boundaries in nova/equilibrium/boundary_comparison.py wired to both EFIT banks; the Solovev certifier's sampled Hausdorff at benchmarks/solovev_certificate.py:1305 is still a second metric and is left for a separate consolidation node, since the node now being dispatched only removes the wall-height path",
       "when": "2026-10-23T20:31:36.563882+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "interface_budget-1",
+      "reason": "section 3 has landed: assemble_separatrix_branches (nova/equilibrium/separatrix_branches.py:269) is the plan's one new contract and replaces the longest-polyline selection it describes; no further public definition is being added by the node now being dispatched",
+      "when": "2026-10-23T20:31:49.686671+00:00"
     }
   ],
   "responses": {
@@ -39,6 +46,12 @@
       "by": "",
       "reason": "section 4 has landed with compare_closed_boundaries in nova/equilibrium/boundary_comparison.py wired to both EFIT banks; the Solovev certifier's sampled Hausdorff at benchmarks/solovev_certificate.py:1305 is still a second metric and is left for a separate consolidation node, since the node now being dispatched only removes the wall-height path",
       "when": "2026-10-23T20:31:36.563882+00:00"
+    },
+    "interface_budget-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "section 3 has landed: assemble_separatrix_branches (nova/equilibrium/separatrix_branches.py:269) is the plan's one new contract and replaces the longest-polyline selection it describes; no further public definition is being added by the node now being dispatched",
+      "when": "2026-10-23T20:31:49.686671+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/separatrix-spline-extraction/r-20261005T154350818496-plan-review-of-separatrix-spline-extraction.json",

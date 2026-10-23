@@ -91,6 +91,10 @@ def test_convention_alone_changes_the_key(tmp_path):
     assert store3.cocos != rekeyed.cocos
     assert store3.cache_key != rekeyed.cache_key
 
+    # The convention enters the key, so the keyed group is distinct from any
+    # group a key carrying no convention could have produced.
+    assert store3.legacy_cache_key != store3.cache_key
+
 
 def test_entry_written_under_the_old_key_is_refused(tmp_path):
     dataset = tensorize(tmp_path, DD3)
@@ -99,7 +103,6 @@ def test_entry_written_under_the_old_key_is_refused(tmp_path):
     stale = make_store(tmp_path, DD3)
     stale.group = stale.legacy_cache_key
     stale.write(dataset)
-    assert stale.legacy_cache_key != stale.cache_key
 
     fresh = make_store(tmp_path, DD3)
     with pytest.raises(StaleConventionError):

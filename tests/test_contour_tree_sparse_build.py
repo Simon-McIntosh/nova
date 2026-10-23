@@ -57,8 +57,8 @@ _INTEGER_FIELDS = (
 
 #: Integer-field digests of the integrated build's receipts, keyed ``<kind>-<cells>``.
 _EXPECTED_INTEGER_DIGESTS = {
-    "limited-550": "925fe6895a471688cfaeae3d1ffe5650309b49b153071b5b1df7ec4745cc34f3",
-    "diverted-550": "1fa0d5f58760b71f208991bc9e817b4ba039c16eb299524793fa8dca56aef61c",
+    "limited-550": "c2d0673837ad1b3b9e93e272a8efb4ba600c79e21a893a5b6998c53f5f8b6e5e",
+    "diverted-550": "b7344b5db5d8929eab1f6f93fa6e7a19f905ad07d1bfc9034e001653629595eb",
 }
 
 

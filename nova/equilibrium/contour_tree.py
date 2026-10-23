@@ -367,9 +367,11 @@ def _sweep_tree(
     births = index
     node_valid = jnp.zeros(node_capacity, dtype=bool)
     node_type = jnp.full(node_capacity, -1, dtype=jnp.int32)
-    arc_sources = jnp.zeros((vertex_count, neighbour_count), dtype=jnp.int32)
-    arc_valid = jnp.zeros((vertex_count, neighbour_count), dtype=bool)
+    arc_sources = jnp.zeros((vertex_count, neighbour_count + 1), dtype=jnp.int32)
+    arc_valid = jnp.zeros((vertex_count, neighbour_count + 1), dtype=bool)
     wall_flag = jnp.zeros(vertex_count, dtype=bool)
+    outside_root = jnp.asarray(0, dtype=jnp.int32)
+    outside_active = jnp.asarray(False)
 
     def visit(rank, state):
         (
@@ -382,14 +384,23 @@ def _sweep_tree(
             arc_sources,
             arc_valid,
             wall_flag,
+            outside_root,
+            outside_active,
         ) = state
         vertex = order[rank].astype(jnp.int32)
         usable = vertex_valid[vertex]
-        adjacent = neighbour_valid[vertex]
-        neighbour = jnp.where(adjacent, neighbours[vertex], vertex)
+        outside_neighbour = (not descending) & outside_active & vertex_is_wall[vertex]
+        adjacent = jnp.concatenate((neighbour_valid[vertex], outside_neighbour[None]))
+        neighbour = jnp.where(
+            adjacent,
+            jnp.concatenate((neighbours[vertex], outside_root[None])),
+            vertex,
+        )
         parents, neighbour_root = _neighbour_roots(parents, neighbour)
         root_active = adjacent & active[neighbour]
-        earlier = jnp.arange(neighbour_count)[:, None] < jnp.arange(neighbour_count)
+        earlier = jnp.arange(neighbour_count + 1)[:, None] < jnp.arange(
+            neighbour_count + 1
+        )
         repeated = jnp.any(
             earlier
             & root_active[:, None]
@@ -405,7 +416,8 @@ def _sweep_tree(
         extremum = component_count == 0
         saddle = component_count >= 2
         terminal = final_vertex & (component_count == 1)
-        event = usable & (extremum | saddle | terminal | first_wall)
+        split_wall = (not descending) & vertex_is_wall[vertex]
+        event = usable & ~split_wall & (extremum | saddle | terminal | first_wall)
         signed_maximum = (descending & extremum) | ((not descending) & terminal)
         signed_minimum = ((not descending) & extremum) | (descending & terminal)
         critical = jnp.where(
@@ -417,7 +429,7 @@ def _sweep_tree(
         node_type = node_type.at[vertex].set(
             jnp.where(event, critical, node_type[vertex])
         )
-        connect = usable & (saddle | terminal | first_wall)
+        connect = event & (saddle | terminal | first_wall)
         sources = births[neighbour_root]
         arc_sources = arc_sources.at[rank].set(sources)
         arc_valid = arc_valid.at[rank].set(representative & connect)
@@ -456,6 +468,12 @@ def _sweep_tree(
                 usable, vertex_is_wall[vertex] | neighbour_wall, wall_flag[winner]
             )
         )
+        outside_root = jnp.where(
+            usable & (not descending) & (vertex_is_wall[vertex] | neighbour_wall),
+            winner,
+            outside_root,
+        )
+        outside_active = outside_active | (usable & vertex_is_wall[vertex])
         return (
             parents,
             ranks,
@@ -466,6 +484,8 @@ def _sweep_tree(
             arc_sources,
             arc_valid,
             wall_flag,
+            outside_root,
+            outside_active,
         )
 
     result = jax.lax.fori_loop(
@@ -482,6 +502,8 @@ def _sweep_tree(
             arc_sources,
             arc_valid,
             wall_flag,
+            outside_root,
+            outside_active,
         ),
     )
     targets = jnp.broadcast_to(order[:, None], arc_sources.shape)

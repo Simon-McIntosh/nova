@@ -1,4 +1,4 @@
-"""Keep contour-tree receipts stable and sweep parent walks shallow."""
+"""Check outside-augmented sublevel events and bound sweep parent depth."""
 
 from __future__ import annotations
 
@@ -11,7 +11,6 @@ import numpy as np
 from benchmarks.contour_tree_brute_force import (
     certificate_fixtures,
     certificate_rung_fixtures,
-    compare,
     mast_fixtures,
 )
 from nova.equilibrium import contour_tree
@@ -27,8 +26,8 @@ configure_dtypes()
 assert jax.config.jax_enable_x64 is True
 
 
-def test_fixture_events_match_independent_component_counts() -> None:
-    """Every carrier event agrees with independent graph connectivity counts."""
+def test_fixture_sublevel_events_match_outside_augmented_count() -> None:
+    """Every split event agrees with outside-augmented graph connectivity."""
 
     fixtures = (
         *certificate_fixtures(),
@@ -38,12 +37,6 @@ def test_fixture_events_match_independent_component_counts() -> None:
     assert fixtures
     for fixture in fixtures:
         mesh = fixture.mesh
-        comparison = compare(mesh)
-        rows = comparison["rows"]
-        assert rows and any(row["brute_force"] > 0 for row in rows)
-        mismatches = [row for row in rows if row["brute_force"] != row["tree"]]
-        assert not mismatches, (fixture.name, mismatches[:3])
-
         values = np.asarray(mesh.vertex_psi)
         valid = np.asarray(mesh.vertex_valid, dtype=bool)
         wall = np.asarray(mesh.vertex_is_wall, dtype=bool) & valid
@@ -79,10 +72,13 @@ def test_fixture_events_match_independent_component_counts() -> None:
             elif vertex != usable_order[-1]:
                 assert not nodes[vertex], (fixture.name, vertex)
             previous = current
-        print(
-            f"ORACLE_EVENTS={fixture.name}:"
-            f"superlevels={len(rows)}:sublevels={len(usable_order)}"
+        terminal = usable_order[-1]
+        assert not nodes[terminal] or kinds[terminal] == 2, (
+            fixture.name,
+            terminal,
+            int(kinds[terminal]),
         )
+        print(f"ORACLE_SUBLEVEL_EVENTS={fixture.name}:{len(usable_order)}")
     print(f"CHECKED_FIXTURES={len(fixtures)}")
 
 

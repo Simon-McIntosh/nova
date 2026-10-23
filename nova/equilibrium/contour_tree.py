@@ -459,7 +459,11 @@ def _sweep_tree(
         births = births.at[winner].set(
             jnp.where(
                 usable,
-                jnp.where(extremum | saddle | first_wall, vertex, inherited),
+                jnp.where(
+                    extremum | saddle | first_wall | implicit_outside,
+                    vertex,
+                    inherited,
+                ),
                 births[winner],
             )
         )

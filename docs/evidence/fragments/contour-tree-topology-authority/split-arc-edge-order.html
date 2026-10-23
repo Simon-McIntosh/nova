@@ -1,0 +1,24 @@
+<section id="split-arc-edge-order">
+  <h3>Split arcs retain the first wall vertex as their outside birth</h3>
+  <p>On the first ascending wall visit, the implicit outside raises the
+  component count to one before any carrier neighbour is active. The prior
+  birth assignment inherited from the first neighbour slot, whose identity
+  changes when carrier edges are reordered. On the four-vertex regression,
+  the base omitted arc <code>(0, 2)</code> while keeping split nodes at
+  <code>[1, 2, 3]</code>; the production permutation cases reported
+  <code>596 vertices: split arc set moved</code> for seeds 0, 1 and 2.
+  The outside birth now uses the first wall vertex itself. Event and node
+  classification conditions are unchanged.</p>
+  <table>
+    <thead><tr><th>Six file gate</th><th>Base</th><th>Head</th></tr></thead>
+    <tbody>
+      <tr><td>Tests passed</td><td>44</td><td>48</td></tr>
+      <tr><td>Failure IDs</td><td>4: three swept arc permutations and the wall regression</td><td>0</td></tr>
+      <tr><td>Added failure IDs</td><td colspan="2">0</td></tr>
+    </tbody>
+  </table>
+  <p>The diverted 340-cell certificate still emits node vertices
+  <code>[5, 10, 69, 447, 457, 461]</code>: zero wall minima, two wall
+  saddles, six nodes, five edges and no overflow. The explanatory figure
+  receipt and the sparse build digests pass without repinning.</p>
+</section>

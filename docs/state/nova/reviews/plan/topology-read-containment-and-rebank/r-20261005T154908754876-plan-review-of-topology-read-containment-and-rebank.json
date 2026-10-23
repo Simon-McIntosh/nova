@@ -70,9 +70,22 @@
       "finding": "thin_wrapper-1",
       "reason": "section 3 is deferred as superseded by contour-tree-topology-authority section 3; no ring-local quadratic is authored",
       "when": "2026-10-23T20:08:24.511697+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-23T20:08:33.783128+00:00"
     }
   ],
   "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-23T20:08:33.783128+00:00"
+    },
     "reuse_search-1": {
       "action": "declined",
       "by": "",

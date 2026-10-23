@@ -5,10 +5,10 @@ cell centres and the supplied material boundaries, clipped to the occupiable
 vessel domain. Boundary samples follow the carrier spacing, so the interior
 centre hull cannot leave an uncovered strip beside the wall.
 
-Standalone callers supply centre flux; boundary values extend the adjacent
-linear field. TopologyGeometry evaluates its physical field directly at every
-resulting vertex, including boundary intersections. The fixed-capacity receipt
-is traceable through jit and vmap.
+Callers supply centre flux and a point evaluator for vertices added beside the
+wall. TopologyGeometry uses the mesh only for geometry and evaluates its physical
+field directly at every resulting vertex. The fixed-capacity receipt is traceable
+through jit and vmap.
 
 Geometry primitives:
 
@@ -18,14 +18,13 @@ Geometry primitives:
 * row 2 - nova.equilibrium.wall_mask.inside_polygon is the host-side vectorised
   (ray-cast) containment used for the occupiable region.
 * row 3 - nova.equilibrium.wall_mask.WallUnit carries the multi-unit wall as
-  data; the containing-triangle flux lookup it records as absent is
-  _barycentric_flux below.
+  data.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Sequence
+from typing import Callable, Sequence
 
 import jax
 import jax.numpy as jnp
@@ -149,34 +148,6 @@ def _inside_wall_units(
     return inside_vessel & ~material
 
 
-def _barycentric_flux(point_rz, triangle_rz, triangle_psi) -> float:
-    """Extend the linear field, using the longest edge for a flat triangle."""
-    a, b, c = triangle_rz
-    edges = np.asarray((b - a, c - b, a - c))
-    lengths = np.einsum("ij,ij->i", edges, edges)
-    scale = float(np.max(lengths))
-    determinant = float(np.linalg.det(np.stack((b - a, c - a), axis=1)))
-    if abs(determinant) <= np.finfo(float).eps * scale:
-        if scale == 0.0:
-            return float(np.mean(triangle_psi))
-        index = int(np.argmax(lengths))
-        start = triangle_rz[index]
-        end = triangle_rz[(index + 1) % 3]
-        fraction = np.dot(np.asarray(point_rz) - start, end - start) / scale
-        return float(
-            triangle_psi[index]
-            + fraction * (triangle_psi[(index + 1) % 3] - triangle_psi[index])
-        )
-    weights = np.linalg.solve(
-        np.stack((b - a, c - a), axis=1), np.asarray(point_rz) - a
-    )
-    return float(
-        triangle_psi[0]
-        + weights[0] * (triangle_psi[1] - triangle_psi[0])
-        + weights[1] * (triangle_psi[2] - triangle_psi[0])
-    )
-
-
 @jax.tree_util.register_pytree_node_class
 @dataclass(frozen=True)
 class ContourMesh:
@@ -255,11 +226,8 @@ def _clipped_carrier(
     scale = float(np.max(np.abs(centre_rz))) if centre_rz.size else 1.0
     tolerance = max(1e-12, 1e-9 * max(1.0, scale))
     domain = _occupiable_geometry(wall_units)
-    triangulation = Delaunay(centre_rz)
     spacing = np.median(cKDTree(centre_rz).query(centre_rz, k=2)[0][:, 1])
     # Boundary samples complete the domain beyond the interior-centre hull.
-    # Linear extrapolation preserves affine fields for standalone mesh callers;
-    # the topology geometry evaluates its physical field at these same points.
     boundary_points = []
     for unit in wall_units:
         if not unit.closed:
@@ -276,25 +244,11 @@ def _clipped_carrier(
             distinct.append(point)
             seen.add(key)
     boundary_points = np.asarray(distinct).reshape(-1, 2)
-    nearest = cKDTree(centre_rz[triangulation.simplices].mean(axis=1))
-    simplex = triangulation.find_simplex(boundary_points)
-    simplex = np.where(simplex >= 0, simplex, nearest.query(boundary_points)[1])
-    boundary_flux = np.array(
-        [
-            _barycentric_flux(
-                point,
-                centre_rz[triangulation.simplices[index]],
-                flux[triangulation.simplices[index]],
-            )
-            for point, index in zip(boundary_points, simplex)
-        ]
-    )
     centre_rz = np.concatenate((centre_rz, boundary_points))
-    flux = np.concatenate((flux, boundary_flux))
     centre_valid = _covers(domain, centre_rz)
 
     vertices: list[tuple] = [(float(p[0]), float(p[1])) for p in centre_rz]
-    vertex_psi: list[float] = [float(v) for v in flux]
+    vertex_psi: list[float] = [float(v) for v in flux] + [0.0] * len(boundary_points)
     vertex_valid: list[bool] = [bool(v) for v in centre_valid]
     vertex_is_wall: list[bool] = list(
         np.asarray(
@@ -308,13 +262,13 @@ def _clipped_carrier(
         if valid:
             dedup.setdefault(_key(point, tolerance), index)
 
-    def vertex_index(point, psi_value) -> int:
+    def vertex_index(point) -> int:
         key = _key(point, tolerance)
         if key in dedup:
             return dedup[key]
         index = len(vertices)
         vertices.append((float(point[0]), float(point[1])))
-        vertex_psi.append(float(psi_value))
+        vertex_psi.append(0.0)
         vertex_valid.append(True)
         vertex_is_wall.append(True)
         dedup[key] = index
@@ -346,10 +300,7 @@ def _clipped_carrier(
             pieces = shapely.constrained_delaunay_triangles(part)
             for piece in pieces.geoms:
                 corners = np.asarray(piece.exterior.coords)[:-1]
-                indices = [
-                    vertex_index(point, _barycentric_flux(point, corner, flux[simplex]))
-                    for point in corners
-                ]
+                indices = [vertex_index(point) for point in corners]
                 a, b, c = (np.asarray(vertices[index]) for index in indices)
                 first, second = b - a, c - a
                 doubled_area = abs(first[0] * second[1] - first[1] * second[0])
@@ -386,6 +337,7 @@ def build_contour_mesh(
     flux,
     wall_units: Sequence[WallUnit],
     *,
+    field_evaluator: Callable[[np.ndarray], np.ndarray] | None = None,
     vertex_capacity: int | None = None,
     edge_capacity: int | None = None,
     triangle_capacity: int | None = None,
@@ -397,6 +349,9 @@ def build_contour_mesh(
     cannot overflow a fixed formula. A capacity that is supplied is a declared
     ceiling: a carrier larger than it refuses with :class:`ContourMeshOverflow`
     naming both counts, rather than returning a mesh with no valid vertex.
+    The evaluator receives all vertices added after the cell centres as one
+    ``(n, 2)`` array. Omitting it assigns zero placeholders for geometry-only
+    callers, which sample their physical field separately.
     """
     centre_rz = np.ascontiguousarray(centre_rz, dtype=np.float64)
     flux = np.ascontiguousarray(flux, dtype=np.float64)
@@ -414,6 +369,12 @@ def build_contour_mesh(
         edges,
         triangles,
     ) = _clipped_carrier(centre_rz, flux, wall_units)
+    added = np.asarray(vertices[len(centre_rz) :], dtype=np.float64).reshape(-1, 2)
+    if len(added) and field_evaluator is not None:
+        sampled = np.asarray(field_evaluator(added), dtype=np.float64)
+        if sampled.shape != (len(added),):
+            raise ValueError("field evaluator must return one flux per added vertex")
+        vertex_psi[len(centre_rz) :] = sampled.tolist()
     vertex_capacity = _declared_capacity("vertex", vertex_capacity, len(vertices))
     edge_capacity = _declared_capacity("edge", edge_capacity, len(edges))
     triangle_capacity = _declared_capacity(

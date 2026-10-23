@@ -7,6 +7,7 @@ import json
 import time
 from collections.abc import Mapping
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 
 import jax
@@ -61,6 +62,19 @@ class Fixture:
     mesh: ContourMesh
 
 
+@lru_cache(maxsize=None)
+def _certificate_field(case: str):
+    """Evaluate the certificate's analytic flux at arbitrary carrier points."""
+    from benchmarks import solovev_certificate as certificate
+
+    exact = certificate._case(case)[2]
+
+    def evaluate(points: np.ndarray) -> np.ndarray:
+        return certificate._exact_state(case, exact, points)
+
+    return evaluate
+
+
 def certificate_fixtures() -> tuple[Fixture, ...]:
     """Read every compact persisted Solov'ev certificate terminal state."""
 
@@ -78,6 +92,7 @@ def certificate_fixtures() -> tuple[Fixture, ...]:
             coordinate,
             flux,
             [vessel_unit(wall[:, 0], wall[:, 1], name=payload["case"])],
+            field_evaluator=_certificate_field(payload["case"]),
             vertex_capacity=VERTEX_CAPACITY,
             edge_capacity=EDGE_CAPACITY,
             triangle_capacity=TRIANGLE_CAPACITY,
@@ -108,6 +123,7 @@ def certificate_rung_fixtures() -> tuple[Fixture, ...]:
                 coordinate,
                 flux,
                 [vessel_unit(wall[:, 0], wall[:, 1], name=payload["case"])],
+                field_evaluator=_certificate_field(payload["case"]),
                 vertex_capacity=count + 256,
                 edge_capacity=3 * count + 512,
                 triangle_capacity=2 * count + 512,
@@ -149,6 +165,7 @@ def _mast_mesh(shot: int, row: int) -> ContourMesh:
         centres,
         sigma * psi,
         wall,
+        field_evaluator=lambda points: sigma * spline.ev(points[:, 1], points[:, 0]),
         vertex_capacity=MAST_VERTEX_CAPACITY,
         edge_capacity=MAST_EDGE_CAPACITY,
         triangle_capacity=MAST_TRIANGLE_CAPACITY,

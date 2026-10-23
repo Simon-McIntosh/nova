@@ -507,7 +507,7 @@ class Equilibrium(Chart, GetSlice):
         ("b0", "equilibrium/vacuum_toroidal_field/b0"),
         ("ip", "equilibrium/global_quantities/ip"),
         ("psi_axis", "equilibrium/global_quantities/psi_axis"),
-        ("psi_boundary", "equilibrium/global_quantities/psi_boundary"),
+        ("psi_boundary", "equilibrium/boundary_separatrix/psi"),
         ("q_axis", "equilibrium/global_quantities/q_axis"),
         ("q_95", "equilibrium/global_quantities/q_95"),
         ("dpressure_dpsi", "equilibrium/profiles_1d/dpressure_dpsi"),
@@ -519,6 +519,14 @@ class Equilibrium(Chart, GetSlice):
     reader renormalises to ``psi_norm``, and a sign reversal of psi leaves that
     normalisation unchanged, so only a signed quantity shows which convention a
     field was read in.
+
+    Each path names the node the dataset actually holds. ``psi_boundary`` is the
+    one field whose name is not its source: the boundary build writes the
+    separatrix flux over the global quantity of the same name, so the field
+    carries ``boundary_separatrix/psi`` and its path says so. On reference data
+    the two stored nodes differ by about 1.8 percent, a published boundary
+    scalar need not equal the separatrix flux, and a path that named the global
+    quantity would attribute the reader's value to a node it never came from.
     """
 
     def _observable(self, field: str, itime: int) -> float:

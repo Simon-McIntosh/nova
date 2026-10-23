@@ -687,7 +687,7 @@ def main() -> None:
         "edges": [asdict(edge) for edge in state.edges],
         "contour_levels_wb": [float(level) for level in state.levels],
         "wall_points": int(state.wall.shape[0]),
-        "figure": str(figure_path.relative_to(ROOT)),
+        "figure": str(figure_path.resolve().relative_to(ROOT)),
         "svg_sha256": _svg_sha256(svg_path),
     }
     receipt_path = arguments.output.with_suffix(".json")

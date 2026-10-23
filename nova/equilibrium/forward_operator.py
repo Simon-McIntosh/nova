@@ -3692,7 +3692,7 @@ class ForwardFluxOperator:
     def residual_shadow_mask(
         self, psi, requested_class=None, previous_shadow=None
     ) -> jax.Array:
-        """Return the composed flood and wall-height residual exclusion."""
+        """Return the composed flood and private-wall residual exclusion."""
 
         flood_shadow, wall_shadow = self.residual_shadow_components(
             psi, requested_class, previous_shadow
@@ -3705,7 +3705,7 @@ class ForwardFluxOperator:
     def residual_shadow_components(
         self, psi, requested_class=None, previous_shadow=None
     ) -> tuple[jax.Array, jax.Array]:
-        """Return independent interior-flood and wall-height shadow components."""
+        """Return independent interior-flood and private-wall shadow components."""
 
         physical = jnp.asarray(psi)
         previous_wall_shadow = self._previous_wall_shadow(previous_shadow)
@@ -3719,9 +3719,7 @@ class ForwardFluxOperator:
                 requested_class,
                 private_wall_node_mask=previous_wall_shadow,
             )
-        return self._residual_shadow_components_from_read(
-            physical, masks, topology, previous_shadow
-        )
+        return self._residual_shadow_components_from_read(physical, masks, topology)
 
     def _previous_wall_shadow(self, previous_shadow):
         """Return the prior iterate's wall mask, or no mask on a cold start.
@@ -3737,9 +3735,7 @@ class ForwardFluxOperator:
             self.grid.node_number : self.physical_node_number
         ]
 
-    def _residual_shadow_components_from_read(
-        self, physical, masks, topology, previous_shadow=None
-    ):
+    def _residual_shadow_components_from_read(self, physical, masks, topology):
         """Build residual shadows from one already-completed topology read.
 
         A read with no finite qualified saddle has no private-flux region:
@@ -3773,7 +3769,7 @@ class ForwardFluxOperator:
                 private_wall_node_mask=previous_wall_shadow,
             )
         flood_shadow, wall_shadow = self._residual_shadow_components_from_read(
-            physical, masks, topology, previous_shadow
+            physical, masks, topology
         )
         direct_sample_shadow = jnp.zeros(
             self.node_number - self.physical_node_number, dtype=bool

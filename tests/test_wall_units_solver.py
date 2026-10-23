@@ -12,7 +12,6 @@ from nova.equilibrium.conservation import FluxLattice
 from nova.equilibrium.connectivity_boundary import (
     _points_inside_wall_units,
     _wall_segment_geometry,
-    wall_height_shadow_mask,
 )
 from nova.equilibrium.forward_operator import ForwardFluxOperator
 from nova.equilibrium.source import DomainProfile, ForwardSource
@@ -117,23 +116,6 @@ def test_open_unit_has_no_terminal_or_inter_unit_segment() -> None:
     np.testing.assert_array_equal(unit, [0, 0, 0, 0, 1, 1, 1])
     np.testing.assert_array_equal(end[3], VESSEL[0])
     np.testing.assert_array_equal(end[6], BLADE[-1])
-
-
-def test_wall_height_shadow_retains_unit_ownership() -> None:
-    """The flat shadow mask marks nodes on both eligible physical units."""
-    qualified = jnp.asarray([[1.0, -0.5], [jnp.nan, jnp.nan]])
-    mask = wall_height_shadow_mask(
-        WALL[:, 1],
-        0.0,
-        qualified[0],
-        qualified,
-        jnp.ones(len(WALL), dtype=bool),
-        jnp.zeros(len(WALL), dtype=bool),
-        0.01,
-        0.1,
-    )
-    node_unit = np.searchsorted(OFFSETS[1:], np.arange(len(WALL)), side="right")
-    assert set(node_unit[np.asarray(mask)]) == {0, 1}
 
 
 def test_receipts_name_limiting_and_strike_units() -> None:

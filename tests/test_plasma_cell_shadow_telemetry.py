@@ -117,7 +117,7 @@ def _band_limits(axis_height, saddle_height):
 
 
 def _node_flux_private_mask(
-    wall_flux, wall_height, axis_height, saddle_height, saddle_flux, polarity
+    wall_flux, wall_z, axis_height, saddle_height, saddle_flux, polarity
 ):
     """Recompute the node-flux private rule independently of the production read.
 
@@ -126,7 +126,7 @@ def _node_flux_private_mask(
     band bounded by the admitted saddle. Cell labels play no part.
     """
     flux = np.asarray(wall_flux, dtype=np.float64)
-    height = np.asarray(wall_height, dtype=np.float64)
+    height = np.asarray(wall_z, dtype=np.float64)
     qualified = bool(np.isfinite(saddle_flux)) and bool(np.isfinite(axis_height))
     if not qualified:
         return np.zeros_like(flux, dtype=bool)
@@ -195,7 +195,7 @@ def test_carrier_private_wall_follows_the_node_flux_rule():
 def test_residual_shadow_uses_carrier_operands_without_raster_read():
     """Constructed operators never request the tensor-product boundary read."""
     configure_dtypes()
-    operator, physical, masks, _topology = _fixture_read(
+    operator, physical, masks, topology = _fixture_read(
         _single_null_flux, TopologyClass.DIVERTED
     )
 
@@ -205,7 +205,10 @@ def test_residual_shadow_uses_carrier_operands_without_raster_read():
     operator._connectivity_read = forbid_raster_read
     flood_shadow, wall_shadow = operator.residual_shadow_components(physical)
     np.testing.assert_array_equal(flood_shadow, masks.private_flux)
-    assert wall_shadow.shape == (operator.wall.node_number,)
+    expected_wall = operator._carrier_shadow_read(physical, masks, topology)[
+        "private_wall_node_mask"
+    ]
+    np.testing.assert_array_equal(wall_shadow, expected_wall)
 
 
 def test_active_set_receipts_equal_tripwise_cell_label_differences():

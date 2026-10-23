@@ -931,6 +931,35 @@ class EquilibriumData(Equilibrium, Profile2D, Profile1D, Parameter0D, Grid):
         self.name = "equilibrium"
         super().__post_init__()
 
+    def load(self):
+        """Load the cached dataset, refusing one written under another convention.
+
+        A cache entry is labelled by the source's identity and its Data
+        Dictionary version, both of which are unchanged by this reader's own
+        convention: an entry written before the reader translated to COCOS 17
+        holds the source's convention in fields whose names are identical. The
+        recorded convention is therefore required on load, and an entry that
+        carries none, or another, is evicted so the caller rebuilds it rather than
+        serving raw quantities as though they carried the reader's convention.
+
+        Raises
+        ------
+        FileNotFoundError
+            The cached data carries no convention, or one other than
+            ``NOVA_CONVENTION``. ``Datafile.load_build`` reads this as a cache
+            miss and rebuilds.
+        """
+        loaded = super().load()
+        stored = self.data.attrs.get("cocos")
+        if stored != NOVA_CONVENTION:
+            self.delete_group()
+            self.data = type(self.data)()
+            raise FileNotFoundError(
+                f"cached equilibrium data at {self.group} carries convention "
+                f"{stored!r}, not {NOVA_CONVENTION}"
+            )
+        return loaded
+
     def build(self):
         """Build netCDF database using data extracted from imasdb."""
         match self.homogeneous_time:

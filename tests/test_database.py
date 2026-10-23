@@ -1,3 +1,7 @@
+from types import SimpleNamespace
+
+import fsspec
+
 import numpy as np
 import pandas
 import pytest
@@ -146,6 +150,88 @@ def test_load_equilibrium_attrs():
     assert equilibrium.machine == "iter"
     assert equilibrium.filename == "iter_130506_403"
     assert equilibrium.group == "equilibrium"
+
+
+class IdsStub:
+    """Stand in for an open IDS so the cache seam is exercised without a database."""
+
+    metadata = SimpleNamespace(name="equilibrium")
+
+
+def reader_on(store, group):
+    """Return a reader bound to one cache store without opening a pulse.
+
+    The constructor reaches the pulse for the scenario timebase, which is not
+    what these tests measure, so the reader is built around an open-IDS stand-in
+    and bound to the store directly. That is the same binding the constructor
+    produces: a filename, a group and a file system, with the store path
+    resolved through them.
+    """
+    reader = object.__new__(EquilibriumData)
+    reader.filename = "equilibrium_test"
+    reader.group = group
+    reader.dirname = str(store.parent)
+    reader.basename = store.name
+    reader.hostname = None
+    reader.fsys = fsspec.filesystem("file")
+    reader.data = xarray.Dataset()
+    reader._ids = IdsStub()
+    return reader
+
+
+def test_cached_equilibrium_without_the_convention_is_rebuilt(tmp_path, monkeypatch):
+    """A cached entry carrying no convention is refused rather than served.
+
+    The cache identity is the source's pulse, run and Data Dictionary version,
+    none of which the reader's own convention changes, so an entry written
+    before the reader translated to COCOS 17 is found by the same name and holds
+    the source's signed quantities. Requiring the recorded convention on load is
+    what separates the two, and the eviction is what makes the refusal a rebuild
+    rather than an error.
+    """
+    store = tmp_path / "equilibrium_cache.zarr"
+    xarray.Dataset(
+        {"psi_boundary": ("time", [102.454])},
+        attrs={"cocos": 11},
+    ).to_zarr(store, group="equilibrium_stale", mode="a", consolidated=False)
+    calls = []
+    monkeypatch.setattr(EquilibriumData, "filepath", property(lambda self: store))
+    monkeypatch.setattr(
+        EquilibriumData,
+        "build",
+        lambda self: (calls.append("build"), self)[1],
+    )
+    reader_on(store, "equilibrium_stale").load_build()
+    assert calls == ["build"], "a cache entry without the convention must be rebuilt"
+    # The rebuild replaces the entry in place, so the group is still there and
+    # the raw quantity it held is not: a reader that serves this store now sees
+    # rebuilt data rather than the source's own convention.
+    with xarray.open_zarr(
+        store, group="equilibrium_stale", consolidated=False
+    ) as served:
+        assert "psi_boundary" not in served
+
+
+def test_cached_equilibrium_with_the_convention_is_served(tmp_path, monkeypatch):
+    """An entry that records the reader's convention is served without a rebuild."""
+    from nova.io.sourcemap import NOVA_CONVENTION
+
+    store = tmp_path / "equilibrium_cache.zarr"
+    xarray.Dataset(
+        {"psi_boundary": ("time", [-102.454])},
+        attrs={"cocos": NOVA_CONVENTION},
+    ).to_zarr(store, group="equilibrium_current", mode="a", consolidated=False)
+    calls = []
+    monkeypatch.setattr(EquilibriumData, "filepath", property(lambda self: store))
+    monkeypatch.setattr(
+        EquilibriumData,
+        "build",
+        lambda self: (calls.append("build"), self)[1],
+    )
+    reader = reader_on(store, "equilibrium_current")
+    reader.load_build()
+    assert calls == [], "a conforming cache entry must not be rebuilt"
+    assert float(reader.data["psi_boundary"][0]) == -102.454
 
 
 @mark["equilibrium"]
@@ -306,20 +392,20 @@ def test_kernel_cache_separates_compute_provenance(tmp_path):
     """A consumer can warm-load only the artifact built by its code generator."""
     store = ZarrStore(filename="kernel_provenance", dirname=tmp_path)
     identity = {"geometry": "same", "kernel": "exact-section"}
-    cpu_provenance = compute_provenance(
-        "jax", platform="cpu", device_kind="cpu"
-    )
+    cpu_provenance = compute_provenance("jax", platform="cpu", device_kind="cpu")
     gpu_provenance = compute_provenance(
         "jax", platform="gpu", device_kind="NVIDIA H200"
     )
     cpu_identity = identity | {"compute_provenance": cpu_provenance}
     gpu_identity = identity | {"compute_provenance": gpu_provenance}
-    assert CoilSet(compute_provenance=cpu_provenance).coilset_attrs[
-        "compute_provenance"
-    ] == cpu_provenance
-    assert CoilSet(compute_provenance=gpu_provenance).coilset_attrs[
-        "compute_provenance"
-    ] == gpu_provenance
+    assert (
+        CoilSet(compute_provenance=cpu_provenance).coilset_attrs["compute_provenance"]
+        == cpu_provenance
+    )
+    assert (
+        CoilSet(compute_provenance=gpu_provenance).coilset_attrs["compute_provenance"]
+        == gpu_provenance
+    )
     cpu_group = store.hash_attrs(cpu_identity)
     gpu_group = store.hash_attrs(gpu_identity)
     assert cpu_group != gpu_group
@@ -328,25 +414,24 @@ def test_kernel_cache_separates_compute_provenance(tmp_path):
     store.data = xarray.Dataset({"matrix": (("row", "column"), [[1.0]])})
     store.store()
 
-    cpu = ZarrStore(
-        filename=store.filename, dirname=tmp_path, group=cpu_group
-    ).load()
+    cpu = ZarrStore(filename=store.filename, dirname=tmp_path, group=cpu_group).load()
     assert float(cpu.data["matrix"][0, 0]) == 1.0
     with pytest.raises(FileNotFoundError):
-        ZarrStore(
-            filename=store.filename, dirname=tmp_path, group=gpu_group
-        ).load()
+        ZarrStore(filename=store.filename, dirname=tmp_path, group=gpu_group).load()
 
     gpu = ZarrStore(filename=store.filename, dirname=tmp_path, group=gpu_group)
     gpu.data = xarray.Dataset({"matrix": (("row", "column"), [[2.0]])})
     gpu.store()
     root = ZarrStore(filename=store.filename, dirname=tmp_path)
     assert sorted(root.group_names()) == sorted((cpu_group, gpu_group))
-    assert float(
-        ZarrStore(
-            filename=store.filename, dirname=tmp_path, group=cpu_group
-        ).load().data["matrix"][0, 0]
-    ) == 1.0
+    assert (
+        float(
+            ZarrStore(filename=store.filename, dirname=tmp_path, group=cpu_group)
+            .load()
+            .data["matrix"][0, 0]
+        )
+        == 1.0
+    )
 
 
 def test_zarr_store_encodes_pandas_string_dtype(tmp_path):

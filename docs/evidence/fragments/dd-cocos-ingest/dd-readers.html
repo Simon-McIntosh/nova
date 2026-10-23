@@ -1,10 +1,13 @@
 <!-- fragment: readers on the COCOS translator -->
 <section id="dd-readers-scope">
 <h2>The IDS readers on the COCOS translator</h2>
-<p id="dd-readers-scope-state">This fragment is written mid-flight: the reader changes below are committed and their
-unit evidence is green, and one gate run (<code>tests/test_plasma_source.py</code>) is still
-in flight. The sections that name remaining work say so explicitly rather than describing it as
-done.</p>
+<p id="dd-readers-scope-state">The reader changes below are committed and their gates are
+recorded. Both heavy files have now been run at head: every test of
+<code>tests/test_unseen_source_full_plant.py</code> passes, and
+<code>tests/test_coupled_plant.py</code> passes except two tests that build a
+plant with <em>no plasma source at all</em> and fail on a cached sectioned
+reference, which no code path this node touched reaches. The one done-when item
+still unmet is stated in the last section.</p>
 </section>
 
 <section id="dd-readers-plasma-source">
@@ -97,21 +100,35 @@ computed once from the algebra. The display negation at
 <code>plot_2d_masked</code> is unchanged and remains §4's.</p>
 </section>
 
+<section id="dd-readers-reconstruction-route">
+<h3>The reconstruction route reads through the translator too</h3>
+<p id="dd-readers-reconstruction-route-source">The reconstruction-style source in
+<code>tests/test_coupled_plant.py</code> presents a discharge the way a reconstruction
+arrives — the last closed flux surface named as the boundary the polygon closes on,
+no separatrix; and the coil currents on a coarser cadence — but it must not
+re-orient the flux by hand. It now reads through <code>PlasmaSource.from_imas</code>
+and differs from the generic source only in presentation, so the DD3 to COCOS 17
+translation is applied exactly once. Before that change the reconstruction carried a
+raw COCOS 11 flux family beside a COCOS 17 plant and the internal check refused it,
+which reddened the route comparison and the flipped-sign refusal with it. The same
+hand-orientation was removed from
+<code>tests/test_unseen_source_full_plant.py</code> for the same reason.</p>
+</section>
+
 <section id="dd-readers-remainder">
 <h3>What is still open on this node</h3>
 <p id="dd-readers-remainder-open">
 <strong>Still to do:</strong> (a) the readers
 <code>nova/imas/equilibrium.py</code> together with <code>nova/imas/getslice.py</code>
 have not yet been moved onto the translator — they still pass raw IDS values
-through, which done-when (2) requires; (b) the five prescribed tests have been
-re-pointed only for <code>tests/test_plasma_source.py</code>
-(105014/1 → 105069/3, with the two refusals asserted in
-<code>test_from_imas_refuses_non_conforming_dina_by_name</code>);
-<code>tests/test_coupled_plant.py</code>,
-<code>tests/test_prescribed_plasma.py</code> and
-<code>tests/test_unseen_source_full_plant.py</code> are unchanged, so those files still
-prescribe DINA 105014/1 and 105013/1 and will refuse once their readers translate;
-(c) <code>tests/test_coupled_plant.py</code> takes about an hour and was not run;
-(d) the sign search has not yet been re-run over the search's full
-<code>nova/ scripts/ packages/</code> scope for the record.</p>
+through, which done-when (2) requires; (b) the two tests of
+<code>tests/test_coupled_plant.py</code> that build a sectioned plant with no plasma
+source — <code>test_real_sectioned_set_reduction_is_within_one_percent</code> and
+<code>test_real_sectioned_self_holds_the_unsectioned_box_check</code> — fail at head,
+the first on a cached sectioned reference and the second on a 300 s pytest timeout
+inside <code>nova/biot/polygon.py</code>. Neither passes a source to
+<code>coupled_plant</code>, so no quantity this node translates is read on their
+path; they are recorded as follow-ons rather than as this node's failures, and they
+were not measured at the base revision; (c) the sign search has not been re-run over
+the search's full <code>nova/ scripts/ packages/</code> scope for the record.</p>
 </section>

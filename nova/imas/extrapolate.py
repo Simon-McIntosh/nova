@@ -347,7 +347,9 @@ class Extrapolate(Grid, Operate):
         if masks[0] is not None:
             try:
                 if attr == "psi":
-                    _levels = -levels[::-1]  # COCOS
+                    # the stored contour levels are reversed into the sign
+                    # sigma_Bp gives the flux map nova works in
+                    _levels = convention(NOVA_CONVENTION).sigma_bp * levels[::-1]
                 else:
                     _levels = levels
                 super().plot_2d(

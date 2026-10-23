@@ -89,9 +89,6 @@ if __name__ == "__main__":
     #operate.grid.plot()
     contour.plot(color='C0')
     contour.lines[index].plot(color='C1')
-    #levels = np.unique(contour.loc['psi'])
-    #operate.plot_2d(operate.itime, axes=operate.axes,
-    #                levels=levels)  # COCOS
     #contour.axes.contour(operate.data.r2d, operate.data.z2d,
     #                     operate['j_tor2d'])
     #plt.tight_layout()

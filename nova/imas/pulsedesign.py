@@ -9,6 +9,7 @@ import xarray
 
 from nova.biot.biot import Nbiot
 from nova.biot.plot import Plot1D
+from nova.equilibrium.convention import CONVENTION
 from nova.equilibrium.inverse import InverseDesign
 from nova.graphics.plot import Animate
 
@@ -19,9 +20,26 @@ from nova.imas.ids_entry import IdsEntry
 from nova.imas.machine import Machine, MachineCoil, MachineSection
 from nova.imas.metadata import Metadata
 from nova.imas.pf_active import PF_Active
+from nova.io.sourcemap import DD3_CONVENTION
+from nova_cocos import PSI_LIKE, convention_transform
 
 
 PF_DOUBLE_PANCAKES = {"PF1": 8, "PF2": 6, "PF3": 8, "PF4": 8, "PF5": 8, "PF6": 9}
+
+
+def psi_write_factor(target_convention: int) -> float:
+    """Return the factor carrying nova's internal flux into a write's convention.
+
+    nova works in COCOS 17 internally, and the Data Dictionary publishes DD3 as
+    COCOS 11 and DD4 as COCOS 17.  The factor follows from the two conventions,
+    so a DD3 target carries every psi-like quantity with a sign flip and a DD4
+    target passes it through unchanged.
+    """
+
+    return convention_transform(
+        source=CONVENTION.identifier,
+        target=target_convention,
+    ).factor(PSI_LIKE)
 
 
 @dataclass
@@ -522,13 +540,15 @@ class PulseDesign(Animate, Plot1D, InverseDesign, ITER):
     def equilibrium_ids(self) -> Ids:
         """Return waveform equilibrium ids."""
         ids_entry = IdsEntry(ids=self.ids, name="equilibrium")
+        # this writer stores DD3 data, whose psi-like rows are COCOS 11
+        psi_factor = psi_write_factor(DD3_CONVENTION)
         self.update_metadata(ids_entry)
         ids_entry.ids.time = self._data.time.data
         with ids_entry.node("time_slice:global_quantities.*"):
             for attr in ["li_3", "psi_axis", "psi_boundary"]:
                 data = self._data[attr].data
                 if "psi" in attr:
-                    ids_entry[attr, :] = -data  # COCOS
+                    ids_entry[attr, :] = psi_factor * data
                 else:
                     ids_entry[attr, :] = data
         with ids_entry.node("time_slice:global_quantities.magnetic_axis.*"):
@@ -541,7 +561,7 @@ class PulseDesign(Animate, Plot1D, InverseDesign, ITER):
             for attr in self._data.attrs_boundary_seperatrix:
                 ids_entry[attr, :] = self._data[attr].data
             ids_entry["type", :] = self._data["boundary_type"].data
-            ids_entry["psi", :] = -self._data["psi_boundary"].data  # COCOS
+            ids_entry["psi", :] = psi_factor * self._data["psi_boundary"].data
         with ids_entry.node("time_slice:boundary_separatrix.outline.*"):
             for i, attr in enumerate("rz"):
                 ids_entry[attr, :] = self._data["boundary"].data[..., i]
@@ -578,7 +598,7 @@ class PulseDesign(Animate, Plot1D, InverseDesign, ITER):
             profiles_2d[0].grid.dim2 = self._data.z.data
             profiles_2d[0].r = self._data.r2d.data
             profiles_2d[0].z = self._data.z2d.data
-            profiles_2d[0].psi = -self._data.psi2d[itime].data  # COCOS
+            profiles_2d[0].psi = psi_factor * self._data.psi2d[itime].data
             # only write field for high order plasma elements
             if self.tplasma == "rectangle":
                 profiles_2d[0].b_field_r = self._data.br2d[itime].data

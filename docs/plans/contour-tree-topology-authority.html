@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="contour-tree-topology-authority">
   <meta name="plan-title" content="Contour-tree topology authority — one tree of the signed flux on hex cells decides axis, X-point, wall contact and class">
   <meta name="plan-summary" content="One contour tree of the signed flux on hex cells decides axis, X-point, private regions, wall contact and class, in webers, emitted as DD 4 contour_tree.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="superseded">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="33.0">
   <meta name="plan-capability-version" content="1.0">
@@ -22,11 +22,11 @@
   <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
   <meta name="plan-blocks" content="null-identification-authority">
   <meta name="plan-informs" content="cut-cell-current-attribution,dual-branch-selection,topology-read-containment-and-rebank,single-grid-solver-cutover,mast-catalog-gpu-solve,gs-absolute-accuracy-gates">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;deferred&quot;,&quot;s4&quot;:&quot;deferred&quot;,&quot;s5&quot;:&quot;deferred&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;deferred&quot;,&quot;s4&quot;:&quot;deferred&quot;,&quot;s5&quot;:&quot;deferred&quot;}">
   <title>Contour-tree topology authority | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="81">
+<meta name="plan-version" content="82">
 <meta name="plan-modified" content="2026-10-23">
 </head>
 <body>
@@ -306,14 +306,14 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="field-representation-on-hex-cells" data-choice="" data-by="" data-when="" data-sections="s3,s4">
+<div class="r-dec" data-key="field-representation-on-hex-cells" data-choice="Cellwise polynomial: the own-node quadratic in every cell, except the saddle neighbourhood, which takes its support from the null&#x27;s normal form; a cut cell books one support split at the effective normal-form disk" data-by="lead" data-when="2026-10-23T20:05:33+00:00" data-sections="s3,s4">
     <p class="r-dec-q">Which smooth field representation locates and values the tree&#x27;s critical points, and traces the saddle level sets, on the hex carrier?</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="three-direction-box-spline">a global C² quartic box spline on the three-direction mesh of hex centres: global and smooth like the tensor spline, and native to the hex lattice</button>
       <button class="r-opt" data-value="own-node-quadratic">the per-cell own-node quadratic already used by the clip: measured 9/9 saddles and 15/15 axes on hex carriers, but only C⁰ across cells, and refuted twice for separatrix shape</button>
       <button class="r-opt" data-value="tensor-spline-on-raster">the existing global tensor spline on the solve raster: proven, but it keeps a raster in the topology read, against the ruling</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">The lead ruled on 2026-10-05, in converged-forward-solve: a cellwise polynomial, the own-node quadratic everywhere except the saddle cell, whose support comes from the null&#x27;s normal form, with the null&#x27;s position, gradient and Hessian from the Biot kernels&#x27; analytic derivatives of the booked current. The 2026-10-21 cut-cell split ruling refined it to cell portions: one support per cut cell, split at the disk of radius max(r_nf, 1.5 × median pitch) about the selected saddle, with the normal-form branches inside the disk and the ordinary quadratic cut outside it. The lead confirmed the lock on 2026-10-23. The global tensor spline on the solve raster and the hex box spline were not chosen.</p>
     </div>
 </section>
 
@@ -331,10 +331,11 @@
     <pre class="r-fu-prompt">/reckon-build contour-tree-topology-authority</pre>
     <p class="r-fu-outcome">Repaired and merged at 0329f9d9a (contour-tree-topology-authority-landed#tree-edge-invariant-repair): padded edge slots corrupted the union-find; the four certificate trees now have one more node than edges, no overflow and zero brute-force mismatches; review 89/100.</p>
     </article>
-<article class="r-fu" data-id="f-ctta-virtual-node-and-persistence" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="nova-s21" data-written-at="2026-10-02" data-recommends-skill="/reckon-build contour-tree-topology-authority" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ctta-virtual-node-and-persistence" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="nova-s21" data-written-at="2026-10-02" data-recommends-skill="/reckon-build contour-tree-topology-authority" data-resolved-at="2026-10-23T20:05:33+00:00" data-resolved-by="lead">
     <h4 class="r-fu-title">Stop emitting the virtual outside slot as a minimum, and measure how persistence absorbs the extra piecewise-linear extrema</h4>
     <div class="r-fu-body"><p>The repair review (89/100) left three follow-ons. (1) The padded virtual-outside slot is still emitted as a minimum, although the §1 contract says the virtual node is not a critical point; make the DD mapping skip it and cover that with a test. (2) The repaired certificate trees carry 2 to 4 maxima, 5 to 8 minima and 6 to 10 saddles where the analytic Solov'ev field has one magnetic axis and at most one X-point; §3 and §4 must show by measurement, per fixture, that persistence and primary selection reduce these to the analytic axis and X-point, with the persistence of each discarded pair. (3) docs/figures/contour-tree-topology-authority/edge-invariant-repair/baseline-brute-force.log carries trailing whitespace at lines 15, 21, 22 and 31.</p></div>
     <pre class="r-fu-prompt">/reckon-build contour-tree-topology-authority</pre>
+    <p class="r-fu-outcome">Closed 2026-10-23 at the lead's confirmation. §1 and §2 landed. §3 to §5 were absorbed into converged-forward-solve §2, the topology read, on 2026-10-06, and field-representation-on-hex-cells is locked to the lead's cellwise-polynomial ruling. Open work on the tree continues under converged-forward-solve.</p>
     </article>
 <article class="r-fu" data-id="f-ctta-sweep-cost-on-carrier-size" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="nova-s21" data-written-at="2026-10-02" data-recommends-skill="/reckon-build contour-tree-topology-authority" data-resolved-at="2026-10-02T22:14:12+00:00" data-resolved-by="nova-s21">
     <h4 class="r-fu-title">Make the contour-tree sweep near-linear in carrier size</h4>
@@ -348,10 +349,11 @@
     <pre class="r-fu-prompt">/reckon-build contour-tree-topology-authority</pre>
     <p class="r-fu-outcome">Merged at 5afbe6d63 (review 93/100): graph-panel labels are placed clear of every other label and marker, checked on rendered boxes; the guard compares the committed figure with the receipt and a stale render fails it; the fragment describes the delivered figure. The node also repaired the figure script, which raised KeyError on CRITICAL_TYPE_OUTSIDE after the virtual-node change merged.</p>
     </article>
-<article class="r-fu" data-id="f-ctta-limiter-level-wall-sampling" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="nova-fd" data-written-at="2026-10-02" data-recommends-skill="/reckon-build contour-tree-topology-authority §4" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ctta-limiter-level-wall-sampling" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="nova-fd" data-written-at="2026-10-02" data-recommends-skill="/reckon-build contour-tree-topology-authority §4" data-resolved-at="2026-10-23T20:05:33+00:00" data-resolved-by="lead">
     <h4 class="r-fu-title">Show that the tree&#x27;s limiter level converges as the wall polyline is sampled more finely</h4>
     <div class="r-fu-body"><p>Carried from profile-owned-solve-domain §5, which the lead closed on 2026-10-02 with its negative result: that ladder probed a read this plan deletes, and its post-repair 0.0 Wb was a non-measurement. The question it asked still stands for the tree: does the limited boundary level <code>σψ_lim</code> converge as wall vertices are added?</p><p><strong>Done when:</strong> on MAST 27079 row 16 (limited) and the 9×9 grid fixture, <code>σψ_lim</code> and the limiter contact position are tabled while the wall polyline sampling doubles at least three times. The successive differences fall, and the receipt states the observed order and the finest-pair difference in webers and millimetres. A diverted control (MAST row 10) shows the class and the primary X-point unchanged across the same ladder.</p></div>
     <pre class="r-fu-prompt">/reckon-build contour-tree-topology-authority §4</pre>
+    <p class="r-fu-outcome">Closed 2026-10-23 at the lead's confirmation. §1 and §2 landed. §3 to §5 were absorbed into converged-forward-solve §2, the topology read, on 2026-10-06, and field-representation-on-hex-cells is locked to the lead's cellwise-polynomial ruling. Open work on the tree continues under converged-forward-solve.</p>
     </article>
 <article class="r-fu" data-id="f-ctta-sweep-durability-and-placement" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-verification="strict" data-written-by="nova-s21" data-written-at="2026-10-03" data-recommends-skill="/reckon-build contour-tree-topology-authority" data-resolved-at="2026-10-03T02:23:13+00:00" data-resolved-by="nova-s21">
     <h4 class="r-fu-title">Make the sweep&#x27;s identity and cost checks durable, fix its dtype warning, and place it for the device</h4>
@@ -365,15 +367,17 @@
     <pre class="r-fu-prompt">/reckon-build contour-tree-topology-authority</pre>
     <p class="r-fu-outcome">Merged at fb9337c3a (review 96): one field runs fastest on the host CPU (0.225 s mean); batches of 8 and 64 run fastest with a parallel union-find prototype on the H200 (0.407 s and 0.461 s, against 1.793 s and 14.484 s serial); a vmap of the existing sweep wins no use. All seven receipt fields match across placements. Record contour-tree-topology-authority-landed#sweep-device-placement; promotion of the prototype is f-ctta-parallel-union-find-production.</p>
     </article>
-<article class="r-fu" data-id="f-ctta-parallel-union-find-production" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="nova-s21" data-written-at="2026-10-03" data-recommends-skill="/reckon-build contour-tree-topology-authority" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ctta-parallel-union-find-production" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="nova-s21" data-written-at="2026-10-03" data-recommends-skill="/reckon-build contour-tree-topology-authority" data-resolved-at="2026-10-23T20:05:33+00:00" data-resolved-by="lead">
     <h4 class="r-fu-title">Promote the parallel union-find sweep into nova for batched use</h4>
     <div class="r-fu-body"><p>The placement measurement (merged fb9337c3a, benchmarks/contour_tree_sweep_placement.py) found a benchmark-only parallel union-find formulation, which pointer-jumps the full parent table at each visit, fastest for batched fields on the H200: 0.407 s at 8 fields and 0.461 s at 64, against 1.793 s and 14.484 s serial on CPU. Move it into nova/equilibrium/contour_tree.py as a batched sweep beside the serial one, which stays the single-field path. Gate it on the committed --compare mode: bit-identical receipts against the serial sweep on the twelve certificate rungs and both MAST carriers, built from carrier arrays persisted from one backend. Add tests for a saturated vertex, an isolated vertex and repeated edges. Report compile and execute walls at batches 8 and 64 on the H200.</p></div>
     <pre class="r-fu-prompt">/reckon-build contour-tree-topology-authority</pre>
+    <p class="r-fu-outcome">Closed 2026-10-23 at the lead's confirmation. §1 and §2 landed. §3 to §5 were absorbed into converged-forward-solve §2, the topology read, on 2026-10-06, and field-representation-on-hex-cells is locked to the lead's cellwise-polynomial ruling. Open work on the tree continues under converged-forward-solve.</p>
     </article>
-<article class="r-fu" data-id="f-ctta-sections-3-5-build-under-cfs" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="nova-fd" data-written-at="2026-10-06" data-recommends-skill="/reckon-build converged-forward-solve §2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ctta-sections-3-5-build-under-cfs" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="nova-fd" data-written-at="2026-10-06" data-recommends-skill="/reckon-build converged-forward-solve §2" data-resolved-at="2026-10-23T20:05:33+00:00" data-resolved-by="lead">
     <h4 class="r-fu-title">Pointer: §3, §4 and §5 are implemented as converged-forward-solve §2</h4>
     <div class="r-fu-body"><p>Lead directive 2026-10-03: the topology read is one of four pure functions behind the narrow interface of converged-forward-solve. That plan's §2 implements this plan's §3 (critical-point geometry on the cellwise polynomial), §4 (primary selection, regions, class and margin in webers) and §5 (consumers cut over, raster read deleted), against the fixtures and done-whens written here. This plan closes when converged-forward-solve §2 lands with those done-whens met; nothing is dispatched from here.</p></div>
     <pre class="r-fu-prompt">/reckon-build converged-forward-solve §2</pre>
+    <p class="r-fu-outcome">Closed 2026-10-23 at the lead's confirmation. §1 and §2 landed. §3 to §5 were absorbed into converged-forward-solve §2, the topology read, on 2026-10-06, and field-representation-on-hex-cells is locked to the lead's cellwise-polynomial ruling. Open work on the tree continues under converged-forward-solve.</p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -580,6 +584,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20261003T031538138757-review-of-ctta-sweep-device-placement" data-who="reckon-build" data-when="2026-10-03T03:35:16.698Z">
     <div class="r-comment-body"><p>Independent review of r-20261003T022349310426-ctta-sweep-device-placement at head 4b55fc0a057be6d08a15e0d3c4a07855da48e589 (base 83f2de99eebcdfb9565e89b176ab694d3d521e11) stored: verdict pass-with-follow-ons, 96/100 (goal_fidelity 20, evidence 19, scope_discipline 20, durability 19, fit 18); the three-placement measurement, per-use recommendation and committed --compare receipt identity independently reproduced; added_failure_count 0.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-close-s2" data-who="reckon-build" data-when="2026-10-23T20:20:00Z">
+    <div class="r-comment-body"><p>§2, the contour tree on the carrier, has landed with its repairs:</p><ul><li>the edge invariant, at <code>0329f9d9a</code>;</li><li>the near-linear sweep, at <code>4db6fb357</code>;</li><li>the receipt comparator, at <code>a1c63dd82</code>;</li><li>the int32 carrier indices, at <code>ce663e84e</code>;</li><li>the duplicate-root combine, at <code>823ada8b5</code>;</li><li>device placement, measured.</li></ul><p>The brute-force control shows zero mismatches on the certificate trees. Records: <a href="/nova/evidence/archive/contour-tree-topology-authority-landed">contour-tree-topology-authority-landed</a>.</p></div>
 </div>
 </section>
 </main>

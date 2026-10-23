@@ -14,13 +14,13 @@
 <meta name="plan-status" content="active">
 <meta name="plan-roi" content="high">
 <meta name="plan-sprint" content="S26">
-<meta name="plan-modified" content="2026-10-02">
 <meta name="plan-effort-hours" content="40.0">
 <meta name="plan-informs" content="null-identification-authority,gs-absolute-accuracy-gates,batched-operator-boundary,millisecond-converged-solve">
-<meta name="plan-version" content="25">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-impl" content="0.45">
-<meta name="plan-depends-on" content="cut-cell-current-attribution">
+<meta name="plan-version" content="26">
+<meta name="plan-modified" content="2026-10-23">
+<meta name="plan-depends-on" content="converged-forward-solve#s3">
 <meta name="plan-graph-handle" content="uniform-clip">
 </head>
 <body>
@@ -79,6 +79,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260910T052734465931-cca-unit-amplitude-current-census" data-who="s19i-ucc-amplitude" data-when="2026-09-10T09:28:18.151Z">
     <div class="r-comment-body"><p>Landed in the worktree at 637ebebd on the held clip stack; receipt, panels and report banked on main under docs/figures/uniform-cell-clip-and-coupling/amplitude-census. On the committed terminal state the analytic total is 1.6315e7 A; whole-cell booking gives 1.5541e7 A (0.9526) and the exact clip 1.5149e7 A (0.9285); both under-book through the same outboard-midplane cells 106 (analytic interior, 192 kA), 104, 108, 83 and 116 (analytic cut, 116 to 192 kA each), all booked zero because their participation flag is false, so the exact mode inherits the label-driven exclusion and is not the cause of missing current. Seed-state ratio 2.37 (75 cells excluded) is the cold disc seed's own flux; the banked 5.56 was recorded on the drifted exact-arm terminal. The spline level disagrees in sign with inside_boundary on 8 cells at the terminal state, a defect in the exact path's curved_level evaluator recorded for rung B.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20261023-repoint-booking" data-who="reckon-build" data-when="2026-10-23T20:25:00Z">
+    <div class="r-comment-body"><p>Re-pointed at the lead's confirmation (2026-10-23). This plan depended on cut-cell-current-attribution, whose §2 to §11 were absorbed into converged-forward-solve on 2026-10-06; that plan is now closed as superseded. What this plan needs from it is the settled cut-cell booking, one clip and one moment path, which is converged-forward-solve §3, so the dependency now names that section. The plan has no declared sections, so the anchor sits on the plan-level dependency rather than on a section gate.</p></div>
 </div>
 </section>
 <section data-reckon="followups" id="followups" class="r-followups">

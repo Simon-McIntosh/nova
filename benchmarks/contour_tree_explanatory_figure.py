@@ -454,7 +454,7 @@ def _place_graph_labels(figure, panel, state, rank, names) -> None:
     """Place each named graph label at the first offset that collides with nothing.
 
     Candidate offsets are tried in order; a candidate is kept only when its
-    display box clears every already-placed label box and every node marker.
+    display box clears every already-placed label box, node marker and arc.
     Two nodes drawn at the same flux level therefore cannot stack their labels,
     and no label can be hidden behind a marker.
     """
@@ -484,6 +484,9 @@ def _place_graph_labels(figure, panel, state, rank, names) -> None:
         )
         for node in state.nodes
     ]
+    arcs = [
+        patch.get_path().transformed(patch.get_transform()) for patch in panel.patches
+    ]
     for row, label in names:
         node = _by_row(state, row)
         point = (rank[node.row], _plotted_level(node))
@@ -495,13 +498,15 @@ def _place_graph_labels(figure, panel, state, rank, names) -> None:
                 textcoords="offset points",
                 fontsize=LABEL_FONTSIZE,
                 color=NODE_COLOR,
-                bbox=DEFAULT_INK.label_bbox,
+                bbox=None,
                 zorder=DEFAULT_INK.zorder_label,
                 ha=align,
                 va="center",
             )
             box = _annotation_display_box(annotation, renderer)
-            if any(box.overlaps(other) for other in occupied):
+            if any(box.overlaps(other) for other in occupied) or any(
+                arc.intersects_bbox(box, filled=False) for arc in arcs
+            ):
                 annotation.remove()
                 continue
             occupied.append(box)
@@ -531,6 +536,7 @@ def _draw_graph(figure, state: State):
     y_limits = (min(levels) - pad, max(levels) + pad)
     panel.set_xlim(*x_limits)
     panel.set_ylim(*y_limits)
+    panel.set_xticks(np.arange(len(state.nodes)))
 
     def to_fraction(x_value, y_value):
         x_fraction = (x_value - x_limits[0]) / (x_limits[1] - x_limits[0])

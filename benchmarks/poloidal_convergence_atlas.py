@@ -40,13 +40,6 @@ The committed operands do not persist the per-wall-node private flux mask.
 Where cell labels are present, their nearest-cell private status is drawn as
 a visual proxy, with that qualification recorded in the receipt.
 
-Run on a debug partition with a per-job TMPDIR so the compilation cache cannot
-collide:
-    srun --partition=<machine>_debug --time=00:59:00 --cpus-per-task=2 \
-        bash -lc 'export TMPDIR=/tmp; \
-          UV_PROJECT_ENVIRONMENT=~/Code/nova/.venv PYTHONPATH=$PWD \
-          uv run --no-sync python benchmarks/poloidal_convergence_atlas.py' \
-        > /tmp/atlas-render.log 2>&1
 """
 
 from __future__ import annotations

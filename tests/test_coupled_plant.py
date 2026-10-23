@@ -19,7 +19,7 @@ from nova.circuit.coupled_plant import (
 )
 from nova.circuit.linkage import circuit_linkage_matrix, ring_resistance
 from nova.circuit.passive import NOMINAL_STEEL_RESISTIVITY, PassiveCircuitSystem
-from nova.imas.plasma_source import CoilCurrentSeries, PlasmaSlice, PlasmaSource
+from nova.imas.plasma_source import CoilCurrentSeries, PlasmaSource
 from nova.imas.prescribed_plasma import plasma_linked_flux_history
 from nova.imas.profiles import PrescribedCurrent
 from nova.media.sources.frame import EquilibriumFrame
@@ -764,15 +764,15 @@ def _dina_equilibrium_and_coils(indices):
 def _reconstruction_style_source(equilibrium, active, indices, *, stride: int = 4):
     """Present DINA's data the way a reconstruction arrives at the source.
 
-    The plasma is prescribed from EFIT-style p' and FF' on DINA's own psi
-    normalisation, with the stored last closed flux surface named as the
-    boundary rather than being called a separatrix, and the coil currents are
-    resampled onto a coarser cadence -- every ``stride``-th row of their own
-    clock -- so the coil story reaches the source on an independent cadence,
-    as a reconstruction's separately acquired coil traces do.
+    The plasma is read through the source's own IDS reader, so its flux family
+    arrives in COCOS 17 as every other reader's does, and is then presented the
+    way a reconstruction arrives: the stored last closed flux surface is named
+    as the boundary the polygon closes on, with no separatrix outline or
+    x-point to prefer, and the coil currents are resampled onto a coarser
+    cadence -- every ``stride``-th row of their own clock -- so the coil story
+    reaches the source on an independent cadence, as a reconstruction's
+    separately acquired coil traces do.
     """
-    from nova.imas.plasma_source import CoilCurrentSeries
-
     coil_time = np.asarray(active.time, float)
     sampled = np.arange(0, coil_time.size, stride)
     coils = CoilCurrentSeries(
@@ -782,38 +782,17 @@ def _reconstruction_style_source(equilibrium, active, indices, *, stride: int = 
             [np.asarray(coil.current.data, float)[sampled] for coil in active.coil]
         ),
     )
-    slices = []
-    for index in indices:
-        slice_ = equilibrium.time_slice[index]
-        global_ = slice_.global_quantities
-        profile = slice_.profiles_1d
-        map_ = slice_.profiles_2d[0]
-        lcfs = slice_.boundary.outline
-        slices.append(
-            PlasmaSlice(
-                time=float(slice_.time),
-                radius=np.asarray(map_.grid.dim1),
-                height=np.asarray(map_.grid.dim2),
-                psi=np.asarray(map_.psi),
-                psi_samples=np.asarray(profile.psi),
-                p_prime=np.asarray(profile.dpressure_dpsi),
-                ff_prime=np.asarray(profile.f_df_dpsi),
-                psi_axis=float(global_.psi_axis),
-                psi_boundary=float(global_.psi_boundary),
-                plasma_current=float(global_.ip),
-                outline=np.empty((0, 2)),
-                axis=(
-                    float(global_.magnetic_axis.r),
-                    float(global_.magnetic_axis.z),
-                ),
-                flux_derivative_scale=2 * np.pi,
-                x_points=(),
-                boundary_outline=np.c_[np.asarray(lcfs.r), np.asarray(lcfs.z)],
-            )
-        )
-    return PlasmaSource(
-        tuple(slices), coils, provenance="DINA 105069/3 as a reconstruction"
+    source = PlasmaSource.from_imas(
+        equilibrium,
+        active,
+        provenance="DINA 105069/3 as a reconstruction",
+        indices=indices,
     )
+    slices = tuple(
+        replace(slice_, outline=np.empty((0, 2)), x_points=())
+        for slice_ in source.slices
+    )
+    return replace(source, slices=slices, coils=coils)
 
 
 def _dina_sources(index: int = 200):

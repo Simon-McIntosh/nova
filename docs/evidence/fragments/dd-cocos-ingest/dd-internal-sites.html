@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="dd-cocos-ingest">
+  <meta name="plan-title" content="Internal and writer sign sites take their convention from the COCOS 17 owner">
+  <meta name="plan-evidence-for" content="dd-cocos-ingest">
+  <meta name="plan-verifies" content="dd-cocos-ingest#s4">
+  <meta name="plan-recorded-at" content="2026-10-23">
+  <meta name="plan-verdict" content="complete">
+  <title>dd-internal-sites | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+<h1 id="dd-internal-sites-title">Internal and writer sign sites take their convention from the COCOS 17 owner</h1>
+<p>Base <code>e69f4b60a</code>. The internal convention now has one owner, and every census sign site in a writer or an internal consumer either takes its sign or factor from that owner or is named as coupled to the equilibrium reader that still passes raw Data Dictionary values through.</p>
+
+<h2 id="dd-internal-sites-owner">The owner</h2>
+<p><code>nova/equilibrium/convention.py</code> states nova's internal convention once, as the value <code>nova_cocos.convention(17)</code> returns, and exports three names from it: <code>CONVENTION</code> (the four Sauter–Medvedev digits), <code>COCOS</code> (<code>CONVENTION.identifier</code>, 17) and <code>SIGMA_BP</code> (<code>CONVENTION.sigma_bp</code>, &minus;1). Nothing else in the module restates the number, and the sign chain below it is unchanged: <code>TOTAL_FLUX_FACTOR</code>, the total-flux and current-density definitions and the <code>p'</code>/<code>FF'</code> sense are exactly as they were. The module docstring therefore remains true of the same algebra, now with its digits named.</p>
+
+<h2 id="dd-internal-sites-table">The census sign sites</h2>
+<table>
+<thead><tr><th>site</th><th>convention of the values it receives</th><th>verdict</th></tr></thead>
+<tbody>
+<tr><th scope="row"><code>nova/imas/pulsedesign.py</code> — the <code>equilibrium_ids</code> writer, three psi entries</th><td>nova-internal COCOS 17 (<code>self._data</code> is the levelset solve's own flux)</td><td><strong>converted.</strong> Each <code>-psi</code> becomes <code>psi_factor * psi</code>, where <code>psi_factor = psi_write_factor(DD3_CONVENTION)</code> and <code>psi_write_factor</code> composes <code>nova_cocos.convention_transform(source=17, target=11).factor(PSI_LIKE)</code>. The writer stores DD3, whose psi-like rows are COCOS 11.</td></tr>
+<tr><th scope="row"><code>nova/imas/extrapolate.py::plot_2d_masked</code></th><td>nova-internal COCOS 17 (the grid the <code>plot_2d</code> caller levels are built from)</td><td><strong>converted.</strong> <code>-levels[::-1]</code> becomes <code>convention(NOVA_CONVENTION).sigma_bp * levels[::-1]</code>, the same factor through the sourcemap's own convention name.</td></tr>
+<tr><th scope="row"><code>nova/imas/flux.py</code></th><td>none — the site is inactive</td><td><strong>deleted.</strong> The commented-out <code>levels</code>/<code>plot_2d</code> fragment carrying the <code># COCOS</code> tag is removed from the docstring it sat in.</td></tr>
+<tr><th scope="row"><code>nova/biot/contour.py::Surface.plot_1d</code></th><td>the caller's — <code>norm</code> supplies the orientation</td><td><strong>tag removed, code unchanged.</strong> <code>psi = norm(psi)</code> is representation-only, so the stale <code># COCOS</code> comment is dropped and the expression is left as written.</td></tr>
+<tr><th scope="row"><code>nova/equilibrium/inverse.py::InverseDesign.update_constraints</code> (line 245)</th><td><strong>raw Data Dictionary</strong> — see below</td><td><strong>coupled; code unchanged.</strong> Moves with the equilibrium reader node.</td></tr>
+</tbody>
+</table>
+
+<h3 id="dd-internal-sites-coupled">Why <code>inverse.py:245</code> is coupled, not internal</h3>
+<p>The census recorded this site as an internal consumer with no IDS read. The <code>InverseDesign</code> row extracts its ψ constraint with <code>self["psi_boundary"]</code>, and <code>Control</code> is <code>PlasmaPoints</code> over <code>Profile(Flux, Equilibrium, GetSlice, CoilData)</code>, so the item resolves through the sample built from the equilibrium source rather than through the levelset solve the writer reads in the table above. The evidence is the covering test: <code>tests/test_pulsedesign.py::test_ids_file_cache</code> sets <code>time_slice[0].boundary_separatrix.psi = 66</code> on the input IDS and then reads back <code>design_a["psi_boundary"] == 66</code> — the raw stored value, tracked with the input. A plasma's own solved boundary flux could not follow a change to an input IDS field. So the value this line negates is in the source read's convention, not nova's, and the negation is an implicit COCOS 11 → 17 conversion that only holds while the source is DD3. That conversion belongs at the reader, which is the node carrying <code>f-ddc-002</code> for <code>nova/imas/equilibrium.py</code> and <code>nova/imas/getslice.py</code>. <strong>Coupled field: <code>Equilibrium</code>/<code>EquilibriumData.psi_boundary</code> as reached by <code>GetSlice</code>.</strong> The line is left byte-identical.</p>
+
+<h2 id="dd-internal-sites-tests">The COCOS 17 tests, and the values they pin</h2>
+<p><code>tests/test_internal_cocos_sites.py</code>, 7 tests, 7 passed. It fixes the COCOS 17 state and checks each changed site's sign-sensitive output against the value the base produced, so a renamed-but-flipped sign is red:</p>
+<ul>
+<li>the owner: <code>CONVENTION.identifier == 17</code>, <code>CONVENTION.digits == nova_cocos.convention(17).digits</code>, <code>SIGMA_BP == &minus;1</code>, and <code>TOTAL_FLUX_FACTOR == tau ** CONVENTION.e_bp</code>;</li>
+<li>the writer: <code>psi_write_factor(DD3_CONVENTION) == &minus;1.0</code> and <code>psi_write_factor(DD4_CONVENTION) == +1.0</code>, with <code>dd_equilibrium_convention("3.42.0") == DD3_CONVENTION</code> and <code>dd_equilibrium_convention("4.1.0") == DD4_CONVENTION</code> tying the version to the convention. <code>psi_write_factor(DD3) * [100, &minus;50, 12.5]</code> equals the base literal's <code>-[100, &minus;50, 12.5]</code> element for element;</li>
+<li>the display levels: the internal convention's sign applied to a 51-point level array equals the base negation, reversed order included.</li>
+</ul>
+<p><strong>Changed expectations: none.</strong> Every factor is &minus;1 for a DD3 target, so the writer, the display and the tests all carry the base's values.</p>
+
+<h2 id="dd-internal-sites-gate">The covering files, by delta against the base</h2>
+<p>Each file ran in its own fresh process, CPU lane, its own <code>--basetemp</code>, before and after the change. The tree carries no IMAS database, so the equilibrium-backed tests skip at both arms and the delta is the thing that is readable.</p>
+<table>
+<thead><tr><th>file</th><th>base</th><th>head</th></tr></thead>
+<tbody>
+<tr><th scope="row"><code>tests/test_pulsedesign.py</code></th><td>5 skipped</td><td>5 skipped</td></tr>
+<tr><th scope="row"><code>tests/test_pointconstraint.py</code></th><td>5 passed, 14 skipped</td><td>5 passed, 14 skipped</td></tr>
+<tr><th scope="row"><code>tests/test_extrapolate.py</code></th><td>2 passed, 10 skipped</td><td>2 passed, 10 skipped</td></tr>
+<tr><th scope="row"><code>tests/test_internal_cocos_sites.py</code></th><td>absent</td><td>7 passed</td></tr>
+</tbody>
+</table>
+<p><strong>Added failures: 0.</strong> <code>tests/test_shape_inverse.py</code> collects 29 tests and does not finish inside a 560 s bound on the CPU lane (18 of 29 before the bound, heavy JAX compiles); it is not baselined and is named under follow-ons. The convention module's change is additive — three new names and no edit to any existing definition — so the seven files that import it are unaffected in behaviour.</p>
+
+<h2 id="dd-internal-sites-search">The §1 sign search, re-run</h2>
+<p>Search B over <code>nova/</code>, <code>scripts/</code> and <code>packages/</code> reports <strong>105 matching lines in 25 files</strong> (the census recorded 80 lines in 25 files at <code>c188c6851</code>; the growth is the COCOS-naming constants and docstrings §2 and §3 landed, which the census's broad <code>COCOS</code> clause counts). The sign-test clause is the sharp one, and after this node it matches only two lines:</p>
+<ul>
+<li><code>nova/imas/plasma_source.py:101</code> — <code>sigma_bp * span * self.plasma_current &lt;= 0</code>, <code>prescribe</code>'s internal COCOS 17 check with <code>sigma_bp</code> taken from the convention. This is the one permitted reader hit and the only fixed-orientation sign test in the tree.</li>
+<li><code>nova/equilibrium/inverse.py:245</code> — the coupled site named above.</li>
+</ul>
+<p>The three converted writer negations, the display negation and the <code># COCOS</code> tag on <code>norm(psi)</code> no longer match. <code>psi = norm(psi)</code> remains, untagged, as a caller-supplied normalisation. One further display negation exists but is outside this census population and outside this node's write scope: <code>nova/imas/operate.py:142</code>, <code>levels = -levels[::-1]  # + 2.3</code>, which no <code>COCOS</code> tag and no census clause reaches; it is recorded under follow-ons.</p>
+<p><strong>Positive control:</strong> a scratch file carrying one <code># COCOS</code> negation and one <code>span * ip &gt;= 0</code> sign test is found by the same command, 3 lines. Log: <code>logs/planted-sign-control.log</code>.</p>
+
+<h2 id="dd-internal-sites-control">Literal negative control</h2>
+<p>Declared mutation: in a scratch copy, give one converted site the opposite sign; its COCOS 17 test fails on its own assertion. Applied as a sign flip on <code>psi_write_factor</code>'s return, and the run is red against the same file that is green at the head: exit 1, 3 failed of 7, the failure ids being <code>test_a_dd3_write_carries_the_flux_sign_flip</code>, <code>test_a_dd4_write_passes_the_internal_flux_through</code> and <code>test_the_written_psi_keeps_its_value</code> — the last failing on its own element-for-element assertion against the base values. The mutation was reverted and the tree is byte-identical to the head commit. Red log: <code>logs/negative-control-inverted-write-sign.log</code>.</p>
+
+<h2 id="dd-internal-sites-commits">Commits</h2>
+<ul>
+<li><code>77fc5e470</code> — the owner statement in <code>nova/equilibrium/convention.py</code>.</li>
+<li><code>404f1c77b</code> — the writer factor, the display sign, the deleted negation and the removed tag, with the new test file.</li>
+</ul>
+
+</main>
+</body>
+</html>

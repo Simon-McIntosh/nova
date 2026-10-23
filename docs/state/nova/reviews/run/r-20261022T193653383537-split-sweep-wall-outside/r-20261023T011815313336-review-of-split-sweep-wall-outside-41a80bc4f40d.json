@@ -1,0 +1,69 @@
+{
+  "added_failure_count": 2,
+  "added_failure_ids": [
+    "tests/test_contour_tree_explanatory_figure.py::test_committed_receipt_matches_the_computed_tree",
+    "tests/test_contour_tree_scatter_equivalence.py::test_receipt_nodes_are_invariant_to_carrier_edge_order[0]"
+  ],
+  "call_sites": [
+    "nova/equilibrium/topology.py:3126 topology.read builds the tree",
+    "scripts/prototypes/fast_map_production/kernel.py:253",
+    "scripts/prototypes/sub_millisecond/measure_tree.py:59",
+    "scripts/prototypes/read_warm_wall/measure.py:77"
+  ],
+  "completed_at": "2026-10-23T02:05:16.916Z",
+  "dispatched_at": "2026-10-23T01:21:47Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/contour_tree.py",
+      "line": "420",
+      "severity": "blocking",
+      "text": "blocking: `event = usable & ~split_wall & (...)` suppresses every ascending event at a wall vertex, so where a lower interior component meets the outside at a wall vertex the merge is recorded nowhere; the node's own outside-augmented oracle reports exactly one such mismatch on the production diverted-single-null fixture at the landed head (wall vertex 447, psi -0.003609), and the receipt keeps node-minus-edge equal to one only because the node and its arc are dropped together, so no check in the suite can see it."
+    },
+    {
+      "file": "tests/test_contour_tree_wall_split.py",
+      "line": "127",
+      "severity": "follow-on",
+      "text": "follow-on: the oracle is parameterised only over the hill and rippled hill from :36, whose wall ring is the carrier's global minimum, so the wall-merge case the plan's rule carves out is not exercised and the over-suppression at nova/equilibrium/contour_tree.py:420 passes green; a carrier whose interior minimum lies below its wall contact (r^2 on the same 21x21 triangulation) reports one wall merge mismatch."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T193653383537-split-sweep-wall-outside/after-wall-counts-final.log",
+      "line": "5",
+      "severity": "follow-on",
+      "text": "follow-on: the log labelled working-tree-final-fix records wall node counts {0:0, 1:2}, which the landed head does not produce (it yields {0:0, 1:1}), so a reader comparing the run's census logs takes a superseded state for the landed one; the fragment's table records the reproducible number."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read all three commits from e4ca8d20 to 41a80bc4; 594ceacfe adds the ascending outside union to nova/equilibrium/contour_tree.py together with tests/test_contour_tree_wall_split.py, a0ca54a37 lands the evidence fragment, and 41a80bc4 repins the two sparse receipt digests.",
+    "done_when": "the brief's measure is the joint gate at base and head plus the wall-node census on the diverted-single-null-340-cells fixture; the manifest records both arms complete (14/14 files, 20 base failures to 17 head, file-gates/base-aggregate.log and file-gates/head-aggregate.log), a red base control (negative-control.log, 5 failed, EXIT=1) and the before/after census, and the census number is what the landed head produces when re-run.",
+    "goal": "the node's goal is to attach the ascending (split) sweep's wall to the outside so no split-born wall extremum or saddle reaches the receipt; nova/equilibrium/contour_tree.py:392-396 hands each ascending wall vertex the outside root as an extra neighbour and :419-420 suppresses the wall event, and the diverted 340-cell census falls from 18 minima and 20 saddles to 0 minima and 1 saddle.",
+    "manifest": "read; it states the per-file gate result for each arm, the census before and after, the red control, the recorded added failures and two follow-ons, and the headline census it quotes (minimum 0, saddle 1) is reproduced by the landed head.",
+    "write_paths": "the manifest declares five paths, and git diff e4ca8d20146f67c86c92bb84feb851c6c5a1ca60..41a80bc4f40d16ab153fc919efd69222cfd440b1 changes four of them, every one inside the declared scope, with nova/equilibrium/topology.py untouched as the brief required."
+  },
+  "justifications": {
+    "durability": "tests/test_contour_tree_wall_split.py:127 carries an independent outside-augmented oracle that reddens when the old sweep is restored, but its fixture at :36 is a hill whose wall ring is the carrier's global minimum, so it cannot fail the over-suppression nova/equilibrium/contour_tree.py:420 introduces.",
+    "evidence": "file-gates/base-aggregate.log and file-gates/head-aggregate.log carry both arms to their summary lines with EXIT=1, and negative-control.log shows the reinstated defect reddening five tests, though after-wall-counts-final.log:5 records a census the landed head does not reproduce and the oracle was never run on a production carrier.",
+    "fit": "nova/equilibrium/contour_tree.py:392-396 extends _sweep_tree through the same fixed-shape fori_loop state it already threads, with no host-side filter, no new sweep and no plan label in any added name.",
+    "goal_fidelity": "nova/equilibrium/contour_tree.py:420 blanks every ascending event at a wall vertex, so the spurious chain is gone on the fixtures but the merge the plan's rule reserves for a wall vertex with a non-outside neighbour is dropped as well, verified on the production fixture at :420's guarded event.",
+    "reuse": "_sweep_tree is the only owner of the merge-tree sweep and the change extends it, reusing its wall_flag, winner and union bookkeeping rather than adding a second wall mechanism.",
+    "scope_discipline": "git diff e4ca8d20..41a80bc4 touches only nova/equilibrium/contour_tree.py, tests/test_contour_tree_wall_split.py, tests/test_contour_tree_sparse_build.py and the evidence fragment, all inside the manifest's declared write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to attach the ascending (split) sweep's wall to the outside so no split-born wall extremum or saddle reaches the receipt; nova/equilibrium/contour_tree.py:392-396 hands each ascending wall vertex the outside root as an extra neighbour and :419-420 suppresses the wall event, and the diverted 340-cell census falls from 18 minima and 20 saddles to 0 minima and 1 saddle.\nVERDICT done_when: the brief's measure is the joint gate at base and head plus the wall-node census on the diverted-single-null-340-cells fixture; the manifest records both arms complete (14/14 files, 20 base failures to 17 head, file-gates/base-aggregate.log and file-gates/head-aggregate.log), a red base control (negative-control.log, 5 failed, EXIT=1) and the before/after census, and the census number is what the landed head produces when re-run.\nVERDICT write_paths: the manifest declares five paths, and git diff e4ca8d20146f67c86c92bb84feb851c6c5a1ca60..41a80bc4f40d16ab153fc919efd69222cfd440b1 changes four of them, every one inside the declared scope, with nova/equilibrium/topology.py untouched as the brief required.\nVERDICT manifest: read; it states the per-file gate result for each arm, the census before and after, the red control, the recorded added failures and two follow-ons, and the headline census it quotes (minimum 0, saddle 1) is reproduced by the landed head.\nVERDICT diff: read all three commits from e4ca8d20 to 41a80bc4; 594ceacfe adds the ascending outside union to nova/equilibrium/contour_tree.py together with tests/test_contour_tree_wall_split.py, a0ca54a37 lands the evidence fragment, and 41a80bc4 repins the two sparse receipt digests.\nCALL_SITES: nova/equilibrium/topology.py:3126 topology.read builds the tree, scripts/prototypes/fast_map_production/kernel.py:253, scripts/prototypes/sub_millisecond/measure_tree.py:59, scripts/prototypes/read_warm_wall/measure.py:77\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: nova/equilibrium/contour_tree.py:420 blanks every ascending event at a wall vertex, so the spurious chain is gone on the fixtures but the merge the plan's rule reserves for a wall vertex with a non-outside neighbour is dropped as well, verified on the production fixture at :420's guarded event.\nSCORE evidence: 15\nJUSTIFICATION evidence: file-gates/base-aggregate.log and file-gates/head-aggregate.log carry both arms to their summary lines with EXIT=1, and negative-control.log shows the reinstated defect reddening five tests, though after-wall-counts-final.log:5 records a census the landed head does not reproduce and the oracle was never run on a production carrier.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff e4ca8d20..41a80bc4 touches only nova/equilibrium/contour_tree.py, tests/test_contour_tree_wall_split.py, tests/test_contour_tree_sparse_build.py and the evidence fragment, all inside the manifest's declared write paths.\nSCORE durability: 12\nJUSTIFICATION durability: tests/test_contour_tree_wall_split.py:127 carries an independent outside-augmented oracle that reddens when the old sweep is restored, but its fixture at :36 is a hill whose wall ring is the carrier's global minimum, so it cannot fail the over-suppression nova/equilibrium/contour_tree.py:420 introduces.\nSCORE fit: 16\nJUSTIFICATION fit: nova/equilibrium/contour_tree.py:392-396 extends _sweep_tree through the same fixed-shape fori_loop state it already threads, with no host-side filter, no new sweep and no plan label in any added name.\nSCORE reuse: 20\nJUSTIFICATION reuse: _sweep_tree is the only owner of the merge-tree sweep and the change extends it, reusing its wall_flag, winner and union bookkeeping rather than adding a second wall mechanism.\nFINDING nova/equilibrium/contour_tree.py:420 blocking: `event = usable & ~split_wall & (...)` suppresses every ascending event at a wall vertex, so where a lower interior component meets the outside at a wall vertex the merge is recorded nowhere; the node's own outside-augmented oracle reports exactly one such mismatch on the production diverted-single-null fixture at the landed head (wall vertex 447, psi -0.003609), and the receipt keeps node-minus-edge equal to one only because the node and its arc are dropped together, so no check in the suite can see it.\nFINDING tests/test_contour_tree_wall_split.py:127 follow-on: the oracle is parameterised only over the hill and rippled hill from :36, whose wall ring is the carrier's global minimum, so the wall-merge case the plan's rule carves out is not exercised and the over-suppression at nova/equilibrium/contour_tree.py:420 passes green; a carrier whose interior minimum lies below its wall contact (r^2 on the same 21x21 triangulation) reports one wall merge mismatch.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T193653383537-split-sweep-wall-outside/after-wall-counts-final.log:5 follow-on: the log labelled working-tree-final-fix records wall node counts {0:0, 1:2}, which the landed head does not produce (it yields {0:0, 1:1}), so a reader comparing the run's census logs takes a superseded state for the landed one; the fragment's table records the reproducible number.\n",
+  "review_run_id": "r-20261023T011815313336-review-of-split-sweep-wall-outside-41a80bc4f40d",
+  "reviewed_base_sha": "e4ca8d20146f67c86c92bb84feb851c6c5a1ca60",
+  "reviewed_head_sha": "41a80bc4f40d16ab153fc919efd69222cfd440b1",
+  "reviewed_run_id": "r-20261022T193653383537-split-sweep-wall-outside",
+  "scores": {
+    "durability": 12,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 13,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T02:11:33.100178+00:00",
+  "total": 95
+}

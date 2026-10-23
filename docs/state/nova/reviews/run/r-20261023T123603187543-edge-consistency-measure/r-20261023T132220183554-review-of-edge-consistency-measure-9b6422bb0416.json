@@ -1,0 +1,77 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "nova/imas/mast_parity_chain.py:615",
+    "nova/imas/mast_parity_gate.py:278"
+  ],
+  "completed_at": "2026-10-23T14:19:26.357Z",
+  "dispatched_at": "2026-10-23T13:54:11Z",
+  "findings": [
+    {
+      "file": "nova/imas/edge_consistency.py",
+      "line": "166",
+      "severity": "non-blocking",
+      "text": "non-blocking: the inside-is-None default scores psi_norm <= 1.0 only, while the docstring at nova/imas/edge_consistency.py:156 promises the plasma interior 0 <= psi_norm <= 1; a caller following the documented definition gets a whole-slice form that includes cells below the axis flux, so it no longer reads against the parity chain, which is fenced to interior in-limiter cells at nova/imas/mast_parity_chain.py:435. Measured inert on the analytic fixture - zero of 3969 finite cells carry psi_norm < 0 (minimum 1.58e-05 over 2402 scored cells) - so the divergence is latent, not live, and the one test that would catch it (tests/test_edge_consistency.py:152 applies its own >= 0.0 bound) agrees with the code today only because the fixture never exercises the difference."
+    },
+    {
+      "file": "nova/imas/edge_consistency.py",
+      "line": "88",
+      "severity": "non-blocking",
+      "text": "non-blocking: structured_grid_current_density duplicates a capability the repository already owns at nova/equilibrium/map_extraction.py:132 (apply_delta_star), whose operator is nova/equilibrium/conservation.py:219 - same central-difference Delta*, same -Delta*Phi/(TOTAL_FLUX_FACTOR mu_0 R) recovery, same interior mask. Measured on the analytic flux the two agree to 4.0e-16 relative in double precision, so the addition duplicates rather than extends the owner and the repository now carries two implementations of one operator that can drift apart."
+    },
+    {
+      "file": "tests/test_edge_consistency.py",
+      "line": "196",
+      "severity": "non-blocking",
+      "text": "non-blocking: band_cell_count is compared between two runs of the same code path on the same grid, so both sides move together; the assertion cannot fail unless the measure is nondeterministic and does not show that the negative control left the band definition untouched."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T123603187543-edge-consistency-measure/manifest.md",
+      "line": "19",
+      "severity": "non-blocking",
+      "text": "non-blocking: the after_suite record's log_path names a directory rather than a log file, so a receipt reader that opens that path reads a listing instead of the suite's exit line; the individual logs are named under test_logs, but the machine-read field is unreadable as a log."
+    },
+    {
+      "file": "logs/edge-consistency.txt",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: every head-arm gate log of the reviewed run opens with a revision header naming the base commit (\"# revision: e69f4b60af04df8259ef914dee3136a3c55f6cb2 (base) + working tree\") although the arm ran the worktree that was committed as 9b6422bb0, so a reader cannot tell the base arm from the head arm by the header alone; and logs/negative_control_band_ff_prime.txt:3 records \"# command: (the declared mutation run)\" instead of the command that ran, so the red log names a later reader no re-executable check. A coordinator's manifest check refuses a record that cites that log as its arm for exactly this reason, so the defect costs a promotion round-trip rather than only legibility."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "VERDICT call_sites: the lifted operator is reached in production from nova/imas/mast_parity_chain.py:615 and nova/imas/mast_parity_gate.py:278 through _profile_reproduction_residuals; edge_consistency() itself has no production caller yet, its consumer being the IDS-table node that follows on top of this one.",
+    "diff": "VERDICT diff: read commit by commit against e69f4b60a; 8ecd93ff4 lifts the inline operator into structured_grid_current_density and rewires _profile_reproduction_residuals to it, 542891b95 renders the convergence figure, 9b6422bb0 adds the evidence fragment - all inside the declared scope.",
+    "done_when": "VERDICT done_when: the done_when names the analytic-state order fit, a 1 per cent FF-prime detection and the band-only negative control; tests/test_edge_consistency.py:199 fits the order over three resolutions and asserts 1.7 < order < 2.3, :168 asserts the perturbation clears the threshold, :179 is the control, and each result is recorded in the fragment and the logs.",
+    "goal": "VERDICT goal: the node's goal is an edge-consistency measure between an equilibrium's flux functions and its flux map, proved on the analytic state; nova/imas/edge_consistency.py:81-260 lands exactly that, with the three forms the brief names and EDGE_BAND_RELATIVE_THRESHOLD / EDGE_BAND_WIDTH as named constants stated beside their measured basis.",
+    "manifest": "VERDICT manifest: read; it states status complete, records the base and head arms as zero failures with their logs and the literal head command, and records the negative-control log that reddens on the band-only mutation.",
+    "write_paths": "VERDICT write_paths: the declared paths are nova/imas/ edge_consistency.py and mast_parity_chain.py, tests/test_edge_consistency.py, tests/test_parity_chain.py, docs/figures/dd-cocos-edge-consistency and the fragment; the seven files in the diff all sit inside them, and nova/imas/parity_tolerances.py is untouched."
+  },
+  "justifications": {
+    "durability": "tests/test_edge_consistency.py:102 pins the lifted arithmetic to an independent closed form and :199 fails if the residual stops falling at second order, but :196 compares two runs of the same code and no test exercises the inside parameter or the documented lower flux bound.",
+    "evidence": "The manifest's gate command ran six files at the head with EXIT=0 and identical counts at the base in scratch/base-arms.log, and the numbers land as a separate node on top of this one.",
+    "fit": "nova/imas/edge_consistency.py:78 follows the surrounding frozen-dataclass and numpy idiom and introduces no forbidden name, though its docstring at :156 states a scored set the code at :166 does not apply.",
+    "goal_fidelity": "nova/imas/edge_consistency.py:73 returns the whole-slice, band-absolute and band-relative forms the goal names, and the band forms carry their own denominator at :192 rather than the slice-wide one.",
+    "reuse": "nova/imas/edge_consistency.py:88 re-implements the structured-grid current-density read that nova/equilibrium/map_extraction.py:132 already owns, agreeing with it to 4.0e-16 relative instead of extending it.",
+    "scope_discipline": "Every path in the diff is inside the declared write paths, and the diff does not touch nova/equilibrium/convention.py or nova/imas/parity_tolerances.py, which the brief fenced off."
+  },
+  "notes": "Read at base e69f4b60af04df8259ef914dee3136a3c55f6cb2 and head 9b6422bb0416e2a358b91c9389c1810d863b1bd0; the same record is written beside it under the head-pinned name in this review-records directory.",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is an edge-consistency measure between an equilibrium's flux functions and its flux map, proved on the analytic state; nova/imas/edge_consistency.py:81-260 lands exactly that, with the three forms the brief names and EDGE_BAND_RELATIVE_THRESHOLD / EDGE_BAND_WIDTH as named constants stated beside their measured basis.\nVERDICT done_when: the done_when names the analytic-state order fit, a 1 per cent FF-prime detection and the band-only negative control; tests/test_edge_consistency.py:199 fits the order over three resolutions and asserts 1.7 < order < 2.3, :168 asserts the perturbation clears the threshold, :179 is the control, and each result is recorded in the fragment and the logs.\nVERDICT write_paths: the declared paths are nova/imas/edge_consistency.py and mast_parity_chain.py, tests/test_edge_consistency.py, tests/test_parity_chain.py, docs/figures/dd-cocos-edge-consistency and the fragment; the seven files in the diff all sit inside them, and nova/imas/parity_tolerances.py is untouched.\nVERDICT manifest: read; it states status complete, records the base and head arms as zero failures with their logs and the literal head command, and records the negative-control log that reddens on the band-only mutation.\nVERDICT diff: read commit by commit against e69f4b60a; 8ecd93ff4 lifts the inline operator into structured_grid_current_density and rewires _profile_reproduction_residuals to it, 542891b95 renders the convergence figure, 9b6422bb0 adds the evidence fragment - all inside the declared scope.\nVERDICT call_sites: the lifted operator is reached in production from nova/imas/mast_parity_chain.py:615 and nova/imas/mast_parity_gate.py:278 through _profile_reproduction_residuals; edge_consistency() itself has no production caller yet, its consumer being the IDS-table node that follows on top of this one.\nCALL_SITES: nova/imas/mast_parity_chain.py:615, nova/imas/mast_parity_gate.py:278\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/imas/edge_consistency.py:73 returns the whole-slice, band-absolute and band-relative forms the goal names, and the band forms carry their own denominator at :192 rather than the slice-wide one.\nSCORE evidence: 17\nJUSTIFICATION evidence: The manifest's gate command ran six files at the head with EXIT=0 and identical counts at the base in scratch/base-arms.log, and the fragment records the fitted order and the perturbation result at docs/evidence/fragments/dd-cocos-ingest/edge-consistency.html:103-117.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: Every path in the diff is inside the declared write paths, and the diff does not touch nova/equilibrium/convention.py or nova/imas/parity_tolerances.py, which the brief fenced off.\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_edge_consistency.py:102 pins the lifted arithmetic to an independent closed form and :199 fails if the residual stops falling at second order, but :196 compares two runs of the same code and no test exercises the inside parameter or the documented lower flux bound.\nSCORE fit: 16\nJUSTIFICATION fit: nova/imas/edge_consistency.py:78 follows the surrounding frozen-dataclass and numpy idiom and introduces no forbidden name, though its docstring at :156 states a scored set the code at :166 does not apply.\nSCORE reuse: 5\nJUSTIFICATION reuse: nova/imas/edge_consistency.py:88 re-implements the structured-grid current-density read that nova/equilibrium/map_extraction.py:132 already owns, agreeing with it to 4.0e-16 relative instead of extending it.\nFINDING nova/imas/edge_consistency.py:166 non-blocking: the inside-is-None default scores psi_norm <= 1.0 only while the docstring at :156 promises 0 <= psi_norm <= 1, so a caller reading against the parity chain gets cells below the axis flux in the whole-slice form; measured inert on the analytic fixture so the divergence is latent rather than live.\nFINDING nova/imas/edge_consistency.py:88 non-blocking: structured_grid_current_density duplicates the capability nova/equilibrium/map_extraction.py:132 already owns through nova/equilibrium/conservation.py:219, agreeing with it to 4.0e-16 relative on the analytic flux, so the repository carries two implementations of one operator that can drift apart.\nFINDING tests/test_edge_consistency.py:196 non-blocking: band_cell_count is compared between two runs of the same code path, so the assertion cannot fail unless the measure is nondeterministic and does not show that the negative control left the band definition untouched.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T123603187543-edge-consistency-measure/manifest.md:19 non-blocking: after_suite.log_path names a directory rather than a log file, so a receipt reader opening that path reads a listing instead of the suite's exit line.\nFINDING logs/edge-consistency.txt:1 non-blocking: every head-arm gate log of the reviewed run opens with a revision header naming the base commit though the arm ran the worktree committed as 9b6422bb0, and logs/negative_control_band_ff_prime.txt:3 records \"# command: (the declared mutation run)\" instead of the command that ran, so neither the arm nor the check is identifiable from the log alone.\n",
+  "review_run_id": "r-20261023T132220183554-review-of-edge-consistency-measure-9b6422bb0416",
+  "reviewed_base_sha": "e69f4b60af04df8259ef914dee3136a3c55f6cb2",
+  "reviewed_head_sha": "9b6422bb0416e2a358b91c9389c1810d863b1bd0",
+  "reviewed_run_id": "r-20261023T123603187543-edge-consistency-measure",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T14:19:39.819915+00:00",
+  "total": 90
+}

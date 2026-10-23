@@ -1,0 +1,32 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-23T13:55:25Z",
+  "figures": [
+    "docs/figures/dd-cocos-edge-consistency/edge-consistency-convergence.svg"
+  ],
+  "findings": [],
+  "images": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T123603187543-edge-consistency-measure/scratch/convergence.png"
+  ],
+  "item_verdicts": {
+    "contrast": "passes - the axis and annotation text is near-black or the repository's declared reference grey #929292 on white and reads clearly against it, including the grey threshold annotation at the top of the plot.",
+    "data_ink": "passes - the four markers and their connecting line, the dashed power-law fit and the dotted threshold line carry the visual weight on a plain white field; nothing is drawn that is not the measurement or a reference the caption uses.",
+    "decoration": "passes - no gradient, background fill, shading, gridline or frame appears anywhere in the rendered PNG; the axes are despined; the only non-data ink is the dotted threshold reference, which the caption names.",
+    "label_collision": "passes - in the rendered PNG the 'threshold 1.0e-03' annotation sits above the dotted line in clear space, the 'fitted order 1.97' annotation sits below-left of the dashed line in empty space, neither overlaps the data line or the other label, and no label is clipped at the canvas edge.",
+    "legibility": "passes - the rendered PNG shows one log-log series of four band-residual points joined by a blue line with circle markers, a dashed fit line beneath it and a grey dotted threshold line; the axis labels 'radial grid spacing [m]' and 'band residual / profile current', the decade tick labels and both annotations ('threshold 1.0e-03', 'fitted order 1.97') are all readable at a glance.",
+    "table_form": "passes - the image is a log-log convergence plot of a residual against grid spacing; the four points are given as a plot because their slope is the result, so nothing it depicts is naturally a table."
+  },
+  "project": "nova",
+  "read_only": true,
+  "review_run_id": "r-20261023T132252853740-review-of-edge-consistency-measure-9b6422bb0416-figure",
+  "reviewed_base_sha": "e69f4b60af04df8259ef914dee3136a3c55f6cb2",
+  "reviewed_head_sha": "9b6422bb0416e2a358b91c9389c1810d863b1bd0",
+  "reviewed_run_id": "r-20261023T123603187543-edge-consistency-measure",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T14:16:28.864183+00:00",
+  "total": null
+}

@@ -18,6 +18,11 @@
       "kind": "exempted",
       "reason": "the coordinator's merged-head gate supplies the literal gate command at promotion",
       "recorded_at": "2026-10-23T12:01:54.093055+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "the red arm is a run-directory log, not tracked evidence; the reverted-row mechanism is stated in commit 69db18fcb and the test is present at that revision",
+      "recorded_at": "2026-10-23T12:02:05.987452+00:00"
     }
   },
   "findings": [

@@ -52,7 +52,12 @@ from __future__ import annotations
 import numpy as np
 from scipy.constants import mu_0
 
+from nova_cocos import convention
+
 __all__ = [
+    "COCOS",
+    "CONVENTION",
+    "SIGMA_BP",
     "TOTAL_FLUX_FACTOR",
     "delta_star_from_current_density",
     "flux_function_pressure",
@@ -60,6 +65,21 @@ __all__ = [
     "grad_shafranov_source",
     "toroidal_current_density",
 ]
+
+#: nova's internal coordinate convention, stated once for the whole package.
+#:
+#: COCOS 17 is the Data Dictionary's own DD4 convention: the poloidal flux is
+#: signed by sigma_Bp = -1, carries the 2*pi, and the flux-surface handedness
+#: sigma_rho_theta_phi = +1. Every sign and factor in nova follows from these
+#: four digits, so a site that needs one reads it here or from
+#: :func:`nova_cocos.convention_transform` rather than negating a value inline.
+CONVENTION = convention(17)
+
+#: The COCOS number nova works in internally.
+COCOS = CONVENTION.identifier
+
+#: Sign of the poloidal flux relative to the plasma current in nova's convention.
+SIGMA_BP = CONVENTION.sigma_bp
 
 #: Wb of total poloidal flux per Wb/rad of flux per radian.
 TOTAL_FLUX_FACTOR = 2.0 * np.pi

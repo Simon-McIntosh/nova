@@ -39,7 +39,12 @@ def _fixture():
 def main() -> None:
     fixture = _fixture()
     state = fixture.cerfon_freidberg_single_null()
-    spacings = np.array([1.0 / (size - 1) for size in SIZES])
+    spacings = np.array(
+        [
+            (fixture.RADIAL_BOUNDS[1] - fixture.RADIAL_BOUNDS[0]) / (size - 1)
+            for size in SIZES
+        ]
+    )
     band = np.array([fixture._measure(state, size).band_relative for size in SIZES])
 
     order = float(np.polyfit(np.log(spacings), np.log(band), 1)[0])

@@ -86,7 +86,7 @@ class Scenario(GetSlice, IdsData):
         self.data.attrs[self.name] = ",".join(
             [str(value) for value in self.ids_attrs.values()]
         )
-        self.data.attrs["homogeneous_time"] = self.homogeneous_time
+        self.data.attrs["homogeneous_time"] = int(self.homogeneous_time)
         self.time_node = time_node
         yield
         if self.pulse != 0 and self.run != 0:  # don't store passed ids

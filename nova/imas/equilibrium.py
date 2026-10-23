@@ -911,8 +911,15 @@ class EquilibriumData(Equilibrium, Profile2D, Profile1D, Parameter0D, Grid):
 
     @cached_property
     def wall(self):
-        """Return wall instance."""
-        return Wall(uri=self.uri)
+        """Return wall instance.
+
+        The wall is read from the same pulse as the equilibrium, so it is
+        opened at the major that pulse was written in. Left to its own
+        default, the machine read asks for the latest published major, and a
+        pulse written under an earlier one is then refused as an unrequested
+        major conversion.
+        """
+        return Wall(uri=self.uri, dd_version=str(self.ids_dd_version))
 
     @cached_property
     def strike(self):

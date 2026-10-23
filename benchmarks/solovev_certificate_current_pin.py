@@ -21,7 +21,7 @@ import subprocess
 import sys
 import tempfile
 from time import perf_counter
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import jax
 import jax.numpy as jnp
@@ -29,11 +29,6 @@ import numpy as np
 
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium import ForwardProfile, fixed_point
-from nova.equilibrium.solve_request import (
-    ExplicitSolveSeed,
-    ForwardSolveRequest,
-    ResolvedForwardSolveDefaults,
-)
 from nova.equilibrium.stencil_mesh import StencilMesh
 from nova.jax.config import (
     configure_dtypes,
@@ -42,6 +37,9 @@ from nova.jax.config import (
 )
 from scripts.analytic_oracle_fixtures import measure as oracle_fixture
 from scripts.oracle_rebaseline import measure as recovery
+
+if TYPE_CHECKING:
+    from nova.equilibrium.solve_request import ForwardSolveRequest
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -166,6 +164,8 @@ def _current_pin_solve_request(
 ) -> ForwardSolveRequest:
     """Declare whether the comparison arm applies the public current pin."""
 
+    from nova.equilibrium.solve_request import ExplicitSolveSeed, ForwardSolveRequest
+
     return ForwardSolveRequest.from_defaults(
         carrier_identity=carrier_identity,
         source_profile=profile.source,
@@ -205,6 +205,8 @@ def _solve_arm(
     pinned: bool,
     carrier_identity: str,
 ) -> dict[str, Any]:
+    from nova.equilibrium.solve_request import ResolvedForwardSolveDefaults
+
     request = _current_pin_solve_request(
         profile,
         seed,
@@ -641,7 +643,10 @@ def _harvest(output: Path, job_id: str) -> dict[str, Any]:
 
 def _parse() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--case", choices=STATIC_CASES)
+    parser.add_argument("--certificate-row", action="store_true")
+    parser.add_argument("--revision")
+    parser.add_argument("--row-output-root", type=Path)
+    parser.add_argument("--case")
     parser.add_argument("--requested-cells", type=int, choices=REQUESTED_CELLS)
     parser.add_argument("--part-output", type=Path)
     parser.add_argument("--run-all", action="store_true")
@@ -655,6 +660,89 @@ def _parse() -> argparse.Namespace:
 
 def main() -> None:
     arguments = _parse()
+    if arguments.certificate_row:
+        if not all(
+            (
+                arguments.revision,
+                arguments.row_output_root,
+                arguments.case,
+                arguments.requested_cells,
+            )
+        ):
+            raise SystemExit(
+                "certificate row requires revision, output root, case, and cells"
+            )
+        if os.environ.get("JAX_PLATFORMS") != "cpu":
+            raise SystemExit("certificate row requires JAX_PLATFORMS=cpu")
+        if arguments.case not in certificate.CASE_NAMES:
+            raise SystemExit("certificate case is not declared by the driver")
+        configure_dtypes()
+        from nova import __file__ as nova_file
+
+        certificate.ROOT = arguments.row_output_root.resolve()
+        certificate.FIGURE_ROOT = (
+            certificate.ROOT / "docs/figures/gs-absolute-accuracy/solovev"
+        )
+        certificate.PART_ROOT = certificate.FIGURE_ROOT / "production-route-parts"
+        certificate._source_revision = lambda: arguments.revision
+        certificate.ROOT.mkdir(parents=True, exist_ok=True)
+        original_solve = certificate.ForwardProfile.solve
+
+        def capture_machine(original, *args, **kwargs):
+            machine = original(*args, **kwargs)
+            np.save(certificate.ROOT / "cell-coordinates.npy", np.asarray(machine.node))
+            return machine
+
+        def capture_solve(profile, *args, **kwargs):
+            receipt = original_solve(profile, *args, **kwargs)
+            equilibrium = getattr(receipt, "equilibrium", receipt)
+            np.save(
+                certificate.ROOT / "terminal-flux.npy",
+                np.asarray(equilibrium.flux),
+            )
+            return receipt
+
+        if hasattr(certificate, "_case_machine"):
+            original_case_machine = certificate._case_machine
+            certificate._case_machine = lambda *args, **kwargs: capture_machine(
+                original_case_machine, *args, **kwargs
+            )
+        else:
+            original_cached_machine = certificate.oracle_fixture.cached_machine
+            certificate.oracle_fixture.cached_machine = lambda *args, **kwargs: (
+                capture_machine(original_cached_machine, *args, **kwargs)
+            )
+        certificate.ForwardProfile.solve = capture_solve
+        print(
+            f"revision={arguments.revision} nova.__file__={nova_file} "
+            f"certificate.__file__={certificate.__file__} "
+            f"cwd={Path.cwd().resolve()}",
+            flush=True,
+        )
+        row = certificate._measure(arguments.case, arguments.requested_cells)
+        solver = row["solver"]
+        flux = np.load(certificate.ROOT / "terminal-flux.npy")
+        print(
+            json.dumps(
+                {
+                    "revision": arguments.revision,
+                    "requested_cells": row["requested_cells"],
+                    "terminal_residual": solver["terminal_fixed_point_residual"],
+                    "step_count": solver["production_telemetry"]["trip_count"],
+                    "amplitudes": solver["lambda_amplitude_history"]["samples"],
+                    "flux_shape": flux.shape,
+                    "flux_finite_count": int(np.count_nonzero(np.isfinite(flux))),
+                    "part": str(
+                        certificate._part_path(
+                            arguments.case, arguments.requested_cells
+                        )
+                    ),
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
+        return
     if arguments.validate:
         receipt = json.loads(arguments.output.read_text(encoding="utf-8"))
         _validate(receipt)
@@ -678,6 +766,8 @@ def main() -> None:
         or arguments.part_output is None
     ):
         raise SystemExit("a case, requested-cell rung, and part output are required")
+    if arguments.case not in STATIC_CASES:
+        raise SystemExit("current-pin comparison requires a static case")
     row = _measure(arguments.case, arguments.requested_cells)
     _write_json(arguments.part_output, row)
     print(

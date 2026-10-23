@@ -80,7 +80,7 @@
 <thead><tr><th>file</th><th>base</th><th>head</th></tr></thead>
 <tbody>
 <tr><th scope="row"><code>tests/test_getslice.py</code></th><td>14 passed</td><td>14 passed</td></tr>
-<tr><th scope="row"><code>tests/test_database.py</code></th><td>26 passed, 19 skipped</td><td>26 passed, 19 skipped <span>(first head run's 10 errors were <code>OSError: [Errno 30] Read-only file system: '/tmp/bt-test_database'</code>, scaffolding; re-run clean against a writable basetemp)</span></td></tr>
+<tr><th scope="row"><code>tests/test_database.py</code></th><td>26 passed, 19 skipped</td><td>28 passed, 19 skipped in 94.72 s <span>(the same 26 as the base arm plus the two cache-entry tests this node adds; the same 19 IMAS-marked skips)</span></td></tr>
 <tr><th scope="row"><code>tests/test_extrapolate.py</code></th><td>2 passed, 10 skipped</td><td>2 passed, 10 skipped</td></tr>
 <tr><th scope="row"><code>tests/test_pulsedesign.py</code></th><td>5 skipped</td><td>5 skipped</td></tr>
 <tr><th scope="row"><code>tests/test_pointconstraint.py</code></th><td>5 passed, 14 skipped</td><td>5 passed, 14 skipped</td></tr>
@@ -90,7 +90,7 @@
 <tr><th scope="row"><code>tests/test_internal_cocos_sites.py</code></th><td>8 passed</td><td>8 passed</td></tr>
 <tr><th scope="row"><code>tests/test_shape_inverse.py</code></th><td><strong>29 passed in 846.68 s</strong>, one <code>all_debug</code> sbatch (job 1294607) against the base extraction at <code>be0ec1321</code></td><td><strong>29 passed in 887 s</strong>, one <code>all_debug</code> sbatch (job 1294444); its sibling id <code>tests/test_coupled_plant.py::test_reconstruction_route_into_the_plant_meets_the_stated_tolerance</code> passed in 44 s in the same job</td></tr>
 <tr><th scope="row"><code>tests/test_equilibrium_reader_cocos.py</code> (refusals)</th><td>absent</td><td><strong>2 passed in 15 s.</strong> DINA <code>105014/1</code> and <code>105013/1</code>, each refused at its global quantities with its own failing digit named.</td></tr>
-<tr><th scope="row"><code>tests/test_equilibrium_reader_cocos.py</code> (signed)</th><td>absent</td><td><strong>6 passed, 1 xfailed in 182 s.</strong> Both conforming pulses pass on both arms: the signed quantities the reader holds, and the read seam's own per-path factors. The one xfail is strict and names the machine-description wall, which is a defect of its own outside this seam; when that defect is fixed the test XPASSes and the marker is forced off.</td></tr>
+<tr><th scope="row"><code>tests/test_equilibrium_reader_cocos.py</code> (signed)</th><td>absent</td><td><strong>6 passed, 1 xfailed in 177 s</strong> at the repair head (182 s before it). Both conforming pulses pass on both arms: the signed quantities the reader holds, and the read seam's own per-path factors. The one xfail is strict and names the machine-description wall, which is a defect of its own outside this seam; when that defect is fixed the test XPASSes and the marker is forced off.</td></tr>
 </tbody>
 </table>
 <p><strong>Changed expectations: none observed.</strong> Every factor above is &minus;1 or +1 for a DD3 source; the psi-like and d/dpsi-like rows flip by &minus;1, which is exactly the sign the reader previously left to its consumers. No covered file changed its result against its base arm.</p>
@@ -118,10 +118,14 @@
 <h2 id="dd-equilibrium-reader-negative-control">Negative control</h2>
 <p>Declared: bypass the translation in a scratch copy, and a signed assertion reddens. <strong>Admissible, and it reddens.</strong> In a scratch copy of the tree, <code>nova/imas/getslice.py::translated</code> was mutated to return its values unconverted, and the run was forced to rebuild rather than read a warm cache by redirecting <code>XDG_DATA_HOME</code> to a scratch path. The signed arm for CORSICA <code>130506/6</code> then <strong>failed on its own psi1d signed assertion</strong>: reader <code>104.58047784535063</code> against expected <code>-104.58047784535063</code>. The unmutated head passes that same id, which is what makes the outcome discriminating; log at <code>logs/negative-control-bypassed-translation.log</code>.</p>
 
+<h2 id="dd-equilibrium-reader-cache">A cache entry written before this change</h2>
+<p>The reader translates on build only, so a store written before this node is the one place where the translation could be silently absent. The identity that finds it is the pulse, run and Data Dictionary version, all unchanged by the reader's own convention, so the entry is found and every name in it matches while the signed quantities are the source's.</p>
+<p>The reader now treats the recorded convention as part of what it reads, not only what it writes. <code>EquilibriumData.load</code> requires <code>attrs["cocos"]</code> to be <code>NOVA_CONVENTION</code>; an entry that carries none, or another, is evicted and re-raised as a cache miss, which is the existing rebuild path rather than a new one. The tests hold both sides without opening a pulse, since a stale entry is the whole subject: a store written with <code>cocos = 11</code> is rebuilt, and one written with the reader's convention is served untouched. Reverting the override reddens the first and leaves the second green, which is what makes the pair discriminating; log at <code>logs/negative-control-stale-cache-reverted.log</code>.</p>
+
 <h2 id="dd-equilibrium-reader-follow-on">Follow-ons</h2>
 <ol>
 <li><code>nova/imas/sample.py</code>'s two psi-signed writers take no factor; they should take <code>psi_write_factor(DD3_CONVENTION)</code> as the pulsedesign writer does.</li>
-<li><code>EquilibriumData</code>'s zarr group does not carry the convention in its key, so a dataset cached before this change is served raw rather than rebuilt; the record proposes the <code>cocos</code> attribute be required on load.</li>
+<li><strong>Closed in this node.</strong> The cache group's identity is the source's pulse, run and Data Dictionary version, and the reader's own convention changes none of them, so a dataset cached before this change was found under the same name and served with its raw DD3 psi. The reader now requires the convention it records on load: an entry carrying none, or another, is evicted and reported as a cache miss, so the store is rebuilt instead of the source's own convention being served as the reader's.</li>
 <li>DINA 105014/1 and 105013/1 are refused at their global quantities rather than by the node the profile walk tripped over, so the <code>Invalid node name '0' in path: 0</code> this node saw first is no longer reached on a refused pulse.</li>
 </ol>
 

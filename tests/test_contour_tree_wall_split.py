@@ -203,3 +203,19 @@ def test_production_split_events_match_outside_augmented_sublevel_counts():
             assert not nodes[vertex]
         previous = current
     assert 447 in wall_merges
+
+
+def test_first_wall_birth_is_invariant_to_carrier_edge_order():
+    """The outside branch starts at the wall, regardless of neighbour slots."""
+    values = np.array([0.0, 1.0, 2.0, 3.0])
+    wall = np.array([True, False, False, False])
+    edges = np.array([[0, 2], [0, 3], [1, 2], [2, 3]], dtype=np.int32)
+    expected_arcs = {(0, 2), (1, 2), (2, 3)}
+    for permutation in ([0, 1, 2, 3], [1, 0, 2, 3]):
+        nodes, _, arcs, arc_valid, overflow, _ = _split(
+            values, edges[permutation], wall
+        )
+        assert not bool(overflow)
+        assert np.flatnonzero(np.asarray(nodes)).tolist() == [1, 2, 3]
+        observed = {tuple(edge) for edge in np.asarray(arcs)[np.asarray(arc_valid)]}
+        assert observed == expected_arcs

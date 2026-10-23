@@ -45,6 +45,14 @@
   same check run against the base barycentric builder, it refused vertex 447
   as an unexpected wall split saddle (EXIT=1). The synthetic wall-joining
   cases remain in the wall-split file.</p>
+  <p>The geometry-only builder now leaves every added vertex at NaN when no
+  evaluator is supplied. Its new test passes on the head and refuses the
+  base builder's finite wall values. The production topology read still
+  evaluates its own physical field at every carrier vertex. In the explanatory
+  graph, labels have no opaque boxes and are placed clear of arcs and markers;
+  node ranks have integer ticks 0 through 3. The fixed-label control intersects
+  one arc, while the regenerated placement has zero arc, marker or label
+  intersections. The PNG was inspected after rendering.</p>
   <figure>
     <img src="/nova/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.svg" alt="Four-node diverted contour tree beside analytic flux contours, without the spurious SOL pair">
     <figcaption>The analytic carrier produces the X-point, axis, private-region wall maximum and virtual outside node.</figcaption>

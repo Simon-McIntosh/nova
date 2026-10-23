@@ -291,6 +291,43 @@
   "plan_link": null,
   "promoted_by": "review-self",
   "promoted_revision": "a2d75a1f20baefc9726d557b07f0a239fdc8cafa",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 234313,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261023T034643745236-review-of-explanatory-figure-after-wall-repair-f4fb36402b7a",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 234313,
+        "path": "/tmp/reckon-crew-scratch/r-20261023T034643745236-review-of-explanatory-figure-after-wall-repair-f4fb36402b7a"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/adb3a390-bdb2-4e2a-8e74-1e049c62c9fe/review-of-explanatory-figure-after-wall-repair-f4fb36402b7a",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

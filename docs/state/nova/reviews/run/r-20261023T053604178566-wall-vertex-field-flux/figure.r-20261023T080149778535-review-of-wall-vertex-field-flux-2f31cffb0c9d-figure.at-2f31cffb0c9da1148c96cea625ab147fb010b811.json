@@ -1,0 +1,66 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "A figure review runs no suite, so no failure ids are produced or claimed.",
+  "attachment_map": {
+    "image-1.png (1400x800 RGBA, attached to this review run)": "docs/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.png"
+  },
+  "attachment_note": "The attached raster was opened and judged directly; every claim below is read from the render, not from any SVG markup, and no SVG was opened. The attachment is 1400x800 and the repository figure is 1680x960, i.e. the same 14 x 8 in two-panel canvas at 100 and 120 dpi; resampling the repository PNG to the attachment's dimensions leaves a mean absolute channel difference of 1.65 with 1.7 % of pixels differing by more than 16, which is thin-stroke phase on downsampling, so the attachment is the reviewed head's figure and not a different draw. Two clips are drawn side by side: left, the state's poloidal flux as unfilled line contours with the vessel, the two analytic nulls and the tree's four node positions; right, the same tree as a signed-flux node-link graph. The drawing script benchmarks/contour_tree_explanatory_figure.py is inside the reviewed diff (2669319dd..2f31cffb0), so its line numbers are cited in the findings as the structural cause; findings are anchored to the figure's repository path because the script's output is what was judged. All pixel coordinates quoted are of the 1680x960 repository render.",
+  "completed_at": "2026-10-23T08:43:52.318Z",
+  "dispatched_at": "2026-10-23T08:02:18Z",
+  "figure_verdicts": [
+    {
+      "attachment": "image-1.png",
+      "figure": "docs/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.png",
+      "rubric": {
+        "contrast": "pass",
+        "data_ink": "pass",
+        "decoration": "pass",
+        "label_collision": "fail; the 'outside (wall contact)' label box hides a stretch of the axis-to-X-point arc (finding 1, blocking) and the 'wall maximum' label box hides a stretch of the wall-maximum-to-X-point arc (finding 2, non-blocking)",
+        "legibility": "pass",
+        "table_form": "pass"
+      }
+    }
+  ],
+  "findings": [
+    {
+      "affected_data": "One of the three edges of the contour tree (the X-point row 0 to the magnetic-axis row 1 adjacency in docs/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.json, edges[1] {first: 0, second: 1}); its two endpoints remain labelled, so the adjacency is still inferable, but the stroke between them is not visible",
+      "evidence": "attached render opened and sampled directly; sampled channel values along the arc's measured path are 42,42 at y = 648 and 132,17,186 at y = 674, with 253,231,235 / 251,230,238 / 248,230,241 / 249,230,240 and similar at y = 650, 652, 654, 668, 670 and 672; the arc's traced centre runs x = 1469 at y = 636, x = 1470, 1474, 1475 at y = 640-648, and x = 1486 at y = 674, x = 1493 at y = 690, x = 1504 at y = 720, so the missing rows are interior to one continuous edge and not its end. Grounds for calling it blocking rather than non-blocking: at 230-235 on white the arc is a contrast ratio near 1.2:1, below the threshold at which a reader sees the stroke at all, so for that stretch the figure does not let a reader see data it has drawn, and the user-wide figure rule makes that a blocking finding",
+      "file": "docs/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.png",
+      "line": null,
+      "remedy": "Add the drawn arcs to the obstacle list the placer tests against, or move the offending default offsets in GRAPH_LABEL_OFFSETS (line 103) clear of the edges, then regenerate the figure and look at the render",
+      "severity": "blocking",
+      "structural_cause": "The label placer benchmarks/contour_tree_explanatory_figure.py:481-485 builds its obstacle list from node-marker boxes and previously placed label boxes only, and tests a candidate at line 504; the edges are arc patches added at line 548 (FancyArrowPatch, connectionstyle arc3 rad=0.18) and are not in that list, so a placement that lands a label on an edge is reported as collision-free and no guard refuses it",
+      "summary": "The graph panel's 'outside (wall contact)' label is drawn on top of the axis-to-X-point edge and its background box erases the edge: in the 1680x960 render the arc renders as solid dark ink at y = 648 (channel value 42) and again at y = 674 (value 17), and holds a near-white 230-235 for every row between, which is what a white box at alpha 0.9 draws over #111111 ink (0.1 x 17 + 0.9 x 255 = 231). The washed span, y = 649-673, is exactly the vertical extent of that label's box (its text occupies x = 1380-1581, y = 653-667, plus the 2 pt padding the style sets), so roughly 24 px of the tree's longest drawn edge carries no visible ink"
+    },
+    {
+      "evidence": "attached render opened and sampled directly; per-row minimum channel value over x = 1290-1390 is 17 at y = 684, 686 and 688, 230 at y = 690 and 150 and 120 at y = 692 and 694 (the text glyph tops), and 17 at y = 696 and 698; a rendered character map of x = 1290-1419 across y = 682-721 shows the arc's dark run turning to the label-dimmed 224-242 value for rows 689-695 and resuming dark at 1359-1365 on row 696",
+      "file": "docs/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.png",
+      "line": null,
+      "severity": "non-blocking",
+      "structural_cause": "Same placer gap as finding 1 (benchmarks/contour_tree_explanatory_figure.py:481-485 with the test at line 504, edges drawn at line 548)",
+      "summary": "The graph panel's 'wall maximum' label box clips the wall-maximum-to-X-point edge where the edge crosses the box's padding band: the arc runs dark (value 17, positions x = 1310, 1320, 1328) at y = 684, 686 and 688, holds 230-240 across y = 689 to 695 as the padding band lies across the stroke, and is dark again (value 17 at x = 1357) below it. Recorded non-blocking and not blocking because the washed stretch is short (about seven rows, and the stroke is shallow there) and the edge re-emerges within a few pixels with both of its endpoints labelled, so nothing stops a reader; it is the same defect class and the same fix as finding 1 and is recorded so the placer repair covers both"
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261023T080149778535-review-of-wall-vertex-field-flux-2f31cffb0c9d-figure",
+  "reviewed_base_sha": "2669319dded99f086120148509b1f16f131d59c2",
+  "reviewed_figures": [
+    "docs/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.png"
+  ],
+  "reviewed_head_sha": "2f31cffb0c9da1148c96cea625ab147fb010b811",
+  "reviewed_run_id": "r-20261023T053604178566-wall-vertex-field-flux",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: pass; the figure is readable at a glance from both attached rasters",
+    "RUBRIC data_ink: pass; the contours, the vessel outline, the node markers and the graph arcs carry the ink; no gradient or filled band is drawn",
+    "RUBRIC decoration: pass; no gradient, background fill, band or gridline is present; the poloidal panel is drawn with its axis off and the graph panel is despined top and right",
+    "RUBRIC contrast: pass; every annotation renders in #111111 or #cc0000 on white, and the light-grey contours are data drawn thin rather than text",
+    "RUBRIC table_form: pass; the left panel is R-Z poloidal geometry and the right panel is a node-link diagram of the tree's adjacency, neither naturally a table",
+    "RUBRIC label_collision: fail; the two graph labels' background boxes are drawn over two of the three graph arcs and each washes a stretch of an edge to a near-white value (findings 1 and 2); no label is clipped by the canvas edge, no two labels overlap each other, and no label overlaps a node marker"
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T08:44:59.317646+00:00",
+  "total": null
+}

@@ -1,0 +1,75 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own gate logs, since its manifest records baseline_suite as empty. Base (2669319dd, and the scratch/base tree): base-gate-summary.log records 13/13 files complete, 88 passed, 1 failed, 15 deselected, the one base failure being tests/test_contour_tree_sweep_bounds.py::test_brute_force_fixture_receipts_match_recorded_fields. Head (a0d88a04a, the reviewed code revision) head-gate-summary.log records 96 passed, 10 failed, 0 deselected; of those ten, nine are not added: tests/test_contour_tree_sweep_bounds.py::test_brute_force_fixture_receipts_match_recorded_fields fails identically at both arms with the same ValueError broadcasting (256,) against (258,) from scripts/prototypes/contour_tree_sweep_profile/profile.py:176, and the eight tests/equilibrium/test_topology_contour_mesh_capacity.py::test_wide_wall_record_builds_below_capacity[...] ids reproduce at base in base-capacity-all-markers.log (revision 2669319dd, -m \"slow or not slow\") with the identical ValueError at scripts/prototypes/efit_field_swap/trace_record.py:144 before any mesh code runs. The tenth, tests/test_contour_tree_wall_split.py::test_production_split_events_match_outside_augmented_sublevel_counts, was a real added failure at a0d88a04a and is repaired by 0b820f056, whose wall-split-repair log records 7 passed EXIT=0 at that revision, so it is not an added failure at the reviewed head 2f31cffb0.",
+  "call_site_count": 1,
+  "call_sites": [
+    "nova/equilibrium/topology.py:2594"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-10-23T08:18:27Z",
+  "findings": [
+    {
+      "file": "benchmarks/contour_tree_brute_force.py",
+      "line": "79",
+      "severity": "non-blocking",
+      "text": "The docstring still reads 'Read every compact persisted Solov'ev certificate terminal state' but the fixture no longer reads render['terminal_flux_wb'] at all: the centres' flux is now the closed-form analytic Solov'ev field (line 88). The comment names a state the code does not use, and the certificate fixtures no longer exercise the solved terminal field anywhere, so the removal of the base arm's non-wall-caused extrema cannot be told from the field substitution on a reading of the docstring alone."
+    },
+    {
+      "file": "manifest.md",
+      "line": "21",
+      "severity": "non-blocking",
+      "text": "baseline_suite is empty in the reviewed manifest, so the run's declared gate arms are unreadable and a reader comparing base-gate-summary.log (1 failed) with head-gate-summary.log (10 failed) derives nine added failures where the true added set is zero. The after_suite key records only the single-file wall-split arm, not the thirteen-file gate the brief names, and the tests: line names that one file alone."
+    },
+    {
+      "file": "scratch/base/conftest.py",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "The base arm's scratch tree carries no conftest.py, so nova's explicit-path markexpr override (conftest.py:36-46) never ran there and the inherited '-m not slow' default deselected fifteen tests: the eight test_wide_wall_record_builds_below_capacity cases plus seven slow cases in test_contour_tree_sparse_build.py and test_escape_level_certificates.py that the head arm ran. The eight capacity failures are closed by base-capacity-all-markers.log, but the other seven have no base arm at all, so the two arms are compared over different test sets."
+    },
+    {
+      "file": "nova/equilibrium/contour_tree_mesh.py",
+      "line": "340",
+      "severity": "non-blocking",
+      "text": "field_evaluator defaults to None and the documented behaviour for that default is to assign 0.0 to every wall and boundary vertex, so a caller that omits it receives a silently false wall field rather than a refusal; the one production caller at nova/equilibrium/topology.py:2594 relies on that default. The value is not consumed by the read today, but it replaces one silently wrong wall value with another."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read all eight commits against 2669319dd. 38486a6d7 removes _barycentric_flux and the nearest-simplex fallback and adds the evaluator to build_contour_mesh; 6b745df07 gives the certificate and MAST fixtures their own closed-form and bicubic fields on both centres and wall vertices; 69b3b8b59 and a0d88a04a drop the now-absent upward-sweep wall contact from the explanatory figure and regenerate its json/svg/png; 0b820f056 rewrites the production wall-split test to require no wall split saddle; the remaining three are documentation and evidence only.",
+    "done_when": "The brief's gate and measures are the thirteen-file base/head pytest arms, the wall-interpolation-caused non-stationary extrema count expected 0, and the diverted-340 tree node list. census-head.log records head_wall_caused 0 and head_nonstationary 0 for all twelve rungs with EXIT=0 and prints a per-rung field-error column proving the carrier field equals the analytic field; the extruded tree carries 4 nodes (5, 69, 457, 461) in the receipt. The gate itself is examined under the evidence score; the recorded base arm is not like-for-like with the head arm.",
+    "goal": "The reviewed run was to make build_contour_mesh take its wall-vertex flux from a supplied field rather than from a linear interpolant over centre triangles, with the barycentric and nearest-simplex paths removed so no caller can receive an interpolated wall value. nova/equilibrium/contour_tree_mesh.py:336-378 makes field_evaluator a keyword of build_contour_mesh and assigns its output to every vertex added after the cell centres; the deleted helper _barycentric_flux appears nowhere in the reviewed tree (grep over nova/, benchmarks/ and scripts/ returns nothing), so the goal is met.",
+    "manifest": "Read the reviewed run's manifest.md, status complete. It records 8 commits, 10 changed paths, the wall-split gate command, 37 test_logs, a negative-control log and note, a per-rung census, the figure repin deltas and the two stranded follow-ons. Its tests: line names one file of the brief's thirteen-file gate and its baseline_suite key is empty, so its declared gate arms are not readable from the manifest itself.",
+    "write_paths": "The node declares 15 exclusive write paths under nova/equilibrium, benchmarks, tests, docs/figures and docs/evidence. git diff 2669319dd..2f31cffb0 changes 10 paths and every one is inside the declared set, with the SVGs and PNG published by force-add as the repository requires; no path outside the fence was touched."
+  },
+  "justifications": {
+    "durability": "tests/test_contour_tree_mesh.py:87 fails at 48 of 48 wall vertices when the barycentric path is restored (negative-control.log, EXIT=1) and tests/test_contour_tree_wall_split.py:210 fails on the same mutation (wall-split-negative-control.log, EXIT=1), so both added guards name a regression that reddens them.",
+    "evidence": "census-head.log and wall-split-repair.log record the done_when measures with EXIT=0, but the base arm of the thirteen-file gate is not like-for-like with the compensation only present for eight of the fifteen deselected ids, so the recorded gate arms are weaker than they read.",
+    "fit": "The node's additions follow the surrounding host-side NumPy idiom of nova/equilibrium/contour_tree_mesh.py and carry no plan labels, but benchmarks/contour_tree_brute_force.py:79 still describes the fixture as a persisted terminal state after its flux was moved to the closed-form field.",
+    "goal_fidelity": "nova/equilibrium/contour_tree_mesh.py:372-378 samples every vertex added after the cell centres through field_evaluator and the barycentric helper is gone, which is exactly the goal the node states.",
+    "reuse": "The added evaluators wrap the existing owners rather than reimplement them \u2014 benchmarks/solovev_certificate.py:_exact_state for the certificate field and the MAST RectBivariateSpline for the EFIT field \u2014 and the capability owner _barycentric_flux was deleted rather than duplicated.",
+    "scope_discipline": "Every one of the ten changed paths in git diff 2669319dd..2f31cffb0 lies inside the run's fifteen declared write paths, and topology.py's production call site carries only the unchanged call at nova/equilibrium/topology.py:2594."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The node goal is to stop build_contour_mesh inventing wall flux by giving it a point evaluator; nova/equilibrium/contour_tree_mesh.py:336 adds field_evaluator, lines 372-378 sample every vertex added after the cell centres, and the _barycentric_flux capability is absent from the reviewed tree.\nVERDICT done_when: The node done_when asks for the wall-adjacent SOL pair to be gone and the wall-interpolation-caused non-stationary extrema count to be zero; census-head.log (revision 6b745df07) records head_wall_caused 0 and head_nonstationary 0 on all twelve rungs with EXIT=0, and docs/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.json carries 4 nodes and 3 edges with wall vertex 447 absent from drawn_carrier_vertices.\nVERDICT write_paths: The node declares 15 exclusive write paths; git diff --stat 2669319dd..2f31cffb0 lists 10 changed paths (nova/equilibrium/contour_tree_mesh.py, benchmarks/contour_tree_brute_force.py, benchmarks/contour_tree_explanatory_figure.py, tests/test_contour_tree_mesh.py, tests/test_contour_tree_brute_force.py, tests/test_contour_tree_wall_split.py, the explanatory json/png/svg and docs/evidence/fragments/contour-tree-topology-authority/wall-vertex-field-flux.html) and every one is inside the declared set, with nothing outside it.\nVERDICT manifest: Read the reviewed run's manifest.md at status complete; it records the eight commits, ten changed paths, 37 test_logs and the negative-control log and note, but its tests: line names only tests/test_contour_tree_wall_split.py of the thirteen-file gate in the brief and its baseline_suite key is empty, so its declared gate arms are unreadable and the arms had to be taken from base-logs/ and head-logs/.\nVERDICT diff: Read commit by commit against 2669319dd: 38486a6d7 deletes _barycentric_flux and adds the point evaluator, 6b745df07 moves the certificate fixtures onto one closed-form field, 69b3b8b59 and a0d88a04a correct the figure roles and regenerate the receipt, 89ff70b13/d3cb50c0b/2f31cffb0 record the evidence, and 0b820f056 rewrites the production wall-split oracle; the code under review is the tree at a0d88a04a, the two later commits touch one test file and one evidence fragment only.\nCALL_SITES: nova/equilibrium/topology.py:2594\n",
+  "review_run_id": "r-20261023T080527389962-review-of-wall-vertex-field-flux-2f31cffb0c9d",
+  "reviewed_base_sha": "2669319dded99f086120148509b1f16f131d59c2",
+  "reviewed_head_sha": "2f31cffb0c9da1148c96cea625ab147fb010b811",
+  "reviewed_run_id": "r-20261023T053604178566-wall-vertex-field-flux",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 18,
+    "evidence": 14,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T08:46:07.357481+00:00",
+  "total": 105
+}

@@ -26,7 +26,7 @@
   <title>Contour-tree topology authority | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="74">
+<meta name="plan-version" content="75">
 <meta name="plan-modified" content="2026-10-23">
 </head>
 <body>
@@ -525,7 +525,10 @@
     <div class="r-comment-body"><p>Grouped topology-read measurement complete at 3baa4796e5cbaac304700eeb940bb11dd7ccfbaa: full-file equivalent 6 failed, 28 passed, 3 skipped, 7 xfailed; added_failure_ids [].</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261023T075130730225-review-of-wall-vertex-field-flux-d3cb50c0b514" data-who="reckon-build" data-when="2026-10-23T08:17:03.596Z">
-    <div class="r-comment-body"><p>review of run r-20261023T053604178566-wall-vertex-field-flux at reviewed base 2669319dded99f086120148509b1f16f131d59c2 -&gt; reviewed head d3cb50c0b51492f6d1c198bb162b6da718ee2264: parsed record stored at both declared paths, scores goal_fidelity 19, evidence 17, scope_discipline 20, durability 18, fit 18, reuse 20 (total 112), added_failure_count 1, added_failure_ids [tests/test_contour_tree_wall_split.py::test_production_split_events_match_outside_augmented_sublevel_counts], findings 0 blocking and 3 follow-on findings; every verdict item and every score dimension is emitted in the record&#x27;s raw_text.</p></div>
+    <div class="r-comment-body"><p>review of run r-20261023T053604178566-wall-vertex-field-flux at reviewed base 2669319dded99f086120148509b1f16f131d59c2 -&gt; reviewed head d3cb50c0b51492f6d1c198bb162b6da718ee2264: parsed record stored at both declared paths, scores goal_fidelity 19, evidence 17, scope_discipline 20, durability 18, fit 18, reuse 20 (total 112), added_failure_count 1, added_failure_ids [tests/test_contour_tree_wall_split.py::test_production_split_events_match_outside_augmented_sublevel_counts], findings 0 blocking and 3 follow-on findings; every verdict item and every score dimension is emitted in the record's raw_text.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261023T080149778535-review-of-wall-vertex-field-flux-2f31cffb0c9d-figure" data-who="reckon-build" data-when="2026-10-23T08:43:52.318Z">
+    <div class="r-comment-body"><p>Figure review of r-20261023T053604178566-wall-vertex-field-flux at 2f31cffb0 delivered as a parsed read-only figure rubric record at both declared paths: 6 rubric items (5 pass, label_collision fail), 2 findings (1 blocking, 1 non-blocking), 0 added failures; the blocking finding is that the graph-label placer does not consider the drawn arcs, so a label box is placed over one of the three tree edges and washes roughly 24 px of it out, and the fix is to add the arcs to that placer&#x27;s obstacle set and regenerate.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261001T215539964290-review-3-of-contour-tree-topology-authority" data-who="reckon-build" data-when="2026-10-01T22:36:28.181Z">
     <div class="r-comment-body"><p>review-3 restates nova:contour-tree-topology-authority (revision e4fedfd80 / HEAD b2cc96f45, plan blob 1b01505b8, plan digest sha256:9ad6ead9...) at its margin revision: intent in the reviewer's own words, the one open decision field-representation-on-hex-cells with all three options, and all five done-whens; 125 prose sentences enumerated, 5 flagged with two-or-more readings (040, 043, 065, 088, 097); no plan file edited.</p></div>

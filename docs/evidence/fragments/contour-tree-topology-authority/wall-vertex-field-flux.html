@@ -1,36 +1,39 @@
 <section id="wall-vertex-field-flux">
-  <h3>Carrier wall flux from the supplied field</h3>
-  <p>The recorded diverted 340-cell defect reproduced at the base: carrier minus
-  analytic flux was +954.529 µWb at vertex 447 and +770.071 µWb at vertex 448;
-  interior vertex 10 lay below its linked wall vertices. The curved-field
-  negative control failed at all 48 added wall vertices (EXIT=1). After the
-  builder sampled added vertices from the supplied field, the two wall errors
-  were 0 and −3.56 × 10<sup>−17</sup> Wb. Vertex 10 ceased to be a minimum.
-  The tree lists vertex 5 (X-point saddle), 69 (axis maximum), 457
-  (private-region wall contact), and 461 (virtual outside); the SOL pair is
-  absent. The old probe stops at its asserted carrier minimum (EXIT=1), and
-  the head audit of its census functions returns zero wall-interpolation-caused
-  extrema across all twelve rungs.</p>
-  <p>The remaining non-stationary interior extrema, counted by the probe's
-  analytic-stationary-point test, are:</p>
+  <h3>One field for each contour carrier</h3>
+  <p>The base defect reproduced: at the diverted 340-cell wall, barycentric
+  carrier flux exceeded analytic flux by 954.529 µWb at vertex 447 and
+  770.071 µWb at vertex 448. The negative control restored that interpolation
+  and failed the curved-field test at all 48 wall vertices (EXIT=1). The builder
+  now samples added vertices through its point evaluator. Certificate fixtures
+  pass the closed-form Solov'ev flux as both centre values and wall evaluator;
+  MAST fixtures pass the same bicubic EFIT interpolant for both. All valid
+  vertices in all 16 certificate carriers agree with their analytic field to
+  floating-point rounding (16-fixture test, EXIT=0). The stored terminal flux
+  is a distinct solved state; production topology samples that state at every
+  vertex through its own field evaluator.</p>
+  <p>The probe's stationary-point census gives the following non-stationary
+  interior extrema. Every head carrier has zero wall-interpolation-caused
+  extrema. The base had one at diverted 340 cells and two at diverted 550 cells;
+  the other base rungs had none. The head has zero non-stationary extrema on
+  every rung, so none rises against base.</p>
   <table>
-    <thead><tr><th>Certificate case</th><th>340 cells</th><th>550 cells</th><th>1074 cells</th></tr></thead>
+    <thead><tr><th>Certificate case</th><th>340 cells base → head</th><th>550 cells base → head</th><th>1074 cells base → head</th></tr></thead>
     <tbody>
-      <tr><td>Diverted single null</td><td>0</td><td>0</td><td>3</td></tr>
-      <tr><td>Moderate rotation conventional static</td><td>54</td><td>65</td><td>86</td></tr>
-      <tr><td>Strong rotation compact static</td><td>55</td><td>66</td><td>94</td></tr>
-      <tr><td>Weak rotation reactor static</td><td>56</td><td>68</td><td>99</td></tr>
+      <tr><td>Diverted single null</td><td>1 → 0</td><td>2 → 0</td><td>1 → 0</td></tr>
+      <tr><td>Moderate rotation conventional static</td><td>0 → 0</td><td>0 → 0</td><td>1 → 0</td></tr>
+      <tr><td>Strong rotation compact static</td><td>1 → 0</td><td>0 → 0</td><td>0 → 0</td></tr>
+      <tr><td>Weak rotation reactor static</td><td>2 → 0</td><td>0 → 0</td><td>0 → 0</td></tr>
     </tbody>
   </table>
-  <p>The explanatory figure's PNG and SVG rendered under the run scratch area;
-  the PNG was inspected and shows the four-node tree without the SOL pair.
-  The JSON receipt remains pending. The figure command requires its output to
-  lie below the repository root, while the assigned explanatory artifact paths
-  also appear in a concurrent node's exclusive write list. The first render
-  attempt exposed an obsolete wall-contact label; the corrected render saved
-  PNG and SVG but refused to serialize the receipt at the scratch path. The
-  two attempts are recorded in the run logs. The baseline sweep-bounds file
-  was already red in the frozen base copy: its recorded reference and current
-  tree produced arrays of lengths 256 and 258. That failure is separate from
-  the wall flux change.</p>
+  <p>The regenerated diverted 340-cell receipt has four nodes and three edges,
+  down from six nodes and five edges. Nodes 10 (false SOL minimum) and 447
+  (paired upward-sweep wall contact) are absent; nodes 5 (X-point), 69 (axis),
+  457 (private-region wall maximum) and 461 (virtual outside) remain. Carrier
+  minus analytic flux is 0 Wb at vertex 447 and −3.56 × 10<sup>−17</sup> Wb at
+  vertex 448. The explanatory figure was rendered to the repository-relative
+  path and its PNG inspected.</p>
+  <figure>
+    <img src="/nova/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.svg" alt="Four-node diverted contour tree beside analytic flux contours, without the spurious SOL pair">
+    <figcaption>The analytic carrier produces the X-point, axis, private-region wall maximum and virtual outside node.</figcaption>
+  </figure>
 </section>

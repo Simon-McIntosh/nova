@@ -22,6 +22,13 @@
       }
     }
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "wall-vertex-field-flux",
+      "recorded_at": "2026-10-23T10:15:31.900222+00:00"
+    }
+  },
   "findings": [
     {
       "affected_data": "One of the three edges of the contour tree (the X-point row 0 to the magnetic-axis row 1 adjacency in docs/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.json, edges[1] {first: 0, second: 1}); its two endpoints remain labelled, so the adjacency is still inferable, but the stroke between them is not visible",

@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "completed_at": "2026-10-23T11:55:59.582Z",
   "dispatched_at": "2026-10-23T11:36:13Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "f-ddc-002",
+      "recorded_at": "2026-10-23T12:01:31.473027+00:00"
+    }
+  },
   "findings": [
     {
       "file": "nova/imas/plasma_source.py",

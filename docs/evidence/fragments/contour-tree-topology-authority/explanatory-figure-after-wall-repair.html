@@ -1,0 +1,26 @@
+<section id="explanatory-figure-after-wall-repair">
+  <h3>Computed contour tree after the wall sweep repair</h3>
+  <p>The committed figure and JSON receipt were regenerated from the
+  diverted-single-null-340-cells carrier. The base receipt claimed 42 nodes;
+  its guard failed against the repaired tree's 6 nodes. The new receipt carries
+  6 nodes and 5 edges. Only two nodes lie at wall vertices, down from 38:
+  the descending sweep's highest-flux contact at vertex 457 and the ascending
+  sweep's contact at vertex 447, where the interior minimum's region meets the
+  outside. Both are saddles. No wall minimum remains.</p>
+  <figure id="explanatory-figure-after-wall-repair-figure">
+    <img src="/nova/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.svg"
+         alt="Poloidal flux contours and a six-node computed contour tree with two wall contacts">
+    <figcaption>The poloidal panel marks the axis, X-point, interior minimum and
+    two wall contacts. The positionless outside node appears only in the graph.
+    The rendered SVG was inspected as a 1400-pixel PNG: the wall chain is gone
+    from the rank panel, and the labels are clear and unclipped.</figcaption>
+  </figure>
+  <p><strong>Measure.</strong> The focused base gate failed only
+  <code>test_committed_receipt_matches_the_computed_tree</code> with
+  <code>assert 42 == 6</code> (5 passed, 1 failed). At the figure commit
+  <code>fd6d46f75e1f555eeae5c72a0dc2047c62e10c3a</code>, the same gate
+  passed all 6 tests (<code>EXIT=0</code>). Its receipt-to-carrier probe printed
+  <code>WALL_NODE_COUNT=2 BEFORE=38 VERTICES=447,457</code> beside the rendered
+  PNG inspection result. The generator and committed PNG, SVG and receipt are
+  bound by the SVG digest recorded in the JSON.</p>
+</section>

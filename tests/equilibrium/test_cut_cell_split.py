@@ -134,3 +134,160 @@ def test_force_conic_right_breaks_the_continuity_assertion():
     moved = [float(jnp.max(jnp.abs(moment - reference))) for moment in moments]
     # The mutated booking is not continuous: its current grows with the disk.
     assert max(moved) > 1e-3, moved
+
+
+# The value test: the region the clip books, against shapely.
+
+# A convex ring that is not a square, and a non-convex one whose disk-crossing
+# cut removes the notch corner.
+TRIANGLE = jnp.asarray(((-0.8, -0.9), (0.9, -0.9), (0.0, 0.9)), dtype=jnp.float64)
+NOTCH = jnp.asarray(
+    (
+        (-1.0, -1.0),
+        (1.0, -1.0),
+        (1.0, -0.2),
+        (-0.2, -0.2),
+        (-0.2, 1.0),
+        (-1.0, 1.0),
+    ),
+    dtype=jnp.float64,
+)
+
+
+def _signed_region(points):
+    """Signed area and first moments of one closed polygon, exact in its vertices."""
+    following = jnp.roll(points, -1, axis=0)
+    cross = points[:, 0] * following[:, 1] - following[:, 0] * points[:, 1]
+    area = 0.5 * jnp.sum(cross)
+    moment = (
+        jnp.stack(
+            (
+                jnp.sum(cross * (points[:, 0] + following[:, 0])),
+                jnp.sum(cross * (points[:, 1] + following[:, 1])),
+            )
+        )
+        / 6.0
+    )
+    return area, moment
+
+
+def _piece_moments(vertices, live):
+    """Signed area and first moments of every clipped piece, summed.
+
+    Every piece is closed on its own live prefix, so a padded slot and a dead
+    piece contribute exactly zero.
+    """
+    vertices = vertices.reshape(-1, vertices.shape[-2], 2)
+    live = live.reshape(-1)
+    width = vertices.shape[1]
+    slot = jnp.arange(width)[None, :]
+    alive = slot < live[:, None]
+    following = jnp.where(slot + 1 >= live[:, None], 0, slot + 1)
+    ahead = jnp.take_along_axis(vertices, following[..., None], axis=1)
+    cross = vertices[..., 0] * ahead[..., 1] - ahead[..., 0] * vertices[..., 1]
+    cross = jnp.where(alive & (following < live[:, None]), cross, 0.0)
+    area = 0.5 * jnp.sum(cross)
+    moment = (
+        jnp.stack(
+            (
+                jnp.sum(cross * (vertices[..., 0] + ahead[..., 0])),
+                jnp.sum(cross * (vertices[..., 1] + ahead[..., 1])),
+            )
+        )
+        / 6.0
+    )
+    return area, moment
+
+
+def _reference_moments(ring, centre, radius):
+    """Shapely's ring ∩ inscribed polygon, in the ring's own orientation."""
+    import numpy as np
+    from shapely.geometry import Polygon
+
+    angle = (
+        2.0 * jnp.pi * jnp.arange(current.DISK_ARC_SEGMENTS) / current.DISK_ARC_SEGMENTS
+    )
+    clip = np.stack(
+        (
+            centre[0] + radius * np.cos(angle),
+            centre[1] + radius * np.sin(angle),
+        ),
+        axis=-1,
+    )
+    subject = Polygon(np.asarray(ring, dtype=float))
+    intersection = subject.intersection(Polygon(clip))
+    area = float(intersection.area)
+    orientation = float(_signed_region(jnp.asarray(ring))[0])
+    if area == 0.0:
+        return jnp.zeros(3, dtype=jnp.float64)
+    centroid = intersection.centroid
+    scaled = area * (1.0 if orientation > 0.0 else -1.0)
+    return jnp.asarray(
+        (
+            scaled,
+            scaled * centroid.x,
+            scaled * centroid.y,
+        ),
+        dtype=jnp.float64,
+    )
+
+
+def _clipped(ring, count, centre, radius, capacity):
+    vertices = jnp.zeros((1, capacity, 2), dtype=jnp.float64)
+    vertices = vertices.at[0, :count].set(ring)
+    clipped, live = current._disk_clipped_triangles(
+        vertices,
+        jnp.asarray([count], dtype=jnp.int32),
+        jnp.asarray(centre, dtype=jnp.float64),
+        jnp.asarray(radius, dtype=jnp.float64),
+    )
+    return _piece_moments(clipped, live)
+
+
+@pytest.mark.parametrize(
+    "ring, centre, radius",
+    [
+        (SQUARE, (0.0, 0.0), 0.6),
+        (TRIANGLE, (0.1, -0.2), 0.7),
+        (NOTCH, (0.2, 0.35), 0.7),
+        (NOTCH, (-0.6, 0.6), 0.5),
+        (NOTCH, (4.0, 4.0), 0.5),
+    ],
+)
+def test_clipped_pieces_book_the_disk_intersection(ring, centre, radius):
+    """The clipped pieces' summed region is the ring ∩ the inscribed polygon.
+
+    The disk is placed to cross a convex ring, to cross the non-convex ring
+    through its notch, to sit wholly inside the non-convex ring, and to miss the
+    ring entirely, where the clipped region must be exactly zero. The ring is
+    padded beyond its vertex count, so the pad slots must book nothing.
+    """
+    assert jax.config.jax_enable_x64 is True
+    count = int(ring.shape[0])
+    capacity = count + 3
+    area, moment = _clipped(ring, count, centre, radius, capacity)
+    reference = _reference_moments(ring, centre, radius)
+    booked = jnp.stack((area, *moment))
+    assert jnp.all(jnp.isfinite(booked)), booked
+    assert jnp.allclose(booked, reference, rtol=0.0, atol=1e-9), (
+        booked,
+        reference,
+    )
+
+
+def test_a_padded_dead_ring_books_nothing():
+    """A ring whose count is below three contributes no clipped region."""
+    assert jax.config.jax_enable_x64 is True
+    capacity = NOTCH.shape[0] + 3
+    vertices = jnp.zeros((2, capacity, 2), dtype=jnp.float64)
+    vertices = vertices.at[0, : NOTCH.shape[0]].set(NOTCH)
+    vertices = vertices.at[1, 0].set(jnp.asarray((0.2, 0.1)))
+    vertices = vertices.at[1, 1].set(jnp.asarray((0.3, 0.1)))
+    centre = jnp.asarray((0.2, 0.35), dtype=jnp.float64)
+    radius = jnp.asarray(0.7, dtype=jnp.float64)
+    clipped, live = current._disk_clipped_triangles(
+        vertices, jnp.asarray([NOTCH.shape[0], 2], dtype=jnp.int32), centre, radius
+    )
+    area, _ = _piece_moments(clipped, live)
+    single, _ = _clipped(NOTCH, NOTCH.shape[0], (0.2, 0.35), 0.7, capacity)
+    assert float(area) == pytest.approx(float(single), abs=0.0)

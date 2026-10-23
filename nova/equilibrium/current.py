@@ -275,13 +275,18 @@ def _disk_clipped_triangles(
         ahead = jnp.take_along_axis(padded, following[..., None], axis=-2)
         next_distance = (ahead - disk_centre) @ line - bound
         live_edge = order < live_count[..., None]
-        keep = live_edge & (distance <= 0.0)
-        entering = (distance > 0.0) & (next_distance <= 0.0)
+        inside = distance <= 0.0
+        keep = live_edge & inside
+        entering = live_edge & (inside != (next_distance <= 0.0))
         gap = distance - next_distance
         fraction = distance / jnp.where(gap != 0.0, gap, 1.0)
         meeting = padded + fraction[..., None] * (ahead - padded)
-        candidates = jnp.concatenate((keep, entering), axis=-1)
-        values = jnp.concatenate((padded, meeting), axis=-2)
+        candidates = jnp.stack((keep, entering), axis=-1).reshape(
+            keep.shape[:-1] + (2 * width,)
+        )
+        values = jnp.stack((padded, meeting), axis=-2).reshape(
+            padded.shape[:-2] + (2 * width, 2)
+        )
         position = jnp.cumsum(candidates, axis=-1) - candidates
         key = jnp.where(candidates, position, 2 * width)
         chosen = jnp.argsort(key, axis=-1)[..., :width]
@@ -340,9 +345,7 @@ def _disk_split_moments(
     def book(points, weights):
         mask = jnp.ones(points.shape[:-1], dtype=bool)
         if polygon is not None:
-            mask = jnp.where(
-                confined_live, _inside_loop(points, polygon, size), mask
-            )
+            mask = jnp.where(confined_live, _inside_loop(points, polygon, size), mask)
         local = (points - centre) / pitch
         x, y = local[..., 0], local[..., 1]
         flux = (
@@ -372,9 +375,7 @@ def _disk_split_moments(
     whole = book(whole_points, whole_weights)
     if force_whole:
         return whole
-    clipped, clipped_live = _disk_clipped_triangles(
-        rings, counts, disk_centre, radius
-    )
+    clipped, clipped_live = _disk_clipped_triangles(rings, counts, disk_centre, radius)
     flat = clipped.reshape(-1, clipped.shape[-2], 2)
     fan_centre = jnp.repeat(centroids, clipped.shape[1], axis=0)
     inside_points, inside_weights = _quadrature_from_arrays(

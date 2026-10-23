@@ -1,4 +1,4 @@
-"""Reader and writer for the imas-efit ``BOUNDARY_LEVEL_TRACE 2`` record.
+"""Reader for imas-efit boundary traces and writer for version-2 records.
 
 The field order and layout mirror ``read_boundary_trace_record`` and
 ``write_boundary_trace_record`` in imas-efit's
@@ -18,6 +18,7 @@ from pathlib import Path
 import numpy as np
 
 HEADER = "BOUNDARY_LEVEL_TRACE 2"
+ESCAPE_HEADER = "BOUNDARY_LEVEL_TRACE 3"
 
 
 def _format_es(value: float) -> str:
@@ -58,19 +59,19 @@ class TraceRecord:
     slice: int
     iteration: int
     verdict: int
-    saddle_source_node: int
-    wall_source_node: int
-    wall_source_segment: int
-    wall_axis_connected: bool
-    handover_reverted: bool
+    saddle_source_node: int | None
+    wall_source_node: int | None
+    wall_source_segment: int | None
+    wall_axis_connected: bool | None
+    handover_reverted: bool | None
     polarity: int
-    sweep_armed: bool
+    sweep_armed: bool | None
     axis_psi: float
     axis_r: float
     axis_z: float
-    saddle_contested: float
-    saddle_refined: float
-    wall_level: float
+    saddle_contested: float | None
+    saddle_refined: float | None
+    wall_level: float | None
     fed_back_psi: float
     rgrid: np.ndarray
     zgrid: np.ndarray
@@ -82,6 +83,10 @@ class TraceRecord:
     polygon_r: np.ndarray
     polygon_z: np.ndarray
     psi: np.ndarray
+    version: int = 2
+    level_psi: float | None = None
+    anchor_r: float | None = None
+    anchor_z: float | None = None
 
     @property
     def diverted(self) -> bool:
@@ -136,26 +141,42 @@ def _closed_ring(vertices: np.ndarray) -> np.ndarray:
 
 
 def read_trace_record(path: str | Path) -> TraceRecord:
-    """Parse one version-2 boundary trace record."""
+    """Parse a version-2 or version-3 boundary trace record."""
     path = Path(path)
     with path.open() as handle:
         header = handle.readline().strip()
-        if header != HEADER:
+        if header not in (HEADER, ESCAPE_HEADER):
             raise ValueError(f"unsupported boundary trace header: {header!r}")
+        version = 3 if header == ESCAPE_HEADER else 2
         line = [int(token) for token in handle.readline().split()]
         slice_, iteration, verdict, nw, nh, nwall, nlim, ncell, npoly = line
         flags = handle.readline().split()
-        saddle_source_node = int(flags[0])
-        wall_source_node = int(flags[1])
-        wall_source_segment = int(flags[2])
-        wall_axis_connected = flags[3] == "T"
-        handover_reverted = flags[4] == "T"
-        polarity = int(flags[5])
-        sweep_armed = flags[6] == "T"
+        if version == 3:
+            if len(flags) != 1:
+                raise ValueError("version-3 trace requires one polarity field")
+            polarity = int(flags[0])
+            saddle_source_node = wall_source_node = wall_source_segment = None
+            wall_axis_connected = handover_reverted = sweep_armed = None
+        else:
+            saddle_source_node = int(flags[0])
+            wall_source_node = int(flags[1])
+            wall_source_segment = int(flags[2])
+            wall_axis_connected = flags[3] == "T"
+            handover_reverted = flags[4] == "T"
+            polarity = int(flags[5])
+            sweep_armed = flags[6] == "T"
         status = _scan(handle, 7)
         axis_psi, axis_r, axis_z = status[0], status[1], status[2]
-        saddle_contested = status[3]
-        saddle_refined, wall_level, fed_back_psi = status[4], status[5], status[6]
+        fed_back_psi = status[6]
+        if version == 3:
+            level_psi, anchor_r, anchor_z = status[3:6]
+            saddle_contested = saddle_refined = wall_level = None
+        else:
+            saddle_contested, saddle_refined, wall_level = status[3:6]
+            level_psi = (
+                wall_level if verdict == 1 else saddle_refined if verdict == 2 else None
+            )
+            anchor_r = anchor_z = None
         rgrid = np.asarray(_scan(handle, nw))
         zgrid = np.asarray(_scan(handle, nh))
         wall_r = np.empty((nwall, 2))
@@ -208,11 +229,17 @@ def read_trace_record(path: str | Path) -> TraceRecord:
         polygon_r=polygon_r,
         polygon_z=polygon_z,
         psi=psi,
+        version=version,
+        level_psi=level_psi,
+        anchor_r=anchor_r,
+        anchor_z=anchor_z,
     )
 
 
 def write_trace_record(path: str | Path, record: TraceRecord) -> None:
     """Write one version-2 boundary trace record in the Fortran layout."""
+    if record.version != 2:
+        raise ValueError("only version-2 trace records can be written")
     nw, nh = int(record.rgrid.size), int(record.zgrid.size)
     nwall = int(record.wall_r.shape[0])
     nlim = int(record.wall_index.shape[0])

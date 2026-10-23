@@ -7,6 +7,7 @@ from typing import Any, Sequence
 
 import numpy as np
 
+from nova.imas.getslice import GetSlice
 from nova.imas.profiles import PrescribedCurrent, prescribe_current_density
 from nova.io.sourcemap import NOVA_CONVENTION, translate_equilibrium
 from nova.io.sourcemap import _observed as _sourcemap_observed
@@ -27,12 +28,6 @@ def _vacuum_field(b0: np.ndarray, index: int) -> float:
     if b0.size == 0:
         return float("nan")
     return float(b0[0] if b0.size == 1 else b0[index])
-
-
-def _translated(signal_map: Any, path: str, values: Any) -> Any:
-    """Return one quantity converted from its source convention into COCOS 17."""
-    (signal,) = signal_map.for_target(path)
-    return signal.apply(values)
 
 
 @dataclass(frozen=True)
@@ -264,38 +259,38 @@ class PlasmaSource:
                     time=float(slice_.time),
                     radius=np.asarray(map_.grid.dim1),
                     height=np.asarray(map_.grid.dim2),
-                    psi=_translated(
+                    psi=GetSlice.translated(
                         signal_map, "equilibrium/profiles_2d/psi", map_.psi
                     ),
-                    psi_samples=_translated(
+                    psi_samples=GetSlice.translated(
                         signal_map, "equilibrium/profiles_1d/psi", profile.psi
                     ),
-                    p_prime=_translated(
+                    p_prime=GetSlice.translated(
                         signal_map,
                         "equilibrium/profiles_1d/dpressure_dpsi",
                         profile.dpressure_dpsi,
                     ),
-                    ff_prime=_translated(
+                    ff_prime=GetSlice.translated(
                         signal_map,
                         "equilibrium/profiles_1d/f_df_dpsi",
                         profile.f_df_dpsi,
                     ),
                     psi_axis=float(
-                        _translated(
+                        GetSlice.translated(
                             signal_map,
                             "equilibrium/global_quantities/psi_axis",
                             global_.psi_axis,
                         )
                     ),
                     psi_boundary=float(
-                        _translated(
+                        GetSlice.translated(
                             signal_map,
                             "equilibrium/global_quantities/psi_boundary",
                             global_.psi_boundary,
                         )
                     ),
                     plasma_current=float(
-                        _translated(
+                        GetSlice.translated(
                             signal_map,
                             "equilibrium/global_quantities/ip",
                             global_.ip,

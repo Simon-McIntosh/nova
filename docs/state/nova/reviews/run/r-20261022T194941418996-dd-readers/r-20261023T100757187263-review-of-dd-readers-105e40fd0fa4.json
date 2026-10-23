@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "completed_at": "2026-10-23T10:35:16.426Z",
   "dispatched_at": "2026-10-23T10:14:03Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "dd-readers",
+      "recorded_at": "2026-10-23T10:39:58.442627+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_media.py",

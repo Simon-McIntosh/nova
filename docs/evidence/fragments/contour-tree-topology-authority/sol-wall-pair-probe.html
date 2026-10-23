@@ -1,0 +1,45 @@
+<section id="sol-wall-pair-probe">
+  <h3>The scrape-off-layer wall pair is a carrier artefact</h3>
+  <p>The recorded defect still reproduces on the diverted-single-null 340-cell
+  certificate: interior vertex 10 has carrier ψ = −4.009710 mWb, below every
+  linked vertex (31, 32, 447 and 448). Vertex 447 is the adjacent wall contact
+  at −3.609201 mWb. The analytic Solov'ev flux uses σ = +1 here. Its gradient
+  at vertex 10 is 31.252 mWb/m, and the minimum gradient over in-vessel
+  grid samples within two cell pitches is 12.497 mWb/m, versus a 14.672 mWb/m
+  median over the certificate's SOL cell centres. The detector finds the known
+  analytic magnetic axis at |∇ψ| = 3.29 × 10<sup>−17</sup> Wb/m; it finds no
+  stationary point within two pitches of vertex 10.</p>
+  <figure id="sol-wall-pair-probe-figure">
+    <img src="/nova/figures/contour-tree-topology-authority/sol-wall-pair/sol-wall-pair.svg"
+         alt="Zoom of the carrier wall pair with analytic flux contours and a gradient profile from interior vertex 10 to wall vertex 447">
+    <figcaption>The left panel shows the vessel wall, thin grey carrier edges,
+    and analytic ψ contours at −4.886, −4.056, −3.226, −2.395, −1.565,
+    −0.734 and +0.096 mWb. The key gives carrier minus analytic flux in µWb
+    for every vertex linked to 10. The right panel shows |∇ψ| along the
+    4.17 cm segment from 10 to 447. The SVG was rendered to a 1400-pixel PNG
+    and inspected; the labels are legible, separate and unclipped.</figcaption>
+  </figure>
+  <p>The smooth field decreases by 554.019 µWb from 10 to 447, with directional
+  derivative between −13.360 and −13.195 mWb/m all along that segment. The
+  carrier instead rises by 400.509 µWb. The term that reverses the ordering is
+  the wall interpolation error: ψ<sub>carrier</sub> − ψ<sub>analytic</sub> is
+  +954.529 µWb at 447 and +770.071 µWb at the other linked wall vertex, 448;
+  it is below 5 × 10<sup>−11</sup> µWb at the three cell samples 10, 31 and
+  32. Vertices 447 and 448 are barycentric interpolations of valid centre
+  cells 81, 10 and 3 (carrier ψ values −5.645122, −4.009710 and −1.485026
+  mWb). Vertex 447 uses weights 0.420944, 0.147744 and 0.431312; the weighted
+  flux reproduces its carrier value to floating-point rounding. The clipped
+  carrier triangles incident to 447 are 338, 507 and 638.</p>
+  <p>Across the twelve exposed certificate rungs, eight interior piecewise-linear
+  extrema (four minima and four maxima) have no analytic stationary point
+  within two pitches. Replacing only their wall-neighbour carrier values with
+  analytic values destroys three of those extrema: minimum 10 on the diverted
+  340-cell rung and minima 71 and 72 on the diverted 550-cell rung. The
+  diverted 1074-cell rung retains one nonstationary minimum under that
+  substitution; the five remaining nonstationary extrema have other local
+  carrier causes. The full per-rung vertex list and the five-vertex flux audit
+  are in the probe log.</p>
+  <p><strong>Proposed repair:</strong> evaluate the physical smooth field at wall
+  vertices instead of assigning their flux by linear interpolation from centre
+  samples, then recheck the carrier topology and its convergence with pitch.</p>
+</section>

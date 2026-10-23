@@ -38,7 +38,9 @@ def open_ids(case: str, dd_version: str):
 
 def open_equilibrium(case: str, dd_version: str) -> EquilibriumData:
     """Return the equilibrium reader on one pulse at its written DD version."""
-    return EquilibriumData(ids=open_ids(case, dd_version), filename=case)
+    return EquilibriumData(
+        ids=open_ids(case, dd_version), filename=f"iter_{case.replace('/', '_')}"
+    )
 
 
 @pytest.mark.parametrize("case", sorted(CASES))
@@ -97,5 +99,6 @@ def test_reader_refuses_non_conforming_data_by_name(case):
     with pytest.raises(ValueError) as refused:
         open_equilibrium(case, "3.38.1")
     message = str(refused.value)
-    assert case in message
+    assert case.replace("/", "_") in message
+    assert "does not conform" in message
     assert NON_CONFORMING[case] in message

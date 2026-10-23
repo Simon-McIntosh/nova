@@ -1,0 +1,82 @@
+{
+  "added_failure_count": 2,
+  "added_failure_ids": [
+    "tests/test_contour_tree_scatter_equivalence.py::test_swept_arc_sets_are_invariant_to_carrier_edge_order[0]",
+    "tests/test_contour_tree_sweep_bounds.py::test_brute_force_fixture_receipts_match_recorded_fields"
+  ],
+  "added_failures_note": "Derived from the reviewed run's own gate logs. baseline_suite (2669319dd, scratch/base-full) records 13/13 files complete, 93 passed, 10 failed, 1 skipped, its failure ids being scatter_equivalence[1], escape_level_certificates[mastu-fullPulse-s1-4-5-B] and the eight test_wide_wall_record_builds_below_capacity ids, each reproducing with the same EXIT=1 in base-full-logs/. after_suite (ac3ce1b1e, the reviewed worktree) records 95 passed, 12 failed, 0 skipped. The set difference is exactly the two ids above. The sweep_bounds id is not caused by the change: the base arm skipped this test (its 1 skipped) because scratch/base-full could not resolve the receipt reference, and when the same reference module is supplied the identical ValueError broadcasting (256,) against (258,) reproduces at base (base-reference-supplement.log) exactly as at head (head-reference-supplement.log), so it is a pre-existing reference-capacity mismatch the change merely made run. The scatter id is a pytest-timeout during a JAX compile: both arms fail with 'Failed: Timeout (>300.0s) from pytest-timeout' at jax/_src/compiler.py, the base arm on case [1] and the head arm on [0] and [1], and the isolated head recheck of [0] passes (scatter-isolated-head.log, 1 passed in 110.97s, EXIT=0).",
+  "call_site_count": 5,
+  "call_sites": [
+    "nova/equilibrium/topology.py:2594",
+    "benchmarks/contour_tree_brute_force.py:92",
+    "benchmarks/contour_tree_brute_force.py:169",
+    "benchmarks/contour_tree_sweep_placement.py:316",
+    "benchmarks/contour_tree_explanatory_figure.py:59"
+  ],
+  "completed_at": "2026-10-23T10:07:26.814Z",
+  "dispatched_at": "2026-10-23T09:41:35Z",
+  "findings": [
+    {
+      "file": "manifest.md",
+      "line": "24",
+      "severity": "non-blocking",
+      "text": "The artifacts head_gate headline reads '13/13 complete: 96 passed, 10 failed, 0 deselected' but the run's own after_suite per-file runs sum to 95 passed and 12 failed, and head-full-gate.log reports four failed files against the base arm's three. A metric quoted from a gate log must be that log's own summary so the record reconciles with the log it cites; a reader trusting this headline under-counts the head arm's failures by two."
+    },
+    {
+      "file": "tests/test_contour_tree_sweep_bounds.py",
+      "line": "114",
+      "severity": "non-blocking",
+      "text": "This test is one of the two added failures at the reviewed head and is not caused by the node's change, but its failure mode is uninformative and its base arm is missing: the base arm skipped it because scratch/base-full could not resolve the receipt reference, and when the reference is supplied the identical 256-versus-258 shape mismatch reproduces at base (base-reference-supplement.log), so the two arms are not compared over the same test set and the mismatch surfaces as 'ValueError: operands could not be broadcast together with shapes (256,) (258,)' at scripts/prototypes/contour_tree_sweep_profile/profile.py:176 rather than as an assertion."
+    },
+    {
+      "file": "tests/test_contour_tree_scatter_equivalence.py",
+      "line": "148",
+      "severity": "non-blocking",
+      "text": "test_swept_arc_sets_are_invariant_to_carrier_edge_order[0] is the second added failure and is a JAX compilation timeout under concurrent load, not a topology result: head-full-logs/test_contour_tree_scatter_equivalence.log records 'Failed: Timeout (>300.0s) from pytest-timeout' inside jax/_src/compiler.py, the isolated head recheck passes in 110.97s (scatter-isolated-head.log, EXIT=0), and no base arm ever ran [0] in isolation, so its exemption rests on the isolated head pass alone."
+    },
+    {
+      "file": "nova/equilibrium/contour_tree_mesh.py",
+      "line": "376",
+      "severity": "non-blocking",
+      "text": "When field_evaluator is None the added boundary and clipped-corner vertices keep vertex_psi as NaN while vertex_valid stays True (lines 249-251 and 270-275), so the placeholder is presented as a valid flux to any caller that builds a tree from the mesh. nova/equilibrium/topology.py:2594 is unharmed because it computes its own vertex_flux at topology.py:3119, but vertex_psi is exactly the argument every other caller feeds to build_contour_tree, so an omitted evaluator yields NaN node values rather than a refusal."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read the twelve commits against 2669319dd: 38486a6d7 removes _barycentric_flux and the nearest-simplex fallback and adds the evaluator; 6b745df07 moves the certificate fixtures onto one closed-form field and MAST onto its own bicubic field; 69b3b8b59 and a0d88a04a correct the figure roles and regenerate the receipt; 0b820f056, 2f31cffb0, d3cb50c0b and 89ff70b13 carry the wall-split oracle and evidence; 0f64b20e marks unsampled wall flux invalid; ac3ce1b1e places graph labels clear of arcs; 61368aeb3 and fcbf7ca37 add landing-evidence text only.",
+    "done_when": "The done_when is that the regenerated explanatory figure receipt for diverted-single-null-340-cells carries no SOL minimum and wall-contact pair and that its rendered PNG is inspected; docs/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.json reads node_count 4, edge_count 3 and drawn_carrier_vertices [5, 69, 457, 461] with vertices 10 and 447 gone, and the gate run-per-file-gate.sh over the thirteen brief-named files asserts it (head arm builds every certificate carrier from the analytic field, base arm from the persisted terminal flux).",
+    "goal": "The goal is that build_contour_mesh assign every non-centre carrier vertex its flux from a supplied field evaluator instead of a linear interpolant over centre triangles; nova/equilibrium/contour_tree_mesh.py:342 adds the field_evaluator keyword and lines 375-379 assign its output to every vertex added after the cell centres, while _barycentric_flux and the nearest-simplex fallback are deleted from the reviewed tree.",
+    "manifest": "Read at status complete; it records twelve commits, ten changed paths, the literal gate command, populated baseline_suite (2669319dd, 10 failure ids) and after_suite (ac3ce1b1e, 12 failure ids) arms with per-file runs, the negative-control log and note, the figure repin delta and the reproducible follow-ons, but its artifacts head_gate headline reads 96 passed and 10 failed while its own after_suite per-file runs sum to 95 passed and 12 failed.",
+    "write_paths": "Fifteen exclusive write paths are declared; git diff --stat 2669319dd..fcbf7ca37080 lists ten changed paths and every one is inside that set (nova/equilibrium/contour_tree_mesh.py, benchmarks/contour_tree_brute_force.py, benchmarks/contour_tree_explanatory_figure.py, tests/test_contour_tree_mesh.py, tests/test_contour_tree_brute_force.py, tests/test_contour_tree_wall_split.py, the explanatory json/svg/png and the wall-vertex-field-flux.html evidence fragment), with nothing outside the fence and topology.py untouched."
+  },
+  "justifications": {
+    "durability": "tests/test_contour_tree_mesh.py:87 reddens at 48 of 48 wall vertices when the barycentric path is restored (negative-control.log, EXIT=1) and tests/test_contour_tree_mesh.py:100 fails at the base that assigns finite interpolated wall flux (nan-sentinel-negative-control.log, EXIT=1), so each added guard names a regression that reddens it.",
+    "evidence": "head-full-gate.log records 13/13 files completed with per-file EXIT lines and its own EXIT=1, and the regenerated receipt carries 4 nodes and 3 edges, but manifest.md:24 quotes the head gate as 96 passed and 10 failed while its own after_suite per-file runs total 95 passed and 12 failed.",
+    "fit": "nova/equilibrium/contour_tree_mesh.py:342 follows the surrounding host-side NumPy idiom and carries no plan label, and ruff check over the six changed Python files reports no finding.",
+    "goal_fidelity": "nova/equilibrium/contour_tree_mesh.py:375-379 assigns the evaluator's output to every vertex added after the cell centres and _barycentric_flux is deleted, which is exactly the goal the node states.",
+    "reuse": "benchmarks/contour_tree_brute_force.py:64-75 wraps benchmarks/solovev_certificate.py's own _case/_exact_state and the existing MAST RectBivariateSpline rather than reimplementing either field, and the superseded capability _barycentric_flux was deleted rather than duplicated.",
+    "scope_discipline": "Every path in git diff 2669319dd..fcbf7ca37080 lies inside the fifteen declared write paths, though benchmarks/contour_tree_explanatory_figure.py:484-515 also reworks label placement beyond the stated mesh goal."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is that build_contour_mesh assign every non-centre carrier vertex its flux from a supplied field evaluator instead of a linear interpolant over centre triangles; nova/equilibrium/contour_tree_mesh.py:342 adds the field_evaluator keyword and lines 375-379 assign its output to every vertex added after the cell centres, and _barycentric_flux and the nearest-simplex fallback are deleted.\nVERDICT done_when: the done_when is that the regenerated explanatory figure receipt for diverted-single-null-340-cells carries no SOL minimum and wall-contact pair and that its PNG is inspected; docs/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.json reads node_count 4, edge_count 3 and drawn_carrier_vertices [5, 69, 457, 461] with vertices 10 and 447 gone, and the thirteen-file run-per-file-gate.sh arms assert it.\nVERDICT write_paths: fifteen write paths are declared and every one of the ten changed paths in git diff 2669319dd..fcbf7ca37080 lies inside them, with nothing outside the fence and topology.py untouched.\nVERDICT manifest: read at status complete; it carries the gate command, both gate arms with per-file runs, the negative-control log and the follow-ons, but its artifacts head_gate headline does not reconcile with its own after_suite per-file totals.\nVERDICT diff: read the twelve commits against 2669319dd commit by commit; ten carry the code and evidence and the last two add landing text only.\nCALL_SITES: nova/equilibrium/topology.py:2594, benchmarks/contour_tree_brute_force.py:92, benchmarks/contour_tree_brute_force.py:169, benchmarks/contour_tree_sweep_placement.py:316, benchmarks/contour_tree_explanatory_figure.py:59\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/equilibrium/contour_tree_mesh.py:375-379 assigns the evaluator output to every added vertex and _barycentric_flux is deleted.\nSCORE evidence: 16\nJUSTIFICATION evidence: head-full-gate.log records 13/13 files with per-file EXIT lines and the regenerated receipt carries 4 nodes and 3 edges, but manifest.md:24 quotes 96 passed and 10 failed against its own after_suite totals of 95 passed and 12 failed.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every changed path is inside the fifteen declared write paths, though benchmarks/contour_tree_explanatory_figure.py:484-515 also reworks label placement beyond the mesh goal.\nSCORE durability: 19\nJUSTIFICATION durability: tests/test_contour_tree_mesh.py:87 reddens 48 of 48 wall vertices on the restored barycentric path and tests/test_contour_tree_mesh.py:100 reddens at the base NaN sentinel, each with its negative-control log EXIT=1.\nSCORE fit: 18\nJUSTIFICATION fit: nova/equilibrium/contour_tree_mesh.py:342 follows the surrounding host-side NumPy idiom and ruff check over the changed Python files reports no finding.\nSCORE reuse: 20\nJUSTIFICATION reuse: benchmarks/contour_tree_brute_force.py:64-75 wraps benchmarks/solovev_certificate.py _case/_exact_state and the existing MAST RectBivariateSpline rather than reimplementing either, and the superseded _barycentric_flux was deleted.\nFINDING manifest.md:24 non-blocking: the artifacts head_gate headline reads 96 passed and 10 failed against the run's own after_suite totals of 95 passed and 12 failed.\nFINDING tests/test_contour_tree_sweep_bounds.py:114 non-blocking: an added failure from a pre-existing 256-versus-258 reference-capacity mismatch that the base arm skipped, reported as a broadcast ValueError rather than an assertion.\nFINDING tests/test_contour_tree_scatter_equivalence.py:148 non-blocking: an added failure that is a JAX compile timeout under load, passing in isolation at the head.\nFINDING nova/equilibrium/contour_tree_mesh.py:376 non-blocking: an omitted evaluator leaves added vertices NaN while vertex_valid stays True.",
+  "review_run_id": "r-20261023T094039741448-review-of-wall-vertex-field-flux-fcbf7ca37080",
+  "reviewed_base_sha": "2669319dded99f086120148509b1f16f131d59c2",
+  "reviewed_head_sha": "fcbf7ca37080a6be6e19e7ea7205e250d97887ce",
+  "reviewed_run_id": "r-20261023T053604178566-wall-vertex-field-flux",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 19,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T10:05:00+00:00",
+  "total": 110
+}

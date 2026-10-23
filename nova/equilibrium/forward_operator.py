@@ -52,7 +52,6 @@ from nova.equilibrium.cell_partition import cell_partition_geometry
 from nova.equilibrium.connectivity_boundary import (
     _points_inside_wall_units,
     traced_boundary_read,
-    wall_height_shadow_mask,
 )
 from nova.equilibrium.domain import (
     DomainMasks,
@@ -253,7 +252,6 @@ _DYNAMIC_OPERATOR_STATE_NAMES = (
     "topology",
     "_fixed_design_topology",
     "_wall_carrier_index",
-    "_wall_height_hysteresis",
     "_x_qualification_distance",
     "_support_moment_stencils",
     "_support_curve_centre",
@@ -2525,15 +2523,6 @@ class ForwardFluxOperator:
         self._wall_carrier_index = _host_array(
             np.argmin(wall_to_cell_distance, axis=1), dtype=np.int32
         )
-        wall_heights = np.unique(np.asarray(self.wall.coordinate[:, 1]))
-        wall_steps = np.diff(wall_heights)
-        positive_steps = wall_steps[wall_steps > 0.0]
-        self._wall_height_hysteresis = _host_array(
-            0.25 * np.min(positive_steps)
-            if positive_steps.size
-            else np.sqrt(np.finfo(np.float64).eps),
-            dtype=self.area.dtype,
-        )
         grid_coordinate = np.asarray(self.grid.coordinate)
         radial_steps = np.diff(np.unique(grid_coordinate[:, 0]))
         vertical_steps = np.diff(np.unique(grid_coordinate[:, 1]))
@@ -3763,20 +3752,7 @@ class ForwardFluxOperator:
             masks, self._private_flux_saddle_present(topology)
         )
         reading = self._carrier_shadow_read(physical, masks, topology)
-        previous_wall_shadow = self._previous_wall_shadow(previous_shadow)
-        if previous_wall_shadow is None:
-            previous_wall_shadow = jnp.zeros(self.wall.node_number, dtype=bool)
-        wall_shadow = wall_height_shadow_mask(
-            self.wall.coordinate[:, 1],
-            topology.axis[1],
-            topology.x_point,
-            reading["xset"],
-            reading["private_wall_node_mask"],
-            previous_wall_shadow,
-            self._wall_height_hysteresis,
-            self._x_qualification_distance,
-        )
-        return masks.private_flux, wall_shadow
+        return masks.private_flux, reading["private_wall_node_mask"]
 
     def _frozen_topology_partition(
         self, psi, requested_class=None, previous_shadow=None

@@ -9,17 +9,17 @@ import numpy as np
 
 from nova.imas.profiles import PrescribedCurrent, prescribe_current_density
 from nova.io.sourcemap import NOVA_CONVENTION, translate_equilibrium
+from nova.io.sourcemap import _observed as _sourcemap_observed
 from nova.media.sources.frame import EquilibriumFrame
 from nova_cocos import convention
 
 
-def _observed(value: Any) -> float:
-    """Return a scalar IDS value, or nan when the IDS leaves it unset."""
-    try:
-        number = float(value)
-    except TypeError, ValueError, AttributeError:
-        return float("nan")
-    return number if np.isfinite(number) else float("nan")
+_observed = _sourcemap_observed
+"""Coerce a Data Dictionary float, reading its unset sentinel as absent.
+
+The conversion owner :mod:`nova.io.sourcemap` states this once; this module
+reads it there rather than repeating the sentinel arithmetic.
+"""
 
 
 def _vacuum_field(b0: np.ndarray, index: int) -> float:

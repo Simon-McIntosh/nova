@@ -34,6 +34,20 @@ class GetSlice:
         except ValueError:
             return data
 
+    @staticmethod
+    def translated(signal_map, path: str, values):
+        """Return one field read through the COCOS translator.
+
+        A reader that declares its source convention serves every
+        convention-bearing field through here, so the data it exposes is in
+        nova's COCOS 17 whatever Data Dictionary version it was read from. The
+        factors come from the signal map
+        :func:`nova.io.sourcemap.translate_equilibrium` builds, so no reader
+        writes a sign of its own.
+        """
+        (signal,) = signal_map.for_target(path)
+        return signal.apply(values)
+
     def __getitem__(self, key: str):
         """Return dataset value with dict-like access."""
         try:

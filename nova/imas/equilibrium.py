@@ -19,6 +19,7 @@ from nova.graphics.line import Chart
 from nova.imas.getslice import GetSlice
 from nova.imas.machine import Wall
 from nova.imas.scenario import Scenario
+from nova.io.sourcemap import NOVA_CONVENTION, translate_equilibrium
 
 
 @dataclass
@@ -500,6 +501,80 @@ class Profile2D(Scenario):
 class Equilibrium(Chart, GetSlice):
     """Operators for equlibrium data."""
 
+    convention_fields: ClassVar[tuple[tuple[str, str], ...]] = (
+        ("psi2d", "equilibrium/profiles_2d/psi"),
+        ("psi1d", "equilibrium/profiles_1d/psi"),
+        ("b0", "equilibrium/vacuum_toroidal_field/b0"),
+        ("ip", "equilibrium/global_quantities/ip"),
+        ("psi_axis", "equilibrium/global_quantities/psi_axis"),
+        ("psi_boundary", "equilibrium/global_quantities/psi_boundary"),
+        ("q_axis", "equilibrium/global_quantities/q_axis"),
+        ("q_95", "equilibrium/global_quantities/q_95"),
+        ("dpressure_dpsi", "equilibrium/profiles_1d/dpressure_dpsi"),
+        ("f_df_dpsi", "equilibrium/profiles_1d/f_df_dpsi"),
+    )
+    """Every dataset field the Data Dictionary convention rescales, with its path.
+
+    The distance between the two statements is what makes a flip visible: the
+    reader renormalises to ``psi_norm``, and a sign reversal of psi leaves that
+    normalisation unchanged, so only a signed quantity shows which convention a
+    field was read in.
+    """
+
+    def _observable(self, field: str, itime: int) -> float:
+        """Return one convention-pinning observable of the read, or nan."""
+        if field not in self.data:
+            return float("nan")
+        return float(np.asarray(self.data[field].data)[itime])
+
+    def _vacuum_field(self, b0: np.ndarray, itime: int) -> float:
+        """Return the toroidal field a slice is read against [T]."""
+        if b0.size == 0:
+            return float("nan")
+        return float(b0[0] if b0.size == 1 else b0[itime])
+
+    def build_convention(self, source_name: str, dd_version: str):
+        """Read every convention-bearing field of the dataset in COCOS 17.
+
+        The Data Dictionary fixes a read's COCOS by its major version -- DD3 is
+        and DD4 is COCOS 17 -- and each slice's observables pin the digits its
+        version implies. A slice whose digits contradict its own version is
+        refused here, by name, before any field is touched; a conforming read
+        has each field converted through
+        :func:`~nova.io.sourcemap.translate_equilibrium` into the convention the
+        rest of nova works in.
+        """
+        length = int(self.data.sizes["time"])
+        b0 = (
+            np.atleast_1d(np.asarray(self.data["b0"].data, float))
+            if "b0" in self.data
+            else np.empty(0)
+        )
+        signal_maps = []
+        for itime in range(length):
+            signal_map = translate_equilibrium(
+                source_name=source_name,
+                dd_version=dd_version,
+                ip=self._observable("ip", itime),
+                psi_axis=self._observable("psi_axis", itime),
+                psi_boundary=self._observable("psi_boundary", itime),
+                q=self._observable("q_95", itime),
+                b0=self._vacuum_field(b0, itime),
+            )
+            if signal_map.blocked:
+                raise ValueError(
+                    "; ".join(blocked.reason for blocked in signal_map.blocked)
+                )
+            signal_maps.append(signal_map)
+        for itime, signal_map in enumerate(signal_maps):
+            for field, path in self.convention_fields:
+                if field not in self.data:
+                    continue
+                self.data[field][itime] = self.translated(
+                    signal_map, path, self.data[field][itime].data
+                )
+        self.data.attrs["cocos"] = NOVA_CONVENTION
+
     @property
     def boundary(self):
         """Return trimmed boundary contour."""
@@ -819,6 +894,7 @@ class EquilibriumData(Equilibrium, Profile2D, Profile1D, Parameter0D, Grid):
         with self.build_scenario(time_node):
             self.data.coords["point"] = ["r", "z"]
             super().build()
+            self.build_convention(str(self.filename), str(self.ids_dd_version))
             self.contour_build()
         try:
             self.wall.insert(self.data)  # insert wall and divertor structures

@@ -241,8 +241,15 @@ class InverseDesign(Control):
     field_weight: float | int = 50
 
     def update_constraints(self):
-        """Extend Control.update_constraints to include boundary psi."""
-        super().update_constraints(-self["psi_boundary"])  # COCOS
+        """Extend Control.update_constraints to include boundary psi.
+
+        ``psi_boundary`` arrives through the equilibrium reader's COCOS 17
+        translation, so it already carries nova's internal flux sense and the
+        boundary flux's sign is the constraint's own. The source read's sign
+        difference is the reader's, taken once there; negating here would apply
+        it a second time.
+        """
+        super().update_constraints(self["psi_boundary"])
 
     def _constrain(self, constraint):
         """Return coupling matrix and vectors."""

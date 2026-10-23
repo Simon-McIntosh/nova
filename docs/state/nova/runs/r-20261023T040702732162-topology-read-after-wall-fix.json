@@ -1,0 +1,665 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 3,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "3baa4796e5cbaac304700eeb940bb11dd7ccfbaa",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T040702732162-topology-read-after-wall-fix/brief.md",
+    "sha256": "32b3630b7483f644534ebb1fbb595dfd49d0705f89675ed5d62a9409fdf7d94c"
+  },
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 62982144,
+      "cached_input_tokens_cumulative": 62982144,
+      "input_tokens": 63264176,
+      "input_tokens_cumulative": 63264176,
+      "output_tokens": 76669,
+      "output_tokens_cumulative": 76669,
+      "reasoning_output_tokens": 28213,
+      "reasoning_output_tokens_cumulative": 28213
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-10-23T07:27:37Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-23T04:10:05Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "test",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "python3 -c 'import json,re; from pathlib import Path; r=Path(\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T040702732162-topology-read-after-wall-fix\"); ids=[x for x in (r/\"topology-read-collect.log\").read_text().splitlines() if x.startswith(\"tests/equilibrium/test_topology_read.py::\")]; h=(r/\"topology-read-deselected.log\").read_text(); marks=re.search(r\"^tests/equilibrium/test_topology_read\\.py ([.F]+)\",h,re.M).group(1); assert len(marks)==27,(len(marks),marks); outcomes={k:(\"FAILED\" if v==\"F\" else \"PASSED\") for k,v in zip(ids[:27],marks,strict=True)}; logs=[r/f\"topology-read-group-{name}.log\" for name in (\"one\",\"two\",\"three\",\"four\")]; [outcomes.update(re.findall(r\"^(tests/equilibrium/test_topology_read\\.py::\\S+)\\s+(PASSED|FAILED|XFAIL|SKIPPED|ERROR)\",p.read_text(),re.M)) for p in logs]; solo=(r/\"topology-read-solo-kernel-limited.log\").read_text(); assert \"1 xfailed\" in solo and \"EXIT=0\" in solo; outcomes[ids[27]]=\"XFAIL\"; assert len(ids)==43 and set(outcomes)==set(ids),(len(ids),len(outcomes)); counts={k:list(outcomes.values()).count(k) for k in (\"PASSED\",\"FAILED\",\"SKIPPED\",\"XFAIL\",\"ERROR\")}; base=json.loads(Path(\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T193653383537-split-sweep-wall-outside/file-gates/base-summary.json\").read_text())[\"files\"][\"tests/equilibrium/test_topology_read.py\"][\"failure_ids\"]; failed=[k for k,v in outcomes.items() if v==\"FAILED\"]; assert counts=={\"PASSED\":28,\"FAILED\":6,\"SKIPPED\":3,\"XFAIL\":6,\"ERROR\":0},counts; print(json.dumps({\"revision\":\"3baa4796e5cbaac304700eeb940bb11dd7ccfbaa\",\"selected_count\":43,\"selected_counts\":counts,\"derivative_solo_xfailed\":True,\"full_file_equivalent_counts\":{\"failed\":6,\"passed\":28,\"skipped\":3,\"xfailed\":7},\"failure_ids\":failed,\"base_failure_ids\":base,\"added_failure_ids\":sorted(set(failed)-set(base)),\"missing_base_failure_ids\":sorted(set(base)-set(failed)),\"components\":[str(r/\"topology-read-deselected.log\"),str(r/\"topology-read-group-one.log\"),str(r/\"topology-read-solo-kernel-limited.log\"),str(r/\"topology-read-group-two.log\"),str(r/\"topology-read-group-three.log\"),str(r/\"topology-read-group-four.log\")]},sort_keys=True))'",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T040702732162-topology-read-after-wall-fix/topology-read-combined.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.5,
+    "plan": "contour-tree-topology-authority",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-23T05:07:17.275116+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-23T04:07:11Z",
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": "2026-10-29T20:08:55Z",
+    "seconds_until_reset": 576103,
+    "state": "quiet",
+    "utilisation_pct": 2.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-23T04:07:11Z",
+    "read_at": "2026-10-23T04:07:17Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 2.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-23T07:27:37Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-10-23T07:27:37Z",
+        "resets_at": 1793304534,
+        "used_percent": 8.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T040702732162-topology-read-after-wall-fix/manifest.md",
+  "member": "disposable-r-20261023T040702732162-topology-read-after-wall-fix",
+  "model_key": "sol",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": "read-only test node; measurement only",
+  "node": "topology-read-after-wall-fix",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.cache/nova-contour-tree-wall/topology-read-rerun-brief.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T040702732162-topology-read-after-wall-fix/brief.md",
+    "brief_sha256": "32b3630b7483f644534ebb1fbb595dfd49d0705f89675ed5d62a9409fdf7d94c",
+    "capability": {
+      "class": "general",
+      "requirements": {},
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 661,
+          "cached_input_tokens": 378036,
+          "input_tokens": 378699,
+          "output_tokens": 211,
+          "reasoning_output_tokens": 20,
+          "total_tokens": 378910,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "adb3a390-bdb2-4e2a-8e74-1e049c62c9fe",
+      "session_id": "adb3a390-bdb2-4e2a-8e74-1e049c62c9fe"
+    },
+    "done_when": "if test_biot_moment_point_derivatives times out, the manifest gives its solo wall time at main and at e4ca8d201",
+    "estimated_hours": null,
+    "goal": "tests/equilibrium/test_topology_read.py is measured in full on main after the contour-tree wall fix",
+    "id": "topology-read-after-wall-fix",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-23T04:07:11Z",
+      "read_at": "2026-10-23T04:07:17Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 2.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T040702732162-topology-read-after-wall-fix/manifest.md",
+    "negative_control": "none: a measurement node that writes no check; the e4ca8d201 base summary is the comparison",
+    "plan": "contour-tree-topology-authority",
+    "regenerate_paths": [],
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "test",
+    "section": "§2",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "/home/ITER/mcintos/.config/reckon/crew/reports/nova-topology-read-after-wall-fix"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "advisory": true,
+      "burn_multiple": null,
+      "derived": null,
+      "drain_hours": 168.0,
+      "effective_limit": null,
+      "elapsed_fraction": 0.04756461730158738,
+      "elapsed_hours": 7.990855706666679,
+      "group": "codex-sub",
+      "lift": {
+        "ends_at": "2026-10-27T06:32:42+00:00",
+        "ends_on": "reset",
+        "form": "credits",
+        "group": "codex-sub",
+        "id": "codex-sub-1792529492-26f087",
+        "pace_multiple": null,
+        "remaining_seconds": 354259.919456,
+        "scope": "global"
+      },
+      "lift_hold": {
+        "held": false,
+        "kind": "credits"
+      },
+      "limited_by": null,
+      "observed_at": "2026-10-23T04:08:22+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": "window too young to project: burn evidence is quantised too coarsely: 4.76% elapsed is below the 5% floor and 2% utilisation is below the 5% floor",
+      "remaining_budget": 0.98,
+      "remaining_windows": null,
+      "resets_at": "2026-10-29T20:08:55Z",
+      "state": "observed",
+      "utilisation": 0.02,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.001184,
+      "decided_by": "window",
+      "margin": 0.5488160000000001,
+      "name": "topology-read-after-wall-fix",
+      "score": 0.55,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.02
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.080544,
+        "observed_at": "2026-10-23T04:08:22+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-29T20:08:55Z",
+        "state": "observed",
+        "utilisation": 0.02,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": "codex-sub-1792529492-26f087",
+    "member": "codex",
+    "node": "topology-read-after-wall-fix",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-23T04:08:22.080544+00:00",
+    "score": 0.55,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "refuse",
+    "answering_model": null,
+    "backend": null,
+    "comment": "codex named: lead asked for a codex lift on this fix (session-scoped lift codex-sub-1792697471-f530ed); the file alone takes ~66 min",
+    "confidence": null,
+    "decision_source": "refused",
+    "effort": null,
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 461.961631,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "credit_even_share": null,
+          "credit_pool_cap": 10000.0,
+          "credit_pool_remaining": null,
+          "credit_rate_per_hour": null,
+          "runway_hours": null,
+          "window_even_share_pct": 3.6743,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 6.667979217233796,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": null,
+        "pace_allowance": null,
+        "prior_outcomes": null,
+        "reasons": [
+          "reserved-lane: codex is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        ],
+        "resets_at": "2026-10-29T20:08:54+00:00",
+        "stale": false,
+        "suits": "The lane's frontier model, strongest and slowest, about five times sol's token price. Suits deep or open-ended design, elevated or critical risk, and nodes that already failed on another model.",
+        "utilisation_pct": 2.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 461.961631,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "credit_even_share": null,
+          "credit_pool_cap": 10000.0,
+          "credit_pool_remaining": null,
+          "credit_rate_per_hour": null,
+          "runway_hours": null,
+          "window_even_share_pct": 3.6743,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 6.667979217233796,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": null,
+        "pace_allowance": null,
+        "prior_outcomes": null,
+        "reasons": [
+          "reserved-lane: codex is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        ],
+        "resets_at": "2026-10-29T20:08:54+00:00",
+        "stale": false,
+        "suits": "The lane's fast, affordable model, about a twentieth of sol's token price. Suits well-defined, less difficult work: reviews, exact-spec implementation, tests and documentation.",
+        "utilisation_pct": 2.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 461.961631,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "credit_even_share": null,
+          "credit_pool_cap": 10000.0,
+          "credit_pool_remaining": null,
+          "credit_rate_per_hour": null,
+          "runway_hours": null,
+          "window_even_share_pct": 3.6743,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 6.667979217233796,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": null,
+        "pace_allowance": null,
+        "prior_outcomes": null,
+        "reasons": [
+          "reserved-lane: codex is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        ],
+        "resets_at": "2026-10-29T20:08:54+00:00",
+        "stale": false,
+        "suits": "The lane default, a previous-generation general model. Suits guided implementation, tests and full reviews at standard or deep reasoning and moderate risk. About twenty times luna's token price and a fifth of astra's.",
+        "utilisation_pct": 2.0,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": "no-eligible-candidates; default-backend-ineligible",
+    "family": null,
+    "jev_latency_ms": 0.0,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 1636.354,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "questions": {},
+    "rendered_state": "{\"node\":{\"role\":\"test\",\"spec_level\":\"exact\",\"capability\":{\"version\":\"1.0\",\"class\":\"general\",\"requirements\":{}},\"goal\":\"tests/equilibrium/test_topology_read.py is measured in full on main after the contour-tree wall fix\",\"done_when\":\"if test_biot_moment_point_derivatives times out, the manifest gives its solo wall time at main and at e4ca8d201\",\"urgency\":{\"due\":null,\"seconds_to_due\":null,\"reason\":null},\"estimated_context\":50392,\"estimated_hours\":33.0,\"estimated_hours_source\":\"plan\",\"attempts\":0,\"write_path_count\":1,\"negative_control_declared\":false,\"serving_lanes\":[],\"serving_lane_count\":0,\"hold_waits_for\":null},\"orchestrator_comment\":\"codex named: lead asked for a codex lift on this fix (session-scoped lift codex-sub-1792697471-f530ed); the file alone takes ~66 min\",\"candidates\":{},\"return_times\":{},\"lanes\":{},\"local_lane\":{\"admission\":\"unavailable\",\"expected_wait_s\":788.5,\"expected_wait_profile_age_s\":104.139849,\"running\":3,\"waiting\":0,\"queue_position\":1,\"headroom\":9,\"worker_slots\":30,\"tokens_per_second\":85.618,\"read_at\":\"2026-10-23T04:07:01.124391+00:00\"}}",
+    "rendered_token_estimate": 269,
+    "stage_ms": {
+      "budget-snapshot": 1131.65,
+      "context-estimate": 2710.051,
+      "records": 1060.35,
+      "verdict-inputs": 726.428
+    },
+    "template_digest": "cb9d48e7fca5878b52cc4affdedfdee9f5e04b929f720979b14d0d78b8456ced",
+    "usage": {}
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.5,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "3baa4796e5cbaac304700eeb940bb11dd7ccfbaa",
+  "resume_waiver": null,
+  "review": null,
+  "review_tier": "full",
+  "review_waiver": {
+    "reason": "read-only measurement node with no commit; its verdict is a failure-id set comparison against the base summary, reproducible from the per-group logs it lists"
+  },
+  "role": "test",
+  "route_mode": "explicit",
+  "run_id": "r-20261023T040702732162-topology-read-after-wall-fix",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "adb3a390-bdb2-4e2a-8e74-1e049c62c9fe",
+  "session_harness": "codex",
+  "session_id": "01a166f4-965b-7f21-81ff-81c398bf7a1a",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 62982144,
+    "cumulative_input_tokens": 126246320,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 104882
+  },
+  "time_budget": "60m",
+  "tool_steps": 86.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "backend": "codex",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 1205,
+        "budget_seconds": 2700,
+        "classification": "scoring",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 3905,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [
+            451605,
+            451718,
+            454033,
+            453064
+          ],
+          "exit_code": 0,
+          "exited_at": "2026-10-23T03:39:48Z",
+          "last_record_type": "item.completed",
+          "launched_at": "2026-10-23T03:04:54Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261023T025830194764-explanatory-figure-after-wall-repair",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 360,
+          "worker_pid": 451485
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-23T03:39:48Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 1713,
+        "log_fresh": false,
+        "manifest_commits": [
+          "fd6d46f75e1f555eeae5c72a0dc2047c62e10c3a",
+          "f4fb36402b7afe2be8c30d62e4cfd245c47a2bec"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "b74e55fe000930a696d7f028ace313218133fb2bfd21584ba5e8a04bcb3a201d",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T025830194764-explanatory-figure-after-wall-repair/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "sol",
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project nova --brief /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T025830194764-explanatory-figure-after-wall-repair/review-brief.md --plan contour-tree-topology-authority --section '§2' --role review --spec-level exact --node review-of-explanatory-figure-after-wall-repair-f4fb36402b7a --goal 'attach an independent review to run r-20261023T025830194764-explanatory-figure-after-wall-repair' --done-when 'the review for r-20261023T025830194764-explanatory-figure-after-wall-repair stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the record is written at one of this run'\"'\"'s declared write paths, under review-records/ inside the directory of run r-20261023T025830194764-explanatory-figure-after-wall-repair, and never in the worktree; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T025830194764-explanatory-figure-after-wall-repair/review-records/r-20261023T025830194764-explanatory-figure-after-wall-repair.json --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T025830194764-explanatory-figure-after-wall-repair/review-records/r-20261023T025830194764-explanatory-figure-after-wall-repair.at-f4fb36402b7afe2be8c30d62e4cfd245c47a2bec.json --time-budget 45m --session adb3a390-bdb2-4e2a-8e74-1e049c62c9fe --allow-unreconciled-runs --local",
+        "node": "explanatory-figure-after-wall-repair",
+        "phase": "complete",
+        "plan": "contour-tree-topology-authority",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261023T025830194764-explanatory-figure-after-wall-repair",
+        "session": "adb3a390-bdb2-4e2a-8e74-1e049c62c9fe",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 2015,
+        "terminal_at": "2026-10-23T03:34:42Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/adb3a390-bdb2-4e2a-8e74-1e049c62c9fe/explanatory-figure-after-wall-repair"
+      }
+    ]
+  },
+  "wall_seconds": 11852,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 3,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-23T07:27:43Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-23T06:24:01Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261023T040702732162-topology-read-after-wall-fix",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 964,
+    "worker_pid": 1667238
+  },
+  "worker_seconds": 11777,
+  "worker_seconds_source": "rollout_receipts",
+  "worktree_retention": null
+}

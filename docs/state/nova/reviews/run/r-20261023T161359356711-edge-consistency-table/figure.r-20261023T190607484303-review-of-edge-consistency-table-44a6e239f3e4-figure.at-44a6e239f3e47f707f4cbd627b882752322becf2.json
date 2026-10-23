@@ -9,7 +9,7 @@
   "call_sites": [
     "none"
   ],
-  "completed_at": "",
+  "completed_at": "2026-10-23T19:30:34.845Z",
   "dispatched_at": "2026-10-23T19:08:30Z",
   "figure_checks": {
     "clipping": "Ink bounding box x 4..1392, y 4..713, and outer-4px ink counts (top, bottom, left, right) = (0, 0, 0, 0), so no text or data is clipped by the canvas edge and no label is cut.",
@@ -73,6 +73,6 @@
   ],
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-10-23T19:30:38.414759+00:00",
+  "timestamp": "2026-10-23T19:34:42.433850+00:00",
   "total": null
 }

@@ -1,0 +1,106 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "This review ran no suite and read no base/head arm, so the count is the neutral value the record shape requires and not a measurement. A figure review measures the rendered picture, not the code.",
+  "attachment_map": {
+    "image-0.png": "docs/figures/dd-cocos-edge-consistency/edge-consistency-convergence.svg",
+    "image-1.png": "docs/figures/dd-cocos-ingest/edge-consistency-table/edge-consistency-band-residual.svg"
+  },
+  "attachment_note": "Two rendered PNGs were handed to this node in its own run directory: image-0.png and image-1.png, both 1399x720. Every verdict below is about those rendered images; no SVG and no other image was opened, read, listed, searched, rendered or shown, and the SVGs are named only as the figures' repository paths. image-0 is the convergence figure: four markers of band-relative residual against radial grid spacing, a dashed fit labelled 'fitted order 1.96', and the 1.0e-3 threshold drawn as a dotted level with the label 'threshold 1.0e-03' above its left end. image-1 is the three-panel band-residual figure: DINA 105052/1, DINA 105069/3 and CORSICA 130506/6 against time slice index, two series ('as the module measures', grey; 'collinear with the flux map', blue) and the same dotted threshold. Identification is confirmed from the figures' own logged numbers, not from the file names: the convergence render's figure.log prints order=1.9628 and band_relative 2.203503e-03, 5.796863e-04, 1.458875e-04, 3.743988e-05 at spacings 38.125, 19.062, 9.531, 4.766 mm, which are the four markers and the slope the image shows; band-residual-rows.json carries the slice indices 75-2096, 76-3650 and 1-55 and the per-source ranges (as_read up to 47.7, 54.5 and 9.79e15) that image-1 plots on its three x axes and y axes.",
+  "call_sites": [
+    "none"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-10-23T20:30:32Z",
+  "figure_checks": {
+    "clipping": "Ink bounding box and outer-2px ink counts: image-0 x 4..1395, y 4..713 with (top, bottom, left, right) = (0, 0, 0, 0); image-1 x 4..1395, y 20..709 with (0, 0, 0, 0). No text or data is cut by the canvas edge in either figure, and no label runs off the panel.",
+    "collision": "image-0: the only grey text is the threshold annotation, glyph box x 266-459, y 63-79, with zero blue pixels inside and 67 px clear of the dotted level at row 146. image-1: the threshold annotation glyph box x 124-317, y 432-447 contains zero blue pixels, with the nearest marker at x 117-126, y 380-401; the figure legend sits at x 336-1093, y 24-71 and the panel titles immediately below it, no overlap; no two text artists overlap.",
+    "dynamic_range": "Measured on image-1: the CORSICA panel's y axis spans from about 1e-4 to above 1e16 (ticks 1e0 to 1e15 drawn), so its 1e0 plateau and the 1e-3 threshold occupy the bottom few percent of the panel height. The two spikes to 9.79e15 are the recorded data and are drawn truthfully; the consequence is compression of the plateau detail, recorded as finding 1.",
+    "provenance": "reviewed_base_sha d246049f5 is an ancestor of reviewed_head_sha 0dfe73a5. The convergence script changed between base and head (x axis moved to millimetres with explicit 5-40 ticks, the fit given a legend label, and the fit's direct annotation replaced by a legend), which is exactly what image-0 shows, so the attachment is the head version and the earlier metres-axis finding is resolved. The band-residual figure and its drawing script are added by this run at the reviewed head. No claim is made from SVG markup.",
+    "render": "Verdicts were formed on the handed PNGs at native resolution (1399x720) only. No SVG and no other image was opened, read, listed, searched, rendered or shown; the SVGs appear only as repository paths.",
+    "series_identity": "The attachments were matched to their figures by their own numbers, not by file name. figure.log (order=1.9628 and band_relative 2.203503e-03, 5.796863e-04, 1.458875e-04, 3.743988e-05) is the four markers and the slope image-0 draws. band-residual-rows.json (slice indices 75-2096, 76-3650, 1-55; as_read maxima 47.7, 54.5, 9.79e15) is the three panels and their x ranges and y spans in image-1.",
+    "spines": "Both figures are despined to the style: image-1 shows left spines at columns 559 and 1015 and the dotted level as its only wide grey rows, with no top or right spine in the dark-column tallies. This matches the repository's data-ink rule."
+  },
+  "figure_verdicts": [
+    {
+      "figure": "docs/figures/dd-cocos-edge-consistency/edge-consistency-convergence.svg",
+      "render": "image-0.png (1399x720)",
+      "rubric": {
+        "contrast": "pass. Near-black text on white; the threshold annotation is #929292 at 3.1:1, the repository's limit grey.",
+        "data_ink": "pass. Subject 3.0 pt solid with markers, fit 2.4 pt dashed beneath it, threshold 1.2 pt dotted; no grid, no fill.",
+        "decoration": "pass. None present; despined; zero ink in the outer 2 px frame.",
+        "label_collision": "pass. Annotation box x 266-459, y 63-79, zero data pixels inside, 67 px above the dotted level at row 146; nothing clipped.",
+        "legibility": "pass. Both axes are named in the prefixed SI units the repository requires ('radial grid spacing [mm]' with ticks 5-40, and 'band residual / profile current'); the four points and the fitted order 1.96 are individually readable and the threshold crossing is visible.",
+        "table_form": "pass. A convergence ladder against a criterion line."
+      }
+    },
+    {
+      "figure": "docs/figures/dd-cocos-ingest/edge-consistency-table/edge-consistency-band-residual.svg",
+      "render": "image-1.png (1399x720)",
+      "rubric": {
+        "contrast": "pass. Near-black text on white; the limit grey is 3.1:1 and legible.",
+        "data_ink": "pass. Two series and a dotted threshold, no decorative ink; the collinear (choosing) series is drawn on top as the subject.",
+        "decoration": "pass. None present; despined; zero ink in the outer 2 px frame.",
+        "label_collision": "pass. No clipping; legend and titles clear; the threshold annotation does not overlap data (finding 2 concerns its distance from its line, not a collision).",
+        "legibility": "pass with finding 1. Three source panels, a shared y axis name, and a figure-level legend; the DINA panels read at a glance, while CORSICA's 16-decade log span compresses its plateau and the 1.0e-3 level into the bottom sliver.",
+        "table_form": "pass. Per-slice residual against time slice index is a time-series relationship, not tabular information."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "file": "docs/figures/dd-cocos-ingest/edge-consistency-table/render_band_residual.py",
+      "line": 47,
+      "severity": "non-blocking",
+      "suggested_disposition": "folded into a small figure pass on docs/figures/dd-cocos-ingest/edge-consistency-table/",
+      "summary": "The CORSICA 130506/6 panel shares one log y scale with the two DINA panels but its data reach about 9.8e15, so 'panel.set_yscale(\"log\")' gives that panel a span of roughly 16 decades on which the 1e0 plateau and the 1.0e-3 threshold are squeezed into the bottom sliver. The reading a reviewer flagged as hardest is the one the panel exists for: the plateau's as-measured and collinear series differ by a factor of about three at 1e0, which renders as a few pixels. The fix is local to the drawing script (per-panel y-axis limits clipped to the data of interest, or an inset for the low decades) and changes no measured value; the fragment cites the figure only in prose."
+    },
+    {
+      "file": "docs/figures/dd-cocos-ingest/edge-consistency-table/render_band_residual.py",
+      "line": 84,
+      "severity": "non-blocking",
+      "suggested_disposition": "folded into a small figure pass on docs/figures/dd-cocos-ingest/edge-consistency-table/",
+      "summary": "The threshold annotation in the first panel is placed at xytext=(0.05, 0.35) in axes fraction with no connector, so on a five-decade log axis it floats about 1.7 decades above the dotted 1.0e-3 level it names, inside the panel's lower data area. A reader has to infer that the distant dotted line at the bottom is the threshold being labelled; the convergence figure places the same label 67 px above its own line, and the mismatch between the two figures costs a read. The fix is local to the drawing script: place the label just above the axhline (as the convergence script does) or leave a short leader."
+    }
+  ],
+  "item_verdicts": {
+    "caption_independence": "No caption was attached to either figure in this review's attachment set, so there is no caption to compare against a title and no caption-vs-title finding. Both figures are referenced in prose in the reviewed fragment.",
+    "finding_materiality": "Two non-blocking findings, no blocking finding. Both figures are readable, the data are visible and correctly weighted, no label is clipped or overlapping another label or the data, and neither depicts information that is naturally a table. Finding 1 is a dynamic-range compression in one panel of the new three-source figure; finding 2 is a label-placement clarity cost. Neither prevents a reader from seeing the residual and its relation to the threshold.",
+    "rendered_artifact": "Two figures were attached and both were opened and inspected at native resolution; each of the six rubric items is reported on each.",
+    "resolution_of_prior_finding": "The earlier figure review of this run at head 44a6e239 recorded one non-blocking finding (the convergence x axis labelled in metres). At this head the axis reads 'radial grid spacing [mm]' with ticks 5-40, which is the prefixed SI presentation the repository's plotting rules require, so that finding is resolved by the rendered image."
+  },
+  "justifications": {
+    "durability": "The record is written at both declared paths and each path is checked with reckon crew check --review --record before the manifest is closed.",
+    "evidence": "Each attachment was identified against its figure's own logged numbers (figure.log for the convergence figure, band-residual-rows.json for the band-residual figure) before any verdict was formed, and provenance was settled against the base/head script diff.",
+    "legibility": "Read from the two 1399x720 PNGs at native resolution, with axis labels, tick labels, glyph boxes and series geometry measured from the images' own pixels.",
+    "scope_discipline": "This review is read-only. No figure, caption, script, fragment or other file was edited, created, moved, deleted, redrawn, relabelled or reformatted. The only writes are this record at its two declared paths and the run manifest."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261023T202949741682-review-of-edge-consistency-table-0dfe73a5d8b7-figure",
+  "reviewed_base_sha": "d246049f532567c80a70770cef4fc9f610547f2d",
+  "reviewed_figures": [
+    "docs/figures/dd-cocos-edge-consistency/edge-consistency-convergence.svg",
+    "docs/figures/dd-cocos-ingest/edge-consistency-table/edge-consistency-band-residual.svg"
+  ],
+  "reviewed_head_sha": "0dfe73a5d8b789fd43198f4216607c713f02f472",
+  "reviewed_run_id": "r-20261023T161359356711-edge-consistency-table",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility [edge-consistency-convergence.svg]: pass. A single log-log convergence ladder with both axes named ('band residual / profile current', 'radial grid spacing [mm]') and ticks 5, 10, 20, 30, 40; the four points and the dashed fit are individually resolvable, and the reader can see the ladder cross the 1.0e-3 level between the 9.5 mm and 19 mm grids without a caption.",
+    "RUBRIC data_ink [edge-consistency-convergence.svg]: pass. The measured series is the heaviest mark (3.0 pt with 5 pt markers), the fit is 2.4 pt dashed beneath it, and the threshold is a 1.2 pt dotted level; no grid, fill or shading competes.",
+    "RUBRIC decoration [edge-consistency-convergence.svg]: pass. No gradient, background fill, band, frame or shadow; the panel is despined (left and bottom only) and the outer 2 px border carries zero ink.",
+    "RUBRIC contrast [edge-consistency-convergence.svg]: pass. Axis labels, tick labels, title-free legend entries are near-black on white; the grey threshold annotation (#929292) is 3.1:1 on white at 14 pt, which is the repository's declared limit grey and remains legible.",
+    "RUBRIC table_form [edge-consistency-convergence.svg]: pass. Four ladder points crossing a criterion line is a scaling relation; its content (the slope and where it crosses) does not survive as a table.",
+    "RUBRIC label_collision [edge-consistency-convergence.svg]: pass. No text is clipped (zero ink in the outer 2 px frame); the grey threshold annotation occupies x 266-459, y 63-79 and contains zero blue data pixels, sitting 67 px above the dotted level at row 146; the frameless legend sits in the clear lower-right quadrant.",
+    "RUBRIC legibility [edge-consistency-band-residual.svg]: pass, with finding 1 recording the CORSICA panel. Three panels each name their source, the shared y label 'band residual / band profile current' names the quantity, and the figure legend above the panels distinguishes both series; the two DINA panels read at a glance and the CORSICA panel shows its series and the threshold, though its 16-decade span compresses the plateau.",
+    "RUBRIC data_ink [edge-consistency-band-residual.svg]: pass. The collinear series is drawn 3.0 pt over the 2.6 pt as-measured series, markers at 4 pt, and the threshold is a 1.2 pt dotted level; no grid, fill or shading.",
+    "RUBRIC decoration [edge-consistency-band-residual.svg]: pass. No gradient, background fill, band, frame or shadow; each panel is despined and the outer 2 px border carries zero ink.",
+    "RUBRIC contrast [edge-consistency-band-residual.svg]: pass. Source titles, axis labels, ticks and legend entries are near-black on white; the grey threshold annotation and grey as-measured series carry #929292, the repository's limit grey, at 3.1:1 on white.",
+    "RUBRIC table_form [edge-consistency-band-residual.svg]: pass. Per-slice residual against time slice index across three sources, with fixed-by-construction slices reproduced from four recorded summary rows in the text.",
+    "RUBRIC label_collision [edge-consistency-band-residual.svg]: pass. No text is clipped (zero ink in the outer 2 px frame); the figure legend and all three source titles sit in clear space above the panels; the grey threshold annotation (glyph box x 124-317, y 432-447) contains zero blue pixels, and the nearest data marker (x 117-126, y 380-401) clears it by about 30 px. Finding 2 records that it is far from the line it names, which is a clarity cost, not a collision."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T20:49:11.921328+00:00",
+  "total": null
+}

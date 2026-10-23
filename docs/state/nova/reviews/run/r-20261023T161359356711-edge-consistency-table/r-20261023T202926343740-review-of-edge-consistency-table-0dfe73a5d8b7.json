@@ -1,0 +1,56 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-23T20:49:34.186Z",
+  "dispatched_at": "2026-10-23T20:30:12Z",
+  "findings": [
+    {
+      "file": "tests/test_edge_consistency.py",
+      "line": 325,
+      "severity": "non-blocking",
+      "text": "the fresh-interpreter precision assertion accepts either 'extended precision: True' or 'refused:', so deleting configure_dtypes() from edge_consistency() -- the review item the test was added for -- still leaves it green because the RuntimeError branch prints that word; it reddens only if both the call and the raise are removed."
+    },
+    {
+      "file": "tests/test_edge_consistency_ids_route.py",
+      "line": 291,
+      "severity": "non-blocking",
+      "text": "the profile_current_ratio assertion compares the reader's integral with 1.0 where the fixture wrote its own Ip from the same toroidal_current_density the reader applies, so the two sides move together and the assertion cannot fail; the stored sources read -1.13, -1.09 and -1.10, so no test covers that sign discrepancy."
+    },
+    {
+      "file": "scripts/edge_consistency_table.py",
+      "line": 51,
+      "severity": "non-blocking",
+      "text": "the driver imports the private _uniform_axis from nova/media/sources/mast_efit.py:49, so a helper the repository owns is borrowed through a leading-underscore symbol rather than a public one and a rename there silently breaks the driver."
+    },
+    {
+      "file": "tests/test_edge_consistency_ids_route.py",
+      "line": 195,
+      "severity": "non-blocking",
+      "text": "_measure re-implements scripts/edge_consistency_table.py:135 measure_slice (resample, interpolate, integrate), so the tests never run the driver that produced the table and a regression in that read path would leave every test green."
+    },
+    {
+      "file": "manifest.md",
+      "line": 15,
+      "severity": "non-blocking",
+      "text": "the tests line is a template carrying an unsubstituted file placeholder rather than the literal command a shell was handed, so the gate receipt cannot be re-run from it; the literal commands survive only in the '# command:' headers of gate-base.log and gate-head.log."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is the edge-consistency measure reported on DINA 105052/1, DINA 105069/3 and CORSICA 130506/6 with a section 6 recommendation and the measure's three review items folded in; docs/evidence/fragments/dd-cocos-ingest/edge-consistency-table.html:114-124 carries the three-source table, :147-264 the recommendation, and :295-303 the module-mutation negative control.\nVERDICT done_when: the done-when asks for the three forms per source, each slice's grid, band width and threshold, the two refused pulses with the contradicted digit, and a recommendation with the integral current check beside it; fragment:105-124 and :128-145 carry them and docs/research/dd-cocos-census.html:81-84 repeats the table, with fragment:114-124 reconciling to table.json's 72 rows to every printed digit (band-relative medians 1.7326, 1.7131, 7.9296; grid current 0.9736-1.0027, 0.9801-1.0019, 0.9867-1.0004 of Ip).\nVERDICT write_paths: the manifest declares the module, both test files, the driver script, the two figure directories, the census and the fragment; all eleven changed files sit inside those paths and docs/plans/iter-passive-plasma-circuit.html is not in the diff.\nVERDICT manifest: read; it records base 14 passed, head 15 passed, ids-route 2 passed, the negative-control log with its one-expression mutation of the module, and the sign section; its tests line is a template carrying an unsubstituted placeholder, so the literal commands survive only in the gate logs' own header lines.\nVERDICT diff: read all nine commits from d246049f5 to 0dfe73a5d; 731106886 adds the driver, b0c1b3b66 the x64 entry and the band-denominator test, 28e2f1ca9 the fragment and census table, c8aba3c8f the figure labels, 44a6e239f the sign settlement, e1328c078 the corrected integral-current ranges, and 0dfe73a5d replaces the earlier negative control with a mutation of the module under test; the earlier review's blocking finding on the 0.3 per cent grid-current claim is repaired at e1328c078.\nCALL_SITES: scripts/edge_consistency_table.py:135 measure_slice, the only caller of edge_consistency(); nova/imas/mast_parity_chain.py:34 imports grid_current_density from the same module, unchanged by this diff\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: fragment:114-124 and :147-264 report the three forms and the recommendation, and fragment:295-303 plus tests/test_edge_consistency_ids_route.py:295 deliver the literal negative control the brief named.\nSCORE evidence: 16\nJUSTIFICATION evidence: gate-base.log ends 14 passed EXIT=0 and gate-head.log 15 passed EXIT=0 at b0c1b3b66, and table.json reconciles with fragment:114-124, though table.log carries neither the allocation the reads ran under nor a command header.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every changed path in the diff lies inside the manifest's declared write paths, and docs/research/dd-cocos-census.html:81-84 is a splice of eight added lines rather than a rewrite.\nSCORE durability: 14\nJUSTIFICATION durability: tests/test_edge_consistency.py:285 fails if the band denominator becomes the slice-wide maximum, and the 0dfe73a5d mutation proves tests/test_edge_consistency_ids_route.py:298 reddens on a code regression.\nSCORE fit: 16\nJUSTIFICATION fit: the module and driver follow the surrounding docstring-and-dataclass idiom, but scripts/edge_consistency_table.py:51 imports the leading-underscore _uniform_axis from nova/media/sources/mast_efit.py:49.\nSCORE reuse: 17\nJUSTIFICATION reuse: nova/imas/edge_consistency.py reuses grid_current_density and apply_delta_star, and _uniform now delegates to nova/media/sources/mast_efit.py:49 rather than re-implementing it; the read-measure path is however implemented twice, at scripts/edge_consistency_table.py:135 and tests/test_edge_consistency_ids_route.py:195.\nFINDING tests/test_edge_consistency.py:325 non-blocking: the fresh-interpreter precision assertion accepts either 'extended precision: True' or 'refused:', so deleting configure_dtypes() from edge_consistency() -- the review item the test was added for -- still leaves it green because the RuntimeError branch prints 'refused:'; it reddens only if both the call and the raise are removed.\nFINDING tests/test_edge_consistency_ids_route.py:291 non-blocking: the profile_current_ratio assertion compares the reader's integral with 1.0 where the fixture wrote its own Ip from the same toroidal_current_density the reader applies, so the two sides move together and the assertion cannot fail; the stored sources read -1.13, -1.09 and -1.10, so no test covers that sign discrepancy.\nFINDING scripts/edge_consistency_table.py:51 non-blocking: the driver imports the private _uniform_axis from nova/media/sources/mast_efit.py:49, so a helper the repository owns is borrowed through a leading-underscore symbol rather than a public one and a rename there silently breaks the driver.\nFINDING tests/test_edge_consistency_ids_route.py:195 non-blocking: _measure re-implements scripts/edge_consistency_table.py:135 measure_slice (resample, interpolate, integrate), so the tests never run the driver that produced the table and a regression in that read path would leave every test green.\nFINDING manifest.md:15 non-blocking: the tests line is a template carrying an unsubstituted file placeholder rather than the literal command a shell was handed, so the gate receipt cannot be re-run from it; the literal commands survive only in the '# command:' headers of gate-base.log and gate-head.log.",
+  "review_run_id": "r-20261023T202926343740-review-of-edge-consistency-table-0dfe73a5d8b7",
+  "reviewed_base_sha": "d246049f532567c80a70770cef4fc9f610547f2d",
+  "reviewed_head_sha": "0dfe73a5d8b789fd43198f4216607c713f02f472",
+  "reviewed_run_id": "r-20261023T161359356711-edge-consistency-table",
+  "scores": {
+    "durability": 14,
+    "evidence": 16,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 17,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T20:51:46.790163+00:00",
+  "total": 100
+}

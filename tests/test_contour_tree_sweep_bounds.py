@@ -2,95 +2,34 @@
 
 from __future__ import annotations
 
-import os
-import subprocess
-import sys
 from math import ceil, log2
-from pathlib import Path
-from types import ModuleType
 
 import jax
 import jax.numpy as jnp
-import pytest
+import numpy as np
 
 from benchmarks.contour_tree_brute_force import (
     certificate_fixtures,
     certificate_rung_fixtures,
+    compare,
     mast_fixtures,
 )
 from nova.equilibrium import contour_tree
 from nova.jax.config import configure_dtypes
 from scripts.prototypes.contour_tree_sweep_profile.profile import (
-    assert_identity,
     inputs,
     instrumented_sweep,
-    load_builder,
 )
+from tests.test_contour_tree_wall_split import _sublevel_count
 
 
 configure_dtypes()
 assert jax.config.jax_enable_x64 is True
 
-_RECEIPT_REFERENCE = "511a22e06^:nova/equilibrium/contour_tree.py"
-_RECEIPT_REFERENCE_REASON = f"missing receipt reference {_RECEIPT_REFERENCE}"
 
+def test_fixture_events_match_independent_component_counts() -> None:
+    """Every carrier event agrees with independent graph connectivity counts."""
 
-def _receipt_reference_available() -> bool:
-    if os.environ.get("REFERENCE_CONTOUR_TREE_MODULE") is not None:
-        return True
-
-    root = Path(__file__).resolve().parents[1]
-    result = subprocess.run(
-        ["git", "cat-file", "-e", _RECEIPT_REFERENCE],
-        cwd=root,
-        capture_output=True,
-        text=True,
-    )
-    return result.returncode == 0
-
-
-_HAS_RECEIPT_REFERENCE = _receipt_reference_available()
-
-
-def _receipt_reference():
-    """Load the source that recorded the fixture receipts."""
-
-    reference_path = os.environ.get("REFERENCE_CONTOUR_TREE_MODULE")
-    if reference_path is not None:
-        return load_builder(Path(reference_path))
-
-    root = Path(__file__).resolve().parents[1]
-    available = subprocess.run(
-        ["git", "cat-file", "-e", _RECEIPT_REFERENCE],
-        cwd=root,
-        capture_output=True,
-        text=True,
-    )
-    if available.returncode != 0:
-        pytest.skip(_RECEIPT_REFERENCE_REASON)
-
-    source = subprocess.run(
-        ["git", "show", _RECEIPT_REFERENCE],
-        cwd=root,
-        check=True,
-        capture_output=True,
-        text=True,
-    ).stdout
-    module = ModuleType("contour_tree_receipt_reference")
-    module.__file__ = str(root / "nova/equilibrium/contour_tree.py")
-    sys.modules[module.__name__] = module
-    exec(compile(source, module.__file__, "exec"), module.__dict__)
-    return module
-
-
-@pytest.mark.skipif(
-    not _HAS_RECEIPT_REFERENCE,
-    reason=_RECEIPT_REFERENCE_REASON,
-)
-def test_brute_force_fixture_receipts_match_recorded_fields() -> None:
-    """Each stored carrier retains all seven receipt fields bit for bit."""
-
-    reference = _receipt_reference()
     fixtures = (
         *certificate_fixtures(),
         *certificate_rung_fixtures(),
@@ -99,22 +38,52 @@ def test_brute_force_fixture_receipts_match_recorded_fields() -> None:
     assert fixtures
     for fixture in fixtures:
         mesh = fixture.mesh
-        arguments = (
+        comparison = compare(mesh)
+        rows = comparison["rows"]
+        assert rows and any(row["brute_force"] > 0 for row in rows)
+        mismatches = [row for row in rows if row["brute_force"] != row["tree"]]
+        assert not mismatches, (fixture.name, mismatches[:3])
+
+        values = np.asarray(mesh.vertex_psi)
+        valid = np.asarray(mesh.vertex_valid, dtype=bool)
+        wall = np.asarray(mesh.vertex_is_wall, dtype=bool) & valid
+        edges = np.asarray(mesh.edges)[np.asarray(mesh.edge_valid)]
+        neighbours, neighbour_valid, adjacency_overflow = (
+            contour_tree._carrier_adjacency(mesh.edges, mesh.edge_valid, len(values))
+        )
+        assert not bool(adjacency_overflow)
+        nodes, kinds, _, _, overflow, order = contour_tree._sweep_tree(
             mesh.vertex_psi,
             mesh.vertex_valid,
             mesh.vertex_is_wall,
-            mesh.edges,
-            mesh.edge_valid,
-            jnp.asarray(1, dtype=jnp.int32),
+            neighbours,
+            neighbour_valid,
+            False,
+            len(values),
+            len(mesh.edges),
         )
-        expected = reference.build_contour_tree(*arguments)
-        actual = contour_tree.build_contour_tree(*arguments)
-        jax.block_until_ready((expected, actual))
-        try:
-            assert_identity(expected, actual)
-        except AssertionError as error:
-            raise AssertionError(f"{fixture.name}: {error}") from error
-    print(f"IDENTICAL_FIXTURES={len(fixtures)}")
+        assert not bool(overflow)
+        nodes = np.asarray(nodes)
+        kinds = np.asarray(kinds)
+        usable_order = [int(v) for v in np.asarray(order) if valid[v]]
+        assert usable_order
+        active: set[int] = set()
+        previous = 1  # The outside component exists before the first wall visit.
+        for vertex in usable_order:
+            active.add(vertex)
+            current = _sublevel_count(active, edges, wall)
+            if current > previous:
+                assert nodes[vertex] and kinds[vertex] == 0, (fixture.name, vertex)
+            elif current < previous:
+                assert nodes[vertex] and kinds[vertex] == 1, (fixture.name, vertex)
+            elif vertex != usable_order[-1]:
+                assert not nodes[vertex], (fixture.name, vertex)
+            previous = current
+        print(
+            f"ORACLE_EVENTS={fixture.name}:"
+            f"superlevels={len(rows)}:sublevels={len(usable_order)}"
+        )
+    print(f"CHECKED_FIXTURES={len(fixtures)}")
 
 
 def test_largest_profile_fixture_bounds_root_hops() -> None:

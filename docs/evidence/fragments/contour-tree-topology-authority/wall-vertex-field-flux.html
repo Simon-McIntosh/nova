@@ -53,6 +53,15 @@
   node ranks have integer ticks 0 through 3. The fixed-label control intersects
   one arc, while the regenerated placement has zero arc, marker or label
   intersections. The PNG was inspected after rendering.</p>
+  <p>Both 13-file gate arms ran from complete trees with <code>conftest.py</code>:
+  base had 93 passes, 10 failures and one archive-only skip; head had 95
+  passes and 12 failures. The eight version-3 trace-parser failures and one
+  escape timeout occurred in both arms. Supplying the same historical
+  reference module reproduced the 256-versus-258 receipt mismatch at base and
+  head. Scatter case 1 also timed out in both arms. The extra head scatter
+  case 0 timeout passed in an isolated process (111 s),
+  as did the timed-out escape case (238 s); both were load-sensitive CPU
+  measurements. The full commands, failure IDs and logs are in the manifest.</p>
   <figure>
     <img src="/nova/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.svg" alt="Four-node diverted contour tree beside analytic flux contours, without the spurious SOL pair">
     <figcaption>The analytic carrier produces the X-point, axis, private-region wall maximum and virtual outside node.</figcaption>

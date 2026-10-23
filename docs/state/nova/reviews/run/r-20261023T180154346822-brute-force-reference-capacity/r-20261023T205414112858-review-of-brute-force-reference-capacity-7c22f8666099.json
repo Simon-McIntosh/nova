@@ -1,0 +1,67 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own gate logs. baseline_suite (d246049f) reads '1 failed, 8 passed in 172.95s' EXIT=1 with failure id ::test_brute_force_fixture_receipts_match_recorded_fields, and after_suite (5d7d8a596) reads '9 passed in 399.08s' EXIT=0 with no failure ids, so head adds no failure. The base failure is the pre-existing recorded-reference defect the node was dispatched to repair, not an additive defect. The commit under review (7c22f8666) is documentation only and cannot change a test outcome.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-23T21:08:11.431Z",
+  "dispatched_at": "2026-10-23T20:55:14Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/contour-tree-topology-authority/brute-force-reference-capacity.html",
+      "line": "4",
+      "severity": "non-blocking",
+      "text": "the adjudication that authorises replacing the recorded-reference pin is asserted in prose and checked only by check_repair_fragment.py in the run directory, which is committed nowhere, so a future reader cannot rerun the evidence and no in-tree test reddens if the fragment's numbers drift."
+    },
+    {
+      "file": "docs/evidence/fragments/contour-tree-topology-authority/brute-force-reference-capacity.html",
+      "line": "5",
+      "severity": "non-blocking",
+      "text": "the sentence 'The current-only pairs bypass removed wall chains' is a per-fixture characterisation the audit does not record, since wall-chain-audit.log lists the removed and added vertex pairs without associating either with a chain; the claim is plausible for the compact diverted pair (2,253) but is unverified for the 16 remaining current-only pairs."
+    },
+    {
+      "file": "docs/evidence/fragments/contour-tree-topology-authority/brute-force-reference-capacity.html",
+      "line": "7",
+      "severity": "non-blocking",
+      "text": "the new table headers read 'Old-only edges' and 'Current-only edges' while line 5's prose names the same quantities 'historical-only' and 'current-only', and the retained node column still reads 'Old-only nodes', so one table carries two vocabularies for one comparison."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read 7c22f8666 against 081f22e1f commit by commit; one file, 21 insertions and 4 deleted table-columns replaced by 6, and every figure it adds reconciles with wall-chain-audit.log.",
+    "done_when": "the repair round's done-when asks that the answering commit address fd26a89de1d and that the manifest name it by id; the fragment at lines 4-5 carries both the adjudication and the explicit 296/21 edge delta, and the reviewed manifest carries 'acted fd26a89de1d: 7c22f86660997efbc3931af0aa1c448a53f0cf9e'.",
+    "goal": "the source node's goal is to repair the brute-force recorded-reference mismatch (brief item 1-4, gate at tests/test_contour_tree_sweep_bounds.py); this review covers only the commit gained since the review at 081f22e1f, and docs/evidence/fragments/contour-tree-topology-authority/brute-force-reference-capacity.html:4-5 records the coordinator's conditional ruling and states the edge-set delta the blocking finding fd26a89de1d asked for.",
+    "manifest": "read at the reviewed head; it carries baseline_suite (d246049f, 1 failure id) and after_suite (5d7d8a596, 0 failures) with logs whose summaries I read, measurement module and cwd, test_logs naming both review checks, and the 'acted fd26a89de1d' line; it now reads status in-progress because a later cleanup round is open, which is current run state rather than a defect of the reviewed commit.",
+    "write_paths": "the diff of d246049f..7c22f8666 changed only docs/evidence/fragments/contour-tree-topology-authority/brute-force-reference-capacity.html, which is inside the five declared write paths in the reviewed manifest's orientation_write_paths."
+  },
+  "justifications": {
+    "durability": "the fragment's numbers are guarded only by check_repair_fragment.py, which lives in the run directory and is referenced from no committed test, so an edit to docs/evidence/fragments/contour-tree-topology-authority/brute-force-reference-capacity.html:5 that restored wrong counts would leave the tree green.",
+    "evidence": "I recomputed from the run's wall-chain-audit.log the 18 per-fixture old-only nodes, wall counts, old-only edges (296), current-only edges (0 to 3 per row, 21 total) and the 296-21=275 net edge removal against 275 old-only nodes, and opened the cited representative pairs; the recorded check review-head-check.log exits 0 (PASS) while review-parent-check.log exits 1 on the parent fragment, so the check fires on the defect it guards.",
+    "fit": "the added paragraphs and the two new table columns follow the fragment's existing paragraph-plus-table idiom and use its <code> convention, though the prose at line 5 says 'historical-only'/'current-only' while the headers at line 7 say 'Old-only edges'/'Current-only edges'.",
+    "goal_fidelity": "docs/evidence/fragments/contour-tree-topology-authority/brute-force-reference-capacity.html:4-5 answers the blocking finding's two demands \u2014 a recorded adjudication and the edge-set difference stated explicitly \u2014 without reopening the substitution the earlier review questioned.",
+    "reuse": "the commit is documentation only and adds no function, class or module, so it forks no capability; the table and audit it cites are the ones the run already produced, and no repository owner exists for evidence-fragment verification at all.",
+    "scope_discipline": "git diff --stat 081f22e1f..7c22f8666 lists one path, docs/evidence/fragments/contour-tree-topology-authority/brute-force-reference-capacity.html, inside the declared write paths, and it touches no test, product module or figure."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source node's goal is to repair the brute-force recorded-reference mismatch (brief item 1-4, gate at tests/test_contour_tree_sweep_bounds.py); this review covers only the commit gained since the review at 081f22e1f, and docs/evidence/fragments/contour-tree-topology-authority/brute-force-reference-capacity.html:4-5 records the coordinator's conditional ruling and states the edge-set delta the blocking finding fd26a89de1d asked for.\nVERDICT done_when: the repair round's done-when asks that the answering commit address fd26a89de1d and that the manifest name it by id; the fragment at lines 4-5 carries both the adjudication and the explicit 296/21 edge delta, and the reviewed manifest carries 'acted fd26a89de1d: 7c22f86660997efbc3931af0aa1c448a53f0cf9e'.\nVERDICT write_paths: the diff of d246049f..7c22f8666 changed only docs/evidence/fragments/contour-tree-topology-authority/brute-force-reference-capacity.html, which is inside the five declared write paths in the reviewed manifest's orientation_write_paths.\nVERDICT manifest: read at the reviewed head; it carries baseline_suite (d246049f, 1 failure id) and after_suite (5d7d8a596, 0 failures) with logs whose summaries I read, measurement module and cwd, test_logs naming both review checks, and the 'acted fd26a89de1d' line; it now reads status in-progress because a later cleanup round is open, which is current run state rather than a defect of the reviewed commit.\nVERDICT diff: read 7c22f8666 against 081f22e1f commit by commit; one file, 21 insertions and 4 deleted table-columns replaced by 6, and every figure it adds reconciles with wall-chain-audit.log.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/contour-tree-topology-authority/brute-force-reference-capacity.html:4-5 answers the blocking finding's two demands \u2014 a recorded adjudication and the edge-set difference stated explicitly \u2014 without reopening the substitution the earlier review questioned.\nSCORE evidence: 17\nJUSTIFICATION evidence: I recomputed from the run's wall-chain-audit.log the 18 per-fixture old-only nodes, wall counts, old-only edges (296), current-only edges (0 to 3 per row, 21 total) and the 296-21=275 net edge removal against 275 old-only nodes, and opened the cited representative pairs; the recorded check review-head-check.log exits 0 (PASS) while review-parent-check.log exits 1 on the parent fragment, so the check fires on the defect it guards.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 081f22e1f..7c22f8666 lists one path, docs/evidence/fragments/contour-tree-topology-authority/brute-force-reference-capacity.html, inside the declared write paths, and it touches no test, product module or figure.\nSCORE durability: 13\nJUSTIFICATION durability: the fragment's numbers are guarded only by check_repair_fragment.py, which lives in the run directory and is referenced from no committed test, so an edit to docs/evidence/fragments/contour-tree-topology-authority/brute-force-reference-capacity.html:5 that restored wrong counts would leave the tree green.\nSCORE fit: 17\nJUSTIFICATION fit: the added paragraphs and the two new table columns follow the fragment's existing paragraph-plus-table idiom and use its <code> convention, though the prose at line 5 says 'historical-only'/'current-only' while the headers at line 7 say 'Old-only edges'/'Current-only edges'.\nSCORE reuse: 20\nJUSTIFICATION reuse: the commit is documentation only and adds no function, class or module, so it forks no capability; the table and audit it cites are the ones the run already produced, and no repository owner exists for evidence-fragment verification at all.\nFINDING docs/evidence/fragments/contour-tree-topology-authority/brute-force-reference-capacity.html:4 non-blocking: the adjudication that authorises replacing the recorded-reference pin is asserted in prose and checked only by check_repair_fragment.py in the run directory, which is committed nowhere, so a future reader cannot rerun the evidence and no in-tree test reddens if the fragment's numbers drift.\nFINDING docs/evidence/fragments/contour-tree-topology-authority/brute-force-reference-capacity.html:5 non-blocking: the sentence 'The current-only pairs bypass removed wall chains' is a per-fixture characterisation the audit does not record, since wall-chain-audit.log lists the removed and added vertex pairs without associating either with a chain; the claim is plausible for the compact diverted pair (2,253) but is unverified for the 16 remaining current-only pairs.\nFINDING docs/evidence/fragments/contour-tree-topology-authority/brute-force-reference-capacity.html:7 non-blocking: the new table headers read 'Old-only edges' and 'Current-only edges' while line 5's prose names the same quantities 'historical-only' and 'current-only', and the retained node column still reads 'Old-only nodes', so one table carries two vocabularies for one comparison.",
+  "review_run_id": "r-20261023T205414112858-review-of-brute-force-reference-capacity-7c22f8666099",
+  "reviewed_base_sha": "081f22e1f291aab0d5e46f56c6612df527b4527b",
+  "reviewed_head_sha": "7c22f86660997efbc3931af0aa1c448a53f0cf9e",
+  "reviewed_run_id": "r-20261023T180154346822-brute-force-reference-capacity",
+  "reviewer": {
+    "backend": "cloned",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 13,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T21:06:07+00:00",
+  "total": 105
+}

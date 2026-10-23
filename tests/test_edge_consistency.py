@@ -10,8 +10,13 @@ vanish at the stencil's second order.
 
 from __future__ import annotations
 
+import subprocess
+import sys
+from pathlib import Path
+
 import jax
 import numpy as np
+import pytest
 from scipy.constants import mu_0
 
 from nova.jax.config import configure_dtypes
@@ -20,7 +25,7 @@ from nova.equilibrium.analytic_single_null import (
     CerfonFreidbergSingleNull,
     cerfon_freidberg_single_null,
 )
-from nova.equilibrium.convention import TOTAL_FLUX_FACTOR
+from nova.equilibrium.convention import TOTAL_FLUX_FACTOR, toroidal_current_density
 from nova.imas.edge_consistency import (
     EDGE_BAND_RELATIVE_THRESHOLD,
     EDGE_BAND_WIDTH,
@@ -238,3 +243,85 @@ def test_band_residual_falls_at_the_stencil_second_order():
     whole_order = float(np.polyfit(np.log(spacings), np.log(whole_slice), 1)[0])
     assert 1.7 < band_order < 2.3
     assert 1.7 < whole_order < 2.3
+
+
+def test_band_forms_take_the_profile_current_of_the_band_as_denominator():
+    """A slice-wide denominator would flatter the edge; the band's own is pinned.
+
+    The band residual is a ratio, so substituting the slice-wide maximum of the
+    grid current changes its value without changing any physics.  This asserts
+    the measure's band forms use the local profile current, by reproducing the
+    band residual from first principles and showing a slice-wide denominator
+    gives a different number.
+    """
+
+    state = cerfon_freidberg_single_null()
+    size = IDS_GRID_SIZE
+    grid_r, grid_z, flux = _sample(state, size)
+    p_prime, ff_prime = _solovev_flux_functions(state)
+    psi_axis = TOTAL_FLUX_FACTOR * state.axis_flux
+    psi_boundary = TOTAL_FLUX_FACTOR * float(state.flux(state.x_point[None, :])[0])
+    psi_norm = (flux - psi_axis) / (psi_boundary - psi_axis)
+
+    mesh_r, _mesh_z = np.meshgrid(grid_r, grid_z)
+    grid_current = grid_current_density(flux, grid_r, grid_z)
+    profile_current = toroidal_current_density(
+        mesh_r, np.full_like(mesh_r, p_prime), np.full_like(mesh_r, ff_prime)
+    )
+    band = (psi_norm >= 1.0 - EDGE_BAND_WIDTH) & (psi_norm <= 1.0)
+    band &= np.isfinite(profile_current) & np.isfinite(grid_current)
+    residual = profile_current - grid_current
+
+    local = np.sqrt(np.mean((residual[band] / profile_current[band]) ** 2))
+    slice_wide = np.sqrt(
+        np.mean(
+            (residual[band] / np.max(np.abs(grid_current[np.isfinite(grid_current)])))
+            ** 2
+        )
+    )
+
+    result = _measure(state, size)
+
+    assert result.band_relative == pytest.approx(local)
+    assert slice_wide != pytest.approx(result.band_relative)
+
+
+# The module sets the working precision on entry and refuses an entry that is
+# still single precision, so the guard is exercised here rather than through the
+# imports above: this file and the IDS-route file both call configure_dtypes()
+# at import, and a guard that only fires on a fresh interpreter is unreachable
+# from a session that has already configured itself.
+_PRECISION_PROBE = """
+import numpy as np
+
+import jax
+
+from nova.imas.edge_consistency import edge_consistency
+
+radius = np.linspace(1.08, 2.30, 9)
+height = np.linspace(-1.10, 1.00, 17)
+flux = np.zeros((height.size, radius.size))
+zeros = lambda psi: np.zeros_like(psi)
+try:
+    edge_consistency(flux, radius, height, 0.0, 1.0, zeros, zeros)
+except RuntimeError as error:
+    print(f"refused: {error}")
+else:
+    print(f"extended precision: {jax.config.jax_enable_x64}")
+"""
+
+
+def test_the_measure_sets_extended_precision_on_a_fresh_entry():
+    """A fresh interpreter either has x64 enabled on entry or is refused."""
+
+    completed = subprocess.run(
+        [sys.executable, "-c", _PRECISION_PROBE],
+        capture_output=True,
+        text=True,
+        cwd=Path(__file__).resolve().parents[1],
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    assert (
+        "extended precision: True" in completed.stdout or "refused:" in completed.stdout
+    ), completed.stdout

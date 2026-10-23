@@ -18,6 +18,7 @@ matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.ticker import NullFormatter
 
 from nova.media.ink import DEFAULT_INK, trace_axes
 from nova.imas.edge_consistency import EDGE_BAND_RELATIVE_THRESHOLD
@@ -41,7 +42,7 @@ def main() -> None:
     state = fixture.cerfon_freidberg_single_null()
     spacings = np.array(
         [
-            (fixture.RADIAL_BOUNDS[1] - fixture.RADIAL_BOUNDS[0]) / (size - 1)
+            1.0e3 * (fixture.RADIAL_BOUNDS[1] - fixture.RADIAL_BOUNDS[0]) / (size - 1)
             for size in SIZES
         ]
     )
@@ -51,7 +52,9 @@ def main() -> None:
     fit = band[0] * (spacings / spacings[0]) ** order
 
     plt.style.use("data-ink")
-    figure, axes = plt.subplots(figsize=(31.1 / 2.54, 16.0 / 2.54), layout="constrained")
+    figure, axes = plt.subplots(
+        figsize=(31.1 / 2.54, 16.0 / 2.54), layout="constrained"
+    )
     trace_axes(axes, DEFAULT_INK)
     axes.set_xscale("log")
     axes.set_yscale("log")
@@ -73,6 +76,7 @@ def main() -> None:
         linewidth=2.4,
         linestyle="--",
         zorder=3,
+        label=f"fitted order {order:.2f}",
     )
     axes.axhline(
         EDGE_BAND_RELATIVE_THRESHOLD,
@@ -82,12 +86,10 @@ def main() -> None:
         zorder=2,
     )
 
-    axes.annotate(
-        f"fitted order {order:.2f}",
-        xy=(spacings[1], fit[1]),
-        xytext=(spacings[1] * 1.05, fit[1] * 0.45),
+    axes.legend(
+        frameon=False,
         fontsize=14,
-        color="#111111",
+        loc="lower right",
     )
     axes.annotate(
         f"threshold {EDGE_BAND_RELATIVE_THRESHOLD:.1e}",
@@ -98,7 +100,10 @@ def main() -> None:
         annotation_clip=False,
     )
 
-    axes.set_xlabel("radial grid spacing [m]", fontsize=16)
+    axes.set_xlabel("radial grid spacing [mm]", fontsize=16)
+    axes.set_xticks([5.0, 10.0, 20.0, 30.0, 40.0])
+    axes.set_xticklabels([f"{tick:g}" for tick in axes.get_xticks()])
+    axes.xaxis.set_minor_formatter(NullFormatter())
     axes.set_ylabel("band residual / profile current", fontsize=16)
     axes.tick_params(axis="both", which="both", labelsize=14)
     for label in axes.get_xticklabels() + axes.get_yticklabels():
@@ -107,7 +112,7 @@ def main() -> None:
     figure.savefig(OUTPUT)
     print(f"order={order:.4f}")
     for size, spacing, value in zip(SIZES, spacings, band):
-        print(f"size={size} spacing={spacing:.6f} band_relative={value:.6e}")
+        print(f"size={size} spacing={spacing:.3f} mm band_relative={value:.6e}")
     print(f"wrote {OUTPUT}")
 
 

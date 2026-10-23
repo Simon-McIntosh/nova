@@ -1,0 +1,315 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="dd-cocos-ingest">
+<meta name="plan-status" content="in-progress">
+<meta name="plan-evidence-for" content="dd-cocos-ingest">
+<meta name="plan-verifies" content="dd-cocos-ingest#s5">
+<meta name="plan-recorded-at" content="2026-10-23">
+<title>The edge-consistency measure on the conforming ITER sources | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+</head><body><main class="plan-doc">
+
+<section id="edge-consistency-table-scope">
+<h2>The edge-consistency measure on the conforming ITER sources</h2>
+<p id="edge-consistency-table-scope-state">The three forms of
+<code>nova/imas/edge_consistency.py</code> are reported for DINA 105052/1, DINA
+105069/3 and CORSICA 130506/6, each read through
+<code>PlasmaSource.from_imas</code> &mdash; the route whose every
+convention-bearing quantity passes through
+<code>nova.io.sourcemap.translate_equilibrium</code>, so a DD3 read leaves the
+reader in nova&rsquo;s internal COCOS 17. The two refused pulses, DINA
+<code>105014/1</code> and <code>105013/1</code>, are read through the same route
+and appear as refused rows with the digit their data contradicts.</p>
+</section>
+
+<section id="edge-consistency-table-route">
+<h3>The route is proved before the data are read</h3>
+<p id="edge-consistency-table-route-roundtrip">The analytic lower-single-null
+state is the instrument that tells a route defect from a data defect, because
+all three of its answers are known exactly. Written into an equilibrium IDS in a
+scratch database at DD 3 in the COCOS 11 sense a DD3 write carries and read back
+through the same route, the state returns the grid current integrating to
+<strong>+0.99491</strong> of its own <code>Ip</code>, the profile current
+integrating to <strong>+0.99830</strong>, and a band residual of
+<strong>5.8001e&minus;4</strong>, below
+<code>EDGE_BAND_RELATIVE_THRESHOLD = 1.0e&minus;3</code>. That is the analytic
+floor the measure&rsquo;s own record reports, so the route hands the measure the
+operands it needs.</p>
+<p id="edge-consistency-table-route-scaling">The two operand scalings follow
+from COCOS 11 and COCOS 17 sharing <code>e_Bp = 1</code>: the translator&rsquo;s
+factor is a sign flip on every psi-like and derivative-like row and no
+<code>2&pi;</code> enters. A first run that applied <code>2&pi;</code> to the map
+and <code>1/2&pi;</code> to the derivatives is what the round trip refused.
+Nothing else in the route was adjusted, and no sign was flipped to make a ratio
+come out positive.</p>
+<p id="edge-consistency-table-route-resample">The stored <code>profiles_2d</code>
+grid is not uniformly spaced while the structured-grid stencil is, so the map is
+resampled onto a uniform grid carrying the stored point counts over the stored
+extents &mdash; and it must be resampled with a cubic spline. A piecewise-linear
+interpolant has a discontinuous second derivative at every stored node, which is
+exactly what the stencil differentiates, and the round trip&rsquo;s band residual
+<b>grows</b> under refinement with it (<code>1.7163e&minus;1</code> at 65 points,
+<code>8.4353e&minus;1</code> at 129, <code>1.5573e0</code> at 257,
+<code>2.3824e0</code> at 513). With the spline it falls and plateaus at the
+state&rsquo;s own floor (<code>5.8001e&minus;4</code>, <code>1.7582e&minus;4</code>,
+<code>1.6165e&minus;4</code>, <code>1.8364e&minus;4</code>).</p>
+</section>
+
+<section id="edge-consistency-table-flux-sign">
+<h3>Where the minus one between the map and the flux functions comes from</h3>
+<p id="edge-consistency-table-flux-sign-files">The three sources put the grid
+current and the profile current anti-parallel, and three files from two codes
+doing the same thing points at a shared step rather than at three data defects,
+so the step was measured. Three checks on the stored file need no convention at
+all. The stored flux map&rsquo;s value at the magnetic axis equals the stored
+<code>psi_axis</code> to 1e&minus;4 relative (<code>0.999991</code>,
+<code>0.999948</code>, <code>1.000032</code>), so the map is the flux the globals
+describe. The stored one-dimensional flux runs the same way as the globals:
+<code>sign(psi[0] &minus; psi[end])</code> matches
+<code>sign(psi_boundary &minus; psi_axis)</code> on all three. And the stored
+<code>dpressure_dpsi</code> falls outward against that same flux ordering, which
+is a statement about pressure, not about COCOS: a derivative row stored in the
+opposite sense to the map it belongs with would make pressure rise outward. All
+three files are internally coherent, with <code>sigma_Bp = +1</code> implied by
+Sauter Eq. 23, which is the digit a DD 3 file carries.</p>
+<p id="edge-consistency-table-flux-sign-regressions">The map and the derivative
+rows were then regressed cell by cell over the plasma interior of one slice per
+source, once with each sign on the profile side, so the reading is not sorted by
+the answer it is given. The whole-slice integral cannot tell a single sign from
+scatter; the regression can, because a sign leaves the two fields collinear.</p>
+<table id="edge-consistency-table-flux-sign-table">
+<caption>One slice per source, plasma interior cells; the map side is the
+current the repo&rsquo;s Grad&ndash;Shafranov stencil reads from the flux map in
+each block&rsquo;s own flux.</caption>
+<thead><tr><th>source</th><th>slice</th><th>block</th><th>profile sign</th>
+<th>slope</th><th>correlation</th><th>residual / grid RMS</th></tr></thead>
+<tbody>
+<tr><td>DINA 105052/1</td><td>1086</td><td>file (COCOS 11)</td><td>&minus;2&pi;</td><td>&minus;0.9683</td><td>&minus;0.9934</td><td>0.0901</td></tr>
+<tr><td>DINA 105052/1</td><td>1086</td><td>file (COCOS 11)</td><td>+2&pi;</td><td>+0.9683</td><td>+0.9934</td><td>0.0901</td></tr>
+<tr><td>DINA 105052/1</td><td>1086</td><td>translated (COCOS 17)</td><td>&minus;2&pi;</td><td>&minus;0.9683</td><td>&minus;0.9934</td><td>0.0901</td></tr>
+<tr><td>DINA 105052/1</td><td>1086</td><td>translated (COCOS 17)</td><td>+2&pi;</td><td>+0.9683</td><td>+0.9934</td><td>0.0901</td></tr>
+<tr><td>DINA 105069/3</td><td>1863</td><td>file (COCOS 11)</td><td>&minus;2&pi;</td><td>&minus;0.9602</td><td>&minus;0.9928</td><td>0.0884</td></tr>
+<tr><td>DINA 105069/3</td><td>1863</td><td>file (COCOS 11)</td><td>+2&pi;</td><td>+0.9602</td><td>+0.9928</td><td>0.0884</td></tr>
+<tr><td>DINA 105069/3</td><td>1863</td><td>translated (COCOS 17)</td><td>&minus;2&pi;</td><td>&minus;0.9602</td><td>&minus;0.9928</td><td>0.0884</td></tr>
+<tr><td>DINA 105069/3</td><td>1863</td><td>translated (COCOS 17)</td><td>+2&pi;</td><td>+0.9602</td><td>+0.9928</td><td>0.0884</td></tr>
+<tr><td>CORSICA 130506/6</td><td>28</td><td>file (COCOS 11)</td><td>&minus;2&pi;</td><td>&minus;0.9061</td><td>&minus;0.9672</td><td>0.1605</td></tr>
+<tr><td>CORSICA 130506/6</td><td>28</td><td>file (COCOS 11)</td><td>+2&pi;</td><td>+0.9061</td><td>+0.9672</td><td>0.1605</td></tr>
+<tr><td>CORSICA 130506/6</td><td>28</td><td>translated (COCOS 17)</td><td>&minus;2&pi;</td><td>&minus;0.9061</td><td>&minus;0.9672</td><td>0.1605</td></tr>
+<tr><td>CORSICA 130506/6</td><td>28</td><td>translated (COCOS 17)</td><td>+2&pi;</td><td>+0.9061</td><td>+0.9672</td><td>0.1605</td></tr>
+</tbody></table>
+</section>
+
+<section id="edge-consistency-table-rows">
+<h3>The three conforming sources</h3>
+<p id="edge-consistency-table-rows-method">Each source is opened with
+<code>imas.DBEntry</code> at the Data Dictionary version it was written in,
+<code>homogeneous_time</code> is checked before any per-signal time is read, and
+every slice above 1 MA is measured; a source with more than twenty such slices is
+measured on a stated evenly spaced sample of 24. A row&rsquo;s grid is uniform
+with the stored point counts over the stored extents, the band width is
+<code>0.10</code> in normalised flux and the threshold is
+<code>1.0e&minus;3</code>. The full per-slice rows are in
+<code>table.json</code> under the run directory.</p>
+<table id="edge-consistency-table-summary">
+<caption>Slices above 1 MA in parentheses; band width 0.10 and threshold 1.0e&minus;3 on every row.</caption>
+<thead><tr><th>source</th><th>written DD</th><th>slices</th><th>scored grid</th>
+<th>band relative median</th><th>band relative max</th><th>band absolute median [A/m<sup>2</sup>]</th>
+<th>whole-slice median</th><th>above threshold</th>
+<th>grid current / I<sub>p</sub></th><th>profile current / I<sub>p</sub></th></tr></thead>
+<tbody>
+<tr><td>DINA 105052/1</td><td>3.38.1</td><td>24 of 2022</td><td>65 &times; 129, R 3.00&ndash;9.00 m, Z &minus;6.00&ndash;6.00 m</td><td>1.7326</td><td>4.7740e1</td><td>1.0185e5</td><td>7.6734e&minus;1</td><td>24 of 24</td><td>median 0.9999, 0.9736&ndash;1.0027</td><td>median &minus;1.1325, &minus;1.3838&ndash;0.7838</td></tr>
+<tr><td>DINA 105069/3</td><td>3.39.0</td><td>24 of 3575</td><td>65 &times; 129, R 3.00&ndash;9.00 m, Z &minus;6.00&ndash;6.00 m</td><td>1.7131</td><td>5.4548e1</td><td>1.2317e5</td><td>8.0558e&minus;1</td><td>24 of 24</td><td>median 1.0000, 0.9801&ndash;1.0019</td><td>median &minus;1.0930, &minus;2.5231&ndash;&minus;0.9519</td></tr>
+<tr><td>CORSICA 130506/6</td><td>3.41.0</td><td>24 of 55</td><td>65 &times; 129, R 2.75&ndash;8.90 m, Z &minus;5.49&ndash;5.51 m</td><td>7.9296</td><td>9.7896e15</td><td>1.4179e5</td><td>9.1771e&minus;1</td><td>24 of 24</td><td>median 0.9993, 0.9867&ndash;1.0004</td><td>median &minus;1.0952, &minus;1.1263&ndash;&minus;1.0180</td></tr>
+</tbody></table>
+<p id="edge-consistency-table-rows-bands">The band forms score between 111 and
+1163 cells of between 1243 and 3200 scored cells, so the band is the edge rather
+than the slice and it is not empty; a form whose cell set were empty would be
+<code>nan</code> rather than a small number. No source is imputed: a slice whose
+stored flux functions were absent would be reported as such.</p>
+</section>
+
+<section id="edge-consistency-table-refused">
+<h3>The two refused pulses</h3>
+<table id="edge-consistency-table-refused-table">
+<thead><tr><th>source</th><th>written DD</th><th>slices &gt; 1 MA</th><th>first refused slice</th><th>the digit its data contradicts</th></tr></thead>
+<tbody>
+<tr><td>DINA 105014/1</td><td>3.38.1</td><td>22</td><td>117</td><td>&sigma;<sub>Bp</sub> = &minus;1, &sigma;<sub>&rho;&theta;&phi;</sub> = +1 &mdash; the digits name COCOS 17, not the COCOS 11 a DD 3.38.1 file carries</td></tr>
+<tr><td>DINA 105013/1</td><td>3.38.1</td><td>20</td><td>116</td><td>&sigma;<sub>Bp</sub> = +1, &sigma;<sub>&rho;&theta;&phi;</sub> = &minus;1 &mdash; the digits name COCOS 15, not COCOS 11</td></tr>
+</tbody></table>
+<p id="edge-consistency-table-refused-note">Both are refused by
+<code>translate_equilibrium</code> by name, stating the DD version, the expected
+convention and the measured digits, before any slice is built. Neither pulse
+reaches the measure, so neither contributes a row to the table above.</p>
+</section>
+
+<section id="edge-consistency-table-recommendation">
+<h3>Recommendation for the <code>iter-passive-plasma-circuit</code> &sect;6 reference</h3>
+<p id="edge-consistency-table-recommendation-rests">This measure does not
+support keeping CORSICA 130506/6 as the &sect;6 reference. Its band-relative
+median is <strong>7.93</strong>, the largest of the three, its maximum is
+<strong>9.79e15</strong> on one slice, and it clears the threshold on
+<strong>24 of 24</strong> sampled slices; DINA 105052/1 has the smallest median
+on all three forms (<strong>1.73</strong> band relative, <strong>0.767</strong>
+whole slice) and the most stable integral current check. Given that every source
+clears the threshold on every slice, the recommendation is to <b>not</b> settle
+&sect;6 on the strength of edge consistency alone; if the section needs the
+measure to choose, DINA 105052/1 is the better candidate and CORSICA 130506/6 is
+the worst of the three.</p>
+<p id="edge-consistency-table-recommendation-provisional">This recommendation is
+<strong>provisional</strong>, and no reference is chosen on this table. The lead
+ruled on 2026-10-23 that nova&rsquo;s flux functions are to be made COCOS 17 once
+a separate node has proved the COCOS 17 relation, and that the &sect;6 reference
+is decided after a re-measure on the corrected sign, with every source&rsquo;s
+COCOS identified from its own data because DINA is not sign-trustworthy. The
+ranking above is therefore a measurement taken through the convention this
+repository currently applies, reported as such rather than as a verdict on the
+sources; when the relation is proved and the flux functions are COCOS 17, this
+table is to be re-measured and the choice of &sect;6 made on those numbers. The
+measured values below stand unchanged.</p>
+<p id="edge-consistency-table-recommendation-rests-on">What the recommendation
+rests on: the operand scaling, which the analytic IDS round trip settles at three
+exact answers rather than by assertion; the grid current, whose integral over
+each sampled slice lies between <strong>0.9736</strong> and <strong>1.0027</strong>
+of the slice&rsquo;s own <code>Ip</code> on DINA 105052/1, 0.9801 and 1.0019 on
+DINA 105069/3, and 0.9867 and 1.0004 on CORSICA 130506/6 &mdash; a worst
+deviation of 2.64 per cent, on one DINA 105052/1 slice &mdash; which is enough to
+show the map side to be the sound one, carrying the stored <code>Ip</code> at the
+right magnitude and sign, and not enough to claim it reproduces that current to a
+fraction of a per cent; and the threshold, fixed on the analytic state before any
+IDS row was read.</p>
+<p id="edge-consistency-table-recommendation-convention">Which sign the
+operator assumes, stated rather than implied: <code>nova.equilibrium.convention</code>
+pins <code>j<sub>&phi;</sub> = &minus;2&pi;(R p&prime; + FF&prime;/(&mu;<sub>0</sub>R))</code>
+beside <code>&Delta;<sup>&star;</sup>&Phi; = &minus;2&pi;&mu;<sub>0</sub>R j<sub>&phi;</sub></code>
+and <code>&Phi; = 2&pi;&psi;</code>, so its <code>p&prime;</code> and
+<code>FF&prime;</code> are derivatives against the <i>negated</i> flux
+(<code>p&prime; = &minus;dp/d&Phi;</code>). The map side satisfies that pair and the
+flux functions do not, and the map side is the one anchored outside nova: it
+integrates to the slice&rsquo;s own signed <code>I<sub>p</sub></code> between 0.9736
+and 1.0027 of it on DINA 105052/1, 0.9801 and 1.0019 on DINA 105069/3, and 0.9867
+and 1.0004 on CORSICA 130506/6 (worst deviation 2.64 per cent), and
+<code>&int;j<sub>&phi;</sub> dA = I<sub>p</sub></code>
+holds whatever convention labels the flux.</p>
+<p id="edge-consistency-table-recommendation-site">So the <code>&minus;1</code>
+is a sign chain, not a datum, and it is one site rather than the translation: the
+raw and the translated regressions agree to every printed digit, which is what a
+uniform flip of both fields looks like, and the translator&rsquo;s own factor for a
+flux-derivative row is the exact reciprocal of the flux factor, so it is
+mathematically self-consistent. The outlier is the profile side of
+<code>nova/equilibrium/convention.py</code>, whose leading minus makes the
+profile current anti-parallel to the map current on data it reads from the Data Dictionary.
+It disagrees with <code>nova/imas/profiles.py</code>, which multiplies the same
+<span class="mono">p_prime</span> and <span class="mono">ff_prime</span> the same reader
+delivers by <code>+2&pi;</code> with no minus and is the sign that is collinear
+with the map here. That file is outside this node&rsquo;s write scope, and the
+change is repo-wide (it also feeds <span class="mono">grad_shafranov_source</span>
+and every forward solve built on it), so it is named rather than patched. No
+sign was flipped anywhere in this node to make a ratio come out positive; the
+table below is reported as the module measures it, with the other sense measured
+beside it.</p>
+<p id="edge-consistency-table-recommendation-overturn">What it rests on and what
+would overturn it: the diagnosis rests on four regressions that are mirror images
+to every printed digit between the raw and translated files, on collinearity of
+&minus;0.99 between the two current fields, and on three checks inside the file
+that need no convention at all &mdash; the map at the magnetic axis equalling
+<code>psi_axis</code> to 1e&minus;4, the one-dimensional flux running the same way
+as the globals, and pressure falling outward against the stored ordering. A
+&minus;1 that were a datum rather than a sign would scatter those fields instead
+of leaving them collinear, and would have to have happened identically in DINA
+and CORSICA. What would overturn the diagnosis is the opposite reading of the
+Data Dictionary&rsquo;s own definition of <code>dpressure_dpsi</code>: if the DD means
+it as a derivative of the <i>negated</i> flux, then the reader should negate these
+two rows and the convention module is right as written. That is a reading of the
+standard, not a measurement, and the lead keeps it: the ruling of 2026-10-23
+adopts COCOS 17 for nova&rsquo;s flux functions and makes the change conditional on
+a separate node proving the COCOS 17 relation from the data. The check this node
+can offer on that proof is the one above: whichever way that relation settles,
+the sample it is proved on must not be one whose flux functions were built under
+the answer.</p>
+<p id="edge-consistency-table-recommendation-corrected">On the corrected numbers,
+the table was re-measured in the sense that is collinear with the map, one call to
+the same measure per slice with the flux functions negated, so nothing is
+inferred:</p>
+<table id="edge-consistency-table-sensitivity-table">
+<caption>Same 24 slices per source. <code>whole slice</code> is the form whose
+denominator is the slice maximum and is well conditioned; <code>band relative</code>
+divides by the band&rsquo;s own profile current.</caption>
+<thead><tr><th>source</th><th>sense</th><th>band relative median</th>
+<th>band relative max</th><th>whole slice median</th><th>above threshold</th></tr></thead>
+<tbody>
+<tr><td>DINA 105052/1</td><td>as the module measures</td><td>1.7326</td><td>4.7740e1</td><td>0.7673</td><td>24 of 24</td></tr>
+<tr><td>DINA 105052/1</td><td>collinear with the map</td><td>0.7064</td><td>4.7794e1</td><td><strong>0.0680</strong></td><td>24 of 24</td></tr>
+<tr><td>DINA 105069/3</td><td>as the module measures</td><td>1.7131</td><td>5.4548e1</td><td>0.8056</td><td>24 of 24</td></tr>
+<tr><td>DINA 105069/3</td><td>collinear with the map</td><td>0.7205</td><td>5.4465e1</td><td><strong>0.0466</strong></td><td>24 of 24</td></tr>
+<tr><td>CORSICA 130506/6</td><td>as the module measures</td><td>7.9296</td><td>9.7896e15</td><td>0.9177</td><td>24 of 24</td></tr>
+<tr><td>CORSICA 130506/6</td><td>collinear with the map</td><td>7.6001</td><td>9.7896e15</td><td><strong>0.0803</strong></td><td>24 of 24</td></tr>
+</tbody></table>
+<figure id="edge-consistency-table-band-figure">
+<img src="/nova/figures/dd-cocos-ingest/edge-consistency-table/edge-consistency-band-residual.svg"
+ alt="Band-relative residual against time slice index for the three conforming sources, in both flux-function senses, with the declared threshold marked.">
+<figcaption>Band-relative residual on every sampled slice of the three
+sources, as the module measures it and with the flux functions negated, which is
+the sense collinear with the flux map. The dotted line is
+<code>EDGE_BAND_RELATIVE_THRESHOLD = 1.0e&minus;3</code>. Every mark on every
+panel sits above it in both senses, so the threshold separates no slice from any
+other; the CORSICA panel additionally shows three slices at 1e12&ndash;1e16, where
+the band&rsquo;s own profile current passes through zero.</figcaption>
+</figure>
+<p id="edge-consistency-table-recommendation-corrected-reading">Two things
+survive the correction and one does not. CORSICA 130506/6 is the worst of the
+three on both forms in both senses, and its maximum of <code>9.79e15</code> is
+unchanged, so it is the worst of the three on this measure. Which DINA
+pulse is best does not survive: on the corrected whole-slice form DINA 105069/3
+leads (<strong>0.0466</strong>, against 0.0680 for 105052/1), the reverse of the
+as-measured ordering, so the earlier preference for 105052/1 was the sign rather
+than the physics. And the band form does not rank at all: it stays between 0.71
+and 7.60 in the corrected sense and clears
+<code>EDGE_BAND_RELATIVE_THRESHOLD = 1.0e&minus;3</code> on 24 of 24 slices for
+every source in both senses, because its denominator is the band&rsquo;s own
+profile current, which is roughly a tenth of the slice maximum there, while the
+numerator is 5 to 8 per cent of that maximum. The measure&rsquo;s threshold was fixed
+on an analytic state whose band current never approaches zero; on stored slices
+it separates nothing. The recommendation to the lead is therefore: keep the
+whole-slice form as the ranking form, re-measure it once the sign is settled, and
+treat the band-relative threshold as untested on real data.</p>
+</section>
+
+<section id="edge-consistency-table-gate">
+<h3>The gate</h3>
+<p id="edge-consistency-table-gate-arms">Every test file that imports the changed
+module was run at the head and again with the changed files swapped back to the
+base revision, each in a fresh process with its own basetemp. The base arm
+reports <strong>14 passed</strong> and the head arm <strong>15 passed</strong>,
+the difference being the band-denominator test added here; no failure is added
+at the head.</p>
+<table id="edge-consistency-table-gate-table">
+<thead><tr><th>arm</th><th>revision</th><th>files</th><th>result</th></tr></thead>
+<tbody>
+<tr><td>base</td><td><code>d246049f5</code></td><td><code>test_edge_consistency.py</code>, <code>test_parity_chain.py</code>, <code>test_map_extraction.py</code></td><td>14 passed</td></tr>
+<tr><td>head</td><td><code>b0c1b3b66</code></td><td>the same three</td><td>15 passed</td></tr>
+<tr><td>head</td><td><code>b0c1b3b66</code></td><td><code>test_edge_consistency_ids_route.py</code></td><td>2 passed</td></tr>
+<tr><td>head</td><td><code>e1328c078</code></td><td><code>test_edge_consistency.py</code></td><td>8 passed</td></tr>
+<tr><td>head</td><td><code>e1328c078</code></td><td><code>test_edge_consistency_ids_route.py</code></td><td>2 passed</td></tr>
+</tbody></table>
+<p id="edge-consistency-table-gate-control">The negative control mutates the
+module under test, not the test: with the profile-current operand replaced by the
+grid current, a change of one expression in
+<code>nova/imas/edge_consistency.py</code>, the measure compares the flux map with
+itself and the arm that asserts the injected edge-band perturbation is reported inconsistent
+goes red (<code>1 failed, 1 passed</code>, <code>EXIT=1</code>, failing
+<code>test_the_ids_route_reports_an_edge_band_perturbation</code>), while the
+unperturbed arm still passes. The control was run at revision
+<code>e1328c078</code>, the mutation was reverted, and the worktree is clean at
+that revision; the log records the revision, the mutation diff and the literal
+command.</p>
+<p id="edge-consistency-table-gate-open">What this node did not reach: the
+figure of band-relative residual against time for the three sources, which the
+brief left optional and the table above already carries numerically. The review
+item that the measure&rsquo;s convergence figure carry a labelled measured series is
+closed (both series are named in a legend clear of the data, and the render was
+inspected), and so is the bounded sign check, whose four regressions and three
+convention-free checks are in the section above.</p>
+</section>
+
+</main></body></html>

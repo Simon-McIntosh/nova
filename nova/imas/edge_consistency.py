@@ -35,10 +35,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Callable
 
+import jax
 import numpy as np
 
 from nova.equilibrium.convention import toroidal_current_density
 from nova.equilibrium.map_extraction import apply_delta_star
+from nova.jax.config import configure_dtypes
 
 __all__ = [
     "EDGE_BAND_RELATIVE_THRESHOLD",
@@ -136,6 +138,12 @@ def edge_consistency(
     """
 
     flux = np.asarray(flux, dtype=float)
+    # The grid operator is assembled in jnp, so the working precision is set on
+    # entry rather than inherited: at single precision the cancellation inside
+    # Delta* leaves a round-off floor above the residual this measure reports.
+    configure_dtypes()
+    if not jax.config.jax_enable_x64:
+        raise RuntimeError("edge_consistency needs double precision arithmetic")
     span = float(psi_boundary) - float(psi_axis)
     if span == 0.0:
         raise ValueError("axis and boundary flux must differ")

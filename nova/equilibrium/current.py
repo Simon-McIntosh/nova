@@ -217,6 +217,79 @@ def _inside_loop(points, polygon, size):
     return jnp.sum(crosses, axis=-1) % 2 == 1
 
 
+DISK_ARC_SEGMENTS = 32
+"""Half-plane count the effective disk is clipped with.
+
+The disk enters the booking as the intersection of this many half-planes
+bounding a regular polygon inscribed in the circle, so the boundary between the
+normal-form portion inside the disk and the ordinary cut outside it is a set of
+explicit support edges that move with the disk centre. Weighting quadrature
+nodes by a radial test instead makes the booked integral jump whenever a node
+changes side of the boundary, and that jump keeps its size while the step
+shrinks, which is why a remainder built on it stops falling with the step.
+
+The inscribed edge lies short of the circle by ``radius * (1 - cos(pi /
+segments))``, about 0.48 per cent of the radius at this count. The two pieces
+still tile the ring set exactly, because the exterior piece is the whole ring
+set with the clipped piece subtracted rather than a second clip.
+"""
+
+
+def _disk_clip_planes(disk_centre, radius, segments):
+    """Return the inward normals and offsets bounding the inscribed disk."""
+    angle = 2.0 * jnp.pi * (jnp.arange(segments) + 0.5) / segments
+    normal = jnp.stack((jnp.cos(angle), jnp.sin(angle)), axis=-1)
+    return normal, radius * jnp.cos(jnp.pi / segments)
+
+
+def _disk_clipped_triangles(
+    vertices, count, disk_centre, radius, segments=DISK_ARC_SEGMENTS
+):
+    """Clip every fan triangle of every ring to the disk, as explicit edges.
+
+    Each ring is fanned from its first vertex and each triangle is clipped by
+    the ``segments`` half-planes in turn. A clipped triangle is convex and
+    carries at most ``3 + segments`` vertices, every one of them a support
+    vertex: a ring corner, an intersection of a ring edge with a clip line, or
+    one of the endpoints the clip lines themselves contribute. No quadrature
+    node is selected or weighted by a radial test anywhere in this route.
+    """
+    capacity = vertices.shape[1]
+    triangle_count = capacity - 2
+    slots = jnp.arange(1, capacity - 1)
+    first = jnp.broadcast_to(vertices[:, :1], (len(vertices), triangle_count, 2))
+    subject = jnp.stack((first, vertices[:, slots], vertices[:, slots + 1]), axis=-2)
+    live = slots[None, :] + 1 < count[:, None]
+    width = 3 + segments
+    order = jnp.arange(width)
+    padded = jnp.concatenate(
+        (subject, jnp.zeros(subject.shape[:-2] + (segments, 2), subject.dtype)),
+        axis=-2,
+    )
+    live_count = jnp.where(live, 3, 0).astype(jnp.int32)
+    normal, bound = _disk_clip_planes(disk_centre, radius, segments)
+    for step in range(segments):
+        line = normal[step]
+        distance = (padded - disk_centre) @ line - bound
+        following = (order + 1) % jnp.maximum(live_count[..., None], 1)
+        ahead = jnp.take_along_axis(padded, following[..., None], axis=-2)
+        next_distance = (ahead - disk_centre) @ line - bound
+        live_edge = order < live_count[..., None]
+        keep = live_edge & (distance <= 0.0)
+        entering = (distance > 0.0) & (next_distance <= 0.0)
+        gap = distance - next_distance
+        fraction = distance / jnp.where(gap != 0.0, gap, 1.0)
+        meeting = padded + fraction[..., None] * (ahead - padded)
+        candidates = jnp.concatenate((keep, entering), axis=-1)
+        values = jnp.concatenate((padded, meeting), axis=-2)
+        position = jnp.cumsum(candidates, axis=-1) - candidates
+        key = jnp.where(candidates, position, 2 * width)
+        chosen = jnp.argsort(key, axis=-1)[..., :width]
+        padded = jnp.take_along_axis(values, chosen[..., None], axis=-2)
+        live_count = jnp.sum(candidates, axis=-1).astype(jnp.int32)
+    return padded, live_count
+
+
 def _disk_split_moments(
     rings,
     counts,
@@ -236,11 +309,13 @@ def _disk_split_moments(
     """Signed fan moments restricted to the disk interior or exterior.
 
     A cut cell books one binary support, ``(C ∩ D ∩ N) ∪ (C ∩ Dᶜ ∩ Q)``. The
-    restriction to each half of the effective disk is applied by weighting the
-    shared clip-quadrature nodes, so both portions are integrated on one node
-    set with one density contract and no copied fan reduction. The exchanged
-    area vanishes with the node spacing, which is what makes the booking
-    continuous across a disk entry or exit.
+    disk split is taken on the geometry and not on the quadrature: the fan
+    triangles of one ring set are clipped by the disk boundary itself and the
+    clipped pieces are integrated through the shared clip-quadrature owner. The
+    exterior piece is the whole ring set with the clipped piece subtracted, so
+    the two tile the ring set exactly whatever the disk does, and both are
+    continuous in ``disk_centre`` with a derivative that carries the boundary's
+    motion.
 
     ``confined`` carries ``(polygon, size, live)`` for the closed normal-form
     component the read admits, already clipped to this cell. When it is given
@@ -256,37 +331,63 @@ def _disk_split_moments(
     """
     live = counts >= 3
     centroids = jnp.broadcast_to(centre, (rings.shape[0], 2))
-    points, weights = _quadrature_from_arrays(
+    polygon = None
+    if confined is not None:
+        polygon, size, confined_live = confined
+    else:
+        size, confined_live = 0, False
+
+    def book(points, weights):
+        mask = jnp.ones(points.shape[:-1], dtype=bool)
+        if polygon is not None:
+            mask = jnp.where(
+                confined_live, _inside_loop(points, polygon, size), mask
+            )
+        local = (points - centre) / pitch
+        x, y = local[..., 0], local[..., 1]
+        flux = (
+            coefficient[0]
+            + coefficient[1] * x
+            + coefficient[2] * y
+            + coefficient[3] * x * x
+            + coefficient[4] * x * y
+            + coefficient[5] * y * y
+        )
+        span = boundary_flux - axis_flux
+        normalized = (flux - axis_flux) / jnp.where(span != 0, span, 1.0)
+        density = profile.current_density(points[..., 0], normalized)
+        weight = jnp.where(mask, weights, 0.0)
+        displacement = points - centre
+        return jnp.stack(
+            (
+                jnp.sum(weight * density),
+                jnp.sum(weight * density * displacement[..., 0]),
+                jnp.sum(weight * density * displacement[..., 1]),
+            )
+        )
+
+    whole_points, whole_weights = _quadrature_from_arrays(
         rings, counts, centroids, live, signed=True
     )
-    local = (points - centre) / pitch
-    x, y = local[..., 0], local[..., 1]
-    flux = (
-        coefficient[0]
-        + coefficient[1] * x
-        + coefficient[2] * y
-        + coefficient[3] * x * x
-        + coefficient[4] * x * y
-        + coefficient[5] * y * y
+    whole = book(whole_points, whole_weights)
+    if force_whole:
+        return whole
+    clipped, clipped_live = _disk_clipped_triangles(
+        rings, counts, disk_centre, radius
     )
-    span = boundary_flux - axis_flux
-    normalized = (flux - axis_flux) / jnp.where(span != 0, span, 1.0)
-    density = profile.current_density(points[..., 0], normalized)
-    radial = jnp.sum((points - disk_centre) ** 2, axis=-1) <= radius**2
-    keep = jnp.where(keep_inside, radial, ~radial)
-    if confined is not None:
-        polygon, size, live = confined
-        keep = jnp.where(live, keep & _inside_loop(points, polygon, size), keep)
-    keep = jnp.where(force_whole, True, keep)
-    weight = jnp.where(keep, weights, 0.0)
-    displacement = points - centre
-    return jnp.stack(
-        (
-            jnp.sum(weight * density),
-            jnp.sum(weight * density * displacement[..., 0]),
-            jnp.sum(weight * density * displacement[..., 1]),
-        )
+    flat = clipped.reshape(-1, clipped.shape[-2], 2)
+    fan_centre = jnp.repeat(centroids, clipped.shape[1], axis=0)
+    inside_points, inside_weights = _quadrature_from_arrays(
+        flat,
+        clipped_live.reshape(-1),
+        fan_centre,
+        clipped_live.reshape(-1) > 0,
+        signed=True,
     )
+    inside = book(inside_points, inside_weights)
+    if keep_inside:
+        return inside
+    return whole - inside
 
 
 def composite_cut_moments(

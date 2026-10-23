@@ -77,8 +77,18 @@ def _conic_rings(vertices, count, centre, pitch, coefficient, selected, segments
     lower, upper = topology._vertical_polygon_interval(local, count, x)
     quadratic = coefficient[5]
     linear = coefficient[2] + coefficient[4] * x
+    # Stationarity in y divides the conic's linear term by its quadratic term, and
+    # for a conic level with no y tilt both are numerical residue of the coefficient
+    # product. Their ratio is a roundoff-scaled value whose derivative is not, so it
+    # enters the ring as a spurious tangent that the booked moments do not see. Read
+    # the term under the same roundoff threshold as the root solver: below it the
+    # conic is untilted and its vertical extremum is the untilted stationarity
+    # point, which the y-independent form carries exactly.
+    scale = jnp.maximum(jnp.abs(quadratic), jnp.abs(linear))
+    tilted = jnp.abs(linear) > 32.0 * jnp.finfo(x.dtype).eps * scale
+    stationarity = -0.5 * jnp.where(tilted, linear, 0.0)
     extremum = jnp.clip(
-        -0.5 * linear / jnp.where(quadratic != 0.0, quadratic, 1.0), lower, upper
+        stationarity / jnp.where(quadratic != 0.0, quadratic, 1.0), lower, upper
     )[..., None]
     bottom = jnp.where(present, bottom, extremum)
     top = jnp.where(present, top, extremum)

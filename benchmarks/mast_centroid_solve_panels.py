@@ -420,7 +420,7 @@ def _wall_arrays(units: tuple[Any, ...]) -> dict[str, np.ndarray]:
         offsets.append(offsets[-1] + radius[-1].size)
     return {
         "wall_radius": np.concatenate(radius),
-        "wall_height": np.concatenate(height),
+        "wall_z": np.concatenate(height),
         "wall_offsets": np.asarray(offsets, dtype=int),
         "wall_closed": np.asarray([bool(unit.closed) for unit in units]),
         "wall_kinds": np.asarray([str(unit.kind) for unit in units]),
@@ -433,7 +433,7 @@ def _restore_units(data: Any) -> tuple[Any, ...]:
 
     offsets = np.asarray(data["wall_offsets"], dtype=int)
     radius = np.asarray(data["wall_radius"], dtype=float)
-    height = np.asarray(data["wall_height"], dtype=float)
+    height = np.asarray(data["wall_z"], dtype=float)
     closed = np.asarray(data["wall_closed"], dtype=bool)
     kinds = [str(value) for value in np.asarray(data["wall_kinds"])]
     return tuple(

@@ -5,8 +5,8 @@ Each panel draws one frame of the committed MAST twelve-row bank or the
 five-frame DIII-D demonstration route as a single poloidal scene: full-map
 flux contours, the governed wall, the magnetic axis, every qualified X-point
 with out-of-vessel candidates drawn distinctly rather than dropped, the chosen
-boundary (Nova closed surface) beside the EFIT reference surface, and the
-hysteretic wall-shadow mask drawn as shaded wall segments.
+boundary (Nova closed surface) beside the EFIT reference surface, and a
+topological private-wall proxy drawn as shaded wall segments.
 
 The purpose is to make the class of defect that the limited-boundary
 investigation spent the whole sprint chasing visible in one glance: the atlas
@@ -36,16 +36,12 @@ containment-filtered, so both saddles of a diverted frame are visible and
 distinguished by fill rather than by absence. The receipt keeps the
 out-of-vessel member count beside draw_nulls' own tallies.
 
-The wall shadow is the production wall_height_shadow_mask hysteretic rule run
-on the committed axis, admitted saddle and finite X candidates; the
-connectivity-private term is passed as an empty mask because the committed
-operands do not persist the per-wall-node private flux classification, so the
-drawn shadow is the saddle-height band only. That deviation is stated in the
-evidence document.
+The committed operands do not persist the per-wall-node private flux mask.
+Where cell labels are present, their nearest-cell private status is drawn as
+a visual proxy, with that qualification recorded in the receipt.
 
 Run on a debug partition with a per-job TMPDIR so the compilation cache cannot
-collide (the render itself is matplotlib-only; the shadow rule is one eager
-kernel):
+collide:
     srun --partition=<machine>_debug --time=00:59:00 --cpus-per-task=2 \
         bash -lc 'export TMPDIR=/tmp; \
           UV_PROJECT_ENVIRONMENT=~/Code/nova/.venv PYTHONPATH=$PWD \
@@ -71,7 +67,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.collections import LineCollection
 
-from nova.equilibrium.connectivity_boundary import wall_height_shadow_mask
 from nova.equilibrium.domain import PlasmaDomain
 from nova.equilibrium.wall_mask import inside_polygon
 from nova.equilibrium import reduced_newton
@@ -135,25 +130,12 @@ def _resolve_raster(
     return radius, height, values.T
 
 
-def _geometry_hysteresis(
-    wall: np.ndarray, radius: np.ndarray, height: np.ndarray
-) -> tuple[float, float]:
-    """Return the geometry-derived wall-height band and X qualification radius.
-
-    These mirror the operator constants in nova.equilibrium.forward_operator:
-    the hysteresis is a quarter of the smallest positive wall-height step and
-    the qualification distance is 1.5 times the largest grid step.
-    """
-    wall_heights = np.unique(np.asarray(wall[:, 1]))
-    steps = np.diff(wall_heights)
-    positive = steps[steps > 0.0]
-    hysteresis = 0.25 * float(np.min(positive)) if positive.size else float("inf")
+def _qualification_distance(radius: np.ndarray, height: np.ndarray) -> float:
+    """Return the operator's X-candidate qualification distance."""
     radial = np.diff(np.unique(np.asarray(radius)))
     vertical = np.diff(np.unique(np.asarray(height)))
     grid_steps = np.concatenate((radial[radial > 0.0], vertical[vertical > 0.0]))
-    if not grid_steps.size:
-        return hysteresis, 0.0
-    return hysteresis, 1.5 * float(np.max(grid_steps))
+    return 1.5 * float(np.max(grid_steps)) if grid_steps.size else 0.0
 
 
 def _distinct_candidates(
@@ -207,62 +189,14 @@ def _qualified_x_points(
 
 def _wall_shadow(
     wall: np.ndarray,
-    axis: np.ndarray,
-    admitted_x: np.ndarray,
-    qualified_x: np.ndarray,
-    hysteresis: float,
-    qualification_distance: float,
-    cells: np.ndarray,
-    domain_labels: np.ndarray,
-) -> tuple[np.ndarray, np.ndarray]:
-    """Return the per-wall-node masks (height bracket, production shadow).
-
-    The production shadow rule is ``proposed & private_wall``, and the
-    committed operands persist neither the per-wall-node private flux nor a
-    raster carrying the private-flux cells on the MAST rows, so two honest
-    quantities are drawn. The dark band is the production mask with the
-    connectivity-private term recovered from the committed domain labels where
-    they exist (a wall node whose nearest grid cell is labelled PRIVATE_FLUX);
-    wherever that term is absent the production shadow reads empty, which is the
-    sprint-wide census result the atlas exists to show. The light band is the
-    visual X-point height bracket --- the wall arc beyond the lower and upper
-    qualified saddle heights --- labelled as a footprint, not a shadowed-node
-    claim: it shows where the excluded band would lie without pretending the
-    per-node private mask survived into the store.
-    """
-    if qualified_x.shape[0] == 0 or not np.all(np.isfinite(axis[:2])):
-        return np.zeros(wall.shape[0], dtype=bool), np.zeros(wall.shape[0], dtype=bool)
-    if domain_labels is not None and cells is not None:
-        nearest = _nearest_cell(domain_labels, cells, wall)
-        private = nearest == int(PlasmaDomain.PRIVATE_FLUX)
-    else:
-        private = np.zeros(wall.shape[0], dtype=bool)
-    primary = (
-        np.asarray(admitted_x[:2], dtype=float)
-        if np.all(np.isfinite(admitted_x[:2]))
-        else qualified_x[0][:2]
-    )
-    shadow = wall_height_shadow_mask(
-        wall[:, 1],
-        axis[1],
-        primary,
-        qualified_x[:, :2],
-        jnp.asarray(private, dtype=bool),
-        jnp.zeros(wall.shape[0], dtype=bool),
-        hysteresis,
-        qualification_distance,
-    )
-    finite_heights = np.asarray(qualified_x[:, 1], dtype=float)[
-        np.all(np.isfinite(qualified_x[:, :2]), axis=1)
-    ]
-    if finite_heights.size:
-        extreme = float(np.max(np.abs(finite_heights - axis[1])))
-    else:
-        extreme = 0.0
-    band = (wall[:, 1] < axis[1] - extreme - hysteresis) | (
-        wall[:, 1] > axis[1] + extreme + hysteresis
-    )
-    return band, np.asarray(shadow, dtype=bool)
+    cells: np.ndarray | None,
+    domain_labels: np.ndarray | None,
+) -> np.ndarray:
+    """Approximate private wall nodes from committed nearest-cell labels."""
+    if domain_labels is None or cells is None:
+        return np.zeros(wall.shape[0], dtype=bool)
+    nearest = _nearest_cell(domain_labels, cells, wall)
+    return nearest == int(PlasmaDomain.PRIVATE_FLUX)
 
 
 def _nearest_cell(
@@ -385,7 +319,7 @@ def _panel(
     efit_lcfs = np.asarray(store[f"{prefix}efit_lcfs"], dtype=float).reshape(-1, 2)
     efit_axis = np.asarray(store[f"{prefix}efit_axis"], dtype=float).reshape(-1)[:2]
     efit_x = np.asarray(store[f"{prefix}efit_x"], dtype=float).reshape(-1, 2)
-    hysteresis, qualification = _geometry_hysteresis(wall, radius, height)
+    qualification = _qualification_distance(radius, height)
     qualified_x = _qualified_x_points(x_candidates, admitted_x, efit_x, qualification)
     label = (
         np.asarray(store[f"{prefix}domain_labels"])
@@ -410,10 +344,7 @@ def _panel(
         style=DEFAULT_INK,
         linewidth=0.5,
     )
-    band, shadow = _wall_shadow(
-        wall, axis, admitted_x, qualified_x, hysteresis, qualification, cells, label
-    )
-    band_segments = _draw_shadowed_wall(axes, wall, band, alpha=0.14, width=9.0)
+    shadow = _wall_shadow(wall, cells, label)
     shadow_segments = _draw_shadowed_wall(axes, wall, shadow, alpha=0.45, width=6.0)
     poloidal.draw_wall(axes, wall[:, 0], wall[:, 1], style=DEFAULT_INK, linewidth=1.6)
     if np.all(np.isfinite(efit_lcfs)) and efit_lcfs.size >= 3:
@@ -542,8 +473,6 @@ def _panel(
             "admitted_x_fill": "filled",
             "other_x_fill": "hollow",
         },
-        "shadow_band_wall_nodes": int(np.sum(band)),
-        "shadow_band_drawn_segments": band_segments,
         "shadow_private_wall_nodes": int(np.sum(shadow)),
         "shadow_private_drawn_segments": shadow_segments,
         "revision": revision,

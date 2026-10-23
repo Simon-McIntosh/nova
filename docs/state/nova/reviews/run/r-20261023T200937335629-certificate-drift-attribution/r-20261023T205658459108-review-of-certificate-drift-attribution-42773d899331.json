@@ -1,0 +1,64 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "the reviewed run carries no baseline_suite or after_suite arms in its manifest and no suite log in its run directory, so added failures are derived over zero arms; the reviewed node's evidence gate was a manifest-state statement plus the single certificate-row log.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "call_sites_emission": "none",
+  "completed_at": "2026-10-23T21:18:21.431Z",
+  "dispatched_at": "2026-10-23T20:58:48Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/topology-read-containment-and-rebank/certificate-drift-attribution.html",
+      "line": 24,
+      "severity": "non-blocking",
+      "text": "non-blocking: the current-main 300-cell row is unqualified, one trip at residual 2.2640848763056183 against the 1e-12 solve bound, so the fragment's no-NaN conclusion is drawn from a non-converged state and does not cover a converged solve at this head."
+    },
+    {
+      "file": "docs/evidence/fragments/topology-read-containment-and-rebank/certificate-drift-attribution.html",
+      "line": 24,
+      "severity": "non-blocking",
+      "text": "non-blocking: the diverted 110-cell current-main row was not measured, main-110.log ends EXIT=124 after a timeout during production_solve, so the 110-cell residual drift has no main-column value and its attribution rests on target-current moves at a3fa8b9b and e227d3dc rather than on measured residuals."
+    },
+    {
+      "file": "benchmarks/solovev_certificate_current_pin.py",
+      "line": 663,
+      "severity": "non-blocking",
+      "text": "non-blocking: the new --certificate-row mode has no test or assertion that fails if certificate._measure's return contract changes, and the manifest's negative_control is recorded as none with no test file in scope."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "no production module imports benchmarks/solovev_certificate_current_pin.py; the only importer is tests/test_route_solve_requests.py, which uses the unchanged _current_pin_solve_request and _run_fixed_point_request names.",
+    "diff": "four commits e0e4bca0..42773d89 add a --certificate-row mode to benchmarks/solovev_certificate_current_pin.py lines 663-742 that wraps certificate._measure and stamps the revision, and add the 34-line evidence fragment; no test file is added.",
+    "done_when": "the node's done_when asks the manifest to state whether the 300-cell NaN reproduces at main with the commit that removed it or the producing line and its array shape; manifest.md states no NaN and names 8c2c4b27, and the guard it introduced is present at nova/equilibrium/forward_operator.py:4113.",
+    "goal": "the goal is a per-revision table attributing the diverted 110- and 300-cell residual drift and a statement on the 300-cell NaN at main; certificate-drift-attribution.html:15-27 delivers rows at six sources for 300 cells and three for 110 cells, but the 110 column carries no current-main residual.",
+    "manifest": "manifest.md reports status complete, the four commits, the main-300-retry gate command and log, EXIT=0 with residual 2.2640848763056183 and 8c2c4b27 as the historical repair commit, and records ten retry failures with attributions.",
+    "write_paths": "the manifest declares benchmarks/solovev_certificate_current_pin.py and the two docs/evidence fragments; git diff e0e4bca0..42773d89 touches exactly two of those paths and nothing else."
+  },
+  "justifications": {
+    "durability": "benchmarks/solovev_certificate_current_pin.py:663-742 adds a measurement mode with no test and no assertion that fails on regression, and the manifest records negative_control as none.",
+    "evidence": "main-300-retry.log ends EXIT=0 and its terminal-flux.npy reads 1536/1536 finite with min -0.061927 and max 0.009948 Wb, matching the fragment, and the no-NaN claim rests on a one-trip residual 2.2640848763056183 far above the 1e-12 bound.",
+    "fit": "the module-global patching at benchmarks/solovev_certificate_current_pin.py:687-701 follows the established idiom at benchmarks/exact_clip_memory_scaling.py:272-275, and the argparse additions at line 645 match the file's existing style.",
+    "goal_fidelity": "certificate-drift-attribution.html:15-27 tabulates the residual and trip count per source for both rows and names a3fa8b9b and e227d3dc as the 110-cell target movers, but line 24 records only a timeout for the current-main 110-cell row.",
+    "reuse": "the mode wraps the owner certificate._measure at benchmarks/solovev_certificate_current_pin.py:722 rather than reimplementing a solve; a capability search over benchmarks/ found no existing per-revision certificate residual tabulator, since bank_revision_reproduction.py reproduces MAST bank arms.",
+    "scope_discipline": "git diff e0e4bca0..42773d89 shows only benchmarks/solovev_certificate_current_pin.py and docs/evidence/fragments/topology-read-containment-and-rebank/certificate-drift-attribution.html, both declared in the manifest's write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is a per-revision table attributing the diverted 110- and 300-cell residual drift and a statement on the 300-cell NaN at main; docs/evidence/fragments/topology-read-containment-and-rebank/certificate-drift-attribution.html:15-27 delivers rows at six sources for 300 cells and three for 110 cells, but the 110 column carries no current-main residual.\nVERDICT done_when: the node's done_when asks the manifest to state whether the 300-cell NaN reproduces at main with the commit that removed it or the producing line and its array shape; manifest.md states no NaN and names 8c2c4b27, and the guard it introduced is present at nova/equilibrium/forward_operator.py:4113.\nVERDICT write_paths: the node declares benchmarks/solovev_certificate_current_pin.py and the two docs/evidence fragments; git diff e0e4bca0..42773d89 touches exactly two of those declared paths and nothing else.\nVERDICT manifest: manifest.md reports status complete, four commits, the main-300-retry gate command and log, EXIT=0 with residual 2.2640848763056183, and 8c2c4b27 as the historical repair commit, and records ten retry failures with attributions.\nVERDICT diff: four commits e0e4bca0..42773d89 add a --certificate-row mode to benchmarks/solovev_certificate_current_pin.py lines 663-742 that wraps certificate._measure and stamps the revision, plus the 34-line evidence fragment; no test file is added.\nCALL_SITES: none\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: certificate-drift-attribution.html:15-27 tabulates the residual and trip count per source for both rows and names a3fa8b9b and e227d3dc as the 110-cell target movers, but line 24 records only a timeout for the current-main 110-cell row.\nSCORE evidence: 14\nJUSTIFICATION evidence: main-300-retry.log ends EXIT=0 and its terminal-flux.npy reads 1536/1536 finite with min -0.061927 and max 0.009948 Wb, matching the fragment, and the no-NaN claim rests on a one-trip residual 2.2640848763056183 far above the 1e-12 bound.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff e0e4bca0..42773d89 shows only benchmarks/solovev_certificate_current_pin.py and docs/evidence/fragments/topology-read-containment-and-rebank/certificate-drift-attribution.html, both declared in the manifest's write paths.\nSCORE durability: 6\nJUSTIFICATION durability: benchmarks/solovev_certificate_current_pin.py:663-742 adds a measurement mode with no test and no assertion that fails on regression, and the manifest records negative_control as none.\nSCORE fit: 16\nJUSTIFICATION fit: the module-global patching at benchmarks/solovev_certificate_current_pin.py:687-701 follows the established idiom at benchmarks/exact_clip_memory_scaling.py:272-275, and the argparse additions at line 645 match the file's existing style.\nSCORE reuse: 17\nJUSTIFICATION reuse: the mode wraps the owner certificate._measure at benchmarks/solovev_certificate_current_pin.py:722 rather than reimplementing a solve; a capability search over benchmarks/ found no existing per-revision certificate residual tabulator, since bank_revision_reproduction.py reproduces MAST bank arms.\nFINDING docs/evidence/fragments/topology-read-containment-and-rebank/certificate-drift-attribution.html:24 non-blocking: the current-main 300-cell row is unqualified, one trip at residual 2.2640848763056183 against the 1e-12 solve bound, so the fragment's no-NaN conclusion is drawn from a non-converged state and does not cover a converged solve at this head.\nFINDING docs/evidence/fragments/topology-read-containment-and-rebank/certificate-drift-attribution.html:24 non-blocking: the diverted 110-cell current-main row was not measured, main-110.log ends EXIT=124 after a timeout during production_solve, so the 110-cell residual drift has no main-column value and its attribution rests on target-current moves at a3fa8b9b and e227d3dc rather than on measured residuals.\nFINDING benchmarks/solovev_certificate_current_pin.py:663 non-blocking: the new --certificate-row mode has no test or assertion that fails if certificate._measure's return contract changes, and the manifest's negative_control is recorded as none with no test file in scope.\n",
+  "review_run_id": "r-20261023T205658459108-review-of-certificate-drift-attribution-42773d899331",
+  "reviewed_base_sha": "e0e4bca04ae5a0b05094028952ba2e7e32d2ee85",
+  "reviewed_head_sha": "42773d89933160dab433385f06ebd3644b18a842",
+  "reviewed_run_id": "r-20261023T200937335629-certificate-drift-attribution",
+  "scores": {
+    "durability": 6,
+    "evidence": 14,
+    "fit": 16,
+    "goal_fidelity": 15,
+    "reuse": 17,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T21:25:55.851258+00:00",
+  "total": 87
+}

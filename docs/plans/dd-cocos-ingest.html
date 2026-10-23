@@ -24,7 +24,7 @@
   <title>DD COCOS Ingest | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="72">
+<meta name="plan-version" content="73">
 <meta name="plan-modified" content="2026-10-23">
 <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;dd-cocos-ingest#s1&quot;],&quot;s3&quot;:[&quot;dd-cocos-ingest#s2&quot;],&quot;s4&quot;:[&quot;dd-cocos-ingest#s3&quot;],&quot;s5&quot;:[&quot;dd-cocos-ingest#s1&quot;,&quot;dd-cocos-ingest#s2&quot;]}">
 </head>
@@ -154,7 +154,10 @@
     <div class="r-comment-body"><p>Reviewed run r-20261023T123447869894-dd-cache-key at base e69f4b60af04df8259ef914dee3136a3c55f6cb2 / head c8b50417b8a719ce0f566124c00dc913c23d985b (four commits, four changed paths, all inside the declared write paths): the convention now enters SignalStore.cache_key through hash_attrs/canonical_key, IdsIngest derives it from the DD version via sourcemap's dd_equilibrium_convention, and a legacy-only group is refused on read by StaleConventionError. Scores 19 goal_fidelity, 16 evidence, 19 scope_discipline, 19 durability, 18 fit, 20 reuse; added_failure_count 0. Two non-blocking findings, both recorded against the file and line: a non-independent assertion at tests/test_signalstore_convention_key.py:90, and orphaned legacy groups left on disk after re-ingest at nova/io/signalstore.py:98.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261023T123447869894-dd-cache-key" data-who="reckon-build" data-when="2026-10-23T13:10:24.103Z">
-    <div class="r-comment-body"><p>SignalStore.cache_key now carries the COCOS convention of the stored fields through hash_attrs/canonical_key: the store derives it from the DD version (DD3-&gt;11, DD4-&gt;17), IdsIngest drops its fixed cocos=11 default and writes the DD version&#x27;s convention, and a group written under the pre-convention identity-only key is refused on read by StaleConventionError rather than served. A two-store test shows distinct keys and declared convention 11/17; the covering files pass at base and head with zero added failures; the negative control that keeps the convention dropped makes the old-entry test fail on DID NOT RAISE StaleConventionError (exit 1).</p></div>
+    <div class="r-comment-body"><p>SignalStore.cache_key now carries the COCOS convention of the stored fields through hash_attrs/canonical_key: the store derives it from the DD version (DD3-&gt;11, DD4-&gt;17), IdsIngest drops its fixed cocos=11 default and writes the DD version's convention, and a group written under the pre-convention identity-only key is refused on read by StaleConventionError rather than served. A two-store test shows distinct keys and declared convention 11/17; the covering files pass at base and head with zero added failures; the negative control that keeps the convention dropped makes the old-entry test fail on DID NOT RAISE StaleConventionError (exit 1).</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261023T132744538500-review-of-dd-internal-sites-d5852e74e675" data-who="reckon-build" data-when="2026-10-23T14:14:35.452Z">
+    <div class="r-comment-body"><p>review-of-dd-internal-sites-d5852e74e675 scores r-20261023T123319685216-dd-internal-sites at base e69f4b60af04df8259ef914dee3136a3c55f6cb2 and head d5852e74e6758c49ac3ad6a822355e3b5ecc1df0 — goal_fidelity 17, evidence 15, scope_discipline 18, durability 11, fit 16, reuse 16, added_failure_count 0 — with one blocking finding (tests/test_internal_cocos_sites.py:68 restates the production expression so the converted display site at nova/imas/extrapolate.py:352 has no regression guard) and one non-blocking finding (the fragment&#x27;s sign-search count at docs/evidence/fragments/dd-cocos-ingest/dd-internal-sites.html:65 understates its remaining hits by one).</p></div>
 </div>
 </section>
 </main>

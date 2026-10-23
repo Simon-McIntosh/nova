@@ -1,0 +1,38 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-23T14:14:35.452Z",
+  "dispatched_at": "2026-10-23T13:57:16Z",
+  "findings": [
+    {
+      "file": "tests/test_internal_cocos_sites.py",
+      "line": "68",
+      "severity": "blocking",
+      "text": "blocking: test_the_flux_contour_levels_keep_their_sign recomputes the production expression inside the test instead of calling Extrapolate.plot_2d_masked, so it exercises no production code. Reverting nova/imas/extrapolate.py:352 from the convention(NOVA_CONVENTION).sigma_bp * levels[::-1] form back to the bare -levels[::-1] leaves all seven tests green, so the converted display site has no assertion that reddens on its regression; the brief's done_when (2) \u2014 each changed site has a test that checks the test's sign-sensitive output \u2014 is unmet for this site, which the evidence fragment nonetheless claims is covered."
+    },
+    {
+      "file": "docs/evidence/fragments/dd-cocos-ingest/dd-internal-sites.html",
+      "line": "65",
+      "severity": "non-blocking",
+      "text": "non-blocking: the paragraph states the sign-test clause 'after this node matches only two lines' and lists plasma_source.py:101 and inverse.py:245. Re-running the command the fragment itself prints over nova/, scripts/ and packages/ returns a third line, nova/biot/contour.py:198 (psi = norm(psi)), so the stated count understates the remaining hits by one; line 70 does discuss norm(psi) separately, but the enumerated pair is presented as exhaustive ('matches only two lines')."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to give nova's internal COCOS 17 one owner and move the census's writer and internal sign sites onto it; nova/equilibrium/convention.py:76 now exports CONVENTION as nova_cocos.convention(17) with COCOS and SIGMA_BP from it, and the three writer negations in nova/imas/pulsedesign.py, the display negation at nova/imas/extrapolate.py:352, the dead negation in nova/imas/flux.py and the stale tag at nova/biot/contour.py:198 are converted or removed.\nVERDICT done_when: the owner, the conversions, the coupled-site naming and the re-run sign search are produced and recorded, but the clause requiring a test that checks each changed site's sign-sensitive output is met for the writer's factor and not met for the display site, whose test at tests/test_internal_cocos_sites.py:68 restates the production expression rather than exercising it.\nVERDICT write_paths: the manifest declares nova/equilibrium/convention.py, nova/imas/pulsedesign.py, nova/equilibrium/inverse.py, nova/imas/extrapolate.py, nova/imas/flux.py, nova/biot/contour.py, four named test files, a new tests/test_internal_cocos_sites.py, the fragment and a figures directory; git diff e69f4b60a..d5852e74e touches seven files, every one inside that set.\nVERDICT manifest: read; status complete, baseline_suite and after_suite are single-line JSON carrying revisions e69f4b60a and 404f1c77b with literal commands, exit_status 0 and empty failure_ids, negative_control_log is one bare path, and the counts it quotes reproduce against the logs it cites.\nVERDICT diff: read commit by commit; 77fc5e470 carries only convention.py's owner statement, 404f1c77b carries the four site changes plus the new test file, and d5852e74e carries the fragment, all inside the declared write paths.\nCALL_SITES: nova/imas/pulsedesign.py:614, nova/imas/extrapolate.py:408\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: nova/equilibrium/convention.py:76-82 states COCOS 17 once from nova_cocos and nova/imas/pulsedesign.py:544 takes the writer's psi factor from it, but nova/imas/extrapolate.py:352 takes its display sign from sourcemap's NOVA_CONVENTION rather than from the owner, so one convention is named at two places.\nSCORE evidence: 15\nJUSTIFICATION evidence: every arm log ends EXIT=0 with zero failures (logs/base-test_pulsedesign.log, logs/head-test_extrapolate.log, logs/head-internal_cocos_sites.log, which I re-ran at seven passed), but the covering files all skip on the absent IMAS database so the by-delta table measures no changed code, and the fragment's sign-search paragraph over-states its own count.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: git diff e69f4b60af04df8259ef914dee3136a3c55f6cb2..d5852e74e6758c49ac3ad6a822355e3b5ecc1df0 touches only nova/biot/contour.py, nova/equilibrium/convention.py, nova/imas/extrapolate.py, nova/imas/flux.py, nova/imas/pulsedesign.py, tests/test_internal_cocos_sites.py and the evidence fragment, all inside the declared write paths.\nSCORE durability: 11\nJUSTIFICATION durability: tests/test_internal_cocos_sites.py:68 recomputes the production expression instead of calling plot_2d_masked, so reverting nova/imas/extrapolate.py:352 to -levels[::-1] leaves all seven tests green, and the writer's call sites are likewise guarded only at the factor, not at the assignment.\nSCORE fit: 16\nJUSTIFICATION fit: psi_write_factor at nova/imas/pulsedesign.py:30 is a documented module-level helper in the module whose writer uses it, matching the file's existing style, and introduces no name the repository's naming rules forbid.\nSCORE reuse: 16\nJUSTIFICATION reuse: psi_write_factor at nova/imas/pulsedesign.py:39 composes nova_cocos.convention_transform(...).factor(PSI_LIKE) directly, the same primitive nova/io/sourcemap.py:135 uses in SourceSignal.convention_factor, so it wraps the existing owner's primitive rather than duplicating a conversion table.\nFINDING tests/test_internal_cocos_sites.py:68 blocking: test_the_flux_contour_levels_keep_their_sign restates the production expression rather than calling Extrapolate.plot_2d_masked, so reverting nova/imas/extrapolate.py:352 to -levels[::-1] leaves all seven tests green and the converted display site has no regression guard.\nFINDING docs/evidence/fragments/dd-cocos-ingest/dd-internal-sites.html:65 non-blocking: the paragraph states the sign-test clause matches only two lines, but the command it names also matches nova/biot/contour.py:198 (psi = norm(psi)), a third line, so the stated count understates the remaining hits by one.\n",
+  "review_run_id": "r-20261023T132744538500-review-of-dd-internal-sites-d5852e74e675",
+  "reviewed_base_sha": "e69f4b60af04df8259ef914dee3136a3c55f6cb2",
+  "reviewed_head_sha": "d5852e74e6758c49ac3ad6a822355e3b5ecc1df0",
+  "reviewed_run_id": "r-20261023T123319685216-dd-internal-sites",
+  "scores": {
+    "durability": 11,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 16,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T14:15:27.402511+00:00",
+  "total": 93
+}

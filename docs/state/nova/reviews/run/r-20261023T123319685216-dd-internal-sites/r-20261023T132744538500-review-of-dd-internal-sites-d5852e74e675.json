@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "completed_at": "2026-10-23T14:14:35.452Z",
   "dispatched_at": "2026-10-23T13:57:16Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-dd-internal-sites-d5852e74e675",
+      "recorded_at": "2026-10-23T14:39:59.856175+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_internal_cocos_sites.py",

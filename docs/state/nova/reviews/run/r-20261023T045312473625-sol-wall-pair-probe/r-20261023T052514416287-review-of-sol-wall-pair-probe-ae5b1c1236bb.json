@@ -1,0 +1,69 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-23T05:48:34.987Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "wall-vertex-field-flux",
+      "recorded_at": "2026-10-23T05:52:17.280153+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-23T05:27:52Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/contour_tree_sol_wall_pair/probe.py",
+      "line": "95",
+      "severity": "follow-on",
+      "text": "follow-on: source_triangle duplicates the centre-cell Delaunay lookup and barycentric weighting owned by nova/equilibrium/contour_tree_mesh.py:152 (_barycentric_flux) and its caller at line 258, so the wall-interpolation diagnostic forks a geometry the repository already owns rather than reusing or wrapping the owner."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T045312473625-sol-wall-pair-probe/manifest.md",
+      "line": "19",
+      "severity": "follow-on",
+      "text": "follow-on: the negative_control reason (decided by the smooth-field gradient, not by a check it writes) misstates the probe, which does gate its verdict with self-written assertions at probe.py:163-173 and the analytic-axis positive control at probe.py:234, so the none declaration understates the run's own control."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit against 4a266ca5b; 7e86daca8 adds only probe.py (428 lines) and ae5b1c123 adds the figure SVG (2030 lines) and the 45-line evidence fragment, and no nova/ source is edited.",
+    "done_when": "the done_when is that docs/figures/contour-tree-topology-authority/sol-wall-pair/sol-wall-pair.svg is committed and its rendered PNG is inspected with no clipped or overlapping label; the SVG is in commit ae5b1c123, the manifest records the render and inspection, and re-rendering the committed SVG to a 1400 px PNG shows legible, separate, unclipped labels in both panels.",
+    "goal": "read the source goal (a probe script and figure measuring the smooth-field gradient and the carrier-minus-smooth flux around carrier vertices 10 and 447 on diverted-single-null-340-cells); scripts/prototypes/contour_tree_sol_wall_pair/probe.py:154 focus_measure returns |grad psi| at vertex 10 (31.252 mWb/m), the two-pitch window minimum (12.497 mWb/m) against a 14.672 mWb/m SOL median, and carrier-minus-smooth for all five link vertices at probe.py:199, so the goal is met.",
+    "manifest": "read; it records status complete, tests naming the probe command run at ae5b1c123, test_logs probe-committed.log with a bare EXIT=0 last line, negative_control none with a stated reason, and the twelve census rows and one focus row under evidence_inputs.",
+    "write_paths": "the manifest orientation_write_paths declare scripts/prototypes/contour_tree_sol_wall_pair, docs/figures/contour-tree-topology-authority/sol-wall-pair and docs/evidence/fragments/contour-tree-topology-authority/sol-wall-pair-probe.html; the diff touches only those three paths, all inside the fence."
+  },
+  "justifications": {
+    "durability": "probe.py:170 raises if vertex 10 is no longer the carrier minimum and probe.py:172 pins it to an independent published receipt value, and probe.py:234 requires the analytic axis positive control, so a regression that moves the pair reddens the probe, but the guards live in a manually run prototype rather than a test a suite executes.",
+    "evidence": "every figure and manifest number reconciles with probe-committed.log (31.252 mWb/m at vertex 10, window 12.497 versus SOL 14.672 mWb/m, +400.509 and +954.529 uWb), though the done_when's own measure rests on a recorded visual inspection rather than a mechanical label check.",
+    "fit": "probe.py:22 calls configure_dtypes before any array and probe.py:25-30 defer the post-configure imports behind noqa E402, following the nova dtype idiom, and every added symbol is descriptive with no plan, version or ticket label.",
+    "goal_fidelity": "probe.py:154 measures the smooth gradient and probe.py:199 the carrier-minus-smooth flux at vertex 10 and its link, exactly the quantities the goal names, though the figure and check are confined to one fixture.",
+    "reuse": "probe.py:95 source_triangle re-derives the centre-cell Delaunay simplex lookup plus barycentric weighting that nova/equilibrium/contour_tree_mesh.py already owns at line 152 (_barycentric_flux), extending no owner.",
+    "scope_discipline": "git diff 4a266ca5b..ae5b1c123 touches only the three files inside the manifest's declared write paths and edits no nova/ source."
+  },
+  "node": "review-of-sol-wall-pair-probe-ae5b1c1236bb",
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: 4a266ca5b611949ec3f7d9caf97949bece2ab858\nreviewed_head_sha: ae5b1c1236bb130fcf90957c98477b852e150128\nVERDICT goal: read the source goal (a probe script and figure measuring the smooth-field gradient and the carrier-minus-smooth flux around carrier vertices 10 and 447 on diverted-single-null-340-cells); scripts/prototypes/contour_tree_sol_wall_pair/probe.py:154 focus_measure returns |grad psi| at vertex 10 (31.252 mWb/m), the two-pitch window minimum (12.497 mWb/m) against a 14.672 mWb/m SOL median, and carrier-minus-smooth for all five link vertices at probe.py:199, so the goal is met.\nVERDICT done_when: the done_when is that docs/figures/contour-tree-topology-authority/sol-wall-pair/sol-wall-pair.svg is committed and its rendered PNG is inspected with no clipped or overlapping label; the SVG is in commit ae5b1c123, the manifest records the render and inspection, and re-rendering the committed SVG to a 1400 px PNG shows legible, separate, unclipped labels in both panels.\nVERDICT write_paths: the manifest orientation_write_paths declare scripts/prototypes/contour_tree_sol_wall_pair, docs/figures/contour-tree-topology-authority/sol-wall-pair and docs/evidence/fragments/contour-tree-topology-authority/sol-wall-pair-probe.html; the diff touches only those three paths, all inside the fence.\nVERDICT manifest: read; it records status complete, tests naming the probe command run at ae5b1c123, test_logs probe-committed.log with a bare EXIT=0 last line, negative_control none with a stated reason, and the twelve census rows and one focus row under evidence_inputs.\nVERDICT diff: read commit by commit against 4a266ca5b; 7e86daca8 adds only probe.py (428 lines) and ae5b1c123 adds the figure SVG (2030 lines) and the 45-line evidence fragment, and no nova/ source is edited.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: probe.py:154 measures the smooth gradient and probe.py:199 the carrier-minus-smooth flux at vertex 10 and its link, exactly the quantities the goal names, though the figure and check are confined to one fixture.\nSCORE evidence: 17\nJUSTIFICATION evidence: every figure and manifest number reconciles with probe-committed.log (31.252 mWb/m at vertex 10, window 12.497 versus SOL 14.672 mWb/m, +400.509 and +954.529 uWb), though the done_when's own measure rests on a recorded visual inspection rather than a mechanical label check.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 4a266ca5b..ae5b1c123 touches only the three files inside the manifest's declared write paths and edits no nova/ source.\nSCORE durability: 13\nJUSTIFICATION durability: probe.py:170 raises if vertex 10 is no longer the carrier minimum and probe.py:172 pins it to an independent published receipt value, and probe.py:234 requires the analytic axis positive control, so a regression that moves the pair reddens the probe, but the guards live in a manually run prototype rather than a test a suite executes.\nSCORE fit: 17\nJUSTIFICATION fit: probe.py:22 calls configure_dtypes before any array and probe.py:25-30 defer the post-configure imports behind noqa E402, following the nova dtype idiom, and every added symbol is descriptive with no plan, version or ticket label.\nSCORE reuse: 5\nJUSTIFICATION reuse: probe.py:95 source_triangle re-derives the centre-cell Delaunay simplex lookup plus barycentric weighting that nova/equilibrium/contour_tree_mesh.py already owns at line 152 (_barycentric_flux), extending no owner.\nFINDING scripts/prototypes/contour_tree_sol_wall_pair/probe.py:95 follow-on: source_triangle duplicates the centre-cell Delaunay lookup and barycentric weighting owned by nova/equilibrium/contour_tree_mesh.py:152 (_barycentric_flux) and its caller at line 258, so the wall-interpolation diagnostic forks a geometry the repository already owns rather than reusing or wrapping the owner.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T045312473625-sol-wall-pair-probe/manifest.md:19 follow-on: the negative_control reason (decided by the smooth-field gradient, not by a check it writes) misstates the probe, which does gate its verdict with self-written assertions at probe.py:163-173 and the analytic-axis positive control at probe.py:234, so the none declaration understates the run's own control.\n",
+  "review_run_id": "r-20261023T052514416287-review-of-sol-wall-pair-probe-ae5b1c1236bb",
+  "reviewed_base_sha": "4a266ca5b611949ec3f7d9caf97949bece2ab858",
+  "reviewed_commit": "ae5b1c1236bb130fcf90957c98477b852e150128",
+  "reviewed_head_sha": "ae5b1c1236bb130fcf90957c98477b852e150128",
+  "reviewed_run_id": "r-20261023T045312473625-sol-wall-pair-probe",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/adb3a390-bdb2-4e2a-8e74-1e049c62c9fe/sol-wall-pair-probe",
+  "scores": {
+    "durability": 13,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T05:57:05.670410+00:00",
+  "total": 91
+}

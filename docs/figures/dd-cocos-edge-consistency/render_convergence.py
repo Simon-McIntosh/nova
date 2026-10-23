@@ -73,6 +73,7 @@ def main() -> None:
         linewidth=2.4,
         linestyle="--",
         zorder=3,
+        label=f"fitted order {order:.2f}",
     )
     axes.axhline(
         EDGE_BAND_RELATIVE_THRESHOLD,
@@ -82,12 +83,10 @@ def main() -> None:
         zorder=2,
     )
 
-    axes.annotate(
-        f"fitted order {order:.2f}",
-        xy=(spacings[1], fit[1]),
-        xytext=(spacings[1] * 1.05, fit[1] * 0.45),
+    axes.legend(
+        frameon=False,
         fontsize=14,
-        color="#111111",
+        loc="lower right",
     )
     axes.annotate(
         f"threshold {EDGE_BAND_RELATIVE_THRESHOLD:.1e}",

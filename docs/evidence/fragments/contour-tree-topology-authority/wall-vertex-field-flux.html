@@ -29,9 +29,15 @@
   down from six nodes and five edges. Nodes 10 (false SOL minimum) and 447
   (paired upward-sweep wall contact) are absent; nodes 5 (X-point), 69 (axis),
   457 (private-region wall maximum) and 461 (virtual outside) remain. Carrier
-  minus analytic flux is 0 Wb at vertex 447 and −3.56 × 10<sup>−17</sup> Wb at
+  minus analytic flux is 0 Wb at vertex 447 and −2.60 × 10<sup>−17</sup> Wb at
   vertex 448. The explanatory figure was rendered to the repository-relative
   path and its PNG inspected.</p>
+  <p>The explanatory JSON, SVG and PNG are the only receipts repinned here.
+  Its node delta is precisely removal of vertices 10 and 447, with the four
+  other nodes retained. The 550-cell sparse integer digests passed their
+  existing pins, so they did not move. The historical brute-force reference
+  comparison has the same 256-versus-258 array-length failure at base and head;
+  no reference field was repinned on this node.</p>
   <figure>
     <img src="/nova/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.svg" alt="Four-node diverted contour tree beside analytic flux contours, without the spurious SOL pair">
     <figcaption>The analytic carrier produces the X-point, axis, private-region wall maximum and virtual outside node.</figcaption>

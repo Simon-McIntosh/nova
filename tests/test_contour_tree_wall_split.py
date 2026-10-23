@@ -153,6 +153,7 @@ def test_split_events_match_outside_augmented_sublevel_counts(ripple):
 
 
 def test_production_split_events_match_outside_augmented_sublevel_counts():
+    field_authority = "closed-form Solov'ev flux at centres and wall vertices"
     fixture = next(
         fixture
         for fixture in certificate_rung_fixtures()
@@ -182,27 +183,33 @@ def test_production_split_events_match_outside_augmented_sublevel_counts():
     kinds = np.asarray(kinds)
     active = set()
     previous = 1
-    wall_merges = []
     usable_order = [int(vertex) for vertex in np.asarray(order) if valid[vertex]]
     for vertex in usable_order:
         active.add(vertex)
         current = _sublevel_count(active, edges, wall)
         if current > previous:
-            assert nodes[vertex] and kinds[vertex] == 0
+            assert nodes[vertex] and kinds[vertex] == 0, (
+                field_authority,
+                vertex,
+                previous,
+                current,
+            )
         elif current < previous:
             assert nodes[vertex] and kinds[vertex] == 1, (
+                field_authority,
                 vertex,
                 values[vertex],
                 wall[vertex],
                 previous,
                 current,
             )
-            if wall[vertex]:
-                wall_merges.append(vertex)
         elif vertex != usable_order[-1]:
-            assert not nodes[vertex]
+            assert not nodes[vertex], (field_authority, vertex, previous, current)
         previous = current
-    assert 447 in wall_merges
+    wall_saddles = np.flatnonzero(nodes & (kinds == 1) & wall)
+    assert not wall_saddles.size, (
+        f"{field_authority}: unexpected wall split saddles {wall_saddles.tolist()}"
+    )
 
 
 def test_first_wall_birth_is_invariant_to_carrier_edge_order():

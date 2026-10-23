@@ -1,0 +1,39 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="dd-cocos-ingest">
+<meta name="plan-evidence-for" content="dd-cocos-ingest">
+<meta name="plan-verifies" content="dd-cocos-ingest#s4">
+<meta name="plan-recorded-at" content="2026-10-23">
+<title>Cached store convention key — landing | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+</head><body><main class="plan-doc">
+<section id="dd-cache-key-landing">
+<h1 id="dd-cache-key-landing-title">Cached store keyed on the convention of its fields</h1>
+<p id="dd-cache-key-landing-outcome"><strong>landing:</strong> <code>SignalStore.cache_key</code> now carries the COCOS convention of the stored fields through <code>hash_attrs</code>/<code>canonical_key</code>, so a store group is keyed on its source identity <em>and</em> the convention its fields are in rather than on the identity alone. The store derives the convention from the DD version it was read at (DD3&nbsp;&rarr;&nbsp;COCOS&nbsp;11, DD4&nbsp;&rarr;&nbsp;COCOS&nbsp;17) through the one owner, <code>IdsIngest</code> drops its fixed <code>cocos: int = 11</code> default and writes the convention the DD version carries, and a group written under the pre-convention key — which declares no convention at all — is refused by name on <code>read()</code> rather than served. A two-store test writes a DD3 and a DD4 store and shows two distinct keys and each store's declared convention; an old-entry test writes a group under the legacy key and asserts the refusal.</p>
+
+<p id="dd-cache-key-landing-defect"><strong>The recorded defect, reproduced at the base before the change.</strong> The census (<a href="/nova/research/dd-cocos-census">dd-cocos-census</a>, its writers and caches rows) records both halves. At base <code>e69f4b60a</code> the snapshot under the run directory shows them directly: <code>nova/io/signalstore.py</code> carries no <code>cocos</code> in its key (a search of that file for <code>cocos</code> returns nothing), and <code>nova/io/ingest.py</code> declares <code>cocos: int = 11</code> at base. So a store written from a DD4 source at the default declared COCOS&nbsp;11 whatever its DD version, and the convention travelled as a dataset attribute that was never a key input. Both halves are repaired here.</p>
+
+<p id="dd-cache-key-landing-key"><strong>The key gains the convention, and <code>IdsIngest</code> derives it.</strong> <code>SignalStore</code> gains a <code>cocos</code> field, derived from <code>dd_version</code> in <code>__post_init__</code> when unset, and <code>cache_key</code> hashes <code>{uri, dd_version, cocos}</code> through <code>hash_attrs</code>/<code>canonical_key</code> — the owner named by <code>&sect;4</code>, used unchanged. <code>IdsIngest</code> drops the fixed default; <code>tensorize</code> reads the convention from the DD version it is handed (through <code>nova.io.sourcemap.dd_equilibrium_convention</code>, the one DD&rarr;COCOS owner) and writes it as the store's <code>cocos</code> attribute, the same convention the store keys on. The sourcemap imports this module's <code>PROVISIONAL_NAMESPACE</code>, so both new imports are function-local rather than module-level, to keep the import graph acyclic.</p>
+
+<p id="dd-cache-key-landing-clause1"><strong>(1) Two stores of the same identity in two conventions key apart and declare their convention.</strong> <code>tests/test_signalstore_convention_key.py</code> constructs a DD&nbsp;3.42.0 store and a DD&nbsp;4.1.0 store over one source URI and asserts <code>store.cocos</code> is <strong>11</strong> and <strong>17</strong>, that the two <code>cache_key</code> values differ, and that each tensorized dataset carries the matching <code>cocos</code> attribute. A second test varies the convention <em>alone</em> — the same DD version, <code>cocos=17</code> against the derived 11 — and requires the keys to differ, so the key is shown to turn on the convention rather than only on the DD version that already fed the identity. A third asserts the convention-keyed group is distinct from the legacy group the pre-convention key produced. All three pass at head; the file is new, so it has no base arm.</p>
+
+<p id="dd-cache-key-landing-clause2"><strong>(2) An entry written under the old key is refused, never served silently.</strong> The old key hashed the identity alone. <code>SignalStore.read</code> asks <code>stale_group()</code> first: when the convention-keyed group is absent while the identity-only group is present, the stored fields' convention is unknown, so it raises <code>StaleConventionError</code> naming the stale group, the URI, the DD version, the expected COCOS and the missing keyed group. The old-entry test writes a dataset under <code>legacy_cache_key</code>, then asserts the refusal on a fresh store, then re-ingests and shows the convention-keyed group is written and served. The refusal is by name and the stale group is never returned as data.</p>
+
+<p id="dd-cache-key-landing-gate"><strong>The covering test files pass by delta, each in its own fresh process.</strong> Every file that imports a changed module was run at the base revision <code>e69f4b60a</code> (snapshot <code>base/</code>) and at head <code>f62286392</code>, each in its own process with its own <code>--basetemp</code>.</p>
+<table id="dd-cache-key-landing-gate-table">
+<caption>Covering tests, base against head. Base arm: <code>tests/test_io_roundtrip.py</code> and <code>tests/test_ingest_import.py</code> at <code>e69f4b60a</code>. Head arm adds <code>tests/test_signalstore_convention_key.py</code>. Each row is a separate process.</caption>
+<thead><tr><th>file</th><th>base</th><th>head</th><th>delta</th></tr></thead>
+<tbody>
+<tr><td><code>tests/test_io_roundtrip.py</code></td><td>3 passed</td><td>3 passed</td><td>0</td></tr>
+<tr><td><code>tests/test_ingest_import.py</code></td><td>1 passed</td><td>1 passed</td><td>0</td></tr>
+<tr><td><code>tests/test_signalstore_convention_key.py</code></td><td>absent</td><td>3 passed</td><td>new file, all pass</td></tr>
+</tbody>
+</table>
+<p id="dd-cache-key-landing-gate-note">No added failures. The two files that exist at base pass identically at base and head, so the change adds none; the new file carries the convention-key tests. The manifest records both arms as single-line JSON with their revisions, commands, exit statuses, log paths and failure ids.</p>
+
+<p id="dd-cache-key-landing-control"><strong>The literal negative control.</strong> In a scratch copy of the package under the run directory, the convention was dropped from <code>cache_key</code> again — it returns the identity-only hash — and the old-entry test was run against that copy. It <strong>failed</strong>, <code>DID NOT RAISE StaleConventionError</code>: the stale entry is served by the mutated read, which is exactly the silent-serve the node exists to close. Exit status 1, and the log names the failing test id <code>test_entry_written_under_the_old_key_is_refused</code>. The scratch package is <code>/tmp/reckon-crew-scratch/r-20261023T123447869894-dd-cache-key/nc-src/nova</code>; its <code>__file__</code> is named on the log header, and the run used <code>--import-mode=importlib</code> so pytest did not insert the worktree root ahead of the scratch package on <code>sys.path</code>.</p>
+
+<p id="dd-cache-key-landing-figure"><strong>No figure.</strong> This node's measure is a partition — two conventions against two keys, and a refusal against a served entry — which is a table, not a plotted or sequential relationship. Its done-when names no artifact, so the landing fragment is the only record, and no figure is drawn.</p>
+</section>
+</main></body></html>

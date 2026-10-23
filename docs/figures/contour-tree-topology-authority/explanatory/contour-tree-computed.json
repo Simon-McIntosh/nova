@@ -4,50 +4,14 @@
   "fixture": "diverted-single-null-340-cells",
   "sigma": 1,
   "flux_units": "Wb",
-  "caption": "Diverted single-null Solovev certificate at its persisted 340-cell rung (fixture diverted-single-null-340-cells). The computed contour tree carries 42 nodes and 41 edges so the node count exceeds the edge count by 1. Two nodes are the analytic nulls: the magnetic-axis maximum and the admitted X-point saddle. The other 39 are piecewise-linear critical points beyond them: 19 piecewise-linear extrema (0 maximum, 19 minima) and 20 further saddles, plus the positionless virtual outside node the padded carrier emits, typed outside the critical-point vocabulary. The private-region wall maximum is the tree's own node at the highest-flux wall vertex. These low-persistence piecewise-linear extrema are drawn rather than hidden, and the critical-point geometry and selection sections (\u00a73 and \u00a74) must absorb them by persistence and primary selection. The poloidal panel draws no lines between nodes: the tree's adjacency is a topological relation, not a geometric path, so it is carried only by the graph panel, where every node is placed at its signed flux level and the edges are drawn as arcs. The virtual outside node is drawn at the level where the outside region joins the tree, its wall contact, not at its mesh-padding sentinel, which is omitted from the signed-flux axis.",
-  "node_count": 42,
-  "edge_count": 41,
+  "caption": "Diverted single-null Solovev certificate at its persisted 340-cell rung (fixture diverted-single-null-340-cells). The computed contour tree carries 6 nodes and 5 edges so the node count exceeds the edge count by 1. Two nodes are the analytic nulls: the magnetic-axis maximum and the admitted X-point saddle. The remaining nodes are an interior minimum, two wall saddles and a positionless virtual outside node, which is typed outside the critical-point vocabulary. The private-region wall maximum is the tree's own node at the highest-flux wall vertex. The other wall saddle is the upward-sweep contact where the interior minimum's region meets the outside. The positionless outside node appears only in the graph panel. The poloidal panel draws no lines between nodes: the tree's adjacency is a topological relation, not a geometric path, so it is carried only by the graph panel, where every node is placed at its signed flux level and the edges are drawn as arcs. The virtual outside node is drawn at the level where the outside region joins the tree, its wall contact, not at its mesh-padding sentinel, which is omitted from the signed-flux axis.",
+  "node_count": 6,
+  "edge_count": 5,
   "node_count_minus_edge_count": 1,
   "drawn_carrier_vertices": [
     5,
     10,
     69,
-    349,
-    350,
-    351,
-    353,
-    355,
-    356,
-    357,
-    358,
-    367,
-    375,
-    376,
-    379,
-    380,
-    383,
-    384,
-    385,
-    386,
-    387,
-    408,
-    409,
-    411,
-    412,
-    415,
-    416,
-    419,
-    420,
-    421,
-    422,
-    427,
-    428,
-    429,
-    430,
-    432,
-    434,
-    435,
-    437,
     447,
     457,
     461
@@ -91,438 +55,6 @@
     },
     {
       "row": 3,
-      "critical_type": 0,
-      "kind": "minimum",
-      "radius": 1.1185078604228953,
-      "height": -0.7299898969150944,
-      "psi_wb": -0.0023963047254873934,
-      "drawn_psi_wb": -0.0023963047254873934,
-      "carrier_vertex": 349,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 4,
-      "critical_type": 1,
-      "kind": "saddle",
-      "radius": 1.0971641915578618,
-      "height": -0.6855974668815868,
-      "psi_wb": -0.002392519794943724,
-      "drawn_psi_wb": -0.002392519794943724,
-      "carrier_vertex": 350,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 5,
-      "critical_type": 0,
-      "kind": "minimum",
-      "radius": 1.0771162164672978,
-      "height": -0.6406055654973704,
-      "psi_wb": -0.0023962377995041676,
-      "drawn_psi_wb": -0.0023962377995041676,
-      "carrier_vertex": 351,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 6,
-      "critical_type": 1,
-      "kind": "saddle",
-      "radius": 1.0416271549231946,
-      "height": -0.5487255836956462,
-      "psi_wb": -0.002295360611889578,
-      "drawn_psi_wb": -0.002295360611889578,
-      "carrier_vertex": 353,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 7,
-      "critical_type": 0,
-      "kind": "minimum",
-      "radius": 1.013169052124221,
-      "height": -0.45443491125966384,
-      "psi_wb": -0.002500901085806647,
-      "drawn_psi_wb": -0.002500901085806647,
-      "carrier_vertex": 355,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 8,
-      "critical_type": 1,
-      "kind": "saddle",
-      "radius": 1.0017336803244798,
-      "height": -0.4065254664988724,
-      "psi_wb": -0.002364594030157935,
-      "drawn_psi_wb": -0.002364594030157935,
-      "carrier_vertex": 356,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 9,
-      "critical_type": 0,
-      "kind": "minimum",
-      "radius": 0.992136732548375,
-      "height": -0.35821394328810885,
-      "psi_wb": -0.002373919899884421,
-      "drawn_psi_wb": -0.002373919899884421,
-      "carrier_vertex": 357,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 10,
-      "critical_type": 1,
-      "kind": "saddle",
-      "radius": 0.9842920741927289,
-      "height": -0.30958678832755837,
-      "psi_wb": -0.0023653008394960056,
-      "drawn_psi_wb": -0.0023653008394960056,
-      "carrier_vertex": 358,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 11,
-      "critical_type": 0,
-      "kind": "minimum",
-      "radius": 0.9676670889425061,
-      "height": 0.1328896170716683,
-      "psi_wb": -0.0027625619267903976,
-      "drawn_psi_wb": -0.0027625619267903976,
-      "carrier_vertex": 367,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 12,
-      "critical_type": 1,
-      "kind": "saddle",
-      "radius": 0.9979363709296388,
-      "height": 0.5255724136875348,
-      "psi_wb": -0.0024438291333365846,
-      "drawn_psi_wb": -0.0024438291333365846,
-      "carrier_vertex": 375,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 13,
-      "critical_type": 0,
-      "kind": "minimum",
-      "radius": 1.0060453999830172,
-      "height": 0.574156617765874,
-      "psi_wb": -0.0026077196568299273,
-      "drawn_psi_wb": -0.0026077196568299273,
-      "carrier_vertex": 376,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 14,
-      "critical_type": 1,
-      "kind": "saddle",
-      "radius": 1.0417514522842335,
-      "height": 0.717436694557672,
-      "psi_wb": -0.0019426947463293779,
-      "drawn_psi_wb": -0.0019426947463293779,
-      "carrier_vertex": 379,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 15,
-      "critical_type": 0,
-      "kind": "minimum",
-      "radius": 1.0584591758095037,
-      "height": 0.763767258627488,
-      "psi_wb": -0.001961084112724525,
-      "drawn_psi_wb": -0.001961084112724525,
-      "carrier_vertex": 380,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 16,
-      "critical_type": 1,
-      "kind": "saddle",
-      "radius": 1.126612397870135,
-      "height": 0.8945581147717878,
-      "psi_wb": -0.001719789770692851,
-      "drawn_psi_wb": -0.001719789770692851,
-      "carrier_vertex": 383,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 17,
-      "critical_type": 0,
-      "kind": "minimum",
-      "radius": 1.1558579154874007,
-      "height": 0.9341767957954983,
-      "psi_wb": -0.0017853968277163036,
-      "drawn_psi_wb": -0.0017853968277163036,
-      "carrier_vertex": 384,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 18,
-      "critical_type": 1,
-      "kind": "saddle",
-      "radius": 1.1884560104572879,
-      "height": 0.9710832921237383,
-      "psi_wb": -0.0016481061765420096,
-      "drawn_psi_wb": -0.0016481061765420096,
-      "carrier_vertex": 385,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 19,
-      "critical_type": 0,
-      "kind": "minimum",
-      "radius": 1.2243378473940816,
-      "height": 1.0048028533837121,
-      "psi_wb": -0.0016494239542046724,
-      "drawn_psi_wb": -0.0016494239542046724,
-      "carrier_vertex": 386,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 20,
-      "critical_type": 1,
-      "kind": "saddle",
-      "radius": 1.2633607459898184,
-      "height": 1.0348282913084175,
-      "psi_wb": -0.0016431388884649864,
-      "drawn_psi_wb": -0.0016431388884649864,
-      "carrier_vertex": 387,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 21,
-      "critical_type": 0,
-      "kind": "minimum",
-      "radius": 2.16558404230893,
-      "height": 0.7523889805504967,
-      "psi_wb": -0.005745937223071807,
-      "drawn_psi_wb": -0.005745937223071807,
-      "carrier_vertex": 408,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 22,
-      "critical_type": 1,
-      "kind": "saddle",
-      "radius": 2.196593080660338,
-      "height": 0.7141212039325068,
-      "psi_wb": -0.005733005698098181,
-      "drawn_psi_wb": -0.005733005698098181,
-      "carrier_vertex": 409,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 23,
-      "critical_type": 0,
-      "kind": "minimum",
-      "radius": 2.2532581552022783,
-      "height": 0.6335739870882712,
-      "psi_wb": -0.006236651353235938,
-      "drawn_psi_wb": -0.006236651353235938,
-      "carrier_vertex": 411,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 24,
-      "critical_type": 1,
-      "kind": "saddle",
-      "radius": 2.278763412433123,
-      "height": 0.591437998745862,
-      "psi_wb": -0.006137605780070344,
-      "drawn_psi_wb": -0.006137605780070344,
-      "carrier_vertex": 412,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 25,
-      "critical_type": 0,
-      "kind": "minimum",
-      "radius": 2.3435171208033467,
-      "height": 0.45872792314665506,
-      "psi_wb": -0.00677795176262337,
-      "drawn_psi_wb": -0.00677795176262337,
-      "carrier_vertex": 415,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 26,
-      "critical_type": 1,
-      "kind": "saddle",
-      "radius": 2.361178022313907,
-      "height": 0.41274838183456036,
-      "psi_wb": -0.006713086059563602,
-      "drawn_psi_wb": -0.006713086059563602,
-      "carrier_vertex": 416,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 27,
-      "critical_type": 1,
-      "kind": "saddle",
-      "radius": 2.402719075516272,
-      "height": 0.27102402022089744,
-      "psi_wb": -0.0072078894471921725,
-      "drawn_psi_wb": -0.0072078894471921725,
-      "carrier_vertex": 419,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 28,
-      "critical_type": 0,
-      "kind": "minimum",
-      "radius": 2.4128261486528486,
-      "height": 0.22281683341664912,
-      "psi_wb": -0.007235866474461399,
-      "drawn_psi_wb": -0.007235866474461399,
-      "carrier_vertex": 420,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 29,
-      "critical_type": 1,
-      "kind": "saddle",
-      "radius": 2.4210638716720694,
-      "height": 0.17425529653592117,
-      "psi_wb": -0.0071562140829242215,
-      "drawn_psi_wb": -0.0071562140829242215,
-      "carrier_vertex": 421,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 30,
-      "critical_type": 0,
-      "kind": "minimum",
-      "radius": 2.4273970662271673,
-      "height": 0.12540899781218942,
-      "psi_wb": -0.007174675591102791,
-      "drawn_psi_wb": -0.007174675591102791,
-      "carrier_vertex": 422,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 31,
-      "critical_type": 1,
-      "kind": "saddle",
-      "radius": 2.4272248920235144,
-      "height": -0.12033631410960266,
-      "psi_wb": -0.006611542286478013,
-      "drawn_psi_wb": -0.006611542286478013,
-      "carrier_vertex": 427,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 32,
-      "critical_type": 0,
-      "kind": "minimum",
-      "radius": 2.4198592040225733,
-      "height": -0.16903438367781237,
-      "psi_wb": -0.006727009453600321,
-      "drawn_psi_wb": -0.006727009453600321,
-      "carrier_vertex": 428,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 33,
-      "critical_type": 1,
-      "kind": "saddle",
-      "radius": 2.409711146894254,
-      "height": -0.21722879970511405,
-      "psi_wb": -0.006658203354853471,
-      "drawn_psi_wb": -0.006658203354853471,
-      "carrier_vertex": 429,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 34,
-      "critical_type": 0,
-      "kind": "minimum",
-      "radius": 2.396686560163605,
-      "height": -0.26472603116157706,
-      "psi_wb": -0.0074338607091472865,
-      "drawn_psi_wb": -0.0074338607091472865,
-      "carrier_vertex": 430,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 35,
-      "critical_type": 1,
-      "kind": "saddle",
-      "radius": 2.361914786926253,
-      "height": -0.3568333345147643,
-      "psi_wb": -0.006006374373804246,
-      "drawn_psi_wb": -0.006006374373804246,
-      "carrier_vertex": 432,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 36,
-      "critical_type": 0,
-      "kind": "minimum",
-      "radius": 2.3160412001538506,
-      "height": -0.4439506136215118,
-      "psi_wb": -0.00632496967330459,
-      "drawn_psi_wb": -0.00632496967330459,
-      "carrier_vertex": 434,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 37,
-      "critical_type": 1,
-      "kind": "saddle",
-      "radius": 2.2893842587191746,
-      "height": -0.485365348753711,
-      "psi_wb": -0.006050399235672931,
-      "drawn_psi_wb": -0.006050399235672931,
-      "carrier_vertex": 435,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 38,
-      "critical_type": 0,
-      "kind": "minimum",
-      "radius": 2.2299211286315725,
-      "height": -0.563866395623994,
-      "psi_wb": -0.0062497739008132705,
-      "drawn_psi_wb": -0.0062497739008132705,
-      "carrier_vertex": 437,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 39,
       "critical_type": 1,
       "kind": "saddle",
       "radius": 1.8761315251245474,
@@ -530,11 +62,11 @@
       "psi_wb": -0.003609200644812455,
       "drawn_psi_wb": -0.003609200644812455,
       "carrier_vertex": 447,
-      "role": "piecewise-linear critical point",
+      "role": "upward-sweep wall contact",
       "join_level_wb": null
     },
     {
-      "row": 40,
+      "row": 4,
       "critical_type": 1,
       "kind": "saddle",
       "radius": 1.5025801649232058,
@@ -546,7 +78,7 @@
       "join_level_wb": null
     },
     {
-      "row": 41,
+      "row": 5,
       "critical_type": 3,
       "kind": "outside (virtual)",
       "radius": 1.5025801649232058,
@@ -561,7 +93,7 @@
   "edges": [
     {
       "first": 0,
-      "second": 40
+      "second": 4
     },
     {
       "first": 0,
@@ -569,158 +101,14 @@
     },
     {
       "first": 0,
-      "second": 20
-    },
-    {
-      "first": 1,
-      "second": 22
-    },
-    {
-      "first": 3,
-      "second": 12
-    },
-    {
-      "first": 4,
-      "second": 5
-    },
-    {
-      "first": 5,
       "second": 3
     },
     {
-      "first": 6,
-      "second": 8
+      "first": 1,
+      "second": 5
     },
     {
-      "first": 7,
-      "second": 13
-    },
-    {
-      "first": 8,
-      "second": 10
-    },
-    {
-      "first": 9,
-      "second": 4
-    },
-    {
-      "first": 10,
-      "second": 9
-    },
-    {
-      "first": 11,
-      "second": 39
-    },
-    {
-      "first": 12,
-      "second": 7
-    },
-    {
-      "first": 13,
-      "second": 11
-    },
-    {
-      "first": 14,
-      "second": 15
-    },
-    {
-      "first": 15,
-      "second": 6
-    },
-    {
-      "first": 16,
-      "second": 17
-    },
-    {
-      "first": 17,
-      "second": 14
-    },
-    {
-      "first": 18,
-      "second": 19
-    },
-    {
-      "first": 19,
-      "second": 16
-    },
-    {
-      "first": 20,
-      "second": 18
-    },
-    {
-      "first": 21,
-      "second": 35
-    },
-    {
-      "first": 22,
-      "second": 21
-    },
-    {
-      "first": 23,
-      "second": 38
-    },
-    {
-      "first": 24,
-      "second": 23
-    },
-    {
-      "first": 25,
-      "second": 29
-    },
-    {
-      "first": 26,
-      "second": 32
-    },
-    {
-      "first": 27,
-      "second": 28
-    },
-    {
-      "first": 28,
-      "second": 34
-    },
-    {
-      "first": 29,
-      "second": 30
-    },
-    {
-      "first": 30,
-      "second": 27
-    },
-    {
-      "first": 31,
-      "second": 33
-    },
-    {
-      "first": 32,
-      "second": 25
-    },
-    {
-      "first": 33,
-      "second": 26
-    },
-    {
-      "first": 34,
-      "second": 41
-    },
-    {
-      "first": 35,
-      "second": 37
-    },
-    {
-      "first": 36,
-      "second": 31
-    },
-    {
-      "first": 37,
-      "second": 24
-    },
-    {
-      "first": 38,
-      "second": 36
-    },
-    {
-      "first": 39,
+      "first": 3,
       "second": 1
     }
   ],
@@ -742,5 +130,5 @@
   ],
   "wall_points": 121,
   "figure": "docs/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.png",
-  "svg_sha256": "439137b5bd2b58a48cfe4771c08a844b414838e004c108ef798708ac4b3334e9"
+  "svg_sha256": "ed9150402cf32aafce6b9ef6d2bb4df49c8f89b70adc0aec8b5741093b17d62a"
 }

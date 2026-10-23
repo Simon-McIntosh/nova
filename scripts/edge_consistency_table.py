@@ -35,9 +35,9 @@ os.environ.setdefault("JAX_PLATFORMS", "cpu")
 
 import imas
 import numpy as np
-from scipy.interpolate import RegularGridInterpolator
+from scipy.interpolate import RectBivariateSpline
 
-from nova.equilibrium.convention import TOTAL_FLUX_FACTOR, toroidal_current_density
+from nova.equilibrium.convention import toroidal_current_density
 from nova.imas.edge_consistency import (
     EDGE_BAND_RELATIVE_THRESHOLD,
     EDGE_BAND_WIDTH,
@@ -66,12 +66,15 @@ CURRENT_FLOOR_A = 1.0e6
 SAMPLE_SIZE = 24
 
 #: The two scalings that carry a translated DD3 read into the measure's
-#: operands.  The measure works in total poloidal flux ``Phi = 2 pi psi`` with
-#: derivatives taken against ``Phi``, while the reader returns the DD3
-#: per-radian flux and its derivatives.  Both scalings are named here and each
-#: slice's integral current check is what shows them to be right.
-FLUX_SCALE = TOTAL_FLUX_FACTOR
-DERIVATIVE_SCALE = 1.0 / TOTAL_FLUX_FACTOR
+#: operands.  Both are one: COCOS 11 and COCOS 17 share ``e_Bp = 1``, so the
+#: translator's factor is a sign flip on every psi-like and derivative-like row
+#: and nothing else, and the value the reader returns is already the operand
+#: the measure takes.  The analytic IDS round trip in
+#: ``tests/test_edge_consistency_ids_route.py`` is what settles it: the grid
+#: current and the profile current it reads back each integrate to its own
+#: ``Ip`` at these scalings, and a 2 pi on either side moves them off one.
+FLUX_SCALE = 1.0
+DERIVATIVE_SCALE = 1.0
 
 
 def _uniform(axis) -> np.ndarray:
@@ -112,13 +115,12 @@ def measure_slice(plasma_slice) -> dict:
     stored_psi = np.asarray(plasma_slice.psi, dtype=float)
     grid_r = _uniform(stored_r)
     grid_z = _uniform(stored_z)
-    interpolate = RegularGridInterpolator(
-        (stored_r, stored_z), stored_psi, bounds_error=False, fill_value=np.nan
-    )
-    mesh_r, mesh_z = np.meshgrid(grid_r, grid_z, indexing="ij")
-    resampled = interpolate(np.column_stack((mesh_r.ravel(), mesh_z.ravel()))).reshape(
-        mesh_r.shape
-    )
+    # A piecewise-linear resample has a discontinuous second derivative at
+    # every stored node, which is exactly what the stencil differentiates, so
+    # the residual grows under refinement instead of falling.  A cubic spline
+    # is C2 and leaves the stencil's own error as the only one.
+    spline = RectBivariateSpline(stored_r, stored_z, stored_psi, kx=3, ky=3)
+    resampled = spline(grid_r, grid_z)
     flux = FLUX_SCALE * resampled.T
 
     psi_axis = float(plasma_slice.psi_axis)

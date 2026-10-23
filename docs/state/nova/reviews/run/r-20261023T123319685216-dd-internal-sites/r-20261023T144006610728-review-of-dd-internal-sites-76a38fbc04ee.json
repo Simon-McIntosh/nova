@@ -1,0 +1,44 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-23T15:35:29.930Z",
+  "dispatched_at": "2026-10-23T15:13:32Z",
+  "findings": [
+    {
+      "file": "nova/imas/pulsedesign.py",
+      "line": "551",
+      "severity": "non-blocking",
+      "text": "non-blocking: the three converted writer entries take their factor from psi_write_factor and no test exercises the assignment - tests/test_pulsedesign.py runs zero tests at either arm (5 skipped, \"pf_active database unavalible\") and no test calls PulseDesign.write_ids or equilibrium_ids - so reverting the assignment to its bare negation would redden nothing while the fragment claims each changed site's sign-sensitive output is checked."
+    },
+    {
+      "file": "docs/evidence/fragments/dd-cocos-ingest/dd-internal-sites.html",
+      "line": "56",
+      "severity": "non-blocking",
+      "text": "non-blocking: the by-delta table presents tests/test_pulsedesign.py as a base/head row of 5 skipped | 5 skipped beside Added failures: 0, which reads as a measured delta for the writer's covering file though zero tests ran; tests/test_shape_inverse.py, named by done_when (2), carries no arm at all."
+    },
+    {
+      "file": "nova/equilibrium/convention.py",
+      "line": "79",
+      "severity": "non-blocking",
+      "text": "non-blocking: the new owner makes the internal convention a name that now appears in three modules - here, nova/io/sourcemap.py:740 (NOVA_CONVENTION, tied to this one only by tests/test_internal_cocos_sites.py:103) and nova/equilibrium/observation_kernels.py:41 (NOVA_COCOS = 17, tied to nothing) - so a future change of the convention can leave the third silently stale."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to give nova's internal COCOS 17 one owner and move the census's writer and internal sign sites onto it; nova/equilibrium/convention.py:76 states CONVENTION as nova_cocos.convention(17) and exports COCOS and SIGMA_BP from it, and at head 76a38fbc0 the three writer negations at nova/imas/pulsedesign.py:551,564,601, the display negation at nova/imas/extrapolate.py:352, the dead negation in nova/imas/flux.py and the stale tag at nova/biot/contour.py:198 are converted, deleted or removed.\nVERDICT done_when: clauses (1) and (3) are met - the owner is stated, every uncoupled site takes its sign or factor from nova_cocos, the coupled site nova/equilibrium/inverse.py:245 is named with the EquilibriumData/GetSlice psi_boundary field it depends on and is byte-identical, and search B re-runs at 105 matching lines in 25 files with a planted control found (I recounted logs/sign-search-B.log: 106 grep result lines less its EXIT=0 sentinel, in 25 files); clause (2) is only partly met, because tests/test_pulsedesign.py, which done_when names, executes zero tests at either arm (5 skipped, \"pf_active database unavalible\", logs/base-test_pulsedesign.log and logs/repair-head-test_pulsedesign.log) and tests/test_shape_inverse.py is named but not baselined.\nVERDICT write_paths: the manifest declares convention.py, pulsedesign.py, inverse.py, extrapolate.py, flux.py, biot/contour.py, four named test files, the new tests/test_internal_cocos_sites.py, the fragment and a figures directory; git diff e69f4b60a..76a38fbc0 touches seven files and every one is inside that set, with inverse.py deliberately untouched.\nVERDICT manifest: read; status complete, commits lists all five, baseline_suite and after_suite are single-line JSON with revisions e69f4b60a and 76a38fbc0, literal commands, exit_status 0, completed true and empty failure_ids, negative_control_log is a bare path, and the counts it quotes reproduce against the logs it cites.\nVERDICT diff: read commit by commit against e69f4b60a; 77fc5e470 adds only the owner statement, 404f1c77b carries the writer factor, the display sign, the flux.py deletion and the contour.py tag with the new test file, 0a3ec0e01 carries only the display test repair, and 76a38fbc0 carries the fragment, with no out-of-scope path.\nCALL_SITES: nova/imas/pulsedesign.py:614, nova/imas/extrapolate.py:408, nova/graphics/bokeh.py:124, apps/pulsedesign/simulator.py:17\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/equilibrium/convention.py:76-82 states COCOS 17 once from nova_cocos and nova/imas/pulsedesign.py:551 takes the writer's psi factor from it, but nova/imas/extrapolate.py:352 takes its display sign from sourcemap's NOVA_CONVENTION, so one convention is named at two places.\nSCORE evidence: 15\nJUSTIFICATION evidence: the arms are recorded and readable (logs/repair-head-internal_cocos_sites.log ends 8 passed EXIT=0 and I re-ran it at 8 passed), and both negative controls carry real red logs with the failure ids the manifest names, but the by-delta table at docs/evidence/fragments/dd-cocos-ingest/dd-internal-sites.html:56 lists a file that executed nothing at either arm, and tests/test_shape_inverse.py, named by done_when (2), is unmeasured.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff e69f4b60af04df8259ef914dee3136a3c55f6cb2..76a38fbc04ee4685ce8b2fa86ee1817831d8903e touches only the six source and test paths and the evidence fragment, all inside the declared write paths, and leaves the declared nova/equilibrium/inverse.py:245 byte-identical.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_internal_cocos_sites.py:97 now drives Extrapolate.plot_2d_masked and logs/negative-control-reverted-display-site.log shows reverting nova/imas/extrapolate.py:352 to the bare negation reddens it alone (1 failed of 8), but the three writer assignments at nova/imas/pulsedesign.py:551,564,601 are pinned only through psi_write_factor and no test drives them.\nSCORE fit: 17\nJUSTIFICATION fit: psi_write_factor at nova/imas/pulsedesign.py:30 is a documented module-level helper beside the writer that uses it, the fragment uses the house HTML, and no added name carries a plan label, ticket reference or author attribution.\nSCORE reuse: 17\nJUSTIFICATION reuse: psi_write_factor composes nova_cocos.convention_transform(...).factor(PSI_LIKE), the primitive nova/io/sourcemap.py:135 already uses, and reuses DD3_CONVENTION and NOVA_CONVENTION from sourcemap rather than re-declaring them, but nova/equilibrium/convention.py:79 is now a second name for the internal convention beside nova/io/sourcemap.py:740.\nFINDING nova/imas/pulsedesign.py:551 non-blocking: the three converted writer entries take their factor from psi_write_factor and no test exercises the assignment - tests/test_pulsedesign.py runs zero tests at either arm and no test calls PulseDesign.write_ids or equilibrium_ids - so reverting the assignment to its bare negation would redden nothing while the fragment claims each changed site's sign-sensitive output is checked.\nFINDING docs/evidence/fragments/dd-cocos-ingest/dd-internal-sites.html:56 non-blocking: the by-delta table presents tests/test_pulsedesign.py as a base/head row of 5 skipped | 5 skipped beside Added failures: 0, which reads as a measured delta for the writer's covering file though zero tests ran, and tests/test_shape_inverse.py, named by done_when (2), carries no arm at all.\nFINDING nova/equilibrium/convention.py:79 non-blocking: the new owner makes the internal convention a name that now appears in three modules - here, nova/io/sourcemap.py:740 (NOVA_CONVENTION, tied to this one only by tests/test_internal_cocos_sites.py:103) and nova/equilibrium/observation_kernels.py:41 (NOVA_COCOS = 17, tied to nothing) - so a future change of the convention can leave the third silently stale.\n",
+  "review_run_id": "r-20261023T144006610728-review-of-dd-internal-sites-76a38fbc04ee",
+  "reviewed_base_sha": "e69f4b60af04df8259ef914dee3136a3c55f6cb2",
+  "reviewed_head_sha": "76a38fbc04ee4685ce8b2fa86ee1817831d8903e",
+  "reviewed_run_id": "r-20261023T123319685216-dd-internal-sites",
+  "scores": {
+    "durability": 16,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 17,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T15:36:23.695249+00:00",
+  "total": 102
+}

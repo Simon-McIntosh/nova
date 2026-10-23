@@ -1,0 +1,50 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-23T11:55:59.582Z",
+  "dispatched_at": "2026-10-23T11:36:13Z",
+  "findings": [
+    {
+      "file": "nova/imas/plasma_source.py",
+      "line": "16",
+      "severity": "non-blocking",
+      "text": "non-blocking: _observed re-implements the scalar coercion nova/io/sourcemap.py:884 already owns -- same name and same contract (a scalar read to float, an unset read as nan) -- in a module the reader imports from on line 11, and it is redundant besides, because translate_equilibrium re-coerces every observable through that same sourcemap _observed inside _digits before any digit is derived; the addition neither calls nor wraps the owner"
+    },
+    {
+      "file": "tests/test_plasma_source.py",
+      "line": "147",
+      "severity": "non-blocking",
+      "text": "non-blocking: assert f\"DINA {case}\" in message compares the refusal text against the provenance string the test itself handed in at line 144, and the blocked reason echoes source_name verbatim (nova/io/sourcemap.py:997), so the assertion holds whatever the reader identified on its own; only the sibling assertion at line 148, the measured digit sigma_Bp=-1 / sigma_rho_theta_phi=-1, is independent of the input"
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T194941418996-dd-readers/manifest.md",
+      "line": "78",
+      "severity": "non-blocking",
+      "text": "non-blocking: the tests: line (manifest.md:78) and after_suite's command (manifest.md:7) still carry an unsubstituted <target> placeholder rather than a command a shell was handed, so a promotion gate receipt built from that line names no runnable command; the checkpoint at manifest.md:30 claims this was fixed and the artefact contradicts the claim"
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T194941418996-dd-readers/logs/mast_row_red.log",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the red arm's header names revision 105e40fd0, a revision that cannot contain the test it reddens because tests/test_media.py::test_each_mast_flux_row_carries_the_declared_factor was added at 69db18fcb, so the log does not record the revision it actually ran and a reader cannot tell which tree produced the failure"
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to move nova's IDS readers onto the DD3 translator and re-express the fixed-orientation guard as the internal COCOS 17 check; nova/imas/plasma_source.py:249 builds every slice from the translated signal map, PlasmaSlice.prescribe (plasma_source.py:94) takes sigma_bp from nova_cocos.convention(NOVA_CONVENTION), and nova/media/sources/mast_efit.py:92,121,122 carry the declared COCOS 3 flux factor, so the landed change does what the goal states.\nVERDICT done_when: the done_when's reader items are measured and recorded -- the refusal and prescription tests at tests/test_plasma_source.py:134 and :152, the three-row MAST factor test at tests/test_media.py:890, the sign-search positive control in the fragment and logs/sign_search_control.log, the machine-only base/head delta table, and the admissible negative control at logs/negative_control_bypass.log -- with the one unmet sub-item (the 105052/1 rebuilt-cell count) stated as open.\nVERDICT write_paths: the manifest declares 21 write paths; git diff e986c9314..69db18fcb touches 12 files (nova/io/sourcemap.py, nova/media/sources/mast_efit.py, nova/imas/plasma_source.py, nova/imas/extrapolate.py, seven test files and the fragment), every one of them named in that list.\nVERDICT manifest: read at the current revision; status complete, negative_control_log a bare admissible path, but the tests: line (manifest.md:78) and after_suite's command (manifest.md:7) still carry an unsubstituted <target> template despite the checkpoint claiming otherwise.\nVERDICT diff: read commit by commit against e986c9314; seven commits, 641 insertions and 116 deletions over 12 files, all inside the declared scope, with 69db18fcb the repair of the prior review's five findings.\nCALL_SITES: nova/imas/plasma_source.py:112, nova/imas/scripts.py:167, nova/media/sources/mast_efit.py:174, scripts/media/efit_pulse_gif.py:139, scripts/media/efit_nova_overlay.py:111, scripts/reconstructed_plasma_source/measure.py:55, scripts/reconstructed_plasma_source/baseline_sign.py:45\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/imas/plasma_source.py:246 reads ip, psi_axis, psi_boundary, q and b0 through translate_equilibrium before any PlasmaSlice exists, and the split of equilibrium.py and getslice.py is carried by followup f-ddc-002, so the untouched readers are not a goal shortfall.\nSCORE evidence: 15\nJUSTIFICATION evidence: logs/gate_head.log records each target's own EXIT=0 with zero added failures and logs/negative_control_bypass.log is a bare admissible path, but after_suite's command (manifest.md:7) is a <target> template, gate_head.log's revision header was authored after the fence rather than emitted by a run, and logs/mast_row_red.log:1 names a revision that cannot contain the test it reddens.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in git diff e986c9314..69db18fcb is named in the manifest's orientation_write_paths list, and no change reaches outside the node's fence.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_media.py:916 fails if any of the three mast_efit flux rows (nova/media/sources/mast_efit.py:92,121,122) carries a literal factor rather than the declared one, its red arm verified at logs/mast_row_red.log, and tests/test_plasma_source.py:104 fails if the translation stops flipping the current scale.\nSCORE fit: 19\nJUSTIFICATION fit: the bare multi-exception form at nova/imas/plasma_source.py:20 is the repository idiom (nova/catalog/mast_geometry.py:549, valid under Python 3.14) and the added names MAST_SOURCE_CONVENTION, MAST_FLUX_TRANSFORMATION and mast_flux_factor are mechanism-named with no plan label.\nSCORE reuse: 5\nJUSTIFICATION reuse: nova/imas/plasma_source.py:16 re-implements the scalar-and-nan coercion nova/io/sourcemap.py:884 already owns, so by the rubric the addition is a duplicate of an owned capability, while _translated (plasma_source.py:32) now extends SourceSignalMap.for_target (nova/io/sourcemap.py:458) and mast_flux_factor (nova/io/sourcemap.py:779) wraps convention_transform.\nFINDING nova/imas/plasma_source.py:16 non-blocking: _observed duplicates the capability nova/io/sourcemap.py:884 already owns -- same name, same contract of a scalar to float and an unset to nan -- in the module the reader imports from on line 11, and it is redundant because translate_equilibrium re-coerces each observable through that same sourcemap _observed before any digit is derived; it neither calls nor wraps the owner.\nFINDING tests/test_plasma_source.py:147 non-blocking: assert f\"DINA {case}\" in message compares the refusal text against the provenance string the test handed in at line 144, and the blocked reason echoes source_name verbatim (nova/io/sourcemap.py:997); only the sibling assertion at line 148, the measured digit, is independent of the input.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T194941418996-dd-readers/manifest.md:78 non-blocking: the tests: line and after_suite's command (manifest.md:7) still carry an unsubstituted <target>, so a promotion gate receipt built from that line names no runnable command.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T194941418996-dd-readers/logs/mast_row_red.log:1 non-blocking: the red arm's header names revision 105e40fd0, which cannot contain the test it reddens (added at 69db18fcb), so the log does not record the revision it actually ran.\n",
+  "review_run_id": "r-20261023T113503305153-review-of-dd-readers-69db18fcb606",
+  "reviewed_base_sha": "e986c931495d0db080e5e8d3c2633d39963e9c7c",
+  "reviewed_head_sha": "69db18fcb60656cddab8052d923d7746ff0d9c4d",
+  "reviewed_run_id": "r-20261022T194941418996-dd-readers",
+  "scores": {
+    "durability": 18,
+    "evidence": 15,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T11:57:22.707783+00:00",
+  "total": 96
+}

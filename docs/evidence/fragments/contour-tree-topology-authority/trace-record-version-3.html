@@ -1,0 +1,16 @@
+<section id="trace-record-version-3">
+  <h3>Versioned boundary traces reach the carrier capacity check</h3>
+  <p>The imas-efit writer now emits <code>BOUNDARY_LEVEL_TRACE 3</code>. Its
+  dimension line and array body retain the version-2 layout. The metadata
+  line contains only polarity instead of seven merge-tree fields; the next
+  line stores axis ψ/R/Z, escape level ψ, anchor R/Z and feedback ψ instead
+  of axis ψ/R/Z, contested saddle, refined saddle, wall level and feedback ψ.
+  The shared Python reader distinguishes the two layouts and leaves fields
+  absent from version 3 unset. Axis adjudication uses that reader.</p>
+  <p>The base capacity gate reproduced eight version-3 header refusals before
+  mesh construction (8 failed, 1 passed). At the head, all eight records
+  reached the real mesh capacity check and the gate passed 9 of 9 cases.
+  The new two-header parser test passed 2 of 2 cases. Restoring the
+  version-2-only header check as a negative control failed the version-3
+  parser case and all eight wide-wall cases (9 failed, 2 passed).</p>
+</section>

@@ -694,9 +694,10 @@ def main() -> None:
 
         def capture_solve(profile, *args, **kwargs):
             receipt = original_solve(profile, *args, **kwargs)
+            equilibrium = getattr(receipt, "equilibrium", receipt)
             np.save(
                 certificate.ROOT / "terminal-flux.npy",
-                np.asarray(receipt.equilibrium.flux),
+                np.asarray(equilibrium.flux),
             )
             return receipt
 

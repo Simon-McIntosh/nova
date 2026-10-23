@@ -26,7 +26,7 @@
   <title>Contour-tree topology authority | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="60">
+<meta name="plan-version" content="61">
 <meta name="plan-modified" content="2026-10-23">
 </head>
 <body>
@@ -483,7 +483,10 @@
     <div class="r-comment-body"><p>Independent review of r-20261002T202550601832-ctta-sweep-cost-on-carrier-size stored at head 73d557eb6: total 89/100, verdict pass; base/head receipts identical on all fields proven independently (48 cases, 336 fields, 0 mismatches), both timing arms reproduced (base 96.995 s vs head 0.464 s at 1089 vertices), the 33-test gate passes, and the central identity claim rests on a now-deleted scratch comparator.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261023T011815313336-review-of-split-sweep-wall-outside-41a80bc4f40d" data-who="reckon-build" data-when="2026-10-23T02:05:16.916Z">
-    <div class="r-comment-body"><p>A blocking review of run r-20261022T193653383537-split-sweep-wall-outside at head 41a80bc4f40d16ab153fc919efd69222cfd440b1 (base e4ca8d20146f67c86c92bb84feb851c6c5a1ca60): the ascending wall union removes the spurious wall chain (18 minima and 20 saddles to 0 and 1 on the diverted 340-cell census, reproduced at the landed head), but nova/equilibrium/contour_tree.py:420 suppresses every ascending wall event, so the merge the plan&#x27;s rule reserves for a wall vertex with a non-outside neighbour is dropped, verified on the production fixture by the node&#x27;s own outside-augmented oracle (wall vertex 447, psi -0.003609); scores goal_fidelity 13, evidence 15, scope_discipline 19, durability 12, fit 16, reuse 20.</p></div>
+    <div class="r-comment-body"><p>A blocking review of run r-20261022T193653383537-split-sweep-wall-outside at head 41a80bc4f40d16ab153fc919efd69222cfd440b1 (base e4ca8d20146f67c86c92bb84feb851c6c5a1ca60): the ascending wall union removes the spurious wall chain (18 minima and 20 saddles to 0 and 1 on the diverted 340-cell census, reproduced at the landed head), but nova/equilibrium/contour_tree.py:420 suppresses every ascending wall event, so the merge the plan's rule reserves for a wall vertex with a non-outside neighbour is dropped, verified on the production fixture by the node's own outside-augmented oracle (wall vertex 447, psi -0.003609); scores goal_fidelity 13, evidence 15, scope_discipline 19, durability 12, fit 16, reuse 20.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261023T025210045328-review-of-split-sweep-wall-outside-b9fd10e09685" data-who="reckon-build" data-when="2026-10-23T03:21:41.257Z">
+    <div class="r-comment-body"><p>Store a parsed review record for run r-20261022T193653383537-split-sweep-wall-outside at head b9fd10e0968536a209b65ff626e9827421d30bb6: six dimensions scored (goal_fidelity 19, evidence 17, scope_discipline 19, durability 18, fit 17, reuse 20), added_failure_count 0, two follow-on findings (a suppressed wall-terminal maximum at nova/equilibrium/contour_tree.py:421; a hardcoded carrier vertex index at tests/test_contour_tree_wall_split.py:205), no blocking finding; the prior blocking finding at contour_tree.py:420 is repaired and independently re-verified at head.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261001T215539964290-review-3-of-contour-tree-topology-authority" data-who="reckon-build" data-when="2026-10-01T22:36:28.181Z">
     <div class="r-comment-body"><p>review-3 restates nova:contour-tree-topology-authority (revision e4fedfd80 / HEAD b2cc96f45, plan blob 1b01505b8, plan digest sha256:9ad6ead9...) at its margin revision: intent in the reviewer's own words, the one open decision field-representation-on-hex-cells with all three options, and all five done-whens; 125 prose sentences enumerated, 5 flagged with two-or-more readings (040, 043, 065, 088, 097); no plan file edited.</p></div>

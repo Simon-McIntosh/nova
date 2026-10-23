@@ -1,0 +1,59 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "nova/equilibrium/topology.py:3126",
+    "scripts/prototypes/fast_map_production/kernel.py:253",
+    "scripts/prototypes/sub_millisecond/measure_tree.py:59",
+    "scripts/prototypes/read_warm_wall/measure.py:77"
+  ],
+  "completed_at": "2026-10-23T03:21:41.257Z",
+  "dispatched_at": "2026-10-23T02:56:46Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/contour_tree.py",
+      "line": "421",
+      "severity": "follow-on",
+      "text": "follow-on: in the ascending sweep `~split_wall` also suppresses `terminal`, so a wall vertex that is the global maximum of the field would be dropped from the split tree (its `signed_maximum` node is never emitted, `connect` false and no arc); no fixture in the suite reaches it because the maximum sits interior on the 21x21 carriers and on the diverted production carrier, and the oracle could not see it anyway, as its last-vertex branch at tests/test_contour_tree_wall_split.py:202 asserts nothing."
+    },
+    {
+      "file": "tests/test_contour_tree_wall_split.py",
+      "line": "205",
+      "severity": "follow-on",
+      "text": "follow-on: `assert 447 in wall_merges` pins a raw carrier vertex index, so a regenerated or reordered carrier fails here as a stale pin rather than as a topology regression and no message distinguishes the two; the oracle loop above it already carries the diagnostic tuple. A named lookup for the wall merge, or a message naming the expected vertex, would keep the guard informative."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read the four commits e4ca8d20146f67c86c92bb84feb851c6c5a1ca60..b9fd10e0968536a209b65ff626e9827421d30bb6 commit by commit; 594ceacfe adds the ascending outside union to _sweep_tree together with tests/test_contour_tree_wall_split.py, a0ca54a37 lands the evidence fragment, 41a80bc4 repins the sparse carrier receipts, and b9fd10e09 (five lines in _sweep_tree plus a production oracle test and the fragment correction) restores the wall saddle.",
+    "done_when": "the brief's measure is the outside-augmented sublevel oracle plus the wall-node census; tests/test_contour_tree_wall_split.py:155 asserts event equivalence at every level on the production carrier and :205 that carrier vertex 447 is a wall merge, the manifest records the head arm green (repair-postcommit.log, 1 passed, EXIT=0) and the parent-source control red (repair-negative-control.log, 1 failed, EXIT=1), and I re-ran the named test at head: 1 passed in 41.32s, EXIT=0.",
+    "goal": "the node's goal is to join the ascending (split) sweep's wall to one outside component so no split-born wall extremum or spurious saddle reaches the receipt while a genuine interior-to-outside wall merge stays a saddle; nova/equilibrium/contour_tree.py:413-414 counts the implicit outside at the first ascending wall visit and :421 admits `saddle` at a wall vertex, and the diverted-single-null-340-cells receipt moves from 18 wall minima and 20 wall saddles to 0 minima and 2 saddles (repair-receipt.log:5).",
+    "manifest": "read; it records the repair commit b9fd10e0968536a209b65ff626e9827421d30bb6, the red parent-source control, the green post-commit arm, the corrected census (wall minimum 0 / saddle 2), and the focused 17 and sparse 9 counts, and its census number is what the landed head reproduces.",
+    "write_paths": "the manifest declares five paths; git diff e4ca8d20146f67c86c92bb84feb851c6c5a1ca60..b9fd10e0968536a209b65ff626e9827421d30bb6 changes four of them (nova/equilibrium/contour_tree.py, tests/test_contour_tree_wall_split.py, tests/test_contour_tree_sparse_build.py, docs/evidence/fragments/contour-tree-topology-authority/split-sweep-wall-outside.html), every one inside the declared scope, with nova/equilibrium/topology.py untouched as the brief required."
+  },
+  "justifications": {
+    "durability": "tests/test_contour_tree_wall_split.py:155-205 is an independent brute-force sublevel count over the production carrier whose loop reddens when the wall saddle is suppressed, and the parent-source negative control at repair-negative-control.log confirms it fails (1 failed, EXIT=1).",
+    "evidence": "repair-negative-control.log and repair-postcommit.log carry the reinstated-defect arm red and the head arm green to their summary lines with EXIT=1 and EXIT=0, the census is in repair-receipt.log:5, and I re-ran tests/test_contour_tree_wall_split.py::test_production_split_events_match_outside_augmented_sublevel_counts at head: 1 passed, EXIT=0.",
+    "fit": "nova/equilibrium/contour_tree.py:413-414 and :421 extend _sweep_tree through the same fixed-shape fori_loop state and the same `usable & (...)` event idiom it already carries, with no host-side filter, no new sweep and no plan label in any added name.",
+    "goal_fidelity": "nova/equilibrium/contour_tree.py:413-414 counts the implicit outside at the first ascending wall visit and :421 admits `saddle` while still suppressing `extremum`/`terminal`/`first_wall` at a wall vertex, and the diverted receipt moves to 0 wall minima and 2 wall saddles, one of them the split merge at carrier vertex 447.",
+    "reuse": "_sweep_tree at nova/equilibrium/contour_tree.py:334 is the repository's only owner of the merge-tree sweep and the change extends it, reusing its wall_flag, winner, outside_root and union bookkeeping rather than adding a second wall mechanism.",
+    "scope_discipline": "git diff e4ca8d20..b9fd10e09 touches only nova/equilibrium/contour_tree.py, tests/test_contour_tree_wall_split.py, tests/test_contour_tree_sparse_build.py and the evidence fragment, all inside the manifest's declared write paths, with nova/equilibrium/topology.py untouched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to join the ascending (split) sweep's wall to one outside component so no split-born wall extremum or spurious saddle reaches the receipt while a genuine interior-to-outside wall merge stays a saddle; nova/equilibrium/contour_tree.py:413-414 counts the implicit outside at the first ascending wall visit and :421 admits `saddle` at a wall vertex, and the diverted-single-null-340-cells receipt moves from 18 wall minima and 20 wall saddles to 0 minima and 2 saddles (repair-receipt.log:5).\nVERDICT done_when: the brief's measure is the outside-augmented sublevel oracle plus the wall-node census; tests/test_contour_tree_wall_split.py:155 asserts event equivalence at every level on the production carrier and :205 that carrier vertex 447 is a wall merge, the manifest records the head arm green (repair-postcommit.log, 1 passed, EXIT=0) and the parent-source control red (repair-negative-control.log, 1 failed, EXIT=1), and I re-ran the named test at head: 1 passed in 41.32s, EXIT=0.\nVERDICT write_paths: the manifest declares five paths; git diff e4ca8d20..b9fd10e09 changes four of them (nova/equilibrium/contour_tree.py, tests/test_contour_tree_wall_split.py, tests/test_contour_tree_sparse_build.py, docs/evidence/fragments/contour-tree-topology-authority/split-sweep-wall-outside.html), every one inside the declared scope, with nova/equilibrium/topology.py untouched as the brief required.\nVERDICT manifest: read; it records the repair commit b9fd10e0968536a209b65ff626e9827421d30bb6, the red parent-source control, the green post-commit arm, the corrected census (wall minimum 0 / saddle 2), and the focused 17 and sparse 9 counts, and its census number is what the landed head reproduces.\nVERDICT diff: read the four commits e4ca8d20..b9fd10e09 commit by commit; 594ceacfe adds the ascending outside union to _sweep_tree together with tests/test_contour_tree_wall_split.py, a0ca54a37 lands the evidence fragment, 41a80bc4 repins the sparse carrier receipts, and b9fd10e09 restores the wall saddle.\nCALL_SITES: nova/equilibrium/topology.py:3126, scripts/prototypes/fast_map_production/kernel.py:253, scripts/prototypes/sub_millisecond/measure_tree.py:59, scripts/prototypes/read_warm_wall/measure.py:77\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/equilibrium/contour_tree.py:413-414 counts the implicit outside at the first ascending wall visit and :421 admits `saddle` while still suppressing `extremum`/`terminal`/`first_wall` at a wall vertex, and the diverted receipt moves to 0 wall minima and 2 wall saddles, one of them the split merge at carrier vertex 447.\nSCORE evidence: 17\nJUSTIFICATION evidence: repair-negative-control.log and repair-postcommit.log carry the reinstated-defect arm red and the head arm green to their summary lines with EXIT=1 and EXIT=0, the census is in repair-receipt.log:5, and I re-ran tests/test_contour_tree_wall_split.py::test_production_split_events_match_outside_augmented_sublevel_counts at head: 1 passed, EXIT=0.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff e4ca8d20..b9fd10e09 touches only nova/equilibrium/contour_tree.py, tests/test_contour_tree_wall_split.py, tests/test_contour_tree_sparse_build.py and the evidence fragment, all inside the manifest's declared write paths, with nova/equilibrium/topology.py untouched.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_contour_tree_wall_split.py:155-205 is an independent brute-force sublevel count over the production carrier whose loop reddens when the wall saddle is suppressed, and the parent-source negative control at repair-negative-control.log confirms it fails (1 failed, EXIT=1).\nSCORE fit: 17\nJUSTIFICATION fit: nova/equilibrium/contour_tree.py:413-414 and :421 extend _sweep_tree through the same fixed-shape fori_loop state and the same `usable & (...)` event idiom it already carries, with no host-side filter, no new sweep and no plan label in any added name.\nSCORE reuse: 20\nJUSTIFICATION reuse: _sweep_tree at nova/equilibrium/contour_tree.py:334 is the repository's only owner of the merge-tree sweep and the change extends it, reusing its wall_flag, winner, outside_root and union bookkeeping rather than adding a second wall mechanism.\nFINDING nova/equilibrium/contour_tree.py:421 follow-on: in the ascending sweep `~split_wall` also suppresses `terminal`, so a wall vertex that is the global maximum of the field would be dropped from the split tree (its `signed_maximum` node is never emitted, `connect` false and no arc); no fixture in the suite reaches it because the maximum sits interior on the 21x21 carriers and on the diverted production carrier, and the oracle could not see it anyway, as its last-vertex branch at tests/test_contour_tree_wall_split.py:202 asserts nothing.\nFINDING tests/test_contour_tree_wall_split.py:205 follow-on: `assert 447 in wall_merges` pins a raw carrier vertex index, so a regenerated or reordered carrier fails here as a stale pin rather than as a topology regression and no message distinguishes the two.\n",
+  "review_run_id": "r-20261023T025210045328-review-of-split-sweep-wall-outside-b9fd10e09685",
+  "reviewed_base_sha": "e4ca8d20146f67c86c92bb84feb851c6c5a1ca60",
+  "reviewed_head_sha": "b9fd10e0968536a209b65ff626e9827421d30bb6",
+  "reviewed_run_id": "r-20261022T193653383537-split-sweep-wall-outside",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T03:24:15.244348+00:00",
+  "total": 110
+}

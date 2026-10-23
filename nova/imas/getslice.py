@@ -8,6 +8,18 @@ import numpy as np
 import xarray
 
 
+def vacuum_field(b0: np.ndarray, index: int) -> float:
+    """Return the toroidal field an equilibrium slice is read against [T].
+
+    A pulse may store one value for the whole IDS or one per slice, and the
+    convention check needs the same reading as the translation, so the rule
+    lives here once rather than in each of its callers.
+    """
+    if b0.size == 0:
+        return float("nan")
+    return float(b0[0] if b0.size == 1 else b0[index])
+
+
 @dataclass
 class GetSlice:
     """Convinence method to provide access to sliced ids data."""

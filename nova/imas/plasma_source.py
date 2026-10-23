@@ -7,7 +7,7 @@ from typing import Any, Sequence
 
 import numpy as np
 
-from nova.imas.getslice import GetSlice
+from nova.imas.getslice import GetSlice, vacuum_field
 from nova.imas.profiles import PrescribedCurrent, prescribe_current_density
 from nova.io.sourcemap import NOVA_CONVENTION, translate_equilibrium
 from nova.io.sourcemap import _observed as _sourcemap_observed
@@ -21,13 +21,6 @@ _observed = _sourcemap_observed
 The conversion owner :mod:`nova.io.sourcemap` states this once; this module
 reads it there rather than repeating the sentinel arithmetic.
 """
-
-
-def _vacuum_field(b0: np.ndarray, index: int) -> float:
-    """Return the toroidal field an equilibrium slice is read against [T]."""
-    if b0.size == 0:
-        return float("nan")
-    return float(b0[0] if b0.size == 1 else b0[index])
 
 
 @dataclass(frozen=True)
@@ -248,7 +241,7 @@ class PlasmaSource:
                 psi_axis=_observed(global_.psi_axis),
                 psi_boundary=_observed(global_.psi_boundary),
                 q=_observed(global_.q_95),
-                b0=_vacuum_field(b0, index),
+                b0=vacuum_field(b0, index),
             )
             if signal_map.blocked:
                 raise ValueError(

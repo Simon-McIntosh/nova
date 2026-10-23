@@ -16,7 +16,7 @@ from nova.geometry.pointloop import PointLoop
 from nova.geometry.curve import LCFS
 from nova.geometry.strike import Strike
 from nova.graphics.line import Chart
-from nova.imas.getslice import GetSlice
+from nova.imas.getslice import GetSlice, vacuum_field
 from nova.imas.machine import Wall
 from nova.imas.scenario import Scenario
 from nova.io.sourcemap import NOVA_CONVENTION, translate_equilibrium
@@ -537,9 +537,7 @@ class Equilibrium(Chart, GetSlice):
 
     def _vacuum_field(self, b0: np.ndarray, itime: int) -> float:
         """Return the toroidal field a slice is read against [T]."""
-        if b0.size == 0:
-            return float("nan")
-        return float(b0[0] if b0.size == 1 else b0[itime])
+        return vacuum_field(b0, itime)
 
     def check_convention(self, source_name: str, dd_version: str):
         """Refuse a non-conforming read from its global quantities alone.

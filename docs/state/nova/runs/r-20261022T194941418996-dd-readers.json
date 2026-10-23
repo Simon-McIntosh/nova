@@ -1,0 +1,2266 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 5,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "e986c931495d0db080e5e8d3c2633d39963e9c7c",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T194941418996-dd-readers/brief.txt",
+    "sha256": "5111fd5802443f21fbb01b9150ee1cad7f759b4975a5714557e343ad4bb4241c"
+  },
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 16908101,
+      "input_tokens_cumulative": 16908101,
+      "output_tokens": 54878,
+      "output_tokens_cumulative": 54878,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 641,
+    "files": 12,
+    "removed": 116
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_certified_limited_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_certified_diverted_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_certified_diverted_2000_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 246
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 260,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 184,
+        "name": "test_critical_node_capacity_overflow_is_jittable_and_visible",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_cold_and_cached_plants_are_identical",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 328,
+        "name": "test_the_cache_is_written_by_the_circuit_tier_serialisers",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 371,
+        "name": "test_machine_passive_layers_change_screening_and_preserve_one_layer",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 623,
+        "name": "_slice_process",
+        "path": "tests/test_forward_profile_corsica.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_receipt_keeps_every_fitted_shot_unknown_without_can_evidence",
+        "path": "tests/test_mast_coil_case_temperature.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_seeding_leaves_the_physical_configuration_identical",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 89,
+        "name": "test_each_family_resolves_at_its_own_key_width",
+        "path": "tests/test_mast_saddle_voltage_reach.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 372,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 372,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 372,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 375
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 372,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 372,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_receipt_keeps_every_fitted_shot_unknown_without_can_evidence",
+        "path": "tests/test_mast_coil_case_temperature.py"
+      },
+      "run_function": {
+        "line": 372,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_seeding_leaves_the_physical_configuration_identical",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 372,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 372,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 89,
+        "name": "test_each_family_resolves_at_its_own_key_width",
+        "path": "tests/test_mast_saddle_voltage_reach.py"
+      },
+      "run_function": {
+        "line": 372,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 372,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 372,
+        "name": "from_dict",
+        "path": "nova/io/sourcemap.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 230,
+        "name": "_reconstruction_style_source",
+        "path": "tests/test_unseen_source_full_plant.py"
+      },
+      "run_function": {
+        "line": 764,
+        "name": "_reconstruction_style_source",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 776
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_certified_limited_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_certified_diverted_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_certified_diverted_2000_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 260,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 184,
+        "name": "test_critical_node_capacity_overflow_is_jittable_and_visible",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_cold_and_cached_plants_are_identical",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 835
+    },
+    {
+      "existing_function": {
+        "line": 328,
+        "name": "test_the_cache_is_written_by_the_circuit_tier_serialisers",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 835
+    },
+    {
+      "existing_function": {
+        "line": 371,
+        "name": "test_machine_passive_layers_change_screening_and_preserve_one_layer",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 835
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 623,
+        "name": "_slice_process",
+        "path": "tests/test_forward_profile_corsica.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "_assert_same_topology",
+        "path": "tests/test_fused_same_state_read.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 838
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_receipt_keeps_every_fitted_shot_unknown_without_can_evidence",
+        "path": "tests/test_mast_coil_case_temperature.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 835
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 838
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 836
+    },
+    {
+      "existing_function": {
+        "line": 337,
+        "name": "test_reconstruction_style_presentation_agrees_within_tolerance",
+        "path": "tests/test_unseen_source_full_plant.py"
+      },
+      "run_function": {
+        "line": 850,
+        "name": "test_reconstruction_route_into_the_plant_meets_the_stated_tolerance",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "window_line": 887
+    },
+    {
+      "existing_function": {
+        "line": 289,
+        "name": "test_the_dd3_read_reproduces_the_dd4_fixture_of_the_same_case",
+        "path": "tests/test_dd_translator.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_the_dd4_fixture_passes_through_bit_identically",
+        "path": "tests/test_dd_translator.py"
+      },
+      "window_line": 249
+    },
+    {
+      "existing_function": {
+        "line": 241,
+        "name": "test_the_dd4_fixture_passes_through_bit_identically",
+        "path": "tests/test_dd_translator.py"
+      },
+      "run_function": {
+        "line": 289,
+        "name": "test_the_dd3_read_reproduces_the_dd4_fixture_of_the_same_case",
+        "path": "tests/test_dd_translator.py"
+      },
+      "window_line": 298
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "_build_module",
+        "path": "tests/test_sectioned_set_geometry_cache.py"
+      },
+      "run_function": {
+        "line": 96,
+        "name": "_build_module",
+        "path": "tests/test_unseen_source_full_plant.py"
+      },
+      "window_line": 96
+    },
+    {
+      "existing_function": {
+        "line": 213,
+        "name": "_spy_every_binding",
+        "path": "tests/test_sectioned_set_geometry_cache.py"
+      },
+      "run_function": {
+        "line": 107,
+        "name": "_spy_every_binding",
+        "path": "tests/test_unseen_source_full_plant.py"
+      },
+      "window_line": 121
+    },
+    {
+      "existing_function": {
+        "line": 424,
+        "name": "test_real_sectioned_set_reduction_is_within_one_percent",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 132,
+        "name": "_refined_machine",
+        "path": "tests/test_unseen_source_full_plant.py"
+      },
+      "window_line": 155
+    },
+    {
+      "existing_function": {
+        "line": 703,
+        "name": "_iter_sectioned_machine",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 132,
+        "name": "_refined_machine",
+        "path": "tests/test_unseen_source_full_plant.py"
+      },
+      "window_line": 155
+    },
+    {
+      "existing_function": {
+        "line": 764,
+        "name": "_reconstruction_style_source",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 230,
+        "name": "_reconstruction_style_source",
+        "path": "tests/test_unseen_source_full_plant.py"
+      },
+      "window_line": 239
+    },
+    {
+      "existing_function": {
+        "line": 236,
+        "name": "test_sectioned_conductor_geometry_reads_from_the_cache",
+        "path": "tests/test_sectioned_set_geometry_cache.py"
+      },
+      "run_function": {
+        "line": 279,
+        "name": "test_unseen_source_drives_the_full_plant_with_zero_rebuilds",
+        "path": "tests/test_unseen_source_full_plant.py"
+      },
+      "window_line": 298
+    },
+    {
+      "existing_function": {
+        "line": 850,
+        "name": "test_reconstruction_route_into_the_plant_meets_the_stated_tolerance",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "test_reconstruction_style_presentation_agrees_within_tolerance",
+        "path": "tests/test_unseen_source_full_plant.py"
+      },
+      "window_line": 369
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "35abb20cd3880c20f02e0d9e4823e2c2ea70a6dd",
+    "60e64fa51991db13b6e7269196df22c2e9850cc7",
+    "498c137d3cb4b0669a4f9a957e0c17fddaec8271",
+    "974b57a4c22dd1abfb13ae48ddaf02a4f2f97ab8",
+    "7b08c13f10a5c122031403150db5c29908b43293",
+    "105e40fd0fa4ca398cc3179db22c842f4288f26a",
+    "69db18fcb60656cddab8052d923d7746ff0d9c4d"
+  ],
+  "completed_at": "2026-10-23T11:34:06Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-22T19:54:04Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "nova/imas/equilibrium.py",
+    "nova/imas/getslice.py",
+    "tests/test_coupled_plant.py::test_real_sectioned_set_reduction_is_within_one_percent",
+    "~/.cache/iter-passive-plasma-circuit/coupled-plant/28148563521d92a2198b/plant.npz",
+    "196/196",
+    "105052/1",
+    "105013/1",
+    "nova/imas/pulsedesign.py",
+    "biot/contour.py:198",
+    "equilibrium/inverse.py:245)."
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/.cache/nova-s21-gates/dd-readers-merged.sh",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T194941418996-dd-readers/gate.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.4270833333333333,
+    "plan": "dd-cocos-ingest",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-22T20:50:23.410960+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-22T19:50:23Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 13,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 9,
+    "headroom": 2,
+    "mean_context": 142222,
+    "observed_at": "2026-10-22T19:50:54Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 13,
+      "aggregate_tokens_per_second": 337.548,
+      "detail": "",
+      "mean_tokens_per_second": 35.909,
+      "observed_at": "2026-10-22T19:50:54Z",
+      "runs": 9.4,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-23T11:34:06Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T194941418996-dd-readers/manifest.md",
+  "member": "disposable-r-20261022T194941418996-dd-readers",
+  "model_key": "flash",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_plasma_source.py::test_from_imas_prescribes_corsica_130506_6"
+    ],
+    "baseline_failure_ids": [
+      "tests/test_coupled_plant.py::test_real_sectioned_set_reduction_is_within_one_percent"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_plasma_source.py::test_from_imas_prescribes_corsica_130506_6"
+    ],
+    "declaration": "bypass the translation in PlasmaSource.from_imas, passing raw DD3 values to the slices, and CORSICA 130506/6 is refused again by the internal COCOS 17 check",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T194941418996-dd-readers/logs/negative_control_bypass.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T194941418996-dd-readers/logs/negative_control_bypass.log",
+    "test_paths": [
+      "tests/test_coupled_plant.py",
+      "tests/test_dd_translator.py",
+      "tests/test_extrapolate.py",
+      "tests/test_getslice.py",
+      "tests/test_io_cocos.py",
+      "tests/test_io_magnetics.py",
+      "tests/test_io_sourcemap.py",
+      "tests/test_media.py",
+      "tests/test_plasma_source.py",
+      "tests/test_prescribed_plasma.py",
+      "tests/test_unseen_source_full_plant.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "dd-readers",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.cache/nova-s21-briefs/oct22/dd-cocos-readers.txt",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T194941418996-dd-readers/brief.txt",
+    "brief_sha256": "5111fd5802443f21fbb01b9150ee1cad7f759b4975a5714557e343ad4bb4241c",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "elevated",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 545,
+          "cached_input_tokens": 859680,
+          "input_tokens": 860227,
+          "output_tokens": 1703,
+          "reasoning_output_tokens": 440,
+          "total_tokens": 861930,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "40d3a43c-d1f4-4016-9584-4e663183c12c",
+      "session_id": "s21-nova"
+    },
+    "done_when": "docs/evidence/fragments/dd-cocos-ingest/dd-readers.html records: (1) from_imas prescribes CORSICA 130506/6 and DINA 105069/3 and refuses 105014/1 and 105013/1 by name, from_mast declares its three flux rows from COCOS 3 with a factor test that fails on convention 13, and test_mast_flipped_psi_is_refused stays green; (2) every reader of a COCOS-dependent quantity goes through the translator or the declared conversion, and the sign search finds no sign site in a reader beyond the named prescribe exemption; (3) the readers test files and the five re-pointed tests pass by delta in fresh processes",
+    "estimated_hours": null,
+    "goal": "Take every COCOS-dependent reader through the translator into COCOS 17, with the plasma-source guard kept as the internal COCOS 17 check and the MAST flux conversion declared at its one module",
+    "id": "dd-readers",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-22T19:50:23Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 13,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 9,
+      "headroom": 2,
+      "mean_context": 142222,
+      "observed_at": "2026-10-22T19:50:54Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 13,
+        "aggregate_tokens_per_second": 337.548,
+        "detail": "",
+        "mean_tokens_per_second": 35.909,
+        "observed_at": "2026-10-22T19:50:54Z",
+        "runs": 9.4,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T194941418996-dd-readers/manifest.md",
+    "negative_control": "bypass the translation in PlasmaSource.from_imas, passing raw DD3 values to the slices, and CORSICA 130506/6 is refused again by the internal COCOS 17 check",
+    "plan": "dd-cocos-ingest",
+    "regenerate_paths": [],
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/imas/plasma_source.py",
+      "nova/imas/equilibrium.py",
+      "nova/imas/getslice.py",
+      "nova/imas/magnetics.py",
+      "nova/imas/io_magnetics.py",
+      "nova/imas/extrapolate.py",
+      "nova/io/sourcemap.py",
+      "nova/media/sources/mast_efit.py",
+      "scripts/reconstructed_plasma_source/baseline_sign.py",
+      "tests/test_plasma_source.py",
+      "tests/test_prescribed_plasma.py",
+      "tests/test_unseen_source_full_plant.py",
+      "tests/test_coupled_plant.py",
+      "tests/test_extrapolate.py",
+      "tests/test_getslice.py",
+      "tests/test_io_magnetics.py",
+      "tests/test_dd_translator.py",
+      "tests/test_io_cocos.py",
+      "tests/test_io_sourcemap.py",
+      "tests/test_media.py",
+      "docs/evidence/fragments/dd-cocos-ingest/dd-readers.html",
+      "docs/figures/dd-cocos-ingest/dd-readers"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 2570908.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "dd-readers",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-22T19:52:57.960233+00:00",
+    "score": 0.64375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "Difficulty moderate to high, openness low: the plan fixes every site after twelve read-backs; the work spans six readers, the MAST frame reader and five re-pointed tests. Risk elevated: the plasma source feeds the coupled plant power_convertor consumes.",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:capability",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.351,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 326.748,
+      "context-estimate": 108.43,
+      "records": 355.24,
+      "verdict-inputs": 360.867
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.4270833333333333,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "69db18fcb60656cddab8052d923d7746ff0d9c4d",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "e986c931495d0db080e5e8d3c2633d39963e9c7c",
+    "reviewed_head_sha": "69db18fcb60656cddab8052d923d7746ff0d9c4d",
+    "scores": {
+      "durability": 18,
+      "evidence": 15,
+      "fit": 19,
+      "goal_fidelity": 19,
+      "reuse": 5,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 96
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261022T194941418996-dd-readers",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "2f8a9475-ab02-4a06-a943-af4bcfb754e4",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 47271937,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 3219.4,
+    "generated_tokens": 202690,
+    "generation_seconds": 1575.891,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 85.2,
+    "machine_seconds": 1643.509,
+    "peak_input_tokens": 196043,
+    "tokens_per_second": 128.62,
+    "wall_tokens_per_second": 62.96
+  },
+  "time_budget": "60m",
+  "tool_steps": 114.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 56402,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 5,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-23T11:34:10Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-23T10:40:19Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261022T194941418996-dd-readers",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 29767,
+    "worker_pid": 3338424
+  },
+  "worker_seconds": 12079,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

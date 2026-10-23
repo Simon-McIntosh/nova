@@ -66,7 +66,22 @@ def _conic_rings(vertices, count, centre, pitch, coefficient, selected, segments
     left, right = fragments.slice_breaks[:-1], fragments.slice_breaks[1:]
     parameter = 0.5 * (1 - jnp.cos(jnp.linspace(0.0, jnp.pi, segments + 1)))
     x = left[:, None] + (right - left)[:, None] * parameter
-    bottom, top, _ = topology._positive_vertical_intervals(local, count, coefficient, x)
+    bottom, top, present = topology._positive_vertical_intervals(
+        local, count, coefficient, x
+    )
+    # A sub-interval with no real vertical root is not part of the superlevel set,
+    # but its padded root is clipped to the polygon bound and would be booked as a
+    # full-height slice. Carry it as the degenerate point at the conic's vertical
+    # extremum, where the interval appears as the discriminant reaches zero, so
+    # crossing a tangency moves no vertex.
+    lower, upper = topology._vertical_polygon_interval(local, count, x)
+    quadratic = coefficient[5]
+    linear = coefficient[2] + coefficient[4] * x
+    extremum = jnp.clip(
+        -0.5 * linear / jnp.where(quadratic != 0.0, quadratic, 1.0), lower, upper
+    )[..., None]
+    bottom = jnp.where(present, bottom, extremum)
+    top = jnp.where(present, top, extremum)
     x = jnp.broadcast_to(x[..., None], bottom.shape)
     lower = jnp.stack((x, bottom), axis=-1)
     upper = jnp.stack((x[:, ::-1], top[:, ::-1]), axis=-1)

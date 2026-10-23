@@ -102,9 +102,9 @@ def test_entry_written_under_the_old_key_is_refused(tmp_path):
     assert stale.legacy_cache_key != stale.cache_key
 
     fresh = make_store(tmp_path, DD3)
-    assert not fresh.cached()
     with pytest.raises(StaleConventionError):
         fresh.read()
+    assert not fresh.cached()
 
     # Re-ingesting writes the convention-keyed group, which is then served.
     IdsIngest(resolver=StandardNameResolver()).ingest(

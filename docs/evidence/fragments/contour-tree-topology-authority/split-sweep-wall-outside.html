@@ -1,8 +1,10 @@
 <section id="split-sweep-wall-outside">
   <h3>The split sweep joins the wall to one outside component</h3>
-  <p>The ascending sweep now unites each wall vertex with the already-active
-  outside-bearing root. It emits no split minimum or saddle at a wall vertex;
-  an interior merge with that root remains a saddle. The descending sweep still
+  <p>The ascending sweep treats the outside as active before the first wall
+  vertex and unites every wall vertex with that component. It emits no split
+  minimum at a wall vertex; a wall
+  vertex where a lower interior component meets the outside is a split saddle,
+  as is an interior merge with that root. The descending sweep still
   records the highest wall contact for each region. On the 21×21 triangulated
   hill and rippled hill, the split tree has no wall event, while a two-hill
   carrier retains its interior saddle. An independent sublevel count augments
@@ -12,15 +14,17 @@
     <thead><tr><th>Wall-node critical type</th><th>Before</th><th>After</th></tr></thead>
     <tbody>
       <tr><td>Minimum</td><td>18</td><td>0</td></tr>
-      <tr><td>Saddle</td><td>20</td><td>1</td></tr>
+      <tr><td>Saddle</td><td>20</td><td>2</td></tr>
       <tr><td>Maximum</td><td>0</td><td>0</td></tr>
       <tr><td>Virtual outside</td><td>0</td><td>0</td></tr>
     </tbody>
   </table>
   <p>Counts are receipt nodes at wall vertices on the
   diverted-single-null-340-cells certificate fixture, loaded through the
-  explanatory figure's fixture selector. The surviving wall saddle is the
-  descending sweep's wall contact, not a split event. The base mutation's
-  five new tests fail on wall-node assertions or the outside-augmented oracle;
-  the fixed focused gate passes all five.</p>
+  explanatory figure's fixture selector. One wall saddle is the descending
+  sweep's contact; the other is the split merge at carrier vertex 447. Its
+  independent outside-augmented sublevel count falls from two components to
+  one there. The base mutation's five new tests fail on wall-node assertions
+  or the outside-augmented oracle; the repaired focused gate passes all 17
+  wall-split and merge tests.</p>
 </section>

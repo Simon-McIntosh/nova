@@ -1,0 +1,72 @@
+{
+  "added_failure_count": 1,
+  "added_failure_ids": [
+    "tests/test_contour_tree_wall_split.py::test_production_split_events_match_outside_augmented_sublevel_counts"
+  ],
+  "added_failures_note": "Derived from the reviewed run's own gate arms. Its manifest records baseline_suite and after_suite as empty, so the arms were taken from base-logs/, base-gate-summary.log, head-logs/ and head-gate-summary.log. Base (2669319dd, tree scratch/base): 13/13 files complete, 88 passed, 1 failed, 15 deselected; the one base failure is tests/test_contour_tree_wall_split.py::test_production_split_events_match_outside_augmented_sublevel_counts's sibling file's sweep_bounds brute-force id. Head (a0d88a04a, two docs-only commits before the reviewed head d3cb50c0b, which touch only the evidence fragment): 96 passed, 10 failed, 0 deselected. Of the 10 head failures, 9 are not added: tests/test_contour_tree_sweep_bounds.py::test_brute_force_fixture_receipts_match_recorded_fields fails identically at base and head (1 failed 1 passed, EXIT=1 in both log pairs), and the 8 tests/equilibrium/test_topology_contour_mesh_capacity.py::test_wide_wall_record_builds_below_capacity[...] ids reproduce at base in base-capacity-all-markers.log (revision 2669319dd, tree scratch/base, command with -m \"slow or not slow\") with the same ValueError at scripts/prototypes/efit_field_swap/trace_record.py:144. The one added failure is tests/test_contour_tree_wall_split.py::test_production_split_events_match_outside_augmented_sublevel_counts: base-logs/test_contour_tree_wall_split.log records 7 passed EXIT=0 and head-logs/test_contour_tree_wall_split.log records 1 failed, 6 passed EXIT=1.",
+  "call_site_count": 1,
+  "call_sites": [
+    "nova/equilibrium/topology.py:2594"
+  ],
+  "completed_at": "2026-10-23T08:17:03.596Z",
+  "dispatched_at": "2026-10-23T07:52:12Z",
+  "findings": [
+    {
+      "file": "tests/test_contour_tree_wall_split.py",
+      "line": "155",
+      "severity": "follow-on",
+      "text": "This node's intended removal of the spurious SOL pair reddens a peer-owned test: base-logs/test_contour_tree_wall_split.py records 7 passed EXIT=0 while head-logs/test_contour_tree_wall_split.py records 1 failed, 6 passed EXIT=1 on test_production_split_events_match_outside_augmented_sublevel_counts, the only added failure of the change; the file lies outside this node's declared write paths so it could not be repaired here, and the reviewed manifest records it under follow_ons."
+    },
+    {
+      "file": "manifest.md",
+      "line": "baseline_suite",
+      "severity": "follow-on",
+      "text": "The reviewed manifest's baseline_suite and after_suite keys are empty, so the reviewed run's declared gate arms are unreadable and a reader taking base-gate-summary.log (1 failed) against head-gate-summary.log (10 failed) naively derives 9 added failures where the true added set is 1; the same defect leaves the arms unreconcilable at promotion time without the supplementary base-capacity-all-markers.log."
+    },
+    {
+      "file": "scratch/base",
+      "line": "conftest.py",
+      "severity": "follow-on",
+      "text": "The base arm's scratch tree has no conftest.py, so nova's markexpr override (conftest.py:36-46, which clears the inherited default '-m not slow' when a test path is named explicitly) never ran there and the default filter deselected the 8 slow tests/equilibrium/test_topology_contour_mesh_capacity.py::test_wide_wall_record_builds_below_capacity cases at base while the head arm ran them, so the two arms are not like-for-like and only the after-the-fact base-capacity-all-markers.log closes the gap."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit against 2669319dd: 38486a6d7 deletes _barycentric_flux and introduces the point evaluator, 69b3b8b59 updates the figure roles, 6b745df07 moves the certificate fixtures onto one analytic field, a0d88a04a regenerates the figure receipt/svg/png, 89ff70b13 and d3cb50c0b update the evidence fragment only (39 insertions, 30 deletions, 1 file).",
+    "done_when": "The done-when is 'the regenerated explanatory figure receipt for diverted-single-null-340-cells carries no SOL minimum and wall-contact pair, and its rendered PNG is inspected'; docs/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.json at the reviewed head carries 4 nodes and 3 edges with nodes 10 (false SOL minimum) and 447 (paired wall contact) absent and 5/69/457/461 retained, figure-head.log records 'nodes=4 edges=3' EXIT=0, and the committed SVG digest recomputes to the receipt's svg_sha256 6a12d451ca888b16f2e7745c33c21ae20d0fdbd242e9e4279a2938561246bedc.",
+    "goal": "The node's goal is 'build_contour_mesh assigns every non-centre carrier vertex its flux from a supplied field evaluator instead of a linear interpolant over centre triangles'; nova/equilibrium/contour_tree_mesh.py:340 adds field_evaluator to the signature and lines 372-377 sample every vertex added after the cell centres, while tests/test_contour_tree_mesh.py:84 fails at 48/48 when the barycentric path is restored, so the goal is met.",
+    "manifest": "Read the reviewed run's manifest.md; it records the six commits, the changed paths, the gate command (run-head-gate.sh), 33 test_logs and the negative-control log and note, and it names the added wall_split failure under follow_ons, but its baseline_suite and after_suite keys are empty and its status is still in-progress.",
+    "write_paths": "The node declares 14 exclusive write paths; git diff --stat 2669319dd..d3cb50c0b lists 9 changed paths (nova/equilibrium/contour_tree_mesh.py, benchmarks/contour_tree_brute_force.py, benchmarks/contour_tree_explanatory_figure.py, tests/test_contour_tree_mesh.py, tests/test_contour_tree_brute_force.py, the explanatory receipt json/png/svg and the new docs/evidence/fragments/contour-tree-topology-authority/wall-vertex-field-flux.html) and every one is inside the declared set, with nothing outside it."
+  },
+  "justifications": {
+    "durability": "Both added assertions name a condition under which they fail: reinstating the barycentric wall flux in _clipped_carrier reddens tests/test_contour_tree_mesh.py:84 test_added_wall_vertices_match_curved_field at 48/48 wall vertices (negative-control.log, EXIT=1), and its own file also carries the retained test_nearest_centre_valuation_fails_linear_exactness, with the figure receipt pinned by tests/test_contour_tree_explanatory_figure.py:106-108 comparing the committed SVG against the receipt digest.",
+    "evidence": "The done-when is measured and recorded, not claimed: the receipt at the reviewed head carries 4 nodes and 3 edges with drawn_carrier_vertices [5, 69, 457, 461] and the removed pair absent, figure-head.log records 'nodes=4 edges=3' at EXIT=0, and the receipt's svg_sha256 independently recomputes over the committed SVG with its dc:date stripped; the deduction is that the reviewed manifest leaves baseline_suite and after_suite empty, so the two gate arms are not readable from the manifest and the base arm additionally under-collected (see the scratch/base finding).",
+    "fit": "The addition follows the module's existing idiom as a keyword-only optional parameter beside vertex_capacity/edge_capacity at nova/equilibrium/contour_tree_mesh.py:340 with a docstring stating its contract, and the new names (_certificate_field, field_evaluator, curved_flux) describe mechanism with no version, plan, sprint or ticket identifier and no author attribution.",
+    "goal_fidelity": "The landed change does exactly what the goal states: nova/equilibrium/contour_tree_mesh.py removes _barycentric_flux and its nearest-simplex fallback entirely and assigns vertex_psi for every vertex added after the cell centres from field_evaluator (lines 372-377, `vertex_psi[len(centre_rz):] = sampled.tolist()`), keeping the supplied centre samples as given, so no caller can obtain an interpolated wall value.",
+    "reuse": "No owner exists for a per-vertex point evaluator on the carrier mesh and the search over nova/equilibrium, nova/media and benchmarks found none, while the addition extends the owners it does touch: benchmarks/contour_tree_brute_force.py:65 _certificate_field wraps the existing benchmarks/solovev_certificate.py _case/_exact_state rather than forking the closed-form field, and _barycentric_flux is deleted rather than superseded in place.",
+    "scope_discipline": "git diff --stat 2669319dded99f086120148509b1f16f131d59c2 d3cb50c0b51492f6d1c198bb162b6da718ee2264 lists 9 changed paths and every one lies inside the node's 14 declared write paths, with no source, test or receipt touched outside them."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: read the node goal ('build_contour_mesh assigns every non-centre carrier vertex its flux from a supplied field evaluator instead of a linear interpolant over centre triangles') and found it met; nova/equilibrium/contour_tree_mesh.py:340 adds field_evaluator and lines 372-377 sample every added vertex, with _barycentric_flux deleted.\nVERDICT done_when: read the done-when (regenerated diverted-340 receipt carries no SOL minimum and wall-contact pair, rendered PNG inspected) and found it met by docs/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.json (4 nodes, 3 edges, nodes 10 and 447 absent) with figure-head.log recording nodes=4 edges=3 at EXIT=0.\nVERDICT write_paths: read the 14 declared exclusive write paths and compared them to git diff --stat 2669319dd..d3cb50c0b; all 9 changed paths lie inside the declared set and none outside.\nVERDICT manifest: read the reviewed run's manifest.md; it records the six commits, the gate command, 33 test_logs and the negative-control log and note, but baseline_suite and after_suite are empty and status is still in-progress.\nVERDICT diff: read all six commits against 2669319dd; 38486a6d7 makes the functional change, 69b3b8b59/6b745df07/a0d88a04a update the figure and fixtures, and 89ff70b13/d3cb50c0b touch only the evidence fragment.\nCALL_SITES: nova/equilibrium/topology.py:2594\nSCORE goal_fidelity: 19\nSCORE evidence: 17\nSCORE scope_discipline: 20\nSCORE durability: 18\nSCORE fit: 18\nSCORE reuse: 20\nJUSTIFICATION goal_fidelity: nova/equilibrium/contour_tree_mesh.py removes _barycentric_flux and its nearest-simplex fallback and assigns every non-centre vertex from field_evaluator at lines 372-377, keeping the centre samples as given.\nJUSTIFICATION evidence: the regenerated receipt at the reviewed head carries 4 nodes and 3 edges with drawn_carrier_vertices [5, 69, 457, 461], figure-head.log records nodes=4 edges=3 EXIT=0, and the receipt's svg_sha256 recomputes over the committed SVG, though the manifest's empty baseline_suite/after_suite leave the gate arms unreadable.\nJUSTIFICATION scope_discipline: git diff --stat 2669319dded99f086120148509b1f16f131d59c2 d3cb50c0b51492f6d1c198bb162b6da718ee2264 lists 9 changed paths, every one inside the node's 14 declared write paths.\nJUSTIFICATION durability: reinstating the barycentric wall flux reddens tests/test_contour_tree_mesh.py:84 test_added_wall_vertices_match_curved_field at 48/48 wall vertices (negative-control.log EXIT=1), and the figure receipt is pinned by tests/test_contour_tree_explanatory_figure.py:106-108.\nJUSTIFICATION fit: the keyword-only optional parameter sits beside vertex_capacity/edge_capacity at nova/equilibrium/contour_tree_mesh.py:340 with a stated contract, and no added name carries a version, plan, sprint or ticket identifier or an author attribution.\nJUSTIFICATION reuse: benchmarks/contour_tree_brute_force.py:65 _certificate_field extends the existing benchmarks/solovev_certificate.py _case/_exact_state rather than forking the field, and a search over nova/equilibrium, nova/media and benchmarks found no existing owner of a per-vertex carrier point evaluator.\nFINDING tests/test_contour_tree_wall_split.py:155 follow-on: the change reddens the peer-owned test test_production_split_events_match_outside_augmented_sublevel_counts (base 7 passed EXIT=0, head 1 failed 6 passed EXIT=1) and the file is outside this node's declared write paths, so it is reported rather than repaired.\nFINDING manifest.md baseline_suite follow-on: the reviewed manifest's gate arms are empty, so base-gate-summary.log (1 failed) against head-gate-summary.log (10 failed) naively reads as 9 added failures where the true added set is 1.\nFINDING scratch/base/conftest.py follow-on: the base arm tree lacks conftest.py, so nova's markexpr override never cleared the default '-m not slow' filter and 8 slow capacity tests were deselected at base while the head arm ran them, making the arms not like-for-like.",
+  "review_run_id": "r-20261023T075130730225-review-of-wall-vertex-field-flux-d3cb50c0b514",
+  "reviewed_base_sha": "2669319dded99f086120148509b1f16f131d59c2",
+  "reviewed_head_sha": "d3cb50c0b51492f6d1c198bb162b6da718ee2264",
+  "reviewed_run_id": "r-20261023T053604178566-wall-vertex-field-flux",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T08:21:07.892289+00:00",
+  "total": 112
+}

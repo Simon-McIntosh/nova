@@ -1,0 +1,1318 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex",
+  "base_sha": "4713415bea69d3a5cc0698eff3a0f375e71b4a0f",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T025830194764-explanatory-figure-after-wall-repair/brief.md",
+    "sha256": "6c23bd6b684683ec83b47b4ac8e19cd5e093aa59b5854487422506653ad8e3fc"
+  },
+  "budget": {
+    "cost_usd": null,
+    "detail": "no events yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": null,
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 8730,
+    "files": 5,
+    "removed": 9919
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_certified_limited_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_certified_diverted_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_certified_diverted_2000_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "_schema_payload",
+        "path": "tests/imas/test_diiid_dataset_recheck.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 83,
+        "name": "test_pf_active_supply_and_circuit_round_trip_without_losing_uncertainty",
+        "path": "tests/imas/test_diiid_description.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 81,
+        "name": "test_omissions_and_grid_margins_are_quantified",
+        "path": "tests/imas/test_diiid_geometry_corroboration.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 260,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 184,
+        "name": "test_critical_node_capacity_overflow_is_jittable_and_visible",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_cold_and_cached_plants_are_identical",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 328,
+        "name": "test_the_cache_is_written_by_the_circuit_tier_serialisers",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 371,
+        "name": "test_machine_passive_layers_change_screening_and_preserve_one_layer",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 844,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "test_mast_frame_exposes_exact_shared_helper_surface",
+        "path": "tests/test_efit_parity_warm_neighbour.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 623,
+        "name": "_slice_process",
+        "path": "tests/test_forward_profile_corsica.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_receipt_keeps_every_fitted_shot_unknown_without_can_evidence",
+        "path": "tests/test_mast_coil_case_temperature.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 586,
+        "name": "_caption",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_receipt",
+        "path": "tests/test_contour_tree_explanatory_figure.py"
+      },
+      "run_function": {
+        "line": 612,
+        "name": "build_state",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 614
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "fd6d46f75e1f555eeae5c72a0dc2047c62e10c3a",
+    "f4fb36402b7afe2be8c30d62e4cfd245c47a2bec"
+  ],
+  "completed_at": "2026-10-23T03:39:44Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-23T03:03:55Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/adb3a390-bdb2-4e2a-8e74-1e049c62c9fe/explanatory-figure-after-wall-repair JAX_PLATFORMS=cpu uv run --no-sync pytest -p no:cacheprovider tests/test_contour_tree_explanatory_figure.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T025830194764-explanatory-figure-after-wall-repair/head-gate.log"
+  },
+  "impl_move": {
+    "at_complete": 0.5,
+    "at_dispatch": 0.5,
+    "plan": "contour-tree-topology-authority",
+    "reason": "regenerates a figure inside the already-landed s2 tree; no section changes state",
+    "verdict": "waived"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-23T03:44:26.312795+00:00",
+    "horizon_seconds": 2700,
+    "metered": true,
+    "observed_at": "2026-10-23T02:59:22Z",
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": "2026-10-29T20:08:54Z",
+    "seconds_until_reset": 580171,
+    "state": "quiet",
+    "utilisation_pct": 1.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-23T02:59:22Z",
+    "read_at": "2026-10-23T02:59:26Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 1.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-23T03:39:44Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-10-23T03:39:44Z",
+        "resets_at": 1793304534,
+        "used_percent": 2.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T025830194764-explanatory-figure-after-wall-repair/manifest.md",
+  "member": "disposable-r-20261023T025830194764-explanatory-figure-after-wall-repair",
+  "model_key": "sol",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "explanatory-figure-after-wall-repair",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.cache/nova-contour-tree-wall/explanatory-figure-regen-brief.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T025830194764-explanatory-figure-after-wall-repair/brief.md",
+    "brief_sha256": "6c23bd6b684683ec83b47b4ac8e19cd5e093aa59b5854487422506653ad8e3fc",
+    "capability": {
+      "class": "general",
+      "requirements": {},
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 254,
+          "cached_input_tokens": 333473,
+          "input_tokens": 333729,
+          "output_tokens": 74,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 333803,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "adb3a390-bdb2-4e2a-8e74-1e049c62c9fe",
+      "session_id": "adb3a390-bdb2-4e2a-8e74-1e049c62c9fe"
+    },
+    "done_when": "the gate log prints the regenerated figure's count of nodes at wall vertices, at most 2 against 38 before, beside the rendered-PNG inspection result",
+    "estimated_hours": null,
+    "goal": "The committed contour-tree explanatory figure and receipt are regenerated from the tree with the wall fix, with no non-stationary wall nodes drawn",
+    "id": "explanatory-figure-after-wall-repair",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-23T02:59:22Z",
+      "read_at": "2026-10-23T02:59:26Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 1.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T025830194764-explanatory-figure-after-wall-repair/manifest.md",
+    "negative_control": "none: the receipt test at the base revision is the failing control, since base carries the stale receipt",
+    "plan": "contour-tree-topology-authority",
+    "regenerate_paths": [],
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "guided",
+    "time_budget": "45m",
+    "token_budget": null,
+    "write_paths": [
+      "benchmarks/contour_tree_explanatory_figure.py",
+      "docs/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.png",
+      "docs/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.svg",
+      "docs/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.json",
+      "docs/evidence/fragments/contour-tree-topology-authority/explanatory-figure-after-wall-repair.html",
+      "docs/figures/contour-tree-topology-authority/explanatory-figure-after-wall-repair"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "advisory": true,
+      "burn_multiple": null,
+      "derived": null,
+      "drain_hours": 168.0,
+      "effective_limit": null,
+      "elapsed_fraction": 0.040963991104497326,
+      "elapsed_hours": 6.881950505555551,
+      "group": "codex-sub",
+      "lift": {
+        "ends_at": "2026-10-27T06:32:42+00:00",
+        "ends_on": "reset",
+        "form": "credits",
+        "group": "codex-sub",
+        "id": "codex-sub-1792529492-26f087",
+        "pace_multiple": null,
+        "remaining_seconds": 358252.97818,
+        "scope": "global"
+      },
+      "lift_hold": {
+        "held": false,
+        "kind": "credits"
+      },
+      "limited_by": null,
+      "observed_at": "2026-10-23T03:01:49+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": "window too young to project: burn evidence is quantised too coarsely: 4.10% elapsed is below the 5% floor and 1% utilisation is below the 5% floor",
+      "remaining_budget": 0.99,
+      "remaining_windows": null,
+      "resets_at": "2026-10-29T20:08:54Z",
+      "state": "observed",
+      "utilisation": 0.01,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.00029800000000000003,
+      "decided_by": "window",
+      "margin": 0.812202,
+      "name": "explanatory-figure-after-wall-repair",
+      "score": 0.8125,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.01
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.02182,
+        "observed_at": "2026-10-23T03:01:49+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-29T20:08:54Z",
+        "state": "observed",
+        "utilisation": 0.01,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": "codex-sub-1792529492-26f087",
+    "member": "codex",
+    "node": "explanatory-figure-after-wall-repair",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-23T03:01:49.021820+00:00",
+    "score": 0.8125,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "codex named: lead asked for a codex lift on this fix (session-scoped lift codex-sub-1792697471-f530ed)",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:capability",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.353,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 5200.083,
+      "context-estimate": 4.136,
+      "records": 387.565,
+      "verdict-inputs": 206.011
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.5,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "f4fb36402b7afe2be8c30d62e4cfd245c47a2bec",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "4713415bea69d3a5cc0698eff3a0f375e71b4a0f",
+    "reviewed_head_sha": "f4fb36402b7afe2be8c30d62e4cfd245c47a2bec",
+    "scores": {
+      "durability": 12,
+      "evidence": 16,
+      "fit": 18,
+      "goal_fidelity": 19,
+      "reuse": 18,
+      "scope_discipline": 17
+    },
+    "status": "parsed",
+    "total": 100
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261023T025830194764-explanatory-figure-after-wall-repair",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "adb3a390-bdb2-4e2a-8e74-1e049c62c9fe",
+  "session_harness": "codex",
+  "session_id": "01a166b8-1a82-79e0-b16b-8f6242b4c435",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "time_budget": "45m",
+  "tool_steps": 115.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "backend": "codex",
+        "budget_overrun": false,
+        "budget_overrun_seconds": 0,
+        "budget_seconds": 3600,
+        "classification": "scoring",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 3321,
+        "exit_record": {
+          "attempt": 5,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-10-23T02:48:55Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-10-23T02:07:04Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261022T193653383537-split-sweep-wall-outside",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 1018,
+          "worker_pid": 91153
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-23T02:48:55Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 762,
+        "log_fresh": true,
+        "manifest_commits": [
+          "594ceacfec06567953b660b20069008095b232d2",
+          "a0ca54a378aa3dc6ecedf1fa0a0f6010efa363e4",
+          "41a80bc4f40d16ab153fc919efd69222cfd440b1",
+          "b9fd10e0968536a209b65ff626e9827421d30bb6"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "3969ffd2ae6c9bb425e704b588c087414cbd5a5fa626003fdb446150c9f3c19b",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T193653383537-split-sweep-wall-outside/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "sol",
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project nova --brief /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T193653383537-split-sweep-wall-outside/review-brief.md --plan contour-tree-topology-authority --section '§2' --role review --spec-level exact --node review-of-split-sweep-wall-outside-b9fd10e09685 --goal 'attach an independent review to run r-20261022T193653383537-split-sweep-wall-outside' --done-when 'the review for r-20261022T193653383537-split-sweep-wall-outside stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the record is written at one of this run'\"'\"'s declared write paths, under review-records/ inside the directory of run r-20261022T193653383537-split-sweep-wall-outside, and never in the worktree; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T193653383537-split-sweep-wall-outside/review-records/r-20261022T193653383537-split-sweep-wall-outside.json --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T193653383537-split-sweep-wall-outside/review-records/r-20261022T193653383537-split-sweep-wall-outside.at-b9fd10e0968536a209b65ff626e9827421d30bb6.json --time-budget 60m --session adb3a390-bdb2-4e2a-8e74-1e049c62c9fe --allow-unreconciled-runs --local",
+        "node": "split-sweep-wall-outside",
+        "phase": "complete",
+        "plan": "contour-tree-topology-authority",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261022T193653383537-split-sweep-wall-outside",
+        "session": "adb3a390-bdb2-4e2a-8e74-1e049c62c9fe",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 933,
+        "terminal_at": "2026-10-23T02:45:53Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/adb3a390-bdb2-4e2a-8e74-1e049c62c9fe/split-sweep-wall-outside"
+      }
+    ]
+  },
+  "wall_seconds": 2149,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [
+      451605,
+      451718,
+      454033,
+      453064
+    ],
+    "exit_code": 0,
+    "exited_at": "2026-10-23T03:39:48Z",
+    "last_record_type": "item.completed",
+    "launched_at": "2026-10-23T03:04:54Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261023T025830194764-explanatory-figure-after-wall-repair",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 360,
+    "worker_pid": 451485
+  },
+  "worker_seconds": 2149,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

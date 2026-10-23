@@ -242,31 +242,32 @@ def _disk_clip_planes(disk_centre, radius, segments):
     return normal, radius * jnp.cos(jnp.pi / segments)
 
 
-def _disk_clipped_triangles(
+def _disk_clipped_rings(
     vertices, count, disk_centre, radius, segments=DISK_ARC_SEGMENTS
 ):
-    """Clip every fan triangle of every ring to the disk, as explicit edges.
+    """Clip every ring to the disk in one pass, as explicit edges.
 
-    Each ring is fanned from its first vertex and each triangle is clipped by
-    the ``segments`` half-planes in turn. A clipped triangle is convex and
-    carries at most ``3 + segments`` vertices, every one of them a support
-    vertex: a ring corner, an intersection of a ring edge with a clip line, or
-    one of the endpoints the clip lines themselves contribute. No quadrature
-    node is selected or weighted by a radial test anywhere in this route.
+    Each ring set is clipped by the ``segments`` half-planes in turn, as one
+    subject rather than as a fan of triangles, so a ring set costs one clipped
+    piece of at most ``capacity + segments`` vertices instead of one piece per
+    fan triangle. Every vertex of the result is a support vertex: a ring
+    corner, an intersection of a ring edge with a clip line, or one of the
+    endpoints the clip lines themselves contribute. A clip line can add at
+    most one vertex to a closed subject, which is the bound the width carries.
+    A non-convex subject is clipped correctly because the pass only ever needs
+    the subject's edges in order; the degenerate bridging edges it introduces
+    between separate excursions span the same two clip points, so they cancel
+    in the signed area and its moments. No quadrature node is selected or
+    weighted by a radial test anywhere in this route.
     """
     capacity = vertices.shape[1]
-    triangle_count = capacity - 2
-    slots = jnp.arange(1, capacity - 1)
-    first = jnp.broadcast_to(vertices[:, :1], (len(vertices), triangle_count, 2))
-    subject = jnp.stack((first, vertices[:, slots], vertices[:, slots + 1]), axis=-2)
-    live = slots[None, :] + 1 < count[:, None]
-    width = 3 + segments
+    width = capacity + segments
     order = jnp.arange(width)
     padded = jnp.concatenate(
-        (subject, jnp.zeros(subject.shape[:-2] + (segments, 2), subject.dtype)),
+        (vertices, jnp.zeros(vertices.shape[:-2] + (segments, 2), vertices.dtype)),
         axis=-2,
     )
-    live_count = jnp.where(live, 3, 0).astype(jnp.int32)
+    live_count = jnp.where(count >= 3, count, 0).astype(jnp.int32)
     normal, bound = _disk_clip_planes(disk_centre, radius, segments)
     for step in range(segments):
         line = normal[step]
@@ -293,6 +294,23 @@ def _disk_clipped_triangles(
         padded = jnp.take_along_axis(values, chosen[..., None], axis=-2)
         live_count = jnp.sum(candidates, axis=-1).astype(jnp.int32)
     return padded, live_count
+
+
+def _disk_ring_inside(vertices, count, disk_centre, radius, segments=DISK_ARC_SEGMENTS):
+    """Return which ring sets lie wholly inside the inscribed disk.
+
+    A ring set whose every live vertex satisfies all ``segments`` half-planes
+    is wholly inside the disk polygon, so its interior piece is the ring set
+    itself and the clip has nothing to add to it. This is a sufficient
+    condition rather than a classification: a ring set that fails it is
+    clipped, whether it crosses the boundary or surrounds the disk, and the
+    clip is exact in both cases.
+    """
+    normal, bound = _disk_clip_planes(disk_centre, radius, segments)
+    offset = vertices[:, :, None, :] - disk_centre
+    distance = jnp.sum(offset * normal[None, None], axis=-1) - bound
+    live = jnp.arange(vertices.shape[1])[None, :] < count[:, None]
+    return jnp.all(jnp.all(distance <= 0.0, axis=-1) | ~live, axis=-1)
 
 
 def _disk_split_moments(
@@ -342,7 +360,7 @@ def _disk_split_moments(
     else:
         size, confined_live = 0, False
 
-    def book(points, weights):
+    def book(points, weights, ring_of_node, ring_count):
         mask = jnp.ones(points.shape[:-1], dtype=bool)
         if polygon is not None:
             mask = jnp.where(confined_live, _inside_loop(points, polygon, size), mask)
@@ -361,34 +379,44 @@ def _disk_split_moments(
         density = profile.current_density(points[..., 0], normalized)
         weight = jnp.where(mask, weights, 0.0)
         displacement = points - centre
-        return jnp.stack(
-            (
-                jnp.sum(weight * density),
-                jnp.sum(weight * density * displacement[..., 0]),
-                jnp.sum(weight * density * displacement[..., 1]),
-            )
-        )
+        terms = jnp.stack(
+            (weight * density,)
+            + tuple(weight * density * displacement[..., axis] for axis in (0, 1))
+        ).T
+        return jnp.zeros((ring_count, 3), dtype=terms.dtype).at[ring_of_node].add(terms)
 
     whole_points, whole_weights = _quadrature_from_arrays(
         rings, counts, centroids, live, signed=True
     )
-    whole = book(whole_points, whole_weights)
-    if force_whole:
-        return whole
-    clipped, clipped_live = _disk_clipped_triangles(rings, counts, disk_centre, radius)
-    flat = clipped.reshape(-1, clipped.shape[-2], 2)
-    fan_centre = jnp.repeat(centroids, clipped.shape[1], axis=0)
-    inside_points, inside_weights = _quadrature_from_arrays(
-        flat,
-        clipped_live.reshape(-1),
-        fan_centre,
-        clipped_live.reshape(-1) > 0,
-        signed=True,
+    ring_of_node = jnp.repeat(jnp.arange(len(rings)), whole_points.shape[1])
+    whole = book(
+        whole_points.reshape(-1, 2),
+        whole_weights.reshape(-1),
+        ring_of_node,
+        len(rings),
     )
-    inside = book(inside_points, inside_weights)
+    if force_whole:
+        return jnp.sum(whole, axis=0)
+    clipped, clipped_live = _disk_clipped_rings(rings, counts, disk_centre, radius)
+    inside_points, inside_weights = _quadrature_from_arrays(
+        clipped, clipped_live, centroids, clipped_live > 0, signed=True
+    )
+    piece = book(
+        inside_points.reshape(-1, 2),
+        inside_weights.reshape(-1),
+        jnp.repeat(jnp.arange(len(rings)), inside_points.shape[1]),
+        len(rings),
+    )
+    wholly_inside = _disk_ring_inside(rings, counts, disk_centre, radius)
+    interior = jnp.where(
+        wholly_inside[:, None],
+        whole,
+        jnp.where((clipped_live > 0)[:, None], piece, 0.0),
+    )
+    inside = jnp.sum(interior, axis=0)
     if keep_inside:
         return inside
-    return whole - inside
+    return jnp.sum(whole, axis=0) - inside
 
 
 def composite_cut_moments(

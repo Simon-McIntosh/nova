@@ -154,6 +154,11 @@ NOTCH = jnp.asarray(
 )
 
 
+RING_AROUND_DISK = jnp.asarray(
+    ((-2.0, -2.0), (2.0, -2.0), (2.0, 2.0), (-2.0, 2.0)), dtype=jnp.float64
+)
+
+
 def _signed_region(points):
     """Signed area and first moments of one closed polygon, exact in its vertices."""
     following = jnp.roll(points, -1, axis=0)
@@ -235,7 +240,7 @@ def _reference_moments(ring, centre, radius):
 def _clipped(ring, count, centre, radius, capacity):
     vertices = jnp.zeros((1, capacity, 2), dtype=jnp.float64)
     vertices = vertices.at[0, :count].set(ring)
-    clipped, live = current._disk_clipped_triangles(
+    clipped, live = current._disk_clipped_rings(
         vertices,
         jnp.asarray([count], dtype=jnp.int32),
         jnp.asarray(centre, dtype=jnp.float64),
@@ -252,6 +257,8 @@ def _clipped(ring, count, centre, radius, capacity):
         (NOTCH, (0.2, 0.35), 0.7),
         (NOTCH, (-0.6, 0.6), 0.5),
         (NOTCH, (4.0, 4.0), 0.5),
+        (SQUARE, (0.0, 0.0), 3.0),
+        (RING_AROUND_DISK, (0.0, 0.0), 0.6),
     ],
 )
 def test_clipped_pieces_book_the_disk_intersection(ring, centre, radius):
@@ -259,8 +266,11 @@ def test_clipped_pieces_book_the_disk_intersection(ring, centre, radius):
 
     The disk is placed to cross a convex ring, to cross the non-convex ring
     through its notch, to sit wholly inside the non-convex ring, and to miss the
-    ring entirely, where the clipped region must be exactly zero. The ring is
-    padded beyond its vertex count, so the pad slots must book nothing.
+    ring entirely, where the clipped region must be exactly zero. A ring whose
+    every vertex is inside the disk books whole, and a ring that surrounds the
+    disk has every vertex outside it while still intersecting it, which a
+    vertex-only inside test reads the wrong way round. The ring is padded beyond
+    its vertex count, so the pad slots must book nothing.
     """
     assert jax.config.jax_enable_x64 is True
     count = int(ring.shape[0])
@@ -285,7 +295,7 @@ def test_a_padded_dead_ring_books_nothing():
     vertices = vertices.at[1, 1].set(jnp.asarray((0.3, 0.1)))
     centre = jnp.asarray((0.2, 0.35), dtype=jnp.float64)
     radius = jnp.asarray(0.7, dtype=jnp.float64)
-    clipped, live = current._disk_clipped_triangles(
+    clipped, live = current._disk_clipped_rings(
         vertices, jnp.asarray([NOTCH.shape[0], 2], dtype=jnp.int32), centre, radius
     )
     area, _ = _piece_moments(clipped, live)

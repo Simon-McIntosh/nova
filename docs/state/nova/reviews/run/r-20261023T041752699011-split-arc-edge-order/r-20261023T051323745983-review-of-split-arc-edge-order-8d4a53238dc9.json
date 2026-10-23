@@ -1,0 +1,54 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "nova/equilibrium/topology.py:3126",
+    "nova/equilibrium/contour_tree.py:569",
+    "nova/imas/contour_tree_layout.py:100"
+  ],
+  "completed_at": "2026-10-23T05:30:43.862Z",
+  "dispatched_at": "2026-10-23T05:15:34Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T041752699011-split-arc-edge-order/manifest.md",
+      "line": "15",
+      "severity": "follow-on",
+      "text": "follow-on: the tests: line names only tests/test_contour_tree_scatter_equivalence.py, but the gate the brief set was six per-file commands and it is the six-command string that ran; promotion fills its gate receipt from this line (the baseline_suite/after_suite arms carry all six), so the receipt for this run understates the studied set until the line lists every command or names the aggregate."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read all three commits against base 3baa4796e; c0577f527 adds the four-vertex permutation regression to tests/test_contour_tree_wall_split.py, b074fcdd8 adds implicit_outside to the births branch of _sweep_tree, 8d4a53238 adds the evidence fragment, 45 insertions and 1 deletion total.",
+    "done_when": "the done_when is 'per-file pytest runs of the six contour-tree files named in the brief report 0 failure ids at head that are absent at base'; the twelve per-file arms are on disk, base-aggregate.log closes 44 passed and 4 failed and head-aggregate.log 48 passed and 0 failed, so the added-failure count is 0.",
+    "goal": "the node's goal is that the ascending sweep's arcs are invariant to carrier edge order with the wall fix's node set unchanged; nova/equilibrium/contour_tree.py:462 now seeds the implicit-outside birth at the wall vertex itself, and diverted-node-counts.log still reports 0 wall minima, 2 wall saddles, 6 nodes and 5 edges.",
+    "manifest": "read; it carries status complete, the three commits, both base/head arms with their aggregate and per-file log paths, and a bare negative_control_log path, though its tests: line names one of the six gate commands rather than the six that ran.",
+    "write_paths": "the manifest declares seven write paths including nova/equilibrium/contour_tree.py, tests/test_contour_tree_wall_split.py and docs/evidence/fragments/contour-tree-topology-authority/split-arc-edge-order.html; git diff --stat 3baa4796e 8d4a53238 lists exactly those three and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/test_contour_tree_wall_split.py:193-200 asserts a literal arc set {(0, 2), (1, 2), (2, 3)} and node set [1, 2, 3] against the sweep output, and negative-inherited-birth.log shows that reinstating the inherited birth reddens this test and all three swept-arc permutation seeds, so the mutant is the regression it guards; the four-vertex fixture alone fails on both permutations of the parent revision, so the order-invariance claim itself rests on the 596-vertex arm in tests/test_contour_tree_scatter_equivalence.py:151.",
+    "evidence": "the gate is the twelve per-file arms under the run directory; base-test_contour_tree_scatter_equivalence.log ends '3 failed, 4 passed' with EXIT=1 and head-test_contour_tree_scatter_equivalence.log ends '7 passed' with EXIT=0, both headers naming revision and command, though manifest.md:15 records only the scatter-equivalence command where six commands ran.",
+    "fit": "the fix reuses the existing event-condition idiom two lines above it at nova/equilibrium/contour_tree.py:459 and the new test reuses the file's own _split helper, its names carry no plan label, and its fragment docs/evidence/fragments/contour-tree-topology-authority/split-arc-edge-order.html uses the section-plus-code shape of its sibling split-sweep-wall-outside.html.",
+    "goal_fidelity": "nova/equilibrium/contour_tree.py:462 adds implicit_outside to the same jnp.where that already carries first_wall, so the first ascending wall visit seeds the outside birth at its own vertex, and the three seeds of the 596-vertex permutation arm move from red to green while diverted-node-counts.log keeps node_vertices [5, 10, 69, 447, 457, 461].",
+    "reuse": "a capability search over nova/, tests/ and benchmarks/ for an existing order-independent component-birth mechanism found only the sweep's own births/representative machinery, which this change extends in place at nova/equilibrium/contour_tree.py:462 rather than forking; no new function, class or module is added.",
+    "scope_discipline": "git diff --stat 3baa4796e 8d4a53238 touches only nova/equilibrium/contour placeholder removed -- only nova/equilibrium/contour_tree.py, tests/test_contour_tree_wall_split.py and docs/evidence/fragments/contour-tree-topology-authority/split-arc-edge-order.html, every one inside the manifest's declared write paths, and the four figure paths it was granted were left untouched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is that the ascending sweep's arcs are invariant to carrier edge order with the wall fix's node set unchanged; nova/equilibrium/contour_tree.py:462 now seeds the implicit-outside birth at the wall vertex itself, and diverted-node-counts.log still reports 0 wall minima, 2 wall saddles, 6 nodes and 5 edges.\nVERDICT done_when: the done_when is 'per-file pytest runs of the six contour-tree files named in the brief report 0 failure ids at head that are absent at base'; the twelve per-file arms are on disk, base-aggregate.log closes 44 passed and 4 failed and head-aggregate.log 48 passed and 0 failed, so the added-failure count is 0.\nVERDICT write_paths: the manifest declares seven write paths including nova/equilibrium/contour_tree.py, tests/test_contour_tree_wall_split.py and docs/evidence/fragments/contour-tree-topology-authority/split-arc-edge-order.html; git diff --stat 3baa4796e 8d4a53238 lists exactly those three and nothing else.\nVERDICT manifest: read; it carries status complete, the three commits, both base/head arms with their aggregate and per-file log paths, and a bare negative_control_log path, though its tests: line names one of the six gate commands rather than the six that ran.\nVERDICT diff: read all three commits against base 3baa4796e; c0577f527 adds the four-vertex permutation regression to tests/test_contour_tree_wall_split.py, b074fcdd8 adds implicit_outside to the births branch of _sweep_tree, 8d4a53238 adds the evidence fragment, 45 insertions and 1 deletion total.\nCALL_SITES: nova/equilibrium/topology.py:3126, nova/equilibrium/contour_tree.py:569, nova/imas/contour_tree_layout.py:100\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: nova/equilibrium/contour_tree.py:462 adds implicit_outside to the same jnp.where that already carries first_wall, so the first ascending wall visit seeds the outside birth at its own vertex, and the three seeds of the 596-vertex permutation arm move from red to green while diverted-node-counts.log keeps node_vertices [5, 10, 69, 447, 457, 461].\nSCORE evidence: 19\nJUSTIFICATION evidence: the gate is the twelve per-file arms under the run directory; base-test_contour_tree_scatter_equivalence.log ends '3 failed, 4 passed' with EXIT=1 and head-test_contour_tree_scatter_equivalence.log ends '7 passed' with EXIT=0, both headers naming revision and command, though manifest.md:15 records only the scatter-equivalence command where six commands ran.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 3baa4796e 8d4a53238 touches only nova/equilibrium/contour_tree.py, tests/test_contour_tree_wall_split.py and docs/evidence/fragments/contour-tree-topology-authority/split-arc-edge-order.html, every one inside the manifest's declared write paths, and the four figure paths it was granted were left untouched.\nSCORE durability: 19\nJUSTIFICATION durability: tests/test_contour_tree_wall_split.py:193-200 asserts a literal arc set {(0, 2), (1, 2), (2, 3)} and node set [1, 2, 3] against the sweep output, and negative-inherited-birth.log shows that reinstating the inherited birth reddens this test and all three swept-arc permutation seeds, so the mutant is the regression it guards; the four-vertex fixture alone fails on both permutations of the parent revision, so the order-invariance claim itself rests on the 596-vertex arm in tests/test_contour_tree_scatter_equivalence.py:151.\nSCORE fit: 19\nJUSTIFICATION fit: the fix reuses the existing event-condition idiom two lines above it at nova/equilibrium/contour_tree.py:459 and the new test reuses the file's own _split helper, its names carry no plan label, and its fragment docs/evidence/fragments/contour-tree-topology-authority/split-arc-edge-order.html uses the section-plus-code shape of its sibling split-sweep-wall-outside.html.\nSCORE reuse: 20\nJUSTIFICATION reuse: a capability search over nova/, tests/ and benchmarks/ for an existing order-independent component-birth mechanism found only the sweep's own births/representative machinery, which this change extends in place at nova/equilibrium/contour_tree.py:462 rather than forking; no new function, class or module is added.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T041752699011-split-arc-edge-order/manifest.md:15 follow-on: the tests: line names only tests/test_contour_tree_scatter_equivalence.py, but the gate the brief set was six per-file commands and it is the six-command string that ran; promotion fills its gate receipt from this line (the baseline_suite/after_suite arms carry all six), so the receipt for this run understates the studied set until the line lists every command or names the aggregate.\n",
+  "review_run_id": "r-20261023T051323745983-review-of-split-arc-edge-order-8d4a53238dc9",
+  "reviewed_base_sha": "3baa4796e5cbaac304700eeb940bb11dd7ccfbaa",
+  "reviewed_head_sha": "8d4a53238dc9483dad2f29b47c9ce66b18443f65",
+  "reviewed_run_id": "r-20261023T041752699011-split-arc-edge-order",
+  "scores": {
+    "durability": 19,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T05:33:00Z",
+  "total": 117
+}

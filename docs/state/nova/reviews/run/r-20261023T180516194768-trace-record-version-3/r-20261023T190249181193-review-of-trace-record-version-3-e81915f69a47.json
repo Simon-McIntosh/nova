@@ -1,0 +1,52 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-23T19:17:08.036Z",
+  "dispatched_at": "2026-10-23T19:04:51Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/efit_axis_adjudication/records.py",
+      "line": 48,
+      "severity": "non-blocking",
+      "summary": "The adapter TraceRecord keeps non-optional field annotations (saddle_source_node: int through wall_level: float, lines 37-48) while parse_record now assigns None for a version-3 record, and downstream analyse.py:324 float(record.wall_level) and analyse.py:318 int(record.saddle_source_node) now raise TypeError on a record that previously refused at read time with a clear header ValueError."
+    }
+  ],
+  "project": "nova",
+  "review": {
+    "call_sites": "scripts/prototypes/efit_field_swap/crosscheck.py:1075, scripts/prototypes/efit_maximin_certificate/certificate.py:53, scripts/prototypes/efit_axis_adjudication/analyse.py:196, scripts/prototypes/efit_axis_adjudication/plot.py:257, scripts/prototypes/efit_axis_adjudication/refresh.py:30",
+    "findings": [
+      "FINDING scripts/prototypes/efit_axis_adjudication/records.py:48 non-blocking: parse_record now returns None for wall_level/saddle_refined/saddle_contested/saddle_source_node on a version-3 record while these fields are annotated non-optional, and analyse.py:324/318 call float()/int() on them, so a record that previously refused at read time now raises a TypeError deeper in the analysis."
+    ],
+    "justifications": [
+      "JUSTIFICATION goal_fidelity: trace_record.py:157-186 parses both layouts and retains each format's decision fields, and records.py:75-104 removes the second parser.",
+      "JUSTIFICATION evidence: the gate named in the done_when ran at base (base-capacity.log, 8 failed/1 passed/EXIT=1) and at head (after-capacity.log, 9 passed/EXIT=0) and both logs are on disk.",
+      "JUSTIFICATION scope_discipline: the four files in git diff --stat e81915f69 are exactly the declared write paths, and nova/equilibrium/topology.py is untouched.",
+      "JUSTIFICATION durability: tests/test_trace_record_versions.py asserts parser output against literal expectations and needs the version-3 branch to exist; the manifest's negative control reinstated the version-2-only header check and it reddened (9 failed, 2 passed, EXIT=1).",
+      "JUSTIFICATION fit: records.py:16 imports the sibling package the way 209 files under scripts/ already do, and the new symbols (level_psi, anchor_r, anchor_z) carry no version or plan label.",
+      "JUSTIFICATION reuse: records.py:75 deletes its own parser and delegates to the owner at trace_record.py:144, so the change removes a fork rather than adding one."
+    ],
+    "verdicts": [
+      "VERDICT goal: the node goal is to parse BOUNDARY_LEVEL_TRACE 3 while keeping version 2 working and route axis adjudication through the shared reader; scripts/prototypes/efit_field_swap/trace_record.py:157 accepts both headers and records.py:75 delegates to it.",
+      "VERDICT done_when: the done_when names the slow cases of tests/equilibrium/test_topology_contour_mesh_capacity.py at base and head; the manifest records base-capacity.log at 8 failed/1 passed/EXIT=1 and after-capacity.log at 9 passed/EXIT=0.",
+      "VERDICT write_paths: the manifest declares six paths; every one of the four files in the diff (trace_record.py, records.py, tests/test_trace_record_versions.py, the evidence fragment) is inside them.",
+      "VERDICT manifest: read; it states the two-header test passed 2 of 2 (after-header.log), records the negative control (negative-control.log, 9 failed/2 passed/EXIT=1) and carries baseline_suite/after_suite JSON.",
+      "VERDICT diff: read commit by commit against d246049f5; four files changed, the version-3 metadata line reduced to a single polarity field and the decision line re-pointed to axis psi/R/Z, escape level psi, anchor R/Z, feedback psi, matching the imas-efit writer at src/EFIT/boundary_level_trace.f90:219-229 and its reader at :288-300."
+    ]
+  },
+  "review_run_id": "r-20261023T190249181193-review-of-trace-record-version-3-e81915f69a47",
+  "reviewed_base_sha": "d246049f532567c80a70770cef4fc9f610547f2d",
+  "reviewed_head_sha": "e81915f69a47c0eb7d7eeb8664b6dc7ad5fc9d88",
+  "reviewed_run_id": "r-20261023T180516194768-trace-record-version-3",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T19:21:30.846088+00:00",
+  "total": 111
+}

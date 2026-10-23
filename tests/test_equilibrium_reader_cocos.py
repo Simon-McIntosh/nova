@@ -33,7 +33,8 @@ CASES = {
     "105069/3": "3.39.0",
 }
 
-#: pulses whose digits contradict their DD version, as ``pulse/run -> (version, digit)``.
+#: pulses whose digits contradict their DD version, as ``pulse/run`` ->
+#: ``(version, failing digit)``.
 REFUSED = {
     "105014/1": ("3.38.1", "sigma_Bp=-1"),
     "105013/1": ("3.38.1", "sigma_rho_theta_phi=-1"),

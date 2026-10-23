@@ -604,19 +604,19 @@ class Equilibrium(Chart, GetSlice):
                 )
             signal_maps.append(signal_map)
         translated = {
-            field: np.array(self.data[field].data, dtype=float)
-            for field, _ in self.convention_fields
-            if field in self.data
+            name: np.array(self.data[name].data, dtype=float)
+            for name, _ in self.convention_fields
+            if name in self.data
         }
         for itime, signal_map in enumerate(signal_maps):
-            for field, path in self.convention_fields:
-                if field not in translated:
+            for name, path in self.convention_fields:
+                if name not in translated:
                     continue
-                translated[field][itime] = self.translated(
-                    signal_map, path, self.data[field][itime].data
+                translated[name][itime] = self.translated(
+                    signal_map, path, self.data[name][itime].data
                 )
-        for field, values in translated.items():
-            self.data[field] = (self.data[field].dims, values)
+        for name, values in translated.items():
+            self.data[name] = (self.data[name].dims, values)
         self.data.attrs["cocos"] = NOVA_CONVENTION
 
     @property

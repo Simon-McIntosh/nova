@@ -40,11 +40,11 @@
 <p>The census recorded this site as an internal consumer with no IDS read. The <code>InverseDesign</code> row extracts its ψ constraint with <code>self["psi_boundary"]</code>, and <code>Control</code> is <code>PlasmaPoints</code> over <code>Profile(Flux, Equilibrium, GetSlice, CoilData)</code>, so the item resolves through the sample built from the equilibrium source rather than through the levelset solve the writer reads in the table above. The evidence is the covering test: <code>tests/test_pulsedesign.py::test_ids_file_cache</code> sets <code>time_slice[0].boundary_separatrix.psi = 66</code> on the input IDS and then reads back <code>design_a["psi_boundary"] == 66</code> — the raw stored value, tracked with the input. A plasma's own solved boundary flux could not follow a change to an input IDS field. So the value this line negates is in the source read's convention, not nova's, and the negation is an implicit COCOS 11 → 17 conversion that only holds while the source is DD3. That conversion belongs at the reader, which is the node carrying <code>f-ddc-002</code> for <code>nova/imas/equilibrium.py</code> and <code>nova/imas/getslice.py</code>. <strong>Coupled field: <code>Equilibrium</code>/<code>EquilibriumData.psi_boundary</code> as reached by <code>GetSlice</code>.</strong> The line is left byte-identical.</p>
 
 <h2 id="dd-internal-sites-tests">The COCOS 17 tests, and the values they pin</h2>
-<p><code>tests/test_internal_cocos_sites.py</code>, 7 tests, 7 passed. It fixes the COCOS 17 state and checks each changed site's sign-sensitive output against the value the base produced, so a renamed-but-flipped sign is red:</p>
+<p><code>tests/test_internal_cocos_sites.py</code>, 8 tests, 8 passed. It fixes the COCOS 17 state and checks each changed site's sign-sensitive output against the value the base produced, so a renamed-but-flipped sign is red:</p>
 <ul>
 <li>the owner: <code>CONVENTION.identifier == 17</code>, <code>CONVENTION.digits == nova_cocos.convention(17).digits</code>, <code>SIGMA_BP == &minus;1</code>, and <code>TOTAL_FLUX_FACTOR == tau ** CONVENTION.e_bp</code>;</li>
 <li>the writer: <code>psi_write_factor(DD3_CONVENTION) == &minus;1.0</code> and <code>psi_write_factor(DD4_CONVENTION) == +1.0</code>, with <code>dd_equilibrium_convention("3.42.0") == DD3_CONVENTION</code> and <code>dd_equilibrium_convention("4.1.0") == DD4_CONVENTION</code> tying the version to the convention. <code>psi_write_factor(DD3) * [100, &minus;50, 12.5]</code> equals the base literal's <code>-[100, &minus;50, 12.5]</code> element for element;</li>
-<li>the display levels: the internal convention's sign applied to a 51-point level array equals the base negation, reversed order included.</li>
+<li>the display levels: both tests call the production <code>Extrapolate.plot_2d_masked</code> on a bare instance whose flux plot is replaced by a recorder, so the levels the site hands on are read from the site rather than re-stated beside it. One pins the value (the internal convention's sign applied to a 51-point array equals the base negation, reversed order included); the other pins the site's dependence on the owner, by monkeypatching the module's <code>NOVA_CONVENTION</code> to COCOS 11 and requiring the handed-on levels to come back <em>un</em>-negated. That second test is the one a bare negation cannot pass only because both signs agree today: <code>SIGMA_BP</code> is &minus;1, so a value assertion alone cannot separate the two forms. Reverting the site to <code>-levels[::-1]</code> fails it, and it is the only test reverted by that change.</li>
 </ul>
 <p><strong>Changed expectations: none.</strong> Every factor is &minus;1 for a DD3 target, so the writer, the display and the tests all carry the base's values.</p>
 
@@ -56,7 +56,7 @@
 <tr><th scope="row"><code>tests/test_pulsedesign.py</code></th><td>5 skipped</td><td>5 skipped</td></tr>
 <tr><th scope="row"><code>tests/test_pointconstraint.py</code></th><td>5 passed, 14 skipped</td><td>5 passed, 14 skipped</td></tr>
 <tr><th scope="row"><code>tests/test_extrapolate.py</code></th><td>2 passed, 10 skipped</td><td>2 passed, 10 skipped</td></tr>
-<tr><th scope="row"><code>tests/test_internal_cocos_sites.py</code></th><td>absent</td><td>7 passed</td></tr>
+<tr><th scope="row"><code>tests/test_internal_cocos_sites.py</code></th><td>absent</td><td>8 passed</td></tr>
 </tbody>
 </table>
 <p><strong>Added failures: 0.</strong> <code>tests/test_shape_inverse.py</code> collects 29 tests and does not finish inside a 560 s bound on the CPU lane (18 of 29 before the bound, heavy JAX compiles); it is not baselined and is named under follow-ons. The convention module's change is additive — three new names and no edit to any existing definition — so the seven files that import it are unaffected in behaviour.</p>
@@ -72,11 +72,13 @@
 
 <h2 id="dd-internal-sites-control">Literal negative control</h2>
 <p>Declared mutation: in a scratch copy, give one converted site the opposite sign; its COCOS 17 test fails on its own assertion. Applied as a sign flip on <code>psi_write_factor</code>'s return, and the run is red against the same file that is green at the head: exit 1, 3 failed of 7, the failure ids being <code>test_a_dd3_write_carries_the_flux_sign_flip</code>, <code>test_a_dd4_write_passes_the_internal_flux_through</code> and <code>test_the_written_psi_keeps_its_value</code> — the last failing on its own element-for-element assertion against the base values. The mutation was reverted and the tree is byte-identical to the head commit. Red log: <code>logs/negative-control-inverted-write-sign.log</code>.</p>
+<p><strong>Second control, for the repair:</strong> reverting the display site to the bare <code>-levels[::-1]</code> at <code>nova/imas/extrapolate.py:352</code> leaves the value test green, because the two signs agree while <code>SIGMA_BP</code> is &minus;1, and reddens <code>test_the_flux_contour_levels_follow_the_internal_convention</code> alone: exit 1, 1 failed of 8. The mutation was reverted, and the tree is byte-identical to the head for that file. Red log: <code>logs/negative-control-reverted-display-site.log</code>.</p>
 
 <h2 id="dd-internal-sites-commits">Commits</h2>
 <ul>
 <li><code>77fc5e470</code> — the owner statement in <code>nova/equilibrium/convention.py</code>.</li>
 <li><code>404f1c77b</code> — the writer factor, the display sign, the deleted negation and the removed tag, with the new test file.</li>
+<li><code>0a3ec0e01</code> — the display test drives <code>plot_2d_masked</code> itself and reddens when the site reverts.</li>
 </ul>
 
 </main>

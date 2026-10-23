@@ -12,6 +12,13 @@
   ],
   "completed_at": "2026-10-23T02:05:16.916Z",
   "dispatched_at": "2026-10-23T01:21:47Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-split-sweep-wall-outside-41a80bc4f40d",
+      "recorded_at": "2026-10-23T02:51:05.089180+00:00"
+    }
+  },
   "findings": [
     {
       "file": "nova/equilibrium/contour_tree.py",

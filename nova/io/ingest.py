@@ -58,12 +58,9 @@ class IdsIngest:
     ----------
     resolver:
         Standard-name resolver used to key and annotate each signal.
-    cocos:
-        COCOS convention of the source data, carried as a store attribute.
     """
 
     resolver: StandardNameResolver = field(default_factory=StandardNameResolver)
-    cocos: int = 11
 
     def _variable_name(self, name: str, provisional: bool) -> str:
         """Return the store variable name, namespacing provisional signals."""
@@ -85,7 +82,16 @@ class IdsIngest:
         The IDS is assumed homogeneous in time (the shared time base lives at
         the IDS level); each signal is stored over the ``time`` coordinate with
         its unit, source, and originating IDS path as variable attributes.
+
+        The COCOS convention the fields are in follows the DD version the IDS
+        was read at -- DD3 is COCOS 11 and DD4 is COCOS 17 -- and is written as
+        the store's ``cocos`` attribute, the same convention the store keys on.
         """
+        # local import: sourcemap imports this module's PROVISIONAL_NAMESPACE, so
+        # a module-level import would cycle
+        from nova.io.sourcemap import dd_equilibrium_convention
+
+        cocos = dd_equilibrium_convention(str(dd_version))
         time = np.asarray(ids.time, dtype=float)
         data_vars: dict[str, xarray.DataArray] = {}
         provisional: list[str] = []
@@ -113,7 +119,7 @@ class IdsIngest:
             "uri": uri,
             "dd_version": str(dd_version),
             "ids_name": ids.metadata.name,
-            "cocos": self.cocos,
+            "cocos": cocos,
             "provenance": provenance,
             "provisional_names": provisional,
         }

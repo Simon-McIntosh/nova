@@ -1,0 +1,60 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-23T19:54:04.416Z",
+  "dispatched_at": "2026-10-23T19:43:20Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/dd-cocos-ingest.html#s5 (snapshot plan.html:80, done-when (2))",
+      "id": "reasoning-1",
+      "reason": "on the only route from an IDS read to the measure the values are untranslated, so the table would be measured in COCOS 11 and reported as COCOS 17; the section must name the reader that feeds it, or take the dependency on the reader node for the node to produce the evidence it promises.",
+      "text": "the node is asked to report the measure for DINA 105052/1, 105069/3, CORSICA 130506/6 \"in COCOS 17 after translation\", but \u00a75 names no reader that supplies these rows, and the only production caller of the measure today is the MAST parity chain: `grep -rln edge_consistency nova tests scripts` returns `nova/imas/edge_consistency.py`, `nova/imas/mast_parity_chain.py` and `tests/test_edge_consistency.py` only, and `nova/imas/equilibrium.py` and `nova/imas/getslice.py` (the readers that supply an IDS equilibrium slice) contain no call to `translate_equilibrium` \u2014 they still pass raw IDS values and are deferred to the open followup f-ddc-002",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/dd-cocos-ingest.html#s5 (snapshot plan.html:80, done-when (3))",
+      "id": "wiring-1",
+      "reason": "as written the \u00a75 node would settle the \u00a76 reference on numbers the plan's own decision says are dominated by the unfixed sign, and f-ddc-007 would then overturn the verdict; \u00a75's done-when (3) needs to gate on the sign fix (or state the sign-corrected reading) to close on a verdict that survives.",
+      "text": "done-when (3) asks the node to confirm or revise the iter-passive-plasma-circuit \u00a76 reference on its table, but decision `d-ddc-flux-function-sign` (recorded the same day as this plan version) states that on exactly these three conforming sources, read through the translator, nova's flux functions put the profile current anti-parallel to the map current (slope \u22120.96, correlation \u22120.99), and followups f-ddc-005/006/007 place the fix at `nova/equilibrium/convention.py`'s owner as a \u00a74 node with the table to be re-measured afterwards \u2014 yet \u00a75 declares `depends-on` only `dd-cocos-ingest#s1` and `dd-cocos-ingest#s2` and its body mentions the sign defect nowhere",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/dd-cocos-ingest.html#s5 (snapshot plan.html:79, body)",
+      "id": "reasoning-2",
+      "reason": "the mechanism \u00a75 relies on (measure the edge residual with the repository's one structured-grid operator and factor) is unaffected; only the description of the base state is stale, and correcting it changes no node's work.",
+      "text": "the body states that `nova/imas/mast_parity_chain.py::_profile_reproduction_residuals` \"assembles \u0394* inline by central differences over the plasma flux and recovers the current density as \u2212\u0394*/(TOTAL_FLUX_FACTOR \u03bc0 R)\" and that \"\u00a75's algebra stays consistent with that inline operator\", but the landed code no longer assembles it inline: `_interior_grid_current_density` pads the map by one ring and calls `grid_current_density` (mast_parity_chain.py:396\u2013422), which delegates to `nova/equilibrium/map_extraction.apply_delta_star` \u2014 the same operator \u00a75's own module docstring names",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "52e690bc0688e6bd3841d40ecc221aa76ff4617e51543b6c187bd278144d6aeb",
+  "plan_slug": "dd-cocos-ingest",
+  "plan_version": 83,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261023T192559001171-plan-review-of-dd-cocos-ingest",
+  "reviewed_blob_sha": "6e9fd900da526b0287ce5204173869ddc6560fa3",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every cited module, symbol and record resolves in the tree (`nova/imas/edge_consistency.py` with `EDGE_BAND_RELATIVE_THRESHOLD = 1.0e-3`, `nova/imas/mast_parity_chain.py::_profile_reproduction_residuals`, `PROFILE_RESIDUAL_RMS` in `nova/imas/parity_tolerances.py`, `nova/io/sourcemap.py::translate_equilibrium`, `docs/research/dd-cocos-census.html`, `imas_ambix/challenge/convention.py`), and the extensionless hrefs `/nova/research/dd-cocos-census` and `/nova/evidence/fragments/...` resolve as `<path>.html`.",
+    "done_when": "pass \u2014 every section states a falsifiable measure (counts before/after, refusal-by-name, per-consumer sign test) and \u00a75 carries a literal negative control whose perturbed state must be reported inconsistent.",
+    "evidence_paths": "pass \u2014 \u00a75's table lands in `docs/research/dd-cocos-census.html` and \u00a71/\u00a72 cite their fragment and research records, all durable repository paths rather than a scratchpad.",
+    "naming": "pass \u2014 no plan label, stage name, ticket or version tag is carried into a symbol, filename or comment that a node would create.",
+    "reasoning": "a finding \u2014 \u00a75's done-when (2) asks for the measure to be reported over three IDS sources \"in COCOS 17 after translation\" but names no caller that supplies those rows, and no production caller of `edge_consistency` reads IDS equilibria at all.",
+    "single_goal": "pass \u2014 each section names one deliverable (census, translator, readers, internals, edge measure); the \u00a73 and \u00a74 splits are already carried by named followups.",
+    "wiring": "a finding \u2014 \u00a75's done-when (3) settles the iter-passive-plasma-circuit \u00a76 reference on a table it asks to be measured before \u00a74's flux-function sign fix, but \u00a75 declares `depends-on` only s1 and s2."
+  },
+  "section_digests": {
+    "_document": "5e569b053d5c4d75754c7537a6228377a380ef2460ce2c25505df874f6bd7009",
+    "s0": "d7c3143494e97518c859457355f006ec1a3961adf5e50d514822385ec2941326",
+    "s1": "8493846bddbd37e17766c3f28357c4dec07fde5dad711cf4d8096db87e577f89",
+    "s2": "38e4a6fd8cb459d4e887ae55cc12b322f74419e30f3f46aaa3022d95172c4f71",
+    "s3": "f3aa4bf7729da3932ab40219de78130254a9501882e530b371e10e120e37eeec",
+    "s4": "5fec46897afddfefa542d8feec59f87425f62eb157c961086e299a411c1ddaaa",
+    "s5": "db46395f9321959e91cc657923e567fa72cda1e12fa3aa977d6a83243b8e1d36"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T19:56:18.271208+00:00"
+}

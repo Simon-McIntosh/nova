@@ -24,7 +24,24 @@
   "plan_slug": "separatrix-spline-extraction",
   "plan_version": 129,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "duplicate_owner-1",
+      "reason": "section 4 has landed with compare_closed_boundaries in nova/equilibrium/boundary_comparison.py wired to both EFIT banks; the Solovev certifier's sampled Hausdorff at benchmarks/solovev_certificate.py:1305 is still a second metric and is left for a separate consolidation node, since the node now being dispatched only removes the wall-height path",
+      "when": "2026-10-23T20:31:36.563882+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "section 4 has landed with compare_closed_boundaries in nova/equilibrium/boundary_comparison.py wired to both EFIT banks; the Solovev certifier's sampled Hausdorff at benchmarks/solovev_certificate.py:1305 is still a second metric and is left for a separate consolidation node, since the node now being dispatched only removes the wall-height path",
+      "when": "2026-10-23T20:31:36.563882+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/separatrix-spline-extraction/r-20261005T154350818496-plan-review-of-separatrix-spline-extraction.json",
   "review_run_id": "r-20261005T154350818496-plan-review-of-separatrix-spline-extraction",
   "reviewed_blob_sha": "ad88c33acf3cfa72621b9be3f96d1434158cc9b4",
   "rubric": "design",

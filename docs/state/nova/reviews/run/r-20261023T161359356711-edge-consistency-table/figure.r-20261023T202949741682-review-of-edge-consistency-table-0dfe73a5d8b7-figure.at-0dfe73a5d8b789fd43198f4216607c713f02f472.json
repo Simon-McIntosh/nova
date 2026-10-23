@@ -10,7 +10,7 @@
   "call_sites": [
     "none"
   ],
-  "completed_at": "",
+  "completed_at": "2026-10-23T20:49:09.155Z",
   "dispatched_at": "2026-10-23T20:30:32Z",
   "figure_checks": {
     "clipping": "Ink bounding box and outer-2px ink counts: image-0 x 4..1395, y 4..713 with (top, bottom, left, right) = (0, 0, 0, 0); image-1 x 4..1395, y 20..709 with (0, 0, 0, 0). No text or data is cut by the canvas edge in either figure, and no label runs off the panel.",
@@ -101,6 +101,6 @@
   ],
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-10-23T20:49:11.921328+00:00",
+  "timestamp": "2026-10-23T20:58:23.461188+00:00",
   "total": null
 }

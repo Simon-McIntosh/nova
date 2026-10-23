@@ -229,10 +229,14 @@ def composite_cut_moments(
 
     Every cut cell books the same one support: the selected normal-form portion
     inside the effective disk about the saddle and the ordinary quadratic cut
-    outside it, both restricted to the closed normal-form component the read
-    admits. Neither a scalar blend nor a whole-cell replacement chosen by
-    centre distance, crossing count or ordinary validity is used here; those
-    remain qualification checks on the read.
+    outside it, both confined by the read's connectivity weight and both taken
+    whole. Neither a scalar blend nor a whole-cell replacement chosen by centre
+    distance, crossing count or ordinary validity is used here; those remain
+    qualification checks on the read. The bookable set is the read's own
+    connectivity weight rather than its closed normal-form component: a read
+    with no closed component would otherwise book nothing here, and a booking
+    that is zero at the state the Newton step is built from contributes nothing
+    to that step's derivative.
 
     Only the cells the composite books are traced, gathered to ``capacity`` by
     ``booking_band``, and a band wider than that capacity refuses rather than
@@ -241,11 +245,12 @@ def composite_cut_moments(
     centre, pitch = geometry.centre, geometry.pitch
     form = reading.saddle_form
     coefficient = reading.field_coefficients
-    confined = confined_component(reading)
     signed = sigma * coefficient
     signed = signed.at[:, 0].add(-sigma * reading.boundary_flux)
 
     def one(index):
+        connectivity = reading.path_weight[index]
+        selected = jnp.broadcast_to(connectivity > 0, (2,))
         moments, _ = current.composite_cut_moments(
             geometry.vertices[index],
             geometry.vertex_count[index],
@@ -255,17 +260,16 @@ def composite_cut_moments(
             coefficient[index],
             signed[index],
             profile,
-            reading.fragment_selected[index],
+            selected,
             reading.edge_interval[index],
-            reading.fragment_selected[index],
+            selected,
             reading.axis_flux,
             reading.boundary_flux,
             reading.disk_position,
             reading.disk_radius,
             segments,
-            confined=confined,
         )
-        return moments
+        return moments * connectivity
 
     band = booking_band(geometry, reading)
     count = jnp.sum(band, dtype=jnp.int32)

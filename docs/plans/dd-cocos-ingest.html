@@ -24,8 +24,8 @@
   <title>DD COCOS Ingest | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="64">
-<meta name="plan-modified" content="2026-10-22">
+<meta name="plan-version" content="65">
+<meta name="plan-modified" content="2026-10-23">
 <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;dd-cocos-ingest#s1&quot;],&quot;s3&quot;:[&quot;dd-cocos-ingest#s2&quot;],&quot;s4&quot;:[&quot;dd-cocos-ingest#s3&quot;],&quot;s5&quot;:[&quot;dd-cocos-ingest#s1&quot;,&quot;dd-cocos-ingest#s2&quot;]}">
 </head>
 <body>
@@ -96,6 +96,11 @@
     <pre class="r-fu-prompt">/reckon-build dd-cocos-ingest §1</pre>
     <p class="r-fu-outcome"><p>§1 landed at merge <code>c188c6851</code>: <a href="/nova/research/dd-cocos-census">dd-cocos-census</a>. Next is §2, the translator built on the sourcemap.</p></p>
     </article>
+<article class="r-fu" data-id="f-ddc-002" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-build" data-written-at="2026-10-23" data-recommends-skill="/reckon-build dd-cocos-ingest §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Move the xarray equilibrium reader and getslice onto the translator</h4>
+    <div class="r-fu-body"><p>Split from the §3 readers node on 2026-10-23. <code>nova/imas/equilibrium.py</code> (Equilibrium and EquilibriumData) and <code>nova/imas/getslice.py</code> still pass raw IDS values through. The equilibrium reader renormalises to <code>psi_norm</code>, which absorbs a ψ sign flip, so moving these readers onto <code>translate_equilibrium</code> changes no normalised quantity and every signed one.</p><p>The work:</p><ul><li>Assert signed quantities in the tests (ψ, the axis and boundary flux, Ip, q, dp/dψ and FF′) on CORSICA 130506/6 and DINA 105069/3 at their written DD versions, and the refusal of DINA 105014/1 and 105013/1.</li><li>Negative control: bypass the translation and a signed assertion reddens.</li><li>Re-run the §1 sign search. The only permitted reader hit is the internal COCOS 17 check in <code>PlasmaSlice.prescribe</code>.</li><li>Gate: the readers' test files and every file that imports them, each in its own fresh process, judged by delta against the base.</li></ul></div>
+    <pre class="r-fu-prompt">/reckon-build dd-cocos-ingest §3</pre>
+    </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s1" data-id="c-run-r-20261022T075054587986-review-of-dd-cocos-census-9c256959d41f" data-who="reckon-build" data-when="2026-10-22T07:59:10.014Z">
@@ -121,6 +126,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261022T082744999453-dd-translator" data-who="reckon-build" data-when="2026-10-22T09:56:05Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/dd-cocos-ingest/dd-translator.html @ 1f32c239d</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20261023-s3-readers-split" data-who="reckon-build" data-when="2026-10-23T09:50:00Z">
+    <div class="r-comment-body"><p>The §3 node (run <code>r-20261022T194941418996-dd-readers</code>) is split. What it landed in its worktree:</p><ul><li><code>PlasmaSource.from_imas</code> goes through the translator.</li><li><code>PlasmaSlice.prescribe</code> keeps its σ_Bp guard as the internal COCOS 17 check, read from <code>nova_cocos.convention(17)</code>.</li><li><code>mast_efit</code>'s three ψ-like rows take the declared 3→17 factor.</li><li><code>Extrapolate.update</code> goes through the translator.</li><li>The DINA tests are re-pointed to conforming cases, with the Table I transcription restored.</li></ul><p>Its negative control is admissible: bypassing the translation reddens <code>test_from_imas_prescribes_corsica_130506_6</code>, which is refused by the internal check.</p><p>The equilibrium reader and getslice are carried by <code>f-ddc-002</code>; the split is recorded in that followup. The node now closes on three measurements:</p><ul><li>the base arm of the two machine-only <code>test_coupled_plant</code> failures (the sectioned-set reduction, and the sectioned self against the unsectioned box check), as one sirius job, judged by delta;</li><li>the re-run sign search with its hit counts;</li><li>its fragment.</li></ul></div>
 </div>
 </section>
 </main>

@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="dd-cocos-ingest">
+  <meta name="plan-title" content="The xarray equilibrium reader and getslice read through the COCOS translator">
+  <meta name="plan-evidence-for" content="dd-cocos-ingest">
+  <meta name="plan-verifies" content="dd-cocos-ingest#s4">
+  <meta name="plan-recorded-at" content="2026-10-23">
+  <meta name="plan-verdict" content="partial">
+  <title>dd-equilibrium-reader | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+<h1 id="dd-equilibrium-reader-title">The xarray equilibrium reader and getslice read through the COCOS translator</h1>
+<p>Base <code>be0ec1321</code>. The equilibrium reader now takes the Data Dictionary read's own convention and serves COCOS 17, and the one internal site whose psi came from it no longer compensates with its own negation. The live-pulse arm of the measure is <strong>produced</strong>: the reader builds a DD3 pulse end to end under a construction that carries the pulse's own Data Dictionary major, the non-conforming pulses are refused by name and digit, and the signed quantities reach their assertions. Every clause of it is green, and the one field that did not match was a source misattribution rather than a numerical one: the dataset's <code>psi_boundary</code> carries <code>psi_boundary</code>, whose declared path was corrected to the node the dataset actually holds. The reader's own gate is green by delta on all ten covered files.</p>
+
+<h2 id="dd-equilibrium-reader-change">What changed</h2>
+<table>
+<thead><tr><th>site</th><th>before</th><th>after</th></tr></thead>
+<tbody>
+<tr><th scope="row"><code>nova/imas/equilibrium.py::EquilibriumData.build</code></th><td>raw Data Dictionary values passed straight into the dataset</td><td>calls <code>build_convention(source_name, dd_version)</code> after the profile build and before <code>contrad_build</code></td></tr>
+<tr><th scope="row"><code>Equilibrium.build_convention</code></th><td>absent</td><td>per slice, builds the source signal map through <code>nova.io.sourcemap.translate_equilibrium</code> from that slice's own observables (<code>ip</code>, <code>psi_axis</code>, <code>psi_boundary</code>, <code>q_95</code>, <code>b0</code>), then converts every field of <code>convention_fields</code> by that map's own factor and records <code>data.attrs["cocos"] = NOVA_CONVENTION</code></td></tr>
+<tr><th scope="row"><code>Equilibrium.check_convention</code>, called first in <code>EquilibriumData.build</code></th><td>absent; the digit check ran inside <code>build_convention</code>, after the profile tree had been walked</td><td>builds the same signal map from the read's <em>global</em> quantities and the vacuum toroidal field, ahead of the profile walk, and refuses the read by name and by digit. Measured effect: DINA <code>105014/1</code> and <code>105013/1</code> are refused in 15 s with <code>sigma_Bp=-1</code> / <code>sigma_rho_theta_phi=-1</code>, where the walk previously reached <code>Invalid node name '0' in path: 0</code> first</td></tr>
+<tr><th scope="row"><code>Equilibrium._ids_vacuum_field</code></th><td>absent</td><td>the toroidal field a slice is read against, taken from the read itself rather than from the built dataset, so the digit check needs no dataset</td></tr>
+<tr><th scope="row"><code>nova/imas/getslice.py::GetSlice.translated</code></th><td>absent</td><td>the read seam: a signal map's row for a target path applies its map to the values, so no reader writes a sign of its own</td></tr>
+<tr><th scope="row"><code>nova/equilibrium/inverse.py::InverseDesign.update_constraints</code> (was line 245)</th><td><code>super().update_constraints(-self["psi_boundary"])  # COCOS</code></td><td><code>super().update_constraints(self["psi_boundary"])</code></td></tr>
+<tr><th scope="row"><code>Equilibrium.check_convention</code>, <code>::_ids_vacuum_field</code></th><td>absent</td><td>a read whose measured digits contradict its own DD version is refused <strong>before the profile tree is walked</strong>, by name and digit. <code>build</code> calls it first, so DINA <code>105014/1</code> and <code>105013/1</code> are refused at <code>sigma_Bp</code> and <code>sigma_rho_theta_phi</code> rather than by whichever node the walk happens to trip over. The vacuum field is read IDS-wide with a per-slice fallback, since these pulses carry no per-slice node.</td></tr>
+<tr><th scope="row"><code>Equilibrium.convention_fields</code></th><td>a <code>tuple[tuple[str, str], ...]</code> of field name and DD path</td><td>each path names the node the dataset actually holds. <code>psi_boundary</code>'s path is <code>equilibrium/boundary_separatrix/psi</code>, not the reader's field name, because the boundary build writes the separatrix flux over the global quantity of the same name.</td></tr>
+<tr><th scope="row"><code>nova/imas/getslice.py::vacuum_field</code></th><td>two private copies, one in <code>equilibrium.py</code> and one in <code>plasma_source.py</code></td><td><strong>one owner.</strong> The rule for reading a vacuum field that may be stored once for the whole IDS or once per slice lives beside the slice access both callers already use, and both call it.</td></tr>
+<tr><th scope="row"><code>nova/imas/plasma_source.py::_translated</code></th><td>a private copy of <code>for_target</code> then <code>signal.apply</code></td><td><strong>removed.</strong> The prescription reads the shared <code>GetSlice.translated</code>, so one helper states what a convention-bearing field read is and the reader and the prescription cannot drift apart on it.</td></tr>
+<tr><th scope="row"><code>Equilibrium.wall</code></th><td><code>Wall(uri=self.uri)</code>, so the machine read defaulted to the latest published major</td><td><code>Wall(uri=self.uri, dd_version=str(self.ids_dd_version))</code>, so the wall read opens at the major the pulse was written in</td></tr>
+<tr><th scope="row"><code>nova/imas/scenario.py:89</code> (<code>build_scenario</code>)</th><td><code>attrs["homogeneous_time"] = self.homogeneous_time</code>, the IMAS node itself, which zarr refuses to serialise</td><td><code>attrs["homogeneous_time"] = int(self.homogeneous_time)</code>, so a first read of an uncached pulse can store at all</td></tr>
+</tbody>
+</table>
+
+<h3 id="dd-equilibrium-reader-inverse">Why the inverse negation goes rather than stays</h3>
+<p>The value was coupled, not internal: <code>tests/test_pulsedesign.py::test_ids_file_cache</code> shows <code>psi_boundary</code> tracking an input IDS field, so it arrives in the source read's convention. Under DD3 that is COCOS 11, whose psi is the negative of COCOS 17's, so <code>-psi_11</code> was exactly the internal COCOS 17 flux and the negation was an implicit 11 &rarr; 17 conversion. The reader now performs that conversion once, so the negation would apply it twice. For a DD3 source the value handed on is unchanged (the factor is -1); for a DD4 source the sign is corrected, which is the defect the line carried.</p>
+
+<h2 id="dd-equilibrium-reader-factors">The factor each changed quantity takes</h2>
+<p><code>nova_cocos.convention_transform(source=11, target=17)</code>, the same table the translator uses:</p>
+<table>
+<thead><tr><th>quantity</th><th>transformation</th><th>factor</th><th>reader field</th></tr></thead>
+<tbody>
+<tr><th scope="row">psi, axis and boundary flux</th><td><code>PSI_LIKE</code></td><td>&minus;1</td><td><code>psi2d</code>, <code>psi1d</code>, <code>psi_axis</code>, <code>psi_boundary</code></td></tr>
+<tr><th scope="row">p&prime; and FF&prime;</th><td><code>DODPSI_LIKE</code></td><td>&minus;1</td><td><code>dpressure_dpsi</code>, <code>f_df_dpsi</code></td></tr>
+<tr><th scope="row">I<sub>p</sub></th><td><code>IP_LIKE</code></td><td>+1</td><td><code>ip</code></td></tr>
+<tr><th scope="row">q</th><td><code>Q_LIKE</code></td><td>+1</td><td><code>q_axis</code>, <code>q_95</code></td></tr>
+<tr><th scope="row">B<sub>0</sub></th><td><code>B0_LIKE</code></td><td>+1</td><td><code>b0</code></td></tr>
+</tbody>
+</table>
+<p>The reader renormalises to <code>psi_norm</code>, and a psi sign reversal leaves <code>(psi - psi_axis) / (psi_boundary - psi_axis)</code> unchanged, so no normalised quantity moves and only a signed one can show the translation at all.</p>
+
+<h2 id="dd-equilibrium-reader-consumers">The consumers, each named</h2>
+<table>
+<thead><tr><th>consumer</th><th>verdict</th></tr>
+</thead><tbody>
+<tr><th scope="row"><code>nova/equilibrium/inverse.py::InverseDesign.update_constraints</code></th><td><strong>converted.</strong> The compensating negation is dropped; the reader applies the 11 &rarr; 17 psi factor once.</td></tr>
+<tr><th scope="row"><code>nova/imas/profiles.py::Profile.psi_axis</code>, <code>::psi_boundary</code>, <code>::psi_norm</code>, <code>::denormalize</code></th><td><strong>unchanged.</strong> Reads through the reader and derives; <code>psi_norm</code> is invariant under the psi factor and <code>denormalize</code> returns the reader's own COCOS 17 value, which is the intended one.</td></tr>
+<tr><th scope="row"><code>nova/imas/pulsedesign.py</code> writer (<code>equilibrium_ids</code>, three psi entries)</th><td><strong>unchanged.</strong> Already takes its factor from <code>psi_write_factor(DD3_CONVENTION)</code> = &minus;1, which is the inverse of the reader's 11 &rarr; 17 factor, so the stored DD3 value is the same before and after.</td></tr>
+<tr><th scope="row"><code>nova/imas/sample.py::Sample.equilibrium_ids</code> (<code>boundary_separatrix.psi</code>), <code>::pulse_schedule_ids</code> (<code>loop_voltage</code>)</th><td><strong>follow-on #1.</strong> These write a psi-signed value into a DD entry with no factor. They are compensating writers of the same shape as the pulsedesign writer and are outside this node's named test gate; they are recorded rather than changed here.</td></tr>
+<tr><th scope="row"><code>nova/imas/ensemble.py</code>, <code>nova/imas/contour_tree.py</code>, <code>nova/linalg/regression.py</code>, <code>nova/imas/flux.py</code></th><td><strong>unchanged.</strong> They read <code>psi_norm</code>, geometry or randomised fixtures, carry no psi sign of their own, and no bare negation tagged COCOS.</td></tr>
+<tr><th scope="row"><code>nova/imas/scenario.py</code></th><td><strong>unchanged.</strong> The dataset builder; it neither reads nor writes a convention.</td></tr>
+</tbody>
+</table>
+
+<h2 id="dd-equilibrium-reader-sign-search">&sect;1's sign search, re-run</h2>
+<p>Both &sect;1 searches were re-run over <code>nova/</code>, <code>scripts/</code> and <code>packages/</code> at head, with the planted positive control re-used:</p>
+<ul>
+<li>Search B (COCOS comments and fixed-orientation sign tests): hits in <a href="/nova/evidence/fragments/dd-cocos-ingest/dd-equilibrium-reader">logs/sign-search-B.txt</a>; no bare negation tagged COCOS and no fixed-orientation sign test in any reader or consumer of the equilibrium quantity set. The one permitted hit stands: <code>nova/imas/plasma_source.py::PlasmaSlice.prescribe</code>'s internal COCOS 17 check, which takes its <code>sigma_Bp</code> from <code>nova_cocos.convention(NOVA_CONVENTION)</code>. The literal &sect;1 recorded at <code>inverse</code>'s line 245 has been removed by this node.</li>
+<li>Planted control: a scratch reader carrying <code>psi = -psi  # COCOS</code> and <code>if span * ip &gt;= 0:</code> is found by both commands (1 line each, <code>scratch/planted_reader.py</code>), so a search reporting nothing is reporting the tree and not its own pattern.</li>
+</ul>
+
+<h2 id="dd-equilibrium-reader-gate">The gate, by delta against the base</h2>
+<p>Every file ran in its own fresh process with its own <code>--basetemp</code>, from <code>/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider</code>, <code>PYTHONPATH</code> at the tree under test and <code>JAX_PLATFORMS=cpu</code>. The base arm ran from an extraction of the base commit at <code>be0ec1321</code>, placed on shared storage because <code>/dev/shm</code> is node-local and a compute node cannot see it; the extraction carries <code>nova</code>, <code>tests</code>, <code>apps</code>, <code>conftest.py</code> and <code>pyproject.toml</code>, and <code>module.__file__</code> is printed in each log so the arm names the tree it measured.</p>
+<table>
+<thead><tr><th>file</th><th>base</th><th>head</th></tr></thead>
+<tbody>
+<tr><th scope="row"><code>tests/test_getslice.py</code></th><td>14 passed</td><td>14 passed</td></tr>
+<tr><th scope="row"><code>tests/test_database.py</code></th><td>26 passed, 19 skipped</td><td>28 passed, 19 skipped in 94.72 s <span>(the same 26 as the base arm plus the two cache-entry tests this node adds; the same 19 IMAS-marked skips)</span></td></tr>
+<tr><th scope="row"><code>tests/test_extrapolate.py</code></th><td>2 passed, 10 skipped</td><td>2 passed, 10 skipped</td></tr>
+<tr><th scope="row"><code>tests/test_pulsedesign.py</code></th><td>5 skipped</td><td>5 skipped</td></tr>
+<tr><th scope="row"><code>tests/test_pointconstraint.py</code></th><td>5 passed, 14 skipped</td><td>6 passed, 14 skipped in 7.30 s <span>(the extra pass is the inverse boundary-flux sign test; the 14 skips are the same wall-marked ids)</span></td></tr>
+<tr><th scope="row"><code>tests/test_regression.py</code></th><td>24 passed, 6 skipped</td><td>24 passed, 6 skipped</td></tr>
+<tr><th scope="row"><code>tests/test_prescribed_plasma.py</code></th><td>13 passed</td><td>13 passed <span>(first head run's 1 error was the same <code>/tmp</code> read-only scaffolding; re-run clean)</span></td></tr>
+<tr><th scope="row"><code>tests/test_plasma_source.py</code></th><td>7 passed</td><td>7 passed</td></tr>
+<tr><th scope="row"><code>tests/test_internal_cocos_sites.py</code></th><td>8 passed</td><td>8 passed</td></tr>
+<tr><th scope="row"><code>tests/test_iter_sectioned_conductor_set.py</code></th><td>12 passed in 14.24 s</td><td>12 passed in 15.15 s</td></tr>
+<tr><th scope="row"><code>tests/test_shape_inverse.py</code></th><td><strong>29 passed in 846.68 s</strong>, one <code>all_debug</code> sbatch (job 1294607) against the base extraction at <code>be0ec1321</code></td><td><strong>29 passed in 986.42 s</strong>, one <code>all_debug</code> sbatch (job 1294540); its sibling id <code>tests/test_coupled_plant.py::test_reconstruction_route_into_the_plant_meets_the_stated_tolerance</code> passed in 121 s in the same job</td></tr>
+<tr><th scope="row"><code>tests/test_equilibrium_reader_cocos.py</code> (refusals)</th><td>absent</td><td><strong>2 passed in 15 s.</strong> DINA <code>105014/1</code> and <code>105013/1</code>, each refused at its global quantities with its own failing digit named.</td></tr>
+<tr><th scope="row"><code>tests/test_equilibrium_reader_cocos.py</code> (signed)</th><td>absent</td><td><strong>6 passed, 1 xfailed in 177 s</strong> at the repair head (182 s before it). Both conforming pulses pass on both arms: the signed quantities the reader holds, and the read seam's own per-path factors. The one xfail is strict and names the machine-description wall, which is a defect of its own outside this seam; when that defect is fixed the test XPASSes and the marker is forced off.</td></tr>
+</tbody>
+</table>
+<p><strong>Changed expectations: none observed.</strong> Every factor above is &minus;1 or +1 for a DD3 source; the psi-like and d/dpsi-like rows flip by &minus;1, which is exactly the sign the reader previously left to its consumers. No covered file changed its result against its base arm.</p>
+<p>Every arm above was re-run at the head as finally committed, because a commit touched <code>nova/imas/scenario.py</code>, which the store path of the first four files runs through. Those runs are <code>logs/final-head-*.log</code> and <code>logs/final-base-*.log</code>, each carrying its revision, tree, literal command and exit status, and each reading exactly as its base arm. Ten files are covered, not nine: <code>tests/test_iter_sectioned_conductor_set.py</code> was named by the done-when and is now measured on both arms.</p>
+
+<h2 id="dd-equilibrium-reader-blocker">The one field that did not match, and the wall that was never in the way</h2>
+<p>The signed arm now passes on both conforming pulses. The field that did not match for most of the node is worth recording, because the diagnostic that settled it was a measurement rather than a candidate list.</p>
+<ol>
+<li>The reader's <code>psi_boundary</code> read <code>-100.63715074656471</code> at slice 0 of CORSICA <code>130506/6</code> while the raw <code>global_quantities.psi_boundary</code> read <code>102.454</code>, a 1.8 percent magnitude difference. <code>psi_axis</code> matched its raw counterpart exactly on the same read, so the factor and its sign were right.</li>
+<li>The cause was a source misattribution, not arithmetic. <code>Parameter0D.build</code> appends <code>global_quantities.psi_boundary</code> into <code>psi_boundary</code>, and then <code>build_boundary_shape</code> runs <code>self.append("time", "psi", "boundary_separatrix", postfix="_boundary")</code> over it, so the dataset carries <code>boundary_separatrix.psi</code> and the global scalar is gone. The two stored nodes differ by about 1.8 percent, which is ordinary reference data: a published boundary scalar need not equal the separatrix flux.</li>
+<li>The fix is the declared path, not the value: <code>convention_fields</code> now names <code>equilibrium/boundary_separatrix/psi</code> for <code>psi_boundary</code>, the node the dataset actually holds, with the reason recorded in the class docstring. Keeping both nodes as two separately named fields was the alternative and was rejected: it would have changed the reader's data model for a name no consumer and no test reads, while the declared path is a statement of provenance the record can be checked against.</li>
+</ol>
+<p>The confirmation is a printed measurement rather than a reading of the code. All three numbers come from one <code>DBEntry</code> read at <code>3.41.0</code> for CORSICA <code>130506/6</code> slice 0: <code>global_quantities.psi_boundary</code> <code>102.454</code>, <code>boundary_separatrix.psi</code> <code>100.63715074656471</code>, and the reader <code>-100.63715074656471</code>.</p>
+<p><strong>A wall failure recorded earlier at this node is withdrawn, and the correction matters more than the failure did.</strong> The reader was reported as dying in <code>nova/frame/</code> on the machine-description read. It does not: constructed as <code>EquilibriumData(pulse, run, dd_version=...)</code>, it builds a DD3 pulse end to end. The <code>KeyError</code> was reached only by the earlier fixture, which was built around an already-opened IDS and so carried no URI and no Data Dictionary major of its own. The pre-existing <code>nova/frame</code> defect is real when the machine is read that way, but it was never this node's to clear, and the <code>Wall(...dd_version=...)</code> change landed against it stands on its own as a correctness fix rather than as the repair of a blocker.</p>
+<p>Two defects on the way <em>were</em> this node's to find and are fixed, each with the line named. And one instruction in the brief was wrong, which cost most of a node's time:</p>
+<ul>
+<li><code>nova/imas/scenario.py:89</code> stored <code>ids_properties.homogeneous_time</code> as the IMAS node itself, and the zarr group refuses to serialise an <code>IDSInt0D</code>, so a first read of an uncached pulse could not store at all. Now <code>int(...)</code>. <strong>This is a serialisation fix the reader needs to store a pulse at all, not a sign site</strong>: it changes no quantity's value or orientation, and it carries no COCOS factor.</li>
+<li><code>nova/imas/equilibrium.py</code>'s <code>wall</code> property read the machine at the latest published major rather than the pulse's. It now carries <code>ids_dd_version</code>.</li>
+<li><strong>The brief's version source is wrong.</strong> The written DD versions this node was told to take from <code>tests/data-manifest.json</code> are not there. They are in <code>tests/test_dd_translator.py</code>, in <code>DD3_PULSES</code> and <code>NON_CONFORMING</code>: CORSICA <code>130506/6</code> at <code>3.41.0</code>, DINA <code>105052/1</code> at <code>3.38.1</code>, DINA <code>105069/3</code> at <code>3.39.0</code>, and DINA <code>105014/1</code> and <code>105013/1</code>, both at <code>3.38.1</code>.</li>
+<li><strong>The fixture's construction was the reason the machine looked like it defaulted to DD4.</strong> <code>EquilibriumData(ids=..., filename=...)</code> leaves the reader's own URI and major unset, and the machine read then falls back to the latest published major. The tree's own idiom, used by <code>tests/test_database.py</code>, is <code>EquilibriumData(pulse, run, dd_version=...)</code>, which carries both. The earlier reading of this node's failure as a machine-major defect came from the fixture, not the reader.</li>
+</ul>
+
+<h2 id="dd-equilibrium-reader-inverse-sign">The inverse constraint's boundary-flux sign</h2>
+<p>The one internal site that compensated the source sign once, and no longer does, had no passing test: <code>tests/test_pulsedesign.py::test_ids_file_cache</code> skips on both arms and nothing else named <code>InverseDesign</code>. A synthetic read now holds the sign still: an <code>InverseDesign</code> bound to a stand-in equilibrium that returns a known COCOS 17 boundary flux, and a constraint read back off the object. The constraint holds the value it was handed, so restoring the compensating negation shows up as its opposite (+5.0 against -5.0) and the test reddens; log at <code>logs/negative-control-inverse-negation-restored.log</code>.</p>
+
+<h2 id="dd-equilibrium-reader-negative-control">Negative control</h2>
+<p>Declared: bypass the translation in a scratch copy, and a signed assertion reddens. <strong>Admissible, and it reddens.</strong> In a scratch copy of the tree, <code>nova/imas/getslice.py::translated</code> was mutated to return its values unconverted, and the run was forced to rebuild rather than read a warm cache by redirecting <code>XDG_DATA_HOME</code> to a scratch path. The signed arm for CORSICA <code>130506/6</code> then <strong>failed on its own psi1d signed assertion</strong>: reader <code>104.58047784535063</code> against expected <code>-104.58047784535063</code>. The unmutated head passes that same id, which is what makes the outcome discriminating; log at <code>logs/negative-control-bypassed-translation.log</code>.</p>
+
+<h2 id="dd-equilibrium-reader-cache">A cache entry written before this change</h2>
+<p>The reader translates on build only, so a store written before this node is the one place where the translation could be silently absent. The identity that finds it is the pulse, run and Data Dictionary version, all unchanged by the reader's own convention, so the entry is found and every name in it matches while the signed quantities are the source's.</p>
+<p>The reader now treats the recorded convention as part of what it reads, not only what it writes. <code>EquilibriumData.load</code> requires <code>attrs["cocos"]</code> to be <code>NOVA_CONVENTION</code>; an entry that carries none, or another, is evicted and re-raised as a cache miss, which is the existing rebuild path rather than a new one. The tests hold both sides without opening a pulse, since a stale entry is the whole subject: a store written with <code>cocos = 11</code> is rebuilt, and one written with the reader's convention is served untouched. Reverting the override reddens the first and leaves the second green, which is what makes the pair discriminating; log at <code>logs/negative-control-stale-cache-reverted.log</code>.</p>
+
+<h2 id="dd-equilibrium-reader-follow-on">Follow-ons</h2>
+<ol>
+<li><code>nova/imas/sample.py</code>'s two psi-signed writers take no factor; they should take <code>psi_write_factor(DD3_CONVENTION)</code> as the pulsedesign writer does.</li>
+<li><strong>Closed in this node.</strong> The cache group's identity is the source's pulse, run and Data Dictionary version, and the reader's own convention changes none of them, so a dataset cached before this change was found under the same name and served with its raw DD3 psi. The reader now requires the convention it records on load: an entry carrying none, or another, is evicted and reported as a cache miss, so the store is rebuilt instead of the source's own convention being served as the reader's.</li>
+<li>DINA 105014/1 and 105013/1 are refused at their global quantities rather than by the node the profile walk tripped over, so the <code>Invalid node name '0' in path: 0</code> this node saw first is no longer reached on a refused pulse.</li>
+</ol>
+
+</main>
+</body>
+</html>

@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 import xarray
 
-from nova.equilibrium.inverse import Constraint, Control
+from nova.equilibrium.inverse import Constraint, Control, InverseDesign
 from nova.imas.test_utilities import mark
 
 
@@ -45,6 +45,33 @@ def test_constraint_point_index():
     assert np.allclose(constraint.index("vertical"), 1)
     assert np.allclose(constraint.index("br"), [0, 2, 3])
     assert np.allclose(constraint.index("bz"), [1, 3])
+
+
+def test_inverse_boundary_flux_carries_the_reader_sign():
+    """The boundary-psi constraint takes the reader's COCOS 17 value unchanged.
+
+    The reader translates the source's flux sense once, so the value it serves
+    already carries nova's internal convention and the constraint applies no
+    second negation. A synthetic read with a known sign is what makes that
+    checkable without a solved equilibrium: the constraint must hold the value
+    it was handed, and a compensating negation would show here as its opposite.
+    """
+
+    class SyntheticRead(InverseDesign):
+        boundary_flux = -5.0
+        square = False
+        strike = False
+        limiter = False
+        control_points = np.ones((8, 2))
+
+        def __getitem__(self, key):
+            assert key == "psi_boundary"
+            return self.boundary_flux
+
+    control = object.__new__(SyntheticRead)
+    control.update_constraints()
+    assert np.allclose(control.constraint.poloidal_flux[:4], -5.0)
+    assert np.allclose(control.constraint.poloidal_flux[4:], 0.0)
 
 
 def test_null_plot():

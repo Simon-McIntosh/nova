@@ -8,6 +8,18 @@ import numpy as np
 import xarray
 
 
+def vacuum_field(b0: np.ndarray, index: int) -> float:
+    """Return the toroidal field an equilibrium slice is read against [T].
+
+    A pulse may store one value for the whole IDS or one per slice, and the
+    convention check needs the same reading as the translation, so the rule
+    lives here once rather than in each of its callers.
+    """
+    if b0.size == 0:
+        return float("nan")
+    return float(b0[0] if b0.size == 1 else b0[index])
+
+
 @dataclass
 class GetSlice:
     """Convinence method to provide access to sliced ids data."""
@@ -33,6 +45,20 @@ class GetSlice:
             return data.item()
         except ValueError:
             return data
+
+    @staticmethod
+    def translated(signal_map, path: str, values):
+        """Return one field read through the COCOS translator.
+
+        A reader that declares its source convention serves every
+        convention-bearing field through here, so the data it exposes is in
+        nova's COCOS 17 whatever Data Dictionary version it was read from. The
+        factors come from the signal map
+        :func:`nova.io.sourcemap.translate_equilibrium` builds, so no reader
+        writes a sign of its own.
+        """
+        (signal,) = signal_map.for_target(path)
+        return signal.apply(values)
 
     def __getitem__(self, key: str):
         """Return dataset value with dict-like access."""

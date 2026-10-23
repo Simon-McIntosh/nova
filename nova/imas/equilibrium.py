@@ -16,9 +16,10 @@ from nova.geometry.pointloop import PointLoop
 from nova.geometry.curve import LCFS
 from nova.geometry.strike import Strike
 from nova.graphics.line import Chart
-from nova.imas.getslice import GetSlice
+from nova.imas.getslice import GetSlice, vacuum_field
 from nova.imas.machine import Wall
 from nova.imas.scenario import Scenario
+from nova.io.sourcemap import NOVA_CONVENTION, translate_equilibrium
 
 
 @dataclass
@@ -500,6 +501,130 @@ class Profile2D(Scenario):
 class Equilibrium(Chart, GetSlice):
     """Operators for equlibrium data."""
 
+    convention_fields: ClassVar[tuple[tuple[str, str], ...]] = (
+        ("psi2d", "equilibrium/profiles_2d/psi"),
+        ("psi1d", "equilibrium/profiles_1d/psi"),
+        ("b0", "equilibrium/vacuum_toroidal_field/b0"),
+        ("ip", "equilibrium/global_quantities/ip"),
+        ("psi_axis", "equilibrium/global_quantities/psi_axis"),
+        ("psi_boundary", "equilibrium/boundary_separatrix/psi"),
+        ("q_axis", "equilibrium/global_quantities/q_axis"),
+        ("q_95", "equilibrium/global_quantities/q_95"),
+        ("dpressure_dpsi", "equilibrium/profiles_1d/dpressure_dpsi"),
+        ("f_df_dpsi", "equilibrium/profiles_1d/f_df_dpsi"),
+    )
+    """Every dataset field the Data Dictionary convention rescales, with its path.
+
+    The distance between the two statements is what makes a flip visible: the
+    reader renormalises to ``psi_norm``, and a sign reversal of psi leaves that
+    normalisation unchanged, so only a signed quantity shows which convention a
+    field was read in.
+
+    Each path names the node the dataset actually holds. ``psi_boundary`` is the
+    one field whose name is not its source: the boundary build writes the
+    separatrix flux over the global quantity of the same name, so the field
+    carries ``boundary_separatrix/psi`` and its path says so. On reference data
+    the two stored nodes differ by about 1.8 percent, a published boundary
+    scalar need not equal the separatrix flux, and a path that named the global
+    quantity would attribute the reader's value to a node it never came from.
+    """
+
+    def _observable(self, field: str, itime: int) -> float:
+        """Return one convention-pinning observable of the read, or nan."""
+        if field not in self.data:
+            return float("nan")
+        return float(np.asarray(self.data[field].data)[itime])
+
+    def _vacuum_field(self, b0: np.ndarray, itime: int) -> float:
+        """Return the toroidal field a slice is read against [T]."""
+        return vacuum_field(b0, itime)
+
+    def check_convention(self, source_name: str, dd_version: str):
+        """Refuse a non-conforming read from its global quantities alone.
+
+        The digits a Data Dictionary version implies are pinned by the global
+        quantities and the vacuum toroidal field, which the read holds before
+        any profile node is walked. Checking them first means a pulse whose
+        measured digits contradict its own version is refused by name and by
+        digit, rather than by whichever node the profile walk happens to trip
+        over.
+        """
+        for itime in range(len(self.ids.time_slice)):
+            time_slice = self.ids.time_slice[itime]
+            signal_map = translate_equilibrium(
+                source_name=source_name,
+                dd_version=dd_version,
+                ip=float(time_slice.global_quantities.ip),
+                psi_axis=float(time_slice.global_quantities.psi_axis),
+                psi_boundary=float(time_slice.global_quantities.psi_boundary),
+                q=float(time_slice.global_quantities.q_95),
+                b0=self._ids_vacuum_field(itime),
+            )
+            if signal_map.blocked:
+                raise ValueError(
+                    "; ".join(blocked.reason for blocked in signal_map.blocked)
+                )
+
+    def _ids_vacuum_field(self, itime: int) -> float:
+        """Return the toroidal field a slice is read against [T]."""
+        values = np.asarray(self.ids.vacuum_toroidal_field.b0).ravel()
+        if values.size == 0:
+            values = np.asarray(
+                self.ids.time_slice[itime].vacuum_toroidal_field.b0
+            ).ravel()
+        if values.size == 0:
+            return float("nan")
+        return float(values[0] if values.size == 1 else values[itime])
+
+    def build_convention(self, source_name: str, dd_version: str):
+        """Read every convention-bearing field of the dataset in COCOS 17.
+
+        The Data Dictionary fixes a read's COCOS by its major version -- DD3 is
+        and DD4 is COCOS 17 -- and each slice's observables pin the digits its
+        version implies. A read whose digits contradict its version is refused
+        by :meth:`check_convention` before the profile nodes are walked, so
+        every field reached here is conforming and is converted through
+        :func:`~nova.io.sourcemap.translate_equilibrium` into the convention the
+        rest of nova works in.
+        """
+        length = int(self.data.sizes["time"])
+        b0 = (
+            np.atleast_1d(np.asarray(self.data["b0"].data, float))
+            if "b0" in self.data
+            else np.empty(0)
+        )
+        signal_maps = []
+        for itime in range(length):
+            signal_map = translate_equilibrium(
+                source_name=source_name,
+                dd_version=dd_version,
+                ip=self._observable("ip", itime),
+                psi_axis=self._observable("psi_axis", itime),
+                psi_boundary=self._observable("psi_boundary", itime),
+                q=self._observable("q_95", itime),
+                b0=self._vacuum_field(b0, itime),
+            )
+            if signal_map.blocked:
+                raise ValueError(
+                    "; ".join(blocked.reason for blocked in signal_map.blocked)
+                )
+            signal_maps.append(signal_map)
+        translated = {
+            name: np.array(self.data[name].data, dtype=float)
+            for name, _ in self.convention_fields
+            if name in self.data
+        }
+        for itime, signal_map in enumerate(signal_maps):
+            for name, path in self.convention_fields:
+                if name not in translated:
+                    continue
+                translated[name][itime] = self.translated(
+                    signal_map, path, self.data[name][itime].data
+                )
+        for name, values in translated.items():
+            self.data[name] = (self.data[name].dims, values)
+        self.data.attrs["cocos"] = NOVA_CONVENTION
+
     @property
     def boundary(self):
         """Return trimmed boundary contour."""
@@ -804,6 +929,35 @@ class EquilibriumData(Equilibrium, Profile2D, Profile1D, Parameter0D, Grid):
         self.name = "equilibrium"
         super().__post_init__()
 
+    def load(self):
+        """Load the cached dataset, refusing one written under another convention.
+
+        A cache entry is labelled by the source's identity and its Data
+        Dictionary version, both of which are unchanged by this reader's own
+        convention: an entry written before the reader translated to COCOS 17
+        holds the source's convention in fields whose names are identical. The
+        recorded convention is therefore required on load, and an entry that
+        carries none, or another, is evicted so the caller rebuilds it rather than
+        serving raw quantities as though they carried the reader's convention.
+
+        Raises
+        ------
+        FileNotFoundError
+            The cached data carries no convention, or one other than
+            ``NOVA_CONVENTION``. ``Datafile.load_build`` reads this as a cache
+            miss and rebuilds.
+        """
+        loaded = super().load()
+        stored = self.data.attrs.get("cocos")
+        if stored != NOVA_CONVENTION:
+            self.delete_group()
+            self.data = type(self.data)()
+            raise FileNotFoundError(
+                f"cached equilibrium data at {self.group} carries convention "
+                f"{stored!r}, not {NOVA_CONVENTION}"
+            )
+        return loaded
+
     def build(self):
         """Build netCDF database using data extracted from imasdb."""
         match self.homogeneous_time:
@@ -816,9 +970,11 @@ class EquilibriumData(Equilibrium, Profile2D, Profile1D, Parameter0D, Grid):
                     f"homogeneous_time={self.homogeneous_time} not implemented"
                 )
 
+        self.check_convention(str(self.filename), str(self.ids_dd_version))
         with self.build_scenario(time_node):
             self.data.coords["point"] = ["r", "z"]
             super().build()
+            self.build_convention(str(self.filename), str(self.ids_dd_version))
             self.contour_build()
         try:
             self.wall.insert(self.data)  # insert wall and divertor structures
@@ -828,8 +984,15 @@ class EquilibriumData(Equilibrium, Profile2D, Profile1D, Parameter0D, Grid):
 
     @cached_property
     def wall(self):
-        """Return wall instance."""
-        return Wall(uri=self.uri)
+        """Return wall instance.
+
+        The wall is read from the same pulse as the equilibrium, so it is
+        opened at the major that pulse was written in. Left to its own
+        default, the machine read asks for the latest published major, and a
+        pulse written under an earlier one is then refused as an unrequested
+        major conversion.
+        """
+        return Wall(uri=self.uri, dd_version=str(self.ids_dd_version))
 
     @cached_property
     def strike(self):

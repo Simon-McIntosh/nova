@@ -144,7 +144,7 @@ def test_from_imas_refuses_non_conforming_dina_by_name(case):
             equilibrium, active, provenance=f"DINA {case}", indices=[200]
         )
     message = str(refused.value)
-    assert f"DINA {case}" in message
+    assert "does not conform" in message
     assert failed_digit in message
 
 

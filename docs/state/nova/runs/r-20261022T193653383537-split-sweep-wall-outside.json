@@ -1,0 +1,451 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 5,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "e4ca8d20146f67c86c92bb84feb851c6c5a1ca60",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T193653383537-split-sweep-wall-outside/brief.md",
+    "sha256": "9bc5645bd167fa98b7bceee7b090620f35c0ca54ea926d7b39404ca8a7c2d1ab"
+  },
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 64977664,
+      "cached_input_tokens_cumulative": 64977664,
+      "input_tokens": 65581411,
+      "input_tokens_cumulative": 65581411,
+      "output_tokens": 145056,
+      "output_tokens_cumulative": 145056,
+      "reasoning_output_tokens": 57057,
+      "reasoning_output_tokens_cumulative": 57057
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 268,
+    "files": 4,
+    "removed": 10
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "594ceacfec06567953b660b20069008095b232d2",
+    "a0ca54a378aa3dc6ecedf1fa0a0f6010efa363e4",
+    "41a80bc4f40d16ab153fc919efd69222cfd440b1",
+    "b9fd10e0968536a209b65ff626e9827421d30bb6"
+  ],
+  "completed_at": "2026-10-23T02:48:47Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-22T19:40:38Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "seed/test",
+    "compilation/load"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_contour_tree_wall_split.py::test_production_split_events_match_outside_augmented_sublevel_counts -q",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T193653383537-split-sweep-wall-outside/repair-postcommit.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.5,
+    "plan": "contour-tree-topology-authority",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-22T20:37:12.034276+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-22T05:24:19Z",
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "unknown",
+    "metered": true,
+    "observed_at": "2026-10-22T05:24:19Z",
+    "read_at": "2026-10-22T19:37:12Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-23T02:48:47Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-10-23T02:48:47Z",
+        "resets_at": 1793304534,
+        "used_percent": 1.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T193653383537-split-sweep-wall-outside/manifest.md",
+  "member": "disposable-r-20261022T193653383537-split-sweep-wall-outside",
+  "model_key": "sol",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_contour_tree_wall_split.py::test_production_split_events_match_outside_augmented_sublevel_counts"
+    ],
+    "baseline_failure_ids": [
+      "tests/test_contour_tree_wall_split.py::test_production_split_events_match_outside_augmented_sublevel_counts"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_contour_tree_wall_split.py::test_production_split_events_match_outside_augmented_sublevel_counts"
+    ],
+    "declaration": "restore the descending-only wall rule in _sweep_tree (split sweep ignores vertex_is_wall); the new wall-split tests must fail with wall-vertex minima and saddles",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T193653383537-split-sweep-wall-outside/repair-negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T193653383537-split-sweep-wall-outside/repair-negative-control.log",
+    "test_paths": [
+      "tests/test_contour_tree_merge.py",
+      "tests/test_contour_tree_sparse_build.py",
+      "tests/test_contour_tree_wall_split.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "split-sweep-wall-outside",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.cache/nova-contour-tree-wall/split-sweep-outside-brief.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T193653383537-split-sweep-wall-outside/brief.md",
+    "brief_sha256": "9bc5645bd167fa98b7bceee7b090620f35c0ca54ea926d7b39404ca8a7c2d1ab",
+    "capability": {
+      "class": "general",
+      "requirements": {},
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 728,
+          "cached_input_tokens": 184453,
+          "input_tokens": 185183,
+          "output_tokens": 989,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 186172,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "adb3a390-bdb2-4e2a-8e74-1e049c62c9fe",
+      "session_id": "adb3a390-bdb2-4e2a-8e74-1e049c62c9fe"
+    },
+    "done_when": "the manifest gives wall-vertex node counts by critical type before and after on the diverted-single-null-340-cells fixture",
+    "estimated_hours": null,
+    "goal": "The ascending split sweep joins every wall vertex to one already-active outside component, so the contour tree emits no minimum or saddle at a wall vertex",
+    "id": "split-sweep-wall-outside",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "unknown",
+      "metered": true,
+      "observed_at": "2026-10-22T05:24:19Z",
+      "read_at": "2026-10-22T19:37:12Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T193653383537-split-sweep-wall-outside/manifest.md",
+    "negative_control": "restore the descending-only wall rule in _sweep_tree (split sweep ignores vertex_is_wall); the new wall-split tests must fail with wall-vertex minima and saddles",
+    "plan": "contour-tree-topology-authority",
+    "regenerate_paths": [],
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/equilibrium/contour_tree.py",
+      "tests/test_contour_tree_wall_split.py",
+      "tests/test_contour_tree_merge.py",
+      "docs/evidence/fragments/contour-tree-topology-authority/split-sweep-wall-outside.html",
+      "docs/figures/contour-tree-topology-authority/split-sweep-wall-outside",
+      "tests/test_contour_tree_sparse_build.py"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "advisory": true,
+      "burn_multiple": 2.749639883392489,
+      "derived": 0.40005238745767197,
+      "drain_hours": 168.0,
+      "effective_limit": 0.40005238745767197,
+      "elapsed_fraction": 0.3636839885978836,
+      "elapsed_hours": 61.09891008444444,
+      "group": "codex-sub",
+      "lift": {
+        "ends_at": "2026-10-27T06:32:42+00:00",
+        "ends_on": "reset",
+        "form": "credits",
+        "group": "codex-sub",
+        "id": "codex-sub-1792529492-26f087",
+        "pace_multiple": null,
+        "remaining_seconds": 384843.923696,
+        "scope": "global"
+      },
+      "lift_hold": {
+        "held": false,
+        "kind": "credits"
+      },
+      "limited_by": "allowance",
+      "observed_at": "2026-10-22T05:24:19+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.0,
+      "remaining_windows": null,
+      "resets_at": "2026-10-27T06:32:42+00:00",
+      "state": "observed",
+      "utilisation": 1.0,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": null,
+      "decided_by": null,
+      "margin": null,
+      "name": "split-sweep-wall-outside",
+      "score": 0.6625,
+      "state": "unknown",
+      "verdict": null,
+      "window_fill": null
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": 51259.076304,
+        "observed_at": "2026-10-22T05:24:19+00:00",
+        "period": "seven_day",
+        "resets_at": "2026-10-27T06:32:42+00:00",
+        "state": "observed",
+        "utilisation": 1.0,
+        "window_minutes": 10080
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": "codex-sub-1792529492-26f087",
+    "member": "codex",
+    "node": "split-sweep-wall-outside",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-22T19:38:38.076304+00:00",
+    "score": 0.6625,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "codex named: lead asked for a codex lift on this fix (session-scoped lift codex-sub-1792697471-f530ed)",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:capability",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.437,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 945.739,
+      "context-estimate": 16.416,
+      "records": 357.271,
+      "verdict-inputs": 178.246
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.5,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "b9fd10e0968536a209b65ff626e9827421d30bb6",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "e4ca8d20146f67c86c92bb84feb851c6c5a1ca60",
+    "reviewed_head_sha": "b9fd10e0968536a209b65ff626e9827421d30bb6",
+    "scores": {
+      "durability": 18,
+      "evidence": 17,
+      "fit": 17,
+      "goal_fidelity": 19,
+      "reuse": 20,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 110
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261022T193653383537-split-sweep-wall-outside",
+  "scope_acceptances": null,
+  "scope_changed": true,
+  "section": "§2",
+  "session": "adb3a390-bdb2-4e2a-8e74-1e049c62c9fe",
+  "session_harness": "codex",
+  "session_id": "01a16522-af22-7290-ab55-da16a8b4363a",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": 6,
+  "throughput": {
+    "cumulative_cached_input_tokens": 64977664,
+    "cumulative_input_tokens": 130559075,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 202113
+  },
+  "time_budget": "60m",
+  "tool_steps": 1.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 25689,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 5,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-23T02:48:55Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-23T02:07:04Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261022T193653383537-split-sweep-wall-outside",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 1018,
+    "worker_pid": 91153
+  },
+  "worker_seconds": 25579,
+  "worker_seconds_source": "rollout_receipts",
+  "worktree_retention": null
+}

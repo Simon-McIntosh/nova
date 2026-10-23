@@ -10,8 +10,11 @@ vanish at the stencil's second order.
 
 from __future__ import annotations
 
+import jax
 import numpy as np
 from scipy.constants import mu_0
+
+from nova.jax.config import configure_dtypes
 
 from nova.equilibrium.analytic_single_null import (
     CerfonFreidbergSingleNull,
@@ -23,8 +26,15 @@ from nova.imas.edge_consistency import (
     EDGE_BAND_WIDTH,
     EdgeConsistency,
     edge_consistency,
-    structured_grid_current_density,
+    grid_current_density,
 )
+
+# The production Grad--Shafranov read assembles its stencil in jnp, so the
+# working precision is set before any array is built: at single precision the
+# cancellation inside Delta* leaves a round-off floor above the second-order
+# residual measured here.
+configure_dtypes()
+assert jax.config.jax_enable_x64 is True
 
 RADIAL_BOUNDS = (1.08, 2.30)
 VERTICAL_BOUNDS = (-1.10, 1.00)
@@ -64,6 +74,15 @@ def _sample(
     return grid_r, grid_z, flux
 
 
+def _band_mask(state: CerfonFreidbergSingleNull, flux: np.ndarray) -> np.ndarray:
+    """Return the edge-band cells a flux map defines, independently of the measure."""
+
+    psi_axis = TOTAL_FLUX_FACTOR * state.axis_flux
+    psi_boundary = TOTAL_FLUX_FACTOR * float(state.flux(state.x_point[None, :])[0])
+    psi_norm = (flux - psi_axis) / (psi_boundary - psi_axis)
+    return (psi_norm >= 1.0 - EDGE_BAND_WIDTH) & (psi_norm <= 1.0)
+
+
 def _measure(
     state: CerfonFreidbergSingleNull,
     size: int,
@@ -99,27 +118,27 @@ def _measure(
     )
 
 
-def test_lifted_operator_recovers_a_constant_current_density():
+def test_grid_read_recovers_a_constant_current_density():
     """A flux whose exact Delta* is a constant current is read exactly."""
 
-    grid_r = np.linspace(1.0, 2.0, 5)
-    grid_z = np.linspace(-1.0, 1.0, 5)
+    grid_r = np.linspace(1.0, 2.0, 7)
+    grid_z = np.linspace(-1.0, 1.0, 7)
     mesh_r, _mesh_z = np.meshgrid(grid_r, grid_z)
     current_density = 7.0
     flux = -TOTAL_FLUX_FACTOR * mu_0 * current_density * mesh_r**3 / 3.0
 
-    observed = structured_grid_current_density(flux, grid_r, grid_z)
+    observed = grid_current_density(flux, grid_r, grid_z)
 
-    radial = grid_r[1:-1][np.newaxis, :]
+    radial = grid_r[2:-2][np.newaxis, :]
     radial_step = grid_r[1] - grid_r[0]
     expected = current_density * (1.0 - radial_step**2 / (3.0 * radial**2))
 
     np.testing.assert_allclose(
-        observed[1:-1, 1:-1],
-        np.broadcast_to(expected, observed[1:-1, 1:-1].shape),
+        observed[2:-2, 2:-2],
+        np.broadcast_to(expected, observed[2:-2, 2:-2].shape),
         rtol=1.0e-12,
     )
-    assert np.isnan(observed[0]).all() and np.isnan(observed[:, 0]).all()
+    assert np.count_nonzero(np.isfinite(observed)) == 9
 
 
 def test_consistent_analytic_state_sits_under_the_fixed_threshold():
@@ -145,7 +164,7 @@ def test_whole_slice_form_is_the_profile_minus_grid_read_rms():
     psi_norm = (flux - psi_axis) / (psi_boundary - psi_axis)
 
     mesh_r, _mesh_z = np.meshgrid(grid_r, grid_z)
-    grid_current = structured_grid_current_density(flux, grid_r, grid_z)
+    grid_current = grid_current_density(flux, grid_r, grid_z)
     profile_current = -TOTAL_FLUX_FACTOR * (
         mesh_r * p_prime + ff_prime / (mu_0 * mesh_r)
     )
@@ -185,7 +204,7 @@ def test_edge_band_ff_prime_perturbation_is_reported_inconsistent():
     """
 
     state = cerfon_freidberg_single_null()
-    _grid_r, _grid_z, flux = _sample(state, IDS_GRID_SIZE)
+    grid_r, grid_z, flux = _sample(state, IDS_GRID_SIZE)
     consistent = _measure(state, IDS_GRID_SIZE)
     perturbed = _measure(state, IDS_GRID_SIZE, band_ff_prime_scale=1.01)
 
@@ -193,7 +212,12 @@ def test_edge_band_ff_prime_perturbation_is_reported_inconsistent():
     np.testing.assert_array_equal(flux, perturbed_flux)
 
     assert perturbed.band_relative > EDGE_BAND_RELATIVE_THRESHOLD
-    assert perturbed.band_cell_count == consistent.band_cell_count
+    band_mask = _band_mask(state, flux)
+    assert np.array_equal(band_mask, _band_mask(state, perturbed_flux))
+    valid = np.isfinite(grid_current_density(flux, grid_r, grid_z))
+    band_cells = int(np.count_nonzero(band_mask & valid))
+    assert consistent.band_cell_count == band_cells
+    assert perturbed.band_cell_count == band_cells
 
 
 def test_band_residual_falls_at_the_stencil_second_order():

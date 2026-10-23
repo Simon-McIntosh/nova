@@ -36,16 +36,16 @@ from dataclasses import dataclass
 from typing import Callable
 
 import numpy as np
-from scipy.constants import mu_0
 
-from nova.equilibrium.convention import TOTAL_FLUX_FACTOR, toroidal_current_density
+from nova.equilibrium.convention import toroidal_current_density
+from nova.equilibrium.map_extraction import apply_delta_star
 
 __all__ = [
     "EDGE_BAND_RELATIVE_THRESHOLD",
     "EDGE_BAND_WIDTH",
     "EdgeConsistency",
     "edge_consistency",
-    "structured_grid_current_density",
+    "grid_current_density",
 ]
 
 #: Width of the edge band in normalised poloidal flux, measured inwards from
@@ -60,9 +60,9 @@ EDGE_BAND_WIDTH = 0.10
 #:
 #: The basis is the analytic lower-single-null state measured at the 65 by 65
 #: grid the IDS profile reads carry.  Its own second-order discretisation
-#: error sets the floor at ``5.96e-4`` on that grid, and a one per cent
+#: error sets the floor at ``5.80e-4`` on that grid, and a one per cent
 #: perturbation of FF' over the whole plasma moves the band residual to
-#: ``2.32e-3``.  The bound sits about 1.7 times above the floor and about 2.3
+#: ``2.33e-3``.  The bound sits about 1.7 times above the floor and about 2.3
 #: times below the perturbation, so it separates a discretised-but-consistent
 #: state from a state whose flux functions and flux map disagree.  It is fixed
 #: before any IDS row is read and is deliberately not a scorecard field.
@@ -85,53 +85,30 @@ class EdgeConsistency:
     scored_cell_count: int
 
 
-def structured_grid_current_density(
+def grid_current_density(
     flux: np.ndarray, grid_r: np.ndarray, grid_z: np.ndarray
 ) -> np.ndarray:
     """Return the toroidal current density a total-flux map implies.
 
     ``flux`` is the total poloidal flux ``Phi`` in Wb on a uniform structured
-    ``(Z, R)`` grid.  The structured-grid Grad--Shafranov operator is
-    assembled by central differences and the current density recovered as
-    ``-Delta*Phi / (TOTAL_FLUX_FACTOR mu_0 R)`` in A/m^2.  Cells without a
-    complete stencil are ``nan``, so a caller's mask and this one compose
-    without a second boundary rule.
+    ``(Z, R)`` grid, and the result is returned on that same grid.  The
+    operator is :func:`nova.equilibrium.map_extraction.apply_delta_star`, the
+    repository's one structured-grid Grad--Shafranov read: the same centred
+    ``Delta*`` and the same ``-Delta*Phi / (TOTAL_FLUX_FACTOR mu_0 R)``
+    recovery.  That receipt carries its map ``(radius, height)`` and this one
+    is ``(Z, R)``, so the map is transposed into the operator and its current
+    density transposed back.  Cells without a complete stencil are ``nan``, so
+    a caller's mask and the operator's own validity mask compose without a
+    second boundary rule.
     """
 
     flux = np.asarray(flux, dtype=float)
     grid_r = np.asarray(grid_r, dtype=float)
     grid_z = np.asarray(grid_z, dtype=float)
-    shape = (grid_z.size, grid_r.size)
-    if flux.shape != shape:
+    if flux.shape != (grid_z.size, grid_r.size):
         raise ValueError("flux does not match the profile grid")
-    radial_step = np.diff(grid_r)
-    vertical_step = np.diff(grid_z)
-    if not (
-        np.all(radial_step > 0.0)
-        and np.all(vertical_step > 0.0)
-        and np.allclose(radial_step, radial_step[0], rtol=1.0e-12)
-        and np.allclose(vertical_step, vertical_step[0], rtol=1.0e-12)
-    ):
-        raise ValueError("profile reproduction requires a uniform structured grid")
-
-    radius = grid_r[np.newaxis, :]
-    radial_first = (flux[:, 2:] - flux[:, :-2]) / (2.0 * radial_step[0])
-    radial_second = (flux[:, 2:] - 2.0 * flux[:, 1:-1] + flux[:, :-2]) / (
-        radial_step[0] ** 2
-    )
-    vertical_second = (flux[2:, :] - 2.0 * flux[1:-1, :] + flux[:-2, :]) / (
-        vertical_step[0] ** 2
-    )
-    delta_star = (
-        radial_second[1:-1]
-        - radial_first[1:-1] / radius[:, 1:-1]
-        + vertical_second[:, 1:-1]
-    )
-    current_density = np.full(shape, np.nan)
-    current_density[1:-1, 1:-1] = -delta_star / (
-        TOTAL_FLUX_FACTOR * mu_0 * radius[:, 1:-1]
-    )
-    return current_density
+    receipt = apply_delta_star(grid_r, grid_z, flux.T)
+    return np.transpose(np.asarray(receipt.toroidal_current_density, dtype=float))
 
 
 def edge_consistency(
@@ -162,15 +139,14 @@ def edge_consistency(
     span = float(psi_boundary) - float(psi_axis)
     if span == 0.0:
         raise ValueError("axis and boundary flux must differ")
+    psi_norm = (flux - float(psi_axis)) / span
     if inside is None:
-        interior = (flux - float(psi_axis)) / span <= 1.0
+        interior = (psi_norm >= 0.0) & (psi_norm <= 1.0)
     else:
         interior = np.asarray(inside, dtype=bool)
         if interior.shape != flux.shape:
             raise ValueError("inside does not match the profile grid")
-    psi_norm = (flux - float(psi_axis)) / span
-
-    current_density = structured_grid_current_density(flux, grid_r, grid_z)
+    current_density = grid_current_density(flux, grid_r, grid_z)
     radius = np.asarray(grid_r, dtype=float)[np.newaxis, :]
     profile_current = toroidal_current_density(
         radius,

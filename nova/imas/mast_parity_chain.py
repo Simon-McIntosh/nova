@@ -31,7 +31,7 @@ from nova.imas.mast_solve_inputs import (
     CorrectedSolveInputs,
     read_corrected_solve_inputs,
 )
-from nova.imas.edge_consistency import structured_grid_current_density
+from nova.imas.edge_consistency import grid_current_density
 from nova.imas.mast_vacuum_cohort import SHOT_STORE
 from nova.imas.parity_tolerances import (
     MagneticsBudgetClass,
@@ -393,6 +393,35 @@ def _raw_magnetics_residuals(
     return np.asarray(jnp.stack(residuals))
 
 
+def _interior_grid_current_density(
+    flux: np.ndarray, grid_r: np.ndarray, grid_z: np.ndarray
+) -> np.ndarray:
+    """Read the grid current on the one-cell interior this residual scores.
+
+    The production validity rule is a two-cell interior, one wider than the
+    central-difference stencil needs and one wider than this residual's cell
+    set, so the map is padded by one ring: the rule then lands on this
+    residual's cells, and a padded value enters the stencil of no valid cell.
+    """
+
+    padded = np.pad(np.asarray(flux, dtype=float), 1, mode="edge")
+    radial = np.concatenate(
+        (
+            [grid_r[0] - (grid_r[1] - grid_r[0])],
+            grid_r,
+            [grid_r[-1] + (grid_r[-1] - grid_r[-2])],
+        )
+    )
+    vertical = np.concatenate(
+        (
+            [grid_z[0] - (grid_z[1] - grid_z[0])],
+            grid_z,
+            [grid_z[-1] + (grid_z[-1] - grid_z[-2])],
+        )
+    )
+    return grid_current_density(padded, radial, vertical)[1:-1, 1:-1]
+
+
 def _profile_reproduction_residuals(
     profile_solver: Any,
     source_current: np.ndarray,
@@ -457,7 +486,7 @@ def _profile_reproduction_residuals(
 
         vacuum_flux = np.asarray(profile_solver.source_to_grid @ source)
         plasma_flux = (np.asarray(state) - vacuum_flux).reshape(grid_shape)
-        grid_current_density = structured_grid_current_density(
+        grid_current_density = _interior_grid_current_density(
             plasma_flux, grid_r, grid_z
         )
         finite = (

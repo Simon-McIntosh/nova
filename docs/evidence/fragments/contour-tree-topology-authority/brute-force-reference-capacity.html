@@ -1,0 +1,28 @@
+<section id="brute-force-reference-capacity">
+  <h3>Connectivity events replace the obsolete receipt pin</h3>
+  <p>The former test loaded the builder at <code>511a22e06^</code> and required its fixed 256-node, 255-edge receipt to match current carrier-sized arrays bit for bit. On the same current carriers, that builder emits 275 nodes absent from the current tree. The wall mask identifies 272 as wall vertices. The other three are MAST interior saddles whose carrier neighbours include wall vertices. The wall-pair probe's <code>components</code> links confirm their adjacency, and the independent outside-augmented sublevel oracle makes each a regular event: its component count stays 1→1. Removing the outside-to-wall links makes them merges (7→6, 6→5, and 3→2, respectively). No old-only node remains unexplained.</p>
+  <table>
+    <thead><tr><th>Fixture</th><th>Old-only nodes</th><th>Wall</th><th>Interior explained by outside links</th></tr></thead>
+    <tbody>
+      <tr><td>diverted single null, compact</td><td>6</td><td>6</td><td>0</td></tr>
+      <tr><td>moderate rotation, compact</td><td>2</td><td>2</td><td>0</td></tr>
+      <tr><td>strong rotation, compact</td><td>2</td><td>2</td><td>0</td></tr>
+      <tr><td>weak rotation, compact</td><td>2</td><td>2</td><td>0</td></tr>
+      <tr><td>diverted single null, 340 cells</td><td>6</td><td>6</td><td>0</td></tr>
+      <tr><td>moderate rotation, 340 cells</td><td>2</td><td>2</td><td>0</td></tr>
+      <tr><td>strong rotation, 340 cells</td><td>2</td><td>2</td><td>0</td></tr>
+      <tr><td>weak rotation, 340 cells</td><td>2</td><td>2</td><td>0</td></tr>
+      <tr><td>diverted single null, 550 cells</td><td>6</td><td>6</td><td>0</td></tr>
+      <tr><td>moderate rotation, 550 cells</td><td>2</td><td>2</td><td>0</td></tr>
+      <tr><td>strong rotation, 550 cells</td><td>2</td><td>2</td><td>0</td></tr>
+      <tr><td>weak rotation, 550 cells</td><td>2</td><td>2</td><td>0</td></tr>
+      <tr><td>diverted single null, 1074 cells</td><td>6</td><td>6</td><td>0</td></tr>
+      <tr><td>moderate rotation, 1074 cells</td><td>56</td><td>56</td><td>0</td></tr>
+      <tr><td>strong rotation, 1074 cells</td><td>63</td><td>63</td><td>0</td></tr>
+      <tr><td>weak rotation, 1074 cells</td><td>68</td><td>68</td><td>0</td></tr>
+      <tr><td>MAST 27079, row 16</td><td>23</td><td>22</td><td>1: vertex 355</td></tr>
+      <tr><td>MAST 22475, row 50</td><td>23</td><td>21</td><td>2: vertices 355, 428</td></tr>
+    </tbody>
+  </table>
+  <p>The replacement test checks every valid superlevel threshold against a graph-search component count and every ascending carrier insertion against the outside-augmented sublevel oracle. It covers all 18 fixtures and retains the largest-carrier sweep-depth bound. The fresh head process passed both requested files: 9 passed in 399.08 s (EXIT=0). The fresh base process ran the historical test source on the same product builder: its recorded-fields test failed at the 256-versus-258 shape mismatch, while the other eight tests passed (EXIT=1). The run manifest names both complete gate logs.</p>
+</section>

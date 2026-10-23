@@ -56,6 +56,50 @@ state&rsquo;s own floor (<code>5.8001e&minus;4</code>, <code>1.7582e&minus;4</co
 <code>1.6165e&minus;4</code>, <code>1.8364e&minus;4</code>).</p>
 </section>
 
+<section id="edge-consistency-table-flux-sign">
+<h3>Where the minus one between the map and the flux functions comes from</h3>
+<p id="edge-consistency-table-flux-sign-files">The three sources put the grid
+current and the profile current anti-parallel, and three files from two codes
+doing the same thing points at a shared step rather than at three data defects,
+so the step was measured. Three checks on the stored file need no convention at
+all. The stored flux map&rsquo;s value at the magnetic axis equals the stored
+<code>psi_axis</code> to 1e&minus;4 relative (<code>0.999991</code>,
+<code>0.999948</code>, <code>1.000032</code>), so the map is the flux the globals
+describe. The stored one-dimensional flux runs the same way as the globals:
+<code>sign(psi[0] &minus; psi[end])</code> matches
+<code>sign(psi_boundary &minus; psi_axis)</code> on all three. And the stored
+<code>dpressure_dpsi</code> falls outward against that same flux ordering, which
+is a statement about pressure, not about COCOS: a derivative row stored in the
+opposite sense to the map it belongs with would make pressure rise outward. All
+three files are internally coherent, with <code>sigma_Bp = +1</code> implied by
+Sauter Eq. 23, which is the digit a DD 3 file carries.</p>
+<p id="edge-consistency-table-flux-sign-regressions">The map and the derivative
+rows were then regressed cell by cell over the plasma interior of one slice per
+source, once with each sign on the profile side, so the reading is not sorted by
+the answer it is given. The whole-slice integral cannot tell a single sign from
+scatter; the regression can, because a sign leaves the two fields collinear.</p>
+<table id="edge-consistency-table-flux-sign-table">
+<caption>One slice per source, plasma interior cells; the map side is the
+current the repo&rsquo;s Grad&ndash;Shafranov stencil reads from the flux map in
+each block&rsquo;s own flux.</caption>
+<thead><tr><th>source</th><th>slice</th><th>block</th><th>profile sign</th>
+<th>slope</th><th>correlation</th><th>residual / grid RMS</th></tr></thead>
+<tbody>
+<tr><td>DINA 105052/1</td><td>1086</td><td>file (COCOS 11)</td><td>&minus;2&pi;</td><td>&minus;0.9683</td><td>&minus;0.9934</td><td>0.0901</td></tr>
+<tr><td>DINA 105052/1</td><td>1086</td><td>file (COCOS 11)</td><td>+2&pi;</td><td>+0.9683</td><td>+0.9934</td><td>0.0901</td></tr>
+<tr><td>DINA 105052/1</td><td>1086</td><td>translated (COCOS 17)</td><td>&minus;2&pi;</td><td>&minus;0.9683</td><td>&minus;0.9934</td><td>0.0901</td></tr>
+<tr><td>DINA 105052/1</td><td>1086</td><td>translated (COCOS 17)</td><td>+2&pi;</td><td>+0.9683</td><td>+0.9934</td><td>0.0901</td></tr>
+<tr><td>DINA 105069/3</td><td>1863</td><td>file (COCOS 11)</td><td>&minus;2&pi;</td><td>&minus;0.9602</td><td>&minus;0.9928</td><td>0.0884</td></tr>
+<tr><td>DINA 105069/3</td><td>1863</td><td>file (COCOS 11)</td><td>+2&pi;</td><td>+0.9602</td><td>+0.9928</td><td>0.0884</td></tr>
+<tr><td>DINA 105069/3</td><td>1863</td><td>translated (COCOS 17)</td><td>&minus;2&pi;</td><td>&minus;0.9602</td><td>&minus;0.9928</td><td>0.0884</td></tr>
+<tr><td>DINA 105069/3</td><td>1863</td><td>translated (COCOS 17)</td><td>+2&pi;</td><td>+0.9602</td><td>+0.9928</td><td>0.0884</td></tr>
+<tr><td>CORSICA 130506/6</td><td>28</td><td>file (COCOS 11)</td><td>&minus;2&pi;</td><td>&minus;0.9061</td><td>&minus;0.9672</td><td>0.1605</td></tr>
+<tr><td>CORSICA 130506/6</td><td>28</td><td>file (COCOS 11)</td><td>+2&pi;</td><td>+0.9061</td><td>+0.9672</td><td>0.1605</td></tr>
+<tr><td>CORSICA 130506/6</td><td>28</td><td>translated (COCOS 17)</td><td>&minus;2&pi;</td><td>&minus;0.9061</td><td>&minus;0.9672</td><td>0.1605</td></tr>
+<tr><td>CORSICA 130506/6</td><td>28</td><td>translated (COCOS 17)</td><td>+2&pi;</td><td>+0.9061</td><td>+0.9672</td><td>0.1605</td></tr>
+</tbody></table>
+</section>
+
 <section id="edge-consistency-table-rows">
 <h3>The three conforming sources</h3>
 <p id="edge-consistency-table-rows-method">Each source is opened with
@@ -121,35 +165,80 @@ the analytic state before any IDS row was read.</p>
 <p id="edge-consistency-table-recommendation-convention">Which sign the
 operator assumes, stated rather than implied: <code>nova.equilibrium.convention</code>
 pins <code>j<sub>&phi;</sub> = &minus;2&pi;(R p&prime; + FF&prime;/(&mu;<sub>0</sub>R))</code>
-with <code>&Delta;<sup>&star;</sup>&Phi; = &minus;2&pi;&mu;<sub>0</sub>R j<sub>&phi;</sub></code>
-and the total flux <code>&Phi; = 2&pi;&psi;</code>, so <code>p&prime;</code> and
-<code>FF&prime;</code> mean derivatives against the <i>negated</i> flux
-(<code>p&prime; = &minus;dp/d&Phi;</code>), not against <code>&psi;</code>. That is
-the convention the map side satisfies here, and the check that says so is its
-own integral: the grid current integrates to <code>+1.0</code> times the
-slice&rsquo;s stored <code>I<sub>p</sub></code>, and a toroidal current density
-shares its sign with the current it integrates to, so the map side is
-consistent with the operator and with the pulse. The translation does not match
-it on the flux functions, which is the <code>&minus;1</code> above. No sign was
-flipped anywhere to make a ratio come out positive.</p>
-<p id="edge-consistency-table-recommendation-overturn">What would overturn it,
-stated plainly: the profile current integrates to about <strong>&minus;1.1</strong>
-times <code>Ip</code> on all three sources while the grid current integrates to
-<strong>+1.0</strong> &mdash; the two sides of the residual are of equal
-magnitude and opposite sign, which is the signature of a sign convention rather
-than of a physical mismatch, and it is what drives a band residual of order one.
-The analytic round trip cannot separate the two, because the state is written
-with the same sign on its flux map and on its flux functions: a route that
-negates both, or neither, returns the same round trip, and only a real DD3 file
-can adjudicate. If that inversion is a read-convention defect &mdash; the sign the
-translator takes on <code>profiles_1d/dpressure_dpsi</code> and
-<code>profiles_1d/f_df_dpsi</code>, or the assumption that a DD3 file&rsquo;s flux
-map and its derivative rows flip together &mdash; then every band residual above
-measures that sign, all three sources must be re-measured, and the ranking
-between them could invert. If it is real, then all three sources&rsquo; stored
-flux functions stand anti-parallel to their flux maps, which is a finding about
-the data and not a choice of reference. The bounded check that separates them is
-named under the gate below and was not reached in this node&rsquo;s budget.</p>
+beside <code>&Delta;<sup>&star;</sup>&Phi; = &minus;2&pi;&mu;<sub>0</sub>R j<sub>&phi;</sub></code>
+and <code>&Phi; = 2&pi;&psi;</code>, so its <code>p&prime;</code> and
+<code>FF&prime;</code> are derivatives against the <i>negated</i> flux
+(<code>p&prime; = &minus;dp/d&Phi;</code>). The map side satisfies that pair and the
+flux functions do not, and the map side is the one anchored outside nova: it
+integrates to the slice&rsquo;s own signed <code>I<sub>p</sub></code> within 0.3 per
+cent on all 72 sampled slices, and <code>&int;j<sub>&phi;</sub> dA = I<sub>p</sub></code>
+holds whatever convention labels the flux.</p>
+<p id="edge-consistency-table-recommendation-site">So the <code>&minus;1</code>
+is a sign chain, not a datum, and it is one site rather than the translation: the
+raw and the translated regressions agree to every printed digit, which is what a
+uniform flip of both fields looks like, and the translator&rsquo;s own factor for a
+flux-derivative row is the exact reciprocal of the flux factor, so it is
+mathematically self-consistent. The outlier is the profile side of
+<code>nova/equilibrium/convention.py</code>, whose leading minus makes the
+profile current anti-parallel to the map current on data it reads from the Data Dictionary.
+It disagrees with <code>nova/imas/profiles.py</code>, which multiplies the same
+<span class="mono">p_prime</span> and <span class="mono">ff_prime</span> the same reader
+delivers by <code>+2&pi;</code> with no minus and is the sign that is collinear
+with the map here. That file is outside this node&rsquo;s write scope, and the
+change is repo-wide (it also feeds <span class="mono">grad_shafranov_source</span>
+and every forward solve built on it), so it is named rather than patched. No
+sign was flipped anywhere in this node to make a ratio come out positive; the
+table below is reported as the module measures it, with the other sense measured
+beside it.</p>
+<p id="edge-consistency-table-recommendation-overturn">What it rests on and what
+would overturn it: the diagnosis rests on four regressions that are mirror images
+to every printed digit between the raw and translated files, on collinearity of
+&minus;0.99 between the two current fields, and on three checks inside the file
+that need no convention at all &mdash; the map at the magnetic axis equalling
+<code>psi_axis</code> to 1e&minus;4, the one-dimensional flux running the same way
+as the globals, and pressure falling outward against the stored ordering. A
+&minus;1 that were a datum rather than a sign would scatter those fields instead
+of leaving them collinear, and would have to have happened identically in DINA
+and CORSICA. What would overturn the diagnosis is the opposite reading of the
+Data Dictionary&rsquo;s own definition of <code>dpressure_dpsi</code>: if the DD means
+it as a derivative of the <i>negated</i> flux, then the reader should negate these
+two rows and the convention module is right as written. That is a reading of the
+standard, not a measurement, and it is the lead&rsquo;s call.</p>
+<p id="edge-consistency-table-recommendation-corrected">On the corrected numbers,
+the table was re-measured in the sense that is collinear with the map, one call to
+the same measure per slice with the flux functions negated, so nothing is
+inferred:</p>
+<table id="edge-consistency-table-sensitivity-table">
+<caption>Same 24 slices per source. <code>whole slice</code> is the form whose
+denominator is the slice maximum and is well conditioned; <code>band relative</code>
+divides by the band&rsquo;s own profile current.</caption>
+<thead><tr><th>source</th><th>sense</th><th>band relative median</th>
+<th>band relative max</th><th>whole slice median</th><th>above threshold</th></tr></thead>
+<tbody>
+<tr><td>DINA 105052/1</td><td>as the module measures</td><td>1.7326</td><td>4.7740e1</td><td>0.7673</td><td>24 of 24</td></tr>
+<tr><td>DINA 105052/1</td><td>collinear with the map</td><td>0.7064</td><td>4.7794e1</td><td><strong>0.0680</strong></td><td>24 of 24</td></tr>
+<tr><td>DINA 105069/3</td><td>as the module measures</td><td>1.7131</td><td>5.4548e1</td><td>0.8056</td><td>24 of 24</td></tr>
+<tr><td>DINA 105069/3</td><td>collinear with the map</td><td>0.7205</td><td>5.4465e1</td><td><strong>0.0466</strong></td><td>24 of 24</td></tr>
+<tr><td>CORSICA 130506/6</td><td>as the module measures</td><td>7.9296</td><td>9.7896e15</td><td>0.9177</td><td>24 of 24</td></tr>
+<tr><td>CORSICA 130506/6</td><td>collinear with the map</td><td>7.6001</td><td>9.7896e15</td><td><strong>0.0803</strong></td><td>24 of 24</td></tr>
+</tbody></table>
+<p id="edge-consistency-table-recommendation-corrected-reading">Two things
+survive the correction and one does not. CORSICA 130506/6 is the worst of the
+three on both forms in both senses, and its maximum of <code>9.79e15</code> is
+unchanged, so it should not be the &sect;6 reference on this measure. Which DINA
+pulse is best does not survive: on the corrected whole-slice form DINA 105069/3
+leads (<strong>0.0466</strong>, against 0.0680 for 105052/1), the reverse of the
+as-measured ordering, so the earlier preference for 105052/1 was the sign rather
+than the physics. And the band form does not rank at all: it stays between 0.71
+and 7.60 in the corrected sense and clears
+<code>EDGE_BAND_RELATIVE_THRESHOLD = 1.0e&minus;3</code> on 24 of 24 slices for
+every source in both senses, because its denominator is the band&rsquo;s own
+profile current, which is roughly a tenth of the slice maximum there, while the
+numerator is 5 to 8 per cent of that maximum. The measure&rsquo;s threshold was fixed
+on an analytic state whose band current never approaches zero; on stored slices
+it separates nothing. The recommendation to the lead is therefore: keep the
+whole-slice form as the ranking form, re-measure it once the sign is settled, and
+treat the band-relative threshold as untested on real data.</p>
 </section>
 
 <section id="edge-consistency-table-gate">
@@ -174,15 +263,13 @@ reports <code>band_relative = 2.3309e&minus;3</code>, above the threshold, and t
 arm that asserts the perturbed state is <i>consistent</i> fails on the exact
 value while the unperturbed arm passes. The mutation was reverted and the file
 matches the head commit.</p>
-<p id="edge-consistency-table-gate-open">What this node did not reach, and what
-each would need: the figure of band-relative residual against time for the three
-sources; and the bounded check that would settle the sign question above &mdash;
-regress the profile current on the grid current cell by cell for one slice of
-each source and report the slope and its residual, a slope near &minus;1 with a
-small residual naming a sign convention and a slope far from &minus;1 naming the
-data. Both are within this node&rsquo;s write scope and both are short; the census
-section is landed, and so is the review item that the measure&rsquo;s convergence
-figure carry a labelled measured series.</p>
+<p id="edge-consistency-table-gate-open">What this node did not reach: the
+figure of band-relative residual against time for the three sources, which the
+brief left optional and the table above already carries numerically. The review
+item that the measure&rsquo;s convergence figure carry a labelled measured series is
+closed (both series are named in a legend clear of the data, and the render was
+inspected), and so is the bounded sign check, whose four regressions and three
+convention-free checks are in the section above.</p>
 </section>
 
 </main></body></html>

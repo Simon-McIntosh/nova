@@ -1,0 +1,36 @@
+<section id="wall-vertex-field-flux">
+  <h3>Carrier wall flux from the supplied field</h3>
+  <p>The recorded diverted 340-cell defect reproduced at the base: carrier minus
+  analytic flux was +954.529 µWb at vertex 447 and +770.071 µWb at vertex 448;
+  interior vertex 10 lay below its linked wall vertices. The curved-field
+  negative control failed at all 48 added wall vertices (EXIT=1). After the
+  builder sampled added vertices from the supplied field, the two wall errors
+  were 0 and −3.56 × 10<sup>−17</sup> Wb. Vertex 10 ceased to be a minimum.
+  The tree lists vertex 5 (X-point saddle), 69 (axis maximum), 457
+  (private-region wall contact), and 461 (virtual outside); the SOL pair is
+  absent. The old probe stops at its asserted carrier minimum (EXIT=1), and
+  the head audit of its census functions returns zero wall-interpolation-caused
+  extrema across all twelve rungs.</p>
+  <p>The remaining non-stationary interior extrema, counted by the probe's
+  analytic-stationary-point test, are:</p>
+  <table>
+    <thead><tr><th>Certificate case</th><th>340 cells</th><th>550 cells</th><th>1074 cells</th></tr></thead>
+    <tbody>
+      <tr><td>Diverted single null</td><td>0</td><td>0</td><td>3</td></tr>
+      <tr><td>Moderate rotation conventional static</td><td>54</td><td>65</td><td>86</td></tr>
+      <tr><td>Strong rotation compact static</td><td>55</td><td>66</td><td>94</td></tr>
+      <tr><td>Weak rotation reactor static</td><td>56</td><td>68</td><td>99</td></tr>
+    </tbody>
+  </table>
+  <p>The explanatory figure's PNG and SVG rendered under the run scratch area;
+  the PNG was inspected and shows the four-node tree without the SOL pair.
+  The JSON receipt remains pending. The figure command requires its output to
+  lie below the repository root, while the assigned explanatory artifact paths
+  also appear in a concurrent node's exclusive write list. The first render
+  attempt exposed an obsolete wall-contact label; the corrected render saved
+  PNG and SVG but refused to serialize the receipt at the scratch path. The
+  two attempts are recorded in the run logs. The baseline sweep-bounds file
+  was already red in the frozen base copy: its recorded reference and current
+  tree produced arrays of lengths 256 and 258. That failure is separate from
+  the wall flux change.</p>
+</section>

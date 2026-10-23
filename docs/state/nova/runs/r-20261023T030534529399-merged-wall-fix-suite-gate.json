@@ -352,6 +352,64 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "4713415bea69d3a5cc0698eff3a0f375e71b4a0f",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'failed' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "manifest is blocked; process kept for resume",
+    "scratch_bytes": 0,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261023T030534529399-merged-wall-fix-suite-gate",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 0,
+        "path": "/tmp/reckon-crew-scratch/r-20261023T030534529399-merged-wall-fix-suite-gate"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "integrated",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [],
+          "head": "4713415bea69d3a5cc0698eff3a0f375e71b4a0f",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/adb3a390-bdb2-4e2a-8e74-1e049c62c9fe/merged-wall-fix-suite-gate",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-10-23T03:59:19Z",
+            "session_id": "01a166bc-9ad0-7420-98a3-b80e6c645bb0",
+            "session_source": "stream",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/adb3a390-bdb2-4e2a-8e74-1e049c62c9fe/merged-wall-fix-suite-gate"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "this worktree is the working directory of recoverable session 01a166bc-9ad0-7420-98a3-b80e6c645bb0"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_withheld": "gate verdict 'failed' is not passing; worktree retained for recovery"
+  },
   "resume_waiver": {
     "reason": "the remaining measurement is carried by two new nodes (split-arc-edge-order, topology-read-after-wall-fix); this run's role cannot repair the regression it found",
     "session_id": "01a166bc-9ad0-7420-98a3-b80e6c645bb0",

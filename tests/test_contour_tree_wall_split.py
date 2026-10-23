@@ -4,6 +4,7 @@ import jax.numpy as jnp
 import numpy as np
 import pytest
 
+from benchmarks.contour_tree_brute_force import certificate_rung_fixtures
 from nova.equilibrium.contour_tree import (
     _carrier_adjacency,
     _sweep_tree,
@@ -149,3 +150,56 @@ def test_split_events_match_outside_augmented_sublevel_counts(ripple):
         elif vertex != order[-1]:
             assert not nodes[vertex]
         previous = current
+
+
+def test_production_split_events_match_outside_augmented_sublevel_counts():
+    fixture = next(
+        fixture
+        for fixture in certificate_rung_fixtures()
+        if fixture.name.endswith("diverted-single-null-340-cells")
+    )
+    mesh = fixture.mesh
+    values = np.asarray(mesh.vertex_psi)
+    valid = np.asarray(mesh.vertex_valid)
+    wall = np.asarray(mesh.vertex_is_wall) & valid
+    edges = np.asarray(mesh.edges)[np.asarray(mesh.edge_valid)]
+    neighbours, neighbour_valid, adjacency_overflow = _carrier_adjacency(
+        mesh.edges, mesh.edge_valid, len(values)
+    )
+    assert not bool(adjacency_overflow)
+    nodes, kinds, _, _, overflow, order = _sweep_tree(
+        mesh.vertex_psi,
+        mesh.vertex_valid,
+        mesh.vertex_is_wall,
+        neighbours,
+        neighbour_valid,
+        False,
+        len(values),
+        len(mesh.edges),
+    )
+    assert not bool(overflow)
+    nodes = np.asarray(nodes)
+    kinds = np.asarray(kinds)
+    active = set()
+    previous = 1
+    wall_merges = []
+    usable_order = [int(vertex) for vertex in np.asarray(order) if valid[vertex]]
+    for vertex in usable_order:
+        active.add(vertex)
+        current = _sublevel_count(active, edges, wall)
+        if current > previous:
+            assert nodes[vertex] and kinds[vertex] == 0
+        elif current < previous:
+            assert nodes[vertex] and kinds[vertex] == 1, (
+                vertex,
+                values[vertex],
+                wall[vertex],
+                previous,
+                current,
+            )
+            if wall[vertex]:
+                wall_merges.append(vertex)
+        elif vertex != usable_order[-1]:
+            assert not nodes[vertex]
+        previous = current
+    assert 447 in wall_merges

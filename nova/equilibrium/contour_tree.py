@@ -410,14 +410,15 @@ def _sweep_tree(
         )
         representative = root_active & ~repeated
         neighbour_wall = jnp.any(representative & wall_flag[neighbour_root])
-        component_count = jnp.sum(representative, dtype=jnp.int32)
+        implicit_outside = (not descending) & vertex_is_wall[vertex] & ~outside_active
+        component_count = jnp.sum(representative, dtype=jnp.int32) + implicit_outside
         first_wall = usable & descending & vertex_is_wall[vertex] & ~neighbour_wall
         final_vertex = usable & (rank == last_usable_rank)
         extremum = component_count == 0
         saddle = component_count >= 2
         terminal = final_vertex & (component_count == 1)
         split_wall = (not descending) & vertex_is_wall[vertex]
-        event = usable & ~split_wall & (extremum | saddle | terminal | first_wall)
+        event = usable & (saddle | (~split_wall & (extremum | terminal | first_wall)))
         signed_maximum = (descending & extremum) | ((not descending) & terminal)
         signed_minimum = ((not descending) & extremum) | (descending & terminal)
         critical = jnp.where(

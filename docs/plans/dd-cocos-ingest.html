@@ -24,7 +24,7 @@
   <title>DD COCOS Ingest | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="79">
+<meta name="plan-version" content="80">
 <meta name="plan-modified" content="2026-10-23">
 <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;dd-cocos-ingest#s1&quot;],&quot;s3&quot;:[&quot;dd-cocos-ingest#s2&quot;],&quot;s4&quot;:[&quot;dd-cocos-ingest#s3&quot;],&quot;s5&quot;:[&quot;dd-cocos-ingest#s1&quot;,&quot;dd-cocos-ingest#s2&quot;]}">
 </head>
@@ -181,6 +181,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261023T154028759642-review-of-edge-consistency-measure-a27cbb200be9-figure" data-who="reckon-build" data-when="2026-10-23T15:58:44.445Z">
     <div class="r-comment-body"><p>figure review of r-20261023T123603187543-edge-consistency-measure at head a27cbb200be9a5864c4a6426b064b947812396c1 - one rendered PNG judged, 6 of 6 rubric items pass, 1 non-blocking finding (unlabelled measured series in render_convergence.py line 67), recorded parsed and read-only at both declared write paths</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261023T153920180664-review-of-edge-consistency-measure-a27cbb200be9" data-who="reckon-build" data-when="2026-10-23T16:07:08.069Z">
+    <div class="r-comment-body"><p>review of run r-20261023T123603187543-edge-consistency-measure at base 9b6422bb0416e2a358b91c9389c1810d863b1bd0 and head a27cbb200be9a5864c4a6426b064b947812396c1: all six dimensions scored (goal_fidelity 19, evidence 18, scope_discipline 19, durability 17, fit 18, reuse 20), added_failure_count 0, two non-blocking findings — the band-denominator property is not independently pinned by a test, and the measure&#x27;s grid read now depends on jnp x64 that the module does not state; the increment repairs the prior review&#x27;s reuse finding by delegating to nova.equilibrium.map_extraction.apply_delta_star.</p></div>
 </div>
 </section>
 </main>

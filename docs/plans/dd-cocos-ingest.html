@@ -24,7 +24,7 @@
   <title>DD COCOS Ingest | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="65">
+<meta name="plan-version" content="66">
 <meta name="plan-modified" content="2026-10-23">
 <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;dd-cocos-ingest#s1&quot;],&quot;s3&quot;:[&quot;dd-cocos-ingest#s2&quot;],&quot;s4&quot;:[&quot;dd-cocos-ingest#s3&quot;],&quot;s5&quot;:[&quot;dd-cocos-ingest#s1&quot;,&quot;dd-cocos-ingest#s2&quot;]}">
 </head>
@@ -129,6 +129,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261023-s3-readers-split" data-who="reckon-build" data-when="2026-10-23T09:50:00Z">
     <div class="r-comment-body"><p>The §3 node (run <code>r-20261022T194941418996-dd-readers</code>) is split. What it landed in its worktree:</p><ul><li><code>PlasmaSource.from_imas</code> goes through the translator.</li><li><code>PlasmaSlice.prescribe</code> keeps its σ_Bp guard as the internal COCOS 17 check, read from <code>nova_cocos.convention(17)</code>.</li><li><code>mast_efit</code>'s three ψ-like rows take the declared 3→17 factor.</li><li><code>Extrapolate.update</code> goes through the translator.</li><li>The DINA tests are re-pointed to conforming cases, with the Table I transcription restored.</li></ul><p>Its negative control is admissible: bypassing the translation reddens <code>test_from_imas_prescribes_corsica_130506_6</code>, which is refused by the internal check.</p><p>The equilibrium reader and getslice are carried by <code>f-ddc-002</code>; the split is recorded in that followup. The node now closes on three measurements:</p><ul><li>the base arm of the two machine-only <code>test_coupled_plant</code> failures (the sectioned-set reduction, and the sectioned self against the unsectioned box check), as one sirius job, judged by delta;</li><li>the re-run sign search with its hit counts;</li><li>its fragment.</li></ul></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261023T100757187263-review-of-dd-readers-105e40fd0fa4" data-who="reckon-build" data-when="2026-10-23T10:35:16.426Z">
+    <div class="r-comment-body"><p>landing: the review of r-20261022T194941418996-dd-readers at head 105e40fd0 reads as parsed, scoring goal_fidelity 19, evidence 14, scope_discipline 20, durability 15, fit 19, reuse 16, with added_failure_count 0 and no blocking finding; five non-blocking findings name the unmeasured three-row MAST coverage (tests/test_media.py:836), the duplicated target lookup at nova/imas/plasma_source.py:34, the fragment&#x27;s orphan duplicate paragraph and unbalanced section tag (dd-readers.html:120/129), the missing planted-sign control, and the template tests: and after_suite commands in the reviewed manifest.</p></div>
 </div>
 </section>
 </main>

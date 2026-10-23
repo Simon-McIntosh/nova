@@ -1,0 +1,56 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-23T10:35:16.426Z",
+  "dispatched_at": "2026-10-23T10:14:03Z",
+  "findings": [
+    {
+      "file": "tests/test_media.py",
+      "line": "836",
+      "severity": "non-blocking",
+      "text": "non-blocking: the test verifies mast_flux_factor() against TOTAL_FLUX_FACTOR and against the declared convention 13, but never the three rows in nova/media/sources/mast_efit.py:92,121,122 that the done_when requires it to check, so a regression reverting those three multiplications to TOTAL_FLUX_FACTOR is invisible to the whole suite because the two factors are the same number."
+    },
+    {
+      "file": "nova/imas/plasma_source.py",
+      "line": "34",
+      "severity": "non-blocking",
+      "text": "non-blocking: _translated rebuilds a standard_name dict on every call, re-implementing the target-path lookup its owner already serves as SourceSignalMap.for_target (nova/io/sourcemap.py:456); it neither extends nor wraps the owner and does the same work six times per slice."
+    },
+    {
+      "file": "docs/evidence/fragments/dd-cocos-ingest/dd-readers.html",
+      "line": "120",
+      "severity": "non-blocking",
+      "text": "non-blocking: an orphan duplicate of the reconstruction-route paragraph (same text with tests/test_coupled_plant.py and tests/test_unseen_source_full_plant.py swapped) sits outside any section, followed by an unbalanced </section> at line 129 \u2014 the fragment carries ten opening and eleven closing section tags, so the artefact the plan indexes renders one section wrongly nested."
+    },
+    {
+      "file": "docs/evidence/fragments/dd-cocos-ingest/dd-readers.html",
+      "line": "132",
+      "severity": "non-blocking",
+      "text": "non-blocking: the sign-search section records the search's hit count (103 lines, 26 files) but no planted positive control, which the done_when requires, so the claim that no reader carries a sign site rests on an instrument whose sensitivity was never shown to report something known present."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T194941418996-dd-readers/manifest.md",
+      "line": "49",
+      "severity": "non-blocking",
+      "text": "non-blocking: the tests: line is a template carrying <tree>, <shared .venv python> and <one test file per process> rather than a command a shell was handed, and after_suite's command (manifest.md:7) carries PYTHONPATH=<worktree>; promotion builds its gate receipt from that line, so the receipt names no runnable command."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to move nova's IDS readers onto the DD3 translator and re-express the fixed-orientation guard; nova/imas/plasma_source.py:246 now routes every convention-bearing slice quantity through translate_equilibrium, PlasmaSlice.prescribe (plasma_source.py:101) takes sigma_Bp from nova_cocos.convention(17), and nova/media/sources/mast_efit.py:92,121,122 carry the declared COCOS 3 factor.\nVERDICT done_when: the done_when's reader items are measured by per-file base/head gate streams (four to seven tests each) and by the two machine-only tests at base e986c9314 and head, while its \"a test checks all three rows\" clause and its planted-sign sensitivity clause are not measured anywhere in the manifest, the fragment or the logs.\nVERDICT write_paths: the manifest declares 21 write paths; git diff e986c9314..105e40fd0 touches 12 files, every one of them named, with nova/imas/plasma_source.py, nova/io/sourcemap.py, nova/media/sources/mast_efit.py, nova/imas/extrapolate.py and seven test files inside the fence and nothing outside it.\nVERDICT manifest: read at the current revision; status complete, the docs/evidence/fragments/dd-cocos-ingest/dd-readers.html fragment landed, negative_control_log a bare admissible path, but the tests: line (manifest.md:49) and after_suite's command (manifest.md:7) are templates carrying <tree>, <shared .venv python>, <one test file per process> and <worktree>.\nVERDICT diff: read commit by commit against e986c9314; six commits, 554 insertions and 116 deletions over 12 files, all inside the declared scope, and the two later documentation commits change only the fragment.\nCALL_SITES: nova/imas/plasma_source.py:PlasmaSource.from_mast, scripts/reconstructed_plasma_source/measure.py:37, scripts/reconstructed_plasma_source/baseline_sign.py:14, scripts/media/emit_boundary_contact.py:56, scripts/media/efit_nova_overlay.py:111, scripts/media/nova_thomson_gif.py:162, scripts/media/efit_pulse_gif.py:139\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/imas/plasma_source.py:249 builds every slice from the signal map and plasma_source.py:258 refuses a blocked read, and the split of nova/imas/equilibrium.py and getslice.py out of the node is recorded in the plan as followup f-ddc-002, so the untouched files are not a goal shortfall.\nSCORE evidence: 14\nJUSTIFICATION evidence: the gate streams run each readers file in its own fresh process at base and head (logs/base_test_*.log, logs/head_test_*.log all EXIT=0), but tests/test_media.py:836 does not measure the three mast_efit flux rows the done_when names and nothing records the planted-sign sensitivity check the done_when also names.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in git diff e986c9314..105e40fd0 (nova/io/sourcemap.py, nova/media/sources/mast_efit.py, nova/imas/plasma_source.py, nova/imas/extrapolate.py and their test files) is inside the manifest's orientation_write_paths list.\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_plasma_source.py:148 fails if the translator stops refusing 105014/1 and 105013/1 by name, and the negative control (logs/negative_control_bypass.log) reddens tests/test_plasma_source.py::test_from_imas_prescribes_corsica_130506_6, but reverting nova/media/sources/mast_efit.py:92,121,122 to TOTAL_FLUX_FACTOR leaves every assertion green because tests/test_media.py:851 compares mast_flux_factor() against that same number.\nSCORE fit: 19\nJUSTIFICATION fit: the paren-free multi-exception form at nova/imas/plasma_source.py:21 matches the repository idiom (nova/catalog/mast_geometry.py:549), and the new names MAST_SOURCE_CONVENTION, MAST_FLUX_TRANSFORMATION and mast_flux_factor (nova/io/sourcemap.py:767-793) are mechanism-named with no plan label.\nSCORE reuse: 16\nJUSTIFICATION reuse: nova/imas/plasma_source.py:25 uses the translator that owns the capability and nova/io/sourcemap.py:793 wraps convention_transform rather than forking it, but nova/imas/plasma_source.py:34 duplicates the target lookup that SourceSignalMap.for_target (nova/io/sourcemap.py:456) already owns.\nFINDING tests/test_media.py:836 non-blocking: the test verifies mast_flux_factor() against TOTAL_FLUX_FACTOR and against the declared convention 13, but never the three rows in nova/media/sources/mast_efit.py:92,121,122 that the done_when requires it to check, so a regression reverting those three multiplications to TOTAL_FLUX_FACTOR is invisible to the whole suite because the two factors are the same number.\nFINDING nova/imas/plasma_source.py:34 non-blocking: _translated rebuilds a standard_name dict on every call, re-implementing the target-path lookup its owner already serves as SourceSignalMap.for_target (nova/io/sourcemap.py:456); it neither extends nor wraps the owner and does the same work six times per slice.\nFINDING docs/evidence/fragments/dd-cocos-ingest/dd-readers.html:120 non-blocking: an orphan duplicate of the reconstruction-route paragraph (same text with tests/test_coupled_plant.py and tests/test_unseen_source_full_plant.py swapped) sits outside any section, followed by an unbalanced </section> at line 129 \u2014 the fragment carries ten opening and eleven closing section tags, so the artefact the plan indexes renders one section wrongly nested.\nFINDING docs/evidence/fragments/dd-cocos-ingest/dd-readers.html:132 non-blocking: the sign-search section records the search's hit count (103 lines, 26 files) but no planted positive control, which the done_when requires, so the claim that no reader carries a sign site rests on an instrument whose sensitivity was never shown to report something known present.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T194941418996-dd-readers/manifest.md:49 non-blocking: the tests: line is a template carrying <tree>, <shared .venv python> and <one test file per process> rather than a command a shell was handed, and after_suite's command (manifest.md:7) carries PYTHONPATH=<worktree>; promotion builds its gate receipt from that line, so the receipt names no runnable command.\n",
+  "review_run_id": "r-20261023T100757187263-review-of-dd-readers-105e40fd0fa4",
+  "reviewed_base_sha": "e986c931495d0db080e5e8d3c2633d39963e9c7c",
+  "reviewed_head_sha": "105e40fd0fa4ca398cc3179db22c842f4288f26a",
+  "reviewed_run_id": "r-20261022T194941418996-dd-readers",
+  "scores": {
+    "durability": 15,
+    "evidence": 14,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T10:36:13.494738+00:00",
+  "total": 103
+}

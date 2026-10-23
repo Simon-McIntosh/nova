@@ -156,12 +156,28 @@ clears the threshold on every slice, the recommendation is to <b>not</b> settle
 &sect;6 on the strength of edge consistency alone; if the section needs the
 measure to choose, DINA 105052/1 is the better candidate and CORSICA 130506/6 is
 the worst of the three.</p>
+<p id="edge-consistency-table-recommendation-provisional">This recommendation is
+<strong>provisional</strong>, and no reference is chosen on this table. The lead
+ruled on 2026-10-23 that nova&rsquo;s flux functions are to be made COCOS 17 once
+a separate node has proved the COCOS 17 relation, and that the &sect;6 reference
+is decided after a re-measure on the corrected sign, with every source&rsquo;s
+COCOS identified from its own data because DINA is not sign-trustworthy. The
+ranking above is therefore a measurement taken through the convention this
+repository currently applies, reported as such rather than as a verdict on the
+sources; when the relation is proved and the flux functions are COCOS 17, this
+table is to be re-measured and the choice of &sect;6 made on those numbers. The
+measured values below stand unchanged.</p>
 <p id="edge-consistency-table-recommendation-rests-on">What the recommendation
 rests on: the operand scaling, which the analytic IDS round trip settles at three
-exact answers rather than by assertion; the grid current, which integrates to the
-slice&rsquo;s own <code>Ip</code> within 0.3 per cent on all 72 sampled slices and
-so shows the map side of the comparison to be sound; and the threshold, fixed on
-the analytic state before any IDS row was read.</p>
+exact answers rather than by assertion; the grid current, whose integral over
+each sampled slice lies between <strong>0.9736</strong> and <strong>1.0027</strong>
+of the slice&rsquo;s own <code>Ip</code> on DINA 105052/1, 0.9801 and 1.0019 on
+DINA 105069/3, and 0.9867 and 1.0004 on CORSICA 130506/6 &mdash; a worst
+deviation of 2.64 per cent, on one DINA 105052/1 slice &mdash; which is enough to
+show the map side to be the sound one, carrying the stored <code>Ip</code> at the
+right magnitude and sign, and not enough to claim it reproduces that current to a
+fraction of a per cent; and the threshold, fixed on the analytic state before any
+IDS row was read.</p>
 <p id="edge-consistency-table-recommendation-convention">Which sign the
 operator assumes, stated rather than implied: <code>nova.equilibrium.convention</code>
 pins <code>j<sub>&phi;</sub> = &minus;2&pi;(R p&prime; + FF&prime;/(&mu;<sub>0</sub>R))</code>
@@ -170,8 +186,10 @@ and <code>&Phi; = 2&pi;&psi;</code>, so its <code>p&prime;</code> and
 <code>FF&prime;</code> are derivatives against the <i>negated</i> flux
 (<code>p&prime; = &minus;dp/d&Phi;</code>). The map side satisfies that pair and the
 flux functions do not, and the map side is the one anchored outside nova: it
-integrates to the slice&rsquo;s own signed <code>I<sub>p</sub></code> within 0.3 per
-cent on all 72 sampled slices, and <code>&int;j<sub>&phi;</sub> dA = I<sub>p</sub></code>
+integrates to the slice&rsquo;s own signed <code>I<sub>p</sub></code> between 0.9736
+and 1.0027 of it on DINA 105052/1, 0.9801 and 1.0019 on DINA 105069/3, and 0.9867
+and 1.0004 on CORSICA 130506/6 (worst deviation 2.64 per cent), and
+<code>&int;j<sub>&phi;</sub> dA = I<sub>p</sub></code>
 holds whatever convention labels the flux.</p>
 <p id="edge-consistency-table-recommendation-site">So the <code>&minus;1</code>
 is a sign chain, not a datum, and it is one site rather than the translation: the
@@ -203,7 +221,12 @@ and CORSICA. What would overturn the diagnosis is the opposite reading of the
 Data Dictionary&rsquo;s own definition of <code>dpressure_dpsi</code>: if the DD means
 it as a derivative of the <i>negated</i> flux, then the reader should negate these
 two rows and the convention module is right as written. That is a reading of the
-standard, not a measurement, and it is the lead&rsquo;s call.</p>
+standard, not a measurement, and the lead keeps it: the ruling of 2026-10-23
+adopts COCOS 17 for nova&rsquo;s flux functions and makes the change conditional on
+a separate node proving the COCOS 17 relation from the data. The check this node
+can offer on that proof is the one above: whichever way that relation settles,
+the sample it is proved on must not be one whose flux functions were built under
+the answer.</p>
 <p id="edge-consistency-table-recommendation-corrected">On the corrected numbers,
 the table was re-measured in the sense that is collinear with the map, one call to
 the same measure per slice with the flux functions negated, so nothing is
@@ -222,10 +245,21 @@ divides by the band&rsquo;s own profile current.</caption>
 <tr><td>CORSICA 130506/6</td><td>as the module measures</td><td>7.9296</td><td>9.7896e15</td><td>0.9177</td><td>24 of 24</td></tr>
 <tr><td>CORSICA 130506/6</td><td>collinear with the map</td><td>7.6001</td><td>9.7896e15</td><td><strong>0.0803</strong></td><td>24 of 24</td></tr>
 </tbody></table>
+<figure id="edge-consistency-table-band-figure">
+<img src="/nova/figures/dd-cocos-ingest/edge-consistency-table/edge-consistency-band-residual.svg"
+ alt="Band-relative residual against time slice index for the three conforming sources, in both flux-function senses, with the declared threshold marked.">
+<figcaption>Band-relative residual on every sampled slice of the three
+sources, as the module measures it and with the flux functions negated, which is
+the sense collinear with the flux map. The dotted line is
+<code>EDGE_BAND_RELATIVE_THRESHOLD = 1.0e&minus;3</code>. Every mark on every
+panel sits above it in both senses, so the threshold separates no slice from any
+other; the CORSICA panel additionally shows three slices at 1e12&ndash;1e16, where
+the band&rsquo;s own profile current passes through zero.</figcaption>
+</figure>
 <p id="edge-consistency-table-recommendation-corrected-reading">Two things
 survive the correction and one does not. CORSICA 130506/6 is the worst of the
 three on both forms in both senses, and its maximum of <code>9.79e15</code> is
-unchanged, so it should not be the &sect;6 reference on this measure. Which DINA
+unchanged, so it is the worst of the three on this measure. Which DINA
 pulse is best does not survive: on the corrected whole-slice form DINA 105069/3
 leads (<strong>0.0466</strong>, against 0.0680 for 105052/1), the reverse of the
 as-measured ordering, so the earlier preference for 105052/1 was the sign rather

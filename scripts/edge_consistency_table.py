@@ -8,10 +8,12 @@ read therefore arrives in nova's internal COCOS 17, and a read whose measured
 digits contradict its own DD version is refused there by name rather than
 imputed.
 
-The stored ``profiles_2d`` grid is not uniformly spaced while the measure's
-structured-grid Grad-Shafranov stencil is, so each flux map is interpolated
-onto a uniform grid carrying the stored point counts over the stored extents.
-The scored grid is named in every row.
+The stored ``profiles_2d`` grid is uniform at the precision the two DINA files
+carry and quantised at 1e-5 m in the CORSICA file, while the measure's
+structured-grid Grad-Shafranov stencil needs a uniform axis, so each flux map is
+interpolated onto the uniform axis the repository's own reconstruction returns,
+carrying the stored point count over the stored extent, and a stored axis that
+reconstruction refuses is reported.  The scored grid is named in every row.
 
 The integral current check the census survey used is carried beside the three
 forms: the current the grid read integrates to, and the current the stored flux
@@ -46,6 +48,7 @@ from nova.imas.edge_consistency import (
 )
 from nova.imas.plasma_source import PlasmaSource
 from nova.jax.config import configure_dtypes
+from nova.media.sources.mast_efit import _uniform_axis
 
 IMASDB = Path("/work/imas/shared/imasdb/ITER/3")
 
@@ -77,11 +80,33 @@ FLUX_SCALE = 1.0
 DERIVATIVE_SCALE = 1.0
 
 
-def _uniform(axis) -> np.ndarray:
-    """Return a uniform axis over the stored extent with the stored point count."""
+def _uniform(axis, name: str = "axis") -> np.ndarray:
+    """Return the uniform axis the measure is scored on.
 
-    axis = np.asarray(axis, dtype=float)
-    return np.linspace(float(axis[0]), float(axis[-1]), int(axis.size))
+    The repository owns this reconstruction: :func:`_uniform_axis` of
+    :mod:`nova.media.sources.mast_efit` returns the endpoint-preserving uniform
+    axis of a stored one and refuses a stored axis that is not uniform at its
+    own precision.  That routine is used directly here; the reconstruction it
+    returns is the only one this script scores on.
+
+    The refusal is a real case rather than a guard: a source whose stored
+    coordinates were quantised when the file was written is not uniform at
+    stored precision, and its uniform axis then differs from the stored one by
+    that quantisation.  For such an axis the reconstruction is made over the
+    same extent and point count, and the deviation from the stored axis is
+    printed, so the substitution is visible in the run log rather than silent.
+    """
+
+    stored = np.asarray(axis, dtype=float)
+    try:
+        return _uniform_axis(stored, name)
+    except ValueError:
+        reconstructed = np.linspace(
+            float(stored[0]), float(stored[-1]), int(stored.size)
+        )
+        deviation = float(np.max(np.abs(stored - reconstructed)))
+        print(f"{name}: stored axis refused at {deviation:.3e} m, reconstructed")
+        return reconstructed
 
 
 def _sample(indices: list[int], size: int = SAMPLE_SIZE) -> tuple[list[int], bool]:
@@ -113,8 +138,8 @@ def measure_slice(plasma_slice) -> dict:
     stored_r = np.asarray(plasma_slice.radius, dtype=float)
     stored_z = np.asarray(plasma_slice.height, dtype=float)
     stored_psi = np.asarray(plasma_slice.psi, dtype=float)
-    grid_r = _uniform(stored_r)
-    grid_z = _uniform(stored_z)
+    grid_r = _uniform(stored_r, "profiles_2d/grid/dim1")
+    grid_z = _uniform(stored_z, "profiles_2d/grid/dim2")
     # A piecewise-linear resample has a discontinuous second derivative at
     # every stored node, which is exactly what the stencil differentiates, so
     # the residual grows under refinement instead of falling.  A cubic spline

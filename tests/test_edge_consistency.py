@@ -10,6 +10,10 @@ vanish at the stencil's second order.
 
 from __future__ import annotations
 
+import subprocess
+import sys
+from pathlib import Path
+
 import jax
 import numpy as np
 import pytest
@@ -280,3 +284,44 @@ def test_band_forms_take_the_profile_current_of_the_band_as_denominator():
 
     assert result.band_relative == pytest.approx(local)
     assert slice_wide != pytest.approx(result.band_relative)
+
+
+# The module sets the working precision on entry and refuses an entry that is
+# still single precision, so the guard is exercised here rather than through the
+# imports above: this file and the IDS-route file both call configure_dtypes()
+# at import, and a guard that only fires on a fresh interpreter is unreachable
+# from a session that has already configured itself.
+_PRECISION_PROBE = """
+import numpy as np
+
+import jax
+
+from nova.imas.edge_consistency import edge_consistency
+
+radius = np.linspace(1.08, 2.30, 9)
+height = np.linspace(-1.10, 1.00, 17)
+flux = np.zeros((height.size, radius.size))
+zeros = lambda psi: np.zeros_like(psi)
+try:
+    edge_consistency(flux, radius, height, 0.0, 1.0, zeros, zeros)
+except RuntimeError as error:
+    print(f"refused: {error}")
+else:
+    print(f"extended precision: {jax.config.jax_enable_x64}")
+"""
+
+
+def test_the_measure_sets_extended_precision_on_a_fresh_entry():
+    """A fresh interpreter either has x64 enabled on entry or is refused."""
+
+    completed = subprocess.run(
+        [sys.executable, "-c", _PRECISION_PROBE],
+        capture_output=True,
+        text=True,
+        cwd=Path(__file__).resolve().parents[1],
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    assert (
+        "extended precision: True" in completed.stdout or "refused:" in completed.stdout
+    ), completed.stdout

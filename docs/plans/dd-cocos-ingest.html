@@ -24,7 +24,7 @@
   <title>DD COCOS Ingest | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="82">
+<meta name="plan-version" content="83">
 <meta name="plan-modified" content="2026-10-23">
 <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;dd-cocos-ingest#s1&quot;],&quot;s3&quot;:[&quot;dd-cocos-ingest#s2&quot;],&quot;s4&quot;:[&quot;dd-cocos-ingest#s3&quot;],&quot;s5&quot;:[&quot;dd-cocos-ingest#s1&quot;,&quot;dd-cocos-ingest#s2&quot;]}">
 </head>
@@ -86,6 +86,10 @@
     <p class="r-dec-q">Which COCOS does nova read and use, and which data is valid?</p>
     <p class="r-dec-rat">Lead ruling, 2026-10-21: nova ingests data from the Data Dictionary, so the convention follows the DD version, not any one code&#x27;s output. Recorded first as d-ippc-dd-cocos on iter-passive-plasma-circuit.</p>
     </div>
+<div class="r-dec" data-key="d-ddc-flux-function-sign" data-choice="COCOS 17: p′ = dp/dψ₁₇ and FF′ = F dF/dψ₁₇, verified before the owner changes" data-by="lead" data-when="2026-10-23T19:23:24+00:00">
+    <p class="r-dec-q">d-ddc-flux-function-sign</p>
+    <p class="r-dec-rat">Lead ruling, 2026-10-23. nova/equilibrium/convention.py books j_φ = −2π(R p′ + FF′/(μ0 R)), which makes nova&#x27;s p′ equal to −dp/dΦ. On all three conforming ITER sources, read through the translator, that puts the profile current anti-parallel to the map current: regression slope −0.96, correlation −0.99, with the grid current within 0.3 % of Ip. nova/imas/profiles.py already uses +2π. The lead chose to make the flux functions COCOS 17, and first to make absolutely sure the COCOS 17 relation is what the change installs. The §6 reference of iter-passive-plasma-circuit is re-measured after the fix, with each source&#x27;s convention identified from its own data, because DINA is not sign-trustworthy.</p>
+    </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
@@ -110,6 +114,21 @@
     <h4 class="r-fu-title">Exercise the IDS writer&#x27;s convention factor and give the internal convention one name</h4>
     <div class="r-fu-body"><p>From the re-review of dd-internal-sites (merge <code>f0cf63219</code>).</p><ul><li>The pulsedesign writer's three sites take their factor from <code>psi_write_factor</code>, but no test reaches them. <code>tests/test_pulsedesign.py</code> skips all five tests without the pf_active database, and nothing calls <code>PulseDesign.write_ids</code> or <code>equilibrium_ids</code>. Add a database-free test that writes a known COCOS 17 state, reads the IDS back, and fails if a site reverts to a bare negation.</li><li><code>tests/test_shape_inverse.py</code> (29 tests, heavy compiles) has no base or head arm. Give it one, on a SLURM lane.</li><li>The internal convention now has three names: <code>nova/equilibrium/convention.py</code> CONVENTION, <code>nova/io/sourcemap.py</code> NOVA_CONVENTION, and <code>nova/equilibrium/observation_kernels.py</code> NOVA_COCOS = 17. Make the latter two read the owner.</li><li>The fragment's sign-search paragraph omits the <code>nova/biot/contour.py:198</code> hit. Correct its count.</li></ul></div>
     <pre class="r-fu-prompt">/reckon-build dd-cocos-ingest §4</pre>
+    </article>
+<article class="r-fu" data-id="f-ddc-005" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-build" data-written-at="2026-10-23" data-recommends-skill="/reckon-build dd-cocos-ingest §5" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Prove the COCOS 17 flux-function current relation before nova&#x27;s owner changes</h4>
+    <div class="r-fu-body"><p>Decision <code>d-ddc-flux-function-sign</code>. Before <code>nova/equilibrium/convention.py</code> changes, establish the sign of j_φ in terms of p′ and FF′ under COCOS 17, by three independent routes that must agree:</p><ul><li>Transcribe the Grad–Shafranov and current relations from Sauter and Medvedev (2013) in their general σ_Bp and e_Bp form, and evaluate them at COCOS 11 and COCOS 17.</li><li>Measure on DD4-native data, which is COCOS 17 by definition and needs no translation: the iter_corsica_130506 DD 4.1.0 layers named in <code>tests/data-manifest.json</code>. Regress the profile current on the grid current cell by cell.</li><li>Cross-check against imas-ambix's convention owner, <code>imas_ambix/challenge/convention.py</code>.</li></ul><p>Then identify each conforming source's COCOS from its own data, without trusting its declared convention. DINA is not sign-trustworthy. Use the full digit set, including the sign the Grad–Shafranov consistency itself implies.</p></div>
+    <pre class="r-fu-prompt">/reckon-build dd-cocos-ingest §5</pre>
+    </article>
+<article class="r-fu" data-id="f-ddc-006" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-written-by="reckon-build" data-written-at="2026-10-23" data-recommends-skill="/reckon-build dd-cocos-ingest §4" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Make nova&#x27;s flux functions COCOS 17 at their owner</h4>
+    <div class="r-fu-body"><p>After <code>f-ddc-005</code> proves the relation, and after the cut-cell split lands, so that its diagnosis keeps a fixed sign:</p><ul><li>Change <code>toroidal_current_density</code> in <code>nova/equilibrium/convention.py</code> to the COCOS 17 relation.</li><li>In the same node, flip every internal producer of p′ and FF′: <code>source.py</code>, <code>continuation.py</code>, <code>analytic_single_null.py</code>, <code>map_extraction.py</code>, the profile bases, and the scripts that call the owner.</li><li>Align <code>nova/imas/profiles.py</code> to the owner instead of its own literal.</li></ul><p>The certified forward-solve rows and the analytic oracles keep their published magnitudes by delta. Every flipped expectation is named with its producer. Negative control: one producer left on the old sign fails its COCOS 17 test.</p></div>
+    <pre class="r-fu-prompt">/reckon-build dd-cocos-ingest §4</pre>
+    </article>
+<article class="r-fu" data-id="f-ddc-007" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-build" data-written-at="2026-10-23" data-recommends-skill="/reckon-build dd-cocos-ingest §5" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Re-measure the edge-consistency table after the sign fix and settle the §6 reference</h4>
+    <div class="r-fu-body"><p>After <code>f-ddc-006</code> lands, re-measure the three forms on DINA 105052/1, DINA 105069/3 and CORSICA 130506/6, with each source's convention identified from its own data as in <code>f-ddc-005</code>. Recommend the iter-passive-plasma-circuit §6 reference on those numbers, for the lead to decide. CORSICA 130506/6 stays provisional until then.</p></div>
+    <pre class="r-fu-prompt">/reckon-build dd-cocos-ingest §5</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -189,7 +208,7 @@
     <div class="r-comment-body"><p>review of run r-20261023T123603187543-edge-consistency-measure at base 9b6422bb0416e2a358b91c9389c1810d863b1bd0 and head a27cbb200be9a5864c4a6426b064b947812396c1: all six dimensions scored (goal_fidelity 19, evidence 18, scope_discipline 19, durability 17, fit 18, reuse 20), added_failure_count 0, two non-blocking findings — the band-denominator property is not independently pinned by a test, and the measure's grid read now depends on jnp x64 that the module does not state; the increment repairs the prior review's reuse finding by delegating to nova.equilibrium.map_extraction.apply_delta_star.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261023T123603187543-edge-consistency-measure" data-who="reckon-build" data-when="2026-10-23T15:38:01Z">
-    <div class="r-comment-body"><p>The measure lands as nova/imas/edge_consistency.py reading the grid current through the repository&#x27;s single structured-grid Grad-Shafranov operator, nova.equilibrium.map_extraction.apply_delta_star, which the parity chain&#x27;s profile reproduction now also calls over a one-ring padded map so its per-slice residuals keep their base values; on CerfonFreidbergSingleNull the band residual falls at a fitted order of 1.96 against the stencil&#x27;s theoretical 2.00, a 1 per cent FF-prime perturbation over the whole plasma is detected at 2.33e-3 above the fixed threshold EDGE_BAND_RELATIVE_THRESHOLD = 1.0e-3, and the band-only negative control is reported inconsistent with the flux map asserted byte-identical and its band mask asserted cell for cell; the measure&#x27;s figure is docs/figures/dd-cocos-edge-consistency/edge-consistency-convergence.svg</p></div>
+    <div class="r-comment-body"><p>The measure lands as nova/imas/edge_consistency.py reading the grid current through the repository's single structured-grid Grad-Shafranov operator, nova.equilibrium.map_extraction.apply_delta_star, which the parity chain's profile reproduction now also calls over a one-ring padded map so its per-slice residuals keep their base values; on CerfonFreidbergSingleNull the band residual falls at a fitted order of 1.96 against the stencil's theoretical 2.00, a 1 per cent FF-prime perturbation over the whole plasma is detected at 2.33e-3 above the fixed threshold EDGE_BAND_RELATIVE_THRESHOLD = 1.0e-3, and the band-only negative control is reported inconsistent with the flux map asserted byte-identical and its band mask asserted cell for cell; the measure's figure is docs/figures/dd-cocos-edge-consistency/edge-consistency-convergence.svg</p></div>
 </div>
 </section>
 </main>

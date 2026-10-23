@@ -854,3 +854,65 @@ def test_the_mast_reader_declares_the_three_to_seventeen_flux_factor(monkeypatch
     assert sourcemap.mast_flux_factor() == pytest.approx(1.0)
     assert sourcemap.mast_flux_factor() != pytest.approx(TOTAL_FLUX_FACTOR)
     assert convention_transform(source=13, target=sourcemap.NOVA_CONVENTION) is not None
+
+
+def _efm_group():
+    """Return a minimal stand-in for the archive's ``efm`` group."""
+    gridr = np.array([1.0, 1.25, 1.5, 1.75], dtype=np.float32)
+    profile_r = np.array([1.0, 1.25, 1.5, 1.75, 2.0, 2.25], dtype=np.float32)
+    gridz = np.array([-1.0, 0.0, 1.0], dtype=np.float32)
+    psirz = np.ones((1, 3, 6), dtype=np.float32)
+    psirz[:, :, 4:] = np.nan
+    return {
+        "psirz": psirz,
+        "profile_r": profile_r,
+        "gridr": gridr,
+        "gridz": gridz,
+        "time": np.array([0.1]),
+        "psi_axis": np.array([1.5]),
+        "psi_boundary": np.array([0.5]),
+        "psi_norm": np.linspace(0.0, 1.0, 5),
+        "pprime": np.ones((1, 5)),
+        "ffprime": np.ones((1, 5)),
+        "lcfs_r": np.array([[1.2, 1.8, np.nan]]),
+        "lcfs_z": np.array([[0.1, -0.1, np.nan]]),
+        "magnetic_axis_r": np.array([1.5]),
+        "magnetic_axis_z": np.array([0.0]),
+        "xpoint1_rc": np.array([1.0]),
+        "xpoint1_zc": np.array([0.5]),
+        "xpoint2_rc": np.array([np.nan]),
+        "xpoint2_zc": np.array([np.nan]),
+        "plasma_current_c": np.array([7.0e5]),
+    }
+
+
+def test_each_mast_flux_row_carries_the_declared_factor(monkeypatch):
+    """The three flux rows the module owns really take the declared factor.
+
+    The test beside this one and the conversion are the same number, so a row
+    reverting to a hard-coded total-flux factor would still satisfy it.  This
+    reads the rows instead: the flux map of ``_flux_map`` and the axis and
+    boundary flux of ``read_frame`` are read twice from one group, once with the
+    source convention declared as COCOS 3 and once as COCOS 13, whose factor is
+    one.  Every one of the three rows must then differ by exactly 2*pi, and a
+    row carrying a factor of its own would not.
+    """
+
+    from nova.io import sourcemap
+    from nova.media.sources import mast_efit
+
+    group = _efm_group()
+    declared_three = mast_efit.read_frame(group, 0)
+
+    monkeypatch.setattr(sourcemap, "MAST_SOURCE_CONVENTION", 13)
+    declared_thirteen = mast_efit.read_frame(group, 0)
+
+    factor = 2.0 * np.pi
+    rows = 0
+    for name in ("flux", "flux_axis", "flux_boundary"):
+        three = np.asarray(getattr(declared_three, name), dtype=float)
+        thirteen = np.asarray(getattr(declared_thirteen, name), dtype=float)
+        assert np.any(thirteen != 0.0), name
+        np.testing.assert_allclose(three, factor * thirteen, rtol=1e-12)
+        rows += 1
+    assert rows == 3

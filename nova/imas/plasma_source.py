@@ -31,8 +31,8 @@ def _vacuum_field(b0: np.ndarray, index: int) -> float:
 
 def _translated(signal_map: Any, path: str, values: Any) -> Any:
     """Return one quantity converted from its source convention into COCOS 17."""
-    signals = {signal.standard_name: signal for signal in signal_map.signals}
-    return signals[path].apply(values)
+    (signal,) = signal_map.for_target(path)
+    return signal.apply(values)
 
 
 @dataclass(frozen=True)

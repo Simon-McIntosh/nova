@@ -1,0 +1,58 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "nova/io/__init__.py:13-14 (both changed names re-exported from the nova.io facade)",
+    "nova/io/ingest.py:151 (IdsIngest.ingest persists through store.write)",
+    "nova/io/sourcemap.py:63 (imports PROVISIONAL_NAMESPACE from the changed ingest module, the cycle the new local imports avoid)"
+  ],
+  "completed_at": "2026-10-23T13:47:46.442Z",
+  "dispatched_at": "2026-10-23T13:27:30Z",
+  "findings": [
+    {
+      "file": "tests/test_signalstore_convention_key.py",
+      "line": 90,
+      "severity": "non-blocking",
+      "text": "non-blocking: `assert store3.dd_version == rekeyed.dd_version` compares two constructor arguments the test itself supplied (DD3 to both stores), so it holds whatever SignalStore does with dd_version and cannot redden on the regression this test exists to catch \u2014 a cache_key that ignores the convention; the file's guard is the pair at :91-92 and, in the stale path, the raises at :108, and this assertion carries no coverage of its own."
+    },
+    {
+      "file": "nova/io/signalstore.py",
+      "line": 98,
+      "severity": "non-blocking",
+      "text": "non-blocking: stale_group reports a legacy-only group but nothing removes it \u2014 write() delegates to store_overwrite(), whose delete_group only ever deletes self.group, so re-ingesting a cache written under the pre-convention key leaves the legacy group on disk beside the new one permanently, duplicating every such group with no path to reclaim it, and once the new group exists stale_group returns None so the orphan never surfaces again."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read commit by commit against e69f4b60af04df8259ef914dee3136a3c55f6cb2; 337dd83a7 carries the source change and the new test file, 10f3c7478 and f62286392 reorder and move assertions inside that same test file, and c8b50417b adds only the evidence fragment \u2014 no file outside the declared write paths and no other module touched.",
+    "done_when": "all three clauses are asserted and their results recorded: tests/test_signalstore_convention_key.py:74-83 writes a DD3 and a DD4 store and shows distinct keys and the declared convention 11/17, :99-117 writes a group under the legacy key and asserts the refusal, and the covering files' base and head arms with their EXIT lines sit in the run's logs (head-test_signalstore_convention_key.log 3 passed EXIT=0, head/base test_io_roundtrip.log 3 passed both, head/base test_ingest_import.log 1 passed both).",
+    "goal": "the goal is a signal-store cache key carrying the COCOS convention of the stored fields; at head nova/io/signalstore.py:67-71 hashes {uri, dd_version, cocos} through the unchanged owner hash_attrs/canonical_key, and nova/io/ingest.py:94 derives that convention from the DD version through sourcemap's dd_equilibrium_convention, replacing the fixed cocos: int = 11 that stood at base.",
+    "manifest": "read; status complete, four commits listed from 337dd83a7 to c8b50417b, baseline_suite and after_suite each single-line JSON with a real revision, a literal command, exit_status 0, log_path and zero failure ids, and negative_control_log naming the scratch red log with the failing test id.",
+    "write_paths": "the manifest declares nova/io/signalstore.py, nova/io/ingest.py, tests/test_io_roundtrip.py, tests/test_ingest_import.py, tests/test_signalstore_convention_key.py and docs/evidence/fragments/dd-cocos-ingest/dd-cache-key.html; git diff --stat e69f4b60af04df8259ef914dee3136a3c55f6cb2 c8b50417b8a719ce0f566124c00dc913c23d985b lists exactly four changed paths and every one of them is inside that set."
+  },
+  "justifications": {
+    "durability": "tests/test_signalstore_convention_key.py:108 reddens on the exact reversion the run recorded \u2014 the negative control that drops the convention from cache_key ends DID NOT RAISE StaleConventionError with exit 1 \u2014 while :92 and :96 fail on the same mutation and all of them compare the code's own outputs against the literals 11/17 rather than against a value fed back in.",
+    "evidence": "the gate's three head arms are recorded with pytest summary lines and bare EXIT= lines, but tests/test_ingest_import.py reaches the changed ingest module only transitively through nova.io.sourcemap:63 and exercises none of it (it asserts an import graph binds no pandas), so that arm supplies no delta about the change and the substantive coverage rests on tests/test_signalstore_convention_key.py and tests/test_io_roundtrip.py.",
+    "fit": "nova/io/signalstore.py:82-98 follows the file's own idiom, opening the store through is_store and _mapper exactly as cached() at :100-105 already does, and no added name carries a plan label, version suffix or ticket reference.",
+    "goal_fidelity": "nova/io/signalstore.py:67-71 keys the group on {uri, dd_version, cocos} through the unchanged hash_attrs/canonical_key owner and nova/io/signalstore.py:112-127 refuses a legacy-only group by name, which is what the goal states.",
+    "reuse": "the key is hashed through the owner nova/database/filepath.py:337,392 unchanged and the DD-to-COCOS mapping through the owner nova/io/sourcemap.py:793; a search of nova/ for a capability that detects a stale or unconventioned cache group found none (filepath.py's only 'legacy' hit is about a worktree path), so stale_group extends this class rather than duplicating an owner.",
+    "scope_discipline": "git diff --stat e69f4b60af04df8259ef914dee3136a3c55f6cb2..c8b50417b8a719ce0f566124c00dc913c23d985b changes exactly the four declared paths, and nova/database/filepath.py is left untouched as the brief required."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is a signal-store cache key carrying the COCOS convention of the stored fields; at head nova/io/signalstore.py:67-71 hashes {uri, dd_version, cocos} through the unchanged owner hash_attrs/canonical_key, and nova/io/ingest.py:94 derives that convention from the DD version through sourcemap's dd_equilibrium_convention, replacing the fixed `cocos: int = 11` that stood at nova/io/ingest.py:66 at base.\nVERDICT done_when: all three clauses are asserted and their results recorded \u2014 tests/test_signalstore_convention_key.py:74-83 writes a DD3 and a DD4 store and shows distinct keys and the declared convention 11/17, :99-117 writes a group under the legacy key and asserts the refusal, and the covering files' arms sit in the run's logs with pytest summaries and bare EXIT lines (head-test_signalstore_convention_key.log 3 passed EXIT=0; head and base test_io_roundtrip.log 3 passed each; head and base test_ingest_import.log 1 passed each).\nVERDICT write_paths: the manifest declares nova/io/signalstore.py, nova/io/ingest.py, tests/test_io_roundtrip.py, tests/test_ingest_import.py, tests/test_signalstore_convention_key.py and docs/evidence/fragments/dd-cocos-ingest/dd-cache-key.html; `git diff --stat e69f4b60af04df8259ef914dee3136a3c55f6cb2 c8b50417b8a719ce0f566124c00dc913c23d985b` lists exactly four changed paths, every one inside that set.\nVERDICT manifest: read; status complete, four commits listed from 337dd83a7 to c8b50417b, baseline_suite and after_suite each a single-line JSON object with a real revision, a literal command, exit_status 0, log_path and zero failure ids, and negative_control_log naming the scratch red log that carries the failing test id.\nVERDICT diff: read commit by commit against e69f4b60af04df8259ef914dee3136a3c55f6cb2; 337dd83a7 carries the source change and the new test file, 10f3c7478 and f62286392 reorder and move assertions inside that same test file, and c8b50417b adds only the evidence fragment \u2014 no file outside the declared write paths and no other module touched.\nCALL_SITES: nova/io/__init__.py:13-14 (both changed names re-exported from the nova.io facade), nova/io/ingest.py:151 (IdsIngest.ingest persists through store.write), nova/io/sourcemap.py:63 (imports PROVISIONAL_NAMESPACE from the changed ingest module, the cycle the new local imports avoid)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/io/signalstore.py:67-71 keys the group on {uri, dd_version, cocos} through the unchanged hash_attrs/canonical_key owner and nova/io/signalstore.py:112-127 refuses a legacy-only group by name, which is what the goal states.\nSCORE evidence: 16\nJUSTIFICATION evidence: the gate's three head arms are recorded with pytest summary lines and bare EXIT= lines, but tests/test_ingest_import.py reaches the changed ingest module only transitively through nova.io.sourcemap:63 and exercises none of it (it asserts an import graph binds no pandas), so that arm supplies no delta about the change and the substantive coverage rests on tests/test_signalstore_convention_key.py and tests/test_io_roundtrip.py.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: `git diff --stat e69f4b60af04df8259ef914dee3136a3c55f6cb2..c8b50417b8a719ce0f566124c00dc913c23d985b` changes exactly the four declared paths, and nova/database/filepath.py is left untouched as the brief required.\nSCORE durability: 19\nJUSTIFICATION durability: tests/test_signalstore_convention_key.py:108 reddens on the exact reversion the run recorded \u2014 the negative control that drops the convention from cache_key ends DID NOT RAISE StaleConventionError with exit 1 \u2014 while :92 and :96 fail on the same mutation and all of them compare the code's own outputs against the literals 11/17 rather than against a value fed back in.\nSCORE fit: 18\nJUSTIFICATION fit: nova/io/signalstore.py:82-98 follows the file's own idiom, opening the store through is_store and _mapper exactly as cached() at :100-105 already does, and no added name carries a plan label, version suffix or ticket reference.\nSCORE reuse: 20\nJUSTIFICATION reuse: the key is hashed through the owner nova/database/filepath.py:337,392 unchanged and the DD-to-COCOS mapping through the owner nova/io/sourcemap.py:793; a search of nova/ for a capability that detects a stale or unconventioned cache group found none, so stale_group extends this class rather than duplicating an owner.\nFINDING tests/test_signalstore_convention_key.py:90 non-blocking: `assert store3.dd_version == rekeyed.dd_version` compares two constructor arguments the test itself supplied (DD3 to both stores), so it holds whatever SignalStore does with dd_version and cannot redden on the regression this test exists to catch \u2014 a cache_key that ignores the convention; the file's guard is the pair at :91-92 and, in the stale path, the raises at :108.\nFINDING nova/io/signalstore.py:98 non-blocking: stale_group reports a legacy-only group but nothing removes it \u2014 write() delegates to store_overwrite(), whose delete_group only ever deletes self.group, so re-ingesting a cache written under the pre-convention key leaves the legacy group on disk beside the new one permanently, duplicating every such group with no path to reclaim it, and once the new group exists stale_group returns None so the orphan never surfaces again.",
+  "review_run_id": "r-20261023T131047989291-review-of-dd-cache-key-c8b50417b8a7",
+  "reviewed_base_sha": "e69f4b60af04df8259ef914dee3136a3c55f6cb2",
+  "reviewed_head_sha": "c8b50417b8a719ce0f566124c00dc913c23d985b",
+  "reviewed_run_id": "r-20261023T123447869894-dd-cache-key",
+  "scores": {
+    "durability": 19,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T13:48:35.557176+00:00",
+  "total": 111
+}

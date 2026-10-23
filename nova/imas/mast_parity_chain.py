@@ -24,15 +24,14 @@ from typing import Any, Mapping, Protocol
 import jax
 import jax.numpy as jnp
 import numpy as np
-from scipy.constants import mu_0
 
 from nova.equilibrium.fixed_point import newton_krylov
-from nova.equilibrium.convention import TOTAL_FLUX_FACTOR
 from nova.equilibrium.measurement import SliceMeasurement
 from nova.imas.mast_solve_inputs import (
     CorrectedSolveInputs,
     read_corrected_solve_inputs,
 )
+from nova.imas.edge_consistency import grid_current_density
 from nova.imas.mast_vacuum_cohort import SHOT_STORE
 from nova.imas.parity_tolerances import (
     MagneticsBudgetClass,
@@ -394,6 +393,35 @@ def _raw_magnetics_residuals(
     return np.asarray(jnp.stack(residuals))
 
 
+def _interior_grid_current_density(
+    flux: np.ndarray, grid_r: np.ndarray, grid_z: np.ndarray
+) -> np.ndarray:
+    """Read the grid current on the one-cell interior this residual scores.
+
+    The production validity rule is a two-cell interior, one wider than the
+    central-difference stencil needs and one wider than this residual's cell
+    set, so the map is padded by one ring: the rule then lands on this
+    residual's cells, and a padded value enters the stencil of no valid cell.
+    """
+
+    padded = np.pad(np.asarray(flux, dtype=float), 1, mode="edge")
+    radial = np.concatenate(
+        (
+            [grid_r[0] - (grid_r[1] - grid_r[0])],
+            grid_r,
+            [grid_r[-1] + (grid_r[-1] - grid_r[-2])],
+        )
+    )
+    vertical = np.concatenate(
+        (
+            [grid_z[0] - (grid_z[1] - grid_z[0])],
+            grid_z,
+            [grid_z[-1] + (grid_z[-1] - grid_z[-2])],
+        )
+    )
+    return grid_current_density(padded, radial, vertical)[1:-1, 1:-1]
+
+
 def _profile_reproduction_residuals(
     profile_solver: Any,
     source_current: np.ndarray,
@@ -433,10 +461,9 @@ def _profile_reproduction_residuals(
     if inside.shape != grid_shape:
         raise ValueError("inside_limiter does not match the profile grid")
 
-    interior = np.zeros(grid_shape, dtype=bool)
-    interior[1:-1, 1:-1] = True
-    keep = interior & inside
-    radius = grid_r[np.newaxis, :]
+    keep = np.zeros(grid_shape, dtype=bool)
+    keep[1:-1, 1:-1] = True
+    keep &= inside
     residuals: list[float] = []
     for index, state in enumerate(np.asarray(flux)):
         source = jnp.asarray(
@@ -459,23 +486,8 @@ def _profile_reproduction_residuals(
 
         vacuum_flux = np.asarray(profile_solver.source_to_grid @ source)
         plasma_flux = (np.asarray(state) - vacuum_flux).reshape(grid_shape)
-        radial_first = (plasma_flux[:, 2:] - plasma_flux[:, :-2]) / (
-            2.0 * radial_step[0]
-        )
-        radial_second = (
-            plasma_flux[:, 2:] - 2.0 * plasma_flux[:, 1:-1] + plasma_flux[:, :-2]
-        ) / radial_step[0] ** 2
-        vertical_second = (
-            plasma_flux[2:, :] - 2.0 * plasma_flux[1:-1, :] + plasma_flux[:-2, :]
-        ) / vertical_step[0] ** 2
-        delta_star = (
-            radial_second[1:-1]
-            - radial_first[1:-1] / radius[:, 1:-1]
-            + vertical_second[:, 1:-1]
-        )
-        grid_current_density = np.full(grid_shape, np.nan)
-        grid_current_density[1:-1, 1:-1] = -delta_star / (
-            TOTAL_FLUX_FACTOR * mu_0 * radius[:, 1:-1]
+        grid_current_density = _interior_grid_current_density(
+            plasma_flux, grid_r, grid_z
         )
         finite = (
             keep

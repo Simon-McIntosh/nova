@@ -1,0 +1,181 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="dd-cocos-ingest">
+<meta name="plan-status" content="in-progress">
+<meta name="plan-evidence-for" content="dd-cocos-ingest">
+<meta name="plan-verifies" content="dd-cocos-ingest#s5">
+<meta name="plan-recorded-at" content="2026-10-23">
+<title>A measured edge consistency between flux functions and flux map | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+</head><body><main class="plan-doc">
+
+<section id="edge-consistency-measure-scope">
+<h2>A measured edge consistency between flux functions and flux map</h2>
+<p id="edge-consistency-measure-scope-state">The measure exists as
+<code>nova/imas/edge_consistency.py</code> and is proved on the analytic
+lower-single-null state. Its band residual falls at a fitted order of
+<strong>1.96</strong> against the central-difference stencil&rsquo;s theoretical
+<strong>2.00</strong>; a one per cent perturbation of FF&prime; over the whole
+plasma is detected above the fixed threshold; and the literal negative control
+&mdash; FF&prime; perturbed only in the edge band, with the flux map left
+byte-identical &mdash; is reported inconsistent. The IDS table and the
+reference recommendation are the section&rsquo;s other two done-when items and
+are carried by a separate node on top of this one.</p>
+</section>
+
+<section id="edge-consistency-measure-operator">
+<h3>The grid-operator read is one operator</h3>
+<p id="edge-consistency-measure-operator-lift">The inline structured-grid
+Grad&ndash;Shafranov read inside
+<code>nova.equilibrium.map_extraction.apply_delta_star</code>, the
+repository&rsquo;s one structured-grid Grad&ndash;Shafranov operator, whose
+receipt the measure reads through
+<code>edge_consistency.grid_current_density</code> with its map transposed
+between the operator&rsquo;s <code>(radius, height)</code> order and the
+<code>(Z, R)</code> order both callers carry. The parity chain calls the same
+operator over a map padded by one ring, so the operator&rsquo;s two-cell
+validity rule lands on the one-cell interior the residual has always scored
+and its per-slice residuals keep their base values:
+<code>test_profile_reproduction_is_current_density_rms_against_grid_read</code>
+pins the residual to a closed form at 10<sup>&minus;12</sup> relative and
+passes unchanged at the head.</p>
+<p id="edge-consistency-measure-operator-units">The operator takes the total
+poloidal flux <code>&#934; = 2&#960;&#968;</code> in Wb on a uniform
+<code>(Z, R)</code> grid, the quantity nova&rsquo;s internal COCOS 17 chain
+carries. The profile side is formed by
+<code>nova.equilibrium.convention.toroidal_current_density</code>, the single
+statement of that chain, so the two currents are commensurate by construction
+rather than by a re-derived textbook formula.</p>
+</section>
+
+<section id="edge-consistency-measure-forms">
+<h3>Three forms, and only the band forms judge the edge</h3>
+<p id="edge-consistency-measure-forms-three">The measure returns an
+<code>EdgeConsistency</code> record of three numbers, each over its own cell
+set.</p>
+<ul id="edge-consistency-measure-forms-list">
+<li><code>whole_slice_relative</code> =
+<code>RMS(j<sub>&#966;,profile</sub> &minus; j<sub>&#966;,grid</sub>) /
+max|j<sub>&#966;,grid</sub>|</code> over the scored cells of the whole slice:
+the parity chain&rsquo;s own figure, judged against the bound the chain already
+registers for that field.</li>
+<li><code>band_absolute</code> = the same RMS residual in A/m<sup>2</sup> over
+the edge band, the cells with <code>1 &minus; EDGE_BAND_WIDTH &#8804;
+&#968;<sub>N</sub> &#8804; 1</code>.</li>
+<li><code>band_relative</code> = the RMS of the residual relative to the local
+profile current over those same band cells.</li>
+</ul>
+<p id="edge-consistency-measure-forms-denominator">The band forms never borrow
+the slice-wide denominator, so a slice whose total current is large cannot
+flatter its own edge. <code>EDGE_BAND_WIDTH</code> is a named constant
+(<code>0.10</code> in normalised flux, which is 304 cells of the 65 by 65 grid
+on the analytic state) and <code>band_width</code> is an argument.</p>
+</section>
+
+<section id="edge-consistency-measure-threshold">
+<h3>The edge threshold is fixed from the analytic state, before any IDS row</h3>
+<p id="edge-consistency-measure-threshold-value">The edge criterion is judged on
+<code>band_relative</code> against
+<code>EDGE_BAND_RELATIVE_THRESHOLD = 1.0e-3</code>, a named constant in
+<code>edge_consistency.py</code>. It is not a <code>ScorecardField</code>, and
+<code>nova/imas/parity_tolerances.py</code> is unchanged.</p>
+<p id="edge-consistency-measure-threshold-basis">The basis is measured, not
+chosen. On the 65 by 65 grid the IDS profile reads carry &mdash; the grid
+<code>nova/imas/diiid_description.py</code> asserts &mdash; the analytic
+state&rsquo;s own second-order discretisation error puts the floor at
+<strong>5.80e&minus;4</strong>, while a one per cent FF&prime; perturbation over
+the whole plasma moves the same figure to <strong>2.33e&minus;3</strong>. The
+bound sits 1.7 times above the floor and 2.3 times below the perturbation, and
+it was fixed before any IDS row was read.</p>
+</section>
+
+<section id="edge-consistency-measure-convergence">
+<h3>The residual falls at the stencil&rsquo;s second order</h3>
+<p id="edge-consistency-measure-convergence-state">On
+<code>CerfonFreidbergSingleNull</code>, whose
+<code>grad_shafranov_source</code> gives the exact strong-form source, the
+measure is evaluated on four uniform grids over <code>R &#8712; [1.08, 2.30]</code>
+and <code>Z &#8712; [&minus;1.10, 1.00]</code>. That state&rsquo;s flux functions
+are the two Solov&rsquo;ev constants, read off the exact source by matching the
+constant and <code>R<sup>2</sup></code> terms of
+<code>&#916;*&#934; = 4&#960;<sup>2</sup>(&#956;<sub>0</sub>R<sup>2</sup>p&prime;
++ FF&prime;)</code>; they reproduce the analytic
+<code>j<sub>&#966;</sub></code> to machine precision, which is what makes the
+only remaining error the stencil&rsquo;s own.</p>
+<table id="edge-consistency-measure-convergence-table">
+<caption>Analytic state, <code>EDGE_BAND_WIDTH = 0.10</code>. The vertical grid spacing is 1.72 times the radial one, the domain not being square.</caption>
+<thead><tr><th>cells per axis</th><th>&#916;R [m]</th><th><code>band_relative</code></th><th><code>whole_slice_relative</code></th></tr></thead>
+<tbody>
+<tr><td>33</td><td>3.8125e&minus;2</td><td>2.2035e&minus;3</td><td>7.4701e&minus;4</td></tr>
+<tr><td>65</td><td>1.9063e&minus;2</td><td>5.7969e&minus;4</td><td>1.8711e&minus;4</td></tr>
+<tr><td>129</td><td>9.5313e&minus;3</td><td>1.4589e&minus;4</td><td>4.7105e&minus;5</td></tr>
+<tr><td>257</td><td>4.7656e&minus;3</td><td>3.7440e&minus;5</td><td>1.1913e&minus;5</td></tr>
+</tbody></table>
+<p id="edge-consistency-measure-convergence-fit">A least-squares fit of
+<code>log band_relative</code> against <code>log &#916;R</code> over the four
+resolution runs gives a slope of <strong>1.96</strong>; the same fit on
+<code>whole_slice_relative</code> gives <strong>1.99</strong>. Both are the
+central-difference stencil&rsquo;s theoretical second order. Each refinement by
+two halves the residual, the factor 2<sup>2</sup> of a second-order scheme.</p>
+<figure id="edge-consistency-measure-convergence-figure">
+<img src="/nova/figures/dd-cocos-edge-consistency/edge-consistency-convergence.svg" alt="Band residual of the analytic state's flux functions against its flux map, plotted against radial grid spacing on log-log axes, with the fitted order 1.96 and the fixed threshold 1.0e-3 marked.">
+<figcaption id="edge-consistency-measure-convergence-caption">Band residual
+relative to the local profile current against radial grid spacing for the
+analytic lower-single-null state at 33, 65, 129 and 257 cells per axis. The
+dashed line is the least-squares power law, its fitted order <code>1.96</code>;
+the dotted grey line is <code>EDGE_BAND_RELATIVE_THRESHOLD = 1.0e-3</code>. The
+65 by 65 point is the IDS-read grid, and it sits below the threshold.</figcaption>
+</figure>
+</section>
+
+<section id="edge-consistency-measure-controls">
+<h3>The perturbation is detected, and the band-only control is refused</h3>
+<p id="edge-consistency-measure-controls-perturbation">Scaling FF&prime; by
+1.01 over the whole plasma, with the flux map left exact, moves
+<code>band_relative</code> from <code>5.7969e&minus;4</code> to
+<code>2.3308e&minus;3</code> &mdash; 4.0 times the consistent value and 2.3 times
+the threshold. The perturbation is detected.</p>
+<p id="edge-consistency-measure-controls-negative">The literal negative control
+is the band-only case: FF&prime; is scaled by 1.01 for
+<code>&#968;<sub>N</sub> &#8805; 0.90</code> and left exact everywhere else,
+while the flux map is the same array in both runs &mdash; the test asserts
+<code>array_equal</code> on the two flux maps, that the band mask derived from
+that flux map is identical cell for cell, and that both runs score the number
+of cells that mask defines &mdash; so every cell of the difference comes from
+the profile current the perturbed flux function drives. The measure reports
+<code>band_relative = 2.3308e&minus;3</code>, above
+<code>EDGE_BAND_RELATIVE_THRESHOLD</code>. A measure that passed that state
+could not confirm a reference.</p>
+</section>
+
+<section id="edge-consistency-measure-gate">
+<h3>The gate, and what it covers</h3>
+<p id="edge-consistency-measure-gate-arms">Every test file that imports a
+changed module was run at the head and again at the base revision, each file in
+its own fresh process with its own basetemp. The counts are identical at the two
+revisions, so the change adds no failure:</p>
+<table id="edge-consistency-measure-gate-table">
+<thead><tr><th>file</th><th>base</th><th>head</th></tr></thead>
+<tbody>
+<tr><td><code>tests/test_edge_consistency.py</code></td><td>absent</td><td>6 passed</td></tr>
+<tr><td><code>tests/test_parity_chain.py</code></td><td>4 passed</td><td>4 passed</td></tr>
+<tr><td><code>tests/test_parity_gate.py</code></td><td>15 passed</td><td>15 passed</td></tr>
+<tr><td><code>tests/test_chain_factory.py</code></td><td>4 passed, 1 skipped</td><td>4 passed, 1 skipped</td></tr>
+<tr><td><code>tests/test_efit_referee.py</code></td><td>10 passed</td><td>10 passed</td></tr>
+<tr><td><code>tests/test_machine_artifact_concurrency.py</code></td><td>3 passed, 2 skipped</td><td>3 passed, 2 skipped</td></tr>
+<tr><td><code>tests/test_map_extraction.py</code></td><td>4 passed</td><td>4 passed</td></tr>
+</tbody></table>
+<p id="edge-consistency-measure-gate-negative">The declared negative control
+was applied and its red log kept: with FF&prime; perturbed only in the edge band
+of the analytic state &mdash; the same mutation the control describes &mdash;
+<code>test_consistent_analytic_state_sits_under_the_fixed_threshold</code>
+fails, because the mutated state is no longer read as consistent. The working
+files were restored afterwards.</p>
+<p id="edge-consistency-measure-gate-figure">The figure was rendered to PNG and
+inspected before it was committed: both annotations sit in clear space, neither
+overlaps the data or another label, and the threshold line and the fitted order
+are both legible.</p>
+</section>
+
+</main></body></html>

@@ -1,0 +1,86 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-23T20:42:10.129Z",
+  "dispatched_at": "2026-10-23T20:31:08Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/uniform-cell-clip-and-coupling/r-20261023T203035584689-plan-review-of-uniform-cell-clip-and-coupling/plan.html:97",
+      "id": "done_when-1",
+      "reason": "the constraint that cost one held stack its merge lives only in a resolved question and a comment, so the followup as written re-runs the experiment that already failed.",
+      "text": "the plan's centre followup `f-20260909T053239593645` states its acceptance as \"same order, same accuracy, same speed\", \"traced and batchable\" and \"one interaction operator\", none of which is a check that can fail, and it omits the rule its own prior experiments established: the open question's resolution (`plan.html:140`) and the re-point comment (`plan.html:69`) both record that the clipped geometry must enter the flux read and the current placement together, and that the unified path's acceptance is convergence to the analytic equilibrium under exact inputs rather than a terminal residual \u2014 a builder reading only the open followup will implement exact clipped moments alone and reproduce the measured 63x/11x static-certificate regression (0.4708 against 0.007448)",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/uniform-cell-clip-and-coupling/r-20261023T203035584689-plan-review-of-uniform-cell-clip-and-coupling/plan.html:87",
+      "id": "done_when-2",
+      "reason": "an active plan at impl 0.45 in sprint S26 that carries no section cannot be dispatched or closed on one verdict, and the reviewer-facing acceptance rule the day's experiments produced has nowhere to live.",
+      "text": "the plan has no `sections` block at all (0 occurrences of `data-reckon=\"section\"`), so there is no node-level done-when anywhere and no negative control declared on any unit of work, while the dependency re-point comment (`plan.html:84`) acknowledges the anchor \"sits on the plan-level dependency rather than on a section gate\"",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/uniform-cell-clip-and-coupling/r-20261023T203035584689-plan-review-of-uniform-cell-clip-and-coupling/plan.html:100",
+      "id": "single_goal-1",
+      "reason": "a node built from this followup cannot be closed on one verdict, and the stencil-bias repair would be gated by the extraction work it does not depend on.",
+      "text": "`f-20260909T053239593652` carries three deliverables in one followup: flux properties extractable from a hexagonal mesh, current support extractable on a rectangular grid, and removal of the uniform second-order radial-stencil bias (worst relative deviation 8.85e-5), the last of which the followup itself calls a separate open question",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/uniform-cell-clip-and-coupling/r-20261023T203035584689-plan-review-of-uniform-cell-clip-and-coupling/plan.html:18",
+      "id": "wiring-1",
+      "reason": "two of four declared consumers can no longer consume anything, so the roadmap reads this plan as feeding work that has closed, and the reciprocal edges that would route the output are absent.",
+      "text": "`plan-informs` names `batched-operator-boundary` (status `shipped`) and `millisecond-converged-solve` (status `superseded`) among its consumers, and none of the four informs targets declares a `depends-on` edge back to this plan",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/uniform-cell-clip-and-coupling/r-20261023T203035584689-plan-review-of-uniform-cell-clip-and-coupling/plan.html:84",
+      "id": "reasoning-1",
+      "reason": "a builder that trusts this claim treats the two-tiling unification as already delivered by the dependency and drops the plan's own centre deliverable.",
+      "text": "the re-point comment states that what this plan needs from the dependency is \"the settled cut-cell booking, one clip and one moment path, which is converged-forward-solve \u00a73\", but `converged-forward-solve.html` contains zero occurrences of hexagonal, rectangular or tiling, and its \u00a73 is headed \"The current booking\" and scopes only implementation of `current.book` over the read's membership",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/uniform-cell-clip-and-coupling/r-20261023T203035584689-plan-review-of-uniform-cell-clip-and-coupling/plan.html:97",
+      "id": "reasoning-2",
+      "reason": "a mechanism with no named caller does not run, and the caller to be rewired is exactly what the followup leaves for the builder to guess.",
+      "text": "the centre mechanism states that one compiled operator serves both tilings and that no host dispatch on mesh type survives into the traced program, but it names no production caller that would reach it, while the plan's own evidence (`plan.html:39`, and `flux_surface_extraction.py:18` importing `_traced_clip` beside `forward_operator.py:3436`) records that the curved path is consumed by flux-surface geometry alone and the current-moment path never reaches the arc correction",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/uniform-cell-clip-and-coupling/r-20261023T203035584689-plan-review-of-uniform-cell-clip-and-coupling/plan.html:39",
+      "id": "anchors_resolve-1",
+      "reason": "the substance of the claim is corroborated by the code, so only the quoted label needs correcting and no node would be sent the wrong way.",
+      "text": "the top comment and `f-20260909T053239593652` both assert that forward receipts are \"flagged unavailable-non-tensor-product\", but that string occurs nowhere in the code (it appears only in three plan/evidence HTML documents), though the underlying mechanism is real: `nova/equilibrium/cell_partition.py:14` returns exact tensor-product axes or None for a cell tiling, and `tests/test_forward_operator_axes.py:67` refuses a non-tensor-product grid",
+      "type": "anchors_resolve",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "e25e8c986c5c09c2e77ad7c2d46fb79b05c9757f71413ebfbb0796e3545c1c5f",
+  "plan_slug": "uniform-cell-clip-and-coupling",
+  "plan_version": 26,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261023T203035584689-plan-review-of-uniform-cell-clip-and-coupling",
+  "reviewed_blob_sha": "503a4661bf11d650abc65e7643b108fec99828d0",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 the quoted status label `unavailable-non-tensor-product` resolves nowhere in the code; every other cited file, section and figure resolves.",
+    "done_when": "a finding \u2014 the plan declares zero sections, so no work item carries a node-level done-when; the only acceptance text is prose inside the open followups, and the centre followup's acceptance names no measurable failure and no negative control.",
+    "evidence_paths": "pass \u2014 every cited receipt and panel resolves under `docs/figures/uniform-cell-clip-and-coupling/` (largest single file 840K, all under the receipts-out-of-git ceiling), none on a scratch or node-local path.",
+    "naming": "pass \u2014 the plan introduces no code symbols; the followups name mechanisms (`the clip`, `the booking`, `one interaction operator`) rather than stage labels, and the stage words that do appear sit in plan metadata, not in proposed code.",
+    "reasoning": "a finding \u2014 the re-point comment asserts `converged-forward-solve#s3` supplies \"the settled cut-cell booking, one clip and one moment path\", but \u00a73 is titled \"The current booking\" and the tiling language appears nowhere in that plan; and the centre mechanism names no production caller that would reach the unified operator.",
+    "single_goal": "a finding \u2014 `f-20260909T053239593652` bundles three deliverables (hex flux extraction, rectangular current support, radial-stencil bias removal) under one followup.",
+    "wiring": "a finding \u2014 `plan-informs` names four plans, of which `batched-operator-boundary` is `shipped` and `millisecond-converged-solve` is `superseded`, and none of the four declares a `depends-on` back to this plan."
+  },
+  "section_digests": {
+    "_document": "c85e6cb9fc9cbb9696e73001db01d8678395016262364ea06d44112e70233f76"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T20:47:02.074542+00:00"
+}

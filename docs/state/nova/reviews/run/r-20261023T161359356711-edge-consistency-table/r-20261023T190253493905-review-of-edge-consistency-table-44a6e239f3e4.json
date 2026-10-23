@@ -1,0 +1,79 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "scripts/edge_consistency_table.py:144 the only production caller of edge_consistency()",
+    "nova/imas/mast_parity_chain.py:34 imports grid_current_density from the same module, unchanged by this diff"
+  ],
+  "completed_at": "2026-10-23T19:31:09.012Z",
+  "dispatched_at": "2026-10-23T19:04:51Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/dd-cocos-ingest/edge-consistency-table.html",
+      "line": 162,
+      "severity": "blocking",
+      "text": "the fragment states that the grid current integrates to the slice's own Ip within 0.3 per cent on all 72 sampled slices, which the node's own receipt contradicts -- table.json shows grid_current_integral_ratio spanning 0.9736 to 1.0027 on DINA 105052/1 and 0.9801 to 1.0019 on DINA 105069/3, a worst deviation of 2.64 per cent -- and the same sentence is repeated at docs/research/dd-cocos-census.html:88 and named as one of the three things the recommendation rests on."
+    },
+    {
+      "file": "tests/test_edge_consistency_ids_route.py",
+      "line": 291,
+      "severity": "non-blocking",
+      "text": "the assertion that profile_current_ratio is approximately 1.0 cannot fail, because the fixture writes its own DD3 file negating the same rows the reader negates, so write and read share one convention and the round trip is closed; the real sources read about minus 1.1 in table.json, so no test covers the sign discrepancy the node itself reports."
+    },
+    {
+      "file": "nova/imas/edge_consistency.py",
+      "line": 146,
+      "severity": "non-blocking",
+      "text": "the x64 refusal is never exercised -- tests/test_edge_consistency.py:37 and tests/test_edge_consistency_ids_route.py:41 both call configure_dtypes() at import, so the guard could be deleted with all three arms still green, and the already-correct guard was verified rather than made to fire."
+    },
+    {
+      "file": "scripts/edge_consistency_table.py",
+      "line": 80,
+      "severity": "non-blocking",
+      "text": "_uniform re-implements the endpoint-preserving uniform-axis reconstruction the repository owns at nova/media/sources/mast_efit.py:49 and validates at nova/equilibrium/map_extraction.py:109, extending neither owner; the substantive capability is properly delegated to grid_current_density, which is why this is a helper duplication rather than a fork of the measure."
+    },
+    {
+      "file": "negative-control.log",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "the log's first line names revision b0c-1b3b66-mutated, which resolves to no commit, and the mutation was applied to the test's own assertion at tests/test_edge_consistency_ids_route.py:298 rather than to the code under test, so the red log shows the assertion is exercised by the measured 2.3309e-3 but not that a code regression would redden it."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read commit by commit from d246049f5 to 44a6e239f; 731106886 adds scripts/edge_consistency_table.py, b0c1b3b66 adds the x64 entry to nova/imas/edge_consistency.py and the band-denominator test, c8aba3c8f labels the figure series, and 28e2f1ca9/c53f2a7ec/f3b193e2d/44a6e239f add and then revise the fragment and the census section.",
+    "done_when": "the done-when asks for the three forms tabulated with per-slice grid, band width and threshold, per-source medians and maxima, refused rows and a recommendation; scripts/edge_consistency_table.py:167-179 records the grid, band width and threshold on every row and :221-238 the medians and maxima, but the gate the worker ran exercises only the test files and asserts none of the table.",
+    "goal": "the node goal is the edge-consistency measure reported on the conforming ITER sources with a recommendation for the circuit plan reference; docs/evidence/fragments/dd-cocos-ingest/edge-consistency-table.html:114-124 carries the three-source table and :146-241 the recommendation.",
+    "manifest": "read; it records status complete, seven commits beyond the base, the base arm at 14 passed and the head arm at 15 passed with EXIT=0, the ids-route arm at 2 passed EXIT=0, the negative control at EXIT=1, and table.json holding 72 measured slice rows.",
+    "write_paths": "the manifest declares eight paths and git diff d246049f5..44a6e239f changes only files inside them (nova/imas/edge_consistency.py, tests/test_edge_consistency.py, tests/test_edge_consistency_ids_route.py, scripts/edge_consistency_table.py, docs/figures/dd-cocos-edge-consistency/render_convergence.py and its SVG, docs/research/dd-cocos-census.html at +8 lines, and the landing fragment)."
+  },
+  "justifications": {
+    "durability": "the band-denominator test at tests/test_edge_consistency.py:279-283 recomputes the band value from first principles and reddens if the slice-wide maximum is substituted, but the x64 guard at nova/imas/edge_consistency.py:146 is unreachable from any arm and the round-trip fixture at tests/test_edge_consistency_ids_route.py:146 cannot fail on the sign defect the node itself reports.",
+    "evidence": "the claim at docs/evidence/fragments/dd-cocos-ingest/edge-consistency-table.html:162 that the grid current integrates to Ip within 0.3 per cent is contradicted by the node's own table.json, whose grid_current_integral_ratio spans 0.9736 to 1.0027 on DINA 105052/1.",
+    "fit": "the x64 entry at nova/imas/edge_consistency.py:141-146 follows the establish-then-report order scripts/edge_consistency_table.py:247-250 already uses, and no added symbol carries a plan or version label, though the fragment uses span class mono at docs/evidence/fragments/dd-cocos-ingest/edge-consistency-table.html:185 in a document that uses code elsewhere.",
+    "goal_fidelity": "docs/evidence/fragments/dd-cocos-ingest/edge-consistency-table.html:120-124 reports the three forms for DINA 105052/1, DINA 105069/3 and CORSICA 130506/6 and :146-158 states the section 6 recommendation with what would overturn it.",
+    "reuse": "the capability search over nova/ found the endpoint-preserving uniform axis owned by nova/media/sources/mast_efit.py:49 and validated at nova/equilibrium/map_extraction.py:109, and scripts/edge_consistency_table.py:80 duplicates both as a private _uniform without extending either.",
+    "scope_discipline": "every path in git diff d246049f5..44a6e239f sits inside the declared write paths, and the census edit is the added section alone at docs/research/dd-cocos-census.html:81-88 with no other section touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is the edge-consistency measure reported on the conforming ITER sources with a recommendation for the circuit plan reference; docs/evidence/fragments/dd-cocos-ingest/edge-consistency-table.html:114-124 carries the three-source table and :146-241 the recommendation.\nVERDICT done_when: the done-when asks for the three forms tabulated with per-slice grid, band width and threshold, per-source medians and maxima, refused rows and a recommendation; scripts/edge_consistency_table.py:167-179 records the grid, band width and threshold on every row and :221-238 the medians and maxima, but the gate the worker ran exercises only the test files and asserts none of the table.\nVERDICT write_paths: the manifest declares eight paths and git diff d246049f5..44a6e239f changes only files inside them (nova/imas/edge_consistency.py, tests/test_edge_consistency.py, tests/test_edge_consistency_ids_route.py, scripts/edge_consistency_table.py, docs/figures/dd-cocos-edge-consistency/render_convergence.py and its SVG, docs/research/dd-cocos-census.html at +8 lines, and the landing fragment).\nVERDICT manifest: read; it records status complete, seven commits beyond the base, the base arm at 14 passed and the head arm at 15 passed with EXIT=0, the ids-route arm at 2 passed EXIT=0, the negative control at EXIT=1, and table.json holding 72 measured slice rows.\nVERDICT diff: read commit by commit from d246049f5 to 44a6e239f; 731106886 adds scripts/edge_consistency_table.py, b0c1b3b66 adds the x64 entry to nova/imas/edge_consistency.py and the band-denominator test, c8aba3c8f labels the figure series, and 28e2f1ca9/c53f2a7ec/f3b193e2d/44a6e239f add and then revise the fragment and the census section.\nCALL_SITES: scripts/edge_consistency_table.py:144 the only production caller of edge_consistency(); nova/imas/mast_parity_chain.py:34 imports grid_current_density from the same module, unchanged by this diff\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/dd-cocos-ingest/edge-consistency-table.html:120-124 reports the three forms for DINA 105052/1, DINA 105069/3 and CORSICA 130506/6 and :146-158 states the section 6 recommendation with what would overturn it.\nSCORE evidence: 15\nJUSTIFICATION evidence: the claim at docs/evidence/fragments/dd-cocos-ingest/edge-consistency-table.html:162 that the grid current integrates to Ip within 0.3 per cent is contradicted by the node's own table.json, whose grid_current_integral_ratio spans 0.9736 to 1.0027 on DINA 105052/1.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff d246049f5..44a6e239f sits inside the declared write paths, and the census edit is the added section alone at docs/research/dd-cocos-census.html:81-88 with no other section touched.\nSCORE durability: 14\nJUSTIFICATION durability: the band-denominator test at tests/test_edge_consistency.py:279-283 recomputes the band value from first principles and reddens if the slice-wide maximum is substituted, but the x64 guard at nova/imas/edge_consistency.py:146 is unreachable from any arm and the round-trip fixture at tests/test_edge_consistency_ids_route.py:146 cannot fail on the sign defect the node itself reports.\nSCORE fit: 16\nJUSTIFICATION fit: the x64 entry at nova/imas/edge_consistency.py:141-146 follows the establish-then-report order scripts/edge_consistency_table.py:247-250 already uses, and no added symbol carries a plan or version label, though the fragment uses span class mono at docs/evidence/fragments/dd-cocos-ingest/edge-consistency-table.html:185 in a document that uses code elsewhere.\nSCORE reuse: 5\nJUSTIFICATION reuse: the capability search over nova/ found the endpoint-preserving uniform axis owned by nova/media/sources/mast_efit.py:49 and validated at nova/equilibrium/map_extraction.py:109, and scripts/edge_consistency_table.py:80 duplicates both as a private _uniform without extending either.\nFINDING docs/evidence/fragments/dd-cocos-ingest/edge-consistency-table.html:162 blocking: the fragment states that the grid current integrates to the slice's own Ip within 0.3 per cent on all 72 sampled slices, which the node's own receipt contradicts -- table.json shows grid_current_integral_ratio spanning 0.9736 to 1.0027 on DINA 105052/1 and 0.9801 to 1.0019 on DINA 105069/3, a worst deviation of 2.64 per cent -- and the same sentence is repeated at docs/research/dd-cocos-census.html:88 and named as one of the three things the recommendation rests on.\nFINDING tests/test_edge_consistency_ids_route.py:291 non-blocking: the assertion that profile_current_ratio is approximately 1.0 cannot fail, because the fixture writes its own DD3 file negating the same rows the reader negates, so write and read share one convention and the round trip is closed; the real sources read about minus 1.1 in table.json, so no test covers the sign discrepancy the node itself reports.\nFINDING nova/imas/edge_consistency.py:146 non-blocking: the x64 refusal is never exercised -- tests/test_edge_consistency.py:37 and tests/test_edge_consistency_ids_route.py:41 both call configure_dtypes() at import, so the guard could be deleted with all three arms still green, and the already-correct guard was verified rather than made to fire.\nFINDING scripts/edge_consistency_table.py:80 non-blocking: _uniform re-implements the endpoint-preserving uniform-axis reconstruction the repository owns at nova/media/sources/mast_efit.py:49 and validates at nova/equilibrium/map_extraction.py:109, extending neither owner; the substantive capability is properly delegated to grid_current_density, which is why this is a helper duplication rather than a fork of the measure.\nFINDING negative-control.log:1 non-blocking: the log's first line names revision b0c-1b3b66-mutated, which resolves to no commit, and the mutation was applied to the test's own assertion at tests/test_edge_consistency_ids_route.py:298 rather than to the code under test, so the red log shows the assertion is exercised by the measured 2.3309e-3 but not that a code regression would redden it.\n",
+  "review_run_id": "r-20261023T190253493905-review-of-edge-consistency-table-44a6e239f3e4",
+  "reviewed_base_sha": "d246049f532567c80a70770cef4fc9f610547f2d",
+  "reviewed_head_sha": "44a6e239f3e47f707f4cbd627b882752322becf2",
+  "reviewed_run_id": "r-20261023T161359356711-edge-consistency-table",
+  "scores": {
+    "durability": 14,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T19:30:00.000000+00:00",
+  "total": 87
+}

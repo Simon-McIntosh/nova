@@ -24,7 +24,7 @@
   <title>DD COCOS Ingest | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="83">
+<meta name="plan-version" content="84">
 <meta name="plan-modified" content="2026-10-23">
 <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;dd-cocos-ingest#s1&quot;],&quot;s3&quot;:[&quot;dd-cocos-ingest#s2&quot;],&quot;s4&quot;:[&quot;dd-cocos-ingest#s3&quot;],&quot;s5&quot;:[&quot;dd-cocos-ingest#s1&quot;,&quot;dd-cocos-ingest#s2&quot;]}">
 </head>
@@ -209,6 +209,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261023T123603187543-edge-consistency-measure" data-who="reckon-build" data-when="2026-10-23T15:38:01Z">
     <div class="r-comment-body"><p>The measure lands as nova/imas/edge_consistency.py reading the grid current through the repository's single structured-grid Grad-Shafranov operator, nova.equilibrium.map_extraction.apply_delta_star, which the parity chain's profile reproduction now also calls over a one-ring padded map so its per-slice residuals keep their base values; on CerfonFreidbergSingleNull the band residual falls at a fitted order of 1.96 against the stencil's theoretical 2.00, a 1 per cent FF-prime perturbation over the whole plasma is detected at 2.33e-3 above the fixed threshold EDGE_BAND_RELATIVE_THRESHOLD = 1.0e-3, and the band-only negative control is reported inconsistent with the flux map asserted byte-identical and its band mask asserted cell for cell; the measure's figure is docs/figures/dd-cocos-edge-consistency/edge-consistency-convergence.svg</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261023T190253493905-review-of-edge-consistency-table-44a6e239f3e4" data-who="reckon-build" data-when="2026-10-23T19:31:09.012Z">
+    <div class="r-comment-body"><p>the review of run r-20261023T190253493905&#x27;s subject record r-20261023T161359356711-edge-consistency-table at base d246049f5 and head 44a6e239f scores all six dimensions (goal_fidelity 18, evidence 15, scope_discipline 19, durability 14, fit 16, reuse 5) with added_failure_count 0 and five findings, one blocking on the fragment&#x27;s grid-current claim at docs/evidence/fragments/dd-cocos-ingest/edge-consistency-table.html:162; stored at the reviewed run&#x27;s review-records under both declared names.</p></div>
 </div>
 </section>
 </main>

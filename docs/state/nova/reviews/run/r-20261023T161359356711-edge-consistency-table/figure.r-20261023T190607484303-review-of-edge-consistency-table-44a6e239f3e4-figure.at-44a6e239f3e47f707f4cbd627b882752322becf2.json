@@ -1,0 +1,78 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "This review ran no suite and read no base/head arm, so the count is the neutral value the record shape requires and not a measurement. No suite-delta claim is made. A figure review measures the picture, not the code.",
+  "attachment_map": {
+    "image-0.png": "docs/figures/dd-cocos-edge-consistency/edge-consistency-convergence.svg"
+  },
+  "attachment_note": "One rendered PNG was handed to this node at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T190607484303-review-of-edge-consistency-table-44a6e239f3e4-figure/image-0.png (1399x720). Every verdict below is about that rendered image. No SVG and no other image was opened, read, listed or shown; the SVG is named only as the figure's repository path. The render is the convergence figure for the analytic single-null state: four markers of band-relative residual against radial grid spacing, a linear fit labelled 'fitted order 1.96', and the declared threshold drawn at 1.0e-3. That identification is confirmed numerically against the reviewed run's own render log (/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T161359356711-edge-consistency-table/figure.log): the four band_relative values 2.203503e-03, 5.796863e-04, 1.458875e-04, 3.743988e-05 and the printed order 1.9628 are exactly the series and the fit slope the image shows. The run's commit c8aba3c8f names both series in the legend, which is the label the image carries, and render_convergence.py at the reviewed head places the threshold annotation at spacings[-1]*1.2, the finest grid, which is the left of the panel as drawn. Provenance: the committed blob at the reviewed head is 35460 bytes (git cat-file -s) and the working-tree file is 35460 bytes with a clean status, so the delivered figure is the committed one and nothing was redrawn after it.",
+  "call_sites": [
+    "none"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-10-23T19:08:30Z",
+  "figure_checks": {
+    "clipping": "Ink bounding box x 4..1392, y 4..713, and outer-4px ink counts (top, bottom, left, right) = (0, 0, 0, 0), so no text or data is clipped by the canvas edge and no label is cut.",
+    "collision": "The only grey text is the threshold annotation, glyph box x 264-457, y 63-78; the dotted threshold level is row 145, spanning x 52..1377. Zero blue series pixels fall inside the annotation box, and the vertical gap to the level is 67 px, so the label overlaps neither the data nor its own line.",
+    "provenance": "reviewed_base_sha d246049f5 is an ancestor of reviewed_head_sha 44a6e239 (git merge-base --is-ancestor confirmed). The figure script at the reviewed head differs over the run's commits only in the legend entry commit c8aba3c8f; the committed SVG blob at the reviewed head is 35460 bytes and the worktree file of the same name is 35460 bytes with a clean status for its directory, so the rendered attachment is the committed figure.",
+    "render": "Verdicts were formed on the handed PNG at native resolution only. canvas 1399x720. No SVG and no other image was opened, read, listed, searched, rendered or shown.",
+    "series_identity": "The attachment was matched to the figure by its own logged numbers rather than by filename: figure.log prints order=1.9628 and the four band_relative values 2.203503e-03, 5.796863e-04, 1.458875e-04, 3.743988e-05 for spacings 0.038125, 0.019062, 0.009531, 0.004766 m, which are the four markers and the fit slope the image shows. This is the positive control for the identification, not an assumption from the file name.",
+    "spines": "Dark-pixel tallies: rows 641 (1277 px) and 145 (322 px, the dotted level); columns 103 (639 px, the left axis) and 11/22/10/23 (y tick labels, the axis label). No top and no right spine is present."
+  },
+  "figure_verdicts": [
+    {
+      "figure": "docs/figures/dd-cocos-edge-consistency/edge-consistency-convergence.svg",
+      "render": "image-0.png (1399x720)",
+      "rubric": {
+        "contrast": "pass. Near-black text on white, with the threshold annotation in the reference grey #929292 (3.1:1 on white) at 14 pt.",
+        "data_ink": "pass. Subject series 3.0 pt solid with markers, fit 2.4 pt dashed beneath it, threshold 1.2 pt dotted; no grid, no fill, no shading.",
+        "decoration": "pass. None present, and the spine tally shows the panel is despined (left column 103, bottom row 641, no top or right spine). Zero ink in the outer 4 px frame.",
+        "label_collision": "pass. Annotation box x 264-457, y 63-78, zero data pixels inside it, 67 px clear of its own dotted level; no clipped text anywhere.",
+        "legibility": "pass, with finding 1 recording the x unit. Both axes are named, the text sizes are the repository's own (16 pt axis, 14 pt ticks), and the four measured points are separately readable. The reader can see the threshold crossing between the second and third grids, which is the claim the plan's done-when rests on.",
+        "table_form": "pass. A convergence ladder against a criterion line."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "evidence": "render_convergence.py:42-47 builds spacings in metres from RADIAL_BOUNDS and :100 sets the label to 'radial grid spacing [m]'; the render shows ticks 6x10-3, 10-2, 2x10-2, 3x10-2, 4x10-2 and the logged spacings are 0.004766 to 0.038125 m.",
+      "file": "docs/figures/dd-cocos-edge-consistency/render_convergence.py",
+      "line": 100,
+      "severity": "non-blocking",
+      "suggested_disposition": "exempted if the log-axis mantissa convention is preferred for this study, otherwise folded into a small figure pass on docs/figures/dd-cocos-edge-consistency/",
+      "summary": "The x axis is labelled and ticked in metres for a quantity that spans 4.8 to 38 mm, so its tick labels read 6x10-3 to 4x10-2 rather than 5 to 40. The repository's plotting rule sizes an SI prefix so tick labels land between about 0.1 and 1000 and puts the prefixed unit in the label; this figure sits an order of magnitude below that floor and needs a mental scale step on every read, which is a legibility cost on the axis that carries the study's independent variable. The fix is local to the drawing script: scale the four spacings to mm (or select the sizes so they read in SI without an exponent) and label the axis 'radial grid spacing [mm]'. Nothing about the data, the fit or the threshold changes, and the SVG must be re-rendered with the script; the figure is cited only in prose, in the fragment's gate section, so no document text depends on the axis number."
+    }
+  ],
+  "item_verdicts": {
+    "caption_independence": "The figure carries no title and no caption anywhere; it is referenced in prose only, in the reviewed fragment's gate section. There is therefore no caption to repeat a title and no caption finding to make.",
+    "finding_materiality": "One non-blocking finding, no blocking finding. The figure is readable, the data are visible and correctly weighted, no label is clipped or overlapping and nothing is drawn as a table. The single finding is an axis-unit choice that is a legibility cost, not a defect that stops a reader reading. It is not a misread of the image: the tick labels and the label text were read from the rendered PNG itself.",
+    "rendered_artifact": "One figure was attached and it was opened and inspected at native resolution. Each of the six rubric items is reported on it."
+  },
+  "justifications": {
+    "durability": "The record is written at both declared paths and checked with reckon crew check --review --record before the manifest is closed.",
+    "evidence": "The rendered attachment was identified against the reviewed run's own render log numbers and matched byte-for-byte in provenance (committed blob size equals working-tree size), so the verdict is about the delivered figure and not an assumed one.",
+    "legibility": "Read from the 1399x720 PNG at native resolution, with the axis label, tick label and series geometry measured from the image's own pixels.",
+    "scope_discipline": "This review is read-only. No figure, caption, script, fragment or other file was edited, created, moved, deleted, redrawn, relabelled or reformatted. The only writes are this record at its two declared paths and the run manifest."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261023T190607484303-review-of-edge-consistency-table-44a6e239f3e4-figure",
+  "reviewed_base_sha": "d246049f532567c80a70770cef4fc9f610547f2d",
+  "reviewed_figures": [
+    "docs/figures/dd-cocos-edge-consistency/edge-consistency-convergence.svg"
+  ],
+  "reviewed_head_sha": "44a6e239f3e47f707f4cbd627b882752322becf2",
+  "reviewed_run_id": "r-20261023T161359356711-edge-consistency-table",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: pass. One series, one fit, one threshold level on log-log axes with both axes named ('band residual / profile current', 'radial grid spacing [m]'); axis labels are 16 pt and tick labels 14 pt, so every label reads at a glance, and the four measured points are individually resolvable at x = 4.77e-3, 9.53e-3, 1.91e-2 and 3.81e-2 m. The story the figure exists to carry is visible without a caption: the two finest grids sit below the 1.0e-3 threshold, the two coarsest above it, and the fit's slope (1.96) is the second-order convergence the plan's done-when claims. Boundary recorded as finding 1: the x quantity spans 4.8 to 38 mm but is labelled and ticked in metres, so the tick labels run 6e-3 to 4e-2 rather than 5 to 40.",
+    "RUBRIC data_ink: pass. The measured series is the figure's subject and is drawn as the heaviest mark in it (3.0 pt solid with 5 pt round markers); the fit is 2.4 pt dashed; the threshold is a 1.2 pt dotted level. No gridlines, no fills, no annotation furniture. The only non-data ink is the legend text and the single threshold annotation.",
+    "RUBRIC decoration: pass. No gradient, no background fill, no band, no shading, no frame, no dropped shadow, no styling theme. Measured on the render: the outer 4 px frame of the 1399x720 canvas carries exactly zero ink pixels, so nothing is trimmed by a decorative edge either. Spines: only the left (column 103, 639 dark pixels) and bottom (row 641, 1277 dark pixels) axes are drawn; no top or right spine appears anywhere in the dark-row or dark-column tallies, so the panel is properly despined.",
+    "RUBRIC contrast: pass. Axis labels and tick labels are near-black on white; the threshold annotation and its dotted level carry the reference grey #929292, which is 3.1:1 against white (relative luminance 0.287) and clears the reference grey the repository's own style names for a limit. The annotation is 14 pt and the measured glyph box is 194 px wide by 16 px tall, so it is comfortably legible.",
+    "RUBRIC table_form: pass. Four ladder points of a discretisation study read against a threshold line is a scaling relation, not tabular information: the figure's content is the slope and where the ladder crosses the threshold, and neither survives a table of four numbers. The numerical content is already tabulated beside it in the fragment, so the figure adds the shape rather than duplicating the rows.",
+    "RUBRIC label_collision: pass. Measured on the render: no text is clipped (zero ink in the outer 4 px frame), the grey threshold annotation occupies x 264-457, y 63-78, and contains zero data pixels, and it sits 67 px above the dotted level it names (row 145). The legend is frameless and sits in the empty lower-right quadrant, clear of the data, with no label over any other label or over the series. No caption exists for this figure, so no caption-vs-title duplication is possible."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T19:30:38.414759+00:00",
+  "total": null
+}

@@ -17,6 +17,13 @@
     }
   },
   "dispatched_at": "2026-10-23T21:17:28Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-dd-equilibrium-reader-c1e7f94edcaf",
+      "recorded_at": "2026-10-23T22:21:34.860002+00:00"
+    }
+  },
   "findings": [
     {
       "file": "nova/imas/database.py",

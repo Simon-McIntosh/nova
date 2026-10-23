@@ -7,6 +7,13 @@
   ],
   "completed_at": "2026-10-23T14:19:26.357Z",
   "dispatched_at": "2026-10-23T13:54:11Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "edge-consistency-measure",
+      "recorded_at": "2026-10-23T14:26:26.749476+00:00"
+    }
+  },
   "findings": [
     {
       "file": "nova/imas/edge_consistency.py",

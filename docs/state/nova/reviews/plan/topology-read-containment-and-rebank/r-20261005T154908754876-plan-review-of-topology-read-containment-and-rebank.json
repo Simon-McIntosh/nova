@@ -84,6 +84,27 @@
       "finding": "duplicate_owner-2",
       "reason": "",
       "when": "2026-10-23T20:08:42.996158+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "duplicate_owner-3",
+      "reason": "section 2 is behind gate g-trcr-rebank-after-rung-a and is not being dispatched now; its dispatch will name benchmarks/solovev_certificate.py and scripts/regenerate_solovev_certificate.sh as the instrument",
+      "when": "2026-10-23T20:08:53.347235+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "duplicate_owner-4",
+      "reason": "section 5 is behind gate g-trcr-rebank-after-rung-a and is not being dispatched now; its dispatch will extend nova/equilibrium/observable_acceptance.py rather than add a third verdict path",
+      "when": "2026-10-23T20:08:57.052504+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "duplicate_owner-3",
+      "reason": "section 2 is behind gate g-trcr-rebank-after-rung-a and is not being dispatched now; its dispatch will name benchmarks/solovev_certificate.py and scripts/regenerate_solovev_certificate.sh as the instrument",
+      "when": "2026-10-23T20:09:07.001994+00:00"
     }
   ],
   "responses": {
@@ -98,6 +119,18 @@
       "by": "",
       "reason": "",
       "when": "2026-10-23T20:08:42.996158+00:00"
+    },
+    "duplicate_owner-3": {
+      "action": "declined",
+      "by": "",
+      "reason": "section 2 is behind gate g-trcr-rebank-after-rung-a and is not being dispatched now; its dispatch will name benchmarks/solovev_certificate.py and scripts/regenerate_solovev_certificate.sh as the instrument",
+      "when": "2026-10-23T20:09:07.001994+00:00"
+    },
+    "duplicate_owner-4": {
+      "action": "declined",
+      "by": "",
+      "reason": "section 5 is behind gate g-trcr-rebank-after-rung-a and is not being dispatched now; its dispatch will extend nova/equilibrium/observable_acceptance.py rather than add a third verdict path",
+      "when": "2026-10-23T20:08:57.052504+00:00"
     },
     "reuse_search-1": {
       "action": "declined",

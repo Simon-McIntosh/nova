@@ -533,14 +533,51 @@ class Equilibrium(Chart, GetSlice):
             return float("nan")
         return float(b0[0] if b0.size == 1 else b0[itime])
 
+    def check_convention(self, source_name: str, dd_version: str):
+        """Refuse a non-conforming read from its global quantities alone.
+
+        The digits a Data Dictionary version implies are pinned by the global
+        quantities and the vacuum toroidal field, which the read holds before
+        any profile node is walked. Checking them first means a pulse whose
+        measured digits contradict its own version is refused by name and by
+        digit, rather than by whichever node the profile walk happens to trip
+        over.
+        """
+        for itime in range(len(self.ids.time_slice)):
+            time_slice = self.ids.time_slice[itime]
+            signal_map = translate_equilibrium(
+                source_name=source_name,
+                dd_version=dd_version,
+                ip=float(time_slice.global_quantities.ip),
+                psi_axis=float(time_slice.global_quantities.psi_axis),
+                psi_boundary=float(time_slice.global_quantities.psi_boundary),
+                q=float(time_slice.global_quantities.q_95),
+                b0=self._ids_vacuum_field(itime),
+            )
+            if signal_map.blocked:
+                raise ValueError(
+                    "; ".join(blocked.reason for blocked in signal_map.blocked)
+                )
+
+    def _ids_vacuum_field(self, itime: int) -> float:
+        """Return the toroidal field a slice is read against [T]."""
+        values = np.asarray(self.ids.vacuum_toroidal_field.b0).ravel()
+        if values.size == 0:
+            values = np.asarray(
+                self.ids.time_slice[itime].vacuum_toroidal_field.b0
+            ).ravel()
+        if values.size == 0:
+            return float("nan")
+        return float(values[0] if values.size == 1 else values[itime])
+
     def build_convention(self, source_name: str, dd_version: str):
         """Read every convention-bearing field of the dataset in COCOS 17.
 
         The Data Dictionary fixes a read's COCOS by its major version -- DD3 is
         and DD4 is COCOS 17 -- and each slice's observables pin the digits its
-        version implies. A slice whose digits contradict its own version is
-        refused here, by name, before any field is touched; a conforming read
-        has each field converted through
+        version implies. A read whose digits contradict its version is refused
+        by :meth:`check_convention` before the profile nodes are walked, so
+        every field reached here is conforming and is converted through
         :func:`~nova.io.sourcemap.translate_equilibrium` into the convention the
         rest of nova works in.
         """
@@ -898,6 +935,7 @@ class EquilibriumData(Equilibrium, Profile2D, Profile1D, Parameter0D, Grid):
                     f"homogeneous_time={self.homogeneous_time} not implemented"
                 )
 
+        self.check_convention(str(self.filename), str(self.ids_dd_version))
         with self.build_scenario(time_node):
             self.data.coords["point"] = ["r", "z"]
             super().build()

@@ -38,7 +38,7 @@ def test_the_internal_convention_is_stated_once():
 def test_the_total_flux_factor_follows_the_convention():
     """The 2*pi on the total flux is the convention's own e_Bp digit."""
     assert CONVENTION.e_bp == 1
-    assert TOTAL_FLUX_FACTOR == tau ** CONVENTION.e_bp
+    assert TOTAL_FLUX_FACTOR == tau**CONVENTION.e_bp
 
 
 def test_a_dd3_write_carries_the_flux_sign_flip():
@@ -61,12 +61,43 @@ def test_the_written_psi_keeps_its_value():
     assert np.array_equal(psi_write_factor(DD3_CONVENTION) * internal, base)
 
 
-def test_the_flux_contour_levels_keep_their_sign():
-    """The plotted psi levels carry the internal convention's sigma_Bp sign."""
+def _plotted_levels(monkeypatch, convention_id: int, levels: np.ndarray) -> np.ndarray:
+    """Return the levels Extrapolate.plot_2d_masked hands to the flux plot.
+
+    The production method runs on a bare instance whose flux plot is replaced
+    by a recorder, so the levels handed on are the thing under test rather
+    than a re-statement of the site's own expression.
+    """
+    from nova.imas import extrapolate as module
+
+    recorded: dict[str, np.ndarray] = {}
+    drawn = next(
+        klass for klass in module.Extrapolate.__mro__[1:] if "plot_2d" in klass.__dict__
+    )
+
+    def record(_self, attr="psi", mask=0, axes=None, **kwargs):
+        recorded["levels"] = kwargs["levels"]
+
+    monkeypatch.setattr(drawn, "plot_2d", record)
+    monkeypatch.setattr(module, "NOVA_CONVENTION", convention_id)
+    instance = object.__new__(module.Extrapolate)
+    instance.axes = None
+    module.Extrapolate.plot_2d_masked(instance, "psi", None, levels)
+    return np.asarray(recorded["levels"])
+
+
+def test_the_flux_contour_levels_keep_their_sign(monkeypatch):
+    """The plotted levels keep the value the bare negation produced."""
     levels = np.linspace(-7.5, 107.8, 51)
-    base = -levels[::-1]
-    site = convention(NOVA_CONVENTION).sigma_bp * levels[::-1]
-    assert np.array_equal(site, base)
+    assert np.array_equal(
+        _plotted_levels(monkeypatch, NOVA_CONVENTION, levels), -levels[::-1]
+    )
+
+
+def test_the_flux_contour_levels_follow_the_internal_convention(monkeypatch):
+    """The plotted sign is the convention's, not a negation the site owns."""
+    levels = np.linspace(-7.5, 107.8, 51)
+    assert np.array_equal(_plotted_levels(monkeypatch, 11, levels), levels[::-1])
 
 
 def test_the_declared_conventions_name_the_dd_versions():

@@ -289,14 +289,20 @@ at the head.</p>
 <tr><td>base</td><td><code>d246049f5</code></td><td><code>test_edge_consistency.py</code>, <code>test_parity_chain.py</code>, <code>test_map_extraction.py</code></td><td>14 passed</td></tr>
 <tr><td>head</td><td><code>b0c1b3b66</code></td><td>the same three</td><td>15 passed</td></tr>
 <tr><td>head</td><td><code>b0c1b3b66</code></td><td><code>test_edge_consistency_ids_route.py</code></td><td>2 passed</td></tr>
+<tr><td>head</td><td><code>e1328c078</code></td><td><code>test_edge_consistency.py</code></td><td>8 passed</td></tr>
+<tr><td>head</td><td><code>e1328c078</code></td><td><code>test_edge_consistency_ids_route.py</code></td><td>2 passed</td></tr>
 </tbody></table>
-<p id="edge-consistency-table-gate-control">The declared negative control was
-applied and its red log kept: with the edge-band FF&prime; perturbation written
-into the scratch DD3 IDS and read back through the translated route, the measure
-reports <code>band_relative = 2.3309e&minus;3</code>, above the threshold, and the
-arm that asserts the perturbed state is <i>consistent</i> fails on the exact
-value while the unperturbed arm passes. The mutation was reverted and the file
-matches the head commit.</p>
+<p id="edge-consistency-table-gate-control">The negative control mutates the
+module under test, not the test: with the profile-current operand replaced by the
+grid current, a change of one expression in
+<code>nova/imas/edge_consistency.py</code>, the measure compares the flux map with
+itself and the arm that asserts the injected edge-band perturbation is reported inconsistent
+goes red (<code>1 failed, 1 passed</code>, <code>EXIT=1</code>, failing
+<code>test_the_ids_route_reports_an_edge_band_perturbation</code>), while the
+unperturbed arm still passes. The control was run at revision
+<code>e1328c078</code>, the mutation was reverted, and the worktree is clean at
+that revision; the log records the revision, the mutation diff and the literal
+command.</p>
 <p id="edge-consistency-table-gate-open">What this node did not reach: the
 figure of band-relative residual against time for the three sources, which the
 brief left optional and the table above already carries numerically. The review

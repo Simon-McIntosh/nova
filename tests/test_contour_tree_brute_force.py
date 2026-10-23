@@ -19,6 +19,7 @@ import numpy as np
 import pytest
 
 from benchmarks.contour_tree_brute_force import (
+    _certificate_field,
     batched_identical,
     certificate_fixtures,
     certificate_rung_fixtures,
@@ -55,6 +56,24 @@ def _corrupt() -> bool:
     """Whether the declared tree mutation is selected for this run."""
 
     return os.environ.get("CONTOUR_TREE_CORRUPT") == "drop-wall-joins"
+
+
+def test_certificate_carriers_sample_one_closed_form():
+    """Every valid centre and wall vertex uses the certificate's analytic field."""
+    fixtures = certificate_fixtures() + certificate_rung_fixtures()
+    assert len(fixtures) == 16
+    for fixture in fixtures:
+        case = (
+            fixture.name.rsplit("-", 2)[0]
+            if fixture.name.endswith("-cells")
+            else fixture.name
+        )
+        mesh = fixture.mesh
+        valid = np.asarray(mesh.vertex_valid)
+        expected = _certificate_field(case)(np.asarray(mesh.vertex_rz)[valid])
+        actual = np.asarray(mesh.vertex_psi)[valid]
+        tolerance = 64 * np.finfo(float).eps * max(1.0, float(np.max(np.abs(expected))))
+        np.testing.assert_allclose(actual, expected, rtol=0, atol=tolerance)
 
 
 def test_certificate_tree_matches_independent_superlevel_components(fixtures):

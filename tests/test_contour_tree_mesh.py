@@ -1,8 +1,7 @@
 """Contour-mesh carrier checks.
 
 The carrier is the three-direction triangulation of hex cell centres, clipped to
-the vessel polygon, with wall vertices valued by linear interpolation on the
-containing triangle of the same piecewise-linear field.
+the vessel polygon, with added vertices valued by the supplied point field.
 """
 
 from __future__ import annotations
@@ -35,6 +34,12 @@ def linear_flux(rz: np.ndarray) -> np.ndarray:
     return _A * rz[:, 0] + _B * rz[:, 1] + _C
 
 
+def curved_flux(rz: np.ndarray) -> np.ndarray:
+    return (
+        0.2 * (rz[:, 0] - 1.3) ** 2 - 0.12 * rz[:, 1] ** 2 + 0.08 * rz[:, 0] * rz[:, 1]
+    )
+
+
 def hex_lattice(nx: int, nz: int, pitch: float = 1.0):
     """Return hex cell centres on a regular hex lattice (odd rows offset)."""
     row, col = np.meshgrid(np.arange(nz), np.arange(nx), indexing="ij")
@@ -55,7 +60,9 @@ def bbox_unit(rz: np.ndarray, pad: float = 0.6):
 
 
 def build(rz, wall, **kw):
-    return build_contour_mesh(rz, linear_flux(rz), wall, **kw)
+    return build_contour_mesh(
+        rz, linear_flux(rz), wall, field_evaluator=linear_flux, **kw
+    )
 
 
 def flat(mesh: ContourMesh):
@@ -65,7 +72,7 @@ def flat(mesh: ContourMesh):
     return valid_v, valid_e, valid_t
 
 
-def test_wall_vertex_flux_is_linear_interpolation():
+def test_wall_vertex_flux_matches_supplied_linear_field():
     rz = hex_lattice(9, 9)
     wall = [circle_unit(3.5)]
     mesh = build(rz, wall)
@@ -75,6 +82,32 @@ def test_wall_vertex_flux_is_linear_interpolation():
     want = linear_flux(np.asarray(mesh.vertex_rz)[wall_mask])
     error = np.max(np.abs(got - want))
     assert error < 1e-12
+
+
+def test_added_wall_vertices_match_curved_field():
+    rz = hex_lattice(9, 9)
+    mesh = build_contour_mesh(
+        rz, curved_flux(rz), [circle_unit(3.5)], field_evaluator=curved_flux
+    )
+    wall_mask = np.asarray(mesh.vertex_is_wall) & np.asarray(mesh.vertex_valid)
+    wall_mask[: len(rz)] = False
+    assert int(wall_mask.sum()) > 20
+    points = np.asarray(mesh.vertex_rz)[wall_mask]
+    np.testing.assert_allclose(
+        np.asarray(mesh.vertex_psi)[wall_mask], curved_flux(points), rtol=0, atol=1e-12
+    )
+
+
+def test_missing_evaluator_marks_added_flux_invalid():
+    rz = hex_lattice(9, 9)
+    mesh = build_contour_mesh(rz, linear_flux(rz), [circle_unit(3.5)])
+    values = np.asarray(mesh.vertex_psi)
+    assert len(values) > len(rz)
+    valid_centres = np.asarray(mesh.vertex_valid)[: len(rz)]
+    np.testing.assert_array_equal(
+        values[: len(rz)][valid_centres], linear_flux(rz)[valid_centres]
+    )
+    assert np.isnan(values[len(rz) :]).all()
 
 
 def test_nearest_centre_valuation_fails_linear_exactness():

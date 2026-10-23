@@ -7,6 +7,7 @@ import json
 import time
 from collections.abc import Mapping
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 
 import jax
@@ -55,14 +56,27 @@ RECEIPT_FIELDS = (
 
 @dataclass(frozen=True)
 class Fixture:
-    """One stored terminal field and its material boundary."""
+    """One carrier field and its material boundary."""
 
     name: str
     mesh: ContourMesh
 
 
+@lru_cache(maxsize=None)
+def _certificate_field(case: str):
+    """Evaluate the certificate's analytic flux at arbitrary carrier points."""
+    from benchmarks import solovev_certificate as certificate
+
+    exact = certificate._case(case)[2]
+
+    def evaluate(points: np.ndarray) -> np.ndarray:
+        return certificate._exact_state(case, exact, points)
+
+    return evaluate
+
+
 def certificate_fixtures() -> tuple[Fixture, ...]:
-    """Read every compact persisted Solov'ev certificate terminal state."""
+    """Build compact certificate carriers from the analytic Solov'ev field."""
 
     fixtures = []
     for path in sorted(PART_ROOT.glob("*production-route-reduced.json")):
@@ -72,12 +86,14 @@ def certificate_fixtures() -> tuple[Fixture, ...]:
             continue
         count = int(payload["realised_cells"])
         coordinate = np.asarray(render["coordinates_rz_m"], dtype=np.float64)[:count]
-        flux = np.asarray(render["terminal_flux_wb"], dtype=np.float64)[:count]
+        field = _certificate_field(payload["case"])
+        flux = field(coordinate)
         wall = np.asarray(render["wall_units_rz_m"][0], dtype=np.float64)
         mesh = build_contour_mesh(
             coordinate,
             flux,
             [vessel_unit(wall[:, 0], wall[:, 1], name=payload["case"])],
+            field_evaluator=field,
             vertex_capacity=VERTEX_CAPACITY,
             edge_capacity=EDGE_CAPACITY,
             triangle_capacity=TRIANGLE_CAPACITY,
@@ -89,7 +105,7 @@ def certificate_fixtures() -> tuple[Fixture, ...]:
 
 
 def certificate_rung_fixtures() -> tuple[Fixture, ...]:
-    """Read persisted certificate carriers at the available production rungs."""
+    """Build analytic certificate carriers at the available production rungs."""
 
     fixtures = []
     for rung, pattern in CERTIFICATE_RUNG_PATHS:
@@ -102,12 +118,14 @@ def certificate_rung_fixtures() -> tuple[Fixture, ...]:
             coordinate = np.asarray(render["coordinates_rz_m"], dtype=np.float64)[
                 :count
             ]
-            flux = np.asarray(render["terminal_flux_wb"], dtype=np.float64)[:count]
+            field = _certificate_field(payload["case"])
+            flux = field(coordinate)
             wall = np.asarray(render["wall_units_rz_m"][0], dtype=np.float64)
             mesh = build_contour_mesh(
                 coordinate,
                 flux,
                 [vessel_unit(wall[:, 0], wall[:, 1], name=payload["case"])],
+                field_evaluator=field,
                 vertex_capacity=count + 256,
                 edge_capacity=3 * count + 512,
                 triangle_capacity=2 * count + 512,
@@ -140,15 +158,19 @@ def _mast_mesh(shot: int, row: int) -> ContourMesh:
         kx=3,
         ky=3,
     )
-    psi = spline.ev(centres[:, 1], centres[:, 0])
     sigma = 1 if frame.flux_axis > frame.flux_boundary else -1
+
+    def field(points: np.ndarray) -> np.ndarray:
+        return sigma * spline.ev(points[:, 1], points[:, 0])
+
     wall = (
         vessel_unit(geometry.limiter[:, 0], geometry.limiter[:, 1], name=str(shot)),
     )
     return build_contour_mesh(
         centres,
-        sigma * psi,
+        field(centres),
         wall,
+        field_evaluator=field,
         vertex_capacity=MAST_VERTEX_CAPACITY,
         edge_capacity=MAST_EDGE_CAPACITY,
         triangle_capacity=MAST_TRIANGLE_CAPACITY,

@@ -23,9 +23,9 @@ emits for the state's own piecewise-linear hex carrier:
   outside region joins the tree, so its mesh-padding sentinel never enters the
   signed-flux axis.
 
-The field is piecewise-linear, so beyond the analytic axis and X-point the tree
-also emits an interior minimum and two wall saddles.  The wall saddles mark
-distinct contacts in the downward and upward sweeps.
+The sampled carrier retains the analytic axis and X-point, a private-region
+wall contact, and the virtual outside. The wall-adjacent interior minimum that
+appears when the wall field is interpolated is absent.
 
 ``psi`` throughout is the state's raw poloidal flux in webers, the same
 convention the certificate receipt stores.  Sigma is the flux sign under which
@@ -189,9 +189,8 @@ def _nodes(mesh, tree) -> tuple[Node, ...]:
     magnetic axis is the greatest valid node of sigma * psi; the admitted
     X-point is the saddle the tree attaches directly to that axis; the
     private-region wall maximum is the tree's own node at the highest-flux wall
-    vertex; the other wall saddle is the upward sweep's contact, where the
-    interior minimum's region meets the outside; the outside node is the
-    virtual slot, whose carrier vertex is mesh padding and carries no position.
+    vertex; the outside node is the virtual slot, whose carrier vertex is mesh
+    padding and carries no position.
     """
 
     carrier = np.asarray(mesh.vertex_rz)
@@ -227,10 +226,6 @@ def _nodes(mesh, tree) -> tuple[Node, ...]:
 
     wall_rows = [row for row in rows if bool(is_wall[int(node_vertex[row])])]
     wall_row = max(wall_rows, key=psi_of) if wall_rows else -1
-    upward_contacts = [row for row in wall_rows if row != wall_row]
-    if len(upward_contacts) != 1 or int(critical_type[upward_contacts[0]]) != SADDLE:
-        raise RuntimeError("expected one upward-sweep wall saddle")
-    upward_contact_row = upward_contacts[0]
     join_level = psi_of(wall_row) if wall_row >= 0 else None
     outside_rows = [
         row for row in rows if not bool(carrier_valid[int(node_vertex[row])])
@@ -257,8 +252,6 @@ def _nodes(mesh, tree) -> tuple[Node, ...]:
             role = "admitted X-point"
         elif row == wall_row:
             role = "private-region wall maximum"
-        elif row == upward_contact_row:
-            role = "upward-sweep wall contact"
         elif row == outside_row:
             role = "outside node"
         if row == outside_row:
@@ -396,7 +389,6 @@ def _draw_poloidal(figure, state: State):
     axis = _by_row(state, state.axis_row)
     xpoint = _by_row(state, state.xpoint_row)
     wallmax = _by_row(state, state.wall_row)
-    upward_contact = _by_row(state, _role_row(state.nodes, "upward-sweep wall contact"))
     poloidal.draw_nulls(
         panel,
         magnetic_axis=[axis.radius, axis.height],
@@ -410,7 +402,6 @@ def _draw_poloidal(figure, state: State):
         (axis, -0.05, 0.06, "right", label_axis, ANALYTIC_COLOR),
         (xpoint, -0.17, 0.06, "right", label_x, ANALYTIC_COLOR),
         (wallmax, -0.18, 0.06, "right", "private-region\nwall maximum", NODE_COLOR),
-        (upward_contact, 0.06, -0.06, "left", "upward-sweep\nwall contact", NODE_COLOR),
     ]
     for node, dr, dz, align, label, color in entries:
         panel.annotate(
@@ -463,7 +454,7 @@ def _place_graph_labels(figure, panel, state, rank, names) -> None:
     """Place each named graph label at the first offset that collides with nothing.
 
     Candidate offsets are tried in order; a candidate is kept only when its
-    display box clears every already-placed label box and every node marker.
+    display box clears every already-placed label box, node marker and arc.
     Two nodes drawn at the same flux level therefore cannot stack their labels,
     and no label can be hidden behind a marker.
     """
@@ -493,6 +484,9 @@ def _place_graph_labels(figure, panel, state, rank, names) -> None:
         )
         for node in state.nodes
     ]
+    arcs = [
+        patch.get_path().transformed(patch.get_transform()) for patch in panel.patches
+    ]
     for row, label in names:
         node = _by_row(state, row)
         point = (rank[node.row], _plotted_level(node))
@@ -504,13 +498,15 @@ def _place_graph_labels(figure, panel, state, rank, names) -> None:
                 textcoords="offset points",
                 fontsize=LABEL_FONTSIZE,
                 color=NODE_COLOR,
-                bbox=DEFAULT_INK.label_bbox,
+                bbox=None,
                 zorder=DEFAULT_INK.zorder_label,
                 ha=align,
                 va="center",
             )
             box = _annotation_display_box(annotation, renderer)
-            if any(box.overlaps(other) for other in occupied):
+            if any(box.overlaps(other) for other in occupied) or any(
+                arc.intersects_bbox(box, filled=False) for arc in arcs
+            ):
                 annotation.remove()
                 continue
             occupied.append(box)
@@ -540,6 +536,7 @@ def _draw_graph(figure, state: State):
     y_limits = (min(levels) - pad, max(levels) + pad)
     panel.set_xlim(*x_limits)
     panel.set_ylim(*y_limits)
+    panel.set_xticks(np.arange(len(state.nodes)))
 
     def to_fraction(x_value, y_value):
         x_fraction = (x_value - x_limits[0]) / (x_limits[1] - x_limits[0])
@@ -592,12 +589,10 @@ def _caption(state: State) -> str:
         "so the node count exceeds the edge count by %d."
         % (len(state.nodes) - len(state.edges)),
         "Two nodes are the analytic nulls: the magnetic-axis maximum and the",
-        "admitted X-point saddle. The remaining nodes are an interior minimum,",
-        "two wall saddles and a positionless virtual outside node, which is typed",
-        "outside the critical-point vocabulary. The private-region wall maximum",
-        "is the tree's own node at the",
-        "highest-flux wall vertex. The other wall saddle is the upward-sweep",
-        "contact where the interior minimum's region meets the outside. The",
+        "admitted X-point saddle. The other physical node is the private-region",
+        "wall maximum, at the highest-flux wall vertex. The wall-adjacent SOL",
+        "minimum and its upward-sweep wall contact are absent. The",
+        "virtual outside node is typed outside the critical-point vocabulary. The",
         "positionless outside node appears only in the graph panel.",
         "The poloidal panel draws no lines between nodes: the tree's adjacency is a",
         "topological relation, not a geometric path, so it is carried only by the",
@@ -698,7 +693,7 @@ def main() -> None:
         "edges": [asdict(edge) for edge in state.edges],
         "contour_levels_wb": [float(level) for level in state.levels],
         "wall_points": int(state.wall.shape[0]),
-        "figure": str(figure_path.relative_to(ROOT)),
+        "figure": str(figure_path.resolve().relative_to(ROOT)),
         "svg_sha256": _svg_sha256(svg_path),
     }
     receipt_path = arguments.output.with_suffix(".json")

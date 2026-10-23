@@ -4,15 +4,13 @@
   "fixture": "diverted-single-null-340-cells",
   "sigma": 1,
   "flux_units": "Wb",
-  "caption": "Diverted single-null Solovev certificate at its persisted 340-cell rung (fixture diverted-single-null-340-cells). The computed contour tree carries 6 nodes and 5 edges so the node count exceeds the edge count by 1. Two nodes are the analytic nulls: the magnetic-axis maximum and the admitted X-point saddle. The remaining nodes are an interior minimum, two wall saddles and a positionless virtual outside node, which is typed outside the critical-point vocabulary. The private-region wall maximum is the tree's own node at the highest-flux wall vertex. The other wall saddle is the upward-sweep contact where the interior minimum's region meets the outside. The positionless outside node appears only in the graph panel. The poloidal panel draws no lines between nodes: the tree's adjacency is a topological relation, not a geometric path, so it is carried only by the graph panel, where every node is placed at its signed flux level and the edges are drawn as arcs. The virtual outside node is drawn at the level where the outside region joins the tree, its wall contact, not at its mesh-padding sentinel, which is omitted from the signed-flux axis.",
-  "node_count": 6,
-  "edge_count": 5,
+  "caption": "Diverted single-null Solovev certificate at its persisted 340-cell rung (fixture diverted-single-null-340-cells). The computed contour tree carries 4 nodes and 3 edges so the node count exceeds the edge count by 1. Two nodes are the analytic nulls: the magnetic-axis maximum and the admitted X-point saddle. The other physical node is the private-region wall maximum, at the highest-flux wall vertex. The wall-adjacent SOL minimum and its upward-sweep wall contact are absent. The virtual outside node is typed outside the critical-point vocabulary. The positionless outside node appears only in the graph panel. The poloidal panel draws no lines between nodes: the tree's adjacency is a topological relation, not a geometric path, so it is carried only by the graph panel, where every node is placed at its signed flux level and the edges are drawn as arcs. The virtual outside node is drawn at the level where the outside region joins the tree, its wall contact, not at its mesh-padding sentinel, which is omitted from the signed-flux axis.",
+  "node_count": 4,
+  "edge_count": 3,
   "node_count_minus_edge_count": 1,
   "drawn_carrier_vertices": [
     5,
-    10,
     69,
-    447,
     457,
     461
   ],
@@ -23,112 +21,80 @@
       "kind": "saddle",
       "radius": 1.5292083397583118,
       "height": -1.0566152705705434,
-      "psi_wb": -9.28600803500046e-06,
-      "drawn_psi_wb": -9.28600803500046e-06,
+      "psi_wb": -9.286008034925939e-06,
+      "drawn_psi_wb": -9.286008034925939e-06,
       "carrier_vertex": 5,
       "role": "admitted X-point",
       "join_level_wb": null
     },
     {
       "row": 1,
-      "critical_type": 0,
-      "kind": "minimum",
-      "radius": 1.8412142685126585,
-      "height": -0.9288083774555755,
-      "psi_wb": -0.0040097101310506145,
-      "drawn_psi_wb": -0.0040097101310506145,
-      "carrier_vertex": 10,
-      "role": "piecewise-linear critical point",
-      "join_level_wb": null
-    },
-    {
-      "row": 2,
       "critical_type": 2,
       "kind": "maximum",
       "radius": 1.785245303894824,
       "height": 0.07669447404089746,
-      "psi_wb": 0.0057010557384265526,
-      "drawn_psi_wb": 0.0057010557384265526,
+      "psi_wb": 0.00570105573842658,
+      "drawn_psi_wb": 0.00570105573842658,
       "carrier_vertex": 69,
       "role": "magnetic axis",
       "join_level_wb": null
     },
     {
-      "row": 3,
-      "critical_type": 1,
-      "kind": "saddle",
-      "radius": 1.8761315251245474,
-      "height": -0.906018607528236,
-      "psi_wb": -0.003609200644812455,
-      "drawn_psi_wb": -0.003609200644812455,
-      "carrier_vertex": 447,
-      "role": "upward-sweep wall contact",
-      "join_level_wb": null
-    },
-    {
-      "row": 4,
+      "row": 2,
       "critical_type": 1,
       "kind": "saddle",
       "radius": 1.5025801649232058,
       "height": -1.2076782703692661,
-      "psi_wb": 0.000974879896966956,
-      "drawn_psi_wb": 0.000974879896966956,
+      "psi_wb": 0.0009954762478988684,
+      "drawn_psi_wb": 0.0009954762478988684,
       "carrier_vertex": 457,
       "role": "private-region wall maximum",
       "join_level_wb": null
     },
     {
-      "row": 5,
+      "row": 3,
       "critical_type": 3,
       "kind": "outside (virtual)",
       "radius": 1.5025801649232058,
       "height": -1.2076782703692661,
-      "psi_wb": -1.007435744009088,
-      "drawn_psi_wb": 0.000974879896966956,
+      "psi_wb": -1.0071667371019963,
+      "drawn_psi_wb": 0.0009954762478988684,
       "carrier_vertex": 461,
       "role": "outside node",
-      "join_level_wb": 0.000974879896966956
+      "join_level_wb": 0.0009954762478988684
     }
   ],
   "edges": [
-    {
-      "first": 0,
-      "second": 4
-    },
     {
       "first": 0,
       "second": 2
     },
     {
       "first": 0,
-      "second": 3
-    },
-    {
-      "first": 1,
-      "second": 5
-    },
-    {
-      "first": 3,
       "second": 1
+    },
+    {
+      "first": 0,
+      "second": 3
     }
   ],
   "contour_levels_wb": [
-    -0.0074357440090878765,
-    -0.0064252209515867666,
-    -0.005414697894085657,
-    -0.004404174836584547,
-    -0.003393651779083437,
-    -0.002383128721582327,
-    -0.001372605664081217,
+    -0.007166737101996301,
+    -0.0061769068835022325,
+    -0.005187076665008165,
+    -0.004197246446514098,
+    -0.00320741622802003,
+    -0.002217586009525963,
+    -0.001227755791031895,
     0.0,
-    0.0006484404509210029,
-    0.0016589635084221137,
-    0.0026694865659232228,
-    0.003680009623424332,
-    0.004690532680925443,
-    0.0057010557384265526
+    0.0007519046459562402,
+    0.0017417348644503073,
+    0.0027315650829443745,
+    0.0037213953014384434,
+    0.0047112255199325105,
+    0.00570105573842658
   ],
   "wall_points": 121,
   "figure": "docs/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.png",
-  "svg_sha256": "ed9150402cf32aafce6b9ef6d2bb4df49c8f89b70adc0aec8b5741093b17d62a"
+  "svg_sha256": "fa81501697b9a6d853e18e933bed2a4b445294c19af15bac5a700568a97bad33"
 }

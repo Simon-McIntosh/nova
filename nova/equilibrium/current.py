@@ -296,23 +296,6 @@ def _disk_clipped_rings(
     return padded, live_count
 
 
-def _disk_ring_inside(vertices, count, disk_centre, radius, segments=DISK_ARC_SEGMENTS):
-    """Return which ring sets lie wholly inside the inscribed disk.
-
-    A ring set whose every live vertex satisfies all ``segments`` half-planes
-    is wholly inside the disk polygon, so its interior piece is the ring set
-    itself and the clip has nothing to add to it. This is a sufficient
-    condition rather than a classification: a ring set that fails it is
-    clipped, whether it crosses the boundary or surrounds the disk, and the
-    clip is exact in both cases.
-    """
-    normal, bound = _disk_clip_planes(disk_centre, radius, segments)
-    offset = vertices[:, :, None, :] - disk_centre
-    distance = jnp.sum(offset * normal[None, None], axis=-1) - bound
-    live = jnp.arange(vertices.shape[1])[None, :] < count[:, None]
-    return jnp.all(jnp.all(distance <= 0.0, axis=-1) | ~live, axis=-1)
-
-
 def _disk_split_moments(
     rings,
     counts,
@@ -339,6 +322,15 @@ def _disk_split_moments(
     the two tile the ring set exactly whatever the disk does, and both are
     continuous in ``disk_centre`` with a derivative that carries the boundary's
     motion.
+
+    The interior piece is the clipped fan alone, with no branch on how the ring
+    set meets the disk. The clip is exact in all three cases -- a ring set
+    wholly inside the disk clips to itself, one that crosses the boundary clips
+    to its intersection with the disk, and one that surrounds the disk clips to
+    the disk -- so classifying the routing and skipping the clip for a ring set
+    would only replace one quadrature with another over the same region, which
+    is a discontinuity in the moments and not an economy. The interior
+    therefore carries no vertex-wise inside test and no comparison to switch it.
 
     ``confined`` carries ``(polygon, size, live)`` for the closed normal-form
     component the read admits, already clipped to this cell. When it is given
@@ -407,13 +399,7 @@ def _disk_split_moments(
         jnp.repeat(jnp.arange(len(rings)), inside_points.shape[1]),
         len(rings),
     )
-    wholly_inside = _disk_ring_inside(rings, counts, disk_centre, radius)
-    interior = jnp.where(
-        wholly_inside[:, None],
-        whole,
-        jnp.where((clipped_live > 0)[:, None], piece, 0.0),
-    )
-    inside = jnp.sum(interior, axis=0)
+    inside = jnp.sum(piece, axis=0)
     if keep_inside:
         return inside
     return jnp.sum(whole, axis=0) - inside

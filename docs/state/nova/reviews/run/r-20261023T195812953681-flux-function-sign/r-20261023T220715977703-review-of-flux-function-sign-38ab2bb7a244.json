@@ -1,0 +1,73 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed manifest's own pair: baseline_suite records exit_status 4 with failure_ids [] (the file is new, so the base arm collects nothing) and after_suite records exit_status 0 with failure_ids []; gate.log and baseline.log both reach their summary lines, so the delta is 0 added failures.",
+  "completed_at": "2026-10-23T22:30:34.247Z",
+  "dispatched_at": "2026-10-23T22:15:16Z",
+  "findings": [
+    {
+      "file": "scripts/flux_function_sign/measure.py",
+      "line": "406",
+      "severity": "non-blocking",
+      "text": "pinned_dd4_layer re-reads tests/data-manifest.json and indexes efitpp_validator_layers itself, duplicating nova/imas/validator_case.py:74 load_case_record, which owns MANIFEST_PATH, RECORD_KEY and the layers/dd_version record; a manifest schema change would then have two readers to update, and the fix is to call load_case_record('iter_corsica_130506')."
+    },
+    {
+      "file": "tests/test_flux_function_sign.py",
+      "line": "107",
+      "severity": "non-blocking",
+      "text": "The assertion compares two calls of the test's own _relation helper with values the test supplies, and the 11-to-17 invariance it claims holds for either overall sign because sigma_bp and the derivative flip together, so this assertion can never redden on the sign it is presented beside; the transform-factor assertions at :104-106 are the only independent part."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T195812953681-flux-function-sign/measure.log",
+      "line": "6",
+      "severity": "non-blocking",
+      "text": "The measurement header names revision ac37a2561, but that revision lacks region_integrals and extraction_roundtrip (added in 38ab2bb7a) and measure.json's shell rows lack the 'physical' key head emits, so the revision named beside the source-digit table cannot reproduce the artifact it labels; the numbers are still corroborated by the head test for the DD4 slopes and by the edge-consistency node's independent integrals."
+    },
+    {
+      "file": "docs/evidence/fragments/dd-cocos-ingest/flux-function-sign.html",
+      "line": "417",
+      "severity": "non-blocking",
+      "text": "The recorded gate result reads '2 passed, 1 xfailed in 8.55s' while the cited gate.log summary line reads '2 passed, 1 xfailed in 7.02s'; the count and exit status are right and the wall time is transcribed from a different run of the same command."
+    },
+    {
+      "file": "scripts/flux_function_sign/measure.py",
+      "line": "427",
+      "severity": "non-blocking",
+      "text": "single_dd4_layer converts the pinned layer into $TMPDIR/dd4-layer and nothing removes it, so the batch node keeps a converted reference layer after the job exits, against the fleet rule that a job removes what it wrote to /tmp."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "The diff adds no production module, so nothing in production reaches it; the production owners it drives and was verified against are nova/equilibrium/convention.py:88 toroidal_current_density, nova/equilibrium/map_extraction.py:130 apply_delta_star, nova/equilibrium/map_extraction.py:183 extract_flux_functions, nova/io/sourcemap.py determine_digits and nova/imas/edge_consistency.py:151, which consumes the owner.",
+    "diff": "Read commit by commit against 09dffd4c9: d47d93bd6 adds measure.py and its launcher, 0db0e5c8e the test file, ac37a2561 the evidence fragment, and 38ab2bb7a repairs the fragment's region misreport, binds the xfail to map_extraction.py:292 as well as the owner, and makes the passing test run the measurement; 1209 insertions, no production file.",
+    "done_when": "(1b) is reported at :120-166 with slope, correlation and residual for both signs; (2) is the digit table at :257-282 plus the region table at :290-306 with the 105013/1 disagreement flagged at :357-375.",
+    "goal": "The goal is to prove which sign the COCOS 17 relation between the toroidal current and the flux functions carries, and to identify each ITER source's COCOS from its own data before nova's owner changes; docs/evidence/fragments/dd-cocos-ingest/flux-function-sign.html:18-30 fixes +2*pi*(R p' + FF'/(mu0 R)) against the Data Dictionary's own signed flux, and :257-282 identifies the digits of five sources.",
+    "manifest": "Read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T195812953681-flux-function-sign/manifest.md: status complete, commits list of four, baseline_suite (exit 4, no tests) and after_suite (exit 0) both present, gate.log ending '2 passed, 1 xfailed' with EXIT=0.",
+    "write_paths": "Read manifest.md:3: tests/test_flux_function_sign.py, scripts/flux_function_sign, the evidence fragment and docs/figures/dd-cocos-ingest/flux-function-sign; the diff's four paths all sit inside them, including scripts/flux_function_sign/run_measure.sbatch inside the declared directory."
+  },
+  "justifications": {
+    "durability": "tests/test_flux_function_sign.py:121-150 reddens if measure_slice drops the +2*pi factor or ignores negate_flux (shown by negative-control.log failing the same assertion), and :152-180's strict xfail reddens through :180 on a bare leading-sign flip; :107-110 is a tautology that guards nothing.",
+    "evidence": "measure.json records slope, correlation and residual for both profile signs and the per-source digits, and gate.log ends '2 passed, 1 xfailed in 7.02s' with EXIT=0, but measure.log:6 names revision ac37a2561 which does not contain the code that produced measure.json.",
+    "fit": "scripts/flux_function_sign/measure.py:188-196 delegates to nova.equilibrium.map_extraction.apply_delta_star and :318-330 to nova.io.sourcemap.determine_digits, and no added name carries a plan label, run id or version suffix.",
+    "goal_fidelity": "docs/evidence/fragments/dd-cocos-ingest/flux-function-sign.html:18-30 states the plus relation against the Data Dictionary's signed flux and names the owner mismatch, and :257-282 tabulates five sources' digits, but the goal's 'three independent routes' is delivered as one complete route plus two partials (:77-90, :219-227).",
+    "reuse": "scripts/flux_function_sign/measure.py:406-407 re-reads tests/data-manifest.json's efitpp_validator_layers directly, duplicating nova/imas/validator_case.py:74 load_case_record, though :190 and :330 correctly reuse the apply_delta_star and determine_digits owners.",
+    "scope_discipline": "Every path in the four-commit diff against 09dffd4c9 is inside the orientation_write_paths declared at manifest.md:3 (tests/test_flux_function_sign.py, scripts/flux_function_sign, the evidence fragment, the figures directory), and no production module is touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The goal is to prove which sign the COCOS 17 relation between the toroidal current and the flux functions carries, and to identify each ITER source's COCOS from its own data before nova's owner changes; docs/evidence/fragments/dd-cocos-ingest/flux-function-sign.html:18-30 fixes +2*pi*(R p' + FF'/(mu0 R)) against the Data Dictionary's own signed flux, and :257-282 identifies the digits of five sources.\nVERDICT done_when: (1b) is reported at :120-166 with slope, correlation and residual for both signs; (2) is the digit table at :257-282 plus the region table at :290-306 with the 105013/1 disagreement flagged at :357-375; (1a) cites only the two Sauter equations the repository already uses (:77-90) and (1c) is reported partial (:219-227), so of the three required routes one is complete and two are partial.\nVERDICT write_paths: Read manifest.md:3: tests/test_flux_function_sign.py, scripts/flux_function_sign, the evidence fragment and docs/figures/dd-cocos-ingest/flux-function-sign; the diff's four paths all sit inside them, including scripts/flux_function_sign/run_measure.sbatch inside the declared directory.\nVERDICT manifest: Read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T195812953681-flux-function-sign/manifest.md: status complete, four commits, baseline_suite (exit 4, no tests) and after_suite (exit 0) both present, gate.log ending '2 passed, 1 xfailed' with EXIT=0.\nVERDICT diff: Read commit by commit against 09dffd4c9: d47d93bd6 adds measure.py and its launcher, 0db0e5c8e the test file, ac37a2561 the evidence fragment, and 38ab2bb7a repairs the fragment's region misreport, binds the xfail to map_extraction.py:292 as well as the owner, and makes the passing test run the measurement; 1209 insertions, no production file changed.\nCALL_SITES: nova/equilibrium/convention.py:88 toroidal_current_density, nova/equilibrium/map_extraction.py:130 apply_delta_star, nova/equilibrium/map_extraction.py:183 extract_flux_functions, nova/io/sourcemap.py determine_digits, nova/imas/edge_consistency.py:151\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/dd-cocos-ingest/flux-function-sign.html:18-30 states the plus relation and names the owner mismatch, and :257-282 tabulates five sources' digits, but the goal's three independent routes are one complete route plus two partials (:77-90, :219-227).\nSCORE evidence: 14\nJUSTIFICATION evidence: measure.json records slope, correlation and residual for both signs and gate.log ends '2 passed, 1 xfailed in 7.02s' with EXIT=0, but measure.log:6 names a revision that does not contain the code that produced measure.json.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the four-commit diff against 09dffd4c9 is inside the orientation_write_paths declared at manifest.md:3, and no production module is touched.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_flux_function_sign.py:121-150 reddens if measure_slice drops the +2*pi factor or ignores negate_flux (shown by negative-control.log), and :152-180's strict xfail reddens through :180 on a bare leading-sign flip, while :107-110 guards nothing.\nSCORE fit: 18\nJUSTIFICATION fit: scripts/flux_function_sign/measure.py:188-196 delegates to apply_delta_star and :318-330 to determine_digits, and no added name carries a plan label, run id or version suffix.\nSCORE reuse: 12\nJUSTIFICATION reuse: scripts/flux_function_sign/measure.py:406-407 re-reads tests/data-manifest.json's efitpp_validator_layers directly, duplicating nova/imas/validator_case.py:74 load_case_record, though :190 and :330 reuse the apply_delta_star and determine_digits owners.\nFINDING scripts/flux_function_sign/measure.py:406 non-blocking: pinned_dd4_layer re-reads tests/data-manifest.json and indexes efitpp_validator_layers itself, duplicating nova/imas/validator_case.py:74 load_case_record, which owns that record.\nFINDING tests/test_flux_function_sign.py:107 non-blocking: the allclose compares two calls of the test's own _relation helper with test-supplied values, and the invariance holds for either overall sign, so it can never redden on the sign.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T195812953681-flux-function-sign/measure.log:6 non-blocking: the header names revision ac37a2561, which lacks region_integrals and extraction_roundtrip, so the named revision cannot reproduce measure.json.\nFINDING docs/evidence/fragments/dd-cocos-ingest/flux-function-sign.html:417 non-blocking: the gate result reads '2 passed, 1 xfailed in 8.55s' while the cited gate.log summary reads 7.02s.\nFINDING scripts/flux_function_sign/measure.py:427 non-blocking: the converted layer at $TMPDIR/dd4-layer is never removed, leaving residue on the batch node.",
+  "review_run_id": "r-20261023T220715977703-review-of-flux-function-sign-38ab2bb7a244",
+  "reviewed_base_sha": "09dffd4c911c0e8f7c67c53d1a6dc53253b48e00",
+  "reviewed_head_sha": "38ab2bb7a244863991bbce63d043cf6a3cea3d23",
+  "reviewed_run_id": "r-20261023T195812953681-flux-function-sign",
+  "scores": {
+    "durability": 16,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "reuse": 12,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T22:31:21.235307+00:00",
+  "total": 95
+}

@@ -1,0 +1,55 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own gate logs. baseline_suite (d246049f) reads '1 failed, 8 passed in 172.95s' EXIT=1 with failure id ::test_brute_force_fixture_receipts_match_recorded_fields; after_suite (ce41a8510) composes two complete fresh processes reading '2 passed in 277.39s' and '9 passed in 326.72s' with aggregate EXIT=0 and no failure ids. Head therefore adds no failure; the base failure is the pre-existing recorded-reference defect the node was dispatched to repair. The reviewed head db321b5cf is documentation only and cannot change a test outcome.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-23T21:47:50.306Z",
+  "dispatched_at": "2026-10-23T21:32:12Z",
+  "findings": [
+    {
+      "file": "tests/test_contour_tree_sweep_bounds.py",
+      "line": "76",
+      "severity": "non-blocking",
+      "text": "the terminal assertion presumes the valid-vertex subgraph is connected: a carrier whose highest valid vertex sits isolated in its own component has no active neighbour, is recorded as a minimum (kind 0), and would fail this assertion on a correct tree. The 18 fixtures are connected, so nothing measures the case and no recorded run exercises the assertion at all."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read ce41a8510 and db321b5cf against 7c22f8666: the duplicate superlevel compare() and its import are removed from tests/test_contour_tree_sweep_bounds.py, the test is renamed to the event it checks, the terminal assertion is added at line 76, and one fragment sentence records the measured gates.",
+    "done_when": "the done_when asks for one fresh process at base and head; cleanup-sweep-head.log and cleanup-brute-force-head.log each open '# revision: ce41a8510' and close 'EXIT=0', and base-suite.log closes '1 failed, 8 passed in 172.95s' EXIT=1 on ::test_brute_force_fixture_receipts_match_recorded_fields.",
+    "goal": "the source node's goal is to repair the recorded-reference mismatch in tests/test_contour_tree_sweep_bounds.py; the gained commits leave that repair as a focused sublevel oracle plus a terminal-maximum invariant (tests/test_contour_tree_sweep_bounds.py:35-84) and record the measured gates in the fragment at line 29.",
+    "manifest": "read at head; status complete, both suite arms recorded with exit status, logs, completed:true, revision and failure ids, plus test_logs, measurement_module, measurement_cwd and a landing line; the claims I checked reconcile with the logs.",
+    "write_paths": "git diff --stat 7c22f8666..db321b5cf lists only tests/test_contour_tree_sweep_bounds.py and docs/evidence/fragments/contour-tree-topology-authority/brute-force-reference-capacity.html, both inside the reviewed manifest's orientation_write_paths."
+  },
+  "justifications": {
+    "durability": "tests/test_contour_tree_sweep_bounds.py:76 reddens if the sweep emits a minimum (kind 0) or saddle (kind 1) node at the final valid vertex, a condition no recorded run exercises, while the deleted superlevel comparison stays guarded by compare() at tests/test_contour_tree_brute_force.py:83,105,171.",
+    "evidence": "cleanup-sweep-head.log and cleanup-brute-force-head.log in the reviewed run directory each carry a revision header, a pytest summary and a bare EXIT=0 line, but the head arm ran at ce41a8510, one docs-only commit behind the reviewed head db321b5cf.",
+    "fit": "tests/test_contour_tree_sweep_bounds.py:35 is named by the event it checks and follows the surrounding pytest and imported-oracle idiom; neither the test file nor the fragment sentence carries a version, phase or ticket label.",
+    "goal_fidelity": "tests/test_contour_tree_sweep_bounds.py:35-84 leaves exactly the connectivity oracle and depth bound the repair node was dispatched to leave, but the gained commits tidy and document that suite rather than repair anything new.",
+    "reuse": "tests/test_contour_tree_sweep_bounds.py:20 imports _sublevel_count, the existing outside-augmented oracle owned by tests/test_contour_tree_wall_split.py:56, and drops compare() rather than re-implementing it, so no capability is forked.",
+    "scope_discipline": "git diff --stat 7c22f8666..db321b5cf lists two paths, tests/test_contour_tree_sweep_bounds.py and docs/evidence/fragments/contour-tree-topology-authority/brute-force-reference-capacity.html, both declared write paths, and nothing else."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source node's goal is to repair the brute-force recorded-reference mismatch in tests/test_contour_tree_sweep_bounds.py; the two commits gained since the review at 7c22f8666 carry the cleanup that leaves the historical-pin replacement as a focused sublevel oracle plus a terminal-maximum invariant (tests/test_contour_tree_sweep_bounds.py:35-84) and the fragment sentence recording those gates (docs/evidence/fragments/contour-tree-topology-authority/brute-force-reference-capacity.html:29).\nVERDICT done_when: the source done_when asks for one fresh pytest process at base and at head with the recorded-reference failure at base and green at head; cleanup-sweep-head.log and cleanup-brute-force-head.log each open with '# revision: ce41a8510' and close 'EXIT=0' (2 passed in 277.39 s; 9 passed in 326.72 s), and base-suite.log closes '1 failed, 8 passed in 172.95s' EXIT=1 on ::test_brute_force_fixture_receipts_match_recorded_fields, so the gate measures the asserted measure.\nVERDICT write_paths: the diff 7c22f8666..db321b5cf touches exactly tests/test_contour_tree_sweep_bounds.py and docs/evidence/fragments/contour-tree-topology-authority/brute-force-reference-capacity.html, both inside the five paths declared in the reviewed manifest's orientation_write_paths; no benchmark, figure or product module is touched.\nVERDICT manifest: read at the reviewed head; it records status complete, commits through db321b5cfa1c, baseline_suite (d246049f, exit 1, 1 failure id) and after_suite (ce41a8510, exit 0, 0 failures, completed true), test_logs naming every gate log, measurement_module and measurement_cwd, and a landing line; every claim I checked reconciles with the log it cites.\nVERDICT diff: read commit by commit against 7c22f8666; ce41a8510 removes the duplicate superlevel compare() call and its import from tests/test_contour_tree_sweep_bounds.py:15,30-41, renames the test to the event it checks, and adds the terminal assertion at line 76; db321b5cf rewrites one fragment sentence to match the measured gates. Ten insertions and fourteen deletions, all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: tests/test_contour_tree_sweep_bounds.py:35-84 leaves exactly the connectivity oracle and depth bound the repair node was dispatched to leave, but the gained commits tidy and document that suite rather than repair anything new.\nSCORE evidence: 17\nJUSTIFICATION evidence: cleanup-sweep-head.log and cleanup-brute-force-head.log in the reviewed run directory each carry a revision header, a pytest summary and a bare EXIT=0 line, but the head arm ran at ce41a8510, one docs-only commit behind the reviewed head db321b5cf.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 7c22f8666..db321b5cf lists two paths, tests/test_contour_tree_sweep_bounds.py and docs/evidence/fragments/contour-tree-topology-authority/brute-force-reference-capacity.html, both declared write paths, and nothing else.\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_contour_tree_sweep_bounds.py:76 reddens if the sweep emits a minimum (kind 0) or saddle (kind 1) node at the final valid vertex, a condition no recorded run exercises, while the deleted superlevel comparison stays guarded by compare() at tests/test_contour_tree_brute_force.py:83,105,171.\nSCORE fit: 18\nJUSTIFICATION fit: tests/test_contour_tree_sweep_bounds.py:35 is named by the event it checks and follows the surrounding pytest and imported-oracle idiom; neither the test file nor the fragment sentence carries a version, phase or ticket label.\nSCORE reuse: 20\nJUSTIFICATION reuse: tests/test_contour_tree_sweep_bounds.py:20 imports _sublevel_count, the existing outside-augmented oracle owned by tests/test_contour_tree_wall_split.py:56, and drops compare() rather than re-implementing it, so no capability is forked.\nFINDING tests/test_contour_tree_sweep_bounds.py:76 non-blocking: the terminal assertion presumes the valid-vertex subgraph is connected, so a carrier whose highest valid vertex sits isolated in its own component has no active neighbour, is recorded as a minimum (kind 0) and would fail this assertion on a correct tree; the fixtures are connected, so nothing measures the case.\n",
+  "review_run_id": "r-20261023T213104602904-review-of-brute-force-reference-capacity-db321b5cfa1c",
+  "reviewed_base_sha": "7c22f86660997efbc3931af0aa1c448a53f0cf9e",
+  "reviewed_head_sha": "db321b5cfa1c16abfd09bbb5936a41857a249c99",
+  "reviewed_run_id": "r-20261023T180154346822-brute-force-reference-capacity",
+  "reviewer": {
+    "backend": "cloned",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T21:44:49.174806+00:00",
+  "total": 106
+}

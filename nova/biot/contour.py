@@ -195,7 +195,7 @@ class Contour(Line):
         self.set_axes("1d", axes=axes)
         psi = self.loc["psi"]
         if norm is not None:
-            psi = norm(psi)  # COCOS
+            psi = norm(psi)
         self.axes.plot(
             psi[self.loc["closed"]],
             self.loc["coefficients"][self.loc["closed"], index],

@@ -1,0 +1,39 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-23T15:58:44.445Z",
+  "dispatched_at": "2026-10-23T15:41:22Z",
+  "figures": [
+    "docs/figures/dd-cocos-edge-consistency/edge-consistency-convergence.svg"
+  ],
+  "findings": [
+    {
+      "file": "docs/figures/dd-cocos-edge-consistency/render_convergence.py",
+      "line": 67,
+      "severity": "non-blocking",
+      "summary": "The measured series is given label=\"band residual\" but the script never renders a legend and never directly labels the blue trace, so the rendered PNG carries two annotated reference lines (the dashed fit, 'fitted order 1.96', and the dotted threshold, 'threshold 1.0e-03') and one unlabelled coloured measurement series. A reader resolves the blue trace only by elimination against the y-axis label and the caption, rather than by an identification carried in the figure. This does not stop anyone reading the figure - there is exactly one data series and the axis label names the plotted ratio - so it is recorded as non-blocking rather than holding the node."
+    }
+  ],
+  "images": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T154028759642-review-of-edge-consistency-measure-a27cbb200be9-figure/image-0.png"
+  ],
+  "item_verdicts": {
+    "contrast": "passes - the axis, tick and annotation text is near-black on white, and the grey 'threshold 1.0e-03' annotation plus the grey dotted threshold line read clearly against the white field at the repository's declared #929292 reference grey; nothing is lost against the background.",
+    "data_ink": "passes - four markers, their connecting line, the dashed fit and the dotted threshold are the only marks on a plain white field, and they carry the visual weight; the four markers sit at evenly spaced log-x positions matching the four grid resolutions the caption names, so the series reads as the convergence measurement itself.",
+    "decoration": "passes - no gradient, no background fill, no shading, no gridline and no frame appears anywhere in the rendered PNG; the top and right spines are absent, leaving only the two scaled axes, and the only non-data ink is the grey dotted threshold reference, which the caption names as EDGE_BAND_RELATIVE_THRESHOLD.",
+    "label_collision": "passes - in the rendered PNG the 'threshold 1.0e-03' annotation sits above the dotted line in clear space, the 'fitted order 1.96' annotation sits below-left of the dashed fit line in empty space, neither annotation touches the data line, the dashed fit line or each other, and no text artist is clipped: the y-axis label, both annotation strings, every tick label and the x-axis label sit wholly inside the canvas.",
+    "legibility": "passes - the rendered PNG is a single log-log panel with one blue measurement series of four round markers joined by a 3 pt line, a black dashed power-law fit drawn just beneath it, and a grey dotted threshold line; the axis labels 'radial grid spacing [m]' and 'band residual / profile current', the decade tick labels (6x10^-3, 10^-2, 2x10^-2, 3x10^-2, 4x10^-2 on x; 10^-3 and 10^-4 on y), and both annotations ('fitted order 1.96', 'threshold 1.0e-03') are all readable at a glance without zooming.",
+    "table_form": "passes - the image plots the band residual against radial grid spacing on log-log axes; the quantity the figure exists to show is the slope of the four-point sequence, which is a plotted relationship rather than a table lookup, so nothing it depicts is naturally a table."
+  },
+  "project": "nova",
+  "read_only": true,
+  "review_run_id": "r-20261023T154028759642-review-of-edge-consistency-measure-a27cbb200be9-figure",
+  "reviewed_base_sha": "e69f4b60af04df8259ef914dee3136a3c55f6cb2",
+  "reviewed_head_sha": "a27cbb200be9a5864c4a6426b064b947812396c1",
+  "reviewed_run_id": "r-20261023T123603187543-edge-consistency-measure",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T15:59:40.791777+00:00",
+  "total": null
+}

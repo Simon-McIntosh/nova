@@ -63,6 +63,13 @@
       "finding": "reuse_search-1",
       "reason": "section 3 is deferred as superseded (2026-10-23 currency review): contour-tree-topology-authority section 3 makes the contour tree the source of critical points, so no parallel saddle detector is built here",
       "when": "2026-10-23T20:08:15.179776+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "thin_wrapper-1",
+      "reason": "section 3 is deferred as superseded by contour-tree-topology-authority section 3; no ring-local quadratic is authored",
+      "when": "2026-10-23T20:08:24.511697+00:00"
     }
   ],
   "responses": {
@@ -71,6 +78,12 @@
       "by": "",
       "reason": "section 3 is deferred as superseded (2026-10-23 currency review): contour-tree-topology-authority section 3 makes the contour tree the source of critical points, so no parallel saddle detector is built here",
       "when": "2026-10-23T20:08:15.179776+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "section 3 is deferred as superseded by contour-tree-topology-authority section 3; no ring-local quadratic is authored",
+      "when": "2026-10-23T20:08:24.511697+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/topology-read-containment-and-rebank/r-20261005T154908754876-plan-review-of-topology-read-containment-and-rebank.json",

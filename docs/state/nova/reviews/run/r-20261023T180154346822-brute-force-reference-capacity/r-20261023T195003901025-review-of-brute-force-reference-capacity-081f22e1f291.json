@@ -1,0 +1,86 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own gate logs. baseline_suite (d246049f) records 1 failed 8 passed EXIT=1 whose failure id is tests/test_contour_tree_sweep_bounds.py::test_brute_force_fixture_receipts_match_recorded_fields, and after_suite (5d7d8a596) records 9 passed EXIT=0 with no failure ids, so the head adds no failure. The base failure is not an additive defect of the change: it is the pre-existing recorded-reference defect the node was dispatched to repair, reproduced from the base revision's own test source (verified byte-identical to git show d246049f:tests/test_contour_tree_sweep_bounds.py), and it disappears at head because that test is deleted rather than repaired.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-23T20:46:49.888Z",
+  "dispatched_at": "2026-10-23T20:28:53Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the coordinator's resume advice (resume-1) superseded the brief's stop rule: it authorised replacing the old-builder contract once every old-only node was shown to be a removed wall artefact, and wall-chain-audit.log shows 272 wall vertices plus 3 wall-linked MAST interior saddles, with the outside-augmented oracle passing on all 18 fixtures",
+      "recorded_at": "2026-10-23T20:49:15.054431+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/test_contour_tree_sweep_bounds.py",
+      "line": "30",
+      "severity": "blocking",
+      "text": "The recorded-reference test was deleted and replaced, but the brief's item 4 said that if the tree differs the node must stop and report the node delta as a blocker, and the tree does differ: wall-chain-audit.log records 275 old-only nodes (272 wall, 3 wall-linked MAST interior) and non-empty new_only_edges, while the manifest records no blocker and declares complete. Plan section 2's done-when does call for a connectivity oracle, so the substitution may be the right decision, but it was one the brief reserved to the coordinator and it is not recorded as an adjudication anywhere. Repair is for the coordinator to rule on the substitution before this lands, and for the evidence fragment to state the edge-set difference explicitly rather than reporting only that no old-only node is unexplained."
+    },
+    {
+      "disposition_candidate": "exempted",
+      "disposition_reason": "The terminal vertex is emitted as a maximum by nova/equilibrium/contour_tree.py:397-400, so the exemption reflects a real product behaviour rather than a silenced failure.",
+      "file": "tests/test_contour_tree_sweep_bounds.py",
+      "line": "79",
+      "severity": "non-blocking",
+      "text": "The final valid vertex is exempt from the regular-node assertion, so the sublevel oracle cannot detect a spurious critical node emitted at that one vertex of every fixture."
+    },
+    {
+      "disposition_candidate": "folded",
+      "disposition_target": "a later instance of this node",
+      "file": "tests/test_contour_tree_sweep_bounds.py",
+      "line": "41",
+      "severity": "non-blocking",
+      "text": "The superlevel half calls the same compare helper over the same fixtures as tests/test_contour_tree_brute_force.py:87 and 150 and re-asserts the same row equality, so it adds roughly six minutes of gate time for no new coverage. The genuinely new coverage is the sublevel oracle at lines 55-81, which is the part that should remain."
+    },
+    {
+      "disposition_candidate": "folded",
+      "disposition_target": "a later instance of this node",
+      "file": "tests/test_contour_tree_sweep_bounds.py",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "The module docstring still says the file keeps contour-tree receipts stable, but the change removes the only receipt-field comparison, so a reader trusting the docstring overstates what the file now protects; the removed test compared node_vertex, node_psi, node_valid, critical_type, edges, edge_valid and overflow, and nothing replaces node_psi or critical_type coverage here."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read the three commits against d246049f commit by commit: 5d7d8a596 replaces the recorded-reference test with a superlevel/compare oracle and an outside-augmented sublevel oracle over all 18 fixtures, d0ded509b adds the per-fixture audit fragment, and 081f22e1f adds the scratch wall-mutation outcome; two files changed, 76 insertions and 78 deletions, and neither the product module nor the wall-split helper is touched.",
+    "done_when": "The source node's evidence fence asks that the sweep-bounds suite pass at head in one fresh process, fail its recorded-fields test at base, and that the manifest show the valid node and edge sets are identical at 256 and 258 slots; head-suite.log records 9 passed EXIT=0 at 5d7d8a596 and that clause holds, base-suite.log records 1 failed 8 passed EXIT=1 on the base revision's own test source, and that clause holds, but wall-chain-audit.log records 275 old-only nodes and non-empty new_only_edges (mast-27079-row-16 new_only_edges [[32, 559], [428, 511]]), so the third clause is contradicted by the run's own data and no gate measures it.",
+    "goal": "The node goal is that tests/test_contour_tree_sweep_bounds.py::test_brute_force_fixture_receipts_match_recorded_fields compare the brute-force receipts against a recorded reference sized to the carrier capacity; the landed change deletes that test (tests/test_contour_tree_sweep_bounds.py:30) and replaces it with an oracle test that never loads a recorded reference, so the goal's literal object is absent and only its purpose (a meaningful, green comparison) is met.",
+    "manifest": "Read at status complete; it records the three commits, two changed paths, the literal gate command, populated baseline_suite (d246049f, 1 failure id) and after_suite (5d7d8a596, 0 failures) arms, the negative-control log and note, measurement module and cwd, and an artifacts/evidence_inputs block whose per-fixture counts I reconciled against wall-chain-audit.log (275 old-only = 272 wall + 3 interior; 12+12+12+193+46 per fixture group), so its arithmetic is sound, but it declares complete without recording that the evidence fence's third clause is unmet and without the blocker brief item 4 required.",
+    "write_paths": "Five write paths are declared (the sweep-bounds test, two benchmarks, the evidence fragment and a figures directory); git diff --stat d246049f..081f22e1 lists exactly two changed paths, tests/test_contour_tree_sweep_bounds.py and docs/evidence/fragments/contour-tree-topology-authority fragment brute-force-reference-capacity.html, both inside the declared set, with no benchmark, figure or topology.py touch."
+  },
+  "justifications": {
+    "durability": "tests/test_contour_tree_sweep_bounds.py:44-45 and 74-80 redden on an independent host graph search and an outside-augmented oracle, and wall-mutation.log shows the sublevel half refused at compact diverted vertex 213 with EXIT=1, but line 79 exempts the final valid vertex and no assertion carries the receipt-field identity the removed test held.",
+    "evidence": "head-suite.log carries 9 passed EXIT=0 at 5d7d8a596 and base-suite.log carries 1 failed 8 passed EXIT=1 on the base revision's test source, but the done-when's third clause is contradicted by wall-chain-audit.log's 275 old-only nodes and non-empty new_only_edges.",
+    "fit": "tests/test_contour_tree_sweep_bounds.py:23 imports a private helper across test modules, which matches an established idiom in 38 files, and the commits carry conventional subjects and bodies, but the module docstring at line 1 still claims the file keeps receipts stable when it no longer checks any receipt.",
+    "goal_fidelity": "tests/test_contour_tree_sweep_bounds.py:30 replaces the recorded-reference test the goal names with a connectivity oracle, so the named comparison no longer exists even though plan section 2's own done-when does call for the connectivity count.",
+    "reuse": "tests/test_contour_tree_sweep_bounds.py:41 calls the existing compare owner at benchmarks/contour_tree_brute_force.py:244 and line 74 the existing _sublevel_count at tests/test_contour_tree_wall_split.py:56 rather than forking either, but the superlevel half duplicates tests/test_contour_tree_brute_force.py:87 and 150 without extending them.",
+    "scope_discipline": "git diff --stat d246049f..081f22e1 lists only tests/test_contour_tree_sweep_bounds.py and docs/evidence/fragments/contour-tree-topology-authority/brute-force-reference-capacity.html, both inside the five declared write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is that test_brute_force_fixture_receipts_match_recorded_fields compare the brute-force receipts against a recorded reference sized to the carrier capacity; tests/test_contour_tree_sweep_bounds.py:30 deletes that test and replaces it with an oracle test that never loads a recorded reference.\nVERDICT done_when: the evidence fence asks the suite to pass at head, fail its recorded-fields test at base, and the manifest to show valid node and edge sets identical at 256 and 258 slots; head-suite.log (9 passed, EXIT=0) and base-suite.log (1 failed 8 passed, EXIT=1) hold the first two clauses, while wall-chain-audit.log records 275 old-only nodes and non-empty new_only_edges, contradicting the third.\nVERDICT write_paths: git diff d246049f..081f22e1 lists exactly two changed paths, tests/test_contour_tree_sweep_bounds.py and docs/evidence/fragments/contour-tree-topology-authority/brute-force-reference-capacity.html, both inside the five declared write paths.\nVERDICT manifest: read at status complete; it carries three commits, both gate arms with logs, the negative-control log and note, and per-fixture counts that reconcile with wall-chain-audit.log, but it declares complete over an unmet evidence-fence clause and without the blocker brief item 4 required.\nVERDICT diff: read commit by commit against d246049f; 5d7d8a596 carries the test replacement, d0ded509b and 081f22e1f add the audit and mutation evidence, and no product or helper file is touched.\nCALL_SITES: none\nSCORE goal_fidelity: 11\nJUSTIFICATION goal_fidelity: tests/test_contour_tree_sweep_bounds.py:30 replaces the recorded-reference comparison the goal names with a connectivity oracle, leaving the named object absent.\nSCORE evidence: 12\nJUSTIFICATION evidence: head-suite.log records 9 passed EXIT=0 and base-suite.log 1 failed 8 passed EXIT=1, but wall-chain-audit.log records 275 old-only nodes and non-empty new_only_edges against the fence's identical-sets clause.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in git diff d246049f..081f22e1 lies inside the five declared write paths and no product file is touched.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_contour_tree_sweep_bounds.py:44 and 74 check the tree against an independent host search and outside-augmented oracle, reddening at vertex 213 under wall-mutation.log, but line 79 exempts the final vertex and no receipt-field identity survives.\nSCORE fit: 17\nJUSTIFICATION fit: tests/test_contour_tree_sweep_bounds.py:23 follows the established cross-test import idiom, but line 1's docstring still claims receipt stability the file no longer checks.\nSCORE reuse: 14\nJUSTIFICATION reuse: lines 41 and 74 reuse the compare and _sublevel_count owners rather than forking them, but line 41 duplicates coverage already at tests/test_contour_tree_brute_force.py:87.\nFINDING tests/test_contour_tree_sweep_bounds.py:30 blocking: the recorded-reference test was replaced over a real tree difference (275 old-only nodes, non-empty new_only_edges) without the blocker brief item 4 required.\nFINDING tests/test_contour_tree_sweep_bounds.py:79 non-blocking: the final valid vertex is exempt from the regular-node assertion, hiding a spurious critical node there.\nFINDING tests/test_contour_tree_sweep_bounds.py:41 non-blocking: the superlevel half re-asserts coverage already owned by tests/test_contour_tree_brute_force.py:87.\nFINDING tests/test_contour_tree_sweep_bounds.py:1 non-blocking: the module docstring claims receipt stability the file no longer checks, and node_psi and critical_type coverage is dropped with no replacement.",
+  "review_run_id": "r-20261023T195003901025-review-of-brute-force-reference-capacity-081f22e1f291",
+  "reviewed_base_sha": "d246049f532567c80a70770cef4fc9f610547f2d",
+  "reviewed_head_sha": "081f22e1f291aab0d5e46f56c6612df527b4527b",
+  "reviewed_run_id": "r-20261023T180154346822-brute-force-reference-capacity",
+  "reviewer": {
+    "backend": "cloned",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 16,
+    "evidence": 12,
+    "fit": 17,
+    "goal_fidelity": 11,
+    "reuse": 14,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T21:05:00+00:00",
+  "total": 90
+}

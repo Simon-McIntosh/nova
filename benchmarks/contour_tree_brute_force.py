@@ -56,7 +56,7 @@ RECEIPT_FIELDS = (
 
 @dataclass(frozen=True)
 class Fixture:
-    """One stored terminal field and its material boundary."""
+    """One carrier field and its material boundary."""
 
     name: str
     mesh: ContourMesh
@@ -76,7 +76,7 @@ def _certificate_field(case: str):
 
 
 def certificate_fixtures() -> tuple[Fixture, ...]:
-    """Read every compact persisted Solov'ev certificate terminal state."""
+    """Build compact certificate carriers from the analytic Solov'ev field."""
 
     fixtures = []
     for path in sorted(PART_ROOT.glob("*production-route-reduced.json")):
@@ -105,7 +105,7 @@ def certificate_fixtures() -> tuple[Fixture, ...]:
 
 
 def certificate_rung_fixtures() -> tuple[Fixture, ...]:
-    """Read persisted certificate carriers at the available production rungs."""
+    """Build analytic certificate carriers at the available production rungs."""
 
     fixtures = []
     for rung, pattern in CERTIFICATE_RUNG_PATHS:

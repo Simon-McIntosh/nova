@@ -98,6 +98,18 @@ def test_added_wall_vertices_match_curved_field():
     )
 
 
+def test_missing_evaluator_marks_added_flux_invalid():
+    rz = hex_lattice(9, 9)
+    mesh = build_contour_mesh(rz, linear_flux(rz), [circle_unit(3.5)])
+    values = np.asarray(mesh.vertex_psi)
+    assert len(values) > len(rz)
+    valid_centres = np.asarray(mesh.vertex_valid)[: len(rz)]
+    np.testing.assert_array_equal(
+        values[: len(rz)][valid_centres], linear_flux(rz)[valid_centres]
+    )
+    assert np.isnan(values[len(rz) :]).all()
+
+
 def test_nearest_centre_valuation_fails_linear_exactness():
     rz = hex_lattice(9, 9)
     mesh = build(rz, [circle_unit(3.5)])

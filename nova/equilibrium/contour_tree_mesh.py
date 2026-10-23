@@ -248,7 +248,9 @@ def _clipped_carrier(
     centre_valid = _covers(domain, centre_rz)
 
     vertices: list[tuple] = [(float(p[0]), float(p[1])) for p in centre_rz]
-    vertex_psi: list[float] = [float(v) for v in flux] + [0.0] * len(boundary_points)
+    vertex_psi: list[float] = [float(v) for v in flux] + [float("nan")] * len(
+        boundary_points
+    )
     vertex_valid: list[bool] = [bool(v) for v in centre_valid]
     vertex_is_wall: list[bool] = list(
         np.asarray(
@@ -268,7 +270,7 @@ def _clipped_carrier(
             return dedup[key]
         index = len(vertices)
         vertices.append((float(point[0]), float(point[1])))
-        vertex_psi.append(0.0)
+        vertex_psi.append(float("nan"))
         vertex_valid.append(True)
         vertex_is_wall.append(True)
         dedup[key] = index
@@ -350,8 +352,8 @@ def build_contour_mesh(
     ceiling: a carrier larger than it refuses with :class:`ContourMeshOverflow`
     naming both counts, rather than returning a mesh with no valid vertex.
     The evaluator receives all vertices added after the cell centres as one
-    ``(n, 2)`` array. Omitting it assigns zero placeholders for geometry-only
-    callers, which sample their physical field separately.
+    ``(n, 2)`` array. Omitting it assigns NaN to every added vertex for
+    geometry-only callers, which sample their physical field separately.
     """
     centre_rz = np.ascontiguousarray(centre_rz, dtype=np.float64)
     flux = np.ascontiguousarray(flux, dtype=np.float64)

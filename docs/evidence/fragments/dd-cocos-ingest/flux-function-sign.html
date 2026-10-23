@@ -12,8 +12,9 @@
 
 <section id="flux-function-sign-scope">
 <h2>The sign of the flux-function current relation at COCOS 17</h2>
-<p id="flux-function-sign-scope-verdict">Three routes agree, and they say
-<strong>plus</strong>: at COCOS 17 the toroidal current density is</p>
+<p id="flux-function-sign-scope-verdict">Two independent routes agree on the
+sign, and they say <strong>plus</strong>; a third is partial and adds nothing
+on that sign. At COCOS 17 the toroidal current density is</p>
 <p id="flux-function-sign-scope-relation" style="text-align:center">
 j<sub>&#966;</sub>
 = +2&#960; ( R &#8706;p/&#8706;&#968; + F &#8706;F/&#8706;&#968; / (&#956;<sub>0</sub> R) )
@@ -28,11 +29,12 @@ current magnitude and an anti-parallel current direction when it is fed the
 Data Dictionary&rsquo;s own derivatives. That is the disagreement
 followup <code>f-ddc-006</code> repairs; this node changes no production
 module.</p>
-<p id="flux-function-sign-scope-routes">The routes are the general digit form
-evaluated at the two conventions, the DD4-native regression (COCOS 17 by
-definition, needing no translation), and imas-ambix&rsquo;s convention owner
-read-only. The third is a partial cross-check and is reported as such below
-rather than counted as an independent confirmation of the whole relation.</p>
+<p id="flux-function-sign-scope-routes">The two independent routes are the
+general digit form evaluated at the two conventions, and the DD4-native
+regression with its negated-map control (COCOS 17 by definition, needing no
+translation). imas-ambix&rsquo;s convention owner is read-only and partial: it
+confirms the Amp&egrave;re side and the 2&#960;, and takes the bracket&rsquo;s
+sign as an input, so it is not counted as a third agreement.</p>
 </section>
 
 <section id="flux-function-sign-general">
@@ -169,11 +171,20 @@ current&rsquo;s RMS and does not distinguish the two arms &mdash; it is the
 sign of the slope that does, and scatter of that size is what a spline
 re-sampling of a coarser stored grid leaves behind.</p>
 <p id="flux-function-sign-dd4-ebp">The same layer pins <code>e<sub>Bp</sub></code>
-from magnitude alone: the operator&rsquo;s integral is 1.00003, 1.00005 and
-1.00006 times the recorded current under <code>e<sub>Bp</sub> = 1</code>, and
-6.2834 times it under <code>e<sub>Bp</sub> = 0</code>. The ratio near one is
-the <code>e<sub>Bp</sub> = 1</code> reading, and the near-2&#960; ratio is what
-a missing 2&#960; factor looks like.</p>
+from magnitude alone. Integrated inside the last closed flux surface, the
+operator&rsquo;s current is 0.9955, 0.9957 and 0.9954 times the recorded
+current under <code>e<sub>Bp</sub> = 1</code>, and 6.2549, 6.2562 and 6.2543
+times it under <code>e<sub>Bp</sub> = 0</code>. The ratio near one is the
+<code>e<sub>Bp</sub> = 1</code> reading, and the near-2&#960; ratio is what a
+missing 2&#960; factor looks like.</p>
+<p id="flux-function-sign-dd4-ebp-region">The region matters, and it is the
+one place in this measurement where an earlier reading was misreported. Summing
+the same operator over the whole resampled box gives 1.0000, 1.0000 and 1.0001
+on this layer &mdash; the same answer, because the DD4 box is only about forty
+per cent plasma and its vacuum carries almost no current. On the four archive
+files whose boxes are 6 m &times; 12 m around a much smaller plasma the
+whole-box sum overshoots badly (see the digit table below), so the whole-box
+figure is reported but never used for the <code>e<sub>Bp</sub></code> test.</p>
 
 <h4 id="flux-function-sign-dd4-control-heading">The literal negative control</h4>
 <p id="flux-function-sign-dd4-control">The declared mutation is
@@ -272,9 +283,60 @@ disagreement.</p>
 <p id="flux-function-sign-sources-agreement">The GS-implied
 <code>&#963;<sub>Bp</sub></code> is <code>&minus;sign(&int;j dA / I<sub>p</sub>)</code>,
 and it agrees with <code>determine_digits</code> on all five sources, which is
-the expected outcome and not the interesting one. <code>e<sub>Bp</sub> = 1</code>
-on all five: the integral ratio is within 3&ndash;7 per cent of one under that
-reading and near 2&#960; under the other.</p>
+the expected outcome and not the interesting one. The
+<code>e<sub>Bp</sub></code> reading rests on the integral ratio, and that
+ratio depends entirely on the region it is taken over, so both regions are
+given.</p>
+<table id="flux-function-sign-sources-region-table">
+<caption>The map current's integral over <code>I<sub>p</sub></code>, by region</caption>
+<thead><tr><th>source</th>
+<th>whole box</th><th>inside the last closed surface</th><th>interior</th>
+<th><code>e<sub>Bp</sub> = 0</code> arm, inside the surface</th></tr></thead>
+<tbody>
+<tr><td>CORSICA 130506/6</td><td>&minus;0.9897</td><td>&minus;0.9867</td>
+<td>&minus;0.9540</td><td>&minus;6.1995</td></tr>
+<tr><td>DINA 105052/1</td><td>&minus;1.6781</td><td>&minus;0.9926</td>
+<td>&minus;0.9700</td><td>&minus;6.2367</td></tr>
+<tr><td>DINA 105069/3</td><td>&minus;1.7652</td><td>&minus;0.9903</td>
+<td>&minus;0.9703</td><td>&minus;6.2221</td></tr>
+<tr><td>DINA 105014/1</td><td>+1.7291</td><td>+0.9991</td>
+<td>+0.9762</td><td>+6.2776</td></tr>
+<tr><td>DINA 105013/1</td><td>&minus;1.7290</td><td>&minus;0.9998</td>
+<td>&minus;0.9768</td><td>&minus;6.2819</td></tr>
+</tbody>
+</table>
+<p id="flux-function-sign-sources-region-gap">The whole-box column is
+<strong>not</strong> a current comparison, and it is what an earlier draft of
+this fragment misreported as &ldquo;within 3 to 7 per cent of one&rdquo;. The
+measured whole-box ratio on the four DINA files is 1.6781, 1.7652, 1.7291 and
+1.7290 &mdash; 68 to 77 per cent <em>above</em> one, not near it &mdash; while
+CORSICA&rsquo;s own box happens to give 0.9897 because its plasma fills it.</p>
+<p id="flux-function-sign-sources-region-cause">What differs is the
+integration region, and nothing else. The measured source: the operator is the
+same, the resample is the same, and the slice&rsquo;s own <code>I<sub>p</sub></code>
+is the same in all three columns. The DINA maps are stored on boxes spanning
+6 m in <code>R</code> and 12 m in <code>Z</code> for a plasma occupying about
+1250 of the 7625 scored cells, so the whole-box sum adds the current the
+spline&rsquo;s edge terms carry in the far vacuum; restricting the sum to
+<code>0 &le; &psi;<sub>N</sub> &le; 1</code> gives &minus;0.9926, &minus;0.9903,
++0.9991 and &minus;0.9998. The interior column additionally drops the ring
+nearest the separatrix and lands at 0.95&ndash;0.98, which is the region an
+edge-sensitive measure would choose, and it is why the two columns differ.</p>
+<p id="flux-function-sign-sources-region-crosscheck">This is now the same
+measurement as the edge-consistency table node (merge <code>90568ecf3</code>),
+which integrated the grid current over the plasma and reported 0.9736 to
+1.0027 of <code>I<sub>p</sub></code> on DINA 105052/1, 0.9801 to 1.0019 on
+DINA 105069/3 and 0.9867 onwards on CORSICA 130506/6. Like is compared with
+like here: the <em>inside the last closed surface</em> column gives
+&minus;0.9926 for 105052/1 (inside their band), &minus;0.9903 for 105069/3
+(inside their band) and &minus;0.9867 for CORSICA (their figure exactly, to
+four places). The two nodes read the same quantity on the same region and
+agree; the whole-box column was a different quantity.</p>
+<p id="flux-function-sign-sources-region-ebp">The digit conclusion survives the
+correction. On the like-for-like region the ratio is 0.9867 to 0.9998 under
+<code>e<sub>Bp</sub> = 1</code> and 6.1995 to 6.2819 under
+<code>e<sub>Bp</sub> = 0</code>, so the two readings are a factor of 2&#960;
+apart and the nearer one is unambiguous on all five sources.</p>
 <p id="flux-function-sign-sources-conforming">Three of the five are COCOS 11,
 which is what a DD3 file should be, and are conforming: CORSICA 130506/6,
 DINA 105052/1 and DINA 105069/3. Two are <strong>not</strong> conforming to the
@@ -326,29 +388,78 @@ carries three tests. Two pass at the head:</p>
 <li><code>test_the_digit_form_gives_the_same_current_in_cocos_11_and_17</code>
 &mdash; the 11-to-17 transform negates <code>&#968;</code> and the derivative
 together, and the written current is unchanged;</li>
-<li><code>test_the_cocos_17_relation_carries_plus_two_pi</code> &mdash; the
-relation equals <code>+2&#960;(R p&prime; + FF&prime;/(&#956;<sub>0</sub>R))</code>,
-<code><code>TOTAL_FLUX_FACTOR == 2&#960;</code></code>, and the recorded
-DD4 slopes and correlations are positive and within five per cent of one.</li>
+<li><code>test_the_cocos_17_relation_carries_plus_two_pi</code> &mdash; it calls
+<code>scripts/flux_function_sign/measure.py</code> on the pinned DD4 layer and
+requires the <code>+2&#960;</code> slopes to be positive and within five per
+cent of one, and the same call with the flux map negated to reverse every
+slope. The regression is run, not transcribed: a change to the measurement
+reddens it, and it skips with a stated reason when the layer is not cached.</li>
 </ul>
 <p id="flux-function-sign-check-xfail">The third,
 <code>test_nova_owner_matches_the_cocos_17_relation</code>, is
-<code>xfail(strict=True)</code>: it asserts that
-<code>toroidal_current_density</code> equals the transcribed relation, and it
-fails because the owner returns the negated value for the same inputs. Its
-reason states the mechanism in plain words, so the repair of
-<code>nova/equilibrium/convention.py</code> turns a strict xfail into an
-XPASS and the suite reports it rather than absorbing it silently.</p>
+<code>xfail(strict=True)</code>. It drives
+<code>toroidal_current_density</code> with the DD4 state&rsquo;s own
+<code>dpressure_dpsi</code> and <code>f_df_dpsi</code> and requires the current
+the flux map carries, and it separately requires the flux functions
+<code>map_extraction</code> publishes from that same state to reproduce the
+same current. The two assertions are not decoration: a bare flip of the
+owner&rsquo;s leading sign satisfies the first and breaks the second, because
+the extractor publishes the negated derivative, and a change at the extractor
+alone breaks the first. Only a repair that moves the derivative convention and
+the sign together turns the strict xfail into an XPASS, which the suite then
+reports rather than absorbing.</p>
 <p id="flux-function-sign-check-gate">The gate ran in one fresh process from
 the worktree:</p>
 <pre id="flux-function-sign-check-command">UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD \
   uv run --no-sync pytest -p no:cacheprovider --basetemp=&lt;scratch&gt; \
   tests/test_flux_function_sign.py -v</pre>
 <p id="flux-function-sign-check-result">The result is
-<code>2 passed, 1 xfailed in 15.98s</code> with <code>EXIT=0</code>. The module
+<code>2 passed, 1 xfailed in 8.55s</code> with <code>EXIT=0</code>. The module
 served was the worktree&rsquo;s own
 (<code>.../flux-function-sign/nova/__init__.py</code>), printed in the
-log header beside the revision and the command.</p>
+log header beside the revision and the command. The negative control makes the
+negated-map arm the plain map, which reddens
+<code>test_the_cocos_17_relation_carries_plus_two_pi</code> on its
+<code>all(value &lt; 0.0 for value in control)</code> assertion with
+<code>EXIT=1</code>, while the head arm passes it. The log is the run&rsquo;s
+<code>negative-control.log</code>.</p>
+<p id="flux-function-sign-check-paired">The repair node must move every site
+listed here together, because each of them publishes or consumes the negated
+derivative. The paired sites, in the order the repair should read them:</p>
+<ul id="flux-function-sign-check-paired-list">
+<li><code>nova/equilibrium/map_extraction.py:292</code> and
+<code>:293</code> &mdash; <code>p_prime = -coefficients[0] / TOTAL_FLUX_FACTOR</code>
+and <code>ff_prime = -mu_0 * coefficients[1] / TOTAL_FLUX_FACTOR</code>. This
+is the publisher: it states in its docstring that it returns the negated
+derivative, and the measured ratio of its output to the DD&rsquo;s
+<code>dpressure_dpsi</code> on the DD4 state is negative (median
+&minus;1.19 to &minus;1.25 per slice), which is what the paired change must
+turn positive.</li>
+<li><code>nova/equilibrium/convention.py:84&ndash;91</code> &mdash; the
+docstring&rsquo;s <code>p&prime; = -dp/d&Phi;</code> statement and
+<code>toroidal_current_density</code>&rsquo;s leading
+<code>-TOTAL_FLUX_FACTOR</code>.</li>
+<li><code>nova/equilibrium/convention.py:</code>
+<code>flux_function_pressure</code> and
+<code>flux_function_toroidal_field</code> &mdash; they integrate a negated
+gradient from the boundary inwards with a plus sign, so they invert with the
+same convention.</li>
+<li><code>nova/imas/edge_consistency.py:151</code> &mdash; calls the owner
+with the profile&rsquo;s <code>p_prime</code>, so it follows whichever sense
+the two sites publish and needs no edit if both move together.</li>
+<li><code>nova/media/sources/diiid_efit.py:135</code> and
+<code>nova/media/sources/mast_efit.py:124</code> &mdash; feed stored
+<code>dpressure_dpsi</code>/<code>pprime</code> straight into
+<code>p_prime</code>, the same mismatch this node measured on the DD4 state.</li>
+<li><code>nova/imas/operate.py:64</code> &mdash;
+<code>radius * p_prime + ff_prime/(mu_0 radius)</code> builds a current
+density from the stored derivative names without the owner.</li>
+<li><code>nova/imas/profiles.py</code> &mdash;
+<code>prescribe_current_density</code> carries
+<code>flux_derivative_scale = 2&#960;</code> with a plus sign, which is the
+DD&rsquo;s derivative sense; it is the one site that already reads the
+relation this node measured, and the repair should leave it alone.</li>
+</ul>
 </section>
 
 <section id="flux-function-sign-reach">

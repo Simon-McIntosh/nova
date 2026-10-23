@@ -246,32 +246,169 @@ def digits(fields):
     )
 
 
-def e_bp_from_magnitude(fields):
-    """Return the integral current ratio under each ``e_Bp`` reading.
+def region_integrals(fields):
+    """Return the map current's integral over three nested regions, over ``Ip``.
 
-    The map's integral is ``-Delta* psi / (2 pi mu0 R)`` when psi is the
-    total flux (``e_Bp = 1``) and ``2 pi`` larger when psi is per radian
-    (``e_Bp = 0``), so the hypothesis whose ratio to ``Ip`` is nearest one is
-    the one the stored magnitude supports.
+    The whole resampled box, the region inside the last closed flux surface
+    (``0 <= psi_norm <= 1``), and the interior (``0.02 <= psi_norm <= 0.98``,
+    which drops the ring nearest the separatrix where the spline's edge terms
+    live).  An ``Ip`` comparison is only meaningful on the region that
+    encloses the current, so all three are reported rather than one.
     """
 
     import numpy as np
 
+    from nova.equilibrium.map_extraction import apply_delta_star
+
     uniform_r, uniform_z, flux = resample(
         fields["radius"], fields["height"], fields["flux"]
     )
-    from nova.equilibrium.map_extraction import apply_delta_star
-
     receipt = apply_delta_star(uniform_r, uniform_z, flux)
     density = np.asarray(receipt.toroidal_current_density, dtype=float)
+    psi_axis, psi_boundary = fields["psi_axis"], fields["psi_boundary"]
+    psi_norm = (flux - psi_axis) / (float(psi_boundary) - float(psi_axis))
     area = float(np.diff(uniform_r).mean() * np.diff(uniform_z).mean())
-    total = float(np.sum(density[np.isfinite(density)]) * area)
-    ratio = total / float(fields["ip"])
+    finite = np.isfinite(density)
+    masks = {
+        "whole_box": finite,
+        "within_lcfs": finite & (psi_norm >= 0.0) & (psi_norm <= 1.0),
+        "interior": finite & (psi_norm >= 0.02) & (psi_norm <= 0.98),
+    }
+    out = {}
+    for name, mask in masks.items():
+        total = float(np.sum(density[mask]) * area)
+        out[name] = {
+            "cells": int(np.count_nonzero(mask)),
+            "integral": total,
+            "over_ip": total / float(fields["ip"]),
+        }
+    return out
+
+
+def e_bp_from_magnitude(fields):
+    """Return the integral current ratio under each ``e_Bp`` reading.
+
+    The map's integral equals ``Ip`` under ``e_Bp = 1`` (total flux) and is
+    ``2 pi`` larger under ``e_Bp = 0`` (flux per radian).  The comparison is
+    made inside the last closed flux surface, the region that encloses the
+    plasma current; the whole-box figure is reported beside it because it is
+    what a naive sum gives, and it is not a current comparison at all.
+    """
+
+    integrals = region_integrals(fields)
+    ratio = integrals["within_lcfs"]["over_ip"]
     return {
+        "region_integrals": integrals,
         "e_bp_1_ratio": ratio,
         "e_bp_0_ratio": ratio * TWO_PI,
         "nearer": 1 if abs(ratio - 1.0) <= abs(ratio * TWO_PI - 1.0) else 0,
     }
+
+
+def _slope(x, y):
+    """Least-squares slope of ``y`` on ``x`` for a short vector pair."""
+
+    import numpy as np
+
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    denominator = float(np.dot(x, x) - x.size * x.mean() ** 2)
+    return float(np.dot(x, y) - x.size * x.mean() * y.mean()) / denominator
+
+
+def extraction_roundtrip(fields):
+    """Compare two currents at shell centres on the stored state.
+
+    The ``extracted`` arm drives
+    :func:`nova.equilibrium.convention.toroidal_current_density` with the flux
+    functions :func:`nova.equilibrium.map_extraction.extract_flux_functions`
+    reads back out of the state's own map, which that function documents as
+    publishing the negated-total-flux derivative.  The ``stored`` arm drives
+    the same owner with the Data Dictionary's own ``dpressure_dpsi`` and
+    ``f_df_dpsi``.  The median ratio of the two derivatives says which sense
+    each site publishes.
+    """
+
+    import numpy as np
+    from scipy.constants import mu_0
+
+    from nova.equilibrium.convention import toroidal_current_density
+    from nova.equilibrium.map_extraction import extract_flux_functions
+
+    uniform_r, uniform_z, flux = resample(
+        fields["radius"], fields["height"], fields["flux"]
+    )
+    psi_axis, psi_boundary = fields["psi_axis"], fields["psi_boundary"]
+    span = float(psi_boundary) - float(psi_axis)
+    psi_norm = (flux - psi_axis) / span
+    receipt = extract_flux_functions(uniform_r, uniform_z, flux, psi_norm)
+    grid = np.asarray(receipt.current.toroidal_current_density, dtype=float)
+    radial = np.broadcast_to(uniform_r[:, np.newaxis], psi_norm.shape)
+    stored_dp = normalise_on_grid(
+        fields["psi_1d"], fields["dp_dpsi"], psi_axis, psi_boundary, psi_norm
+    )
+    stored_fdf = normalise_on_grid(
+        fields["psi_1d"], fields["fdf_dpsi"], psi_axis, psi_boundary, psi_norm
+    )
+    centres = np.asarray(receipt.psi_norm, dtype=float)
+    edges = np.concatenate(([0.0], (centres[1:] + centres[:-1]) / 2.0, [1.0]))
+    rows = []
+    for index, centre in enumerate(centres):
+        if not bool(receipt.reliable[index]):
+            continue
+        shell = (
+            (psi_norm >= edges[index])
+            & (psi_norm <= edges[index + 1])
+            & np.isfinite(grid)
+        )
+        if np.count_nonzero(shell) < 8:
+            continue
+        major = float(np.mean(radial[shell]))
+        grid_mean = float(np.mean(grid[shell]))
+        dp = float(np.mean(stored_dp[shell]))
+        fdf = float(np.mean(stored_fdf[shell]))
+        rows.append(
+            {
+                "psi_norm": float(centre),
+                "major_radius": major,
+                "grid": grid_mean,
+                "extracted": float(
+                    toroidal_current_density(
+                        major, receipt.p_prime[index], receipt.ff_prime[index]
+                    )
+                ),
+                "stored": float(toroidal_current_density(major, dp, fdf)),
+                "physical": float(
+                    TWO_PI * (major * dp + fdf / (mu_0 * major))
+                ),
+                "p_prime_extracted": float(receipt.p_prime[index]),
+                "dp_dpsi_stored": dp,
+            }
+        )
+    if len(rows) < 3:
+        return {"shells": rows, "note": "fewer than three reliable shells"}
+    grid_mean = np.array([row["grid"] for row in rows])
+    extracted = np.array([row["extracted"] for row in rows])
+    stored = np.array([row["stored"] for row in rows])
+    p_extracted = np.array([row["p_prime_extracted"] for row in rows])
+    dp_stored = np.array([row["dp_dpsi_stored"] for row in rows])
+    return {
+        "shells": rows,
+        "slope_extracted": _slope(extracted, grid_mean),
+        "slope_stored": _slope(stored, grid_mean),
+        "p_prime_over_dp_dpsi": float(np.median(p_extracted / dp_stored)),
+    }
+
+
+def pinned_dd4_layer():
+    """Return the pinned DD 4.1.0 reference layer path, digest and version."""
+
+    manifest = Path(__file__).resolve().parents[2] / "tests" / "data-manifest.json"
+    record = json.loads(manifest.read_text())["efitpp_validator_layers"]
+    case = record["cases"]["iter_corsica_130506"]
+    reference = next(layer for layer in case["layers"] if layer["role"] == "reference")
+    layer = Path.home() / ".cache" / "imas-efit-publish-169" / reference["name"]
+    return layer, reference["digest"].removeprefix("sha256:"), case["dd_version"]
 
 
 def single_dd4_layer():
@@ -279,23 +416,16 @@ def single_dd4_layer():
 
     import hashlib
 
-    manifest = Path("tests/data-manifest.json")
-    record = json.loads(manifest.read_text())["efitpp_validator_layers"]
-    case = record["cases"]["iter_corsica_130506"]
-    reference = next(layer for layer in case["layers"] if layer["role"] == "reference")
-    layer = Path.home() / ".cache" / "imas-efit-publish-169" / reference["name"]
+    layer, expected, dd_version = pinned_dd4_layer()
     if not layer.is_file():
         raise SystemExit(f"pinned DD4 layer not cached at {layer}")
     digest = hashlib.sha256(layer.read_bytes()).hexdigest()
-    expected = reference["digest"].removeprefix("sha256:")
     if digest != expected:
         raise SystemExit("pinned DD4 layer digest does not match the manifest")
     from nova.imas.validator_case import netcdf_to_hdf5
 
     target = Path(__import__("os").environ["TMPDIR"]) / "dd4-layer"
-    return netcdf_to_hdf5(layer, target, case["dd_version"], ["equilibrium"]), case[
-        "dd_version"
-    ]
+    return netcdf_to_hdf5(layer, target, dd_version, ["equilibrium"]), dd_version
 
 
 SOURCES = {
@@ -348,6 +478,7 @@ def main() -> None:  # pragma: no cover - runs on a batch node
                 "negated_map_over_ip": negated["grid_current_over_ip"],
                 "digits": digits(fields),
                 "e_bp": e_bp_from_magnitude(fields),
+                "extraction": extraction_roundtrip(fields),
             }
         )
     report["dd4_regression"] = {

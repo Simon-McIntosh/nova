@@ -1,0 +1,1810 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex",
+  "base_sha": "e0e4bca04ae5a0b05094028952ba2e7e32d2ee85",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T200937335629-certificate-drift-attribution/brief.md",
+    "sha256": "abb099b2bcb9420bfdb17c6965df78fde410cfdb2a3d1cd3edf1ee592342f435"
+  },
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 46213248,
+      "cached_input_tokens_cumulative": 46213248,
+      "input_tokens": 46535543,
+      "input_tokens_cumulative": 46535543,
+      "output_tokens": 104773,
+      "output_tokens_cumulative": 104773,
+      "reasoning_output_tokens": 44428,
+      "reasoning_output_tokens_cumulative": 44428
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 131,
+    "files": 2,
+    "removed": 7
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_static_oracle_current_moment_jvp_is_finite",
+        "path": "tests/test_analytic_oracle_tangent.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_prepare",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 122
+    },
+    {
+      "existing_function": {
+        "line": 350,
+        "name": "_diverted_oracle_read",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_prepare",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 19,
+        "name": "test_reduced_hex_request_receipt_records_absent_raster_flux",
+        "path": "tests/test_forward_receipt_raster.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_prepare",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 106
+    },
+    {
+      "existing_function": {
+        "line": 25,
+        "name": "_diverted_exact_read",
+        "path": "tests/test_oracle_axis_admission.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_prepare",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 115
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_call_site_record",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 199,
+        "name": "_solve_arm",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 36,
+        "name": "test_publication_artifact_records_are_stable_and_strict",
+        "path": "tests/test_diiid_forward_gs_match.py"
+      },
+      "run_function": {
+        "line": 199,
+        "name": "_solve_arm",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_call_site_record",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 312,
+        "name": "_banked_unpinned",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 360
+    },
+    {
+      "existing_function": {
+        "line": 36,
+        "name": "test_publication_artifact_records_are_stable_and_strict",
+        "path": "tests/test_diiid_forward_gs_match.py"
+      },
+      "run_function": {
+        "line": 312,
+        "name": "_banked_unpinned",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 360
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "test_shot_to_shot_state_flips_are_preserved_not_averaged",
+        "path": "tests/calibrate/test_pair_state.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 458
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_certified_limited_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_certified_diverted_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_certified_diverted_2000_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 13,
+        "name": "test_banked_inputs_align_on_every_frame_identity",
+        "path": "tests/imas/test_diiid_circuit_ensemble_assessment.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 458
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 260,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 184,
+        "name": "test_critical_node_capacity_overflow_is_jittable_and_visible",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_cold_and_cached_plants_are_identical",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 328,
+        "name": "test_the_cache_is_written_by_the_circuit_tier_serialisers",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 371,
+        "name": "test_machine_passive_layers_change_screening_and_preserve_one_layer",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 458
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 623,
+        "name": "_slice_process",
+        "path": "tests/test_forward_profile_corsica.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_receipt_keeps_every_fitted_shot_unknown_without_can_evidence",
+        "path": "tests/test_mast_coil_case_temperature.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 458
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "_numeric_receipt",
+        "path": "tests/test_transport_ensemble.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 458
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 444,
+        "name": "_validate",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 457
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_call_site_record",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 523,
+        "name": "_run_all",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 577
+    },
+    {
+      "existing_function": {
+        "line": 88,
+        "name": "main",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 523,
+        "name": "_run_all",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 575
+    },
+    {
+      "existing_function": {
+        "line": 36,
+        "name": "test_publication_artifact_records_are_stable_and_strict",
+        "path": "tests/test_diiid_forward_gs_match.py"
+      },
+      "run_function": {
+        "line": 523,
+        "name": "_run_all",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 589
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "_schema_payload",
+        "path": "tests/imas/test_diiid_dataset_recheck.py"
+      },
+      "run_function": {
+        "line": 611,
+        "name": "_harvest",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 617
+    },
+    {
+      "existing_function": {
+        "line": 83,
+        "name": "test_pf_active_supply_and_circuit_round_trip_without_losing_uncertainty",
+        "path": "tests/imas/test_diiid_description.py"
+      },
+      "run_function": {
+        "line": 611,
+        "name": "_harvest",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 617
+    },
+    {
+      "existing_function": {
+        "line": 81,
+        "name": "test_omissions_and_grid_margins_are_quantified",
+        "path": "tests/imas/test_diiid_geometry_corroboration.py"
+      },
+      "run_function": {
+        "line": 611,
+        "name": "_harvest",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 617
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 611,
+        "name": "_harvest",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 617
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 611,
+        "name": "_harvest",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 617
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 611,
+        "name": "_harvest",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 617
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "test_mast_frame_exposes_exact_shared_helper_surface",
+        "path": "tests/test_efit_parity_warm_neighbour.py"
+      },
+      "run_function": {
+        "line": 611,
+        "name": "_harvest",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 617
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 611,
+        "name": "_harvest",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 617
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 611,
+        "name": "_harvest",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 617
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 611,
+        "name": "_harvest",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 617
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 611,
+        "name": "_harvest",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 617
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 611,
+        "name": "_harvest",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 617
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 611,
+        "name": "_harvest",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 617
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 611,
+        "name": "_harvest",
+        "path": "benchmarks/solovev_certificate_current_pin.py"
+      },
+      "window_line": 617
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "cffbd0262955ad24b2c99d6f661d41fdd53a4faa",
+    "5300532d21994654bc64aa7241d65d9ae21b94da",
+    "fbe2772232828d31f763deb29bd378fdc9a255d2",
+    "42773d89933160dab433385f06ebd3644b18a842"
+  ],
+  "completed_at": "2026-10-23T20:55:29Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-23T20:10:18Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/adb3a390-bdb2-4e2a-8e74-1e049c62c9fe/certificate-drift-attribution /home/ITER/mcintos/Code/nova/.venv/bin/python benchmarks/solovev_certificate_current_pin.py --certificate-row --revision e0e4bca04ae5a0b05094028952ba2e7e32d2ee85 --row-output-root /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T200937335629-certificate-drift-attribution/results/main-300-retry --case diverted-single-null --requested-cells -300",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T200937335629-certificate-drift-attribution/main-300-retry.log"
+  },
+  "impl_move": {
+    "at_complete": 0.25,
+    "at_dispatch": 0.25,
+    "plan": "topology-read-containment-and-rebank",
+    "reason": "attribution evidence for s4; the section stays open until the certificate is re-committed with its floor",
+    "verdict": "waived"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-23T21:09:41.763094+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-23T20:09:40Z",
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": "2026-10-30T17:41:35Z",
+    "seconds_until_reset": 595914,
+    "state": "quiet",
+    "utilisation_pct": 3.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-23T20:09:40Z",
+    "read_at": "2026-10-23T20:09:41Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 3.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-23T20:55:29Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-10-23T20:55:29Z",
+        "resets_at": 1793382095,
+        "used_percent": 5.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T200937335629-certificate-drift-attribution/manifest.md",
+  "member": "disposable-r-20261023T200937335629-certificate-drift-attribution",
+  "model_key": "sol",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "certificate-drift-attribution",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.cache/nova-contour-tree-wall/certificate-drift-brief.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T200937335629-certificate-drift-attribution/brief.md",
+    "brief_sha256": "abb099b2bcb9420bfdb17c6965df78fde410cfdb2a3d1cd3edf1ee592342f435",
+    "capability": {
+      "class": "general",
+      "requirements": {},
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1714,
+          "cached_input_tokens": 661020,
+          "input_tokens": 662736,
+          "output_tokens": 340,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 663076,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "adb3a390-bdb2-4e2a-8e74-1e049c62c9fe",
+      "session_id": "adb3a390-bdb2-4e2a-8e74-1e049c62c9fe"
+    },
+    "done_when": "the manifest states whether the 300-cell NaN reproduces at main, with the commit that removed it or the producing line and its array shape",
+    "estimated_hours": null,
+    "goal": "A per-revision table attributes the diverted 110- and 300-cell certificate rows' residual drift and states whether the 300-cell NaN reproduces at main",
+    "id": "certificate-drift-attribution",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-23T20:09:40Z",
+      "read_at": "2026-10-23T20:09:41Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 3.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T200937335629-certificate-drift-attribution/manifest.md",
+    "negative_control": "none: an attribution measurement whose verdict is read from per-revision solver logs, not from a check it writes",
+    "plan": "topology-read-containment-and-rebank",
+    "regenerate_paths": [],
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§4",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "benchmarks/solovev_certificate_current_pin.py",
+      "docs/evidence/fragments/topology-read-containment-and-rebank/certificate-drift.html",
+      "docs/evidence/fragments/topology-read-containment-and-rebank/certificate-drift-attribution.html",
+      "docs/figures/topology-read-containment-and-rebank/certificate-drift-attribution"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "outside_scope_paths": [
+    "nova/equilibrium/topology.py:1141",
+    "tests/test_reduced_newton.py::test_diverted_normalised_certificate_rung_retains_finite_fallback"
+  ],
+  "pace": {
+    "allowance": {
+      "advisory": true,
+      "burn_multiple": null,
+      "derived": null,
+      "drain_hours": 168.0,
+      "effective_limit": null,
+      "elapsed_fraction": 0.014710783647486838,
+      "elapsed_hours": 2.471411652777789,
+      "group": "codex-sub",
+      "limited_by": null,
+      "observed_at": "2026-10-23T20:09:52+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": "window too young to project: burn evidence is quantised too coarsely: 1.47% elapsed is below the 5% floor and 3% utilisation is below the 5% floor",
+      "remaining_budget": 0.97,
+      "remaining_windows": null,
+      "resets_at": "2026-10-30T17:41:35Z",
+      "state": "observed",
+      "utilisation": 0.03,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.002646,
+      "decided_by": "window",
+      "margin": 0.809854,
+      "name": "certificate-drift-attribution",
+      "score": 0.8125,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.03
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.08195,
+        "observed_at": "2026-10-23T20:09:52+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-30T17:41:35Z",
+        "state": "observed",
+        "utilisation": 0.03,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": null,
+    "member": "codex",
+    "node": "certificate-drift-attribution",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-23T20:09:52.081950+00:00",
+    "score": 0.8125,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "refuse",
+    "answering_model": null,
+    "backend": null,
+    "comment": "codex named: lead asked for codex on this work (session-scoped lift codex-sub-1792697471-f530ed); CPU-only attribution, fleet allocation",
+    "confidence": null,
+    "decision_source": "refused",
+    "effort": null,
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 19.134023,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 3.5159,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 6.897197291400462,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": null,
+        "pace_allowance": null,
+        "prior_outcomes": null,
+        "reasons": [
+          "reserved-lane: codex is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        ],
+        "resets_at": "2026-10-30T17:41:35+00:00",
+        "stale": false,
+        "suits": "The lane's frontier model, strongest and slowest, about five times sol's token price. Suits deep or open-ended design, elevated or critical risk, and nodes that already failed on another model.",
+        "utilisation_pct": 3.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 19.134023,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 3.5159,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 6.897197291400462,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": null,
+        "pace_allowance": null,
+        "prior_outcomes": null,
+        "reasons": [
+          "reserved-lane: codex is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        ],
+        "resets_at": "2026-10-30T17:41:35+00:00",
+        "stale": false,
+        "suits": "The lane's fast, affordable model, about a twentieth of sol's token price. Suits well-defined, less difficult work: reviews, exact-spec implementation, tests and documentation.",
+        "utilisation_pct": 3.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 19.134023,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 3.5159,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 6.897197291400462,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 17,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": null,
+        "pace_allowance": null,
+        "prior_outcomes": null,
+        "reasons": [
+          "reserved-lane: codex is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        ],
+        "resets_at": "2026-10-30T17:41:35+00:00",
+        "stale": false,
+        "suits": "The lane default, a previous-generation general model. Suits guided implementation, tests and full reviews at standard or deep reasoning and moderate risk. About twenty times luna's token price and a fifth of astra's.",
+        "utilisation_pct": 3.0,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": "no-eligible-candidates; default-backend-ineligible",
+    "family": null,
+    "jev_latency_ms": 0.0,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 1466.299,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "questions": {},
+    "rendered_state": "{\"node\":{\"role\":\"implement\",\"spec_level\":\"guided\",\"capability\":{\"version\":\"1.0\",\"class\":\"general\",\"requirements\":{}},\"goal\":\"A per-revision table attributes the diverted 110- and 300-cell certificate rows' residual drift and states whether the 300-cell NaN reproduces at main\",\"done_when\":\"the manifest states whether the 300-cell NaN reproduces at main, with the commit that removed it or the producing line and its array shape\",\"urgency\":{\"due\":null,\"seconds_to_due\":null,\"reason\":null},\"estimated_context\":50392,\"estimated_hours\":29.0,\"estimated_hours_source\":\"plan\",\"attempts\":0,\"write_path_count\":2,\"negative_control_declared\":false,\"serving_lanes\":[],\"serving_lane_count\":0,\"hold_waits_for\":null},\"orchestrator_comment\":\"codex named: lead asked for codex on this work (session-scoped lift codex-sub-1792697471-f530ed); CPU-only attribution, fleet allocation\",\"candidates\":{},\"return_times\":{},\"lanes\":{},\"local_lane\":{\"admission\":\"paused\",\"expected_wait_s\":1873.0,\"expected_wait_profile_age_s\":2409.930472,\"running\":null,\"waiting\":null,\"headroom\":null,\"worker_slots\":0,\"tokens_per_second\":null,\"read_at\":\"2026-10-23T20:09:37.224450+00:00\"}}",
+    "rendered_token_estimate": 287,
+    "stage_ms": {
+      "budget-snapshot": 365.191,
+      "context-estimate": 6.066,
+      "records": 236.909,
+      "verdict-inputs": 395.141
+    },
+    "template_digest": "cb9d48e7fca5878b52cc4affdedfdee9f5e04b929f720979b14d0d78b8456ced",
+    "usage": {}
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.25,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "42773d89933160dab433385f06ebd3644b18a842",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "e0e4bca04ae5a0b05094028952ba2e7e32d2ee85",
+    "reviewed_head_sha": "42773d89933160dab433385f06ebd3644b18a842",
+    "scores": {
+      "durability": 6,
+      "evidence": 14,
+      "fit": 16,
+      "goal_fidelity": 15,
+      "reuse": 17,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 87
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261023T200937335629-certificate-drift-attribution",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§4",
+  "session": "adb3a390-bdb2-4e2a-8e74-1e049c62c9fe",
+  "session_harness": "codex",
+  "session_id": "01a16a62-eb56-7952-a489-23f29aaa1043",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 46213248,
+    "cumulative_input_tokens": 92748791,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 149201
+  },
+  "time_budget": "60m",
+  "tool_steps": 358.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "backend": "codex",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 216,
+        "budget_seconds": 2700,
+        "classification": "scoring",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 2916,
+        "exit_record": {
+          "attempt": 2,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-10-23T19:49:22Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-10-23T19:22:40Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [
+            {
+              "bytes": 43147444,
+              "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T180154346822-brute-force-reference-capacity/codex-home/cache"
+            },
+            {
+              "bytes": 28833121,
+              "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T180154346822-brute-force-reference-capacity/codex-home/plugins"
+            }
+          ],
+          "run_id": "r-20261023T180154346822-brute-force-reference-capacity",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 529,
+          "worker_pid": 3598434
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-23T19:49:22Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 1232,
+        "log_fresh": false,
+        "manifest_commits": [
+          "5d7d8a59638da7afab3acd436ec3e1657c4cbeef",
+          "d0ded509b145ffea6b0740b692b2d570483dc9a8",
+          "081f22e1f291aab0d5e46f56c6612df527b4527b"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "add75bed21c7417e28aed398bf45710da50c2bce50b53d1f67fb36e93b472373",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T180154346822-brute-force-reference-capacity/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "sol",
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project nova --brief /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T180154346822-brute-force-reference-capacity/review-brief.md --plan contour-tree-topology-authority --section '§2' --role review --spec-level exact --node review-of-brute-force-reference-capacity-081f22e1f291 --goal 'attach an independent review to run r-20261023T180154346822-brute-force-reference-capacity' --done-when 'the review for r-20261023T180154346822-brute-force-reference-capacity stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the record is written at one of this run'\"'\"'s declared write paths, under review-records/ inside the directory of run r-20261023T180154346822-brute-force-reference-capacity, and never in the worktree; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T180154346822-brute-force-reference-capacity/review-records/r-20261023T180154346822-brute-force-reference-capacity.json --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T180154346822-brute-force-reference-capacity/review-records/r-20261023T180154346822-brute-force-reference-capacity.at-081f22e1f291aab0d5e46f56c6612df527b4527b.json --time-budget 45m --session adb3a390-bdb2-4e2a-8e74-1e049c62c9fe --allow-unreconciled-runs --local",
+        "node": "brute-force-reference-capacity",
+        "phase": "complete",
+        "plan": "contour-tree-topology-authority",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261023T180154346822-brute-force-reference-capacity",
+        "session": "adb3a390-bdb2-4e2a-8e74-1e049c62c9fe",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 1264,
+        "terminal_at": "2026-10-23T19:48:45Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/adb3a390-bdb2-4e2a-8e74-1e049c62c9fe/brute-force-reference-capacity"
+      }
+    ]
+  },
+  "wall_seconds": 2711,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-23T20:55:43Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-23T20:10:27Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [
+      {
+        "bytes": 43188692,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T200937335629-certificate-drift-attribution/codex-home/cache"
+      },
+      {
+        "bytes": 28833121,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T200937335629-certificate-drift-attribution/codex-home/plugins"
+      }
+    ],
+    "run_id": "r-20261023T200937335629-certificate-drift-attribution",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 994,
+    "worker_pid": 3902171
+  },
+  "worker_seconds": 2711,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

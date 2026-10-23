@@ -1,0 +1,6 @@
+<section id="certificate-300-trip-cap-evidence">
+  <h3>Diverted 300-cell certificate trip</h3>
+  <p>The fresh CPU row at source revision <code>cb42790ebadbb31c8a2bb70fc998c3d5b6898468</code> reproduced the finite but unqualified terminal state: relative residual <strong>2.2640848763056183</strong> after one trip, against a <code>1e-12</code> qualification bound. The row used a target current of 37174.65342635735 A.</p>
+  <p>The solver reported <code>active_set_settled</code> with zero mask differences, although <code>converged=false</code>. Its only Newton promotion was refused as <code>krylov_action_refused</code> because the linear action was <code>nonfinite_linear_action</code>; zero promotions were accepted and the residual stayed at 2.2640848763056183. The policy allowed 16 active-set trips, 10 Newton steps, 30 Krylov iterations per step, a step cap of 10, and a <code>1e-12</code> kernel tolerance. The one-trip exit was therefore an unchanged-mask termination after a numerical refusal, not a CPU-lane trip cap or exhausted iteration budget.</p>
+  <p>The H200 row at the same source revision is running under Slurm job 1294621; its terminal receipt will determine whether this numerical refusal is device-specific.</p>
+</section>

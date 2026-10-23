@@ -21,7 +21,7 @@ import subprocess
 import sys
 import tempfile
 from time import perf_counter
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import jax
 import jax.numpy as jnp
@@ -29,11 +29,6 @@ import numpy as np
 
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium import ForwardProfile, fixed_point
-from nova.equilibrium.solve_request import (
-    ExplicitSolveSeed,
-    ForwardSolveRequest,
-    ResolvedForwardSolveDefaults,
-)
 from nova.equilibrium.stencil_mesh import StencilMesh
 from nova.jax.config import (
     configure_dtypes,
@@ -42,6 +37,9 @@ from nova.jax.config import (
 )
 from scripts.analytic_oracle_fixtures import measure as oracle_fixture
 from scripts.oracle_rebaseline import measure as recovery
+
+if TYPE_CHECKING:
+    from nova.equilibrium.solve_request import ForwardSolveRequest
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -166,6 +164,8 @@ def _current_pin_solve_request(
 ) -> ForwardSolveRequest:
     """Declare whether the comparison arm applies the public current pin."""
 
+    from nova.equilibrium.solve_request import ExplicitSolveSeed, ForwardSolveRequest
+
     return ForwardSolveRequest.from_defaults(
         carrier_identity=carrier_identity,
         source_profile=profile.source,
@@ -205,6 +205,8 @@ def _solve_arm(
     pinned: bool,
     carrier_identity: str,
 ) -> dict[str, Any]:
+    from nova.equilibrium.solve_request import ResolvedForwardSolveDefaults
+
     request = _current_pin_solve_request(
         profile,
         seed,
@@ -684,11 +686,10 @@ def main() -> None:
         certificate.PART_ROOT = certificate.FIGURE_ROOT / "production-route-parts"
         certificate._source_revision = lambda: arguments.revision
         certificate.ROOT.mkdir(parents=True, exist_ok=True)
-        original_case_machine = certificate._case_machine
         original_solve = certificate.ForwardProfile.solve
 
-        def capture_machine(*args, **kwargs):
-            machine = original_case_machine(*args, **kwargs)
+        def capture_machine(original, *args, **kwargs):
+            machine = original(*args, **kwargs)
             np.save(certificate.ROOT / "cell-coordinates.npy", np.asarray(machine.node))
             return machine
 
@@ -701,7 +702,16 @@ def main() -> None:
             )
             return receipt
 
-        certificate._case_machine = capture_machine
+        if hasattr(certificate, "_case_machine"):
+            original_case_machine = certificate._case_machine
+            certificate._case_machine = lambda *args, **kwargs: capture_machine(
+                original_case_machine, *args, **kwargs
+            )
+        else:
+            original_cached_machine = certificate.oracle_fixture.cached_machine
+            certificate.oracle_fixture.cached_machine = lambda *args, **kwargs: (
+                capture_machine(original_cached_machine, *args, **kwargs)
+            )
         certificate.ForwardProfile.solve = capture_solve
         print(
             f"revision={arguments.revision} nova.__file__={nova_file} "

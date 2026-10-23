@@ -5,8 +5,10 @@ from dataclasses import dataclass, replace
 import jax.numpy as jnp
 import numpy as np
 import pytest
+from scipy.constants import mu_0
 
 import nova.imas.mast_parity_chain as chain_module
+from nova.equilibrium.convention import TOTAL_FLUX_FACTOR
 from nova.imas.mast_parity_chain import (
     AcceleratorSettings,
     TopologyLabels,
@@ -234,13 +236,7 @@ def test_profile_reproduction_is_current_density_rms_against_grid_read():
     grid_z = np.linspace(-1.0, 1.0, 5)
     radius, _height = np.meshgrid(grid_r, grid_z)
     current_density = 7.0
-    plasma_flux = (
-        -chain_module.TOTAL_FLUX_FACTOR
-        * chain_module.mu_0
-        * current_density
-        * radius**3
-        / 3.0
-    )
+    plasma_flux = -TOTAL_FLUX_FACTOR * mu_0 * current_density * radius**3 / 3.0
 
     class CurrentReadSolver:
         def __init__(self):

@@ -24,15 +24,14 @@ from typing import Any, Mapping, Protocol
 import jax
 import jax.numpy as jnp
 import numpy as np
-from scipy.constants import mu_0
 
 from nova.equilibrium.fixed_point import newton_krylov
-from nova.equilibrium.convention import TOTAL_FLUX_FACTOR
 from nova.equilibrium.measurement import SliceMeasurement
 from nova.imas.mast_solve_inputs import (
     CorrectedSolveInputs,
     read_corrected_solve_inputs,
 )
+from nova.imas.edge_consistency import structured_grid_current_density
 from nova.imas.mast_vacuum_cohort import SHOT_STORE
 from nova.imas.parity_tolerances import (
     MagneticsBudgetClass,
@@ -433,10 +432,9 @@ def _profile_reproduction_residuals(
     if inside.shape != grid_shape:
         raise ValueError("inside_limiter does not match the profile grid")
 
-    interior = np.zeros(grid_shape, dtype=bool)
-    interior[1:-1, 1:-1] = True
-    keep = interior & inside
-    radius = grid_r[np.newaxis, :]
+    keep = np.zeros(grid_shape, dtype=bool)
+    keep[1:-1, 1:-1] = True
+    keep &= inside
     residuals: list[float] = []
     for index, state in enumerate(np.asarray(flux)):
         source = jnp.asarray(
@@ -459,23 +457,8 @@ def _profile_reproduction_residuals(
 
         vacuum_flux = np.asarray(profile_solver.source_to_grid @ source)
         plasma_flux = (np.asarray(state) - vacuum_flux).reshape(grid_shape)
-        radial_first = (plasma_flux[:, 2:] - plasma_flux[:, :-2]) / (
-            2.0 * radial_step[0]
-        )
-        radial_second = (
-            plasma_flux[:, 2:] - 2.0 * plasma_flux[:, 1:-1] + plasma_flux[:, :-2]
-        ) / radial_step[0] ** 2
-        vertical_second = (
-            plasma_flux[2:, :] - 2.0 * plasma_flux[1:-1, :] + plasma_flux[:-2, :]
-        ) / vertical_step[0] ** 2
-        delta_star = (
-            radial_second[1:-1]
-            - radial_first[1:-1] / radius[:, 1:-1]
-            + vertical_second[:, 1:-1]
-        )
-        grid_current_density = np.full(grid_shape, np.nan)
-        grid_current_density[1:-1, 1:-1] = -delta_star / (
-            TOTAL_FLUX_FACTOR * mu_0 * radius[:, 1:-1]
+        grid_current_density = structured_grid_current_density(
+            plasma_flux, grid_r, grid_z
         )
         finite = (
             keep

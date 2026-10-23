@@ -24,7 +24,7 @@
   <title>DD COCOS Ingest | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="89">
+<meta name="plan-version" content="90">
 <meta name="plan-modified" content="2026-10-23">
 <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;dd-cocos-ingest#s1&quot;],&quot;s3&quot;:[&quot;dd-cocos-ingest#s2&quot;],&quot;s4&quot;:[&quot;dd-cocos-ingest#s3&quot;],&quot;s5&quot;:[&quot;dd-cocos-ingest#s1&quot;,&quot;dd-cocos-ingest#s2&quot;]}">
 </head>
@@ -227,6 +227,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261023T161359356711-edge-consistency-table" data-who="reckon-build" data-when="2026-10-23T20:28:52Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/dd-cocos-ingest/edge-consistency-table.html carries the three-source table, the two refused rows, the sign settlement with its four regressions run in both senses, the corrected-sense re-measurement, and a PROVISIONAL section 6 recommendation: no reference is chosen on this table, because the lead ruled on 2026-10-23 that the flux functions are to be made COCOS 17 once a separate node proves the relation. The measured numbers stand unchanged. The grid current integrals to 0.9736-1.0027 of the slice own Ip on DINA 105052/1, 0.9801-1.0019 on DINA 105069/3 and 0.9867-1.0004 on CORSICA 130506/6, a worst deviation of 2.64 per cent, which is what the fragment and the census now report. docs/research/dd-cocos-census.html carries the same section with its table.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261023T210616053772-review-of-flux-function-sign-ac37a2561669" data-who="reckon-build" data-when="2026-10-23T21:27:21.781Z">
+    <div class="r-comment-body"><p>A parsed review record for r-20261023T195812953681-flux-function-sign at head ac37a2561 scores goal_fidelity 16, evidence 12, scope_discipline 19, durability 14, fit 18, reuse 15, with six non-blocking findings; the sharpest is that the strict xfail at tests/test_flux_function_sign.py:120 feeds the DD derivative into a parameter convention.py documents as p&#x27; = -dp/dPhi, so a sign-only owner flip would satisfy it while nova/equilibrium/map_extraction.py:292 keeps publishing the negated derivative.</p></div>
 </div>
 </section>
 </main>

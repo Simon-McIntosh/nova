@@ -1,0 +1,79 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed manifest records no baseline_suite and no after_suite arm, so the added-failure delta is taken from its single recorded gate, gate.log, which ends '2 passed, 1 xfailed in 15.98s' with EXIT=0 -- one readable arm, zero failures, not a baseline/after pair.",
+  "completed_at": "2026-10-23T21:27:21.781Z",
+  "dispatched_at": "2026-10-23T21:09:07Z",
+  "findings": [
+    {
+      "file": "tests/test_flux_function_sign.py",
+      "line": "120",
+      "severity": "non-blocking",
+      "text": "The strict xfail feeds the DD's dpressure_dpsi into a parameter nova/equilibrium/convention.py documents as p' = -dp/dPhi, so it pins a naming divergence rather than a measured sign defect; a flip of the owner's leading sign alone satisfies it while nova/equilibrium/map_extraction.py:292 still publishes the negated derivative the new contract would contradict, and that paired site is named nowhere in the deliverable."
+    },
+    {
+      "file": "docs/evidence/fragments/dd-cocos-ingest/flux-function-sign.html",
+      "line": "276",
+      "severity": "non-blocking",
+      "text": "The fragment states that under e_Bp = 1 'the integral ratio is within 3-7 per cent of one' for all five sources, but the run's own measure.json gives e_bp_1_ratio of -1.6781, -1.7652, +1.7291 and -1.7290 for four of them -- 68 to 77 per cent from one -- so the sentence misreports the measurement it cites; the digit conclusion survives because the e_Bp = 0 arm is another factor of 2pi away."
+    },
+    {
+      "file": "docs/evidence/fragments/dd-cocos-ingest/flux-function-sign.html",
+      "line": "15",
+      "severity": "non-blocking",
+      "text": "The artifact's headline says three routes agree, while its own ambix section at :208-215 states that route adds no evidence about the bracket's sign and the conclusion rests on two routes; the summary overstates the evidence its body reports."
+    },
+    {
+      "file": "tests/test_flux_function_sign.py",
+      "line": "96",
+      "severity": "non-blocking",
+      "text": "The DD4 arm of the passing test is a tuple of hand-copied literals, so no change to scripts/flux_function_sign/measure.py can redden it; the regression that produced them is recorded in measure.json but unguarded by the suite."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T195812953681-flux-function-sign/manifest.md",
+      "line": "15",
+      "severity": "non-blocking",
+      "text": "The reviewed manifest carries no baseline_suite or after_suite key although its own brief requires both as single-line JSON, so the review's added-failure count cannot be derived from the pair the record contract assumes."
+    },
+    {
+      "file": "docs/evidence/fragments/dd-cocos-ingest/flux-function-sign.html",
+      "line": "331",
+      "severity": "non-blocking",
+      "text": "A doubled <code><code> tag around TOTAL_FLUX_FACTOR renders a literal second tag on the served page."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "The diff adds no production code; the convention chain verified against it is nova/equilibrium/convention.py:88, nova/equilibrium/map_extraction.py:292, nova/imas/edge_consistency.py:151, nova/imas/operate.py:64 and nova/imas/profiles.py:194.",
+    "diff": "Read commit by commit against 09dffd4c9: d47d93bd6 adds measure.py and its sbatch, 0db0e5c8e adds the test file, ac37a2561 adds the evidence fragment, 908 insertions across four files and no deletion.",
+    "done_when": "Of the done_when's parts, (1b) the DD4-native regression at :146-176, (2) the digit table at :246-270 and (3) the tests at :323-351 are recorded, while (1a) is stated from the repository's digit table without Sauter-Medvedev equation numbers (:75-88) and (1c) is reported partial (:208-215).",
+    "goal": "The source goal is to prove which sign the COCOS 17 relation carries and identify each source's COCOS from its own data before nova's owner changes; docs/evidence/fragments/dd-cocos-ingest/flux-function-sign.html:17-30 states +2pi and :246-270 tabulates five sources' digits.",
+    "manifest": "Read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T195812953681-flux-function-sign/manifest.md: status complete, the gate command at line 15 and 2 passed/1 xfailed in gate.log, but no baseline_suite or after_suite arm.",
+    "write_paths": "The reviewed manifest line 3 declares tests/test_flux_function_sign.py, scripts/flux_function_sign, docs/evidence/fragments/dd-cocos-ingest/flux-function-sign.html and docs/figures/dd-cocos-ingest/flux-function-sign; every path in the diff is inside them."
+  },
+  "justifications": {
+    "durability": "tests/test_flux_function_sign.py:103-121 is a strict xfail that reddens on a mechanical return to the negated owner, and :71-74 fails if the 11-to-17 derivative factors flip, but :96-100 asserts constants no change to scripts/flux_function_sign/measure.py can redden.",
+    "evidence": "The gate recorded at docs/evidence/fragments/dd-cocos-ingest/flux-function-sign.html:344-351 asserts only the transcription and the owner mismatch, the DD4 slopes are hand-copied literals at tests/test_flux_function_sign.py:96, and the run's manifest records no baseline_suite or after_suite arm.",
+    "fit": "tests/test_flux_function_sign.py:27-28 and scripts/flux_function_sign/measure.py:38 use the repository's existing owners (nova_cocos, nova.equilibrium.map_extraction, nova.io.sourcemap) and carry no plan label, version suffix or attribution.",
+    "goal_fidelity": "docs/evidence/fragments/dd-cocos-ingest/flux-function-sign.html:17-30 states the plus relation and the per-source table at :246-270 discharges the digit census, but the owner claim at :23-30 is stated without the caveat that nova/equilibrium/map_extraction.py:292 publishes the negated derivative the owner consumes.",
+    "reuse": "scripts/flux_function_sign/measure.py:181-188 restates the R p' + FF'/(mu0 R) bracket and the 2*pi factor that nova/equilibrium/convention.py:88-100 already owns instead of calling toroidal_current_density, deliberately but visibly for its two-arm sign test.",
+    "scope_discipline": "All four paths in the three-commit diff lie inside the write paths declared in the reviewed manifest line 3, and no production module is touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source goal is to prove which sign the COCOS 17 relation carries and identify each source's COCOS from its own data before nova's owner changes; docs/evidence/fragments/dd-cocos-ingest/flux-function-sign.html:17-30 states +2pi and :246-270 tabulates five sources' digits.\nVERDICT done_when: (1b) the DD4-native regression at :146-176, (2) the digit table at :246-270 and (3) the tests at :323-351 are recorded; (1a) is stated from the repository's digit table without Sauter-Medvedev equation numbers (:75-88) and (1c) is reported partial (:208-215).\nVERDICT write_paths: the reviewed manifest line 3 declares the test file, scripts/flux_function_sign, the fragment and a figures directory; every path in the diff is inside them.\nVERDICT manifest: read at .../r-20261023T195812953681-flux-function-sign/manifest.md; status complete, gate command at line 15 and 2 passed/1 xfailed in gate.log, but no baseline_suite or after_suite arm.\nVERDICT diff: three commits against 09dffd4c9 add 908 lines in four files, all additions, no production module touched.\nCALL_SITES: note: the diff adds no production code; the convention chain verified against it is nova/equilibrium/convention.py:88, nova/equilibrium/map_extraction.py:292, nova/imas/edge_consistency.py:151, nova/imas/operate.py:64, nova/imas/profiles.py:194.\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/dd-cocos-ingest/flux-function-sign.html:17-30 states the plus relation and :246-270 the digit census, but the owner claim at :23-30 omits that nova/equilibrium/map_extraction.py:292 publishes the negated derivative the owner consumes.\nSCORE evidence: 12\nJUSTIFICATION evidence: the gate recorded at docs/evidence/fragments/dd-cocos-ingest/flux-function-sign.html:344-351 asserts only the transcription and the owner mismatch, the DD4 slopes are literals at tests/test_flux_function_sign.py:96, and no suite arms are recorded.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the three-commit diff is inside the write paths declared in the reviewed manifest line 3, and no production module is touched.\nSCORE durability: 14\nJUSTIFICATION durability: tests/test_flux_function_sign.py:103-121 reddens on a mechanical return to the negated owner, but :96-100 asserts constants no change to scripts/flux_function_sign/measure.py can redden.\nSCORE fit: 18\nJUSTIFICATION fit: tests/test_flux_function_sign.py:27-28 and scripts/flux_function_sign/measure.py:38 use the repository's existing owners and carry no plan label or version suffix.\nSCORE reuse: 15\nJUSTIFICATION reuse: scripts/flux_function_sign/measure.py:181-188 restates the bracket and the 2*pi factor owned by nova/equilibrium/convention.py:88-100 instead of calling toroidal_current_density.\nFINDING tests/test_flux_function_sign.py:120 non-blocking: the strict xfail feeds dpressure_dpsi into a parameter convention.py documents as p' = -dp/dPhi, so a sign-only flip satisfies it while map_extraction.py:292 still publishes the negated derivative.\nFINDING docs/evidence/fragments/dd-cocos-ingest/flux-function-sign.html:276 non-blocking: the fragment claims the e_Bp = 1 integral ratio is within 3-7 per cent of one, while measure.json gives 68-77 per cent for four of five sources.\nFINDING docs/evidence/fragments/dd-cocos-ingest/flux-function-sign.html:15 non-blocking: the headline says three routes agree while :208-215 states the ambix route adds no evidence about the bracket's sign.\nFINDING tests/test_flux_function_sign.py:96 non-blocking: the DD4 arm asserts hand-copied literals that no change to the measurement script can redden.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T195812953681-flux-function-sign/manifest.md:15 non-blocking: the reviewed manifest carries no baseline_suite or after_suite key although its brief requires both.\nFINDING docs/evidence/fragments/dd-cocos-ingest/flux-function-sign.html:331 non-blocking: a doubled code tag renders a literal second tag.",
+  "review_run_id": "r-20261023T210616053772-review-of-flux-function-sign-ac37a2561669",
+  "reviewed_base_sha": "09dffd4c911c0e8f7c67c53d1a6dc53253b48e00",
+  "reviewed_head_sha": "ac37a2561669860f57452f75b98a67741c69197e",
+  "reviewed_run_id": "r-20261023T195812953681-flux-function-sign",
+  "scores": {
+    "durability": 14,
+    "evidence": 12,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "reuse": 15,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T21:31:34.213103+00:00",
+  "total": 94
+}

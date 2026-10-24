@@ -92,24 +92,57 @@ def _cells(number, *, slope=0.2, level=0.0):
 def _reference_conic_rings(
     vertices, count, centre, pitch, coefficient, selected, segments
 ):
-    """Trace the same cosine-spaced strips as support.geometry.read_polygons."""
+    """Trace one cosine-spaced ring per conic fragment, over the fragment's span.
+
+    The scan books a fragment as a single ring from its first strip's left break
+    to its last strip's right break, so no internal break is a ring boundary and
+    the composite quadrature cannot depend on where one falls.
+    """
     local = (vertices - centre) / pitch
     fragments = topology.quadratic_cell_fragments(
         local, count, coefficient, selected.shape[0]
     )
-    left, right = fragments.slice_breaks[:-1], fragments.slice_breaks[1:]
+    breaks = fragments.slice_breaks
+    labels = fragments.slice_labels
+    strips = labels.shape[0]
+    flat = labels.reshape(-1)
+    cell = jnp.arange(flat.size)
+    same = flat[None, :] == flat[:, None]
+    strip_of_cell = jnp.broadcast_to(cell // 3, same.shape)
+    first = jnp.min(jnp.where(same, strip_of_cell, strips), axis=1)
+    last = jnp.max(jnp.where(same, strip_of_cell, -1), axis=1)
+    left = breaks[first]
+    right = breaks[jnp.minimum(last + 1, strips)]
     parameter = 0.5 * (1 - jnp.cos(jnp.linspace(0.0, jnp.pi, segments + 1)))
     x = left[:, None] + (right - left)[:, None] * parameter
-    bottom, top, _ = topology._positive_vertical_intervals(local, count, coefficient, x)
+    bottom, top, present = topology._positive_vertical_intervals(
+        local, count, coefficient, x
+    )
+    band = jnp.broadcast_to((cell % 3)[:, None, None], (*present.shape[:-1], 1))
+    bottom = jnp.take_along_axis(bottom, band, -1)
+    top = jnp.take_along_axis(top, band, -1)
+    present = jnp.take_along_axis(present, band, -1)
+    lower_polygon, upper_polygon = topology._vertical_polygon_interval(local, count, x)
+    quadratic = coefficient[5]
+    linear = coefficient[2] + coefficient[4] * x
+    extremum = jnp.clip(
+        -0.5 * linear / jnp.where(quadratic != 0.0, quadratic, 1.0),
+        lower_polygon,
+        upper_polygon,
+    )[..., None]
+    bottom = jnp.where(present, bottom, extremum)
+    top = jnp.where(present, top, extremum)
     x = jnp.broadcast_to(x[..., None], bottom.shape)
     lower = jnp.stack((x, bottom), axis=-1)
     upper = jnp.stack((x[:, ::-1], top[:, ::-1]), axis=-1)
     rings = jnp.transpose(jnp.concatenate((lower, upper), axis=1), (0, 2, 1, 3))
-    labels = fragments.slice_labels
-    live = (labels >= 0) & selected[jnp.maximum(labels, 0)]
-    live &= (right > left)[:, None]
+    live = (
+        (flat >= 0)
+        & selected[jnp.clip(flat, 0, selected.shape[0] - 1)]
+        & (right > left)
+    )
+    live &= cell == flat
     rings = centre + pitch * rings.reshape(-1, 2 * (segments + 1), 2)
-    live = live.reshape(-1)
     rings = jnp.where(live[:, None, None], rings, centre)
     return rings, jnp.where(live, rings.shape[1], 0), fragments.valid
 

@@ -433,7 +433,13 @@ def _restore_units(data: Any) -> tuple[Any, ...]:
 
     offsets = np.asarray(data["wall_offsets"], dtype=int)
     radius = np.asarray(data["wall_radius"], dtype=float)
-    height = np.asarray(data["wall_z"], dtype=float)
+    vertical_key = next(
+        (f"wall_{axis}" for axis in ("z", "height") if f"wall_{axis}" in data.files),
+        None,
+    )
+    if vertical_key is None:
+        raise KeyError("wall vertical coordinate is missing")
+    height = np.asarray(data[vertical_key], dtype=float)
     closed = np.asarray(data["wall_closed"], dtype=bool)
     kinds = [str(value) for value in np.asarray(data["wall_kinds"])]
     return tuple(
@@ -695,32 +701,70 @@ def panels(
     vacuum = np.asarray(data["vacuum_psi"], dtype=float).reshape(shape).T
     solved = np.asarray(data["solved_psi"], dtype=float).reshape(shape).T
     units = _restore_units(data)
-    coils = np.asarray(data["coil_outlines"], dtype=float)
+    coils = (
+        np.asarray(data["coil_outlines"], dtype=float)
+        if "coil_outlines" in data.files
+        else np.empty((0, 0, 2), dtype=float)
+    )
     boundary_flux = float(np.asarray(data["boundary_flux"]))
     magnetic_axis = np.asarray(data["axis"], dtype=float)
     x_points = np.asarray(data["x_points"], dtype=float).reshape(-1, 2)
     saddle = int(np.asarray(data["saddle_index"]))
-    branches = {
-        name: np.asarray(data[f"branch_{name}"])
-        for name in (
-            "closed_controls_rz",
-            "closed_valid",
-            "open_controls_rz",
-            "open_valid",
-            "open_branch_valid",
+    branch_names = (
+        "closed_controls_rz",
+        "closed_valid",
+        "open_controls_rz",
+        "open_valid",
+        "open_branch_valid",
+    )
+    if all(f"branch_{name}" in data.files for name in branch_names):
+        branches = {name: np.asarray(data[f"branch_{name}"]) for name in branch_names}
+        boundary = poloidal.sample_cubic_controls(
+            branches["closed_controls_rz"],
+            branches["closed_valid"],
+            BOUNDARY_SAMPLES,
         )
-    }
+        mesh, mesh_provenance = hex_mesh(units, cells=hex_cells)
+        clipped = clip_to_boundary(mesh, boundary) if boundary.shape[0] >= 3 else ()
+        vertex_counts = np.asarray([len(item) for item in clipped], dtype=int)
+        cut_cells = int(np.count_nonzero(vertex_counts != 7))
+        boundary_source = (
+            "assemble_separatrix_branches on the solved lattice spline, split "
+            "at the admitted saddle"
+        )
+    else:
+        import contourpy
+        from matplotlib.path import Path as PlotPath
 
-    boundary = poloidal.sample_cubic_controls(
-        branches["closed_controls_rz"], branches["closed_valid"], BOUNDARY_SAMPLES
-    )
-    mesh, mesh_provenance = hex_mesh(units, cells=hex_cells)
-    clipped = clip_to_boundary(mesh, boundary) if boundary.shape[0] >= 3 else ()
-    vertex_counts = (
-        np.asarray([len(item) for item in clipped])
-        if clipped
-        else np.zeros(0, dtype=int)
-    )
+        branches = None
+        contours = contourpy.contour_generator(x=radius, y=height, z=solved).lines(
+            boundary_flux
+        )
+        axis_loops = [
+            line
+            for line in contours
+            if np.allclose(line[0], line[-1])
+            and PlotPath(line).contains_point(magnetic_axis)
+        ]
+        if axis_loops:
+            boundary = max(axis_loops, key=len)
+            mesh, mesh_provenance = hex_mesh(units, cells=hex_cells)
+            clipped = clip_to_boundary(mesh, boundary)
+            vertex_counts = np.asarray([len(item) for item in clipped], dtype=int)
+            cut_cells = int(np.count_nonzero(vertex_counts != 7))
+            boundary_source = "axis-enclosing contour of stored boundary flux"
+        else:
+            boundary = np.empty((0, 2), dtype=float)
+            stored_cells = np.asarray(data["cell_polygons"], dtype=float)
+            core = np.asarray(data["cell_core"], dtype=bool)
+            clipped = tuple(stored_cells[core])
+            mesh_provenance = {
+                "source": "persisted_core_cells",
+                "requested_cells": int(stored_cells.shape[0]),
+                "delivered_cells": len(clipped),
+            }
+            cut_cells = 0
+            boundary_source = "stored core cells; closed boundary unavailable"
 
     both = np.concatenate((vacuum.ravel(), solved.ravel()))
     levels = poloidal.contour_levels(both, LEVEL_COUNT, boundary=boundary_flux)
@@ -743,14 +787,24 @@ def panels(
     # The boundary is one of the drawn contours, not a separate red curve: same
     # ink, slightly heavier, so it reads as the surface the level array already
     # contains rather than as an overlay from somewhere else.
-    tally = poloidal.draw_separatrix_branches(
-        axes[1],
-        branches,
-        closed_color=DEFAULT_INK.contour_color,
-        open_color=DEFAULT_INK.contour_color,
-        closed_linewidth=BOUNDARY_LINEWIDTH,
-        open_linewidth=BOUNDARY_LINEWIDTH,
-    )
+    tally = {"closed_drawn": 0, "open_drawn": 0}
+    if branches is not None:
+        tally = poloidal.draw_separatrix_branches(
+            axes[1],
+            branches,
+            closed_color=DEFAULT_INK.contour_color,
+            open_color=DEFAULT_INK.contour_color,
+            closed_linewidth=BOUNDARY_LINEWIDTH,
+            open_linewidth=BOUNDARY_LINEWIDTH,
+        )
+    elif boundary.shape[0] >= 3:
+        axes[1].plot(
+            boundary[:, 0],
+            boundary[:, 1],
+            color=DEFAULT_INK.separatrix_color,
+            linewidth=BOUNDARY_LINEWIDTH,
+        )
+        tally["closed_drawn"] = 1
     admitted = x_points[saddle : saddle + 1] if x_points.size else None
     other = np.delete(x_points, saddle, axis=0) if x_points.shape[0] > 1 else None
     poloidal.draw_nulls(
@@ -772,14 +826,11 @@ def panels(
     plt.close(figure)
     drawn = {
         **mesh_provenance,
-        "boundary_source": (
-            "assemble_separatrix_branches on the solved lattice spline, split "
-            "at the admitted saddle"
-        ),
+        "boundary_source": boundary_source,
         "boundary_vertex_count": int(boundary.shape[0]),
         "boundary_branches_drawn": tally,
-        "boundary_clipped_cells": int(len(clipped)),
-        "cut_at_boundary_cells": int(np.count_nonzero(vertex_counts != 7)),
+        "boundary_clipped_cells": int(len(clipped)) if boundary.shape[0] >= 3 else 0,
+        "cut_at_boundary_cells": cut_cells,
         "coil_section_count": int(coils.shape[0]),
     }
     print(
@@ -789,7 +840,7 @@ def panels(
             figure_path,
             int(mesh_provenance["delivered_cells"]),
             len(clipped),
-            drawn["cut_at_boundary_cells"],
+            cut_cells,
             coils.shape[0],
             boundary.shape[0],
             levels.size,

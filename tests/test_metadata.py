@@ -17,7 +17,9 @@ imas = pytest.importorskip("imas")
 
 PROVENANCE = ["130506,6,equilibrium,0,iter,public,hdf5"]
 
-#: the IDS names the review found sharing the DD4 layout.
+#: the IDS names whose DD4 provenance layout was measured. A DD4 node carries a
+#: structured reference and no source list for every one of them, so the write
+#: is exercised on the set the layout was observed on rather than on one name.
 IDS_NAMES = ["equilibrium", "pf_active", "pulse_schedule", "wall"]
 
 

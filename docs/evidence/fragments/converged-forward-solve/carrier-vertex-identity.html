@@ -300,6 +300,39 @@ because <code>AtomicCellMesh.from_cells</code> in
 <code>nova/equilibrium/separatrix_clip.py</code> still atomises by a quantised
 coordinate key. It does not enter <code>node_number</code>, which counts the
 grid, wall and sample vertices, and those agree exactly.</p>
+<h2>The canonical corner costs a value-matrix rebuild, not a booking</h2>
+
+<p>Rewriting a shared corner to one value moves the geometry the read poses
+its Gauss rule on, and the dense value matrix is cached on that rule's bytes.
+Measured on the diverted carrier at 250 cells, timing each stage of the
+prototype build on its own cores: <code>from_cells</code> costs 0.37 s at the
+reviewed head and 0.38 s here, the compiled read 6.46 s against 6.54 s,
+<code>current.book</code> 2.51 s against 2.44 s, and the triangle rule 0.02 s
+as against 0.02 s. Every arithmetic stage agrees. The build dies in
+<code>build_values</code>, which costs 0.22 s against the warm cache and was
+still running at 480 s.</p>
+
+<p>The cells are not the difference. The polygon bytes handed to the value
+matrix are identical at both revisions
+(<code>60d11d75ed1c1bd9</code>); what moves is the rule, by at most
+<code>8.9e-16</code> in the point coordinates (3760 of 10152 entries) and
+<code>4.4e-16</code> in the centres (184 of 564). The matrix key is a sha256
+over those raw bytes, so the digest moves from
+<code>e1afb81b137ef38e</code> to <code>d1e1e0926e8d6d4e</code> and the whole
+<code>(5076, 282, 3)</code> matrix is reassembled through
+<code>build_flux_blocks</code>. A stack dump taken during the hang sits in
+<code>values.py</code> in <code>assemble</code>, reached from
+<code>operand_matrix</code>.</p>
+
+<p>So the census slowdown is a cold operand-cache fill that any change to this
+geometry incurs, not work the canonical corners added. It cannot be removed
+inside <code>stencil_mesh.py</code>: the key is byte-exact, so every
+representative choice -- the mean of the copies, the first in sorted order, or
+any other -- moves it. The line to change is the operand key in
+<code>scripts/prototypes/lean_map/values.py</code> and the quadrature's
+<code>operand_key</code>, which is outside this node's write paths and is named
+here rather than edited.</p>
+
 
 </article>
 </body>

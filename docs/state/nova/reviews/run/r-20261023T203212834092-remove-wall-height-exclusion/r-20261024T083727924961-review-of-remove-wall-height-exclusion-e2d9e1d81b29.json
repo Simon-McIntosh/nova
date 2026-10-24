@@ -1,0 +1,88 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 6,
+  "call_sites": [
+    "nova/equilibrium/forward.py:2074 residual_shadow_mask call",
+    "nova/equilibrium/forward.py:2244 residual_shadow_mask call",
+    "nova/equilibrium/batched_labeller.py:587 residual_shadow_mask call",
+    "nova/equilibrium/reduced_newton.py:923 residual_shadow_mask call",
+    "nova/equilibrium/forward_operator.py:3771 _residual_shadow_components_from_read call in _frozen_topology_partition",
+    "benchmarks/limited_row_shadow_census.py:240 residual_shadow_mask call"
+  ],
+  "completed_at": "2026-10-24T08:54:58.656Z",
+  "dispatched_at": "2026-10-24T08:38:25Z",
+  "findings": [
+    {
+      "file": "benchmarks/mast_centroid_solve_panels.py",
+      "line": "436",
+      "severity": "blocking",
+      "text": "blocking: _restore_units now reads data[\"wall_z\"] while the three committed state files docs/figures/mast-centroid-capability/{cpu-lane,full-axis-lane,titan-lane}/panel-fields.npz store wall_height, so `panels --state <committed npz>` raises KeyError and the committed figures cannot be re-rendered from committed state."
+    },
+    {
+      "file": "tests/test_plasma_cell_shadow_telemetry.py",
+      "line": "208",
+      "severity": "non-blocking",
+      "text": "non-blocking: the added assertion compares the residual wall mask against a second call to _carrier_shadow_read, and because the single_null fixture mask digest is identical at base and head the assertion stays green when wall_height_shadow_mask is reinstated, so it characterises behaviour rather than guarding the deletion."
+    },
+    {
+      "file": "benchmarks/limiter_read_resolution_audit.py",
+      "line": "421",
+      "severity": "non-blocking",
+      "text": "non-blocking: with shadow = private at :413 the \"topological shadow excluded no private wall node below the X-point\" guard duplicates the private_below check at :417 and can never fire, so it no longer reports anything about the exclusion."
+    },
+    {
+      "file": "docs/evidence/poloidal-convergence-atlas.html",
+      "line": "15",
+      "severity": "non-blocking",
+      "text": "non-blocking: the published legend still documents the qualified-saddle height band and wall_height_shadow_mask as the dark-band production rule, which benchmarks/poloidal_convergence_atlas.py no longer draws; the file is outside the node declared write paths."
+    },
+    {
+      "file": "docs/figures/batched-operator-boundary/exit-incidence/batched-exit-incidence.json",
+      "line": "374",
+      "severity": "non-blocking",
+      "text": "non-blocking: the committed receipt lists flattened_static_state._wall_height_hysteresis among its compared fields, a state the operator no longer carries, so benchmarks/strict_exit_incidence.py can never reproduce that receipt; the file is outside the node declared write paths."
+    }
+  ],
+  "gate_sources": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T203212834092-remove-wall-height-exclusion/head-measured-summary.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T203212834092-remove-wall-height-exclusion/base-measured-summary.log"
+  },
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 6 production call sites",
+    "diff": "Read commit by commit from eb76220 to e2d9e1d8; 9a07f1608 removes the rule from both modules, 8dfea1ba7 retires the height tests, 5c2940792 retires the height benchmark arms, b072bfcd8 drops the now-unused previous_shadow argument, 632ea47b4 restores the firing census on the topological mask, and e2d9e1d81 records the fragment and trims the atlas docstring.",
+    "done_when": "The done_when is 0 head failure ids absent at base across the edited tests and every test importing connectivity_boundary or forward_operator; baseline_suite and after_suite record 76 and 73 failure ids over 60/60 completed files, subtraction gives 0 added and 3 removed, and head-measured-summary.log ends \"=== 60/60 measured files complete, 73 failure ids ===\" then EXIT=1.",
+    "goal": "The goal is \"the wall shadow is the topological private-flux shadow alone, with wall_height_shadow_mask and its eligibility fractions removed from nova\"; nova/equilibrium/connectivity_boundary.py deletes the function, both fractions, _print_wall_height_eligibility and the __all__ entry, and nova/equilibrium/forward_operator.py:3751 returns reading[\"private_wall_node_mask\"], with git grep wall_height over nova/ tests/ benchmarks/ exiting 1 at head.",
+    "manifest": "Read; it records status complete, commits 9a07f1608 through e2d9e1d81, both suite JSONs with revision, literal command, log path and completed=true, three fixture mask digests, and eleven retry_failures with scaffolding attributions.",
+    "write_paths": "The brief grants 11 exclusive paths and git diff --stat eb762209d07867ad0eafec87f521f26bf9c656b0..e2d9e1d81b29c3b569bf0b1b06b2b19b0da94605 changes exactly those 11 files, including tests/test_wall_height_exclusion.py (deleted) and the landing fragment, with nothing outside them."
+  },
+  "justifications": {
+    "durability": "tests/test_plasma_cell_shadow_telemetry.py:208-211 compares the residual mask against a second call to the same carrier read, and the manifest's identical base/head digest for that fixture means reinstating wall_height_shadow_mask leaves it green.",
+    "evidence": "base-measured-summary.log and head-measured-summary.log both carry revision, module and cwd headers plus a final EXIT= line over 60/60 complete files, and the 76-to-73 failure-id sets subtract to zero added.",
+    "fit": "the edits follow the surrounding docstring and helper idiom and carry no plan label, though benchmarks/limiter_read_resolution_audit.py:421 leaves a guard that can no longer fail.",
+    "goal_fidelity": "nova/equilibrium/forward_operator.py:3751 returns reading[\"private_wall_node_mask\"] and no hysteresis token survives anywhere under nova/.",
+    "reuse": "the only added definition, _qualification_distance at benchmarks/poloidal_convergence_atlas.py:126, is split out of that file\u2019s own _geometry_hysteresis and the capability search over nova/equilibrium found no owner it forked.",
+    "scope_discipline": "every changed path is a declared one, but benchmarks/mast_centroid_solve_panels.py:423 renames a persisted state key the goal does not imply."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The goal is \"the wall shadow is the topological private-flux shadow alone, with wall_height_shadow_mask and its eligibility fractions removed from nova\"; nova/equilibrium/connectivity_boundary.py deletes the function, both fractions, _print_wall_height_eligibility and the __all__ entry, and nova/equilibrium/forward_operator.py:3751 returns reading[\"private_wall_node_mask\"], with git grep wall_height over nova/ tests/ benchmarks/ exiting 1 at head.\nVERDICT done_when: The done_when is 0 head failure ids absent at base across the edited tests and every test importing connectivity_boundary or forward_operator; baseline_suite and after_suite record 76 and 73 failure ids over 60/60 completed files, subtraction gives 0 added and 3 removed, and head-measured-summary.log ends \"=== 60/60 measured files complete, 73 failure ids ===\" then EXIT=1.\nVERDICT write_paths: The brief grants 11 exclusive paths and git diff --stat eb762209d07867ad0eafec87f521f26bf9c656b0..e2d9e1d81b29c3b569bf0b1b06b2b19b0da94605 changes exactly those 11 files, including tests/test_wall_height_exclusion.py (deleted) and the landing fragment, with nothing outside them.\nVERDICT manifest: Read; it records status complete, commits 9a07f1608 through e2d9e1d81, both suite JSONs with revision, literal command, log path and completed=true, three fixture mask digests, and eleven retry_failures with scaffolding attributions.\nVERDICT diff: Read commit by commit from eb76220 to e2d9e1d8; 9a07f1608 removes the rule from both modules, 8dfea1ba7 retires the height tests, 5c2940792 retires the height benchmark arms, b072bfcd8 drops the now-unused previous_shadow argument, 632ea47b4 restores the firing census on the topological mask, and e2d9e1d81 records the fragment and trims the atlas docstring.\nCALL_SITES: nova/equilibrium/forward.py:2074 residual_shadow_mask call, nova/equilibrium/forward.py:2244 residual_shadow_mask call, nova/equilibrium/batched_labeller.py:587 residual_shadow_mask call, nova/equilibrium/reduced_newton.py:923 residual_shadow_mask call, nova/equilibrium/forward_operator.py:3771 _residual_shadow_components_from_read call in _frozen_topology_partition, benchmarks/limited_row_shadow_census.py:240 residual_shadow_mask call\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/equilibrium/forward_operator.py:3751 returns reading[\"private_wall_node_mask\"] and no hysteresis token survives anywhere under nova/.\nSCORE evidence: 18\nJUSTIFICATION evidence: base-measured-summary.log and head-measured-summary.log both carry revision, module and cwd headers plus a final EXIT= line over 60/60 complete files, and the 76-to-73 failure-id sets subtract to zero added.\nSCORE scope_discipline: 15\nJUSTIFICATION scope_discipline: every changed path is a declared one, but benchmarks/mast_centroid_solve_panels.py:423 renames a persisted state key the goal does not imply.\nSCORE durability: 8\nJUSTIFICATION durability: tests/test_plasma_cell_shadow_telemetry.py:208-211 compares the residual mask against a second call to the same carrier read, and the manifest's identical base/head digest for that fixture means reinstating wall_height_shadow_mask leaves it green.\nSCORE fit: 17\nJUSTIFICATION fit: the edits follow the surrounding docstring and helper idiom and carry no plan label, though benchmarks/limiter_read_resolution_audit.py:421 leaves a guard that can no longer fail.\nSCORE reuse: 20\nJUSTIFICATION reuse: the only added definition, _qualification_distance at benchmarks/poloidal_convergence_atlas.py:126, is split out of that file\u2019s own _geometry_hysteresis and the capability search over nova/equilibrium found no owner it forked.\nFINDING benchmarks/mast_centroid_solve_panels.py:436 blocking: _restore_units now reads data[\"wall_z\"] while the three committed state files docs/figures/mast-centroid-capability/{cpu-lane,full-axis-lane,titan-lane}/panel-fields.npz store wall_height, so `panels --state <committed npz>` raises KeyError and the committed figures cannot be re-rendered from committed state.\nFINDING tests/test_plasma_cell_shadow_telemetry.py:208 non-blocking: the added assertion compares the residual wall mask against a second call to _carrier_shadow_read, and because the single_null fixture mask digest is identical at base and head the assertion stays green when wall_height_shadow_mask is reinstated, so it characterises behaviour rather than guarding the deletion.\nFINDING benchmarks/limiter_read_resolution_audit.py:421 non-blocking: with shadow = private at :413 the \"topological shadow excluded no private wall node below the X-point\" guard duplicates the private_below check at :417 and can never fire, so it no longer reports anything about the exclusion.\nFINDING docs/evidence/poloidal-convergence-atlas.html:15 non-blocking: the published legend still documents the qualified-saddle height band and wall_height_shadow_mask as the dark-band production rule, which benchmarks/poloidal_convergence_atlas.py no longer draws; the file is outside the node declared write paths.\nFINDING docs/figures/batched-operator-boundary/exit-incidence/batched-exit-incidence.json:374 non-blocking: the committed receipt lists flattened_static_state._wall_height_hysteresis among its compared fields, a state the operator no longer carries, so benchmarks/strict_exit_incidence.py can never reproduce that receipt; the file is outside the node declared write paths.\n",
+  "review_run_id": "r-20261024T083727924961-review-of-remove-wall-height-exclusion-e2d9e1d81b29",
+  "reviewed_base_sha": "eb762209d07867ad0eafec87f521f26bf9c656b0",
+  "reviewed_head_sha": "e2d9e1d81b29c3b569bf0b1b06b2b19b0da94605",
+  "reviewed_run_id": "r-20261023T203212834092-remove-wall-height-exclusion",
+  "scores": {
+    "durability": 8,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T08:48:03.434448+00:00",
+  "total": 97
+}

@@ -61,7 +61,14 @@ def main() -> int:
     requested_cells = -300
     _carrier_case, source_case, exact = certificate._case(case_name)
     wall = certificate._diverted_wall(exact)
-    np.savez(out / "s0_wall.npz", wall=wall)
+    np.savez(
+        out / "s0_wall.npz",
+        wall=wall,
+        coefficients=np.asarray(exact.coefficients, dtype=np.float64),
+        magnetic_axis=np.asarray(exact.magnetic_axis, dtype=np.float64),
+        x_point=np.asarray(exact.x_point, dtype=np.float64),
+        separatrix=np.asarray(exact.separatrix(1441), dtype=np.float64),
+    )
     report["s0_wall_nodes"] = int(len(wall))
     print(f"STAGE s0_wall nodes={len(wall)}", flush=True)
 

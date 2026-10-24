@@ -178,6 +178,46 @@
     "warm_wall_milliseconds_median": 85032.56649337709,
     "warm_wall_milliseconds_minimum": 77090.30328132212
   },
+  "vacuum_saddle_validation": {
+    "in_wall_grid_count": 684,
+    "marker": {
+      "coordinate_m": [
+        1.8181249998742715,
+        0.0
+      ],
+      "gradient_norm_wb_per_m": 0.010637405235374146,
+      "hessian_determinant": -5.469013277342389,
+      "hessian_eigenvalues": [
+        -2.34715484251611,
+        2.3300607093649184
+      ]
+    },
+    "marker_gradient_to_median": 0.012872407078661384,
+    "median_contour_level_spacing_wb": 0.09131310981319096,
+    "median_in_wall_gradient_wb_per_m": 0.8263726566733425,
+    "method": "scipy.interpolate.RectBivariateSpline(kx=3, ky=3, s=0), analytic-gradient Newton polish",
+    "nearest_drawn_contour_delta_wb": 0.040843117150665575,
+    "polish_converged": true,
+    "polish_distance_m": 0.004544097418991104,
+    "polished": {
+      "coordinate_m": [
+        1.8135817990841143,
+        9.026590495437594e-05
+      ],
+      "gradient_norm_wb_per_m": 1.4061863363159105e-16,
+      "hessian_determinant": -5.600561065436418,
+      "hessian_eigenvalues": [
+        -2.3814063960999516,
+        2.351787193739171
+      ]
+    },
+    "polished_gradient_to_median": 1.7016370580031947e-16,
+    "polished_inside_wall": true,
+    "relative_gradient_maximum": 1e-06,
+    "saddle_flux_wb": -1.2615756394635096,
+    "state_sha256": "1bbcacbf7ad2f2b60d86afb5610e44c6f63c4e309137aaec5965e124240f073f",
+    "verdict": "confirmed_smooth_saddle"
+  },
   "warm_solves": [
     {
       "converged": false,

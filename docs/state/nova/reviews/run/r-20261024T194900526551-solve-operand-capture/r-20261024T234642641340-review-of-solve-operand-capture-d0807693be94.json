@@ -1,0 +1,74 @@
+{
+  "added_failure_count": 0,
+  "added_failure_derivation": "baseline_suite (48d7adda6, suite-base.summary.log) fails only tests/equilibrium/test_topology_read.py, cut short by the 900 s per-file cap with 1 error in its 22-test executed prefix; after_suite (8422b03cb, suite-tip.summary.log) reports the same file cut short at the same 22 tests with a byte-identical -q log. tests/equilibrium/test_read_correction_path.py collects nothing (code=5) at both arms. The set is unchanged, so the added-failure count is 0. The delta's own gate (gates/dense-arm-test.exit.log, 4 passed at 90ad9cf24) is newer than both arms and is recorded separately; the reviewed head d0807693b is a docs-only commit over that gate's revision.",
+  "added_failure_ids": [],
+  "call_sites": [
+    "scripts/prototypes/fast_map_production/candidate.py:8 (imports measure",
+    "runs its linear_step)",
+    "scripts/prototypes/fast_map_production/baseline.py:8",
+    "scripts/prototypes/fast_map_production/probe_stall.py:10",
+    "scripts/prototypes/fast_map_production/probe_random.py:13",
+    "scripts/prototypes/fast_map_production/probe_window.py:10",
+    "scripts/prototypes/fast_map_production/probe_path.py:13",
+    "scripts/prototypes/fine_grid_convergence/cold.py:12 (imports solver.main)",
+    "scripts/prototypes/fast_map_production/deep-job.sh:24 (--method through solver CLI)",
+    "scripts/prototypes/fast_map_production/two_merit_job.sh:12"
+  ],
+  "completed_at": "2026-10-24T23:55:41.126Z",
+  "dispatched_at": "2026-10-24T23:47:50Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/constant-capture.html",
+      "line": "22",
+      "severity": "non-blocking",
+      "text": "the paragraph says the measure.py row \"was not carried to a step row\" and that its control arm \"was cut at the job wall\", but gates/dense-fixed-measure.json in the same gates directory records that row building one accepted correction (iterations 1, linear_residual 5.33e-15, residual 7.73e-06) and gates/dense-control-measure.log records the reverted copy raising UnboundLocalError at measure.py:665 \u2014 the deliverable understates its own strongest evidence and a reader cannot tell which statement to trust."
+    },
+    {
+      "file": "tests/test_solve_operand_capture.py",
+      "line": "139",
+      "severity": "non-blocking",
+      "text": "the assertion checks only that the name `product` is bound at the fall-through arm's top level, so binding it to the batched program (`product = products`) or to `None` keeps the test green while the step row would still be wrong; the padding-to-width logic the fix depends on has no test."
+    },
+    {
+      "file": "tests/test_solve_operand_capture.py",
+      "line": "121",
+      "severity": "non-blocking",
+      "text": "the driver paths are read relative to the process CWD, so the test passes only when pytest is launched from the repository root, where the neighbouring tests/test_artifacts_carry_no_worktree_paths.py:22 resolves repository files from `Path(__file__).resolve().parents[1]`."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "three commits read against 34cc6a730 \u2014 77ac7917d adds the same 9-line `product` closure to both drivers' dense arms, 90ad9cf24 adds the AST test, d0807693b adds one paragraph to docs/evidence/fragments/converged-forward-solve/constant-capture.html; 74 insertions, no deletions, nothing outside the four declared paths.",
+    "done_when": "the done_when asks for both sites' arrays passed as runtime operands with a sub-64 MB captured-constants report, H200 rows before and after, and every importing test file green by delta in fresh processes; this delta touches none of that measure, and its own gate is `pytest tests/test_solve_operand_capture.py` (gates/dense-arm-test.exit.log: 4 passed, EXIT=0) plus its reverted-copy control (gates/negctl-dense-arm.exit.log: 2 failed, 2 deselected, EXIT=1).",
+    "goal": "the node's goal is to stop the solve's compile capturing operands as constants, and this delta repairs the dense step arm the change left unbound; scripts/prototypes/fast_map_production/solver.py:675 and scripts/prototypes/diverted_stall/measure.py:621 now bind a single-direction `product` in the fall-through arm, and a dense row builds at the tip (gates/dense-fixed.json history: iterations 1, accepted true, linear_residual 1.65e-15).",
+    "manifest": "the source run's manifest.md (lines 11-23) records the repair round, both finding answers, the 4-passed gate log and the 2-failed control log, the solver dense row's numbers, and the two suite arms; its baseline_suite and after_suite both carry completed false because tests/equilibrium/test_topology_read.py hit the 900 s cap at both arms.",
+    "write_paths": "the node's declared paths are the four files in this diff; all four changed paths in --stat of 34cc6a730..d0807693b sit inside them, and gating on the parent brief's own grants (nova/equilibrium/fixed_points.py and the docs figures) shows nothing outside this round touched."
+  },
+  "justifications": {
+    "durability": "tests/test_solve_operand_capture.py:139 reddens when the binding is removed (gates/negctl-dense-arm.exit.log), but it asserts only that the name `product` is bound in the dense arm, so a wrong binding such as `product = products` passes and nothing exercises the pad-and-slice arithmetic.",
+    "evidence": "gates/dense-arm-test.exit.log (4 passed, EXIT=0) and gates/negctl-dense-arm.exit.log (2 failed, EXIT=1 on a reverted copy) are recorded, but no gate ran at the reviewed head d0807693b and constant-capture.html:22 misstates the measure.py evidence that gates/dense-fixed-measure.json already holds.",
+    "fit": "scripts/prototypes/fast_map_production/solver.py:675 follows the driver's existing local-closure idiom and tests/test_solve_operand_capture.py:113 names only by mechanism, but tests/test_solve_operand_capture.py:121 reads its drivers from the process CWD where tests/test_artifacts_carry_no_worktree_paths.py:22 resolves from `Path(__file__)`.",
+    "goal_fidelity": "scripts/prototypes/fast_map_production/solver.py:675-680 and scripts/prototypes/diverted_stall/measure.py:621-626 bind `product` in the dense arm and slice row 0 out of the batched program, and gates/dense-fixed.json shows the row building with linear_residual 1.65e-15.",
+    "reuse": "a search of nova/ and scripts/ for an existing \"apply a batched program to one direction\" owner found only the batched `operand_block` at scripts/prototypes/fast_map_production/solver.py:88 (no inverse exists), and the added closure duplicates only the drivers' pre-existing duplicated `operand_tangent`/`wall`/`generated_bytes` helpers, not a repository owner.",
+    "scope_discipline": "the diff of 34cc6a730..d0807693b changes only scripts/prototypes/fast_map_production/solver.py, scripts/prototypes/diverted_stall/measure.py, tests/test_solve_operand_capture.py and docs/evidence/fragments/converged-forward-solve/constant-capture.html, all four in the manifest's declared write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to stop the solve's compile capturing operands as constants, and this delta repairs the dense step arm the change left unbound; scripts/prototypes/fast_map_production/solver.py:675 and scripts/prototypes/diverted_stall/measure.py:621 now bind a single-direction `product` in the fall-through arm, and a dense row builds at the tip (gates/dense-fixed.json history: iterations 1, accepted true, linear_residual 1.65e-15).\nVERDICT done_when: the done_when asks for both sites' arrays passed as runtime operands with a sub-64 MB captured-constants report, H200 rows before and after, and every importing test file green by delta in fresh processes; this delta touches none of that measure, and its own gate is `pytest tests/test_solve_operand_capture.py` (gates/dense-arm-test.exit.log: 4 passed, EXIT=0) plus its reverted-copy control (gates/negctl-dense-arm.exit.log: 2 failed, 2 deselected, EXIT=1).\nVERDICT write_paths: the node's declared paths are the four files in this diff; all four changed paths in --stat of 34cc6a730..d0807693b sit inside them, and gating on the parent brief's own grants (nova/equilibrium/fixed_points.py and the docs figures) shows nothing outside this round touched.\nVERDICT manifest: the source run's manifest.md (lines 11-23) records the repair round, both finding answers, the 4-passed gate log and the 2-failed control log, the solver dense row's numbers, and the two suite arms; its baseline_suite and after_suite both carry completed false because tests/equilibrium/test_topology_read.py hit the 900 s cap at both arms.\nVERDICT diff: three commits read against 34cc6a730 \u2014 77ac7917d adds the same 9-line `product` closure to both drivers' dense arms, 90ad9cf24 adds the AST test, d0807693b adds one paragraph to docs/evidence/fragments/converged-forward-solve/constant-capture.html; 74 insertions, no deletions, nothing outside the four declared paths.\nCALL_SITES: scripts/prototypes/fast_map_production/candidate.py:8 (imports measure, runs its linear_step), scripts/prototypes/fast_map_production/baseline.py:8, scripts/prototypes/fast_map_production/probe_stall.py:10, scripts/prototypes/fast_map_production/probe_random.py:13, scripts/prototypes/fast_map_production/probe_window.py:10, scripts/prototypes/fast_map_production/probe_path.py:13, scripts/prototypes/fine_grid_convergence/cold.py:12 (imports solver.main), scripts/prototypes/fast_map_production/deep-job.sh:24 (--method through solver CLI), scripts/prototypes/fast_map_production/two_merit_job.sh:12\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: scripts/prototypes/fast_map_production/solver.py:675-680 and scripts/prototypes/diverted_stall/measure.py:621-626 bind `product` in the dense arm and slice row 0 out of the batched program, and gates/dense-fixed.json shows the row building with linear_residual 1.65e-15.\nSCORE evidence: 15\nJUSTIFICATION evidence: gates/dense-arm-test.exit.log (4 passed, EXIT=0) and gates/negctl-dense-arm.exit.log (2 failed, EXIT=1 on a reverted copy) are recorded, but no gate ran at the reviewed head d0807693b and constant-capture.html:22 misstates the measure.py evidence that gates/dense-fixed-measure.json already holds.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the diff of 34cc6a730..d0807693b changes only scripts/prototypes/fast_map_production/solver.py, scripts/prototypes/diverted_stall/measure.py, tests/test_solve_operand_capture.py and docs/evidence/fragments/converged-forward-solve/constant-capture.html, all four in the manifest's declared write paths.\nSCORE durability: 14\nJUSTIFICATION durability: tests/test_solve_operand_capture.py:139 reddens when the binding is removed (gates/negctl-dense-arm.exit.log), but it asserts only that the name `product` is bound in the dense arm, so a wrong binding such as `product = products` passes and nothing exercises the pad-and-slice arithmetic.\nSCORE fit: 16\nJUSTIFICATION fit: scripts/prototypes/fast_map_production/solver.py:675 follows the driver's existing local-closure idiom and tests/test_solve_operand_capture.py:113 names only by mechanism, but tests/test_solve_operand_capture.py:121 reads its drivers from the process CWD where tests/test_artifacts_carry_no_worktree_paths.py:22 resolves from `Path(__file__)`.\nSCORE reuse: 20\nJUSTIFICATION reuse: a search of nova/ and scripts/ for an existing \"apply a batched program to one direction\" owner found only the batched `operand_block` at scripts/prototypes/fast_map_production/solver.py:88 (no inverse exists), and the added closure duplicates only the drivers' pre-existing duplicated `operand_tangent`/`wall`/`generated_bytes` helpers, not a repository owner.\nFINDING docs/evidence/fragments/converged-forward-solve/constant-capture.html:22 non-blocking: the paragraph says the measure.py row \"was not carried to a step row\" and that its control arm \"was cut at the job wall\", but gates/dense-fixed-measure.json in the same gates directory records that row building one accepted correction (iterations 1, linear_residual 5.33e-15, residual 7.73e-06) and gates/dense-control-measure.log records the reverted copy raising UnboundLocalError at measure.py:665 \u2014 the deliverable understates its own strongest evidence and a reader cannot tell which statement to trust.\nFINDING tests/test_solve_operand_capture.py:139 non-blocking: the assertion checks only that the name `product` is bound at the fall-through arm's top level, so binding it to the batched program (`product = products`) or to `None` keeps the test green while the step row would still be wrong; the padding-to-width logic the fix depends on has no test.\nFINDING tests/test_solve_operand_capture.py:121 non-blocking: the driver paths are read relative to the process CWD, so the test passes only when pytest is launched from the repository root, where the neighbouring tests/test_artifacts_carry_no_worktree_paths.py:22 resolves repository files from `Path(__file__).resolve().parents[1]`.",
+  "review_run_id": "r-20261024T234642641340-review-of-solve-operand-capture-d0807693be94",
+  "reviewed_base_sha": "34cc6a730358aa8c0bb7d66ad09df0bacb2222ea",
+  "reviewed_head_sha": "d0807693be94035fe39e5c44c99435116b63cd97",
+  "reviewed_run_id": "r-20261024T194900526551-solve-operand-capture",
+  "rubric": "code-review",
+  "scope_of_review": "commits 34cc6a730..d0807693b only: the dense step arm repair, its static test and the evidence paragraph",
+  "scores": {
+    "durability": 14,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T23:56:25.535365+00:00",
+  "total": 102
+}

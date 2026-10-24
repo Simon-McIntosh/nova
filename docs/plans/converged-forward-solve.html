@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="555">
+<meta name="plan-version" content="556">
 <meta name="plan-modified" content="2026-10-25">
 </head>
 <body>
@@ -1969,6 +1969,9 @@ NO PRODUCT OR TEST SOURCE WAS CHANGED.  The 1e-10 tolerance was not widened.</p>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261024T224026361071-review-of-solve-operand-capture-34cc6a730358" data-who="reckon-build" data-when="2026-10-24T23:00:22.855Z">
     <div class="r-comment-body"><p>Independent review of r-20261024T194900526551-solve-operand-capture at head 34cc6a730: goal met (base 4.20 GB of captured constants to a tip whose largest lowering is 38.48 KB), two blocking findings on the dense linear_step arm (UnboundLocalError on `product` in both scripts/prototypes/fast_map_production/solver.py and scripts/prototypes/diverted_stall/measure.py), and six non-blocking findings; added_failure_count 0 from the two suite arms.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261024T234642641340-review-of-solve-operand-capture-d0807693be94" data-who="reckon-build" data-when="2026-10-24T23:55:41.126Z">
+    <div class="r-comment-body"><p>review-of-solve-operand-capture-d0807693b: the dense step arm repair (77ac7917d, 90ad9cf24, d0807693b) does what the goal states and its parse test reddens on a reverted copy (gates/negctl-dense-arm.exit.log, 2 failed), scored goal_fidelity 18, evidence 15, scope_discipline 19, durability 14, fit 16, reuse 20; three non-blocking findings: the evidence fragment understates the measure.py row it already has (constant-capture.html:22), the durability assertion checks only that the name `product` is bound (tests/test_solve_operand_capture.py:139), and the test resolves its driver paths from the process CWD (tests/test_solve_operand_capture.py:121).</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-s21-moment-space-ruling" data-who="reckon-build" data-when="2026-10-13T18:40:00Z">
     <div class="r-comment-body"><p>Lead ruling 2026-10-13: the forward solve's unknown is the cell current moments.</p><p>The locked read builds its field from booked moments: the Bell jets at the nodes are the jet coupling rows times m, plus the exterior's jets. So it cannot evaluate an arbitrary trial flux vector, but it can always evaluate a trial m. The solve therefore iterates m = book(read(psi_ext + G m)), and the flux is G m wherever output needs it.</p><ul><li>Newton runs on the device with autograd.</li><li>A dense <code>jax.jacfwd</code> Jacobian with a device LU is measured against a device-side Jacobian-free Krylov, replacing SciPy's host <code>newton_krylov</code>.</li><li>Autograd must be shown to pass through the read and the booking.</li><li><code>current.book</code> is vectorised. Its sequential cell scan costs 0.9 to 8 s per step at 2,000 to 10,000 cells.</li><li>The legacy support partition, the spline-clip read and the chord default are deleted.</li></ul></div>

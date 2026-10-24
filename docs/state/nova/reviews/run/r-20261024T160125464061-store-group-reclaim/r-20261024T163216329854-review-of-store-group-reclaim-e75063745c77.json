@@ -1,0 +1,44 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-24T16:42:22.410Z",
+  "dispatched_at": "2026-10-24T16:34:15Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/dd-cocos-ingest/store-group-reclaim.html",
+      "line": 25,
+      "severity": "non-blocking",
+      "text": "the gate table caption cites logs/baseline/ and logs/after/ as the two arms, but logs/after/ does not exist and logs/baseline/ holds five of the six files with baseline-test_media.log truncated before its summary and EXIT line, so the counts cannot be checked from the paths the record names; line 36's 'every log's last line is a bare EXIT=0' is also false for that file. The counts do reconcile with the combined logs/baseline-suite.log and logs/after-suite.log that the manifest cites."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T160125464061-store-group-reclaim/logs/baseline-suite.log",
+      "line": 3,
+      "severity": "non-blocking",
+      "text": "the base arm's header names the imported module as /home/ITER/mcintos/Code/nova/nova/__init__.py, the main checkout, while naming 6c642019 as its revision and the node worktree as its tree; the log therefore cannot show which tree the base arm imported. The measurement is sound in substance because nova code is identical between 6c642019 and the main head b1c42788e (the delta is docs only), but the header is not the provenance it claims."
+    },
+    {
+      "file": "nova/io/signalstore.py",
+      "line": 122,
+      "severity": "non-blocking",
+      "text": "reclaim_legacy_group duplicates the zarr group-deletion mechanism owned by ZarrStore.delete_group at nova/database/zarrstore.py:148-155 (open mode 'a' then del root[name]) rather than extending that owner to take a group name, so two places now know how to remove a group from a store."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to reclaim the refused pre-convention store group on re-ingest and report it; nova/io/signalstore.py:141 calls reclaim_legacy_group from write(), and nova/io/signalstore.py:124 prints the removed group name, so the goal is met.\nVERDICT done_when: the done_when asks for a one-group re-ingest test with the removal reported, a replaceable self-fulfilling assertion, and six covering files by delta in fresh processes; tests/test_signalstore_convention_key.py:129-151 asserts stored_groups(fresh) == {fresh.cache_key} plus the printed legacy name, and logs/after-suite.log records 93 passed against logs/baseline-suite.log's 92, both EXIT=0.\nVERDICT write_paths: the manifest declares nova/io/signalstore.py, tests/test_signalstore_convention_key.py, the fragment and a figures directory; the two commits touch only the first three, all inside the declared scope.\nVERDICT manifest: read; it records status complete, commits 12b6a98bc and e75063745, baseline 92 passed at 6c642019, after 93 passed at 12b6a98bc, and names both negative-control logs.\nVERDICT diff: read commit by commit against 6c642019; 12b6a98bc splits stale_group into legacy_group plus a narrower stale_group, adds reclaim_legacy_group and calls it from write, and rewrites the convention-key assertions with the new reclaim test; e75063745 adds only the evidence fragment.\nCALL_SITES: nova/io/ingest.py:151 (IdsIngest.ingest calls SignalStore.write, so the reclaim runs on every production ingest), nova/io/__init__.py:14 (public export of SignalStore)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/io/signalstore.py:110-128 deletes the identity-only group and reports it before the convention-keyed store, and nova/io/signalstore.py:97-107 keeps stale_group's refusal meaning unchanged.\nSCORE evidence: 14\nJUSTIFICATION evidence: the counts are real (logs/baseline-suite.log 92 passed EXIT=0, logs/after-suite.log 93 passed EXIT=0, six sections each) but the fragment's own arm paths at docs/evidence/fragments/dd-cocos-ingest/store-group-reclaim.html:25 are absent or incomplete and the base log's module header at logs/baseline-suite.log:3 names the main checkout.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the two commits change only nova/io/signalstore.py, tests/test_signalstore_convention_key.py and the fragment, all declared, and the code diff carries no unrelated edit.\nSCORE durability: 18\nJUSTIFICATION durability: logs/negative-control-reclaim-removed.log shows tests/test_signalstore_convention_key.py:148 failing with the legacy group as the extra set member when the reclaim call is removed, and logs/negative-control-convention-assertion.log shows the rewritten key assertion failing when cocos is dropped from cache_key; the one-group assertion's expected name comes from the store's own cache_key, but its disk side is independent enumeration and the reclaim negative control reddens it.\nSCORE fit: 18\nJUSTIFICATION fit: the new methods follow the dataclass docstring and return-None-on-miss idiom of nova/io/signalstore.py:82-107 and none of legacy_group, reclaim_legacy_group or stored_groups carries a plan, version or ticket label.\nSCORE reuse: 12\nJUSTIFICATION reuse: reclaim_legacy_group re-implements the zarr delete at nova/io/signalstore.py:122-123 that nova/database/zarrstore.py:148-155 already owns as delete_group, instead of extending that owner with a group-name argument.\nFINDING docs/evidence/fragments/dd-cocos-ingest/store-group-reclaim.html:25 non-blocking: the gate table cites logs/baseline/ and logs/after/, but logs/after/ does not exist and logs/baseline/ is missing test_parity_gate.log with test_media.log truncated before its summary and EXIT line, so the record's own citation cannot support the counts it states (they reconcile only against the combined logs the manifest names).\nFINDING logs/baseline-suite.log:3 non-blocking: the base arm's header names the imported module as the main checkout /home/ITER/mcintos/Code/nova/nova/__init__.py while claiming revision 6c642019 in the node worktree, so the log does not show which tree the base arm imported; the delta between that revision and main head is docs only, which is why the measurement still stands.\nFINDING nova/io/signalstore.py:122 non-blocking: reclaim_legacy_group duplicates the group-deletion mechanism ZarrStore.delete_group owns at nova/database/zarrstore.py:148-155 rather than extending the owner, leaving two implementations of deleting a group from a store.\n",
+  "review_run_id": "r-20261024T163216329854-review-of-store-group-reclaim-e75063745c77",
+  "reviewed_base_sha": "6c642019db2a977c7c45a5015ea590316266877f",
+  "reviewed_head_sha": "e75063745c770b15def2453a991e8dae554c1208",
+  "reviewed_run_id": "r-20261024T160125464061-store-group-reclaim",
+  "scores": {
+    "durability": 18,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 12,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T16:43:14.942598+00:00",
+  "total": 100
+}

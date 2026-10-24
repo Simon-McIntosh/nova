@@ -52,6 +52,7 @@ def _hex_sampling(centres: np.ndarray, coilset: CoilSet) -> np.ndarray:
 
 def diverted_carrier(
     wall_shift: tuple[float, float] = (0.0, 0.0),
+    permutation: np.ndarray | None = None,
 ) -> tuple[np.ndarray, MomentGeometry]:
     """Build the diverted 300-cell certificate carrier's fixed geometry."""
     exact = cerfon_freidberg_single_null()
@@ -84,6 +85,16 @@ def diverted_carrier(
     stencil, _ = PlasmaGrid.loop_neighbour_vertices(
         centres, triangulation.vertex_neighbor_vertices, boundary_cells
     )
+    if permutation is not None:
+        order = np.asarray(permutation, dtype=np.intp)
+        position = np.argsort(order)
+        centres = centres[order]
+        area = area[order]
+        polygons = tuple(polygons[index] for index in order)
+        remapped = np.where(
+            stencil >= 0, position[np.clip(stencil, 0, None)], stencil
+        )
+        stencil = remapped
     mesh = StencilMesh(centres, stencil, area)
     geometry = MomentGeometry.from_cells(
         mesh, polygons, sampling_vertices=_hex_sampling(centres, coilset)
@@ -130,16 +141,52 @@ def carrier_receipt(wall_shift: tuple[float, float] = (0.0, 0.0)) -> dict:
     }
 
 
+def distinct_lattice_vertices(polygons) -> int:
+    """Count the corners of the lattice by an instrument outside the geometry.
+
+    Every cell lists each shared corner, so the lattice's vertex count is the
+    number of distinct positions in the union of the cell polygons. Counting
+    them by a coarse coordinate grid that no device drift can straddle measures
+    the identity the geometry publishes against something it does not produce.
+    """
+    corners = np.concatenate([np.asarray(cell, dtype=np.float64)[:, :2] for cell in polygons])
+    return len(np.unique(np.rint(corners / 1e-6).astype(np.int64), axis=0))
+
+
 def test_reference_carrier_vertices_are_identified_by_lattice_topology():
     wall, geometry = diverted_carrier()
     exact = cerfon_freidberg_single_null()
 
     assert len(wall) == fixture.WALL_POINT_COUNT
     assert geometry.cell_sample_nodes.shape[0] == 340
-    assert len(geometry.sample_node_coordinates) == len(
-        np.unique(geometry.cell_sample_nodes)
+    assert len(geometry.sample_node_coordinates) == distinct_lattice_vertices(
+        geometry.sampling_vertices
     )
     assert exact.coefficient_digest
+
+
+def ordered_rows(rows: np.ndarray) -> np.ndarray:
+    """Return rows in a canonical order, so a per-cell array can be compared."""
+    values = np.asarray(rows, dtype=np.float64)
+    return values[np.lexsort((values[:, 1], values[:, 0]))]
+
+
+def test_carrier_identity_is_independent_of_cell_order():
+    """Two builds that list one lattice differently publish the same arrays."""
+    _, reference = diverted_carrier()
+    order = np.random.default_rng(0).permutation(len(reference.sampling_vertices))
+    _, reordered = diverted_carrier(permutation=order)
+
+    np.testing.assert_array_equal(
+        reference.sample_node_coordinates, reordered.sample_node_coordinates
+    )
+    np.testing.assert_array_equal(
+        ordered_rows(reference.atomic_mesh.node_coordinates),
+        ordered_rows(reordered.atomic_mesh.node_coordinates),
+    )
+    np.testing.assert_array_equal(
+        reference.second_moment[order], reordered.second_moment
+    )
 
 
 def test_perturbed_wall_keeps_the_carrier_vertex_identity():

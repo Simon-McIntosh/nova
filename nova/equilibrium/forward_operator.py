@@ -429,6 +429,21 @@ def qualify_cell_current_moments(
     return qualified, indices
 
 
+def qualified_cell_current_moments(moments: CellCurrentMoments) -> CellCurrentMoments:
+    """Return the qualified moments, refusing by index when a cell is non-finite.
+
+    A concrete state carries cell values, so a non-finite cell is a defect the
+    solve must name rather than erase: the indices are reported and the caller
+    stops. A traced state carries no value to judge, so the qualification is
+    carried forward there and the offending cell is reported by the concrete
+    evaluation that reads the same state.
+    """
+    qualified, indices = qualify_cell_current_moments(moments)
+    if indices:
+        raise NonFiniteCellMomentError(indices)
+    return qualified
+
+
 def _cell_banked_field_integrals(
     support,
     selection,
@@ -3519,7 +3534,7 @@ class ForwardFluxOperator:
     def _internal_on_partition(self, psi, frozen, target_current=None):
         """Return the plasma image while retaining one trip's partition."""
         partition = self._partition_for_state(psi, frozen)
-        moments, _indices = qualify_cell_current_moments(
+        moments = qualified_cell_current_moments(
             self._current_moments_on_partition(psi, partition)
         )
         if target_current is not None:
@@ -3644,16 +3659,6 @@ class ForwardFluxOperator:
             self._support_partition(psi, requested_class)
         )
 
-    def cell_moment_receipt(self, psi, requested_class=None) -> tuple[int, ...]:
-        """Return the cell indices whose integrated current moment is non-finite.
-
-        The solve reports these indices rather than letting one cell's
-        singularity enter the total current and the common amplitude.
-        """
-        return qualify_cell_current_moments(
-            self.cell_current_moments(psi, requested_class)
-        )[1]
-
     @staticmethod
     def scaled_current_moments(
         moments: CellCurrentMoments, amplitude: jax.Array
@@ -3699,7 +3704,7 @@ class ForwardFluxOperator:
         self, psi, target_current, requested_class=None
     ) -> tuple[CellCurrentMoments, jax.Array]:
         """Return exact clipped moments and their declared-current amplitude."""
-        moments, _indices = qualify_cell_current_moments(
+        moments = qualified_cell_current_moments(
             self.cell_current_moments(psi, requested_class)
         )
         amplitude = self.current_normalisation_amplitude(
@@ -3722,7 +3727,7 @@ class ForwardFluxOperator:
     ):
         """Return one clipped partition, its scaled moments, and amplitude."""
         partition = self._support_partition(psi, requested_class)
-        moments, _indices = qualify_cell_current_moments(
+        moments = qualified_cell_current_moments(
             self._partitioned_current_moments(partition)
         )
         amplitude = self.current_normalisation_amplitude(

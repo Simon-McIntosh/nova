@@ -7,6 +7,8 @@ import pytest
 
 from nova.equilibrium.forward_operator import (
     ForwardFluxOperator,
+    NonFiniteCellMomentError,
+    qualified_cell_current_moments,
     qualify_cell_current_moments,
 )
 from nova.equilibrium.source import CurrentNormalisationError
@@ -65,6 +67,42 @@ def test_amplitude_refuses_by_name_on_a_non_finite_total():
     total = jnp.sum(moments.cell_current)
     with pytest.raises(CurrentNormalisationError):
         ForwardFluxOperator.current_normalisation_amplitude(jnp.asarray(37632.0), total)
+
+
+def test_a_concrete_non_finite_cell_refuses_by_index():
+    """The solve-path qualification raises instead of erasing a broken cell."""
+    with pytest.raises(NonFiniteCellMomentError) as caught:
+        qualified_cell_current_moments(planted_moments())
+    assert caught.value.indices == (PLANTED,)
+    assert str(PLANTED) in str(caught.value)
+
+
+def test_a_finite_state_passes_the_solve_path_qualification():
+    """A finite state is returned unchanged and nothing is raised."""
+    index = np.arange(CELL_COUNT, dtype=np.float64)
+    moments = CellCurrentMoments(
+        jnp.asarray(index + 1.0),
+        jnp.asarray(0.5 * (index + 1.0)),
+        jnp.asarray(-0.25 * (index + 1.0)),
+    )
+    returned = qualified_cell_current_moments(moments)
+    np.testing.assert_array_equal(
+        np.asarray(returned.cell_current), np.asarray(moments.cell_current)
+    )
+
+
+def test_a_traced_state_is_qualified_without_a_value_to_judge():
+    """A traced evaluation carries the qualification forward and names nothing."""
+    traced = jax.jit(
+        lambda scale: qualified_cell_current_moments(
+            CellCurrentMoments(
+                scale * jnp.ones(CELL_COUNT),
+                jnp.zeros(CELL_COUNT),
+                jnp.zeros(CELL_COUNT),
+            )
+        ).cell_current.sum()
+    )
+    assert np.isfinite(float(traced(jnp.asarray(2.0))))
 
 
 def test_qualified_total_normalises():

@@ -1,0 +1,101 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "nova/imas/plasma_source.py:255",
+    "nova/equilibrium/inverse.py:252",
+    "nova/imas/profiles.py:227",
+    "nova/imas/pulsedesign.py:726",
+    "nova/imas/ensemble.py:64",
+    "nova/imas/sample.py:428",
+    "nova/imas/contour_tree.py:10",
+    "nova/linalg/basis.py:166",
+    "nova/linalg/regression.py:189",
+    "nova/imas/equilibrium.py:977"
+  ],
+  "completed_at": "2026-10-24T00:38:56.148Z",
+  "dispatched_at": "2026-10-24T00:31:27Z",
+  "findings": [
+    {
+      "file": "nova/imas/equilibrium.py",
+      "line": "568",
+      "severity": "non-blocking",
+      "text": "_ids_vacuum_field re-expresses the b0-size selection (one value for the IDS, else one per slice) that nova/imas/getslice.py:11 vacuum_field owns in this same change, instead of calling it, so the rule the node consolidated to one owner still has two statements and the evidence fragment's claim that both callers read the owner is wrong for this one."
+    },
+    {
+      "file": "nova/imas/sample.py",
+      "line": "347",
+      "severity": "non-blocking",
+      "text": "Sample.equilibrium_ids writes psi_boundary, psi1d, dpressure_dpsi and f_df_dpsi into an equilibrium IDS with no write factor; those values now arrive in COCOS 17 from the translated reader, so their stored sign flips by -1 for a DD3 target where before the raw DD3 value passed through unchanged. The file is inside the declared write paths and plan section 4 requires a converted consumer to take its sign from the owner, but the node recorded it as follow-on 1 rather than converting it, so a real write-path regression is disclosed and left open."
+    },
+    {
+      "file": "docs/evidence/fragments/dd-cocos-ingest/dd-equilibrium-reader.html",
+      "line": "100",
+      "severity": "non-blocking",
+      "text": "the fragment says every arm above was re-run at the head as finally committed; the test_shape_inverse head arm (logs/shape_inverse-two-arms-1294540.log, job 1294540, started 2026-10-23T19:25:15Z) ran before 3b28b8b64, c76777000, c1e7f94ed, 505298bfd, 2319a6e58, bef45f5a6, fa01f7936 and ef1643e61, and 505298bfd changes EquilibriumData.load on a path that test can reach, so the delta claim for that file is not measured at the reviewed revision."
+    },
+    {
+      "file": "docs/evidence/fragments/dd-cocos-ingest/dd-equilibrium-reader.html",
+      "line": "94",
+      "severity": "non-blocking",
+      "text": "the gate table quotes 94.72 s for test_database and 7.30 s for test_pointconstraint, but the final-head logs the manifest names as that arm read 86.25 s and 5.01 s (logs/final-head-test_database.log, logs/final-head-test_pointconstraint.log), so the record's metrics do not reconcile with the logs a promotion receipt would open."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T154924795618-dd-equilibrium-reader/manifest.md",
+      "line": "26",
+      "severity": "non-blocking",
+      "text": "changed_paths lists eight paths while the diff against the base changes ten: tests/test_database.py and tests/test_pointconstraint.py are both in the landed change and absent from the list, so the record a coordinator audits scope against undercounts it. The required artifacts key is also absent and artifacts_note stands in its place."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T154924795618-dd-equilibrium-reader/logs/negative-control-stale-cache-reverted.log",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "the manifest's negative_control_log points at a log whose last line is a pytest summary (1 failed, 1 passed, 45 deselected) and which carries no bare EXIT= line anywhere, so the non-zero status admission reads from that field is not present in the file it names; the failing test id is legible, but the record shape the contract states is not met."
+    },
+    {
+      "file": "nova/imas/equilibrium.py",
+      "line": "986",
+      "severity": "non-blocking",
+      "text": "the wall property's dd_version argument has no passing guard: the only test that reaches the wall build is tests/test_equilibrium_reader_cocos.py's strict xfail for an unrelated frame KeyError, so removing the argument again would leave every test green."
+    },
+    {
+      "file": "nova/imas/scenario.py",
+      "line": "89",
+      "severity": "non-blocking",
+      "text": "int(self.homogeneous_time) is a serialisation fix the reader needs to store an uncached pulse at all, but the brief admits scenario.py for a sign site only, so the node widened the condition it was given rather than stopping to name it; the evidence fragment discloses the change in those terms."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read all seventeen commits from be0ec1321 to ef1643e61 and the ten-file diff: the reader's per-slice convention build and its by-name refusal, the cache-convention requirement on load, the inverse negation drop, the shared GetSlice.translated and vacuum_field owners, the wall dd_version, the scenario serialisation fix, the folded _observed reuse, the new signed/refusal test file with its IMAS_HOME fixture, and the evidence fragment.",
+    "done_when": "clause (1) is met by tests/test_equilibrium_reader_cocos.py:122-170, which asserts signed psi1d, psi_axis, the separatrix flux, dpressure_dpsi and f_df_dpsi against the raw DBEntry read times the 11 to 17 factor, and by :201-210, which asserts DINA 105014/1 and 105013/1 are refused with sigma_Bp=-1 and sigma_rho_theta_phi=-1, recorded as 6 passed and 1 xfailed in logs/fix-imashome-*.log at the reviewed head; clause (2) has both arms on all ten named files in logs/final-base-*.log and logs/final-head-*.log, every one EXIT=0 with zero failures, but the heavy test_shape_inverse head arm predates the final eight commits and sample.py's writer flip is named as a follow-on rather than converted; clause (3) is logs/sign-search.log at 119 hits with the planted control found and no bare negation tagged COCOS in a reader or consumer, plus the two folded review items in nova/imas/plasma_source.py:18 and tests/test_plasma_source.py:147.",
+    "goal": "the goal is to move the xarray equilibrium reader and GetSlice onto translate_equilibrium and have the inverse sign site and compensating consumers take their sign from the COCOS 17 owner; nova/imas/equilibrium.py:504-626 declares convention_fields, builds a signal map per slice from that slice's own observables and converts each field, :973 and :977 invoke the refusal and then the conversion, nova/equilibrium/inverse.py:245-252 drops the compensating negation, and nova/imas/getslice.py:50 gives the read seam one owner.",
+    "manifest": "read at manifest.md; status complete, seventeen commits and eleven final gate logs named, baseline_suite and after_suite are single-line JSON arrays at be0ec1321 and fa01f7936 with zero failures on both arms, but changed_paths omits two changed test files, the artifacts key is absent, the tests field is a JSON object rather than the literal command, and the named negative-control log carries no EXIT= line.",
+    "write_paths": "all ten paths in the diff are inside the manifest's declared write paths; nova/imas/scenario.py:89 is on that list but the brief admits the file for a sign site only and this is a serialisation change, and nova/imas/equilibrium.py:995 corrects the machine read's DD major, which the goal does not imply although the build needs it."
+  },
+  "justifications": {
+    "durability": "tests/test_equilibrium_reader_cocos.py:138 fails on the recorded bypass of GetSlice.translated (104.58 against minus 104.58), tests/test_pointconstraint.py:50 reddens when inverse.py:252 restores its negation (logs/negative-control-inverse-negation-restored.log), and tests/test_database.py:182 and :215 fail on either side of the cache check, but nova/imas/equilibrium.py:986 and nova/imas/scenario.py:89 have no test that reddens if reverted, and the new fixture guard at tests/test_equilibrium_reader_cocos.py:147 compares the reader's own IdsBase path against IdsBase's, so it guards the fixture rather than production.",
+    "evidence": "the ten named gate files have both arms recorded and green in logs/final-*.log with zero failures and the new signed and refusal checks record 6 passed and 1 xfailed at the reviewed head, but the fragment's sentence at :100 that every arm was re-run at the final head is false for test_shape_inverse, its quoted durations at :94 do not match the final-head logs, and the declared negative-control log carries no EXIT= line.",
+    "fit": "nova/imas/equilibrium.py:504-579 follows the surrounding class-attribute and method idiom and introduces no plan label or forbidden name, though check_convention at :554 repeats the translate_equilibrium construction of build_convention at :598, and nova/imas/plasma_source.py:13 imports the private _observed across a module boundary the owner does not export.",
+    "goal_fidelity": "nova/imas/equilibrium.py:579-626 converts every convention field through translate_equilibrium and records attrs['cocos'], EquilibriumData.load at :932-960 refuses a foreign-convention cache entry, and inverse.py:252 carries the sign once, so the build, read and load paths meet the goal, but nova/imas/sample.py:347 leaves a psi-signed writer unconverted.",
+    "reuse": "the change correctly consolidates the real forks -- plasma_source's private _translated and _vacuum_field are deleted in favour of nova/imas/getslice.py:50 and :11, and _observed now reads nova/io/sourcemap._observed -- but nova/imas/equilibrium.py:568 still re-implements the b0-by-index rule that getslice.py:11 owns without calling or extending it, which this dimension's rule scores at most 5.",
+    "scope_discipline": "every path in the diff is inside the declared write paths, but nova/imas/scenario.py:89 is admitted by the brief for a sign site only and is a serialisation change, and nova/imas/equilibrium.py:995 changes the machine read's Data Dictionary major, which the goal does not imply."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to move the xarray equilibrium reader and GetSlice onto translate_equilibrium and have the inverse sign site and compensating consumers take their sign from the COCOS 17 owner; nova/imas/equilibrium.py:504-626 declares convention_fields, builds a signal map per slice from that slice's own observables and converts each field, :973 and :977 invoke the refusal and then the conversion, nova/equilibrium/inverse.py:245-252 drops the compensating negation, and nova/imas/getslice.py:50 gives the read seam one owner.\nVERDICT done_when: clause (1) is met by tests/test_equilibrium_reader_cocos.py:122-170, which asserts signed psi1d, psi_axis, the separatrix flux, dpressure_dpsi and f_df_dpsi against the raw DBEntry read times the 11 to 17 factor, and by :201-210, which asserts DINA 105014/1 and 105013/1 are refused with sigma_Bp=-1 and sigma_rho_theta_phi=-1, recorded as 6 passed and 1 xfailed in logs/fix-imashome-*.log at the reviewed head; clause (2) has both arms on all ten named files in logs/final-base-*.log and logs/final-head-*.log, every one EXIT=0 with zero failures, but the heavy test_shape_inverse head arm predates the final eight commits and sample.py's writer flip is named as a follow-on rather than converted; clause (3) is logs/sign-search.log at 119 hits with the planted control found and no bare negation tagged COCOS in a reader or consumer, plus the two folded review items in nova/imas/plasma_source.py:18 and tests/test_plasma_source.py:147.\nVERDICT write_paths: all ten paths in the diff are inside the manifest's declared write paths; nova/imas/scenario.py:89 is on that list but the brief admits the file for a sign site only and this is a serialisation change, and nova/imas/equilibrium.py:995 corrects the machine read's DD major, which the goal does not imply although the build needs it.\nVERDICT manifest: read at manifest.md; status complete, seventeen commits and eleven final gate logs named, baseline_suite and after_suite are single-line JSON arrays at be0ec1321 and fa01f7936 with zero failures on both arms, but changed_paths omits two changed test files, the artifacts key is absent, the tests field is a JSON object rather than the literal command, and the named negative-control log carries no EXIT= line.\nVERDICT diff: read all seventeen commits from be0ec1321 to ef1643e61 and the ten-file diff: the reader's per-slice convention build and its by-name refusal, the cache-convention requirement on load, the inverse negation drop, the shared GetSlice.translated and vacuum_field owners, the wall dd_version, the scenario serialisation fix, the folded _observed reuse, the new signed/refusal test file with its IMAS_HOME fixture, and the evidence fragment.\nCALL_SITES: nova/imas/plasma_source.py:255, nova/equilibrium/inverse.py:252, nova/imas/profiles.py:227, nova/imas/pulsedesign.py:726, nova/imas/ensemble.py:64, nova/imas/sample.py:428, nova/imas/contour_tree.py:10, nova/linalg/basis.py:166, nova/linalg/regression.py:189, nova/imas/equilibrium.py:977\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/imas/equilibrium.py:579-626 converts every convention field through translate_equilibrium and records attrs['cocos'], EquilibriumData.load at :932-960 refuses a foreign-convention cache entry, and inverse.py:252 carries the sign once, so the build, read and load paths meet the goal, but nova/imas/sample.py:347 leaves a psi-signed writer unconverted.\nSCORE evidence: 14\nJUSTIFICATION evidence: the ten named gate files have both arms recorded and green in logs/final-*.log with zero failures and the new signed and refusal checks record 6 passed and 1 xfailed at the reviewed head, but the fragment's sentence at :100 that every arm was re-run at the final head is false for test_shape_inverse, its quoted durations at :94 do not match the final-head logs, and the declared negative-control log carries no EXIT= line.\nSCORE scope_discipline: 15\nJUSTIFICATION scope_discipline: every path in the diff is inside the declared write paths, but nova/imas/scenario.py:89 is admitted by the brief for a sign site only and is a serialisation change, and nova/imas/equilibrium.py:995 changes the machine read's Data Dictionary major, which the goal does not imply.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_equilibrium_reader_cocos.py:138 fails on the recorded bypass of GetSlice.translated (104.58 against minus 104.58), tests/test_pointconstraint.py:50 reddens when inverse.py:252 restores its negation, and tests/test_database.py:182 and :215 fail on either side of the cache check, but nova/imas/equilibrium.py:986 and nova/imas/scenario.py:89 have no test that reddens if reverted.\nSCORE fit: 16\nJUSTIFICATION fit: nova/imas/equilibrium.py:504-579 follows the surrounding class-attribute and method idiom and introduces no plan label or forbidden name, though check_convention at :554 repeats the translate_equilibrium construction of build_convention at :598, and nova/imas/plasma_source.py:13 imports the private _observed across a module boundary the owner does not export.\nSCORE reuse: 5\nJUSTIFICATION reuse: the change correctly consolidates the real forks -- plasma_source's private _translated and _vacuum_field are deleted in favour of nova/imas/getslice.py:50 and :11 -- but nova/imas/equilibrium.py:568 still re-implements the b0-by-index rule that getslice.py:11 owns without calling or extending it, which this dimension's rule scores at most 5.\nFINDING nova/imas/equilibrium.py:568 non-blocking: _ids_vacuum_field re-expresses the b0-size selection that nova/imas/getslice.py:11 vacuum_field owns in this same change instead of calling it, so the consolidated rule still has two statements and the fragment's claim that both callers read the owner is wrong for this one.\nFINDING nova/imas/sample.py:347 non-blocking: Sample.equilibrium_ids writes psi_boundary, psi1d, dpressure_dpsi and f_df_dpsi into a DD IDS with no write factor, so their stored sign flips by -1 for a DD3 target now that the reader serves COCOS 17; the file is inside the declared write paths and the node recorded it as a follow-on rather than converting it.\nFINDING docs/evidence/fragments/dd-cocos-ingest/dd-equilibrium-reader.html:100 non-blocking: the claim that every arm was re-run at the head as finally committed is false for tests/test_shape_inverse.py, whose head arm (job 1294540, 2026-10-23T19:25:15Z) predates 505298bfd and seven other commits, and 505298bfd changes EquilibriumData.load on a reachable path.\nFINDING docs/evidence/fragments/dd-cocos-ingest/dd-equilibrium-reader.html:94 non-blocking: the gate table quotes 94.72 s and 7.30 s where the final-head logs named in the manifest read 86.25 s and 5.01 s, so the record does not reconcile with the logs a receipt would open.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T154924795618-dd-equilibrium-reader/manifest.md:26 non-blocking: changed_paths lists eight paths while the diff changes ten, omitting tests/test_database.py and tests/test_pointconstraint.py, and the required artifacts key is absent.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T154924795618-dd-equilibrium-reader/logs/negative-control-stale-cache-reverted.log:1 non-blocking: the declared negative-control log ends on a pytest summary and carries no bare EXIT= line, so the non-zero status admission reads from that field is not in the file it names.\nFINDING nova/imas/equilibrium.py:986 non-blocking: the wall's dd_version argument has no passing guard; the only test reaching the wall build is a strict xfail for an unrelated KeyError, so removing the argument again would leave every test green.\nFINDING nova/imas/scenario.py:89 non-blocking: int(self.homogeneous_time) is a needed serialisation fix but the brief admits scenario.py for a sign site only, so the node widened its condition rather than naming it before proceeding.\n",
+  "review_run_id": "r-20261024T003102498136-review-of-dd-equilibrium-reader-ef1643e613c0",
+  "reviewed_base_sha": "be0ec13216426c276802be4b8320d5f8d7a82715",
+  "reviewed_head_sha": "ef1643e613c02bc26abfd00a3191e2a86d05ab1f",
+  "reviewed_run_id": "r-20261023T154924795618-dd-equilibrium-reader",
+  "scores": {
+    "durability": 17,
+    "evidence": 14,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T00:52:00+00:00",
+  "total": 85
+}

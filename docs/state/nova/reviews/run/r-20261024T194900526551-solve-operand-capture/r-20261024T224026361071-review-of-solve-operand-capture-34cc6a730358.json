@@ -12,6 +12,13 @@
   ],
   "completed_at": "2026-10-24T23:00:22.855Z",
   "dispatched_at": "2026-10-24T22:45:55Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-solve-operand-capture-34cc6a730358",
+      "recorded_at": "2026-10-24T23:44:40.655433+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diverted_stall/measure.py",

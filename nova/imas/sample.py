@@ -14,6 +14,12 @@ from nova.imas.dataset import Ids
 from nova.imas.ids_entry import IdsEntry
 from nova.imas.equilibrium import EquilibriumData
 from nova.imas.metadata import Metadata
+from nova.io.sourcemap import dd_equilibrium_factor
+from nova_cocos import DODPSI_LIKE, PSI_LIKE
+
+#: the Data Dictionary version a write goes to when the caller names none. The
+#: pulsedesign writers store DD3, so a sample written without a target joins them.
+DEFAULT_DD_VERSION = "3.39.0"
 
 
 @dataclass
@@ -332,9 +338,19 @@ class Sample(Plot, Defeature, Select):
                 ids_entry["z", i] = self.data.strike_point[:, i, 1].data
         return ids_entry.ids
 
-    def equilibrium_ids(self) -> Ids:
-        """Write sample data to a equilibrium IDS."""
-        ids_entry = IdsEntry(name="equilibrium")
+    def equilibrium_ids(self, dd_version: str = DEFAULT_DD_VERSION) -> Ids:
+        """Write sample data to an equilibrium IDS at the version being written.
+
+        The sample holds nova's own convention, COCOS 17, so every psi-like and
+        d/dpsi-like row is converted into the convention of the Data Dictionary
+        version the entry is written at.  The factor follows from that version
+        through :func:`nova.io.sourcemap.dd_equilibrium_factor`, so a DD3 target
+        stores COCOS 11 data and a DD4 target stores the sample's values
+        unchanged; no site states a sign of its own.
+        """
+        ids_entry = IdsEntry(name="equilibrium", dd_version=dd_version)
+        psi_factor = dd_equilibrium_factor(dd_version, PSI_LIKE)
+        dpsi_factor = dd_equilibrium_factor(dd_version, DODPSI_LIKE)
         self.update_metadata(ids_entry, provenance=[self.data.attrs["equilibrium"]])
         ids_entry.ids.time = self.data.time.data
         ids_entry.ids.time_slice.resize(self.data.sizes["time"])
@@ -344,7 +360,7 @@ class Sample(Plot, Defeature, Select):
 
         with ids_entry.node("time_slice:boundary_separatrix.*"):
             ids_entry["type", :] = self.data["boundary_type"].data
-            ids_entry["psi", :] = self.data["psi_boundary"].data
+            ids_entry["psi", :] = psi_factor * self.data["psi_boundary"].data
             for attr in [
                 "minor_radius",
                 "elongation",
@@ -384,9 +400,9 @@ class Sample(Plot, Defeature, Select):
         # include profile data - to remove in future
         with ids_entry.node("time_slice:profiles_1d.*"):
             for itime in range(self.data.sizes["time"]):
-                ids_entry["psi", itime] = self.data.psi1d.data[itime]
+                ids_entry["psi", itime] = psi_factor * self.data.psi1d.data[itime]
                 for attr in ["dpressure_dpsi", "f_df_dpsi"]:
-                    ids_entry[attr, itime] = self.data[attr].data[itime]
+                    ids_entry[attr, itime] = dpsi_factor * self.data[attr].data[itime]
         return ids_entry.ids
 
     def update_metadata(self, ids_entry: IdsEntry, provenance=None):
@@ -404,7 +420,9 @@ class Sample(Plot, Defeature, Select):
         """Write sample data to pulse_schedule ids."""
         match ids_attrs["name"]:
             case "equilibrium":
-                ids = self.equilibrium_ids()
+                ids = self.equilibrium_ids(
+                    ids_attrs.get("dd_version") or DEFAULT_DD_VERSION
+                )
             case "pulse_schedule":
                 ids = self.pulse_schedule_ids()
             case _:

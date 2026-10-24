@@ -113,13 +113,16 @@ class Properties(Contacts, Attrs):
     def update(self, ids):
         """Extend Attrs update to include provenance ids."""
         super().update(ids)
-        if self.provenance is not None:
-            ids.provenance.node.resize(1)
-            # DD3 carries a source list on the provenance node; DD4 replaced it
-            # with a structured reference, so a list of sources has no field to
-            # go in there and is left unwritten rather than refused.
-            if hasattr(ids.provenance.node[0], "sources"):
-                ids.provenance.node[0].sources = self.provenance
+        # The provenance structure sits on ids_properties, which DD3 and DD4
+        # both carry. A DD3 node holds a source list; a DD4 node holds a
+        # structured reference and has no source field at all, so the list is
+        # written only where the field exists.
+        if self.provenance is None:
+            return
+        node = ids.provenance.node
+        node.resize(1)
+        if hasattr(node[0], "sources"):
+            node[0].sources = self.provenance
 
     @property
     def creation_date(self):

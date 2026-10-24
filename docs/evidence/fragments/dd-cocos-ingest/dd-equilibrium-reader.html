@@ -58,9 +58,16 @@ which COCOS the version being written publishes and
 <code>nova_cocos.convention_transform</code> what factor each row type takes
 between the two, so a DD3 target stores COCOS 11 data and a DD4 target stores
 the sample's values unchanged. No site states a sign of its own. A DD4 write
-also exposed a metadata defect of its own: DD3 carries a source list on the
-provenance node and DD4 replaced it with a structured reference, so the source
-list is now written only where the node carries one.</p>
+also exposed a metadata defect of its own: the provenance structure sits on
+<code>ids_properties</code>, which every version carries, but DD4 has no source
+list on its entries — a DD4 provenance node carries a structured reference and
+no <code>sources</code> field at all — so the source list is written only where
+the field exists, and the node is read before it is resized rather than after.
+<code>tests/test_metadata.py</code> writes provenance at DD3 and at DD4, for
+<code>equilibrium</code>, <code>pf_active</code>, <code>pulse_schedule</code>
+and <code>wall</code>, and shows every one of those writes completes; with the
+source-list guard removed in a scratch copy the eight DD4 arms fail
+(<code>logs/r7-negative-control-metadata-guard-removed.log</code>).</p>
 <p>Both arms are measured in <code>tests/test_sample_write_convention.py</code>,
 which writes a known COCOS 17 state and reads the entry back without a database.
 The DD3 arm is a whole-entry round trip and every signed row flips while the
@@ -92,7 +99,7 @@ shows they see the factor at all.</p>
 </thead><tbody>
 <tr><th scope="row"><code>nova/equilibrium/inverse.py::InverseDesign.update_constraints</code></th><td><strong>converted.</strong> The compensating negation is dropped; the reader applies the 11 &rarr; 17 psi factor once.</td></tr>
 <tr><th scope="row"><code>nova/imas/profiles.py::Profile.psi_axis</code>, <code>::psi_boundary</code>, <code>::psi_norm</code>, <code>::denormalize</code></th><td><strong>unchanged.</strong> Reads through the reader and derives; <code>psi_norm</code> is invariant under the psi factor and <code>denormalize</code> returns the reader's own COCOS 17 value, which is the intended one.</td></tr>
-<tr><th scope="row"><code>nova/imas/pulsedesign.py</code> writer (<code>equilibrium_ids</code>, three psi entries)</th><td><strong>unchanged.</strong> Already takes its factor from <code>psi_write_factor(DD3_CONVENTION)</code> = &minus;1, which is the inverse of the reader's 11 &rarr; 17 factor, so the stored DD3 value is the same before and after.</td></tr>
+<tr><th scope="row"><code>nova/imas/pulsedesign.py</code> writer (<code>equilibrium_ids</code>, three psi entries)</th><td><strong>unchanged.</strong> Already takes its factor from <code>nova.io.sourcemap.dd_equilibrium_factor("3.39.0", PSI_LIKE)</code> = &minus;1, which is the inverse of the reader's 11 &rarr; 17 factor, so the stored DD3 value is the same before and after.</td></tr>
 <tr><th scope="row"><code>nova/imas/sample.py::Sample.equilibrium_ids</code> (<code>boundary_separatrix.psi</code>), <code>::pulse_schedule_ids</code> (<code>loop_voltage</code>)</th><td><strong>follow-on #1.</strong> These write a psi-signed value into a DD entry with no factor. They are compensating writers of the same shape as the pulsedesign writer and are outside this node's named test gate; they are recorded rather than changed here.</td></tr>
 <tr><th scope="row"><code>nova/imas/ensemble.py</code>, <code>nova/imas/contour_tree.py</code>, <code>nova/linalg/regression.py</code>, <code>nova/imas/flux.py</code></th><td><strong>unchanged.</strong> They read <code>psi_norm</code>, geometry or randomised fixtures, carry no psi sign of their own, and no bare negation tagged COCOS.</td></tr>
 <tr><th scope="row"><code>nova/imas/scenario.py</code></th><td><strong>unchanged.</strong> The dataset builder; it neither reads nor writes a convention.</td></tr>
@@ -158,7 +165,7 @@ shows they see the factor at all.</p>
 
 <h2 id="dd-equilibrium-reader-follow-on">Follow-ons</h2>
 <ol>
-<li><code>nova/imas/sample.py</code>'s two psi-signed writers take no factor; they should take <code>psi_write_factor(DD3_CONVENTION)</code> as the pulsedesign writer does.</li>
+<li><code>nova/imas/sample.py</code>'s two psi-signed writers take no factor; they should take <code>nova.io.sourcemap.dd_equilibrium_factor</code> with the version being written as the pulsedesign writer does.</li>
 <li><strong>Closed in this node.</strong> The cache group's identity is the source's pulse, run and Data Dictionary version, and the reader's own convention changes none of them, so a dataset cached before this change was found under the same name and served with its raw DD3 psi. The reader now requires the convention it records on load: an entry carrying none, or another, is evicted and reported as a cache miss, so the store is rebuilt instead of the source's own convention being served as the reader's.</li>
 <li>DINA 105014/1 and 105013/1 are refused at their global quantities rather than by the node the profile walk tripped over, so the <code>Invalid node name '0' in path: 0</code> this node saw first is no longer reached on a refused pulse.</li>
 </ol>

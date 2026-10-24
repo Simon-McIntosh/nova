@@ -17,14 +17,14 @@ from nova.equilibrium.convention import (
     SIGMA_BP,
     TOTAL_FLUX_FACTOR,
 )
-from nova.imas.pulsedesign import psi_write_factor
 from nova.io.sourcemap import (
     DD3_CONVENTION,
     DD4_CONVENTION,
     NOVA_CONVENTION,
     dd_equilibrium_convention,
+    dd_equilibrium_factor,
 )
-from nova_cocos import convention
+from nova_cocos import PSI_LIKE, convention
 
 
 def test_the_internal_convention_is_stated_once():
@@ -45,20 +45,20 @@ def test_a_dd3_write_carries_the_flux_sign_flip():
     """A table writer's psi entries keep the sign they had before the refactor."""
     assert dd_equilibrium_convention("3.42.0") == DD3_CONVENTION
     assert dd_equilibrium_convention("3.38.1") == DD3_CONVENTION
-    assert psi_write_factor(DD3_CONVENTION) == -1.0
+    assert dd_equilibrium_factor("3.42.0", PSI_LIKE) == -1.0
 
 
 def test_a_dd4_write_passes_the_internal_flux_through():
     """A DD4 write stores the internal COCOS 17 flux unchanged."""
     assert dd_equilibrium_convention("4.1.0") == DD4_CONVENTION
-    assert psi_write_factor(DD4_CONVENTION) == 1.0
+    assert dd_equilibrium_factor("4.1.0", PSI_LIKE) == 1.0
 
 
 def test_the_written_psi_keeps_its_value():
     """A stored COCOS 17 flux is negated to DD3 exactly as the literal did."""
     internal = np.array([100.0, -50.0, 12.5])
     base = -internal
-    assert np.array_equal(psi_write_factor(DD3_CONVENTION) * internal, base)
+    assert np.array_equal(dd_equilibrium_factor("3.42.0", PSI_LIKE) * internal, base)
 
 
 def _plotted_levels(monkeypatch, convention_id: int, levels: np.ndarray) -> np.ndarray:

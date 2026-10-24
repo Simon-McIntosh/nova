@@ -1,0 +1,50 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-24T21:06:36.265Z",
+  "dispatched_at": "2026-10-24T20:44:30Z",
+  "findings": [
+    {
+      "file": "benchmarks/mast_centroid_solve_panels.py",
+      "line": "779",
+      "severity": "non-blocking",
+      "text": "the conductor-only vacuum saddles are passed as x_points, the filled-cross glyph nova/media/poloidal.py:540 reserves for an ADMITTED saddle, while a conductor-only field admits none and the plotting rule's hollow marker is for other qualified nulls; the caption disambiguates, but both panels now carry the same glyph so the vacuum null reads as an admission."
+    },
+    {
+      "file": "benchmarks/mast_centroid_solve_panels.py",
+      "line": "817",
+      "severity": "non-blocking",
+      "text": "the label check collects only axes titles, so the LABEL_CHECK line it prints at :830 reports zero clipped and zero overlapping labels for the whole figure while any axis label, tick label or annotation a later panel adds would be excluded from that count without changing the reported number."
+    },
+    {
+      "file": "benchmarks/mast_centroid_solve_panels.py",
+      "line": "873",
+      "severity": "non-blocking",
+      "text": "the receipt writer stores str(figure_path), an absolute and in a worktree worktree-absolute path, while all three committed receipts carry repository-relative paths (docs/figures/mast-centroid-capability/full-axis-lane/centroid-solve.json:135), so the committed receipt is not what the recorded render command produces and every worktree regeneration needs the same hand relativisation the commit hook forces."
+    },
+    {
+      "file": "benchmarks/mast_centroid_solve_panels.py",
+      "line": "781",
+      "severity": "non-blocking",
+      "text": "vacuum_axes[0] draws the first in-wall O point and silently drops any others, and draw_nulls has no multi-O vocabulary, so a field with two in-wall minima would record o_points_inside_wall above one while the panel shows a single triangle; all three committed states record zero, so the branch is latent rather than active."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal (brief.md:22-48) is a repository test over the three committed panel-fields.npz states, the restored CPU provenance reason, and the conductor-only panel's own null markers; tests/test_mast_centroid_panel_states.py:29-42 lands the test, benchmarks/mast_centroid_solve_panels.py:769-786 lands the vacuum census and its markers, and docs/figures/mast-centroid-capability/cpu-lane/centroid-solve.json:150 restores that reason's original text.\nVERDICT done_when: the source brief's Gate (brief.md:50-59) asks for the new test file and tests/test_contour_tree_explanatory_figure.py as fresh processes with recorded commands, and a negative control of the new test against the pre-regeneration state; panel-states-final.log records 4 passed EXIT=0, contour-figure-final.log records 6 passed EXIT=0, and negative-control.log records test_committed_panel_state_renders[cpu-lane] FAILED on six missing keys (coil_outlines plus all five branch_*) with EXIT=1.\nVERDICT write_paths: read the manifest's orientation_write_paths (seven entries) and the reviewed diff; git diff 68dab2cf3..1057896e1 touches benchmarks/mast_centroid_solve_panels.py, tests/test_mast_centroid_panel_states.py, the cpu-lane, full-axis-lane and titan-lane directories under docs/figures/mast-centroid-capability, and docs/evidence/fragments/separatrix-spline-extraction/centroid-state-guard.html, every one inside the declared set.\nVERDICT manifest: read; status complete with three commits (2b9b749c0, 043f95d79, 1057896e1), tests: names the literal new-test pytest command, test_logs names both focused gate logs, and negative_control_log is one bare path with a failing head-arm test id, but baseline_suite and after_suite are empty, so the run carries no paired suite arm and its added-failure count rests on the two focused gates plus the control.\nVERDICT diff: read commit by commit against 68dab2cf3; 2b9b749c0 adds PANEL_STATE_KEYS with its precondition check, the FieldNull vacuum census with draw_nulls markers, and the label refusal; 043f95d79 redraws the three lane figures and restores the provenance text verbatim from 754e1de17^ plus a continuity clause; 1057896e1 adds an 11-line evidence fragment; no file outside the declared scope, and the extra figure-path relativisation in two receipts is inside the lane directories.\nCALL_SITES: benchmarks/mast_centroid_solve_panels.py:1477 main -> :1514 panels, /home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T202117352778-centroid-state-guard/render_panels.py:9 panels (the generator that wrote the committed figures; tests/test_mast_centroid_panel_states.py:37 is a test caller and is not counted)\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: all three Do items landed at benchmarks/mast_centroid_solve_panels.py:769-786, tests/test_mast_centroid_panel_states.py:37 and docs/figures/mast-centroid-capability/cpu-lane/centroid-solve.json:150, with only the admitted-saddle glyph assignment and the receipt path form below detracting.\nSCORE evidence: 17\nJUSTIFICATION evidence: panel-states-final.log, contour-figure-final.log, render-panels.log (four LABEL_CHECK clipped=0 overlapping=0 lines) and negative-control.log each carry a # command: header and a bare EXIT= line, and a conductor-panel marker independently appears in docs/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels.svg (one extra #cc0000 use element from x=163 in the left panel), but no suite arm exists for a paired failure count and the gates ran at 043f95d rather than at the docs-only head.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff 68dab2cf3..1057896e1 is inside the manifest's declared write paths, and the only tangential content is the figure-path relativisation at docs/figures/mast-centroid-capability/full-axis-lane/centroid-solve.json:135 and the titan equivalent, which nova's worktree-path rule requires.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_mast_centroid_panel_states.py:31-32 is proven to redden by negative-control.log and :42 pins the new conductor-panel draw through its own receipt, but nothing asserts the restored marker text survives a regeneration and the label refusal at benchmarks/mast_centroid_solve_panels.py:832 has no test that makes it fire.\nSCORE fit: 17\nJUSTIFICATION fit: the additions at benchmarks/mast_centroid_solve_panels.py:717-786 follow the module's inline-import and documented-helper idiom and introduce no forbidden name, though the vacuum.T double transpose at :769 reads obscurely and the label check sits inline rather than in any save path the repository shares.\nSCORE reuse: 19\nJUSTIFICATION reuse: the census reuses FieldNull.categorize_2d (nova/biot/fieldnull.py:239), the containment test reuses inside_wall_units (nova/media/sources/frame.py:56) and the markers reuse poloidal.draw_nulls, and a search for a shared clipped or overlapping label refusal over nova/media and benchmarks found only the placement helper at benchmarks/contour_tree_explanatory_figure.py:453, which is a different capability.\nFINDING benchmarks/mast_centroid_solve_panels.py:779 non-blocking: the conductor-only vacuum saddles are passed as x_points, the filled-cross glyph nova/media/poloidal.py:540 reserves for an ADMITTED saddle, while a conductor-only field admits none and the plotting rule's hollow marker is for other qualified nulls; the caption disambiguates, but both panels now carry the same glyph so the vacuum null reads as an admission.\nFINDING benchmarks/mast_centroid_solve_panels.py:817 non-blocking: the label check collects only axes titles, so the LABEL_CHECK line it prints at :830 reports zero clipped and zero overlapping labels for the whole figure while any axis label, tick label or annotation a later panel adds would be excluded from that count without changing the reported number.\nFINDING benchmarks/mast_centroid_solve_panels.py:873 non-blocking: the receipt writer stores str(figure_path), an absolute and in a worktree worktree-absolute path, while all three committed receipts carry repository-relative paths (docs/figures/mast-centroid-capability/full-axis-lane/centroid-solve.json:135), so the committed receipt is not what the recorded render command produces and every worktree regeneration needs the same hand relativisation the commit hook forces.\nFINDING benchmarks/mast_centroid_solve_panels.py:781 non-blocking: vacuum_axes[0] draws the first in-wall O point and silently drops any others, and draw_nulls has no multi-O vocabulary, so a field with two in-wall minima would record o_points_inside_wall above one while the panel shows a single triangle; all three committed states record zero, so the branch is latent rather than active.\n",
+  "review_run_id": "r-20261024T204231339876-review-of-centroid-state-guard-1057896e13ea",
+  "reviewed_base_sha": "68dab2cf380664803587c562a71db914abbe8ab9",
+  "reviewed_head_sha": "1057896e13ea459dcf1cba543e709aa20de2e780",
+  "reviewed_run_id": "r-20261024T202117352778-centroid-state-guard",
+  "scores": {
+    "durability": 16,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T21:08:14.437597+00:00",
+  "total": 106
+}

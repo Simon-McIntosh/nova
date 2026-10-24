@@ -75,7 +75,10 @@ def test_closing_over_the_operand_is_what_captures_it(operands):
     point = jnp.zeros(STATE_SIZE)
     direction = jnp.ones(STATE_SIZE)
 
-    factor = jax.linearize(equation, point, (rows,))[1]
+    def closed_equation(state):
+        return equation(state, (rows,))
+
+    factor = jax.linearize(closed_equation, point)[1]
     closed = jax.make_jaxpr(factor)(direction)
 
     captured = _constant_bytes(closed)

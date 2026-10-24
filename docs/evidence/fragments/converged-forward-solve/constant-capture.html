@@ -1,0 +1,13 @@
+<section data-evidence="constant-capture">
+<h3 id="solve-operand-capture-record">Operands are program arguments, not captured constants</h3>
+
+<p id="solve-operand-capture-mechanism">The Newton factor programs were compiled from <code>jax.linearize</code> over <em>concrete</em> operands. A linearization taken over concrete values embeds every operand array as a literal in the jaxpr it returns, and the solve then compiles one factor program per correction with <code>jax.jit(factor)</code>. Each compiled program therefore carried its own copy of the window rows and the interior jets, so the copies multiplied with every step: the cut-cell split node measured <code>84.36GB total</code> of captured constants when the limited 550 cold solve lowered, with <code>float64[10,16,1177600]</code> (1.51 GB) repeating about twenty-five times. The report's frames name the wall-events step at <code>topology.py:2847</code>, reached through <code>program.py:46</code> (<code>FusedField.evaluate</code>) and <code>fixed_points.py:294</code> (<code>CachedField.evaluate</code>) — the path along which the closed-operand window rows are read.</p>
+
+<p id="solve-operand-capture-change">The tangent map built by <code>operand_tangent</code> in <code>scripts/prototypes/fast_map_production/solver.py</code> now takes the operands as arguments, so the lowering reads them as program parameters and one compiled program serves every correction. The same treatment covers the one-off read and booking programs, which had closed over the field and the reading.</p>
+
+<p id="solve-operand-capture-test"><code>tests/test_solve_operand_capture.py</code> pins the distinction by measuring the constant bytes of a lowered tangent program. Its positive control linearizes over a concrete operand and requires the instrument to see at least half that operand's bytes as constants, so a green result cannot come from an instrument that never reports a capture.</p>
+
+<h3 id="solve-operand-capture-measure">Measure</h3>
+
+<p id="solve-operand-capture-measure-pending">The captured-constants report for the limited 550 lowering, the certificate rows at the base and the tip, and the negative control were submitted as SLURM job <code>1295096</code> on <code>betelgeuse</code> under <code>gpu_0003_grpA</code>. The job was still pending on <code>Resources</code> when the node's turn ended, so its readings are recorded in the run's logs (<code>capture-rows.log</code>, <code>report-*.log</code>, <code>certificate-*.log</code>) and are filled into this fragment's measure sentence on resume.</p>
+</section>

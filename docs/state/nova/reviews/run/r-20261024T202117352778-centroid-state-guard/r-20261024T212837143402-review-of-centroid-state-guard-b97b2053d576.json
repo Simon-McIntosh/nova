@@ -1,0 +1,38 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-24T21:50:09.351Z",
+  "dispatched_at": "2026-10-24T21:32:13Z",
+  "findings": [
+    {
+      "file": "benchmarks/mast_centroid_solve_panels.py",
+      "line": "873",
+      "severity": "non-blocking",
+      "text": "panels() rewrites only the `figure` and `drawn_plasma_mesh` keys of the receipt, so the `vacuum_saddle_validation` block the new assertions read at tests/test_mast_centroid_panel_states.py:39 exists only as hand-inserted JSON written by vacuum_null_probe.py and record_vacuum_probe.py in the run directory, which are not in the tree; the test can detect the block being edited or dropped but no committed code can regenerate it, the same run-directory-only evidence dependency the node was dispatched to remove."
+    },
+    {
+      "file": "benchmarks/mast_centroid_solve_panels.py",
+      "line": "778",
+      "severity": "non-blocking",
+      "text": "the hollow cross is drawn at the six-neighbour census grid marker (1.818125, 0.0), which each receipt's own vacuum_saddle_validation records 4.5 mm from the polished root (1.813582, 9.0e-05), and neither the receipt nor tests/test_mast_centroid_panel_states.py:39-60 binds the drawn coordinate to the polished one, so the 'confirmed in-wall root' assertion confirms the field contains a saddle rather than that the glyph marks it."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source node's goal (prompt.txt GOAL line) is a repository test over every committed MAST centroid panel state, restored CPU provenance and marked conductor-only nulls; the increment under review lands the marker half at benchmarks/mast_centroid_solve_panels.py:782, moving the vacuum saddles into `other_x_points` so they draw hollow, and adds a stationarity confirmation and method table at docs/evidence/fragments/separatrix-spline-extraction/centroid-state-guard.html:7-20.\nVERDICT done_when: the brief's Gate (brief.md:51-56) asks for the new test file and tests/test_contour_tree_explanatory_figure.py as fresh pytest processes with recorded commands plus a negative control; panel-states-smooth-final.log records 4 passed EXIT=0 at staged tree e20d43230f5d (verified equal to b97b2053's tree), contour-figure-final.log records 6 passed EXIT=0 at 043f95d79, and negative-control.log records test_committed_panel_state_renders[cpu-lane] FAILED on the pre-regeneration state with EXIT=1; I re-ran the head gate independently as review-gate.log and saw 4 passed EXIT=0.\nVERDICT write_paths: read the manifest's orientation_write_paths (seven entries) and git diff 1057896e13ea b97b2053; all 14 changed paths - benchmarks/mast_centroid_solve_panels.py, tests/test_mast_centroid_panel_states.py, the three docs/figures/mast-centroid-capability lane directories and the evidence fragment - lie inside the declared set.\nVERDICT manifest: read; status complete with five commits, the literal head pytest command under tests:, both focused gate logs under test_logs and a bare-path negative_control_log naming a failing head-arm id, but baseline_suite and after_suite are empty, so the run records no paired suite arms and its added-failure count is zero by absence rather than by measurement.\nVERDICT diff: read both commits commit by commit against 1057896e13ea; 9d5a6bf92 changes one keyword at benchmarks/mast_centroid_solve_panels.py:782, updates the caption and republishes four panels with matching counts, while b97b2053 adds receipt data, the caption and method table, and ten assertions, its SVG churn being clip-path id and dc:date only (which is why its PNG bytes are unchanged).\nCALL_SITES: benchmarks/mast_centroid_solve_panels.py:1514 (main at :1477 calls panels; tests/test_mast_centroid_panel_states.py:51 is a test caller and the renderer that wrote the committed figures lives in the run directory, so neither is a production call site)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: benchmarks/mast_centroid_solve_panels.py:782 routes the conductor-only saddles through `other_x_points`, the hollow vocabulary, and the caption at docs/evidence/fragments/separatrix-spline-extraction/centroid-state-guard.html:7 states the distinction.\nSCORE evidence: 16\nJUSTIFICATION evidence: panel-states-smooth-final.log carries a bare EXIT=0 at head tree e20d43230f5d and my independent re-run reproduced 4 passed, but the vacuum_saddle_validation block those assertions read at tests/test_mast_centroid_panel_states.py:39 is produced by run-directory scripts absent from the tree.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff 1057896e13ea b97b2053 is inside the manifest's declared write paths, and the large SVG diffs at docs/figures/mast-centroid-capability/*/vacuum-and-plasma-panels.svg are re-renders whose only changes are clip-path ids and dc:date.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_mast_centroid_panel_states.py:59-60 would redden on reverting benchmarks/mast_centroid_solve_panels.py:782 to `x_points=vacuum_saddles`, and :39-49 bind each receipt to the sha256 of its committed state; nothing asserts the drawn glyph sits at the confirmed root.\nSCORE fit: 18\nJUSTIFICATION fit: the production change uses the keyword vocabulary benchmarks/poloidal_convergence_atlas.py:249 and a dozen sibling benchmark call sites already use, though tests/test_mast_centroid_panel_states.py:5-6 puts hashlib after json.\nSCORE reuse: 20\nJUSTIFICATION reuse: the one production change reuses the hollow-null capability nova/media/poloidal.py:665-687 already owns instead of adding a detector, and the increment defines no new symbol.\nFINDING benchmarks/mast_centroid_solve_panels.py:873 non-blocking: panels() rewrites only the `figure` and `drawn_plasma_mesh` keys of the receipt, so the `vacuum_saddle_validation` block the new assertions read at tests/test_mast_centroid_panel_states.py:39 exists only as hand-inserted JSON written by vacuum_null_probe.py and record_vacuum_probe.py in the run directory, which are not in the tree; the test can detect the block being edited or dropped but no committed code can regenerate it, the same run-directory-only evidence dependency the node was dispatched to remove.\nFINDING benchmarks/mast_centroid_solve_panels.py:778 non-blocking: the hollow cross is drawn at the six-neighbour census grid marker (1.818125, 0.0), which each receipt's own vacuum_saddle_validation records 4.5 mm from the polished root (1.813582, 9.0e-05), and neither the receipt nor tests/test_mast_centroid_panel_states.py:39-60 binds the drawn coordinate to the polished one, so the confirmed-root assertion confirms the field contains a saddle rather than that the caption's glyph marks it.\n",
+  "review_run_id": "r-20261024T212837143402-review-of-centroid-state-guard-b97b2053d576",
+  "reviewed_base_sha": "1057896e13ea459dcf1cba543e709aa20de2e780",
+  "reviewed_head_sha": "b97b2053d576a0c5c7f8abf5f04f60489f592508",
+  "reviewed_run_id": "r-20261024T202117352778-centroid-state-guard",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T21:52:02.634585+00:00",
+  "total": 109
+}

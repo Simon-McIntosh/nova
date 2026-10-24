@@ -1,0 +1,138 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-24T21:35:41Z",
+  "evidence_notes": [
+    "Judged from the eight named PNGs only: four committed plates at 1295x1061 and four 1400x1146 re-renders. No SVG was opened, searched or read.",
+    "Plate-to-re-render pairing measured by mean absolute grey difference after resizing both to 518x424: image-1 to the fine plate at 3.19 (against 3.88 for the standard/titan plates and 5.70 for full-axis), image-3 to the CPU-lane standard plate at 3.14, image-5 to the full-axis plate at 3.10, image-7 at 3.14 to both the standard and titan plates.",
+    "Red-mark census of each plate found exactly three components at consistent pixel positions: the hollow conductor-only cross at (453,548), the filled solved cross at (927,245) and the filled solved axis triangle at (1006,546). The hollow cross is 25x25 px and 300 red pixels with a white core; the filled cross is 25x25 px and 413 red pixels, solid at the centre; the triangle is 21x22 px and 259 red pixels.",
+    "The reviewed run's receipt records the polished vacuum saddle at R = 1.8136 m, Z = 0.00009 m with |grad psi| = 1.4e-16 Wb/m on a converged polish, which matches the position of the hollow cross in every plate.",
+    "Border scan of every plate and re-render: 0 non-white pixels on the top, bottom, left and right edges, so no content is clipped by the canvas boundary.",
+    "Ink census of the CPU-lane standard plate: 17.6 percent of pixels carry ink; the lavender plasma-cell region is 7.5 percent of the canvas at mean RGB (217,203,236), a pale fill that recedes behind the contours.",
+    "The CPU-lane standard plate and the titan-lane plate are visually identical (mean absolute grey difference 0.0, maximum channel difference 12), which is the lane-agreement result rather than a duplicated figure defect.",
+    "The evidence caption is substantive, not a restatement of the panel titles: it names the hollow-cross convention, the 4.5 mm Newton polish of the vacuum saddle, the absence of an in-wall O point, the shared 24-level contour array, and the three sibling lane views. It is not a finding.",
+    "The reviewed head commit b97b2053d576 regenerated the four SVG siblings and their receipts but left all four PNG plates byte-identical, so the plates judged here are the ones produced at 9d5a6bf92, the last plate-producing commit. Whether the SVG and PNG renderings now differ cannot be judged without opening an SVG, which this review is instructed not to do."
+  ],
+  "figure_verdicts": {
+    "docs/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels-fine.png": {
+      "contrast": "pass: panel titles are near-black on white; the red marks (RGB 204,0,0) clear both white and the pale lavender fill (mean RGB 217,203,236) they do not overlap",
+      "data_ink": "pass: both fields are drawn as unfilled line contours on one shared level array; the only fill is the low-alpha plasma-cell region the solved data describes, not a gradient or a decorative band",
+      "decoration": "pass: white canvas, no grid, frame, background fill or drop shadow; the axes are off as the poloidal convention requires",
+      "label_collision": "pass: the only text is the two panel titles, neither clipped, touching the artwork nor overlapping anything; a scan of all four canvas edges found 0 non-white pixels",
+      "legibility": "pass: two titled panels read at a glance as one machine section in two states; the black vessel outline, pale grey coil sections, grey flux contours, lavender plasma region and three red stationary-point marks separate by weight and colour, and the densest cell mesh (the fine view) still resolves as a tessellation rather than a solid block",
+      "table_form": "pass: a spatial poloidal flux comparison; nothing here is naturally a table"
+    },
+    "docs/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels.png": {
+      "contrast": "pass: titles near-black on white and the red marks clear their backgrounds",
+      "data_ink": "pass: line contours carry both fields; the sole fill is the plasma-cell region",
+      "decoration": "pass: no gradient, band, frame, grid or background fill",
+      "label_collision": "pass: two titles only, neither clipped nor overlapping; 0 non-white pixels on all four canvas edges",
+      "legibility": "pass: coarser cell density than the fine view, same two-panel reading; vessel, coils, contours and the three red marks all remain distinguishable at page width",
+      "table_form": "pass: a spatial field plot, not tabular information"
+    },
+    "docs/figures/mast-centroid-capability/full-axis-lane/vacuum-and-plasma-panels.png": {
+      "contrast": "pass: text and marks clear their backgrounds",
+      "data_ink": "pass: unfilled contours over the low-alpha cell region",
+      "decoration": "pass: no decorative styling",
+      "label_collision": "pass: no clipped or overlapping label; 0 non-white pixels on all four canvas edges",
+      "legibility": "pass: the same two-panel reading as the CPU-lane standard view, carrying the same three red marks at the same locations; the marks and the plasma boundary remain distinct",
+      "table_form": "pass: spatial field comparison"
+    },
+    "docs/figures/mast-centroid-capability/titan-lane/vacuum-and-plasma-panels.png": {
+      "contrast": "pass: as the CPU-lane standard view",
+      "data_ink": "pass: as the CPU-lane standard view",
+      "decoration": "pass: as the CPU-lane standard view",
+      "label_collision": "pass: no clipped or overlapping label; 0 non-white pixels on all four canvas edges",
+      "legibility": "pass: reads as the CPU-lane standard plate; every feature including the three red marks is legible, and the near-identity of the two plates is itself the lane-agreement result rather than a defect",
+      "table_form": "pass: spatial field comparison"
+    },
+    "image-1.png": {
+      "contrast": "pass: as the committed fine figure",
+      "data_ink": "pass: as the committed fine figure",
+      "decoration": "pass: as the committed fine figure",
+      "label_collision": "pass: as the committed fine figure",
+      "legibility": "pass: a 1400x1146 re-render closest to the committed fine plate (mean absolute grey difference 3.1 after resize to 518x424); the same two-panel reading, with slightly heavier strokes",
+      "table_form": "pass: as the committed fine figure"
+    },
+    "image-3.png": {
+      "contrast": "pass: as the committed standard figure",
+      "data_ink": "pass: as the committed standard figure",
+      "decoration": "pass: as the committed standard figure",
+      "label_collision": "pass: as the committed standard figure",
+      "legibility": "pass: a 1400x1146 re-render closest to the committed CPU-lane standard plate (mean absolute grey difference 3.1); the same reading",
+      "table_form": "pass: as the committed standard figure"
+    },
+    "image-5.png": {
+      "contrast": "pass: as the full-axis figure",
+      "data_ink": "pass: as the full-axis figure",
+      "decoration": "pass: as the full-axis figure",
+      "label_collision": "pass: as the full-axis figure",
+      "legibility": "pass: a 1400x1146 re-render closest to the committed full-axis plate (mean absolute grey difference 3.1); the same reading",
+      "table_form": "pass: as the full-axis figure"
+    },
+    "image-7.png": {
+      "contrast": "pass: as the titan figure",
+      "data_ink": "pass: as the titan figure",
+      "decoration": "pass: as the titan figure",
+      "label_collision": "pass: as the titan figure",
+      "legibility": "pass: a 1400x1146 re-render equidistant to the CPU-lane standard and titan plates (3.1 to both, because those two committed plates are themselves visually identical); no distinct defect is visible",
+      "table_form": "pass: as the titan figure"
+    }
+  },
+  "figures_reviewed": [
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/adb3a390-bdb2-4e2a-8e74-1e049c62c9fe/centroid-state-guard/docs/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels-fine.png",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T213225926035-review-of-centroid-state-guard-b97b2053d576-figure/image-1.png",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/adb3a390-bdb2-4e2a-8e74-1e049c62c9fe/centroid-state-guard/docs/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels.png",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T213225926035-review-of-centroid-state-guard-b97b2053d576-figure/image-3.png",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/adb3a390-bdb2-4e2a-8e74-1e049c62c9fe/centroid-state-guard/docs/figures/mast-centroid-capability/full-axis-lane/vacuum-and-plasma-panels.png",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T213225926035-review-of-centroid-state-guard-b97b2053d576-figure/image-5.png",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/adb3a390-bdb2-4e2a-8e74-1e049c62c9fe/centroid-state-guard/docs/figures/mast-centroid-capability/titan-lane/vacuum-and-plasma-panels.png",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T213225926035-review-of-centroid-state-guard-b97b2053d576-figure/image-7.png"
+  ],
+  "findings": [
+    {
+      "file": "benchmarks/mast_centroid_solve_panels.py",
+      "line": 779,
+      "severity": "non-blocking",
+      "summary": "The conductor-only stationary point is drawn hollow and the solved admitted saddle is drawn filled, but the two marks are the same red, the same 25x25 px size and only 474 px apart in adjacent panels, with no legend and no direct label anywhere on either plate. Measured on the committed PNGs: the hollow conductor cross has a white core (its centre 7x7 window carries 4 of 49 red pixels) and the solved cross is solid red (49 of 49), so the distinction exists in the pixels, but at a 900 px column each mark is about 17 px and the fill difference is easy to miss on a figure whose marks carry no key. A reader who lands on the figure through the Figures index, without the evidence caption that explains the hollow convention, cannot tell an unadmitted vacuum candidate from the admitted saddle. Not blocking: the caption does name it and each mark sits in a separately titled panel."
+    },
+    {
+      "file": "benchmarks/mast_centroid_solve_panels.py",
+      "line": 766,
+      "severity": "non-blocking",
+      "summary": "The flux contours are drawn in a hairline pale grey whose solid core measures 153 of 255 (about 2.85:1 against white), with most anti-aliased pixels between 184 and 246 and therefore under 1.6:1. In the outer field, where levels are widely spaced, the curves are faint at page width while the black vessel outline carries far more visual weight than the field the figure exists to show. The field stays readable and no contour is lost, so this is a legibility margin rather than a defect; a heavier contour stroke would put the weight on the data."
+    },
+    {
+      "file": "benchmarks/mast_centroid_solve_panels.py",
+      "line": 757,
+      "severity": "non-blocking",
+      "summary": "The plate is drawn on a 9.2 x 6.4 in canvas (1295 x 1061 px at 200 dpi after tight bounding, aspect 1.22:1) rather than the declared 14 in wide slide canvas, and the panel titles are set at 9 pt. Two side-by-side square poloidal panels justify a tighter canvas and nothing is cramped or clipped, so the plate reads well; a reader placing it beside other figures on the same page will nonetheless notice the different proportional weight."
+    },
+    {
+      "file": "benchmarks/mast_centroid_solve_panels.py",
+      "line": 811,
+      "severity": "non-blocking",
+      "summary": "The axes limits are the data lattice extent, so the outboard and inboard conductor context stops where the grid stops: the pale coil shapes at the top and bottom of each panel terminate mid-structure at the frame edge. The canvas itself is clean (0 non-white pixels on all four edges, so nothing is cut by the image boundary) and the vessel, plasma boundary and all stationary points are complete, so this is framing rather than clipping; it slightly limits how much machine context a reader can see around the solve."
+    }
+  ],
+  "project": "nova",
+  "read_only": true,
+  "review_run_id": "r-20261024T213225926035-review-of-centroid-state-guard-b97b2053d576-figure",
+  "reviewed_base_sha": "68dab2cf380664803587c562a71db914abbe8ab9",
+  "reviewed_head_sha": "b97b2053d576a0c5c7f8abf5f04f60489f592508",
+  "reviewed_run_id": "r-20261024T202117352778-centroid-state-guard",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "pass: all text is near-black on white and the red marks (RGB 204,0,0) clear both white and the pale lavender fill",
+    "data_ink": "pass: each field is unfilled line contours on one shared level array; the only fill is the low-alpha plasma-cell tessellation, which carries the solved plasma extent rather than decorating it",
+    "decoration": "pass: no gradient, band, background fill, frame, grid or drop shadow; the axis furniture is absent by the poloidal convention",
+    "label_collision": "pass: the only text is two panel titles per plate, none clipped, overlapping each other or over the data; every plate has 0 non-white pixels on all four canvas edges",
+    "legibility": "pass: all four plates and their four re-renders read at a glance as the same two-panel machine section, and the vessel, coils, flux contours, plasma-cell region and red stationary-point marks are distinguishable by weight and colour",
+    "table_form": "pass: a spatial poloidal flux comparison; no tabular information is rendered as an image"
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T21:53:03.706626+00:00",
+  "total": null
+}

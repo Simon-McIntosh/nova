@@ -1,0 +1,31 @@
+<section id="brute-force-reference-capacity">
+  <h3>Connectivity events replace the obsolete receipt pin</h3>
+  <p>The former test loaded the builder at <code>511a22e06^</code> and required its fixed 256-node, 255-edge receipt to match current carrier-sized arrays bit for bit. On the same current carriers, that builder emits 275 nodes absent from the current tree. The wall mask identifies 272 as wall vertices. The other three are MAST interior saddles whose carrier neighbours include wall vertices. The wall-pair probe's <code>components</code> links confirm their adjacency, and the independent outside-augmented sublevel oracle makes each a regular event: its component count stays 1→1. Removing the outside-to-wall links makes them merges (7→6, 6→5, and 3→2, respectively). No old-only node remains unexplained.</p>
+  <p>The coordinator's 2026-10-23 repair instruction adjudicated the earlier stop condition: replace the historical bit-for-bit pin with connectivity oracles if every old-only node is a removed wall artefact or an interior event dependent on that wall chain; otherwise stop. The 18-fixture wall-mask audit and the three MAST outside-augmented oracle checks satisfy that condition. The substitution is authorised by that conditional instruction, not by treating the old and current trees as identical.</p>
+  <p>The edge sets also differ on all 18 fixtures: 296 historical-only vertex pairs and 21 current-only pairs, a net removal of 275 edges matching the net removal of 275 nodes. The current-only pairs bypass removed wall chains. For the compact diverted carrier, historical-only pairs are (2,180), (140,146), (140,159), (146,180), (159,225), (225,230), and (230,253); the current-only pair is (2,253). For MAST 22475 row 50, 26 historical-only pairs include (355,588), (355,589), (428,515), and (428,614); its three current-only pairs are (32,249), (515,614), and (553,558). The run's wall-chain audit records every pair for every fixture. These are changed tree edges, not padding-only differences.</p>
+  <table>
+    <thead><tr><th>Fixture</th><th>Old-only nodes</th><th>Wall</th><th>Interior explained by outside links</th><th>Old-only edges</th><th>Current-only edges</th></tr></thead>
+    <tbody>
+      <tr><td>diverted single null, compact</td><td>6</td><td>6</td><td>0</td><td>7</td><td>1</td></tr>
+      <tr><td>moderate rotation, compact</td><td>2</td><td>2</td><td>0</td><td>3</td><td>1</td></tr>
+      <tr><td>strong rotation, compact</td><td>2</td><td>2</td><td>0</td><td>3</td><td>1</td></tr>
+      <tr><td>weak rotation, compact</td><td>2</td><td>2</td><td>0</td><td>3</td><td>1</td></tr>
+      <tr><td>diverted single null, 340 cells</td><td>6</td><td>6</td><td>0</td><td>7</td><td>1</td></tr>
+      <tr><td>moderate rotation, 340 cells</td><td>2</td><td>2</td><td>0</td><td>3</td><td>1</td></tr>
+      <tr><td>strong rotation, 340 cells</td><td>2</td><td>2</td><td>0</td><td>3</td><td>1</td></tr>
+      <tr><td>weak rotation, 340 cells</td><td>2</td><td>2</td><td>0</td><td>3</td><td>1</td></tr>
+      <tr><td>diverted single null, 550 cells</td><td>6</td><td>6</td><td>0</td><td>7</td><td>1</td></tr>
+      <tr><td>moderate rotation, 550 cells</td><td>2</td><td>2</td><td>0</td><td>3</td><td>1</td></tr>
+      <tr><td>strong rotation, 550 cells</td><td>2</td><td>2</td><td>0</td><td>3</td><td>1</td></tr>
+      <tr><td>weak rotation, 550 cells</td><td>2</td><td>2</td><td>0</td><td>3</td><td>1</td></tr>
+      <tr><td>diverted single null, 1074 cells</td><td>6</td><td>6</td><td>0</td><td>7</td><td>1</td></tr>
+      <tr><td>moderate rotation, 1074 cells</td><td>56</td><td>56</td><td>0</td><td>57</td><td>1</td></tr>
+      <tr><td>strong rotation, 1074 cells</td><td>63</td><td>63</td><td>0</td><td>64</td><td>1</td></tr>
+      <tr><td>weak rotation, 1074 cells</td><td>68</td><td>68</td><td>0</td><td>69</td><td>1</td></tr>
+      <tr><td>MAST 27079, row 16</td><td>23</td><td>22</td><td>1: vertex 355</td><td>25</td><td>2</td></tr>
+      <tr><td>MAST 22475, row 50</td><td>23</td><td>21</td><td>2: vertices 355, 428</td><td>26</td><td>3</td></tr>
+    </tbody>
+  </table>
+  <p>The focused sweep-bounds test checks every ascending carrier insertion against the outside-augmented sublevel oracle on all 18 fixtures, requires the final valid vertex to carry either no node or the terminal maximum, and retains the largest-carrier parent-depth bound. The superlevel fixture comparison remains in <code>tests/test_contour_tree_brute_force.py</code>; it is no longer duplicated here. At test commit <code>ce41a8510</code>, separate fresh head processes passed the sweep-bounds file (2 passed in 277.39 s, EXIT=0) and the brute-force file (9 passed in 326.72 s, EXIT=0). The earlier base process ran the historical test source on the same product builder: its recorded-fields test failed at the 256-versus-258 shape mismatch, while the other eight tests passed (EXIT=1). The run manifest names the complete gate logs.</p>
+  <p>A scratch-only negative control passed false wall flags into the split sweep while the oracle retained the actual wall links. The replacement test refused the resulting spurious event at compact diverted vertex 213 (EXIT=1). The committed test and product source were unchanged for this check.</p>
+</section>

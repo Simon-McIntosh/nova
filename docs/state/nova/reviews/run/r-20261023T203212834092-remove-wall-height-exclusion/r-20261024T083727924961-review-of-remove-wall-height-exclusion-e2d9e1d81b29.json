@@ -14,6 +14,13 @@
   ],
   "completed_at": "2026-10-24T08:54:58.656Z",
   "dispatched_at": "2026-10-24T08:38:25Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-remove-wall-height-exclusion-e2d9e1d81b29",
+      "recorded_at": "2026-10-24T09:16:38.884430+00:00"
+    }
+  },
   "findings": [
     {
       "file": "benchmarks/mast_centroid_solve_panels.py",

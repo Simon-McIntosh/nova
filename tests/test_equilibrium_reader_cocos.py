@@ -21,12 +21,16 @@ import imas
 import numpy as np
 import pytest
 
+from nova.imas.dataset import IdsBase
 from nova.imas.equilibrium import EquilibriumData
 from nova.imas.getslice import GetSlice
 from nova.io.sourcemap import NOVA_CONVENTION, translate_equilibrium
 from nova_cocos import DODPSI_LIKE, IP_LIKE, PSI_LIKE, convention, convention_transform
 
-IMASDB = Path("/work/imas/shared/imasdb/ITER/3")
+#: the imasdb root these pulses live under. The reader builds its own path from
+#: the same variable at the moment it opens a pulse, so a shell that exports
+#: another root opens a tree that does not hold them; the fixture below pins it.
+IMAS_HOME = "/work/imas"
 
 #: conforming DD3 pulses, as ``pulse/run -> written DD version``.
 CASES = {
@@ -64,6 +68,32 @@ class NoMachine:
         return None
 
 
+@pytest.fixture(autouse=True)
+def imasdb_root(monkeypatch):
+    """Resolve every read of these pulses under one imasdb root.
+
+    ``EquilibriumData(pulse, run)`` composes its path from ``$IMAS_HOME`` when
+    it opens the pulse, while the guard below needs the same tree before the
+    reader is built, so both sides read this variable. A shell exporting another
+    root would otherwise open a tree that does not hold these pulses and turn a
+    missing database into a red test, which is what happened to the coordinator
+    gate: the refusal assertions failed on ``master.h5`` not found rather than
+    on the reader's own message.
+    """
+    monkeypatch.setenv("IMAS_HOME", IMAS_HOME)
+
+
+def imasdb(case: str, dd_version: str) -> Path:
+    """Return the pulse path the reader composes for one pulse.
+
+    ``IdsBase`` is where an equilibrium reader's database path is defined, so
+    asking it here is asking the reader rather than restating the rule beside
+    it: the guard and the reader cannot drift apart.
+    """
+    pulse, run = (int(part) for part in case.split("/"))
+    return Path(IdsBase(pulse=pulse, run=run, dd_version=dd_version).ids_path)
+
+
 @pytest.fixture
 def no_machine(monkeypatch):
     """Serve the convention build without the machine the reader reads with it.
@@ -80,9 +110,9 @@ def no_machine(monkeypatch):
 
 def open_ids(case: str, dd_version: str):
     """Open one pulse's equilibrium IDS at the version it was written in."""
-    path = IMASDB / case
+    path = imasdb(case, dd_version)
     if not path.is_dir():
-        pytest.skip(f"imasdb pulse {case} not found")
+        pytest.skip(f"imasdb pulse {case} not found at {path}")
     entry = imas.DBEntry(f"imas:hdf5?path={path}", "r", dd_version=dd_version)
     with entry:
         return entry.get("equilibrium", lazy=False, autoconvert=False)
@@ -123,6 +153,9 @@ def test_signed_quantities_carry_the_internal_convention(case, no_machine):
     """Every convention-bearing field the reader holds is in COCOS 17."""
     equilibrium = open_equilibrium(case, CASES[case])
     equilibrium.itime = 0
+    assert Path(equilibrium.ids_path) == imasdb(case, CASES[case]), (
+        "the reader must open the pulse this file guards, not another tree's"
+    )
     assert equilibrium.data.attrs["cocos"] == NOVA_CONVENTION
 
     raw = open_ids(case, CASES[case]).time_slice[0]
@@ -153,9 +186,7 @@ def test_signed_quantities_carry_the_internal_convention(case, no_machine):
     boundary_psi = float(raw.boundary_separatrix.psi)
     global_psi = float(raw.global_quantities.psi_boundary)
     if not np.isclose(boundary_psi, global_psi):
-        assert np.isclose(
-            float(equilibrium["psi_boundary"]), psi_factor * boundary_psi
-        )
+        assert np.isclose(float(equilibrium["psi_boundary"]), psi_factor * boundary_psi)
         assert not np.isclose(
             float(equilibrium["psi_boundary"]), psi_factor * global_psi
         ), "the boundary field carries the separatrix flux, not the global quantity"

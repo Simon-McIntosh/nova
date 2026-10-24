@@ -115,7 +115,11 @@ class Properties(Contacts, Attrs):
         super().update(ids)
         if self.provenance is not None:
             ids.provenance.node.resize(1)
-            ids.provenance.node[0].sources = self.provenance
+            # DD3 carries a source list on the provenance node; DD4 replaced it
+            # with a structured reference, so a list of sources has no field to
+            # go in there and is left unwritten rather than refused.
+            if hasattr(ids.provenance.node[0], "sources"):
+                ids.provenance.node[0].sources = self.provenance
 
     @property
     def creation_date(self):

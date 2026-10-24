@@ -809,6 +809,23 @@ def dd_equilibrium_convention(dd_version: str) -> int:
     )
 
 
+def dd_equilibrium_factor(dd_version: str, transformation: str) -> float:
+    """Return the factor carrying nova's own convention into a write's convention.
+
+    The translation above runs the other way, from a source's convention into
+    COCOS 17; a writer that stores nova's data into a Data Dictionary entry
+    needs the inverse direction.  Which convention a version carries is
+    :func:`dd_equilibrium_convention`'s to state, and which factor a quantity
+    type takes follows from the two conventions through
+    :func:`nova_cocos.convention_transform`, so a DD3 target stores a psi-like
+    row with a sign flip and a DD4 target passes it through.
+    """
+
+    return convention_transform(
+        source=NOVA_CONVENTION, target=dd_equilibrium_convention(dd_version)
+    ).factor(transformation)
+
+
 def determine_digits(rows: list[dict[str, Any]]) -> dict[str, Any]:
     """Reduce per-slice sign rows to the four COCOS digits.
 

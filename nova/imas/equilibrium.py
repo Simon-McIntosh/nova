@@ -566,15 +566,18 @@ class Equilibrium(Chart, GetSlice):
                 )
 
     def _ids_vacuum_field(self, itime: int) -> float:
-        """Return the toroidal field a slice is read against [T]."""
+        """Return the toroidal field a slice is read against [T].
+
+        A pulse may carry the field once for the whole IDS or once per slice,
+        so the slice is read only when the IDS-level field is empty; reading
+        whichever is found is :func:`nova.imas.getslice.vacuum_field`'s rule.
+        """
         values = np.asarray(self.ids.vacuum_toroidal_field.b0).ravel()
         if values.size == 0:
             values = np.asarray(
                 self.ids.time_slice[itime].vacuum_toroidal_field.b0
             ).ravel()
-        if values.size == 0:
-            return float("nan")
-        return float(values[0] if values.size == 1 else values[itime])
+        return vacuum_field(values, itime)
 
     def build_convention(self, source_name: str, dd_version: str):
         """Read every convention-bearing field of the dataset in COCOS 17.

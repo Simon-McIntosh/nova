@@ -42,6 +42,36 @@
 <h3 id="dd-equilibrium-reader-inverse">Why the inverse negation goes rather than stays</h3>
 <p>The value was coupled, not internal: <code>tests/test_pulsedesign.py::test_ids_file_cache</code> shows <code>psi_boundary</code> tracking an input IDS field, so it arrives in the source read's convention. Under DD3 that is COCOS 11, whose psi is the negative of COCOS 17's, so <code>-psi_11</code> was exactly the internal COCOS 17 flux and the negation was an implicit 11 &rarr; 17 conversion. The reader now performs that conversion once, so the negation would apply it twice. For a DD3 source the value handed on is unchanged (the factor is -1); for a DD4 source the sign is corrected, which is the defect the line carried.</p>
 
+<h2 id="dd-equilibrium-reader-write">The write seam, which the change turned over</h2>
+<p>Translating on the read moves the sign of every psi-like row the reader
+serves, and a writer that stores those rows into a Data Dictionary entry has to
+carry them back. <code>Sample.equilibrium_ids</code> did not:
+it wrote <code>psi_boundary</code>, <code>psi1d</code>,
+<code>dpressure_dpsi</code> and <code>f_df_dpsi</code> unchanged, so a DD3
+target, which publishes COCOS 11, received COCOS 17 values under names that
+mean the opposite. Before the reader translated, the raw DD3 value passed
+through and the omission was invisible; after it, the entry was wrong by a
+sign.</p>
+<p>The writer now takes both factors from <code>nova/io/sourcemap.py</code>:
+<code>dd_equilibrium_factor</code> asks <code>dd_equilibrium_convention</code>
+which COCOS the version being written publishes and
+<code>nova_cocos.convention_transform</code> what factor each row type takes
+between the two, so a DD3 target stores COCOS 11 data and a DD4 target stores
+the sample's values unchanged. No site states a sign of its own. A DD4 write
+also exposed a metadata defect of its own: DD3 carries a source list on the
+provenance node and DD4 replaced it with a structured reference, so the source
+list is now written only where the node carries one.</p>
+<p>Both arms are measured in <code>tests/test_sample_write_convention.py</code>,
+which writes a known COCOS 17 state and reads the entry back without a database.
+The DD3 arm is a whole-entry round trip and every signed row flips while the
+current does not; the DD4 arm asserts the identity factor, because DD4 renamed
+<code>global_quantities.beta_normal</code> to <code>beta_tor_norm</code> and
+removed <code>time_slice[].boundary_separatrix</code>, so this writer's node
+paths name fields DD4 does not have and no entry can be built there. With the
+write factor removed in a scratch copy both DD3 tests fail
+(<code>logs/negative-control-write-factor-removed.log</code>), which is what
+shows they see the factor at all.</p>
+
 <h2 id="dd-equilibrium-reader-factors">The factor each changed quantity takes</h2>
 <p><code>nova_cocos.convention_transform(source=11, target=17)</code>, the same table the translator uses:</p>
 <table>

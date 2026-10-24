@@ -8,6 +8,11 @@
       "kind": "exempted",
       "reason": "the evidence fragment's log-path and header notes are superseded by the coordinator's merged-head gate in fresh processes from an archive of 1e3b30d19 (93 passed, every exit 0), recorded on the plan",
       "recorded_at": "2026-10-24T16:54:57.336637+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "the evidence fragment's log-path and header notes are superseded by the coordinator's merged-head gate in fresh processes from an archive of 1e3b30d19 (93 passed, every exit 0), recorded on the plan",
+      "recorded_at": "2026-10-24T16:55:08.417797+00:00"
     }
   },
   "findings": [

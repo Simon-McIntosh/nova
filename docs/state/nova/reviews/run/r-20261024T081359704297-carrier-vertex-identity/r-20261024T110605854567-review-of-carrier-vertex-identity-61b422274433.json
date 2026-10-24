@@ -1,0 +1,77 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_source": "logs/baseline-suite.log (revision 06ebc1bf8) ends '36 passed, 1 skipped' EXIT=0 and logs/after-suite.log (revision a1fde04cb) ends '39 passed, 2 skipped' EXIT=0; the manifest records failure_count 0 and failure_ids [] for both arms, so the declared suite delta adds no failing id. The reviewed head was also re-run for this review: tests/test_carrier_vertex_identity.py reads '4 passed, 1 skipped' EXIT=0 and tests/test_biotpolysection.py reads '27 passed' EXIT=0 at 61b422274, so the round-1 biotpolysection delta is repaired.",
+  "call_site_count": 5,
+  "call_sites": [
+    "nova/equilibrium/forward.py:658 MomentGeometry.from_cells",
+    "nova/biot/plasmagrid.py:271 PlasmaGrid._index_sampling_vertices",
+    "apps/playable/solovev.py:229 MomentGeometry.from_cells",
+    "scripts/analytic_oracle_fixtures/measure.py:141 MomentGeometry.from_cells",
+    "benchmarks/solovev_certificate.py:124 cerfon_freidberg_single_null"
+  ],
+  "completed_at": "2026-10-24T11:25:37.172Z",
+  "dispatched_at": "2026-10-24T11:06:42Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/carrier-vertex-identity.html",
+      "line": "234",
+      "severity": "blocking",
+      "text": "blocking: done_when (3) requires that, where the carrier digest changes, the certificate fixture cache rebuild be measured on one row, and the fragment states the cold and warm rebuild 'is measured' in logs/carrier-fixture-rebuild.log; that log is 459 bytes and ends at 'cold=  warnings.warn(', carrying only the two builder revisions and no wall time, so the named measurement does not exist and the clause is unmet."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/carrier-vertex-identity.html",
+      "line": "59",
+      "severity": "non-blocking",
+      "text": "non-blocking: the section 'A vertex is the slot set that shares it' states the merge now 'reads the mesh's own neighbour rings', but nova/equilibrium/stencil_mesh.py:320-407 reads no adjacency at all (a coordinate spatial hash at 1e-9 of the lattice scale) and the fragment's own later section at :186-190 says exactly that; the node goal asked for identification through PlasmaGrid.loop_neighbour_vertices, so the earlier section both misdescribes the landed mechanism and does not disclose the deviation from the goal's named topology."
+    },
+    {
+      "file": "tests/test_carrier_vertex_identity.py",
+      "line": "5",
+      "severity": "non-blocking",
+      "text": "non-blocking: the module docstring repeats that vertices are 'identified through the mesh's own neighbour rings', which the landed code does not do; a reader tracing the identity is sent to a mechanism absent from nova/equilibrium/stencil_mesh.py:320-407."
+    },
+    {
+      "file": "nova/equilibrium/stencil_mesh.py",
+      "line": "326",
+      "severity": "non-blocking",
+      "text": "non-blocking: lattice_vertex_groups documents that 'A merge is accepted only where the match is mutual and unique', but the body at :377-407 joins every pair within reach with no mutuality or uniqueness test; the only rejection implemented is the group-spread check at :399-406."
+    },
+    {
+      "file": "tests/test_carrier_vertex_identity.py",
+      "line": "246",
+      "severity": "non-blocking",
+      "text": "non-blocking: the determinism arm compares two solves of the unchanged code at 1 and 4 BLAS threads, and no recorded measurement shows it reddening if ordered_solve is replaced by np.linalg.solve; a 12-unknown dense dgesv is commonly bit-identical across thread counts, so the assertion states the done_when's test but cannot be shown to fail on the regression it is named to guard, leaving the deterministic-solve half of the change without a falsified guard."
+    },
+    {
+      "file": "tests/test_carrier_vertex_identity.py",
+      "line": "240",
+      "severity": "non-blocking",
+      "text": "non-blocking: _solve_receipt runs its subprocess with cwd=os.getcwd(), so the child resolves nova from the caller's directory rather than from the module under test; measured in this review, running the file with cwd set to a sibling worktree fails with CalledProcessError from the thread-count test while the same file passes 4 tests from its own root."
+    },
+    {
+      "file": "logs/negative-control-binned-dedup.log",
+      "line": "2",
+      "severity": "non-blocking",
+      "text": "non-blocking: the manifest's negative_control_log names this run at revision 71dc61b6b, whose failing assertion is cell_sample_nodes equality; that assertion no longer exists at the head, so the structured control demonstrates a pre-head test. The head-revision control does bite (logs/negative-control-head-assertion.log, 1075 against 1085 sample vertices, EXIT=1) but is recorded only in the prose field negative_control_head."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261024T110605854567-review-of-carrier-vertex-identity-61b422274433",
+  "reviewed_base_sha": "06ebc1bf88436cc9c2f2f40129fa3ce753788e78",
+  "reviewed_head_sha": "61b422274433b02686ceaa23f4b9eb221e7adcd1",
+  "reviewed_run_id": "r-20261024T081359704297-carrier-vertex-identity",
+  "rubric": "code",
+  "scores": {
+    "durability": 13,
+    "evidence": 12,
+    "fit": 15,
+    "goal_fidelity": 13,
+    "reuse": 16,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T11:28:49.772002+00:00",
+  "total": 88
+}

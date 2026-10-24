@@ -24,7 +24,7 @@
   <title>DD COCOS Ingest | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="106">
+<meta name="plan-version" content="107">
 <meta name="plan-modified" content="2026-10-24">
 <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;dd-cocos-ingest#s1&quot;],&quot;s3&quot;:[&quot;dd-cocos-ingest#s2&quot;],&quot;s4&quot;:[&quot;dd-cocos-ingest#s3&quot;],&quot;s5&quot;:[&quot;dd-cocos-ingest#s1&quot;,&quot;dd-cocos-ingest#s2&quot;]}">
 </head>
@@ -236,6 +236,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261024T163216329854-review-of-store-group-reclaim-e75063745c77" data-who="reckon-build" data-when="2026-10-24T16:42:22.410Z">
     <div class="r-comment-body"><p>store-group-reclaim reviewed at base 6c642019db2a977c7c45a5015ea590316266877f / head e75063745c770b15def2453a991e8dae554c1208 (two commits, three changed paths, all inside the declared write paths): the reclaim is correct and guarded by two red-verified controls, added failures 0; scores 19 goal_fidelity, 14 evidence, 19 scope_discipline, 18 durability, 18 fit, 12 reuse, with three non-blocking findings (fragment cites absent/incomplete arm log paths, base-arm log header names the main checkout as its module, reclaim duplicates ZarrStore.delete_group's deletion mechanism).</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261024T160125464061-store-group-reclaim" data-who="reckon-build" data-when="2026-10-24T16:31:19.842Z">
+    <div class="r-comment-body"><p>store-group-reclaim: SignalStore.write now deletes the identity-only (pre-convention) group for the same source and prints the removed group name before storing the convention-keyed group; re-ingest leaves exactly one group (one-group test, 4 passed in tests/test_signalstore_convention_key.py, 93 passed across the six covering files at head against 92 at base, zero added failures), and the self-fulfilling dd_version comparison is replaced by assertions on the derived conventions 11/17 and on the identity-only key, shown able to fail.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261023T132220183554-review-of-edge-consistency-measure-9b6422bb0416" data-who="reckon-build" data-when="2026-10-23T14:19:26.357Z">
     <div class="r-comment-body"><p>Independent review of run r-20261023T123603187543-edge-consistency-measure, read at base e69f4b60af04df8259ef914dee3136a3c55f6cb2 and head 9b6422bb0416e2a358b91c9389c1810d863b1bd0. All five checklist items carry a verdict and all six dimensions a score: goal_fidelity 18, evidence 17, scope_discipline 19, durability 15, fit 16, reuse 5. Five non-blocking findings, no blocking finding: the measure duplicates the structured-grid current-density read nova/equilibrium/map_extraction.py:132 already owns (agrees to 4.0e-16 relative rather than extending it), the inside-is-None default at nova/imas/edge_consistency.py:166 scores psi_norm &lt;= 1 only while the docstring promises 0 &lt;= psi_norm &lt;= 1 (inert on the analytic fixture), tests/test_edge_consistency.py:196 compares two runs of the same code, the reviewed manifest's after_suite.log_path at line 19 names a directory rather than a log file, and every head-arm gate log of the reviewed run opens with a revision header naming the base commit while the negative-control log's command line is prose. The landed change is sound: the lift is arithmetic-identical for the parity chain, the order fit is 1.97 against the stencil's 2.00, the perturbation is detected and the band-only negative control reddens three tests the head arm does not fail.</p></div>

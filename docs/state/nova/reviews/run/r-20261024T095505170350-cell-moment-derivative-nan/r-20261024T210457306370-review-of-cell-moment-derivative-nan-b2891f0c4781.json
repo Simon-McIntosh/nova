@@ -1,0 +1,78 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "nova/equilibrium/forward.py:1426",
+    "nova/equilibrium/separatrix_clip.py:1243",
+    "nova/equilibrium/forward_operator.py:_internal_on_partition",
+    "nova/equilibrium/forward_operator.py:normalised_current_moments",
+    "nova/equilibrium/forward_operator.py:normalised_current_moments_and_observation"
+  ],
+  "completed_at": "2026-10-24T21:22:43.383Z",
+  "dispatched_at": "2026-10-24T21:07:42Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/forward_operator.py",
+      "line": 3647,
+      "severity": "blocking",
+      "text": "cell_moment_receipt has no production caller and NonFiniteCellMomentError (line 395) is never raised; every solve path at lines 3522, 3702 and 3725 discards the returned indices and silently zeroes a non-finite cell, so done_when clause (2)'s report-by-index in the solve receipt is unmet and a non-finite cell now passes silently instead of being refused."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T095505170350-cell-moment-derivative-nan/manifest.md",
+      "line": 18,
+      "severity": "non-blocking",
+      "text": "baseline_suite and after_suite record completed: true while the partition wall clock ended the sweep at 19 of 88 files at the base and 21 of 88 at the head, so the arms completion is overstated."
+    },
+    {
+      "file": "nova/equilibrium/separatrix_clip.py",
+      "line": 665,
+      "severity": "non-blocking",
+      "text": "the repaired expression sits in a file outside the node's declared write grant, disclosed in the manifest scope_note under a lead ruling this review cannot verify from the shas."
+    },
+    {
+      "file": "nova/equilibrium/forward_operator.py",
+      "line": 419,
+      "severity": "non-blocking",
+      "text": "the non-finite mask is derived from cell_current alone while the docstring claims every moment component of the cell is zeroed, so a non-finite radial or vertical moment with a finite cell_current survives into scaled_current_moments."
+    },
+    {
+      "file": "nova/equilibrium/forward_operator.py",
+      "line": 3685,
+      "severity": "non-blocking",
+      "text": "the traced branch still returns jnp.nan for an inadmissible amplitude; the refuse-by-name clause of done_when (2) is satisfied only by the pre-existing eager raise, unchanged from base 2967db463."
+    },
+    {
+      "file": "nova/equilibrium/forward_operator.py",
+      "line": 395,
+      "severity": "non-blocking",
+      "text": "NonFiniteCellMomentError is defined but never raised, duplicating the naming role CurrentNormalisationError already owns at nova/equilibrium/source.py:119."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is a finite first Krylov action for the CPU diverted 300-cell row plus containment of one non-finite cell through the CPU current normalisation; verify-finite-tip.log records 0 of 1536 entries non-finite at revision c4bd20313, and forward_operator.py:3522 qualifies the moments before the sum.\nVERDICT done_when: the first clause is met (row-tip.log: converged, 2 trips, terminal residual 5.626976272072871e-15), but the importer-sweep clause is partial (gate-suite/base-arm.log header: 19 of 88 files, head-arm 21 of 88) and the receipt clause has no production caller (forward_operator.py:3647).\nVERDICT write_paths: the manifest declares seven paths; the diff touches four files, and nova/equilibrium/separatrix_clip.py is outside the declared grant (disclosed in the manifest scope_note under a claimed lead ruling).\nVERDICT manifest: read; it records status complete with an extra remaining_work line, but baseline_suite and after_suite both mark completed: true for a sweep that ran 19 and 21 of 88 files before the partition wall clock.\nVERDICT diff: read all seven commits from 2967db463 to b2891f0c4; 4 files, 298 insertions and 5 deletions: the arc-root double-where at separatrix_clip.py:665-667, the per-cell qualifier at forward_operator.py:407, the seam and planted-NaN tests, and the evidence fragment.\nCALL_SITES: nova/equilibrium/forward.py:1426, nova/equilibrium/separatrix_clip.py:1243, nova/equilibrium/forward_operator.py:_internal_on_partition, nova/equilibrium/forward_operator.py:normalised_current_moments, nova/equilibrium/forward_operator.py:normalised_current_moments_and_observation\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: the row now converges in 2 trips at 5.63e-15 (row-tip.log) and the arc root is repaired at its site (separatrix_clip.py:665), though the required index report is not reachable from any solve (forward_operator.py:3647).\nSCORE evidence: 10\nJUSTIFICATION evidence: verify-finite-tip.log and negative-control.log substantiate the central claims, but the importer sweep covers 21 of 88 files and both arms record completed: true anyway (manifest.md:18-19).\nSCORE scope_discipline: 9\nJUSTIFICATION scope_discipline: separatrix_clip.py:665 was edited although the declared write paths list only forward_operator.py, source.py, their tests, the fragment, and a figures directory.\nSCORE durability: 14\nJUSTIFICATION durability: tests/test_cell_moment_derivative_finite.py:81 fails on the restored clamped square root (negative-control-test.log, 1 failed) and line 32 guards the qualifier, but line 62 exercises the pre-existing eager CurrentNormalisationError and nothing tests that a solve receipt carries the offending index.\nSCORE fit: 15\nJUSTIFICATION fit: the double-where at separatrix_clip.py:665-667 matches the guarded-argument idiom and the names carry no plan labels, but forward_operator.py:395 defines NonFiniteCellMomentError, which nothing raises.\nSCORE reuse: 14\nJUSTIFICATION reuse: a search over nova/ for isfinite, nan_to_num and non-finite handling found no per-cell moment qualifier, so forward_operator.py:407 is a first owner, but forward_operator.py:395 duplicates the naming channel source.py:119 already owns.\nFINDING nova/equilibrium/forward_operator.py:3647 blocking: cell_moment_receipt has no production caller and NonFiniteCellMomentError (line 395) is never raised; every solve path at lines 3522, 3702 and 3725 discards the returned indices and silently zeroes a non-finite cell, so done_when clause (2)'s report-by-index in the solve receipt is unmet and a refusal became a silent drop.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T095505170350-cell-moment-derivative-nan/manifest.md:18 non-blocking: baseline_suite and after_suite record completed: true while the partition wall clock ended the sweep at 19 of 88 files at the base and 21 of 88 at the head, so the arms completion is overstated.\nFINDING nova/equilibrium/separatrix_clip.py:665 non-blocking: the repaired expression sits in a file outside the node's declared write grant, disclosed in the manifest under a lead ruling this review cannot verify from the shas.\nFINDING nova/equilibrium/forward_operator.py:419 non-blocking: the non-finite mask is derived from cell_current alone while the docstring claims every moment component of the cell is zeroed, so a non-finite radial or vertical moment with a finite cell_current survives into scaled_current_moments.\nFINDING nova/equilibrium/forward_operator.py:3685 non-blocking: the traced branch still returns jnp.nan for an inadmissible amplitude; the refuse-by-name clause of done_when (2) is satisfied only by the pre-existing eager raise, unchanged from base 2967db463.\nFINDING nova/equilibrium/forward_operator.py:395 non-blocking: NonFiniteCellMomentError is defined but never raised, duplicating the naming role CurrentNormalisationError already owns at nova/equilibrium/source.py:119.\n",
+  "review_run_id": "r-20261024T210457306370-review-of-cell-moment-derivative-nan-b2891f0c4781",
+  "reviewed_base_sha": "2967db4635671b942220d7d42797f1b08c805b95",
+  "reviewed_head_sha": "b2891f0c4781edf115a7df824ec073258e8b6e49",
+  "reviewed_run_id": "r-20261024T095505170350-cell-moment-derivative-nan",
+  "reviewer": "deepseek-v4.1-flash",
+  "scores": {
+    "durability": 14,
+    "evidence": 10,
+    "fit": 15,
+    "goal_fidelity": 16,
+    "reuse": 14,
+    "scope_discipline": 9
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T21:24:28.004415+00:00",
+  "total": 78,
+  "verdicts": {
+    "diff": "seven commits, four files, reviewed commit by commit, 298 insertions.",
+    "done_when": "clause (1) met; clause (2) partly met because the receipt is unreachable; clause (3) partial at 21 of 88 files.",
+    "goal": "finite first Krylov action (0 of 1536 entries at c4bd20313) and per-cell containment both landed; see verify-finite-tip.log and forward_operator.py:3522.",
+    "manifest": "read; honest remaining_work, but completed: true overstates the partial sweep.",
+    "write_paths": "four files changed; separatrix_clip.py is outside the declared grant."
+  }
+}

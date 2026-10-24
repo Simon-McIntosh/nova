@@ -43,12 +43,18 @@ class Quadrature:
     fragment that crosses several strip breaks is integrated piecewise on
     intervals that are smooth rather than across a corner. No polygon-count
     limit is imposed here.
+
+    ``subdivisions`` is a static slot count, so ``fragment_spans`` measures what
+    a state needs: on the limited certificate state the widest of 492 fragments
+    crosses 9 strips, three quarters of them cross exactly 3. Fewer slots than a
+    fragment needs would absorb its remainder into one interval across a corner,
+    so a wider fragment refuses to book rather than booking at a lower order.
     """
 
     sigma: object = 1.0
     target_current: object = None
     segments: int = dataclass_field(default=512, metadata={"static": True})
-    subdivisions: int = dataclass_field(default=8, metadata={"static": True})
+    subdivisions: int = dataclass_field(default=9, metadata={"static": True})
 
 
 class Booking(NamedTuple):
@@ -60,6 +66,48 @@ class Booking(NamedTuple):
     raw_current: jax.Array
     normalization: jax.Array
     valid: jax.Array
+
+
+def fragment_spans(vertices, count, centre, pitch, coefficient, selected):
+    """Return the number of interior breaks each conic fragment crosses.
+
+    A fragment's span is ``last - first + 1`` strips: the strip it starts in,
+    the strip it ends in, and every break between them. The composite booking
+    gives each of those a quadrature slot, so this is the slot count a fragment
+    actually needs; slots past its span carry no width.
+
+    Returns ``(spans, live)``, one entry per fragment, ``spans`` zero where the
+    fragment is not live.
+    """
+    local = (vertices - centre) / pitch
+    fragments = topology.quadratic_cell_fragments(
+        local, count, coefficient, selected.shape[0]
+    )
+    first, last, _, _, live = _fragment_extent(fragments, selected)
+    return jnp.where(live, last - first + 1, 0), live
+
+
+def _fragment_extent(fragments, selected):
+    """Return each fragment's first and last strip, its span bounds and liveness."""
+    breaks = fragments.slice_breaks
+    labels = fragments.slice_labels
+    strips = labels.shape[0]
+    flat = labels.reshape(-1)
+    cell = jnp.arange(flat.size)
+    same = flat[None, :] == flat[:, None]
+    strip_of_cell = jnp.broadcast_to(cell // 3, same.shape)
+    first = jnp.min(jnp.where(same, strip_of_cell, strips), axis=1)
+    last = jnp.max(jnp.where(same, strip_of_cell, -1), axis=1)
+    start = jnp.min(jnp.where(same, cell, flat.size), axis=1)
+    left = breaks[first]
+    right = breaks[jnp.minimum(last + 1, strips)]
+    live = (
+        (flat >= 0)
+        & selected[jnp.clip(flat, 0, selected.shape[0] - 1)]
+        & (right > left)
+    )
+    live = live & (cell == start)
+    return first, last, left, right, live
 
 
 def _conic_rings(
@@ -94,13 +142,8 @@ def _conic_rings(
     strips = labels.shape[0]
     flat = labels.reshape(-1)
     cell = jnp.arange(flat.size)
-    same = flat[None, :] == flat[:, None]
-    strip_of_cell = jnp.broadcast_to(cell // 3, same.shape)
-    first = jnp.min(jnp.where(same, strip_of_cell, strips), axis=1)
-    last = jnp.max(jnp.where(same, strip_of_cell, -1), axis=1)
-    start = jnp.min(jnp.where(same, cell, flat.size), axis=1)
-    left = breaks[first]
-    right = breaks[jnp.minimum(last + 1, strips)]
+    first, last, left, right, live = _fragment_extent(fragments, selected)
+    span = jnp.where(live, last - first + 1, 0)
     parameter = 0.5 * (1 - jnp.cos(jnp.linspace(0.0, jnp.pi, segments + 1)))
     slot = jnp.arange(subdivisions)
     slot_first = jnp.minimum(first[:, None] + slot[None, :], strips)
@@ -110,8 +153,6 @@ def _conic_rings(
     right_column = right[:, None]
     low = jnp.where(covered, low, right_column)
     high = jnp.where(covered, high, right_column)
-    # The last slot absorbs any span beyond the static subdivision count, so a
-    # fragment crossing more breaks than there are slots is still covered whole.
     high = jnp.where(slot[None, :] == subdivisions - 1, right_column, high)
     x = (low[..., None] + (high - low)[..., None] * parameter).reshape(
         left.shape[0], -1
@@ -143,15 +184,28 @@ def _conic_rings(
     lower = jnp.stack((x, bottom), axis=-1)
     upper = jnp.stack((x[:, ::-1], top[:, ::-1]), axis=-1)
     rings = jnp.transpose(jnp.concatenate((lower, upper), axis=1), (0, 2, 1, 3))
-    live = (
-        (flat >= 0)
-        & selected[jnp.clip(flat, 0, selected.shape[0] - 1)]
-        & (right > left)
-    )
-    live &= cell == start
     rings = centre + pitch * rings.reshape(-1, 2 * nodes, 2)
     rings = jnp.where(live[:, None, None], rings, centre)
-    return rings, jnp.where(live, rings.shape[1], 0), fragments.valid
+    # A fragment crossing more breaks than there are slots would have its
+    # remainder absorbed into the last slot and integrated across a corner, so
+    # the cell is refused rather than booked at a lower order.
+    fits = jnp.all(span <= subdivisions)
+    return rings, jnp.where(live, rings.shape[1], 0), fragments.valid & fits
+
+
+def _rematerialised_conic_rings(
+    vertices, count, centre, pitch, coefficient, selected, segments, subdivisions
+):
+    """Trace each fragment's ring under rematerialisation.
+
+    A linearisation keeps the tangent of every intermediate a traced function
+    produces. The ring construction rebuilds a fragment's whole node set from a
+    handful of inputs, so the tangent stores those inputs instead of every node
+    it passes through.
+    """
+    return jax.checkpoint(_conic_rings, static_argnums=(6, 7))(
+        vertices, count, centre, pitch, coefficient, selected, segments, subdivisions
+    )
 
 
 def _closed_normal_rings(loop, vertices, count):
@@ -496,7 +550,7 @@ def composite_cut_moments(
     disk_centre,
     radius,
     segments,
-    subdivisions=8,
+    subdivisions=9,
     force_conic_right=False,
     confined=None,
 ):
@@ -596,8 +650,9 @@ def book(psi, read, geometry, profile, quadrature=Quadrature()):
         )
         return centre, field
 
-    def integrate(index, rings, counts):
-        centre, field = cell_field(index)
+    @jax.checkpoint
+    def ring_moments(index, centre, field, rings, counts):
+        """Integrate one ring, rematerialised from its inputs in the tangent."""
         support = FragmentSupport(
             rings[None],
             counts[None],
@@ -614,6 +669,10 @@ def book(psi, read, geometry, profile, quadrature=Quadrature()):
             boundary_reduction=False,
         )
         return jax.tree.map(lambda value: value[0], moments)
+
+    def integrate(index, rings, counts):
+        centre, field = cell_field(index)
+        return ring_moments(index, centre, field, rings, counts)
 
     def whole_cell(index):
         rings = geometry.vertices[index][None]
@@ -638,7 +697,7 @@ def book(psi, read, geometry, profile, quadrature=Quadrature()):
         vertices, count = geometry.vertices[index], geometry.vertex_count[index]
 
         def conic(_):
-            rings, counts, valid = _conic_rings(
+            rings, counts, valid = _rematerialised_conic_rings(
                 vertices,
                 count,
                 centre,

@@ -34,6 +34,14 @@
     "requested_cells": 12000,
     "source": "nova.frame.firstwall.PlasmaGrid.insert",
     "turn": "hex",
+    "vacuum_nulls": {
+      "o_points_inside_wall": 0,
+      "other_x_points_drawn": 0,
+      "strike_points_drawn": 0,
+      "x_points_drawn": 1,
+      "x_points_dropped_outside_wall": 0,
+      "x_points_inside_wall": 1
+    },
     "vertex_count_range": [
       4,
       29
@@ -139,7 +147,7 @@
     "warm_definition": "the same fixed-shape program re-entered on a moved current vector, so the timed solve does real trips"
   },
   "runtime": {
-    "cpu_provenance_marker": "CPU lane retained from the original sirius run; regenerate the current panel schema",
+    "cpu_provenance_marker": "reservation gpu_0003_grpA admits no job at all: sbatch --test-only refuses a one-task request with no cpu, memory or gres ask while the node holds 43 idle cores, 792 GB free and cards IDX 1-3 idle; panel schema regenerated on CPU for continuity with the original sirius lane",
     "device_kind": "cpu",
     "devices": [
       "cpu:0"

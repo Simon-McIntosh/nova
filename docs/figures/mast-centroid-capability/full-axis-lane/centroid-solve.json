@@ -34,6 +34,14 @@
     "requested_cells": 4000,
     "source": "nova.frame.firstwall.PlasmaGrid.insert",
     "turn": "hex",
+    "vacuum_nulls": {
+      "o_points_inside_wall": 0,
+      "other_x_points_drawn": 0,
+      "strike_points_drawn": 0,
+      "x_points_drawn": 1,
+      "x_points_dropped_outside_wall": 0,
+      "x_points_inside_wall": 1
+    },
     "vertex_count_range": [
       4,
       29
@@ -124,7 +132,7 @@
     "shot": 22086,
     "slice_index": 43
   },
-  "figure": "/home/ITER/mcintos/Code/nova/docs/figures/mast-centroid-capability/full-axis-lane/vacuum-and-plasma-panels.png",
+  "figure": "docs/figures/mast-centroid-capability/full-axis-lane/vacuum-and-plasma-panels.png",
   "identity": "22086/43 mixed",
   "measurement_contract": {
     "active_set_steps": 16,

@@ -354,6 +354,32 @@ assembly, not the topology read, and a timeout taken there says nothing about
 either. This applies to any change to the canonical corner values, the cell
 polygons or the atomiser, not only to this one.</p>
 
+<h2>The assembly itself is far slower on this grid than on its peers</h2>
+
+<p>The warm-up was armed and measured rather than assumed, and the number it
+returned is larger than a reader would expect. Main's head prints the same
+value digest as this worktree's tip, so one published entry serves both, and
+neither revision had assembled it: the tip's build was stopped at exactly
+50 minutes by its own bound, with no completion line.</p>
+
+<p>The cost is per point and it is huge. Over all 282 polygons,
+<code>build_flux_blocks</code> takes 51.4 s for one point, 86.4 s for four and
+166.7 s for sixteen -- a marginal 6.7 s per point, projecting to about nine
+hours for the 5076 Gauss points. Two peer entries published under the same
+values root within the hour cost 133.4 s at shape <code>(10908, 606, 3)</code>
+and 122.4 s at <code>(10980, 610, 3)</code>, which is 0.012 s per point. The
+same routine is therefore roughly five hundred times slower per point here.</p>
+
+<p>Two candidate causes are excluded by measurement. No Gauss point sits on a
+polygon edge: the minimum point-to-edge distance is
+<code>0.000268277341531222</code> m at both revisions, so the 8.9e-16 rule move
+does not open a degenerate quadrature path. And it is not one bad cell: a
+per-polygon scan of 282 single-polygon calls did not finish in 220 s after
+initialisation was paid, so the slowness is broad. What remains to be found is
+why this grid's polygons are expensive for the analytic block builder -- that
+is the next measurement, and it is a cost of the grid, not of the canonical
+corner.</p>
+
 
 </article>
 </body>

@@ -132,7 +132,7 @@ is new, so it has no base arm.</p>
 <tr><td><code>tests/test_plasma_cell_flood_families.py</code></td><td>11 passed</td><td>11 passed</td></tr>
 <tr><td><code>tests/test_biotpolysection.py</code></td><td>27 passed</td><td>26 passed, 1 failed</td></tr>
 <tr><td><code>tests/equilibrium/test_topology_read.py</code></td><td>timeout, no result</td><td>timeout, no result</td></tr>
-<tr><td><code>tests/test_equilibrium_forward_reference.py</code></td><td>timeout, no result</td><td>timeout, no result</td></tr>
+<tr><td><code>tests/test_equilibrium_forward_reference.py</code></td><td>4 passed, 25 timed out</td><td>4 passed, 25 timed out</td></tr>
 <tr><td><code>tests/test_carrier_vertex_identity.py</code></td><td>absent</td><td>3 passed</td></tr>
 </tbody>
 </table>
@@ -161,12 +161,17 @@ grows a global tolerance pass, which changes all three device arms and the
 negative control and must be measured again. The delta is recorded rather than
 argued away.</p>
 
-<p><strong>Two files did not produce a result.</strong>
-<code>tests/equilibrium/test_topology_read.py</code> and
-<code>tests/test_equilibrium_forward_reference.py</code> exceeded the 420 s
-per-file bound on <em>both</em> arms, so neither carries a measurement in either
-direction. They are the heaviest of the eleven and were not run to completion
-here.</p>
+<p><strong>Two files carry no usable measurement.</strong>
+<code>tests/test_equilibrium_forward_reference.py</code> ran to completion on
+both arms with an identical outcome — 4 passed and 25 errors — and every one of
+the 25 is <code>Failed: Timeout (&gt;300.0s) from pytest-timeout</code>: the
+reference solve does not finish inside the per-test bound on a shared CPU while
+four of these files run together. The sets match exactly, so the delta is zero,
+but those 25 tests never ran and neither arm measures them.
+<code>tests/equilibrium/test_topology_read.py</code> was still running when the
+run reached its deadline, so it carries no result on either arm. Both belong on
+a device lane, where the forward solve's 370 ms edits rather than minutes do the
+work.</p>
 
 <p>One residual device difference is outside this node's write scope: the
 atomic vertex count reads 923 on the CPU and 922 on the H200 at the head,

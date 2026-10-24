@@ -19,6 +19,28 @@
     "wall_milliseconds": 141765.18486067653,
     "wall_seconds": 141.76518486067653
   },
+  "drawn_plasma_mesh": {
+    "boundary_branches_drawn": {
+      "closed_drawn": 1,
+      "open_drawn": 2
+    },
+    "boundary_clipped_cells": 4262,
+    "boundary_source": "assemble_separatrix_branches on the solved lattice spline, split at the admitted saddle",
+    "boundary_vertex_count": 901,
+    "coil_section_count": 938,
+    "coupling": "none; cell geometry only, no Biot build",
+    "cut_at_boundary_cells": 423,
+    "delivered_cells": 12353,
+    "requested_cells": 12000,
+    "source": "nova.frame.firstwall.PlasmaGrid.insert",
+    "turn": "hex",
+    "vertex_count_range": [
+      4,
+      29
+    ],
+    "wall_clipped": true,
+    "wall_unit_count": 1
+  },
   "evidence_inputs": {
     "coil_mapping": {
       "family": "p4_upper",
@@ -102,6 +124,7 @@
     "shot": 22086,
     "slice_index": 43
   },
+  "figure": "docs/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels-fine.png",
   "identity": "22086/43 mixed",
   "measurement_contract": {
     "active_set_steps": 16,

@@ -111,6 +111,63 @@ cached under the previous identity rebuilds on first use, because the carrier
 identity hashes <code>nova/equilibrium/stencil_mesh.py</code> and
 <code>nova/equilibrium/analytic_single_null.py</code>.</p>
 
+<h3 id="carrier-vertex-identity-importers">Every importing test file, by delta</h3>
+
+<p>Eleven test files import the changed modules. Each ran in its own fresh
+process, once from an archive of base <code>06ebc1bf8</code> and once from the
+head tree, at one BLAS thread each. <code>tests/test_carrier_vertex_identity.py</code>
+is new, so it has no base arm.</p>
+
+<table id="carrier-vertex-identity-importer-table">
+<caption>Per-file delta, base <code>06ebc1bf8</code> against head <code>0ac91093b</code>; one pytest process per file per arm.</caption>
+<thead><tr><th>file</th><th>base</th><th>head</th></tr></thead>
+<tbody>
+<tr><td><code>tests/test_analytic_single_null.py</code></td><td>3 passed</td><td>3 passed</td></tr>
+<tr><td><code>tests/test_equilibrium_stencil_mesh.py</code></td><td>19 passed</td><td>19 passed</td></tr>
+<tr><td><code>tests/test_equilibrium_diagnostics.py</code></td><td>64 passed</td><td>64 passed</td></tr>
+<tr><td><code>tests/test_edge_consistency.py</code></td><td>8 passed</td><td>8 passed</td></tr>
+<tr><td><code>tests/test_edge_consistency_ids_route.py</code></td><td>2 passed</td><td>2 passed</td></tr>
+<tr><td><code>tests/test_forward_operator_arguments.py</code></td><td>5 passed</td><td>5 passed</td></tr>
+<tr><td><code>tests/test_gs_runtime_operands.py</code></td><td>3 passed</td><td>3 passed</td></tr>
+<tr><td><code>tests/test_plasma_cell_flood_families.py</code></td><td>11 passed</td><td>11 passed</td></tr>
+<tr><td><code>tests/test_biotpolysection.py</code></td><td>27 passed</td><td>26 passed, 1 failed</td></tr>
+<tr><td><code>tests/equilibrium/test_topology_read.py</code></td><td>timeout, no result</td><td>timeout, no result</td></tr>
+<tr><td><code>tests/test_equilibrium_forward_reference.py</code></td><td>timeout, no result</td><td>timeout, no result</td></tr>
+<tr><td><code>tests/test_carrier_vertex_identity.py</code></td><td>absent</td><td>3 passed</td></tr>
+</tbody>
+</table>
+
+<p>Eight files are unchanged on both arms, including the two that pin
+reference magnitudes: <code>tests/test_analytic_single_null.py</code> and
+<code>tests/test_gs_runtime_operands.py</code>. The reference solve moves by at
+most <code>3.9e-14</code> absolute, so no published analytic certificate
+magnitude is expected to move, and none of the pinned comparisons moved.</p>
+
+<p><strong>One delta: <code>test_preclip_samples_come_from_the_verified_authored_generator</code>.</strong>
+It builds a mesh carrying a single ring — one centre and its six nearest cells —
+and requires <code>PlasmaGrid._index_sampling_vertices</code> to reproduce
+<code>MomentGeometry.sample_node_coordinates</code>. The two agree only while
+the identity is mesh-independent. It is not any more: a vertex is now the set of
+slots that share it <em>through the adjacency the mesh declares</em>, so a
+one-ring mesh merges nothing that lies outside that ring, and the test's
+restricted lattice keeps 318 sample nodes where the grid's full lattice keeps
+242. The binned identity it was written against merged coincident coordinates
+globally, so adjacency played no part.</p>
+
+<p>Reconciling the two means either the sample bank adopts the lattice identity
+as well — which changes this pinned equality rather than preserving it, and so
+needs the test file itself, outside this round's write scope — or the identity
+grows a global tolerance pass, which changes all three device arms and the
+negative control and must be measured again. The delta is recorded rather than
+argued away.</p>
+
+<p><strong>Two files did not produce a result.</strong>
+<code>tests/equilibrium/test_topology_read.py</code> and
+<code>tests/test_equilibrium_forward_reference.py</code> exceeded the 420 s
+per-file bound on <em>both</em> arms, so neither carries a measurement in either
+direction. They are the heaviest of the eleven and were not run to completion
+here.</p>
+
 <p>One residual device difference is outside this node's write scope: the
 atomic vertex count reads 923 on the CPU and 922 on the H200 at the head,
 because <code>AtomicCellMesh.from_cells</code> in

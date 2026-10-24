@@ -1,7 +1,7 @@
 {
   "added_failure_count": 0,
   "added_failure_ids": [],
-  "completed_at": "",
+  "completed_at": "2026-10-24T21:08:32.768Z",
   "dispatched_at": "2026-10-24T20:47:12Z",
   "evidence_notes": [
     "Judged from the eight named PNGs only: four committed plates at 1295x1061 and four 1400x1146 re-renders, matched to their sources by mean absolute pixel difference after resize (image-1 to the fine plate at 5.72, image-3 to the CPU standard plate at 5.47, image-5 to the full-axis plate at 5.43).",
@@ -124,6 +124,6 @@
   },
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-10-24T21:08:34.980927+00:00",
+  "timestamp": "2026-10-24T21:11:07.041726+00:00",
   "total": null
 }

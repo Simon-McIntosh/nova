@@ -1,0 +1,44 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-24T17:09:09.798Z",
+  "dispatched_at": "2026-10-24T17:03:09Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/certificate-fixture-republish.html",
+      "line": 36,
+      "severity": "non-blocking",
+      "text": "the paragraph states the table gives every test's verdict at each arm and names only two tests as not run, but the table itself (lines 42-44) records three tests with no verdict at either arm and a fourth whose base arm never started, so the done_when clause asking for every other test's verdict beside its base verdict is unmet for three of the five rows; the table rows are accurate and label the gaps, so this is an overstatement in the prose rather than a false claim."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/certificate-fixture-republish.html",
+      "line": 47,
+      "severity": "non-blocking",
+      "text": "the head failure is attributed to 'the known 550 stall and not this node's' on the strength of the carrier loading as a store hit, but no base arm ran for that test (arms-head-base.log line 239-254 ends with the job cancelled EXIT=15) and the stall residual the plan records for the limited 550 cold solve was 5.681e-3, not the 1.444e-4 measured here; the attribution is plausible and the fixture is demonstrably serving, but it is not established by this run."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T161514336256-certificate-fixture-republish/manifest.md",
+      "line": 10,
+      "severity": "non-blocking",
+      "text": "the manifest carries no baseline_suite or after_suite JSON block although the run brief required both, so added failures cannot be read from the record; the two arms are recoverable only by parsing arms-head-base.log, whose base arm stops at the cancelled limited-550 row, which is why no failure is attributable as added rather than pre-existing."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to publish the certified carrier and exterior fixtures at the archived builder revision so the certified carrier loads from the store; the four entries exist on disk under /work/projects/imas_gpu/sophelio/evidence/operands/certificate-fixtures/{carrier,exterior}/sha256/ (carriers 29M, exteriors 49K) and publish-limited-550.log and publish-diverted-550.log each print a FIXTURE_ROW line carrying the digest and its non-None entry path, so the goal is met; the published objects are consumed at runtime by scripts/prototypes/support/certificate_fixtures.py:cached_carrier and cached_exterior, and through them by scripts/prototypes/fast_map_production/solver.py.\nVERDICT done_when: the done_when asks for published carrier and exterior fixtures with a printed digest and entry path, the 2000-cell row published or its measured wall stated, and test_certificate_550_convergence.py run at head and base with the root-tangent test passing at head and every other verdict listed beside its base verdict; publish-limited-550.log and publish-diverted-550.log print all four rows with builder_revision 534721b67d1a7ec2, publish-diverted-2000.log ends EXIT=124 at the declared 420 s cut, and arms-head-base.log lines 33-100 record the root-tangent test passing at head in 30.92 s and at base in 12.75 s with the stationary-seed pair passing at both arms; the base verdicts for the three remaining tests are absent (lines 239-254 cancel at EXIT=15), which the fragment's table states at lines 42-44.\nVERDICT write_paths: the manifest declares docs/evidence/fragments/converged-forward-solve/certificate-fixture-republish.html and docs/figures/converged-forward-solve/certificate-fixture-republish; git diff --stat over b1c42788e..84917cc6d touches exactly the fragment, 54 insertions and no deletions, and no fixture-store or product path is written from the diff.\nVERDICT manifest: read; it records status complete, commits bdc38a256, b00e9f400 and 84917cc6d, the lane command in tests, four log paths in test_logs, the empty-root control log, and the published digests with their build and load seconds; it omits the baseline_suite and after_suite blocks its brief required.\nVERDICT diff: read commit by commit against b1c42788e; bdc38a256 creates the 54-line evidence fragment, b00e9f400 corrects the control wall it quotes, and 84917cc6d expands the verdict table, all inside docs/evidence/fragments/converged-forward-solve/.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/converged-forward-solve/certificate-fixture-republish.html:25-28 lists the four published digests whose store directories I confirmed exist, and arms-head-base.log:33-48 shows the head root-tangent test passing on them, with the diverted 2000-cell absence disclosed at line 49 as the brief permits.\nSCORE evidence: 14\nJUSTIFICATION evidence: arms-head-base.log:49,66,83,100 and 238 carry the VERDICT rows the fragment cites and the empty-root control log ends EXIT=1 on 'assert None is not None' at the fixture assertion, but no base verdict exists for three of the five tests and the reviewed manifest.md:10 carries no baseline_suite or after_suite block.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the single file in the diff, docs/evidence/fragments/converged-forward-solve/certificate-fixture-republish.html, is inside the declared write paths and the fixture store was written only through certificate_fixtures.cached_carrier at publish_fixtures.py:62 and cached_exterior at publish_fixtures.py:92.\nSCORE durability: 15\nJUSTIFICATION durability: the diff adds no assertions to judge for self-fulfilment, and what protects the work is the pre-existing guard at tests/equilibrium/test_certificate_550_convergence.py:234-239, which the empty-root run reddens by returning None from fixture_entry, so the store entry is guarded while the fragment's own claims are not.\nSCORE fit: 18\nJUSTIFICATION fit: the fragment's metadata block follows docs/evidence/fragments/converged-forward-solve/book-fixture-cache.html:4-15 and carries no run id or plan label in a symbol, path or comment.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no definition and publication reuses the existing owner certificate_fixtures.cached_carrier and cached_exterior called at publish_fixtures.py:62 and :92, so no capability is duplicated and no owner forked.\nFINDING docs/evidence/fragments/converged-forward-solve/certificate-fixture-republish.html:36 non-blocking: the text says the table gives every test's verdict at each arm and names two tests as not run, while lines 42-44 record three tests with no verdict at either arm and a fourth with no base verdict, so the done_when's base-verdict clause is unmet for three of five rows even though the rows themselves are honestly labelled.\nFINDING docs/evidence/fragments/converged-forward-solve/certificate-fixture-republish.html:47 non-blocking: the head failure is called the known 550 stall on the carrier store hit alone, without a base arm and against the 5.681e-3 stall residual the plan records, so the attribution is plausible but not established by this run.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T161514336256-certificate-fixture-republish/manifest.md:10 non-blocking: the manifest carries no baseline_suite or after_suite JSON block, so added failures cannot be read from the record and the arms are recoverable only by parsing arms-head-base.log, whose base arm stops at the cancelled limited-550 row.\n",
+  "review_run_id": "r-20261024T170204350204-review-of-certificate-fixture-republish-84917cc6d670",
+  "reviewed_base_sha": "b1c42788e35bceca05b2928ad860eaf6dbe3903c",
+  "reviewed_head_sha": "84917cc6d6706e364584d9732ee8800fde3de091",
+  "reviewed_run_id": "r-20261024T161514336256-certificate-fixture-republish",
+  "scores": {
+    "durability": 15,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T17:35:00Z",
+  "total": 106
+}

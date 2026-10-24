@@ -7,14 +7,14 @@
 <body>
 <h1 id="cell-moment-derivative-nan-title">Cell 103 moment derivative: the non-finite term and the per-cell qualification</h1>
 
-<p id="cell-moment-derivative-nan-summary">The CPU diverted 300-cell certificate row still refuses its first Krylov
-action, and this record locates the term that turns the derivative non-finite:
-the level-set arc root's square root is taken at a discriminant clamped to
-zero, so its tangent is non-finite exactly across the band of samples where
-the discriminant changes sign. That expression is in
-<code>nova/equilibrium/separatrix_clip.py</code>, outside this node's write
-grant. The second defect, one cell's non-finite moment scaling every cell
-through the common amplitude, is repaired and tested.</p>
+<p id="cell-moment-derivative-nan-summary">The CPU diverted 300-cell certificate row now has a finite first Krylov
+action and converges in two trips at residual 5.63e-15. The non-finite
+derivative was the sampled level-set arc taking the square root of a
+discriminant clamped at zero: its tangent is undefined across the band where
+the discriminant changes sign, which is the arrangement cell 103 held at arc
+slots 483 to 505. The square root is now taken off that seam with the
+double-where pattern, and one non-finite cell can no longer poison every cell
+through the current normalisation.</p>
 
 <h2 id="cell-moment-derivative-nan-reproduction">Reproduction at the base revision</h2>
 <p id="cell-moment-derivative-nan-repro-facts">At base <code>2967db463</code>, on CPU in place on the fleet allocation,
@@ -53,17 +53,37 @@ undefined, so the composed tangent is non-finite while every value stays
 finite. This is the tangency signature the brief named, confirmed here at a
 sign-changing discriminant rather than an exactly-zero one.</p>
 
-<h3 id="cell-moment-derivative-nan-fix-site">Why it is not repaired here</h3>
-<p id="cell-moment-derivative-nan-scope">The site is <code>nova/equilibrium/separatrix_clip.py</code>. This node's
-exclusive write grant covers <code>nova/equilibrium/forward_operator.py</code>
-and <code>nova/equilibrium/source.py</code> only, and the clip geometry files
-belong to the cut-cell node. The repair belongs there, as a guarded-argument
-sqrt: take the square root of a discriminant held at a positive floor
-(<code>sqrt(max(D, floor))</code> with <code>floor</code> of order
-64 eps &times; the local scale), and carry the linear branch
-(<code>-zero_value / linear</code>) across the whole seam band rather than
-below a per-scalar floor. The cut-cell node's edge-discriminant repair is the
-same signature in a different bookkeeping.</p>
+<h3 id="cell-moment-derivative-nan-fix">The repair (commit 4688864ee)</h3>
+<p id="cell-moment-derivative-nan-fix-site">Under the lead's 2026-10-24 ruling that concurrent edits to one file from
+separate worktrees are reconciled at integration, the expression is repaired at
+its site in <code>nova/equilibrium/separatrix_clip.py</code> with the
+double-where pattern: the discriminant keeps its sign, a safe value of
+<code>1.0</code> replaces it where it is not resolvable, and the square root is
+selected by that same mask.</p>
+<pre id="cell-moment-derivative-nan-code-fixed"><code>discriminant = linear * linear - 4.0 * quadratic * zero_value
+resolvable = discriminant &gt; 0.0
+safe_discriminant = jnp.where(resolvable, discriminant, 1.0)
+root_scale = jnp.where(resolvable, jnp.sqrt(safe_discriminant), 0.0)</code></pre>
+<p id="cell-moment-derivative-nan-fix-value">The value is unchanged — <code>sqrt(D)</code> where <code>D &gt; 0</code> and
+<code>0</code> elsewhere, which is what the clamp produced — while neither the
+value nor the tangent touches <code>sqrt</code> at zero. At the production
+seed, cell 103's moment tangent is <code>2824.328634996701</code> against a
+central difference of <code>2824.179876803612</code>, relative difference
+<code>5.267e-05</code> on a step of <code>1.0e-6</code>; no cell's moment or
+tangent is non-finite and the median relative difference over the 340 cells is
+zero. The first Krylov action of the CPU diverted 300-cell row is finite:
+<strong>0 of 1536</strong> entries non-finite, <code>QUALIFICATION=ACCEPTED</code>
+(<code>verify-finite.log</code>).</p>
+
+<h3 id="cell-moment-derivative-nan-row">The CPU row as it comes</h3>
+<p id="cell-moment-derivative-nan-row-facts">The diverted single-null 300-cell CPU row at commit <code>4688864ee</code>,
+run from a git archive on the fleet allocation, terminates
+<strong>converged</strong> in <strong>2 trips</strong> with terminal fixed-point
+residual <code>5.626976272072871e-15</code>, against the base's one-trip stop at
+<code>2.2640848763056183</code> after a <code>nonfinite_linear_action</code>
+refusal. The solver qualification is <code>unqualified</code> with
+<code>converged=true</code>; the receipt is <code>row-tip-part.json</code>
+under the run directory and the run log <code>row-tip.log</code>.</p>
 
 <h2 id="cell-moment-derivative-nan-qualification">Per-cell qualification (repaired)</h2>
 <p id="cell-moment-derivative-nan-qualify">Commit <code>e10705e61e6562c59326f28b8b70cd3173efaa5a</code> adds
@@ -79,25 +99,25 @@ a concrete state. A non-finite total reaches the existing
 of returning an amplitude that scales every cell.</p>
 
 <h2 id="cell-moment-derivative-nan-gate">Gate</h2>
-<p id="cell-moment-derivative-nan-gate-facts">The planted-degeneracy test plants a NaN at cell 103 of 340 and asserts the
-receipt names <code>(103,)</code>, that no other cell's moment changes, that
-the qualified total is finite, and that the same plant without qualification
-makes the amplitude refuse by name. It passes, 4 tests, in
-<code>gate-unit.log</code>. Of the direct importers, the source test file
-passes (7 tests, <code>gate-test_equilibrium_source.log</code>); the forward
-operator file exceeded a 240 s bound after two passing tests and is reported as
-not completed (<code>gate-test_equilibrium_forward_operator.log</code>,
-<code>EXIT=124</code>). The wider importer set (88 files) was not run.</p>
+<p id="cell-moment-derivative-nan-gate-facts">The unit gate is <code>tests/test_cell_moment_derivative_finite.py</code>,
+5 tests, passing in <code>gate-unit.log</code>: the planted NaN is named at
+<code>(103,)</code> with no other cell changed, the qualified total is finite,
+the unqualified total makes the amplitude refuse by name, and the arc-root
+tangent is finite across a discriminant seam. The import sweep runs every file
+that imports <code>separatrix_clip</code>, <code>source</code> or
+<code>forward_operator</code> directly, plus the certificate tests, each in its
+own fresh process at the tip and at the base, in one <code>all_debug</code>
+job. Its per-file results are in <code>gate-suite/summary.tsv</code> and are
+recorded in the manifest when the job is read.</p>
 
 <h2 id="cell-moment-derivative-nan-negative-control">Negative control</h2>
-<p id="cell-moment-derivative-nan-negative">The declared mutation restores the unguarded expression and requires the CPU
-row's first Krylov action to be non-finite again. The expression was never
-guarded in this node's tree, so the unmutated head <em>is</em> the control
-arm: <code>diag-nan.log</code> records the full staged derivation at head and
-reports <code>stage4 non-finite tangent vertices in 1 cells: [103]</code>, and
-<code>repro-normalisation.log</code> reports the raw moment derivative
-non-finite at index 103. Both logs end <code>EXIT=0</code>: this arm shows the
-defect present, not a red test, because the guarded expression it would be
-compared against does not exist in this tree.</p>
+<p id="cell-moment-derivative-nan-negative">The declared mutation restores the clamped square root in a scratch copy of
+commit <code>4688864ee</code>. The CPU row's first Krylov action is non-finite
+again: 1518 of 1536 entries, <code>QUALIFICATION=NONFINITE_LINEAR_ACTION</code>,
+and cell 103's moment tangent is NaN against a central difference of
+<code>2824.179876803612</code> (<code>negative-control.log</code>). The pinned
+test fails in the same tree with a non-finite direction
+(<code>negative-control-test.log</code>, one failed, four passed,
+<code>EXIT=1</code>), so the guard is shown firing rather than merely passing.</p>
 </body>
 </html>

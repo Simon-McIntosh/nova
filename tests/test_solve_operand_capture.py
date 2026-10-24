@@ -9,6 +9,9 @@ takes the operands as arguments, which the lowering reads as program parameters
 rather than literals.
 """
 
+import ast
+import pathlib
+
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -85,4 +88,55 @@ def test_closing_over_the_operand_is_what_captures_it(operands):
     assert captured >= _operand_bytes(rows) // 2, (
         f"a linearization over concrete operands captured only {captured} bytes, "
         "so this instrument cannot show a capture when one is present"
+    )
+
+
+DENSE_ARM_DRIVERS = [
+    "scripts/prototypes/fast_map_production/solver.py",
+    "scripts/prototypes/diverted_stall/measure.py",
+]
+
+
+def _bound_names(statements):
+    """The names a block binds at its top level, by assignment or by def."""
+    names = set()
+    for statement in statements:
+        if isinstance(statement, ast.Assign):
+            for target in statement.targets:
+                if isinstance(target, ast.Name):
+                    names.update([target.id])
+        elif isinstance(statement, ast.FunctionDef):
+            names.update([statement.name])
+    return names
+
+
+def _dense_arm_bindings(path):
+    """The names bound directly in the fall-through arm of ``linear_step``.
+
+    The step row and the diagnose block read a single-direction tangent program
+    after the method branch, so every arm must bind one; the dense arm binds a
+    program batched over a block of directions, and it is the arm that supplied
+    none.
+    """
+    tree = ast.parse(pathlib.Path(path).read_text())
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef) and node.name == "linear_step":
+            for statement in node.body:
+                if isinstance(statement, ast.If) and statement.orelse:
+                    chain = statement
+                    while len(chain.orelse) == 1 and isinstance(
+                        chain.orelse[0], ast.If
+                    ):
+                        chain = chain.orelse[0]
+                    if any(isinstance(item, ast.Assign) for item in chain.orelse):
+                        return _bound_names(chain.orelse)
+    raise AssertionError(f"linear_step's dense arm not found in {path}")
+
+
+@pytest.mark.parametrize("path", DENSE_ARM_DRIVERS)
+def test_the_dense_arm_binds_a_single_direction_program(path):
+    bound = _dense_arm_bindings(path)
+    assert "product" in bound, (
+        f"{path}: the dense arm binds {sorted(bound)}, but the step row and the "
+        "diagnose block read a single-direction 'product' after the branch"
     )

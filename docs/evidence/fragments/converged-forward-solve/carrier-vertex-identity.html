@@ -380,6 +380,22 @@ why this grid's polygons are expensive for the analytic block builder -- that
 is the next measurement, and it is a cost of the grid, not of the canonical
 corner.</p>
 
+<h2>The warm-up is an hour-plus, which is itself a cost</h2>
+
+<p>The warm-up was run at main's head from a git archive and it did not finish.
+The first attempt stopped at its own 50-minute bound with no completion line;
+the second reached a 59-minute wall and was killed by the scheduler
+(<code>TIMEOUT 00:59:03</code>). So a cold rebuild of this grid's value matrix
+is an hour or more of dedicated eight-core wall, to publish one 158 MB entry.</p>
+
+<p>That is the cost every later edit to the Gauss rule inherits, and it is large
+enough to be a planning fact rather than friction: an hour-plus rebuild per
+geometry change, against the three census tests it serves being given 900, 300
+and 900 seconds between them. The third attempt carries a four-hour wall so the
+number is measured rather than bounded, and its <code>BUILD_WALL</code> line is
+where the figure will be read. Until it lands, the honest statement is that the
+assembly exceeds 59 minutes on eight dedicated cores, which is the floor.</p>
+
 
 </article>
 </body>

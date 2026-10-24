@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "completed_at": "2026-10-24T16:42:22.410Z",
   "dispatched_at": "2026-10-24T16:34:15Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the evidence fragment's log-path and header notes are superseded by the coordinator's merged-head gate in fresh processes from an archive of 1e3b30d19 (93 passed, every exit 0), recorded on the plan",
+      "recorded_at": "2026-10-24T16:54:57.336637+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/dd-cocos-ingest/store-group-reclaim.html",

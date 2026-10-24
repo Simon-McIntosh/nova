@@ -12,12 +12,28 @@ def vacuum_field(b0: np.ndarray, index: int) -> float:
     """Return the toroidal field an equilibrium slice is read against [T].
 
     A pulse may store one value for the whole IDS or one per slice, and the
-    convention check needs the same reading as the translation, so the rule
-    lives here once rather than in each of its callers.
+    convention check needs the same reading as the Data Dictionary translation,
+    so the rule lives here once rather than in each of its callers.
     """
     if b0.size == 0:
         return float("nan")
     return float(b0[0] if b0.size == 1 else b0[index])
+
+
+def ids_vacuum_field(ids, index: int) -> float:
+    """Return the toroidal field one equilibrium IDS slice is read against [T].
+
+    The IDS carries the field either once at the top level or once per slice,
+    so a top-level array that is empty is read from the slice instead. That
+    fallback belongs with the value rule above rather than in the readers that
+    need it: a reader that restated it could drift from
+    :func:`vacuum_field` and check the convention against a different field
+    from the one it translates.
+    """
+    values = np.asarray(ids.vacuum_toroidal_field.b0).ravel()
+    if values.size == 0:
+        values = np.asarray(ids.time_slice[index].vacuum_toroidal_field.b0).ravel()
+    return vacuum_field(values, index)
 
 
 @dataclass

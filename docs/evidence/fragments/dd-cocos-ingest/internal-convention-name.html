@@ -1,0 +1,66 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="dd-cocos-ingest">
+<meta name="plan-evidence-for" content="dd-cocos-ingest">
+<meta name="plan-verifies" content="dd-cocos-ingest#s4">
+<meta name="plan-recorded-at" content="2026-10-24">
+<title>One owner for the internal convention — landing | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+</head><body><main class="plan-doc">
+<section id="internal-convention-name-landing">
+<h1 id="internal-convention-name-title">The internal convention has one owner, and the two shared rules have one each</h1>
+<p id="internal-convention-name-outcome"><strong>landing:</strong> <code>nova.io.sourcemap.NOVA_CONVENTION</code> and <code>nova.equilibrium.observation_kernels.NOVA_COCOS</code> now read <code>nova.equilibrium.convention.COCOS</code>, so nova states its COCOS 17 internal convention once. <code>nova.imas.getslice.ids_vacuum_field</code> owns the whole toroidal-field read (the value rule and the IDS-level fallback), and <code>Equilibrium</code> calls it instead of restating it. The equilibrium dataset cache keeps one refusal mechanism — the recorded convention marker, now named once by <code>CONVENTION_ATTR</code> — and the fragment records why this cache cannot key on its convention the way <code>SignalStore</code> does.</p>
+
+<p id="internal-convention-name-defect"><strong>The recorded defect.</strong> The followup records three names for one convention and two restated rules. Reproduced at the base revision: <code>nova/equilibrium/observation_kernels.py:41</code> read <code>NOVA_COCOS = 17</code>, <code>nova/io/sourcemap.py:740</code> read <code>NOVA_CONVENTION = DD4_CONVENTION</code> with <code>DD4_CONVENTION = 17</code> beside it, <code>nova/imas/equilibrium.py</code> carried its own <code>_ids_vacuum_field</code> restating the IDS-level fallback, and the cache refusal used the string literal <code>"cocos"</code> at its write and read sites separately.</p>
+
+<p id="internal-convention-name-owner"><strong>(1) Two names read the owner.</strong> <code>NOVA_CONVENTION = COCOS</code> in sourcemap and <code>NOVA_COCOS = COCOS</code> in observation_kernels, both importing <code>from nova.equilibrium.convention import COCOS</code>. <code>DD4_CONVENTION = 17</code> stays in sourcemap: it is the convention a Data Dictionary major 4 <em>source</em> publishes, which is a fact about the source and the input to <code>dd_equilibrium_convention</code>, not a statement of nova's internal convention. The test file asserts each name equals the owner's value and that neither module assigns the name a literal.</p>
+
+<p id="internal-convention-name-search"><strong>The search, and every hit it returns.</strong> Run over <code>nova/</code> at this head:</p>
+<pre id="internal-convention-name-search-command"><code>grep -rnE "^\s*[A-Z][A-Z0-9_]*\s*=\s*(11|17)\s*$" nova/ --include=*.py</code></pre>
+<table id="internal-convention-name-search-table">
+<caption>Every constant assigned 11 or 17 in <code>nova/</code>, with what it states.</caption>
+<thead><tr><th>hit</th><th>what it is</th></tr></thead>
+<tbody>
+<tr><td><code>nova/io/sourcemap.py:735 DD3_CONVENTION = 11</code></td><td>the convention a DD3 source publishes — a source fact</td></tr>
+<tr><td><code>nova/io/sourcemap.py:738 DD4_CONVENTION = 17</code></td><td>the convention a DD4 source publishes — a source fact</td></tr>
+<tr><td><code>nova/imas/mast_solve_inputs.py:106 TARGET_CONVENTION = 17</code></td><td>the convention DD 4 is written in, the target of a MAST conversion — a source fact</td></tr>
+<tr><td><code>nova/imas/getslice.py</code>, <code>nova/imas/equilibrium.py</code>, <code>nova/equilibrium/observation_kernels.py</code></td><td>no literal hit: all three read the owner</td></tr>
+<tr><td><code>nova/equilibrium/steering_frames.py:159 COCOS = 17</code></td><td><strong>a second statement of the internal convention</strong>, outside this node's write fence</td></tr>
+<tr><td><code>nova/equilibrium/flux_surface_geometry.py:186 DEFAULT_SURFACES = 11</code>, <code>nova/equilibrium/steering_frames.py:188 N_SURFACE = 11</code></td><td>a surface count, not a convention</td></tr>
+</tbody>
+</table>
+<p id="internal-convention-name-search-note">The three names the brief names are closed. The search returns one remaining statement of the internal convention, <code>steering_frames.py:159</code>, whose module docstring also calls it "Nova's observation convention"; it is recorded under <code>outside_scope</code> because <code>nova/equilibrium/steering_frames.py</code> is not in this node's write paths, and the coordinator answers it in the next dispatch. The claim this node makes is therefore precise: sourcemap and observation_kernels read the owner, and the remaining hits are named rather than left to a later reader's search.</p>
+
+<p id="internal-convention-name-vacuum"><strong>(2a) The vacuum-field read has one owner.</strong> <code>nova.imas.getslice.ids_vacuum_field(ids, index)</code> reads the IDS-level field and falls back to the slice when the IDS-level array is empty, then returns through <code>vacuum_field</code>, which owns the single-value-or-per-slice rule. <code>Equilibrium</code> lost <code>_ids_vacuum_field</code> and its <code>check_convention</code> calls <code>ids_vacuum_field(self.ids, itime)</code>. The test drives all three shapes a pulse can carry (one value for the IDS, one per slice, IDS-level empty with per-slice data) plus the empty case, and asserts the reader no longer defines its own rule.</p>
+
+<p id="internal-convention-name-cache"><strong>(2b) One cache-refusal mechanism, and why it is not a key.</strong> The equilibrium dataset cache's identity is the store path (the pulse/run name) and the group (the IDS name), both composed in <code>nova.imas.database.Database.update_filename</code>, which every IDS reader shares; the convention is what the reader <em>translates into</em>, not a property of the source identity the key describes, and re-keying it would rename every existing group and orphan every pulse already cached on disk. Those two files, and the tests that assert the group name, are outside this node's fence, so the cache cannot take the <code>SignalStore</code> key route here. Exactly one refusal is kept: <code>build_convention</code> records the convention under <code>CONVENTION_ATTR</code>, and <code>EquilibriumData.load</code> requires that marker and evicts an entry carrying another convention or none, so a foreign entry is rebuilt rather than served. The attribute name is now stated once, used by the writer and the load check, and the load compares it against <code>NOVA_CONVENTION</code> — the owner's value, not a literal.</p>
+
+<p id="internal-convention-name-cache-test"><strong>The refusal, exercised.</strong> <code>test_cached_equilibrium_under_the_other_convention_is_refused</code> writes a cached dataset carrying <code>cocos = 11</code> into a temporary zarr store, binds a reader to that store, and asserts the reader rebuilds and that the refused group's <code>psi_boundary</code> array is no longer served. <code>test_cached_equilibrium_in_the_owner_convention_is_served</code> is the control: an entry carrying the owner's convention is served without a rebuild, so the guard discriminates rather than always rebuilding.</p>
+
+<p id="internal-convention-name-gate"><strong>(3) The covering test files pass by delta, each in its own fresh process.</strong> Base <code>48d7adda6</code> (extracted with <code>git archive</code>), head this node's committed tree. One pytest process per file, a separate <code>--basetemp</code> for each, <code>JAX_PLATFORMS=cpu</code> and <code>PYTHONPATH</code> set to the tree under test; every log's last line is a bare <code>EXIT=0</code>.</p>
+<table id="internal-convention-name-gate-table">
+<caption>Covering tests, base against head. Each row is a separate process with its own basetemp.</caption>
+<thead><tr><th>file</th><th>base</th><th>head</th><th>delta</th></tr></thead>
+<tbody>
+<tr><td><code>tests/test_database.py</code></td><td>28 passed, 19 skipped</td><td>28 passed, 19 skipped</td><td>0</td></tr>
+<tr><td><code>tests/test_dd_translator.py</code></td><td>9 passed</td><td>9 passed</td><td>0</td></tr>
+<tr><td><code>tests/test_equilibrium_reader_cocos.py</code></td><td>6 passed, 1 xfailed</td><td>6 passed, 1 xfailed</td><td>0</td></tr>
+<tr><td><code>tests/test_extrapolate.py</code></td><td>2 passed, 10 skipped</td><td>2 passed, 10 skipped</td><td>0</td></tr>
+<tr><td><code>tests/test_getslice.py</code></td><td>14 passed</td><td>14 passed</td><td>0</td></tr>
+<tr><td><code>tests/test_internal_cocos_sites.py</code></td><td>8 passed</td><td>8 passed</td><td>0</td></tr>
+<tr><td><code>tests/test_io_sourcemap.py</code></td><td>22 passed</td><td>22 passed</td><td>0</td></tr>
+<tr><td><code>tests/test_mastcocos.py</code></td><td>28 passed</td><td>28 passed</td><td>0</td></tr>
+<tr><td><code>tests/test_media.py</code></td><td>48 passed</td><td>48 passed</td><td>0</td></tr>
+<tr><td><code>tests/test_pulsedesign.py</code></td><td>5 skipped</td><td>5 skipped</td><td>0</td></tr>
+<tr><td><code>tests/test_sample_write_convention.py</code></td><td>5 passed</td><td>5 passed</td><td>0</td></tr>
+<tr><td><code>tests/test_internal_convention_owner.py</code></td><td>absent at base</td><td>7 passed</td><td>+7 new, 0 failed</td></tr>
+</tbody>
+</table>
+<p id="internal-convention-name-gate-note">Seven added passes are this node's new tests; no file gains a failure.</p>
+
+<p id="internal-convention-name-negative"><strong>Negative control.</strong> A scratch copy of this head sets <code>nova/equilibrium/observation_kernels.py</code> to <code>NOVA_COCOS = 11</code>. The kernel guard then refuses the owner's convention, and two tests fail on their own assertions: <code>test_observation_kernels_take_the_internal_convention_from_its_owner</code> and <code>test_observation_kernel_accepts_the_owner_convention_and_refuses_another</code>, the second being the arm that reaches the kernel through <code>nova.diagnostics.thomson.ForwardEquilibrium</code>. The run exits 1, and its header names the module imported from the scratch tree.</p>
+
+<p id="internal-convention-name-figure"><strong>No figure.</strong> The measure is a set of equality assertions and a search hit list — naturally a table. The node's done-when names no artifact, so this landing fragment is its only record.</p>
+</section>
+</main></body></html>

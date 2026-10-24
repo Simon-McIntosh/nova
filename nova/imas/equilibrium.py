@@ -16,10 +16,19 @@ from nova.geometry.pointloop import PointLoop
 from nova.geometry.curve import LCFS
 from nova.geometry.strike import Strike
 from nova.graphics.line import Chart
-from nova.imas.getslice import GetSlice, vacuum_field
+from nova.imas.getslice import GetSlice, ids_vacuum_field, vacuum_field
 from nova.imas.machine import Wall
 from nova.imas.scenario import Scenario
 from nova.io.sourcemap import NOVA_CONVENTION, translate_equilibrium
+
+CONVENTION_ATTR = "cocos"
+"""Dataset attribute naming the convention the cached fields are in.
+
+The cache identity is the source's pulse, run and Data Dictionary version,
+none of which the reader's own convention changes, so the convention cannot be
+read off the group name. It is written beside the fields instead, and one name
+is used by the writer and the load check so the two cannot disagree.
+"""
 
 
 @dataclass
@@ -558,26 +567,12 @@ class Equilibrium(Chart, GetSlice):
                 psi_axis=float(time_slice.global_quantities.psi_axis),
                 psi_boundary=float(time_slice.global_quantities.psi_boundary),
                 q=float(time_slice.global_quantities.q_95),
-                b0=self._ids_vacuum_field(itime),
+                b0=ids_vacuum_field(self.ids, itime),
             )
             if signal_map.blocked:
                 raise ValueError(
                     "; ".join(blocked.reason for blocked in signal_map.blocked)
                 )
-
-    def _ids_vacuum_field(self, itime: int) -> float:
-        """Return the toroidal field a slice is read against [T].
-
-        A pulse may carry the field once for the whole IDS or once per slice,
-        so the slice is read only when the IDS-level field is empty; reading
-        whichever is found is :func:`nova.imas.getslice.vacuum_field`'s rule.
-        """
-        values = np.asarray(self.ids.vacuum_toroidal_field.b0).ravel()
-        if values.size == 0:
-            values = np.asarray(
-                self.ids.time_slice[itime].vacuum_toroidal_field.b0
-            ).ravel()
-        return vacuum_field(values, itime)
 
     def build_convention(self, source_name: str, dd_version: str):
         """Read every convention-bearing field of the dataset in COCOS 17.
@@ -626,7 +621,7 @@ class Equilibrium(Chart, GetSlice):
                 )
         for name, values in translated.items():
             self.data[name] = (self.data[name].dims, values)
-        self.data.attrs["cocos"] = NOVA_CONVENTION
+        self.data.attrs[CONVENTION_ATTR] = NOVA_CONVENTION
 
     @property
     def boundary(self):
@@ -951,7 +946,7 @@ class EquilibriumData(Equilibrium, Profile2D, Profile1D, Parameter0D, Grid):
             miss and rebuilds.
         """
         loaded = super().load()
-        stored = self.data.attrs.get("cocos")
+        stored = self.data.attrs.get(CONVENTION_ATTR)
         if stored != NOVA_CONVENTION:
             self.delete_group()
             self.data = type(self.data)()

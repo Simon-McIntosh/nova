@@ -1,0 +1,102 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_source": "logs/baseline-suite.log ends '36 passed, 1 skipped' EXIT=0 and logs/after-suite.log ends '39 passed, 2 skipped' EXIT=0; both record failure_count 0 in the manifest, so the delta adds no failing id",
+  "call_site_count": 4,
+  "call_sites": [
+    "nova/equilibrium/forward.py:658 MomentGeometry.from_cells",
+    "scripts/analytic_oracle_fixtures/measure.py:141 MomentGeometry.from_cells",
+    "apps/playable/solovev.py:229 MomentGeometry.from_cells",
+    "benchmarks/solovev_certificate.py:124 cerfon_freidberg_single_null"
+  ],
+  "completed_at": "2026-10-24T09:13:29.570Z",
+  "dispatched_at": "2026-10-24T09:02:13Z",
+  "findings": [
+    {
+      "file": "tests/test_gs_runtime_operands.py",
+      "line": "196",
+      "severity": "blocking",
+      "text": "blocking: done_when (3) requires every test file importing the changed modules to pass by delta, but the recorded arms run only 2 of the 11 existing test files that import MomentGeometry or the Cerfon-Freidberg class (tests/test_equilibrium_stencil_mesh.py and tests/test_analytic_single_null.py) plus one file that imports neither changed symbol (tests/test_stencil_nulls.py); the nine omitted importers include tests/test_gs_runtime_operands.py:196, tests/test_equilibrium_forward_reference.py, tests/test_equilibrium_diagnostics.py, tests/test_biotpolysection.py, tests/test_edge_consistency.py, tests/test_edge_consistency_ids_route.py, tests/test_forward_operator_arguments.py, tests/equilibrium/test_topology_read.py and tests/test_plasma_cell_flood_families.py, so a moment-value or reference-magnitude regression in those files is unmeasured and the certificate-rows clause has no recorded check."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/carrier-vertex-identity.html",
+      "line": "110",
+      "severity": "non-blocking",
+      "text": "non-blocking: done_when (3) also asks the carrier-fixture rebuild to be measured on one row; the fragment states only that a carrier cached under the previous identity rebuilds on first use because the identity hashes nova/equilibrium/stencil_mesh.py, and neither the fragment nor any log under the run directory records a rebuild row or its wall."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T081359704297-carrier-vertex-identity/logs/negative-control-binned-dedup.log",
+      "line": "2",
+      "severity": "non-blocking",
+      "text": "non-blocking: the negative control ran at revision 71dc61b6b, whose test compared cell_sample_nodes id arrays with assert_array_equal, while the head assertion at tests/test_carrier_vertex_identity.py:156 compares vertex partitions; the discrimination is very likely preserved (618 of 2040 slot ids mismatched implies a different partition) but the head assertion itself was never shown red, and the manifest's negative_control_note calls the scratch tree 'the head tree'."
+    },
+    {
+      "file": "nova/equilibrium/stencil_mesh.py",
+      "line": "406",
+      "severity": "non-blocking",
+      "text": "non-blocking: _representative_polygons keeps the first cell's copy of a merged corner (representative.setdefault over cells in list order), and the sampling path does the same at :500 with vertices[corner]; because the CoilSet lists the same 340 cells in a different order on each device (the run's own outside_scope entry), the stored coordinate, and therefore second_moment and sample_node_coordinates, still differ in their last bits between devices, so the carrier cache content remains device-selected even though node_number and topology now agree. The receipt omits coordinates, so the cross-device test cannot see it."
+    },
+    {
+      "file": "tests/test_carrier_vertex_identity.py",
+      "line": "139",
+      "severity": "non-blocking",
+      "text": "non-blocking: assert len(geometry.sample_node_coordinates) == len(np.unique(geometry.cell_sample_nodes)) compares two outputs of the code under test against each other; the implementation appends exactly one coordinate per new group id, so the relation holds by construction and cannot fail on any change to the vertex-identity rule it is placed beside."
+    }
+  ],
+  "findings_verified": [
+    {
+      "check": "grep -rln for MomentGeometry|cerfon_freidberg_single_null|CerfonFreidbergSingleNull over tests/ returns 11 files; the two recorded suite commands name tests/test_equilibrium_stencil_mesh.py and tests/test_analytic_single_null.py from that set, plus tests/test_stencil_nulls.py which imports nova.equilibrium.stencil_nulls only",
+      "path": "tests/test_gs_runtime_operands.py:196"
+    },
+    {
+      "check": "grep of the fragment for rebuild/cache/fixture/measure returns only the statement line; no log under logs/ contains 'rebuild'",
+      "path": "docs/evidence/fragments/converged-forward-solve/carrier-vertex-identity.html:110"
+    },
+    {
+      "check": "negative-control log header reads '# revision: 71dc61b6b... with the binned vertex merge restored' and its traceback is np.testing.assert_array_equal at tests/test_carrier_vertex_identity.py:130, an assertion absent from the head test file",
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T081359704297-carrier-vertex-identity/logs/negative-control-binned-dedup.log:2"
+    },
+    {
+      "check": "read of _representative_polygons and the sampling loop at head: both select the first encountered copy, and the manifest's outside_scope records that the per-device cell order differs",
+      "path": "nova/equilibrium/stencil_mesh.py:406"
+    },
+    {
+      "check": "the sampling loop appends to sample_nodes exactly when a new group id appears, so the asserted relation is the loop's own invariant",
+      "path": "tests/test_carrier_vertex_identity.py:139"
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit from 06ebc1bf8 to 0ac91093b: 71dc61b6b replaces the binned dedup and the library solve, a1fde04cb rewrites the perturbed-wall comparison as a cell-order-free partition, 0ac91093b adds the evidence fragment; no unrelated edit and no declared path left untouched without reason.",
+    "done_when": "Clause (1) is asserted by tests/test_carrier_vertex_identity.py:145 and :159 with the H200 receipt compared at :159-170, clause (2) by :201 across two fresh subprocesses with the digest field at nova/equilibrium/analytic_single_null.py:364, but clause (3) is partially met: the delta covers 2 of the 11 existing files importing the changed symbols and no fixture rebuild is measured.",
+    "goal": "The goal is a device-independent 300-cell hex carrier via topological vertex identity and a deterministic reference solve; nova/equilibrium/stencil_mesh.py:320 replaces the quantised merge with a ring-adjacency union-find, nova/equilibrium/analytic_single_null.py:23 adds ordered_solve and :62 a coefficient digest, and docs/evidence/fragments/converged-forward-solve/carrier-vertex-identity.html:68 records node_number 1536 with an equal vertex partition on CPU, H200 and a wall displaced by 4e-12 m, against 1536/1547 at base in logs/base_device_cpu.log and receipts/h200.json.",
+    "manifest": "Read; it is complete with three commits, both gate arms (36 passed baseline, 39 passed after), retry_failures [] and the atomic-count residual under outside_scope, but its negative_control_note describes the scratch tree as the head tree while the log records 71dc61b6b.",
+    "write_paths": "git diff --name-only 06ebc1bf8..0ac91093b lists exactly nova/equilibrium/stencil_mesh.py, nova/equilibrium/analytic_single_null.py, tests/test_carrier_vertex_identity.py and docs/evidence/fragments/converged-forward-solve/carrier-vertex-identity.html, all inside the brief's grant, with new logs under the run directory as permitted."
+  },
+  "justifications": {
+    "durability": "tests/test_carrier_vertex_identity.py:156 is a genuine guard on the vertex rule (it reddens with the binned merge restored per logs/negative-control-binned-dedup.log), but :139 asserts an invariant of the code under test against itself, and :201's thread-count arm would not necessarily redden on reverting nova/equilibrium/analytic_single_null.py:349 to np.linalg.solve on one host.",
+    "evidence": "logs/after-suite.log ends '39 passed, 2 skipped' EXIT=0 and the cross-device receipt arm passes in logs/device-receipt-comparison.log, but the delta runs 2 of the 11 test files importing the changed symbols and the required fixture-rebuild measurement appears in no log.",
+    "fit": "The additions follow the module's numpy/dataclass idiom and the repository naming rules (ordered_solve, coefficient_digest, _lattice_vertex_groups, _representative_polygons carry no plan, version or ticket label), with only the O(n^3) Python loops in nova/equilibrium/analytic_single_null.py:37 departing from the surrounding vectorised style.",
+    "goal_fidelity": "nova/equilibrium/stencil_mesh.py:320 and nova/equilibrium/analytic_single_null.py:349 land both halves of the goal and the measured three-arm identity at docs/evidence/fragments/converged-forward-solve/carrier-vertex-identity.html:68 is real, but the representative coordinate still comes from whichever cell the device lists first (nova/equilibrium/stencil_mesh.py:406), so the carrier content is not yet fully device-independent.",
+    "reuse": "Searches over nova/equilibrium, nova/biot and nova/linalg found no owner for deterministic dense elimination or for topology-based vertex grouping; nova/equilibrium/separatrix_clip.py:1951 still owns binned atomisation and is left to its own node, and the digest helper has no generic array-digest owner in nova (the sha256 helpers in nova/imas hash file chains).",
+    "scope_discipline": "Every path in git diff --name-only 06ebc1bf8..0ac91093b is inside the brief's write grant, including tests/test_carrier_vertex_identity.py and the evidence fragment, and nova/biot/plasmagrid.py and forward_operator.py were correctly left alone."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to make the diverted 300-cell hex carrier device-independent by identifying lattice vertices topologically and making the reference solve deterministic; nova/equilibrium/stencil_mesh.py:320 replaces the binned merge with a ring-adjacency union-find and nova/equilibrium/analytic_single_null.py:23 adds ordered_solve with a coefficient digest, and docs/evidence/fragments/converged-forward-solve/carrier-vertex-identity.html:68 records node_number 1536 with an equal vertex partition on CPU, H200 and a wall displaced by 4e-12 m, against 1536/1547 at base in logs/base_device_cpu.log and receipts/h200.json.\nVERDICT done_when: clause (1) is asserted by tests/test_carrier_vertex_identity.py:145 and the H200 receipt at :159, clause (2) by :201 across two fresh subprocesses with the digest at nova/equilibrium/analytic_single_null.py:364, but clause (3) is only partly met because the delta runs 2 of the 11 existing files holding the changed symbols and no carrier-fixture rebuild is measured anywhere.\nVERDICT write_paths: git diff --name-only 06ebc1bf8..0ac91093b lists exactly nova/equilibrium/stencil_mesh.py, nova/equilibrium/analytic_single_null.py, tests/test_carrier_vertex_identity.py and docs/evidence/fragments/converged-forward-solve/carrier-vertex-identity.html, all inside the brief's grant, with logs under the run directory as permitted.\nVERDICT manifest: read; it is complete with three commits, both gate arms (36 passed baseline, 39 passed after), retry_failures [] and the atomic-count residual under outside_scope, but its negative_control_note calls the scratch tree the head tree while the log records revision 71dc61b6b.\nVERDICT diff: read commit by commit from 06ebc1bf8 to 0ac91093b: 71dc61b6b replaces the quantised merge and the library solve, a1fde04cb rewrites the perturbed-wall comparison as a cell-order-free partition, and 0ac91093b adds the evidence fragment; no unrelated edit.\nCALL_SITES: nova/equilibrium/forward.py:658, scripts/analytic_oracle_fixtures/measure.py:141, apps/playable/solovev.py:229, benchmarks/solovev_certificate.py:124\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: nova/equilibrium/stencil_mesh.py:320 and nova/equilibrium/analytic_single_null.py:349 land both halves and the three-arm identity at docs/evidence/fragments/converged-forward-solve/carrier-vertex-identity.html:68 is real, but the stored representative coordinate still comes from whichever cell the device lists first (nova/equilibrium/stencil_mesh.py:406), so the carrier content is not yet fully device-independent.\nSCORE evidence: 11\nJUSTIFICATION evidence: logs/after-suite.log ends '39 passed, 2 skipped' EXIT=0 and logs/device-receipt-comparison.log passes the cross-device receipt, but the delta runs 2 of the 11 test files that import the changed symbols and the required fixture-rebuild measurement appears in no log.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff --name-only 06ebc1bf8..0ac91093b is inside the brief's write grant, including tests/test_carrier_vertex_identity.py and the evidence fragment, and nova/biot/plasmagrid.py and forward_operator.py were left untouched.\nSCORE durability: 13\nJUSTIFICATION durability: tests/test_carrier_vertex_identity.py:156 is a genuine guard that reddens with the binned merge restored, but :139 asserts an invariant of the code under test against itself and :201's thread-count arm need not redden on reverting nova/equilibrium/analytic_single_null.py:349 to np.linalg.solve on one host.\nSCORE fit: 17\nJUSTIFICATION fit: the additions follow the module idiom and carry no plan, version or ticket label in nova/equilibrium/stencil_mesh.py:320 or nova/equilibrium/analytic_single_null.py:23, with only the O(n^3) Python loops at nova/equilibrium/analytic_single_null.py:37 departing from the surrounding vectorised style.\nSCORE reuse: 18\nJUSTIFICATION reuse: no owner exists for deterministic dense elimination or topology-based vertex grouping after searches over nova/equilibrium, nova/biot and nova/linalg, while nova/equilibrium/separatrix_clip.py:1951 keeps its own binned atomisation for its separate node.\nFINDING tests/test_gs_runtime_operands.py:196 blocking: done_when (3) requires every test file importing the changed modules to pass by delta, but the recorded arms run only 2 of the 11 existing files holding those symbols plus one file that imports neither, leaving tests/test_equilibrium_forward_reference.py, tests/test_equilibrium_diagnostics.py, tests/test_biotpolysection.py, tests/test_edge_consistency.py, tests/test_edge_consistency_ids_route.py, tests/test_forward_operator_arguments.py, tests/equilibrium/test_topology_read.py and tests/test_plasma_cell_flood_families.py unmeasured.\nFINDING docs/evidence/fragments/converged-forward-solve/carrier-vertex-identity.html:110 non-blocking: done_when (3) also asks the carrier-fixture rebuild to be measured on one row, and the fragment states the rebuild mechanism but no log records a rebuilt row or its wall.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T081359704297-carrier-vertex-identity/logs/negative-control-binned-dedup.log:2 non-blocking: the negative control ran at 71dc61b6b against assert_array_equal while the head compares vertex partitions at tests/test_carrier_vertex_identity.py:156, so the head assertion was never itself shown red and the manifest note calls the scratch tree the head tree.\nFINDING nova/equilibrium/stencil_mesh.py:406 non-blocking: _representative_polygons keeps the first cell's copy of a merged corner (and :500 does the same for sampling), so with the per-device cell ordering the run itself records, second_moment and sample_node_coordinates still differ in their last bits between devices and the receipt carries no coordinates to see it.\nFINDING tests/test_carrier_vertex_identity.py:139 non-blocking: the assertion compares two outputs of the code under test against each other, and the sampling loop appends one coordinate per new group id by construction, so the relation cannot fail on any change to the vertex-identity rule it sits beside.\n",
+  "review_run_id": "r-20261024T090130306391-review-of-carrier-vertex-identity-0ac91093b1f2",
+  "reviewed_base_sha": "06ebc1bf88436cc9c2f2f40129fa3ce753788e78",
+  "reviewed_head_sha": "0ac91093b1f2a6fb3e90c3692c447f01aefa083e",
+  "reviewed_run_id": "r-20261024T081359704297-carrier-vertex-identity",
+  "rubric": "code",
+  "scores": {
+    "durability": 13,
+    "evidence": 11,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T09:10:30.000000+00:00",
+  "total": 94
+}

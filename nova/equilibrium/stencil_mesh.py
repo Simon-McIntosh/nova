@@ -452,13 +452,20 @@ def lattice_vertex_index(polygons) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     return coordinates, inverse, rows
 
 
-def _representative_polygons(polygons, groups, rows) -> tuple[np.ndarray, ...]:
+def canonical_polygons(polygons) -> tuple[np.ndarray, ...]:
     """Return each polygon with every shared vertex rewritten to one value.
 
     Merged slots carry exactly one stored coordinate, so the atomic mesh that
     atomises these polygons keys its own lookups on equal values rather than on
-    a bin boundary.
+    a bin boundary. Callers that atomise cells themselves apply this first, so
+    the copies of one lattice corner reach the atomiser bit-identical and no
+    quantisation edge can split them.
     """
+    groups, rows = lattice_vertex_groups(polygons)
+    return _representative_polygons(polygons, groups, rows)
+
+
+def _representative_polygons(polygons, groups, rows) -> tuple[np.ndarray, ...]:
     representative = canonical_vertex_values(polygons, groups, rows)
     return tuple(
         np.ascontiguousarray(

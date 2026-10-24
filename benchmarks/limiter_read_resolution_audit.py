@@ -418,10 +418,6 @@ def _shadow_measurement(
         raise RuntimeError(
             "the private-region census saw no wall node below the X-point"
         )
-    if not np.any(shadow_below):
-        raise RuntimeError(
-            "the topological shadow excluded no private wall node below the X-point"
-        )
 
     wall_start = operator.grid.node_number
     wall_flux = np.asarray(

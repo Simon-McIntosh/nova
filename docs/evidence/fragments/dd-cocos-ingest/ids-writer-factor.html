@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="dd-cocos-ingest">
+  <meta name="plan-title" content="The pulsedesign writer's convention factor is exercised without a database and the DD version has one default">
+  <meta name="plan-evidence-for" content="dd-cocos-ingest">
+  <meta name="plan-verifies" content="dd-cocos-ingest#s4">
+  <meta name="plan-recorded-at" content="2026-10-24">
+  <meta name="plan-verdict" content="complete">
+  <title>ids-writer-factor | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+<h1 id="ids-writer-factor-title">The pulsedesign writer's convention factor is exercised without a database and the DD version has one default</h1>
+<p>Base <code>48d7adda6</code>. The pulsedesign writer's three psi sites now have a database-free test that reads the written IDS back, the writer takes its Data Dictionary version from the one owner instead of a literal, and the equilibrium reader's wall read has a passing guard where the only previous test reaching it was a strict xfail for another failure.</p>
+
+<h2 id="ids-writer-factor-defects">Three defects, one of them a live sign error</h2>
+<table>
+<thead><tr><th>defect</th><th>state at the base</th><th>verdict</th></tr></thead>
+<tbody>
+<tr><th scope="row">the writer's three factor sites are untested</th><td>every test in <code>tests/test_pulsedesign.py</code> skips without the <code>pf_active</code> only a database supplies</td><td><strong>covered.</strong> <code>tests/test_pulsedesign_write_convention.py</code> writes a known COCOS 17 state through the writer body with no machine and no database.</td></tr>
+<tr><th scope="row"><code>time_slice.global_quantities.psi_axis</code> and <code>psi_boundary</code> were written twice</th><td>the factored write was overwritten by an <code>attrs_0d</code> loop that carried no factor, so the entry stored COCOS 17 numbers in a DD3 field that means the opposite</td><td><strong>repaired.</strong> One loop now writes <code>attrs_0d</code> and applies the factor to the psi-like names in it. This is the defect the new test found; it is not a refactor.</td></tr>
+<tr><th scope="row">the writer stated its DD version as a literal</th><td><code>dd_equilibrium_factor("3.39.0", PSI_LIKE)</code> while <code>nova/imas/sample.py</code> owns <code>DEFAULT_DD_VERSION</code></td><td><strong>one default.</strong> The writer imports that owner; no literal remains in <code>nova/imas/pulsedesign.py</code>.</td></tr>
+<tr><th scope="row">the wall read's <code>dd_version</code> had no passing guard</th><td><code>EquilibriumData.wall</code> already passed <code>str(self.ids_dd_version)</code>, but the only test reaching it was <code>test_full_build_completes_on_a_dd3_pulse</code>, a strict xfail for the wall build's unrelated <code>KeyError</code></td><td><strong>guard added, code unchanged.</strong> The read was already correct, so <code>nova/imas/equilibrium.py</code> is untouched and <code>tests/test_equilibrium_wall_dd_version.py</code> fixes the argument.</td></tr>
+</tbody>
+</table>
+
+<h2 id="ids-writer-factor-reproduction">The reproduction, quoted before the repair</h2>
+<p>The new test was run against the unmodified writer first. It failed at the first site and named it:</p>
+<pre><code>assert np.isclose(
+    float(time_slice.global_quantities.psi_axis), factor * PSI_AXIS
+), "time_slice.global_quantities.psi_axis carries no factor"
+E   AssertionError: time_slice.global_quantities.psi_axis carries no factor
+E   assert np.False_
+E    +  where np.False_ = ...(-95.0, (-1.0 * -95.0))</code></pre>
+<p>The entry held <code>-95.0</code> where the DD3 target requires <code>+95.0</code>: the <code>attrs_0d</code> loop (<code>["li_3", "psi_axis", "psi_boundary"]</code>) ran after the factoring loop and rewrote both psi rows unfactored. The same test then passed with the loop merged.</p>
+
+<h2 id="ids-writer-factor-tests">What the two new tests fix</h2>
+<p><strong>Writer</strong>, <code>tests/test_pulsedesign_write_convention.py</code>, 4 passed. A <code>WriterState</code> supplies the three attributes the writer reaches — the input dataset, the IDS to fill, the metadata hook — so the writer body runs without the machine that made it database-bound. A known COCOS 17 state (<code>psi_axis</code> &minus;95, <code>psi_boundary</code> &minus;102, a 2&times;3 <code>psi2d</code>) is written and read back:</p>
+<ul>
+<li>all three sites carry the factor: <code>global_quantities.psi_axis</code>, <code>global_quantities.psi_boundary</code>, <code>boundary_separatrix.psi</code> and <code>profiles_2d[0].psi</code>, each compared against <code>dd_equilibrium_factor(DEFAULT_DD_VERSION, PSI_LIKE)</code>, which the test asserts is &minus;1;</li>
+<li>rows that are not psi-like do not move: <code>li_3</code>, <code>minor_radius</code> and <code>boundary_separatrix.type</code> are asserted unchanged;</li>
+<li>the writer names the one default: <code>nova.imas.pulsedesign.DEFAULT_DD_VERSION == nova.imas.sample.DEFAULT_DD_VERSION</code>;</li>
+<li>a DD4 default reaches the source convention unchanged: monkeypatching the module's <code>DEFAULT_DD_VERSION</code> to <code>4.0.0</code> makes every site pass the state through, which no site can do if it states its own version.</li>
+</ul>
+<p><strong>Wall</strong>, <code>tests/test_equilibrium_wall_dd_version.py</code>, 2 passed. The property body is driven on an instance built without the reader's initialiser, with a recorder in place of <code>Wall</code> and the pulse's URI and written version supplied directly. The tests assert the constructor receives <code>uri</code> and <code>dd_version == "3.38.1"</code>, and that the version passed is not the bare major the URI carries — dropping the major, or omitting the argument so the wall resolves a latest default, is red.</p>
+
+<h2 id="ids-writer-factor-negative-control">Negative control</h2>
+<p>Declared mutation: drop the factor at one writer site in a scratch copy. Applied at the <code>profiles_2d[0].psi</code> line of a <code>git archive</code> of the base revision, the write test fails on its own assertion and names that site: <code>AssertionError: time_slice.profiles_2d.psi carries no factor</code>, exit 1, the other 3 tests still passing. Log: <code>negative-control.log</code> under the run directory.</p>
+
+<h2 id="ids-writer-factor-gate">Every affected file, by delta against the base</h2>
+<p>Each file ran in its own fresh process, CPU lane, its own <code>--basetemp</code>. The base arm is a <code>git archive</code> of <code>48d7adda6</code>; the head arm is the committed tree. Both arms exited 0 on every file.</p>
+<table>
+<thead><tr><th>file</th><th>base</th><th>head</th></tr></thead>
+<tbody>
+<tr><th scope="row"><code>tests/test_database.py</code></th><td>28 passed, 19 skipped</td><td>28 passed, 19 skipped</td></tr>
+<tr><th scope="row"><code>tests/test_equilibrium_reader_cocos.py</code></th><td>6 passed, 1 xfailed</td><td>6 passed, 1 xfailed</td></tr>
+<tr><th scope="row"><code>tests/test_extrapolate.py</code></th><td>2 passed, 10 skipped</td><td>2 passed, 10 skipped</td></tr>
+<tr><th scope="row"><code>tests/test_iter_sectioned_conductor_set.py</code></th><td>12 passed</td><td>12 passed</td></tr>
+<tr><th scope="row"><code>tests/test_pulsedesign.py</code></th><td>5 skipped</td><td>5 skipped</td></tr>
+<tr><th scope="row"><code>tests/test_sample_write_convention.py</code></th><td>5 passed</td><td>5 passed</td></tr>
+<tr><th scope="row"><code>tests/test_equilibrium_wall_dd_version.py</code></th><td>absent</td><td>2 passed</td></tr>
+<tr><th scope="row"><code>tests/test_pulsedesign_write_convention.py</code></th><td>absent</td><td>4 passed</td></tr>
+</tbody>
+</table>
+<p><strong>Delta: zero failures added, zero passing tests lost.</strong> The two new files are the only rows that change.</p>
+
+</main>
+</body>
+</html>

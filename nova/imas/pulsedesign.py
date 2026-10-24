@@ -19,6 +19,7 @@ from nova.imas.ids_entry import IdsEntry
 from nova.imas.machine import Machine, MachineCoil, MachineSection
 from nova.imas.metadata import Metadata
 from nova.imas.pf_active import PF_Active
+from nova.imas.sample import DEFAULT_DD_VERSION
 from nova.io.sourcemap import dd_equilibrium_factor
 from nova_cocos import PSI_LIKE
 
@@ -524,12 +525,11 @@ class PulseDesign(Animate, Plot1D, InverseDesign, ITER):
     def equilibrium_ids(self) -> Ids:
         """Return waveform equilibrium ids."""
         ids_entry = IdsEntry(ids=self.ids, name="equilibrium")
-        # this writer stores DD3 data, whose psi-like rows are COCOS 11
-        psi_factor = dd_equilibrium_factor("3.39.0", PSI_LIKE)
+        psi_factor = dd_equilibrium_factor(DEFAULT_DD_VERSION, PSI_LIKE)
         self.update_metadata(ids_entry)
         ids_entry.ids.time = self._data.time.data
         with ids_entry.node("time_slice:global_quantities.*"):
-            for attr in ["li_3", "psi_axis", "psi_boundary"]:
+            for attr in self._data.attrs_0d:
                 data = self._data[attr].data
                 if "psi" in attr:
                     ids_entry[attr, :] = psi_factor * data
@@ -538,9 +538,6 @@ class PulseDesign(Animate, Plot1D, InverseDesign, ITER):
         with ids_entry.node("time_slice:global_quantities.magnetic_axis.*"):
             for i, attr in enumerate("rz"):
                 ids_entry[attr, :] = self._data.magnetic_axis.data[:, i]
-        with ids_entry.node("time_slice:global_quantities.*"):
-            for attr in self._data.attrs_0d:
-                ids_entry[attr, :] = self._data[attr].data
         with ids_entry.node("time_slice:boundary_separatrix.*"):
             for attr in self._data.attrs_boundary_seperatrix:
                 ids_entry[attr, :] = self._data[attr].data

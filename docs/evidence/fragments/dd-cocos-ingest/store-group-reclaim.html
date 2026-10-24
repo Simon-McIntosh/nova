@@ -1,0 +1,40 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="dd-cocos-ingest">
+<meta name="plan-evidence-for" content="dd-cocos-ingest">
+<meta name="plan-verifies" content="dd-cocos-ingest#s4">
+<meta name="plan-recorded-at" content="2026-10-24">
+<title>Legacy store group reclaimed on re-ingest — landing | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+</head><body><main class="plan-doc">
+<section id="store-group-reclaim-landing">
+<h1 id="store-group-reclaim-landing-title">Re-ingest reclaims the refused pre-convention store group</h1>
+<p id="store-group-reclaim-landing-outcome"><strong>landing:</strong> <code>SignalStore.write</code> removes the identity-only group for the same source before storing the convention-keyed one, and prints the group it removed. Re-ingesting a legacy cache now leaves exactly one group on disk and reports which one it reclaimed, instead of leaving the refused group beside the new one as an orphan that no later read can detect. The self-fulfilling <code>dd_version</code> comparison in the convention-key test is replaced by assertions on the derived conventions and on the identity-only key, which the convention-bearing key must differ from.</p>
+
+<p id="store-group-reclaim-landing-defect"><strong>The recorded defect, reproduced.</strong> The followup records that <code>SignalStore</code> refuses a pre-convention group with <code>StaleConventionError</code> but nothing removes it, and that <code>write</code> reaches only <code>store_overwrite</code>, whose <code>delete_group</code> deletes the store's own convention-keyed group. The reproduction is the declared negative control: a scratch copy of this head with the reclaim call removed (behaviourally the base) writes a legacy group, re-ingests, and the one-group assertion fails because two groups remain. The log <code>logs/negative-control-reclaim-removed.log</code> shows <code>AssertionError: assert {'675ba56bcee…c21911b2efd0'} == {'89b5c21911b2efd0'}</code>, the extra item being the legacy group, and exits 1 naming <code>test_reingest_reclaims_the_legacy_group</code>.</p>
+
+<p id="store-group-reclaim-landing-change"><strong>The reclaim, and why it cannot be a read-time path.</strong> <code>legacy_group()</code> reports the identity-only group whenever it is present, independent of the convention-keyed one; <code>stale_group()</code> keeps its narrower meaning — present only while the keyed group is absent — so the refusal on read is unchanged. <code>write</code> calls <code>reclaim_legacy_group()</code>, which deletes the identity-only group when it exists and is not the group being written, and prints its name, the source URI, the DD version and the convention-keyed group that supersedes it. The read-time detector cannot do this job: once the new group exists <code>stale_group()</code> returns <code>None</code> by design, which is exactly the state in which the orphan would persist. Deleting it on write is the one moment both groups are known.</p>
+
+<p id="store-group-reclaim-landing-clause1"><strong>(1) A legacy group is removed on re-ingest, and the removal is reported.</strong> <code>test_reingest_reclaims_the_legacy_group</code> writes a dataset under <code>legacy_cache_key</code> with a store whose group is set to that key — the shape an older nova left — asserts the store holds exactly that one top-level group, then re-ingests through <code>IdsIngest.ingest</code> on a fresh store. It asserts the store now holds exactly <code>{cache_key}</code>, that <code>legacy_group()</code> is <code>None</code>, that the served data match the ingested current, and that the captured stdout names the removed legacy group.</p>
+
+<p id="store-group-reclaim-landing-clause2"><strong>(2) The assertion that could not fail is replaced by one that can.</strong> The previous line compared two stores' <code>dd_version</code> where both were constructed from the literal <code>DD3</code>, so it re-derived a constant it had just supplied. The replacement asserts the two stores share <code>DD3</code>, that their conventions are <strong>11</strong> and <strong>17</strong>, that their convention-keyed names differ, and that both legacy names are equal to each other and different from their convention-keyed names. In a scratch copy with <code>cocos</code> dropped from <code>cache_key</code>, <code>test_convention_alone_changes_the_key</code> fails on its own key-inequality assertion (<code>'675ba56bcee66021' != '675ba56bcee66021'</code>) and exits 1; log <code>logs/negative-control-convention-assertion.log</code>.</p>
+
+<p id="store-group-reclaim-landing-gate"><strong>(3) The covering test files pass by delta, each in its own fresh process.</strong> The six files named by the brief were run at base <code>6c642019d</code> and at head <code>12b6a98bc</code>, one pytest process per file, each with its own <code>--basetemp</code>, <code>JAX_PLATFORMS=cpu</code>, <code>PYTHONPATH</code> set to the tree under test.</p>
+<table id="store-group-reclaim-landing-gate-table">
+<caption>Covering tests, base against head. Each row is a separate process with its own basetemp. Base arm: <code>logs/baseline/</code> at <code>6c642019d</code>. Head arm: <code>logs/after/</code> at <code>12b6a98bc</code>.</caption>
+<thead><tr><th>file</th><th>base</th><th>head</th><th>delta</th></tr></thead>
+<tbody>
+<tr><td><code>tests/test_signalstore_convention_key.py</code></td><td>3 passed</td><td>4 passed</td><td>+1 new test, 0 failed</td></tr>
+<tr><td><code>tests/test_io_roundtrip.py</code></td><td>3 passed</td><td>3 passed</td><td>0</td></tr>
+<tr><td><code>tests/test_io_sourcemap.py</code></td><td>22 passed</td><td>22 passed</td><td>0</td></tr>
+<tr><td><code>tests/test_ingest_import.py</code></td><td>1 passed</td><td>1 passed</td><td>0</td></tr>
+<tr><td><code>tests/test_media.py</code></td><td>48 passed</td><td>48 passed</td><td>0</td></tr>
+<tr><td><code>tests/test_parity_gate.py</code></td><td>15 passed</td><td>15 passed</td><td>0</td></tr>
+</tbody>
+</table>
+<p id="store-group-reclaim-landing-gate-note">92 passed at base, 93 at head, no failures at either arm, so added failures are zero. The one added pass is the reclaim test. Every log's last line is a bare <code>EXIT=0</code>.</p>
+
+<p id="store-group-reclaim-landing-figure"><strong>No figure.</strong> The measure is a group count before and after a write plus a line of printed output — naturally a table, not a plotted or sequential relationship. The node's done-when names no artifact, so the landing fragment is its only record.</p>
+</section>
+</main></body></html>

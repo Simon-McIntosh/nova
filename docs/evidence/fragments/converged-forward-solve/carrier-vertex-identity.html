@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="carrier-vertex-identity">
+<meta name="plan-title" content="Hex carrier vertex identity and reference-solve determinism">
+<meta name="plan-summary" content="Lattice vertices are grouped by coordinate through a spatial hash one billionth of the lattice scale wide, independent of cell order and device, and the analytic reference solve publishes the same coefficient digest on CPU and H200">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s4">
+<title>Hex carrier vertex identity and reference-solve determinism</title>
+</head>
+<body>
+<main>
+<article class="landing" data-node="carrier-vertex-identity" id="carrier-vertex-identity">
+
+<h2 id="carrier-vertex-identity-result">The carrier is the same carrier on every device</h2>
+
+<p>Two changes make the diverted 300-cell certificate carrier device
+independent. The reference solve now runs through one ordered routine, so its
+coefficients are bit-identical wherever it runs, and the moment geometry
+identifies a lattice vertex by the cell slots that share it rather than by a
+quantised coordinate.</p>
+
+<h3 id="carrier-vertex-identity-reproduction">The defect, re-measured at base</h3>
+
+<p>Revision <code>06ebc1bf8</code> was built twice from one archive, once in
+place on the fleet allocation and once as one betelgeuse job under
+<code>gpu_0003_grpA</code> on one H200. The two carriers are not the same
+carrier:</p>
+
+<table id="carrier-vertex-identity-base-table">
+<caption>Diverted 300-cell certificate carrier at revision <code>06ebc1bf8</code>, before the repair.</caption>
+<thead><tr><th>quantity</th><th>CPU (clu-2068)</th><th>H200 (gpu-0003)</th></tr></thead>
+<tbody>
+<tr><td>coefficient digest</td><td><code>3b71e589179c036f</code></td><td><code>93b5b2b6287ac400</code></td></tr>
+<tr><td>sample vertices</td><td>1075</td><td>1086</td></tr>
+<tr><td>atomic vertices</td><td>923</td><td>937</td></tr>
+<tr><td><code>node_number</code></td><td>1536</td><td>1547</td></tr>
+</tbody>
+</table>
+
+<p>These reproduce the diagnosis recorded at merge <code>57c31ff1e</code>
+exactly: 1075 against 1086 sample coordinates, 1536 against 1547 nodes, and a
+coefficient vector that differs by <code>3.9e-14</code> at its largest element
+between the two devices. The constraint system the reference solves has
+condition number <code>1.58e5</code>, so a last-bit difference in the library
+solve becomes <code>4e-14</code> in the coefficients and moves every wall and
+cell position downstream.</p>
+
+<h3 id="carrier-vertex-identity-identity">A vertex is the slot set that shares it</h3>
+
+<p><code>MomentGeometry.from_cells</code> merged sampling and atomic vertices by
+<code>rint(vertex / tolerance)</code>. A shared corner is reconstructed once
+per cell that carries it, so the copies differ in their last bits; two copies
+merge only while they fall inside one bin, and a bin boundary between them is
+decided by the phase the reference solve happens to produce. The merge now
+groups slots through a coordinate spatial hash whose cells are
+<code>1e-9</code> of the lattice scale wide, and it reads no neighbour rings
+and no cell order at all. That reach is a millionth of the distance between
+neighbouring corners and a thousand times the <code>7.4e-13</code> m drift the
+reference solve was observed to produce, and every slot is compared against the
+hash cells on both sides of its own, so no bin edge can separate a pair. A
+candidate group is rejected when its own spread reaches the merge width, which
+keeps a wall-clipped sliver from collapsing into a degenerate polygon, and two
+slots of one cell are never joined. Merged polygon vertices carry one stored
+coordinate — the mean of the copies taken in sorted order — so the atomic mesh
+that atomises them keys on equal values instead of on a bin edge, and the
+stored value does not depend on which cell was listed first.</p>
+
+<h3 id="carrier-vertex-identity-measure">The three arms agree</h3>
+
+<table id="carrier-vertex-identity-head-table">
+<caption>Diverted 300-cell certificate carrier at revision <code>a1fde04cb</code>. The perturbed arm displaces the wall by <code>4e-12</code> m on each coordinate, <code>5.7e-12</code> m in magnitude.</caption>
+<thead><tr><th>quantity</th><th>CPU</th><th>H200</th><th>wall + 4e-12 m</th></tr></thead>
+<tbody>
+<tr><td>coefficient digest</td><td><code>01818d5d423fe502</code></td><td><code>01818d5d423fe502</code></td><td><code>01818d5d423fe502</code></td></tr>
+<tr><td>cell count</td><td>340</td><td>340</td><td>340</td></tr>
+<tr><td>sample vertices</td><td>1075</td><td>1075</td><td>1075</td></tr>
+<tr><td><code>node_number</code></td><td>1536</td><td>1536</td><td>1536</td></tr>
+<tr><td>vertex partition</td><td>equal</td><td>equal</td><td>equal</td></tr>
+</tbody>
+</table>
+
+<p>The vertex identity is compared as a partition, not as the numeric id array:
+the two devices list the same cells in a different order, so a slot's id is
+not comparable between them. Each slot is named by the micron cell of its own
+centre and the comparison asks which slots share a vertex, which a cell
+reordering does not disturb.</p>
+
+<p>The reference solve is solved twice in fresh processes at
+<code>OMP_NUM_THREADS</code>, <code>OPENBLAS_NUM_THREADS</code> and
+<code>MKL_NUM_THREADS</code> of 1 and 4, and the coefficients, magnetic axis and
+separatrix are required to be bit-identical. The solve publishes
+<code>coefficient_digest</code>, the sha256 of its coefficient vector as stored
+binary64, so a carrier records the reference it was built from.</p>
+
+<p>The thread-count arm alone does not carry the claim, since one machine
+usually gives the same answer at one and four threads either way. The digest
+itself is therefore compared across devices: the CPU and the H200 both publish
+<code>01818d5d423fe502</code>. The control is the library solve this replaced.
+Restoring <code>np.linalg.solve</code> in a scratch copy of the head tree gives
+<code>3b71e589179c036f</code> on the CPU against <code>01818d5d423fe502</code>
+from the H200 receipt, so the digests disagree exactly when the driver chooses
+the elimination order (<code>logs/determinism-control-library-solve.log</code>).</p>
+
+<h3 id="carrier-vertex-identity-negative-control">Negative control</h3>
+
+<p>Restoring the binned dedup in a scratch copy of
+<code>a1fde04cb</code> turns the perturbed-wall arm red:
+<code>tests/test_carrier_vertex_identity.py::test_perturbed_wall_keeps_the_carrier_vertex_identity</code>
+fails with 618 of 2040 slot ids mismatched, and the run exits 1. The same file
+passes 3 tests at the head. Log:
+<code>logs/negative-control-binned-dedup.log</code>.</p>
+
+<h3 id="carrier-vertex-identity-certificate">Certified rows</h3>
+
+<p>The coefficient vector moved by at most <code>3.9e-14</code> absolute against
+the library solve on this host, on a vector whose largest element is
+<code>0.763</code>. Every published certificate magnitude is a quantity that
+floor sits far below, and the emitted row values are unchanged. Any carrier
+cached under the previous identity rebuilds on first use, because the carrier
+identity hashes <code>nova/equilibrium/stencil_mesh.py</code> and
+<code>nova/equilibrium/analytic_single_null.py</code>.</p>
+
+<h3 id="carrier-vertex-identity-importers">Every importing test file, by delta</h3>
+
+<p>Eleven test files import the changed modules. Each ran in its own fresh
+process, once from an archive of base <code>06ebc1bf8</code> and once from the
+head tree, at one BLAS thread each. <code>tests/test_carrier_vertex_identity.py</code>
+is new, so it has no base arm.</p>
+
+<table id="carrier-vertex-identity-importer-table">
+<caption>Per-file delta, base <code>06ebc1bf8</code> against head <code>0ac91093b</code>; one pytest process per file per arm.</caption>
+<thead><tr><th>file</th><th>base</th><th>head</th></tr></thead>
+<tbody>
+<tr><td><code>tests/test_analytic_single_null.py</code></td><td>3 passed</td><td>3 passed</td></tr>
+<tr><td><code>tests/test_equilibrium_stencil_mesh.py</code></td><td>19 passed</td><td>19 passed</td></tr>
+<tr><td><code>tests/test_equilibrium_diagnostics.py</code></td><td>64 passed</td><td>64 passed</td></tr>
+<tr><td><code>tests/test_edge_consistency.py</code></td><td>8 passed</td><td>8 passed</td></tr>
+<tr><td><code>tests/test_edge_consistency_ids_route.py</code></td><td>2 passed</td><td>2 passed</td></tr>
+<tr><td><code>tests/test_forward_operator_arguments.py</code></td><td>5 passed</td><td>5 passed</td></tr>
+<tr><td><code>tests/test_gs_runtime_operands.py</code></td><td>3 passed</td><td>3 passed</td></tr>
+<tr><td><code>tests/test_plasma_cell_flood_families.py</code></td><td>11 passed</td><td>11 passed</td></tr>
+<tr><td><code>tests/test_biotpolysection.py</code></td><td>27 passed</td><td>26 passed, 1 failed</td></tr>
+<tr><td><code>tests/equilibrium/test_topology_read.py</code></td><td>timeout, no result</td><td>timeout, no result</td></tr>
+<tr><td><code>tests/test_equilibrium_forward_reference.py</code></td><td>4 passed, 25 timed out</td><td>4 passed, 25 timed out</td></tr>
+<tr><td><code>tests/test_carrier_vertex_identity.py</code></td><td>absent</td><td>3 passed</td></tr>
+</tbody>
+</table>
+
+<p>Eight files are unchanged on both arms, including the two that pin
+reference magnitudes: <code>tests/test_analytic_single_null.py</code> and
+<code>tests/test_gs_runtime_operands.py</code>. The reference solve moves by at
+most <code>3.9e-14</code> absolute, so no published analytic certificate
+magnitude is expected to move, and none of the pinned comparisons moved.</p>
+
+<p><strong>One delta: <code>test_preclip_samples_come_from_the_verified_authored_generator</code>.</strong>
+It builds a mesh carrying a single ring — one centre and its six nearest cells —
+and requires <code>PlasmaGrid._index_sampling_vertices</code> to reproduce
+<code>MomentGeometry.sample_node_coordinates</code>. The two agree only while
+the identity is mesh-independent. It is not any more: a vertex is now the set of
+slots that share it <em>through the adjacency the mesh declares</em>, so a
+one-ring mesh merges nothing that lies outside that ring, and the test's
+restricted lattice keeps 318 sample nodes where the grid's full lattice keeps
+242. The binned identity it was written against merged coincident coordinates
+globally, so adjacency played no part.</p>
+
+<p>Reconciling the two means either the sample bank adopts the lattice identity
+as well — which changes this pinned equality rather than preserving it, and so
+needs the test file itself, outside this round's write scope — or the identity
+grows a global tolerance pass, which changes all three device arms and the
+negative control and must be measured again. The delta is recorded rather than
+argued away.</p>
+
+<p><strong>Two files carry no usable measurement.</strong>
+<code>tests/test_equilibrium_forward_reference.py</code> ran to completion on
+both arms with an identical outcome — 4 passed and 25 errors — and every one of
+the 25 is <code>Failed: Timeout (&gt;300.0s) from pytest-timeout</code>: the
+reference solve does not finish inside the per-test bound on a shared CPU while
+four of these files run together. The sets match exactly, so the delta is zero,
+but those 25 tests never ran and neither arm measures them.
+<code>tests/equilibrium/test_topology_read.py</code> was still running when the
+run reached its deadline, so it carries no result on either arm. Both belong on
+a device lane, where the forward solve's 370 ms edits rather than minutes do the
+work.</p>
+
+<h3 id="carrier-vertex-identity-one-identity">One identity, chosen by value</h3>
+
+<p>The first repair left two identities in the tree. <code>PlasmaGrid</code>
+merged sample vertices by a quantised coordinate while <code>MomentGeometry</code>
+merged them through the mesh's neighbour rings, so one lattice produced 242
+sample nodes through the grid and 318 through the geometry, and
+<code>tests/test_biotpolysection.py</code> — which requires the two to agree —
+passed at base and failed at head. Both now call one function,
+<code>stencil_mesh.lattice_vertex_index</code>.</p>
+
+<p>That function reads no adjacency at all. A lattice vertex is the set of cell
+slots whose coordinates agree within <code>1e-9</code> of the lattice scale,
+found through a spatial hash at that width. A candidate group is rejected when
+its own spread reaches the merge width, which keeps a wall-clipped sliver from
+collapsing, and two slots of one cell are never joined. Because the answer
+depends on the coordinates and not on which of the mesh's rings happened to
+carry them, a grid that lists one lattice in a different order — which the
+two devices do — keeps the same identity.</p>
+
+<p>The stored coordinate of a merged corner is the mean of its copies taken in
+sorted order, not the first copy in list order, and the sample coordinate array
+is published sorted. Both remove the last dependence on cell order, so two
+builds of one lattice publish the same <code>sample_node_coordinates</code>,
+the same atomic nodes and the same second moments.</p>
+
+<h3 id="carrier-vertex-identity-tests">What the tests now require</h3>
+
+<p>The test that compared two outputs of one build now counts the lattice
+vertices from the cell polygons instead: every cell lists every corner it
+carries, so the number of distinct positions in their union is the lattice's
+vertex count, measured outside the geometry. It reads 1075, and the geometry
+publishes 1075. A new test permutes the cells and requires the sample
+coordinates, the atomic node coordinates and the second moments to be identical
+to the unpermuted build.</p>
+
+<p>The negative control is re-run against the head assertion. Restoring the
+binned identity in a scratch copy of the head tree fails
+<code>test_perturbed_wall_keeps_the_carrier_vertex_identity</code> and exits 1;
+log <code>logs/negative-control-head-assertion.log</code>.</p>
+
+<p>The device arm is a receipt written on one H200 under <code>gpu_0003_grpA</code>
+(job 1294754, <code>logs/h200-identity-receipt.log</code>) and compared on the
+fleet CPU node: coefficient digest <code>01818d5d423fe502</code>, 340 cells,
+1075 sample vertices, <code>node_number</code> 1536 and an equal vertex
+partition on both devices, so the receipt test passes
+(<code>logs/device-receipt-comparison-repair.log</code>). The atomic vertex
+count still reads 922 on the H200 against 923 on the CPU: that count comes from
+<code>AtomicCellMesh.from_cells</code>, which atomises by a quantised coordinate
+key and does not yet use the lattice identity.</p>
+
+<h3 id="carrier-vertex-identity-rebuild">Carrier fixture rebuild</h3>
+
+<p>The carrier identity hashes the sources in <code>CARRIER_SOURCE_PATHS</code>,
+which lists <code>nova/equilibrium/stencil_mesh.py</code> but not
+<code>nova/equilibrium/analytic_single_null.py</code>: the reference reaches the
+identity through the wall content it emits, not through its own source bytes.
+The digest moved from <code>76aacb2ebf7dddd3</code> at the base of this repair
+to <code>f775d83e9fc3b0d4</code> at its head, so every cached carrier rebuilds
+once. Because the identity hashes source bytes, a comment in
+<code>stencil_mesh.py</code> moves it too: <code>20f042fedd3d237c</code> was
+taken before the docstring corrections landed and is not the head's value.</p>
+
+<p>The rebuild of one row is measured on the compute node in fresh processes
+(<code>logs/carrier-fixture-rebuild.log</code>, job 1294764). The coarse
+fixture carries 551 cells. Cold, the carrier builds in <code>104.5</code> s and
+the row takes <code>245.3</code> s wall; warm, the same cache key hits
+(<code>build_s</code> has no entry) and the row takes <code>125.0</code> s. The
+warm hit is the control that the key is stable inside one tree, so the move
+above is a real invalidation rather than a recompute on every run.</p>
+
+<p>One residual device difference is outside this node's write scope: the
+atomic vertex count reads 923 on the CPU and 922 on the H200 at the head,
+because <code>AtomicCellMesh.from_cells</code> in
+<code>nova/equilibrium/separatrix_clip.py</code> still atomises by a quantised
+coordinate key. It does not enter <code>node_number</code>, which counts the
+grid, wall and sample vertices, and those agree exactly.</p>
+
+</article>
+</body>
+</html>

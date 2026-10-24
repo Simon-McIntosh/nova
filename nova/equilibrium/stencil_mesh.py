@@ -317,6 +317,161 @@ class SharedNodeFluxStencil:
         )
 
 
+def lattice_vertex_groups(polygons) -> tuple[np.ndarray, np.ndarray]:
+    """Return one lattice vertex id per polygon slot, and each cell's slot row.
+
+    A shared corner is reconstructed once per cell that carries it, and the two
+    reconstructions differ in their last bits, so a coordinate cannot decide
+    whether they are the same vertex: any quantisation puts a bin edge between
+    them for some pair. The merge is made instead on a scale coarse enough to
+    have no edge at the observed drift: two slots join when their coordinates
+    agree within ``1e-9`` of the lattice scale, found through a spatial hash
+    whose cells are that same width. The reach is a millionth of the distance
+    between neighbouring corners and a thousand times the observed reference
+    drift of ``7.4e-13`` m, and every slot is compared against the neighbouring
+    hash cells on both sides of its own, so no bin edge can separate a pair.
+
+    A candidate group is rejected when its own spread reaches the merge width,
+    which keeps a wall-clipped sliver from collapsing into a degenerate
+    polygon, and two slots of one cell are never joined.
+
+    The answer depends on the coordinates alone, never on the order the cells
+    are listed in, so a grid that realises one lattice in a different order
+    keeps the same identity, and one device's build is the other device's build.
+    """
+    arrays = [
+        np.ascontiguousarray(np.asarray(cell, dtype=np.float64)[:, :2])
+        for cell in polygons
+    ]
+    counts = np.asarray([len(cell) for cell in arrays], dtype=np.intp)
+    rows = np.concatenate(([0], np.cumsum(counts)[:-1])).astype(np.intp)
+    points = np.concatenate(arrays) if len(arrays) else np.zeros((0, 2))
+    parent = np.arange(len(points), dtype=np.intp)
+    cell_of = np.repeat(np.arange(len(arrays), dtype=np.intp), counts)
+
+    def root_of(index: int) -> int:
+        root = index
+        while parent[root] != root:
+            root = parent[root]
+        while parent[index] != root:
+            parent[index], index = root, parent[index]
+        return root
+
+    def join(first: int, second: int) -> None:
+        left, right = root_of(first), root_of(second)
+        if left != right:
+            if right < left:
+                left, right = right, left
+            parent[right] = left
+
+    scale = max(float(np.max(np.abs(points))) if len(points) else 1.0, 1.0)
+    reach = 1.0e-9 * scale
+    sites = np.floor(points / reach).astype(np.int64)
+    lattice: dict[tuple[int, int], list[int]] = {}
+    for index, site in enumerate(map(tuple, sites)):
+        lattice.setdefault(site, []).append(index)
+
+    candidates: dict[int, list[int]] = {}
+    for index in range(len(points)):
+        column, height = int(sites[index, 0]), int(sites[index, 1])
+        found = []
+        for offset_column in (-1, 0, 1):
+            for offset_height in (-1, 0, 1):
+                for other in lattice.get(
+                    (column + offset_column, height + offset_height), ()
+                ):
+                    if other == index or cell_of[other] == cell_of[index]:
+                        continue
+                    if np.hypot(*(points[other] - points[index])) < reach:
+                        found.append(other)
+        candidates[index] = sorted(found)
+
+    pairs = []
+    for index in range(len(points)):
+        for other in candidates[index]:
+            if other > index:
+                pairs.append((index, other))
+                join(index, other)
+    members: dict[int, list[int]] = {}
+    for index in range(len(points)):
+        members.setdefault(root_of(index), []).append(index)
+    for group in members.values():
+        if len(group) < 2:
+            continue
+        spread = np.asarray(points)[group]
+        separation = np.max(
+            np.hypot(
+                spread[:, np.newaxis, 0] - spread[np.newaxis, :, 0],
+                spread[:, np.newaxis, 1] - spread[np.newaxis, :, 1],
+            )
+        )
+        if separation >= reach:
+            for index in group:
+                parent[index] = index
+    return (
+        np.asarray([root_of(index) for index in range(parent.size)], dtype=np.intp),
+        rows,
+    )
+
+
+def canonical_vertex_values(polygons, groups, rows) -> dict[int, np.ndarray]:
+    """Return one stored coordinate per lattice vertex, chosen by value.
+
+    The copies of a merged corner differ in their last bits and the cells that
+    carry them are listed in an order the build does not control, so keeping
+    "the first copy" would make the stored coordinates depend on that order and
+    differ between devices. The copies are therefore sorted by their own
+    coordinates and averaged, which is a function of the multiset alone.
+    """
+    copies: dict[int, list[np.ndarray]] = {}
+    for cell, polygon in enumerate(polygons):
+        for slot, vertex in enumerate(np.asarray(polygon, dtype=np.float64)):
+            copies.setdefault(int(groups[rows[cell] + slot]), []).append(vertex)
+    return {
+        group: np.mean(
+            np.asarray(sorted(group_copies, key=lambda item: (item[0], item[1]))),
+            axis=0,
+        )
+        for group, group_copies in copies.items()
+    }
+
+
+def lattice_vertex_index(polygons) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Return the lattice vertex coordinates, one node id per slot, and the rows.
+
+    The coordinate array is sorted, so two builds of one lattice publish the
+    same array whatever order their cells are listed in, and the ids a cell
+    carries are indices into it. ``rows`` locates each cell's first slot.
+    """
+    groups, rows = lattice_vertex_groups(polygons)
+    value = canonical_vertex_values(polygons, groups, rows)
+    ordered = sorted(value, key=lambda group: (value[group][0], value[group][1]))
+    label = {group: position for position, group in enumerate(ordered)}
+    coordinates = np.asarray([value[group] for group in ordered], dtype=np.float64)
+    inverse = np.asarray([label[int(group)] for group in groups], dtype=np.intp)
+    return coordinates, inverse, rows
+
+
+def _representative_polygons(polygons, groups, rows) -> tuple[np.ndarray, ...]:
+    """Return each polygon with every shared vertex rewritten to one value.
+
+    Merged slots carry exactly one stored coordinate, so the atomic mesh that
+    atomises these polygons keys its own lookups on equal values rather than on
+    a bin boundary.
+    """
+    representative = canonical_vertex_values(polygons, groups, rows)
+    return tuple(
+        np.ascontiguousarray(
+            [
+                representative[int(groups[rows[cell] + slot])]
+                for slot in range(len(polygon))
+            ],
+            dtype=np.float64,
+        )
+        for cell, polygon in enumerate(polygons)
+    )
+
+
 @dataclass(frozen=True)
 class MomentGeometry:
     """Fixed polygon topology and interpolation used by current moments."""
@@ -362,6 +517,8 @@ class MomentGeometry:
             polygons.append(np.ascontiguousarray(vertices))
         if len(polygons) != mesh.node_count:
             raise ValueError("one polygon is required per mesh cell")
+        polygon_groups, polygon_rows = lattice_vertex_groups(polygons)
+        polygons = _representative_polygons(polygons, polygon_groups, polygon_rows)
         centroids = np.asarray([section_centroid(cell) for cell in polygons])
         atomic = AtomicCellMesh.from_cells(polygons, centroids=centroids)
         moments = np.asarray([second_moments(cell) for cell in polygons])
@@ -383,21 +540,18 @@ class MomentGeometry:
                 raise ValueError(
                     "sampling polygons must have four or six two-dimensional vertices"
                 )
-        sample_nodes: list[np.ndarray] = []
-        sample_lookup: dict[tuple[int, int], int] = {}
         sample_count = np.asarray(
             [len(vertices) for vertices in sampling], dtype=np.intp
         )
         sample_width = int(np.max(sample_count))
         cell_sample_nodes = np.zeros((mesh.node_count, sample_width), dtype=np.intp)
+        sample_coordinate, sample_slot_nodes, sample_rows = lattice_vertex_index(
+            sampling
+        )
         for cell, vertices in enumerate(sampling):
-            for corner, vertex in enumerate(vertices):
-                key = tuple(np.rint(vertex / atomic.tolerance).astype(np.int64))
-                if key not in sample_lookup:
-                    sample_lookup[key] = len(sample_nodes)
-                    sample_nodes.append(vertex)
-                cell_sample_nodes[cell, corner] = sample_lookup[key]
-        sample_coordinate = np.asarray(sample_nodes)
+            cell_sample_nodes[cell, : len(vertices)] = sample_slot_nodes[
+                sample_rows[cell] : sample_rows[cell] + len(vertices)
+            ]
         return cls(
             polygons=tuple(polygons),
             atomic_mesh=atomic,

@@ -248,19 +248,21 @@ class PlasmaGrid(BaseGrid, PlasmaLoc):
     def _index_sampling_vertices(
         vertices: np.ndarray, tolerance: float
     ) -> tuple[np.ndarray, np.ndarray]:
-        """Deduplicate fixed samples with the support mesh's node identity."""
-        flat = vertices.reshape(-1, 2)
-        lookup: dict[tuple[int, int], int] = {}
-        coordinates = []
-        inverse = np.empty(len(flat), dtype=np.intp)
-        for index, vertex in enumerate(flat):
-            key = tuple(np.rint(vertex / tolerance).astype(np.int64))
-            if key not in lookup:
-                lookup[key] = len(coordinates)
-                coordinates.append(vertex)
-            inverse[index] = lookup[key]
-        cell_nodes = inverse.reshape(len(vertices), vertices.shape[1])
-        return np.asarray(coordinates), cell_nodes
+        """Deduplicate fixed samples with the support mesh's node identity.
+
+        The identity is the moment geometry's, so the sample bank and the
+        moments index one lattice. A sample vertex is the set of cell slots that
+        share it, merged where the copies agree to well inside a corner spacing
+        rather than by quantising the coordinate, and the coordinates are
+        published in sorted order so two builds of one lattice agree whatever
+        order the cells are listed in. ``tolerance`` is the support round-off
+        bound and is no longer the merge width; the merge width is relative to
+        the lattice scale, which is the only place it can be measured from.
+        """
+        from nova.equilibrium.stencil_mesh import lattice_vertex_index  # noqa: PLC0415
+
+        coordinates, cell_nodes, _ = lattice_vertex_index(vertices)
+        return coordinates, cell_nodes.reshape(len(vertices), vertices.shape[1])
 
     def _build_direct_samples(self, target: Target) -> None:
         """Bank the authoritative pre-clip hex vertices and their coupling rows."""

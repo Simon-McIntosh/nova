@@ -29,9 +29,7 @@ def main() -> int:
 
     import jax
     import nova
-    from nova.jax.config import Precision, configure_dtypes as _reconfigure
 
-    _reconfigure(precision=Precision.DOUBLE)
     assert jax.config.jax_enable_x64 is True, "x64 is required for this measurement"
 
     from scipy.spatial import Delaunay

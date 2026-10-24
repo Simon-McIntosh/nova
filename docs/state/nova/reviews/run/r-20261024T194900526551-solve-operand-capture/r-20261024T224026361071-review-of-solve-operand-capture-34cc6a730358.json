@@ -1,0 +1,99 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "scripts/prototypes/fast_map_production/candidate.py:main (imports measure and calls measure.main)",
+    "scripts/prototypes/fast_map_production/baseline.py:8 (imports measure)",
+    "scripts/prototypes/fast_map_production/probe_stall.py:10 (imports measure)",
+    "scripts/prototypes/fast_map_production/probe_random.py:13 (imports measure)",
+    "scripts/prototypes/fast_map_production/baseline-job.sh:14 (--method dense through baseline.py)",
+    "scripts/prototypes/fast_map_production/warm-job.sh:13 (--method dense through candidate.py)",
+    "scripts/prototypes/fine_grid_convergence/cold.py:12 (imports fast_map_production.solver main)"
+  ],
+  "completed_at": "2026-10-24T23:00:22.855Z",
+  "dispatched_at": "2026-10-24T22:45:55Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/diverted_stall/measure.py",
+      "line": "665",
+      "severity": "blocking",
+      "text": "the step row reads product(...) but product is bound only in the krylov and gmres arms of linear_step, so --method dense raises UnboundLocalError before the row is built; measure.py:945 accepts dense and six job scripts pass it, so those runs now crash where the base returned a step row."
+    },
+    {
+      "file": "scripts/prototypes/fast_map_production/solver.py",
+      "line": "729",
+      "severity": "blocking",
+      "text": "the same unbound product reference sits in solver.py's linear_step: the dense arm binds products (plural) and lines 729 and 734 then read product, which symtable reports as a local of that function, so --method dense raises UnboundLocalError where the pre-change code read the factor returned by jax.linearize."
+    },
+    {
+      "file": "scripts/prototypes/diverted_stall/measure.py",
+      "line": "851",
+      "severity": "non-blocking",
+      "text": "measure_warm builds its factor program with active_operands, but that name is the cold tuple assigned at measure.py:788 in the sibling compare branch; the warm operand set it actually computed is warm_operands at measure.py:837, and the two agree only because the warm path leaves active_operands untouched."
+    },
+    {
+      "file": "scripts/prototypes/diverted_stall/measure.py",
+      "line": "69",
+      "severity": "non-blocking",
+      "text": "operand_tangent takes a point argument and never uses it, while the identically named helper at solver.py:71 closes over point; two helpers share a name and a docstring with incompatible contracts, so a reader moving between the two drivers is told the wrong thing."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/constant-capture.html",
+      "line": "22",
+      "severity": "non-blocking",
+      "text": "the record carries the captured-constants, generated-bytes and host-RSS comparisons but no figure, and the brief's write list names docs/figures/converged-forward-solve/constant-capture; the before/after lowering comparison is the one relationship the record exists to show."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/solve-operand-capture.html",
+      "line": "4",
+      "severity": "non-blocking",
+      "text": "the node summary still says the measurement of the captured-constants total and the certificate rows is pending on SLURM job 1295096, while the sibling fragment reports those figures; the landed text states a pending state the run itself has since superseded."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T194900526551-solve-operand-capture/manifest.md",
+      "line": "20",
+      "severity": "non-blocking",
+      "text": "baseline_suite and after_suite carry a <file> placeholder and a prose expansion in their command field, so neither records the literal command that ran and neither arm can be re-run from the record."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T194900526551-solve-operand-capture/manifest.md",
+      "line": "12",
+      "severity": "non-blocking",
+      "text": "changed_paths omits docs/evidence/fragments/converged-forward-solve/solve-operand-capture.html, which the diff against the base adds, so the record's path list understates what the node landed."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "pass \u2014 ten commits read from 48d7adda6 to 34cc6a730: two code commits, one test commit, seven docs commits, and no file outside the declared scope.",
+    "done_when": "fail \u2014 the captured-constants half is met and logged (4.20GB to at most 38.48 KB, both frame reports quoted in constant-capture.html), but no device memory is reported for either row and the candidate row was not retaken at the final tip.",
+    "goal": "pass \u2014 the goal is to stop the solve's compile capturing operands as constants; solver.py:71 and measure.py:69 now pass the operands into the lowered tangent program, and the forced tip report in gates/tip-exact.log contains no lowering above 38.48 KB.",
+    "manifest": "pass \u2014 the manifest records the gate command and log, the captured-constants and factor-program readings before and after, and both suite arms' summaries, though its changed_paths omits one file the diff adds.",
+    "write_paths": "pass \u2014 the diff touches solver.py, measure.py, tests/test_solve_operand_capture.py and two docs fragments, all inside the declared write paths; the four cut-cell files named in the brief were not edited, and the one widened path is recorded under scope_note."
+  },
+  "justifications": {
+    "durability": "tests/test_solve_operand_capture.py:55 fails if operand_tangent closes over its operand again (the captured 8 MB operand exceeds the 1 MB ceiling) and tests/test_solve_operand_capture.py:81 is its positive control, but no test covers the dense branch either driver builds.",
+    "evidence": "gates/base-production.log prints 4.20GB total and gates/tip-exact.log prints nine lowerings with none above 38.48KB, but the done_when's device-memory half is explicitly not measured (constant-capture.html, solve-operand-capture-cost) and the candidate row reading is not retaken at the final tip.",
+    "fit": "scripts/prototypes/fast_map_production/solver.py:729 and scripts/prototypes/diverted_stall/measure.py:665 reference a local name bound only in the krylov and gmres arms, so the dense arm the surrounding branches support reads unbound.",
+    "goal_fidelity": "scripts/prototypes/fast_map_production/solver.py:380-392 and scripts/prototypes/diverted_stall/measure.py:323-338 rebuild the tangent map so the operands are program arguments, and the tip lowering measures at most 38.48 KB against the base 4.20 GB.",
+    "reuse": "nova/equilibrium/solve.py:68 factor already owns building a Jacobian with the operands passed as runtime arguments, and operand_tangent/operand_block re-implement a slice of it twice in two prototype modules rather than extending it.",
+    "scope_discipline": "every changed path in the diff is inside the manifest's declared write paths and the brief's edit-anyway list, and the widening of scripts/prototypes/diverted_stall/measure.py is named under scope_note."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: pass \u2014 the goal is to stop the solve's compile capturing operands as constants; solver.py:71 and measure.py:69 now pass the operands into the lowered tangent program, and the forced tip report in gates/tip-exact.log contains no lowering above 38.48 KB.\nVERDICT done_when: fail \u2014 the captured-constants half is met and logged (4.20GB to at most 38.48 KB, both frame reports quoted in constant-capture.html), but no device memory is reported for either row and the candidate row was not retaken at the final tip.\nVERDICT write_paths: pass \u2014 the diff touches solver.py, measure.py, tests/test_solve_operand_capture.py and two docs fragments, all inside the declared write paths; the four cut-cell files named in the brief were not edited, and the one widened path is recorded under scope_note.\nVERDICT manifest: pass \u2014 the manifest records the gate command and log, the captured-constants and factor-program readings before and after, and both suite arms' summaries, though its changed_paths omits one file the diff adds.\nVERDICT diff: pass \u2014 ten commits read from 48d7adda6 to 34cc6a730: two code commits, one test commit, seven docs commits, and no file outside the declared scope.\nCALL_SITES: scripts/prototypes/fast_map_production/candidate.py:main (imports measure and calls measure.main), scripts/prototypes/fast_map_production/baseline.py:8 (imports measure), scripts/prototypes/fast_map_production/probe_stall.py:10 (imports measure), scripts/prototypes/fast_map_production/probe_random.py:13 (imports measure), scripts/prototypes/fast_map_production/baseline-job.sh:14 (--method dense through baseline.py), scripts/prototypes/fast_map_production/warm-job.sh:13 (--method dense through candidate.py), scripts/prototypes/fine_grid_convergence/cold.py:12 (imports fast_map_production.solver main)\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: scripts/prototypes/fast_map_production/solver.py:380-392 and scripts/prototypes/diverted_stall/measure.py:323-338 rebuild the tangent map so the operands are program arguments, and the tip lowering measures at most 38.48 KB against the base 4.20 GB.\nSCORE evidence: 13\nJUSTIFICATION evidence: gates/base-production.log prints 4.20GB total and gates/tip-exact.log prints nine lowerings with none above 38.48KB, but the done_when's device-memory half is explicitly not measured (constant-capture.html, solve-operand-capture-cost) and the candidate row reading is not retaken at the final tip.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: every changed path in the diff is inside the manifest's declared write paths and the brief's edit-anyway list, and the widening of scripts/prototypes/diverted_stall/measure.py is named under scope_note.\nSCORE durability: 14\nJUSTIFICATION durability: tests/test_solve_operand_capture.py:55 fails if operand_tangent closes over its operand again (the captured 8 MB operand exceeds the 1 MB ceiling) and tests/test_solve_operand_capture.py:81 is its positive control, but no test covers the dense branch either driver builds.\nSCORE fit: 10\nJUSTIFICATION fit: scripts/prototypes/fast_map_production/solver.py:729 and scripts/prototypes/diverted_stall/measure.py:665 reference a local name bound only in the krylov and gmres arms, so the dense arm the surrounding branches support reads unbound.\nSCORE reuse: 5\nJUSTIFICATION reuse: nova/equilibrium/solve.py:68 factor already owns building a Jacobian with the operands passed as runtime arguments, and operand_tangent/operand_block re-implement a slice of it twice in two prototype modules rather than extending it.\nFINDING scripts/prototypes/diverted_stall/measure.py:665 blocking: the step row reads product(...) but product is bound only in the krylov and gmres arms of linear_step, so --method dense raises UnboundLocalError before the row is built; measure.py:945 accepts dense and six job scripts pass it, so those runs now crash where the base returned a step row.\nFINDING scripts/prototypes/fast_map_production/solver.py:729 blocking: the same unbound product reference sits in solver.py's linear_step: the dense arm binds products (plural) and lines 729 and 734 then read product, which symtable reports as a local of that function, so --method dense raises UnboundLocalError where the pre-change code read the factor returned by jax.linearize.\nFINDING scripts/prototypes/diverted_stall/measure.py:851 non-blocking: measure_warm builds its factor program with active_operands, but that name is the cold tuple assigned at measure.py:788 in the sibling compare branch; the warm operand set it actually computed is warm_operands at measure.py:837, and the two agree only because the warm path leaves active_operands untouched.\nFINDING scripts/prototypes/diverted_stall/measure.py:69 non-blocking: operand_tangent takes a point argument and never uses it, while the identically named helper at solver.py:71 closes over point; two helpers share a name and a docstring with incompatible contracts, so a reader moving between the two drivers is told the wrong thing.\nFINDING docs/evidence/fragments/converged-forward-solve/constant-capture.html:22 non-blocking: the record carries the captured-constants, generated-bytes and host-RSS comparisons but no figure, and the brief's write list names docs/figures/converged-forward-solve/constant-capture; the before/after lowering comparison is the one relationship the record exists to show.\nFINDING docs/evidence/fragments/converged-forward-solve/solve-operand-capture.html:4 non-blocking: the node summary still says the measurement of the captured-constants total and the certificate rows is pending on SLURM job 1295096, while the sibling fragment reports those figures; the landed text states a pending state the run itself has since superseded.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T194900526551-solve-operand-capture/manifest.md:20 non-blocking: baseline_suite and after_suite carry a <file> placeholder and a prose expansion in their command field, so neither records the literal command that ran and neither arm can be re-run from the record.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T194900526551-solve-operand-capture/manifest.md:12 non-blocking: changed_paths omits docs/evidence/fragments/converged-forward-solve/solve-operand-capture.html, which the diff against the base adds, so the record's path list understates what the node landed.\n",
+  "review_run_id": "r-20261024T224026361071-review-of-solve-operand-capture-34cc6a730358",
+  "reviewed_base_sha": "48d7adda68b5e86d26f5c896c8a47e2ead865be8",
+  "reviewed_head_sha": "34cc6a730358aa8c0bb7d66ad09df0bacb2222ea",
+  "reviewed_run_id": "r-20261024T194900526551-solve-operand-capture",
+  "rubric": "code-review",
+  "scores": {
+    "durability": 14,
+    "evidence": 13,
+    "fit": 10,
+    "goal_fidelity": 15,
+    "reuse": 5,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T23:01:25.443183+00:00",
+  "total": 73
+}

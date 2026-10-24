@@ -9,7 +9,6 @@ import xarray
 
 from nova.biot.biot import Nbiot
 from nova.biot.plot import Plot1D
-from nova.equilibrium.convention import CONVENTION
 from nova.equilibrium.inverse import InverseDesign
 from nova.graphics.plot import Animate
 
@@ -20,26 +19,11 @@ from nova.imas.ids_entry import IdsEntry
 from nova.imas.machine import Machine, MachineCoil, MachineSection
 from nova.imas.metadata import Metadata
 from nova.imas.pf_active import PF_Active
-from nova.io.sourcemap import DD3_CONVENTION
-from nova_cocos import PSI_LIKE, convention_transform
+from nova.io.sourcemap import dd_equilibrium_factor
+from nova_cocos import PSI_LIKE
 
 
 PF_DOUBLE_PANCAKES = {"PF1": 8, "PF2": 6, "PF3": 8, "PF4": 8, "PF5": 8, "PF6": 9}
-
-
-def psi_write_factor(target_convention: int) -> float:
-    """Return the factor carrying nova's internal flux into a write's convention.
-
-    nova works in COCOS 17 internally, and the Data Dictionary publishes DD3 as
-    COCOS 11 and DD4 as COCOS 17.  The factor follows from the two conventions,
-    so a DD3 target carries every psi-like quantity with a sign flip and a DD4
-    target passes it through unchanged.
-    """
-
-    return convention_transform(
-        source=CONVENTION.identifier,
-        target=target_convention,
-    ).factor(PSI_LIKE)
 
 
 @dataclass
@@ -541,7 +525,7 @@ class PulseDesign(Animate, Plot1D, InverseDesign, ITER):
         """Return waveform equilibrium ids."""
         ids_entry = IdsEntry(ids=self.ids, name="equilibrium")
         # this writer stores DD3 data, whose psi-like rows are COCOS 11
-        psi_factor = psi_write_factor(DD3_CONVENTION)
+        psi_factor = dd_equilibrium_factor("3.39.0", PSI_LIKE)
         self.update_metadata(ids_entry)
         ids_entry.ids.time = self._data.time.data
         with ids_entry.node("time_slice:global_quantities.*"):

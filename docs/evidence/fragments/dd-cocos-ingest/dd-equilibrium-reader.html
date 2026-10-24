@@ -58,9 +58,16 @@ which COCOS the version being written publishes and
 <code>nova_cocos.convention_transform</code> what factor each row type takes
 between the two, so a DD3 target stores COCOS 11 data and a DD4 target stores
 the sample's values unchanged. No site states a sign of its own. A DD4 write
-also exposed a metadata defect of its own: DD3 carries a source list on the
-provenance node and DD4 replaced it with a structured reference, so the source
-list is now written only where the node carries one.</p>
+also exposed a metadata defect of its own: the provenance structure sits on
+<code>ids_properties</code>, which every version carries, but DD4 has no source
+list on its entries — a DD4 provenance node carries a structured reference and
+no <code>sources</code> field at all — so the source list is written only where
+the field exists, and the node is read before it is resized rather than after.
+<code>tests/test_metadata.py</code> writes provenance at DD3 and at DD4, for
+<code>equilibrium</code>, <code>pf_active</code>, <code>pulse_schedule</code>
+and <code>wall</code>, and shows every one of those writes completes; with the
+source-list guard removed in a scratch copy the eight DD4 arms fail
+(<code>logs/r7-negative-control-metadata-guard-removed.log</code>).</p>
 <p>Both arms are measured in <code>tests/test_sample_write_convention.py</code>,
 which writes a known COCOS 17 state and reads the entry back without a database.
 The DD3 arm is a whole-entry round trip and every signed row flips while the

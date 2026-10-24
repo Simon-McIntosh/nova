@@ -33,13 +33,16 @@ STAGES = (
     "s8_assembled",
 )
 
-# Arrays that carry a coordinate ordering, compared as an unordered set too.
+# Arrays that carry coordinates, compared as a set and by nearest neighbour as
+# well as slot by slot, so a permutation is distinguishable from a value shift.
 COORDINATE_ARRAYS = {
     "s0_wall": ["wall"],
     "s1_coilset": ["centres", "x", "z"],
     "s3_delaunay": ["centres"],
     "s6_sampling": ["sampling"],
-    "s7_moment_geometry": ["sample_coordinates", "atomic_node_coordinates"],
+    "s7_moment_geometry": ["sample_coordinates",
+                           "atomic_node_coordinates",
+                           "atomic_centroids"],
 }
 
 
@@ -54,58 +57,81 @@ def rows(array: np.ndarray) -> np.ndarray:
     return np.ascontiguousarray(array.reshape(len(array), -1))
 
 
+def nearest_row_max(first: np.ndarray, second: np.ndarray) -> float:
+    """Return the largest nearest-row distance from the first set into the second."""
+    from scipy.spatial import cKDTree
+
+    distance, _index = cKDTree(second).query(first, k=1)
+    return float(np.max(distance))
+
+
 def compare_stage(first: Path, second: Path, stage: str) -> dict[str, object]:
     left = np.load(first / f"{stage}.npz", allow_pickle=True)
     right = np.load(second / f"{stage}.npz", allow_pickle=True)
     result: dict[str, object] = {"stage": stage, "differences": [], "agree": True}
     for key in sorted(set(left.files) | set(right.files)):
         if key not in left.files or key not in right.files:
-            result["differences"].append({"array": key, "reason": "missing_key",})
+            result["differences"].append({"array": key, "reason": "missing_key"})
             result["agree"] = False
-            continue
-        a, b = np.asarray(left[key]), np.asarray(right[key])
-        item: dict[str, object] = {
-            "array": key,
-            "shape_a": list(a.shape),
-            "shape_b": list(b.shape),
-            "digest_a": digest(a),
-            "digest_b": digest(b),
-        }
-        if a.shape != b.shape:
-            item["reason"] = "shape"
-            result["differences"].append(item)
-            result["agree"] = False
-            continue
-        if np.array_equal(a, b):
-            item["reason"] = None
-        elif a.dtype.kind in "OU":
-            item["reason"] = "value"
-            item["mismatch_count"] = int(np.count_nonzero(a != b))
-            result["differences"].append(item)
-            result["agree"] = False
-            continue
         else:
-            differing = ~np.isclose(a, b, rtol=0.0, atol=0.0, equal_nan=True)
-            item["reason"] = "value"
-            item["mismatch_count"] = int(np.count_nonzero(differing))
-            item["max_abs_delta"] = float(
-                np.nanmax(np.abs(np.asarray(a, dtype=float) - np.asarray(b, dtype=float)))
-            )
+            a, b = np.asarray(left[key]), np.asarray(right[key])
+            item: dict[str, object] = {
+                "array": key,
+                "shape_a": list(a.shape),
+                "shape_b": list(b.shape),
+                "digest_a": digest(a),
+                "digest_b": digest(b),
+            }
+            if a.shape != b.shape:
+                item["reason"] = "shape"
+                result["differences"].append(item)
+                result["agree"] = False
+                continue
+            numeric = a.dtype.kind not in "OU"
+            if np.array_equal(a, b):
+                item["reason"] = None
+                continue
+            elif numeric and np.all(
+                np.isclose(
+                    np.asarray(a, dtype=float),
+                    np.asarray(b, dtype=float),
+                    rtol=0.0,
+                    atol=0.0,
+                    equal_nan=True,
+                )
+            ):
+                # NaN==NaN is not equality to numpy, but the same NaN in the
+                # same slot is the same datum for this comparison.
+                item["reason"] = None
+                item["nan_matched"] = True
+                continue
+            elif numeric:
+                differing = ~np.isclose(a, b, rtol=0.0, atol=0.0, equal_nan=True)
+                item["reason"] = "value"
+                item["mismatch_count"] = int(np.count_nonzero(differing))
+                item["max_abs_delta"] = float(
+                    np.nanmax(
+                        np.abs(np.asarray(a, dtype=float) - np.asarray(b, dtype=float))
+                    )
+                )
+            else:
+                item["reason"] = "value"
+                item["mismatch_count"] = int(np.count_nonzero(a != b))
+            if key in COORDINATE_ARRAYS.get(stage, ()) and numeric:
+                rows_a, rows_b = rows(a), rows(b)
+                order_a = np.lexsort(rows_a.T[::-1])
+                order_b = np.lexsort(rows_b.T[::-1])
+                item["same_order"] = bool(np.array_equal(a, b))
+                item["sorted_rows_equal"] = bool(
+                    np.array_equal(rows_a[order_a], rows_b[order_b])
+                )
+                item["max_nearest_row_distance"] = nearest_row_max(rows_a, rows_b)
+                if not item["sorted_rows_equal"] and (
+                    item["max_nearest_row_distance"] > 1.0e-9
+                ):
+                    item["reason"] = "coordinate_set"
             result["differences"].append(item)
             result["agree"] = False
-            continue
-        if key in COORDINATE_ARRAYS.get(stage, ()):
-            same_order = np.array_equal(a, b)
-            set_a = np.unique(rows(a), axis=0)
-            set_b = np.unique(rows(b), axis=0)
-            item["same_order"] = bool(same_order)
-            item["unique_rows_a"] = int(len(set_a))
-            item["unique_rows_b"] = int(len(set_b))
-            item["row_set_equal"] = bool(
-                set_a.shape == set_b.shape and np.array_equal(set_a, set_b)
-            )
-            if not item["row_set_equal"]:
-                result["agree"] = False
     return result
 
 
@@ -115,14 +141,13 @@ def plant(dump: Path, mode: str) -> str:
     payload = dict(np.load(target, allow_pickle=True))
     sampling = np.array(payload["sampling"], copy=True)
     if mode == "reorder":
-        sampling = sampling[:, ::-1, :]
+        payload["sampling"] = sampling[:, ::-1, :]
         story = "reversed the per-cell sampling-vertex order"
     elif mode == "duplicate":
-        sampling = np.concatenate([sampling, sampling[:1]], axis=0)
+        payload["sampling"] = np.concatenate([sampling, sampling[:1]], axis=0)
         story = "appended one duplicated sampling coordinate row"
     else:
         raise ValueError(f"unknown plant mode {mode!r}")
-    payload["sampling"] = sampling
     np.savez(target, **payload)
     return f"s6_sampling ({story})"
 
@@ -146,7 +171,7 @@ def main() -> int:
         planted = plant(copy, args.plant)
         first = copy
 
-    report = {
+    report: dict[str, object] = {
         "first": str(args.first.resolve()),
         "second": str(args.second.resolve()),
         "planted": planted,

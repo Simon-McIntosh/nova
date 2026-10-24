@@ -333,6 +333,27 @@ any other -- moves it. The line to change is the operand key in
 <code>operand_key</code>, which is outside this node's write paths and is named
 here rather than edited.</p>
 
+<h2>A geometry edit that moves the Gauss rule owes a warm-up</h2>
+
+<p>The value matrix is content-addressed on purpose: the key is a digest of the
+Gauss rule, the source polygons and the two builder sources, and a miss
+publishes the matrix it assembles, so the next build at that revision hits.
+That is the behaviour the persistence test pins, and it is why the base arm
+looks fast -- its entry was published long ago. It also means a change that
+moves the rule by a single ulp is indistinguishable from a change that rebuilds
+every polygon, and the assembly is far more expensive than the tests that
+consume it: a cold rebuild of the <code>(5076, 282, 3)</code> matrix ran past
+19 minutes on eight dedicated cores, where the three census tests are given
+900, 300 and 900 seconds in total.</p>
+
+<p>So any later edit that moves the Gauss rule owes the same warm-up the
+certificate fixtures owe: build once at the new digest, unbounded, letting the
+entry publish under the shared operand root, before timing or gating anything
+that consumes it. A test that runs on a cold cache is measuring polygon
+assembly, not the topology read, and a timeout taken there says nothing about
+either. This applies to any change to the canonical corner values, the cell
+polygons or the atomiser, not only to this one.</p>
+
 
 </article>
 </body>

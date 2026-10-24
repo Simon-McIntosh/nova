@@ -1,0 +1,59 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "nova/equilibrium/gs.py:34",
+    "nova/equilibrium/forward.py:1426",
+    "nova/equilibrium/reduced_newton.py:353",
+    "nova/equilibrium/forward_operator.py:3537",
+    "benchmarks/solovev_certificate.py:979",
+    "benchmarks/mast_centroid_solve_panels.py:1167"
+  ],
+  "completed_at": "2026-10-24T22:14:22.801Z",
+  "dispatched_at": "2026-10-24T21:57:59Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/forward_operator.py",
+      "line": 441,
+      "severity": "blocking",
+      "text": "the refusal cannot fire on any production route: gs.apply (nova/equilibrium/gs.py:34), the jitted reduced map (nova/equilibrium/reduced_newton.py:353) and the certificate's jitted jvp (benchmarks/solovev_certificate.py:996) all pass tracers, so qualify_cell_current_moments returns indices=() and a non-finite cell is still zeroed silently, which is the behaviour the answered blocking finding was about, on the only route that produced the original non-finite action."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/cell-moment-derivative-nan.html",
+      "line": 107,
+      "severity": "non-blocking",
+      "text": "the fragment and the docstring at forward_operator.py:438-439 claim the offending cell is reported by the concrete evaluation that reads the same state, but no concrete evaluation of these moments exists in the solve path; the certificate benchmark jits the only reader (benchmarks/solovev_certificate.py:996)."
+    },
+    {
+      "file": "tests/test_cell_moment_derivative_finite.py",
+      "line": 94,
+      "severity": "non-blocking",
+      "text": "test_a_traced_state_is_qualified_without_a_value_to_judge feeds a fully finite traced state (scale * ones), so it never exercises qualification of a non-finite cell under trace and cannot fail if the traced branch stopped zeroing the bad cell; the production route is the traced one."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the increment answers the blocking finding that a non-finite cell was silently discarded; nova/equilibrium/forward_operator.py:432 adds qualified_cell_current_moments and the three solve paths at lines 3537, 3707 and 3730 now call it.\nVERDICT done_when: done_when clause (2) asks for a report by index in the solve receipt; gate-unit-repair.log records 8 passed and the refusal fires on the eager path at forward_operator.py:441, but no solve receipt carries the index and the traced production route at nova/equilibrium/gs.py:34 cannot reach the raise.\nVERDICT write_paths: the source manifest declares seven paths; the increment touches only nova/equilibrium/forward_operator.py, tests/test_cell_moment_derivative_finite.py and docs/evidence/fragments/converged-forward-solve/cell-moment-derivative-nan.html, all inside that grant.\nVERDICT manifest: read at status complete; gate-suite/summary.tsv shows 19 base and 21 tip of 88 files while both arm JSONs record completed: true, and gate-unit-repair.log shows 8 passed EXIT=0 with negative-control-refusal.log showing 1 failed 7 passed EXIT=1.\nVERDICT diff: read commit by commit from b2891f0c4781edf115a7df824ec073258e8b6e49 to 2a091de5e2e97550ab80ec185c6efbeccfeb226f; ba1741440 adds the wrapper, swaps three call sites and removes cell_moment_receipt, 2a091de5e updates the fragment; 3 files, 80 insertions, 22 deletions.\nCALL_SITES: nova/equilibrium/gs.py:34, nova/equilibrium/forward.py:1426, nova/equilibrium/reduced_newton.py:353, nova/equilibrium/forward_operator.py:3537, benchmarks/solovev_certificate.py:979, benchmarks/mast_centroid_solve_panels.py:1167\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: the refusal at nova/equilibrium/forward_operator.py:441 answers the dead-accessor finding for eager callers but not for the jitted production routes, so the per-cell report is still absent where the solve runs.\nSCORE evidence: 13\nJUSTIFICATION evidence: gate-unit-repair.log records 8 passed EXIT=0 and negative-control-refusal.log records the restored discard failing the new test (1 failed, 7 passed, EXIT=1), but the after_suite arm ran at 4688864ee and never ran the three added tests, and the fragment at line 107 claims a concrete reporting evaluation that does not exist.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff touches only nova/equilibrium/forward_operator.py, tests/test_cell_moment_derivative_finite.py and the fragment cell-moment-derivative-nan.html, all inside the source node's declared write paths.\nSCORE durability: 13\nJUSTIFICATION durability: the assertion at tests/test_cell_moment_derivative_finite.py:75 fails on the restored silent discard (negative-control-refusal.log, 1 failed 7 passed EXIT=1), but line 105's traced test feeds a finite state and no test exercises the traced production path where the NaN arises.\nSCORE fit: 16\nJUSTIFICATION fit: the wrapper at nova/equilibrium/forward_operator.py:432 follows the module's qualifier idiom and its names carry no plan labels, but the traced half of its docstring at line 438 overstates what the code does.\nSCORE reuse: 20\nJUSTIFICATION reuse: qualified_cell_current_moments wraps the existing owner qualify_cell_current_moments at nova/equilibrium/forward_operator.py:407 rather than duplicating it, and removes the duplicate accessor cell_moment_receipt.\nFINDING nova/equilibrium/forward_operator.py:441 blocking: the refusal cannot fire on any production route: gs.apply (nova/equilibrium/gs.py:34), the jitted reduced map (nova/equilibrium/reduced_newton.py:353) and the certificate's jitted jvp (benchmarks/solovev_certificate.py:996) all pass tracers, so qualify_cell_current_moments returns indices=() and a non-finite cell is still zeroed silently, which is the behaviour the answered blocking finding was about, on the only route that produced the original non-finite action.\nFINDING docs/evidence/fragments/converged-forward-solve/cell-moment-derivative-nan.html:107 non-blocking: the fragment and the docstring at forward_operator.py:438-439 claim the offending cell is reported by the concrete evaluation that reads the same state, but no concrete evaluation of these moments exists in the solve path; the certificate benchmark jits the only reader (benchmarks/solovev_certificate.py:996).\nFINDING tests/test_cell_moment_derivative_finite.py:94 non-blocking: test_a_traced_state_is_qualified_without_a_value_to_judge feeds a fully finite traced state (scale * ones), so it never exercises qualification of a non-finite cell under trace and cannot fail if the traced branch stopped zeroing the bad cell; the production route is the traced one.\n",
+  "review_run_id": "r-20261024T215520283035-review-of-cell-moment-derivative-nan-2a091de5e2e9",
+  "reviewed_base_sha": "b2891f0c4781edf115a7df824ec073258e8b6e49",
+  "reviewed_head_sha": "2a091de5e2e97550ab80ec185c6efbeccfeb226f",
+  "reviewed_run_id": "r-20261024T095505170350-cell-moment-derivative-nan",
+  "scores": {
+    "durability": 13,
+    "evidence": 13,
+    "fit": 16,
+    "goal_fidelity": 13,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T22:15:55.871255+00:00",
+  "total": 95,
+  "verdicts": {
+    "diff": "read commit by commit from b2891f0c4781edf115a7df824ec073258e8b6e49 to 2a091de5e2e97550ab80ec185c6efbeccfeb226f; ba1741440 adds the wrapper, swaps three call sites and removes cell_moment_receipt, 2a091de5e updates the fragment; 3 files, 80 insertions, 22 deletions.",
+    "done_when": "done_when clause (2) asks for a report by index in the solve receipt; gate-unit-repair.log records 8 passed and the refusal fires on the eager path at forward_operator.py:441, but no solve receipt carries the index and the traced production route at nova/equilibrium/gs.py:34 cannot reach the raise.",
+    "goal": "the increment answers the blocking finding that a non-finite cell was silently discarded; nova/equilibrium/forward_operator.py:432 adds qualified_cell_current_moments and the three solve paths at lines 3537, 3707 and 3730 now call it.",
+    "manifest": "read at status complete; gate-suite/summary.tsv shows 19 base and 21 tip of 88 files while both arm JSONs record completed: true, and gate-unit-repair.log shows 8 passed EXIT=0 with negative-control-refusal.log showing 1 failed 7 passed EXIT=1.",
+    "write_paths": "the source manifest declares seven paths; the increment touches only nova/equilibrium/forward_operator.py, tests/test_cell_moment_derivative_finite.py and docs/evidence/fragments/converged-forward-solve/cell-moment-derivative-nan.html, all inside that grant."
+  }
+}

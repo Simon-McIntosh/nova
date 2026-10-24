@@ -9,6 +9,7 @@ system.  Physical coordinates use ``R = R0 x`` and ``Z = R0 y``.
 
 from __future__ import annotations
 
+import hashlib
 from collections.abc import Callable
 from dataclasses import dataclass, field
 
@@ -17,6 +18,51 @@ from scipy.optimize import brentq, root
 
 
 Array = np.ndarray
+
+
+def ordered_solve(matrix: Array, right_hand_side: Array) -> Array:
+    """Solve a dense system by Gaussian elimination in a fixed operation order.
+
+    Every step is a scalar IEEE-754 double operation taken in an order the code
+    states, so the answer does not depend on which BLAS kernel the process
+    dispatches or on how many threads it hands it. A library solve of the same
+    system returns last-bit-different results on different machines, and this
+    system's answer propagates into every carrier built from the reference.
+    """
+    coefficients = np.array(matrix, dtype=np.float64, copy=True)
+    values = np.array(right_hand_side, dtype=np.float64, copy=True)
+    if coefficients.ndim != 2 or coefficients.shape[0] != coefficients.shape[1]:
+        raise ValueError("the ordered solve needs a square coefficient matrix")
+    size = coefficients.shape[0]
+    if values.shape != (size,):
+        raise ValueError("the ordered solve needs one right-hand value per unknown")
+    for column in range(size):
+        pivot = column + int(np.argmax(np.abs(coefficients[column:, column])))
+        if coefficients[pivot, column] == 0.0:
+            raise np.linalg.LinAlgError("the ordered solve met a singular matrix")
+        if pivot != column:
+            coefficients[[column, pivot]] = coefficients[[pivot, column]]
+            values[[column, pivot]] = values[[pivot, column]]
+        diagonal = coefficients[column, column]
+        for row in range(column + 1, size):
+            factor = coefficients[row, column] / diagonal
+            coefficients[row, column] = 0.0
+            for entry in range(column + 1, size):
+                coefficients[row, entry] -= factor * coefficients[column, entry]
+            values[row] -= factor * values[column]
+    solution = np.empty(size, dtype=np.float64)
+    for row in range(size - 1, -1, -1):
+        total = values[row]
+        for entry in range(row + 1, size):
+            total -= coefficients[row, entry] * solution[entry]
+        solution[row] = total / coefficients[row, row]
+    return solution
+
+
+def coefficient_digest(coefficients: Array) -> str:
+    """Return the digest of a coefficient vector as stored binary64."""
+    binary = np.ascontiguousarray(coefficients, dtype="<f8").tobytes()
+    return hashlib.sha256(binary).hexdigest()
 
 
 def _basis_values(x: Array, y: Array) -> Array:
@@ -258,6 +304,7 @@ class CerfonFreidbergSingleNull:
     coefficients: Array = field(init=False, repr=False, compare=False)
     magnetic_axis: Array = field(init=False, repr=False, compare=False)
     x_point: Array = field(init=False, repr=False, compare=False)
+    coefficient_digest: str = field(init=False, repr=False, compare=False)
 
     def __post_init__(self) -> None:
         if self.major_radius <= 0.0:
@@ -299,7 +346,7 @@ class CerfonFreidbergSingleNull:
                 )
             )
             physical_hessian = self.hessian_with(coefficients, magnetic_axis)
-            magnetic_axis = magnetic_axis - np.linalg.solve(
+            magnetic_axis = magnetic_axis - ordered_solve(
                 physical_hessian, physical_gradient
             )
         axis_eigenvalues = np.linalg.eigvalsh(
@@ -314,6 +361,7 @@ class CerfonFreidbergSingleNull:
         object.__setattr__(self, "coefficients", coefficients)
         object.__setattr__(self, "magnetic_axis", magnetic_axis)
         object.__setattr__(self, "x_point", x_point)
+        object.__setattr__(self, "coefficient_digest", coefficient_digest(coefficients))
 
     @property
     def minor_radius(self) -> float:
@@ -409,7 +457,7 @@ class CerfonFreidbergSingleNull:
             lambda x, y: _basis_dxx(x, y) + curvature_upper * _basis_dy(x, y),
             _particular_dxx(upper[0], self.source_parameter),
         )
-        return np.linalg.solve(np.stack(rows), np.asarray(right_hand_side))
+        return ordered_solve(np.stack(rows), np.asarray(right_hand_side))
 
     def _dimensionless_flux(
         self, x: Array, y: Array, coefficients: Array | None = None

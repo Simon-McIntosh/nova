@@ -317,6 +317,105 @@ class SharedNodeFluxStencil:
         )
 
 
+def _lattice_vertex_groups(
+    mesh: StencilMesh, polygons
+) -> tuple[np.ndarray, np.ndarray]:
+    """Return one lattice vertex id per polygon slot, merged through the rings.
+
+    A shared corner is reconstructed once per cell that carries it, and the two
+    reconstructions differ in their last bits, so a coordinate cannot decide
+    whether they are the same vertex: any quantisation puts a bin edge between
+    them for some pair. The mesh's own neighbour rings state which cells share a
+    corner, and the corners of one cell are a cell width apart, so the merge is
+    made on geometry coarse enough to have no edge at the observed drift: two
+    slots join when their coordinates agree within ``1e-9`` of the mesh scale.
+    The result is identical on every device that builds the same lattice, and a
+    wall moved by ``4e-12`` m moves neither the count nor the ids.
+    """
+    arrays = [
+        np.ascontiguousarray(np.asarray(cell, dtype=np.float64)[:, :2])
+        for cell in polygons
+    ]
+    counts = np.asarray([len(cell) for cell in arrays], dtype=np.intp)
+    rows = np.concatenate(([0], np.cumsum(counts)[:-1])).astype(np.intp)
+    width = int(np.max(counts)) if len(counts) else 0
+    padded = np.zeros((len(arrays), width, 2), dtype=np.float64)
+    valid = np.zeros((len(arrays), width), dtype=bool)
+    for cell, vertices in enumerate(arrays):
+        padded[cell, : len(vertices)] = vertices
+        valid[cell, : len(vertices)] = True
+    scale = max(float(np.max(np.abs(padded))) if padded.size else 1.0, 1.0)
+    reach = 1.0e-9 * scale
+    parent = np.arange(int(counts.sum()), dtype=np.intp)
+
+    def root_of(index: int) -> int:
+        root = index
+        while parent[root] != root:
+            root = parent[root]
+        while parent[index] != root:
+            parent[index], index = root, parent[index]
+        return root
+
+    def join(first: int, second: int) -> None:
+        left, right = root_of(first), root_of(second)
+        if left != right:
+            if right < left:
+                left, right = right, left
+            parent[right] = left
+
+    rings = np.asarray(mesh.stencil, dtype=np.intp)
+    for ring in rings:
+        centre = int(ring[0])
+        neighbours = [int(index) for index in ring[1:] if 0 <= int(index) != centre]
+        if not neighbours:
+            continue
+        near = padded[neighbours]
+        offset = (
+            near[:, :, np.newaxis, :] - padded[centre][np.newaxis, np.newaxis, :, :]
+        )
+        distance = np.sqrt(np.sum(offset**2, axis=-1))
+        allowed = (
+            valid[neighbours][:, :, np.newaxis]
+            & valid[centre][np.newaxis, np.newaxis, :]
+        )
+        mergeable = (distance < reach) & allowed
+        for position, neighbour in enumerate(neighbours):
+            for slot in range(width):
+                candidates = np.flatnonzero(mergeable[position, :, slot])
+                if len(candidates) != 1:
+                    continue
+                other = int(candidates[0])
+                if len(np.flatnonzero(mergeable[position, other, :])) != 1:
+                    continue
+                join(int(rows[centre] + slot), int(rows[neighbour] + other))
+    return np.asarray(
+        [root_of(index) for index in range(parent.size)], dtype=np.intp
+    ), rows
+
+
+def _representative_polygons(polygons, groups, rows) -> tuple[np.ndarray, ...]:
+    """Return each polygon with every shared vertex rewritten to one value.
+
+    Merged slots carry exactly one stored coordinate, so the atomic mesh that
+    atomises these polygons keys its own lookups on equal values rather than on
+    a bin boundary.
+    """
+    representative: dict[int, np.ndarray] = {}
+    for cell, polygon in enumerate(polygons):
+        for slot, vertex in enumerate(np.asarray(polygon, dtype=np.float64)):
+            representative.setdefault(int(groups[rows[cell] + slot]), vertex)
+    return tuple(
+        np.ascontiguousarray(
+            [
+                representative[int(groups[rows[cell] + slot])]
+                for slot in range(len(polygon))
+            ],
+            dtype=np.float64,
+        )
+        for cell, polygon in enumerate(polygons)
+    )
+
+
 @dataclass(frozen=True)
 class MomentGeometry:
     """Fixed polygon topology and interpolation used by current moments."""
@@ -362,6 +461,8 @@ class MomentGeometry:
             polygons.append(np.ascontiguousarray(vertices))
         if len(polygons) != mesh.node_count:
             raise ValueError("one polygon is required per mesh cell")
+        polygon_groups, polygon_rows = _lattice_vertex_groups(mesh, polygons)
+        polygons = _representative_polygons(polygons, polygon_groups, polygon_rows)
         centroids = np.asarray([section_centroid(cell) for cell in polygons])
         atomic = AtomicCellMesh.from_cells(polygons, centroids=centroids)
         moments = np.asarray([second_moments(cell) for cell in polygons])
@@ -384,19 +485,20 @@ class MomentGeometry:
                     "sampling polygons must have four or six two-dimensional vertices"
                 )
         sample_nodes: list[np.ndarray] = []
-        sample_lookup: dict[tuple[int, int], int] = {}
+        group_ids: dict[int, int] = {}
         sample_count = np.asarray(
             [len(vertices) for vertices in sampling], dtype=np.intp
         )
         sample_width = int(np.max(sample_count))
         cell_sample_nodes = np.zeros((mesh.node_count, sample_width), dtype=np.intp)
+        group_of_slot, slot_rows = _lattice_vertex_groups(mesh, sampling)
         for cell, vertices in enumerate(sampling):
-            for corner, vertex in enumerate(vertices):
-                key = tuple(np.rint(vertex / atomic.tolerance).astype(np.int64))
-                if key not in sample_lookup:
-                    sample_lookup[key] = len(sample_nodes)
-                    sample_nodes.append(vertex)
-                cell_sample_nodes[cell, corner] = sample_lookup[key]
+            for corner in range(len(vertices)):
+                group = int(group_of_slot[slot_rows[cell] + corner])
+                if group not in group_ids:
+                    group_ids[group] = len(sample_nodes)
+                    sample_nodes.append(vertices[corner])
+                cell_sample_nodes[cell, corner] = group_ids[group]
         sample_coordinate = np.asarray(sample_nodes)
         return cls(
             polygons=tuple(polygons),

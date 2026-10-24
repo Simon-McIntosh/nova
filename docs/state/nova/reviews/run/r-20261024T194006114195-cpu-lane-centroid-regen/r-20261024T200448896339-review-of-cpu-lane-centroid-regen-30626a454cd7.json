@@ -1,0 +1,57 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-24T20:19:33.332Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "centroid-state-guard",
+      "recorded_at": "2026-10-24T20:24:15.485472+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-24T20:07:24Z",
+  "findings": [
+    {
+      "file": "docs/figures/mast-centroid-capability/cpu-lane/centroid-solve.json",
+      "line": 142,
+      "severity": "non-blocking",
+      "text": "cpu_provenance_marker was rewritten to a generic 'CPU lane retained from the original sirius run' where the base revision recorded why the lane is CPU at all (the gpu_0003_grpA reservation admitting no job while the node was idle); the brief asked to keep the lane's recorded rationale, and the replacement drops it while leaving the rest of the receipt honest."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T194006114195-cpu-lane-centroid-regen/manifest.md",
+      "line": 15,
+      "severity": "non-blocking",
+      "text": "the tests line carries a 'timeout 900' prefix that the gate log's own '# command:' header (panel-gate.log:3) does not, so the literal command recorded is not the literal command that ran; promotion reads its receipt from this line."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T194006114195-cpu-lane-centroid-regen/panel_gate.py",
+      "line": 32,
+      "severity": "non-blocking",
+      "text": "every guard on the regenerated schema (the required-key set here, the clipped/overlapping label asserts at 79-80, the receipt-revision assert comparing 48d7adda6 as an independent literal) lives in a run-directory script that disappears after the run, so nothing in the repository reddens if the committed state reverts to the pre-regeneration schema; no test under tests/ reads docs/figures/mast-centroid-capability."
+    },
+    {
+      "file": "docs/evidence/fragments/separatrix-spline-extraction/cpu-lane-centroid-regen.html",
+      "line": 7,
+      "severity": "non-blocking",
+      "text": "the caption states the conductor-only panel has no reference null set, but the binding poloidal plotting rule requires every panel that draws flux to mark the magnetic axis and admitted X-points; the regenerated conductor-only panel (rendered from the head SVG) draws contours with no null markers and the rule says such a figure is regenerated rather than captioned around, though a fix would need a producer source change outside this node's write paths."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is that the MAST centroid CPU-lane state and its panel figures are regenerated at current main in the current panel schema; docs/figures/mast-centroid-capability/cpu-lane/panel-fields.npz at 30626a454 carries 27 keys including coil_outlines (panel-gate.log:4 reads STATE_SCHEMA required=8 missing=0 keys=27) and centroid-solve.json:162 records source_revision 48d7adda68b5e86d26f5c896c8a47e2ead865be8, so both the state and its two panel variants are regenerated at that base in the current schema.\nVERDICT done_when: the done_when asks the gate log to report 0 clipped and 0 overlapping labels across every regenerated panel SVG rendered to PNG; panel-gate.log:5 and :9 print LABELS clipped=0 overlapping=0 for the standard and fine SVGs, :13 prints PANEL_GATE svg_rendered=2 clipped=0 overlapping=0, and :15 ends EXIT=0, so the measure is asserted and recorded rather than claimed.\nVERDICT write_paths: the manifest declares docs/figures/mast-centroid-capability/cpu-lane, docs/evidence/fragments/separatrix-spline-extraction/cpu-lane-centroid-regen.html and docs/figures/separatrix-spline-extraction/cpu-lane-centroid-regen; git diff --name-status 48d7adda6..30626a454 lists 7 paths, six under the first and one the second, and nothing outside them.\nVERDICT manifest: read; it records status complete, commits 754e1de17 and 30626a454, the seven changed paths, the panel-gate command and log, and the cold and warm residuals, but its baseline_suite and after_suite blocks are null (a data-regeneration node runs no suite arm) and its tests line adds a timeout 900 prefix the gate log's own command header does not carry.\nVERDICT diff: read commit by commit against 48d7adda6; 754e1de17 rewrites panel-fields.npz (35798 -> 54249 bytes) and centroid-solve.json with the new source revision and solve receipt, and 30626a454 redraws both SVG and PNG panel pairs and adds the 10-line evidence fragment, all inside the declared paths and touching no source file.\nCALL_SITES: benchmarks/mast_centroid_solve_panels.py:698, benchmarks/mast_centroid_solve_panels.py:62\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/figures/mast-centroid-capability/cpu-lane/panel-fields.npz now carries coil_outlines and the branch control keys (panel-gate.log:4) and centroid-solve.json:162 names the base revision, so both halves of the goal are regenerated at current main.\nSCORE evidence: 17\nJUSTIFICATION evidence: panel-gate.log line 13 records PANEL_GATE svg_rendered=2 clipped=0 overlapping=0 with EXIT=0 at line 15, and solve-1295093.log:7 records COLD residual=1.308e-14 matching centroid-solve.json, though the label check at panel_gate.py:43-55 can inspect only the two panel titles because these axes are drawn with axison off.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff --name-status 48d7adda6..30626a454 is under docs/figures/mast-centroid-capability/cpu-lane or is docs/evidence/fragments/separatrix-spline-extraction... both declared, and no source, test or plan file is touched.\nSCORE durability: 7\nJUSTIFICATION durability: the guards that would redden on a regression (panel_gate.py:32 on the required key set, :79-80 on clipped and overlapping labels, :100 comparing the receipt revision against an independent literal) live in a run-directory script that disappears with the run, and no test under tests/ reads docs/figures/mast-centroid-capability, so no committed assertion fails if the state reverts to the pre-regeneration schema; no added assertion compares a value against the variable itself.\nSCORE fit: 18\nJUSTIFICATION fit: the redrawn panels follow the repository poloidal idiom - line contours on 24 shared levels, the wall and coil outlines drawn, the axis triangle and saddle cross on the solved panel, no axes (rendered vacuum-and-plasma-panels-rendered.png) - and the names are hyphenated with no run or plan label, but centroid-solve.json:142 replaces the recorded CPU-lane rationale with a generic marker.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no definition or mechanism and draws the state through the existing owner benchmarks/mast_centroid_solve_panels.py:698 panels(), so no capability is duplicated or forked.\nFINDING docs/figures/mast-centroid-capability/cpu-lane/centroid-solve.json:142 non-blocking: cpu_provenance_marker was rewritten to a generic marker where the base revision recorded why the lane is CPU (the gpu_0003_grpA reservation admitting no job), and the brief asked to keep the lane's recorded rationale.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T194006114195-cpu-lane-centroid-regen/manifest.md:15 non-blocking: the tests line carries a timeout 900 prefix absent from the gate log's own command header at panel-gate.log:3, so the recorded literal command is not the one that ran.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T194006114195-cpu-lane-centroid-regen/panel_gate.py:32 non-blocking: every guard on the regenerated schema lives in a run-directory script that vanishes with the run, and nothing under tests/ reads docs/figures/mast-centroid-capability, so a regression of the committed state reddens no committed assertion.\nFINDING docs/evidence/fragments/separatrix-spline-extraction/cpu-lane-centroid-regen.html:7 non-blocking: the conductor-only panel draws flux without null markers, against the binding rule that every flux panel marks its axis and admitted X-points; the caption explains the absence rather than the figure complying, and a fix needs a producer source change outside this node's write paths.\n",
+  "review_run_id": "r-20261024T200448896339-review-of-cpu-lane-centroid-regen-30626a454cd7",
+  "reviewed_base_sha": "48d7adda68b5e86d26f5c896c8a47e2ead865be8",
+  "reviewed_head_sha": "30626a454cd709b1491bbd1df2479e35ade4471d",
+  "reviewed_run_id": "r-20261024T194006114195-cpu-lane-centroid-regen",
+  "scores": {
+    "durability": 7,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T20:20:00Z",
+  "total": 100
+}

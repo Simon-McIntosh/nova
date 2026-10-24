@@ -1,0 +1,85 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-24T20:09:23Z",
+  "evidence_notes": [
+    "Judged from the four named PNGs only: the two committed panels at 1295x1061 and the two 1400x1146 re-renders, each matched to its source by pixel difference (image-1 to the fine variant, image-3 to the standard variant, differing only inside the plasma cell region).",
+    "Border scan of both committed PNGs: 0 non-white pixels on top, bottom, left and right edges, so no content is clipped at the canvas boundary.",
+    "Both panels in each PNG share the same 422x978 px machine bounding box, so the two panels are on one physical extent and are directly comparable.",
+    "The reviewed run's evidence caption states one 24-level contour array shared by both panels, both separatrix branch styles, the admitted saddle and the axis; the rendered marks are consistent with it."
+  ],
+  "figure_verdicts": {
+    "docs/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels-fine.png": {
+      "contrast": "pass: titles and markers clear their backgrounds",
+      "data_ink": "pass: the finer plasma mesh adds texture but the contours remain the readable structure",
+      "decoration": "pass: no gradient, band, frame or shadow",
+      "label_collision": "pass: two titles only, neither clipped nor overlapping; 0 non-white pixels on all four canvas edges",
+      "legibility": "pass: same two-panel layout at finer cell density; contours stay smooth and readable at page width",
+      "table_form": "pass: a spatial field plot, not tabular information"
+    },
+    "docs/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels.png": {
+      "contrast": "pass: black panel titles on white, grey and black line work, red markers clear against both white and the pale fill",
+      "data_ink": "pass: the flux contours, wall and plasma boundary carry the weight; the translucent lavender cell fill sits beneath the contours and does not obscure them",
+      "decoration": "pass: white canvas, no gradient, band, frame or shadow; the one fill is the plasma-cell region, which describes the solved plasma rather than decorating it",
+      "label_collision": "pass: only the two panel titles, neither clipped nor overlapping the artwork; a border scan found 0 non-white pixels on all four canvas edges",
+      "legibility": "pass: two labelled panels; the first wall, coil outlines and flux contours separate by line weight; the red axis triangle, red saddle cross and dashed boundary all read at 900 px page width",
+      "table_form": "pass: poloidal flux geometry and null placement; nothing in the figure is naturally a table"
+    },
+    "image-1.png": {
+      "contrast": "pass: same as the fine panel figure",
+      "data_ink": "pass: same as the fine panel figure",
+      "decoration": "pass: same as the fine panel figure",
+      "label_collision": "pass: same as the fine panel figure",
+      "legibility": "pass: a 1400 px re-render of the fine panel figure; same verdict as the repository fine PNG",
+      "table_form": "pass: same as the fine panel figure"
+    },
+    "image-3.png": {
+      "contrast": "pass: same as the standard panel figure",
+      "data_ink": "pass: same as the standard panel figure",
+      "decoration": "pass: same as the standard panel figure",
+      "label_collision": "pass: same as the standard panel figure",
+      "legibility": "pass: a 1400 px re-render of the standard panel figure; same verdict as the repository standard PNG",
+      "table_form": "pass: same as the standard panel figure"
+    }
+  },
+  "figures_reviewed": [
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/adb3a390-bdb2-4e2a-8e74-1e049c62c9fe/cpu-lane-centroid-regen/docs/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels.png",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/adb3a390-bdb2-4e2a-8e74-1e049c62c9fe/cpu-lane-centroid-regen/docs/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels-fine.png",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T200737395612-review-of-cpu-lane-centroid-regen-30626a454cd7-figure/image-1.png",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T200737395612-review-of-cpu-lane-centroid-regen-30626a454cd7-figure/image-3.png"
+  ],
+  "findings": [
+    {
+      "file": "docs/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels.png",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The conductor-only panel draws poloidal flux contours but no stationary-point markers of any kind, while the solved panel draws both the magnetic axis (filled red triangle) and the admitted saddle (red cross). The regenerated state stores stationary points only for the solved field, so a reader cannot tell from either panel whether the conductor-only field has no nulls or whether its nulls were simply not computed. The caption discloses that the panel is a field decomposition with no reference null set to overlay, so it does not mislead; it nonetheless cannot serve as a like-for-like null comparison, which is what the two panels otherwise invite."
+    },
+    {
+      "file": "docs/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels.png",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Flux contours inside the plasma are drawn over the translucent lavender cell fill and render lighter than the same-weight contours outside the plasma: at native resolution the contour rings in the plasma core are pale grey where the neighbouring exterior contours are darker. The layer order is correct and the contours remain visible in both the standard and fine variants at 900 px page width, but the plasma core, which is where the solved field's structure is most informative, carries visibly less contour contrast than the surrounding region."
+    }
+  ],
+  "project": "nova",
+  "read_only": true,
+  "review_run_id": "r-20261024T200737395612-review-of-cpu-lane-centroid-regen-30626a454cd7-figure",
+  "reviewed_base_sha": "48d7adda68b5e86d26f5c896c8a47e2ead865be8",
+  "reviewed_head_sha": "30626a454cd709b1491bbd1df2479e35ade4471d",
+  "reviewed_run_id": "r-20261024T194006114195-cpu-lane-centroid-regen",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "pass: all text is black on white; the two red null markers read against both white and the pale plasma fill",
+    "data_ink": "pass: the scalar fields are unfilled line contours on one shared level array; the only fill is the low-alpha plasma-cell region, which the contours are drawn over",
+    "decoration": "pass: no grid, gradient, background fill, frame or drop shadow; axis furniture is absent as the poloidal convention requires",
+    "label_collision": "pass: no clipped, overlapping or data-overlapping labels in either variant; no ink touches any canvas edge",
+    "legibility": "pass: both variants name their two panels, and the wall, coil, contour, boundary and null marks are distinguishable by weight and colour at page width",
+    "table_form": "pass: the figure shows a spatial field comparison; no tabular information is rendered as an image"
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T20:22:39.982363+00:00",
+  "total": null
+}

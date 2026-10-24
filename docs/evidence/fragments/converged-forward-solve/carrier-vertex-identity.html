@@ -211,6 +211,44 @@ is published sorted. Both remove the last dependence on cell order, so two
 builds of one lattice publish the same <code>sample_node_coordinates</code>,
 the same atomic nodes and the same second moments.</p>
 
+<h3 id="carrier-vertex-identity-atomiser">The atomiser is a second quantisation</h3>
+
+<p>The topology read builds its own carrier: <code>TopologyGeometry.from_cells</code>
+atomises the cell polygons through <code>AtomicCellMesh.from_cells</code>, whose
+node key is a quantised coordinate. That key is a second binned identity, and it
+split a shared corner into two nodes on the diverted closed-form carrier. The
+cells carry six corners each; the copies of one corner differ in their last bits
+because each cell recomputes it from its own centre, and the vessel centroid
+those centres are built from moved in the last bit when the reference solve
+began running through the ordered routine. The bins followed.</p>
+
+<p>Measured on the diverted closed-form carrier at 132 cells: at the base the
+carrier has no cell carrying a repeated vertex, and at the merged head 70 of the
+132 do, with a maximum of 11 vertices in one cell against 10 before. The split
+lands in the column of cells at <code>x = 1.5722</code> (cells 48 to 53). Cell 50
+reads a membership fraction of <code>0.011</code> where the reference quadrature
+gives <code>1.0</code>, and the X-point is not admitted: the saddle sits at
+<code>(1.502528, &#8722;1.01728)</code>, <code>0.0256</code> m from the centre of
+cell 49, and <code>boundary_class</code> reads 0 where the read needs 1. The
+contour tree grows the padding to 264 node rows, and the extra row reads
+<code>8.3e-32</code> in the eager path against <code>7.1e-3</code> in the compiled
+one, which is the trace mismatch.</p>
+
+<p><code>TopologyGeometry.from_cells</code> now rewrites its cells through
+<code>canonical_polygons</code> — the same merge the moment geometry uses —
+before atomising. The copies of a corner then carry one value, so no bin edge
+can separate them: duplicate-vertex cells fall from 70 to 0 and the maximum cell
+vertex count from 11 to 10, and the three tests pass at their exact tolerances
+(<code>logs/fix-three-tests.log</code>, 5 passed). The cross-device receipt arm
+and the perturbed-wall arm still pass (51 passed across the carrier, stencil-mesh
+and poly-section files, <code>logs/fix-device-and-identity.log</code>).</p>
+
+<p><code>AtomicCellMesh</code> itself still keys on a quantised coordinate, which
+is the mechanism that split the corner. The canonical input makes that key
+unable to separate two copies of one lattice vertex, and leaves the atomiser's
+own cell-internal split behaviour to the node that owns
+<code>separatrix_clip.py</code>.</p>
+
 <h3 id="carrier-vertex-identity-tests">What the tests now require</h3>
 
 <p>The test that compared two outputs of one build now counts the lattice

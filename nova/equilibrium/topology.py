@@ -2524,7 +2524,9 @@ class TopologyGeometry:
     def from_cells(cls, cells, sampling_vertices, wall_units):
         """Atomise authored cells and preserve each wall unit's own closure."""
         from nova.equilibrium.separatrix_clip import AtomicCellMesh
+        from nova.equilibrium.stencil_mesh import canonical_polygons
 
+        cells = canonical_polygons(cells)
         atomic = AtomicCellMesh.from_cells(cells)
         vertices = atomic.node_coordinates[atomic.cell_nodes]
         counts = atomic.cell_vertex_count

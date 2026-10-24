@@ -1,0 +1,83 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "nova/imas/pulsedesign.py:540 equilibrium_ids (via :528)",
+    "nova/imas/sample.py:412 put_properties",
+    "nova/field/errorfield.py:203 put_properties",
+    "nova/imas/metadata.py:196 put_properties"
+  ],
+  "completed_at": "2026-10-24T02:10:10.086Z",
+  "dispatched_at": "2026-10-24T01:59:44Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/dd-cocos-ingest/dd-equilibrium-reader.html",
+      "line": "102",
+      "severity": "blocking",
+      "text": "the fragment this commit edits still names psi_write_factor(DD3_CONVENTION) as the pulsedesign writer's mechanism, which is the function this same commit deletes at nova/imas/pulsedesign.py:30, and line 168 instructs the sample.py follow-on to adopt that same deleted helper; the node's own evidence artifact therefore cites a symbol that no longer exists and directs the follow-up work to an ImportError, while the code at nova/imas/pulsedesign.py:528 now calls dd_equilibrium_factor(\"3.39.0\", PSI_LIKE)."
+    },
+    {
+      "file": "nova/imas/metadata.py",
+      "line": "121",
+      "severity": "non-blocking",
+      "text": "the `provenance is None` early return guards a case that cannot occur: I probed imas 2.3.0 directly and every IDS carries ids_properties.provenance at DD 3.39.0 (74 names) and DD 4.1.1 (82 names), and Metadata.put_properties always passes self.ids.ids_properties (nova/imas/metadata.py:196), so the parent revision's resize-then-hasattr sequence already completes every DD4 write and this commit changes no observed behaviour; the dead branch is the only part of the change that the added tests exercise."
+    },
+    {
+      "file": "tests/test_metadata.py",
+      "line": "49",
+      "severity": "non-blocking",
+      "text": "the DD4 arms do not fail if this commit's change is reverted: the hasattr(node[0], \"sources\") guard predates the commit (it is present at 5326ef004), so the eight parametrised arms pass on the parent exactly as they pass at the head, and the negative control reproduces the parent's guard rather than this diff's; only tests/test_metadata.py:57 exercises the new early return, so the round's durability rests on one assertion."
+    },
+    {
+      "file": "nova/imas/metadata.py",
+      "line": "114",
+      "severity": "non-blocking",
+      "text": "this file and the new tests/test_metadata.py are outside the source run's declared write paths (the manifest's orientation_write_paths and the brief's 'Write only' list both stop at nova/imas/plasma_source.py and the scenario/reader set) and outside the brief's named test files, so the node widened its own fence rather than asking; this review's dispatch names both paths, which makes the expansion visible but does not make it declared."
+    },
+    {
+      "file": "docs/evidence/fragments/dd-cocos-ingest/dd-internal-sites.html",
+      "line": "31",
+      "severity": "non-blocking",
+      "text": "another evidence fragment of the same plan still documents psi_write_factor as the writer's mechanism at :31 and :46 and as the declared mutation site at :74; deleting the helper makes all three stale, and a reader following that fragment's negative control can no longer apply it. The file is outside this node's write scope, so it needs a plan section rather than a silent omission."
+    },
+    {
+      "file": "tests/test_metadata.py",
+      "line": "20",
+      "severity": "non-blocking",
+      "text": "the comment '#: the IDS names the review found sharing the DD4 layout.' cites a review as the source of a code fact; provenance belongs in the commit message and the source should state why those four IDS names are the set (they are the ones whose DD4 node layout was measured), not who reported them."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read c6c1ec560 against 5326ef004 commit by commit; it is one commit over five files, and the write-factor consolidation is complete while the provenance change is a no-op and the fragment it edits is left citing the deleted helper.",
+    "done_when": "the source brief's done_when (2) asks that the converted consumers be recorded with their changed expectations, and the manifest's after_suite records ten arms at c6c1ec560 (logs/r7-head-*.log) each ending EXIT=0 with dirty_entries 0, including r7-head-test_metadata.log (10 passed) and r7-head-test_internal_cocos_sites.log (8 passed); no base arm exists for tests/test_metadata.py, because baseline_suite is the ten-file arm at be0ec1321 and predates both this commit and the previous reviewed head.",
+    "goal": "this round's goal is to repair the DD4 provenance guard the previous review named and to give the write-direction factor one owner; c6c1ec560 does the second at nova/imas/pulsedesign.py:528 by deleting psi_write_factor and calling the existing nova/io/sourcemap.py:812 dd_equilibrium_factor, and the first at nova/imas/metadata.py:120-123 is a behaviour-preserving reorder whose added branch cannot be reached.",
+    "manifest": "read; it is status complete with the full commit list, single-line baseline_suite and after_suite JSON, and negative_control_log naming logs/r7-negative-control-metadata-guard-removed.log, which I opened and found ending '8 failed, 2 passed' with EXIT=1 as recorded.",
+    "write_paths": "the run's manifest declares twenty-five paths; the diff touches five, and nova/imas/metadata.py and tests/test_metadata.py are not among them, so two of the five land outside the declared write scope."
+  },
+  "justifications": {
+    "durability": "only tests/test_metadata.py:57 fails if this commit's early return regresses, while the eight DD4 arms at :39-50 pass unchanged on the parent 5326ef004 because the hasattr guard they exercise predates the commit, and no test drives the writer call at nova/imas/pulsedesign.py:528.",
+    "evidence": "the head arms at logs/r7-head-test_metadata.log and logs/r7-head-test_internal_cocos_sites.log carry the full revision c6c1ec560 with dirty_entries 0 and end EXIT=0, but there is no base arm for either new or edited test at 5326ef004, so the recorded delta is against be0ec1321 and cannot isolate this commit.",
+    "fit": "the new code follows the surrounding dataclass and comment style of nova/imas/metadata.py:113-123 and introduces no plan label, ticket reference or symbol suffix, though tests/test_metadata.py:20 attributes a code fact to a review.",
+    "goal_fidelity": "nova/imas/pulsedesign.py:528 now takes the writer's factor from the owner at nova/io/sourcemap.py:812, but the provenance repair at nova/imas/metadata.py:121 guards a branch no IDS can reach, so half the round's goal is claimed rather than delivered.",
+    "reuse": "nova/imas/pulsedesign.py:22-28 deletes its duplicate helper and calls the existing owner nova/io/sourcemap.py:812 dd_equilibrium_factor, and tests/test_internal_cocos_sites.py asserts through that same owner.",
+    "scope_discipline": "nova/imas/metadata.py and tests/test_metadata.py in git diff 5326ef004..c6c1ec560 are outside the manifest's orientation_write_paths and the brief's Write-only list."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: this round's goal is to repair the DD4 provenance guard the previous review named and to give the write-direction factor one owner; c6c1ec560 does the second at nova/imas/pulsedesign.py:528 by deleting psi_write_factor and calling the existing nova/io/sourcemap.py:812 dd_equilibrium_factor, and the first at nova/imas/metadata.py:120-123 is a behaviour-preserving reorder whose added branch cannot be reached.\nVERDICT done_when: the source brief's done_when (2) asks that the converted consumers be recorded with their changed expectations, and the manifest's after_suite records ten arms at c6c1ec560 (logs/r7-head-*.log) each ending EXIT=0 with dirty_entries 0, including r7-head-test_metadata.log (10 passed) and r7-head-test_internal_cocos_sites.log (8 passed); no base arm exists for tests/test_metadata.py, because baseline_suite is the ten-file arm at be0ec1321 and predates both this commit and the previous reviewed head.\nVERDICT write_paths: the run's manifest declares twenty-five paths; the diff touches five, and nova/imas/metadata.py and tests/test_metadata.py are not among them, so two of the five land outside the declared write scope.\nVERDICT manifest: read; it is status complete with the full commit list, single-line baseline_suite and after_suite JSON, and negative_control_log naming logs/r7-negative-control-metadata-guard-removed.log, which I opened and found ending '8 failed, 2 passed' with EXIT=1 as recorded.\nVERDICT diff: read c6c1ec560 against 5326ef004 commit by commit; it is one commit over five files, and the write-factor consolidation is complete while the provenance change is a no-op and the fragment it edits is left citing the deleted helper.\nCALL_SITES: nova/imas/pulsedesign.py:540 equilibrium_ids, nova/imas/sample.py:412, nova/field/errorfield.py:203, nova/imas/metadata.py:196\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: nova/imas/pulsedesign.py:528 now takes the writer's factor from the owner at nova/io/sourcemap.py:812, but the provenance repair at nova/imas/metadata.py:121 guards a branch no IDS can reach, so half the round's goal is claimed rather than delivered.\nSCORE evidence: 14\nJUSTIFICATION evidence: the head arms at logs/r7-head-test_metadata.log and logs/r7-head-test_internal_cocos_sites.log carry the full revision c6c1ec560 with dirty_entries 0 and end EXIT=0, but there is no base arm for either new or edited test at 5326ef004, so the recorded delta is against be0ec1321 and cannot isolate this commit.\nSCORE scope_discipline: 12\nJUSTIFICATION scope_discipline: nova/imas/metadata.py and tests/test_metadata.py in git diff 5326ef004..c6c1ec560 are outside the manifest's orientation_write_paths and the brief's Write-only list.\nSCORE durability: 12\nJUSTIFICATION durability: only tests/test_metadata.py:57 fails if this commit's early return regresses, while the eight DD4 arms at :39-50 pass unchanged on the parent 5326ef004 because the hasattr guard they exercise predates the commit, and no test drives the writer call at nova/imas/pulsedesign.py:528.\nSCORE fit: 16\nJUSTIFICATION fit: the new code follows the surrounding dataclass and comment style of nova/imas/metadata.py:113-123 and introduces no plan label, ticket reference or symbol suffix, though tests/test_metadata.py:20 attributes a code fact to a review.\nSCORE reuse: 18\nJUSTIFICATION reuse: nova/imas/pulsedesign.py:22-28 deletes its duplicate helper and calls the existing owner nova/io/sourcemap.py:812 dd_equilibrium_factor, and tests/test_internal_cocos_sites.py asserts through that same owner.\nFINDING docs/evidence/fragments/dd-cocos-ingest/dd-equilibrium-reader.html:102 blocking: the fragment the commit edits still names psi_write_factor(DD3_CONVENTION) as the writer's mechanism and at :168 tells the sample.py follow-on to adopt it, though this same commit deletes it at nova/imas/pulsedesign.py:30.\nFINDING nova/imas/metadata.py:121 non-blocking: the provenance-is-None branch guards a case that cannot occur, since every IDS at DD 3.39.0 and 4.1.1 carries ids_properties.provenance and put_properties always passes ids_properties, so the change repairs nothing and the parent already completed every DD4 write.\nFINDING tests/test_metadata.py:49 non-blocking: the DD4 arms pass on the parent revision, so they do not fail if this commit's change is reverted, and only :57 exercises the new early return.\nFINDING nova/imas/metadata.py:114 non-blocking: this file and the new tests/test_metadata.py are outside the declared write paths, so the node widened its own fence rather than asking.\nFINDING docs/evidence/fragments/dd-cocos-ingest/dd-internal-sites.html:31 non-blocking: a sibling fragment still documents psi_write_factor at :31, :46 and :74, including its declared negative control, so deleting the helper leaves three stale references outside this node's write scope.\nFINDING tests/test_metadata.py:20 non-blocking: a source comment attributes the IDS set to a review rather than stating the measured reason those four names carry the DD4 layout.",
+  "review_run_id": "r-20261024T015812937240-review-of-dd-equilibrium-reader-c6c1ec560eb7",
+  "reviewed_base_sha": "5326ef004152de85dfd58e244720847dae2b4a6a",
+  "reviewed_head_sha": "c6c1ec560eb79a221214ffa53f7b63b09d50128e",
+  "reviewed_run_id": "r-20261023T154924795618-dd-equilibrium-reader",
+  "scores": {
+    "durability": 12,
+    "evidence": 14,
+    "fit": 16,
+    "goal_fidelity": 13,
+    "reuse": 18,
+    "scope_discipline": 12
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T02:11:17.560359+00:00",
+  "total": 85
+}

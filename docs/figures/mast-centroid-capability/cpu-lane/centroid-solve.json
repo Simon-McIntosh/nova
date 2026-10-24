@@ -36,9 +36,9 @@
     "turn": "hex",
     "vacuum_nulls": {
       "o_points_inside_wall": 0,
-      "other_x_points_drawn": 0,
+      "other_x_points_drawn": 1,
       "strike_points_drawn": 0,
-      "x_points_drawn": 1,
+      "x_points_drawn": 0,
       "x_points_dropped_outside_wall": 0,
       "x_points_inside_wall": 1
     },

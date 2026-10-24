@@ -779,7 +779,7 @@ def panels(
     vacuum_tally = poloidal.draw_nulls(
         axes[0],
         magnetic_axis=vacuum_axes[0] if len(vacuum_axes) else None,
-        x_points=vacuum_saddles,
+        other_x_points=vacuum_saddles,
         contain=units,
     )
     axes[0].set_title("conductors only, no plasma", fontsize=9)

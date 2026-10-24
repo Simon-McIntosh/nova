@@ -55,7 +55,7 @@ reference those arrays are derived from. Each stage's worst per-array delta:</p>
 with three Newton steps whose each iteration is another
 <code>np.linalg.solve</code> (<code>:302</code>). Run in two processes on two
 nodes these LAPACK calls return last-bit-different results: the 12 coefficients
-differ by at most <code>null</code>. That is the only device-dependent step in the
+differ by at most <code>8.216e-15</code> absolute, and the magnetic axis by <code>3.421e-15</code> m. That is the only device-dependent step in the
 whole carrier build — every stage after it is numpy/scipy on the host.</li>
 <li><strong>Amplification to the wall.</strong> The coefficient delta reaches the
 separatrix at <code>2.049e-13</code> m and the buffered, arc-length-sampled wall at

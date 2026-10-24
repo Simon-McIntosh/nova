@@ -310,7 +310,7 @@
     "arms_removed_paths": [],
     "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
     "process_signalled": false,
-    "process_withheld": "process is not alive",
+    "process_withheld": "no terminal manifest was delivered",
     "scratch_absent": true,
     "scratch_bytes": null,
     "scratch_host": "98dci4-clu-2068.iter.org",
@@ -336,7 +336,8 @@
         }
       ]
     },
-    "worktree_released": true
+    "worktree_released": false,
+    "worktree_withheld": "tree is no longer available"
   },
   "resume_waiver": null,
   "review": {

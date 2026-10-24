@@ -220,7 +220,9 @@ def main() -> int:
         atomic_centroids=np.asarray(
             geometry.atomic_mesh.centroids, dtype=np.float64
         ),
-        atomic_areas=np.asarray(geometry.atomic_mesh.areas, dtype=np.float64),
+        atomic_cell_nodes=np.asarray(geometry.atomic_mesh.cell_nodes, dtype=np.int64),
+        atomic_cell_vertex_count=np.asarray(geometry.atomic_mesh.cell_vertex_count, dtype=np.int64),
+        atomic_tolerance=np.asarray([geometry.atomic_mesh.tolerance]),
     )
     report["s7_sample_coordinates"] = int(len(sample))
     report["s7_atomic_nodes"] = int(len(geometry.atomic_mesh.node_coordinates))

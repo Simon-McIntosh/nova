@@ -42,6 +42,7 @@ import numpy as np
 
 from benchmarks import coil_edit_latency as edit
 from benchmarks import mast_response_carrier_warm as response_carrier
+from nova.biot.fieldnull import FieldNull
 from nova.catalog.mast_geometry import shaped_section_vertices
 from nova.equilibrium.forward import _lattice_cells
 from nova.equilibrium.separatrix_branches import assemble_separatrix_branches
@@ -86,6 +87,30 @@ RATIONAL_STYLES = {"1.5": (0, (1, 1.6)), "2": (0, (5, 2, 1, 2))}
 #: Drawn plasma tessellation; the wall fit decides the delivered count.
 DEFAULT_HEX_CELLS = 4000
 CPU_PROVENANCE_MARKER = "NOVA_CENTROID_PANELS_CPU_PROVENANCE"
+PANEL_STATE_KEYS = frozenset(
+    {
+        "shape",
+        "radius",
+        "height",
+        "vacuum_psi",
+        "solved_psi",
+        "wall_offsets",
+        "wall_radius",
+        "wall_height",
+        "wall_closed",
+        "wall_kinds",
+        "coil_outlines",
+        "boundary_flux",
+        "axis",
+        "x_points",
+        "saddle_index",
+        "branch_closed_controls_rz",
+        "branch_closed_valid",
+        "branch_open_controls_rz",
+        "branch_open_valid",
+        "branch_open_branch_valid",
+    }
+)
 
 
 def _source_revision() -> str:
@@ -689,6 +714,9 @@ def panels(
     from nova.media.sources.plasma_mesh import clip_to_boundary, hex_mesh
 
     data = np.load(state_path, allow_pickle=False)
+    missing = PANEL_STATE_KEYS.difference(data.files)
+    if missing:
+        raise KeyError(f"panel state is missing {sorted(missing)}")
     shape = tuple(int(value) for value in np.asarray(data["shape"]))
     radius = np.asarray(data["radius"], dtype=float)
     height = np.asarray(data["height"], dtype=float)
@@ -736,6 +764,24 @@ def panels(
         poloidal.draw_wall(panel, units=units)
 
     poloidal.draw_flux_contours(axes[0], radius, height, vacuum, levels)
+    # The vacuum panel has its own stationary points; solved-state landmarks
+    # describe a different field and cannot stand in for them.
+    o_mask, x_mask = FieldNull.categorize_2d(vacuum.T)
+    from nova.media.sources.frame import inside_wall_units
+
+    def interior_points(mask: np.ndarray) -> np.ndarray:
+        radial_index, vertical_index = np.where(mask)
+        points = np.column_stack((radius[radial_index], height[vertical_index]))
+        return points[np.asarray(inside_wall_units(points, units), dtype=bool)]
+
+    vacuum_axes = interior_points(o_mask)
+    vacuum_saddles = interior_points(x_mask)
+    vacuum_tally = poloidal.draw_nulls(
+        axes[0],
+        magnetic_axis=vacuum_axes[0] if len(vacuum_axes) else None,
+        other_x_points=vacuum_saddles,
+        contain=units,
+    )
     axes[0].set_title("conductors only, no plasma", fontsize=9)
 
     poloidal.draw_plasma_cells(axes[1], clipped, alpha=CELL_ALPHA)
@@ -766,6 +812,27 @@ def panels(
         panel.set_xlim(float(radius.min()), float(radius.max()))
         panel.set_ylim(float(height.min()), float(height.max()))
 
+    figure.canvas.draw()
+    renderer = figure.canvas.get_renderer()
+    labels = [panel.title for panel in axes if panel.title.get_text()]
+    boxes = [label.get_window_extent(renderer) for label in labels]
+    clipped_labels = sum(
+        not figure.bbox.contains(*box.get_points()[0])
+        or not figure.bbox.contains(*box.get_points()[1])
+        for box in boxes
+    )
+    overlapping_labels = sum(
+        first.overlaps(second)
+        for index, first in enumerate(boxes)
+        for second in boxes[index + 1 :]
+    )
+    print(
+        f"LABEL_CHECK clipped={clipped_labels} overlapping={overlapping_labels}",
+        flush=True,
+    )
+    if clipped_labels or overlapping_labels:
+        raise ValueError("panel labels are clipped or overlap")
+
     figure_path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(figure_path, dpi=200, bbox_inches="tight")
     figure.savefig(figure_path.with_suffix(".svg"), bbox_inches="tight")
@@ -781,6 +848,11 @@ def panels(
         "boundary_clipped_cells": int(len(clipped)),
         "cut_at_boundary_cells": int(np.count_nonzero(vertex_counts != 7)),
         "coil_section_count": int(coils.shape[0]),
+        "vacuum_nulls": {
+            "o_points_inside_wall": int(len(vacuum_axes)),
+            "x_points_inside_wall": int(len(vacuum_saddles)),
+            **vacuum_tally,
+        },
     }
     print(
         "FIGURE=%s hex_delivered=%d boundary_cells=%d cut=%d coils=%d "

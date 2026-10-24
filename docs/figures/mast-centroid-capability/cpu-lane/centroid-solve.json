@@ -34,6 +34,14 @@
     "requested_cells": 12000,
     "source": "nova.frame.firstwall.PlasmaGrid.insert",
     "turn": "hex",
+    "vacuum_nulls": {
+      "o_points_inside_wall": 0,
+      "other_x_points_drawn": 1,
+      "strike_points_drawn": 0,
+      "x_points_drawn": 0,
+      "x_points_dropped_outside_wall": 0,
+      "x_points_inside_wall": 1
+    },
     "vertex_count_range": [
       4,
       29
@@ -139,7 +147,7 @@
     "warm_definition": "the same fixed-shape program re-entered on a moved current vector, so the timed solve does real trips"
   },
   "runtime": {
-    "cpu_provenance_marker": "CPU lane retained from the original sirius run; regenerate the current panel schema",
+    "cpu_provenance_marker": "reservation gpu_0003_grpA admits no job at all: sbatch --test-only refuses a one-task request with no cpu, memory or gres ask while the node holds 43 idle cores, 792 GB free and cards IDX 1-3 idle; panel schema regenerated on CPU for continuity with the original sirius lane",
     "device_kind": "cpu",
     "devices": [
       "cpu:0"
@@ -169,6 +177,46 @@
     "warm_wall_milliseconds_maximum": 160738.8633210212,
     "warm_wall_milliseconds_median": 85032.56649337709,
     "warm_wall_milliseconds_minimum": 77090.30328132212
+  },
+  "vacuum_saddle_validation": {
+    "in_wall_grid_count": 684,
+    "marker": {
+      "coordinate_m": [
+        1.8181249998742715,
+        0.0
+      ],
+      "gradient_norm_wb_per_m": 0.010637405235374146,
+      "hessian_determinant": -5.469013277342389,
+      "hessian_eigenvalues": [
+        -2.34715484251611,
+        2.3300607093649184
+      ]
+    },
+    "marker_gradient_to_median": 0.012872407078661384,
+    "median_contour_level_spacing_wb": 0.09131310981319096,
+    "median_in_wall_gradient_wb_per_m": 0.8263726566733425,
+    "method": "scipy.interpolate.RectBivariateSpline(kx=3, ky=3, s=0), analytic-gradient Newton polish",
+    "nearest_drawn_contour_delta_wb": 0.040843117150665575,
+    "polish_converged": true,
+    "polish_distance_m": 0.004544097418991104,
+    "polished": {
+      "coordinate_m": [
+        1.8135817990841143,
+        9.026590495437594e-05
+      ],
+      "gradient_norm_wb_per_m": 1.4061863363159105e-16,
+      "hessian_determinant": -5.600561065436418,
+      "hessian_eigenvalues": [
+        -2.3814063960999516,
+        2.351787193739171
+      ]
+    },
+    "polished_gradient_to_median": 1.7016370580031947e-16,
+    "polished_inside_wall": true,
+    "relative_gradient_maximum": 1e-06,
+    "saddle_flux_wb": -1.2615756394635096,
+    "state_sha256": "1bbcacbf7ad2f2b60d86afb5610e44c6f63c4e309137aaec5965e124240f073f",
+    "verdict": "confirmed_smooth_saddle"
   },
   "warm_solves": [
     {

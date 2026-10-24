@@ -34,6 +34,14 @@
     "requested_cells": 4000,
     "source": "nova.frame.firstwall.PlasmaGrid.insert",
     "turn": "hex",
+    "vacuum_nulls": {
+      "o_points_inside_wall": 0,
+      "other_x_points_drawn": 1,
+      "strike_points_drawn": 0,
+      "x_points_drawn": 0,
+      "x_points_dropped_outside_wall": 0,
+      "x_points_inside_wall": 1
+    },
     "vertex_count_range": [
       4,
       29
@@ -119,7 +127,7 @@
     "shot": 22086,
     "slice_index": 43
   },
-  "figure": "/home/ITER/mcintos/Code/nova/docs/figures/mast-centroid-capability/titan-lane/vacuum-and-plasma-panels.png",
+  "figure": "docs/figures/mast-centroid-capability/titan-lane/vacuum-and-plasma-panels.png",
   "identity": "22086/43 mixed",
   "measurement_contract": {
     "active_set_steps": 16,
@@ -164,6 +172,46 @@
     "warm_wall_milliseconds_maximum": 2179.3850995600224,
     "warm_wall_milliseconds_median": 1812.4833926558495,
     "warm_wall_milliseconds_minimum": 1093.7894992530346
+  },
+  "vacuum_saddle_validation": {
+    "in_wall_grid_count": 684,
+    "marker": {
+      "coordinate_m": [
+        1.8181249998742715,
+        0.0
+      ],
+      "gradient_norm_wb_per_m": 0.010637405235365048,
+      "hessian_determinant": -5.469013277342716,
+      "hessian_eigenvalues": [
+        -2.3471548425158417,
+        2.3300607093653234
+      ]
+    },
+    "marker_gradient_to_median": 0.012872407078650366,
+    "median_contour_level_spacing_wb": 0.09131310981319096,
+    "median_in_wall_gradient_wb_per_m": 0.8263726566733429,
+    "method": "scipy.interpolate.RectBivariateSpline(kx=3, ky=3, s=0), analytic-gradient Newton polish",
+    "nearest_drawn_contour_delta_wb": 0.040843117150665575,
+    "polish_converged": true,
+    "polish_distance_m": 0.00454409741898642,
+    "polished": {
+      "coordinate_m": [
+        1.813581799084119,
+        9.026590495325066e-05
+      ],
+      "gradient_norm_wb_per_m": 1.2306630307685268e-16,
+      "hessian_determinant": -5.600561065436426,
+      "hessian_eigenvalues": [
+        -2.381406396099651,
+        2.351787193739472
+      ]
+    },
+    "polished_gradient_to_median": 1.4892349363575275e-16,
+    "polished_inside_wall": true,
+    "relative_gradient_maximum": 1e-06,
+    "saddle_flux_wb": -1.2615756394635096,
+    "state_sha256": "22c38892a0a25701364c6c6e68eafa87b7b8f500ce00d303c6b03d40a46371cc",
+    "verdict": "confirmed_smooth_saddle"
   },
   "warm_solves": [
     {

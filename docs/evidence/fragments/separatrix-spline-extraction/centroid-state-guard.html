@@ -1,0 +1,21 @@
+<section id="centroid-state-guard">
+  <h2>Committed MAST centroid panel states are renderable</h2>
+  <p id="centroid-state-guard-schema">The repository test opens all three committed <code>panel-fields.npz</code> states and redraws each panel pair. Its negative control used the CPU state before regeneration: the test failed on the missing <code>coil_outlines</code> and five <code>branch_*</code> keys (one failing test, exit 1). The regenerated CPU, full-axis and titan states passed all four checks at the landed renderer revision.</p>
+  <p id="centroid-state-guard-provenance">The CPU receipt again states why the original lane ran on CPU: reservation <code>gpu_0003_grpA</code> admitted no job while its node had idle cores, memory and cards. The panel schema regeneration stayed on CPU for continuity with that lane.</p>
+  <figure id="centroid-state-guard-panels">
+    <img src="/nova/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels.svg" alt="MAST conductor-only vacuum flux and solved flux panels, both with their own stationary-point markers and the vessel outline." />
+    <figcaption>The conductor-only panel marks the in-wall X candidate from the six-neighbour census with a hollow cross. Bicubic Newton polish confirms a saddle about 4.5 mm inboard; the vacuum field admits no saddle as the plasma boundary. It has no O point inside the wall, so it has no magnetic-axis marker. The solved panel retains its own axis and filled admitted saddle. Both panels share one 24-level physical contour array. The <a href="/nova/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels-fine.svg">fine CPU view</a>, <a href="/nova/figures/mast-centroid-capability/full-axis-lane/vacuum-and-plasma-panels.svg">full-axis view</a> and <a href="/nova/figures/mast-centroid-capability/titan-lane/vacuum-and-plasma-panels.svg">titan view</a> carry the same hollow conductor marker.</figcaption>
+  </figure>
+  <p id="centroid-state-guard-smooth-method">A not-a-knot bicubic fit of each committed vacuum field was checked at the grid marker and polished by Newton using analytic first and second derivatives. Stationarity requires the polished gradient to be at most <code>10^-6</code> of the median in-wall grid gradient, a negative Hessian determinant, and an in-wall root. A manufactured quadratic saddle gave gradient below <code>3e-17 Wb/m</code> and determinant <code>-4 Wb²/m⁴</code>, confirming that the probe detects a known saddle.</p>
+  <table id="centroid-state-guard-smooth-results">
+    <thead><tr><th>Lane</th><th>Marker |∇ψ| / median [Wb/m]</th><th>Marker det H [Wb²/m⁴]</th><th>Polished (R, Z) [m]</th><th>Polished |∇ψ| [Wb/m]</th><th>Polished det H [Wb²/m⁴]</th></tr></thead>
+    <tbody>
+      <tr><td>CPU</td><td>0.010637 / 0.826373</td><td>-5.469</td><td>(1.813582, 0.000090)</td><td>1.41e-16</td><td>-5.601</td></tr>
+      <tr><td>Full axis</td><td>0.010657 / 0.810286</td><td>-5.375</td><td>(1.813564, -0.000025)</td><td>1.81e-16</td><td>-5.502</td></tr>
+      <tr><td>Titan</td><td>0.010637 / 0.826373</td><td>-5.469</td><td>(1.813582, 0.000090)</td><td>1.23e-16</td><td>-5.601</td></tr>
+    </tbody>
+  </table>
+  <p id="centroid-state-guard-smooth-verdict">All three polished roots lie inside the wall and satisfy the stationarity and saddle tests. Their flux is about <code>-1.261576 Wb</code>; the nearest one of the 24 drawn contour levels is <code>0.041–0.042 Wb</code> away, about 45% of a level interval. No drawn contour crossing is expected at the null value. Each lane receipt binds these measurements to its stored state digest and records <code>confirmed_smooth_saddle</code>.</p>
+  <p id="centroid-state-guard-render">All four redrawn SVGs were rendered to PNG and inspected. The render log reports zero clipped and zero overlapping labels for each SVG; each receipt records one in-wall vacuum X point and zero in-wall vacuum O points.</p>
+  <p id="centroid-state-guard-gates">At the figure revision, the committed-state test passed 4 of 4 checks and the contour-tree explanatory-figure test passed 6 of 6 checks in separate pytest processes.</p>
+</section>

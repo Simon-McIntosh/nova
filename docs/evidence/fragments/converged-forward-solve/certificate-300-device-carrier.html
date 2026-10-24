@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<title>Diverted 300-cell certificate carrier: device divergence and CPU Krylov refusal</title>
+</head>
+<body>
+<main>
+<article class="landing" data-node="certificate-300-device-carrier" id="certificate-300-device-carrier">
+
+<h2 id="certificate-300-device-carrier-result">Diverted 300-cell certificate carrier: device divergence and CPU Krylov refusal</h2>
+
+<p>Both arms were built in fresh processes from one git archive of revision
+<code>0f8ce37fe</code>, dumping every construction stage to npz. The CPU arm ran
+in place on the fleet allocation, the H200 arm as one betelgeuse job under
+<code>gpu_0003_grpA</code> on one card (<code>NOVA_REVISION</code> in that job's
+header reads the earlier label <code>acaffe5d3</code> because the launcher script
+hard-codes it; the tree it ran is the same archive, which is why its
+<code>s0_wall.npz</code> carries the reference arrays added at
+<code>0f8ce37fe</code>). The same benchmark route as the trip-cap record was used:
+<code>benchmarks/solovev_certificate.py::_measure("diverted-single-null", -300)</code>,
+replayed stage by stage by <code>scripts/certificate_300_carrier/dump_carrier_stages.py</code>.</p>
+
+<h3 id="certificate-300-device-carrier-first-stage">The first differing stage is the analytic reference, not the carrier</h3>
+
+<p>The comparison names <code>s0_wall</code> as the first stage where the two
+devices disagree, and the disagreement is already present in the analytic
+reference those arrays are derived from. Each stage's worst per-array delta:</p>
+
+<table id="certificate-300-device-carrier-stage-table">
+<caption>Device-difference by construction stage at revision <code>0f8ce37fe</code>; "set distance" is the largest nearest-neighbour distance from a CPU array into the H200 array, so an ordering difference shows as a small set distance under a large slot delta.</caption>
+<thead><tr><th>Stage</th><th>Array</th><th>CPU vs H200</th></tr></thead>
+<tbody>
+<tr><td><code>s0_wall</code></td><td><code>coefficients</code> [12]</td><td>all 12 differ, max <code>8.216e-15</code></td></tr>
+<tr><td><code>s0_wall</code></td><td><code>magnetic_axis</code> [2]</td><td>both differ, max <code>3.421e-15</code> m</td></tr>
+<tr><td><code>s0_wall</code></td><td><code>x_point</code> [2]</td><td>identical (<code>0.0</code>)</td></tr>
+<tr><td><code>s0_wall</code></td><td><code>separatrix</code> [1441,2]</td><td>2831 of 2882 entries differ, max <code>2.049e-13</code> m</td></tr>
+<tr><td><code>s0_wall</code></td><td><code>wall</code> [121,2]</td><td>242 of 242 differ, max <code>4.268e-12</code> m; nearest-neighbour <code>4.274e-12</code> m</td></tr>
+<tr><td><code>s1_coilset</code></td><td><code>centres</code> [340,2]</td><td>all 680 entries differ, slot delta up to <code>1.109</code> m — a <strong>permutation</strong>: nearest-neighbour <code>7.361e-13</code> m</td></tr>
+<tr><td><code>s7_moment_geometry</code></td><td><code>atomic_node_coordinates</code></td><td><strong>923 (CPU) vs 937 (H200)</strong></td></tr>
+<tr><td><code>s7_moment_geometry</code></td><td><code>sample_coordinates</code></td><td><strong>1075 (CPU) vs 1086 (H200)</strong></td></tr>
+<tr><td>total</td><td><code>node_number</code></td><td><strong>1536 vs 1547</strong> (grid 340 + wall 121 fixed; the 11 are sample coordinates)</td></tr>
+</tbody>
+</table>
+
+<p id="certificate-300-device-carrier-mechanism">The mechanism, in order:</p>
+<ol>
+<li><strong>Reference coefficients.</strong> The single-null reference solves a
+12×12 host linear system for its basis coefficients
+(<code>nova/equilibrium/analytic_single_null.py:412</code>,
+<code>np.linalg.solve(np.stack(rows), …)</code>), and refines the magnetic axis
+with three Newton steps whose each iteration is another
+<code>np.linalg.solve</code> (<code>:302</code>). Run in two processes on two
+nodes these LAPACK calls return last-bit-different results: the 12 coefficients
+differ by at most <code>8.216e-15</code> absolute, and the magnetic axis by <code>3.421e-15</code> m. That is the only device-dependent step in the
+whole carrier build — every stage after it is numpy/scipy on the host.</li>
+<li><strong>Amplification to the wall.</strong> The coefficient delta reaches the
+separatrix at <code>2.049e-13</code> m and the buffered, arc-length-sampled wall at
+<code>4.268e-12</code> m (<code>polygon.buffer(clearance, quad_segs=64)</code> then
+<code>loop.interpolate</code>).</li>
+<li><strong>CoilSet ordering</strong> upstream of the hex packing is then
+different: the same 340 cell centres to <code>7.361e-13</code> m but a different
+order (slot delta up to <code>1.109</code> m).</li>
+<li><strong>The quantised vertex merge makes the 11.</strong>
+<code>MomentGeometry.from_cells</code> receives
+<code>sampling = centres[:,None,:] + offsets[None,:,:]</code> — 340×6 = 2040
+vertices — and merges them through a <em>bin</em> key, not an equality test:
+<code>key = tuple(np.rint(vertex / atomic.tolerance))</code>
+(<code>nova/equilibrium/stencil_mesh.py:395</code>, the same form as
+<code>separatrix_clip._point_key</code> at <code>nova/equilibrium/separatrix_clip.py:139</code>).
+The tolerance is <code>128&nbsp;&middot;&nbsp;eps&nbsp;&middot;&nbsp;scale</code>
+(<code>stencil_mesh.py:349</code>), <code>1.0351e-13</code> m on both devices.
+A shared hex corner is reconstructed twice, as <code>centre_i + offset_j</code>
+and <code>centre_k + offset_l</code>, and the two sums differ by one ulp —
+measured <code>8.88e-16</code> m, about 1/117 of a bin. Two reconstructions
+merge when they fall in one bin, so the merge survives a device change only if
+the pair is not near a bin edge. The reference drift
+(<code>7.4e-13</code> m in the centres, seven bins wide) resamples that phase
+between devices.</li>
+</ol>
+
+<p id="certificate-300-device-carrier-bins">Measured on the two stage dumps
+(<code>scripts/certificate_300_carrier/bin_census.py</code>, report
+<code>bin-census.json</code>): the H200 arm holds <strong>11</strong> pairs of
+sample coordinates closer than a micron, and in every one of the 11 the two
+endpoints occupy <em>adjacent bins</em> — e.g. index 284 and index 291, both on
+the line <code>R&nbsp;bin&nbsp;20820480132490</code>, one at
+<code>Z&nbsp;bin&nbsp;-4495549544932</code> and the other at
+<code>-4495549544931</code>. Under the CPU arm's tolerance those same two
+endpoints land in one bin. The CPU arm itself has <strong>zero</strong> such
+pairs. So the 11 extra coordinates are one-ulp splits that straddle a bin edge
+on one device and not the other, which is why CPU merges to 1075 unique sample
+coordinates and H200 to 1086 (atomic mesh 923 vs 937).</p>
+
+<p id="certificate-300-device-carrier-cell103">The point comparison additionally
+reproduces the earlier <code>4.274e-12</code> m wall figure exactly, and explains
+the unreproducible <code>7.4e-13</code> m cell claim: the cells agree to
+<code>7.361e-13</code> m under nearest-neighbour matching, but they are not in the
+same order, so a slot-wise comparison reports <code>1.109</code> m.</p>
+
+<h3 id="certificate-300-device-carrier-krylov">The CPU Krylov action: one cell's moment derivative</h3>
+
+<p>Reconstructing the solver's first linear action at the CPU seed
+(<code>scripts/certificate_300_carrier/trace_krylov_action.py</code>):
+<code>linear_action(v) = v - tangent(v)</code> with <code>tangent</code> the
+directional derivative of the write-then-read map at the seed. The map value and
+the residual vector are <strong>fully finite</strong> (0 non-finite of 1536); the
+derivative is NaN in <strong>1518 of 1536</strong> entries, which is the
+qualification the solver reports as <em>nonfinite_linear_action</em>.</p>
+
+<p>Decomposing the map (<code>trace_normalisation.py</code>, same seed):</p>
+
+<table id="certificate-300-device-carrier-krylov-table">
+<caption>Finiteness of value and of the probe derivative at each stage of the CPU map, seed at target current <code>37174.653426357349</code> A.</caption>
+<thead><tr><th>Stage</th><th>Value non-finite</th><th>Derivative non-finite</th></tr></thead>
+<tbody>
+<tr><td><code>cell_current_moments</code> (raw, 340)</td><td>0</td><td><strong>1 — cell index 103</strong></td></tr>
+<tr><td>total unscaled current (1)</td><td>0</td><td>1</td></tr>
+<tr><td><code>current_normalisation_amplitude</code> (1)</td><td>0</td><td>1</td></tr>
+<tr><td><code>normalised_current_moments</code> (340)</td><td>0</td><td><strong>340</strong> — every cell</td></tr>
+<tr><td>map / residual (1536)</td><td>0</td><td>1518</td></tr>
+</tbody>
+</table>
+
+<p id="certificate-300-device-carrier-nonfinite-location">The first non-finite
+intermediate is therefore the <strong>derivative of the cell-current moment of
+grid cell 103</strong>, in
+<code>ForwardFluxOperator.cell_current_moments</code>
+(<code>nova/equilibrium/forward_operator.py:3607</code>) and the
+<code>source.current_moments</code> call it makes at <code>:3514</code>. Cell 103
+is an ordinary complete hexagon — centre <code>(R, Z) = (1.52920834, -1.05661527)</code>
+m, section <code>hexagon</code>, six authored vertices, area
+<code>8.410701056134584e-3</code> m² against a grid median of
+<code>8.410701056134595e-3</code> m² (ratio <code>0.9999999999999988</code>), and
+it is flagged <code>regular</code> — so the singularity is not a degenerate or
+clipped cell. The census behind that statement is
+<code>cell-103-census.json</code> under the run directory, written by
+<code>scripts/certificate_300_carrier/cell_census.py</code>: section
+<code>hexagon</code>, <code>authored_polygon_is_hexagon true</code>,
+<code>regular_flag true</code>, area z-score <code>0.428</code>, area rank
+<code>244</code> of 340 descending (the 240 interior hexagons are equal to the
+median within <code>1e-15</code> relative, so the rank falls inside a tie), and
+a full seven-entry stencil row.</p>
+
+<p>The spread is a second defect, not the same one:
+<code>current_normalisation_amplitude</code> (<code>:3627</code>) returns
+<code>jnp.where(admissible, target / safe_unscaled, jnp.nan)</code>
+(<code>:3647</code>). One non-finite cell poisons the total, the total poisons the
+amplitude, and <code>scaled_current_moments</code> (<code>:3619</code>) multiplies
+<em>every</em> cell by that one amplitude — so a single-cell singularity is amplified into a
+uniform NaN, which the Krylov qualification then reports as the whole linear
+action being non-finite.</p>
+
+<p id="certificate-300-device-carrier-independence"><strong>Tied to the carrier
+divergence or independent?</strong> Independent of the 11-coordinate
+difference. Cell 103 exists on both devices with the same six-vertex geometry
+(the grid is 340 cells on both, and the 11 coordinates are sample coordinates,
+not grid cells), and the CPU's non-finite action is produced entirely within the
+CPU arm's own carrier. The two defects share only the reference solve, which is
+not part of the derivative path.</p>
+
+<h3 id="certificate-300-device-carrier-repairs">Proposed repair sites (named, not implemented)</h3>
+
+<ol>
+<li><strong>Identify a lattice vertex by its topology, not its coordinate.</strong>
+The merge at <code>stencil_mesh.py:395</code> already quantises, so a coarser
+bin does not repair it: any bin splits a vertex that lies on its edge, and the
+measured split is one ulp against a bin seven times narrower than the reference
+drift, so the pair straddles the edge on one device and not the other. The
+identification has to stop depending on the float coordinate at all. Every
+sample vertex is generated as <code>centres[c] + offsets[k]</code>
+(<code>scripts/analytic_oracle_fixtures/measure.py:668</code>; the production
+path is <code>PlasmaGrid._preclip_sampling_vertices</code> in
+<code>nova/biot/plasmagrid.py</code>), so a vertex's identity is
+<code>(cell, slot)</code> reduced through the hex lattice's own adjacency —
+which the caller already holds, because <code>MomentGeometry.from_cells</code>
+receives <code>mesh.stencil</code> and that stencil is
+<code>PlasmaGrid.loop_neighbour_vertices</code>'s output
+(<code>nova/biot/plasmagrid.py:394</code>). For each neighbouring pair, the
+shared corner is the slot whose offset best matches half the centre
+displacement; that choice is made among six offsets about
+<code>5.7e-2</code> m apart, so it has no bin edge to straddle. The repair
+carries that canonical id from the generator into
+<code>MomentGeometry.from_cells</code>, which merges on the id and uses the
+coordinate only as the representative value of a merged vertex. Pinning test:
+build the carrier from the reference solve on CPU and on H200, and again from a
+wall perturbed by <code>4e-12</code> m, and require identical
+<code>node_number</code> <em>and</em> identical vertex ids across all three.</li>
+<li><strong>Reference-solve determinism.</strong>
+<code>nova/equilibrium/analytic_single_null.py:412</code> and <code>:302</code>
+should solve through one repository-owned deterministic routine (a fixed-order
+Gaussian elimination or a pinned LAPACK driver with a declared thread count), and
+the receipt should carry the coefficient vector's digest. Pinning test: solve the
+reference twice with different BLAS thread counts and require bit identity of
+<code>coefficients</code>, <code>magnetic_axis</code> and
+<code>separatrix</code>.</li>
+<li><strong>Per-cell qualification before the sum.</strong> In
+<code>forward_operator.py:3509 _partitioned_current_moments</code> /
+<code>:3607 cell_current_moments</code>, qualify each cell's moment derivative and
+report the offending cell index in a receipt instead of letting one cell's NaN
+enter the total silently.</li>
+<li><strong>Finite sentinel instead of a NaN amplitude.</strong> In
+<code>current_normalisation_amplitude</code> (<code>:3627). Return a
+finite value with a separate admissibility flag (as the eager branch already
+does by raising), so <code>scaled_current_moments</code> at <code>:3619</code>
+cannot turn one non-finite moment into a uniform NaN across all 340 cells.</li>
+</ol>
+
+<h3 id="certificate-300-device-carrier-negative-control">Negative control</h3>
+
+<p>The comparator was falsified by planting a known defect into a copy of one
+device's stage arrays and comparing that copy against the unplanted dump of the
+<em>same</em> device — the only pairing in which a stage other than
+<code>s0_wall</code> could be the first to differ. Two defects were planted, one
+per run: reversing the per-cell sampling-vertex order, and appending one
+duplicated sampling coordinate row. In both runs the comparison reports exactly
+one differing stage, <code>FIRST_DIFFERING_STAGE=s6_sampling</code>, which is
+the stage the defect was planted in, and exits <code>0</code>. The logs are
+<code>negative-control-reorder.log</code> and
+<code>negative-control-duplicate.log</code> under the run directory; each
+carries its literal command at the head and ends with <code>EXIT=0</code>.</p>
+
+</article>
+</body>
+</html>

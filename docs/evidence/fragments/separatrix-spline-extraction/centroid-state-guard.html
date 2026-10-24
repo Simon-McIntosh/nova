@@ -1,0 +1,11 @@
+<section id="centroid-state-guard">
+  <h2>Committed MAST centroid panel states are renderable</h2>
+  <p id="centroid-state-guard-schema">The repository test opens all three committed <code>panel-fields.npz</code> states and redraws each panel pair. Its negative control used the CPU state before regeneration: the test failed on the missing <code>coil_outlines</code> and five <code>branch_*</code> keys (one failing test, exit 1). The regenerated CPU, full-axis and titan states passed all four checks at the landed renderer revision.</p>
+  <p id="centroid-state-guard-provenance">The CPU receipt again states why the original lane ran on CPU: reservation <code>gpu_0003_grpA</code> admitted no job while its node had idle cores, memory and cards. The panel schema regeneration stayed on CPU for continuity with that lane.</p>
+  <figure id="centroid-state-guard-panels">
+    <img src="/nova/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels.svg" alt="MAST conductor-only vacuum flux and solved flux panels, both with their own stationary-point markers and the vessel outline." />
+    <figcaption>The conductor-only panel now marks the in-wall X point found by the existing six-neighbour census on its stored vacuum flux. That field has no O point inside the wall, so it has no magnetic-axis marker. The solved panel retains its own axis and admitted saddle. Both panels share one 24-level physical contour array. The <a href="/nova/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels-fine.svg">fine CPU view</a>, <a href="/nova/figures/mast-centroid-capability/full-axis-lane/vacuum-and-plasma-panels.svg">full-axis view</a> and <a href="/nova/figures/mast-centroid-capability/titan-lane/vacuum-and-plasma-panels.svg">titan view</a> carry the same conductor marker.</figcaption>
+  </figure>
+  <p id="centroid-state-guard-render">All four redrawn SVGs were rendered to PNG and inspected. The render log reports zero clipped and zero overlapping labels for each SVG; each receipt records one in-wall vacuum X point and zero in-wall vacuum O points.</p>
+  <p id="centroid-state-guard-gates">At the figure revision, the committed-state test passed 4 of 4 checks and the contour-tree explanatory-figure test passed 6 of 6 checks in separate pytest processes.</p>
+</section>

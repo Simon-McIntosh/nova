@@ -1,0 +1,5 @@
+<section data-evidence="solve-operand-capture">
+<h3 id="solve-operand-capture-node-record">The cold solve's lowering carries its operands instead of capturing them</h3>
+
+<p id="solve-operand-capture-node-summary">The solve compiled each Newton factor program from a linearization over concrete operands, so every operand array was embedded as a literal in every one of those programs. Passing the operands as program arguments collapses that to one copy per executable. The mechanism, the changed sites and the test live in the <a href="/nova/evidence/fragments/converged-forward-solve/constant-capture.html">constant-capture record</a>; the measurement of the captured-constants total and the certificate rows is pending on SLURM job <code>1295096</code>.</p>
+</section>

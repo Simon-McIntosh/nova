@@ -66,6 +66,21 @@ def wall(program, arguments, repetitions=5):
     return float(np.median(elapsed))
 
 
+def operand_tangent(equation, point):
+    """Linearize ``equation`` with its operands carried as program arguments.
+
+    A linearization taken over concrete operands embeds every operand array as
+    a literal in each program compiled from it, so every Newton step carries
+    its own copy of the window rows and the interior jets. The returned map
+    takes the operands as arguments, so one compiled program holds one copy.
+    """
+
+    def tangent(direction, point_flat, args):
+        return jax.jvp(lambda x: equation(x, args), (point_flat,), (direction,))[1]
+
+    return tangent
+
+
 def generated_bytes(program):
     executable = program.runtime_executable()
     method = getattr(executable, "size_of_generated_code_in_bytes", None)
@@ -301,18 +316,24 @@ def run(args):
 
         saved = json.loads(args.start_json.read_text())
         point = jnp.asarray(saved["terminal_state"]["moments"]) / scale
-        residual, factor = jax.linearize(
-            lambda x: equation(x, operands), point.reshape(-1)
-        )
+        point_flat = point.reshape(-1)
+        residual = equation(point_flat, operands)
+        tangent = operand_tangent(equation, point_flat)
         columns = jnp.eye(residual.size, dtype=residual.dtype)
-        products = jax.jit(jax.vmap(factor)).lower(columns[: args.block]).compile()
+        products = (
+            jax.jit(jax.vmap(tangent, in_axes=(0, None, None)))
+            .lower(columns[: args.block], point_flat, operands)
+            .compile()
+        )
         blocks = []
         for first in range(0, residual.size, args.block):
             last = min(first + args.block, residual.size)
             batch = columns[first:last]
             if last - first < args.block:
                 batch = jnp.pad(batch, ((0, args.block - last + first), (0, 0)))
-            blocks.append(np.asarray(products(batch))[: last - first])
+            blocks.append(
+                np.asarray(products(batch, point_flat, operands))[: last - first]
+            )
         matrix = np.concatenate(blocks, axis=0).T
         residual_np = np.asarray(residual)
         direction = lu_solve(lu_factor(matrix), -residual_np)
@@ -539,29 +560,33 @@ def run(args):
 
     def linear_step(point, active_operands=operands):
         started = perf_counter()
-        residual, factor = jax.linearize(
-            lambda x: equation(x, active_operands), point.reshape(-1)
-        )
+        point_flat = point.reshape(-1)
+        residual = equation(point_flat, active_operands)
+        tangent = operand_tangent(equation, point_flat)
         jax.block_until_ready(residual)
         linearize_ms = 1000 * (perf_counter() - started)
         rhs = -residual
         build_start = perf_counter()
         compile_start = perf_counter()
         if args.method == "krylov":
-            product = jax.jit(factor).lower(rhs).compile()
+            product = jax.jit(tangent).lower(rhs, point_flat, active_operands).compile()
             compile_ms = 1000 * (perf_counter() - compile_start)
             result.setdefault("factor_executable_bytes", generated_bytes(product))
-            step, iterations = krylov_step(product, rhs)
+            step, iterations = krylov_step(
+                lambda vector: product(vector, point_flat, active_operands), rhs
+            )
             jax.block_until_ready(step)
             build_ms = 0.0
         elif args.method == "gmres":
-            product = jax.jit(factor).lower(rhs).compile()
+            product = jax.jit(tangent).lower(rhs, point_flat, active_operands).compile()
             compile_ms = 1000 * (perf_counter() - compile_start)
             result.setdefault("factor_executable_bytes", generated_bytes(product))
             counter = [0]
 
             def multiply(x):
-                return np.asarray(product(jnp.asarray(x))).copy()
+                return np.asarray(
+                    product(jnp.asarray(x), point_flat, active_operands)
+                ).copy()
 
             def count(_):
                 counter[0] += 1
@@ -584,16 +609,33 @@ def run(args):
             build_ms = 0.0
         else:
             columns = jnp.eye(rhs.size, dtype=rhs.dtype)
-            products = jax.jit(jax.vmap(factor)).lower(columns[: args.block]).compile()
+            products = (
+                jax.jit(jax.vmap(tangent, in_axes=(0, None, None)))
+                .lower(columns[: args.block], point_flat, active_operands)
+                .compile()
+            )
             compile_ms = 1000 * (perf_counter() - compile_start)
             result.setdefault("factor_executable_bytes", generated_bytes(products))
+            width = columns[: args.block].shape[0]
+
+            def product(vector, point, operands):
+                """Apply the batched program to one direction, as a batch of one."""
+                single = jnp.atleast_2d(vector)
+                if single.shape[0] < width:
+                    single = jnp.pad(single, ((0, width - single.shape[0]), (0, 0)))
+                return products(single, point, operands)[0]
+
             blocks = []
             for start in range(0, rhs.size, args.block):
                 stop = min(start + args.block, rhs.size)
                 batch = columns[start:stop]
                 if stop - start < args.block:
                     batch = jnp.pad(batch, ((0, args.block - stop + start), (0, 0)))
-                blocks.append(np.asarray(products(batch))[: stop - start])
+                blocks.append(
+                    np.asarray(products(batch, point_flat, active_operands))[
+                        : stop - start
+                    ]
+                )
             matrix = np.concatenate(blocks, axis=0).T
             decomposition = lu_factor(matrix)
             build_ms = 1000 * (perf_counter() - build_start)
@@ -628,7 +670,9 @@ def run(args):
             "apply_ms": apply_ms,
             "iterations": iterations,
             "linear_residual": float(
-                jnp.linalg.norm(factor(jnp.asarray(step)) - rhs)
+                jnp.linalg.norm(
+                    product(jnp.asarray(step), point_flat, active_operands) - rhs
+                )
                 / jnp.maximum(jnp.linalg.norm(rhs), 1e-30)
             ),
         }
@@ -650,23 +694,27 @@ def run(args):
 
     def compare_methods(point, active_operands):
         started = perf_counter()
-        residual, factor = jax.linearize(
-            lambda x: equation(x, active_operands), point.reshape(-1)
-        )
+        point_flat = point.reshape(-1)
+        residual = equation(point_flat, active_operands)
+        tangent = operand_tangent(equation, point_flat)
         jax.block_until_ready(residual)
         linearize_ms = 1000 * (perf_counter() - started)
         rhs = -residual
         started = perf_counter()
-        product = jax.jit(factor).lower(rhs).compile()
+        product = jax.jit(tangent).lower(rhs, point_flat, active_operands).compile()
         scalar_compile_ms = 1000 * (perf_counter() - started)
         started = perf_counter()
-        short_step, _ = krylov_step(product, rhs)
+        short_step, _ = krylov_step(
+            lambda vector: product(vector, point_flat, active_operands), rhs
+        )
         jax.block_until_ready(short_step)
         short_ms = 1000 * (perf_counter() - started)
         counter = [0]
 
         def multiply(x):
-            return np.asarray(product(jnp.asarray(x, dtype=rhs.dtype))).copy()
+            return np.asarray(
+                product(jnp.asarray(x, dtype=rhs.dtype), point_flat, active_operands)
+            ).copy()
 
         def count(_):
             counter[0] += 1
@@ -688,7 +736,11 @@ def run(args):
         gmres_ms = 1000 * (perf_counter() - started)
         columns = jnp.eye(rhs.size, dtype=rhs.dtype)
         started = perf_counter()
-        products = jax.jit(jax.vmap(factor)).lower(columns[: args.block]).compile()
+        products = (
+            jax.jit(jax.vmap(tangent, in_axes=(0, None, None)))
+            .lower(columns[: args.block], point_flat, active_operands)
+            .compile()
+        )
         batch_compile_ms = 1000 * (perf_counter() - started)
         started = perf_counter()
         blocks = []
@@ -697,7 +749,9 @@ def run(args):
             batch = columns[first:last]
             if last - first < args.block:
                 batch = jnp.pad(batch, ((0, args.block - last + first), (0, 0)))
-            blocks.append(np.asarray(products(batch))[: last - first])
+            blocks.append(
+                np.asarray(products(batch, point_flat, active_operands))[: last - first]
+            )
         matrix = np.concatenate(blocks, axis=0).T
         decomposition = lu_factor(matrix)
         dense_build_ms = 1000 * (perf_counter() - started)
@@ -717,7 +771,7 @@ def run(args):
                     jnp.max(jnp.abs(equation(candidate, active_operands)))
                 ),
                 "linear_residual": float(
-                    jnp.linalg.norm(factor(step) - rhs)
+                    jnp.linalg.norm(product(step, point_flat, active_operands) - rhs)
                     / jnp.maximum(jnp.linalg.norm(rhs), 1e-30)
                 ),
                 "apply_ms": apply_ms,
@@ -797,18 +851,24 @@ def run(args):
             return
 
         started = perf_counter()
-        residual, factor = jax.linearize(
-            lambda x: equation(x, operands), predecessor.reshape(-1)
-        )
+        point_flat = predecessor.reshape(-1)
+        residual = equation(point_flat, operands)
+        tangent = operand_tangent(equation, point_flat)
         columns = jnp.eye(residual.size, dtype=residual.dtype)
-        products = jax.jit(jax.vmap(factor)).lower(columns[: args.block]).compile()
+        products = (
+            jax.jit(jax.vmap(tangent, in_axes=(0, None, None)))
+            .lower(columns[: args.block], point_flat, active_operands)
+            .compile()
+        )
         blocks = []
         for start in range(0, residual.size, args.block):
             stop = min(start + args.block, residual.size)
             batch = columns[start:stop]
             if stop - start < args.block:
                 batch = jnp.pad(batch, ((0, args.block - stop + start), (0, 0)))
-            blocks.append(np.asarray(products(batch))[: stop - start])
+            blocks.append(
+                np.asarray(products(batch, point_flat, active_operands))[: stop - start]
+            )
         matrix = np.concatenate(blocks, axis=0).T
         decomposition = lu_factor(matrix)
         build_ms = 1000 * (perf_counter() - started)

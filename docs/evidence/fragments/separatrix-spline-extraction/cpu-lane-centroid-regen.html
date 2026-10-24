@@ -1,0 +1,10 @@
+<section id="cpu-lane-centroid-regen">
+  <h2>MAST centroid CPU panels at the current schema</h2>
+  <p id="cpu-lane-centroid-regen-reproduction">The committed CPU state at <code>48d7adda68b5e86d26f5c896c8a47e2ead865be8</code> failed the panel command with <code>KeyError: 'coil_outlines is not a file in the archive'</code> (exit 1). Its prior cold solve had converged after one trip with residual <code>1.3086753902769162e-14</code>.</p>
+  <p id="cpu-lane-centroid-regen-result">One <code>sirius</code> CPU job (1295093, 8 CPUs, 128 GB) regenerated the state from that source revision. The new state has 27 keys, including coil outlines and the closed and open branch controls. The cold solve converged after one trip with residual <code>1.3083284455817205e-14</code>. The 2% warm edit remained nonconverged at <code>3.4918956953837254e-4</code>; the 4% and 6% edits converged.</p>
+  <figure id="cpu-lane-centroid-regen-panels">
+    <img src="/nova/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels.svg" alt="Conductor-only and solved MAST poloidal flux contours, with the vessel, coils, clipped plasma mesh, magnetic axis and saddle." />
+    <figcaption>The conductor-only and solved panels use one physical contour-level array (24 levels). The solved panel shows the wall, both open and closed separatrix branches, the admitted saddle, and the magnetic axis. The conductor-only panel is a field decomposition, so it has no reference null set to overlay. A fine-mesh variant is recorded beside this figure.</figcaption>
+  </figure>
+  <p id="cpu-lane-centroid-regen-gate">Both regenerated SVGs rendered to PNG and were inspected. The panel gate found <code>0 clipped</code> and <code>0 overlapping</code> labels across the two SVGs; the new state loads and draws both panel variants (exit 0).</p>
+</section>

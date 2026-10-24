@@ -21,7 +21,7 @@
   <meta name="plan-tags" content="equilibrium,topology,efit,mast,diii-d">
   <meta name="plan-blocks" content="efit-baseline-demonstration">
   <meta name="plan-impl" content="0.95">
-<meta name="plan-version" content="130">
+<meta name="plan-version" content="131">
 <meta name="plan-modified" content="2026-10-24">
 <meta name="plan-commits" content="74f95e41,a8927be3a0fc5fc387a2e64dfc97c6621ce1eb56,e3784a3127d1ca1bc6f07057fb5252d574af3732,130d84e3322a114d7c25f9d675ac23619cf9a640,b5666c5422fb9e708496993a4fe7f2f7e2e31036">
   <meta name="plan-artifacts" content="nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,docs/evidence/archive/separatrix-spline-extraction-landed.html,benchmarks/stationary_point_polish.py,nova/equilibrium/boundary_comparison.py,tests/test_boundary_comparison.py,benchmarks/diiid_forward_gs_match.py,tests/imas/test_diiid_forward_gs_match.py,docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py,tests/test_efit_topology_corroboration.py">
@@ -592,6 +592,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261024T083727924961-review-of-remove-wall-height-exclusion-e2d9e1d81b29" data-who="reckon-build" data-when="2026-10-24T08:54:58.656Z">
     <div class="r-comment-body"><p>Reviewed r-20261023T203212834092-remove-wall-height-exclusion at eb762209d07867ad0eafec87f521f26bf9c656b0..e2d9e1d81b29c3b569bf0b1b06b2b19b0da94605: 6 dimension scores, 0 added failure ids, 5 findings (1 blocking: the committed panel-fields.npz state files still store wall_height while the renderer now reads wall_z).</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261024T091905223391-review-of-remove-wall-height-exclusion-1bcb23582b5d" data-who="reckon-build" data-when="2026-10-24T09:32:35.681Z">
+    <div class="r-comment-body"><p>Independent review of r-20261023T203212834092-remove-wall-height-exclusion at e2d9e1d81b29..1bcb23582b5d: all 6 dimensions scored (goal_fidelity 12, evidence 10, scope_discipline 8, durability 3, fit 11, reuse 5; total 49), 0 added failure ids, 5 findings of which 1 blocking (benchmarks/mast_centroid_solve_panels.py:736 reinstates the contourpy/Matplotlib boundary fallback that separatrix-spline-extraction §4 removed and the coordinator&#x27;s resume instruction forbade).</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260826T125905793456-sse-branch-assembler-verify" data-who="sse-verify" data-when="2026-08-26T13:04:59Z">
     <div class="r-comment-body"><p>Independent verification confirmed deterministic fixed-capacity separation of one axis-enclosing closed branch from saddle-ended open legs, with exact-zero padding, overflow refusal, and eager/JIT/vmap parity.</p></div>

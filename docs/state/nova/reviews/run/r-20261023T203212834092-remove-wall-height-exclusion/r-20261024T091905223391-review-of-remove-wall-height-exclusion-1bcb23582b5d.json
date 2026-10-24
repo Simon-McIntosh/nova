@@ -1,0 +1,83 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "benchmarks/mast_centroid_solve_panels.py:1493 panels() call from main",
+    "none under nova/: the changed module is a benchmark script"
+  ],
+  "completed_at": "2026-10-24T09:32:35.681Z",
+  "dispatched_at": "2026-10-24T09:21:17Z",
+  "findings": [
+    {
+      "file": "benchmarks/mast_centroid_solve_panels.py",
+      "line": "736",
+      "severity": "blocking",
+      "text": "the fallback at :736-767 rebuilds the closed boundary from a contourpy marching-squares loop filtered by matplotlib.path.Path containment, and then from stored core cells, so the committed cpu-lane state renders only through the Matplotlib-contour path that separatrix-spline-extraction \u00a74 replaced with the shared comparator; the coordinator's resume instruction was explicit that a committed state predating the schema is a recorded follow-on and that no fallback may be added, so this commit cannot land as written."
+    },
+    {
+      "file": "benchmarks/mast_centroid_solve_panels.py",
+      "line": "423",
+      "severity": "non-blocking",
+      "text": "the writer still persists wall_z while _restore_units at :436 now prefers wall_z and falls back to wall_height, so the state schema carries two spellings and a freshly written state stays unreadable to the pre-rename reader; the directed repair was to restore the persisted name wall_height in both the writer and the reader."
+    },
+    {
+      "file": "benchmarks/mast_centroid_solve_panels.py",
+      "line": "640",
+      "severity": "non-blocking",
+      "text": "_solved_boundary already returns the closed contour at a level that encloses the magnetic axis, and the fallback at :736-755 duplicates it with different semantics (longest line rather than largest polygon area, no validity repair), leaving two divergent implementations of one selection in the same file."
+    },
+    {
+      "file": "benchmarks/mast_centroid_solve_panels.py",
+      "line": "436",
+      "severity": "non-blocking",
+      "text": "no test loads a committed docs/figures/mast-centroid-capability/*/panel-fields.npz through the panels state path, so the regression this increment exists to repair is guarded only by manually run receipts that are not a gate."
+    },
+    {
+      "file": "benchmarks/mast_centroid_solve_panels.py",
+      "line": "705",
+      "severity": "non-blocking",
+      "text": "a state without coil_outlines silently yields an empty array and coil_section_count=0 in the receipt (review-final-cpu-lane-receipt.json) while the other two lanes record 938, so the cpu-lane figure omits the coil outline with no qualification a reader can see."
+    }
+  ],
+  "gate_sources": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T203212834092-remove-wall-height-exclusion/head-measured-summary.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T203212834092-remove-wall-height-exclusion/base-measured-summary.log"
+  },
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read commit by commit from e2d9e1d81 to 1bcb23582; one commit, 87 insertions and 36 deletions in benchmarks/mast_centroid_solve_panels.py only: a dual-key wall vertical lookup in _restore_units at :436, an optional coil_outlines read at :705, and an if/else at :721-767 that rebuilds the boundary from a contourpy axis-enclosing loop or from stored core cells when the branch_* keys are absent",
+    "done_when": "the source node's done_when is 0 head failure ids absent at base over the edited tests and every test importing connectivity_boundary or forward_operator; baseline_suite and after_suite record 76 and 73 ids over 60/60 completed files, but head-measured-summary.log:1 is stamped revision=e2d9e1d81b29c3b569bf0b1b06b2b19b0da94605 and therefore predates 1bcb23582b5, and no fresh per-file run covers the reviewed commit",
+    "goal": "the node goal is \"The wall shadow is the topological private-flux shadow alone, with wall_height_shadow_mask and its eligibility fractions removed from nova\"; this increment touches only benchmarks/mast_centroid_solve_panels.py:430-767, leaves the removal intact, and makes all three committed docs/figures/mast-centroid-capability/*/panel-fields.npz states render (review-final-*-lane.log EXIT=0), but does so by reinstating the flux-contour boundary extraction the plan removed",
+    "manifest": "read; it carries status in-progress, commits through 1bcb23582, a checkpoint stating the coordinator rejected the broad panel fallback and that reversing it is the next step, and both suite JSONs, but it contradicts itself: `repair_pending fcfc9421a35` says the replacement commit is still pending while evidence_inputs claims 1bcb23582 answered it",
+    "write_paths": "the brief grants 11 exclusive paths and the increment changes exactly one file, benchmarks/mast_centroid_solve_panels.py, which is inside them"
+  },
+  "justifications": {
+    "durability": "no test under tests/ references benchmarks/mast_centroid_solve_panels.py and the diff adds no assertion, so nothing reddens if the dual-key lookup or the fallback at :736-767 is reverted",
+    "evidence": "review-final-cpu-lane.log:1 and review-final-full-axis-lane.log:1 stamp revision=e2d9e1d81b29c3b569bf0b1b06b2b19b0da94605, the same value as the failing negative-control arm at review-negative-parent.log:1, so the passing receipts carry no revision that distinguishes them from the failure they answer",
+    "fit": "benchmarks/mast_centroid_solve_panels.py:436 spells the coordinate key through an f-string joined from ('z','height') so the literal wall_height the coordinator asked to restore never appears, and :705-709 silently degrades a missing coil_outlines to coils=0 rather than qualifying the receipt",
+    "goal_fidelity": "benchmarks/mast_centroid_solve_panels.py:736-755 makes the committed cpu-lane state render only by re-adding the flux-contour boundary path separatrix-spline-extraction \u00a74 removed, and the coordinator's resume instruction was to record the missing keys as a follow-on and add no fallback",
+    "reuse": "benchmarks/mast_centroid_solve_panels.py:736-755 re-implements the closed contour that encloses the magnetic axis, a capability the same file already owns at :640 (_solved_boundary) and nova/biot/contour.py:84 (Contour.closedlevelset), selecting by longest line instead of the owner's largest area",
+    "scope_discipline": "every changed path is a declared one, but benchmarks/mast_centroid_solve_panels.py:721-767 adds 47 lines of schema fallback and a second contour extraction that neither the goal nor the coordinator's instruction allows"
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is \"The wall shadow is the topological private-flux shadow alone, with wall_height_shadow_mask and its eligibility fractions removed from nova\"; this increment touches only benchmarks/mast_centroid_solve_panels.py:430-767, leaves the removal intact, and makes all three committed docs/figures/mast-centroid-capability/*/panel-fields.npz states render (review-final-*-lane.log EXIT=0), but does so by reinstating the flux-contour boundary extraction the plan removed\nVERDICT done_when: the source node's done_when is 0 head failure ids absent at base over the edited tests and every test importing connectivity_boundary or forward_operator; baseline_suite and after_suite record 76 and 73 ids over 60/60 completed files, but head-measured-summary.log:1 is stamped revision=e2d9e1d81b29c3b569bf0b1b06b2b19b0da94605 and therefore predates 1bcb23582b5, and no fresh per-file run covers the reviewed commit\nVERDICT write_paths: the brief grants 11 exclusive paths and the increment changes exactly one file, benchmarks/mast_centroid_solve_panels.py, which is inside them\nVERDICT manifest: read; it carries status in-progress, commits through 1bcb23582, a checkpoint stating the coordinator rejected the broad panel fallback and that reversing it is the next step, and both suite JSONs, but it contradicts itself: `repair_pending fcfc9421a35` says the replacement commit is still pending while evidence_inputs claims 1bcb23582 answered it\nVERDICT diff: read commit by commit from e2d9e1d81 to 1bcb23582; one commit, 87 insertions and 36 deletions in benchmarks/mast_centroid_solve_panels.py only: a dual-key wall vertical lookup in _restore_units at :436, an optional coil_outlines read at :705, and an if/else at :721-767 that rebuilds the boundary from a contourpy axis-enclosing loop or from stored core cells when the branch_* keys are absent\nCALL_SITES: benchmarks/mast_centroid_solve_panels.py:1493 panels() call from main, none under nova/: the changed module is a benchmark script\nSCORE goal_fidelity: 12\nJUSTIFICATION goal_fidelity: benchmarks/mast_centroid_solve_panels.py:736-755 makes the committed cpu-lane state render only by re-adding the flux-contour boundary path separatrix-spline-extraction \u00a74 removed, and the coordinator's resume instruction was to record the missing keys as a follow-on and add no fallback\nSCORE evidence: 10\nJUSTIFICATION evidence: review-final-cpu-lane.log:1 and review-final-full-axis-lane.log:1 stamp revision=e2d9e1d81b29c3b569bf0b1b06b2b19b0da94605, the same value as the failing negative-control arm at review-negative-parent.log:1, so the passing receipts carry no revision that distinguishes them from the failure they answer\nSCORE scope_discipline: 8\nJUSTIFICATION scope_discipline: every changed path is a declared one, but benchmarks/mast_centroid_solve_panels.py:721-767 adds 47 lines of schema fallback and a second contour extraction that neither the goal nor the coordinator's instruction allows\nSCORE durability: 3\nJUSTIFICATION durability: no test under tests/ references benchmarks/mast_centroid_solve_panels.py and the diff adds no assertion, so nothing reddens if the dual-key lookup or the fallback at :736-767 is reverted\nSCORE fit: 11\nJUSTIFICATION fit: benchmarks/mast_centroid_solve_panels.py:436 spells the coordinate key through an f-string joined from ('z','height') so the literal wall_height the coordinator asked to restore never appears, and :705-709 silently degrades a missing coil_outlines to coils=0 rather than qualifying the receipt\nSCORE reuse: 5\nJUSTIFICATION reuse: benchmarks/mast_centroid_solve_panels.py:736-755 re-implements the closed contour that encloses the magnetic axis, a capability the same file already owns at :640 (_solved_boundary) and nova/biot/contour.py:84 (Contour.closedlevelset), selecting by longest line instead of the owner's largest area\nFINDING benchmarks/mast_centroid_solve_panels.py:736 blocking: the fallback at :736-767 rebuilds the closed boundary from a contourpy marching-squares loop filtered by matplotlib.path.Path containment, and then from stored core cells, so the committed cpu-lane state renders only through the Matplotlib-contour path that separatrix-spline-extraction \u00a74 replaced with the shared comparator; the coordinator's resume instruction was explicit that a committed state predating the schema is a recorded follow-on and that no fallback may be added, so this commit cannot land as written.\nFINDING benchmarks/mast_centroid_solve_panels.py:423 non-blocking: the writer still persists wall_z while _restore_units at :436 now prefers wall_z and falls back to wall_height, so the state schema carries two spellings and a freshly written state stays unreadable to the pre-rename reader; the directed repair was to restore the persisted name wall_height in both the writer and the reader.\nFINDING benchmarks/mast_centroid_solve_panels.py:640 non-blocking: _solved_boundary already returns the closed contour at a level that encloses the magnetic axis, and the fallback at :736-755 duplicates it with different semantics (longest line rather than largest polygon area, no validity repair), leaving two divergent implementations of one selection in the same file.\nFINDING benchmarks/mast_centroid_solve_panels.py:436 non-blocking: no test loads a committed docs/figures/mast-centroid-capability/*/panel-fields.npz through the panels state path, so the regression this increment exists to repair is guarded only by manually run receipts that are not a gate.\nFINDING benchmarks/mast_centroid_solve_panels.py:705 non-blocking: a state without coil_outlines silently yields an empty array and coil_section_count=0 in the receipt (review-final-cpu-lane-receipt.json) while the other two lanes record 938, so the cpu-lane figure omits the coil outline with no qualification a reader can see.\n",
+  "review_run_id": "r-20261024T091905223391-review-of-remove-wall-height-exclusion-1bcb23582b5d",
+  "reviewed_base_sha": "e2d9e1d81b29c3b569bf0b1b06b2b19b0da94605",
+  "reviewed_head_sha": "1bcb23582b5d93798593b9f43ef4f7787b47c765",
+  "reviewed_run_id": "r-20261023T203212834092-remove-wall-height-exclusion",
+  "scores": {
+    "durability": 3,
+    "evidence": 10,
+    "fit": 11,
+    "goal_fidelity": 12,
+    "reuse": 5,
+    "scope_discipline": 8
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T09:34:00+00:00",
+  "total": 49
+}

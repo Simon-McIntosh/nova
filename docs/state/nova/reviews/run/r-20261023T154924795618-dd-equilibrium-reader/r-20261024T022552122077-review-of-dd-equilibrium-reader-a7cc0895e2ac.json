@@ -1,0 +1,101 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "nova/imas/sample.py:446 EquilibriumData read in write_ids",
+    "nova/imas/sample.py:423 Sample.equilibrium_ids write",
+    "nova/imas/ensemble.py:64 EquilibriumData(...).data read",
+    "nova/imas/pulsedesign.py:710 PulseDesign source_data equilibrium read",
+    "nova/imas/pulsedesign.py:528 PulseDesign.equilibrium_ids write",
+    "nova/linalg/regression.py:189 EquilibriumData read",
+    "apps/pulsedesign/simulator.py:60 EquilibriumData(**ids_attrs) read",
+    "nova/equilibrium/inverse.py:252 InverseDesign.update_constraints",
+    "nova/imas/plasma_source.py:255-286 GetSlice.translated",
+    "nova/media/sources/nova_labels.py:168 dataset attrs[\"cocos\"] read"
+  ],
+  "completed_at": "2026-10-24T02:36:29.148Z",
+  "dispatched_at": "2026-10-24T02:27:29Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/dd-cocos-ingest/dd-equilibrium-reader.html",
+      "line": "137",
+      "severity": "non-blocking",
+      "text": "the fragment states every arm above was re-run at the head as finally committed and cites logs/final-head-*.log, but those logs' headers read revision fa01f7936ddbce01b3674e2c7e566d5218e1e37a, not the final head a7cc0895e2ac; sixteen commits landed after them, including nova/imas/equilibrium.py, sample.py, pulsedesign.py and io/sourcemap.py, so six of the ten arms were not measured at the head the sentence names, although each of the six exercises a module no later commit touched."
+    },
+    {
+      "file": "docs/evidence/fragments/dd-cocos-ingest/dd-equilibrium-reader.html",
+      "line": "122",
+      "severity": "non-blocking",
+      "text": "the head column reports tests/test_database.py at 94.72 s and, at :125, tests/test_pointconstraint.py at 7.30 s, while the logs the paragraph cites record 86.25 s and 5.01 s, so the table does not reconcile with the logs it names; the pass and skip counts do agree."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T154924795618-dd-equilibrium-reader/manifest.md",
+      "line": "18",
+      "severity": "non-blocking",
+      "text": "after_suite is recorded as two objects carrying an `arms` list with no exit_status, completed, failure_count or failure_ids, and a command containing <worktree>, <fresh /dev/shm dir> and <file> placeholders, so promotion cannot read a status or a failing id from it and this review derived the added-failure delta from the per-arm logs instead."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T154924795618-dd-equilibrium-reader/manifest.md",
+      "line": "13",
+      "severity": "non-blocking",
+      "text": "changed_paths omits nova/imas/metadata.py, nova/io/sourcemap.py, tests/test_metadata.py, tests/test_sample_write_convention.py and docs/evidence/fragments/dd-cocos-ingest/dd-internal-sites.html, all five changed in the diff and all five inside the scope the repair rounds granted, so the record understates the change a coordinator is promoting."
+    },
+    {
+      "file": "nova/imas/equilibrium.py",
+      "line": "935",
+      "severity": "non-blocking",
+      "text": "load() implements \"refuse a cache entry whose stored COCOS convention is unknown or foreign\" as a dataset attrs marker plus eviction, a capability nova/io/signalstore.py:82-133 already owns by keying the group name on the convention (cache_key, legacy_cache_key, stale_group, read); the addition does not extend that owner, and the two mechanisms now detect the same class of stale entry differently."
+    },
+    {
+      "file": "nova/imas/pulsedesign.py",
+      "line": "528",
+      "severity": "non-blocking",
+      "text": "the writer's factor names the Data Dictionary version as the literal \"3.39.0\", while nova/imas/sample.py:22 was added in this node as DEFAULT_DD_VERSION to own exactly that default; two statements of one default in two modules can drift, and the sample writer beside it derives the version from its target instead."
+    },
+    {
+      "file": "tests/test_equilibrium_reader_cocos.py",
+      "line": "79",
+      "severity": "non-blocking",
+      "text": "the fixture docstring explains the pinned IMAS_HOME by what \"happened to the coordinator\", a role attribution in source where the rule is to state the mechanism that makes the two sides resolve one tree."
+    },
+    {
+      "file": "tests/test_pointconstraint.py",
+      "line": "73",
+      "severity": "non-blocking",
+      "text": "the assertion compares the constraint's output against the -5.0 the test itself hands the stand-in at :61, so its two sides move together by construction; its independence rests entirely on the recorded control logs/negative-control-inverse-negation-restored.log, which does redden it when the negation is restored, and the assertion carries no independent oracle of its own."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read commit by commit from be0ec1321 to a7cc0895e; 18 files with 1042 insertions and 92 deletions, every subject conventional with a body and no AI trailer, and the two defects the reader needed to store an uncached pulse (nova/imas/scenario.py:89 int(homogeneous_time), and the wall read carrying the pulse's DD major at nova/imas/equilibrium.py:990) are in it and are named as serialisation fixes rather than sign sites.",
+    "done_when": "the done_when asks for signed assertions on CORSICA 130506/6 and DINA 105069/3, refusals of 105014/1 and 105013/1 by name and digit, ten test files judged by delta, and a sign search with a hit count and a planted control; tests/test_equilibrium_reader_cocos.py:151-208 asserts the reader's psi1d, psi_axis, psi_boundary, dpressure_dpsi, f_df_dpsi and ip against the raw IDS read independently at its written DD version, :231-239 asserts the named refusals with their digits, and docs/evidence/fragments/dd-cocos-ingest/dd-equilibrium-reader.html:120-137 tabulates the ten-file delta; the gate the worker ran asserts that measure, with one citation defect recorded below.",
+    "goal": "the source node's goal is to move nova's xarray equilibrium reader and GetSlice onto translate_equilibrium and to carry the one internal sign site that depends on them; nova/imas/equilibrium.py:601-629 build_convention converts psi2d, psi1d, psi_axis, psi_boundary, dpressure_dpsi and f_df_dpsi per slice through translate_equilibrium, nova/imas/getslice.py:50 adds GetSlice.translated as the read seam, and nova/equilibrium/inverse.py:245-252 drops the compensating negation, so the deliverable is present.",
+    "manifest": "read; status complete with 21 commits listed, baseline_suite carrying ten arms at be0ec1321 with literal commands and empty failure_ids, after_suite recorded as two objects of `arms` with no exit_status, completed, failure_count or failure_ids and a command carrying <worktree>/<file> placeholders, and negative_control_log naming logs/negative-control-stale-cache-reverted.log, whose last line is EXIT=1 over a failing test id.",
+    "write_paths": "the manifest declares 25 paths and the diff touches 18 files, and every one of them is inside the cumulative scope the repair rounds granted (resume-3 widened to nova/imas/machine.py and database.py, resume-7 to nova/imas/sample.py and its tests, resume-8 to nova/imas/metadata.py and nova/io/sourcemap.py, resume-9 to dd-internal-sites.html); I found no change outside the granted scope."
+  },
+  "justifications": {
+    "durability": "tests/test_equilibrium_reader_cocos.py:171-181 compares the reader's output against the raw IDS value read independently at its written DD version, so reinstating the bypass reddens it, and logs/negative-control-bypassed-translation.log shows exactly that with 1 failed and EXIT=1.",
+    "evidence": "the per-arm logs named in after_suite end in a bare EXIT=0 with zero failures, but the manifest's after_suite block at manifest.md:18 carries placeholders and no exit_status/failure_count/failure_ids, and the fragment's arm table at docs/evidence/fragments/dd-cocos-ingest/dd-equilibrium-reader.html:137 describes six of its ten arms as run at the finally-committed head when their logs read revision fa01f7936.",
+    "fit": "the reader follows the surrounding Scenario/GetSlice idiom (nova/imas/equilibrium.py:535-560), but tests/test_equilibrium_reader_cocos.py:79 attributes a design fact to what \"happened to the coordinator\", a role attribution where the rule is to state the mechanism.",
+    "goal_fidelity": "nova/imas/equilibrium.py:601-629 and nova/imas/getslice.py:50 deliver the translation seam and nova/equilibrium/inverse.py:252 removes the compensating negation the goal names.",
+    "reuse": "vacuum_field, _observed, GetSlice.translated and dd_equilibrium_factor each now have one owner and their copies are deleted, but nova/imas/equilibrium.py:935-961 re-implements the convention-guard capability nova/io/signalstore.py:82-133 already owns, and nova/imas/pulsedesign.py:528 restates the default DD version nova/imas/sample.py:22 now owns.",
+    "scope_discipline": "every path in the diff is inside the cumulatively granted scope, but tests/test_database.py:395-437 carries an unrelated ruff rewrap of two pre-existing tests inside this node's change."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source node's goal is to move nova's xarray equilibrium reader and GetSlice onto translate_equilibrium and to carry the one internal sign site that depends on them; nova/imas/equilibrium.py:601-629 build_convention converts psi2d, psi1d, psi_axis, psi_boundary, dpressure_dpsi and f_df_dpsi per slice through translate_equilibrium, nova/imas/getslice.py:50 adds GetSlice.translated as the read seam, and nova/equilibrium/inverse.py:245-252 drops the compensating negation, so the deliverable is present.\nVERDICT done_when: the done_when asks for signed assertions on CORSICA 130506/6 and DINA 105069/3, refusals of 105014/1 and 105013/1 by name and digit, ten test files judged by delta, and a sign search with a hit count and a planted control; tests/test_equilibrium_reader_cocos.py:151-208 asserts the reader's psi1d, psi_axis, psi_boundary, dpressure_dpsi, f_df_dpsi and ip against the raw IDS read independently at its written DD version, :231-239 asserts the named refusals with their digits, and docs/evidence/fragments/dd-cocos-ingest/dd-equilibrium-reader.html:120-137 tabulates the ten-file delta; the gate the worker ran asserts that measure, with one citation defect recorded below.\nVERDICT write_paths: the manifest declares 25 paths and the diff touches 18 files, and every one of them is inside the cumulative scope the repair rounds granted (resume-3 widened to nova/imas/machine.py and database.py, resume-7 to nova/imas/sample.py and its tests, resume-8 to nova/imas/metadata.py and nova/io/sourcemap.py, resume-9 to dd-internal-sites.html); I found no change outside the granted scope.\nVERDICT manifest: read; status complete with 21 commits listed, baseline_suite carrying ten arms at be0ec1321 with literal commands and empty failure_ids, after_suite recorded as two objects of `arms` with no exit_status, completed, failure_count or failure_ids and a command carrying <worktree>/<file> placeholders, and negative_control_log naming logs/negative-control-stale-cache-reverted.log, whose last line is EXIT=1 over a failing test id.\nVERDICT diff: read commit by commit from be0ec1321 to a7cc0895e; 18 files with 1042 insertions and 92 deletions, every subject conventional with a body and no AI trailer, and the two defects the reader needed to store an uncached pulse (nova/imas/scenario.py:89 int(homogeneous_time), and the wall read carrying the pulse's DD major at nova/imas/equilibrium.py:990) are in it and are named as serialisation fixes rather than sign sites.\nCALL_SITES: nova/imas/sample.py:446 EquilibriumData read in write_ids, nova/imas/sample.py:423 Sample.equilibrium_ids write, nova/imas/ensemble.py:64 EquilibriumData(...).data read, nova/imas/pulsedesign.py:710 PulseDesign source_data equilibrium read, nova/imas/pulsedesign.py:528 PulseDesign.equilibrium_ids write, nova/linalg/regression.py:189 EquilibriumData read, apps/pulsedesign/simulator.py:60 EquilibriumData(**ids_attrs) read, nova/equilibrium/inverse.py:252 InverseDesign.update_constraints, nova/imas/plasma_source.py:255-286 GetSlice.translated, nova/media/sources/nova_labels.py:168 dataset attrs[\"cocos\"] read\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/imas/equilibrium.py:601-629 and nova/imas/getslice.py:50 deliver the translation seam and nova/equilibrium/inverse.py:252 removes the compensating negation the goal names.\nSCORE evidence: 13\nJUSTIFICATION evidence: the per-arm logs named in after_suite end in a bare EXIT=0 with zero failures, but the manifest's after_suite block at manifest.md:18 carries placeholders and no exit_status/failure_count/failure_ids, and the fragment's arm table at docs/evidence/fragments/dd-cocos-ingest/dd-equilibrium-reader.html:137 describes six of its ten arms as run at the finally-committed head when their logs read revision fa01f7936.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: every path in the diff is inside the cumulatively granted scope, but tests/test_database.py:395-437 carries an unrelated ruff rewrap of two pre-existing tests inside this node's change.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_equilibrium_reader_cocos.py:171-181 compares the reader's output against the raw IDS value read independently at its written DD version, so reinstating the bypass reddens it, and logs/negative-control-bypassed-translation.log shows exactly that with 1 failed and EXIT=1.\nSCORE fit: 15\nJUSTIFICATION fit: the reader follows the surrounding Scenario/GetSlice idiom (nova/imas/equilibrium.py:535-560), but tests/test_equilibrium_reader_cocos.py:79 attributes a design fact to what \"happened to the coordinator\", a role attribution where the rule is to state the mechanism.\nSCORE reuse: 13\nJUSTIFICATION reuse: vacuum_field, _observed, GetSlice.translated and dd_equilibrium_factor each now have one owner and their copies are deleted, but nova/imas/equilibrium.py:935-961 re-implements the convention-guard capability nova/io/signalstore.py:82-133 already owns, and nova/imas/pulsedesign.py:528 restates the default DD version nova/imas/sample.py:22 now owns.\nFINDING docs/evidence/fragments/dd-cocos-ingest/dd-equilibrium-reader.html:137 non-blocking: the fragment states every arm above was re-run at the head as finally committed and cites logs/final-head-*.log, but those logs' headers read revision fa01f7936ddbce01b3674e2c7e566d5218e1e37a, not the final head a7cc0895e2ac; sixteen commits landed after them, including nova/imas/equilibrium.py, sample.py, pulsedesign.py and io/sourcemap.py, so six of the ten arms were not measured at the head the sentence names, although each of the six exercises a module no later commit touched.\nFINDING docs/evidence/fragments/dd-cocos-ingest/dd-equilibrium-reader.html:122 non-blocking: the head column reports tests/test_database.py at 94.72 s and, at :125, tests/test_pointconstraint.py at 7.30 s, while the logs the paragraph cites record 86.25 s and 5.01 s, so the table does not reconcile with the logs it names; the pass and skip counts do agree.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T154924795618-dd-equilibrium-reader/manifest.md:18 non-blocking: after_suite is recorded as two objects carrying an `arms` list with no exit_status, completed, failure_count or failure_ids, and a command containing <worktree>, <fresh /dev/shm dir> and <file> placeholders, so promotion cannot read a status or a failing id from it and this review derived the added-failure delta from the per-arm logs instead.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T154924795618-dd-equilibrium-reader/manifest.md:13 non-blocking: changed_paths omits nova/imas/metadata.py, nova/io/sourcemap.py, tests/test_metadata.py, tests/test_sample_write_convention.py and docs/evidence/fragments/dd-cocos-ingest/dd-internal-sites.html, all five changed in the diff and all five inside the scope the repair rounds granted, so the record understates the change a coordinator is promoting.\nFINDING nova/imas/equilibrium.py:935 non-blocking: load() implements \"refuse a cache entry whose stored COCOS convention is unknown or foreign\" as a dataset attrs marker plus eviction, a capability nova/io/signalstore.py:82-133 already owns by keying the group name on the convention (cache_key, legacy_cache_key, stale_group, read); the addition does not extend that owner, and the two mechanisms now detect the same class of stale entry differently.\nFINDING nova/imas/pulsedesign.py:528 non-blocking: the writer's factor names the Data Dictionary version as the literal \"3.39.0\", while nova/imas/sample.py:22 was added in this node as DEFAULT_DD_VERSION to own exactly that default; two statements of one default in two modules can drift, and the sample writer beside it derives the version from its target instead.\nFINDING tests/test_equilibrium_reader_cocos.py:79 non-blocking: the fixture docstring explains the pinned IMAS_HOME by what \"happened to the coordinator\", a role attribution in source where the rule is to state the mechanism that makes the two sides resolve one tree.\nFINDING tests/test_pointconstraint.py:73 non-blocking: the assertion compares the constraint's output against the -5.0 the test itself hands the stand-in at :61, so its two sides move together by construction; its independence rests entirely on the recorded control logs/negative-control-inverse-negation-restored.log, which does redden it when the negation is restored, and the assertion carries no independent oracle of its own.",
+  "review_run_id": "r-20261024T022552122077-review-of-dd-equilibrium-reader-a7cc0895e2ac",
+  "reviewed_base_sha": "be0ec13216426c276802be4b8320d5f8d7a82715",
+  "reviewed_head_sha": "a7cc0895e2ac663316c6d10e6495519a4cf10c08",
+  "reviewed_run_id": "r-20261023T154924795618-dd-equilibrium-reader",
+  "scores": {
+    "durability": 17,
+    "evidence": 13,
+    "fit": 15,
+    "goal_fidelity": 18,
+    "reuse": 13,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T02:37:33.891004+00:00",
+  "total": 92
+}

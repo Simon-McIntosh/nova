@@ -24,7 +24,7 @@
   <title>DD COCOS Ingest | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="100">
+<meta name="plan-version" content="101">
 <meta name="plan-modified" content="2026-10-24">
 <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;dd-cocos-ingest#s1&quot;],&quot;s3&quot;:[&quot;dd-cocos-ingest#s2&quot;],&quot;s4&quot;:[&quot;dd-cocos-ingest#s3&quot;],&quot;s5&quot;:[&quot;dd-cocos-ingest#s1&quot;,&quot;dd-cocos-ingest#s2&quot;]}">
 </head>
@@ -219,6 +219,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261024T015812937240-review-of-dd-equilibrium-reader-c6c1ec560eb7" data-who="reckon-build" data-when="2026-10-24T02:10:10.086Z">
     <div class="r-comment-body"><p>seventh review of dd-equilibrium-reader at its base..c6c1ec560: 85/120 with one blocking finding (two evidence fragments cite the deleted psi_write_factor), reuse 18, 0 added failures</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261024T022552122077-review-of-dd-equilibrium-reader-a7cc0895e2ac" data-who="reckon-build" data-when="2026-10-24T02:36:29.148Z">
+    <div class="r-comment-body"><p>dd-equilibrium-reader at head a7cc0895e is reviewed as landed: the reader and GetSlice take their COCOS-dependent fields through translate_equilibrium with signed assertions against the raw IDS at its written DD version, the inverse boundary-psi compensation is removed, and the ten-file delta holds with zero added failures; eight non-blocking findings are recorded, six of them record-accuracy or reuse items and none of them blocking.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261023T132220183554-review-of-edge-consistency-measure-9b6422bb0416" data-who="reckon-build" data-when="2026-10-23T14:19:26.357Z">
     <div class="r-comment-body"><p>Independent review of run r-20261023T123603187543-edge-consistency-measure, read at base e69f4b60af04df8259ef914dee3136a3c55f6cb2 and head 9b6422bb0416e2a358b91c9389c1810d863b1bd0. All five checklist items carry a verdict and all six dimensions a score: goal_fidelity 18, evidence 17, scope_discipline 19, durability 15, fit 16, reuse 5. Five non-blocking findings, no blocking finding: the measure duplicates the structured-grid current-density read nova/equilibrium/map_extraction.py:132 already owns (agrees to 4.0e-16 relative rather than extending it), the inside-is-None default at nova/imas/edge_consistency.py:166 scores psi_norm &lt;= 1 only while the docstring promises 0 &lt;= psi_norm &lt;= 1 (inert on the analytic fixture), tests/test_edge_consistency.py:196 compares two runs of the same code, the reviewed manifest's after_suite.log_path at line 19 names a directory rather than a log file, and every head-arm gate log of the reviewed run opens with a revision header naming the base commit while the negative-control log's command line is prose. The landed change is sound: the lift is arithmetic-identical for the parity chain, the order fit is 1.97 against the stencil's 2.00, the perturbation is detected and the band-only negative control reddens three tests the head arm does not fail.</p></div>

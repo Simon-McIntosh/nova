@@ -323,12 +323,17 @@ def lattice_vertex_groups(polygons) -> tuple[np.ndarray, np.ndarray]:
     A shared corner is reconstructed once per cell that carries it, and the two
     reconstructions differ in their last bits, so a coordinate cannot decide
     whether they are the same vertex: any quantisation puts a bin edge between
-    them for some pair. The merge is made on geometry coarse enough to have no
-    edge at the observed drift: two slots join when their coordinates agree
-    within ``1e-9`` of the lattice scale, which is a millionth of the distance
-    between neighbouring corners and a thousand times the drift. A merge is
-    accepted only where the match is mutual and unique, so a wall-clipped sliver
-    cannot be collapsed into a degenerate polygon.
+    them for some pair. The merge is made instead on a scale coarse enough to
+    have no edge at the observed drift: two slots join when their coordinates
+    agree within ``1e-9`` of the lattice scale, found through a spatial hash
+    whose cells are that same width. The reach is a millionth of the distance
+    between neighbouring corners and a thousand times the observed reference
+    drift of ``7.4e-13`` m, and every slot is compared against the neighbouring
+    hash cells on both sides of its own, so no bin edge can separate a pair.
+
+    A candidate group is rejected when its own spread reaches the merge width,
+    which keeps a wall-clipped sliver from collapsing into a degenerate
+    polygon, and two slots of one cell are never joined.
 
     The answer depends on the coordinates alone, never on the order the cells
     are listed in, so a grid that realises one lattice in a different order

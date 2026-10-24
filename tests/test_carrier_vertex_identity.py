@@ -2,16 +2,18 @@
 
 A carrier's lattice vertices were merged by quantising their coordinates, so
 two reconstructions of one shared corner merged only while they happened to
-fall inside one bin. They are now identified through the mesh's own neighbour
-rings, and the analytic reference they are built from solves through one
-ordered routine, so a carrier built on one device is the same carrier as one
-built on another.
+fall inside one bin. They are now grouped through a spatial hash one billionth
+of the lattice scale wide, which reads no neighbour rings and no cell order,
+and the analytic reference they are built from solves through one ordered
+routine, so a carrier built on one device is the same carrier as one built on
+another.
 """
 
 from __future__ import annotations
 
 import json
 import os
+import pathlib
 import subprocess
 import sys
 
@@ -19,6 +21,8 @@ import numpy as np
 import pytest
 from scipy.spatial import Delaunay
 from shapely.geometry import LineString
+
+import nova
 
 from benchmarks.solovev_certificate import DIVERTED_WALL_CLEARANCE_FRACTION
 from nova.biot.plasmagrid import PlasmaGrid
@@ -28,6 +32,7 @@ from nova.frame.coilset import CoilSet
 from scripts.analytic_oracle_fixtures import measure as fixture
 
 CERTIFICATE_CELLS = -300
+REPOSITORY_ROOT = pathlib.Path(nova.__file__).resolve().parents[1]
 SEPARATRIX_SAMPLES = 1441
 WALL_PERTURBATION_M = 4.0e-12  # applied to each coordinate, 5.7e-12 m displacement
 RECEIPT_ENVIRONMENT = "NOVA_CARRIER_VERTEX_RECEIPT"
@@ -222,6 +227,9 @@ def _solve_receipt(threads: int) -> dict:
     environment = dict(os.environ)
     for name in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS"):
         environment[name] = str(threads)
+    environment["PYTHONPATH"] = os.pathsep.join(
+        [str(REPOSITORY_ROOT), environment.get("PYTHONPATH", "")]
+    ).rstrip(os.pathsep)
     program = (
         "import json, hashlib, numpy as np;"
         "from nova.equilibrium.analytic_single_null import"
@@ -240,7 +248,7 @@ def _solve_receipt(threads: int) -> dict:
         text=True,
         check=True,
         env=environment,
-        cwd=os.getcwd(),
+        cwd=str(REPOSITORY_ROOT),
     )
     return json.loads(completed.stdout.strip().splitlines()[-1])
 

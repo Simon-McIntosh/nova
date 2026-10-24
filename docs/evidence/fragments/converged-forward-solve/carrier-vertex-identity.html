@@ -56,14 +56,18 @@ cell position downstream.</p>
 per cell that carries it, so the copies differ in their last bits; two copies
 merge only while they fall inside one bin, and a bin boundary between them is
 decided by the phase the reference solve happens to produce. The merge now
-reads the mesh's own neighbour rings, which the geometry already receives:
-two slots of adjacent cells join when their coordinates agree within
-<code>1e-9</code> of the mesh scale, which is a millionth of the distance
-between neighbouring corners and a thousand times the observed drift. A merge
-is accepted only when the match is mutual and unique, so a wall-clipped sliver
-cannot be collapsed into a degenerate polygon. Merged polygon vertices carry
-one stored coordinate, so the atomic mesh that atomises them keys on equal
-values instead of on a bin edge.</p>
+groups slots through a coordinate spatial hash whose cells are
+<code>1e-9</code> of the lattice scale wide, and it reads no neighbour rings
+and no cell order at all. That reach is a millionth of the distance between
+neighbouring corners and a thousand times the <code>7.4e-13</code> m drift the
+reference solve was observed to produce, and every slot is compared against the
+hash cells on both sides of its own, so no bin edge can separate a pair. A
+candidate group is rejected when its own spread reaches the merge width, which
+keeps a wall-clipped sliver from collapsing into a degenerate polygon, and two
+slots of one cell are never joined. Merged polygon vertices carry one stored
+coordinate — the mean of the copies taken in sorted order — so the atomic mesh
+that atomises them keys on equal values instead of on a bin edge, and the
+stored value does not depend on which cell was listed first.</p>
 
 <h3 id="carrier-vertex-identity-measure">The three arms agree</h3>
 
@@ -91,6 +95,15 @@ reordering does not disturb.</p>
 separatrix are required to be bit-identical. The solve publishes
 <code>coefficient_digest</code>, the sha256 of its coefficient vector as stored
 binary64, so a carrier records the reference it was built from.</p>
+
+<p>The thread-count arm alone does not carry the claim, since one machine
+usually gives the same answer at one and four threads either way. The digest
+itself is therefore compared across devices: the CPU and the H200 both publish
+<code>01818d5d423fe502</code>. The control is the library solve this replaced.
+Restoring <code>np.linalg.solve</code> in a scratch copy of the head tree gives
+<code>3b71e589179c036f</code> on the CPU against <code>01818d5d423fe502</code>
+from the H200 receipt, so the digests disagree exactly when the driver chooses
+the elimination order (<code>logs/determinism-control-library-solve.log</code>).</p>
 
 <h3 id="carrier-vertex-identity-negative-control">Negative control</h3>
 

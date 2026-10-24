@@ -4,7 +4,11 @@
 <meta charset="utf-8">
 <meta name="docs-project" content="nova">
 <meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="certificate-300-device-carrier">
+<meta name="plan-title" content="Diverted 300-cell certificate carrier: device divergence and CPU Krylov refusal">
+<meta name="plan-summary" content="Locate the 300-cell diverted carrier's CPU/H200 divergence and the CPU Krylov action's first non-finite entry, and name the repair sites">
 <meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s4">
 <title>Diverted 300-cell certificate carrier: device divergence and CPU Krylov refusal</title>
 </head>
 <body>
@@ -87,9 +91,9 @@ between devices.</li>
 <code>bin-census.json</code>): the H200 arm holds <strong>11</strong> pairs of
 sample coordinates closer than a micron, and in every one of the 11 the two
 endpoints occupy <em>adjacent bins</em> — e.g. index 284 and index 291, both on
-the line <code>R&nbsp;bin&nbsp;20820480132490</code>, one at
-<code>Z&nbsp;bin&nbsp;-4495549544932</code> and the other at
-<code>-4495549544931</code>. Under the CPU arm's tolerance those same two
+the line <code>Z&nbsp;bin&nbsp;-4495549544932</code>, one at
+<code>R&nbsp;bin&nbsp;20820480132490</code> and the other at
+<code>20820480132491</code>. Under the CPU arm's tolerance those same two
 endpoints land in one bin. The CPU arm itself has <strong>zero</strong> such
 pairs. So the 11 extra coordinates are one-ulp splits that straddle a bin edge
 on one device and not the other, which is why CPU merges to 1075 unique sample
@@ -141,9 +145,12 @@ clipped cell. The census behind that statement is
 <code>scripts/certificate_300_carrier/cell_census.py</code>: section
 <code>hexagon</code>, <code>authored_polygon_is_hexagon true</code>,
 <code>regular_flag true</code>, area z-score <code>0.428</code>, area rank
-<code>244</code> of 340 descending (the 240 interior hexagons are equal to the
-median within <code>1e-15</code> relative, so the rank falls inside a tie), and
-a full seven-entry stencil row.</p>
+<code>244</code> of 340 descending, and a full seven-entry stencil row. That rank
+is arbitrary inside a tie: counting the stage dump
+(<code>cpu-stages/s2_polygons.npz</code>, the source the census reads), 231 of
+the 340 cells sit within <code>1e-15</code> relative of the median area and 210
+of those are exactly equal to it, so the rank reports a position inside a group
+the sort can order either way.</p>
 
 <p>The spread is a second defect, not the same one:
 <code>current_normalisation_amplitude</code> (<code>:3627</code>) returns
@@ -178,8 +185,9 @@ path is <code>PlasmaGrid._preclip_sampling_vertices</code> in
 <code>(cell, slot)</code> reduced through the hex lattice's own adjacency —
 which the caller already holds, because <code>MomentGeometry.from_cells</code>
 receives <code>mesh.stencil</code> and that stencil is
-<code>PlasmaGrid.loop_neighbour_vertices</code>'s output
-(<code>nova/biot/plasmagrid.py:394</code>). For each neighbouring pair, the
+<code>PlasmaGrid.loop_neighbour_vertices</code>'s output (defined at
+<code>nova/biot/plasmagrid.py:361</code>, invoked by
+<code>PlasmaGrid.tessellate</code> at <code>:410</code>). For each neighbouring pair, the
 shared corner is the slot whose offset best matches half the centre
 displacement; that choice is made among six offsets about
 <code>5.7e-2</code> m apart, so it has no bin edge to straddle. The repair

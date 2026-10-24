@@ -1,0 +1,114 @@
+{
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed manifest records no base log and no head log: its baseline_suite and after_suite fields are empty and its negative_control is 'none: a measurement whose verdict is read from solver termination records, not from a check it writes'. The node is docs-only and its diff changes no source, so there is no suite arm to reduce and zero added failures is the derived figure rather than an unmeasured one.",
+  "completed_at": "2026-10-23T22:06:20.210Z",
+  "dispatched_at": "2026-10-23T21:45:45Z",
+  "findings": [
+    {
+      "disposition": null,
+      "file": "docs/evidence/fragments/topology-read-containment-and-rebank/certificate-300-trip-cap.html",
+      "line": "10",
+      "severity": "non-blocking",
+      "text": "The sentence 'Their 340 cell locations match within 7.4e-13 m under nearest-neighbour matching, but cell ordering and total solve-coordinate count differ (1536 on CPU, 1547 on H200), so the two receipts do not isolate device arithmetic as the cause of that gap' is not reproducible from anything the run persisted. No script or log in the run directory computes the 7.4e-13 figure, and the only coordinate sets in the receipts (render_data.coordinates_rz_m) give a nearest-neighbour maximum of 4.274211833313678e-12 m, an order of magnitude larger; the count difference is also not a carrier difference, because the H200 row's array carries 11 exactly duplicated rows and both arrays hold 1536 unique coordinates that agree to 5.0e-12 m when sorted. The caveat may still hold for another reason, but as written it asserts an unreproducible measurement and overstates how far the two carriers differ; correct the number from a persisted computation, or state the duplicate-row origin and drop the count claim."
+    },
+    {
+      "disposition": null,
+      "file": "docs/evidence/fragments/topology-read-containment-and-rebank/certificate-300-trip-cap.html",
+      "line": "11",
+      "severity": "non-blocking",
+      "text": "The tracked edb02142 receipt is described as reporting 'residual 5.626976272072871e-15 after two trips, and converged', but that receipt's own qualification verdict is 'unqualified' with reason topology_read_does_not_admit_required_stationary_points (git show edb02142:docs/figures/gs-absolute-accuracy/solovev/production-route-parts/diverted-single-null-production-route-cells-300.json). Section 4 needs a qualified row before the certificate is re-committed, so reporting only 'converged' lets a reader take the historical row as qualification-ready when it is not."
+    },
+    {
+      "disposition": null,
+      "file": "docs/evidence/fragments/topology-read-containment-and-rebank/certificate-300-trip-cap.html",
+      "line": "3",
+      "severity": "non-blocking",
+      "text": "Lines 3, 6-7 and 11 restate values already committed in the sibling record docs/evidence/fragments/topology-read-containment-and-rebank/certificate-drift-attribution.html -- the 2.2640848763056183 CPU residual, the 1536-versus-1547 counts, both target currents and the 5.626976272072871e-15 tracked receipt -- without citing it, so the same numbers are now recorded twice and can drift apart; reference the sibling record or say which fragment is authoritative for the shared values."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "none",
+    "diff": "Read commit by commit against cb42790e: a40c2616 adds the CPU termination paragraphs at certificate-300-trip-cap.html:3-4, ee1b73ce adds the current CPU/H200 comparison and the table rows at :5-7,9-10, and 9fe3b827 adds the earlier-revision row and resolves the historical receipt at :8,11; all three carry conventional subjects with bodies and touch no path outside the declared scope.",
+    "done_when": "The done-when (prompt.txt, FENCE - EVIDENCE) is that the manifest states whether the CPU non-convergence is a budget difference, a numerical difference or a regression since edb02142, with the residuals that decide it; manifest.md:26 states the numerical refusal (nonfinite_linear_action, 0 accepted promotions) beside the 2.2640848763056183 CPU residual and records that a regression since edb02142 is not established, and certificate-300-trip-cap.html:4 and :11 state the same in the landed artefact.",
+    "goal": "The node goal (prompt.txt:30) is an evidence fragment stating why the diverted 300-cell row ends after one trip at residual 2.264 on CPU at main and whether the same row converges on the H200 at main; docs/evidence/fragments/topology-read-containment-and-rebank/certificate-300-trip-cap.html:3-4 answers the first with the termination record (active_set_settled, zero mask differences, one Newton promotion refused for nonfinite_linear_action, the 16-trip policy cap not reached) and :7,10 answers the second with 12 trips and terminal residual 0.07489864728918744, converged=false.",
+    "manifest": "Read; manifest.md:11 names the three commits, :15 records the literal CPU command, :16 names cpu-current.log, gpu-current.log and gpu-earlier.log, :17-18 pin the imported module and resolved working directory to the source-current archive extract, :25 lists the per-row part receipts with their headline residuals, and :26 carries the quantitative evidence inputs; baseline_suite and after_suite are empty because this docs-only node armed no suite, which its negative_control reason states.",
+    "write_paths": "The declared write paths (prompt.txt:135-138) are docs/evidence/fragments/topology-read-containment-and-rebank/certificate-300-trip.html, .../certificate-300-trip-cap.html and docs/figures/topology-read-containment-and-rebank/certificate-300-trip-cap; git diff --stat cb42790e..9fe3b8274 lists exactly one file, certificate-300-trip-cap.html, and every commit in the range touches only that file."
+  },
+  "justifications": {
+    "durability": "The diff adds no assertion of any kind, so no test reddens if a fragment claim regresses, and the one claim a reader cannot re-derive is the 7.4e-13 m agreement at certificate-300-trip-cap.html:10.",
+    "evidence": "Every headline number reconciles with the run's own receipts -- cpu-current-part.json terminal residual 2.2640848763056183 with accepted_newton_promotions 0 and krylov_action_qualification nonfinite_linear_action, gpu-current-part.json 0.07489864728918744 with 29 of 48 promotions, and the tracked edb02142 receipt read from git at 5.626976272072871e-15 over two trips -- but certificate-300-trip-cap.html:10 states a nearest-neighbour agreement of 7.4e-13 m that no run artefact records and that the receipts' own coordinates do not reproduce.",
+    "fit": "certificate-300-trip-cap.html:1 is a bare section carrying an id and an h3, the form most bare-section fragments under docs/evidence/fragments take, and neither the filename nor any text carries a plan, sprint or ticket label.",
+    "goal_fidelity": "certificate-300-trip-cap.html:4 states the one-trip exit is an unchanged-mask termination after a numerical refusal rather than a cap, and :10 reports the H200 path as converged=false after 12 trips, so both halves of the goal are answered with numbers.",
+    "reuse": "The diff adds no definition, and a search over docs/evidence/fragments, benchmarks/ and scripts/ found no renderer that emits a termination table -- fragments are hand-authored and only the certificate driver and its siblings emit the underlying SUMMARY records -- though the fragment restates values already committed in the sibling record certificate-drift-attribution.html without citing it.",
+    "scope_discipline": "git diff --stat cb42790e..9fe3b8274 lists a single new file, docs/evidence/fragments/topology-read-containment-and-rebank/certificate-300-trip-cap.html, inside the declared write paths, and the fragment carries nothing the goal's four questions do not call for."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The node goal (prompt.txt:30) is an evidence fragment stating why the diverted 300-cell row ends after one trip at residual 2.264 on CPU at main and whether the same row converges on the H200 at main; docs/evidence/fragments/topology-read-containment-and-rebank/certificate-300-trip-cap.html:3-4 answers the first with the termination record (active_set_settled, zero mask differences, one Newton promotion refused for nonfinite_linear_action, the 16-trip policy cap not reached) and :7,10 answers the second with 12 trips and terminal residual 0.07489864728918744, converged=false.\nVERDICT done_when: The done-when requires the manifest to state whether the CPU non-convergence is a budget difference, a numerical difference or a regression since edb02142, with the residuals that decide it; manifest.md:26 states the numerical refusal (nonfinite_linear_action, 0 accepted promotions) beside the 2.2640848763056183 CPU residual and records that a regression since edb02142 is not established, and certificate-300-trip-cap.html:4 and :11 state the same.\nVERDICT write_paths: The declared write paths (prompt.txt:135-138) are certificate-300-trip.html, certificate-300-trip-cap.html and the figures directory under docs/; git diff --stat cb42790e..9fe3b8274 lists exactly one file, certificate-300-trip-cap.html, and every commit in the range touches only that file.\nVERDICT manifest: Read; manifest.md:11 names the three commits, :15 records the literal CPU command, :16 names the three row logs, :17-18 pin the imported module and resolved working directory, :25 lists the per-row part receipts and :26 states the evidence inputs; baseline_suite and after_suite are empty because this docs-only node armed no suite, which its negative_control reason states.\nVERDICT diff: Read commit by commit against cb42790e; a40c2616 adds the CPU termination paragraphs at certificate-300-trip-cap.html:3-4, ee1b73ce adds the current CPU/H200 comparison and table rows at :5-7,9-10, and 9fe3b827 adds the earlier-revision row and the historical-receipt resolution at :8,11, all inside the declared scope with conventional subjects and bodies.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: certificate-300-trip-cap.html:4 states the one-trip exit is an unchanged-mask termination after a numerical refusal rather than a cap, and :10 reports the H200 path as converged=false after 12 trips, so both halves of the goal are answered with numbers.\nSCORE evidence: 15\nJUSTIFICATION evidence: cpu-current-part.json, gpu-current-part.json and the tracked edb02142 receipt read from git reconcile every headline residual, trip count and promotion tally, but certificate-300-trip-cap.html:10 states a 7.4e-13 m nearest-neighbour agreement that no run artefact records and that the receipts' own coordinates do not reproduce (4.274211833313678e-12 m).\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat cb42790e..9fe3b8274 lists a single new file, docs/evidence/fragments/topology-read-containment-and-rebank/certificate-300-trip-cap.html, inside the declared write paths, and nothing in it is outside what the goal's four questions call for.\nSCORE durability: 12\nJUSTIFICATION durability: The diff adds no assertion of any kind, so nothing reddens if a fragment claim regresses, and the one claim a reader cannot re-derive is the fragment's 7.4e-13 m agreement at certificate-300-trip-cap.html:10.\nSCORE fit: 16\nJUSTIFICATION fit: certificate-300-trip-cap.html:1 is a bare section with an id and an h3, the form most bare-section fragments under docs/evidence/fragments take, and no filename, symbol or comment carries a plan, sprint or ticket label.\nSCORE reuse: 19\nJUSTIFICATION reuse: The diff adds no definition and a search over docs/evidence/fragments, benchmarks/ and scripts/ found no renderer that emits a termination table -- fragments are hand-authored -- though certificate-300-trip-cap.html:3,6-7,11 restate values already committed in the sibling record certificate-drift-attribution.html without citing it.\nFINDING docs/evidence/fragments/topology-read-containment-and-rebank/certificate-300-trip-cap.html:10 non-blocking: the 340-cell-location agreement of 7.4e-13 m has no persisted computation and does not reproduce -- nearest-neighbour over the receipts' own render_data.coordinates_rz_m gives 4.274211833313678e-12 m -- and the 1536-versus-1547 count is 11 exactly duplicated rows in the H200 array rather than a different carrier, so the sentence overstates how far the two carriers differ.\nFINDING docs/evidence/fragments/topology-read-containment-and-rebank/certificate-300-trip-cap.html:11 non-blocking: the tracked edb02142 receipt is reported as converged without noting its own qualification verdict is unqualified (topology_read_does_not_admit_required_stationary_points), which matters because section 4 needs a qualified row before the certificate is re-committed.\nFINDING docs/evidence/fragments/topology-read-containment-and-rebank/certificate-300-trip-cap.html:3 non-blocking: lines 3, 6-7 and 11 restate values already committed in the sibling record certificate-drift-attribution.html without citing it, so the same numbers are now recorded twice and can drift.\n",
+  "review_run_id": "r-20261023T214505414178-review-of-certificate-300-trip-cap-9fe3b82740cb",
+  "reviewed_base_sha": "cb42790ebadbb31c8a2bb70fc998c3d5b6898468",
+  "reviewed_head_sha": "9fe3b82740cbbafdabef50b436dfc67fdb93ee96",
+  "reviewed_run_id": "r-20261023T205848353575-certificate-300-trip-cap",
+  "scores": {
+    "durability": 12,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T21:56:18+00:00",
+  "total": 99,
+  "verification": {
+    "arithmetic": {
+      "cpu_over_h200_first_trip_residual_ratio": 21.92842306393499,
+      "edb02142_minus_current_target_a": 133.7557451317407,
+      "tracked_minus_fresh_edb02142_target_a": 24525.899496729733
+    },
+    "basis": "recomputed from the reviewed run's own artefacts: cpu-current-part.json, gpu-current-part.json, gpu-earlier-part.json, the three row logs' SUMMARY lines, and the tracked part receipt read with git show edb02142ffacb695e8376ec7f7c31b13e8f5ba9c:docs/figures/gs-absolute-accuracy/solovev/production-route-parts/diverted-single-null-production-route-cells-300.json",
+    "carrier_comparison": {
+      "cpu_coordinates": 1536,
+      "cpu_unique_coordinates": 1536,
+      "h200_coordinates": 1547,
+      "h200_duplicate_rows": 11,
+      "h200_unique_coordinates": 1536,
+      "nearest_neighbour_max_m": 4.274211833313678e-12,
+      "sorted_unique_max_difference_m": 5.000000413701855e-12
+    },
+    "cpu_current": {
+      "accepted_newton_promotions": 0,
+      "attempted_newton_promotions": 1,
+      "krylov_action_qualification": "nonfinite_linear_action",
+      "target_current_a": 37174.65342635735,
+      "terminal_residual": 2.2640848763056183,
+      "termination": "active_set_settled",
+      "trip_count": 1
+    },
+    "h200_current": {
+      "accepted_newton_promotions": 29,
+      "attempted_newton_promotions": 48,
+      "first_trip_mask_difference_cells": 18,
+      "target_current_a": 37174.65342635673,
+      "terminal_residual": 0.07489864728918744,
+      "termination": "active_set_settled",
+      "trip_count": 12
+    },
+    "h200_edb02142_fresh": {
+      "target_current_a": 37308.40917148847,
+      "terminal_residual": 2.24835158221713,
+      "trip_count": 4
+    },
+    "tracked_edb02142_receipt": {
+      "converged": true,
+      "qualification": "unqualified",
+      "qualification_reason": "topology_read_does_not_admit_required_stationary_points",
+      "source_revision": null,
+      "target_current_a": 61834.308668218204,
+      "terminal_residual": 5.626976272072871e-15,
+      "trip_count": 2
+    }
+  }
+}

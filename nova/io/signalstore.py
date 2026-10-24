@@ -79,6 +79,21 @@ class SignalStore(ZarrStore):
         """
         return self.hash_attrs({"uri": self.uri, "dd_version": self.dd_version})
 
+    def legacy_group(self) -> str | None:
+        """Return the pre-convention group present in the store, if any.
+
+        A group written before the convention entered the key is keyed on the
+        source identity alone, so its presence means the stored fields declare
+        no convention.
+        """
+        if not self.is_store():
+            return None
+        legacy = self.legacy_cache_key
+        if legacy == self.cache_key:
+            return None
+        root = zarr.open_group(store=self._mapper(), mode="r")
+        return legacy if legacy in root else None
+
     def stale_group(self) -> str | None:
         """Return the pre-convention group when only it is present.
 
@@ -87,15 +102,31 @@ class SignalStore(ZarrStore):
         one does not, the stored fields' convention is unknown, so the entry is
         reported rather than served.
         """
-        if not self.is_store():
+        legacy = self.legacy_group()
+        if legacy is None or self.cached():
             return None
-        legacy = self.legacy_cache_key
-        if legacy == self.cache_key:
+        return legacy
+
+    def reclaim_legacy_group(self) -> str | None:
+        """Remove the pre-convention group the convention-keyed write supersedes.
+
+        A legacy group is refused on read while it is the only one present, but
+        once the convention-keyed group exists it can no longer be detected as
+        stale, so it would survive as an unreachable orphan. Removing it on
+        write keeps one group per source; the removed group is named so the
+        re-ingest reports what it reclaimed.
+        """
+        legacy = self.legacy_group()
+        if legacy is None or legacy == self.group:
             return None
-        root = zarr.open_group(store=self._mapper(), mode="r")
-        if self.group in root:
-            return None
-        return legacy if legacy in root else None
+        root = zarr.open_group(store=self._mapper(), mode="a")
+        del root[legacy]
+        print(
+            f"SignalStore: removed legacy group {legacy!r} for {self.uri!r} at "
+            f"DD {self.dd_version}; the convention-keyed group {self.group!r} "
+            f"(COCOS {self.cocos}) supersedes it"
+        )
+        return legacy
 
     def cached(self) -> bool:
         """Return True when this source identity already has a stored group."""
@@ -105,8 +136,9 @@ class SignalStore(ZarrStore):
         return self.group in root
 
     def write(self, data: xarray.Dataset):
-        """Store the signal dataset, replacing any existing group in place."""
+        """Store the signal dataset, replacing existing groups for the source."""
         self.data = data
+        self.reclaim_legacy_group()
         return self.store_overwrite()
 
     def read(self) -> xarray.Dataset:

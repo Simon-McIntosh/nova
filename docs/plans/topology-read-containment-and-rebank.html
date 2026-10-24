@@ -24,7 +24,7 @@
   <title>Topology read containment and rebank | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="12">
+<meta name="plan-version" content="13">
 <meta name="plan-modified" content="2026-10-24">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-impl" content="0.14">
@@ -184,7 +184,10 @@
     <div class="r-comment-body"><p>§4 attribution landed (merged <code>9552583e6</code> and <code>1e69853dd</code>): the historical 300-cell NaN was introduced at <code>c5e1498a</code> and removed by <code>8c2c4b278</code>; the 110-cell target moved at <code>a3fa8b9b</code> and <code>e227d3dc</code>. The repair half of §4 is met. The section stays open because the diverted 300-cell row qualifies at no measured revision or device: CPU at main stops after one trip when the first Krylov action is refused as non-finite (residual 2.264); the H200 at main reaches 0.0749 after 12 trips; <code>edb02142</code> on the H200 stops at 2.248 after four; the tracked <code>edb02142</code> receipt is itself unqualified. The CPU and H200 carriers also differ (1536 versus 1547 solve coordinates for the same 340 cells). Lead decision 2026-10-24: these forward-solve defects belong to <code>converged-forward-solve</code> and are handed to its coordinator; the certificate is re-committed with its floor once the row qualifies.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261023T214505414178-review-of-certificate-300-trip-cap-9fe3b82740cb" data-who="reckon-build" data-when="2026-10-23T22:06:20.210Z">
-    <div class="r-comment-body"><p>Independent review of r-20261023T205848353575-certificate-300-trip-cap reviewed at base cb42790ebadbb31c8a2bb70fc998c3d5b6898468 head 9fe3b82740cbbafdabef50b436dfc67fdb93ee96: scores goal_fidelity 18, evidence 15, scope_discipline 19, durability 12, fit 16, reuse 19; the landed fragment&#x27;s headline numbers reconcile with the run&#x27;s own part receipts and logs, and three non-blocking findings are recorded, the chief one being an unreproducible 7.4e-13 m nearest-neighbour claim at certificate-300-trip-cap.html:10 that the receipts&#x27; own coordinates do not reproduce (4.274211833313678e-12 m).</p></div>
+    <div class="r-comment-body"><p>Independent review of r-20261023T205848353575-certificate-300-trip-cap reviewed at base cb42790ebadbb31c8a2bb70fc998c3d5b6898468 head 9fe3b82740cbbafdabef50b436dfc67fdb93ee96: scores goal_fidelity 18, evidence 15, scope_discipline 19, durability 12, fit 16, reuse 19; the landed fragment's headline numbers reconcile with the run's own part receipts and logs, and three non-blocking findings are recorded, the chief one being an unreproducible 7.4e-13 m nearest-neighbour claim at certificate-300-trip-cap.html:10 that the receipts' own coordinates do not reproduce (4.274211833313678e-12 m).</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261023T205848353575-certificate-300-trip-cap" data-who="reckon-build" data-when="2026-10-23T21:44:54Z">
+    <div class="r-comment-body"><p>Recorded fresh CPU and H200 diverted 300-cell termination evidence at current source and a same-device earlier-source comparison; CPU residual 2.2640848763056183 after one trip, current H200 0.07489864728918744 after 12, earlier H200 2.24835158221713 after four; all are unqualified, CPU and H200 carriers have 1536 versus 1547 solve coordinates, and the tracked converged receipt is not reproduced.</p></div>
 </div>
 </section>
 </main>

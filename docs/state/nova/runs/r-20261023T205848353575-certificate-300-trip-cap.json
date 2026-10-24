@@ -1,0 +1,567 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "cb42790ebadbb31c8a2bb70fc998c3d5b6898468",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T205848353575-certificate-300-trip-cap/brief.md",
+    "sha256": "b1076a557b4b764ce81e46d84a273c8b3d2126b3d5a17112942fd0707957ef43"
+  },
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 18159488,
+      "cached_input_tokens_cumulative": 18159488,
+      "input_tokens": 18369204,
+      "input_tokens_cumulative": 18369204,
+      "output_tokens": 63217,
+      "output_tokens_cumulative": 63217,
+      "reasoning_output_tokens": 20141,
+      "reasoning_output_tokens_cumulative": 20141
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 12,
+    "files": 1,
+    "removed": 0
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "a40c261657a70f8ea277d13455a49b6917912ce6",
+    "ee1b73ce79c6e20b23ffbef7ca558261f6f9b9b9",
+    "9fe3b82740cbbafdabef50b436dfc67fdb93ee96"
+  ],
+  "completed_at": "2026-10-23T21:44:54Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-23T21:03:12Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "bash /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T205848353575-certificate-300-trip-cap/run_cpu.sh",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T205848353575-certificate-300-trip-cap/cpu-current.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.25,
+    "plan": "topology-read-containment-and-rebank",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-23T21:59:18.502123+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-23T20:59:16Z",
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": "2026-10-30T17:41:35Z",
+    "seconds_until_reset": 592938,
+    "state": "quiet",
+    "utilisation_pct": 5.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-23T20:59:16Z",
+    "read_at": "2026-10-23T20:59:18Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 5.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-23T21:44:54Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-10-23T21:44:54Z",
+        "resets_at": 1793382095,
+        "used_percent": 9.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T205848353575-certificate-300-trip-cap/manifest.md",
+  "member": "disposable-r-20261023T205848353575-certificate-300-trip-cap",
+  "model_key": "sol",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "certificate-300-trip-cap",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.cache/nova-contour-tree-wall/cert300-trip-brief.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T205848353575-certificate-300-trip-cap/brief.md",
+    "brief_sha256": "b1076a557b4b764ce81e46d84a273c8b3d2126b3d5a17112942fd0707957ef43",
+    "capability": {
+      "class": "general",
+      "requirements": {},
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1008,
+          "cached_input_tokens": 698976,
+          "input_tokens": 699986,
+          "output_tokens": 203,
+          "reasoning_output_tokens": 77,
+          "total_tokens": 700189,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "adb3a390-bdb2-4e2a-8e74-1e049c62c9fe",
+      "session_id": "adb3a390-bdb2-4e2a-8e74-1e049c62c9fe"
+    },
+    "done_when": "the manifest states whether the CPU non-convergence is a budget difference, a numerical difference, or a regression since edb02142, with the residuals that decide it",
+    "estimated_hours": null,
+    "goal": "An evidence fragment states why the diverted 300-cell certificate row ends after one trip at residual 2.264 on CPU at main, and whether the same row converges on the H200 at main",
+    "id": "certificate-300-trip-cap",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-23T20:59:16Z",
+      "read_at": "2026-10-23T20:59:18Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 5.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T205848353575-certificate-300-trip-cap/manifest.md",
+    "negative_control": "none: a measurement whose verdict is read from solver termination records, not from a check it writes",
+    "plan": "topology-read-containment-and-rebank",
+    "regenerate_paths": [],
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§4",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/evidence/fragments/topology-read-containment-and-rebank/certificate-300-trip.html",
+      "docs/evidence/fragments/topology-read-containment-and-rebank/certificate-300-trip-cap.html",
+      "docs/figures/topology-read-containment-and-rebank/certificate-300-trip-cap"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": {
+      "advisory": true,
+      "burn_multiple": null,
+      "derived": null,
+      "drain_hours": 168.0,
+      "effective_limit": null,
+      "elapsed_fraction": 0.01976996228835979,
+      "elapsed_hours": 3.3213536644444446,
+      "group": "codex-sub",
+      "limited_by": null,
+      "observed_at": "2026-10-23T21:00:51+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": "window too young to project: burn evidence is quantised too coarsely: 1.98% elapsed is below the 5% floor",
+      "remaining_budget": 0.94,
+      "remaining_windows": null,
+      "resets_at": "2026-10-30T17:41:35Z",
+      "state": "observed",
+      "utilisation": 0.06,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.010367999999999999,
+      "decided_by": "window",
+      "margin": 0.727132,
+      "name": "certificate-300-trip-cap",
+      "score": 0.7375,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.06
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.873192,
+        "observed_at": "2026-10-23T21:00:51+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-30T17:41:35Z",
+        "state": "observed",
+        "utilisation": 0.06,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": null,
+    "member": "codex",
+    "node": "certificate-300-trip-cap",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-23T21:00:51.873192+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "refuse",
+    "answering_model": null,
+    "backend": null,
+    "comment": "codex named: lead asked for codex on this work (session-scoped lift codex-sub-1792697471-f530ed); one H200 job per the compute hierarchy",
+    "confidence": null,
+    "decision_source": "refused",
+    "effort": null,
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 10.290373,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 3.4606,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 6.863049301238426,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": null,
+        "pace_allowance": null,
+        "prior_outcomes": null,
+        "reasons": [
+          "reserved-lane: codex is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        ],
+        "resets_at": "2026-10-30T17:41:35+00:00",
+        "stale": false,
+        "suits": "The lane's frontier model, strongest and slowest, about five times sol's token price. Suits deep or open-ended design, elevated or critical risk, and nodes that already failed on another model.",
+        "utilisation_pct": 5.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 10.290373,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 3.4606,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 6.863049301238426,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": null,
+        "pace_allowance": null,
+        "prior_outcomes": null,
+        "reasons": [
+          "reserved-lane: codex is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        ],
+        "resets_at": "2026-10-30T17:41:35+00:00",
+        "stale": false,
+        "suits": "The lane's fast, affordable model, about a twentieth of sol's token price. Suits well-defined, less difficult work: reviews, exact-spec implementation, tests and documentation.",
+        "utilisation_pct": 5.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 10.290373,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 3.4606,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 6.863049301238426,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 17,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": null,
+        "pace_allowance": null,
+        "prior_outcomes": null,
+        "reasons": [
+          "reserved-lane: codex is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        ],
+        "resets_at": "2026-10-30T17:41:35+00:00",
+        "stale": false,
+        "suits": "The lane default, a previous-generation general model. Suits guided implementation, tests and full reviews at standard or deep reasoning and moderate risk. About twenty times luna's token price and a fifth of astra's.",
+        "utilisation_pct": 5.0,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": "no-eligible-candidates; default-backend-ineligible",
+    "family": null,
+    "jev_latency_ms": 0.0,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 2002.837,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "questions": {},
+    "rendered_state": "{\"node\":{\"role\":\"implement\",\"spec_level\":\"guided\",\"capability\":{\"version\":\"1.0\",\"class\":\"general\",\"requirements\":{}},\"goal\":\"An evidence fragment states why the diverted 300-cell certificate row ends after one trip at residual 2.264 on CPU at main, and whether the same row converges on the H200 at main\",\"done_when\":\"the manifest states whether the CPU non-convergence is a budget difference, a numerical difference, or a regression since edb02142, with the residuals that decide it\",\"urgency\":{\"due\":null,\"seconds_to_due\":null,\"reason\":null},\"estimated_context\":50392,\"estimated_hours\":29.0,\"estimated_hours_source\":\"plan\",\"attempts\":0,\"write_path_count\":1,\"negative_control_declared\":false,\"serving_lanes\":[],\"serving_lane_count\":0,\"hold_waits_for\":null},\"orchestrator_comment\":\"codex named: lead asked for codex on this work (session-scoped lift codex-sub-1792697471-f530ed); one H200 job per the compute hierarchy\",\"candidates\":{},\"return_times\":{},\"lanes\":{},\"local_lane\":{\"admission\":\"unavailable\",\"expected_wait_s\":2856,\"expected_wait_profile_age_s\":1495.766453,\"running\":4,\"waiting\":2,\"queue_position\":3,\"headroom\":4,\"worker_slots\":17,\"tokens_per_second\":70.749,\"read_at\":\"2026-10-23T20:58:48.140037+00:00\"}}",
+    "rendered_token_estimate": 305,
+    "stage_ms": {
+      "budget-snapshot": 1678.763,
+      "context-estimate": 216.305,
+      "records": 1282.32,
+      "verdict-inputs": 1354.406
+    },
+    "template_digest": "cb9d48e7fca5878b52cc4affdedfdee9f5e04b929f720979b14d0d78b8456ced",
+    "usage": {}
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.25,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "9fe3b82740cbbafdabef50b436dfc67fdb93ee96",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "cb42790ebadbb31c8a2bb70fc998c3d5b6898468",
+    "reviewed_head_sha": "9fe3b82740cbbafdabef50b436dfc67fdb93ee96",
+    "scores": {
+      "durability": 12,
+      "evidence": 15,
+      "fit": 16,
+      "goal_fidelity": 18,
+      "reuse": 19,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 99
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261023T205848353575-certificate-300-trip-cap",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§4",
+  "session": "adb3a390-bdb2-4e2a-8e74-1e049c62c9fe",
+  "session_harness": "codex",
+  "session_id": "01a16a94-a036-79d3-9297-205d4a84e93d",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 18159488,
+    "cumulative_input_tokens": 36528692,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 83358
+  },
+  "time_budget": "60m",
+  "tool_steps": 168.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 2502,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-23T21:45:00Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-23T21:39:01Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [
+      {
+        "bytes": 43272763,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T205848353575-certificate-300-trip-cap/codex-home/cache"
+      },
+      {
+        "bytes": 28832101,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T205848353575-certificate-300-trip-cap/codex-home/plugins"
+      }
+    ],
+    "run_id": "r-20261023T205848353575-certificate-300-trip-cap",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 570,
+    "worker_pid": 339171
+  },
+  "worker_seconds": 2402,
+  "worker_seconds_source": "rollout_receipts",
+  "worktree_retention": null
+}

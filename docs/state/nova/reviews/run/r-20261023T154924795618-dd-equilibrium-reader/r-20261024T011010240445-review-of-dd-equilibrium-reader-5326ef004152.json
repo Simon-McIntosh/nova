@@ -1,0 +1,71 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "nova/imas/sample.py:420",
+    "apps/pulsedesign/simulator.py:62",
+    "nova/graphics/bokeh.py:124",
+    "nova/imas/equilibrium.py:580"
+  ],
+  "completed_at": "2026-10-24T01:24:18.911Z",
+  "dispatched_at": "2026-10-24T01:11:34Z",
+  "findings": [
+    {
+      "file": "nova/imas/metadata.py",
+      "line": "121",
+      "severity": "non-blocking",
+      "text": "the DD4 guard is unreachable and the repair it claims does not happen: ids.provenance.node.resize(1) at :117 runs before it, and the DD4 equilibrium IDS has no root provenance node at all (measured on 4.0.0, 4.1.0 and 4.1.1: hasattr(ids, 'provenance') is False, as it also is for pf_active, pulse_schedule and wall), so a DD4 write still raises AttributeError one line earlier; the guard is a no-op, and the fragment's sentence that DD4 'replaced it with a structured reference' misstates the schema, which drops the node rather than replacing the field."
+    },
+    {
+      "file": "nova/io/sourcemap.py",
+      "line": "812",
+      "severity": "non-blocking",
+      "text": "dd_equilibrium_factor states the write-direction rule a second time: nova/imas/pulsedesign.py:30 psi_write_factor already computes convention_transform(source=..., target=...).factor(PSI_LIKE) for the same purpose, and this diff neither calls it nor folds it into the new helper, so a change to what nova's own convention means now has to be made in two places."
+    },
+    {
+      "file": "nova/imas/metadata.py",
+      "line": "114",
+      "severity": "non-blocking",
+      "text": "this file, and nova/io/sourcemap.py:812, are outside the source node's declared write paths and its brief's Write-only list, which ended 'If a fix needs another file, stop and name it'; the coordinator's dispatch for this review names both files, so the expansion is visible, but the node widened its own fence rather than asking."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T154924795618-dd-equilibrium-reader/logs/final5-head-test_sample_write_convention.log",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "every gate log this round added names 'revision ef1643e613c02bc26abfd00a3191e2a86d05ab1f (+ uncommitted gate changes)', so the passing arm cannot be tied to the landed commit 6aaffa08a or to 5326ef004 from the log itself, and the manifest's after_suite (manifest.md:18) is the ten-file arm at fa01f7936, which predates both commits and contains no arm for the new test file or for metadata.py."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read both commits from ef1643e61 to 5326ef004 commit by commit; 6aaffa08a carries the sample writer's version-derived factor, the sourcemap helper, the DD4 metadata guard and the vacuum-field reuse, and 5326ef004 adds the fragment's write-seam section; six files, 224 insertions and 12 deletions, all code paths read against the landed blobs rather than the worktree.",
+    "done_when": "the source node carries no done_when of its own for these two commits; the manifest's after_suite at line 18 is the ten-file arm at fa01f7936 and predates both, so the change's own arms are the eight final5-head-*.log runs (test_sample_write_convention 5 passed, test_io_sourcemap 22 passed, test_dd_translator 9 passed, test_mastcocos 28 passed, test_database 28 passed 19 skipped, test_equilibrium_reader_cocos 6 passed 1 xfailed, test_internal_cocos_sites 8 passed, test_pulsedesign 5 skipped), every one ending in a bare EXIT=0 line, plus logs/negative-control-write-factor-removed.log at EXIT=1 failing both DD3 tests; no arm reaches nova/imas/metadata.py.",
+    "goal": "the section's goal is that the sample writer carries the reader's COCOS 17 rows back into the Data Dictionary entry it writes, and that the vacuum-field rule has one owner; nova/imas/sample.py:352-353 take psi_factor and dpsi_factor from nova.io.sourcemap.dd_equilibrium_factor and apply them at :363, :403 and :405, nova/imas/equilibrium.py:580 now calls getslice.vacuum_field, and no site states a sign of its own, while the DD4 metadata repair at nova/imas/metadata.py:121 is unreachable and so does not do what it says.",
+    "manifest": "read at manifest.md; status complete, nineteen commits listed, checkpoint at line 11 recording the write seam, sourcemap and metadata named openly in the landing line; baseline_suite and after_suite are single-line JSON with ten arms each at zero failures, but after_suite's revision fa01f7936 predates both reviewed commits and negative_control_log at line 22 points at the stale-cache control rather than the write-factor control this round added.",
+    "write_paths": "the source node's declared write paths at manifest.md:3 and the fence at prompt.txt:92-118 contain neither nova/io/sourcemap.py nor nova/imas/metadata.py, both of which the diff changes, and the brief's Write-only clause ends 'If a fix needs another file, stop and name it'."
+  },
+  "justifications": {
+    "durability": "tests/test_sample_write_convention.py:86-103 reddens on the recorded removal of the write factor, but nova/imas/metadata.py:117-121 has no test that fails if reverted, and tests/test_sample_write_convention.py:119-128 multiplies by the writer's own helper, resting on the hard-coded -1.0 assertions at :115-116 for its independence.",
+    "evidence": "the eight final5-head-*.log arms are EXIT=0 with zero failures and logs/negative-control-write-factor-removed.log reddens both DD3 tests, but every one of those logs is headed 'revision ef1643e61 (+ uncommitted gate changes)' rather than the landed commit, and no arm exercises nova/imas/metadata.py.",
+    "fit": "nova/io/sourcemap.py:812 sits beside dd_equilibrium_convention at :793 and follows its docstring idiom, DEFAULT_DD_VERSION at nova/imas/sample.py:22 is a plain module constant, and no name carries a plan label or ticket reference.",
+    "goal_fidelity": "nova/imas/sample.py:352-353 derive both factors from the version being written and apply them at :363, :403 and :405, and nova/imas/equilibrium.py:580 calls the one vacuum-field owner, but nova/imas/metadata.py:121 cannot reach the DD4 case it names so that part of the goal is only claimed.",
+    "reuse": "dd_equilibrium_factor extends sourcemap, the owner the plan names for per-quantity conversion, with version resolution and an arbitrary transformation, but nova/imas/pulsedesign.py:30 psi_write_factor still states the same write-direction rule on its own.",
+    "scope_discipline": "nova/io/sourcemap.py:812 and nova/imas/metadata.py:114 are outside the declared write paths at manifest.md:3 and outside the brief's Write-only list, which instructed a stop rather than an extra file."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the section's goal is that the sample writer carries the reader's COCOS 17 rows back into the Data Dictionary entry it writes, and that the vacuum-field rule has one owner; nova/imas/sample.py:352-353 take psi_factor and dpsi_factor from nova.io.sourcemap.dd_equilibrium_factor and apply them at :363, :403 and :405, nova/imas/equilibrium.py:580 now calls getslice.vacuum_field, and no site states a sign of its own, while the DD4 metadata repair at nova/imas/metadata.py:121 is unreachable and so does not do what it says.\nVERDICT done_when: the source node carries no done_when of its own for these two commits; the manifest's after_suite at line 18 is the ten-file arm at fa01f7936 and predates both, so the change's own arms are the eight final5-head-*.log runs (test_sample_write_convention 5 passed, test_io_sourcemap 22 passed, test_dd_translator 9 passed, test_mastcocos 28 passed, test_database 28 passed 19 skipped, test_equilibrium_reader_cocos 6 passed 1 xfailed, test_internal_cocos_sites 8 passed, test_pulsedesign 5 skipped), every one ending in a bare EXIT=0 line, plus logs/negative-control-write-factor-removed.log at EXIT=1 failing both DD3 tests; no arm reaches nova/imas/metadata.py.\nVERDICT write_paths: the source node's declared write paths at manifest.md:3 and the fence at prompt.txt:92-118 contain neither nova/io/sourcemap.py nor nova/imas/metadata.py, both of which the diff changes, and the brief's Write-only clause ends 'If a fix needs another file, stop and name it'.\nVERDICT manifest: read at manifest.md; status complete, nineteen commits listed, checkpoint at line 11 recording the write seam, sourcemap and metadata named openly in the landing line; baseline_suite and after_suite are single-line JSON with ten arms each at zero failures, but after_suite's revision fa01f7936 predates both reviewed commits and negative_control_log at line 22 points at the stale-cache control rather than the write-factor control this round added.\nVERDICT diff: read both commits from ef1643e61 to 5326ef004 commit by commit; 6aaffa08a carries the sample writer's version-derived factor, the sourcemap helper, the DD4 metadata guard and the vacuum-field reuse, and 5326ef004 adds the fragment's write-seam section; six files, 224 insertions and 12 deletions, all code paths read against the landed blobs rather than the worktree.\nCALL_SITES: nova/imas/sample.py:420, apps/pulsedesign/simulator.py:62, nova/graphics/bokeh.py:124, nova/imas/equilibrium.py:580\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: nova/imas/sample.py:352-353 derive both factors from the version being written and apply them at :363, :403 and :405, and nova/imas/equilibrium.py:580 calls the one vacuum-field owner, but nova/imas/metadata.py:121 cannot reach the DD4 case it names so that part of the goal is only claimed.\nSCORE evidence: 13\nJUSTIFICATION evidence: the eight final5-head-*.log arms are EXIT=0 with zero failures and logs/negative-control-write-factor-removed.log reddens both DD3 tests, but every one of those logs is headed 'revision ef1643e61 (+ uncommitted gate changes)' rather than the landed commit, and no arm exercises nova/imas/metadata.py.\nSCORE scope_discipline: 9\nJUSTIFICATION scope_discipline: nova/io/sourcemap.py:812 and nova/imas/metadata.py:114 are outside the declared write paths at manifest.md:3 and outside the brief's Write-only list, which instructed a stop rather than an extra file.\nSCORE durability: 14\nJUSTIFICATION durability: tests/test_sample_write_convention.py:86-103 reddens on the recorded removal of the write factor, but nova/imas/metadata.py:117-121 has no test that fails if reverted, and tests/test_sample_write_convention.py:119-128 multiplies by the writer's own helper, resting on the hard-coded -1.0 assertions at :115-116 for its independence.\nSCORE fit: 16\nJUSTIFICATION fit: nova/io/sourcemap.py:812 sits beside dd_equilibrium_convention at :793 and follows its docstring idiom, DEFAULT_DD_VERSION at nova/imas/sample.py:22 is a plain module constant, and no name carries a plan label or ticket reference.\nSCORE reuse: 10\nJUSTIFICATION reuse: dd_equilibrium_factor extends sourcemap, the owner the plan names for per-quantity conversion, with version resolution and an arbitrary transformation, but nova/imas/pulsedesign.py:30 psi_write_factor still states the same write-direction rule on its own.\nFINDING nova/imas/metadata.py:121 non-blocking: the DD4 guard is unreachable because ids.provenance.node.resize(1) at :117 runs first and DD4's equilibrium IDS has no root provenance node (measured on 4.0.0, 4.1.0 and 4.1.1), so a DD4 write still raises AttributeError one line earlier; the change is a no-op, it has no test, and the fragment's claim that DD4 replaced the source list with a structured reference misstates a schema that drops the node.\nFINDING nova/io/sourcemap.py:812 non-blocking: dd_equilibrium_factor states the write-direction rule that nova/imas/pulsedesign.py:30 psi_write_factor already owns, without calling or subsuming it, so the rule now has two statements to keep in step.\nFINDING nova/imas/metadata.py:114 non-blocking: this file, and nova/io/sourcemap.py:812, are outside the source node's declared write paths and its brief's Write-only list, which ended 'If a fix needs another file, stop and name it; the coordinator's dispatch for this review names both files, so the expansion is visible, but the node widened its own fence rather than asking.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T154924795618-dd-equilibrium-reader/logs/final5-head-test_sample_write_convention.log:1 non-blocking: every arm this round records carries 'revision ef1643e61 (+ uncommitted gate changes)' rather than the landed commit, and the manifest's after_suite is the fa01f7936 arm which predates both commits, so the receipt cannot tie the green result to the revision being promoted and covers none of the changed metadata path.\n",
+  "review_run_id": "r-20261024T011010240445-review-of-dd-equilibrium-reader-5326ef004152",
+  "reviewed_base_sha": "ef1643e613c02bc26abfd00a3191e2a86d05ab1f",
+  "reviewed_head_sha": "5326ef004152de85dfd58e244720847dae2b4a6a",
+  "reviewed_run_id": "r-20261023T154924795618-dd-equilibrium-reader",
+  "scores": {
+    "durability": 14,
+    "evidence": 13,
+    "fit": 16,
+    "goal_fidelity": 15,
+    "reuse": 10,
+    "scope_discipline": 9
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T01:25:27.312143+00:00",
+  "total": 77
+}

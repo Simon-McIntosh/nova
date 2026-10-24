@@ -24,7 +24,7 @@
   <title>DD COCOS Ingest | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="110">
+<meta name="plan-version" content="111">
 <meta name="plan-modified" content="2026-10-25">
 <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;dd-cocos-ingest#s1&quot;],&quot;s3&quot;:[&quot;dd-cocos-ingest#s2&quot;],&quot;s4&quot;:[&quot;dd-cocos-ingest#s3&quot;],&quot;s5&quot;:[&quot;dd-cocos-ingest#s1&quot;,&quot;dd-cocos-ingest#s2&quot;]}">
 </head>
@@ -248,6 +248,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261024T205636433921-review-of-internal-convention-name-4f1989319667" data-who="reckon-build" data-when="2026-10-24T22:16:47.940Z">
     <div class="r-comment-body"><p>review of internal-convention-name at head 4f1989319667e8bf5d02bbfa2a66158035b8b293 (base 48d7adda68b5e86d26f5c896c8a47e2ead865be8): total 99/120, one blocking finding — seven of eleven base-arm logs measured the head worktree rather than the base archive, so the done-when's delta clause is unmeasured for the cache and sourcemap test files — plus two non-blocking record-accuracy findings; the landed change itself is sound, with the b0 read delegated to getslice and the two convention names reading their owner.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261024T195259475022-ids-writer-factor" data-who="reckon-build" data-when="2026-10-24T20:40:06.506Z">
+    <div class="r-comment-body"><p>The pulsedesign writer&#x27;s three psi sites are exercised by tests/test_pulsedesign_write_convention.py with no database (4 passed), its literal DD version is replaced by sample.DEFAULT_DD_VERSION, and the wall read gains a passing guard (tests/test_equilibrium_wall_dd_version.py, 2 passed); every file importing the three modules passed at base and head in fresh processes (delta zero, 8 head files all exit 0). Repairing the writer exposed a live defect: the attrs_0d loop rewrote psi_axis and psi_boundary unfactored, so a DD3 entry stored the source convention.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261023T132220183554-review-of-edge-consistency-measure-9b6422bb0416" data-who="reckon-build" data-when="2026-10-23T14:19:26.357Z">
     <div class="r-comment-body"><p>Independent review of run r-20261023T123603187543-edge-consistency-measure, read at base e69f4b60af04df8259ef914dee3136a3c55f6cb2 and head 9b6422bb0416e2a358b91c9389c1810d863b1bd0. All five checklist items carry a verdict and all six dimensions a score: goal_fidelity 18, evidence 17, scope_discipline 19, durability 15, fit 16, reuse 5. Five non-blocking findings, no blocking finding: the measure duplicates the structured-grid current-density read nova/equilibrium/map_extraction.py:132 already owns (agrees to 4.0e-16 relative rather than extending it), the inside-is-None default at nova/imas/edge_consistency.py:166 scores psi_norm &lt;= 1 only while the docstring promises 0 &lt;= psi_norm &lt;= 1 (inert on the analytic fixture), tests/test_edge_consistency.py:196 compares two runs of the same code, the reviewed manifest's after_suite.log_path at line 19 names a directory rather than a log file, and every head-arm gate log of the reviewed run opens with a revision header naming the base commit while the negative-control log's command line is prose. The landed change is sound: the lift is arithmetic-identical for the parity chain, the order fit is 1.97 against the stencil's 2.00, the perturbation is detected and the band-only negative control reddens three tests the head arm does not fail.</p></div>

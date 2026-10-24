@@ -392,56 +392,41 @@ def _cell_banked_current_moments(
     )
 
 
-class NonFiniteCellMomentError(RuntimeError):
-    """Report cells whose integrated current moment is not finite."""
-
-    def __init__(self, indices):
-        self.indices = tuple(int(index) for index in indices)
-        shown = list(self.indices[:16])
-        more = f" (+{len(self.indices) - 16} more)" if len(self.indices) > 16 else ""
-        super().__init__(
-            f"integrated current moment is non-finite at cell indices {shown}{more}"
-        )
-
-
-def qualify_cell_current_moments(
+def cell_moment_nonfinite(
     moments: CellCurrentMoments,
-) -> tuple[CellCurrentMoments, tuple[int, ...]]:
-    """Zero a non-finite cell's moments and name the offending cell indices.
+) -> tuple[jax.Array, tuple[int, ...]]:
+    """Return a per-cell non-finite mask over every moment component.
 
-    One cell's non-finite derivative would otherwise enter the total current
-    and the normalisation amplitude, which multiplies every cell, so a local
-    singularity would be reported as a uniform failure. Each cell is qualified
-    here before either reduction. Indices are returned when the moments are
-    concrete; a traced evaluation names none because a tracer carries no value.
+    The mask is an output of the step rather than a repair applied inside it:
+    a non-finite component is left exactly as it is, so it reaches the residual
+    instead of being replaced by a zero that reads as a valid cell. Every
+    component is tested, not ``cell_current`` alone, because a cell can carry a
+    finite total current and a divergent moment derivative. Indices are returned
+    only when the mask is concrete; a traced mask names none, and the host
+    refuses from the mask itself.
     """
-    current = jnp.asarray(moments.cell_current)
-    nonfinite = ~jnp.isfinite(current)
-    qualified = CellCurrentMoments(
-        *(
-            jnp.where(nonfinite, jnp.zeros_like(jnp.asarray(value)), jnp.asarray(value))
-            for value in moments
-        )
-    )
+    mask = jnp.zeros_like(jnp.asarray(moments.cell_current), dtype=bool)
+    for value in moments:
+        mask = mask | ~jnp.isfinite(jnp.asarray(value))
     indices: tuple[int, ...] = ()
-    if not isinstance(nonfinite, jax.core.Tracer):
-        indices = tuple(int(index) for index in np.flatnonzero(np.asarray(nonfinite)))
-    return qualified, indices
+    if not isinstance(mask, jax.core.Tracer):
+        indices = tuple(int(index) for index in np.flatnonzero(np.asarray(mask)))
+    return mask, indices
 
 
-def qualified_cell_current_moments(moments: CellCurrentMoments) -> CellCurrentMoments:
-    """Return the qualified moments, refusing by index when a cell is non-finite.
+def refuse_non_finite_cell_moments(
+    moments: CellCurrentMoments,
+) -> jax.Array:
+    """Return the non-finite mask, refusing by index on a concrete state.
 
-    A concrete state carries cell values, so a non-finite cell is a defect the
-    solve must name rather than erase: the indices are reported and the caller
-    stops. A traced state carries no value to judge, so the qualification is
-    carried forward there and the offending cell is reported by the concrete
-    evaluation that reads the same state.
+    A concrete state carries cell values, so a non-finite component is refused
+    by name at the boundary that reads it. A traced state has no value to judge,
+    so the mask is carried out and the values are left untouched.
     """
-    qualified, indices = qualify_cell_current_moments(moments)
+    mask, indices = cell_moment_nonfinite(moments)
     if indices:
-        raise NonFiniteCellMomentError(indices)
-    return qualified
+        raise CurrentNormalisationError(float("nan"), indices)
+    return mask
 
 
 def _cell_banked_field_integrals(
@@ -3534,9 +3519,8 @@ class ForwardFluxOperator:
     def _internal_on_partition(self, psi, frozen, target_current=None):
         """Return the plasma image while retaining one trip's partition."""
         partition = self._partition_for_state(psi, frozen)
-        moments = qualified_cell_current_moments(
-            self._current_moments_on_partition(psi, partition)
-        )
+        moments = self._current_moments_on_partition(psi, partition)
+        refuse_non_finite_cell_moments(moments)
         if target_current is not None:
             amplitude = self.current_normalisation_amplitude(
                 target_current, jnp.sum(moments.cell_current)
@@ -3667,27 +3651,45 @@ class ForwardFluxOperator:
         return CellCurrentMoments(*(amplitude * value for value in moments))
 
     @staticmethod
-    def current_normalisation_amplitude(target_current, unscaled_current) -> jax.Array:
-        """Return a guarded declared-current amplitude without clipping.
+    def current_normalisation_admissible(target_current, unscaled_current) -> jax.Array:
+        """Return whether a declared-current amplitude is admissible.
 
-        Admissibility is established by products and magnitude comparisons
-        before the division. Eager evaluations raise so an accepted state can
-        never masquerade as normalised; traced evaluations return a non-finite
-        amplitude which the solver rejects rather than clipping to a bound.
+        The flag is the traced signal an inadmissible amplitude carries: it is
+        an output of the step, so the host can refuse by name from it rather
+        than inferring the refusal from a non-finite amplitude that would
+        otherwise scale every cell.
         """
         target = jnp.asarray(target_current)
         unscaled = jnp.asarray(unscaled_current, dtype=target.dtype)
         magnitude = jnp.abs(unscaled)
         lower, upper = SCALAR_CURRENT_AMPLITUDE_BAND
-        admissible = (
+        return (
             jnp.isfinite(target)
             & jnp.isfinite(unscaled)
             & (target * unscaled > 0.0)
             & (jnp.abs(target) >= lower * magnitude)
             & (jnp.abs(target) <= upper * magnitude)
         )
+
+    @staticmethod
+    def current_normalisation_amplitude(target_current, unscaled_current) -> jax.Array:
+        """Return a guarded declared-current amplitude without clipping.
+
+        Admissibility is established by products and magnitude comparisons
+        before the division. Eager evaluations raise so an accepted state can
+        never masquerade as normalised; a traced evaluation returns zero and
+        carries the refusal through ``current_normalisation_admissible``, so an
+        inadmissible amplitude never scales a cell.
+        """
+        target = jnp.asarray(target_current)
+        unscaled = jnp.asarray(unscaled_current, dtype=target.dtype)
+        admissible = ForwardFluxOperator.current_normalisation_admissible(
+            target, unscaled
+        )
         safe_unscaled = jnp.where(admissible, unscaled, jnp.ones_like(unscaled))
-        amplitude = jnp.where(admissible, target / safe_unscaled, jnp.nan)
+        amplitude = jnp.where(
+            admissible, target / safe_unscaled, jnp.zeros_like(target)
+        )
         if not isinstance(admissible, jax.core.Tracer) and not bool(admissible):
             target_value = float(target)
             unscaled_value = float(unscaled)
@@ -3704,9 +3706,8 @@ class ForwardFluxOperator:
         self, psi, target_current, requested_class=None
     ) -> tuple[CellCurrentMoments, jax.Array]:
         """Return exact clipped moments and their declared-current amplitude."""
-        moments = qualified_cell_current_moments(
-            self.cell_current_moments(psi, requested_class)
-        )
+        moments = self.cell_current_moments(psi, requested_class)
+        refuse_non_finite_cell_moments(moments)
         amplitude = self.current_normalisation_amplitude(
             target_current, jnp.sum(moments.cell_current)
         )
@@ -3727,9 +3728,8 @@ class ForwardFluxOperator:
     ):
         """Return one clipped partition, its scaled moments, and amplitude."""
         partition = self._support_partition(psi, requested_class)
-        moments = qualified_cell_current_moments(
-            self._partitioned_current_moments(partition)
-        )
+        moments = self._partitioned_current_moments(partition)
+        refuse_non_finite_cell_moments(moments)
         amplitude = self.current_normalisation_amplitude(
             target_current, jnp.sum(moments.cell_current)
         )

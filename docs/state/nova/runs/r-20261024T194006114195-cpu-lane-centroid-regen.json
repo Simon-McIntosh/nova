@@ -1,0 +1,429 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex",
+  "base_sha": "48d7adda68b5e86d26f5c896c8a47e2ead865be8",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T194006114195-cpu-lane-centroid-regen/brief.md",
+    "sha256": "505cffb38c4d7f411514656a7436f749eb6da1df90ff6d654350c3aa3cd0dc9a"
+  },
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 7364992,
+      "cached_input_tokens_cumulative": 7364992,
+      "input_tokens": 7499284,
+      "input_tokens_cumulative": 7499284,
+      "output_tokens": 26099,
+      "output_tokens_cumulative": 26099,
+      "reasoning_output_tokens": 9218,
+      "reasoning_output_tokens_cumulative": 9218
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 34911,
+    "files": 7,
+    "removed": 7510
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "754e1de179dcd49314f2489ee1fde295011f574f",
+    "30626a454cd709b1491bbd1df2479e35ade4471d"
+  ],
+  "completed_at": "2026-10-24T20:03:49Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-24T19:41:44Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/adb3a390-bdb2-4e2a-8e74-1e049c62c9fe/cpu-lane-centroid-regen /home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T194006114195-cpu-lane-centroid-regen/panel_gate.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T194006114195-cpu-lane-centroid-regen/panel-gate.log"
+  },
+  "impl_move": {
+    "at_complete": 0.95,
+    "at_dispatch": 0.95,
+    "plan": "separatrix-spline-extraction",
+    "reason": "regenerated evidence; no section changes state",
+    "verdict": "waived"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 2.2634488510601893,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-10-27T10:24:59Z, which is after this node's 3600s horizon ending 2026-10-24T20:40:17.368300+00:00",
+    "horizon_ends_at": "2026-10-24T20:40:17.368300+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-24T19:40:15Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-27T10:24:59Z",
+    "resets_at": "2026-10-30T17:41:35Z",
+    "seconds_until_reset": 511279,
+    "state": "quiet",
+    "utilisation_pct": 35.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-24T19:40:15Z",
+    "read_at": "2026-10-24T19:40:17Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 35.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-24T20:03:49Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-10-24T20:03:49Z",
+        "resets_at": 1793382095,
+        "used_percent": 36.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T194006114195-cpu-lane-centroid-regen/manifest.md",
+  "member": "disposable-r-20261024T194006114195-cpu-lane-centroid-regen",
+  "model_key": "sol",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "cpu-lane-centroid-regen",
+  "node_definition": {
+    "after": [],
+    "brief": "/home/ITER/mcintos/.cache/nova-contour-tree-wall/cpu-lane-regen-brief.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T194006114195-cpu-lane-centroid-regen/brief.md",
+    "brief_sha256": "505cffb38c4d7f411514656a7436f749eb6da1df90ff6d654350c3aa3cd0dc9a",
+    "capability": {
+      "class": "general",
+      "requirements": {},
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1078,
+          "cached_input_tokens": 800349,
+          "input_tokens": 801429,
+          "output_tokens": 1310,
+          "reasoning_output_tokens": 166,
+          "total_tokens": 802739,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "adb3a390-bdb2-4e2a-8e74-1e049c62c9fe",
+      "session_id": "adb3a390-bdb2-4e2a-8e74-1e049c62c9fe"
+    },
+    "done_when": "the gate log reports 0 clipped and 0 overlapping labels across every regenerated panel SVG rendered to PNG",
+    "estimated_hours": null,
+    "goal": "The MAST centroid CPU-lane state and its panel figures are regenerated at current main in the current panel schema",
+    "id": "cpu-lane-centroid-regen",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-24T19:40:15Z",
+      "read_at": "2026-10-24T19:40:17Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 35.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T194006114195-cpu-lane-centroid-regen/manifest.md",
+    "negative_control": "none: the regeneration's check is that the base-revision state fails to load and the head state loads, read from the panels exit status",
+    "plan": "separatrix-spline-extraction",
+    "regenerate_paths": [],
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§4",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/figures/mast-centroid-capability/cpu-lane",
+      "docs/evidence/fragments/separatrix-spline-extraction/cpu-lane-centroid-regen.html",
+      "docs/figures/separatrix-spline-extraction/cpu-lane-centroid-regen"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "outside_scope_paths": [
+    "TMPDIR=/tmp",
+    "/tmp."
+  ],
+  "pace": {
+    "allowance": {
+      "advisory": true,
+      "burn_multiple": 2.2618989758049866,
+      "derived": 0.17021096172652117,
+      "drain_hours": 168.0,
+      "effective_limit": 0.17021096172652117,
+      "elapsed_fraction": 0.15473723793320104,
+      "elapsed_hours": 25.995855972777775,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-24T19:41:20+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.65,
+      "remaining_windows": null,
+      "resets_at": "2026-10-30T17:41:35Z",
+      "state": "observed",
+      "utilisation": 0.35,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.28174999999999994,
+      "decided_by": "window",
+      "margin": 0.4557500000000001,
+      "name": "cpu-lane-centroid-regen",
+      "score": 0.7375,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.35
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.081502,
+        "observed_at": "2026-10-24T19:41:20+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-30T17:41:35Z",
+        "state": "observed",
+        "utilisation": 0.35,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": null,
+    "member": "codex",
+    "node": "cpu-lane-centroid-regen",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-24T19:41:20.081502+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "codex named: lead asked for codex on this work (session-scoped lift codex-sub-1792697471-f530ed); lead asked to regenerate this figure",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:capability",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.812,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 585.782,
+      "context-estimate": 49.573,
+      "records": 416.998,
+      "verdict-inputs": 266.195
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.95,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "30626a454cd709b1491bbd1df2479e35ade4471d",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "48d7adda68b5e86d26f5c896c8a47e2ead865be8",
+    "reviewed_head_sha": "30626a454cd709b1491bbd1df2479e35ade4471d",
+    "scores": {
+      "durability": 7,
+      "evidence": 17,
+      "fit": 18,
+      "goal_fidelity": 19,
+      "reuse": 20,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 100
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261024T194006114195-cpu-lane-centroid-regen",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§4",
+  "session": "adb3a390-bdb2-4e2a-8e74-1e049c62c9fe",
+  "session_harness": "codex",
+  "session_id": "01a16f6f-45f3-7670-89cf-f0e94a51c97e",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 7364992,
+    "cumulative_input_tokens": 14864276,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 35317
+  },
+  "time_budget": "60m",
+  "tool_steps": 131.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 1325,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-24T20:03:53Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-24T19:41:51Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [
+      {
+        "bytes": 44830702,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T194006114195-cpu-lane-centroid-regen/codex-home/cache"
+      },
+      {
+        "bytes": 28832101,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T194006114195-cpu-lane-centroid-regen/codex-home/plugins"
+      }
+    ],
+    "run_id": "r-20261024T194006114195-cpu-lane-centroid-regen",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 344,
+    "worker_pid": 3114127
+  },
+  "worker_seconds": 1325,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

@@ -94,18 +94,33 @@ under the run directory and the run log <code>row-tip.log</code>.</p>
 component of a non-finite cell and returns the offending indices; it is
 applied before each sum and before the normalisation amplitude, in
 <code>_internal_on_partition</code>, <code>normalised_current_moments</code>
-and <code>normalised_current_moments_and_observation</code>.
-<code>ForwardFluxOperator.cell_moment_receipt</code> returns those indices for
-a concrete state. A non-finite total reaches the existing
-<code>CurrentNormalisationError</code>, which names the normalisation instead
-of returning an amplitude that scales every cell.</p>
+and <code>normalised_current_moments_and_observation</code>. A non-finite total
+reaches the existing <code>CurrentNormalisationError</code>, which names the
+normalisation instead of returning an amplitude that scales every cell.</p>
+<p id="cell-moment-derivative-nan-refusal">Commit <code>ba1741440</code> supplies the half that was missing. Those three
+paths bound the returned indices to <code>_indices</code> and discarded them,
+so a non-finite cell was zeroed and the solve continued silently, and the
+error class that names these cells was raised nowhere. The paths now go
+through <code>qualified_cell_current_moments</code>: a concrete state raises
+<code>NonFiniteCellMomentError</code>, whose <code>indices</code> attribute and
+message name the offending cells, and only a traced state — where no value
+exists to judge — carries the qualified moments forward. The accessor that
+returned those indices without a caller is removed; its work is the refusal.
+Three tests cover the three behaviours: a concrete non-finite state refuses at
+<code>(103,)</code>, a finite state passes unchanged, and a traced state
+qualifies without raising. Reverting the refusal in a copy of the commit makes
+the first of them fail (1 failed, 7 passed, <code>EXIT=1</code>,
+<code>negative-control-refusal.log</code>), and the CPU row is unchanged by the
+repair at residual <code>5.626976272072871e-15</code> in
+<code>2</code> trips (<code>row-repair.log</code>).</p>
 
 <h2 id="cell-moment-derivative-nan-gate">Gate</h2>
 <p id="cell-moment-derivative-nan-gate-facts">The unit gate is <code>tests/test_cell_moment_derivative_finite.py</code>,
-5 tests, passing in <code>gate-unit.log</code>: the planted NaN is named at
-<code>(103,)</code> with no other cell changed, the qualified total is finite,
-the unqualified total makes the amplitude refuse by name, and the arc-root
-tangent is finite across a discriminant seam.</p>
+8 tests, passing in <code>gate-unit-repair.log</code>: the planted NaN is named
+at <code>(103,)</code> with no other cell changed, the qualified total is
+finite, the unqualified total makes the amplitude refuse by name, the concrete
+solve path refuses by index while a finite and a traced state do not, and the
+arc-root tangent is finite across a discriminant seam.</p>
 <p id="cell-moment-derivative-nan-gate-sweep">The import sweep runs every file that imports <code>separatrix_clip</code>,
 <code>source</code> or <code>forward_operator</code>, plus the certificate tests,
 each in its own fresh process at the tip and at the base, from a git archive of

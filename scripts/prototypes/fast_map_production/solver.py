@@ -670,6 +670,15 @@ def run(args):
             )
             compile_ms = 1000 * (perf_counter() - compile_start)
             result.setdefault("factor_executable_bytes", generated_bytes(products))
+            width = columns[: args.block].shape[0]
+
+            def product(vector, *operands):
+                """Apply the batched program to one direction, as a batch of one."""
+                single = jnp.atleast_2d(vector)
+                if single.shape[0] < width:
+                    single = jnp.pad(single, ((0, width - single.shape[0]), (0, 0)))
+                return products(single, *operands)[0]
+
             blocks = []
             for start in range(0, rhs.size, args.block):
                 stop = min(start + args.block, rhs.size)

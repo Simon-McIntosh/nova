@@ -1,0 +1,83 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_source": "logs/baseline-suite.log (revision 06ebc1bf8) ends '36 passed, 1 skipped in 191.13s' with EXIT=0 and logs/after-suite.log (revision a1fde04cb) ends '39 passed, 2 skipped in 227.04s' with EXIT=0; the manifest records failure_count 0 and failure_ids [] for both arms, so the declared suite delta adds no failing id. The head re-runs I could not find a log for were verified independently for this review: a git archive of e3de3c290 run with PYTHONPATH at that tree gives tests/test_biotpolysection.py::test_preclip_samples_come_from_the_verified_authored_generator and tests/test_carrier_vertex_identity.py as '5 passed, 1 skipped in 48.14s' EXIT=0 (review-verify-head.log), so the round-1 biotpolysection delta is repaired at the reviewed head.",
+  "call_site_count": 5,
+  "call_sites": [
+    "nova/equilibrium/forward.py:658 MomentGeometry.from_cells",
+    "nova/biot/plasmagrid.py:270 PlasmaGrid._build_direct_samples -> _index_sampling_vertices -> lattice_vertex_index",
+    "scripts/analytic_oracle_fixtures/measure.py:141 MomentGeometry.from_cells",
+    "scripts/analytic_oracle_fixtures/measure.py:669 MomentGeometry.from_cells",
+    "benchmarks/solovev_certificate.py:124 cerfon_freidberg_single_null"
+  ],
+  "completed_at": "2026-10-24T12:01:11.909Z",
+  "dispatched_at": "2026-10-24T11:50:52Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/stencil_mesh.py",
+      "line": "320",
+      "severity": "non-blocking",
+      "text": "non-blocking: the plan's repair names identification of a lattice vertex by its (cell, slot) 'reduced through the hex adjacency the merge already receives (PlasmaGrid.loop_neighbour_vertices)', and this function identifies it instead by coordinate proximity within a spatial hash 1e-9 of the lattice scale wide, reading no adjacency; the device-independence measure is met (1075 sample vertices, node_number 1536 on CPU, H200 and the perturbed wall) and the substitution is recorded in the manifest, but the plan text now describes a mechanism the code does not use, so the coordinator must amend the plan's repair bullet or ratify the deviation."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/carrier-vertex-identity.html",
+      "line": "164",
+      "severity": "non-blocking",
+      "text": "non-blocking: the importing-file delta paragraph explains the test_biotpolysection.py failure as 'a vertex is now the set of slots that share it through the adjacency the mesh declares', which is the mechanism commit 1b6bd6bf3 removed; at the reviewed head that test passes (1 passed alongside the carrier file, EXIT=0, review-verify-head.log), so the paragraph attributes a superseded cause to a delta that no longer exists."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/carrier-vertex-identity.html",
+      "line": "75",
+      "severity": "non-blocking",
+      "text": "non-blocking: the three-arm table is captioned at revision a1fde04cb and its H200 column comes from receipts/h200-repair.json, written by logs/h200-identity-receipt.log at revision 42f0dbaa5; both predate 1b6bd6bf3, which replaced the identity rule, so no H200 build of the reviewed head exists and done_when (1)'s H200 arm measures a superseded implementation."
+    },
+    {
+      "file": "logs/after-suite.log",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the manifest's after_suite arm is recorded at revision a1fde04cb, but the identity rule was rewritten in 1b6bd6bf3 and the thread-count receipt changed in d189a950d, so the gate the record calls the after arm does not cover the reviewed head; the head is covered only by per-file repair2 logs for six of the eleven importers plus the two files this review re-ran."
+    },
+    {
+      "file": "nova/equilibrium/stencil_mesh.py",
+      "line": "408",
+      "severity": "non-blocking",
+      "text": "non-blocking: when a group's spread reaches the merge width the rejection resets parent[index] = index for every member, which un-merges pairs that were legitimately within reach of each other, not only the over-wide link that joined the chain; a chain of coincident-or-near slots spanning the width therefore loses every merge it contained rather than just the suspect one."
+    },
+    {
+      "file": "tests/test_carrier_vertex_identity.py",
+      "line": "256",
+      "severity": "non-blocking",
+      "text": "non-blocking: the determinism arm compares two solves of the same code at 1 and 4 BLAS threads and no recorded measurement shows it reddening if ordered_solve is replaced by np.linalg.solve; the worker's control (logs/determinism-control-library-solve.log) compares the two implementations on one host and shows the digest moving, but that is not the thread-count assertion, so the assertion states the done_when's test without a demonstrated failure condition."
+    },
+    {
+      "file": "nova/biot/plasmagrid.py",
+      "line": "249",
+      "severity": "non-blocking",
+      "text": "non-blocking: _index_sampling_vertices still accepts and documents a 'tolerance' argument as the support round-off bound but never reads it, while callers at :270 and tests/test_biotpolysection.py:734 still compute and pass one, so the signature advertises a width the identity no longer uses."
+    },
+    {
+      "file": "tests/test_carrier_vertex_identity.py",
+      "line": "157",
+      "severity": "non-blocking",
+      "text": "non-blocking: running ruff on the file at the reviewed head reports 'E501 Line too long (94 > 88)'; tests/ is excluded from the project's default lint lane so the worker's gate never sees it, and the line is in the new vertex-count instrument."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261024T115014988282-review-of-carrier-vertex-identity-e3de3c290cd7",
+  "reviewed_base_sha": "06ebc1bf88436cc9c2f2f40129fa3ce753788e78",
+  "reviewed_head_sha": "e3de3c290cd707986419863f62dfa54c81b34cfe",
+  "reviewed_run_id": "r-20261024T081359704297-carrier-vertex-identity",
+  "rubric": "code",
+  "scores": {
+    "durability": 15,
+    "evidence": 15,
+    "fit": 15,
+    "goal_fidelity": 13,
+    "reuse": 16,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T12:03:59.568219+00:00",
+  "total": 93
+}

@@ -111,6 +111,7 @@ def _reference_conic_rings(
     strip_of_cell = jnp.broadcast_to(cell // 3, same.shape)
     first = jnp.min(jnp.where(same, strip_of_cell, strips), axis=1)
     last = jnp.max(jnp.where(same, strip_of_cell, -1), axis=1)
+    start = jnp.min(jnp.where(same, cell, flat.size), axis=1)
     left = breaks[first]
     right = breaks[jnp.minimum(last + 1, strips)]
     parameter = 0.5 * (1 - jnp.cos(jnp.linspace(0.0, jnp.pi, segments + 1)))
@@ -141,7 +142,7 @@ def _reference_conic_rings(
         & selected[jnp.clip(flat, 0, selected.shape[0] - 1)]
         & (right > left)
     )
-    live &= cell == flat
+    live &= cell == start
     rings = centre + pitch * rings.reshape(-1, 2 * (segments + 1), 2)
     rings = jnp.where(live[:, None, None], rings, centre)
     return rings, jnp.where(live, rings.shape[1], 0), fragments.valid

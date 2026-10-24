@@ -105,12 +105,28 @@ of returning an amplitude that scales every cell.</p>
 5 tests, passing in <code>gate-unit.log</code>: the planted NaN is named at
 <code>(103,)</code> with no other cell changed, the qualified total is finite,
 the unqualified total makes the amplitude refuse by name, and the arc-root
-tangent is finite across a discriminant seam. The import sweep runs every file
-that imports <code>separatrix_clip</code>, <code>source</code> or
-<code>forward_operator</code> directly, plus the certificate tests, each in its
-own fresh process at the tip and at the base, in one <code>all_debug</code>
-job. Its per-file results are in <code>gate-suite/summary.tsv</code> and are
-recorded in the manifest when the job is read.</p>
+tangent is finite across a discriminant seam.</p>
+<p id="cell-moment-derivative-nan-gate-sweep">The import sweep runs every file that imports <code>separatrix_clip</code>,
+<code>source</code> or <code>forward_operator</code>, plus the certificate tests,
+each in its own fresh process at the tip and at the base, from a git archive of
+each, in one <code>all_debug</code> job. That job reached <strong>21 of 88
+files</strong> before its one-hour partition wall clock ended it
+(<code>sacct</code> State <code>TIMEOUT</code>, ExitCode <code>0:0</code>), so the
+sweep is <strong>partial</strong> and is reported as such. Two files,
+<code>test_connectivity_boundary.py</code> and
+<code>test_certificate_exterior_support.py</code>, ran at the tip only because the
+job died between the two halves of their pair; the job was killed at the wall
+clock, so the second stopped at its own 1200-second per-test timeout rather than
+failing. The remaining 67 files did not run.</p>
+<p id="cell-moment-derivative-nan-gate-delta">The 19 files that ran in <strong>both</strong> arms show <strong>zero added
+failures</strong>: the same eleven test ids fail at the tip and at the base
+(<code>test_batched_labeller</code> 3, <code>test_batched_operator_boundary</code>
+1, <code>test_census_polish_compaction</code> 3,
+<code>test_certificate_baseline_revision</code> 3, <code>test_certificate_pin</code>
+1), the counts are equal file by file, and no test fails at the tip that passes
+at the base. Per-arm rows are in <code>gate-suite/base-arm.log</code> and
+<code>gate-suite/head-arm.log</code>, derived from
+<code>gate-suite/summary.tsv</code>.</p>
 
 <h2 id="cell-moment-derivative-nan-negative-control">Negative control</h2>
 <p id="cell-moment-derivative-nan-negative">The declared mutation restores the clamped square root in a scratch copy of

@@ -90,13 +90,16 @@ def _cells(number, *, slope=0.2, level=0.0):
 
 
 def _reference_conic_rings(
-    vertices, count, centre, pitch, coefficient, selected, segments
+    vertices, count, centre, pitch, coefficient, selected, segments, subdivisions
 ):
     """Trace one cosine-spaced ring per conic fragment, over the fragment's span.
 
-    The scan books a fragment as a single ring from its first strip's left break
-    to its last strip's right break, so no internal break is a ring boundary and
-    the composite quadrature cannot depend on where one falls.
+    The scan books a fragment as a fragment-owned ring, so no internal break is
+    a ring boundary and the composite quadrature cannot depend on where one
+    falls. The ring carries ``subdivisions`` sub-intervals, each ending on an
+    interior break the fragment crosses and each with ``segments`` chords, so a
+    corner never sits inside an interval. Slots past the fragment's span
+    collapse onto its right break.
     """
     local = (vertices - centre) / pitch
     fragments = topology.quadratic_cell_fragments(
@@ -115,7 +118,19 @@ def _reference_conic_rings(
     left = breaks[first]
     right = breaks[jnp.minimum(last + 1, strips)]
     parameter = 0.5 * (1 - jnp.cos(jnp.linspace(0.0, jnp.pi, segments + 1)))
-    x = left[:, None] + (right - left)[:, None] * parameter
+    slot = jnp.arange(subdivisions)
+    slot_first = jnp.minimum(first[:, None] + slot[None, :], strips)
+    low = breaks[slot_first]
+    high = breaks[jnp.minimum(slot_first + 1, strips)]
+    covered = slot[None, :] < (last - first + 1)[:, None]
+    right_column = right[:, None]
+    low = jnp.where(covered, low, right_column)
+    high = jnp.where(covered, high, right_column)
+    high = jnp.where(slot[None, :] == subdivisions - 1, right_column, high)
+    x = (low[..., None] + (high - low)[..., None] * parameter).reshape(
+        left.shape[0], -1
+    )
+    nodes = x.shape[1]
     bottom, top, present = topology._positive_vertical_intervals(
         local, count, coefficient, x
     )
@@ -143,7 +158,7 @@ def _reference_conic_rings(
         & (right > left)
     )
     live &= cell == start
-    rings = centre + pitch * rings.reshape(-1, 2 * (segments + 1), 2)
+    rings = centre + pitch * rings.reshape(-1, 2 * nodes, 2)
     rings = jnp.where(live[:, None, None], rings, centre)
     return rings, jnp.where(live, rings.shape[1], 0), fragments.valid
 
@@ -305,6 +320,7 @@ def _reference_book(psi, read, geometry, profile, quadrature=Quadrature()):
                         signed[index],
                         read.fragment_selected[index],
                         quadrature.segments,
+                        quadrature.subdivisions,
                     )
                     moments = integrate(rings, counts)
                     return jax.tree.map(

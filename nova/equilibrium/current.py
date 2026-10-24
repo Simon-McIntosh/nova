@@ -38,12 +38,17 @@ class Quadrature:
 
     ``sigma`` is the signed-flux convention supplied to the topology read.
     ``segments`` sets cosine-spaced conic chords and cubic-ray chords, without
-    changing fragment ownership. No polygon-count limit is imposed here.
+    changing fragment ownership. ``subdivisions`` is the number of sub-intervals
+    a fragment's own span is split into, each getting ``segments`` chords, so a
+    fragment that crosses several strip breaks is integrated piecewise on
+    intervals that are smooth rather than across a corner. No polygon-count
+    limit is imposed here.
     """
 
     sigma: object = 1.0
     target_current: object = None
     segments: int = dataclass_field(default=512, metadata={"static": True})
+    subdivisions: int = dataclass_field(default=8, metadata={"static": True})
 
 
 class Booking(NamedTuple):
@@ -57,16 +62,28 @@ class Booking(NamedTuple):
     valid: jax.Array
 
 
-def _conic_rings(vertices, count, centre, pitch, coefficient, selected, segments):
-    """Trace each conic fragment once over the fragment's own vertical span.
+def _conic_rings(
+    vertices, count, centre, pitch, coefficient, selected, segments, subdivisions=1
+):
+    """Trace each conic fragment once, compositely, over the fragment's own span.
 
-    A fragment is booked as one ring running from its first strip's left break to
-    its last strip's right break. Booking it strip by strip makes the composite
-    quadrature depend on an internal break's position, and where two conic/edge
-    crossings coincide in x that position is a minimum over two smooth branches:
-    the total then acquires a kink the integral does not have, and its derivative
-    stops agreeing with a central difference. One ring per fragment has no
-    internal boundary to depend on.
+    Booking a fragment strip by strip makes the composite quadrature depend on
+    an internal break's position, and where two conic/edge crossings coincide in
+    x that position is a minimum over two smooth branches: the total then
+    acquires a kink the integral does not have, and its derivative stops
+    agreeing with a central difference. One ring per fragment has no internal
+    boundary to depend on, but a single smooth rule across the whole span puts
+    the conic/edge corner inside an interval and its convergence falls to
+    algebraic.
+
+    Both properties are kept by tracing one ring per fragment whose nodes come
+    from ``subdivisions`` sub-intervals, each ending on an interior break the
+    fragment crosses and each carrying ``segments`` chords. Every sub-interval
+    is then free of a corner, so it converges at the rate a strip does, while
+    the fragment total stays a sum of sub-integrals of one integrand, so moving
+    a coincident break between two of them changes nothing to first order.
+    Slots beyond a fragment's own span are collapsed onto its right break and
+    carry no width.
     """
     local = (vertices - centre) / pitch
     fragments = topology.quadratic_cell_fragments(
@@ -85,7 +102,21 @@ def _conic_rings(vertices, count, centre, pitch, coefficient, selected, segments
     left = breaks[first]
     right = breaks[jnp.minimum(last + 1, strips)]
     parameter = 0.5 * (1 - jnp.cos(jnp.linspace(0.0, jnp.pi, segments + 1)))
-    x = left[:, None] + (right - left)[:, None] * parameter
+    slot = jnp.arange(subdivisions)
+    slot_first = jnp.minimum(first[:, None] + slot[None, :], strips)
+    low = breaks[slot_first]
+    high = breaks[jnp.minimum(slot_first + 1, strips)]
+    covered = slot[None, :] < (last - first + 1)[:, None]
+    right_column = right[:, None]
+    low = jnp.where(covered, low, right_column)
+    high = jnp.where(covered, high, right_column)
+    # The last slot absorbs any span beyond the static subdivision count, so a
+    # fragment crossing more breaks than there are slots is still covered whole.
+    high = jnp.where(slot[None, :] == subdivisions - 1, right_column, high)
+    x = (low[..., None] + (high - low)[..., None] * parameter).reshape(
+        left.shape[0], -1
+    )
+    nodes = x.shape[1]
     bottom, top, present = topology._positive_vertical_intervals(
         local, count, coefficient, x
     )
@@ -118,7 +149,7 @@ def _conic_rings(vertices, count, centre, pitch, coefficient, selected, segments
         & (right > left)
     )
     live &= cell == start
-    rings = centre + pitch * rings.reshape(-1, 2 * (segments + 1), 2)
+    rings = centre + pitch * rings.reshape(-1, 2 * nodes, 2)
     rings = jnp.where(live[:, None, None], rings, centre)
     return rings, jnp.where(live, rings.shape[1], 0), fragments.valid
 
@@ -465,6 +496,7 @@ def composite_cut_moments(
     disk_centre,
     radius,
     segments,
+    subdivisions=8,
     force_conic_right=False,
     confined=None,
 ):
@@ -494,7 +526,14 @@ def composite_cut_moments(
         vertices, count, centre, form, selected, intervals, segments
     )
     conic_rings, conic_counts, conic_valid = _conic_rings(
-        vertices, count, centre, pitch, conic_coefficient, conic_selected, segments
+        vertices,
+        count,
+        centre,
+        pitch,
+        conic_coefficient,
+        conic_selected,
+        segments,
+        subdivisions,
     )
     inside = _disk_split_moments(
         normal_rings,
@@ -607,6 +646,7 @@ def book(psi, read, geometry, profile, quadrature=Quadrature()):
                 signed[index],
                 read.fragment_selected[index],
                 quadrature.segments,
+                quadrature.subdivisions,
             )
             moments = integrate_live_rings(index, rings, counts)
             return jax.tree.map(lambda value: jnp.where(valid, value, jnp.nan), moments)

@@ -1,0 +1,38 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-24T16:03:50.243Z",
+  "dispatched_at": "2026-10-24T15:56:12Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/uniform-cell-clip-and-coupling.html:87",
+      "id": "reasoning-1",
+      "reason": "the note tells the section author to \"name the caller to rewire\" and hands them `flux_surface_extraction.py`, while the caller the plan's centre actually needs is `ForwardFluxOperator._profile_support`/`_moment_support_masks`; a node aimed at the wrong module rewires a consumer of the curved path instead of the producer and leaves the shared clip-and-coupling seam untouched.",
+      "text": "the carry comment states \"Today the curved path is reached only by flux-surface geometry (`flux_surface_extraction.py` importing `_traced_clip`), and the current-moment path never reaches the arc correction\", but `nova/equilibrium/forward_operator.py:69` imports `_traced_clip` and `_profile_support` calls it at line 3425 with a fitted spline `curve_evaluator=_ExactClipLevel(...)` (line 3406) and `arc_tracer=_implicit_traced_level_arc` (line 3435), so the current-moment support path already traces the curved boundary; `nova/equilibrium/clip_quadrature.py:921` imports it too, and the branch is live in the forward solve (`nova/equilibrium/forward.py:688` calls `with_clip_mode`, `nova/equilibrium/forward.py:938` branches on `clip_mode == \"exact\"`, default `\"chord\"` at `nova/equilibrium/forward_operator.py:2340`). The reproduction is the import/call-site pair above, read at HEAD",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "1c6d9b2b789357c8bb0bdf4b4fcd4df30deb08f9116527a5ddf9523d35a577b7",
+  "plan_slug": "uniform-cell-clip-and-coupling",
+  "plan_version": 27,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261024T155524097715-plan-review-of-uniform-cell-clip-and-coupling",
+  "reviewed_blob_sha": "9963415198b2621f6b0941b983f6f72015541195",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the dependency anchor resolves to a real section, the plan-level `plan-informs` targets resolve, and the two negative claims in the carry comment are correct: `grep -rn 'unavailable-non-tensor-product' nova/ tests/ scripts/` returns nothing, and `nova/equilibrium/cell_partition.py:13-23` returns `None` from `_tensor_product_axes` for a non-tensor-product tiling; the carry comment's `flux_surface_extraction.py` citation is the one anchor that does not support the claim it is attached to, reported under `reasoning`.",
+    "done_when": "a finding \u2014 the plan carries no `data-reckon=\"section\"` block (only decisions, comments, followups, questions), so no unit declares a done-when or a negative control; the 2026-10-24 carry comment records this and defers it to the section author, so the gap is declared rather than hidden.",
+    "evidence_paths": "pass \u2014 every receipt the document cites resolves in the repository: `docs/figures/uniform-cell-clip-and-coupling/{off-axis-error/census.json,cut-cell-moments/receipt.json,solver-discriminator/receipt.json,amplitude-census,exact-participation}` and `docs/evidence/forward-gs-contour-evidence.html` all exist, and the outcomes cite commits rather than session scratchpads.",
+    "naming": "pass \u2014 the new content (the 2026-10-24 carry comment) adds no plan labels or ticket numbers to code, the identifiers it names (`_traced_clip`, `cell_partition.py`, `flux_surface_extraction.py`) are real code symbols, and the nonexistent status label `unavailable-non-tensor-product` is correctly flagged for removal rather than adopted.",
+    "reasoning": "a finding \u2014 the carry comment's instruction on the production caller is contradicted by the code: the curved support path is reached from the current-moment operator itself, not only from flux-surface geometry, so a section author following the note would name the wrong module to rewire.",
+    "single_goal": "a finding \u2014 with no sections there are no nodes to judge; the carry comment already splits the three-deliverable followup `f-20260909T053239593652` into one section each, which is the correct remedy and is recorded.",
+    "wiring": "pass \u2014 `plan-depends-on` names `converged-forward-solve#s3`, and that section exists in `docs/plans/converged-forward-solve.html` (line 55, `id=\"s3\"`, \"\u00a73 \u2014 The current booking\", status `implementable`); both `plan-informs` targets (`null-identification-authority`, `gs-absolute-accuracy-gates`) exist under `docs/plans/` and are `active`."
+  },
+  "section_digests": {
+    "_document": "6dd3b9854b7e64a38f549c16f04dfb6aaf14e664700c405f49248e0ee5e31bcc"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T16:11:36.504213+00:00"
+}

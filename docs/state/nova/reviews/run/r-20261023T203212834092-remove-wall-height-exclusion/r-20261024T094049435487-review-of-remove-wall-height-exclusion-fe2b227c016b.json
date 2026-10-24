@@ -1,0 +1,74 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 5,
+  "call_sites": [
+    "nova/equilibrium/reduced_newton.py:923",
+    "nova/equilibrium/forward.py:2074",
+    "nova/equilibrium/forward.py:2244",
+    "nova/equilibrium/batched_labeller.py:587",
+    "nova/equilibrium/forward_operator.py:3966"
+  ],
+  "completed_at": "2026-10-24T09:52:23.325Z",
+  "dispatched_at": "2026-10-24T09:41:22Z",
+  "findings": [
+    {
+      "file": "tests/test_plasma_cell_shadow_telemetry.py",
+      "line": "211",
+      "severity": "non-blocking",
+      "text": "the added np.testing.assert_array_equal(wall_shadow, expected_wall) takes its expected side from operator._carrier_shadow_read(physical, masks, topology), the same production helper that nova/equilibrium/forward_operator.py:3751 calls, so both sides move together under any regression inside that helper; and the regression it claims to guard is invisible on this fixture, because the removed rule's band (|z| > 0.31 + hysteresis) and the carrier band (|z| > 0.31) select the same nodes of the 92-node wall, whose z values are 0.68*sin(k*2pi/96) plus the inserted -0.31/-0.46 segment, with no node in the 0.011 m sliver, so reinstating the height rule leaves the assertion green. The deletion is durable through the code being gone, not through this assertion."
+    },
+    {
+      "file": "benchmarks/mast_centroid_solve_panels.py",
+      "line": "423",
+      "severity": "non-blocking",
+      "text": "the brief's first measure is `grep -rn wall_height nova/ tests/ benchmarks/` returning nothing at head; at head it exits 0 with two hits, this line and :436, so the measure as written is unmet. The hits are the persisted wall vertical coordinate rather than the removed rule, and renaming them was tried and reverted because the committed docs/figures/mast-centroid-capability/*/panel-fields.npz states read that key (coordinate-negative-parent.log shows the KeyError a rename produces), so the intent holds; what is wrong is that the closing artefact symbol-absence-final.log reports SCAN_EXIT=1 at revision e2d9e1d81, a superseded commit where the key was still renamed, and never describes the landed tree a reader will check."
+    },
+    {
+      "file": "benchmarks/limiter_read_resolution_audit.py",
+      "line": "413",
+      "severity": "non-blocking",
+      "text": "shadow is assigned the same array as private, so the census now records shadowed_wall_node_count and private_wall_node_count, and shadowed_private_nodes_below_x_point and private_wall_nodes_below_x_point, as the same measured numbers under two names and prints them as two columns of the report table; a reader takes two agreeing columns for corroboration when the audit is now measuring one mask once. Either report the topological mask alone or keep the positive control as the single observable."
+    }
+  ],
+  "gate_sources": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T203212834092-remove-wall-height-exclusion/head-measured-summary.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T203212834092-remove-wall-height-exclusion/base-measured-summary.log"
+  },
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read commit by commit over the 10 commits eb762209d..fe2b227c0: 11 files, 68 insertions and 1124 deletions, dominated by the 219-line removal from connectivity_boundary.py and the 654-line deletion of tests/test_wall_height_exclusion.py; the height arm is dropped from each of the four benchmarks that used it and mast_centroid_solve_panels.py nets to zero change after three commits that renamed and then restored its persisted key",
+    "done_when": "the brief's Measures are three: grep, fixture mask digests, and per-file gates at base and head. The per-file gates are recorded and complete (60/60 files in each arm, 0 added failure ids); the three fixture mask digests printed at base (mask-base.log) and at head (mask-head-final.log) are identical; the grep measure is NOT met at head, where benchmarks/mast_centroid_solve_panels.py:423 and :436 still carry the name wall_height",
+    "goal": "the node goal, from the plan section 'Remove the wall-height exclusion path and its eligibility guard' (docs/plans/separatrix-spline-extraction.html:246), plus the dispatch brief's Change items 1-3; the landed tree deletes wall_height_shadow_mask, _print_wall_height_eligibility, both wall-span fractions and the __all__ entry from nova/equilibrium/connectivity_boundary.py, deletes the call and the _wall_height_hysteresis state from nova/equilibrium/forward_operator.py, and returns reading['private_wall_node_mask'] at forward_operator.py:3751 so the topological private-flux shadow is the only wall rule",
+    "manifest": "read; status complete, both baseline_suite and after_suite carry completed true with exit_status 1 and 76/73 failure ids over 60/60 files, the two edited test files were re-run green at 364708bb4 (3 and 5 passed), and evidence_inputs discloses that the two remaining wall_height hits name the persisted wall vertical coordinate rather than the removed rule",
+    "write_paths": "the manifest declares 11 exclusive paths and every path in the base..head diff is inside them: nova/equilibrium/connectivity_boundary.py, nova/equilibrium/forward_operator.py, three tests files (one deleted), five benchmarks, and the two docs evidence files"
+  },
+  "justifications": {
+    "durability": "the only assertion added by the diff, tests/test_plasma_cell_shadow_telemetry.py:211, compares the residual wall mask against the same _carrier_shadow_read helper the code under test calls, and on this fixture the removed rule selects the identical node set, so reinstating it leaves the assertion green",
+    "evidence": "the fixture digest pair is quoted from mask-base.log and mask-head-final.log and the 60/60 arms from head-measured-summary.log, but symbol-absence-final.log reports SCAN_EXIT=1 at revision e2d9e1d81 rather than at head, where the scan exits 0 with two hits",
+    "fit": "the replacement in nova/equilibrium/forward_operator.py:3751 uses the reading dict the surrounding _carrier_shadow_read already returns, and the rename of the test helper parameter to wall_z at tests/test_plasma_cell_shadow_telemetry.py:120 names the coordinate rather than the deleted rule",
+    "goal_fidelity": "nova/equilibrium/connectivity_boundary.py:360 no longer defines the height rule and nova/equilibrium/forward_operator.py:3751 returns the carrier private mask directly, so the two fractions, the hysteresis state and the eligibility reporting are all gone",
+    "reuse": "the diff adds one definition, benchmarks/poloidal_convergence_atlas.py:_qualification_distance, which is a split of the file's own pre-existing _geometry_hysteresis and not a new capability; the search over nova/equilibrium for a qualification-radius owner finds ForwardFluxOperator._x_qualification_distance at forward_operator.py:2532, which the benchmark already mirrored from committed operands before this change",
+    "scope_discipline": "every path in `git diff --stat eb762209d fe2b227c0` is inside the manifest's declared write_paths, and the only churn outside the removal itself is the benchmark rewire the brief asks for at item 3"
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal, from the plan section 'Remove the wall-height exclusion path and its eligibility guard' (docs/plans/separatrix-spline-extraction.html:246), plus the dispatch brief's Change items 1-3; the landed tree deletes wall_height_shadow_mask, _print_wall_height_eligibility, both wall-span fractions and the __all__ entry from nova/equilibrium/connectivity_boundary.py, deletes the call and the _wall_height_hysteresis state from nova/equilibrium/forward_operator.py, and returns reading['private_wall_node_mask'] at forward_operator.py:3751 so the topological private-flux shadow is the only wall rule\nVERDICT done_when: the brief's Measures are three: grep, fixture mask digests, and per-file gates at base and head. The per-file gates are recorded and complete (60/60 files in each arm, 0 added failure ids); the three fixture mask digests printed at base (mask-base.log) and at head (mask-head-final.log) are identical; the grep measure is NOT met at head, where benchmarks/mast_centroid_solve_panels.py:423 and :436 still carry the name wall_height\nVERDICT write_paths: the manifest declares 11 exclusive paths and every path in the base..head diff is inside them: nova/equilibrium/connectivity_boundary.py, nova/equilibrium/forward_operator.py, three tests files (one deleted), five benchmarks, and the two docs evidence files\nVERDICT manifest: read; status complete, both baseline_suite and after_suite carry completed true with exit_status 1 and 76/73 failure ids over 60/60 files, the two edited test files were re-run green at 364708bb4 (3 and 5 passed), and evidence_inputs discloses that the two remaining wall_height hits name the persisted wall vertical coordinate rather than the removed rule\nVERDICT diff: read commit by commit over the 10 commits eb762209d..fe2b227c0: 11 files, 68 insertions and 1124 deletions, dominated by the 219-line removal from connectivity_boundary.py and the 654-line deletion of tests/test_wall_height_exclusion.py; the height arm is dropped from each of the four benchmarks that used it and mast_centroid_solve_panels.py nets to zero change after three commits that renamed and then restored its persisted key\nCALL_SITES: nova/equilibrium/reduced_newton.py:923, nova/equilibrium/forward.py:2074, nova/equilibrium/forward.py:2244, nova/equilibrium/batched_labeller.py:587, nova/equilibrium/forward_operator.py:3966\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/equilibrium/connectivity_boundary.py:360 no longer defines the height rule and nova/equilibrium/forward_operator.py:3751 returns the carrier private mask directly, so the two fractions, the hysteresis state and the eligibility reporting are all gone\nSCORE evidence: 13\nJUSTIFICATION evidence: the fixture digest pair is quoted from mask-base.log and mask-head-final.log and the 60/60 arms from head-measured-summary.log, but symbol-absence-final.log reports SCAN_EXIT=1 at revision e2d9e1d81 rather than at head, where the scan exits 0 with two hits\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in `git diff --stat eb762209d fe2b227c0` is inside the manifest's declared write_paths, and the only churn outside the removal itself is the benchmark rewire the brief asks for at item 3\nSCORE durability: 12\nJUSTIFICATION durability: the only assertion added by the diff, tests/test_plasma_cell_shadow_telemetry.py:211, compares the residual wall mask against the same _carrier_shadow_read helper the code under test calls, and on this fixture the removed rule selects the identical node set, so reinstating it leaves the assertion green\nSCORE fit: 18\nJUSTIFICATION fit: the replacement in nova/equilibrium/forward_operator.py:3751 uses the reading dict the surrounding _carrier_shadow_read already returns, and the rename of the test helper parameter to wall_z at tests/test_plasma_cell_shadow_telemetry.py:120 names the coordinate rather than the deleted rule\nSCORE reuse: 18\nJUSTIFICATION reuse: the diff adds one definition, benchmarks/poloidal_convergence_atlas.py:_qualification_distance, which is a split of the file's own pre-existing _geometry_hysteresis and not a new capability; the search over nova/equilibrium for a qualification-radius owner finds ForwardFluxOperator._x_qualification_distance at forward_operator.py:2532, which the benchmark already mirrored from committed operands before this change\nFINDING tests/test_plasma_cell_shadow_telemetry.py:211 non-blocking: the added np.testing.assert_array_equal(wall_shadow, expected_wall) takes its expected side from operator._carrier_shadow_read(physical, masks, topology), the same production helper that nova/equilibrium/forward_operator.py:3751 calls, so both sides move together under any regression inside that helper; and the regression it claims to guard is invisible on this fixture, because the removed rule's band (|z| > 0.31 + hysteresis) and the carrier band (|z| > 0.31) select the same nodes of the 92-node wall, whose z values are 0.68*sin(k*2pi/96) plus the inserted -0.31/-0.46 segment, with no node in the 0.011 m sliver, so reinstating the height rule leaves the assertion green. The deletion is durable through the code being gone, not through this assertion.\nFINDING benchmarks/mast_centroid_solve_panels.py:423 non-blocking: the brief's first measure is `grep -rn wall_height nova/ tests/ benchmarks/` returning nothing at head; at head it exits 0 with two hits, this line and :436, so the measure as written is unmet. The hits are the persisted wall vertical coordinate rather than the removed rule, and renaming them was tried and reverted because the committed docs/figures/mast-centroid-capability/*/panel-fields.npz states read that key (coordinate-negative-parent.log shows the KeyError a rename produces), so the intent holds; what is wrong is that the closing artefact symbol-absence-final.log reports SCAN_EXIT=1 at revision e2d9e1d81, a superseded commit where the key was still renamed, and never describes the landed tree a reader will check.\nFINDING benchmarks/limiter_read_resolution_audit.py:413 non-blocking: shadow is assigned the same array as private, so the census now records shadowed_wall_node_count and private_wall_node_count, and shadowed_private_nodes_below_x_point and private_wall_nodes_below_x_point, as the same measured numbers under two names and prints them as two columns of the report table; a reader takes two agreeing columns for corroboration when the audit is now measuring one mask once. Either report the topological mask alone or keep the positive control as the single observable.",
+  "review_run_id": "r-20261024T094049435487-review-of-remove-wall-height-exclusion-fe2b227c016b",
+  "reviewed_base_sha": "eb762209d07867ad0eafec87f521f26bf9c656b0",
+  "reviewed_head_sha": "fe2b227c016b53ba0545a7fa498615e6ba4bf97d",
+  "reviewed_run_id": "r-20261023T203212834092-remove-wall-height-exclusion",
+  "scores": {
+    "durability": 12,
+    "evidence": 13,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T09:54:30.298632+00:00",
+  "total": 98
+}

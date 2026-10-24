@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="certificate-fixture-republish">
+<meta name="plan-title" content="Certified certificate fixtures republished at the merged carrier identity">
+<meta name="plan-summary" content="Publish the limited and diverted 550-cell carrier and exterior fixtures on the builder revision the carrier-vertex-identity merges define, so the certified carrier load is a hit again and the root-tangent test reads it">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s4">
+<meta name="plan-recorded-at" content="2026-10-24">
+<meta name="plan-verdict" content="verified">
+<meta name="plan-environment" content="One reserved H200 (job 1294900 on 98dci4-gpu-0003), binary64, head arm at b1c42788e in the dispatch worktree and base arm at 797380d15 from a git archive extraction; fixture publication on the fleet allocation in place with JAX_PLATFORMS=cpu">
+<title>Certified certificate fixtures republished at the merged carrier identity | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<section id="certificate-fixture-republish-landing">
+<h2 id="certificate-fixture-republish-heading">Certified certificate fixtures republished at the merged carrier identity</h2>
+<p id="certificate-fixture-republish-identity">The carrier fixtures are addressed by a digest of the sources that build them, and the carrier-vertex-identity merges moved that digest. At <code>797380d15</code> the builder revision was <code>76aacb2ebf7dddd3</code>; at <code>05ac1585b</code> and at the archived head <code>b1c42788e</code> it is <code>534721b67d1a7ec2</code>. No commit between <code>05ac1585b</code> and <code>b1c42788e</code> touches any path in <code>CARRIER_SOURCE_PATHS</code>, the coupling build module or the measured builder functions, and <code>builder_revision()</code> read <code>534721b67d1a7ec2</code> in the head tree, so the two revisions key one fixture set. Every certificate fixture was therefore absent at main: the limited 550-cell carrier digest <code>sha256:958c60c85ac6a01a1afdcbfe9fe937f6a02ca428fa6195c4755451aaf35ddea0</code> returned no store entry, and the fast-map solver refused the cold build with <code>certified carrier is absent</code>.</p>
+<p id="certificate-fixture-republish-published">Each row was rebuilt through the store's own publication route, which validates a cold build and renames it onto its digest, so no product code changed. The table gives the defining digest and the entry path the store now returns for the carrier and the clipped exterior of both 550-requested-cell certificate rows.</p>
+<table>
+<thead><tr><th>row</th><th>kind</th><th>defining digest</th><th>entry path</th><th>mesh cells</th><th>build / load s</th></tr></thead>
+<tbody>
+<tr><td>limited 550</td><td>carrier</td><td><code>sha256:958c60c85ac6a01a1afdcbfe9fe937f6a02ca428fa6195c4755451aaf35ddea0</code></td><td><code>/work/projects/imas_gpu/sophelio/evidence/operands/certificate-fixtures/carrier/sha256/958c60c85ac6a01a1afdcbfe9fe937f6a02ca428fa6195c4755451aaf35ddea0</code></td><td>553 nodes</td><td>116.7 / 0.0002</td></tr>
+<tr><td>limited 550</td><td>exterior</td><td><code>sha256:fdac621a76fded492209535e1ebf8cb3ad90e102ca9a947246696d9abfd40ed1</code></td><td><code>/work/projects/imas_gpu/sophelio/evidence/operands/certificate-fixtures/exterior/sha256/fdac621a76fded492209535e1ebf8cb3ad90e102ca9a947246696d9abfd40ed1</code></td><td>—</td><td>1.3 / 0.0002</td></tr>
+<tr><td>diverted 550</td><td>carrier</td><td><code>sha256:eccb01adba1e2a61a0152f0aa5c7ba2544510368869417c1b8a6104deafc036e</code></td><td><code>/work/projects/imas_gpu/sophelio/evidence/operands/certificate-fixtures/carrier/sha256/eccb01adba1e2a61a0152f0aa5c7ba2544510368869417c1b8a6104deafc036e</code></td><td>550 nodes</td><td>106.3 / 0.0002</td></tr>
+<tr><td>diverted 550</td><td>exterior</td><td><code>sha256:826c9fad3d636c1b709bb6d0aedb9ac35bc7eb22bca46411836cb3f7807165bb</code></td><td><code>/work/projects/imas_gpu/sophelio/evidence/operands/certificate-fixtures/exterior/sha256/826c9fad3d636c1b709bb6d0aedb9ac35bc7eb22bca46411836cb3f7807165bb</code></td><td>—</td><td>1.3 / 0.0002</td></tr>
+</tbody>
+</table>
+<p id="certificate-fixture-republish-lane">On the reserved H200 lane, one job ran <code>tests/equilibrium/test_certificate_550_convergence.py</code> at the archived head <code>b1c42788e</code> and at the base <code>797380d153b1fc68048f079b03572a3a2932f763</code>, each test in its own pytest process so a verdict is durable as soon as its test ends. The base arm ran from a <code>git archive</code> extraction of that revision; each arm's log header names the module file the run imported, and the base arm imported <code>base-tree/nova/equilibrium/__init__.py</code> rather than the head tree's.</p>
+<p id="certificate-fixture-republish-verdicts">The carrier root-tangent test reads the published fixture, asserts the store entry exists, and asserts the load was a hit at 553 nodes. It passes at the head in 30.9 s and passes at the base in 12.8 s. The stationary-seed tangent pair passes at both arms as well, in 9.8 s and 9.2 s.</p>
+<p id="certificate-fixture-republish-control">The negative control points the fixture root at an empty directory: <code>fixture_entry('carrier', 'sha256:958c60c85ac6a01a1afdcbfe9fe937f6a02ca428fa6195c4755451aaf35ddea0')</code> returns <code>None</code> and the root-tangent test fails on its fixture assertion (<code>assert None is not None</code>) in 9.8 s. The refusal names the same digest the published store returns under the default root, so the passing arm is reading that object and not a rebuild.</p>
+<p id="certificate-fixture-republish-2000">The diverted 2000-cell row was attempted on the same publication route and does not fit the available window: the build was still running when it was cut at a measured 420 s wall, against 106 s for the diverted 550-cell carrier. It is unpublished, and the fast-map solver still refuses that row's cold build.</p>
+<p id="certificate-fixture-republish-provenance">Publication driver, arm driver and logs are under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T161514336256-certificate-fixture-republish</code>: <code>publish_fixtures.py</code> with <code>publish-limited-550.log</code>, <code>publish-diverted-550.log</code> and <code>publish-diverted-2000.log</code>; the lane log is <code>arms-head-base.log</code> and the red control log is <code>negative-control-empty-root.log</code>. The fixture store itself was written only through the store's publication route.</p>
+</section>
+</main>
+</body>
+</html>

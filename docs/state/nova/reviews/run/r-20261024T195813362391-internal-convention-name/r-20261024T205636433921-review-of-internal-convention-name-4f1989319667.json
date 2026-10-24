@@ -1,0 +1,76 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "baseline_suite base-test_database.log exit 0 with 0 failure ids; after_suite head-test_internal_convention_owner.log exit 0 with 0 failure ids",
+  "call_site_count": 8,
+  "call_sites": [
+    "nova/imas/equilibrium.py:570",
+    "nova/imas/equilibrium.py:624",
+    "nova/imas/equilibrium.py:949",
+    "nova/diagnostics/thomson.py:118",
+    "nova/imas/extrapolate.py:305",
+    "nova/imas/plasma_source.py:83",
+    "nova/io/sourcemap.py:825",
+    "nova/io/sourcemap.py:1030"
+  ],
+  "completed_at": "2026-10-24T22:16:47.940Z",
+  "dispatched_at": "2026-10-24T21:56:08Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T195813362391-internal-convention-name/logs/base-test_database.log",
+      "line": "3",
+      "severity": "blocking",
+      "text": "blocking: seven of the eleven base-arm logs print # module: as the head worktree's nova (database, dd_translator, equilibrium_reader_cocos, internal_cocos_sites, io_sourcemap, mastcocos, sample_write_convention) because python -m put the worktree's cwd ahead of the base archive, so their \"base\" results are head results and the delta the done_when asks for is unmeasured for the files that cover the changed modules; re-running those seven with PYTHONPATH set to the base archive is the repair."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T195813362391-internal-convention-name/logs/head-test_database.log",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: every head-arm log stamps \"# revision: 48d7adda6\", the base, while its tree and module lines name the worktree, because the arms ran against uncommitted edits before 940863729 existed, so a reader cannot tell from the header which revision was measured even though the source mtimes at 22:10 precede the runs."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T195813362391-internal-convention-name/manifest.md",
+      "line": "15",
+      "severity": "non-blocking",
+      "text": "non-blocking: the artifacts line sums the arms wrongly, reporting 169 passed and 29 skipped for the head and 162 passed and 29 skipped for the base where the logs it cites give 170 passed and 34 skipped for each, so the record does not reconcile with its own evidence."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 8 production call site(s)",
+    "diff": "read commit by commit against 48d7adda6; 940863729 rebinds two constants to the owner, moves the b0 IDS-level fallback into getslice as ids_vacuum_field and names the cache marker once, 4f1989319 adds the 66-line evidence fragment, and the only capability change is the delegation at nova/imas/equilibrium.py:570 which is behaviour-preserving against the deleted _ids_vacuum_field.",
+    "done_when": "clause (2) is asserted by tests/test_internal_convention_owner.py:140 writing a dataset under DD3 and asserting the rebuild, and clause (1) is recorded with its full hit list in docs/evidence/fragments/dd-cocos-ingest/internal-convention-name.html:29-33, but clause (3)'s base arm is not a base measurement for seven of its eleven rows: logs/base-test_database.log:3 and six sibling base logs print # module: .../internal-convention-name/nova/__init__.py, the head worktree, so those \"base\" results are the head's own results relabelled.",
+    "goal": "the node goal was one name and one owner per repeated rule; nova/io/sourcemap.py:741 and nova/equilibrium/observation_kernels.py:42 now both read nova.equilibrium.convention.COCOS, nova/imas/getslice.py:23 owns the toroidal-field read that nova/imas/equilibrium.py:570 delegates to, and the equilibrium cache keeps one refusal mechanism named once by CONVENTION_ATTR at nova/imas/equilibrium.py:24.",
+    "manifest": "read; it reports status complete with two commits, and records baseline_suite and after_suite both as exit 0 with zero failure ids, but its artifacts line overstates the arms: it says \"head arm: 12 files, 169 passed 29 skipped\" and \"base arm: 11 files, 162 passed 29 skipped\" while the eleven base logs sum to 170 passed and 34 skipped and the eleven head logs to 170 passed and 34 skipped plus the new file's 7 passed.",
+    "write_paths": "the manifest declares six write paths and the two commits touch exactly those \u2014 nova/io/sourcemap.py, nova/equilibrium/observation_kernels.py, nova/imas/equilibrium.py, nova/imas/getslice.py, tests/test_internal_convention_owner.py and the fragment \u2014 with the shared equilibrium.py covered by the lead's concurrent-edit ruling and a scope_note, and no path outside them appears in git show --stat 940863729 or 4f1989319."
+  },
+  "justifications": {
+    "durability": "tests/test_internal_convention_owner.py:51 reddens on the literal revert and its own negative control at logs/negative-control.log shows NOVA_COCOS = 11 failing two tests with EXIT=1, but the sourcemap guard at tests/test_internal_convention_owner.py:44 and the reader guard at :107 assert source text rather than behaviour, so a restatement that keeps those strings would not redden.",
+    "evidence": "logs/base-test_database.log:3 and six sibling base logs record # module: naming the head worktree rather than /tmp/.../base-48d7adda6, so the delta claimed in internal-convention-name.html:42-59 is measured against the head for seven rows including the cache and sourcemap files; the new file's own gate at logs/head-test_internal_convention_owner.log ran at 4f1989319 with EXIT=0 and is sound.",
+    "fit": "the added names CONVENTION_ATTR and ids_vacuum_field are mechanism-named and the same suite of module docstrings and #: comments as nova/equilibrium/convention.py is used, with one bare string literal standing in for a variable docstring at nova/equilibrium/observation_kernels.py:43.",
+    "goal_fidelity": "nova/io/sourcemap.py:741 and nova/equilibrium/observation_kernels.py:42 take the number from nova.equilibrium.convention.COCOS and nova/imas/equilibrium.py:570 delegates the b0 read, but nova/equilibrium/steering_frames.py:159 still states COCOS = 17 as the internal convention, so the brief's \"no other literal 17 used as the internal convention\" is not reached even though the worker named that hit under outside_scope as the fence required.",
+    "reuse": "ids_vacuum_field at nova/imas/getslice.py:23 extends the module that already owns vacuum_field at :5, and a search over nova/ for vacuum_toroidal read, for \"cocos\" attribute sites and for COCOS/CONVENTION assignments found no owner for either capability that the additions duplicate, though nova/io/ingest.py:122 and nova/media/sources/nova_labels.py:168 still state the \"cocos\" attribute name inline for their own stores.",
+    "scope_discipline": "git show --stat on both commits lists only the six declared paths, and the shared nova/imas/equilibrium.py edit stays inside the vacuum-field and cache-refusal code with a scope_note recording the concurrent-edit ruling."
+  },
+  "plan_slug": "dd-cocos-ingest",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal was one name and one owner per repeated rule; nova/io/sourcemap.py:741 and nova/equilibrium/observation_kernels.py:42 now both read nova.equilibrium.convention.COCOS, nova/imas/getslice.py:23 owns the toroidal-field read that nova/imas/equilibrium.py:570 delegates to, and the equilibrium cache keeps one refusal mechanism named once by CONVENTION_ATTR at nova/imas/equilibrium.py:24.\nVERDICT done_when: clause (2) is asserted by tests/test_internal_convention_owner.py:140 writing a dataset under DD3 and asserting the rebuild, and clause (1) is recorded with its full hit list in docs/evidence/fragments/dd-cocos-ingest/internal-convention-name.html:29-33, but clause (3)'s base arm is not a base measurement for seven of its eleven rows: logs/base-test_database.log:3 and six sibling base logs print # module: .../internal-convention-name/nova/__init__.py, the head worktree, so those \"base\" results are the head's own results relabelled.\nVERDICT write_paths: the manifest declares six write paths and the two commits touch exactly those \u2014 nova/io/sourcemap.py, nova/equilibrium/observation_kernels.py, nova/imas/equilibrium.py, nova/imas/getslice.py, tests/test_internal_convention_owner.py and the fragment \u2014 with the shared equilibrium.py covered by the lead's concurrent-edit ruling and a scope_note, and no path outside them appears in git show --stat 940863729 or 4f1989319.\nVERDICT manifest: read; it reports status complete with two commits, and records baseline_suite and after_suite both as exit 0 with zero failure ids, but its artifacts line overstates the arms: it says \"head arm: 12 files, 169 passed 29 skipped\" and \"base arm: 11 files, 162 passed 29 skipped\" while the eleven base logs sum to 170 passed and 34 skipped and the eleven head logs to 170 passed and 34 skipped plus the new file's 7 passed.\nVERDICT diff: read commit by commit against 48d7adda6; 940863729 rebinds two constants to the owner, moves the b0 IDS-level fallback into getslice as ids_vacuum_field and names the cache marker once, 4f1989319 adds the 66-line evidence fragment, and the only capability change is the delegation at nova/imas/equilibrium.py:570 which is behaviour-preserving against the deleted _ids_vacuum_field.\nCALL_SITES: nova/imas/equilibrium.py:570, nova/imas/equilibrium.py:624, nova/imas/equilibrium.py:949, nova/diagnostics/thomson.py:118, nova/imas/extrapolate.py:305, nova/imas/plasma_source.py:83, nova/io/sourcemap.py:825, nova/io/sourcemap.py:1030\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: nova/io/sourcemap.py:741 and nova/equilibrium/observation_kernels.py:42 take the number from nova.equilibrium.convention.COCOS and nova/imas/equilibrium.py:570 delegates the b0 read, but nova/equilibrium/steering_frames.py:159 still states COCOS = 17 as the internal convention, so the brief's \"no other literal 17 used as the internal convention\" is not reached even though the worker named that hit under outside_scope as the fence required.\nSCORE evidence: 11\nJUSTIFICATION evidence: logs/base-test_database.log:3 and six sibling base logs record # module: naming the head worktree rather than /tmp/.../base-48d7adda6, so the delta claimed in internal-convention-name.html:42-59 is measured against the head for seven rows including the cache and sourcemap files; the new file's own gate at logs/head-test_internal_convention_owner.log ran at 4f1989319 with EXIT=0 and is sound.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git show --stat on both commits lists only the six declared paths, and the shared nova/imas/equilibrium.py edit stays inside the vacuum-field and cache-refusal code with a scope_note recording the concurrent-edit ruling.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_internal_convention_owner.py:51 reddens on the literal revert and its own negative control at logs/negative-control.log shows NOVA_COCOS = 11 failing two tests with EXIT=1, but the sourcemap guard at tests/test_internal_convention_owner.py:44 and the reader guard at :107 assert source text rather than behaviour, so a restatement that keeps those strings would not redden.\nSCORE fit: 18\nJUSTIFICATION fit: the added names CONVENTION_ATTR and ids_vacuum_field are mechanism-named and the same suite of module docstrings and #: comments as nova/equilibrium/convention.py is used, with one bare string literal standing in for a variable docstring at nova/equilibrium/observation_kernels.py:43.\nSCORE reuse: 18\nJUSTIFICATION reuse: ids_vacuum_field at nova/imas/getslice.py:23 extends the module that already owns vacuum_field at :5, and a search over nova/ for vacuum_toroidal read, for \"cocos\" attribute sites and for COCOS/CONVENTION assignments found no owner for either capability that the additions duplicate, though nova/io/ingest.py:122 and nova/media/sources/nova_labels.py:168 still state the \"cocos\" attribute name inline for their own stores.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T195813362391-internal-convention-name/logs/base-test_database.log:3 blocking: seven of the eleven base-arm logs print # module: as the head worktree's nova (database, dd_translator, equilibrium_reader_cocos, internal_cocos_sites, io_sourcemap, mastcocos, sample_write_convention) because python -m put the worktree's cwd ahead of the base archive, so their \"base\" results are head results and the delta the done_when asks for is unmeasured for the files that cover the changed modules; re-running those seven with PYTHONPATH set to the base archive is the repair.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T195813362391-internal-convention-name/logs/head-test_database.log:1 non-blocking: every head-arm log stamps \"# revision: 48d7adda6\", the base, while its tree and module lines name the worktree, because the arms ran against uncommitted edits before 940863729 existed, so a reader cannot tell from the header which revision was measured even though the source mtimes at 22:10 precede the runs.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T195813362391-internal-convention-name/manifest.md:15 non-blocking: the artifacts line sums the arms wrongly, reporting 169 passed and 29 skipped for the head and 162 passed and 29 skipped for the base where the logs it cites give 170 passed and 34 skipped for each, so the record does not reconcile with its own evidence.",
+  "review_run_id": "r-20261024T205636433921-review-of-internal-convention-name-4f1989319667",
+  "reviewed_base_sha": "48d7adda68b5e86d26f5c896c8a47e2ead865be8",
+  "reviewed_head_sha": "4f1989319667e8bf5d02bbfa2a66158035b8b293",
+  "reviewed_run_id": "r-20261024T195813362391-internal-convention-name",
+  "scores": {
+    "durability": 17,
+    "evidence": 11,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T22:23:16.150439+00:00",
+  "total": 99
+}

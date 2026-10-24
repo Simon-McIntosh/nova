@@ -87,40 +87,73 @@ refusal. The solver qualification is <code>unqualified</code> with
 <code>converged=true</code>; the receipt is <code>row-tip-part.json</code>
 under the run directory and the run log <code>row-tip.log</code>.</p>
 
-<h2 id="cell-moment-derivative-nan-qualification">Per-cell qualification (repaired)</h2>
-<p id="cell-moment-derivative-nan-qualify">Commit <code>e10705e61e6562c59326f28b8b70cd3173efaa5a</code> adds
-<code>qualify_cell_current_moments</code> to
-<code>nova/equilibrium/forward_operator.py</code>. It zeroes every moment
-component of a non-finite cell and returns the offending indices; it is
-applied before each sum and before the normalisation amplitude, in
-<code>_internal_on_partition</code>, <code>normalised_current_moments</code>
-and <code>normalised_current_moments_and_observation</code>. A non-finite total
-reaches the existing <code>CurrentNormalisationError</code>, which names the
-normalisation instead of returning an amplitude that scales every cell.</p>
-<p id="cell-moment-derivative-nan-refusal">Commit <code>ba1741440</code> supplies the half that was missing. Those three
-paths bound the returned indices to <code>_indices</code> and discarded them,
-so a non-finite cell was zeroed and the solve continued silently, and the
-error class that names these cells was raised nowhere. The paths now go
-through <code>qualified_cell_current_moments</code>: a concrete state raises
-<code>NonFiniteCellMomentError</code>, whose <code>indices</code> attribute and
-message name the offending cells, and only a traced state — where no value
-exists to judge — carries the qualified moments forward. The accessor that
-returned those indices without a caller is removed; its work is the refusal.
-Three tests cover the three behaviours: a concrete non-finite state refuses at
-<code>(103,)</code>, a finite state passes unchanged, and a traced state
-qualifies without raising. Reverting the refusal in a copy of the commit makes
-the first of them fail (1 failed, 7 passed, <code>EXIT=1</code>,
-<code>negative-control-refusal.log</code>), and the CPU row is unchanged by the
-repair at residual <code>5.626976272072871e-15</code> in
-<code>2</code> trips (<code>row-repair.log</code>).</p>
-
-<h2 id="cell-moment-derivative-nan-gate">Gate</h2>
+<h2 id="cell-moment-derivative-nan-qualification">Per-cell non-finite mask (repaired)</h2>
+<p id="cell-moment-derivative-nan-qualify">Commit <code>497942d16</code> replaces the zeroing qualification with a mask
+that is carried out of the step. <code>cell_moment_nonfinite</code> in
+<code>nova/equilibrium/forward_operator.py</code> builds one boolean per cell
+over <strong>every</strong> component of <code>CellCurrentMoments</code> —
+<code>cell_current</code>, <code>radial_moment</code>,
+<code>vertical_moment</code> — rather than <code>cell_current</code> alone,
+because a cell can carry a finite total current and a divergent moment
+derivative. It returns that mask and, when the mask is concrete, the offending
+indices; a traced mask names none, and the mask itself is the output. Moment
+values are left exactly as they are, so a non-finite cell reaches the residual
+instead of being replaced by a zero that reads as a valid cell. The three solve
+paths (<code>_internal_on_partition</code>,
+<code>normalised_current_moments</code>,
+<code>normalised_current_moments_and_observation</code>) call
+<code>refuse_non_finite_cell_moments</code>, which returns the mask and raises
+<code>CurrentNormalisationError</code> — the owner in
+<code>nova/equilibrium/source.py</code> — carrying <code>indices</code> in its
+message whenever the state is concrete and the mask is not empty.
+<code>NonFiniteCellMomentError</code>,
+<code>qualify_cell_current_moments</code> and
+<code>qualified_cell_current_moments</code> are deleted: one named refusal, not
+two.</p>
+<p id="cell-moment-derivative-nan-amplitude">The traced normalisation amplitude no longer signals refusal with
+<code>jnp.nan</code>. <code>current_normalisation_admissible</code> returns the
+admissibility flag as an output of the step, and
+<code>current_normalisation_amplitude</code> returns
+<code>jnp.zeros_like(target)</code> where that flag is false, so an inadmissible
+amplitude never scales every cell by NaN; an eager evaluation still raises
+<code>CurrentNormalisationError</code> at the call.</p>
+<p id="cell-moment-derivative-nan-refusal">Ten tests in
+<code>tests/test_cell_moment_derivative_finite.py</code> cover the behaviour and
+pass in <code>gate-unit-mask.log</code> (<code>10 passed</code>,
+<code>EXIT=0</code>). A planted NaN in one cell's radial moment, with that
+cell's <code>cell_current</code> finite, is flagged by the mask at
+<code>(103,)</code> with no other cell flagged and no value altered, and is
+refused by <code>CurrentNormalisationError</code> with
+<code>indices == (103,)</code> and the index in the message; a non-finite
+<code>cell_current</code> is refused the same way; a finite state is admitted;
+a <code>jax.jit</code>-traced step reports the flag, the first offending index
+and the count across the jit boundary, and the host boundary refuses from the
+index that traced step reported; an admissible amplitude is flagged admissible
+and equals 0.5, an inadmissible one is flagged and raises eagerly, and the
+traced amplitude is finite under a NaN total. The CPU diverted 300-cell row
+still converges in <code>trip_count</code> <code>2</code> at
+<code>5.626976272072871e-15</code> with <code>EXIT=0</code>
+(<code>row-mask.log</code>).</p>
+<p id="cell-moment-derivative-nan-scope">The mask reaches the host through the three solve paths above. The driver
+seam that <code>gs.apply</code> (<code>gs.py:34</code>), the jitted reduced map
+(<code>reduced_newton.py:353</code>) and the certificate jvp
+(<code>solovev_certificate.py:996</code>) return is a bare
+<code>jax.Array</code>, so an array-only step cannot carry a mask out of it, and
+those three driver modules are outside this round's write scope. The refusal is
+therefore complete inside <code>forward_operator.py</code> — no cell is zeroed
+at any path and a concrete state is refused by index at each of them — while
+threading the traced mask through the driver seam is remaining work that needs
+a scope extension.</p><h2 id="cell-moment-derivative-nan-gate">Gate</h2>
 <p id="cell-moment-derivative-nan-gate-facts">The unit gate is <code>tests/test_cell_moment_derivative_finite.py</code>,
-8 tests, passing in <code>gate-unit-repair.log</code>: the planted NaN is named
-at <code>(103,)</code> with no other cell changed, the qualified total is
-finite, the unqualified total makes the amplitude refuse by name, the concrete
-solve path refuses by index while a finite and a traced state do not, and the
-arc-root tangent is finite across a discriminant seam.</p>
+10 tests, passing in <code>gate-unit-mask.log</code>: the planted NaN is named
+at <code>(103,)</code> with no other cell flagged and no value altered, it is
+refused by <code>CurrentNormalisationError</code> with that index in the
+message, a non-finite <code>cell_current</code> is refused the same way, a
+finite state is admitted, a jitted step reports the flag, the first offending
+index and the count across the trace boundary while the host boundary refuses
+from it, an inadmissible amplitude is flagged and refused while the traced
+amplitude stays finite under a NaN total, and the arc-root tangent is finite
+across a discriminant seam.</p>
 <p id="cell-moment-derivative-nan-gate-sweep">The import sweep runs every file that imports <code>separatrix_clip</code>,
 <code>source</code> or <code>forward_operator</code>, plus the certificate tests,
 each in its own fresh process at the tip and at the base, from a git archive of
@@ -152,5 +185,16 @@ and cell 103's moment tangent is NaN against a central difference of
 test fails in the same tree with a non-finite direction
 (<code>negative-control-test.log</code>, one failed, four passed,
 <code>EXIT=1</code>), so the guard is shown firing rather than merely passing.</p>
+<p id="cell-moment-derivative-nan-negative-mask">The declared mutation for the mask repair restores the silent zeroing in a
+scratch copy of commit <code>497942d16</code>: <code>cell_moment_nonfinite</code>
+replaces every non-finite component with <code>0.0</code> before it builds the
+mask, which is exactly the behaviour the first repair shipped. Four tests then
+fail — the mask names no cell, the planted radial moment is no longer refused,
+the non-finite <code>cell_current</code> is no longer refused, and the traced
+step reports its flag false — so the planted-NaN state passes silently instead
+of being refused (<code>negative-control-mask.log</code>,
+<code>4 failed, 6 deselected</code>, <code>EXIT=1</code>). The tests fail in the
+mutated tree and pass in the committed one, which is the fact the negative
+control has to show.</p>
 </body>
 </html>

@@ -1,0 +1,72 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_source": "The reviewed run's own arms: logs/baseline-suite.log (revision 06ebc1bf8) ends '36 passed, 1 skipped in 191.13s' with EXIT=0 and logs/after-suite.log (revision a1fde04cb) ends '39 passed, 2 skipped in 227.04s' with EXIT=0; grep -c '^FAILED' is 0 in both and the manifest records failure_count 0 with failure_ids [] for both arms, so the declared suite delta adds no failing id.",
+  "call_site_count": 4,
+  "call_sites": [
+    "nova/equilibrium/stencil_mesh.py:522 MomentGeometry.from_cells -> _representative_polygons (canonical_polygons is the same pair)",
+    "scripts/prototypes/fast_read/measure.py:60 TopologyGeometry.from_cells",
+    "scripts/prototypes/diverted_stall/measure.py:118 TopologyGeometry.from_cells",
+    "scripts/prototypes/fast_map_production/solver.py:159 TopologyGeometry.from_cells"
+  ],
+  "completed_at": "2026-10-24T15:41:11.631Z",
+  "dispatched_at": "2026-10-24T15:31:57Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/carrier-vertex-identity.html",
+      "line": "242",
+      "severity": "blocking",
+      "text": "blocking: the sentence 'the three tests pass at their exact tolerances (logs/fix-three-tests.log, 5 passed)' rests on a log that carries no revision header, no command line and no EXIT= line, and no completed full-file gate exists at the fix revision: logs/fix-equilibrium_test_topology_read.py.log writes '# revision: e3de3c290...' (the pre-fix head) and its mtime is 17:30 against a fix committed at 17:22, so the fragment's claim is unattributable to 0ff6d2318 and done_when (3) is unmet for tests/equilibrium/test_topology_read.py, the file that imports the module this increment changes. The sibling citation at :244, logs/fix-device-and-identity.log, likewise carries no revision and no EXIT= line."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/carrier-vertex-identity.html",
+      "line": "229",
+      "severity": "non-blocking",
+      "text": "non-blocking: the diagnostic figures 'membership fraction of 0.011', '264 node rows' and '8.3e-32 in the eager path against 7.1e-3 in the compiled one' appear in no file under the run's logs/ directory; grep for 0.011 and 8.3e-32 over logs/ returns nothing, and the four probe logs the manifest cites for round4_diagnosis (probe-geom-base.log, probe-geom-head.log, probe-dups-head.log, probe-geom-fix.log) report only duplicate-vertex counts and cell coordinates. The values exist only in the worker transcript resume-4.jsonl, so the fragment presents measurements no later reader can open."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/carrier-vertex-identity.html",
+      "line": "220",
+      "severity": "non-blocking",
+      "text": "non-blocking: 'The cells carry six corners each' is contradicted by the run's own probe: logs/probe-geom-head.log reports 'CELLS 132 VCOUNT [3, 4, 5, 6, 7, 8, 9, 10]' and lists cells 48 to 53 carrying eight slots each (slots 1,2 and 6,7), so the polygons reaching the atomiser hold three to ten vertices, not six."
+    },
+    {
+      "file": "nova/equilibrium/topology.py",
+      "line": "2529",
+      "severity": "non-blocking",
+      "text": "non-blocking: this call is written to a file outside the brief's declared write scope (nova/equilibrium/stencil_mesh.py, nova/equilibrium/analytic_single_null.py, nova/biot/plasmagrid.py, their test files, tests/test_carrier_vertex_identity.py and the fragment); the worker names the breach in the manifest's round4_fix key rather than stopping for a scope grant, so the coordinator must ratify the addition of topology.py to the node's scope."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T081359704297-carrier-vertex-identity/manifest.md",
+      "line": "12",
+      "severity": "non-blocking",
+      "text": "non-blocking: round4_gate states 'tests/equilibrium/test_topology_read.py at 0ff6d2318 is running as job 1294861', but the job's log header, written by its own script with git -C <worktree> rev-parse HEAD at launch, records '# revision: e3de3c290cd707986419863f62dfa54c81b34cfe'; a reader cannot tell from the record which revision the gate measured, and the job was still RUNNING 25 minutes in against a 59-minute limit."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261024T153040024745-review-of-carrier-vertex-identity-42563384ce49",
+  "reviewed_base_sha": "e3de3c290cd707986419863f62dfa54c81b34cfe",
+  "reviewed_head_sha": "42563384ce498da2544e529dac96c634397e7920",
+  "reviewed_run_id": "r-20261024T081359704297-carrier-vertex-identity",
+  "rubric": "code",
+  "scope_note": "This review covers only the two commits gained since the previous review (e3de3c290..42563384c): 0ff6d2318 fix(equilibrium): canonicalise carrier corners before they are atomised and 42563384c docs(converged-forward-solve): record why the topology read lost its X-point. The earlier commits of this run were reviewed at 0ac91093b, 42f0dbaa5, 61b422274 and e3de3c290.",
+  "scores": {
+    "durability": 11,
+    "evidence": 8,
+    "fit": 17,
+    "goal_fidelity": 15,
+    "reuse": 20,
+    "scope_discipline": 13
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T15:43:26.829133+00:00",
+  "total": 84,
+  "verdicts": {
+    "diff": "Read both commits against e3de3c290: 0ff6d2318 factors _representative_polygons behind a public canonical_polygons wrapper in nova/equilibrium/stencil_mesh.py:455 and calls it from nova/equilibrium/topology.py:2529; 42563384c adds one 38-line fragment section, and no test file is changed in either commit.",
+    "done_when": "done_when (3) requires every test file importing the changed modules to pass by delta in its own fresh process; the increment adds nova/equilibrium/topology.py to the changed set, and tests/equilibrium/test_topology_read.py imports TopologyGeometry at :469 and :507, but its gate log logs/fix-equilibrium_test_topology_read.py.log is uncollected and its header records revision e3de3c290, so no completed arm exists at the fix.",
+    "goal": "The node goal is to make the hex carrier device-independent and the analytic reference solve deterministic; this increment addresses the follow-on regression those changes caused in the topology read, and nova/equilibrium/topology.py:2529 now feeds canonical polygons to the atomiser.",
+    "manifest": "Read the run manifest (status complete); it declares twelve commits and records the topology gate as running and uncollected at its checkpoint line, but its round4_gate line states the job runs at 0ff6d2318 while the job's own log header names e3de3c290.",
+    "write_paths": "Read the run manifest's orientation_write_paths and the brief's write-only list; nova/equilibrium/topology.py, touched at 0ff6d2318:2527-2529, is in neither, and the worker records the breach itself in the round4_fix key."
+  }
+}

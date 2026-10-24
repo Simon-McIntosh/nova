@@ -1,0 +1,68 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "nova/graphics/bokeh.py:124 write button calls simulator.write_ids",
+    "nova/imas/pulsedesign.py:590 write_ids stores equilibrium_ids through IdsEntry.put_ids",
+    "nova/imas/equilibrium.py:998 EquilibriumData.wall passes the pulse dd_version to Wall"
+  ],
+  "completed_at": "2026-10-24T21:47:00.411Z",
+  "dispatched_at": "2026-10-24T21:31:15Z",
+  "findings": [
+    {
+      "file": "tests/test_pulsedesign_write_convention.py",
+      "line": "144",
+      "severity": "non-blocking",
+      "text": "non-blocking: the assertion compares pulsedesign.DEFAULT_DD_VERSION with sample.DEFAULT_DD_VERSION, whose value is \"3.39.0\", so re-introducing a literal DEFAULT_DD_VERSION = \"3.39.0\" in pulsedesign leaves it true; the done_when's \"no literal left\" has no failing condition."
+    },
+    {
+      "file": "tests/test_equilibrium_wall_dd_version.py",
+      "line": "75",
+      "severity": "non-blocking",
+      "text": "non-blocking: str(version.major) is compared with PULSE_VERSION.split(\".\")[0] after line 74 has already asserted version equals Version(PULSE_VERSION), so both sides derive from the same constant the test supplied and the line cannot fail."
+    },
+    {
+      "file": "docs/evidence/fragments/dd-cocos-ingest/ids-writer-factor.html",
+      "line": "57",
+      "severity": "non-blocking",
+      "text": "non-blocking: the fragment says \"all three sites carry the factor\" and then lists four psi rows (psi_axis, psi_boundary, boundary_separatrix.psi, profiles_2d.psi), so the count and the list disagree."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read commit by commit: 07e470d00 merges the duplicate attrs_0d loop into the factored one and adds the two tests, and 3dbbc159c adds the 77-line evidence fragment; no other file is touched.",
+    "done_when": "the done_when names three clauses; tests/test_pulsedesign_write_convention.py (4 passed), tests/test_equilibrium_wall_dd_version.py (2 passed) and eight file-level arms under logs/base and logs/head assert them, the writer arm by reading the written IDS back and the wall arm by recording the constructor argument.",
+    "goal": "the reviewed node's goal is to exercise the pulsedesign writer's DD convention factor and give the DD version one default; nova/imas/pulsedesign.py:528-538 now reads sample.DEFAULT_DD_VERSION and applies the factor to every psi-named attrs_0d row in one loop.",
+    "manifest": "read; it records status complete, commits 07e470d00 and 3dbbc159c, a zero-delta two-armed gate across eight files, and the negative-control log, and states equilibrium.py needed no change because EquilibriumData.wall already passed str(self.ids_dd_version).",
+    "write_paths": "the source manifest declares five write paths (pulsedesign.py, equilibrium.py, the two new tests and the fragment); git diff 48d7adda68b5e86d26f5c896c8a47e2ead865be8..3dbbc159c6bc72cf5448d2473ee23f0cd29beaa8 changes exactly four of them and touches nothing else."
+  },
+  "justifications": {
+    "durability": "tests/test_pulsedesign_write_convention.py:151-169 fails on the base writer and on the mutated scratch copy, but tests/test_pulsedesign_write_convention.py:144 cannot fail for the literal it claims to guard and tests/test_equilibrium_wall_dd_version.py:75 is tautological.",
+    "evidence": "logs/base and logs/head hold one fresh process per file with matching collection counts and EXIT=0 on every arm, and logs/negative-control.log ends 1 failed 3 passed EXIT=1 naming time_slice.profiles_2d.psi.",
+    "fit": "tests/test_pulsedesign_write_convention.py:104-124 follows the database-free known-state round-trip idiom of tests/test_sample_write_convention.py:47-75.",
+    "goal_fidelity": "nova/imas/pulsedesign.py:532-538 applies the factor to psi-named attrs_0d loop rows in one loop, so the unfactored overwrite is gone, and nova/imas/pulsedesign.py:528 reads sample.DEFAULT_DD_VERSION with no literal left.",
+    "reuse": "the capability search for a database-free writer seam found only tests/test_sample_write_convention.py, which owns the Sample writer's own arm; WriterState serves PulseDesign and extends that idiom rather than duplicating production code.",
+    "scope_discipline": "git diff 48d7adda68b5e86d26f5c896c8a47e2ead865be8..3dbbc159c6bc72cf5448d2473ee23f0cd29beaa8 changes only the two source/test files and the fragment its declared write paths grant."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the reviewed node's goal is to exercise the pulsedesign writer's DD convention factor and give the DD version one default; nova/imas/pulsedesign.py:528-538 now reads sample.DEFAULT_DD_VERSION and applies the factor to every psi-named attrs_0d row in one loop.\nVERDICT done_when: the done_when names three clauses; tests/test_pulsedesign_write_convention.py (4 passed), tests/test_equilibrium_wall_dd_version.py (2 passed) and eight file-level arms under logs/base and logs/head assert them, the writer arm by reading the written IDS back and the wall arm by recording the constructor argument.\nVERDICT write_paths: the source manifest declares five write paths (pulsedesign.py, equilibrium.py, the two new tests and the fragment); git diff 48d7adda68b5e86d26f5c896c8a47e2ead865be8..3dbbc159c6bc72cf5448d2473ee23f0cd29beaa8 changes exactly four of them and touches nothing else.\nVERDICT manifest: read; it records status complete, commits 07e470d00 and 3dbbc159c, a zero-delta two-armed gate across eight files, and the negative-control log, and states equilibrium.py needed no change because EquilibriumData.wall already passed str(self.ids_dd_version).\nVERDICT diff: read commit by commit: 07e470d00 merges the duplicate attrs_0d loop into the factored one and adds the two tests, and 3dbbc159c adds the 77-line evidence fragment; no other file is touched.\nCALL_SITES: nova/graphics/bokeh.py:124 write button calls simulator.write_ids, nova/imas/pulsedesign.py:590 write_ids stores equilibrium_ids through IdsEntry.put_ids, nova/imas/equilibrium.py:998 EquilibriumData.wall passes the pulse dd_version to Wall\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/imas/pulsedesign.py:532-538 applies the factor to psi-named attrs_0d loop rows in one loop, so the unfactored overwrite is gone, and nova/imas/pulsedesign.py:528 reads sample.DEFAULT_DD_VERSION with no literal left.\nSCORE evidence: 18\nJUSTIFICATION evidence: logs/base and logs/head hold one fresh process per file with matching collection counts and EXIT=0 on every arm, and logs/negative-control.log ends 1 failed 3 passed EXIT=1 naming time_slice.profiles_2d.psi.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 48d7adda68b5e86d26f5c896c8a47e2ead865be8..3dbbc159c6bc72cf5448d2473ee23f0cd29beaa8 changes only the two source/test files and the fragment its declared write paths grant.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_pulsedesign_write_convention.py:151-169 fails on the base writer and on the mutated scratch copy, but tests/test_pulsedesign_write_convention.py:144 cannot fail for the literal it claims to guard and tests/test_equilibrium_wall_dd_version.py:75 is tautological.\nSCORE fit: 18\nJUSTIFICATION fit: tests/test_pulsedesign_write_convention.py:104-124 follows the database-free known-state round-trip idiom of tests/test_sample_write_convention.py:47-75.\nSCORE reuse: 20\nJUSTIFICATION reuse: the capability search for a database-free writer seam found only tests/test_sample_write_convention.py, which owns the Sample writer's own arm; WriterState serves PulseDesign and extends that idiom rather than duplicating production code.\nFINDING tests/test_pulsedesign_write_convention.py:144 non-blocking: the assertion compares pulsedesign.DEFAULT_DD_VERSION with sample.DEFAULT_DD_VERSION, whose value is \"3.39.0\", so re-introducing a literal DEFAULT_DD_VERSION = \"3.39.0\" in pulsedesign leaves it true; the done_when's \"no literal left\" has no failing condition.\nFINDING tests/test_equilibrium_wall_dd_version.py:75 non-blocking: str(version.major) is compared with PULSE_VERSION.split(\".\")[0] after line 74 has already asserted version equals Version(PULSE_VERSION), so both sides derive from the same constant the test supplied and the line cannot fail.\n",
+  "review_run_id": "r-20261024T204500258675-review-of-ids-writer-factor-3dbbc159c6bc",
+  "reviewed_base_sha": "48d7adda68b5e86d26f5c896c8a47e2ead865be8",
+  "reviewed_head_sha": "3dbbc159c6bc72cf5448d2473ee23f0cd29beaa8",
+  "reviewed_run_id": "r-20261024T195259475022-ids-writer-factor",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T21:51:48.514999+00:00",
+  "total": 111
+}

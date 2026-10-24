@@ -28,7 +28,9 @@ def census(values) -> dict[str, object]:
         "inf": int(np.count_nonzero(np.isinf(values))),
         "first_bad": [int(i) for i in bad[:8]],
         "finite_max_abs": float(
-            np.max(np.abs(values[np.isfinite(values)])) if bad.size < values.size else 0.0
+            np.max(np.abs(values[np.isfinite(values)]))
+            if bad.size < values.size
+            else 0.0
         ),
     }
 
@@ -52,9 +54,7 @@ def main() -> int:
     case_name = "diverted-single-null"
     requested_cells = -300
     carrier_case, source_case, exact = certificate._case(case_name)
-    machine = certificate._case_machine(
-        case_name, carrier_case, exact, requested_cells
-    )
+    machine = certificate._case_machine(case_name, carrier_case, exact, requested_cells)
     coordinates = np.vstack(
         (machine.node, machine.wall_node, machine.sample_coordinates)
     )
@@ -112,9 +112,7 @@ def main() -> int:
 
     def amplitude(scale_vector):
         moments = op.cell_current_moments(scale_vector, None)
-        return op.current_normalisation_amplitude(
-            target, jnp.sum(moments.cell_current)
-        )
+        return op.current_normalisation_amplitude(target, jnp.sum(moments.cell_current))
 
     amp_value, amp_tangent = jax.linearize(amplitude, state)
     report["amplitude_value"] = census(amp_value)

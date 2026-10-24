@@ -53,8 +53,11 @@ def main() -> int:
         flush=True,
     )
 
-    report: dict[str, object] = {"label": label, "revision": revision,
-                                 "backend": jax.default_backend()}
+    report: dict[str, object] = {
+        "label": label,
+        "revision": revision,
+        "backend": jax.default_backend(),
+    }
 
     # --- stage 0: the analytic reference and the wall -----------------------
     case_name = "diverted-single-null"
@@ -115,14 +118,15 @@ def main() -> int:
         out / "s2_polygons.npz",
         area=area,
         vertex_counts=vertex_counts,
-        polygon_offsets=np.concatenate(
-            ([0], np.cumsum(vertex_counts))
-        ).astype(np.int64),
+        polygon_offsets=np.concatenate(([0], np.cumsum(vertex_counts))).astype(
+            np.int64
+        ),
         polygon_vertices=np.concatenate(cleaned),
         area_sum=area.sum(),
     )
     report["s2_vertex_counts_hist"] = {
-        str(int(k)): int(v) for k, v in zip(*np.unique(vertex_counts, return_counts=True))
+        str(int(k)): int(v)
+        for k, v in zip(*np.unique(vertex_counts, return_counts=True))
     }
     report["s2_area_sum"] = float(area.sum())
     print(
@@ -224,11 +228,11 @@ def main() -> int:
         atomic_node_coordinates=np.asarray(
             geometry.atomic_mesh.node_coordinates, dtype=np.float64
         ),
-        atomic_centroids=np.asarray(
-            geometry.atomic_mesh.centroids, dtype=np.float64
-        ),
+        atomic_centroids=np.asarray(geometry.atomic_mesh.centroids, dtype=np.float64),
         atomic_cell_nodes=np.asarray(geometry.atomic_mesh.cell_nodes, dtype=np.int64),
-        atomic_cell_vertex_count=np.asarray(geometry.atomic_mesh.cell_vertex_count, dtype=np.int64),
+        atomic_cell_vertex_count=np.asarray(
+            geometry.atomic_mesh.cell_vertex_count, dtype=np.int64
+        ),
         atomic_tolerance=np.asarray([geometry.atomic_mesh.tolerance]),
     )
     report["s7_sample_coordinates"] = int(len(sample))
@@ -252,16 +256,16 @@ def main() -> int:
     payload: dict[str, np.ndarray] = {}
     for family in ("grid", "wall", "sample"):
         for index, name in enumerate(("plain", "radial", "vertical")):
-            payload[f"{family}_{name}"] = np.asarray(assembled[family][index], dtype=np.float64)
+            payload[f"{family}_{name}"] = np.asarray(
+                assembled[family][index], dtype=np.float64
+            )
     np.savez(out / "s8_assembled.npz", **payload)
     report["s8_builder"] = builder
     report["s8_shapes"] = {k: list(v.shape) for k, v in payload.items()}
     print(f"STAGE s8_assembled builder={builder}", flush=True)
 
     # --- operator-level node count: grid + wall + sample -------------------
-    report["total_nodes"] = (
-        int(len(centres)) + int(len(wall)) + int(len(sample))
-    )
+    report["total_nodes"] = int(len(centres)) + int(len(wall)) + int(len(sample))
     print(
         f"TOTAL grid={len(centres)} wall={len(wall)} sample={len(sample)} "
         f"node_number={report['total_nodes']}",

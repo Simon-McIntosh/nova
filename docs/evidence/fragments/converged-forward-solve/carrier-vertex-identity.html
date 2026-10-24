@@ -173,6 +173,67 @@ run reached its deadline, so it carries no result on either arm. Both belong on
 a device lane, where the forward solve's 370 ms edits rather than minutes do the
 work.</p>
 
+<h3 id="carrier-vertex-identity-one-identity">One identity, chosen by value</h3>
+
+<p>The first repair left two identities in the tree. <code>PlasmaGrid</code>
+merged sample vertices by a quantised coordinate while <code>MomentGeometry</code>
+merged them through the mesh's neighbour rings, so one lattice produced 242
+sample nodes through the grid and 318 through the geometry, and
+<code>tests/test_biotpolysection.py</code> — which requires the two to agree —
+passed at base and failed at head. Both now call one function,
+<code>stencil_mesh.lattice_vertex_index</code>.</p>
+
+<p>That function reads no adjacency at all. A lattice vertex is the set of cell
+slots whose coordinates agree within <code>1e-9</code> of the lattice scale,
+found through a spatial hash at that width. A candidate group is rejected when
+its own spread reaches the merge width, which keeps a wall-clipped sliver from
+collapsing, and two slots of one cell are never joined. Because the answer
+depends on the coordinates and not on which of the mesh's rings happened to
+carry them, a grid that lists one lattice in a different order — which the
+two devices do — keeps the same identity.</p>
+
+<p>The stored coordinate of a merged corner is the mean of its copies taken in
+sorted order, not the first copy in list order, and the sample coordinate array
+is published sorted. Both remove the last dependence on cell order, so two
+builds of one lattice publish the same <code>sample_node_coordinates</code>,
+the same atomic nodes and the same second moments.</p>
+
+<h3 id="carrier-vertex-identity-tests">What the tests now require</h3>
+
+<p>The test that compared two outputs of one build now counts the lattice
+vertices from the cell polygons instead: every cell lists every corner it
+carries, so the number of distinct positions in their union is the lattice's
+vertex count, measured outside the geometry. It reads 1075, and the geometry
+publishes 1075. A new test permutes the cells and requires the sample
+coordinates, the atomic node coordinates and the second moments to be identical
+to the unpermuted build.</p>
+
+<p>The negative control is re-run against the head assertion. Restoring the
+binned identity in a scratch copy of the head tree fails
+<code>test_perturbed_wall_keeps_the_carrier_vertex_identity</code> and exits 1;
+log <code>logs/negative-control-head-assertion.log</code>.</p>
+
+<p>The device arm is a receipt written on one H200 under <code>gpu_0003_grpA</code>
+(job 1294754, <code>logs/h200-identity-receipt.log</code>) and compared on the
+fleet CPU node: coefficient digest <code>01818d5d423fe502</code>, 340 cells,
+1075 sample vertices, <code>node_number</code> 1536 and an equal vertex
+partition on both devices, so the receipt test passes
+(<code>logs/device-receipt-comparison-repair.log</code>). The atomic vertex
+count still reads 922 on the H200 against 923 on the CPU: that count comes from
+<code>AtomicCellMesh.from_cells</code>, which atomises by a quantised coordinate
+key and does not yet use the lattice identity.</p>
+
+<h3 id="carrier-vertex-identity-rebuild">Carrier fixture rebuild</h3>
+
+<p>The carrier identity hashes the sources in <code>CARRIER_SOURCE_PATHS</code>,
+which lists <code>nova/equilibrium/stencil_mesh.py</code> but not
+<code>nova/equilibrium/analytic_single_null.py</code>: the reference reaches the
+identity through the wall content it emits, not through its own source bytes.
+The digest moved from <code>76aacb2ebf7dddd3</code> at the base of this repair
+to <code>20f042fedd3d237c</code> at its head, so every cached carrier rebuilds
+once. The rebuild of one row (the coarse fixture) is measured cold and warm in
+<code>logs/carrier-fixture-rebuild.log</code>.</p>
+
 <p>One residual device difference is outside this node's write scope: the
 atomic vertex count reads 923 on the CPU and 922 on the H200 at the head,
 because <code>AtomicCellMesh.from_cells</code> in

@@ -243,9 +243,18 @@ which lists <code>nova/equilibrium/stencil_mesh.py</code> but not
 <code>nova/equilibrium/analytic_single_null.py</code>: the reference reaches the
 identity through the wall content it emits, not through its own source bytes.
 The digest moved from <code>76aacb2ebf7dddd3</code> at the base of this repair
-to <code>20f042fedd3d237c</code> at its head, so every cached carrier rebuilds
-once. The rebuild of one row (the coarse fixture) is measured cold and warm in
-<code>logs/carrier-fixture-rebuild.log</code>.</p>
+to <code>f775d83e9fc3b0d4</code> at its head, so every cached carrier rebuilds
+once. Because the identity hashes source bytes, a comment in
+<code>stencil_mesh.py</code> moves it too: <code>20f042fedd3d237c</code> was
+taken before the docstring corrections landed and is not the head's value.</p>
+
+<p>The rebuild of one row is measured on the compute node in fresh processes
+(<code>logs/carrier-fixture-rebuild.log</code>, job 1294764). The coarse
+fixture carries 551 cells. Cold, the carrier builds in <code>104.5</code> s and
+the row takes <code>245.3</code> s wall; warm, the same cache key hits
+(<code>build_s</code> has no entry) and the row takes <code>125.0</code> s. The
+warm hit is the control that the key is stable inside one tree, so the move
+above is a real invalidation rather than a recompute on every run.</p>
 
 <p>One residual device difference is outside this node's write scope: the
 atomic vertex count reads 923 on the CPU and 922 on the H200 at the head,

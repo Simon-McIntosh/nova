@@ -29,7 +29,7 @@ from scripts.analytic_oracle_fixtures import measure as fixture
 
 CERTIFICATE_CELLS = -300
 SEPARATRIX_SAMPLES = 1441
-WALL_PERTURBATION_M = 4.0e-12
+WALL_PERTURBATION_M = 4.0e-12  # applied to each coordinate, 5.7e-12 m displacement
 RECEIPT_ENVIRONMENT = "NOVA_CARRIER_VERTEX_RECEIPT"
 
 
@@ -91,6 +91,24 @@ def diverted_carrier(
     return wall, geometry
 
 
+def vertex_partition(geometry: MomentGeometry) -> list[list[list[int]]]:
+    """Return which cell slots share a vertex, in a cell-order-free form.
+
+    Two builds may realise the same lattice with the cells listed in a
+    different order, so a slot's numeric vertex id is not comparable between
+    them. What must agree is which slots are the same vertex, and each slot is
+    named by the micron cell its own centre sits in, which the ordering does
+    not move.
+    """
+    members: dict[int, list[list[int]]] = {}
+    for cell, vertices in enumerate(geometry.sampling_vertices):
+        centre = np.rint(np.mean(np.asarray(vertices, dtype=np.float64), axis=0) / 1e-6)
+        for slot in range(len(vertices)):
+            shared = members.setdefault(int(geometry.cell_sample_nodes[cell, slot]), [])
+            shared.append([int(centre[0]), int(centre[1]), slot])
+    return sorted(sorted(group) for group in members.values())
+
+
 def carrier_receipt(wall_shift: tuple[float, float] = (0.0, 0.0)) -> dict:
     """Return the identity a carrier build publishes for comparison."""
     wall, geometry = diverted_carrier(wall_shift)
@@ -105,8 +123,10 @@ def carrier_receipt(wall_shift: tuple[float, float] = (0.0, 0.0)) -> dict:
             + len(wall)
             + len(geometry.sample_node_coordinates)
         ),
-        "cell_sample_nodes": geometry.cell_sample_nodes.tolist(),
-        "sample_vertex_count": geometry.sample_vertex_count.tolist(),
+        "vertex_partition": vertex_partition(geometry),
+        "sample_vertex_count": sorted(
+            int(count) for count in geometry.sample_vertex_count
+        ),
     }
 
 
@@ -123,16 +143,17 @@ def test_reference_carrier_vertices_are_identified_by_lattice_topology():
 
 
 def test_perturbed_wall_keeps_the_carrier_vertex_identity():
-    _, reference = diverted_carrier()
-    _, perturbed = diverted_carrier((WALL_PERTURBATION_M, 0.0))
-
-    assert reference.cell_sample_nodes.shape == perturbed.cell_sample_nodes.shape
-    np.testing.assert_array_equal(
-        reference.cell_sample_nodes, perturbed.cell_sample_nodes
+    reference_wall, reference = diverted_carrier()
+    perturbed_wall, perturbed = diverted_carrier(
+        (WALL_PERTURBATION_M, WALL_PERTURBATION_M)
     )
+
+    assert np.max(np.abs(perturbed_wall - reference_wall)) > WALL_PERTURBATION_M
+    assert reference.cell_sample_nodes.shape == perturbed.cell_sample_nodes.shape
     assert len(reference.sample_node_coordinates) == len(
         perturbed.sample_node_coordinates
     )
+    assert vertex_partition(reference) == vertex_partition(perturbed)
 
 
 def test_carrier_identity_matches_a_receipt_from_another_device():
@@ -145,7 +166,7 @@ def test_carrier_identity_matches_a_receipt_from_another_device():
 
     assert mine["node_number"] == other["node_number"]
     assert mine["sample_node_count"] == other["sample_node_count"]
-    assert mine["cell_sample_nodes"] == other["cell_sample_nodes"]
+    assert mine["vertex_partition"] == other["vertex_partition"]
     assert mine["coefficient_digest"] == other["coefficient_digest"]
 
 

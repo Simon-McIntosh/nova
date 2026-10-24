@@ -24,8 +24,8 @@
   <title>Topology read containment and rebank | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="10">
-<meta name="plan-modified" content="2026-10-23">
+<meta name="plan-version" content="11">
+<meta name="plan-modified" content="2026-10-24">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-impl" content="0.14">
 </head>
@@ -179,6 +179,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261023T200937335629-certificate-drift-attribution" data-who="reckon-build" data-when="2026-10-23T20:55:29Z">
     <div class="r-comment-body"><p>Added the existing-pin fresh revision row mode and the certificate attribution fragment; current-main diverted 300-cell CPU solve has 1536/1536 finite flux values, two finite source-amplitude samples, and residual 2.2640848763056183 after one trip; historical NaN repair is already landed, while this answer remains unqualified.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20261024-s4-handoff" data-who="reckon-build" data-when="2026-10-24T05:00:00Z">
+    <div class="r-comment-body"><p>§4 attribution landed (merged <code>9552583e6</code> and <code>1e69853dd</code>): the historical 300-cell NaN was introduced at <code>c5e1498a</code> and removed by <code>8c2c4b278</code>; the 110-cell target moved at <code>a3fa8b9b</code> and <code>e227d3dc</code>. The repair half of §4 is met. The section stays open because the diverted 300-cell row qualifies at no measured revision or device: CPU at main stops after one trip when the first Krylov action is refused as non-finite (residual 2.264); the H200 at main reaches 0.0749 after 12 trips; <code>edb02142</code> on the H200 stops at 2.248 after four; the tracked <code>edb02142</code> receipt is itself unqualified. The CPU and H200 carriers also differ (1536 versus 1547 solve coordinates for the same 340 cells). Lead decision 2026-10-24: these forward-solve defects belong to <code>converged-forward-solve</code> and are handed to its coordinator; the certificate is re-committed with its floor once the row qualifies.</p></div>
 </div>
 </section>
 </main>

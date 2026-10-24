@@ -392,6 +392,43 @@ def _cell_banked_current_moments(
     )
 
 
+class NonFiniteCellMomentError(RuntimeError):
+    """Report cells whose integrated current moment is not finite."""
+
+    def __init__(self, indices):
+        self.indices = tuple(int(index) for index in indices)
+        shown = list(self.indices[:16])
+        more = f" (+{len(self.indices) - 16} more)" if len(self.indices) > 16 else ""
+        super().__init__(
+            f"integrated current moment is non-finite at cell indices {shown}{more}"
+        )
+
+
+def qualify_cell_current_moments(
+    moments: CellCurrentMoments,
+) -> tuple[CellCurrentMoments, tuple[int, ...]]:
+    """Zero a non-finite cell's moments and name the offending cell indices.
+
+    One cell's non-finite derivative would otherwise enter the total current
+    and the normalisation amplitude, which multiplies every cell, so a local
+    singularity would be reported as a uniform failure. Each cell is qualified
+    here before either reduction. Indices are returned when the moments are
+    concrete; a traced evaluation names none because a tracer carries no value.
+    """
+    current = jnp.asarray(moments.cell_current)
+    nonfinite = ~jnp.isfinite(current)
+    qualified = CellCurrentMoments(
+        *(
+            jnp.where(nonfinite, jnp.zeros_like(jnp.asarray(value)), jnp.asarray(value))
+            for value in moments
+        )
+    )
+    indices: tuple[int, ...] = ()
+    if not isinstance(nonfinite, jax.core.Tracer):
+        indices = tuple(int(index) for index in np.flatnonzero(np.asarray(nonfinite)))
+    return qualified, indices
+
+
 def _cell_banked_field_integrals(
     support,
     selection,
@@ -3482,7 +3519,9 @@ class ForwardFluxOperator:
     def _internal_on_partition(self, psi, frozen, target_current=None):
         """Return the plasma image while retaining one trip's partition."""
         partition = self._partition_for_state(psi, frozen)
-        moments = self._current_moments_on_partition(psi, partition)
+        moments, _indices = qualify_cell_current_moments(
+            self._current_moments_on_partition(psi, partition)
+        )
         if target_current is not None:
             amplitude = self.current_normalisation_amplitude(
                 target_current, jnp.sum(moments.cell_current)
@@ -3605,6 +3644,16 @@ class ForwardFluxOperator:
             self._support_partition(psi, requested_class)
         )
 
+    def cell_moment_receipt(self, psi, requested_class=None) -> tuple[int, ...]:
+        """Return the cell indices whose integrated current moment is non-finite.
+
+        The solve reports these indices rather than letting one cell's
+        singularity enter the total current and the common amplitude.
+        """
+        return qualify_cell_current_moments(
+            self.cell_current_moments(psi, requested_class)
+        )[1]
+
     @staticmethod
     def scaled_current_moments(
         moments: CellCurrentMoments, amplitude: jax.Array
@@ -3650,7 +3699,9 @@ class ForwardFluxOperator:
         self, psi, target_current, requested_class=None
     ) -> tuple[CellCurrentMoments, jax.Array]:
         """Return exact clipped moments and their declared-current amplitude."""
-        moments = self.cell_current_moments(psi, requested_class)
+        moments, _indices = qualify_cell_current_moments(
+            self.cell_current_moments(psi, requested_class)
+        )
         amplitude = self.current_normalisation_amplitude(
             target_current, jnp.sum(moments.cell_current)
         )
@@ -3671,7 +3722,9 @@ class ForwardFluxOperator:
     ):
         """Return one clipped partition, its scaled moments, and amplitude."""
         partition = self._support_partition(psi, requested_class)
-        moments = self._partitioned_current_moments(partition)
+        moments, _indices = qualify_cell_current_moments(
+            self._partitioned_current_moments(partition)
+        )
         amplitude = self.current_normalisation_amplitude(
             target_current, jnp.sum(moments.cell_current)
         )

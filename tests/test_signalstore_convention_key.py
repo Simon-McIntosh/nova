@@ -8,6 +8,7 @@ if it were the convention-keyed one.
 
 import numpy as np
 import pytest
+import zarr
 
 from nova.utilities.importmanager import skip_import
 
@@ -58,6 +59,12 @@ def make_store(tmp_path, dd_version, **kwargs):
     )
 
 
+def stored_groups(store):
+    """Return the top-level group names persisted for a signal store."""
+    root = zarr.open_group(store=str(store.filepath), mode="r")
+    return set(root.group_keys())
+
+
 def tensorize(tmp_path, dd_version):
     """Tensorize a synthetic equilibrium read for a store identity."""
     ingest = IdsIngest(resolver=StandardNameResolver())
@@ -87,13 +94,17 @@ def test_convention_alone_changes_the_key(tmp_path):
     store3 = make_store(tmp_path, DD3)
     rekeyed = make_store(tmp_path, DD3, cocos=17)
 
-    assert store3.dd_version == rekeyed.dd_version
-    assert store3.cocos != rekeyed.cocos
+    assert store3.dd_version == rekeyed.dd_version == DD3
+    assert store3.cocos == 11
+    assert rekeyed.cocos == 17
     assert store3.cache_key != rekeyed.cache_key
 
-    # The convention enters the key, so the keyed group is distinct from any
-    # group a key carrying no convention could have produced.
+    # The identity-only key ignores the convention, so both stores name the
+    # same group a key carrying no convention could have produced, and each
+    # convention-keyed name differs from it.
+    assert store3.legacy_cache_key == rekeyed.legacy_cache_key
     assert store3.legacy_cache_key != store3.cache_key
+    assert rekeyed.legacy_cache_key != rekeyed.cache_key
 
 
 def test_entry_written_under_the_old_key_is_refused(tmp_path):
@@ -115,3 +126,26 @@ def test_entry_written_under_the_old_key_is_refused(tmp_path):
     )
     assert fresh.cached()
     assert np.allclose(fresh.read()["plasma_current"].values, IP)
+
+
+def test_reingest_reclaims_the_legacy_group(tmp_path, capsys):
+    dataset = tensorize(tmp_path, DD3)
+
+    # An older nova wrote the group under a key carrying no convention.
+    stale = make_store(tmp_path, DD3)
+    stale.group = stale.legacy_cache_key
+    stale.write(dataset)
+    assert stored_groups(stale) == {stale.legacy_cache_key}
+    capsys.readouterr()
+
+    # Re-ingesting writes the convention-keyed group and reports what it
+    # removed, leaving exactly one group for the source.
+    fresh = make_store(tmp_path, DD3)
+    IdsIngest(resolver=StandardNameResolver()).ingest(
+        build_equilibrium(DD3), SPECS, fresh
+    )
+
+    assert stored_groups(fresh) == {fresh.cache_key}
+    assert fresh.legacy_group() is None
+    assert np.allclose(fresh.read()["plasma_current"].values, IP)
+    assert stale.legacy_cache_key in capsys.readouterr().out

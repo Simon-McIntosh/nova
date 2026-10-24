@@ -1,0 +1,42 @@
+{
+  "added_failure_basis": "the reviewed run is a diagnostic node with no test arms: its manifest carries no baseline_suite and no after_suite block, and its test_logs name diagnostic gate logs (cpu-stages.log, gpu-stages.log, compare.log, cpu-krylov.log, bin-census.log, cell-census.log, negative-control-reorder.log, negative-control-duplicate.log) rather than suite arms; with no readable arm there is no added failure id to derive, so the count is 0 over an empty id list, not a measured zero over a failing pair. The one log that exits non-zero is cpu-krylov.log, whose EXIT=1 is the node's measurement (two trace stages record non-finite derivatives), not a suite failure.",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-10-24T08:04:44.928Z",
+  "dispatched_at": "2026-10-24T07:58:45Z",
+  "findings": [],
+  "justifications": {
+    "durability": "the meta block is guarded by reckon audit-doc, which I showed refuses the pre-fix file and accepts the fixed one, but the three numeric corrections are pinned by no automated assertion tying the page's figures to bin-census.json or s2_polygons.npz",
+    "evidence": "each corrected claim reproduces against its cited artifact \u2014 bin-census.json pair 284/291 bins, cpu-stages/s2_polygons.npz 231/210, and nova/biot/plasmagrid.py:361 definition with :410 call site at ab9192d50",
+    "fit": "the meta block matches the sibling fragments' shape and the added names carry no plan-stage label beyond the required plan-slug meta at certificate-300-device-carrier.html:7",
+    "goal_fidelity": "the delta delivers exactly what the node goal implies for a finished diagnostic \u2014 a record that publishes and whose claims match its evidence, at certificate-300-device-carrier.html:7-11 and :150-152",
+    "reuse": "no code is added; the corrections cite the existing census artifacts and the identity check reuses reckon audit-doc rather than a new validator",
+    "scope_discipline": "git diff --name-only d936af99d..ab9192d50 lists one path, inside the declared fragment, and nova/ is untouched"
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the run's goal is to locate the 300-cell carrier's CPU/H200 divergence, locate the CPU Krylov action's first non-finite entry, and name repair sites; the gained commit ab9192d50 publishes the fragment's identity meta at docs/evidence/fragments/converged-forward-solve/certificate-300-device-carrier.html:7-11 and corrects the three record slips the prior review named at :94-96, :150-152 and :189-190, leaving the diagnostic content itself unchanged\nVERDICT done_when: the done_when's three items were recorded by the earlier commits; this delta's own measure is the publishable record \u2014 reckon audit-doc reports OK on the extracted head file and FAIL [meta-missing] on the same file at d936af99d, and the corrected numbers re-derive: 231 cells within 1e-15 of the median with 210 exactly equal from cpu-stages/s2_polygons.npz, and pair 284/291 sharing Z bin -4495549544932 while differing by one on R bin from bin-census.json\nVERDICT write_paths: the run's declared paths are the fragment, scripts/certificate_300_carrier/ and docs/figures/converged-forward-solve/certificate-300-device-carrier; the diff d936af99d..ab9192d50 touches exactly the fragment, 16 insertions and 8 deletions in one file\nVERDICT manifest: read; status complete, commits name ab9192d50 as the head, and the landing and checkpoint lines state audit-doc OK and name the three corrections \u2014 all four claims reproduce, including the 136-character plan-summary\nVERDICT diff: read ab9192d50 against d936af99d (one commit, one file): four meta lines added beside plan-evidence-for, the worked bin example now names Z as the shared axis and R as the differing one, the 240-cell tie count is replaced by the measured 231/210, and the repair pointer moves from plasmagrid.py:394 to the definition at :361 with the call at :410\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the delta delivers exactly what the node goal implies for a finished diagnostic \u2014 a record that publishes and whose claims match its evidence, at certificate-300-device-carrier.html:7-11 and :150-152\nSCORE evidence: 19\nJUSTIFICATION evidence: each corrected claim reproduces against its cited artifact \u2014 bin-census.json pair 284/291 bins, cpu-stages/s2_polygons.npz 231/210, and nova/biot/plasmagrid.py:361 definition with :410 call site at ab9192d50\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only d936af99d..ab9192d50 lists one path, inside the declared fragment, and nova/ is untouched\nSCORE durability: 14\nJUSTIFICATION durability: the meta block is guarded by reckon audit-doc, which I showed refuses the pre-fix file and accepts the fixed one, but the three numeric corrections are pinned by no automated assertion tying the page's figures to bin-census.json or s2_polygons.npz\nSCORE fit: 20\nJUSTIFICATION fit: the meta block matches the sibling fragments' shape and the added names carry no plan-stage label beyond the required plan-slug meta at certificate-300-device-carrier.html:7\nSCORE reuse: 20\nJUSTIFICATION reuse: no code is added; the corrections cite the existing census artifacts and the identity check reuses reckon audit-doc rather than a new validator\n",
+  "review_run_id": "r-20261024T075757721566-review-of-certificate-300-device-carrier-ab9192d50340",
+  "reviewed_base_sha": "d936af99d771cfc9b86c08d0c52d92a238539bfe",
+  "reviewed_head_sha": "ab9192d50340accb8672445ad4f454de06164d81",
+  "reviewed_run_id": "r-20261024T055903467516-certificate-300-device-carrier",
+  "scores": {
+    "durability": 14,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T08:05:28.481172+00:00",
+  "total": 112,
+  "verdicts": {
+    "diff": "read ab9192d50 against d936af99d (one commit, one file): four meta lines added beside plan-evidence-for, the worked bin example now names Z as the shared axis and R as the differing one, the 240-cell tie count is replaced by the measured 231/210, and the repair pointer moves from plasmagrid.py:394 to the definition at :361 with the call at :410",
+    "done_when": "the done_when's three items were recorded by the earlier commits; this delta's own measure is the publishable record \u2014 reckon audit-doc reports OK on the extracted head file and FAIL [meta-missing] on the same file at d936af99d, and the corrected numbers re-derive: 231 cells within 1e-15 of the median with 210 exactly equal from cpu-stages/s2_polygons.npz, and pair 284/291 sharing Z bin -4495549544932 while differing by one on R bin from bin-census.json",
+    "goal": "the run's goal is to locate the 300-cell carrier's CPU/H200 divergence, locate the CPU Krylov action's first non-finite entry, and name repair sites; the gained commit ab9192d50 publishes the fragment's identity meta at docs/evidence/fragments/converged-forward-solve/certificate-300-device-carrier.html:7-11 and corrects the three record slips the prior review named at :94-96, :150-152 and :189-190, leaving the diagnostic content itself unchanged",
+    "manifest": "read; status complete, commits name ab9192d50 as the head, and the landing and checkpoint lines state audit-doc OK and name the three corrections \u2014 all four claims reproduce, including the 136-character plan-summary",
+    "write_paths": "the run's declared paths are the fragment, scripts/certificate_300_carrier/ and docs/figures/converged-forward-solve/certificate-300-device-carrier; the diff d936af99d..ab9192d50 touches exactly the fragment, 16 insertions and 8 deletions in one file"
+  }
+}

@@ -41,7 +41,6 @@ from scipy.optimize import minimize_scalar
 
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium import forward_operator as forward_operator_module
-from nova.equilibrium.connectivity_boundary import wall_height_shadow_mask
 from nova.equilibrium.forward_operator import ForwardFluxOperator
 from nova.equilibrium.topology import Topology, TopologyClass
 from nova.jax.config import (
@@ -86,11 +85,6 @@ ROWS = (
     ("moderate-rotation-conventional-static", -1000),
     (certificate.DIVERTED_CASE_NAME, -1000),
 )
-BRANCH_NAMES = {
-    0: "retain_previous",
-    1: "qualified_height_band",
-    2: "connectivity_private_fallback",
-}
 
 
 def _strict(value: Any) -> Any:
@@ -416,29 +410,13 @@ def _shadow_measurement(
     x_point = np.asarray(topology.x_point, dtype=np.float64)
     if not np.all(np.isfinite(x_point)):
         raise RuntimeError("the diverted shadow control requires a finite X-point")
-    shadow, report = wall_height_shadow_mask(
-        operator.wall.coordinate[:, 1],
-        topology.axis[1],
-        topology.x_point,
-        carrier["xset"],
-        carrier["private_wall_node_mask"],
-        jnp.zeros(operator.wall.node_number, dtype=bool),
-        operator._wall_height_hysteresis,
-        operator._x_qualification_distance,
-        return_report=True,
-    )
-    shadow, report = _block_tree((shadow, report))
-    shadow = np.asarray(shadow, dtype=bool)
+    shadow = private
     below = wall[:, 1] < x_point[1]
     private_below = private & below
     shadow_below = shadow & below
     if not np.any(private_below):
         raise RuntimeError(
             "the private-region census saw no wall node below the X-point"
-        )
-    if not np.any(shadow_below):
-        raise RuntimeError(
-            "the height shadow excluded no private wall node below the X-point"
         )
 
     wall_start = operator.grid.node_number
@@ -498,21 +476,13 @@ def _shadow_measurement(
     if not masked_rejected_injected_panel:
         raise RuntimeError("the private-wall shadow did not reject the injection")
 
-    lower_branch = int(report["lower_branch"])
-    upper_branch = int(report["upper_branch"])
     return (
         {
             "private_wall_node_count": int(np.count_nonzero(private)),
             "private_wall_nodes_below_x_point": int(np.count_nonzero(private_below)),
             "shadowed_wall_node_count": int(np.count_nonzero(shadow)),
             "shadowed_private_nodes_below_x_point": int(np.count_nonzero(shadow_below)),
-            "lower_exclusion_branch": BRANCH_NAMES[lower_branch],
-            "upper_exclusion_branch": BRANCH_NAMES[upper_branch],
-            "mask_composition": (
-                "wall_height_shadow_mask applies a qualified-saddle height gate "
-                "and intersects it with the connectivity-private wall mask"
-            ),
-            "report": {key: np.asarray(value).item() for key, value in report.items()},
+            "mask_composition": "carrier topological private-wall mask",
             "positive_control": {
                 "injected_wall_node_index": injected_index,
                 "injected_coordinate_rz_m": injected_coordinate.tolist(),
@@ -975,8 +945,8 @@ def _source_contract() -> dict[str, Any]:
             ("global_surface.evaluate", "refine_root"),
         ),
         "private_wall_shadow": _pointer(
-            wall_height_shadow_mask.__wrapped__,
-            ("mask = proposed & private_wall",),
+            ForwardFluxOperator._carrier_shadow_read,
+            ("private_wall_node_mask",),
         ),
     }
 
@@ -1653,19 +1623,16 @@ def _write_report(path: Path, receipt: dict[str, Any]) -> None:
         (
             f"All {len(shadow_rows)} single-null controls passed: the injected "
             "private-region node won the unmasked limited read and was rejected by "
-            "the masked read. `wall_height_shadow_mask` uses the qualified-saddle "
-            "height band and intersects it with the connectivity-private wall mask. "
-            "The selecting exclusion is therefore height-based over connectivity-"
-            "qualified private nodes, not a connectivity-only shadow; each row records "
-            "whether either side fell back to connectivity alone."
+            "the masked read. The selecting exclusion is the carrier's "
+            "topological private-wall mask."
         )
     )
     lines.extend(
         [
             "",
             "| Cells | Wall nodes | Private below X | Shadowed below X | "
-            "Lower branch | Selected instead [R, Z] m |",
-            "|---:|---:|---:|---:|---|---|",
+            "Selected instead [R, Z] m |",
+            "|---:|---:|---:|---:|---|",
         ]
     )
     for row in shadow_rows:
@@ -1675,7 +1642,6 @@ def _write_report(path: Path, receipt: dict[str, Any]) -> None:
             f"| {row['realised_cells']} | {row['wall_nodes']} | "
             f"{shadow['private_wall_nodes_below_x_point']} | "
             f"{shadow['shadowed_private_nodes_below_x_point']} | "
-            f"{shadow['lower_exclusion_branch']} | "
             f"[{replacement[0]:.6f}, {replacement[1]:.6f}] |"
         )
     lines.extend(["", "## Why the single-null saddle moves with wall count", ""])

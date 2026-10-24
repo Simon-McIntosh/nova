@@ -117,7 +117,6 @@ CPU_TEST_MODULES = (
     "tests/test_topology_domain_partition.py",
     "tests/test_topology_o_qualification.py",
     "tests/test_wall_anchor_shadow.py",
-    "tests/test_wall_height_exclusion.py",
     "tests/test_wall_units_solver.py",
 )
 

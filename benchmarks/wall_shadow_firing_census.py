@@ -12,7 +12,6 @@ import time
 import uuid
 from typing import Any, Sequence
 
-import jax
 import jax.numpy as jnp
 import numpy as np
 import zarr
@@ -26,7 +25,6 @@ from benchmarks.forward_labeller_throughput import (
     _slices_seed,
 )
 from nova.equilibrium import reduced_newton
-from nova.equilibrium.connectivity_boundary import wall_height_shadow_mask
 from nova.equilibrium.topology import TopologyClass
 from nova.jax.config import configure_dtypes
 from scripts.labeller_batch import shard
@@ -45,11 +43,6 @@ DEFAULT_REPORT = Path(
     "wall-shadow-firing-census.md"
 )
 EXPECTED_SHOT_COUNT = 7
-BRANCH_NAMES = {
-    0: "retain_previous",
-    1: "qualified_height_band",
-    2: "connectivity_private_fallback",
-}
 
 
 @dataclass(frozen=True)
@@ -97,16 +90,6 @@ def _companion_rows(path: Path) -> dict[int, dict[str, Any]]:
         }
 
 
-def _host_scalar(value: Any) -> int | float | bool:
-    """Convert one device scalar to its JSON-native value."""
-    item = np.asarray(jax.device_get(value)).item()
-    if isinstance(item, (bool, np.bool_)):
-        return bool(item)
-    if isinstance(item, (int, np.integer)):
-        return int(item)
-    return float(item)
-
-
 def _wall_report(operator: Any, state: Any, requested: Any) -> dict[str, Any]:
     """Read the settled wall mask and whether it covers the unmasked winner."""
     physical = jnp.asarray(state)[: operator.physical_node_number]
@@ -119,7 +102,6 @@ def _wall_report(operator: Any, state: Any, requested: Any) -> dict[str, Any]:
     )
 
     previous = jnp.zeros(operator.wall.node_number, dtype=bool)
-    report = None
     iterations = 0
     for iterations in range(1, 17):
         masks, topology, _connected, _admitted = operator._fixed_design_read(  # noqa: SLF001
@@ -127,18 +109,8 @@ def _wall_report(operator: Any, state: Any, requested: Any) -> dict[str, Any]:
             requested,
             private_wall_node_mask=previous,
         )
-        reading = operator._carrier_shadow_read(physical, masks)  # noqa: SLF001
-        current, report = wall_height_shadow_mask(
-            operator.wall.coordinate[:, 1],
-            topology.axis[1],
-            topology.x_point,
-            reading["xset"],
-            reading["private_wall_node_mask"],
-            previous,
-            operator._wall_height_hysteresis,  # noqa: SLF001
-            operator._x_qualification_distance,  # noqa: SLF001
-            return_report=True,
-        )
+        reading = operator._carrier_shadow_read(physical, masks, topology)  # noqa: SLF001
+        current = reading["private_wall_node_mask"]
         current = jnp.asarray(current, dtype=bool)
         current.block_until_ready()
         if np.array_equal(np.asarray(current), np.asarray(previous)):
@@ -146,14 +118,9 @@ def _wall_report(operator: Any, state: Any, requested: Any) -> dict[str, Any]:
         previous = current
     else:
         raise RuntimeError("wall shadow did not settle within 16 active-set reads")
-    assert report is not None
-    values = {name: _host_scalar(value) for name, value in report.items()}
-    lower_code = int(values.pop("lower_branch"))
-    upper_code = int(values.pop("upper_branch"))
     return {
-        **values,
-        "lower_eligibility_branch": BRANCH_NAMES[lower_code],
-        "upper_eligibility_branch": BRANCH_NAMES[upper_code],
+        "masked_wall_node_count": int(np.count_nonzero(np.asarray(current))),
+        "wall_node_count": operator.wall.node_number,
         "winning_anchor_node_index": winner_index,
         "winning_anchor_node_r_m": float(operator.wall.coordinate[winner_index, 0]),
         "winning_anchor_node_z_m": float(operator.wall.coordinate[winner_index, 1]),
@@ -315,8 +282,8 @@ def _write_report(payload: dict[str, Any], path: Path) -> None:
         (
             f"Coverage: {summary['limited_frames']} limited frames across "
             f"{summary['shot_count']} shots; every row records its wall-node "
-            "denominator, qualified-saddle count, both eligibility branches, and "
-            "whether the unmasked winning anchor node was masked."
+            "denominator and whether the unmasked winning anchor node was "
+            "masked by the topological private-wall shadow."
         ),
         "",
         "| Shot | Limited frames | Masked wall nodes | Winning anchors masked |",
@@ -357,7 +324,6 @@ def run(input_root: Path, output: Path, report: Path) -> dict[str, Any]:
         "output": str(output.resolve()),
         "report": str(report.resolve()),
         "compilation_cache": prepared.cache_directory,
-        "eligibility_branch_codes": BRANCH_NAMES,
         "shots": [],
         "frames": [],
     }
@@ -385,23 +351,15 @@ def run(input_root: Path, output: Path, report: Path) -> dict[str, Any]:
     winner_masked = sum(
         int(frame["winning_anchor_node_was_masked"]) for frame in payload["frames"]
     )
-    if masked == 0:
-        verdict = "the predicate never classifies wall nodes on these limited frames"
-    elif winner_masked == 0:
-        verdict = (
-            "the mask fires away from the winning anchor, so selection is downstream "
-            "of where the mask applies"
-        )
-    else:
-        verdict = (
-            "neither predeclared outcome: the mask fires and covers at least one "
-            "winning anchor"
-        )
+    verdict = (
+        "The topological shadow covers at least one winning anchor"
+        if winner_masked
+        else "The topological shadow covers no winning anchor in this replay"
+    )
     payload["summary"] = {
         "shot_count": len(payload["shots"]),
         "limited_frames": len(payload["frames"]),
         "masked_wall_nodes": masked,
-        "masked_wall_node_bound": 0,
         "winning_anchor_masked_frames": winner_masked,
         "verdict": verdict,
         "wall_seconds": time.perf_counter() - started,

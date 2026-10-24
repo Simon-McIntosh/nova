@@ -23,6 +23,7 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
 from nova.biot.biotframe import Target
+from nova.equilibrium.convention import COCOS
 from nova.equilibrium.map_extraction import sample_chord_psi_norm
 
 if TYPE_CHECKING:
@@ -38,7 +39,8 @@ __all__ = [
     "virtual_poloidal_probes",
 ]
 
-NOVA_COCOS = 17
+NOVA_COCOS = COCOS
+"""The internal convention the observation kernels require, taken from its owner."""
 
 
 @dataclass(frozen=True)

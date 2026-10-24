@@ -41,6 +41,7 @@ from typing import Any, Iterable, Mapping, Sequence
 import numpy as np
 import xarray
 
+from nova.equilibrium.convention import COCOS
 from nova.imas.machine_evidence import (
     FieldEvidence,
     canonical_json,
@@ -737,8 +738,13 @@ DD3_CONVENTION = 11
 DD4_CONVENTION = 17
 """The COCOS the Data Dictionary major version 4 publishes equilibrium data in."""
 
-NOVA_CONVENTION = DD4_CONVENTION
-"""The convention nova works in internally, so a DD4 read passes through."""
+NOVA_CONVENTION = COCOS
+"""The convention nova works in internally, so a DD4 read passes through.
+
+Taken from :data:`nova.equilibrium.convention.COCOS`, the one statement of the
+internal convention: a site that needs the number reads it there rather than
+restating it, so the internal convention cannot be declared twice and disagree.
+"""
 
 EQUILIBRIUM_GROUP = "equilibrium"
 """The source group every equilibrium quantity row belongs to."""

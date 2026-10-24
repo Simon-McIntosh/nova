@@ -16,7 +16,6 @@ import hashlib
 import json
 from pathlib import Path
 import shutil
-import sys
 import tempfile
 
 import numpy as np
@@ -40,9 +39,11 @@ COORDINATE_ARRAYS = {
     "s1_coilset": ["centres", "x", "z"],
     "s3_delaunay": ["centres"],
     "s6_sampling": ["sampling"],
-    "s7_moment_geometry": ["sample_coordinates",
-                           "atomic_node_coordinates",
-                           "atomic_centroids"],
+    "s7_moment_geometry": [
+        "sample_coordinates",
+        "atomic_node_coordinates",
+        "atomic_centroids",
+    ],
 }
 
 
@@ -184,7 +185,9 @@ def main() -> int:
         status = "agree" if result["agree"] else "DIFFER"
         print(f"{stage}: {status}", flush=True)
         for item in result["differences"]:
-            detail = {k: v for k, v in item.items() if k not in ("digest_a", "digest_b")}
+            detail = {
+                k: v for k, v in item.items() if k not in ("digest_a", "digest_b")
+            }
             print(f"    {detail}", flush=True)
         if not result["agree"] and first_failing is None:
             first_failing = stage
@@ -195,8 +198,20 @@ def main() -> int:
         args.json.write_text(json.dumps(report, indent=2, sort_keys=True))
     if scratch is not None:
         shutil.rmtree(scratch, ignore_errors=True)
-    print("EXIT=0", flush=True)
-    return 0
+    # A comparison exits non-zero when any stage failed to be read or compared;
+    # a stage that merely differs from its partner is the measurement, not a
+    # failure, and keeps the exit at zero.
+    broken = [
+        item
+        for stage in report["stages"]
+        for item in stage["differences"]
+        if item.get("reason") == "missing_key"
+    ]
+    status = 1 if broken else 0
+    if broken:
+        print(f"COMPARISON_FAILED {len(broken)} missing-key difference(s)", flush=True)
+    print(f"EXIT={status}", flush=True)
+    return status
 
 
 if __name__ == "__main__":

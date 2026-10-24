@@ -64,18 +64,36 @@ separatrix at <code>2.049e-13</code> m and the buffered, arc-length-sampled wall
 <li><strong>CoilSet ordering</strong> upstream of the hex packing is then
 different: the same 340 cell centres to <code>7.361e-13</code> m but a different
 order (slot delta up to <code>1.109</code> m).</li>
-<li><strong>The float-keyed vertex dedup makes the 11.</strong>
+<li><strong>The quantised vertex merge makes the 11.</strong>
 <code>MomentGeometry.from_cells</code> receives
 <code>sampling = centres[:,None,:] + offsets[None,:,:]</code> — 340×6 = 2040
-vertices — and merges vertices that are <em>exactly equal</em> in float64. A
-shared hex corner is reached as <code>centre_i + offset_j</code> from one cell
-and <code>centre_k + offset_l</code> from another; the two sums agree only
-because the values are bit-identical, so the <code>~1e-12</code> reference shift
-flips 11 of those merges. CPU merges to 1075 unique sample coordinates, H200 to
-1086, and the atomic mesh follows (923 vs 937). The 11-coordinate difference is
-therefore a <em>tie broken by host floating-point rounding</em> in an
-exact-equality dedup, not device arithmetic in the solve.</li>
+vertices — and merges them through a <em>bin</em> key, not an equality test:
+<code>key = tuple(np.rint(vertex / atomic.tolerance))</code>
+(<code>nova/equilibrium/stencil_mesh.py:395</code>, the same form as
+<code>separatrix_clip._point_key</code> at <code>nova/equilibrium/separatrix_clip.py:139</code>).
+The tolerance is <code>128&nbsp;&middot;&nbsp;eps&nbsp;&middot;&nbsp;scale</code>
+(<code>stencil_mesh.py:349</code>), <code>1.0351e-13</code> m on both devices.
+A shared hex corner is reconstructed twice, as <code>centre_i + offset_j</code>
+and <code>centre_k + offset_l</code>, and the two sums differ by one ulp —
+measured <code>8.88e-16</code> m, about 1/117 of a bin. Two reconstructions
+merge when they fall in one bin, so the merge survives a device change only if
+the pair is not near a bin edge. The reference drift
+(<code>7.4e-13</code> m in the centres, seven bins wide) resamples that phase
+between devices.</li>
 </ol>
+
+<p id="certificate-300-device-carrier-bins">Measured on the two stage dumps
+(<code>scripts/certificate_300_carrier/bin_census.py</code>, report
+<code>bin-census.json</code>): the H200 arm holds <strong>11</strong> pairs of
+sample coordinates closer than a micron, and in every one of the 11 the two
+endpoints occupy <em>adjacent bins</em> — e.g. index 284 and index 291, both on
+the line <code>R&nbsp;bin&nbsp;20820480132490</code>, one at
+<code>Z&nbsp;bin&nbsp;-4495549544932</code> and the other at
+<code>-4495549544931</code>. Under the CPU arm's tolerance those same two
+endpoints land in one bin. The CPU arm itself has <strong>zero</strong> such
+pairs. So the 11 extra coordinates are one-ulp splits that straddle a bin edge
+on one device and not the other, which is why CPU merges to 1075 unique sample
+coordinates and H200 to 1086 (atomic mesh 923 vs 937).</p>
 
 <p id="certificate-300-device-carrier-cell103">The point comparison additionally
 reproduces the earlier <code>4.274e-12</code> m wall figure exactly, and explains
@@ -114,9 +132,18 @@ grid cell 103</strong>, in
 (<code>nova/equilibrium/forward_operator.py:3607</code>) and the
 <code>source.current_moments</code> call it makes at <code>:3514</code>. Cell 103
 is an ordinary complete hexagon — centre <code>(R, Z) = (1.52920834, -1.05661527)</code>
-m, section <code>hexagon</code>, six vertices, area <code>8.411e-3</code> m²,
-rank 89 of 340 by area, and it is flagged <code>regular</code> — so the
-singularity is not a degenerate or clipped cell.</p>
+m, section <code>hexagon</code>, six authored vertices, area
+<code>8.410701056134584e-3</code> m² against a grid median of
+<code>8.410701056134595e-3</code> m² (ratio <code>0.9999999999999988</code>), and
+it is flagged <code>regular</code> — so the singularity is not a degenerate or
+clipped cell. The census behind that statement is
+<code>cell-103-census.json</code> under the run directory, written by
+<code>scripts/certificate_300_carrier/cell_census.py</code>: section
+<code>hexagon</code>, <code>authored_polygon_is_hexagon true</code>,
+<code>regular_flag true</code>, area z-score <code>0.428</code>, area rank
+<code>244</code> of 340 descending (the 240 interior hexagons are equal to the
+median within <code>1e-15</code> relative, so the rank falls inside a tie), and
+a full seven-entry stencil row.</p>
 
 <p>The spread is a second defect, not the same one:
 <code>current_normalisation_amplitude</code> (<code>:3627</code>) returns
@@ -138,16 +165,30 @@ not part of the derivative path.</p>
 <h3 id="certificate-300-device-carrier-repairs">Proposed repair sites (named, not implemented)</h3>
 
 <ol>
-<li><strong>Integer-keyed dedup on the host.</strong> In
-<code>MomentGeometry.from_cells</code> (and its
-<code>atomic_node_coordinates</code> dedup), replace the exact float-equality
-merge of the <code>centres[:,None,:] + offsets[None,:,:]</code> vertices with an
-integer key: round the vertices to a fixed power-of-two grid coarser than the
-<code>~1e-12</code> jitter (e.g. <code>np.round(point / 2**-40)</code>) and merge on
-the integer tuple. Pinning test: build the carrier twice with a deliberately
-perturbed wall (<code>wall + 4e-12</code>) and require the same
-<code>sample_coordinates</code> count and the same
-<code>node_number</code>.</li>
+<li><strong>Identify a lattice vertex by its topology, not its coordinate.</strong>
+The merge at <code>stencil_mesh.py:395</code> already quantises, so a coarser
+bin does not repair it: any bin splits a vertex that lies on its edge, and the
+measured split is one ulp against a bin seven times narrower than the reference
+drift, so the pair straddles the edge on one device and not the other. The
+identification has to stop depending on the float coordinate at all. Every
+sample vertex is generated as <code>centres[c] + offsets[k]</code>
+(<code>scripts/analytic_oracle_fixtures/measure.py:668</code>; the production
+path is <code>PlasmaGrid._preclip_sampling_vertices</code> in
+<code>nova/biot/plasmagrid.py</code>), so a vertex's identity is
+<code>(cell, slot)</code> reduced through the hex lattice's own adjacency —
+which the caller already holds, because <code>MomentGeometry.from_cells</code>
+receives <code>mesh.stencil</code> and that stencil is
+<code>PlasmaGrid.loop_neighbour_vertices</code>'s output
+(<code>nova/biot/plasmagrid.py:394</code>). For each neighbouring pair, the
+shared corner is the slot whose offset best matches half the centre
+displacement; that choice is made among six offsets about
+<code>5.7e-2</code> m apart, so it has no bin edge to straddle. The repair
+carries that canonical id from the generator into
+<code>MomentGeometry.from_cells</code>, which merges on the id and uses the
+coordinate only as the representative value of a merged vertex. Pinning test:
+build the carrier from the reference solve on CPU and on H200, and again from a
+wall perturbed by <code>4e-12</code> m, and require identical
+<code>node_number</code> <em>and</em> identical vertex ids across all three.</li>
 <li><strong>Reference-solve determinism.</strong>
 <code>nova/equilibrium/analytic_single_null.py:412</code> and <code>:302</code>
 should solve through one repository-owned deterministic routine (a fixed-order
@@ -171,12 +212,16 @@ cannot turn one non-finite moment into a uniform NaN across all 340 cells.</li>
 <h3 id="certificate-300-device-carrier-negative-control">Negative control</h3>
 
 <p>The comparator was falsified by planting a known defect into a copy of one
-device's stage arrays: reversing the per-cell sampling-vertex order, and
-appending one duplicated sampling coordinate row. In both runs the comparison
-reports <code>FIRST_DIFFERING_STAGE=s6_sampling</code> and no earlier stage —
-which is the stage the defect was planted in. The logs are
+device's stage arrays and comparing that copy against the unplanted dump of the
+<em>same</em> device — the only pairing in which a stage other than
+<code>s0_wall</code> could be the first to differ. Two defects were planted, one
+per run: reversing the per-cell sampling-vertex order, and appending one
+duplicated sampling coordinate row. In both runs the comparison reports exactly
+one differing stage, <code>FIRST_DIFFERING_STAGE=s6_sampling</code>, which is
+the stage the defect was planted in, and exits <code>0</code>. The logs are
 <code>negative-control-reorder.log</code> and
-<code>negative-control-duplicate.log</code> under the run directory.</p>
+<code>negative-control-duplicate.log</code> under the run directory; each
+carries its literal command at the head and ends with <code>EXIT=0</code>.</p>
 
 </article>
 </body>

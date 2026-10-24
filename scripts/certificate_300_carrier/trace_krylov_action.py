@@ -67,9 +67,7 @@ def main() -> int:
     case_name = "diverted-single-null"
     requested_cells = -300
     carrier_case, source_case, exact = certificate._case(case_name)
-    machine = certificate._case_machine(
-        case_name, carrier_case, exact, requested_cells
-    )
+    machine = certificate._case_machine(case_name, carrier_case, exact, requested_cells)
     coordinates = np.vstack(
         (machine.node, machine.wall_node, machine.sample_coordinates)
     )
@@ -101,9 +99,7 @@ def main() -> int:
     )
     active = profile._with_source(request.source_profile, clip_mode=request.clip_mode)
     initial_flux = request.seed_policy.resolve(active, current=request.current)
-    external = active.operator.external(
-        request.current, request.prescribed_current
-    )
+    external = active.operator.external(request.current, request.prescribed_current)
     target_value = (
         None if request.target_current is None else jnp.asarray(request.target_current)
     )
@@ -245,6 +241,8 @@ def main() -> int:
         print(f"STAGE_FAILED residual {error!r}", flush=True)
 
     report["stages"] = stages
+    failed = sorted(name for name, entry in stages.items() if "error" in entry)
+    report["failed_stages"] = failed
 
     np.savez(
         out / "krylov_action.npz",
@@ -258,8 +256,11 @@ def main() -> int:
     (out / "krylov_report.json").write_text(
         json.dumps(report, indent=2, sort_keys=True)
     )
-    print("EXIT=0", flush=True)
-    return 0
+    status = 1 if failed else 0
+    for name in failed:
+        print(f"STAGE_FAILED_STAGE {name}", flush=True)
+    print(f"EXIT={status}", flush=True)
+    return status
 
 
 if __name__ == "__main__":

@@ -60,6 +60,14 @@ def test_adjacent_saddle_booking_keeps_one_representation():
         sampled(offset * state["scale"], prior)
         for offset in (0.16436667480678155, 0.16436667480678158)
     ]
+    import numpy as np
+
+    # The pair has to straddle a switch, or the booking claim below is asserted
+    # on a state where the switch never happened and passes for that reason.
+    states = [np.asarray(reading.booking_cells) for _, reading, *_ in readings]
+    differing = [int(index) for index in np.nonzero(states[0] != states[1])[0]]
+    assert differing, "the pair does not straddle a booking switch"
+
     for _, reading, current, _, _, _ in readings:
         assert bool(reading.valid and reading.qualified)
         assert bool(reading.booking_cells[266])

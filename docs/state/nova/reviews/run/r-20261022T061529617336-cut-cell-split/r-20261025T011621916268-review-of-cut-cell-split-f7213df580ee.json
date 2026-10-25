@@ -8,7 +8,7 @@
     "scripts/prototypes/fast_map_production/program.py:219 map_moments calls _saddle_moments(per_cell=ordinary)",
     "scripts/prototypes/fast_map_production/solver.py:588 linear_step builds the step matvec from jax.jvp"
   ],
-  "completed_at": "",
+  "completed_at": "2026-10-25T01:28:37.635Z",
   "dispatched_at": "2026-10-25T01:18:33Z",
   "findings": [
     {

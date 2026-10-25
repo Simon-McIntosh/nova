@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="561">
+<meta name="plan-version" content="562">
 <meta name="plan-modified" content="2026-10-25">
 </head>
 <body>
@@ -1985,6 +1985,9 @@ NO PRODUCT OR TEST SOURCE WAS CHANGED.  The 1e-10 tolerance was not widened.</p>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261024T194900526551-solve-operand-capture" data-who="reckon-build" data-when="2026-10-24T23:43:12Z">
     <div class="r-comment-body"><p>solve-operand-capture: both solve drivers' tangent maps carry their operands as program arguments; through the certificate's production entry the base lowering captures 4.20 GB of constants and the tip's largest is 38.48 KB (factor program 3.94 GB to 2.65 MB, peak RSS 28.35 to 5.40 GiB, residuals agreeing to 1.6e-13), while the 84 GB aggregate remains the cut-cell branch's to explain.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261025T012823744949-review-of-cell-moment-derivative-nan-7b0cec214107" data-who="reckon-build" data-when="2026-10-25T01:39:20.960Z">
+    <div class="r-comment-body"><p>review-of-cell-moment-derivative-nan at base 2967db4635671b942220d7d42797f1b08c805b95 and head 7b0cec2141071526ddbe7f7d99f436b34f930d23: the arc-root repair is correct and the CPU 300-cell row converges in 2 trips at 5.626976272072871e-15, but two blocking findings stand — a traced inadmissible amplitude now returns zero and silently zeroes the whole plasma source (forward_operator.py:3691), and the per-cell non-finite mask is discarded at all three solve paths so no solve receipt carries an offending index (forward_operator.py:3523) — with the importer sweep partial at 41 of 79 files and one edit outside the declared write grant.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-s21-moment-space-ruling" data-who="reckon-build" data-when="2026-10-13T18:40:00Z">
     <div class="r-comment-body"><p>Lead ruling 2026-10-13: the forward solve's unknown is the cell current moments.</p><p>The locked read builds its field from booked moments: the Bell jets at the nodes are the jet coupling rows times m, plus the exterior's jets. So it cannot evaluate an arbitrary trial flux vector, but it can always evaluate a trial m. The solve therefore iterates m = book(read(psi_ext + G m)), and the flux is G m wherever output needs it.</p><ul><li>Newton runs on the device with autograd.</li><li>A dense <code>jax.jacfwd</code> Jacobian with a device LU is measured against a device-side Jacobian-free Krylov, replacing SciPy's host <code>newton_krylov</code>.</li><li>Autograd must be shown to pass through the read and the booking.</li><li><code>current.book</code> is vectorised. Its sequential cell scan costs 0.9 to 8 s per step at 2,000 to 10,000 cells.</li><li>The legacy support partition, the spline-clip read and the chord default are deleted.</li></ul></div>

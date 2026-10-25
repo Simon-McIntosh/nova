@@ -1,0 +1,97 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "nova/equilibrium/gs.py:34",
+    "nova/equilibrium/forward.py:1426",
+    "nova/equilibrium/forward.py:1455",
+    "nova/equilibrium/forward_operator.py:3523",
+    "nova/equilibrium/forward_operator.py:3710",
+    "nova/equilibrium/forward_operator.py:3732",
+    "nova/equilibrium/forward_operator.py:3867",
+    "benchmarks/solovev_certificate.py:996"
+  ],
+  "completed_at": "2026-10-25T01:39:20.960Z",
+  "dispatched_at": "2026-10-25T01:31:02Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/forward_operator.py",
+      "line": 3691,
+      "severity": "blocking",
+      "text": "current_normalisation_amplitude now returns jnp.zeros_like(target) where the admissibility flag is false, and current_normalisation_admissible has no production consumer (only the test file calls it), so on the traced production route (gs.py:34 -> _internal_on_partition -> scaled_current_moments at 3525) a non-finite total current now scales every cell to zero and the solve proceeds on a zero plasma source with no refusal, where the base returned jnp.nan and the solver refused the step as nonfinite_linear_action."
+    },
+    {
+      "file": "nova/equilibrium/forward_operator.py",
+      "line": 3523,
+      "severity": "blocking",
+      "text": "the mask returned by refuse_non_finite_cell_moments is discarded at all three solve paths (3523, 3710, 3732) and no solve receipt carries an offending index, so done_when clause (2)'s report-by-index is unmet on the only route that runs in a solve; on a traced state indices is () by construction and the mask itself goes nowhere."
+    },
+    {
+      "file": "nova/equilibrium/separatrix_clip.py",
+      "line": 665,
+      "severity": "non-blocking",
+      "text": "the repaired arc root sits in a file outside the node's declared write grant; it is disclosed in the manifest scope_note under a lead ruling of 2026-10-24 that this review cannot verify from the shas."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/cell-moment-derivative-nan.html",
+      "line": 137,
+      "severity": "non-blocking",
+      "text": "the fragment states that the mask reaches the host through the three solve paths, but each of those paths drops the return value and none of them is a host boundary, so the sentence describes an effect the code does not have."
+    },
+    {
+      "file": "tests/test_cell_moment_derivative_finite.py",
+      "line": 46,
+      "severity": "non-blocking",
+      "text": "np.testing.assert_array_equal compares np.asarray(moments.radial_moment) against original, which is that same array, so the assertion cannot fail whatever the code does and does not show that no value is altered."
+    },
+    {
+      "file": "tests/test_cell_moment_derivative_finite.py",
+      "line": 76,
+      "severity": "non-blocking",
+      "text": "the assertion compares refuse_non_finite_cell_moments(moments) against the mask cell_moment_nonfinite(moments) computed immediately before; both sides derive from the same call chain, so a regression that emptied the mask would leave the assertion true."
+    },
+    {
+      "file": "tests/test_cell_moment_derivative_finite.py",
+      "line": 153,
+      "severity": "non-blocking",
+      "text": "test_the_traced_amplitude_never_scales_a_cell_by_nan asserts only that the amplitude is finite, so it passes on the silent zero at forward_operator.py:3691 and on any constant the branch might return; no test asserts that an inadmissible traced amplitude is refused or flagged anywhere a caller reads."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T095505170350-cell-moment-derivative-nan/verify-finite-tip.log",
+      "line": 2,
+      "severity": "non-blocking",
+      "text": "the header records revision=c4bd203138321627a145d7850961cbe7e914aa60, three commits before the reviewed head, and row-mask.log ran with PYTHONPATH on the live worktree rather than from a git archive of a committed tip as the brief requires, so neither log quantifies the reviewed revision."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/cell-moment-derivative-nan.html",
+      "line": 151,
+      "severity": "non-blocking",
+      "text": "done_when clause (3) is unmet: the direct importer sweep ran 37 files in both arms and 4 tip-only of 79 listed, with both arms ending TIMEOUT at EXIT=124, so 38 files that import forward_operator or source were never measured against the base."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: nova/equilibrium/separatrix_clip.py:665 repairs the clamped arc root and row-mask.log records terminal_residual 5.626976272072871e-15 with trip_count 2, so the finite-first-Krylov-action half of the goal is met; the containment half is not, because nova/equilibrium/forward_operator.py:3691 now returns a zero amplitude for an inadmissible traced state and nothing consumes the admissibility flag.\nVERDICT done_when: clause (1) is met and measured (verify-finite-tip.log 0 of 1536 non-finite, cell 103 tangent 2824.328634996701 against central difference 2824.179876803612); clause (2) is not met because no solve receipt carries an offending index (the mask at forward_operator.py:3523 is discarded, and the traced amplitude carries no refusal); clause (3) is partial at 41 of 79 listed files with both arms recorded EXIT=124.\nVERDICT write_paths: the source manifest declares seven paths; the diff at 7b0cec214 touches nova/equilibrium/separatrix_clip.py:665, which is outside that grant and is disclosed in the manifest scope_note under a lead ruling this review cannot verify from the shas.\nVERDICT manifest: read at status complete; it records the two gate arms honestly with completed false and exit_status 124, records ten unit tests passing in gate-unit-mask.log, and its remaining_work names the 38 files that never ran and the driver-seam scope limit.\nVERDICT diff: read all twelve commits from 2967db4635671b942220d7d42797f1b08c805b95 to 7b0cec2141071526ddbe7f7d99f436b34f930d23 commit by commit; 5 files, 445 insertions and 16 deletions: the arc-root double-where, cell_moment_nonfinite and refuse_non_finite_cell_moments, the amplitude flag split with a zero traced branch, the CurrentNormalisationError index message, the ten tests and the fragment.\nCALL_SITES: nova/equilibrium/gs.py:34, nova/equilibrium/forward.py:1426, nova/equilibrium/forward.py:1455, nova/equilibrium/forward_operator.py:3523, nova/equilibrium/forward_operator.py:3710, nova/equilibrium/forward_operator.py:3732, nova/equilibrium/forward_operator.py:3867, benchmarks/solovev_certificate.py:996\nSCORE goal_fidelity: 11\nJUSTIFICATION goal_fidelity: nova/equilibrium/separatrix_clip.py:665 makes the row finite and convergent (row-mask.log, 5.626976272072871e-15), but forward_operator.py:3691 replaces the refused non-finite action with a silent zero source, so the containment goal is met as finiteness only.\nSCORE evidence: 10\nJUSTIFICATION evidence: row-mask.log and verify-finite-tip.log substantiate clause (1) at c4bd20313, but the after_suite arm at 497942d16 measured 41 of 79 files to EXIT=124 and no log measures the reviewed head 7b0cec214.\nSCORE scope_discipline: 10\nJUSTIFICATION scope_discipline: nova/equilibrium/separatrix_clip.py:665 is edited although the declared write paths list only forward_operator.py, source.py, their tests, the new test file, the fragment and a figures directory.\nSCORE durability: 12\nJUSTIFICATION durability: negative-control-mask.log shows four tests red with the zeroing restored and negative-control-test.log shows the arc test red with the clamp restored, but tests/test_cell_moment_derivative_finite.py:46 compares an array with itself, line 76 compares two sides that move together, and line 153 passes on the silent zero.\nSCORE fit: 14\nJUSTIFICATION fit: the names and the double-where idiom at separatrix_clip.py:665 match the module, but the docstring at forward_operator.py:3678 and the fragment at line 137 claim a host refusal the code does not perform.\nSCORE reuse: 19\nJUSTIFICATION reuse: cell_moment_nonfinite at nova/equilibrium/forward_operator.py:395 is the first per-cell moment finite-mask owner (a search over nova/ for isfinite and finite-mask helpers found none) and CurrentNormalisationError at source.py:119 is extended rather than duplicated, with the competing error class deleted.\nFINDING nova/equilibrium/forward_operator.py:3691 blocking: the traced amplitude returns zero instead of refusing, so an inadmissible state scales every cell to zero and the solve continues on a silent zero plasma source where the base refused the step.\nFINDING nova/equilibrium/forward_operator.py:3523 blocking: the non-finite mask is discarded at all three solve paths and no solve receipt carries an offending index, so done_when clause (2) is unmet on the production route.\nFINDING nova/equilibrium/separatrix_clip.py:665 non-blocking: the repaired expression is in a file outside the declared write grant, disclosed under an unverifiable lead ruling.\nFINDING docs/evidence/fragments/converged-forward-solve/cell-moment-derivative-nan.html:137 non-blocking: the fragment says the mask reaches the host through the three solve paths, which drop it.\nFINDING tests/test_cell_moment_derivative_finite.py:46 non-blocking: the assertion compares an array with itself and cannot fail.\nFINDING tests/test_cell_moment_derivative_finite.py:76 non-blocking: the assertion compares the wrapper's return against the mask it delegates to, so it holds under a mask regression.\nFINDING tests/test_cell_moment_derivative_finite.py:153 non-blocking: the assertion checks only finiteness and so passes on the silent zero.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T095505170350-cell-moment-derivative-nan/verify-finite-tip.log:2 non-blocking: the finiteness evidence runs at c4bd20313 and the row log runs from the live worktree, not from a committed tip archive.\nFINDING docs/evidence/fragments/converged-forward-solve/cell-moment-derivative-nan.html:151 non-blocking: 38 of the 79 importer files were never measured, so clause (3) is partial.",
+  "review_run_id": "r-20261025T012823744949-review-of-cell-moment-derivative-nan-7b0cec214107",
+  "reviewed_base_sha": "2967db4635671b942220d7d42797f1b08c805b95",
+  "reviewed_head_sha": "7b0cec2141071526ddbe7f7d99f436b34f930d23",
+  "reviewed_run_id": "r-20261024T095505170350-cell-moment-derivative-nan",
+  "scores": {
+    "durability": 12,
+    "evidence": 10,
+    "fit": 14,
+    "goal_fidelity": 11,
+    "reuse": 19,
+    "scope_discipline": 10
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-25T01:42:17.024339+00:00",
+  "total": 76,
+  "verdicts": {
+    "diff": "read all twelve commits from 2967db4635671b942220d7d42797f1b08c805b95 to 7b0cec2141071526ddbe7f7d99f436b34f930d23 commit by commit; 5 files, 445 insertions and 16 deletions: the arc-root double-where, cell_moment_nonfinite and refuse_non_finite_cell_moments, the amplitude flag split with a zero traced branch, the CurrentNormalisationError index message, the ten tests and the fragment.",
+    "done_when": "clause (1) is met and measured (verify-finite-tip.log 0 of 1536 non-finite, cell 103 tangent 2824.328634996701 against central difference 2824.179876803612); clause (2) is not met because no solve receipt carries an offending index (the mask at forward_operator.py:3523 is discarded, and the traced amplitude carries no refusal); clause (3) is partial at 41 of 79 listed files with both arms recorded EXIT=124.",
+    "goal": "nova/equilibrium/separatrix_clip.py:665 repairs the clamped arc root and row-mask.log records terminal_residual 5.626976272072871e-15 with row-mask-part.json trip_count 2, so the finite-first-Krylov-action half of the goal is met; the containment half is not, because nova/equilibrium/forward_operator.py:3691 now returns a zero amplitude for an inadmissible traced state and nothing consumes the admissibility flag.",
+    "manifest": "read at status complete; it records the two gate arms honestly with completed false and exit_status 124, records ten unit tests passing in gate-unit-mask.log, and its remaining_work names the 38 files that never ran and the driver-seam scope limit.",
+    "write_paths": "the source manifest declares seven paths; the diff at 7b0cec214 touches nova/equilibrium/separatrix_clip.py:665, which is outside that grant and is disclosed in the manifest scope_note under a lead ruling this review cannot verify from the shas."
+  }
+}

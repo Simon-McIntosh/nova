@@ -1,0 +1,51 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-25T01:27:10.823Z",
+  "dispatched_at": "2026-10-25T01:20:25Z",
+  "figures_reviewed": [
+    {
+      "caption": "docs/evidence/fragments/converged-forward-solve/cut-cell-split.html (figure id cut-cell-split-convergence-figure)",
+      "figure": "docs/figures/converged-forward-solve/cut-cell-split/convergence-550.svg",
+      "rendered_pixels": "1400x720",
+      "rendered_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261025T011857285780-review-of-cut-cell-split-f7213df580ee-figure/image-0.png"
+    }
+  ],
+  "findings": [
+    {
+      "disposition": "folded",
+      "disposition_node": "cut-cell-split figure follow-up: place the ceiling annotation clear of the rule",
+      "file": "docs/figures/converged-forward-solve/cut-cell-split/convergence-550.svg",
+      "line": null,
+      "severity": "blocking",
+      "summary": "The 'qualification ceiling 1e-12' label is placed on the dotted 1e-12 rule it names: at 1400x720 the descenders of 'q' and 'g' reach pixel row 593 and the rule occupies rows 594-595, continuously across the label's width, so the dotted rule reads as struck through the annotation and the two merge into one dark band. The label's own value is the one the figure exists to show relative to, and a reader cannot tell where the rule is once it enters the text. Moving the label above the rule (or to the left of the panel, clear of the line) fixes it; the caption already carries the same statement in words, so the label may also be reduced to the level alone."
+    },
+    {
+      "disposition": "folded",
+      "disposition_node": "cut-cell-split figure follow-up: darken the ceiling annotation to clear 4.5:1",
+      "file": "docs/figures/converged-forward-solve/cut-cell-split/convergence-550.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The ceiling annotation is drawn in mid grey (sampled rgb(146,146,146), about 3.1:1 against white), below the 4.5:1 threshold for text of this size; it reads as faded beside the near-black tick labels and the blue series label, so the one piece of text that identifies the reference level is the least legible text on the figure. A darker neutral grey would keep it subordinate to the data without fading it."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261025T011857285780-review-of-cut-cell-split-f7213df580ee-figure",
+  "reviewed_base_sha": "b467e11d4ad99853360450169eb709ac4b79bf42",
+  "reviewed_head_sha": "f7213df580ee137a82a198a6ffe1ef4d1717d510",
+  "reviewed_run_id": "r-20261022T061529617336-cut-cell-split",
+  "rubric": "figure",
+  "rubric_verdicts": [
+    "RUBRIC legibility: pass \u2014 seven-point log-scale trace of residual against solve correction reads at a glance; decay from the cold state and the flattening after correction 2 are visible, and the end point carries a direct label 'stalled at 5.68e-3'.",
+    "RUBRIC data_ink: pass \u2014 one thick blue series with point markers and one grey dotted reference rule carry the whole panel; no fills, no shading and no second series compete with them.",
+    "RUBRIC decoration: pass \u2014 white background, no grid, no frame: only left and bottom spines, with the reference rule as the only non-data furniture.",
+    "RUBRIC contrast: fail (non-blocking) \u2014 the 'qualification ceiling 1e-12' label is mid grey, sampled at rgb(146,146,146), about 3.1:1 against white; the series label is blue and the tick labels are near-black and both clear it easily, but the grey annotation sits below the 4.5:1 normal-text threshold and fades at a glance.",
+    "RUBRIC table_form: pass \u2014 the message is that the residual sequence flattens while remaining five orders above a threshold; the shape of the flattening and its distance to the rule are spatial facts a column of seven numbers does not convey, so a plot is the right form.",
+    "RUBRIC label_collision: fail (blocking) \u2014 the grey label 'qualification ceiling 1e-12' is drawn on top of the dotted 1e-12 rule: the glyph body occupies pixel rows 575-590 and the descenders of 'q' and 'g' reach row 593, while the rule itself occupies rows 594-595 across the label's whole width (x about 1002 to 1250), so the rule runs immediately under, and visually through, the text; nothing is clipped and no two text artists overlap."
+  ],
+  "status": "parsed",
+  "summary": "One figure reviewed (the limited 550 residual-against-correction trace). Its data are correct and legible and the plot form is right: the cold state at 0.0288, the drop to 0.00605 and the stall at 0.00568 are all readable, and the dotted 1e-12 rule plus a direct end label make the five-order gap the point of the panel. Two presentation defects are recorded: the ceiling annotation collides with the rule it names (blocking), and that same annotation is under the contrast threshold (non-blocking). The caption does not merely repeat the title; it states what each feature means, so it is not a finding.",
+  "times_source": "run-record",
+  "timestamp": "2026-10-25T01:31:19.861677+00:00",
+  "total": null
+}

@@ -1,0 +1,106 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "nova/equilibrium/current.py:700 book calls _rematerialised_conic_rings",
+    "scripts/prototypes/fast_read/ordinary_cut.py:302 bell_moments calls composite_cut_moments",
+    "scripts/prototypes/fast_map_production/program.py:219 map_moments calls _saddle_moments(per_cell=ordinary)",
+    "scripts/prototypes/fast_map_production/solver.py:588 linear_step builds the step matvec from jax.jvp"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-10-25T01:18:33Z",
+  "findings": [
+    {
+      "file": "tests/equilibrium/test_cut_cell_split.py",
+      "line": "125",
+      "severity": "blocking",
+      "text": "the continuity assertion is not independent of the value under test: _moments (:52) sums the inside piece with (whole - the same inside piece), so it equals the whole-square moments for every radius and passes whatever the split does; it cannot redden on a discontinuous disk crossing, which is the regression it claims to guard."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T061529617336-cut-cell-split/gates/gate-final/base/summary.txt",
+      "line": "1",
+      "severity": "blocking",
+      "text": "the 'base' arm ran at 2a6f934e3, seventeen commits after the declared base b467e11d4, so it already contains the whole composite booking (8ef1d0d91..2a6f934e3) and the new test file itself; the zero-added-failures delta is not measured against the node's base and cannot show the change added none."
+    },
+    {
+      "file": "tests/equilibrium/test_read_correction_path.py",
+      "line": "61",
+      "severity": "blocking",
+      "text": "the required guard repair is absent: the file is unchanged by the diff and still hard-codes the two adjacent-double offsets at :61 while asserting booking_cells[266] at :65, with no check that the pair straddles the switch, so it can pass vacuously on the Broadwell host where cell 266 never switches."
+    },
+    {
+      "file": "nova/equilibrium/current.py",
+      "line": "536",
+      "severity": "blocking",
+      "text": "composite_cut_moments returns only three moments (booked current, Mx, My) and integrates no area, so the goal clause 'read area, booked current and both first moments integrating that support' is unmet; nothing in the diff books the composite support's area."
+    },
+    {
+      "file": "scripts/prototypes/fast_map_production/solver.py",
+      "line": "588",
+      "severity": "non-blocking",
+      "text": "the file is outside the node's declared write paths, and its linear_step rewrite from a stored jax.linearize to jax.jvp is a substantive behavioural change carried without a scope grant."
+    },
+    {
+      "file": "tests/test_current_book_vectorised.py",
+      "line": "93",
+      "severity": "non-blocking",
+      "text": "outside the declared write paths, and the changed _reference_conic_rings mirrors _conic_rings line for line, so it no longer validates the composite construction independently; the source manifest's own follow_ons record this loss."
+    },
+    {
+      "file": "nova/equilibrium/current.py",
+      "line": "325",
+      "severity": "non-blocking",
+      "text": "_inside_loop re-implements the crossing-number point-in-polygon test the repository already owns at nova/equilibrium/connectivity_boundary.py:169 (_points_inside_polygon) rather than extending it."
+    },
+    {
+      "file": "nova/equilibrium/current.py",
+      "line": "486",
+      "severity": "non-blocking",
+      "text": "the connectivity confinement is applied by masking quadrature nodes against the clipped loop rather than by explicit support edges, reintroducing the node-selection discontinuity the disk clip at :373 was built to remove; the continuity test passes confined=None so this path is never exercised."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/cut-cell-split.html",
+      "line": "27",
+      "severity": "non-blocking",
+      "text": "the fragment says the disk boundary 'is still resolved by quadrature-node density masking rather than by explicit arc edges', but _disk_clipped_rings at nova/equilibrium/current.py:373 now clips by 32 explicit half-plane edges; the statement is stale against the code it describes."
+    }
+  ],
+  "gate_sources": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T061529617336-cut-cell-split/gates/gate-final/tip/summary.txt",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T061529617336-cut-cell-split/gates/gate-final/base/summary.txt"
+  },
+  "item_verdicts": {
+    "diff": "Read commit by commit from b467e11d4 to f7213df580ee; 19 commits change nine files (+2102/-157): the composite booking and disk clipper in nova/equilibrium/current.py, the read receipt and refusals in kernel.py, the per-cell gather in program.py, the band owner in ordinary_cut.py, the jvp step in solver.py, one new test file, the mirrored vectorised reference, and the evidence fragment with one SVG.",
+    "done_when": "The done_when names a paired suite, an H200 certified-rows job and a continuity test; the paired suite ran but at 2a6f934e3 rather than the declared base b467e11d4, the H200 certified-rows job is not in the manifest at all, and tests/equilibrium/test_read_correction_path.py:61 still pins the two adjacent-double offsets with no straddle check.",
+    "goal": "The node goal is to book each cut cell over one support split at the normal-form neighbourhood boundary with read area, current and both first moments through the shared clip-quadrature owner; nova/equilibrium/current.py:536 composite_cut_moments does book the inside/outside split through _quadrature_from_arrays, but returns no area.",
+    "manifest": "Read; it records status complete with tip 6b617e510, the composite booking numbers and the measured nine slots, and it states plainly that the certificate's 550 solve stalls at 5.68e-3 and lists the unmet clauses.",
+    "write_paths": "The brief grants eleven paths; the diff changes nine files and two of them, scripts/prototypes/fast_map_production/solver.py and tests/test_current_book_vectorised.py, lie outside the grant."
+  },
+  "justifications": {
+    "durability": "tests/equilibrium/test_cut_cell_split.py:264 compares the clip against shapely and would redden on a clip regression, but the continuity assertion at :125 is a tautology that cannot fail, and the required test_read_correction_path.py guard was not added.",
+    "evidence": "The done_when's paired gate ran its base arm at 2a6f934e3, not the declared base b467e11d4, so the gate measures a delta against an intermediate tip of the same change; the H200 certified-rows job is absent and one suite file timed out in both arms.",
+    "fit": "nova/equilibrium/current.py:314-560 follows the module's existing named-moment and _quadrature_from_arrays idiom and introduces no plan label or forbidden name.",
+    "goal_fidelity": "nova/equilibrium/current.py:536 books the composite support through _quadrature_from_arrays but returns three moments and no area, so a clause of the goal is not delivered.",
+    "reuse": "the composite booking extends the shared owner and topology.clip_normal_form_loop, but _inside_loop at nova/equilibrium/current.py:325 re-implements the point-in-polygon capability already owned at nova/equilibrium/connectivity_boundary.py:169.",
+    "scope_discipline": "git diff b467e11d4..f7213df580ee changes scripts/prototypes/fast_map_production/solver.py and tests/test_current_book_vectorised.py, neither of which is in the brief's write grant."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The node goal is to book each cut cell over one support split at the normal-form neighbourhood boundary with read area, current and both first moments through the shared clip-quadrature owner; nova/equilibrium/current.py:536 composite_cut_moments does book the inside/outside split through _quadrature_from_arrays, but returns no area.\nVERDICT done_when: The done_when names a paired suite, an H200 certified-rows job and a continuity test; the paired suite ran but at 2a6f934e3 rather than the declared base b467e11d4, the H200 certified-rows job is not in the manifest at all, and tests/equilibrium/test_read_correction_path.py:61 still pins the two adjacent-double offsets with no straddle check.\nVERDICT write_paths: The brief grants eleven paths; the diff changes nine files and two of them, scripts/prototypes/fast_map_production/solver.py and tests/test_current_book_vectorised.py, lie outside the grant.\nVERDICT manifest: Read; it records status complete with tip 6b617e510, the composite booking numbers and the measured nine slots, and it states plainly that the certificate's 550 solve stalls at 5.68e-3 and lists the unmet clauses.\nVERDICT diff: Read commit by commit from b467e11d4 to f7213df580ee; 19 commits change nine files (+2102/-157): the composite booking and disk clipper in nova/equilibrium/current.py, the read receipt and refusals in kernel.py, the per-cell gather in program.py, the band owner in ordinary_cut.py, the jvp step in solver.py, one new test file, the mirrored vectorised reference, and the evidence fragment with one SVG.\nCALL_SITES: nova/equilibrium/current.py:700 book calls _rematerialised_conic_rings, scripts/prototypes/fast_read/ordinary_cut.py:302 bell_moments calls composite_cut_moments, scripts/prototypes/fast_map_production/program.py:219 map_moments calls _saddle_moments(per_cell=ordinary), scripts/prototypes/fast_map_production/solver.py:588 linear_step builds the step matvec from jax.jvp\nSCORE goal_fidelity: 11\nJUSTIFICATION goal_fidelity: nova/equilibrium/current.py:536 books the composite support through _quadrature_from_arrays but returns three moments and no area, so a clause of the goal is not delivered.\nSCORE evidence: 5\nJUSTIFICATION evidence: The done_when's paired gate ran its base arm at 2a6f934e3, not the declared base b467e11d4, so the gate measures a delta against an intermediate tip of the same change; the H200 certified-rows job is absent and one suite file timed out in both arms.\nSCORE scope_discipline: 8\nJUSTIFICATION scope_discipline: git diff b467e11d4..f7213df580ee changes scripts/prototypes/fast_map_production/solver.py and tests/test_current_book_vectorised.py, neither of which is in the brief's write grant.\nSCORE durability: 9\nJUSTIFICATION durability: tests/equilibrium/test_cut_cell_split.py:264 compares the clip against shapely and would redden on a clip regression, but the continuity assertion at :125 is a tautology that cannot fail, and the required test_read_correction_path.py guard was not added.\nSCORE fit: 16\nJUSTIFICATION fit: nova/equilibrium/current.py:314-560 follows the module's existing named-moment and _quadrature_from_arrays idiom and introduces no plan label or forbidden name.\nSCORE reuse: 5\nJUSTIFICATION reuse: the composite booking extends the shared owner and topology.clip_normal_form_loop, but _inside_loop at nova/equilibrium/current.py:325 re-implements the point-in-polygon capability already owned at nova/equilibrium/connectivity_boundary.py:169.\nFINDING tests/equilibrium/test_cut_cell_split.py:125 blocking: the continuity assertion is not independent of the value under test: _moments (:52) sums the inside piece with (whole - the same inside piece), so it equals the whole-square moments for every radius and passes whatever the split does; it cannot redden on a discontinuous disk crossing, which is the regression it claims to guard.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T061529617336-cut-cell-split/gates/gate-final/base/summary.txt:1 blocking: the 'base' arm ran at 2a6f934e3, seventeen commits after the declared base b467e11d4, so it already contains the whole composite booking (8ef1d0d91..2a6f934e3) and the new test file itself; the zero-added-failures delta is not measured against the node's base and cannot show the change added none.\nFINDING tests/equilibrium/test_read_correction_path.py:61 blocking: the required guard repair is absent: the file is unchanged by the diff and still hard-codes the two adjacent-double offsets at :61 while asserting booking_cells[266] at :65, with no check that the pair straddles the switch, so it can pass vacuously on the Broadwell host where cell 266 never switches.\nFINDING nova/equilibrium/current.py:536 blocking: composite_cut_moments returns only three moments (booked current, Mx, My) and integrates no area, so the goal clause 'read area, booked current and both first moments integrating that support' is unmet; nothing in the diff books the composite support's area.\nFINDING scripts/prototypes/fast_map_production/solver.py:588 non-blocking: the file is outside the node's declared write paths, and its linear_step rewrite from a stored jax.linearize to jax.jvp is a substantive behavioural change carried without a scope grant.\nFINDING tests/test_current_book_vectorised.py:93 non-blocking: outside the declared write paths, and the changed _reference_conic_rings mirrors _conic_rings line for line, so it no longer validates the composite construction independently; the source manifest's own follow_ons record this loss.\nFINDING nova/equilibrium/current.py:325 non-blocking: _inside_loop re-implements the crossing-number point-in-polygon test the repository already owns at nova/equilibrium/connectivity_boundary.py:169 (_points_inside_polygon) rather than extending it.\nFINDING nova/equilibrium/current.py:486 non-blocking: the connectivity confinement is applied by masking quadrature nodes against the clipped loop rather than by explicit support edges, reintroducing the node-selection discontinuity the disk clip at :373 was built to remove; the continuity test passes confined=None so this path is never exercised.\nFINDING docs/evidence/fragments/converged-forward-solve/cut-cell-split.html:27 non-blocking: the fragment says the disk boundary 'is still resolved by quadrature-node density masking rather than by explicit arc edges', but _disk_clipped_rings at nova/equilibrium/current.py:373 now clips by 32 explicit half-plane edges; the statement is stale against the code it describes.\n",
+  "review_run_id": "r-20261025T011621916268-review-of-cut-cell-split-f7213df580ee",
+  "reviewed_base_sha": "b467e11d4ad99853360450169eb709ac4b79bf42",
+  "reviewed_head_sha": "f7213df580ee137a82a198a6ffe1ef4d1717d510",
+  "reviewed_run_id": "r-20261022T061529617336-cut-cell-split",
+  "scores": {
+    "durability": 9,
+    "evidence": 5,
+    "fit": 16,
+    "goal_fidelity": 11,
+    "reuse": 5,
+    "scope_discipline": 8
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-25T02:10:00+00:00",
+  "total": 54
+}

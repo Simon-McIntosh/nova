@@ -392,43 +392,6 @@ def _cell_banked_current_moments(
     )
 
 
-def cell_moment_nonfinite(
-    moments: CellCurrentMoments,
-) -> tuple[jax.Array, tuple[int, ...]]:
-    """Return a per-cell non-finite mask over every moment component.
-
-    The mask is an output of the step rather than a repair applied inside it:
-    a non-finite component is left exactly as it is, so it reaches the residual
-    instead of being replaced by a zero that reads as a valid cell. Every
-    component is tested, not ``cell_current`` alone, because a cell can carry a
-    finite total current and a divergent moment derivative. Indices are returned
-    only when the mask is concrete; a traced mask names none, and the host
-    refuses from the mask itself.
-    """
-    mask = jnp.zeros_like(jnp.asarray(moments.cell_current), dtype=bool)
-    for value in moments:
-        mask = mask | ~jnp.isfinite(jnp.asarray(value))
-    indices: tuple[int, ...] = ()
-    if not isinstance(mask, jax.core.Tracer):
-        indices = tuple(int(index) for index in np.flatnonzero(np.asarray(mask)))
-    return mask, indices
-
-
-def refuse_non_finite_cell_moments(
-    moments: CellCurrentMoments,
-) -> jax.Array:
-    """Return the non-finite mask, refusing by index on a concrete state.
-
-    A concrete state carries cell values, so a non-finite component is refused
-    by name at the boundary that reads it. A traced state has no value to judge,
-    so the mask is carried out and the values are left untouched.
-    """
-    mask, indices = cell_moment_nonfinite(moments)
-    if indices:
-        raise CurrentNormalisationError(float("nan"), indices)
-    return mask
-
-
 def _cell_banked_field_integrals(
     support,
     selection,
@@ -3520,7 +3483,6 @@ class ForwardFluxOperator:
         """Return the plasma image while retaining one trip's partition."""
         partition = self._partition_for_state(psi, frozen)
         moments = self._current_moments_on_partition(psi, partition)
-        refuse_non_finite_cell_moments(moments)
         if target_current is not None:
             amplitude = self.current_normalisation_amplitude(
                 target_current, jnp.sum(moments.cell_current)
@@ -3651,45 +3613,27 @@ class ForwardFluxOperator:
         return CellCurrentMoments(*(amplitude * value for value in moments))
 
     @staticmethod
-    def current_normalisation_admissible(target_current, unscaled_current) -> jax.Array:
-        """Return whether a declared-current amplitude is admissible.
+    def current_normalisation_amplitude(target_current, unscaled_current) -> jax.Array:
+        """Return a guarded declared-current amplitude without clipping.
 
-        The flag is the traced signal an inadmissible amplitude carries: it is
-        an output of the step, so the host can refuse by name from it rather
-        than inferring the refusal from a non-finite amplitude that would
-        otherwise scale every cell.
+        Admissibility is established by products and magnitude comparisons
+        before the division. Eager evaluations raise so an accepted state can
+        never masquerade as normalised; traced evaluations return a non-finite
+        amplitude which the solver rejects rather than clipping to a bound.
         """
         target = jnp.asarray(target_current)
         unscaled = jnp.asarray(unscaled_current, dtype=target.dtype)
         magnitude = jnp.abs(unscaled)
         lower, upper = SCALAR_CURRENT_AMPLITUDE_BAND
-        return (
+        admissible = (
             jnp.isfinite(target)
             & jnp.isfinite(unscaled)
             & (target * unscaled > 0.0)
             & (jnp.abs(target) >= lower * magnitude)
             & (jnp.abs(target) <= upper * magnitude)
         )
-
-    @staticmethod
-    def current_normalisation_amplitude(target_current, unscaled_current) -> jax.Array:
-        """Return a guarded declared-current amplitude without clipping.
-
-        Admissibility is established by products and magnitude comparisons
-        before the division. Eager evaluations raise so an accepted state can
-        never masquerade as normalised; a traced evaluation returns zero and
-        carries the refusal through ``current_normalisation_admissible``, so an
-        inadmissible amplitude never scales a cell.
-        """
-        target = jnp.asarray(target_current)
-        unscaled = jnp.asarray(unscaled_current, dtype=target.dtype)
-        admissible = ForwardFluxOperator.current_normalisation_admissible(
-            target, unscaled
-        )
         safe_unscaled = jnp.where(admissible, unscaled, jnp.ones_like(unscaled))
-        amplitude = jnp.where(
-            admissible, target / safe_unscaled, jnp.zeros_like(target)
-        )
+        amplitude = jnp.where(admissible, target / safe_unscaled, jnp.nan)
         if not isinstance(admissible, jax.core.Tracer) and not bool(admissible):
             target_value = float(target)
             unscaled_value = float(unscaled)
@@ -3707,7 +3651,6 @@ class ForwardFluxOperator:
     ) -> tuple[CellCurrentMoments, jax.Array]:
         """Return exact clipped moments and their declared-current amplitude."""
         moments = self.cell_current_moments(psi, requested_class)
-        refuse_non_finite_cell_moments(moments)
         amplitude = self.current_normalisation_amplitude(
             target_current, jnp.sum(moments.cell_current)
         )
@@ -3729,7 +3672,6 @@ class ForwardFluxOperator:
         """Return one clipped partition, its scaled moments, and amplitude."""
         partition = self._support_partition(psi, requested_class)
         moments = self._partitioned_current_moments(partition)
-        refuse_non_finite_cell_moments(moments)
         amplitude = self.current_normalisation_amplitude(
             target_current, jnp.sum(moments.cell_current)
         )

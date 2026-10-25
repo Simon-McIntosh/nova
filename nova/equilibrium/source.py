@@ -117,33 +117,14 @@ SCALAR_CURRENT_AMPLITUDE_BAND = (1.0e-6, 1.0e6)
 
 
 class CurrentNormalisationError(RuntimeError):
-    """Report an inadmissible declared-current source amplitude.
+    """Report an inadmissible declared-current source amplitude."""
 
-    ``indices`` names the cells whose integrated current moment is not finite
-    when that is why the amplitude is refused, and is empty for a purely
-    out-of-band amplitude.
-    """
-
-    def __init__(self, amplitude: float, indices: tuple[int, ...] = ()):
+    def __init__(self, amplitude: float):
         self.amplitude = float(amplitude)
-        self.indices = tuple(int(index) for index in indices)
-        if self.indices:
-            shown = list(self.indices[:16])
-            more = (
-                f" (+{len(self.indices) - 16} more)"
-                if len(self.indices) > 16
-                else ""
-            )
-            message = (
-                "integrated current moment is non-finite at cell indices "
-                f"{shown}{more}: the declared-current amplitude is refused"
-            )
-        else:
-            message = (
-                f"source amplitude {self.amplitude:.12g} is outside "
-                f"{SCALAR_CURRENT_AMPLITUDE_BAND}"
-            )
-        super().__init__(message)
+        super().__init__(
+            f"source amplitude {self.amplitude:.12g} is outside "
+            f"{SCALAR_CURRENT_AMPLITUDE_BAND}"
+        )
 
 
 class RotationClosure(IntEnum):

@@ -224,7 +224,11 @@ def _polar_reference(radius, *, scale=1.0, unit=False):
                 + shift[1] * rho**3 * cosine / 3.0
             )
         total += jacobian * np.asarray(
-            (np.sum(weights * piece), np.sum(weights * moment_x), np.sum(weights * moment_y))
+            (
+                np.sum(weights * piece),
+                np.sum(weights * moment_x),
+                np.sum(weights * moment_y),
+            )
         )
     return jnp.asarray(total, dtype=jnp.float64)
 
@@ -243,7 +247,10 @@ def test_inside_piece_books_the_exact_clipped_disk(radius):
     booked = _inside(radius)
     reference = _polar_reference(radius)
     assert jnp.all(jnp.isfinite(booked))
-    assert jnp.allclose(booked, reference, rtol=0.0, atol=TOLERANCE), (booked, reference)
+    assert jnp.allclose(booked, reference, rtol=0.0, atol=TOLERANCE), (
+        booked,
+        reference,
+    )
 
     # The negative control: where the disk boundary actually crosses the cell, a
     # split that drops a sliver at the crossing must fail this same assertion,
@@ -302,7 +309,10 @@ def test_inside_piece_is_continuous_across_disk_entry_and_exit():
         booked = _inside(radius)
         reference = _polar_reference(radius)
         assert jnp.all(jnp.isfinite(booked))
-        assert jnp.allclose(booked, reference, rtol=0.0, atol=TOLERANCE), (booked, reference)
+        assert jnp.allclose(booked, reference, rtol=0.0, atol=TOLERANCE), (
+            booked,
+            reference,
+        )
 
 
 def test_force_conic_right_breaks_the_continuity_assertion():

@@ -1,0 +1,529 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 4,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "48d7adda68b5e86d26f5c896c8a47e2ead865be8",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T194900526551-solve-operand-capture/brief.txt",
+    "sha256": "521b1ab3dd5f5853db0c8e748b9eb585e4adc0b9dcb5af095269370f44da2780"
+  },
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 12342615,
+      "input_tokens_cumulative": 12342615,
+      "output_tokens": 34146,
+      "output_tokens_cumulative": 34146,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 352,
+    "files": 5,
+    "removed": 62
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 371,
+        "name": "_near_edge_reference_rows",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "linear_step",
+        "path": "scripts/prototypes/fast_map_production/solver.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 114,
+        "name": "test_tangent_against_extended_precision",
+        "path": "tests/biot/test_near_collinear_tangent.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "linear_step",
+        "path": "scripts/prototypes/fast_map_production/solver.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 11,
+        "name": "_dataset_row",
+        "path": "tests/imas/test_diiid_machine_description.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "linear_step",
+        "path": "scripts/prototypes/fast_map_production/solver.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 15,
+        "name": "test_variant_set_exhausts_convention_digits_and_required_axes",
+        "path": "tests/imas/test_diiid_root_convention_sweep.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "linear_step",
+        "path": "scripts/prototypes/fast_map_production/solver.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 331,
+        "name": "test_conditioned_elliptic_combinations_match_a_high_precision_arbiter",
+        "path": "tests/test_biotgreens.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "linear_step",
+        "path": "scripts/prototypes/fast_map_production/solver.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 580,
+        "name": "test_smooth_merit_brackets_relative_sup_for_distributed_residuals",
+        "path": "tests/test_fixed_point.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "linear_step",
+        "path": "scripts/prototypes/fast_map_production/solver.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 243,
+        "name": "test_registry_contains_all_census_source_gaps",
+        "path": "tests/test_mast_catalog_geometry.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "linear_step",
+        "path": "scripts/prototypes/fast_map_production/solver.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 114,
+        "name": "test_the_seeded_held_out_extension_is_pinned_across_campaigns_and_polarities",
+        "path": "tests/test_parity_tolerances.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "linear_step",
+        "path": "scripts/prototypes/fast_map_production/solver.py"
+      },
+      "window_line": 747
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "3c679ca06b4410b04407615115a06a698f5dfedd",
+    "0d1dbf435e8cce0e7cc0e7b11b6c8482d7436736",
+    "0abb4e2a9c04bf023854ef072e63d292653ff146",
+    "12a81e8e17c630ce53ec74a2ad53b7c7a123e8b2",
+    "1f2cfd1432410961ae81b48d4c714669a1b0af13",
+    "b9b24c06344b5f1344ac0253607de343e6b5a0e0",
+    "8422b03cb2876bb85fb7de1fa3b078c6bb52f1f2",
+    "0fb4ce277251f18d17f4c2772477164e5bb3d0d0",
+    "4aed9925a6c3fcadc255fb0ccf611887ce649519",
+    "34cc6a730358aa8c0bb7d66ad09df0bacb2222ea",
+    "77ac7917d07d245e3266b355ab2cf4e2169f350f",
+    "90ad9cf24f8db8a58a3b4ad7566a7d47619425c4",
+    "d0807693be94035fe39e5c44c99435116b63cd97"
+  ],
+  "completed_at": "2026-10-24T23:43:12Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-24T19:51:51Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "bash /home/ITER/mcintos/.cache/nova-s21-gates/capture-merged.sh",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T194900526551-solve-operand-capture/gate.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.2857142857142857,
+    "plan": "converged-forward-solve",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-24T20:49:12.488076+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-24T19:49:12Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 29,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 1,
+    "headroom": 11,
+    "mean_context": 160000,
+    "observed_at": "2026-10-24T19:48:47Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 29,
+      "aggregate_tokens_per_second": 68.998,
+      "detail": "",
+      "mean_tokens_per_second": 86.248,
+      "observed_at": "2026-10-24T19:48:47Z",
+      "runs": 0.8,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-24T23:43:12Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T194900526551-solve-operand-capture/manifest.md",
+  "member": "disposable-r-20261024T194900526551-solve-operand-capture",
+  "model_key": "flash",
+  "negative_control": {
+    "added_failure_ids": [],
+    "comparison_arm": "none",
+    "control_exit_status": 1,
+    "control_failure_ids": [],
+    "declaration": "close over one of the two operands again and its capture returns in the report, named by frame",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T194900526551-solve-operand-capture/gates/control-exact.exit.log",
+    "reason": "the declared control is a measurement, not a test: with one operand closed over again (gates/control-exact.json) the factor program returns to 1,074,146,166 bytes against the tip's 2.65 MB, which is the capture coming back; the dense-arm control (gates/negctl-dense-arm.exit.log) fails 2 tests with EXIT=1",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T194900526551-solve-operand-capture/gates/control-exact.exit.log",
+    "test_paths": [
+      "tests/test_solve_operand_capture.py"
+    ],
+    "verdict": "waived"
+  },
+  "no_commit": null,
+  "node": "solve-operand-capture",
+  "node_definition": {
+    "after": [],
+    "brief": "/home/ITER/mcintos/.cache/nova-s21-briefs/oct24-constant-capture.txt",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T194900526551-solve-operand-capture/brief.txt",
+    "brief_sha256": "521b1ab3dd5f5853db0c8e748b9eb585e4adc0b9dcb5af095269370f44da2780",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "critical",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1162,
+          "cached_input_tokens": 380403,
+          "input_tokens": 381567,
+          "output_tokens": 2376,
+          "reasoning_output_tokens": 131,
+          "total_tokens": 383943,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "40d3a43c-d1f4-4016-9584-4e663183c12c",
+      "session_id": "s21-nova"
+    },
+    "done_when": "the limited 550 lowering's captured-constants report totals under 64 MB, and tests/test_solve_operand_capture.py passes with the H200 receipt showing identical certificate map values before and after",
+    "estimated_hours": null,
+    "goal": "the cold solve's lowering captures no operand as a constant, so the 550 rows compile within host and device memory",
+    "id": "solve-operand-capture",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-24T19:49:12Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 29,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 1,
+      "headroom": 11,
+      "mean_context": 160000,
+      "observed_at": "2026-10-24T19:48:47Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 29,
+        "aggregate_tokens_per_second": 68.998,
+        "detail": "",
+        "mean_tokens_per_second": 86.248,
+        "observed_at": "2026-10-24T19:48:47Z",
+        "runs": 0.8,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T194900526551-solve-operand-capture/manifest.md",
+    "negative_control": "close over one of the two operands again and its capture returns in the report, named by frame",
+    "plan": "converged-forward-solve",
+    "regenerate_paths": [],
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§4",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/equilibrium/fixed_points.py",
+      "tests/test_solve_operand_capture.py",
+      "docs/evidence/fragments/converged-forward-solve/constant-capture.html",
+      "docs/figures/converged-forward-solve/constant-capture",
+      "docs/evidence/fragments/converged-forward-solve/solve-operand-capture.html",
+      "docs/figures/converged-forward-solve/solve-operand-capture",
+      "scripts/prototypes/diverted_stall/measure.py",
+      "scripts/prototypes/fast_map_production/solver.py"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 2301640.0,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "solve-operand-capture",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-24T19:51:15.394232+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:snapshot",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.478,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 531.986,
+      "context-estimate": 25.783,
+      "records": 376.55,
+      "verdict-inputs": 155.029
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.2857142857142857,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "d0807693be94035fe39e5c44c99435116b63cd97",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "34cc6a730358aa8c0bb7d66ad09df0bacb2222ea",
+    "reviewed_head_sha": "d0807693be94035fe39e5c44c99435116b63cd97",
+    "scores": {
+      "durability": 14,
+      "evidence": 15,
+      "fit": 16,
+      "goal_fidelity": 18,
+      "reuse": 20,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 102
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261024T194900526551-solve-operand-capture",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§4",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "dafb304a-8ccd-42d6-a73d-cf27a3b239a3",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 46498559,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 2460.681,
+    "generated_tokens": 172569,
+    "generation_seconds": 606.934,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 85.1,
+    "machine_seconds": 1853.747,
+    "peak_input_tokens": 195953,
+    "tokens_per_second": 284.33,
+    "wall_tokens_per_second": 70.13
+  },
+  "time_budget": "60m",
+  "tool_steps": 133.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 13881,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 4,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-24T23:43:15Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-24T23:02:04Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261024T194900526551-solve-operand-capture",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 25221,
+    "worker_pid": 3645722
+  },
+  "worker_seconds": 9921,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

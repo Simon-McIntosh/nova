@@ -45,6 +45,14 @@ class LinearDensity:
         return radius + 2.0
 
 
+@dataclass(frozen=True)
+class UnitDensity:
+    """Unit density, so the booked current is the support's own area."""
+
+    def current_density(self, radius, normalized):
+        return jnp.ones_like(radius)
+
+
 def _ring(values):
     return values[None], jnp.asarray([values.shape[0]], dtype=jnp.int32)
 
@@ -107,7 +115,181 @@ def _disk_weight_fraction(radius):
     return float(jnp.sum(jnp.where(inside, weights, 0.0)) / total)
 
 
-def test_composite_support_is_continuous_across_disk_entry_and_exit():
+# The cell and the disk the inside piece is measured against. The cell is a
+# triangle that is not symmetric about the disk, so the booked first moments are
+# non-zero and the density, which reads the absolute x coordinate, is not
+# constant across the region.
+CELL = jnp.asarray(((-0.8, -0.9), (0.9, -0.9), (0.0, 0.9)), dtype=jnp.float64)
+DISK_CENTRE = jnp.asarray((0.1, -0.2), dtype=jnp.float64)
+CELL_CENTRE = jnp.zeros(2, dtype=jnp.float64)
+
+# The clip quadrature's own discretisation against this reference, measured at
+# the radii below: 8e-6 relative at radius 0.2 and 1.4e-5 at 0.9, i.e. about
+# 4e-5 absolute on the largest booked value. The tolerance is set above that
+# and far below the sliver the negative control drops.
+TOLERANCE = 2e-4
+
+
+def _inside(radius, *, scale=1.0, profile=None):
+    """Book only the inside piece: the cell clipped to the disk.
+
+    The exterior piece is not added, so this is the quantity the split has to
+    get right and not a sum in which the inside piece cancels.
+    """
+    rings, counts = _ring(CELL)
+    return current._disk_split_moments(
+        rings,
+        counts,
+        CELL_CENTRE,
+        jnp.asarray(1.0, dtype=jnp.float64),
+        jnp.zeros(6, dtype=jnp.float64),
+        jnp.asarray(0.0, dtype=jnp.float64),
+        jnp.asarray(1.0, dtype=jnp.float64),
+        LinearDensity() if profile is None else profile,
+        DISK_CENTRE,
+        jnp.asarray(radius * scale, dtype=jnp.float64),
+        keep_inside=True,
+    )
+
+
+def _polar_reference(radius, *, scale=1.0, unit=False):
+    """The inside piece in closed polar form, sharing nothing with the split.
+
+    The region is the convex cell intersected with the disk boundary the clip
+    draws, an inscribed regular polygon of ``DISK_ARC_SEGMENTS`` vertices at
+    ``radius*scale``. About the disk centre, a ray at angle ``theta`` leaves the
+    region at the nearer of the cell edge and that polygon, whose boundary
+    radius is ``R cos(pi/n) / cos(phi)`` with ``phi`` the angular distance to the
+    nearest polygon vertex. The cell edge is fixed between consecutive vertex
+    angles, so each angular piece is smooth and is integrated with
+    Gauss-Legendre nodes. The booked
+    quantities are ``integral density dA`` and the two ``integral density *
+    (x - centre) dA`` with ``density = x + 2``, which in these coordinates is
+    ``A + t cos(theta)`` with ``A = disk_centre_x + 2``. With ``unit`` the
+    density is one, so the same routine returns the support's area and its
+    geometric first moments.
+    """
+    import numpy as np
+
+    limit = radius * scale
+    vertices = np.asarray(CELL, dtype=float)
+    origin = np.asarray(DISK_CENTRE, dtype=float)
+    centre = np.asarray(CELL_CENTRE, dtype=float)
+    density_offset = origin[0] + 2.0
+    shift = origin - centre
+
+    angles = np.arctan2(vertices[:, 1] - origin[1], vertices[:, 0] - origin[0])
+    order = np.argsort(angles)
+    angles = angles[order]
+    vertices = vertices[order]
+    nodes, weights = np.polynomial.legendre.leggauss(48)
+
+    total = np.zeros(3)
+    for index in range(len(angles)):
+        start = angles[index]
+        stop = angles[(index + 1) % len(angles)]
+        if stop <= start:
+            stop += 2.0 * np.pi
+        first = vertices[index]
+        edge = vertices[(index + 1) % len(vertices)] - first
+        theta = 0.5 * (stop - start) * nodes + 0.5 * (stop + start)
+        jacobian = 0.5 * (stop - start)
+        direction = np.stack((np.cos(theta), np.sin(theta)), axis=-1)
+        denominator = direction[..., 0] * edge[1] - direction[..., 1] * edge[0]
+        numerator = (first[0] - origin[0]) * edge[1] - (first[1] - origin[1]) * edge[0]
+        with np.errstate(divide="ignore", invalid="ignore"):
+            hit = np.where(np.abs(denominator) > 0.0, numerator / denominator, np.inf)
+        segments = current.DISK_ARC_SEGMENTS
+        step = 2.0 * np.pi / segments
+        phase = np.mod(theta, step) - 0.5 * step
+        boundary = limit * np.cos(0.5 * step) / np.cos(phase)
+        rho = np.minimum(boundary, np.maximum(hit, 0.0))
+        cosine, sine = np.cos(theta), np.sin(theta)
+        if unit:
+            piece = 0.5 * rho**2
+            moment_x = rho**3 * cosine / 3.0 + shift[0] * rho**2 / 2.0
+            moment_y = rho**3 * sine / 3.0 + shift[1] * rho**2 / 2.0
+        else:
+            piece = 0.5 * density_offset * rho**2 + cosine * rho**3 / 3.0
+            moment_x = (
+                density_offset * rho**3 * cosine / 3.0
+                + density_offset * shift[0] * rho**2 / 2.0
+                + rho**4 * cosine**2 / 4.0
+                + shift[0] * rho**3 * cosine / 3.0
+            )
+            moment_y = (
+                density_offset * rho**3 * sine / 3.0
+                + density_offset * shift[1] * rho**2 / 2.0
+                + rho**4 * sine * cosine / 4.0
+                + shift[1] * rho**3 * cosine / 3.0
+            )
+        total += jacobian * np.asarray(
+            (np.sum(weights * piece), np.sum(weights * moment_x), np.sum(weights * moment_y))
+        )
+    return jnp.asarray(total, dtype=jnp.float64)
+
+
+@pytest.mark.parametrize("radius", [0.2, 0.55, 0.9, 1.4, 3.0])
+def test_inside_piece_books_the_exact_clipped_disk(radius):
+    """The inside piece is asserted against a reference that shares no split.
+
+    The composite support tiles the cell for every radius, so asserting the
+    composite against itself cannot fail. This asserts the inside piece -- the
+    cell clipped to the disk -- against its closed polar form, at radii that put
+    the disk wholly inside the cell, crossing one edge, crossing two, and
+    containing the cell.
+    """
+    assert jax.config.jax_enable_x64 is True
+    booked = _inside(radius)
+    reference = _polar_reference(radius)
+    assert jnp.all(jnp.isfinite(booked))
+    assert jnp.allclose(booked, reference, rtol=0.0, atol=TOLERANCE), (booked, reference)
+
+    # The negative control: where the disk boundary actually crosses the cell, a
+    # split that drops a sliver at the crossing must fail this same assertion,
+    # so the tolerance is not hiding the region. Where the disk contains the
+    # cell there is no crossing to drop a sliver at, so the control does not
+    # apply and the check is that the whole cell books exactly.
+    fraction = _disk_weight_fraction(radius)
+    if 0.0 < fraction < 1.0:
+        sliver = _inside(radius, scale=1.0 - 1e-3)
+        assert not jnp.allclose(sliver, reference, rtol=0.0, atol=TOLERANCE), radius
+    else:
+        assert fraction == pytest.approx(1.0, abs=1e-12)
+
+
+@pytest.mark.parametrize("radius", [0.2, 0.55, 0.9, 1.4])
+def test_area_current_and_moments_share_one_support(radius):
+    """The read area, the booked current and both first moments cover one region.
+
+    The same rings are booked twice, once with unit density and once with
+    ``density = x + 2``. Under unit density slot zero is the support's area and
+    the two later slots are its geometric first moments about the cell centre,
+    so the density-weighted current is fixed by them:
+
+        integral (x + 2) dA = integral (x - centre_x) dA + (centre_x + 2) * area.
+
+    If the two bookings integrated different supports that identity would not
+    hold, and both bookings are separately asserted against the closed polar
+    form, so neither is merely self-consistent.
+    """
+    assert jax.config.jax_enable_x64 is True
+    support = _inside(radius, profile=UnitDensity())
+    weighted = _inside(radius)
+    unit_reference = _polar_reference(radius, unit=True)
+    assert jnp.all(jnp.isfinite(support))
+    assert jnp.allclose(support, unit_reference, rtol=0.0, atol=TOLERANCE), (
+        support,
+        unit_reference,
+    )
+
+    area, moment_x, _ = (float(value) for value in support)
+    assert area > 0.0
+    predicted = moment_x + (float(CELL_CENTRE[0]) + 2.0) * area
+    assert float(weighted[0]) == pytest.approx(predicted, rel=0.0, abs=2.0 * TOLERANCE)
+
+
+def test_inside_piece_is_continuous_across_disk_entry_and_exit():
     assert jax.config.jax_enable_x64 is True
     radii = (0.0, 0.25, 0.5, 0.9, 1.1, 1.5, 3.0)
     fractions = [_disk_weight_fraction(jnp.asarray(r)) for r in radii]
@@ -116,13 +298,11 @@ def test_composite_support_is_continuous_across_disk_entry_and_exit():
     assert fractions[1] > 0.0
     assert fractions[-1] == pytest.approx(1.0, abs=1e-12)
 
-    moments = [
-        _moments(jnp.asarray(r), force_conic_right=FORCE_CONIC_RIGHT) for r in radii
-    ]
-    reference = moments[0]
-    for moment in moments:
-        assert jnp.all(jnp.isfinite(moment))
-        assert jnp.allclose(moment, reference, rtol=0.0, atol=1e-12)
+    for radius in radii:
+        booked = _inside(radius)
+        reference = _polar_reference(radius)
+        assert jnp.all(jnp.isfinite(booked))
+        assert jnp.allclose(booked, reference, rtol=0.0, atol=TOLERANCE), (booked, reference)
 
 
 def test_force_conic_right_breaks_the_continuity_assertion():

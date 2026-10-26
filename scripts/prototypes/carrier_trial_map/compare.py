@@ -112,6 +112,38 @@ def compare(run, arm):
                 right[f"{state}.tree_values"][columns],
             ),
         )
+    if "common.nodal_jets" in left and "common.nodal_jets" in right:
+        assert np.array_equal(left["jet.nodes"], right["jet.nodes"])
+        for name, columns in (
+            ("value", [0]),
+            ("gradient", [1, 2]),
+            ("hessian", [3, 4, 5]),
+        ):
+            print(
+                "NODAL",
+                name,
+                relative(
+                    left["common.nodal_jets"][:, columns],
+                    right["common.nodal_jets"][:, columns],
+                ),
+            )
+    for label, data in (("split", left), (arm, right)):
+        key = "common.contour.node_valid"
+        if key in data:
+            live = data[key]
+            ids = data["common.contour.node_vertex"][live]
+            print(
+                "CONTOUR_NODES",
+                label,
+                "count",
+                int(np.sum(live)),
+                "coordinates",
+                data["tree.vertex_rz"][ids].tolist(),
+                "flux",
+                data["common.contour.node_psi"][live].tolist(),
+                "types",
+                data["common.contour.critical_type"][live].tolist(),
+            )
     (run / f"{arm}-comparison.json").write_text(json.dumps(result, indent=2) + "\n")
 
 

@@ -10,7 +10,10 @@ import numpy as np
 from scipy.optimize import linear_sum_assignment
 
 from nova.equilibrium import fixed_points, topology
-from scripts.prototypes.fast_map_production.program import FusedField
+from scripts.prototypes.fast_map_production.program import (
+    FusedField,
+    _density_coefficients,
+)
 from scripts.prototypes.sub_millisecond.measure_bell_cut import bell_polygon
 
 
@@ -140,6 +143,13 @@ def measure(context):
                 payload[f"{label}.read.{name}"] = np.asarray(value)
         for name in state._fields:
             payload[f"{label}.map.{name}"] = np.asarray(getattr(state, name))
+        payload[f"{label}.density"] = np.asarray(
+            jax.jit(
+                lambda geometry, reading: _density_coefficients(
+                    geometry, reading, context["profile"]
+                )
+            )(geometry, reading)
+        )
         for name in ("position", "valid", "status"):
             if hasattr(roots, name):
                 payload[f"{label}.roots.{name}"] = np.asarray(getattr(roots, name))

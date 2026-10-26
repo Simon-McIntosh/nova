@@ -515,7 +515,6 @@ def deflate(series: list, root):
     return quotient, series[0] + root * quotient[0] - 0.5 * current
 
 
-@_array_program
 def _harmonic_pair_step(rising, falling, one, other, *, coincident):
     """Apply both product-to-sum contributions in their serial update order."""
     term = 0.5 * one * other

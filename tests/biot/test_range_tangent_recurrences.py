@@ -352,6 +352,26 @@ def test_package_functions_equal_base_functions():
         np.testing.assert_array_equal(np.asarray(left), np.asarray(right))
 
 
+def test_harmonic_product_public_jvp_matches_base():
+    _, base, primals, tangents = CASES["harmonic_multiply"]
+    actual = jax.jit(lambda p, t: jax.jvp(rangefunction.harmonic_multiply, p, t))(
+        primals, tangents
+    )
+    expected = jax.jit(lambda p, t: jax.jvp(base, p, t))(primals, tangents)
+    for got, reference in zip(
+        jax.tree.leaves(actual[0]), jax.tree.leaves(expected[0]), strict=True
+    ):
+        np.testing.assert_array_equal(np.asarray(got), np.asarray(reference))
+    error = worst(actual[1], expected[1])
+    print(f"HARMONIC_PRODUCT_JVP samples={SAMPLES} maximum={error:.17g}")
+    assert error <= 1e-9
+
+    graph = jax.make_jaxpr(lambda p, t: jax.jvp(rangefunction.harmonic_multiply, p, t))(
+        primals, tangents
+    )
+    assert "name=_harmonic_pair_step" not in str(graph)
+
+
 @pytest.mark.slow
 # A compile row spawns 21 fresh processes; the repository's 300 s hang guard is
 # for ordinary tests and cuts this one off before it asserts, so it gets its own

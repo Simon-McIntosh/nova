@@ -661,8 +661,10 @@ def _traced_quadratic_arc(start, end, coefficient, centre, scale):
     floor = 64.0 * jnp.finfo(dtype).eps
     safe_quadratic = jnp.where(jnp.abs(quadratic) > floor, quadratic, 1.0)
     safe_linear = jnp.where(jnp.abs(linear) > floor, linear, 1.0)
-    discriminant = jnp.maximum(linear * linear - 4.0 * quadratic * zero_value, 0.0)
-    root_scale = jnp.sqrt(discriminant)
+    discriminant = linear * linear - 4.0 * quadratic * zero_value
+    resolvable = discriminant > 0.0
+    safe_discriminant = jnp.where(resolvable, discriminant, 1.0)
+    root_scale = jnp.where(resolvable, jnp.sqrt(safe_discriminant), 0.0)
     first_root = (-linear - root_scale) / (2.0 * safe_quadratic)
     second_root = (-linear + root_scale) / (2.0 * safe_quadratic)
     curved_root = jnp.where(

@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Cell 103 moment derivative: the non-finite term and the arc-root seam repair</title>
+</head>
+<body>
+<h1 id="cell-moment-derivative-nan-title">Cell 103 moment derivative: the non-finite term and the arc-root seam repair</h1>
+
+<p id="cell-moment-derivative-nan-summary">The CPU diverted 300-cell certificate row now has a finite first Krylov
+action and converges in two trips at residual 5.63e-15. The non-finite
+derivative was the sampled level-set arc taking the square root of a
+discriminant clamped at zero: its tangent is undefined across the band where
+the discriminant changes sign, which is the arrangement cell 103 held at arc
+slots 483 to 505. The square root is now taken off that seam with the
+double-where pattern. That repair is what this node lands. Two later attempts
+to refuse a non-finite cell by index are recorded and reverted below, because
+neither could fire or be carried out of a traced step; the base normalisation
+behaviour, where a non-finite amplitude poisons the residual and the solver
+refuses it, is kept.</p>
+
+<h2 id="cell-moment-derivative-nan-reproduction">Reproduction at the base revision</h2>
+<p id="cell-moment-derivative-nan-repro-facts">At base <code>2967db463</code>, on CPU in place on the fleet allocation,
+<code>scripts/certificate_300_carrier/trace_normalisation.py</code> at the
+production diverted single-null seed (target current
+37174.65342635735 A) reports the raw cell-moment derivative non-finite in
+<strong>1 of 340</strong> entries, index <strong>103</strong>, with every value
+finite (largest value 313.543 A). The total-current derivative is non-finite,
+and the normalised moments are non-finite in <strong>340 of 340</strong>. The
+reproduction log is <code>repro-normalisation.log</code> under the run
+directory.</p>
+
+<h2 id="cell-moment-derivative-nan-expression">The expression</h2>
+<p id="cell-moment-derivative-nan-stage">Staged differentiation at the same seed narrows it. Every upstream stage is
+finite at cell 103: the support vertices' tangent is identically zero, the
+flux-polynomial coefficient tangent is finite
+(<code>[-0.1981, -0.6826, -0.3137, 0.2767, -0.1531, 0.0298]</code> against the
+value <code>[1.0007, 0.01215, 0.005441, 0.006906, -0.007116, -0.005519]</code>),
+and the density tangent at the cell's fixed quadrature points is finite. The
+first non-finite tangent is the <em>moving level-set clip vertices</em> of
+<code>SeparatrixClip</code>: 46 of 366520 entries, all in cell 103.</p>
+<p id="cell-moment-derivative-nan-slots">Those entries are arc slots 483 to 505. Recomputing
+<code>_traced_quadratic_arc</code>'s own discriminant per sample for that cell
+gives its smallest magnitudes at samples 481 to 507, where it <em>changes
+sign</em>: sample 482 <code>+4.876e-08</code>, sample 483
+<code>-2.254e-07</code>, sample 505 <code>+3.261e-07</code>, sample 506
+<code>+2.970e-08</code>. The non-finite band is exactly that sign-change band.
+The term is</p>
+<pre id="cell-moment-derivative-nan-code"><code>discriminant = jnp.maximum(linear * linear - 4.0 * quadratic * zero_value, 0.0)
+root_scale = jnp.sqrt(discriminant)</code></pre>
+<p id="cell-moment-derivative-nan-why">in <code>_traced_quadratic_arc</code> (<code>nova/equilibrium/separatrix_clip.py</code>,
+the <code>root_scale</code> line). The clamp makes the value finite on the
+negative side, where its tangent is zero, and leaves the positive side with a
+tangent of <code>dD / (2 sqrt(D))</code>; across the seam the tangent is
+undefined, so the composed tangent is non-finite while every value stays
+finite. This is the tangency signature the brief named, confirmed here at a
+sign-changing discriminant rather than an exactly-zero one.</p>
+
+<h3 id="cell-moment-derivative-nan-fix">The repair (commit 4688864ee)</h3>
+<p id="cell-moment-derivative-nan-fix-site">Under the lead's 2026-10-24 ruling that concurrent edits to one file from
+separate worktrees are reconciled at integration, the expression is repaired at
+its site in <code>nova/equilibrium/separatrix_clip.py</code> with the
+double-where pattern: the discriminant keeps its sign, a safe value of
+<code>1.0</code> replaces it where it is not resolvable, and the square root is
+selected by that same mask.</p>
+<pre id="cell-moment-derivative-nan-code-fixed"><code>discriminant = linear * linear - 4.0 * quadratic * zero_value
+resolvable = discriminant &gt; 0.0
+safe_discriminant = jnp.where(resolvable, discriminant, 1.0)
+root_scale = jnp.where(resolvable, jnp.sqrt(safe_discriminant), 0.0)</code></pre>
+<p id="cell-moment-derivative-nan-fix-value">The value is unchanged — <code>sqrt(D)</code> where <code>D &gt; 0</code> and
+<code>0</code> elsewhere, which is what the clamp produced — while neither the
+value nor the tangent touches <code>sqrt</code> at zero. At the production
+seed, cell 103's moment tangent is <code>2824.328634996701</code> against a
+central difference of <code>2824.179876803612</code>, relative difference
+<code>5.267e-05</code> on a step of <code>1.0e-6</code>; no cell's moment or
+tangent is non-finite and the median relative difference over the 340 cells is
+zero. The first Krylov action of the CPU diverted 300-cell row is finite:
+<strong>0 of 1536</strong> entries non-finite, <code>QUALIFICATION=ACCEPTED</code>
+(<code>verify-finite-tip.log</code>, measured from a git archive of commit
+<code>c4bd20313</code> with the revision stamped into the log header, so the code
+it quantifies is the code that is committed).</p>
+
+<h3 id="cell-moment-derivative-nan-row">The CPU row as it comes</h3>
+<p id="cell-moment-derivative-nan-row-facts">The diverted single-null 300-cell CPU row is rerun from a git archive of the committed tip <code>e39ffd109</code>, with the revision stamped in the log header. It terminates <strong>converged</strong> in <strong>2 trips</strong> with terminal fixed-point residual <code>5.626976272072871e-15</code>, against the base’s one-trip stop at <code>2.2640848763056183</code> after a <code>nonfinite_linear_action</code> refusal. The solver qualification is <code>unqualified</code> with <code>converged=true</code>; the run log is <code>row-final.log</code> and the trip count and residual are read from the route part it names.</p>
+
+<h2 id="cell-moment-derivative-nan-reversal">Reverted to the base behaviour</h2>
+<p id="cell-moment-derivative-nan-reversal-why">Two later attempts at reporting a non-finite cell by index were made on top of the
+arc-root repair and both are removed by commit <code>e39ffd109</code>, because
+neither closed the gap it was aimed at. The first refused a non-finite cell
+from a concrete evaluation, and no production route is concrete: <code>gs.apply</code>,
+the jitted reduced map and the certificate jvp all pass tracers, so the refusal
+could not fire. The second carried a per-cell mask out of the step and replaced
+the amplitude's non-finite signal with an admissibility flag; on the traced
+route an inadmissible total current then returned a zero amplitude, which scales
+every cell to zero and lets the solve proceed on a zero source instead of
+poisoning the residual, and the mask itself was discarded at all three solve
+paths because the driver seam returns a bare <code>jax.Array</code>. The base
+behaviour is the safe one: a non-finite amplitude poisons the residual and the
+solver refuses it as a non-finite linear action.</p>
+<p id="cell-moment-derivative-nan-reversal-facts">Commit <code>e39ffd109</code> restores
+<code>nova/equilibrium/forward_operator.py</code> and
+<code>nova/equilibrium/source.py</code> byte for byte to <code>2967db463</code>.
+<code>git diff 2967db463 -- nova/equilibrium/forward_operator.py
+nova/equilibrium/source.py</code> prints nothing, so the node's surviving code
+change is the arc-root repair in <code>separatrix_clip.py</code> alone. The
+traced normalisation amplitude returns <code>jnp.nan</code> where the base did,
+<code>current_normalisation_admissible</code>, the mask helpers and their
+plumbing at the three solve paths are gone, and the unit file now carries only
+the arc-root seam test
+(<code>gate-unit-final.log</code>, 1 passed, <code>EXIT=0</code>).</p>
+<p id="cell-moment-derivative-nan-reversal-successor">The report-by-index is moved to a successor with an exact specification rather than
+attempted again here: the jitted step must return the non-finite flag and the
+offending cell indices as outputs, and the host loop in each solve driver — the
+certificate solver's <code>linear_step</code> loop and the reduced Newton driver
+— must refuse by name with <code>CurrentNormalisationError</code> when the flag
+is set. That requires editing the drivers, which are outside this node's write
+scope.</p>
+<h2 id="cell-moment-derivative-nan-gate">Gate</h2>
+<p id="cell-moment-derivative-nan-gate-sweep">The gate runs every test file that references <code>separatrix_clip</code>,
+plus <code>tests/test_equilibrium_forward_operator.py</code> and
+<code>tests/test_equilibrium_source.py</code>, each in its own fresh process at
+the tip and at the base, from a git archive of each, as one <code>sirius</code>
+job with an explicit <code>--mem=64G</code> and a 600-second per-test timeout
+(job 1295252). 14 of the 15 listed files ran in both arms, 0 at the tip only, 0 at the base only, and 0 did not run. Every listed file that exists in an arm ran there, but 2 arm run(s) were cut short by the 600-second per-test timeout and printed no verdict line, so the gate is not counted complete: <code>tests/test_exact_clip_memory.py</code> (base arm), <code>tests/test_exact_clip_memory.py</code> (tip arm). The job also ended in the scheduler's OUT_OF_MEMORY state after the sweep had written its last row. The gate is <strong>partial</strong>.</p>
+<p id="cell-moment-derivative-nan-gate-delta">The <strong>14</strong> files that ran in both arms show <strong>zero added failures</strong>: identical pytest exit status and identical failure counts file by file, 0 failing test ids at the base and 0 at the tip, and no test fails at the tip that passes at the base. Per-arm rows are in
+<code>gate-suite/clip-base-arm.log</code> and
+<code>gate-suite/clip-tip-arm.log</code>, each derived from
+<code>gate-clip/summary.tsv</code> (job start stamped
+<code># tip=e39ffd109dc610d63321d96a161994050f29a0b7 base=2967db4635671b942220d7d42797f1b08c805b95 files=15 host=98dci4-clu-5081.iter.org job=1295252 2026-10-25T01:46:08Z</code>).</p>
+
+<h2 id="cell-moment-derivative-nan-negative-control">Negative control</h2>
+<p id="cell-moment-derivative-nan-negative">The declared mutation restores the clamped square root in a scratch copy of
+commit <code>4688864ee</code>. The CPU row's first Krylov action is non-finite
+again: 1518 of 1536 entries, <code>QUALIFICATION=NONFINITE_LINEAR_ACTION</code>,
+and cell 103's moment tangent is NaN against a central difference of
+<code>2824.179876803612</code> (<code>negative-control.log</code>). The pinned
+test fails in the same tree with a non-finite direction
+(<code>negative-control-test.log</code>, one failed, four passed,
+<code>EXIT=1</code>), so the guard is shown firing rather than merely passing.</p>
+<!-- the masked-refusal control was withdrawn with the repair it tested (e39ffd109) -->
+
+</body>
+</html>

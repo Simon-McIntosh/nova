@@ -1,0 +1,72 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "nova/equilibrium/forward.py:958",
+    "nova/equilibrium/forward.py:1455",
+    "nova/equilibrium/forward.py:1458",
+    "nova/equilibrium/reduced_newton.py:352",
+    "benchmarks/solovev_certificate.py:978"
+  ],
+  "completed_at": "2026-10-26T20:53:04.689Z",
+  "dispatched_at": "2026-10-26T20:42:53Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/forward_operator.py",
+      "line": 3636,
+      "severity": "blocking",
+      "text": "blocking: done_when clause (2) is delivered by nothing \u2014 the amplitude still returns jnp.nan where the current is inadmissible, so one non-finite cell still scales all 1518 of 1536 entries through scaled_current_moments:3613, no cell index reaches any solve receipt, and the planted-NaN test the clause requires does not exist; the manifest discloses this under `unmet` and names the scope extension it needs, so the gap is honest but not closed."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/cell-moment-derivative-nan.html",
+      "line": 84,
+      "severity": "non-blocking",
+      "text": "non-blocking: the headline trip count of 2 is read from the route part row-final.log names, which lives under the node-local /dev/shm/39486-fleet-1291586 tree rather than the run directory or GPFS, so a reader on another host cannot open the artifact the number rests on."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/cell-moment-derivative-nan.html",
+      "line": 138,
+      "severity": "non-blocking",
+      "text": "non-blocking: the negative-control paragraph cites negative-control-test.log as \"one failed, four passed\", but that log predates e39ffd109 and ran against a five-test file, while the landed file holds a single test, so the control was not regenerated for the tree it now certifies."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T095505170350-cell-moment-derivative-nan/manifest.md",
+      "line": 19,
+      "severity": "non-blocking",
+      "text": "non-blocking: baseline_suite and after_suite omit the required failure_count key, and manifest.md:22 reports \"0 never ran\" while tests/test_exact_clip_memory.py carries EXIT=1 and no verdict line in both arms."
+    }
+  ],
+  "justifications": {
+    "durability": "tests/test_cell_moment_*: the single remaining assertion at tests/test_cell_moment_derivative_finite.py:32 is red in the negative control (negative-control-test.log), so it guards the arc-root repair, but the reverted amplitude and moment paths carry no test and the nine assertions that covered them were deleted with the code.",
+    "evidence": "row-final.log carries the revision in its header and gate-suite/clip-base-arm.log and clip-tip-arm.log record zero added failures, but the gate is complete:false with two arm runs cut short, and no measurement exists for clause (2).",
+    "fit": "e39ffd109 restores base text exactly, the commits carry conventional subjects with bodies and no plan labels, and the fragment matches the surrounding evidence style in docs/evidence/fragments/converged-forward-solve.",
+    "goal_fidelity": "nova/equilibrium/forward_operator.py:3596 leaves cell_current_moments unqualified and :3636 leaves the NaN amplitude, so done_when clause (2) is delivered by nothing and the increment removes the partial attempt rather than repairing it.",
+    "reuse": "the increment adds no definition and deletes the second refusal type, leaving CurrentNormalisationError as the sole owner in nova/equilibrium/source.py:119; a search over nova/equilibrium for a per-cell finiteness qualifier found only that owner's existing eager raise.",
+    "scope_discipline": "every path in the increment is inside the manifest's declared write paths, and the surviving repair in nova/equilibrium/separatrix_clip.py:665 is disclosed in the manifest scope_note as outside the grant under a lead ruling."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: read the plan followup f-cfs-cell-moment-derivative-nan and the source brief; at the landed head nova/equilibrium/forward_operator.py:3636 keeps the base `jnp.where(admissible, target / safe_unscaled, jnp.nan)` amplitude and cell_current_moments at :3596 carries no per-cell qualification, so the increment preserves the goal's finite-row half (row-final.log: converged, 5.626976272072871e-15) and delivers nothing of its containment half.\nVERDICT done_when: clause (1) is measured, by row-final.log and gate-unit-final.log; clause (2) has no implementation and no evidence at f2f836863, because e39ffd109 deletes the mask helpers, the admissibility flag and the index-carrying error message; clause (3) is measured on 14 of the 15 listed files with zero added failures and additionally rests on the verified byte-identity of forward_operator.py and source.py to 2967db463.\nVERDICT write_paths: the source manifest declares seven paths; the increment 7b0cec214..f2f836863 touches exactly the four this review's goal names, and no file outside them.\nVERDICT manifest: read at status complete; it records completed:false with empty failure lists on both gate arms, records the report-by-index under `unmet` with an exact successor specification, and its baseline_suite and after_suite JSON omit the required failure_count key (manifest.md:19-20).\nVERDICT diff: read the three commits e39ffd109, 9ee203629 and f2f836863 against 7b0cec214; e39ffd109 restores nova/equilibrium/forward_operator.py and nova/equilibrium/source.py byte for byte to 2967db463 (git diff 2967db463 against both at f2f836863 prints nothing), and the other two are the fragment rewrites, totalling 70 insertions and 330 deletions across four files.\nCALL_SITES: nova/equilibrium/forward.py:958, nova/equilibrium/forward.py:1455, nova/equilibrium/forward.py:1458, nova/equilibrium/reduced_newton.py:352, benchmarks/solovev_certificate.py:978\nSCORE goal_fidelity: 9\nJUSTIFICATION goal_fidelity: nova/equilibrium/forward_operator.py:3596 leaves cell_current_moments unqualified and :3636 leaves the NaN amplitude, so done_when clause (2) is delivered by nothing and the increment removes the partial attempt rather than repairing it.\nSCORE evidence: 11\nJUSTIFICATION evidence: row-final.log carries the revision in its header and gate-suite/clip-base-arm.log and clip-tip-arm.log record zero added failures, but the gate is complete:false with two arm runs cut short, and no measurement exists for clause (2).\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the increment is inside the manifest's declared write paths, and the surviving repair in nova/equilibrium/separatrix_clip.py:665 is disclosed in the manifest scope_note as outside the grant under a lead ruling.\nSCORE durability: 12\nJUSTIFICATION durability: tests/test_cell_moment_*: the single remaining assertion at tests/test_cell_moment_derivative_finite.py:32 is red in the negative control (negative-control-test.log), so it guards the arc-root repair, but the reverted amplitude and moment paths carry no test and the nine assertions that covered them were deleted with the code.\nSCORE fit: 17\nJUSTIFICATION fit: e39ffd109 restores base text exactly, the commits carry conventional subjects with bodies and no plan labels, and the fragment matches the surrounding evidence style in docs/evidence/fragments/converged-forward-solve.\nSCORE reuse: 20\nJUSTIFICATION reuse: the increment adds no definition and deletes the second refusal type, leaving CurrentNormalisationError as the sole owner in nova/equilibrium/source.py:119; a search over nova/equilibrium for a per-cell finiteness qualifier found only that owner's existing eager raise.\nFINDING nova/equilibrium/forward_operator.py:3636 blocking: done_when clause (2) is delivered by nothing \u2014 the amplitude still returns jnp.nan where the current is inadmissible, so one non-finite cell still scales all 1518 of 1536 entries through scaled_current_moments:3613, no cell index reaches any solve receipt, and the planted-NaN test the clause requires does not exist; the manifest discloses this under `unmet` and names the scope extension it needs, so the gap is honest but not closed.\nFINDING docs/evidence/fragments/converged-forward-solve/cell-moment-derivative-nan.html:84 non-blocking: the headline trip count of 2 is read from the route part row-final.log names, which lives under the node-local /dev/shm/39486-fleet-1291586 tree rather than the run directory or GPFS, so a reader on another host cannot open the artifact the number rests on.\nFINDING docs/evidence/fragments/converged-forward-solve/cell-moment-derivative-nan.html:138 non-blocking: the negative-control paragraph cites negative-control-test.log as \"one failed, four passed\", but that log predates e39ffd109 and ran against a five-test file, while the landed file holds a single test, so the control was not regenerated for the tree it now certifies.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T095505170350-cell-moment-derivative-nan/manifest.md:19 non-blocking: baseline_suite and after_suite omit the required failure_count key, and manifest.md:22 reports \"0 never ran\" while tests/test_exact_clip_memory.py carries EXIT=1 and no verdict line in both arms.\n",
+  "review_run_id": "r-20261026T204127128170-review-of-cell-moment-derivative-nan-f2f83686320e",
+  "reviewed_base_sha": "7b0cec2141071526ddbe7f7d99f436b34f930d23",
+  "reviewed_head_sha": "f2f83686320e3e0ee56587b89ddafcd0c7cb4f64",
+  "reviewed_run_id": "r-20261024T095505170350-cell-moment-derivative-nan",
+  "scores": {
+    "durability": 12,
+    "evidence": 11,
+    "fit": 17,
+    "goal_fidelity": 9,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-26T20:54:17.087724+00:00",
+  "total": 88,
+  "verdicts": {
+    "diff": "read the three commits e39ffd109, 9ee203629 and f2f836863 against 7b0cec214; e39ffd109 restores nova/equilibrium/forward_operator.py and nova/equilibrium/source.py byte for byte to 2967db463 (git diff 2967db463 against both at f2f836863 prints nothing), and the other two are the fragment rewrites, totalling 70 insertions and 330 deletions across four files.",
+    "done_when": "clause (1) is measured, by row-final.log and gate-unit-final.log; clause (2) has no implementation and no evidence at f2f836863, because e39ffd109 deletes the mask helpers, the admissibility flag and the index-carrying error message; clause (3) is measured on 14 of the 15 listed files with zero added failures and additionally rests on the verified byte-identity of forward_operator.py and source.py to 2967db463.",
+    "goal": "read the plan followup f-cfs-cell-moment-derivative-nan and the source brief; at the landed head nova/equilibrium/forward_operator.py:3636 keeps the base `jnp.where(admissible, target / safe_unscaled, jnp.nan)` amplitude and cell_current_moments at :3596 carries no per-cell qualification, so the increment preserves the goal's finite-row half (row-final.log: converged, 5.626976272072871e-15) and delivers nothing of its containment half.",
+    "manifest": "read at status complete; it records completed:false with empty failure lists on both gate arms, records the report-by-index under `unmet` with an exact successor specification, and its baseline_suite and after_suite JSON omit the required failure_count key (manifest.md:19-20).",
+    "write_paths": "the source manifest declares seven paths; the increment 7b0cec214..f2f836863 touches exactly the four this review's goal names, and no file outside them."
+  }
+}

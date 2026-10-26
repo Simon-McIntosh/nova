@@ -1,0 +1,51 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-26T21:17:13.771Z",
+  "dispatched_at": "2026-10-26T21:09:39Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/kernel-compile-barrier.html:61",
+      "id": "wiring-1",
+      "reason": "the section is unbuildable as written until \u00a73 is wired to \u00a72, and the plan system already carries section links in other plans (`mast-nonaxisymmetric-physics`, `forward-solver-route-integrity`).",
+      "text": "s3 is `implementable` beside s2 with `data-links=\"\"`, while \u00a73's own mechanism consumes \u00a72's tangents, so nothing stops a \u00a73 worker being dispatched to bound the point program with no \u00a72 outcome to use",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/kernel-compile-barrier.html:64",
+      "id": "done_when-1",
+      "reason": "the clause is unmeasurable at one of its two arms until the plan names how the base rows are obtained, whether that is a longer job or a reduced comparison set.",
+      "text": "done-when (2) requires the built jet rows to match \"the base build at every node at both arms\", but \u00a73's own comment (line 95) records that the 2,132-node base run reproduced the compile at 7,013 s then held ~378 GB through ~11,000 s of node loop \"without publishing the operand\", so the base rows this clause compares against do not exist and no clause says how to produce them",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "99cb31d3215296db06dc87b601684a3bc89cb5fff236aeca30fb49b46be093fe",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 11,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261026T210913072217-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "ec6d90b021bded90c91e5c2591f5756ecb3cb9f9",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `fixed_points.py` :391 `_row_program`, :206 `_source_jets`, :413 `maintain_rows`, :478 its call, `read_route/jets.py` :229 and :321, `support_read.py`'s row-window docstring, `tests/test_fixed_points.py` as a `maintain_rows` caller, the 500-cell parametrisation at `tests/equilibrium/test_topology_read.py:2917` and commit `0b5972bfd` all resolve.",
+    "done_when": "a finding \u2014 done-when (2) compares against \"the base build\" at the 2,132-node arm, and the plan's own comment records that base run as never publishing its operand and outlasting a five-hour wall.",
+    "evidence_paths": "pass \u2014 \u00a73 names no scratchpad or node-local path; its receipts belong to the run that lands \u00a73, as \u00a71's did under `docs/research/compile-cost-evidence.html`.",
+    "naming": "pass \u2014 \u00a73 introduces no symbols, filenames or comments, and its prose names mechanisms rather than tracker entries.",
+    "reasoning": "pass \u2014 the mechanism does run on the path done-when (3) measures: `scripts/prototypes/lean_map/jets.py:10` imports `build_jet_matrix` from `scripts/prototypes/read_route/jets.py`, so bounding and redirecting that copy reaches `tie_probe.build` and the census test; \"the expression is defined twice\" is accurate (the two owners are `fixed_points.py:391` and `read_route/jets.py:321`), and the callers named match `grep` over `scripts/` and `tests/` (one prototype gate, `fixed_points/latency_gate.py:43`, is unlisted but is a measure script).",
+    "single_goal": "pass \u2014 \u00a73 carries one deliverable, one bounded jets point program, with the prototype copy redirected to the single owner.",
+    "wiring": "a finding \u2014 \u00a73 states it bounds the program \"using the \u00a72 tangents\", yet both s2 and s3 are `data-status=\"implementable\"` with `data-links=\"\"`, so no depends-on is declared and a \u00a73 dispatch can start before \u00a72 lands."
+  },
+  "section_digests": {
+    "_document": "76bd47b632f76205c6b048aef6b7a270a9229bec90839b52aad6d50a9d7014b3",
+    "s0": "6af29e9c0d4ae386d870df6baa70b910da2c50485eef97ddf1c3d2ebc9f12a27",
+    "s1": "f60ffbcd7c6c609b9e2ce1cbc5be3879c9613e2a1f1b41018a50e31a169abdb0",
+    "s2": "4b4ae60065134cb7cdc8a4479e5525cf0785449c22833f6d824f728d3a0deaf2",
+    "s3": "4b82057988b1fa81facf0c5a3ddc82c373280c0395bd62c92b9bcad43b641d66",
+    "s4": "043c0ccddafb69cbd714f400a3810894eb704687755dfb014b018a750adc8b16"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-26T21:23:35.427175+00:00"
+}

@@ -164,10 +164,30 @@ def make_sampler(state):
 
 def warm(state, sampled, start, stop, step):
     """Follow the root prior forward, as the sweep does, to reach a bracket."""
+    jets = state["jets"]
+    reference = state["reference"]
+    geometry = state["geometry"]
+    convention = state["convention"]
+    policy = state["policy"]
+
+    @jax.jit
+    def roots_only(offset, prior, jets, reference, geometry, slope):
+        varied = replace(jets, exterior=jets.exterior + offset * slope)
+        return census(
+            varied.field(reference), geometry, convention, policy, prior
+        ).roots
+
     prior = state["previous"]
     values = np.arange(start, stop + step / 2, step)
     for value in values:
-        roots, *_ = sampled(jnp.asarray(value * state["scale"]), prior)
+        roots = roots_only(
+            jnp.asarray(value * state["scale"]),
+            prior,
+            jets,
+            reference,
+            geometry,
+            state["jet_slope"],
+        )
         updated = np.asarray(prior).copy()
         for slot, live in enumerate(np.asarray(roots.valid)):
             if live and slot < len(updated):

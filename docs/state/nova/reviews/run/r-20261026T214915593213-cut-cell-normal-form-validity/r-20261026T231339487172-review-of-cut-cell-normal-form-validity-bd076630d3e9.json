@@ -24,6 +24,11 @@
       "kind": "exempted",
       "reason": "the coordinator narrowed the node to the diagnosis on resume; the diagnosis shows a fragment repair cannot make these trial maps admissible, so convergence moves to the carrier trial-map and Newton globalisation work",
       "recorded_at": "2026-10-26T23:25:26.128329+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "no product behaviour changed beyond a roots-only warm pass and a strict-xfail guard; the paired suite runs when the chain is integrated for landing",
+      "recorded_at": "2026-10-26T23:25:34.107611+00:00"
     }
   },
   "findings": [

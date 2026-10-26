@@ -162,6 +162,28 @@ def make_sampler(state):
     return jax.jit(sampled)
 
 
+def make_booking_sampler(state):
+    """Read the booking state without integrating its current moments."""
+    geometry = state["geometry"]
+    convention = state["convention"]
+    policy = state["policy"]
+    jets = state["jets"]
+    reference = state["reference"]
+    slope = state["jet_slope"]
+
+    @jax.jit
+    def booking(offset, prior, jets, reference, geometry, slope):
+        varied = replace(jets, exterior=jets.exterior + offset * slope)
+        moving = varied.field(reference)
+        roots = census(moving, geometry, convention, policy, prior)
+        return read(moving, roots.roots, geometry, convention, policy).booking_cells
+
+    def sampled(offset, prior):
+        return booking(offset, prior, jets, reference, geometry, slope)
+
+    return sampled
+
+
 def warm(state, sampled, start, stop, step):
     """Follow the root prior forward, as the sweep does, to reach a bracket."""
     jets = state["jets"]

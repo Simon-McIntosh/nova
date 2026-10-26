@@ -56,11 +56,26 @@ def test_adjacent_saddle_booking_keeps_one_representation():
     assert jax.config.jax_enable_x64 is True
     state, prior, _ = _census_tie_setup(_census_cache())
     sampled = tie_probe.make_sampler(state)
-    readings = [
-        sampled(offset * state["scale"], prior)
-        for offset in (0.16436667480678155, 0.16436667480678158)
-    ]
     import numpy as np
+
+    def sample(offset):
+        return sampled(offset * state["scale"], prior)
+
+    left, right = 0.16, 0.17
+    left_row, right_row = sample(left), sample(right)
+    left_class = int(left_row[1].boundary_class)
+    assert left_class != int(right_row[1].boundary_class)
+    while np.nextafter(left, right) != right:
+        middle = (left + right) / 2
+        if middle in (left, right):
+            break
+        middle_row = sample(middle)
+        if int(middle_row[1].boundary_class) == left_class:
+            left, left_row = middle, middle_row
+        else:
+            right, right_row = middle, middle_row
+    assert np.nextafter(left, right) == right
+    readings = (left_row, right_row)
 
     # The pair has to straddle a switch, or the booking claim below is asserted
     # on a state where the switch never happened and passes for that reason.

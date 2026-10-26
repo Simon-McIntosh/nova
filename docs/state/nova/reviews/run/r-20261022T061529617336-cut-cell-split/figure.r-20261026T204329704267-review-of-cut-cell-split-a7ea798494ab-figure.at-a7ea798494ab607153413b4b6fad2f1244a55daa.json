@@ -1,7 +1,7 @@
 {
   "added_failure_count": 0,
   "added_failure_ids": [],
-  "completed_at": "",
+  "completed_at": "2026-10-26T20:56:35.623Z",
   "dispatched_at": "2026-10-26T20:45:06Z",
   "figures_reviewed": [
     {
@@ -38,6 +38,6 @@
   "status": "parsed",
   "summary": "One figure reviewed: the limited 550 residual-against-correction trace at head a7ea79849. Its data are correct and reconcile with the run's own record: every plotted marker matches the documented residuals (cold 0.0288 at correction 0, then 0.0164, 0.00605, 0.00586 and a plateau at 0.005681) to within one pixel on the 46.2 px-per-decade axis, and the direct label's 5.68e-3 is the plateau value. The figure has no gradient, shading or grid, and the dotted 1e-12 rule is the one piece of reference ink. No text is clipped or overlapping: measured on the rendered PNG, the ceiling annotation clears the rule by 6 px at rgb(110,110,110) (about 5.1:1), which resolves both the label-on-rule collision and the sub-threshold grey recorded against the earlier revision f7213df5. One non-blocking defect remains: no labelled y tick sits at or above the trace, so apart from the labelled endpoint the residuals cannot be read from the axis. The caption does not merely repeat a title; it explains the correction-0 cold state, the rule, and the accepted line-search scales, so it is not a finding.",
   "times_source": "run-record",
-  "timestamp": "2026-10-26T20:56:42.869151+00:00",
+  "timestamp": "2026-10-26T21:15:40.911660+00:00",
   "total": null
 }

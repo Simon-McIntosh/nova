@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="values-entry-cold-fill">
+<meta name="plan-title" content="Values-entry cold fill">
+<meta name="plan-summary" content="The values matrix evaluates only flux rows and groups near and distant pairs before quadrature; the diverted carrier's cold fill is measured against its published entry.">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s4">
+<title>Values-entry cold fill</title>
+</head>
+<body>
+<main>
+<article class="landing" data-node="values-entry-cold-fill" id="values-entry-cold-fill">
+<h2 id="values-entry-cold-fill-result">The cold fill spends its work on flux pairs</h2>
+<p>The diverted 282-cell carrier's published <code>(5076, 282, 3)</code> values entry took 12,452 s to build and 6.4 s to reload. On the same fleet CPU allocation, the pre-repair builder took 13.751, 28.918 and 96.965 s at 1, 4 and 16 points. The 4-to-16 slope was 5.670 s per point, reproducing the recorded 6.7 s scale.</p>
+<p>The packed moment tile computes nine rows although the values entry consumes only the three flux rows. Its flux quadrature takes 64 × 128 nodes for a near source and 12 × 12 for a distant one; the previous batch applied the near rule to all pairs in a mixed 128-pair chunk. On this carrier only 16.9 of 282 sources per target are near on average. A flux-only probe cut the 16-point wall from 96.965 to 32.177 s; grouping near and distant pairs cut it to 4.247 s on the same allocation. The two costs are thus the unused field rows and the mixed-batch near rule, rather than recompilation per tile or reflection setup. For the complete entry, four concurrent batches preserve bitwise results on a 128-point check and shorten its wall from 20.733 to 12.603 s; one batch is warmed before the pool starts.</p>
+<table id="values-entry-cold-fill-timings">
+<caption>One-point, four-point and sixteen-point cold calls on CPU; seconds. Base is a scratch archive of <code>a806edfa1</code>; repaired is <code>bb7a2d7c0</code>. Each three-point series ran in one process on a sirius CPU node; marginal cost is (16-point wall − 4-point wall)/12.</caption>
+<thead><tr><th>revision and carrier</th><th>1 point</th><th>4 points</th><th>16 points</th><th>4-to-16 marginal per point</th></tr></thead>
+<tbody>
+<tr><th scope="row">Base, diverted 282 cells</th><td>7.941</td><td>20.276</td><td>69.921</td><td>4.137</td></tr>
+<tr><th scope="row">Repaired, diverted 282 cells</th><td>3.429</td><td>2.738</td><td>3.165</td><td>0.036</td></tr>
+<tr><th scope="row">Base, weak peer 610 cells</th><td>8.031</td><td>23.572</td><td>86.944</td><td>5.281</td></tr>
+<tr><th scope="row">Repaired, weak peer 610 cells</th><td>3.080</td><td>2.116</td><td>2.329</td><td>0.018</td></tr>
+</tbody>
+</table>
+<h3 id="values-entry-cold-fill-identity">Values and complete entry</h3>
+<p>The repaired source builds only flux rows, using the same conditioned flux integral. It classifies pairs with that integral's distance rule, then batches near and distant pairs separately. Against the published entry at digest <code>sha256:d1e1e0926e8d6d4e25f502a6da1d318ef4b75aab7100b225a99c1a94b6e7870f</code>, 64 fixed points spanning the 5,076-point carrier have worst row-relative differences of 3.56e-15, 9.93e-15 and 9.14e-15; each is below 1e-12.</p>
+<p id="values-entry-cold-fill-full-wall">The complete <code>(5076, 282, 3)</code> entry built cold in an isolated scratch store in 755.543 s (<code>build_seconds</code> 755.072 s; 34,354,368 matrix bytes), with <code>cache_hit=False</code> and <code>EXIT=0</code>. Its digest is <code>sha256:84998fb8546f1b3857d80072439d2482b05a4b57284d69d577cb25c916534980</code>; the published entry remained at the original digest. Reading the saved scratch matrix back gives the same three 64-point row-relative differences as above. The complete wall is 16.48 times faster than the recorded 12,452 s, or 0.149 s averaged over all 5,076 points. That average is above 0.12 s; the specified 4-to-16-point marginal is 0.036 s. The full carrier has 16.9 near sources per point on average, while the first sixteen points have ten, so the small-slice marginal does not predict the full-grid average.</p>
+<h3 id="values-entry-cold-fill-guard">Refusal and suite delta</h3>
+<p>The guard test makes a call to the nine-row tile evaluator fail. It passes at the repaired head and fails by <code>test_flux_builder_never_evaluates_unused_field_rows</code> with the repair reverted in a scratch archive. The paired sirius job ran each of <code>tests/test_coupling_build.py</code>, <code>tests/test_carrier_identity.py</code> and the value-cache checks in <code>tests/test_operand_cache.py</code> in a fresh process per file: 22 passed at base and 24 passed at the repaired head, with zero added failures. The two explicitly marked slow cache tests were deselected on both arms.</p>
+</article>
+</main>
+</body>
+</html>

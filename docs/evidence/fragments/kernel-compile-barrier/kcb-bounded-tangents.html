@@ -1,0 +1,15 @@
+<section id="kcb-bounded-tangents">
+<h3>Bounded tangent graph measurement</h3>
+<p>An archive of <code>a806edfa135a13cf185d86301cbdfe6efb1a97dd</code> reproduced <strong>106,218 expanded equations</strong> for <code>program("point_jet", 4)</code> through <code>attribute_graph</code>, with JAX's persistent compilation cache disabled before import. The log printed the archived <code>nova.__file__</code> and working directory, both inside the extracted archive. The same instrument governs every comparison below.</p>
+<table><thead><tr><th>Base source term</th><th>Expanded equations</th><th>Share</th></tr></thead><tbody>
+<tr><td><code>rangefunction._harmonic_pair_step</code></td><td>24,653</td><td>23.21%</td></tr>
+<tr><td><code>rangefunction._product_sum_step</code></td><td>9,633</td><td>9.07%</td></tr>
+<tr><td>Unattributed</td><td>8,587</td><td>8.08%</td></tr>
+<tr><td><code>elliptic._pole_forward_step</code></td><td>7,544</td><td>7.10%</td></tr>
+<tr><td><code>completeelliptic._accumulate</code></td><td>7,139</td><td>6.72%</td></tr>
+<tr><td><code>rangefunction.evaluate</code></td><td>6,348</td><td>5.98%</td></tr>
+<tr><td><code>elliptic._harmonic_ratio_step</code></td><td>3,891</td><td>3.66%</td></tr>
+<tr><td><code>rangefunction.deflate</code></td><td>3,376</td><td>3.18%</td></tr>
+</tbody></table>
+<p>The existing hand tangent of <code>_harmonic_pair_step</code> is called by private tangent helpers, while the measured point jet differentiates the primal route automatically. A custom JVP around <code>harmonic_multiply</code> using that unrolled hand tangent measured 125,915 equations; a per-output fixed loop measured 224,393; a grouped fixed loop measured 126,872. All three grew the graph against the archived base. The grouped loop agreed with the base JVP on 10,000 sampled coefficients (maximum relative error 0), but was rejected on graph size. These candidate edits were removed.</p>
+</section>

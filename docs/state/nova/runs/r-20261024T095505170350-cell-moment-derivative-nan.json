@@ -1,0 +1,439 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 6,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "2967db4635671b942220d7d42797f1b08c805b95",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T095505170350-cell-moment-derivative-nan/brief.txt",
+    "sha256": "0f7ced5411174ff63f2a659b41ef4f0b52b4b19b66cb8b41eae9e8e4d7a6b48e"
+  },
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 2460445,
+      "input_tokens_cumulative": 2460445,
+      "output_tokens": 5357,
+      "output_tokens_cumulative": 5357,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 171,
+    "files": 5,
+    "removed": 2
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "e10705e61e6562c59326f28b8b70cd3173efaa5a",
+    "6fd3551074c9589a417088a3b1144fe1607b2e11",
+    "4688864eeab1d76ca09510ca200445dc27d79b34",
+    "35bd657e770362bfbedc75c09717b1c083e12345",
+    "c4bd203138321627a145d7850961cbe7e914aa60",
+    "76cf8a238bcda68ccf0126609da20ed09a954935",
+    "b2891f0c4781edf115a7df824ec073258e8b6e49",
+    "ba174144049c9a6269d7da9ec28ad0f5056b6fda",
+    "2a091de5e2e97550ab80ec185c6efbeccfeb226f",
+    "497942d16da2554091768490abe1f3b6a1533d7e",
+    "12fe4687ee591f43f6953739ecc4f215f2011d6f",
+    "7b0cec2141071526ddbe7f7d99f436b34f930d23",
+    "e39ffd109dc610d63321d96a161994050f29a0b7",
+    "9ee203629cc118d88696e53189e8e948788c6f9a",
+    "f2f83686320e3e0ee56587b89ddafcd0c7cb4f64"
+  ],
+  "completed_at": "2026-10-25T02:18:40Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-24T09:57:15Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "bash /home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T095505170350-cell-moment-derivative-nan/gate_suite_clip.sh",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T095505170350-cell-moment-derivative-nan/gate-suite/clip-tip-arm.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.2857142857142857,
+    "plan": "converged-forward-solve",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-24T10:55:38.956868+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-24T09:55:38Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 15,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 0,
+    "headroom": 12,
+    "mean_context": 80000,
+    "observed_at": "2026-10-24T09:55:34Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 15,
+      "aggregate_tokens_per_second": 120.307,
+      "detail": "",
+      "mean_tokens_per_second": 601.535,
+      "observed_at": "2026-10-24T09:55:34Z",
+      "runs": 0.2,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-25T02:18:40Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T095505170350-cell-moment-derivative-nan/manifest.md",
+  "member": "disposable-r-20261024T095505170350-cell-moment-derivative-nan",
+  "model_key": "flash",
+  "negative_control": {
+    "added_failure_ids": [],
+    "comparison_arm": "none",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_cell_moment_derivative_finite.py::test_arc_root_tangent_is_finite_across_the_discriminant_seam"
+    ],
+    "declaration": "restore the unguarded expression in a scratch copy; the CPU row first Krylov action is non-finite again",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T095505170350-cell-moment-derivative-nan/negative-control-test.log",
+    "reason": "negative-control-test.log fails the arc-root seam test with the clamped root restored and negative-control.log shows the CPU row's first Krylov action non-finite in 1518 of 1536 entries; the suite arms read completed=false only because job 1295252 ran out of memory on test_exact_clip_memory.py identically in both arms",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T095505170350-cell-moment-derivative-nan/negative-control-test.log",
+    "test_paths": [
+      "tests/test_cell_moment_derivative_finite.py",
+      "tests/test_equilibrium_forward_operator.py",
+      "tests/test_equilibrium_source.py"
+    ],
+    "verdict": "waived"
+  },
+  "no_commit": null,
+  "node": "cell-moment-derivative-nan",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.cache/nova-s21-briefs/oct24-cell-moment-nan.txt",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T095505170350-cell-moment-derivative-nan/brief.txt",
+    "brief_sha256": "0f7ced5411174ff63f2a659b41ef4f0b52b4b19b66cb8b41eae9e8e4d7a6b48e",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "critical",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1313,
+          "cached_input_tokens": 901067,
+          "input_tokens": 902382,
+          "output_tokens": 2782,
+          "reasoning_output_tokens": 281,
+          "total_tokens": 905164,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "40d3a43c-d1f4-4016-9584-4e663183c12c",
+      "session_id": "s21-nova"
+    },
+    "done_when": "the expression turning cell 103 moment derivative non-finite is named and fixed at its site so the CPU row first Krylov action is finite; per-cell qualification names a non-finite cell by index and the normalisation refuses by name, shown by a planted-NaN test; importers of forward_operator.py and source.py pass by delta in fresh processes, recorded in docs/evidence/fragments/converged-forward-solve/cell-moment-derivative-nan.html",
+    "estimated_hours": null,
+    "goal": "the CPU 300-cell certificate row has a finite first Krylov action, and one non-finite cell can no longer poison every cell through the current normalisation",
+    "id": "cell-moment-derivative-nan",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-24T09:55:38Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 15,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 0,
+      "headroom": 12,
+      "mean_context": 80000,
+      "observed_at": "2026-10-24T09:55:34Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 15,
+        "aggregate_tokens_per_second": 120.307,
+        "detail": "",
+        "mean_tokens_per_second": 601.535,
+        "observed_at": "2026-10-24T09:55:34Z",
+        "runs": 0.2,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T095505170350-cell-moment-derivative-nan/manifest.md",
+    "negative_control": "restore the unguarded expression in a scratch copy; the CPU row first Krylov action is non-finite again",
+    "plan": "converged-forward-solve",
+    "regenerate_paths": [],
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§4",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/equilibrium/forward_operator.py",
+      "nova/equilibrium/source.py",
+      "tests/test_cell_moment_derivative_finite.py",
+      "tests/test_equilibrium_forward_operator.py",
+      "tests/test_equilibrium_source.py",
+      "docs/evidence/fragments/converged-forward-solve/cell-moment-derivative-nan.html",
+      "docs/figures/converged-forward-solve/cell-moment-derivative-nan",
+      "nova/equilibrium/separatrix_clip.py"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 4808862.0,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "cell-moment-derivative-nan",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-24T09:56:06.737971+00:00",
+    "score": 0.64375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:capability",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.431,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 1270.357,
+      "context-estimate": 121.352,
+      "records": 724.461,
+      "verdict-inputs": 705.553
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.2857142857142857,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "f2f83686320e3e0ee56587b89ddafcd0c7cb4f64",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "7b0cec2141071526ddbe7f7d99f436b34f930d23",
+    "reviewed_head_sha": "f2f83686320e3e0ee56587b89ddafcd0c7cb4f64",
+    "scores": {
+      "durability": 12,
+      "evidence": 11,
+      "fit": 17,
+      "goal_fidelity": 9,
+      "reuse": 20,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 88
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261024T095505170350-cell-moment-derivative-nan",
+  "scope_acceptances": [
+    {
+      "path": "nova/equilibrium/separatrix_clip.py",
+      "reason": "lead ruling 2026-10-24: concurrent edits to one file from separate worktrees are allowed; the coordinator reconciled it at merge d5a9d0cc7",
+      "stopped_peer_claims": [
+        {
+          "claim": "nova/equilibrium/separatrix_clip.py",
+          "run_id": "r-20261024T081359704297-carrier-vertex-identity"
+        }
+      ]
+    }
+  ],
+  "scope_changed": true,
+  "section": "§4",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "fc3a3168-8a4a-4350-ba3c-cadb81eca003",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": 1,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 56534971,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 113.629,
+    "generated_tokens": 230481,
+    "generation_seconds": -199.243,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 78.0,
+    "machine_seconds": 312.872,
+    "peak_input_tokens": 179472,
+    "wall_tokens_per_second": 2028.36
+  },
+  "time_budget": "60m",
+  "tool_steps": 66.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 58885,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 6,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-25T02:18:44Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-25T01:42:52Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261024T095505170350-cell-moment-derivative-nan",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 30889,
+    "worker_pid": 459042
+  },
+  "worker_seconds": 12489,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

@@ -1,0 +1,578 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 11,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "06ebc1bf88436cc9c2f2f40129fa3ce753788e78",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T081359704297-carrier-vertex-identity/brief.txt",
+    "sha256": "553f533a6fd8f39c7aa7e7c587ae30b99c3d0456785addc98ac6de5219990e3f"
+  },
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 3072299,
+      "input_tokens_cumulative": 3072299,
+      "output_tokens": 10761,
+      "output_tokens_cumulative": 10761,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 932,
+    "files": 6,
+    "removed": 24
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 377,
+        "name": "value",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "run_function": {
+        "line": 68,
+        "name": "_basis_values",
+        "path": "nova/equilibrium/analytic_single_null.py"
+      },
+      "window_line": 80
+    },
+    {
+      "existing_function": {
+        "line": 192,
+        "name": "_measure_placeholder_map",
+        "path": "tests/test_gs_runtime_operands.py"
+      },
+      "run_function": {
+        "line": 41,
+        "name": "_hex_sampling",
+        "path": "tests/test_carrier_vertex_identity.py"
+      },
+      "window_line": 47
+    },
+    {
+      "existing_function": {
+        "line": 192,
+        "name": "_measure_placeholder_map",
+        "path": "tests/test_gs_runtime_operands.py"
+      },
+      "run_function": {
+        "line": 58,
+        "name": "diverted_carrier",
+        "path": "tests/test_carrier_vertex_identity.py"
+      },
+      "window_line": 70
+    },
+    {
+      "existing_function": {
+        "line": 378,
+        "name": "test_module_is_contour_free",
+        "path": "tests/test_connectivity_boundary.py"
+      },
+      "run_function": {
+        "line": 225,
+        "name": "_solve_receipt",
+        "path": "tests/test_carrier_vertex_identity.py"
+      },
+      "window_line": 240
+    },
+    {
+      "existing_function": {
+        "line": 158,
+        "name": "test_module_is_contour_free",
+        "path": "tests/test_flux_surface_connectivity.py"
+      },
+      "run_function": {
+        "line": 225,
+        "name": "_solve_receipt",
+        "path": "tests/test_carrier_vertex_identity.py"
+      },
+      "window_line": 240
+    },
+    {
+      "existing_function": {
+        "line": 237,
+        "name": "test_a_rule_call_elsewhere_in_the_body_does_not_cover_the_step",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "run_function": {
+        "line": 225,
+        "name": "_solve_receipt",
+        "path": "tests/test_carrier_vertex_identity.py"
+      },
+      "window_line": 234
+    },
+    {
+      "existing_function": {
+        "line": 253,
+        "name": "test_a_rule_subject_covers_a_step_inside_it",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "run_function": {
+        "line": 225,
+        "name": "_solve_receipt",
+        "path": "tests/test_carrier_vertex_identity.py"
+      },
+      "window_line": 234
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "test_treats_a_positionally_passed_wall_as_guarded",
+        "path": "tests/test_renderer_wall_scan.py"
+      },
+      "run_function": {
+        "line": 225,
+        "name": "_solve_receipt",
+        "path": "tests/test_carrier_vertex_identity.py"
+      },
+      "window_line": 234
+    },
+    {
+      "existing_function": {
+        "line": 417,
+        "name": "test_marker_census_refuses_a_module_without_markers",
+        "path": "tests/test_solve_program_size.py"
+      },
+      "run_function": {
+        "line": 225,
+        "name": "_solve_receipt",
+        "path": "tests/test_carrier_vertex_identity.py"
+      },
+      "window_line": 234
+    },
+    {
+      "existing_function": {
+        "line": 559,
+        "name": "test_mast_efm_geometry_matches_host_contour_route",
+        "path": "tests/test_transport_geometry_reference.py"
+      },
+      "run_function": {
+        "line": 225,
+        "name": "_solve_receipt",
+        "path": "tests/test_carrier_vertex_identity.py"
+      },
+      "window_line": 239
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "71dc61b6b54a503c4226356630dc9c8c361a6b95",
+    "a1fde04cb3f3d01a0fd0609da9199dcd22fe4f67",
+    "0ac91093b1f2a6fb3e90c3692c447f01aefa083e",
+    "843248b7f8c320e0721480660d3778c9164f14f3",
+    "42f0dbaa557430fdee3fc7182d8ed57d9e173646",
+    "1b6bd6bf3285996b69989e6ee141bdead7d8df01",
+    "61b422274433b02686ceaa23f4b9eb221e7adcd1",
+    "d189a950dfcbcc4dfbfaf87029e437504ba1881e",
+    "f3f3e3e293f095d2cbc44450f18e495b53dbdfc7",
+    "e3de3c290cd707986419863f62dfa54c81b34cfe",
+    "0ff6d23180adcf08669d921aa4fccaca5cbbd3cf",
+    "42563384ce498da2544e529dac96c634397e7920",
+    "75f234bafb8c6a4f95c222662f8ff03e91cb46d1",
+    "f5124fc24e7a6bae52bf57e6a62e7e562507b040",
+    "406d746ef86b68881822d701e9e8188382b07589",
+    "c1e4f84998cc2952cdafd67025fac1be655abe5b",
+    "b108c9f0b4ce423e5a144eea25f4ea82d3c6b9ac"
+  ],
+  "completed_at": "2026-10-26T20:53:56Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-24T08:14:57Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_equilibrium_stencil_mesh.py tests/test_analytic_single_null.py tests/test_stencil_nulls.py tests/test_carrier_vertex_identity.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T081359704297-carrier-vertex-identity/logs/after-suite.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.2857142857142857,
+    "plan": "converged-forward-solve",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-24T09:14:15.452892+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-24T08:14:15Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 6,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 0,
+    "headroom": 12,
+    "mean_context": 140000,
+    "observed_at": "2026-10-24T08:14:15Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 6,
+      "aggregate_tokens_per_second": 119.511,
+      "detail": "",
+      "mean_tokens_per_second": 149.389,
+      "observed_at": "2026-10-24T08:14:15Z",
+      "runs": 0.8,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-26T20:53:56Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T081359704297-carrier-vertex-identity/manifest.md",
+  "member": "disposable-r-20261024T081359704297-carrier-vertex-identity",
+  "model_key": "flash",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_carrier_vertex_identity.py::test_perturbed_wall_keeps_the_carrier_vertex_identity"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_carrier_vertex_identity.py::test_perturbed_wall_keeps_the_carrier_vertex_identity"
+    ],
+    "declaration": "restore the binned dedup in a scratch copy; the perturbed-wall arm splits a vertex and fails on its own assertion",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T081359704297-carrier-vertex-identity/logs/negative-control-head-assertion.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T081359704297-carrier-vertex-identity/logs/negative-control-head-assertion.log",
+    "test_paths": [
+      "tests/biot/test_plasmagrid.py",
+      "tests/test_analytic_single_null.py",
+      "tests/test_biotpolysection.py",
+      "tests/test_carrier_vertex_identity.py",
+      "tests/test_stencil_mesh.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "carrier-vertex-identity",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.cache/nova-s21-briefs/oct24-carrier-vertex-identity.txt",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T081359704297-carrier-vertex-identity/brief.txt",
+    "brief_sha256": "553f533a6fd8f39c7aa7e7c587ae30b99c3d0456785addc98ac6de5219990e3f",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "critical",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 740,
+          "cached_input_tokens": 871195,
+          "input_tokens": 871937,
+          "output_tokens": 3285,
+          "reasoning_output_tokens": 819,
+          "total_tokens": 875222,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "40d3a43c-d1f4-4016-9584-4e663183c12c",
+      "session_id": "s21-nova"
+    },
+    "done_when": "carriers built on CPU, on the H200 and from a wall perturbed by 4e-12 m give identical node_number and vertex ids; the reference solve is bit-identical under different BLAS thread counts with its coefficient digest recorded; covering test files pass by delta and the certified rows keep their magnitudes, recorded in docs/evidence/fragments/converged-forward-solve/carrier-vertex-identity.html",
+    "estimated_hours": null,
+    "goal": "the hex carrier is identical on every device: lattice vertices are identified by cell and slot through the hex adjacency, and the analytic reference solve is deterministic",
+    "id": "carrier-vertex-identity",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-24T08:14:15Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 6,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 0,
+      "headroom": 12,
+      "mean_context": 140000,
+      "observed_at": "2026-10-24T08:14:15Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 6,
+        "aggregate_tokens_per_second": 119.511,
+        "detail": "",
+        "mean_tokens_per_second": 149.389,
+        "observed_at": "2026-10-24T08:14:15Z",
+        "runs": 0.8,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T081359704297-carrier-vertex-identity/manifest.md",
+    "negative_control": "restore the binned dedup in a scratch copy; the perturbed-wall arm splits a vertex and fails on its own assertion",
+    "plan": "converged-forward-solve",
+    "regenerate_paths": [],
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§4",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/equilibrium/stencil_mesh.py",
+      "nova/equilibrium/analytic_single_null.py",
+      "nova/biot/plasmagrid.py",
+      "tests/test_carrier_vertex_identity.py",
+      "tests/test_stencil_mesh.py",
+      "tests/test_analytic_single_null.py",
+      "tests/biot/test_plasmagrid.py",
+      "docs/evidence/fragments/converged-forward-solve/carrier-vertex-identity.html",
+      "docs/figures/converged-forward-solve/carrier-vertex-identity",
+      "nova/equilibrium/separatrix_clip.py",
+      "tests/test_biotpolysection.py",
+      "nova/equilibrium/topology.py"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 1727365.0,
+  "outcome": "",
+  "outside_scope_paths": [
+    "nova/equilibrium/separatrix_clip.py"
+  ],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "carrier-vertex-identity",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-24T08:14:27.135936+00:00",
+    "score": 0.64375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:capability",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5002.778,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 589.277,
+      "context-estimate": 69.148,
+      "records": 354.799,
+      "verdict-inputs": 471.701
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.2857142857142857,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "b108c9f0b4ce423e5a144eea25f4ea82d3c6b9ac",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "42563384ce498da2544e529dac96c634397e7920",
+    "reviewed_head_sha": "b108c9f0b4ce423e5a144eea25f4ea82d3c6b9ac",
+    "scores": {
+      "durability": 12,
+      "evidence": 15,
+      "fit": 15,
+      "goal_fidelity": 14,
+      "reuse": 20,
+      "scope_discipline": 18
+    },
+    "status": "parsed",
+    "total": 94
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261024T081359704297-carrier-vertex-identity",
+  "scope_acceptances": [
+    {
+      "path": "nova/equilibrium/topology.py",
+      "reason": "carrier corners canonicalised before atomisation (0ff6d2318); lead ruling 2026-10-24 allows shared-file edits; merged to main 2026-10-24"
+    }
+  ],
+  "scope_changed": true,
+  "section": "§4",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "ff139571-e481-4cc1-b2c1-fda5b59dbb7d",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": 1,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 74248955,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 430.149,
+    "generated_tokens": 350389,
+    "generation_seconds": 382.214,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 85.3,
+    "machine_seconds": 47.935,
+    "peak_input_tokens": 196327,
+    "tokens_per_second": 916.74,
+    "wall_tokens_per_second": 814.58
+  },
+  "time_budget": "60m",
+  "tool_steps": 115.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 218339,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 11,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-26T20:54:01Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-26T20:46:30Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261024T081359704297-carrier-vertex-identity",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 53817,
+    "worker_pid": 533546
+  },
+  "worker_seconds": 19933,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

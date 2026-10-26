@@ -19,6 +19,11 @@
       "kind": "folded",
       "node": "cut-cell-chain-test-guards",
       "recorded_at": "2026-10-26T23:25:17.630992+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "the coordinator narrowed the node to the diagnosis on resume; the diagnosis shows a fragment repair cannot make these trial maps admissible, so convergence moves to the carrier trial-map and Newton globalisation work",
+      "recorded_at": "2026-10-26T23:25:26.128329+00:00"
     }
   },
   "findings": [

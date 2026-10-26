@@ -20,7 +20,7 @@ for arm in "$@"; do
   tree="$scratch/$arm"
   mkdir "$tree"
   git -C "$source_tree" archive "$revision" nova scripts tests benchmarks pyproject.toml | tar -x -C "$tree" || exit 2
-  if [ "$arm" = topology ]; then
+  if [ "$arm" = topology ] || [ "$arm" = topology_carrier ]; then
     git -C "$source_tree" show a7ea79849:nova/equilibrium/topology.py > "$tree/nova/equilibrium/topology.py"
   fi
   export PYTHONPATH="$tree:$source_tree/scripts/prototypes/carrier_trial_map" MEASURE_ARM="$arm"
@@ -32,6 +32,11 @@ text = path.read_text()
 marker = '    started = perf_counter()\n    map_program = jax.jit(mapped).lower(reference, *operands).compile()'
 assert text.count(marker) == 1
 text = text.replace(marker, '    from probe import measure\n    measure(locals())\n    return\n\n' + marker)
+import os
+if os.environ['MEASURE_ARM'] in ('carrier', 'topology_carrier'):
+    marker = '    machine = certified_machine(carrier, kind, args.cells, exact)'
+    assert text.count(marker) == 1
+    text = text.replace(marker, '    from fixture import pinned_carrier\n    machine = pinned_carrier()')
 path.write_text(text)
 PY
   command="$py -m scripts.prototypes.fast_map_production.solver --kind limited --cells 550 --method gmres --max-steps 1 --line-search --no-panel --output $MEASURE_RUN/$arm-setup.json"

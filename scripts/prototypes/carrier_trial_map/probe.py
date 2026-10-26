@@ -44,7 +44,9 @@ def measure(context):
     assert np.max(distance[rows, matched]) < 1e-10
     split_receipt = json.loads((bank / "split-first.json").read_text())
     common = np.asarray(split_receipt["terminal_state"]["moments"])[matched]
-    native_arm = "split" if arm == "split" else "integration"
+    native_arm = (
+        "split" if arm in ("split", "carrier", "topology_carrier") else "integration"
+    )
     native_receipt = json.loads((bank / f"{native_arm}-first.json").read_text())
     native_source = np.load(bank / f"{native_arm}-first-step.npz")
     distance_native = np.linalg.norm(

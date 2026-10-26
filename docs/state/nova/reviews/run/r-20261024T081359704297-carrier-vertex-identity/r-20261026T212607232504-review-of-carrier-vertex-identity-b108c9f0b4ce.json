@@ -1,0 +1,96 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_source": "The reviewed run's own two arms: logs/baseline-suite.log (revision 06ebc1bf8) ends '36 passed, 1 skipped in 191.13s' with EXIT=0, and logs/after-suite.log (revision a1fde04cb) ends '39 passed, 2 skipped in 227.04s' with EXIT=0. grep -c '^FAILED' is 0 in both, and the manifest records failure_count 0 with failure_ids [] for both arms, so the declared suite delta adds no failing id.",
+  "call_site_count": 4,
+  "call_sites": [
+    "nova/equilibrium/forward.py:658 MomentGeometry.from_cells (forward solve)",
+    "nova/biot/plasmagrid.py:271 _build_direct_samples -> _index_sampling_vertices, reached from PlasmaGrid.__init__ at :149",
+    "scripts/analytic_oracle_fixtures/measure.py:141 MomentGeometry.from_cells",
+    "scripts/prototypes/diverted_stall/measure.py:118 TopologyGeometry.from_cells"
+  ],
+  "completed_at": "2026-10-26T21:41:21.621Z",
+  "dispatched_at": "2026-10-26T21:27:34Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/carrier-vertex-identity.html",
+      "line": "241",
+      "severity": "blocking",
+      "text": "blocking: the sentence at :241-242, 'the three tests pass at their exact tolerances (logs/fix-three-tests.log, 5 passed)', rests on a log that has no '# revision' header and no EXIT= line at all (grep -c returns 0 for both), so it cannot be attributed to 0ff6d2318; combined with logs/fix-equilibrium_test_topology_read.py.log ending EXIT=124 at revision e3de3c290, done_when (3) is unmet for tests/equilibrium/test_topology_read.py, the file that exercises the topology.py:2529 change. Carried from the review at 42563384c and unaddressed by the five documentation commits."
+    },
+    {
+      "file": "tests/test_carrier_vertex_identity.py",
+      "line": "193",
+      "severity": "non-blocking",
+      "text": "non-blocking: this assertion compares reference.second_moment[order] against reordered.second_moment, applying to the reference the same permutation the test handed to diverted_carrier at :183; second_moment is a per-polygon function of the polygon geometry and does not read the vertex identity at all, so the line holds for any identity implementation and cannot redden on the regression it sits beside."
+    },
+    {
+      "file": "tests/test_carrier_vertex_identity.py",
+      "line": "260",
+      "severity": "non-blocking",
+      "text": "non-blocking: the thread-count arm asserts that two runs of the same code at OMP_NUM_THREADS 1 and 4 agree, but records no pinned coefficient value, and the run's own control (logs/determinism-control-library-solve.log) discriminates the library solve from the ordered one across CPU and H200, not across thread counts; a reversion to np.linalg.solve would therefore pass this assertion on a 12x12 system unless BLAS threading happened to change the last bit. The fragment acknowledges the limitation at :99-101, so this is a recorded weakness rather than a concealed one."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/carrier-vertex-identity.html",
+      "line": "307",
+      "severity": "non-blocking",
+      "text": "non-blocking: the new section opens 'Measured on the diverted carrier at 250 cells', but the log the numbers come from reports 282 cells (logs/stage-breakdown-tip.log:8 'STAGE machine 0.11 cells=282', :13 'samples=(282, 7, 2)'), and the same section quotes the matrix shape '(5076, 282, 3)' at :321; the arithmetic figures match that log exactly, so the cell count alone is wrong and a reader checking provenance finds a mismatch."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/carrier-vertex-identity.html",
+      "line": "366",
+      "severity": "non-blocking",
+      "text": "non-blocking: the supporting measurements 'build_flux_blocks takes 51.4 s for one point, 86.4 s for four and 166.7 s for sixteen' (:366-368) and 'a per-polygon scan of 282 single-polygon calls did not finish in 220 s, so the slowness is broad' (:379-381) appear in no file under the run's logs/; the manifest's attempt_round6 lists logs/digest-probe-both-*arms*.log as their evidence but that file does not exist. The headline cold-fill wall is auditable: logs/main-warm2.log does carry BUILD_WALL 12750.3, SECOND_BUILD_WALL 6.4 and EXIT=0, so the central claim is auditable and only the supporting figures are not."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/carrier-vertex-identity.html",
+      "line": "124",
+      "severity": "non-blocking",
+      "text": "non-blocking: the certified-rows section says the carrier identity 'hashes nova/equilibrium/stencil_mesh.py and nova/equilibrium/analytic_single_null.py', while the later rebuild section at :280-283 says CARRIER_SOURCE_PATHS 'lists nova/equilibrium/stencil_mesh.py but not nova/equilibrium/analytic_single_null.py'; the two statements cannot both be true and the second is the specific, evidenced one, so a reader of :117-126 draws the wrong conclusion about which edits invalidate the carrier cache."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/carrier-vertex-identity.html",
+      "line": "164",
+      "severity": "non-blocking",
+      "text": "non-blocking: the importers section still explains the single delta as 'a vertex is now the set of slots that share it through the adjacency the mesh declares' and concludes 'Reconciling the two means either the sample bank adopts the lattice identity as well ... or the identity grows a global tolerance pass', which the same document contradicts at :196-199 ('Both now call one function ... That function reads no adjacency at all') and :200-203; the table at :142-158 is captioned at head 0ac91093b and :196 records tests/test_biotpolysection.py passing 27 afterwards, so a reader of that section sees a surviving failure and an unresolved cause that the landed code does not have."
+    },
+    {
+      "file": "nova/equilibrium/topology.py",
+      "line": "2529",
+      "severity": "non-blocking",
+      "text": "non-blocking: canonical_polygons is called from a file outside the brief's write-only list and outside the manifest's orientation_write_paths; the worker records the breach in the manifest's round4_fix key rather than stopping for a scope grant, so the coordinator must either ratify the two-line extension or have runtime consumers re-verified without it (carried from the review at 42563384c)."
+    },
+    {
+      "file": "nova/biot/plasmagrid.py",
+      "line": "262",
+      "severity": "non-blocking",
+      "text": "non-blocking: this file is changed by the run (28 lines, routing _index_sampling_vertices through lattice_vertex_index) but is absent from the manifest's changed_paths list, so the record understates the landed surface and a coordinator reading only that list would not know the sample bank's identity moved."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261026T212607232504-review-of-carrier-vertex-identity-b108c9f0b4ce",
+  "reviewed_base_sha": "42563384ce498da2544e529dac96c634397e7920",
+  "reviewed_head_sha": "b108c9f0b4ce423e5a144eea25f4ea82d3c6b9ac",
+  "reviewed_run_id": "r-20261024T081359704297-carrier-vertex-identity",
+  "rubric": "code",
+  "scope_note": "Incremental review of the five commits gained since the previous review at 42563384c: 75f234baf, f5124fc24, 406d746ef, c1e4f8499, b108c9f0b. They change one file, docs/evidence/fragments/converged-forward-solve/carrier-vertex-identity.html, +119 lines and 0 removals, adding four sections on the operand-cache rebuild and the census timeout. The product code was reviewed at 0ac91093b, 42f0dbaa5, 61b422274, e3de3c290 and 42563384c; the node-level gaps those reviews recorded are re-emitted here because they are still live at this head. All product-code and test-file line numbers below were read at b108c9f0b, whose code and test trees are byte-identical to this worktree's HEAD for those paths.",
+  "scores": {
+    "durability": 12,
+    "evidence": 15,
+    "fit": 15,
+    "goal_fidelity": 14,
+    "reuse": 20,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-26T21:43:56.729122+00:00",
+  "total": 94,
+  "verdicts": {
+    "diff": "Read all five commits against 42563384c commit by commit: 75f234baf, f5124fc24, 406d746ef, c1e4f8499 and b108c9f0b each edit only the fragment, netting +119 lines and no removals, and no product code or test is touched in the increment.",
+    "done_when": "done_when (1) and (2) are recorded as measured (fragment :72-107 three arms, :108-116 the binned-dedup negative control, :252-276 the tests), but done_when (3) is still unmet for one importing file: tests/equilibrium/test_topology_read.py calls TopologyGeometry.from_cells at :352, :507 and :2972, and logs/fix-equilibrium_test_topology_read.py.log ends EXIT=124 with '# revision: e3de3c290' and no result at either arm.",
+    "goal": "The node goal is a device-independent hex carrier vertex identity plus a deterministic analytic reference solve; the five commits since 42563384c change no code and add four measured sections at docs/evidence/fragments/converged-forward-solve/carrier-vertex-identity.html:303-422 attributing the census slowdown to an operand-cache rebuild, which is a consequence of the goal's change rather than the goal itself.",
+    "manifest": "Read the manifest (status complete); its attempt_round6 block names logs/digest-probe-both-arms.log, which does not exist under the run's logs/ directory, and its changed_paths omits nova/biot/plasmagrid.py although the diff changes that file by 28 lines.",
+    "write_paths": "The increment writes only docs/evidence/fragments/converged-forward-solve/carrier-vertex-identity.html, which is inside the brief's write-only list; the node as a whole also changed nova/equilibrium/topology.py:2527-2529, which is in neither the brief's list nor the manifest's orientation_write_paths (carried from the review at 42563384c)."
+  }
+}

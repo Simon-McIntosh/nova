@@ -1,0 +1,43 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-26T20:45:06Z",
+  "figures_reviewed": [
+    {
+      "caption": "docs/evidence/fragments/converged-forward-solve/cut-cell-split.html (figure id cut-cell-split-convergence-figure)",
+      "figure": "docs/figures/converged-forward-solve/cut-cell-split/convergence-550.svg",
+      "rendered_pixels": "1400x720",
+      "rendered_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261026T204329704267-review-of-cut-cell-split-a7ea798494ab-figure/image-0.png"
+    }
+  ],
+  "findings": [
+    {
+      "disposition": "folded",
+      "disposition_node": "cut-cell split convergence figure: label the y axis above 1e-3 so the trace is readable off the axis",
+      "file": "docs/figures/converged-forward-solve/cut-cell-split/convergence-550.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The y axis is labelled only at 10^-3, 10^-6, 10^-9 and 10^-12 with no minor ticks, while matplotlib default minor ticks are absent, and every plotted residual (cold state 0.0288, corrections 1-6 at 0.0164, 0.00605, 0.00586, 0.00568, 0.00568127, 0.00568110) lies above the highest labelled tick. Only the last point is readable, through the direct label 'stalled at 5.68e-3'; the cold state and the size of each early drop cannot be measured against any axis mark, so the reader cannot verify the descent against the numbers the caption gives. Adding minor decade ticks, or labelling a tick at 1e-2, would make the trace readable from the axis without changing its shape."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261026T204329704267-review-of-cut-cell-split-a7ea798494ab-figure",
+  "reviewed_base_sha": "b467e11d4ad99853360450169eb709ac4b79bf42",
+  "reviewed_head_sha": "a7ea798494ab607153413b4b6fad2f1244a55daa",
+  "reviewed_run_id": "r-20261022T061529617336-cut-cell-split",
+  "rubric": "figure",
+  "rubric_verdicts": [
+    "RUBRIC legibility: fail (non-blocking) - the seven-point log trace reads at a glance and the final point carries a direct label, but the y axis carries only four major ticks at three-decade spacing (1e-3 at row 178, 1e-6 at 317, 1e-9 at 456, 1e-12 at 594) and no minor ticks, so the whole trace (0.0288 down to 0.00568) sits in the unlabelled region above the top tick and its magnitude is not readable off the axis.",
+    "RUBRIC data_ink: pass - one thick blue series with point markers and one grey dotted reference rule carry the panel; no fills, no shading and no second series compete with them, and the empty band between the plateau and the rule is the five-order gap the figure exists to show.",
+    "RUBRIC decoration: pass - white ground, no grid and no frame beyond the left and bottom spines; the dotted rule is a labelled reference level, not decoration.",
+    "RUBRIC contrast: pass - the 'qualification ceiling 1e-12' annotation is rgb(110,110,110), about 5.1:1 on white; the 'stalled at 5.68e-3' label is rgb(47,111,159), about 5.4:1; tick labels are rgb(82,81,78), about 8.4:1; all clear the 4.5:1 normal-text threshold.",
+    "RUBRIC table_form: pass - the message is the flattening of the residual and its distance to the 1e-12 rule, which are spatial facts; a column of seven numbers would not convey them as directly.",
+    "RUBRIC label_collision: pass - the ceiling annotation occupies pixel rows 569-588 and the dotted rule rows 594-595, a clear 6 px gap with no overlap; 'stalled at 5.68e-3' begins about 10 px beyond the final marker (marker ends at x 1098, text starts at x 1108) and does not touch the series; all ink lies within x 79-1278 and y 85-696 of the 1400x720 canvas, so nothing is clipped."
+  ],
+  "status": "parsed",
+  "summary": "One figure reviewed: the limited 550 residual-against-correction trace at head a7ea79849. Its data are correct and reconcile with the run's own record: every plotted marker matches the documented residuals (cold 0.0288 at correction 0, then 0.0164, 0.00605, 0.00586 and a plateau at 0.005681) to within one pixel on the 46.2 px-per-decade axis, and the direct label's 5.68e-3 is the plateau value. The figure has no gradient, shading or grid, and the dotted 1e-12 rule is the one piece of reference ink. No text is clipped or overlapping: measured on the rendered PNG, the ceiling annotation clears the rule by 6 px at rgb(110,110,110) (about 5.1:1), which resolves both the label-on-rule collision and the sub-threshold grey recorded against the earlier revision f7213df5. One non-blocking defect remains: no labelled y tick sits at or above the trace, so apart from the labelled endpoint the residuals cannot be read from the axis. The caption does not merely repeat a title; it explains the correction-0 cold state, the rule, and the accepted line-search scales, so it is not a finding.",
+  "times_source": "run-record",
+  "timestamp": "2026-10-26T20:56:42.869151+00:00",
+  "total": null
+}

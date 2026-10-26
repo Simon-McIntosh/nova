@@ -1,0 +1,85 @@
+{
+  "added_failure_count": 2,
+  "added_failure_ids": [
+    "tests/equilibrium/test_read_correction_path.py::test_first_diverted_correction_is_finite",
+    "tests/equilibrium/test_read_correction_path.py::test_adjacent_saddle_booking_keeps_one_representation"
+  ],
+  "call_site_count": 4,
+  "call_sites": [
+    "nova/equilibrium/current.py:427 _disk_split_moments",
+    "nova/equilibrium/current.py:373 _disk_clipped_rings",
+    "nova/equilibrium/clip_quadrature.py:378 _quadrature_from_arrays",
+    "scripts/prototypes/fast_map_production/tie_probe.py:118 make_sampler"
+  ],
+  "completed_at": "2026-10-26T20:56:48.396Z",
+  "dispatched_at": "2026-10-26T20:43:50Z",
+  "findings": [
+    {
+      "file": "tests/equilibrium/test_read_correction_path.py",
+      "line": "69",
+      "severity": "blocking",
+      "text": "the straddle assertion rests on the two offsets pinned at :61, which the source node's own brief measured booking cell 266 ordinary in both readings on the Broadwell node class this dispatch runs on (98dci4-clu-2068), and the guard has never been observed green at a7ea79849: job 1295254 failed both tests in this file by 300 s timeout and the paired gate's tip arm exited 124 with an empty log. The round ships an assertion expected to redden on a host class the gate runs on instead of the run-time bisection to the switch the brief asked for."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T061529617336-cut-cell-split/manifest.md",
+      "line": "136",
+      "severity": "non-blocking",
+      "text": "baseline_suite and after_suite record three of the seven rows each gate arm produced and omit both tests/equilibrium/test_read_correction_path.py rows (base exit 0 with 2 passed in 292.75s, tip exit 124 with an empty log), so a reader of the recorded fields cannot see that the file this round changed has no readable head arm; the tests line at manifest.md:121 carries <arm-root> and <scratch> placeholders and is not a re-runnable command."
+    },
+    {
+      "file": "tests/equilibrium/test_cut_cell_split.py",
+      "line": "260",
+      "severity": "non-blocking",
+      "text": "the sliver control branches on _disk_weight_fraction (:100), which books SQUARE while the asserted cell is the triangle CELL (:119), so at radius 0.2 -- where the nearest cell edge lies 0.4025 from the disk centre and the disk is wholly inside the cell -- it takes the crossing branch and reddens only because shrinking the disk moves about 5.3e-4 of current against a 2e-4 tolerance, not because a sliver at a crossing was dropped."
+    },
+    {
+      "file": "tests/equilibrium/test_cut_cell_split.py",
+      "line": "318",
+      "severity": "non-blocking",
+      "text": "the declared literal negative control --force-conic-right is exercised only through _moments at :68, while the continuity assertion this round rewrote at :299 asserts _inside (:133), which never passes force_whole, so the mutation the done_when names cannot reach the assertion it was declared to falsify."
+    },
+    {
+      "file": "tests/equilibrium/test_cut_cell_split.py",
+      "line": "155",
+      "severity": "non-blocking",
+      "text": "_polar_reference re-derives the ring-against-inscribed-polygon area and first moments that _reference_moments at :397 already owns through shapely, duplicating the unit-density oracle instead of extending it; only the density-weighted form has no existing owner."
+    }
+  ],
+  "gate_sources": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T061529617336-cut-cell-split/gates/gate-d18/tip/summary.txt",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T061529617336-cut-cell-split/gates/gate-d18/base/summary.txt"
+  },
+  "item_verdicts": {
+    "diff": "read commit by commit; c2b292cf0 adds UnitDensity, _inside and _polar_reference plus the two new tests and rewrites the continuity test, 4b771302f records the repair in the evidence fragment, 74f7c4953 is formatting only, and a7ea79849 adds the straddle assertion and nothing else.",
+    "done_when": "the done_when clauses this increment answers are the continuity test against an independent reference and a literal negative control; tests/equilibrium/test_cut_cell_split.py:237 does assert the inside piece against a negative control at :260, but that control branches on _disk_weight_fraction (:100), which is computed on SQUARE rather than the CELL the test books, so at radius 0.2 it runs on a cell the disk does not cross, and the declared --force-conic-right mutation no longer reaches the rewritten assertion at :299 at all.",
+    "goal": "the increment f7213df58..a7ea79849 touches only tests and docs (tests/equilibrium/test_cut_cell_split.py, tests/equilibrium/test_read_correction_path.py, the evidence fragment and its figure) and lands no production change, so what it adds to the node goal is the independent reference at tests/equilibrium/test_cut_cell_split.py:155 and the demand that the differential work inside the split be verified rather than self-asserted.",
+    "manifest": "read; it says status complete and completed false, and its baseline_suite (manifest.md:136) and after_suite (manifest.md:137) record three of the seven rows gates/gate-d18/base/summary.txt and gates/gate-d18/tip/summary.txt carry, omitting precisely the rows for tests/equilibrium/test_read_correction_path.py (base exit 0, 2 passed in 292.75s; tip exit 124 with an empty log), so the changed guard's head arm reads as absent rather than as unreadable.",
+    "write_paths": "all four changed paths are inside the source node's declared write paths -- tests/equilibrium/test_cut_cell_split.py, tests/equilibrium/test_read_correction_path.py, docs/evidence/fragments/converged-forward-solve/cut-cell-split.html and docs/figures/converged-forward-solve/cut-cell-split/convergence-550.svg -- and nothing outside them is touched."
+  },
+  "justifications": {
+    "durability": "the assertion at tests/equilibrium/test_cut_cell_split.py:237 reddens on any booking error above 2e-4 against a closed polar form that shares no split with the code, while the guard this round was asked to repair fails on its own terms -- tests/equilibrium/test_read_correction_path.py:61 still pins two offsets the node brief measured as not straddling on the Broadwell class, so the new assertion at :69 is expected to fail there.",
+    "evidence": "tests/equilibrium/test_cut_cell_split.py ran 19 passed at tip 4b771302f (gates/gate-d18/tip/summary.txt) and is byte-identical after the style commit, but the added assertion at tests/equilibrium/test_read_correction_path.py:69 has no green run at a7ea79849 -- gates/gate-d18/tip/tests_equilibrium_test_read_correction_path.py.log holds one line, F, and gates/gate-d18-adjacent/summary.txt reads exit=1 with both tests in that file failed.",
+    "fit": "the additions follow the file's own idiom of a frozen dataclass density (tests/equilibrium/test_cut_cell_split.py:48), local imports and the existing _ring helper, and introduce no plan, stage or ticket name.",
+    "goal_fidelity": "the increment repairs the evidence and the tests standing under the goal and changes no production booking, and nova/equilibrium/current.py:536 still returns three moments with no area, so the goal's area clause is neither advanced nor regressed here.",
+    "reuse": "_polar_reference at tests/equilibrium/test_cut_cell_split.py:155 re-derives the ring-against-inscribed-polygon area and first moments that _reference_moments at tests/equilibrium/test_cut_cell_split.py:397 already owns with shapely, duplicating the unit-density oracle rather than extending it, though the density-weighted form has no existing owner.",
+    "scope_discipline": "git diff --stat f7213df58..a7ea79849 changes four files and nova/equilibrium/current.py, nova/equilibrium/clip_quadrature.py and the solver are untouched, so the increment carries nothing beyond the goal it repairs."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the increment f7213df58..a7ea79849 touches only tests and docs (tests/equilibrium/test_cut_cell_split.py, tests/equilibrium/test_read_correction_path.py, the evidence fragment and its figure) and lands no production change, so what it adds to the node goal is the independent reference at tests/equilibrium/test_cut_cell_split.py:155 and the demand that the differential work inside the split be verified rather than self-asserted.\nVERDICT done_when: the done_when clauses this increment answers are the continuity test against an independent reference and a literal negative control; tests/equilibrium/test_cut_cell_split.py:237 does assert the inside piece against a negative control at :260, but that control branches on _disk_weight_fraction (:100), which is computed on SQUARE rather than the CELL the test books, so at radius 0.2 it runs on a cell the disk does not cross, and the declared --force-conic-right mutation no longer reaches the rewritten assertion at :299 at all.\nVERDICT write_paths: all four changed paths are inside the source node's declared write paths -- tests/equilibrium/test_cut_cell_split.py, tests/equilibrium/test_read_correction_path.py, docs/evidence/fragments/converged-forward-solve/cut-cell-split.html and docs/figures/converged-forward-solve/cut-cell-split/convergence-550.svg -- and nothing outside them is touched.\nVERDICT manifest: read; it says status complete and completed false, and its baseline_suite (manifest.md:136) and after_suite (manifest.md:137) record three of the seven rows gates/gate-d18/base/summary.txt and gates/gate-d18/tip/summary.txt carry, omitting precisely the rows for tests/equilibrium/test_read_correction_path.py (base exit 0, 2 passed in 292.75s; tip exit 124 with an empty log), so the changed guard's head arm reads as absent rather than as unreadable.\nVERDICT diff: read commit by commit; c2b292cf0 adds UnitDensity, _inside and _polar_reference plus the two new tests and rewrites the continuity test, 4b771302f records the repair in the evidence fragment, 74f7c4953 is formatting only, and a7ea79849 adds the straddle assertion and nothing else.\nCALL_SITES: nova/equilibrium/current.py:427 _disk_split_moments, nova/equilibrium/current.py:373 _disk_clipped_rings, nova/equilibrium/clip_quadrature.py:378 _quadrature_from_arrays, scripts/prototypes/fast_map_production/tie_probe.py:118 make_sampler\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: the increment repairs the evidence and the tests standing under the goal and changes no production booking, and nova/equilibrium/current.py:536 still returns three moments with no area, so the goal's area clause is neither advanced nor regressed here.\nSCORE evidence: 9\nJUSTIFICATION evidence: tests/equilibrium/test_cut_cell_split.py ran 19 passed at tip 4b771302f (gates/gate-d18/tip/summary.txt) and is byte-identical after the style commit, but the added assertion at tests/equilibrium/test_read_correction_path.py:69 has no green run at a7ea79849 -- gates/gate-d18/tip/tests_equilibrium_test_read_correction_path.py.log holds one line, F, and gates/gate-d18-adjacent/summary.txt reads exit=1 with both tests in that file failed.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat f7213df58..a7ea79849 changes four files and nova/equilibrium/current.py, nova/equilibrium/clip_quadrature.py and the solver are untouched, so the increment carries nothing beyond the goal it repairs.\nSCORE durability: 12\nJUSTIFICATION durability: the assertion at tests/equilibrium/test_cut_cell_split.py:237 reddens on any booking error above 2e-4 against a closed polar form that shares no split with the code, while the guard this round was asked to repair fails on its own terms -- tests/equilibrium/test_read_correction_path.py:61 still pins two offsets the node brief measured as not straddling on the Broadwell class, so the new assertion at :69 is expected to fail there.\nSCORE fit: 17\nJUSTIFICATION fit: the additions follow the file's own idiom of a frozen dataclass density (tests/equilibrium/test_cut_cell_split.py:48), local imports and the existing _ring helper, and introduce no plan, stage or ticket name.\nSCORE reuse: 11\nJUSTIFICATION reuse: _polar_reference at tests/equilibrium/test_cut_cell_split.py:155 re-derives the ring-against-inscribed-polygon area and first moments that _reference_moments at tests/equilibrium/test_cut_cell_split.py:397 already owns with shapely, duplicating the unit-density oracle rather than extending it, though the density-weighted form has no existing owner.\nFINDING tests/equilibrium/test_read_correction_path.py:69 blocking: the straddle assertion rests on the two offsets pinned at :61, which the source node's own brief measured booking cell 266 ordinary in both readings on the Broadwell node class that this dispatch runs on (98dci4-clu-2068), and the guard has never been observed green at a7ea79849 -- job 1295254 failed both tests in this file by 300 s timeout and the paired gate's tip arm exited 124 with an empty log -- so the round ships an assertion expected to redden on a host class the gate runs on, in place of the run-time bisection to the switch the node's brief asked for.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T061529617336-cut-cell-split/manifest.md:136 non-blocking: baseline_suite and after_suite record three of the seven rows each gate arm produced and omit both tests/equilibrium/test_read_correction_path.py rows (base exit 0, tip exit 124), so a reader of the recorded fields cannot see that the file this round changed has no readable head arm; the tests line at manifest.md:121 is a command carrying <arm-root> and <scratch> placeholders, which cannot be re-run as written.\nFINDING tests/equilibrium/test_cut_cell_split.py:260 non-blocking: the sliver control branches on _disk_weight_fraction (:100), which books SQUARE while the asserted cell is the triangle CELL (:119), so at radius 0.2 -- where the nearest cell edge lies 0.4025 from the disk centre and the disk is wholly inside the cell -- it takes the crossing branch and reddens only because shrinking the disk moves 5.3e-4 of current against a 2e-4 tolerance, not because a sliver at a crossing was dropped; the comment and the evidence fragment's account of which radii cross are therefore about the wrong shape.\nFINDING tests/equilibrium/test_cut_cell_split.py:318 non-blocking: the declared literal negative control --force-conic-right is exercised only through _moments at :68, while the continuity assertion this round rewrote at :299 asserts _inside (:133), which never passes force_whole, so the mutation the done_when names cannot reach the assertion it was declared to falsify.",
+  "review_run_id": "r-20261026T204225541761-review-of-cut-cell-split-a7ea798494ab",
+  "reviewed_base_sha": "f7213df580ee137a82a198a6ffe1ef4d1717d510",
+  "reviewed_head_sha": "a7ea798494ab607153413b4b6fad2f1244a55daa",
+  "reviewed_run_id": "r-20261022T061529617336-cut-cell-split",
+  "scores": {
+    "durability": 12,
+    "evidence": 9,
+    "fit": 17,
+    "goal_fidelity": 13,
+    "reuse": 11,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-26T21:20:00+00:00",
+  "total": 81
+}

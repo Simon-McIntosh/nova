@@ -1,0 +1,71 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "scripts/prototypes/lean_map/values.py:67",
+    "scripts/analytic_oracle_fixtures/measure.py:583",
+    "scripts/analytic_oracle_fixtures/compare_cached_radial.py:43",
+    "scripts/analytic_oracle_fixtures/inspect_radial_carrier.py:114"
+  ],
+  "completed_at": "2026-10-26T22:50:56.416Z",
+  "dispatched_at": "2026-10-26T22:43:32Z",
+  "findings": [
+    {
+      "file": "scripts/analytic_oracle_fixtures/coupling_build.py",
+      "line": "35",
+      "severity": "non-blocking",
+      "text": "tile_side now sizes a pair batch as 2 * tile_side rather than a target-by-source tile, so a caller selecting tile geometry silently selects a batch length instead; inspect_radial_carrier.py:115 still passes tile_side=64 expecting the old meaning."
+    },
+    {
+      "file": "scripts/analytic_oracle_fixtures/coupling_build.py",
+      "line": "59",
+      "severity": "non-blocking",
+      "text": "the near/distant grouping that took the diverted 16-point wall from 32.177 s to 4.247 s (logs/grouped-probe.log) is guarded by no test, so deleting the group split keeps the suite green while restoring most of the cost."
+    },
+    {
+      "file": "scripts/analytic_oracle_fixtures/coupling_build.py",
+      "line": "107",
+      "severity": "non-blocking",
+      "text": "the batching and worker pool duplicate a capability nova/biot/polygonanalytic.py:2209 already owns, but with a hardcoded ThreadPoolExecutor(max_workers=4) that ignores the granted CPU set the owner sizes from, and the near/distant predicate at :74 is a second copy of polygonanalytic.py:2084-2092."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/values-entry-cold-fill.html",
+      "line": "23",
+      "severity": "non-blocking",
+      "text": "the table caption calls the base arm a scratch archive of a806edfa1, but logs/final-negative-control.log records a scratch checkout of bb7a2d7c0 with only coupling_build.py taken from the base revision, so the recorded provenance names a tree that did not produce those rows."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read all three commits against a806edfa; one source file, one test file and one new evidence fragment, no change outside the declared scope.",
+    "done_when": "the done_when asks for a named stage with 1/4/16-point timings against a peer, a repaired marginal at or below 0.12 s with 1e-12 value agreement and a scratch-store full build, and paired per-file suite arms; logs/final-head-timing.log, logs/final-full-build.log and the baseline/after suite logs assert each clause.",
+    "goal": "the goal is to remove the per-point cold-fill cost on the diverted 282-cell carrier; coupling_build.py:29 now calls only the three-row flux integral and the measured marginal falls from 4.137 to 0.0356 s per point.",
+    "manifest": "read; it states 22 passes at base and 24 at head with zero added failures, names both paired suite logs, and records the negative control that reddens the guard test.",
+    "write_paths": "read the manifest's declared paths (coupling_build.py, tests/test_coupling_build.py, the evidence fragment and a figures directory); every path in the diff is one of the first three."
+  },
+  "justifications": {
+    "durability": "tests/test_coupling_build.py:68 reddens when the base builder is restored (logs/final-negative-control.log shows 1 failed), but no test covers the near/distant grouping at coupling_build.py:59 that carried the larger measured step, and :87 compares the concurrent path against the same implementation's serial path.",
+    "evidence": "logs/final-head-timing.log carries both the diverted 282-cell carrier and the 1,0980-point/610-cell peer at 1, 4 and 16 points in one job, logs/final-full-build.log records FULL_WALL 755.543 s with OLD_DIGEST preserved, and SAMPLE_ROW gaps 3.56e-15/9.93e-15/9.14e-15 sit under 1e-12, though the same log's 755 s over 5076 points averages 0.149 s per point and the fragment discloses that plainly.",
+    "fit": "coupling_build.py:66 sets batch = 2 * int(tile_side), so the tile_side parameter no longer names what it controls while inspect_radial_carrier.py:115 still passes tile_side=64 expecting a tile side.",
+    "goal_fidelity": "scripts/analytic_oracle_fixtures/coupling_build.py:118 returns the three flux rows from a jitted call to nova.biot.polygonanalytic._conditioned_flux_moments, and logs/final-head-timing.log records the diverted carrier's 4-to-16 marginal at (3.165-2.738)/12 = 0.0356 s per point, under the 0.12 s bound.",
+    "reuse": "the numerical work extends the owner at nova/biot/polygonanalytic.py:2060, but coupling_build.py:107 forks a concurrency layer the same module already owns at polygonanalytic.py:2209 and re-derives its near/distant predicate from polygonanalytic.py:2084-2092.",
+    "scope_discipline": "git diff a806edfa..0b179e28 touches exactly scripts/analytic_oracle_fixtures/coupling_build.py, tests/test_coupling_build.py and docs/evidence/fragments/converged-forward-solve/values-entry-cold-fill.html, all inside the declared write paths, and the declared docs/figures path is simply unused."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to remove the per-point cost of the values-entry cold fill on the diverted 282-cell carrier; coupling_build.py:29 now evaluates only the three flux rows and logs/final-head-timing.log records the marginal falling from 4.137 to 0.036 s per point.\nVERDICT done_when: the done_when asks for a named stage with 1/4/16-point timings beside a peer grid, a repaired marginal at or below 0.12 s with 1e-12 agreement and a scratch-store full build, and paired per-file suite arms; logs/final-head-timing.log, logs/final-full-build.log, logs/baseline-final-suite.log and logs/after-final-suite.log each record the clause they assert.\nVERDICT write_paths: read the manifest's declared paths; the diff touches coupling_build.py, tests/test_coupling_build.py and the evidence fragment, all inside them, and the declared figures directory is unused rather than exceeded.\nVERDICT manifest: read; it records 22 passes at base and 24 at head with zero added failures, names both suite logs, and names the negative-control log whose reverted source reddens the guard test.\nVERDICT diff: read all three commits against a806edfa commit by commit; one source file rewritten to call the conditioned flux integral directly, two added tests, and one new evidence fragment.\nCALL_SITES: scripts/prototypes/lean_map/values.py:67, scripts/analytic_oracle_fixtures/measure.py:583, scripts/analytic_oracle_fixtures/compare_cached_radial.py:43, scripts/analytic_oracle_fixtures/inspect_radial_carrier.py:114\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: coupling_build.py:118 builds only the three flux rows through nova.biot.polygonanalytic._conditioned_flux_moments and (3.165-2.738)/12 in logs/final-head-timing.log is 0.0356 s per point, inside the 0.12 s bound.\nSCORE evidence: 16\nJUSTIFICATION evidence: logs/final-head-timing.log holds the diverted carrier and the 610-cell peer at 1, 4 and 16 points in one job and logs/final-full-build.log records SAMPLE_ROW gaps of 3.56e-15, 9.93e-15 and 9.14e-15 beside FULL_WALL 755.543 s, though that wall averages 0.149 s per point and the fragment says so.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff a806edfa..0b179e28 reports three changed files, each one of the manifest's declared write paths, with nothing added that the goal does not imply.\nSCORE durability: 13\nJUSTIFICATION durability: tests/test_coupling_build.py:68 fails when the base builder is restored, as logs/final-negative-control.log shows, but nothing fails if the near/distant grouping at coupling_build.py:59 is removed and the concurrent-path test at :87 checks the implementation against itself.\nSCORE fit: 14\nJUSTIFICATION fit: coupling_build.py:66 reads batch = 2 * int(tile_side), so the parameter no longer names the quantity it sets while inspect_radial_carrier.py:115 still selects tile_side=64.\nSCORE reuse: 7\nJUSTIFICATION reuse: the flux maths extends nova/biot/polygonanalytic.py:2060 as it should, but coupling_build.py:107 rebuilds the batching and worker pool polygonanalytic.py:2209 already owns and :74 re-derives that module's near predicate from :2084-2092.\nFINDING scripts/analytic_oracle_fixtures/coupling_build.py:35 non-blocking: tile_side now sizes a pair batch as 2 * tile_side instead of a tile side, so a caller selecting tile geometry silently selects a batch length, and inspect_radial_carrier.py:115 still passes tile_side=64.\nFINDING scripts/analytic_oracle_fixtures/coupling_build.py:59 non-blocking: the near/distant group split that took the diverted 16-point wall from 32.177 to 4.247 s has no test, so removing it keeps the suite green while restoring most of the cost.\nFINDING scripts/analytic_oracle_fixtures/coupling_build.py:107 non-blocking: the batching and worker pool duplicate nova/biot/polygonanalytic.py:2209's capability with a hardcoded ThreadPoolExecutor of four threads that ignores the granted CPU set.\nFINDING docs/evidence/fragments/converged-forward-solve/values-entry-cold-fill.html:23 non-blocking: the caption calls the base arm a scratch archive of a806edfa1, but logs/final-negative-control.log records a head checkout carrying only the base coupling_build.py.\n",
+  "review_run_id": "r-20261026T224213426970-review-of-values-entry-cold-fill-0b179e285cf0",
+  "reviewed_base_sha": "a806edfa135a13cf185d86301cbdfe6efb1a97dd",
+  "reviewed_head_sha": "0b179e285cf0601489ba4d3617010b3298c93c37",
+  "reviewed_run_id": "r-20261026T215103715521-values-entry-cold-fill",
+  "scores": {
+    "durability": 13,
+    "evidence": 16,
+    "fit": 14,
+    "goal_fidelity": 19,
+    "reuse": 7,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-26T22:52:13.148885+00:00",
+  "total": 89
+}

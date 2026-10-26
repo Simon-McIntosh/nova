@@ -2,6 +2,9 @@
 
 import argparse
 import json
+import shlex
+import subprocess
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -135,6 +138,12 @@ def run(path, cells):
 
 
 if __name__ == "__main__":
+    revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+    print(
+        f"revision={revision} tree={Path.cwd()} "
+        f"command={shlex.join([sys.executable, *sys.argv])}",
+        flush=True,
+    )
     parser = argparse.ArgumentParser()
     parser.add_argument("path", type=Path)
     parser.add_argument("cells", type=int, nargs="+")

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
+
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -11,6 +13,7 @@ from nova.biot.polygonanalytic import _conditioned_flux_moments, _section_centro
 from nova.jax.config import Precision, resolve_precision
 
 FLUX_ROWS = (0, 1, 2)
+PARALLEL_PAIR_FLOOR = 8192
 
 
 @jax.jit
@@ -76,23 +79,38 @@ def build_flux_blocks(
         target_z[:, None] - section_centre[1]
     ) ** 2 < 16.0 * extent
     rows = np.empty((len(FLUX_ROWS), n_target * n_source), dtype=np.float64)
+    chunks = []
     for nearby in (False, True):
         indices = np.flatnonzero(near.ravel() == nearby)
         for start in range(0, len(indices), batch):
-            selected = indices[start : start + batch]
-            padded = np.pad(selected, (0, batch - len(selected)), mode="edge")
-            targets = padded // n_source
-            sources = padded % n_source
-            values = np.asarray(
-                _flux_pairs(
-                    target_r[targets].astype(dtype),
-                    target_z[targets].astype(dtype),
-                    edge[:, :, sources].astype(dtype),
-                    weight[:, sources].astype(dtype),
-                    norm[sources].astype(dtype),
-                    section_centre[:, sources].astype(dtype),
-                    expansion.T[:, sources].astype(dtype),
-                )
+            chunks.append(indices[start : start + batch])
+
+    def evaluate_chunk(selected):
+        padded = np.pad(selected, (0, batch - len(selected)), mode="edge")
+        targets = padded // n_source
+        sources = padded % n_source
+        values = np.asarray(
+            _flux_pairs(
+                target_r[targets].astype(dtype),
+                target_z[targets].astype(dtype),
+                edge[:, :, sources].astype(dtype),
+                weight[:, sources].astype(dtype),
+                norm[sources].astype(dtype),
+                section_centre[:, sources].astype(dtype),
+                expansion.T[:, sources].astype(dtype),
             )
-            rows[:, selected] = values[:, : len(selected)]
+        )
+        return selected, values[:, : len(selected)]
+
+    if chunks:
+        selected, values = evaluate_chunk(chunks[0])
+        rows[:, selected] = values
+        if n_target * n_source < PARALLEL_PAIR_FLOOR:
+            completed = map(evaluate_chunk, chunks[1:])
+            for selected, values in completed:
+                rows[:, selected] = values
+        else:
+            with ThreadPoolExecutor(max_workers=4) as pool:
+                for selected, values in pool.map(evaluate_chunk, chunks[1:]):
+                    rows[:, selected] = values
     return tuple(row.reshape(n_target, n_source) for row in rows)

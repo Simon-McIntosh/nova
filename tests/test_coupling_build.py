@@ -79,6 +79,18 @@ def test_flux_builder_never_evaluates_unused_field_rows(monkeypatch):
     assert all(np.isfinite(block).all() for block in blocks)
 
 
+def test_parallel_value_batches_keep_identical_rows():
+    """Concurrent batches preserve each target and section's flux values."""
+    targets, polygons, centres = _case()
+    reference = coupling_build.build_flux_blocks(targets, polygons, centres)
+    repeated = np.tile(targets, (114, 1))[:1024]
+    actual = coupling_build.build_flux_blocks(repeated, polygons, centres)
+    for row in range(3):
+        np.testing.assert_array_equal(
+            actual[row], reference[row][np.arange(len(repeated)) % len(targets)]
+        )
+
+
 def test_identity_check_catches_perturbed_block_by_test_id():
     targets, polygons, centres = _case()
     reference = polygon_analytic_flux_moments_batched(

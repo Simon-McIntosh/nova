@@ -364,8 +364,10 @@ neither revision had assembled it: the tip's build was stopped at exactly
 
 <p>The cost is per point and it is huge. Over all 282 polygons,
 <code>build_flux_blocks</code> takes 51.4 s for one point, 86.4 s for four and
-166.7 s for sixteen -- a marginal 6.7 s per point, projecting to about nine
-hours for the 5076 Gauss points. Two peer entries published under the same
+166.7 s for sixteen -- a marginal 6.7 s per point on the small slices, which
+extrapolates to about nine hours for the 5076 Gauss points and overstates it:
+the measured full-grid fill is 12452 s, so the marginal cost falls as the batch
+grows and the slices bound the cost from above. Two peer entries published under the same
 values root within the hour cost 133.4 s at shape <code>(10908, 606, 3)</code>
 and 122.4 s at <code>(10980, 610, 3)</code>, which is 0.012 s per point. The
 same routine is therefore roughly five hundred times slower per point here.</p>
@@ -380,22 +382,43 @@ why this grid's polygons are expensive for the analytic block builder -- that
 is the next measurement, and it is a cost of the grid, not of the canonical
 corner.</p>
 
-<h2>The warm-up is an hour-plus, which is itself a cost</h2>
+<h2>The warm-up is 12452 seconds, and it is itself a cost</h2>
 
-<p>The warm-up was run at main's head from a git archive and it did not finish.
-The first attempt stopped at its own 50-minute bound with no completion line;
-the second reached a 59-minute wall and was killed by the scheduler
-(<code>TIMEOUT 00:59:03</code>). So a cold rebuild of this grid's value matrix
-is an hour or more of dedicated eight-core wall, to publish one 158 MB entry.</p>
+<p>The warm-up was run at main's head (<code>0b5972bfd</code>) from a git
+archive, with no per-call bound. It completed and published the entry. The
+digest is <code>sha256:d1e1e0926e8d6d4e25f502a6da1d318ef4b75aab7100b225a99c1a94b6e7870f</code>,
+the entry was absent when the build started (<code>ENTRY_BEFORE None</code>),
+and the assembly took <code>BUILD_WALL 12750.3</code> s. The store's own record
+agrees: <code>build_seconds</code> <code>12452</code> for shape
+<code>[5076, 282, 3]</code>, a 34 MB matrix. The same build run again in the
+same job took <code>SECOND_BUILD_WALL 6.4</code> s, so the reload is 6.4 s and
+the cold fill is 12452 s -- a factor of about two thousand, and the entire
+difference the census tests were seeing.</p>
 
-<p>That is the cost every later edit to the Gauss rule inherits, and it is large
-enough to be a planning fact rather than friction: an hour-plus rebuild per
-geometry change, against the three census tests it serves being given 900, 300
-and 900 seconds between them. The third attempt carries a four-hour wall so the
-number is measured rather than bounded, and its <code>BUILD_WALL</code> line is
-where the figure will be read. Until it lands, the honest statement is that the
-assembly exceeds 59 minutes on eight dedicated cores, which is the floor.</p>
+<p>Two attempts before it had only bounded the same number: one stopped at its
+own 50-minute bound with no completion line, the other was killed at a
+59-minute scheduler wall (<code>TIMEOUT 00:59:03</code>). The four-hour attempt
+measured it instead.</p>
 
+<p>Against the published entry the census returns to base for two of its three
+tests and not the third. At main <code>0b5972bfd</code>:
+<code>test_census_keeps_the_wall_contact_saddle_across_the_adjacent_pair</code> passed
+in <code>87.07</code> s (call <code>68.57</code> s) against 86 s at base;
+<code>test_strict_exact_zero_admission_loses_the_saddle_at_the_adjacent_pair</code>
+passed in <code>61.02</code> s (call <code>47.79</code> s) against 55 s at
+base; and
+<code>test_census_neighbour_proposals_keep_saddles_across_coarse_ties</code>
+hit its 900-second timeout where base took 49 s. The three identity and escape
+files passed beside them, 34 passed and 1 skipped. So the cache was warm and
+the node healthy for two of the three, and the third is a separate cost still
+to be attributed.</p>
+
+<p>That 12452-second fill is the cost every later edit to the Gauss rule
+inherits, and it is a planning fact rather than friction: three and a half hours
+of dedicated eight-core wall per geometry change, against the census tests it
+serves being given 900, 300 and 900 seconds between them. A node whose brief
+moves the Gauss rule has to carry the four-hour wall, and its base arm has to be
+measured warm.</p>
 
 </article>
 </body>

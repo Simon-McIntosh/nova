@@ -1,0 +1,67 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-26T21:01:46.191Z",
+  "dispatched_at": "2026-10-26T20:53:38Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/kernel-compile-barrier.html:64",
+      "id": "reasoning-1",
+      "reason": "as written, done-when (3) can fail for a reason neither clause measures, so the plan must either bound the loop wall or lift the test timeout explicitly, and that decision belongs in \u00a73.",
+      "text": "done-when (1) permits the CPU cold compile to take up to 600 s, while done-when (3) requires `test_census_neighbour_proposals_keep_saddles_across_coarse_ties` at 500 cells to pass against an empty operand store; that test carries `@pytest.mark.timeout(900)` (tests/equilibrium/test_topology_read.py:2911) and the cold compile happens inside it (`tie_probe.build` -> `lean_map.jets.build_jets` -> `read_route.jets.build_jet_matrix`), so at the allowed compile ceiling only 300 s remain for the jet build loop and the census reads, and the section's own comment records that loop holding 378 GB for a further ~11,000 s at 2,132 nodes \u2014 the two clauses conflict at their own stated numbers and a worker cannot tell whether to bound the loop or raise the timeout",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/kernel-compile-barrier.html:64",
+      "id": "done_when-1",
+      "reason": "the gate's replacement sizes are the measurement, so a cell/node slip makes the node run a different experiment and report a bound that cannot be compared to the row it came from.",
+      "text": "done-when (1) states the low arm as \"at 282 and 2,132 nodes\", but \u00a70 row 44 measures that arm as \"same build, 282 cells, operand cache bypassed \u2014 79 GB peak\" and \u00a73's own body (line 63) says \"the same at 282 cells\"; the 282 figure is a cell count in the evidence the \u226464 GB bound is derived from, so the clause as written sends a worker to build a 282-node program that reproduces neither the 79 GB row nor the 381 GB row, and it fixes one 64 GB bound across two arms \u00a70 records at 79 GB and 381 GB",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/kernel-compile-barrier.html:64",
+      "id": "done_when-2",
+      "reason": "the plan states its own done-when is insufficient and does not amend it, so the builder's gate omits the one measure the recorded failure produced.",
+      "text": "\u00a73's own comment at line 95 records that \"the node that builds \u00a73 should also report the loop's wall per batch, so a bounded compile is not followed by an unbounded run\", and the commit that added it (9dc843919) repeats that requirement in its message, yet no done-when clause carries it; the three clauses measure compile wall, row agreement and the census test, so a node closing \u00a73 on them can declare a bounded compile while the unbounded post-compile loop that actually outlasted a five-hour wall goes unmeasured",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/kernel-compile-barrier.html:63",
+      "id": "anchors_resolve-1",
+      "reason": "four of the section's six code citations now open on blank or unrelated lines, so the plan needs a citation refresh even though each symbol still resolves by name.",
+      "text": "the four `nova/equilibrium/fixed_points.py` citations are stale by two lines: the plan says `_row_program` at :389, `_source_jets` at :204, `maintain_rows` at :411 and the call at :476, while grep resolves them at :391, :206, :413 and :478, the drift introduced when commit b6bbf445d (2026-10-22) added two docstring lines above them; \u00a73's two `scripts/prototypes/read_route/jets.py` anchors (:229, :321) still resolve exactly, which shows the owner file moved rather than the section being misread",
+      "type": "anchors_resolve",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "18028a9a71e8a1d31a2725fa3f0a71a8ebf28e90b49ede1bfe0de86ae1cf80eb",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 10,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261026T205312767800-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "725845fbc8003ee7ee1d4091ba08b4e613251ba6",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 all four `nova/equilibrium/fixed_points.py` line anchors in \u00a73 land two lines short of the symbols they name.",
+    "done_when": "a finding \u2014 \u00a73 done-when (1) sizes its low arm in nodes (\"282 nodes\") where \u00a70 row 44 and \u00a73's own body both size it in cells, and the per-batch loop wall the s3 comment requires the builder to report appears in no clause.",
+    "evidence_paths": "pass \u2014 \u00a73 names no path of its own, and the two durable homes it joins (`docs/evidence/archive/kernel-compile-barrier-landed.html`, `docs/research/compile-cost-evidence.html`) both exist in the tree.",
+    "naming": "pass \u2014 \u00a73's symbols are mechanism names (`_row_program`, `_source_jets`, `maintain_rows`) and no stage label, ticket number or version tag reaches a name or comment.",
+    "reasoning": "a finding \u2014 \u00a73's stated cause and caller are sound and verified in the code, but done-when (1)'s 600 s CPU compile ceiling and done-when (3)'s census-test clause are not shown to be jointly satisfiable, because the test's own 900 s timeout must also cover the batch loop the section's comment measured at about 11,000 s.",
+    "single_goal": "pass \u2014 \u00a73 carries one deliverable, a bounded jets point program with the prototype build redirected onto the owner; its three clauses measure that one thing.",
+    "wiring": "pass \u2014 \u00a73 declares no node-level relationships, but none is missing: its prose names the two upstream units it consumes (\u00a71's ranking and \u00a72's tangents), the `plan-blocks` target `converged-forward-solve` resolves in `docs/plans/`, and the decision it rests on (`tangent-representation`, line 73) is present in this plan."
+  },
+  "section_digests": {
+    "_document": "76bd47b632f76205c6b048aef6b7a270a9229bec90839b52aad6d50a9d7014b3",
+    "s0": "6af29e9c0d4ae386d870df6baa70b910da2c50485eef97ddf1c3d2ebc9f12a27",
+    "s1": "f60ffbcd7c6c609b9e2ce1cbc5be3879c9613e2a1f1b41018a50e31a169abdb0",
+    "s2": "4b4ae60065134cb7cdc8a4479e5525cf0785449c22833f6d824f728d3a0deaf2",
+    "s3": "e69c90abb3c619b9bdae59666ebbf89bf8fab3736d04dd7356f2441c3fbeeace",
+    "s4": "043c0ccddafb69cbd714f400a3810894eb704687755dfb014b018a750adc8b16"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-26T21:05:29.410532+00:00"
+}

@@ -1,0 +1,70 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed manifest names no baseline_suite or after_suite gate logs, so the contract's paired by-delta count could not be taken. The only same-command pair present is base-adjacent.log (revision 1fd48c0fa, FAILED tests/equilibrium/test_read_correction_path.py::test_adjacent_saddle_booking_keeps_one_representation by timeout) against verified-adjacent.log (revision 6e4bebfc6, the same id), which yields an empty added set; 0 is measured over that focused pair only and is not a suite-wide count.",
+  "call_sites": [
+    "scripts/prototypes/fast_map_production/saddle_admission_probe.py:tie_probe.warm",
+    "scripts/prototypes/fast_map_production/census_probe.py:tie_probe.warm",
+    "scripts/prototypes/read_robustness/census_departure_scan.py:tie_probe.warm"
+  ],
+  "completed_at": "2026-10-26T23:22:53.520Z",
+  "dispatched_at": "2026-10-26T23:14:59Z",
+  "findings": [
+    {
+      "file": "tests/equilibrium/test_read_correction_path.py",
+      "line": 55,
+      "severity": "non-blocking",
+      "text": "the strict xfail marker swallows every assertion in the adjacent guard (:78-103), so a regression that breaks the bisection or makes the two samplers diverge reports xfail and passes; only an unexpected pass fails, so the guard does not protect the change it was added to protect."
+    },
+    {
+      "file": "scripts/prototypes/fast_map_production/tie_probe.py",
+      "line": 187,
+      "severity": "non-blocking",
+      "text": "the roots-only rewrite of warm changes work reached by three production probes (saddle_admission_probe.py:165, census_probe.py:36, read_robustness/census_departure_scan.py:108) and no test exercises warm, so a regression in the prior-following path is invisible."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/cut-cell-normal-form-validity.html",
+      "line": 18,
+      "severity": "non-blocking",
+      "text": "the landed deliverable substitutes a diagnosis for the goal: it establishes the refusal is an upstream magnetic-axis qualification and declines the normal-form fragment repair, leaving the 550 rows unconverged."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/cut-cell-normal-form-validity.html",
+      "line": 18,
+      "severity": "non-blocking",
+      "text": "the recorded done_when is a paired by-delta suite run as one sirius job; the manifest carries empty baseline_suite and after_suite, so the node's own quantitative gate was never run and the added-failure count cannot be derived as the contract specifies."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read commit by commit across nine commits from 1fd48c0fa to bd076630d3; three files changed, a rewritten adjacent guard, a booking sampler plus roots-only warm pass, and the evidence fragment.",
+    "done_when": "the recorded done_when requires the importing files plus the read-correction, cut-cell, certificate-550 and current-book tests to pass by delta against main be54c31f6 as one sirius job; manifest.md:23-24 carries empty baseline_suite and after_suite, so that measure was never taken.",
+    "goal": "the node goal recorded for this run is to make the 550-cell certificate rows converge by repairing the normal-form fragment validity that writes NaN at trial states; the diff touches no validity site (nova/equilibrium/topology.py is unchanged) and the fragment at docs/evidence/fragments/converged-forward-solve/cut-cell-normal-form-validity.html:18 declares that repair declined and the rows unconverged.",
+    "manifest": "read; it reports status complete, records the adjacent guard as red at verified-adjacent.log EXIT=1, marks negative_control none with a reason, and admits the paired rows, full file, paired suite and restored-NaN control remain unmet.",
+    "write_paths": "read the manifest's declared paths at manifest.md:3; every changed path in the diff is inside them and no file outside is touched."
+  },
+  "justifications": {
+    "durability": "tests/equilibrium/test_read_correction_path.py:55 wraps the bisection guard in strict xfail, so its assertions at :78-103 cannot fail the suite when the guarded behaviour regresses.",
+    "evidence": "manifest.md:23-24 leaves baseline_suite and after_suite empty, so the recorded done_when's paired by-delta suite was never measured; the only gate run is the focused adjacent test, red at verified-adjacent.log EXIT=1.",
+    "fit": "scripts/prototypes/fast_map_production/tie_probe.py:165 follows the module's jax.jit closure idiom set by make_sampler at :118 and introduces no forbidden name.",
+    "goal_fidelity": "docs/evidence/fragments/converged-forward-solve/cut-cell-normal-form-validity.html:18 records that the normal-form fragment repair was declined and both 550 certificate rows remain unconverged, so the stated goal is not delivered.",
+    "reuse": "make_booking_sampler at scripts/prototypes/fast_map_production/tie_probe.py:165 extends the module's existing census/read path rather than forking an owner; a search of scripts/, nova/ and tests/ for a booking sampler found none.",
+    "scope_discipline": "every changed path (tests/equilibrium/test_read_correction_path.py, scripts/prototypes/fast_map_production/tie_probe.py, docs/evidence/fragments/converged-forward-solve/cut-cell-normal-form-validity.html) is inside the manifest's declared write paths at manifest.md:3."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261026T231339487172-review-of-cut-cell-normal-form-validity-bd076630d3e9",
+  "reviewed_base_sha": "1fd48c0fa32641a918ba3787c4a1400d5779a692",
+  "reviewed_head_sha": "bd076630d3e90028126da77a7e4577abf169bdea",
+  "reviewed_run_id": "r-20261026T214915593213-cut-cell-normal-form-validity",
+  "scores": {
+    "durability": 4,
+    "evidence": 4,
+    "fit": 17,
+    "goal_fidelity": 6,
+    "reuse": 16,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-26T23:22:54.976285+00:00",
+  "total": 64
+}

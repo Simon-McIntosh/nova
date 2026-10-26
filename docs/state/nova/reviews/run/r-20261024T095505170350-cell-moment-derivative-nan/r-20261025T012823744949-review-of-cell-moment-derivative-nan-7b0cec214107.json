@@ -13,6 +13,13 @@
   ],
   "completed_at": "2026-10-25T01:39:20.960Z",
   "dispatched_at": "2026-10-25T01:31:02Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "reverted at e39ffd109: forward_operator.py and source.py are byte-identical to base 2967db463, so the zero amplitude is gone and the base NaN refusal (nonfinite_linear_action) is back",
+      "recorded_at": "2026-10-26T20:41:03.425701+00:00"
+    }
+  },
   "findings": [
     {
       "file": "nova/equilibrium/forward_operator.py",

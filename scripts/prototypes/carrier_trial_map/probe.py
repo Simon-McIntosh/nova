@@ -30,7 +30,16 @@ def measure(context):
     cold = source["point"].reshape(-1, 3)
     own = reference / scale
     distance = np.linalg.norm(own[:, None] - cold[None], axis=-1)
-    rows, matched = linear_sum_assignment(distance)
+    anchor = os.environ.get("MEASURE_ANCHOR")
+    cost = distance
+    if anchor:
+        anchor_data = np.load(Path(anchor) / "split-stages.npz")
+        spatial = np.linalg.norm(
+            np.asarray(geometry.centre)[:, None] - anchor_data["geometry.centre"][None],
+            axis=-1,
+        )
+        cost = spatial + np.where(distance < 1e-10, 0, 1e6)
+    rows, matched = linear_sum_assignment(cost)
     assert np.array_equal(rows, np.arange(len(rows)))
     assert np.max(distance[rows, matched]) < 1e-10
     split_receipt = json.loads((bank / "split-first.json").read_text())
@@ -41,10 +50,12 @@ def measure(context):
     distance_native = np.linalg.norm(
         own[:, None] - native_source["point"].reshape(-1, 3)[None], axis=-1
     )
-    native_rows, native_match = linear_sum_assignment(distance_native)
+    native_rows = native_match = np.arange(len(reference))
     assert np.max(distance_native[native_rows, native_match]) < 1e-10
     native = np.asarray(native_receipt["terminal_state"]["moments"])[native_match]
     payload = {"match": matched, "cold": reference, "scale": scale}
+    payload["jet.nodes"] = np.asarray(context["jets"].nodes)
+    payload["jet.sample_index"] = np.asarray(context["jets"].sample_index)
     for name in (
         "vertices",
         "vertex_count",
@@ -132,6 +143,7 @@ def measure(context):
     )
     for label, moments in (("cold", reference), ("native", native), ("common", common)):
         moments = jnp.asarray(moments)
+        payload[f"{label}.nodal_jets"] = np.asarray(context["jets"].gather(moments))
         reading, roots = read(moments, *context["operands"])
         jax.block_until_ready(reading)
         state = mapped(moments, *context["operands"])
@@ -187,4 +199,8 @@ def measure(context):
             flush=True,
         )
         np.savez(run / f"{arm}-stages.npz", **payload)
+    if os.environ.get("MEASURE_DETAIL"):
+        from direct import measure_direct
+
+        measure_direct(context, jnp.asarray(common), payload, run, arm)
     print("SAVED", str(run / f"{arm}-stages.npz"), flush=True)

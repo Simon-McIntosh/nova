@@ -119,6 +119,14 @@ def run(path, cells):
             "full_control": control.tolist(),
             "shapely_full": expected.tolist(),
         }
+        if "direct.boundary_flux" in data:
+            direct_level = float(data["direct.boundary_flux"])
+            row["physical_reference"] = integrate(
+                vertices, centre, pitch, coefficient, direct_level, sigma
+            ).tolist()
+            row["physical_refined"] = integrate(
+                vertices, centre, pitch, coefficient, direct_level, sigma, 4096
+            ).tolist()
         results.append(row)
         print("REFERENCE", json.dumps(row), flush=True)
     path.with_name(path.stem + "-reference.json").write_text(

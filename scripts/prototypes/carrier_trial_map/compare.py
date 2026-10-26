@@ -27,7 +27,26 @@ def relative(left, right):
 def compare(run, arm):
     left = np.load(run / "split-stages.npz")
     right = np.load(run / f"{arm}-stages.npz")
-    li, ri = np.argsort(left["match"]), np.argsort(right["match"])
+    cold_distance = np.linalg.norm(
+        (left["cold"] / left["scale"])[:, None]
+        - (right["cold"] / right["scale"])[None],
+        axis=-1,
+    )
+    spatial = np.linalg.norm(
+        left["geometry.centre"][:, None] - right["geometry.centre"][None], axis=-1
+    )
+    li, ri = linear_sum_assignment(spatial + np.where(cold_distance < 1e-10, 0, 1e6))
+    assert np.max(cold_distance[li, ri]) < 1e-10
+    assert np.max(spatial[li, ri]) < 1e-12
+    print(
+        "MATCH_CONTROL",
+        "cold_distance",
+        np.max(cold_distance[li, ri]),
+        "spatial_distance",
+        np.max(spatial[li, ri]),
+        "changed_indices",
+        np.sum(li != ri),
+    )
     count = len(li)
     result = {}
     for state in ("cold", "native", "common"):

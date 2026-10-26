@@ -620,6 +620,7 @@ def run(args):
         residual = equation(point_flat, active_operands)
         tangent = operand_tangent(equation, point_flat)
         jax.block_until_ready(residual)
+
         linearize_ms = 1000 * (perf_counter() - started)
         rhs = -residual
         build_start = perf_counter()

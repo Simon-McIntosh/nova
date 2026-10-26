@@ -15,6 +15,7 @@ import jax.numpy as jnp
 from nova.equilibrium import topology
 from nova.equilibrium.clip_quadrature import (
     ClippedCurrentMoments,
+    _quadrature_from_arrays,
     clipped_support_current_moments,
 )
 from nova.equilibrium.stencil_mesh import FluxFieldPolynomial
@@ -37,12 +38,23 @@ class Quadrature:
 
     ``sigma`` is the signed-flux convention supplied to the topology read.
     ``segments`` sets cosine-spaced conic chords and cubic-ray chords, without
-    changing fragment ownership. No polygon-count limit is imposed here.
+    changing fragment ownership. ``subdivisions`` is the number of sub-intervals
+    a fragment's own span is split into, each getting ``segments`` chords, so a
+    fragment that crosses several strip breaks is integrated piecewise on
+    intervals that are smooth rather than across a corner. No polygon-count
+    limit is imposed here.
+
+    ``subdivisions`` is a static slot count, so ``fragment_spans`` measures what
+    a state needs: on the limited certificate state the widest of 492 fragments
+    crosses 9 strips, three quarters of them cross exactly 3. Fewer slots than a
+    fragment needs would absorb its remainder into one interval across a corner,
+    so a wider fragment refuses to book rather than booking at a lower order.
     """
 
     sigma: object = 1.0
     target_current: object = None
     segments: int = dataclass_field(default=512, metadata={"static": True})
+    subdivisions: int = dataclass_field(default=9, metadata={"static": True})
 
 
 class Booking(NamedTuple):
@@ -56,27 +68,144 @@ class Booking(NamedTuple):
     valid: jax.Array
 
 
-def _conic_rings(vertices, count, centre, pitch, coefficient, selected, segments):
-    """Trace the same cosine-spaced strips as support.geometry.read_polygons."""
+def fragment_spans(vertices, count, centre, pitch, coefficient, selected):
+    """Return the number of interior breaks each conic fragment crosses.
+
+    A fragment's span is ``last - first + 1`` strips: the strip it starts in,
+    the strip it ends in, and every break between them. The composite booking
+    gives each of those a quadrature slot, so this is the slot count a fragment
+    actually needs; slots past its span carry no width.
+
+    Returns ``(spans, live)``, one entry per fragment, ``spans`` zero where the
+    fragment is not live.
+    """
     local = (vertices - centre) / pitch
     fragments = topology.quadratic_cell_fragments(
         local, count, coefficient, selected.shape[0]
     )
-    left, right = fragments.slice_breaks[:-1], fragments.slice_breaks[1:]
+    first, last, _, _, live = _fragment_extent(fragments, selected)
+    return jnp.where(live, last - first + 1, 0), live
+
+
+def _fragment_extent(fragments, selected):
+    """Return each fragment's first and last strip, its span bounds and liveness."""
+    breaks = fragments.slice_breaks
+    labels = fragments.slice_labels
+    strips = labels.shape[0]
+    flat = labels.reshape(-1)
+    cell = jnp.arange(flat.size)
+    same = flat[None, :] == flat[:, None]
+    strip_of_cell = jnp.broadcast_to(cell // 3, same.shape)
+    first = jnp.min(jnp.where(same, strip_of_cell, strips), axis=1)
+    last = jnp.max(jnp.where(same, strip_of_cell, -1), axis=1)
+    start = jnp.min(jnp.where(same, cell, flat.size), axis=1)
+    left = breaks[first]
+    right = breaks[jnp.minimum(last + 1, strips)]
+    live = (
+        (flat >= 0)
+        & selected[jnp.clip(flat, 0, selected.shape[0] - 1)]
+        & (right > left)
+    )
+    live = live & (cell == start)
+    return first, last, left, right, live
+
+
+def _conic_rings(
+    vertices, count, centre, pitch, coefficient, selected, segments, subdivisions=1
+):
+    """Trace each conic fragment once, compositely, over the fragment's own span.
+
+    Booking a fragment strip by strip makes the composite quadrature depend on
+    an internal break's position, and where two conic/edge crossings coincide in
+    x that position is a minimum over two smooth branches: the total then
+    acquires a kink the integral does not have, and its derivative stops
+    agreeing with a central difference. One ring per fragment has no internal
+    boundary to depend on, but a single smooth rule across the whole span puts
+    the conic/edge corner inside an interval and its convergence falls to
+    algebraic.
+
+    Both properties are kept by tracing one ring per fragment whose nodes come
+    from ``subdivisions`` sub-intervals, each ending on an interior break the
+    fragment crosses and each carrying ``segments`` chords. Every sub-interval
+    is then free of a corner, so it converges at the rate a strip does, while
+    the fragment total stays a sum of sub-integrals of one integrand, so moving
+    a coincident break between two of them changes nothing to first order.
+    Slots beyond a fragment's own span are collapsed onto its right break and
+    carry no width.
+    """
+    local = (vertices - centre) / pitch
+    fragments = topology.quadratic_cell_fragments(
+        local, count, coefficient, selected.shape[0]
+    )
+    breaks = fragments.slice_breaks
+    labels = fragments.slice_labels
+    strips = labels.shape[0]
+    flat = labels.reshape(-1)
+    cell = jnp.arange(flat.size)
+    first, last, left, right, live = _fragment_extent(fragments, selected)
+    span = jnp.where(live, last - first + 1, 0)
     parameter = 0.5 * (1 - jnp.cos(jnp.linspace(0.0, jnp.pi, segments + 1)))
-    x = left[:, None] + (right - left)[:, None] * parameter
-    bottom, top, _ = topology._positive_vertical_intervals(local, count, coefficient, x)
+    slot = jnp.arange(subdivisions)
+    slot_first = jnp.minimum(first[:, None] + slot[None, :], strips)
+    low = breaks[slot_first]
+    high = breaks[jnp.minimum(slot_first + 1, strips)]
+    covered = slot[None, :] < (last - first + 1)[:, None]
+    right_column = right[:, None]
+    low = jnp.where(covered, low, right_column)
+    high = jnp.where(covered, high, right_column)
+    high = jnp.where(slot[None, :] == subdivisions - 1, right_column, high)
+    x = (low[..., None] + (high - low)[..., None] * parameter).reshape(
+        left.shape[0], -1
+    )
+    nodes = x.shape[1]
+    bottom, top, present = topology._positive_vertical_intervals(
+        local, count, coefficient, x
+    )
+    # Over a wider span the vertical decomposition has the same three bands as a
+    # strip, so the fragment keeps the band its own strip carried.
+    band = jnp.broadcast_to((cell % 3)[:, None, None], (*present.shape[:-1], 1))
+    bottom = jnp.take_along_axis(bottom, band, -1)
+    top = jnp.take_along_axis(top, band, -1)
+    present = jnp.take_along_axis(present, band, -1)
+    # A sub-interval with no real vertical root is not part of the superlevel set,
+    # but its padded root is clipped to the polygon bound and would be booked as a
+    # full-height slice. Carry it as the degenerate point at the conic's vertical
+    # extremum, where the interval appears as the discriminant reaches zero, so
+    # crossing a tangency moves no vertex.
+    lower, upper = topology._vertical_polygon_interval(local, count, x)
+    quadratic = coefficient[5]
+    linear = coefficient[2] + coefficient[4] * x
+    extremum = jnp.clip(
+        -0.5 * linear / jnp.where(quadratic != 0.0, quadratic, 1.0), lower, upper
+    )[..., None]
+    bottom = jnp.where(present, bottom, extremum)
+    top = jnp.where(present, top, extremum)
     x = jnp.broadcast_to(x[..., None], bottom.shape)
     lower = jnp.stack((x, bottom), axis=-1)
     upper = jnp.stack((x[:, ::-1], top[:, ::-1]), axis=-1)
     rings = jnp.transpose(jnp.concatenate((lower, upper), axis=1), (0, 2, 1, 3))
-    labels = fragments.slice_labels
-    live = (labels >= 0) & selected[jnp.maximum(labels, 0)]
-    live &= (right > left)[:, None]
-    rings = centre + pitch * rings.reshape(-1, 2 * (segments + 1), 2)
-    live = live.reshape(-1)
+    rings = centre + pitch * rings.reshape(-1, 2 * nodes, 2)
     rings = jnp.where(live[:, None, None], rings, centre)
-    return rings, jnp.where(live, rings.shape[1], 0), fragments.valid
+    # A fragment crossing more breaks than there are slots would have its
+    # remainder absorbed into the last slot and integrated across a corner, so
+    # the cell is refused rather than booked at a lower order.
+    fits = jnp.all(span <= subdivisions)
+    return rings, jnp.where(live, rings.shape[1], 0), fragments.valid & fits
+
+
+def _rematerialised_conic_rings(
+    vertices, count, centre, pitch, coefficient, selected, segments, subdivisions
+):
+    """Trace each fragment's ring under rematerialisation.
+
+    A linearisation keeps the tangent of every intermediate a traced function
+    produces. The ring construction rebuilds a fragment's whole node set from a
+    handful of inputs, so the tangent stores those inputs instead of every node
+    it passes through.
+    """
+    return jax.checkpoint(_conic_rings, static_argnums=(6, 7))(
+        vertices, count, centre, pitch, coefficient, selected, segments, subdivisions
+    )
 
 
 def _closed_normal_rings(loop, vertices, count):
@@ -182,6 +311,315 @@ def _normal_rings(vertices, count, centre, form, selected, intervals, segments):
     )
 
 
+def effective_disk(form, geometry, policy_radius, pitch_floor):
+    """Return the effective neighbourhood centre and radius about the saddle.
+
+    The radius is ``max(r_nf, pitch_floor * median pitch)``; the centre is the
+    selected saddle. Both are runtime policy operands, so the caller supplies
+    the configured radius and floor and this owner only composes them.
+    """
+    radius = jnp.maximum(policy_radius, pitch_floor * jnp.median(geometry.pitch))
+    return form.position, radius
+
+
+def _inside_loop(points, polygon, size):
+    """Crossing-number test over the first ``size`` vertices of a padded loop.
+
+    The clip that produces ``polygon`` pads the tail with the origin, so the
+    test reads only the live prefix. A ray cast from each point counts the
+    edges it crosses; an odd count is the interior. No orientation is assumed,
+    so a lobe traced either way is read the same.
+    """
+    slots = jnp.arange(polygon.shape[0])
+    live = slots < size
+    following = jnp.where(slots + 1 < size, slots + 1, 0)
+    start = jnp.where(live[:, None], polygon, 0.0)
+    end = jnp.where(live[:, None], polygon[following], 0.0)
+    x, y = points[..., 0][..., None], points[..., 1][..., None]
+    x0, y0, x1, y1 = start[:, 0], start[:, 1], end[:, 0], end[:, 1]
+    rising = (y0 > y) & (y1 <= y)
+    falling = (y1 > y) & (y0 <= y)
+    run = y1 - y0
+    crossing = x0 + (x1 - x0) * (y - y0) / jnp.where(run != 0, run, 1.0)
+    crosses = (rising | falling) & (x < crossing) & live[None, :]
+    return jnp.sum(crosses, axis=-1) % 2 == 1
+
+
+DISK_ARC_SEGMENTS = 32
+"""Half-plane count the effective disk is clipped with.
+
+The disk enters the booking as the intersection of this many half-planes
+bounding a regular polygon inscribed in the circle, so the boundary between the
+normal-form portion inside the disk and the ordinary cut outside it is a set of
+explicit support edges that move with the disk centre. Weighting quadrature
+nodes by a radial test instead makes the booked integral jump whenever a node
+changes side of the boundary, and that jump keeps its size while the step
+shrinks, which is why a remainder built on it stops falling with the step.
+
+The inscribed edge lies short of the circle by ``radius * (1 - cos(pi /
+segments))``, about 0.48 per cent of the radius at this count. The two pieces
+still tile the ring set exactly, because the exterior piece is the whole ring
+set with the clipped piece subtracted rather than a second clip.
+"""
+
+
+def _disk_clip_planes(disk_centre, radius, segments):
+    """Return the inward normals and offsets bounding the inscribed disk."""
+    angle = 2.0 * jnp.pi * (jnp.arange(segments) + 0.5) / segments
+    normal = jnp.stack((jnp.cos(angle), jnp.sin(angle)), axis=-1)
+    return normal, radius * jnp.cos(jnp.pi / segments)
+
+
+def _disk_clipped_rings(
+    vertices, count, disk_centre, radius, segments=DISK_ARC_SEGMENTS
+):
+    """Clip every ring to the disk in one pass, as explicit edges.
+
+    Each ring set is clipped by the ``segments`` half-planes in turn, as one
+    subject rather than as a fan of triangles, so a ring set costs one clipped
+    piece of at most ``capacity + segments`` vertices instead of one piece per
+    fan triangle. Every vertex of the result is a support vertex: a ring
+    corner, an intersection of a ring edge with a clip line, or one of the
+    endpoints the clip lines themselves contribute. A clip line can add at
+    most one vertex to a closed subject, which is the bound the width carries.
+    A non-convex subject is clipped correctly because the pass only ever needs
+    the subject's edges in order; the degenerate bridging edges it introduces
+    between separate excursions span the same two clip points, so they cancel
+    in the signed area and its moments. No quadrature node is selected or
+    weighted by a radial test anywhere in this route.
+    """
+    capacity = vertices.shape[1]
+    width = capacity + segments
+    order = jnp.arange(width)
+    padded = jnp.concatenate(
+        (vertices, jnp.zeros(vertices.shape[:-2] + (segments, 2), vertices.dtype)),
+        axis=-2,
+    )
+    live_count = jnp.where(count >= 3, count, 0).astype(jnp.int32)
+    normal, bound = _disk_clip_planes(disk_centre, radius, segments)
+    for step in range(segments):
+        line = normal[step]
+        distance = (padded - disk_centre) @ line - bound
+        following = (order + 1) % jnp.maximum(live_count[..., None], 1)
+        ahead = jnp.take_along_axis(padded, following[..., None], axis=-2)
+        next_distance = (ahead - disk_centre) @ line - bound
+        live_edge = order < live_count[..., None]
+        inside = distance <= 0.0
+        keep = live_edge & inside
+        entering = live_edge & (inside != (next_distance <= 0.0))
+        gap = distance - next_distance
+        fraction = distance / jnp.where(gap != 0.0, gap, 1.0)
+        meeting = padded + fraction[..., None] * (ahead - padded)
+        candidates = jnp.stack((keep, entering), axis=-1).reshape(
+            keep.shape[:-1] + (2 * width,)
+        )
+        values = jnp.stack((padded, meeting), axis=-2).reshape(
+            padded.shape[:-2] + (2 * width, 2)
+        )
+        position = jnp.cumsum(candidates, axis=-1) - candidates
+        key = jnp.where(candidates, position, 2 * width)
+        chosen = jnp.argsort(key, axis=-1)[..., :width]
+        padded = jnp.take_along_axis(values, chosen[..., None], axis=-2)
+        live_count = jnp.sum(candidates, axis=-1).astype(jnp.int32)
+    return padded, live_count
+
+
+def _disk_split_moments(
+    rings,
+    counts,
+    centre,
+    pitch,
+    coefficient,
+    axis_flux,
+    boundary_flux,
+    profile,
+    disk_centre,
+    radius,
+    *,
+    keep_inside,
+    force_whole=False,
+    confined=None,
+):
+    """Signed fan moments restricted to the disk interior or exterior.
+
+    A cut cell books one binary support, ``(C ∩ D ∩ N) ∪ (C ∩ Dᶜ ∩ Q)``. The
+    disk split is taken on the geometry and not on the quadrature: the fan
+    triangles of one ring set are clipped by the disk boundary itself and the
+    clipped pieces are integrated through the shared clip-quadrature owner. The
+    exterior piece is the whole ring set with the clipped piece subtracted, so
+    the two tile the ring set exactly whatever the disk does, and both are
+    continuous in ``disk_centre`` with a derivative that carries the boundary's
+    motion.
+
+    The interior piece is the clipped fan alone, with no branch on how the ring
+    set meets the disk. The clip is exact in all three cases -- a ring set
+    wholly inside the disk clips to itself, one that crosses the boundary clips
+    to its intersection with the disk, and one that surrounds the disk clips to
+    the disk -- so classifying the routing and skipping the clip for a ring set
+    would only replace one quadrature with another over the same region, which
+    is a discontinuity in the moments and not an economy. The interior
+    therefore carries no vertex-wise inside test and no comparison to switch it.
+
+    ``confined`` carries ``(polygon, size, live)`` for the closed normal-form
+    component the read admits, already clipped to this cell. When it is given
+    and live, both halves of the split are additionally restricted to it, so a
+    booking cell books only current inside the confined component and never the
+    whole ordinary cut. With no confined component the split is used.
+
+    ``force_whole`` drops the disk restriction and integrates the whole ring
+    set. It exists only so the continuity check can apply its ``--force-conic
+    -right`` mutation -- the right-hand (exterior) support replaced by the whole
+    ordinary cut at the same density and weight -- and require that mutation to
+    fail the same assertion.
+    """
+    live = counts >= 3
+    centroids = jnp.broadcast_to(centre, (rings.shape[0], 2))
+    polygon = None
+    if confined is not None:
+        polygon, size, confined_live = confined
+    else:
+        size, confined_live = 0, False
+
+    def book(points, weights, ring_of_node, ring_count):
+        mask = jnp.ones(points.shape[:-1], dtype=bool)
+        if polygon is not None:
+            mask = jnp.where(confined_live, _inside_loop(points, polygon, size), mask)
+        local = (points - centre) / pitch
+        x, y = local[..., 0], local[..., 1]
+        flux = (
+            coefficient[0]
+            + coefficient[1] * x
+            + coefficient[2] * y
+            + coefficient[3] * x * x
+            + coefficient[4] * x * y
+            + coefficient[5] * y * y
+        )
+        span = boundary_flux - axis_flux
+        normalized = (flux - axis_flux) / jnp.where(span != 0, span, 1.0)
+        density = profile.current_density(points[..., 0], normalized)
+        weight = jnp.where(mask, weights, 0.0)
+        displacement = points - centre
+        terms = jnp.stack(
+            (weight * density,)
+            + tuple(weight * density * displacement[..., axis] for axis in (0, 1))
+        ).T
+        return jnp.zeros((ring_count, 3), dtype=terms.dtype).at[ring_of_node].add(terms)
+
+    whole_points, whole_weights = _quadrature_from_arrays(
+        rings, counts, centroids, live, signed=True
+    )
+    ring_of_node = jnp.repeat(jnp.arange(len(rings)), whole_points.shape[1])
+    whole = book(
+        whole_points.reshape(-1, 2),
+        whole_weights.reshape(-1),
+        ring_of_node,
+        len(rings),
+    )
+    if force_whole:
+        return jnp.sum(whole, axis=0)
+    clipped, clipped_live = _disk_clipped_rings(rings, counts, disk_centre, radius)
+    inside_points, inside_weights = _quadrature_from_arrays(
+        clipped, clipped_live, centroids, clipped_live > 0, signed=True
+    )
+    piece = book(
+        inside_points.reshape(-1, 2),
+        inside_weights.reshape(-1),
+        jnp.repeat(jnp.arange(len(rings)), inside_points.shape[1]),
+        len(rings),
+    )
+    inside = jnp.sum(piece, axis=0)
+    if keep_inside:
+        return inside
+    return jnp.sum(whole, axis=0) - inside
+
+
+def composite_cut_moments(
+    vertices,
+    count,
+    centre,
+    pitch,
+    form,
+    flux_coefficient,
+    conic_coefficient,
+    profile,
+    selected,
+    intervals,
+    conic_selected,
+    axis_flux,
+    boundary_flux,
+    disk_centre,
+    radius,
+    segments,
+    subdivisions=9,
+    force_conic_right=False,
+    confined=None,
+):
+    """Book one cut cell over a single support split at the disk boundary.
+
+    Inside the disk the support is the selected normal-form sector; outside it
+    the support is the ordinary quadratic cut. Both portions are integrated on
+    the shared clip-quadrature nodes with the same density, and their moments
+    add because their interiors are disjoint. ``flux_coefficient`` carries the
+    physical local flux used to evaluate the density; ``conic_coefficient``
+    carries the same flux in the signed, level-subtracted form the ordinary cut
+    traces its positive region with.
+
+    ``confined`` carries the read's own closed normal-form component as
+    ``(loop, live)``. It is clipped to this cell once and handed to both halves,
+    so the booking follows the connectivity the read already publishes rather
+    than the whole ordinary cut; a read with no admitted closed component books
+    the split uninterruptedly.
+    """
+    if confined is None:
+        split_confined = None
+    else:
+        loop, live = confined
+        polygon, size = topology.clip_normal_form_loop(loop, vertices, count)
+        split_confined = (polygon, size, live)
+    normal_rings, normal_counts = _normal_rings(
+        vertices, count, centre, form, selected, intervals, segments
+    )
+    conic_rings, conic_counts, conic_valid = _conic_rings(
+        vertices,
+        count,
+        centre,
+        pitch,
+        conic_coefficient,
+        conic_selected,
+        segments,
+        subdivisions,
+    )
+    inside = _disk_split_moments(
+        normal_rings,
+        normal_counts,
+        centre,
+        pitch,
+        flux_coefficient,
+        axis_flux,
+        boundary_flux,
+        profile,
+        disk_centre,
+        radius,
+        keep_inside=True,
+        confined=split_confined,
+    )
+    outside = _disk_split_moments(
+        conic_rings,
+        conic_counts,
+        centre,
+        pitch,
+        flux_coefficient,
+        axis_flux,
+        boundary_flux,
+        profile,
+        disk_centre,
+        radius,
+        keep_inside=False,
+        force_whole=force_conic_right,
+    )
+    return inside + outside, conic_valid
+
+
 def book(psi, read, geometry, profile, quadrature=Quadrature()):
     """Integrate every selected fragment and normalize its current once.
 
@@ -212,8 +650,9 @@ def book(psi, read, geometry, profile, quadrature=Quadrature()):
         )
         return centre, field
 
-    def integrate(index, rings, counts):
-        centre, field = cell_field(index)
+    @jax.checkpoint
+    def ring_moments(index, centre, field, rings, counts):
+        """Integrate one ring, rematerialised from its inputs in the tangent."""
         support = FragmentSupport(
             rings[None],
             counts[None],
@@ -230,6 +669,10 @@ def book(psi, read, geometry, profile, quadrature=Quadrature()):
             boundary_reduction=False,
         )
         return jax.tree.map(lambda value: value[0], moments)
+
+    def integrate(index, rings, counts):
+        centre, field = cell_field(index)
+        return ring_moments(index, centre, field, rings, counts)
 
     def whole_cell(index):
         rings = geometry.vertices[index][None]
@@ -254,7 +697,7 @@ def book(psi, read, geometry, profile, quadrature=Quadrature()):
         vertices, count = geometry.vertices[index], geometry.vertex_count[index]
 
         def conic(_):
-            rings, counts, valid = _conic_rings(
+            rings, counts, valid = _rematerialised_conic_rings(
                 vertices,
                 count,
                 centre,
@@ -262,6 +705,7 @@ def book(psi, read, geometry, profile, quadrature=Quadrature()):
                 signed[index],
                 read.fragment_selected[index],
                 quadrature.segments,
+                quadrature.subdivisions,
             )
             moments = integrate_live_rings(index, rings, counts)
             return jax.tree.map(lambda value: jnp.where(valid, value, jnp.nan), moments)

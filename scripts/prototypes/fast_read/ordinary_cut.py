@@ -3,9 +3,8 @@
 import jax
 import jax.numpy as jnp
 
-from nova.equilibrium.separatrix_clip import padded_polynomial_current_moments
+from nova.equilibrium import current
 from scripts.prototypes.sub_millisecond.measure_bell_cut import (
-    bell_moments as single_moments,
     bell_polygon as single_polygon,
 )
 from scripts.prototypes.sub_millisecond.measure_wall_march import polygon_area
@@ -158,63 +157,149 @@ def bell_fraction(geometry, reading, sigma):
     )
 
 
-def bell_moments(geometry, reading, profile, sigma):
-    ordinary, ordinary_valid = single_moments(geometry, reading, profile, sigma, 4)
-    split, counts, split_valid, four = _split_polygons(geometry, reading, sigma)
-    centre, pitch = geometry.centre, geometry.pitch
-    polynomial = reading.field_coefficients
-    span = reading.boundary_flux - reading.axis_flux
+def confined_component(reading):
+    """Return the read's closed normal-form component as ``(loop, live)``.
 
-    def density(x, y):
-        flux = (
-            polynomial[:, 0]
-            + polynomial[:, 1] * x
-            + polynomial[:, 2] * y
-            + polynomial[:, 3] * x * x
-            + polynomial[:, 4] * x * y
-            + polynomial[:, 5] * y * y
-        )
-        return profile.current_density(
-            centre[:, 0] + pitch * x, (flux - reading.axis_flux) / span
-        )
+    A read that carries no closed component books the split unrestrained, so
+    the absence of the fields is represented as ``None`` rather than as an
+    empty loop, which would erase the ordinary cut instead.
+    """
+    loop = getattr(reading, "closed_loop", None)
+    live = getattr(reading, "closed_live", None)
+    if loop is None or live is None:
+        return None
+    return loop, live
 
-    origin = density(0, 0)
-    radial_positive, radial_negative = density(1, 0), density(-1, 0)
-    vertical_positive, vertical_negative = density(0, 1), density(0, -1)
-    radial = (radial_positive - radial_negative) / 2
-    vertical = (vertical_positive - vertical_negative) / 2
-    coefficients = jnp.stack(
-        (
-            origin,
-            radial,
-            vertical,
-            (radial_positive + radial_negative) / 2 - origin,
-            density(1, 1) - radial_positive - vertical_positive + origin,
-            (vertical_positive + vertical_negative) / 2 - origin,
-        ),
-        axis=1,
-    )
-    cells = len(centre)
-    flattened = (cells * 2,)
-    values, first = padded_polynomial_current_moments(
-        split.reshape(flattened + split.shape[2:]),
-        counts.reshape(flattened),
-        jnp.broadcast_to(centre[:, None], (cells, 2, 2)).reshape(flattened + (2,)),
-        jnp.broadcast_to(pitch[:, None, None], (cells, 2, 2)).reshape(flattened + (2,)),
-        jnp.broadcast_to(coefficients[:, None], (cells, 2, 6)).reshape(
-            flattened + (6,)
-        ),
-    )
-    split_moments = jnp.stack(
-        (
-            values.reshape(cells, 2).sum(axis=1),
-            first.reshape(cells, 2, 2).sum(axis=1)[:, 0],
-            first.reshape(cells, 2, 2).sum(axis=1)[:, 1],
-        ),
-        axis=1,
-    )
+
+MOMENT_SLOTS = 3
+
+BAND_CAPACITY = 160
+"""Cells one trace of the composite books, before the booking refuses.
+
+The composite allocates a quadrature over every ring a cell carries, so a trace
+per mesh cell costs the whole mesh rather than the boundary band the research
+record estimates. ``booking_band`` gathers the cells the composite books to this
+capacity, and a band wider than it refuses by name instead of truncating: the
+refusal is returned as an invalid booking, the way the saddle booking refuses
+past its capacity of 16.
+"""
+
+
+BAND_BATCH = 16
+"""Cells one dispatch of the band trace covers.
+
+The composite materialises its support over every ring, every quadrature node
+and every clip slot of each cell it traces, so one dispatch over the whole band
+holds a ``(cells, rings, nodes, slots)`` array whose leading axis is the band
+capacity. On the limited 550 carrier that is 39.87 GiB for a single array at
+capacity 160. Walking the band in fixed batches inside one compiled loop keeps
+the support each cell books unchanged while one dispatch holds ``BAND_BATCH``
+cells' worth of it.
+"""
+
+
+def dense_cells(geometry, reading):
+    """Return the whole cells the ordinary bell route covers.
+
+    These are the cells whose quadratic cut is complete, so they book no cut
+    support and are excluded from the band the composite applies to.
+    """
     return (
-        jnp.where(four[:, None], split_moments, ordinary),
-        jnp.where(four, split_valid, ordinary_valid),
-        four,
+        (reading.geometric_membership >= 1 - 1e-14)
+        & (geometry.vertex_count == 6)
+        & ~reading.booking_cells
     )
+
+
+def booking_band(geometry, reading):
+    """Return the cells the composite books, as this read's cut set."""
+    return (reading.membership > 0) & ~dense_cells(geometry, reading)
+
+
+def composite_cut_moments(
+    geometry,
+    reading,
+    profile,
+    sigma,
+    segments=8,
+    capacity=BAND_CAPACITY,
+    batch=BAND_BATCH,
+):
+    """Book every cut cell over (C∩D∩N) ∪ (C∩Dᶜ∩Q) through the shared owner.
+
+    Every cut cell books the same one support: the selected normal-form portion
+    inside the effective disk about the saddle and the ordinary quadratic cut
+    outside it, both confined by the read's connectivity weight and both taken
+    whole. Neither a scalar blend nor a whole-cell replacement chosen by centre
+    distance, crossing count or ordinary validity is used here; those remain
+    qualification checks on the read. The bookable set is the read's own
+    connectivity weight rather than its closed normal-form component: a read
+    with no closed component would otherwise book nothing here, and a booking
+    that is zero at the state the Newton step is built from contributes nothing
+    to that step's derivative.
+
+    Only the cells the composite books are traced, gathered to ``capacity`` by
+    ``booking_band``, and a band wider than that capacity refuses rather than
+    truncating, so one trace costs the cut band instead of the whole mesh.
+    """
+    centre, pitch = geometry.centre, geometry.pitch
+    form = reading.saddle_form
+    coefficient = reading.field_coefficients
+    signed = sigma * coefficient
+    signed = signed.at[:, 0].add(-sigma * reading.boundary_flux)
+
+    def one(index):
+        connectivity = reading.path_weight[index]
+        selected = jnp.broadcast_to(connectivity > 0, (2,))
+        moments, _ = current.composite_cut_moments(
+            geometry.vertices[index],
+            geometry.vertex_count[index],
+            centre[index],
+            pitch[index],
+            form,
+            coefficient[index],
+            signed[index],
+            profile,
+            selected,
+            reading.edge_interval[index],
+            selected,
+            reading.axis_flux,
+            reading.boundary_flux,
+            reading.disk_position,
+            reading.disk_radius,
+            segments,
+        )
+        return moments * connectivity
+
+    band = booking_band(geometry, reading)
+    count = jnp.sum(band, dtype=jnp.int32)
+    filled = count <= capacity
+    if capacity % batch:
+        raise ValueError("band capacity must divide into the batch width")
+    indices = jnp.nonzero(band, size=capacity, fill_value=0)[0]
+    width = jnp.result_type(geometry.pitch, 1.0)
+
+    def step(index, packed):
+        cells = jax.lax.dynamic_slice(indices, (index * batch,), (batch,))
+        return packed.at[index].set(jax.vmap(one)(cells))
+
+    packed = jax.lax.fori_loop(
+        0,
+        capacity // batch,
+        step,
+        jnp.zeros((capacity // batch, batch, MOMENT_SLOTS), dtype=width),
+    ).reshape(capacity, MOMENT_SLOTS)
+    live = jnp.arange(capacity) < jnp.where(filled, count, 0)
+    moments = jnp.zeros((len(centre), MOMENT_SLOTS), dtype=packed.dtype)
+    moments = moments.at[indices].add(jnp.where(live[:, None], packed, 0.0))
+    return moments, filled
+
+
+def bell_moments(
+    geometry, reading, profile, sigma, capacity=BAND_CAPACITY, batch=BAND_BATCH
+):
+    """Book the band cells and report whether the band fitted its capacity."""
+    moments, filled = composite_cut_moments(
+        geometry, reading, profile, sigma, capacity=capacity, batch=batch
+    )
+    return moments, filled, reading.booking_cells

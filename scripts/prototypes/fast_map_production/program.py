@@ -8,7 +8,11 @@ import jax.numpy as jnp
 
 from nova.equilibrium import current, fixed_points
 from scripts.prototypes.lean_map.quadrature import interior_moments
-from scripts.prototypes.fast_read.ordinary_cut import bell_moments
+from scripts.prototypes.fast_read.ordinary_cut import (
+    bell_moments,
+    confined_component,
+    dense_cells,
+)
 from scripts.prototypes.fast_map_production.kernel import read
 
 
@@ -82,77 +86,60 @@ def _density_coefficients(geometry, reading, profile):
     )
 
 
-def _saddle_moments(geometry, reading, profile, capacity=16):
-    """Book selected saddle sectors using profile values on signed ring fans."""
+def _saddle_moments(geometry, reading, profile, capacity=16, per_cell=None):
+    """Book the booking cells over the composite support, split at the disk.
+
+    Each booking cell books ``(C ∩ D ∩ N) ∪ (C ∩ Dᶜ ∩ Q)`` through the shared
+    clip-quadrature owner, with the same density the ordinary consumer uses. No
+    copied fan reduction is applied here. The signed-flux convention is taken
+    from the read, so callers need not restate it.
+
+    ``per_cell`` carries the same composite moments already computed for every
+    cell by the ordinary consumer. A caller holding them passes them here so
+    the composite body is traced once for the map instead of once for every
+    cell and again for the booking slots; the booking is then a gather, and the
+    two routes agree by construction because both read one trace of one owner.
+    """
     active = reading.booking_cells & (reading.membership > 0)
     count = jnp.sum(active, dtype=jnp.int32)
     indices = jnp.nonzero(active, size=capacity, fill_value=0)[0]
+    sigma = reading.sigma
+    confined = confined_component(reading)
+    coefficient = reading.field_coefficients
+    signed = sigma * coefficient
+    signed = signed.at[:, 0].add(-sigma * reading.boundary_flux)
 
-    def integrate(index, rings, sizes):
-        origin = geometry.centre[index]
-        slot = jnp.arange(rings.shape[1])
-        following = jnp.where(slot[None] + 1 < sizes[:, None], slot[None] + 1, 0)
-        end = jnp.take_along_axis(rings, following[..., None], axis=1)
-        first = rings - origin
-        second = end - origin
-        area = 0.5 * (first[..., 0] * second[..., 1] - first[..., 1] * second[..., 0])
-        area = jnp.where(slot[None] < sizes[:, None], area, 0.0)
-        barycentric = jnp.asarray(((2 / 3, 1 / 6), (1 / 6, 2 / 3), (1 / 6, 1 / 6)))
-        points = (
-            origin
-            + barycentric[:, 0, None] * first[..., None, :]
-            + barycentric[:, 1, None] * second[..., None, :]
+    if per_cell is not None:
+        packed = per_cell[indices]
+        live = jnp.arange(capacity) < count
+        scattered = (
+            jnp.zeros((len(geometry.centre), 3), dtype=packed.dtype)
+            .at[indices]
+            .add(jnp.where(live[:, None], packed, 0.0))
         )
-        local = (points - origin) / geometry.pitch[index]
-        x, y = local[..., 0], local[..., 1]
-        coefficient = reading.field_coefficients[index]
-        flux = (
-            coefficient[0]
-            + coefficient[1] * x
-            + coefficient[2] * y
-            + coefficient[3] * x * x
-            + coefficient[4] * x * y
-            + coefficient[5] * y * y
-        )
-        normalized = (flux - reading.axis_flux) / (
-            reading.boundary_flux - reading.axis_flux
-        )
-        density = profile.current_density(points[..., 0], normalized)
-        weighted = area[..., None] * density / 3
-        displacement = points - origin
-        return jnp.stack(
-            (
-                jnp.sum(weighted),
-                jnp.sum(weighted * displacement[..., 0]),
-                jnp.sum(weighted * displacement[..., 1]),
-            )
-        )
+        return scattered, count <= capacity
 
     def one(index):
-        def ordinary(_):
-            rings, sizes = current._normal_rings(
-                geometry.vertices[index],
-                geometry.vertex_count[index],
-                geometry.centre[index],
-                reading.saddle_form,
-                reading.fragment_selected[index],
-                reading.edge_interval[index],
-                4,
-            )
-            return integrate(index, rings, sizes)
-
-        if getattr(reading, "closed_loop", None) is None:
-            return ordinary(None)
-
-        def closed(_):
-            rings, sizes = current._closed_normal_rings(
-                reading.closed_loop,
-                geometry.vertices[index],
-                geometry.vertex_count[index],
-            )
-            return integrate(index, rings, sizes)
-
-        return jax.lax.cond(reading.closed_live, closed, ordinary, None)
+        moments, _ = current.composite_cut_moments(
+            geometry.vertices[index],
+            geometry.vertex_count[index],
+            geometry.centre[index],
+            geometry.pitch[index],
+            reading.saddle_form,
+            coefficient[index],
+            signed[index],
+            profile,
+            reading.fragment_selected[index],
+            reading.edge_interval[index],
+            reading.fragment_selected[index],
+            reading.axis_flux,
+            reading.boundary_flux,
+            reading.disk_position,
+            reading.disk_radius,
+            8,
+            confined=confined,
+        )
+        return moments
 
     packed = jax.vmap(one)(indices)
     live = jnp.arange(capacity) < count
@@ -202,11 +189,7 @@ def map_moments(
     field = FusedField(cached, coefficient)
     reading = read(field, roots, geometry, convention, policy, frame_gate=frame_gate)
     selected = reading.selected_cells
-    full = (
-        (reading.geometric_membership >= 1 - 1e-14)
-        & (geometry.vertex_count == 6)
-        & ~reading.booking_cells
-    )
+    full = dense_cells(geometry, reading)
     interior = interior_moments(
         rule, gauss_flux, profile, reading.axis_flux, reading.boundary_flux, full
     )
@@ -216,7 +199,9 @@ def map_moments(
     cut = (reading.membership > 0) & ~full
     saddle_cut = cut & reading.booking_cells
     ordinary_cut = cut & ~saddle_cut
-    saddle, saddle_valid = _saddle_moments(geometry, reading, profile)
+    saddle, saddle_valid = _saddle_moments(
+        geometry, reading, profile, per_cell=ordinary
+    )
     raw = (
         interior + jnp.where(ordinary_cut[:, None], ordinary, 0.0) + saddle
     ) * reading.path_weight[:, None]
@@ -226,6 +211,7 @@ def map_moments(
         jnp.all(roots.valid)
         & reading.valid
         & reading.qualified
+        & ordinary_valid
         & jnp.all(~ordinary_cut | ordinary_valid)
         & saddle_valid
         & ~missing

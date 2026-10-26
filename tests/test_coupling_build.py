@@ -65,6 +65,20 @@ def test_device_blocks_match_host_builder_at_small_count():
     assert vertical <= MOMENT_BOUND
 
 
+def test_flux_builder_never_evaluates_unused_field_rows(monkeypatch):
+    """A values matrix only needs area-integrated flux, not field derivatives."""
+    targets, polygons, centres = _case()
+
+    def refuse_field_kernel(*args, **kwargs):
+        raise AssertionError("the nine-row field kernel reached the values builder")
+
+    monkeypatch.setattr(
+        coupling_build, "tile_evaluator", refuse_field_kernel, raising=False
+    )
+    blocks = coupling_build.build_flux_blocks(targets, polygons, centres)
+    assert all(np.isfinite(block).all() for block in blocks)
+
+
 def test_identity_check_catches_perturbed_block_by_test_id():
     targets, polygons, centres = _case()
     reference = polygon_analytic_flux_moments_batched(

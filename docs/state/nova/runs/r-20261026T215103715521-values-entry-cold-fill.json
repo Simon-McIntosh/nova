@@ -1,0 +1,622 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex",
+  "base_sha": "a806edfa135a13cf185d86301cbdfe6efb1a97dd",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261026T215103715521-values-entry-cold-fill/brief.txt",
+    "sha256": "8b4b44412da8954b6da05319f321ba0a1e59f9c6644c9b7c62adafd20224e6ed"
+  },
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 50122368,
+      "cached_input_tokens_cumulative": 50122368,
+      "input_tokens": 50460423,
+      "input_tokens_cumulative": 50460423,
+      "output_tokens": 80006,
+      "output_tokens_cumulative": 80006,
+      "reasoning_output_tokens": 35273,
+      "reasoning_output_tokens_cumulative": 35273
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 131,
+    "files": 3,
+    "removed": 82
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "f8c4c494e47259e719bfd4325c78fc940a781045",
+    "bb7a2d7c0122136bd64bd90a264e88c883d40f19",
+    "0b179e285cf0601489ba4d3617010b3298c93c37"
+  ],
+  "completed_at": "2026-10-26T22:41:28Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-26T21:53:14Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/values-entry-cold-fill JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -m \"not slow\" -q /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/values-entry-cold-fill/tests/test_coupling_build.py; PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/values-entry-cold-fill JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -m \"not slow\" -q /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/values-entry-cold-fill/tests/test_carrier_identity.py; PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/values-entry-cold-fill JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -m \"not slow\" -q /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/values-entry-cold-fill/tests/test_operand_cache.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261026T215103715521-values-entry-cold-fill/logs/after-final-suite.log"
+  },
+  "impl_move": {
+    "at_complete": 0.2857142857142857,
+    "at_dispatch": 0.2857142857142857,
+    "plan": "converged-forward-solve",
+    "reason": "lands inside cfs s4, which stays implementable",
+    "verdict": "waived"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-26T22:51:17.635019+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-26T21:51:16Z",
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": "2026-11-02T20:41:14Z",
+    "seconds_until_reset": 600597,
+    "state": "quiet",
+    "utilisation_pct": 4.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-26T21:51:16Z",
+    "read_at": "2026-10-26T21:51:17Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 4.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-26T22:41:28Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-10-26T22:41:28Z",
+        "resets_at": 1793652074,
+        "used_percent": 10.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261026T215103715521-values-entry-cold-fill/manifest.md",
+  "member": "disposable-r-20261026T215103715521-values-entry-cold-fill",
+  "model_key": "sol",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_coupling_build.py::test_flux_builder_never_evaluates_unused_field_rows"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_coupling_build.py::test_flux_builder_never_evaluates_unused_field_rows"
+    ],
+    "declaration": "revert the repair in a scratch copy; the per-point cost at 4 points returns to the measured 6.7 s scale",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261026T215103715521-values-entry-cold-fill/logs/final-negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261026T215103715521-values-entry-cold-fill/logs/final-negative-control.log",
+    "test_paths": [
+      "tests/test_coupling_build.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "values-entry-cold-fill",
+  "node_definition": {
+    "after": [],
+    "brief": "/home/ITER/mcintos/.cache/nova-s21-briefs/oct26/values-entry-cold-fill.txt",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261026T215103715521-values-entry-cold-fill/brief.txt",
+    "brief_sha256": "8b4b44412da8954b6da05319f321ba0a1e59f9c6644c9b7c62adafd20224e6ed",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "critical",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1240,
+          "cached_input_tokens": 365295,
+          "input_tokens": 366537,
+          "output_tokens": 348,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 366885,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "session_id": "s21-nova"
+    },
+    "done_when": "The tests in tests/test_coupling_build.py, tests/test_carrier_identity.py and every importer of a changed module pass with no added failure, both suite arms as one sirius job",
+    "estimated_hours": null,
+    "goal": "Bring the diverted 282-cell carrier's values-entry cold fill from 6.7 s to at most 0.12 s per point",
+    "id": "values-entry-cold-fill",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-26T21:51:16Z",
+      "read_at": "2026-10-26T21:51:17Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 4.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261026T215103715521-values-entry-cold-fill/manifest.md",
+    "negative_control": "revert the repair in a scratch copy; the per-point cost at 4 points returns to the measured 6.7 s scale",
+    "plan": "converged-forward-solve",
+    "regenerate_paths": [],
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§4",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "scripts/analytic_oracle_fixtures/coupling_build.py",
+      "tests/test_coupling_build.py",
+      "docs/evidence/fragments/converged-forward-solve/values-entry-cold-fill.html",
+      "docs/figures/converged-forward-solve/values-entry-cold-fill"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "outside_scope_paths": [
+    "tests/test_operand_cache.py"
+  ],
+  "pace": {
+    "allowance": {
+      "advisory": true,
+      "burn_multiple": null,
+      "derived": null,
+      "drain_hours": 168.0,
+      "effective_limit": null,
+      "elapsed_fraction": 0.007076141144179833,
+      "elapsed_hours": 1.188791712222212,
+      "group": "codex-sub",
+      "limited_by": null,
+      "observed_at": "2026-10-26T21:52:33+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": "window too young to project: burn evidence is quantised too coarsely: 0.71% elapsed is below the 5% floor and 4% utilisation is below the 5% floor",
+      "remaining_budget": 0.96,
+      "remaining_windows": null,
+      "resets_at": "2026-11-02T20:41:14Z",
+      "state": "observed",
+      "utilisation": 0.04,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.004672,
+      "decided_by": "window",
+      "margin": 0.732828,
+      "name": "values-entry-cold-fill",
+      "score": 0.7375,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.04
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.650164,
+        "observed_at": "2026-10-26T21:52:33+00:00",
+        "period": "primary",
+        "resets_at": "2026-11-02T20:41:14Z",
+        "state": "observed",
+        "utilisation": 0.04,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": null,
+    "member": "codex",
+    "node": "values-entry-cold-fill",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-26T21:52:33.650164+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "refuse",
+    "answering_model": null,
+    "backend": null,
+    "comment": "lead 2026-10-26: use codex lane for long running jobs; a 12,452 s cold fill must be re-measured",
+    "confidence": null,
+    "decision_source": "refused",
+    "effort": null,
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 116.738194,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 3.4525,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 6.951512798680556,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 2,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": null,
+        "prior_outcomes": null,
+        "reasons": [
+          "reserved-lane: codex is reserved while the orchestrators it shares with it needs it; its window reading is unknown or stale"
+        ],
+        "resets_at": "2026-11-02T20:41:14+00:00",
+        "stale": false,
+        "suits": "The lane's frontier model, strongest and slowest, about five times sol's token price. Suits deep or open-ended design, elevated or critical risk, and nodes that already failed on another model.",
+        "utilisation_pct": 4.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 116.738194,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 3.4525,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 6.951512798680556,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 0,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": null,
+        "prior_outcomes": null,
+        "reasons": [
+          "reserved-lane: codex is reserved while the orchestrators it shares with it needs it; its window reading is unknown or stale"
+        ],
+        "resets_at": "2026-11-02T20:41:14+00:00",
+        "stale": false,
+        "suits": "The lane's fast, affordable model, about a twentieth of sol's token price. Suits well-defined, less difficult work: reviews, exact-spec implementation, tests and documentation.",
+        "utilisation_pct": 4.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 116.738194,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 3.4525,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 6.951512798680556,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 23,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 24,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": null,
+        "prior_outcomes": null,
+        "reasons": [
+          "reserved-lane: codex is reserved while the orchestrators it shares with it needs it; its window reading is unknown or stale"
+        ],
+        "resets_at": "2026-11-02T20:41:14+00:00",
+        "stale": false,
+        "suits": "The lane default, a previous-generation general model. Suits guided implementation, tests and full reviews at standard or deep reasoning and moderate risk. About twenty times luna's token price and a fifth of astra's.",
+        "utilisation_pct": 4.0,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": "no-eligible-candidates; default-backend-ineligible",
+    "family": null,
+    "jev_latency_ms": 0.0,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 1055.186,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "questions": {},
+    "rendered_state": "{\"node\":{\"role\":\"implement\",\"spec_level\":\"guided\",\"capability\":{\"version\":\"1.0\",\"class\":\"orchestrator\",\"requirements\":{\"reasoning\":\"deep\",\"verification\":\"strict\",\"risk\":\"critical\"}},\"goal\":\"Bring the diverted 282-cell carrier's values-entry cold fill from 6.7 s to at most 0.12 s per point\",\"done_when\":\"The tests in tests/test_coupling_build.py, tests/test_carrier_identity.py and every importer of a changed module pass with no added failure, both suite arms as one sirius job\",\"urgency\":{\"due\":null,\"seconds_to_due\":null,\"reason\":null},\"estimated_context\":54068,\"estimated_hours\":8.0,\"estimated_hours_source\":\"section\",\"attempts\":0,\"write_path_count\":3,\"negative_control_declared\":true,\"serving_lanes\":[],\"serving_lane_count\":0,\"hold_waits_for\":null,\"lift_preference\":null},\"orchestrator_comment\":\"lead 2026-10-26: use codex lane for long running jobs; a 12,452 s cold fill must be re-measured\",\"candidates\":{},\"return_times\":{},\"lanes\":{},\"local_lane\":{\"admission\":\"unavailable\",\"expected_wait_s\":783.0,\"expected_wait_profile_age_s\":553.233415,\"running\":4,\"waiting\":0,\"queue_position\":1,\"headroom\":8,\"worker_slots\":31,\"tokens_per_second\":85.438,\"read_at\":\"2026-10-26T21:51:03.517949+00:00\"}}",
+    "rendered_token_estimate": 299,
+    "stage_ms": {
+      "budget-snapshot": 526.94,
+      "context-estimate": 6.179,
+      "records": 285.779,
+      "verdict-inputs": 202.688
+    },
+    "template_digest": "cb9d48e7fca5878b52cc4affdedfdee9f5e04b929f720979b14d0d78b8456ced",
+    "usage": {}
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.2857142857142857,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "0b179e285cf0601489ba4d3617010b3298c93c37",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "a806edfa135a13cf185d86301cbdfe6efb1a97dd",
+    "reviewed_head_sha": "0b179e285cf0601489ba4d3617010b3298c93c37",
+    "scores": {
+      "durability": 13,
+      "evidence": 16,
+      "fit": 14,
+      "goal_fidelity": 19,
+      "reuse": 7,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 89
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261026T215103715521-values-entry-cold-fill",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§4",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a17a34-9160-7ed3-9e41-2f1874ef0265",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 2,
+  "throughput": {
+    "cumulative_cached_input_tokens": 50122368,
+    "cumulative_input_tokens": 100582791,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 115279
+  },
+  "time_budget": "60m",
+  "tool_steps": 334.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 2894,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-26T22:41:32Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-26T21:53:30Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [
+      {
+        "bytes": 46365369,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261026T215103715521-values-entry-cold-fill/codex-home/cache"
+      },
+      {
+        "bytes": 28832101,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261026T215103715521-values-entry-cold-fill/codex-home/plugins"
+      }
+    ],
+    "run_id": "r-20261026T215103715521-values-entry-cold-fill",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 903,
+    "worker_pid": 1054049
+  },
+  "worker_seconds": 2894,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

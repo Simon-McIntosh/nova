@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="583">
+<meta name="plan-version" content="584">
 <meta name="plan-modified" content="2026-10-27">
 </head>
 <body>
@@ -2076,6 +2076,9 @@ oracle _reference_moments already owns.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261027T093340343636-review-of-carrier-identity-followons-4ab55b96fe84" data-who="reckon-build" data-when="2026-10-27T09:53:58.347Z">
     <div class="r-comment-body"><p>Independent review of r-20261027T090241470465-carrier-identity-followons at base d3dcd9ce3549e75e0e2a36073912bd061924e982 and head 4ab55b96fe8446bc54ef7f6b51bf36d18e95adac scored goal_fidelity 19, evidence 16, scope_discipline 16, durability 18, fit 18, reuse 19 with three non-blocking findings. Verdict: the node delivers all three followup items — a single over-wide lattice link is now refused without dissolving its group (base arm reproduces the old dissolve, head keeps the close pair), the unread tolerance argument and its bound are fully removed with the one remaining caller updated, and the determinism test carries an independent constant that reddens under the declared np.linalg.solve mutation; the findings record an under-scoped write-path declaration, an uncommitted 550-carrier measurement script, and a missing base importer arm.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261027T090241470465-carrier-identity-followons" data-who="reckon-build" data-when="2026-10-27T09:31:49.479Z">
+    <div class="r-comment-body"><p>Finished the three review items: an over-wide lattice link is now refused on its own (new test fails at base 1 failed/2 passed and passes at head 3 passed), the unread tolerance argument and its bound are gone, and the determinism test is red under a library solve at digest 3b71e589 against the pinned 01818d5d; the diverted 550-cell carrier is unchanged at node_number 2469 and partition digest 576421da.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-s21-moment-space-ruling" data-who="reckon-build" data-when="2026-10-13T18:40:00Z">
     <div class="r-comment-body"><p>Lead ruling 2026-10-13: the forward solve's unknown is the cell current moments.</p><p>The locked read builds its field from booked moments: the Bell jets at the nodes are the jet coupling rows times m, plus the exterior's jets. So it cannot evaluate an arbitrary trial flux vector, but it can always evaluate a trial m. The solve therefore iterates m = book(read(psi_ext + G m)), and the flux is G m wherever output needs it.</p><ul><li>Newton runs on the device with autograd.</li><li>A dense <code>jax.jacfwd</code> Jacobian with a device LU is measured against a device-side Jacobian-free Krylov, replacing SciPy's host <code>newton_krylov</code>.</li><li>Autograd must be shown to pass through the read and the booking.</li><li><code>current.book</code> is vectorised. Its sequential cell scan costs 0.9 to 8 s per step at 2,000 to 10,000 cells.</li><li>The legacy support partition, the spline-clip read and the chord default are deleted.</li></ul></div>

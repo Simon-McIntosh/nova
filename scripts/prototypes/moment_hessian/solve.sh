@@ -16,6 +16,7 @@ revision=$2
 run=$3
 python=/home/ITER/mcintos/Code/nova/.venv/bin/python
 export NOVA_OPERAND_CACHE="$HOME/.cache/nova-moment-hessian"
+export NOVA_BOOK_FIXTURE_ROOT="$NOVA_OPERAND_CACHE/certificate-fixtures"
 export NOVA_COMPILATION_CACHE_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
 mkdir -p "$NOVA_OPERAND_CACHE"
 tree="$scratch/source"

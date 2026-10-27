@@ -14,7 +14,7 @@ export TMPDIR=/tmp
 export PYTHONPATH="$repo"
 export JAX_ENABLE_COMPILATION_CACHE=false
 export XLA_PYTHON_CLIENT_PREALLOCATE=false
-export XLA_FLAGS="--xla_dump_to=$dumps --xla_dump_hlo_pass_re=.* --xla_dump_hlo_as_text --xla_dump_include_timestamp --xla_dump_ir"
+export XLA_FLAGS="--xla_dump_to=$dumps --xla_dump_hlo_pass_re=.* --xla_dump_hlo_as_text --xla_dump_include_timestamp"
 
 interpreter=/home/ITER/mcintos/Code/nova/.venv/bin/python
 printf 'program=%s size=%s out=%s dumps=%s\n' "$program" "$size" "$out" "$dumps"

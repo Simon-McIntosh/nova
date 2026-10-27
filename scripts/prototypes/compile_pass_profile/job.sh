@@ -21,10 +21,13 @@ control_small=$?
 "$repo"/scripts/prototypes/compile_pass_profile/run.sh \
   "$repo" control 256 "$out/control-256" "$scratch/dumps-control-256"
 control_large=$?
-printf 'point_jet_exit=%s control_64_exit=%s control_256_exit=%s\n' \
-  "$point" "$control_small" "$control_large"
+"$repo"/scripts/prototypes/compile_pass_profile/run.sh \
+  "$repo" control 1024 "$out/control-1024" "$scratch/dumps-control-1024"
+control_deep=$?
+printf 'point_jet_exit=%s control_64_exit=%s control_256_exit=%s control_1024_exit=%s\n' \
+  "$point" "$control_small" "$control_large" "$control_deep"
 status=0
-for code in "$point" "$control_small" "$control_large"; do
+for code in "$point" "$control_small" "$control_large" "$control_deep"; do
   [[ "$code" -eq 0 ]] || status="$code"
 done
 printf 'EXIT=%s\n' "$status"

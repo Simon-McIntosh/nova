@@ -1,5 +1,7 @@
 """Draw time per HLO pass for the point jet and the split of its compile wall."""
 
+# ruff: noqa: E402
+
 import argparse
 import json
 from pathlib import Path
@@ -9,6 +11,8 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
+
+matplotlib.rcParams["svg.hashsalt"] = "compile-pass-profile"
 
 from nova.media.ink import DEFAULT_INK, trace_axes
 
@@ -116,7 +120,7 @@ def main():
         frameon=False,
     )
     figure.tight_layout(rect=(0, 0.05, 1, 1))
-    figure.savefig(args.output, format="svg")
+    figure.savefig(args.output, format="svg", metadata={"Date": None})
     print("wrote %s" % args.output)
 
 

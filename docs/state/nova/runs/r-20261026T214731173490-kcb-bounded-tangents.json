@@ -1,0 +1,592 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 3,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "a806edfa135a13cf185d86301cbdfe6efb1a97dd",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261026T214731173490-kcb-bounded-tangents/brief.txt",
+    "sha256": "a56ef9fd92f61c48fcfb1cb44c7c40f7aea60939b1b4a8f2a01880e644486192"
+  },
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 97165440,
+      "cached_input_tokens_cumulative": 97165440,
+      "input_tokens": 97732200,
+      "input_tokens_cumulative": 97732200,
+      "output_tokens": 152105,
+      "output_tokens_cumulative": 152105,
+      "reasoning_output_tokens": 68403,
+      "reasoning_output_tokens_cumulative": 68403
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-10-27T02:15:25Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-26T21:49:03Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": "negative-result",
+  "gate": "failed",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.3333333333333333,
+    "plan": "kernel-compile-barrier",
+    "reason": "failure-classification:negative-result",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-26T22:47:37.223752+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-26T21:47:35Z",
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": "2026-11-02T20:41:14Z",
+    "seconds_until_reset": 600818,
+    "state": "quiet",
+    "utilisation_pct": 3.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-26T21:47:35Z",
+    "read_at": "2026-10-26T21:47:37Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 3.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-27T02:15:25Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-10-27T02:15:25Z",
+        "resets_at": 1793652074,
+        "used_percent": 19.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261026T214731173490-kcb-bounded-tangents/manifest.md",
+  "member": "disposable-r-20261026T214731173490-kcb-bounded-tangents",
+  "model_key": "sol",
+  "negative_control": {
+    "reason": "gate-not-passing",
+    "test_paths": [
+      "tests/biot"
+    ],
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "kcb-bounded-tangents",
+  "node_definition": {
+    "after": [],
+    "brief": "/home/ITER/mcintos/.cache/nova-s21-briefs/oct26/kcb-bounded-tangents.txt",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261026T214731173490-kcb-bounded-tangents/brief.txt",
+    "brief_sha256": "a56ef9fd92f61c48fcfb1cb44c7c40f7aea60939b1b4a8f2a01880e644486192",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "critical",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1240,
+          "cached_input_tokens": 365295,
+          "input_tokens": 366537,
+          "output_tokens": 348,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 366885,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Kernel tests pass at head with no added failure, both suite arms as one sirius job",
+    "estimated_hours": null,
+    "goal": "Bound the tangent graphs of the census-ranked Biot kernel terms so the point jet cold-compiles in 10 s or less on the H200",
+    "id": "kcb-bounded-tangents",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-26T21:47:35Z",
+      "read_at": "2026-10-26T21:47:37Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 3.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261026T214731173490-kcb-bounded-tangents/manifest.md",
+    "negative_control": "restore one changed term's automatic tangent in a scratch copy; the tangent-agreement test and the census equation count must both move back",
+    "plan": "kernel-compile-barrier",
+    "regenerate_paths": [],
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/biot",
+      "tests/biot",
+      "docs/evidence/fragments/kernel-compile-barrier/bounded-tangents.html",
+      "docs/figures/kernel-compile-barrier/bounded-tangents",
+      "docs/evidence/fragments/kernel-compile-barrier/kcb-bounded-tangents.html",
+      "docs/figures/kernel-compile-barrier/kcb-bounded-tangents"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": {
+      "advisory": true,
+      "burn_multiple": null,
+      "derived": null,
+      "drain_hours": 168.0,
+      "effective_limit": null,
+      "elapsed_fraction": 0.0066818101620369705,
+      "elapsed_hours": 1.122544107222211,
+      "group": "codex-sub",
+      "limited_by": null,
+      "observed_at": "2026-10-26T21:48:35+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": "window too young to project: burn evidence is quantised too coarsely: 0.67% elapsed is below the 5% floor and 4% utilisation is below the 5% floor",
+      "remaining_budget": 0.96,
+      "remaining_windows": null,
+      "resets_at": "2026-11-02T20:41:14Z",
+      "state": "observed",
+      "utilisation": 0.04,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.004672,
+      "decided_by": "window",
+      "margin": 0.732828,
+      "name": "kcb-bounded-tangents",
+      "score": 0.7375,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.04
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.158786,
+        "observed_at": "2026-10-26T21:48:35+00:00",
+        "period": "primary",
+        "resets_at": "2026-11-02T20:41:14Z",
+        "state": "observed",
+        "utilisation": 0.04,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": null,
+    "member": "codex",
+    "node": "kcb-bounded-tangents",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-26T21:48:35.158786+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "refuse",
+    "answering_model": null,
+    "backend": null,
+    "comment": "lead 2026-10-26: use codex lane for long running jobs; H200 compile ladder plus two suite arms",
+    "confidence": null,
+    "decision_source": "refused",
+    "effort": null,
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 153.388738,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 3.4872,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 6.953981299328703,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 2,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": null,
+        "prior_outcomes": null,
+        "reasons": [
+          "reserved-lane: codex is reserved while the orchestrators it shares with it needs it; its window reading is unknown or stale"
+        ],
+        "resets_at": "2026-11-02T20:41:14+00:00",
+        "stale": false,
+        "suits": "The lane's frontier model, strongest and slowest, about five times sol's token price. Suits deep or open-ended design, elevated or critical risk, and nodes that already failed on another model.",
+        "utilisation_pct": 3.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 153.388738,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 3.4872,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 6.953981299328703,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 0,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": null,
+        "prior_outcomes": null,
+        "reasons": [
+          "reserved-lane: codex is reserved while the orchestrators it shares with it needs it; its window reading is unknown or stale"
+        ],
+        "resets_at": "2026-11-02T20:41:14+00:00",
+        "stale": false,
+        "suits": "The lane's fast, affordable model, about a twentieth of sol's token price. Suits well-defined, less difficult work: reviews, exact-spec implementation, tests and documentation.",
+        "utilisation_pct": 3.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 153.388738,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 3.4872,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 6.953981299328703,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 23,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 24,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": null,
+        "prior_outcomes": null,
+        "reasons": [
+          "reserved-lane: codex is reserved while the orchestrators it shares with it needs it; its window reading is unknown or stale"
+        ],
+        "resets_at": "2026-11-02T20:41:14+00:00",
+        "stale": false,
+        "suits": "The lane default, a previous-generation general model. Suits guided implementation, tests and full reviews at standard or deep reasoning and moderate risk. About twenty times luna's token price and a fifth of astra's.",
+        "utilisation_pct": 3.0,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": "no-eligible-candidates; default-backend-ineligible",
+    "family": null,
+    "jev_latency_ms": 0.0,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 4263.537,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "questions": {},
+    "rendered_state": "{\"node\":{\"role\":\"implement\",\"spec_level\":\"guided\",\"capability\":{\"version\":\"1.0\",\"class\":\"orchestrator\",\"requirements\":{\"reasoning\":\"deep\",\"verification\":\"strict\",\"risk\":\"critical\"}},\"goal\":\"Bound the tangent graphs of the census-ranked Biot kernel terms so the point jet cold-compiles in 10 s or less on the H200\",\"done_when\":\"Kernel tests pass at head with no added failure, both suite arms as one sirius job\",\"urgency\":{\"due\":null,\"seconds_to_due\":null,\"reason\":null},\"estimated_context\":50392,\"estimated_hours\":8.0,\"estimated_hours_source\":\"section\",\"attempts\":0,\"write_path_count\":4,\"negative_control_declared\":true,\"serving_lanes\":[],\"serving_lane_count\":0,\"hold_waits_for\":null,\"lift_preference\":null},\"orchestrator_comment\":\"lead 2026-10-26: use codex lane for long running jobs; H200 compile ladder plus two suite arms\",\"candidates\":{},\"return_times\":{},\"lanes\":{},\"local_lane\":{\"admission\":\"unavailable\",\"expected_wait_s\":756.5,\"expected_wait_profile_age_s\":340.660315,\"running\":2,\"waiting\":0,\"queue_position\":1,\"headroom\":10,\"worker_slots\":24,\"tokens_per_second\":89.78,\"read_at\":\"2026-10-26T21:47:30.945388+00:00\"}}",
+    "rendered_token_estimate": 282,
+    "stage_ms": {
+      "budget-snapshot": 799.69,
+      "context-estimate": 13.283,
+      "records": 328.309,
+      "verdict-inputs": 557.036
+    },
+    "template_digest": "cb9d48e7fca5878b52cc4affdedfdee9f5e04b929f720979b14d0d78b8456ced",
+    "usage": {}
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.3333333333333333,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "b534076f02395679b994ff28de13bebdc51fdafd",
+  "resume_waiver": null,
+  "review": null,
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261026T214731173490-kcb-bounded-tangents",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a17a30-9001-7ce1-bcdc-d348cb9a8ffd",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 97165440,
+    "cumulative_input_tokens": 97732200,
+    "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+    "generated_tokens": 220508,
+    "generation_seconds": 14858.422,
+    "machine_seconds": 1101.594,
+    "tokens_per_second": 14.84
+  },
+  "time_budget": "60m",
+  "tool_steps": 99.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 15982,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 3,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-27T02:15:28Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-27T02:11:02Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [
+      {
+        "bytes": 46737829,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261026T214731173490-kcb-bounded-tangents/codex-home/cache"
+      },
+      {
+        "bytes": 28835209,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261026T214731173490-kcb-bounded-tangents/codex-home/plugins"
+      }
+    ],
+    "run_id": "r-20261026T214731173490-kcb-bounded-tangents",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 1402,
+    "worker_pid": 2629997
+  },
+  "worker_seconds": 15960,
+  "worker_seconds_source": "rollout_receipts",
+  "worktree_retention": {
+    "classification": "retained-for-resume",
+    "retained_at": "2026-10-27T02:15:25Z",
+    "session_id": "01a17a30-9001-7ce1-bcdc-d348cb9a8ffd",
+    "session_source": "pointer",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/kcb-bounded-tangents"
+  }
+}

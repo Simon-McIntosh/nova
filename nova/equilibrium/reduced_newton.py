@@ -99,6 +99,7 @@ from nova.equilibrium.constraint import (
     select_compensating_directions,
 )
 from nova.equilibrium.forward_operator import CellCurrentMoments
+from nova.equilibrium.source import CurrentNormalisationError
 from nova.equilibrium.fixed_point import (
     _BACKTRACKING_FACTORS,
     _RELATIVE_SUP_MERIT_EXPONENT,
@@ -115,6 +116,7 @@ from nova.equilibrium.fixed_point import (
 __all__ = [
     "ConstrainedReducedNewtonResult",
     "JACOBIAN_REFRESH_THRESHOLD",
+    "NonFiniteCellMomentError",
     "ReducedProgram",
     "ReducedCoordinates",
     "ReducedNewtonResult",
@@ -122,7 +124,9 @@ __all__ = [
     "ReducedTrip",
     "derive_reduced_constraint_pairs",
     "linearized_constraint_response_matrix",
+    "non_finite_cell_mask",
     "reduced_coordinates",
+    "refuse_non_finite_cell_moments",
     "solve_constrained_reduced_newton",
     "solve_constrained_reduced_newton_compiled",
     "solve_reduced_newton",
@@ -354,6 +358,46 @@ def _current_moments(operator, psi, requested_class, target_current):
         psi, target_current, requested_class
     )
     return moments
+
+
+class NonFiniteCellMomentError(CurrentNormalisationError):
+    """Report the cells whose current moments came back non-finite."""
+
+    def __init__(self, cells):
+        self.cells = tuple(sorted({int(cell) for cell in np.ravel(cells)}))
+        self.amplitude = float("nan")
+        RuntimeError.__init__(
+            self,
+            f"non-finite current moment at cell indices {list(self.cells)}",
+        )
+
+
+def non_finite_cell_mask(moments) -> jax.Array:
+    """Return the per-cell mask of non-finite current moments.
+
+    ``moments`` is one moment array whose leading axis indexes the grid cells,
+    or a sequence of such arrays sharing that axis.  A cell is flagged when any
+    of its moment entries is not finite, so a rate the map cannot be evaluated
+    at is named by the cell that carries it rather than by the whole vector
+    whose residual it poisons.
+    """
+    leaves = moments if isinstance(moments, tuple | list) else (moments,)
+    mask = jnp.zeros(jnp.shape(jnp.asarray(leaves[0]))[0], dtype=bool)
+    for leaf in leaves:
+        mask = mask | jnp.any(~jnp.isfinite(jnp.asarray(leaf)), axis=-1)
+    return mask
+
+
+def refuse_non_finite_cell_moments(mask) -> None:
+    """Raise naming the flagged cells, reading a mask produced on the device.
+
+    A non-finite moment cannot raise where it is computed: every solve route is
+    traced, and a raise inside a compiled program never runs.  The traced step
+    returns the mask instead and the host loop that drives it calls this.
+    """
+    cells = np.flatnonzero(np.asarray(mask, dtype=bool))
+    if cells.size:
+        raise NonFiniteCellMomentError(cells)
 
 
 class _OperatorArguments(NamedTuple):
@@ -987,6 +1031,43 @@ def _reduced_kernels(
             request, base_state, external_value, target_value, requested_value, rows
         ).mapped
 
+    def moment_finiteness(
+        reduced,
+        shadow,
+        base_state,
+        external_value=None,
+        target_value=None,
+        requested_value=None,
+        rows=None,
+    ):
+        """Return the per-cell mask of non-finite moments one state induces.
+
+        This is the qualification the host loop reads: the moments are computed
+        here rather than raised over, because a raise inside a traced program
+        never runs, and the mask leaves the device as an output the driver can
+        name cells from.
+        """
+        _external, operator_value = _operator_arguments(
+            external_value, external, operator
+        )
+        moments = _current_moments(
+            operator_value,
+            reconstruct(
+                reduced,
+                shadow,
+                base_state,
+                external_value,
+                target_value,
+                requested_value,
+                rows,
+            ),
+            _requested(requested_value, external_value),
+            _target(target_value, external_value),
+        )
+        return non_finite_cell_mask(
+            [getattr(moments, leaf) for leaf in coordinates.leaves]
+        )
+
     def jacobian_request(
         reduced,
         shadow,
@@ -1024,6 +1105,7 @@ def _reduced_kernels(
         "tail": jax.jit(tail_grades),
         "boundary": jax.jit(trip_boundary),
         "initial_gather": jax.jit(initial_gather),
+        "moment_finiteness": jax.jit(moment_finiteness),
     }
 
 
@@ -1413,6 +1495,9 @@ def _drive_trips(
         _stage_mark(f"trip{trip}:start")
         if not fused:
             reduced = regather(state)
+        refuse_non_finite_cell_moments(
+            kernels["moment_finiteness"](reduced, shadow, state)
+        )
         reduced, census = _plain_newton_trip(
             kernels,
             reduced,

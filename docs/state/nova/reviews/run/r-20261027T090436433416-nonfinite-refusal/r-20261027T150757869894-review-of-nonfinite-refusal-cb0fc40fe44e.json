@@ -1,0 +1,56 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-27T15:30:10.438Z",
+  "dispatched_at": "2026-10-27T15:10:39Z",
+  "findings": [
+    {
+      "file": "manifest.md",
+      "line": 14,
+      "severity": "non-blocking",
+      "summary": "The landing line still reports five tests and a 2-of-5 negative control while the head carries nine tests and a 5-of-9 control at b4954b211, and promotion comments this line onto the plan section, so the plan would record a weaker gate than the code carries."
+    },
+    {
+      "file": "manifest.md",
+      "line": 15,
+      "severity": "non-blocking",
+      "summary": "The first test_logs entry /tmp/reckon-crew-scratch/r-20261027T090436433416-nonfinite-refusal/nfr/test.log records five tests at base revision d3dcd9ce3 and no persisted green nine-test log exists; the nine-test head result lives only in the worker transcript, while I re-ran the file at cb0fc40fe and got 9 passed with EXIT=0."
+    },
+    {
+      "file": "tests/test_solve_nonfinite_refusal.py",
+      "line": 144,
+      "severity": "non-blocking",
+      "summary": "The reduced-Newton production-mask test defines its own moment_finiteness that ignores the state arguments and fabricates a NaN CellCurrentMoments, so the production closure at nova/equilibrium/reduced_newton.py:1034 and its _current_moments derivation stay unexercised; the certificate side is now genuinely on the production closure at scripts/prototypes/fast_map_production/solver.py:160."
+    },
+    {
+      "file": "nova/equilibrium/reduced_newton.py",
+      "line": 1498,
+      "severity": "non-blocking",
+      "summary": "The terminal-step asymmetry the gained commit fixes in the certificate driver remains here: the mask is read only at the head of each trip, so a non-finite moment produced only by the final trip's newton or boundary step reaches the returned state unrefused, and the new tests do not reach that path because the refusal fires on trip entry."
+    },
+    {
+      "file": "logs/row-cli/base.log",
+      "line": 4,
+      "severity": "non-blocking",
+      "summary": "The row gate's per-arm import is not evidenced by the log header: row-cli-gate.sh:51 prints nova.__file__ from the launcher environment, so both arms report the reviewed worktree's path, though the child receives PYTHONPATH set to its own tree and each arm regenerated its own part receipt."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the run's goal is to refuse a non-finite cell moment by index at both solve host loops, and the gained commits close the certificate loop's terminal-state gap at scripts/prototypes/fast_map_production/solver.py:199-200, with the refusal itself defined at nova/equilibrium/reduced_newton.py:391.\nVERDICT done_when: done_when asks for refusal at both loops, a planted-NaN test per driver with a negative control, and row and importer parity; tests/test_solve_nonfinite_refusal.py now holds nine tests, which I re-ran at cb0fc40fe in a scratch archive (9 passed, EXIT=0), logs/negative-control-wiring.log cuts the production mask wiring at b4954b211 and fails 5 of those 9, and logs/row-cli/base.log and head.log each carry a ROW-SUMMARY of terminal_fixed_point_residual 0.0749196925647991 after 12 trips with EXIT=0.\nVERDICT write_paths: the declared scope is scripts/prototypes/fast_map_production/solver.py, tests/test_solve_nonfinite_refusal.py and docs/evidence/fragments/converged-forward-solve/nonfinite-refusal.html; git diff 6c2dbbfd8..cb0fc40fe touches exactly those three and nothing else.\nVERDICT manifest: read in full; it states the nine-test gate, the wiring-cut negative control (5 of 9, EXIT=1), the three row arms and the importer pairs with their log paths, but its landing line and its tests/test_logs entries still describe the earlier five-test state at the base revision.\nVERDICT diff: read both commits against 6c2dbbfd8; b4954b211 extracts the certificate mask closure as certificate_cell_moments and adds the post-loop refusal plus four tests, and cb0fc40fe rewrites the row record and the fragment's host-loop line references, with no unrelated change and no plan or ticket label in any name, comment or commit subject.\nCALL_SITES: scripts/prototypes/fast_map_production/solver.py:1261, scripts/prototypes/fast_map_production/solver.py:1267, nova/equilibrium/reduced_newton.py:2066, nova/equilibrium/reduced_newton.py:2978, benchmarks/traced_vector_identity_receipt.py:334\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: scripts/prototypes/fast_map_production/solver.py:199-200 now refuses the state the terminating step returns, closing the gap the previous review recorded against the same driver.\nSCORE evidence: 14\nJUSTIFICATION evidence: I re-ran tests/test_solve_nonfinite_refusal.py at cb0fc40fe and got 9 passed with EXIT=0, but the manifest's tests and test_logs entries still cite a five-test base-revision log (manifest.md:15) and no persisted green nine-test log exists.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff 6c2dbbfd8..cb0fc40fe is one of the three declared write paths, and neither commit adds a file outside them.\nSCORE durability: 16\nJUSTIFICATION durability: logs/negative-control-wiring.log shows test_certificate_host_loop_refuses_the_state_the_final_step_returns and test_certificate_host_loop_refuses_through_the_production_moments failing when the refusal wiring is cut, while tests/test_solve_nonfinite_refusal.py:144 supplies its own mask so the reduced-Newton production mask stays unguarded.\nSCORE fit: 18\nJUSTIFICATION fit: certificate_cell_moments at scripts/prototypes/fast_map_production/solver.py:160 follows the surrounding helper idiom and carries no plan, ticket or version label in its name, docstring or comment.\nSCORE reuse: 19\nJUSTIFICATION reuse: the new function wraps the repository's owner non_finite_cell_mask at nova/equilibrium/reduced_newton.py:375, and a capability search over nova/, scripts/ and benchmarks/ found no other owner of a per-cell non-finite mask.\nFINDING manifest.md:14 non-blocking: the landing line still reports five tests and a 2-of-5 negative control while the head carries nine tests and a 5-of-9 control at b4954b211, and promotion comments this line onto the plan section.\nFINDING manifest.md:15 non-blocking: the first test_logs entry /tmp/reckon-crew-scratch/r-20261027T090436433416-nonfinite-refusal/nfr/test.log records five tests at base revision d3dcd9ce3, and no persisted green nine-test log exists.\nFINDING tests/test_solve_nonfinite_refusal.py:144 non-blocking: the reduced-Newton production-mask test ignores the state arguments and fabricates a NaN CellCurrentMoments, so the production closure at nova/equilibrium/reduced_newton.py:1034 stays unexercised.\nFINDING nova/equilibrium/reduced_newton.py:1498 non-blocking: the mask is read only at the head of each trip, so the terminal-step gap the certificate driver just had fixed remains here and the added tests do not reach it.\nFINDING logs/row-cli/base.log:4 non-blocking: the nova.__file__ header is printed from the launcher environment (row-cli-gate.sh:51) so both arms report the reviewed worktree's path and the header does not evidence each arm's own import.",
+  "review_run_id": "r-20261027T150757869894-review-of-nonfinite-refusal-cb0fc40fe44e",
+  "reviewed_base_sha": "6c2dbbfd8b76756ddf43fcffcc32bee680847aff",
+  "reviewed_head_sha": "cb0fc40fe44e2625b1003d53487189f22f9baa4a",
+  "reviewed_run_id": "r-20261027T090436433416-nonfinite-refusal",
+  "scores": {
+    "durability": 16,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T15:34:31.957499+00:00",
+  "total": 104
+}

@@ -24,7 +24,7 @@
   <title>Kernel Compile Barrier | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="14">
+<meta name="plan-version" content="15">
 <meta name="plan-modified" content="2026-10-27">
 </head>
 <body>
@@ -105,6 +105,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261026T214731173490-kcb-bounded-tangents" data-who="reckon-build" data-when="2026-10-27T02:15:25Z">
     <div class="r-comment-body"><p>Inlining the serial harmonic pair step preserves 10000-sample primal and JVP identity, lowers the point jet from 106218 to 101922 expanded equations (4.04%), and trims H200 cold compile from 82.4337146 s to 82.3566876 s; the 10 s target remains open. The kernel suite timed out at 35/56 base files with 28 observed base failure IDs; no tip comparison is available.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20261027-census-not-the-lever" data-who="reckon-build" data-when="2026-10-27T03:50:00Z">
+    <div class="r-comment-body"><p><strong>The census count does not drive compile time.</strong> Node kcb-bounded-tangents (run r-20261026T214731173490, closed as a negative result, not merged; tip archived at <code>refs/reckon/archive/kcb-bounded-tangents</code>) inlined the serial harmonic pair step, the census's top term at 23.2%. Primals and the 10,000-sample JVP stayed identical. The point jet fell from 106,218 to 101,922 expanded equations (4.04%). Base and tip were cold-compiled in one H200 job: 82.43 s and 82.36 s. Removing the top-ranked term's tangent did not move the compile, so bounding more census-ranked terms is not a route to the 10 s target. The kernel suite also cannot finish both arms in one 3.5 h sirius job: the base arm reached 35 of 56 files.</p><p>Before §2 or §3 is dispatched again, the compile time has to be attributed. The next measure is the XLA pass profile of the point-jet compile (time per pass, HLO size before and after fusion), not the expanded-equation count. Note also that the moment field's jacfwd Hessian is wrong near horizontal source edges (converged-forward-solve, comment c-20261027-trial-read-hessian), and node moment-field-hessian is repairing it in <code>nova/biot/polygonanalytic.py</code>. Any later tangent work here must keep that repair's finite-difference test green.</p></div>
 </div>
 </section>
 </main>

@@ -1,0 +1,93 @@
+<section id="nonfinite-refusal-evidence">
+  <h3>Refusing a non-finite cell moment by index at the solve host loops</h3>
+
+  <p id="nonfinite-refusal-why">A raise written inside the mapped step never
+  runs: every production solve route is traced, so the refusal has to leave the
+  compiled program as an output and be applied by the host loop that drives it.
+  The earlier attempt that put the raise inside the traced code was reverted
+  with the arc-root repair; this node places it where the driver can act on it.</p>
+
+  <p id="nonfinite-refusal-mechanism">The reduced Newton kernels gain
+  <code>moment_finiteness</code>, a compiled program that reconstructs the flux
+  one reduced state induces, recomputes that state's cell moments, and returns a
+  per-cell boolean mask marking every cell carrying a non-finite moment.
+  <code>_drive_trips</code> — the reduced Newton driver's host loop — reads the
+  mask at the top of each active-set trip and on the state the last trip
+  returns, and raises <code>NonFiniteCellMomentError</code> (a
+  <code>CurrentNormalisationError</code>) naming the offending cell indices.
+  The certificate solver's Newton loop is now <code>drive_linear_steps</code>
+  in <code>scripts/prototypes/fast_map_production/solver.py</code>, which takes
+  the per-cell mask of the state it is about to step from and of the state the
+  final step returns, and refuses the same way. Neither driver substitutes a
+  value: a NaN is never replaced by zero inside the solve, so the residual
+  still poisons as it did and
+  the existing non-finite-linear-action refusal remains behind this one.</p>
+
+  <p id="nonfinite-refusal-host-loops">The two host loops are
+  <code>_drive_trips</code> in <code>nova/equilibrium/reduced_newton.py</code>
+  — the <code>for trip in range(active_set_steps)</code> loop, which refuses
+  twice: at <code>reduced_newton.py:1503</code> on the state a trip is about to
+  step from, after the fused or non-fused reduction is in hand, and at
+  <code>reduced_newton.py:1576</code> on the state the last trip returns, which
+  is the terminal state the solve records, so a moment the final trip's Newton
+  or boundary step produces is refused rather than returned — and
+  <code>drive_linear_steps</code> in
+  <code>scripts/prototypes/fast_map_production/solver.py</code>, called from
+  <code>run</code> in place of the inline <code>linear_step</code> loop. That
+  loop refuses twice: at <code>solver.py:191</code> on the state it is about to
+  step from, and at <code>solver.py:200</code> on the state the final step
+  returns, which is the terminal state and panel the run records, so a moment
+  that only the terminating step produces is refused rather than written.</p>
+
+  <p id="nonfinite-refusal-row">The CPU diverted 300-cell certificate row was
+  run at the base <code>d3dcd9ce3</code> and at this node's head
+  <code>b4954b211</code> through the benchmark's own command line, each in its
+  own throwaway worktree: the committed part receipt is removed inside the
+  worktree first, so each arm solves rather than re-rendering a stored row.
+  Both arms return a terminal <code>fixed_point_residual</code> of
+  <code>0.0749196925647991</code> after 12 trips with termination
+  <code>active_set_settled</code>, the row reported unqualified and not
+  converged, <code>EXIT=0</code>, differing by no digit; an earlier three-arm
+  run through the measure driver at the base, at <code>c9fd19dcc</code> and at
+  the main checkout's <code>491406301</code> returned that same number, so the
+  refusal reads a mask without changing what the solve reaches
+  (<code>logs/row-cli/base.log</code> and <code>logs/row-cli/head.log</code>,
+  job 1297278, 00:15:38).</p>
+
+  <p id="nonfinite-refusal-row-receipt">The roughly <code>5.6e-15</code> in two
+  trips recorded for this row earlier is not reproducible as a solve, and the
+  reason is in the benchmark rather than in the tree:
+  <code>benchmarks/solovev_certificate.py:2230</code> returns early from
+  <code>_measure</code> whenever the part JSON is already present, printing
+  <code>SOLOVEV_RENDER_PERSISTED</code> and reporting the stored row.
+  Invoked that way the command completes both arms in 43 s without solving and
+  returns <code>5.626976272072871e-15</code> in 2 trips at both revisions,
+  which is the receipt's own number read back
+  (<code>logs/row-cli/slurm-1297270.out</code>, kept as the record of that
+  trap). The same receipt is what the earlier row recorded, so that figure
+  measures a stale artifact rather than either tree.</p>
+
+  <p id="nonfinite-refusal-tests">Ten tests in
+  <code>tests/test_solve_nonfinite_refusal.py</code> pass: the mask flags only
+  the planted cell and reads every moment leaf; each driver's host loop
+  requires the refusal to name the planted cell 103 on a traced route; the
+  certificate loop refuses a moment that only its terminating step produces,
+  and the reduced Newton driver refuses one that only its final trip produces,
+  opened on a finite state so the head-of-trip check passes; and both drivers
+  are exercised through their production mask — the certificate through
+  <code>certificate_cell_moments</code>, which is the closure <code>run</code>
+  builds, and the reduced Newton driver through the closure
+  <code>_reduced_kernels</code> registers as <code>moment_finiteness</code>
+  over a real machine operator, where the NaN is planted in the flux state the
+  closure reconstructs from and the same call on the unplanted state returns
+  no flag. The
+  negative control removes the check each test targets, in a scratch copy of the
+  head tree: the production closure is made to report an empty mask and the
+  driver's post-loop refusal is set aside, and exactly those two tests then
+  fail, 2 failed and 8 passed with <code>EXIT=1</code>
+  (<code>logs/negative-control-terminal.log</code>). An earlier control cut
+  both refusal calls from <code>drive_linear_steps</code> and the
+  <code>moment_finiteness</code> call from <code>_drive_trips</code>, failing 5
+  of the nine tests then present (<code>logs/negative-control-wiring.log</code>).
+  The guard is shown firing rather than merely passing.</p>
+</section>

@@ -19,6 +19,10 @@ import nova
 
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium import current, fixed_points, topology
+from nova.equilibrium.reduced_newton import (
+    non_finite_cell_mask,
+    refuse_non_finite_cell_moments,
+)
 from nova.equilibrium.solve_request import TopologyPolicy
 from scripts.analytic_oracle_fixtures import measure as fixture
 from scripts.prototypes.fast_map_production.kernel import read as fixed_shape_read
@@ -151,6 +155,50 @@ class CachedExterior:
             row[1:3],
             jnp.stack((jnp.stack((row[3], row[4])), jnp.stack((row[4], row[5])))),
         )
+
+
+def certificate_cell_moments(reference, scale):
+    """Return the per-cell non-finite moment mask of one scaled state.
+
+    ``reference`` fixes the moment array's shape and ``scale`` carries the
+    solver's scaling, so a state vector is expanded back to moments the same
+    way the step code does.  The mask is compiled, so the caller reads cells
+    from an output rather than expecting a raise inside traced code.
+    """
+
+    mask = jax.jit(non_finite_cell_mask)
+    shape = tuple(np.shape(reference))
+
+    def cell_moments(state):
+        return mask(jnp.asarray(state).reshape(shape) * scale)
+
+    return cell_moments
+
+
+def drive_linear_steps(step, point, max_steps, *, record=None, cell_moments=None):
+    """Drive the Newton loop, refusing a non-finite cell moment at each state.
+
+    The step is compiled, so a non-finite moment inside it cannot raise where
+    it is computed: the residual it poisons is refused downstream as a
+    non-finite linear action, which names no cell.  ``cell_moments`` returns
+    the per-cell mask of non-finite moments the state induces, and this host
+    loop refuses by name both before taking a step and on the state the final
+    step returns, which is the terminal state the run records.
+    """
+    history = []
+    for index in range(max_steps):
+        if cell_moments is not None:
+            refuse_non_finite_cell_moments(cell_moments(point))
+        point, row = step(point)
+        row["correction"] = index + 1
+        history.append(row)
+        if record is not None:
+            record(history)
+        if row["residual"] <= 1e-12 or not row["accepted"]:
+            break
+    if cell_moments is not None:
+        refuse_non_finite_cell_moments(cell_moments(point))
+    return point, history
 
 
 def run(args):
@@ -1210,15 +1258,19 @@ def run(args):
             jnp.max(jnp.abs(equation(point.reshape(-1), operands)))
         )
         save(output, result)
-    history = []
-    for index in range(args.max_steps):
-        point, row = linear_step(point)
-        row["correction"] = index + 1
-        history.append(row)
+    cell_moments = certificate_cell_moments(reference, scale)
+
+    def record(history):
         result["history"] = history
         save(output, result)
-        if row["residual"] <= 1e-12 or not row["accepted"]:
-            break
+
+    point, history = drive_linear_steps(
+        linear_step,
+        point,
+        args.max_steps,
+        record=record,
+        cell_moments=cell_moments,
+    )
     result["converged"] = history[-1]["residual"] <= 1e-12
     result["terminal_state"] = {
         "moments": np.asarray(point * scale).tolist(),

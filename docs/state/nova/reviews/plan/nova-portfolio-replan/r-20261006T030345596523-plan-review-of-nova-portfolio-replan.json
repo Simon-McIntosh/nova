@@ -54,6 +54,13 @@
       "finding": "deep_module-1",
       "reason": "Applies to section 4, which this wave does not build; the wave dispatches only section 5 nodes (hdf5_read deletion and the DBEntry opener). The finding is carried into section 4's node brief, recorded as a section 4 comment.",
       "when": "2026-10-27T09:22:58.458127+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "duplicate_owner-1",
+      "reason": "Applies to section 4, which this wave does not build; the wave dispatches only section 5 nodes (hdf5_read deletion and the DBEntry opener). The finding is carried into section 4's node brief, recorded as a section 4 comment.",
+      "when": "2026-10-27T09:23:11.545500+00:00"
     }
   ],
   "responses": {
@@ -62,6 +69,12 @@
       "by": "",
       "reason": "Applies to section 4, which this wave does not build; the wave dispatches only section 5 nodes (hdf5_read deletion and the DBEntry opener). The finding is carried into section 4's node brief, recorded as a section 4 comment.",
       "when": "2026-10-27T09:22:58.458127+00:00"
+    },
+    "duplicate_owner-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "Applies to section 4, which this wave does not build; the wave dispatches only section 5 nodes (hdf5_read deletion and the DBEntry opener). The finding is carried into section 4's node brief, recorded as a section 4 comment.",
+      "when": "2026-10-27T09:23:11.545500+00:00"
     },
     "reuse_search-1": {
       "action": "declined",

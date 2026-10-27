@@ -12,16 +12,18 @@ import numpy as np
 import pytest
 
 import scripts.prototypes.fast_map_production.solver as certificate_solver
-from nova.equilibrium.forward_operator import CellCurrentMoments
+from nova.equilibrium import reduced_newton
 from nova.equilibrium.reduced_newton import (
     NonFiniteCellMomentError,
     _drive_trips,
     non_finite_cell_mask,
     refuse_non_finite_cell_moments,
 )
+from tests.test_reduced_newton import machine  # noqa: F401
 
 CELLS = 256
 PLANTED = 103
+PLANTED_NODE = 40
 
 
 def planted_mask_program():
@@ -138,26 +140,80 @@ def test_certificate_host_loop_refuses_through_the_production_moments():
         )
 
 
-def test_reduced_newton_host_loop_refuses_a_moment_the_production_mask_flags():
-    program = jax.jit(non_finite_cell_mask)
+def _production_kernels(profile, seed):
+    """Build the reduced kernels and the readings one trip opens with."""
+    operator = profile.operator
+    state = jnp.asarray(seed)
+    coordinates = reduced_newton.reduced_coordinates(operator, state)
+    kernels = reduced_newton._reduced_kernels(
+        operator, coordinates, operator.external(), None, None
+    )
+    shadow = jnp.ravel(
+        jnp.asarray(operator.residual_shadow_mask(state, None), dtype=bool)
+    )
 
-    def moment_finiteness(reduced, shadow, base_state):
-        current = jnp.zeros(CELLS).at[PLANTED].set(jnp.nan)
-        return program(CellCurrentMoments(current, jnp.zeros(CELLS), jnp.zeros(CELLS)))
+    def regather(flux):
+        moments = reduced_newton._current_moments(operator, flux, None, None)
+        return reduced_newton._gather(coordinates, moments)
 
-    with pytest.raises(NonFiniteCellMomentError, match=str(PLANTED)):
+    return kernels, state, shadow, regather
+
+
+def test_the_production_moment_closure_flags_a_planted_moment(machine):  # noqa: F811
+    """The closure the solve builds finds a non-finite moment in its own input.
+
+    The NaN is planted in the flux state the closure reconstructs from and
+    reads through ``_current_moments``, so the derivation of
+    ``cell_current_moments`` is what has to notice it.  The same call on the
+    unplanted state returns no flag, which is the control that the mask is
+    reading this input rather than reporting a constant.
+    """
+    profile, seed = machine
+    kernels, state, shadow, regather = _production_kernels(profile, seed)
+    amplitudes = regather(state)
+
+    clean = np.asarray(kernels["moment_finiteness"](amplitudes, shadow, state))
+    assert not clean.any()
+
+    planted = state.at[PLANTED_NODE].set(jnp.nan)
+    flagged = np.asarray(
+        kernels["moment_finiteness"](regather(planted), shadow, planted)
+    )
+    assert flagged.any()
+    with pytest.raises(NonFiniteCellMomentError):
+        refuse_non_finite_cell_moments(jnp.asarray(flagged))
+
+
+def test_reduced_newton_refuses_a_moment_only_the_final_trip_produces(
+    machine,  # noqa: F811
+):
+    """The driver reads the mask on the state its last trip returns.
+
+    The trip opens on a finite state, so the head-of-trip check passes; the
+    boundary step then returns a state carrying a non-finite moment, which no
+    later trip would ever inspect.  The closure that finds it is the
+    production one, over the real operator.
+    """
+    profile, seed = machine
+    kernels, state, shadow, regather = _production_kernels(profile, seed)
+    planted = state.at[PLANTED_NODE].set(jnp.nan)
+
+    def boundary(reduced, trip_shadow, base_state):
+        return planted, trip_shadow, 0, 0.5, 0.0
+
+    with pytest.raises(NonFiniteCellMomentError):
         _drive_trips(
-            {"moment_finiteness": moment_finiteness},
-            jnp.zeros((4,)),
+            kernels,
+            state,
             None,
-            jnp.zeros((4,), dtype=bool),
+            shadow,
             tolerance=1e-12,
-            newton_steps=1,
+            newton_steps=0,
             active_set_steps=1,
             fused=False,
-            scoring="first",
-            regather=lambda state: state,
-            dispatched_boundary=None,
+            scoring=reduced_newton.LADDER_SCORING,
+            regather=regather,
+            dispatched_boundary=boundary,
             stream=False,
         )
 

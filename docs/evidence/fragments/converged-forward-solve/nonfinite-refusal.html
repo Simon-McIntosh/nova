@@ -24,10 +24,13 @@
 
   <p id="nonfinite-refusal-host-loops">The two host loops are
   <code>_drive_trips</code> in <code>nova/equilibrium/reduced_newton.py</code>
-  — the <code>for trip in range(active_set_steps)</code> loop, whose
-  <code>refuse_non_finite_cell_moments</code> call sits at
-  <code>reduced_newton.py:1498</code>, after the fused or non-fused reduction is
-  in hand — and <code>drive_linear_steps</code> in
+  — the <code>for trip in range(active_set_steps)</code> loop, which refuses
+  twice: at <code>reduced_newton.py:1503</code> on the state a trip is about to
+  step from, after the fused or non-fused reduction is in hand, and at
+  <code>reduced_newton.py:1576</code> on the state the last trip returns, which
+  is the terminal state the solve records, so a moment the final trip's Newton
+  or boundary step produces is refused rather than returned — and
+  <code>drive_linear_steps</code> in
   <code>scripts/prototypes/fast_map_production/solver.py</code>, called from
   <code>run</code> in place of the inline <code>linear_step</code> loop. That
   loop refuses twice: at <code>solver.py:191</code> on the state it is about to
@@ -63,24 +66,27 @@
   trap). The same receipt is what the earlier row recorded, so that figure
   measures a stale artifact rather than either tree.</p>
 
-  <p id="nonfinite-refusal-tests">Nine tests in
+  <p id="nonfinite-refusal-tests">Ten tests in
   <code>tests/test_solve_nonfinite_refusal.py</code> pass: the mask flags only
   the planted cell and reads every moment leaf; each driver's host loop
   requires the refusal to name the planted cell 103 on a traced route; the
-  certificate loop refuses a moment that only its terminating step produces;
-  and each driver is exercised through its production mask — the certificate
-  through <code>certificate_cell_moments</code>, which is the closure
-  <code>run</code> builds, and the reduced Newton driver through
-  <code>non_finite_cell_mask</code> over a real
-  <code>CellCurrentMoments</code>. The
-  negative control cuts the production mask wiring in a scratch copy of the
-  head tree — both refusal calls removed from <code>drive_linear_steps</code>
-  and the <code>moment_finiteness</code> call removed from
-  <code>_drive_trips</code> — and 5 of the nine tests then fail with
-  <code>EXIT=1</code>: both certificate host-loop tests, including the one
-  whose only non-finite state is the one the terminating step returns, the
-  certificate production-mask test, and both reduced-Newton host-loop tests,
-  the last failing by proceeding into the trip rather than by refusing
-  (<code>logs/negative-control-wiring.log</code>). The guard is shown firing
-  rather than merely passing.</p>
+  certificate loop refuses a moment that only its terminating step produces,
+  and the reduced Newton driver refuses one that only its final trip produces,
+  opened on a finite state so the head-of-trip check passes; and both drivers
+  are exercised through their production mask — the certificate through
+  <code>certificate_cell_moments</code>, which is the closure <code>run</code>
+  builds, and the reduced Newton driver through the closure
+  <code>_reduced_kernels</code> registers as <code>moment_finiteness</code>
+  over a real machine operator, where the NaN is planted in the flux state the
+  closure reconstructs from and the same call on the unplanted state returns
+  no flag. The
+  negative control removes the check each test targets, in a scratch copy of the
+  head tree: the production closure is made to report an empty mask and the
+  driver's post-loop refusal is set aside, and exactly those two tests then
+  fail, 2 failed and 8 passed with <code>EXIT=1</code>
+  (<code>logs/negative-control-terminal.log</code>). An earlier control cut
+  both refusal calls from <code>drive_linear_steps</code> and the
+  <code>moment_finiteness</code> call from <code>_drive_trips</code>, failing 5
+  of the nine tests then present (<code>logs/negative-control-wiring.log</code>).
+  The guard is shown firing rather than merely passing.</p>
 </section>

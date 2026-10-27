@@ -1472,6 +1472,11 @@ def _drive_trips(
     amplitude vector on its own, or that vector extended by the compensating
     unknowns of a constraint tuple; the loop is the same either way because
     every difference between the two lives inside the kernels.
+
+    The non-finite moment mask is read at the head of every trip and once more
+    on the state the last trip returns, which is the terminal state the caller
+    records: the check is made before the step so nothing is walked across, and
+    after the loop so nothing the final step produces escapes.
     """
     residuals: list[float] = []
     differences: list[int] = []
@@ -1562,6 +1567,17 @@ def _drive_trips(
                 else FixedPointTerminationReason.ACTIVE_SET_SETTLED
             )
             break
+
+    # The terminal state is the one the caller records and may render, and a
+    # trip's Newton or boundary step can produce a non-finite moment that no
+    # later trip's opener ever sees, so the mask is read once more on what the
+    # loop returns.
+    if active_set_steps:
+        refuse_non_finite_cell_moments(
+            kernels["moment_finiteness"](
+                reduced if fused else regather(state), shadow, state
+            )
+        )
 
     # A budget that runs out while the terminal iterate already sits inside
     # tolerance is convergence, not exhaustion: the loop kept spending trips

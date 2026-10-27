@@ -17,7 +17,7 @@
 <meta name="plan-owner" content="Simon McIntosh">
 <meta name="plan-effort-hours" content="3.0">
 <meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="46">
+<meta name="plan-version" content="47">
 <meta name="plan-modified" content="2026-10-27">
 <meta name="plan-tags" content="replan,handoff,infrastructure">
 <meta name="plan-informs" content="plasma-cell-read-fidelity,single-grid-solver-cutover,ensemble-forward-seam,forward-profile-validator-set,separatrix-spline-extraction,profile-owned-solve-domain,mast-nonaxisymmetric-physics,diiid-forward-onboarding,machine-description-retirement,diiid-pulse-replay,dual-branch-selection,efit-baseline-demonstration,mast-catalog-gpu-solve">
@@ -196,6 +196,9 @@ Done when: the report lists each coupling with files, line counts, refactor and 
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261027T112908331407-review-of-replan-dbentry-constructor-18e65a69e45a" data-who="reckon-build" data-when="2026-10-27T11:55:24.802Z">
     <div class="r-comment-body"><p>Reviewed the two commits gained since the delta base 2a8ae1f8f (3cd2f931a test(imas) and 18e65a69e docs(evidence)) over docs/evidence/fragments/nova-portfolio-replan/replan-dbentry-constructor.html, nova/imas/AGENTS.md and tests/test_imas_opener.py at head 18e65a69e; the delta answers both prior findings (the two-arm gate now runs all 26 modules to their summary line in each arm and the assertions are mutation-proven), adds no failure id, and carries two non-blocking findings about the gate shape and the recorded command.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261027T162106909912-review-of-replan-gpfs-data-root-60aa92783c40" data-who="reckon-build" data-when="2026-10-27T16:47:59.263Z">
+    <div class="r-comment-body"><p>review of replan-gpfs-data-root at head 60aa92783c40ca8b2a712a37ec2b4e0eefe0ad52 (base 0f50140bbe1a0e1d08c961ae20433f1ee7ae15c1) scores 19/13/19/14/17/16 with four non-blocking findings and zero added failures; no blocking finding, so the node can land.</p></div>
 </div>
 </section>
 </main>

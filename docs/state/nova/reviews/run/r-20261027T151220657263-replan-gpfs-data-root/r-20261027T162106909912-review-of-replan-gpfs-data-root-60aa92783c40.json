@@ -1,0 +1,77 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "nova/catalog/mast_geometry.py:534",
+    "nova/imas/mast_chain_factory.py:527",
+    "nova/imas/mast_flux_loop_adjudication.py:445",
+    "nova/media/sources/mast_efit.py:140",
+    "nova/imas/mast_vacuum_cohort.py:483",
+    "nova/imas/diiid_current.py:210",
+    "nova/calibrate/sweep.py:653",
+    "nova/imas/connect.py:115"
+  ],
+  "completed_at": "2026-10-27T16:47:59.263Z",
+  "dispatched_at": "2026-10-27T16:38:48Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/nova-portfolio-replan/replan-gpfs-data-root.html",
+      "line": 31,
+      "severity": "non-blocking",
+      "text": "The no-added-failure arm covers 14 of the 38 test modules that import a changed module, so the modules covering mast_geometry, mast_vacuum_cohort and the remaining mast_* consumers were never measured; the omission is recorded honestly, and the defaults are pinned unchanged, but a failure introduced in those consumers would not have been seen."
+    },
+    {
+      "file": "nova/calibrate/sweep.py",
+      "line": 655,
+      "severity": "non-blocking",
+      "text": "No assertion in tests/test_filepath_data_roots.py covers this route or the one in nova/imas/connect.py:117, so restoring either literal leaves the suite green; the negative control proves only the product-constant assertions fire."
+    },
+    {
+      "file": "nova/database/filepath.py",
+      "line": 78,
+      "severity": "non-blocking",
+      "text": "The new _named_root helper restates the environment-override idiom that operand_cache_root at :35-38 already carries in the same file, leaving two spellings of one rule where the owner could hold one."
+    },
+    {
+      "file": "nova/calibrate/sweep.py",
+      "line": 653,
+      "severity": "non-blocking",
+      "text": "The recorded provenance string changes from the portable ~/.cache/nova-mast/... form to an absolute per-user home path, so a written recorded_corrections document now embeds the running user's home directory where it previously embedded a tilde."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "Runtime consumers of the changed constants were opened and read: catalog geometry default arguments, the MAST chain factory, flux-loop adjudication, mast_efit, diiid_current, sweep merge_chunks and Connect.rsync.",
+    "diff": "Four commits read against 0f50140bb: named roots added to filepath.py, 10 product modules switched to them, two dead literals deleted, a Path-to-text fix in sweep.py, and a new 170-line test.",
+    "done_when": "The done_when asks for a quoted grep over nova/, a new test failing at base and passing at head, and no added failure across the importing modules; the first two hold and the third holds over a 14-of-38 subset.",
+    "goal": "The goal is to route every hard-coded GPFS and home data path in nova/ through the existing FilePath owner; the diff does that for all 12 named sites and deletes two dead literals.",
+    "manifest": "The manifest records status complete, four commits, the arm-pair exit statuses (base EXIT=4, head EXIT=1) and the recorded shortfall of the full importer set.",
+    "write_paths": "The declared write paths list 16 entries; every path in the diff against 0f50140bb is inside that list, with no write outside it."
+  },
+  "justifications": {
+    "durability": "tests/test_filepath_data_roots.py:79 and :164 assert each accessor and nine product constants against independent literals, and the negative control reddens two assertions, but no assertion covers the sweep.py:655 or connect.py:117 route.",
+    "evidence": "The new test fails at base (AttributeError: module 'nova.database.filepath' has no attribute 'mast_level1_shots', gate-fast-base.log) and head passes it, but the suite gate ran 14 of the 38 declared importer modules (docs/evidence/fragments/nova-portfolio-replan/replan-gpfs-data-root.html:31).",
+    "fit": "The module-level accessors with docstring-cited defaults follow the existing operand_cache_root idiom at nova/database/filepath.py:35-38, though the new import lands out of alphabetical order at nova/imas/diiid_current.py:17-21.",
+    "goal_fidelity": "Every site the brief names now reads a named root from nova/database/filepath.py:41-124, and an independent grep at 60aa92783 over nova/ for /work/projects, /home/ITER and ~/ returns hits only in filepath.py plus three solve_request.py docstrings.",
+    "reuse": "The change extends the owner of this capability rather than forking it, but _named_root at nova/database/filepath.py:78 restates the override idiom that operand_cache_root at :35-38 already holds instead of folding it in.",
+    "scope_discipline": "All 15 changed paths sit inside the manifest's declared write paths, and the two deletions (VACUUM_COHORT_STORE, qsub) are literals the brief licensed removing."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to route every hard-coded GPFS and home data path under nova/ through the existing FilePath owner in nova/database/filepath.py; the diff routes all 12 named sites and deletes two dead literals.\nVERDICT done_when: the done_when asks for a quoted grep, a test failing at base and passing at head, and no added failure across importing modules; the grep and the test hold and the third holds over 14 of 38 modules (docs/evidence/fragments/nova-portfolio-replan/replan-gpfs-data-root.html:31).\nVERDICT write_paths: the declared write paths list 16 entries and every path in the diff 0f50140bb..60aa92783 is inside them, including the evidence fragment and the new test.\nVERDICT manifest: the manifest records status complete, commits f729f8f7c/231012989/745123834/60aa92783, base EXIT=4 and head EXIT=1 with the two commit-hook failures present in both arms.\nVERDICT diff: four commits read commit by commit: filepath.py:41-124 adds five named roots and their accessors, ten product modules read them, VACUUM_COHORT_STORE and IO.qsub are deleted, sweep.py:655 renders the cache path to text, and tests/test_filepath_data_roots.py adds 22 tests.\nCALL_SITES: nova/catalog/mast_geometry.py:534, nova/imas/mast_chain_factory.py:527, nova/imas/mast_flux_loop_adjudication.py:445, nova/media/sources/mast_efit.py:140, nova/imas/mast_vacuum_cohort.py:483, nova/imas/diiid_current.py:210, nova/calibrate/sweep.py:653, nova/imas/connect.py:115\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: every site the brief names reads a named root from nova/database/filepath.py:41-124, and an independent grep at 60aa92783 over nova/ returns the literals only there and in three solve_request.py docstrings.\nSCORE evidence: 13\nJUSTIFICATION evidence: the new test fails at base with AttributeError for filepath.mast_level1_shots and passes at head, but the arm pair covers 14 of the 38 importer modules (docs/evidence/fragments/nova-portfolio-replan/replan-gpfs-data-root.html:31).\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: all 15 changed paths sit inside the manifest's declared write paths and no file outside that list is touched.\nSCORE durability: 14\nJUSTIFICATION durability: tests/test_filepath_data_roots.py:79 and :164 assert the accessors and nine product constants against independent literals, yet no assertion covers the routes at nova/calibrate/sweep.py:655 or nova/imas/connect.py:117.\nSCORE fit: 17\nJUSTIFICATION fit: the accessors follow the operand_cache_root idiom at nova/database/filepath.py:35-38, though the new import is out of alphabetical order at nova/imas/diiid_current.py:20.\nSCORE reuse: 16\nJUSTIFICATION reuse: the change extends the filepath owner, but _named_root at nova/database/filepath.py:78 restates the override idiom operand_cache_root already carries at :35-38.\nFINDING docs/evidence/fragments/nova-portfolio-replan/replan-gpfs-data-root.html:31 non-blocking: the no-added-failure arm covers 14 of the 38 declared importer modules, leaving the mast_geometry and remaining mast_* consumers unmeasured.\nFINDING nova/calibrate/sweep.py:655 non-blocking: no assertion covers this route or nova/imas/connect.py:117, so restoring either literal leaves the suite green.\nFINDING nova/database/filepath.py:78 non-blocking: _named_root restates the environment-override idiom operand_cache_root already carries at :35-38 in the same file.\nFINDING nova/calibrate/sweep.py:653 non-blocking: the recorded provenance string changes from ~/.cache/nova-mast/... to an absolute per-user path, so written corrections documents now embed the running user's home directory.\n",
+  "review_run_id": "r-20261027T162106909912-review-of-replan-gpfs-data-root-60aa92783c40",
+  "reviewed_base_sha": "0f50140bbe1a0e1d08c961ae20433f1ee7ae15c1",
+  "reviewed_head_sha": "60aa92783c40ca8b2a712a37ec2b4e0eefe0ad52",
+  "reviewed_run_id": "r-20261027T151220657263-replan-gpfs-data-root",
+  "rubric": "landed",
+  "scores": {
+    "durability": 14,
+    "evidence": 13,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 16,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T16:49:09.265048+00:00",
+  "total": 98
+}

@@ -13,6 +13,7 @@ import re  # noqa: E402
 import matplotlib  # noqa: E402
 
 matplotlib.use("Agg")
+matplotlib.rcParams["svg.hashsalt"] = "limited-flux-panel"
 import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.lines import Line2D  # noqa: E402
 from matplotlib.text import Text  # noqa: E402
@@ -45,18 +46,6 @@ def main():
     )
     figure, axes = plt.subplots(figsize=(14, 7.2), dpi=100)
     poloidal_axes(axes)
-    reference_contours = draw_scattered_contours(
-        axes,
-        coordinates[:, 0],
-        coordinates[:, 1],
-        analytic,
-        levels,
-        wall,
-        color="#929292",
-        linewidth=4.0,
-        zorder=2,
-    )
-    reference_contours.set_linestyle("dashed")
     draw_scattered_contours(
         axes,
         coordinates[:, 0],
@@ -66,14 +55,28 @@ def main():
         wall,
         color=DEFAULT_INK.flux_color,
         linewidth=3.0,
+        zorder=2,
+    )
+    reference_contours = draw_scattered_contours(
+        axes,
+        coordinates[:, 0],
+        coordinates[:, 1],
+        analytic,
+        levels,
+        wall,
+        color="#676767",
+        linewidth=1.5,
         zorder=3,
     )
+    reference_contours.set_linestyle("dashed")
     draw_wall(axes, wall[:, 0], wall[:, 1])
     draw_nulls(
         axes,
         reference_roots[0],
         reference_roots[1:],
-        style=DEFAULT_INK.variant(axis_color="#929292", xpoint_color="#929292"),
+        style=DEFAULT_INK.variant(
+            axis_color="#676767", xpoint_color="#676767", axis_markersize=12.0
+        ),
         contain=wall,
     )
     draw_nulls(
@@ -85,15 +88,45 @@ def main():
         ),
         contain=wall,
     )
+    axes.plot(
+        reference_roots[0, 0],
+        reference_roots[0, 1],
+        marker="^",
+        markersize=12,
+        markerfacecolor="none",
+        markeredgecolor="#676767",
+        markeredgewidth=1.5,
+        linestyle="none",
+        zorder=7,
+    )
     axes.set_aspect("equal")
     figure.legend(
         handles=[
-            Line2D([], [], color="#929292", lw=4.0, ls="--", label="analytic flux"),
+            Line2D([], [], color="#676767", lw=1.5, ls="--", label="analytic flux"),
             Line2D([], [], color=DEFAULT_INK.flux_color, lw=3.0, label="solved flux"),
+            Line2D(
+                [],
+                [],
+                color="#676767",
+                marker="^",
+                markersize=10,
+                markerfacecolor="none",
+                linestyle="none",
+                label="analytic axis",
+            ),
+            Line2D(
+                [],
+                [],
+                color=DEFAULT_INK.flux_color,
+                marker="^",
+                markersize=7,
+                linestyle="none",
+                label="solved axis",
+            ),
         ],
         loc="upper center",
         bbox_to_anchor=(0.5, 0.98),
-        ncol=2,
+        ncol=4,
         frameon=False,
         fontsize=14,
     )
@@ -134,7 +167,9 @@ def main():
         count=1,
     )
     assert count == 1
-    args.output.write_text(image)
+    args.output.write_text(
+        "\n".join(line.rstrip() for line in image.splitlines()) + "\n"
+    )
     print(
         f"panel={args.output} residual={panel['terminal_residual']} "
         f"converged={panel['converged']} levels={levels.tolist()}",

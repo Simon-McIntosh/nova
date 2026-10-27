@@ -1,0 +1,34 @@
+<section data-reckon="evidence" data-node="replan-imas-hdf5-read">
+<h2 id="replan-imas-hdf5-read">Delete the unused h5py reader of IMAS-written HDF5</h2>
+<p><code>nova/imas/hdf5_read.py</code> opened IMAS-written HDF5 directly through
+<code>h5py</code>, bypassing imas-python, and had zero callers. IMAS data is read
+only through <code>imas.DBEntry</code>, so the module is deleted rather than routed
+(commit <code>c326a7653</code>).</p>
+
+<h3 id="replan-imas-hdf5-read-search">Caller search, before and after</h3>
+<pre><code>$ grep -rn "hdf5_read" nova/ tests/ scripts/ benchmarks/
+(no output; exit 1)
+</code></pre>
+<p>The search is quoted with its command. The same command was run before the
+deletion and after it, returning exit 1 with no output both times: nothing in the
+product tree, the tests, the scripts or the benchmarks names the module.</p>
+
+<h3 id="replan-imas-hdf5-read-h5py">Remaining h5py imports under nova/</h3>
+<pre><code>$ grep -rn "h5py" nova/ --include=*.py
+(none: the only match in the whole package was the deleted line)
+</code></pre>
+<p>No module under <code>nova/</code> imports <code>h5py</code> at all, so there is
+no h5py read of IMAS data and no non-IMAS h5py read to list.</p>
+
+<h3 id="replan-imas-hdf5-read-gate">Two-arm suite gate</h3>
+<p>Every test module importing <code>nova.imas</code> (103 files) ran as one fresh
+pytest process per file with a separate <code>--basetemp</code>, base and head arms
+concurrent in one sirius job, no timeout around any arm. Both arms ran to
+completion at 103 of 103 files. The base arm leaves 26 failing test ids, the head
+arm 11, and all 11 head ids were already non-passing at base: <strong>zero added
+failures</strong>. The head arm is strictly better on the one file that differs,
+where the base run additionally produced 8 fixture errors. Logs:
+<code>&lt;run&gt;/gate/base-suite.log</code> and <code>&lt;run&gt;/gate/head-suite.log</code>,
+each headed by its revision, tree and <code>nova.__file__</code> and ended by a
+bare <code>EXIT=</code> line.</p>
+</section>

@@ -1,0 +1,1220 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 3,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "d06fe116aca44c5c80d0aefc2ee96670da1328b9",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T100537293263-compile-pass-profile/brief.txt",
+    "sha256": "aa46c64ec4d953827ccdcb215c58c7361544da4c6a408c391bb9f1b8e6670596"
+  },
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 5692796,
+      "input_tokens_cumulative": 5692796,
+      "output_tokens": 16171,
+      "output_tokens_cumulative": 16171,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 15603,
+    "files": 10,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "test_shot_to_shot_state_flips_are_preserved_not_averaged",
+        "path": "tests/calibrate/test_pair_state.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 210
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_certified_limited_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_certified_diverted_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_certified_diverted_2000_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 13,
+        "name": "test_banked_inputs_align_on_every_frame_identity",
+        "path": "tests/imas/test_diiid_circuit_ensemble_assessment.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 210
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 260,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 184,
+        "name": "test_critical_node_capacity_overflow_is_jittable_and_visible",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_cold_and_cached_plants_are_identical",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 328,
+        "name": "test_the_cache_is_written_by_the_circuit_tier_serialisers",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 371,
+        "name": "test_machine_passive_layers_change_screening_and_preserve_one_layer",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 203
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 623,
+        "name": "_slice_process",
+        "path": "tests/test_forward_profile_corsica.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 175,
+        "name": "test_native_and_torax_rungs_share_the_typed_call_and_receipt",
+        "path": "tests/test_forward_transport.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 211
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 203
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_receipt_keeps_every_fitted_shot_unknown_without_can_evidence",
+        "path": "tests/test_mast_coil_case_temperature.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 210
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "_numeric_receipt",
+        "path": "tests/test_transport_ensemble.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 210
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/compile_pass_profile/analyse.py"
+      },
+      "window_line": 204
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "9d23934dab799d7af0fac4166c0dfe5aec26f823",
+    "b7b00d9743e12f2b4496d1b76301cbc909662293",
+    "b506f807506e8808445f0a1adeceeb210f13706e",
+    "0444f06c276d2c89a777374c06902624fec3f841",
+    "a199ec70eb812553935555c25e2cbf693e81f3b6",
+    "56097c60b0a9d3edb2980c9dec2606e2426e4672",
+    "02d82b775814c7faf27695be32ce43a2312f4ec7",
+    "4cab176b6bcbd19503f4118308a3990d37e97c37"
+  ],
+  "completed_at": "2026-10-27T12:45:57Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-27T10:08:21Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "bash /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/compile-pass-profile/scripts/prototypes/compile_pass_profile/job.sh",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T100537293263-compile-pass-profile/pass-profile/job6.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.29012345679012347,
+    "plan": "kernel-compile-barrier",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-27T11:05:46.919978+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-27T10:05:46Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 24,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 9,
+    "headroom": 2,
+    "mean_context": 120000,
+    "observed_at": "2026-10-27T10:05:22Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 24,
+      "aggregate_tokens_per_second": 317.745,
+      "detail": "",
+      "mean_tokens_per_second": 41.809,
+      "observed_at": "2026-10-27T10:05:22Z",
+      "runs": 7.6,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-27T12:45:57Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T100537293263-compile-pass-profile/manifest.md",
+  "member": "disposable-r-20261027T100537293263-compile-pass-profile",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "compile-pass-profile",
+  "node_definition": {
+    "after": [],
+    "brief": "/home/ITER/mcintos/.cache/nova-s21-briefs/oct27/compile-pass-profile.txt",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T100537293263-compile-pass-profile/brief.txt",
+    "brief_sha256": "aa46c64ec4d953827ccdcb215c58c7361544da4c6a408c391bb9f1b8e6670596",
+    "capability": {
+      "class": "general",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "moderate",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1109,
+          "cached_input_tokens": 419214,
+          "input_tokens": 420325,
+          "output_tokens": 375,
+          "reasoning_output_tokens": 86,
+          "total_tokens": 420700,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "session_id": "s21-nova"
+    },
+    "done_when": "The fragment carries a time-per-pass figure and recommends one lever for the next compile node, stating the seconds of the 82 s cold compile that lever accounts for",
+    "estimated_hours": null,
+    "goal": "Attribute the point jet's H200 cold compile to XLA passes",
+    "id": "compile-pass-profile",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-27T10:05:46Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 24,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 9,
+      "headroom": 2,
+      "mean_context": 120000,
+      "observed_at": "2026-10-27T10:05:22Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 24,
+        "aggregate_tokens_per_second": 317.745,
+        "detail": "",
+        "mean_tokens_per_second": 41.809,
+        "observed_at": "2026-10-27T10:05:22Z",
+        "runs": 7.6,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T100537293263-compile-pass-profile/manifest.md",
+    "negative_control": "the small-program positive control in the same job",
+    "plan": "kernel-compile-barrier",
+    "regenerate_paths": [],
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§5",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "scripts/prototypes/compile_pass_profile",
+      "docs/evidence/fragments/kernel-compile-barrier/compile-pass-profile.html",
+      "docs/figures/kernel-compile-barrier/compile-pass-profile"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 961896.0,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "compile-pass-profile",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-27T10:07:56.534597+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:snapshot",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.631,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 445.25,
+      "context-estimate": 7.916,
+      "records": 322.936,
+      "verdict-inputs": 157.544
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.29012345679012347,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "4cab176b6bcbd19503f4118308a3990d37e97c37",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "02d82b775814c7faf27695be32ce43a2312f4ec7",
+    "reviewed_head_sha": "4cab176b6bcbd19503f4118308a3990d37e97c37",
+    "scores": {
+      "durability": 14,
+      "evidence": 18,
+      "fit": 17,
+      "goal_fidelity": 19,
+      "reuse": 19,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 107
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261027T100537293263-compile-pass-profile",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§5",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "2d042ecb-ae50-456c-86d5-35c1bb156062",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 27706343,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 752.188,
+    "generated_tokens": 140684,
+    "generation_seconds": 467.64,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 68.6,
+    "machine_seconds": 284.548,
+    "peak_input_tokens": 157956,
+    "tokens_per_second": 300.84,
+    "wall_tokens_per_second": 187.03
+  },
+  "time_budget": "60m",
+  "tool_steps": 114.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 9456,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 3,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-27T12:46:01Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-27T12:33:16Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261027T100537293263-compile-pass-profile",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 22539,
+    "worker_pid": 2577082
+  },
+  "worker_seconds": 4723,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

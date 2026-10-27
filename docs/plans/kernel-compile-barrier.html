@@ -24,7 +24,7 @@
   <title>Kernel Compile Barrier | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="28">
+<meta name="plan-version" content="29">
 <meta name="plan-modified" content="2026-10-27">
 </head>
 <body>
@@ -139,6 +139,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-20261027-compile-pass-profile-landed" data-who="reckon-build" data-when="2026-10-27T13:10:00Z">
     <div class="r-comment-body"><p><strong>§5 done.</strong> The point jet's H200 cold compile is attributed to 96 XLA passes (91.19 s of 95.12 s). <code>variadic-op-splitter</code> and <code>multi_output_fusion</code> take 51.31 s over a graph the splitter grows from 146 to 100,579 instructions.</p><p>§2 and §3 now take this as their lever: reduce or restructure the variadic ops the point program hands to XLA, so the splitter has less to expand. They do not bound census-ranked terms.</p><p>edge-tangent-base-failures adds that the three-primals tangent bound is below the reference derivative's own cost on the H200 (about 9.5 for cn_pole_moment), so §2's done-when needs restating from this profile before it is dispatched.</p><p><a href="/nova/evidence/archive/kernel-compile-barrier-landed.html#compile-pass-profile">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261027T100537293263-compile-pass-profile" data-who="reckon-build" data-when="2026-10-27T12:45:57Z">
+    <div class="r-comment-body"><p>Point jet H200 cold compile profiled per HLO pass: 95.12 s wall with dumping (trace 3.25 s, lowering 0.43 s), 91.19 s attributed across 96 passes (95.9%) with 0.85 s before the first dump and 3.07 s after the last summing to the wall exactly; variadic-op-splitter 34.23 s and multi_output_fusion 17.08 s over the graph the splitter expands from 146 to 100,579 instructions take 51.31 s of it, so the lever is the size the program hands the fusion pipeline, not the expanded-equation count.</p></div>
 </div>
 </section>
 </main>

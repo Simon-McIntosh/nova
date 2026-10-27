@@ -50,6 +50,7 @@ from nova.calibrate.transition import (
     refine_established_transitions,
 )
 from nova.calibrate.windows import PulseWindow, classify_pulse
+from nova.database.filepath import derived_cache_root
 
 DRIVE_THRESHOLD = 1.0e3
 """Absolute current that labels a conductor as driven, in amperes."""
@@ -652,7 +653,11 @@ def merge_chunks(
         )
     )
     document = recorded_corrections(
-        pulses, "~/.cache/nova-mast/vacuum-signatures/archive/signature_series.npz"
+        pulses,
+        derived_cache_root()
+        / "vacuum-signatures"
+        / "archive"
+        / "signature_series.npz",
     )
     write_correction_set(root / "recorded_corrections.yaml", document)
     summary = {

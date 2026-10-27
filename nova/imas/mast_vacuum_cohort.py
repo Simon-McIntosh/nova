@@ -37,6 +37,7 @@ from typing import Any, Iterable, Mapping, Sequence
 
 import numpy as np
 
+from nova.database.filepath import mast_level1_shots
 from nova.imas.mast_block_scale import (
     BlockScaleTable,
     ScaleCorrection,
@@ -44,7 +45,7 @@ from nova.imas.mast_block_scale import (
     promoted_block_scales,
 )
 
-SHOT_STORE = Path("/work/projects/imas_gpu/mast/level1/shots")
+SHOT_STORE = mast_level1_shots()
 """Level-1 MAST shot store holding one Zarr group per shot."""
 
 CURRENT_GROUP = "amc"

@@ -24,7 +24,9 @@ import numpy as np
 from matplotlib.colors import LinearSegmentedColormap, TwoSlopeNorm
 from matplotlib.lines import Line2D
 
-HUNT = Path("/home/ITER/mcintos/.cache/nova-mast/misfit-hunt")
+from nova.database.filepath import misfit_hunt_root
+
+HUNT = misfit_hunt_root()
 ROOT = Path(
     subprocess.run(
         [

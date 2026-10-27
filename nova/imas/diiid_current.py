@@ -17,6 +17,7 @@ from nova.equilibrium.conductor_current import (
     UnknownCurrentPrior,
     resolve_conductor_currents,
 )
+from nova.database.filepath import diiid_machine_source
 from nova.equilibrium.forward import ForwardProfile
 
 from .diiid_description import (
@@ -73,7 +74,7 @@ CIRCUIT_RELATIONS = {
     )
     for drive in PF_ACTIVE_CIRCUIT.drives
 }
-DEFAULT_ACTIVE_COIL_ENTRY = Path("/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc")
+DEFAULT_ACTIVE_COIL_ENTRY = diiid_machine_source()
 DEFAULT_ACTIVE_COIL_DD_VERSION = "3.41.0"
 
 

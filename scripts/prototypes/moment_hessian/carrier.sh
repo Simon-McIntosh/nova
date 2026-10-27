@@ -9,8 +9,9 @@ set -uo pipefail
 
 export TMPDIR=/tmp
 scratch=$(mktemp -d "$TMPDIR/$USER-${SLURM_JOB_ID}-XXXX")
-trap 'printf "scratch contents before removal: %s\n" "$scratch"; find "$scratch" -mindepth 1 -maxdepth 1 -print; rm -rv "$scratch"' EXIT
+trap 'printf "removing scratch: %s\n" "$scratch"; find "$scratch" -mindepth 1 -maxdepth 1 -print; rm -r "$scratch"' EXIT
 export TMPDIR="$scratch"
+export XLA_PYTHON_CLIENT_PREALLOCATE=false
 source_tree=$1
 revision=$2
 run=$3

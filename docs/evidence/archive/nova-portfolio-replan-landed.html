@@ -47,6 +47,11 @@
     <p>The draft's timing inputs were checked against the repository. <code>tests/test_equilibrium_forward_solve.py</code> now carries an accelerator-routes test at 4649 s on CPU (749 s on the H200). The independent review scored the node 100 of 100.</p>
     <p>A suite run holds light promotions only while the latest record failed to collect or overran its budget, and no run has been made. The first wave close is a separate, scheduled measurement: it holds the H200 card for hours, and its GPU leg is unmeasured. Two coordinator decisions are open. Slow-marked tests under ten minutes run in neither pass; <code>NOVA_SUITE_MARKEXPR</code> is the remedy. A budget kill leaves the routed SLURM jobs running, and their ids are in the run's <code>*.h200.launch.log</code> files, for cancellation by id.</p>
   </section>
+  <section id="thin-interface-refactors">
+    <h2>§5 — the thin-interface refactors the census found unowned</h2>
+    <p>All four nodes landed on 2026-10-27, each reviewed with no blocking finding and no added test failure.</p><ul><li><strong>replan-imas-hdf5-read</strong> (<code>117e41bd2</code>): <code>nova/imas/hdf5_read.py</code>, an h5py reader of IMAS data with no callers, is deleted.</li><li><strong>replan-dbentry-constructor</strong> (<code>de45db7d5</code>): every <code>imas.DBEntry</code> construction goes through <code>open_db_entry</code> in <code>nova/imas/dataset.py</code>, and <code>nova/imas/db_entry.py</code> is deleted.</li><li><strong>replan-gpfs-data-root</strong> (<code>f6dc883c2</code>): the hard-coded GPFS and home paths in <code>nova/</code> resolve through named <code>FilePath</code> roots. Each root can be overridden by one environment variable, with the previous literal as its default. Recorded provenance keeps its portable form. All 38 importing test modules were measured.</li><li><strong>replan-evidence-tooling-paths</strong> (<code>87b7b8fbb</code>): 61 absolute crew paths in 45 benchmarks and 4 scripts resolve through <code>benchmarks/receipt_locations.py</code>, with the per-benchmark overrides kept. A scan test guards against their return.</li></ul><p>Non-blocking notes left open:</p><ul><li>The connect guard does not catch a literal reintroduced through a module constant.</li><li>Some gate logs carry stale command headers.</li></ul>
+  </section>
+
 </main>
 </body>
 </html>

@@ -17,7 +17,7 @@
 <meta name="plan-owner" content="Simon McIntosh">
 <meta name="plan-effort-hours" content="3.0">
 <meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="50">
+<meta name="plan-version" content="51">
 <meta name="plan-modified" content="2026-10-27">
 <meta name="plan-tags" content="replan,handoff,infrastructure">
 <meta name="plan-informs" content="plasma-cell-read-fidelity,single-grid-solver-cutover,ensemble-forward-seam,forward-profile-validator-set,separatrix-spline-extraction,profile-owned-solve-domain,mast-nonaxisymmetric-physics,diiid-forward-onboarding,machine-description-retirement,diiid-pulse-replay,dual-branch-selection,efit-baseline-demonstration,mast-catalog-gpu-solve">
@@ -26,7 +26,7 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="moderate">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;}">
 </head>
 <body>
 <main class="plan-doc">
@@ -80,7 +80,7 @@
 
 
 <h2 id="s5">§5 — Land the thin-interface refactors the census found unowned</h2>
-<section data-reckon="section" data-id="s5" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-attempts="0" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s5" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-attempts="0" data-status="done" data-links=""></section>
 <p>The §2 census (<a href="/nova/evidence/replan-2026-09-24/thin-interfaces">thin-interfaces.md</a>) named five nova couplings with no owning followup. Each is one local-lane node, sequenced away from files held by S21 and S22 nodes:</p><ul><li><strong>replan-imas-hdf5-read</strong> (census 4.2): <code>nova/imas/hdf5_read.py</code> reads IMAS-written HDF5 through h5py and has zero callers, so it is deleted, not routed. Done when the file is gone, no module under <code>nova/</code> imports h5py on IMAS data, and no test module shows an added failure.</li><li><strong>replan-dbentry-constructor</strong> (census 4.1): the imas DBEntry constructor is called from 15 modules; they route through the opener already in use, the <code>db_entry</code> property in <code>nova/imas/dataset.py</code> (:723 to :735), which carries the DD-version policy and is extended with the backend policy. The second, independent <code>imas.DBEntry</code> that <code>is_valid</code> opens in the same file (:739) routes through that property too. The subclass <code>DBEntry</code> in <code>nova/imas/db_entry.py</code> (:15) has zero call sites and is deleted, not adopted. Done when the 15 call sites use the dataset opener, <code>nova/imas/db_entry.py</code> is gone, and no added failure appears in their test modules.</li><li><strong>replan-gpfs-data-root</strong> (census 5.1): product code under <code>nova/</code> hard-codes GPFS and home paths; they route through the existing path owner, <code>FilePath</code> in <code>nova/database/filepath.py</code> (<code>_resolve_absolute</code> :209, <code>_resolve_relative</code> :231), No second resolver. FilePath carries no GPFS evidence-root code today; the receipts-out-of-git migration (f-replan-receipts-out-of-git) adds it there, sequenced after artifacts-carry-no-worktree-paths' node acnwp-rewrite-data-artifacts, which holds <code>filepath.py</code>. Done when the census grep over <code>nova/</code> returns zero literal paths outside the resolver.</li><li><strong>replan-evidence-tooling-paths</strong> (census 5.2 and 1.3): benchmarks and scripts read crew run directories and worktree paths by absolute literal; route them through the existing <code>repository_relative</code> helper (<code>nova/database/filepath.py</code>:62) with repo-relative receipt paths, not a new resolver. Done when the census greps over <code>benchmarks/</code> and <code>scripts/</code> return zero absolute crew or worktree literals in source.</li></ul><p>The committed crew-state mirror under <code>docs/state/nova/</code> (census 1.1) is reckon's to retire and is reported upstream, not built here.</p>
 
 <section data-reckon="followups" id="followups" class="r-followups">

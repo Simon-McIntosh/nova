@@ -1,0 +1,38 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-27T13:05:20.721Z",
+  "dispatched_at": "2026-10-27T12:56:21Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/compile_pass_profile/figure.py",
+      "line": 43,
+      "severity": "non-blocking",
+      "summary": "The left panel draws the first 12 rows of a 96-row pass table and nothing in the picture says the list is cut: no 'top 12' in the axis label, no continuation mark, no remainder row, no summed share. The twelve shown account for 76.22 s of the 91.19 s attributed, so 84 further passes carrying 14.97 s - 16.4% of the attributed compile - are absent, and the figcaption's 'Time per pass for the point jet's H200 cold compile' reads as if the panel were complete. A reader cannot tell from the picture whether the bars are all the passes, the costliest subset, or a thresholded set. Marking the truncation in the axis label or caption, or drawing the remainder as one 'other 84 passes' bar, would make the panel's own claim checkable. This is the same finding the previous figure review recorded at the earlier head; it has been folded to a plan section rather than repaired here."
+    },
+    {
+      "file": "scripts/prototypes/compile_pass_profile/figure.py",
+      "line": 70,
+      "severity": "non-blocking",
+      "summary": "Every bar in the left panel is the sum of that pass over all its dumps, not a single-pass time: the receipt groups by pass name and accumulates seconds and a dump count, so the grey ir-no-opt bar's 4.5 s is 253 dumps and the blue zero_sized_hlo_elimination bar's 1.6 s is 18 dumps. Drawn on an axis labelled 'time per pass [s]' beside genuine single-dump bars, the picture invites a reader to compare 4.5 s against 34.2 s as two passes of different cost when it is 253 executions against one. The fragment's table states the dump counts ('LLVM stage, 253 dumps') and the figure says nothing, so a reader who has only the figure over-weights the codegen stages and cannot tell that the total is an aggregate. Naming the unit as attributed time per pass across all its dumps, or annotating the dump count on the aggregated rows, would remove the ambiguity."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261027T125329159851-review-of-compile-pass-profile-4cab176b6bcb-figure",
+  "reviewed_base_sha": "d06fe116aca44c5c80d0aefc2ee96670da1328b9",
+  "reviewed_head_sha": "4cab176b6bcbd19503f4118308a3990d37e97c37",
+  "reviewed_run_id": "r-20261027T100537293263-compile-pass-profile",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "pass - text clears its background everywhere, measured on the rendered PNG: value and legend-glyph ink #0b0b0b at 19.68:1 and tick/axis-label ink #52514e at 7.94:1 against white; the bar fills are #3366cc at 5.37:1 and #999999 at 2.85:1, the grey reading clearly as data at bar scale against a #999999-neutral style rule rather than the 2:1 grey the repository rejects",
+    "data_ink": "pass - ink is bars, value labels, tick labels, axis labels and one frameless two-entry legend; no gridlines, no shading and no mark that carries no quantity",
+    "decoration": "pass - white background throughout with no gradient, fill, band or theme; the top and right spines are absent on both panels and only the axes carrying a scale are drawn",
+    "label_collision": "pass - nothing is clipped or overlapping: measured ink spans columns 18-1379 of 1400 and rows 20-701 of 720, so no mark comes within 18 px of a canvas edge; the longest tick label zero_sized_hlo_elimination clears the left edge and the axis, every value label sits outside its bar end, and a 19 px clear white band (columns 962-981) separates the panels so the right panel's before-first-dump / passes / after-last-dump tick labels do not meet the left panel's value labels",
+    "legibility": "pass - read at a glance on the 1400x720 canvas: 12 ranked horizontal bars each carrying its own value label, tick and value text at 14 pt, axis labels at 16 pt, and the right panel's three-way wall split labelled 0.85 / 91.19 / 3.07 above its bars",
+    "table_form": "pass - the left panel is a ranked magnitude comparison over 12 passes and the right panel is a part-to-whole split whose message is the ratio of the passes bar to the two bracketing bars; neither is a table drawn as an image, and the ten-costliest-pass table the section asks for exists beside the figure in the evidence fragment"
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T13:05:23.755608+00:00",
+  "total": null
+}

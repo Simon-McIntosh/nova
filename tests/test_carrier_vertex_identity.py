@@ -36,6 +36,9 @@ REPOSITORY_ROOT = pathlib.Path(nova.__file__).resolve().parents[1]
 SEPARATRIX_SAMPLES = 1441
 WALL_PERTURBATION_M = 4.0e-12  # applied to each coordinate, 5.7e-12 m displacement
 RECEIPT_ENVIRONMENT = "NOVA_CARRIER_VERTEX_RECEIPT"
+REFERENCE_COEFFICIENT_DIGEST = (
+    "01818d5d423fe5028709b9ac955d67f0cbbc5252a936edfa82cb36931c4c7805"
+)
 
 
 def _hex_sampling(centres: np.ndarray, coilset: CoilSet) -> np.ndarray:
@@ -254,6 +257,14 @@ def _solve_receipt(threads: int) -> dict:
 
 
 def test_reference_solve_is_bit_identical_under_different_thread_counts():
+    """One answer whatever the thread count, and it is the recorded answer.
+
+    Comparing two thread counts alone cannot see a library solve on this
+    twelve-row system: the library returns the same last bits at one and four
+    threads, so such a test passes a solve whose answer is still the library's
+    to choose. The coefficient digest pins the answer the fixed-order
+    elimination produces, and a library solve departs from it.
+    """
     single = _solve_receipt(1)
     many = _solve_receipt(4)
 
@@ -261,6 +272,7 @@ def test_reference_solve_is_bit_identical_under_different_thread_counts():
     assert single["axis"] == many["axis"]
     assert single["separatrix"] == many["separatrix"]
     assert single["digest"] == many["digest"]
+    assert single["digest"] == REFERENCE_COEFFICIENT_DIGEST
 
 
 if __name__ == "__main__":

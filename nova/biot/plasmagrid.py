@@ -229,35 +229,18 @@ class PlasmaGrid(BaseGrid, PlasmaLoc):
         return centres[:, None, :] + analytic_offsets[None, :, :]
 
     @staticmethod
-    def _support_roundoff_bound(target: Target) -> float:
-        """Return the atomic-mesh coordinate tolerance of the material support."""
-        points = np.vstack(
-            [
-                np.asarray(polygon.poly.exterior.coords, dtype=np.float64)[:, :2]
-                for polygon in target.poly
-            ]
-        )
-        scale = max(
-            float(np.max(np.abs(points))),
-            float(np.ptp(points)),
-            1.0,
-        )
-        return 128.0 * np.finfo(np.float64).eps * scale
-
-    @staticmethod
     def _index_sampling_vertices(
-        vertices: np.ndarray, tolerance: float
+        vertices: np.ndarray,
     ) -> tuple[np.ndarray, np.ndarray]:
         """Deduplicate fixed samples with the support mesh's node identity.
 
         The identity is the moment geometry's, so the sample bank and the
         moments index one lattice. A sample vertex is the set of cell slots that
         share it, merged where the copies agree to well inside a corner spacing
-        rather than by quantising the coordinate, and the coordinates are
-        published in sorted order so two builds of one lattice agree whatever
-        order the cells are listed in. ``tolerance`` is the support round-off
-        bound and is no longer the merge width; the merge width is relative to
-        the lattice scale, which is the only place it can be measured from.
+        rather than by quantising the coordinate, and the merge width is
+        relative to the lattice scale, which is the only place it can be
+        measured from. The coordinates are published in sorted order so two
+        builds of one lattice agree whatever order the cells are listed in.
         """
         from nova.equilibrium.stencil_mesh import lattice_vertex_index  # noqa: PLC0415
 
@@ -267,10 +250,7 @@ class PlasmaGrid(BaseGrid, PlasmaLoc):
     def _build_direct_samples(self, target: Target) -> None:
         """Bank the authoritative pre-clip hex vertices and their coupling rows."""
         vertices = self._preclip_sampling_vertices(target)
-        tolerance = self._support_roundoff_bound(target)
-        coordinates, cell_sample_nodes = self._index_sampling_vertices(
-            vertices, tolerance
-        )
+        coordinates, cell_sample_nodes = self._index_sampling_vertices(vertices)
         self._sampling_vertices = vertices
         self._sample_coordinates = coordinates
         self._cell_sample_nodes = cell_sample_nodes

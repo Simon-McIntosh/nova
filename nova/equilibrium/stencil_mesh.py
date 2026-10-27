@@ -331,9 +331,13 @@ def lattice_vertex_groups(polygons) -> tuple[np.ndarray, np.ndarray]:
     drift of ``7.4e-13`` m, and every slot is compared against the neighbouring
     hash cells on both sides of its own, so no bin edge can separate a pair.
 
-    A candidate group is rejected when its own spread reaches the merge width,
-    which keeps a wall-clipped sliver from collapsing into a degenerate
-    polygon, and two slots of one cell are never joined.
+    A link is refused when joining it would make its group's spread reach the
+    merge width, which keeps a wall-clipped sliver from collapsing into a
+    degenerate polygon without dissolving the group's other links: a chain of
+    near neighbours whose far ends are an over-wide pair keeps every link but
+    that one. Links are taken in ascending separation, ties broken by
+    coordinate, so the refused link is chosen from the geometry alone and two
+    slots of one cell are never joined.
 
     The answer depends on the coordinates alone, never on the order the cells
     are listed in, so a grid that realises one lattice in a different order
@@ -357,13 +361,6 @@ def lattice_vertex_groups(polygons) -> tuple[np.ndarray, np.ndarray]:
             parent[index], index = root, parent[index]
         return root
 
-    def join(first: int, second: int) -> None:
-        left, right = root_of(first), root_of(second)
-        if left != right:
-            if right < left:
-                left, right = right, left
-            parent[right] = left
-
     scale = max(float(np.max(np.abs(points))) if len(points) else 1.0, 1.0)
     reach = 1.0e-9 * scale
     sites = np.floor(points / reach).astype(np.int64)
@@ -386,28 +383,44 @@ def lattice_vertex_groups(polygons) -> tuple[np.ndarray, np.ndarray]:
                         found.append(other)
         candidates[index] = sorted(found)
 
-    pairs = []
+    def group_spread(group: list[int]) -> float:
+        if len(group) < 2:
+            return 0.0
+        block = points[np.asarray(group, dtype=np.intp)]
+        return float(
+            np.max(
+                np.hypot(
+                    block[:, np.newaxis, 0] - block[np.newaxis, :, 0],
+                    block[:, np.newaxis, 1] - block[np.newaxis, :, 1],
+                )
+            )
+        )
+
+    def link_key(link: tuple[float, int, int]) -> tuple:
+        separation, first, second = link
+        lower, upper = sorted((tuple(points[first]), tuple(points[second])))
+        return (separation, lower, upper)
+
+    links = []
     for index in range(len(points)):
         for other in candidates[index]:
             if other > index:
-                pairs.append((index, other))
-                join(index, other)
-    members: dict[int, list[int]] = {}
-    for index in range(len(points)):
-        members.setdefault(root_of(index), []).append(index)
-    for group in members.values():
-        if len(group) < 2:
+                links.append(
+                    (float(np.hypot(*(points[other] - points[index]))), index, other)
+                )
+    links.sort(key=link_key)
+    members: dict[int, list[int]] = {index: [index] for index in range(len(points))}
+    for _, first, second in links:
+        left, right = root_of(first), root_of(second)
+        if left == right:
             continue
-        spread = np.asarray(points)[group]
-        separation = np.max(
-            np.hypot(
-                spread[:, np.newaxis, 0] - spread[np.newaxis, :, 0],
-                spread[:, np.newaxis, 1] - spread[np.newaxis, :, 1],
-            )
-        )
-        if separation >= reach:
-            for index in group:
-                parent[index] = index
+        group = members[left] + members[right]
+        if group_spread(group) >= reach:
+            continue
+        if right < left:
+            left, right = right, left
+        parent[right] = left
+        members[left].extend(members.pop(right))
     return (
         np.asarray([root_of(index) for index in range(parent.size)], dtype=np.intp),
         rows,

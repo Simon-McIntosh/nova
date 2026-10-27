@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="nova-portfolio-replan">
+<meta name="plan-evidence-for" content="nova-portfolio-replan">
+<title>Criterion receipt provenance repair: the benchmark change moved no result</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+</head>
+<body><main class="plan-doc">
+<header><h1>Criterion receipt provenance repair</h1></header>
+<section id="provenance-receipt-repair-landing">
+<p><strong>What landed.</strong> <code>tests/test_efit_parity_criterion_provenance.py::test_checked_receipt_preserves_results_across_live_source_provenance</code> is green again, and its guard is now the one it was meant to be. The checked receipt <code>docs/figures/efit-forward-parity/convergence-criterion-provenance.json</code> is regenerated from the live tree, and the test no longer names the source digests that may differ. It requires instead that every recorded <em>result</em> is reproduced exactly — the per-reference Richardson estimates and pass decisions, the rescore, the units audit, the claim bounds and the protected-artifact verification — while the provenance a rebuild derives live (the verbatim evidence beside a bound, one cited-path digest, and the digests of the sources the audit names) may move as sources are edited.</p>
+<p><strong>Which side was wrong: the receipt, not a result.</strong> Reproduced at base <code>624860447</code>: the regenerated receipt differed from the checked one in eight leaves, the seven the test allowed plus <code>('source_digests', 'benchmarks/efit_parity_tared_external_field.py')</code>. That benchmark changed at <code>f7e94d844</code>, a refactor that made <code>exact_current_moments</code>'s <code>support_arm</code> a required keyword and named it at all twenty-five call sites, each with the arm it already ran. The benchmark supplies no criterion value at all: <code>build_receipt</code> uses it only as a <code>source_digests</code> entry. Compared across the two receipts, <code>discretisation_consistent_criterion.per_reference</code> and <code>rescore</code> are equal as whole objects — all six estimates and pass flags identical, <code>21978/35</code> at <code>0.005299693489256675</code>, <code>21983/35</code> at <code>0.0015446543055689574</code>, <code>21985/51</code> at <code>0.0013073838879026024</code>, <code>21986/46</code> with no estimate and a registered pass, <code>21989/55</code> at <code>0.0016933846141990048</code>, <code>22086/43</code> at <code>0.0035417937581059254</code>, and the rescore still reading <code>1 of 6</code> registered against <code>6 of 6</code> discretisation-consistent. The regenerated receipt's diff is eight lines, every one of them a provenance field.</p>
+<p><strong>Measure.</strong> Base arm then head arm, one fresh pytest process per file, both modules that import the criterion module, in one <code>sirius</code> job (1297706). Base <code>624860447</code>: <code>tests/test_efit_parity_criterion_provenance.py</code> 1 failed, 9 passed, <code>EXIT=1</code> (only the known red); <code>tests/test_bound_classification.py</code> 5 passed, <code>EXIT=0</code>. Head <code>adba0ba02</code>: 10 passed, <code>EXIT=0</code>, and 5 passed, <code>EXIT=0</code>. Zero added failures; the only failure either arm carries is the one this node removed.</p>
+<p><strong>Negative control</strong> (declared: change one criterion result by one ulp in a scratch copy of the receipt; the test fails). A scratch tree mirrors the worktree by symlink with a real copy of the receipt in which <code>per_reference[0].fine_mesh_richardson_error_estimate</code> is moved from <code>0.005299693489256675</code> to <code>0.005299693489256676</code>. The same tree with the unmutated copy passes (1 passed, <code>EXIT=0</code>, the positive control); with the mutation the test fails on <code>('discretisation_consistent_criterion', 'per_reference', 0, 'fine_mesh_richardson_error_estimate')</code>, 1 failed, <code>EXIT=1</code>.</p>
+</section>
+</main></body>
+</html>

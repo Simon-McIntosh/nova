@@ -24,11 +24,16 @@
 
   <p id="nonfinite-refusal-host-loops">The two host loops are
   <code>_drive_trips</code> in <code>nova/equilibrium/reduced_newton.py</code>
-  (the <code>for trip in range(active_set_steps)</code> loop, whose check sits
-  after the fused/non-fused reduction is in hand) and
-  <code>drive_linear_steps</code> in
+  — the <code>for trip in range(active_set_steps)</code> loop, whose
+  <code>refuse_non_finite_cell_moments</code> call sits at
+  <code>reduced_newton.py:1498</code>, after the fused or non-fused reduction is
+  in hand — and <code>drive_linear_steps</code> in
   <code>scripts/prototypes/fast_map_production/solver.py</code>, called from
-  <code>run</code> in place of the inline <code>linear_step</code> loop.</p>
+  <code>run</code> in place of the inline <code>linear_step</code> loop. That
+  loop refuses twice: at <code>solver.py:191</code> on the state it is about to
+  step from, and at <code>solver.py:200</code> on the state the final step
+  returns, which is the terminal state and panel the run records, so a moment
+  that only the terminating step produces is refused rather than written.</p>
 
   <p id="nonfinite-refusal-row">The CPU diverted 300-cell certificate row was
   measured at three revisions with one driver: the base <code>d3dcd9ce3</code>,
@@ -44,10 +49,16 @@
   <code>logs/row/base.log</code>, <code>logs/row/head.log</code> and
   <code>logs/row/main.log</code> and the three arms differ by no digit.</p>
 
-  <p id="nonfinite-refusal-tests">Five tests in
+  <p id="nonfinite-refusal-tests">Nine tests in
   <code>tests/test_solve_nonfinite_refusal.py</code> pass: the mask flags only
-  the planted cell and reads every moment leaf, and each driver's host loop
-  requires the refusal to name the planted cell 103 on a traced route. The
+  the planted cell and reads every moment leaf; each driver's host loop
+  requires the refusal to name the planted cell 103 on a traced route; the
+  certificate loop refuses a moment that only its terminating step produces;
+  and each driver is exercised through its production mask — the certificate
+  through <code>certificate_cell_moments</code>, which is the closure
+  <code>run</code> builds, and the reduced Newton driver through
+  <code>non_finite_cell_mask</code> over a real
+  <code>CellCurrentMoments</code>. The
   negative control removes the two host-loop refusal calls from a scratch
   archive of the head tree; both planted-NaN host-loop tests then fail
   (<code>negative-control.log</code>, 2 failed, 3 passed, <code>EXIT=1</code>),

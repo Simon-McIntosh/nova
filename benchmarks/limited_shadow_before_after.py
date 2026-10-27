@@ -24,6 +24,7 @@ from scipy.interpolate import LinearNDInterpolator
 
 from nova.media import poloidal
 from nova.media.ink import DEFAULT_INK, poloidal_axes
+from benchmarks.receipt_locations import crew_reports
 
 ROOT = Path(__file__).resolve().parents[1]
 FIGURE_ROOT = ROOT / "docs/figures/cut-cell-current-attribution/limited-shadow"
@@ -31,11 +32,7 @@ DEFAULT_FIGURE = FIGURE_ROOT / "lfs-contours-before-after.png"
 DEFAULT_RECEIPT = FIGURE_ROOT / "lfs-contours-before-after-receipt.json"
 DEFAULT_ORACLE_FIGURE = FIGURE_ROOT / "oracle-overlay-error.png"
 DEFAULT_ORACLE_RECEIPT = FIGURE_ROOT / "oracle-overlay-error-receipt.json"
-DEFAULT_ORACLE_REPORT = (
-    Path.home()
-    / ".config/reckon/crew/reports/nova/s19-handoff/oracle-overlay"
-    / "report.md"
-)
+DEFAULT_ORACLE_REPORT = crew_reports("nova/s19-handoff/oracle-overlay/report.md")
 SOLVE_RECEIPT = FIGURE_ROOT / "solve-receipt.json"
 SHADOW_RECEIPT = FIGURE_ROOT / "receipt.json"
 SOURCE_PART_ROOT = (
@@ -43,10 +40,9 @@ SOURCE_PART_ROOT = (
 )
 UNMASKED_PART_ROOT = FIGURE_ROOT / "solve-parts/chord"
 SOLVE_PART_ROOT = FIGURE_ROOT / "solve-parts"
-WEAK_REPRODUCTION_PART = (
-    Path.home()
-    / ".config/reckon/crew/reports/nova/s19-handoff/limited-shadow"
-    / "reproduction/parts/weak-rotation-reactor-static-cells-2500.json"
+WEAK_REPRODUCTION_PART = crew_reports(
+    "nova/s19-handoff/limited-shadow/reproduction/parts/"
+    "weak-rotation-reactor-static-cells-2500.json"
 )
 SOURCE_REVISION = "3082be61cb6dd4a4d9cae1889993717c4e63e58c"
 ROWS = (

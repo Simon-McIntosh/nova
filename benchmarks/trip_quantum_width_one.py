@@ -63,6 +63,7 @@ from benchmarks.strict_exit_incidence import (
 from nova.equilibrium import reduced_newton
 from nova.equilibrium.topology import TopologyClass
 from nova.imas.mast_vacuum_cohort import SHOT_STORE
+from benchmarks.receipt_locations import crew_reports
 from nova.jax.config import (
     configure_dtypes,
     configure_persistent_compilation_cache,
@@ -78,10 +79,7 @@ DEFAULT_FIGURE = (
     ROOT
     / "docs/figures/millisecond-converged-solve/trip-quantum/width-one-compiled.png"
 )
-DEFAULT_REPORT = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/millisecond/"
-    "trip-quantum-compiled.md"
-)
+DEFAULT_REPORT = crew_reports("nova/millisecond/trip-quantum-compiled.md")
 SOLVER_QUANTUM_RECEIPT = (
     ROOT / "docs/figures/solver-trip-orchestration/trip-quantum.json"
 )

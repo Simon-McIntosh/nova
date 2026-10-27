@@ -28,6 +28,7 @@ from nova.equilibrium import reduced_newton
 from nova.equilibrium.topology import TopologyClass
 from nova.jax.config import configure_dtypes
 from scripts.labeller_batch import shard
+from benchmarks.receipt_locations import crew_reports
 
 
 DEFAULT_INPUT = Path(
@@ -38,10 +39,7 @@ DEFAULT_OUTPUT = Path(
     "docs/figures/playable-forward-solve/wall-shadow-firing/"
     "wall-shadow-firing-census.json"
 )
-DEFAULT_REPORT = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/"
-    "wall-shadow-firing-census.md"
-)
+DEFAULT_REPORT = crew_reports("nova/playable/wall-shadow-firing-census.md")
 EXPECTED_SHOT_COUNT = 7
 
 

@@ -32,6 +32,7 @@ from benchmarks.forward_labeller_throughput import (
 )
 from nova.equilibrium import reduced_newton
 from scripts.labeller_batch import shard
+from benchmarks.receipt_locations import crew_reports
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -434,10 +435,7 @@ def main() -> None:
     parser.add_argument(
         "--report",
         type=Path,
-        default=Path(
-            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/"
-            "compensator-jacobian-response.md"
-        ),
+        default=crew_reports("nova/playable/compensator-jacobian-response.md"),
     )
     args = parser.parse_args()
     print(json.dumps(measure(args.output.resolve(), args.report.resolve()), indent=2))

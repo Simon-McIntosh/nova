@@ -71,6 +71,7 @@ from nova.jax.config import (
 from nova.media import poloidal
 from nova.media.ink import DEFAULT_INK, poloidal_axes
 from nova.media.sources.frame import inside_wall_units
+from benchmarks.receipt_locations import crew_runs
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -3118,10 +3119,7 @@ def main() -> None:
         job_parser.add_argument(
             "--log-directory",
             type=Path,
-            default=Path(
-                "/home/ITER/mcintos/.config/reckon/crew/runs/"
-                "r-20260907T165537745800-fsa-coil-edit-latency/logs"
-            ),
+            default=crew_runs("r-20260907T165537745800-fsa-coil-edit-latency/logs"),
         )
 
     harvest_parser = subparsers.add_parser("harvest")

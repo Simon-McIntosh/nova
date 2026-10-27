@@ -21,6 +21,7 @@ import jax.numpy as jnp
 import numpy as np
 import zarr
 
+from benchmarks.receipt_locations import crew_reports
 from scripts.labeller_batch.shard import (
     SHOT_STORE,
     _slice_inputs,
@@ -36,10 +37,7 @@ DEFAULT_CORPUS_ROOT = Path(
 DEFAULT_OUTPUT_DIRECTORY = (
     ROOT / "docs/figures/playable-forward-solve/zero-converged-block"
 )
-DEFAULT_REPORT = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/"
-    "zero-converged-block.md"
-)
+DEFAULT_REPORT = crew_reports("nova/playable/zero-converged-block.md")
 DEFAULT_BLOCK_START = 22_475
 DEFAULT_BLOCK_END = 22_626
 DEFAULT_NEIGHBOURS_PER_SIDE = 20

@@ -29,6 +29,7 @@ import matplotlib.pyplot as plt
 
 from benchmarks.diiid_batched_throughput import build_workload
 from nova.jax.config import configure_dtypes
+from benchmarks.receipt_locations import crew_runs
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -36,10 +37,7 @@ DEFAULT_OUTPUT = (
     ROOT / "docs/figures/single-grid-solver-cutover/h200-solve-profile.json"
 )
 DEFAULT_FIGURE = ROOT / "docs/figures/single-grid-solver-cutover/h200-solve-profile.png"
-BANKED_RUN = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/runs/"
-    "r-20260901T053948341346-sse-h200-step-decomposition"
-)
+BANKED_RUN = crew_runs("r-20260901T053948341346-sse-h200-step-decomposition")
 LADDER_RECEIPT = (
     ROOT / "docs/figures/diiid-forward-onboarding/throughput/"
     "batched_throughput_budget.json"

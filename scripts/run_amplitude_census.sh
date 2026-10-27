@@ -4,7 +4,7 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64G
 #SBATCH --job-name=amplitude-census
-#SBATCH --output=/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T052734465931-cca-unit-amplitude-current-census/amplitude-census-%j.log
+#SBATCH --output=amplitude-census-%j.log
 
 script_path="$(realpath -e -- "${BASH_SOURCE[0]}")"
 repository_root="$(git -C "$(dirname "${script_path}")" rev-parse --show-toplevel)"

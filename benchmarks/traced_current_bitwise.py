@@ -21,6 +21,7 @@ from benchmarks import mast_response_carrier_warm as response_carrier
 from nova.equilibrium.fixed_point import FixedPointTerminationReason
 from nova.equilibrium.topology import TopologyClass
 from nova.imas.mast_solve_inputs import SHOT_STORE
+from benchmarks.receipt_locations import crew_runs
 from nova.jax.config import (
     configure_dtypes,
     configure_persistent_compilation_cache,
@@ -450,8 +451,7 @@ def main() -> None:
         job_parser.add_argument(
             "--log-directory",
             type=Path,
-            default=Path(
-                "/home/ITER/mcintos/.config/reckon/crew/runs/"
+            default=crew_runs(
                 "r-20260902T180320449650-fsa-traced-current-bitwise/logs"
             ),
         )

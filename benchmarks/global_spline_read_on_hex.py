@@ -41,12 +41,11 @@ from benchmarks import limiter_read_resolution_audit as limiter_audit
 from benchmarks import solovev_certificate as certificate
 from nova.jax.config import configure_dtypes
 from nova.linalg.tensor_spline import TensorBSpline, fit_tensor_spline
+from benchmarks.receipt_locations import crew_reports
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_REPORT_DIRECTORY = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/spline-read"
-)
+DEFAULT_REPORT_DIRECTORY = crew_reports("nova/s19-review/spline-read")
 DEFAULT_FIGURE_DIRECTORY = (
     ROOT / "docs/figures/cut-cell-current-attribution/spline-read"
 )

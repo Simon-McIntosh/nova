@@ -40,6 +40,7 @@ from nova.imas.diiid_description import (
     vacuum_response,
 )
 from nova.jax.config import configure_dtypes
+from benchmarks.receipt_locations import crew_reports
 
 
 DEFAULT_DATA = prior.DEFAULT_DATA
@@ -48,10 +49,7 @@ RECEIPT_NAME = "grid_residual_current_regression_receipt.json"
 ORACLE_NAME = "grid_residual_composition_oracle.parquet"
 CONTOUR_PREFIX = "grid_residual_contours"
 REUSE_MAP = prior.REUSE_MAP
-TIER_SEAM_MAP = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/"
-    "coil-circuit-discovery/tier-seam-map.md"
-)
+TIER_SEAM_MAP = crew_reports("nova/coil-circuit-discovery/tier-seam-map.md")
 REGULARISATION_GRID = tuple(float(value) for value in np.logspace(-12.0, 2.0, 43))
 
 

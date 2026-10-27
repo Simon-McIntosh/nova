@@ -41,6 +41,7 @@ from nova.database.filepath import relativize_cprofile_dump
 from nova.equilibrium import fixed_point
 from nova.equilibrium.topology import TopologyClass
 from nova.jax.config import configure_dtypes, configure_persistent_compilation_cache
+from benchmarks.receipt_locations import crew_reports
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -53,10 +54,7 @@ DEFAULT_STATS = OUTPUT_ROOT / "production-solve.pstats"
 DEFAULT_STATS_TEXT = OUTPUT_ROOT / "production-solve-cprofile.txt"
 DEFAULT_MEASUREMENT = OUTPUT_ROOT / "cprofile-measurement.json"
 DEFAULT_FLAME = OUTPUT_ROOT / "production-solve-native.svg"
-DEFAULT_REPORT = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/millisecond/"
-    "production-solve-host-profile.md"
-)
+DEFAULT_REPORT = crew_reports("nova/millisecond/production-solve-host-profile.md")
 DEFAULT_CACHE = Path("/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile")
 REFERENCE_SHOT = 22086
 REFERENCE_SLICE = 43
@@ -67,10 +65,7 @@ TRACE_RECEIPT_PATH = (
     "docs/figures/millisecond-converged-solve/trip-quantum/"
     "hessenberg-trace/profile.json"
 )
-TRACE_REPORT = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/millisecond/"
-    "condition-discriminator-trace.md"
-)
+TRACE_REPORT = crew_reports("nova/millisecond/condition-discriminator-trace.md")
 SUMMARY_FIELDS = (
     "active_set_iterations",
     "attempted_newton_promotions",

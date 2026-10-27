@@ -52,11 +52,10 @@ from benchmarks import limiter_read_resolution_audit as limiter_audit
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium.stencil_mesh import RING_CONDITION_LIMIT
 from nova.jax.config import configure_dtypes
+from benchmarks.receipt_locations import crew_reports
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_REPORT_DIRECTORY = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/dual-stencil"
-)
+DEFAULT_REPORT_DIRECTORY = crew_reports("nova/s19-review/dual-stencil")
 DEFAULT_FIGURE_DIRECTORY = (
     ROOT / "docs/figures/cut-cell-current-attribution/dual-stencil"
 )

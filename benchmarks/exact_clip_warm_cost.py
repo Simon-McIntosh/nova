@@ -42,14 +42,13 @@ from nova.equilibrium import clip_quadrature
 from nova.equilibrium import forward_operator
 from nova.equilibrium.topology import TopologyClass
 from nova.jax.config import configure_dtypes, configure_persistent_compilation_cache
+from benchmarks.receipt_locations import crew_reports
 
 
 ROOT = Path(__file__).resolve().parents[1]
 PRODUCTION_ROOT = Path(forward_operator.__file__).resolve().parents[2]
 DEFAULT_OUTPUT_ROOT = ROOT / "docs/figures/cut-cell-current-attribution/exact-clip-cost"
-DEFAULT_REPORT_ROOT = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/exact-clip-cost"
-)
+DEFAULT_REPORT_ROOT = crew_reports("nova/s19-handoff/exact-clip-cost")
 REQUESTED_CELLS = (110, 300, 1000)
 REFERENCE_CELLS = (110, 300)
 REPEATS = 3

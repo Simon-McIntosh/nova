@@ -40,6 +40,7 @@ from benchmarks.receipt_raster_check import _profile_and_seed
 from nova.equilibrium import fixed_point
 from nova.equilibrium.topology import TopologyClass
 from nova.jax.config import configure_dtypes, configure_persistent_compilation_cache
+from benchmarks.receipt_locations import crew_reports
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -48,10 +49,7 @@ DEFAULT_OUTPUT = OUTPUT_ROOT / "profile.json"
 DEFAULT_TABLE = OUTPUT_ROOT / "outer-iterations.csv"
 DEFAULT_FIGURE = OUTPUT_ROOT / "outer-loop-trace.png"
 DEFAULT_EVENT_LOG = OUTPUT_ROOT / "callback-events.jsonl"
-DEFAULT_REPORT = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/millisecond/"
-    "compiled-outer-loop-trace.md"
-)
+DEFAULT_REPORT = crew_reports("nova/millisecond/compiled-outer-loop-trace.md")
 DEFAULT_CACHE = Path("/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile")
 HOST_PROFILE = (
     ROOT / "docs/figures/millisecond-converged-solve/trip-quantum/host-profile/"

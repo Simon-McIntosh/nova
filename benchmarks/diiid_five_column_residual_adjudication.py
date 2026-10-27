@@ -41,6 +41,7 @@ from nova.imas.diiid_description import (
     vacuum_response,
 )
 from nova.jax.config import configure_dtypes
+from benchmarks.receipt_locations import crew_reports, crew_runs
 
 
 DEFAULT_DATA = tare.DEFAULT_DATA
@@ -50,12 +51,8 @@ OHMIC_RECEIPT = Path(
     "docs/figures/diiid-forward-onboarding/ohmic-circuit/"
     "ohmic_circuit_retest_receipt.json"
 )
-REUSE_MAP = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/"
-    "coil-circuit-discovery/reuse-map.md"
-)
-DIAGNOSTIC_MANIFEST = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/runs/"
+REUSE_MAP = crew_reports("nova/coil-circuit-discovery/reuse-map.md")
+DIAGNOSTIC_MANIFEST = crew_runs(
     "r-20260821T204446383949-ohmic-circuit-driven-vacuum-field/manifest.md"
 )
 RECEIPT_NAME = "five_column_residual_adjudication_receipt.json"

@@ -41,12 +41,11 @@ from benchmarks import solovev_certificate as certificate
 from nova.jax.config import configure_dtypes
 from nova.media import poloidal
 from nova.media.ink import DEFAULT_INK, poloidal_axes
+from benchmarks.receipt_locations import crew_reports
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_REPORT_DIRECTORY = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/topology-ladder"
-)
+DEFAULT_REPORT_DIRECTORY = crew_reports("nova/s19-review/topology-ladder")
 DEFAULT_FIGURE_DIRECTORY = (
     ROOT / "docs/figures/cut-cell-current-attribution/topology-ladder"
 )

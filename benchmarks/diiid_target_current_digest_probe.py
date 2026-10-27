@@ -29,6 +29,7 @@ from benchmarks import efit_forward_parity_slice as mast
 from benchmarks import efit_reproduction_gate as gate
 from nova.equilibrium.topology import TopologyClass
 from nova.jax.config import configure_dtypes
+from benchmarks.receipt_locations import crew_reports
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_RECEIPT = (
@@ -36,9 +37,7 @@ DEFAULT_RECEIPT = (
     / "docs/figures/diiid-vertical-force-balance/two-field-gate"
     / "target-current-digest-probe.json"
 )
-DEFAULT_ARTIFACTS = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/digest-probe"
-)
+DEFAULT_ARTIFACTS = crew_reports("nova/s19-handoff/digest-probe")
 
 VARIANT_NAMES = (
     "row_one",

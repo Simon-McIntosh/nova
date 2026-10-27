@@ -25,6 +25,7 @@ import traceback
 from typing import Any, Sequence
 
 import numpy as np
+from benchmarks.receipt_locations import crew_reports
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -32,10 +33,7 @@ DEFAULT_OUTPUT = (
     ROOT / "docs/figures/playable-forward-solve/batched-labeller/"
     "h200-throughput-receipt.json"
 )
-DEFAULT_REPORT = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/"
-    "batched-labeller-receipt.md"
-)
+DEFAULT_REPORT = crew_reports("nova/playable/batched-labeller-receipt.md")
 DEFAULT_ACCEPTANCE_OUTPUT = (
     ROOT / "docs/figures/playable-forward-solve/batched-labeller/"
     "h200-acceptance-receipt.json"

@@ -46,19 +46,15 @@ from benchmarks import solovev_certificate as certificate
 from nova.jax.config import configure_dtypes
 from nova.media import poloidal
 from nova.media.ink import DEFAULT_INK, poloidal_axes
+from benchmarks.receipt_locations import crew_reports
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_REPORT_DIRECTORY = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/vertex-census"
-)
+DEFAULT_REPORT_DIRECTORY = crew_reports("nova/s19-review/vertex-census")
 DEFAULT_FIGURE_DIRECTORY = (
     ROOT / "docs/figures/cut-cell-current-attribution/vertex-census"
 )
-PRODUCTION_RECEIPT = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/"
-    "topology-ladder/receipt.json"
-)
+PRODUCTION_RECEIPT = crew_reports("nova/s19-review/topology-ladder/receipt.json")
 REQUESTED_CELL_COUNTS = (110, 200, 300, 342, 400, 500, 750, 1000, 2500)
 STATIC_CASES = (
     "weak-rotation-reactor-static",

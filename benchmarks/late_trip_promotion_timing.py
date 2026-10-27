@@ -46,6 +46,7 @@ from benchmarks.receipt_raster_check import _profile_and_seed
 from nova.equilibrium import fixed_point
 from nova.equilibrium.topology import TopologyClass
 from nova.jax.config import configure_dtypes, configure_persistent_compilation_cache
+from benchmarks.receipt_locations import crew_reports
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -55,10 +56,7 @@ DEFAULT_TABLE = OUTPUT_ROOT / "promotions.csv"
 DEFAULT_TRIP_TABLE = OUTPUT_ROOT / "per-trip.csv"
 DEFAULT_FIGURE = OUTPUT_ROOT / "promotion-wall-by-trip.png"
 DEFAULT_EVENT_LOG = OUTPUT_ROOT / "promotion-events.jsonl"
-DEFAULT_REPORT = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/millisecond/"
-    "late-trip-promotion-timing.md"
-)
+DEFAULT_REPORT = crew_reports("nova/millisecond/late-trip-promotion-timing.md")
 DEFAULT_CACHE = Path("/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile")
 FROZEN_PROFILE = (
     ROOT / "docs/figures/millisecond-converged-solve/trip-quantum/"

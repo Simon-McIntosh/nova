@@ -48,6 +48,7 @@ from nova.equilibrium import (
 from nova.equilibrium.topology import TopologyClass
 from nova.jax.config import configure_dtypes, configure_persistent_compilation_cache
 from nova.linalg import split_spline
+from benchmarks.receipt_locations import crew_reports
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -56,11 +57,8 @@ DEFAULT_OUTPUT = (
     / "docs/figures/millisecond-converged-solve/trip-quantum/remainder/remainder.json"
 )
 DEFAULT_FIGURE = DEFAULT_OUTPUT.with_name("remainder.png")
-DEFAULT_REPORT = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/millisecond/"
-    "trip-remainder-attribution.md"
-)
-DEFAULT_TRACE_ROOT = DEFAULT_REPORT.parent / "trip-remainder-trace"
+DEFAULT_REPORT = crew_reports("nova/millisecond/trip-remainder-attribution.md")
+DEFAULT_TRACE_ROOT = crew_reports("nova/millisecond/trip-remainder-trace")
 DEFAULT_CACHE = Path("/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile")
 SOURCE_RECEIPT = (
     ROOT / "docs/figures/millisecond-converged-solve/trip-quantum/one-read/profile.json"

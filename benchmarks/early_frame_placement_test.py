@@ -61,14 +61,12 @@ from nova.equilibrium.constraint import compensator_rule_name
 from nova.equilibrium.flux_surface_geometry import SurfaceGeometryError
 from nova.media import poloidal
 from scripts.labeller_batch import shard
+from benchmarks.receipt_locations import crew_reports
 
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = ROOT / "docs/figures/playable-forward-solve/early-frame-placement"
-DEFAULT_REPORT = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/"
-    "early-frame-placement-test.md"
-)
+DEFAULT_REPORT = crew_reports("nova/playable/early-frame-placement-test.md")
 SHOT = 27079
 # Converged frames first, unconverged controls second, exactly as the
 # candidate instrument's row order.

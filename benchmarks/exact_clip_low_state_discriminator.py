@@ -49,6 +49,7 @@ from nova.media import poloidal
 from nova.media.ink import DEFAULT_INK, poloidal_axes
 from scripts.analytic_oracle_fixtures import measure as oracle_fixture
 from scripts.oracle_rebaseline import measure as recovery
+from benchmarks.receipt_locations import crew_reports
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -58,10 +59,7 @@ DEFAULT_OUTPUT_ROOT = (
 DEFAULT_REFERENCE_PARTS = (
     ROOT / "docs/figures/cut-cell-current-attribution/exact-clip-seed/parts"
 )
-DEFAULT_REPORT_PATH = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/"
-    "s19-handoff/exact-clip-low-state/report.md"
-)
+DEFAULT_REPORT_PATH = crew_reports("nova/s19-handoff/exact-clip-low-state/report.md")
 CASE_NAME = "weak-rotation-reactor-static"
 REQUESTED_ROWS = (-110, -300)
 TRIP_SNAPSHOTS = (1, 2, 4)

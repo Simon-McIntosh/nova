@@ -20,11 +20,11 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="jax,h200,throughput,equilibrium">
   <meta name="plan-blocks" content="converged-forward-solve">
-  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;}">
   <title>Kernel Compile Barrier | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="27">
+<meta name="plan-version" content="28">
 <meta name="plan-modified" content="2026-10-27">
 </head>
 <body>
@@ -69,7 +69,7 @@
     <p>Done when: (1) on the H200, fresh process and cache disabled, the kernel-backed topology read compiles in at most 60 s, with an executable of at most 50 MB and at most 64 GB of host memory, at 132, 300 and 550 cells; (2) the strict xfail on <code>test_kernel_compile_growth</code> is removed and the test passes there; (3) the module-level strict marker <code>kernel_compile_expected_failure</code> (<code>tests/equilibrium/test_topology_read.py:39</code>, raising <code>KernelCompileBarrier</code>) is removed from every test that carries it, and the seven <code>kernel_compile_budget</code> fixture ids then pass on their own assertions, in one H200 job that runs the whole file. Leaving the marker in place while the compile meets the bound turns those ids into strict XPASS failures, so the marker removal is part of this clause.</p>
 
     <h2 id="s5">§5 — Attribute the point jet&#x27;s compile before bounding anything</h2>
-<section data-reckon="section" data-id="s5" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s5" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
 <p>The census count is not what sets the compile time. Inlining §1's top-ranked term, <code>_harmonic_pair_step</code> (23.2% of the point jet's expanded equations), cut that count by 4.04% and moved the H200 cold compile from 82.43 s to 82.36 s (archived tip <code>refs/reckon/archive/kcb-bounded-tangents</code>). So bounding more census-ranked terms does not reach the 10 s target, and §2 and §3 cannot pick their mechanism until the time is attributed. This section measures where it goes. It changes no product code.</p><p>Done when: (1) one fresh-process, cache-disabled H200 compile of the point jet at main splits its wall into trace, lowering and XLA compile, and the XLA compile into time per HLO pass or pass pipeline that accounts for at least 90% of it, with HLO instruction counts before and after fusion and the ten costliest passes in a table; (2) as a positive control, a small program whose compile takes a few seconds, profiled in the same job, has at least 90% of its compile wall attributed by the same instrument; (3) the evidence carries a figure of time per pass and recommends one lever for §2 and §3, stating how many of the 82 s cold-compile seconds that lever accounts for. §2 and §3 then state their mechanism from that recommendation.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
@@ -136,6 +136,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261027T100839626666-edge-tangent-base-failures" data-who="reckon-build" data-when="2026-10-27T12:21:30Z">
     <div class="r-comment-body"><p>Recorded every failure in tests/biot/test_edge_term_tangents.py and tests/biot/test_elliptic_tangent_recurrences.py with its assertion, measured value against bound, wall and H200 result: nine edge failures are the 300 s per-test default cutting off compile rows on both devices, two are a primal bit-identity difference seen only on the GPU so far, one is a stale strict expected failure, and the elliptic compile rows are not device-qualified: four exceed three on the H200 where the reference JVP arm is also at or above three. Fragment docs/evidence/fragments/kernel-compile-barrier/edge-tangent-base-failures.html, no figure.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20261027-compile-pass-profile-landed" data-who="reckon-build" data-when="2026-10-27T13:10:00Z">
+    <div class="r-comment-body"><p><strong>§5 done.</strong> The point jet's H200 cold compile is attributed to 96 XLA passes (91.19 s of 95.12 s). <code>variadic-op-splitter</code> and <code>multi_output_fusion</code> take 51.31 s over a graph the splitter grows from 146 to 100,579 instructions.</p><p>§2 and §3 now take this as their lever: reduce or restructure the variadic ops the point program hands to XLA, so the splitter has less to expand. They do not bound census-ranked terms.</p><p>edge-tangent-base-failures adds that the three-primals tangent bound is below the reference derivative's own cost on the H200 (about 9.5 for cn_pole_moment), so §2's done-when needs restating from this profile before it is dispatched.</p><p><a href="/nova/evidence/archive/kernel-compile-barrier-landed.html#compile-pass-profile">evidence</a></p></div>
 </div>
 </section>
 </main>

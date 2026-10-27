@@ -25,6 +25,11 @@
     <p>Merge <code>44f73061f</code>. The census section of <a href="/nova/research/compile-cost-evidence.html">compile-cost-evidence</a> reports all 18 two-size graph rows (unique and expanded equations, StableHLO and executable bytes, cold compile wall and peak host memory) and ranks source functions against the point jet's 106,218 expanded equations: <code>_harmonic_pair_step</code> carries 24,653 (23.21 percent). Titan compiled all 18 rows; the H200 reservation pended on Resources, so cold timing is titan-qualified. On CPU the topology read's compile exceeded 450 GB and the certificate inputs exceeded 64 GB at 132 cells. Review 103/120.</p>
   </section>
 
+  <section id="compile-pass-profile">
+    <h2>§5 — the point jet&#x27;s compile attributed to XLA passes</h2>
+    <p>Node compile-pass-profile, merged at <code>6babcf370</code> (head <code>4cab176b6</code>).</p><ul><li>One fresh-process, cache-disabled H200 cold compile of the point jet: 95.12 s wall with dumping, trace 3.25 s, lowering 0.43 s.</li><li>91.19 s is attributed across 96 HLO passes (95.9%). With 0.85 s before the first dump and 3.07 s after the last, the parts sum to the wall.</li><li>A 1024-step control in the same job attributes 95.1% of a 7.64 s compile.</li><li><code>variadic-op-splitter</code> (34.23 s) and <code>multi_output_fusion</code> (17.08 s) take 51.31 s, over a graph the splitter expands from 146 to 100,579 HLO instructions.</li></ul><p><strong>Recommended lever:</strong> the size of the program handed to the fusion pipeline, that is, the variadic ops the splitter breaks apart, not the expanded-equation count.</p><p>Receipt: <code>docs/figures/kernel-compile-barrier/compile-pass-profile/pass-profile.json</code>. Figure: <code>/nova/figures/kernel-compile-barrier/compile-pass-profile/time-per-pass.svg</code>. Fragment: <a href="/nova/evidence/fragments/kernel-compile-barrier/compile-pass-profile.html">compile-pass-profile</a>.</p><p>Known limits, non-blocking at the final review:</p><ul><li>The reconcile check accepts a negative before-first-dump time on two small controls.</li><li>The figure shows the top 12 of 96 passes without saying so, and its bars are per-pass sums over dumps.</li></ul>
+  </section>
+
 </main>
 </body>
 </html>

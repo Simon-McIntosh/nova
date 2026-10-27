@@ -17,7 +17,7 @@
 <meta name="plan-owner" content="Simon McIntosh">
 <meta name="plan-effort-hours" content="3.0">
 <meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="52">
+<meta name="plan-version" content="53">
 <meta name="plan-modified" content="2026-10-27">
 <meta name="plan-tags" content="replan,handoff,infrastructure">
 <meta name="plan-informs" content="plasma-cell-read-fidelity,single-grid-solver-cutover,ensemble-forward-seam,forward-profile-validator-set,separatrix-spline-extraction,profile-owned-solve-domain,mast-nonaxisymmetric-physics,diiid-forward-onboarding,machine-description-retirement,diiid-pulse-replay,dual-branch-selection,efit-baseline-demonstration,mast-catalog-gpu-solve">
@@ -211,6 +211,9 @@ Done when: the report lists each coupling with files, line counts, refactor and 
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261027T151220657263-replan-gpfs-data-root" data-who="reckon-build" data-when="2026-10-27T18:17:51Z">
     <div class="r-comment-body"><p>replan-gpfs-data-root: GPFS and home data paths now resolve through named FilePath roots in nova/database/filepath.py (NOVA_MAST_DATA_ROOT, NOVA_DIIIID_SOURCE, NOVA_CACHE_ROOT, NOVA_LABELLER_SOURCE, NOVA_PUBLIC_HOME_ROOT), each defaulting to the former literal, across 12 product modules; two dead literals deleted; new tests/test_filepath_data_roots.py fails at base and passes at head (22 passed), and the imported test modules show zero added failures across base and head arms in one sirius job</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261027T151902415357-replan-evidence-tooling-paths" data-who="reckon-build" data-when="2026-10-27T17:47:19Z">
+    <div class="r-comment-body"><p>Forty-five benchmark modules and four supporting scripts carried 61 absolute crew report and crew run paths; they now resolve through benchmarks/receipt_locations.py from NOVA_CREW_REPORTS or NOVA_CREW_RUNS with no default, the census grep returns 61 lines at base and 0 at head, and the new scan test fails at base, passes at head, and refuses a restored absolute path under its negative control.</p></div>
 </div>
 </section>
 </main>

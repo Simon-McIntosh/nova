@@ -1,0 +1,2105 @@
+{
+  "point_jet-4": {
+    "program": "point_jet",
+    "size": 4,
+    "device": "NVIDIA H200 NVL",
+    "revision": "b506f807506e8808445f0a1adeceeb210f13706e",
+    "nova_file": "nova/__init__.py",
+    "trace_seconds": 3.2717464230954647,
+    "lower_seconds": 0.45109748654067516,
+    "compile_seconds": 96.11564750224352,
+    "stablehlo_bytes": 3043945,
+    "executable_bytes": 5626327,
+    "dump_count": 679,
+    "distinct_passes": 96,
+    "attributed_seconds": 92.098,
+    "coverage_of_compile": 0.9582,
+    "seconds_before_first_dump": 3.4452,
+    "seconds_after_last_dump": 3.6917,
+    "instructions_first": 5813,
+    "instructions_last": 0,
+    "instructions_peak": 100579,
+    "table": [
+      {
+        "pass": "after_pipeline-start/variadic-op-splitter",
+        "seconds": 34.666,
+        "share_of_attributed": 0.3764,
+        "dumps": 1,
+        "instructions_first": 146,
+        "instructions_last": 146
+      },
+      {
+        "pass": "after_dce/multi_output_fusion",
+        "seconds": 17.547,
+        "share_of_attributed": 0.1905,
+        "dumps": 1,
+        "instructions_first": 23807,
+        "instructions_last": 23807
+      },
+      {
+        "pass": "after_fusion-wrapper/autotuner",
+        "seconds": 7.622,
+        "share_of_attributed": 0.0828,
+        "dumps": 1,
+        "instructions_first": 10726,
+        "instructions_last": 10726
+      },
+      {
+        "pass": "jit__lambda.ir-no-opt.ll",
+        "seconds": 4.229,
+        "share_of_attributed": 0.0459,
+        "dumps": 253,
+        "instructions_first": 20,
+        "instructions_last": 727
+      },
+      {
+        "pass": "jit__lambda.ir-with-opt.ll",
+        "seconds": 3.353,
+        "share_of_attributed": 0.0364,
+        "dumps": 253,
+        "instructions_first": 23,
+        "instructions_last": 3373
+      },
+      {
+        "pass": "after_flatten-call-graph/call-inliner",
+        "seconds": 1.745,
+        "share_of_attributed": 0.0189,
+        "dumps": 1,
+        "instructions_first": 65497,
+        "instructions_last": 65497
+      },
+      {
+        "pass": "after_pipeline-start/zero_sized_hlo_elimination",
+        "seconds": 1.624,
+        "share_of_attributed": 0.0176,
+        "dumps": 18,
+        "instructions_first": 2,
+        "instructions_last": 81
+      },
+      {
+        "pass": "after_cse/dce",
+        "seconds": 1.525,
+        "share_of_attributed": 0.0166,
+        "dumps": 11,
+        "instructions_first": 98,
+        "instructions_last": 10714
+      },
+      {
+        "pass": "after_pipeline-start/fusion-wrapper",
+        "seconds": 1.311,
+        "share_of_attributed": 0.0142,
+        "dumps": 3,
+        "instructions_first": 10714,
+        "instructions_last": 115
+      },
+      {
+        "pass": "jit__lambda.priority_fusion_dump.txt",
+        "seconds": 1.191,
+        "share_of_attributed": 0.0129,
+        "dumps": 1,
+        "instructions_first": 0,
+        "instructions_last": 0
+      },
+      {
+        "pass": "after_pipeline-start/pipeline-end",
+        "seconds": 0.97,
+        "share_of_attributed": 0.0105,
+        "dumps": 4,
+        "instructions_first": 10714,
+        "instructions_last": 114
+      },
+      {
+        "pass": "after_pipeline-start/algsimp",
+        "seconds": 0.871,
+        "share_of_attributed": 0.0095,
+        "dumps": 3,
+        "instructions_first": 1839,
+        "instructions_last": 10714
+      },
+      {
+        "pass": "after_reshape-mover/constant_folding",
+        "seconds": 0.853,
+        "share_of_attributed": 0.0093,
+        "dumps": 16,
+        "instructions_first": 1094,
+        "instructions_last": 81
+      },
+      {
+        "pass": "after_pipeline-start/float-normalization-bf16",
+        "seconds": 0.741,
+        "share_of_attributed": 0.008,
+        "dumps": 3,
+        "instructions_first": 42,
+        "instructions_last": 156
+      },
+      {
+        "pass": "after_pipeline-start/pdl-launch-annotation",
+        "seconds": 0.617,
+        "share_of_attributed": 0.0067,
+        "dumps": 1,
+        "instructions_first": 115,
+        "instructions_last": 115
+      },
+      {
+        "pass": "after_flatten-call-graph/layout-assignment",
+        "seconds": 0.596,
+        "share_of_attributed": 0.0065,
+        "dumps": 1,
+        "instructions_first": 42,
+        "instructions_last": 42
+      },
+      {
+        "pass": "after_algsimp/simplify-sorts",
+        "seconds": 0.595,
+        "share_of_attributed": 0.0065,
+        "dumps": 11,
+        "instructions_first": 1399,
+        "instructions_last": 81
+      },
+      {
+        "pass": "after_priority-fusion/cse",
+        "seconds": 0.546,
+        "share_of_attributed": 0.0059,
+        "dumps": 1,
+        "instructions_first": 100579,
+        "instructions_last": 100579
+      },
+      {
+        "pass": "after_constant_folding/simplify-conditional",
+        "seconds": 0.494,
+        "share_of_attributed": 0.0054,
+        "dumps": 7,
+        "instructions_first": 1030,
+        "instructions_last": 81
+      },
+      {
+        "pass": "after_pipeline-start/dce",
+        "seconds": 0.485,
+        "share_of_attributed": 0.0053,
+        "dumps": 2,
+        "instructions_first": 10720,
+        "instructions_last": 115
+      },
+      {
+        "pass": "after_dot_decomposer/result_caster",
+        "seconds": 0.483,
+        "share_of_attributed": 0.0052,
+        "dumps": 1,
+        "instructions_first": 2,
+        "instructions_last": 2
+      },
+      {
+        "pass": "after_pipeline-start/cudnn-custom-call-converter",
+        "seconds": 0.372,
+        "share_of_attributed": 0.004,
+        "dumps": 1,
+        "instructions_first": 5813,
+        "instructions_last": 5813
+      },
+      {
+        "pass": "after_loop-schedule-linearizer/copy-insertion",
+        "seconds": 0.372,
+        "share_of_attributed": 0.004,
+        "dumps": 1,
+        "instructions_first": 10720,
+        "instructions_last": 10720
+      },
+      {
+        "pass": "after_pipeline-start/rematerialization",
+        "seconds": 0.366,
+        "share_of_attributed": 0.004,
+        "dumps": 1,
+        "instructions_first": 115,
+        "instructions_last": 115
+      },
+      {
+        "pass": "jit__lambda.copy-insertion.after_adding_copies_to_resolve_interference.txt",
+        "seconds": 0.361,
+        "share_of_attributed": 0.0039,
+        "dumps": 1,
+        "instructions_first": 10730,
+        "instructions_last": 10730
+      },
+      {
+        "pass": "jit__lambda.copy-insertion.after_removing_unnecessary_copies.txt",
+        "seconds": 0.327,
+        "share_of_attributed": 0.0036,
+        "dumps": 1,
+        "instructions_first": 10730,
+        "instructions_last": 10730
+      },
+      {
+        "pass": "after_layout_normalization/algsimp",
+        "seconds": 0.326,
+        "share_of_attributed": 0.0035,
+        "dumps": 2,
+        "instructions_first": 21386,
+        "instructions_last": 1869
+      },
+      {
+        "pass": "after_dynamic-dimension-simplifier/associative-scan-rewriter",
+        "seconds": 0.314,
+        "share_of_attributed": 0.0034,
+        "dumps": 1,
+        "instructions_first": 2,
+        "instructions_last": 2
+      },
+      {
+        "pass": "after_dot-strength-reduction/algsimp",
+        "seconds": 0.308,
+        "share_of_attributed": 0.0033,
+        "dumps": 1,
+        "instructions_first": 692,
+        "instructions_last": 692
+      },
+      {
+        "pass": "after_batched_gather_scatter_normalizer/windowed-einsum-handler",
+        "seconds": 0.304,
+        "share_of_attributed": 0.0033,
+        "dumps": 1,
+        "instructions_first": 2,
+        "instructions_last": 2
+      },
+      {
+        "pass": "after_dce/pipeline-end",
+        "seconds": 0.288,
+        "share_of_attributed": 0.0031,
+        "dumps": 8,
+        "instructions_first": 62,
+        "instructions_last": 81
+      },
+      {
+        "pass": "after_pipeline-start/ragged-all-to-all-canonicalizer",
+        "seconds": 0.265,
+        "share_of_attributed": 0.0029,
+        "dumps": 1,
+        "instructions_first": 42,
+        "instructions_last": 42
+      },
+      {
+        "pass": "after_sanitize-constant-names/pipeline-end",
+        "seconds": 0.263,
+        "share_of_attributed": 0.0029,
+        "dumps": 2,
+        "instructions_first": 10725,
+        "instructions_last": 115
+      },
+      {
+        "pass": "jit__lambda.after_spmd_partitioner.txt",
+        "seconds": 0.263,
+        "share_of_attributed": 0.0029,
+        "dumps": 1,
+        "instructions_first": 1,
+        "instructions_last": 1
+      },
+      {
+        "pass": "after_scheduling-instruction-annotator/pipeline-end",
+        "seconds": 0.248,
+        "share_of_attributed": 0.0027,
+        "dumps": 1,
+        "instructions_first": 114,
+        "instructions_last": 114
+      },
+      {
+        "pass": "after_reshape-decomposer/move_copy_to_users",
+        "seconds": 0.238,
+        "share_of_attributed": 0.0026,
+        "dumps": 1,
+        "instructions_first": 46,
+        "instructions_last": 46
+      },
+      {
+        "pass": "after_multi_output_fusion/cse",
+        "seconds": 0.224,
+        "share_of_attributed": 0.0024,
+        "dumps": 1,
+        "instructions_first": 10968,
+        "instructions_last": 10968
+      },
+      {
+        "pass": "after_layout_normalization/scatter_simplifier",
+        "seconds": 0.215,
+        "share_of_attributed": 0.0023,
+        "dumps": 1,
+        "instructions_first": 156,
+        "instructions_last": 156
+      },
+      {
+        "pass": "jit__lambda.thunk_sequence.txt",
+        "seconds": 0.197,
+        "share_of_attributed": 0.0021,
+        "dumps": 1,
+        "instructions_first": 0,
+        "instructions_last": 0
+      },
+      {
+        "pass": "after_pipeline-start/sanitize-constant-names",
+        "seconds": 0.18,
+        "share_of_attributed": 0.002,
+        "dumps": 1,
+        "instructions_first": 115,
+        "instructions_last": 115
+      },
+      {
+        "pass": "after_copy_fusion/sanitize-constant-names",
+        "seconds": 0.17,
+        "share_of_attributed": 0.0018,
+        "dumps": 1,
+        "instructions_first": 10725,
+        "instructions_last": 10725
+      },
+      {
+        "pass": "after_simplify-while-loops/slice-sinker",
+        "seconds": 0.164,
+        "share_of_attributed": 0.0018,
+        "dumps": 2,
+        "instructions_first": 1094,
+        "instructions_last": 175
+      },
+      {
+        "pass": "after_call-inliner/zero_sized_hlo_elimination",
+        "seconds": 0.156,
+        "share_of_attributed": 0.0017,
+        "dumps": 1,
+        "instructions_first": 1,
+        "instructions_last": 1
+      },
+      {
+        "pass": "after_pipeline-start/legalize-scheduling-annotations",
+        "seconds": 0.15,
+        "share_of_attributed": 0.0016,
+        "dumps": 1,
+        "instructions_first": 10725,
+        "instructions_last": 10725
+      },
+      {
+        "pass": "after_gather_expander/scatter_simplifier",
+        "seconds": 0.146,
+        "share_of_attributed": 0.0016,
+        "dumps": 1,
+        "instructions_first": 592,
+        "instructions_last": 592
+      },
+      {
+        "pass": "after_pipeline-start/rename_fusions",
+        "seconds": 0.144,
+        "share_of_attributed": 0.0016,
+        "dumps": 1,
+        "instructions_first": 10714,
+        "instructions_last": 10714
+      },
+      {
+        "pass": "after_autotuner/convert_triton_gemm_config",
+        "seconds": 0.135,
+        "share_of_attributed": 0.0015,
+        "dumps": 1,
+        "instructions_first": 10720,
+        "instructions_last": 10720
+      },
+      {
+        "pass": "after_pipeline-start/ragged_dot_rewriter",
+        "seconds": 0.13,
+        "share_of_attributed": 0.0014,
+        "dumps": 1,
+        "instructions_first": 1,
+        "instructions_last": 1
+      },
+      {
+        "pass": "after_pipeline-start/convert-mover",
+        "seconds": 0.13,
+        "share_of_attributed": 0.0014,
+        "dumps": 2,
+        "instructions_first": 81,
+        "instructions_last": 42
+      },
+      {
+        "pass": "after_pipeline-start/apply-xla-transforms",
+        "seconds": 0.13,
+        "share_of_attributed": 0.0014,
+        "dumps": 1,
+        "instructions_first": 115,
+        "instructions_last": 115
+      },
+      {
+        "pass": "after_pipeline-start/gpu-convert-async-collectives-to-sync",
+        "seconds": 0.128,
+        "share_of_attributed": 0.0014,
+        "dumps": 1,
+        "instructions_first": 115,
+        "instructions_last": 115
+      },
+      {
+        "pass": "after_rename_fusions/dus-accumulator-zero-init-elimination",
+        "seconds": 0.127,
+        "share_of_attributed": 0.0014,
+        "dumps": 1,
+        "instructions_first": 10714,
+        "instructions_last": 10714
+      },
+      {
+        "pass": "after_computation-deduplicator/stream-attribute-annotator",
+        "seconds": 0.126,
+        "share_of_attributed": 0.0014,
+        "dumps": 1,
+        "instructions_first": 10714,
+        "instructions_last": 10714
+      },
+      {
+        "pass": "after_pipeline-start/async-to-sync-converter",
+        "seconds": 0.126,
+        "share_of_attributed": 0.0014,
+        "dumps": 1,
+        "instructions_first": 115,
+        "instructions_last": 115
+      },
+      {
+        "pass": "after_sanitize-constant-names/pdl-launch-annotation",
+        "seconds": 0.126,
+        "share_of_attributed": 0.0014,
+        "dumps": 1,
+        "instructions_first": 115,
+        "instructions_last": 115
+      },
+      {
+        "pass": "jit__lambda.copy-insertion.after_adding_special-case_copies.txt",
+        "seconds": 0.12,
+        "share_of_attributed": 0.0013,
+        "dumps": 1,
+        "instructions_first": 10730,
+        "instructions_last": 10730
+      },
+      {
+        "pass": "after_pipeline-start/propagate-call-metadata",
+        "seconds": 0.118,
+        "share_of_attributed": 0.0013,
+        "dumps": 1,
+        "instructions_first": 10720,
+        "instructions_last": 10720
+      },
+      {
+        "pass": "after_copy-insertion/copy_fusion",
+        "seconds": 0.117,
+        "share_of_attributed": 0.0013,
+        "dumps": 1,
+        "instructions_first": 10724,
+        "instructions_last": 10724
+      },
+      {
+        "pass": "after_pipeline-start/sharding-remover",
+        "seconds": 0.115,
+        "share_of_attributed": 0.0012,
+        "dumps": 1,
+        "instructions_first": 1,
+        "instructions_last": 1
+      },
+      {
+        "pass": "jit__lambda/config_assignment",
+        "seconds": 0.114,
+        "share_of_attributed": 0.0012,
+        "dumps": 1,
+        "instructions_first": 10714,
+        "instructions_last": 10714
+      },
+      {
+        "pass": "after_pipeline-start/collectives-schedule-linearizer",
+        "seconds": 0.113,
+        "share_of_attributed": 0.0012,
+        "dumps": 1,
+        "instructions_first": 10714,
+        "instructions_last": 10714
+      },
+      {
+        "pass": "after_gather_simplifier/gather_expander",
+        "seconds": 0.111,
+        "share_of_attributed": 0.0012,
+        "dumps": 1,
+        "instructions_first": 2,
+        "instructions_last": 2
+      },
+      {
+        "pass": "after_slice-sinker/reshape-mover",
+        "seconds": 0.111,
+        "share_of_attributed": 0.0012,
+        "dumps": 1,
+        "instructions_first": 1094,
+        "instructions_last": 1094
+      },
+      {
+        "pass": "after_pipeline-start/async-collective-creator",
+        "seconds": 0.11,
+        "share_of_attributed": 0.0012,
+        "dumps": 1,
+        "instructions_first": 10714,
+        "instructions_last": 10714
+      },
+      {
+        "pass": "after_layout-assignment/sub-byte-size-setter",
+        "seconds": 0.108,
+        "share_of_attributed": 0.0012,
+        "dumps": 1,
+        "instructions_first": 46,
+        "instructions_last": 46
+      },
+      {
+        "pass": "after_pipeline-start/host_compute_asyncifier",
+        "seconds": 0.106,
+        "share_of_attributed": 0.0012,
+        "dumps": 1,
+        "instructions_first": 1,
+        "instructions_last": 1
+      },
+      {
+        "pass": "after_reduction-layout-normalizer/algsimp",
+        "seconds": 0.092,
+        "share_of_attributed": 0.001,
+        "dumps": 1,
+        "instructions_first": 1877,
+        "instructions_last": 1877
+      },
+      {
+        "pass": "after_cse/constant_folding",
+        "seconds": 0.08,
+        "share_of_attributed": 0.0009,
+        "dumps": 1,
+        "instructions_first": 146,
+        "instructions_last": 146
+      },
+      {
+        "pass": "after_simplification/dot-merger",
+        "seconds": 0.072,
+        "share_of_attributed": 0.0008,
+        "dumps": 1,
+        "instructions_first": 81,
+        "instructions_last": 81
+      },
+      {
+        "pass": "jit__lambda/optimizations",
+        "seconds": 0.065,
+        "share_of_attributed": 0.0007,
+        "dumps": 1,
+        "instructions_first": 5813,
+        "instructions_last": 5813
+      },
+      {
+        "pass": "after_computation-deduplicator/apply-xla-transforms",
+        "seconds": 0.063,
+        "share_of_attributed": 0.0007,
+        "dumps": 1,
+        "instructions_first": 42,
+        "instructions_last": 42
+      },
+      {
+        "pass": "after_pipeline-start/reshape-mover",
+        "seconds": 0.063,
+        "share_of_attributed": 0.0007,
+        "dumps": 1,
+        "instructions_first": 42,
+        "instructions_last": 42
+      },
+      {
+        "pass": "after_pipeline-start/reshape-decomposer",
+        "seconds": 0.063,
+        "share_of_attributed": 0.0007,
+        "dumps": 1,
+        "instructions_first": 46,
+        "instructions_last": 46
+      },
+      {
+        "pass": "after_pipeline-start/rename-instructions",
+        "seconds": 0.057,
+        "share_of_attributed": 0.0006,
+        "dumps": 1,
+        "instructions_first": 146,
+        "instructions_last": 146
+      },
+      {
+        "pass": "after_reduction-dimension-grouper/reduction-splitter",
+        "seconds": 0.056,
+        "share_of_attributed": 0.0006,
+        "dumps": 1,
+        "instructions_first": 152,
+        "instructions_last": 152
+      },
+      {
+        "pass": "after_algsimp/broadcast_canonicalizer",
+        "seconds": 0.055,
+        "share_of_attributed": 0.0006,
+        "dumps": 1,
+        "instructions_first": 1839,
+        "instructions_last": 1839
+      },
+      {
+        "pass": "after_algsimp/cse",
+        "seconds": 0.053,
+        "share_of_attributed": 0.0006,
+        "dumps": 1,
+        "instructions_first": 1857,
+        "instructions_last": 1857
+      },
+      {
+        "pass": "after_algsimp/scatter_simplifier",
+        "seconds": 0.053,
+        "share_of_attributed": 0.0006,
+        "dumps": 1,
+        "instructions_first": 1846,
+        "instructions_last": 1846
+      },
+      {
+        "pass": "after_pipeline-start/block-scaling-rewriter",
+        "seconds": 0.051,
+        "share_of_attributed": 0.0006,
+        "dumps": 1,
+        "instructions_first": 1839,
+        "instructions_last": 1839
+      },
+      {
+        "pass": "after_reduction-degenerate-dim-remover/reduction-layout-normalizer",
+        "seconds": 0.046,
+        "share_of_attributed": 0.0005,
+        "dumps": 1,
+        "instructions_first": 1864,
+        "instructions_last": 1864
+      },
+      {
+        "pass": "after_algsimp/simplify-fp-conversions",
+        "seconds": 0.045,
+        "share_of_attributed": 0.0005,
+        "dumps": 1,
+        "instructions_first": 146,
+        "instructions_last": 146
+      },
+      {
+        "pass": "after_pipeline-start/sub-byte-collective-normalization",
+        "seconds": 0.044,
+        "share_of_attributed": 0.0005,
+        "dumps": 1,
+        "instructions_first": 152,
+        "instructions_last": 152
+      },
+      {
+        "pass": "after_while-loop-constant-sinking/simplify-while-loops",
+        "seconds": 0.043,
+        "share_of_attributed": 0.0005,
+        "dumps": 1,
+        "instructions_first": 173,
+        "instructions_last": 173
+      },
+      {
+        "pass": "after_while-loop-trip-count-annotator/pipeline-end",
+        "seconds": 0.043,
+        "share_of_attributed": 0.0005,
+        "dumps": 1,
+        "instructions_first": 42,
+        "instructions_last": 42
+      },
+      {
+        "pass": "after_pipeline-start/triangular-solve-rewriter",
+        "seconds": 0.041,
+        "share_of_attributed": 0.0004,
+        "dumps": 1,
+        "instructions_first": 146,
+        "instructions_last": 146
+      },
+      {
+        "pass": "after_rename-instructions/pipeline-end",
+        "seconds": 0.041,
+        "share_of_attributed": 0.0004,
+        "dumps": 1,
+        "instructions_first": 146,
+        "instructions_last": 146
+      },
+      {
+        "pass": "after_pipeline-start/dynamic-slice-annotator",
+        "seconds": 0.04,
+        "share_of_attributed": 0.0004,
+        "dumps": 1,
+        "instructions_first": 146,
+        "instructions_last": 146
+      },
+      {
+        "pass": "after_pipeline-start/flatten-call-graph",
+        "seconds": 0.035,
+        "share_of_attributed": 0.0004,
+        "dumps": 1,
+        "instructions_first": 42,
+        "instructions_last": 42
+      },
+      {
+        "pass": "jit__lambda.sm_9.0a_gpu_after_optimizations-buffer-assignment.txt",
+        "seconds": 0.025,
+        "share_of_attributed": 0.0003,
+        "dumps": 1,
+        "instructions_first": 0,
+        "instructions_last": 0
+      },
+      {
+        "pass": "after_pipeline-start/hlo_host_device_type_call_wrapper",
+        "seconds": 0.023,
+        "share_of_attributed": 0.0002,
+        "dumps": 1,
+        "instructions_first": 5813,
+        "instructions_last": 5813
+      },
+      {
+        "pass": "jit__lambda.sm_9.0a_gpu_after_optimizations-memory-usage-report.txt",
+        "seconds": 0.012,
+        "share_of_attributed": 0.0001,
+        "dumps": 1,
+        "instructions_first": 0,
+        "instructions_last": 0
+      },
+      {
+        "pass": "jit__lambda.sm_9.0a_gpu_after_optimizations-buffer-assignment-values.txt",
+        "seconds": 0.004,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 0,
+        "instructions_last": 0
+      },
+      {
+        "pass": "jit__lambda.sm_9.0a_gpu_after_optimizations.txt",
+        "seconds": 0.003,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 115,
+        "instructions_last": 115
+      },
+      {
+        "pass": "jit__lambda.sm_9.0a_gpu_after_optimizations-live-range.txt",
+        "seconds": 0.003,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 0,
+        "instructions_last": 0
+      },
+      {
+        "pass": "jit__lambda.thunk_metadata.txt",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 0,
+        "instructions_last": 0
+      },
+      {
+        "pass": "jit__lambda.thunk_sequence_after_thunk_passes.txt",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 0,
+        "instructions_last": 0
+      }
+    ],
+    "gaps": [
+      {
+        "start": -2.517,
+        "seconds": 84.2536,
+        "pass": "after_pipeline-start/hlo_host_device_type_call_wrapper",
+        "instructions": 5813,
+        "bytes": 4480942
+      },
+      {
+        "start": -2.494,
+        "seconds": 84.2456,
+        "pass": "after_pipeline-start/cudnn-custom-call-converter",
+        "instructions": 5813,
+        "bytes": 4480942
+      },
+      {
+        "start": -2.122,
+        "seconds": 83.8596,
+        "pass": "after_flatten-call-graph/call-inliner",
+        "instructions": 65497,
+        "bytes": 23010581
+      },
+      {
+        "start": -0.377,
+        "seconds": 82.1325,
+        "pass": "after_call-inliner/zero_sized_hlo_elimination",
+        "instructions": 1,
+        "bytes": 35832054
+      },
+      {
+        "start": -0.221,
+        "seconds": 81.9595,
+        "pass": "after_pipeline-start/sharding-remover",
+        "instructions": 1,
+        "bytes": 35832054
+      },
+      {
+        "start": -0.106,
+        "seconds": 81.8575,
+        "pass": "after_pipeline-start/host_compute_asyncifier",
+        "instructions": 1,
+        "bytes": 35832054
+      },
+      {
+        "start": 0.263,
+        "seconds": 81.4955,
+        "pass": "after_pipeline-start/ragged_dot_rewriter",
+        "instructions": 1,
+        "bytes": 35832054
+      },
+      {
+        "start": 0.393,
+        "seconds": 81.3945,
+        "pass": "after_batched_gather_scatter_normalizer/windowed-einsum-handler",
+        "instructions": 2,
+        "bytes": 35832285
+      },
+      {
+        "start": 0.697,
+        "seconds": 81.0655,
+        "pass": "after_dot_decomposer/result_caster",
+        "instructions": 2,
+        "bytes": 35852877
+      },
+      {
+        "start": 1.18,
+        "seconds": 80.6065,
+        "pass": "after_dynamic-dimension-simplifier/associative-scan-rewriter",
+        "instructions": 2,
+        "bytes": 35852925
+      },
+      {
+        "start": 1.494,
+        "seconds": 80.2705,
+        "pass": "after_pipeline-start/zero_sized_hlo_elimination",
+        "instructions": 2,
+        "bytes": 35852925
+      },
+      {
+        "start": 1.616,
+        "seconds": 80.1755,
+        "pass": "after_gather_simplifier/gather_expander",
+        "instructions": 2,
+        "bytes": 35861452
+      }
+    ]
+  },
+  "control-1024": {
+    "program": "control",
+    "size": 1024,
+    "device": "NVIDIA H200 NVL",
+    "revision": "b506f807506e8808445f0a1adeceeb210f13706e",
+    "nova_file": "nova/__init__.py",
+    "trace_seconds": 0.19985432364046574,
+    "lower_seconds": 0.08514678850769997,
+    "compile_seconds": 7.723387140780687,
+    "stablehlo_bytes": 1081992,
+    "executable_bytes": 454920,
+    "dump_count": 99,
+    "distinct_passes": 61,
+    "attributed_seconds": 7.355,
+    "coverage_of_compile": 0.9523,
+    "seconds_before_first_dump": 0.3375,
+    "seconds_after_last_dump": 2.1297,
+    "instructions_first": 1031,
+    "instructions_last": 0,
+    "instructions_peak": 106646,
+    "table": [
+      {
+        "pass": "after_pipeline-start/variadic-op-splitter",
+        "seconds": 3.552,
+        "share_of_attributed": 0.4829,
+        "dumps": 1,
+        "instructions_first": 1031,
+        "instructions_last": 1031
+      },
+      {
+        "pass": "jit_composed.ir-no-opt.ll",
+        "seconds": 1.433,
+        "share_of_attributed": 0.1948,
+        "dumps": 14,
+        "instructions_first": 634,
+        "instructions_last": 633
+      },
+      {
+        "pass": "jit_composed.ir-with-opt.ll",
+        "seconds": 0.584,
+        "share_of_attributed": 0.0794,
+        "dumps": 14,
+        "instructions_first": 10380,
+        "instructions_last": 10378
+      },
+      {
+        "pass": "jit_composed.priority_fusion_dump.txt",
+        "seconds": 0.504,
+        "share_of_attributed": 0.0685,
+        "dumps": 1,
+        "instructions_first": 0,
+        "instructions_last": 0
+      },
+      {
+        "pass": "after_priority-fusion/cse",
+        "seconds": 0.199,
+        "share_of_attributed": 0.0271,
+        "dumps": 1,
+        "instructions_first": 106646,
+        "instructions_last": 106646
+      },
+      {
+        "pass": "after_cse/dce",
+        "seconds": 0.15,
+        "share_of_attributed": 0.0204,
+        "dumps": 1,
+        "instructions_first": 103610,
+        "instructions_last": 103610
+      },
+      {
+        "pass": "after_pipeline-start/fusion-wrapper",
+        "seconds": 0.129,
+        "share_of_attributed": 0.0175,
+        "dumps": 3,
+        "instructions_first": 1110,
+        "instructions_last": 1061
+      },
+      {
+        "pass": "after_pipeline-start/algsimp",
+        "seconds": 0.126,
+        "share_of_attributed": 0.0171,
+        "dumps": 3,
+        "instructions_first": 1031,
+        "instructions_last": 1110
+      },
+      {
+        "pass": "after_pipeline-start/float-normalization-bf16",
+        "seconds": 0.112,
+        "share_of_attributed": 0.0152,
+        "dumps": 3,
+        "instructions_first": 1031,
+        "instructions_last": 1031
+      },
+      {
+        "pass": "after_dce/multi_output_fusion",
+        "seconds": 0.093,
+        "share_of_attributed": 0.0126,
+        "dumps": 1,
+        "instructions_first": 1110,
+        "instructions_last": 1110
+      },
+      {
+        "pass": "after_pipeline-start/pipeline-end",
+        "seconds": 0.042,
+        "share_of_attributed": 0.0057,
+        "dumps": 4,
+        "instructions_first": 1110,
+        "instructions_last": 1061
+      },
+      {
+        "pass": "after_pipeline-start/flatten-call-graph",
+        "seconds": 0.036,
+        "share_of_attributed": 0.0049,
+        "dumps": 1,
+        "instructions_first": 1031,
+        "instructions_last": 1031
+      },
+      {
+        "pass": "after_pipeline-start/ragged-all-to-all-canonicalizer",
+        "seconds": 0.031,
+        "share_of_attributed": 0.0042,
+        "dumps": 1,
+        "instructions_first": 1031,
+        "instructions_last": 1031
+      },
+      {
+        "pass": "after_pipeline-start/dce",
+        "seconds": 0.025,
+        "share_of_attributed": 0.0034,
+        "dumps": 2,
+        "instructions_first": 1110,
+        "instructions_last": 1061
+      },
+      {
+        "pass": "jit_composed.sm_9.0a_gpu_after_optimizations.txt",
+        "seconds": 0.023,
+        "share_of_attributed": 0.0031,
+        "dumps": 1,
+        "instructions_first": 1061,
+        "instructions_last": 1061
+      },
+      {
+        "pass": "after_pipeline-start/pdl-launch-annotation",
+        "seconds": 0.019,
+        "share_of_attributed": 0.0026,
+        "dumps": 1,
+        "instructions_first": 1061,
+        "instructions_last": 1061
+      },
+      {
+        "pass": "after_pipeline-start/convert-mover",
+        "seconds": 0.018,
+        "share_of_attributed": 0.0024,
+        "dumps": 2,
+        "instructions_first": 1031,
+        "instructions_last": 1031
+      },
+      {
+        "pass": "jit_composed.copy-insertion.after_adding_copies_to_resolve_interference.txt",
+        "seconds": 0.016,
+        "share_of_attributed": 0.0022,
+        "dumps": 1,
+        "instructions_first": 1110,
+        "instructions_last": 1110
+      },
+      {
+        "pass": "after_pipeline-start/rematerialization",
+        "seconds": 0.016,
+        "share_of_attributed": 0.0022,
+        "dumps": 1,
+        "instructions_first": 1061,
+        "instructions_last": 1061
+      },
+      {
+        "pass": "jit_composed.copy-insertion.after_removing_unnecessary_copies.txt",
+        "seconds": 0.014,
+        "share_of_attributed": 0.0019,
+        "dumps": 1,
+        "instructions_first": 1110,
+        "instructions_last": 1110
+      },
+      {
+        "pass": "after_pipeline-start/ragged_dot_rewriter",
+        "seconds": 0.014,
+        "share_of_attributed": 0.0019,
+        "dumps": 1,
+        "instructions_first": 1031,
+        "instructions_last": 1031
+      },
+      {
+        "pass": "after_pipeline-start/zero_sized_hlo_elimination",
+        "seconds": 0.014,
+        "share_of_attributed": 0.0019,
+        "dumps": 1,
+        "instructions_first": 1031,
+        "instructions_last": 1031
+      },
+      {
+        "pass": "jit_composed/optimizations",
+        "seconds": 0.012,
+        "share_of_attributed": 0.0016,
+        "dumps": 1,
+        "instructions_first": 1031,
+        "instructions_last": 1031
+      },
+      {
+        "pass": "after_pipeline-start/reshape-decomposer",
+        "seconds": 0.011,
+        "share_of_attributed": 0.0015,
+        "dumps": 1,
+        "instructions_first": 1031,
+        "instructions_last": 1031
+      },
+      {
+        "pass": "after_scheduling-instruction-annotator/pipeline-end",
+        "seconds": 0.01,
+        "share_of_attributed": 0.0014,
+        "dumps": 1,
+        "instructions_first": 1061,
+        "instructions_last": 1061
+      },
+      {
+        "pass": "after_sanitize-constant-names/pipeline-end",
+        "seconds": 0.01,
+        "share_of_attributed": 0.0014,
+        "dumps": 2,
+        "instructions_first": 1110,
+        "instructions_last": 1061
+      },
+      {
+        "pass": "after_pipeline-start/reshape-mover",
+        "seconds": 0.008,
+        "share_of_attributed": 0.0011,
+        "dumps": 1,
+        "instructions_first": 1031,
+        "instructions_last": 1031
+      },
+      {
+        "pass": "after_layout-assignment/sub-byte-size-setter",
+        "seconds": 0.008,
+        "share_of_attributed": 0.0011,
+        "dumps": 1,
+        "instructions_first": 1031,
+        "instructions_last": 1031
+      },
+      {
+        "pass": "after_pipeline-start/rename_fusions",
+        "seconds": 0.008,
+        "share_of_attributed": 0.0011,
+        "dumps": 1,
+        "instructions_first": 1110,
+        "instructions_last": 1110
+      },
+      {
+        "pass": "after_autotuner/convert_triton_gemm_config",
+        "seconds": 0.008,
+        "share_of_attributed": 0.0011,
+        "dumps": 1,
+        "instructions_first": 1110,
+        "instructions_last": 1110
+      },
+      {
+        "pass": "jit_composed.thunk_sequence.txt",
+        "seconds": 0.008,
+        "share_of_attributed": 0.0011,
+        "dumps": 1,
+        "instructions_first": 0,
+        "instructions_last": 0
+      },
+      {
+        "pass": "jit_composed.after_spmd_partitioner.txt",
+        "seconds": 0.008,
+        "share_of_attributed": 0.0011,
+        "dumps": 1,
+        "instructions_first": 1031,
+        "instructions_last": 1031
+      },
+      {
+        "pass": "after_pipeline-start/sanitize-constant-names",
+        "seconds": 0.007,
+        "share_of_attributed": 0.001,
+        "dumps": 1,
+        "instructions_first": 1061,
+        "instructions_last": 1061
+      },
+      {
+        "pass": "after_pipeline-start/cudnn-custom-call-converter",
+        "seconds": 0.007,
+        "share_of_attributed": 0.001,
+        "dumps": 1,
+        "instructions_first": 1031,
+        "instructions_last": 1031
+      },
+      {
+        "pass": "after_copy-insertion/copy_fusion",
+        "seconds": 0.007,
+        "share_of_attributed": 0.001,
+        "dumps": 1,
+        "instructions_first": 1110,
+        "instructions_last": 1110
+      },
+      {
+        "pass": "after_pipeline-start/rename-instructions",
+        "seconds": 0.006,
+        "share_of_attributed": 0.0008,
+        "dumps": 1,
+        "instructions_first": 1031,
+        "instructions_last": 1031
+      },
+      {
+        "pass": "after_pipeline-start/legalize-scheduling-annotations",
+        "seconds": 0.006,
+        "share_of_attributed": 0.0008,
+        "dumps": 1,
+        "instructions_first": 1110,
+        "instructions_last": 1110
+      },
+      {
+        "pass": "after_pipeline-start/gpu-convert-async-collectives-to-sync",
+        "seconds": 0.005,
+        "share_of_attributed": 0.0007,
+        "dumps": 1,
+        "instructions_first": 1061,
+        "instructions_last": 1061
+      },
+      {
+        "pass": "after_pipeline-start/hlo_host_device_type_call_wrapper",
+        "seconds": 0.005,
+        "share_of_attributed": 0.0007,
+        "dumps": 1,
+        "instructions_first": 1031,
+        "instructions_last": 1031
+      },
+      {
+        "pass": "after_rename_fusions/dus-accumulator-zero-init-elimination",
+        "seconds": 0.005,
+        "share_of_attributed": 0.0007,
+        "dumps": 1,
+        "instructions_first": 1110,
+        "instructions_last": 1110
+      },
+      {
+        "pass": "after_pipeline-start/async-collective-creator",
+        "seconds": 0.005,
+        "share_of_attributed": 0.0007,
+        "dumps": 1,
+        "instructions_first": 1110,
+        "instructions_last": 1110
+      },
+      {
+        "pass": "jit_composed/config_assignment",
+        "seconds": 0.005,
+        "share_of_attributed": 0.0007,
+        "dumps": 1,
+        "instructions_first": 1110,
+        "instructions_last": 1110
+      },
+      {
+        "pass": "jit_composed.copy-insertion.after_adding_special-case_copies.txt",
+        "seconds": 0.005,
+        "share_of_attributed": 0.0007,
+        "dumps": 1,
+        "instructions_first": 1110,
+        "instructions_last": 1110
+      },
+      {
+        "pass": "after_pipeline-start/apply-xla-transforms",
+        "seconds": 0.005,
+        "share_of_attributed": 0.0007,
+        "dumps": 1,
+        "instructions_first": 1061,
+        "instructions_last": 1061
+      },
+      {
+        "pass": "after_pipeline-start/async-to-sync-converter",
+        "seconds": 0.005,
+        "share_of_attributed": 0.0007,
+        "dumps": 1,
+        "instructions_first": 1061,
+        "instructions_last": 1061
+      },
+      {
+        "pass": "after_sanitize-constant-names/pdl-launch-annotation",
+        "seconds": 0.005,
+        "share_of_attributed": 0.0007,
+        "dumps": 1,
+        "instructions_first": 1061,
+        "instructions_last": 1061
+      },
+      {
+        "pass": "after_pipeline-start/collectives-schedule-linearizer",
+        "seconds": 0.004,
+        "share_of_attributed": 0.0005,
+        "dumps": 1,
+        "instructions_first": 1110,
+        "instructions_last": 1110
+      },
+      {
+        "pass": "after_pipeline-start/propagate-call-metadata",
+        "seconds": 0.004,
+        "share_of_attributed": 0.0005,
+        "dumps": 1,
+        "instructions_first": 1110,
+        "instructions_last": 1110
+      },
+      {
+        "pass": "after_pipeline-start/block-scaling-rewriter",
+        "seconds": 0.004,
+        "share_of_attributed": 0.0005,
+        "dumps": 1,
+        "instructions_first": 1031,
+        "instructions_last": 1031
+      },
+      {
+        "pass": "after_pipeline-start/sub-byte-collective-normalization",
+        "seconds": 0.004,
+        "share_of_attributed": 0.0005,
+        "dumps": 1,
+        "instructions_first": 1031,
+        "instructions_last": 1031
+      },
+      {
+        "pass": "after_pipeline-start/triangular-solve-rewriter",
+        "seconds": 0.004,
+        "share_of_attributed": 0.0005,
+        "dumps": 1,
+        "instructions_first": 1031,
+        "instructions_last": 1031
+      },
+      {
+        "pass": "after_pipeline-start/dynamic-slice-annotator",
+        "seconds": 0.004,
+        "share_of_attributed": 0.0005,
+        "dumps": 1,
+        "instructions_first": 1031,
+        "instructions_last": 1031
+      },
+      {
+        "pass": "after_pipeline-start/sharding-remover",
+        "seconds": 0.004,
+        "share_of_attributed": 0.0005,
+        "dumps": 1,
+        "instructions_first": 1031,
+        "instructions_last": 1031
+      },
+      {
+        "pass": "after_pipeline-start/host_compute_asyncifier",
+        "seconds": 0.004,
+        "share_of_attributed": 0.0005,
+        "dumps": 1,
+        "instructions_first": 1031,
+        "instructions_last": 1031
+      },
+      {
+        "pass": "after_rename-instructions/pipeline-end",
+        "seconds": 0.004,
+        "share_of_attributed": 0.0005,
+        "dumps": 1,
+        "instructions_first": 1031,
+        "instructions_last": 1031
+      },
+      {
+        "pass": "jit_composed.sm_9.0a_gpu_after_optimizations-buffer-assignment-values.txt",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 0,
+        "instructions_last": 0
+      },
+      {
+        "pass": "jit_composed.sm_9.0a_gpu_after_optimizations-buffer-assignment.txt",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 0,
+        "instructions_last": 0
+      },
+      {
+        "pass": "jit_composed.sm_9.0a_gpu_after_optimizations-live-range.txt",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 0,
+        "instructions_last": 0
+      },
+      {
+        "pass": "jit_composed.sm_9.0a_gpu_after_optimizations-memory-usage-report.txt",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 0,
+        "instructions_last": 0
+      },
+      {
+        "pass": "jit_composed.thunk_metadata.txt",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 0,
+        "instructions_last": 0
+      },
+      {
+        "pass": "jit_composed.thunk_sequence_after_thunk_passes.txt",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 0,
+        "instructions_last": 0
+      }
+    ],
+    "gaps": [
+      {
+        "start": 0.32,
+        "seconds": 6.9101,
+        "pass": "after_pipeline-start/float-normalization-bf16",
+        "instructions": 1031,
+        "bytes": 958429
+      },
+      {
+        "start": 0.132,
+        "seconds": 6.5401,
+        "pass": "after_pipeline-start/reshape-mover",
+        "instructions": 1031,
+        "bytes": 958429
+      },
+      {
+        "start": 0.376,
+        "seconds": 6.4611,
+        "pass": "after_pipeline-start/algsimp",
+        "instructions": 1031,
+        "bytes": 958429
+      },
+      {
+        "start": 0.149,
+        "seconds": 6.4341,
+        "pass": "after_pipeline-start/flatten-call-graph",
+        "instructions": 1031,
+        "bytes": 958429
+      },
+      {
+        "start": 0.208,
+        "seconds": 6.4181,
+        "pass": "after_pipeline-start/algsimp",
+        "instructions": 1031,
+        "bytes": 958429
+      },
+      {
+        "start": 0.193,
+        "seconds": 6.4161,
+        "pass": "after_pipeline-start/reshape-decomposer",
+        "instructions": 1031,
+        "bytes": 958429
+      },
+      {
+        "start": 0.316,
+        "seconds": 6.2841,
+        "pass": "after_pipeline-start/sub-byte-collective-normalization",
+        "instructions": 1031,
+        "bytes": 958429
+      },
+      {
+        "start": 0.353,
+        "seconds": 6.2641,
+        "pass": "after_pipeline-start/float-normalization-bf16",
+        "instructions": 1031,
+        "bytes": 958429
+      },
+      {
+        "start": 0.407,
+        "seconds": 6.2551,
+        "pass": "after_pipeline-start/variadic-op-splitter",
+        "instructions": 1031,
+        "bytes": 1003509
+      },
+      {
+        "start": 0.403,
+        "seconds": 6.2431,
+        "pass": "after_rename-instructions/pipeline-end",
+        "instructions": 1031,
+        "bytes": 1003509
+      },
+      {
+        "start": 0.389,
+        "seconds": 6.2381,
+        "pass": "after_pipeline-start/triangular-solve-rewriter",
+        "instructions": 1031,
+        "bytes": 958429
+      },
+      {
+        "start": 0.397,
+        "seconds": 6.2351,
+        "pass": "after_pipeline-start/rename-instructions",
+        "instructions": 1031,
+        "bytes": 958429
+      }
+    ]
+  },
+  "control-64": {
+    "program": "control",
+    "size": 64,
+    "device": "NVIDIA H200 NVL",
+    "revision": "b506f807506e8808445f0a1adeceeb210f13706e",
+    "nova_file": "nova/__init__.py",
+    "trace_seconds": 0.015079325065016747,
+    "lower_seconds": 0.00928477942943573,
+    "compile_seconds": 0.7352598160505295,
+    "stablehlo_bytes": 65726,
+    "executable_bytes": 36916,
+    "dump_count": 83,
+    "distinct_passes": 65,
+    "attributed_seconds": 0.082,
+    "coverage_of_compile": 0.1115,
+    "seconds_before_first_dump": -0.1216,
+    "seconds_after_last_dump": 0.8148,
+    "instructions_first": 2,
+    "instructions_last": 0,
+    "instructions_peak": 20,
+    "table": [
+      {
+        "pass": "after_pipeline-start/fusion-wrapper",
+        "seconds": 0.033,
+        "share_of_attributed": 0.4024,
+        "dumps": 3,
+        "instructions_first": 5,
+        "instructions_last": 3
+      },
+      {
+        "pass": "jit__linspace.ir-no-opt.ll",
+        "seconds": 0.03,
+        "share_of_attributed": 0.3659,
+        "dumps": 2,
+        "instructions_first": 0,
+        "instructions_last": 16
+      },
+      {
+        "pass": "jit__linspace.ir-with-opt.ll",
+        "seconds": 0.005,
+        "share_of_attributed": 0.061,
+        "dumps": 2,
+        "instructions_first": 0,
+        "instructions_last": 17
+      },
+      {
+        "pass": "jit__linspace.sm_9.0a_gpu_after_optimizations-memory-usage-report.txt",
+        "seconds": 0.004,
+        "share_of_attributed": 0.0488,
+        "dumps": 1,
+        "instructions_first": 0,
+        "instructions_last": 0
+      },
+      {
+        "pass": "after_pipeline-start/variadic-op-splitter",
+        "seconds": 0.003,
+        "share_of_attributed": 0.0366,
+        "dumps": 1,
+        "instructions_first": 3,
+        "instructions_last": 3
+      },
+      {
+        "pass": "after_scheduling-instruction-annotator/pipeline-end",
+        "seconds": 0.001,
+        "share_of_attributed": 0.0122,
+        "dumps": 1,
+        "instructions_first": 3,
+        "instructions_last": 3
+      },
+      {
+        "pass": "after_pipeline-start/ragged_dot_rewriter",
+        "seconds": 0.001,
+        "share_of_attributed": 0.0122,
+        "dumps": 1,
+        "instructions_first": 2,
+        "instructions_last": 2
+      },
+      {
+        "pass": "after_cse/dce",
+        "seconds": 0.001,
+        "share_of_attributed": 0.0122,
+        "dumps": 2,
+        "instructions_first": 3,
+        "instructions_last": 20
+      },
+      {
+        "pass": "after_pipeline-start/convert-mover",
+        "seconds": 0.001,
+        "share_of_attributed": 0.0122,
+        "dumps": 2,
+        "instructions_first": 3,
+        "instructions_last": 3
+      },
+      {
+        "pass": "after_reshape-decomposer/move_copy_to_users",
+        "seconds": 0.001,
+        "share_of_attributed": 0.0122,
+        "dumps": 1,
+        "instructions_first": 3,
+        "instructions_last": 3
+      },
+      {
+        "pass": "jit__linspace.copy-insertion.after_adding_copies_to_resolve_interference.txt",
+        "seconds": 0.001,
+        "share_of_attributed": 0.0122,
+        "dumps": 1,
+        "instructions_first": 5,
+        "instructions_last": 5
+      },
+      {
+        "pass": "after_pipeline-start/pdl-launch-annotation",
+        "seconds": 0.001,
+        "share_of_attributed": 0.0122,
+        "dumps": 1,
+        "instructions_first": 3,
+        "instructions_last": 3
+      },
+      {
+        "pass": "jit__linspace.after_spmd_partitioner.txt",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 2,
+        "instructions_last": 2
+      },
+      {
+        "pass": "jit__linspace/optimizations",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 2,
+        "instructions_last": 2
+      },
+      {
+        "pass": "after_pipeline-start/hlo_host_device_type_call_wrapper",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 2,
+        "instructions_last": 2
+      },
+      {
+        "pass": "after_pipeline-start/cudnn-custom-call-converter",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 2,
+        "instructions_last": 2
+      },
+      {
+        "pass": "after_pipeline-start/sharding-remover",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 2,
+        "instructions_last": 2
+      },
+      {
+        "pass": "after_pipeline-start/host_compute_asyncifier",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 2,
+        "instructions_last": 2
+      },
+      {
+        "pass": "after_pipeline-start/zero_sized_hlo_elimination",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 3,
+        "instructions_first": 2,
+        "instructions_last": 3
+      },
+      {
+        "pass": "after_algsimp/simplify-sorts",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 2,
+        "instructions_first": 2,
+        "instructions_last": 3
+      },
+      {
+        "pass": "after_reshape-mover/constant_folding",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 3,
+        "instructions_last": 3
+      },
+      {
+        "pass": "after_constant_folding/simplify-conditional",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 3,
+        "instructions_last": 3
+      },
+      {
+        "pass": "after_simplification/dot-merger",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 3,
+        "instructions_last": 3
+      },
+      {
+        "pass": "after_pipeline-start/ragged-all-to-all-canonicalizer",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 3,
+        "instructions_last": 3
+      },
+      {
+        "pass": "after_pipeline-start/float-normalization-bf16",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 3,
+        "instructions_first": 3,
+        "instructions_last": 3
+      },
+      {
+        "pass": "after_pipeline-start/reshape-mover",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 3,
+        "instructions_last": 3
+      },
+      {
+        "pass": "after_pipeline-start/flatten-call-graph",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 3,
+        "instructions_last": 3
+      },
+      {
+        "pass": "after_layout-assignment/sub-byte-size-setter",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 3,
+        "instructions_last": 3
+      },
+      {
+        "pass": "after_pipeline-start/reshape-decomposer",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 3,
+        "instructions_last": 3
+      },
+      {
+        "pass": "after_pipeline-start/block-scaling-rewriter",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 3,
+        "instructions_last": 3
+      },
+      {
+        "pass": "after_pipeline-start/algsimp",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 3,
+        "instructions_first": 3,
+        "instructions_last": 5
+      },
+      {
+        "pass": "after_pipeline-start/sub-byte-collective-normalization",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 3,
+        "instructions_last": 3
+      },
+      {
+        "pass": "after_pipeline-start/triangular-solve-rewriter",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 3,
+        "instructions_last": 3
+      },
+      {
+        "pass": "after_pipeline-start/dynamic-slice-annotator",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 3,
+        "instructions_last": 3
+      },
+      {
+        "pass": "after_pipeline-start/rename-instructions",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 3,
+        "instructions_last": 3
+      },
+      {
+        "pass": "after_rename-instructions/pipeline-end",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 3,
+        "instructions_last": 3
+      },
+      {
+        "pass": "jit__linspace.priority_fusion_dump.txt",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 0,
+        "instructions_last": 0
+      },
+      {
+        "pass": "after_priority-fusion/cse",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 20,
+        "instructions_last": 20
+      },
+      {
+        "pass": "jit__linspace/config_assignment",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 5,
+        "instructions_last": 5
+      },
+      {
+        "pass": "after_dce/multi_output_fusion",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 5,
+        "instructions_last": 5
+      },
+      {
+        "pass": "after_pipeline-start/rename_fusions",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 5,
+        "instructions_last": 5
+      },
+      {
+        "pass": "after_rename_fusions/dus-accumulator-zero-init-elimination",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 5,
+        "instructions_last": 5
+      },
+      {
+        "pass": "after_pipeline-start/async-collective-creator",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 5,
+        "instructions_last": 5
+      },
+      {
+        "pass": "after_pipeline-start/pipeline-end",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 4,
+        "instructions_first": 5,
+        "instructions_last": 3
+      },
+      {
+        "pass": "after_pipeline-start/collectives-schedule-linearizer",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 5,
+        "instructions_last": 5
+      },
+      {
+        "pass": "after_autotuner/convert_triton_gemm_config",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 5,
+        "instructions_last": 5
+      },
+      {
+        "pass": "after_pipeline-start/propagate-call-metadata",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 5,
+        "instructions_last": 5
+      },
+      {
+        "pass": "after_pipeline-start/dce",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 2,
+        "instructions_first": 5,
+        "instructions_last": 3
+      },
+      {
+        "pass": "jit__linspace.copy-insertion.after_removing_unnecessary_copies.txt",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 5,
+        "instructions_last": 5
+      },
+      {
+        "pass": "jit__linspace.copy-insertion.after_adding_special-case_copies.txt",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 5,
+        "instructions_last": 5
+      },
+      {
+        "pass": "after_copy-insertion/copy_fusion",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 5,
+        "instructions_last": 5
+      },
+      {
+        "pass": "after_sanitize-constant-names/pipeline-end",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 2,
+        "instructions_first": 5,
+        "instructions_last": 3
+      },
+      {
+        "pass": "after_pipeline-start/legalize-scheduling-annotations",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 5,
+        "instructions_last": 5
+      },
+      {
+        "pass": "jit__linspace.sm_9.0a_gpu_after_optimizations-buffer-assignment.txt",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 0,
+        "instructions_last": 0
+      },
+      {
+        "pass": "jit__linspace.sm_9.0a_gpu_after_optimizations.txt",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 3,
+        "instructions_last": 3
+      },
+      {
+        "pass": "after_pipeline-start/apply-xla-transforms",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 3,
+        "instructions_last": 3
+      },
+      {
+        "pass": "after_pipeline-start/async-to-sync-converter",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 3,
+        "instructions_last": 3
+      },
+      {
+        "pass": "after_pipeline-start/gpu-convert-async-collectives-to-sync",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 3,
+        "instructions_last": 3
+      },
+      {
+        "pass": "after_pipeline-start/rematerialization",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 3,
+        "instructions_last": 3
+      },
+      {
+        "pass": "after_pipeline-start/sanitize-constant-names",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 3,
+        "instructions_last": 3
+      },
+      {
+        "pass": "after_sanitize-constant-names/pdl-launch-annotation",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 3,
+        "instructions_last": 3
+      },
+      {
+        "pass": "jit__linspace.sm_9.0a_gpu_after_optimizations-buffer-assignment-values.txt",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 0,
+        "instructions_last": 0
+      },
+      {
+        "pass": "jit__linspace.sm_9.0a_gpu_after_optimizations-live-range.txt",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 0,
+        "instructions_last": 0
+      },
+      {
+        "pass": "jit__linspace.thunk_metadata.txt",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 0,
+        "instructions_last": 0
+      },
+      {
+        "pass": "jit__linspace.thunk_sequence.txt",
+        "seconds": 0.0,
+        "share_of_attributed": 0.0,
+        "dumps": 1,
+        "instructions_first": 0,
+        "instructions_last": 0
+      }
+    ],
+    "gaps": [
+      {
+        "start": 0.0,
+        "seconds": 0.081,
+        "pass": "after_pipeline-start/host_compute_asyncifier",
+        "instructions": 2,
+        "bytes": 3182
+      },
+      {
+        "start": 0.0,
+        "seconds": 0.051,
+        "pass": "after_pipeline-start/sharding-remover",
+        "instructions": 2,
+        "bytes": 3182
+      },
+      {
+        "start": 0.0,
+        "seconds": 0.047,
+        "pass": "after_pipeline-start/hlo_host_device_type_call_wrapper",
+        "instructions": 2,
+        "bytes": 3182
+      },
+      {
+        "start": 0.0,
+        "seconds": 0.047,
+        "pass": "after_pipeline-start/cudnn-custom-call-converter",
+        "instructions": 2,
+        "bytes": 3182
+      },
+      {
+        "start": 0.042,
+        "seconds": 0.04,
+        "pass": "jit__linspace.sm_9.0a_gpu_after_optimizations.txt",
+        "instructions": 3,
+        "bytes": 4249
+      },
+      {
+        "start": 0.006,
+        "seconds": 0.037,
+        "pass": "jit__linspace.priority_fusion_dump.txt",
+        "instructions": 0,
+        "bytes": 15199
+      },
+      {
+        "start": 0.009,
+        "seconds": 0.032,
+        "pass": "after_pipeline-start/fusion-wrapper",
+        "instructions": 5,
+        "bytes": 3544
+      },
+      {
+        "start": 0.0,
+        "seconds": 0.007,
+        "pass": "jit__linspace.after_spmd_partitioner.txt",
+        "instructions": 2,
+        "bytes": 3182
+      },
+      {
+        "start": 0.0,
+        "seconds": 0.006,
+        "pass": "jit__linspace/optimizations",
+        "instructions": 2,
+        "bytes": 3182
+      },
+      {
+        "start": 0.003,
+        "seconds": 0.003,
+        "pass": "after_pipeline-start/variadic-op-splitter",
+        "instructions": 3,
+        "bytes": 2879
+      },
+      {
+        "start": 0.0,
+        "seconds": 0.001,
+        "pass": "after_pipeline-start/ragged_dot_rewriter",
+        "instructions": 2,
+        "bytes": 3182
+      },
+      {
+        "start": 0.001,
+        "seconds": 0.001,
+        "pass": "after_pipeline-start/convert-mover",
+        "instructions": 3,
+        "bytes": 2850
+      }
+    ]
+  }
+}

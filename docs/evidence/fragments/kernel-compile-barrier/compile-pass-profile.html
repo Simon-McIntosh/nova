@@ -1,0 +1,31 @@
+<section id="compile-pass-profile-landing">
+<h3>Where the point jet's cold compile spends its time</h3>
+<p>One H200 job (<code>1296870</code>, node <code>98dci4-gpu-0003</code>) compiled the point jet at revision <code>b506f8075</code> in a fresh process with the compilation cache disabled, dumping the module after every HLO pass. The wall splits into trace 3.27 s, StableHLO lowering 0.45 s and XLA compile <code>96.12 s</code>. The pass-level chain covers <code>92.10 s</code> of that compile (<code>95.8%</code>), leaving 3.45 s before the first dump and 3.69 s after the last. The compile ran with per-pass dumping enabled, so its wall is longer than the <code>82.43 s</code> measured without dumping; the split, not the total, is what this instrument reports.</p>
+
+<table id="compile-pass-profile-top-passes">
+<thead><tr><th>Pass</th><th>Seconds</th><th>Share of attributed</th><th>Module instructions at the pass</th></tr></thead>
+<tbody>
+<tr><td><code>variadic-op-splitter</code></td><td>34.67</td><td>37.6%</td><td>146 → 100,579</td></tr>
+<tr><td><code>multi_output_fusion</code></td><td>17.55</td><td>19.1%</td><td>100,456 → 23,807</td></tr>
+<tr><td><code>autotuner</code></td><td>7.62</td><td>8.3%</td><td>10,726</td></tr>
+<tr><td><code>ir-no-opt</code> (LLVM stage, 253 dumps)</td><td>4.23</td><td>4.6%</td><td>—</td></tr>
+<tr><td><code>ir-with-opt</code> (LLVM stage, 253 dumps)</td><td>3.35</td><td>3.6%</td><td>—</td></tr>
+<tr><td><code>call-inliner</code></td><td>1.75</td><td>1.9%</td><td>65,497</td></tr>
+<tr><td><code>zero_sized_hlo_elimination</code> (18 dumps)</td><td>1.62</td><td>1.8%</td><td>2 → 81</td></tr>
+<tr><td><code>dce</code> (11 dumps)</td><td>1.53</td><td>1.7%</td><td>98 → 10,714</td></tr>
+<tr><td><code>fusion-wrapper</code> (3 dumps)</td><td>1.31</td><td>1.4%</td><td>10,714 → 115</td></tr>
+<tr><td><code>priority_fusion_dump</code></td><td>1.19</td><td>1.3%</td><td>—</td></tr>
+</tbody>
+</table>
+
+<p id="compile-pass-profile-instructions">The HLO instruction count grows and then collapses across the fusion pipeline: 5,813 instructions at the entry to optimization, a peak of <code>100,579</code> inside it (548 MB of HLO text), and 10,714 after the fusion passes have run. The expanded-equation count is a different number and does not follow this one.</p>
+
+<p id="compile-pass-profile-control">Positive control, same job and same instrument: a chained elementwise program of 1,024 steps compiles in <code>7.72 s</code> and the profile attributes <code>95.2%</code> of that wall, with the same leading pass (<code>variadic-op-splitter</code>, 3.55 s). A 64-step chain of the same shape compiles in 0.74 s and the instrument attributes only 11% of it, which is the failure mode the control is there to expose: below about a second the dump chain does not bracket the work and a profile that reports nothing would go unnoticed.</p>
+
+<figure id="compile-pass-profile-figure">
+<img src="/nova/figures/kernel-compile-barrier/compile-pass-profile/time-per-pass.svg" alt="Time per HLO pass for the point jet, and the split of its compile wall, with the positive control coverage">
+<figcaption>Time per pass for the point jet's H200 cold compile (left) and the split of the compile wall into attributed passes, pre-dump and post-dump time (right). Grey marks codegen stages: the autotuner and the two LLVM IR dump stages. Control rows give the wall and attributed share for the two chained-elementwise controls profiled in the same job.</figcaption>
+</figure>
+
+<p id="compile-pass-profile-recommendation"><strong>Recommendation.</strong> The lever is HLO size at the entry to the fusion pipeline, not an individual arithmetic term. The graph that reaches fusion is not the traced one: <code>variadic-op-splitter</code> takes the module from 146 to 100,579 instructions in a single pass, and the two passes that then walk that expanded graph — <code>variadic-op-splitter</code> at 34.67 s and <code>multi_output_fusion</code> at 17.55 s — account for <code>52.22 s</code> of the 92.10 s attributed, which is <code>56.7%</code> of the profile and about <code>47 s</code> of the 82.43 s cold compile measured without dumping. Codegen stages (autotuner 7.62 s plus 7.58 s of LLVM IR stages) add roughly 15 s, and nothing else exceeds 2 s. So §2 and §3 should bound what the program hands to the variadic splitter — the number of operands carried together through the point jet's <code>vmap</code> and the tuple structure of the source-jets carrier — because that is what turns a small module into 100,579 instructions before fusion runs. Removing census-ranked arithmetic terms will not reach it, which is what the earlier 4.04% equation reduction and 0.07 s compile change already showed.</p>
+</section>

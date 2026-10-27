@@ -104,12 +104,7 @@ def main():
     for row in rows:
         modules.setdefault(row["module"], []).append(row)
     name, chosen = max(modules.items(), key=lambda item: len(item[1]))
-    chosen.sort(
-        key=lambda row: (
-            -1 if row["index"] is None else row["index"],
-            row["path"].name,
-        )
-    )
+    chosen.sort(key=lambda row: (row["stamp"], row["path"].name))
     base = chosen[0]["stamp"]
     for position, row in enumerate(chosen):
         row["start"] = (row["stamp"] - base) / 1e9

@@ -1,0 +1,89 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured from suite arms: the reviewed manifest records no baseline_suite and no after_suite gate log because the node ran no pytest arm, its tests line naming the stage-comparison script in evidence; the zero is the schema's positive placeholder and is not a measured count of added failures",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-27T02:14:37.743Z",
+  "dispatched_at": "2026-10-27T02:05:37Z",
+  "finding_dispositions": {
+    "1": {
+      "kind": "exempted",
+      "reason": "Diagnostic aside about an ambiguous assignment; the physical matching that replaced it is persisted in comparison-complete.log",
+      "recorded_at": "2026-10-27T02:16:03.281951+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "moment-field-hessian",
+      "recorded_at": "2026-10-27T02:16:06.218401+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "Prototype script run only through its launcher, which sets PYTHONPATH; not imported as a module",
+      "recorded_at": "2026-10-27T02:16:09.437779+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/carrier-trial-map-split.html",
+      "line": "60",
+      "severity": "non-blocking",
+      "text": "non-blocking: the brief's negative control was to swap only the module named in mechanism (3) and show the difference vanish, but the module named is scripts/prototypes/read_route/jets.py, which is blob 64f0697 on both revisions so no swap exists, and the executed substitute swaps nova/equilibrium/topology.py and fails with EXIT=1; the acceptance clause is therefore answered by coordinator adjudication recorded in status-repair.json rather than by the prescribed experiment, which a reader of the fragment alone cannot see."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/carrier-trial-map-split.html",
+      "line": "7",
+      "severity": "non-blocking",
+      "text": "non-blocking: the claim that a minimum-distance cold-triple assignment can pair cells 6.57 m apart is reproduced only in the worker's stream, not in any persisted log in the run directory, so a later reader cannot re-derive it from the cited receipts."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/carrier-trial-map-split.html",
+      "line": "3",
+      "severity": "non-blocking",
+      "text": "non-blocking: the evidence record carries no figure although its subject is a poloidal comparison of two carriers' cell support, axis and wall contact and the declared figures write path is unused, which the repository's figure mandate requires for a claim about geometry or topology."
+    },
+    {
+      "file": "scripts/prototypes/carrier_trial_map/probe.py",
+      "line": "205",
+      "severity": "non-blocking",
+      "text": "non-blocking: `from direct import measure_direct` is a bare sibling import that resolves only because launch.sh exports the script directory on PYTHONPATH, so an import of probe.py as a module fails at the detail stage only when MEASURE_DETAIL is set."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit from bd076630 to 7589c078; 934 insertions across eight prototype scripts and one evidence fragment, no deletion, no product code and no test file touched, and the only invocation path is scripts/prototypes/carrier_trial_map/launch.sh:1, which is not production code.",
+    "done_when": "the done_when's three clauses are (1) a stage-by-stage matched comparison naming the first stage above 1e-12, (2) an independent area/moment reference, (3) a named mechanism plus a negative control that swaps the module named there; detail/comparison-complete.log records (1) with MATCH_CONTROL changed_indices 20 and NODAL hessian relative 0.711303, detail/split-reference.log and reference-control.log record (2) with its positive controls, and (3) is only partly met because module-control.log is EXIT=1 and the swapped module is not the one the fragment names.",
+    "goal": "the node goal is to find which carrier representation is wrong at the scale-0.5 trial state; docs/evidence/fragments/converged-forward-solve/carrier-trial-map-split.html:3 answers neither, showing both arms' reads rejected by an independent polygon field and locating the divergence in the inherited nodal Hessian at scripts/prototypes/read_route/jets.py:258.",
+    "manifest": "read at the reviewed run directory; it reports status complete, five commits beyond base bd076630, the compare.py gate command, fourteen gate logs with their EXIT lines, the failed module control as its negative_control_log, and the two scaffolding failure attributions; it declares baseline_suite and after_suite empty because this node ran no suite arm.",
+    "write_paths": "the manifest declares docs/evidence/fragments/converged-forward-solve/carrier-trial-map-split.html, scripts/prototypes/carrier_trial_map and docs/figures/converged-forward-solve/carrier-trial-map-split; all nine added files land under the first two and nothing lands under the third."
+  },
+  "justifications": {
+    "durability": "control.py:18 returns nonzero on a failed axis match and module-control.log records that refusal firing, but no test reddens if the derivative finding regresses and the stage arrays the fragment rests on are npz receipts in the run directory rather than committed fixtures.",
+    "evidence": "detail/comparison-complete.log:2 and reference-control.log:2 gate clauses (1) and (2) with EXIT=0, while module-control.log:3 shows EXIT=1 for the prescribed module control and carrier-trial-map-split.html:7 cites a 6.57 m mis-assignment that no persisted log line carries.",
+    "fit": "the scripts follow the existing scripts/prototypes idiom with the revision/command log header at compare.py:153 and carry no plan label, with one deviation at probe.py:205 where a bare `from direct import measure_direct` depends on launch.sh's PYTHONPATH.",
+    "goal_fidelity": "carrier-trial-map-split.html:3 answers the question by rejecting both arms against the direct polygon field at direct.py:29 and naming the inherited derivative as the first unstable input.",
+    "reuse": "probe.py:13 reuses scripts/prototypes/fast_map_production/program.py and probe.py:17 reuses scripts/prototypes/sub_millisecond/measure_bell_cut.py rather than re-implementing them, and reference.py:14 duplicates the support integration that bell_polygon owns only because the done_when requires an independent reference.",
+    "scope_discipline": "git diff --stat bd076630 7589c078 lists nine files, all under the two used declared write prefixes, and no production module under nova/ is modified."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to find which carrier representation is wrong at the scale-0.5 trial state; docs/evidence/fragments/converged-forward-solve/carrier-trial-map-split.html:3 answers neither, showing both arms' reads rejected by an independent polygon field and locating the divergence in the inherited nodal Hessian at scripts/prototypes/read_route/jets.py:258.\nVERDICT done_when: the done_when's three clauses are (1) a stage-by-stage matched comparison naming the first stage above 1e-12, (2) an independent area/moment reference, (3) a named mechanism plus a negative control that swaps the module named there; detail/comparison-complete.log records (1) with MATCH_CONTROL changed_indices 20 and NODAL hessian relative 0.711303, detail/split-reference.log and reference-control.log record (2) with its positive controls, and (3) is only partly met because module-control.log is EXIT=1 and the swapped module is not the one the fragment names.\nVERDICT write_paths: the manifest declares docs/evidence/fragments/converged-forward-solve/carrier-trial-map-split.html, scripts/prototypes/carrier_trial_map and docs/figures/converged-forward-solve/carrier-trial-map-split; all nine added files land under the first two and nothing lands under the third.\nVERDICT manifest: read at the reviewed run directory; it reports status complete, five commits beyond base bd076630, the compare.py gate command, fourteen gate logs with their EXIT lines, the failed module control as its negative_control_log, and the two scaffolding failure attributions; it declares baseline_suite and after_suite empty because this node ran no suite arm.\nVERDICT diff: read commit by commit from bd076630 to 7589c078; 934 insertions across eight prototype scripts and one evidence fragment, no deletion, no product code and no test file touched, and the only invocation path is scripts/prototypes/carrier_trial_map/launch.sh:1, which is not production code.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: carrier-trial-map-split.html:3 answers the question by rejecting both arms against the direct polygon field at direct.py:29 and naming the inherited derivative as the first unstable input.\nSCORE evidence: 14\nJUSTIFICATION evidence: detail/comparison-complete.log:2 and reference-control.log:2 gate clauses (1) and (2) with EXIT=0, while module-control.log:3 shows EXIT=1 for the prescribed module control and carrier-trial-map-split.html:7 cites a 6.57 m mis-assignment that no persisted log line carries.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat bd076630 7589c078 lists nine files, all under the two used declared write prefixes, and no production module under nova/ is modified.\nSCORE durability: 11\nJUSTIFICATION durability: control.py:18 returns nonzero on a failed axis match and module-control.log records that refusal firing, but no test reddens if the derivative finding regresses and the stage arrays the fragment rests on are npz receipts in the run directory rather than committed fixtures.\nSCORE fit: 16\nJUSTIFICATION fit: the scripts follow the existing scripts/prototypes idiom with the revision/command log header at compare.py:153 and carry no plan label, with one deviation at probe.py:205 where a bare `from direct import measure_direct` depends on launch.sh's PYTHONPATH.\nSCORE reuse: 17\nJUSTIFICATION reuse: probe.py:13 reuses scripts/prototypes/fast_map_production/program.py and probe.py:17 reuses scripts/prototypes/sub_millisecond/measure_bell_cut.py rather than re-implementing them, and reference.py:14 duplicates the support integration that bell_polygon owns only because the done_when requires an independent reference.\nFINDING docs/evidence/fragments/converged-forward-solve/carrier-trial-map-split.html:60 non-blocking: the brief's negative control was to swap only the module named in mechanism (3) and show the difference vanish, but the module named is scripts/prototypes/read_route/jets.py, which is blob 64f0697 on both revisions so no swap exists, and the executed substitute swaps nova/equilibrium/topology.py and fails with EXIT=1; the acceptance clause is therefore answered by coordinator adjudication recorded in status-repair.json rather than by the prescribed experiment, which a reader of the fragment alone cannot see.\nFINDING docs/evidence/fragments/converged-forward-solve/carrier-trial-map-split.html:7 non-blocking: the claim that a minimum-distance cold-triple assignment can pair cells 6.57 m apart is reproduced only in the worker's stream, not in any persisted log in the run directory, so a later reader cannot re-derive it from the cited receipts.\nFINDING docs/evidence/fragments/converged-forward-solve/carrier-trial-map-split.html:3 non-blocking: the evidence record carries no figure although its subject is a poloidal comparison of two carriers' cell support, axis and wall contact and the declared figures write path is unused, which the repository's figure mandate requires for a claim about geometry or topology.\nFINDING scripts/prototypes/carrier_trial_map/probe.py:205 non-blocking: `from direct import measure_direct` is a bare sibling import that resolves only because launch.sh exports the script directory on PYTHONPATH, so an import of probe.py as a module fails at the detail stage only when MEASURE_DETAIL is set.",
+  "review_run_id": "r-20261027T020243079245-review-of-carrier-trial-map-split-7589c078b5d9",
+  "reviewed_base_sha": "bd076630d3e90028126da77a7e4577abf169bdea",
+  "reviewed_head_sha": "7589c078b5d920d01ff6c8d6395198da4c062bfe",
+  "reviewed_run_id": "r-20261026T231702585031-carrier-trial-map-split",
+  "scores": {
+    "durability": 11,
+    "evidence": 14,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 17,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T02:18:57.583122+00:00",
+  "total": 94
+}

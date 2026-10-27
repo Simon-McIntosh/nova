@@ -1,0 +1,145 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-27T10:01:14.915Z",
+  "dispatched_at": "2026-10-27T09:51:09Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/kernel-compile-barrier.html:23",
+      "id": "wiring-1",
+      "reason": "the ordering the plan states in prose is not the ordering the queue reads, so \u00a72/\u00a73/\u00a74 get dispatched with no lever named and fail their own done-whens.",
+      "text": "no section-level wire is declared, yet \u00a75's recommendation is the input \u00a72 and \u00a73 must pick their mechanism from (\u00a75 line 73) and the plan's own comment (line 114) says \"Before \u00a72 or \u00a73 is dispatched again, the compile time has to be attributed\"; with s2, s3 and s4 all `implementable` the queue can launch them beside or ahead of s5",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/kernel-compile-barrier.html:67",
+      "id": "wiring-2",
+      "reason": "a \u00a74 worker dispatched now compiles the unbounded kernel read, blows the 60 s / 50 MB / 64 GB clauses at every size, and closes nothing.",
+      "text": "\u00a74 is `implementable` with `data-links=\"\"` while its own first sentence makes it conditional on \u00a72's outcome (\"With the kernel terms bounded\"), the same defect this plan already fixed for \u00a73",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/kernel-compile-barrier.html:64",
+      "id": "done_when-1",
+      "reason": "without the bound on the arm where the 381 GB was measured, the node can pass on its headline number while leaving the memory barrier it was dispatched to remove.",
+      "text": "\u00a73 done-when (1) bounds the H200 arm by wall and executable only (\"at most 60 s on the H200\") while \u00a70 (line 47) declares the plan owns \"at most 64 GB resident on the host during a cold compile\"; the 381 GB figure this plan exists to remove is host memory and the batch program is the program that produced it, so a build that compiles in 55 s and holds 300 GB would pass",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/kernel-compile-barrier.html:64",
+      "id": "done_when-2",
+      "reason": "a worker sizes a \"64-node\" job as a small one and loses it, or reports the base arm unmeasured, leaving done-when (2) unsatisfiable.",
+      "text": "\u00a73 done-when (2)'s base arm is \"the base program evaluated over those nodes alone in one bounded job\", but \u00a73's own line 62 states the cost is node-count-independent, so a 64-node base build pays the same 7,044 s cold compile and ~381 GB as the 2,132-node one; the clause states no job size and the only recorded job of that shape (sirius 1290676, 450 GB, 5 h) is the one that failed to publish its rows",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/kernel-compile-barrier.html:63",
+      "id": "reasoning-1",
+      "reason": "the conclusion (expanded-equation count does not set compile time) still follows from the inlining result, and \u00a75 states the experiment correctly, so only \u00a73's one-line paraphrase is wrong.",
+      "text": "\u00a73 cites \u00a75 as showing that \"removing the top-ranked term's tangent left the compile unchanged\", but the measured experiment inlined `_harmonic_pair_step` (comment c-run-r-20261026T214731173490, line 111: \"Inlining the serial harmonic pair step ... trims H200 cold compile from 82.43 s to 82.36 s\"), and no tangent removal was run",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "d7a36b9d1cfb95cd0ee3f3048da28f1fb43ab5db0565cba52b3bb59da73a304b",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 17,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "",
+      "when": "2026-10-27T10:04:30.238413+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "wiring-2",
+      "reason": "",
+      "when": "2026-10-27T10:04:50.599794+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "",
+      "when": "2026-10-27T10:04:56.642117+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "done_when-2",
+      "reason": "",
+      "when": "2026-10-27T10:05:02.103975+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-27T10:05:08.945877+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-27T10:04:56.642117+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-27T10:05:02.103975+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-27T10:05:08.945877+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-27T10:04:30.238413+00:00"
+    },
+    "wiring-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-27T10:04:50.599794+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-kernel-compile-barrier.v17.json",
+  "review_run_id": "r-20261027T094949357231-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "fb4a024d547db8171b85209a79b022656038c28f",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `nova/equilibrium/fixed_points.py` :391 `_row_program`, :206 `_source_jets`, :413 `maintain_rows`, :478 the call; `scripts/prototypes/read_route/jets.py` :229 `_source_jets` and :321 the `jax.jit(jax.vmap(...))` copy at the cited lines; `refs/reckon/archive/kcb-bounded-tangents` resolves to b534076f0; every cited `docs/` path exists and `#s1` exists in the landed evidence.",
+    "done_when": "a finding \u2014 \u00a73's done-when (1) bounds the H200 arm by wall alone, dropping the host-memory bound the plan's own \u00a70 declares it owns; \u00a73's done-when (2) requires a base arm whose cost is unchanged by shrinking it to 64 nodes.",
+    "evidence_paths": "pass \u2014 the plan routes evidence into `docs/research/compile-cost-evidence.html`, the landed evidence archive and the plan's own comments; no node writes to a scratchpad or a node-local temporary path.",
+    "naming": "pass \u2014 the plan names existing code and test identifiers (`kernel_compile_expected_failure`, `kernel_compile_budget`, `test_kernel_compile_growth`) but mandates no new symbol carrying a plan label, stage name, ticket number or version tag.",
+    "reasoning": "a finding \u2014 \u00a73 restates the \u00a75 experiment as \"removing the top-ranked term's tangent\", which is not what was run.",
+    "single_goal": "pass \u2014 each node names one deliverable (census, bounded tangents, one bounded jets build, the topology read meeting its clause, pass attribution).",
+    "wiring": "a finding \u2014 the plan declares no `plan-section-depends-on` wire at all (line 23), while \u00a75 is the prerequisite whose recommendation \u00a72 and \u00a73 must consume and \u00a74's premise is \"with the kernel terms bounded\"; `data-links` is a hyperlink record (`_plan_html.py:1173`), not the ordering wire the queue reads (`queue_admission.py` awaiting-upstream), so all four remaining sections are dispatchable in any order."
+  },
+  "section_digests": {
+    "_document": "35f84c826db2f1a2e63552acb13d7f53451bd622e30b56405e1d9a89cb35b050",
+    "s0": "6af29e9c0d4ae386d870df6baa70b910da2c50485eef97ddf1c3d2ebc9f12a27",
+    "s1": "f60ffbcd7c6c609b9e2ce1cbc5be3879c9613e2a1f1b41018a50e31a169abdb0",
+    "s2": "4b4ae60065134cb7cdc8a4479e5525cf0785449c22833f6d824f728d3a0deaf2",
+    "s3": "72d6de61585438d24dd570eb9dbbba4db0f8d79a5c0438c8d4968d3305015a8a",
+    "s4": "043c0ccddafb69cbd714f400a3810894eb704687755dfb014b018a750adc8b16",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T10:04:24.189185+00:00"
+}

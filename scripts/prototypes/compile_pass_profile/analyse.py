@@ -1,11 +1,11 @@
 """Attribute an XLA compile wall to its per-pass HLO dumps.
 
-XLA writes one dump per pass, naming it
-``<stamp>.<module>.<index>.<pipeline>.<after_previous>.before_<next>.txt``.
-The gap between one dump and the next is therefore the cost of the pass named
-``before_<next>`` in the earlier file. Ordering by the stamp XLA records at
-write time turns the sequence into a wall-time chain that reconciles against
-the compile wall the profiling process measured around ``Lowered.compile()``.
+XLA writes one dump per pass and restarts its dump index inside each pipeline,
+so the order that carries the wall is the order the files were written. The gap
+between one dump and the next is the cost of the pass that ran between them.
+The chain is bounded by the epoch times the profiling process took around
+``Lowered.compile()``, which is what lets the profile say how much of the wall
+it did not see.
 """
 
 import argparse
@@ -25,14 +25,13 @@ SKIP = (
     "is_scheduled=",
     "backend_config=",
 )
+TOLERANCE = 1.02
 
 
 def describe(path):
     """Return (module, pass label, dump index) for one dump file."""
     parts = path.name.split(".")
-    stamp = None
     if parts and STAMP.match(parts[0]):
-        stamp = int(parts[0])
         parts = parts[1:]
     module = None
     if parts and MODULE.match(parts[0]):
@@ -43,7 +42,8 @@ def describe(path):
     if body:
         body[-1] = Path(body[-1]).stem
     marker = next(
-        (index for index, part in enumerate(body) if part.startswith("before_")), None
+        (position for position, part in enumerate(body) if part.startswith("before_")),
+        None,
     )
     if marker is not None and marker > 0:
         label = body[marker - 1] + "/" + body[marker][len("before_") :]
@@ -103,7 +103,7 @@ def main():
     modules = {}
     for row in rows:
         modules.setdefault(row["module"], []).append(row)
-    name, chosen = max(modules.items(), key=lambda item: len(item[1]))
+    _, chosen = max(modules.items(), key=lambda item: len(item[1]))
     chosen.sort(key=lambda row: (row["stamp"], row["path"].name))
     base = chosen[0]["stamp"]
     for position, row in enumerate(chosen):
@@ -114,7 +114,9 @@ def main():
             else row["start"]
         )
         row["seconds"] = max(0.0, following - row["start"])
-        row["instructions"], row["fusion_instructions"] = count_instructions(row["path"])
+        row["instructions"], row["fusion_instructions"] = count_instructions(
+            row["path"]
+        )
 
     attributed = sum(row["seconds"] for row in chosen)
     grouped = {}
@@ -126,7 +128,6 @@ def main():
         entry["dumps"] += 1
         if row["instructions"] is not None:
             entry["instructions"].append(row["instructions"])
-    ranking = sorted(grouped.items(), key=lambda item: -item[1]["seconds"])
     table = [
         {
             "pass": label,
@@ -135,26 +136,24 @@ def main():
             if attributed
             else 0.0,
             "dumps": entry["dumps"],
-            "instructions_first": entry["instructions"][0]
+            "instructions_entry": entry["instructions"][0]
             if entry["instructions"]
             else None,
-            "instructions_last": entry["instructions"][-1]
+            "instructions_exit": entry["instructions"][-1]
             if entry["instructions"]
             else None,
         }
-        for label, entry in ranking
+        for label, entry in sorted(
+            grouped.items(), key=lambda item: -item[1]["seconds"]
+        )
     ]
 
     compile_seconds = receipt.get("compile_seconds")
-    first_seconds = chosen[0]["start"]
-    last_seconds = chosen[-1]["start"]
     started = receipt.get("compile_started_epoch")
     finished = receipt.get("compile_finished_epoch")
-    before_first = None
-    after_last = None
-    if started and finished:
-        before_first = chosen[0]["stamp"] / 1e9 - started
-        after_last = finished - chosen[-1]["stamp"] / 1e9
+    before_first = chosen[0]["stamp"] / 1e9 - started if started else None
+    after_last = finished - chosen[-1]["stamp"] / 1e9 if finished else None
+    coverage = attributed / compile_seconds if compile_seconds else None
     summary = {
         "program": receipt["program"],
         "size": receipt["size"],
@@ -166,31 +165,21 @@ def main():
         "compile_seconds": compile_seconds,
         "stablehlo_bytes": receipt.get("stablehlo_bytes"),
         "executable_bytes": receipt.get("executable_bytes"),
-        "module": name,
-        "modules_dumped": {key: len(value) for key, value in modules.items()},
         "dump_count": len(chosen),
         "distinct_passes": len(grouped),
         "attributed_seconds": round(attributed, 4),
         "seconds_before_first_dump": round(before_first, 4)
         if before_first is not None
         else None,
-        "dump_span_seconds": round(last_seconds - first_seconds, 4),
         "seconds_after_last_dump": round(after_last, 4)
         if after_last is not None
         else None,
-        "reconciled_seconds": round(
-            (before_first or 0.0) + attributed + (after_last or 0.0), 4
-        ),
-        "coverage_of_compile": round(attributed / compile_seconds, 4)
-        if compile_seconds
-        else None,
-        "instructions_before": chosen[0]["instructions"],
-        "fusion_instructions_before": chosen[0]["fusion_instructions"],
-        "instructions_after": chosen[-1]["instructions"],
-        "fusion_instructions_after": chosen[-1]["fusion_instructions"],
-        "peak_instructions": max(
-            (row["instructions"] for row in chosen if row["instructions"] is not None),
-            default=None,
+        "coverage_of_compile": round(coverage, 4) if coverage is not None else None,
+        "instructions_first": chosen[0]["instructions"],
+        "instructions_peak": max(
+            (row["instructions"] or 0)
+            for row in chosen
+            if row["instructions"] is not None
         ),
         "table": table,
         "sequence": [
@@ -221,8 +210,8 @@ def main():
                     "seconds_after_last_dump",
                     "distinct_passes",
                     "dump_count",
-                    "instructions_before",
-                    "instructions_after",
+                    "instructions_first",
+                    "instructions_peak",
                 )
             }
         ),
@@ -239,6 +228,19 @@ def main():
             ),
             flush=True,
         )
+
+    if coverage is None:
+        print("ATTRIBUTION-FAIL the receipt records no compile wall", flush=True)
+        raise SystemExit(2)
+    if coverage > 1.0 or attributed > compile_seconds * TOLERANCE:
+        print(
+            "ATTRIBUTION-FAIL %.3f s attributed against a %.3f s compile wall "
+            "(coverage %.3f): the dump chain is longer than the compile it "
+            "describes; the dumps are not in write order."
+            % (attributed, compile_seconds, coverage),
+            flush=True,
+        )
+        raise SystemExit(2)
 
 
 if __name__ == "__main__":

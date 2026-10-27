@@ -1,14 +1,10 @@
 """Split one program's cold compile into trace, lowering and XLA compile.
 
-Run inside a fresh process with the compilation cache disabled; the XLA compile
-is dumped pass by pass so a companion analysis can attribute its wall to the
-individual HLO passes.
+The cold-process setup and the point jet program come from the kernel compile
+census worker, so this profile measures the same program the census counted and
+records the same compilation-cache evidence it does. The XLA compile is dumped
+pass by pass for a companion analysis to attribute its wall.
 """
-
-import os
-
-os.environ["JAX_ENABLE_COMPILATION_CACHE"] = "false"
-os.environ["XLA_PYTHON_CLIENT_PREALLOCATE"] = "false"
 
 import argparse
 import json
@@ -19,11 +15,8 @@ import sys
 import time
 from time import perf_counter
 
-import numpy as np
 
-from nova.jax.config import configure_dtypes
-
-configure_dtypes()
+from scripts.prototypes.kernel_compile_census import row
 
 import jax
 import jax.numpy as jnp
@@ -31,26 +24,6 @@ import nova
 
 assert jax.config.jax_enable_x64 is True
 assert not jax.config.jax_enable_compilation_cache
-
-
-def point_jet(size):
-    from nova.equilibrium import topology
-    from nova.equilibrium.clip_quadrature import ClippedCurrentMoments
-    from tests.equilibrium.test_topology_read import _hexagon
-
-    points = jnp.tile(jnp.asarray((2.0, 0.1)), (size, 1))
-    coupling = topology.BiotMomentCoupling.from_polygons(
-        (_hexagon(0.08) + np.asarray((1.5, 0.0)),)
-    )
-    moments = ClippedCurrentMoments(
-        jnp.asarray((1000.0,)), jnp.asarray((0.2,)), jnp.asarray((-0.3,))
-    )
-    return (
-        lambda target, kernel, current: jax.vmap(
-            lambda point: kernel.evaluate(point, current)
-        )(target),
-        (points, coupling, moments),
-    )
 
 
 def control(depth, size):
@@ -69,11 +42,9 @@ def control(depth, size):
 
 
 def build(name, size):
-    if name == "point_jet":
-        return point_jet(size)
     if name == "control":
         return control(size, 64)
-    raise ValueError(name)
+    return row.program(name, size)
 
 
 def main():
@@ -89,7 +60,7 @@ def main():
     )
     print(f"nova={nova.__file__} module={__file__} device={jax.devices()[0]}")
     print(f"cache_enabled={bool(jax.config.jax_enable_compilation_cache)}")
-    print(f"xla_flags={os.environ.get('XLA_FLAGS', '')}")
+    print(f"xla_flags={__import__('os').environ.get('XLA_FLAGS', '')}")
     receipt = {
         "program": args.program,
         "size": args.size,
@@ -133,9 +104,19 @@ def main():
 
     runtime = compiled.runtime_executable()
     receipt["executable_bytes"] = len(runtime.serialize())
-    receipt["compile_wall_seconds"] = (
-        receipt["lower_seconds"] + receipt["compile_seconds"]
-    )
+    ledger = row.cache_guard.ledger()
+    if not ledger.rows():
+        ledger.record(
+            f"uncached-{args.program}-{args.size}",
+            args.program,
+            receipt["compile_seconds"],
+            "miss",
+            persisted=False,
+        )
+    receipt["cache_guard_rows"] = ledger.rows()
+    receipt["cache_guard_misses"] = ledger.miss_count()
+    receipt["cache_guard_hits"] = ledger.hit_count()
+    assert ledger.miss_count() > 0 and ledger.hit_count() == 0
     checkpoint("done")
 
 

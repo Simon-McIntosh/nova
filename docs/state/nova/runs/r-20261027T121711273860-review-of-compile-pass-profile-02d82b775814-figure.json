@@ -1,0 +1,380 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "read-only",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "b03f273513fb236b077f5ed7bf8e39da5bbb1af1",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T121711273860-review-of-compile-pass-profile-02d82b775814-figure/brief.md",
+    "sha256": "8638663e205692d9d51532c5a70143c815247225f78316bacfea98a9b5a6e8bf"
+  },
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 2306647,
+      "input_tokens_cumulative": 2306647,
+      "output_tokens": 20743,
+      "output_tokens_cumulative": 20743,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-10-27T12:29:57.745Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-27T12:19:13Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": false,
+    "matched_measure": null,
+    "override": false,
+    "role": "review",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.29012345679012347,
+    "plan": "kernel-compile-barrier",
+    "reason": "role-not-enforced:review",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-27T13:17:13.781562+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-27T12:17:13Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 18,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 7,
+    "headroom": 4,
+    "mean_context": 128000,
+    "observed_at": "2026-10-27T12:16:55Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 18,
+      "aggregate_tokens_per_second": 359.425,
+      "detail": "",
+      "mean_tokens_per_second": 64.183,
+      "observed_at": "2026-10-27T12:16:55Z",
+      "runs": 5.6,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-27T12:29:57.745Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T121711273860-review-of-compile-pass-profile-02d82b775814-figure/manifest.md",
+  "member": "disposable-r-20261027T121711273860-review-of-compile-pass-profile-02d82b775814-figure",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": "review run; it writes only its record",
+  "node": "review-of-compile-pass-profile-02d82b775814-figure",
+  "node_definition": {
+    "after": [],
+    "brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T100537293263-compile-pass-profile/figure-review-brief.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T121711273860-review-of-compile-pass-profile-02d82b775814-figure/brief.md",
+    "brief_sha256": "8638663e205692d9d51532c5a70143c815247225f78316bacfea98a9b5a6e8bf",
+    "capability": {
+      "class": "general",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "moderate",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 370,
+          "cached_input_tokens": 515696,
+          "input_tokens": 516068,
+          "output_tokens": 78,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 516146,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "session_id": "s21-nova"
+    },
+    "done_when": "the figure review for r-20261027T100537293263-compile-pass-profile stores a parsed read-only rubric record with all 6 rubric items at a declared write path, anchored to the reviewed base and head",
+    "estimated_hours": null,
+    "goal": "attach an independent figure review to run r-20261027T100537293263-compile-pass-profile",
+    "id": "review-of-compile-pass-profile-02d82b775814-figure",
+    "images": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T121711273860-review-of-compile-pass-profile-02d82b775814-figure/image-0.png"
+    ],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-27T12:17:13Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 18,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 7,
+      "headroom": 4,
+      "mean_context": 128000,
+      "observed_at": "2026-10-27T12:16:55Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 18,
+        "aggregate_tokens_per_second": 359.425,
+        "detail": "",
+        "mean_tokens_per_second": 64.183,
+        "observed_at": "2026-10-27T12:16:55Z",
+        "runs": 5.6,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T121711273860-review-of-compile-pass-profile-02d82b775814-figure/manifest.md",
+    "negative_control": "",
+    "plan": "kernel-compile-barrier",
+    "regenerate_paths": [],
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "review",
+    "section": "§5",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T100537293263-compile-pass-profile/review-records/r-20261027T100537293263-compile-pass-profile.figure.json",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T100537293263-compile-pass-profile/review-records/r-20261027T100537293263-compile-pass-profile.figure.at-02d82b775814c7faf27695be32ce43a2312f4ec7.json"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 1620605.0,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "review-of-compile-pass-profile-02d82b775814-figure",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-27T12:18:54.372699+00:00",
+    "score": 0.625,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.493,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {}
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.29012345679012347,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "b03f273513fb236b077f5ed7bf8e39da5bbb1af1",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "id": "r-20261027T121711273860-review-of-compile-pass-profile-02d82b775814-figure",
+    "reviewed_base_sha": "d06fe116aca44c5c80d0aefc2ee96670da1328b9",
+    "reviewed_head_sha": "02d82b775814c7faf27695be32ce43a2312f4ec7",
+    "scores": {},
+    "status": "parsed",
+    "total": null
+  },
+  "review_tier": "full",
+  "role": "review",
+  "route_mode": "explicit",
+  "run_id": "r-20261027T121711273860-review-of-compile-pass-profile-02d82b775814-figure",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§5",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "d400d86c-0857-41d9-957a-f6dac41ce6f5",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 2306647,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 598.958,
+    "generated_tokens": 20743,
+    "generation_seconds": 497.679,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 44.3,
+    "machine_seconds": 101.279,
+    "peak_input_tokens": 102059,
+    "tokens_per_second": 41.68,
+    "wall_tokens_per_second": 34.63
+  },
+  "time_budget": "60m",
+  "tool_steps": 32.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 644,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-27T12:30:01Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-27T12:19:28Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261027T121711273860-review-of-compile-pass-profile-02d82b775814-figure",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 4234,
+    "worker_pid": 2484586
+  },
+  "worker_seconds": 563,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

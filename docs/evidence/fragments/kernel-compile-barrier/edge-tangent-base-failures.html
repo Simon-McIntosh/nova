@@ -34,8 +34,8 @@ and the revision this node measured (<code>git rev-parse f1e09f09d:&lt;path&gt;<
 <tr><td><code>test_truncated_tangent_fails_identity[edge_terms]</code></td><td>same</td><td>pytest-timeout, no value</td><td>300 s ceiling</td><td>FAIL, same primal-bit assertion</td></tr>
 <tr><td><code>test_tangent_compiles_within_bound[channel_split]</code></td><td><code>test_edge_term_tangents.py:322</code> to <code>tangent_identity.py:224</code></td><td>pytest-timeout in a spawned compile arm, no ratio</td><td>300 s ceiling</td><td>PASS (inside 300 s)</td></tr>
 <tr><td><code>test_tangent_compiles_within_bound[edge_integrands]</code></td><td>same</td><td>pytest-timeout, no ratio</td><td>300 s ceiling</td><td>FAIL (progress mark at the same 300 s ceiling; the failure section prints only at the run's summary, which this node did not reach)</td></tr>
-<tr><td><code>test_tangent_compiles_within_bound[flux_line_moments]</code></td><td>same</td><td>pytest-timeout, no ratio</td><td>300 s ceiling</td><td>not reached</td></tr>
-<tr><td><code>test_tangent_compiles_within_bound[flux_and_moment_terms]</code></td><td>same</td><td>pytest-timeout, no ratio</td><td>300 s ceiling</td><td>not reached</td></tr>
+<tr><td><code>test_tangent_compiles_within_bound[flux_line_moments]</code></td><td>same</td><td>pytest-timeout, no ratio</td><td>300 s ceiling</td><td>fails; reason not yet printed (see note)</td></tr>
+<tr><td><code>test_tangent_compiles_within_bound[flux_and_moment_terms]</code></td><td>same</td><td>pytest-timeout, no ratio</td><td>300 s ceiling</td><td>fails; reason not yet printed (see note)</td></tr>
 <tr><td><code>test_tangent_compiles_within_bound[edge_terms]</code></td><td>same</td><td>pytest-timeout, no ratio</td><td>300 s ceiling</td><td>FAIL at 300.10 s: pytest-timeout</td></tr>
 <tr><td><code>test_near_edge_tangent_meets_reference</code></td><td><code>test_edge_term_tangents.py:449</code>, <code>@pytest.mark.xfail(strict=True)</code></td><td>XPASS(strict): the row now passes its 1e-9 assertion</td><td>in-process on CPU; 2.58 s on H200</td><td>FAIL (XPASS strict)</td></tr>
 </tbody>
@@ -208,10 +208,15 @@ because the plan's decision fixes the primal as bit-identical.
 </tbody>
 </table>
 
-<p>Two H200 cells are recorded as not reached: the H200 arm was still running
+<p>Both H200 cells in the last two rows read <em>fails</em> rather than <em>not reached</em>:
+the H200 arm's progress line runs <code>......F......F...FFF</code> over its first 22 rows, so
 <code>test_tangent_compiles_within_bound[flux_line_moments]</code> and
-<code>[flux_and_moment_terms]</code> when this node's wall closed, while
-<code>[edge_integrands]</code> had already registered a failure at the same 300 s ceiling. The
-same ceiling cut <code>[edge_terms]</code> at 300.10 s on the H200, so the class is measured
-on both devices even where an H200 cell is not.</p>
+<code>[flux_and_moment_terms]</code> are recorded as failures on that device. Their failure text
+had not printed when this node's wall closed, because pytest writes its report section at the
+end of the process and the same job went on into the elliptic file, so the two reasons are
+unmeasured here. What is measured on the H200 is the ceiling that cuts this class:
+<code>Failed: Timeout (&gt;300.0s)</code> with a <code>300.10s call</code> duration in
+<code>h200-edge-terms.log</code> (job 1296867, 3 failed in 354.25 s). The class-A repair below
+therefore applies to these two rows on both devices, and a re-run of the file after that repair
+is what confirms their reason is the ceiling rather than a bound.</p>
 </section>

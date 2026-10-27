@@ -6,6 +6,7 @@ configure_dtypes()
 
 import argparse  # noqa: E402
 import json  # noqa: E402
+import os  # noqa: E402
 from pathlib import Path  # noqa: E402
 import re  # noqa: E402
 
@@ -44,7 +45,7 @@ def main():
     )
     figure, axes = plt.subplots(figsize=(14, 7.2), dpi=100)
     poloidal_axes(axes)
-    draw_scattered_contours(
+    reference_contours = draw_scattered_contours(
         axes,
         coordinates[:, 0],
         coordinates[:, 1],
@@ -52,9 +53,10 @@ def main():
         levels,
         wall,
         color="#929292",
-        linewidth=2.6,
+        linewidth=4.0,
         zorder=2,
     )
+    reference_contours.set_linestyle("dashed")
     draw_scattered_contours(
         axes,
         coordinates[:, 0],
@@ -86,7 +88,7 @@ def main():
     axes.set_aspect("equal")
     figure.legend(
         handles=[
-            Line2D([], [], color="#929292", lw=2.6, label="analytic flux"),
+            Line2D([], [], color="#929292", lw=4.0, ls="--", label="analytic flux"),
             Line2D([], [], color=DEFAULT_INK.flux_color, lw=3.0, label="solved flux"),
         ],
         loc="upper center",
@@ -120,6 +122,8 @@ def main():
                     f"{labels[second].get_text()}"
                 )
     args.output.parent.mkdir(parents=True, exist_ok=True)
+    if preview := os.environ.get("NOVA_PANEL_PREVIEW"):
+        figure.savefig(preview, format="png", dpi=100)
     figure.savefig(args.output, format="svg")
     plt.close(figure)
     image = args.output.read_text()

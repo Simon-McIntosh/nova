@@ -1,0 +1,66 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "benchmarks/exact_clip_closed_form_floor.py:46",
+    "benchmarks/exact_clip_moment_floor.py:64",
+    "benchmarks/exact_clip_moment_floor.py:67"
+  ],
+  "completed_at": "2026-10-27T18:24:09.259Z",
+  "dispatched_at": "2026-10-27T18:12:32Z",
+  "findings": [
+    {
+      "file": "manifest.md",
+      "line": 14,
+      "severity": "non-blocking",
+      "text": "after_suite records revision dff94725fc2ff410f7b18c9319b8ddae58f11b92, which predates the reviewed head 6bd5d0ac, so the recorded after-arm does not cover the fix commit; the fix's own coverage is split into gate/fix-summary.log over two modules and nothing in the record points a reader at that split. The measure still holds: those two modules are base 2 ids and head 1 id at 6bd5d0ac with 0 added."
+    },
+    {
+      "file": "manifest.md",
+      "line": 17,
+      "severity": "non-blocking",
+      "text": "the artifacts line claims 3 tests passed at head for tests/test_evidence_tooling_paths.py, but no stored log covers that module at 6bd5d0ac; the only log named is gate/head-test_evidence_tooling_paths.log, which is revision dff94725f with 1 passed and predates the two probe tests the fix added. I re-ran the module at 6bd5d0ac and got 3 passed in 35.31s, so the claim is true but was not recorded at the revision it is about."
+    },
+    {
+      "file": "tests/test_evidence_tooling_paths.py",
+      "line": 66,
+      "severity": "non-blocking",
+      "text": "unchanged from the prior review: gate/base-test_evidence_tooling_paths.log exits 1 on the self-check that benchmarks/receipt_locations.py is absent from a base tree, not on catching a literal, so the base arm alone does not show the scan fires; only the negative control does."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "verified 3 production call sites",
+    "diff": "read commit by commit against 8334897d; the single commit 6bd5d0ac changes five files, restoring two benchmark overrides through a new crew_reports_or_override, importing Any, adding two subprocess probes to tests/test_evidence_tooling_paths.py and recording the routing in the evidence fragment.",
+    "done_when": "clause (3) asks for base-then-head arms with no added failure across the test modules importing a changed module; gate/fix-summary.log records base 2 failure ids (fix-base-ids.txt) and head 1 (fix-head-ids.txt) at 6bd5d0ac with 0 added, and I re-ran the third affected module myself at 6bd5d0ac: tests/test_evidence_tooling_paths.py 3 passed in 35.31s.",
+    "goal": "the node goal is that no benchmark or supporting script carries an absolute crew-run or worktree path; the commit under review restores the three overrides the prior review called lost, at benchmarks/exact_clip_closed_form_floor.py:45-48 and benchmarks/exact_clip_moment_floor.py:62-70, routed through benchmarks/receipt_locations.py:75-85 with no absolute default.",
+    "manifest": "read; it records commits dff94725f 8334897d5 6bd5d0ac0, status complete, the fix re-run job 1297845, ruff clean, and its baseline_suite and after_suite lines now parse as JSON with completed true, though after_suite cites revision dff94725f rather than the reviewed head.",
+    "write_paths": "the declared paths name benchmarks, five script files, tests/test_evidence_tooling_paths.py and the evidence fragment; every one of the five paths in the incremental diff against 8334897d is inside that list."
+  },
+  "justifications": {
+    "durability": "reverting benchmarks/receipt_locations.py:82-85 to ignore the override variable reddens tests/test_evidence_tooling_paths.py:88-105, and dropping the relative tails reddens :108-118; I ran the module at 6bd5d0ac in an extracted tree and it reports 3 passed, but the fail-by-name SystemExit at benchmarks/receipt_locations.py:44-47 still has no assertion.",
+    "evidence": "the manifest's suite lines now parse as JSON (baseline_suite 7 ids at 624860447, after_suite 2 ids) and gate/fix-summary.log records a base-then-head arm at 6bd5d0ac over the two exact-clip modules with 0 added failures, but after_suite at manifest.md:14 still cites revision dff94725f rather than the reviewed head and no stored log covers the test module at 6bd5d0ac.",
+    "fit": "from typing import Any is now present at benchmarks/receipt_locations.py:18, ruff check reports All checks passed! and ruff format --check reports 4 files already formatted over the four touched files, matching the module's surrounding style; the commit body only repeats its own subject as its first line.",
+    "goal_fidelity": "the incremental commit restores the three per-benchmark location variables at benchmarks/exact_clip_closed_form_floor.py:45-48 and benchmarks/exact_clip_moment_floor.py:62-70 through benchmarks/receipt_locations.py:75-85, which prefers the named variable and falls back to the crew root with no absolute default on either branch.",
+    "reuse": "crew_reports_or_override calls the module's own crew_reports and forks nothing; a search of nova/ for environ.get and getenv found no owner of a caller-named-root-with-fallback accessor, and nova/database/filepath.py:296 repository_relative records a path rather than resolving one.",
+    "scope_discipline": "all five paths in the incremental diff (two benchmarks, benchmarks/receipt_locations.py, the evidence fragment and the test module) sit inside the node's declared write paths, and the commit carries nothing the prior review did not raise."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: read the node goal (no absolute crew-run or worktree path in benchmarks or the named scripts) and the one commit gained since the prior review; 6bd5d0ac restores the three per-benchmark overrides the prior review called lost at benchmarks/exact_clip_closed_form_floor.py:45-48 and benchmarks/exact_clip_moment_floor.py:62-70, routed through benchmarks/receipt_locations.py:75-85.\nVERDICT done_when: clause (3) asks for base-then-head arms with no added failure across the test modules importing a changed module; gate/fix-summary.log records base 2 failure ids and head 1 at head 6bd5d0ac with 0 added (gate/fix-base-ids.txt, gate/fix-head-ids.txt), and I re-ran the third affected module, tests/test_evidence_tooling_paths.py, at 6bd5d0ac: 3 passed in 35.31s.\nVERDICT write_paths: the declared paths name benchmarks, the five scripts, tests/test_evidence_tooling_paths.py and the evidence fragment; all five paths in the incremental diff against 8334897d sit inside them, and nothing in scripts/prototypes/ was touched.\nVERDICT manifest: read; it records the three commits, status complete, fix re-run job 1297845 and ruff clean, and both suite lines now parse as JSON with completed true, though after_suite cites revision dff94725f rather than the reviewed head.\nVERDICT diff: read commit by commit against 8334897d; the single commit 6bd5d0ac changes five files: it adds from typing import Any at benchmarks/receipt_locations.py:18, adds crew_reports_or_override at :75-85, routes two benchmarks through it, adds two subprocess probes to the test module, and records the routing in the evidence fragment.\nCALL_SITES: benchmarks/exact_clip_closed_form_floor.py:46, benchmarks/exact_clip_moment_floor.py:64, benchmarks/exact_clip_moment_floor.py:67\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the commit restores the three per-benchmark location variables at benchmarks/exact_clip_closed_form_floor.py:45-48 and benchmarks/exact_clip_moment_floor.py:62-70 through benchmarks/receipt_locations.py:75-85, which prefers the named variable and falls back to the crew root with no absolute default on either branch.\nSCORE evidence: 15\nJUSTIFICATION evidence: the suite lines now parse as JSON (baseline_suite 7 ids at 624860447, after_suite 2 ids) and gate/fix-summary.log records a base-then-head arm at 6bd5d0ac with 0 added failures, but after_suite at manifest.md:14 still cites dff94725f rather than the reviewed head and no stored log covers the test module at 6bd5d0ac.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: all five paths in the incremental diff (two benchmarks, benchmarks/receipt_locations.py, the evidence fragment and tests/test_evidence_tooling_paths.py) sit inside the node's declared write paths, and the commit carries nothing the prior review did not raise.\nSCORE durability: 17\nJUSTIFICATION durability: reverting benchmarks/receipt_locations.py:82-85 to ignore the override variable reddens tests/test_evidence_tooling_paths.py:88-105 and dropping the relative tails reddens :108-118, and the module reports 3 passed at 6bd5d0ac when I ran it, but the fail-by-name SystemExit at benchmarks/receipt_locations.py:44-47 still has no assertion.\nSCORE fit: 18\nJUSTIFICATION fit: from typing import Any is present at benchmarks/receipt_locations.py:18 and ruff check reports All checks passed! with ruff format --check reporting 4 files already formatted over the four touched files, matching the module's surrounding style.\nSCORE reuse: 20\nJUSTIFICATION reuse: benchmarks/receipt_locations.py:75-85 calls the module's own crew_reports and forks nothing, and a search of nova/ for environ.get and getenv found no owner of a caller-named-root-with-fallback accessor, while nova/database/filepath.py:296 repository_relative records a path rather than resolving one.\nFINDING manifest.md:14 non-blocking: after_suite records revision dff94725f, which predates the reviewed head 6bd5d0ac, so the recorded after-arm does not cover the fix commit and nothing in the record points at gate/fix-summary.log where the fix's own coverage lives.\nFINDING manifest.md:17 non-blocking: the artifacts line claims 3 tests passed at head for tests/test_evidence_tooling_paths.py, but the only log named is gate/head-test_evidence_tooling_paths.log at revision dff94725f with 1 passed; I re-ran the module at 6bd5d0ac and got 3 passed, so the claim is true but was not recorded at the revision it is about.\nFINDING tests/test_evidence_tooling_paths.py:66 non-blocking: unchanged from the prior review, the base arm exits 1 on the self-check that benchmarks/receipt_locations.py is absent, not on catching a literal, so the base arm alone does not show the scan fires and only the negative control does.\n",
+  "review_run_id": "r-20261027T174920487824-review-of-replan-evidence-tooling-paths-6bd5d0ac027c",
+  "reviewed_base_sha": "8334897d57ad70f75146a5f39d9769b665dbab48",
+  "reviewed_head_sha": "6bd5d0ac027c058438c726c1ba81355b059ddeff",
+  "reviewed_run_id": "r-20261027T151902415357-replan-evidence-tooling-paths",
+  "rubric": "landed",
+  "scores": {
+    "durability": 17,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T18:24:14.476431+00:00",
+  "total": 109
+}

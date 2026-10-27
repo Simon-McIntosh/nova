@@ -1,0 +1,96 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run records no baseline_suite or after_suite block (both null; it is a measurement node), so no gate-log pair exists to subtract. The count is nevertheless derived rather than assumed: git diff --name-only 0f50140bbe..b038b345d -- nova/ tests/ returns 0 files, so the product and test trees at the reviewed head are identical to the base and the node cannot add a failing test id. The importing-test arm at main logs 46 failing ids across 11 of 45 files, all pre-existing at the base, which I re-derived from the run's own suite logs.",
+  "assertion_analysis": [],
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-27T18:41:46.118Z",
+  "dispatched_at": "2026-10-27T18:22:02Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/carrier-identity-receipt.html",
+      "line": "7",
+      "severity": "blocking",
+      "text": "the table's caption claims N = 7 recorded figures, all listed, none omitted, but the earlier receipt receipts/h200-repair.json carries seven keys including sample_vertex_count (340 entries, all 6), which the table omits, while vertex_partition is counted twice as groups and digest; the table therefore lists six of the seven keys and its completeness claim is false."
+    },
+    {
+      "file": "scripts/prototypes/carrier_identity_receipt/run_importing_tests.sh",
+      "line": "35",
+      "severity": "non-blocking",
+      "text": "the launcher prints a literal EXIT=0 regardless of the per-file results, so a re-run of the recorded gate command logs a green exit even when files fail, and promotion reading that log's last line would record a false pass."
+    },
+    {
+      "file": "scripts/prototypes/carrier_identity_receipt/measure_carrier.py",
+      "line": "173",
+      "severity": "non-blocking",
+      "text": "catch-all handling records any exception as a carrier refusal, which is how the driver's own AttributeError was published as a limited-carrier refusal in receipts/carrier-h200.json; the final ValueError measurement is correct but a driver bug is indistinguishable from a build limitation in the receipt."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/carrier-identity-receipt.html",
+      "line": "37",
+      "severity": "non-blocking",
+      "text": "the limited refusal is cited beside jobs 1297464/1297465, whose logs record an AttributeError at measure.py:248, while the ValueError at separatrix_clip.py:1950 actually came from jobs 1297476 and 1297480; the conclusion holds but the evidence trail points at logs that show a different refusal."
+    },
+    {
+      "file": "tests/test_carrier_vertex_identity.py",
+      "line": "44",
+      "severity": "non-blocking",
+      "text": "the driver duplicates the test module's _hex_sampling (measure_carrier.py:47) and vertex_partition (measure_carrier.py:64) rather than extending the owner, so the identity computation now lives twice and can drift from the test that pins it."
+    }
+  ],
+  "head_log_revision": "b038b345d29b29aa5b800fb3208b35ca422ee8ae",
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read commit by commit against 0f50140bbe; the 13 commits add 383 lines in five new files (four prototype scripts and the fragment), and the only behavioural code is the measurement driver, not product code.",
+    "done_when": "all three done_when clauses are recorded in carrier-identity-receipt.html:11-37 (identity table, 550 table, limited refusal) and :41-57 (the sirius importing-test arm), and I re-derived the arm's counts from the run's own suite logs: 45 files, 44 complete, 46 failure ids across 11 files, one file unfinished.",
+    "goal": "the source goal is to rebuild the carrier vertex identity H200 receipt and importing-test arm at main; scripts/prototypes/carrier_identity_receipt/measure_carrier.py:86 builds each carrier and records cell/node counts, node_number, the partition digest and the reference coefficient digest, and docs/evidence/fragments/converged-forward-solve/carrier-identity-receipt.html:11-37 publishes them against the earlier records.",
+    "manifest": "the reviewed manifest.md declares status complete, lists 13 commits, the diverted figures, the limited refusal at separatrix_clip.py:1950 and the 44-of-45 arm; its test_logs name the receipt and suite logs and logs/h200-receipt.log ends EXIT=0.",
+    "write_paths": "the diff 0f50140bbe..b038b345d touches five files and every one is inside a declared write path (scripts/prototypes/carrier_identity_receipt, the evidence fragment); no product code, test or figure changed."
+  },
+  "justifications": {
+    "durability": "the diff adds no test and no assertion anywhere, so nothing fails if measure_carrier.py:86 changes the counts or digests it publishes.",
+    "evidence": "the digests and counts reproduce from receipts/carrier-h200.json and the suite logs (I re-derived 45/44/46/11), but carrier-identity-receipt.html:7 claims N=7 with \"none omitted\" while omitting sample_vertex_count and splitting vertex_partition into two rows.",
+    "fit": "the driver follows the surrounding prototype idiom and imports the repository route (scripts/analytic_oracle_fixtures/measure.py), but measure_carrier.py:173 catches every exception and prints it as a carrier refusal.",
+    "goal_fidelity": "measure_carrier.py:86-137 and carrier-identity-receipt.html:11-37 deliver the identity and the refusal, but the limited carrier was measured on jobs 1297476/1297480 rather than the receipt arms 1297464/1297465, so done_when (1)'s \"one H200 job\" is not met as written.",
+    "reuse": "measure_carrier.py:47 and :64 re-implement _hex_sampling and vertex_partition already owned by tests/test_carrier_vertex_identity.py:44 and :113 instead of extending that owner.",
+    "scope_discipline": "every path in the diff 0f50140bbe..b038b345d is inside the three declared write paths and no product source or test is touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source goal is to rebuild the carrier vertex identity H200 receipt and importing-test arm at main; scripts/prototypes/carrier_identity_receipt/measure_carrier.py:86 builds each carrier and records cell/node counts, node_number, the partition digest and the reference coefficient digest, and docs/evidence/fragments/converged-forward-solve/carrier-identity-receipt.html:11-37 publishes them against the earlier records.\nVERDICT done_when: all three done_when clauses are recorded in carrier-identity-receipt.html:11-37 (identity table, 550 table, limited refusal) and :41-57 (the sirius importing-test arm), and I re-derived the arm's counts from the run's own suite logs: 45 files, 44 complete, 46 failure ids across 11 files, one file unfinished.\nVERDICT write_paths: the diff 0f50140bbe..b038b345d touches five files and every one is inside a declared write path (scripts/prototypes/carrier_identity_receipt, the evidence fragment); no product code, test or figure changed.\nVERDICT manifest: the reviewed manifest.md declares status complete, lists 13 commits, the diverted figures, the limited refusal at separatrix_clip.py:1950 and the 44-of-45 arm; its test_logs name the receipt and suite logs and logs/h200-receipt.log ends EXIT=0.\nVERDICT diff: read commit by commit against 0f50140bbe; the 13 commits add 383 lines in five new files (four prototype scripts and the fragment), and the only behavioural code is the measurement driver, not product code.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: measure_carrier.py:86-137 and carrier-identity-receipt.html:11-37 deliver the identity and the refusal, but the limited carrier was measured on jobs 1297476/1297480 rather than the receipt arms 1297464/1297465, so done_when (1)'s \"one H200 job\" is not met as written.\nSCORE evidence: 12\nJUSTIFICATION evidence: the digests and counts reproduce from receipts/carrier-h200.json and the suite logs (I re-derived 45/44/46/11), but carrier-identity-receipt.html:7 claims N=7 with \"none omitted\" while omitting sample_vertex_count and splitting vertex_partition into two rows.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff 0f50140bbe..b038b345d is inside the three declared write paths and no product source or test is touched.\nSCORE durability: 5\nJUSTIFICATION durability: the diff adds no test and no assertion anywhere, so nothing fails if measure_carrier.py:86 changes the counts or digests it publishes.\nSCORE fit: 16\nJUSTIFICATION fit: the driver follows the surrounding prototype idiom and imports the repository route (scripts/analytic_oracle_fixtures/measure.py), but measure_carrier.py:173 catches every exception and prints it as a carrier refusal.\nSCORE reuse: 5\nJUSTIFICATION reuse: measure_carrier.py:47 and :64 re-implement _hex_sampling and vertex_partition already owned by tests/test_carrier_vertex_identity.py:44 and :113 instead of extending that owner.\nFINDING docs/evidence/fragments/converged-forward-solve/carrier-identity-receipt.html:7 blocking: the table's caption claims N = 7 recorded figures, all listed, none omitted, but the earlier receipt receipts/h200-repair.json carries seven keys including sample_vertex_count (340 entries, all 6), which the table omits, while vertex_partition is counted twice as groups and digest; the table therefore lists six of the seven keys and its completeness claim is false.\nFINDING scripts/prototypes/carrier_identity_receipt/run_importing_tests.sh:35 non-blocking: the launcher prints a literal EXIT=0 regardless of the per-file results, so a re-run of the recorded gate command logs a green exit even when files fail, and promotion reading that log's last line would record a false pass.\nFINDING scripts/prototypes/carrier_identity_receipt/measure_carrier.py:173 non-blocking: catch-all handling records any exception as a carrier refusal, which is how the driver's own AttributeError was published as a limited-carrier refusal in receipts/carrier-h200.json; the final ValueError measurement is correct but a driver bug is indistinguishable from a build limitation in the receipt.\nFINDING docs/evidence/fragments/converged-forward-solve/carrier-identity-receipt.html:37 non-blocking: the limited refusal is cited beside jobs 1297464/1297465, whose logs record an AttributeError at measure.py:248, while the ValueError at separatrix_clip.py:1950 actually came from jobs 1297476 and 1297480; the conclusion holds but the evidence trail points at logs that show a different refusal.\nFINDING tests/test_carrier_vertex_identity.py:44 non-blocking: the driver duplicates the test module's _hex_sampling (measure_carrier.py:47) and vertex_partition (measure_carrier.py:64) rather than extending the owner, so the identity computation now lives twice and can drift from the test that pins it.\n",
+  "review_run_id": "r-20261027T181521991060-review-of-carrier-identity-receipt-b038b345d29b",
+  "reviewed_base_sha": "0f50140bbe1a0e1d08c961ae20433f1ee7ae15c1",
+  "reviewed_commits": [
+    "ae0fa3204",
+    "a2e94c3b6",
+    "29583e6d8",
+    "16bd4b36b",
+    "8391c1df9",
+    "1746d3984",
+    "83b256f5f",
+    "39befa993",
+    "f0f1f5ddf",
+    "355bafb67",
+    "d90c0123b",
+    "0b72da76f",
+    "b038b345d"
+  ],
+  "reviewed_head_sha": "b038b345d29b29aa5b800fb3208b35ca422ee8ae",
+  "reviewed_run_id": "r-20261027T151501014817-carrier-identity-receipt",
+  "scores": {
+    "durability": 5,
+    "evidence": 12,
+    "fit": 16,
+    "goal_fidelity": 16,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T19:40:00Z",
+  "total": 74
+}

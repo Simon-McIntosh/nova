@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="nova-portfolio-replan">
+<meta name="plan-evidence-for" content="nova-portfolio-replan">
+<title>GPFS and home data roots routed through named FilePath roots</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+</head>
+<body><main class="plan-doc">
+<header><h1>Named data roots for the GPFS and home data paths</h1></header>
+<section id="replan-gpfs-data-root-landing">
+<p><strong>What landed.</strong> Product code under <code>nova/</code> no longer spells a GPFS or home location. Each site reads a named root from <code>nova/database/filepath.py</code>, and each root resolves from one environment variable with the former literal as its default, so behaviour on this workstation is unchanged:</p>
+<table>
+<thead><tr><th>Named root</th><th>Environment variable</th><th>Default</th><th>Sites routed</th></tr></thead>
+<tbody>
+<tr><td><code>mast_level1_shots()</code>, <code>mast_level2_shots()</code></td><td><code>NOVA_MAST_DATA_ROOT</code></td><td><code>/work/projects/imas_gpu/mast</code></td><td><code>nova/imas/mast_vacuum_cohort.py</code> (<code>SHOT_STORE</code>), <code>nova/catalog/mast_geometry.py</code> (<code>DEFAULT_LEVEL1_ROOT</code>, <code>DEFAULT_LEVEL2_ROOT</code>), <code>nova/scripts/identify_source_cocos.py</code> (<code>LEVEL1</code>)</td></tr>
+<tr><td><code>diiid_machine_source()</code></td><td><code>NOVA_DIIIID_SOURCE</code></td><td><code>/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc</code></td><td><code>nova/media/sources/diiid_efit.py</code>, <code>nova/imas/diiid_current.py</code>, <code>nova/imas/diiid_machine_ids.py</code></td></tr>
+<tr><td><code>derived_cache_root()</code>, <code>misfit_hunt_root()</code></td><td><code>NOVA_CACHE_ROOT</code></td><td><code>~/.cache/nova-mast</code></td><td><code>nova/scripts/render_misfit_figures.py</code>, <code>nova/calibrate/sweep.py</code></td></tr>
+<tr><td><code>labeller_session_root()</code></td><td><code>NOVA_LABELLER_SOURCE</code></td><td><code>/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29</code></td><td><code>nova/media/sources/nova_labels.py</code></td></tr>
+<tr><td><code>public_imasdb_root(username, machine)</code></td><td><code>NOVA_PUBLIC_HOME_ROOT</code></td><td><code>/home/ITER</code></td><td><code>nova/imas/connect.py</code></td></tr>
+</tbody>
+</table>
+<p><strong>Removed rather than routed.</strong> <code>nova/imas/mast_fitted_parameters.py</code> carried <code>VACUUM_COHORT_STORE</code>, an unused string copy of the level-1 store; it is deleted. <code>nova/utilities/IO.py</code> carried a dead <code>qsub</code> helper, with no callers anywhere in <code>nova/</code>, <code>scripts/</code>, <code>apps/</code> or <code>tests/</code>; it named a remote home and an anaconda interpreter, names a tool rather than data, and is deleted with its now-unused <code>subprocess</code> and <code>shlex</code> imports.</p>
+<p><strong>Audit.</strong> <code>grep -rn "/work/projects\|/home/ITER\|~/" nova/ --include=*.py</code> now returns literals only inside <code>nova/database/filepath.py</code> (the named-root defaults, plus the <code>~</code> in the worktree-path character class, which is a regex, not a path). Three further hits are in <code>nova/equilibrium/solve_request.py</code> docstrings, which describe the forward-compilation cache's location in prose; that module is outside this node's write scope and is listed under <code>outside_scope</code>.</p>
+<p><strong>Measure.</strong> A new <code>tests/test_filepath_data_roots.py</code> passes at head and fails at base, and every test module importing a changed module passes with no added failure across a base arm and a head arm, one fresh pytest process per file, in one sirius job.</p>
+<p class="replan-gpfs-data-root-gate">Gate figures are recorded in the run manifest's <code>tests</code>, <code>test_logs</code>, <code>baseline_suite</code>, <code>after_suite</code> and <code>negative_control_log</code> fields.</p>
+<p><strong>Negative control</strong> (declared: restore one literal path at its site in a scratch copy; the data-root test fails). The mutant rewrites <code>nova/imas/mast_vacuum_cohort.py</code>'s <code>SHOT_STORE = mast_level1_shots()</code> back to the literal, and the override assertions in the data-root test then fail while the head arm passes them.</p>
+</section>
+</main></body>
+</html>

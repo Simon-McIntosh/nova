@@ -4,7 +4,7 @@
 <p id="carrier-identity-receipt-arms">Two arms of one revision, one job each. H200 job 1297464 on <code>betelgeuse</code> under the H200 reservation, <code>jax.default_backend()</code> <code>gpu</code>, devices <code>[CudaDevice(id=0)]</code>; and CPU job 1297465 on <code>sirius</code>, backend <code>cpu</code>, <code>[CpuDevice(id=0)]</code>. Both imported <code>nova/__init__.py</code> from the same tree, printed the module path and the revision in the log header, and ended in a bare exit status.</p>
 
 <h4 id="carrier-identity-receipt-table-title">Every figure of the earlier receipt, at main, on both devices</h4>
-<p id="carrier-identity-receipt-table-caption">The earlier receipt is <code>receipts/h200-repair.json</code> of the carrier vertex identity run. N = 7 recorded figures, all listed, none omitted. Delta is the main H200 value minus the recorded value. The vertex partition is compared as a value and not as a numeric id array, because two builds may list one lattice in a different order; each slot is named by the micron cell its own centre sits in, which ordering does not move.</p>
+<p id="carrier-identity-receipt-table-caption">The earlier receipt is <code>receipts/h200-repair.json</code> of the carrier vertex identity run. N = 7 recorded keys, every one listed and none omitted. <code>vertex_partition</code> takes two rows, as the group count and as the digest, so eight rows stand for the seven keys. That claim is checked rather than asserted: <code>scripts/prototypes/carrier_identity_receipt/check_receipt_table.py</code> reads this caption and the record together and fails if a key has no row or the stated count disagrees. Delta is the main H200 value minus the recorded value. The vertex partition is compared as a value and not as a numeric id array, because two builds may list one lattice in a different order; each slot is named by the micron cell its own centre sits in, which ordering does not move.</p>
 <table>
 <thead><tr><th>recorded figure</th><th>earlier receipt</th><th>main, H200</th><th>main, CPU</th><th>delta</th></tr></thead>
 <tbody>
@@ -13,6 +13,7 @@
 <tr><td><code>atomic_node_count</code></td><td>922</td><td>922</td><td>922</td><td>0</td></tr>
 <tr><td><code>node_number</code></td><td>1536</td><td>1536</td><td>1536</td><td>0</td></tr>
 <tr><td><code>coefficient_digest</code></td><td><code>01818d5d…4c7805</code></td><td><code>01818d5d…4c7805</code></td><td><code>01818d5d…4c7805</code></td><td>0</td></tr>
+<tr><td><code>sample_vertex_count</code></td><td>340 entries, all 6</td><td>340 entries, all 6</td><td>340 entries, all 6</td><td>0</td></tr>
 <tr><td><code>vertex_partition</code> groups</td><td>1075</td><td>1075</td><td>1075</td><td>0</td></tr>
 <tr><td><code>vertex_partition</code> digest</td><td><code>eac30256…b5268af</code></td><td><code>eac30256…b5268af</code></td><td><code>eac30256…b5268af</code></td><td>0</td></tr>
 </tbody>

@@ -142,9 +142,11 @@ from __future__ import annotations
 
 from concurrent.futures import Executor, ProcessPoolExecutor
 from contextlib import contextmanager
-from functools import lru_cache
+from functools import lru_cache, partial
 from multiprocessing import get_context
 import os
+import jax
+import jax.numpy as jnp
 from jax import lax
 from typing import Iterator
 
@@ -2638,7 +2640,7 @@ def packed_analytic_greens(
     )
 
 
-def packed_analytic_moments(
+def _packed_analytic_moments_primal(
     xp,
     target_r,
     target_z,
@@ -2857,6 +2859,121 @@ def packed_analytic_moments(
             0.0,
             vertical_vertical_central - displacement_z * uniform_vertical,
         ),
+    )
+
+
+@partial(jax.custom_jvp, nondiff_argnums=(9,))
+def _packed_moments_with_stable_height(
+    target_r,
+    target_z,
+    edge,
+    weight,
+    norm,
+    section_centre,
+    expansion_centre,
+    reflection_axis,
+    reflection_partner,
+    nodes,
+):
+    return _packed_analytic_moments_primal(
+        jnp,
+        target_r,
+        target_z,
+        edge,
+        weight,
+        norm,
+        section_centre,
+        expansion_centre,
+        reflection_axis,
+        reflection_partner,
+        nodes=nodes,
+    )
+
+
+@_packed_moments_with_stable_height.defjvp
+def _packed_moments_height_tangent(nodes, primals, tangents):
+    """Use a symmetric field derivative at a nearly level edge corner.
+
+    The edge arctangent's ring-pole contraction has a finite total limit, but
+    its separate pole and endpoint derivatives lose that limit when the target
+    is within round-off of a corner's height.  Values retain the analytic route;
+    only the affected field derivative uses two centred differences.
+    """
+
+    def evaluate(*arguments):
+        return _packed_analytic_moments_primal(jnp, *arguments, nodes=nodes)
+
+    value, ordinary = jax.jvp(evaluate, primals, tangents)
+    target_z = primals[1]
+    edge = primals[2]
+    nearest = jnp.minimum(
+        jnp.min(jnp.abs(edge[:, 1] - target_z), axis=0),
+        jnp.min(jnp.abs(edge[:, 3] - target_z), axis=0),
+    )
+    near_corner = nearest <= 1e-7
+    without_height = (*tangents[:1], jnp.zeros_like(target_z), *tangents[2:])
+    _, other = jax.jvp(evaluate, primals, without_height)
+
+    def difference(step):
+        shift = jnp.asarray(step, dtype=target_z.dtype)
+        upper = evaluate(primals[0], target_z + shift, *primals[2:])
+        lower = evaluate(primals[0], target_z - shift, *primals[2:])
+        return tuple((a - b) / (2.0 * shift) for a, b in zip(upper, lower, strict=True))
+
+    coarse = difference(1e-5)
+    fine = difference(5e-6)
+    stable = tuple((4.0 * a - b) / 3.0 for a, b in zip(fine, coarse, strict=True))
+    result = tuple(
+        jnp.where(
+            near_corner, other[index] + tangents[1] * stable[index], ordinary[index]
+        )
+        if index >= 3
+        else ordinary[index]
+        for index in range(len(value))
+    )
+    return value, result
+
+
+def packed_analytic_moments(
+    xp,
+    target_r,
+    target_z,
+    edge,
+    weight,
+    norm,
+    section_centre,
+    expansion_centre,
+    reflection_axis,
+    reflection_partner,
+    *,
+    nodes: int = _NODES,
+):
+    """Return the packed section moments with a stable near-corner field tangent."""
+    if xp is jnp:
+        return _packed_moments_with_stable_height(
+            target_r,
+            target_z,
+            edge,
+            weight,
+            norm,
+            section_centre,
+            expansion_centre,
+            reflection_axis,
+            reflection_partner,
+            nodes,
+        )
+    return _packed_analytic_moments_primal(
+        xp,
+        target_r,
+        target_z,
+        edge,
+        weight,
+        norm,
+        section_centre,
+        expansion_centre,
+        reflection_axis,
+        reflection_partner,
+        nodes=nodes,
     )
 
 

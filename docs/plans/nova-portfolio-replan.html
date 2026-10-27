@@ -17,7 +17,7 @@
 <meta name="plan-owner" content="Simon McIntosh">
 <meta name="plan-effort-hours" content="3.0">
 <meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="39">
+<meta name="plan-version" content="40">
 <meta name="plan-modified" content="2026-10-27">
 <meta name="plan-tags" content="replan,handoff,infrastructure">
 <meta name="plan-informs" content="plasma-cell-read-fidelity,single-grid-solver-cutover,ensemble-forward-seam,forward-profile-validator-set,separatrix-spline-extraction,profile-owned-solve-domain,mast-nonaxisymmetric-physics,diiid-forward-onboarding,machine-description-retirement,diiid-pulse-replay,dual-branch-selection,efit-baseline-demonstration,mast-catalog-gpu-solve">
@@ -175,6 +175,9 @@ Done when: the report lists each coupling with files, line counts, refactor and 
 </div>
 <div class="r-comment" data-section="s5" data-id="c-20261027-imas-hdf5-read-landed" data-who="reckon-build" data-when="2026-10-27T10:25:00Z">
     <div class="r-comment-body"><p><strong>replan-imas-hdf5-read landed at <code>117e41bd2</code></strong> (head <code>7084d3571</code>). <code>nova/imas/hdf5_read.py</code> is deleted. It read IMAS-written HDF5 through h5py and had no callers. No module under <code>nova/</code> imports h5py; the one search hit is a docstring in <code>validator_case.py</code>.</p><p>The 103 test modules that import nova.imas ran in base and head arms in one sirius job (1296790) and add no failure: 26 failing ids at base, 11 at head, all 11 already failing or erroring at base. The base arm's archive omitted <code>docs/</code>, so 8 tests errored at setup there. The review scored 20/15/20/13/18/20 with no blocking finding.</p><p>Still open in this section: replan-dbentry-constructor (delivered, review queued), replan-gpfs-data-root and replan-evidence-tooling-paths.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261027T095958524667-review-of-replan-imas-hdf5-read-7084d3571b7a" data-who="reckon-build" data-when="2026-10-27T10:19:45.583Z">
+    <div class="r-comment-body"><p>Reviewed run r-20261027T092347032284-replan-imas-hdf5-read at head 7084d357 (base 7a31104d): file deletion and both searches confirmed independently, two-arm sirius gate re-read at 103 of 103 files per arm with zero added failures under the ERROR-inclusive rule; scores goal_fidelity 20, evidence 15, scope_discipline 20, durability 13, fit 18, reuse 20 (total 106); two non-blocking findings — the evidence fragment&#x27;s h5py search output is not the command&#x27;s real output, and the base arm&#x27;s partial archive (no docs/) left 8 tests unmeasured at base.</p></div>
 </div>
 </section>
 </main>

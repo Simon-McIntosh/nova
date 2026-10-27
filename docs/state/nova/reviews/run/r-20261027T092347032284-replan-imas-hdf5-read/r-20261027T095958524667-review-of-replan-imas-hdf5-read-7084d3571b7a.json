@@ -1,0 +1,57 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-27T10:19:45.583Z",
+  "dispatched_at": "2026-10-27T10:02:38Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/nova-portfolio-replan/replan-imas-hdf5-read.html",
+      "line": "18",
+      "severity": "non-blocking",
+      "text": "the quoted grep h5py output claims no match, but the command returns one line (nova/imas/validator_case.py:18, a docstring mention); the record should quote the real output and state that the sole hit is prose rather than an import."
+    },
+    {
+      "file": "gate/run_gate.sh",
+      "line": "14",
+      "severity": "non-blocking",
+      "text": "the base arm's git archive omits docs/ although docs/figures/efit-forward-parity/converged-root-geometry-attribution.json is tracked at base, so 8 tests errored at setup at base and one of them fails at head; the zero added count is correct under the ERROR-inclusive rule but the base coverage is reduced."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read commit by commit from 7a31104d to 7084d357: c326a7653 deletes the 25-line module, 5437e130e adds the 34-line evidence fragment and 7084d357 amends it; 25 of 25 base callers absent at both revisions.",
+    "done_when": "the brief's three clauses are measured; I re-ran hdf5_read over nova/ tests/ scripts/ benchmarks/ (no hits, exit 1) and h5py over nova/ --include=*.py (one docstring mention, no import) at head, and gate/base-suite.log and gate/head-suite.log record 103 of 103 files in each arm, concurrent in sirius job 1296790.",
+    "goal": "the goal is to delete the unused h5py reader of IMAS-written HDF5; nova/imas/hdf5_read.py is gone at 7084d357 and git grep hdf5_read at base 7a31104d over nova/ tests/ scripts/ benchmarks/ returns no content reference, so no consumer existed.",
+    "manifest": "read in full; its commit list c326a7653 5437e130e 7084d357, its 26-and-11 failure-id sets and its added-failure claim of zero reconcile with gate/base-failed-ids.txt and gate/head-failed-ids.txt, but its statement that the h5py search 'returns nothing' is false and its artifacts line counts 26 deleted lines where the diff deletes 25.",
+    "write_paths": "the manifest declares nova/imas/hdf5_read.py, docs/evidence/fragments/nova-portfolio-replan/replan-imas-hdf5-read.html and docs/figures/nova-portfolio-replan/replan-imas-hdf5-read; the diff touches only the first two."
+  },
+  "justifications": {
+    "durability": "no assertion in the diff or the suite fails if nova/imas/hdf5_read.py is reinstated, so the deletion's only guard is the collection failure a new caller would cause.",
+    "evidence": "gate/base-suite.log and gate/head-suite.log each read 103 of 103 files and end EXIT=1 carrying the ids the manifest quotes, but gate/run_gate.sh:14 built the base arm on a tree without docs/ and docs/evidence/fragments/nova-portfolio-replan/replan-imas-hdf5-read.html:18 records an h5py search output the command does not produce.",
+    "fit": "the fragment uses the bare section data-node shape the plan already carries in docs/evidence/fragments/forward-solve-api/fsa-default-wiring-one-owner.html, and c326a7653 follows the repository's conventional subject plus body.",
+    "goal_fidelity": "nova/imas/hdf5_read.py is absent from the tree at 7084d357 and both arms show no reference to it under nova/, tests/, scripts/ or benchmarks/.",
+    "reuse": "the change removes a capability rather than adding one, and IMAS HDF5 reading is owned by imas-python's imas.DBEntry route with no second reader left under nova/.",
+    "scope_discipline": "git diff 7a31104d 7084d357 changes only nova/imas/hdf5_read.py and docs/evidence/fragments/nova-portfolio-replan/replan-imas-hdf5-read.html, both inside the declared write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to delete the unused h5py reader of IMAS-written HDF5; nova/imas/hdf5_read.py is gone at 7084d357 and git grep hdf5_read at base 7a31104d over nova/ tests/ scripts/ benchmarks/ returns no content reference, so no consumer existed.\nVERDICT done_when: the brief's three clauses are measured; I re-ran hdf5_read over nova/ tests/ scripts/ benchmarks/ (no hits, exit 1) and h5py over nova/ --include=*.py (one docstring mention, no import) at head, and gate/base-suite.log and gate/head-suite.log record 103 of 103 files in each arm, concurrent in sirius job 1296790.\nVERDICT write_paths: the manifest declares nova/imas/hdf5_read.py, docs/evidence/fragments/nova-portfolio-replan/replan-imas-hdf5-read.html and docs/figures/nova-portfolio-replan/replan-imas-hdf5-read; the diff touches only the first two.\nVERDICT manifest: read in full; its commit list c326a7653 5437e130e 7084d357, its 26-and-11 failure-id sets and its added-failure claim of zero reconcile with gate/base-failed-ids.txt and gate/head-failed-ids.txt, but its statement that the h5py search 'returns nothing' is false and its artifacts line counts 26 deleted lines where the diff deletes 25.\nVERDICT diff: read commit by commit from 7a31104d to 7084d357: c326a7653 deletes the 25-line module, 5437e130e adds the 34-line evidence fragment and 7084d357 amends it; 25 of 25 base callers absent at both revisions.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: nova/imas/hdf5_read.py is absent from the tree at 7084d357 and both arms show no reference to it under nova/, tests/, scripts/ or benchmarks/.\nSCORE evidence: 15\nJUSTIFICATION evidence: gate/base-suite.log and gate/head-suite.log each read 103 of 103 files and end EXIT=1 carrying the ids the manifest quotes, but gate/run_gate.sh:14 built the base arm on a tree without docs/ and docs/evidence/fragments/nova-portfolio-replan/replan-imas-hdf5-read.html:18 records an h5py search output the command does not produce.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 7a31104d 7084d357 changes only nova/imas/hdf5_read.py and docs/evidence/fragments/nova-portfolio-replan/replan-imas-hdf5-read.html, both inside the declared write paths.\nSCORE durability: 13\nJUSTIFICATION durability: no assertion in the diff or the suite fails if nova/imas/hdf5_read.py is reinstated, so the deletion's only guard is the collection failure a new caller would cause.\nSCORE fit: 18\nJUSTIFICATION fit: the fragment uses the bare section data-node shape the plan already carries in docs/evidence/fragments/forward-solve-api/fsa-default-wiring-one-owner.html, and c326a7653 follows the repository's conventional subject plus body.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change removes a capability rather than adding one, and IMAS HDF5 reading is owned by imas-python's imas.DBEntry route with no second reader left under nova/.\nFINDING docs/evidence/fragments/nova-portfolio-replan/replan-imas-hdf5-read.html:18 non-blocking: the quoted grep -rn h5py nova/ --include=*.py output claims no match, but the command returns one line (nova/imas/validator_case.py:18, a docstring mention), so the record should quote the real output and state that the sole hit is prose rather than an import.\nFINDING gate/run_gate.sh:14 non-blocking: git archive of BASE over nova tests scripts pyproject.toml conftest.py omits docs/ although docs/figures/efit-forward-parity/converged-root-geometry-attribution.json is tracked at base, so 8 tests errored at setup in the base arm and one of them, test_checked_receipt_preserves_results_across_live_source_provenance, fails at head; the count stays zero because that id is an ERROR at base under the ERROR-inclusive rule, but a full archive would have measured it in both arms.\n",
+  "review_run_id": "r-20261027T095958524667-review-of-replan-imas-hdf5-read-7084d3571b7a",
+  "reviewed_base_sha": "7a31104db6deec3117e2e2b9bbaedcefd71fe075",
+  "reviewed_head_sha": "7084d3571b7ac0017b403e3dd6e215308ed50bb3",
+  "reviewed_run_id": "r-20261027T092347032284-replan-imas-hdf5-read",
+  "scores": {
+    "durability": 13,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T10:16:35.058558+00:00",
+  "total": 106
+}

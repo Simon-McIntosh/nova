@@ -8,9 +8,11 @@ tree extracted from <code>f1e09f09d</code>
 The edge file finished its summary line: 14 failed, 10 passed in 6260.39 s. The elliptic
 file's log was cut off mid-progress at 24 of 28 tests with two failures marked and no
 summary, so its failures are re-measured here in fresh CPU processes. The H200 column re-runs the same identifiers
-through <code>scripts/h200_test_lane/run.sh</code> at the same test ceiling
-(<code>NOVA_LANE_TEST_TIMEOUT=300</code>), so a row that differs between the columns is a
-device-qualified measurement and not a looser bound. The two test modules,
+through <code>scripts/h200_test_lane/run.sh</code> at the same per-test ceiling: the edge-file
+jobs pass <code>NOVA_LANE_TEST_TIMEOUT=300</code> so the ceiling is the recorded one, and the
+elliptic compile rows keep their own <code>@pytest.mark.timeout(1800)</code> on both devices.
+A row that differs between the columns is therefore a device-qualified measurement and not a
+looser bound. The two test modules,
 <code>tests/biot/tangent_identity.py</code>, <code>nova/biot/polygonanalytic.py</code> and
 <code>nova/biot/momentchannel.py</code> are byte-identical between <code>f1e09f09d</code>
 and the revision this node measured (<code>git rev-parse f1e09f09d:&lt;path&gt;</code> equals
@@ -31,9 +33,9 @@ and the revision this node measured (<code>git rev-parse f1e09f09d:&lt;path&gt;<
 <tr><td><code>test_truncated_tangent_fails_identity[flux_and_moment_terms]</code></td><td>same</td><td>pytest-timeout, no value</td><td>300 s ceiling</td><td>PASS</td></tr>
 <tr><td><code>test_truncated_tangent_fails_identity[edge_terms]</code></td><td>same</td><td>pytest-timeout, no value</td><td>300 s ceiling</td><td>FAIL, same primal-bit assertion</td></tr>
 <tr><td><code>test_tangent_compiles_within_bound[channel_split]</code></td><td><code>test_edge_term_tangents.py:322</code> to <code>tangent_identity.py:224</code></td><td>pytest-timeout in a spawned compile arm, no ratio</td><td>300 s ceiling</td><td>PASS (inside 300 s)</td></tr>
-<tr><td><code>test_tangent_compiles_within_bound[edge_integrands]</code></td><td>same</td><td>pytest-timeout, no ratio</td><td>300 s ceiling</td><td>still running</td></tr>
-<tr><td><code>test_tangent_compiles_within_bound[flux_line_moments]</code></td><td>same</td><td>pytest-timeout, no ratio</td><td>300 s ceiling</td><td>still running</td></tr>
-<tr><td><code>test_tangent_compiles_within_bound[flux_and_moment_terms]</code></td><td>same</td><td>pytest-timeout, no ratio</td><td>300 s ceiling</td><td>still running</td></tr>
+<tr><td><code>test_tangent_compiles_within_bound[edge_integrands]</code></td><td>same</td><td>pytest-timeout, no ratio</td><td>300 s ceiling</td><td>FAIL (progress mark at the same 300 s ceiling; the failure section prints only at the run's summary, which this node did not reach)</td></tr>
+<tr><td><code>test_tangent_compiles_within_bound[flux_line_moments]</code></td><td>same</td><td>pytest-timeout, no ratio</td><td>300 s ceiling</td><td>not reached</td></tr>
+<tr><td><code>test_tangent_compiles_within_bound[flux_and_moment_terms]</code></td><td>same</td><td>pytest-timeout, no ratio</td><td>300 s ceiling</td><td>not reached</td></tr>
 <tr><td><code>test_tangent_compiles_within_bound[edge_terms]</code></td><td>same</td><td>pytest-timeout, no ratio</td><td>300 s ceiling</td><td>FAIL at 300.10 s: pytest-timeout</td></tr>
 <tr><td><code>test_near_edge_tangent_meets_reference</code></td><td><code>test_edge_term_tangents.py:449</code>, <code>@pytest.mark.xfail(strict=True)</code></td><td>XPASS(strict): the row now passes its 1e-9 assertion</td><td>in-process on CPU; 2.58 s on H200</td><td>FAIL (XPASS strict)</td></tr>
 </tbody>
@@ -51,13 +53,17 @@ wall limit, which is consistent with the two failures being compile rows and not
 rows. The two flagged rows were then run alone on the CPU
 (<code>logs/cpu-elliptic-compile-rows.log</code>). One reproduces and one does not: the
 finite-part tangent compiles at 3.60 times its primal, over the bound of three, while the
-harmonic-pole-moment row measures 2.74 and passes. The re-measured row is therefore a
-compile-budget failure of a real magnitude, and the other is a once-red row that sits 9
-percent inside its bound now; a single run each way, so the harmonic row is recorded as not reproducible
-rather than as fixed. Classification: the finite-part row is a product defect in the sense
-the plan's decision defines — its tangent program needs 243 equations against the primal's
-69 and 0.282 s of compile against 0.078 s. The repair the decision permits is a scan-form
-tangent for that row, not a raised bound.</p>
+harmonic-pole-moment row measures 2.74 and passes. The H200 arm measures 2.33 and 1.33 for the
+same two rows, so neither is red there either. The harmonic row is therefore recorded as not
+reproducible rather than as fixed: it is 2.74 on CPU and 1.33 on the H200 against a bound of
+three, and it was recorded red once in a run whose log carries no values. Classification: the finite-part row is a device-qualified bound. It
+measures 3.60 on the CPU and 2.33 on the H200 for the same program, so the bound of three is
+met on one device and missed on the other, and the row's own module says why — the ratio is
+taken on process-wide CPU seconds that XLA's compile threads sum, so a host with fewer cores
+moves it in absolute terms. Its graph is small either way: 243 equations against the primal's
+69. The repair is to run the compile rows where the ratio is host-stable, or to record the
+core count beside the ratio; a scan-form tangent is not needed for a row that compiles in
+0.28 s.</p>
 
 <h4 id="edge-tangent-base-failures-elliptic-table">Elliptic file failures</h4>
 <table>
@@ -65,14 +71,17 @@ tangent for that row, not a raised bound.</p>
 <tr><th>identifier</th><th>assertion</th><th>CPU measured vs bound</th><th>H200 measured vs bound</th></tr>
 </thead>
 <tbody>
-<tr><td><code>test_tangent_compiles_within_three_primals[finite_part]</code></td><td><code>test_elliptic_tangent_recurrences.py:470</code> asserts the ratio at or below three; the row carries <code>@pytest.mark.timeout(1800)</code> at line 466</td><td>FAIL: ratio 3.60 against the bound of 3.0, from median compile CPU 0.282 s tangent and 0.078 s primal over seven fresh cache-disabled processes, equation counts 243 and 69, zero cache hits</td><td>ELLIPTIC-H200</td></tr>
-<tr><td><code>test_tangent_compiles_within_three_primals[harmonic_pole_moments]</code></td><td>same</td><td>PASS: ratio 2.74 against the bound of 3.0, from median compile CPU 0.877 s tangent over the primal's seven runs, equation counts 519 and 1129 for the tangent and the base JVP, zero cache hits. The recorded failure does not reproduce: the row is 9 percent under its bound and was recorded red once</td><td>ELLIPTIC-H200-2</td></tr>
+<tr><td><code>test_tangent_compiles_within_three_primals[finite_part]</code></td><td><code>test_elliptic_tangent_recurrences.py:470</code> asserts the ratio at or below three; the row carries <code>@pytest.mark.timeout(1800)</code> at line 466</td><td>FAIL: ratio 3.60 against the bound of 3.0, from median compile CPU 0.282 s tangent and 0.078 s primal over seven fresh cache-disabled processes, equation counts 243 and 69, zero cache hits</td><td>PASS: ratio 2.33 against the bound of 3.0</td></tr>
+<tr><td><code>test_tangent_compiles_within_three_primals[harmonic_pole_moments]</code></td><td>same</td><td>PASS: ratio 2.74 against the bound of 3.0, from median compile CPU 0.877 s tangent over the primal's seven runs, equation counts 519 and 1129 for the tangent and the base JVP, zero cache hits. The recorded failure does not reproduce: the row is 9 percent under its bound and was recorded red once</td><td>PASS: ratio 1.33 against the bound of 3.0</td></tr>
 </tbody>
 </table>
 
 <h4 id="edge-tangent-base-failures-classes">Classification and recommended repair</h4>
 
-<p><strong>Class A — the 300 s default timeout, not a value (11 of the 14 edge failures).</strong>
+<p><strong>Class A — the 300 s default timeout, not a value (nine of the fourteen edge
+failures; eleven timeout observations on the CPU arm, since the two
+<code>edge_terms</code> rows time out there as well and carry a different cause on the
+GPU).</strong>
 Five <code>test_tangent_compiles_within_bound</code> rows, three
 <code>test_truncated_tangent_fails_identity</code> rows and three
 <code>test_tangent_matches_base_jvp</code> rows fail with a bare
@@ -184,4 +193,25 @@ half through the base program's own expression and association so the bytes agre
 the two rows. If the last bit turns out to be attributable to the device rather than to the
 expression, the bit-identity contract needs the lead's ruling rather than a relaxed assertion,
 because the plan's decision fixes the primal as bit-identical.
-</p></section>
+</p><h4 id="edge-tangent-base-failures-repairs">Recommended repair, by class</h4>
+<table>
+<thead>
+<tr><th>class</th><th>failures</th><th>kind</th><th>repair</th></tr>
+</thead>
+<tbody>
+<tr><td>A</td><td>two <code>test_tangent_matches_base_jvp</code> rows, two <code>test_truncated_tangent_fails_identity</code> rows, five <code>test_tangent_compiles_within_bound</code> rows</td><td>test defect</td><td>add <code>@pytest.mark.timeout(1800)</code> to the compile row and to the three <code>SLOW_IDENTITY_ROWS</code>, as the sibling module already does at <code>test_elliptic_tangent_recurrences.py:466</code></td></tr>
+<tr><td>B</td><td><code>test_tangent_matches_base_jvp[second_residual]</code></td><td>device-qualified bound</td><td>keep the 1e-13 assertion on the device that meets it and record the CPU maximum beside it; changing the CPU bound needs the lead</td></tr>
+<tr><td>C</td><td><code>test_tangent_matches_base_jvp[flux_line_moments]</code></td><td>device-qualified bound, mechanism open</td><td>attribute the 232 crossing samples by domain block before touching the bound or the tangent</td></tr>
+<tr><td>D</td><td><code>test_near_edge_tangent_meets_reference</code></td><td>test defect</td><td>delete the strict <code>xfail</code> marker; the row now meets the 1e-9 it asserts</td></tr>
+<tr><td>E</td><td><code>test_tangent_matches_base_jvp[edge_terms]</code>, <code>test_truncated_tangent_fails_identity[edge_terms]</code></td><td>product defect</td><td>make <code>_edge_terms_tangent</code>'s primal half reproduce the base program's bytes, then re-run both rows</td></tr>
+<tr><td>elliptic</td><td><code>test_tangent_compiles_within_three_primals[finite_part]</code></td><td>device-qualified bound</td><td>run the compile rows where the CPU-seconds ratio is host-stable, or record the core count beside the ratio; the row compiles in 0.28 s, so no tangent change is needed</td></tr>
+</tbody>
+</table>
+
+<p>Two H200 cells are recorded as not reached: the H200 arm was still running
+<code>test_tangent_compiles_within_bound[flux_line_moments]</code> and
+<code>[flux_and_moment_terms]</code> when this node's wall closed, while
+<code>[edge_integrands]</code> had already registered a failure at the same 300 s ceiling. The
+same ceiling cut <code>[edge_terms]</code> at 300.10 s on the H200, so the class is measured
+on both devices even where an H200 cell is not.</p>
+</section>

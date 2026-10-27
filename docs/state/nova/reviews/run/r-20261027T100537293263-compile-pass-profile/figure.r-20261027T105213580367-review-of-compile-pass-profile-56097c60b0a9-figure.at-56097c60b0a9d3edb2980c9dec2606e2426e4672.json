@@ -1,0 +1,50 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-27T11:08:08.882Z",
+  "dispatched_at": "2026-10-27T10:56:24Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/compile_pass_profile/figure.py",
+      "line": 91,
+      "severity": "non-blocking",
+      "summary": "The right panel of docs/figures/kernel-compile-barrier/compile-pass-profile/time-per-pass.svg is labelled 'seconds of the compile wall' and presents its three bars as a split of that wall, but they sum to 99.235 s against the 96.116 s compile wall the same receipt reports (attributed 92.098 + before-first-dump 3.4452 + after-last-dump 3.6917), so a reader who adds the bars exceeds the wall the axis names. The three bars partition the pass-dump chain, not the compile wall, and the 95.8% coverage the fragment headlines divides 92.098 by the different 96.116 figure, so neither the wall total nor the coverage percentage can be read off the figure. A wall reference line at compile_seconds, or a y-label naming the chain wall with a stated denominator, would let a reader check the panel's own claim."
+    },
+    {
+      "file": "scripts/prototypes/compile_pass_profile/figure.py",
+      "line": 51,
+      "severity": "non-blocking",
+      "summary": "The left panel labels every row with the last path component of its dump key, so two rows read as file names rather than passes - 'jit__lambda.ir-no-opt.ll' (4.2 s) and 'jit__lambda.priority_fusion_dump.txt' (1.2 s) - while the evidence table names the same rows ir-no-opt and priority_fusion_dump. The rendered bars also give a reader no way to tell a single-pass row from an aggregate: ir-no-opt.ll is 253 dumps and ir-with-opt.ll is 253, zero_sized_hlo_elimination is 18 and dce is 11, all drawn identically to the one-dump rows beside them, so 4.2 s reads as one expensive pass when it is the summed LLVM IR stage."
+    },
+    {
+      "file": "scripts/prototypes/compile_pass_profile/figure.py",
+      "line": 103,
+      "severity": "non-blocking",
+      "summary": "The positive-control figures are drawn as a four-line block of prose inside the right axes ('control 1024-op chain: 7.72 s, 95% attributed' and 'control 64-op chain: 0.74 s, 11% attributed'). Two rows of two numbers is naturally a table, and in the picture the block reads as an annotation of the point-jet bars rather than as the control measurement the run's done-when (2) requires, so a reader skimming the figure can miss that the same instrument attributed 95% of a 7.72 s compile and only 11% of a 0.74 s one."
+    },
+    {
+      "file": "scripts/prototypes/compile_pass_profile/figure.py",
+      "line": 12,
+      "severity": "non-blocking",
+      "summary": "The blue/grey split of the left panel's bars carries meaning that appears nowhere in the picture: grey marks the codegen stages and blue the HLO passes, and only the figcaption in the evidence fragment says so. There is no legend and no direct label, so a reader who sees the figure without its caption has two colours and no key."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261027T105213580367-review-of-compile-pass-profile-56097c60b0a9-figure",
+  "reviewed_base_sha": "d06fe116aca44c5c80d0aefc2ee96670da1328b9",
+  "reviewed_head_sha": "56097c60b0a9d3edb2980c9dec2606e2426e4672",
+  "reviewed_run_id": "r-20261027T100537293263-compile-pass-profile",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "pass - value and tick text is #333333 on white at about 12.6:1, and both bar fills clear 3:1 (blue #3b6ea5 about 5.2:1, grey #929292 about 3.1:1)",
+    "data_ink": "pass - two plain bar panels on white; the ink is bars, value labels and the two axis labels, with no fill or gradient carrying information",
+    "decoration": "pass - no gridlines, no background fill, no shading, no styling theme; top and right spines removed on both panels",
+    "label_collision": "pass - no text is clipped or overlapping: rendered ink spans columns 13-1382 of 1400 and rows 20-698 of 720, the right panel's control block ends 88 px short of the right edge, and no label touches a bar or another label",
+    "legibility": "pass - both panels read at a glance: 14 pt ticks and 16 pt axis labels on a 1400x720 canvas, every bar carrying its own value label, and the longest tick label (jit__lambda.priority_fusion_dump.txt) clearing the canvas edge by 13 px",
+    "table_form": "defect - the right panel's four-line control block states two rows of two numbers (wall and attributed share for the 1024-op and 64-op controls) as running prose, which is a small table drawn as text; the bar panels themselves plot a part-to-whole relationship and are not a table in image form"
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T11:11:31.874571+00:00",
+  "total": null
+}

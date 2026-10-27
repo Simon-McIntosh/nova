@@ -1,0 +1,63 @@
+<section id="replan-evidence-tooling-paths-landing">
+  <h2>Benchmark receipts come from the caller</h2>
+  <p id="replan-evidence-tooling-paths-what">
+    Forty-five benchmark modules and four supporting scripts carried 61
+    absolute paths into <code>~/.config/reckon/crew/reports</code> or
+    <code>~/.config/reckon/crew/runs</code>. Both are reclaimed: a crew report
+    resolves only while the run that wrote it is live. Every one of those
+    literals now resolves through <code>benchmarks/receipt_locations.py</code>,
+    which reads <code>NOVA_CREW_REPORTS</code> or <code>NOVA_CREW_RUNS</code>
+    and raises under the variable's own name when the location is unset. The
+    accessor is not a resolver: it joins one caller-supplied root with a
+    repository-relative tail, keeps no default, rewrites nothing.
+  </p>
+  <p id="replan-evidence-tooling-paths-lazy">
+    The path resolves on first use rather than at import, because 171 test
+    modules import a benchmark module to reach one of its functions and must
+    import without the environment set: all 47 changed modules import cleanly
+    with both variables unset. Three sites that had derived a second location
+    from a first (<code>with_name</code>, <code>parent</code>) were respelled as
+    their own caller-supplied path so no derivation forces resolution at
+    import. No benchmark changes what it computes, and none gained or lost a
+    receipt it was reading.
+  </p>
+  <p id="replan-evidence-tooling-paths-census">
+    <code>grep -rnE "\.config/reckon/crew" benchmarks/
+    scripts/run_amplitude_census.sh scripts/media/efit_nova_overlay.py
+    scripts/labeller_batch/shard.py scripts/analytic_oracle_fixtures/
+    --exclude-dir=prototypes</code> returns 61 lines at
+    <code>624860447</code> and 0 lines at <code>dff94725f</code>. No docstring
+    was kept: every hit was code that read or wrote the path.
+  </p>
+  <p id="replan-evidence-tooling-paths-test">
+    <code>tests/test_evidence_tooling_paths.py</code> runs that scan and fails
+    naming each offending line. It carries its own positive control, because a
+    scan that finds no file reports a clean tree for the same reason a clean
+    tree does: the pattern is proved against text known to carry both prefixes
+    and the candidate list against <code>benchmarks/receipt_locations.py</code>.
+    Scripts under <code>scripts/prototypes/</code> are outside this node's
+    scope and are excluded. The scan carries the worktree root name beside the
+    crew prefix; this record does not spell that name, because the
+    repository's own worktree check refuses any file that does, which is why the
+    test composes both patterns from joined pieces.
+  </p>
+  <p id="replan-evidence-tooling-paths-gate">
+    Gate: the eight test modules importing a changed module, one fresh pytest
+    process per file, four at a time, as one sirius job (1297670). The base arm
+    ran at <code>624860447</code> from a git archive and the head arm at
+    <code>dff94725f</code> from the worktree; each per-file log records its arm,
+    tree, revision and the resolved <code>nova.__file__</code>, and every file
+    ran to its summary line. Base reports 7 failure ids, head 2; nothing present
+    at head is absent at base, so the change adds no failure. The two remaining
+    head failures are pre-existing: <code>test_exact_clip_moments</code> and
+    <code>test_labeller_parallel</code> fail in both arms, the latter with 4
+    failures at base and 1 at head across the same 11 tests.
+  </p>
+  <p id="replan-evidence-tooling-paths-negative-control">
+    Negative control: one absolute crew report path restored in a scratch copy
+    of <code>benchmarks/</code> makes the scan fail naming
+    <code>benchmarks/sample.py:1</code> and exit 1; the same file passes in the
+    worktree-side test file, whose own arm logs <code>1 failed</code> at base
+    and <code>1 passed</code> at head.
+  </p>
+</section>

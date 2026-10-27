@@ -39,7 +39,9 @@ def read(path: pathlib.Path) -> dict:
 
 def main(argv: list[str]) -> int:
     root = pathlib.Path(argv[1])
-    rows = [read(path) for path in sorted(root.glob("*.log"))]
+    # a kept copy of a killed run ends .oom.log; counting it would report one
+    # module twice and read a killed copy as a second unfinished file
+    rows = [read(path) for path in sorted(root.glob("*.log")) if ".oom." not in path.name]
     for row in rows:
         state = row["summary"] or "INCOMPLETE"
         print(f"{row['file']}: {state}")

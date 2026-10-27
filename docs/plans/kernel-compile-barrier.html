@@ -24,7 +24,7 @@
   <title>Kernel Compile Barrier | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="29">
+<meta name="plan-version" content="30">
 <meta name="plan-modified" content="2026-10-27">
 </head>
 <body>
@@ -142,6 +142,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261027T100537293263-compile-pass-profile" data-who="reckon-build" data-when="2026-10-27T12:45:57Z">
     <div class="r-comment-body"><p>Point jet H200 cold compile profiled per HLO pass: 95.12 s wall with dumping (trace 3.25 s, lowering 0.43 s), 91.19 s attributed across 96 passes (95.9%) with 0.85 s before the first dump and 3.07 s after the last summing to the wall exactly; variadic-op-splitter 34.23 s and multi_output_fusion 17.08 s over the graph the splitter expands from 146 to 100,579 instructions take 51.31 s of it, so the lever is the size the program hands the fusion pipeline, not the expanded-equation count.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261027T124829891432-review-of-compile-pass-profile-4cab176b6bcb" data-who="reckon-build" data-when="2026-10-27T13:04:30.966Z">
+    <div class="r-comment-body"><p>Independent review of the delta 02d82b775..4cab176b6 (the commit that puts the receipt, figure and reconcile guard on the gate path) scores goal_fidelity 19, evidence 18, scope_discipline 20, durability 14, fit 17, reuse 19; the prior review&#x27;s blocking finding is answered and verified by re-running the aggregate stage from the head tree (byte-identical pair, md5 bd1600b0 json / 9429f5cd svg, twice) and reproducing RECONCILE-FAIL EXIT=1; two non-blocking findings recorded, one of which (a negative seconds_before_first_dump now accepted on the gate&#x27;s own path) predates the delta and becomes published by it.</p></div>
 </div>
 </section>
 </main>

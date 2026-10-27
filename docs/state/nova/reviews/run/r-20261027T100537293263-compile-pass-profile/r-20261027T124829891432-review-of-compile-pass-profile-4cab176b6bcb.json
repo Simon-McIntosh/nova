@@ -1,0 +1,55 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "the reviewed manifest records no baseline_suite and no after_suite keys at all: this is a measurement node whose declared write paths reach no test file, so no suite arm ran and there is no gate log to derive failure ids from; the count is 0 because no arm ran, not because an arm ran clean",
+  "call_sites": [],
+  "completed_at": "2026-10-27T13:04:30.966Z",
+  "dispatched_at": "2026-10-27T12:53:16Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/compile_pass_profile/summarise.py",
+      "line": 104,
+      "severity": "non-blocking",
+      "summary": "reconcile still accepts a negative seconds_before_first_dump, and this commit is what makes that acceptance the gate's own verdict: the shipped docs/figures/kernel-compile-barrier/compile-pass-profile/pass-profile.json publishes -0.1601 s for control-64 and -0.2181 s for control-256, dumps stamped before the compile started, with residual 0.000, so the guard passes a bracket it should refuse now that job.sh:50 runs it on every gate. The defect predates this commit and the commit does not introduce it; it is recorded because the delta makes this path the published one."
+    },
+    {
+      "file": "scripts/prototypes/compile_pass_profile/job.sh",
+      "line": 67,
+      "severity": "non-blocking",
+      "summary": "summarise.py rewrites the artefacts directory's pass-profile.json before figure.py draws, and figure.py savefig writes the committed SVG in place, so a figure failure leaves the tree holding a new receipt beside the previous figure with nothing recording that the pair came from two different runs. The script does exit nonzero so a gate run refuses, but the tree is already inconsistent at that point; writing both stages to a scratch directory and moving them into place together would make the pair atomic."
+    }
+  ],
+  "justifications": {
+    "durability": "the refusal is exercised through the gate and fires (RECONCILE-FAIL, EXIT=1), but no test asserts the stage wiring itself, so removing the summarise call from scripts/prototypes/compile_pass_profile/job.sh:50 would leave every recorded check green",
+    "evidence": "pass-profile/job6.log ends summarise_exit=0 / figure_exit=0 / EXIT=0 and the red arm at pass-profile/red-arm/gate-red-arm.log ends RECONCILE-FAIL with EXIT=1, and I reproduced both outcomes through job.sh's aggregate mode run from the head tree",
+    "fit": "the added shell and Python follow the surrounding prototype idiom and ruff check passes on figure.py and summarise.py, though figure.py:3 introduces a file-wide noqa suppression where three import lines needed it",
+    "goal_fidelity": "scripts/prototypes/compile_pass_profile/job.sh:50 runs summarise.py and job.sh:66 runs figure.py after the four measurement programs, so the reconcile guard, receipt and figure the prior review found off the gate path are now on it",
+    "reuse": "the delta reuses the repository's own owners rather than forking: the filepath console tool relativizes the recorded module path at job.sh:60 and figure.py:19 draws through nova.media.ink, and no added definition duplicates a capability nova/ owns",
+    "scope_discipline": "all four paths of commit 4cab176b6 sit under the three declared write roots and no file under nova/ is touched, so the delta carries no product code"
+  },
+  "project": "nova",
+  "review_run_id": "r-20261027T124829891432-review-of-compile-pass-profile-4cab176b6bcb",
+  "reviewed_base_sha": "02d82b775814c7faf27695be32ce43a2312f4ec7",
+  "reviewed_head_sha": "4cab176b6bcbd19503f4118308a3990d37e97c37",
+  "reviewed_run_id": "r-20261027T100537293263-compile-pass-profile",
+  "rubric": "independent",
+  "scores": {
+    "durability": 14,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T13:04:47.832596+00:00",
+  "total": 107,
+  "verdicts": {
+    "diff": "read the single commit 02d82b775..4cab176b6: job.sh gains summarise.py and figure.py as its last two stages with their exits folded into its own, plus an aggregate mode that re-runs only those stages, figure.py pins svg.hashsalt and drops the svg Date metadata, the committed SVG changes only generated element ids and the removed dc:date with no geometry or plotted value moving, and the evidence fragment gains one sentence naming the gate",
+    "done_when": "the done_when asks for one H200 job whose pass chain covers at least 90% of the compile wall with instruction counts, a same-job positive control and one figure plus a recommendation; pass-profile/job6.log:16-18 records coverage 0.9591 at the recorded revision, and job6.log's own summarise_exit=0 and figure_exit=0 lines can only be emitted by the job.sh this commit lands, so the delta's stages are inside the recorded gate",
+    "goal": "the source node's goal is a measured attribution of the point jet's H200 cold compile to XLA passes with no product code changed; the delta at 4cab176b6 changes no measurement and instead puts the receipt-and-figure build and the reconcile guard onto scripts/prototypes/compile_pass_profile/job.sh's own path, which answers the prior review's blocking finding at run.sh:30",
+    "manifest": "read; it reports status complete, records the aggregate-stage command and the H200 sbatch gate through pass-profile/job6.log, and states the aggregate stage writes pass-profile.json and time-per-pass.svg byte-identically to the shipped pair twice; I re-ran that named aggregate stage against pass-profile/rerun and reproduced both files byte-identically (md5 bd1600b0 for the json, 9429f5cd for the svg) on two runs, and reproduced the same refusal (residual +3.119 s, EXIT=1, no artefact written), so the recorded result holds",
+    "write_paths": "the manifest declares scripts/prototypes/compile_pass_profile, docs/evidence/fragments/kernel-compile-barrier/compile-pass-profile.html and docs/figures/kernel-compile-barrier/compile-pass-profile; commit 4cab176b6 touches exactly job.sh, figure.py, that evidence fragment and docs/figures/kernel-compile-barrier/compile-pass-profile/time-per-pass.svg, all inside those three declared roots"
+  }
+}

@@ -40,7 +40,24 @@
   "plan_slug": "nova-portfolio-replan",
   "plan_version": 37,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reuse_search-1",
+      "reason": "Applies to section 4, which this wave does not build; the wave dispatches only section 5 nodes (hdf5_read deletion and the DBEntry opener). The finding is carried into section 4's node brief, recorded as a section 4 comment.",
+      "when": "2026-10-27T09:22:47.223101+00:00"
+    }
+  ],
+  "responses": {
+    "reuse_search-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "Applies to section 4, which this wave does not build; the wave dispatches only section 5 nodes (hdf5_read deletion and the DBEntry opener). The finding is carried into section 4's node brief, recorded as a section 4 comment.",
+      "when": "2026-10-27T09:22:47.223101+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/nova-portfolio-replan/r-20261006T030345596523-plan-review-of-nova-portfolio-replan.json",
   "review_run_id": "r-20261006T030345596523-plan-review-of-nova-portfolio-replan",
   "reviewed_blob_sha": "a0beefe7d495e8f47def8a67461ffa53ff56d3f3",
   "rubric": "design",

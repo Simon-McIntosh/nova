@@ -1,0 +1,86 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "the reviewed manifest records no baseline_suite or after_suite arms: this is a measurement node that changes no product code, so no test arm was applicable and there are no gate logs to derive failure ids from; the count is 0 because no arm ran, not because an arm ran clean",
+  "call_sites": [],
+  "completed_at": "2026-10-27T11:26:57.923Z",
+  "dispatched_at": "2026-10-27T11:08:22Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/compile_pass_profile/run.sh",
+      "line": 34,
+      "severity": "blocking",
+      "summary": "The gate's exit status is taken from profile_code alone: analysis_code is captured at run.sh:29, printed at run.sh:30 and then discarded, so a run whose attribution is nonsense still ends EXIT=0. Job 1296870 did exactly that - its ATTRIBUTION line reports 9975.8858 s attributed inside a 96.12 s compile (coverage 103.7904), a physically impossible value, and the job closed with EXIT=0 and printed analysis_exit=0. A broken instrument therefore reads as a green gate, which is how the contradiction reached the manifest and the fragment unchallenged. The analysis exit must reach the log's EXIT line, and an attribution whose attributed_seconds exceed the compile wall must fail the run."
+    },
+    {
+      "file": "scripts/prototypes/compile_pass_profile/summarise.py",
+      "line": 48,
+      "severity": "blocking",
+      "summary": "summarise.py re-derives per-pass time into `table` but builds its `gaps` block from `row[\"seconds\"]`, the per-dump values carried over from attribution.json, which were computed under the index ordering that commit 0444f06c2 replaced. The delivered docs/figures/kernel-compile-barrier/compile-pass-profile/pass-profile.json therefore ships 12 gaps summing to 983.3 s, the largest a single entry of 84.2536 s, inside a compile whose whole wall is 96.1156 s. The figures and the fragment read `table` and are unaffected, but the JSON is the delivered receipt and it carries a self-evidently impossible number a later reader may quote."
+    },
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/compile-pass-profile.html",
+      "line": 3,
+      "severity": "non-blocking",
+      "summary": "The fragment states the chain leaves 3.45 s before the first dump and 3.69 s after the last, but those two values are read from index-ordered endpoints (analyse.py takes chosen[0] and chosen[-1] after sorting by index) and do not reconcile: 92.10 + 3.45 + 3.69 = 99.24 s against the 96.12 s wall the same paragraph names. Reconstructing the split from attribution.json's own start values gives 0.86 s before (base offset 3.4452 s, earliest chosen dump -2.5820 s) and 3.16 s after (latest +89.5157 s, compile wall 96.1157 s), which reconciles exactly as 0.86 + 92.10 + 3.16 = 96.12. The 95.8% headline is unaffected; the two supporting numbers are wrong."
+    },
+    {
+      "file": "scripts/prototypes/compile_pass_profile/profile.py",
+      "line": 36,
+      "severity": "non-blocking",
+      "summary": "profile.py duplicates the cold-process timing harness the repository already owns at scripts/prototypes/kernel_compile_census/row.py: it repeats the same cache and preallocate environment settings, the same configure_dtypes call and x64/cache asserts, the same perf_counter split into lower_seconds and compile_seconds, the same PHASE checkpoint and receipt keys, and it copies row.py:67's point_jet builder verbatim, including the fixture imports. The brief told the worker these files were to be reused. Nothing here extends or wraps that owner, so a change to the census harness will not reach this profile and the two builds of the same program can drift. Only the per-pass dump analysis (analyse.py, summarise.py) has no existing owner."
+    },
+    {
+      "file": "scripts/prototypes/compile_pass_profile/profile.py",
+      "line": 33,
+      "severity": "non-blocking",
+      "summary": "The node's central condition is a cold compile, and the harness asserts it only from the configuration flag (`assert not jax.config.jax_enable_compilation_cache`), dropping the `cache_guard.install()` that the sibling harness at scripts/prototypes/kernel_compile_census/row.py:32 uses to record hit and miss rows from the compiler's own ledger. A cache hit would leave the flag false and the run green, so the coldness that makes the 96.12 s wall meaningful is asserted rather than measured."
+    },
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/compile-pass-profile.html",
+      "line": 8,
+      "severity": "non-blocking",
+      "summary": "The table column 'Module instructions at the pass' states 146 -> 100,579 for variadic-op-splitter and 100,456 -> 23,807 for multi_output_fusion, but the delivered receipt's rows for those two passes read instructions_first 146 / instructions_last 146 and 23807 / 23807 (each row is a single dump, so its own first and last are the same file). The stated transitions are assembled from other rows and the overall peak, so a reader checking the table against docs/figures/kernel-compile-barrier/compile-pass-profile/pass-profile.json cannot reconcile the column with the artifact it cites; the column should name which dump pair each count comes from."
+    },
+    {
+      "file": "scripts/prototypes/compile_pass_profile/figure.py",
+      "line": 15,
+      "severity": "non-blocking",
+      "summary": "figure.py declares its own matplotlib rcParams dictionary and its own two hex colours (HLO #3b6ea5 at figure.py:12, STAGE #929292 at figure.py:13) rather than loading nova/media/ink.py, the module the repository designates as the one place the house style exists, which the sibling prototype scripts/prototypes/lean_map/render.py:28 imports as DEFAULT_INK and uses for its palette. A repository-wide restyle therefore cannot reach this figure, and its grey restates a value the style owner is meant to hold once."
+    }
+  ],
+  "justifications": {
+    "durability": "no assertion anywhere in scripts/prototypes/compile_pass_profile/ fails if the attribution regresses; run.sh:34 prints analysis_exit and then exits on profile_code, and the 90% coverage claim is computed at summarise.py:71 and never compared against a floor",
+    "evidence": "the manifest's declared gate log reports coverage_of_compile 103.79 for the point jet and its top pass zero_sized_hlo_elimination, while the delivered table at docs/figures/kernel-compile-barrier/compile-pass-profile/pass-profile.json reports 0.9582 and variadic-op-splitter, so the record's stated evidence does not reproduce its stated result",
+    "fit": "naming and module shape follow the neighbouring prototypes, but figure.py:15 hand-writes the style dictionary instead of loading the repository's single style owner",
+    "goal_fidelity": "the fragment and the receipt deliver the per-pass attribution and the single named lever (HLO size at the variadic splitter, 52.22 s of 92.10 s) that the goal states, at docs/evidence/fragments/kernel-compile-barrier/compile-pass-profile.html:30",
+    "reuse": "profile.py:36 copies the point_jet builder and the whole cold-process timing harness from scripts/prototypes/kernel_compile_census/row.py:67 rather than importing it, and figure.py:12 invents a second palette beside nova/media/ink.py",
+    "scope_discipline": "every one of the nine paths in the diff sits inside the three declared write paths"
+  },
+  "project": "nova",
+  "review_run_id": "r-20261027T105039783289-review-of-compile-pass-profile-56097c60b0a9",
+  "reviewed_base_sha": "d06fe116aca44c5c80d0aefc2ee96670da1328b9",
+  "reviewed_head_sha": "56097c60b0a9d3edb2980c9dec2606e2426e4672",
+  "reviewed_run_id": "r-20261027T100537293263-compile-pass-profile",
+  "rubric": "independent",
+  "scores": {
+    "durability": 6,
+    "evidence": 11,
+    "fit": 14,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T11:30:54.748153+00:00",
+  "total": 74,
+  "verdicts": {
+    "call_sites": "none",
+    "diff": "read commit by commit from d06fe116 to 56097c60b: six commits adding profile.py, analyse.py, summarise.py, figure.py, run.sh, job.sh, the evidence fragment and the figure pair, with no product-code change; the last three commits correct the analysis ordering, the control width and a figure twin, and none of them re-ran the measurement",
+    "done_when": "the done_when asks for a per-pass split of at least 90% with pre/post fusion instruction counts and ten costliest passes, a same-job small-program control also at 90%, and a figure plus one named lever; the delivered table and figure satisfy the shape, and the gate that ran (job 1296870) is the one named, but its own printed attribution contradicts the delivered table by two orders of magnitude, so the gate does not assert the measure the done_when states",
+    "goal": "the node's goal is to attribute the point jet's H200 cold compile to XLA passes before any further bounding; docs/evidence/fragments/kernel-compile-barrier/compile-pass-profile.html:3 and the committed docs/figures/kernel-compile-barrier/compile-pass-profile/pass-profile.json carry that attribution (96.12 s compile, 92.10 s across 96 passes) and no product code changed",
+    "manifest": "read; it records status complete, six commits, the sbatch command and job3.log as its gate, and the positive-control reasoning; it carries no baseline_suite or after_suite arms, and its tests/test_logs pair points at a log whose ATTRIBUTION line reports 9975.8858 s attributed against a 96.12 s compile",
+    "write_paths": "the manifest declares scripts/prototypes/compile_pass_profile, docs/evidence/fragments/kernel-compile-barrier/compile-pass-profile.html and docs/figures/kernel-compile-barrier/compile-pass-profile; all nine files of the diff are inside those three, and no product code under nova/ was touched"
+  }
+}

@@ -24,7 +24,7 @@
   <title>Kernel Compile Barrier | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="21">
+<meta name="plan-version" content="22">
 <meta name="plan-modified" content="2026-10-27">
 </head>
 <body>
@@ -117,7 +117,10 @@
     <div class="r-comment-body"><p>Figure review of the point-jet time-per-pass figure is parsed with all six rubric items: legibility, data_ink, decoration, contrast and label_collision pass, table_form carries the one non-blocking defect; four non-blocking findings are recorded and none blocks — the right panel's three bars sum to 99.235 s against the 96.116 s compile wall its axis names, aggregate passes are drawn identically to single passes, control figures sit in prose, and the blue/grey key lives only in the caption.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261027T105039783289-review-of-compile-pass-profile-56097c60b0a9" data-who="reckon-build" data-when="2026-10-27T11:26:57.923Z">
-    <div class="r-comment-body"><p>Independent review of r-20261027T100537293263-compile-pass-profile at head 56097c60b, base d06fe116: the per-pass attribution and its named lever are sound and independently reproducible from the run&#x27;s own receipts, but two blocking defects sit between the receipt and the gate - run.sh:34 discards the analysis exit so job 1296870 closed EXIT=0 while its own ATTRIBUTION line reported 9975.88 s inside a 96.12 s compile, and summarise.py:48 ships 12 stale per-dump gaps summing to 983.3 s inside a 96.12 s wall in the delivered pass-profile.json.</p></div>
+    <div class="r-comment-body"><p>Independent review of r-20261027T100537293263-compile-pass-profile at head 56097c60b, base d06fe116: the per-pass attribution and its named lever are sound and independently reproducible from the run's own receipts, but two blocking defects sit between the receipt and the gate - run.sh:34 discards the analysis exit so job 1296870 closed EXIT=0 while its own ATTRIBUTION line reported 9975.88 s inside a 96.12 s compile, and summarise.py:48 ships 12 stale per-dump gaps summing to 983.3 s inside a 96.12 s wall in the delivered pass-profile.json.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261027T105642520419-review-of-edge-tangent-base-failures-6dbae8420eb1" data-who="reckon-build" data-when="2026-10-27T11:58:53.201Z">
+    <div class="r-comment-body"><p>Reviewed r-20261027T100839626666-edge-tangent-base-failures at d06fe116aca44c5c80d0aefc2ee96670da1328b9..6dbae8420eb1dc839301bb104176cb0261857f30: goal_fidelity 18, evidence 11, scope_discipline 20, durability 9, fit 16, reuse 4; six findings, one blocking - the elliptic &quot;device-qualified bound&quot; rests on a two-row H200 arm while the node own retained logs/h200-tangents.log records four further elliptic compile rows over the bound on the H200 (complete_pole 9.894, harmonic_root_moments 3.006, cn_pole_moment 10.372, sn_pole_moment 9.616), none of which the fragment mentions</p></div>
 </div>
 </section>
 </main>

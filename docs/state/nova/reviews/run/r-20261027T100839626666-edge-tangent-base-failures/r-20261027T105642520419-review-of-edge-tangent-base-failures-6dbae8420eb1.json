@@ -1,0 +1,71 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-10-27T11:58:53.201Z",
+  "dispatched_at": "2026-10-27T11:34:38Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/edge-tangent-base-failures.html",
+      "line": 59,
+      "severity": "blocking",
+      "text": "The elliptic section classifies test_tangent_compiles_within_three_primals[finite_part] as a device-qualified bound, saying the bound of three is 'met on the one device and missed on the other' (lines 56-59) and recommending that the compile rows be moved to a host where the ratio is stable, with 'no tangent change needed' (line 207). The node's own retained H200 full-file log contradicts the device-qualified framing: logs/h200-tangents.log (job 1296858, SOURCE_REVISION=d06fe116a, completed '11 failed, 39 passed' at 12:08) records FOUR further elliptic compile rows over the same bound of three on the H200 -- complete_pole 9.894, harmonic_root_moments 3.006, cn_pole_moment 10.372, sn_pole_moment 9.616. None of those four identifiers appears anywhere in the fragment. So the ratio bound is exceeded on both devices, by different rows, and a reader acting on the fragment would conclude the elliptic compile rows are safe to run on the H200, which is false for four of them."
+    },
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/edge-tangent-base-failures.html",
+      "line": 188,
+      "severity": "non-blocking",
+      "text": "Class E is labelled 'This is a product defect' for the H200 primal bit-difference at test_edge_term_tangents.py:257. The evidence does not exclude the alternative the fragment itself concedes at lines 190-194: the CPU arm never reached the assertion (it timed out at 300 s), so the only device evidence is a one-bit difference at one element of 52024 on the GPU, which is equally consistent with device-level floating-point reassociation. The label commits to a cause the measurement cannot separate; recording it as 'product defect suspected, device alternative open until the CPU arm reaches the assertion' would be supported by the evidence."
+    },
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/edge-tangent-base-failures.html",
+      "line": 37,
+      "severity": "non-blocking",
+      "text": "The H200 cells for test_tangent_compiles_within_bound[flux_line_moments] and [flux_and_moment_terms] read 'fails; reason not yet printed (see note)', and the closing note (lines 209-215) explains the reason was unmeasured because the node's wall closed first. That reason is printable and printed: logs/h200-tangents.log, which the manifest's own evidence_inputs list as a source, records 'Failed: Timeout (>300.0s) from pytest-timeout' for both rows at lines 163 and 211. The cells are stale against evidence the run retained, so a reader at this revision is told a value is unmeasured when it is measured."
+    },
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/edge-tangent-base-failures.html",
+      "line": 212,
+      "severity": "non-blocking",
+      "text": "The note quotes the H200 arm's progress line as '......F......F...FFF' and uses its trailing F letters to mark two specific cells as failing. The log records '......F......F...FFFFF' (h200-tangents.log:44, five trailing F letters over 22 rows). The quoted receipt has two fewer failures than the log it cites, so the evidence offered for which cells fail does not match the log."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T100839626666-edge-tangent-base-failures/manifest.md",
+      "line": 14,
+      "severity": "non-blocking",
+      "text": "The tests: line names <logs>/cpu-gate.log as the gate that ran, and that file does not exist in the run's logs directory. The CPU gate it describes was killed (cpu-numeric-rows.log ends EXIT=137) before completing either file, and the manifest's own retry_failures concedes that flux_line_moments' wall is unmeasured and its value read from the older base log. Promotion reads its gate receipt from this line, so the named receipt cannot be opened."
+    },
+    {
+      "file": "scripts/prototypes/edge_tangent_failures/cpu_arm.sh",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "The scratch runner re-implements a capability the repository already owns rather than extending it: scripts/nova_lane/run.sh is the lane launcher that writes the revision/tree/command header, exports TMPDIR, sets PYTHONPATH, and unsets UV_NO_SYNC/UV_RUN_RECURSION_DEPTH, and scripts/nova_lane/standing_suite.sh already runs every test file in its own fresh pytest process with the heavy tail on the H200 rung. This is a third runner of the same shape."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "No production call site reaches the change: the fragment is a serve-only evidence page and cpu_arm.sh is invoked only from the reviewed run's own manifest tests: line.",
+    "diff": "Seven commits read against d06fe116a; two files added (cpu_arm.sh, 31 lines, and the 221-line evidence fragment), all inside the declared scope.",
+    "done_when": "The done_when names a table of every failing id with assertion, measured value against bound, wall and named log, a per-failure H200 result, and a classification with a repair per class; the fragment carries the first two and a classification table at lines 197-208.",
+    "goal": "The reviewed node's goal is to explain every failure the two kernel tangent test files carry, changing no product code and no test; docs/evidence/fragments/kernel-compile-barrier/edge-tangent-base-failures.html does exactly that.",
+    "manifest": "Read; it reports status complete, names the base-arm log and two CPU row logs, and honestly records the killed CPU gate (EXIT=137) in retry_failures, but its tests: line names a log that does not exist.",
+    "write_paths": "The manifest declares scripts/prototypes/edge_tangent_failures, docs/evidence/fragments/kernel-compile-barrier/edge-tangent-base-failures.html and docs/figures/kernel-compile-barrier/edge-tangent-base-failures; the diff touches only the first two, and neither test files nor nova/ product code."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The reviewed node's goal is to explain every failure the two kernel tangent test files carry on main, changing no product code and no test; docs/evidence/fragments/kernel-compile-barrier/edge-tangent-base-failures.html does that, with a row per failing id.\nVERDICT done_when: The done_when asks for a table of every failing id with assertion, measured value against bound and wall from a named log, a per-failure H200 result, and a classification with a repair per class; the fragment's tables at lines 20-39 and 62-72 and its classification at 197-208 assert those measures, and the 14 edge rows match the base log's FAILED list exactly.\nVERDICT write_paths: The manifest declares scripts/prototypes/edge_tangent_failures, docs/evidence/fragments/kernel-compile-barrier/edge-tangent-base-failures.html and docs/figures/kernel-compile-barrier/edge-tangent-base-failures; the diff touches only cpu_arm.sh and the fragment, and no test or nova/ product file.\nVERDICT manifest: Read; it reports complete with the base-arm log and two CPU row logs named, and it discloses the killed CPU gate (EXIT=137) and the unmeasured flux_line_moments wall, but its tests: line names cpu-gate.log, which does not exist.\nVERDICT diff: Seven commits read against d06fe116a; the range adds only scripts/prototypes/edge_tangent_failures/cpu_arm.sh (31 lines) and the 221-line fragment; every measured value I spot-checked reconciles with the log it cites.\nVERDICT call_sites: No production call site reaches the change; the fragment is a serve-only evidence page and cpu_arm.sh is invoked only from the reviewed run's own manifest tests: line.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/kernel-compile-barrier/edge-tangent-base-failures.html lines 20-39 table every one of the base log's 14 edge failures and the two elliptic rows, matching the base log's FAILED list exactly.\nSCORE evidence: 11\nJUSTIFICATION evidence: the fragment's elliptic H200 cells at lines 56-59 rest on a two-row arm while the node's own retained logs/h200-tangents.log records four further elliptic rows failing on the H200, and its tests: line names a log that does not exist.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff touches only scripts/prototypes/edge_tangent_failures/cpu_arm.sh and docs/evidence/fragments/kernel-compile-barrier/edge-tangent-base-failures.html, both inside the declared write paths, with no product or test change.\nSCORE durability: 9\nJUSTIFICATION durability: the brief forbids a test, so durability rests on the committed reproduction script and logs, and nothing fails when the fragment goes stale, as it already has against h200-tangents.log:163.\nSCORE fit: 16\nJUSTIFICATION fit: the fragment follows the evidence-fragment convention of docs/evidence/fragments/converged-forward-solve/cfs-edge-term-tangents.html and carries no forbidden plan label; the scratch script lacks the log-header discipline of scripts/nova_lane/run.sh:1, whose header it partly reproduces.\nSCORE reuse: 4\nJUSTIFICATION reuse: scripts/prototypes/edge_tangent_failures/cpu_arm.sh:1 duplicates the runner capability already owned by scripts/nova_lane/run.sh and scripts/nova_lane/standing_suite.sh, neither extended nor wrapped.\nFINDING docs/evidence/fragments/kernel-compile-barrier/edge-tangent-base-failures.html:59 blocking: the elliptic section calls the compile-ratio bound device-qualified (met on one device, missed on the other) and says no tangent change is needed, but the run's own h200-tangents.log records four further elliptic compile rows over the bound of three on the H200 (complete_pole 9.894, harmonic_root_moments 3.006, cn_pole_moment 10.372, sn_pole_moment 9.616), none of which the fragment mentions.\nFINDING docs/evidence/fragments/kernel-compile-barrier/edge-tangent-base-failures.html:188 non-blocking: Class E labels the H200 one-bit primal difference a product defect while the CPU arm never reached the assertion and the fragment itself concedes the device alternative is open.\nFINDING docs/evidence/fragments/kernel-compile-barrier/edge-tangent-base-failures.html:37 non-blocking: two H200 cells read 'reason not yet printed', but h200-tangents.log prints Failed: Timeout (>300.0s) for both at lines 163 and 211.\nFINDING docs/evidence/fragments/kernel-compile-barrier/edge-tangent-base-failures.html:212 non-blocking: the note quotes the H200 progress line as '......F......F...FFF' while the log records '......F......F...FFFFF', so the cited receipt carries fewer failures than the log.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T100839626666-edge-tangent-base-failures/manifest.md:14 non-blocking: the tests: line names cpu-gate.log, which does not exist in the run's logs directory.\nFINDING scripts/prototypes/edge_tangent_failures/cpu_arm.sh:1 non-blocking: the scratch runner re-implements the runner capability already owned by scripts/nova_lane/run.sh and scripts/nova_lane/standing_suite.sh.\n",
+  "review_run_id": "r-20261027T105642520419-review-of-edge-tangent-base-failures-6dbae8420eb1",
+  "reviewed_base_sha": "d06fe116aca44c5c80d0aefc2ee96670da1328b9",
+  "reviewed_head_sha": "6dbae8420eb1dc839301bb104176cb0261857f30",
+  "reviewed_run_id": "r-20261027T100839626666-edge-tangent-base-failures",
+  "scores": {
+    "durability": 9,
+    "evidence": 11,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 4,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T12:06:14.111219+00:00",
+  "total": 78
+}

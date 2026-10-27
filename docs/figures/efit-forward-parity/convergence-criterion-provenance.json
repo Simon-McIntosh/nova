@@ -12,7 +12,7 @@
       "direction": "at-most",
       "unit": "m",
       "basis_verbatim": "four times the 0.025336 cm committed-stamp axis reference; the deterministic reproduction spread was zero",
-      "evidence_verbatim": "physics-spine-v0-mast-heldout-6-08ae0dee74-98dci4-clu-3141.yaml",
+      "evidence_verbatim": "sha256:8df7a0a6c3f6162dbe0f226660bc069f37de8eb69f0f7c80bbfedc2bd4be220c",
       "classification": "INHERITED",
       "evidence_read": {
         "relationship": "merely-contains",
@@ -29,7 +29,7 @@
       "direction": "at-most",
       "unit": "m",
       "basis_verbatim": "four times the 0.008262 cm committed-stamp LCFS reference; the deterministic reproduction spread was zero",
-      "evidence_verbatim": "physics-spine-v0-mast-heldout-6-08ae0dee74-98dci4-clu-3141.yaml",
+      "evidence_verbatim": "sha256:8df7a0a6c3f6162dbe0f226660bc069f37de8eb69f0f7c80bbfedc2bd4be220c",
       "classification": "INHERITED",
       "evidence_read": {
         "relationship": "merely-contains",
@@ -88,7 +88,7 @@
         "finding": "The cited source implements max|g(x)-x|/max|g(x)|, with a 1e-30 denominator floor, but contains no 1e-8 physical or discretisation argument.",
         "corroborating_path": null,
         "cited_path_exists": true,
-        "cited_path_sha256": "44281b5170ead543753d50f82439c700f001e506f2f1281525429fe018477d05"
+        "cited_path_sha256": "4031cfe6076a047b3561a532797eaf7ff749d8e1aa850152c7afad6ee78bac54"
       }
     }
   ],
@@ -249,11 +249,11 @@
     "byte_for_byte_unchanged": true
   },
   "source_digests": {
-    "nova/imas/parity_tolerances.py": "54287a39b366f355acd1866d03496d19f9511ea77f0373a7f0d855eabef4ed74",
-    "nova/equilibrium/fixed_point.py": "44281b5170ead543753d50f82439c700f001e506f2f1281525429fe018477d05",
-    "nova/equilibrium/forward.py": "8098aa29b016c19c2455c24bfe2fa7b8b1dbac401f1b7037c918707c711e303d",
-    "nova/equilibrium/forward_operator.py": "df13ceb0458a5ebf7c2e1046d52cb46f640569d9e25dcd24f735257978b50c59",
-    "benchmarks/efit_parity_tared_external_field.py": "62764ed6469d7f9a346e85a570edf09c3956762caf7ad47019c2950c2d230173",
+    "nova/imas/parity_tolerances.py": "374dc09a7f51584fc1413aab3607448e2b0dc39d92f8b2ebc22376288a85ace5",
+    "nova/equilibrium/fixed_point.py": "4031cfe6076a047b3561a532797eaf7ff749d8e1aa850152c7afad6ee78bac54",
+    "nova/equilibrium/forward.py": "bf2223f35a7c152d64905866b3f8f9c79bca05358864d2bd4f40933f58112270",
+    "nova/equilibrium/forward_operator.py": "366dea735fda8377cdf45147041163e02b258e463c1fe7cf4531859389c40e79",
+    "benchmarks/efit_parity_tared_external_field.py": "4ffc9a86cecfe853d60cdf0a754f818934e7b9aa2c931c6c139a62cb6c037d92",
     "docs/figures/jax-dissolution/fieldnull_production_route.json": "138e50da8f58b65267dc3a9b6f11a5faa615bf5a67c6c97300a3b00a4c6bb079",
     "docs/research/mast-cutover-parity-evidence.html": "38d1ae023e4f61be9ea51caf82a84818d086698cbf2e5978b749c75019a00ba1",
     "docs/figures/efit-forward-parity/tared-plasma-support-solve.json": "14ee0945438613f5c65ba79663de09eba0a75e9ee053eb5b1fbe814abaf9f7c2"

@@ -181,12 +181,30 @@ def test_checked_receipt_preserves_results_across_live_source_provenance(
     regenerated = criterion.write_receipt(tmp_path / "receipt.json")
 
     assert regenerated == receipt
-    assert set(_leaf_differences(checked, regenerated)) == {
+
+    # The checked receipt records the live provenance it was written from: the
+    # verbatim evidence quoted beside each bound, the digest of the path a row
+    # cites, and the digest of every source the audit names. Any of those move
+    # when a source is edited, so naming the digests that may differ would make
+    # this test red on every unrelated source change and say nothing about the
+    # results. What must be reproduced exactly is every recorded RESULT: the
+    # per-reference estimates and pass decisions, the rescore, the units audit,
+    # the claim bounds and the protected-artifact verification.
+    pinned_provenance_drift = {
         ("provenance_table", 0, "evidence_verbatim"),
         ("provenance_table", 1, "evidence_verbatim"),
         ("provenance_table", 4, "evidence_read", "cited_path_sha256"),
-        ("source_digests", "nova/imas/parity_tolerances.py"),
-        ("source_digests", "nova/equilibrium/fixed_point.py"),
-        ("source_digests", "nova/equilibrium/forward.py"),
-        ("source_digests", "nova/equilibrium/forward_operator.py"),
     }
+    differences = set(_leaf_differences(checked, regenerated))
+    source_digest_drift = {
+        path for path in differences if path[0] == "source_digests"
+    }
+
+    assert differences - source_digest_drift - pinned_provenance_drift == set()
+    assert checked["source_digests"].keys() == regenerated["source_digests"].keys()
+    for path in source_digest_drift:
+        assert len(path) == 2, path
+    for key in regenerated:
+        if key in {"provenance_table", "source_digests"}:
+            continue
+        assert checked[key] == regenerated[key], key

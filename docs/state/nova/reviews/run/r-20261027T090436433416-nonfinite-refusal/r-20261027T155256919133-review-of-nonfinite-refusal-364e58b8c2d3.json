@@ -1,0 +1,44 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-27T16:31:37.642Z",
+  "dispatched_at": "2026-10-27T16:17:40Z",
+  "findings": [
+    {
+      "file": "manifest.md",
+      "line": 10,
+      "severity": "non-blocking",
+      "summary": "The row gate's head arm is b4954b211, which predates the gained post-loop refusal at reduced_newton.py:1576, so done_when clause (3) is unmeasured at the reviewed head and the new check could newly refuse a row whose terminal state carries a non-finite moment."
+    },
+    {
+      "file": "manifest.md",
+      "line": 19,
+      "severity": "non-blocking",
+      "summary": "baseline_suite and after_suite both record completed false at pre-head revisions (base archive d3dcd9ce3, head 2acda367b) while their logs run to summary lines and show identical termination-test failure ids, so the zero added-failure conclusion survives but the arm it rests on is not the reviewed head."
+    },
+    {
+      "file": "tests/test_solve_nonfinite_refusal.py",
+      "line": 184,
+      "severity": "non-blocking",
+      "summary": "refuse_non_finite_cell_moments(jnp.asarray(flagged)) is implied by assert flagged.any() at line 182 and by the unconditional raise at reduced_newton.py:391-399, so the line adds no independent check over the assertion above it."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to refuse a non-finite cell moment by index at both solve host loops; the gained commits close the reduced Newton loop's terminal-state half at nova/equilibrium/reduced_newton.py:1576-1581, reusing the refusal owner at nova/equilibrium/reduced_newton.py:391 rather than adding a second mechanism.\nVERDICT done_when: clauses (1) and (2) are met at the reviewed code head \u2014 tests/test_solve_nonfinite_refusal.py passes 10 of 10 at 624f8727d (logs/final-tests.log, '10 passed', EXIT=0) and logs/negative-control-terminal.log fails exactly the two tests whose checks it cuts ('2 failed, 8 passed', EXIT=1) \u2014 but clause (3)'s row arm was measured at head b4954b211 (manifest.md:10), a tree that does not contain the gained refusal.\nVERDICT write_paths: the declared scope is scripts/prototypes/fast_map_production/solver.py, nova/equilibrium/reduced_newton.py, tests/test_solve_nonfinite_refusal.py, docs/evidence/fragments/converged-forward-solve/nonfinite-refusal.html and docs/figures/converged-forward-solve/nonfinite-refusal; the two gained commits touch only the middle three of those.\nVERDICT manifest: read in full; it records the ten-test head gate, both row arms and the negative control, and its landing line names both refusal reads, but its baseline_suite and after_suite entries remain completed:false at revisions that precede the reviewed head (manifest.md:19-20).\nVERDICT diff: read 624f8727d and 364e58b8c against cb0fc40fe commit by commit; the fix commit adds a post-loop mask read on the state the last trip returns (reduced_newton.py:1576) and replaces the fabricated-mask test with two tests over the production closure and a real machine operator, and the docs commit retargets the fragment's line references, test count and control description; nothing outside the node's subject is touched.\nCALL_SITES: nova/equilibrium/reduced_newton.py:solve_reduced_newton (line 2082), nova/equilibrium/reduced_newton.py:solve_constrained_reduced_newton (line 2994)\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/equilibrium/reduced_newton.py:1576-1581 now reads the mask on the returned terminal state, which is exactly the gap the previous review recorded at the same driver.\nSCORE evidence: 13\nJUSTIFICATION evidence: the head test gate and its negative control are recorded in logs/final-tests.log and logs/negative-control-terminal.log, but manifest.md:10 measures done_when clause (3) at head b4954b211 and manifest.md:19-20 record completed:false suite arms, so the gained change carries no row measurement and no readable head suite arm at its own revision.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff cb0fc40fe..364e58b8c touches nova/equilibrium/reduced_newton.py, tests/test_solve_nonfinite_refusal.py and the evidence fragment, all three inside the node's declared write paths, and adds no file.\nSCORE durability: 17\nJUSTIFICATION durability: logs/negative-control-terminal.log shows test_reduced_newton_refuses_a_moment_only_the_final_trip_produces failing with 'DID NOT RAISE' once the post-loop refusal at reduced_newton.py:1576 is set aside, so the guard is shown firing and not merely passing; no added assertion compares a value against a test-supplied one, though tests/test_solve_nonfinite_refusal.py:184 is redundant with its own line 182.\nSCORE fit: 18\nJUSTIFICATION fit: the added block at nova/equilibrium/reduced_newton.py:1571-1581 follows the existing head-of-trip refusal idiom and its comments describe the mechanism, carrying no plan, ticket, version or author label.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no definition and calls the repository's owner refuse_non_finite_cell_moments at nova/equilibrium/reduced_newton.py:391 with the closure registered at :1108; a capability search over nova/, scripts/prototypes and benchmarks found no second per-cell non-finite mask implementation.\nFINDING manifest.md:10 non-blocking: the row gate's head arm is b4954b211, which predates the gained post-loop refusal at reduced_newton.py:1576, so done_when clause (3) is unmeasured at the reviewed head and the new check could newly refuse a row whose terminal state carries a non-finite moment.\nFINDING manifest.md:19 non-blocking: baseline_suite and after_suite both record completed:false at pre-head revisions while their logs run to summary lines with identical failure ids, so the zero added-failure count is right but the arm it rests on is not the reviewed head.\nFINDING tests/test_solve_nonfinite_refusal.py:184 non-blocking: the refusal call is implied by assert flagged.any() at line 182 and by the unconditional raise at reduced_newton.py:391-399, so the line adds no independent check.",
+  "review_run_id": "r-20261027T155256919133-review-of-nonfinite-refusal-364e58b8c2d3",
+  "reviewed_base_sha": "cb0fc40fe44e2625b1003d53487189f22f9baa4a",
+  "reviewed_head_sha": "364e58b8c2d3f39a808a8d85bd3d43334f5d591d",
+  "reviewed_run_id": "r-20261027T090436433416-nonfinite-refusal",
+  "scores": {
+    "durability": 17,
+    "evidence": 13,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T16:37:01.042137+00:00",
+  "total": 106
+}

@@ -13,8 +13,13 @@ cd "$W" || exit 3
 echo "# command: bash scripts/prototypes/carrier_identity_receipt/run_importing_tests.sh"
 echo "# revision: $(git rev-parse HEAD)"
 echo "# tree: $W"
-echo "# files: $(grep -rlE 'stencil_mesh|biot\.plasmagrid|analytic_single_null' tests/ --include='*.py' | wc -l)"
-FILES=$(grep -rlE 'stencil_mesh|biot\.plasmagrid|analytic_single_null' tests/ --include='*.py' | sort)
+if [ "$(($#))" -gt 0 ]; then
+    FILES=$(printf '%s\n' "$@" | sort)
+else
+    FILES=$(grep -rlE 'stencil_mesh|biot\.plasmagrid|analytic_single_null' tests/ --include='*.py' | sort)
+fi
+echo "# files: $(printf '%s\n' "$FILES" | grep -c .)"
+echo "# concurrency: ${CARRIER_TEST_CONCURRENCY:-4}"
 run_one() {
     file=$1
     name=$(echo "$file" | tr '/' '_')
@@ -26,5 +31,5 @@ run_one() {
 }
 export -f run_one
 export LOG PY
-printf '%s\n' "$FILES" | xargs -P 4 -I{} bash -c 'run_one "$@"' _ {}
+printf '%s\n' "$FILES" | xargs -P "${CARRIER_TEST_CONCURRENCY:-4}" -I{} bash -c 'run_one "$@"' _ {}
 echo "EXIT=0"

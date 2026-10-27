@@ -95,6 +95,10 @@ def build(kind):
         )
     else:
         wall = fixture.limiter_contour(fixture.analytic_case(), points=WALL_POINTS)
+    perturbation = float(os.environ.get("CARRIER_WALL_PERTURB_M", "0.0"))
+    if perturbation:
+        wall = np.array(wall, dtype=np.float64, copy=True)
+        wall[0, 0] += perturbation
     coilset = CoilSet(dplasma=-case["requested_cells"], tplasma="hex")
     coilset.firstwall.insert(wall, turn="hex")
     plasma = np.asarray(coilset.subframe.loc[:, "plasma"], dtype=bool)
@@ -138,6 +142,7 @@ def build(kind):
             + len(geometry.sample_node_coordinates)
         ),
         "wall_point_count": int(len(wall)),
+        "wall_perturbation_m": perturbation,
         "partition_digest": partition_digest(partition),
         "vertex_partition": partition,
         "sample_vertex_count": sorted(
@@ -172,8 +177,7 @@ def main(argv):
                 "refused": True,
                 "error": f"{type(error).__name__}: {error}",
                 "stage": (
-                    f"{os.path.basename(stage.filename)}:"
-                    f"{stage.lineno}:{stage.name}"
+                    f"{os.path.basename(stage.filename)}:{stage.lineno}:{stage.name}"
                 ),
             }
             print(

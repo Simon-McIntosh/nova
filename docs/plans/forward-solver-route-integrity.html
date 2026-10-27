@@ -25,8 +25,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
-<meta name="plan-version" content="140">
-<meta name="plan-modified" content="2026-10-20">
+<meta name="plan-version" content="141">
+<meta name="plan-modified" content="2026-10-27">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 <meta name="plan-impl" content="0.67">
 </head>
@@ -943,7 +943,10 @@
     <div class="r-comment-body"><p>Independent review of xla-autotune-h200-arms (base 52702d307482ec0f35e0276e98c21c3a81d1cc91, head 589bb14c2598bc32a8db03d0235020924b80762c)</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261020T064518012150-review-of-xla-autotune-playable-route-2c080ff7ba66" data-who="reckon-build" data-when="2026-10-20T06:57:00.786Z">
-    <div class="r-comment-body"><p>independent six-dimension review of run r-20261020T063501951269-xla-autotune-playable-route at base 52702d307482ec0f35e0276e98c21c3a81d1cc91 / head 2c080ff7ba664565a82f04c0c950c625a26ac3d8; scores goal_fidelity 20, evidence 17, scope_discipline 20, durability 17, fit 18, reuse 20; added_failure_count 0; two follow-on findings, no blocker; stored as a parsed record under the reviewed run&#x27;s review-records/ directory</p></div>
+    <div class="r-comment-body"><p>independent six-dimension review of run r-20261020T063501951269-xla-autotune-playable-route at base 52702d307482ec0f35e0276e98c21c3a81d1cc91 / head 2c080ff7ba664565a82f04c0c950c625a26ac3d8; scores goal_fidelity 20, evidence 17, scope_discipline 20, durability 17, fit 18, reuse 20; added_failure_count 0; two follow-on findings, no blocker; stored as a parsed record under the reviewed run's review-records/ directory</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20261027-pin-republish-after-hessian" data-who="reckon-build" data-when="2026-10-27T07:40:00Z">
+    <div class="r-comment-body"><p><strong>Item 5 (republish the pin) is deferred until the moment-field Hessian repair lands.</strong> Lead decision 2026-10-27. The attempt <code>xla-autotune-pin-republish</code> (run r-20261020T063401929208) was blocked on 2026-10-20 for two reasons: pre-warm rows ran out of GPU memory, and an oracle fixture was missing. It cancelled job 1290841 before publishing, so the published pin is intact. That run is discarded, and its record commit is kept at <code>refs/reckon/archive/xla-autotune-pin-republish</code> (9dc6916ab). The repair under way in converged-forward-solve §4 changes <code>nova/biot/polygonanalytic.py</code>, which changes the compiled programs, so a pin published before it lands would be stale at once. Redispatch item 5 from a main revision that carries that repair, with both blockers named in the brief: size the pre-warm rows to the card's memory, and name the oracle fixture's path. Item 3's removal of <code>runtime-7b315420b55b91bffb05</code> still follows item 5.</p></div>
 </div>
 </section>
 </main>

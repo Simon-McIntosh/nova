@@ -1,0 +1,61 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "body": "VERDICT goal: the goal is to route every imas.DBEntry construction through one opener; the delta only hardens that landing, and git grep \"imas.DBEntry(\" over nova/ at 18e65a69e returns exactly one line, nova/imas/dataset.py:540.\nVERDICT done_when: done_when asks for a one-site search, a base-fail/head-pass test and a two-arm suite with no added failure; the delta's logs show tests/test_imas_opener.py 8 failed at base and 8 passed at head and no head-only failure id, but the arms ran sequentially rather than concurrently as its third clause requires.\nVERDICT write_paths: the two delta commits touch docs/evidence/fragments/nova-portfolio-replan/replan-dbentry-constructor.html, nova/imas/AGENTS.md and tests/test_imas_opener.py, all three inside the source node's declared write paths.\nVERDICT manifest: read; baseline_suite and after_suite record completed:true with 79 and 70 ids and the negative-control note matches the three scratch logs, but its tests: line and baseline_suite.command name a tests/test_uri.py-only run the harness did not execute.\nVERDICT diff: read commit by commit against 2a8ae1f8f; 3cd2f931a adds the Version type assertion, the version-string pass-through test and two backend assertions plus the AGENTS.md worked-example rewrite, and 18e65a69e rewrites only the evidence fragment.\nCALL_SITES: nova/imas/dataset.py:open_db_entry, nova/imas/dataset.py:Dataset.db_entry, nova/imas/dataset.py:Dataset.is_valid\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/imas/dataset.py:540 is the only imas.DBEntry construction site at head and the delta does not disturb it.\nSCORE evidence: 15\nJUSTIFICATION evidence: gate/logs/head/test_imas_opener.log reads 8 passed against base 8 failed and gate/fails-head.txt minus gate/fails-base.txt is empty, but gate/logs/base/gate.log:2 names a test_uri.py-only command and gate/run_gate.sh:47-48 ran the arms in sequence.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every changed path in the delta is inside the source node's declared write paths and adds nothing the goal does not imply.\nSCORE durability: 19\nJUSTIFICATION durability: tests/test_imas_opener.py:44, :53 and :73 each redden under their own scratch mutation, so the literal comparisons are load-bearing rather than self-supplied.\nSCORE fit: 19\nJUSTIFICATION fit: tests/test_imas_opener.py:47-73 follows the file's Recorder and monkeypatch idiom and its names state the mechanism without a plan or ticket label.\nSCORE reuse: 20\nJUSTIFICATION reuse: the delta adds no production definition and a capability search over tests/ for a DBEntry recorder found only tests/test_equilibrium_wall_dd_version.py:29, which records constructor kwargs rather than opener forwarding.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T092647846592-replan-dbentry-constructor/gate/run_gate.sh:47 non-blocking: the gate runs run_arm base then run_arm head in sequence, while done_when (3) requires the base and head arms concurrently in one sirius job; the failure-id comparison is unaffected but the measure was not taken in the named shape.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T092647846592-replan-dbentry-constructor/gate/logs/base/gate.log:2 non-blocking: the header records a single-module tests/test_uri.py command as the command that ran, and the source manifest's tests: line and baseline_suite.command repeat it, while the arm was driven by run_gate.sh:37's xargs loop over 26 modules; the recorded command cannot reproduce the 79 ids the same log reports.\n",
+  "call_sites": [
+    "nova/imas/dataset.py:open_db_entry",
+    "nova/imas/dataset.py:Dataset.db_entry",
+    "nova/imas/dataset.py:Dataset.is_valid"
+  ],
+  "completed_at": "2026-10-27T11:55:24.802Z",
+  "dispatched_at": "2026-10-27T11:35:05Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T092647846592-replan-dbentry-constructor/gate/run_gate.sh",
+      "id": "arms-not-concurrent-1",
+      "line": 47,
+      "severity": "non-blocking",
+      "text": "the gate runs run_arm base then run_arm head in sequence (gate/run_gate.sh:47-48), while done_when (3) requires the base and head arms concurrently in one sirius job; the failure-id comparison is unaffected by the shape, but the measure was not taken in the form the brief names."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T092647846592-replan-dbentry-constructor/gate/logs/base/gate.log",
+      "id": "recorded-command-mismatch-1",
+      "line": 2,
+      "severity": "non-blocking",
+      "text": "the header records a single-module tests/test_uri.py command as the command that ran, and the source manifest's tests: line and baseline_suite.command repeat it, while the arm was driven by run_gate.sh:37's xargs loop over the 26 modules in modules.txt; re-running the recorded command cannot reproduce the 79 ids the same log reports."
+    }
+  ],
+  "justifications": {
+    "durability": "tests/test_imas_opener.py:44, :53 and :73 each redden under their own scratch mutation, recorded in negative-control-drop-dd.log (2 failed, 6 passed), negative-control-rewrite-dd.log (1 failed, 7 passed) and negative-control-drop-backend.log (1 failed, 7 passed), so the literal comparisons are not vacuous.",
+    "evidence": "gate/logs/head/test_imas_opener.log reads 8 passed against gate/logs/base/test_imas_opener.log 8 failed and gate/fails-head.txt minus gate/fails-base.txt is empty, but gate/logs/base/gate.log:2 names a test_uri.py-only command and gate/run_gate.sh:47-48 ran the arms in sequence.",
+    "fit": "tests/test_imas_opener.py:47-73 follows the file's Recorder/monkeypatch idiom and names the mechanism (test_opener_passes_a_dd_version_string_unchanged) with no plan, ticket or version label.",
+    "goal_fidelity": "the single construction site at nova/imas/dataset.py:540 is untouched by the delta, which only records and defends it.",
+    "reuse": "the delta adds no production name; a capability search over tests/ for an existing DBEntry recorder found only tests/test_equilibrium_wall_dd_version.py:29, which records constructor kwargs rather than opener forwarding, and the delta's Recorder predates this delta.",
+    "scope_discipline": "the three changed paths (docs/evidence/fragments/nova-portfolio-replan/replan-dbentry-constructor.html, nova/imas/AGENTS.md, tests/test_imas_opener.py) are all inside the source node's declared write paths and add nothing the goal does not imply."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261027T112908331407-review-of-replan-dbentry-constructor-18e65a69e45a",
+  "reviewed_base_sha": "2a8ae1f8f74649e6362d5c3644b7165ec7ffd9b2",
+  "reviewed_head_sha": "18e65a69e45aba86c53c0b2ba03de78370e8a407",
+  "reviewed_run_id": "r-20261027T092647846592-replan-dbentry-constructor",
+  "rubric": "code",
+  "scores": {
+    "durability": 19,
+    "evidence": 15,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T11:55:27.623060+00:00",
+  "total": 112,
+  "verdicts": {
+    "diff": "read commit by commit against 2a8ae1f8f; 3cd2f931a adds a Version type assertion, a version-string pass-through test and two backend assertions plus the AGENTS.md worked-example rewrite, and 18e65a69e rewrites only the evidence fragment.",
+    "done_when": "the done_when asks for a one-site search, a base-fail/head-pass test and a two-arm suite with no added failure; the delta's logs show tests/test_imas_opener.py 8 failed at base and 8 passed at head and no head-only failure id, but the arms ran sequentially rather than concurrently as its third clause requires.",
+    "goal": "the goal is to route every imas.DBEntry construction through one opener; the delta only hardens that landing and its record, and git grep \"imas.DBEntry(\" over nova/ at 18e65a69e returns exactly one line, nova/imas/dataset.py:540.",
+    "manifest": "read; its baseline_suite and after_suite record completed:true with 79 and 70 ids and its negative-control note matches the three scratch logs, but its tests: line and baseline_suite.command name a tests/test_uri.py-only run the harness did not execute.",
+    "write_paths": "the two delta commits touch docs/evidence/fragments/nova-portfolio-replan/replan-dbentry-constructor.html, nova/imas/AGENTS.md and tests/test_imas_opener.py, all three inside the source node's declared write path list."
+  }
+}

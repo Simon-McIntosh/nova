@@ -7,8 +7,7 @@ tree extracted from <code>f1e09f09d</code>
 <code>tests__biot__test_elliptic_tangent_recurrences.log</code>, both named in full below).
 The edge file finished its summary line: 14 failed, 10 passed in 6260.39 s. The elliptic
 file's log was cut off mid-progress at 24 of 28 tests with two failures marked and no
-summary, so its failures are re-measured here in a fresh CPU process
-(<code>logs/cpu-elliptic-base.log</code>). The H200 column re-runs the same identifiers
+summary, so its failures are re-measured here in fresh CPU processes. The H200 column re-runs the same identifiers
 through <code>scripts/h200_test_lane/run.sh</code> at the same test ceiling
 (<code>NOVA_LANE_TEST_TIMEOUT=300</code>), so a row that differs between the columns is a
 device-qualified measurement and not a looser bound. The two test modules,
@@ -23,7 +22,7 @@ and the revision this node measured (<code>git rev-parse f1e09f09d:&lt;path&gt;<
 <tr><th>identifier</th><th>assertion site</th><th>measured vs bound</th><th>CPU wall</th><th>H200</th></tr>
 </thead>
 <tbody>
-<tr><td><code>test_tangent_matches_base_jvp[second_residual]</code></td><td><code>tests/biot/tangent_identity.py:142</code> <code>assert tangent &lt;= bound</code></td><td>3.370e-12 vs 1e-13; 0.9996 covered, 4 of 10 000 samples over</td><td>in-process on CPU; 0.75 s on H200</td><td>PASS: 0.000e+00, covered 1.0000</td></tr>
+<tr><td><code>test_tangent_matches_base_jvp[second_residual]</code></td><td><code>tests/biot/tangent_identity.py:142</code> <code>assert tangent &lt;= bound</code></td><td>3.370e-12 vs 1e-13; 0.9996 covered, 4 of 10 000 samples over in the recorded run, and 0.9995 with 5 over in a repeat: the CPU figure is round-off and moves between runs</td><td>in-process on CPU; 0.75 s on H200</td><td>PASS: 0.000e+00, covered 1.0000</td></tr>
 <tr><td><code>test_tangent_matches_base_jvp[flux_line_moments]</code></td><td>same</td><td>1.021e-03 vs 1e-09; 0.9768 covered, 232 of 10 000 samples over</td><td>in-process on CPU; 3.17 s on H200</td><td>PASS: 0.000e+00, covered 1.0000</td></tr>
 <tr><td><code>test_tangent_matches_base_jvp[edge_integrands]</code></td><td><code>test_edge_term_tangents.py:255</code> inside <code>jax.jit(jax.jvp(...))</code></td><td>pytest-timeout, no value</td><td>300 s ceiling</td><td>PASS</td></tr>
 <tr><td><code>test_tangent_matches_base_jvp[flux_and_moment_terms]</code></td><td>same</td><td>pytest-timeout, no value</td><td>300 s ceiling</td><td>PASS</td></tr>
@@ -49,7 +48,16 @@ without a summary line, so it names no identifier and no measured value. Its pro
 failure: each asserts a tangent-over-primal compile ratio at or below three. A fresh CPU
 process covering tests 1 to 20 produced twenty passes and no failure before reaching its own
 wall limit, which is consistent with the two failures being compile rows and not identity
-rows. The two flagged rows were then run alone, and the H200 lane ran the whole file.</p>
+rows. The two flagged rows were then run alone on the CPU
+(<code>logs/cpu-elliptic-compile-rows.log</code>). One reproduces and one does not: the
+finite-part tangent compiles at 3.60 times its primal, over the bound of three, while the
+harmonic-pole-moment row measures 2.74 and passes. The re-measured row is therefore a
+compile-budget failure of a real magnitude, and the other is a once-red row that sits 9
+percent inside its bound now; a single run each way, so the harmonic row is recorded as not reproducible
+rather than as fixed. Classification: the finite-part row is a product defect in the sense
+the plan's decision defines — its tangent program needs 243 equations against the primal's
+69 and 0.282 s of compile against 0.078 s. The repair the decision permits is a scan-form
+tangent for that row, not a raised bound.</p>
 
 <h4 id="edge-tangent-base-failures-elliptic-table">Elliptic file failures</h4>
 <table>
@@ -57,8 +65,8 @@ rows. The two flagged rows were then run alone, and the H200 lane ran the whole 
 <tr><th>identifier</th><th>assertion</th><th>CPU measured vs bound</th><th>H200 measured vs bound</th></tr>
 </thead>
 <tbody>
-<tr><td><code>test_tangent_compiles_within_three_primals[finite_part]</code></td><td><code>test_elliptic_tangent_recurrences.py:470</code> asserts the ratio at or below three; the row carries <code>@pytest.mark.timeout(1800)</code> at line 466</td><td>COLLECTED</td><td>COLLECTED</td></tr>
-<tr><td><code>test_tangent_compiles_within_three_primals[harmonic_pole_moments]</code></td><td>same</td><td>COLLECTED</td><td>COLLECTED</td></tr>
+<tr><td><code>test_tangent_compiles_within_three_primals[finite_part]</code></td><td><code>test_elliptic_tangent_recurrences.py:470</code> asserts the ratio at or below three; the row carries <code>@pytest.mark.timeout(1800)</code> at line 466</td><td>FAIL: ratio 3.60 against the bound of 3.0, from median compile CPU 0.282 s tangent and 0.078 s primal over seven fresh cache-disabled processes, equation counts 243 and 69, zero cache hits</td><td>ELLIPTIC-H200</td></tr>
+<tr><td><code>test_tangent_compiles_within_three_primals[harmonic_pole_moments]</code></td><td>same</td><td>PASS: ratio 2.74 against the bound of 3.0, from median compile CPU 0.877 s tangent over the primal's seven runs, equation counts 519 and 1129 for the tangent and the base JVP, zero cache hits. The recorded failure does not reproduce: the row is 9 percent under its bound and was recorded red once</td><td>ELLIPTIC-H200-2</td></tr>
 </tbody>
 </table>
 
@@ -105,11 +113,16 @@ recommended repair is not a lowered number: run the exact rows where the exact b
 figure, leaving the 1e-13 assertion intact on the device that reproduces it. Changing the CPU
 bound needs the lead's ruling.</p>
 
-<p><strong>Class C — a hand tangent left behind by the primal it differentiates
+<p><strong>Class C — a 1e-03 crossing that only the CPU arm sees
 (<code>test_tangent_matches_base_jvp[flux_line_moments]</code>).</strong> The row measures
-1.021e-03 against 1e-09, with 232 of 10 000 samples over. Nine orders of magnitude above
-round-off is not a device effect, and this row is also <em>exactly zero</em> on the H200 in
-the 2026-10-08 record. Between that record and this measurement the flux-moment primal was
+1.021e-03 against 1e-09, with 232 of 10 000 samples over, and is <em>exactly zero</em> —
+1.0000 covered — on the H200 at the same revision in the same hour. The device comparison was
+run to test the hypothesis that a 1e-03 excess is a product defect, and it rejected it: the
+same code agrees to the byte on the GPU. Nine orders of magnitude is nevertheless not
+round-off, so what the two arms measure is a discontinuity the backends resolve on opposite
+sides of, not a tolerance that a bound could admit. The samples that cross it are not
+identified here, which is the first measurement the next node owes. Between the 2026-10-08
+record and this measurement the flux-moment primal was
 rewritten three times with no tangent line changed: <code>b54a1af9b</code> (2026-10-11,
 "accumulate flux moments in local source coordinates", 291 lines of
 <code>nova/biot/polygonanalytic.py</code>), <code>c805c781a</code> ("form only the elliptic
@@ -123,15 +136,17 @@ function (<code>git show &lt;commit&gt; -- nova/biot/polygonanalytic.py | grep -
 <code>nova/biot/polygonanalytic.py:3769</code>; it consumes the construction fields of the
 current <code>_Edge</code>/<code>_Vertex</code> while the identity compares it with
 <code>jax.jvp</code> of base revision <code>716d859f</code>, so a construction or quadrature
-change alone breaks the row. This is a product defect in the sense that the tangent no longer
-differentiates the program it is asserted against; the H200 column of the table decides
-whether the discrepancy is device-independent, which the 1e-03 magnitude predicts.
-Recommended repair: re-derive <code>_edge_flux_line_moments_tangent</code> (and, because it
-shares <code>_EdgeReductionTangent</code>, <code>_edge_flux_and_moment_terms_tangent</code> at
-<code>nova/biot/polygonanalytic.py:3814</code>) against the current construction and confirm
-the 10 000-sample identity, or repoint the identity's base revision at the commit that
-rewrote the primal so the row measures a change it actually covers. The first is the repair;
-the second only clears the red.</p>
+change alone breaks the row, but the H200 column shows it does not break it there, so the
+three rewrites are a candidate rather than the established cause. The classification is a
+device-qualified bound: the 1e-09 assertion is met on the same revision on the H200 and not on
+the CPU, where 2.3 percent of the domain crosses. Recommended repair, in order: attribute the
+excess by sample index first — the domain's near-endpoint and near-interior blocks are the
+places a branch would flip — and only then decide. If the crossing block is a numerical path
+that one backend evaluates differently, the repair belongs in
+<code>_edge_flux_line_moments_tangent</code> (<code>nova/biot/polygonanalytic.py:3769</code>)
+or in the construction it reads, not in the bound; if the blocks are the ones the near-edge
+graded quadrature covers, this row and Class D describe the same gap from two sides. Do not
+lower <code>SCAN_TOLERANCE</code> on the strength of this row: 1e-03 is not a tolerance.</p>
 
 <p><strong>Class D — a stale strict expected failure
 (<code>test_near_edge_tangent_meets_reference</code>).</strong> The test is marked

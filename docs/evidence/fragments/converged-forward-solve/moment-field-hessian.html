@@ -25,6 +25,31 @@
   <p id="moment-field-hessian-negative">The declared mutation reverted only the repaired tangent in a scratch copy. The two named integration-pair tests, integration-212 and integration-234, failed under the mutation (negative-control.log, EXIT=1); the repaired nine-case arm passed (head-hessian.log, EXIT=0).</p>
   <p id="moment-field-hessian-progress">The first cold 550-cell solve stopped before iteration because the repaired source digest had no certified carrier in the private fixture store (cold-solve.log at job 1296465, EXIT=1). The first private build encountered GPU preallocation exhaustion in its host-worker process pool (carrier-build-1296475.log, EXIT=1). With preallocation disabled, the same 553-cell certified carrier was built in 126.8037 s under the private root; its digest is sha256:ba78b7b8e10c7a43bdd18fa3ff36f81043fea39b1c29b9358bad421f33d15d6a (carrier-build-1296477.log, EXIT=0). The matching private exterior then built in 0.9186 s at digest sha256:e2e8257ccf4fc43a64a133769a8ad3c5b1b9c7c2d829e7fc7941dc1cb644a166 (carrier-build.log, EXIT=0). From cold on the corrected carrier, the limited solve converged in three corrections to a terminal residual of 7.892009486298989e−15, after 0.01738494446496465 at the centre (cold-solve.log, EXIT=0). Its solved axis is (6.199967983222125, −2.0513463584631955e−9) m.</p>
   <p id="moment-field-hessian-suite">The first two-arm source-importer suite ended OUT_OF_MEMORY at 64 GB before either arm reached its summary. The coordinator cancelled the sequential 128 GB rerun, job 1296489, by id after its base edge-tangent file completed: 14 failed and 10 passed in 6260.39 s, EXIT=1. Its revision, pytest summary, all 14 failure IDs and terminal EXIT were checked before carrying that row; the other 1296489 logs remain incomplete evidence. In job 1296538, base and head ran concurrently in one 256 GB sirius allocation, one fresh pytest process and separate basetemp per file. All 26 base and 27 head targets have complete matching summaries, failure IDs and final EXIT markers. Each arm has 56 distinct failure IDs; 55 are shared. The base-only ID is tests/biot/test_edge_term_tangents.py::test_tangent_compiles_within_bound[channel_split]. The head-only ID is tests/biot/test_kernel_compile_cost.py::test_point_jet_expression_bound: the repaired point jet has 55,504 equations against the 22,000 bound, while the base file passed (5 passed, 4 skipped, 1 expected failure). Thus the suite has one added failure at the measured head and the no-added-failure clause is unmet.</p>
+  <table id="moment-field-hessian-compile">
+    <caption>Cold H200 point-jet profile, one job, fresh process per arm, persistent compilation cache disabled [s]</caption>
+    <thead><tr><th>Arm</th><th>Trace</th><th>Lowering</th><th>XLA compile</th><th>End-to-end</th><th>HLO instructions after variadic-op-splitter</th></tr></thead>
+    <tbody>
+      <tr><td>Base f1e09f09d</td><td>3.3574</td><td>0.4337</td><td>94.5765</td><td>98.3676</td><td>100,579 (from 146)</td></tr>
+      <tr><td>Head 50e0af6f2</td><td>7.8899</td><td>1.0976</td><td>305.6362</td><td>314.6236</td><td>305,391 (from 333)</td></tr>
+    </tbody>
+  </table>
+  <p id="moment-field-hessian-compile-verdict">The XLA compile wall ratio is 3.2316304, or 223.16% above base; the end-to-end ratio including trace and lowering is 3.1984484. Both arms report an H200 NVL, a disabled compilation cache, one miss, zero hits, a complete attribution and EXIT=0 (point-jet-profile/base/arm.log and head/arm.log, job 1297990). The base positive control reproduces the previously reported 100,579 instructions after variadic-op-splitter. The 1.10 compile-wall criterion fails; the visible point-jet expression-bound test remains for kernel-compile-barrier §2.</p>
+  <table id="moment-field-hessian-passes">
+    <caption>Ten costliest attributed stages in each cold XLA compile [s], ordered separately by arm</caption>
+    <thead><tr><th>Rank</th><th>Base pass</th><th>Base [s]</th><th>Head pass</th><th>Head [s]</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><code>variadic-op-splitter</code></td><td>34.800</td><td><code>variadic-op-splitter</code></td><td>124.872</td></tr>
+      <tr><td>2</td><td><code>multi_output_fusion</code></td><td>17.453</td><td><code>multi_output_fusion</code></td><td>70.648</td></tr>
+      <tr><td>3</td><td><code>autotuner</code></td><td>8.001</td><td><code>autotuner</code></td><td>10.641</td></tr>
+      <tr><td>4</td><td><code>jit__lambda.ir-no-opt.ll</code></td><td>4.170</td><td><code>jit__lambda.ir-no-opt.ll</code></td><td>8.418</td></tr>
+      <tr><td>5</td><td><code>jit__lambda.ir-with-opt.ll</code></td><td>3.145</td><td><code>jit__lambda.ir-with-opt.ll</code></td><td>7.447</td></tr>
+      <tr><td>6</td><td><code>call-inliner</code></td><td>1.722</td><td><code>cse/dce</code></td><td>6.336</td></tr>
+      <tr><td>7</td><td><code>zero_sized_hlo_elimination</code></td><td>1.624</td><td><code>call-inliner</code></td><td>5.104</td></tr>
+      <tr><td>8</td><td><code>cse/dce</code></td><td>1.386</td><td><code>zero_sized_hlo_elimination</code></td><td>4.935</td></tr>
+      <tr><td>9</td><td><code>fusion-wrapper</code></td><td>1.242</td><td><code>fusion-wrapper</code></td><td>4.028</td></tr>
+      <tr><td>10</td><td><code>jit__lambda.priority_fusion_dump.txt</code></td><td>1.197</td><td><code>jit__lambda.priority_fusion_dump.txt</code></td><td>3.361</td></tr>
+    </tbody>
+  </table>
   <figure id="moment-field-hessian-flux">
     <img src="/nova/figures/converged-forward-solve/moment-field-hessian/limited-cold-solve.svg" alt="Line contours of the converged limited field and analytic reference inside the first wall, with both magnetic axes marked" />
     <figcaption>Cold limited solve on the 553-cell carrier. Solved blue contours and thin grey dashed analytic contours use the same seven physical flux levels. The analytic dashes overlay the nearly coincident solved traces so both remain visible. The black curve is the wall; the larger grey outlined triangle marks the analytic axis and the smaller blue filled triangle marks the solved axis. Terminal residual 7.892009486298989e−15; converged after three corrections.</figcaption>

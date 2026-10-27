@@ -17,7 +17,7 @@
 <meta name="plan-owner" content="Simon McIntosh">
 <meta name="plan-effort-hours" content="3.0">
 <meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="41">
+<meta name="plan-version" content="42">
 <meta name="plan-modified" content="2026-10-27">
 <meta name="plan-tags" content="replan,handoff,infrastructure">
 <meta name="plan-informs" content="plasma-cell-read-fidelity,single-grid-solver-cutover,ensemble-forward-seam,forward-profile-validator-set,separatrix-spline-extraction,profile-owned-solve-domain,mast-nonaxisymmetric-physics,diiid-forward-onboarding,machine-description-retirement,diiid-pulse-replay,dual-branch-selection,efit-baseline-demonstration,mast-catalog-gpu-solve">
@@ -181,6 +181,9 @@ Done when: the report lists each coupling with files, line counts, refactor and 
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261027T092347032284-replan-imas-hdf5-read" data-who="reckon-build" data-when="2026-10-27T09:59:09.389Z">
     <div class="r-comment-body"><p>Deleted the zero-caller nova/imas/hdf5_read.py that read IMAS-written HDF5 through h5py; grep for hdf5_read over nova/ tests/ scripts/ benchmarks/ returns nothing before and after, no module under nova/ imports h5py, and the 103 test modules importing nova.imas show 0 added failures across concurrent base and head arms (base 26 failing ids, head 11, all 11 already non-passing at base).</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261027T101824885907-review-of-replan-dbentry-constructor-2a8ae1f8f746" data-who="reckon-build" data-when="2026-10-27T10:54:10.208Z">
+    <div class="r-comment-body"><p>Independent review of run r-20261027T092647846592-replan-dbentry-constructor at head 2a8ae1f8f; scores goal_fidelity 20, evidence 14, scope_discipline 20, durability 18, fit 19, reuse 20; added_failure_count 0; two non-blocking findings.</p></div>
 </div>
 </section>
 </main>

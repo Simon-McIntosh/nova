@@ -1,0 +1,72 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "body": "VERDICT goal: the goal is one opener for every imas.DBEntry construction; nova/imas/dataset.py:540 is the only construction site left in nova/*.py and nova/imas/db_entry.py is deleted.\nVERDICT done_when: done_when asks for a one-site search, a base-fail/head-pass test and a two-arm suite with no added failure; search and test material are recorded, and the arms show 0 added and 0 removed ids with 2 of 25 modules unmeasured.\nVERDICT write_paths: read the manifest's declared paths; all 15 changed files sit inside them.\nVERDICT manifest: read; it records the new test's mutation result and the two-arm gate JSON (exit 124, completed:false, 50 identical ids per arm).\nVERDICT diff: read commit by commit against 7a31104db; 3d69662eb routes the opener and 11 call sites and deletes db_entry.py, 2a8ae1f8f adds only the evidence fragment, and each site keeps its dd_version.\nCALL_SITES: nova/imas/dataset.py:Dataset.db_entry, nova/imas/dataset.py:Dataset.is_valid, nova/equilibrium/steering_frames.py:dereference_wall, nova/imas/diiid_description.py:active_coil_response_from_imas, nova/imas/diiid_machine_ids.py:_source_dd_version, nova/imas/diiid_machine_ids.py:_read_source_description, nova/imas/mast_solve_input_ids.py:open_verified_description, nova/imas/mast_solve_input_ids.py:write_and_reopen, nova/imas/mast_geometry.py:write_and_reopen, nova/imas/validator_case.py:netcdf_to_hdf5, nova/imas/validator_case.py:ValidatorLayer.entry, nova/io/egress.py:IdsEgress.write, nova/media/sources/diiid_efit.py:read_pulse, nova/scripts/diiid_machine_artifact.py:_declared_dd_version\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: nova/imas/dataset.py:540 is the only imas.DBEntry construction left in nova/*.py and both Dataset.db_entry (dataset.py:765) and is_valid (dataset.py:770) call open_db_entry.\nSCORE evidence: 14\nJUSTIFICATION evidence: the manifest's baseline_suite and after_suite both record exit 124 and completed:false with 0 added and 0 removed ids, leaving 2 of 25 modules unmeasured.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every changed path is inside the manifest's declared write paths and the diff adds nothing the goal does not imply.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_imas_opener.py:30-84 reddens on a reverted opener, as its negative control shows, though line 99 compares against the value the test itself supplied.\nSCORE fit: 19\nJUSTIFICATION fit: open_db_entry (nova/imas/dataset.py:512) matches the file's numpydoc and modern type-hint style and adds no forbidden name.\nSCORE reuse: 20\nJUSTIFICATION reuse: the db_entry property in nova/imas/dataset.py already owned the opening policy, the change extends it, and a capability search over nova/ found no other DBEntry opener.\nFINDING docs/evidence/fragments/nova-portfolio-replan/replan-dbentry-constructor.html:21 non-blocking: each arm exited 124 with 2 of 25 modules unmeasured and tests/test_imas_opener.py absent from both arms, so the zero-added-failure result covers 23 modules and the head-pass is inferred.\nFINDING tests/test_imas_opener.py:99 non-blocking: the assertion compares against the Version the test supplied at line 93, so it catches non-forwarding but not a transform, and backend (line 94) is never asserted.\n",
+  "call_sites": [
+    "nova/imas/dataset.py:Dataset.db_entry",
+    "nova/imas/dataset.py:Dataset.is_valid",
+    "nova/equilibrium/steering_frames.py:dereference_wall",
+    "nova/imas/diiid_description.py:active_coil_response_from_imas",
+    "nova/imas/diiid_machine_ids.py:_source_dd_version",
+    "nova/imas/diiid_machine_ids.py:_read_source_description",
+    "nova/imas/mast_solve_input_ids.py:open_verified_description",
+    "nova/imas/mast_solve_input_ids.py:write_and_reopen",
+    "nova/imas/mast_geometry.py:write_and_reopen",
+    "nova/imas/validator_case.py:netcdf_to_hdf5",
+    "nova/imas/validator_case.py:ValidatorLayer.entry",
+    "nova/io/egress.py:IdsEgress.write",
+    "nova/media/sources/diiid_efit.py:read_pulse",
+    "nova/scripts/diiid_machine_artifact.py:_declared_dd_version"
+  ],
+  "completed_at": "2026-10-27T10:54:10.208Z",
+  "dispatched_at": "2026-10-27T10:38:49Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/nova-portfolio-replan/replan-dbentry-constructor.html",
+      "id": "gate-truncated-1",
+      "line": 21,
+      "severity": "non-blocking",
+      "text": "the two-arm gate ran each arm to exit 124 (timeout) with tests/test_steering_frames.py and tests/test_playable_session.py truncated mid-run and tests/test_imas_opener.py absent from both module lists, so done_when (3)'s 'no added failure' is established for 23 of 25 modules only and done_when (2)'s head-pass of the new test is inferred from the mutation log rather than recorded as a head arm."
+    },
+    {
+      "file": "tests/test_imas_opener.py",
+      "id": "self-supplied-assertion-1",
+      "line": 99,
+      "severity": "non-blocking",
+      "text": "test_db_entry_property_passes_the_dataset_dd_version asserts record[\"args\"][1] == Version(\"3.39.0\"), the same value the test supplied through SimpleNamespace at line 93, so it detects non-forwarding but cannot detect a transform of dd_version, and the backend value supplied at line 94 is never asserted."
+    }
+  ],
+  "justifications": {
+    "durability": "tests/test_imas_opener.py:30-84 asserts read-only default, dd_version pass-through, no dd_version when absent, backend routing and is_valid routing, and the negative control shows test_opener_passes_dd_version_through reddens when the opener drops dd_version.",
+    "evidence": "the manifest's baseline_suite and after_suite both record exit 124 and completed:false with 50 identical ids, so the zero-added-failure result is truncated to 23 of 25 modules.",
+    "fit": "open_db_entry (dataset.py:512) sits beside the Datastore class, follows the file's numpydoc and modern type-hint style, and adds no name the naming rules forbid.",
+    "goal_fidelity": "nova/imas/dataset.py:540 is the only imas.DBEntry construction left in nova/*.py and both Dataset.db_entry (dataset.py:765) and is_valid (dataset.py:770) call open_db_entry.",
+    "reuse": "nova/imas/dataset.py already owned the DD-version opening policy in the db_entry property; the change extends that owner and deletes the competing nova/imas/db_entry.py subclass, and a capability search over nova/ found no other DBEntry opener.",
+    "scope_discipline": "every changed path (dataset.py, the 11 call-site modules, tests/test_imas_opener.py, docs/evidence/...html) is inside the manifest's declared write paths."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261027T101824885907-review-of-replan-dbentry-constructor-2a8ae1f8f746",
+  "reviewed_base_sha": "7a31104db6deec3117e2e2b9bbaedcefd71fe075",
+  "reviewed_head_sha": "2a8ae1f8f74649e6362d5c3644b7165ec7ffd9b2",
+  "reviewed_run_id": "r-20261027T092647846592-replan-dbentry-constructor",
+  "rubric": "code",
+  "scores": {
+    "durability": 18,
+    "evidence": 14,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T10:59:50.725856+00:00",
+  "total": 111,
+  "verdicts": {
+    "diff": "read commit by commit against 7a31104db; 3d69662eb refactors the opener and 11 call sites plus deletes db_entry.py, 2a8ae1f8f adds only the evidence fragment, and every call site keeps the dd_version it had.",
+    "done_when": "the done_when asks for a one-site search, a test that fails at base and passes at head, and a two-arm suite with no added failure; the search is recorded, tests/test_imas_opener.py and its mutation log exist, and the arms show 0 added / 0 removed failure ids with 2 of 25 modules unmeasured.",
+    "goal": "the goal is to route every imas.DBEntry construction through one opener in nova/imas/dataset.py; the landed open_db_entry at dataset.py:540 is the single .py construction site (search receipt: nova/imas/dataset.py:540 only) and nova/imas/db_entry.py is deleted.",
+    "manifest": "read; it records tests/test_imas_opener.py's negative control (1 failed, 6 passed under mutation) and the two-arm gate JSON with completed:false, exit 124 and 50 identical ids per arm.",
+    "write_paths": "read the manifest's 16 declared write paths; the diff touches exactly 15 files, all inside that declared scope."
+  }
+}

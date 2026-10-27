@@ -32,10 +32,30 @@ without the shared filesystem - or a unit test - point at a local store.
 """
 
 
+def _env_root(variable: str, default: Path) -> Path:
+    """Return the directory named by ``variable``, else ``default``."""
+    override = os.environ.get(variable)
+    return Path(override) if override else default
+
+
+def portable_path(path) -> str:
+    """Return ``path`` with the user's home directory written as a leading ``~``.
+
+    A recorded document states where its evidence lives, and a home directory
+    is per-user: the resolved path is right for this workstation and wrong for
+    every reader who did not produce it, so the portable form is what gets
+    written while the resolved form is what gets opened.
+    """
+    resolved = Path(path).expanduser()
+    try:
+        return "~/" + resolved.relative_to(Path.home()).as_posix()
+    except ValueError:
+        return str(resolved)
+
+
 def operand_cache_root() -> Path:
     """Return the root directory holding cached forward-solve operands."""
-    override = os.environ.get("NOVA_OPERAND_CACHE")
-    return Path(override) if override else OPERAND_CACHE_ROOT
+    return _env_root("NOVA_OPERAND_CACHE", OPERAND_CACHE_ROOT)
 
 
 MAST_DATA_ROOT = Path("/work/projects/imas_gpu/mast")
@@ -75,15 +95,9 @@ directories sit elsewhere.
 """
 
 
-def _named_root(variable: str, default: Path) -> Path:
-    """Return the environment override for a named data root, else ``default``."""
-    override = os.environ.get(variable)
-    return Path(override) if override else default
-
-
 def mast_data_root() -> Path:
     """Return the root holding the MAST level-1 and level-2 shot stores."""
-    return _named_root("NOVA_MAST_DATA_ROOT", MAST_DATA_ROOT)
+    return _env_root("NOVA_MAST_DATA_ROOT", MAST_DATA_ROOT)
 
 
 def mast_level1_shots() -> Path:
@@ -98,12 +112,12 @@ def mast_level2_shots() -> Path:
 
 def diiid_machine_source() -> Path:
     """Return the DIII-D IMAS pulse read as the machine-description source."""
-    return _named_root("NOVA_DIIIID_SOURCE", DIIID_MACHINE_SOURCE)
+    return _env_root("NOVA_DIIIID_SOURCE", DIIID_MACHINE_SOURCE)
 
 
 def derived_cache_root() -> Path:
     """Return the root of nova's derived MAST caches."""
-    return _named_root("NOVA_CACHE_ROOT", DERIVED_CACHE_ROOT)
+    return _env_root("NOVA_CACHE_ROOT", DERIVED_CACHE_ROOT)
 
 
 def misfit_hunt_root() -> Path:
@@ -113,13 +127,13 @@ def misfit_hunt_root() -> Path:
 
 def labeller_session_root() -> Path:
     """Return the labeller session directory holding the pulse labels."""
-    return _named_root("NOVA_LABELLER_SOURCE", LABELLER_SESSION_ROOT)
+    return _env_root("NOVA_LABELLER_SOURCE", LABELLER_SESSION_ROOT)
 
 
 def public_imasdb_root(username: str, machine: str) -> Path:
     """Return one user's public IMAS database tree for ``machine``."""
     return (
-        _named_root("NOVA_PUBLIC_HOME_ROOT", PUBLIC_HOME_ROOT)
+        _env_root("NOVA_PUBLIC_HOME_ROOT", PUBLIC_HOME_ROOT)
         / username
         / "public"
         / "imasdb"

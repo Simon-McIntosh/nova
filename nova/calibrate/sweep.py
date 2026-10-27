@@ -50,7 +50,7 @@ from nova.calibrate.transition import (
     refine_established_transitions,
 )
 from nova.calibrate.windows import PulseWindow, classify_pulse
-from nova.database.filepath import derived_cache_root
+from nova.database.filepath import derived_cache_root, portable_path
 
 DRIVE_THRESHOLD = 1.0e3
 """Absolute current that labels a conductor as driven, in amperes."""
@@ -545,6 +545,18 @@ def _pooled_terms(pulses: Sequence[Mapping[str, Any]]) -> list[PooledInstrumentT
     return result
 
 
+def recorded_signature_series() -> str:
+    """Return the portable location of the archived signature series.
+
+    The correction set records where its evidence came from, and the archive
+    lives under the per-user cache root, so the written document carries the
+    ``~`` form rather than one workstation's resolved home directory.
+    """
+    return portable_path(
+        derived_cache_root() / "vacuum-signatures" / "archive" / "signature_series.npz"
+    )
+
+
 def recorded_corrections(
     pulses: Sequence[Mapping[str, Any]], evidence_uri: str
 ) -> CorrectionSet:
@@ -652,15 +664,7 @@ def merge_chunks(
             expected_transitions,
         )
     )
-    document = recorded_corrections(
-        pulses,
-        str(
-            derived_cache_root()
-            / "vacuum-signatures"
-            / "archive"
-            / "signature_series.npz"
-        ),
-    )
+    document = recorded_corrections(pulses, recorded_signature_series())
     write_correction_set(root / "recorded_corrections.yaml", document)
     summary = {
         "chunk_count": len(chunks),

@@ -10,7 +10,9 @@ accessors.
 
 from __future__ import annotations
 
+import ast
 import importlib
+import importlib.util
 from pathlib import Path
 
 import pytest
@@ -168,3 +170,65 @@ def test_product_constant_follows_filepath(
     module = reloaded(module_name)
     expected = Path(value) / relative if relative else Path(value)
     assert getattr(module, attribute) == expected
+
+
+def _pulse_evidence(shot: int, gain: float = 1.0) -> dict:
+    return {
+        "gains": [
+            {
+                "channel": "probe",
+                "gain": gain,
+                "residual": 0.0,
+                "sample_count": 300,
+                "shape_agreement": 1.0,
+                "signal": 1.0,
+            }
+        ],
+        "shot": shot,
+        "terms": [
+            {
+                "channel": "probe",
+                "drift_curvature": 3.0e-6,
+                "drift_rate": 2.0e-5,
+                "offset": 1.0e-4,
+                "rate_fit_error": 1.0e-7,
+                "sample_count": 160,
+                "scatter": 1.0e-8,
+            }
+        ],
+    }
+
+
+def test_sweep_records_the_portable_signature_series(tmp_path, monkeypatch):
+    """The merged correction set states its evidence in portable form."""
+    from nova.calibrate import sweep
+
+    monkeypatch.delenv("NOVA_CACHE_ROOT", raising=False)
+    chunk = tmp_path / "chunk.json"
+    result = sweep.sweep_chunk(
+        sweep.ChunkSpec(0, 1, 2, (101, 102)),
+        lambda shot: _pulse_evidence(shot, 1.0 if shot < 102 else 2.0),
+    )
+    sweep.write_chunk(chunk, result)
+    sweep.merge_chunks([chunk], tmp_path / "bank")
+
+    written = (tmp_path / "bank" / "recorded_corrections.yaml").read_text()
+    assert (
+        "~/.cache/nova-mast/vacuum-signatures/archive/signature_series.npz" in written
+    )
+    assert str(Path.home()) not in written
+
+
+def test_connect_builds_the_public_tree_from_filepath():
+    """``Connect.rsync`` names the public imasdb tree through the named root."""
+    module = importlib.util.find_spec("nova.imas.connect")
+    source = Path(module.origin).read_text()
+    tree = ast.parse(source)
+    rsync = next(
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef) and node.name == "rsync"
+    )
+    body = ast.unparse(rsync)
+    assert "public_imasdb_root(" in body
+    assert "/home/ITER" not in body

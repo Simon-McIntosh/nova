@@ -9,8 +9,12 @@ come back as a literal, which is the one way the old paths returned.
 
 from __future__ import annotations
 
+import json
+import os
 from pathlib import Path
 import re
+import subprocess
+import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -51,6 +55,72 @@ def _text(path: Path) -> str | None:
         return path.read_text(encoding="utf-8")
     except UnicodeDecodeError, OSError:
         return None
+
+
+PROBE = """
+import json
+
+from benchmarks.exact_clip_closed_form_floor import REPORT_ROOT as CLOSED_FORM
+from benchmarks.exact_clip_moment_floor import (
+    REPORT_INPUT_ROOT as MOMENT_INPUT,
+    REPORT_ROOT as MOMENT,
+)
+
+print(json.dumps({
+    "closed_form": str(CLOSED_FORM),
+    "moment": str(MOMENT),
+    "moment_input": str(MOMENT_INPUT),
+}))
+"""
+
+
+def _probe(environment: dict[str, str]) -> dict[str, str]:
+    root = os.environ.get("PYTHONPATH")
+    completed = subprocess.run(
+        [sys.executable, "-c", PROBE],
+        cwd=ROOT,
+        env={
+            "PATH": os.environ.get("PATH", ""),
+            "PYTHONPATH": str(ROOT) if not root else f"{ROOT}{os.pathsep}{root}",
+            **environment,
+        },
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert completed.returncode == 0, completed.stderr
+    return json.loads(completed.stdout)
+
+
+def test_benchmark_override_wins_over_the_crew_report_root(tmp_path):
+    closed_form = tmp_path / "closed-form"
+    moment = tmp_path / "moment"
+    moment_input = tmp_path / "moment-input"
+    resolved = _probe(
+        {
+            "NOVA_CREW_REPORTS": str(tmp_path / "crew-reports"),
+            "NOVA_EXACT_CLOSED_FORM_REPORT_ROOT": str(closed_form),
+            "NOVA_EXACT_CLIP_REPORT_ROOT": str(moment),
+            "NOVA_EXACT_CLIP_REPORT_INPUT_ROOT": str(moment_input),
+        }
+    )
+
+    assert resolved == {
+        "closed_form": str(closed_form),
+        "moment": str(moment),
+        "moment_input": str(moment_input),
+    }
+
+
+def test_unset_benchmark_override_falls_through_to_the_crew_report_root(tmp_path):
+    crew = tmp_path / "crew-reports"
+    resolved = _probe({"NOVA_CREW_REPORTS": str(crew)})
+
+    assert resolved == {
+        "closed_form": str(crew / "nova/s19-local/exact-closed-form"),
+        "moment": str(crew / "nova/s19-local/exact-gauss"),
+        "moment_input": str(crew / "nova/s19-local/exact-gauss"),
+    }
 
 
 def test_scanned_tree_holds_no_crew_or_worktree_literal():

@@ -60,4 +60,24 @@
     worktree-side test file, whose own arm logs <code>1 failed</code> at base
     and <code>1 passed</code> at head.
   </p>
+  <p id="replan-evidence-tooling-paths-overrides">
+    Three sites had their own location variable before this change and keep it:
+    <code>NOVA_EXACT_CLOSED_FORM_REPORT_ROOT</code> in
+    <code>exact_clip_closed_form_floor.py</code>, and
+    <code>NOVA_EXACT_CLIP_REPORT_ROOT</code> with
+    <code>NOVA_EXACT_CLIP_REPORT_INPUT_ROOT</code> in
+    <code>exact_clip_moment_floor.py</code>. Each still takes precedence over
+    the shared root and carries no absolute default, so an unset override falls
+    through to <code>NOVA_CREW_REPORTS</code> rather than to a stale literal.
+    Two probes hold that precedence: one imports both modules with all four
+    variables set and asserts each module answers its own override, and one
+    asserts the crew report root and its repository-relative tails when the
+    overrides are unset.
+  </p>
+  <p id="replan-evidence-tooling-paths-lint">
+    <code>ruff check</code> over the four files touched in the fix reports
+    <code>All checks passed!</code>, and <code>ruff format --check</code> reports
+    <code>4 files already formatted</code>; the first pass had reported one file
+    that would be reformatted, which <code>ruff format</code> then wrote.
+  </p>
 </section>

@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+from typing import Any
 
 CREW_REPORTS_VARIABLE = "NOVA_CREW_REPORTS"
 CREW_RUNS_VARIABLE = "NOVA_CREW_RUNS"
@@ -68,9 +69,20 @@ class CallerSuppliedPath(os.PathLike):
 
 def crew_reports(*parts: str) -> CallerSuppliedPath:
     """Return a path under the crew report root named by ``NOVA_CREW_REPORTS``."""
-    return CallerSuppliedPath(
-        CREW_REPORTS_VARIABLE, "crew report root", tuple(parts)
-    )
+    return CallerSuppliedPath(CREW_REPORTS_VARIABLE, "crew report root", tuple(parts))
+
+
+def crew_reports_or_override(variable: str, *parts: str) -> Path | CallerSuppliedPath:
+    """Return the location ``variable`` names, else the crew report root.
+
+    A benchmark that accepts its own location variable keeps that override; it
+    carries no default, so an unset variable falls through to the caller's crew
+    report root rather than to a path baked into source.
+    """
+    override = os.environ.get(variable)
+    if override:
+        return Path(override)
+    return crew_reports(*parts)
 
 
 def crew_runs(*parts: str) -> CallerSuppliedPath:

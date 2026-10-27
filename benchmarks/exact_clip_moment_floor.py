@@ -55,12 +55,18 @@ except ImportError:
 from nova.equilibrium.stencil_mesh import CellCurrentMoments, flux_field_polynomial
 from nova.jax.config import configure_dtypes
 from scripts.analytic_oracle_fixtures import measure as fixture
-from benchmarks.receipt_locations import crew_reports
+from benchmarks.receipt_locations import crew_reports, crew_reports_or_override
 
 
 ROOT = Path(__file__).resolve().parents[1]
-REPORT_ROOT = crew_reports("nova/s19-local/exact-gauss")
-REPORT_INPUT_ROOT = crew_reports("nova/s19-local/exact-gauss")
+REPORT_ROOT_VARIABLE = "NOVA_EXACT_CLIP_REPORT_ROOT"
+REPORT_INPUT_ROOT_VARIABLE = "NOVA_EXACT_CLIP_REPORT_INPUT_ROOT"
+REPORT_ROOT = crew_reports_or_override(
+    REPORT_ROOT_VARIABLE, "nova/s19-local/exact-gauss"
+)
+REPORT_INPUT_ROOT = crew_reports_or_override(
+    REPORT_INPUT_ROOT_VARIABLE, "nova/s19-local/exact-gauss"
+)
 COUPLING_RECEIPT = crew_reports("nova/s19-review/moment-order/receipt.json")
 FIGURE_ROOT = ROOT / "docs/figures/exact-clip-moment-quadrature"
 CASES = (

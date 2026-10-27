@@ -39,10 +39,13 @@ from nova.equilibrium.clip_quadrature import (
 )
 from nova.equilibrium.separatrix_clip import padded_polynomial_current_moments
 from nova.jax.config import configure_dtypes
-from benchmarks.receipt_locations import crew_reports
+from benchmarks.receipt_locations import crew_reports_or_override
 
 ROOT = Path(__file__).resolve().parents[1]
-REPORT_ROOT = crew_reports("nova/s19-local/exact-closed-form")
+REPORT_ROOT_VARIABLE = "NOVA_EXACT_CLOSED_FORM_REPORT_ROOT"
+REPORT_ROOT = crew_reports_or_override(
+    REPORT_ROOT_VARIABLE, "nova/s19-local/exact-closed-form"
+)
 ARC_VERTEX_COUNTS = (8, 16, 32, 64, 128)
 SWEEP_CASES = CASES[:3]
 

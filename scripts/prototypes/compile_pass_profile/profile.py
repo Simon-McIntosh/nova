@@ -34,7 +34,7 @@ assert not jax.config.jax_enable_compilation_cache
 
 
 def point_jet(size):
-    from nova.biot import topology
+    from nova.equilibrium import topology
     from nova.equilibrium.clip_quadrature import ClippedCurrentMoments
     from tests.equilibrium.test_topology_read import _hexagon
 

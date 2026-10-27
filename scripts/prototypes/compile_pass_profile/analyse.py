@@ -57,15 +57,10 @@ def describe(path):
 def count_instructions(path):
     total = 0
     fused = 0
-    heading = False
     try:
         with path.open("r", errors="replace") as stream:
             for line in stream:
                 stripped = line.rstrip()
-                if not heading:
-                    if stripped.startswith("ENTRY") or stripped.endswith(") {"):
-                        heading = True
-                    continue
                 if stripped.endswith(") {"):
                     continue
                 if any(token in line for token in SKIP):
@@ -89,7 +84,7 @@ def main():
 
     rows = []
     for path in args.dumps.iterdir():
-        if not path.is_file() or not path.name.endswith(".txt"):
+        if not path.is_file() or not path.name.endswith((".txt", ".ll")):
             continue
         module, label, index = describe(path)
         rows.append(
@@ -158,10 +153,13 @@ def main():
     compile_seconds = receipt.get("compile_seconds")
     first_seconds = chosen[0]["start"]
     last_seconds = chosen[-1]["start"]
+    started = receipt.get("compile_started_epoch")
+    finished = receipt.get("compile_finished_epoch")
     before_first = None
     after_last = None
-    if compile_seconds:
-        after_last = compile_seconds - last_seconds - attributed
+    if started and finished:
+        before_first = chosen[0]["stamp"] / 1e9 - started
+        after_last = finished - chosen[-1]["stamp"] / 1e9
     summary = {
         "program": receipt["program"],
         "size": receipt["size"],
@@ -185,6 +183,9 @@ def main():
         "seconds_after_last_dump": round(after_last, 4)
         if after_last is not None
         else None,
+        "reconciled_seconds": round(
+            (before_first or 0.0) + attributed + (after_last or 0.0), 4
+        ),
         "coverage_of_compile": round(attributed / compile_seconds, 4)
         if compile_seconds
         else None,

@@ -1,0 +1,42 @@
+<article class="r-evidence-fragment" data-node="carrier-identity-receipt">
+<h3 id="carrier-identity-receipt-title">Carrier vertex identity: the device receipt and the importing-test arm rebuilt at main</h3>
+<p id="carrier-identity-receipt-scope">A measurement at main revision <code>0f50140bb</code>, which carries both the vertex grouping rule and the pinned reference solve. No product code, test or data file changed: the only committed source is the driver <code>scripts/prototypes/carrier_identity_receipt/measure_carrier.py</code>, which builds each certificate carrier through the same route the identity test uses and publishes the identity that build reads. The receipt is a build's own output rather than a test's, so the arm can be re-measured without importing a test module, and a carrier that will not build records the stage that refused it instead of aborting the run.</p>
+<p id="carrier-identity-receipt-arms">Two arms of one revision, one job each. H200 job 1297464 on <code>betelgeuse</code> under the H200 reservation, <code>jax.default_backend()</code> <code>gpu</code>, devices <code>[CudaDevice(id=0)]</code>; and CPU job 1297465 on <code>sirius</code>, backend <code>cpu</code>, <code>[CpuDevice(id=0)]</code>. Both imported <code>nova/__init__.py</code> from the same tree, printed the module path and the revision in the log header, and ended in a bare exit status.</p>
+
+<h4 id="carrier-identity-receipt-table-title">Every figure of the earlier receipt, at main, on both devices</h4>
+<p id="carrier-identity-receipt-table-caption">The earlier receipt is <code>receipts/h200-repair.json</code> of the carrier vertex identity run. N = 7 recorded figures, all listed, none omitted. Delta is the main H200 value minus the recorded value. The vertex partition is compared as a value and not as a numeric id array, because two builds may list one lattice in a different order; each slot is named by the micron cell its own centre sits in, which ordering does not move.</p>
+<table>
+<thead><tr><th>recorded figure</th><th>earlier receipt</th><th>main, H200</th><th>main, CPU</th><th>delta</th></tr></thead>
+<tbody>
+<tr><td><code>cell_count</code></td><td>340</td><td>340</td><td>340</td><td>0</td></tr>
+<tr><td><code>sample_node_count</code></td><td>1075</td><td>1075</td><td>1075</td><td>0</td></tr>
+<tr><td><code>atomic_node_count</code></td><td>922</td><td>922</td><td>922</td><td>0</td></tr>
+<tr><td><code>node_number</code></td><td>1536</td><td>1536</td><td>1536</td><td>0</td></tr>
+<tr><td><code>coefficient_digest</code></td><td><code>01818d5d…4c7805</code></td><td><code>01818d5d…4c7805</code></td><td><code>01818d5d…4c7805</code></td><td>0</td></tr>
+<tr><td><code>vertex_partition</code> groups</td><td>1075</td><td>1075</td><td>1075</td><td>0</td></tr>
+<tr><td><code>vertex_partition</code> digest</td><td><code>eac30256…b5268af</code></td><td><code>eac30256…b5268af</code></td><td><code>eac30256…b5268af</code></td><td>0</td></tr>
+</tbody>
+</table>
+
+<p id="carrier-identity-receipt-instrument">The absence of a change is itself a measurement, so the instrument is shown to see a value known to be present before it is trusted with an absence. The driver's partition digest of the main build reproduces the digest of the earlier receipt's stored partition byte for byte (<code>eac30256…</code> from both), and on the diverted 550-cell carrier it reproduces the followons record's recorded digest under the encoding that record used: <code>576421da…</code>. An instrument that published a constant would not reproduce two independently recorded values, and one that silently read an empty partition would publish a digest of the empty list instead.</p>
+
+<h4 id="carrier-identity-receipt-fifty">The 550-cell carriers</h4>
+<table>
+<thead><tr><th>recorded figure</th><th>followons record</th><th>main, H200</th><th>main, CPU</th><th>delta</th></tr></thead>
+<tbody>
+<tr><td>diverted <code>cell_count</code></td><td>606</td><td>606</td><td>606</td><td>0</td></tr>
+<tr><td>diverted <code>sample_node_count</code></td><td>1742</td><td>1742</td><td>1742</td><td>0</td></tr>
+<tr><td>diverted <code>node_number</code></td><td>2469</td><td>2469</td><td>2469</td><td>0</td></tr>
+<tr><td>diverted partition digest</td><td><code>576421da…</code></td><td><code>576421da…</code></td><td><code>576421da…</code></td><td>0</td></tr>
+<tr><td>diverted <code>atomic_node_count</code></td><td>not recorded</td><td>1454</td><td>1454</td><td>—</td></tr>
+</tbody>
+</table>
+<p id="carrier-identity-receipt-diverted">The diverted 550-cell carrier is the same carrier at main as the followons record left it, on both devices, with the reference coefficient digest <code>01818d5d…</code> unchanged. No group moved.</p>
+<p id="carrier-identity-receipt-limited">The limited 550-cell carrier still does not build at main, and the refusal is the same one and at the same stage on both devices: <code>ValueError: cell edges must have non-zero length</code>, raised in <code>AtomicCellMesh.from_cells</code> at <code>nova/equilibrium/separatrix_clip.py:1950</code>, reached from <code>MomentGeometry.from_cells</code> at <code>nova/equilibrium/stencil_mesh.py:545</code>. The limiter-contour wall at this cell count yields a polygon carrying a zero-length edge, so the arm publishes no identity on either device and no partition can differ. This is a pre-existing build limitation of the carrier, not a change in the partition, and it is recorded rather than worked around.</p>
+
+<h4 id="carrier-identity-receipt-suite">The tests that import the carrier's three modules</h4>
+<p id="carrier-identity-receipt-suite-caption">Every test module that imports <code>nova/equilibrium/stencil_mesh.py</code>, <code>nova/biot/plasmagrid.py</code> or <code>nova/equilibrium/analytic_single_null.py</code>, run at main as one <code>sirius</code> job: 44 files, one fresh pytest process per file, a <code>--basetemp</code> of its own for each, four at a time, no file inside a timeout.</p>
+<p id="carrier-identity-receipt-suite-result">PLACEHOLDER-SUITE</p>
+
+<p id="carrier-identity-receipt-changed">Which recorded figures changed, and by how much: none of the seven figures of the earlier receipt changed, and none of the four recorded figures of the diverted 550-cell carrier changed. Both carriers publish the same values at main as their records hold, and both devices publish the same values as each other. The earlier receipt therefore describes main on both devices for the diverted carriers; the limited 550-cell carrier still has no receipt to describe.</p>
+</article>

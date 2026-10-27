@@ -14,6 +14,7 @@ import matplotlib  # noqa: E402
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.lines import Line2D  # noqa: E402
+from matplotlib.text import Text  # noqa: E402
 import numpy as np  # noqa: E402
 
 from nova.media.ink import DEFAULT_INK, poloidal_axes  # noqa: E402
@@ -95,6 +96,29 @@ def main():
         fontsize=14,
     )
     figure.subplots_adjust(left=0.03, right=0.97, top=0.9, bottom=0.03)
+    figure.canvas.draw()
+    renderer = figure.canvas.get_renderer()
+    labels = [
+        artist
+        for artist in figure.findobj(match=Text)
+        if artist.get_visible() and artist.get_text().strip()
+    ]
+    boxes = [label.get_window_extent(renderer) for label in labels]
+    for label, box in zip(labels, boxes, strict=True):
+        if (
+            box.x0 < 0
+            or box.y0 < 0
+            or box.x1 > figure.bbox.width
+            or box.y1 > figure.bbox.height
+        ):
+            raise ValueError(f"text leaves canvas: {label.get_text()}")
+    for first in range(len(labels)):
+        for second in range(first + 1, len(labels)):
+            if boxes[first].overlaps(boxes[second]):
+                raise ValueError(
+                    f"text overlaps: {labels[first].get_text()}, "
+                    f"{labels[second].get_text()}"
+                )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(args.output, format="svg")
     plt.close(figure)

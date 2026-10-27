@@ -1,0 +1,78 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "nova/calibrate/sweep.py:667",
+    "nova/calibrate/sweep.py:912",
+    "nova/imas/connect.py:118",
+    "nova/catalog/mast_geometry.py:37",
+    "nova/imas/mast_vacuum_cohort.py:48",
+    "nova/imas/diiid_current.py:77",
+    "nova/imas/diiid_machine_ids.py:26",
+    "nova/media/sources/diiid_efit.py:37",
+    "nova/scripts/identify_source_cocos.py:89"
+  ],
+  "completed_at": "2026-10-27T19:02:14.631Z",
+  "dispatched_at": "2026-10-27T18:49:53Z",
+  "findings": [
+    {
+      "file": "tests/test_filepath_data_roots.py",
+      "line": 233,
+      "severity": "non-blocking",
+      "text": "the connect guard parses rsync's body and only requires public_imasdb_root( to appear and /home/ITER not to, so a literal reintroduced through a module-level constant the function reads still passes; the demonstrated regression is covered, an indirection is not."
+    },
+    {
+      "file": "docs/evidence/fragments/nova-portfolio-replan/replan-gpfs-data-root.html",
+      "line": 30,
+      "severity": "non-blocking",
+      "text": "the head arm's single tests/test_filepath.py failure id was not captured by the gate, so the zero added-failure claim rests on a file-level comparison and cannot distinguish a head-only test id inside a file that also fails at base."
+    },
+    {
+      "file": "logs/gate-full-base.log",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "the header records `command: sbatch ... gate_full.sh ... --mem=64G`, which is not the submission that ran; the manifest and the slurm record name gate_arms.sh at --mem=96G, and the head log carries the same stale string, so neither header can be re-run as evidence."
+    },
+    {
+      "file": "nova/database/filepath.py",
+      "line": 41,
+      "severity": "non-blocking",
+      "text": "portable_path leaves its parameter unannotated while its peer public helper repository_relative at :399 annotates str | os.PathLike, so the module's public surface is inconsistent."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "runtime consumers of the changed definitions were opened at cffa9ce3b: sweep.merge_chunks, Connect.rsync, and the eleven product modules that bind a FilePath accessor at import time.",
+    "diff": "read commit by commit over 60aa92783..cffa9ce3b: 9e40e32e2 replaces sweep.py's hard-coded portable literal with portable_path(derived_cache_root()/...), folds _named_root into _env_root at nova/database/filepath.py:35, adds 66 lines of test including the sweep and connect guards, and three evidence commits record the re-run arm pair, the lost first-pair logs and the route coverage.",
+    "done_when": "the done_when asks for a quoted grep, a new test failing at base and passing at head, and no added failure in the importing modules; the grep over nova/ at cffa9ce3b still returns Python literals only in nova/database/filepath.py plus three nova/equilibrium/solve_request.py docstrings, the new test errors at base and reports 24 passed at head in logs/gate-full-head.log, and both arms cover all 38 files with no file failing at head that passes at base.",
+    "goal": "the goal is to route hard-coded GPFS and home paths through the existing FilePath owner; the reviewed delta keeps that route honest, restoring the portable provenance form via filepath.portable_path at nova/calibrate/sweep.py:555 and extending the guard to two previously uncovered routes.",
+    "manifest": "read at cffa9ce3b; it records status complete, eight commits, base arm EXIT=5 and head arm EXIT=3 with per-file failure ids, but omits the measurement_module and measurement_cwd fields its own contract requires for the scratch-tree base arm.",
+    "write_paths": "read the manifest's declared paths; the delta touches docs/evidence/fragments/nova-portfolio-replan/replan-gpfs-data-root.html, nova/calibrate/sweep.py, nova/database/filepath.py and tests/test_filepath_data_roots.py, all inside them."
+  },
+  "justifications": {
+    "durability": "tests/test_filepath_data_roots.py:216 and :233 both redden under the recorded negative controls (logs/negative-control-sweep.log, logs/negative-control-connect.log), though the connect guard asserts on rsync's unparsed source text rather than on behaviour.",
+    "evidence": "logs/gate-full-base.log and logs/gate-full-head.log each record 38 files and a bare EXIT= line (5 and 3 failed files), which satisfies the no-added-failure clause, but the head arm captured no failure id and the log header's `command:` names a different submission than the one that ran.",
+    "fit": "nova/database/filepath.py:41 follows the module's accessor idiom but leaves its parameter unannotated where repository_relative at :399 annotates `str | os.PathLike`.",
+    "goal_fidelity": "nova/calibrate/sweep.py:667 routes the recorded provenance through FilePath (recorded_signature_series at :548), and nova/database/filepath.py:35 consolidates every named-root accessor onto one override helper, so the four named files carry the goal.",
+    "reuse": "every added definition extends an existing owner \u2014 _env_root folds the override idiom the file already carried, and portable_path is the first home-relative formatter in the repository, with no owner found by a search over nova/ for relative_to(Path.home()).",
+    "scope_discipline": "the delta 60aa92783..cffa9ce3b touches exactly the four files under review, and each sits inside the manifest's sixteen declared write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to route hard-coded GPFS and home paths through the existing FilePath owner; the reviewed delta keeps that route honest, restoring the portable provenance form via filepath.portable_path at nova/calibrate/sweep.py:555 and extending the guard to two previously uncovered routes.\nVERDICT done_when: the done_when asks for a quoted grep, a new test failing at base and passing at head, and no added failure in the importing modules; the grep over nova/ at cffa9ce3b still returns Python literals only in nova/database/filepath.py plus three nova/equilibrium/solve_request.py docstrings, the new test errors at base and reports 24 passed at head in logs/gate-full-head.log, and both arms cover all 38 files with no file failing at head that passes at base.\nVERDICT write_paths: read the manifest's declared paths; the delta touches docs/evidence/fragments/nova-portfolio-replan/replan-gpfs-data-root.html, nova/calibrate/sweep.py, nova/database/filepath.py and tests/test_filepath_data_roots.py, all inside them.\nVERDICT manifest: read at cffa9ce3b; it records status complete, eight commits, base arm EXIT=5 and head arm EXIT=3 with per-file failure ids, but omits the measurement_module and measurement_cwd fields its own contract requires for the scratch-tree base arm.\nVERDICT diff: read commit by commit over 60aa92783..cffa9ce3b: 9e40e32e2 replaces sweep.py's hard-coded portable literal with portable_path(derived_cache_root()/...), folds _named_root into _env_root at nova/database/filepath.py:35, adds 66 lines of test including the sweep and connect guards, and three evidence commits record the re-run arm pair, the lost first-pair logs and the route coverage.\nCALL_SITES: nova/calibrate/sweep.py:667, nova/calibrate/sweep.py:912, nova/imas/connect.py:118, nova/catalog/mast_geometry.py:37, nova/imas/mast_vacuum_cohort.py:48, nova/imas/diiid_current.py:77, nova/imas/diiid_machine_ids.py:26, nova/media/sources/diiid_efit.py:37, nova/scripts/identify_source_cocos.py:89\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/calibrate/sweep.py:667 routes the recorded provenance through FilePath (recorded_signature_series at :548), and nova/database/filepath.py:35 consolidates every named-root accessor onto one override helper, so the four named files carry the goal.\nSCORE evidence: 15\nJUSTIFICATION evidence: logs/gate-full-base.log and logs/gate-full-head.log each record 38 files and a bare EXIT= line (5 and 3 failed files), which satisfies the no-added-failure clause, but the head arm captured no failure id and the log header's command: names a different submission than the one that ran.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the delta 60aa92783..cffa9ce3b touches exactly the four files under review, and each sits inside the manifest's sixteen declared write paths.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_filepath_data_roots.py:216 and :233 both redden under the recorded negative controls (logs/negative-control-sweep.log, logs/negative-control-connect.log), though the connect guard asserts on rsync's unparsed source text rather than on behaviour.\nSCORE fit: 18\nJUSTIFICATION fit: nova/database/filepath.py:41 follows the module's accessor idiom but leaves its parameter unannotated where repository_relative at :399 annotates str | os.PathLike.\nSCORE reuse: 19\nJUSTIFICATION reuse: every added definition extends an existing owner - _env_root folds the override idiom the file already carried, and portable_path is the first home-relative formatter in the repository, with no owner found by a search over nova/ for relative_to(Path.home()).\nFINDING tests/test_filepath_data_roots.py:233 non-blocking: the connect guard parses rsync's body and only requires public_imasdb_root( to appear and /home/ITER not to, so a literal reintroduced through a module-level constant the function reads still passes; the demonstrated regression is covered, an indirection is not.\nFINDING docs/evidence/fragments/nova-portfolio-replan/replan-gpfs-data-root.html:30 non-blocking: the head arm's single tests/test_filepath.py failure id was not captured by the gate, so the zero added-failure claim rests on a file-level comparison and cannot distinguish a head-only test id inside a file that also fails at base.\nFINDING logs/gate-full-base.log:1 non-blocking: the header records `command: sbatch ... gate_full.sh ... --mem=64G`, which is not the submission that ran; the manifest and the slurm record name gate_arms.sh at --mem=96G, and the head log carries the same stale string, so neither header can be re-run as evidence.\nFINDING nova/database/filepath.py:41 non-blocking: portable_path leaves its parameter unannotated while its peer public helper repository_relative at :399 annotates str | os.PathLike, so the module's public surface is inconsistent.\n",
+  "review_run_id": "r-20261027T181924223718-review-of-replan-gpfs-data-root-cffa9ce3b39f",
+  "reviewed_base_sha": "60aa92783c40ca8b2a712a37ec2b4e0eefe0ad52",
+  "reviewed_head_sha": "cffa9ce3b39f0c28702e9b06052dfd29156c9deb",
+  "reviewed_run_id": "r-20261027T151220657263-replan-gpfs-data-root",
+  "rubric": "landed",
+  "scores": {
+    "durability": 17,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T19:02:17.705669+00:00",
+  "total": 107
+}

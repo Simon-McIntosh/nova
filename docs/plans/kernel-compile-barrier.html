@@ -24,7 +24,7 @@
   <title>Kernel Compile Barrier | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="25">
+<meta name="plan-version" content="26">
 <meta name="plan-modified" content="2026-10-27">
 </head>
 <body>
@@ -130,6 +130,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-20261027-edge-tangent-base-failures-landed" data-who="reckon-build" data-when="2026-10-27T13:05:00Z">
     <div class="r-comment-body"><p><strong>edge-tangent-base-failures landed at <code>3f0b443c6</code></strong> (evidence only). It classifies every failure main carries in <code>tests/biot/test_edge_term_tangents.py</code> and <code>tests/biot/test_elliptic_tangent_recurrences.py</code>:</p><ul><li><strong>Nine edge failures are the 300 s per-test default</strong> cutting off compile rows on both CPU and H200. The repair is a per-row timeout sized to the measured compile, or moving those rows to the H200 lane, not a code change.</li><li><strong>Two are a one-bit primal difference seen only on the GPU.</strong> A product defect is suspected, but device reassociation is not yet excluded, because the CPU arm never reached that assertion.</li><li><strong>One is a stale strict expected failure.</strong></li><li><strong>The elliptic compile-ratio rows are not device-qualified.</strong> Four exceed the bound of three on the H200 too, and the reference JVP alone already costs more than three times the primal (cn_pole_moment about 9.5). The three-primals bound is therefore below what any tangent of these terms costs, and §2 should restate it from §5's attribution, not tighten tangents to meet it.</li></ul><p>The re-review found no blocking finding. Four slips remain in the fragment:</p><ul><li>The cn_pole_moment ratio reads 9.76 where the log gives 9.50.</li><li>The H200 primal range's top end is taken from the CPU arm.</li><li>The base progress line has 24 entries, not 25.</li><li>Collection position 25 never ran.</li></ul><p>None changes a classification.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261027T122241128107-review-of-edge-tangent-base-failures-76af3d7a854d" data-who="reckon-build" data-when="2026-10-27T12:58:01.788Z">
+    <div class="r-comment-body"><p>Reviewed run r-20261027T100839626666-edge-tangent-base-failures over the two commits it gained since its first review (6dbae8420..76af3d7a854d, both docs-only on edge-tangent-base-failures.html). The prior blocking finding is resolved: the elliptic compile bound is now classified not device-qualified, and the four H200 rows over the bound of three are tabled with their JVP arms. Four non-blocking findings remain, all numeric or positional: cn_pole_moment&#x27;s H200 JVP/primal recorded as 9.76 where the log gives 9.50; a primal range upper bound of 0.272 s that is a CPU tangent sample rather than an H200 primal; &quot;25 of its 28 tests&quot; against a 24-character progress line that the fragment&#x27;s own intro calls 24; and a row at collection position 25 said to have passed though the cited log ends at 24. Scores: goal_fidelity 18, evidence 12, scope_discipline 20, durability 9, fit 17, reuse 20.</p></div>
 </div>
 </section>
 </main>

@@ -1,0 +1,67 @@
+{
+  "added_failure_basis": "The reviewed run declares no baseline_suite/after_suite pair: its brief is an investigation that changes no product code and no test, and its manifest records negative_control 'none' with no suite keys. There is therefore no baseline/after gate pair from which added failures could be derived, and the range under review adds no executable code.",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "call_sites_verdict": "No production call site reaches the change: the diff edits a served evidence page under docs/evidence/fragments/, which no runtime module imports and no console script loads.",
+  "completed_at": "2026-10-27T12:58:01.788Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "evidence-only investigation; its record slips are listed on the plan comment c-20261027-edge-tangent-base-failures-landed and change no classification",
+      "recorded_at": "2026-10-27T13:01:00.004062+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-27T12:47:21Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/edge-tangent-base-failures.html",
+      "line": 94,
+      "severity": "non-blocking",
+      "text": "The [cn_pole_moment] row records the H200 reference JVP/primal ratio as 9.76 (repeated in prose at line 108), but logs/h200-tangents.log:373-375 gives the primal median 0.244 s and the JVP median 2.318 s, a ratio of 9.50, and no line of any log prints 9.76. The conclusion the number supports \u2014 that the bound of three sits below what the reference derivative costs \u2014 survives at 9.50, so this is a wrong stated value rather than a wrong class."
+    },
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/edge-tangent-base-failures.html",
+      "line": 110,
+      "severity": "non-blocking",
+      "text": "The mechanism paragraph says the H200 primal compiles in '0.111 to 0.272 s', but the four failing rows' H200 primal medians at logs/h200-tangents.log:331, 352, 373 and 394 are 0.244, 0.111, 0.244 and 0.265 s; 0.272 appears only as one raw sample of the CPU [finite_part] tangent at logs/cpu-elliptic-compile-rows.log:10, so the upper bound is taken from the wrong arm."
+    },
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/edge-tangent-base-failures.html",
+      "line": 63,
+      "severity": "non-blocking",
+      "text": "The paragraph says the base log 'stopped after 25 of its 28 tests', but the progress line it quotes two lines later is .....................F.F, which is 24 characters (r-20261027T024706009820-moment-field-hessian/suite-files/base/tests__biot__test_elliptic_tangent_recurrences.log:2, measured len=24), and the fragment's own introduction at line 9 states 24 of 28. The same file now carries two different counts."
+    },
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/edge-tangent-base-failures.html",
+      "line": 69,
+      "severity": "non-blocking",
+      "text": "The sentence says the compile rows at collection positions 20, 21, 23 and 25 'passed there on the CPU at f1e09f09d', but the cited progress line ends at position 24, so position 25 ([harmonic_pole_moments_mirrored]) was never run in that base arm and its outcome cannot be read from the log; only positions 20, 21 and 23 carry a completed progress character."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read both commits against 6dbae8420: 4595d1668 rewrote the elliptic section (+106/-50 in the file) to report four H200 failing compile rows and to reclassify the bound as not device-qualified, and 76af3d7a854d reworded three sentences without changing a value; every measured second I checked reconciles with logs/h200-tangents.log:331-397 except the two cells named in the findings.",
+    "done_when": "The done_when asks for every failing id with its assertion, measured value against bound and wall from a named log, an H200 result per failure, and a classification with a repair per class; at head, lines 86-96 table all nine elliptic compile rows against both devices and the reference JVP ratio, and lines 273-274 carry the repair, but three numeric or positional claims do not reconcile with the logs they cite (lines 63, 69, 94/108).",
+    "goal": "The reviewed node's goal is to explain every failure the two kernel tangent test files carry on main, changing no product code and no test; the two commits under review correct the elliptic classification, its table and its repair in docs/evidence/fragments/kernel-compile-barrier/edge-tangent-base-failures.html rather than adding a new deliverable.",
+    "manifest": "Read; it reports status complete with commits 2a747c784..76af3d7a8, and its tests: line now names scripts/prototypes/edge_tangent_failures/cpu_arm.sh with logs/cpu-elliptic-compile-rows.log and logs/cpu-elliptic-pole-rows.log, both of which exist, repairing the earlier record's cpu-gate.log defect.",
+    "write_paths": "The node declares scripts/prototypes/edge_tangent_failures, docs/evidence/fragments/kernel-compile-barrier/edge-tangent-base-failures.html and docs/figures/kernel-compile-barrier/edge-tangent-base-failures; git diff 6dbae8420..76af3d7a854d touches only the fragment, and no test or nova/ product file."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The reviewed node's goal is to explain every failure the two kernel tangent test files carry on main, changing no product code and no test; the commits under review correct the elliptic classification and its tables in docs/evidence/fragments/kernel-compile-barrier/edge-tangent-base-failures.html:99-132 rather than adding a new deliverable.\nVERDICT done_when: The done_when asks for every failing id with its assertion, measured value against bound and wall from a named log, an H200 result per failure, and a classification with a repair per class; the head fragment tables all nine elliptic compile rows against both devices and the reference JVP ratio at lines 86-96 and carries the repair at 273-274, but three numeric or positional claims do not reconcile with the logs they cite (lines 63, 69, 94/108).\nVERDICT write_paths: The manifest declares scripts/prototypes/edge_tangent_failures, docs/evidence/fragments/kernel-compile-barrier/edge-tangent-base-failures.html and docs/figures/kernel-compile-barrier/edge-tangent-base-failures; git diff 6dbae8420..76af3d7a854d touches only the fragment, with no test or nova/ product change.\nVERDICT manifest: Read; it reports status complete with commits 2a747c784..76af3d7a8, and its tests: line now names scripts/prototypes/edge_tangent_failures/cpu_arm.sh with logs/cpu-elliptic-compile-rows.log and logs/cpu-elliptic-pole-rows.log, both present on disk, repairing the earlier cpu-gate.log defect.\nVERDICT diff: Read both commits against 6dbae8420; 4595d1668 rewrote the elliptic section (+106/-50 in the file) to report four H200 failing compile rows and reclassify the bound, and 76af3d7a854d reworded three sentences without changing a value, and every measured second I spot-checked reconciles with logs/h200-tangents.log:331-397 except the two cells named in the findings.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/kernel-compile-barrier/edge-tangent-base-failures.html:99-116 now states the compile bound is not device-qualified, which is the correction the prior review's blocking finding asked for.\nSCORE evidence: 12\nJUSTIFICATION evidence: the class at line 108 rests on H200 JVP ratios that do reconcile for [complete_pole] (2.194/0.244=8.99), [sn_pole_moment] (2.338/0.265=8.82) and [harmonic_root_moments] (0.334/0.111=3.01), but three claims do not: the cn ratio 9.76 against the log's 9.50, the primal range 'to 0.272 s' against 0.265, and 'stopped after 25 of its 28 tests' against a 24-character progress line.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 6dbae8420..76af3d7a854d touches only docs/evidence/fragments/kernel-compile-barrier/edge-tangent-base-failures.html, inside the declared write paths.\nSCORE durability: 9\nJUSTIFICATION durability: the brief forbids a test or product change, so nothing fails when edge-tangent-base-failures.html:94 goes stale against logs/h200-tangents.log:373-376, and it has.\nSCORE fit: 17\nJUSTIFICATION fit: the fragment follows the sibling evidence-fragment convention and carries no plan label, but its table states a ratio no arm printed while the logs print the same ratio to three decimals.\nSCORE reuse: 20\nJUSTIFICATION reuse: the range adds no function, class or module \u2014 it edits one served evidence page \u2014 so no capability is forked; searched the repository for an owner of compile-ratio evidence and found none.\nFINDING docs/evidence/fragments/kernel-compile-barrier/edge-tangent-base-failures.html:94 non-blocking: the [cn_pole_moment] H200 JVP/primal ratio is recorded as 9.76 (repeated at line 108) but logs/h200-tangents.log:373-375 gives 0.244 s primal and 2.318 s JVP, a ratio of 9.50, and no line of any log prints 9.76; the class survives at 9.50.\nFINDING docs/evidence/fragments/kernel-compile-barrier/edge-tangent-base-failures.html:110 non-blocking: the primal range 'to 0.272 s' is not an H200 primal \u2014 the four failing rows' medians are 0.244, 0.111, 0.244 and 0.265 s at logs/h200-tangents.log:331,352,373,394, and 0.272 is a raw CPU [finite_part] tangent sample at logs/cpu-elliptic-compile-rows.log:10.\nFINDING docs/evidence/fragments/kernel-compile-barrier/edge-tangent-base-failures.html:63 non-blocking: 'stopped after 25 of its 28 tests' contradicts the 24-character progress line quoted two lines below and the fragment's own line 9, which says 24 of 28.\nFINDING docs/evidence/fragments/kernel-compile-barrier/edge-tangent-base-failures.html:69 non-blocking: the compile row at collection position 25 is said to have 'passed there on the CPU', but the cited log ends at position 24, so that row's outcome was never observed.\n",
+  "review_run_id": "r-20261027T122241128107-review-of-edge-tangent-base-failures-76af3d7a854d",
+  "reviewed_base_sha": "6dbae8420eb1dc839301bb104176cb0261857f30",
+  "reviewed_head_sha": "76af3d7a854d936d8e2808a9762beb7db88ab8cf",
+  "reviewed_run_id": "r-20261027T100839626666-edge-tangent-base-failures",
+  "scores": {
+    "durability": 9,
+    "evidence": 12,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T13:01:38.443767+00:00",
+  "total": 96
+}

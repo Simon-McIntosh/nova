@@ -1,0 +1,77 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "benchmarks/trip_quantum_profile.py:48",
+    "benchmarks/efit_reproduction_gate.py:49",
+    "benchmarks/exact_clip_closed_form_floor.py:45",
+    "benchmarks/coil_edit_latency.py:3122",
+    "scripts/labeller_batch/shard.py:78",
+    "scripts/media/efit_nova_overlay.py:76",
+    "scripts/analytic_oracle_fixtures/run_cached_radial.sh:4",
+    "scripts/run_amplitude_census.sh:7"
+  ],
+  "completed_at": "2026-10-27T17:33:43.978Z",
+  "dispatched_at": "2026-10-27T17:15:00Z",
+  "findings": [
+    {
+      "file": "benchmarks/receipt_locations.py",
+      "line": 59,
+      "severity": "non-blocking",
+      "text": "Any is used in three annotations (lines 59, 62, 65) and never imported, so ruff check reports three F821 and ruff format --check reports the module would be rewritten; the new file does not pass the repository's own lint and format gate."
+    },
+    {
+      "file": "benchmarks/exact_clip_closed_form_floor.py",
+      "line": 45,
+      "severity": "non-blocking",
+      "text": "the site's dedicated NOVA_EXACT_CLOSED_FORM_REPORT_ROOT override was removed with its literal, and the two variables at benchmarks/exact_clip_moment_floor.py:62-63 likewise, so a caller that pointed one benchmark elsewhere can no longer do so without moving the shared root for all 47 modules."
+    },
+    {
+      "file": "manifest.md",
+      "line": 13,
+      "severity": "non-blocking",
+      "text": "both baseline_suite and after_suite carry an unterminated log_path string and no completed key, so the recorded gate cannot be parsed by a machine reader even though the gate/base-summary.log and gate/head-summary.log behind them are sound."
+    },
+    {
+      "file": "tests/test_evidence_tooling_paths.py",
+      "line": 66,
+      "severity": "non-blocking",
+      "text": "the base arm fails on the self-check that benchmarks/receipt_locations.py exists, not on finding a literal, so the base arm alone does not show the scan fires; only the negative control shows that."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "verified 8 production call sites",
+    "diff": "read commit by commit; dff94725f rewrites 45 benchmark modules and four scripts onto the new accessor and 8334897d5 adds only docs/evidence/fragments/nova-portfolio-replan/replan-evidence-tooling-paths.html.",
+    "done_when": "the done_when asks for a 0-line census, a test that fails at base and passes at head, and no added failure across the importing modules; the census holds 61 to 0, the head arm of tests/test_evidence_tooling_paths.py passes when re-run, and the base arm fails only on its self-check at :66 rather than on a caught literal.",
+    "goal": "the goal is that no benchmark or supporting script carries an absolute crew-run or worktree path; an independent git grep at 8334897d5 over benchmarks/ and the five named scripts returns 0 lines against 61 at 624860447.",
+    "manifest": "read; it records status complete, both commits, gate job 1297670 with base 7 failure ids and head 2, and the negative control, though its baseline_suite and after_suite lines are not parseable JSON.",
+    "write_paths": "the declared paths name benchmarks, five script files, tests/test_evidence_tooling_paths.py and the evidence fragment; all 53 changed paths sit inside that list."
+  },
+  "justifications": {
+    "durability": "tests/test_evidence_tooling_paths.py:61 fails on a restored literal as its negative control shows, and the accessor lives inside the scanned tree so a default literal there would redden, but no assertion covers the fail-by-name contract of benchmarks/receipt_locations.py:43 or the shell substitutions at scripts/analytic_oracle_fixtures/run_cached_radial.sh:4.",
+    "evidence": "the census and both arm logs were read directly (gate/base-summary.log 7 ids, gate/head-summary.log 2 ids, 0 added), but the manifest's own receipt at manifest.md:13-14 is malformed JSON with no completed field, so the recorded gate is not machine-readable.",
+    "fit": "benchmarks/receipt_locations.py:59 leaves Any unimported, so ruff check reports three F821 and ruff format --check would rewrite the new module, which lands outside the lint gate nova/AGENTS.md applies to touched paths.",
+    "goal_fidelity": "every literal the brief lists now routes through benchmarks/receipt_locations.py:71-78 and the benchmarks census is 0, but three sites lost the dedicated environment override they already had (benchmarks/exact_clip_closed_form_floor.py:45) instead of losing only their default.",
+    "reuse": "the only owner of the repository-relative capability is nova/database/filepath.py:296 repository_relative, which records a path rather than resolving a caller-named root, so the addition duplicates nothing, but benchmarks/receipt_locations.py:28 introduces a custom PathLike where the brief asked for no new resolver.",
+    "scope_discipline": "all 53 changed paths are inside the declared write paths, with only two cosmetic reformats (benchmarks/trip_quantum_profile.py:1241, benchmarks/edge_constraint_demonstration.py:61) beyond the addition of benchmarks/receipt_locations.py and the rewrite."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is that no benchmark or supporting script carries an absolute crew-run or worktree path; an independent git grep at 8334897d5 over benchmarks/ and the five named scripts returns 0 lines against 61 at 624860447, and every replacement resolves through benchmarks/receipt_locations.py:71-78.\nVERDICT done_when: the done_when asks for a 0-line census, a test that fails at base and passes at head, and no added failure across the importing modules; the census holds 61 to 0, tests/test_evidence_tooling_paths.py:64 passes when re-run at 8334897d5, and the base arm fails only on its self-check at tests/test_evidence_tooling_paths.py:66 rather than on a caught literal.\nVERDICT write_paths: the declared paths name benchmarks, five script files, tests/test_evidence_tooling_paths.py and the evidence fragment; all 53 paths in the diff against 624860447 sit inside that list and none of the outside_scope script trees was touched.\nVERDICT manifest: read; it records status complete, both commits, gate job 1297670 with base 7 failure ids and head 2, and the negative control, though its baseline_suite and after_suite lines are not parseable JSON.\nVERDICT diff: read commit by commit; dff94725f rewrites 45 benchmark modules and four scripts onto the new accessor and 8334897d5 adds only docs/evidence/fragments/nova-portfolio-replan/replan-evidence-tooling-paths.html.\nCALL_SITES: benchmarks/trip_quantum_profile.py:48, benchmarks/efit_reproduction_gate.py:49, benchmarks/exact_clip_closed_form_floor.py:45, benchmarks/coil_edit_latency.py:3122, scripts/labeller_batch/shard.py:78, scripts/media/efit_nova_overlay.py:76, scripts/analytic_oracle_fixtures/run_cached_radial.sh:4, scripts/run_amplitude_census.sh:7\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: every literal the brief lists now routes through benchmarks/receipt_locations.py:71-78 and the census at benchmarks/ is 0, but three sites lost the dedicated environment override they already had (benchmarks/exact_clip_closed_form_floor.py:45) instead of losing only their default.\nSCORE evidence: 14\nJUSTIFICATION evidence: the census and both arm logs were read directly (gate/base-summary.log 7 ids, gate/evidence head-summary.log 2 ids, 0 added), but the manifest's own receipt at manifest.md:13-14 is malformed JSON with no completed field, so the recorded gate is not machine-readable.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: all 53 changed paths are inside the declared write paths, with only two cosmetic reformats (benchmarks/trip_quantum_profile.py:1241, benchmarks/edge_constraint_demonstration.py:61) beyond the path rewrite.\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_evidence_tooling_paths.py:61 fails on a restored literal as its negative control shows, and the accessor lives inside the scanned tree so a default literal there would also redden, but no assertion covers the fail-by-name contract of benchmarks/receipt_locations.py:43 or the shell substitutions at scripts/analytic_oracle_fixtures/run_cached_radial.sh:4.\nSCORE fit: 12\nJUSTIFICATION fit: benchmarks/receipt_locations.py:59 leaves Any unimported, so ruff check reports three F821 and ruff format --check would rewrite the new module, which lands outside the lint gate nova/AGENTS.md applies to touched paths.\nSCORE reuse: 15\nJUSTIFICATION reuse: the only owner of the repository-relative capability is nova/database/filepath.py:296 repository_relative, which records a path rather than resolving a caller-named root, so the addition duplicates nothing, but benchmarks/receipt_locations.py:28 introduces a custom PathLike where the brief asked for no new resolver and a plain accessor would do.\nFINDING benchmarks/receipt_locations.py:59 non-blocking: Any is used in three annotations (lines 59, 62, 65) and never imported, so ruff check reports three F821 and ruff format --check reports the module would be rewritten; the new file does not pass the repository's own lint and format gate.\nFINDING benchmarks/exact_clip_closed_form_floor.py:45 non-blocking: the site's dedicated NOVA_EXACT_CLOSED_FORM_REPORT_ROOT override was removed with its literal, and the two variables NOVA_EXACT_CLIP_REPORT_ROOT and NOVA_EXACT_CLIP_REPORT_INPUT_ROOT at benchmarks/exact_clip_moment_floor.py:62-63 likewise, so a caller that pointed one benchmark elsewhere can no longer do so without moving the shared root for all 47 modules.\nFINDING manifest.md:13 non-blocking: both baseline_suite and after_suite carry an unterminated log_path string and no completed key, so the recorded gate cannot be parsed by a machine reader even though the gate/base-summary.log and gate/head-summary.log behind them are sound.\nFINDING tests/test_evidence_tooling_paths.py:66 non-blocking: the base arm fails on the self-check that benchmarks/receipt_locations.py exists, not on finding a literal, so the base arm alone does not show the scan fires; only the negative control shows that.\n",
+  "review_run_id": "r-20261027T163107236439-review-of-replan-evidence-tooling-paths-8334897d57ad",
+  "reviewed_base_sha": "624860447b7cd10c494a88e3178d46c5f983fe74",
+  "reviewed_head_sha": "8334897d57ad70f75146a5f39d9769b665dbab48",
+  "reviewed_run_id": "r-20261027T151902415357-replan-evidence-tooling-paths",
+  "rubric": "landed",
+  "scores": {
+    "durability": 15,
+    "evidence": 14,
+    "fit": 12,
+    "goal_fidelity": 17,
+    "reuse": 15,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T17:34:48.589336+00:00",
+  "total": 90
+}

@@ -654,10 +654,12 @@ def merge_chunks(
     )
     document = recorded_corrections(
         pulses,
-        derived_cache_root()
-        / "vacuum-signatures"
-        / "archive"
-        / "signature_series.npz",
+        str(
+            derived_cache_root()
+            / "vacuum-signatures"
+            / "archive"
+            / "signature_series.npz"
+        ),
     )
     write_correction_set(root / "recorded_corrections.yaml", document)
     summary = {

@@ -15,12 +15,9 @@ from dataclasses import dataclass
 import numpy as np
 import xarray
 
-from nova.utilities.importmanager import check_import
+from nova.imas.dataset import open_db_entry
 from nova.imas.ids_entry import IdsEntry
 from nova.io.ingest import PROVISIONAL_NAMESPACE, SignalSpec
-
-with check_import("imas"):
-    import imas
 
 
 @dataclass
@@ -71,7 +68,7 @@ class IdsEgress:
         store can never masquerade as a valid pulse.
         """
         entry.ids.validate()
-        database = imas.DBEntry(uri, "w", dd_version=str(dd_version))
+        database = open_db_entry(uri, "w", dd_version=str(dd_version))
         try:
             database.put(entry.ids)
         finally:

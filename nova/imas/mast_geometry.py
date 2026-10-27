@@ -26,6 +26,7 @@ from nova.catalog.mast_geometry import (
     GeometrySelection,
     MachineGeometryRegistry,
 )
+from nova.imas.dataset import open_db_entry
 from nova.imas.machine import GeomData, MachineGeometryReader
 from nova.imas.machine_drive import DriveMap
 from nova.imas.machine_evidence import EvidenceLedger, FieldEvidence
@@ -639,14 +640,14 @@ def write_and_reopen(
     """Write and reopen a bundle with the same pinned DD version."""
 
     uri = f"imas:hdf5?path={Path(path)}"
-    database = imas.DBEntry(uri, "x", dd_version=DD_VERSION)
+    database = open_db_entry(uri, "x", dd_version=DD_VERSION)
     try:
         for ids in bundle.ids.values():
             database.put(ids)
     finally:
         database.close()
 
-    reopened = imas.DBEntry(uri, "r", dd_version=DD_VERSION)
+    reopened = open_db_entry(uri, "r", dd_version=DD_VERSION)
     try:
         result = {name: reopened.get(name) for name in bundle.ids}
     finally:

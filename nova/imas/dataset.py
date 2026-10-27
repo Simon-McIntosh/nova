@@ -507,6 +507,39 @@ class Datastore(IdsBase):  # noqa: D207
         return (self.uri == "" or self.uri is None) and super()._unset_attrs
 
 
+def open_db_entry(
+    uri: str | os.PathLike,
+    mode: str | None = "r",
+    dd_version: Version | str | None = None,
+    backend: str | None = None,
+) -> imas.DBEntry:
+    """Open an imas.DBEntry, keeping the dictionary version the data was written in.
+
+    Parameters
+    ----------
+    uri: data entry URI, or a path to a netCDF file.
+    mode: access mode. The default is read-only.
+    dd_version: Data Dictionary version the data was written in. It is passed to
+        imas only when known, so a store is never opened for conversion at a
+        version the caller did not name.
+    backend: access layer backend. imas-python selects the backend through the URI
+        scheme (``imas:hdf5?path=...``) and the constructor takes no backend
+        keyword, so a named backend prefixes a plain path and a uri that already
+        carries a scheme is opened as given.
+
+    Returns
+    -------
+    An opened imas.DBEntry.
+    """
+    uri = os.fspath(uri)
+    if backend is not None and not uri.startswith("imas:"):
+        uri = f"imas:{backend}?path={uri}"
+    kwargs: dict[str, Any] = {"mode": mode}
+    if dd_version is not None:
+        kwargs["dd_version"] = str(dd_version)
+    return imas.DBEntry(uri, **kwargs)
+
+
 @dataclass(kw_only=True)
 class Dataset(Datastore):  # noqa: D207
     """Locate an IDS dataset on a local or remote machine using a pulse-run layout.
@@ -729,15 +762,13 @@ mode='r', lazy=True, ids=None)
         """Return imas.DBEntry instance."""
         if not self.uri:
             raise ValueError("No URI provided.")
-        return imas.DBEntry(
-            uri=self.uri, mode=self.mode, dd_version=str(self.dd_version)
-        )
+        return open_db_entry(self.uri, self.mode, self.dd_version, self.backend)
 
     @property
     def is_valid(self):
         """Return database entry validity flag."""
         try:
-            db_entry = imas.DBEntry(uri=self.uri, mode="r")
+            db_entry = open_db_entry(self.uri, "r")
             db_entry.get(self.name, self.occurrence)
             db_entry.close()  # win32
             return True

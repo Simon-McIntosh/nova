@@ -144,6 +144,7 @@ import numpy as np
 import xarray as xr
 
 from nova.database.netcdf import netCDF
+from nova.imas.dataset import open_db_entry
 from nova.biot.contour import Contour
 from nova.equilibrium.labels import N_XPOINT_SLOTS
 from nova.equilibrium.flux_surface_geometry import PlasmaInternalGeometry
@@ -1831,12 +1832,10 @@ def dereference_wall(reference: WallReference) -> tuple[WallUnit, ...]:
 
     if reference.legacy_copied_wall:
         raise ValueError("a legacy copied wall has no dereferenceable source")
-    import imas
-
     uri = reference.source
     if not uri.startswith("imas:"):
         uri = f"imas:hdf5?path={uri}"
-    entry = imas.DBEntry(uri, "r", dd_version=reference.dd_version)
+    entry = open_db_entry(uri, "r", dd_version=reference.dd_version)
     try:
         units = wall_units_from_ids(entry.get("wall", 0, lazy=False, autoconvert=False))
     finally:

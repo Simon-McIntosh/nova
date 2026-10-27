@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run records no baseline_suite or after_suite block (grep of its manifest.md returns 0 for both; it is a measurement node), so no gate-log pair exists to subtract. The count is derived rather than assumed: git diff --name-only b038b345d..de5a20aa0 -- nova/ tests/ returns 0 files, so this commit cannot add a failing test id, and the run's importing-test arm logs in suite/ carry 46 failing ids across 11 of 50 per-file logs, all pre-existing at the base.",
+  "assertion_analysis": [
+    {
+      "assertion": "check_receipt_table.py:27-30 missing = sorted(keys - named), status 1",
+      "independent": "true: keys come from the record and labels from the fragment, two separately supplied files",
+      "would_fail_if": "a key present in receipts/h200-repair.json has no <tr><td><code>key</code> row in the first table; reinstating the pre-change fragment reproduces exactly this, printing MISSING 1 key(s) with no row: sample_vertex_count and exiting 1."
+    },
+    {
+      "assertion": "check_receipt_table.py:33-40 the caption's N must equal len(keys)",
+      "independent": "true",
+      "would_fail_if": "the caption states a count other than the record's key count, or states none; the caption text is read from the fragment and the count from the record, so the two sides move independently."
+    }
+  ],
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-27T19:05:48.795Z",
+  "dispatched_at": "2026-10-27T18:55:37Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/carrier_identity_receipt/check_receipt_table.py",
+      "line": 22,
+      "severity": "non-blocking",
+      "text": "the check is a standalone script with no automatic invocation, so a later caption or record edit leaves the claim at carrier-identity-receipt.html:7 unchecked unless someone runs it by hand, while the repository's existing idiom for this reconciliation is a pytest test (tests/test_outboard_census_receipt_consistency.py:90) that runs in the suite."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/carrier-identity-receipt.html",
+      "line": 7,
+      "severity": "non-blocking",
+      "text": "the caption says the claim is checked but gives no command and no resolved path, and the record it reads (receipts/h200-repair.json) lives in a crew run directory outside the repository, so the cited check cannot be reproduced from a checkout without knowing that run's location."
+    }
+  ],
+  "head_log_revision": "de5a20aa0c87a303d5ec56e2cec8f95538f28542",
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "one commit, two files, +56/-1, reviewed commit by commit against b038b345d.",
+    "done_when": "done_when (3) is served by the sample_vertex_count row at carrier-identity-receipt.html:16 (340 entries, all 6, delta 0) and the key-counting caption at :7; clauses (1) and (2) are untouched by this commit and were scored at b038b345d.",
+    "goal": "de5a20aa0 changes no measurement; it repairs carrier-identity-receipt.html:7 and adds check_receipt_table.py:1 to make the completeness claim true and checkable.",
+    "manifest": "read; status complete, commits end at de5a20aa0.",
+    "write_paths": "both gained paths are inside the declared roots scripts/prototypes/carrier_identity_receipt and docs/evidence/fragments/converged-forward-solve/carrier-identity-receipt.html; nova/ and tests/ are untouched."
+  },
+  "justifications": {
+    "durability": "check_receipt_table.py:22 reddens on the omission, but nothing in tests/ or scripts/ invokes it, so it fires only when run by hand.",
+    "evidence": "I re-ran the check (keys=7 named=7 rows=8, exit 0; sample_vertex_count missing, exit 1 pre-change) and the added row reconciles with the earlier receipt's 340 entries all 6 and with receipts/carrier-h200.json and carrier-cpu.json.",
+    "fit": "check_receipt_table.py:1-54 follows the prototype idiom, passes ruff check, and carries no plan or version label.",
+    "goal_fidelity": "check_receipt_table.py:22 reports keys=7 named=7 rows=8 exit 0 at the head and MISSING sample_vertex_count exit 1 at b038b345d, so carrier-identity-receipt.html:7 is now true and shown to be checked.",
+    "reuse": "tests/test_outboard_census_receipt_consistency.py:90 reconciles one receipt with one fragment by pinned values and offers no reusable completeness check, so this addition neither extends nor duplicates it.",
+    "scope_discipline": "git diff --stat b038b345d..de5a20aa0 names exactly the fragment and check_receipt_table.py, both inside the declared write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source goal is to rebuild the carrier vertex identity's H200 receipt and importing-test arm at main; the gained commit de5a20aa0 changes no measurement, it repairs docs/evidence/fragments/converged-forward-solve/carrier-identity-receipt.html:7 and adds scripts/prototypes/carrier_identity_receipt/check_receipt_table.py:1, which the caption names at carrier-identity-receipt.html:7.\nVERDICT done_when: done_when (3) requires the fragment to state which recorded figures changed; the gained row at carrier-identity-receipt.html:16 lists sample_vertex_count with delta 0 on both devices against the earlier receipt's 340 entries all 6, and the caption at :7 now counts keys (N = 7, eight rows) rather than claiming seven figures, which is the measure the earlier blocking finding took.\nVERDICT write_paths: the declared write paths cover scripts/prototypes/carrier_identity_receipt and docs/evidence/fragments/converged-forward-solve/carrier-identity-receipt.html; both gained paths sit inside them, and git diff --name-only b038b345d..de5a20aa0 -- nova/ tests/ returns 0 files.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T151501014817-carrier-identity-receipt/manifest.md; status complete, commits end at de5a20aa0, and its checkpoint states the check reports sample_vertex_count missing before that commit and keys=7 named=7 rows=8 at it, both of which I reproduced.\nVERDICT diff: read de5a20aa0 against b038b345d commit by commit (one commit, two files, +56/-1): carrier-identity-receipt.html:7 gains the key-counting caption and :16 the sample_vertex_count row, and check_receipt_table.py is a new 54-line script with no other change.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: check_receipt_table.py:22 reports keys=7 named=7 rows=8 exit 0 at the head and MISSING sample_vertex_count exit 1 at b038b345d, so the caption's completeness claim at carrier-identity-receipt.html:7 is now true and shown to be checked.\nSCORE evidence: 17\nJUSTIFICATION evidence: I re-ran the check the commit body records (keys=7 named=7 rows=8, exit 0; sample_vertex_count missing, exit 1 on the pre-change fragment) and the added row reconciles with the earlier receipt's sample_vertex_count of 340 entries all 6 and with receipts/carrier-h200.json and carrier-cpu.json.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat b038b345d..de5a20aa0 names exactly the fragment and check_receipt_table.py, both inside the declared write paths, and no product, test or figure file.\nSCORE durability: 12\nJUSTIFICATION durability: check_receipt_table.py:22 is a real guard that reddens on the omission, but nothing in the repository invokes it (grep over tests/ and scripts/ for the module finds only the caption's citation at carrier-identity-receipt.html:7), so it fires only when a reader runs it by hand.\nSCORE fit: 17\nJUSTIFICATION fit: check_receipt_table.py:1-54 follows the surrounding prototype idiom, ruff check reports no findings on it, and its names carry no plan or version label.\nSCORE reuse: 16\nJUSTIFICATION reuse: I searched for an owner of record-versus-fragment reconciliation and found tests/test_outboard_census_receipt_consistency.py:90, which pins one receipt's values into one fragment; it offers no reusable key-completeness check, so this addition neither extends nor duplicates that owner, though it also does not adopt the test idiom.\nFINDING scripts/prototypes/carrier_identity_receipt/check_receipt_table.py:22 non-blocking: the check is a standalone script with no automatic invocation, so a later caption or record edit leaves the claim at carrier-identity-receipt.html:7 unchecked unless someone runs it by hand, while the repository's existing idiom for this reconciliation is a pytest test (tests/test_outboard_census_receipt_consistency.py:90) that runs in the suite.\nFINDING docs/evidence/fragments/converged-forward-solve/carrier-identity-receipt.html:7 non-blocking: the caption says the claim is checked but gives no command and no resolved path, and the record it reads (receipts/h200-repair.json) lives in a crew run directory outside the repository, so the cited check cannot be reproduced from a checkout without knowing that run's location.\n",
+  "review_run_id": "r-20261027T185325475793-review-of-carrier-identity-receipt-de5a20aa0c87",
+  "reviewed_base_sha": "b038b345d29b29aa5b800fb3208b35ca422ee8ae",
+  "reviewed_commits": [
+    "de5a20aa0"
+  ],
+  "reviewed_head_sha": "de5a20aa0c87a303d5ec56e2cec8f95538f28542",
+  "reviewed_run_id": "r-20261027T151501014817-carrier-identity-receipt",
+  "scores": {
+    "durability": 12,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T19:59:00Z",
+  "total": 100
+}

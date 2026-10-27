@@ -36,18 +36,32 @@
   that only the terminating step produces is refused rather than written.</p>
 
   <p id="nonfinite-refusal-row">The CPU diverted 300-cell certificate row was
-  measured at three revisions with one driver: the base <code>d3dcd9ce3</code>,
-  this node's head <code>c9fd19dcc</code>, and the main checkout's
-  <code>491406301</code>. All three return the same terminal
-  <code>fixed_point_residual</code> of <code>0.0749196925647991</code> after 12
-  trips with the active set settled and the row reported unqualified, so the
-  refusal reads a mask without changing what the solve reaches; the row does
-  not reach the roughly <code>5.6e-15</code> in two trips recorded for the
-  production route earlier, and because the main tip reproduces this row's
-  number exactly, that difference belongs to the tree and the lane rather than
-  to the refusal. The measurements are
-  <code>logs/row/base.log</code>, <code>logs/row/head.log</code> and
-  <code>logs/row/main.log</code> and the three arms differ by no digit.</p>
+  run at the base <code>d3dcd9ce3</code> and at this node's head
+  <code>b4954b211</code> through the benchmark's own command line, each in its
+  own throwaway worktree: the committed part receipt is removed inside the
+  worktree first, so each arm solves rather than re-rendering a stored row.
+  Both arms return a terminal <code>fixed_point_residual</code> of
+  <code>0.0749196925647991</code> after 12 trips with termination
+  <code>active_set_settled</code>, the row reported unqualified and not
+  converged, <code>EXIT=0</code>, differing by no digit; an earlier three-arm
+  run through the measure driver at the base, at <code>c9fd19dcc</code> and at
+  the main checkout's <code>491406301</code> returned that same number, so the
+  refusal reads a mask without changing what the solve reaches
+  (<code>logs/row-cli/base.log</code> and <code>logs/row-cli/head.log</code>,
+  job 1297278, 00:15:38).</p>
+
+  <p id="nonfinite-refusal-row-receipt">The roughly <code>5.6e-15</code> in two
+  trips recorded for this row earlier is not reproducible as a solve, and the
+  reason is in the benchmark rather than in the tree:
+  <code>benchmarks/solovev_certificate.py:2230</code> returns early from
+  <code>_measure</code> whenever the part JSON is already present, printing
+  <code>SOLOVEV_RENDER_PERSISTED</code> and reporting the stored row.
+  Invoked that way the command completes both arms in 43 s without solving and
+  returns <code>5.626976272072871e-15</code> in 2 trips at both revisions,
+  which is the receipt's own number read back
+  (<code>logs/row-cli/slurm-1297270.out</code>, kept as the record of that
+  trap). The same receipt is what the earlier row recorded, so that figure
+  measures a stale artifact rather than either tree.</p>
 
   <p id="nonfinite-refusal-tests">Nine tests in
   <code>tests/test_solve_nonfinite_refusal.py</code> pass: the mask flags only
@@ -59,8 +73,14 @@
   <code>run</code> builds, and the reduced Newton driver through
   <code>non_finite_cell_mask</code> over a real
   <code>CellCurrentMoments</code>. The
-  negative control removes the two host-loop refusal calls from a scratch
-  archive of the head tree; both planted-NaN host-loop tests then fail
-  (<code>negative-control.log</code>, 2 failed, 3 passed, <code>EXIT=1</code>),
-  so the guard is shown firing rather than merely passing.</p>
+  negative control cuts the production mask wiring in a scratch copy of the
+  head tree — both refusal calls removed from <code>drive_linear_steps</code>
+  and the <code>moment_finiteness</code> call removed from
+  <code>_drive_trips</code> — and 5 of the nine tests then fail with
+  <code>EXIT=1</code>: both certificate host-loop tests, including the one
+  whose only non-finite state is the one the terminating step returns, the
+  certificate production-mask test, and both reduced-Newton host-loop tests,
+  the last failing by proceeding into the trip rather than by refusing
+  (<code>logs/negative-control-wiring.log</code>). The guard is shown firing
+  rather than merely passing.</p>
 </section>

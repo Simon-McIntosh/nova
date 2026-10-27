@@ -1,0 +1,124 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-27T16:24:15.270Z",
+  "dispatched_at": "2026-10-27T16:13:49Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/kernel-compile-barrier.html:59",
+      "id": "done_when-1",
+      "reason": "a worker reaching this clause either cuts the suite short and reports a subset as the whole, or exhausts its budget, and either way the section's gate proves nothing about the change.",
+      "text": "\u00a72 done-when (3) requires \"the kernel tests pass at head with no added failure, with both suite arms run as one sirius job\", but the plan's own comment `c-20261027-census-not-the-lever` (line 114) records that \"the base arm reached 35 of 56 files\" in one 3.5 h sirius job, so the clause cannot be satisfied and the node fails on capacity rather than on the bound",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/kernel-compile-barrier.html:59",
+      "id": "reasoning-1",
+      "reason": "a \u00a72 worker cannot reach 0 s-to-10 s by shrinking the variadic input, so a correct implementation reports a failed gate, or the worker widens the change past the declared mechanism chasing a target the lever cannot deliver.",
+      "text": "done-when (2) demands \"the point jet's cold compile falls to 10 s or less\" from a mechanism whose lever covers 51.3 s of the 95.1 s wall (`variadic-op-splitter` 34.2 s plus `multi_output_fusion` 17.1 s, \u00a75 line 73 and comment `c-20261027-compile-pass-profile-landed`), leaving an arithmetic floor near 43.8 s even if both passes vanished; the demand is also six times tighter than the 60 s clause this plan exists to meet (\u00a70 line 47)",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/kernel-compile-barrier.html:58",
+      "id": "anchors_resolve-1",
+      "reason": "the decisions block is the plan's semantic authority, and a worker checking the ruling it is told to follow finds the opposite one.",
+      "text": "\u00a72 says the three-times-primal bound \"is retired as a done-when (lead decision 2026-10-27)\", but no decision of that date is recorded in the plan: the only decision block is `tangent-representation` (line 77, 2026-10-06, choice `scan-or-exact`, whose own text still states \"exact tangents within three times the primal\")",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/kernel-compile-barrier.html:63",
+      "id": "reasoning-2",
+      "reason": "a \u00a73 worker completes the named redirect, counts the section met, and leaves a copy that still pays the copy's full cold compile, which is the cost this section exists to remove.",
+      "text": "\u00a73 asserts \"the expression is defined twice today\" (the production `_row_program` and the copy at `scripts/prototypes/read_route/jets.py`), but `jax.jit(jax.vmap(_source_jets, in_axes=(0, None)))` is defined four times, including `scripts/prototypes/fixed_points/solve.py:121`, which the instruction \"bound the owner ... and redirect the copy\" leaves live, so the section's own goal (\"one bounded program serves both\") is not reached by the mechanism it states",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "d6c877fca1a84e718d78a8475d16c3182a2052f9add1c04cc037d646c6902866",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 32,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "",
+      "when": "2026-10-27T16:32:17.187496+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-27T16:32:20.963067+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "anchors_resolve-1",
+      "reason": "",
+      "when": "2026-10-27T16:32:24.346592+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-2",
+      "reason": "",
+      "when": "2026-10-27T16:32:29.319642+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-27T16:32:24.346592+00:00"
+    },
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-27T16:32:17.187496+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-27T16:32:20.963067+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-27T16:32:29.319642+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-kernel-compile-barrier.v32.json",
+  "review_run_id": "r-20261027T153305931000-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "50800311069c878a16c08998f84889ce454ca0ee",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \u00a72 retires the three-times-primal bound citing a \"lead decision 2026-10-27\", which no decisions block records, while `tangent-representation` (2026-10-06) still declares that bound as the chosen form.",
+    "done_when": "a finding \u2014 \u00a72's done-when (3) requires both kernel-suite arms in one sirius job, which the plan's own comment at line 114 records as not achievable (the base arm reached 35 of 56 files in 3.5 h).",
+    "evidence_paths": "pass \u2014 both sections land into the existing ledger (`docs/research/compile-cost-evidence.html`) and the plan's evidence fragments under `docs/evidence/`; neither puts a gate log in a scratchpad or a node-local directory.",
+    "naming": "pass \u2014 no plan labels, stage names or ticket ids reach a symbol or comment in the changed units; node and job ids appear only as evidence provenance.",
+    "reasoning": "a finding \u2014 \u00a72's 10 s target in done-when (2) is not produced by the lever \u00a72 states: the two passes it names account for 51.3 s of a 95.1 s wall, so removing them entirely leaves about 43.8 s.",
+    "single_goal": "pass \u2014 \u00a72 carries the variadic-program restructure and \u00a73 the bounded jets build; each has one deliverable and its own gate.",
+    "wiring": "pass \u2014 s2 declares `data-links=\"kernel-compile-barrier#s5\"` and s3 declares `#s2,#s5`; both predecessors exist and are `done`, and both sections now take their mechanism from \u00a75's attribution as \u00a75's done-when requires."
+  },
+  "section_digests": {
+    "_document": "d67c7f20073239498faa0ce9cc8e3a1685606ac748b509ce4c998f9ec0513f65",
+    "s0": "6af29e9c0d4ae386d870df6baa70b910da2c50485eef97ddf1c3d2ebc9f12a27",
+    "s1": "f60ffbcd7c6c609b9e2ce1cbc5be3879c9613e2a1f1b41018a50e31a169abdb0",
+    "s2": "522247c0ffb4137be29cd0c5ef2da53233abe64bb3f26c6ed3400354106a0b41",
+    "s3": "2328e546b4ee7adc67356c6ffbf4e4111086ab7f05643eee6dbbb80d7c498344",
+    "s4": "043c0ccddafb69cbd714f400a3810894eb704687755dfb014b018a750adc8b16",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T16:32:14.642700+00:00"
+}

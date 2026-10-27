@@ -5,6 +5,13 @@
   "call_sites": [],
   "completed_at": "2026-10-27T11:26:57.923Z",
   "dispatched_at": "2026-10-27T11:08:22Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "compile-pass-profile",
+      "recorded_at": "2026-10-27T12:13:39.715099+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/compile_pass_profile/run.sh",

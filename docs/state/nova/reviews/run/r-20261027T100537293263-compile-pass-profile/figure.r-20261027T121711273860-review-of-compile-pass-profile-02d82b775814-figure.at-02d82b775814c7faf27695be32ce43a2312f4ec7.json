@@ -1,0 +1,32 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-27T12:29:57.745Z",
+  "dispatched_at": "2026-10-27T12:19:13Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/compile_pass_profile/figure.py",
+      "line": 39,
+      "severity": "non-blocking",
+      "summary": "The left panel draws the first 12 rows of a 96-row pass table and nothing in the picture says the list is cut: no 'top 12' in the axis label, no continuation mark, no summed share. The twelve shown account for 76.22 s of the 91.19 s attributed, so 84 further passes carrying 14.97 s - 16.4% of the attributed compile - are absent, and the figcaption's 'Time per pass for the point jet's H200 cold compile' reads as if the panel were complete. A reader cannot tell from the picture whether the bars are all the passes, the costliest subset, or a thresholded set, so the panel understates where the remaining time sits. Marking the truncation in the axis label or caption, or drawing the remainder as one 'other 84 passes' bar, would make the panel's own claim checkable."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261027T121711273860-review-of-compile-pass-profile-02d82b775814-figure",
+  "reviewed_base_sha": "d06fe116aca44c5c80d0aefc2ee96670da1328b9",
+  "reviewed_head_sha": "02d82b775814c7faf27695be32ce43a2312f4ec7",
+  "reviewed_run_id": "r-20261027T100537293263-compile-pass-profile",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "pass - text is dark on white throughout (tick and label ink #52514e at 7.94:1, value and legend ink #0b0b0b at 19.68:1 measured on the rendered PNG), and the bar fills are #3366cc at 5.37:1 and #999999 at 2.85:1 against white, both reading clearly as data at bar scale",
+    "data_ink": "pass - ink is bars, value labels, axis labels, tick labels and one legend row; every mark carries a quantity and nothing else is drawn",
+    "decoration": "pass - white background with no gradient, fill, gridline, shading or theme; the axes drawn are the two that carry a scale and the top and right spines are absent on both panels",
+    "label_collision": "pass - nothing is clipped or overlapping: dark ink spans columns 19-1378 of 1400 and rows 54-701 of 720 with no mark within 2 px of a canvas edge, the longest tick label zero_sized_hlo_elimination clears the axis by about 9 px, and the right panel's before-first-dump / passes / after-last-dump tick labels are separated by clear white columns",
+    "legibility": "pass - both panels read at a glance on the 1400x720 canvas: 12 ranked bars each carrying its own value label, tick and value text at 14 pt, axis labels at 16 pt, and the right panel's three-way wall split labelled 0.85 / 91.19 / 3.07",
+    "table_form": "pass - the left panel is a ranked magnitude comparison over 12 passes and the right panel is a part-to-whole split whose message is the ratio of the passes bar to the two bracketing bars; neither is a table drawn as an image, and the ten-costliest-pass table the section asks for exists beside the figure in the evidence fragment"
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T12:33:02.663015+00:00",
+  "total": null
+}

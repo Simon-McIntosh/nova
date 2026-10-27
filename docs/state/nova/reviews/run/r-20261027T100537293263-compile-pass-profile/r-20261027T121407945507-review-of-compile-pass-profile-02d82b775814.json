@@ -1,0 +1,76 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "the reviewed manifest records baseline_suite: null and after_suite: null: this is a measurement node whose write paths reach no test file, so no suite arm ran and there are no gate logs to derive failure ids from; the count is 0 because no arm ran, not because an arm ran clean",
+  "call_sites": [
+    "scripts/prototypes/compile_pass_profile/job.sh",
+    "scripts/prototypes/compile_pass_profile/run.sh"
+  ],
+  "completed_at": "2026-10-27T12:31:28.913Z",
+  "dispatched_at": "2026-10-27T12:17:00Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/compile_pass_profile/run.sh",
+      "line": 30,
+      "severity": "blocking",
+      "summary": "The reconcile guard the commit exists to add is not on the gate's path: run.sh ends after analyse.py and job.sh calls nothing else, so neither run.sh nor job.sh ever invokes summarise.py:111 or figure.py. The delivered docs/figures/kernel-compile-barrier/compile-pass-profile/pass-profile.json was produced by a manual summarise call (it carries reconciled_seconds and reconciliation_residual_seconds=0.0) and a manual figure call, so re-running the manifest's declared gate produces only profile.json and attribution.json: it cannot regenerate the shipped receipt or run the RECONCILE-FAIL check. A gate that never runs the guard reports a protection that is not there. Add summarise.py and figure.py to run.sh (or job.sh) and propagate their exits."
+    },
+    {
+      "file": "scripts/prototypes/compile_pass_profile/profile.py",
+      "line": 108,
+      "severity": "non-blocking",
+      "summary": "The cold-cache evidence is authored by the profile, not measured. When the ledger is empty - which is the normal state with JAX_ENABLE_COMPILATION_CACHE=false, because cache_guard only records a miss inside put_executable_and_time - the code fabricates a row with cache_key 'uncached-<program>-<size>' and its own measured compile_seconds. The delivered rerun/point_jet-4/profile.json carries exactly that key and program, so the fallback fired, and the assert at profile.py:119 then holds by construction. The commit body's 'records the compilation as a measured cache miss' and the manifest's 'measured cache miss' are therefore not borne out: the receipt states a miss it assumed. Coldness is still true from `assert not jax.config.jax_enable_compilation_cache` at profile.py:26, so the measurement stands; the assertion does not guard what it claims."
+    },
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/compile-pass-profile.html",
+      "line": 39,
+      "severity": "non-blocking",
+      "summary": "The recommendation states the two passes 'account for 51.31 s of the 91.19 s attributed, which is 56.3% of the profile and about 42 s of the 82.43 s cold compile', but 56.3% of 82.43 s is 46.4 s, and scaling the same 51.31 s by the wall share (51.31/95.12) gives 44.5 s. The 42 s figure follows from neither reading and is 4 to 5 s low, in the sentence the fragment ends on. The 51.31 s, 56.3% and 82.43 s are all correct against job5.log; only the derived second figure is wrong."
+    },
+    {
+      "file": "scripts/prototypes/compile_pass_profile/summarise.py",
+      "line": 104,
+      "severity": "non-blocking",
+      "summary": "reconcile accepts a negative seconds_before_first_dump, so an inconsistent bracket satisfies the sum rather than failing it. The delivered receipt publishes -0.1601 s for control-64 and -0.2181 s for control-256 - dumps stamped before the compile start, i.e. the sampled module wrote its dumps outside the interval being accounted - and both pass with residual 0.0 because the negative value and the oversized after_last_dump absorb each other (control-256: -0.218 + 0.068 + 2.003 = 1.853 s). In exactly the sub-two-second regime the fragment discusses at line 37, the guard cannot tell a bad bracket from a bad chain; a non-negative requirement would refuse the case the fragment describes."
+    },
+    {
+      "file": "scripts/prototypes/compile_pass_profile/figure.py",
+      "line": 21,
+      "severity": "non-blocking",
+      "summary": "CODEGEN omits 'autotuner', so the autotuner row (8.374 s, the third largest) is drawn in HLO_COLOUR and the figure legend at figure.py:111 calls it an HLO pass, while the fragment at line 39 counts it among 'Codegen stages (autotuner 8.37 s plus 7.54 s of LLVM IR stages)'. The rendered time-per-pass.svg shows a blue autotuner bar under a legend reading 'blue = HLO pass', so the figure and the prose attached to it classify the same row two ways."
+    }
+  ],
+  "justifications": {
+    "durability": "three refusals are demonstrated red (pass-profile/red-arm/summarise-red-arm.log, analyse-red-arm.log, run-sh-analysis-red-arm.log) but no test exists, profile.py:119 is guaranteed true by profile.py:108, and the reconcile guard at summarise.py:111 is not invoked by run.sh or job.sh so the declared gate cannot reach it",
+    "evidence": "job5.log:16 and pass-profile.json agree to every published digit (compile 95.11917246878147 s, attributed 91.1917 s, before 0.8542 s, after 3.0733 s, residual 0.0), but profile.py:108 synthesises the cache-miss row the receipt cites, so one part of the record is asserted rather than measured",
+    "fit": "the modules follow the neighbouring prototypes and introduce no plan label, but profile.py:67 replaces the removed `import os` with an inline __import__('os') rather than the module import the rest of the file uses",
+    "goal_fidelity": "docs/evidence/fragments/kernel-compile-barrier/compile-pass-profile.html:39 carries the 51.31 s split between variadic-op-splitter and multi_output_fusion that the goal exists to establish, against job5.log:16's 91.19 s attributed total",
+    "reuse": "profile.py:18 now calls the census owner's row.program and row.cache_guard and figure.py:19 imports nova.media.ink, closing both duplication findings; the remaining local code is the timing split and the control program, which scripts/prototypes/kernel_compile_census/row.py does not expose as a callable",
+    "scope_discipline": "the eight paths of commit 02d82b775 are all inside the three declared write paths and the commit carries no product code"
+  },
+  "project": "nova",
+  "review_run_id": "r-20261027T121407945507-review-of-compile-pass-profile-02d82b775814",
+  "reviewed_base_sha": "56097c60b0a9d3edb2980c9dec2606e2426e4672",
+  "reviewed_head_sha": "02d82b775814c7faf27695be32ce43a2312f4ec7",
+  "reviewed_run_id": "r-20261027T100537293263-compile-pass-profile",
+  "rubric": "independent",
+  "scores": {
+    "durability": 11,
+    "evidence": 17,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T12:33:15.069134+00:00",
+  "total": 99,
+  "verdicts": {
+    "diff": "read the single commit 56097c60b..02d82b775: run.sh now propagates the analysis exit, analyse.py refuses a chain longer than its compile, summarise.py re-derives gaps from write order and reconciles them against the wall, profile.py imports the census worker's program and cache ledger, and figure.py loads nova.media.ink; every change answers a finding from the prior review at 56097c60b",
+    "done_when": "the done_when asks for one H200 job whose pass chain covers at least 90% of the compile wall with instruction counts and ten costliest passes, a same-job positive control (a few seconds), and one figure plus a recommendation; /home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T100537293263-compile-pass-profile/pass-profile/job5.log:16 reports coverage 0.9587 at revision 56097c60b, its PASS lines through job5.log:26 give the ten rows the table carries, job5.log:100 makes the 1024-step control 7.64 s at 95.1%, and time-per-pass.svg renders cleanly, so the gate asserts the measure",
+    "goal": "the node's goal is to attribute the point jet's H200 cold compile to XLA passes; going into docs/evidence/fragments/kernel-compile-barrier/compile-pass-profile.html:3 the delivered fragment splits a 95.12 s compile into trace 3.25 s, lowering 0.43 s and 91.19 s across 96 passes (95.9%), and line 39 names the single lever, so the goal is met and this commit is the repair that makes the attribution checkable; one gap is that the reconcile check the commit adds is not on the gate's path (see finding)",
+    "manifest": "read; it records status complete, seven commits, the job.sh sbatch line through job5.log as its gate, a checkpoint quoting 95.12 s / 91.19 s / 95.9%, and three red-arm logs; baseline_suite and after_suite are both null and no test files exist, which matches a measurement node whose worktree carries no test path",
+    "write_paths": "the manifest declares scripts/prototypes/compile_pass_profile, docs/evidence/fragments/kernel-compile-barrier/compile-pass-profile.html and docs/figures/kernel-compile-barrier/compile-pass-profile; all eight files of the diff sit inside those three and no file under nova/ is touched"
+  }
+}

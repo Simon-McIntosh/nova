@@ -24,7 +24,7 @@
   <title>Kernel Compile Barrier | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="22">
+<meta name="plan-version" content="24">
 <meta name="plan-modified" content="2026-10-27">
 </head>
 <body>
@@ -120,7 +120,13 @@
     <div class="r-comment-body"><p>Independent review of r-20261027T100537293263-compile-pass-profile at head 56097c60b, base d06fe116: the per-pass attribution and its named lever are sound and independently reproducible from the run's own receipts, but two blocking defects sit between the receipt and the gate - run.sh:34 discards the analysis exit so job 1296870 closed EXIT=0 while its own ATTRIBUTION line reported 9975.88 s inside a 96.12 s compile, and summarise.py:48 ships 12 stale per-dump gaps summing to 983.3 s inside a 96.12 s wall in the delivered pass-profile.json.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261027T105642520419-review-of-edge-tangent-base-failures-6dbae8420eb1" data-who="reckon-build" data-when="2026-10-27T11:58:53.201Z">
-    <div class="r-comment-body"><p>Reviewed r-20261027T100839626666-edge-tangent-base-failures at d06fe116aca44c5c80d0aefc2ee96670da1328b9..6dbae8420eb1dc839301bb104176cb0261857f30: goal_fidelity 18, evidence 11, scope_discipline 20, durability 9, fit 16, reuse 4; six findings, one blocking - the elliptic &quot;device-qualified bound&quot; rests on a two-row H200 arm while the node own retained logs/h200-tangents.log records four further elliptic compile rows over the bound on the H200 (complete_pole 9.894, harmonic_root_moments 3.006, cn_pole_moment 10.372, sn_pole_moment 9.616), none of which the fragment mentions</p></div>
+    <div class="r-comment-body"><p>Reviewed r-20261027T100839626666-edge-tangent-base-failures at d06fe116aca44c5c80d0aefc2ee96670da1328b9..6dbae8420eb1dc839301bb104176cb0261857f30: goal_fidelity 18, evidence 11, scope_discipline 20, durability 9, fit 16, reuse 4; six findings, one blocking - the elliptic "device-qualified bound" rests on a two-row H200 arm while the node own retained logs/h200-tangents.log records four further elliptic compile rows over the bound on the H200 (complete_pole 9.894, harmonic_root_moments 3.006, cn_pole_moment 10.372, sn_pole_moment 9.616), none of which the fragment mentions</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261027T121711273860-review-of-compile-pass-profile-02d82b775814-figure" data-who="reckon-build" data-when="2026-10-27T12:29:57.745Z">
+    <div class="r-comment-body"><p>Figure review of the point-jet time-per-pass figure at head 02d82b775814 is parsed with all six rubric items: legibility, data_ink, decoration, contrast, table_form and label_collision pass, one non-blocking finding (the left panel draws only the first 12 of 96 passes, 76.22 s of the 91.19 s attributed, with no truncation mark), and no blocking finding. The four findings raised at head 56097c60b are all repaired in this picture: the right panel's three bars now sum to 95.1192 s against a 95.119 s compile wall (0.0000 s residual), the codegen rows are labelled by stage and carry their own grey, the legend states the blue/grey split, and the positive-control prose block is gone from the axes.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261027T121407945507-review-of-compile-pass-profile-02d82b775814" data-who="reckon-build" data-when="2026-10-27T12:31:28.913Z">
+    <div class="r-comment-body"><p>Independent review of r-20261027T100537293263-compile-pass-profile at head 02d82b775 scores goal_fidelity 18, evidence 17, scope_discipline 20, durability 11, fit 16, reuse 17; the commit genuinely repairs the prior review&#x27;s blockers (write-order gaps, exit propagation, an over-coverage refusal, and reuse of the census harness and nova.media.ink), but one blocking finding remains: summarise.py&#x27;s RECONCILE-FAIL guard is not invoked by run.sh or job.sh, so the declared gate cannot regenerate or refuse the shipped pass-profile.json.</p></div>
 </div>
 </section>
 </main>

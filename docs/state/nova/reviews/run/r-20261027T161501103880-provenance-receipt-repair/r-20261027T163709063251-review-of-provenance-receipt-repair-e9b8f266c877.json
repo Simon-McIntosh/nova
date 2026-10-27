@@ -1,0 +1,52 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "benchmarks/efit_parity_criterion_provenance.py:24",
+    "benchmarks/efit_parity_criterion_provenance.py:586"
+  ],
+  "completed_at": "2026-10-27T16:48:12.688Z",
+  "dispatched_at": "2026-10-27T16:39:04Z",
+  "findings": [
+    {
+      "file": "tests/test_efit_parity_criterion_provenance.py",
+      "line": "193",
+      "severity": "non-blocking",
+      "text": "the guard still enumerates by hardcoded index the provenance leaves allowed to drift (rows 0 and 1 evidence_verbatim, row 4 cited_path_sha256), so an edit to any of those three sources reddens the test for a reason unrelated to any criterion result, which is the same brittleness the change removed for source digests; the index paths also retarget silently if row order changes, currently pinned only by this same file at :29."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read both commits against 624860447 commit by commit; the receipt's eight changed leaves are two evidence_verbatim, one cited_path_sha256 and five source digests, every result section unchanged, and the test's fixed digest list replaced by a results-preservation guard.",
+    "done_when": "the done-when asks for a green head test plus a stated case citing compared result values, a one-ulp negative control that reddens the test, and base-then-head per-file arms in one sirius job; logs/gate-head-test_efit_parity_criterion_provenance.log (10 passed, EXIT=0), logs/negative-control.log (1 failed, EXIT=1) together with logs/negative-control-positive.log (EXIT=0) and logs/arms-summary.log record each clause.",
+    "goal": "the goal is to repair the red test on main after deciding which side is wrong; tests/test_efit_parity_criterion_provenance.py:203 now requires the checked receipt to reproduce every live result, and docs/figures/efit-forward-parity/convergence-criterion-provenance.json differs from base only in provenance leaves, so the regenerated-receipt case is the one taken.",
+    "manifest": "read; it records base 1 failed/9 passed EXIT=1 and head 10 passed EXIT=0, test_bound_classification.py 5 passed in both arms, the negative control at EXIT=1 with its positive control, and the case-1 evidence carrying all six Richardson estimates and the rescore, with both retry failures attributed to its own scaffolding.",
+    "write_paths": "the manifest declares four paths; the diff touches only tests/test_efit_parity_criterion_provenance.py, docs/figures/efit-forward-parity/convergence-criterion-provenance.json and docs/evidence/fragments/nova-portfolio-replan/provenance-receipt-repair.html, all inside them, and the declared figure directory is unused rather than exceeded."
+  },
+  "justifications": {
+    "durability": "the assertion at tests/test_efit_parity_criterion_provenance.py:203 reddens whenever any non-provenance leaf drifts, demonstrated by logs/negative-control.log where moving per_reference[0].fine_mesh_richardson_error_estimate by one ulp fails it, while :204-208 add key-set and whole-section equality, and both sides of every comparison come from independent sources (the on-disk receipt and a live rebuild) rather than a value the test supplied.",
+    "evidence": "the gate is recorded, not claimed: logs/gate-base-test_efit_parity_criterion_provenance.log holds the exact expected extra leaf ('source_digests', 'benchmarks/efit_parity_tared_external_field.py') at EXIT=1, logs/gate-head-test_efit_parity_criterion_provenance.log reads 10 passed EXIT=0, and logs/arms-summary.log reads the sirius job's four per-file arms; the head arm ran at adba0ba02 while reviewed head e9b8f266c adds only the evidence fragment, so the result transfers.",
+    "fit": "the added comment at tests/test_efit_parity_criterion_provenance.py:186 names the property in mechanism terms without plan labels, the names carry no version or stage marker, and both commit subjects carry conventional types with bodies and no attribution.",
+    "goal_fidelity": "tests/test_efit_parity_criterion_provenance.py:203 now compares the checked receipt against a live rebuild and permits drift only under source_digests and the three enumerated provenance leaves, and the receipt diff at docs/figures/efit-forward-parity/convergence-criterion-provenance.json touches no result section, so case 1 of the brief is correctly decided.",
+    "reuse": "the diff adds no function, class or module and reworks the existing guard in place, reusing the local _leaf_differences helper at tests/test_efit_parity_criterion_provenance.py:20; a search of benchmarks/ and tests/ for a receipt-preservation comparator found no other owner for this capability.",
+    "scope_discipline": "git diff 624860447..e9b8f266c reports exactly three changed files, each a declared write path, 53 insertions and 13 deletions, with nothing the goal does not imply."
+  },
+  "plan": "nova:nova-portfolio-replan",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to repair the red receipt-provenance test on main after deciding which side is wrong; tests/test_efit_parity_criterion_provenance.py:203 now requires the checked receipt to reproduce every live result, and docs/figures/efit-forward-parity/convergence-criterion-provenance.json differs from base only in provenance leaves, so the regenerated-receipt case is the one taken.\nVERDICT done_when: the done-when asks for a green head test plus a stated case citing compared result values, a one-ulp negative control that reddens the test, and base-then-head per-file arms in one sirius job; logs/gate-head-test_efit_parity_criterion_provenance.log (10 passed, EXIT=0), logs/negative-control.log (1 failed, EXIT=1) with logs/negative-control-positive.log (EXIT=0) and logs/arms-summary.log record each clause.\nVERDICT write_paths: the manifest declares four paths; the diff touches only tests/test_efit_parity_criterion_provenance.py, docs/figures/efit-forward-parity/convergence-criterion-provenance.json and docs/evidence/fragments/nova-portfolio-replan/provenance-receipt-repair.html, all inside them, and the declared figure directory is unused rather than exceeded.\nVERDICT manifest: read; it records base 1 failed/9 passed EXIT=1 and head 10 passed EXIT=0, test_bound_classification.py 5 passed in both arms, the negative control at EXIT=1 with its positive control, and the case-1 evidence carrying all six Richardson estimates and the rescore, with both retry failures attributed to its own scaffolding.\nVERDICT diff: read both commits against 624860447 commit by commit; the receipt's eight changed leaves are two evidence_verbatim, one cited_path_sha256 and five source digests, every result section unchanged, and the test's fixed digest list replaced by a results-preservation guard.\nCALL_SITES: benchmarks/efit_parity_criterion_provenance.py:24, benchmarks/efit_parity_criterion_provenance.py:586\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: tests/test_efit_parity_criterion_provenance.py:203 compares the checked receipt against a live rebuild and permits drift only under source_digests and three enumerated provenance leaves, and the receipt diff touches no result section.\nSCORE evidence: 18\nJUSTIFICATION evidence: logs/gate-base-test_efit_parity_criterion_provenance.log records the expected extra leaf at EXIT=1 and logs/gate-head-test_efit_parity_criterion_provenance.log reads 10 passed EXIT=0, with the head arm at adba0ba02 and e9b8f266c adding only the evidence fragment.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 624860447..e9b8f266c reports exactly three changed files, each a declared write path, 53 insertions and 13 deletions and nothing else.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_efit_parity_criterion_provenance.py:203 reddens on any non-provenance leaf drift, demonstrated by logs/negative-control.log moving per_reference[0].fine_mesh_richardson_error_estimate one ulp, and :204-208 add key-set and whole-section equality between the on-disk receipt and a live rebuild.\nSCORE fit: 19\nJUSTIFICATION fit: the added comment at tests/test_efit_parity_criterion_provenance.py:186 states the mechanism without plan labels and both commit subjects carry conventional types with bodies and no attribution.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no function, class or module, reworks the existing guard in place and reuses _leaf_differences at tests/test_efit_parity_criterion_provenance.py:20; no other receipt-preservation comparator exists in benchmarks/ or tests/.\nFINDING tests/test_efit_parity_criterion_provenance.py:193 non-blocking: the guard still enumerates by hardcoded index the provenance leaves allowed to drift (rows 0 and 1 evidence_verbatim, row 4 cited_path_sha256), so an edit to any of those three sources reddens the test for a reason unrelated to any criterion result, the same brittleness the change removed for source digests.\n",
+  "review_run_id": "r-20261027T163709063251-review-of-provenance-receipt-repair-e9b8f266c877",
+  "reviewed_base_sha": "624860447b7cd10c494a88e3178d46c5f983fe74",
+  "reviewed_head_sha": "e9b8f266c87700919465a5a56bb3622eb3eca5ff",
+  "reviewed_run_id": "r-20261027T161501103880-provenance-receipt-repair",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T16:44:55+00:00",
+  "total": 114
+}

@@ -17,7 +17,7 @@
 <meta name="plan-owner" content="Simon McIntosh">
 <meta name="plan-effort-hours" content="3.0">
 <meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="48">
+<meta name="plan-version" content="49">
 <meta name="plan-modified" content="2026-10-27">
 <meta name="plan-tags" content="replan,handoff,infrastructure">
 <meta name="plan-informs" content="plasma-cell-read-fidelity,single-grid-solver-cutover,ensemble-forward-seam,forward-profile-validator-set,separatrix-spline-extraction,profile-owned-solve-domain,mast-nonaxisymmetric-physics,diiid-forward-onboarding,machine-description-retirement,diiid-pulse-replay,dual-branch-selection,efit-baseline-demonstration,mast-catalog-gpu-solve">
@@ -175,6 +175,9 @@ Done when: the report lists each coupling with files, line counts, refactor and 
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261027T161501103880-provenance-receipt-repair" data-who="reckon-build" data-when="2026-10-27T16:36:08.344Z">
     <div class="r-comment-body"><p>Regenerate the checked efit parity criterion receipt (8 provenance-only lines) and replace the fixed list of source digests the test allows to differ with an assertion that every recorded criterion result is reproduced exactly; base arm 1 failed/9 passed against head arm 10 passed, test_bound_classification 5 passed in both arms, and one criterion estimate moved by one ulp in a scratch receipt copy fails the test.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261027T163709063251-review-of-provenance-receipt-repair-e9b8f266c877" data-who="reckon-build" data-when="2026-10-27T16:48:12.688Z">
+    <div class="r-comment-body"><p>Reviewed r-20261027T161501103880-provenance-receipt-repair at base 624860447b7cd10c494a88e3178d46c5f983fe74 and head e9b8f266c87700919465a5a56bb3622eb3eca5ff; scores goal_fidelity 19, evidence 18, scope_discipline 20, durability 18, fit 19, reuse 20, added_failure_count 0, one non-blocking finding that the guard still enumerates the provenance leaves allowed to drift by index, zero blocking findings.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-nova-fd-20261006-size-ceiling-in-shared-hook" data-who="nova-fd" data-when="2026-10-06T02:30:00Z">
     <div class="r-comment-body"><p>2026-10-06, for f-replan-receipts-out-of-git: the size ceiling is not a second commit-time mechanism. artifacts-carry-no-worktree-paths §4 (S27) adds nova's one commit-time hook, <code>scripts/git-hooks/pre-commit</code>, a read-only shim enabled through <code>core.hooksPath</code>. The receipts migration adds the ceiling as a second check line in that hook, in its own migration commit, after the hook lands. Its negative control is a test file above the ceiling refused by that hook.</p></div>

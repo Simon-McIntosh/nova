@@ -13,5 +13,15 @@
     </tbody>
   </table>
   <p id="moment-field-hessian-regression">All nine source-cell and corner-height cases pass at the repaired head in 686.84 s (head-hessian.log, EXIT=0). The step sweep includes 0, 10<sup>−16</sup>, 10<sup>−12</sup>, 10<sup>−8</sup>, and 10<sup>−4</sup> m. Every case checks all Hessian entries to 10<sup>−6</sup> absolute or relative and requires byte-identical primal outputs.</p>
-  <p id="moment-field-hessian-progress">The two-arm source-importer suite is running in one sirius job (1296457). The mutation control is running in one CPU batch job (1296464). The pinned-carrier replay is running on the H200 (1296463), with a cold 550-cell solve queued after it (1296465). Their terminal receipts will determine the remaining acceptance claims. Values and jets build under a private operand cache rather than altering published entries.</p>
+  <table id="moment-field-hessian-trial">
+    <caption>Scale-0.5 trial state on the two stored carriers; axis errors use the direct polygon field [m]</caption>
+    <thead><tr><th>Carrier</th><th>Map residual</th><th>Bell read axis R [m]</th><th>Direct axis R [m]</th><th>Axis error [m]</th><th>Wall height [m]</th><th>Boundary flux [Wb]</th></tr></thead>
+    <tbody>
+      <tr><td>Split</td><td>0.00311057883925982</td><td>6.200034636928319</td><td>6.200033587210902</td><td>1.04972013975445e−6</td><td>1.46458933591997e−8</td><td>−0.0030274897537745453</td></tr>
+      <tr><td>Integration</td><td>0.00311057883912629</td><td>6.200035239548553</td><td>6.200033587211955</td><td>1.65233971860708e−6</td><td>7.18702454494125e−9</td><td>−0.003027489755541886</td></tr>
+    </tbody>
+  </table>
+  <p id="moment-field-hessian-trial-verdict">Both carriers agree in read-axis position to 6.02646294234768e−7 m. Each exceeds the stated 1e−6 m direct-axis limit: the split carrier by 4.972013975445e−8 m and the integration carrier by 6.5233971860708e−7 m. The direct field's cold axis and both Bell interpolants' cold axes are exactly (6.2, 0) m in the measured binary64 read, so the Bell interpolant's cold-state axis error against the direct field is 0 m; that is the cold-state floor of this comparison. The repaired jets were cold-built in the private store in about 305 s per carrier.</p>
+  <p id="moment-field-hessian-negative">The declared mutation reverted only the repaired tangent in a scratch copy. The two named integration-pair tests, integration-212 and integration-234, failed under the mutation (negative-control.log, EXIT=1); the repaired nine-case arm passed (head-hessian.log, EXIT=0).</p>
+  <p id="moment-field-hessian-progress">The first cold 550-cell solve stopped before iteration because the repaired source digest had no certified carrier in the private fixture store (cold-solve.log, EXIT=1). The first private build encountered GPU preallocation exhaustion in its host-worker process pool (carrier-build-1296475.log, EXIT=1). A build with device preallocation disabled and its dependent solve are queued under the same private store. The two-arm source-importer suite remains in its sirius job; its base arm was killed before its pytest summary and the head arm is still running. No claim of a passing suite is made from the incomplete receipt.</p>
 </section>

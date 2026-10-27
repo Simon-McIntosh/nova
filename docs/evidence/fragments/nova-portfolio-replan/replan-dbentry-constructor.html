@@ -19,21 +19,29 @@
     <code>nova/imas/dataset.py:540</code>.
   </p>
   <p id="replan-dbentry-constructor-gate">
-    Gate: the 25 test modules importing a changed module, one fresh pytest
-    process per file, base at <code>7a31104db</code> and head at
-    <code>3d69662eb</code> running concurrently. Each arm reports 50 failure
-    ids and the two sets are identical, so the change adds and removes none.
+    Gate: the 25 test modules importing a changed module plus the opener test,
+    one fresh pytest process per file, four at a time, as one sirius job
+    (1296924). The base arm ran at <code>7a31104db</code> from a git archive
+    and the head arm at <code>3cd2f931a</code> from the worktree; each log
+    prints <code>nova.__file__</code> and <code>nova.imas.dataset.__file__</code>
+    so the two arms are shown reading different code. Base reports 79 failure
+    ids and head 70; <code>comm</code> finds nothing present at head and absent
+    at base, so the change adds no failure. The difference is the eight opener
+    tests, which fail at base and pass at head, and one pre-existing
+    <code>test_diiid_current</code> failure the head arm does not show.
   </p>
   <p id="replan-dbentry-constructor-not-measured">
-    Not measured: <code>tests/test_steering_frames.py</code> and
-    <code>tests/test_playable_session.py</code> did not finish inside the
-    bounded arm run in either arm, so they are reported unmeasured rather than
-    passing.
+    All 26 modules ran to their summary line in both arms, including
+    <code>tests/test_steering_frames.py</code> (8 failed, 11 passed) and
+    <code>tests/test_playable_session.py</code> (2 failed, 26 passed), the two
+    the earlier timeout cut off.
   </p>
   <p id="replan-dbentry-constructor-negative-control">
-    Negative control: with the opener's <code>dd_version</code> pass-through
-    removed in a scratch copy, <code>tests/test_imas_opener.py</code> reports
-    <code>1 failed, 6 passed</code> and exits 1, failing only
-    <code>test_opener_passes_dd_version_through</code>, which passes at head.
+    Negative control, three mutations in scratch copies, each failing only its
+    own assertion: dropping <code>dd_version</code> fails both version
+    assertions (<code>2 failed, 6 passed</code>); rewriting it to the minor
+    release fails the string pass-through (<code>1 failed, 7 passed</code>);
+    dropping the backend routing fails the backend assertion
+    (<code>1 failed, 7 passed</code>). Each exits 1.
   </p>
 </section>

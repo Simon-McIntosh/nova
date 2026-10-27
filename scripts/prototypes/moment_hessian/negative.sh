@@ -1,7 +1,11 @@
 #!/bin/bash
+#SBATCH --partition=all_debug
+#SBATCH --time=00:59:00
+#SBATCH --cpus-per-task=2
+#SBATCH --mem=24G
 set -uo pipefail
 export TMPDIR=/tmp
-scratch=$(mktemp -d "$TMPDIR/$USER-${SLURM_JOB_ID:-$$}-XXXX")
+scratch=$(mktemp -d "$TMPDIR/$USER-${SLURM_JOB_ID:-$$}-XXXX") || exit 2
 trap 'printf "scratch contents before removal: %s\n" "$scratch"; find "$scratch" -mindepth 1 -maxdepth 1 -print; rm -rv "$scratch"' EXIT
 tree=$1
 revision=$2

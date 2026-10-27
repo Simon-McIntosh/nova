@@ -43,8 +43,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-import imas
-
+from nova.imas.dataset import open_db_entry
 from nova.imas.machine import (
     CrossSection,
     ImasGeometryReader,
@@ -83,7 +82,7 @@ def machine_section(element: object, fallback: str) -> MachineSection:
     )
 
 
-with imas.DBEntry(source, "r", dd_version=dd_version) as entry:
+with open_db_entry(source, "r", dd_version=dd_version) as entry:
     occurrences = {
         name: entry.list_all_occurrences(name)
         for name in ("wall", "pf_active", "magnetics", "pf_passive", "tf")

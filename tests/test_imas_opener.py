@@ -41,6 +41,16 @@ def test_opener_passes_dd_version_through(monkeypatch):
     opener()("imas:hdf5?path=/tmp/entry", "r", dd_version=Version("3.39.0"))
 
     assert record["kwargs"]["dd_version"] == "3.39.0"
+    assert type(record["kwargs"]["dd_version"]) is str
+
+
+def test_opener_passes_a_dd_version_string_unchanged(monkeypatch):
+    record = {}
+    monkeypatch.setattr(dataset_module.imas, "DBEntry", Recorder(record))
+
+    opener()("imas:hdf5?path=/tmp/entry", "r", dd_version="3.40.1")
+
+    assert record["kwargs"]["dd_version"] == "3.40.1"
 
 
 def test_opener_adds_no_dd_version_it_was_not_given(monkeypatch):
@@ -56,9 +66,11 @@ def test_opener_routes_a_named_backend_into_the_uri(monkeypatch):
     record = {}
     monkeypatch.setattr(dataset_module.imas, "DBEntry", Recorder(record))
 
-    opener()("/tmp/pulse.nc", "r", backend="hdf5")
+    opener()("/tmp/pulse.nc", "r", backend="netcdf")
 
-    assert record["uri"] == "imas:hdf5?path=/tmp/pulse.nc"
+    assert record["uri"] == "imas:netcdf?path=/tmp/pulse.nc"
+    assert record["uri"].split("?", 1)[0] == "imas:netcdf"
+    assert "backend" not in record["kwargs"]
 
 
 def test_opener_leaves_a_uri_that_names_its_backend(monkeypatch):

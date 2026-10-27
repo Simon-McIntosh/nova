@@ -33,9 +33,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
 
-import imas
 import numpy as np
 
+from nova.imas.dataset import open_db_entry
 from nova.imas.machine_artifact import (
     VerifiedMachineArtifact,
     pinned_dd_version,
@@ -120,7 +120,7 @@ def open_verified_description(
     """Open an already-verified artifact at the dictionary version it pins."""
 
     dd_version = pinned_dd_version(artifact)
-    entry = imas.DBEntry(
+    entry = open_db_entry(
         f"imas:hdf5?path={artifact.directory}", "r", dd_version=dd_version
     )
     try:
@@ -248,13 +248,13 @@ def write_and_reopen(
     """Write the served description to a pulse and read it back at the same pin."""
 
     uri = f"imas:hdf5?path={Path(path)}"
-    entry = imas.DBEntry(uri, "x", dd_version=dd_version)
+    entry = open_db_entry(uri, "x", dd_version=dd_version)
     try:
         for name in DYNAMIC_IDS:
             entry.put(ids[name])
     finally:
         entry.close()
-    reopened = imas.DBEntry(uri, "r", dd_version=dd_version)
+    reopened = open_db_entry(uri, "r", dd_version=dd_version)
     try:
         result = {name: reopened.get(name) for name in DYNAMIC_IDS}
     finally:

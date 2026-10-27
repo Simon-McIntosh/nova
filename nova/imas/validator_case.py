@@ -29,6 +29,7 @@ from typing import TYPE_CHECKING, Sequence
 if TYPE_CHECKING:
     import imas
 
+from nova.imas.dataset import open_db_entry
 from nova.database.layer_fetch import (
     LayerFetchError,
     LayerRegistryUnreachable,
@@ -147,8 +148,6 @@ def netcdf_to_hdf5(
     through imas-python; an IDS the layer does not carry is skipped.
     """
 
-    import imas
-
     source = Path(nc_path)
     target = Path(hdf5_directory)
     master = target / "master.h5"
@@ -156,8 +155,8 @@ def netcdf_to_hdf5(
         return target
     target.mkdir(parents=True, exist_ok=True)
 
-    entry_nc = imas.DBEntry(str(source), "r", dd_version=dd_version)
-    entry_hdf5 = imas.DBEntry(f"imas:hdf5?path={target}", "w", dd_version=dd_version)
+    entry_nc = open_db_entry(str(source), "r", dd_version=dd_version)
+    entry_hdf5 = open_db_entry(f"imas:hdf5?path={target}", "w", dd_version=dd_version)
     try:
         for name in ids_names:
             try:
@@ -193,9 +192,7 @@ class ValidatorLayer:
     def entry(self) -> "imas.DBEntry":
         """Return an opened read-only DBEntry at this layer's DD version."""
 
-        import imas
-
-        return imas.DBEntry(
+        return open_db_entry(
             f"imas:hdf5?path={self.hdf5_directory}",
             "r",
             dd_version=self.dd_version,

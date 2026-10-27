@@ -23,6 +23,7 @@ import numpy as np
 from scipy import stats
 
 from nova.biot.polygon import polygon_greens
+from nova.imas.dataset import open_db_entry
 
 if TYPE_CHECKING:
     from nova.imas.machine import StaticMachineDescription
@@ -1356,8 +1357,6 @@ def active_coil_response_from_imas(
     filament-centre approximation or data-dictionary conversion is allowed.
     """
 
-    import imas
-
     names = tuple(str(name) for name in coil_names)
     if not names or len(set(names)) != len(names):
         raise DiiidDescriptionError("active-coil names must be unique and nonempty")
@@ -1371,7 +1370,7 @@ def active_coil_response_from_imas(
 
     responses = []
     records = []
-    with imas.DBEntry(Path(entry_path), "r", dd_version=dd_version) as entry:
+    with open_db_entry(Path(entry_path), "r", dd_version=dd_version) as entry:
         active = entry.get("pf_active", autoconvert=False)
         written_dd = str(active.ids_properties.version_put.data_dictionary)
         if written_dd != dd_version:

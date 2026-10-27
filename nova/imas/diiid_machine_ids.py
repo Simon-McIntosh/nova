@@ -18,6 +18,7 @@ import numpy as np
 from imas.dd_zip import dd_xml_versions
 
 from nova.equilibrium.wall_mask import WallUnit, wall_units_from_ids
+from nova.imas.dataset import open_db_entry
 from nova.imas.machine import DiagnosticSightline, StaticMachineDescription
 
 
@@ -375,7 +376,7 @@ def _element_record(element: Any, fallback_name: str) -> dict[str, Any]:
 def _source_dd_version(source_path: Path) -> str:
     """Discover the version written into the source without converting it."""
 
-    with imas.DBEntry(source_path, "r") as database:
+    with open_db_entry(source_path, "r") as database:
         wall = database.get("wall", 0, lazy=True, autoconvert=False)
         return str(wall.ids_properties.version_put.data_dictionary)
 
@@ -384,7 +385,7 @@ def _read_source_description(source_path: Path) -> SourceMachineDescription:
     """Read at the declared DD and detach values through Nova dataclasses."""
 
     source_dd_version = _source_dd_version(source_path)
-    with imas.DBEntry(source_path, "r", dd_version=source_dd_version) as source_entry:
+    with open_db_entry(source_path, "r", dd_version=source_dd_version) as source_entry:
         source_ids = {
             name: source_entry.get(name, 0, autoconvert=False) for name in IDS_NAMES
         }

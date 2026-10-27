@@ -22,6 +22,7 @@ from nova.imas.diiid_machine_ids import (
     machine_ids_snapshot,
     round_trip_leaf_receipt,
 )
+from nova.imas.dataset import open_db_entry
 from nova.imas.machine_artifact import (
     ArtifactShotRange,
     MachineArtifactError,
@@ -79,7 +80,7 @@ def _sha256_file(path: Path) -> str:
 def _declared_dd_version(path: Path) -> str:
     """Read an IDS file's own dictionary version without conversion."""
 
-    with imas.DBEntry(path.resolve(), "r") as database:
+    with open_db_entry(path.resolve(), "r") as database:
         wall = database.get("wall", 0, lazy=True, autoconvert=False)
         return str(wall.ids_properties.version_put.data_dictionary)
 
@@ -92,14 +93,14 @@ def _write_and_verify_ids(
 
     output.parent.mkdir(parents=True, exist_ok=True)
     expected = machine_ids_snapshot(bundle.ids)
-    database = imas.DBEntry(output.resolve(), "w", dd_version=bundle.dd_version)
+    database = open_db_entry(output.resolve(), "w", dd_version=bundle.dd_version)
     try:
         for name in IDS_NAMES:
             database.put(bundle.ids[name])
     finally:
         database.close()
 
-    database = imas.DBEntry(output.resolve(), "r", dd_version=bundle.dd_version)
+    database = open_db_entry(output.resolve(), "r", dd_version=bundle.dd_version)
     try:
         reopened = {
             name: database.get(name, 0, autoconvert=False) for name in IDS_NAMES
@@ -205,7 +206,7 @@ def write_prior_major_probe(path: Path) -> str:
     outline.r = [1.0, 2.0, 1.0, 1.0]
     outline.z = [0.0, 0.0, 1.0, 0.0]
     path.parent.mkdir(parents=True, exist_ok=True)
-    database = imas.DBEntry(path.resolve(), "w", dd_version=dd_version)
+    database = open_db_entry(path.resolve(), "w", dd_version=dd_version)
     try:
         database.put(wall)
     finally:

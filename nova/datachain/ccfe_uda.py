@@ -1,8 +1,9 @@
-import imas
 import pyuda
 
+from nova.imas.dataset import open_db_entry
+
 """
-entry = imas.DBEntry(
+entry = open_db_entry(
     "imas://localhost:56565/uda?path=/home/mcintos/Code/uda/data/105029/1&"
     "backend=hdf5",
     "r",
@@ -24,7 +25,7 @@ result = client.get(
     "IMAS_JSON_MAP::get(path=magnetics/ids_properties/homogeneous_time, mapping=DRAFT)"
 )
 
-entry = imas.DBEntry(
+entry = open_db_entry(
     "imas://localhost:56565/uda?mapping=DRAFT&verbose=0&path=/",
     "r",
 )

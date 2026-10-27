@@ -126,7 +126,7 @@ if __name__ == "__main__":
     """
     import imas
 
-    db_entry = imas.DBEntry(magnetics.uri, "a")
+    db_entry = open_db_entry(magnetics.uri, "a")
     db_entry.open()
     ids_data = db_entry.get("magnetics")
     db_entry.close()

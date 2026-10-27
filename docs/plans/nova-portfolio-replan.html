@@ -17,7 +17,7 @@
 <meta name="plan-owner" content="Simon McIntosh">
 <meta name="plan-effort-hours" content="3.0">
 <meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="51">
+<meta name="plan-version" content="52">
 <meta name="plan-modified" content="2026-10-27">
 <meta name="plan-tags" content="replan,handoff,infrastructure">
 <meta name="plan-informs" content="plasma-cell-read-fidelity,single-grid-solver-cutover,ensemble-forward-seam,forward-profile-validator-set,separatrix-spline-extraction,profile-owned-solve-domain,mast-nonaxisymmetric-physics,diiid-forward-onboarding,machine-description-retirement,diiid-pulse-replay,dual-branch-selection,efit-baseline-demonstration,mast-catalog-gpu-solve">
@@ -208,6 +208,9 @@ Done when: the report lists each coupling with files, line counts, refactor and 
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261027T163107236439-review-of-replan-evidence-tooling-paths-8334897d57ad" data-who="reckon-build" data-when="2026-10-27T17:33:43.978Z">
     <div class="r-comment-body"><p>Reviewed 624860447→8334897d5; the census rewrite holds (61 to 0, scan test green at head), scores goal_fidelity 17, evidence 14, scope_discipline 17, durability 15, fit 12, reuse 15, zero added failures, four non-blocking findings (unimported Any plus unformatted new module, three dropped per-site env overrides, malformed suite JSON in the source manifest, base arm failing on its own self-check).</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261027T151220657263-replan-gpfs-data-root" data-who="reckon-build" data-when="2026-10-27T18:17:51Z">
+    <div class="r-comment-body"><p>replan-gpfs-data-root: GPFS and home data paths now resolve through named FilePath roots in nova/database/filepath.py (NOVA_MAST_DATA_ROOT, NOVA_DIIIID_SOURCE, NOVA_CACHE_ROOT, NOVA_LABELLER_SOURCE, NOVA_PUBLIC_HOME_ROOT), each defaulting to the former literal, across 12 product modules; two dead literals deleted; new tests/test_filepath_data_roots.py fails at base and passes at head (22 passed), and the imported test modules show zero added failures across base and head arms in one sirius job</p></div>
 </div>
 </section>
 </main>

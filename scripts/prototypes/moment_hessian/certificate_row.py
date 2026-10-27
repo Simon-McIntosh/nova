@@ -3,6 +3,7 @@
 # ruff: noqa: E402
 
 import argparse
+from functools import partial
 import json
 from pathlib import Path
 import sys
@@ -28,6 +29,10 @@ def main():
     certificate.FIGURE_ROOT = root / "figures"
     certificate.PART_ROOT = root / "parts"
     certificate.DIAGNOSTIC_ROOT = root / "diagnostics"
+    certificate._figure_receipts = partial(
+        certificate._figure_receipts,
+        logical="docs/figures/solovev/diverted-single-null-production-route-cells-300.png",
+    )
     print(
         f"nova={nova.__file__} measurement_module={polygonanalytic.__file__} "
         f"cwd={Path.cwd().resolve()}",

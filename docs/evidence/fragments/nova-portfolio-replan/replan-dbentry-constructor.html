@@ -1,0 +1,39 @@
+<section id="replan-dbentry-constructor-landing">
+  <h2>One IMAS entry opener</h2>
+  <p id="replan-dbentry-constructor-what">
+    <code>open_db_entry(uri, mode="r", dd_version=None, backend=None)</code> in
+    <code>nova/imas/dataset.py</code> is now the only place a
+    <code>imas.DBEntry</code> is constructed. It passes <code>dd_version</code>
+    only when the caller knows it, so a store is never opened at a version the
+    caller did not name, and it routes a named backend into the URI scheme,
+    which is how imas-python selects an access layer. The
+    <code>Dataset.db_entry</code> property and <code>Dataset.is_valid</code>
+    both call it. Eleven modules that built entries themselves now call it,
+    each keeping the version that site already passed, and
+    <code>nova/imas/db_entry.py</code> is deleted because its
+    <code>DBEntry</code> subclass had no call sites.
+  </p>
+  <p id="replan-dbentry-constructor-search">
+    <code>grep -rn "imas.DBEntry(" nova/ --include=*.py</code> returns one
+    line, the opener's own construction:
+    <code>nova/imas/dataset.py:540</code>.
+  </p>
+  <p id="replan-dbentry-constructor-gate">
+    Gate: the 25 test modules importing a changed module, one fresh pytest
+    process per file, base at <code>7a31104db</code> and head at
+    <code>3d69662eb</code> running concurrently. Each arm reports 50 failure
+    ids and the two sets are identical, so the change adds and removes none.
+  </p>
+  <p id="replan-dbentry-constructor-not-measured">
+    Not measured: <code>tests/test_steering_frames.py</code> and
+    <code>tests/test_playable_session.py</code> did not finish inside the
+    bounded arm run in either arm, so they are reported unmeasured rather than
+    passing.
+  </p>
+  <p id="replan-dbentry-constructor-negative-control">
+    Negative control: with the opener's <code>dd_version</code> pass-through
+    removed in a scratch copy, <code>tests/test_imas_opener.py</code> reports
+    <code>1 failed, 6 passed</code> and exits 1, failing only
+    <code>test_opener_passes_dd_version_through</code>, which passes at head.
+  </p>
+</section>

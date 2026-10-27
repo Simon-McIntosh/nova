@@ -29,14 +29,11 @@ import zarr
 
 from benchmarks.centroid_radius_attribution import CARRIER_SHOT, FAILING_ROWS
 from nova.imas.mast_solve_inputs import SHOT_STORE
+from benchmarks.receipt_locations import crew_reports
 
 
-DEFAULT_OUTPUT = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/centroid-offset"
-)
-CONVENTION_SPLIT_OUTPUT = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/centroid-convention-split"
-)
+DEFAULT_OUTPUT = crew_reports("nova/s19-handoff/centroid-offset")
+CONVENTION_SPLIT_OUTPUT = crew_reports("nova/playable/centroid-convention-split")
 SOLENOID_CIRCUIT = 0
 
 

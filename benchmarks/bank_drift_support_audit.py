@@ -31,6 +31,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+from benchmarks.receipt_locations import crew_reports
 
 SUPPORT_ROWS = (
     "declared_axis_flux",
@@ -344,7 +345,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--reports-root",
-        default="/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local",
+        default=crew_reports("nova/s19-local"),
     )
     parser.add_argument("--old-tree", required=True, help="producer tree root")
     parser.add_argument("--new-tree", required=True, help="current tree root")

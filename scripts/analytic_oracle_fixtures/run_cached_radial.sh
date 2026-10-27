@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -uo pipefail
 TREE="${SLURM_SUBMIT_DIR:-$(pwd -P)}"
-RUN=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T013636329481-carrier-agreement
-CACHE=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T160532295843-carrier-requalify/rows/cache/analytic_oracle_hex_machine_5000.zarr
+RUN="${NOVA_CREW_RUNS:?NOVA_CREW_RUNS must name the crew run root}/r-20261014T013636329481-carrier-agreement"
+CACHE="${NOVA_CREW_RUNS:?NOVA_CREW_RUNS must name the crew run root}/r-20261013T160532295843-carrier-requalify/rows/cache/analytic_oracle_hex_machine_5000.zarr"
 PY=/home/ITER/mcintos/Code/nova/.venv/bin/python
 export TMPDIR=/tmp XLA_PYTHON_CLIENT_PREALLOCATE=false JAX_PLATFORMS=cuda,cpu
 export PYTHONPATH="$TREE"

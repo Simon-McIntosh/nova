@@ -63,6 +63,7 @@ from nova.equilibrium.steering_frames import (
     session_dataset,
 )
 from nova.equilibrium.topology import TopologyClass
+from benchmarks.receipt_locations import crew_reports
 from nova.jax.config import (
     configure_dtypes,
     configure_persistent_compilation_cache,
@@ -74,8 +75,7 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_MANIFEST = Path(
     "/work/projects/imas_gpu/agents/excitation-corpus/curated_windows_unified_6cam.json"
 )
-DEFAULT_COHORT_REPORT = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/"
+DEFAULT_COHORT_REPORT = crew_reports(
     "physics-carried-playable-plasma/labeller-cohort-census.md"
 )
 EXPECTED_CORPUS_SHOTS = 8_012

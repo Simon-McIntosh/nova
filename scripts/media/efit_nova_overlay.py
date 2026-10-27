@@ -53,6 +53,7 @@ from nova.media import poloidal as pol, traces as tr
 from nova.media.ink import DEFAULT_INK
 from nova.media.layout import three_view
 from nova.media.sources.mast_efit import read_pulse
+from benchmarks.receipt_locations import crew_reports
 
 
 def _reference_span(shot: int) -> tuple[float, float, float, float]:
@@ -72,11 +73,10 @@ def _reference_span(shot: int) -> tuple[float, float, float, float]:
     )
 
 
-DEFAULT_SOLVE = (
-    Path.home()
-    / ".config/reckon/crew/reports/nova/presentation-media/mast-21978-wide-solve.npz"
+DEFAULT_SOLVE = crew_reports("nova/presentation-media/mast-21978-wide-solve.npz")
+DEFAULT_RECEIPT = crew_reports(
+    "nova/presentation-media/wide-solve-receipt.json"
 )
-DEFAULT_RECEIPT = DEFAULT_SOLVE.with_name("wide-solve-receipt.json")
 DEFAULT_OUTPUT = Path("docs/figures/presentation-media")
 
 #: Sienna, imas-ink's reference-underlay colour: the reconstruction is the

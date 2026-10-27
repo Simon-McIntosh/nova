@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 from pathlib import Path
 from typing import Any
 
@@ -40,14 +39,10 @@ from nova.equilibrium.clip_quadrature import (
 )
 from nova.equilibrium.separatrix_clip import padded_polynomial_current_moments
 from nova.jax.config import configure_dtypes
+from benchmarks.receipt_locations import crew_reports
 
 ROOT = Path(__file__).resolve().parents[1]
-REPORT_ROOT = Path(
-    os.environ.get(
-        "NOVA_EXACT_CLOSED_FORM_REPORT_ROOT",
-        "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/exact-closed-form",
-    )
-)
+REPORT_ROOT = crew_reports("nova/s19-local/exact-closed-form")
 ARC_VERTEX_COUNTS = (8, 16, 32, 64, 128)
 SWEEP_CASES = CASES[:3]
 

@@ -32,6 +32,7 @@ from nova.imas.diiid_description import (
     vacuum_response,
 )
 from nova.jax.config import configure_dtypes
+from benchmarks.receipt_locations import crew_reports
 
 
 DEFAULT_DATA = prior.DEFAULT_DATA
@@ -41,10 +42,7 @@ RECEIPT_NAME = "flux_space_adjudication_receipt.json"
 FIGURE_NAME = "flux_space_adjudication.png"
 OHMIC_RECEIPT = prior.OHMIC_RECEIPT
 REUSE_MAP = prior.REUSE_MAP
-REVIEW_REPORT = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/"
-    "coil-circuit-discovery/adjudication-review.md"
-)
+REVIEW_REPORT = crew_reports("nova/coil-circuit-discovery/adjudication-review.md")
 
 
 def _sha256(path: Path) -> str:

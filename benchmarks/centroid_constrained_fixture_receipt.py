@@ -40,6 +40,7 @@ from nova.jax.config import (
 from nova.media import poloidal
 from nova.media.ink import DEFAULT_INK, poloidal_axes
 from scripts.analytic_oracle_fixtures import measure as oracle_fixture
+from benchmarks.receipt_locations import crew_reports
 from scripts.analytic_oracle_fixtures.centroid_row import (
     DEFAULT_FIELD_BOUND_T,
     DEFAULT_FIELD_SCALE_T,
@@ -53,16 +54,12 @@ from scripts.analytic_oracle_fixtures.centroid_row import (
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_OUTPUT_ROOT = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/centroid-step"
-)
+DEFAULT_OUTPUT_ROOT = crew_reports("nova/s19-local/centroid-step")
 DEFAULT_FIGURE = ROOT / (
     "docs/figures/centroid-constrained-oracle-solve/weak-displaced-control.png"
 )
 DEFAULT_SOURCE_ROOT = DEFAULT_OUTPUT_ROOT
-DEFAULT_GAUGE_ROOT = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/centroid-gauge"
-)
+DEFAULT_GAUGE_ROOT = crew_reports("nova/s19-local/centroid-gauge")
 # A converged boundary level must sit inside a thousandth of the analytic span.
 LEVEL_TOLERANCE_OF_SPAN = 1.0e-3
 ROWS = (("weak-rotation-reactor-static", -110),)

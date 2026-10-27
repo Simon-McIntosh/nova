@@ -45,6 +45,7 @@ from nova.jax.config import (
 from nova.media import poloidal
 from nova.media.ink import DEFAULT_INK, poloidal_axes
 from nova.media.sources.frame import inside_wall_units
+from benchmarks.receipt_locations import crew_reports
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -57,14 +58,10 @@ DEFAULT_FIGURE = (
     "edge-contours.png"
 )
 DEFAULT_RENDER_RECEIPT = (
-    ROOT
-    / "docs/figures/constraint-augmented-newton-krylov/edge-constraint/"
+    ROOT / "docs/figures/constraint-augmented-newton-krylov/edge-constraint/"
     "edge-contours-render.json"
 )
-DEFAULT_REPORT = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/"
-    "edge-constraint/report.md"
-)
+DEFAULT_REPORT = crew_reports("nova/s19-handoff/edge-constraint/report.md")
 TARGET = (22086, 43)
 COMMANDS_M = (0.005, 0.010, 0.020)
 POSITION_TOLERANCE_M = 2.5e-4

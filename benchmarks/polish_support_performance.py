@@ -29,6 +29,7 @@ from time import perf_counter
 from typing import Any
 
 import numpy as np
+from benchmarks.receipt_locations import crew_reports
 
 
 BASELINE_REVISION = "e2aaf78853a70b51b339981e6b6f65c97fa84614"
@@ -37,9 +38,8 @@ REFERENCE_SHOT = 22086
 MEASURED_SOLVE_LAUNCHES = 5
 MEASURED_BATCH_LAUNCHES = 5
 MEASURED_COMPONENT_LAUNCHES = 5
-DEFAULT_OPERANDS = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/"
-    "bank-regeneration-raw-20260902/current-operands.npz"
+DEFAULT_OPERANDS = crew_reports(
+    "nova/bank-regeneration-raw-20260902/current-operands.npz"
 )
 DEFAULT_CACHE = Path(
     "/work/projects/imas_gpu/sophelio/jax-cache/polish-support-performance"

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -uo pipefail
 TREE="${SLURM_SUBMIT_DIR:-$(pwd -P)}"
-RUN=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T013636329481-carrier-agreement
+RUN="${NOVA_CREW_RUNS:?NOVA_CREW_RUNS must name the crew run root}/r-20261014T013636329481-carrier-agreement"
 PY=/home/ITER/mcintos/Code/nova/.venv/bin/python
 export TMPDIR=/tmp XLA_PYTHON_CLIENT_PREALLOCATE=false JAX_PLATFORMS=cuda,cpu
 export PYTHONPATH="$TREE"

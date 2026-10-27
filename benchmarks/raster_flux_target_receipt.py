@@ -56,6 +56,7 @@ from nova.equilibrium.topology import TopologyClass
 from nova.imas.mast_geometry import MachineGeometryRegistry
 from nova.imas.mast_solve_inputs import SHOT_STORE
 from nova.imas.mast_vacuum_response import coil_sections
+from benchmarks.receipt_locations import crew_runs
 from nova.jax.config import (
     configure_dtypes,
     configure_persistent_compilation_cache,
@@ -681,8 +682,7 @@ def main() -> None:
         job_parser.add_argument(
             "--log-directory",
             type=Path,
-            default=Path(
-                "/home/ITER/mcintos/.config/reckon/crew/runs/"
+            default=crew_runs(
                 "r-20260906T130706783090-fsa-raster-flux-target-receipt/logs"
             ),
         )

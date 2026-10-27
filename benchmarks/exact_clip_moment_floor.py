@@ -55,25 +55,13 @@ except ImportError:
 from nova.equilibrium.stencil_mesh import CellCurrentMoments, flux_field_polynomial
 from nova.jax.config import configure_dtypes
 from scripts.analytic_oracle_fixtures import measure as fixture
+from benchmarks.receipt_locations import crew_reports
 
 
 ROOT = Path(__file__).resolve().parents[1]
-REPORT_ROOT = Path(
-    os.environ.get(
-        "NOVA_EXACT_CLIP_REPORT_ROOT",
-        "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/exact-gauss",
-    )
-)
-REPORT_INPUT_ROOT = Path(
-    os.environ.get(
-        "NOVA_EXACT_CLIP_REPORT_INPUT_ROOT",
-        "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/exact-gauss",
-    )
-)
-COUPLING_RECEIPT = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/"
-    "moment-order/receipt.json"
-)
+REPORT_ROOT = crew_reports("nova/s19-local/exact-gauss")
+REPORT_INPUT_ROOT = crew_reports("nova/s19-local/exact-gauss")
+COUPLING_RECEIPT = crew_reports("nova/s19-review/moment-order/receipt.json")
 FIGURE_ROOT = ROOT / "docs/figures/exact-clip-moment-quadrature"
 CASES = (
     "weak-rotation-reactor-static",

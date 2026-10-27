@@ -36,6 +36,7 @@ from benchmarks.mast_response_carrier_warm import load_carrier
 from nova.equilibrium.observation import ConstraintViolationError
 from nova.equilibrium.topology import NoQualifiedAxisError, TopologyClass
 from nova.imas.mast_efit_referee import read_efit_referee
+from benchmarks.receipt_locations import crew_runs
 from nova.jax.config import (
     configure_persistent_compilation_cache,
     default_persistent_compilation_cache_root,
@@ -45,12 +46,11 @@ matplotlib.use("Agg")
 
 DEFAULT_OUTPUT = Path("docs/figures/gs-absolute-accuracy/efit-reproduction.json")
 DEFAULT_FIGURE_DIRECTORY = Path("docs/figures/gs-absolute-accuracy/efit")
-DEFAULT_ZERO_RECEIPT = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/runs/"
-    "r-20260901T062947707320-sse-efit-reproduction-completion/"
-    "job-output/zero_iteration_receipt.json"
+DEFAULT_ZERO_RECEIPT = crew_runs(
+    "r-20260901T062947707320-sse-efit-reproduction-completion/job-output/zero_iteration_receipt.json"
 )
-DEFAULT_ZERO_FIELDS = DEFAULT_ZERO_RECEIPT.with_name(
+DEFAULT_ZERO_FIELDS = crew_runs(
+    "r-20260901T062947707320-sse-efit-reproduction-completion/job-output/"
     "zero_iteration_residual_fields.npz"
 )
 DEFAULT_BACKEND_RECEIPT = Path(

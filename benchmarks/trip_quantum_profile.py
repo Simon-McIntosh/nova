@@ -38,32 +38,29 @@ from nova.equilibrium.flux_surface_connectivity import (
 )
 from nova.equilibrium.topology import TopologyClass
 from nova.jax.config import configure_dtypes, configure_persistent_compilation_cache
+from benchmarks.receipt_locations import crew_reports
 
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = (
     ROOT / "docs/figures/millisecond-converged-solve/trip-quantum/profile.json"
 )
-DEFAULT_REPORT = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/attribution/"
-    "trip-quantum-profile.md"
-)
-PARTIAL_TRACE = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/attribution/trip-quantum-trace"
-    "/plugins/profile/2026_09_04_14_30_40/perfetto_trace.json.gz"
+DEFAULT_REPORT = crew_reports("nova/attribution/trip-quantum-profile.md")
+PARTIAL_TRACE = crew_reports(
+    "nova/attribution/trip-quantum-trace/plugins/profile/2026_09_04_14_30_40/perfetto_trace.json.gz"
 )
 DEFAULT_CACHE = Path("/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile")
 DEFAULT_TIMER_LOGS = (
     (
         "1262560",
-        DEFAULT_REPORT.parent / "trip-quantum-profile-3-slurm.log",
+        crew_reports("nova/attribution/trip-quantum-profile-3-slurm.log"),
     ),
     (
         "1262571",
-        DEFAULT_REPORT.parent / "trip-quantum-profile-4-slurm.log",
+        crew_reports("nova/attribution/trip-quantum-profile-4-slurm.log"),
     ),
 )
-PRIOR_FULL_SOLVE_LOG = DEFAULT_REPORT.parent / "trip-quantum-slurm.log"
+PRIOR_FULL_SOLVE_LOG = crew_reports("nova/attribution/trip-quantum-slurm.log")
 PRIOR_FULL_SOLVE_JOB = "1262501"
 SOURCE_RECEIPT = ROOT / "docs/figures/polish-support-performance/raw-main.json"
 ACTIVE_SET_AUTHORITY = (
@@ -1241,9 +1238,7 @@ def _build_receipt(
                 "revision": source["revision"],
                 "active_set_authority": active_set_authority,
                 "baseline_attempted_newton_promotions": baseline_promotion_count,
-                "after_attempted_newton_promotions": counts[
-                    "newton_updates_total"
-                ],
+                "after_attempted_newton_promotions": counts["newton_updates_total"],
                 "median_warm_wall_s": source_wall,
                 "arithmetic_wall_s_per_active_set_trip": source_wall
                 / active_set_authority["active_set_iterations"],

@@ -39,6 +39,7 @@ from nova.equilibrium.forward import PerturbedSeedPolicy
 from nova.equilibrium.observation import ConstraintViolationError
 from nova.equilibrium.topology import NoQualifiedAxisError, TopologyClass
 from nova.imas.mast_solve_inputs import SHOT_STORE
+from benchmarks.receipt_locations import crew_reports, crew_runs
 from nova.jax.config import (
     configure_dtypes,
     configure_persistent_compilation_cache,
@@ -47,10 +48,8 @@ from nova.jax.config import (
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_OPERANDS = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/runs/"
-    "r-20260904T065818622161-nia-bank-regeneration-repaired-census-2/"
-    "raw/current-operands.npz"
+DEFAULT_OPERANDS = crew_runs(
+    "r-20260904T065818622161-nia-bank-regeneration-repaired-census-2/raw/current-operands.npz"
 )
 DEFAULT_OUTPUT = (
     ROOT
@@ -71,9 +70,8 @@ DEFAULT_PRODUCTION_OUTPUT = (
     / "docs/figures/solver-convergence-regression"
     / "settled-mask-stall/production/production-path.json"
 )
-DEFAULT_PRODUCTION_REPORT = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/production-path/"
-    "production-path-damping.md"
+DEFAULT_PRODUCTION_REPORT = crew_reports(
+    "nova/production-path/production-path-damping.md"
 )
 DEFAULT_PUBLIC_ROUTE_OUTPUT = (
     ROOT

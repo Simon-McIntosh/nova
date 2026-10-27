@@ -20,6 +20,7 @@ from scipy.constants import mu_0
 from benchmarks import efit_forward_parity_slice as parity
 from benchmarks import mast_response_carrier_warm as response_carrier
 from benchmarks.label_seed_residual_field import _persisted_response_cache
+from benchmarks.receipt_locations import crew_runs
 from nova.biot.greens import hybrid_greens
 from nova.equilibrium import ForwardProfile, reduced_newton
 from nova.equilibrium.conservation import FluxLattice
@@ -610,9 +611,7 @@ def main() -> None:
     submit_parser.add_argument(
         "--log-directory",
         type=Path,
-        default=Path(
-            "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T130303852320-fsa-traced-vector-identity/logs"
-        ),
+        default=crew_runs("r-20260906T130303852320-fsa-traced-vector-identity/logs"),
     )
     arguments = parser.parse_args()
     if arguments.prepare_only:

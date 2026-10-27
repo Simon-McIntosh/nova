@@ -39,13 +39,12 @@ from nova.equilibrium.domain import PlasmaDomain
 from nova.equilibrium.stencil_mesh import CellCurrentMoments
 from nova.jax.config import configure_dtypes
 from scripts.analytic_oracle_fixtures import measure as oracle_fixture
+from benchmarks.receipt_locations import crew_reports
 
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_FIGURE_ROOT = ROOT / "docs/figures/cut-cell-current-attribution/moment-order"
-DEFAULT_REPORT_ROOT = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/moment-order"
-)
+DEFAULT_REPORT_ROOT = crew_reports("nova/s19-review/moment-order")
 CASE_REQUESTS = (
     ("weak-rotation-reactor-static", -110),
     ("weak-rotation-reactor-static", -300),

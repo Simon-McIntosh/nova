@@ -25,6 +25,7 @@ import zarr
 
 from benchmarks.forward_labeller_throughput import _centroid_pair, _circuit_names
 from scripts.labeller_batch import shard
+from benchmarks.receipt_locations import crew_reports
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -334,10 +335,7 @@ def main() -> None:
     parser.add_argument(
         "--report",
         type=Path,
-        default=Path(
-            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/"
-            "compensator-authority.md"
-        ),
+        default=crew_reports("nova/playable/compensator-authority.md"),
     )
     args = parser.parse_args()
     receipt = measure(args.output.resolve(), args.report.resolve())

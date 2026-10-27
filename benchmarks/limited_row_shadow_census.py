@@ -55,6 +55,7 @@ from nova.jax.config import configure_dtypes
 from nova.media import poloidal
 from nova.media.ink import DEFAULT_INK, poloidal_axes
 from nova.media.sources.frame import inside_wall_units
+from benchmarks.receipt_locations import crew_reports
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT_ROOT = ROOT / "docs/figures/cut-cell-current-attribution/limited-shadow"
@@ -1195,10 +1196,7 @@ def main() -> None:
     parser.add_argument(
         "--cpu-report-root",
         type=Path,
-        default=Path(
-            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/"
-            "s19-handoff/limited-shadow/cpu-delta"
-        ),
+        default=crew_reports("nova/s19-handoff/limited-shadow/cpu-delta"),
     )
     arguments = parser.parse_args()
     if arguments.dry_run:

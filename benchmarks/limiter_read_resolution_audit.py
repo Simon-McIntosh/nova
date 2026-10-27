@@ -52,12 +52,11 @@ from nova.media import poloidal
 from nova.media.ink import DEFAULT_INK, poloidal_axes, trace_axes
 from nova.media.sources.frame import inside_wall_units
 from scripts.analytic_oracle_fixtures import measure as oracle_fixture
+from benchmarks.receipt_locations import crew_reports
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_REPORT_DIRECTORY = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/limiter-read"
-)
+DEFAULT_REPORT_DIRECTORY = crew_reports("nova/s19-review/limiter-read")
 DEFAULT_FIGURE_DIRECTORY = (
     ROOT / "docs/figures/cut-cell-current-attribution/limiter-read"
 )

@@ -30,6 +30,7 @@ from nova.equilibrium import fixed_point
 from nova.equilibrium.forward_operator import _structured_grid_axes
 from nova.equilibrium.stencil_mesh import CellCurrentMoments
 from nova.equilibrium.topology import TopologyClass
+from benchmarks.receipt_locations import crew_reports
 from nova.jax.config import (
     configure_dtypes,
     configure_persistent_compilation_cache,
@@ -44,10 +45,7 @@ DEFAULT_OUTPUT = (
     "jacobian-null-direction.json"
 )
 DEFAULT_FIGURE = DEFAULT_OUTPUT.with_suffix(".png")
-DEFAULT_REPORT = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/vertical-mode/"
-    "jacobian-null-direction.md"
-)
+DEFAULT_REPORT = crew_reports("nova/vertical-mode/jacobian-null-direction.md")
 STALLED_TARGETS = ((21985, 51), (21986, 46), (21989, 55), (22086, 43))
 CONTRAST_TARGET = (22086, 43)
 SMALLEST_SINGULAR_VALUE_COUNT = 3

@@ -18,7 +18,7 @@
 </tbody>
 </table>
 
-<p id="compile-pass-profile-instructions">The HLO instruction count grows and then collapses across the fusion pipeline: 5,813 instructions at the entry to optimization, a peak of <code>100,579</code> inside it (548 MB of HLO text), and 10,714 after the fusion passes have run. The expanded-equation count is a different number and does not follow this one.</p>
+<p id="compile-pass-profile-instructions">The HLO instruction count grows and then collapses across the fusion pipeline: 5,813 instructions at the entry to optimization, a peak of <code>100,579</code> inside it (548 MB of HLO text), 23,807 on leaving <code>multi_output_fusion</code>, and 10,714 after the dead-code pass that follows. The expanded-equation count is a different number and does not follow this one.</p>
 
 <p id="compile-pass-profile-control">Positive control, same job and same instrument: a chained elementwise program of 1,024 steps compiles in <code>7.72 s</code> and the profile attributes <code>95.2%</code> of that wall, with the same leading pass (<code>variadic-op-splitter</code>, 3.55 s). A 64-step chain of the same shape compiles in 0.74 s and the instrument attributes only 11% of it, which is the failure mode the control is there to expose: below about a second the dump chain does not bracket the work and a profile that reports nothing would go unnoticed.</p>
 

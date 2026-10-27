@@ -1,0 +1,44 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-27T14:15:11.964Z",
+  "dispatched_at": "2026-10-27T14:05:42Z",
+  "findings": [
+    {
+      "file": "tests/test_solve_nonfinite_refusal.py",
+      "line": 53,
+      "severity": "non-blocking",
+      "summary": "Both driver tests inject a synthetic jitted mask program instead of driving the production mask path: the moment_finiteness kernel at nova/equilibrium/reduced_newton.py:1034 and the cell_moments closure at scripts/prototypes/fast_map_production/solver.py:1242 are never exercised by any test, so a regression in the real moment-to-mask wiring leaves all five tests green."
+    },
+    {
+      "file": "scripts/prototypes/fast_map_production/solver.py",
+      "line": 172,
+      "severity": "non-blocking",
+      "summary": "The certificate driver checks the state before each step but never the state the final step returns, so a non-finite moment produced by the terminating step breaks the loop and flows unchecked into result terminal_state and terminal_panel instead of being refused."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/nonfinite-refusal.html",
+      "line": 18,
+      "severity": "non-blocking",
+      "summary": "The record names both host loops by function and enclosing loop but gives no line numbers, while the brief asked for each host loop to be named by function and line; the checks sit at nova/equilibrium/reduced_newton.py:1498 and scripts/prototypes/fast_map_production/solver.py:172."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to refuse a non-finite cell moment by index at both solve host loops, and nova/equilibrium/reduced_newton.py:391 refuses through non_finite_cell_mask and refuse_non_finite_cell_moments with NonFiniteCellMomentError subclassing CurrentNormalisationError (nova/equilibrium/source.py:119).\nVERDICT done_when: done_when asks for refusal at both loops, a planted-NaN test per driver with a negative control, and row and importing-file parity; tests/test_solve_nonfinite_refusal.py runs 5 tests (independently re-run here at 6c2dbbfd8, EXIT=0), logs/negative-control.log is 2 failed of 5 with EXIT=1, and the three row arms agree to the last digit.\nVERDICT write_paths: the declared scope is nova/equilibrium/reduced_newton.py, scripts/prototypes/fast_map_production/solver.py, tests/test_solve_nonfinite_refusal.py, docs/evidence/fragments/converged-forward-solve/nonfinite-refusal.html and docs/figures/; d3dcd9ce3..6c2dbbfd8 touches exactly the first four and nothing else.\nVERDICT manifest: read in full; it states the five-test gate, the negative control, the three row arms and the importer pairs with their log paths, and its landing line names both host loops.\nVERDICT diff: read all three commits against d3dcd9ce3; 2acda367b adds the mask, the error and its two host-loop call sites, c9fd19dcc and 6c2dbbfd8 add the evidence fragment and the row record, with no unrelated change.\nCALL_SITES: nova/equilibrium/reduced_newton.py:2066, nova/equilibrium/reduced_newton.py:2978, benchmarks/traced_vector_identity_receipt.py:334, scripts/prototypes/fast_map_production/solver.py:1249\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: nova/equilibrium/reduced_newton.py:1498 and scripts/prototypes/fast_map_production/solver.py:172 both refuse by index, but the certificate driver never checks the state its final step returns.\nSCORE evidence: 15\nJUSTIFICATION evidence: logs/row/base.log, head.log and main.log each carry a ROW-SUMMARY of terminal_fixed_point_residual 0.0749196925647991 after 12 trips with EXIT=0, and the main arm is the control that places the difference in the tree rather than the change.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff d3dcd9ce3..6c2dbbfd8 is inside the four declared write paths, with no figure directory added and no out-of-scope file touched.\nSCORE durability: 14\nJUSTIFICATION durability: removing the two refusal calls reddens tests/test_solve_nonfinite_refusal.py:53 and :66 (logs/negative-control.log), but the tests supply a synthetic mask so the production mask at nova/equilibrium/reduced_newton.py:1034 is unguarded.\nSCORE fit: 16\nJUSTIFICATION fit: the helpers follow the idiom of nova/equilibrium/reduced_newton.py:375 and carry no plan, ticket or version label in name, docstring or comment.\nSCORE reuse: 18\nJUSTIFICATION reuse: a search of nova for isfinite and per-cell non-finite refusal found only whole-array validators such as nova/biot/target.py:189 and the per-step flag at nova/equilibrium/fixed_point.py:630, none of which returns a per-cell mask; the certificate driver imports the owner's helpers rather than duplicating them.\nFINDING tests/test_solve_nonfinite_refusal.py:53 non-blocking: both driver tests inject a synthetic jitted mask program rather than driving the production mask path, so the moment_finiteness kernel at nova/equilibrium/reduced_newton.py:1034 and the cell_moments closure at scripts/prototypes/fast_map_production/solver.py:1242 are untested and a regression there leaves all five tests green.\nFINDING scripts/prototypes/fast_map_production/solver.py:172 non-blocking: the certificate driver checks each state before stepping but never the state the final step returns, so a non-finite moment produced by the terminating step escapes the refusal and reaches result terminal_state and terminal_panel.\nFINDING docs/evidence/fragments/converged-forward-solve/nonfinite-refusal.html:18 non-blocking: the record names both host loops by function but not by line although the brief required a function and line for each, and the two host loops stand at nova/equilibrium/reduced_newton.py:1498 and scripts/prototypes/fast_map_production/solver.py:172.",
+  "review_run_id": "r-20261027T140244137721-review-of-nonfinite-refusal-6c2dbbfd8b76",
+  "reviewed_base_sha": "d3dcd9ce3549e75e0e2a36073912bd061924e982",
+  "reviewed_head_sha": "6c2dbbfd8b76756ddf43fcffcc32bee680847aff",
+  "reviewed_run_id": "r-20261027T090436433416-nonfinite-refusal",
+  "scores": {
+    "durability": 14,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T14:16:19.121811+00:00",
+  "total": 100
+}

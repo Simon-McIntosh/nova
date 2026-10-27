@@ -32,8 +32,10 @@ import zarr
 from shapely.geometry import Polygon, box
 from shapely.ops import unary_union
 
-DEFAULT_LEVEL1_ROOT = Path("/work/projects/imas_gpu/mast/level1/shots")
-DEFAULT_LEVEL2_ROOT = Path("/work/projects/imas_gpu/mast/level2/shots")
+from nova.database.filepath import mast_level1_shots, mast_level2_shots
+
+DEFAULT_LEVEL1_ROOT = mast_level1_shots()
+DEFAULT_LEVEL2_ROOT = mast_level2_shots()
 DEFAULT_REGISTRY_PATH = Path(__file__).with_name("mast_geometry.json")
 GEOMETRY_PRECISION_M = 1e-5
 ANGLE_PRECISION_DEG = 1e-4

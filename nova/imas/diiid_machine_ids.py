@@ -17,12 +17,13 @@ import imas
 import numpy as np
 from imas.dd_zip import dd_xml_versions
 
+from nova.database.filepath import diiid_machine_source
 from nova.equilibrium.wall_mask import WallUnit, wall_units_from_ids
 from nova.imas.dataset import open_db_entry
 from nova.imas.machine import DiagnosticSightline, StaticMachineDescription
 
 
-SOURCE_PATH = Path("/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc")
+SOURCE_PATH = diiid_machine_source()
 IDS_NAMES = ("wall", "pf_active", "magnetics")
 PUBLISHED_DD_MAJOR = 4
 LIMITER_CHAIN_DIGEST_ALGORITHM = (

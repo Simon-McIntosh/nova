@@ -36,9 +36,10 @@ from pathlib import Path
 
 import numpy as np
 
+from nova.database.filepath import labeller_session_root
 from nova.media.sources.frame import SurfaceFrame
 
-SESSION_ROOT = Path("/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29")
+SESSION_ROOT = labeller_session_root()
 
 
 def _finite_pairs(radius: np.ndarray, height: np.ndarray) -> np.ndarray:

@@ -1,6 +1,4 @@
 import os.path
-from subprocess import Popen, PIPE
-from shlex import split
 import pickle
 import datetime
 import hashlib
@@ -358,33 +356,6 @@ def get_filepath(path, subfolder="", filename="", label="", **kwargs):
     if label:
         filepath += "_" + label
     return filepath, date
-
-
-def qsub(script, jobname="analysis", t=1, freiahost=1, verbose=True, Code="Nova"):
-    p = Popen(
-        split("ssh -T freia{:03.0f}.hpc.l".format(freiahost)),
-        stdin=PIPE,
-        stdout=PIPE,
-        stderr=PIPE,
-    )
-    p.stdin.write("cd ~/Code/Nova/nova\n".encode())
-
-    if ".py" not in script:
-        script += ".py"
-    # wd = ''
-    py3 = "~/Code/anaconda3/bin/python3"
-    flags = "-V -N {} -j y -wd -S {}".format(jobname, py3)
-    if t > 1:
-        flags += " -t 1:{:1.0f}".format(t)
-    flags += " "
-    qsub = "qsub " + flags + script + "\n"
-
-    #
-    p.stdin.write(qsub.encode())  # submit job
-    p.stdin.flush()
-    stdout, stderr = p.communicate()
-    if verbose:
-        print(stdout.decode(), stderr.decode())
 
 
 class PATH(object):  # file paths

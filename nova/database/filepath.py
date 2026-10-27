@@ -32,10 +32,113 @@ without the shared filesystem - or a unit test - point at a local store.
 """
 
 
+def _env_root(variable: str, default: Path) -> Path:
+    """Return the directory named by ``variable``, else ``default``."""
+    override = os.environ.get(variable)
+    return Path(override) if override else default
+
+
+def portable_path(path) -> str:
+    """Return ``path`` with the user's home directory written as a leading ``~``.
+
+    A recorded document states where its evidence lives, and a home directory
+    is per-user: the resolved path is right for this workstation and wrong for
+    every reader who did not produce it, so the portable form is what gets
+    written while the resolved form is what gets opened.
+    """
+    resolved = Path(path).expanduser()
+    try:
+        return "~/" + resolved.relative_to(Path.home()).as_posix()
+    except ValueError:
+        return str(resolved)
+
+
 def operand_cache_root() -> Path:
     """Return the root directory holding cached forward-solve operands."""
-    override = os.environ.get("NOVA_OPERAND_CACHE")
-    return Path(override) if override else OPERAND_CACHE_ROOT
+    return _env_root("NOVA_OPERAND_CACHE", OPERAND_CACHE_ROOT)
+
+
+MAST_DATA_ROOT = Path("/work/projects/imas_gpu/mast")
+"""Default shared root of the MAST IMAS stores.
+
+The level-1 and level-2 shot stores sit beneath it as ``level1/shots`` and
+``level2/shots``.  ``NOVA_MAST_DATA_ROOT`` overrides the root, so a copy of the
+stores elsewhere is reachable without editing source.
+"""
+
+DIIID_MACHINE_SOURCE = Path("/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc")
+"""Default DIII-D IMAS pulse read as the machine-description source.
+
+``NOVA_DIIIID_SOURCE`` overrides the file, which lets a machine without the
+shared home tree open a local copy of the same pulse.
+"""
+
+DERIVED_CACHE_ROOT = Path.home() / ".cache" / "nova-mast"
+"""Default root of nova's derived MAST caches (misfit hunt, vacuum signatures).
+
+``NOVA_CACHE_ROOT`` overrides the root.
+"""
+
+LABELLER_SESSION_ROOT = Path(
+    "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29"
+)
+"""Default labeller session holding the pulse labels.
+
+``NOVA_LABELLER_SOURCE`` overrides the session directory.
+"""
+
+PUBLIC_HOME_ROOT = Path("/home/ITER")
+"""Default parent of the per-user ``public/imasdb`` trees on the shared cluster.
+
+``NOVA_PUBLIC_HOME_ROOT`` overrides the parent, for a host whose home
+directories sit elsewhere.
+"""
+
+
+def mast_data_root() -> Path:
+    """Return the root holding the MAST level-1 and level-2 shot stores."""
+    return _env_root("NOVA_MAST_DATA_ROOT", MAST_DATA_ROOT)
+
+
+def mast_level1_shots() -> Path:
+    """Return the MAST level-1 shot store, one Zarr group per shot."""
+    return mast_data_root() / "level1" / "shots"
+
+
+def mast_level2_shots() -> Path:
+    """Return the MAST level-2 shot store, one Zarr group per shot."""
+    return mast_data_root() / "level2" / "shots"
+
+
+def diiid_machine_source() -> Path:
+    """Return the DIII-D IMAS pulse read as the machine-description source."""
+    return _env_root("NOVA_DIIIID_SOURCE", DIIID_MACHINE_SOURCE)
+
+
+def derived_cache_root() -> Path:
+    """Return the root of nova's derived MAST caches."""
+    return _env_root("NOVA_CACHE_ROOT", DERIVED_CACHE_ROOT)
+
+
+def misfit_hunt_root() -> Path:
+    """Return the directory holding the precomputed misfit-hunt arrays."""
+    return derived_cache_root() / "misfit-hunt"
+
+
+def labeller_session_root() -> Path:
+    """Return the labeller session directory holding the pulse labels."""
+    return _env_root("NOVA_LABELLER_SOURCE", LABELLER_SESSION_ROOT)
+
+
+def public_imasdb_root(username: str, machine: str) -> Path:
+    """Return one user's public IMAS database tree for ``machine``."""
+    return (
+        _env_root("NOVA_PUBLIC_HOME_ROOT", PUBLIC_HOME_ROOT)
+        / username
+        / "public"
+        / "imasdb"
+        / machine.lower()
+    )
 
 
 WORKTREE_ROOT = "reckon-worktrees"

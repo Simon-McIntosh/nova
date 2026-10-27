@@ -47,9 +47,6 @@ from nova.imas.mast_corrections import (
 )
 from nova.imas.mast_seed_parameters import catalog_source
 
-VACUUM_COHORT_STORE = "/work/projects/imas_gpu/mast/level1/shots"
-"""Level-1 shot store the cohort was drawn from."""
-
 VACUUM_COHORT_SHOTS = 400
 """Plasma-free, deliberately excited, adequately instrumented shots available."""
 

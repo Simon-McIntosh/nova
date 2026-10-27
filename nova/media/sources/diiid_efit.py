@@ -31,9 +31,10 @@ import numpy as np
 
 from nova.equilibrium.wall_mask import WallUnit, wall_units_from_ids
 from nova.imas.dataset import open_db_entry
+from nova.database.filepath import diiid_machine_source
 from nova.media.sources.frame import EquilibriumFrame, MachineGeometry, Pulse
 
-NETCDF_SOURCE = Path("/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc")
+NETCDF_SOURCE = diiid_machine_source()
 
 
 def _uniform_axis(stored: Any, name: str) -> np.ndarray:

@@ -12,6 +12,7 @@ import numpy as np
 import pandas
 from tqdm import tqdm
 
+from nova.database.filepath import public_imasdb_root
 from nova.imas.database import Datafile
 
 
@@ -114,7 +115,7 @@ class Connect:
 
     def rsync(self):
         """Syncronize SDCC remote (user)/public with local IMAS database."""
-        public = f"/home/ITER/{self.username}/public/imasdb/{self.machine.lower()}/"
+        public = f"{public_imasdb_root(self.username, self.machine)}/"
         local = pathlib.Path.home() / pathlib.Path(
             f"imas/shared/imasdb/{self.machine.lower()}/"
         )

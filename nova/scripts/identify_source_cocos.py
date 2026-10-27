@@ -83,9 +83,10 @@ from typing import Any
 import numpy as np
 from nova_cocos import identify_convention
 
+from nova.database.filepath import mast_level1_shots
 from nova.io.sourcemap import determine_digits
 
-LEVEL1 = Path("/work/projects/imas_gpu/mast/level1/shots")
+LEVEL1 = mast_level1_shots()
 
 #: static-setup arrays hashed into the representation fingerprint (no time axis;
 #: each is indexed by a geometry dimension).

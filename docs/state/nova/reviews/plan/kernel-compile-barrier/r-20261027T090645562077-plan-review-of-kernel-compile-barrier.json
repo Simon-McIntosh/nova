@@ -1,0 +1,51 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-27T09:16:40.686Z",
+  "dispatched_at": "2026-10-27T09:07:34Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/kernel-compile-barrier.html:63",
+      "id": "reasoning-1",
+      "reason": "a \u00a73 worker dispatched on this text spends its budget re-running the falsified route (bound more terms, check the section's compile bound, find it unchanged), and the plan needs a different mechanism before \u00a73 is implementable again.",
+      "text": "\u00a73 directs the builder to bound the jets point program \"using the \u00a72 tangents and the packed-moment terms \u00a71 ranks\", but the plan records at line 110 that inlining \u00a71's top-ranked term `_harmonic_pair_step` (23.2% of the point jet's expanded equations) cut the census count by only 4.04% and left the H200 cold compile essentially unmoved at 82.36 s against a base of 82.43 s, concluding \"bounding more census-ranked terms is not a route to the 10 s target\" \u2014 so the section's named mechanism has been measured and does not produce the bound it is asked to produce.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/kernel-compile-barrier.html:110",
+      "id": "wiring-1",
+      "reason": "without a declared section the plan's next dispatch is chosen from the section table, so the prerequisite the document itself names cannot be scheduled and \u00a72 and \u00a73 are dispatched in the order the plan has already shown to be wrong.",
+      "text": "the document states that \"before \u00a72 or \u00a73 is dispatched again, the compile time has to be attributed\" and names the XLA pass profile as the next measure, yet no section body declares that attribution, no section status or data-links reflects it, and \u00a72 and \u00a73 both remain `implementable` with \u00a73 still linked to \u00a72 as its tangent source; the prerequisite lives only in comment prose, which no dispatch and no done-when reads.",
+      "type": "wiring",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "3e17dceac8e7c75f3d6cdc829e8bbef1a9155626894cce4e308ad5c047156ae8",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 15,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261027T090645562077-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "20c6eabc4bb74675d64428f24fce20f8085a0d3a",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 verified in the tree at HEAD: `nova/equilibrium/fixed_points.py:391` is `_row_program`, `:206` is `def _source_jets`, `:413` is `def maintain_rows` and `:478` is its `_row_program(...)` call; `scripts/prototypes/read_route/jets.py:229` and `:321` resolve; the cited evidence files all exist, with extensionless hrefs resolving as `<path>.html`.",
+    "done_when": "pass \u2014 \u00a73's three clauses are each measurable (a compile count with wall and peak-memory bounds at two named arms, a row comparison against a base build evaluated over the same nodes, and a named test passing on its own assertion inside its own 900 s timeout), and the base build over the section's 64-node subset is a comparison arm that can fail.",
+    "evidence_paths": "pass \u2014 \u00a73's evidence lands in the compile ledger `docs/research/compile-cost-evidence.html` and the landed evidence archive under `docs/evidence/`, both durable and both present in the tree; no clause routes a gate log to a scratch or node-local path.",
+    "naming": "pass \u2014 \u00a73 and its done-when carry no plan labels, stage names, ticket numbers or version tags into any symbol or path, and the section states mechanism rather than tracker provenance.",
+    "reasoning": "a finding \u2014 \u00a73's stated mechanism (\"bound that program, using the \u00a72 tangents and the packed-moment terms \u00a71 ranks\") is the mechanism the plan's own \u00a72 measurement at line 110 falsifies, so the section argues against its own evidence.",
+    "single_goal": "pass \u2014 \u00a73 names one deliverable, a bounded jets-build point program evaluated through one shared owner, and the redirect of the prototype copy serves that same deliverable rather than adding a second.",
+    "wiring": "a finding \u2014 \u00a73 declares `data-links=\"kernel-compile-barrier#s2\"` and stays `implementable`, but the plan's own comment at line 110 states the compile time must be attributed by an XLA pass profile \"before \u00a72 or \u00a73 is dispatched again\", and no section, decision or followup carries that measure, so the wiring still points a \u00a73 worker at \u00a72 as the source of its tangents with nothing in the plan that performs the required attribution first."
+  },
+  "section_digests": {
+    "_document": "aedadecaa2d8d1ca844fd55860d2b25d5b89064ba342851b3fe4686576c6c395",
+    "s0": "6af29e9c0d4ae386d870df6baa70b910da2c50485eef97ddf1c3d2ebc9f12a27",
+    "s1": "f60ffbcd7c6c609b9e2ce1cbc5be3879c9613e2a1f1b41018a50e31a169abdb0",
+    "s2": "4b4ae60065134cb7cdc8a4479e5525cf0785449c22833f6d824f728d3a0deaf2",
+    "s3": "3a04e3f2877a1d7833bba2ef22100a06484e45699f98170dba999c08ae24f9a8",
+    "s4": "043c0ccddafb69cbd714f400a3810894eb704687755dfb014b018a750adc8b16"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T09:49:16.078199+00:00"
+}

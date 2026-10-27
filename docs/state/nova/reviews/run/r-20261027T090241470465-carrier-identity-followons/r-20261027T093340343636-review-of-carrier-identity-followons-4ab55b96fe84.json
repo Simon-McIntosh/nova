@@ -1,0 +1,69 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed manifest's own arms: baseline_suite (revision d3dcd9ce3) failed 1 test, test_one_over_wide_link_is_refused_without_dissolving_the_group, which is the new guard's expected red arm; after_suite (revision b5443b5fd) failed 0. No after failure is absent from the baseline, so no failure was added.",
+  "call_site_count": 3,
+  "call_sites": [
+    "nova/biot/plasmagrid.py:149",
+    "nova/equilibrium/stencil_mesh.py:568",
+    "nova/equilibrium/topology.py:2529"
+  ],
+  "completed_at": "2026-10-27T09:53:58.347Z",
+  "dispatched_at": "2026-10-27T09:39:36Z",
+  "findings": [
+    {
+      "file": "tests/test_carrier_vertex_identity.py",
+      "line": "275",
+      "severity": "non-blocking",
+      "text": "this file and tests/test_biotpolysection.py:733 are outside the node's declared write paths; the brief's done-when requires both edits so the work is correct, but the declared path list is under-scoped."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/carrier-identity-followons.html",
+      "line": "6",
+      "severity": "non-blocking",
+      "text": "the diverted-550 carrier comparison was produced by an uncommitted scratch script (measure_550.py) and drivers, so node_number 2469 and digest 576421da cannot be re-derived from the repository."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/carrier-identity-followons.html",
+      "line": "8",
+      "severity": "non-blocking",
+      "text": "the brief required the importers' base and head arms concurrently in one sirius job; only head arms exist, and all are green, so no-added-failure holds vacuously but the named base arm is absent."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "present",
+    "diff": "present",
+    "done_when": "present",
+    "goal": "present",
+    "manifest": "present",
+    "write_paths": "present"
+  },
+  "justifications": {
+    "durability": "tests/test_lattice_vertex_groups.py:33 fails at base and passes at head; tests/test_carrier_vertex_identity.py:275 pins an independent constant that reddens under the declared mutation.",
+    "evidence": "base-550-diverted.log and head-550-diverted.log both record node_number 2469 and digest 576421da; the importer no-added-failure check rests on head arms alone.",
+    "fit": "nova/equilibrium/stencil_mesh.py:386-402 extends the function's own idiom and words the rule by mechanism with no label in any path, symbol or comment.",
+    "goal_fidelity": "nova/equilibrium/stencil_mesh.py:404-420 now refuses only the link that would push a group's spread to the merge width; base-newtest.log reproduces the old dissolve, confirming the stated defect.",
+    "reuse": "the change extends the existing owner lattice_vertex_groups at nova/equilibrium/stencil_mesh.py:320; the search for a union-find or distance owner over nova/ found none to fork.",
+    "scope_discipline": "tests/test_carrier_vertex_identity.py:275 and tests/test_biotpolysection.py:733 are outside the declared write paths, required by the brief's done-when."
+  },
+  "node": "review-of-carrier-identity-followons-4ab55b96fe84",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to land followup items (2)-(4) of the carrier vertex identity -- one over-wide lattice link refused on its own, the unread tolerance argument removed, and a red arm for the determinism test; nova/equilibrium/stencil_mesh.py:392-420 now refuses a link whose join would carry its group's spread to the merge width while keeping the group's other links.\nVERDICT done_when: the measure names a new test failing at base, an unchanged 550-carrier partition, a behaviour-preserving tolerance removal, and a determinism red arm; each is recorded -- base-newtest.log fails test_one_over_wide_link_is_refused_without_dissolving_the_group (1 failed, 2 passed, EXIT=1), base-550-diverted.log and head-550-diverted.log both read node_number 2469 and the same partition digest 576421da, and negative-control.log fails the determinism test by id at EXIT=1.\nVERDICT write_paths: the manifest declares nova/equilibrium/stencil_mesh.py, nova/biot/plasmagrid.py, tests/test_lattice_vertex_groups.py and two docs paths; git diff --stat d3dcd9ce3..4ab55b96f carries those plus tests/test_carrier_vertex_identity.py and tests/test_biotpolysection.py, which the brief's own done-when requires and which the manifest records under outside_scope.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T090241470465-carrier-identity-followons/manifest.md; status complete, commits b5443b5fd and 4ab55b96f, baseline_suite 1 failure / after_suite 0 failures, and nine gate logs named.\nVERDICT diff: read both commits against base d3dcd9ce3549e75e0e2a36073912bd061924e982; b5443b5fd changes the two source modules, two test files and adds tests/test_lattice_vertex_groups.py, and 4ab55b96f adds the evidence fragment, with no unrelated edit and no touch of nova/biot/polygonanalytic.py.\nCALL_SITES: nova/biot/plasmagrid.py:149 (_build_direct_samples), nova/equilibrium/stencil_mesh.py:568 (MomentGeometry.from_cells), nova/equilibrium/topology.py:2529 (canonical_polygons)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/equilibrium/stencil_mesh.py:404-420 now refuses only the link that would push a group's spread to the merge width, and the base arm reproducing the old dissolve (base-newtest.log, [0],[1],[2]) confirms the stated defect was real and is repaired.\nSCORE evidence: 16\nJUSTIFICATION evidence: base-550-diverted.log and head-550-diverted.log both record node_number 2469 with partition digest 576421da, and head-550.log and base-550.log both die at separate constant-zero-length-cell edges, so the 550 clause is measured on both arms; the no-added-failure importer check rests on head arms alone, and the 550 comparison was produced by an uncommitted scratch script.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: tests/test_carrier_vertex_identity.py:275 and tests/test_biotpolysection.py:733 lie outside the declared write paths, edited because the brief's done-when demanded them.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_lattice_vertex_groups.py:33 fails at base (whole group dissolved to [0],[1],[2]) and at head returns [0,1] plus a standalone slot, so it reddens both on a re-dissolve and on a dropped spread check, and tests/test_carrier_vertex_identity.py:275 pins an independent constant that negative-control.log shows reddening under the declared np.linalg.solve mutation.\nSCORE fit: 18\nJUSTIFICATION fit: nova/equilibrium/stencil_mesh.py:386-402 extends the function's own idiom (and adds a module-local helper beside the existing root_of) and the rewritten docstring at :334 words the rule by mechanism, with no plan, version or ticket label in any path, symbol or comment.\nSCORE reuse: 19\nJUSTIFICATION reuse: the change extends the existing owner lattice_vertex_groups in nova/equilibrium/stencil_mesh.py:320, keeping the union-find it already carried at base; a search for union-find, disjoint-set and pairwise-distance owners over nova/ found only unrelated application uses (nova/imas/decimate.py:128, nova/equilibrium/wall_mask.py) and no lattice-grouping owner to fork.\nFINDING tests/test_carrier_vertex_identity.py:275 non-blocking: this file and tests/test_biotpolysection.py:733 are outside the node's declared write paths; the brief's done-when requires both edits so the work is correct, but the declared path list is under-scoped and a reader checking the fence would see a violation.\nFINDING docs/evidence/fragments/converged-forward-solve/carrier-identity-followons.html:6 non-blocking: the diverted-550 carrier comparison, which is half of the done-when's gate, was produced by /tmp/.../measure_550.py and the head-550/base-550 drivers, none of which is committed, so the reported node_number 2469 and digest 576421da cannot be re-derived from the repository.\nFINDING docs/evidence/fragments/converged-forward-solve/carrier-identity-followons.html:8 non-blocking: the brief required the importers' base and head arms concurrently in one sirius job, but only head arms exist and all are green; the no-added-failure conclusion holds because there are zero head failures to attribute, though the base arm the brief named is absent.\n",
+  "review_run_id": "r-20261027T093340343636-review-of-carrier-identity-followons-4ab55b96fe84",
+  "reviewed_base_sha": "d3dcd9ce3549e75e0e2a36073912bd061924e982",
+  "reviewed_head_sha": "4ab55b96fe8446bc54ef7f6b51bf36d18e95adac",
+  "reviewed_run_id": "r-20261027T090241470465-carrier-identity-followons",
+  "scores": {
+    "durability": 18,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T09:55:00+00:00",
+  "total": 106
+}

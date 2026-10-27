@@ -12,14 +12,15 @@
   one reduced state induces, recomputes that state's cell moments, and returns a
   per-cell boolean mask marking every cell carrying a non-finite moment.
   <code>_drive_trips</code> — the reduced Newton driver's host loop — reads the
-  mask at the top of each active-set trip and raises
-  <code>NonFiniteCellMomentError</code> (a <code>CurrentNormalisationError</code>)
-  naming the offending cell indices. The certificate solver's Newton loop is now
-  <code>drive_linear_steps</code> in
-  <code>scripts/prototypes/fast_map_production/solver.py</code>, which takes the
-  per-cell mask of the state it is about to step from and refuses the same way
-  before taking the step. Neither driver substitutes a value: a NaN is never
-  replaced by zero inside the solve, so the residual still poisons as it did and
+  mask at the top of each active-set trip and on the state the last trip
+  returns, and raises <code>NonFiniteCellMomentError</code> (a
+  <code>CurrentNormalisationError</code>) naming the offending cell indices.
+  The certificate solver's Newton loop is now <code>drive_linear_steps</code>
+  in <code>scripts/prototypes/fast_map_production/solver.py</code>, which takes
+  the per-cell mask of the state it is about to step from and of the state the
+  final step returns, and refuses the same way. Neither driver substitutes a
+  value: a NaN is never replaced by zero inside the solve, so the residual
+  still poisons as it did and
   the existing non-finite-linear-action refusal remains behind this one.</p>
 
   <p id="nonfinite-refusal-host-loops">The two host loops are

@@ -1,0 +1,41 @@
+<section id="nonfinite-refusal-evidence">
+  <h3>Refusing a non-finite cell moment by index at the solve host loops</h3>
+
+  <p id="nonfinite-refusal-why">A raise written inside the mapped step never
+  runs: every production solve route is traced, so the refusal has to leave the
+  compiled program as an output and be applied by the host loop that drives it.
+  The earlier attempt that put the raise inside the traced code was reverted
+  with the arc-root repair; this node places it where the driver can act on it.</p>
+
+  <p id="nonfinite-refusal-mechanism">The reduced Newton kernels gain
+  <code>moment_finiteness</code>, a compiled program that reconstructs the flux
+  one reduced state induces, recomputes that state's cell moments, and returns a
+  per-cell boolean mask marking every cell carrying a non-finite moment.
+  <code>_drive_trips</code> — the reduced Newton driver's host loop — reads the
+  mask at the top of each active-set trip and raises
+  <code>NonFiniteCellMomentError</code> (a <code>CurrentNormalisationError</code>)
+  naming the offending cell indices. The certificate solver's Newton loop is now
+  <code>drive_linear_steps</code> in
+  <code>scripts/prototypes/fast_map_production/solver.py</code>, which takes the
+  per-cell mask of the state it is about to step from and refuses the same way
+  before taking the step. Neither driver substitutes a value: a NaN is never
+  replaced by zero inside the solve, so the residual still poisons as it did and
+  the existing non-finite-linear-action refusal remains behind this one.</p>
+
+  <p id="nonfinite-refusal-host-loops">The two host loops are
+  <code>_drive_trips</code> in <code>nova/equilibrium/reduced_newton.py</code>
+  (the <code>for trip in range(active_set_steps)</code> loop, whose check sits
+  after the fused/non-fused reduction is in hand) and
+  <code>drive_linear_steps</code> in
+  <code>scripts/prototypes/fast_map_production/solver.py</code>, called from
+  <code>run</code> in place of the inline <code>linear_step</code> loop.</p>
+
+  <p id="nonfinite-refusal-tests">Five tests in
+  <code>tests/test_solve_nonfinite_refusal.py</code> pass: the mask flags only
+  the planted cell and reads every moment leaf, and each driver's host loop
+  requires the refusal to name the planted cell 103 on a traced route. The
+  negative control removes the two host-loop refusal calls from a scratch
+  archive of the head tree; both planted-NaN host-loop tests then fail
+  (<code>negative-control.log</code>, 2 failed, 3 passed, <code>EXIT=1</code>),
+  so the guard is shown firing rather than merely passing.</p>
+</section>

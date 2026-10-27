@@ -30,6 +30,20 @@
   <code>scripts/prototypes/fast_map_production/solver.py</code>, called from
   <code>run</code> in place of the inline <code>linear_step</code> loop.</p>
 
+  <p id="nonfinite-refusal-row">The CPU diverted 300-cell certificate row was
+  measured at three revisions with one driver: the base <code>d3dcd9ce3</code>,
+  this node's head <code>c9fd19dcc</code>, and the main checkout's
+  <code>491406301</code>. All three return the same terminal
+  <code>fixed_point_residual</code> of <code>0.0749196925647991</code> after 12
+  trips with the active set settled and the row reported unqualified, so the
+  refusal reads a mask without changing what the solve reaches; the row does
+  not reach the roughly <code>5.6e-15</code> in two trips recorded for the
+  production route earlier, and because the main tip reproduces this row's
+  number exactly, that difference belongs to the tree and the lane rather than
+  to the refusal. The measurements are
+  <code>logs/row/base.log</code>, <code>logs/row/head.log</code> and
+  <code>logs/row/main.log</code> and the three arms differ by no digit.</p>
+
   <p id="nonfinite-refusal-tests">Five tests in
   <code>tests/test_solve_nonfinite_refusal.py</code> pass: the mask flags only
   the planted cell and reads every moment leaf, and each driver's host loop

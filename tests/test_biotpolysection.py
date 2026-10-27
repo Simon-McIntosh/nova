@@ -730,10 +730,7 @@ def test_preclip_samples_come_from_the_verified_authored_generator():
         np.asarray(polygon.poly.exterior.coords, dtype=float)[:-1, :2]
         for polygon in target.poly
     )
-    sample_tolerance = coilset.plasmagrid._support_roundoff_bound(target)
-    coordinates, cell_nodes = coilset.plasmagrid._index_sampling_vertices(
-        vertices, sample_tolerance
-    )
+    coordinates, cell_nodes = coilset.plasmagrid._index_sampling_vertices(vertices)
     full = np.flatnonzero(authored == "hexagon")
     central = full[np.argmin(np.linalg.norm(centres[full] - centres.mean(0), axis=1))]
     distance = np.linalg.norm(centres - centres[central], axis=1)

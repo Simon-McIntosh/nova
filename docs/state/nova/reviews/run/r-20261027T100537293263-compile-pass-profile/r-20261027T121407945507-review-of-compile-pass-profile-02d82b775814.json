@@ -8,6 +8,13 @@
   ],
   "completed_at": "2026-10-27T12:31:28.913Z",
   "dispatched_at": "2026-10-27T12:17:00Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-compile-pass-profile-02d82b775814",
+      "recorded_at": "2026-10-27T12:46:23.922380+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/compile_pass_profile/run.sh",

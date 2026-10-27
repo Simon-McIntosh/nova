@@ -1,0 +1,69 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-27T18:07:29.678Z",
+  "dispatched_at": "2026-10-27T17:58:22Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261027T163652574279-plan-review-of-kernel-compile-barrier/plan.html:57",
+      "id": "reasoning-1",
+      "reason": "without a named module, function and caller, \u00a72 is unfalsifiable on the one question the rubric asks of a mechanism, and the worker is free to bound a harness artifact.",
+      "text": "\u00a72 never names the file or function it restructures. The point jet \u00a75 profiled and \u00a72 must reshape is built by `scripts/prototypes/kernel_compile_census/row.py:115` from the prototype copy `read_route/jets.py:321` (compile_pass_profile/profile.py:3 imports that census module for the program), while the only production variant, `_row_program` at `nova/equilibrium/fixed_points.py:391`, is reached solely through `maintain_rows` (:413) whose callers \u00a73:63 itself records as `tests/test_fixed_points.py` and prototype scripts \u2014 so a \u00a72 worker can bound the census copy, pass both \u00a72 clauses, and leave the production program and every read untouched, with no caller named anywhere in \u00a72 to say otherwise.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261027T163652574279-plan-review-of-kernel-compile-barrier/plan.html:64",
+      "id": "reasoning-2",
+      "reason": "the CPU bound is either wrong by an order of magnitude or needs a CPU attribution and a sizing job added to \u00a73, and a worker dispatched on it will fail the clause with no mechanism left to try.",
+      "text": "\u00a73 done-when (1) requires the point batch to compile in at most 300 s on CPU, while \u00a70:43 records that same program's CPU cold compile at 7,044 s (a 23x cut), and the only attribution the plan holds is \u00a75's H200 profile, where the named lever removes 51.3 s of a 95.1 s wall and leaves about 44 s on the H200 device; no CPU pass profile exists anywhere in the plan (\u00a75 done-when (1) profiles the H200 only, \u00a72 done-when (2) measures the H200 only), and the 64 GB half of the same clause is likewise inherited from a 79 GB CPU measurement at 282 cells.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261027T163652574279-plan-review-of-kernel-compile-barrier/plan.html:95",
+      "id": "reasoning-3",
+      "reason": "the composition claim is arithmetically impossible on the plan's own clauses, so a reader cannot tell whether 10 s is a live target, a retired one, or a bound no node owes \u2014 and the decision block is where \u00a72 and \u00a73 take their bar from.",
+      "text": "decision `compile-target-shared` asserts \"the plan's 10 s goal stays, met by \u00a72, \u00a73 and \u00a74 together\", but no done-when in the plan measures 10 s of anything: \u00a72 sets 45 s or less for the point jet, \u00a73 sets 60 s for the batch, \u00a74 sets 60 s for the topology read, and \u00a70:47 declares the bound the plan owns as 60 s.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261027T163652574279-plan-review-of-kernel-compile-barrier/plan.html:54",
+      "id": "anchors_resolve-1",
+      "reason": "\u00a71 is `done` and (2) needs a landed basis, so no dispatch reads \u00a71's clause; the coordinator should correct the sentence when it next touches \u00a71, not re-open a done section.",
+      "text": "\u00a71 still says each function's equation share \"is the denominator \u00a72 done-when (2) measures its fall against\", but \u00a72's rewritten done-when (2) measures post-splitter instruction count and cold-compile seconds, so the cross-reference now points at a measure \u00a72 does not take.",
+      "type": "anchors_resolve",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "",
+  "plan_fingerprint": "86977d149f48024b7cbb1f8e18a546b8d8023ac3e9b61f0c2cf6e9130cc88456",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 35,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261027T163652574279-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "ee84552658776665b88d691c590c46d18d676994",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 every file, commit and decision anchor in the changed units resolves (fixed_points.py:391/:206/:413/:478, jets.py:229/:321, solve.py:121, row.py:115, scripts/prototypes/compile_pass_profile/, 0b5972bfd, decisions `tangent-bound-retired` and `compile-target-shared`), but \u00a71's cross-reference into \u00a72's done-when is now stale.",
+    "done_when": "pass \u2014 \u00a72 measures instruction count and cold compile on base and head arms in one job, \u00a73 measures two arms on two devices with a base arm on a 64-node subset and cites the main-line 900 s timeout for clause (3), so each clause has a state in which it fails.",
+    "evidence_paths": "pass \u2014 neither changed section sends evidence to a scratchpad or node-local path; \u00a72's per-pass table and \u00a73's per-batch walls land through the run's own landing record as \u00a75's did.",
+    "naming": "pass \u2014 the rewritten sections name mechanisms (`variadic-op-splitter`, `multi_output_fusion`, `_harmonic_pair_step`) with no plan labels, ticket numbers or changelog prose.",
+    "reasoning": "a finding \u2014 \u00a72 and \u00a73 both take their lever from \u00a75, but \u00a72 names no module or caller for the program it would restructure, and \u00a73's CPU arm carries a bound its cited H200-only attribution cannot reach.",
+    "single_goal": "pass \u2014 \u00a72 delivers one bounded point program and \u00a73 one bounded jets build; their suite and job clauses are gates on that deliverable, not second deliverables.",
+    "wiring": "pass \u2014 \u00a72 declares `kernel-compile-barrier#s5` and \u00a73 declares `#s2,#s5`; both hrefs resolve to live sections, \u00a73's mechanism consumes \u00a72's facility, and the earlier \"no section-level wire\" defect is answered."
+  },
+  "section_digests": {
+    "_document": "5a0b2f18ff0d618fa5f94fa4d6dfd5e9093744ee219353b0d59e692b373dbddf",
+    "s0": "6af29e9c0d4ae386d870df6baa70b910da2c50485eef97ddf1c3d2ebc9f12a27",
+    "s1": "f60ffbcd7c6c609b9e2ce1cbc5be3879c9613e2a1f1b41018a50e31a169abdb0",
+    "s2": "85b91ce8933b6c34ba21e7646d4add1eace31834df166ece1bf2647d2a6c2356",
+    "s3": "42cdaa1b0343bebba554ce0167f6dfe3bd854c439915704d384eca7e5f46fa80",
+    "s4": "043c0ccddafb69cbd714f400a3810894eb704687755dfb014b018a750adc8b16",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T21:20:05.182216+00:00"
+}

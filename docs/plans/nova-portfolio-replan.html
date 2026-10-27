@@ -17,7 +17,7 @@
 <meta name="plan-owner" content="Simon McIntosh">
 <meta name="plan-effort-hours" content="3.0">
 <meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="43">
+<meta name="plan-version" content="44">
 <meta name="plan-modified" content="2026-10-27">
 <meta name="plan-tags" content="replan,handoff,infrastructure">
 <meta name="plan-informs" content="plasma-cell-read-fidelity,single-grid-solver-cutover,ensemble-forward-seam,forward-profile-validator-set,separatrix-spline-extraction,profile-owned-solve-domain,mast-nonaxisymmetric-physics,diiid-forward-onboarding,machine-description-retirement,diiid-pulse-replay,dual-branch-selection,efit-baseline-demonstration,mast-catalog-gpu-solve">
@@ -187,6 +187,9 @@ Done when: the report lists each coupling with files, line counts, refactor and 
 </div>
 <div class="r-comment" data-section="s5" data-id="c-20261027-dbentry-constructor-landed" data-who="reckon-build" data-when="2026-10-27T12:00:00Z">
     <div class="r-comment-body"><p><strong>replan-dbentry-constructor landed at <code>de45db7d5</code></strong> (head <code>18e65a69e</code>).</p><ul><li>Every <code>imas.DBEntry</code> construction in <code>nova/</code> now goes through <code>open_db_entry</code> in <code>nova/imas/dataset.py</code>, which carries the DD-version and backend policy. <code>is_valid</code> uses it as well.</li><li>The unused subclass in <code>nova/imas/db_entry.py</code> is deleted.</li><li><code>nova/imas/AGENTS.md</code> now names the opener.</li><li>The new <code>tests/test_imas_opener.py</code> fails when the opener rewrites <code>dd_version</code> or drops the backend.</li></ul><p>The first gate is not evidence. Its arms ran under a timeout, and the head arm's <code>PYTHONPATH</code> was malformed, so I sent the run back.</p><p>The rerun was sirius job 1296924: all 26 modules, one fresh process each, with <code>nova.__file__</code> logged for each arm (head arm: the worktree; base arm: the archive). It added no failure id: 79 failures at base, 70 at head.</p><p>The re-review scored 19/15/20/19/19/20 with no blocking finding.</p><p>Still open in §5: replan-gpfs-data-root and replan-evidence-tooling-paths. <code>nova/imas/callstate.py</code> may now be unreferenced; the worker records whether anything still imports it.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261027T092647846592-replan-dbentry-constructor" data-who="reckon-build" data-when="2026-10-27T11:27:42Z">
+    <div class="r-comment-body"><p>Routed every imas.DBEntry construction through open_db_entry in nova/imas/dataset.py, made is_valid use it, deleted nova/imas/db_entry.py and pointed the imas note at the opener; the sirius two-arm gate over 26 test modules adds no failure id at head (79 base, 70 head, both complete)</p></div>
 </div>
 </section>
 </main>

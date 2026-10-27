@@ -61,6 +61,13 @@
       "finding": "duplicate_owner-1",
       "reason": "Applies to section 4, which this wave does not build; the wave dispatches only section 5 nodes (hdf5_read deletion and the DBEntry opener). The finding is carried into section 4's node brief, recorded as a section 4 comment.",
       "when": "2026-10-27T09:23:11.545500+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reuse_search-2",
+      "reason": "Applies to section 4, which this wave does not build; the wave dispatches only section 5 nodes (hdf5_read deletion and the DBEntry opener). The finding is carried into section 4's node brief, recorded as a section 4 comment.",
+      "when": "2026-10-27T09:23:20.975511+00:00"
     }
   ],
   "responses": {
@@ -81,6 +88,12 @@
       "by": "",
       "reason": "Applies to section 4, which this wave does not build; the wave dispatches only section 5 nodes (hdf5_read deletion and the DBEntry opener). The finding is carried into section 4's node brief, recorded as a section 4 comment.",
       "when": "2026-10-27T09:22:47.223101+00:00"
+    },
+    "reuse_search-2": {
+      "action": "declined",
+      "by": "",
+      "reason": "Applies to section 4, which this wave does not build; the wave dispatches only section 5 nodes (hdf5_read deletion and the DBEntry opener). The finding is carried into section 4's node brief, recorded as a section 4 comment.",
+      "when": "2026-10-27T09:23:20.975511+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/nova-portfolio-replan/r-20261006T030345596523-plan-review-of-nova-portfolio-replan.json",

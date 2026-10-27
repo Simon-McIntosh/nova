@@ -906,6 +906,45 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "4ab55b96fe8446bc54ef7f6b51bf36d18e95adac",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 2913423344,
+    "scratch_host": "98dci4-clu-2068.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261027T090241470465-carrier-identity-followons",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 2913423344,
+        "path": "/tmp/reckon-crew-scratch/r-20261027T090241470465-carrier-identity-followons"
+      }
+    ],
+    "scratch_warning": "run scratch for r-20261027T090241470465-carrier-identity-followons is 2913423344 bytes, above the 2147483648 byte budget",
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/carrier-identity-followons",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

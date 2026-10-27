@@ -23,26 +23,44 @@ and the revision this node measured (<code>git rev-parse f1e09f09d:&lt;path&gt;<
 <tr><th>identifier</th><th>assertion site</th><th>measured vs bound</th><th>CPU wall</th><th>H200</th></tr>
 </thead>
 <tbody>
-<tr><td><code>test_tangent_matches_base_jvp[second_residual]</code></td><td><code>tests/biot/tangent_identity.py:142</code> <code>assert tangent &lt;= bound</code></td><td>3.370e-12 vs 1e-13; 0.9996 covered, 4 of 10 000 samples over</td><td>in-process, not separate</td><td>pending</td></tr>
-<tr><td><code>test_tangent_matches_base_jvp[flux_line_moments]</code></td><td>same</td><td>1.021e-03 vs 1e-09; 0.9768 covered, 232 of 10 000 samples over</td><td>in-process, not separate</td><td>pending</td></tr>
-<tr><td><code>test_tangent_matches_base_jvp[edge_integrands]</code></td><td><code>test_edge_term_tangents.py:255</code> inside <code>jax.jit(jax.jvp(...))</code></td><td>pytest-timeout, no value</td><td>300 s ceiling</td><td>pending</td></tr>
-<tr><td><code>test_tangent_matches_base_jvp[flux_and_moment_terms]</code></td><td>same</td><td>pytest-timeout, no value</td><td>300 s ceiling</td><td>pending</td></tr>
-<tr><td><code>test_tangent_matches_base_jvp[edge_terms]</code></td><td>same</td><td>pytest-timeout, no value</td><td>300 s ceiling</td><td>pending</td></tr>
-<tr><td><code>test_truncated_tangent_fails_identity[edge_integrands]</code></td><td><code>test_edge_term_tangents.py:304</code> via the same compile</td><td>pytest-timeout, no value</td><td>300 s ceiling</td><td>pending</td></tr>
-<tr><td><code>test_truncated_tangent_fails_identity[flux_and_moment_terms]</code></td><td>same</td><td>pytest-timeout, no value</td><td>300 s ceiling</td><td>pending</td></tr>
-<tr><td><code>test_truncated_tangent_fails_identity[edge_terms]</code></td><td>same</td><td>pytest-timeout, no value</td><td>300 s ceiling</td><td>pending</td></tr>
-<tr><td><code>test_tangent_compiles_within_bound[channel_split]</code></td><td><code>test_edge_term_tangents.py:322</code> to <code>tangent_identity.py:224</code></td><td>pytest-timeout in a spawned compile arm, no ratio</td><td>300 s ceiling</td><td>pending</td></tr>
-<tr><td><code>test_tangent_compiles_within_bound[edge_integrands]</code></td><td>same</td><td>pytest-timeout, no ratio</td><td>300 s ceiling</td><td>pending</td></tr>
-<tr><td><code>test_tangent_compiles_within_bound[flux_line_moments]</code></td><td>same</td><td>pytest-timeout, no ratio</td><td>300 s ceiling</td><td>pending</td></tr>
-<tr><td><code>test_tangent_compiles_within_bound[flux_and_moment_terms]</code></td><td>same</td><td>pytest-timeout, no ratio</td><td>300 s ceiling</td><td>pending</td></tr>
-<tr><td><code>test_tangent_compiles_within_bound[edge_terms]</code></td><td>same</td><td>pytest-timeout, no ratio</td><td>300 s ceiling</td><td>pending</td></tr>
-<tr><td><code>test_near_edge_tangent_meets_reference</code></td><td><code>test_edge_term_tangents.py:449</code>, <code>@pytest.mark.xfail(strict=True)</code></td><td>XPASS(strict): the row now passes its 1e-9 assertion</td><td>in-process, not separate</td><td>pending</td></tr>
+<tr><td><code>test_tangent_matches_base_jvp[second_residual]</code></td><td><code>tests/biot/tangent_identity.py:142</code> <code>assert tangent &lt;= bound</code></td><td>3.370e-12 vs 1e-13; 0.9996 covered, 4 of 10 000 samples over</td><td>in-process on CPU; 0.75 s on H200</td><td>PASS: 0.000e+00, covered 1.0000</td></tr>
+<tr><td><code>test_tangent_matches_base_jvp[flux_line_moments]</code></td><td>same</td><td>1.021e-03 vs 1e-09; 0.9768 covered, 232 of 10 000 samples over</td><td>in-process on CPU; 3.17 s on H200</td><td>PASS: 0.000e+00, covered 1.0000</td></tr>
+<tr><td><code>test_tangent_matches_base_jvp[edge_integrands]</code></td><td><code>test_edge_term_tangents.py:255</code> inside <code>jax.jit(jax.jvp(...))</code></td><td>pytest-timeout, no value</td><td>300 s ceiling</td><td>PASS</td></tr>
+<tr><td><code>test_tangent_matches_base_jvp[flux_and_moment_terms]</code></td><td>same</td><td>pytest-timeout, no value</td><td>300 s ceiling</td><td>PASS</td></tr>
+<tr><td><code>test_tangent_matches_base_jvp[edge_terms]</code></td><td>same</td><td>pytest-timeout, no value</td><td>300 s ceiling</td><td>FAIL</td></tr>
+<tr><td><code>test_truncated_tangent_fails_identity[edge_integrands]</code></td><td><code>test_edge_term_tangents.py:304</code> via the same compile</td><td>pytest-timeout, no value</td><td>300 s ceiling</td><td>PASS</td></tr>
+<tr><td><code>test_truncated_tangent_fails_identity[flux_and_moment_terms]</code></td><td>same</td><td>pytest-timeout, no value</td><td>300 s ceiling</td><td>PASS</td></tr>
+<tr><td><code>test_truncated_tangent_fails_identity[edge_terms]</code></td><td>same</td><td>pytest-timeout, no value</td><td>300 s ceiling</td><td>FAIL</td></tr>
+<tr><td><code>test_tangent_compiles_within_bound[channel_split]</code></td><td><code>test_edge_term_tangents.py:322</code> to <code>tangent_identity.py:224</code></td><td>pytest-timeout in a spawned compile arm, no ratio</td><td>300 s ceiling</td><td>still running</td></tr>
+<tr><td><code>test_tangent_compiles_within_bound[edge_integrands]</code></td><td>same</td><td>pytest-timeout, no ratio</td><td>300 s ceiling</td><td>still running</td></tr>
+<tr><td><code>test_tangent_compiles_within_bound[flux_line_moments]</code></td><td>same</td><td>pytest-timeout, no ratio</td><td>300 s ceiling</td><td>still running</td></tr>
+<tr><td><code>test_tangent_compiles_within_bound[flux_and_moment_terms]</code></td><td>same</td><td>pytest-timeout, no ratio</td><td>300 s ceiling</td><td>still running</td></tr>
+<tr><td><code>test_tangent_compiles_within_bound[edge_terms]</code></td><td>same</td><td>pytest-timeout, no ratio</td><td>300 s ceiling</td><td>still running</td></tr>
+<tr><td><code>test_near_edge_tangent_meets_reference</code></td><td><code>test_edge_term_tangents.py:449</code>, <code>@pytest.mark.xfail(strict=True)</code></td><td>XPASS(strict): the row now passes its 1e-9 assertion</td><td>in-process on CPU; 2.58 s on H200</td><td>FAIL (XPASS strict)</td></tr>
 </tbody>
 </table>
 
-<p><strong>Elliptic file.</strong> The CPU log for this file stopped after 24 of 28 tests
-without a summary line, so the two failures it recorded were re-measured in a fresh CPU
-process. Fill from <code>logs/cpu-elliptic-base.log</code>.</p>
+<p><strong>Elliptic file.</strong> The recorded log for this file stopped after 24 of 28 tests
+without a summary line, so it names no identifier and no measured value. Its progress string
+<code>.....................F.F</code> marks failures at collection positions 22 and 24, and
+<code>pytest --collect-only</code> on the file puts
+<code>test_tangent_compiles_within_three_primals[finite_part]</code> at 22 and
+<code>[harmonic_pole_moments]</code> at 24. Both are cold-compile rows, so neither is a value
+failure: each asserts a tangent-over-primal compile ratio at or below three. A fresh CPU
+process covering tests 1 to 20 produced twenty passes and no failure before reaching its own
+wall limit, which is consistent with the two failures being compile rows and not identity
+rows. The two flagged rows were then run alone, and the H200 lane ran the whole file.</p>
+
+<h4 id="edge-tangent-base-failures-elliptic-table">Elliptic file failures</h4>
+<table>
+<thead>
+<tr><th>identifier</th><th>assertion</th><th>CPU measured vs bound</th><th>H200 measured vs bound</th></tr>
+</thead>
+<tbody>
+<tr><td><code>test_tangent_compiles_within_three_primals[finite_part]</code></td><td><code>test_elliptic_tangent_recurrences.py:470</code> asserts the ratio at or below three; the row carries <code>@pytest.mark.timeout(1800)</code> at line 466</td><td>COLLECTED</td><td>COLLECTED</td></tr>
+<tr><td><code>test_tangent_compiles_within_three_primals[harmonic_pole_moments]</code></td><td>same</td><td>COLLECTED</td><td>COLLECTED</td></tr>
+</tbody>
+</table>
 
 <h4 id="edge-tangent-base-failures-classes">Classification and recommended repair</h4>
 
@@ -57,7 +75,10 @@ rule exceeds the whole per-test budget by 1.6 times. <code>pyproject.toml</code>
 <code>timeout = 300</code>, and the sibling module in the same suite already overrides it
 for the identical row: <code>tests/biot/test_elliptic_tangent_recurrences.py:466</code> puts
 <code>@pytest.mark.timeout(1800)</code> on <code>test_tangent_compiles_within_three_primals</code>.
-The edge module's compile row (<code>test_edge_term_tangents.py:319-321</code>) and its three
+The sibling module states the reason in its own comment: <em>A compile row spawns 21 fresh
+processes; the repository's 300 s hang guard is for ordinary tests and cuts this one off before
+it asserts, so it gets its own bound.</em> The edge module's compile row
+(<code>test_edge_term_tangents.py:319-321</code>) and its three
 <code>SLOW_IDENTITY_ROWS</code> carry no override, so they inherit 300 s while each runs 21
 fresh cache-disabled compiles (seven repeats of three arms) or one 472 s compile. This is a
 test defect, and the bound it asserts is not implicated: the ratio was measured at or below

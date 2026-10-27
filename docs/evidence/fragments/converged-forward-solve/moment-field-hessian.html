@@ -1,0 +1,17 @@
+<section id="moment-field-hessian-landing">
+  <h2 id="moment-field-hessian-heading">A level corner destabilises the field tangent</h2>
+  <p id="moment-field-hessian-mechanism">At a target height within the last bits of a source corner, the edge arctangent's ring-pole contraction loses its finite target-height derivative. A corner-only derivative agrees with central differences; suppressing the plane residual leaves the edge discrepancy unchanged; suppressing the ring contraction removes it. At the two adjacent sloped-edge limits of source cell 212, the original derivative exceeds the Richardson reference by −33.4305307 and −11.7254265 in edge-integrand units. The near-collinear logarithm suggested in the brief serves the axis-field path and is not the term responsible for this off-axis failure.</p>
+  <p id="moment-field-hessian-repair">The packed JAX moment route now keeps the original primal evaluation and supplies a Richardson-combined height tangent for field rows only when a target lies within 10<sup>−7</sup> m of a source corner height. Other derivatives retain the original automatic derivative. The two central-difference steps are 10 and 5 µm. The regression compares all four field-Hessian entries and checks the packed primal bytes against the unchanged expression.</p>
+  <table id="moment-field-hessian-cells">
+    <caption>Mixed field-Hessian contribution at target (6.176290619919, 0) m [Wb/m²]</caption>
+    <thead><tr><th>Carrier</th><th>Source cell</th><th>Base automatic derivative</th><th>Repaired derivative</th><th>Richardson field difference</th></tr></thead>
+    <tbody>
+      <tr><td>Split</td><td>212</td><td>11.198541477</td><td>−4.43450076223e−6</td><td>−4.43450076261e−6</td></tr>
+      <tr><td>Split</td><td>234</td><td>31.6874177143</td><td>4.43550834197e−6</td><td>4.43550834184e−6</td></tr>
+      <tr><td>Integration</td><td>212</td><td>10.4170592573</td><td>−4.43697015942e−6</td><td>−4.43697016e−6</td></tr>
+      <tr><td>Integration</td><td>234</td><td>−8.7931539753</td><td>4.43846058661e−6</td><td>4.43846058731e−6</td></tr>
+    </tbody>
+  </table>
+  <p id="moment-field-hessian-regression">All nine source-cell and corner-height cases pass at the repaired head in 686.84 s (head-hessian.log, EXIT=0). The step sweep includes 0, 10<sup>−16</sup>, 10<sup>−12</sup>, 10<sup>−8</sup>, and 10<sup>−4</sup> m. Every case checks all Hessian entries to 10<sup>−6</sup> absolute or relative and requires byte-identical primal outputs.</p>
+  <p id="moment-field-hessian-progress">The two-arm source-importer suite is running in one sirius job (1296457). The mutation control is running in one CPU batch job (1296464). The pinned-carrier replay is running on the H200 (1296463), with a cold 550-cell solve queued after it (1296465). Their terminal receipts will determine the remaining acceptance claims. Values and jets build under a private operand cache rather than altering published entries.</p>
+</section>

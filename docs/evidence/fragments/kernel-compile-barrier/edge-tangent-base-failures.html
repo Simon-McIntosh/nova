@@ -27,15 +27,15 @@ and the revision this node measured (<code>git rev-parse f1e09f09d:&lt;path&gt;<
 <tr><td><code>test_tangent_matches_base_jvp[flux_line_moments]</code></td><td>same</td><td>1.021e-03 vs 1e-09; 0.9768 covered, 232 of 10 000 samples over</td><td>in-process on CPU; 3.17 s on H200</td><td>PASS: 0.000e+00, covered 1.0000</td></tr>
 <tr><td><code>test_tangent_matches_base_jvp[edge_integrands]</code></td><td><code>test_edge_term_tangents.py:255</code> inside <code>jax.jit(jax.jvp(...))</code></td><td>pytest-timeout, no value</td><td>300 s ceiling</td><td>PASS</td></tr>
 <tr><td><code>test_tangent_matches_base_jvp[flux_and_moment_terms]</code></td><td>same</td><td>pytest-timeout, no value</td><td>300 s ceiling</td><td>PASS</td></tr>
-<tr><td><code>test_tangent_matches_base_jvp[edge_terms]</code></td><td>same</td><td>pytest-timeout, no value</td><td>300 s ceiling</td><td>FAIL</td></tr>
+<tr><td><code>test_tangent_matches_base_jvp[edge_terms]</code></td><td>same</td><td>pytest-timeout, no value</td><td>300 s ceiling</td><td>FAIL, 5.67 s: primal bits differ at index 52024</td></tr>
 <tr><td><code>test_truncated_tangent_fails_identity[edge_integrands]</code></td><td><code>test_edge_term_tangents.py:304</code> via the same compile</td><td>pytest-timeout, no value</td><td>300 s ceiling</td><td>PASS</td></tr>
 <tr><td><code>test_truncated_tangent_fails_identity[flux_and_moment_terms]</code></td><td>same</td><td>pytest-timeout, no value</td><td>300 s ceiling</td><td>PASS</td></tr>
-<tr><td><code>test_truncated_tangent_fails_identity[edge_terms]</code></td><td>same</td><td>pytest-timeout, no value</td><td>300 s ceiling</td><td>FAIL</td></tr>
-<tr><td><code>test_tangent_compiles_within_bound[channel_split]</code></td><td><code>test_edge_term_tangents.py:322</code> to <code>tangent_identity.py:224</code></td><td>pytest-timeout in a spawned compile arm, no ratio</td><td>300 s ceiling</td><td>still running</td></tr>
+<tr><td><code>test_truncated_tangent_fails_identity[edge_terms]</code></td><td>same</td><td>pytest-timeout, no value</td><td>300 s ceiling</td><td>FAIL, same primal-bit assertion</td></tr>
+<tr><td><code>test_tangent_compiles_within_bound[channel_split]</code></td><td><code>test_edge_term_tangents.py:322</code> to <code>tangent_identity.py:224</code></td><td>pytest-timeout in a spawned compile arm, no ratio</td><td>300 s ceiling</td><td>PASS (inside 300 s)</td></tr>
 <tr><td><code>test_tangent_compiles_within_bound[edge_integrands]</code></td><td>same</td><td>pytest-timeout, no ratio</td><td>300 s ceiling</td><td>still running</td></tr>
 <tr><td><code>test_tangent_compiles_within_bound[flux_line_moments]</code></td><td>same</td><td>pytest-timeout, no ratio</td><td>300 s ceiling</td><td>still running</td></tr>
 <tr><td><code>test_tangent_compiles_within_bound[flux_and_moment_terms]</code></td><td>same</td><td>pytest-timeout, no ratio</td><td>300 s ceiling</td><td>still running</td></tr>
-<tr><td><code>test_tangent_compiles_within_bound[edge_terms]</code></td><td>same</td><td>pytest-timeout, no ratio</td><td>300 s ceiling</td><td>still running</td></tr>
+<tr><td><code>test_tangent_compiles_within_bound[edge_terms]</code></td><td>same</td><td>pytest-timeout, no ratio</td><td>300 s ceiling</td><td>FAIL at 300.10 s: pytest-timeout</td></tr>
 <tr><td><code>test_near_edge_tangent_meets_reference</code></td><td><code>test_edge_term_tangents.py:449</code>, <code>@pytest.mark.xfail(strict=True)</code></td><td>XPASS(strict): the row now passes its 1e-9 assertion</td><td>in-process on CPU; 2.58 s on H200</td><td>FAIL (XPASS strict)</td></tr>
 </tbody>
 </table>
@@ -80,9 +80,11 @@ processes; the repository's 300 s hang guard is for ordinary tests and cuts this
 it asserts, so it gets its own bound.</em> The edge module's compile row
 (<code>test_edge_term_tangents.py:319-321</code>) and its three
 <code>SLOW_IDENTITY_ROWS</code> carry no override, so they inherit 300 s while each runs 21
-fresh cache-disabled compiles (seven repeats of three arms) or one 472 s compile. This is a
-test defect, and the bound it asserts is not implicated: the ratio was measured at or below
-3 for all fourteen rows on the H200 on 2026-10-08
+fresh cache-disabled compiles (seven repeats of three arms) or one 472 s compile. This is a test defect on both devices, not a CPU-slowness artefact: run at the same 300 s
+ceiling on the H200, <code>test_tangent_compiles_within_bound[edge_terms]</code> took 300.10 s
+and was cut off by the same <code>Failed: Timeout (&gt;300.0s) from pytest-timeout</code>.
+The bound the row asserts is not implicated: with the lane's own default budget all fourteen
+ratios were measured at or below 3 on the H200 on 2026-10-08
 (<code>docs/evidence/fragments/converged-forward-solve/cfs-edge-term-tangents.html</code>).
 Recommended repair: add <code>@pytest.mark.timeout(1800)</code> to
 <code>test_tangent_compiles_within_bound</code> and to the three slow identity rows, matching
@@ -144,4 +146,27 @@ exactly that gap. This is a test defect: the marker outlived its measurement.
 Recommended repair: delete the <code>xfail</code> marker so the row asserts the 1e-9 agreement
 it now meets, and carry the measurement history in the commit body. Do not relax
 <code>SCAN_TOLERANCE</code>.</p>
-</section>
+<p><strong>Class E — a primal bit-identity the GPU does not preserve
+(<code>test_tangent_matches_base_jvp[edge_terms]</code> and its truncation control).</strong>
+On the H200 these two rows do not reach their tolerance assertion at all. Both fail in
+<code>_identity</code> at <code>tests/biot/test_edge_term_tangents.py:257</code>, the
+<code>assert left.tobytes() == right.tobytes()</code> that requires the tangent's primal half to
+be byte-identical to the base revision's: <code>AssertionError: edge_terms: primal bits
+differ</code>, <code>At index 52024 diff: b'\x1a' != b'\x04</code>, one element of 52 024
+differing in its last byte, in 5.67 s. Because the primal check precedes the identity check, the
+truncation control in <code>test_truncated_tangent_fails_identity[edge_terms]</code> fails at
+that same assertion too, so the declared mutation is never exercised for this row. The two
+values compared are the current <code>_edge_terms_tangent</code>'s primal half
+(<code>nova/biot/polygonanalytic.py:3912</code>, whose
+<code>tuple(a + b for a, b in zip(value, corner))</code> sums
+<code>_edge_integrands_tangent</code>'s <code>edge.terms(vertex)</code> with
+<code>_arsinh_terms_tangent</code>'s corner term) and the base revision's own
+<code>_Edge.terms(vertex) + _Vertex.arsinh_terms()</code>. This is a product defect: the
+tangent's primal half does not reproduce the base program bit for bit on this device. It is not
+a tolerance question, because a last-bit difference at one sample of 52 024 is not round-off
+scaling with magnitude. Recommended repair: make <code>_edge_terms_tangent</code> form its primal
+half through the base program's own expression and association so the bytes agree, then re-run
+the two rows. If the last bit turns out to be attributable to the device rather than to the
+expression, the bit-identity contract needs the lead's ruling rather than a relaxed assertion,
+because the plan's decision fixes the primal as bit-identical.
+</p></section>

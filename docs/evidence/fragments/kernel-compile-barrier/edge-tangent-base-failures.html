@@ -107,14 +107,14 @@ same table also shows that on the H200 the bound is not reachable by a correct d
 The reference JVP arm computes the same derivative a different way, and its own ratio to the
 primal is 8.99 for <code>[complete_pole]</code>, 9.76 for <code>[cn_pole_moment]</code>, 8.82 for
 <code>[sn_pole_moment]</code> and 3.01 for <code>[harmonic_root_moments]</code> — at or above
-three on all four failing terms. A tangent bound of three therefore asks the tangent to be
-cheaper than the JVP by a factor of three on those terms.</p>
+three on all four failing terms. A bound of three on tangent-over-primal therefore asks the
+tangent to compile in a third of what the reference derivative costs on those terms.</p>
 
 <p>The mechanism is the primal's own compile cost, not the tangent's. On the H200 the primal
 compiles in 0.111 to 0.272 s while both derivative arms take 2.2 to 2.6 s; on the CPU the same
 complete-pole primal takes 0.877 s and its two derivative arms 1.87 s and 1.85 s. The GPU makes
-the small primal 3.6 times cheaper and leaves the derivative arms close to where the host put
-them, so the ratio moves from 2.13 to 9.89 on an unchanged program. The ratio is therefore
+the small primal 3.6 times cheaper while both derivative arms move the other way, the tangent
+from 1.87 s to 2.41 s, so the ratio moves from 2.13 to 9.89 on an unchanged program. The ratio is therefore
 measuring how small the primal is against fixed program overhead, and only secondarily how
 expensive the tangent is.</p>
 
@@ -123,7 +123,7 @@ instrument: for these terms the discriminating comparison is tangent against JVP
 tangent against primal, because the JVP is the same derivative computed another way and is the
 only arm whose cost a correct tangent can be held to. Replacing the ratio's denominator, or
 recording a per-term bound derived from the JVP, is a test change and it is the lead's call.
-The product excess, and its size depends on the device: on the H200 the tangent is 9 to 10 percent
+The product excess, whose size depends on the device: on the H200 the tangent is 9 to 10 percent
 above the JVP on the three pole terms — 2.412 s against 2.194 s, 2.535 against 2.318, 2.552
 against 2.338 — while on the CPU the same tangents sit within 1 percent of the JVP (1.868 s
 against 1.853 s and 1.898 against 1.857, the sn row unmeasured). The tangent also carries 1035

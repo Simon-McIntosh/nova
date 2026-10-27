@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="592">
+<meta name="plan-version" content="593">
 <meta name="plan-modified" content="2026-10-27">
 </head>
 <body>
@@ -2105,6 +2105,9 @@ oracle _reference_moments already owns.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20261027-carrier-identity-receipt-landed" data-who="reckon-build" data-when="2026-10-27T21:20:00Z">
     <div class="r-comment-body"><p><strong>carrier-identity-receipt landed at <code>ca0d57929</code></strong> (evidence only). It closes item (1) of <code>f-cfs-carrier-identity-followons</code>; items (2) to (4) landed at <code>911fcf285</code>.</p><p>At main, the carrier vertex identity is identical on the H200 and the CPU:</p><ul><li>Diverted 300-cell carrier: 340 cells, node_number 1536.</li><li>Diverted 550-cell carrier: 606 cells, node_number 2469, partition digest 576421da.</li></ul><p>None of the earlier receipt's seven figures changed.</p><p><strong>Open defect.</strong> The limited 550-cell carrier is refused at <code>AtomicCellMesh.from_cells</code> on both devices at main. carrier-identity-followons saw the same refusal at its own base, so it predates today's landings. moment-field-hessian solved the limited 550 row on a private carrier built by its own builder, so main's production builder for that row is still broken. It needs its own node.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261027T151501014817-carrier-identity-receipt" data-who="reckon-build" data-when="2026-10-27T18:50:09Z">
+    <div class="r-comment-body"><p>Rebuilt the carrier vertex identity at main on both devices: the diverted 300-cell carrier reads 340 cells, 1075 sample vertices, 922 atomic nodes and node_number 1536 with partition digest eac30256… on the H200 and on the CPU, and the diverted 550-cell carrier reads 606 cells, 1742 samples, 1454 atomic nodes and node_number 2469 with partition digest 576421da…, identical across devices and to the earlier records, so none of the earlier receipt&#x27;s seven figures changed; the limited 550-cell carrier is still refused at AtomicCellMesh.from_cells on both devices.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-s21-moment-space-ruling" data-who="reckon-build" data-when="2026-10-13T18:40:00Z">
     <div class="r-comment-body"><p>Lead ruling 2026-10-13: the forward solve's unknown is the cell current moments.</p><p>The locked read builds its field from booked moments: the Bell jets at the nodes are the jet coupling rows times m, plus the exterior's jets. So it cannot evaluate an arbitrary trial flux vector, but it can always evaluate a trial m. The solve therefore iterates m = book(read(psi_ext + G m)), and the flux is G m wherever output needs it.</p><ul><li>Newton runs on the device with autograd.</li><li>A dense <code>jax.jacfwd</code> Jacobian with a device LU is measured against a device-side Jacobian-free Krylov, replacing SciPy's host <code>newton_krylov</code>.</li><li>Autograd must be shown to pass through the read and the booking.</li><li><code>current.book</code> is vectorised. Its sequential cell scan costs 0.9 to 8 s per step at 2,000 to 10,000 cells.</li><li>The legacy support partition, the spline-clip read and the chord default are deleted.</li></ul></div>

@@ -84,7 +84,18 @@ def main():
         zorder=3,
     )
     draw_wall(axis, np.asarray(wall)[:, 0], np.asarray(wall)[:, 1])
-    reference_style = DEFAULT_INK.variant(axis_color="#555555", xpoint_color="#555555")
+    reference_style = DEFAULT_INK.variant(
+        axis_color="#555555",
+        xpoint_color="#555555",
+        axis_markersize=13,
+        xpoint_markersize=14,
+    )
+    solved_style = DEFAULT_INK.variant(
+        axis_color=DEFAULT_INK.flux_color,
+        xpoint_color=DEFAULT_INK.flux_color,
+        axis_markersize=8.5,
+        xpoint_markersize=9.5,
+    )
     draw_nulls(
         axis,
         oracle_axis,
@@ -96,7 +107,7 @@ def main():
         axis,
         solved_axis,
         np.asarray(solved_boundary).reshape(1, 2),
-        style=DEFAULT_INK,
+        style=solved_style,
         contain=wall,
     )
     fig.legend(

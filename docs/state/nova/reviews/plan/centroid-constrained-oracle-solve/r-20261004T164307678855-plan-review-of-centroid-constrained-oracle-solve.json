@@ -26,7 +26,24 @@
   "plan_slug": "centroid-constrained-oracle-solve",
   "plan_version": 80,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "finding": "thin_wrapper-1",
+      "reason": "the wrappers carry real fixture defaults (bound 0.25 T, per-pair scale and tolerance, the static column map) and the plan's \u00a72 done-when is interface parity in the solver, which a fixture-side builder satisfies; the honest remedy is a code simplification, not a design change.",
+      "when": "2026-10-28T05:05:54.104964+00:00"
+    }
+  ],
+  "responses": {
+    "thin_wrapper-1": {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "reason": "the wrappers carry real fixture defaults (bound 0.25 T, per-pair scale and tolerance, the static column map) and the plan's \u00a72 done-when is interface parity in the solver, which a fixture-side builder satisfies; the honest remedy is a code simplification, not a design change.",
+      "when": "2026-10-28T05:05:54.104964+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/centroid-constrained-oracle-solve/r-20261004T164307678855-plan-review-of-centroid-constrained-oracle-solve.json",
   "review_run_id": "r-20261004T164307678855-plan-review-of-centroid-constrained-oracle-solve",
   "reviewed_blob_sha": "10b6daee9cbda73411b2625f6c8f9734f6921a62",
   "rubric": "design",

@@ -7,8 +7,8 @@
 #SBATCH --time=01:00:00
 #SBATCH --job-name=read-derivatives
 export TMPDIR=/tmp
-# the worktree root is three levels above this script's own directory
-W=$(cd "$(dirname "$0")/../../.." && pwd)
+# slurm runs a copy of this script outside the repository, so the worktree
+W=${1:?usage: run.sh worktree-root}
 export PYTHONPATH=$W
 L=$W/scripts/prototypes/read_derivatives/logs
 PY=${NOVA_PYTHON:-/home/ITER/mcintos/Code/nova/.venv/bin/python}

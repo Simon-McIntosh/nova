@@ -14,6 +14,13 @@
     "benchmarks/zero_residual_check.py:391"
   ],
   "completed_at": "2026-10-28T22:19:41.777Z",
+  "dimension_dispositions": {
+    "evidence": {
+      "kind": "folded",
+      "node": "diverted-300-regression",
+      "recorded_at": "2026-10-28T22:23:00.521717+00:00"
+    }
+  },
   "dispatched_at": "2026-10-28T21:59:38Z",
   "findings": [
     {

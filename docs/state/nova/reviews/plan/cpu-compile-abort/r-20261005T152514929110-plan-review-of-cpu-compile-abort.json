@@ -40,7 +40,24 @@
   "plan_slug": "cpu-compile-abort",
   "plan_version": 24,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "finding": "reuse_search-1",
+      "reason": "the child-surviving, fixed-interval sampler is genuinely a different measurement from the self-sampling pytest plugin, so the omission is a prior-art account gap rather than a design change.",
+      "when": "2026-10-28T05:06:17.150316+00:00"
+    }
+  ],
+  "responses": {
+    "reuse_search-1": {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "reason": "the child-surviving, fixed-interval sampler is genuinely a different measurement from the self-sampling pytest plugin, so the omission is a prior-art account gap rather than a design change.",
+      "when": "2026-10-28T05:06:17.150316+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/cpu-compile-abort/r-20261005T152514929110-plan-review-of-cpu-compile-abort.json",
   "review_run_id": "r-20261005T152514929110-plan-review-of-cpu-compile-abort",
   "reviewed_blob_sha": "8f96e168b196721e28ee9866240ca57d8af407de",
   "rubric": "design",

@@ -263,7 +263,7 @@ def test_the_read_and_the_field_choose_the_same_cell(measured):
     )
     edge = jnp.asarray(0.5 * (generators[first] + generators[second]))
     chosen = int(np.asarray(fixed_points.nearest_cell(mesh, edge)))
-    located = int(np.asarray(field._location(edge)))
+    located = int(np.asarray(field._location(edge)[0]))
     assert chosen == located, (chosen, located, first, second)
 
 

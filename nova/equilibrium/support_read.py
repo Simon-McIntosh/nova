@@ -153,19 +153,6 @@ class SupportRead(NamedTuple):
     rebuilt: jax.Array
 
 
-def stationary_cells(operands: SupportOperands, position, live) -> jax.Array:
-    """Index the hex cell that holds each tracked point, ``-1`` when not live.
-
-    The cell is the one whose generator is nearest, which is the same
-    selection ``fixed_points._CachedField`` evaluates the cell-local Bell fit
-    in, so a reused decision and a rebuilt one agree on where the point sits.
-    """
-    distance = jnp.sum(
-        (operands.mesh.generators[None, :, :] - position[:, None, :]) ** 2, axis=-1
-    )
-    return jnp.where(live, jnp.argmin(distance, axis=-1), -1)
-
-
 def nodal_jets(operands: SupportOperands, moments) -> jax.Array:
     """Contract the booked moments once into every node's value and derivatives."""
     stacked = jnp.stack(tuple(moments), axis=-1)
@@ -216,7 +203,9 @@ def read(
         lambda point: jnp.any(topology._inside_cells(operands.geometry, point))
     )(solved.position)
     live = solved.valid & inside
-    cells = stationary_cells(operands, solved.position, live)
+    cells = jnp.where(
+        live, fixed_points.nearest_cell(operands.mesh, solved.position), -1
+    )
     saddles = live & (eigenvalues[:, 0] < 0.0) & (eigenvalues[:, 1] > 0.0)
     saddle_live = jnp.any(saddles)
 

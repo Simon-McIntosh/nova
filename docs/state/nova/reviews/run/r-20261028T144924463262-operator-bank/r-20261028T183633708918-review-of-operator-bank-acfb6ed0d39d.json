@@ -1,0 +1,67 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-28T18:46:55.345Z",
+  "dispatched_at": "2026-10-28T18:38:24Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T144924463262-operator-bank/manifest.md",
+      "id": "f344e077b2f",
+      "line": 21,
+      "severity": "non-blocking",
+      "text": "The record's after_suite revision is 77961a75c and logs/suite-rerun-slurm.out line 1 prints HEAD_SHA=77961a75c0ea29b2d60fb9d6378d01f3e04618a2, so the head arm ran before dc97e6f4f changed nova/equilibrium/forward.py; the checkpoint at line 9 nevertheless reads as if both arms completed for the repair round. Every suite file that imports forward was exercised at a revision that does not carry the new field and key element, so the arm cannot show the repair broke no importer. The focused gate covers the touched modules, so this is not a landing blocker, but the wave's merged-head integration run should carry the repaired head.",
+      "title": "after_suite was measured before the repair it is cited for"
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/operator-bank.html",
+      "id": "f95fee6a487",
+      "line": 60,
+      "severity": "non-blocking",
+      "text": "The sentence states that two geometries in one bucket key identically \"which is why the second geometry costs no compilation\". The COMPILE rows in logs/operator_bank_h200.log count jit_cache_size and cache_entries of the jitted bank_program, not ForwardProfile._request_compilation_cache, so the measured zero recompilation comes from the program's own shape-static jit; the profile compile key was not on that path. The causal link is unmeasured, and a reader takes it as recorded evidence.",
+      "title": "the zero-compilation result is attributed to a key the measurement never exercised"
+    },
+    {
+      "file": "nova/equilibrium/forward.py",
+      "id": "f41e3a4341c",
+      "line": 574,
+      "severity": "non-blocking",
+      "text": "support_bank defaults to None and git grep at the head finds no construction of a ForwardProfile carrying one outside tests/test_operator_bank_compile.py:96, so _request_compilation_cache_key returns a bucket of None for every request a route can make today. The seam is declared and settable, which is what the prior finding required and what section 1 fences; the wiring is section 4's, and until it lands the key's second element carries no bucket in production.",
+      "title": "the new bucket slot is None on every production solve"
+    },
+    {
+      "file": "nova/transport/coupled_window.py",
+      "id": "f10bd6425ad",
+      "line": 1623,
+      "severity": "non-blocking",
+      "text": "dataclasses.replace(profile, operator=operator) passes every init field through, so an attached support_bank survives a replacement of the operator and its grid; a bank's padded rows and its bucket are built for one mesh, so the copied profile would key a bucket that no longer describes its operands. Unreachable while nothing attaches a bank, but the field added at nova/equilibrium/forward.py:574 makes this call site the one that must decide what happens to it when section 4 attaches one.",
+      "title": "a profile copied with a substituted operator would keep a bank built for the old one"
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Four commits from 32abc792a to acfb6ed0d, 88 insertions over six files: dc97e6f4f adds ForwardProfile.support_bank and swaps the key element from getattr(self.operator, ...) to the field, and drops an unused pathlib import; 79d995200 and 63ac4d428 add the control script and the evidence paragraph; acfb6ed0d cites the script in the log list.",
+    "done_when": "The compile-key clause now holds: forward.py:2775 reads self.support_bank.bucket, forward.py:687 _with_source copies __dict__ so the field reaches the keyed profile, and tests/test_operator_bank_compile.py at acfb6ed0d passes 4 of 4 when I ran it in a scratch tree; the bank's build, load, reproduction, compile-count and memory clauses are the prior review's and its H200 log is unchanged.",
+    "goal": "The node's goal is a per-machine operator bank at fixed shape compiled once; forward.py:574 adds the declared ForwardProfile.support_bank field and forward.py:2775 keys the single compilation cache on its static bucket, which answers the prior review's blocking finding that the slot read an attribute nothing set.",
+    "manifest": "Read in full; it records the repair and a real red control at logs/negative_control_compile_key.log, but its after_suite revision is 77961a75c rather than the reviewed head, its checkpoint reads as if the arms covered the repair, and the focused-gate results are prose in evidence_inputs rather than a named log.",
+    "write_paths": "All six changed paths are inside the declared write paths: nova/equilibrium/forward.py, nova/equilibrium/support_read.py, tests/test_support_read.py, tests/test_operator_bank_compile.py, scripts/prototypes/operator_bank/run_compile_key_control.sh and docs/evidence/fragments/sub-millisecond-forward-path/operator-bank.html."
+  },
+  "plan_slug": "sub-millisecond-forward-path",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is a per-machine operator bank at fixed shape compiled once, and the obligation this window carries is that its bucket enters the existing compile key; nova/equilibrium/forward.py:574 adds a declared ForwardProfile.support_bank and :2775 keys on support_bank.bucket.\nVERDICT done_when: the compile-key clause is now met where it was not at 32abc792a - forward.py:2775 reads self.support_bank.bucket, forward.py:687 _with_source carries the field into the profile the key is computed on, and I re-ran tests/test_operator_bank_compile.py at acfb6ed0d for 4 passed, with the red direction recorded in logs/negative_control_compile_key.log.\nVERDICT write_paths: read the manifest's declared paths; all six files in 32abc792a..acfb6ed0d sit inside them, including the new script under the scripts/prototypes/operator_bank directory grant.\nVERDICT manifest: read in full; its after_suite names revision 77961a75c rather than the reviewed head so the repair commits carry no suite arm, its checkpoint reads as if they did, and its focused-gate results appear only as prose in evidence_inputs.\nVERDICT diff: read commit by commit from 32abc792a to acfb6ed0d; dc97e6f4f is the substantive commit (a dataclass field and one key element, plus the removal of an unused pathlib import), 79d995200 and 63ac4d428 add the control script and evidence text, and acfb6ed0d cites the script; 88 insertions over six files, all inside scope.\nCALL_SITES: nova/equilibrium/forward.py:2627 ForwardProfile._solve_imposed_request (sole consumer, key computed at :2653), nova/equilibrium/forward.py:687 ForwardProfile._with_source, nova/transport/coupled_window.py:1623, nova/imas/diiid_current.py:261\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/equilibrium/forward.py:2775 reads the bucket from the declared ForwardProfile.support_bank field, which forward.py:687 preserves through _with_source and dataclasses.replace preserves on copy, so the key distinguishes buckets for any profile a route can reach; nothing attaches a bank yet, which section 1 fences to section 4.\nSCORE evidence: 15\nJUSTIFICATION evidence: the red direction is recorded (logs/negative_control_compile_key.log ends EXIT=1 on assert None == 64) and I verified the green direction at head (4 passed), but the suite arm the manifest calls the head ran at 77961a75c per logs/suite-rerun-slurm.out, so the repair commits are covered by neither the suite nor a logged focused run.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: all six paths changed in 32abc792a..acfb6ed0d are inside the manifest's declared write paths, and neither SolveRoute wiring nor a second cache was introduced.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_operator_bank_compile.py:88 fails on assert None == 64 when getattr(self.operator, \"support_bank_bucket\", None) is put back at forward.py:2775, and passes at head, so the guard names the regression it was added to catch.\nSCORE fit: 18\nJUSTIFICATION fit: both changed source files pass ruff at head and the field follows the surrounding dataclass idiom, while nova/equilibrium/support_read.py:29 still defines the unreferenced BANK_MANIFEST_NAME carried over from the prior review.\nSCORE reuse: 18\nJUSTIFICATION reuse: the bucket enters the module's single compile-key function nova/equilibrium/forward.py:2740 rather than a second cache, and scripts/prototypes/operator_bank/run_compile_key_control.sh reuses the archive-and-run idiom of run_suite_arms.sh for which the prototypes directory holds no reusable helper.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T144924463262-operator-bank/manifest.md:21 non-blocking: after_suite records revision 77961a75c while the checkpoint reads as if the arms covered the repair, so no suite arm exercises the four commits this review covers.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/operator-bank.html:60 non-blocking: the zero-recompilation result is attributed to the profile compile key, but the COMPILE rows of logs/operator_bank_h200.log count the jitted bank_program's cache, so the stated causal link is unmeasured.\nFINDING nova/equilibrium/forward.py:574 non-blocking: no production path constructs a ForwardProfile with support_bank, so the key's bucket element is None on every solve until section 4 attaches one.\nFINDING nova/transport/coupled_window.py:1623 non-blocking: dataclasses.replace(profile, operator=operator) copies support_bank, so once a bank is attached this call site keys a bucket built for the operator it replaced.\n",
+  "review_run_id": "r-20261028T183633708918-review-of-operator-bank-acfb6ed0d39d",
+  "reviewed_at": "2026-10-28",
+  "reviewed_base_sha": "32abc792ad5e430d0ec83c8c18cce7b166db28c9",
+  "reviewed_head_sha": "acfb6ed0d39d7dd6e4cda141c9471fa7fbc59dce",
+  "reviewed_run_id": "r-20261028T144924463262-operator-bank",
+  "scores": {
+    "durability": 18,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T18:47:47.438528+00:00",
+  "total": 106
+}

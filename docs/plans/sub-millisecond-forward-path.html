@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="11">
+<meta name="plan-version" content="12">
 <meta name="plan-modified" content="2026-10-28">
 </head>
 <body>
@@ -148,6 +148,9 @@
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s1" data-id="c-run-r-20261028T181102994342-review-of-operator-bank-32abc792ad5e" data-who="reckon-build" data-when="2026-10-28T18:20:20.888Z">
     <div class="r-comment-body"><p>Independent review of run r-20261028T144924463262-operator-bank at 32abc792ad5e430d0ec83c8c18cce7b166db28c9 (base 330abce22572052e13649cd6351e8aad39bbf13b): scores goal_fidelity 15, evidence 16, scope_discipline 18, durability 15, fit 14, reuse 16, added_failure_count 0, and one blocking finding — forward.py:2766 keys the compile cache on an attribute nothing sets, so the shape bucket never enters the compile key that section 1 and the landed evidence both say it does.</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261028T183633708918-review-of-operator-bank-acfb6ed0d39d" data-who="reckon-build" data-when="2026-10-28T18:46:55.345Z">
+    <div class="r-comment-body"><p>Independent review of r-20261028T144924463262-operator-bank at acfb6ed0d39d (base 32abc792ad5e) stored in review-records/: scores goal_fidelity 18, evidence 15, scope_discipline 19, durability 18, fit 18, reuse 18, added_failure_count 0, four non-blocking findings; the prior round&#x27;s blocking finding is answered, because the compile key now reads the declared ForwardProfile.support_bank field instead of an attribute nothing sets.</p></div>
 </div>
 </section>
 </main>

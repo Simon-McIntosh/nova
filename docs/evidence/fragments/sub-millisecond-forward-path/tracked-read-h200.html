@@ -26,10 +26,10 @@
       <td>1.49e-5</td><td>[2, 2]</td><td>6.81e-4 / 1e-4</td></tr>
     <tr><td>diverted, trial</td><td>1.88e-4</td><td>8.82e-4</td>
       <td>2.21e-3</td><td>[2, 2]</td><td>6.81e-4 / 1e-4</td></tr>
-    <tr><td>limited, converged</td><td>inside budget</td><td>—</td>
-      <td>inside budget</td><td>—</td><td>2.00e-3 / 1e-4</td></tr>
+    <tr><td>limited, converged</td><td>8.40e-4</td><td>—</td>
+      <td>8.24e-5</td><td>[2]</td><td>2.00e-3 / 1e-4</td></tr>
     <tr><td>limited, trial</td><td>4.12e-3</td><td>—</td>
-      <td>inside budget</td><td>—</td><td>2.00e-3 / 1e-4</td></tr>
+      <td>3.32e-5</td><td>[3]</td><td>2.00e-3 / 1e-4</td></tr>
   </table>
   <p>The shared store publishes the diverted certificate's bank only
   (<code>receipt.json</code> reads <code>"kind": "diverted"</code>), so binding
@@ -37,9 +37,10 @@
   reported invalid with a boundary-flux error of 259 in span units. A case the
   store does not hold is built from its own rows; the numbers here are each
   certificate measured on the field it books.</p>
-  <p>The stage is fixed by the iteration count. Both points terminate after two
-  Newton iterations with <code>status=0</code> on a position tolerance of
-  <code>1e-10</code> of the pitch, so the read's position is the stationary
+  <p>The stage is fixed by the iteration count. Both diverted points terminate
+  after two Newton iterations and the limited trial point after three, each with
+  <code>status=0</code> on a position tolerance of <code>1e-10</code> of the
+  pitch, so the read's position is the stationary
   point of its derivative source to far better than the budgets above; the
   distance the table reports is that source's distance from the analytic flux,
   not a solve that stopped short. Widening the iteration budget cannot move it,
@@ -61,6 +62,15 @@
   defect reproduced on the H200, and it is left failing rather than relaxed:
   the budgets are the section's, and a test that stopped asserting them would
   report a read that meets them.</p>
+  <p>The gate is controlled. The declared mutation averages the Bell fit across
+  the three nodes of the triangle a point occupies instead of contracting each
+  node's own jets, applied to an exported copy of this revision and run on the
+  same device: it reports <code>6 failed, 2 passed</code> in 419 s, and the ids
+  it adds to the three above are both converged cases
+  (<code>limited-converged</code> axis and boundary, <code>diverted-converged</code>
+  axis, X-point and boundary), which the head passes. A mutation that no clause
+  catches would leave this gate's three failures indistinguishable from a gate
+  that is simply too strict.</p>
 
   <h3 id="tracked-read-h200-wall">The warm wall on the H200</h3>
   <p>One job on <code>98dci4-gpu-0003</code>, an <code>NVIDIA H200 NVL</code>,
@@ -80,6 +90,12 @@
     <tr><td>rebuild step</td><td>35.65 ms</td><td>805</td><td>24,025</td>
       <td>0</td></tr>
   </table>
+  <p>A second job on the same device repeated the table: the steady read came
+  back at 1.237 ms with 805 launches, so the steady figure is stable to about
+  1 %, while the solve-alone row moved from 0.634 ms to 0.817 ms between runs.
+  The bound is missed by either reading and the conclusion below does not turn
+  on which; the spread is stated so the solve figure is not read as tighter than
+  it is.</p>
   <p>The steady read is 1.225 ms, six times the section's 0.2 ms bound. The
   launches table says where they go: the stationary solve is 55 launches and
   0.634 ms, and the remaining 750 launches carry the other 0.591 ms, over

@@ -154,6 +154,22 @@ def test_krylov_condition_estimate_resolves_two_scales():
     np.testing.assert_allclose(estimate, 4.0, rtol=1e-12)
 
 
+def test_krylov_solve_does_not_require_a_transpose():
+    """A nonsymmetric linear operator reaches its requested residual."""
+    matrix = jnp.asarray([[4.0, 1.0], [0.5, 3.0]])
+    right = jnp.asarray([1.0, 2.0])
+
+    @jax.jit
+    def solve(matrix, right):
+        return support_read._krylov_solve(
+            lambda value: matrix @ value, right, 1e-10, restart=2, maxiter=4
+        )
+
+    solution, residual = solve(matrix, right)
+    np.testing.assert_allclose(solution, np.linalg.solve(matrix, right), rtol=1e-10)
+    assert float(residual) <= 1e-10
+
+
 def test_bank_jvp_composes_flux_and_level_derivatives(monkeypatch):
     """The bank carries all three booking inputs into the moment residual."""
 

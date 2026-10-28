@@ -368,6 +368,59 @@ def _krylov_condition_estimate(matvec, size: int, width: int = 8):
     return jnp.maximum(largest / smallest, 1.0)
 
 
+def _krylov_solve(matvec, right, tolerance, restart: int = 20, maxiter: int = 20):
+    """Solve a linear operator without tracing a transpose of its program."""
+    width = min(restart, right.size)
+    basis_dtype = right.dtype
+    right_norm = jnp.linalg.norm(right)
+    threshold = tolerance * right_norm
+
+    def one_restart(state):
+        solution, iteration, _ = state
+        residual = right - matvec(solution)
+        length = jnp.linalg.norm(residual)
+        basis = (
+            jnp.zeros((width + 1, right.size), basis_dtype)
+            .at[0]
+            .set(residual / jnp.where(length > 0, length, 1.0))
+        )
+        hessenberg = jnp.zeros((width + 1, width), basis_dtype)
+
+        def advance(column, carried):
+            vectors, h = carried
+            candidate = matvec(vectors[column])
+
+            def orthogonalize(row, value):
+                remaining, matrix = value
+                coefficient = jnp.vdot(vectors[row], remaining)
+                remaining = remaining - coefficient * vectors[row]
+                return remaining, matrix.at[row, column].set(coefficient)
+
+            candidate, h = jax.lax.fori_loop(
+                0, column + 1, orthogonalize, (candidate, h)
+            )
+            norm = jnp.linalg.norm(candidate)
+            vectors = vectors.at[column + 1].set(
+                candidate / jnp.where(norm > 0, norm, 1.0)
+            )
+            return vectors, h.at[column + 1, column].set(norm)
+
+        basis, hessenberg = jax.lax.fori_loop(0, width, advance, (basis, hessenberg))
+        target = jnp.zeros(width + 1, basis_dtype).at[0].set(length)
+        coefficients = jnp.linalg.pinv(hessenberg, rtol=1e-12) @ target
+        solution = solution + basis[:width].T @ coefficients
+        error = jnp.linalg.norm(right - matvec(solution))
+        return solution, iteration + 1, error
+
+    def continue_solve(state):
+        _, iteration, error = state
+        return (iteration < maxiter) & (error > threshold)
+
+    initial = (jnp.zeros_like(right), jnp.asarray(0), right_norm)
+    solution, _, error = jax.lax.while_loop(continue_solve, one_restart, initial)
+    return solution, error / jnp.maximum(right_norm, jnp.finfo(right.dtype).tiny)
+
+
 def newton_step(
     operands,
     moments,
@@ -403,18 +456,13 @@ def newton_step(
 
     estimate = _krylov_condition_estimate(matvec, right.size)
     tolerance = 1e-8 / estimate
-    solution, info = jax.scipy.sparse.linalg.gmres(
-        matvec, right, tol=tolerance, atol=0.0, restart=20, maxiter=20
-    )
-    linear_residual = jnp.linalg.norm(matvec(solution) - right) / jnp.maximum(
-        jnp.linalg.norm(right), jnp.finfo(right.dtype).tiny
-    )
+    solution, linear_residual = _krylov_solve(matvec, right, tolerance)
     return NewtonStep(
         tuple(jnp.split(solution, boundaries)),
         estimate,
         tolerance,
         linear_residual,
-        (info == 0) & (linear_residual <= tolerance),
+        linear_residual <= tolerance,
     )
 
 

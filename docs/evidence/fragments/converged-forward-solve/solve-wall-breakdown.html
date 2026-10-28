@@ -30,7 +30,7 @@
 <tr><td>map</td><td>1.486</td><td>0.548</td><td>12.291</td><td>0.393</td><td>167.8</td><td>168.3</td><td>7,728</td><td>2,729,683</td></tr>
 <tr><td><strong>total</strong></td><td><strong>3.983</strong></td><td><strong>1.240</strong></td><td><strong>28.996</strong></td><td><strong>0.714</strong></td><td><strong>285.6</strong></td><td></td><td>13,037</td><td>2,745,760</td></tr>
 </tbody></table>
-<p>Three distinct programs were compiled, one per call site. The XLA compile is 79 % of the cold wall and tracing is 11 %; the executables total 2.75 MB, far inside the 2 GiB serialisation limit. The map's executable is 2.73 MB because the interaction operands are traced arguments rather than program literals; the executable stays small while the operands stay in the store.</p>
+<p>Three distinct programs were compiled, one per call site. The total row sums the three programs alone: its warm median of 285.6 ms is these three stages and nothing else, and the full Newton step, which also carries the Jacobian block and the dense solve, is 1,023.7 ms in the next section. The XLA compile is 79 % of the cold wall and tracing is 11 %; the executables total 2.75 MB, far inside the 2 GiB serialisation limit. The map's executable is 2.73 MB because the interaction operands are traced arguments rather than program literals; the executable stays small while the operands stay in the store.</p>
 </section>
 
 <section id="solve-wall-breakdown-warm"><h2>Warm per-step split against the 1 ms target</h2>
@@ -39,13 +39,17 @@
 <table>
 <thead><tr><th>Newton-step stage</th><th>warm median [ms]</th><th>p95 [ms]</th><th>share of the measured step</th></tr></thead>
 <tbody>
-<tr><td>topology read</td><td>110.2</td><td>110.5</td><td>38.6 %</td></tr>
-<tr><td>booking</td><td>7.6</td><td>7.8</td><td>2.7 %</td></tr>
-<tr><td>map</td><td>167.8</td><td>168.3</td><td>58.7 %</td></tr>
+<tr><td>topology read</td><td>107.8</td><td>108.1</td><td>10.5 %</td></tr>
+<tr><td>booking</td><td>7.6</td><td>7.7</td><td>0.7 %</td></tr>
+<tr><td>map</td><td>166.2</td><td>166.7</td><td>16.2 %</td></tr>
 <tr><td>Jacobian block</td><td>735.7</td><td>739.3</td><td>71.9 %</td></tr>
 <tr><td>dense linear solve</td><td>6.4</td><td>6.5</td><td>0.6 %</td></tr>
 <tr><td><strong>one Newton step</strong></td><td><strong>1,023.7</strong></td><td></td><td>1,024 times the 1 ms target</td></tr>
 </tbody></table>
+<figure>
+<img src="/nova/figures/converged-forward-solve/solve-wall-breakdown/step-stages.svg" alt="Horizontal bars on a logarithmic millisecond axis for the topology read, the booking, the map, the Jacobian block and the dense linear solve, with a dotted line at the 1 ms target and a grey bar for the map's per-slice wall at batch width 16." style="width:100%">
+<figcaption>Warm wall of each stage of one Newton step on the diverted 550-cell carrier, one H200, median of 50 calls (20 for the Jacobian block and the dense solve). The dotted line is the 1 ms target. The blue bars are the stages of a single step and sum to 1,023.7 ms; the grey bar is the map's wall per slice at batch width 16, drawn on the same axis but not a stage of one step. Values in milliseconds.</figcaption>
+</figure>
 <p>Adding the Jacobian block and the dense solve, one full Newton step is <strong>1,023.7 ms</strong>, 1,024 times the 1 ms target. The Jacobian block is 71.9 % of it, the map 16.2 %, the topology read 10.5 %, the booking 0.7 % and the dense solve 0.6 %. The booking is no longer a target. The step count is one Newton step: the receipt measures the per-step stages and does not run the outer solve, so the number of steps the production solve takes from its seed is not recorded here.</p>
 </section>
 
@@ -84,7 +88,7 @@
 <p>The two largest contributors to the 1,023.7 ms Newton step are:</p>
 <ol>
 <li><strong>The Jacobian block, 735.7 ms (71.9 %).</strong> It materialises all 1,650 columns of the map's Jacobian through traced JVP, one direction at a time. Removing it, for instance by a matrix-free Krylov solve over the same JVP, leaves a step of about <strong>288 ms</strong> — 288 times the target, still not close, but it removes seven tenths of the step.</li>
-<li><strong>The map, 166.2 ms (16.2 %), of which the topology read is 107.8 ms.</strong> Removing the per-call contour tree by supplying the solved stationary points (the route the study measured) would take the map towards the study's 10.176 ms and the step to about <strong>866 ms</strong>; removing the read entirely is not possible while the map depends on membership.</li>
+<li><strong>The map, 166.2 ms (16.2 %), of which the topology read is 107.8 ms.</strong> Removing the per-call contour tree by supplying the solved stationary points (the route the study measured) would take the map towards the study's 10.176 ms and the step to about <strong>857.5 ms</strong>; removing the read entirely is not possible while the map depends on membership.</li>
 </ol>
 <p>Together the two contributors are 88 % of the step, and the remaining 12 % (read outside the map, booking, dense solve) cannot close the gap alone. The measured step is 1,024 times the 1 ms target, so the target is not reachable by shaving stages: the Jacobian route and the tree-free read are the two changes the numbers point at.</p>
 </section>

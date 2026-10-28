@@ -166,18 +166,34 @@ def main():
     # Compilation counting reads the persistent compilation cache, fresh per run.
     args.compile_cache.mkdir(parents=True, exist_ok=True)
     jax.config.update("jax_compilation_cache_dir", str(args.compile_cache))
+    for name, value in (
+        ("jax_persistent_cache_min_compile_time_secs", 0.0),
+        ("jax_persistent_cache_min_entry_size_bytes", 0),
+    ):
+        try:
+            jax.config.update(name, value)
+        except AttributeError:
+            pass
 
     def counted(label, operands):
-        before = cache_entries(args.compile_cache)
+        before = program._cache_size()
+        entries_before = cache_entries(args.compile_cache)
         jax.block_until_ready(program(operands, converged_moments))
-        after = cache_entries(args.compile_cache)
-        row = dict(label=label, bucket=operands.bucket, entries=after, new=after - before)
+        after = program._cache_size()
+        row = dict(
+            label=label,
+            bucket=operands.bucket,
+            jit_cache_size=after,
+            compiled=after - before,
+            cache_entries=cache_entries(args.compile_cache) - entries_before,
+        )
         emit("COMPILE", **row)
         return after
 
     first = counted("bucket-first", bank)
-    same_rows = np.asarray(bank.rows) * 1.0 + 1e-3 * np.asarray(bank.rows).max()
-    same_exterior = np.asarray(bank.exterior) + 1e-3
+    same_rows = np.asarray(bank.rows)[:active] * 1.0
+    same_rows = same_rows + 1e-3 * same_rows.max()
+    same_exterior = np.asarray(bank.exterior)[:active] + 1e-3
     same_bucket = support_read.SupportOperands.from_rows(
         geometry,
         same_rows,
@@ -207,6 +223,7 @@ def main():
         after_different_bucket=third,
         same_bucket_delta=second - first,
         different_bucket_delta=third - second,
+        same_bucket_compiled=second - first,
         different_bucket_bucket=wide.bucket,
     )
 
@@ -246,10 +263,10 @@ def main():
     middle = cache_entries(args.compile_cache)
     closure_program(same_bucket)(converged_moments)
     after = cache_entries(args.compile_cache)
-    before_traced = cache_entries(args.compile_cache)
+    before_traced = program._cache_size()
     program(bank, converged_moments)
     jax.block_until_ready(program(same_bucket, converged_moments))
-    traced_delta = cache_entries(args.compile_cache) - before_traced
+    traced_delta = program._cache_size() - before_traced
     emit(
         "NEGATIVE_CONTROL",
         captured_operator="rows",

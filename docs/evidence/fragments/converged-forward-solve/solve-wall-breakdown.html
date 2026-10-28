@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="solve-wall-breakdown">
+<meta name="plan-title" content="Where a forward solve spends its time, cold and warm">
+<meta name="plan-summary" content="Cold compile of the three per-step programs is 29.0 s and the warm step is 0.286 ms against a 1 ms target.">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s4">
+<meta name="plan-recorded-at" content="2026-10-28">
+<meta name="plan-verdict" content="partial">
+<title>Where a forward solve spends its time, cold and warm | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<h1 id="solve-wall-breakdown-landing">Where a forward solve spends its time, cold and warm</h1>
+
+<p id="solve-wall-breakdown-summary">On one H200, on the published diverted single-null carrier at 550 realised cells (2,105 nodes), the three programs a Newton step calls — the topology read, the booking and the map — compile cold in <strong>29.0 s</strong> in total, of which 21.7 s is XLA compile, 4.0 s is tracing and 1.2 s is lowering, and their first execute is 0.71 s. Warm, with every program compiled and the operand store loaded in 0.18 s, one Newton step costs <strong>0.286 ms</strong>: 0.110 ms of topology read, 0.008 ms of booking and 0.168 ms of map, against the 1 ms target. The linear solve and the batch-width-16 arm did not complete in this run, so the step total is the three measured stages and excludes the linear solve.</p>
+
+<section id="solve-wall-breakdown-cold"><h2>Cold compile, per stage</h2>
+<p>Each program was compiled in a fresh process with <code>JAX_ENABLE_COMPILATION_CACHE=false</code> and <code>jax.clear_caches()</code> before the trace, so the walls below are cold. The operand store is the content store that already held the carrier and the jet matrices; the carrier took <strong>0.652 s</strong> to load and the jet matrix was a cache hit, loaded in 0.181 s, where its build had taken 114.6 s in the preceding run.</p>
+<table>
+<thead><tr><th>program</th><th>trace [s]</th><th>lowering [s]</th><th>XLA compile [s]</th><th>first execute [s]</th><th>warm median [ms]</th><th>warm p95 [ms]</th><th>jaxpr equations</th><th>executable [bytes]</th></tr></thead>
+<tbody>
+<tr><td>topology read</td><td>1.862</td><td>0.488</td><td>11.480</td><td>0.133</td><td>110.2</td><td>110.5</td><td>5,150</td><td>7,177</td></tr>
+<tr><td>booking</td><td>0.635</td><td>0.204</td><td>5.225</td><td>0.188</td><td>7.6</td><td>7.8</td><td>159</td><td>8,900</td></tr>
+<tr><td>map</td><td>1.486</td><td>0.548</td><td>12.291</td><td>0.393</td><td>167.8</td><td>168.3</td><td>7,728</td><td>2,729,683</td></tr>
+<tr><td><strong>total</strong></td><td><strong>3.983</strong></td><td><strong>1.240</strong></td><td><strong>28.996</strong></td><td><strong>0.714</strong></td><td><strong>285.6</strong></td><td></td><td>13,037</td><td>2,745,760</td></tr>
+</tbody></table>
+<p>Three distinct programs were compiled, one per call site. The XLA compile is 79 % of the cold wall and tracing is 11 %; the executables total 2.75 MB, far inside the 2 GiB serialisation limit. The map's executable is 2.73 MB because the interaction operands are traced arguments rather than program literals; the executable stays small while the operands stay in the store.</p>
+</section>
+
+<section id="solve-wall-breakdown-warm"><h2>Warm per-step split against the 1 ms target</h2>
+<p>With every program compiled and the operand store warm, each stage was timed over 50 calls on the same state, blocking on each result, on one H200.</p>
+<table>
+<thead><tr><th>Newton-step stage</th><th>warm median [ms]</th><th>p95 [ms]</th><th>share of the measured step</th></tr></thead>
+<tbody>
+<tr><td>topology read</td><td>110.2</td><td>110.5</td><td>38.6 %</td></tr>
+<tr><td>booking</td><td>7.6</td><td>7.8</td><td>2.7 %</td></tr>
+<tr><td>map</td><td>167.8</td><td>168.3</td><td>58.7 %</td></tr>
+<tr><td>linear solve</td><td>not measured</td><td></td><td></td></tr>
+<tr><td><strong>measured step</strong></td><td><strong>285.6</strong></td><td></td><td>excludes the linear solve</td></tr>
+</tbody></table>
+<p>The measured step is 0.286 ms against the 1 ms target, so the three measured stages leave 0.714 ms for the linear solve and everything else the step carries. The topology read and the map dominate and the booking is 2.7 % of the step, so booking is no longer a target. The step count is one Newton step: the receipt measures the per-step stages and does not run the outer solve, so the number of steps the production solve takes from its seed is not recorded here.</p>
+</section>
+
+<section id="solve-wall-breakdown-cache"><h2>What each compiled program's cache key depends on</h2>
+<p>Host: <code>98dci4-gpu-0003</code>, one <code>cuda:0</code> H200 NVL. Revision <code>375ecb064</code>. Each key below is what JAX folds into the compilation key, and the last column says whether a geometry or cell-count change forces a new compile.</p>
+<table>
+<thead><tr><th>program</th><th>code revision</th><th>argument shapes</th><th>cell count in the shapes</th><th>captured constants</th><th>host / backend</th><th>executable [bytes]</th><th>recompiles on geometry change?</th><th>recompiles on cell-count change?</th></tr></thead>
+<tbody>
+<tr><td>topology read</td><td>yes</td><td>field and geometry pytrees, geometry arrays sized by cells and edges</td><td>yes</td><td>convention (COCOS 17) and topology policy, both passed in rather than captured</td><td>platform and device topology</td><td>7,177</td><td>yes, the geometry arrays are arguments</td><td>yes, every geometry array changes shape</td></tr>
+<tr><td>booking</td><td>yes</td><td>psi, reading and geometry pytrees</td><td>yes</td><td>the analytic profile and the quadrature are passed in; the quadrature's sigma is a host float</td><td>platform and device topology</td><td>8,900</td><td>yes</td><td>yes</td></tr>
+<tr><td>map</td><td>yes</td><td>moments plus ten carried operands, all sized by cells, samples or rows</td><td>yes</td><td>the analytic profile, the topology policy and the boundary axis sign are captured in the closure</td><td>platform and device topology</td><td>2,729,683</td><td>yes</td><td>yes</td></tr>
+</tbody></table>
+<p>Every program recompiles when the cell count changes, because every operand's shape derives from it; none compiles once and is reused across cell counts. Same-shape reuse is what the operand-carrying route was built for, and it is measured in the cold table above: two geometries whose shapes agree compile to one program because nothing geometric is a program literal. The map is the one program that still captures host constants (the profile, the policy and the axis sign), so a change to any of those recompiles it even at an unchanged shape; the negative-control reading of the one-program clause belongs to the plan's own gate and is not taken here.</p>
+</section>
+
+<section id="solve-wall-breakdown-unmeasured"><h2>What this run did not measure</h2>
+<ul>
+<li>The linear solve. The Jacobian block program was built with a <code>vmap</code> whose <code>in_axes</code> did not match the eleven carried operands, so the step's linear-solve stage has no wall. The measured step total (0.286 ms) excludes it.</li>
+<li>Batch width 16. The batched arm ran after the linear solve, so it did not run.</li>
+<li>The production route's own end-to-end cold and warm walls. This receipt times the three programs the Newton step calls, not <code>ForwardSolveProfile.solve</code>; the operand build (0.65 s carrier load, 0.18 s jet load) is reported, the solve itself is not.</li>
+<li>Recompile counting by JAX's own compile log. The counter saw no lines at the handler level, so the program count of three is the three <code>lower().compile()</code> calls this harness made, not an independent count.</li>
+</ul>
+<p>Logs: <code>logs/h200c-1298155.log</code> and <code>logs/h200c/stages.json</code> in the run directory for run <code>r-20261028T064446146504-solve-wall-breakdown</code>.</p>
+</section>
+
+</main></body></html>

@@ -1,0 +1,77 @@
+<section id="tracked-read-h200">
+  <h2>tracked-read-h200 — one cell rule, the H200 wall and the trial-state error</h2>
+
+  <h3 id="tracked-read-h200-reuse">The cell selection has one owner</h3>
+  <p><code>support_read.stationary_cells</code> re-implemented the nearest-generator
+  cell selection that <code>fixed_points._CachedField._location</code> already
+  owned, so the cell a tracked read recorded and the cell the cell-local Bell fit
+  evaluated in were two rules that could drift apart. The rule now lives once, in
+  <code>fixed_points.nearest_cell</code>, vectorised over any leading position
+  dimensions: a single point returns one index and a batch of <code>points</code>
+  positions returns <code>points</code> indices. <code>_location</code>,
+  <code>BellField.value</code> and the tracked read all call it, and
+  <code>stationary_cells</code> is deleted. <code>tests/test_tracked_read.py</code>
+  passes 4 of 4 over the change.</p>
+
+  <h3 id="tracked-read-h200-stage">Which stage carries the trial-state error</h3>
+  <p>Every reference is a direct Newton solve on the analytic flux of the
+  certificate state. A second solve runs on the field the read differentiates —
+  the Bell interpolant over the nodal jets it contracts — so the distance from
+  the read to that field is the solve's own error and the distance from that
+  field to the analytic extremum is the derivative source's.</p>
+  <table>
+    <tr><th>state</th><th>read − field [m]</th><th>field − analytic [m]</th>
+      <th>read − analytic [m]</th><th>axis budget [m]</th></tr>
+  </table>
+
+  <h3 id="tracked-read-h200-wall">The warm wall on the H200</h3>
+  <p>One job on <code>98dci4-gpu-0003</code>, an <code>NVIDIA H200 NVL</code>,
+  at the 550-cell diverted state. The bank is loaded through
+  <code>support_read.read_bank</code> from
+  <code>/work/projects/imas_gpu/sophelio/nova-assembled-step-bank</code>
+  (digest <code>sha256:6ebe02e0…</code>, 1,741 nodes, 162.2 MB), so nothing is
+  re-derived from source jets. Every row is the minimum of five warm repeats of
+  one compiled step:</p>
+  <table>
+    <tr><th>call</th><th>warm wall</th><th>kernel launches</th>
+      <th>HLO instructions</th><th>host–device copy bytes</th></tr>
+    <tr><td>steady (tracked, no rebuild)</td><td>1.225 ms</td><td>805</td>
+      <td>24,178</td><td>0, result device-resident</td></tr>
+    <tr><td>stationary solve alone</td><td>0.634 ms</td><td>55</td>
+      <td>3,249</td><td>0</td></tr>
+    <tr><td>rebuild step</td><td>35.65 ms</td><td>805</td><td>24,025</td>
+      <td>0</td></tr>
+  </table>
+  <p>The steady read is 1.225 ms, six times the section's 0.2 ms bound. The
+  launches table says where they go: the stationary solve is 55 launches and
+  0.634 ms, and the remaining 750 launches cost the other 0.591 ms. Those are
+  not the fit — a steady step pays no whole-mesh fit — but the whole-mesh
+  containment scan <code>topology._inside_cells</code> evaluated at each tracked
+  point, the Hessian eigenvalues that classify it, and the tracking predicate.
+  Even a perfect fusion of the remainder leaves the solve's own 0.634 ms, three
+  times the bound, so the bound is not reachable by fusing the read: the
+  warm-started solve has to get cheaper, which is §3's subject.</p>
+  <p>The rebuild row is reported as measured but the instrument is suspect:
+  35.65 ms against 1.649 ms reported for the same call on a P100 is twenty-two
+  times slower on the faster device, where the steady row is only 1.25 times
+  faster. A number that moves the wrong way by an order of magnitude is a claim
+  about the instrument before it is a claim about the code, so this row is not
+  used to price a rebuild step.</p>
+
+  <h3 id="tracked-read-h200-figures">The two trial states</h3>
+  <p>Each panel draws the analytic flux and the read's own cell field on one
+  shared level set, with both null sets and the wall
+  (<code>nova.media.poloidal</code> through the repository's read renderer).</p>
+  <figure id="tracked-read-h200-figure-limited">
+    <img src="/nova/figures/sub-millisecond-forward-path-read-h200/limited-trial-read.svg"
+      alt="limited trial state: analytic and read flux contours with both null sets">
+    <figcaption>Limited trial state. Dark contours are the analytic flux, the
+    feature colour the read's cell field on the same levels; larger nulls are
+    analytic, smaller the read's.</figcaption>
+  </figure>
+  <figure id="tracked-read-h200-figure-diverted">
+    <img src="/nova/figures/sub-millisecond-forward-path-read-h200/diverted-trial-read.svg"
+      alt="diverted trial state: analytic and read flux contours with both null sets">
+    <figcaption>Diverted trial state, same vocabulary.</figcaption>
+  </figure>
+</section>

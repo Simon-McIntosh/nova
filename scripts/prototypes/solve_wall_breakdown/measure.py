@@ -384,14 +384,7 @@ def main():
     residual = equation(flat, *operands)
     tangent = operand_tangent(equation, flat)
     identity = jnp.eye(residual.size, dtype=residual.dtype)
-    in_axes = (0,) + (None,) * len(operands)
-
-    def columns_image(columns, *carried):
-        def one(column, *operands_):
-            return operand_block(tangent, 1)(column, *operands_)
-
-        return jax.vmap(one, in_axes=in_axes)(columns, *carried)
-
+    columns_image = operand_block(tangent, len(operands))
     jacobian_program = jax.jit(columns_image).lower(identity, *operands).compile()
     matrix = jacobian_program(identity, *operands)
     jax.block_until_ready(matrix)

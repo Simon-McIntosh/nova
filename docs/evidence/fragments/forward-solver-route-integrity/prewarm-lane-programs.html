@@ -55,7 +55,13 @@ sequential arms, one process each).</strong> The pre-warm row compiled
 <code>tests/test_equilibrium_forward_solve.py</code> into a fresh sibling root,
 <code>/work/…/jax-cache/nova-prewarm-lane-programs</code>, and published that
 root's own pin document (both arms exited 0; the row records 1637 misses and
-383.0 compile seconds, which is what filling that pin cost). The lane run against that root
+383.0 compile seconds, which is what filling that pin cost).
+<span id="prewarm-lane-programs-status-correction">That zero is the status of
+the arm's own invocation, which passed the test path to the row runner rather
+than pytest, so the target's three content failures never reached the exit
+code. The production path passes pytest and did exit nonzero for them; the
+repair below is what makes the row's status say what it means.</span>
+The lane run against that root
 with <code>NOVA_CACHE_MISS_BUDGET=0</code> reports
 <code>CACHE_GUARD_MARKER=wall-clock-reliable misses=0 budget=0</code>, and its
 receipt reads <strong>1710 hits, 0 misses, 0.0 compile seconds</strong> in
@@ -80,6 +86,41 @@ fail in the 30-case file (3 failed, 27 passed) at a revision whose miss count
 is zero, so the compiles were all served from disk and the failures belong to
 the tests' own subject matter. They are reported as outside this node's write
 scope rather than triaged here.</p>
+
+<h3 id="prewarm-lane-programs-repair">Repair: one counter, and a pre-warm status that means its compiles</h3>
+
+<p><strong>The guard had grown a second counter.</strong> The capability belongs
+to <code>cache_reuse_summary.served_keys</code>, which read every name in a
+served directory: the <code>-atime</code> companion JAX writes beside each
+entry, the pin document and the autotune subtree all entered its key set, so
+it and the guard reported two different sizes for one directory under the same
+<code>served_entries</code> name. <code>served_keys</code> now reads the
+top-level <code>-cache</code> files alone and returns their keys, and
+<code>program_key_entry_count</code> is its length, so the summary and the
+guard cannot disagree. The check is
+<code>test_served_keys_and_the_guard_count_agree</code>, and it fails on a tree
+with only that hunk reverted (<code>negative-control-reverted-counter.log</code>,
+1 failed, exit 1).</p>
+
+<p><strong>The lane row made every pre-warm exit nonzero for test content.</strong>
+<code>prewarm_row.py</code> propagated pytest's status, and the lane target
+fails three cases at this revision for reasons unrelated to the cache. The row
+runner gains <code>--allow-pytest-failures</code>: a row whose compilations
+were all persisted reports success, the command's own status is still recorded
+in the receipt's <code>command_status</code>, and a miss written nowhere is
+never tolerated. The lane row opts in; the certificate rows keep the strict
+path. Driven end to end against a payload with one failing case: with the flag
+the runner exits 0 with <code>command_status 1</code> and <code>status 0</code>
+(<code>repair-prewarm-status-tolerate.log</code>), without it exits 1
+(<code>repair-prewarm-status-strict.log</code>), and
+<code>test_prewarm_row_does_not_gate_on_the_targets_own_failures</code> fails on
+a tree with only that hunk reverted
+(<code>negative-control-reverted-prewarm-status.log</code>, 1 failed,
+exit 1).</p>
+
+<p><strong>The gate over both repairs.</strong> <code>tests/test_cache_guard.py</code>
+is 7 passed at the repaired head and 7 failed against the base revision's
+modules, so every case — the two repairs included — fails without its fix.</p>
 
 <p><strong>What the coordinator still owns.</strong> The measured root covers
 the lane row alone, because the pre-warm's certificate rows were not re-run

@@ -1,0 +1,84 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run carries no baseline_suite or after_suite arm (tests: not-run, a prototype whose write scope holds no test path), so no arm exists to derive an added-failure delta from; the count is zero by that absence rather than by a green pair.",
+  "call_sites": [],
+  "completed_at": "2026-10-28T08:07:51.845Z",
+  "dispatched_at": "2026-10-28T07:54:28Z",
+  "findings": [
+    {
+      "detail": "The fragment's protocol paragraph sends the reader to logs/ for every number, but no receipt on disk contains 90.5, 182.4, 0.27 or 13.4. The 13.4 figure lies outside the range of both receipts and is carried into the recommendation at line 31 as '11.8 to 13.4 s', so a reader cannot reconcile the fragment with the measurement it cites.",
+      "file": "docs/evidence/fragments/converged-forward-solve/read-derivative-prototype.html",
+      "id": "f088861f669",
+      "line": 12,
+      "severity": "blocking",
+      "summary": "The compile table's numbers match neither receipt it cites: the read row reports 13.4 s where the logs record read_cold_compile_seconds 11.798 and 11.791, and the oracle/fd/interp rows (90.5, 182.4, 0.27) fall between the two receipts' 91.81/89.60, 184.49/179.16 and 0.259/0.308 without matching either."
+    },
+    {
+      "detail": "limited-550.json records valid=true only for oracle/converged; diverted-550.json records valid=true for oracle/trial and fd/converged. No interp row and no other fd row is valid, so the tally overstates the variants' success sixfold and understates the failure the recommendation rests on.",
+      "file": "docs/evidence/fragments/converged-forward-solve/read-derivative-prototype.html",
+      "id": "fb6e99e225c",
+      "line": 29,
+      "severity": "blocking",
+      "summary": "The claim that 'only six of the twelve variant reads admit a valid, qualified state' is contradicted by the cited receipts, which show one of the eight variant rows and three of the twelve rows overall with valid true."
+    },
+    {
+      "detail": "The conclusion (the interp derivative program is two orders of magnitude smaller) survives any reasonable counting rule, but the fragment's HLO-instruction column is not the splitter figure its protocol sentence implies.",
+      "file": "scripts/prototypes/read_derivatives/measure.py",
+      "id": "f4b432a78a8",
+      "line": 160,
+      "severity": "non-blocking",
+      "summary": "The recorded instruction count comes from lowered.as_text(dialect=\"hlo\"), which is backend HLO before the variadic-op splitter, whereas the done_when asks for the count after that splitter; the 89 against 60529 ratio is therefore not the quantity the brief's 146-to-100,579 baseline was measured with."
+    },
+    {
+      "detail": "Device memory forced the block size (recorded in the manifest's retry_failures) and a vmap program's compile wall is largely block-independent, so the direction of the result stands; the recorded cold-compile wall is still a 64-node proxy rather than the 550-cell derivative program the done_when names.",
+      "file": "scripts/prototypes/read_derivatives/measure.py",
+      "id": "f1ab1e8fea6",
+      "line": 278,
+      "severity": "non-blocking",
+      "summary": "The oracle and fd derivative programs are compiled over a 64-node block while interp compiles over all 1743 nodes, so the fragment's compile columns compare programs of different size."
+    },
+    {
+      "detail": "_source_jets is module-level and importable, so the oracle path could have been reached through the owner instead of copied; the copy is what the fragment then measures, so a later change to the analytic kernel would leave this oracle silently diverging from production.",
+      "file": "scripts/prototypes/read_derivatives/measure.py",
+      "id": "fc6ef3dd0a5",
+      "line": 53,
+      "severity": "non-blocking",
+      "summary": "value_gradient at line 53 and jets_oracle at line 80 re-implement, nearly verbatim, the analytic value/gradient closure and the jacfwd Hessian that scripts/prototypes/read_route/jets.py:232 and :258 already own, while the same module already imports two other names from that file."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "no production call site reaches the landed change: nothing outside scripts/prototypes/read_derivatives imports measure.py, and the change consumes nova/equilibrium/topology.py rather than being reached by it.",
+    "diff": "read commit by commit from f41ee6ee1 to c467a6421; nine commits add 444 lines across four files, all inside the declared write paths.",
+    "done_when": "the fragment records compile, per-call and comparison tables for both 550-cell states, but measure.py:278 compiles the oracle and fd derivative programs on a 64-node block, measure.py:160 counts pre-splitter HLO, and no state admits an X-point, so three parts of the done_when are measured as proxies or left unexercised.",
+    "goal": "the brief's goal is to prototype cheaper second derivatives for the topology read; scripts/prototypes/read_derivatives/measure.py:80-176 implements the fd and interp variants against the oracle at scripts/prototypes/read_route/jets.py:258, with no product module changed.",
+    "manifest": "read at the reviewed run's manifest.md; it records status complete, nine commits, no test arms, and points at scripts/prototypes/read_derivatives/logs/{limited,diverted}-550.log and .json, both present and ending EXIT=0.",
+    "write_paths": "the manifest declares scripts/prototypes/read_derivatives, the landing fragment and a figures directory; the diff touches the first two and nothing outside them, and the figures grant is unused."
+  },
+  "justifications": {
+    "durability": "measure.py adds no test and no assertion, so nothing reddens if the recorded behaviour regresses; the manifest records tests: not-run.",
+    "evidence": "docs/evidence/fragments/converged-forward-solve/read-derivative-prototype.html:9-12 reports compile numbers that match neither receipt in scripts/prototypes/read_derivatives/logs/, and :29 states a validity tally the receipts contradict.",
+    "fit": "measure.py:37-40 follows the sibling prototype idiom at scripts/prototypes/read_route/measure.py:37, including the private fixture helpers and configure_dtypes ahead of the array imports.",
+    "goal_fidelity": "scripts/prototypes/read_derivatives/measure.py:80-176 implements both variants named in the brief and compares each against the analytic oracle, with no product module touched.",
+    "reuse": "measure.py:53 and :80 re-implement the analytic value/gradient and the jacfwd Hessian already owned by the importable scripts/prototypes/read_route/jets.py:232 and :258.",
+    "scope_discipline": "every path in the diff (measure.py, run.sh, logs/.gitignore and the evidence fragment) is inside the write paths the manifest declares."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the brief's goal is to prototype cheaper second derivatives for the topology read without double autodiff; scripts/prototypes/read_derivatives/measure.py:80-176 implements the fd and interp variants against the oracle at scripts/prototypes/read_route/jets.py:258, with no product module changed.\nVERDICT done_when: the fragment records compile, per-call and comparison tables at both 550-cell states, but measure.py:278 compiles the oracle and fd derivative programs on a 64-node block, measure.py:160 counts pre-splitter HLO, and no state admits an X-point, so three parts of the done_when are measured as proxies or left unexercised.\nVERDICT write_paths: read the manifest's declared grants against the diff stat; measure.py, run.sh and logs/.gitignore sit under scripts/prototypes/read_derivatives and the fragment under docs/evidence/fragments/converged-forward-solve, and no path falls outside them.\nVERDICT manifest: read; it records status complete, nine commits beyond f41ee6ee1, tests: not-run, and points at scripts/prototypes/read_derivatives/logs/{limited,diverted}-550.log and .json, both present and each ending EXIT=0.\nVERDICT diff: read commit by commit from f41ee6ee18f8ae4f3bf9e64ae7fbaeee186a5f2e to c467a64215a27179f1143bebebb42e11fa8844c4; nine commits add 444 lines across four files, all inside the declared scope.\nCALL_SITES_PLACEHOLDER\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: scripts/prototypes/read_derivatives/measure.py:80-176 implements both variants named in the brief and compares each against the analytic oracle, and the diff touches no product module.\nSCORE evidence: 9\nJUSTIFICATION evidence: docs/evidence/fragments/converged-forward-solve/read-derivative-prototype.html:9-12 reports compile numbers that match neither receipt in scripts/prototypes/read_derivatives/logs/, and line 29 states a validity tally the receipts contradict.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the diff is inside the write paths the manifest declares, and the unused docs/figures grant carries nothing.\nSCORE durability: 4\nJUSTIFICATION durability: measure.py adds no test and no assertion, so nothing reddens if the recorded behaviour regresses, and the manifest records tests: not-run.\nSCORE fit: 17\nJUSTIFICATION fit: measure.py:37-40 follows the sibling prototype idiom at scripts/prototypes/read_route/measure.py:37, including the private fixture helpers and configure_dtypes ahead of the array imports.\nSCORE reuse: 5\nJUSTIFICATION reuse: measure.py:37 imports from scripts/prototypes/read_route/jets.py, which already owns the analytic value/gradient and jacfwd Hessian at :232 and :258 that measure.py:53 and :80 re-implement.\nFINDING docs/evidence/fragments/converged-forward-solve/read-derivative-prototype.html:12 blocking: the compile table's numbers match neither cited receipt; the read row reports 13.4 s against recorded 11.798 and 11.791 s, and the oracle/fd/interp rows fall between the receipts without matching either.\nFINDING docs/evidence/fragments/converged-forward-solve/read-derivative-prototype.html:29 blocking: the claim that six of twelve variant reads admit a valid state is contradicted by the receipts, which show one of eight variant rows and three of twelve rows valid.\nFINDING scripts/prototypes/read_derivatives/measure.py:160 non-blocking: the instruction count is pre-variadic-op-splitter HLO, not the post-splitter count the done_when asks for.\nFINDING scripts/prototypes/read_derivatives/measure.py:278 non-blocking: the oracle and fd derivative programs compile on a 64-node block against interp's 1743 nodes, so the compile columns compare different program sizes.\nFINDING scripts/prototypes/read_derivatives/measure.py:53 non-blocking: value_gradient and jets_oracle duplicate the analytic value/gradient and jacfwd Hessian already owned at scripts/prototypes/read_route/jets.py:232 and :258 instead of calling the owner.\n",
+  "review_run_id": "r-20261028T075221491154-review-of-read-derivative-prototype-c467a64215a2",
+  "reviewed_base_sha": "f41ee6ee18f8ae4f3bf9e64ae7fbaeee186a5f2e",
+  "reviewed_head_sha": "c467a64215a27179f1143bebebb42e11fa8844c4",
+  "reviewed_run_id": "r-20261028T064709575901-read-derivative-prototype",
+  "scores": {
+    "durability": 4,
+    "evidence": 9,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T08:09:21.066421+00:00",
+  "total": 71
+}

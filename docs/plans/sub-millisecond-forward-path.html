@@ -25,6 +25,8 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="2">
+<meta name="plan-modified" content="2026-10-28">
 </head>
 <body>
   <main class="plan-doc">
@@ -36,8 +38,8 @@
       <thead><tr><th>Warm stage of one Newton step, 550 diverted cells, H200</th><th>ms</th><th>What sets it</th></tr></thead>
       <tbody>
         <tr><td>Jacobian block</td><td>735.7</td><td>all 1,650 columns built by traced JVP, one direction at a time</td></tr>
-        <tr><td>Map, with its own fixed-shape read</td><td>166.2</td><td>about 76,000 kernel launches per call</td></tr>
-        <tr><td>Standalone topology read</td><td>107.8</td><td>about 61,000 kernel launches per call; the contour tree is rebuilt every call</td></tr>
+        <tr><td>Map, with its own fixed-shape read</td><td>166.2</td><td>76,083 kernel launches per call (solve-wall-breakdown trace table)</td></tr>
+        <tr><td>Standalone topology read</td><td>107.8</td><td>61,330 kernel launches per call; the contour tree is rebuilt every call</td></tr>
         <tr><td>Booking</td><td>7.6</td><td></td></tr>
         <tr><td>Dense linear solve</td><td>6.4</td><td></td></tr>
         <tr><td><strong>Step total</strong></td><td><strong>1,023.7</strong></td><td>about 1,000 times the target</td></tr>
@@ -52,7 +54,7 @@
       <li>a Newton step with no per-step autodiff, built from a few large fused kernels;</li>
       <li>batched slices.</li>
     </ul>
-    <p>The analytic kernels stay as the reference oracle that every section is judged against. They leave the production path.</p>
+    <p>The analytic kernels stay as the reference oracle that every section is judged against. <strong>Both paths stay viable</strong> (decision <code>both-routes-viable</code>). The fast path is added as a new <code>SolveRoute</code> value in <code>nova/equilibrium/solve_request.py</code>. It is reached through the existing <code>ForwardSolveRequest</code> → <code>ForwardProfile.solve</code> → <code>ForwardSolveReceipt</code> seam, which today cannot choose a second numerical route; §4 opens it to one. The present route stays selectable, tested, and passing its own certificate rows. Nothing in this plan removes it.</p>
     <p><strong>Not in this plan.</strong> converged-forward-solve keeps the certificate route and the analytic map. This plan's work does not depend on that route's open repairs. The moment-field Hessian repair and kernel-compile-barrier §2 are paused, and they resume only if this plan needs them as the oracle.</p>
 
     <h2 id="s1">§1 — A per-machine operator bank at fixed shape, compiled once</h2>
@@ -69,9 +71,9 @@
     <ol>
       <li>The bank for the diverted 550-cell certificate builds once, and loads in at most 1 s on an H200. Its operators reproduce the analytic map at the certificate's analytic state within 1e-10 relative.</li>
       <li>A second geometry in the same shape bucket runs with zero new compilations, counted by the compilation log. A geometry in a different bucket compiles exactly once.</li>
-      <li>The step program's cold compile on the H200, fresh process and cache disabled, is at most 60 s, and its executable is under 50 MB.</li>
+      <li>The bank's device memory per shape bucket is recorded, and the 550-cell bucket leaves room on one H200 for a batch of 16 slices, with the headroom stated.</li>
     </ol>
-    <p>Negative control: capture one operator as a closure constant, and a same-bucket geometry change compiles again.</p>
+    <p>Negative control: capture one operator as a closure constant, and a same-bucket geometry change compiles again. The bank is applied through a minimal matvec program for this measurement; the full step program and its compile bound belong to §3.</p>
 
     <h2 id="s2">§2 — A read that tracks its stationary points, once per step</h2>
     <section data-reckon="section" data-id="s2" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-attempts="0" data-status="implementable" data-links="sub-millisecond-forward-path#s1"></section>
@@ -81,11 +83,11 @@
       <li>It refines the magnetic axis and the admitted X-point by a few Newton iterations from the previous step's positions.</li>
       <li>It rebuilds the connected-domain decision only when a tracked point leaves its cell, or the limited/diverted ownership changes, and it reports that rebuild.</li>
     </ul>
-    <p>The precision budget is the open decision <code>precision-budget</code> below.</p>
+    <p>The present read's 107.8 ms is spent rebuilding the connected-domain decision and contour tree on every call, across 61,330 launches: the tree's loop body alone takes 18.4 ms of device time per call, and its fragment and fusion kernels take the rest. Moving the derivative source to a stencil fit does not remove that cost, as read-derivative-prototype found (141–144 ms per call). What removes it is tracking: in the steady state this read refines two points from the previous step's positions and rebuilds nothing. The 0.2 ms bound below holds only for that steady state. A rebuild step is measured separately and is not held to it. Accuracy is judged against the locked decision <code>precision-budget</code>.</p>
     <p>Done when:</p>
     <ol>
-      <li>At the limited and diverted 550-cell trial and converged states, the axis and X-point are within the locked budget of the analytic oracle, and the boundary flux is within the budget's relative bound. The proposed budget is 1 cm and 1e-3 of the flux span.</li>
-      <li>The warm read, with no tree rebuild, costs at most 0.2 ms per call on an H200 at the 550-cell diverted state. Kernel launches per call are counted and tabled.</li>
+      <li>At the limited and diverted 550-cell trial and converged states, the magnetic axis is within 5e-4 of the minor radius of the analytic oracle's axis, and the boundary flux is within 1e-4 of the flux span. The X-point error is measured at every state where the oracle admits one. The diverted converged state must admit one: if the oracle harness admits no X-point there, the harness is repaired in this section before the clause is judged.</li>
+      <li>The warm steady-state read, with no rebuild, costs at most 0.2 ms per call on an H200 at the 550-cell diverted state, with kernel launches per call counted and tabled. A rebuild step's wall is tabled beside it.</li>
       <li>A field change that moves the X-point out of its cell triggers the rebuild, which is reported. A field change that does not move it triggers no rebuild.</li>
     </ol>
     <p>Negative control: average the fit across cells, as the prototype did, and the axis error exceeds the budget.</p>
@@ -96,7 +98,7 @@
     <p>Done when:</p>
     <ol>
       <li>On the diverted 550-cell certificate, the step converges to a solved-equation residual of at most 1e-10 in no more Newton steps than the present route takes from the same seed. Its converged state matches the present route's within the locked precision budget.</li>
-      <li>The warm per-step wall, excluding the read, is at most 0.5 ms on an H200, with kernel launches per step counted and at most 100.</li>
+      <li>The warm per-step wall, excluding the read, is at most 0.5 ms on an H200, with kernel launches per step counted and at most 100. The step program's cold compile, in a fresh process with the cache disabled, is at most 60 s, and its executable is under 50 MB.</li>
       <li>The step's Jacobian-vector product agrees with central differences of the step residual within 1e-6 relative, at a trial state and at the converged state.</li>
     </ol>
     <p>Negative control: drop the booking-derivative term, and the Jacobian check fails.</p>
@@ -107,31 +109,41 @@
     <p>Done when:</p>
     <ol>
       <li>Warm, the converged solve costs at most 1 ms per slice on one H200 at batch width 16 or more on the 550-cell diverted certificate. The batch-1 wall and the per-stage split are recorded beside it.</li>
-      <li>Over the limited and diverted certificate rows at about 550, 2,000 and 5,000 cells, every converged state is within the locked precision budget of the analytic oracle, and its residual is at most 1e-10. Any row that misses is named with its error.</li>
+      <li>The fast route is selectable as a <code>SolveRoute</code> value through <code>ForwardSolveRequest</code>. Over the limited and diverted certificate rows at about 550, 2,000 and 5,000 cells, both the fast route and the present route converge to a residual of at most 1e-10, and every fast-route state is within the locked precision budget of the analytic oracle. The section fails if any row misses.</li>
       <li>The record tables nova's per-iteration wall beside imas-efit's flux-update and whole-iteration walls at the nearest grid sizes, with the source of each figure.</li>
     </ol>
+    <p>Negative control: perturb one bank operator by 1e-3 relative in a scratch copy, and the precision check in clause (2) fails on the fast route while the present route still passes.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="precision-budget" data-choice="" data-by="" data-when="" data-recommended="read-1cm-flux-1e-3" data-recommended-by="reckon-build">
-        <p class="r-dec-q">What precision does the production path owe the analytic oracle?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="read-1cm-flux-1e-3">Axis and X-point within 1 cm, boundary flux within 1e-3 of the span, solved residual at most 1e-10</button>
-          <button class="r-opt" data-value="read-1mm-flux-1e-4">Axis and X-point within 1 mm, boundary flux within 1e-4 of the span, solved residual at most 1e-10</button>
-          <button class="r-opt" data-value="flux-1e-8">Flux within 1e-8 relative everywhere, the present analytic standard</button>
-        </p>
-        <p class="r-dec-rat">The proposed default follows read-derivative-prototype's proposal. Magnetic measurements carry errors near 1e-3. A budget at ULP level is what has set the cost of the present route.</p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="precision-budget" data-choice="read-1mm-flux-1e-4" data-by="lead" data-when="2026-10-28T14:11:35+00:00" data-recommended="read-1cm-flux-1e-3" data-recommended-by="reckon-build">
+    <p class="r-dec-q">What precision does the production path owe the analytic oracle?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="read-1cm-flux-1e-3">Axis and X-point within 1 cm, boundary flux within 1e-3 of the span, solved residual at most 1e-10</button>
+      <button class="r-opt chosen" data-value="read-1mm-flux-1e-4">Axis and X-point within 1 mm, boundary flux within 1e-4 of the span, solved residual at most 1e-10</button>
+      <button class="r-opt" data-value="flux-1e-8">Flux within 1e-8 relative everywhere, the present analytic standard</button>
+      </p>
+    <p class="r-dec-rat">Lead decision 2026-10-28: the tighter budget, stated as ratios of machine size rather than absolute lengths, since this is a forward solve and measurement error does not enter. Magnetic axis and X-point within 5e-4 of the plasma minor radius (1.0 mm at ITER&#x27;s a = 2.0 m), boundary flux within 1e-4 of the flux span, and a solved residual of at most 1e-10. A ULP-level budget is what set the cost of the present route.</p>
+    </div>
+<div class="r-dec" data-key="both-routes-viable" data-choice="both-viable" data-by="lead" data-when="2026-10-28" data-sections="s4">
+    <p class="r-dec-q">Both forward routes stay viable</p>
+    <p class="r-dec-ctx">&lt;p&gt;The fast path is added beside the present route, not in place of it. The request seam today admits one numerical route.&lt;/p&gt;</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="both-viable">both-viable</button>
+      <button class="r-opt" data-value="fast-replaces">fast-replaces</button>
+      </p>
+    <p class="r-dec-rat">&lt;p&gt;Lead decision 2026-10-28. The fast route becomes a new &lt;code&gt;SolveRoute&lt;/code&gt; value selected through &lt;code&gt;ForwardSolveRequest&lt;/code&gt;. The present route stays selectable, tested and passing its certificate rows, and §4 requires both routes to pass the same rows.&lt;/p&gt;</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-smfp-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-10-28" data-recommends-skill="/reckon-build sub-millisecond-forward-path §1">
-        <h4 class="r-fu-title">Build the per-machine operator bank (§1)</h4>
-        <div class="r-fu-body"><p>Start with §1. It sets the fixed shape and the traced operators that §2 and §3 consume. Lock the <code>precision-budget</code> decision before §2 and §3 are dispatched.</p></div>
-        <pre class="r-fu-prompt">/reckon-build sub-millisecond-forward-path §1</pre>
-      </article>
-    </section>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-smfp-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-10-28" data-recommends-skill="/reckon-build sub-millisecond-forward-path §1" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Build the per-machine operator bank (§1)</h4>
+    <div class="r-fu-body"><p>Start with §1. It sets the fixed shape and the traced operators that §2 and §3 consume. Lock the <code>precision-budget</code> decision before §2 and §3 are dispatched.</p></div>
+    <pre class="r-fu-prompt">/reckon-build sub-millisecond-forward-path §1</pre>
+    </article>
+</section>
   </main>
 </body>
 </html>

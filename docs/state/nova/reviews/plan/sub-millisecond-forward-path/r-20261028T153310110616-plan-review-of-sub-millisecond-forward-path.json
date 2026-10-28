@@ -1,0 +1,52 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-28T15:52:53.711Z",
+  "dispatched_at": "2026-10-28T15:40:18Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:87",
+      "id": "reasoning-1",
+      "reason": "\u00a72's own cost model describes a different program and its sole stated removal mechanism is a no-op on the program it bounds, so the 0.2 ms clause has nothing under it and a dispatched node would either miss the bound blind or re-derive the decomposition the plan was supposed to supply.",
+      "text": "\u00a72 spends 107.8 ms, 61,330 launches, the two while-loops and the 29.4 ms of copies on \"the present read\" and then says \"What removes it is tracking: in the steady state this read refines two points from the previous step's positions and rebuilds nothing\" \u2014 but the read \u00a72 is building and bounding is `support_read.read`, and that program is not the traced one and is not missing the mechanism \u00a72 names. `solve-wall-breakdown` measures `nova.equilibrium.topology.read` (its own words: \"The step's read stage runs nova.equilibrium.topology.read on the field\"), a program that builds the contour tree; `support_read.read` instead calls `topology.read_at_stationary_points`, whose docstring states \"No contour tree or null census is built: the supplied points are the census\", and it already receives those points warm-started solved (`fixed_points.solve` from `seeds`/`previous` over the `maintain_rows` row window \u2014 \u00a70 :58 says so itself). The only measurement of `support_read.read` in the cited prototype is \"read (production read over a supplied jet field)\", 141\u2013144 ms per call, which that fragment calls \"a floor above the sub-millisecond target independently of how the jets are built\". So the 141\u2013144 ms \u00a72 must remove is nowhere decomposed, and \"tracking\" cannot be what removes it, because the present program already tracks and already builds no tree.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:83",
+      "id": "reasoning-2",
+      "reason": "naming which cells carry the fit decides whether \u00a72 clause (2)'s 0.2 ms is reachable at all, and the node is otherwise free to implement the 550-fit reading that cannot meet it.",
+      "text": "\u00a72's first mechanism bullet says \"It takes nodal flux derivatives from a cell-local quadratic fit over each hex cell's stencil \u2026 Each cell evaluates only its own fit, so no jets are averaged across cells\", which puts the fit over every hex cell, while :87 says the read \"evaluates the stencil fit only in the few cells that hold the tracked axis and X-point, never over every node\". The two readings differ by roughly the cell count (about 550 fits against about two) and :87 prices the all-nodes version at the prototype's 0.51\u20130.72 ms, which is itself 2.5\u20133.6 times the 0.2 ms clause (2) allows.",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "c10bc02fc7705c147909ece2af7e0249f3aabcf5",
+  "plan_fingerprint": "c9f2d1909c058a270020ccdc77b85e72da32157f62e5cb5e6f4a53fecb74fdf9",
+  "plan_slug": "sub-millisecond-forward-path",
+  "plan_version": 8,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261028T153310110616-plan-review-of-sub-millisecond-forward-path",
+  "reviewed_blob_sha": "a1e6930b044f278922ebfe6f590853b9dd86c324",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 all nine source anchors \u00a72 and \u00a73 cite resolve at the stated lines (`support_read.py` :27 `SupportOperands`, :44 `from_rows`, :78 `read`, :130 `read_and_book`; `fixed_points.py` :413 `maintain_rows`, :646 `solve`; `stencil_nulls.py` :378 `_fit_selected_cells`, :412 `_quadratic_fit_matrices`; `forward.py` :2731 `_request_compilation_cache_key`), `support_read.read` does return the `valid` flag \u00a72 clause (1) rests on (`support_read.py:113-114`), and both cited fragments exist.",
+    "done_when": "pass \u2014 every clause in \u00a72 and \u00a73 is a measurable quantity, and each section names a mutation control whose expected failure the cited evidence or the mechanism makes specific (\u00a72 :94, \u00a73 :105); \u00a72 clause (3) additionally carries its own no-trigger leg.",
+    "evidence_paths": "pass \u2014 neither unit names a scratchpad, node-local temporary or session path; both defer to the fragment record convention \u00a70 already cites under `/nova/evidence/fragments/converged-forward-solve/`.",
+    "naming": "pass \u2014 no plan labels, stage names or ticket numbers reach a symbol, filename or comment in either unit; the names \u00a72 and \u00a73 introduce are existing owners.",
+    "reasoning": "a finding \u2014 \u00a72 accounts for the cost of `nova.equilibrium.topology.read` while bounding `support_read.read`, and the mechanism it names for the removal is already present in the read it is bounding.",
+    "single_goal": "pass \u2014 \u00a72 is one deliverable (one tracked read in place of the step's two) and \u00a73 is one (one Newton step built from the \u00a71 operators with no per-step autodiff).",
+    "wiring": "pass \u2014 \u00a72 and \u00a73 each declare `sub-millisecond-forward-path#s1` in `plan-section-depends-on`, \u00a74 declares both, and both decisions \u00a72 and \u00a73 measure against (`precision-budget`, `both-routes-viable`) now carry a `data-choice`."
+  },
+  "section_digests": {
+    "_document": "6463ca0c5cddeb270554e523f56f43bc296e279984295861655ec23c245eeae7",
+    "s0": "2aeef3dc567f2412561cbf7802dd51784609c34077acd0066ebff3932abd34ac",
+    "s1": "80e332b5e9b6fc57780809e818fb2d50967b00d2aab208be5d16b6b6d9ecbcb3",
+    "s2": "c7d3fec2839087d6d70cc66b0e7f54e8ba85c91157a0899de5e67113ed858758",
+    "s3": "a0b9c6a24e4849c4ff248270b6269c9b3fd32faa707cdf5731a3d6ed625ccc44",
+    "s4": "c65f25ea989a99e6f330defe1f8ebc57de5dccaa51b9e793958120cd0dc31e7e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T16:00:14.252583+00:00"
+}

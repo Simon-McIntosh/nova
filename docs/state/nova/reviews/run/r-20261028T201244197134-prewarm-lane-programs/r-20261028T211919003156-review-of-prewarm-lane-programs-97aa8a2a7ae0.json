@@ -8,6 +8,13 @@
     "scripts/h200_test_lane/run.sh:29"
   ],
   "completed_at": "2026-10-28T21:34:04.110Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "prewarm-lane-programs",
+      "recorded_at": "2026-10-28T21:48:51.520970+00:00"
+    }
+  },
   "dispatched_at": "2026-10-28T21:24:40Z",
   "findings": [
     {

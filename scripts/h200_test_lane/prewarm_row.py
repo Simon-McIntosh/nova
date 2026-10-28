@@ -33,6 +33,26 @@ def run_command(argv: list[str]) -> int:
     return 0
 
 
+def program_status(
+    command_status: int, unpersisted_misses: int, allow_command_failures: bool
+) -> int:
+    """Return the status this row reports for the pre-warm.
+
+    The deliverable of a pre-warm is a populated cache, so a row whose
+    compilations were all persisted has warmed what it was there to warm even
+    when the command that drove them failed. A lane target with failing cases
+    of its own therefore does not make every pre-warm run exit nonzero; the
+    command's status is still recorded in the receipt so the failure stays
+    visible. A miss written nowhere is never tolerated: that is a pre-warm
+    that reports a cache it does not have.
+    """
+    if unpersisted_misses:
+        return 1
+    if allow_command_failures:
+        return 0
+    return command_status
+
+
 def build_receipt(label: str, argv: list[str], status: int, seconds: float) -> dict:
     """Return one program's compile accounting as a receipt row."""
     ledger = cache_guard.ledger()
@@ -40,6 +60,7 @@ def build_receipt(label: str, argv: list[str], status: int, seconds: float) -> d
         "label": label,
         "argv": argv,
         "status": status,
+        "command_status": status,
         "wall_seconds": round(seconds, 3),
         "hits": ledger.hit_count(),
         "misses": ledger.miss_count(),
@@ -57,6 +78,15 @@ def main() -> int:
         "--label", required=True, help="name this program in the receipt"
     )
     parser.add_argument("--receipt", required=True, help="JSON lines file to append to")
+    parser.add_argument(
+        "--allow-pytest-failures",
+        action="store_true",
+        help=(
+            "report success when every compilation was persisted, even if the "
+            "command driving them exited nonzero; the command's status is still "
+            "recorded in the receipt"
+        ),
+    )
     parser.add_argument("command", nargs=argparse.REMAINDER)
     args = parser.parse_args()
 
@@ -70,6 +100,9 @@ def main() -> int:
     started = time.monotonic()
     status = run_command(argv)
     record = build_receipt(args.label, argv, status, time.monotonic() - started)
+    record["status"] = program_status(
+        status, record["unpersisted_misses"], args.allow_pytest_failures
+    )
     with open(args.receipt, "a", encoding="utf-8") as stream:
         stream.write(json.dumps(record, sort_keys=True) + "\n")
     print("PREWARM_ROW=%s" % json.dumps(record, sort_keys=True), flush=True)
@@ -85,7 +118,7 @@ def main() -> int:
             flush=True,
         )
         return 1
-    return status
+    return record["status"]
 
 
 if __name__ == "__main__":

@@ -220,19 +220,19 @@ def served_directory_state() -> dict[str, Any]:
 def program_key_entry_count(directory: Path | str) -> int:
     """Return the number of executable cache entries a served directory holds.
 
-    A program-key entry is one file JAX writes at the directory's top level and
-    names ``<program>-<key>-cache``: the entries a lane can be served by. The
-    XLA autotune subtree beneath it holds no executable, so counting every file
-    recursively reports thousands of entries no lookup can ever hit.
+    The definition of an entry is the served-directory key set's, so the guard
+    and the cache-reuse summary cannot report different sizes for one
+    directory: a top-level ``<program>-<key>-cache`` file, which is what a
+    lookup can be served by. The XLA autotune subtree beneath it holds no
+    executable, so counting every file recursively reports thousands of entries
+    no lookup can ever hit.
     """
+    from cache_reuse_summary import served_keys
+
     path = Path(directory)
     if not path.is_dir():
         return 0
-    return sum(
-        1
-        for entry in path.iterdir()
-        if entry.is_file() and entry.name.endswith(PROGRAM_KEY_SUFFIX)
-    )
+    return len(served_keys(path))
 
 
 def verify_pinned_directory() -> dict[str, Any]:

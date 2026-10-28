@@ -96,10 +96,15 @@ run_payload() {
   local status=0
   compile_row() {
     local label=$1
+    local extra=()
     shift
+    if [[ "${1:-}" == '--allow-pytest-failures' ]]; then
+      extra+=("$1")
+      shift
+    fi
     printf 'PREWARM_PROGRAM_START=%s\n' "${label}"
     "${PYTHON}" "${LANE_DIRECTORY}/prewarm_row.py" --label "${label}" \
-      --receipt "${receipt}" -- "$@" || status=$?
+      "${extra[@]}" --receipt "${receipt}" -- "$@" || status=$?
   }
 
   compile_row solve-weak-rotation-reactor-static \
@@ -130,7 +135,7 @@ run_payload() {
   # program the lane requests: warming the drivers alone leaves the lane cold.
   # Naming a test path clears the inherited `not slow` filter, which collects all
   # of this file's cases and is exactly the program name the lane runs.
-  compile_row forward-solve-lane pytest \
+  compile_row forward-solve-lane --allow-pytest-failures pytest \
     "${repository_root}/tests/test_equilibrium_forward_solve.py" \
     -p no:cacheprovider -p cache_guard
 

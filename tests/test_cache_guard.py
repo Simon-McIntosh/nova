@@ -22,6 +22,8 @@ if str(LANE_DIRECTORY) not in sys.path:
     sys.path.insert(0, str(LANE_DIRECTORY))
 
 import cache_guard  # noqa: E402
+import cache_reuse_summary  # noqa: E402
+import prewarm_row  # noqa: E402
 
 
 def write_entry(directory: Path, name: str) -> None:
@@ -35,8 +37,9 @@ def populate(directory: Path) -> None:
     """Write a served directory holding entries, autotune records and noise."""
     for program in ("jit_solve", "jit_scan", "jit_while"):
         write_entry(directory, "%s-%s-cache" % (program, "0" * 8 + program))
+        write_entry(directory, "%s-%s-cache-atime" % (program, "0" * 8 + program))
     write_entry(directory, "xla_gpu_per_fusion_autotune_cache_dir/tmp/record.textproto")
-    write_entry(directory, "notes.txt")
+    write_entry(directory, "prewarm-latest.json")
     write_entry(directory, "nested/jit_solve-outside-top-level-cache")
 
 
@@ -62,6 +65,28 @@ def test_served_directory_reports_program_key_entries(tmp_path, monkeypatch):
     assert state["served_entries"] == 3
 
 
+def test_served_keys_and_the_guard_count_agree(tmp_path):
+    """One directory, one entry count: the summary and the guard cannot differ."""
+    populate(tmp_path)
+    keys = cache_reuse_summary.served_keys(tmp_path)
+    assert len(keys) == 3
+    assert not any(key.endswith("-atime") for key in keys)
+    assert len(keys) == cache_guard.program_key_entry_count(tmp_path)
+
+
+def test_prewarm_row_does_not_gate_on_the_targets_own_failures():
+    """A row whose compiles all persisted reports success though its command failed."""
+    assert prewarm_row.program_status(1, 0, allow_command_failures=True) == 0
+    assert prewarm_row.program_status(1, 0, allow_command_failures=False) == 1
+    assert prewarm_row.program_status(0, 0, allow_command_failures=False) == 0
+
+
+def test_prewarm_row_refuses_a_compile_it_did_not_persist():
+    """Tolerating a failed command never tolerates a miss written nowhere."""
+    assert prewarm_row.program_status(1, 2, allow_command_failures=True) == 1
+    assert prewarm_row.program_status(0, 2, allow_command_failures=True) == 1
+
+
 def test_marker_begins_a_line_after_unterminated_output(monkeypatch):
     """A line-anchored grep finds the marker after a partial progress line."""
     monkeypatch.delenv(cache_guard.PREWARM_RUN_VARIABLE, raising=False)
@@ -75,11 +100,7 @@ def test_marker_begins_a_line_after_unterminated_output(monkeypatch):
 
     emitted = buffer.getvalue()
     marker_lines = [
-        line
-        for line in emitted.splitlines()
-        if re.match(r"^CACHE_GUARD_MARKER=", line)
+        line for line in emitted.splitlines() if re.match(r"^CACHE_GUARD_MARKER=", line)
     ]
     assert marker_lines == ["CACHE_GUARD_MARKER=wall-clock-reliable misses=0 budget=0"]
-    assert (
-        "tests/test_example.py .....\nCACHE_GUARD_MARKER=" in emitted
-    ), emitted
+    assert "tests/test_example.py .....\nCACHE_GUARD_MARKER=" in emitted, emitted

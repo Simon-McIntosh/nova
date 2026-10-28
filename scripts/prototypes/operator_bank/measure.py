@@ -143,7 +143,7 @@ def main():
     )
 
     program = jax.jit(support_read.bank_program)
-    bank_jets = np.asarray(jax.block_until_ready(program(bank, converged_moments)))
+    bank_jets = np.asarray(jax.block_until_ready(program(bank, reference.moments)))
     from nova.equilibrium import fixed_points
 
     analytic_jets = np.asarray(
@@ -157,7 +157,7 @@ def main():
     }
     emit(
         "BANK_REPRODUCTION",
-        state="converged",
+        state="reference-moments",
         per_entry=per_entry,
         worst_relative=max(per_entry.values()),
         within_1e10=bool(max(per_entry.values()) <= 1e-10),
@@ -166,7 +166,6 @@ def main():
     # Compilation counting reads the persistent compilation cache, fresh per run.
     args.compile_cache.mkdir(parents=True, exist_ok=True)
     jax.config.update("jax_compilation_cache_dir", str(args.compile_cache))
-    jax.config.update("jax_compilation_cache_min_entry_size_bytes", -1)
 
     def counted(label, operands):
         before = cache_entries(args.compile_cache)

@@ -5,6 +5,13 @@
   "call_sites": [],
   "completed_at": "2026-10-28T08:07:51.845Z",
   "dispatched_at": "2026-10-28T07:54:28Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-read-derivative-prototype-c467a64215a2",
+      "recorded_at": "2026-10-28T08:21:01.382565+00:00"
+    }
+  },
   "findings": [
     {
       "detail": "The fragment's protocol paragraph sends the reader to logs/ for every number, but no receipt on disk contains 90.5, 182.4, 0.27 or 13.4. The 13.4 figure lies outside the range of both receipts and is carried into the recommendation at line 31 as '11.8 to 13.4 s', so a reader cannot reconcile the fragment with the measurement it cites.",

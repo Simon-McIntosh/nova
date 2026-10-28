@@ -20,12 +20,12 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="equilibrium,grad-shafranov,jax,h200,throughput">
   <meta name="plan-after" content="converged-forward-solve">
-  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
   <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sub-millisecond-forward-path#s1&quot;],&quot;s3&quot;:[&quot;sub-millisecond-forward-path#s1&quot;],&quot;s4&quot;:[&quot;sub-millisecond-forward-path#s2&quot;,&quot;sub-millisecond-forward-path#s3&quot;]}">
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="12">
+<meta name="plan-version" content="13">
 <meta name="plan-modified" content="2026-10-28">
 </head>
 <body>
@@ -59,7 +59,7 @@
     <p><strong>Not in this plan.</strong> converged-forward-solve keeps the certificate route and the analytic map. This plan's work does not depend on that route's open repairs. The moment-field Hessian repair and kernel-compile-barrier §2 are paused, and they resume only if this plan needs them as the oracle.</p>
 
     <h2 id="s1">§1 — A per-machine operator bank at fixed shape, compiled once</h2>
-    <section data-reckon="section" data-id="s1" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-attempts="0" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s1" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-attempts="0" data-status="done" data-links=""></section>
     <p>The bank is <code>support_read.SupportOperands</code> extended, not a new container. It holds every operator the step applies, precomputed from the analytic kernels once per machine and mesh and stored as dense device arrays, with the row window kept by <code>fixed_points.RowCache</code>:</p>
     <ul>
       <li>coil and passive response to the grid;</li>
@@ -150,7 +150,7 @@
     <div class="r-comment-body"><p>Independent review of run r-20261028T144924463262-operator-bank at 32abc792ad5e430d0ec83c8c18cce7b166db28c9 (base 330abce22572052e13649cd6351e8aad39bbf13b): scores goal_fidelity 15, evidence 16, scope_discipline 18, durability 15, fit 14, reuse 16, added_failure_count 0, and one blocking finding — forward.py:2766 keys the compile cache on an attribute nothing sets, so the shape bucket never enters the compile key that section 1 and the landed evidence both say it does.</p></div>
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20261028T183633708918-review-of-operator-bank-acfb6ed0d39d" data-who="reckon-build" data-when="2026-10-28T18:46:55.345Z">
-    <div class="r-comment-body"><p>Independent review of r-20261028T144924463262-operator-bank at acfb6ed0d39d (base 32abc792ad5e) stored in review-records/: scores goal_fidelity 18, evidence 15, scope_discipline 19, durability 18, fit 18, reuse 18, added_failure_count 0, four non-blocking findings; the prior round&#x27;s blocking finding is answered, because the compile key now reads the declared ForwardProfile.support_bank field instead of an attribute nothing sets.</p></div>
+    <div class="r-comment-body"><p>Independent review of r-20261028T144924463262-operator-bank at acfb6ed0d39d (base 32abc792ad5e) stored in review-records/: scores goal_fidelity 18, evidence 15, scope_discipline 19, durability 18, fit 18, reuse 18, added_failure_count 0, four non-blocking findings; the prior round's blocking finding is answered, because the compile key now reads the declared ForwardProfile.support_bank field instead of an attribute nothing sets.</p></div>
 </div>
 </section>
 </main>

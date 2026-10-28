@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="sub-millisecond-forward-path-landed">
+  <meta name="plan-title" content="Sub-millisecond Forward Path — a production forward solve under 1 ms, compiled once per machine shape — landed record">
+  <meta name="plan-summary" content="Closure synthesis for Sub-millisecond Forward Path — a production forward solve under 1 ms, compiled once per machine shape: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).">
+  <meta name="plan-evidence-for" content="sub-millisecond-forward-path">
+  <meta name="plan-verdict" content="qualified">
+  <title>Sub-millisecond Forward Path — a production forward solve under 1 ms, compiled once per machine shape — landed record | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+ <main class="plan-doc">
+  <h1>Sub-millisecond Forward Path — a production forward solve under 1 ms, compiled once per machine shape — landed record</h1>
+  <p>Closure synthesis for Sub-millisecond Forward Path — a production forward solve under 1 ms, compiled once per machine shape: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).</p>
+
+
+   <section id="operator-bank">
+    <h2>§1 — the per-machine operator bank</h2>
+    <p>Landed 2026-10-28 (merge <code>ff23b37d5</code>, worker head <code>acfb6ed0d</code>). <code>support_read.SupportOperands</code> is extended into a bank padded to static shape buckets. The bank is published and reloaded through the content store. Its bucket enters <code>forward._request_compilation_cache_key</code> through <code>ForwardProfile.support_bank</code>. Measured on one H200 at the diverted 550-cell certificate (1,741 nodes, bucket 2,048):</p><ul><li>The bank builds once in 94.5–96.1 s and reloads in 0.114 s, against the 1 s load bound.</li><li>It reproduces the analytic jet to 2.94e-13 relative, against the 1e-10 bound.</li><li>A same-bucket geometry adds 0 compilations, and the next bucket adds exactly 1. The negative control, an operator captured as a closure constant, recompiles on a same-bucket change.</li><li>The device has 112.6 GB; the peak is 1.88 GB, so 100.7 GiB stays free at a batch of 16 slices.</li><li>Both suite arms ran all 69 files in one sirius job, with no failing id at head that is absent at base (55 failures at base, 51 at head).</li></ul><p>Findings carried to §4, all non-blocking:</p><ul><li>No production route constructs a <code>ForwardProfile</code> with a bank yet, so the key's bucket element is None until §4 wires it.</li><li><code>dataclasses.replace(profile, operator=…)</code> (<code>forward.py:1623</code>) carries a bank across an operator change. §4 must drop or rebuild it there.</li><li>The measured zero recompilation comes from <code>bank_program</code>'s shape-static jit. The profile compile key was not on that path, so §4 measures the keyed route itself.</li><li><code>tests/test_forward_compile_identity.py</code> was killed for running out of memory in both arms and produced no result. It needs a run with more memory at the merged head.</li><li>The head arm ran before the key repair (<code>dc97e6f4f</code>). The wave's merged-head integration run covers the importers of <code>forward.py</code>.</li></ul>
+  </section>
+
+</main>
+</body>
+</html>

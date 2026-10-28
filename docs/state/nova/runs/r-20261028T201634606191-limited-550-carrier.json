@@ -933,18 +933,13 @@
     "arms_withheld": "",
     "process_signalled": false,
     "process_withheld": "process is not alive",
-    "scratch_bytes": 2918409370,
+    "scratch_absent": true,
+    "scratch_bytes": null,
     "scratch_host": "98dci4-clu-2068.iter.org",
     "scratch_path": "/tmp/reckon-crew-scratch/r-20261028T201634606191-limited-550-carrier",
-    "scratch_removed": true,
-    "scratch_removed_paths": [
-      {
-        "bytes": 2918409370,
-        "path": "/tmp/reckon-crew-scratch/r-20261028T201634606191-limited-550-carrier"
-      }
-    ],
-    "scratch_warning": "run scratch for r-20261028T201634606191-limited-550-carrier is 2918409370 bytes, above the 2147483648 byte budget",
-    "scratch_withheld": "",
+    "scratch_removed": false,
+    "scratch_removed_paths": [],
+    "scratch_withheld": "scratch directory is no longer present",
     "worktree_audit": {
       "counts": {
         "dirty": 0,
@@ -963,7 +958,8 @@
         }
       ]
     },
-    "worktree_released": true
+    "worktree_released": false,
+    "worktree_withheld": "tree is no longer available"
   },
   "resume_waiver": null,
   "review": {

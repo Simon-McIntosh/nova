@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sub-millisecond-forward-path">
+  <meta name="plan-title" content="Sub-millisecond Forward Path — a production forward solve under 1 ms, compiled once per machine shape">
+  <meta name="plan-summary" content="A production forward solve under 1 ms warm on an H200, compiled once per machine shape, judged against the analytic kernels as the reference oracle">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="24.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="critical">
+  <meta name="plan-sprint" content="S21">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="equilibrium,grad-shafranov,jax,h200,throughput">
+  <meta name="plan-after" content="converged-forward-solve">
+  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sub-millisecond-forward-path#s1&quot;],&quot;s3&quot;:[&quot;sub-millisecond-forward-path#s1&quot;],&quot;s4&quot;:[&quot;sub-millisecond-forward-path#s2&quot;,&quot;sub-millisecond-forward-path#s3&quot;]}">
+  <title>Sub-millisecond Forward Path | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s0">Why this plan exists</h2>
+    <section data-reckon="section" data-id="s0" data-effort-hours="0.25" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="standard" data-capability-risk="low" data-attempts="0" data-status="done" data-links=""></section>
+    <p>The lead set the target on 2026-10-28: a converged forward solve in under 1 ms of run time, with compile paid once. Compile matters less if it happens once per code revision and machine shape. Today it happens constantly, and run time is three orders of magnitude off.</p>
+    <p>Two measurements on one H200 established where the present route stands. Both are recorded on <a href="/nova/converged-forward-solve.html">converged-forward-solve</a> §4: <a href="/nova/evidence/fragments/converged-forward-solve/solve-wall-breakdown.html">solve-wall-breakdown</a> and <a href="/nova/evidence/fragments/converged-forward-solve/read-derivative-prototype.html">read-derivative-prototype</a>.</p>
+    <table>
+      <thead><tr><th>Warm stage of one Newton step, 550 diverted cells, H200</th><th>ms</th><th>What sets it</th></tr></thead>
+      <tbody>
+        <tr><td>Jacobian block</td><td>735.7</td><td>all 1,650 columns built by traced JVP, one direction at a time</td></tr>
+        <tr><td>Map, with its own fixed-shape read</td><td>166.2</td><td>about 76,000 kernel launches per call</td></tr>
+        <tr><td>Standalone topology read</td><td>107.8</td><td>about 61,000 kernel launches per call; the contour tree is rebuilt every call</td></tr>
+        <tr><td>Booking</td><td>7.6</td><td></td></tr>
+        <tr><td>Dense linear solve</td><td>6.4</td><td></td></tr>
+        <tr><td><strong>Step total</strong></td><td><strong>1,023.7</strong></td><td>about 1,000 times the target</td></tr>
+      </tbody>
+    </table>
+    <p>The cost is launches and repeated work, not arithmetic. The October lean-map study (<a href="/nova/research/sub-millisecond-forward-design.html">sub-millisecond-forward-design</a>) found the same thing: the ideal memory read floor of its operands is 0.017 ms. The route also differentiates the ULP-precise analytic Biot kernels twice to build the read's Hessians. That one choice makes the point-jet program expand from 146 to 100,579 instructions in XLA's splitter, and costs 95 s of cold compile, or 306 s with the moment-field Hessian repair. A quadratic fit over each hex cell's stencil gives the same derivatives in a program that compiles in 0.3 s and runs in 0.4 ms over every node. Its accuracy is not yet proven.</p>
+    <p>imas-efit's fast path is the comparison. It precomputes response rows once per run and applies them as BLAS matvecs. Its flux update costs about 5 ms per Picard iteration at 65×65 and about 12 ms at 129×129, on one CPU thread (derived figures, 2026-10-28), with no per-iteration differentiation and one boundary flood per iteration.</p>
+    <p>This plan builds a production forward path to that shape:</p>
+    <ul>
+      <li>operators precomputed per machine at fixed shape;</li>
+      <li>a read that tracks its stationary points;</li>
+      <li>a Newton step with no per-step autodiff, built from a few large fused kernels;</li>
+      <li>batched slices.</li>
+    </ul>
+    <p>The analytic kernels stay as the reference oracle that every section is judged against. They leave the production path.</p>
+    <p><strong>Not in this plan.</strong> converged-forward-solve keeps the certificate route and the analytic map. This plan's work does not depend on that route's open repairs. The moment-field Hessian repair and kernel-compile-barrier §2 are paused, and they resume only if this plan needs them as the oracle.</p>
+
+    <h2 id="s1">§1 — A per-machine operator bank at fixed shape, compiled once</h2>
+    <section data-reckon="section" data-id="s1" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-attempts="0" data-status="implementable" data-links=""></section>
+    <p>The bank holds every operator the step applies, precomputed from the analytic kernels once per machine and mesh and stored as dense device arrays:</p>
+    <ul>
+      <li>coil and passive response to the grid;</li>
+      <li>plasma-cell response to the grid;</li>
+      <li>the boundary and wall operators;</li>
+      <li>the cached coupling operand the read samples.</li>
+    </ul>
+    <p>The mesh is padded to a small set of shape buckets, so a machine maps to one bucket and two geometries in one bucket share one program. The step program takes every operator as a traced argument and captures no constants, so a geometry change inside a bucket never recompiles. The bank is built through the existing content store. It adds no second store.</p>
+    <p>Done when:</p>
+    <ol>
+      <li>The bank for the diverted 550-cell certificate builds once, and loads in at most 1 s on an H200. Its operators reproduce the analytic map at the certificate's analytic state within 1e-10 relative.</li>
+      <li>A second geometry in the same shape bucket runs with zero new compilations, counted by the compilation log. A geometry in a different bucket compiles exactly once.</li>
+      <li>The step program's cold compile on the H200, fresh process and cache disabled, is at most 60 s, and its executable is under 50 MB.</li>
+    </ol>
+    <p>Negative control: capture one operator as a closure constant, and a same-bucket geometry change compiles again.</p>
+
+    <h2 id="s2">§2 — A read that tracks its stationary points, once per step</h2>
+    <section data-reckon="section" data-id="s2" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-attempts="0" data-status="implementable" data-links="sub-millisecond-forward-path#s1"></section>
+    <p>The present step reads twice: once inside the map and once standalone. Each read rebuilds the contour tree. This read runs once per step:</p>
+    <ul>
+      <li>It takes nodal flux derivatives from a cell-local quadratic fit over each hex cell's stencil, read from the §1 coupling operand. Each cell evaluates only its own fit, so no jets are averaged across cells.</li>
+      <li>It refines the magnetic axis and the admitted X-point by a few Newton iterations from the previous step's positions.</li>
+      <li>It rebuilds the connected-domain decision only when a tracked point leaves its cell, or the limited/diverted ownership changes, and it reports that rebuild.</li>
+    </ul>
+    <p>The precision budget is the open decision <code>precision-budget</code> below.</p>
+    <p>Done when:</p>
+    <ol>
+      <li>At the limited and diverted 550-cell trial and converged states, the axis and X-point are within the locked budget of the analytic oracle, and the boundary flux is within the budget's relative bound. The proposed budget is 1 cm and 1e-3 of the flux span.</li>
+      <li>The warm read, with no tree rebuild, costs at most 0.2 ms per call on an H200 at the 550-cell diverted state. Kernel launches per call are counted and tabled.</li>
+      <li>A field change that moves the X-point out of its cell triggers the rebuild, which is reported. A field change that does not move it triggers no rebuild.</li>
+    </ol>
+    <p>Negative control: average the fit across cells, as the prototype did, and the axis error exceeds the budget.</p>
+
+    <h2 id="s3">§3 — A Newton step with no per-step autodiff</h2>
+    <section data-reckon="section" data-id="s3" data-effort-hours="8.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-attempts="0" data-status="implementable" data-links="sub-millisecond-forward-path#s1"></section>
+    <p>The step forms its Jacobian from the §1 operators and closed-form booking derivatives. It does not trace a JVP per column, and it applies the Jacobian either as one dense block or matrix-free inside a Krylov solve, whichever the measurement favours. The map, booking and solve are fused into a small fixed number of kernels per step. The 735.7 ms Jacobian block and the 166.2 ms map are what this section removes.</p>
+    <p>Done when:</p>
+    <ol>
+      <li>On the diverted 550-cell certificate, the step converges to a solved-equation residual of at most 1e-10 in no more Newton steps than the present route takes from the same seed. Its converged state matches the present route's within the locked precision budget.</li>
+      <li>The warm per-step wall, excluding the read, is at most 0.5 ms on an H200, with kernel launches per step counted and at most 100.</li>
+      <li>The step's Jacobian-vector product agrees with central differences of the step residual within 1e-6 relative, at a trial state and at the converged state.</li>
+    </ol>
+    <p>Negative control: drop the booking-derivative term, and the Jacobian check fails.</p>
+
+    <h2 id="s4">§4 — A converged solve under 1 ms, batched, against the oracle</h2>
+    <section data-reckon="section" data-id="s4" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-attempts="0" data-status="implementable" data-links="sub-millisecond-forward-path#s2,sub-millisecond-forward-path#s3"></section>
+    <p>This section assembles §1 to §3 into one solve. It is warm-started from the previous slice, steps until converged, and is batched over slices on one device. Its result is judged against the analytic oracle on the certificate rows.</p>
+    <p>Done when:</p>
+    <ol>
+      <li>Warm, the converged solve costs at most 1 ms per slice on one H200 at batch width 16 or more on the 550-cell diverted certificate. The batch-1 wall and the per-stage split are recorded beside it.</li>
+      <li>Over the limited and diverted certificate rows at about 550, 2,000 and 5,000 cells, every converged state is within the locked precision budget of the analytic oracle, and its residual is at most 1e-10. Any row that misses is named with its error.</li>
+      <li>The record tables nova's per-iteration wall beside imas-efit's flux-update and whole-iteration walls at the nearest grid sizes, with the source of each figure.</li>
+    </ol>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="precision-budget" data-choice="" data-by="" data-when="" data-recommended="read-1cm-flux-1e-3" data-recommended-by="reckon-build">
+        <p class="r-dec-q">What precision does the production path owe the analytic oracle?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="read-1cm-flux-1e-3">Axis and X-point within 1 cm, boundary flux within 1e-3 of the span, solved residual at most 1e-10</button>
+          <button class="r-opt" data-value="read-1mm-flux-1e-4">Axis and X-point within 1 mm, boundary flux within 1e-4 of the span, solved residual at most 1e-10</button>
+          <button class="r-opt" data-value="flux-1e-8">Flux within 1e-8 relative everywhere, the present analytic standard</button>
+        </p>
+        <p class="r-dec-rat">The proposed default follows read-derivative-prototype's proposal. Magnetic measurements carry errors near 1e-3. A budget at ULP level is what has set the cost of the present route.</p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-smfp-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-10-28" data-recommends-skill="/reckon-build sub-millisecond-forward-path §1">
+        <h4 class="r-fu-title">Build the per-machine operator bank (§1)</h4>
+        <div class="r-fu-body"><p>Start with §1. It sets the fixed shape and the traced operators that §2 and §3 consume. Lock the <code>precision-budget</code> decision before §2 and §3 are dispatched.</p></div>
+        <pre class="r-fu-prompt">/reckon-build sub-millisecond-forward-path §1</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

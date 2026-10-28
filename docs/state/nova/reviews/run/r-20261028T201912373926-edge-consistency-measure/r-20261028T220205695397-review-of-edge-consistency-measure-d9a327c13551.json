@@ -1,0 +1,55 @@
+{
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run armed no suite arms: baseline_suite and after_suite are both empty in its manifest. Its only full-gate log, gate-analytic.log, records 8 passed with EXIT=0 at 6ccf43de, and negative-control.log is the deliberate mutation arm (6 failed, EXIT=1), not an added failure. The head d9a327c13 changes documentation only, so no test result can differ from the base.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-28T22:10:59.769Z",
+  "dispatched_at": "2026-10-28T22:03:54Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/dd-cocos-ingest/edge-consistency-measure.html",
+      "line": 23,
+      "severity": "non-blocking",
+      "text": "non-blocking: The value 22.09 for the FF-prime-only negation appears in no log in the run directory; negated_and_crossings.py computes only the both-term negation and reproduce-row.log records only the p-prime-only 22.3425. docs/research/dd-cocos-census.html:88 repeats the same unreceipted number. The decision itself is carried by the logged both-term reproduction, which is why this does not block."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call site can reach a documentation change",
+    "diff": "Read as the single commit d9a327c13 against 91c9eb59d: 10 insertions and 8 deletions over the two docs; it replaces the fragment's does-not-reproduce verdict with a logged both-term negation that reproduces, and splits the census paragraph so the recorded medians and the one-slice-per-source re-measurement are stated separately.",
+    "done_when": "The done-when asks for the analytic zero-order gate, the 1 percent FF-prime detection, the edge-band negative control and the three-source table with a figure; gate-analytic.log records 8 passed EXIT=0 at 6ccf43de, negative-control.log reddens 6 of 8 with EXIT=1, and the table stands at docs/research/dd-cocos-census.html:84-87, though the delta changes no figure.",
+    "goal": "The delta commit d9a327c13 corrects docs/evidence/fragments/dd-cocos-ingest/edge-consistency-measure.html:23-31 and docs/research/dd-cocos-census.html:87-88 so the section 6 reference decision rests on a correction reached by a re-measured whole-current negation, which is the clause of the node goal the earlier review found unproven; the measure module and its gates are untouched.",
+    "manifest": "Read in full; it lists commits 2920f86a4, 91c9eb59d and d9a327c13, records gate-analytic.log (8 passed, EXIT=0), negated-measurement.log (EXIT=0, both columns reproduced on one slice per source) and negative-control.log (EXIT=1, 6 failed), and leaves baseline_suite and after_suite empty because no suite arm was armed.",
+    "write_paths": "The manifest declares six paths including both doc files, and git diff --name-status over 91c9eb59d..d9a327c13 and over 6ccf43de9..d9a327c13 each lists exactly docs/evidence/fragments/dd-cocos-ingest/edge-consistency-measure.html and docs/research/dd-cocos-census.html."
+  },
+  "justifications": {
+    "durability": "the delta adds no assertion and no test reads band-residual-rows.json against the documented numbers, so a census figure could drift silently.",
+    "evidence": "every headline number in the delta reconciles with an artifact, negated-measurement.log EXIT=0 plus band-residual-rows.json giving 1.98761/0.105678, 1.8637/0.221145 and 9.7896e15 and the medians 1.7326/1.7131/7.9296 and 0.7064/0.7205/7.6004 exactly, while the 22.09 at docs/research/dd-cocos-census.html:88 has no receipt.",
+    "fit": "the changed sentences follow the census's existing id-carrying paragraph idiom at docs/research/dd-cocos-census.html:87-88 with no plan label, version suffix or forbidden name, though the sign paragraph now carries a dozen numbers.",
+    "goal_fidelity": "docs/evidence/fragments/dd-cocos-ingest/edge-consistency-measure.html:23 now rests the recorded column's status on a probe that negates both p-prime and FF-prime at negated_and_crossings.py:65-66, which is the quantity the reference decision needs.",
+    "reuse": "the commit adds no function, class or module and re-measures through nova/imas/edge_consistency.py's edge_consistency and nova/equilibrium/convention.py's toroidal_current_density rather than writing a second operator.",
+    "scope_discipline": "both paths in d9a327c13, docs/evidence/fragments/dd-cocos-ingest/edge-consistency-measure.html and docs/research/dd-cocos-census.html, are inside the manifest's declared write paths and the commit adds no code, test or figure."
+  },
+  "plan_slug": "dd-cocos-ingest",
+  "project": "nova",
+  "raw_text": "VERDICT goal: The delta commit d9a327c13 corrects docs/evidence/fragments/dd-cocos-ingest/edge-consistency-measure.html:23-31 and docs/research/dd-cocos-census.html:87-88 so the section 6 reference decision rests on a re-measured whole-current negation, which is the clause of the node goal the earlier review found unproven; the measure module and its gates are untouched.\nVERDICT done_when: The done-when asks for the analytic zero-order gate, the 1 percent FF-prime detection, the edge-band negative control and the three-source table with a figure; gate-analytic.log records 8 passed EXIT=0 at 6ccf43de, negative-control.log reddens 6 of 8 with EXIT=1, and the table stands at docs/research/dd-cocos-census.html:84-87, though the delta changes no figure.\nVERDICT write_paths: The manifest declares six paths including both doc files, and git diff --name-status over 91c9eb59d..d9a327c13 and over 6ccf43de9..d9a327c13 each lists exactly docs/evidence/fragments/dd-cocos-ingest/edge-consistency-measure.html and docs/research/dd-cocos-census.html.\nVERDICT manifest: Read in full; it lists commits 2920f86a4, 91c9eb59d and d9a327c13, records gate-analytic.log (8 passed, EXIT=0), negated-measurement.log (EXIT=0, both columns reproduced on one slice per source) and negative-control.log (EXIT=1, 6 failed), and leaves baseline_suite and after_suite empty because no suite arm was armed.\nVERDICT diff: Read as the single commit d9a327c13 against 91c9eb59d: 10 insertions and 8 deletions over the two docs; it replaces the fragment's \"does not reproduce, stays out of the census\" verdict with a logged both-term negation that reproduces, and splits the census paragraph so the recorded medians and the one-slice-per-source re-measurement are stated separately.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/dd-cocos-ingest/edge-consistency-measure.html:23 now rests the recorded column's status on a probe that negates both p-prime and FF-prime at negated_and_crossings.py:65-66, which is the quantity the reference decision needs.\nSCORE evidence: 17\nJUSTIFICATION evidence: every headline number in the delta reconciles with an artifact, negative-measurement log EXIT=0 plus band-residual-rows.json giving 1.98761/0.105678, 1.8637/0.221145 and 9.7896e15 and the medians 1.7326/1.7131/7.9296 and 0.7064/0.7205/7.6004 exactly, while the 22.09 at docs/research/dd-cocos-census.html:88 has no receipt.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: both paths in d9a327c13, docs/evidence/fragments/dd-cocos-ingest/edge-consistency-measure.html and docs/research/dd-cocos-census.html, are inside the manifest's declared write paths and the commit adds no code, test or figure.\nSCORE durability: 20\nJUSTIFICATION durability: The delta adds no assertion; no test reads the documented numbers, so nothing reddens if a census figure stops reproducing.\nSCORE fit: 17\nJUSTIFICATION fit: The changed sentences follow the census's existing id-carrying paragraph idiom at docs/research/dd-cocos-census.html:87-88 with no plan label, version suffix or forbidden name, though the sign paragraph now carries a dozen numbers.\nSCORE reuse: 20\nJUSTIFICATION reuse: The commit adds no function, class or module and re-measures through nova/imas/edge_consistency.py's edge_consistency and nova/equilibrium/convention.py's toroidal_current_density, rather than writing a second operator.\nFINDING docs/evidence/fragments/dd-cocos-ingest/edge-consistency-measure.html:23 non-blocking: The value 22.09 for the FF-prime-only negation appears in no log in the run directory; negated_and_crossings.py computes only the both-term negation and reproduce-row.log records only the p-prime-only 22.3425, so the sentence's claim that a single-term probe measures something else rests half on a number a reader cannot check. The decision itself is carried by the logged both-term reproduction, which is why this does not block.\n",
+  "review_run_id": "r-20261028T220205695397-review-of-edge-consistency-measure-d9a327c13551",
+  "reviewed_at": "2026-10-28",
+  "reviewed_base_sha": "91c9eb59d32335de90d560c42825262c43c394d6",
+  "reviewed_head_sha": "d9a327c13551f5ec743631557da237ef53792d73",
+  "reviewed_run_id": "r-20261028T201912373926-edge-consistency-measure",
+  "scores": {
+    "durability": 8,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T22:09:32.386861+00:00",
+  "total": 99
+}

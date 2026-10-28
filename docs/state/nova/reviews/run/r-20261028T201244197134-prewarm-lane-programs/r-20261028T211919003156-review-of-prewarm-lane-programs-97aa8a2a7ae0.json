@@ -1,0 +1,88 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "scripts/h200_test_lane/prewarm.sh:144",
+    "scripts/h200_test_lane/prewarm_row.py:50",
+    "scripts/h200_test_lane/run.sh:28",
+    "scripts/h200_test_lane/run.sh:29"
+  ],
+  "completed_at": "2026-10-28T21:34:04.110Z",
+  "dispatched_at": "2026-10-28T21:24:40Z",
+  "findings": [
+    {
+      "file": "scripts/h200_test_lane/cache_guard.py",
+      "id": "f6dc8a1286b",
+      "line": 220,
+      "severity": "blocking",
+      "text": "program_key_entry_count is a second program-key counter: the capability is owned by scripts/h200_test_lane/cache_reuse_summary.py:63 served_keys, which the plan's owner note and counter-reconciliation note both require this node to extend, and the addition duplicates rather than extends it, leaving cache_reuse_summary.py:115 reporting len(served_keys) under the same served_entries name with a definition that counts -atime companions and any non-suffixed file, so the two counters disagree on one directory and the plan's one-counter post-condition is false."
+    },
+    {
+      "file": "scripts/h200_test_lane/prewarm.sh",
+      "id": "f8fdfffc86b",
+      "line": 130,
+      "severity": "blocking",
+      "text": "the added row passes pytest as the command, so prewarm_row.py:88 propagates pytest's exit status, and the lane target fails three tests at this revision (3 failed, 27 passed in arm-prewarm.log:344, arm-warm.log:282 and arm-old-pin.log:350), which makes every full pre-warm run exit nonzero for test content unrelated to the cache; the arms recorded ARMS_PREWARM_STATUS=0 only because they invoked prewarm_row.py with the test path, whose module-level if __name__ == '__main__' discards pytest.main's return value, so the measured exit contradicts the production path."
+    },
+    {
+      "file": "tests/test_cache_guard.py",
+      "id": "fec18b1aac8",
+      "line": 43,
+      "severity": "non-blocking",
+      "text": "no assertion covers the plan's counter reconciliation, which requires a test that the guard, the pre-warm payload and the summary report the same count on one fixture layout, so nothing reddens when the three sites drift apart."
+    },
+    {
+      "file": "tests/test_cache_guard.py",
+      "id": "f9dcf34298e",
+      "line": 55,
+      "severity": "non-blocking",
+      "text": "test_served_directory_reports_program_key_entries calls jax.config.update without restoring the previous value, leaving the session's compilation cache directory pointing at a tmp_path pytest deletes afterwards, so any later test in the same process that reads the cache configuration sees a vanished directory."
+    },
+    {
+      "file": "tests/test_cache_guard.py",
+      "id": "fec9f0ef5d2",
+      "line": 75,
+      "severity": "non-blocking",
+      "text": "the file is not ruff-format clean: ruff format would collapse the marker_lines comprehension and the final assert onto single lines and the file has no trailing newline, so a path-scoped formatter run on this file rewrites it."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "scripts/h200_test_lane/prewarm.sh:144, scripts/h200_test_lane/prewarm_row.py:50, scripts/h200_test_lane/run.sh:28, scripts/h200_test_lane/run.sh:29",
+    "diff": "three commits, code and tests in 1efb2faa3 and documentation in the other two, nothing outside the goal.",
+    "done_when": "clauses 1 and 3 are measured in arm-warm.log:23,27 and clause 2 as 18986 key entries against 50653 files on the old pin leaf.",
+    "goal": "all three named defects are addressed in the diff, but the counter is a second one rather than the plan's sole owner (scripts/h200_test_lane/cache_guard.py:220).",
+    "manifest": "records gate-head 4 passed and gate-base 4 failed, names the fresh pin root, and states the three lane-test failures as outside scope.",
+    "write_paths": "all four changed paths are inside the declared grants."
+  },
+  "justifications": {
+    "durability": "tests/test_cache_guard.py:46 and :62 redden if program_key_entry_count reverts to a recursive count and :82-84 reddens if the leading newline is removed, but :51 passes on the old recursive implementation because rglob on an absent path also returns zero files.",
+    "evidence": "arm-warm.log:23,27 carries hits 1710 misses 0 compile_seconds 0.0 against the fresh pin leaf and gate-base.log/gate-head.log carry 4 failed / 4 passed, but the prewarm.sh:130-134 row form was never the one exercised and no full pre-warm with the new row has run.",
+    "fit": "program_key_entry_count and PROGRAM_KEY_SUFFIX at scripts/h200_test_lane/cache_guard.py:220 follow the module's docstring-and-type-hint idiom, but tests/test_cache_guard.py:75 is not ruff-format clean.",
+    "goal_fidelity": "scripts/h200_test_lane/cache_guard.py:220 adds a second program-key counter instead of extending scripts/h200_test_lane/cache_reuse_summary.py:63 served_keys, so the plan's stated post-condition of one program-key counter is not met even though all three named defects are addressed.",
+    "reuse": "scripts/h200_test_lane/cache_guard.py:220 re-implements the program-key enumeration that scripts/h200_test_lane/cache_reuse_summary.py:63 served_keys already owns, which the plan's 2026-10-06 owner note says this node must extend instead.",
+    "scope_discipline": "all four changed paths sit inside the declared scope at scripts/h200_test_lane/cache_guard.py, scripts/h200_test_lane/prewarm.sh, tests/test_cache_guard.py and docs/evidence/fragments/forward-solver-route-integrity/prewarm-lane-programs.html."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is a pre-warm covering the lane's own programs plus a guard counting program-key entries with a line-anchored marker; scripts/h200_test_lane/cache_guard.py:220 and scripts/h200_test_lane/prewarm.sh:130-134 land all three, but the counter is a second one rather than the SOLE owner the plan names.\nVERDICT done_when: the plan's done-when has three clauses; arms at H200 job 1299214 in arm-warm.log:23,27 measure clause 1 (1710 hits, 0 misses, 0.0 compile seconds against the fresh pin) and clause 3 (a ^-anchored grep finds CACHE_GUARD_MARKER), and clause 2 is measured as 18986 program-key entries against 50653 recursive files on the old pin leaf.\nVERDICT write_paths: the node declared scripts/h200_test_lane, tests/test_cache_guard.py, docs/evidence/fragments/forward-solver-route-integrity/prewarm-lane-programs.html and docs/figures/...; the diff touches four paths and every one is inside those grants.\nVERDICT manifest: read; it records gate-head.log 4 passed and gate-base.log 4 failed, names the fresh pin root to switch to, and records the three lane-test failures as outside_scope rather than hiding them.\nVERDICT diff: read commit by commit from 6ccf43de to 97aa8a2a7; 1efb2faa3 carries the code and tests (cache_guard.py -12/+34, prewarm.sh +12/-2, tests/test_cache_guard.py new 85 lines) and 0e7f4911c and 97aa8a2a7 carry documentation only, with no code paths outside the goal.\nCALL_SITES: scripts/h200_test_lane/prewarm.sh:144, scripts/h200_test_lane/prewarm_row.py:50, scripts/h200_test_lane/run.sh:28, scripts/h200_test_lane/run.sh:29\nSCORE goal_fidelity: 15\nSCORE evidence: 14\nSCORE scope_discipline: 19\nSCORE durability: 14\nSCORE fit: 17\nSCORE reuse: 5\nJUSTIFICATION goal_fidelity: scripts/h200_test_lane/cache_guard.py:220 adds a second program-key counter instead of extending scripts/h200_test_lane/cache_reuse_summary.py:63 served_keys, so the plan's stated post-condition of one program-key counter is not met even though all three named defects are addressed.\nJUSTIFICATION evidence: arm-warm.log:23,27 carries hits 1710 misses 0 compile_seconds 0.0 against the fresh pin leaf and gate-base.log/gate-head.log carry 4 failed / 4 passed, but the prewarm.sh:130-134 row form was never the one exercised and no full pre-warm with the new row has run.\nJUSTIFICATION scope_discipline: all four changed paths sit inside the declared scope at scripts/h200_test_lane/cache_guard.py, scripts/h200_test_lane/prewarm.sh, tests/test_cache_guard.py and docs/evidence/fragments/forward-solver-route-integrity/prewarm-lane-programs.html.\nJUSTIFICATION durability: tests/test_cache_guard.py:46 and :62 redden if program_key_entry_count reverts to a recursive count and :82-84 reddens if the leading newline is removed, but :51 passes on the old recursive implementation because rglob on an absent path also returns zero files.\nJUSTIFICATION fit: program_key_entry_count and PROGRAM_KEY_SUFFIX at scripts/h200_test_lane/cache_guard.py:220 follow the module's docstring-and-type-hint idiom, but tests/test_cache_guard.py:75 is not ruff-format clean.\nJUSTIFICATION reuse: scripts/h200_test_lane/cache_guard.py:220 re-implements the program-key enumeration that scripts/h200_test_lane/cache_reuse_summary.py:63 served_keys already owns, which the plan's 2026-10-06 owner note says this node must extend instead.\nFINDING scripts/h200_test_lane/cache_guard.py:220 blocking: program_key_entry_count is a second program-key counter: the capability is owned by scripts/h200_test_lane/cache_reuse_summary.py:63 served_keys, which the plan's owner note and counter-reconciliation note both require this node to extend, and the addition duplicates rather than extends it, leaving cache_reuse_summary.py:115 reporting len(served_keys) under the same served_entries name with a definition that counts -atime companions and any non-suffixed file, so the two counters disagree on one directory and the plan's one-counter post-condition is false.\nFINDING scripts/h200_test_lane/prewarm.sh:130 blocking: the added row passes pytest as the command, so prewarm_row.py:88 propagates pytest's exit status, and the lane target fails three tests at this revision (3 failed, 27 passed in arm-prewarm.log:344, arm-warm.log:282 and arm-old-pin.log:350), which makes every full pre-warm run exit nonzero for test content unrelated to the cache; the arms recorded ARMS_PREWARM_STATUS=0 only because they invoked prewarm_row.py with the test path, whose module-level if __name__ == '__main__' discards pytest.main's return value, so the measured exit contradicts the production path.\nFINDING tests/test_cache_guard.py:43 non-blocking: no assertion covers the plan's counter reconciliation, which requires a test that the guard, the pre-warm payload and the summary report the same count on one fixture layout, so nothing reddens when the three sites drift apart.\nFINDING tests/test_cache_guard.py:55 non-blocking: test_served_directory_reports_program_key_entries calls jax.config.update without restoring the previous value, leaving the session's compilation cache directory pointing at a tmp_path pytest deletes afterwards, so any later test in the same process that reads the cache configuration sees a vanished directory.\nFINDING tests/test_cache_guard.py:75 non-blocking: the file is not ruff-format clean: ruff format would collapse the marker_lines comprehension and the final assert onto single lines and the file has no trailing newline, so a path-scoped formatter run on this file rewrites it.\n",
+  "review_run_id": "r-20261028T211919003156-review-of-prewarm-lane-programs-97aa8a2a7ae0",
+  "reviewed_base_sha": "6ccf43de9a42707444627079ac5da06b097d9c74",
+  "reviewed_commits": [
+    "1efb2faa307889d2b0a5c3fe137ae1293175edf1",
+    "0e7f4911c",
+    "97aa8a2a7ae02c175a254be1c7f2b03ed46577de"
+  ],
+  "reviewed_head_sha": "97aa8a2a7ae02c175a254be1c7f2b03ed46577de",
+  "reviewed_run_id": "r-20261028T201244197134-prewarm-lane-programs",
+  "scores": {
+    "durability": 14,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 15,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T21:41:44.548485+00:00",
+  "total": 84
+}

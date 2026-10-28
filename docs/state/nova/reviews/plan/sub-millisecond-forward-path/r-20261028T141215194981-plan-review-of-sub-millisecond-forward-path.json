@@ -1,0 +1,60 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-28T14:20:00.063Z",
+  "dispatched_at": "2026-10-28T14:13:13Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:112",
+      "id": "wiring-1",
+      "reason": "as written the clause is unpassable until another plan's paused repairs land, so either the clause must compare rather than require the present route, or the dependency and those repairs must be declared and scoped inside this plan.",
+      "text": "\u00a74's clause (2) now requires that \"both the fast route and the present route converge to a residual of at most 1e-10\" at ~550, direct 2,000 and 5,000 cells, but the cited evidence records the present route stalling on exactly those rows: `certificate-550-convergence.html` reports the published limited carrier \"stops at scaled residual 0.0012319931459852727, not converged against 1e-12\", and `certificate-diverted-stall.html` records the diverted 2,000-cell iterate stalled at 0.003627 with a zero forward-mode derivative against a central difference of 50000 \u2014 while \u00a70 at :58 states \"This plan's work does not depend on that route's open repairs\" and `plan-section-depends-on` declares no relationship to converged-forward-solve",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:90",
+      "id": "reasoning-1",
+      "reason": "the node would be gated on a bound its stated mechanism cannot reach, so the bound must rise to at least the fit's own cost or the fit must be restricted to the tracked points' stencils, which changes the mechanism text.",
+      "text": "\u00a72's done-when (2) requires the warm read to cost \"at most 0.2 ms per call\", but \u00a72's own mechanism at :82 takes its derivatives \"from a cell-local quadratic fit over each hex cell's stencil\", and the plan at :48 states that fit \"runs in 0.4 ms over every node\", so the read cannot cost less than the fit it evaluates, before the point refinement and the rebuild check are added",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:89",
+      "id": "done_when-1",
+      "reason": "a node that repairs the oracle until it admits an X-point can satisfy the clause by weakening the reference rather than by fixing the read, so the repair needs its own recorded control and either a separate node or an explicit validation of the repaired harness against the analytic kernels.",
+      "text": "\u00a72's done-when (1) says \"if the oracle harness admits no X-point there, the harness is repaired in this section before the clause is judged\", which makes the node being measured the editor of its own measuring instrument with no independent validation of the repair",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "6a747ee86a05a6c62b626c5bd62aba9bafff00e0",
+  "plan_fingerprint": "3d4b735b6940ae4bc04bc2db28be1d7f46878393b094ae10713e60d150649a11",
+  "plan_slug": "sub-millisecond-forward-path",
+  "plan_version": 2,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261028T141215194981-plan-review-of-sub-millisecond-forward-path",
+  "reviewed_blob_sha": "0906bdee952a306839187eb1947d4527e34c5c98",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `/nova/converged-forward-solve.html`, `/nova/research/sub-millisecond-forward-design.html`, `solve-wall-breakdown.html` and `read-derivative-prototype.html` all resolve; the quoted figures 76,083 and 61,330 launches, 107.8 ms, 18.394 ms and 141\u2013144 ms are all present in the fragments the plan cites.",
+    "done_when": "a finding \u2014 \u00a72's done-when (1) makes an in-node repair of the analytic oracle harness the precondition for judging its own accuracy clause.",
+    "evidence_paths": "pass \u2014 the plan names no session scratchpad or node-local temporary path; every measurement is required into \"the record\", which under this repository's convention is the durable evidence fragment under `docs/evidence/fragments/`, and the cited fragments resolve there.",
+    "naming": "pass \u2014 the changed units introduce no plan labels, stage names, ticket numbers or version tags into any named symbol or file; the code symbols they cite (`SolveRoute`, `ForwardSolveRequest`, `ForwardProfile.solve`, `ForwardSolveReceipt`) already exist under those names.",
+    "reasoning": "a finding \u2014 \u00a72's done-when bound of 0.2 ms for the warm read is below the 0.4 ms the plan itself quotes for the derivative fit the read is built on, so the section's mechanism cannot satisfy its own measure.",
+    "single_goal": "pass \u2014 each of \u00a71 to \u00a74 names one deliverable (the bank, the read, the Newton step, the batched solve), and each section's clauses measure that one deliverable.",
+    "wiring": "a finding \u2014 \u00a74's clause (2) makes the plan's own gate depend on converged-forward-solve's open certificate defects, which the plan declares it does not depend on."
+  },
+  "section_digests": {
+    "_document": "ae9e31e9e8b11cf8466f469a6702ad49bf702a86bbea01ba56e529765d4159c6",
+    "s0": "27b1d77525232326e03fa39361c681aeec8a85704606479509393bab9339ef99",
+    "s1": "87b7956295f79c4e17023ca0c0b044fc9c92d0df24aeac4371171dfb83d696b7",
+    "s2": "92bd3854019e534ed6d6150d958085928f2e8f1542c585ab4143eb7d72c0f93c",
+    "s3": "4ae225491be5d1e848dc2b5d2c7a0b4cbb52a50c649190c647b4f2a9aa34f84e",
+    "s4": "678d2b1768946489f302bcced314164b4c47945548d5488817cfe8772803c4dd"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T14:22:43.645088+00:00"
+}

@@ -19,6 +19,8 @@ from nova.jax.config import configure_dtypes
 configure_dtypes()
 
 import argparse
+import glob
+import gzip
 import json
 import logging
 from pathlib import Path
@@ -133,6 +135,54 @@ def cold_stages(name, function, arguments, revision):
         "argument_leafs": [describe(a) for a in arguments],
     }
 
+
+
+def profile_program(label, program, arguments, directory, repetitions=20):
+    """Trace repeated warm calls and table their device kernels by device time."""
+    directory.mkdir(parents=True, exist_ok=True)
+    prepared = program(*arguments)
+    jax.block_until_ready(prepared)
+    started = perf_counter()
+    with jax.profiler.trace(str(directory), create_perfetto_link=False):
+        for _ in range(repetitions):
+            jax.block_until_ready(program(*arguments))
+    total = perf_counter() - started
+    record = {
+        "label": label,
+        "repetitions": repetitions,
+        "wall_ms": 1000 * total,
+        "per_call_ms": 1000 * total / repetitions,
+        "directory": str(directory),
+        "kernels": [],
+    }
+    files = sorted(Path(directory).glob("plugins/profile/*/*.trace.json.gz"))
+    if not files:
+        record["trace_absent"] = True
+        return record
+    payload = json.loads(gzip.decompress(files[0].read_bytes()))
+    events = payload.get("traceEvents", [])
+    kernel_events = [
+        event
+        for event in events
+        if event.get("ph") == "X"
+        and event.get("cat") in ("kernel", "Kernel", "gpu_user_annotation")
+        and event.get("dur")
+    ]
+    totals = {}
+    for event in kernel_events:
+        totals[event.get("args", {}).get("name", event.get("name", "?"))] = (
+            totals.get(event.get("args", {}).get("name", event.get("name", "?")), 0.0)
+            + event["dur"]
+    )
+    device_us = sum(totals.values()) / repetitions
+    record["device_us_per_call"] = device_us
+    record["host_gap_ms_per_call"] = 1000 * total / repetitions - device_us / 1000
+    record["trace_file"] = str(files[0])
+    record["kernels"] = [
+        {"name": name, "ms_per_call": value / repetitions / 1000}
+        for name, value in sorted(totals.items(), key=lambda item: -item[1])[:12]
+    ]
+    return record
 
 def main():
     parser = argparse.ArgumentParser()
@@ -301,23 +351,49 @@ def main():
     book_ms, book_p95 = wall(
         lambda psi: book_program(psi, reading, geometry), (samples,), 50
     )
+    number = len(roots)
+    solved = fixed_points.FixedPointResult(
+        position=jnp.asarray(roots),
+        jet=jax.vmap(field.evaluate)(jnp.asarray(roots)),
+        valid=jnp.ones((number,), dtype=bool),
+        status=jnp.zeros((number,), dtype=jnp.int32),
+        iterations=jnp.zeros((number,), dtype=jnp.int32),
+        retried=jnp.zeros((number,), dtype=bool),
+    )
+
+    def read_without_tree(field, geometry, solved):
+        return topology.read_at_stationary_points(
+            field, geometry, convention, policy, solved
+        )
+
+    no_tree_program = (
+        jax.jit(read_without_tree).lower(field, geometry, solved).compile()
+    )
+    no_tree_ms, no_tree_p95 = wall(
+        no_tree_program, (field, geometry, solved), 50
+    )
     map_ms, map_p95 = wall(map_program, (reference, *operands), 50)
 
     flat = reference.reshape(-1)
     residual = equation(flat, *operands)
     tangent = operand_tangent(equation, flat)
     identity = jnp.eye(residual.size, dtype=residual.dtype)
-    jacobian_program = jax.jit(
-        lambda columns: jax.vmap(lambda c: operand_block(tangent, 1)(c, *operands))(
-            columns
-        )
-    ).lower(identity).compile()
+    in_axes = (0,) + (None,) * len(operands)
 
-    def dense_step():
-        matrix = jacobian_program(identity)
-        return jnp.linalg.solve(identity - matrix.T, residual)
+    def columns_image(columns, *carried):
+        return jax.vmap(
+            lambda c: operand_block(tangent, 1)(c, *carried), in_axes=in_axes
+        )(columns, *carried)
 
-    solve_ms, solve_p95 = wall(lambda: dense_step(), (), 20)
+    jacobian_program = jax.jit(columns_image).lower(identity, *operands).compile()
+    matrix = jacobian_program(identity, *operands)
+    jax.block_until_ready(matrix)
+    solve_ms, solve_p95 = wall(
+        lambda: jnp.linalg.solve(identity - matrix.T, residual), (), 20
+    )
+    jacobian_ms, jacobian_p95 = wall(
+        lambda: jacobian_program(identity, *operands), (), 20
+    )
 
     steps["1"] = {
         "batch": 1,
@@ -329,6 +405,10 @@ def main():
         "map_p95_ms": 1000 * map_p95,
         "linear_solve_ms": 1000 * solve_ms,
         "linear_solve_p95_ms": 1000 * solve_p95,
+        "read_without_tree_ms": 1000 * no_tree_ms,
+        "read_without_tree_p95_ms": 1000 * no_tree_p95,
+        "jacobian_block_ms": 1000 * jacobian_ms,
+        "jacobian_block_p95_ms": 1000 * jacobian_p95,
         "residual_size": int(residual.size),
         "cells": int(len(machine.node)),
     }
@@ -338,16 +418,16 @@ def main():
         1e-7 * np.arange(batch), dtype=reference.dtype
     ).reshape((-1,) + (1,) * reference.ndim)
 
-    def batched(moments):
-        return jax.vmap(lambda m: mapped(m, *operands))(moments)
+    def batched(moments, *carried):
+        return jax.vmap(lambda m: mapped(m, *carried))(moments)
 
     started = perf_counter()
-    batch_program = jax.jit(batched).lower(states).compile()
+    batch_program = jax.jit(batched).lower(states, *operands).compile()
     batch_compile_seconds = perf_counter() - started
     started = perf_counter()
-    jax.block_until_ready(batch_program(states))
+    jax.block_until_ready(batch_program(states, *operands))
     batch_first_seconds = perf_counter() - started
-    batch_ms, batch_p95 = wall(batch_program, (states,), 50)
+    batch_ms, batch_p95 = wall(batch_program, (states, *operands), 50)
     steps[str(batch)] = {
         "batch": batch,
         "compile_seconds": batch_compile_seconds,
@@ -357,6 +437,18 @@ def main():
         "map_per_solve_ms": 1000 * batch_ms / batch,
     }
     results["steps"] = steps
+    profiles = []
+    for label, program, arguments_ in (
+        ("map", map_program, (reference, *operands)),
+        ("topology_read", read_program, (field, geometry)),
+    ):
+        profiles.append(
+            profile_program(
+                label, program, arguments_, args.output.parent / f"profile-{label}"
+            )
+        )
+    results["profiles"] = profiles
+
     results["host_peak_rss_gb"] = (
         resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024**2
     )

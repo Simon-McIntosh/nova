@@ -32,7 +32,24 @@
   "plan_slug": "efit-baseline-demonstration",
   "plan_version": 57,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "finding": "reuse_search-1",
+      "reason": "the machinery was landed by the two feeder plans this endpoint dispatches, so naming the modules in \u00a73 is prose correction, not a design change.",
+      "when": "2026-10-28T05:06:22.680480+00:00"
+    }
+  ],
+  "responses": {
+    "reuse_search-1": {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "reason": "the machinery was landed by the two feeder plans this endpoint dispatches, so naming the modules in \u00a73 is prose correction, not a design change.",
+      "when": "2026-10-28T05:06:22.680480+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/efit-baseline-demonstration/r-20261005T153045516936-plan-review-of-efit-baseline-demonstration.json",
   "review_run_id": "r-20261005T153045516936-plan-review-of-efit-baseline-demonstration",
   "reviewed_blob_sha": "78538e0bf3b4c7abab85d9bdcf16fafce2fd35d3",
   "rubric": "design",

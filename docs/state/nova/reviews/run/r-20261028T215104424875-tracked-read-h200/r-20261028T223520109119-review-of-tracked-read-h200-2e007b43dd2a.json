@@ -1,0 +1,92 @@
+{
+  "added_failure_count": 3,
+  "added_failure_ids": [
+    "tests/test_tracked_read_accuracy.py::test_stationary_points_against_the_analytic_newton[limited-trial]",
+    "tests/test_tracked_read_accuracy.py::test_stationary_points_against_the_analytic_newton[diverted-trial]",
+    "tests/test_tracked_read_accuracy.py::test_boundary_flux_against_the_analytic_read[diverted-trial]"
+  ],
+  "added_failures_note": "The pre-existing suite arm is 0 added failures: tests/test_tracked_read.py passed 4 of 4 at base a1f6782 (logs/gate_tracked_read_base.log, EXIT=0) and 4 of 4 at head 0adcf5d6c (logs/gate_tracked_read_head.log, EXIT=0). The three ids above are the new accuracy file this diff adds, red at head (logs/accuracy_gate_head.log, EXIT=1); the reviewed manifest declares them deliberately, under outside_scope, as the reproduced trial-booking defect.",
+  "call_sites": [
+    "nova/equilibrium/fixed_points.py:652 fixed_points.solve constructs _CachedField, whose _location calls nearest_cell",
+    "nova/equilibrium/fixed_points.py:680 fixed_points.solve's second _CachedField construction",
+    "nova/equilibrium/fixed_points.py:148 BellField.value, called from BellField.evaluate at :163"
+  ],
+  "completed_at": "2026-10-28T22:45:35.535Z",
+  "dispatched_at": "2026-10-28T22:37:14Z",
+  "findings": [
+    {
+      "file": "tests/test_tracked_read_accuracy.py",
+      "id": "fad56787fd4",
+      "line": 107,
+      "severity": "non-blocking",
+      "text": "The boundary-flux reference is case[\"analytic_read\"].boundary_flux, and analytic_read is topology.read on the analytic flux (scripts/prototypes/tracked_read/measure.py build_kind), i.e. the present read the plan replaces; sub-millisecond-forward-path section 2 requires both references to be located by a direct Newton solve on the analytic psi so that no read instrument decides its own clause, so the boundary clause is judged against read code rather than against an independent reference."
+    },
+    {
+      "file": "tests/test_tracked_read_accuracy.py",
+      "id": "f8fcbacbc6e",
+      "line": 126,
+      "severity": "non-blocking",
+      "text": "The accuracy gate is committed red at head (3 failing ids, EXIT=1) and section 2's accuracy clause is therefore unmet; the manifest records this under outside_scope and attributes the error to the trial booking and the Bell interpolant upstream of support_read, and the coordinator must decide whether that attribution stands."
+    },
+    {
+      "file": "nova/equilibrium/fixed_points.py",
+      "id": "f465227d77b",
+      "line": 265,
+      "severity": "non-blocking",
+      "text": "No test fails if the single-owner property regresses: restoring support_read.stationary_cells, or inlining the argmin back into BellField.value, leaves tests/test_tracked_read.py green because it passes 4 of 4 at the base as well as the head, so the done-when's own gate cannot distinguish the two revisions and the reuse removal is evidenced only by reading the diff."
+    },
+    {
+      "file": "scripts/prototypes/tracked_read_h200/run_h200.sh",
+      "id": "fd43a184106",
+      "line": 9,
+      "severity": "non-blocking",
+      "text": "The four committed job scripts hardcode this run's absolute instance directory, including the run id, in #SBATCH --output and RUN=, so none of them runs for anyone else and a run identifier is carried into the repository."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-h200.html",
+      "id": "f8b2f9ef47c",
+      "line": 86,
+      "severity": "non-blocking",
+      "text": "The H200 wall table reads as this node's own measurement but both measuring jobs (logs/h200_1299299.log, logs/h200_1299301.log) ran at the base revision a1f6782 and no log line or table caption names a revision, and section 2 asks for the warm wall by stage at base and at head, so no head-arm wall exists."
+    },
+    {
+      "file": "logs/accuracy_gate_head.log",
+      "id": "f039e8d3411",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "The cited accuracy-gate log carries no device label, contrary to the brief's fourth item, although its enclosing job log logs/accuracy_1299308.log does read '# device NVIDIA H200 NVL'."
+    },
+    {
+      "file": "manifest.md",
+      "id": "f3aa6fb2e62",
+      "line": 8,
+      "severity": "non-blocking",
+      "text": "The commits list omits e11c1149c and the reviewed head 2e007b43d, and changed_paths and artifacts cite two PNG twins that the head deletes, so the record is stale against the tree it describes."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit from a1f6782 to 2e007b43d: the product change is 18 lines in nova/equilibrium/fixed_points.py and support_read.py, the rest is a 141-line accuracy test, five measure and job scripts, the evidence fragment and two SVG panels; no file outside the declared or explicitly granted paths is touched.",
+    "done_when": "The done-when is the removal of support_read.stationary_cells in favour of the fixed_points cell owner with tests/test_tracked_read.py passing 4 of 4; git grep at 2e007b43d finds the name only outside nova/equilibrium, and logs/gate_tracked_read_head.log and its base arm each record 4 passed with EXIT=0, but both arms pass so the gate does not assert the change.",
+    "goal": "The node goal is to bring the tracked read to its accuracy and H200 bounds through the fixed_points cell owner; nova/equilibrium/fixed_points.py:265 now owns one cell-selection rule and support_read.stationary_cells is gone, but both bounds are measured and missed rather than met, and the manifest attributes each rather than repairing it.",
+    "manifest": "The manifest reports status complete with a scope_note, a checkpoint, the gate command and three log paths, and its headline metrics reconcile with the logs it names; its commits list is two commits short of the range and its changed_paths and artifacts name PNGs the head deletes.",
+    "write_paths": "The declared write paths are nova/equilibrium/fixed_points.py, tests/test_tracked_read_accuracy.py, scripts/prototypes/tracked_read_h200, the tracked-read-h200 evidence fragment and two figure directories; every changed file sits inside them except nova/equilibrium/support_read.py, which the brief explicitly granted under the lead's shared-file ruling and which the manifest records under scope_note."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to bring the tracked read to its accuracy and H200 bounds through the fixed_points cell owner; nova/equilibrium/fixed_points.py:265 now owns one cell rule and support_read.stationary_cells is gone, while both bounds are measured and missed rather than met.\nVERDICT done_when: the done-when is support_read.stationary_cells removed in favour of the fixed_points cell owner with tests/test_tracked_read.py passing 4 of 4; git grep at 2e007b43d finds the name nowhere under nova/equilibrium, but the gate passes 4 of 4 at base and at head so it does not assert the change.\nVERDICT write_paths: read the declared paths; every changed file is inside them except nova/equilibrium/support_read.py, granted explicitly by the brief and recorded in the manifest's scope_note.\nVERDICT manifest: read; it states status complete, records the gate command and three logs, and its metrics reconcile, but its commits list omits e11c1149c and 2e007b43d and it cites PNG twins the head deletes.\nVERDICT diff: read commit by commit from a1f6782 to 2e007b43d; 18 product lines across nova/equilibrium/fixed_points.py and support_read.py, one accuracy test, five scripts, the fragment and two SVG panels, all in scope.\nCALL_SITES: nova/equilibrium/fixed_points.py:652, nova/equilibrium/fixed_points.py:680, nova/equilibrium/fixed_points.py:148\nSCORE goal_fidelity: 11\nJUSTIFICATION goal_fidelity: nova/equilibrium/fixed_points.py:265 delivers the cell-owner clause, while tests/test_tracked_read_accuracy.py:126 and the 1.225 ms wall in docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-h200.html:86 show both bounds the goal names are unmet.\nSCORE evidence: 12\nJUSTIFICATION evidence: logs/gate_tracked_read_head.log and logs/gate_tracked_read_base.log both record 4 passed with EXIT=0, so the named gate is recorded yet cannot distinguish base from head, and the boundary-flux reference at tests/test_tracked_read_accuracy.py:107 is another read.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: every path in the diff is inside the declared write paths or the brief's explicit grant for nova/equilibrium/support_read.py.\nSCORE durability: 8\nJUSTIFICATION durability: restoring support_read.stationary_cells or inlining the argmin in nova/equilibrium/fixed_points.py:148 leaves tests/test_tracked_read.py green at both arms, so no test fails if the reuse change regresses.\nSCORE fit: 15\nJUSTIFICATION fit: nearest_cell at nova/equilibrium/fixed_points.py:265 follows the module's function-and-dataclass idiom and carries no plan or ticket name, but scripts/prototypes/tracked_read_h200/run_h200.sh:9 hardcodes the run's own directory.\nSCORE reuse: 20\nJUSTIFICATION reuse: the added definition extracts the rule already owned by fixed_points._CachedField._location and every sibling call site now extends that owner; searching by capability found stencil_mesh.py:899, benchmarks/poloidal_convergence_atlas.py:195 and scripts/saddle_gap_check/measure_saddle_gap.py:177, none of which is the mesh-generator rule.\nFINDING tests/test_tracked_read_accuracy.py:107 non-blocking: the boundary-flux reference is topology.read's own output rather than the direct Newton solve on the analytic psi the section requires, so a read instrument decides that clause.\nFINDING tests/test_tracked_read_accuracy.py:126 non-blocking: the accuracy gate is committed red with 3 failing ids and the accuracy clause is unmet, declared in the manifest under outside_scope and attributed to the trial booking upstream.\nFINDING nova/equilibrium/fixed_points.py:265 non-blocking: no test fails if the single-owner property regresses, because tests/test_tracked_read.py passes at both base and head.\nFINDING scripts/prototypes/tracked_read_h200/run_h200.sh:9 non-blocking: the committed job scripts hardcode this run's absolute directory and run id, so they are not reproducible.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-h200.html:86 non-blocking: the H200 wall table names no revision and both measuring jobs ran at the base a1f6782, so no head-arm wall exists although the section asks for both.\nFINDING logs/accuracy_gate_head.log:1 non-blocking: the cited gate log carries no device label.\nFINDING manifest.md:8 non-blocking: the commits list omits e11c1149c and 2e007b43d and the record cites PNG twins the head deletes.",
+  "review_run_id": "r-20261028T223520109119-review-of-tracked-read-h200-2e007b43dd2a",
+  "reviewed_base_sha": "a1f6782c9c1bb1b6278418393961d76ffc7329ca",
+  "reviewed_head_sha": "2e007b43dd2a1127582a6bc21a235ad2c98c9c23",
+  "reviewed_run_id": "r-20261028T215104424875-tracked-read-h200",
+  "scores": {
+    "durability": 8,
+    "evidence": 12,
+    "fit": 15,
+    "goal_fidelity": 11,
+    "reuse": 20,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T22:46:25.844709+00:00",
+  "total": 83
+}

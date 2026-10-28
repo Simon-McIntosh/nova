@@ -10,6 +10,13 @@
   ],
   "completed_at": "2026-10-28T22:02:52.159Z",
   "dispatched_at": "2026-10-28T21:55:33Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "non-blocking, noted at landing",
+      "recorded_at": "2026-10-28T22:10:09.677513+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/h200_test_lane/cache_guard.py",

@@ -9,9 +9,9 @@
 #SBATCH --output=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T173210176748-tracked-read/logs/h200_%j.log
 # One H200 job: the tracked read at base and head, with the four-state accuracy.
 set -u
-WT=$(cd "$(dirname "$0")/../../.." && pwd)
+WT=${WT:?WT must name the worktree the job measures}
 RUN=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T173210176748-tracked-read
-BASE_SHA=$(git -C "$WT" rev-parse HEAD~2)
+BASE_SHA=${BASE_SHA:?BASE_SHA must name the base revision the arms compare, and it must not carry the change under test}
 export TMPDIR=/tmp
 export JAX_PLATFORMS=cuda
 D=$(mktemp -d /tmp/tracked-read-XXXX)

@@ -1,0 +1,53 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-27T21:36:52.856Z",
+  "dispatched_at": "2026-10-27T21:28:15Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/kernel-compile-barrier.html:58",
+      "id": "reasoning-1",
+      "reason": "the node cannot meet or fail clause (2) cleanly until the plan either re-measures base and head on `production_point_batch` and restates the instruction and wall thresholds from that arm, or names `point_jet` as the measured program and states why the production program inherits its lever.",
+      "text": "\u00a72's new sentence redirects the section to `_source_jets`/`_row_program` in `nova/equilibrium/fixed_points.py` and states \"\u00a72's measurement compiles the program built from `fixed_points.py`\", but every threshold in done-when (2) on line 59 \u2014 95.1 s, 51.3 s for `variadic-op-splitter` plus `multi_output_fusion`, 100,579 post-splitter instructions, and the 45 s target \u2014 was measured on the census `point_jet` program (`scripts/prototypes/kernel_compile_census/row.py:67-80`, `jax.vmap(lambda point: coupling.evaluate(point, moments))`, profiled by \u00a75 through `compile_pass_profile/job.sh:23`, whose program list is `point_jet-4` and controls only), which is a different graph from `production_point_batch` = `fixed_points._row_program`: the compile ledger records `point_jet` at 106,218 expanded equations and `production_point_batch` at 161,338 (`docs/research/compile-cost-evidence.html:139,141`). The section therefore has no base arm for the program it now changes, and \"at most half of 100,579\" is a threshold on a program it is not editing; \u00a72 also names no production caller, and \u00a73's own body records that `maintain_rows` is reached today only by `tests/test_fixed_points.py` and prototype scripts",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/kernel-compile-barrier.html:63",
+      "id": "reasoning-2",
+      "reason": "the node decides its scope from this enumeration, so as written it must either leave the read_route copy in place (failing its own edit clause) or modify the census harness the plan says stays as it is; the plan has to say where the census row's import is redirected, and stop calling the solve.py line a copy.",
+      "text": "\u00a73 states the expression \"is defined four times today\" and calls `scripts/prototypes/fixed_points/solve.py:121` \"a second copy\", but that line is a `jax.jit(jax.vmap(_source_jets, in_axes=(0, None)))` wrapper over `_source_jets` imported from `scripts/prototypes/read_route/jets.py:14`, not a second definition; the census row's `prototype_point_batch` imports the same read_route function (`scripts/prototypes/kernel_compile_census/row.py:112-116`) while the same paragraph says the census row \"stays as it is\". The instruction \"redirect both prototype copies to it, deleting the copies\" therefore removes a function that `solve.py` and the census harness both import, one of which the plan declares unchanged",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "e06fc8b82e9ef15002b5721863317faf9024b70c",
+  "plan_fingerprint": "8cc118637e2ee20a6ccf3f0405bfe6e487d81ffc88b40a8f59c90123a382f9e0",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 37,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261027T212722988726-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "736251e99f20e0f0d85f4f2060c443cdafd46cb5",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every path and line the changed units cite resolves in the worktree at e22171d1c: `nova/equilibrium/fixed_points.py:206` (`_source_jets`), `:391` (`_row_program`), `:413` (`maintain_rows`) and `:478` (its `_row_program` call); `scripts/prototypes/kernel_compile_census/row.py:115`; `scripts/prototypes/read_route/jets.py:229` and `:321`; `scripts/prototypes/fixed_points/solve.py:121`.",
+    "done_when": "pass \u2014 each changed clause carries a quantity and a base arm (\u00a72's per-pass table on base and head in one fresh-process H200 job; \u00a73's bit-identical row comparison against a base build, the 64 GB peak-host bound, and the 900 s coarse-tie test that timed out on main); the one clause whose measure is not reachable on the program the section changes is raised under reasoning.",
+    "evidence_paths": "pass \u2014 the changed clauses name H200 and sirius jobs and the ledger `docs/research/compile-cost-evidence.html`; no session scratchpad, node-local temporary directory or run-scoped path appears in either section.",
+    "naming": "pass \u2014 the changed sentences introduce no plan labels, stage names, ticket numbers or version tags into symbols, files or comments.",
+    "reasoning": "two findings \u2014 \u00a72 now names the production row program as its subject while every number in its done-when belongs to the census `point_jet`, a different program, and \u00a73's \"second copy\" at solve.py:121 is an import that two importers share, one of which the same paragraph declares untouched.",
+    "single_goal": "pass \u2014 \u00a72 carries the point jet's variadic restructure and \u00a73 carries the bounded jets build, whose copy-redirection and delete serve that single deliverable rather than a second one.",
+    "wiring": "pass \u2014 s2 declares `data-links=\"kernel-compile-barrier#s5\"` and s3 `#s2,#s5`, matching the section each consumes: \u00a75 is `done` and is the source both mechanisms take their lever from, and \u00a73's done-when (2)-(3) consume the bounded program \u00a72 lands; the section declarations on line 23 agree with the section tags."
+  },
+  "section_digests": {
+    "_document": "f08e222b01d6b1f0402c89ed7232778c51a916af5b42afb912c6af8b668b2c83",
+    "s0": "6af29e9c0d4ae386d870df6baa70b910da2c50485eef97ddf1c3d2ebc9f12a27",
+    "s1": "aa5aa8c58e97b36f2cd4f105d3cfb0b24bd5697ec1f0ec570392a44b85ce3e6e",
+    "s2": "19fcbf895e48e7fc9a4c6825cf9caa244d44eac10fc462ab0e4e43bd12ccf314",
+    "s3": "9e56b6d38cb4cf34022489c8167932bb095339ef8688331fb8c9699e6ee57bbd",
+    "s4": "043c0ccddafb69cbd714f400a3810894eb704687755dfb014b018a750adc8b16",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T06:35:50.633763+00:00"
+}

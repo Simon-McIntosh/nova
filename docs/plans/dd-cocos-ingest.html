@@ -24,8 +24,8 @@
   <title>DD COCOS Ingest | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="112">
-<meta name="plan-modified" content="2026-10-25">
+<meta name="plan-version" content="113">
+<meta name="plan-modified" content="2026-10-28">
 <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;dd-cocos-ingest#s1&quot;],&quot;s3&quot;:[&quot;dd-cocos-ingest#s2&quot;],&quot;s4&quot;:[&quot;dd-cocos-ingest#s3&quot;],&quot;s5&quot;:[&quot;dd-cocos-ingest#s1&quot;,&quot;dd-cocos-ingest#s2&quot;]}">
 </head>
 <body>
@@ -293,6 +293,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261023T195812953681-flux-function-sign" data-who="reckon-build" data-when="2026-10-23T22:06:24Z">
     <div class="r-comment-body"><p>The COCOS 17 flux-function current relation is j_phi = +2*pi*(R dp/dpsi + F dF/dpsi/(mu0 R)) against the Data Dictionary's own signed poloidal flux, established by two independent routes (the digit form and the DD4-native regression with its negated-map control) plus a partial Ampère-side cross-check. nova's owner declares COCOS 17 while documenting p' = -dp/dPhi and computing -2*pi*(...), which is self-consistent with what map_extraction publishes and anti-parallel to the map current when fed the DD's derivatives; the repair must move map_extraction.py:292-293 and the owner together. Evidence: docs/evidence/fragments/dd-cocos-ingest/flux-function-sign.html</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261028T204304205746-review-of-edge-consistency-measure-91c9eb59d323" data-who="reckon-build" data-when="2026-10-28T20:57:22.920Z">
+    <div class="r-comment-body"><p>review of r-20261028T201912373926-edge-consistency-measure at 91c9eb59d (base 6ccf43de) stored parsed: goal_fidelity 15, evidence 12, scope_discipline 19, durability 8, reuse 20, fit 16, total 90, one blocking finding that the fragment&#x27;s non-reproduction conclusion rests on a probe negating only p-prime while the census paragraph from the same commit uses the same column as evidence</p></div>
 </div>
 </section>
 </main>

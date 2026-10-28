@@ -49,9 +49,22 @@
       "finding": "thin_wrapper-1",
       "reason": "the ladder landed and was retired as an attribution, so no remaining node duplicates it, but the pattern is real and would have been reused had the design cited the owner.",
       "when": "2026-10-28T05:06:52.631511+00:00"
+    },
+    {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "finding": "duplicate_owner-2",
+      "reason": "the item is already satisfied by the owner, so the plan should record it as done rather than dispatch work that would add a second field.",
+      "when": "2026-10-28T05:06:59.565632+00:00"
     }
   ],
   "responses": {
+    "duplicate_owner-2": {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "reason": "the item is already satisfied by the owner, so the plan should record it as done rather than dispatch work that would add a second field.",
+      "when": "2026-10-28T05:06:59.565632+00:00"
+    },
     "thin_wrapper-1": {
       "action": "noted",
       "by": "plan-review-reflex",

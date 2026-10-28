@@ -137,7 +137,10 @@ def main():
     name = "diverted-single-null"
     started = perf_counter()
     carrier, source, exact = certificate._case(name, clip_mode="exact")
-    machine = certified_machine(carrier, kind, cells, exact)
+    requested = -500 if cells == 550 else -cells
+    machine = certificate._case_machine(
+        name, carrier, exact, requested, clip_mode="exact"
+    )
     carrier_seconds = perf_counter() - started
     geometry = topology.TopologyGeometry.from_cells(
         machine.cell_polygons, machine.sampling_vertices, (machine.wall_node,)
@@ -247,11 +250,15 @@ def main():
     }
 
     started = perf_counter()
-    reloaded = certificate_fixtures.cached_carrier(
-        carrier, -500, certificate._diverted_wall(exact)
-    )
-    results["operand_load_seconds"] = perf_counter() - started
-    results["operand_load_cache"] = reloaded.cache
+    try:
+        reloaded = certificate_fixtures.cached_carrier(
+            carrier, requested, certificate._diverted_wall(exact)
+        )
+        results["operand_load_seconds"] = perf_counter() - started
+        results["operand_load_cache"] = reloaded.cache
+    except FileNotFoundError:
+        results["operand_load_seconds"] = None
+        results["operand_load_cache"] = {"absent": "certificate content store has no carrier at this revision"}
 
     results["programs"].append(
         cold_stages("topology_read", read_function, (field, geometry), revision)

@@ -12,65 +12,90 @@
   <code>BellField.value</code> and the tracked read all call it, and
   <code>stationary_cells</code> is deleted. <code>tests/test_tracked_read.py</code>
   passes 4 of 4 over the change.</p>
+  <p>Two clauses keep it one owner. The first refuses a second nearest-generator
+  rule: <code>support_read</code> must carry no <code>stationary_cells</code>,
+  and both <code>support_read.read</code> and
+  <code>fixed_points._CachedField._location</code> must reach the shared rule.
+  The second is behavioural, because a source check cannot see two correct
+  implementations that disagree at a boundary: it takes the two generators
+  nearest each other in the mesh, puts a point exactly between them - on the
+  surface where two cell choices are equidistant - and requires the read's cell
+  and the field's cell to be the same index. Two owners drift at exactly the
+  points this one is chosen from.</p>
 
   <h3 id="tracked-read-h200-stage">Which stage carries the trial-state error</h3>
-  <p>Every reference is a direct Newton solve on the analytic flux of the
-  certificate state. A second solve runs on the field the read differentiates —
-  the Bell interpolant over the nodal jets it contracts — so the distance from
-  the read to that field is the solve's own error and the distance from that
-  field to the analytic extremum is the derivative source's.</p>
+  <p>Every reference is a direct solve on the analytic flux of the certificate
+  state, and none of them passes through the read it judges. The axis and the
+  diverted boundary are Newton solves on the analytic flux seeded from the
+  certificate; the limited boundary is the wall point where that flux is
+  extremal on the plasma side, found by sweeping the wall polygon and refining
+  the segment with a ternary search; the flux span is the difference of those
+  two analytic values. An earlier version of this row compared the read against
+  <code>topology.read</code> on the analytic field, which is the same read, so
+  the reference decided its own clause; that is what the numbers below replace.</p>
+  <p>Each state is measured twice: on the moments it books (the trial state books
+  the sampled field, the converged state books the analytic one), and on the
+  analytic field substituted for those moments. A third column is the distance
+  from the read's own derivative source - the cell-local Bell interpolant of the
+  booked nodal jets, solved directly - to the analytic extremum, which is the
+  interpolant's own share.</p>
   <table>
     <tr><th>state</th><th>axis [m]</th><th>X-point [m]</th>
-      <th>boundary flux / span</th><th>Newton iterations</th><th>budget</th></tr>
+      <th>boundary flux / span</th><th>axis, analytic field substituted [m]</th>
+      <th>interpolant's own distance [m]</th><th>budget</th></tr>
     <tr><td>diverted, converged</td><td>3.88e-6</td><td>5.28e-6</td>
-      <td>1.49e-5</td><td>[2, 2]</td><td>6.81e-4 / 1e-4</td></tr>
+      <td>1.49e-5</td><td>3.88e-6</td><td>3.88e-6</td>
+      <td>6.81e-4 m / 1e-4</td></tr>
     <tr><td>diverted, trial</td><td>1.88e-4</td><td>8.82e-4</td>
-      <td>2.21e-3</td><td>[2, 2]</td><td>6.81e-4 / 1e-4</td></tr>
+      <td>2.21e-3</td><td>3.88e-6</td><td>1.88e-4</td>
+      <td>6.81e-4 m / 1e-4</td></tr>
     <tr><td>limited, converged</td><td>8.40e-4</td><td>—</td>
-      <td>8.24e-5</td><td>[2]</td><td>2.00e-3 / 1e-4</td></tr>
+      <td>8.24e-5</td><td>8.40e-4</td><td>8.40e-4</td>
+      <td>2.00e-3 m / 1e-4</td></tr>
     <tr><td>limited, trial</td><td>4.12e-3</td><td>—</td>
-      <td>3.32e-5</td><td>[3]</td><td>2.00e-3 / 1e-4</td></tr>
+      <td>3.33e-5</td><td>8.40e-4</td><td>4.12e-3</td>
+      <td>2.00e-3 m / 1e-4</td></tr>
   </table>
+  <p>The booked field carries the miss, and the substitution shows it. Hand the
+  read the analytic field's moments and both trial states land inside every
+  axis budget: the diverted X-point at 3.88e-6 m against 6.81e-4 and the limited
+  axis at 8.40e-4 m against 2.00e-3. Hand it the trial booking and the diverted
+  X-point goes to 8.82e-4 m and the limited axis to 4.12e-3 m. The interpolant
+  is not the carrier on the diverted state - solved directly on the analytic
+  moments it sits 3.88e-6 m from the analytic axis - while on the limited state
+  it is already at 8.40e-4 m, inside the 2.00e-3 budget but the larger of the
+  two shares. What moves either state out of budget is the column of booked
+  moments, which is the booking's error, upstream of the read.</p>
+  <p>The solve is not the carrier either, and the iteration count settles that:
+  every point terminates with <code>status=0</code> on a position tolerance of
+  <code>1e-10</code> of the pitch, so where the solve stops is a stationary
+  point of the field it is handed, not a Newton that ran out. Widening the
+  iteration budget cannot move these numbers, and a converged Newton solve has
+  forgotten its seed.</p>
+  <p>At the converged state the same instrument lands at 3.88e-6 m on the
+  diverted axis and 8.40e-4 m on the limited one with the boundary flux inside
+  1.5e-5 and 8.3e-5 of the span, so the read reproduces the analytic state it is
+  handed. The gate runs as <code>tests/test_tracked_read_accuracy.py</code> over
+  the four states and reports <code>3 failed, 5 passed</code>: the limited trial
+  axis at 4.12e-3 m against 2.00e-3, the diverted trial X-point at 8.82e-4
+  against 6.81e-4, and the diverted trial boundary flux at 2.21e-3 of the span
+  against 1e-4. Both converged states pass every clause. Those are the recorded
+  defect reproduced against a reference the read does not decide, and they are
+  left failing rather than relaxed: the budgets are the section's, and a test
+  that stopped asserting them would report a read that meets them.</p>
+  <p>The gate is controlled. The declared mutation averages the Bell fit across
+  the three nodes of the triangle a point occupies instead of contracting each
+  node's own jets, applied to an exported copy of this revision and run on the
+  same device: it reports <code>6 failed, 2 passed</code> in 419 s, and the ids
+  it adds to the three above are both converged cases, which the head passes. A
+  mutation that no clause catches would leave this gate's failures
+  indistinguishable from a gate that is simply too strict.</p>
   <p>The shared store publishes the diverted certificate's bank only
   (<code>receipt.json</code> reads <code>"kind": "diverted"</code>), so binding
   the limited case to it fed that case another state's field and the read
   reported invalid with a boundary-flux error of 259 in span units. A case the
   store does not hold is built from its own rows; the numbers here are each
   certificate measured on the field it books.</p>
-  <p>The stage is fixed by the iteration count. Both diverted points terminate
-  after two Newton iterations and the limited trial point after three, each with
-  <code>status=0</code> on a position tolerance of <code>1e-10</code> of the
-  pitch, so the read's position is the stationary
-  point of its derivative source to far better than the budgets above; the
-  distance the table reports is that source's distance from the analytic flux,
-  not a solve that stopped short. Widening the iteration budget cannot move it,
-  and the seed cannot either — a converged Newton solve has forgotten its seed.
-  What carries these numbers is the column of booked moments at the trial
-  state, the sampled-field booking the fast route consumes, together with the
-  Bell interpolant that turns nodal jets into a field. Both are upstream of the
-  read.</p>
-  <p>At the converged state the same instrument lands at 3.88e-6 m on the axis
-  and 5.28e-6 m on the X-point with the boundary flux inside 1.5e-5 of the
-  span, so the read reproduces the analytic state it is handed. The trial state
-  is the one that misses, by 1.3 and 22 times the budgets, and no change inside
-  the read reaches it: the repair belongs to the trial booking.</p>
-  <p>The gate runs as <code>tests/test_tracked_read_accuracy.py</code> over the
-  four states and reports <code>3 failed, 5 passed</code>: the limited trial
-  axis at 4.12e-3 m against 2.00e-3, the diverted trial X-point at 8.82e-4
-  against 6.81e-4, and the diverted trial boundary flux at 2.21e-3 of the span
-  against 1e-4. Both converged states pass every clause. That is the recorded
-  defect reproduced on the H200, and it is left failing rather than relaxed:
-  the budgets are the section's, and a test that stopped asserting them would
-  report a read that meets them.</p>
-  <p>The gate is controlled. The declared mutation averages the Bell fit across
-  the three nodes of the triangle a point occupies instead of contracting each
-  node's own jets, applied to an exported copy of this revision and run on the
-  same device: it reports <code>6 failed, 2 passed</code> in 419 s, and the ids
-  it adds to the three above are both converged cases
-  (<code>limited-converged</code> axis and boundary, <code>diverted-converged</code>
-  axis, X-point and boundary), which the head passes. A mutation that no clause
-  catches would leave this gate's three failures indistinguishable from a gate
-  that is simply too strict.</p>
 
   <h3 id="tracked-read-h200-wall">The warm wall on the H200</h3>
   <p>One job on <code>98dci4-gpu-0003</code>, an <code>NVIDIA H200 NVL</code>,
@@ -90,13 +115,13 @@
     <tr><td>rebuild step</td><td>35.65 ms</td><td>805</td><td>24,025</td>
       <td>0</td></tr>
   </table>
-  <p>A second job on the same device repeated the table: the steady read came
-  back at 1.237 ms with 805 launches, so the steady figure is stable to about
-  1 %, while the solve-alone row moved from 0.634 ms to 0.817 ms between runs.
-  The bound is missed by either reading and the conclusion below does not turn
-  on which; the spread is stated so the solve figure is not read as tighter than
-  it is.</p>
-  <p>The steady read is 1.225 ms, six times the section's 0.2 ms bound. The
+  <p>Two further jobs on the same device repeated the table at the head: the
+  steady read came back at 1.237 ms and 1.268 ms with 805 launches, so the
+  steady figure is stable to about 2 %, while the solve-alone row moved between
+  0.594 ms and 0.817 ms across the three runs. The bound is missed by every
+  reading and the conclusion below does not turn on which; the spread is stated
+  so the solve figure is not read as tighter than it is.</p>
+  <p>The steady read is 1.225-1.268 ms across three head revisions, six times the section's 0.2 ms bound. The
   launches table says where they go: the stationary solve is 55 launches and
   0.634 ms, and the remaining 750 launches carry the other 0.591 ms, over
   21,000 of the 24,178 HLO instructions. The remainder is not the fit — a

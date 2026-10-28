@@ -195,13 +195,18 @@ def cache_for(operands):
 
 
 def timed_call(function, *operands, repeats):
-    """Warm per-call wall: compile and one warm call outside, minimum of repeats."""
-    out = function(*operands)
+    """Warm per-call wall: compile and one warm call outside, minimum of repeats.
+
+    The call is lowered and compiled once here, so the timed region is the
+    device execution of one step and not a trace or a compile.
+    """
+    program = jax.jit(function)
+    out = program(*operands)
     jax.block_until_ready(out)
     walls = []
     for _ in range(repeats):
         started = perf_counter()
-        result = function(*operands)
+        result = program(*operands)
         jax.block_until_ready(result)
         walls.append(perf_counter() - started)
     return min(walls), result

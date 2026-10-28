@@ -1,0 +1,58 @@
+<!-- fragment: prewarm-lane-programs -->
+<section id="prewarm-lane-programs">
+<h3>The pre-warm pin now compiles the lane's own target, and the guard counts entries a lookup can hit</h3>
+
+<p><strong>Three defects, and the base arm reproduces each of them.</strong>
+The guard reported <code>served_entries</code> as a recursive file count, so
+the XLA per-fusion autotune subtree beneath a served directory counted as
+cache: read at the revision measured here, the published pin's leaf holds
+<strong>18986 program-key entries and 50653 files</strong>, and the guard
+reported the second. The marker was printed from a pytest session hook with a
+bare <code>print</code>, so on a run whose last progress line was
+unterminated it landed at the tail of that line and a reader grepping for
+<code>^CACHE_GUARD_MARKER</code> found nothing on a run that passed. And the
+pre-warm compiled the certificate drivers, whose cache keys carry the jitted
+function's abstract shapes: the drivers and the lane target both log a row
+named <code>jit_solve</code>, yet the pin supplied none of the 1285 keys the
+lane requested, so a lane on a fresh directory compiled everything it needed.</p>
+
+<p><strong>The change.</strong> <code>program_key_entry_count</code> counts the
+top-level <code>&lt;program&gt;-&lt;key&gt;-cache</code> files a lookup can be
+served by, and <code>served_directory_state</code>,
+<code>verify_pinned_directory</code> and the pre-warm payload's own
+<code>PREWARM_SERVED_ENTRIES</code> all read that count; the payload no longer
+runs a bare <code>find | wc -l</code>. The marker is written with a leading
+newline so it begins a line whatever pytest has left unterminated. The
+pre-warm gains a row that runs <code>tests/test_equilibrium_forward_solve.py</code>,
+the lane's own target, in its own process like every other row.</p>
+
+<table>
+<caption>The gate, one process per arm, the new test file against the module
+each revision ships.</caption>
+<thead><tr><th scope="col">arm</th><th scope="col">tree</th><th scope="col">result</th><th scope="col">exit</th></tr></thead>
+<tbody>
+<tr><td>base <code>6ccf43de</code></td><td><code>git archive</code> of the base
+revision in the run's scratch tree</td>
+<td>4 failed — <code>test_program_key_entry_count_counts_only_executable_entries</code>,
+<code>test_program_key_entry_count_ignores_a_missing_directory</code>,
+<code>test_served_directory_reports_program_key_entries</code>,
+<code>test_marker_begins_a_line_after_unterminated_output</code></td><td>1</td></tr>
+<tr><td>head <code>1efb2faa</code></td><td>this worktree</td>
+<td>4 passed</td><td>0</td></tr>
+</tbody>
+</table>
+
+<p><strong>An anchored grep finds the marker on a passing run.</strong> The
+head gate is the passing run the guard is exercised on, and the test that
+proves the fix writes an unterminated progress line immediately before the
+receipt is emitted, then requires the marker to start a line of its own. At
+base that assertion fails and the marker-line list is empty; at head it is
+the single line</p>
+<pre>CACHE_GUARD_MARKER=wall-clock-reliable misses=0 budget=0</pre>
+
+<p><strong>The H200 arms.</strong> One allocation, three sequential arms, each
+in its own process: the lane target compiled into a fresh pin root, the same
+target run against that root with the miss budget at zero, and the same target
+run against a copy holding only the currently published pin's documented keys.
+The arm results are appended here once the allocation reports them.</p>
+</section>

@@ -5,6 +5,13 @@
   "call_sites": [],
   "completed_at": "2026-10-28T08:44:36.767Z",
   "dispatched_at": "2026-10-28T08:31:07Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "solve-wall-breakdown",
+      "recorded_at": "2026-10-28T09:02:45.727721+00:00"
+    }
+  },
   "findings": [
     {
       "detail": "The round's purpose was to correct the cold decomposition, and 08b7d5906 rewrote line 21 and line 33 while leaving line 9 untouched. The guard cannot catch it: fragment_seconds scans the whole file, so 29.0 s in the meta matches the 28.997 s XLA sum within the half-unit tolerance and the head run exits 0. This review re-analyzed nothing: it ran the guard's own command at HEAD and got exit 0, so the stale figure is green.",

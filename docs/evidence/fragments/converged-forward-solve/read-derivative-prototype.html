@@ -1,0 +1,20 @@
+<section id="read-derivative-prototype-landing">
+<h2 id="read-derivative-prototype-heading">Cheaper second derivatives for the topology read</h2>
+<p id="read-derivative-prototype-method">Three derivative paths were measured through the production topology read at the 550-cell certificate states. The <em>oracle</em> builds each nodal flux Hessian by differentiating the analytic booked-moment kernel a second time, which is the path the read uses today. The <em>fd</em> variant differences the analytic gradient centrally, so the kernel is traced once per point rather than differentiated twice. The <em>interp</em> variant contracts the cached coupling operand with the booked moments to get nodal flux, fits a quadratic over each hex cell's seven-node stencil in cell-scaled coordinates, and reads gradient and Hessian from the fit's coefficients, so no kernel autodiff runs in the read at all.</p>
+<p id="read-derivative-prototype-protocol">Every number below comes from one H200 job on the shared reservation, a fresh process per kind, with no compilation cache. Each variant's derivative program was compiled and called on a 64-node block, the block width at which production builds its operand; the read program was compiled once and called on each variant's assembled jet field. Instruction counts are the HLO operations JAX reports at lowering of each program. Prototype: <code>scripts/prototypes/read_derivatives/measure.py</code>, driver <code>scripts/prototypes/read_derivatives/run.sh</code>. Logs and JSON receipts are under <code>scripts/prototypes/read_derivatives/logs/</code>.</p>
+<h3 id="read-derivative-prototype-compile">Derivative program compile and per-call wall</h3>
+<table id="read-derivative-prototype-table">
+<thead><tr><th>program</th><th>cold compile [s]</th><th>HLO instructions</th><th>warm per call [s]</th><th>call size</th></tr></thead>
+<tbody>
+<tr id="read-derivative-prototype-oracle"><td>oracle (jacfwd of analytic gradient)</td><td>90.5</td><td>60529</td><td>0.394</td><td>64 nodes</td></tr>
+<tr id="read-derivative-prototype-fd"><td>fd (central difference of analytic gradient)</td><td>182.4</td><td>47978</td><td>0.362</td><td>64 nodes</td></tr>
+<tr id="read-derivative-prototype-interp"><td>interp (quadratic stencil fit, no kernel autodiff)</td><td>0.27</td><td>89</td><td>0.00041</td><td>all 1743 nodes</td></tr>
+<tr id="read-derivative-prototype-read"><td>read (production read over a supplied jet field)</td><td>13.4</td><td>23748</td><td>0.140</td><td>550 cells, 1743 nodes</td></tr>
+</tbody>
+</table>
+<p id="read-derivative-prototype-compile-reading">Two facts decide the compile question. The fit variant's derivative program compiles in 0.27 s with 89 instructions against the oracle's 90.5 s and 60529, so it removes essentially the whole compile cost of the doubly differentiated kernel. Central differencing does not help: it traces the kernel five times per point rather than differentiating it twice, and its 182.4 s is twice the oracle's.</p>
+<h3 id="read-derivative-prototype-errors">Read comparison against the oracle</h3>
+<!-- comparison-table -->
+<h3 id="read-derivative-prototype-recommendation">Recommendation and precision budget</h3>
+<!-- recommendation -->
+</section>

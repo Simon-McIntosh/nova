@@ -56,7 +56,24 @@
   "plan_slug": "diiid-forward-onboarding",
   "plan_version": 83,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "finding": "single_goal-1",
+      "reason": "both halves are assertions about one criterion's provenance and the node closes on one verdict, but the two measures are independent enough that a reviewer should read them separately; flagging so the author can split if desired rather than as a blocking defect.",
+      "when": "2026-10-28T05:07:30.123699+00:00"
+    }
+  ],
+  "responses": {
+    "single_goal-1": {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "reason": "both halves are assertions about one criterion's provenance and the node closes on one verdict, but the two measures are independent enough that a reviewer should read them separately; flagging so the author can split if desired rather than as a blocking defect.",
+      "when": "2026-10-28T05:07:30.123699+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-forward-onboarding/r-20261008T011414804262-plan-review-of-diiid-forward-onboarding.json",
   "review_run_id": "r-20261008T011414804262-plan-review-of-diiid-forward-onboarding",
   "reviewed_blob_sha": "2a483b2256a1a8ff57be4fb9270117dcaf56908b",
   "rubric": "content",

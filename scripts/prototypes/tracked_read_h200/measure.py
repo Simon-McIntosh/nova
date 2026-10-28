@@ -83,7 +83,29 @@ def header(args):
 
 
 def loaded_bank(case, store, digest):
-    """Bind the published bank to this case's geometry and mesh."""
+    """Bind a published bank to this case, or build one when none is published.
+
+    A published bank carries one certificate and one cell count, so a case the
+    store does not hold is assembled from its own operands rather than bound to
+    a bank of another state.
+    """
+    if digest is None:
+        operands = support_read.SupportOperands.from_rows(
+            case["geometry"],
+            case["matrix"],
+            case["exterior"],
+            case["nodes"],
+            case["sample_index"],
+            bucket=len(np.asarray(case["nodes"])),
+        )
+        jax.block_until_ready(operands.rows)
+        emit(
+            "BANK_BUILD",
+            kind=case["kind"],
+            nodes=int(np.asarray(operands.active_nodes)),
+            bucket=operands.bucket,
+        )
+        return operands
     mesh = fixed_points.build_mesh(
         np.asarray(case["nodes"]), np.asarray(case["sample_index"]), case["geometry"]
     )
@@ -242,7 +264,8 @@ def main():
     if args.arm == "head" and args.accuracy:
         limited = build_kind("limited", args.cells, policy_radius)
         for case in (limited, diverted):
-            case_operands = loaded_bank(case, args.store, args.digest)
+            case_digest = args.digest if case["kind"] == "diverted" else None
+            case_operands = loaded_bank(case, args.store, case_digest)
             case_cache = cache_for(case_operands)
             case_seeds = jnp.asarray(case["roots"])
             references = [newton_reference(case["analytic"], seed) for seed in case_seeds]

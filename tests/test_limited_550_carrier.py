@@ -22,6 +22,9 @@ from nova.equilibrium.separatrix_clip import AtomicCellMesh  # noqa: E402
 from scripts.analytic_oracle_fixtures import measure as oracle_fixture  # noqa: E402
 from tests.rotating_equilibrium_references import reference_cases  # noqa: E402
 
+#: The carrier is a cold build on a miss, which alone is minutes of wall time.
+pytestmark = [pytest.mark.slow, pytest.mark.timeout(900)]
+
 #: The hex generator requested for the coarse certificate rung.
 REQUESTED_CELLS = -500
 

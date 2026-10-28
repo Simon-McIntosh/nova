@@ -206,6 +206,33 @@ commit date of the last change to each file.</p>
 </tbody>
 </table>
 
+<h3 id="diverted-300-regression-live-gate">The live gate's own part</h3>
+
+<p>One older test depends on the served path, and the check broke it on purpose.
+<code>tests/test_certificate_gate_live.py</code> copies a banked part into a
+temporary root and asserts that the row drawn from it is <em>not</em> a fresh
+production row. That assertion holds only while the part is served, and the
+banked weak-rotation part matches none of the three facts this tree builds, so
+the copy was refused and the row fell through to a full solve — which outlasts
+the test's timeout instead of reaching the assertion.</p>
+
+<p>The test now restamps the copy to the declared current, the carrier digest and
+the row count this tree builds before installing it, so it again measures what a
+rendered row is worth rather than whether the part is refused. The refusal path
+keeps its own coverage in the four single-fact tests above.</p>
+
+<pre><code>tests/test_certificate_gate_live.py::test_rerendered_part_receipt_is_not_a_live_certificate_row
+1 passed in 11.61s
+EXIT=0</code></pre>
+
+<p>With the restamping removed and everything else unchanged, the same node
+falls through to the solver and does not finish:</p>
+
+<pre><code>+++ Timeout +++
+E  Failed: Timeout (&gt;150.0s) from pytest-timeout.
+1 failed in 173.40s
+EXIT=1</code></pre>
+
 <p>The residual plateau the reproduced rows do show is a frozen-partition
 Newton stopping with zero mask changes, which is a region decision, not a
 residual arithmetic. A fresh CPU row at <code>e0e4bca0</code> stops after one

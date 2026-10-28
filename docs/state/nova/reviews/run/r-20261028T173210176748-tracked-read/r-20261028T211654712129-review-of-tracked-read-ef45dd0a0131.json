@@ -1,0 +1,107 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Baseline and after arms over tests/test_support_read.py (13 passed, 2 skipped) and tests/test_fixed_points.py (19 passed) both exit 0 with no failure ids, so the delta is zero. A third arm, tests/test_connectivity_boundary.py, was killed at the harness's background ceiling (EXIT=137) in both arms at the same point (11 passes, one F marker, no summary line), so it emits no failure id and cannot contribute a delta; the reviewed manifest records that under retry_failures and failure_attribution.",
+  "call_sites": [
+    "none in nova/ (no production runtime caller)",
+    "scripts/prototypes/solve_options/local_jet_factor.py:61 calls support_read.read",
+    "scripts/prototypes/solve_options/global_structured_factor.py:109 calls support_read.read",
+    "scripts/prototypes/solve_options/live_iterations.py:177 calls support_read.read",
+    "scripts/prototypes/solve_options/support_dependency.py:49 calls support_read.read",
+    "scripts/prototypes/support/read_route_rows.py:152 calls support_read.read_and_book"
+  ],
+  "completed_at": "2026-10-28T21:31:19.534Z",
+  "dispatched_at": "2026-10-28T21:19:02Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/support_read.py",
+      "id": "f6f072cc840",
+      "line": "156",
+      "severity": "non-blocking",
+      "text": "non-blocking: stationary_cells re-implements the nearest-generator cell selection already owned by fixed_points._CachedField._location (nova/equilibrium/fixed_points.py:279) and by topology's wall_cell argmax (nova/equilibrium/topology.py:3325); it neither extends nor wraps either owner, so a future change to how a cell is chosen has to be made in three places or the tracked cell silently stops agreeing with the cell the fit is evaluated in."
+    },
+    {
+      "file": "tests/test_tracked_read.py",
+      "id": "fd7818a9bad",
+      "line": "146",
+      "severity": "non-blocking",
+      "text": "non-blocking: the accuracy assertion compares the read's position against `roots`, the same array the test passes into read() as its seeds and previous point, so a read that returned its initial guess unchanged would satisfy it; the recorded negative control (axis 0.3049 m off) is what currently rules that out, and the test itself does not."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T173210176748-tracked-read/logs/titan_1299233.log",
+      "id": "f61dbce1fef",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the stage log's first line reads 'tracked-read H200 measure' while the job ran on a titan P100, so a reader of the log cannot tell that no H200 wall exists and that section 2's 0.2 ms H200 bound is still unmet at the measured 1.531 ms; the manifest labels the device correctly, the log does not."
+    },
+    {
+      "file": "/tmp/reckon-crew-scratch/r-20261028T173210176748-tracked-read/baseline/baseline_tests_test_support_read.py.log",
+      "id": "f66009b50a3",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the baseline arm's '# revision:' header stamps 4398ff4e3, a commit that already contains the node's own change, for a tree (/tmp/reckon-crew-scratch/.../base) that carries no TrackingState, because run_arm.sh stamps the worktree's HEAD rather than the tree it runs; a reader comparing revisions alone would see no delta between the arms."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T173210176748-tracked-read/logs/negative_control_averaged_fit.log",
+      "id": "fbf532a1f32",
+      "line": "7",
+      "severity": "non-blocking",
+      "text": "non-blocking: the negative control's own provenance line names the unmutated worktree's fixed_points.py, not the mutant tree named on line 2 and named by the PYTHONPATH on line 4, so the log does not itself establish that the mutated module was the one imported; the mutant tree does carry the declared averaging change, so this reads as a defective provenance line rather than a false red, but the artefact cannot prove which."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T173210176748-tracked-read/manifest.md",
+      "id": "fa50061277b",
+      "line": "5",
+      "severity": "non-blocking",
+      "severity_typo_guard": "see text",
+      "text": "non-blocking: the manifest sets status: complete while its own blockers line (:38) states an unmet condition and outside_scope lists the four-state accuracy table, the H200 wall and the qualification-gate repair as not delivered, so the two fields disagree about whether the node's brief was met."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/tracked-read.html",
+      "id": "f70a07858f8",
+      "line": "29",
+      "severity": "non-blocking",
+      "text": "non-blocking: the fragment describes the no-rebuild probe as moving the X-point 'about 0.1 pitch' while tests/test_tracked_read.py:113-115 constructs the displacement as 0.2 * pitch, so the evidence document understates the shift its own test performs."
+    }
+  ],
+  "gate_sources": {
+    "after_suite": "/tmp/reckon-crew-scratch/r-20261028T173210176748-tracked-read/after/",
+    "baseline_suite": "/tmp/reckon-crew-scratch/r-20261028T173210176748-tracked-read/baseline/",
+    "focused_gate": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T173210176748-tracked-read/logs/focused_head.log",
+    "negative_control": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T173210176748-tracked-read/logs/negative_control_averaged_fit.log"
+  },
+  "item_verdicts": {
+    "call_sites": "No production (nova/) runtime caller of support_read.read exists at ef45dd0a; the only callers are the node's own test file and scripts/prototypes/solve_options, which still construct read() by its unchanged positional signature, so the added keyword-only tracking argument and the widened NamedTuple break none of them.",
+    "diff": "Read commit by commit from 6ccf43de9a42 to ef45dd0a0131; 72717729a adds TrackingState, stationary_cells and the rebuild gate to support_read.py, 4398ff4e3 and ef45dd0a0 add the evidence fragment, a868bfa54 through 298ed5220 add the prototype measurement and its two launchers, and nothing outside the declared scope plus the brief-directed support_read.py changed.",
+    "done_when": "The source brief's measure is a test in tests/test_tracked_read.py requiring exactly 1 reported rebuild when a field change moves the X-point out of its cell and 0 when it stays; tests/test_tracked_read.py:149-165 and :107-124 assert exactly that pair, and logs/focused_head.log ends '4 passed in 112.57s' with EXIT=0.",
+    "goal": "The node's goal is 'Make support_read.read the fast route's only read, tracking its stationary points cell-locally'; nova/equilibrium/support_read.py:175-252 delivers the tracking half (per-point cells, saddle ownership, a rebuild counter and a rebuild gate) but no production route consumes the read (no caller anywhere under nova/), and the fit it refines is fixed_points._CachedField rather than stencil_nulls._quadratic_fit_matrices as the brief's reuse map names.",
+    "manifest": "Read; it names seven commits, the 4-passed 112.57 s gate, a real negative control, both comparable suite arms, and five undelivered items under outside_scope/blockers rather than claiming them, though its status line and its blockers line contradict each other.",
+    "write_paths": "The declared paths are nova/equilibrium/fixed_points.py, nova/equilibrium/stencil_nulls.py, tests/test_tracked_read.py, scripts/prototypes/tracked_read and the two docs paths; the diff touches tests/test_tracked_read.py, scripts/prototypes/tracked_read and the fragment, plus nova/equilibrium/support_read.py, which is outside the fence but explicitly directed by the brief's 'Shared file' paragraph and recorded in the manifest's scope_note."
+  },
+  "justifications": {
+    "durability": "tests/test_tracked_read.py:107-124 fails if the rebuild becomes unconditional and :149-165 fails if tracking never fires, but :146's accuracy assertion compares against the same roots array the test passes in as seeds and previous, so it alone would not catch a read that returned its initial guess.",
+    "evidence": "logs/focused_head.log records '4 passed in 112.57s' EXIT=0 for the gate the done-when names, and logs/negative_control_averaged_fit.log records the accuracy test red at EXIT=1 with the axis 0.3049 m from the analytic extremum, so the gate is shown to fail on a degraded fit rather than only to pass.",
+    "fit": "The change follows the module's NamedTuple idiom and adds no plan or ticket name, but nova/equilibrium/support_read.py:216 reaches into the private topology._inside_cells across a module boundary and :156 recomputes a mesh-sized argmin on every call.",
+    "goal_fidelity": "nova/equilibrium/support_read.py:226-251 rebuilds the connected-domain decision only when a tracked cell or the saddle ownership changes, which is the goal's tracking clause, but no route under nova/ calls read(), so 'the fast route's only read' is unwired and the cell-local fit is fixed_points._CachedField (fixed_points.py:279) rather than the stencil_nulls owner the reuse map names.",
+    "reuse": "stationary_cells at nova/equilibrium/support_read.py:156 re-implements the nearest-generator cell selection that nova/equilibrium/fixed_points.py:279 (_CachedField._location) and nova/equilibrium/topology.py:3325 (wall_cell) already own, without extending or wrapping either.",
+    "scope_discipline": "git diff 6ccf43de9a42..ef45dd0a0131 touches only tests/test_tracked_read.py, scripts/prototypes/tracked_read, the evidence fragment and nova/equilibrium/support_read.py, the last of which the source brief's 'Shared file' paragraph instructs be edited and the manifest reports in scope_note."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The node's goal is 'Make support_read.read the fast route's only read, tracking its stationary points cell-locally'; nova/equilibrium/support_read.py:175-252 delivers the tracking half (per-point cells, saddle ownership, a rebuild counter and a rebuild gate) but no production route consumes the read (no caller anywhere under nova/), and the fit it refines is fixed_points._CachedField rather than stencil_nulls._quadratic_fit_matrices as the brief's reuse map names.\nVERDICT done_when: The source brief's measure is a test in tests/test_tracked_read.py requiring exactly 1 reported rebuild when a field change moves the X-point out of its cell and 0 when it stays; tests/test_tracked_read.py:149-165 and :107-124 assert exactly that pair, and logs/focused_head.log ends '4 passed in 112.57s' with EXIT=0.\nVERDICT write_paths: The declared paths are nova/equilibrium/fixed_points.py, nova/equilibrium/stencil_nulls.py, tests/test_tracked_read.py, scripts/prototypes/tracked_read and the two docs paths; the diff touches tests/test_tracked_read.py, scripts/prototypes/tracked_read and the fragment, plus nova/equilibrium/support_read.py, which is outside the fence but explicitly directed by the brief's 'Shared file' paragraph and recorded in the manifest's scope_note.\nVERDICT manifest: Read; it names seven commits, the 4-passed 112.57 s gate, a real negative control, both comparable suite arms, and five undelivered items under outside_scope/blockers rather than claiming them, though its status line and its blockers line contradict each other.\nVERDICT diff: Read commit by commit from 6ccf43de9a42 to ef45dd0a0131; 72717729a adds TrackingState, stationary_cells and the rebuild gate to support_read.py, 4398ff4e3 and ef45dd0a0 add the evidence fragment, a868bfa54 through 298ed5220 add the prototype measurement and its two launchers, and nothing outside the declared scope plus the brief-directed support_read.py changed.\nCALL_SITES: none in nova/ (no production runtime caller); examined scripts/prototypes/solve_options/local_jet_factor.py:61, scripts/prototypes/solve_options/global_structured_factor.py:109, scripts/prototypes/solve_options/live_iterations.py:177, scripts/prototypes/solve_options/support_dependency.py:49, scripts/prototypes/support/read_route_rows.py:152\nSCORE goal_fidelity: 12\nJUSTIFICATION goal_fidelity: nova/equilibrium/support_read.py:226-251 rebuilds the connected-domain decision only when a tracked cell or the saddle ownership changes, which is the goal's tracking clause, but no route under nova/ calls read(), so 'the fast route's only read' is unwired and the cell-local fit is fixed_points._CachedField (fixed_points.py:279) rather than the stencil_nulls owner the reuse map names.\nSCORE evidence: 16\nJUSTIFICATION evidence: logs/focused_head.log records '4 passed in 112.57s' EXIT=0 for the gate the done-when names, and logs/negative_control_averaged_fit.log records the accuracy test red at EXIT=1 with the axis 0.3049 m from the analytic extremum, so the gate is shown to fail on a degraded fit rather than only to pass.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: git diff 6ccf43de9a42..ef45dd0a0131 touches only tests/test_tracked_read.py, scripts/prototypes/tracked_read, the evidence fragment and nova/equilibrium/support_read.py, the last of which the source brief's 'Shared file' paragraph instructs be edited and the manifest reports in scope_note.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_tracked_read.py:107-124 fails if the rebuild becomes unconditional and :149-165 fails if tracking never fires, but :146's accuracy assertion compares against the same roots array the test passes in as seeds and previous, so it alone would not catch a read that returned its initial guess.\nSCORE fit: 15\nJUSTIFICATION fit: The change follows the module's NamedTuple idiom and adds no plan or ticket name, but nova/equilibrium/support_read.py:216 reaches into the private topology._inside_cells across a module boundary and :156 recomputes a mesh-sized argmin on every call.\nSCORE reuse: 5\nJUSTIFICATION reuse: stationary_cells at nova/equilibrium/support_read.py:156 re-implements the nearest-generator cell selection that nova/equilibrium/fixed_points.py:279 (_CachedField._location) and nova/equilibrium/topology.py:3325 (wall_cell) already own, without extending or wrapping either.\nFINDING nova/equilibrium/support_read.py:156 non-blocking: stationary_cells re-implements the nearest-generator cell selection already owned by fixed_points._CachedField._location (nova/equilibrium/fixed_points.py:279) and by topology's wall_cell argmax (nova/equilibrium/topology.py:3325); it neither extends nor wraps either owner, so a future change to how a cell is chosen has to be made in three places or the tracked cell silently stops agreeing with the cell the fit is evaluated in.\nFINDING tests/test_tracked_read.py:146 non-blocking: the accuracy assertion compares the read's position against `roots`, the same array the test passes into read() as its seeds and previous point, so a read that returned its initial guess unchanged would satisfy it; the recorded negative control (axis 0.3049 m off) is what currently rules that out, and the test itself does not.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T173210176748-tracked-read/logs/titan_1299233.log:1 non-blocking: the stage log's first line reads 'tracked-read H200 measure' while the job ran on a titan P100, so a reader of the log cannot tell that no H200 wall exists and that section 2's 0.2 ms H200 bound is still unmet at the measured 1.531 ms; the manifest labels the device correctly, the log does not.\nFINDING /tmp/reckon-crew-scratch/r-20261028T173210176748-tracked-read/baseline/baseline_tests_test_support_read.py.log:1 non-blocking: the baseline arm's '# revision:' header stamps 4398ff4e3, a commit that already contains the node's own change, for a tree (/tmp/reckon-crew-scratch/.../base) that carries no TrackingState, because run_arm.sh stamps the worktree's HEAD rather than the tree it runs; a reader comparing revisions alone would see no delta between the arms.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T173210176748-tracked-read/logs/negative_control_averaged_fit.log:7 non-blocking: the negative control's own provenance line names the unmutated worktree's fixed_points.py, not the mutant tree named on line 2 and named by the PYTHONPATH on line 4, so the log does not itself establish that the mutated module was the one imported; the mutant tree does carry the declared averaging change, so this reads as a defective provenance line rather than a false red, but the artefact cannot prove which.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T173210176748-tracked-read/manifest.md:5 non-blocking: the manifest sets status: complete while its own blockers line (:38) states an unmet condition and outside_scope lists the four-state accuracy table, the H200 wall and the qualification-gate repair as not delivered, so the two fields disagree about whether the node's brief was met.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/tracked-read.html:29 non-blocking: the fragment describes the no-rebuild probe as moving the X-point 'about 0.1 pitch' while tests/test_tracked_read.py:113-115 constructs the displacement as 0.2 * pitch, so the evidence document understates the shift its own test performs.\n",
+  "review_run_id": "r-20261028T211654712129-review-of-tracked-read-ef45dd0a0131",
+  "reviewed_base_sha": "6ccf43de9a42707444627079ac5da06b097d9c74",
+  "reviewed_head_sha": "ef45dd0a01315b87339e25cc5ab7ad6f074555b0",
+  "reviewed_run_id": "r-20261028T173210176748-tracked-read",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 15,
+    "goal_fidelity": 12,
+    "reuse": 5,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T22:33:00+00:00",
+  "total": 83
+}

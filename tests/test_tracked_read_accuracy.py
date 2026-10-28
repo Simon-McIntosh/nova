@@ -93,7 +93,12 @@ def analytic_boundary(case, references):
     analytic = case["analytic"]
     if len(references) > 1:
         return references[1], _psi(analytic, references[1])
-    wall = np.asarray(case["geometry"].wall.coordinate, dtype=float)
+    from tests.equilibrium.test_topology_read import _analytic_inputs
+
+    wall = _analytic_inputs(case["kind"])[2]
+    wall = np.asarray(getattr(wall, "coordinate", wall), dtype=float)
+    if wall.ndim == 1:
+        wall = wall.reshape(-1, 2)
     axis_flux = _psi(analytic, references[0])
     values = np.asarray(
         jax.vmap(lambda point: analytic.evaluate(point).value)(jnp.asarray(wall))

@@ -29,15 +29,16 @@ echo "# revision $(git -C "$WT" rev-parse HEAD) tree $D/tree"
   echo "# revision $(git -C "$WT" rev-parse HEAD) tree $D/tree"
   echo "# module $(cd "$D/tree" && PYTHONPATH="$D/tree" /home/ITER/mcintos/Code/nova/.venv/bin/python -c 'import nova.equilibrium.support_read as m; print(m.__file__)')"
   echo "# cwd $D/tree"
-  echo "# command: /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q -m slow tests/test_tracked_read_accuracy.py"
+  echo "# command: /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q -m slow ${SELECT:-} tests/test_tracked_read_accuracy.py"
   cd "$D/tree" || exit 1
   set +e
   PYTHONPATH="$D/tree" /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest \
-    -p no:cacheprovider -q -m slow tests/test_tracked_read_accuracy.py \
+    -p no:cacheprovider -q -m slow ${SELECT:-} tests/test_tracked_read_accuracy.py \
     --basetemp="$D/bt-head"
   echo "EXIT=$?"
-} > "$RUN/logs/accuracy_gate_head.log" 2>&1
-tail -8 "$RUN/logs/accuracy_gate_head.log"
+} > "${GATE_LOG:-$RUN/logs/accuracy_gate_head.log}" 2>&1
+tail -8 "${GATE_LOG:-$RUN/logs/accuracy_gate_head.log}"
+[ -n "${SKIP_MEASURE:-}" ] && exit 0
 {
   echo "# device $(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head -1)"
   echo "# revision $(git -C "$WT" rev-parse HEAD) tree $D/tree"

@@ -74,6 +74,18 @@
 <p>The batch of 16 fits with 100.7 GiB still free, so the 550-cell bucket is not device-memory bound; the next bucket doubles the padding and still leaves two orders of magnitude of room.</p>
 </section>
 
+<section id="operator-bank-suite"><h2>Suite arms</h2>
+<p>Both arms ran inside one allocation (sirius job 1299145): the base arm from a git archive of the base revision extracted into the job's own scratch tree, the head arm from the worktree, one fresh pytest process per file with a private basetemp and no timeout around any of them. Each arm completed all 69 files.</p>
+<table>
+<thead><tr><th>quantity</th><th>base (330abce22)</th><th>head (77961a75c)</th></tr></thead>
+<tbody>
+<tr><td>files run</td><td>69</td><td>69</td></tr>
+<tr><td>distinct failing test ids</td><td>55</td><td>51</td></tr>
+<tr><td>ids failing at head and not at base</td><td>&mdash;</td><td><strong>0</strong></td></tr>
+</tbody></table>
+<p>The head arm fails a strict subset of the base arm's ids; the ids base fails and head passes include three tests plus the new <code>tests/test_operator_bank_compile.py</code>, which does not exist at the base revision. <code>tests/test_forward_compile_identity.py</code> was killed mid-run by the step cgroup out-of-memory limit in <strong>both</strong> arms (exit 137) and is therefore incomplete in both, which is why slurm reports the step as OUT_OF_MEMORY after both arms had written all 69 results.</p>
+</section>
+
 <section id="operator-bank-logs"><h2>Logs</h2>
 <ul>
 <li><code>logs/operator_bank_h200.log</code> &mdash; the H200 measurement (build, load, reproduction, compilations, memory).</li>

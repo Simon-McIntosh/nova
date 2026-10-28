@@ -24,12 +24,15 @@ __all__ = [
     "cut_cell_moment_evaluation_bound",
     "cut_cell_bank_capacity",
     "saddle_wedge_current_moments",
+    "level_set_current_moment_tangent",
+    "fixed_polygon_current_moment_tangent",
 ]
 
 
 _GAUSS_NODE, _GAUSS_WEIGHT = np.polynomial.legendre.leggauss(8)
 _UNIT_NODE = 0.5 * (_GAUSS_NODE + 1.0)
 _UNIT_WEIGHT = 0.5 * _GAUSS_WEIGHT
+_LEVEL_NODE, _LEVEL_WEIGHT = np.polynomial.legendre.leggauss(32)
 _WHOLE_CELL_VERTEX_CAPACITY = 24
 _ROW_CROSSING_CAPACITY = 4
 _SPLINE_ARC_SEGMENTS = 128
@@ -112,6 +115,137 @@ class _QuadratureSupport(NamedTuple):
     support_vertices: jax.Array
     vertex_count: jax.Array
     centroids: jax.Array
+
+
+def level_set_current_moment_tangent(
+    vertices,
+    vertex_count,
+    centre,
+    pitch,
+    signed_coefficient,
+    signed_tangent,
+    selected,
+    profile,
+) -> ClippedCurrentMoments:
+    """Integrate the moving quadratic superlevel boundary in one cell.
+
+    The derivative of an integral over ``signed_coefficient >= 0`` is the
+    contour integral of density times ``signed_tangent / |grad signed|``.
+    Vertical slicing makes its line element divided by the gradient equal to
+    ``dx / |partial_y signed|``. A cosine transformed rule removes the square
+    root singularity at a vertical conic tangency. Polygon-edge endpoints do
+    not move with the level and contribute no boundary term.
+    """
+    from nova.equilibrium import topology
+
+    local = (vertices - centre) / pitch
+    fragments = topology.quadratic_cell_fragments(
+        local, vertex_count, signed_coefficient, selected.shape[0]
+    )
+    left, right = fragments.slice_breaks[:-1], fragments.slice_breaks[1:]
+    parameter = 0.5 * (1.0 - jnp.cos(0.5 * jnp.pi * (_LEVEL_NODE + 1.0)))
+    derivative = 0.25 * jnp.pi * jnp.sin(0.5 * jnp.pi * (_LEVEL_NODE + 1.0))
+    x = left[:, None] + (right - left)[:, None] * parameter[None]
+    weight = (right - left)[:, None] * derivative[None] * _LEVEL_WEIGHT[None]
+    bottom, top, present = topology._positive_vertical_intervals(
+        local, vertex_count, signed_coefficient, x
+    )
+    labels = fragments.slice_labels
+    chosen = (
+        present
+        & (labels[:, None, :] >= 0)
+        & selected[jnp.maximum(labels[:, None, :], 0)]
+    )
+
+    def endpoint(y):
+        value = (
+            signed_coefficient[0]
+            + signed_coefficient[1] * x[..., None]
+            + signed_coefficient[2] * y
+            + signed_coefficient[3] * x[..., None] ** 2
+            + signed_coefficient[4] * x[..., None] * y
+            + signed_coefficient[5] * y**2
+        )
+        tangent = (
+            signed_tangent[0]
+            + signed_tangent[1] * x[..., None]
+            + signed_tangent[2] * y
+            + signed_tangent[3] * x[..., None] ** 2
+            + signed_tangent[4] * x[..., None] * y
+            + signed_tangent[5] * y**2
+        )
+        vertical_gradient = (
+            signed_coefficient[2]
+            + signed_coefficient[4] * x[..., None]
+            + 2.0 * signed_coefficient[5] * y
+        )
+        root = jnp.abs(value) <= 1e-9 * jnp.maximum(
+            jnp.max(jnp.abs(signed_coefficient)), 1.0
+        )
+        safe_gradient = jnp.where(vertical_gradient != 0, vertical_gradient, 1.0)
+        area_tangent = jnp.where(
+            chosen & root,
+            pitch**2 * weight[..., None] * tangent / jnp.abs(safe_gradient),
+            0.0,
+        )
+        point = centre + pitch * jnp.stack(
+            (jnp.broadcast_to(x[..., None], y.shape), y), axis=-1
+        )
+        density = profile.current_density(point[..., 0], jnp.ones_like(y))
+        relative = point - centre
+        return (
+            jnp.sum(area_tangent * density),
+            jnp.sum(area_tangent * density * relative[..., 0]),
+            jnp.sum(area_tangent * density * relative[..., 1]),
+        )
+
+    lower = endpoint(bottom)
+    upper = endpoint(top)
+    return ClippedCurrentMoments(*(a + b for a, b in zip(lower, upper, strict=True)))
+
+
+def fixed_polygon_current_moment_tangent(
+    vertices,
+    vertex_count,
+    centre,
+    pitch,
+    normalized_coefficient,
+    normalized_tangent,
+    density_gradient,
+) -> ClippedCurrentMoments:
+    """Integrate the density change on a polygon whose vertices are fixed.
+
+    The caller supplies the exact derivative of current density with respect
+    to normalized flux. Both polynomial fields are evaluated at the same
+    quadrature points, so this is the local chain rule without differentiating
+    the clipping or source program.
+    """
+    points, weights = _quadrature_from_arrays(
+        vertices[None], vertex_count[None], centre[None], jnp.ones(1, bool), signed=True
+    )
+    local = (points[0] - centre) / pitch
+    radial, vertical = local[:, 0], local[:, 1]
+    basis = jnp.stack(
+        (
+            jnp.ones_like(radial),
+            radial,
+            vertical,
+            radial**2,
+            radial * vertical,
+            vertical**2,
+        ),
+        axis=-1,
+    )
+    normalized_flux = basis @ normalized_coefficient
+    flux_tangent = basis @ normalized_tangent
+    density_tangent = density_gradient(points[0, :, 0], normalized_flux) * flux_tangent
+    weighted = weights[0] * density_tangent
+    relative = points[0] - centre
+    return ClippedCurrentMoments(
+        jnp.sum(weighted),
+        jnp.sum(weighted * relative[:, 0]),
+        jnp.sum(weighted * relative[:, 1]),
+    )
 
 
 def cut_capacity_edge_bound() -> int:

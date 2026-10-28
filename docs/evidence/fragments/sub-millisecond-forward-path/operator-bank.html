@@ -55,7 +55,7 @@
 <tr><td>second geometry, same bucket</td><td>2048</td><td>1</td><td><strong>0</strong></td></tr>
 <tr><td>geometry in the next bucket</td><td>4096</td><td>2</td><td><strong>1</strong></td></tr>
 </tbody></table>
-<p>The negative control captures one operator as a closure constant in a scratch copy of <code>tests/test_operator_bank_compile.py</code>: a same-bucket geometry change then compiles again, and the two reuse tests fail (<code>assert 2 == 1</code>, <code>assert 3 == 2</code>) with <code>EXIT=1</code>.</p>
+<p>The negative control captures one operator as a closure constant. In the same H200 job it compiles <strong>once more</strong> on a same-bucket geometry change (<code>closure_same_bucket_new_compiles: 1</code>) where the traced bank compiles nothing (<code>traced_same_bucket_new_compiles: 0</code>). The same mutation carried into a scratch copy of <code>tests/test_operator_bank_compile.py</code> makes both reuse tests fail (<code>assert 2 == 1</code>, <code>assert 3 == 2</code>) with <code>EXIT=1</code>.</p>
 </section>
 
 <section id="operator-bank-memory"><h2>Device memory per shape bucket</h2>
@@ -64,11 +64,11 @@
 <thead><tr><th>quantity</th><th>bytes</th><th>GiB</th></tr></thead>
 <tbody>
 <tr><td>device limit</td><td>112,585,605,120</td><td>104.9</td></tr>
-<tr><td>peak in use after the bank and its programs</td><td>1,875,678,464</td><td>1.75</td></tr>
-<tr><td>headroom against the limit</td><td>110,709,926,656</td><td>103.1</td></tr>
+<tr><td>peak in use after the bank and its programs</td><td>1,875,706,624</td><td>1.75</td></tr>
+<tr><td>headroom against the limit</td><td>110,709,898,496</td><td>103.1</td></tr>
 <tr><td>one slice's operators (bucket 2048, 1741 active)</td><td>162,299,904</td><td>0.151</td></tr>
 <tr><td>batch of 16 slices</td><td>2,596,798,464</td><td>2.42</td></tr>
-<tr><td>headroom left after a batch of 16</td><td>108,113,128,192</td><td>100.7</td></tr>
+<tr><td>headroom left after a batch of 16</td><td>108,113,100,032</td><td>100.7</td></tr>
 </tbody></table>
 <p>The batch of 16 fits with 100.7 GiB still free, so the 550-cell bucket is not device-memory bound; the next bucket doubles the padding and still leaves two orders of magnitude of room.</p>
 </section>

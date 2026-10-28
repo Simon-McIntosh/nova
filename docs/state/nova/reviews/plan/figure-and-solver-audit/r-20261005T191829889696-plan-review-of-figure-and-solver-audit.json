@@ -40,7 +40,24 @@
   "plan_slug": "figure-and-solver-audit",
   "plan_version": 105,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "finding": "duplicate_owner-2",
+      "reason": "the plan already carries the open node f-fsa-one-project-relative-helper (r-20261005T190533725591) naming exactly this owner, so a finding adds nothing the plan does not already act on.",
+      "when": "2026-10-28T05:05:21.856825+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-2": {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "reason": "the plan already carries the open node f-fsa-one-project-relative-helper (r-20261005T190533725591) naming exactly this owner, so a finding adds nothing the plan does not already act on.",
+      "when": "2026-10-28T05:05:21.856825+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/figure-and-solver-audit/r-20261005T191829889696-plan-review-of-figure-and-solver-audit.json",
   "review_run_id": "r-20261005T191829889696-plan-review-of-figure-and-solver-audit",
   "reviewed_blob_sha": "49a0f803b308122afd3bf017b157c3056166c78e",
   "rubric": "design",

@@ -6,12 +6,12 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64G
 #SBATCH --time=00:25:00
-#SBATCH --output=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T215104424875-tracked-read-h200/logs/accuracy_%j.log
+
 # The accuracy gate at head, then the declared mutation, on the device the
 # section's budgets are stated for. Each arm writes its own log with an EXIT line.
 set -u
 WT=${WT:?WT must name the worktree the gate runs against}
-RUN=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T215104424875-tracked-read-h200
+RUN=${RUN:?RUN must name the run directory}
 export TMPDIR=/tmp
 export JAX_PLATFORMS=cuda
 D=$(mktemp -d /tmp/tracked-accuracy-XXXX)

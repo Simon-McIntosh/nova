@@ -17,6 +17,9 @@ from nova.jax.config import configure_dtypes
 
 configure_dtypes()
 
+import inspect
+import json
+
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -47,6 +50,59 @@ def _built(kind):
     return case, operands, cache_for(operands)
 
 
+def _psi(analytic, point):
+    return float(np.asarray(analytic.evaluate(jnp.asarray(point)).value))
+
+
+def _wall_extremum(analytic, wall, index, maximise, refinements=120):
+    """Refine a coarse wall vertex onto the psi extremum along its segments."""
+    count = len(wall)
+    best = (float("inf"), None) if not maximise else (float("-inf"), None)
+    for step in (-1, 1):
+        start = wall[index]
+        end = wall[(index + step) % count]
+        low, high = 0.0, 1.0
+        for _ in range(refinements):
+            first = low + (high - low) / 3.0
+            second = high - (high - low) / 3.0
+            left = _psi(analytic, start + first * (end - start))
+            right = _psi(analytic, start + second * (end - start))
+            if (left < right) == maximise:
+                low = first
+            else:
+                high = second
+        fraction = 0.5 * (low + high)
+        point = start + fraction * (end - start)
+        value = _psi(analytic, point)
+        better = value > best[0] if maximise else value < best[0]
+        if best[1] is None or better:
+            best = (value, point)
+    return best[1], best[0]
+
+
+def analytic_boundary(case, references):
+    """The boundary point and its flux, from the analytic field alone.
+
+    A diverted state's boundary is the saddle of a direct Newton solve on the
+    analytic flux. A limited state's is the wall point where the flux is
+    extremal away from the axis: the wall polygon is swept for the coarse
+    extremum farthest from the axis flux and refined by a ternary search on the
+    analytic flux along the two segments meeting that vertex. Neither route
+    consults a read.
+    """
+    analytic = case["analytic"]
+    if len(references) > 1:
+        return references[1], _psi(analytic, references[1])
+    wall = np.asarray(case["geometry"].wall.coordinate, dtype=float)
+    axis_flux = _psi(analytic, references[0])
+    values = np.asarray(
+        jax.vmap(lambda point: analytic.evaluate(point).value)(jnp.asarray(wall))
+    )
+    coarse = np.argmax(np.abs(values - axis_flux))
+    maximise = bool(values[coarse] > axis_flux)
+    return _wall_extremum(analytic, wall, int(coarse), maximise)
+
+
 def field_reference(operands, moments, seed, iterations=60):
     """Newton on the read's own derivative source, from a stated seed."""
     field = fixed_points._CachedField(
@@ -59,9 +115,7 @@ def field_reference(operands, moments, seed, iterations=60):
     position = np.asarray(seed, dtype=float)
     for _ in range(iterations):
         jet = field.evaluate(jnp.asarray(position))
-        step = np.linalg.solve(
-            np.asarray(jet.hessian), np.asarray(jet.gradient)
-        )
+        step = np.linalg.solve(np.asarray(jet.hessian), np.asarray(jet.gradient))
         position = position - step
         if np.linalg.norm(step) < 1e-14:
             break
@@ -84,9 +138,11 @@ def measured(request):
             )
         )
     )
-    span = abs(float(case["analytic_read"].boundary_flux - case["analytic_read"].axis_flux))
-    states = {}
-    for name, moments in case["states"].items():
+    boundary_point, boundary_flux_reference = analytic_boundary(case, references)
+    axis_flux = _psi(case["analytic"], references[0])
+    span = abs(boundary_flux_reference - axis_flux)
+
+    def run(moments):
         reading = support_read.read(
             operands,
             cache,
@@ -98,21 +154,109 @@ def measured(request):
             iterations=24,
         )
         jax.block_until_ready(reading)
-        states[name] = dict(
+        return dict(
             position=np.asarray(reading.stationary.position),
             valid=bool(reading.valid),
             qualified=bool(reading.reading.qualified),
             status=np.asarray(reading.stationary.status).tolist(),
             boundary_flux=float(reading.reading.boundary_flux),
-            boundary_reference=float(case["analytic_read"].boundary_flux),
         )
+
+    states = {name: run(moments) for name, moments in case["states"].items()}
+    for name, row in states.items():
+        row["moments"] = case["states"][name]
+    # The same read on the moments booked from the analytic field, so a failing
+    # booked-field row can be shown beside the row the analytic field gives.
+    substituted = run(case["states"]["converged"])
+    budget = AXIS_BUDGET * minor_radius
+    for name, row in states.items():
+        row["boundary_reference"] = boundary_flux_reference
+        source = field_reference(operands, case["states"][name], case["roots"][0])
+        print(
+            "ACCURACY_ROW",
+            json.dumps(
+                dict(
+                    kind=kind,
+                    state=name,
+                    axis_error_m=float(
+                        np.linalg.norm(row["position"][0] - references[0])
+                    ),
+                    saddle_error_m=(
+                        float(np.linalg.norm(row["position"][1] - references[1]))
+                        if len(references) > 1
+                        else None
+                    ),
+                    axis_budget_m=budget,
+                    boundary_error=abs(row["boundary_flux"] - boundary_flux_reference)
+                    / span,
+                    analytic_field_axis_error_m=float(
+                        np.linalg.norm(substituted["position"][0] - references[0])
+                    ),
+                    analytic_field_boundary_error=abs(
+                        substituted["boundary_flux"] - boundary_flux_reference
+                    )
+                    / span,
+                    interpolant_axis_error_m=float(
+                        np.linalg.norm(source - references[0])
+                    ),
+                    iterations=row["status"],
+                )
+            ),
+            flush=True,
+        )
+    print(
+        "BOUNDARY_REFERENCE",
+        json.dumps(
+            dict(
+                kind=kind,
+                point=np.asarray(boundary_point).tolist(),
+                flux=boundary_flux_reference,
+                axis_flux=axis_flux,
+                span=span,
+                minor_radius=minor_radius,
+            )
+        ),
+        flush=True,
+    )
     return dict(
         kind=kind,
+        mesh=operands.mesh,
+        operands=operands,
         references=references,
         minor_radius=minor_radius,
         span=span,
         states=states,
     )
+
+
+@pytest.mark.slow
+def test_the_cell_selection_has_one_owner():
+    """A second nearest-generator rule would drift from the field's own."""
+    assert not hasattr(support_read, "stationary_cells")
+    assert "nearest_cell" in inspect.getsource(support_read.read)
+    assert "nearest_cell" in inspect.getsource(fixed_points._CachedField._location)
+
+
+@pytest.mark.slow
+def test_the_read_and_the_field_choose_the_same_cell(measured):
+    """A point equidistant from two generators is where two owners diverge."""
+    mesh = measured["mesh"]
+    generators = np.asarray(mesh.generators, dtype=float)
+    field = fixed_points._CachedField(
+        mesh,
+        jnp.arange(len(generators), dtype=jnp.int32),
+        measured["operands"].rows,
+        jnp.stack(tuple(measured["states"]["converged"]["moments"]), axis=-1),
+        measured["operands"].exterior,
+    )
+    distance = np.linalg.norm(generators[:, None, :] - generators[None, :, :], axis=-1)
+    first, second = np.unravel_index(
+        np.argmin(np.where(distance > 0.0, distance, np.inf)), distance.shape
+    )
+    edge = jnp.asarray(0.5 * (generators[first] + generators[second]))
+    chosen = int(np.asarray(fixed_points.nearest_cell(mesh, edge)))
+    located = int(np.asarray(field._location(edge)))
+    assert chosen == located, (chosen, located, first, second)
 
 
 @pytest.mark.slow

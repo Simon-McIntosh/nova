@@ -57,7 +57,13 @@ from scripts.prototypes.tracked_read.measure import (  # noqa: E402
 def header(args):
     try:
         revision = subprocess.check_output(
-            ["git", "-C", str(Path(__file__).resolve().parents[3]), "rev-parse", "HEAD"],
+            [
+                "git",
+                "-C",
+                str(Path(__file__).resolve().parents[3]),
+                "rev-parse",
+                "HEAD",
+            ],
             text=True,
             stderr=subprocess.DEVNULL,
         ).strip()
@@ -128,7 +134,10 @@ def main():
     parser.add_argument("--cells", type=int, default=550)
     parser.add_argument("--repeats", type=int, default=5)
     parser.add_argument("--store", type=Path, required=True)
-    parser.add_argument("--digest", default="sha256:6ebe02e02ae9ed8646077b3116596fa08ff0f18cb7f17d2566f91f779b4c17be")
+    parser.add_argument(
+        "--digest",
+        default="sha256:6ebe02e02ae9ed8646077b3116596fa08ff0f18cb7f17d2566f91f779b4c17be",
+    )
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--base-tree", type=Path, default=None)
     parser.add_argument("--accuracy", action="store_true")
@@ -268,7 +277,9 @@ def main():
             case_operands = loaded_bank(case, args.store, case_digest)
             case_cache = cache_for(case_operands)
             case_seeds = jnp.asarray(case["roots"])
-            references = [newton_reference(case["analytic"], seed) for seed in case_seeds]
+            references = [
+                newton_reference(case["analytic"], seed) for seed in case_seeds
+            ]
             minor_radius = float(
                 np.max(
                     np.linalg.norm(
@@ -278,8 +289,14 @@ def main():
                     )
                 )
             )
-            analytic_read = case["analytic_read"]
-            span = abs(float(analytic_read.boundary_flux - analytic_read.axis_flux))
+            from tests.test_tracked_read_accuracy import _psi, analytic_boundary
+
+            boundary_flux_reference = analytic_boundary(
+                case, [reference[0] for reference in references]
+            )[1]
+            span = abs(
+                boundary_flux_reference - _psi(case["analytic"], references[0][0])
+            )
             for state_name, state_moments in case["states"].items():
                 reading = support_read.read(
                     case_operands,
@@ -300,7 +317,7 @@ def main():
                     else float(np.linalg.norm(position[1] - references[1][0]))
                 )
                 boundary = float(reading.reading.boundary_flux)
-                boundary_error = abs(boundary - float(analytic_read.boundary_flux)) / span
+                boundary_error = abs(boundary - boundary_flux_reference) / span
                 emit(
                     "ACCURACY_ROW",
                     kind=case["kind"],
@@ -325,7 +342,9 @@ def main():
     if args.arm == "head" and args.base_tree is not None:
         base_log = args.output.with_suffix(".base.log")
         environment = dict(
-            os.environ, PYTHONPATH=str(args.base_tree), JAX_PLATFORMS=os.environ.get("JAX_PLATFORMS", "cuda")
+            os.environ,
+            PYTHONPATH=str(args.base_tree),
+            JAX_PLATFORMS=os.environ.get("JAX_PLATFORMS", "cuda"),
         )
         command = [
             "/home/ITER/mcintos/Code/nova/.venv/bin/python",
@@ -344,7 +363,11 @@ def main():
             str(args.output.with_suffix(".base.json")),
         ]
         base = subprocess.run(
-            command, cwd=str(args.base_tree), env=environment, capture_output=True, text=True
+            command,
+            cwd=str(args.base_tree),
+            env=environment,
+            capture_output=True,
+            text=True,
         )
         base_log.write_text(base.stdout + base.stderr)
         emit("BASE_ARM", exit_status=base.returncode, log=str(base_log))

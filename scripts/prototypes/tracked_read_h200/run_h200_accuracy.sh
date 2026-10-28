@@ -6,13 +6,13 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64G
 #SBATCH --time=00:25:00
-#SBATCH --output=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T215104424875-tracked-read-h200/logs/figures_%j.log
+
 # The two trial-state panels and the four-state accuracy, on the H200. A bank is
 # published for the diverted certificate only, so the limited case is measured
 # on operands assembled from its own rows rather than bound to another state's.
 set -u
 WT=${WT:?WT must name the worktree the job measures}
-RUN=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T215104424875-tracked-read-h200
+RUN=${RUN:?RUN must name the run directory}
 STORE=/work/projects/imas_gpu/sophelio/nova-assembled-step-bank
 export TMPDIR=/tmp
 export JAX_PLATFORMS=cuda

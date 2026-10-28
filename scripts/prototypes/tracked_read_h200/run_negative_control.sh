@@ -6,12 +6,12 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64G
 #SBATCH --time=00:25:00
-#SBATCH --output=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T215104424875-tracked-read-h200/logs/mutant_%j.log
+
 # The declared negative control, on the device the gate itself runs on: a case
 # that gained the mutation in its fit must fail a test id the head arm passes.
 set -u
 WT=${WT:?WT must name the worktree the control runs against}
-RUN=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T215104424875-tracked-read-h200
+RUN=${RUN:?RUN must name the run directory}
 export TMPDIR=/tmp
 export JAX_PLATFORMS=cuda
 echo "# device $(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head -1)"

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Edge consistency: the measure, its gates and the §6 reference</title></head>
+<body>
+<main>
+<h2 id="edge-consistency-measure-title">The edge-consistency measure, its gates, and the reference decision</h2>
+
+<p id="edge-consistency-measure-summary">The measure of section 5 is <code>nova/imas/edge_consistency.py</code>, which reports three forms on one structured grid: the parity chain's own <code>RMS(j_phi_profile - j_phi_grid) / max|j_phi_grid|</code> over the whole scored slice, and two band forms inside <code>1 - EDGE_BAND_WIDTH &lt;= psi_norm &lt;= 1</code> &mdash; the absolute residual in A/m<sup>2</sup> and the residual relative to the local profile current. The band forms never borrow the slice-wide denominator. <code>nova/imas/mast_parity_chain.py</code> reads its grid current through that same owner operator, so the parity chain and this measure are one arithmetic. The edge threshold is <code>EDGE_BAND_RELATIVE_THRESHOLD = 1.0e-3</code>, fixed on the analytic state before any IDS row was read.</p>
+
+<h3 id="edge-consistency-measure-gate">The gate, run at this node's base</h3>
+<p id="edge-consistency-measure-gate-result">One fresh process, <code>tests/test_edge_consistency.py</code>: <strong>8 passed</strong>, exit 0, 22.6 s. The four load-bearing tests are the ones section 5's done-when names:</p>
+<ul id="edge-consistency-measure-gate-tests">
+<li>the analytic <code>CerfonFreidbergSingleNull</code> state sits under the fixed threshold, its only error the stencil's own;</li>
+<li>the band residual falls at the stencil's second order under refinement, which is the stated order rather than an assertion of zero;</li>
+<li>a whole-plasma 1 % FF&rsquo; perturbation is detected, and</li>
+<li>the edge-band negative control &mdash; FF&rsquo; perturbed only in the band, the flux map byte-identical and the band mask identical cell for cell &mdash; is reported inconsistent beyond the threshold.</li>
+</ul>
+<p id="edge-consistency-measure-receipt">The receipt is the log's own last line, <code>EXIT=0</code>, with the run's <code>nova.__file__</code> resolving inside this worktree and every <code>uv</code> invocation absent: the shared interpreter was run directly.</p>
+
+<h3 id="edge-consistency-measure-table">The conforming sources, and one receipt re-read</h3>
+<p id="edge-consistency-measure-reproduced">The table in <a href="/nova/research/dd-cocos-census">the census</a> reports, over 24 slices above 1 MA per source, a band-relative median of <strong>1.7326</strong> (DINA 105052/1), 1.7131 (DINA 105069/3) and <strong>7.9296</strong> (CORSICA 130506/6). Those numbers are from the earlier landing, so this node re-read one of them independently: slice 75 of DINA 105052/1, measured from the IDS through <code>PlasmaSource.from_imas</code> at its written DD, returns <code>band_relative</code> <strong>1.98761</strong> against the recorded <strong>1.98761</strong>. The recorded rows reproduce; the table is a receipt, not a restatement.</p>
+
+<p id="edge-consistency-measure-falsified">A second column in the recorded rows, labelled as the flux-function-sense re-measure, does <strong>not</strong> reproduce and is therefore not used as evidence here. Negating the stored FF&rsquo; alone gives 22.09 on the same slice and negating both stored flux functions gives 22.34, against the recorded 0.105678. The positive control &mdash; the as-read column reproducing to every printed digit &mdash; rules out a broken route, so the column&rsquo;s provenance is unexplained. It stays out of the argument and out of the census table.</p>
+
+<h3 id="edge-consistency-measure-reference">The <code>iter-passive-plasma-circuit</code> section 6 reference: revised</h3>
+<p id="edge-consistency-measure-revised">The reference choice is <strong>revised, not confirmed</strong>, and the threshold it is judged against is the stated 1.0e-3. Two facts carry the decision.</p>
+<p id="edge-consistency-measure-sign">First, the repository&rsquo;s flux-function sense is still the one <code>nova/equilibrium/convention.py</code> books at this base, and the stored profiles read anti-parallel to the map under it: the profile current integrates to a median of &minus;1.13, &minus;1.09 and &minus;1.10 times each slice&rsquo;s own <code>Ip</code> while the map current integrates to 0.97&ndash;1.00 of it. So the reported inconsistency is dominated by a known sign defect in the owner rather than by the sources. That bounds what the numbers can say about the sources: a pure sign disagreement with equal magnitudes puts the relative residual near 2, not above it.</p>
+<p id="edge-consistency-measure-ranking">Second, that bound separates the sources anyway. The two DINA pulses sit at <strong>1.73</strong> and <strong>1.71</strong>, the sign floor, and this measure does not distinguish them (1.2 %). CORSICA 130506/6 sits at <strong>7.93</strong>, four and a half times the floor, which a sign flip cannot produce: its flux functions disagree with its own map in magnitude and shape as well. Its relative form is in any case unusable on the slices whose local profile current crosses zero, where it reaches 9.79e15.</p>
+<p id="edge-consistency-measure-decision">The decision this node records: <strong>CORSICA 130506/6 is not confirmed as the section 6 reference and should not be chosen on this measure</strong>; between the two DINA pulses edge consistency does not discriminate, so no source is confirmed on it and the choice must rest on grounds this measure does not cover. The ranking is provisional in one specific sense only: it is measured through the current flux-function sense, and the leader&rsquo;s ruling to make the owner COCOS 17 is not landed at this base. When it lands, the table re-measures against the same fixed threshold and the DINA-versus-CORSICA gap above is the number to watch.</p>
+
+<h3 id="edge-consistency-measure-not-done">What this node did not do</h3>
+<p id="edge-consistency-measure-scope">The measure itself, its threshold and its IDS route were landed by the earlier node of this scope and are unchanged here: this node verifies them, re-reads one row, and settles the reference question the section&rsquo;s third done-when clause asks for. The parity chain&rsquo;s residual is not restructured; it already reads its grid current through the one owner operator.</p>
+</main>
+</body>
+</html>

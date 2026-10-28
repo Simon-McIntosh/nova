@@ -1,0 +1,52 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-28T15:14:41.616Z",
+  "dispatched_at": "2026-10-28T15:06:54Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:87",
+      "id": "reasoning-1",
+      "reason": "a worker following the plan would keep operands resident (already true), watch the 29.4 ms survive, and never learn that removing it requires the read to return a device-resident result the step consumes on device, which the section does not specify.",
+      "text": "\u00a72 says \"The memory copies are removed only if the read's operands stay resident on the device: the \u00a71 bank holds them, and the steady-state read copies no operand between host and device\", but the `solve-wall-breakdown` trace it cites states the opposite: \"Not host transfers of the operands. The operands are device-resident traced arguments \u2026 so no per-call transfer appears in the step\", and attributes the 29.4 ms to \"the read returning host-side data inside the measured call\" \u2014 the copies are the read's *output*, not its operands, so the stated mechanism removes nothing and done-when (2)'s \"copy bytes are zero\" cannot be reached by it",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:98",
+      "id": "reasoning-2",
+      "reason": "the sentence tells a node the Krylov tolerance is provably harmless, so a 1e-6 mismatch will be hunted as a Jacobian defect instead of the solver tolerance, or the matrix-free option will be chosen on a guarantee that does not hold.",
+      "text": "\u00a73 says \"A Krylov solve is converged to 1e-10 relative linear residual, tighter than the 1e-6 agreements below, so its tolerance cannot decide them\", but a relative residual of 1e-10 bounds the relative error in the update only by \u03ba(A)\u00b71e-10, and no condition-number bound is stated for the 1,650-row Newton matrix, so a Krylov solve at that tolerance can still miss the 1e-6 agreement in done-when (1)",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "5b12aec592d577348f3649cc4540cda7e3b9deca",
+  "plan_fingerprint": "575a9dfe75e161a475c66cf65565ce2ee0fb1f405b0b7b8ee785f6e818e5f472",
+  "plan_slug": "sub-millisecond-forward-path",
+  "plan_version": 7,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261028T150555923882-plan-review-of-sub-millisecond-forward-path",
+  "reviewed_blob_sha": "4bb6753234c8eec085372502c735b1008e15cd4b",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `support_read.read` :78, its `valid` flag :69/:113, `read_and_book` :130, `fixed_points.solve` :646, `stencil_nulls._quadratic_fit_matrices` :412 all resolve in the tree; the cited `read-derivative-prototype` and `solve-wall-breakdown` fragments exist and carry the quoted rows.",
+    "done_when": "pass \u2014 s2's gate (:90\u2013:92) and s3's gate (:101\u2013:103) are measurable, and each unit declares a mechanism-mutating negative control (:94 averages the fit across cells; :105 drops the booking-derivative term) that makes a named clause fail.",
+    "evidence_paths": "pass \u2014 neither unit names a scratchpad or node-local path; both gate against the certificate states whose receipts already sit under `docs/evidence/fragments/converged-forward-solve/`.",
+    "naming": "pass \u2014 no plan labels, ticket numbers or version tags reach a symbol or comment; \u00a7-numbers are plan structure, not code names.",
+    "reasoning": "findings \u2014 s2:87 misattributes the 29.4 ms of device copies to operands that the cited trace already records as device-resident, and s3:98 infers a 1e-6 update agreement from a 1e-10 linear residual with no condition-number bound.",
+    "single_goal": "pass \u2014 s2 delivers one fast tracking read, s3 one Newton step with no per-step autodiff.",
+    "wiring": "pass \u2014 s2 and s3 each declare `depends-on` s1, s4 declares both s2 and s3, and every target resolves; \u00a74's \"seventh `SolveRoute` value\" matches the six values in `nova/equilibrium/solve_request.py:31-38` (host, host_krylov, picard, anderson, newton_krylov, reduced_newton), and `_ACCELERATED`/`_REDUCED` exist at `nova/equilibrium/forward.py:196,200`."
+  },
+  "section_digests": {
+    "_document": "6463ca0c5cddeb270554e523f56f43bc296e279984295861655ec23c245eeae7",
+    "s0": "2aeef3dc567f2412561cbf7802dd51784609c34077acd0066ebff3932abd34ac",
+    "s1": "80e332b5e9b6fc57780809e818fb2d50967b00d2aab208be5d16b6b6d9ecbcb3",
+    "s2": "7c8a0e2834fa0df7f8d8abe8b841fb487c3a6de76e4e3c8a61150fd585f8f1cb",
+    "s3": "8d9d7719ef804a16cec746b6e3ec32c08334ccf7dbe2461ab613cb55ec034005",
+    "s4": "c65f25ea989a99e6f330defe1f8ebc57de5dccaa51b9e793958120cd0dc31e7e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T15:17:22.867719+00:00"
+}

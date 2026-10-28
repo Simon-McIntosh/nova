@@ -81,6 +81,24 @@ figures, and differs from the banked receipt by 24659.65 A. A row whose declared
 current is 37174.65 A cannot produce a receipt stamped 61834.31 A, so the
 5.63e-15 residual was not measured on any of these three trees.</p>
 
+<h3 id="diverted-300-regression-gpu-arm">The same revision on a GPU</h3>
+
+<p>The row itself was then run at <code>e39ffd109</code> on a GPU, in a fresh
+process from that revision's own tree (titan, <code>98dci4-gpu-0002</code>, job
+<code>1299226</code>, <code>CudaDevice(id=0)</code>). It does not converge
+there either: terminal residual <code>0.3008686198923309</code>,
+<code>converged</code> false, <code>unqualified</code>, three active-set
+iterations and sixteen accepted Newton promotions.</p>
+
+<p>The trace is the more informative half. Twenty map evaluations measured a
+residual and all twenty report the identical value
+<code>0.3008686198923305</code> &mdash; sixteen accepted promotions moved the
+state without moving the measured residual by one bit. A residual that is
+invariant under the promotions the solver accepts is not a step-length problem;
+it is the frozen partition the promotions are solved against. That is a region
+decision, the property the tracked-read and moment-field-hessian nodes carry,
+not a residual arithmetic this node could repair inside its write paths.</p>
+
 <h3 id="diverted-300-regression-guard">The guard, and it firing</h3>
 
 <p><code>tests/test_diverted_300_convergence.py</code> compares the current the

@@ -8,6 +8,13 @@
   "call_sites": [],
   "completed_at": "2026-10-28T21:38:44.815Z",
   "dispatched_at": "2026-10-28T21:30:54Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "non-blocking, noted at landing",
+      "recorded_at": "2026-10-28T21:53:17.319259+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/converged-forward-solve/limited-550-carrier.html",

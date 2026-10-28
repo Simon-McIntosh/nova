@@ -22,7 +22,7 @@
 <tr><td>Diverted trial, ramp direction</td><td>1e-7</td><td>at least 1e-5 along this direction</td><td>1.50e-6; misses the bound</td></tr>
 <tr><td>Converged state</td><td>not available</td><td>not available</td><td>not measured</td></tr>
 </tbody></table>
-<p>The first boundary calculation used the smooth conic and plateaued at 1.74e-4 relative against the booking's sampled polygon. Differentiating the polygon's implicit conic vertices and integrating their normal velocity on its own edges removed that fixed discrepancy. Five focused derivative checks and the bank-composition check pass. A scratch mutation that drops the booking derivative makes <code>test_bank_jvp_composes_flux_and_level_derivatives</code> fail; its log ends with <code>EXIT=1</code>. The base and head regression arms both completed with zero failing tests.</p>
+<p>The first boundary calculation used the smooth conic and plateaued at 1.74e-4 relative against the booking's sampled polygon. Differentiating the polygon's implicit conic vertices and integrating their normal velocity on its own edges removed that fixed discrepancy. Five focused derivative checks and the bank-composition check pass. A scratch mutation that drops the booking derivative makes <code>test_bank_jvp_composes_flux_and_level_derivatives</code> fail; its log ends with <code>EXIT=1</code>. The suggested second mutation that drops only the moving-clip term was not run. The base and head regression arms both completed with zero failing tests.</p>
 </section>
 <section id="bank-newton-step-solve">
 <h2>Why convergence remains open</h2>

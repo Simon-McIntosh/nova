@@ -14,6 +14,13 @@
     }
   },
   "dispatched_at": "2026-10-28T22:03:54Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "non-blocking, noted at landing",
+      "recorded_at": "2026-10-28T22:16:24.201255+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/dd-cocos-ingest/edge-consistency-measure.html",

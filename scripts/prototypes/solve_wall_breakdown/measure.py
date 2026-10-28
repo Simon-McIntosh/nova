@@ -387,9 +387,10 @@ def main():
     in_axes = (0,) + (None,) * len(operands)
 
     def columns_image(columns, *carried):
-        return jax.vmap(
-            lambda c: operand_block(tangent, 1)(c, *carried), in_axes=in_axes
-        )(columns, *carried)
+        def one(column, *operands_):
+            return operand_block(tangent, 1)(column, *operands_)
+
+        return jax.vmap(one, in_axes=in_axes)(columns, *carried)
 
     jacobian_program = jax.jit(columns_image).lower(identity, *operands).compile()
     matrix = jacobian_program(identity, *operands)

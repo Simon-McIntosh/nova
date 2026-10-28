@@ -1,0 +1,56 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-28T08:18:57.792Z",
+  "dispatched_at": "2026-10-28T08:08:21Z",
+  "findings": [
+    {
+      "file": "docs/figures/converged-forward-solve/solve-wall-breakdown/step-stages.svg",
+      "id": "f8b614f4d1f",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The bars are drawn on a logarithmic x axis, so bar length is not proportional to value: the 7.6 ms booking bar renders nearly as long as the 21.4 ms bar and about three quarters the 107.8 ms topology read, though it is fourteen times smaller. A reader comparing lengths misranks the stages, and only the printed values correct it; a dot or lollipop mark would encode the ratios the text relies on."
+    },
+    {
+      "file": "scripts/prototypes/solve_wall_breakdown/figure.py",
+      "id": "f8c072dfef7",
+      "line": 60,
+      "severity": "non-blocking",
+      "summary": "The value labels and the target annotation are drawn at 11 pt while the data-ink style sheet the script loads sets 14 pt for direct labels, so this figure's numbers render smaller than the same 14 pt tick labels beside them and smaller than other figures on the page. Readable, but below the size the repository's figure rules specify and inconsistent within one canvas."
+    },
+    {
+      "file": "docs/figures/converged-forward-solve/solve-wall-breakdown/step-stages.svg",
+      "id": "f8b614f4d1f",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The grey bar mixes quantities on one axis: 'map, width 16 per slice' is 21.4 ms per solve at batch width 16, not a stage of one step, while the axis label reads 'wall per stage [ms]'. The bar's own series label and the caption disambiguate it, so the defect is the axis label's silence rather than a lost distinction."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "pass \u2014 near-black category labels and values on white, and the red target label clears the white ground comfortably; the grey width-16 bar reads as data rather than fading out.",
+    "data_ink": "pass \u2014 six solid bars plus one-line value labels carry the ink; no gridlines, no fills, no shading, no legend box.",
+    "decoration": "pass \u2014 white ground, top and right spines removed; the only non-data mark is a 1 ms threshold drawn 1.2 pt dotted in red, which the caption identifies as the target.",
+    "label_collision": "pass \u2014 no text is clipped or overlapping: category labels sit left of the axis, each value sits in clear space right of its bar end, and the '1 ms target' annotation sits above the top bar rather than on it.",
+    "legibility": "pass \u2014 on the 1400 x 720 px render every category label, bar and printed value reads at a glance, from the 735.7 ms Jacobian bar down to the 6.4 ms linear solve, without zoom. The log-axis length distortion noted in the findings does not stop a reader reading the figure, because every value is printed and the caption and text give the percentages.",
+    "table_form": "pass \u2014 the figure's message is distance from a threshold, which is spatial rather than tabular; the same numbers also sit in the table above it in the evidence fragment, but the figure is not depicting a table's content."
+  },
+  "project": "nova",
+  "raw_text": "RUBRIC legibility: pass \u2014 every category label, bar and printed value reads at a glance on the 1400 x 720 px render, from the 735.7 ms Jacobian bar down to the 6.4 ms linear solve, without zoom.\nRUBRIC data_ink: pass \u2014 six solid bars plus one-line value labels carry the ink; no gridlines, fills, shading or legend box.\nRUBRIC decoration: pass \u2014 white ground, top and right spines removed, and the only non-data mark is a 1.2 pt dotted red line at 1 ms that the caption names as the target.\nRUBRIC contrast: pass \u2014 near-black labels and values on white, the grey batch-16 bar still reads as data, and the red target label clears the white ground.\nRUBRIC table_form: pass \u2014 distance from a threshold is a spatial message, not a table's content, and the figure does not re-depict the neighbouring table as an image.\nRUBRIC label_collision: pass \u2014 nothing is clipped or overlapping; category labels sit left of the axis, values in clear space right of each bar end, and the target annotation above the top bar.\nFINDING docs/figures/converged-forward-solve/solve-wall-breakdown/step-stages.svg non-blocking: the bars sit on a logarithmic x axis, so bar length is not proportional to value and the 7.6 ms booking bar renders nearly as long as the 21.4 ms one; only the printed values correct the misreading.\nFINDING scripts/prototypes/solve_wall_breakdown/figure.py:60 non-blocking: the value labels and target annotation are set to 11 pt against the style sheet's 14 pt for direct labels, so they render smaller than every other text on the same canvas.\nFINDING docs/figures/converged-forward-solve/solve-wall-breakdown/step-stages.svg non-blocking: the grey 'map, width 16 per slice' bar is 21.4 ms per solve at batch width 16 rather than a stage of one step, and the axis label 'wall per stage [ms]' does not describe it.",
+  "review_run_id": "r-20261028T080638474503-review-of-solve-wall-breakdown-e77d251057da-figure",
+  "reviewed_base_sha": "f41ee6ee18f8ae4f3bf9e64ae7fbaeee186a5f2e",
+  "reviewed_head_sha": "e77d251057dafc1b8152b37777da300d94f6214f",
+  "reviewed_run_id": "r-20261028T064446146504-solve-wall-breakdown",
+  "rubric": "figure",
+  "rubric_items": [
+    "legibility",
+    "data_ink",
+    "decoration",
+    "contrast",
+    "table_form",
+    "label_collision"
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T08:19:40.731357+00:00",
+  "total": null
+}

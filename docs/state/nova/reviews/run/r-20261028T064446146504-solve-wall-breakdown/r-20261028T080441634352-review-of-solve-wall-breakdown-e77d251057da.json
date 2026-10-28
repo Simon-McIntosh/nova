@@ -1,0 +1,100 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run armed no suite (manifest tests: none, receipt baseline_suite and after_suite are both null), so no arm exists from which to derive an added-failure delta; the count is zero by that absence rather than by a green pair. Its one guard, check_units.py, was run by hand and both its runs are on disk: units.log (UNIT CHECK OK) and units-negative.log (the same check failing on a planted 0.7357 ms for 735.7 ms).",
+  "call_sites": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-28T08:06:29Z",
+  "findings": [
+    {
+      "detail": "The sentence was written in revision 7af8aff12 and left unchanged by 6bd899229, which corrected the warm step from seconds to milliseconds but not this line, so a stale figure sits beside a corrected table. check_units.py passes it because it parses only `N ms`, never `N s`. A reader quoting the headline gets both a wrong cold total and a wrong compile share.",
+      "file": "docs/evidence/fragments/converged-forward-solve/solve-wall-breakdown.html",
+      "id": "bb2b144fa77",
+      "line": 21,
+      "severity": "blocking",
+      "summary": "The summary's cold decomposition states the three programs compile cold in 29.0 s of which 21.7 s is XLA compile, while the document's own total row (line 31) records XLA compile 28.996 s and trace 3.983 + lowering 1.240 on top of it (34.2 s), and line 33 calls XLA 79 % of the cold wall where 28.996/34.2 is 84.7 %; no receipt in logs/h200c/stages.json or any other arm contains 21.7 s."
+    },
+    {
+      "detail": "Line 118 repeats the containment ('of which the topology read is 107.8 ms') and line 120 then calls the read 'outside the map', contradicting line 113 in the same section. The '~58 ms of roots, booking and contractions' split (166.2 - 107.8) and the 857.5 ms counterfactual therefore subtract one function's time from another's, and the trace section's own measurement of the map's internal contour tree (37.1 ms of 139.3 ms device time) is the figure that actually applies.",
+      "file": "docs/evidence/fragments/converged-forward-solve/solve-wall-breakdown.html",
+      "id": "2a5c27b1a86",
+      "line": 113,
+      "severity": "blocking",
+      "summary": "'The map carries the read inside it ... the 166.2 ms map contains this read's 107.8 ms' is contradicted by the code: program.map_moments calls kernel.read (scripts/prototypes/fast_map_production/program.py:203 -> kernel.py:330), a separate fixed-shape read, and the solver calls nova.equilibrium.topology.read on its own (scripts/prototypes/fast_map_production/solver.py:237), so the two stages are disjoint and the map contains none of the measured 107.8 ms."
+    },
+    {
+      "detail": "The fragment discloses all three under 'What this run did not measure', so the record is honest, but the done_when's first clause asks for the empty-store arm and the converged solve and its second asks for the whole step at batch width 16; only the map was measured at width 16 (logs/h200h/stages.json step 16). A follow-up node that measures the production solve end to end, cold and warm, would close both.",
+      "file": "docs/evidence/fragments/converged-forward-solve/solve-wall-breakdown.html",
+      "id": "6c6987dbe3e",
+      "line": 72,
+      "severity": "non-blocking",
+      "summary": "Two clauses the done_when names are not measured: the cold arm's operand store was warm in every arm (logs/h200c/stages.json records operand_load_seconds 0.690 with hit true, not an empty store), and the converged solve's own wall is absent, as is the production route's end-to-end wall."
+    },
+    {
+      "detail": "The regex r'([0-9][0-9,]*(?:\\.[0-9]+)?)\\s?ms\\b' never matches '29.0 s', '21.7 s' or the cold table's per-program seconds, which is exactly the class of slip the check was built for after the earlier seconds-as-milliseconds error. It is also not collected by pytest and reads its receipts from a run directory outside the repository, so it cannot run in CI; units.log and units-negative.log show it does bite on ms.",
+      "file": "scripts/prototypes/solve_wall_breakdown/check_units.py",
+      "id": "3c17166d9d1",
+      "line": 43,
+      "severity": "non-blocking",
+      "summary": "The guard parses only milliseconds, so every second-valued statement in the fragment is unchecked, and the one wrong number the fragment carries is a seconds statement (line 21)."
+    },
+    {
+      "detail": "It duplicates the capability while extending what that module lacks (first execute, executable bytes, warm median). Either the prototype should import the owner for its cold split or the owner should grow the added stages so one module holds the instrument; as landed, a later change to cold-compile attribution has two places to change.",
+      "file": "scripts/prototypes/solve_wall_breakdown/measure.py",
+      "id": "2e9fd7b9036",
+      "line": 97,
+      "severity": "non-blocking",
+      "summary": "cold_stages re-implements the cold compile split the repository already owns at scripts/prototypes/compile_pass_profile/profile.py:85-102 (trace_seconds, lower_seconds, compile_seconds) rather than importing or extending it, which is also the reuse target the reviewed brief named."
+    },
+    {
+      "detail": "The same paragraph's line 24 reports both parts correctly (carrier 0.652 s, jet matrix 0.181 s), so the summary's single figure drops the 0.65 s carrier load from the store cost a reader is asked to accept.",
+      "file": "docs/evidence/fragments/converged-forward-solve/solve-wall-breakdown.html",
+      "id": "42e4c7c4904",
+      "line": 21,
+      "severity": "non-blocking",
+      "summary": "'the operand store loaded in 0.18 s' understates the receipt: operand_load_seconds is 0.690 s in logs/h200c/stages.json and 0.649 s in logs/h200h/stages.json, and 0.18 s is the jet matrix alone."
+    },
+    {
+      "detail": "A record that names an unresolvable revision cannot be tied to the code it reviewed; this review read the resolved base, and the promoted row should carry that one.",
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T064446146504-solve-wall-breakdown/manifest.md",
+      "id": "a83cf108077",
+      "line": 2,
+      "severity": "non-blocking",
+      "summary": "orientation_base_sha records f41ee6ee18f8ae4e3ebf9e64ae7fbaeee186a5f2e, which resolves to no object; the commit the work was based on is f41ee6ee18f8ae4f3bf9e64ae7fbaeee186a5f2e."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "no production call site reaches the landed change: nothing outside scripts/prototypes/solve_wall_breakdown imports it.",
+    "diff": "read commit by commit from f41ee6ee18f8ae4f3bf9e64ae7fbaeee186a5f2e to e77d251057dafc1b8152b37777da300d94f6214f: sixteen commits, seven files, 2,210 insertions and no deletions, being the harness, both job scripts, the unit check, the figure script, the figure and the evidence fragment.",
+    "done_when": "clause 1 is partially met: trace, lowering, XLA compile, first execute and warm wall per program plus the operand load are in logs/h200c/stages.json, but the empty-operand-store arm and the converged solve are absent (fragment:72) and the per-program compile count is by construction, the counter having seen no lines (fragment:73); clause 2 is partially met: width-1 stage medians over 50 calls are recorded in logs/h200h/stages.json, width 16 is the map alone, and the step count is not recorded (fragment:53); clause 3 is met: fragment:56-65 tables each program's key dependencies and states which recompile.",
+    "goal": "the brief's goal is a cold and warm stage split of a production forward solve on one H200; docs/evidence/fragments/converged-forward-solve/solve-wall-breakdown.html:23-53 and :105-121 deliver the three-program cold split, the warm per-step split and the cache table, but they time the certificate carrier's per-step programs rather than either route named in the brief, and the production route's end-to-end wall is unmeasured (fragment:72, measure.py:1-14).",
+    "manifest": "read; status complete, artifacts and evidence_inputs filled, tests: none with both unit-check logs named. Its orientation_base_sha f41ee6ee18f8ae4e3ebf9e64ae7fbaeee186a5f2e does not resolve: the base is f41ee6ee18f8ae4f3bf9e64ae7fbaeee186a5f2e.",
+    "write_paths": "the reviewed manifest declares scripts/prototypes/solve_wall_breakdown, docs/evidence/fragments/converged-forward-solve/solve-wall-breakdown.html and docs/figures/converged-forward-solve/solve-wall-breakdown; all seven changed paths sit inside those roots and no file under nova/ is touched."
+  },
+  "justifications": {
+    "durability": "The only guard is check_units.py:43, which is not a repository test, reads receipts outside the tree, and parses only `ms`; units-negative.log shows it reddens on a planted 0.7357 ms, while the shipped 21.7 s slip passes it.",
+    "evidence": "Every number in the tables reconciles with logs/h200c/stages.json and logs/h200h/stages.json, but fragment:21 and :33 state a cold total (29.0 s / 21.7 s / 79 %) that no receipt supports, and the width-16 arm covers only the map.",
+    "fit": "measure.py and figure.py follow the surrounding prototype idiom and figure.py:57 uses the data-ink style on the 14 x 7.2 in canvas; measure.py:67 leaves CompileCounter attached to the jax logger although it recorded zero lines.",
+    "goal_fidelity": "The adjustable figure sits here: fragment:23-53 gives the cold and warm split the goal asks for, but measure.py:1-14 times the certificate carrier's per-step programs and no route end to end, so the production solve the brief names is described rather than measured.",
+    "reuse": "cold_stages at measure.py:97 duplicates the cold compile split owned by scripts/prototypes/compile_pass_profile/profile.py:85-102 instead of extending it; kernel.py, program.py and solver.py are otherwise consumed rather than copied.",
+    "scope_discipline": "git diff --stat f41ee6ee1..e77d25105 shows seven added files, all inside the three declared write-path roots, with nothing under nova/ touched and no deletions."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the brief's goal is a cold and warm stage split of a production forward solve on one H200; docs/evidence/fragments/converged-forward-solve/solve-wall-breakdown.html:23-53 and :105-121 deliver the three-program cold split, the warm per-step split and the cache table, but measure.py:1-14 times the certificate carrier's per-step programs rather than either route named in the brief, and the production route's end-to-end wall is not measured (fragment:72).\nVERDICT done_when: clause 1 is partially met by logs/h200c/stages.json (trace, lowering, XLA compile, first execute, warm wall, operand load), with the empty-store arm and the converged solve absent (fragment:72) and the program count of three taken from the harness rather than a live compile log (fragment:73); clause 2 is partially met by logs/h200h/stages.json, width 1 over 50 calls, width 16 for the map alone and no step count (fragment:53); clause 3 is met by the cache table at fragment:56-65.\nVERDICT write_paths: the reviewed manifest declares scripts/prototypes/solve_wall_breakdown, the evidence fragment and docs/figures/converged-forward-solve/solve-wall-breakdown, and all seven changed paths sit inside them with no file under nova/ touched.\nVERDICT manifest: read; status complete with artifacts, evidence_inputs and both unit-check logs named, but its orientation_base_sha f41ee6ee18f8ae4e3ebf9e64ae7fbaeee186a5f2e resolves to no object (the base is f41ee6ee18f8ae4f3bf9e64ae7fbaeee186a5f2e).\nVERDICT diff: read commit by commit from f41ee6ee18f8ae4f3bf9e64ae7fbaeee186a5f2e to e77d251057dafc1b8152b37777da300d94f6214f; sixteen commits add seven files (2,210 lines, no deletions) being the harness, two job scripts, the unit check, the figure script, the figure and the fragment.\nCALL_SITES: none\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: The adjustable figure sits here: fragment:23-53 gives the cold and warm split the goal asks for, but measure.py:1-14 times the certificate carrier's per-step programs and no route end to end, so the production solve the brief names is described rather than measured.\nSCORE evidence: 11\nJUSTIFICATION evidence: Every number in the tables reconciles with logs/h200c/stages.json and logs/h200h/stages.json, but fragment:21 and :33 state a cold total (29.0 s / 21.7 s / 79 %) that no receipt supports, and the width-16 arm covers only the map.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat f41ee6ee1..e77d25105 shows seven added files, all inside the three declared write-path roots, with nothing under nova/ touched and no deletions.\nSCORE durability: 11\nJUSTIFICATION durability: The only guard is check_units.py:43, which is not a repository test, reads receipts outside the tree, and parses only `ms`; units-negative.log shows it reddens on a planted 0.7357 ms, while the shipped 21.7 s slip passes it.\nSCORE fit: 16\nJUSTIFICATION fit: measure.py and figure.py follow the surrounding prototype idiom and figure.py:57 uses the data-ink style on the 14 x 7.2 in canvas; measure.py:67 leaves CompileCounter attached to the jax logger although it recorded zero lines.\nSCORE reuse: 5\nJUSTIFICATION reuse: cold_stages at measure.py:97 duplicates the cold compile split owned by scripts/prototypes/compile_pass_profile/profile.py:85-102 instead of extending it; kernel.py, program.py and solver.py are otherwise consumed rather than copied.\nFINDING docs/evidence/fragments/converged-forward-solve/solve-wall-breakdown.html:21 blocking: The summary's cold decomposition states the three programs compile cold in 29.0 s of which 21.7 s is XLA compile, while the document's own total row (line 31) records XLA compile 28.996 s and trace 3.983 + lowering 1.240 on top of it (34.2 s), and line 33 calls XLA 79 % of the cold wall where 28.996/34.2 is 84.7 %; no receipt in logs/h200c/stages.json or any other arm contains 21.7 s.\nFINDING docs/evidence/fragments/converged-forward-solve/solve-wall-breakdown.html:113 blocking: 'The map carries the read inside it ... the 166.2 ms map contains this read's 107.8 ms' is contradicted by the code: program.map_moments calls kernel.read (scripts/prototypes/fast_map_production/program.py:203 -> kernel.py:330), a separate fixed-shape read, and the solver calls nova.equilibrium.topology.read on its own (scripts/prototypes/fast_map_production/solver.py:237), so the two stages are disjoint and the map contains none of the measured 107.8 ms.\nFINDING docs/evidence/fragments/converged-forward-solve/solve-wall-breakdown.html:72 non-blocking: Two clauses the done_when names are not measured: the cold arm's operand store was warm in every arm (logs/h200c/stages.json records operand_load_seconds 0.690 with hit true, not an empty store), and the converged solve's own wall is absent, as is the production route's end-to-end wall.\nFINDING scripts/prototypes/solve_wall_breakdown/check_units.py:43 non-blocking: The guard parses only milliseconds, so every second-valued statement in the fragment is unchecked, and the one wrong number the fragment carries is a seconds statement (line 21).\nFINDING scripts/prototypes/solve_wall_breakdown/measure.py:97 non-blocking: cold_stages re-implements the cold compile split the repository already owns at scripts/prototypes/compile_pass_profile/profile.py:85-102 (trace_seconds, lower_seconds, compile_seconds) rather than importing or extending it, which is also the reuse target the reviewed brief named.\nFINDING docs/evidence/fragments/converged-forward-solve/solve-wall-breakdown.html:21 non-blocking: 'the operand store loaded in 0.18 s' understates the receipt: operand_load_seconds is 0.690 s in logs/h200c/stages.json and 0.649 s in logs/h200h/stages.json, and 0.18 s is the jet matrix alone.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T064446146504-solve-wall-breakdown/manifest.md:2 non-blocking: orientation_base_sha records f41ee6ee18f8ae4e3ebf9e64ae7fbaeee186a5f2e, which resolves to no object; the commit the work was based on is f41ee6ee18f8ae4f3bf9e64ae7fbaeee186a5f2e.\n",
+  "review_run_id": "r-20261028T080441634352-review-of-solve-wall-breakdown-e77d251057da",
+  "reviewed_base_sha": "f41ee6ee18f8ae4f3bf9e64ae7fbaeee186a5f2e",
+  "reviewed_head_sha": "e77d251057dafc1b8152b37777da300d94f6214f",
+  "reviewed_run_id": "r-20261028T064446146504-solve-wall-breakdown",
+  "scores": {
+    "durability": 11,
+    "evidence": 11,
+    "fit": 16,
+    "goal_fidelity": 13,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T09:25:00+00:00",
+  "total": 76
+}

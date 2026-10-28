@@ -11,6 +11,13 @@
     "scripts/prototypes/support/read_route_rows.py:152 calls support_read.read_and_book"
   ],
   "completed_at": "2026-10-28T21:31:19.534Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "tracked-read-h200",
+      "recorded_at": "2026-10-28T21:40:54.592480+00:00"
+    }
+  },
   "dispatched_at": "2026-10-28T21:19:02Z",
   "findings": [
     {

@@ -306,10 +306,16 @@ def main():
             return exterior + executables[name](
                 value_operand, moments, inverse, index, pitch
             )
+        host = np.asarray(nodes)
         matrix_rows = []
-        for first in range(0, len(nodes), batch):
-            points = jnp.asarray(np.asarray(nodes)[first : first + batch])
-            matrix_rows.append(executables[name](points, coupling))
+        for first in range(0, len(host), batch):
+            block = host[first : first + batch]
+            width = len(block)
+            if width < batch:
+                # the compiled executable is fixed at the block size
+                block = np.concatenate((block, np.repeat(block[-1:], batch - width, 0)))
+            rows = executables[name](jnp.asarray(block), coupling)
+            matrix_rows.append(rows[:width])
         local = jnp.concatenate(matrix_rows, axis=0)
         return exterior + jnp.einsum("ncmq,cm->nq", local, moments)
 

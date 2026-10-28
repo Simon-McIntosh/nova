@@ -1,0 +1,99 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 1,
+  "added_failure_ids": [
+    "tests/test_certificate_gate_live.py::test_rerendered_part_receipt_is_not_a_live_certificate_row"
+  ],
+  "added_failures_note": "derived from the reviewed run's own logs/suite-base.log and logs/suite-head.log; the head arm had reached 20 of 29 importer files when this record was composed and its EXIT line had not appeared, so the count is a lower bound and the reviewed manifest carried no after_suite field at delivery",
+  "call_site_count": 4,
+  "call_sites": [
+    "benchmarks/limited_row_shadow_census.py:336",
+    "benchmarks/exact_clip_memory_scaling.py:278",
+    "benchmarks/solovev_certificate_current_pin.py:343",
+    "benchmarks/zero_residual_check.py:391"
+  ],
+  "completed_at": "2026-10-28T22:19:41.777Z",
+  "dispatched_at": "2026-10-28T21:59:38Z",
+  "findings": [
+    {
+      "file": "tests/test_certificate_gate_live.py",
+      "line": "271",
+      "severity": "blocking",
+      "text": "blocking: the change makes _measure refuse the banked part this test installs, so it falls through to a full solve, the row no longer carries figure.render_source \"persisted_part_receipt\" as the assertion at :272 requires, and the solve exceeds the 300 s pytest timeout (Failed: Timeout (>300.0s), logs/suite-head.log); this is the single added failure between the two arms and the node's declared done_when is zero."
+    },
+    {
+      "file": "tests/test_diverted_300_convergence.py",
+      "line": "80",
+      "severity": "non-blocking",
+      "text": "non-blocking: the acceptance assertion derives the receipt's current, carrier key and cell count from the same setup mapping the verdict compares against, so its two sides move together and it passes whatever the comparison does, including an implementation that accepts everything; it cannot redden on the regression it appears to guard."
+    },
+    {
+      "file": "tests/test_diverted_300_convergence.py",
+      "line": "149",
+      "severity": "non-blocking",
+      "text": "non-blocking: the row-convergence test is marked slow, was deselected in logs/head-guard.log (5 passed, 1 deselected) and is absent from every arm, so the row behaviour the node exists to measure has no executed guard and a regression there would not redden any recorded log."
+    },
+    {
+      "file": "tests/test_diverted_300_convergence.py",
+      "line": "110",
+      "severity": "non-blocking",
+      "text": "non-blocking: at base the guard reddens on AttributeError for the absent _certificate_case_setup helper (logs/suite-base.log:116) rather than on the driver serving a stale receipt, so the base arm shows the API is missing, not that the guarded defect is present and caught."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T201253421766-diverted-300-regression/manifest.md",
+      "line": "5",
+      "severity": "non-blocking",
+      "text": "non-blocking: status is complete while after_suite is absent and the checkpoint states the head arm had not finished, so the record claims completion for a node whose declared zero-added-failure measure was never taken; the arm has since reached 20 of 29 files and reports one added failure."
+    },
+    {
+      "file": "benchmarks/solovev_certificate.py",
+      "line": "2398",
+      "severity": "non-blocking",
+      "text": "non-blocking: a rendered row keeps solver.route \"profile.solve newton_krylov\" and the banked receipt's solver.qualification while only receipt.status marks it rendered, and benchmarks/solovev_certificate_current_pin.py:343 and benchmarks/zero_residual_check.py:391 read qualification without consulting that marker, so \"never reported as solved\" holds only for consumers that know to look."
+    }
+  ],
+  "findings_blocking": [
+    {
+      "file": "tests/test_certificate_gate_live.py",
+      "line": "271",
+      "severity": "blocking",
+      "text": "blocking: the change makes _measure refuse the banked part this test installs, so it falls through to a full solve, the row no longer carries figure.render_source \"persisted_part_receipt\" as the assertion at :272 requires, and the solve exceeds the 300 s pytest timeout (Failed: Timeout (>300.0s), logs/suite-head.log); this is the single added failure between the two arms and the node's declared done_when is zero."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read commit by commit against 6ccf43de9 (9eb1642af test, 2596fc910 evidence, 5c3c3c856 driver repair, a995112c0 audit evidence); the change adds _read_persisted_part, _receipt_verdict and _certificate_case_setup in benchmarks/solovev_certificate.py, a 181-line test file, three read-only prototype scripts and the evidence fragment.",
+    "done_when": "the declared done_when is \"Test files importing the changed modules show 0 added failures between base and head arms in one sirius job\" (prompt.txt:110); the worker's gate names that pair, but only the base arm completed (logs/suite-base.log FAILURE_COUNT=41 EXIT=1) and manifest.md records after_suite as absent, so the measure it asserts was not produced at delivery.",
+    "goal": "the node goal (prompt.txt:38) is to find and repair the change that stopped the diverted 300-cell row converging; benchmarks/solovev_certificate.py:2361 now refuses a banked part receipt it cannot reproduce and the evidence fragment records that no such change exists, so the premise is falsified and a different defect is repaired.",
+    "manifest": "manifest.md reports status complete with five green guard tests (logs/head-guard.log, 5 passed 1 deselected EXIT=0), a red base negative control, three carrier arms and a twenty-row refusal audit, and states plainly that after_suite is absent rather than claiming it passed.",
+    "write_paths": "the manifest's declared paths are benchmarks/solovev_certificate.py, tests/test_diverted_300_convergence.py, scripts/prototypes/diverted_300_regression, docs/evidence/fragments/converged-forward-solve/diverted-300-regression.html and the figures directory; git diff --stat shows exactly six files under those paths and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/test_diverted_300_convergence.py:110 reddens if benchmarks/solovev_certificate.py:2383 stops consulting the verdict, but tests/test_diverted_300_convergence.py:80 asserts acceptance against a receipt built from the same setup object, the row guard at :149 is slow and was deselected, and no existing test of the driver's contract was updated to the new behaviour.",
+    "evidence": "the guard is genuinely red at base (logs/suite-base.log:166-170) and green at head (logs/head-guard.log EXIT=0), yet the declared zero-added-failure measure was unmeasured at delivery and the head arm, once it advanced, shows one added failure (logs/suite-head.log) that this node's own done_when would have refused.",
+    "fit": "benchmarks/solovev_certificate.py:2235 follows the driver's helper and docstring idiom and no plan label, run id or ticket reference appears in any added path or symbol, but tests/test_diverted_300_convergence.py:48 carries a garbled docstring and the new test file ends without a trailing newline.",
+    "goal_fidelity": "benchmarks/solovev_certificate.py:2235 answers the goal by falsifying the regression premise and repairing the receipt-serving path, but the row itself still does not converge (logs/arm-e39ffd109.log terminal_residual 0.3008686198923309), that work is deferred, and the repair changes a contract another test depends on.",
+    "reuse": "no owner of banked-receipt verification exists in the repository; the nearest prior art inlines a single-field comparison (benchmarks/null_census_assertion.py:123, scripts/dual_basin_audit/audit_diverted_separatrix.py:334) and the new audit script calls _receipt_verdict rather than restating it.",
+    "scope_discipline": "every path in git diff --stat 6ccf43de9..a995112c0 lies under the declared write paths, and manifest.md names the one path its grant did not yet record rather than editing it silently."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal (prompt.txt:38) is to find and repair the change that stopped the diverted 300-cell row converging; benchmarks/solovev_certificate.py:2361 now refuses a banked part receipt it cannot reproduce and the evidence fragment records that no such change exists, so the premise is falsified and a different defect is repaired.\nVERDICT done_when: the declared done_when is \"Test files importing the changed modules show 0 added failures between base and head arms in one sirius job\" (prompt.txt:110); the worker's gate names that pair, but only the base arm completed (logs/suite-base.log FAILURE_COUNT=41 EXIT=1) and manifest.md records after_suite as absent, so the measure it asserts was not produced at delivery.\nVERDICT write_paths: the manifest's declared paths are benchmarks/solovev_certificate.py, tests/test_diverted_300_convergence.py, scripts/prototypes/diverted_300_regression, docs/evidence/fragments/converged-forward-solve/diverted-300-regression.html and the figures directory; git diff --stat shows exactly six files under those paths and nothing else.\nVERDICT manifest: manifest.md reports status complete with five green guard tests (logs/head-guard.log, 5 passed 1 deselected EXIT=0), a red base negative control, three carrier arms and a twenty-row refusal audit, and states plainly that after_suite is absent rather than claiming it passed.\nVERDICT diff: read commit by commit against 6ccf43de9 (9eb1642af test, 2596fc910 evidence, 5c3c3c856 driver repair, a995112c0 audit evidence); the change adds _read_persisted_part, _receipt_verdict and _certificate_case_setup in benchmarks/solovev_certificate.py, a 181-line test file, three read-only prototype scripts and the evidence fragment.\nCALL_SITES: benchmarks/limited_row_shadow_census.py:336, benchmarks/exact_clip_memory_scaling.py:278, benchmarks/solovev_certificate_current_pin.py:343, benchmarks/zero_residual_check.py:391\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: benchmarks/solovev_certificate.py:2235 answers the goal by falsifying the regression premise and repairing the receipt-serving path, but the row itself still does not converge (logs/arm-e39ffd109.log terminal_residual 0.3008686198923309), that work is deferred, and the repair changes a contract another test depends on.\nSCORE evidence: 9\nJUSTIFICATION evidence: the guard is genuinely red at base (logs/suite-base.log:166-170) and green at head (logs/head-guard.log EXIT=0), yet the declared zero-added-failure measure was unmeasured at delivery and the head arm, once it advanced, shows one added failure (logs/suite-head.log) that this node's own done_when would have refused.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in git diff --stat 6ccf43de9..a995112c0 lies under the declared write paths, and manifest.md names the one path its grant did not yet record rather than editing it silently.\nSCORE durability: 13\nJUSTIFICATION durability: tests/test_diverted_300_convergence.py:110 reddens if benchmarks/solovev_certificate.py:2383 stops consulting the verdict, but tests/test_diverted_300_convergence.py:80 asserts acceptance against a receipt built from the same setup object, the row guard at :149 is slow and was deselected, and no existing test of the driver's contract was updated to the new behaviour.\nSCORE fit: 16\nJUSTIFICATION fit: benchmarks/solovev_certificate.py:2235 follows the driver's helper and docstring idiom and no plan label, run id or ticket reference appears in any added path or symbol, but tests/test_diverted_300_convergence.py:48 carries a garbled docstring and the new test file ends without a trailing newline.\nSCORE reuse: 18\nJUSTIFICATION reuse: no owner of banked-receipt verification exists in the repository; the nearest prior art inlines a single-field comparison (benchmarks/null_census_assertion.py:123, scripts/dual_basin_audit/audit_diverted_separatrix.py:334) and the new audit script calls _receipt_verdict rather than restating it.\nFINDING tests/test_certificate_gate_live.py:271 blocking: the change makes _measure refuse the banked part this test installs, so it falls through to a full solve, the row no longer carries figure.render_source \"persisted_part_receipt\" as the assertion at :272 requires, and the solve exceeds the 300 s pytest timeout (Failed: Timeout (>300.0s), logs/suite-head.log); this is the single added failure between the two arms and the node's declared done_when is zero.\nFINDING tests/test_diverted_300_convergence.py:80 non-blocking: the acceptance assertion derives the receipt's current, carrier key and cell count from the same setup mapping the verdict compares against, so its two sides move together and it passes whatever the comparison does, including an implementation that accepts everything; it cannot redden on the regression it appears to guard.\nFINDING tests/test_diverted_300_convergence.py:149 non-blocking: the row-convergence test is marked slow, was deselected in logs/head-guard.log (5 passed, 1 deselected) and is absent from every arm, so the row behaviour the node exists to measure has no executed guard and a regression there would not redden any recorded log.\nFINDING tests/test_diverted_300_convergence.py:110 non-blocking: at base the guard reddens on AttributeError for the absent _certificate_case_setup helper (logs/suite-base.log:116) rather than on the driver serving a stale receipt, so the base arm shows the API is missing, not that the guarded defect is present and caught.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T201253421766-diverted-300-regression/manifest.md:5 non-blocking: status is complete while after_suite is absent and the checkpoint states the head arm had not finished, so the record claims completion for a node whose declared zero-added-failure measure was never taken; the arm has since reached 20 of 29 files and reports one added failure.\nFINDING benchmarks/solovev_certificate.py:2398 non-blocking: a rendered row keeps solver.route \"profile.solve newton_krylov\" and the banked receipt's solver.qualification while only receipt.status marks it rendered, and benchmarks/solovev_certificate_current_pin.py:343 and benchmarks/zero_residual_check.py:391 read qualification without consulting that marker, so \"never reported as solved\" holds only for consumers that know to look.",
+  "review_run_id": "r-20261028T215753040008-review-of-diverted-300-regression-a995112c07d8",
+  "reviewed_base_sha": "6ccf43de9a42707444627079ac5da06b097d9c74",
+  "reviewed_head_sha": "a995112c07d81a749de4289c0635358f8fb6c721",
+  "reviewed_run_id": "r-20261028T201253421766-diverted-300-regression",
+  "scores": {
+    "durability": 13,
+    "evidence": 9,
+    "fit": 16,
+    "goal_fidelity": 14,
+    "reuse": 18,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T22:22:30.379226+00:00",
+  "total": 88
+}

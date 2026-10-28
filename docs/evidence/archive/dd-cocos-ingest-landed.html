@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="dd-cocos-ingest-landed">
+  <meta name="plan-title" content="DD COCOS Ingest — COCOS 11 and 17 In, COCOS 17 Within — landed record">
+  <meta name="plan-summary" content="Closure synthesis for DD COCOS Ingest — COCOS 11 and 17 In, COCOS 17 Within: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).">
+  <meta name="plan-evidence-for" content="dd-cocos-ingest">
+  <meta name="plan-verdict" content="qualified">
+  <title>DD COCOS Ingest — COCOS 11 and 17 In, COCOS 17 Within — landed record | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+ <main class="plan-doc">
+  <h1>DD COCOS Ingest — COCOS 11 and 17 In, COCOS 17 Within — landed record</h1>
+  <p>Closure synthesis for DD COCOS Ingest — COCOS 11 and 17 In, COCOS 17 Within: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).</p>
+
+
+   <section id="edge-consistency-measure">
+    <h2>§5 — the edge-consistency measure and the revised reference</h2>
+    <p>Landed 2026-10-28 (worker head <code>d9a327c13</code>, merged to main at <code>44bcda0b2</code>). The measure was already in place at the base: <code>tests/test_edge_consistency.py</code> passes 8 tests, covering the analytic zero-residual case and the 1 % FF′ detection. Both recorded band columns reproduce from the IDS on one slice per source. On the corrected sense, with the whole profile current reversed, the band-relative medians against the fixed 1.0e-3 threshold are:</p><ul><li>DINA 105052/1: 0.7064.</li><li>DINA 105069/3: 0.7205.</li><li>CORSICA 130506/6: 7.6004.</li></ul><p>The reference choice of iter-passive-plasma-circuit §6 is revised:</p><ul><li>CORSICA 130506/6, at 7.60, is 10.5 times the DINA pair and should not be the reference.</li><li>The two DINA pulses are not separated by this measure.</li><li>The DINA residual survives the convention correction at about 700 times the threshold. No source meets the threshold, so the measure ranks the sources but certifies none of them.</li></ul><p>The table is in <a href="/nova/research/dd-cocos-census">dd-cocos-census</a>. One non-blocking review note: the FF′-only figure 22.09 appears in no run log.</p>
+  </section>
+
+</main>
+</body>
+</html>

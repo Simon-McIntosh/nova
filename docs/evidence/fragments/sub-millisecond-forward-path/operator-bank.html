@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="operator-bank">
+<meta name="plan-title" content="The support operators as one bank per shape bucket"></meta>
+<meta name="plan-summary" content="SupportOperands carries a static shape bucket and pads its operator rows to it; the diverted 550-cell bank builds in 94.5-96.1 s, reloads from the content store in 0.114 s, reproduces the analytic jet at the kernel-backed moments to 2.9e-13 relative, costs one compilation per bucket and none for a second geometry inside a bucket, and leaves 100.7 GiB free on an H200 after a batch of 16 slices.">
+<meta name="plan-evidence-for" content="sub-millisecond-forward-path">
+<meta name="plan-verifies" content="sub-millisecond-forward-path#s1">
+<meta name="plan-recorded-at" content="2026-10-28">
+<meta name="plan-verdict" content="passed">
+<title>The support operators as one bank per shape bucket | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<h1 id="operator-bank-landing">The support operators as one bank per shape bucket</h1>
+
+<p id="operator-bank-summary"><code>support_read.SupportOperands</code> was extended, not replaced. It carries a static <code>bucket</code>, pads <code>rows</code>, <code>exterior</code> and <code>nodes</code> up to that bucket with zeros, keeps the machine's own count in a traced <code>active_nodes</code> field, and applies the bank through <code>bank_program</code>, a minimal traced matvec. The bucket enters <code>forward._request_compilation_cache_key</code>, so it selects a program inside the existing compilation cache rather than a second one. The bank is published and reloaded through the existing content store (<code>write_bank</code> / <code>read_bank</code>). At the diverted single-null certificate with 550 realised cells (1,741 nodes, bucket 2048) on one H200 the bank builds in <strong>94.5&ndash;96.1 s</strong> over three runs, reloads in <strong>0.114 s</strong>, reproduces the analytic jet at its kernel-backed moments to <strong>2.9&times;10<sup>-13</sup></strong> relative, costs <strong>zero</strong> further compilations for a second geometry in the same bucket and <strong>one</strong> for a geometry in the next bucket, and occupies <strong>162.3 MB</strong> of operators, leaving <strong>100.7 GiB</strong> free for a batch of 16 slices.</p>
+
+<section id="operator-bank-build"><h2>Build and reload</h2>
+<p>The bank was built by <code>scripts/prototypes/operator_bank/measure.py</code> on one reserved H200, from the same certificate route <code>scripts/prototypes/read_derivatives/measure.py</code> uses: <code>tests.equilibrium.test_topology_read._analytic_inputs(&quot;diverted&quot;)</code> for the analytic state, <code>_realised_hex_geometry(wall, 550)</code> for the mesh, <code>benchmarks.solovev_certificate._case(&quot;diverted-single-null&quot;)</code> for the source, and <code>build_jet_matrix</code> for the dense rows.</p>
+<table>
+<thead><tr><th>quantity</th><th>measured</th><th>clause</th></tr></thead>
+<tbody>
+<tr><td>nodes / source cells / bucket</td><td>1,741 / 550 / 2,048</td><td>&mdash;</td></tr>
+<tr><td>build wall, three runs</td><td>94.5 s, 95.4 s, 96.1 s</td><td>builds once</td></tr>
+<tr><td>operator bytes (rows + exterior)</td><td>162.3 MB</td><td>&mdash;</td></tr>
+<tr><td>content-store reload</td><td>0.114 s, byte-identical</td><td>at most 1 s</td></tr>
+</tbody></table>
+</section>
+
+<section id="operator-bank-reproduction"><h2>Reproduction of the analytic map</h2>
+<p>The bank contracts the kernel-backed booked moments of the certificate and is compared with the analytic jet at every node, entry by entry. The worst entry is the mixed second derivative at 2.9&times;10<sup>-13</sup> relative, four orders inside the 1e-10 clause.</p>
+<table>
+<thead><tr><th>jet entry</th><th>relative error</th></tr></thead>
+<tbody>
+<tr><td>value</td><td>5.8&times;10<sup>-15</sup></td></tr>
+<tr><td>&part;<sub>x</sub></td><td>1.7&times;10<sup>-14</sup></td></tr>
+<tr><td>&part;<sub>y</sub></td><td>9.8&times;10<sup>-15</sup></td></tr>
+<tr><td>&part;<sub>xx</sub></td><td>5.9&times;10<sup>-14</sup></td></tr>
+<tr><td>&part;<sub>xy</sub></td><td>2.9&times;10<sup>-13</sup></td></tr>
+<tr><td>&part;<sub>yy</sub></td><td>1.7&times;10<sup>-14</sup></td></tr>
+</tbody></table>
+</section>
+
+<section id="operator-bank-compilation"><h2>Compilations per bucket</h2>
+<p>The program is applied three times on one device: the bank itself, a second geometry of the same bucket (perturbed operator rows, same shape), and a geometry of the next bucket (4096). Compilations are read from the jit cache size, which is the instrument that observes a reuse; the persistent cache file count rose with the different bucket too.</p>
+<table>
+<thead><tr><th>geometry</th><th>bucket</th><th>jit cache size</th><th>new compilations</th></tr></thead>
+<tbody>
+<tr><td>bank</td><td>2048</td><td>1</td><td>1 (the first)</td></tr>
+<tr><td>second geometry, same bucket</td><td>2048</td><td>1</td><td><strong>0</strong></td></tr>
+<tr><td>geometry in the next bucket</td><td>4096</td><td>2</td><td><strong>1</strong></td></tr>
+</tbody></table>
+<p>The negative control captures one operator as a closure constant in a scratch copy of <code>tests/test_operator_bank_compile.py</code>: a same-bucket geometry change then compiles again, and the two reuse tests fail (<code>assert 2 == 1</code>, <code>assert 3 == 2</code>) with <code>EXIT=1</code>.</p>
+</section>
+
+<section id="operator-bank-memory"><h2>Device memory per shape bucket</h2>
+<p>Measured on one H200 NVL with the bank resident and the measurement programs compiled.</p>
+<table>
+<thead><tr><th>quantity</th><th>bytes</th><th>GiB</th></tr></thead>
+<tbody>
+<tr><td>device limit</td><td>112,585,605,120</td><td>104.9</td></tr>
+<tr><td>peak in use after the bank and its programs</td><td>1,875,678,464</td><td>1.75</td></tr>
+<tr><td>headroom against the limit</td><td>110,709,926,656</td><td>103.1</td></tr>
+<tr><td>one slice's operators (bucket 2048, 1741 active)</td><td>162,299,904</td><td>0.151</td></tr>
+<tr><td>batch of 16 slices</td><td>2,596,798,464</td><td>2.42</td></tr>
+<tr><td>headroom left after a batch of 16</td><td>108,113,128,192</td><td>100.7</td></tr>
+</tbody></table>
+<p>The batch of 16 fits with 100.7 GiB still free, so the 550-cell bucket is not device-memory bound; the next bucket doubles the padding and still leaves two orders of magnitude of room.</p>
+</section>
+
+<section id="operator-bank-logs"><h2>Logs</h2>
+<ul>
+<li><code>logs/operator_bank_h200.log</code> &mdash; the H200 measurement (build, load, reproduction, compilations, memory).</li>
+<li><code>logs/negative_control.log</code> &mdash; the captured-operator mutation in a scratch copy, both reuse tests failing.</li>
+<li><code>logs/suite/base/</code> and <code>logs/suite/head/</code> &mdash; the suite arms, one fresh pytest process per file.</li>
+</ul>
+</section>
+</main></body>
+</html>

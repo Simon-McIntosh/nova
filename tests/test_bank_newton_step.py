@@ -9,7 +9,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-from nova.equilibrium import clip_quadrature, current, topology
+from nova.equilibrium import clip_quadrature, current, support_read, topology
 
 
 class ConstantDensity:
@@ -143,3 +143,10 @@ def test_sampled_conic_shape_integral_matches_discrete_area_derivative():
     step = 1e-4
     difference = (area(step) - area(-step)) / (2 * step)
     np.testing.assert_allclose(jnp.sum(boundary.cell_current), difference, rtol=1e-6)
+
+
+def test_krylov_condition_estimate_resolves_two_scales():
+    """The linear tolerance reads a condition estimate from the operator."""
+    matrix = jnp.diag(jnp.asarray([1.0, 4.0]))
+    estimate = support_read._krylov_condition_estimate(lambda value: matrix @ value, 2)
+    np.testing.assert_allclose(estimate, 4.0, rtol=1e-12)

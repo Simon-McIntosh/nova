@@ -3,6 +3,7 @@
 # ruff: noqa: E402
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 import subprocess
@@ -63,6 +64,11 @@ def machine():
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--converge", action="store_true")
+    parser.add_argument("--state-path", type=Path)
+    parser.add_argument("--direction", choices=("ramp", "balanced"), default="ramp")
+    args = parser.parse_args()
     revision = subprocess.check_output(
         ["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True
     ).strip()
@@ -99,7 +105,14 @@ def main():
         ),
         normal=int(jnp.sum(support.reading.normal_form_cells)),
     )
-    direction = tuple(jnp.linspace(0.1, 0.4, value.shape[0]) for value in moments)
+    if args.direction == "ramp":
+        direction = tuple(jnp.linspace(0.1, 0.4, value.shape[0]) for value in moments)
+    else:
+        index = jnp.arange(moments[0].shape[0])
+        shape = jnp.sin(1.7 * index) + jnp.cos(2.3 * index)
+        shape = 0.4 * (shape - jnp.mean(shape)) / jnp.max(jnp.abs(shape))
+        direction = (shape, 0.5 * jnp.roll(shape, 17), -0.2 * jnp.roll(shape, 31))
+    emit("DIRECTION", kind=args.direction)
 
     @jax.jit
     def residual(operands, base_moments, moments_in, support):
@@ -122,7 +135,15 @@ def main():
     print("STAGE tangent", flush=True)
     product = applied(operands, moments, direction, support)
     jax.block_until_ready(product)
-    emit("TANGENT", finite=bool(jnp.all(jnp.isfinite(jnp.concatenate(product)))))
+    vector = jnp.concatenate(product)
+    direction_flat = jnp.concatenate(direction)
+    emit(
+        "TANGENT",
+        finite=bool(jnp.all(jnp.isfinite(vector))),
+        booking_ratio=float(
+            jnp.linalg.norm(vector - direction_flat) / jnp.linalg.norm(vector)
+        ),
+    )
     for step in (1e-5, 1e-6, 1e-7, 1e-8):
         plus = tuple(a + step * d for a, d in zip(moments, direction, strict=True))
         minus = tuple(a - step * d for a, d in zip(moments, direction, strict=True))
@@ -134,9 +155,7 @@ def main():
             for a, b in zip(high.residual, low.residual, strict=True)
         )
         difference = jnp.concatenate(difference_parts)
-        vector = jnp.concatenate(product)
         error = jnp.linalg.norm(vector - difference) / jnp.linalg.norm(difference)
-        direction_flat = jnp.concatenate(direction)
         booking_error = jnp.linalg.norm(vector - difference) / jnp.linalg.norm(
             difference - direction_flat
         )
@@ -163,6 +182,81 @@ def main():
             high_valid=bool(high.valid),
             low_valid=bool(low.valid),
             finite=bool(jnp.all(jnp.isfinite(difference))),
+        )
+
+    if not args.converge:
+        return
+
+    @jax.jit
+    def solve_one(operands, moments, support):
+        return support_read.newton_step(
+            operands,
+            moments,
+            support,
+            profile,
+            lambda radius, flux: jnp.zeros_like(radius),
+            quadrature,
+        )
+
+    print("STAGE solve", flush=True)
+    current_moments = moments
+    current_support = support
+    converged = False
+    for iteration in range(12):
+        state = residual(operands, current_moments, current_moments, current_support)
+        norm = float(jnp.max(jnp.abs(jnp.concatenate(state.residual))))
+        emit("ITERATE", index=iteration, residual_sup=norm)
+        if norm <= 1e-10:
+            converged = True
+            break
+        update = solve_one(operands, current_moments, current_support)
+        jax.block_until_ready(update)
+        emit(
+            "LINEAR_SOLVE",
+            index=iteration,
+            condition=float(update.condition_estimate),
+            tolerance=float(update.tolerance),
+            residual=float(update.linear_residual),
+            converged=bool(update.converged),
+        )
+        accepted = False
+        for half in range(10):
+            scale = 2.0**-half
+            candidate = tuple(
+                value + scale * delta
+                for value, delta in zip(current_moments, update.update, strict=True)
+            )
+            candidate_support = read_state(operands, cache, candidate)
+            if not bool(candidate_support.valid):
+                continue
+            candidate_residual = residual(
+                operands, candidate, candidate, candidate_support
+            )
+            candidate_norm = float(
+                jnp.max(jnp.abs(jnp.concatenate(candidate_residual.residual)))
+            )
+            if np.isfinite(candidate_norm) and candidate_norm < norm:
+                current_moments = candidate
+                current_support = candidate_support
+                accepted = True
+                emit(
+                    "ACCEPT", index=iteration, scale=scale, residual_sup=candidate_norm
+                )
+                break
+        if not accepted:
+            emit("NO_ADMISSIBLE_UPDATE", index=iteration)
+            break
+    emit("CONVERGED", value=converged, steps=iteration, residual_sup=norm)
+    if args.state_path is not None:
+        np.savez_compressed(
+            args.state_path,
+            moments=np.stack(tuple(np.asarray(value) for value in current_moments)),
+            axis=np.asarray(current_support.reading.axis),
+            boundary=np.asarray(current_support.reading.boundary),
+            axis_flux=np.asarray(current_support.reading.axis_flux),
+            boundary_flux=np.asarray(current_support.reading.boundary_flux),
+            converged=np.asarray(converged),
+            residual_sup=np.asarray(norm),
         )
 
 

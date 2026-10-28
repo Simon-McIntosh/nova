@@ -10,6 +10,7 @@ import numpy as np
 from scipy.constants import mu_0
 from scipy.interpolate import RectBivariateSpline
 
+from nova.equilibrium.convention import TOTAL_FLUX_FACTOR, toroidal_current_density
 from nova.graphics.line import Line
 
 
@@ -49,7 +50,9 @@ class Surface(Line):
         self.coefficients, self.residual = np.linalg.lstsq(
             np.c_[self.radius, 1 / (mu_0 * self.radius)], self.variable
         )[:2]
-        self.coefficients /= -2 * np.pi
+        # divide out the convention's factor, inverting the relation
+        # :func:`nova.equilibrium.convention.toroidal_current_density` states
+        self.coefficients /= -TOTAL_FLUX_FACTOR
         if len(self.radius) < 5:
             self.coefficients = np.zeros(2)
 
@@ -179,7 +182,9 @@ class Contour(Line):
         )
         radius = np.linspace(np.min(surface.points[:, 0]), np.max(surface.points[:, 0]))
 
-        fit = -2 * np.pi * np.c_[radius, 1 / (mu_0 * radius)] @ surface.coefficients
+        fit = toroidal_current_density(
+            radius, surface.coefficients[0], surface.coefficients[1]
+        )
         fit_label = rf"fit: $p^\prime$={surface.coefficients[0]:1.2f} "
         fit_label += rf"$ff^\prime$={surface.coefficients[1]:1.2f}"
         self.axes.plot(radius, fit, "C1", label=fit_label)

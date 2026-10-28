@@ -40,7 +40,24 @@
   "plan_slug": "iter-passive-plasma-circuit",
   "plan_version": 22,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "finding": "anchors_resolve-1",
+      "reason": "the ruling is recorded in the body of commit `9e6f24d4d` and the plan's comment thread, so a node reading \u00a76 finds it, but the plan's own convention of carrying the lead's decisions in the Decisions block would place it there with its rationale.",
+      "when": "2026-10-28T05:07:43.367260+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "reason": "the ruling is recorded in the body of commit `9e6f24d4d` and the plan's comment thread, so a node reading \u00a76 finds it, but the plan's own convention of carrying the lead's decisions in the Decisions block would place it there with its rationale.",
+      "when": "2026-10-28T05:07:43.367260+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/iter-passive-plasma-circuit/r-20261021T140125262392-plan-review-of-iter-passive-plasma-circuit.json",
   "review_run_id": "r-20261021T140125262392-plan-review-of-iter-passive-plasma-circuit",
   "reviewed_blob_sha": "5e79b0a9ea19ebd9d6ef6231689c9103f6dc91cf",
   "rubric": "content",

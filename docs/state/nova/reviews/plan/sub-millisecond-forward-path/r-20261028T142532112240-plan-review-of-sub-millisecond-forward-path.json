@@ -1,0 +1,74 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-28T14:30:36.564Z",
+  "dispatched_at": "2026-10-28T14:26:30Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/support_read.py:78",
+      "id": "reuse_search-1",
+      "reason": "\u00a72 would become \"promote `support_read.read` onto the `ForwardProfile` step and hold it to the 0.2 ms bound\" instead of a six-hour build, and the plan must say whether the existing 141\u2013144 ms prototype read the plan cites is this module.",
+      "text": "the module docstring of `support_read.py` already states the exact contract \u00a72 proposes to build (\"one read and one booking per step\"), and `read` (support_read.py:78) takes `cache`/`seeds`/`previous`/`iterations` to solve stationary points warm-started from the previous step, with `read_and_book` (support_read.py:130) doing the whole step's support work; the plan describes building this read from scratch and cites none of it, so \u00a72 would be re-implemented rather than wired in. The same census covers: `nova/equilibrium/fixed_points.py:646` (`solve`, warm-started Newton on stationary points), `fixed_points.py:413` (`maintain_rows`, the \"rebuild only when a tracked point leaves its cell\" mechanism, returning `RowMaintenance`), `fixed_points.py:364` (`RowCache`), `fixed_points.py:381` (`RowMaintenance` with `nodes_added`/`nodes_retained` \u2014 the \"reports that rebuild\" clause of \u00a72 done-when (3) already exists), `nova/equilibrium/topology.py:3154` (`read_at_stationary_points`, membership at the tracked points), and `nova/equilibrium/fixed_points.py:394`/`_exterior_program` (the exterior jets half of \u00a71's coupling operand). Evidence that this is live, tested code rather than dead scaffolding: `tests/test_support_read.py` and three prototype drivers (`scripts/prototypes/support/read_route_rows.py:137`, `scripts/prototypes/solve_options/live_iterations.py:115`, `local_jet_factor.py:61`) call it; no production route does, so the real work is promotion, not construction.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/stencil_nulls.py:412",
+      "id": "reuse_search-2",
+      "reason": "\u00a72 should name which of the two existing fits it extends and delete the one it does not, which also makes the accuracy clause a test of existing code rather than of new code.",
+      "text": "\u00a72's derivative source, \"a cell-local quadratic fit over each hex cell's stencil\", already exists twice: `stencil_nulls._quadratic_fit_matrices` (stencil_nulls.py:412) with `_fit_selected_cells` (stencil_nulls.py:378), a least-squares quadratic on the hex ring giving gradient and Hessian at the centre, and `forward_operator._FixedDesignNull2D` (forward_operator.py:829) with `_local_fit_census` (forward_operator.py:1048) and `fit_dtype` (forward_operator.py:1044), a per-cell local fit doing exactly the stationary-point census \u00a72 wants; `nova/equilibrium/stencil_mesh.py` (module docstring, lines 1-40) carries the same quadratic-on-rings derivative contract for the unstructured shipped mesh. The plan's negative control (\"average the fit across cells, as the prototype did\") is the distinction these two owners already encode as \"each cell evaluates only its own fit\", so the plan is re-deriving a settled design.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/support_read.py:27",
+      "id": "duplicate_owner-1",
+      "reason": "a second operand container beside `SupportOperands` is the exact fork the item exists to prevent, and the placement question decides whether \u00a71 builds a new cache key or extends the machine-artifact owner.",
+      "text": "the plan's \u00a71 bank (\"coil and passive response to the grid; plasma-cell response to the grid; \u2026 the cached coupling operand the read samples\") is the shape of `SupportOperands` (support_read.py:27), whose docstring describes exactly `rows` (nodes, source cells, three moments, six jet entries) plus `exterior`, assembled by `SupportOperands.from_rows` (support_read.py:44) from `topology.BiotMomentCoupling` (topology.py:2355) and an `ExteriorField` (topology.py:1492); \u00a71 must extend that owner rather than introduce a second operand container, and the cached window it needs is `fixed_points.RowCache` maintained by `maintain_rows` (fixed_points.py:413), not a new bank. The plan also says \"It adds no second store\" without naming `nova/database/content_store.py`, whose only current consumer is `nova/imas/machine_artifact.py:26` for machine descriptions \u2014 so whether the bank belongs under `machine_artifact`'s per-machine artifact identity or a new artifact kind is an unmade placement decision.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/forward.py:2731",
+      "id": "duplicate_owner-2",
+      "reason": "if the bucket is just the cache key, \u00a71's done-when (2) becomes a test of the existing cache rather than a new subsystem, and the allocation of six hours changes.",
+      "text": "\u00a71's \"compiled once per machine shape\u2026 the step program takes every operator as a traced argument and captures no constants, so a geometry change inside a bucket never recompiles\" re-states a property the route already claims: `forward.py:2731 _request_compilation_cache_key` \"Describe the static compiled-program inputs observed by this profile\", feeding `_configure_solve_compilation_cache` (forward.py:2380) and the per-request hit counter (`compilation_cache_hit`, forward.py:2644-2669), and `support_read.py:11-13` already asserts \"All numerical operands are runtime pytree leaves, so one compiled program serves any state of the same layout\". \u00a71 must state which of these it extends and what the shape bucket adds that the request cache key does not.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "sub-millisecond-forward-path#s4",
+      "id": "interface_budget-1",
+      "reason": "the section must carry the one-line accounting (kept-forever with the retirement trigger, or a merge), and the route family's only existing test is a subset assertion at tests/test_equilibrium_forward.py:601, so the added route lands untested unless \u00a74 names the coverage it brings.",
+      "text": "\u00a74 adds a seventh `SolveRoute` value (\"The fast route is selectable as a `SolveRoute` value\", `nova/equilibrium/solve_request.py:31` holds six today) and \u00a71\u2013\u00a73 add public operator-bank, read and step entry points, while no section names anything it retires or merges or says why nothing can; the week's figures are public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0, and decision `both-routes-viable` explicitly keeps the present route, which is precisely the case where the section owes one sentence saying why the retirement cannot happen and what would retire it. The route literal is also reviewed surface rather than an internal switch: `tests/test_equilibrium_forward.py:601` pins that `{\"picard\",\"anderson\"}` remain reachable by name (a subset assertion, so it does not fail on an added value \u2014 the existing coverage will not notice the seventh route is untested).",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "e4004d7a72a0e6fc467da33c6cc576693e647ad4",
+  "plan_fingerprint": "d92954daa33a001cf3ec93e4a8b29aea53f3f5c10c1dc8dee02a6069339581f4",
+  "plan_slug": "sub-millisecond-forward-path",
+  "plan_version": 4,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261028T142532112240-plan-review-of-sub-millisecond-forward-path",
+  "reviewed_blob_sha": "bf031549be03d269d9c756bdbeffb2e372e0cf53",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 \u00a71\u2013\u00a74 spread one mechanism (coupling operand, row window, cell-local fit, stationary-point solve, one read, booking) across four sections and name no owning module, while a single deep module with exactly that contract already exists at `nova/equilibrium/support_read.py`.",
+    "duplicate_owner": "a finding \u2014 \u00a71's per-machine operator bank duplicates the response-row owner and its cache (`support_read.SupportOperands.rows`/`exterior`, `fixed_points.RowCache` and `maintain_rows`), and \u00a71's \"compiled once per machine shape\" duplicates the existing persistent compilation-cache owner (`forward.py:2380`, `forward.py:2731 _request_compilation_cache_key`).",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a74 adds a new `SolveRoute` value (`nova/equilibrium/solve_request.py:31`, currently six values) and \u00a71\u2013\u00a73 add operator-bank, read and step entry points, and no section names what it retires or merges or states why nothing can be, even though `both-routes-viable` makes \"nothing is retired\" a decision that must be argued in the section text.",
+    "reuse_search": "a finding \u2014 the plan cites none of the machinery that already implements its \u00a71 coupling operand and \u00a72 tracked read (`nova/equilibrium/support_read.py`, `fixed_points.maintain_rows`/`solve`, `topology.read_at_stationary_points`, `stencil_nulls._quadratic_fit_matrices`); the snapshot contains zero mentions of `support_read`, `fixed_points`, `maintain_rows`, `stencil_mesh`, `RowCache` or `BiotMomentCoupling`.",
+    "thin_wrapper": "pass \u2014 the fast route enters through the existing route-dispatched seam (`nova/equilibrium/forward.py:2880-2905`, `_ACCELERATED`/`_REDUCED` at forward.py:196-204) rather than wrapping a second front door, and \u00a71 says the bank uses the existing content store, so the plan proposes extending the seam rather than layering over it."
+  },
+  "section_digests": {
+    "_document": "6463ca0c5cddeb270554e523f56f43bc296e279984295861655ec23c245eeae7",
+    "s0": "27b1d77525232326e03fa39361c681aeec8a85704606479509393bab9339ef99",
+    "s1": "87b7956295f79c4e17023ca0c0b044fc9c92d0df24aeac4371171dfb83d696b7",
+    "s2": "ec980479f7784ec57977d7a0d45a4ecb914402370a07cf47d25850dd05144150",
+    "s3": "4ae225491be5d1e848dc2b5d2c7a0b4cbb52a50c649190c647b4f2a9aa34f84e",
+    "s4": "fe89fc4c751b2a9badd6f6a98e5870852c6afabc2c25f1a657b6564e61b7bdab"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T14:33:26.334140+00:00"
+}

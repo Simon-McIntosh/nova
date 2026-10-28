@@ -366,12 +366,18 @@ def main():
             field, geometry, convention, policy, solved
         )
 
-    no_tree_program = (
-        jax.jit(read_without_tree).lower(field, geometry, solved).compile()
-    )
-    no_tree_ms, no_tree_p95 = wall(
-        no_tree_program, (field, geometry, solved), 50
-    )
+    try:
+        no_tree_program = (
+            jax.jit(read_without_tree).lower(field, geometry, solved).compile()
+        )
+        no_tree_ms, no_tree_p95 = wall(no_tree_program, (field, geometry, solved), 50)
+        no_tree = {
+            "supported": True,
+            "read_without_tree_ms": 1000 * no_tree_ms,
+            "read_without_tree_p95_ms": 1000 * no_tree_p95,
+        }
+    except (AttributeError, TypeError, ValueError) as error:
+        no_tree = {"supported": False, "unavailable": repr(error)}
     map_ms, map_p95 = wall(map_program, (reference, *operands), 50)
 
     flat = reference.reshape(-1)
@@ -405,12 +411,11 @@ def main():
         "map_p95_ms": 1000 * map_p95,
         "linear_solve_ms": 1000 * solve_ms,
         "linear_solve_p95_ms": 1000 * solve_p95,
-        "read_without_tree_ms": 1000 * no_tree_ms,
-        "read_without_tree_p95_ms": 1000 * no_tree_p95,
         "jacobian_block_ms": 1000 * jacobian_ms,
         "jacobian_block_p95_ms": 1000 * jacobian_p95,
         "residual_size": int(residual.size),
         "cells": int(len(machine.node)),
+        "read_without_tree": no_tree,
     }
 
     batch = args.batch
@@ -442,11 +447,14 @@ def main():
         ("map", map_program, (reference, *operands)),
         ("topology_read", read_program, (field, geometry)),
     ):
-        profiles.append(
-            profile_program(
-                label, program, arguments_, args.output.parent / f"profile-{label}"
+        try:
+            profiles.append(
+                profile_program(
+                    label, program, arguments_, args.output.parent / f"profile-{label}"
+                )
             )
-        )
+        except (RuntimeError, ValueError, AttributeError, OSError) as error:
+            profiles.append({"label": label, "failed": repr(error)})
     results["profiles"] = profiles
 
     results["host_peak_rss_gb"] = (

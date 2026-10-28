@@ -18,7 +18,7 @@
 <body><main class="plan-doc">
 <h1 id="operator-bank-landing">The support operators as one bank per shape bucket</h1>
 
-<p id="operator-bank-summary"><code>support_read.SupportOperands</code> was extended, not replaced. It carries a static <code>bucket</code>, pads <code>rows</code>, <code>exterior</code> and <code>nodes</code> up to that bucket with zeros, keeps the machine's own count in a traced <code>active_nodes</code> field, and applies the bank through <code>bank_program</code>, a minimal traced matvec. The bucket enters <code>forward._request_compilation_cache_key</code>, so it selects a program inside the existing compilation cache rather than a second one. The bank is published and reloaded through the existing content store (<code>write_bank</code> / <code>read_bank</code>). At the diverted single-null certificate with 550 realised cells (1,741 nodes, bucket 2048) on one H200 the bank builds in <strong>94.5&ndash;96.1 s</strong> over three runs, reloads in <strong>0.114 s</strong>, reproduces the analytic jet at its kernel-backed moments to <strong>2.9&times;10<sup>-13</sup></strong> relative, costs <strong>zero</strong> further compilations for a second geometry in the same bucket and <strong>one</strong> for a geometry in the next bucket, and occupies <strong>162.3 MB</strong> of operators, leaving <strong>100.7 GiB</strong> free for a batch of 16 slices.</p>
+<p id="operator-bank-summary"><code>support_read.SupportOperands</code> was extended, not replaced. It carries a static <code>bucket</code>, pads <code>rows</code>, <code>exterior</code> and <code>nodes</code> up to that bucket with zeros, keeps the machine's own count in a traced <code>active_nodes</code> field, and applies the bank through <code>bank_program</code>, a minimal traced matvec. The bucket enters <code>forward._request_compilation_cache_key</code> through <code>ForwardProfile.support_bank</code>, so it selects a program inside the existing compilation cache rather than a second one. The bank is published and reloaded through the existing content store (<code>write_bank</code> / <code>read_bank</code>). At the diverted single-null certificate with 550 realised cells (1,741 nodes, bucket 2048) on one H200 the bank builds in <strong>94.5&ndash;96.1 s</strong> over three runs, reloads in <strong>0.114 s</strong>, reproduces the analytic jet at its kernel-backed moments to <strong>2.9&times;10<sup>-13</sup></strong> relative, costs <strong>zero</strong> further compilations for a second geometry in the same bucket and <strong>one</strong> for a geometry in the next bucket, and occupies <strong>162.3 MB</strong> of operators, leaving <strong>100.7 GiB</strong> free for a batch of 16 slices.</p>
 
 <section id="operator-bank-build"><h2>Build and reload</h2>
 <p>The done-when&apos;s 1 s bound is the <strong>load</strong>, not the build: the bank builds in 94.5&ndash;96.1 s and the published bank reloads in 0.114 s, so the reload is the measured quantity and it sits an order of magnitude inside the bound.</p>
@@ -57,6 +57,7 @@
 <tr><td>geometry in the next bucket</td><td>4096</td><td>2</td><td><strong>1</strong></td></tr>
 </tbody></table>
 <p>The negative control captures one operator as a closure constant. In the same H200 job it compiles <strong>once more</strong> on a same-bucket geometry change (<code>closure_same_bucket_new_compiles: 1</code>) where the traced bank compiles nothing (<code>traced_same_bucket_new_compiles: 0</code>). The same mutation carried into a scratch copy of <code>tests/test_operator_bank_compile.py</code> makes both reuse tests fail (<code>assert 2 == 1</code>, <code>assert 3 == 2</code>) with <code>EXIT=1</code>.</p>
+<p>The bucket reaches that cache through one declared place: <code>ForwardProfile.support_bank</code> carries the machine&apos;s bank and <code>_request_compilation_cache_key</code> reads its static <code>bucket</code>. A profile with no bank keys <code>None</code>; two banks padding to different buckets key differently; two geometries in one bucket key identically, which is why the second geometry costs no compilation. <code>tests/test_operator_bank_compile.py::test_the_compile_key_carries_the_bank_bucket</code> pins the seam, and reverting only the key change makes it fail on <code>assert None == 64</code> with <code>EXIT=1</code> (<code>logs/negative_control_compile_key.log</code>).</p>
 </section>
 
 <section id="operator-bank-memory"><h2>Device memory per shape bucket</h2>
@@ -90,7 +91,8 @@
 <ul>
 <li><code>logs/operator_bank_h200.log</code> &mdash; the H200 measurement (build, load, reproduction, compilations, memory).</li>
 <li><code>logs/negative_control.log</code> &mdash; the captured-operator mutation in a scratch copy, both reuse tests failing.</li>
-<li><code>logs/suite/base/</code> and <code>logs/suite/head/</code> &mdash; the suite arms, one fresh pytest process per file.</li>
+<li><code>logs/negative_control_compile_key.log</code> &mdash; the same test against the pre-repair compile key, failing on <code>assert None == 64</code>.</li>
+<li><code>logs/suite-rerun/base/</code> and <code>logs/suite-rerun/head/</code> &mdash; the suite arms, one fresh pytest process per file.</li>
 </ul>
 </section>
 </main></body>

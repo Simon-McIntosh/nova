@@ -1,0 +1,60 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-28T14:42:48.383Z",
+  "dispatched_at": "2026-10-28T14:37:17Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:90",
+      "id": "done_when-1",
+      "reason": "the node would either be gated on an unmeasurable clause at half its states or pass on a comparison its own evidence says carries no weight; the clause needs an axis reference valid at every state it names, exactly as it now does for the X-point.",
+      "text": "\u00a72's done-when (1) requires the axis within 5e-4 of the minor radius of \"the analytic oracle's axis\" at the limited and diverted trial and converged states, but the cited read-derivative-prototype records the oracle's axis reference as refused at the limited trial and the diverted converged state (\"The oracle's refusals are the limited trial and the diverted convergent state, so the axis comparisons at those two instances are made against a refused reference and carry no weight on their own\"), so two of the four named states have no reference to measure against",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:101",
+      "id": "reasoning-1",
+      "reason": "a step-count bound and an accuracy match are both undefined against a baseline with no converged state, so the section must either cite a present-route diverted-550 convergence or judge the step against the analytic oracle instead.",
+      "text": "\u00a73's done-when (1) requires the step to converge \"in no more Newton steps than the present route takes from the same seed\" and to match \"the present route's\" converged state on the diverted 550-cell certificate, while \u00a74 (:113) now records that the present route stalls on certificate rows today and the two fragments it names cover the limited 550-cell carrier (stopping at scaled residual 0.00123, converged=false) and the diverted 2,000-cell iterate, not a converged diverted 550-cell state",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:87",
+      "id": "anchors_resolve-1",
+      "reason": "the sentence's argument is that the steady state does not pay the whole-nodes fit at all, which holds at either figure and does not move the 0.2 ms bound's plausibility.",
+      "text": "\u00a72 says \"the prototype's 0.4 ms is the fit over all 1,743 nodes\", but the cited read-derivative-prototype table records that row (\"interp (quadratic stencil fit, no kernel autodiff)\") at 0.000512 / 0.000715 s warm per call over all 1743 nodes, i.e. 0.51-0.72 ms, not 0.4 ms",
+      "type": "anchors_resolve",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "f533442c3d9dafc54848f1a9df9727f9ea618af2",
+  "plan_fingerprint": "a8f2068396843de799645bc1678eb532515c1701b5a5a7cf19d5dcfda278e9f4",
+  "plan_slug": "sub-millisecond-forward-path",
+  "plan_version": 5,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261028T143616621399-plan-review-of-sub-millisecond-forward-path",
+  "reviewed_blob_sha": "fec41c3ebc1b06b0daff923cd941aae0da7e37b0",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \u00a72 quotes the prototype's stencil-fit warm cost as 0.4 ms where the cited table's fit row records 0.512/0.715 ms; every other cited symbol and href resolves (support_read.read :78, read_and_book :130, SupportOperands :27/from_rows :45, fixed_points.RowCache 364, maintain_rows 413, solve 646, stencil_nulls._quadratic_fit_matrices 412, _fit_selected_cells 378, forward._request_compilation_cache_key 2731).",
+    "done_when": "a finding \u2014 \u00a72's done-when (1) measures the magnetic axis against \"the analytic oracle's axis\" at four named states, but the section's own cited evidence records that reference as refused at two of them.",
+    "evidence_paths": "pass \u2014 every measured claim resolves to a fragment under docs/evidence/fragments/converged-forward-solve/, which is durable repository content, not a session or node-local path.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags reach new symbols; section numbers appear only as plan prose and evidence-fragment names are cited data, not code identifiers.",
+    "reasoning": "a finding \u2014 \u00a73's done-when (1) anchors both its step bound and its accuracy to \"the present route\" on the diverted 550-cell certificate, a baseline the plan never shows converging.",
+    "single_goal": "pass \u2014 \u00a71 the bank, \u00a72 the read, \u00a73 the step, \u00a74 the assembled converged solve; each carries one deliverable and one gate.",
+    "wiring": "pass \u2014 every depends-on (s2\u2192s1, s3\u2192s1, s4\u2192s2+s3) resolves to a node that exists and matches what each section consumes; s3's gate excludes the read so its s1-only dependency is correct, and the six existing `SolveRoute` values make \u00a74's \"seventh\" value accurate."
+  },
+  "section_digests": {
+    "_document": "6463ca0c5cddeb270554e523f56f43bc296e279984295861655ec23c245eeae7",
+    "s0": "2aeef3dc567f2412561cbf7802dd51784609c34077acd0066ebff3932abd34ac",
+    "s1": "80e332b5e9b6fc57780809e818fb2d50967b00d2aab208be5d16b6b6d9ecbcb3",
+    "s2": "71c8557adf04a2420fb3ce28ff21f2017f40763a9a4c877c69f6f76c704a2cbe",
+    "s3": "175ffea20364bf8caee617967265dfba6a450fe49611d6adf63fa032a5ffaf9f",
+    "s4": "c65f25ea989a99e6f330defe1f8ebc57de5dccaa51b9e793958120cd0dc31e7e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T14:44:46.929802+00:00"
+}

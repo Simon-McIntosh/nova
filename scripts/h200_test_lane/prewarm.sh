@@ -125,6 +125,14 @@ run_payload() {
   compile_row forward-compile-identity pytest \
     "${repository_root}/tests/test_forward_compile_identity.py" \
     -p no:cacheprovider -p cache_guard
+  # The lane's own target. A cache key carries the jitted function's abstract
+  # shapes, so the certificate rows above compile a different key set from the
+  # program the lane requests: warming the drivers alone leaves the lane cold.
+  # Naming a test path clears the inherited `not slow` filter, which collects all
+  # of this file's cases and is exactly the program name the lane runs.
+  compile_row forward-solve-lane pytest \
+    "${repository_root}/tests/test_equilibrium_forward_solve.py" \
+    -p no:cacheprovider -p cache_guard
 
   "${PYTHON}" "${LANE_DIRECTORY}/publish_prewarm_pin.py" \
     --receipt "${receipt}" --pin "${pin}" --revision "${actual_revision}" || status=$?
@@ -133,7 +141,9 @@ run_payload() {
   # cannot report from its own rows alone: the receipts record compile cost
   # whether or not the write reached the disk, so the directory is counted.
   local served_entries
-  served_entries="$(find "${served_directory}" -type f | wc -l)"
+  served_entries="$(
+    "${PYTHON}" -c 'import sys; import cache_guard; print(cache_guard.program_key_entry_count(sys.argv[1]))' "${served_directory}"
+  )"
   printf 'PREWARM_SERVED_ENTRIES=%s\n' "${served_entries}"
   if [[ "${served_entries}" -eq 0 ]]; then
     printf 'PREWARM_UNPERSISTED_DIRECTORY=%s\n' "${served_directory}"

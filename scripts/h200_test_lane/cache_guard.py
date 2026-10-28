@@ -42,6 +42,7 @@ __all__ = [
     "prewarm_run",
     "pin_reference",
     "pinned_cache_directory",
+    "program_key_entry_count",
     "verify_pinned_directory",
     "sample_gpu_utilisation",
     "emit_header",
@@ -69,6 +70,12 @@ PINNED_CACHE_ROOT = Path(
         "/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm",
     )
 )
+
+# JAX writes one file per compiled program, named after the program and its
+# cache key. Everything else under a served directory — the XLA per-fusion
+# autotune subtree in particular — is not an executable the lane can hit, so a
+# count of every file reports a cache far larger than the key set it serves.
+PROGRAM_KEY_SUFFIX = "-cache"
 
 
 def prewarm_run() -> bool:
@@ -206,22 +213,32 @@ def served_directory_state() -> dict[str, Any]:
     configured = jax.config.jax_compilation_cache_dir
     return {
         "served_directory": str(configured) if configured else "",
-        "served_entries": directory_entry_count(configured) if configured else 0,
+        "served_entries": program_key_entry_count(configured) if configured else 0,
     }
 
 
-def directory_entry_count(directory: Path | str) -> int:
-    """Return the number of files written under a cache directory."""
+def program_key_entry_count(directory: Path | str) -> int:
+    """Return the number of executable cache entries a served directory holds.
+
+    A program-key entry is one file JAX writes at the directory's top level and
+    names ``<program>-<key>-cache``: the entries a lane can be served by. The
+    XLA autotune subtree beneath it holds no executable, so counting every file
+    recursively reports thousands of entries no lookup can ever hit.
+    """
     path = Path(directory)
     if not path.is_dir():
         return 0
-    return sum(1 for entry in path.rglob("*") if entry.is_file())
+    return sum(
+        1
+        for entry in path.iterdir()
+        if entry.is_file() and entry.name.endswith(PROGRAM_KEY_SUFFIX)
+    )
 
 
 def verify_pinned_directory() -> dict[str, Any]:
     """Report the pinned directory's entry count and the pre-warm revision."""
     directory = pinned_cache_directory()
-    entries = directory_entry_count(directory)
+    entries = program_key_entry_count(directory)
     bytes_on_disk = 0
     if directory.is_dir():
         for path in directory.rglob("*"):
@@ -335,7 +352,12 @@ def emit_receipt(version_key: str = "", revision: str = "unknown") -> dict[str, 
     if unpersisted:
         marker += " unpersisted=%d" % unpersisted
     receipt["marker"] = marker
-    print("CACHE_GUARD_MARKER=%s" % marker, flush=True)
+    # The marker is emitted from a pytest hook, so pytest's progress line may be
+    # unterminated on stdout when it is written, and without a leading newline
+    # it lands at the tail of that line: a reader grepping for the marker at
+    # line start then finds nothing on a run that passed. The newline anchors
+    # it to a line of its own whatever precedes the write.
+    print("\nCACHE_GUARD_MARKER=%s" % marker, flush=True)
     print("CACHE_GUARD_RECEIPT=%s" % json.dumps(receipt, sort_keys=True), flush=True)
     return receipt
 

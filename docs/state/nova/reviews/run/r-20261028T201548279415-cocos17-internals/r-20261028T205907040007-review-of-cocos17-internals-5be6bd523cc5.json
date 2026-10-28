@@ -1,0 +1,60 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "nova/imas/flux.py:68",
+    "nova/imas/flux.py:82",
+    "nova/biot/contour.py:153"
+  ],
+  "completed_at": "2026-10-28T21:12:34.684Z",
+  "dispatched_at": "2026-10-28T21:01:15Z",
+  "findings": [
+    {
+      "file": "tests/test_cocos17_internals.py",
+      "id": "f1f7cdfa95d",
+      "line": 51,
+      "severity": "non-blocking",
+      "text": "the fitted target and the asserted coefficients both come from the (p_prime, ff_prime) pair the test itself hands to toroidal_current_density, so the assertion holds under any value or sense of TOTAL_FLUX_FACTOR and cannot show the consumer's sign is COCOS 17; it reddens only if Surface.fit's divisor diverges from the owner's factor"
+    },
+    {
+      "file": "docs/evidence/fragments/dd-cocos-ingest/cocos17-internals.html",
+      "id": "f69d7e36eb5",
+      "line": 34,
+      "severity": "non-blocking",
+      "text": "the recorded negative control returns nova/io/signalstore.py::cache_key to its pre-convention identity, a consumer this node measured but did not convert, so no log shows nova/biot/contour.py:55 reddening on its own revert; the plan's literal control asks for a converted consumer"
+    },
+    {
+      "file": "docs/evidence/fragments/dd-cocos-ingest/cocos17-internals.html",
+      "id": "f0a220b3c80",
+      "line": 37,
+      "severity": "non-blocking",
+      "text": "the recorded arms measure only files importing nova.biot.contour and none of the certified forward-solve rows or analytic oracles the section's done_when names, so the unchanged-magnitude claim rests on the algebra (-2*pi equals -TOTAL_FLUX_FACTOR) rather than on a measured row delta"
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "The changed plot path is reached in production from nova/imas/flux.py:68 and nova/imas/flux.py:82 via ContourLoc.plot_fit, and the changed fit from nova/biot/contour.py:153 inside ContourLoc.plot.",
+    "diff": "Read commit by commit from 6ccf43de9a to 5be6bd523: 3 files, 178 insertions and 2 deletions; contour.py takes the owner's factor, the test file adds seven contracts, and the fragment records the audit.",
+    "done_when": "The section's done_when asks for one COCOS 17 test per consumer and a base/head delta; tests/test_cocos17_internals.py:42-130 holds one per consumer and the manifest records both arms, but the contour contract at line 51 fixes no independent COCOS 17 state and no forward-solve row is measured.",
+    "goal": "The node goal is to bring nova's internal consumers into COCOS 17 through the owners; the diff converts the last bare factor in nova/biot/contour.py:55 and nova/biot/contour.py:185 onto TOTAL_FLUX_FACTOR and toroidal_current_density, and I verified at the base that inverse.py, extrapolate.py and pulsedesign.py carry no COCOS literal any more.",
+    "manifest": "The manifest states status complete, names both commits (0b0e70cff, 5be6bd523), records the negative control at EXIT=1 with 3 failed and after_suite green at 7 passed, and its attributions for the seven base failure ids are confirmed verbatim in the gate logs.",
+    "write_paths": "The manifest declares nova/biot/contour.py, tests/test_cocos17_internals.py, docs/evidence/fragments/dd-cocos-ingest/cocos17-internals.html and docs/figures/dd-cocos-ingest/cocos17-internals; all three changed paths sit inside them."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to bring nova's internal consumers into COCOS 17 through their owners, and nova/biot/contour.py:55 and nova/biot/contour.py:185 now take their factor from nova/equilibrium/convention.py instead of the -2*pi literal that was the last bare site in this section's scope.\nVERDICT done_when: the section's done_when asks for one COCOS 17 test per consumer plus a base/head delta; tests/test_cocos17_internals.py:42-130 supplies seven contracts and the manifest records both arms, but the contour contract at tests/test_cocos17_internals.py:51 fixes no independent COCOS 17 state and no forward-solve row is measured.\nVERDICT write_paths: the manifest declares nova/biot/contour.py, tests/test_cocos17_internals.py, docs/evidence/fragments/dd-cocos-ingest/cocos17-internals.html and docs/figures/dd-cocos-ingest/cocos17-internals, and every path in the diff is inside them.\nVERDICT manifest: read; status complete, commits 0b0e70cff and 5be6bd523, negative control 3 failed at EXIT=1, after_suite 0 failing ids, and the seven base failure ids match gate/base/*.log verbatim as git-archive scaffolding.\nVERDICT diff: read commit by commit from 6ccf43de9a to 5be6bd523; 3 files, +178/-2, being the contour factor refactor, the seven-test contract file and the evidence fragment.\nCALL_SITES: nova/imas/flux.py:68, nova/imas/flux.py:82, nova/biot/contour.py:153\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: nova/biot/contour.py:55 replaces the literal -2*np.pi with -TOTAL_FLUX_FACTOR and nova/biot/contour.py:185 rebuilds through toroidal_current_density, which is the one bare factor the census still listed for this node while inverse.py, extrapolate.py and pulsedesign.py already read owners at the base.\nSCORE evidence: 15\nJUSTIFICATION evidence: both arms are recorded with revisions, commands and EXIT lines, the seven base failure ids appear verbatim in gate/base/*.log as git-archive scaffolding, and I reproduced gate/head/tests_test_cocos17_internals.py.log as 7 passed EXIT=0 from a git archive of 5be6bd523, but no forward-solve row or analytic oracle delta is measured.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: git diff 6ccf43de9a 5be6bd523 changes only nova/biot/contour.py, tests/test_cocos17_internals.py and docs/evidence/fragments/dd-cocos-ingest/cocos17-internals.html, all inside the manifest's declared paths, and the open flux-function sign is reported rather than edited.\nSCORE durability: 14\nJUSTIFICATION durability: tests/test_cocos17_internals.py:68 monkeypatches contour_module.TOTAL_FLUX_FACTOR and requires the coefficients to scale by it, so reverting nova/biot/contour.py:55 to the literal reddens the test, while tests/test_cocos17_internals.py:51 compares against the same owner-supplied pair it fitted to and cannot catch a wrong convention.\nSCORE fit: 16\nJUSTIFICATION fit: the change follows the existing biot-imports-equilibrium idiom of nova/biot/boundary.py:11, adds no new production name, and the mechanism comment at nova/biot/contour.py:53-54 states the relation rather than a plan label.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no production definition at all, removing a duplicate of the Grad-Shafranov factor in favour of nova/equilibrium/convention.py, and the new tests import their fixtures from tests/test_signalstore_convention_key.py rather than rebuilding them.\nFINDING tests/test_cocos17_internals.py:51 non-blocking: the fitted target and the asserted coefficients both derive from the (p_prime, ff_prime) pair the test hands to toroidal_current_density, so the assertion holds under any value or sense of TOTAL_FLUX_FACTOR and cannot show the consumer's sign is COCOS 17.\nFINDING docs/evidence/fragments/dd-cocos-ingest/cocos17-internals.html:34 non-blocking: the recorded negative control mutates nova/io/signalstore.py::cache_key, a consumer this node measured but did not convert, so no log shows nova/biot/contour.py:55 reddening on its own revert.\nFINDING docs/evidence/fragments/dd-cocos-ingest/cocos17-internals.html:37 non-blocking: the arms cover only files importing nova.biot.contour and no certified forward-solve row, so the unchanged-magnitude claim rests on the identity of -2*pi and -TOTAL_FLUX_FACTOR rather than a measured row delta.\n",
+  "review_run_id": "r-20261028T205907040007-review-of-cocos17-internals-5be6bd523cc5",
+  "reviewed_base_sha": "6ccf43de9a42707444627079ac5da06b097d9c74",
+  "reviewed_head_sha": "5be6bd523cc523fbc7914b6e7e8d8791efd84ad5",
+  "reviewed_run_id": "r-20261028T201548279415-cocos17-internals",
+  "scores": {
+    "durability": 14,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T21:17:10.625126+00:00",
+  "total": 100
+}

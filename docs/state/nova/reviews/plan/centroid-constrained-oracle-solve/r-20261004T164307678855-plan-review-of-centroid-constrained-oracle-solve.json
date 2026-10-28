@@ -33,9 +33,22 @@
       "finding": "thin_wrapper-1",
       "reason": "the wrappers carry real fixture defaults (bound 0.25 T, per-pair scale and tolerance, the static column map) and the plan's \u00a72 done-when is interface parity in the solver, which a fixture-side builder satisfies; the honest remedy is a code simplification, not a design change.",
       "when": "2026-10-28T05:05:54.104964+00:00"
+    },
+    {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "finding": "duplicate_owner-1",
+      "reason": "the two builders differ in both scope and unknown (response-derived CircuitCurrentUnknown on a machine vs a bounded static exterior field on a coil-less fixture), so the fork is by design; and the column convention is consumed once by the fixture driver, which the plan does not extend \u2014 a single-source-of-truth repair worth landing, but not a change to what the plan builds.",
+      "when": "2026-10-28T05:05:59.773450+00:00"
     }
   ],
   "responses": {
+    "duplicate_owner-1": {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "reason": "the two builders differ in both scope and unknown (response-derived CircuitCurrentUnknown on a machine vs a bounded static exterior field on a coil-less fixture), so the fork is by design; and the column convention is consumed once by the fixture driver, which the plan does not extend \u2014 a single-source-of-truth repair worth landing, but not a change to what the plan builds.",
+      "when": "2026-10-28T05:05:59.773450+00:00"
+    },
     "thin_wrapper-1": {
       "action": "noted",
       "by": "plan-review-reflex",

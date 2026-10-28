@@ -17,6 +17,7 @@ export JAX_PLATFORMS=cuda
 echo "# device $(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head -1)"
 echo "# partition ${SLURM_JOB_PARTITION:-unknown} node $(hostname) job ${SLURM_JOB_ID:-local}"
 echo "# revision $(git -C "$WT" rev-parse HEAD) tree $WT"
+export SELECT=${NC_SELECT:-}
 bash "$WT/scripts/prototypes/tracked_read_h200/negative_control.sh" HEAD \
-  "$RUN/logs/negative_control.log"
+  "${NC_LOG:-$RUN/logs/negative_control.log}"
 echo "WRAPPER_EXIT=$?"

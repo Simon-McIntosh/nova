@@ -40,7 +40,24 @@
   "plan_slug": "mast-nonaxisymmetric-physics",
   "plan_version": 9,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "finding": "anchors_resolve-1",
+      "reason": "the same URL is used by peer plans (`mast-catalog-geometry-recovery.html`) and the document is reachable through the Resources panel built from parsed state, so this is a stale href rather than a missing document, and correcting it does not change what a node builds.",
+      "when": "2026-10-28T05:07:24.623658+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "reason": "the same URL is used by peer plans (`mast-catalog-geometry-recovery.html`) and the document is reachable through the Resources panel built from parsed state, so this is a stale href rather than a missing document, and correcting it does not change what a node builds.",
+      "when": "2026-10-28T05:07:24.623658+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/mast-nonaxisymmetric-physics/r-20261008T011344633559-plan-review-of-mast-nonaxisymmetric-physics.json",
   "review_run_id": "r-20261008T011344633559-plan-review-of-mast-nonaxisymmetric-physics",
   "reviewed_blob_sha": "f4c637f2647391d57495f2397a69813fcedbd687",
   "rubric": "content",

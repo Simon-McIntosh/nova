@@ -6,7 +6,7 @@
 <meta name="reckon-type" content="evidence">
 <meta name="plan-slug" content="solve-wall-breakdown">
 <meta name="plan-title" content="Where a forward solve spends its time, cold and warm">
-<meta name="plan-summary" content="Cold compile of the three per-step programs is 29.0 s and the warm step is 0.286 ms against a 1 ms target.">
+<meta name="plan-summary" content="Cold compile of the three per-step programs is 29.0 s; the warm Newton step is 1,023.7 ms against a 1 ms target, 72 % of it the Jacobian block.">
 <meta name="plan-evidence-for" content="converged-forward-solve">
 <meta name="plan-verifies" content="converged-forward-solve#s4">
 <meta name="plan-recorded-at" content="2026-10-28">
@@ -18,7 +18,7 @@
 <body><main class="plan-doc">
 <h1 id="solve-wall-breakdown-landing">Where a forward solve spends its time, cold and warm</h1>
 
-<p id="solve-wall-breakdown-summary">On one H200, on the published diverted single-null carrier at 550 realised cells (2,105 nodes), the three programs a Newton step calls — the topology read, the booking and the map — compile cold in <strong>29.0 s</strong> in total, of which 21.7 s is XLA compile, 4.0 s is tracing and 1.2 s is lowering, and their first execute is 0.71 s. Warm, with every program compiled and the operand store loaded in 0.18 s, one Newton step costs <strong>0.286 ms</strong>: 0.110 ms of topology read, 0.008 ms of booking and 0.168 ms of map, against the 1 ms target. The linear solve and the batch-width-16 arm did not complete in this run, so the step total is the three measured stages and excludes the linear solve.</p>
+<p id="solve-wall-breakdown-summary">On one H200, on the published diverted single-null carrier at 550 realised cells (2,105 nodes), the three programs a Newton step calls — the topology read, the booking and the map — compile cold in <strong>29.0 s</strong>, of which 21.7 s is XLA compile, 4.0 s is tracing and 1.2 s is lowering, and their first execute is 0.71 s. Warm, with every program compiled and the operand store loaded in 0.18 s, one Newton step costs <strong>1,023.7 ms</strong> against the 1 ms target: the Jacobian block 735.7 ms, the map 166.2 ms, the topology read 107.8 ms, the booking 7.6 ms and the dense linear solve 6.4 ms. At batch width 16 the map falls to 21.4 ms per slice. The largest contributor is the Jacobian block, not the map.</p>
 
 <section id="solve-wall-breakdown-cold"><h2>Cold compile, per stage</h2>
 <p>Each program was compiled in a fresh process with <code>JAX_ENABLE_COMPILATION_CACHE=false</code> and <code>jax.clear_caches()</code> before the trace, so the walls below are cold. The operand store is the content store that already held the carrier and the jet matrices; the carrier took <strong>0.652 s</strong> to load and the jet matrix was a cache hit, loaded in 0.181 s, where its build had taken 114.6 s in the preceding run.</p>
@@ -34,17 +34,19 @@
 </section>
 
 <section id="solve-wall-breakdown-warm"><h2>Warm per-step split against the 1 ms target</h2>
-<p>With every program compiled and the operand store warm, each stage was timed over 50 calls on the same state, blocking on each result, on one H200.</p>
+<p>With every program compiled and the operand store warm, each stage was timed over 50 calls on the same state, blocking on each result, on one H200. The Jacobian block and the dense solve were timed over 20 calls; the residual the solve acts on has 1,650 rows.</p>
+<p>At batch width 16 on the same state the map&#39;s batched program costs 342.7 ms for sixteen states, <strong>21.4 ms per slice</strong>, against 166.2 ms at width 1, a 7.8-fold gain and still 21 times the target.</p>
 <table>
 <thead><tr><th>Newton-step stage</th><th>warm median [ms]</th><th>p95 [ms]</th><th>share of the measured step</th></tr></thead>
 <tbody>
 <tr><td>topology read</td><td>110.2</td><td>110.5</td><td>38.6 %</td></tr>
 <tr><td>booking</td><td>7.6</td><td>7.8</td><td>2.7 %</td></tr>
 <tr><td>map</td><td>167.8</td><td>168.3</td><td>58.7 %</td></tr>
-<tr><td>linear solve</td><td>not measured</td><td></td><td></td></tr>
-<tr><td><strong>measured step</strong></td><td><strong>285.6</strong></td><td></td><td>excludes the linear solve</td></tr>
+<tr><td>Jacobian block</td><td>735.7</td><td>739.3</td><td>71.9 %</td></tr>
+<tr><td>dense linear solve</td><td>6.4</td><td>6.5</td><td>0.6 %</td></tr>
+<tr><td><strong>one Newton step</strong></td><td><strong>1,023.7</strong></td><td></td><td>1,024 times the 1 ms target</td></tr>
 </tbody></table>
-<p>The measured step is 0.286 ms against the 1 ms target, so the three measured stages leave 0.714 ms for the linear solve and everything else the step carries. The topology read and the map dominate and the booking is 2.7 % of the step, so booking is no longer a target. The step count is one Newton step: the receipt measures the per-step stages and does not run the outer solve, so the number of steps the production solve takes from its seed is not recorded here.</p>
+<p>Adding the Jacobian block and the dense solve, one full Newton step is <strong>1,023.7 ms</strong>, 1,024 times the 1 ms target. The Jacobian block is 71.9 % of it, the map 16.2 %, the topology read 10.5 %, the booking 0.7 % and the dense solve 0.6 %. The booking is no longer a target. The step count is one Newton step: the receipt measures the per-step stages and does not run the outer solve, so the number of steps the production solve takes from its seed is not recorded here.</p>
 </section>
 
 <section id="solve-wall-breakdown-cache"><h2>What each compiled program's cache key depends on</h2>
@@ -61,12 +63,30 @@
 
 <section id="solve-wall-breakdown-unmeasured"><h2>What this run did not measure</h2>
 <ul>
-<li>The linear solve. The Jacobian block program was built with a <code>vmap</code> whose <code>in_axes</code> did not match the eleven carried operands, so the step's linear-solve stage has no wall. The measured step total (0.286 ms) excludes it.</li>
-<li>Batch width 16. The batched arm ran after the linear solve, so it did not run.</li>
+<li>The recompile experiment across cell counts.</li>
+<li>A device kernel table. Two profiler traces were taken over twenty warm calls each and both failed with a CUDA error inside the profiler (a branch_index retrieval failure and a CUDA-graph kernel-node failure), so device time is not separated from host gaps here; the stage walls above are host-side walls that include every launch.</li>
 <li>The production route's own end-to-end cold and warm walls. This receipt times the three programs the Newton step calls, not <code>ForwardSolveProfile.solve</code>; the operand build (0.65 s carrier load, 0.18 s jet load) is reported, the solve itself is not.</li>
 <li>Recompile counting by JAX's own compile log. The counter saw no lines at the handler level, so the program count of three is the three <code>lower().compile()</code> calls this harness made, not an independent count.</li>
 </ul>
 <p>Logs: <code>logs/h200c-1298155.log</code> and <code>logs/h200c/stages.json</code> in the run directory for run <code>r-20261028T064446146504-solve-wall-breakdown</code>.</p>
+</section>
+
+<section id="solve-wall-breakdown-gap"><h2>Why this carrier is far slower than the 282-cell lean-map study</h2>
+<p>The October <a href="/nova/research/sub-millisecond-forward-design.html">lean-map study</a> measured the connected read at 282 diverted cells at <strong>6.120 ms</strong> and two field-map contractions at 0.743 ms, with a fused map at 10.176 ms. Here, at 550 cells, the same production read takes <strong>107.8 ms</strong> and the map <strong>166.2 ms</strong>. The cell count doubles, but the read is 17.6 times slower, so cell count alone does not explain it.</p>
+<p>Three of the four candidate explanations are ruled out by the receipts and one is confirmed:</p>
+<ul>
+<li><strong>Not cell count.</strong> 282 to 550 is a factor 1.95 in cells against 17.6 in read wall.</li>
+<li><strong>Not host transfers of the operands.</strong> The operands are device-resident traced arguments: the 550-cell jet matrix is a 166.7 MB store hit loaded in 0.18 s once, and the warm step reuses it, so no per-call transfer appears in the step.</li>
+<li><strong>Not synchronisation inside the stage.</strong> Each stage is timed with a single <code>block_until_ready</code> around one call and 50 repeats; the wall is per call, and the p95 sits within 0.6 % of the median, which a launch-jitter explanation would not produce.</li>
+<li><strong>Different route: confirmed.</strong> The study states that its exact label and dense timings start with fragments and intervals already computed, and that the connected read at 6.120 ms is the production fragment graph, not the contour tree. The production <code>topology.read</code> measured here builds the contour tree and null census on every call. The same study measures the isolated device contour tree at <strong>406.1 ms</strong> at 282 cells, which alone exceeds this carrier's whole 107.8 ms read, so the route, not the mesh, is the difference.</li>
+<li><strong>The map carries the read inside it.</strong> <code>map_moments</code> solves the roots and invokes the selected read before contracting the moments, so the 166.2 ms map contains this read's 107.8 ms plus roughly 58 ms of roots, booking and contractions. That is why the fused map is not the 10.176 ms the study measured for a map whose read was supplied.</li>
+</ul>
+<p>The two largest contributors to the 1,023.7 ms Newton step are:</p>
+<ol>
+<li><strong>The Jacobian block, 735.7 ms (71.9 %).</strong> It materialises all 1,650 columns of the map's Jacobian through traced JVP, one direction at a time. Removing it, for instance by a matrix-free Krylov solve over the same JVP, leaves a step of about <strong>288 ms</strong> — 288 times the target, still not close, but it removes seven tenths of the step.</li>
+<li><strong>The map, 166.2 ms (16.2 %), of which the topology read is 107.8 ms.</strong> Removing the per-call contour tree by supplying the solved stationary points (the route the study measured) would take the map towards the study's 10.176 ms and the step to about <strong>866 ms</strong>; removing the read entirely is not possible while the map depends on membership.</li>
+</ol>
+<p>Together the two contributors are 88 % of the step, and the remaining 12 % (read outside the map, booking, dense solve) cannot close the gap alone. The measured step is 1,024 times the 1 ms target, so the target is not reachable by shaving stages: the Jacobian route and the tree-free read are the two changes the numbers point at.</p>
 </section>
 
 </main></body></html>

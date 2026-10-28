@@ -21,6 +21,7 @@ STAGES = (
     ("topology_read_ms", "topology read"),
     ("booking_ms", "booking"),
     ("map_ms", "map"),
+    ("jacobian_block_ms", "Jacobian block"),
     ("linear_solve_ms", "linear solve"),
 )
 

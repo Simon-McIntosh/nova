@@ -1,0 +1,68 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-28T15:00:53.884Z",
+  "dispatched_at": "2026-10-28T14:52:38Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/sub-millisecond-forward-path.html:101",
+      "id": "done_when-1",
+      "reason": "the node either measures against a non-finite reference and reports a false failure, or silently substitutes a different state, and the plan should name the states where the present route's read is valid (the limited converged and diverted trial states) instead.",
+      "text": "\u00a73's done-when (1) compares \"one fast step's update\" with \"the present route's Newton update\" at the limited and diverted 550-cell trial states, but `read-derivative-prototype` records `read valid: no` for the production read at the limited trial state (every row, including the exact analytic-derivative oracle), and `solve-wall-breakdown` (:113) makes `nova.equilibrium.topology.read` the present step's read stage while `support_read.read` invalidates the whole read on any unconverged point and books non-finite moments from an invalid read (`support_read.py:113`, `support_read.book` :121\u2013127) \u2014 so at the limited trial state the present route has no established finite Newton update to compare against, and the clause is not measurable there as written",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/sub-millisecond-forward-path.html:90",
+      "id": "done_when-2",
+      "reason": "a node cannot tell whether clause (1) is satisfied by an accurate position from an invalid read or must first repair the qualification gate, and it has no plan-sanctioned route to the X-point the clause demands.",
+      "text": "\u00a72's done-when (1) requires the axis within 5e-4 of the minor radius at the limited trial and diverted converged states and an X-point at the diverted trial and converged states, but `read-derivative-prototype` records `read valid: no` for every read at the limited trial state and states \"No row admits an X-point, including every oracle row, so no X-point error is reported\"; \u00a72 changes the derivative source and the rebuild strategy only and says nothing about the validity/qualification gate (`support_read.read` returns `valid = jnp.all(solved.valid) & reading.valid & reading.qualified`, :113) or about the saddle branch \u2014 so the clause does not state whether a read that reports itself invalid may satisfy it, and its X-point requirement has no stated mechanism to make an X-point admitted",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/sub-millisecond-forward-path.html:87",
+      "id": "reasoning-1",
+      "reason": "the 0.2 ms steady-state bound rests on tracking removing the whole stage, and if the ~29 ms of per-call device data movement is not produced by the rebuild the section needs a stated change to the per-call operand transfer before its bound is reachable.",
+      "text": "\u00a72 attributes the present read's whole 107.8 ms to \"rebuilding the connected-domain decision and contour tree\" (\"the tree's loop body alone takes 18.4 ms \u2026 and its fragment and fusion kernels take the rest\"), but the `solve-wall-breakdown` device trace it cites records only 18.394 ms as the `build_contour_tree` while-loop body, a separate 29.4 ms of device memcpy per call (27% of the stage, absent from the plan's accounting), 39.618 ms of unnamed XLA fusion kernels the trace does not place inside the tree, and 17.935 ms of a separate reads' while-loop body \u2014 so the cited trace does not show that the rebuild accounts for the stage the mechanism claims to remove",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/sub-millisecond-forward-path.html:98",
+      "id": "reasoning-2",
+      "reason": "an implementer who converges the inner solve tightly meets both clauses, so the omission costs a sentence rather than a wrong mechanism.",
+      "text": "\u00a73 permits the Jacobian to be \"applied either as one dense block or matrix-free inside a Krylov solve\", while its done-when (1) and (3) both demand a 1e-6 relative agreement (update against the present route, JVP against central differences), and the inner Krylov tolerance that sets the update's agreement is never stated",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "330abce22572052e13649cd6351e8aad39bbf13b",
+  "plan_fingerprint": "29f38d4e7c6aa1a2f993160e4d99c49559d91c0eb06e78c880fb12d5a5d99a33",
+  "plan_slug": "sub-millisecond-forward-path",
+  "plan_version": 6,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261028T145146326508-plan-review-of-sub-millisecond-forward-path",
+  "reviewed_blob_sha": "45a71bea144994db2a8479845015dbee4e00f1b9",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every code anchor in s2 and s3 resolves (`support_read.read` :78, `support_read.read_and_book` :130, `fixed_points.solve` :646, `fixed_points.RowCache` :364 / `maintain_rows` :413, `stencil_nulls._quadratic_fit_matrices` :412, `_fit_selected_cells` :378), and the changed figures now match `read-derivative-prototype` exactly (0.51\u20130.72 ms per call over all 1,743 nodes; 141\u2013144 ms for the jet-consuming read) and `solve-wall-breakdown` (61,330 launches, 18.4 ms tree loop body).",
+    "done_when": "a finding \u2014 \u00a73's comparison needs \"the present route's Newton update\" at the limited trial state the cited evidence records as refused, and \u00a72's axis/X-point clauses measure states where no cited read admits a state or an X-point.",
+    "evidence_paths": "pass \u2014 the plan cites fragments under `docs/evidence/fragments/converged-forward-solve/` and the prototype's drivers and logs under `scripts/prototypes/read_derivatives/`, all in-repo durable paths a later reader can open.",
+    "naming": "pass \u2014 no plan label, stage name, ticket number or version tag reaches a symbol or comment; the names s2 and s3 introduce are existing code owners rather than plan artefacts.",
+    "reasoning": "a finding \u2014 \u00a72's root cause assigns the read's whole 107.8 ms wall to the contour-tree rebuild, while the trace it cites accounts 29.4 ms as device memcpy and places only 18.4 ms in the tree loop body.",
+    "single_goal": "pass \u2014 s2 carries one deliverable (a tracking read that is the step's only read) and s3 one (a step with no per-step autodiff); s2's launch/rebuild table and s3's compile bound are measurements of those same deliverables, not second goals.",
+    "wiring": "pass \u2014 s2 and s3 each declare `depends-on` s1 (the coupling operand and the operator bank), s4 depends on both, every link resolves to a section that exists, and the `precision-budget` decision their done-whens cite is locked (`data-choice=\"read-1mm-flux-1e-4\"`), so the wiring gap earlier reviews raised is closed."
+  },
+  "section_digests": {
+    "_document": "6463ca0c5cddeb270554e523f56f43bc296e279984295861655ec23c245eeae7",
+    "s0": "2aeef3dc567f2412561cbf7802dd51784609c34077acd0066ebff3932abd34ac",
+    "s1": "80e332b5e9b6fc57780809e818fb2d50967b00d2aab208be5d16b6b6d9ecbcb3",
+    "s2": "a74fd3429e99d638980bef0ae8622990abff8dffd2d072872715f3dd5591cf51",
+    "s3": "d8ebbe0defd45df1847ace512e04fcc3d822ae199f89b2744b0e8fb62ea8fb32",
+    "s4": "c65f25ea989a99e6f330defe1f8ebc57de5dccaa51b9e793958120cd0dc31e7e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T15:03:18.413259+00:00"
+}

@@ -1,0 +1,52 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run carries no baseline_suite or after_suite arm and no agent that can reach its two positions: its manifest records tests: not-run (a prototype whose write scope holds no test path) and the run directory holds no suite log \u2014 only scripts/prototypes/read_derivatives/logs/{limited,diverted}-550.log and negative-control.log. The count is therefore zero by that absence, not by a green pair, and no failing id exists to attribute.",
+  "call_sites": [],
+  "completed_at": "2026-10-28T08:57:44.672Z",
+  "dispatched_at": "2026-10-28T08:46:20Z",
+  "findings": [
+    {
+      "detail": "DIRECTION at :201 admits under, below, above, over, exceeds and exceeding. When none matches, :213 continues out of the sentence before any wall is read, and the only loud fallback is the document-wide `compared == 0` guard at :232, which other sentences satisfy. Verified by mutation on the delivered fragment: replacing the fixed clause with 'compiles in 11.798116 s and 11.791027 s, within the 10 s target.' prints CONSISTENT and exits 0, and the same holds for 'which meets the 10 s target.' and 'against the 10 s target.'. The delivered sentence is correct and the regression it names is caught, so this does not hold the node; it narrows how much the guard protects against the next edit.",
+      "file": "scripts/prototypes/read_derivatives/check_fragment.py",
+      "id": "faf6080f42c",
+      "line": 213,
+      "severity": "non-blocking",
+      "summary": "The new target comparison recognises only six direction words, so a sentence that states the same wrong claim with a synonym is skipped with no comparison and the checker still prints CONSISTENT."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "no production call site reaches the delta: check_fragment.py is invoked only by hand as documented in its own docstring at line 10 and is imported or executed by no other path in the tree, and the fragment is documentation under docs/evidence, so neither is reachable from nova/.",
+    "diff": "read commit by commit from c4679e4371cc64a234b03210c24c4122af955866 to 265f8d2b00ca9e664ecc07fc90782ccb9a8909cd: 3f2896207 rewrites one sentence of the fragment and 265f8d2b0 adds 38 lines to check_fragment.py, nothing else.",
+    "done_when": "the done_when's three clauses were met at the base review; this delta repairs that review's one blocking finding (the compile reading at fragment line 15 now places 11.798116 s and 11.791027 s above the 10 s target) and adds a checker arm for it, while the two non-blocking proxies recorded there (HLO counted at lowering rather than after the variadic-op splitter, oracle and fd compiled on a 64-node block) still stand and are unaffected by this delta.",
+    "goal": "the source node's goal is to prototype cheaper second derivatives for the topology read against the analytic oracle; the delta reviewed here changes no measurement and only corrects and guards how docs/evidence/fragments/converged-forward-solve/read-derivative-prototype.html states one compile comparison.",
+    "manifest": "read at r-20261028T064709575901-read-derivative-prototype/manifest.md; it records status complete, lists 265f8d2b0 in commits and in the checkpoint, records tests: not-run, and its negative_control_log at scripts/prototypes/read_derivatives/logs/negative-control.log now carries the round-2 arm whose two target lines and EXIT=1 this review reproduced independently.",
+    "write_paths": "the source manifest declares scripts/prototypes/read_derivatives, the evidence fragment and a figure directory; both paths in this diff are inside those grants and the figure grant is still unused."
+  },
+  "justifications": {
+    "durability": "the new arm at scripts/prototypes/read_derivatives/check_fragment.py:199-233 reddens on a restored 'well under the 10 s target', which this review reproduced (EXIT=1, two target lines) and which is recorded in scripts/prototypes/read_derivatives/logs/negative-control.log, but a synonym such as 'within the 10 s target' bypasses the sentence at :213 and the checker still prints CONSISTENT.",
+    "evidence": "scripts/prototypes/read_derivatives/check_fragment.py prints CONSISTENT on the delivered fragment and prints exactly the two read walls when run against the pre-fix fragment taken from c4679e437, reproduced by this review; the values themselves still round from scripts/prototypes/read_derivatives/logs/{limited,diverted}-550.json, but the 10 s target the sentence is checked against is quoted from prose and has no independent source.",
+    "fit": "the added block follows the module's own idiom of module-level compiled patterns and an accumulating problems list, as at scripts/prototypes/read_derivatives/check_fragment.py:171-195, and introduces no plan label, run id or forbidden name.",
+    "goal_fidelity": "3f2896207 repairs the blocking defect the prior review named at docs/evidence/fragments/converged-forward-solve/read-derivative-prototype.html:15, which now places 11.798116 s and 11.791027 s above rather than below the 10 s target, and the clause it adds agrees with the recommendation at :32.",
+    "reuse": "no repository owner exists for reconciling a prose wall against a stated target: the closest, tests/test_outboard_census_receipt_consistency.py, asserts a committed receipt rather than parsing a document's prose, and the addition extends the one script that already owns fragment reconciliation rather than forking it.",
+    "scope_discipline": "the diff from c4679e4371cc64 to 265f8d2b00ca touches only docs/evidence/fragments/converged-forward-solve/read-derivative-prototype.html (1 line) and scripts/prototypes/read_derivatives/check_fragment.py (38 lines), both inside the grants the source manifest declares, and no product module changed."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source node's goal is to prototype cheaper second derivatives for the analytic-kernel read; the reviewed delta (3f2896207, 265f8d2b0) changes no measurement and only corrects and guards one compile comparison in docs/evidence/fragments/converged-forward-solve/read-derivative-prototype.html:15.\nVERDICT done_when: the done_when's three clauses were met at the base review; this delta repairs that review's one blocking finding (fragment:15 now places 11.798116 s and 11.791027 s above rather than below the 10 s target) and adds a checker arm for it, leaving the two recorded non-blocking proxies (pre-splitter HLO count, 64-node compile block) standing and untouched.\nVERDICT write_paths: the source manifest declares scripts/prototypes/read_derivatives, the evidence fragment and a figure directory; both changed paths are inside those grants and the figure grant is unused.\nVERDICT manifest: read at r-20261028T064709575901-read-derivative-prototype/manifest.md; status complete, 265f8d2b0 listed in commits and checkpoint, tests: not-run, and negative_control_log scripts/prototypes/read_derivatives/logs/negative-control.log carries the round-2 arm that this review reproduced.\nVERDICT diff: read commit by commit from c4679e4371cc64a234b03210c24c4122af955866 to 265f8d2b00ca9e664ecc07fc90782ccb9a8909cd; 3f2896207 rewrites one sentence of the fragment, 265f8d2b0 adds 38 lines to scripts/prototypes/read_derivatives/check_fragment.py, and nothing else changes.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/converged-forward-solve/read-derivative-prototype.html:15 now states 11.798116 s and 11.791027 s are above the 10 s target, which agrees with the recommendation paragraph at :32 that the stencil fit is the path meeting the compile requirement.\nSCORE evidence: 15\nJUSTIFICATION evidence: scripts/prototypes/read_derivatives/check_fragment.py prints CONSISTENT on the delivered fragment and prints exactly the two read walls against the pre-fix-fragment taken from c4679e437, but the 10 s target it compares against is quoted from prose at :204 and has no independent source.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff touches only docs/evidence/fragments/converged-forward-solve/read-derivative-prototype.html:15 and scripts/prototypes/read_derivatives/check_fragment.py:199-233, both inside the grants the source manifest declares, and no product module is changed.\nSCORE durability: 14\nJUSTIFICATION durability: scripts/prototypes/read_derivatives/check_fragment.py:218-230 reddens on a restored 'well under the 10 s target' (reproduced here, EXIT=1), but :213 skips any sentence whose direction word is a synonym, so the same defect phrased 'within the 10 s target' still prints CONSISTENT.\nSCORE fit: 18\nJUSTIFICATION fit: scripts/prototypes/read_derivatives/check_fragment.py:199-233 follows the module-level compiled-pattern and problems-list idiom already at :161-195, and adds no plan label, run id or forbidden name.\nSCORE reuse: 19\nJUSTIFICATION reuse: no owner exists for reconciling a prose wall against a stated target (tests/test_outboard_census_receipt_consistency.py asserts a committed receipt rather than parsing document prose), and the addition extends the one script that already owns fragment reconciliation.\nFINDING scripts/prototypes/read_derivatives/check_fragment.py:213 non-blocking: a sentence stating the same wrong claim with a synonym (within, meets, against) is skipped before any wall is compared, and the document-wide compared==0 fallback at :232 is satisfied by other sentences, so 'compiles in 11.798116 s and 11.791027 s, within the 10 s target.' prints CONSISTENT under the guard added to catch exactly that defect.\n",
+  "review_run_id": "r-20261028T084347706394-review-of-read-derivative-prototype-265f8d2b00ca",
+  "reviewed_base_sha": "c4679e4371cc64a234b03210c24c4122af955866",
+  "reviewed_head_sha": "265f8d2b00ca9e664ecc07fc90782ccb9a8909cd",
+  "reviewed_run_id": "r-20261028T064709575901-read-derivative-prototype",
+  "scores": {
+    "durability": 14,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T08:57:45.759085+00:00",
+  "total": 104
+}

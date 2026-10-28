@@ -289,9 +289,7 @@ def main():
             )
             label = f"{name}:{state_name}"
             row, executable = timed(function, operands, label)
-            del executable
-            result = jax.jit(function)(*operands)
-            jax.block_until_ready(result)
+            result = jax.block_until_ready(executable(*operands))
             x_points = np.asarray(result.x_points)[np.asarray(result.x_point_valid)]
             row.update(
                 state=state_name,

@@ -79,9 +79,22 @@
       "finding": "done_when-1",
       "reason": "",
       "when": "2026-10-28T14:08:49.194064+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "anchors_resolve-1",
+      "reason": "",
+      "when": "2026-10-28T14:09:05.535405+00:00"
     }
   ],
   "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-28T14:09:05.535405+00:00"
+    },
     "done_when-1": {
       "action": "acted",
       "by": "",

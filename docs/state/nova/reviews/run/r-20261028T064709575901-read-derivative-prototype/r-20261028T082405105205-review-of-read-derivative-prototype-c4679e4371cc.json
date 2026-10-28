@@ -1,0 +1,68 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run carries no baseline_suite or after_suite arm (its manifest records tests: not-run, a prototype whose write scope holds no test path), so no arm exists from which to derive an added-failure delta; the count is zero by that absence rather than by a green pair.",
+  "call_sites": [],
+  "completed_at": "2026-10-28T08:34:14.890Z",
+  "dispatched_at": "2026-10-28T08:26:21Z",
+  "findings": [
+    {
+      "detail": "This sentence was added by 94b7a1380, the commit whose stated purpose was to quote the measured compile walls. It states the opposite of what its own figure shows: 11.798116 > 10. The contradiction is internal to the fragment, so a reader cannot resolve it from either paragraph, and the checker does not read prose compile claims.",
+      "file": "docs/evidence/fragments/converged-forward-solve/read-derivative-prototype.html",
+      "id": "fe7ebbb0965",
+      "line": 15,
+      "severity": "blocking",
+      "summary": "The compile reading says the read program's 11.798116 s and 11.791027 s are \"well under the 10 s target\", but both exceed 10 s, and the recommendation at line 32 calls the 10 s target the compile requirement that the stencil fit meets and the read does not."
+    },
+    {
+      "detail": "The fragment says \"Of the eight variant reads, one admits a valid, qualified state\" and \"of the four oracle reads, two do\"; patterns 1 and 2 at :173 and :177 expect \"<count> of the <total> variant reads admits\" and so never match, leaving only the \"three of the twelve rows overall\" claim guarded. Verified by mutation: rewriting those two claims to \"six admit\" and \"three do\" still prints CONSISTENT and exits 0, so the commit message's claim to require \"any count claimed over the reads\" to match the receipts holds for one of three.",
+      "file": "scripts/prototypes/read_derivatives/check_fragment.py",
+      "id": "f288b0d79eb",
+      "line": 171,
+      "severity": "non-blocking",
+      "summary": "The validity-tally guard fires on one of the three tally claims the delivered fragment makes, because two of its four patterns do not match the phrasing 678985cc7 wrote."
+    },
+    {
+      "detail": "Verified by mutation: changing the limited-converged interp axis error from 3.626 to 9.999 and the limited-converged fd axis error from 0.046 to 0.999 both still print CONSISTENT and exit 0. The prior review's blocking finding was that fragment figures matched no receipt; leaving two numeric columns of the same table unguarded keeps that class of defect open, even though the delivered values do match.",
+      "file": "scripts/prototypes/read_derivatives/check_fragment.py",
+      "id": "fce15b80261",
+      "line": 105,
+      "severity": "non-blocking",
+      "summary": "The error-table check compares only the two validity cells, so neither the axis-error nor the boundary-flux-error column is ever reconciled with the receipts that hold axis_error_m and boundary_flux_error_relative."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "no production call site reaches the delta: check_fragment.py is imported by nothing and the fragment is documentation, so neither is reachable from nova/.",
+    "diff": "read commit by commit from c467a6421 to c4679e437; three commits change 16 lines of the fragment and add a 198-line checker, nothing else.",
+    "done_when": "the done_when's three clauses were met by the base review; this delta repairs two of that review's blocking evidence findings and leaves the two recorded non-blocking proxies standing (HLO counted at lowering rather than after the variadic-op splitter, oracle and fd compiled on a 64-node block).",
+    "goal": "the source node's goal is to prototype cheaper second derivatives for the topology read against the analytic oracle; the delta reviewed here changes no measurement and only corrects and guards how the fragment reports it.",
+    "manifest": "read at r-20261028T064709575901-read-derivative-prototype/manifest.md; it records status complete, the checker commit in its checkpoint, tests: not-run and a negative_control_log path that exists and ends EXIT=1.",
+    "write_paths": "the source manifest declares scripts/prototypes/read_derivatives, the evidence fragment and a figures directory; both paths in this diff are inside them and the figures grant is still unused."
+  },
+  "justifications": {
+    "durability": "check_fragment.py:70-103 reddens on a compile-table mutation and :112-140 on a validity-cell mutation, but its tally guard at :171-193 matches one of the three validity claims in the delivered text and never compares the error table's numeric columns.",
+    "evidence": "every figure in the compile table (lines 10-13) rounds from scripts/prototypes/read_derivatives/logs/{limited,diverted}-550.json at the precision printed, but line 15's compile reading states that 11.798116 s and 11.791027 s are \"well under the 10 s target\".",
+    "fit": "check_fragment.py follows the sibling prototype script idiom in the same tree, with a module docstring, pathlib roots resolved from __file__ and a bare print/exit contract as in scripts/prototypes/read_route/measure.py.",
+    "goal_fidelity": "the three commits repair both prior blocking defects in docs/evidence/fragments/converged-forward-solve/read-derivative-prototype.html and add scripts/prototypes/read_derivatives/check_fragment.py, but line 15 introduces a claim its own numbers contradict, so the delta serves the node goal imperfectly.",
+    "reuse": "the repository owns receipt reconciliation only as per-document tests such as tests/test_outboard_census_receipt_consistency.py, which assumes a committed receipt; no shared helper exists to extend, and check_fragment.py needs to run against gitignored receipts.",
+    "scope_discipline": "the diff from c467a6421 to c4679e437 touches only the evidence fragment and check_fragment.py, both inside the scripts/prototypes/read_derivatives and fragment grants the source manifest declares."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source node's goal is to prototype cheaper second derivatives for the topology read against the analytic oracle; the reviewed delta (94b7a1380, 678985cc7, c4679e437) changes no measurement and only corrects and guards how docs/evidence/fragments/converged-forward-solve/read-derivative-prototype.html reports it.\nVERDICT done_when: the done_when's three clauses were met at the base review; this delta repairs both blocking evidence findings there (the compile table at fragment lines 10-13 now rounds from scripts/prototypes/read_derivatives/logs/{limited,diverted}-550.json, and line 29 states the receipts' own tally) and leaves the two recorded non-blocking proxies standing, the pre-splitter HLO count and the 64-node compile block.\nVERDICT write_paths: the source manifest declares scripts/prototypes/read_derivatives, the evidence fragment and a figures directory; both paths in the diff are inside them and the figures grant is unused.\nVERDICT manifest: read; it records status complete, the checker commit in its checkpoint, tests: not-run, and a negative_control_log path that exists on disk and ends EXIT=1.\nVERDICT diff: read commit by commit from c467a64215a27179f1143bebebb42e11fa8844c4 to c4679e4371cc64a234b03210c24c4122af955866; three commits change 16 fragment lines and add a 198-line checker, nothing else.\nCALL_SITES: none\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/converged-forward-solve/read-derivative-prototype.html:15 introduces a false statement in the very paragraph 94b7a1380 rewrote to be accurate.\nSCORE evidence: 14\nJUSTIFICATION evidence: every compile-table value at docs/evidence/fragments/converged-forward-solve/read-derivative-prototype.html:10-13 rounds from scripts/prototypes/read_derivatives/logs/{limited,diverted}-550.json, but line 15 misstates the same figures.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff touches only the fragment and scripts/prototypes/read_derivatives/check_fragment.py, both inside the grants the source manifest declares.\nSCORE durability: 11\nJUSTIFICATION durability: scripts/prototypes/read_derivatives/check_fragment.py:171 guards one of the three validity claims, and :105 never compares the error table's numeric columns, though the compile-table and per-cell validity arms do redden when mutated.\nSCORE fit: 17\nJUSTIFICATION fit: scripts/prototypes/read_derivatives/check_fragment.py:18-24 resolves its roots from __file__ in the idiom of scripts/prototypes/read_route/measure.py, with no forbidden name or plan label.\nSCORE reuse: 16\nJUSTIFICATION reuse: the nearest owner of receipt reconciliation is tests/test_outboard_census_receipt_consistency.py, a bespoke per-document test that assumes a committed receipt, so no shared helper is forked here.\nFINDING docs/evidence/fragments/converged-forward-solve/read-derivative-prototype.html:15 blocking: the compile reading calls 11.798116 s and 11.791027 s \"well under the 10 s target\" when both exceed it, contradicting the recommendation at line 32 in the same fragment.\nFINDING scripts/prototypes/read_derivatives/check_fragment.py:171 non-blocking: the tally guard matches one of the three validity claims, so mutating \"one admits\" to \"six admit\" and \"two do\" to \"three do\" still exits CONSISTENT.\nFINDING scripts/prototypes/read_derivatives/check_fragment.py:105 non-blocking: the error table's axis-error and boundary-flux-error columns are never compared with their receipt fields, and mutating 3.626 to 9.999 still exits CONSISTENT.\n",
+  "review_run_id": "r-20261028T082405105205-review-of-read-derivative-prototype-c4679e4371cc",
+  "reviewed_base_sha": "c467a64215a27179f1143bebebb42e11fa8844c4",
+  "reviewed_head_sha": "c4679e4371cc64a234b03210c24c4122af955866",
+  "reviewed_run_id": "r-20261028T064709575901-read-derivative-prototype",
+  "scores": {
+    "durability": 11,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 15,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T08:36:50.388037+00:00",
+  "total": 93
+}

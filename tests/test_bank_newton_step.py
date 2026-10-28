@@ -8,6 +8,8 @@ configure_dtypes()
 import jax
 import jax.numpy as jnp
 import numpy as np
+from typing import NamedTuple
+from types import SimpleNamespace
 
 from nova.equilibrium import clip_quadrature, current, support_read, topology
 
@@ -150,3 +152,97 @@ def test_krylov_condition_estimate_resolves_two_scales():
     matrix = jnp.diag(jnp.asarray([1.0, 4.0]))
     estimate = support_read._krylov_condition_estimate(lambda value: matrix @ value, 2)
     np.testing.assert_allclose(estimate, 4.0, rtol=1e-12)
+
+
+def test_bank_jvp_composes_flux_and_level_derivatives(monkeypatch):
+    """The bank carries all three booking inputs into the moment residual."""
+
+    class Reading(NamedTuple):
+        field_coefficients: jax.Array
+        axis_flux: jax.Array
+        boundary_flux: jax.Array
+        axis: jax.Array
+        boundary: jax.Array
+
+    class Field:
+        def __init__(self, jets):
+            self.jets = jets
+
+        def sampled_coefficient(self, geometry):
+            del geometry
+            return jnp.asarray([[self.jets[0, 0], 0.0, 0.0, 0.0, 0.0, 0.0]])
+
+        def value(self, point):
+            return self.jets[0, 0] * point[0]
+
+    def book(psi, read, geometry, profile, quadrature):
+        del geometry, profile, quadrature
+        value = (
+            psi[0, 0]
+            + 2.0 * read.field_coefficients[0, 0]
+            + 3.0 * read.axis_flux
+            + 4.0 * read.boundary_flux
+        )
+        return current.Booking(
+            jnp.asarray([value]),
+            jnp.zeros(1),
+            jnp.zeros(1),
+            value,
+            jnp.asarray(1.0),
+            jnp.asarray(True),
+        )
+
+    def book_tangent(
+        psi,
+        psi_tangent,
+        read,
+        field_tangent,
+        axis_tangent,
+        boundary_tangent,
+        geometry,
+        profile,
+        density_gradient,
+        quadrature,
+        booked,
+    ):
+        del psi, read, geometry, profile, density_gradient, quadrature, booked
+        value = (
+            psi_tangent[0, 0]
+            + 2.0 * field_tangent[0, 0]
+            + 3.0 * axis_tangent
+            + 4.0 * boundary_tangent
+        )
+        return clip_quadrature.ClippedCurrentMoments(
+            jnp.asarray([value]), jnp.zeros(1), jnp.zeros(1)
+        )
+
+    monkeypatch.setattr(
+        support_read.fixed_points, "field_from_jets", lambda jets, *args: Field(jets)
+    )
+    monkeypatch.setattr(current, "book", book)
+    monkeypatch.setattr(current, "book_tangent", book_tangent)
+    rows = jnp.zeros((1, 1, 3, 6)).at[0, 0, 0, 0].set(2.0)
+    operands = SimpleNamespace(
+        rows=rows,
+        exterior=jnp.zeros((1, 6)),
+        sample_index=jnp.zeros((1, 1), dtype=jnp.int32),
+        geometry=object(),
+        mesh=object(),
+    )
+    reading = Reading(
+        jnp.zeros((1, 6)), 0.0, 0.0, jnp.asarray([1.0, 0.0]), jnp.asarray([2.0, 0.0])
+    )
+    support = SimpleNamespace(reading=reading, valid=jnp.asarray(True))
+    moments = (jnp.zeros(1), jnp.zeros(1), jnp.zeros(1))
+    direction = (jnp.ones(1), jnp.zeros(1), jnp.zeros(1))
+    applied = support_read.step_jacobian_vector(
+        operands, moments, direction, support, None, None, None
+    )
+    step = 1e-5
+    plus = tuple(a + step * d for a, d in zip(moments, direction, strict=True))
+    minus = tuple(a - step * d for a, d in zip(moments, direction, strict=True))
+    high = support_read.step_residual(operands, moments, plus, support, None, None)
+    low = support_read.step_residual(operands, moments, minus, support, None, None)
+    difference = (high.residual[0] - low.residual[0]) / (2 * step)
+    np.testing.assert_allclose(applied[0], difference, rtol=1e-10)
+    np.testing.assert_allclose(applied[0], -27.0, rtol=1e-10)

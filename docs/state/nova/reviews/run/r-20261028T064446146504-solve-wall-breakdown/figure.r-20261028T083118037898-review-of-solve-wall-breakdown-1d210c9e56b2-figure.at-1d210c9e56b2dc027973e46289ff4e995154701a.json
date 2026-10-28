@@ -1,0 +1,63 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-28T08:40:13.588Z",
+  "dispatched_at": "2026-10-28T08:33:18Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/solve_wall_breakdown/figure.py",
+      "id": "f7c46d23432",
+      "line": 49,
+      "severity": "non-blocking",
+      "summary": "The bars have no common origin because the x axis is logarithmic, so a bar's length encodes log(value) rather than value: the 7.6 ms booking bar renders about three quarters as long as the 107.8 ms topology read and nearly as long as the 21.4 ms grey bar, though it is 14 times smaller than the first and 2.8 times smaller than the second. A reader who compares bar lengths instead of reading the printed values misranks the stages. The log axis is a deliberate choice stated in the module docstring, and every bar carries its value, so the figure still reads; a dot or lollipop mark anchored at the target would encode the ratios the prose relies on."
+    },
+    {
+      "file": "scripts/prototypes/solve_wall_breakdown/figure.py",
+      "id": "f8c072dfef7",
+      "line": 60,
+      "severity": "non-blocking",
+      "summary": "The bar values and the '1 ms target' annotation are drawn at 11 pt, while the data-ink style sheet this script loads sets font.size and the tick label sizes to 14 pt. The numbers therefore render smaller than the tick labels on the same canvas, against the repository rule that a figure uses one text size throughout. Legible at 1400 x 720 px, but inconsistent within one figure and with other figures built from the same sheet."
+    },
+    {
+      "file": "scripts/prototypes/solve_wall_breakdown/figure.py",
+      "id": "fb6938e49a0",
+      "line": 50,
+      "severity": "non-blocking",
+      "summary": "The x axis is labelled 'wall per stage [ms]', but the grey bar is not a stage: it is the map's wall per solve at batch width 16, a different quantity on the same axis, and it breaks the blue bars' summing property. The caption and the bar's own series label both disambiguate it, so no distinction is lost; the defect is that the axis label alone would mislead a reader who reads the bars without the caption."
+    },
+    {
+      "file": "scripts/prototypes/solve_wall_breakdown/figure.py",
+      "id": "f5c718c7570",
+      "line": 51,
+      "severity": "non-blocking",
+      "summary": "The 1 ms target line is drawn in red, where the repository's plotting rules give thresholds and clamps a 1.2 pt dotted neutral grey and reserve red for marks that are past a limit. Every bar here is past the target, so the red reads as consistent with the message rather than wrong, and it does not impede a reader; recorded because the encoding differs from the rule as written and the same script will be reused for figures where not every stage breaches the target."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "pass \u2014 near-black category labels and values sit on a white ground and clear it comfortably; the red target label and dotted line are dark enough to read against white; the grey width-16 bar reads as data rather than fading out.",
+    "data_ink": "pass \u2014 six solid bars and one-line value labels carry essentially all the ink; there are no gridlines, fills, shading or legend box, and the tick marks and axis rule are the only furniture.",
+    "decoration": "pass \u2014 white ground, top and right spines removed, no gradient or background wash; the only non-data mark is the dotted 1 ms threshold, which the caption names as the target.",
+    "label_collision": "pass \u2014 nothing is clipped or overlapping on the 1400 x 720 px render: content sits at least 17 px inside every edge, the longest category label ends left of the axis, each value sits in clear space beyond its bar end, and the target annotation sits above the top bar rather than on it.",
+    "legibility": "pass \u2014 every category label, bar and printed value reads at a glance from the 735.7 ms Jacobian bar down to the 6.4 ms linear solve without zoom; the smallest printed value, 6.4, is short enough to stay clear of the neighbouring labels on its own row.",
+    "table_form": "pass \u2014 the figure's message is each stage's distance from a 1 ms target, which is spatial rather than tabular; the same numbers appear in the evidence prose, but the figure does not re-depict a table as an image."
+  },
+  "project": "nova",
+  "raw_text": "RUBRIC legibility: pass \u2014 every category label, bar and printed value reads at a glance on the 1400 x 720 px render, from the 735.7 ms Jacobian bar down to the 6.4 ms linear solve, without zoom.\nRUBRIC data_ink: pass \u2014 six solid bars plus one-line value labels carry the ink; no gridlines, fills, shading or legend box.\nRUBRIC decoration: pass \u2014 white ground, top and right spines removed, and the only non-data mark is a 1.2 pt dotted line at 1 ms that the caption names as the target.\nRUBRIC contrast: pass \u2014 near-black labels and values on white, the grey batch-16 bar still reads as data, and the red target annotation clears the white ground.\nRUBRIC table_form: pass \u2014 each stage's distance from a threshold is a spatial message, not a table's content, and the figure does not re-depict the neighbouring numbers as an image.\nRUBRIC label_collision: pass \u2014 nothing is clipped or overlapping; content sits at least 17 px inside every edge, category labels end left of the axis, values in clear space beyond each bar end, and the target annotation above the top bar.\nFINDING scripts/prototypes/solve_wall_breakdown/figure.py:49 non-blocking: bars start from the axis edge on a logarithmic scale, so bar length encodes log(value) rather than value and the 7.6 ms booking bar renders nearly as long as the 21.4 ms one; only the printed values correct the misreading.\nFINDING scripts/prototypes/solve_wall_breakdown/figure.py:60 non-blocking: the value labels and the target annotation are 11 pt against the loaded style sheet's 14 pt for body and tick text, so the numbers render smaller than the rest of the same canvas.\nFINDING scripts/prototypes/solve_wall_breakdown/figure.py:50 non-blocking: the axis label 'wall per stage [ms]' covers a grey bar that is the map's per-solve wall at batch width 16 rather than a stage of one step; the caption disambiguates it, the axis label alone does not.\nFINDING scripts/prototypes/solve_wall_breakdown/figure.py:51 non-blocking: the 1 ms target is purely a threshold, which the plotting rules give a neutral grey dotted line and the code draws red; harmless here because every bar breaches the target, but a different encoding from the rule the script is reused under.",
+  "review_run_id": "r-20261028T083118037898-review-of-solve-wall-breakdown-1d210c9e56b2-figure",
+  "reviewed_base_sha": "f41ee6ee18f8ae4f3bf9e64ae7fbaeee186a5f2e",
+  "reviewed_head_sha": "1d210c9e56b2dc027973e46289ff4e995154701a",
+  "reviewed_run_id": "r-20261028T064446146504-solve-wall-breakdown",
+  "rubric": "figure",
+  "rubric_items": [
+    "legibility",
+    "data_ink",
+    "decoration",
+    "contrast",
+    "table_form",
+    "label_collision"
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T08:41:59.987757+00:00",
+  "total": null
+}

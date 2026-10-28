@@ -69,6 +69,22 @@ measures the inputs the solver would receive rather than a compile.</p>
 </tbody>
 </table>
 
+<p>All twenty are refused, and none was deleted or rewritten. Two independent
+facts move under them. The declared current differs on six receipts, all of them
+the two diverted cases, where the fixture's exterior current has since been
+recomputed. The carrier digest differs on every one: the mesh this tree builds
+is not the mesh the September solves ran on, and the cell count moved with it on
+eight of them. So the refusal is not a tolerance tightening — the September
+receipts describe a carrier that no longer exists, and that is why a served row
+could report a residual for a solve this tree cannot reproduce.</p>
+
+<p>One receipt has no declared current to compare against at all: the builder
+cannot construct <code>weak-rotation-reactor-static</code> at 110 cells and
+raises <code>cell edges must have non-zero length</code>, so the driver would
+have no row to serve even if the receipt were current. That refusal is reported
+by name rather than swallowed.</p>
+
+
 <p>The merge <code>50837db4d</code> carries no change to
 <code>nova/</code>, <code>tests/</code>, <code>benchmarks/</code> or
 <code>scripts/</code> against its first parent
@@ -112,20 +128,83 @@ they disagree. At base it fails in 17 s:</p>
 EXIT=1</code></pre>
 
 <p>A second test in the same file, <code>slow</code> marked, runs the row and
-asserts the terminal residual is inside the qualification bound. It was not run
-inside this node's window: the row needs a full XLA compile and a twelve-trip
-Newton solve, and the CPU allocation did not reach a terminal receipt before the
-node's time was spent.</p>
+asserts the terminal residual is inside the qualification bound. The row needs a
+full XLA compile and a twelve-trip Newton solve, so it is the gate a GPU lane or
+a long CPU lane carries rather than the fast arm.</p>
 
-<h3 id="diverted-300-regression-owner">Where the repair belongs</h3>
+<h3 id="diverted-300-regression-repair">The driver no longer serves a receipt
+it cannot reproduce</h3>
 
-<p>Whatever stops the row converging is not a regression introduced after
-<code>e39ffd109</code>: the carrier and the declared current are unchanged
-across the window. The reachable defect on this row is the receipt reuse above,
-whose owner is <code>benchmarks/solovev_certificate.py</code>. That file is
-outside this node's write paths, and the row's solver behaviour belongs to the
-cut-cell and topology read the tracked-read and moment-field-hessian nodes
-carry, so it is reported rather than edited.</p>
+<p><code>benchmarks/solovev_certificate.py</code> now judges a banked part before
+it serves it. <code>_certificate_case_setup</code> builds the machine, the
+analytic fixture and the declared target current once; <code>_receipt_verdict</code>
+compares the receipt against that setup on three independent facts and returns
+the reasons it accepted or refused. A refused receipt sends <code>_measure</code>
+into the solver. Nothing is deleted, rewritten or repaired in place: the banked
+files are read, judged and left as they were.</p>
+
+<table>
+<thead><tr><th>fact compared</th><th>recorded in the receipt</th><th>built by this tree</th></tr></thead>
+<tbody>
+<tr><td>declared target current</td><td><code>solver.target_current_a</code></td><td><code>_closed_form_current_target</code> over the analytic exterior, <code>rtol=1e-12</code></td></tr>
+<tr><td>carrier identity</td><td><code>cache.semantic_key</code></td><td><code>machine.cache["semantic_key"]</code></td></tr>
+<tr><td>carrier size</td><td><code>realised_cells</code></td><td><code>len(machine.node)</code></td></tr>
+</tbody>
+</table>
+
+<p>A served row is labelled as served. It carries
+<code>receipt = {served_from: "persisted_part", status: "rendered", basis: ...,
+solver_entered: false}</code> and <code>solver.solve_status =
+"rendered_from_receipt"</code>, so a figure drawn from a banked part can never
+read as a solve this tree ran. A refused row prints
+<code>SOLOVEV_RECEIPT_REFUSED</code> with the reason before the solver is
+entered, and an accepted one prints <code>SOLOVEV_RECEIPT_RENDERED</code> with
+the same basis it was accepted on.</p>
+
+<p>The guard is <code>tests/test_diverted_300_convergence.py</code>: five fast
+tests over the verdict and over the driver's path, and one <code>slow</code> test
+that runs the row. Four of the fast tests construct a receipt at the declared
+current and perturb exactly one fact each, so a future change that loosens one
+comparison fails naming that comparison. The fifth replaces
+<code>ForwardProfile.solve</code> with a marker and shows that a refused receipt
+sends the driver into the solver rather than into the figure.</p>
+
+<pre><code>tests/test_diverted_300_convergence.py .. 5 passed, 1 deselected in 74.65s</code></pre>
+
+<h3 id="diverted-300-regression-refusals">Every banked receipt the check refuses
+at base</h3>
+
+<p>Each <code>*.json</code> under
+<code>docs/figures/gs-absolute-accuracy/solovev/production-route-parts/</code>
+was opened and judged against the carrier and current this tree builds for its
+own case and resolution. No receipt was written by the audit; the dates are the
+commit date of the last change to each file.</p>
+
+<table>
+<thead><tr><th>case</th><th>requested cells</th><th>banked current [A]</th><th>declared current [A]</th><th>realised cells</th><th>banked</th><th>why refused</th></tr></thead>
+<tbody>
+<tr><td><code>diverted-jump-bearing</code></td><td>1000</td><td>810,819.858973</td><td>37,174.653426</td><td>1076</td><td>2026-09-02</td><td>declared current differs and carrier digest differs and cell count differs</td></tr>
+<tr><td><code>diverted-jump-bearing</code></td><td>300</td><td>811,121.720484</td><td>37,174.653426</td><td>342</td><td>2026-09-02</td><td>declared current differs and carrier digest differs and cell count differs</td></tr>
+<tr><td><code>diverted-jump-bearing</code></td><td>500</td><td>811,121.719974</td><td>37,174.653426</td><td>551</td><td>2026-09-02</td><td>declared current differs and carrier digest differs and cell count differs</td></tr>
+<tr><td><code>diverted-single-null</code></td><td>1000</td><td>61,317.590191</td><td>37,174.653426</td><td>1074</td><td>2026-09-19</td><td>declared current differs and carrier digest differs</td></tr>
+<tr><td><code>diverted-single-null</code></td><td>300</td><td>61,834.308668</td><td>37,174.653426</td><td>340</td><td>2026-09-19</td><td>declared current differs and carrier digest differs</td></tr>
+<tr><td><code>diverted-single-null</code></td><td>500</td><td>61,700.150212</td><td>37,174.653426</td><td>550</td><td>2026-09-19</td><td>declared current differs and carrier digest differs</td></tr>
+<tr><td><code>moderate-rotation-conventional-static</code></td><td>1000</td><td>1,624,991.177861</td><td>1,624,991.177861</td><td>1070</td><td>2026-09-19</td><td>carrier digest differs and cell count differs</td></tr>
+<tr><td><code>moderate-rotation-conventional-static</code></td><td>300</td><td>1,624,991.177861</td><td>1,624,991.177861</td><td>341</td><td>2026-09-19</td><td>carrier digest differs and cell count differs</td></tr>
+<tr><td><code>moderate-rotation-conventional-static</code></td><td>500</td><td>1,624,991.177861</td><td>1,624,991.177861</td><td>548</td><td>2026-09-19</td><td>carrier digest differs</td></tr>
+<tr><td><code>strong-rotation-compact-static</code></td><td>1000</td><td>251,245.908918</td><td>251,245.908918</td><td>1069</td><td>2026-09-19</td><td>carrier digest differs and cell count differs</td></tr>
+<tr><td><code>strong-rotation-compact-static</code></td><td>300</td><td>251,245.908918</td><td>251,245.908918</td><td>341</td><td>2026-09-19</td><td>carrier digest differs</td></tr>
+<tr><td><code>strong-rotation-compact-static</code></td><td>500</td><td>251,245.908918</td><td>251,245.908918</td><td>551</td><td>2026-09-19</td><td>carrier digest differs</td></tr>
+<tr><td><code>weak-rotation-reactor-static</code></td><td>1000</td><td>16,314,773.311828</td><td>16,314,773.311828</td><td>1072</td><td>2026-09-19</td><td>carrier digest differs and cell count differs</td></tr>
+<tr><td><code>weak-rotation-reactor-static</code></td><td>300</td><td>16,314,773.311828</td><td>16,314,773.311828</td><td>342</td><td>2026-09-19</td><td>carrier digest differs</td></tr>
+<tr><td><code>weak-rotation-reactor-static</code></td><td>500</td><td>16,314,773.311828</td><td>16,314,773.311828</td><td>555</td><td>2026-09-19</td><td>carrier digest differs and cell count differs</td></tr>
+<tr><td><code>diverted-jump-bearing</code></td><td>reduced (110)</td><td>811,121.721960</td><td>37,174.653426</td><td>136</td><td>2026-09-02</td><td>declared current differs and carrier digest differs and cell count differs</td></tr>
+<tr><td><code>diverted-single-null</code></td><td>reduced (110)</td><td>61,842.020120</td><td>37,174.653426</td><td>132</td><td>2026-09-19</td><td>declared current differs and carrier digest differs</td></tr>
+<tr><td><code>moderate-rotation-conventional-static</code></td><td>reduced (110)</td><td>1,624,991.177861</td><td>1,624,991.177861</td><td>136</td><td>2026-09-19</td><td>carrier digest differs</td></tr>
+<tr><td><code>strong-rotation-compact-static</code></td><td>reduced (110)</td><td>251,245.908918</td><td>251,245.908918</td><td>135</td><td>2026-09-19</td><td>carrier digest differs</td></tr>
+<tr><td><code>weak-rotation-reactor-static</code></td><td>reduced (110)</td><td>16,314,773.311828</td><td>&mdash;</td><td>135</td><td>2026-09-19</td><td>the builder cannot construct this case at 110 cells: <code>cell edges must have non-zero length</code></td></tr>
+</tbody>
+</table>
 
 <p>The residual plateau the reproduced rows do show is a frozen-partition
 Newton stopping with zero mask changes, which is a region decision, not a

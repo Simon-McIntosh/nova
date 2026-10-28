@@ -1,0 +1,52 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-28T17:19:34.998Z",
+  "dispatched_at": "2026-10-28T17:15:21Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:83",
+      "id": "reasoning-1",
+      "reason": "a builder taking the bullet at face value will measure and optimise the fixed-point solve while the per-step all-node fit and Bell-field rebuild stay in place, and clause (2) then fails against a cost the plan asserted was already conditional; the plan should either name those two stages as per-step costs the section must remove or make the fit genuinely cell-selective.",
+      "text": "bullet 1 says the cell-local fit is paid \"only in the cells that hold the tracked axis and X-point and the cells a Newton iterate enters\" and that \"Only a rebuild step pays for the fit over every node\", but the read the section wires in (support_read.read) computes an own-node quadratic fit over every node on every call: `sampled_coefficient` (fixed_points.py:168-175) is invoked unconditionally by `read_at_stationary_points` (topology.py:3193), and `field_from_jets` (fixed_points.py:178-212) rebuilds the whole-mesh Bell coefficients from the nodal jets on every `support_read.read` (`support_read.py:108-112`) \u2014 neither is gated on a tracked point leaving its cell, so the all-node cost the bullet says a steady-state step avoids is in fact paid each step; the 0.2 ms clause (2) is therefore judged against a mechanism the cited implementation does not provide.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:81",
+      "id": "reasoning-2",
+      "reason": "the claim's purpose is to establish that the read is unwired from the production route, which is true; a test caller does not alter the wiring decision or the section's work.",
+      "text": "the intro states \"Nothing calls it, though\", but `support_read.read_and_book` is exercised by `tests/test_support_read.py:51`, so the true statement is that no production route calls it.",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "a4ae20f82b4120bb4a06582c4d912a4c69e65712",
+  "plan_fingerprint": "cbe6d417bcf757bb9c6111630223c390eee653e2c59f717890cbf4a092f679c0",
+  "plan_slug": "sub-millisecond-forward-path",
+  "plan_version": 9,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261028T162418405196-plan-review-of-sub-millisecond-forward-path",
+  "reviewed_blob_sha": "aaf4c096358c5f156d3ac0c81295b18ce8da46f4",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `support_read.read`, `topology.read_at_stationary_points`, `fixed_points.solve` and `stencil_nulls._quadratic_fit_matrices` all resolve in the tree; `read-derivative-prototype` resolves in `docs/evidence/fragments/converged-forward-solve/`.",
+    "done_when": "pass \u2014 all three clauses are measurable (axis/boundary errors against an independently solved analytic reference, a 0.2 ms warm bound with copy bytes tabled, an A/B rebuild trigger), and the section names a mechanism-mutating negative control (average the fit across cells \u2192 axis error exceeds budget) that `read-derivative-prototype.html:30` shows is a real failure mode (3.6-3.8 m axis error, 5.2e-2 of span in flux).",
+    "evidence_paths": "pass \u2014 \u00a72 cites `read-derivative-prototype` and `solve-wall-breakdown` under `docs/evidence/fragments/converged-forward-solve/`, durable committed paths, and clause (2) requires the wall and copy-byte tables be recorded rather than left in a session.",
+    "naming": "pass \u2014 \u00a72's changed text introduces no plan labels, stage names or ticket numbers into symbols, and no changelog prose.",
+    "reasoning": "a finding \u2014 \u00a72 now correctly attributes the 107.8 ms to `topology.read` and states the residual depends on `support_read.read`'s own cost, but its bullet 1 claims \"Only a rebuild step pays for the fit over every node\", which the code the section names as already implementing the read contradicts.",
+    "single_goal": "pass \u2014 \u00a72's deliverable is one thing, a tracked stationary-point read wired into the fast route and made fast; measuring before changing is the mechanism, not a second deliverable.",
+    "wiring": "pass \u2014 `s2` declares `depends-on` `sub-millisecond-forward-path#s1` (plan.html:24), the operand bank \u00a72 reads its fit from, and `s4` declares its dependency on `s2`; no relationship points at a missing or wrong node."
+  },
+  "section_digests": {
+    "_document": "6463ca0c5cddeb270554e523f56f43bc296e279984295861655ec23c245eeae7",
+    "s0": "2aeef3dc567f2412561cbf7802dd51784609c34077acd0066ebff3932abd34ac",
+    "s1": "80e332b5e9b6fc57780809e818fb2d50967b00d2aab208be5d16b6b6d9ecbcb3",
+    "s2": "56a9d86d8e898ae137650d561e4b3b3653c5385d0012e684846a6c2df17d84ac",
+    "s3": "a0b9c6a24e4849c4ff248270b6269c9b3fd32faa707cdf5731a3d6ed625ccc44",
+    "s4": "c65f25ea989a99e6f330defe1f8ebc57de5dccaa51b9e793958120cd0dc31e7e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T17:21:28.188382+00:00"
+}

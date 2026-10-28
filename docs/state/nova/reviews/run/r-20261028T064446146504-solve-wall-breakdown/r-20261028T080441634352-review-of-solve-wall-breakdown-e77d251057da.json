@@ -3,7 +3,7 @@
   "added_failure_ids": [],
   "added_failures_note": "the reviewed run armed no suite (manifest tests: none, receipt baseline_suite and after_suite are both null), so no arm exists from which to derive an added-failure delta; the count is zero by that absence rather than by a green pair. Its one guard, check_units.py, was run by hand and both its runs are on disk: units.log (UNIT CHECK OK) and units-negative.log (the same check failing on a planted 0.7357 ms for 735.7 ms).",
   "call_sites": [],
-  "completed_at": "",
+  "completed_at": "2026-10-28T08:20:32.667Z",
   "dispatched_at": "2026-10-28T08:06:29Z",
   "findings": [
     {
